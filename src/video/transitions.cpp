@@ -44,6 +44,10 @@ Transitions::Transitions():
         _active(false) { }
 Transitions::~Transitions() { }
 
+void Transitions::reset() {
+    _active = false;
+}
+
 void Transitions::start_boolean(int32_t in_speed, int32_t out_speed, uint8_t goal_color) {
     _step = kStartAnimation;
     _in_speed = in_speed;
@@ -104,6 +108,14 @@ void ColorFade::key_down(const KeyDownEvent& event) {
     }
 }
 
+void ColorFade::gamepad_button_down(const GamepadButtonDownEvent& event) {
+    static_cast<void>(event);
+    if (_allow_skip) {
+        *_skipped = true;
+        stack()->pop(this);
+    }
+}
+
 bool ColorFade::next_timer(int64_t& time) {
     time = _next_event;
     return true;
@@ -136,12 +148,11 @@ void ColorFade::draw() const {
     VideoDriver::driver()->fill_rect(world, fill_color);
 }
 
-PictFade::PictFade(int pict_id, bool* skipped)
-        : _state(NEW),
-          _skipped(skipped) {
-    Picture pict(pict_id);
-    _sprite.reset(VideoDriver::driver()->new_sprite(format("/pictures/{0}.png", pict_id), pict));
-}
+PictFade::PictFade(int pict_id, bool* skipped):
+        _state(NEW),
+        _skipped(skipped),
+        _sprite(VideoDriver::driver()->new_sprite(
+                    format("/pictures/{0}.png", pict_id), Picture(pict_id))) { }
 
 PictFade::~PictFade() { }
 

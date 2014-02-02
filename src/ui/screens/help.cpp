@@ -34,21 +34,21 @@ using sfz::Exception;
 using sfz::String;
 using sfz::format;
 
-namespace macroman = sfz::macroman;
+namespace utf8 = sfz::utf8;
 
 namespace antares {
 
 HelpScreen::HelpScreen():
-        InterfaceScreen(5012, play_screen, false),
+        InterfaceScreen("help", play_screen, false),
         _text(computer_font) {
     // TODO(sfiera): top and bottom buffer of 1, not just top buffer of 2.
     offset((world.width() / 2) - (viewport.width() / 2), 2);
 
-    _bounds = item(BOX).bounds;
+    _bounds = item(BOX).bounds();
     _bounds.offset(viewport.left, 0);
 
     Resource rsrc("text", "txt", 6002);
-    String text(macroman::decode(rsrc.data()));
+    String text(utf8::decode(rsrc.data()));
     Replace_KeyCode_Strings_With_Actual_Key_Names(&text, 1000, 4);
 
     RgbColor fore = GetRGBTranslateColorShade(RED, VERY_LIGHT);
@@ -61,19 +61,26 @@ HelpScreen::HelpScreen():
 
 HelpScreen::~HelpScreen() { }
 
-void HelpScreen::handle_button(int button) {
-    switch (button) {
+void HelpScreen::key_down(const KeyDownEvent& event) {
+    if (event.key() == Preferences::preferences()->key(kHelpKeyNum) - 1) {
+        stack()->pop(this);
+    } else {
+        InterfaceScreen::key_down(event);
+    }
+}
+
+void HelpScreen::handle_button(Button& button) {
+    switch (button.id) {
       case DONE:
         stack()->pop(this);
         break;
 
       default:
-        throw Exception(format("Got unknown button {0}.", button));
+        throw Exception(format("Got unknown button {0}.", button.id));
     }
 }
 
-void HelpScreen::draw() const {
-    InterfaceScreen::draw();
+void HelpScreen::overlay() const {
     _text.draw(_bounds);
 }
 

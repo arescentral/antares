@@ -152,6 +152,7 @@ class ArrayPixMap : public PixMap {
     // @param [in] size     the desired size of the PixMap.
     ArrayPixMap(int32_t width, int32_t height);
     ArrayPixMap(Size size);
+    ArrayPixMap(ArrayPixMap&&) = default;
 
     // Deletes memory associated with the PixMap.
     ~ArrayPixMap();
@@ -182,7 +183,7 @@ class ArrayPixMap : public PixMap {
     // An array of pixel data.  Although not required to by the PixMap interface, ArrayPixMap
     // stores all rows of pixels contiguously.  This permits the optimization of `fill()` provided
     // above.
-    sfz::scoped_array<RgbColor> _bytes;
+    std::unique_ptr<RgbColor[]> _bytes;
 
     DISALLOW_COPY_AND_ASSIGN(ArrayPixMap);
 };

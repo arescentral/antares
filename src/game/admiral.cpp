@@ -33,9 +33,8 @@ using sfz::Bytes;
 using sfz::Exception;
 using sfz::String;
 using sfz::StringSlice;
-using sfz::scoped_array;
 using std::min;
-namespace macroman = sfz::macroman;
+using std::unique_ptr;
 
 namespace antares {
 
@@ -55,7 +54,7 @@ const Fixed kImportantTarget            = 0x00000140;
 const Fixed kSomewhatImportantTarget    = 0x00000120;
 const Fixed kAbsolutelyEssential        = 0x00008000;
 
-scoped_array<destBalanceType> gDestBalanceData;
+unique_ptr<destBalanceType[]> gDestBalanceData;
 
 }  // namespace
 
@@ -120,18 +119,18 @@ void ResetAllDestObjectData() {
     }
 }
 
-destBalanceType* mGetDestObjectBalancePtr(long whichObject) {
+destBalanceType* mGetDestObjectBalancePtr(int32_t whichObject) {
     return gDestBalanceData.get() + whichObject;
 }
 
-admiralType* mGetAdmiralPtr(long mwhichAdmiral) {
+admiralType* mGetAdmiralPtr(int32_t mwhichAdmiral) {
     return globals()->gAdmiralData.get() + mwhichAdmiral;
 }
 
-long MakeNewAdmiral(
-        long flagship, long destinationObject, destinationType dType, unsigned long attributes,
-        long race, short nameResID, short nameStrNum, Fixed earningPower) {
-    long n = 0;
+int32_t MakeNewAdmiral(
+        int32_t flagship, int32_t destinationObject, destinationType dType, uint32_t attributes,
+        int32_t race, int16_t nameResID, int16_t nameStrNum, Fixed earningPower) {
+    int32_t n = 0;
     spaceObjectType* destObject;
 
     admiralType* a = globals()->gAdmiralData.get();
@@ -150,7 +149,7 @@ long MakeNewAdmiral(
 
     a->destinationObject = destinationObject;
     if (destinationObject >= 0) {
-        destObject = gSpaceObjectData.get() + destinationObject;
+        destObject = mGetSpaceObjectPtr(destinationObject);
         a->destinationObjectID = destObject->id;
     } else {
         a->destinationObjectID = -1;
@@ -158,7 +157,7 @@ long MakeNewAdmiral(
 
     a->flagship = flagship;
     if (flagship >= 0) {
-        destObject = gSpaceObjectData.get() + flagship;
+        destObject = mGetSpaceObjectPtr(flagship);
         a->flagshipID = destObject->id;
     } else {
         a->flagshipID = -1;
@@ -192,11 +191,11 @@ long MakeNewAdmiral(
     return n;
 }
 
-long MakeNewDestination(
-        long whichObject, int32_t* canBuildType, Fixed earn, short nameResID,
-        short nameStrNum) {
-    long i = 0;
-    spaceObjectType* object = gSpaceObjectData.get() + whichObject;
+int32_t MakeNewDestination(
+        int32_t whichObject, int32_t* canBuildType, Fixed earn, int16_t nameResID,
+        int16_t nameStrNum) {
+    int32_t i = 0;
+    spaceObjectType* object = mGetSpaceObjectPtr(whichObject);
 
     destBalanceType* d = mGetDestObjectBalancePtr(0);
     while ((i < kMaxDestObject) && (d->whichObject != kDestNoObject)) {
@@ -243,7 +242,7 @@ long MakeNewDestination(
     }
 }
 
-void RemoveDestination(long whichDestination) {
+void RemoveDestination(int32_t whichDestination) {
     destBalanceType* d = mGetDestObjectBalancePtr(whichDestination);
     admiralType* a;
 
@@ -287,7 +286,7 @@ void RecalcAllAdmiralBuildData() {
     spaceObjectType* anObject= NULL;
     baseObjectType* baseObject = NULL;
     destBalanceType* d = mGetDestObjectBalancePtr(0);
-    long l;
+    int32_t l;
 
     // first clear all the data
     for (int i = 0; i < kMaxPlayerNum; i++) {
@@ -303,7 +302,7 @@ void RecalcAllAdmiralBuildData() {
 
     for (int i = 0; i < kMaxDestObject; i++) {
         if (d->whichObject != kDestNoObject) {
-            anObject = gSpaceObjectData.get() + d->whichObject;
+            anObject = mGetSpaceObjectPtr(d->whichObject);
             if (anObject->owner >= 0) {
                 a = globals()->gAdmiralData.get() + anObject->owner;
                 for (int k = 0; k < kMaxTypeBaseCanBuild; k++) {
@@ -339,17 +338,17 @@ void RecalcAllAdmiralBuildData() {
     }
 }
 
-void SetAdmiralAttributes(long whichAdmiral, unsigned long attributes) {
+void SetAdmiralAttributes(int32_t whichAdmiral, uint32_t attributes) {
     admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
     a->attributes = attributes;
 }
 
-void SetAdmiralColor(long whichAdmiral, unsigned char color) {
+void SetAdmiralColor(int32_t whichAdmiral, uint8_t color) {
     admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
     a->color = color;
 }
 
-unsigned char GetAdmiralColor(long whichAdmiral) {
+uint8_t GetAdmiralColor(int32_t whichAdmiral) {
     if (whichAdmiral < 0) {
         return 0;
     }
@@ -357,7 +356,7 @@ unsigned char GetAdmiralColor(long whichAdmiral) {
     return a->color;
 }
 
-long GetAdmiralRace(long whichAdmiral) {
+int32_t GetAdmiralRace(int32_t whichAdmiral) {
     if (whichAdmiral < 0) {
         return -1;
     }
@@ -365,21 +364,21 @@ long GetAdmiralRace(long whichAdmiral) {
     return a->race;
 }
 
-void SetAdmiralFlagship(long whichAdmiral, long whichShip) {
+void SetAdmiralFlagship(int32_t whichAdmiral, int32_t whichShip) {
     if (whichAdmiral < 0) {
         throw Exception ("Can't set flagship of -1 admiral.");
     }
     admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
     if (whichShip >= 0) {
         a->flagship = whichShip;
-        spaceObjectType* anObject = gSpaceObjectData.get() + whichShip;
+        spaceObjectType* anObject = mGetSpaceObjectPtr(whichShip);
         a->flagshipID = anObject->id;
     } else {
         a->flagshipID = -1;
     }
 }
 
-spaceObjectType* GetAdmiralFlagship(long whichAdmiral) {
+spaceObjectType* GetAdmiralFlagship(int32_t whichAdmiral) {
     if (whichAdmiral < 0) {
         return NULL;
     }
@@ -387,7 +386,7 @@ spaceObjectType* GetAdmiralFlagship(long whichAdmiral) {
     if (a->flagship == kNoShip) {
         return NULL;
     }
-    spaceObjectType* anObject = gSpaceObjectData.get() + a->flagship;
+    spaceObjectType* anObject = mGetSpaceObjectPtr(a->flagship);
     if (anObject->id == a->flagshipID) {
         return anObject;
     } else {
@@ -395,14 +394,14 @@ spaceObjectType* GetAdmiralFlagship(long whichAdmiral) {
     }
 }
 
-void SetAdmiralEarningPower(long whichAdmiral, Fixed power) {
+void SetAdmiralEarningPower(int32_t whichAdmiral, Fixed power) {
     if (whichAdmiral >= 0) {
         admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
         a->earningPower = power;
     }
 }
 
-Fixed GetAdmiralEarningPower(long whichAdmiral) {
+Fixed GetAdmiralEarningPower(int32_t whichAdmiral) {
     if (whichAdmiral >= 0) {
         admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
         return a->earningPower;
@@ -411,11 +410,11 @@ Fixed GetAdmiralEarningPower(long whichAdmiral) {
     }
 }
 
-void SetAdmiralDestinationObject(long whichAdmiral, long whichObject, destinationType dType) {
+void SetAdmiralDestinationObject(int32_t whichAdmiral, int32_t whichObject, destinationType dType) {
     admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
     a->destinationObject = whichObject;
     if (whichObject >= 0) {
-        spaceObjectType* destObject = gSpaceObjectData.get() + whichObject;
+        spaceObjectType* destObject = mGetSpaceObjectPtr(whichObject);
         a->destinationObjectID = destObject->id;
     } else {
         a->destinationObjectID = -1;
@@ -423,14 +422,14 @@ void SetAdmiralDestinationObject(long whichAdmiral, long whichObject, destinatio
     a->destType = dType;
 }
 
-long GetAdmiralDestinationObject(long whichAdmiral) {
+int32_t GetAdmiralDestinationObject(int32_t whichAdmiral) {
     admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
 
     if (a->destinationObject < 0) {
         return (a->destinationObject);
     }
 
-    spaceObjectType* destObject = gSpaceObjectData.get() + a->destinationObject;
+    spaceObjectType* destObject = mGetSpaceObjectPtr(a->destinationObject);
     if ((destObject->id == a->destinationObjectID)
             && (destObject->active == kObjectInUse)) {
         return a->destinationObject;
@@ -441,8 +440,8 @@ long GetAdmiralDestinationObject(long whichAdmiral) {
     }
 }
 
-void SetAdmiralConsiderObject(long whichAdmiral, long whichObject) {
-    spaceObjectType* anObject= gSpaceObjectData.get() + whichObject;
+void SetAdmiralConsiderObject(int32_t whichAdmiral, int32_t whichObject) {
+    spaceObjectType* anObject= mGetSpaceObjectPtr(whichObject);
     destBalanceType* d = mGetDestObjectBalancePtr(0);
 
     if (whichAdmiral < 0) {
@@ -473,9 +472,9 @@ void SetAdmiralConsiderObject(long whichAdmiral, long whichObject) {
     }
 }
 
-bool BaseHasSomethingToBuild(long whichObject) {
+bool BaseHasSomethingToBuild(int32_t whichObject) {
     destBalanceType* d = mGetDestObjectBalancePtr(0);
-    spaceObjectType* anObject= gSpaceObjectData.get() + whichObject;
+    spaceObjectType* anObject= mGetSpaceObjectPtr(whichObject);
 
     if (anObject->attributes & kCanAcceptBuild) {
         int buildAtNum = 0;
@@ -496,7 +495,7 @@ bool BaseHasSomethingToBuild(long whichObject) {
     return false;
 }
 
-long GetAdmiralConsiderObject(long whichAdmiral) {
+int32_t GetAdmiralConsiderObject(int32_t whichAdmiral) {
     admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
     spaceObjectType* anObject;
 
@@ -504,7 +503,7 @@ long GetAdmiralConsiderObject(long whichAdmiral) {
         return -1;
     }
     if (a->considerShip >= 0) {
-        anObject = gSpaceObjectData.get() + a->considerShip;
+        anObject = mGetSpaceObjectPtr(a->considerShip);
         if ((anObject->id == a->considerShipID)
                 && (anObject->active == kObjectInUse)
                 && (anObject->owner == whichAdmiral)) {
@@ -522,12 +521,12 @@ long GetAdmiralConsiderObject(long whichAdmiral) {
     }
 }
 
-long GetAdmiralBuildAtObject(long whichAdmiral) {
+int32_t GetAdmiralBuildAtObject(int32_t whichAdmiral) {
     admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
     if (a->buildAtObject >= 0) {
         destBalanceType* destBalance = mGetDestObjectBalancePtr(a->buildAtObject);
         if (destBalance->whichObject >= 0) {
-            spaceObjectType* anObject = gSpaceObjectData.get() + destBalance->whichObject;
+            spaceObjectType* anObject = mGetSpaceObjectPtr(destBalance->whichObject);
             if (anObject->owner != whichAdmiral) {
                 a->buildAtObject = kNoShip;
             }
@@ -538,8 +537,8 @@ long GetAdmiralBuildAtObject(long whichAdmiral) {
     return a->buildAtObject;
 }
 
-void SetAdmiralBuildAtObject(long whichAdmiral, long whichObject) {
-    spaceObjectType* anObject = gSpaceObjectData.get() + whichObject;
+void SetAdmiralBuildAtObject(int32_t whichAdmiral, int32_t whichObject) {
+    spaceObjectType* anObject = mGetSpaceObjectPtr(whichObject);
     destBalanceType* d = mGetDestObjectBalancePtr(0);
 
     if (whichAdmiral < 0) {
@@ -566,24 +565,24 @@ void SetAdmiralBuildAtObject(long whichAdmiral, long whichObject) {
     }
 }
 
-StringSlice GetAdmiralBuildAtName(long whichAdmiral) {
+StringSlice GetAdmiralBuildAtName(int32_t whichAdmiral) {
     admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
     destBalanceType* destObject = mGetDestObjectBalancePtr(a->buildAtObject);
     return destObject->name;
 }
 
-void SetAdmiralBuildAtName(long whichAdmiral, StringSlice name) {
+void SetAdmiralBuildAtName(int32_t whichAdmiral, StringSlice name) {
     admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
     destBalanceType* destObject = mGetDestObjectBalancePtr(a->buildAtObject);
     destObject->name.assign(name.slice(0, min<size_t>(name.size(), kDestinationNameLen)));
 }
 
-StringSlice GetDestBalanceName(long whichDestObject) {
+StringSlice GetDestBalanceName(int32_t whichDestObject) {
     destBalanceType* destObject = mGetDestObjectBalancePtr(whichDestObject);
     return (destObject->name);
 }
 
-StringSlice GetAdmiralName(long whichAdmiral) {
+StringSlice GetAdmiralName(int32_t whichAdmiral) {
     if ((whichAdmiral >= 0) && (whichAdmiral < kMaxPlayerNum)) {
         admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
         return a->name;
@@ -592,7 +591,7 @@ StringSlice GetAdmiralName(long whichAdmiral) {
     }
 }
 
-void SetAdmiralName(long whichAdmiral, StringSlice name) {
+void SetAdmiralName(int32_t whichAdmiral, StringSlice name) {
     if ((whichAdmiral >= 0) && (whichAdmiral < kMaxPlayerNum)) {
         admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
         a->name.assign(name.slice(0, min<size_t>(name.size(), kAdmiralNameLen)));
@@ -712,7 +711,7 @@ void SetObjectDestination(spaceObjectType* o, spaceObjectType* overrideObject) {
 
         // first make sure we're still looking at the same object
         if (dObject == NULL) {
-            dObject = gSpaceObjectData.get() + a->destinationObject;
+            dObject = mGetSpaceObjectPtr(a->destinationObject);
         }
 
         if ((dObject->active == kObjectInUse) &&
@@ -809,7 +808,7 @@ void AdmiralThink() {
     spaceObjectType* otherDestObject;
     spaceObjectType* stepObject;
     destBalanceType* destBalance;
-    long origObject, origDest, baseNum, difference;
+    int32_t origObject, origDest, baseNum, difference;
     Fixed  friendValue, foeValue, thisValue;
     baseObjectType* baseObject;
     Point gridLoc;
@@ -820,14 +819,14 @@ void AdmiralThink() {
         if (destBalance->buildTime <= 0) {
             destBalance->buildTime = 0;
             if (destBalance->buildObjectBaseNum != kNoShip) {
-                anObject = gSpaceObjectData.get() + destBalance->whichObject;
+                anObject = mGetSpaceObjectPtr(destBalance->whichObject);
                 AdmiralBuildAtObject(anObject->owner, destBalance->buildObjectBaseNum, i);
                 destBalance->buildObjectBaseNum = kNoShip;
             }
         }
 
-        anObject = gSpaceObjectData.get() + destBalance->whichObject;
-        if (anObject->owner >= 0) {
+        anObject = mGetSpaceObjectPtr(destBalance->whichObject);
+        if (anObject && (anObject->owner >= 0)) {
             PayAdmiral(anObject->owner, destBalance->earn);
         }
         destBalance++;
@@ -839,26 +838,24 @@ void AdmiralThink() {
                 a->blitzkrieg--;
                 if (a->blitzkrieg <= 0) {
                     // Really 48:
-                    a->blitzkrieg = 0 - (RandomSeeded(1200, &gRandomSeed, 'adm1', -1) + 1200);
-                    anObject = gSpaceObjectData.get();
+                    a->blitzkrieg = 0 - (gRandomSeed.next(1200) + 1200);
                     for (int j = 0; j < kMaxSpaceObject; j++) {
+                        anObject = mGetSpaceObjectPtr(j);
                         if (anObject->owner == i) {
                             anObject->currentTargetValue = 0x00000000;
                         }
-                        anObject++;
                     }
                 }
             } else {
                 a->blitzkrieg++;
                 if (a->blitzkrieg >= 0) {
                     // Really 48:
-                    a->blitzkrieg = RandomSeeded(1200, &gRandomSeed, 'adm2', -1) + 1200;
-                    anObject = gSpaceObjectData.get();
+                    a->blitzkrieg = gRandomSeed.next(1200) + 1200;
                     for (int j = 0; j < kMaxSpaceObject; j++) {
+                        anObject = mGetSpaceObjectPtr(j);
                         if (anObject->owner == i) {
                             anObject->currentTargetValue = 0x00000000;
                         }
-                        anObject++;
                     }
                 }
             }
@@ -866,10 +863,10 @@ void AdmiralThink() {
             // get the current object
             if (a->considerShip < 0) {
                 a->considerShip = gRootObjectNumber;
-                anObject = gSpaceObjectData.get() + a->considerShip;
+                anObject = mGetSpaceObjectPtr(a->considerShip);
                 a->considerShipID = anObject->id;
             } else {
-                anObject = gSpaceObjectData.get() + a->considerShip;
+                anObject = mGetSpaceObjectPtr(a->considerShip);
             }
 
             if (a->destinationObject < 0) {
@@ -878,12 +875,12 @@ void AdmiralThink() {
 
             if (anObject->active != kObjectInUse) {
                 a->considerShip = gRootObjectNumber;
-                anObject = gSpaceObjectData.get() + a->considerShip;
+                anObject = mGetSpaceObjectPtr(a->considerShip);
                 a->considerShipID = anObject->id;
             }
 
             if (a->destinationObject >= 0) {
-                destObject = gSpaceObjectData.get() + a->destinationObject;
+                destObject = mGetSpaceObjectPtr(a->destinationObject);
                 if (destObject->active != kObjectInUse) {
                     destObject = gRootObject;
                     a->destinationObject = gRootObjectNumber;
@@ -904,14 +901,14 @@ void AdmiralThink() {
                             a->destinationObject = anObject->bestConsideredTargetNumber;
                             a->destType = kObjectDestinationType;
                             if (a->destinationObject >= 0) {
-                                destObject = gSpaceObjectData.get() + a->destinationObject;
+                                destObject = mGetSpaceObjectPtr(a->destinationObject);
                                 if (destObject->active == kObjectInUse) {
                                     a->destinationObjectID = destObject->id;
                                     anObject->currentTargetValue
                                         = anObject->bestConsideredTargetValue;
-                                    thisValue = RandomSeeded(
-                                            mFloatToFixed(0.5), &(anObject->randomSeed), 'adm3',
-                                            anObject->whichBaseObject) - mFloatToFixed(0.25);
+                                    thisValue = anObject->randomSeed.next(
+                                            mFloatToFixed(0.5))
+                                        - mFloatToFixed(0.25);
                                     thisValue = mMultiplyFixed(
                                             thisValue, anObject->currentTargetValue);
                                     anObject->currentTargetValue += thisValue;
@@ -933,7 +930,7 @@ void AdmiralThink() {
 
                         // >>> INCREASE CONSIDER SHIP
                         origObject = a->considerShip;
-                        anObject = gSpaceObjectData.get() + a->considerShip;
+                        anObject = mGetSpaceObjectPtr(a->considerShip);
                         if (anObject->active != kObjectInUse) {
                             anObject = gRootObject;
                             a->considerShip = gRootObjectNumber;
@@ -1122,11 +1119,11 @@ void AdmiralThink() {
                     }
                 }
 
-                difference = ABS(implicit_cast<long>(destObject->location.h)
-                        - implicit_cast<long>(anObject->location.h));
+                difference = ABS(implicit_cast<int32_t>(destObject->location.h)
+                        - implicit_cast<int32_t>(anObject->location.h));
                 gridLoc.h = difference;
-                difference =  ABS(implicit_cast<long>(destObject->location.v)
-                        - implicit_cast<long>(anObject->location.v));
+                difference =  ABS(implicit_cast<int32_t>(destObject->location.v)
+                        - implicit_cast<int32_t>(anObject->location.v));
                 gridLoc.v = difference;
 
                 if ((gridLoc.h < kMaximumRelevantDistance)
@@ -1156,9 +1153,7 @@ void AdmiralThink() {
                 }
 
                 if (thisValue > 0) {
-                    thisValue += RandomSeeded(
-                            thisValue >> 1, &(anObject->randomSeed), 'adm4',
-                            anObject->whichBaseObject) - (thisValue >> 2);
+                    thisValue += anObject->randomSeed.next(thisValue >> 1) - (thisValue >> 2);
                 }
                 if (thisValue > anObject->bestConsideredTargetValue) {
                     anObject->bestConsideredTargetValue = thisValue;
@@ -1187,7 +1182,7 @@ void AdmiralThink() {
                         destBalance = mGetDestObjectBalancePtr(0);
                     }
                     if (destBalance->whichObject >= 0) {
-                        anObject = gSpaceObjectData.get() + destBalance->whichObject;
+                        anObject = mGetSpaceObjectPtr(destBalance->whichObject);
                         if ((anObject->owner != i)
                                 || (!(anObject->attributes & kCanAcceptBuild))) {
                             anObject = NULL;
@@ -1203,8 +1198,7 @@ void AdmiralThink() {
                             while ((a->hopeToBuild < 0) && (k < 7)) {
                                 k++;
                                 // choose something to build
-                                thisValue = RandomSeeded(
-                                        a->totalBuildChance, &gRandomSeed, 'adm5', -1);
+                                thisValue = gRandomSeed.next(a->totalBuildChance);
                                 friendValue = 0xffffffff; // equals the highest qualifying object
                                 for (int j = 0; j < kMaxNumAdmiralCanBuild; ++j) {
                                     if ((a->canBuildType[j].chanceRange <= thisValue)
@@ -1217,9 +1211,8 @@ void AdmiralThink() {
                                     mGetBaseObjectFromClassRace(
                                             baseObject, baseNum, a->hopeToBuild, a->race);
                                     if (baseObject->buildFlags & kSufficientEscortsExist) {
-                                        anObject = gSpaceObjectData.get();
-                                        int j = 0;
-                                        while (j < kMaxSpaceObject) {
+                                        for (int j = 0; j < kMaxSpaceObject; ++j) {
+                                            anObject = mGetSpaceObjectPtr(j);
                                             if ((anObject->active)
                                                     && (anObject->owner == i)
                                                     && (anObject->whichBaseObject == baseNum)
@@ -1228,15 +1221,13 @@ void AdmiralThink() {
                                                 a->hopeToBuild = -1;
                                                 j = kMaxSpaceObject;
                                             }
-                                            j++;
-                                            anObject++;
                                         }
                                     }
 
                                     if (baseObject->buildFlags & kMatchingFoeExists) {
                                         thisValue = 0;
-                                        anObject = gSpaceObjectData.get();
                                         for (int j = 0; j < kMaxSpaceObject; j++) {
+                                            anObject = mGetSpaceObjectPtr(j);
                                             if ((anObject->active)
                                                     && (anObject->owner != i)
                                                     && ((anObject->baseType->buildFlags
@@ -1245,7 +1236,6 @@ void AdmiralThink() {
                                                             & kLevelKeyTagMask))) {
                                                 thisValue = 1;
                                             }
-                                            anObject++;
                                         }
                                         if (!thisValue) {
                                             a->hopeToBuild = -1;
@@ -1281,7 +1271,7 @@ void AdmiralThink() {
 Fixed HackGetObjectStrength(spaceObjectType* anObject) {
     spaceObjectType* tObject = anObject;
     Point           gridLoc;
-    long            owner = anObject->owner;
+    int32_t            owner = anObject->owner;
 
     gridLoc = anObject->distanceGrid;
     while (anObject->nextFarObject != NULL) {
@@ -1301,22 +1291,22 @@ Fixed HackGetObjectStrength(spaceObjectType* anObject) {
 }
 
 // assumes you can afford it & base has time
-void AdmiralBuildAtObject(long whichAdmiral, long baseTypeNum, long whichDestObject) {
+void AdmiralBuildAtObject(int32_t whichAdmiral, int32_t baseTypeNum, int32_t whichDestObject) {
     admiralType* admiral = globals()->gAdmiralData.get() + whichAdmiral;
     destBalanceType* buildAtDest = mGetDestObjectBalancePtr(whichDestObject);
     spaceObjectType* buildAtObject = NULL;
-    long            newObject;
+    int32_t            newObject;
     coordPointType  coord;
     fixedPointType  v = {0, 0};
 
     if ((baseTypeNum >= 0) && (admiral->buildAtObject >= 0)) {
-        buildAtObject = gSpaceObjectData.get() + buildAtDest->whichObject;
+        buildAtObject = mGetSpaceObjectPtr(buildAtDest->whichObject);
         coord = buildAtObject->location;
 
         newObject = CreateAnySpaceObject(baseTypeNum, &v, &coord, 0, whichAdmiral, 0, -1);
 
         if (newObject >= 0) {
-            buildAtObject = gSpaceObjectData.get() + newObject;
+            buildAtObject = mGetSpaceObjectPtr(newObject);
             SetObjectDestination(buildAtObject, NULL);
             if (whichAdmiral == globals()->gPlayerAdmiralNumber) {
                 PlayVolumeSound(kComputerBeep2, kMediumVolume, kMediumPersistence,
@@ -1326,11 +1316,11 @@ void AdmiralBuildAtObject(long whichAdmiral, long baseTypeNum, long whichDestObj
     }
 }
 
-bool AdmiralScheduleBuild(long whichAdmiral, long buildWhichType) {
+bool AdmiralScheduleBuild(int32_t whichAdmiral, int32_t buildWhichType) {
     admiralType* admiral = globals()->gAdmiralData.get() + whichAdmiral;
     destBalanceType* buildAtDest = mGetDestObjectBalancePtr(admiral->buildAtObject);
     baseObjectType* buildBaseObject = NULL;
-    long            baseNum;
+    int32_t            baseNum;
 
     GetAdmiralBuildAtObject(whichAdmiral);
     if ((buildWhichType >= 0)
@@ -1354,7 +1344,7 @@ bool AdmiralScheduleBuild(long whichAdmiral, long buildWhichType) {
     return false;
 }
 
-void StopBuilding(long whichDestObject) {
+void StopBuilding(int32_t whichDestObject) {
     destBalanceType* destObject;
 
     destObject = mGetDestObjectBalancePtr(whichDestObject);
@@ -1362,7 +1352,7 @@ void StopBuilding(long whichDestObject) {
     destObject->buildObjectBaseNum = kNoShip;
 }
 
-void PayAdmiral(long whichAdmiral, Fixed howMuch) {
+void PayAdmiral(int32_t whichAdmiral, Fixed howMuch) {
     admiralType* admiral = globals()->gAdmiralData.get() + whichAdmiral;
 
     if ((whichAdmiral >= 0) && (whichAdmiral < kMaxPlayerNum)) {
@@ -1370,7 +1360,7 @@ void PayAdmiral(long whichAdmiral, Fixed howMuch) {
     }
 }
 
-void PayAdmiralAbsolute(long whichAdmiral, Fixed howMuch) {
+void PayAdmiralAbsolute(int32_t whichAdmiral, Fixed howMuch) {
     admiralType* admiral = globals()->gAdmiralData.get() + whichAdmiral;
 
     if ((whichAdmiral >= 0) && (whichAdmiral < kMaxPlayerNum)) {
@@ -1381,7 +1371,7 @@ void PayAdmiralAbsolute(long whichAdmiral, Fixed howMuch) {
     }
 }
 
-void AlterAdmiralScore(long whichAdmiral, long whichScore, long amount) {
+void AlterAdmiralScore(int32_t whichAdmiral, int32_t whichScore, int32_t amount) {
     admiralType* admiral = globals()->gAdmiralData.get() + whichAdmiral;
 
     if ((whichAdmiral >= 0) && (whichAdmiral < kMaxPlayerNum)
@@ -1390,7 +1380,7 @@ void AlterAdmiralScore(long whichAdmiral, long whichScore, long amount) {
     }
 }
 
-long GetAdmiralScore(long whichAdmiral, long whichScore) {
+int32_t GetAdmiralScore(int32_t whichAdmiral, int32_t whichScore) {
     admiralType* admiral = globals()->gAdmiralData.get() + whichAdmiral;
 
     if ((whichAdmiral >= 0) && (whichAdmiral < kMaxPlayerNum)
@@ -1401,7 +1391,7 @@ long GetAdmiralScore(long whichAdmiral, long whichScore) {
     }
 }
 
-long GetAdmiralShipsLeft(long whichAdmiral) {
+int32_t GetAdmiralShipsLeft(int32_t whichAdmiral) {
     admiralType* admiral = globals()->gAdmiralData.get() + whichAdmiral;
 
     if ((whichAdmiral >= 0) && (whichAdmiral < kMaxPlayerNum)) {
@@ -1411,7 +1401,7 @@ long GetAdmiralShipsLeft(long whichAdmiral) {
     }
 }
 
-long AlterDestinationObjectOccupation(long whichDestination, long whichAdmiral, long amount) {
+int32_t AlterDestinationObjectOccupation(int32_t whichDestination, int32_t whichAdmiral, int32_t amount) {
     destBalanceType* d = mGetDestObjectBalancePtr(whichDestination);
 
     if (whichAdmiral >= 0) {
@@ -1422,7 +1412,7 @@ long AlterDestinationObjectOccupation(long whichDestination, long whichAdmiral, 
     }
 }
 
-void ClearAllOccupants(long whichDestination, long whichAdmiral, long fullAmount) {
+void ClearAllOccupants(int32_t whichDestination, int32_t whichAdmiral, int32_t fullAmount) {
     destBalanceType* d = mGetDestObjectBalancePtr(whichDestination);
 
     for (int i = 0; i < kMaxPlayerNum; i++) {
@@ -1446,7 +1436,7 @@ void AddKillToAdmiral(spaceObjectType* anObject) {
     }
 }
 
-long GetAdmiralLoss(long whichAdmiral) {
+int32_t GetAdmiralLoss(int32_t whichAdmiral) {
     admiralType* admiral = globals()->gAdmiralData.get() + whichAdmiral;
 
     if ((whichAdmiral >= 0) && (whichAdmiral < kMaxPlayerNum)) {
@@ -1456,7 +1446,7 @@ long GetAdmiralLoss(long whichAdmiral) {
     }
 }
 
-long GetAdmiralKill(long whichAdmiral) {
+int32_t GetAdmiralKill(int32_t whichAdmiral) {
     admiralType* admiral = globals()->gAdmiralData.get() + whichAdmiral;
 
     if ((whichAdmiral >= 0) && (whichAdmiral < kMaxPlayerNum)) {

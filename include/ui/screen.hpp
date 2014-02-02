@@ -23,6 +23,8 @@
 #include <sfz/sfz.hpp>
 
 #include "data/interface.hpp"
+#include "drawing/interface.hpp"
+#include "game/cursor.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
 
@@ -30,10 +32,12 @@ namespace antares {
 
 class InterfaceScreen : public Card {
   public:
-    InterfaceScreen(int id, const Rect& bounds, bool full_screen);
+    InterfaceScreen(sfz::PrintItem name, const Rect& bounds, bool full_screen);
+    InterfaceScreen(sfz::Json json, const Rect& bounds, bool full_screen);
     ~InterfaceScreen();
 
     virtual void become_front();
+    virtual void resign_front();
 
     virtual void draw() const;
 
@@ -42,18 +46,20 @@ class InterfaceScreen : public Card {
     virtual void mouse_move(const MouseMoveEvent& event);
     virtual void key_down(const KeyDownEvent& event);
     virtual void key_up(const KeyUpEvent& event);
+    virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
+    virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
 
   protected:
-    double last_event() const;
+    virtual void overlay() const;
     virtual void adjust_interface();
-    virtual void handle_button(int button) = 0;
+    virtual void handle_button(Button& button) = 0;
 
     void truncate(size_t size);
-    void extend(int id, size_t within);
+    void extend(const sfz::Json& json);
 
     size_t size() const;
-    const interfaceItemType& item(int index) const;
-    interfaceItemType* mutable_item(int index);
+    const InterfaceItem& item(int index) const;
+    InterfaceItem& mutable_item(int index);
     void offset(int offset_x, int offset_y);
 
   private:
@@ -61,14 +67,19 @@ class InterfaceScreen : public Card {
         NORMAL,
         MOUSE_DOWN,
         KEY_DOWN,
+        GAMEPAD_DOWN,
     };
     State _state;
 
+    sfz::Json load_json(sfz::PrintItem id);
+    void become_normal();
+
     const Rect _bounds;
     const bool _full_screen;
-    double _last_event;
-    std::vector<interfaceItemType> _items;
-    int _hit_item;
+    std::vector<std::unique_ptr<InterfaceItem>> _items;
+    Button* _hit_button;
+    uint32_t _pressed;
+    Cursor _cursor;
 
     DISALLOW_COPY_AND_ASSIGN(InterfaceScreen);
 };

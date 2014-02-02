@@ -19,19 +19,24 @@
 #include "data/extractor.hpp"
 
 #include <fcntl.h>
+#include <math.h>
 #include <stdint.h>
 #include <rezin/rezin.hpp>
 #include <sfz/sfz.hpp>
 #include <zipxx/zipxx.hpp>
 
 #include "data/replay.hpp"
+#include "drawing/pix-map.hpp"
+#include "math/geometry.hpp"
 #include "net/http.hpp"
 
 using rezin::AppleDouble;
+using rezin::Options;
 using rezin::ResourceEntry;
 using rezin::ResourceFork;
 using rezin::ResourceType;
 using rezin::Sound;
+using rezin::StringList;
 using rezin::aiff;
 using sfz::Bytes;
 using sfz::BytesSlice;
@@ -41,16 +46,19 @@ using sfz::MappedFile;
 using sfz::ScopedFd;
 using sfz::Sha1;
 using sfz::String;
+using sfz::StringMap;
 using sfz::StringSlice;
 using sfz::WriteTarget;
+using sfz::dec;
 using sfz::format;
 using sfz::makedirs;
 using sfz::quote;
-using sfz::read;
 using sfz::range;
-using sfz::scoped_ptr;
+using sfz::read;
 using sfz::tree_digest;
 using sfz::write;
+using std::unique_ptr;
+using std::vector;
 using zipxx::ZipArchive;
 using zipxx::ZipFileReader;
 
@@ -61,8 +69,7 @@ namespace antares {
 
 namespace {
 
-bool verbatim(int16_t id, BytesSlice data, WriteTarget out) {
-    static_cast<void>(id);
+bool verbatim(StringSlice, int16_t, BytesSlice data, WriteTarget out) {
     write(out, data);
     return true;
 }
@@ -85,39 +92,40 @@ int32_t nlrp_chapter(int16_t id) {
     throw Exception(format("invalid replay ID {0}", id));
 }
 
-bool convert_nlrp(int16_t id, BytesSlice data, WriteTarget out) {
+bool convert_nlrp(StringSlice, int16_t id, BytesSlice data, WriteTarget out) {
     ReplayData replay;
+    replay.scenario.identifier.assign("com.biggerplanet.ares");
+    replay.scenario.version.assign("1.1.1");
     replay.chapter_id = nlrp_chapter(id);
     read(data, replay.global_seed);
 
-    int correction = 0;
     uint32_t keys = 0;
+    uint32_t at = 0;
     while (!data.empty()) {
-        const uint32_t ticks = read<uint32_t>(data) + correction;
+        const uint32_t ticks = read<uint32_t>(data) + 1;
         const uint32_t new_keys = read<uint32_t>(data);
         const uint32_t keys_down = new_keys & ~keys;
         const uint32_t keys_up = keys & ~new_keys;
 
         for (int i = 0; i < 19; ++i) {
             if (keys_down & (1 << i)) {
-                replay.key_down(i);
+                replay.key_down(at, i);
             }
             if (keys_up & (1 << i)) {
-                replay.key_up(i);
+                replay.key_up(at, i);
             }
         }
-        replay.wait(ticks);
+        at += ticks;
 
-        correction = 1;
         keys = new_keys;
     }
+    replay.duration = at;
 
     write(out, replay);
     return true;
 }
 
-bool convert_pict(int16_t id, BytesSlice data, WriteTarget out) {
-    static_cast<void>(id);
+bool convert_pict(StringSlice, int16_t, BytesSlice data, WriteTarget out) {
     rezin::Picture pict(data);
     if ((pict.version() == 2) && (pict.is_raster())) {
         write(out, png(pict));
@@ -126,10 +134,179 @@ bool convert_pict(int16_t id, BytesSlice data, WriteTarget out) {
     return false;
 }
 
-bool convert_snd(int16_t id, BytesSlice data, WriteTarget out) {
-    static_cast<void>(id);
+bool convert_str(StringSlice, int16_t, BytesSlice data, WriteTarget out) {
+    Options options;
+    StringList list(data, options);
+    String string(pretty_print(json(list)));
+    write(out, utf8::encode(string));
+    return true;
+}
+
+bool convert_text(StringSlice, int16_t, BytesSlice data, WriteTarget out) {
+    Options options;
+    String string(options.decode(data));
+    write(out, utf8::encode(string));
+    return true;
+}
+
+bool convert_snd(StringSlice, int16_t, BytesSlice data, WriteTarget out) {
     Sound snd(data);
     write(out, aiff(snd));
+    return true;
+}
+
+void convert_frame(StringSlice dir, int16_t id, BytesSlice data, PixMap::View pix) {
+    auto width = pix.size().width;
+    auto height = pix.size().height;
+
+    pix.fill(RgbColor::kClear);
+    for (auto y: range(height)) {
+        for (auto x: range(width)) {
+            uint8_t byte = read<uint8_t>(data);
+            if (byte) {
+                pix.set(x, y, RgbColor::at(byte));
+            }
+        }
+    }
+}
+
+void convert_overlay(StringSlice dir, int16_t id, BytesSlice data, PixMap::View pix) {
+    auto width = pix.size().width;
+    auto height = pix.size().height;
+
+    int white_count = 0;
+    int pixel_count = 0;
+    for (auto b: data) {
+        if (b) {
+            ++pixel_count;
+            if (b < 0x10) {
+                ++white_count;
+            }
+        }
+    }
+
+    // If more than 1/3 of the opaque pixels in the frame are in the
+    // 'white' band of the color table, then colorize all opaque
+    // (non-0x00) pixels.  Otherwise, only colors pixels which are
+    // opaque and outside of the white band (0x01..0x0F).
+    const uint8_t color_mask = (white_count > (pixel_count / 3)) ? 0xFF : 0xF0;
+    for (auto y: range(height)) {
+        for (auto x: range(width)) {
+            uint8_t byte = read<uint8_t>(data);
+            if (byte & color_mask) {
+                byte = (byte & 0x0f) | 0x10;
+                uint8_t value = RgbColor::at(byte).red;
+                pix.set(x, y, RgbColor(value, 0, 0));
+            } else {
+                pix.set(x, y, RgbColor::kClear);
+            }
+        }
+    }
+}
+
+static Json json(const Rect& r) {
+    StringMap<Json> json;
+    json["left"] = Json::number(r.left);
+    json["top"] = Json::number(r.top);
+    json["right"] = Json::number(r.right);
+    json["bottom"] = Json::number(r.bottom);
+    return Json::object(json);
+}
+
+static Json json(const Point& p) {
+    StringMap<Json> json;
+    json["x"] = Json::number(p.h);
+    json["y"] = Json::number(p.v);
+    return Json::object(json);
+}
+
+bool convert_smiv(StringSlice dir, int16_t id, BytesSlice data, WriteTarget out) {
+    BytesSlice header = data;
+    header.shift(4);
+    uint32_t size = read<uint32_t>(header);
+    vector<uint32_t> offsets;
+    vector<Rect> bounds;
+
+    StringMap<Json> object;
+    vector<Json> frames;
+    for (auto i: range(size)) {
+        static_cast<void>(i);
+        uint32_t offset = read<uint32_t>(header);
+        BytesSlice frame_data = data.slice(offset);
+        auto width = read<uint16_t>(frame_data);
+        auto height = read<uint16_t>(frame_data);
+        auto x_offset = -read<int16_t>(frame_data);
+        auto y_offset = -read<int16_t>(frame_data);
+        offsets.push_back(offset);
+        bounds.emplace_back(Point(x_offset, y_offset), Size(width, height));
+
+        frames.push_back(json(bounds.back()));
+    }
+    object["frames"] = Json::array(frames);
+
+    Rect max_bounds = bounds[0];
+    for (const auto& rect: bounds) {
+        max_bounds.left = std::min(max_bounds.left, rect.left);
+        max_bounds.top = std::min(max_bounds.top, rect.top);
+        max_bounds.right = std::max(max_bounds.right, rect.right);
+        max_bounds.bottom = std::max(max_bounds.bottom, rect.bottom);
+    }
+    object["center"] = json(Point(-max_bounds.left, -max_bounds.top));
+
+    // Do our best to find a square layout of all the frames.  In the
+    // event of a prime number of frames, we'll end up with one row and
+    // many columns.
+    int rows = sqrt(size);
+    int cols = size;
+    while (rows > 1) {
+        if ((size % rows) == 0) {
+            cols = size / rows;
+            break;
+        } else {
+            --rows;
+        }
+    }
+    object["rows"] = Json::number(rows);
+    object["cols"] = Json::number(cols);
+
+    ArrayPixMap image(max_bounds.width() * cols, max_bounds.height() * rows);
+    ArrayPixMap overlay(max_bounds.width() * cols, max_bounds.height() * rows);
+    image.fill(RgbColor::kClear);
+    overlay.fill(RgbColor::kClear);
+    for (auto i: range(size)) {
+        int col = i % cols;
+        int row = i / cols;
+        
+        StringMap<Json> frame;
+        BytesSlice frame_data = data.slice(offsets[i]);
+        frame_data.shift(8);
+        Rect r = bounds[i];
+        r.offset(max_bounds.width() * col, max_bounds.height() * row);
+        r.offset(-max_bounds.left, -max_bounds.top);
+
+        convert_frame(dir, id, frame_data.slice(0, r.area()), image.view(r));
+        convert_overlay(dir, id, frame_data.slice(0, r.area()), overlay.view(r));
+    }
+
+    String sprite_dir(format("{0}/{1}", dir, id));
+    makedirs(sprite_dir, 0755);
+
+    {
+        String output(format("{0}/{1}/image.png", dir, id));
+        ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
+        write(fd, Bytes(image));
+        object["image"] = Json::string(format("sprites/{0}/image.png", id));
+    }
+
+    {
+        String output(format("{0}/{1}/overlay.png", dir, id));
+        ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
+        write(fd, Bytes(overlay));
+        object["overlay"] = Json::string(format("sprites/{0}/overlay.png", id));
+    }
+
+    String string(pretty_print(Json::object(object)));
+    write(out, utf8::encode(string));
     return true;
 }
 
@@ -139,28 +316,17 @@ struct ResourceFile {
         const char* resource;
         const char* output_directory;
         const char* output_extension;
-        bool (*convert)(int16_t id, BytesSlice data, WriteTarget out);
+        bool (*convert)(StringSlice dir, int16_t id, BytesSlice data, WriteTarget out);
     } resources[16];
 };
 
-const ResourceFile kResourceFiles[] = {
-    {
-        "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Interfaces",
-        {
-            { "PICT",  "pictures",           "png",   convert_pict },
-            { "STR#",  "strings",            "STR#",  verbatim },
-            { "TEXT",  "text",               "txt",   verbatim },
-            { "intr",  "interfaces",         "intr",  verbatim },
-            { "nlFD",  "font-descriptions",  "nlFD",  verbatim },
-            { "nlFM",  "font-bitmaps",       "nlFM",  verbatim },
-        },
-    },
+static const ResourceFile kResourceFiles[] = {
     {
         "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Scenarios",
         {
             { "PICT",  "pictures",                  "png",   convert_pict },
-            { "STR#",  "strings",                   "STR#",  verbatim },
-            { "TEXT",  "text",                      "txt",   verbatim },
+            { "STR#",  "strings",                   "json",  convert_str },
+            { "TEXT",  "text",                      "txt",   convert_text },
             { "bsob",  "objects",                   "bsob",  verbatim },
             { "nlAG",  "scenario-info",             "nlAG",  verbatim },
             { "obac",  "object-actions",            "obac",  verbatim },
@@ -180,29 +346,24 @@ const ResourceFile kResourceFiles[] = {
     {
         "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Sprites",
         {
-            { "SMIV",  "sprites",  "SMIV",  verbatim },
+            { "SMIV",  "sprites",  "json",  convert_smiv },
         },
     },
     {
         "__MACOSX/Ares 1.2.0 ƒ/._Ares",
         {
-            { "PICT",  "pictures",        "png",   convert_pict },
             { "NLRP",  "replays",         "NLRP",  convert_nlrp },
-            { "STR#",  "strings",         "STR#",  verbatim },
-            { "TEXT",  "text",            "txt",   verbatim },
-            { "rot ",  "rotation-table",  "rot ",  verbatim },
         },
     },
 };
 
-const ResourceFile::ExtractedResource kPluginFiles[] = {
+static const ResourceFile::ExtractedResource kPluginFiles[] = {
     { "PICT",   "pictures",                     "png",      convert_pict},
     { "NLRP",   "replays",                      "NLRP",     convert_nlrp },
-    { "SMIV",   "sprites",                      "SMIV",     verbatim },
-    { "STR#",   "strings",                      "STR#",     verbatim},
-    { "TEXT",   "text",                         "txt",      verbatim},
+    { "SMIV",   "sprites",                      "json",     convert_smiv },
+    { "STR#",   "strings",                      "json",     convert_str },
+    { "TEXT",   "text",                         "txt",      convert_text },
     { "bsob",   "objects",                      "bsob",     verbatim},
-    { "intr",   "interfaces",                   "intr",     verbatim},
     { "nlAG",   "scenario-info",                "nlAG",     verbatim},
     { "obac",   "object-actions",               "obac",     verbatim},
     { "race",   "races",                        "race",     verbatim},
@@ -213,13 +374,13 @@ const ResourceFile::ExtractedResource kPluginFiles[] = {
     { "snro",   "scenarios",                    "snro",     verbatim},
 };
 
-const char kFactoryScenario[] = "com.biggerplanet.ares";
-const char kDownloadBase[] = "http://downloads.arescentral.org";
-const char kVersion[] = "3\n";
+static const char kFactoryScenario[] = "com.biggerplanet.ares";
+static const char kDownloadBase[] = "http://downloads.arescentral.org";
+static const char kVersion[] = "13\n";
 
-const char kPluginVersionFile[] = "data/version";
-const char kPluginVersion[] = "1\n";
-const char kPluginIdentifierFile[] = "data/identifier";
+static const char kPluginVersionFile[] = "data/version";
+static const char kPluginVersion[] = "1\n";
+static const char kPluginIdentifierFile[] = "data/identifier";
 
 void check_version(ZipArchive& archive, StringSlice expected) {
     ZipFileReader version_file(archive, kPluginVersionFile);
@@ -301,16 +462,10 @@ void DataExtractor::extract_factory_scenario(Observer* observer) const {
     if (!scenario_current(kFactoryScenario)) {
         download(observer, kDownloadBase, "Ares", "1.2.0",
                 (Sha1::Digest){{0x246c393c, 0xa598af68, 0xa58cfdd1, 0x8e1601c1, 0xf4f30931}});
-        download(observer, kDownloadBase, "Antares-Music", "0.3.0",
-                (Sha1::Digest){{0x9a1ceb4e, 0x2e0d4e7d, 0x61ed9934, 0x1274355e, 0xd8238bc4}});
-        download(observer, kDownloadBase, "Antares-Text", "0.3.0",
-                (Sha1::Digest){{0x2b5f3d50, 0xcc243db1, 0x35173461, 0x819f5e1b, 0xabde1519}});
 
         String scenario_dir(format("{0}/{1}", _output_dir, kFactoryScenario));
         rmtree(scenario_dir);
         extract_original(observer, "Ares-1.2.0.zip");
-        extract_supplemental(observer, "Antares-Music-0.3.0.zip");
-        extract_supplemental(observer, "Antares-Text-0.3.0.zip");
         write_version(kFactoryScenario);
     }
 }
@@ -394,64 +549,31 @@ void DataExtractor::extract_original(Observer* observer, const StringSlice& file
     rezin::Options options;
     options.line_ending = rezin::Options::CR;
 
-    SFZ_FOREACH(const ResourceFile& resource_file, kResourceFiles, {
+    for (const ResourceFile& resource_file: kResourceFiles) {
         String path(utf8::decode(resource_file.path));
         ZipFileReader file(archive, path);
         AppleDouble apple_double(file.data());
         ResourceFork rsrc(apple_double.at(AppleDouble::RESOURCE_FORK), options);
 
-        SFZ_FOREACH(const ResourceFile::ExtractedResource& conversion, resource_file.resources, {
+        for (const ResourceFile::ExtractedResource& conversion: resource_file.resources) {
             if (!conversion.resource) {
                 continue;
             }
 
             const ResourceType& type = rsrc.at(conversion.resource);
-            SFZ_FOREACH(const ResourceEntry& entry, type, {
+            for (const ResourceEntry& entry: type) {
                 Bytes data;
-                if (conversion.convert(entry.id(), entry.data(), data)) {
-                    String output(format("{0}/com.biggerplanet.ares/{1}/{2}.{3}",
-                                _output_dir, conversion.output_directory, entry.id(),
-                                conversion.output_extension));
+                String output(format("{0}/com.biggerplanet.ares/{1}/{2}.{3}",
+                            _output_dir, conversion.output_directory, entry.id(),
+                            conversion.output_extension));
+                if (conversion.convert(path::dirname(output), entry.id(), entry.data(), data)) {
                     makedirs(path::dirname(output), 0755);
                     ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
                     write(fd, data.data(), data.size());
                 }
-            });
-        });
-    });
-}
-
-void DataExtractor::extract_supplemental(Observer* observer, const StringSlice& file) const {
-    String status(format("Extracting {0}...", file));
-    observer->status(status);
-    String full_path(format("{0}/{1}", _downloads_dir, file));
-    ZipArchive archive(full_path, 0);
-
-    SFZ_FOREACH(size_t i, range(archive.size()), {
-        ZipFileReader file(archive, i);
-
-        // Ignore directories.
-        if (file.path().rfind('/') == (file.path().size() - 1)) {
-            continue;
+            }
         }
-
-        // Ignore files in the root.
-        size_t slash = file.path().find('/');
-        if (slash == String::npos) {
-            continue;
-        }
-
-        StringSlice input = file.path().slice(slash + 1);
-        if ((input == "README") || (input == "COPYING")) {
-            continue;
-        }
-
-        String output(format("{0}/com.biggerplanet.ares/{1}",
-                _output_dir, file.path().slice(slash + 1)));
-        makedirs(path::dirname(output), 0755);
-        ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-        write(fd, file.data());
-    });
+    }
 }
 
 void DataExtractor::extract_plugin(Observer* observer) const {
@@ -467,7 +589,7 @@ void DataExtractor::extract_plugin(Observer* observer) const {
     check_version(archive, kPluginVersion);
     check_identifier(archive, _scenario);
 
-    SFZ_FOREACH(size_t i, range(archive.size()), {
+    for (size_t i: range(archive.size())) {
         ZipFileReader file(archive, i);
         StringSlice path = file.path();
 
@@ -496,25 +618,25 @@ void DataExtractor::extract_plugin(Observer* observer) const {
             resource_type.resize(4, ' ');
         }
 
-        SFZ_FOREACH(const ResourceFile::ExtractedResource& conversion, kPluginFiles, {
+        for (const ResourceFile::ExtractedResource& conversion: kPluginFiles) {
             if (conversion.resource == resource_type) {
                 Bytes data;
-                if (conversion.convert(id, file.data(), data)) {
-                    String output(format("{0}/{1}/{2}/{3}.{4}",
-                                _output_dir, _scenario, conversion.output_directory, id,
-                                conversion.output_extension));
+                String output(format("{0}/{1}/{2}/{3}.{4}",
+                            _output_dir, _scenario, conversion.output_directory, id,
+                            conversion.output_extension));
+                if (conversion.convert(path::dirname(output), id, file.data(), data)) {
                     makedirs(path::dirname(output), 0755);
                     ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
                     write(fd, data.data(), data.size());
                 }
                 goto next;
             }
-        });
+        }
 
         throw Exception(format("unknown resource type {0}", quote(resource_type)));
 
 next:   ;  // labeled continue.
-    });
+    }
 }
 
 }  // namespace antares

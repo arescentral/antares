@@ -23,9 +23,9 @@
 
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
-#include "game/main.hpp"
 #include "sound/driver.hpp"
 #include "ui/card.hpp"
+#include "ui/flows/master.hpp"
 #include "video/driver.hpp"
 #include "video/offscreen-driver.hpp"
 #include "video/text-driver.hpp"
@@ -40,11 +40,10 @@ using sfz::args::help;
 using sfz::args::store;
 using sfz::args::store_const;
 using sfz::makedirs;
-using sfz::make_linked_ptr;
 using sfz::print;
 using sfz::quote;
-using sfz::scoped_ptr;
 using sfz::string_to_int;
+using std::unique_ptr;
 
 namespace args = sfz::args;
 namespace io = sfz::io;
@@ -56,7 +55,6 @@ namespace {
 const int32_t kScreenWidth = 640;
 const int32_t kScreenHeight = 480;
 
-void usage(const StringSlice& program_name);
 void main_screen(EventScheduler& scheduler);
 void options(EventScheduler& scheduler);
 void mission_briefing(EventScheduler& scheduler, Ledger& ledger);
@@ -106,7 +104,7 @@ void main(int argc, char* const* argv) {
         exit(1);
     }
 
-    scoped_ptr<SoundDriver> sound;
+    unique_ptr<SoundDriver> sound;
     if (output_dir.has()) {
         String out(format("{0}/sound.log", *output_dir));
         sound.reset(new LogSoundDriver(out));
@@ -114,23 +112,13 @@ void main(int argc, char* const* argv) {
         sound.reset(new NullSoundDriver);
     }
 
-    Size screen_size = Preferences::preferences()->screen_size();
     if (text) {
         TextVideoDriver video(Preferences::preferences()->screen_size(), scheduler, output_dir);
-        video.loop(AresInit());
+        video.loop(new Master(14586));
     } else {
         OffscreenVideoDriver video(Preferences::preferences()->screen_size(), scheduler, output_dir);
-        video.loop(AresInit());
+        video.loop(new Master(14586));
     }
-}
-
-void usage(const StringSlice& program_name) {
-    print(io::err, format(
-                "usage: {0} [<options>] <script>\n"
-                "options:\n"
-                "    -o|--output=<dir>  directory to save dumps to\n",
-                program_name));
-    exit(1);
 }
 
 void main_screen(EventScheduler& scheduler) {
@@ -176,7 +164,6 @@ void options(EventScheduler& scheduler) {
 
     scheduler.schedule_key(Keys::Q, 1800, 1860);
     scheduler.schedule_snapshot(1800);
-    scheduler.schedule_snapshot(1860);
 }
 
 void mission_briefing(EventScheduler& scheduler, Ledger& ledger) {
@@ -210,11 +197,15 @@ void mission_briefing(EventScheduler& scheduler, Ledger& ledger) {
 
     scheduler.schedule_key(Keys::Q, time_ticks + 60, time_ticks + 120);
     scheduler.schedule_snapshot(time_ticks + 60);
+    scheduler.schedule_snapshot(time_ticks + 119);
     scheduler.schedule_snapshot(time_ticks + 120);
+    scheduler.schedule_snapshot(time_ticks + 150);
+    scheduler.schedule_snapshot(time_ticks + 179);
+    scheduler.schedule_snapshot(time_ticks + 180);
 }
 
 void pause(EventScheduler& scheduler) {
-    scheduler.schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
+    scheduler.schedule_event(unique_ptr<Event>(new MouseMoveEvent(0, Point(320, 240))));
 
     // Skip the intro.  Start the first tutorial and skip the prologue.
     scheduler.schedule_key(Keys::Q, 1756, 1757);
@@ -232,7 +223,7 @@ void pause(EventScheduler& scheduler) {
     scheduler.schedule_snapshot(1980);
     scheduler.schedule_snapshot(2000);
 
-    scheduler.schedule_key(Keys::CAPS_LOCK, 2020, 2140);
+    scheduler.schedule_event(unique_ptr<Event>(new CapsLockEvent(2020)));
     scheduler.schedule_snapshot(2020);
     scheduler.schedule_snapshot(2040);
     scheduler.schedule_snapshot(2060);
@@ -240,6 +231,7 @@ void pause(EventScheduler& scheduler) {
     scheduler.schedule_snapshot(2100);
     scheduler.schedule_snapshot(2120);
     scheduler.schedule_snapshot(2140);
+    scheduler.schedule_event(unique_ptr<Event>(new CapsUnlockEvent(2140)));
 
     scheduler.schedule_snapshot(2160);
     scheduler.schedule_snapshot(2180);
@@ -256,7 +248,6 @@ void pause(EventScheduler& scheduler) {
     // Quit game.
     scheduler.schedule_key(Keys::Q, 2440, 2500);
     scheduler.schedule_snapshot(2440);
-    scheduler.schedule_snapshot(2500);
 }
 
 }  // namespace

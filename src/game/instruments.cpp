@@ -27,7 +27,6 @@
 #include "game/admiral.hpp"
 #include "game/cursor.hpp"
 #include "game/globals.hpp"
-#include "game/labels.hpp"
 #include "game/minicomputer.hpp"
 #include "game/motion.hpp"
 #include "game/player-ship.hpp"
@@ -41,10 +40,9 @@
 
 using sfz::format;
 using sfz::range;
-using sfz::scoped_array;
-using sfz::scoped_ptr;
-using std::min;
 using std::max;
+using std::min;
+using std::unique_ptr;
 
 namespace antares {
 
@@ -121,23 +119,23 @@ const int32_t kMouseSleepTime       = 58;
 
 const int32_t kSectorLineBrightness = DARKER;
 
-coordPointType          gLastGlobalCorner;
-
 namespace {
 
-scoped_ptr<Sprite> left_instrument_sprite;
-scoped_ptr<Sprite> right_instrument_sprite;
-scoped_array<Point> gRadarBlipData;
-scoped_array<int32_t> gScaleList;
-scoped_array<int32_t> gSectorLineData;
-bool should_draw_sector_lines = false;
-Rect view_range;
+static coordPointType          gLastGlobalCorner;
+static unique_ptr<Sprite> left_instrument_sprite;
+static unique_ptr<Sprite> right_instrument_sprite;
+static unique_ptr<Point[]> gRadarBlipData;
+static unique_ptr<int32_t[]> gScaleList;
+static unique_ptr<int32_t[]> gSectorLineData;
+static bool should_draw_sector_lines = false;
+static Rect view_range;
 
 struct SiteData {
+    bool should_draw;
     Point a, b, c;
+    RgbColor light, dark;
 };
-SiteData site_data;
-bool should_draw_site = false;
+static SiteData site;
 
 template <typename T>
 T clamp(T value, T min, T max) {
@@ -174,8 +172,8 @@ void InstrumentInit() {
             from.offset(0, (pict.size().height - world.height()) / 2);
         }
         pix_map.view(to).copy(pict.view(from));
-        left_instrument_sprite.reset(VideoDriver::driver()->new_sprite(
-                    format("/pictures/{0}.png", kInstLeftPictID), pix_map));
+        left_instrument_sprite = VideoDriver::driver()->new_sprite(
+                format("/pictures/{0}.png", kInstLeftPictID), pix_map);
     }
     {
         Picture pict(kInstRightPictID);
@@ -186,9 +184,12 @@ void InstrumentInit() {
             from.offset(0, (pict.size().height - world.height()) / 2);
         }
         pix_map.view(to).copy(pict.view(from));
-        right_instrument_sprite.reset(VideoDriver::driver()->new_sprite(
-                    format("/pictures/{0}.png", kInstRightPictID), pix_map));
+        right_instrument_sprite = VideoDriver::driver()->new_sprite(
+                format("/pictures/{0}.png", kInstRightPictID), pix_map);
     }
+
+    site.light = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);
+    site.dark = GetRGBTranslateColorShade(PALE_GREEN, DARKER + kSlightlyDarkerColor);
 
     MiniScreenInit();
 }
@@ -208,8 +209,6 @@ void ResetInstruments() {
     globals()->gLastScale = gAbsoluteScale = SCALE_SCALE;
     globals()->gWhichScaleNum = 0;
     gLastGlobalCorner.h = gLastGlobalCorner.v = 0;
-    globals()->gMouseActive = false;
-    globals()->gMouseTimeout = 0;
     l = gScaleList.get();
     for (i = 0; i < kScaleListNum; i++) {
         *l = SCALE_SCALE;
@@ -238,7 +237,8 @@ void ResetInstruments() {
     }
 
     l = gSectorLineData.get();
-    SFZ_FOREACH(int count, range(kMaxSectorLine), {
+    for (int count: range(kMaxSectorLine)) {
+        static_cast<void>(count);
         *l = -1;
         l++;
         *l = -1;
@@ -247,7 +247,7 @@ void ResetInstruments() {
         l++;
         *l = -1;
         l++;
-    });
+    }
 }
 
 void UpdateRadar(int32_t unitsDone) {
@@ -263,9 +263,6 @@ void UpdateRadar(int32_t unitsDone) {
         unitsDone = 0;
     }
     globals()->gRadarCount -= unitsDone;
-    if (globals()->gMouseActive) {
-        globals()->gMouseTimeout += unitsDone;
-    }
 
     if ((gScrollStarObject == NULL) || !gScrollStarObject->active) {
         return;
@@ -274,10 +271,6 @@ void UpdateRadar(int32_t unitsDone) {
     Rect bounds(kRadarLeft, kRadarTop, kRadarRight, kRadarBottom);
     bounds.offset(0, globals()->gInstrumentTop);
     bounds.inset(1, 1);
-
-    const RgbColor very_light = GetRGBTranslateColorShade(kRadarColor, VERY_LIGHT);
-    const RgbColor darkest = GetRGBTranslateColorShade(kRadarColor, DARKEST);
-    const RgbColor very_dark = GetRGBTranslateColorShade(kRadarColor, VERY_DARK);
 
     if (globals()->radar_is_functioning) {
         if (globals()->gRadarCount <= 0) {
@@ -302,7 +295,7 @@ void UpdateRadar(int32_t unitsDone) {
 
             const int32_t rrange = globals()->gRadarRange >> 1L;
             for (int oCount = 0; oCount < kMaxSpaceObject; oCount++) {
-                spaceObjectType *anObject = gSpaceObjectData.get() + oCount;
+                spaceObjectType *anObject = mGetSpaceObjectPtr(oCount);
                 if (!anObject->active || (anObject == gScrollStarObject)) {
                     continue;
                 }
@@ -332,7 +325,7 @@ void UpdateRadar(int32_t unitsDone) {
       case kNearestFoeZoom:
       case kNearestAnythingZoom:
         {
-            spaceObjectType* anObject = gSpaceObjectData.get() + globals()->gClosestObject;
+            spaceObjectType* anObject = mGetSpaceObjectPtr(globals()->gClosestObject);
             uint64_t hugeDistance = anObject->distanceFromPlayer;
             if (hugeDistance == 0) { // if this is true, then we haven't calced its distance
                 uint64_t x_distance = ABS<int32_t>(gScrollStarObject->location.h - anObject->location.h);
@@ -370,7 +363,7 @@ void UpdateRadar(int32_t unitsDone) {
 
       case kSmallestZoom:
         {
-            spaceObjectType* anObject = gSpaceObjectData.get() + globals()->gFarthestObject;
+            spaceObjectType* anObject = mGetSpaceObjectPtr(globals()->gFarthestObject);
             uint64_t tempWide = anObject->distanceFromPlayer;
             bestScale = wsqrt(tempWide);
             if (bestScale == 0) bestScale = 1;
@@ -542,7 +535,7 @@ void draw_instruments() {
     right_instrument_sprite->draw(right_rect.left, right_rect.top);
 
     if (globals()->gPlayerShipNumber >= 0) {
-        spaceObjectType* player = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
+        spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
         if (player->active) {
             draw_player_ammo(
                 ((player->pulseType >= 0) && (player->pulseBase->frame.weapon.ammo > 0))
@@ -568,89 +561,81 @@ void draw_instruments() {
 }
 
 void EraseSite() {
-    globals()->old_cursor_coord = globals()->cursor_coord;
+}
+
+static void update_triangle(SiteData& site, int32_t direction, int32_t distance, int32_t size) {
+    int count;
+    Fixed fa, fb, fc;
+    GetRotPoint(&fa, &fb, direction);
+
+    fc = mLongToFixed(-distance);
+    fa = mMultiplyFixed(fc, fa);
+    fb = mMultiplyFixed(fc, fb);
+
+    Point a(mFixedToLong(fa), mFixedToLong(fb));
+    a.offset(gScrollStarObject->sprite->where.h, gScrollStarObject->sprite->where.v);
+    site.a = a;
+
+    count = direction;
+    mAddAngle(count, 30);
+    GetRotPoint(&fa, &fb, count);
+    fc = mLongToFixed(size);
+    fa = mMultiplyFixed(fc, fa);
+    fb = mMultiplyFixed(fc, fb);
+
+    Point b(a.h + mFixedToLong(fa), a.v + mFixedToLong(fb));
+    site.b = b;
+
+    count = direction;
+    mAddAngle(count, -30);
+    GetRotPoint(&fa, &fb, count);
+    fc = mLongToFixed(size);
+    fa = mMultiplyFixed(fc, fa);
+    fb = mMultiplyFixed(fc, fb);
+
+    Point c(a.h + mFixedToLong(fa), a.v + mFixedToLong(fb));
+    site.c = c;
 }
 
 void update_site(bool replay) {
     if (gScrollStarObject == NULL) {
-        should_draw_site = false;
+        site.should_draw = false;
+    } else if (!(gScrollStarObject->active && (gScrollStarObject->sprite != NULL))) {
+        site.should_draw = false;
     } else if (gScrollStarObject->offlineTime <= 0) {
-        should_draw_site = true;
+        site.should_draw = true;
     } else {
-        should_draw_site = (Randomize(gScrollStarObject->offlineTime) < 5);
+        site.should_draw = (Randomize(gScrollStarObject->offlineTime) < 5);
     }
 
-    if (should_draw_site && gScrollStarObject->active && (gScrollStarObject->sprite != NULL)) {
-        int count;
-        Fixed fa, fb, fc;
-        GetRotPoint(&fa, &fb, gScrollStarObject->direction);
-
-        fc = mLongToFixed(-kSiteDistance);
-        fa = mMultiplyFixed(fc, fa);
-        fb = mMultiplyFixed(fc, fb);
-
-        Point a(mFixedToLong(fa), mFixedToLong(fb));
-        a.offset(gScrollStarObject->sprite->where.h, gScrollStarObject->sprite->where.v);
-        site_data.a = a;
-
-        count = gScrollStarObject->direction;
-        mAddAngle(count, 30);
-        GetRotPoint(&fa, &fb, count);
-        fc = mLongToFixed(kSiteSize);
-        fa = mMultiplyFixed(fc, fa);
-        fb = mMultiplyFixed(fc, fb);
-
-        Point b(a.h + mFixedToLong(fa), a.v + mFixedToLong(fb));
-        site_data.b = b;
-
-        count = gScrollStarObject->direction;
-        mAddAngle(count, -30);
-        GetRotPoint(&fa, &fb, count);
-        fc = mLongToFixed(kSiteSize);
-        fa = mMultiplyFixed(fc, fa);
-        fb = mMultiplyFixed(fc, fb);
-
-        Point c(a.h + mFixedToLong(fa), a.v + mFixedToLong(fb));
-        site_data.c = c;
-    } else {
-        should_draw_site = false;
-    }
-
-    // Do the cursor, too, unless this is a replay.
-    if (replay) {
-        HideSpriteCursor();
-        return;
-    }
-    Point cursor_coord = VideoDriver::driver()->get_mouse();
-    MoveSpriteCursor(cursor_coord);
-    HideSpriteCursor();
-    if (cursor_coord.h < viewport.left) {
-        ShowSpriteCursor();
-    } else if (cursor_coord.h > (viewport.right - kCursorBoundsSize - 1)) {
-        cursor_coord.h = viewport.right - kCursorBoundsSize - 1;
-    }
-    if (cursor_coord.v < (viewport.top + kCursorBoundsSize)) {
-        cursor_coord.v = viewport.top + kCursorBoundsSize;
-    } else if (cursor_coord.v > (play_screen.bottom - kCursorBoundsSize - 1)) {
-        cursor_coord.v = play_screen.bottom - kCursorBoundsSize - 1;
-    }
-
-    globals()->cursor_coord = cursor_coord;
-    if ((cursor_coord != globals()->old_cursor_coord) && (!SpriteCursorVisible())) {
-        globals()->gMouseActive = true;
-        globals()->gMouseTimeout = 0;
-    } else if (globals()->gMouseTimeout > kMouseSleepTime) {
-        globals()->gMouseActive = false;
+    if (site.should_draw) {
+        update_triangle(site, gScrollStarObject->direction, kSiteDistance, kSiteSize);
     }
 }
 
-void draw_site() {
-    if (should_draw_site) {
-        const RgbColor light = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);
-        const RgbColor dark = GetRGBTranslateColorShade(PALE_GREEN, DARKER + kSlightlyDarkerColor);
-        VideoDriver::driver()->draw_line(site_data.a, site_data.b, light);
-        VideoDriver::driver()->draw_line(site_data.a, site_data.c, light);
-        VideoDriver::driver()->draw_line(site_data.b, site_data.c, dark);
+void draw_site(const PlayerShip& player) {
+    if (site.should_draw) {
+        VideoDriver::driver()->draw_line(site.a, site.b, site.light);
+        VideoDriver::driver()->draw_line(site.a, site.c, site.light);
+        VideoDriver::driver()->draw_line(site.b, site.c, site.dark);
+
+        SiteData control = {};
+        if (player.show_select()) {
+            control.light = GetRGBTranslateColorShade(YELLOW, MEDIUM);
+            control.dark = GetRGBTranslateColorShade(YELLOW, DARKER + kSlightlyDarkerColor);
+            control.should_draw = true;
+        } else if (player.show_target()) {
+            control.light = GetRGBTranslateColorShade(SKY_BLUE, MEDIUM);
+            control.dark = GetRGBTranslateColorShade(SKY_BLUE, DARKER + kSlightlyDarkerColor);
+            control.should_draw = true;
+        }
+        if (control.should_draw) {
+            update_triangle(
+                    control, player.control_direction(), kSiteDistance - 3, kSiteSize - 6);
+            VideoDriver::driver()->draw_line(control.a, control.b, control.light);
+            VideoDriver::driver()->draw_line(control.a, control.c, control.light);
+            VideoDriver::driver()->draw_line(control.b, control.c, control.dark);
+        }
     }
 }
 
@@ -676,8 +661,6 @@ void draw_sector_lines() {
     int32_t         *l;
     uint32_t        size, level, x, h, division;
     RgbColor        color;
-
-    Rect clipRect = viewport;
 
     size = kSubSectorSize / 4;
     level = 1;
@@ -742,33 +725,25 @@ void draw_sector_lines() {
     }
 }
 
-void InstrumentsHandleClick() {
-    const Point where = globals()->cursor_coord;
+void InstrumentsHandleClick(const GameCursor& cursor) {
+    const Point where = cursor.clamped_location();
     PlayerShipHandleClick(where, 0);
     MiniComputerHandleClick(where);
-    if (!SpriteCursorVisible()) {
-        globals()->gMouseActive = true;
-        globals()->gMouseTimeout = 0;
-    }
 }
 
-void InstrumentsHandleDoubleClick() {
-    const Point where = globals()->cursor_coord;
+void InstrumentsHandleDoubleClick(const GameCursor& cursor) {
+    const Point where = cursor.clamped_location();
     PlayerShipHandleClick(where, 0);
     MiniComputerHandleDoubleClick(where);
-    if (!SpriteCursorVisible()) {
-        globals()->gMouseActive = true;
-        globals()->gMouseTimeout = 0;
-    }
 }
 
-void InstrumentsHandleMouseUp() {
-    const Point where = globals()->cursor_coord;
+void InstrumentsHandleMouseUp(const GameCursor& cursor) {
+    const Point where = cursor.clamped_location();
     MiniComputerHandleMouseUp(where);
 }
 
-void InstrumentsHandleMouseStillDown() {
-    const Point where = globals()->cursor_coord;
+void InstrumentsHandleMouseStillDown(const GameCursor& cursor) {
+    const Point where = cursor.clamped_location();
     MiniComputerHandleMouseStillDown(where);
 }
 
@@ -943,7 +918,6 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
     }
 
     int32_t graphicValue;
-    globals()->gBarIndicator[which].thisValue;
     if (max > 0) {
         graphicValue = (kBarIndicatorHeight * value) / max;
         if (graphicValue < 0) {

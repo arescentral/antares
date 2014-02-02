@@ -1,0 +1,11 @@
+<?xml version="1.0" standalone="no"?>
+<?xml-stylesheet href="gamepad.xsl" type="text/xsl" ?>
+<gamepad>
+  <ls>Aim</ls>
+  <lsb>Transfer Control</lsb>
+  <a>Target Friendly</a>
+  <b>Target Enemy</b>
+  <x>Target Base</x>
+  <y>Order</y>
+  <rb style="fill:#ec0">Select Mode</rb>
+</gamepad>

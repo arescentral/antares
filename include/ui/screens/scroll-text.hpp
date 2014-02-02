@@ -38,6 +38,7 @@ class ScrollTextScreen : public Card {
 
     virtual void mouse_down(const MouseDownEvent& event);
     virtual void key_down(const KeyDownEvent& event);
+    virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
 
     virtual bool next_timer(int64_t& time);
     virtual void fire_timer();
@@ -45,7 +46,7 @@ class ScrollTextScreen : public Card {
     virtual void draw() const;
 
   private:
-    sfz::scoped_ptr<Sprite> _sprite;
+    std::unique_ptr<Sprite> _sprite;
     const double _speed;
     const bool _play_song;
     const int _song_id;

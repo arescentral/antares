@@ -26,7 +26,6 @@
 using sfz::Exception;
 using sfz::WriteTarget;
 using sfz::format;
-using sfz::scoped_array;
 using sfz::write;
 
 namespace antares {

@@ -28,27 +28,27 @@ namespace antares {
 
 class Font {
   public:
-    Font(int32_t id);
+    Font(sfz::StringSlice name);
     ~Font();
 
     uint8_t char_width(sfz::Rune mchar) const;
     int32_t string_width(sfz::StringSlice s) const;
 
-    void draw(
-            Point origin, sfz::StringSlice string, RgbColor color, PixMap* pix,
-            const Rect& clip) const;
+    void draw(Point origin, sfz::Rune r, RgbColor color, PixMap* pix) const;
 
     void draw_sprite(Point origin, sfz::StringSlice string, RgbColor color) const;
 
-    int16_t resID;
     int32_t logicalWidth;
-    int32_t physicalWidth;
     int32_t height;
     int32_t ascent;
 
   private:
-    sfz::Bytes charSet;
-    sfz::scoped_array<sfz::scoped_ptr<Sprite> > _sprites;
+    void draw_internal(Point origin, sfz::Rune r, RgbColor color, PixMap* pix) const;
+    Rect glyph_rect(sfz::Rune r) const;
+
+    ArrayPixMap _glyph_table;
+    std::map<sfz::Rune, Rect> _glyphs;
+    std::map<sfz::Rune, std::unique_ptr<Sprite>> _sprites;
 
     DISALLOW_COPY_AND_ASSIGN(Font);
 };
@@ -56,12 +56,10 @@ class Font {
 extern const Font* tactical_font;
 extern const Font* computer_font;
 extern const Font* button_font;
-extern const Font* message_font;
 extern const Font* title_font;
 extern const Font* small_button_font;
 
 void InitDirectText();
-void DirectTextCleanup();
 
 }  // namespace antares
 

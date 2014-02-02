@@ -1,0 +1,20 @@
+<?xml version="1.0" standalone="no"?>
+<?xml-stylesheet href="gamepad.xsl" type="text/xsl" ?>
+<gamepad>
+  <back>Next Message</back>
+  <start>Pause</start>
+  <ls>Rotate</ls>
+  <lsb>Warp</lsb>
+  <left>Comp Back</left>
+  <right>Comp Accept</right>
+  <up>Comp Up</up>
+  <down>Comp Down</down>
+  <a>Thrust</a>
+  <b>Brake</b>
+  <x>Zoom Out</x>
+  <y>Zoom In</y>
+  <lb>Target Mode</lb>
+  <lt>Fire Special</lt>
+  <rb>Select Mode</rb>
+  <rt>Fire Main</rt>
+</gamepad>

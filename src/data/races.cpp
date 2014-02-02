@@ -28,7 +28,7 @@ using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::ReadSource;
 using sfz::read;
-using sfz::scoped_array;
+using std::unique_ptr;
 
 namespace antares {
 
@@ -36,7 +36,7 @@ namespace {
 
 const int16_t kRaceResID = 500;
 
-scoped_array<Race> gRaceData;
+unique_ptr<Race[]> gRaceData;
 
 }  // namespace
 
@@ -63,7 +63,7 @@ void CleanupRaces() {
 }
 
 int16_t GetRaceIDFromNum(size_t raceNum) {
-    if ((0 <= raceNum) && (raceNum < kRaceNum)) {
+    if (raceNum < kRaceNum) {
         return gRaceData[raceNum].id;
     } else {
         return -1;

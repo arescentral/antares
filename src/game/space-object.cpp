@@ -48,8 +48,7 @@ using sfz::ReadSource;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::read;
-using sfz::scoped_array;
-namespace macroman = sfz::macroman;
+using std::unique_ptr;
 
 namespace antares {
 
@@ -61,33 +60,39 @@ const uint8_t kNeutralColor         = SKY_BLUE;
 
 const int32_t kBatteryToEnergyRatio = 5;
 
+static const int16_t kSpaceObjectNameResID          = 5000;
+static const int16_t kSpaceObjectShortNameResID     = 5001;
+static StringList* space_object_names;
+static StringList* space_object_short_names;
+
 struct actionQueueType {
     objectActionType            *action;
-    long                            actionNum;
-    long                            actionToDo;
-    long                            scheduledTime;
+    int32_t                         actionNum;
+    int32_t                         actionToDo;
+    int32_t                         scheduledTime;
     actionQueueType         *nextActionQueue;
-    long                            nextActionQueueNum;
+    int32_t                         nextActionQueueNum;
     spaceObjectType         *subjectObject;
-    long                            subjectObjectNum;
-    long                            subjectObjectID;
+    int32_t                         subjectObjectNum;
+    int32_t                         subjectObjectID;
     spaceObjectType         *directObject;
-    long                            directObjectNum;
-    long                            directObjectID;
+    int32_t                         directObjectNum;
+    int32_t                         directObjectID;
     Point                       offset;
 };
 
 spaceObjectType* gRootObject = NULL;
-long gRootObjectNumber = -1;
-actionQueueType* gFirstActionQueue = NULL;
-long gFirstActionQueueNumber = -1;
-baseObjectType kZeroBaseObject;
-spaceObjectType kZeroSpaceObject = {0, &kZeroBaseObject};
+int32_t gRootObjectNumber = -1;
 
-scoped_array<spaceObjectType> gSpaceObjectData;
-scoped_array<baseObjectType> gBaseObjectData;
-scoped_array<objectActionType> gObjectActionData;
-scoped_array<actionQueueType> gActionQueueData;
+static actionQueueType* gFirstActionQueue = NULL;
+static int32_t gFirstActionQueueNumber = -1;
+static baseObjectType kZeroBaseObject;
+static spaceObjectType kZeroSpaceObject = {0, &kZeroBaseObject};
+
+static unique_ptr<spaceObjectType[]> gSpaceObjectData;
+static unique_ptr<baseObjectType[]> gBaseObjectData;
+static unique_ptr<objectActionType[]> gObjectActionData;
+static unique_ptr<actionQueueType[]> gActionQueueData;
 
 void SpaceObjectHandlingInit() {
     bool correctBaseObjectColor = false;
@@ -128,6 +133,9 @@ void SpaceObjectHandlingInit() {
     }
     ResetAllSpaceObjects();
     ResetActionQueueData();
+
+    space_object_names = new StringList(kSpaceObjectNameResID);
+    space_object_short_names = new StringList(kSpaceObjectShortNameResID);
 }
 
 void CleanupSpaceObjectHandling() {
@@ -139,7 +147,7 @@ void CleanupSpaceObjectHandling() {
 
 void ResetAllSpaceObjects() {
     spaceObjectType *anObject = NULL;
-    short           i;
+    int16_t         i;
 
     gRootObject = NULL;
     gRootObjectNumber = -1;
@@ -237,7 +245,7 @@ void ResetAllSpaceObjects() {
 void ResetActionQueueData( void)
 {
     actionQueueType *action = gActionQueueData.get();
-    long            i;
+    int32_t         i;
 
     gFirstActionQueueNumber = -1;
     gFirstActionQueue = NULL;
@@ -261,11 +269,52 @@ void ResetActionQueueData( void)
     }
 }
 
+baseObjectType* mGetBaseObjectPtr(int32_t whichObject) {
+    if (whichObject >= 0) {
+        return gBaseObjectData.get() + whichObject;
+    }
+    return nullptr;
+}
+
+spaceObjectType* mGetSpaceObjectPtr(int32_t whichObject) {
+    if (whichObject >= 0) {
+        return gSpaceObjectData.get() + whichObject;
+    }
+    return nullptr;
+}
+
+objectActionType* mGetObjectActionPtr(int32_t whichAction) {
+    if (whichAction >= 0) {
+        return gObjectActionData.get() + whichAction;
+    }
+    return nullptr;
+}
+
+void mGetBaseObjectFromClassRace(
+        baseObjectType*& mbaseObject, int32_t& mcount, int mbaseClass, int mbaseRace) {
+    mcount = 0;
+    if ( mbaseClass >= kLiteralClass)
+    {
+        mcount = mbaseClass - kLiteralClass;
+        mbaseObject = mGetBaseObjectPtr(mcount);
+    }
+    else
+    {
+        mbaseObject = mGetBaseObjectPtr( 0);
+        while (( mcount < globals()->maxBaseObject) && (( mbaseObject->baseClass != mbaseClass) || ( mbaseObject->baseRace != mbaseRace)))
+        {
+            mcount++;
+            mbaseObject++;
+        }
+        if ( mcount >= globals()->maxBaseObject) mbaseObject = NULL;
+    }
+}
+
 /* AddSpaceObject:
     Returns -1 if no object available, otherwise returns object #
 
-int AddSpaceObject( spaceObjectType *sourceObject, long *canBuildType,
-                short nameResID, short nameStrNum)
+int AddSpaceObject( spaceObjectType *sourceObject, int32_t *canBuildType,
+                int16_t nameResID, int16_t nameStrNum)
 */
 
 int AddSpaceObject( spaceObjectType *sourceObject)
@@ -275,10 +324,10 @@ int AddSpaceObject( spaceObjectType *sourceObject)
     int             whichObject = 0;
     NatePixTable* spriteTable = NULL;
     Point           where;
-    long            scaleCalc;
+    int32_t         scaleCalc;
     RgbColor        tinyColor;
-    unsigned char   tinyShade;
-    short           whichShape = 0, angle;
+    uint8_t         tinyShade;
+    int16_t         whichShape = 0, angle;
 
     destObject = gSpaceObjectData.get();
 
@@ -347,7 +396,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
 
         if ( destObject->tinySize == 0)
         {
-            tinyColor = kNoTinyColor;
+            tinyColor = RgbColor::kClear;
         } else if ( destObject->owner == globals()->gPlayerAdmiralNumber)
         {
             tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
@@ -408,7 +457,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
 
     if ( destObject->attributes & kIsBeam)
     {
-        destObject->frame.beam.beam = AddBeam( &(destObject->location),
+        destObject->frame.beam.beam = Beams::add( &(destObject->location),
             destObject->baseType->frame.beam.color,
             destObject->baseType->frame.beam.kind,
             destObject->baseType->frame.beam.accuracy,
@@ -430,7 +479,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
 
     destObject->active = kObjectInUse;
     destObject->nextNearObject = destObject->nextFarObject = NULL;
-    destObject->whichLabel = kNoLabel;
+    destObject->whichLabel = Labels::kNone;
     destObject->entryNumber = whichObject;
     destObject->cloakState = destObject->hitState = 0;
     destObject->duty = eNoDuty;
@@ -447,7 +496,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
     return ( whichObject);
 }
 
-int AddNumberedSpaceObject( spaceObjectType *sourceObject, long whichObject)
+int AddNumberedSpaceObject( spaceObjectType *sourceObject, int32_t whichObject)
 
 {
 #pragma unused( sourceObject, whichObject)
@@ -455,7 +504,7 @@ int AddNumberedSpaceObject( spaceObjectType *sourceObject, long whichObject)
     Handle          spriteTable = nil;
     Point           where;
     spritePix       oldStyleSprite;
-    long            scaleCalc;
+    int32_t         scaleCalc;
 
     destObject = gSpaceObjectData.get() + whichObject;
 
@@ -537,7 +586,7 @@ void CorrectAllBaseObjectColor( void)
 
 {
     baseObjectType  *aBase = gBaseObjectData.get();
-    short           i;
+    int16_t         i;
 
     for ( i = 0; i < globals()->maxBaseObject; i++)
     {
@@ -570,16 +619,15 @@ void CorrectAllBaseObjectColor( void)
 
 }
 
-void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObject, short seed,
-            long direction, fixedPointType *velocity, long owner, short spriteIDOverride)
-
-{
+static void InitSpaceObjectFromBaseObject(
+        spaceObjectType *dObject, int32_t  whichBaseObject, Random seed,
+        int32_t direction, fixedPointType *velocity, int32_t owner, int16_t spriteIDOverride) {
     baseObjectType  *sObject = mGetBaseObjectPtr( whichBaseObject), *weaponBase = NULL;
-    short           i;
-    long            r;
+    int16_t         i;
+    int32_t         r;
     Fixed           f;
     fixedPointType  newVel;
-    long            l;
+    int32_t         l;
 
     dObject->offlineTime = 0;
 
@@ -601,23 +649,22 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
     dObject->layer = sObject->pixLayer;
     do
     {
-        dObject->id =RandomSeeded( 32768, &(dObject->randomSeed), 'soh0', whichBaseObject);
+        dObject->id = dObject->randomSeed.next(32768);
     } while ( dObject->id == -1);
 
     dObject->distanceGrid.h = dObject->distanceGrid.v = dObject->collisionGrid.h = dObject->collisionGrid.v = 0;
     if ( sObject->activateActionNum & kPeriodicActionTimeMask)
     {
         dObject->periodicTime = ((sObject->activateActionNum & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift) +
-            RandomSeeded( ((sObject->activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift),
-            &(dObject->randomSeed), 'soh1', whichBaseObject);
+            dObject->randomSeed.next(
+                    ((sObject->activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift));
     } else dObject->periodicTime = 0;
 
     r = sObject->initialDirection;
     mAddAngle( r, direction);
     if ( sObject->initialDirectionRange > 0)
     {
-        i = RandomSeeded( sObject->initialDirectionRange, &(dObject->randomSeed), 'soh2',
-            whichBaseObject);
+        i = dObject->randomSeed.next(sObject->initialDirectionRange);
         mAddAngle( r, i);
     }
     dObject->direction = r;
@@ -625,8 +672,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
     f = sObject->initialVelocity;
     if ( sObject->initialVelocityRange > 0)
     {
-        f += RandomSeeded( sObject->initialVelocityRange,
-                    &(dObject->randomSeed), 'soh3', whichBaseObject);
+        f += dObject->randomSeed.next(sObject->initialVelocityRange);
     }
     GetRotPoint(&newVel.h, &newVel.v, r);
     newVel.h = mMultiplyFixed( newVel.h, f);
@@ -678,23 +724,20 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
         dObject->frame.animation.thisShape = sObject->frame.animation.frameShape;
         if ( sObject->frame.animation.frameShapeRange > 0)
         {
-            l = RandomSeeded( sObject->frame.animation.frameShapeRange,
-                &(dObject->randomSeed), 'soh5', whichBaseObject);
+            l = dObject->randomSeed.next(sObject->frame.animation.frameShapeRange);
             dObject->frame.animation.thisShape += l;
         }
         dObject->frame.animation.frameDirection =
             sObject->frame.animation.frameDirection;
         if ( sObject->frame.animation.frameDirectionRange == -1)
         {
-            if (RandomSeeded( 2, &(dObject->randomSeed),'so51', whichBaseObject) == 1)
-            {
+            if (dObject->randomSeed.next(2) == 1) {
                 dObject->frame.animation.frameDirection = 1;
             }
         } else if ( sObject->frame.animation.frameDirectionRange > 0)
         {
-            dObject->frame.animation.frameDirection += RandomSeeded(
-                sObject->frame.animation.frameDirectionRange,
-                &(dObject->randomSeed), 'so52', whichBaseObject);
+            dObject->frame.animation.frameDirection += dObject->randomSeed.next(
+                sObject->frame.animation.frameDirectionRange);
         }
         dObject->frame.animation.frameFraction = 0;
         dObject->frame.animation.frameSpeed = sObject->frame.animation.frameSpeed;
@@ -710,8 +753,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
     // not setting owner
 
     if ( sObject->initialAge >= 0)
-        dObject->age = sObject->initialAge + RandomSeeded( sObject->initialAgeRange, &(dObject->randomSeed), 'soh6',
-            whichBaseObject);
+        dObject->age = sObject->initialAge + dObject->randomSeed.next(sObject->initialAgeRange);
     else dObject->age = -1;
     dObject->naturalScale = sObject->naturalScale;
 
@@ -811,13 +853,13 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
 // Can you change the frame type? Like from a direction frame to a self-animated frame? I'm not sure...
 //
 
-void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
-    long spriteIDOverride, bool relative)
+void ChangeObjectBaseType( spaceObjectType *dObject, int32_t whichBaseObject,
+    int32_t spriteIDOverride, bool relative)
 
 {
     baseObjectType  *sObject = mGetBaseObjectPtr( whichBaseObject), *weaponBase = NULL;
-    short           angle;
-    long            r;
+    int16_t         angle;
+    int32_t         r;
     NatePixTable* spriteTable;
 
     dObject->attributes = sObject->attributes | (dObject->attributes &
@@ -838,23 +880,20 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
         dObject->frame.animation.thisShape = sObject->frame.animation.frameShape;
         if ( sObject->frame.animation.frameShapeRange > 0)
         {
-            r = RandomSeeded( sObject->frame.animation.frameShapeRange,
-                &(dObject->randomSeed), 'soh6', whichBaseObject);
+            r = dObject->randomSeed.next(sObject->frame.animation.frameShapeRange);
             dObject->frame.animation.thisShape += r;
         }
         dObject->frame.animation.frameDirection =
             sObject->frame.animation.frameDirection;
         if ( sObject->frame.animation.frameDirectionRange == -1)
         {
-            if (RandomSeeded( 2, &(dObject->randomSeed),'so51', whichBaseObject) == 1)
-            {
+            if (dObject->randomSeed.next(2) == 1) {
                 dObject->frame.animation.frameDirection = 1;
             }
         } else if ( sObject->frame.animation.frameDirectionRange > 0)
         {
-            dObject->frame.animation.frameDirection += RandomSeeded(
-                sObject->frame.animation.frameDirectionRange,
-                &(dObject->randomSeed), 'so52', whichBaseObject);
+            dObject->frame.animation.frameDirection += dObject->randomSeed.next(
+                sObject->frame.animation.frameDirectionRange);
         }
         dObject->frame.animation.frameFraction = 0;
         dObject->frame.animation.frameSpeed = sObject->frame.animation.frameSpeed;
@@ -865,8 +904,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
 
     dObject->maxVelocity = sObject->maxVelocity;
 
-    dObject->age = sObject->initialAge + RandomSeeded( sObject->initialAgeRange,
-        &(dObject->randomSeed), 'soh7', whichBaseObject);
+    dObject->age = sObject->initialAge + dObject->randomSeed.next(sObject->initialAgeRange);
 
     dObject->naturalScale = sObject->naturalScale;
 
@@ -904,8 +942,8 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
     if ( sObject->activateActionNum & kPeriodicActionTimeMask)
     {
         dObject->periodicTime = ((sObject->activateActionNum & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift) +
-            RandomSeeded( ((sObject->activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift),
-            &(dObject->randomSeed), 'soh8', whichBaseObject);
+            dObject->randomSeed.next(
+                    ((sObject->activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift));
     } else dObject->periodicTime = 0;
 
     if ( dObject->pulseType != kNoWeapon)
@@ -1006,11 +1044,11 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
 
 }
 
-void AddActionToQueue( objectActionType *action, long actionNumber, long actionToDo,
-                        long delayTime, spaceObjectType *subjectObject,
+void AddActionToQueue( objectActionType *action, int32_t actionNumber, int32_t actionToDo,
+                        int32_t delayTime, spaceObjectType *subjectObject,
                         spaceObjectType *directObject, Point* offset)
 {
-    long                queueNumber = 0;
+    int32_t             queueNumber = 0;
     actionQueueType     *actionQueue = gActionQueueData.get(),
                         *nextQueue = gFirstActionQueue, *previousQueue = NULL;
 
@@ -1077,12 +1115,12 @@ void AddActionToQueue( objectActionType *action, long actionNumber, long actionT
     }
 }
 
-void ExecuteActionQueue( long unitsToDo)
+void ExecuteActionQueue( int32_t unitsToDo)
 
 {
 //  actionQueueType     *actionQueue = gFirstActionQueue;
     actionQueueType     *actionQueue = gActionQueueData.get();
-    long                        subjectid, directid, i;
+    int32_t                     subjectid, directid, i;
 
     for ( i = 0; i < kActionQueueLength; i++)
     {
@@ -1140,7 +1178,7 @@ void ExecuteActionQueue( long unitsToDo)
     }
 }
 
-void ExecuteObjectActions( long whichAction, long actionNum,
+void ExecuteObjectActions( int32_t whichAction, int32_t actionNum,
                 spaceObjectType *sObject, spaceObjectType *dObject, Point* offset,
                 bool allowDelay)
 
@@ -1149,16 +1187,16 @@ void ExecuteObjectActions( long whichAction, long actionNum,
     spaceObjectType *anObject, *originalSObject = sObject, *originalDObject = dObject;
     baseObjectType  *baseObject;
     objectActionType    *action = gObjectActionData.get() + whichAction;
-    short           end, angle;
+    int16_t         end, angle;
     fixedPointType  fpoint, newVel;
-    long            l;
-    unsigned long   ul1;
+    int32_t         l;
+    uint32_t        ul1;
     Fixed           f, f2;
     coordPointType  newLocation;
     Point           location;
     bool         OKtoExecute, checkConditions = false;
     Fixed           aFixed;
-    unsigned char   tinyColor;
+    uint8_t         tinyColor;
 
     if ( whichAction < 0) return;
     while (( action->verb != kNoAction) && ( actionNum > 0))
@@ -1262,8 +1300,8 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     baseObject = mGetBaseObjectPtr( action->argument.createObject.whichBaseType);
                     end = action->argument.createObject.howManyMinimum;
                     if ( action->argument.createObject.howManyRange > 0)
-                        end += RandomSeeded( action->argument.createObject.howManyRange,
-                                &(anObject->randomSeed), 'soh9', action->argument.createObject.whichBaseType);
+                        end += anObject->randomSeed.next(
+                                action->argument.createObject.howManyRange);
                     while ( end > 0)
                     {
                         if ( action->argument.createObject.velocityRelative)
@@ -1279,8 +1317,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                         /*
                         l += baseObject->initialDirection;
                         if ( baseObject->initialDirectionRange > 0)
-                            l += RandomSeeded( baseObject->initialDirectionRange,
-                                        &(anObject->randomSeed));
+                            l += anObject->randomSeed.next(baseObject->initialDirectionRange);
                         */
                         newLocation = anObject->location;
                         if ( offset != NULL)
@@ -1291,14 +1328,12 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 
                         if ( action->argument.createObject.randomDistance > 0)
                         {
-                            newLocation.h += RandomSeeded( action->argument.createObject.randomDistance << 1,
-                                &(anObject->randomSeed), 'so10',
-                                    action->argument.createObject.whichBaseType)
-                                    - action->argument.createObject.randomDistance;
-                            newLocation.v += RandomSeeded( action->argument.createObject.randomDistance << 1,
-                                &(anObject->randomSeed), 'so11',
-                                    action->argument.createObject.whichBaseType)
-                                    - action->argument.createObject.randomDistance;
+                            newLocation.h += anObject->randomSeed.next(
+                                    action->argument.createObject.randomDistance << 1)
+                                - action->argument.createObject.randomDistance;
+                            newLocation.v += anObject->randomSeed.next(
+                                    action->argument.createObject.randomDistance << 1)
+                                - action->argument.createObject.randomDistance;
                         }
 
 //                      l = CreateAnySpaceObject( action->argument.createObject.whichBaseType, &fpoint,
@@ -1352,8 +1387,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                     eKineticBeamKind)
                                 // special beams need special post-creation acts
                                 {
-                                        SetSpecialBeamAttributes( newObject,
-                                        anObject);
+                                    Beams::set_attributes(newObject, anObject);
                                 }
                             }
                         }
@@ -1368,10 +1402,8 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     angle = action->argument.playSound.idMinimum;
                     if ( action->argument.playSound.idRange > 0)
                     {
-                        angle += RandomSeeded(
-                            action->argument.playSound.idRange + 1,
-                            &(anObject->randomSeed),
-                            'so33', -1);
+                        angle += anObject->randomSeed.next(
+                            action->argument.playSound.idRange + 1);
                     }
                     if ( !action->argument.playSound.absolute)
                     {
@@ -1493,6 +1525,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                 action->argument.alterObject.minimum);
                             break;
 
+                        /*
                         case 919191://kAlterSpecial:
                             anObject->specialType = action->argument.alterObject.minimum;
                             baseObject = mGetBaseObjectPtr( anObject->specialType);
@@ -1503,6 +1536,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                             if ( baseObject->frame.weapon.range < anObject->shortestWeaponRange)
                                 anObject->shortestWeaponRange = baseObject->frame.weapon.range;
                             break;
+                        */
 
                         case kAlterHidden:
                             l = 0;
@@ -1524,14 +1558,14 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                 {
                                     f = mMultiplyFixed( anObject->baseType->frame.rotation.maxTurnRate,
                                                     action->argument.alterObject.minimum +
-                                                    RandomSeeded( action->argument.alterObject.range,
-                                                    &(anObject->randomSeed), 'so13', anObject->whichBaseObject));
+                                                    anObject->randomSeed.next(
+                                                        action->argument.alterObject.range));
                                 } else
                                 {
                                     f = mMultiplyFixed( 2 /*kDefaultTurnRate*/,
                                                     action->argument.alterObject.minimum +
-                                                    RandomSeeded( action->argument.alterObject.range,
-                                                    &(anObject->randomSeed), 'so14', anObject->whichBaseObject));
+                                                    anObject->randomSeed.next(
+                                                        action->argument.alterObject.range));
                                 }
                                 f2 = anObject->baseType->mass;
                                 if ( f2 == 0) f = -1;
@@ -1545,16 +1579,14 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                         mMultiplyFixed( anObject->baseType->frame.rotation.maxTurnRate,
                                             action->argument.alterObject.minimum);
 
-                                anObject->frame.rotation.turnVelocity += RandomSeeded( f,
-                                                &(anObject->randomSeed));
+                                anObject->frame.rotation.turnVelocity += anObject->randomSeed(f);
                                 */
                             }
                             break;
 
                         case kAlterOffline:
                             f = action->argument.alterObject.minimum +
-                                RandomSeeded( action->argument.alterObject.range, &(anObject->randomSeed), 'so15',
-                                    anObject->whichBaseObject);
+                                anObject->randomSeed.next(action->argument.alterObject.range);
                             f2 = anObject->baseType->mass;
                             if ( f2 == 0) anObject->offlineTime = -1;
                             else
@@ -1704,8 +1736,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 
                         case kAlterThrust:
                             f = action->argument.alterObject.minimum +
-                                RandomSeeded( action->argument.alterObject.range, &(anObject->randomSeed),
-                                    'so16', anObject->whichBaseObject);
+                                anObject->randomSeed.next(action->argument.alterObject.range);
                             if ( action->argument.alterObject.relative)
                             {
                                 anObject->thrust += f;
@@ -1787,8 +1818,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 
                         case kAlterAge:
                             l = action->argument.alterObject.minimum +
-                                    RandomSeeded( action->argument.alterObject.range,
-                                        &(anObject->randomSeed), 'so17', anObject->whichBaseObject);
+                                anObject->randomSeed.next(action->argument.alterObject.range);
 
                             if ( action->argument.alterObject.relative)
                             {
@@ -1821,16 +1851,12 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                             {
                                 newLocation.h = newLocation.v = 0;
                             }
-                            newLocation.h += RandomSeeded(
-                                action->argument.alterObject.minimum <<
-                                1,
-                                &(anObject->randomSeed), 'so40', 0) -
-                                action->argument.alterObject.minimum;
-                            newLocation.v += RandomSeeded(
-                                action->argument.alterObject.minimum <<
-                                1,
-                                &(anObject->randomSeed), 'so41', 0) -
-                                action->argument.alterObject.minimum;
+                            newLocation.h += anObject->randomSeed.next(
+                                    action->argument.alterObject.minimum << 1)
+                                - action->argument.alterObject.minimum;
+                            newLocation.v += anObject->randomSeed.next(
+                                    action->argument.alterObject.minimum << 1)
+                                - action->argument.alterObject.minimum;
                             anObject->location.h = newLocation.h;
                             anObject->location.v = newLocation.v;
                             break;
@@ -1971,7 +1997,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     break;
 
                 case kDisplayMessage:
-                    StartLongMessage(
+                    Messages::start(
                             action->argument.displayMessage.resID,
                             (action->argument.displayMessage.resID +
                              action->argument.displayMessage.pageNum - 1));
@@ -2014,7 +2040,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                         PlayVolumeSound(  kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
                         StringList strings(kMessageStringID);
                         StringSlice string = strings.at(globals()->gZoomMode + kZoomStringOffset - 1);
-                        SetStatusString(string, kStatusLabelColor);
+                        Messages::set_status(string, kStatusLabelColor);
                     }
                     break;
 
@@ -2049,17 +2075,17 @@ void ExecuteObjectActions( long whichAction, long actionNum,
     if ( checkConditions) CheckScenarioConditions( 0);
 }
 
-long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
-            coordPointType *location, long direction, long owner,
-            unsigned long specialAttributes, short spriteIDOverride)
+int32_t CreateAnySpaceObject( int32_t whichBase, fixedPointType *velocity,
+            coordPointType *location, int32_t direction, int32_t owner,
+            uint32_t specialAttributes, int16_t spriteIDOverride)
 
 {
     spaceObjectType *madeObject = NULL, newObject, *player = NULL;
-    long            newObjectNumber;
-    unsigned long   distance, dcalc, difference;
+    int32_t         newObjectNumber;
+    uint32_t        distance, dcalc, difference;
     uint64_t        hugeDistance;
 
-    InitSpaceObjectFromBaseObject( &newObject, whichBase, RandomSeeded( 32766, &gRandomSeed, 'so18', whichBase),
+    InitSpaceObjectFromBaseObject( &newObject, whichBase, {gRandomSeed.next(32766)},
                                     direction, velocity, owner, spriteIDOverride);
     newObject.location = *location;
     if ( globals()->gPlayerShipNumber >= 0)
@@ -2118,7 +2144,7 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
     }
 
     newObject.sprite = NULL;
-    newObject.id = RandomSeeded( 16384, &gRandomSeed, 'so19', whichBase);
+    newObject.id = gRandomSeed.next(16384);
 
     if ( newObject.attributes & kCanTurn)
     {
@@ -2160,10 +2186,10 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
     return( newObjectNumber);
 }
 
-long CountObjectsOfBaseType( long whichType, long owner)
+int32_t CountObjectsOfBaseType( int32_t whichType, int32_t owner)
 
 {
-    long    count, result = 0;
+    int32_t count, result = 0;
 
     spaceObjectType *anObject;
 
@@ -2178,10 +2204,10 @@ long CountObjectsOfBaseType( long whichType, long owner)
     return (result);
 }
 
-long GetNextObjectWithAttributes( long startWith, unsigned long attributes, bool exclude)
+int32_t GetNextObjectWithAttributes( int32_t startWith, uint32_t attributes, bool exclude)
 
 {
-    long    original = startWith;
+    int32_t original = startWith;
     spaceObjectType *anObject;
 
     anObject = gSpaceObjectData.get() + startWith;
@@ -2219,7 +2245,7 @@ long GetNextObjectWithAttributes( long startWith, unsigned long attributes, bool
     }
 }
 
-void AlterObjectHealth( spaceObjectType *anObject, long health)
+void AlterObjectHealth( spaceObjectType *anObject, int32_t health)
 
 {
     if ( health <= 0)
@@ -2238,7 +2264,7 @@ void AlterObjectHealth( spaceObjectType *anObject, long health)
 
 }
 
-void AlterObjectEnergy( spaceObjectType *anObject, long energy)
+void AlterObjectEnergy( spaceObjectType *anObject, int32_t energy)
 
 {
     anObject->energy += energy;
@@ -2259,7 +2285,7 @@ void AlterObjectEnergy( spaceObjectType *anObject, long energy)
 
 }
 
-void AlterObjectBattery( spaceObjectType *anObject, long energy)
+void AlterObjectBattery( spaceObjectType *anObject, int32_t energy)
 
 {
     anObject->battery += energy;
@@ -2272,13 +2298,13 @@ void AlterObjectBattery( spaceObjectType *anObject, long energy)
 }
 
 
-void AlterObjectOwner( spaceObjectType *anObject, long owner, bool message)
+void AlterObjectOwner( spaceObjectType *anObject, int32_t owner, bool message)
 
 {
     spaceObjectType *fixObject = NULL;
-    long            i, originalOwner = anObject->owner;
+    int32_t         i, originalOwner = anObject->owner;
     RgbColor        tinyColor;
-    unsigned char   tinyShade;
+    uint8_t         tinyShade;
 
     if ( anObject->owner != owner)
     {
@@ -2399,22 +2425,21 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, bool message)
                 String destination_name(GetDestBalanceName(anObject->destinationObject));
                 if (owner >= 0) {
                     String new_owner_name(GetAdmiralName(anObject->owner));
-                    AddMessage(format("{0} captured by {1}.", destination_name, new_owner_name));
+                    Messages::add(format("{0} captured by {1}.", destination_name, new_owner_name));
                 } else if (originalOwner >= 0) { // must be since can't both be -1
                     String old_owner_name(GetAdmiralName(originalOwner));
-                    AddMessage(format("{0} lost by {1}.", destination_name, old_owner_name));
+                    Messages::add(format("{0} lost by {1}.", destination_name, old_owner_name));
                 }
             }
         } else {
             if (message) {
-                StringList strings(kSpaceObjectNameResID);
-                StringSlice object_name = strings.at(anObject->whichBaseObject);
+                StringSlice object_name = get_object_name(anObject->whichBaseObject);
                 if (owner >= 0) {
                     String new_owner_name(GetAdmiralName(anObject->owner));
-                    AddMessage(format("{0} captured by {1}.", object_name, new_owner_name));
+                    Messages::add(format("{0} captured by {1}.", object_name, new_owner_name));
                 } else if (originalOwner >= 0) { // must be since can't both be -1
                     String old_owner_name(GetAdmiralName(originalOwner));
-                    AddMessage(format("{0} lost by {1}.", object_name, old_owner_name));
+                    Messages::add(format("{0} lost by {1}.", object_name, old_owner_name));
                 }
             }
         }
@@ -2424,7 +2449,7 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, bool message)
 //  if ( anObject->attributes & kIsEndgameObject) CheckEndgame();
 }
 
-void AlterObjectOccupation( spaceObjectType *anObject, long owner, long howMuch, bool message)
+void AlterObjectOccupation( spaceObjectType *anObject, int32_t owner, int32_t howMuch, bool message)
 {
     if ( ( anObject->active) && ( anObject->attributes & kIsDestination) && ( anObject->attributes & kNeutralDeath))
     {
@@ -2437,7 +2462,7 @@ void AlterObjectOccupation( spaceObjectType *anObject, long owner, long howMuch,
 
 void AlterObjectCloakState( spaceObjectType *anObject, bool cloak)
 {
-    long            longscrap = kMaxSoundVolume;
+    int32_t         longscrap = kMaxSoundVolume;
 
     if ( (cloak) && ( anObject->cloakState == 0))
     {
@@ -2455,7 +2480,7 @@ void AlterObjectCloakState( spaceObjectType *anObject, bool cloak)
 void DestroyObject( spaceObjectType *anObject)
 
 {
-    short   energyNum, i;
+    int16_t energyNum, i;
     spaceObjectType *fixObject;
 
     if ( anObject->active == kObjectInUse)
@@ -2544,7 +2569,7 @@ void ActivateObjectSpecial( spaceObjectType *anObject)
 {
     baseObjectType  *weaponObject, *baseObject = anObject->baseType;
     Point           offset;
-    short           h;
+    int16_t         h;
     Fixed           fcos, fsin;
 
     if (( anObject->specialTime <= 0) && ( anObject->specialType != kNoWeapon))
@@ -2581,7 +2606,7 @@ void ActivateObjectSpecial( spaceObjectType *anObject)
 void CreateFloatingBodyOfPlayer( spaceObjectType *anObject)
 
 {
-    long        count;
+    int32_t     count;
 
 //  count = CreateAnySpaceObject( globals()->scenarioFileInfo.playerBodyID, &(anObject->velocity),
 //      &(anObject->location), anObject->direction, anObject->owner, 0, nil, -1, -1, -1);
@@ -2617,6 +2642,14 @@ void CreateFloatingBodyOfPlayer( spaceObjectType *anObject)
     {
         PlayerShipBodyExpire( anObject, true);
     }
+}
+
+StringSlice get_object_name(int16_t id) {
+    return space_object_names->at(id);
+}
+
+StringSlice get_object_short_name(int16_t id) {
+    return space_object_short_names->at(id);
 }
 
 }  // namespace antares

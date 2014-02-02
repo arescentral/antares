@@ -34,8 +34,8 @@ using sfz::args::help;
 using sfz::args::store;
 using sfz::dec;
 using sfz::format;
-using sfz::scoped_ptr;
 using sfz::write;
+using std::unique_ptr;
 
 namespace args = sfz::args;
 namespace io = sfz::io;
@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
 
     ObjectDataBuilder builder(output_dir);
     for (int id = 0; id < globals()->maxBaseObject; ++id) {
-        const int pict_id = gBaseObjectData.get()[id].pictPortraitResID;
+        const int pict_id = mGetBaseObjectPtr(id)->pictPortraitResID;
         if (pict_id <= 0) {
             continue;
         }

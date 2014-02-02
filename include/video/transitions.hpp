@@ -33,6 +33,7 @@ class Transitions {
     Transitions();
     ~Transitions();
 
+    void reset();
     void start_boolean(int32_t in_speed, int32_t out_speed, uint8_t goal_color);
     void update_boolean(int32_t time_passed);
     void draw() const;
@@ -61,6 +62,7 @@ class ColorFade : public Card {
 
     virtual void mouse_down(const MouseDownEvent& event);
     virtual void key_down(const KeyDownEvent& event);
+    virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
     virtual bool next_timer(int64_t& time);
     virtual void fire_timer();
 
@@ -114,7 +116,7 @@ class PictFade : public Card {
     bool* _skipped;
     int64_t _wane_start;
 
-    sfz::scoped_ptr<Sprite> _sprite;
+    std::unique_ptr<Sprite> _sprite;
 
     DISALLOW_COPY_AND_ASSIGN(PictFade);
 };

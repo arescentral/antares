@@ -21,12 +21,18 @@
 #include "data/resource.hpp"
 
 using sfz::BytesSlice;
+using sfz::String;
+using sfz::StringSlice;
+using sfz::format;
 
 namespace antares {
 
-Picture::Picture(int32_t id)
+Picture::Picture(int32_t id):
+        Picture(String(format("pictures/{0}.png", id))) { }
+
+Picture::Picture(StringSlice resource)
         : ArrayPixMap(0, 0) {
-    Resource rsrc("pictures", "png", id);
+    Resource rsrc(resource);
     BytesSlice in(rsrc.data());
     read(in, *this);
 }

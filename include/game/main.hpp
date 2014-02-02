@@ -19,6 +19,7 @@
 #ifndef ANTARES_GAME_MAIN_HPP_
 #define ANTARES_GAME_MAIN_HPP_
 
+#include "data/replay.hpp"
 #include "ui/card.hpp"
 #include "ui/interface-handling.hpp"
 
@@ -32,13 +33,11 @@ enum GameResult {
     QUIT_GAME = 3,
 };
 
-Card* AresInit();
-
 class MainPlay : public Card {
   public:
     MainPlay(
             const Scenario* scenario, bool replay, bool show_loading_screen,
-            GameResult* game_result);
+            GameResult* game_result, int32_t* seconds);
 
     virtual void become_front();
 
@@ -55,7 +54,9 @@ class MainPlay : public Card {
     const bool _replay;
     const bool _show_loading_screen;
     bool _cancelled;
-    GameResult* _game_result;
+    GameResult* const _game_result;
+    int32_t* const _seconds;
+    ReplayBuilder _replay_builder;
 };
 
 }  // namespace antares

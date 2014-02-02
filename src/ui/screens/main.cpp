@@ -19,7 +19,6 @@
 #include "ui/screens/main.hpp"
 
 #include "config/preferences.hpp"
-#include "data/replay-list.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/main.hpp"
@@ -41,67 +40,101 @@ namespace antares {
 
 namespace {
 
-const int kMainScreenResID = 5000;
 const int64_t kMainDemoTimeOutTime = 30e6;
 const int kTitleTextScrollWidth = 450;
 
 }  // namespace
 
-MainScreen::MainScreen()
-        : InterfaceScreen(kMainScreenResID, world, true) { }
+MainScreen::MainScreen():
+        InterfaceScreen("main", world, true),
+        _state(NORMAL) { }
 
 MainScreen::~MainScreen() { }
 
 void MainScreen::become_front() {
-    InterfaceScreen::become_front();
-    if (Preferences::preferences()->play_idle_music() && !SongIsPlaying()) {
-        LoadSong(kTitleSongID);
-        SetSongVolume(kMaxMusicVolume);
-        PlaySong();
+    switch (_state) {
+      case NORMAL:
+        InterfaceScreen::become_front();
+        if (Preferences::preferences()->play_idle_music() && !SongIsPlaying()) {
+            LoadSong(kTitleSongID);
+            SetSongVolume(kMaxMusicVolume);
+            PlaySong();
+        }
+        _next_timer = now_usecs() + kMainDemoTimeOutTime;
+        break;
+      case QUITTING:
+        stack()->pop(this);
+        break;
     }
 }
 
 bool MainScreen::next_timer(int64_t& time) {
-    time = last_event() + kMainDemoTimeOutTime;
+    time = _next_timer;
     return true;
 }
 
 void MainScreen::fire_timer() {
     Randomize(1);
-    ReplayList replays;
-    size_t demo = rand() % (replays.size() + 1);
-    if (demo == replays.size()) {
+    size_t demo = rand() % (_replays.size() + 1);
+    if (demo == _replays.size()) {
         stack()->push(new ScrollTextScreen(5600, kTitleTextScrollWidth, 15.0));
     } else {
-        stack()->push(new ReplayGame(replays.at(demo)));
+        stack()->push(new ReplayGame(_replays.at(demo)));
     }
+}
+
+void MainScreen::mouse_down(const MouseDownEvent& event) {
+    InterfaceScreen::mouse_down(event);
+    _next_timer = now_usecs() + kMainDemoTimeOutTime;
+}
+
+void MainScreen::mouse_up(const MouseUpEvent& event) {
+    InterfaceScreen::mouse_up(event);
+    _next_timer = now_usecs() + kMainDemoTimeOutTime;
+}
+
+void MainScreen::key_down(const KeyDownEvent& event) {
+    InterfaceScreen::key_down(event);
+    _next_timer = now_usecs() + kMainDemoTimeOutTime;
+}
+
+void MainScreen::key_up(const KeyUpEvent& event) {
+    InterfaceScreen::key_up(event);
+    _next_timer = now_usecs() + kMainDemoTimeOutTime;
+}
+
+void MainScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
+    InterfaceScreen::gamepad_button_down(event);
+    _next_timer = now_usecs() + kMainDemoTimeOutTime;
+}
+
+void MainScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
+    InterfaceScreen::gamepad_button_up(event);
+    _next_timer = now_usecs() + kMainDemoTimeOutTime;
 }
 
 void MainScreen::adjust_interface() {
     // TODO(sfiera): switch on whether or not network games are available.
-    mutable_item(START_NETWORK_GAME)->set_status(kDimmed);
+    dynamic_cast<PlainButton&>(mutable_item(START_NETWORK_GAME)).status = kDimmed;
 
     // TODO(sfiera): switch on whether or not there is a single-player campaign.
-    mutable_item(START_NEW_GAME)->set_status(kActive);
+    dynamic_cast<PlainButton&>(mutable_item(START_NEW_GAME)).status = kActive;
 
-    ReplayList replays;
-    if (replays.size() == 0) {
-        mutable_item(DEMO)->set_status(kDimmed);
+    if (_replays.size() == 0) {
+        dynamic_cast<PlainButton&>(mutable_item(DEMO)).status = kDimmed;
     }
 }
 
-void MainScreen::handle_button(int button) {
-    switch (button) {
+void MainScreen::handle_button(antares::Button& button) {
+    switch (button.id) {
       case QUIT:
         // 1-second fade-out.
-        stack()->pop(this);
+        _state = QUITTING;
+        stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::kBlack, 1e6, false, NULL));
         break;
 
       case DEMO:
-        {
-            ReplayList replays;
-            stack()->push(new ReplayGame(replays.at(rand() % replays.size())));
-        }
+        stack()->push(new ReplayGame(_replays.at(rand() % _replays.size())));
         break;
 
       case REPLAY_INTRO:

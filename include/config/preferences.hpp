@@ -31,7 +31,9 @@ class Preferences {
 
     Preferences();
     Preferences(const Preferences& other);
+    Preferences(Preferences&& other) = default;
     Preferences& operator=(const Preferences& other);
+    Preferences& operator=(Preferences&& other) = default;
     ~Preferences();
 
     void reset();
@@ -56,7 +58,7 @@ class Preferences {
     void set_scenario_identifier(sfz::StringSlice id);
 
   private:
-    static sfz::scoped_ptr<Preferences> _preferences;
+    static std::unique_ptr<Preferences> _preferences;
 
     int16_t             _key_map[44];
     bool                _play_idle_music;

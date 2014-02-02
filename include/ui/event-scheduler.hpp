@@ -44,7 +44,7 @@ class EventScheduler {
     EventScheduler();
 
     void schedule_snapshot(int64_t at);
-    void schedule_event(sfz::linked_ptr<Event> event);
+    void schedule_event(std::unique_ptr<Event> event);
     void schedule_key(int32_t key, int64_t down, int64_t up);
     void schedule_mouse(int button, const Point& where, int64_t down, int64_t up);
 
@@ -53,6 +53,7 @@ class EventScheduler {
     bool button(int which) const { return _event_tracker.button(which); }
     Point get_mouse() const { return _event_tracker.mouse(); }
     void get_keys(KeyMap* k) const { k->copy(_event_tracker.keys()); }
+    InputMode input_mode() const { return KEYBOARD_MOUSE; }
     int ticks() const { return _ticks; }
     int64_t usecs() const { return ticks_to_usecs(_ticks); }
 
@@ -60,11 +61,11 @@ class EventScheduler {
     void advance_tick_count(MainLoop& loop, int64_t ticks);
     bool have_snapshots_before(int64_t ticks) const;
 
-    static bool is_later(const sfz::linked_ptr<Event>& x, const sfz::linked_ptr<Event>& y);
+    static bool is_later(const std::unique_ptr<Event>& x, const std::unique_ptr<Event>& y);
 
     int64_t _ticks;
     std::vector<int64_t> _snapshot_times;
-    std::vector<sfz::linked_ptr<Event> > _event_heap;
+    std::vector<std::unique_ptr<Event>> _event_heap;
     EventTracker _event_tracker;
 
     DISALLOW_COPY_AND_ASSIGN(EventScheduler);

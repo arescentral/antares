@@ -18,6 +18,7 @@
 
 #include <sfz/sfz.hpp>
 #include <getopt.h>
+#include <fcntl.h>
 
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
@@ -42,6 +43,7 @@
 #include "sound/music.hpp"
 #include "ui/card.hpp"
 #include "ui/interface-handling.hpp"
+#include "ui/screens/debriefing.hpp"
 #include "video/driver.hpp"
 #include "video/offscreen-driver.hpp"
 #include "video/text-driver.hpp"
@@ -49,14 +51,16 @@
 using sfz::BytesSlice;
 using sfz::MappedFile;
 using sfz::Optional;
+using sfz::ScopedFd;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::args::store;
 using sfz::args::store_const;
 using sfz::format;
-using sfz::make_linked_ptr;
 using sfz::mkdir;
-using sfz::scoped_ptr;
+using sfz::open;
+using std::unique_ptr;
+
 namespace args = sfz::args;
 namespace io = sfz::io;
 namespace path = sfz::path;
@@ -66,8 +70,9 @@ namespace antares {
 
 class ReplayMaster : public Card {
   public:
-    ReplayMaster(BytesSlice data):
+    ReplayMaster(BytesSlice data, Optional<String> output_path):
             _state(NEW),
+            _output_path(output_path),
             _replay_data(data),
             _random_seed(_replay_data.global_seed),
             _game_result(NO_GAME) { }
@@ -79,14 +84,32 @@ class ReplayMaster : public Card {
             init();
             Randomize(4);  // For the decision to replay intro.
             _game_result = NO_GAME;
-            gRandomSeed = _random_seed;
+            gRandomSeed.seed = _random_seed;
             globals()->gInputSource.reset(new ReplayInputSource(&_replay_data));
             stack()->push(new MainPlay(
                         GetScenarioPtrFromChapter(_replay_data.chapter_id), true, false,
-                        &_game_result));
+                        &_game_result, &_seconds));
             break;
 
           case REPLAY:
+            if (_output_path.has()) {
+                String path(format("{0}/debriefing.txt", *_output_path));
+                makedirs(path::dirname(path), 0755);
+                ScopedFd outcome(open(path, O_WRONLY | O_CREAT, 0644));
+                if ((globals()->gScenarioWinner.text >= 0)) {
+                    Resource rsrc("text", "txt", globals()->gScenarioWinner.text);
+                    sfz::write(outcome, rsrc.data());
+                    if (_game_result == WIN_GAME) {
+                        sfz::write(outcome, "\n\n");
+                        String text = DebriefingScreen::build_score_text(
+                                _seconds, gThisScenario->parTime,
+                                GetAdmiralLoss(0), gThisScenario->parLosses,
+                                GetAdmiralKill(0), gThisScenario->parKills);
+                        sfz::write(outcome, utf8::encode(text));
+                    }
+                    sfz::write(outcome, "\n");
+                }
+            }
             stack()->pop(this);
             break;
         }
@@ -101,9 +124,11 @@ class ReplayMaster : public Card {
     };
     State _state;
 
+    Optional<String> _output_path;
     ReplayData _replay_data;
     const int32_t _random_seed;
     GameResult _game_result;
+    int32_t _seconds;
 
     DISALLOW_COPY_AND_ASSIGN(ReplayMaster);
 };
@@ -119,11 +144,10 @@ void ReplayMaster::init() {
         world.right - kRightPanelWidth, world.bottom);
     viewport = play_screen;
 
-    InitSpriteCursor();
     RotationInit();
     InitDirectText();
-    ScreenLabelInit();
-    InitMessageScreen();
+    Labels::init();
+    Messages::init();
     InstrumentInit();
     SpriteHandlingInit();
     AresCheatInit();
@@ -133,7 +157,7 @@ void ReplayMaster::init() {
     MusicInit();
     InitMotion();
     AdmiralInit();
-    InitBeams();
+    Beams::init();
 }
 
 void usage(StringSlice program_name) {
@@ -157,6 +181,7 @@ void main(int argc, char** argv) {
     int width = 640;
     int height = 480;
     bool text = false;
+    bool smoke = false;
     parser.add_argument("-i", "--interval", store(interval))
         .help("take one screenshot per this many ticks (default: 60)");
     parser.add_argument("-w", "--width", store(width))
@@ -165,6 +190,8 @@ void main(int argc, char** argv) {
         .help("screen height (default: 480)");
     parser.add_argument("-t", "--text", store_const(text, true))
         .help("produce text output");
+    parser.add_argument("-s", "--smoke", store_const(smoke, true))
+        .help("run as smoke text");
 
     parser.add_argument("--help", help(parser, 0))
         .help("display this help screen");
@@ -185,14 +212,14 @@ void main(int argc, char** argv) {
     NullPrefsDriver prefs(preferences);
 
     EventScheduler scheduler;
-    scheduler.schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
+    scheduler.schedule_event(unique_ptr<Event>(new MouseMoveEvent(0, Point(320, 240))));
     // TODO(sfiera): add recurring snapshots to OffscreenVideoDriver.
     for (int64_t i = 1; i < 72000; i += interval) {
         scheduler.schedule_snapshot(i);
     }
 
-    scoped_ptr<SoundDriver> sound;
-    if (output_dir.has()) {
+    unique_ptr<SoundDriver> sound;
+    if (!smoke && output_dir.has()) {
         String out(format("{0}/sound.log", *output_dir));
         sound.reset(new LogSoundDriver(out));
     } else {
@@ -202,12 +229,15 @@ void main(int argc, char** argv) {
 
     Size screen_size = Preferences::preferences()->screen_size();
     MappedFile replay_file(replay_path);
-    if (text) {
+    if (smoke) {
+        TextVideoDriver video(screen_size, scheduler, Optional<String>());
+        video.loop(new ReplayMaster(replay_file.data(), output_dir));
+    } else if (text) {
         TextVideoDriver video(screen_size, scheduler, output_dir);
-        video.loop(new ReplayMaster(replay_file.data()));
+        video.loop(new ReplayMaster(replay_file.data(), output_dir));
     } else {
         OffscreenVideoDriver video(screen_size, scheduler, output_dir);
-        video.loop(new ReplayMaster(replay_file.data()));
+        video.loop(new ReplayMaster(replay_file.data(), output_dir));
     }
 }
 

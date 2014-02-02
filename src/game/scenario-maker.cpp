@@ -54,9 +54,7 @@ using sfz::String;
 using sfz::StringSlice;
 using sfz::range;
 using sfz::read;
-using sfz::scoped_array;
 using std::vector;
-namespace macroman = sfz::macroman;
 
 namespace antares {
 
@@ -73,6 +71,7 @@ const int32_t kOwnerMayChangeFlag   = 0x80000000;
 const int32_t kAnyOwnerColorFlag    = 0x0000ffff;
 
 const int16_t kLevelNameID = 4600;
+static StringList* level_names;
 
 vector<Scenario> gScenarioData;
 vector<Scenario::InitialObject> gScenarioInitialData;
@@ -86,8 +85,8 @@ void AddBaseObjectActionMedia(int32_t whichBase, int32_t whichType, uint8_t colo
 void AddActionMedia(objectActionType *action, uint8_t color);
 
 void SetAllBaseObjectsUnchecked() {
-    baseObjectType  *aBase = gBaseObjectData.get();
-    long            count;
+    baseObjectType  *aBase = mGetBaseObjectPtr(0);
+    int32_t         count;
 
     for ( count = 0; count < globals()->maxBaseObject; count++)
     {
@@ -140,9 +139,9 @@ void CheckBaseObjectMedia(baseObjectType *aBase, uint8_t color) {
 
 void CheckActionMedia(int32_t whichAction, int32_t actionNum, uint8_t color) {
     baseObjectType      *baseObject;
-    objectActionType    *action = gObjectActionData.get() + whichAction;
+    objectActionType    *action = mGetObjectActionPtr(whichAction);
     bool             OKtoExecute;
-    long                count;
+    int32_t             count;
 
     while ((actionNum > 0) && (action->verb != kNoAction))
     {
@@ -173,7 +172,7 @@ void CheckActionMedia(int32_t whichAction, int32_t actionNum, uint8_t color) {
                         break;
 
                     case kAlterOwner:
-                        baseObject = gBaseObjectData.get();
+                        baseObject = mGetBaseObjectPtr(0);
                         for ( count = 0; count < globals()->maxBaseObject; count++)
                         {
                             OKtoExecute = false;
@@ -262,38 +261,38 @@ void AddBaseObjectMedia(int32_t whichBase, uint8_t color) {
 }
 
 void mGetActionFromBaseTypeNum(
-        objectActionType*& mactPtr, baseObjectType* mbaseObjPtr, long mactionType,
-        long mactionNum) {
+        objectActionType*& mactPtr, baseObjectType* mbaseObjPtr, int32_t mactionType,
+        int32_t mactionNum) {
     if ( (mactionType) == kDestroyActionType)
     {
         if ( mactionNum >= ((mbaseObjPtr)->destroyActionNum & kDestroyActionNotMask)) mactPtr = NULL;
-        else mactPtr = gObjectActionData.get() + (mbaseObjPtr)->destroyAction + implicit_cast<long>(mactionNum);
+        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->destroyAction + implicit_cast<int32_t>(mactionNum));
     } else if ( (mactionType) == kExpireActionType)
     {
         if ( mactionNum >= ((mbaseObjPtr)->expireActionNum  & kDestroyActionNotMask)) mactPtr = NULL;
-        else mactPtr = gObjectActionData.get() + (mbaseObjPtr)->expireAction + implicit_cast<long>(mactionNum);
+        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->expireAction + implicit_cast<int32_t>(mactionNum));
     } else if ( (mactionType) == kCreateActionType)
     {
         if ( mactionNum >= (mbaseObjPtr)->createActionNum) mactPtr = NULL;
-        else mactPtr = gObjectActionData.get() + (mbaseObjPtr)->createAction + implicit_cast<long>(mactionNum);
+        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->createAction + implicit_cast<int32_t>(mactionNum));
     } else if ( (mactionType) == kCollideActionType)
     {
         if ( mactionNum >= (mbaseObjPtr)->collideActionNum) mactPtr = NULL;
-        else mactPtr = gObjectActionData.get() + (mbaseObjPtr)->collideAction + implicit_cast<long>(mactionNum);
+        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->collideAction + implicit_cast<int32_t>(mactionNum));
     } else if ( (mactionType) == kActivateActionType)
     {
         if ( mactionNum >= ((mbaseObjPtr)->activateActionNum & kPeriodicActionNotMask)) mactPtr = NULL;
-        else mactPtr = gObjectActionData.get() + (mbaseObjPtr)->activateAction + implicit_cast<long>(mactionNum);
+        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->activateAction + implicit_cast<int32_t>(mactionNum));
     } else if ( (mactionType) == kArriveActionType)
     {
         if ( mactionNum >= (mbaseObjPtr)->arriveActionNum) mactPtr = NULL;
-        else mactPtr = gObjectActionData.get() + (mbaseObjPtr)->arriveAction + implicit_cast<long>(mactionNum);
+        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->arriveAction + implicit_cast<int32_t>(mactionNum));
     } else mactPtr = NULL;
 }
 
 void AddBaseObjectActionMedia(int32_t whichBase, int32_t whichType, uint8_t color) {
     baseObjectType      *baseObject = NULL;
-    long                count = 0;
+    int32_t             count = 0;
     objectActionType    *action = NULL;
 
     do
@@ -308,7 +307,7 @@ void AddBaseObjectActionMedia(int32_t whichBase, int32_t whichType, uint8_t colo
 
 void AddActionMedia(objectActionType *action, uint8_t color) {
     baseObjectType      *baseObject = NULL;
-    long                count = 0, l1, l2;
+    int32_t             count = 0, l1, l2;
     bool             OKtoExecute;
 
     if ( action != NULL)
@@ -342,7 +341,7 @@ void AddActionMedia(objectActionType *action, uint8_t color) {
                         break;
 
                     case kAlterOwner:
-                        baseObject = gBaseObjectData.get();
+                        baseObject = mGetBaseObjectPtr(0);
                         for ( count = 0; count < globals()->maxBaseObject; count++)
                         {
                             OKtoExecute = false;
@@ -445,8 +444,7 @@ ScenarioName Scenario::name() const {
 }
 
 void print_to(PrintTarget out, ScenarioName name) {
-    StringList strings(kLevelNameID);
-    print(out, strings.at(name.string_id - 1));
+    print(out, level_names->at(name.string_id - 1));
 }
 
 int32_t Scenario::prologue_id() const {
@@ -528,14 +526,16 @@ void ScenarioMakerInit() {
     }
 
     InitRaces();
+
+    level_names = new StringList(kLevelNameID);
 }
 
 bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     ResetAllSpaceObjects();
     ResetActionQueueData();
-    ResetBeams();
+    Beams::reset();
     ResetAllSprites();
-    ResetAllLabels();
+    Labels::reset();
     ResetInstruments();
     ResetAllAdmirals();
     ResetAllDestObjectData();
@@ -568,7 +568,7 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     {
         int32_t angle = gThisScenario->angle();
         if (angle < 0) {
-            gScenarioRotation = RandomSeeded(ROT_POS, &gRandomSeed, 'scm0', -1);
+            gScenarioRotation = gRandomSeed.next(ROT_POS);
         } else {
             gScenarioRotation = angle;
         }
@@ -613,7 +613,7 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
                 SetAdmiralColor(gAdmiralNumbers[i], GetPlayerColor(i));
                 SetAdmiralName(gAdmiralNumbers[i], (anyCharType *)GetPlayerName(i));
             }
-#endif NETSPROCKET_AVAILABLE
+#endif  // NETSPROCKET_AVAILABLE
         } else {
             if (gThisScenario->player[i].playerType == kSingleHumanPlayer) {
                 gAdmiralNumbers[i] = MakeNewAdmiral(
@@ -700,7 +700,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 && (!(initial->attributes & kFixedRace))) {
             int32_t baseClass = baseObject->baseClass;
             int32_t race = GetAdmiralRace(initial->owner);
-            long newShipNum;
+            int32_t newShipNum;
             mGetBaseObjectFromClassRace(baseObject, newShipNum, baseClass, race);
             if (baseObject == NULL) {
                 baseObject = mGetBaseObjectPtr(initial->type);
@@ -720,7 +720,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             if (initial->canBuild[i] != kNoClass) {
                 // check for each player
                 for (int j = 0; j < gThisScenario->playerNum; j++) {
-                    long newShipNum;
+                    int32_t newShipNum;
                     mGetBaseObjectFromClassRace(baseObject, newShipNum, initial->canBuild[i], GetAdmiralRace(j));
                     if (baseObject != NULL) {
                         CheckBaseObjectMedia(baseObject, GetAdmiralColor(j));
@@ -783,7 +783,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         Scenario::InitialObject* initial = gThisScenario->initial(i);
 
         // get the base object equiv
-        long type = initial->type;
+        int32_t type = initial->type;
         baseObjectType* baseObject = mGetBaseObjectPtr(type);
         if (NETWORK_ON && (GetAdmiralRace(initial->owner) >= 0)
                 && (!(initial->attributes & kFixedRace))) {
@@ -827,7 +827,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 for (int k = 0; k < gThisScenario->playerNum; k++) {
                     initial = gThisScenario->initial(i);
                     baseObject = mGetBaseObjectPtr(type);
-                    long newShipNum;
+                    int32_t newShipNum;
                     mGetBaseObjectFromClassRace(
                             baseObject, newShipNum, initial->canBuild[j], GetAdmiralRace(k));
                     if (baseObject != NULL) {
@@ -847,10 +847,10 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             Scenario::Condition* condition = gThisScenario->condition(0);
             for (int i = 0; i < gThisScenario->conditionNum; i++) {
                 condition = gThisScenario->condition(i);
-                objectActionType* action = gObjectActionData.get() + condition->startVerb;
+                objectActionType* action = mGetObjectActionPtr(condition->startVerb);
                 for (int j = 0; j < condition->verbNum; j++) {
                     condition = gThisScenario->condition(i);
-                    action = gObjectActionData.get() + condition->startVerb + j;
+                    action = mGetObjectActionPtr(condition->startVerb + j);
                     AddActionMedia(action, 0);
                 }
             }
@@ -914,7 +914,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 }
             }
 
-            long type = initial->type;
+            int32_t type = initial->type;
             if (NETWORK_ON && (GetAdmiralRace(initial->owner) >= 0)
                     && (!(initial->attributes & kFixedRace))) {
                 baseObjectType* baseObject = mGetBaseObjectPtr(type);
@@ -927,12 +927,12 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 }
             }
             fixedPointType v = {0, 0};
-            long newShipNum;
+            int32_t newShipNum;
             initial->realObjectNumber = newShipNum = CreateAnySpaceObject(
                     type, &v, &coord, gScenarioRotation, owner, specialAttributes,
                     initial->spriteIDOverride);
 
-            spaceObjectType* anObject = gSpaceObjectData.get() + newShipNum;
+            spaceObjectType* anObject = mGetSpaceObjectPtr(newShipNum);
             if (anObject->attributes & kIsDestination) {
                 anObject->destinationObject = MakeNewDestination(
                         newShipNum, initial->canBuild, initial->earning, initial->nameResID,
@@ -991,7 +991,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 // now give the mapped initial object the admiral's destination
 
                 initial = gThisScenario->initial(i);
-                spaceObjectType* anObject = gSpaceObjectData.get() + initial->realObjectNumber;
+                spaceObjectType* anObject = mGetSpaceObjectPtr(initial->realObjectNumber);
                 int32_t specialAttributes = anObject->attributes; // preserve the attributes
                 anObject->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
                 SetObjectDestination(anObject, NULL);
@@ -1006,33 +1006,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
     if (step == 0) {
         // set up all the admiral's destination objects
         RecalcAllAdmiralBuildData();
-
-        if (NETWORK_ON) {
-            for (int i = 0; i < gThisScenario->playerNum; i++) {
-                if (GetAdmiralFlagship(i) == NULL) {
-                    spaceObjectType* anObject = gSpaceObjectData.get();
-                    int32_t count = 0;
-                    while ((((anObject->attributes & kCanThink) != kCanThink)
-                                || (anObject->owner != i))
-                            && (count < kMaxSpaceObject)) {
-                        count++;
-                        anObject++;
-                    }
-
-                    if (count < kMaxSpaceObject) {
-                        SetAdmiralFlagship(i, count);
-                        anObject->attributes |= kIsPlayerShip;
-                        if (i != globals()->gPlayerAdmiralNumber) {
-                            anObject->attributes |= kIsRemote;
-                        } else {
-                            anObject->attributes |= kIsHumanControlled;
-                            ResetPlayerShip(count);
-                        }
-                    }
-                }
-            }
-        }
-        ClearMessage();
+        Messages::clear();
 
         int x = 0;
         const int64_t start_ticks
@@ -1041,19 +1015,18 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         globals()->gGameTime = 0;
         for (int64_t i = 0; i < start_ticks; ++i) {
             globals()->gGameTime = add_ticks(globals()->gGameTime, 1);
-            MoveSpaceObjects(gSpaceObjectData.get(), kMaxSpaceObject,
-                        kDecideEveryCycles);
+            MoveSpaceObjects(kDecideEveryCycles);
             NonplayerShipThink(kDecideEveryCycles);
             AdmiralThink();
             ExecuteActionQueue(kDecideEveryCycles);
-            CollideSpaceObjects(gSpaceObjectData.get(), kMaxSpaceObject);
+            CollideSpaceObjects();
             x++;
             if (x == 30) {
                 x = 0;
                 CheckScenarioConditions(0);
             }
             CullSprites();
-            CullBeams();
+            Beams::cull();
             if ((i % kScenarioTimeMultiple) == 0) {
                 (*current)++;
             }
@@ -1068,8 +1041,8 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
 void CheckScenarioConditions(int32_t timePass) {
     Scenario::Condition     *condition = NULL;
     spaceObjectType         *sObject = NULL, *dObject = NULL;
-    long                    i, l, difference;
-    unsigned long           distance, dcalc;
+    int32_t                 i, l, difference;
+    uint32_t                distance, dcalc;
     Point                   offset(0, 0);
     bool                 conditionTrue = false;
 
@@ -1201,7 +1174,7 @@ void CheckScenarioConditions(int32_t timePass) {
                             l = GetAdmiralConsiderObject( globals()->gPlayerAdmiralNumber);
                             if ( l >= 0)
                             {
-                                dObject = gSpaceObjectData.get() + l;
+                                dObject = mGetSpaceObjectPtr(l);
                                 if ( dObject == sObject)
                                 {
                                     conditionTrue = true;
@@ -1216,7 +1189,7 @@ void CheckScenarioConditions(int32_t timePass) {
                             l = GetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber);
                             if ( l >= 0)
                             {
-                                dObject = gSpaceObjectData.get() + l;
+                                dObject = mGetSpaceObjectPtr(l);
                                 if ( dObject == sObject)
                                 {
                                     conditionTrue = true;
@@ -1245,10 +1218,7 @@ void CheckScenarioConditions(int32_t timePass) {
 
                     case kCurrentMessageCondition:
                         {
-                            longMessageType *tmessage;
-
-                            tmessage = globals()->gLongMessageData.get();
-                            if ( tmessage->currentResID == (condition->conditionArgument.location.h +
+                            if (Messages::current() == (condition->conditionArgument.location.h +
                                 condition->conditionArgument.location.v - 1))
                             {
                                 conditionTrue = true;
@@ -1336,7 +1306,7 @@ void CheckScenarioConditions(int32_t timePass) {
 }
 
 int32_t GetRealAdmiralNumber(int32_t whichAdmiral) {
-    long result;
+    int32_t result;
 
     result = mGetRealAdmiralNum( whichAdmiral);
     return( result);
@@ -1347,8 +1317,8 @@ void UnhideInitialObject(int32_t whichInitial) {
     spaceObjectType         *anObject = NULL;
     coordPointType          coord;
     fixedPointType          v = {0, 0};
-    unsigned long           specialAttributes;
-    long                    newShipNum, owner, type, saveDest, baseClass, race;
+    uint32_t                specialAttributes;
+    int32_t                 newShipNum, owner, type, saveDest, baseClass, race;
     baseObjectType          *baseObject;
 
     v.h = 0;
@@ -1398,7 +1368,7 @@ void UnhideInitialObject(int32_t whichInitial) {
                                             specialAttributes,
                                             initial->spriteIDOverride);
 
-        anObject = gSpaceObjectData.get() + newShipNum;
+        anObject = mGetSpaceObjectPtr(newShipNum);
         initial = gThisScenario->initial(whichInitial);
 
         if ( anObject->attributes & kIsDestination)
@@ -1458,7 +1428,7 @@ void UnhideInitialObject(int32_t whichInitial) {
                     // now give the mapped initial object the admiral's destination
 
                     initial = gThisScenario->initial(whichInitial);
-                    anObject = gSpaceObjectData.get() + initial->realObjectNumber;
+                    anObject = mGetSpaceObjectPtr(initial->realObjectNumber);
                     specialAttributes = anObject->attributes; // preserve the attributes
                     anObject->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
                     SetObjectDestination( anObject, NULL);
@@ -1476,7 +1446,7 @@ spaceObjectType *GetObjectFromInitialNumber(int32_t initialNumber) {
     if (initialNumber >= 0) {
         Scenario::InitialObject* initial = gThisScenario->initial(initialNumber);
         if (initial->realObjectNumber >= 0) {
-            spaceObjectType& object = gSpaceObjectData[initial->realObjectNumber];
+            spaceObjectType& object = *mGetSpaceObjectPtr(initial->realObjectNumber);
             if ((object.id != initial->realObjectID) || (object.active != kObjectInUse)) {
                 return NULL;
             }
@@ -1484,7 +1454,7 @@ spaceObjectType *GetObjectFromInitialNumber(int32_t initialNumber) {
         }
         return NULL;
     } else if (initialNumber == -2) {
-        spaceObjectType& object = gSpaceObjectData[globals()->gPlayerShipNumber];
+        spaceObjectType& object = *mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
         if ((!object.active) || (!(object.attributes & kCanThink))) {
             return NULL;
         }
@@ -1528,7 +1498,7 @@ void DeclareWinner(int32_t whichPlayer, int32_t nextLevel, int32_t textID) {
 void GetScenarioFullScaleAndCorner(
         const Scenario* scenario, int32_t rotation, coordPointType *corner, int32_t *scale,
         Rect *bounds) {
-    long            biggest, count, otherCount, mustFit;
+    int32_t         biggest, count, otherCount, mustFit;
     Point           coord, otherCoord, tempCoord;
     Scenario::InitialObject     *initial;
 
@@ -1601,11 +1571,11 @@ void GetScenarioFullScaleAndCorner(
 }
 
 const Scenario* GetScenarioPtrFromChapter(int32_t chapter) {
-    SFZ_FOREACH(const Scenario& scenario, gScenarioData, {
+    for (const Scenario& scenario: gScenarioData) {
         if (scenario.chapter_number() == chapter) {
             return &scenario;
         }
-    });
+    }
     return NULL;
 }
 

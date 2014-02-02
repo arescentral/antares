@@ -28,7 +28,7 @@
 
 namespace antares {
 
-class Scenario;
+struct Scenario;
 class Sprite;
 
 class BriefingScreen : public InterfaceScreen {
@@ -37,14 +37,14 @@ class BriefingScreen : public InterfaceScreen {
     ~BriefingScreen();
 
     virtual void become_front();
-    virtual void draw() const;
+    virtual void overlay() const;
 
     virtual void mouse_down(const MouseDownEvent& event);
     virtual void key_down(const KeyDownEvent& event);
 
   protected:
     virtual void adjust_interface();
-    virtual void handle_button(int button);
+    virtual void handle_button(Button& button);
 
   private:
     enum Item {
@@ -70,11 +70,11 @@ class BriefingScreen : public InterfaceScreen {
     bool* const _cancelled;
     int _briefing_point;
     const int _briefing_point_count;
-    mutable interfaceItemType _data_item;
+    mutable LabeledRect _data_item;
 
     Rect _bounds;
 
-    sfz::scoped_ptr<Sprite> _star_map;
+    std::unique_ptr<Sprite> _star_map;
     Rect _star_rect;
 
     struct Star {
@@ -84,7 +84,7 @@ class BriefingScreen : public InterfaceScreen {
     std::vector<Star> _system_stars;
     std::vector<inlinePictType> _inline_pict;
     Rect _highlight_rect;
-    std::vector<std::pair<Point, Point> > _highlight_lines;
+    std::vector<std::pair<Point, Point>> _highlight_lines;
     sfz::String _text;
 
     DISALLOW_COPY_AND_ASSIGN(BriefingScreen);

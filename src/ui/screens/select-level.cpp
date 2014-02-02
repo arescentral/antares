@@ -37,20 +37,13 @@ using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::String;
 using sfz::StringSlice;
-using sfz::scoped_ptr;
 using sfz::format;
-
-namespace macroman = sfz::macroman;
+using std::unique_ptr;
 
 namespace antares {
-namespace {
-
-const int kSelectLevelScreenResID = 5011;
-
-}  // namespace
 
 SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Scenario** scenario)
-        : InterfaceScreen(kSelectLevelScreenResID, world, true),
+        : InterfaceScreen("select-level", world, true),
           _state(SELECTING),
           _cancelled(cancelled),
           _scenario(scenario) {
@@ -75,19 +68,19 @@ void SelectLevelScreen::become_front() {
 
 void SelectLevelScreen::adjust_interface() {
     if (_index > 0) {
-        mutable_item(PREVIOUS)->set_status(kActive);
+        dynamic_cast<Button&>(mutable_item(PREVIOUS)).status = kActive;
     } else {
-        mutable_item(PREVIOUS)->set_status(kDimmed);
+        dynamic_cast<Button&>(mutable_item(PREVIOUS)).status = kDimmed;
     }
     if (_index < _chapters.size() - 1) {
-        mutable_item(NEXT)->set_status(kActive);
+        dynamic_cast<Button&>(mutable_item(NEXT)).status = kActive;
     } else {
-        mutable_item(NEXT)->set_status(kDimmed);
+        dynamic_cast<Button&>(mutable_item(NEXT)).status = kDimmed;
     }
 }
 
-void SelectLevelScreen::handle_button(int button) {
-    switch (button) {
+void SelectLevelScreen::handle_button(Button& button) {
+    switch (button.id) {
       case OK:
         _state = FADING_OUT;
         *_cancelled = false;
@@ -116,19 +109,18 @@ void SelectLevelScreen::handle_button(int button) {
         break;
 
       default:
-        throw Exception(format("Got unknown button {0}.", button));
+        throw Exception(format("Got unknown button {0}.", button.id));
     }
 }
 
-void SelectLevelScreen::draw() const {
-    InterfaceScreen::draw();
+void SelectLevelScreen::overlay() const {
     draw_level_name();
 }
 
 void SelectLevelScreen::draw_level_name() const {
     const String chapter_name((*_scenario)->name());
 
-    const interfaceItemType& i = item(NAME);
+    const InterfaceItem& i = item(NAME);
 
     RgbColor color = GetRGBTranslateColorShade(AQUA, VERY_LIGHT);
     StyledText retro(title_font);
@@ -136,7 +128,7 @@ void SelectLevelScreen::draw_level_name() const {
     retro.set_retro_text(chapter_name);
     retro.wrap_to(440, 0, 2);
 
-    retro.draw(i.bounds);
+    retro.draw(i.bounds());
 }
 
 }  // namespace antares

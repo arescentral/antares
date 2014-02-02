@@ -43,12 +43,17 @@ class DebriefingScreen : public Card {
 
     virtual void mouse_down(const MouseDownEvent& event);
     virtual void key_down(const KeyDownEvent& event);
+    virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
 
     virtual bool next_timer(int64_t& time);
     virtual void fire_timer();
 
+    static sfz::String build_score_text(
+            int your_length, int par_length, int your_loss, int par_loss, int your_kill,
+            int par_kill);
+    
   private:
-    void initialize(int text_id, bool do_score);
+    LabeledRect initialize(int text_id, bool do_score);
 
     enum State {
         TYPING,
@@ -58,15 +63,17 @@ class DebriefingScreen : public Card {
     State _state;
 
     sfz::String _message;
-    sfz::scoped_ptr<StyledText> _score;
+    std::unique_ptr<StyledText> _score;
     Rect _pix_bounds;
     Rect _message_bounds;
     Rect _score_bounds;
-    sfz::scoped_ptr<PixMap> _pix;
-    sfz::scoped_ptr<Sprite> _sprite;
+    std::unique_ptr<PixMap> _pix;
+    std::unique_ptr<Sprite> _sprite;
 
     int64_t _next_update;
     int _typed_chars;
+
+    LabeledRect _data_item;
 
     DISALLOW_COPY_AND_ASSIGN(DebriefingScreen);
 };

@@ -21,13 +21,12 @@
 #include <strings.h>
 
 #include "data/string-list.hpp"
+#include "game/globals.hpp"
 #include "video/driver.hpp"
 
 namespace antares {
 
-KeyMap::KeyMap() {
-    clear();
-}
+KeyMap::KeyMap(): _data{} {}
 
 bool KeyMap::get(size_t index) const {
     return _data[index >> 3] & (1 << (index & 0x7));
@@ -40,7 +39,7 @@ void KeyMap::set(size_t index, bool value) {
 }
 
 bool KeyMap::any() const {
-    const Data zero = { };
+    static const Data zero = { };
     return memcmp(_data, zero, kDataSize) == 0;
 }
 
@@ -70,7 +69,7 @@ void GetKeyMapFromKeyNum(int key_num, KeyMap* key_map) {
 }
 
 int GetKeyNumFromKeyMap(const KeyMap& key_map) {
-    for (int i = 0; i < 128; ++i) {
+    for (int i = 0; i < 256; ++i) {
         if (key_map.get(i)) {
             return i + 1;
         }
@@ -81,12 +80,22 @@ int GetKeyNumFromKeyMap(const KeyMap& key_map) {
 bool CommandKey() {
     KeyMap key_map;
     VideoDriver::driver()->get_keys(&key_map);
-    return key_map.get(Keys::COMMAND);
+    return key_map.get(Keys::L_COMMAND);
 }
 
 void GetKeyNumName(int key_num, sfz::String* out) {
-    StringList strings(KEY_NAMES);
-    out->assign(strings.at(key_num - 1));
+    out->assign(globals()->key_names->at(key_num - 1));
+}
+
+bool GetKeyNameNum(sfz::StringSlice name, int& out) {
+    bool result = false;
+    for (int i = 0; i < globals()->key_names->size(); ++i) {
+        if (globals()->key_names->at(i) == name) {
+            out = i + 1;
+            result = true;
+        }
+    }
+    return result;
 }
 
 // returns true if any keys OTHER THAN POWER ON AND CAPS LOCK are down
@@ -108,14 +117,14 @@ bool AnyKeyButThisOne(const KeyMap& key_map, int key_num) {
     return others.any();
 }
 
-long GetAsciiFromKeyMap(const KeyMap& sourceKeyMap, const KeyMap& previousKeyMap) {
+int32_t GetAsciiFromKeyMap(const KeyMap& sourceKeyMap, const KeyMap& previousKeyMap) {
     // TODO(sfiera): write a new implementation of this method.
     static_cast<void>(sourceKeyMap);
     static_cast<void>(previousKeyMap);
     return 0;
     /*
-    short           whichKeyCode = 0, modifiers = 0, count;
-    long            result;
+    int16_t         whichKeyCode = 0, modifiers = 0, count;
+    int32_t         result;
     Ptr             KCHRPtr;
     KeyMap          keyMap;
 

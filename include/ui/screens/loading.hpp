@@ -42,8 +42,8 @@ class LoadingScreen : public InterfaceScreen {
     void update(int32_t current, int32_t max);
 
   protected:
-    virtual void handle_button(int button);
-    virtual void draw() const;
+    virtual void handle_button(Button& button);
+    virtual void overlay() const;
 
   private:
     enum State {
@@ -56,7 +56,7 @@ class LoadingScreen : public InterfaceScreen {
     const Scenario* const _scenario;
     bool* const _cancelled;
 
-    sfz::scoped_ptr<StyledText> _name_text;
+    std::unique_ptr<StyledText> _name_text;
     int64_t _next_update;
     int32_t _chars_typed;
 

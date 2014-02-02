@@ -24,6 +24,7 @@
 
 #include "drawing/color.hpp"
 #include "math/geometry.hpp"
+#include "math/random.hpp"
 #include "ui/card.hpp"
 #include "video/driver.hpp"
 
@@ -35,7 +36,7 @@ class OpenGlVideoDriver : public VideoDriver {
   public:
     OpenGlVideoDriver(Size screen_size);
 
-    virtual Sprite* new_sprite(sfz::PrintItem name, const PixMap& content);
+    virtual std::unique_ptr<Sprite> new_sprite(sfz::PrintItem name, const PixMap& content);
     virtual void fill_rect(const Rect& rect, const RgbColor& color);
     virtual void dither_rect(const Rect& rect, const RgbColor& color);
     virtual void draw_point(const Point& at, const RgbColor& color);
@@ -77,14 +78,13 @@ class OpenGlVideoDriver : public VideoDriver {
 
   private:
     const Size _screen_size;
-    int32_t _static_seed;
+    Random _static_seed;
 
     Uniforms _uniforms;
 
-    // TODO(sfiera): don't leak these.
-    std::map<size_t, Sprite*> _triangles;
-    std::map<size_t, Sprite*> _diamonds;
-    std::map<size_t, Sprite*> _pluses;
+    std::map<size_t, std::unique_ptr<Sprite>> _triangles;
+    std::map<size_t, std::unique_ptr<Sprite>> _diamonds;
+    std::map<size_t, std::unique_ptr<Sprite>> _pluses;
 
     DISALLOW_COPY_AND_ASSIGN(OpenGlVideoDriver);
 };

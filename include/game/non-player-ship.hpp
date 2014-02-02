@@ -25,16 +25,17 @@
 
 namespace antares {
 
-spaceObjectType *HackNewNonplayerShip( long, short, Rect *);
-void NonplayerShipThink( long);
+spaceObjectType *HackNewNonplayerShip(int32_t, int16_t, Rect *);
+void NonplayerShipThink(int32_t);
 void UpdateMyNonplayerShip( void);
 void HackShowShipID( void);
 void HitObject( spaceObjectType *, spaceObjectType *);
-long GetManualSelectObject( spaceObjectType *, unsigned long,
-                            unsigned long, unsigned long,
-                            const uint64_t*, long, short);
-long GetSpritePointSelectObject( Rect *, spaceObjectType *, unsigned long,
-                            unsigned long, unsigned long, long, short);
+int32_t GetManualSelectObject(
+        spaceObjectType *sourceObject, int32_t direction, uint32_t inclusiveAttributes,
+        uint32_t anyOneAttribute, uint32_t exclusiveAttributes,
+        const uint64_t* fartherThan, int32_t currentShipNum, int16_t friendOrFoe);
+int32_t GetSpritePointSelectObject( Rect *, spaceObjectType *, uint32_t,
+                            uint32_t, uint32_t, int32_t, int16_t);
 
 }  // namespace antares
 

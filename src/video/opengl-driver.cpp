@@ -42,6 +42,8 @@ using sfz::format;
 using sfz::print;
 using std::min;
 using std::max;
+using std::unique_ptr;
+
 namespace io = sfz::io;
 
 namespace antares {
@@ -126,7 +128,7 @@ void gl_log(GLint object) {
     if (log_size == 0) {
         return;
     }
-    sfz::scoped_array<GLchar> log(new GLchar[log_size + 1]);
+    unique_ptr<GLchar[]> log(new GLchar[log_size + 1]);
     if (glIsShader(object)) {
         glGetShaderInfoLog(object, log_size, &log_size, log.get());
     } else {
@@ -272,10 +274,10 @@ class OpenGlSprite : public Sprite {
 
 OpenGlVideoDriver::OpenGlVideoDriver(Size screen_size)
         : _screen_size(screen_size),
-          _static_seed(0) { }
+          _static_seed{0} { }
 
-Sprite* OpenGlVideoDriver::new_sprite(PrintItem name, const PixMap& content) {
-    return new OpenGlSprite(name, content, _uniforms);
+unique_ptr<Sprite> OpenGlVideoDriver::new_sprite(PrintItem name, const PixMap& content) {
+    return unique_ptr<Sprite>(new OpenGlSprite(name, content, _uniforms));
 }
 
 void OpenGlVideoDriver::fill_rect(const Rect& rect, const RgbColor& color) {
@@ -470,12 +472,12 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     size_t size = 256;
-    sfz::scoped_array<uint8_t> static_data(new uint8_t[size * size * 2]);
-    int32_t static_index = 0;
+    unique_ptr<uint8_t[]> static_data(new uint8_t[size * size * 2]);
+    Random static_index = {0};
     uint8_t* p = static_data.get();
     for (int i = 0; i < (size * size); ++i) {
         *(p++) = 255;
-        *(p++) = XRandomSeeded(256, &static_index);
+        *(p++) = static_index.next(256);
     }
     glTexImage2D(
             GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, size, size, 0, GL_LUMINANCE_ALPHA,
@@ -493,6 +495,10 @@ OpenGlVideoDriver::MainLoop::MainLoop(OpenGlVideoDriver& driver, Card* initial):
         _stack(initial) { }
 
 void OpenGlVideoDriver::MainLoop::draw() {
+    if (done()) {
+        return;
+    }
+
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
     glViewport(0, 0, _driver._screen_size.width, _driver._screen_size.height);
@@ -504,9 +510,9 @@ void OpenGlVideoDriver::MainLoop::draw() {
     glTranslatef(-1.0, 1.0, 0.0);
     glScalef(2.0, -2.0, 1.0);
     glScalef(1.0 / _driver._screen_size.width, 1.0 / _driver._screen_size.height, 1.0);
-    int32_t seed = XRandomSeeded(256, &_driver._static_seed);
+    int32_t seed = {_driver._static_seed.next(256)};
     seed <<= 8;
-    seed += XRandomSeeded(256, &_driver._static_seed);
+    seed += _driver._static_seed.next(256);
     glUniform1i(_driver._uniforms.seed, seed);
 
     gl_check();

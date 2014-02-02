@@ -29,13 +29,13 @@ namespace antares {
 
 class Master : public Card {
   public:
-    Master();
+    Master(int32_t seed);
 
     virtual void become_front();
-    virtual void draw();
+    virtual void draw() const;
 
   private:
-    static void init();
+    void init();
 
     enum State {
         START,
@@ -47,6 +47,7 @@ class Master : public Card {
     };
 
     State _state;
+    const int32_t _seed;
     bool _skipped;
 };
 

@@ -43,8 +43,6 @@ const int32_t kTimesTwoScale    = SCALE_SCALE * 2;
 
 const int32_t SHIFT_SCALE       = 12;
 
-extern const RgbColor& kNoTinyColor;
-
 enum {
     kNoSpriteLayer      = 0,
     kFirstSpriteLayer   = 1,
@@ -70,14 +68,14 @@ typedef void (*draw_tiny_t)(const Rect& rect, const RgbColor& color);
 struct spriteType {
     Point           where;
     NatePixTable*   table;
-    short           resID;
+    int16_t         resID;
     int             whichShape;
     int32_t         scale;
     spriteStyleType style;
     RgbColor        styleColor;
-    short           styleData;
-    long            tinySize;
-    short           whichLayer;
+    int16_t         styleData;
+    int32_t         tinySize;
+    int16_t         whichLayer;
     RgbColor        tinyColor;
     bool            killMe;
     draw_tiny_t     draw_tiny;
@@ -86,7 +84,6 @@ struct spriteType {
 };
 
 extern int32_t gAbsoluteScale;
-extern sfz::scoped_array<spriteType> gSpriteTable;
 
 // Scale `value` by `scale`.
 //
@@ -106,8 +103,8 @@ void RemoveAllUnusedPixTables();
 NatePixTable* AddPixTable(int16_t resource_id);
 NatePixTable* GetPixTable(int16_t resource_id);
 spriteType *AddSprite(
-        Point where, NatePixTable* table, short resID, short whichShape, int32_t scale, long size,
-        short layer, const RgbColor& color, long *whichSprite);
+        Point where, NatePixTable* table, int16_t resID, int16_t whichShape, int32_t scale, int32_t size,
+        int16_t layer, const RgbColor& color, int32_t *whichSprite);
 void RemoveSprite(spriteType *);
 void draw_sprites();
 void CullSprites();

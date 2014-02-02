@@ -24,6 +24,7 @@
 
 #include "drawing/color.hpp"
 #include "math/geometry.hpp"
+#include "ui/event.hpp"
 
 namespace antares {
 
@@ -51,12 +52,13 @@ class VideoDriver {
     virtual bool button(int which) = 0;
     virtual Point get_mouse() = 0;
     virtual void get_keys(KeyMap* k) = 0;
+    virtual InputMode input_mode() const = 0;
 
     virtual int ticks() const = 0;
     virtual int usecs() const = 0;
     virtual int64_t double_click_interval_usecs() const = 0;
 
-    virtual Sprite* new_sprite(sfz::PrintItem name, const PixMap& content) = 0;
+    virtual std::unique_ptr<Sprite> new_sprite(sfz::PrintItem name, const PixMap& content) = 0;
     virtual void fill_rect(const Rect& rect, const RgbColor& color) = 0;
     virtual void dither_rect(const Rect& rect, const RgbColor& color) = 0;
     virtual void draw_point(const Point& at, const RgbColor& color) = 0;

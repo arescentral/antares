@@ -43,12 +43,11 @@ using sfz::StringSlice;
 using sfz::WriteTarget;
 using sfz::dec;
 using sfz::format;
-using sfz::linked_ptr;
-using sfz::make_linked_ptr;
 using sfz::range;
-using sfz::scoped_array;
 using std::greater;
 using std::max;
+using std::unique_ptr;
+
 namespace utf8 = sfz::utf8;
 
 namespace antares {
@@ -70,22 +69,22 @@ class SnapshotBuffer {
     void write_to(const WriteTarget& out) const {
         ArrayPixMap pix(_screen_size.width, _screen_size.height);
         uint8_t* p = _data.get();
-        SFZ_FOREACH(int32_t y, range(_screen_size.height), {
-            SFZ_FOREACH(int32_t x, range(_screen_size.width), {
+        for (int32_t y: range(_screen_size.height)) {
+            for (int32_t x: range(_screen_size.width)) {
                 uint8_t blue = *(p++);
                 uint8_t green = *(p++);
                 uint8_t red = *(p++);
                 ++p;
-                pix.set(x, y, RgbColor(red, green, blue));
-            });
-        });
+                pix.set(x, _screen_size.height - y - 1, RgbColor(red, green, blue));
+            }
+        }
         write(out, pix);
     }
 
   private:
     const Size _screen_size;
     const int32_t _bytes_per_pixel;
-    scoped_array<uint8_t> _data;
+    unique_ptr<uint8_t[]> _data;
 };
 
 void write_to(const WriteTarget& out, const SnapshotBuffer& buffer) {
@@ -94,10 +93,41 @@ void write_to(const WriteTarget& out, const SnapshotBuffer& buffer) {
 
 static const CGLPixelFormatAttribute kAttrs[] = {
     kCGLPFAColorSize, static_cast<CGLPixelFormatAttribute>(24),
-    // kCGLPFAAccelerated,
-    kCGLPFAOffScreen,
-    kCGLPFARemotePBuffer,
+    kCGLPFAAccelerated,
     static_cast<CGLPixelFormatAttribute>(0),
+};
+
+void gl_check() {
+    GLenum error = glGetError();
+    if (error != GL_NO_ERROR) {
+        throw Exception(error);
+    }
+}
+
+struct Framebuffer {
+    GLuint id;
+
+    Framebuffer() {
+        glGenFramebuffers(1, &id);
+        gl_check();
+    }
+
+    ~Framebuffer() {
+        glDeleteFramebuffers(1, &id);
+    }
+};
+
+struct Renderbuffer {
+    GLuint id;
+
+    Renderbuffer() {
+        glGenRenderbuffers(1, &id);
+        gl_check();
+    }
+
+    ~Renderbuffer() {
+        glDeleteRenderbuffers(1, &id);
+    }
 };
 
 }  // namespace
@@ -108,7 +138,7 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
             _pix(kAttrs),
             _context(_pix.c_obj(), NULL),
             _buffer(Preferences::preferences()->screen_size(), 4),
-            _setup(_context, _buffer),
+            _setup(*this),
             _output_dir(output_dir),
             _loop(driver, initial) {
     }
@@ -118,6 +148,9 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
     }
 
     void snapshot(int64_t ticks) {
+        glReadPixels(
+                0, 0, _buffer.width(), _buffer.height(), GL_BGRA, GL_UNSIGNED_BYTE,
+                _buffer.mutable_data());
         String dir(format("{0}/screens", *_output_dir));
         makedirs(dir, 0755);
         String path(format("{0}/{1}.png", dir, dec(ticks, 6)));
@@ -132,12 +165,18 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
   private:
     cgl::PixelFormat _pix;
     cgl::Context _context;
+    Framebuffer _fb;
+    Renderbuffer _rb;
     SnapshotBuffer _buffer;
     struct Setup {
-        Setup(cgl::Context& context, SnapshotBuffer& buffer) {
-            cgl::check(CGLSetCurrentContext(context.c_obj()));
-            cgl::check(CGLSetOffScreen(context.c_obj(), buffer.width(), buffer.height(),
-                        buffer.row_bytes(), buffer.mutable_data()));
+        Setup(OffscreenVideoDriver::MainLoop& loop) {
+            cgl::check(CGLSetCurrentContext(loop._context.c_obj()));
+            glBindFramebuffer(GL_FRAMEBUFFER, loop._fb.id);
+            glBindRenderbuffer(GL_RENDERBUFFER, loop._rb.id);
+            glRenderbufferStorage(
+                    GL_RENDERBUFFER, GL_RGBA, loop._buffer.width(), loop._buffer.height());
+            glFramebufferRenderbuffer(
+                    GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, loop._rb.id);
         }
     };
     Setup _setup;

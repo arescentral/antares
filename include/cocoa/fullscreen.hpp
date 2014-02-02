@@ -30,7 +30,7 @@ class Context;
 
 class CocoaFullscreen {
   public:
-    CocoaFullscreen(const cgl::Context& context, Size screen_size);
+    CocoaFullscreen(const cgl::Context& context, Size screen_size, uint32_t display_mask);
     ~CocoaFullscreen();
 
   private:
@@ -40,7 +40,7 @@ class CocoaFullscreen {
     };
     DisplayCapturer _capturer;
     struct SetFullscreen {
-        SetFullscreen(const cgl::Context& context);
+        SetFullscreen(const cgl::Context& context, uint32_t display_mask);
     };
     SetFullscreen _set_fullscreen;
     struct MenuBarHider {
@@ -48,6 +48,11 @@ class CocoaFullscreen {
         ~MenuBarHider();
     };
     MenuBarHider _menu_bar_hider;
+    struct MouseHider {
+        MouseHider();
+        ~MouseHider();
+    };
+    MouseHider _mouse_hider;
 
     DISALLOW_COPY_AND_ASSIGN(CocoaFullscreen);
 };

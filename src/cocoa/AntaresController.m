@@ -28,6 +28,7 @@
 #define kScreenHeight @"ScreenHeight"
 #define kScenario @"Scenario"
 #define kFullscreen @"Fullscreen"
+#define kSkipSettings @"SkipSettings"
 
 #define kIdentifier @"Identifier"
 #define kTitle @"Title"
@@ -42,7 +43,7 @@
 // the pair (screen height, screen width).  The case where this ordering
 // differs from (screen width, screen height) is unlikely enough that
 // it's not worth doing anything fancier.
-static int compare_resolutions(id x, id y, void* unused) {
+static NSInteger compare_resolutions(id x, id y, void* unused) {
     (void)unused;
 
     int x_width = [[x objectForKey:(NSString*)kCGDisplayWidth] intValue];
@@ -63,7 +64,7 @@ static int compare_resolutions(id x, id y, void* unused) {
     }
 }
 
-static int compare_scenarios(id x, id y, void* unused) {
+static NSInteger compare_scenarios(id x, id y, void* unused) {
     (void)unused;
 
     return [[x objectForKey:kTitle] caseInsensitiveCompare:[y objectForKey:kTitle]];
@@ -92,6 +93,20 @@ static NSURL* url(const char* utf8_bytes) {
     if (!extract) {
         NSLog(@"Failed to create AntaresExtractDataController");
         exit(1);
+    }
+}
+
+- (void)applicationDidFinishLaunching:(NSNotification*)aNotification {
+    bool skip =
+        [[NSUserDefaults standardUserDefaults] boolForKey:kSkipSettings]
+        && !([NSEvent modifierFlags]
+                & NSDeviceIndependentModifierFlagsMask
+                & NSAlternateKeyMask);
+    if (skip) {
+        [self settingsDone:self];
+    } else {
+        [_window center];
+        [_window makeKeyAndOrderFront:self];
     }
 }
 
@@ -254,9 +269,10 @@ static NSURL* url(const char* utf8_bytes) {
         [[NSUserDefaults standardUserDefaults] objectForKey:kFullscreen]
         && ![[NSUserDefaults standardUserDefaults] boolForKey:kFullscreen];
     [_window_checkbox setIntValue:windowed];
+    bool skip_settings = 
+        [[NSUserDefaults standardUserDefaults] boolForKey:kSkipSettings];
+    [_skip_checkbox setIntValue:skip_settings];
     [self setWindowedFrom:_window_checkbox];
-    [_window center];
-    [_window makeKeyAndOrderFront:self];
 }
 
 - (IBAction)openScenarioURL:(id)sender {
@@ -270,6 +286,11 @@ static NSURL* url(const char* utf8_bytes) {
 - (IBAction)setWindowedFrom:(id)sender {
     bool fullscreen = ![sender intValue];
     [[NSUserDefaults standardUserDefaults] setBool:fullscreen forKey:kFullscreen];
+}
+
+- (IBAction)setSkipSettingsFrom:(id)sender {
+    bool skip_settings = [sender intValue];
+    [[NSUserDefaults standardUserDefaults] setBool:skip_settings forKey:kSkipSettings];
 }
 
 - (IBAction)settingsDone:(id)sender {

@@ -36,7 +36,7 @@ class KeyMap {
     void clear();
 
   private:
-    typedef uint8_t Data[16];
+    typedef uint8_t Data[32];
     static const size_t kDataSize = sizeof(Data);
 
     Data _data;
@@ -48,118 +48,132 @@ bool operator==(const KeyMap& a, const KeyMap& b);
 bool operator!=(const KeyMap& a, const KeyMap& b);
 
 struct Keys {
+    // USB Key codes.
     enum Key {
         // Letters, A-Z.
-        A           = 0x00,
-        B           = 0x0b,
-        C           = 0x08,
-        D           = 0x02,
-        E           = 0x0e,
-        F           = 0x03,
-        G           = 0x05,
-        H           = 0x04,
-        I           = 0x22,
-        J           = 0x26,
-        K           = 0x28,
-        L           = 0x25,
-        M           = 0x2e,
-        N           = 0x2d,
-        O           = 0x1f,
-        P           = 0x23,
-        Q           = 0x0c,
-        R           = 0x0f,
-        S           = 0x01,
-        T           = 0x11,
-        U           = 0x20,
-        V           = 0x09,
-        W           = 0x0d,
-        X           = 0x07,
-        Y           = 0x10,
-        Z           = 0x06,
+        A           = 0x04,
+        B           = 0x05,
+        C           = 0x06,
+        D           = 0x07,
+        E           = 0x08,
+        F           = 0x09,
+        G           = 0x0a,
+        H           = 0x0b,
+        I           = 0x0c,
+        J           = 0x0d,
+        K           = 0x0e,
+        L           = 0x0f,
+        M           = 0x10,
+        N           = 0x11,
+        O           = 0x12,
+        P           = 0x13,
+        Q           = 0x14,
+        R           = 0x15,
+        S           = 0x16,
+        T           = 0x17,
+        U           = 0x18,
+        V           = 0x19,
+        W           = 0x1a,
+        X           = 0x1b,
+        Y           = 0x1c,
+        Z           = 0x1d,
 
-        // Numbers, 0-9.
-        K0          = 0x1d,
-        K1          = 0x12,
-        K2          = 0x13,
-        K3          = 0x14,
-        K4          = 0x15,
-        K5          = 0x17,
-        K6          = 0x16,
-        K7          = 0x1a,
-        K8          = 0x1c,
-        K9          = 0x19,
+        // Numbers  0-9.
+        K1          = 0x1e,
+        K2          = 0x1f,
+        K3          = 0x20,
+        K4          = 0x21,
+        K5          = 0x22,
+        K6          = 0x23,
+        K7          = 0x24,
+        K8          = 0x25,
+        K9          = 0x26,
+        K0          = 0x27,
 
-        MINUS       = 0x18,
-        PLUS        = 0x1b,
+        RETURN      = 0x28,
+        ESCAPE      = 0x29,
+        BACKSPACE   = 0x2a,
+        TAB         = 0x2b,
+        SPACE       = 0x2c,
 
-        SPACE       = 0x31,
-        TAB         = 0x30,
-        RETURN      = 0x24,
-        BACKSPACE   = 0x33,
-        ESCAPE      = 0x35,
+        MINUS       = 0x2d,
+        EQUALS      = 0x2e,
+        L_BRACKET   = 0x2f,
+        R_BRACKET   = 0x30,
+        BACKSLASH   = 0x31,
+        SEMICOLON   = 0x33,
+        QUOTE       = 0x34,
+        BACKTICK    = 0x35,
+        COMMA       = 0x36,
+        PERIOD      = 0x37,
+        SLASH       = 0x38,
 
         // Modifier keys.
-        COMMAND     = 0x37,
-        SHIFT       = 0x38,
         CAPS_LOCK   = 0x39,
-        OPTION      = 0x3a,
-        CONTROL     = 0x3b,
+        L_CONTROL   = 0xe0,
+        L_SHIFT     = 0xe1,
+        L_OPTION    = 0xe2,
+        L_COMMAND   = 0xe3,
+        R_CONTROL   = 0xe4,
+        R_SHIFT     = 0xe5,
+        R_OPTION    = 0xe6,
+        R_COMMAND   = 0xe7,
 
         // Arrow keys.
-        LEFT_ARROW  = 0x7b,
-        RIGHT_ARROW = 0x7c,
-        UP_ARROW    = 0x7e,
-        DOWN_ARROW  = 0x7d,
+        RIGHT_ARROW = 0x4f,
+        LEFT_ARROW  = 0x50,
+        DOWN_ARROW  = 0x51,
+        UP_ARROW    = 0x52,
 
         // Keys above arrow keys.
-        DELETE      = 0x75,
-        PAGE_DOWN   = 0x77,
-        END         = 0x79,
-        HELP        = 0x72,
-        PAGE_UP     = 0x73,
-        HOME        = 0x74,
+        HOME        = 0x4a,
+        PAGE_UP     = 0x4b,
+        DELETE      = 0x4c,
+        END         = 0x4d,
+        PAGE_DOWN   = 0x4e,
+        HELP        = 0x75,
 
         // Numeric keypad, numbers 0-9.
-        N0          = 0x52,
-        N1          = 0x53,
-        N2          = 0x54,
-        N3          = 0x55,
-        N4          = 0x56,
-        N5          = 0x57,
-        N6          = 0x58,
-        N7          = 0x59,
-        N8          = 0x5b,
-        N9          = 0x5c,
+        N1          = 0x59,
+        N2          = 0x5a,
+        N3          = 0x5b,
+        N4          = 0x5c,
+        N5          = 0x5d,
+        N6          = 0x5e,
+        N7          = 0x5f,
+        N8          = 0x60,
+        N9          = 0x61,
+        N0          = 0x62,
 
         // Numeric keypad, non-numbers.
-        N_PERIOD    = 0x41,
-        N_TIMES     = 0x43,
-        N_PLUS      = 0x45,
-        N_CLEAR     = 0x47,
-        N_DIVIDE    = 0x4b,
-        N_MINUS     = 0x4e,
-        N_ENTER     = 0x4c,
-        N_EQUALS    = 0x51,
+        N_CLEAR     = 0x53,
+        N_DIVIDE    = 0x54,
+        N_TIMES     = 0x55,
+        N_MINUS     = 0x56,
+        N_PLUS      = 0x57,
+        N_ENTER     = 0x58,
+        N_PERIOD    = 0x63,
+        N_EQUALS    = 0x67,
 
         // Function keys.
-        F1          = 0x7a,
-        F2          = 0x78,
-        F3          = 0x63,
-        F4          = 0x76,
-        F5          = 0x60,
-        F6          = 0x61,
-        F7          = 0x62,
-        F8          = 0x64,
-        F9          = 0x65,
-        F10         = 0x6d,
-        F11         = 0x67,
-        F12         = 0x6f,
-        F13         = 0x69,
-        F14         = 0x6b,
-        F15         = 0x71,
+        F1          = 0x3a,
+        F2          = 0x3b,
+        F3          = 0x3c,
+        F4          = 0x3d,
+        F5          = 0x3e,
+        F6          = 0x3f,
+        F7          = 0x40,
+        F8          = 0x41,
+        F9          = 0x42,
+        F10         = 0x43,
+        F11         = 0x44,
+        F12         = 0x45,
+        F13         = 0x68,
+        F14         = 0x69,
+        F15         = 0x6a,
 
         // Miscellaneous.
-        POWER       = 0x7f,
+        POWER       = 0x66,
     };
 };
 
@@ -174,16 +188,17 @@ inline bool mCapsLockKey(const KeyMap& km)   { return km.get(Keys::CAPS_LOCK); }
 inline bool mReturnKey(const KeyMap& km)     { return km.get(Keys::RETURN); }
 inline bool mEscKey(const KeyMap& km)        { return km.get(Keys::ESCAPE); }
 inline bool mQKey(const KeyMap& km)          { return km.get(Keys::Q); }
-inline bool mCommandKey(const KeyMap& km)    { return km.get(Keys::COMMAND); }
+inline bool mCommandKey(const KeyMap& km)    { return km.get(Keys::L_COMMAND); }
 inline bool mLeftArrowKey(const KeyMap& km)  { return km.get(Keys::LEFT_ARROW); }
 
 void GetKeyMapFromKeyNum(int key_num, KeyMap* key_map);
 int GetKeyNumFromKeyMap(const KeyMap& key_map);
 bool CommandKey( void);
 void GetKeyNumName(int key_num, sfz::String* out);
+bool GetKeyNameNum(sfz::StringSlice name, int& out);
 bool AnyRealKeyDown();
 bool AnyKeyButThisOne(const KeyMap& key_map, int key_num);
-long GetAsciiFromKeyMap(const KeyMap&, const KeyMap&);
+int32_t GetAsciiFromKeyMap(const KeyMap&, const KeyMap&);
 
 enum {
     kUpKeyNum = 0,   // thrust

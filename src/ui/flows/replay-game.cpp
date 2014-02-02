@@ -36,7 +36,7 @@ ReplayGame::ReplayGame(int16_t replay_id):
         _state(NEW),
         _resource("replays", "NLRP", replay_id),
         _data(_resource.data()),
-        _random_seed(_data.global_seed),
+        _random_seed{_data.global_seed},
         _scenario(GetScenarioPtrFromChapter(_data.chapter_id)),
         _game_result(NO_GAME) { }
 
@@ -55,7 +55,8 @@ void ReplayGame::become_front() {
             globals()->gInputSource.reset(new ReplayInputSource(&_data));
             swap(_random_seed, gRandomSeed);
             _game_result = NO_GAME;
-            stack()->push(new MainPlay(_scenario, true, true, &_game_result));
+            _seconds = 0;
+            stack()->push(new MainPlay(_scenario, true, true, &_game_result, &_seconds));
         }
         break;
 

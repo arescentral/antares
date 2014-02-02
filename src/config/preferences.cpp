@@ -30,9 +30,9 @@ using sfz::Exception;
 using sfz::ReadSource;
 using sfz::StringSlice;
 using sfz::read;
-using sfz::scoped_ptr;
 using std::max;
 using std::min;
+using std::unique_ptr;
 
 namespace antares {
 
@@ -58,35 +58,20 @@ Preferences* Preferences::preferences() {
 }
 
 Preferences::Preferences() {
-    reset();
-}
-
-Preferences::Preferences(const Preferences& other) {
-    copy(other);
-}
-
-Preferences& Preferences::operator=(const Preferences& other) {
-    copy(other);
-    return *this;
-}
-
-Preferences::~Preferences() { }
-
-void Preferences::reset() {
     set_key(kUpKeyNum,              1 + Keys::N8);
     set_key(kDownKeyNum,            1 + Keys::N5);
     set_key(kLeftKeyNum,            1 + Keys::N4);
     set_key(kRightKeyNum,           1 + Keys::N6);
-    set_key(kOneKeyNum,             1 + Keys::OPTION);
-    set_key(kTwoKeyNum,             1 + Keys::COMMAND);
+    set_key(kOneKeyNum,             1 + Keys::L_OPTION);
+    set_key(kTwoKeyNum,             1 + Keys::L_COMMAND);
     set_key(kEnterKeyNum,           1 + Keys::SPACE);
     set_key(kWarpKeyNum,            1 + Keys::TAB);
 
     set_key(kSelectFriendKeyNum,    1 + Keys::N_CLEAR);
     set_key(kSelectFoeKeyNum,       1 + Keys::N_EQUALS);
     set_key(kSelectBaseKeyNum,      1 + Keys::N_DIVIDE);
-    set_key(kDestinationKeyNum,     1 + Keys::SHIFT);
-    set_key(kOrderKeyNum,           1 + Keys::CONTROL);
+    set_key(kDestinationKeyNum,     1 + Keys::L_SHIFT);
+    set_key(kOrderKeyNum,           1 + Keys::L_CONTROL);
 
     set_key(kZoomInKeyNum,          1 + Keys::N_PLUS);
     set_key(kZoomOutKeyNum,         1 + Keys::N_MINUS);
@@ -102,8 +87,8 @@ void Preferences::reset() {
     set_key(kScale124KeyNum,        1 + Keys::F11);
     set_key(kScale1216KeyNum,       1 + Keys::F12);
     set_key(kScaleHostileKeyNum,    1 + Keys::HELP);
-    set_key(kScaleObjectKeyNum,     1 + Keys::PAGE_UP);
-    set_key(kScaleAllKeyNum,        1 + Keys::HOME);
+    set_key(kScaleObjectKeyNum,     1 + Keys::HOME);
+    set_key(kScaleAllKeyNum,        1 + Keys::PAGE_UP);
 
     set_key(kMessageNextKeyNum,     1 + Keys::BACKSPACE);
     set_key(kHelpKeyNum,            1 + Keys::F1);
@@ -134,6 +119,21 @@ void Preferences::reset() {
     set_screen_size(Size(640, 480));
 
     _scenario_identifier.assign("com.biggerplanet.ares");
+}
+
+Preferences::Preferences(const Preferences& other) {
+    copy(other);
+}
+
+Preferences& Preferences::operator=(const Preferences& other) {
+    copy(other);
+    return *this;
+}
+
+Preferences::~Preferences() { }
+
+void Preferences::reset() {
+    *this = Preferences();
 }
 
 void Preferences::copy(const Preferences& preferences) {

@@ -130,8 +130,7 @@ void write_to(WriteTarget out, const PixMap& pix) {
 
     png_set_write_fn(png, &out, png_write_data, png_flush_data);
     png_set_IHDR(
-            png, info, pix.size().width, pix.size().height, 8, PNG_COLOR_TYPE_RGBA, NULL,
-            NULL, NULL);
+            png, info, pix.size().width, pix.size().height, 8, PNG_COLOR_TYPE_RGBA, 0, 0, 0);
     png_set_swap_alpha(png);
 
     png_write_info(png, info);

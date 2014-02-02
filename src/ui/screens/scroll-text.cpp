@@ -28,7 +28,7 @@
 #include "video/driver.hpp"
 
 using sfz::format;
-using sfz::scoped_ptr;
+using std::unique_ptr;
 
 namespace antares {
 namespace {
@@ -38,20 +38,18 @@ const int kScrollTextHeight = 200;
 }  // namespace
 
 ScrollTextScreen::ScrollTextScreen(int text_id, int width, double speed)
-        : _speed(speed),
+        : _sprite(VideoDriver::driver()->new_sprite(
+                      format("/x/scroll_text/{0}", text_id), *build_pix(text_id, width))),
+          _speed(speed),
           _play_song(false),
-          _song_id(0) {
-    scoped_ptr<PixMap> pix_map(build_pix(text_id, width));
-    _sprite.reset(VideoDriver::driver()->new_sprite(format("/x/scroll_text/{0}", text_id), *pix_map));
-}
+          _song_id(0) { }
 
 ScrollTextScreen::ScrollTextScreen(int text_id, int width, double speed, int song_id)
-        : _speed(speed),
+        : _sprite(VideoDriver::driver()->new_sprite(
+                  format("/x/scroll_text/{0}", text_id), *build_pix(text_id, width))),
+          _speed(speed),
           _play_song(true),
-          _song_id(song_id) {
-    scoped_ptr<PixMap> pix_map(build_pix(text_id, width));
-    _sprite.reset(VideoDriver::driver()->new_sprite(format("/x/scroll_text/{0}", text_id), *pix_map));
-}
+          _song_id(song_id) { }
 
 void ScrollTextScreen::become_front() {
     // If a song was requested, play it.
@@ -88,6 +86,11 @@ void ScrollTextScreen::mouse_down(const MouseDownEvent& event) {
 }
 
 void ScrollTextScreen::key_down(const KeyDownEvent& event) {
+    static_cast<void>(event);
+    stack()->pop(this);
+}
+
+void ScrollTextScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
     static_cast<void>(event);
     stack()->pop(this);
 }

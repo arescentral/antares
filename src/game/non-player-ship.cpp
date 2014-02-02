@@ -23,7 +23,6 @@
 #include "drawing/color.hpp"
 #include "game/admiral.hpp"
 #include "game/globals.hpp"
-#include "game/labels.hpp"
 #include "game/messages.hpp"
 #include "game/motion.hpp"
 #include "game/player-ship.hpp"
@@ -40,7 +39,6 @@
 
 using sfz::Exception;
 using sfz::StringSlice;
-using sfz::scoped_array;
 
 namespace antares {
 
@@ -70,18 +68,18 @@ enum {
     kNeutralColor   = SKY_BLUE,
 };
 
-unsigned long ThinkObjectNormalPresence( spaceObjectType *, baseObjectType *, long);
-unsigned long ThinkObjectWarpingPresence( spaceObjectType *);
-unsigned long ThinkObjectWarpInPresence( spaceObjectType *);
-unsigned long ThinkObjectWarpOutPresence( spaceObjectType *, baseObjectType *);
-unsigned long ThinkObjectLandingPresence( spaceObjectType *);
-void ThinkObjectGetCoordVector( spaceObjectType *, coordPointType *, unsigned long *, short *);
-void ThinkObjectGetCoordDistance( spaceObjectType *, coordPointType *, unsigned long *);
+uint32_t ThinkObjectNormalPresence( spaceObjectType *, baseObjectType *, int32_t);
+uint32_t ThinkObjectWarpingPresence( spaceObjectType *);
+uint32_t ThinkObjectWarpInPresence( spaceObjectType *);
+uint32_t ThinkObjectWarpOutPresence( spaceObjectType *, baseObjectType *);
+uint32_t ThinkObjectLandingPresence( spaceObjectType *);
+void ThinkObjectGetCoordVector( spaceObjectType *, coordPointType *, uint32_t *, int16_t *);
+void ThinkObjectGetCoordDistance( spaceObjectType *, coordPointType *, uint32_t *);
 void ThinkObjectResolveDestination( spaceObjectType *, coordPointType *, spaceObjectType **);
-bool ThinkObjectResolveTarget( spaceObjectType *, coordPointType *, unsigned long *, spaceObjectType **);
-unsigned long ThinkObjectEngageTarget( spaceObjectType *, spaceObjectType *, unsigned long, short *, long);
+bool ThinkObjectResolveTarget( spaceObjectType *, coordPointType *, uint32_t *, spaceObjectType **);
+uint32_t ThinkObjectEngageTarget( spaceObjectType *, spaceObjectType *, uint32_t, int16_t *, int32_t);
 
-spaceObjectType *HackNewNonplayerShip( long owner, short type, Rect *bounds)
+spaceObjectType *HackNewNonplayerShip( int32_t owner, int16_t type, Rect *bounds)
 
 {
 #pragma unused( owner, type, bounds)
@@ -90,20 +88,20 @@ spaceObjectType *HackNewNonplayerShip( long owner, short type, Rect *bounds)
 
 #ifdef kUseOldThinking
 #else   // if NOT kUseOldThinking
-void NonplayerShipThink( long timePass)
+void NonplayerShipThink( int32_t timePass)
 {
     admiralType     *anAdmiral;
     spaceObjectType *anObject, *targetObject;
     baseObjectType  *baseObject, *weaponObject;
     Point           offset;
-    long            count, difference;
-    unsigned long   keysDown;
-    short           h;
+    int32_t         count, difference;
+    uint32_t        keysDown;
+    int16_t         h;
     Fixed           fcos, fsin;
     RgbColor        friendSick, foeSick, neutralSick;
-    unsigned long   sickCount = usecs_to_ticks(globals()->gGameTime) / 9;
+    uint32_t        sickCount = usecs_to_ticks(globals()->gGameTime) / 9;
 
-    globals()->gSynchValue = gRandomSeed;
+    globals()->gSynchValue = gRandomSeed.seed;
     sickCount &= 0x00000003;
     if ( sickCount == 0)
     {
@@ -257,8 +255,7 @@ void NonplayerShipThink( long timePass)
                             // to simulate the innaccuracy of battle
                             // (to keep things from wiggling, really)
                             if  (
-                                    RandomSeeded( baseObject->skillDen,
-                                        &anObject->randomSeed, 'np99', anObject->whichBaseObject)
+                                    anObject->randomSeed.next(baseObject->skillDen)
                                     <
                                     baseObject->skillNum
                                 )
@@ -266,8 +263,7 @@ void NonplayerShipThink( long timePass)
                                 anObject->keysDown &= ~kMotionKeyMask;
                                 anObject->keysDown |= keysDown & kMotionKeyMask;
                             }
-                            if ( RandomSeeded( 3, &anObject->randomSeed, 'np13', anObject->whichBaseObject) == 1)
-                            {
+                            if (anObject->randomSeed.next(3) == 1) {
                                 anObject->keysDown &= ~kWeaponKeyMask;
                                 anObject->keysDown |= keysDown & kWeaponKeyMask;
                             }
@@ -307,9 +303,9 @@ void NonplayerShipThink( long timePass)
 
                 if ( anObject->offlineTime > 0)
                 {
-                    if ( RandomSeeded( anObject->offlineTime, &(anObject->randomSeed),
-                            'np14', anObject->whichBaseObject) > 5)
+                    if (anObject->randomSeed.next(anObject->offlineTime) > 5) {
                         anObject->keysDown = 0;
+                    }
                     anObject->offlineTime--;
                 }
 
@@ -463,7 +459,7 @@ void NonplayerShipThink( long timePass)
                 // targetObject is set for all three weapons -- do not change
                 if ( anObject->targetObjectNumber >= 0)
                 {
-                    targetObject = gSpaceObjectData.get() + anObject->targetObjectNumber;
+                    targetObject = mGetSpaceObjectPtr(anObject->targetObjectNumber);
                 } else targetObject = NULL;
 
                 if ( anObject->pulseTime > 0) anObject->pulseTime -= timePass;
@@ -621,15 +617,15 @@ void NonplayerShipThink( long timePass)
 }
 #endif  // kUseOldThinking
 
-unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *baseObject, long timePass)
+uint32_t ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *baseObject, int32_t timePass)
 {
-    unsigned long   keysDown = anObject->keysDown & kSpecialKeyMask, distance, dcalc;
+    uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask, distance, dcalc;
     spaceObjectType *targetObject;
     baseObjectType  *bestWeapon, *weaponObject;
     coordPointType  dest;
-    long            difference;
+    int32_t         difference;
     Fixed           slope;
-    short           angle, theta, beta;
+    int16_t         angle, theta, beta;
     Fixed           calcv, fdist;
     Point           offset;
 
@@ -723,8 +719,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                         {
                             beta = 90;
                             if ( anObject->location.h & 0x00000001)
-//                          if ( RandomSeeded( 2,
-//                                  &anObject->randomSeed, 'nps4', anObject->whichBaseObject))
+//                          if (anObject->randomSeed.next(2))
                                 beta = -90;
                             mAddAngle( anObject->directionGoal, beta);
                         }
@@ -750,8 +745,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                         } else
                         {
                             beta = kEvadeAngle;
-//                          if ( RandomSeeded( 2,
-//                                  &anObject->randomSeed, 'nps5', anObject->whichBaseObject))
+//                          if (anObject->randomSeed.next(2))
                             if ( anObject->location.h & 0x00000001)
                                 beta = -kEvadeAngle;
                             mAddAngle( anObject->directionGoal, beta);
@@ -769,8 +763,9 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                 } else
                 {
                     beta = kEvadeAngle;
-                    if ( RandomSeeded( 2, &anObject->randomSeed,
-                        'nps6', anObject->whichBaseObject)) beta = -kEvadeAngle;
+                    if (anObject->randomSeed.next(2)) {
+                        beta = -kEvadeAngle;
+                    }
                     mAddAngle( anObject->direction, beta);
                     keysDown |= kUpKey;
                 }
@@ -912,8 +907,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                         } else
                         {
                             beta = kEvadeAngle;
-//                          if ( RandomSeeded( 2,
-//                              &anObject->randomSeed, 'np10', anObject->whichBaseObject))
+//                          if (anObject->randomSeed.next(2))
                             if ( anObject->location.h & 0x00000001)
                                 beta = -kEvadeAngle;
                             mAddAngle( anObject->directionGoal, beta);
@@ -930,8 +924,9 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                     } else
                     {
                         beta = kEvadeAngle;
-                        if ( RandomSeeded( 2, &anObject->randomSeed,
-                            'np11', anObject->whichBaseObject)) beta = -kEvadeAngle;
+                        if (anObject->randomSeed.next(2)) {
+                            beta = -kEvadeAngle;
+                        }
                         mAddAngle( anObject->direction, beta);
                         keysDown |= kUpKey;
                     }
@@ -1002,7 +997,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                             if ( anObject->destinationObject !=
                                 kNoDestinationObject)
                             {
-                                targetObject = gSpaceObjectData.get() + anObject->destinationObject;
+                                targetObject = mGetSpaceObjectPtr(anObject->destinationObject);
                                 if ( targetObject->id != anObject->destObjectDestID) targetObject = NULL;
                             } else targetObject = NULL;
                             if ( targetObject != NULL)
@@ -1245,8 +1240,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
             if ( targetObject->cloakState > 250)
             {
                 angle -= 45;
-                mAddAngle( angle, RandomSeeded( 90,
-                    &anObject->randomSeed, 'np12', anObject->whichBaseObject));
+                mAddAngle(angle, anObject->randomSeed.next(90));
             }
             anObject->targetAngle = angle;
         }
@@ -1255,10 +1249,10 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
     return( keysDown);
 }
 
-unsigned long ThinkObjectWarpInPresence( spaceObjectType *anObject)
+uint32_t ThinkObjectWarpInPresence( spaceObjectType *anObject)
 {
-    unsigned long   keysDown = anObject->keysDown & kSpecialKeyMask;
-    long            longscrap;
+    uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask;
+    int32_t         longscrap;
     fixedPointType  newVel;
 
     if (( !(anObject->attributes & kRemoteOrHuman)) ||
@@ -1322,12 +1316,12 @@ unsigned long ThinkObjectWarpInPresence( spaceObjectType *anObject)
     return( keysDown);
 }
 
-unsigned long ThinkObjectWarpingPresence( spaceObjectType *anObject)
+uint32_t ThinkObjectWarpingPresence( spaceObjectType *anObject)
 {
-    unsigned long   keysDown = anObject->keysDown & kSpecialKeyMask, distance;
+    uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask, distance;
     coordPointType  dest;
     spaceObjectType *targetObject = NULL;
-    short           angle, theta;
+    int16_t         angle, theta;
 
     if ( anObject->energy <= 0)
     {
@@ -1370,9 +1364,9 @@ unsigned long ThinkObjectWarpingPresence( spaceObjectType *anObject)
     return( keysDown);
 }
 
-unsigned long ThinkObjectWarpOutPresence( spaceObjectType *anObject, baseObjectType *baseObject)
+uint32_t ThinkObjectWarpOutPresence( spaceObjectType *anObject, baseObjectType *baseObject)
 {
-    unsigned long   keysDown = anObject->keysDown & kSpecialKeyMask;
+    uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask;
     Fixed           calcv, fdist;
     fixedPointType  newVel;
 
@@ -1406,14 +1400,14 @@ unsigned long ThinkObjectWarpOutPresence( spaceObjectType *anObject, baseObjectT
     return( keysDown);
 }
 
-unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
+uint32_t ThinkObjectLandingPresence( spaceObjectType *anObject)
 {
-    unsigned long   keysDown = anObject->keysDown & kSpecialKeyMask, distance, dcalc;
+    uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask, distance, dcalc;
     spaceObjectType *targetObject = NULL;
     coordPointType  dest;
-    long            difference;
+    int32_t         difference;
     Fixed           slope;
-    short           angle, theta, shortx, shorty;
+    int16_t         angle, theta, shortx, shorty;
 
     keysDown = 0;
 
@@ -1470,7 +1464,7 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
                     if ( anObject->destinationObject !=
                         kNoDestinationObject)
                     {
-                        targetObject = gSpaceObjectData.get() + anObject->destinationObject;
+                        targetObject = mGetSpaceObjectPtr(anObject->destinationObject);
                         if ( targetObject->id != anObject->destObjectDestID) targetObject = NULL;
                     } else targetObject = NULL;
                     if ( targetObject != NULL)
@@ -1613,11 +1607,11 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
 }
 
 // this gets the distance & angle between an object and arbitrary coords
-void ThinkObjectGetCoordVector( spaceObjectType *anObject, coordPointType *dest, unsigned long *distance, short *angle)
+void ThinkObjectGetCoordVector( spaceObjectType *anObject, coordPointType *dest, uint32_t *distance, int16_t *angle)
 {
-    long            difference;
-    unsigned long   dcalc;
-    short           shortx, shorty;
+    int32_t         difference;
+    uint32_t        dcalc;
+    int16_t         shortx, shorty;
     Fixed           slope;
 
     difference = ABS<int>( dest->h - anObject->location.h);
@@ -1671,10 +1665,10 @@ void ThinkObjectGetCoordVector( spaceObjectType *anObject, coordPointType *dest,
     }
 }
 
-void ThinkObjectGetCoordDistance( spaceObjectType *anObject, coordPointType *dest, unsigned long *distance)
+void ThinkObjectGetCoordDistance( spaceObjectType *anObject, coordPointType *dest, uint32_t *distance)
 {
-    long            difference;
-    unsigned long   dcalc;
+    int32_t         difference;
+    uint32_t        dcalc;
 
     difference = ABS<int>( dest->h - anObject->location.h);
     dcalc = difference;
@@ -1757,7 +1751,7 @@ void ThinkObjectResolveDestination( spaceObjectType *anObject, coordPointType *d
                     if ( anObject->destinationObject !=
                         kNoDestinationObject)
                     {
-                        (*targetObject) = gSpaceObjectData.get() + anObject->destinationObject;
+                        (*targetObject) = mGetSpaceObjectPtr(anObject->destinationObject);
                         if ( (*targetObject)->id != anObject->destObjectDestID) *targetObject = NULL;
                     } else *targetObject = NULL;
                     if ( *targetObject != NULL)
@@ -1802,7 +1796,7 @@ void ThinkObjectResolveDestination( spaceObjectType *anObject, coordPointType *d
 }
 
 bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
-    unsigned long *distance, spaceObjectType **targetObject)
+    uint32_t *distance, spaceObjectType **targetObject)
 {
     spaceObjectType *closestObject;
 
@@ -1811,11 +1805,11 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
 
     if ( anObject->closestObject != kNoShip)
     {
-        closestObject = gSpaceObjectData.get() + anObject->closestObject;
+        closestObject = mGetSpaceObjectPtr(anObject->closestObject);
     } else closestObject = NULL;
 
     // if we have no target  then
-    if (( anObject->targetObjectNumber == kNoShip))
+    if (anObject->targetObjectNumber == kNoShip)
     {
         // if the closest object is appropriate (if it exists, it should be, then
         if (( closestObject != NULL) &&
@@ -1844,7 +1838,7 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
     if ( anObject->targetObjectNumber != kNoShip)
     {
         // make sure we're still talking about the same object
-        *targetObject = gSpaceObjectData.get() + anObject->targetObjectNumber;
+        *targetObject = mGetSpaceObjectPtr(anObject->targetObjectNumber);
 
         // if the object is wrong or smells at all funny, then
         if  (
@@ -1876,7 +1870,7 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
             {
                 // make it our target
                 anObject->targetObjectNumber = anObject->closestObject;
-                closestObject = *targetObject = gSpaceObjectData.get() + anObject->targetObjectNumber;
+                closestObject = *targetObject = mGetSpaceObjectPtr(anObject->targetObjectNumber);
                 anObject->targetObjectID = closestObject->id;
                 if ( !((*targetObject)->attributes & kPotentialTarget))
                 {   // cancel
@@ -1936,7 +1930,7 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
                 kRemoteOrHuman))
             {
                 anObject->targetObjectNumber = anObject->closestObject;
-                *targetObject = gSpaceObjectData.get() + anObject->targetObjectNumber;
+                *targetObject = mGetSpaceObjectPtr(anObject->targetObjectNumber);
                 anObject->targetObjectID = (*targetObject)->id;
                 dest->h = (*targetObject)->location.h;
                 dest->v = (*targetObject)->location.v;
@@ -1967,14 +1961,14 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
     }
 }
 
-unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *targetObject,
-    unsigned long distance, short *theta, long timePass)
+uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *targetObject,
+    uint32_t distance, int16_t *theta, int32_t timePass)
 {
-    unsigned long   keysDown = 0;
+    uint32_t        keysDown = 0;
     baseObjectType  *bestWeapon, *weaponObject;
     coordPointType  dest;
-    long            difference;
-    short           angle, beta;
+    int32_t         difference;
+    int16_t         angle, beta;
     Fixed           slope;
 
     *theta = 0xffff;
@@ -1984,11 +1978,9 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
     if ( targetObject->cloakState > 250)
     {
         dest.h -= 70;
-        dest.h += RandomSeeded( 140, &anObject->randomSeed,
-            'nps0', anObject->whichBaseObject);
+        dest.h += anObject->randomSeed.next(140);
         dest.v -= 70;
-        dest.v += RandomSeeded( 140, &anObject->randomSeed,
-            'nps1', anObject->whichBaseObject);
+        dest.v += anObject->randomSeed.next(140);
     }
 
     // if target is in our weapon range & we hate the object
@@ -2068,7 +2060,7 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
     if ( targetObject->cloakState > 250)
     {
         angle -= 45;
-        mAddAngle( angle, RandomSeeded( 90, &anObject->randomSeed, 'nps2', anObject->whichBaseObject));
+        mAddAngle(angle, anObject->randomSeed.next(90));
     }
     anObject->targetAngle = angle;
 
@@ -2165,10 +2157,9 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
         if (anObject->health < 0) {
             if ((anObject->owner == globals()->gPlayerAdmiralNumber)
                     && (anObject->attributes & kCanAcceptDestination)) {
-                StringList strings(5000);
-                const StringSlice& object_name = strings.at(anObject->whichBaseObject);
+                const StringSlice& object_name = get_object_name(anObject->whichBaseObject);
                 int count = CountObjectsOfBaseType(anObject->whichBaseObject, anObject->owner) - 1;
-                AddMessage(format(" {0} destroyed.  {1} remaining. ", object_name, count));
+                Messages::add(format(" {0} destroyed.  {1} remaining. ", object_name, count));
             }
         }
 
@@ -2194,17 +2185,16 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
 //  For the human player selecting a ship.  If friend or foe = 0, will get any ship.  If it's
 //  positive, will get only friendly ships.  If it's negative, only unfriendly ships.
 
-long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusiveAttributes,
-                            unsigned long anyOneAttribute, unsigned long exclusiveAttributes,
-                            const uint64_t* fartherThan, long currentShipNum, short friendOrFoe)
-
-{
+int32_t GetManualSelectObject(
+        spaceObjectType *sourceObject, int32_t direction, uint32_t inclusiveAttributes,
+        uint32_t anyOneAttribute, uint32_t exclusiveAttributes,
+        const uint64_t* fartherThan, int32_t currentShipNum, int16_t friendOrFoe) {
     spaceObjectType *anObject;
-    long            whichShip = 0, resultShip = -1, closestShip = -1, startShip = -1, hdif, vdif;
-    unsigned long   distance, dcalc, myOwnerFlag = 1 << sourceObject->owner;
-    long            difference;
+    int32_t         whichShip = 0, resultShip = -1, closestShip = -1, startShip = -1, hdif, vdif;
+    uint32_t        distance, dcalc, myOwnerFlag = 1 << sourceObject->owner;
+    int32_t         difference;
     Fixed           slope;
-    short           angle;
+    int16_t         angle;
 //  const wide      kMaxAngleDistance = {0, 1073676289}; // kMaximumAngleDistance ^ 2
     uint64_t        wideClosestDistance, wideFartherDistance, thisWideDistance, wideScrap;
     uint8_t         thisDistanceState;
@@ -2220,7 +2210,7 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
     whichShip = startShip = currentShipNum;
     if ( whichShip >= 0)
     {
-        anObject = gSpaceObjectData.get() + startShip;
+        anObject = mGetSpaceObjectPtr(startShip);
         if ( anObject->active != kObjectInUse) // if it's not in the loop
         {
             anObject = gRootObject;
@@ -2294,7 +2284,7 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
                         ( vdif > 0))
                     angle = 0;
 
-                angle = mAngleDifference( angle, sourceObject->direction);
+                angle = mAngleDifference( angle, direction);
 
                 if ( ABS( angle) < 30)
                 {
@@ -2325,19 +2315,17 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
     return ( resultShip);
 }
 
-long GetSpritePointSelectObject( Rect *bounds, spaceObjectType *sourceObject, unsigned long inclusiveAttributes,
-                            unsigned long anyOneAttribute, unsigned long exclusiveAttributes,
-                            long currentShipNum, short friendOrFoe)
+int32_t GetSpritePointSelectObject( Rect *bounds, spaceObjectType *sourceObject, uint32_t inclusiveAttributes,
+                            uint32_t anyOneAttribute, uint32_t exclusiveAttributes,
+                            int32_t currentShipNum, int16_t friendOrFoe)
 
 {
-    spaceObjectType *anObject;
-    long            whichShip = 0, resultShip = -1, closestShip = -1;
-    unsigned long   myOwnerFlag = 1 << sourceObject->owner;
+    int32_t         resultShip = -1, closestShip = -1;
+    uint32_t        myOwnerFlag = 1 << sourceObject->owner;
 
-    anObject = gSpaceObjectData.get();
 
-    for ( whichShip = 0; whichShip < kMaxSpaceObject; whichShip++)
-    {
+    for (int32_t whichShip = 0; whichShip < kMaxSpaceObject; whichShip++) {
+        spaceObjectType* anObject = mGetSpaceObjectPtr(whichShip);
         if (( anObject->active) && ( anObject->sprite != NULL) &&
             ( anObject->seenByPlayerFlags & myOwnerFlag) &&
             (( anObject->attributes & inclusiveAttributes) == inclusiveAttributes) &&
@@ -2367,7 +2355,6 @@ long GetSpritePointSelectObject( Rect *bounds, spaceObjectType *sourceObject, un
                 }
             }
         }
-        anObject++;
     }
     if ((( resultShip == -1) && ( closestShip != -1)) || ( resultShip == currentShipNum)) resultShip = closestShip;
 

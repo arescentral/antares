@@ -73,14 +73,23 @@ CocoaFullscreen::MenuBarHider::~MenuBarHider() {
     antares_menu_bar_show();
 }
 
-CocoaFullscreen::SetFullscreen::SetFullscreen(const cgl::Context& context) {
-    cgl::check(CGLSetFullScreen(context.c_obj()));
+CocoaFullscreen::MouseHider::MouseHider() {
+    antares_mouse_hide();
+}
+
+CocoaFullscreen::MouseHider::~MouseHider() {
+    antares_mouse_show();
+}
+
+CocoaFullscreen::SetFullscreen::SetFullscreen(
+        const cgl::Context& context, uint32_t display_mask) {
+    cgl::check(CGLSetFullScreenOnDisplay(context.c_obj(), display_mask));
     cgl::check(CGLSetCurrentContext(context.c_obj()));
 }
 
-CocoaFullscreen::CocoaFullscreen(const cgl::Context& context, Size screen_size):
+CocoaFullscreen::CocoaFullscreen(const cgl::Context& context, Size screen_size, uint32_t display_mask):
         _capturer(screen_size),
-        _set_fullscreen(context) {
+        _set_fullscreen(context, display_mask) {
 }
 
 CocoaFullscreen::~CocoaFullscreen() { }

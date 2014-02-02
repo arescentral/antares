@@ -19,11 +19,13 @@
 #ifndef ANTARES_DRAWING_BUILD_PIX_HPP_
 #define ANTARES_DRAWING_BUILD_PIX_HPP_
 
+#include <memory>
+
 namespace antares {
 
 class PixMap;
 
-PixMap* build_pix(int text_id, int width);
+std::unique_ptr<PixMap> build_pix(int text_id, int width);
 
 }  // namespace antares
 

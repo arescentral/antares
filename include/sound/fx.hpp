@@ -56,8 +56,8 @@ const int16_t kWarpThree        = 528;
 const int16_t kWarpFour         = 529;
 const int16_t kTeletype         = 535;
 
-struct Sound;
-struct SoundChannel;
+class Sound;
+class SoundChannel;
 struct spaceObjectType;
 
 enum soundPriorityType {
@@ -70,16 +70,16 @@ enum soundPriorityType {
 };
 
 struct smartSoundChannel {
-    long                whichSound;
+    int32_t             whichSound;
     int32_t             soundAge;
-    short               soundVolume;
+    int16_t             soundVolume;
     soundPriorityType   soundPriority;
-    sfz::scoped_ptr<SoundChannel> channelPtr;
+    std::unique_ptr<SoundChannel> channelPtr;
 };
 
 struct smartSoundHandle {
-    sfz::scoped_ptr<Sound>   soundHandle;
-    short               id;
+    std::unique_ptr<Sound>   soundHandle;
+    int16_t             id;
     bool             keepMe;
 };
 
@@ -90,15 +90,16 @@ int AddSound(int sound_id);
 void RemoveAllUnusedSounds();
 void ResetAllSounds();
 void PlayVolumeSound(
-        short whichSoundID, uint8_t amplitude, short persistence, soundPriorityType priority);
+        int16_t whichSoundID, uint8_t amplitude, int16_t persistence, soundPriorityType priority);
 void PlayLocalizedSound(
-        unsigned long sx, unsigned long sy, unsigned long dx, unsigned long dy,
-        Fixed hvel, Fixed vvel, short whichSoundID, short amplitude,
-        short persistence, soundPriorityType priority);
+        uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy,
+        Fixed hvel, Fixed vvel, int16_t whichSoundID, int16_t amplitude,
+        int16_t persistence, soundPriorityType priority);
+void quiet_all();
 void SoundFXCleanup();
 
 void mPlayDistanceSound(
-        long mvolume, spaceObjectType* mobjectptr, long msoundid, long msoundpersistence,
+        int32_t mvolume, spaceObjectType* mobjectptr, int32_t msoundid, int32_t msoundpersistence,
         soundPriorityType msoundpriority);
 
 }  // namespace antares

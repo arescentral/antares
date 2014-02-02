@@ -33,7 +33,6 @@
 
 using sfz::Exception;
 using sfz::format;
-using sfz::scoped_array;
 
 namespace antares {
 
@@ -47,7 +46,7 @@ void InitSoundFX() {
         globals()->gChannel[i].soundAge = 0;
         globals()->gChannel[i].soundPriority = kNoSound;
         globals()->gChannel[i].whichSound = -1;
-        SoundDriver::driver()->open_channel(globals()->gChannel[i].channelPtr);
+        globals()->gChannel[i].channelPtr = SoundDriver::driver()->open_channel();
     }
 
     ResetAllSounds();
@@ -69,7 +68,7 @@ void InitSoundFX() {
 }
 
 void PlayVolumeSound(
-        short whichSoundID, uint8_t amplitude, short persistence, soundPriorityType priority) {
+        int16_t whichSoundID, uint8_t amplitude, int16_t persistence, soundPriorityType priority) {
     int32_t oldestSoundTime = -ticks_to_usecs(kLongPersistence), whichChannel = -1;
     // TODO(sfiera): don't play sound at all if the game is muted.
     if (amplitude > 0) {
@@ -153,9 +152,9 @@ void PlayVolumeSound(
 }
 
 void PlayLocalizedSound(
-        unsigned long sx, unsigned long sy, unsigned long dx, unsigned long dy,
-        Fixed hvel, Fixed vvel, short whichSoundID, short amplitude,
-        short persistence, soundPriorityType priority) {
+        uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy,
+        Fixed hvel, Fixed vvel, int16_t whichSoundID, int16_t amplitude,
+        int16_t persistence, soundPriorityType priority) {
     static_cast<void>(sx);
     static_cast<void>(sy);
     static_cast<void>(dx);
@@ -190,7 +189,7 @@ void ResetAllSounds() {
 }
 
 void KeepSound(int soundID) {
-    short whichSound;
+    int16_t whichSound;
 
     whichSound = 0;
     while ((globals()->gSound[whichSound].id != soundID) && (whichSound < kSoundNum)) {
@@ -219,9 +218,8 @@ int AddSound(int soundID) {
             throw Exception("Can't manage any more sounds");
         }
 
-        SoundDriver::driver()->open_sound(
-                format("/sounds/{0}.aiff", soundID),
-                globals()->gSound[whichSound].soundHandle);
+        globals()->gSound[whichSound].soundHandle = SoundDriver::driver()->open_sound(
+                format("/sounds/{0}", soundID));
         globals()->gSound[whichSound].id = soundID;
     }
     return whichSound;
@@ -234,6 +232,12 @@ void SoundFXCleanup() {
 
     for (int i = 0; i < kSoundNum; i++) {
         globals()->gSound[i].soundHandle.reset();
+    }
+}
+
+void quiet_all() {
+    for (int i = 0; i < kMaxChannelNum; i++) {
+        globals()->gChannel[i].channelPtr->quiet();
     }
 }
 
@@ -261,7 +265,7 @@ void SoundFXCleanup() {
 //
 
 void mPlayDistanceSound(
-        long mvolume, spaceObjectType* mobjectptr, long msoundid, long msoundpersistence,
+        int32_t mvolume, spaceObjectType* mobjectptr, int32_t msoundid, int32_t msoundpersistence,
         soundPriorityType msoundpriority) {
     if (mobjectptr->distanceFromPlayer < kMaximumRelevantDistanceSquared) {
         int32_t mdistance = mobjectptr->distanceFromPlayer;
@@ -271,7 +275,7 @@ void mPlayDistanceSound(
 
         if (mdistance == 0) {
             if (globals()->gPlayerShipNumber >= 0) {
-                mplayerobjectptr = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
+                mplayerobjectptr = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
             } else {
                 mplayerobjectptr = NULL;
             }
@@ -340,7 +344,7 @@ void mPlayDistanceSound(
                 }
             }
             if (globals()->gPlayerShipNumber >= 0) {
-                mplayerobjectptr = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
+                mplayerobjectptr = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
             } else {
                 mplayerobjectptr = NULL;
             }

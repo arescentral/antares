@@ -25,58 +25,41 @@
 
 namespace antares {
 
-const int32_t kNoLabel = -1;
-const int32_t kLabelOffVisibleTime = 60;
+class Labels {
+  public:
+    static const int32_t kNone = -1;
+    static const int32_t kVisibleTime = 60;
 
-struct screenLabelType {
-    Point               where;
-    Point               offset;
-    Rect                thisRect;
-    long                width;
-    long                height;
-    long                age;
-    sfz::String         text;
-    unsigned char       color;
-    bool                active;
-    bool                killMe;
-    bool                visible;
-    long                whichObject;
-    spaceObjectType*    object;
-    bool                objectLink;     // true if label requires an object to be seen
-    long                lineNum;
-    long                lineHeight;
-    bool                keepOnScreenAnyway; // if not attached to object, keep on screen if it's off
-    bool                attachedHintLine;
-    Point               attachedToWhere;
-    int32_t             retroCount;
+    static void init();
+    static void reset();
+    static int16_t add(
+            int16_t h, int16_t v, int16_t hoff, int16_t voff, spaceObjectType* object, bool objectLink,
+            uint8_t color);
+    static void remove(int32_t);
+    static void draw();
+    static void update_contents(int32_t units_done);
+    static void update_positions(int32_t units_done);
+    static void show_all();
 
-    screenLabelType();
+    static void set_position(int32_t, int16_t, int16_t);
+    static void set_object(int32_t, spaceObjectType *);
+    static void set_age(int32_t, int32_t);
+    static void set_string(int32_t which, const sfz::StringSlice& string);
+    static void clear_string(int32_t which);
+    static void set_color(int32_t, uint8_t);
+    static void set_offset(int32_t which, int32_t hoff, int32_t voff);
+    static int32_t get_width(int32_t which);
+    static void set_keep_on_screen_anyway(int32_t which, bool keepOnScreenAnyWay);
+    static void set_attached_hint_line(int32_t which, bool attachedHintLine, Point toWhere);
+    static sfz::String* get_string(int32_t);  // TODO(sfiera): encapsulate.
+
+    static void recalc_size(int32_t);
+
+  private:
+    struct screenLabelType;
+    static void zero(screenLabelType& label);
+    static screenLabelType* data;
 };
-
-void zero(screenLabelType& label);
-
-void ScreenLabelInit();
-void ResetAllLabels();
-short AddScreenLabel(
-        short h, short v, short hoff, short voff, spaceObjectType* object, bool objectLink,
-        unsigned char color);
-void RemoveScreenLabel( long);
-void draw_labels();
-void update_all_label_contents(int32_t units_done);
-void update_all_label_positions(int32_t units_done);
-void ShowAllLabels();
-void SetScreenLabelPosition( long, short, short);
-void SetScreenLabelObject( long, spaceObjectType *);
-void SetScreenLabelAge( long, long);
-void SetScreenLabelString(long which, const sfz::StringSlice& string);
-void ClearScreenLabelString(long which);
-void SetScreenLabelColor( long, unsigned char);
-void SetScreenLabelOffset( long which, long hoff, long voff);
-long GetScreenLabelWidth( long which);
-void SetScreenLabelKeepOnScreenAnyway( long which, bool keepOnScreenAnyWay);
-void SetScreenLabelAttachedHintLine( long which, bool attachedHintLine, Point toWhere);
-sfz::String* GetScreenLabelStringPtr(long);  // TODO(sfiera): encapsulate.
-void RecalcScreenLabelSize( long);
 
 }  // namespace antares
 

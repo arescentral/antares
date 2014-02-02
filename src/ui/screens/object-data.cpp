@@ -30,8 +30,6 @@ using sfz::Exception;
 using sfz::String;
 using sfz::format;
 
-namespace macroman = sfz::macroman;
-
 namespace antares {
 
 namespace {

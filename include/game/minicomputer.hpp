@@ -41,45 +41,46 @@ struct miniScreenLineType {
     sfz::String     statusTrue;
     sfz::String     statusString;
     sfz::String     postString;
-    long            hiliteLeft;
-    long            hiliteRight;
-    long            whichButton;
+    int32_t         hiliteLeft;
+    int32_t         hiliteRight;
+    int32_t         whichButton;
     lineSelectType  selectable;
     bool         underline;
     lineKindType    lineKind;
-    long            value;      // for keeping track of changing values
-    long            statusType;
-    long            whichStatus;
-    long            statusPlayer;
-    long            negativeValue;
+    int32_t         value;      // for keeping track of changing values
+    int32_t         statusType;
+    int32_t         whichStatus;
+    int32_t         statusPlayer;
+    int32_t         negativeValue;
     baseObjectType* sourceData;
 };
 
 void MiniScreenInit( void);
 void MiniScreenCleanup( void);
-void SetMiniScreenStatusStrList( short);
+void SetMiniScreenStatusStrList( int16_t);
 void DisposeMiniScreenStatusStrList( void);
 void ClearMiniScreenLines( void);
 void ClearMiniObjectData( void);
 void draw_mini_screen();
-void MakeMiniScreenFromIndString( short);
-void MiniComputerHandleKeys( unsigned long, unsigned long);
-void MiniComputerHandleNull( long);
-long MiniComputerGetPriceOfCurrentSelection( void);
+void MakeMiniScreenFromIndString( int16_t);
+void minicomputer_handle_keys(uint32_t new_keys, uint32_t old_keys, bool cancel);
+void minicomputer_cancel();
+void MiniComputerHandleNull(int32_t);
+int32_t MiniComputerGetPriceOfCurrentSelection( void);
 void UpdateMiniScreenLines( void);
 void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special);
 void draw_mini_ship_data(
-        const spaceObjectType& newObject, unsigned char headerColor,
-        short screenTop, short whichString);
+        const spaceObjectType& newObject, uint8_t headerColor,
+        int16_t screenTop, int16_t whichString);
 void MiniComputerDoAccept( void);
-void MiniComputerExecute( long, long, long);
+void MiniComputerExecute(int32_t, int32_t, int32_t);
 void MiniComputerDoCancel( void);
 void MiniComputerSetBuildStrings( void);
 void MiniComputerHandleClick( Point);
 void MiniComputerHandleDoubleClick( Point);
 void MiniComputerHandleMouseUp( Point);
 void MiniComputerHandleMouseStillDown( Point);
-void MiniComputer_SetScreenAndLineHack( long whichScreen, long whichLine);
+void MiniComputer_SetScreenAndLineHack(int32_t whichScreen, int32_t whichLine);
 
 }  // namespace antares
 

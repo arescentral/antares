@@ -23,8 +23,7 @@
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
 #include "data/replay.hpp"
-#include "game/globals.hpp"
-#include "video/driver.hpp"
+#include "game/time.hpp"
 
 using sfz::BytesSlice;
 using sfz::read;
@@ -33,48 +32,42 @@ namespace antares {
 
 InputSource::~InputSource() { }
 
-UserInputSource::UserInputSource() { }
-
-bool UserInputSource::next(KeyMap& key_map) {
-    VideoDriver::driver()->get_keys(&key_map);
-    return true;
-}
-
 ReplayInputSource::ReplayInputSource(ReplayData* data):
         _data(data),
         _data_index(0),
-        _wait_ticks(0) {
-    advance();
+        _at(0) {
+    EventReceiver receiver;
+    advance(receiver);
 }
 
-bool ReplayInputSource::next(KeyMap& key_map) {
-    if (_wait_ticks == 0) {
-        if (!advance()) {
-            return false;
-        }
+bool ReplayInputSource::next(EventReceiver& receiver) {
+    if (!advance(receiver)) {
+        return false;
     }
-    --_wait_ticks;
-
-    key_map.copy(_key_map);
     return true;
 }
 
-bool ReplayInputSource::advance() {
-    while (_data_index < _data->items.size()) {
-        const ReplayData::Item& item = _data->items[_data_index++];
-        switch (item.type) {
-          case ReplayData::Item::WAIT:
-            _wait_ticks += item.data.wait;
-            return true;
-          case ReplayData::Item::KEY_DOWN:
-            _key_map.set(Preferences::preferences()->key(item.data.key_down) - 1, true);
-            break;
-          case ReplayData::Item::KEY_UP:
-            _key_map.set(Preferences::preferences()->key(item.data.key_up) - 1, false);
-            break;
-        }
+bool ReplayInputSource::advance(EventReceiver& receiver) {
+    if (_at >= _data->duration) {
+        return false;
     }
-    return false;
+    while ((_data_index < _data->actions.size())
+            && (_at >= _data->actions[_data_index].at)) {
+        const ReplayData::Action& action = _data->actions[_data_index];
+        if (_at == action.at) {
+            for (uint8_t key: action.keys_down) {
+                int code = Preferences::preferences()->key(key) - 1;
+                receiver.key_down(KeyDownEvent(now_usecs(), code));
+            }
+            for (uint8_t key: action.keys_up) {
+                int code = Preferences::preferences()->key(key) - 1;
+                receiver.key_up(KeyUpEvent(now_usecs(), code));
+            }
+        }
+        ++_data_index;
+    }
+    ++_at;
+    return true;
 }
 
 }  // namespace antares

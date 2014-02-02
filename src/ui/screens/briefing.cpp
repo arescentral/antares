@@ -46,30 +46,26 @@ enum BriefingPoint {
     BRIEFING_POINT_COUNT,
 };
 
-const int kBriefingScreenResId = 6000;
 const int kStarMapPictId = 8000;
 const int kMissionStarPointWidth = 16;
 const int kMissionStarPointHeight = 12;
 const int32_t kMissionDataHiliteColor = GOLD;
 
+LabeledRect data_item(const InterfaceItem& map_rect) {
+    Rect bounds(0, 0, 200, 200);
+    bounds.center_in(map_rect.bounds());
+    return LabeledRect(0, bounds, {4000, 1}, GOLD, kLarge);
+}
+
 }  // namespace
 
 BriefingScreen::BriefingScreen(const Scenario* scenario, bool* cancelled)
-        : InterfaceScreen(kBriefingScreenResId, world, true),
+        : InterfaceScreen("briefing", world, true),
           _scenario(scenario),
           _cancelled(cancelled),
           _briefing_point(0),
-          _briefing_point_count(_scenario->brief_point_size() + 2) {
-    Rect map_rect = item(MAP_RECT).bounds;
-
-    _data_item.bounds = Rect(0, 0, 200, 200);
-    _data_item.bounds.center_in(map_rect);
-    _data_item.color = GOLD;
-    _data_item.kind = kLabeledRect;
-    _data_item.style = kLarge;
-    _data_item.item.labeledRect.label.stringID = 4000;
-    _data_item.item.labeledRect.label.stringNumber = 1;
-
+          _briefing_point_count(_scenario->brief_point_size() + 2),
+          _data_item(data_item(item(MAP_RECT))) {
     build_star_map();
     build_system_map();
 }
@@ -84,9 +80,7 @@ void BriefingScreen::become_front() {
     }
 }
 
-void BriefingScreen::draw() const {
-    InterfaceScreen::draw();
-
+void BriefingScreen::overlay() const {
     switch (_briefing_point) {
       case STAR_MAP:
         {
@@ -120,7 +114,7 @@ void BriefingScreen::mouse_down(const MouseDownEvent& event) {
         if (_inline_pict[i].bounds.contains(event.where())) {
             const int pict_id = _inline_pict[i].id;
             for (int i = 0; i < globals()->maxBaseObject; ++i) {
-                if (gBaseObjectData[i].pictPortraitResID == pict_id) {
+                if (mGetBaseObjectPtr(i)->pictPortraitResID == pict_id) {
                     stack()->push(new ObjectDataScreen(
                                 event.where(), i, ObjectDataScreen::MOUSE, event.button()));
                     return;
@@ -128,6 +122,7 @@ void BriefingScreen::mouse_down(const MouseDownEvent& event) {
             }
         }
     }
+    InterfaceScreen::mouse_down(event);
 }
 
 void BriefingScreen::key_down(const KeyDownEvent& event) {
@@ -155,19 +150,19 @@ void BriefingScreen::key_down(const KeyDownEvent& event) {
 
 void BriefingScreen::adjust_interface() {
     if (_briefing_point > 0) {
-        mutable_item(PREVIOUS)->set_status(kActive);
+        dynamic_cast<Button&>(mutable_item(PREVIOUS)).status = kActive;
     } else {
-        mutable_item(PREVIOUS)->set_status(kDimmed);
+        dynamic_cast<Button&>(mutable_item(PREVIOUS)).status = kDimmed;
     }
     if (_briefing_point < _briefing_point_count - 1) {
-        mutable_item(NEXT)->set_status(kActive);
+        dynamic_cast<Button&>(mutable_item(NEXT)).status = kActive;
     } else {
-        mutable_item(NEXT)->set_status(kDimmed);
+        dynamic_cast<Button&>(mutable_item(NEXT)).status = kDimmed;
     }
 }
 
-void BriefingScreen::handle_button(int button) {
-    switch (button) {
+void BriefingScreen::handle_button(Button& button) {
+    switch (button.id) {
       case DONE:
         stack()->pop(this);
         break;
@@ -189,22 +184,21 @@ void BriefingScreen::handle_button(int button) {
         break;
 
       default:
-        throw Exception(format("Got unknown button {0}.", button));
+        throw Exception(format("Got unknown button {0}.", button.id));
     }
 }
 
 void BriefingScreen::build_star_map() {
     Picture pict(kStarMapPictId);
-    _star_map.reset(VideoDriver::driver()->new_sprite(format("/pict/{0}", kStarMapPictId), pict));
+    _star_map = VideoDriver::driver()->new_sprite(format("/pictures/{0}.png", kStarMapPictId), pict);
     Rect pix_bounds = pict.size().as_rect();
     pix_bounds.offset(0, 2);
     pix_bounds.bottom -= 3;
     _bounds = pix_bounds;
-    _bounds.center_in(item(MAP_RECT).bounds);
+    _bounds.center_in(item(MAP_RECT).bounds());
 
     _star_rect = Rect(_scenario->star_map_point(), Size(0, 0));
     _star_rect.inset(-kMissionStarPointWidth, -kMissionStarPointHeight);
-    RgbColor gold = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
 
     // Move `_star_rect` so that it is inside of `pix_bounds`.
     if (_star_rect.left < pix_bounds.left) {
@@ -244,7 +238,7 @@ void BriefingScreen::build_brief_point() {
     if (_briefing_point >= BRIEFING_POINT_COUNT) {
         coordPointType corner;
         int32_t scale;
-        Rect map_rect = item(MAP_RECT).bounds;
+        Rect map_rect = item(MAP_RECT).bounds();
         GetScenarioFullScaleAndCorner(_scenario, 0, &corner, &scale, &map_rect);
 
         vector<inlinePictType> inline_pict;
@@ -304,10 +298,9 @@ void BriefingScreen::draw_brief_point() const {
     Rect bounds;
     GetAnyInterfaceItemGraphicBounds(_data_item, &bounds);
     VideoDriver::driver()->fill_rect(bounds, RgbColor::kBlack);
-    draw_interface_item(_data_item);
+    draw_interface_item(_data_item, KEYBOARD_MOUSE);
     vector<inlinePictType> unused;
-    draw_text_in_rect(
-            _data_item.bounds, _text, _data_item.style, _data_item.color, unused);
+    draw_text_in_rect(_data_item.bounds(), _text, _data_item.style, _data_item.hue, unused);
 }
 
 void BriefingScreen::show_object_data_key(int index, int key) {
@@ -315,7 +308,7 @@ void BriefingScreen::show_object_data_key(int index, int key) {
         const int pict_id = _inline_pict[index].id;
         const Point origin = _inline_pict[index].bounds.center();
         for (int i = 0; i < globals()->maxBaseObject; ++i) {
-            if (gBaseObjectData[i].pictPortraitResID == pict_id) {
+            if (mGetBaseObjectPtr(i)->pictPortraitResID == pict_id) {
                 stack()->push(new ObjectDataScreen(origin, i, ObjectDataScreen::KEY, key));
                 return;
             }

@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "config/preferences.hpp"
+#include "data/string-list.hpp"
 #include "ui/screen.hpp"
 
 namespace antares {
@@ -49,11 +50,11 @@ class SoundControlScreen : public InterfaceScreen {
     SoundControlScreen(OptionsScreen::State* state, Preferences* preferences);
     ~SoundControlScreen();
 
-    virtual void draw() const;
+    virtual void overlay() const;
 
   protected:
     virtual void adjust_interface();
-    virtual void handle_button(int button);
+    virtual void handle_button(Button& button);
 
   private:
     enum Item {
@@ -94,11 +95,11 @@ class KeyControlScreen : public InterfaceScreen {
     virtual bool next_timer(int64_t& time);
     virtual void fire_timer();
 
-    virtual void draw() const;
+    virtual void overlay() const;
 
   protected:
     virtual void adjust_interface();
-    virtual void handle_button(int button);
+    virtual void handle_button(Button& button);
 
   private:
     enum Item {
@@ -135,11 +136,14 @@ class KeyControlScreen : public InterfaceScreen {
 
     Tab _tab;
     const size_t _key_start;
-    size_t _selected_key;
-    std::vector<std::pair<size_t, size_t> > _conflicts;
+    int32_t _selected_key;
+    std::vector<std::pair<size_t, size_t>> _conflicts;
 
     int64_t _next_flash;
     bool _flashed_on;
+
+    StringList _tabs;
+    StringList _keys;
 
     DISALLOW_COPY_AND_ASSIGN(KeyControlScreen);
 };

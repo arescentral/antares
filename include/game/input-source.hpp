@@ -23,40 +23,31 @@
 #include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
+#include "ui/event.hpp"
 
 namespace antares {
 
-class ReplayData;
+struct ReplayData;
 
 class InputSource {
   public:
     virtual ~InputSource();
 
-    virtual bool next(KeyMap& key_map) = 0;
-};
-
-class UserInputSource : public InputSource {
-  public:
-    UserInputSource();
-
-    virtual bool next(KeyMap& key_map);
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(UserInputSource);
+    virtual bool next(EventReceiver& key_map) = 0;
 };
 
 class ReplayInputSource : public InputSource {
   public:
     explicit ReplayInputSource(ReplayData* data);
 
-    virtual bool next(KeyMap& key_map);
+    virtual bool next(EventReceiver& receiver);
 
   private:
-    bool advance();
+    bool advance(EventReceiver& receiver);
 
     const ReplayData* _data;
     size_t _data_index;
-    uint32_t _wait_ticks;
+    uint64_t _at;
     KeyMap _key_map;
 
     DISALLOW_COPY_AND_ASSIGN(ReplayInputSource);

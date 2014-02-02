@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <cmath>
 #include <sfz/sfz.hpp>
+#include "config/dirs.hpp"
 #include "config/preferences.hpp"
 
 using sfz::Bytes;
@@ -39,9 +40,9 @@ using sfz::format;
 using sfz::makedirs;
 using sfz::print;
 using sfz::range;
-using sfz::scoped_ptr;
 using sfz::string_to_int;
 using sfz::write;
+using std::unique_ptr;
 using std::vector;
 
 namespace path = sfz::path;
@@ -70,9 +71,7 @@ Ledger* Ledger::ledger() {
     return ::antares::ledger;
 }
 
-NullLedger::NullLedger() {
-    _chapters.insert(1);
-}
+NullLedger::NullLedger(): _chapters{1} { }
 
 void NullLedger::unlock_chapter(int chapter) {
     _chapters.insert(chapter);
@@ -82,8 +81,7 @@ void NullLedger::unlocked_chapters(std::vector<int>* chapters) {
     *chapters = std::vector<int>(_chapters.begin(), _chapters.end());
 }
 
-DirectoryLedger::DirectoryLedger(PrintItem directory)
-        : _directory(directory) {
+DirectoryLedger::DirectoryLedger() {
     load();
 }
 
@@ -125,9 +123,9 @@ class DirectoryLedger::Visitor : public JsonVisitor {
     virtual void visit_array(const std::vector<Json>& value) const {
         if (_state == UNLOCKED_CHAPTERS) {
             _state = UNLOCKED_CHAPTER;
-            SFZ_FOREACH(const Json& chapter, value, {
+            for (const Json& chapter: value) {
                 chapter.accept(*this);
-            });
+            }
             _state = UNLOCKED_CHAPTERS;
             return;
         }
@@ -161,14 +159,10 @@ class DirectoryLedger::Visitor : public JsonVisitor {
 
 void DirectoryLedger::load() {
     const StringSlice scenario_id = Preferences::preferences()->scenario_identifier();
-    String path(format("{0}/Registry/{1}/ledger.json", _directory, scenario_id));
-
-    if (!path::isfile(path) && (scenario_id == "com.biggerplanet.ares")) {
-        path.assign(format("{0}/{1}.json", _directory, scenario_id));
-    }
+    String path(format("{0}/{1}/ledger.json", dirs().registry, scenario_id));
 
     _chapters.clear();
-    scoped_ptr<MappedFile> file;
+    unique_ptr<MappedFile> file;
     try {
         file.reset(new MappedFile(path));
     } catch (Exception& e) {
@@ -188,7 +182,7 @@ void DirectoryLedger::load() {
 
 void DirectoryLedger::save() {
     const StringSlice scenario_id = Preferences::preferences()->scenario_identifier();
-    const String path(format("{0}/Registry/{1}/ledger.json", _directory, scenario_id));
+    const String path(format("{0}/{1}/ledger.json", dirs().registry, scenario_id));
 
     vector<Json> unlocked_levels;
     for (std::set<int>::const_iterator it = _chapters.begin(); it != _chapters.end(); ++it) {

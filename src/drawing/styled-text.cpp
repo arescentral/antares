@@ -32,7 +32,7 @@ using sfz::Exception;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
-using sfz::scoped_ptr;
+using std::unique_ptr;
 
 namespace antares {
 
@@ -80,8 +80,8 @@ void StyledText::set_retro_text(sfz::StringSlice text) {
 
     for (size_t i = 0; i < text.size(); ++i) {
         switch (text.at(i)) {
-          case '\r':
-            _chars.push_back(StyledChar('\r', LINE_BREAK, fore_color, back_color));
+          case '\n':
+            _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
             break;
 
           case '_':
@@ -148,7 +148,7 @@ void StyledText::set_retro_text(sfz::StringSlice text) {
             break;
         }
     }
-    _chars.push_back(StyledChar('\r', LINE_BREAK, fore_color, back_color));
+    _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
 
     wrap_to(std::numeric_limits<int>::max(), 0, 0);
 }
@@ -156,8 +156,8 @@ void StyledText::set_retro_text(sfz::StringSlice text) {
 void StyledText::set_interface_text(sfz::StringSlice text) {
     for (size_t i = 0; i < text.size(); ++i) {
         switch (text.at(i)) {
-          case '\r':
-            _chars.push_back(StyledChar('\r', LINE_BREAK, _fore_color, _back_color));
+          case '\n':
+            _chars.push_back(StyledChar('\n', LINE_BREAK, _fore_color, _back_color));
             break;
 
           case ' ':
@@ -210,7 +210,7 @@ void StyledText::set_interface_text(sfz::StringSlice text) {
             break;
         }
     }
-    _chars.push_back(StyledChar('\r', LINE_BREAK, _fore_color, _back_color));
+    _chars.push_back(StyledChar('\n', LINE_BREAK, _fore_color, _back_color));
 
     wrap_to(std::numeric_limits<int>::max(), 0, 0);
 }
@@ -349,8 +349,8 @@ void StyledText::draw_char(const Rect& bounds, int index) const {
             const inlinePictType& inline_pict = _inline_picts[ch.character];
             corner.offset(inline_pict.bounds.left, inline_pict.bounds.top + _line_spacing);
             Picture pict(inline_pict.id);
-            scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(
-                        format("/pict/{0}"), pict));
+            unique_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(
+                        format("/pictures/{0}.png", inline_pict.id), pict));
             sprite->draw(corner.h, corner.v);
         }
         break;
@@ -384,8 +384,7 @@ void StyledText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
                 char_rect.offset(corner.h, corner.v);
                 pix->view(char_rect).fill(ch.back_color);
             }
-            String str(1, ch.character);
-            _font->draw(Point(corner.h, corner.v + char_adjust), str, ch.fore_color, pix, bounds);
+            _font->draw(Point(corner.h, corner.v + char_adjust), ch.character, ch.fore_color, pix);
         }
         break;
 

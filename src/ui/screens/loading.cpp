@@ -31,12 +31,11 @@
 namespace antares {
 
 static const int16_t kLevelNameID = 4600;
-static const int16_t kLoadingScreenResID = 6001;
 static const uint8_t kLoadingScreenColor = PALE_GREEN;
 static const int64_t kTypingDelay = 16667;
 
 LoadingScreen::LoadingScreen(const Scenario* scenario, bool* cancelled):
-        InterfaceScreen(kLoadingScreenResID, world, true),
+        InterfaceScreen("loading", world, true),
         _state(TYPING),
         _scenario(scenario),
         _cancelled(cancelled),
@@ -109,15 +108,13 @@ void LoadingScreen::fire_timer() {
     }
 }
 
-void LoadingScreen::handle_button(int button) {
+void LoadingScreen::handle_button(Button& button) {
 }
 
-void LoadingScreen::draw() const {
-    InterfaceScreen::draw();
-
+void LoadingScreen::overlay() const {
     Rect above_content(0, 0, 640, 480);
     above_content.center_in(world);
-    above_content.bottom = item(0).bounds.top;
+    above_content.bottom = item(0).bounds().top;
     Rect bounds(0, 0, _name_text->auto_width(), _name_text->height());
     bounds.center_in(above_content);
 
@@ -130,7 +127,7 @@ void LoadingScreen::draw() const {
 
     const RgbColor& light = GetRGBTranslateColorShade(kLoadingScreenColor, LIGHT);
     const RgbColor& dark = GetRGBTranslateColorShade(kLoadingScreenColor, DARK);
-    Rect bar = item(0).bounds;
+    Rect bar = item(0).bounds();
     VideoDriver::driver()->fill_rect(bar, dark);
     bar.right = bar.left + (bar.width() * _current / _max);
     VideoDriver::driver()->fill_rect(bar, light);

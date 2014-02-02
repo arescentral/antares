@@ -28,6 +28,7 @@ struct Version {
     std::vector<int> components;
 };
 void print_to(sfz::PrintTarget out, const Version& v);
+Version u32_to_version(uint32_t in);
 
 class ScenarioList {
   public:
@@ -45,7 +46,7 @@ class ScenarioList {
     const Entry& at(size_t index) const;
 
   private:
-    std::vector<sfz::linked_ptr<Entry> > _scenarios;
+    std::vector<Entry> _scenarios;
 
     DISALLOW_COPY_AND_ASSIGN(ScenarioList);
 };

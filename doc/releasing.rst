@@ -4,15 +4,15 @@ Releasing Antares
 Starting a release
 ------------------
 
-1.  Branch ``release/$VERSION`` from ``develop``, or ``hotfix/$VERSION`` from ``master``.
-2.  Update ``VERSION`` in ``wscript`` to ``${VERSION}rc1``.
+1.  Run ``./scripts/release start $VERSION``.
+2.  Run ``./waf dist``.
 
 Finishing a release
 -------------------
 
-1.  Update ``VERSION in ``wscript`` to ``$VERSION``.
-2.  Update link in ``README``.
-3.  Tag the release.
+1.  Run ``./scripts/release finish $VERSION``.
+2.  Run ``./waf dist``.
+3.  Publish the release.
 
 Places to update
 ----------------

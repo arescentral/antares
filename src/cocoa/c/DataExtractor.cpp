@@ -25,7 +25,8 @@
 using sfz::CString;
 using sfz::String;
 using sfz::StringSlice;
-using sfz::scoped_ptr;
+using std::unique_ptr;
+
 namespace utf8 = sfz::utf8;
 
 struct AntaresDataExtractor {

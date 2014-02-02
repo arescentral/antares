@@ -59,15 +59,14 @@ using sfz::ReadSource;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::read;
-using sfz::scoped_array;
-using sfz::scoped_ptr;
 using std::make_pair;
 using std::max;
 using std::min;
 using std::pair;
+using std::unique_ptr;
 using std::vector;
 
-namespace macroman = sfz::macroman;
+namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -75,16 +74,6 @@ namespace {
 
 const int32_t kTargetScreenWidth = 640;
 const int32_t kTargetScreenHeight = 480;
-
-inline void mPlayButtonDown() {
-    PlayVolumeSound(kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
-}
-inline void mPlayButtonUp() {
-    PlayVolumeSound(kComputerBeep2, kMediumLowVolume, kShortPersistence, kMustPlaySound);
-}
-inline void mPlayScreenSound() {
-    PlayVolumeSound(kComputerBeep3, kMediumLowVolume, kShortPersistence, kVeryLowPrioritySound);
-}
 
 const int32_t kMissionDataWidth         = 200;
 const int32_t kMissionDataVBuffer       = 40;
@@ -141,7 +130,7 @@ int find_replace(String& data, int pos, const StringSlice& search, const PrintIt
 
 }  // namespace
 
-void CreateWeaponDataText(sfz::String* text, long whichWeapon, const sfz::StringSlice& weaponName);
+void CreateWeaponDataText(sfz::String* text, int32_t whichWeapon, const sfz::StringSlice& weaponName);
 
 //
 // BothCommandAndQ:
@@ -156,16 +145,16 @@ bool BothCommandAndQ() {
     for (int i = 0; i < kKeyExtendedControlNum; i++) {
         uint32_t key = Preferences::preferences()->key(i);
         q |= (key == Keys::Q);
-        command |= (key == Keys::COMMAND);
+        command |= (key == Keys::L_COMMAND);
     }
 
     return command && q;
 }
 
 void update_mission_brief_point(
-        interfaceItemType *dataItem, long whichBriefPoint, const Scenario* scenario,
-        coordPointType *corner, long scale, Rect *bounds, vector<inlinePictType>& inlinePict,
-        Rect& highlight_rect, vector<pair<Point, Point> >& lines, String& text) {
+        LabeledRect *dataItem, int32_t whichBriefPoint, const Scenario* scenario,
+        coordPointType *corner, int32_t scale, Rect *bounds, vector<inlinePictType>& inlinePict,
+        Rect& highlight_rect, vector<pair<Point, Point>>& lines, String& text) {
     if (whichBriefPoint < kMissionBriefPointOffset) {
         // No longer handled here.
         return;
@@ -174,49 +163,50 @@ void update_mission_brief_point(
     whichBriefPoint -= kMissionBriefPointOffset;
 
     Rect hiliteBounds;
-    long            headerID, headerNumber, contentID;
+    int32_t         headerID, headerNumber, contentID;
     BriefPoint_Data_Get(whichBriefPoint, scenario, &headerID, &headerNumber, &contentID,
             &hiliteBounds, corner, scale, 16, 32, bounds);
     hiliteBounds.offset(bounds->left, bounds->top);
 
     // TODO(sfiera): catch exception.
     Resource rsrc("text", "txt", contentID);
-    text.assign(macroman::decode(rsrc.data()));
-    short textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
+    text.assign(utf8::decode(rsrc.data()));
+    int16_t textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
     if (hiliteBounds.left == hiliteBounds.right) {
-        dataItem->bounds.left = (bounds->right - bounds->left) / 2 - (kMissionDataWidth / 2) + bounds->left;
-        dataItem->bounds.right = dataItem->bounds.left + kMissionDataWidth;
-        dataItem->bounds.top = (bounds->bottom - bounds->top) / 2 - (textHeight / 2) + bounds->top;
-        dataItem->bounds.bottom = dataItem->bounds.top + textHeight;
+        dataItem->bounds().left = (bounds->right - bounds->left) / 2 - (kMissionDataWidth / 2) + bounds->left;
+        dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
+        dataItem->bounds().top = (bounds->bottom - bounds->top) / 2 - (textHeight / 2) + bounds->top;
+        dataItem->bounds().bottom = dataItem->bounds().top + textHeight;
+        highlight_rect = Rect();
     } else {
         if ((hiliteBounds.left + (hiliteBounds.right - hiliteBounds.left) / 2) >
                 (bounds->left + (bounds->right - bounds->left) / 2)) {
-            dataItem->bounds.right = hiliteBounds.left - kMissionDataHBuffer;
-            dataItem->bounds.left = dataItem->bounds.right - kMissionDataWidth;
+            dataItem->bounds().right = hiliteBounds.left - kMissionDataHBuffer;
+            dataItem->bounds().left = dataItem->bounds().right - kMissionDataWidth;
         } else {
-            dataItem->bounds.left = hiliteBounds.right + kMissionDataHBuffer;
-            dataItem->bounds.right = dataItem->bounds.left + kMissionDataWidth;
+            dataItem->bounds().left = hiliteBounds.right + kMissionDataHBuffer;
+            dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
         }
 
-        dataItem->bounds.top = hiliteBounds.top + (hiliteBounds.bottom - hiliteBounds.top) / 2 -
+        dataItem->bounds().top = hiliteBounds.top + (hiliteBounds.bottom - hiliteBounds.top) / 2 -
                                 textHeight / 2;
-        dataItem->bounds.bottom = dataItem->bounds.top + textHeight;
-        if (dataItem->bounds.top < (bounds->top + kMissionDataTopBuffer)) {
-            dataItem->bounds.top = bounds->top + kMissionDataTopBuffer;
-            dataItem->bounds.bottom = dataItem->bounds.top + textHeight;
+        dataItem->bounds().bottom = dataItem->bounds().top + textHeight;
+        if (dataItem->bounds().top < (bounds->top + kMissionDataTopBuffer)) {
+            dataItem->bounds().top = bounds->top + kMissionDataTopBuffer;
+            dataItem->bounds().bottom = dataItem->bounds().top + textHeight;
         }
-        if (dataItem->bounds.bottom > (bounds->bottom - kMissionDataBottomBuffer)) {
-            dataItem->bounds.bottom = bounds->bottom - kMissionDataBottomBuffer;
-            dataItem->bounds.top = dataItem->bounds.bottom - textHeight;
+        if (dataItem->bounds().bottom > (bounds->bottom - kMissionDataBottomBuffer)) {
+            dataItem->bounds().bottom = bounds->bottom - kMissionDataBottomBuffer;
+            dataItem->bounds().top = dataItem->bounds().bottom - textHeight;
         }
 
-        if (dataItem->bounds.left < (bounds->left + kMissionDataVBuffer)) {
-            dataItem->bounds.left = bounds->left + kMissionDataVBuffer;
-            dataItem->bounds.right = dataItem->bounds.left + kMissionDataWidth;
+        if (dataItem->bounds().left < (bounds->left + kMissionDataVBuffer)) {
+            dataItem->bounds().left = bounds->left + kMissionDataVBuffer;
+            dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
         }
-        if (dataItem->bounds.right > (bounds->right - kMissionDataVBuffer)) {
-            dataItem->bounds.right = bounds->right - kMissionDataVBuffer;
-            dataItem->bounds.left = dataItem->bounds.right - kMissionDataWidth;
+        if (dataItem->bounds().right > (bounds->right - kMissionDataVBuffer)) {
+            dataItem->bounds().right = bounds->right - kMissionDataVBuffer;
+            dataItem->bounds().left = dataItem->bounds().right - kMissionDataWidth;
         }
 
         hiliteBounds.right++;
@@ -225,7 +215,7 @@ void update_mission_brief_point(
         Rect newRect;
         GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
         lines.clear();
-        if (dataItem->bounds.right < hiliteBounds.left) {
+        if (dataItem->bounds().right < hiliteBounds.left) {
             Point p1(hiliteBounds.left, hiliteBounds.top);
             Point p2(newRect.right + kMissionLineHJog, hiliteBounds.top);
             Point p3(newRect.right + kMissionLineHJog, newRect.top);
@@ -259,18 +249,17 @@ void update_mission_brief_point(
             lines.push_back(make_pair(p7, p8));
         }
     }
-    dataItem->item.labeledRect.label.stringID = headerID;
-    dataItem->item.labeledRect.label.stringNumber = headerNumber;
+    dataItem->label.assign(StringList(headerID).at(headerNumber - 1));
     Rect newRect;
     GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
-    populate_inline_picts(dataItem->bounds, text, dataItem->style, inlinePict);
+    populate_inline_picts(dataItem->bounds(), text, dataItem->style, inlinePict);
 }
 
-void CreateObjectDataText(String* text, short id) {
+void CreateObjectDataText(String* text, int16_t id) {
     Resource rsrc("text", "txt", kShipDataTextID);
-    String data(macroman::decode(rsrc.data()));
+    String data(utf8::decode(rsrc.data()));
 
-    const baseObjectType& baseObject = gBaseObjectData.get()[id];
+    const baseObjectType& baseObject = *mGetBaseObjectPtr(id);
 
     StringList keys(kShipDataKeyStringID);
     StringList values(kShipDataNameID);
@@ -287,8 +276,7 @@ void CreateObjectDataText(String* text, short id) {
 
     // ship name
     {
-        StringList names(5000);
-        const StringSlice& name = names.at(id);
+        const StringSlice& name = get_object_name(id);
         find_replace(data, 0, keys.at(kShipTypeStringNum), name);
     }
 
@@ -319,9 +307,9 @@ void CreateObjectDataText(String* text, short id) {
     print(*text, data);
 }
 
-void CreateWeaponDataText(String* text, long whichWeapon, const StringSlice& weaponName) {
+void CreateWeaponDataText(String* text, int32_t whichWeapon, const StringSlice& weaponName) {
     baseObjectType      *weaponObject, *missileObject;
-    long                mostDamage, actionNum;
+    int32_t             mostDamage, actionNum;
     objectActionType    *action;
     bool             isGuided = false;
 
@@ -329,11 +317,11 @@ void CreateWeaponDataText(String* text, long whichWeapon, const StringSlice& wea
         return;
     }
 
-    weaponObject = gBaseObjectData.get() + whichWeapon;
+    weaponObject = mGetBaseObjectPtr(whichWeapon);
 
     // TODO(sfiera): catch exception.
     Resource rsrc("text", "txt", kWeaponDataTextID);
-    String data(macroman::decode(rsrc.data()));
+    String data(utf8::decode(rsrc.data()));
     // damage; this is tricky--we have to guess by walking through activate actions,
     //  and for all the createObject actions, see which creates the most damaging
     //  object.  We calc this first so we can use isGuided
@@ -342,13 +330,12 @@ void CreateWeaponDataText(String* text, long whichWeapon, const StringSlice& wea
     isGuided = false;
     if ( weaponObject->activateActionNum > 0)
     {
-        action = gObjectActionData.get() + weaponObject->activateAction;
+        action = mGetObjectActionPtr(weaponObject->activateAction);
         for ( actionNum = 0; actionNum < weaponObject->activateActionNum; actionNum++)
         {
             if (( action->verb == kCreateObject) || ( action->verb == kCreateObjectSetDest))
             {
-                missileObject = gBaseObjectData.get() +
-                    action->argument.createObject.whichBaseType;
+                missileObject = mGetBaseObjectPtr(action->argument.createObject.whichBaseType);
                 if ( missileObject->attributes & kIsGuided) isGuided = true;
                 if ( missileObject->damage > mostDamage) mostDamage = missileObject->damage;
             }
@@ -364,8 +351,7 @@ void CreateWeaponDataText(String* text, long whichWeapon, const StringSlice& wea
 
     // weapon name
     {
-        StringList names(5000);
-        const StringSlice& name = names.at(whichWeapon);
+        const StringSlice& name = get_object_name(whichWeapon);
         find_replace(data, 0, keys.at(kWeaponNameStringNum), name);
     }
 
@@ -399,7 +385,7 @@ void CreateWeaponDataText(String* text, long whichWeapon, const StringSlice& wea
     print(*text, data);
 }
 
-void Replace_KeyCode_Strings_With_Actual_Key_Names(String* text, short resID, size_t padTo) {
+void Replace_KeyCode_Strings_With_Actual_Key_Names(String* text, int16_t resID, size_t padTo) {
     StringList keys(kHelpScreenKeyStringID);
     StringList values(resID);
 

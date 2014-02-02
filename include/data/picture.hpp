@@ -29,6 +29,7 @@ namespace antares {
 class Picture : public ArrayPixMap {
   public:
     Picture(int32_t id);
+    Picture(sfz::StringSlice resource);
 
   private:
     DISALLOW_COPY_AND_ASSIGN(Picture);

@@ -33,11 +33,9 @@ using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
 using sfz::quote;
-using sfz::scoped_ptr;
-using std::min;
 using std::max;
-
-namespace macroman = sfz::macroman;
+using std::min;
+using std::unique_ptr;
 
 namespace antares {
 
@@ -51,26 +49,39 @@ const int32_t kLabelTotalInnerSpace = kLabelInnerSpace << 1;
 
 }  // namespace
 
+struct Labels::screenLabelType {
+    Point               where;
+    Point               offset;
+    Rect                thisRect;
+    int32_t             width;
+    int32_t             height;
+    int32_t             age;
+    sfz::String         text;
+    uint8_t             color;
+    bool                active;
+    bool                killMe;
+    bool                visible;
+    int32_t             whichObject;
+    spaceObjectType*    object;
+    bool                objectLink;     // true if label requires an object to be seen
+    int32_t             lineNum;
+    int32_t             lineHeight;
+    bool                keepOnScreenAnyway; // if not attached to object, keep on screen if it's off
+    bool                attachedHintLine;
+    Point               attachedToWhere;
+    int32_t             retroCount;
+
+    screenLabelType();
+};
+
 // local function prototypes
-static long String_Count_Lines(const StringSlice& s);
-static StringSlice String_Get_Nth_Line(const StringSlice& source, long nth);
+static int32_t String_Count_Lines(const StringSlice& s);
+static StringSlice String_Get_Nth_Line(const StringSlice& source, int32_t nth);
 static void Auto_Animate_Line( Point *source, Point *dest);
 
-void ScreenLabelInit() {
-    globals()->gScreenLabelData.reset(new screenLabelType[kMaxLabelNum]);
-}
+Labels::screenLabelType* Labels::data = nullptr;
 
-void ResetAllLabels() {
-    for (int i = 0; i < kMaxLabelNum; ++i) {
-        zero(globals()->gScreenLabelData[i]);
-    }
-}
-
-screenLabelType::screenLabelType() {
-    zero(*this);
-}
-
-void zero(screenLabelType& label) {
+void Labels::zero(Labels::screenLabelType& label) {
     label.thisRect = Rect(0, 0, -1, -1);
     label.text.clear();
     label.active = false;
@@ -86,21 +97,35 @@ void zero(screenLabelType& label) {
     label.retroCount = -1;
 }
 
-short AddScreenLabel(
-        short h, short v, short hoff, short voff, spaceObjectType* object, bool objectLink,
-        unsigned char color) {
+void Labels::init() {
+    data = new screenLabelType[kMaxLabelNum];
+}
+
+void Labels::reset() {
+    for (int i = 0; i < kMaxLabelNum; ++i) {
+        zero(data[i]);
+    }
+}
+
+Labels::screenLabelType::screenLabelType() {
+    zero(*this);
+}
+
+int16_t Labels::add(
+        int16_t h, int16_t v, int16_t hoff, int16_t voff, spaceObjectType* object, bool objectLink,
+        uint8_t color) {
     screenLabelType* label = NULL;
 
     for (int i = 0; i < kMaxLabelNum; ++i) {
-        if (!globals()->gScreenLabelData[i].active) {
-            label = globals()->gScreenLabelData.get() + i;
+        if (!data[i].active) {
+            label = data + i;
             break;
         }
     }
     if (label == NULL) {
         return -1;  // no free label
     }
-    int label_num = label - globals()->gScreenLabelData.get();
+    int label_num = label - data;
 
     label->active = true;
     label->killMe = false;
@@ -127,8 +152,8 @@ short AddScreenLabel(
     return label_num;
 }
 
-void RemoveScreenLabel(long which) {
-    screenLabelType *label = globals()->gScreenLabelData.get() + which;
+void Labels::remove(int32_t which) {
+    screenLabelType *label = data + which;
     label->thisRect = Rect(0, 0, -1, -1);
     label->text.clear();
     label->active = false;
@@ -137,9 +162,9 @@ void RemoveScreenLabel(long which) {
     label->width = label->height = label->lineNum = label->lineHeight = 0;
 }
 
-void draw_labels() {
+void Labels::draw() {
     for (int i = 0; i < kMaxLabelNum; ++i) {
-        screenLabelType* const label = globals()->gScreenLabelData.get() + i;
+        screenLabelType* const label = data + i;
 
         // We anchor the image at the corner of the rect instead of label->where.  In some cases,
         // label->where is changed between update_all_label_contents() and draw time, but the rect
@@ -181,10 +206,10 @@ void draw_labels() {
     }
 }
 
-void update_all_label_contents(int32_t units_done) {
+void Labels::update_contents(int32_t units_done) {
     Rect clip = viewport;
     for (int i = 0; i < kMaxLabelNum; ++i) {
-        screenLabelType* const label = globals()->gScreenLabelData.get() + i;
+        screenLabelType* const label = data + i;
         if (!label->active || label->killMe || (label->text.empty()) || !label->visible) {
             label->thisRect.left = label->thisRect.right = 0;
             continue;
@@ -212,9 +237,9 @@ void update_all_label_contents(int32_t units_done) {
     }
 }
 
-void ShowAllLabels() {
+void Labels::show_all() {
     for (int i = 0; i < kMaxLabelNum; i++) {
-        screenLabelType *label = globals()->gScreenLabelData.get() + i;
+        screenLabelType *label = data + i;
         if (label->active && label->visible) {
             if (label->killMe) {
                 label->active = false;
@@ -223,19 +248,19 @@ void ShowAllLabels() {
     }
 }
 
-void SetScreenLabelPosition(long which, short h, short v) {
-    screenLabelType *label = globals()->gScreenLabelData.get() + which;
+void Labels::set_position(int32_t which, int16_t h, int16_t v) {
+    screenLabelType *label = data + which;
     label->where = label->offset;
     label->where.offset(h, v);
 }
 
-void update_all_label_positions(int32_t units_done) {
+void Labels::update_positions(int32_t units_done) {
     const Rect label_limits(
             viewport.left + kLabelBuffer, viewport.top + kLabelBuffer,
             viewport.right - kLabelBuffer, viewport.bottom - kLabelBuffer);
 
     for (int i = 0; i < kMaxLabelNum; i++) {
-        screenLabelType *label = globals()->gScreenLabelData.get() + i;
+        screenLabelType *label = data + i;
         bool isOffScreen = false;
         if ((label->active) && (!label->killMe)) {
             if ((label->object != NULL) && (label->object->sprite != NULL)) {
@@ -272,7 +297,7 @@ void update_all_label_positions(int32_t units_done) {
                     if (!label->keepOnScreenAnyway) {
                         if (isOffScreen) {
                             if (label->age == 0) {
-                                label->age = -kLabelOffVisibleTime;
+                                label->age = -kVisibleTime;
                             }
                         } else if (label->age < 0) {
                             label->age = 0;
@@ -290,12 +315,12 @@ void update_all_label_positions(int32_t units_done) {
                             source.v = label->where.v + label->height + 2;
                         }
                         Auto_Animate_Line(&source, &dest);
-                        ShowHintLine(source, dest, label->color, DARK);
+                        HintLine::show(source, dest, label->color, DARK);
                     }
                 } else {
-                    SetScreenLabelString(i, "");
+                    Labels::set_string(i, "");
                     if (label->attachedHintLine) {
-                        HideHintLine();
+                        HintLine::hide();
                     }
                 }
             } else if (label->keepOnScreenAnyway) {
@@ -314,7 +339,7 @@ void update_all_label_positions(int32_t units_done) {
                         source.h = label->where.h + label->width + 2;
                     }
                     Auto_Animate_Line(&source, &dest);
-                    ShowHintLine(source, dest, label->color, VERY_LIGHT);
+                    HintLine::show(source, dest, label->color, VERY_LIGHT);
                 }
             }
             if (label->age > 0) {
@@ -325,7 +350,7 @@ void update_all_label_positions(int32_t units_done) {
                     label->object = NULL;
                     label->text.clear();
                     if (label->attachedHintLine) {
-                        HideHintLine();
+                        HintLine::hide();
                     }
                 }
             } else if (label->age < 0) {
@@ -339,8 +364,8 @@ void update_all_label_positions(int32_t units_done) {
     }
 }
 
-void SetScreenLabelObject(long which, spaceObjectType *object) {
-    screenLabelType *label = globals()->gScreenLabelData.get() + which;
+void Labels::set_object(int32_t which, spaceObjectType *object) {
+    screenLabelType *label = data + which;
     label->object = object;
 
     if (label->object != NULL) {
@@ -354,64 +379,64 @@ void SetScreenLabelObject(long which, spaceObjectType *object) {
     }
 }
 
-void SetScreenLabelAge(long which, long age) {
-    screenLabelType *label = globals()->gScreenLabelData.get() + which;
+void Labels::set_age(int32_t which, int32_t age) {
+    screenLabelType *label = data + which;
     label->age = age;
     label->visible = true;
 }
 
-void SetScreenLabelString(long which, const StringSlice& string) {
-    screenLabelType *label = globals()->gScreenLabelData.get() + which;
+void Labels::set_string(int32_t which, const StringSlice& string) {
+    screenLabelType *label = data + which;
     label->text.assign(string);
-    RecalcScreenLabelSize( which);
+    Labels::recalc_size( which);
 }
 
-void ClearScreenLabelString(long which) {
-    screenLabelType *label = globals()->gScreenLabelData.get() + which;
+void Labels::clear_string(int32_t which) {
+    screenLabelType *label = data + which;
     label->text.clear();
     label->width = label->height = 0;
 }
 
-void SetScreenLabelColor(long which, unsigned char color) {
-    screenLabelType *label = globals()->gScreenLabelData.get() + which;
+void Labels::set_color(int32_t which, uint8_t color) {
+    screenLabelType *label = data + which;
     label->color = color;
 }
 
-void SetScreenLabelKeepOnScreenAnyway(long which, bool keepOnScreenAnyway) {
-    screenLabelType *label = globals()->gScreenLabelData.get() + which;
+void Labels::set_keep_on_screen_anyway(int32_t which, bool keepOnScreenAnyway) {
+    screenLabelType *label = data + which;
     label->keepOnScreenAnyway = keepOnScreenAnyway;
     label->retroCount = 0;
 }
 
-void SetScreenLabelAttachedHintLine(long which, bool attachedHintLine, Point toWhere) {
-    screenLabelType *label = globals()->gScreenLabelData.get() + which;
+void Labels::set_attached_hint_line(int32_t which, bool attachedHintLine, Point toWhere) {
+    screenLabelType *label = data + which;
     if (label->attachedHintLine) {
-        HideHintLine();
+        HintLine::hide();
     }
     label->attachedHintLine = attachedHintLine;
     label->attachedToWhere = toWhere;
     label->retroCount = 0;
 }
 
-void SetScreenLabelOffset(long which, long hoff, long voff) {
-    screenLabelType *label = globals()->gScreenLabelData.get() + which;
+void Labels::set_offset(int32_t which, int32_t hoff, int32_t voff) {
+    screenLabelType *label = data + which;
     label->offset.h = hoff;
     label->offset.v = voff;
 }
 
-long GetScreenLabelWidth(long which) {
-    screenLabelType *label = globals()->gScreenLabelData.get() + which;
+int32_t Labels::get_width(int32_t which) {
+    screenLabelType *label = data + which;
     return label->width;
 }
 
-String* GetScreenLabelStringPtr( long which) {
-    screenLabelType *label = globals()->gScreenLabelData.get() + which;
+String* Labels::get_string( int32_t which) {
+    screenLabelType *label = data + which;
     return &label->text;
 }
 
 // do this if you mess with its string
-void RecalcScreenLabelSize(long which) {
-    screenLabelType *label = globals()->gScreenLabelData.get() + which;
+void Labels::recalc_size(int32_t which) {
+    screenLabelType *label = data + which;
     int lineNum = String_Count_Lines(label->text);
 
     if (lineNum > 1) {
@@ -435,16 +460,16 @@ void RecalcScreenLabelSize(long which) {
     }
 }
 
-static long String_Count_Lines(const StringSlice& s) {
-    static const Rune kCarriageReturn = '\r';
+static int32_t String_Count_Lines(const StringSlice& s) {
+    static const Rune kCarriageReturn = '\n';
     return 1 + std::count(s.begin(), s.end(), kCarriageReturn);
 }
 
-static StringSlice String_Get_Nth_Line(const StringSlice& source, long nth) {
+static StringSlice String_Get_Nth_Line(const StringSlice& source, int32_t nth) {
     if (nth < 1) {
         return StringSlice();
     }
-    const StringSlice::size_type carriage_return = source.find('\r');
+    const StringSlice::size_type carriage_return = source.find('\n');
     if (carriage_return == StringSlice::npos) {
         if (nth == 1) {
             return source;

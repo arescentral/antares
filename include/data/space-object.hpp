@@ -24,6 +24,7 @@
 #include "game/beam.hpp"
 #include "game/globals.hpp"
 #include "math/fixed.hpp"
+#include "math/random.hpp"
 #include "sound/fx.hpp"
 
 namespace antares {
@@ -56,9 +57,6 @@ const int32_t kLiteralClass             = 10000;
 const int32_t kHitStateMax              = 128;
 const int32_t kCloakOnStateMax          = 254;
 const int32_t kCloakOffStateMax         = -252;
-
-const int16_t kSpaceObjectNameResID         = 5000;
-const int16_t kSpaceObjectShortNameResID    = 5001;
 
 const int32_t kEngageRange              = 1048576;  // range at which to engage closest ship
                                                     // about 2 subsectors (512 * 2)^2
@@ -223,7 +221,6 @@ const uint32_t kDestroyActionNotMask        = 0x7fffffff;
 const uint32_t kDestroyActionDontDieFlag    = 0x80000000;
 
 struct spaceObjectType;
-typedef spaceObjectType *spaceObjectTypePtr;
 
 enum objectVerbIDEnum {
     kNoAction = 0,
@@ -450,7 +447,7 @@ struct objectActionType {
     uint32_t                    exclusiveFilter;        // don't execute if it has ANY of these
     int16_t                     owner;                  // 0 no matter, 1 same owner, -1 different owner
     uint32_t                    delay;
-//  unsigned long               reserved1;
+//  uint32_t                    reserved1;
     int16_t                     initialSubjectOverride;
     int16_t                     initialDirectOverride;
     uint32_t                    reserved2;
@@ -565,8 +562,8 @@ struct baseObjectType {
 
     Fixed                   friendDefecit;
     Fixed                   dangerThreshold;
-//  long                    pulseDirection;             // direction relative to shooter
-//  long                    beamDirection;              // direction relative to shooter
+//  int32_t                 pulseDirection;             // direction relative to shooter
+//  int32_t                 beamDirection;              // direction relative to shooter
     int32_t                 specialDirection;           // direction relative to shooter
 
     int32_t                 arriveActionDistance;               // distance^2 at which arrive action is triggered on dest
@@ -590,7 +587,7 @@ struct baseObjectType {
     uint32_t            orderFlags;
     Fixed               buildRatio;
     uint32_t            buildTime;
-//  long                reserved1;
+//  int32_t             reserved1;
     uint8_t             skillNum;
     uint8_t             skillDen;
     uint8_t             skillNumAdj;
@@ -616,43 +613,43 @@ enum dutyType {
 
 
 struct spaceObjectType {
-    unsigned long           attributes;
+    uint32_t                attributes;
     baseObjectType          *baseType;
-    long                    whichBaseObject;
-    long                    entryNumber;            // major hack?
+    int32_t                 whichBaseObject;
+    int32_t                 entryNumber;            // major hack?
 
-    unsigned long           keysDown;
+    uint32_t                keysDown;
 
-    long                    tinySize;
+    int32_t                 tinySize;
     RgbColor                tinyColor;
 
-    long                    direction;
-    long                    directionGoal;
+    int32_t                 direction;
+    int32_t                 directionGoal;
     Fixed                   turnVelocity;
     Fixed                   turnFraction;
 
-    long                    offlineTime;
+    int32_t                 offlineTime;
 
     coordPointType          location;
     coordPointType          lastLocation;
-    long                    lastDir;
-    spaceObjectTypePtr      collideObject;
+    int32_t                 lastDir;
+    spaceObjectType*        collideObject;
     Point                   collisionGrid;
-    spaceObjectTypePtr      nextNearObject;
+    spaceObjectType*        nextNearObject;
     Point                   distanceGrid;
-    spaceObjectTypePtr      nextFarObject;
-    spaceObjectTypePtr      previousObject;
-    long                    previousObjectNumber;
-    spaceObjectTypePtr      nextObject;
-    long                    nextObjectNumber;
+    spaceObjectType*        nextFarObject;
+    spaceObjectType*        previousObject;
+    int32_t                 previousObjectNumber;
+    spaceObjectType*        nextObject;
+    int32_t                 nextObjectNumber;
 
-    long                    runTimeFlags;       // distance from origin to destination
+    int32_t                 runTimeFlags;       // distance from origin to destination
     coordPointType          destinationLocation;// coords of our destination ( or kNoDestination)
-    long                    destinationObject;  // which object?  or kNoDestinationObject -- or, if we're a dest, our corresponding destBalance for AI
-    spaceObjectTypePtr      destObjectPtr;      // ptr to destination object
-    long                    destObjectDest;     // # of our destination's destination in case it dies
-    long                    destObjectID;       // ID of our dest object
-    long                    destObjectDestID;   // id of our dest's destination
+    int32_t                 destinationObject;  // which object?  or kNoDestinationObject -- or, if we're a dest, our corresponding destBalance for AI
+    spaceObjectType*        destObjectPtr;      // ptr to destination object
+    int32_t                 destObjectDest;     // # of our destination's destination in case it dies
+    int32_t                 destObjectID;       // ID of our dest object
+    int32_t                 destObjectDestID;   // id of our dest's destination
 
     Fixed                   localFriendStrength;
     Fixed                   localFoeStrength;
@@ -662,9 +659,9 @@ struct spaceObjectType {
 
     Fixed                   bestConsideredTargetValue;
     Fixed                   currentTargetValue;
-    long                    bestConsideredTargetNumber;
+    int32_t                 bestConsideredTargetNumber;
 
-    long                    timeFromOrigin;     // time it's been since we left
+    int32_t                 timeFromOrigin;     // time it's been since we left
     fixedPointType          idealLocationCalc;  // calced when we got origin
     coordPointType          originLocation;     // coords of our origin
 
@@ -675,21 +672,21 @@ struct spaceObjectType {
     Point                   scaledCornerOffset;
     Point                   scaledSize;
     Rect                absoluteBounds;
-    int32_t                 randomSeed;
+    Random                  randomSeed;
 
     union
     {
 //      struct
 //      {
-            long                directionGoal;
+            int32_t             directionGoal;
             Fixed               turnVelocity;
             Fixed               turnFraction;
 //      } rotation;
         struct
         {
-            long                thisShape;
+            int32_t             thisShape;
             Fixed               frameFraction;
-            long                frameDirection;
+            int32_t             frameDirection;
             Fixed               frameSpeed;
         } animation;
         struct
@@ -699,72 +696,72 @@ struct spaceObjectType {
         } beam;
     } frame;
 
-    long                    health;
-    long                    energy;
-    long                    battery;
-    long                    owner;
-    long                    age;
-    long                    naturalScale;
-    long                    id;
-    short                   rechargeTime;
-    short                   pulseCharge;
-    short                   beamCharge;
-    short                   specialCharge;
-    short                   active;
+    int32_t                 health;
+    int32_t                 energy;
+    int32_t                 battery;
+    int32_t                 owner;
+    int32_t                 age;
+    int32_t                 naturalScale;
+    int32_t                 id;
+    int16_t                 rechargeTime;
+    int16_t                 pulseCharge;
+    int16_t                 beamCharge;
+    int16_t                 specialCharge;
+    int16_t                 active;
 
-    long                    warpEnergyCollected;
+    int32_t                 warpEnergyCollected;
 
-    short                   layer;
+    int16_t                 layer;
     spriteType              *sprite;
-    long                    whichSprite;
+    int32_t                 whichSprite;
 
     uint64_t                distanceFromPlayer;
-    unsigned long           closestDistance;
-    long                    closestObject;
-    long                    targetObjectNumber;
-    long                    targetObjectID;
-    long                    targetAngle;
-    long                    lastTarget;
-    long                    lastTargetDistance;
-    long                    longestWeaponRange;
-    long                    shortestWeaponRange;
-    long                    engageRange;            // either longestWeaponRange or kEngageRange
+    uint32_t                closestDistance;
+    int32_t                 closestObject;
+    int32_t                 targetObjectNumber;
+    int32_t                 targetObjectID;
+    int32_t                 targetAngle;
+    int32_t                 lastTarget;
+    int32_t                 lastTargetDistance;
+    int32_t                 longestWeaponRange;
+    int32_t                 shortestWeaponRange;
+    int32_t                 engageRange;            // either longestWeaponRange or kEngageRange
 
     kPresenceStateType      presenceState;
-    long                    presenceData;
+    int32_t                 presenceData;
 
-    long                    hitState;
-    long                    cloakState;
+    int32_t                 hitState;
+    int32_t                 cloakState;
     dutyType                duty;
     int                     pixResID;
 
     baseObjectType          *pulseBase;
-    long                    pulseType;
-    long                    pulseTime;
-    long                    pulseAmmo;
-    long                    pulsePosition;
+    int32_t                 pulseType;
+    int32_t                 pulseTime;
+    int32_t                 pulseAmmo;
+    int32_t                 pulsePosition;
 
     baseObjectType          *beamBase;
-    long                    beamType;
-    long                    beamTime;
-    long                    beamAmmo;
-    long                    beamPosition;
+    int32_t                 beamType;
+    int32_t                 beamTime;
+    int32_t                 beamAmmo;
+    int32_t                 beamPosition;
 
     baseObjectType          *specialBase;
-    long                    specialType;
-    long                    specialTime;
-    long                    specialAmmo;
-    long                    specialPosition;
+    int32_t                 specialType;
+    int32_t                 specialTime;
+    int32_t                 specialAmmo;
+    int32_t                 specialPosition;
 
-    long                    periodicTime;
-    long                    whichLabel;
+    int32_t                 periodicTime;
+    int32_t                 whichLabel;
 
-    unsigned long           myPlayerFlag;
-    unsigned long           seenByPlayerFlags;
-    unsigned long           hostileTowardsFlags;
+    uint32_t                myPlayerFlag;
+    uint32_t                seenByPlayerFlags;
+    uint32_t                hostileTowardsFlags;
 
-    unsigned char           shieldColor;
-    unsigned char           originalColor;
+    uint8_t                 shieldColor;
+    uint8_t                 originalColor;
 };
 
 }  // namespace antares

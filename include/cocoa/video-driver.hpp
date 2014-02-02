@@ -40,6 +40,7 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     virtual bool button(int which);
     virtual Point get_mouse();
     virtual void get_keys(KeyMap* k);
+    virtual InputMode input_mode() const;
 
     virtual int ticks() const;
     virtual int usecs() const;
@@ -48,11 +49,10 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     void loop(Card* initial);
 
   private:
-    bool wait_next_event(int64_t until, sfz::scoped_ptr<Event>& event);
-    void enqueue_events(int64_t until);
-
     const bool _fullscreen;
     int64_t _start_time;
+
+    struct EventBridge;
 
     class EventTranslator {
       public:
@@ -67,7 +67,6 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     EventTranslator _translator;
 
     EventTracker _event_tracker;
-    std::queue<Event*> _event_queue;
 
     DISALLOW_COPY_AND_ASSIGN(CocoaVideoDriver);
 };

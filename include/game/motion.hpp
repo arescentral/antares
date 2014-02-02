@@ -26,24 +26,24 @@ namespace antares {
 const int32_t kUnitsToCheckNumber = 5;
 
 struct adjacentUnitType {
-    long                    adjacentUnit;           // the normal adjacent unit
+    int32_t                 adjacentUnit;           // the normal adjacent unit
     Point                   superOffset;            // the offset of the super unit (for wrap-around)
 };
 
 struct proximityUnitType {
-    spaceObjectTypePtr      nearObject;                         // for collision checking
-    spaceObjectTypePtr      farObject;                          // for distance checking
+    spaceObjectType*        nearObject;                         // for collision checking
+    spaceObjectType*        farObject;                          // for distance checking
     adjacentUnitType        unitsToCheck[kUnitsToCheckNumber];  // adjacent units to check
 };
 
 extern coordPointType gGlobalCorner;
 
-void InitMotion( void);
-void ResetMotionGlobals( void);
+void InitMotion();
+void ResetMotionGlobals();
 
-void MotionCleanup( void);
-void MoveSpaceObjects( spaceObjectType *, const long, const long);
-void CollideSpaceObjects( spaceObjectType *, const long);
+void MotionCleanup();
+void MoveSpaceObjects(const int32_t unitsToDo);
+void CollideSpaceObjects();
 void CorrectPhysicalSpace( spaceObjectType *, spaceObjectType *);
 
 }  // namespace antares

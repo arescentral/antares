@@ -24,7 +24,6 @@
 
 #include "data/space-object.hpp"
 #include "drawing/color.hpp"
-#include "game/globals.hpp"
 #include "game/motion.hpp"
 #include "game/space-object.hpp"
 #include "lang/casts.hpp"
@@ -34,7 +33,6 @@
 #include "video/driver.hpp"
 
 using sfz::range;
-using sfz::scoped_array;
 using std::abs;
 using std::max;
 
@@ -70,26 +68,28 @@ int32_t scale(int32_t value, int32_t scale) {
 
 }  // namespace
 
+std::unique_ptr<beamType[]> Beams::_data;
+
 beamType::beamType():
         killMe(false),
         active(false) { }
 
-void InitBeams() {
-    globals()->gBeamData.reset(new beamType[kBeamNum]);
+void Beams::init() {
+    _data.reset(new beamType[kBeamNum]);
 }
 
-void ResetBeams() {
-    beamType* const beams = globals()->gBeamData.get();
-    SFZ_FOREACH(beamType* beam, range(beams, beams + kBeamNum), {
+void Beams::reset() {
+    beamType* const beams = _data.get();
+    for (beamType* beam: range(beams, beams + kBeamNum)) {
         clear(*beam);
-    });
+    }
 }
 
-beamType *AddBeam(
+beamType* Beams::add(
         coordPointType* location, uint8_t color, beamKindType kind, int32_t accuracy,
         int32_t beam_range, int32_t* whichBeam) {
-    beamType* const beams = globals()->gBeamData.get();
-    SFZ_FOREACH(beamType* beam, range(beams, beams + kBeamNum), {
+    beamType* const beams = _data.get();
+    for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (!beam->active) {
             beam->lastGlobalLocation = *location;
             beam->objectLocation = *location;
@@ -120,20 +120,20 @@ beamType *AddBeam(
             *whichBeam = beam - beams;
             return beam;
         }
-    });
+    }
 
     *whichBeam = -1;
     return NULL;
 }
 
-void SetSpecialBeamAttributes(spaceObjectType* beamObject, spaceObjectType* sourceObject) {
+void Beams::set_attributes(spaceObjectType* beamObject, spaceObjectType* sourceObject) {
     beamType& beam = *beamObject->frame.beam.beam;
     beam.fromObjectNumber = sourceObject->entryNumber;
     beam.fromObjectID = sourceObject->id;
     beam.fromObject = sourceObject;
 
     if (sourceObject->targetObjectNumber >= 0) {
-        spaceObjectType* target = gSpaceObjectData.get() + sourceObject->targetObjectNumber;
+        spaceObjectType* target = mGetSpaceObjectPtr(sourceObject->targetObjectNumber);
 
         if ((target->active) && (target->id == sourceObject->targetObjectID)) {
             const int32_t h = abs(implicit_cast<int32_t>(
@@ -155,10 +155,10 @@ void SetSpecialBeamAttributes(spaceObjectType* beamObject, spaceObjectType* sour
                         || (beam.beamKind == eBoltObjectToRelativeCoordKind)) {
                     beam.toRelativeCoord.h = target->location.h - sourceObject->location.h
                         - beam.accuracy
-                        + RandomSeeded(beam.accuracy << 1, &(beamObject->randomSeed), 'beam', 1);
+                        + beamObject->randomSeed.next(beam.accuracy << 1);
                     beam.toRelativeCoord.v = target->location.v - sourceObject->location.v
                         - beam.accuracy
-                        + RandomSeeded(beam.accuracy << 1, &(beamObject->randomSeed), 'beam', 1);
+                        + beamObject->randomSeed.next(beam.accuracy << 1);
                 } else {
                     beam.toObjectNumber = target->entryNumber;
                     beam.toObjectID = target->id;
@@ -183,9 +183,9 @@ void SetSpecialBeamAttributes(spaceObjectType* beamObject, spaceObjectType* sour
     }
 }
 
-void update_beams() {
-    beamType* const beams = globals()->gBeamData.get();
-    SFZ_FOREACH(beamType* beam, range(beams, beams + kBeamNum), {
+void Beams::update() {
+    beamType* const beams = _data.get();
+    for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
             if (beam->lastApparentLocation != beam->objectLocation) {
                 beam->thisLocation = Rect(
@@ -197,7 +197,7 @@ void update_beams() {
                 beam->lastApparentLocation = beam->objectLocation;
             }
 
-            if ((!beam->killMe) && (beam->active != kObjectToBeFreed)) {
+            if (!beam->killMe) {
                 if (beam->color) {
                     if (beam->beamKind != eKineticBeamKind) {
                         beam->boltState++;
@@ -225,37 +225,35 @@ void update_beams() {
                                     abs(beam->thisLocation.height()))
                                 / kBoltPointNum / 2;
 
-                            SFZ_FOREACH(int j, range(1, kBoltPointNum - 1), {
+                            for (int j: range(1, kBoltPointNum - 1)) {
                                 beam->thisBoltPoint[j].h = beam->thisLocation.left
                                     + ((beam->thisLocation.width() * j) / kBoltPointNum)
                                     - inaccuracy + Randomize(inaccuracy * 2);
                                 beam->thisBoltPoint[j].v = beam->thisLocation.top
                                     + ((beam->thisLocation.height() * j) / kBoltPointNum)
                                     - inaccuracy + Randomize(inaccuracy * 2);
-                            });
+                            }
                         }
                     }
                 }
             }
         }
-    });
+    }
 }
 
-void draw_beams() {
-    Rect bounds = viewport;
-
-    beamType* const beams = globals()->gBeamData.get();
-    SFZ_FOREACH(beamType* beam, range(beams, beams + kBeamNum), {
+void Beams::draw() {
+    beamType* const beams = _data.get();
+    for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
-            if ((!beam->killMe) && (beam->active != kObjectToBeFreed)) {
+            if (!beam->killMe) {
                 if (beam->color) {
                     if ((beam->beamKind == eBoltObjectToObjectKind)
                             || (beam->beamKind == eBoltObjectToRelativeCoordKind)) {
-                        SFZ_FOREACH(int j, range(1, kBoltPointNum), {
+                        for (int j: range(1, kBoltPointNum)) {
                             VideoDriver::driver()->draw_line(
                                     beam->thisBoltPoint[j-1], beam->thisBoltPoint[j],
                                     GetRGBTranslateColor(beam->color));
-                        });
+                        }
                     } else {
                         VideoDriver::driver()->draw_line(
                                 Point(beam->thisLocation.left, beam->thisLocation.top),
@@ -265,39 +263,39 @@ void draw_beams() {
                 }
             }
         }
-    });
+    }
 }
 
-void ShowAllBeams() {
-    beamType* const beams = globals()->gBeamData.get();
-    SFZ_FOREACH(beamType* beam, range(beams, beams + kBeamNum), {
+void Beams::show_all() {
+    beamType* const beams = _data.get();
+    for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
-            if ((beam->killMe) || (beam->active == kObjectToBeFreed)) {
+            if (beam->killMe) {
                 beam->active = false;
             }
             if (beam->color) {
                 if ((beam->beamKind == eBoltObjectToObjectKind)
                         || (beam->beamKind == eBoltObjectToRelativeCoordKind)) {
-                    SFZ_FOREACH(int j, range(kBoltPointNum), {
+                    for (int j: range(kBoltPointNum)) {
                         beam->lastBoltPoint[j] = beam->thisBoltPoint[j];
-                    });
+                    }
                 }
             }
             beam->lastLocation = beam->thisLocation;
         }
-    });
+    }
 }
 
-void CullBeams() {
-    beamType* const beams = globals()->gBeamData.get();
-    SFZ_FOREACH(beamType* beam, range(beams, beams + kBeamNum), {
+void Beams::cull() {
+    beamType* const beams = _data.get();
+    for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
-                if ((beam->killMe) || (beam->active == kObjectToBeFreed)) {
+                if (beam->killMe) {
                     beam->active = false;
                 }
                 beam->lastLocation = beam->thisLocation;
         }
-    });
+    }
 }
 
 }  // namespace antares

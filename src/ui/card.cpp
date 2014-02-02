@@ -26,13 +26,12 @@
 
 using sfz::Exception;
 using sfz::format;
-using sfz::scoped_ptr;
+using std::unique_ptr;
 
 namespace antares {
 
 Card::Card()
-        : _stack(NULL),
-          _next(NULL) { }
+        : _stack(NULL) { }
 
 Card::~Card() { }
 
@@ -56,50 +55,43 @@ CardStack* Card::stack() const {
 }
 
 Card* Card::next() const {
-    return _next;
+    return _next.get();
 }
 
-void Card::set_stack(CardStack* stack) {
-    // Can add or remove from stack, not move between.
-    if (_stack != NULL) {
-        throw Exception("Card is already on a stack");
-    }
-    _stack = stack;
-    _next = stack->top();
-}
-
-CardStack::CardStack(Card* top)
-        : _top(NULL) {
+CardStack::CardStack(Card* top) {
     push(top);
 }
 
 bool CardStack::empty() const {
-    return _top == NULL;
+    return _top == nullptr;
 }
 
 void CardStack::push(Card* card) {
     if (!empty()) {
         _top->resign_front();
     }
-    card->set_stack(this);
-    _top = card;
+    card->_stack = this;
+    unique_ptr<Card> c(card);
+    swap(_top, c->_next);
+    swap(_top, c);
     card->become_front();
 }
 
 void CardStack::pop(Card* card) {
-    if (card != _top) {
+    if (card != _top.get()) {
         throw Exception(format("tried to pop card {0} when not frontmost", card));
     }
+    unique_ptr<Card> old;
     card->resign_front();
-    _top = card->next();
-    delete card;
+    swap(_top, old);
+    swap(_top, old->_next);
     if (!empty()) {
         _top->become_front();
     }
 }
 
 Card* CardStack::top() const {
-    return _top;
+    return _top.get();
 }
 
 }  // namespace antares

@@ -41,9 +41,9 @@
 using sfz::Exception;
 using sfz::String;
 using sfz::format;
-using sfz::scoped_ptr;
 using std::make_pair;
 using std::pair;
+using std::unique_ptr;
 using std::vector;
 
 namespace antares {
@@ -75,52 +75,46 @@ void OptionsScreen::become_front() {
     }
 }
 
-namespace {
-
-const int kSoundControlScreenResID = 5007;
-
-}  // namespace
-
 SoundControlScreen::SoundControlScreen(OptionsScreen::State* state, Preferences* preferences)
-        : InterfaceScreen(kSoundControlScreenResID, world, true),
+        : InterfaceScreen("options/sound", world, true),
           _state(state),
           _preferences(preferences) { }
 
 SoundControlScreen::~SoundControlScreen() { }
 
 void SoundControlScreen::adjust_interface() {
-    mutable_item(IDLE_MUSIC)->item.checkboxButton.on = _preferences->play_idle_music();
-    mutable_item(GAME_MUSIC)->item.checkboxButton.on = _preferences->play_music_in_game();
-    mutable_item(SPEECH_ON)->item.checkboxButton.on = _preferences->speech_on();
+    dynamic_cast<CheckboxButton&>(mutable_item(IDLE_MUSIC)).on = _preferences->play_idle_music();
+    dynamic_cast<CheckboxButton&>(mutable_item(GAME_MUSIC)).on = _preferences->play_music_in_game();
+    dynamic_cast<CheckboxButton&>(mutable_item(SPEECH_ON)).on = _preferences->speech_on();
 
     if (false) {  // TODO(sfiera): if speech available.
-        mutable_item(SPEECH_ON)->set_status(kActive);
+        dynamic_cast<Button&>(mutable_item(SPEECH_ON)).status = kActive;
     } else {
-        mutable_item(SPEECH_ON)->set_status(kDimmed);
+        dynamic_cast<Button&>(mutable_item(SPEECH_ON)).status = kDimmed;
     }
 
     if (_preferences->volume() > 0) {
-        mutable_item(VOLUME_DOWN)->set_status(kActive);
+        dynamic_cast<Button&>(mutable_item(VOLUME_DOWN)).status = kActive;
     } else {
-        mutable_item(VOLUME_DOWN)->set_status(kDimmed);
+        dynamic_cast<Button&>(mutable_item(VOLUME_DOWN)).status = kDimmed;
     }
 
     if (_preferences->volume() < kMaxVolumePreference) {
-        mutable_item(VOLUME_UP)->set_status(kActive);
+        dynamic_cast<Button&>(mutable_item(VOLUME_UP)).status = kActive;
     } else {
-        mutable_item(VOLUME_UP)->set_status(kDimmed);
+        dynamic_cast<Button&>(mutable_item(VOLUME_UP)).status = kDimmed;
     }
 }
 
-void SoundControlScreen::handle_button(int button) {
-    switch (button) {
+void SoundControlScreen::handle_button(Button& button) {
+    switch (button.id) {
       case GAME_MUSIC:
-        _preferences->set_play_music_in_game(!item(GAME_MUSIC).item.checkboxButton.on);
+        _preferences->set_play_music_in_game(!dynamic_cast<CheckboxButton&>(button).on);
         adjust_interface();
         break;
 
       case IDLE_MUSIC:
-        _preferences->set_play_idle_music(!item(IDLE_MUSIC).item.checkboxButton.on);
+        _preferences->set_play_idle_music(!dynamic_cast<CheckboxButton&>(button).on);
         if (_preferences->play_idle_music()) {
             LoadSong(kTitleSongID);
             PlaySong();
@@ -131,7 +125,7 @@ void SoundControlScreen::handle_button(int button) {
         break;
 
       case SPEECH_ON:
-        _preferences->set_speech_on(!item(SPEECH_ON).item.checkboxButton.on);
+        _preferences->set_speech_on(!dynamic_cast<CheckboxButton&>(button).on);
         adjust_interface();
         break;
 
@@ -150,20 +144,18 @@ void SoundControlScreen::handle_button(int button) {
       case DONE:
       case CANCEL:
       case KEY_CONTROL:
-        *_state = button_state(button);
+        *_state = button_state(button.id);
         stack()->pop(this);
         break;
 
       default:
-        throw Exception(format("Got unknown button {0}.", button));
+        throw Exception(format("Got unknown button {0}.", button.id));
     }
 }
 
-void SoundControlScreen::draw() const {
-    InterfaceScreen::draw();
-
+void SoundControlScreen::overlay() const {
     const int volume = _preferences->volume();
-    Rect bounds = item(VOLUME_BOX).bounds;
+    Rect bounds = item(VOLUME_BOX).bounds();
 
     const int notch_width = bounds.width() / kMaxVolumePreference;
     const int notch_height = bounds.height() - 4;
@@ -194,19 +186,13 @@ OptionsScreen::State SoundControlScreen::button_state(int button) {
     }
 }
 
-namespace {
-
-// Resource IDs of the various interfaces used in the key control interface.
-const int kKeyControlScreenResID    = 5030;
-const int kKeyControlTabIds[] = { 5031, 5032, 5033, 5034, 5035 };
-
-const int64_t kFlashTime = 0.2e6;
+static const int64_t kFlashTime = 0.2e6;
 
 // Indices of the keys controlled by each tab.  The "Ship" tab specifies keys 0..7, the "Command"
 // tab specifies keys 8..18, and so on.
-const size_t kKeyIndices[] = { 0, 8, 19, 28, 34, 44 };
+static const size_t kKeyIndices[] = { 0, 8, 19, 28, 34, 44 };
 
-size_t get_tab_num(size_t key) {
+static size_t get_tab_num(size_t key) {
     for (size_t i = 1; i < 5; ++i) {
         if (key < kKeyIndices[i]) {
             return i - 1;
@@ -215,16 +201,16 @@ size_t get_tab_num(size_t key) {
     return 4;
 }
 
-}  // namespace
-
 KeyControlScreen::KeyControlScreen(OptionsScreen::State* state, Preferences* preferences)
-        : InterfaceScreen(kKeyControlScreenResID, world, true),
+        : InterfaceScreen("options/keys", world, true),
           _state(state),
           _preferences(preferences),
           _key_start(size()),
           _selected_key(-1),
-          _next_flash(0.0),
-          _flashed_on(false) {
+          _next_flash(0),
+          _flashed_on(false),
+          _tabs(2009),
+          _keys(2005) {
     set_tab(SHIP);
 }
 
@@ -256,8 +242,11 @@ void KeyControlScreen::key_up(const KeyUpEvent& event) {
 }
 
 bool KeyControlScreen::next_timer(int64_t& time) {
-    time = _next_flash;
-    return true;
+    if (_next_flash > 0) {
+        time = _next_flash;
+        return true;
+    }
+    return false;
 }
 
 void KeyControlScreen::fire_timer() {
@@ -271,23 +260,23 @@ void KeyControlScreen::fire_timer() {
 
 void KeyControlScreen::adjust_interface() {
     for (size_t i = SHIP_TAB; i <= HOT_KEY_TAB; ++i) {
-        mutable_item(i)->color = AQUA;
+        dynamic_cast<TabBoxButton&>(mutable_item(i)).hue = AQUA;
     }
 
     for (size_t i = _key_start; i < size(); ++i) {
         size_t key = kKeyIndices[_tab] + i - _key_start;
         int key_num = _preferences->key(key);
-        mutable_item(i)->item.plainButton.key = key_num;
+        dynamic_cast<Button&>(mutable_item(i)).key = key_num;
         if (key == _selected_key) {
-            mutable_item(i)->set_status(kIH_Hilite);
+            dynamic_cast<Button&>(mutable_item(i)).status = kIH_Hilite;
         } else {
-            mutable_item(i)->set_status(kActive);
+            dynamic_cast<Button&>(mutable_item(i)).status = kActive;
         }
-        mutable_item(i)->color = AQUA;
+        dynamic_cast<Button&>(mutable_item(i)).hue = AQUA;
     }
 
     if (_flashed_on) {
-        for (vector<pair<size_t, size_t> >::const_iterator it = _conflicts.begin();
+        for (vector<pair<size_t, size_t>>::const_iterator it = _conflicts.begin();
                 it != _conflicts.end(); ++it) {
             flash_on(it->first);
             flash_on(it->second);
@@ -295,20 +284,20 @@ void KeyControlScreen::adjust_interface() {
     }
 
     if (_conflicts.empty()) {
-        mutable_item(DONE)->set_status(kActive);
-        mutable_item(SOUND_CONTROL)->set_status(kActive);
+        dynamic_cast<Button&>(mutable_item(DONE)).status = kActive;
+        dynamic_cast<Button&>(mutable_item(SOUND_CONTROL)).status = kActive;
     } else {
-        mutable_item(DONE)->set_status(kDimmed);
-        mutable_item(SOUND_CONTROL)->set_status(kDimmed);
+        dynamic_cast<Button&>(mutable_item(DONE)).status = kDimmed;
+        dynamic_cast<Button&>(mutable_item(SOUND_CONTROL)).status = kDimmed;
     }
 }
 
-void KeyControlScreen::handle_button(int button) {
-    switch (button) {
+void KeyControlScreen::handle_button(Button& button) {
+    switch (button.id) {
       case DONE:
       case CANCEL:
       case SOUND_CONTROL:
-        *_state = button_state(button);
+        *_state = button_state(button.id);
         stack()->pop(this);
         break;
 
@@ -317,46 +306,38 @@ void KeyControlScreen::handle_button(int button) {
       case SHORTCUT_TAB:
       case UTILITY_TAB:
       case HOT_KEY_TAB:
-        for (int i = SHIP_TAB; i <= HOT_KEY_TAB; ++i) {
-            mutable_item(i)->item.radioButton.on = (button == i);
-        }
-        set_tab(button_tab(button));
+        set_tab(button_tab(button.id));
         adjust_interface();
         break;
 
       default:
         {
-            size_t key = kKeyIndices[_tab] + button - _key_start;
+            size_t key = kKeyIndices[_tab] + button.id - _key_start;
             if ((kKeyIndices[_tab] <= key) && (key < kKeyIndices[_tab + 1])) {
                 // TODO(sfiera): ensure that the button stays highlighted, instead of flashing.
                 _selected_key = key;
                 adjust_interface();
             } else {
-                throw Exception(format("Got unknown button {0}.", button));
+                throw Exception(format("Got unknown button {0}.", button.id));
             }
         }
         break;
     }
 }
 
-void KeyControlScreen::draw() const {
-    InterfaceScreen::draw();
-
+void KeyControlScreen::overlay() const {
     if (!_conflicts.empty()) {
         const size_t key_one = _conflicts[0].first;
         const size_t key_two = _conflicts[0].second;
-        StringList tabs(2009);
-        StringList keys(2005);
 
         // TODO(sfiera): permit localization.
         String text(format("{0}: {1} conflicts with {2}: {3}",
-                    tabs.at(get_tab_num(key_one)), keys.at(key_one),
-                    tabs.at(get_tab_num(key_two)), keys.at(key_two)));
+                    _tabs.at(get_tab_num(key_one)), _keys.at(key_one),
+                    _tabs.at(get_tab_num(key_two)), _keys.at(key_two)));
 
-        const interfaceItemType& box = item(CONFLICT_TEXT);
-        ArrayPixMap pix(box.bounds.width(), box.bounds.height());
+        const TextRect& box = dynamic_cast<const TextRect&>(item(CONFLICT_TEXT));
         vector<inlinePictType> pict;
-        draw_text_in_rect(box.bounds, text, box.style, box.color, pict);
+        draw_text_in_rect(box.bounds(), text, box.style, box.hue, pict);
     }
 }
 
@@ -391,14 +372,30 @@ KeyControlScreen::Tab KeyControlScreen::button_tab(int button) {
 }
 
 void KeyControlScreen::set_tab(Tab tab) {
+    static const int buttons[] = {
+        SHIP_TAB,
+        COMMAND_TAB,
+        SHORTCUT_TAB,
+        UTILITY_TAB,
+        HOT_KEY_TAB,
+    };
+
+    truncate(_key_start);
+    for (int i = SHIP_TAB; i <= HOT_KEY_TAB; ++i) {
+        TabBoxButton& item = dynamic_cast<TabBoxButton&>(mutable_item(i));
+        if (buttons[tab] == i) {
+            item.on = true;
+            extend(item.tab_content);
+        } else {
+            item.on = false;
+        }
+    }
     _tab = tab;
     _selected_key = -1;
-    truncate(_key_start);
-    extend(kKeyControlTabIds[tab], TAB_BOX);
 }
 
 void KeyControlScreen::update_conflicts() {
-    vector<pair<size_t, size_t> > new_conflicts;
+    vector<pair<size_t, size_t>> new_conflicts;
     for (size_t i = 0; i < kKeyExtendedControlNum; ++i) {
         for (size_t j = i + 1; j < kKeyExtendedControlNum; ++j) {
             if (_preferences->key(i) == _preferences->key(j)) {
@@ -410,9 +407,9 @@ void KeyControlScreen::update_conflicts() {
     _conflicts.swap(new_conflicts);
 
     if (_conflicts.empty()) {
-        _next_flash = 0.0;
+        _next_flash = 0;
         _flashed_on = false;
-    } else if (_next_flash == 0.0) {
+    } else if (_next_flash == 0) {
         _next_flash = now_usecs() + kFlashTime;
         _flashed_on = true;
     }
@@ -420,9 +417,11 @@ void KeyControlScreen::update_conflicts() {
 
 void KeyControlScreen::flash_on(size_t key) {
     if (kKeyIndices[_tab] <= key && key < kKeyIndices[_tab + 1]) {
-        mutable_item(key - kKeyIndices[_tab] + _key_start)->color = GOLD;
+        Button& item = dynamic_cast<Button&>(mutable_item(key - kKeyIndices[_tab] + _key_start));
+        item.hue = GOLD;
     } else {
-        mutable_item(SHIP_TAB + get_tab_num(key))->color = GOLD;
+        Button& item = dynamic_cast<Button&>(mutable_item(SHIP_TAB + get_tab_num(key)));
+        item.hue = GOLD;
     }
 }
 

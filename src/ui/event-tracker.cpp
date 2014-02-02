@@ -27,6 +27,7 @@ void EventTracker::key_down(const KeyDownEvent& event) {
     if (_strict && _keys.get(event.key())) {
         throw Exception(format("Received KeyDownEvent but key {0} already down.", event.key()));
     }
+    _input_mode = KEYBOARD_MOUSE;
     _keys.set(event.key(), true);
 }
 
@@ -37,10 +38,27 @@ void EventTracker::key_up(const KeyUpEvent& event) {
     _keys.set(event.key(), false);
 }
 
+void EventTracker::gamepad_button_down(const GamepadButtonDownEvent& event) {
+    _input_mode = GAMEPAD;
+}
+
+void EventTracker::gamepad_stick(const GamepadStickEvent& event) {
+    _input_mode = GAMEPAD;
+}
+
+void EventTracker::caps_lock(const CapsLockEvent& event) {
+    _input_mode = KEYBOARD_MOUSE;
+}
+
+void EventTracker::caps_unlock(const CapsUnlockEvent& event) {
+    _input_mode = KEYBOARD_MOUSE;
+}
+
 void EventTracker::mouse_down(const MouseDownEvent& event) {
     if (_strict && _button[event.button()]) {
         throw Exception("Received MouseDownEvent when mouse already down.");
     }
+    _input_mode = KEYBOARD_MOUSE;
     _button[event.button()] = true;
     _mouse = event.where();
 }
@@ -54,6 +72,7 @@ void EventTracker::mouse_up(const MouseUpEvent& event) {
 }
 
 void EventTracker::mouse_move(const MouseMoveEvent& event) {
+    _input_mode = KEYBOARD_MOUSE;
     _mouse = event.where();
 }
 

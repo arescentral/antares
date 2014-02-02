@@ -33,10 +33,11 @@ class HelpScreen : public InterfaceScreen {
     HelpScreen();
     ~HelpScreen();
 
-    virtual void draw() const;
+    virtual void key_down(const KeyDownEvent& event);
+    virtual void overlay() const;
 
   protected:
-    virtual void handle_button(int button);
+    virtual void handle_button(Button& button);
 
   private:
     enum Item {

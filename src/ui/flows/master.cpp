@@ -66,8 +66,9 @@ class TitleScreenFade : public PictFade {
 
 }  // namespace
 
-Master::Master():
+Master::Master(int32_t seed):
         _state(START),
+        _seed(seed),
         _skipped(false) { }
 
 void Master::become_front() {
@@ -110,7 +111,7 @@ void Master::become_front() {
     }
 }
 
-void Master::draw() { }
+void Master::draw() const { }
 
 void Master::init() {
     RgbColor                initialFadeColor;
@@ -127,15 +128,14 @@ void Master::init() {
 
     // TODO(sfiera): set gRandomSeed.
 
-    InitSpriteCursor();
-
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
 
     RotationInit();
+    gRandomSeed.seed = _seed;
 
     InitDirectText();
-    ScreenLabelInit();
-    InitMessageScreen();
+    Labels::init();
+    Messages::init();
     InstrumentInit();
     SpriteHandlingInit();
     AresCheatInit();
@@ -145,7 +145,7 @@ void Master::init() {
     MusicInit();
     InitMotion();
     AdmiralInit();
-    InitBeams();
+    Beams::init();
 
     if (Preferences::preferences()->play_idle_music()) {
         LoadSong( kTitleSongID);

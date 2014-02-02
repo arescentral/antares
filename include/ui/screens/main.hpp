@@ -21,6 +21,7 @@
 
 #include <sfz/sfz.hpp>
 
+#include "data/replay-list.hpp"
 #include "ui/screen.hpp"
 
 namespace antares {
@@ -35,9 +36,16 @@ class MainScreen : public InterfaceScreen {
     virtual bool next_timer(int64_t& time);
     virtual void fire_timer();
 
+    virtual void mouse_down(const MouseDownEvent& event);
+    virtual void mouse_up(const MouseUpEvent& event);
+    virtual void key_down(const KeyDownEvent& event);
+    virtual void key_up(const KeyUpEvent& event);
+    virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
+    virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
+
   protected:
     virtual void adjust_interface();
-    virtual void handle_button(int button);
+    virtual void handle_button(antares::Button& button);
 
   private:
     enum Button {
@@ -49,6 +57,13 @@ class MainScreen : public InterfaceScreen {
         DEMO = 5,
         REPLAY_INTRO = 6,
     };
+    enum State {
+        NORMAL = 0,
+        QUITTING = 1,
+    };
+    State _state;
+    ReplayList _replays;
+    int64_t _next_timer;
 
     DISALLOW_COPY_AND_ASSIGN(MainScreen);
 };
