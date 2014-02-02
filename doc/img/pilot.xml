@@ -1,6 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <?xml-stylesheet href="gamepad.xsl" type="text/xsl" ?>
 <gamepad>
+  <back>Next Message</back>
   <start>Pause</start>
   <ls>Rotate</ls>
   <lsb>Warp</lsb>
@@ -10,8 +11,8 @@
   <down>Comp Down</down>
   <a>Thrust</a>
   <b>Brake</b>
-  <x>Zoom In</x>
-  <y>Zoom Out</y>
+  <x>Zoom Out</x>
+  <y>Zoom In</y>
   <lb>Target Mode</lb>
   <lt>Fire Special</lt>
   <rb>Select Mode</rb>

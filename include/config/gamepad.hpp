@@ -19,6 +19,9 @@
 #ifndef ANTARES_CONFIG_GAMEPAD_HPP_
 #define ANTARES_CONFIG_GAMEPAD_HPP_
 
+#include <stdint.h>
+#include <sfz/sfz.hpp>
+
 namespace antares {
 
 struct Gamepad {
@@ -47,6 +50,16 @@ struct Gamepad {
         LS          = 0x30,
         RS          = 0x33,
     };
+
+    enum {
+        BEGIN       = A,
+        END         = RT + 1,
+        NAMES       = 1001,
+        LONG_NAMES  = 1003,
+    };
+
+    static int16_t num(sfz::StringSlice name);
+    static bool name(int16_t button, sfz::String& out);
 };
 
 }  // namespace antares

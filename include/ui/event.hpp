@@ -28,6 +28,11 @@ namespace antares {
 
 class EventReceiver;
 
+enum InputMode {
+    KEYBOARD_MOUSE,
+    GAMEPAD,
+};
+
 // Superclass for all events.
 class Event {
   public:

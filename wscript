@@ -212,6 +212,7 @@ def build(bld):
         target="antares/libantares-config",
         features="universal",
         source=[
+            "src/config/gamepad.cpp",
             "src/config/keys.cpp",
             "src/config/ledger.cpp",
             "src/config/preferences.cpp",

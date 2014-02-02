@@ -799,7 +799,7 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
 
     if (theShip->attributes & kOnAutoPilot) {
         if ((globals()->gAutoPilotOff) && // no off request pending
-                (gTheseKeys & (kUpKey | kDownKey | kLeftKey | kRightKey))) {
+                ((gTheseKeys | _gamepad_keys) & (kUpKey | kDownKey | kLeftKey | kRightKey))) {
             theShip->keysDown = gTheseKeys | kAutoPilotKey;
             globals()->gAutoPilotOff = false;
         } else {

@@ -113,7 +113,7 @@ void InterfaceScreen::draw() const {
     VideoDriver::driver()->fill_rect(copy_area, RgbColor::kBlack);
 
     for (const auto& item: _items) {
-        draw_interface_item(*item, _bounds.origin());
+        draw_interface_item(*item, VideoDriver::driver()->input_mode(), _bounds.origin());
     }
     overlay();
     if (stack()->top() == this) {
@@ -177,7 +177,7 @@ void InterfaceScreen::key_down(const KeyDownEvent& event) {
             button->status = kIH_Hilite;
             PlayVolumeSound(kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
             _hit_button = button;
-            _pressed_key = key_code;
+            _pressed = key_code;
             return;
         }
     }
@@ -185,7 +185,7 @@ void InterfaceScreen::key_down(const KeyDownEvent& event) {
 
 void InterfaceScreen::key_up(const KeyUpEvent& event) {
     const int32_t key_code = event.key() + 1;
-    if ((_state == KEY_DOWN) && (_pressed_key == key_code)) {
+    if ((_state == KEY_DOWN) && (_pressed == key_code)) {
         _state = NORMAL;
         _hit_button->status = kActive;
         if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_hit_button)) {
@@ -195,29 +195,30 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
     }
 }
 
-template <typename KeyEvent, typename GamepadEvent>
-static void translate_gamepad_button(EventReceiver& receiver, const GamepadEvent& event) {
-    uint32_t key_equivalent;
-    switch (event.button) {
-      case Gamepad::A: key_equivalent = Keys::RETURN; break;
-      case Gamepad::B: key_equivalent = Keys::ESCAPE; break;
-      case Gamepad::X: key_equivalent = Keys::Q; break;
-      case Gamepad::Y: key_equivalent = Keys::S; break;
-      case Gamepad::LEFT: key_equivalent = Keys::LEFT_ARROW; break;
-      case Gamepad::RIGHT: key_equivalent = Keys::RIGHT_ARROW; break;
-      case Gamepad::UP: key_equivalent = Keys::UP_ARROW; break;
-      case Gamepad::DOWN: key_equivalent = Keys::DOWN_ARROW; break;
-      default: return;
-    }
-    KeyEvent(event.at(), key_equivalent).send(&receiver);
-}
-
 void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
-    translate_gamepad_button<KeyDownEvent>(*this, event);
+    for (auto& item: _items) {
+        Button* button = dynamic_cast<Button*>(item.get());
+        if (button && button->status != kDimmed && button->gamepad == event.button) {
+            become_normal();
+            _state = GAMEPAD_DOWN;
+            button->status = kIH_Hilite;
+            PlayVolumeSound(kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
+            _hit_button = button;
+            _pressed = event.button;
+            return;
+        }
+    }
 }
 
 void InterfaceScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
-    translate_gamepad_button<KeyUpEvent>(*this, event);
+    if ((_state == GAMEPAD_DOWN) && (_pressed == event.button)) {
+        _state = NORMAL;
+        _hit_button->status = kActive;
+        if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_hit_button)) {
+            b->on = true;
+        }
+        handle_button(*_hit_button);
+    }
 }
 
 void InterfaceScreen::overlay() const { }

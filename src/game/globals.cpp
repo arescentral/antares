@@ -18,6 +18,7 @@
 
 #include "game/globals.hpp"
 
+#include "config/gamepad.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/sprite-handling.hpp"
@@ -67,6 +68,8 @@ aresGlobalType::aresGlobalType() {
     gLastSoundTime = 0;
     key_names.reset(new StringList(KEY_NAMES));
     key_long_names.reset(new StringList(KEY_LONG_NAMES));
+    gamepad_names.reset(new StringList(Gamepad::NAMES));
+    gamepad_long_names.reset(new StringList(Gamepad::LONG_NAMES));
     gAutoPilotOff = true;
     levelNum = 31;
     keyMask = 0;
