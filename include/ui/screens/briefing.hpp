@@ -25,6 +25,7 @@
 #include "math/geometry.hpp"
 #include "drawing/interface.hpp"
 #include "ui/screen.hpp"
+#include "ui/screens/object-data.hpp"
 
 namespace antares {
 
@@ -41,6 +42,7 @@ class BriefingScreen : public InterfaceScreen {
 
     virtual void mouse_down(const MouseDownEvent& event);
     virtual void key_down(const KeyDownEvent& event);
+    virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
 
   protected:
     virtual void adjust_interface();
@@ -64,7 +66,9 @@ class BriefingScreen : public InterfaceScreen {
     void draw_system_map() const;
     void draw_brief_point() const;
 
-    void show_object_data_key(int index, int key);
+    void show_object_data(int index, const KeyDownEvent& event);
+    void show_object_data(int index, const GamepadButtonDownEvent& event);
+    void show_object_data(int index, ObjectDataScreen::Trigger trigger, int which);
 
     const Scenario* const _scenario;
     bool* const _cancelled;

@@ -18,6 +18,7 @@
 
 #include "ui/screens/briefing.hpp"
 
+#include "config/gamepad.hpp"
 #include "data/picture.hpp"
 #include "drawing/briefing.hpp"
 #include "drawing/color.hpp"
@@ -132,18 +133,33 @@ void BriefingScreen::key_down(const KeyDownEvent& event) {
             stack()->pop(this);
         }
         return;
-        case Keys::K1: return show_object_data_key(0, event.key());
-        case Keys::K2: return show_object_data_key(1, event.key());
-        case Keys::K3: return show_object_data_key(2, event.key());
-        case Keys::K4: return show_object_data_key(3, event.key());
-        case Keys::K5: return show_object_data_key(4, event.key());
-        case Keys::K6: return show_object_data_key(5, event.key());
-        case Keys::K7: return show_object_data_key(6, event.key());
-        case Keys::K8: return show_object_data_key(7, event.key());
-        case Keys::K9: return show_object_data_key(8, event.key());
-        case Keys::K0: return show_object_data_key(9, event.key());
+        case Keys::K1: return show_object_data(0, event);
+        case Keys::K2: return show_object_data(1, event);
+        case Keys::K3: return show_object_data(2, event);
+        case Keys::K4: return show_object_data(3, event);
+        case Keys::K5: return show_object_data(4, event);
+        case Keys::K6: return show_object_data(5, event);
+        case Keys::K7: return show_object_data(6, event);
+        case Keys::K8: return show_object_data(7, event);
+        case Keys::K9: return show_object_data(8, event);
+        case Keys::K0: return show_object_data(9, event);
         default: {
             return InterfaceScreen::key_down(event);
+        }
+    }
+}
+
+void BriefingScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
+    switch (event.button) {
+        case Gamepad::B: {
+            *_cancelled = true;
+            stack()->pop(this);
+        }
+        return;
+        case Gamepad::UP: return show_object_data(0, event);
+        case Gamepad::DOWN: return show_object_data(1, event);
+        default: {
+            return InterfaceScreen::gamepad_button_down(event);
         }
     }
 }
@@ -303,13 +319,21 @@ void BriefingScreen::draw_brief_point() const {
     draw_text_in_rect(_data_item.bounds(), _text, _data_item.style, _data_item.hue, unused);
 }
 
-void BriefingScreen::show_object_data_key(int index, int key) {
+void BriefingScreen::show_object_data(int index, const KeyDownEvent& event) {
+    show_object_data(index, ObjectDataScreen::KEY, event.key());
+}
+
+void BriefingScreen::show_object_data(int index, const GamepadButtonDownEvent& event) {
+    show_object_data(index, ObjectDataScreen::GAMEPAD, event.button);
+}
+
+void BriefingScreen::show_object_data(int index, ObjectDataScreen::Trigger trigger, int which) {
     if (index < _inline_pict.size()) {
         const int pict_id = _inline_pict[index].id;
         const Point origin = _inline_pict[index].bounds.center();
         for (int i = 0; i < globals()->maxBaseObject; ++i) {
             if (mGetBaseObjectPtr(i)->pictPortraitResID == pict_id) {
-                stack()->push(new ObjectDataScreen(origin, i, ObjectDataScreen::KEY, key));
+                stack()->push(new ObjectDataScreen(origin, i, trigger, which));
                 return;
             }
         }
