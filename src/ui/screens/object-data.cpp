@@ -123,6 +123,12 @@ void ObjectDataScreen::key_up(const KeyUpEvent& event) {
     }
 }
 
+void ObjectDataScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
+    if ((_trigger == GAMEPAD) && (event.button == _which)) {
+        stack()->pop(this);
+    }
+}
+
 void ObjectDataScreen::draw() const {
     next()->draw();
     Rect outside = _bounds;

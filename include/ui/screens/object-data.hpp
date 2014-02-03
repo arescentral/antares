@@ -30,7 +30,7 @@ namespace antares {
 
 class ObjectDataScreen : public Card {
   public:
-    enum Trigger { MOUSE, KEY };
+    enum Trigger { MOUSE, KEY, GAMEPAD };
 
     ObjectDataScreen(Point origin, int32_t object_id, Trigger trigger, int which);
     ~ObjectDataScreen();
@@ -42,6 +42,7 @@ class ObjectDataScreen : public Card {
 
     virtual void mouse_up(const MouseUpEvent& event);
     virtual void key_up(const KeyUpEvent& event);
+    virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
 
     virtual void draw() const;
 
