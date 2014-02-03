@@ -275,6 +275,10 @@ static void target_base(spaceObjectType* origin_ship, int32_t direction) {
             GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber), 0);
 }
 
+static void target_self() {
+    SetPlayerSelectShip(globals()->gPlayerShipNumber, true, globals()->gPlayerAdmiralNumber);
+}
+
 void PlayerShip::key_down(const KeyDownEvent& event) {
     _keys.set(event.key(), true);
 
@@ -394,11 +398,15 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
             }
             return;
           case Gamepad::Y:
-            player->keysDown |= kGiveCommandKey;
+            if (_gamepad_state & SELECT_BUMPER) {
+                player->keysDown |= kGiveCommandKey;
+            } else {
+                engage_autopilot();
+            }
             return;
           case Gamepad::LSB:
             if (_gamepad_state & TARGET_BUMPER) {
-                engage_autopilot();
+                target_self();
             } else {
                 MiniComputerExecute(3, 1, globals()->gPlayerAdmiralNumber);
             }
@@ -689,8 +697,7 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
             if ((theShip->attributes & kCanBeDestination)
                     && (!globals()->destKeyUsedForSelection)) {
                 if (!NETWORK_ON) {
-                    SetPlayerSelectShip(globals()->gPlayerShipNumber, true,
-                            globals()->gPlayerAdmiralNumber);
+                    target_self();
                 } else {
 #ifdef NETSPROCKET_AVAILABLE
                     if (!SendSelectMessage(
