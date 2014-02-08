@@ -1,18 +1,27 @@
-WAF=python ext/waf-sfiera/waf
+NINJA=ninja -C out/cur
 
 all:
-	@$(WAF) build
+	@$(NINJA)
 
-test:
-	@$(WAF) test
+test: all
+	scripts/test.py
 
 clean:
-	@$(WAF) clean
+	@$(NINJA) -t clean
 
 dist:
-	@$(WAF) dist
+	scripts/dist.py
 
 distclean:
-	@$(WAF) distclean
+	rm -Rf out/
 
-.PHONY: clean dist distclean all test
+run: all
+	out/cur/Antares.app/Contents/MacOS/Antares
+
+sign:
+	codesign --force \
+		--sign "Developer ID Application" \
+		--entitlements resources/entitlements.plist \
+		out/cur/Antares.app
+
+.PHONY: all clean dist distclean run sign test

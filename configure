@@ -1,5 +1,15 @@
 #!/bin/bash
 
-set -e
+set -o errexit
+set -o nounset
 
-python ext/waf-sfiera/waf configure "$@"
+MODE=${MODE-opt}
+DEPTH=$(dirname "$0")
+mkdir -p out
+rm -f out/cur
+ln -s "$MODE" out/cur
+exec gyp \
+    --include=defaults.gypi \
+    --format=ninja \
+    --depth="$DEPTH" \
+    "$@"
