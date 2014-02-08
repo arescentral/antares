@@ -1,0 +1,41 @@
+#!/usr/bin/env python
+
+import contextlib
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+
+def main():
+    args = sys.argv[1:]
+    name = args.pop(0)
+    smoke = bool(os.environ.get("SMOKE", ""))
+    if smoke:
+        expected = "test/smoke/%s" % name
+    else:
+        expected = "test/%s" % name
+
+    with NamedTemporaryDir() as dir:
+        antares_command = ["out/cur/offscreen", name] + args + ["--output=%s" % dir]
+        if smoke:
+            antares_command.append("--text")
+        antares = subprocess.Popen(antares_command)
+        antares.communicate()
+        assert antares.returncode == 0, "Antares failed"
+
+        diff_command = ["diff", "-ru", "-x.*", expected, dir]
+        diff = subprocess.Popen(diff_command)
+        diff.communicate()
+        assert diff.returncode == 0, "diff failed"
+
+@contextlib.contextmanager
+def NamedTemporaryDir():
+    dir = tempfile.mkdtemp()
+    try:
+        yield dir
+    finally:
+        shutil.rmtree(dir)
+
+if __name__ == "__main__":
+    main()
