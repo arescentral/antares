@@ -313,7 +313,7 @@
       , "src/video/offscreen-driver.cpp"
       , "src/video/text-driver.cpp"
       ]
-    , "defines": ["ANTARES_DATA=data"]
+    , "defines": ["ANTARES_DATA=<(DEPTH)/data"]
     , "dependencies": ["libantares"]
     , "export_dependent_settings": ["libantares"]
     }
