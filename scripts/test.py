@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import contextlib
+import multiprocessing.pool
 import os
 import shutil
 import subprocess
@@ -53,11 +54,16 @@ def replay_test(name, args=[]):
     diff_test(cmd + args, expected)
 
 
+def call(args):
+    args[0](*args[1:])
+
+
 def main():
     args = sys.argv[1:]
     assert not sys.argv[1:]
 
-    tests = [
+    pool = multiprocessing.pool.ThreadPool()
+    pool.map_async(call, [
         (unit_test, "fixed-test"),
 
         (data_test, "build-pix"),
@@ -82,10 +88,10 @@ def main():
         (replay_test, "while-the-iron-is-hot"),
         (replay_test, "yo-ho-ho"),
         (replay_test, "you-should-have-seen-the-one-that-got-away"),
-    ]
-    for test in tests:
-        sys.stderr.write("running %s\n" % test[1])
-        test[0](*test[1:])
+    ])
+    pool.close()
+    pool.join()
+    print "All tests passed!"
 
 
 @contextlib.contextmanager
