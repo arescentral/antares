@@ -24,6 +24,7 @@
 #include "drawing/color.hpp"
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
+#include "lang/casts.hpp"
 #include "video/driver.hpp"
 
 using sfz::BytesSlice;
@@ -43,10 +44,10 @@ namespace antares {
 
 static Rect rect(const Json& json) {
     return {
-        json.get("left").number(),
-        json.get("top").number(),
-        json.get("right").number(),
-        json.get("bottom").number()
+        implicit_cast<int>(json.get("left").number()),
+        implicit_cast<int>(json.get("top").number()),
+        implicit_cast<int>(json.get("right").number()),
+        implicit_cast<int>(json.get("bottom").number())
     };
 }
 
