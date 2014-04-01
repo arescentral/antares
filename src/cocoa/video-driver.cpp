@@ -247,9 +247,10 @@ void CocoaVideoDriver::loop(Card* initial) {
     unique_ptr<CocoaFullscreen> fullscreen;
     unique_ptr<CocoaWindowed> windowed;
     if (_fullscreen) {
-        fullscreen.reset(new CocoaFullscreen(context, screen_size(), attrs[1]));
+        fullscreen.reset(new CocoaFullscreen(pixel_format, context, screen_size()));
+        antares_event_translator_set_window(_translator.c_obj(), fullscreen->window());
     } else {
-        windowed.reset(new CocoaWindowed(pixel_format, context, screen_size()));
+        windowed.reset(new CocoaWindowed(pixel_format, context, screen_size(), false, false));
         antares_event_translator_set_window(_translator.c_obj(), windowed->window());
     }
     GLint swap_interval = 1;

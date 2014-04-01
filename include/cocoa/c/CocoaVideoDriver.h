@@ -38,8 +38,11 @@ int64_t antares_double_click_interval_usecs();
 typedef struct AntaresWindow AntaresWindow;
 AntaresWindow* antares_window_create(
         CGLPixelFormatObj pixel_format, CGLContextObj context,
-        int32_t screen_width, int32_t screen_height);
+        int32_t screen_width, int32_t screen_height,
+        bool fullscreen, bool retina);
 void antares_window_destroy(AntaresWindow* window);
+void antares_window_show(AntaresWindow* window);
+void antares_window_hide(AntaresWindow* window);
 
 typedef struct AntaresEventTranslator AntaresEventTranslator;
 AntaresEventTranslator* antares_event_translator_create(
