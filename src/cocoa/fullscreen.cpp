@@ -65,7 +65,8 @@ CocoaFullscreen::MouseHider::~MouseHider() {
 
 CocoaFullscreen::CocoaFullscreen(
         const cgl::PixelFormat& pixel_format, const cgl::Context& context, Size screen_size):
-        _windowed(pixel_format, context, screen_size, true, false),
+        _screen_size(screen_size),
+        _windowed(pixel_format, context, screen_size, true, true),
         _fader(_windowed) {
     CGReleaseDisplayFadeReservation(_fader.token);
 }

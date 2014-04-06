@@ -38,8 +38,10 @@ class CocoaFullscreen {
     ~CocoaFullscreen();
 
     AntaresWindow* window() { return _windowed.window(); }
+    Size viewport_size() const { return _screen_size; }
 
   private:
+    const Size _screen_size;
     struct DisplayFader {
         DisplayFader(CocoaWindowed& windowed);
         void finish();

@@ -41,4 +41,8 @@ CocoaWindowed::~CocoaWindowed() {
     antares_window_destroy(_window);
 }
 
+Size CocoaWindowed::viewport_size() const {
+    return {antares_window_viewport_width(_window), antares_window_viewport_height(_window)};
+}
+
 }  // namespace antares

@@ -131,6 +131,15 @@ void antares_window_destroy(AntaresWindow* window) {
     free(window);
 }
 
+int32_t antares_window_viewport_width(const AntaresWindow* window) {
+    return [window->view convertRectToBacking:[window->view bounds]].size.width;
+}
+
+int32_t antares_window_viewport_height(const AntaresWindow* window) {
+    // [self convertRectToBacking:[self bounds]];
+    return [window->view convertRectToBacking:[window->view bounds]].size.height;
+}
+
 struct AntaresEventTranslator {
     void (*mouse_down_callback)(int button, int32_t x, int32_t y, void* userdata);
     void* mouse_down_userdata;

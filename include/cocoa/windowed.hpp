@@ -38,6 +38,7 @@ class CocoaWindowed {
     ~CocoaWindowed();
 
     AntaresWindow* window() const { return _window; }
+    Size viewport_size() const;
 
   private:
     AntaresWindow* _window;
