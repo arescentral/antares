@@ -21,6 +21,8 @@
 #include <stdint.h>
 #include <sfz/sfz.hpp>
 
+#include "lang/casts.hpp"
+
 using sfz::ReadSource;
 using sfz::WriteTarget;
 using sfz::format;
@@ -365,9 +367,9 @@ static uint8_t ambient[][3] = {
 
 RgbColor RgbColor::tint(uint8_t color, uint8_t value) {
     return {
-        (diffuse[color][0] * value / 255) + ambient[color][0],
-        (diffuse[color][1] * value / 255) + ambient[color][1],
-        (diffuse[color][2] * value / 255) + ambient[color][2],
+        implicit_cast<uint8_t>((diffuse[color][0] * value / 255) + ambient[color][0]),
+        implicit_cast<uint8_t>((diffuse[color][1] * value / 255) + ambient[color][1]),
+        implicit_cast<uint8_t>((diffuse[color][2] * value / 255) + ambient[color][2]),
     };
 }
 
