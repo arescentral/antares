@@ -186,7 +186,7 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
 
 OffscreenVideoDriver::OffscreenVideoDriver(
         Size screen_size, EventScheduler& scheduler, const Optional<String>& output_dir):
-        OpenGlVideoDriver(screen_size),
+        _screen_size(screen_size),
         _output_dir(output_dir),
         _scheduler(scheduler) { }
 

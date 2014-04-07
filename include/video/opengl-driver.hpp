@@ -34,7 +34,7 @@ class Event;
 
 class OpenGlVideoDriver : public VideoDriver {
   public:
-    OpenGlVideoDriver(Size screen_size);
+    OpenGlVideoDriver();
 
     virtual std::unique_ptr<Sprite> new_sprite(sfz::PrintItem name, const PixMap& content);
     virtual void fill_rect(const Rect& rect, const RgbColor& color);
@@ -74,10 +74,10 @@ class OpenGlVideoDriver : public VideoDriver {
         DISALLOW_COPY_AND_ASSIGN(MainLoop);
     };
 
-    Size screen_size() const { return _screen_size; }
+    virtual Size viewport_size() const = 0;
+    virtual Size screen_size() const = 0;
 
   private:
-    const Size _screen_size;
     Random _static_seed;
 
     Uniforms _uniforms;

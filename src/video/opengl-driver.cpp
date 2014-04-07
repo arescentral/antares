@@ -272,9 +272,8 @@ class OpenGlSprite : public Sprite {
 
 }  // namespace
 
-OpenGlVideoDriver::OpenGlVideoDriver(Size screen_size)
-        : _screen_size(screen_size),
-          _static_seed{0} { }
+OpenGlVideoDriver::OpenGlVideoDriver()
+        : _static_seed{0} { }
 
 unique_ptr<Sprite> OpenGlVideoDriver::new_sprite(PrintItem name, const PixMap& content) {
     return unique_ptr<Sprite>(new OpenGlSprite(name, content, _uniforms));
@@ -501,7 +500,7 @@ void OpenGlVideoDriver::MainLoop::draw() {
 
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
-    glViewport(0, 0, _driver._screen_size.width, _driver._screen_size.height);
+    glViewport(0, 0, _driver.viewport_size().width, _driver.viewport_size().height);
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glMatrixMode(GL_MODELVIEW);
@@ -509,7 +508,7 @@ void OpenGlVideoDriver::MainLoop::draw() {
 
     glTranslatef(-1.0, 1.0, 0.0);
     glScalef(2.0, -2.0, 1.0);
-    glScalef(1.0 / _driver._screen_size.width, 1.0 / _driver._screen_size.height, 1.0);
+    glScalef(1.0 / _driver.screen_size().width, 1.0 / _driver.screen_size().height, 1.0);
     int32_t seed = {_driver._static_seed.next(256)};
     seed <<= 8;
     seed += _driver._static_seed.next(256);

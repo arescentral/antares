@@ -78,24 +78,48 @@ struct AntaresWindow {
 
 AntaresWindow* antares_window_create(
         CGLPixelFormatObj pixel_format, CGLContextObj context,
-        int32_t screen_width, int32_t screen_height) {
+        int32_t screen_width, int32_t screen_height,
+        bool fullscreen, bool retina) {
     AntaresWindow* window = malloc(sizeof(AntaresWindow));
     window->screen_width = screen_width;
     window->screen_height = screen_height;
     window->pixel_format = [[NSOpenGLPixelFormat alloc] initWithCGLPixelFormatObj:pixel_format];
     window->context = [[NSOpenGLContext alloc] initWithCGLContextObj:context];
-    NSRect screen_rect = NSMakeRect(0, 0, screen_width, screen_height);
-    window->view = [[NSOpenGLView alloc] initWithFrame:screen_rect
+
+    NSRect screen_rect = [[NSScreen mainScreen] frame];
+    NSRect display_rect = NSMakeRect(0, 0, screen_width, screen_height);
+    NSRect window_rect;
+    int style_mask;
+    if (fullscreen) {
+        window_rect = screen_rect;
+        style_mask = NSBorderlessWindowMask;
+        GLint gl_size[2] = {screen_width, screen_height};
+        CGLSetParameter(context, kCGLCPSurfaceBackingSize, gl_size);
+        CGLEnable(context, kCGLCESurfaceBackingSize);
+    } else {
+        window_rect = display_rect;
+        style_mask = NSTitledWindowMask | NSMiniaturizableWindowMask;
+    }
+
+    window->view = [[NSOpenGLView alloc] initWithFrame:window_rect
         pixelFormat:window->pixel_format];
+    if (retina) {
+        [window->view setWantsBestResolutionOpenGLSurface:YES];
+    }
     [window->view setOpenGLContext:window->context];
-    window->window = [[NSWindow alloc] initWithContentRect:screen_rect
-        styleMask:(NSTitledWindowMask | NSMiniaturizableWindowMask)
+
+    window->window = [[NSWindow alloc] initWithContentRect:window_rect
+        styleMask:style_mask
         backing:NSBackingStoreBuffered
         defer:NO];
     [window->window setAcceptsMouseMovedEvents:YES];
     [window->window setContentView:window->view];
     [window->window makeKeyAndOrderFront:NSApp];
-    [window->window center];
+    if (fullscreen) {
+        [window->window setLevel:NSMainMenuWindowLevel+1];
+    } else {
+        [window->window center];
+    }
     return window;
 }
 
@@ -105,6 +129,15 @@ void antares_window_destroy(AntaresWindow* window) {
     [window->context release];
     [window->pixel_format release];
     free(window);
+}
+
+int32_t antares_window_viewport_width(const AntaresWindow* window) {
+    return [window->view convertRectToBacking:[window->view bounds]].size.width;
+}
+
+int32_t antares_window_viewport_height(const AntaresWindow* window) {
+    // [self convertRectToBacking:[self bounds]];
+    return [window->view convertRectToBacking:[window->view bounds]].size.height;
 }
 
 struct AntaresEventTranslator {
@@ -141,7 +174,11 @@ static NSPoint translate_coords(
             input = [to_window convertScreenToBase:input];
         }
     }
-    return NSMakePoint(input.x, translator->screen_height - 1 - input.y);
+    input = [translator->window->view convertPoint:input fromView:nil];
+    NSSize view_size = [translator->window->view bounds].size;
+    input.x = round(input.x / view_size.width * translator->screen_width);
+    input.y = round(input.y / view_size.height * translator->screen_height);
+    return NSMakePoint(input.x, translator->screen_height - input.y);
 }
 
 AntaresEventTranslator* antares_event_translator_create(

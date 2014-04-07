@@ -55,7 +55,7 @@ int64_t usecs() {
 }  // namespace
 
 CocoaVideoDriver::CocoaVideoDriver(bool fullscreen, Size screen_size)
-        : OpenGlVideoDriver(screen_size),
+        : _screen_size(screen_size),
           _fullscreen(fullscreen),
           _start_time(antares::usecs()),
           _translator(screen_size.width, screen_size.height),
@@ -247,10 +247,13 @@ void CocoaVideoDriver::loop(Card* initial) {
     unique_ptr<CocoaFullscreen> fullscreen;
     unique_ptr<CocoaWindowed> windowed;
     if (_fullscreen) {
-        fullscreen.reset(new CocoaFullscreen(context, screen_size(), attrs[1]));
+        fullscreen.reset(new CocoaFullscreen(pixel_format, context, _screen_size));
+        antares_event_translator_set_window(_translator.c_obj(), fullscreen->window());
+        _viewport_size = fullscreen->viewport_size();
     } else {
-        windowed.reset(new CocoaWindowed(pixel_format, context, screen_size()));
+        windowed.reset(new CocoaWindowed(pixel_format, context, _screen_size, false, true));
         antares_event_translator_set_window(_translator.c_obj(), windowed->window());
+        _viewport_size = windowed->viewport_size();
     }
     GLint swap_interval = 1;
     CGLSetParameter(context.c_obj(), kCGLCPSwapInterval, &swap_interval);

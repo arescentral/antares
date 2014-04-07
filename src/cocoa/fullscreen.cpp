@@ -30,39 +30,21 @@ using sfz::Exception;
 
 namespace antares {
 
-CocoaFullscreen::DisplayCapturer::DisplayCapturer(Size screen_size) {
-    CGDisplayFadeReservationToken token;
-    if (CGAcquireDisplayFadeReservation(1.0, &token) == kCGErrorSuccess) {
+CocoaFullscreen::DisplayFader::DisplayFader(CocoaWindowed& windowed) {
+    if (CGAcquireDisplayFadeReservation(kCGMaxDisplayReservationInterval, &token)
+            == kCGErrorSuccess) {
         CGDisplayFade(
                 token, 1.0, kCGDisplayBlendNormal, kCGDisplayBlendSolidColor,
                 0, 0, 0, true);
     }
-
-    CGDisplayErr err = CGCaptureAllDisplays();
-    if (err != CGDisplayNoErr) {
-        throw Exception("CGCaptureAllDisplays() failed");
-        return;
-    }
-
-    // TODO(sfiera): control the resolution of the OpenGL context by
-    // setting the resolution of the backing store, rather than the
-    // screen.  Setting the backing store's resolution independently
-    // appears to have only been supported since 10.6, and since we
-    // currently target 10.4, we need to control the screen resolution
-    // directly for the time being.
-    CGDisplaySwitchToMode(kCGDirectMainDisplay, CGDisplayBestModeForParameters(
-                kCGDirectMainDisplay, 32, screen_size.width, screen_size.height,
-                NULL));
 }
 
-CocoaFullscreen::DisplayCapturer::~DisplayCapturer() {
-    CGDisplayFadeReservationToken token;
+void CocoaFullscreen::DisplayFader::finish() {
     if (CGAcquireDisplayFadeReservation(1.0, &token) == kCGErrorSuccess) {
         CGDisplayFade(
                 token, 1.0, kCGDisplayBlendSolidColor, kCGDisplayBlendNormal,
                 0, 0, 0, false);
     }
-    CGReleaseAllDisplays();
 }
 
 CocoaFullscreen::MenuBarHider::MenuBarHider() {
@@ -81,17 +63,16 @@ CocoaFullscreen::MouseHider::~MouseHider() {
     antares_mouse_show();
 }
 
-CocoaFullscreen::SetFullscreen::SetFullscreen(
-        const cgl::Context& context, uint32_t display_mask) {
-    cgl::check(CGLSetFullScreenOnDisplay(context.c_obj(), display_mask));
-    cgl::check(CGLSetCurrentContext(context.c_obj()));
+CocoaFullscreen::CocoaFullscreen(
+        const cgl::PixelFormat& pixel_format, const cgl::Context& context, Size screen_size):
+        _screen_size(screen_size),
+        _windowed(pixel_format, context, screen_size, true, true),
+        _fader(_windowed) {
+    CGReleaseDisplayFadeReservation(_fader.token);
 }
 
-CocoaFullscreen::CocoaFullscreen(const cgl::Context& context, Size screen_size, uint32_t display_mask):
-        _capturer(screen_size),
-        _set_fullscreen(context, display_mask) {
+CocoaFullscreen::~CocoaFullscreen() {
+    _fader.finish();
 }
-
-CocoaFullscreen::~CocoaFullscreen() { }
 
 }  // namespace antares
