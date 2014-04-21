@@ -392,11 +392,22 @@ void Replace_KeyCode_Strings_With_Actual_Key_Names(String* text, int16_t resID, 
     for (int i = 0; i < kKeyExtendedControlNum; ++i) {
         const StringSlice& search = keys.at(i);
         String replace(values.at(Preferences::preferences()->key(i) - 1));
+        // First, pad to the desired width.
         if (replace.size() < padTo) {
             replace.resize(padTo, ' ');
         }
-        while (find_replace(*text, 0, search, replace) > 0) {
-            // DO NOTHING
+
+        // Double backslashes.  The text produced here will be fed into
+        // StyledText.set_retro_text(), which interprets backslashes
+        // specially.  Don't do this until after padding, though.
+        size_t pos = 0;
+        while ((pos = find_replace(replace, pos, "\\", "\\\\")) != String::npos) {
+            pos += 2;  // Don't find the just-inserted backslashes again.
+        }
+
+        // Replace search string with value string in resulting text.
+        while (find_replace(*text, 0, search, replace) != String::npos) {
+            pos += 1;
         };
     }
 }
