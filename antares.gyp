@@ -1,6 +1,6 @@
 { "target_defaults":
   { "variables":
-    { "ANTARES_VERSION": "0.7.1"
+    { "ANTARES_VERSION": "0.7.2rc1"
     }
   , "cxxflags":
     [ "-Wall"
