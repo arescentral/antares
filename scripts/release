@@ -13,8 +13,8 @@ if [[ $# != 2 ]]; then
     usage
 fi
 
-# Check that there is a line 'VERSION = "..."' in the wscript file.
-grep >/dev/null '^VERSION = ".*"$' wscript
+# Check that there is a line 'VERSION = "..."' in the gyp file.
+grep >/dev/null '"ANTARES_VERSION": ".*"' antares.gyp
 ACTION=$1
 VERSION=$2
 
@@ -32,8 +32,8 @@ else
     usage
 fi
 
-update-wscript() {
-    sed -i '' 's/^VERSION = "\(.*\)"$/VERSION = "'$1'"/' wscript
+update-gyp() {
+    sed -i '' 's/"ANTARES_VERSION": ".*"/"ANTARES_VERSION": "'$1'"/' antares.gyp
 }
 
 update-readme() {
@@ -43,13 +43,13 @@ update-readme() {
 if [[ $ACTION == start ]]; then
     set -o verbose
     git checkout -b release/$VERSION
-    update-wscript ${VERSION}rc1
-    git commit wscript README.rst -m "Create release branch for $VERSION."
+    update-gyp ${VERSION}rc1
+    git commit antares.gyp README.rst -m "Create release branch for $VERSION."
 else
     set -o verbose
-    update-wscript $VERSION
+    update-gyp $VERSION
     update-readme $VERSION
-    git commit wscript README.rst -m "Release Antares $VERSION."
+    git commit antares.gyp README.rst -m "Release Antares $VERSION."
     git checkout master
     git merge --no-ff release/$VERSION
     git tag v$VERSION
