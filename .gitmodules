@@ -10,18 +10,15 @@
 [submodule "ext/rezin"]
 	path = ext/rezin
 	url = git://github.com/sfiera/rezin.git
-[submodule "ext/waf-sfiera"]
-	path = ext/waf-sfiera
-	url = git://github.com/sfiera/waf-sfiera.git
-[submodule "ext/gmock-waf"]
-	path = ext/gmock-waf
-	url = https://github.com/sfiera/gmock-waf.git
-[submodule "ext/libpng-waf"]
-	path = ext/libpng-waf
-	url = https://github.com/sfiera/libpng-waf.git
+[submodule "ext/gmock-gyp"]
+	path = ext/gmock-gyp
+	url = https://github.com/sfiera/gmock-gyp.git
+[submodule "ext/libpng-gyp"]
+	path = ext/libpng-gyp
+	url = https://github.com/sfiera/libpng-gyp.git
 [submodule "data"]
 	path = data
 	url = https://code.google.com/p/antares.data/
-[submodule "ext/libmodplug-waf"]
-	path = ext/libmodplug-waf
-	url = https://github.com/sfiera/libmodplug-waf.git
+[submodule "ext/libmodplug-gyp"]
+	path = ext/libmodplug-gyp
+	url = https://github.com/sfiera/libmodplug-gyp.git

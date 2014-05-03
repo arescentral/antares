@@ -21,6 +21,9 @@
 
 #include <sfz/sfz.hpp>
 
+#include <ApplicationServices/ApplicationServices.h>
+
+#include "cocoa/windowed.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
@@ -30,19 +33,22 @@ class Context;
 
 class CocoaFullscreen {
   public:
-    CocoaFullscreen(const cgl::Context& context, Size screen_size, uint32_t display_mask);
+    CocoaFullscreen(
+            const cgl::PixelFormat& pixel_format, const cgl::Context& context, Size screen_size);
     ~CocoaFullscreen();
 
+    AntaresWindow* window() { return _windowed.window(); }
+    Size viewport_size() const { return _screen_size; }
+
   private:
-    struct DisplayCapturer {
-        DisplayCapturer(Size screen_size);
-        ~DisplayCapturer();
+    const Size _screen_size;
+    struct DisplayFader {
+        DisplayFader(CocoaWindowed& windowed);
+        void finish();
+        CGDisplayFadeReservationToken token;
     };
-    DisplayCapturer _capturer;
-    struct SetFullscreen {
-        SetFullscreen(const cgl::Context& context, uint32_t display_mask);
-    };
-    SetFullscreen _set_fullscreen;
+    DisplayFader _fader;
+    CocoaWindowed _windowed;
     struct MenuBarHider {
         MenuBarHider();
         ~MenuBarHider();

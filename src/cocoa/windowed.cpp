@@ -31,13 +31,18 @@ using sfz::Exception;
 namespace antares {
 
 CocoaWindowed::CocoaWindowed(
-        const cgl::PixelFormat& pixel_format, const cgl::Context& context, Size screen_size):
+        const cgl::PixelFormat& pixel_format, const cgl::Context& context, Size screen_size,
+        bool fullscreen, bool retina):
         _window(antares_window_create(
                     pixel_format.c_obj(), context.c_obj(),
-                    screen_size.width, screen_size.height)) { }
+                    screen_size.width, screen_size.height, fullscreen, retina)) { }
 
 CocoaWindowed::~CocoaWindowed() {
     antares_window_destroy(_window);
+}
+
+Size CocoaWindowed::viewport_size() const {
+    return {antares_window_viewport_width(_window), antares_window_viewport_height(_window)};
 }
 
 }  // namespace antares

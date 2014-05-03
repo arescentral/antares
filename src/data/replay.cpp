@@ -334,7 +334,7 @@ void ReplayBuilder::key_down(const KeyDownEvent& event) {
     if (!_file) {
         return;
     }
-    for (int i: range(KEY_COUNT)) {
+    for (auto i: range<int>(KEY_COUNT)) {
         if (event.key() == Preferences::preferences()->key(i) - 1) {
             ReplayData::Action action = {};
             action.at = _at;
@@ -348,7 +348,7 @@ void ReplayBuilder::key_up(const KeyUpEvent& event) {
     if (!_file) {
         return;
     }
-    for (int i: range(KEY_COUNT)) {
+    for (auto i: range<int>(KEY_COUNT)) {
         if (event.key() == Preferences::preferences()->key(i) - 1) {
             ReplayData::Action action = {};
             action.at = _at;

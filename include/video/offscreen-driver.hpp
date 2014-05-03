@@ -34,6 +34,9 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
             Size screen_size, EventScheduler& scheduler,
             const sfz::Optional<sfz::String>& output_dir);
 
+    virtual Size viewport_size() const { return _screen_size; }
+    virtual Size screen_size() const { return _screen_size; }
+
     virtual bool button(int which) { return _scheduler.button(which); }
     virtual Point get_mouse() { return _scheduler.get_mouse(); }
     virtual void get_keys(KeyMap* k) { _scheduler.get_keys(k); }
@@ -46,6 +49,7 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
     void loop(Card* initial);
 
   private:
+    const Size _screen_size;
     const sfz::Optional<sfz::String> _output_dir;
 
     EventScheduler& _scheduler;
