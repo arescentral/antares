@@ -1,6 +1,6 @@
 { "target_defaults":
   { "variables":
-    { "ANTARES_VERSION": "0.7.1"
+    { "ANTARES_VERSION": "0.7.2"
     }
   , "cxxflags":
     [ "-Wall"
@@ -9,7 +9,8 @@
     , "-Wno-deprecated-declarations"
     ]
   , "xcode_settings":
-    { "INFOPLIST_PREPROCESSOR_DEFINITIONS": "ANTARES_VERSION=<(ANTARES_VERSION) SYSTEM_VERSION=<(MACOSX_VERSION)"
+    { "ANTARES_VERSION": "0.7.2"
+    , "SYSTEM_VERSION": "<(MACOSX_VERSION)"
     }
   , "include_dirs": ["include"]
   }
@@ -363,7 +364,6 @@
           , "mac_bundle": 1
           , "xcode_settings":
             { "INFOPLIST_FILE": "resources/Antares-Info.plist"
-            , "INFOPLIST_PREPROCESS": "YES"
             , "CODE_SIGN_IDENTITY": "Developer ID Application"
             , "CODE_SIGN_ENTITLEMENTS": "resources/entitlements.plist"
             }
