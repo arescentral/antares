@@ -20,6 +20,7 @@
 
 #include <sfz/sfz.hpp>
 
+#include "config/keys.hpp"
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "drawing/color.hpp"
@@ -28,6 +29,7 @@
 #include "game/globals.hpp"
 #include "game/main.hpp"
 #include "game/scenario-maker.hpp"
+#include "sound/driver.hpp"
 #include "ui/card.hpp"
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
@@ -57,6 +59,7 @@ SelectLevelScreen::~SelectLevelScreen() { }
 void SelectLevelScreen::become_front() {
     switch (_state) {
       case SELECTING:
+      case UNLOCKING:
         InterfaceScreen::become_front();
         break;
 
@@ -64,6 +67,58 @@ void SelectLevelScreen::become_front() {
         stack()->pop(this);
         break;
     }
+}
+
+static int ndigits(size_t n) {
+    if (n == 0) {
+        return 1;
+    }
+    int result = 1;
+    while (n >= 10) {
+        ++result;
+        n /= 10;
+    }
+    return result;
+}
+
+void SelectLevelScreen::key_down(const KeyDownEvent& event) {
+    int digit;
+    switch (_state) {
+      case SELECTING:
+        switch (event.key()) {
+          case Keys::K8:
+          case Keys::N_TIMES:
+            _state = UNLOCKING;
+            _unlock_chapter = 0;
+            _unlock_digits = ndigits(globals()->scenarioNum);
+            PlayVolumeSound(kCloakOn, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
+            return;
+        }
+      case UNLOCKING:
+        {
+            int digit = key_digit(event.key());
+            if (digit < 0) {
+                _state = SELECTING;
+                break;
+            }
+            _unlock_chapter = (_unlock_chapter * 10) + digit;
+            if (--_unlock_digits == 0) {
+                _state = SELECTING;
+                if (_unlock_chapter > globals()->scenarioNum) {
+                    return;
+                }
+                PlayVolumeSound(kCloakOff, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
+                Ledger::ledger()->unlock_chapter(_unlock_chapter);
+                Ledger::ledger()->unlocked_chapters(&_chapters);
+                adjust_interface();
+            }
+            return;
+        }
+        break;
+      case FADING_OUT:
+        return;
+    }
+    InterfaceScreen::key_down(event);
 }
 
 void SelectLevelScreen::adjust_interface() {
