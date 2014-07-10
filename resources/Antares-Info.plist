@@ -17,10 +17,6 @@
             <string>Viewer</string>
             <key>LSHandlerRank</key>
             <string>Owner</string>
-            <key>LSItemContentTypes</key>
-            <array>
-                <string>org.arescentral.antares.plugin</string>
-            </array>
         </dict>
     </array>
     <key>CFBundleExecutable</key>
