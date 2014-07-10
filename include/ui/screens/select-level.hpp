@@ -34,6 +34,7 @@ class SelectLevelScreen : public InterfaceScreen {
     ~SelectLevelScreen();
 
     virtual void become_front();
+    virtual void key_down(const KeyDownEvent& event);
 
   protected:
     virtual void adjust_interface();
@@ -55,6 +56,7 @@ class SelectLevelScreen : public InterfaceScreen {
     enum State {
         SELECTING,
         FADING_OUT,
+        UNLOCKING,
     };
     State _state;
 
@@ -64,6 +66,8 @@ class SelectLevelScreen : public InterfaceScreen {
     size_t _index;
     const Scenario** _scenario;
     std::vector<int> _chapters;
+    int _unlock_digits;
+    size_t _unlock_chapter;
 
     DISALLOW_COPY_AND_ASSIGN(SelectLevelScreen);
 };
