@@ -4,7 +4,7 @@
   ]
 , "target_defaults":
   { "variables":
-    { "MACOSX_VERSION": "10.8"
+    { "MACOSX_VERSION": "10.9"
     }
   , "default_configuration": "opt"
   , "configurations":
