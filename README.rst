@@ -20,7 +20,7 @@ plugins and multiplayer. These are considered features to be added after
 ..  _Ares: http://en.wikipedia.org/wiki/Ares_(computer_game)
 ..  _Nathan Lamont: http://biggerplanet.com/
 ..  _Ambrosia Software: http://www.ambrosiasw.com/
-..  _list of them: http://code.google.com/p/antares/issues/list?q=-label:Milestone:Later+-label%3ARelease
+..  _list of them: https://github.com/arescentral/antares/issues?q=is%3Aissue+is%3Aopen+-milestone%3ALater+
 
 Links
 -----
@@ -29,19 +29,14 @@ Links
 
     *   `Contributing to Antares`_
 
-*   `Google Code project`_
-
-    *   `Issue tracker`_
-    *   `Announcements mailing list`_
-    *   `Development mailing list`_
+*   `Announcements mailing list`_
+*   `Development mailing list`_
 
 *   `Ares Forums`_
 *   Xsera_
 
 ..  _Antares website: http://arescentral.org/antares/
 ..  _Contributing to Antares: http://arescentral.org/antares/contributing/
-..  _Google Code project: http://code.google.com/p/antares/
-..  _Issue Tracker: http://code.google.com/p/antares/issues
 ..  _Announcements mailing list: https://groups.google.com/a/arescentral.org/group/antares-announce
 ..  _Development mailing list: https://groups.google.com/a/arescentral.org/group/antares-dev
 ..  _Ares Forums: http://www.ambrosiasw.com/forums/index.php?showforum=88
