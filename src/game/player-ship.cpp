@@ -61,8 +61,6 @@ namespace antares {
 
 namespace {
 
-const bool NETWORK_ON = false;
-
 const int32_t kSendMessageVOffset = 20;
 const int32_t kCursorBoundsSize = 16;  // should be same in instruments.c
 
@@ -687,9 +685,7 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
         if (gDestKeyTime > 45) {
             if ((theShip->attributes & kCanBeDestination)
                     && (!globals()->destKeyUsedForSelection)) {
-                if (!NETWORK_ON) {
-                    target_self();
-                }
+                target_self();
             }
         }
         gDestKeyTime = 0;
@@ -742,12 +738,10 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
                     bool is_target = (gTheseKeys & kDestinationKey)
                         || (selectShip->owner != globals()->gPlayerAdmiralNumber)
                         || (globals()->hotKey_target);
-                    if (!NETWORK_ON) {
-                        SetPlayerSelectShip(
-                                globals()->hotKey[hot_key].objectNum,
-                                is_target,
-                                globals()->gPlayerAdmiralNumber);
-                    }
+                    SetPlayerSelectShip(
+                            globals()->hotKey[hot_key].objectNum,
+                            is_target,
+                            globals()->gPlayerAdmiralNumber);
                 } else {
                     globals()->hotKey[hot_key].objectNum = -1;
                 }
@@ -866,9 +860,7 @@ void PlayerShipHandleClick(Point where, int button) {
                         kCanBeDestination | kIsDestination,//kCanThink | kIsDestination,
                         0, selectShipNum, 0);
                 if (selectShipNum >= 0) {
-                    if (!NETWORK_ON) {
-                        SetPlayerSelectShip(selectShipNum, true, globals()->gPlayerAdmiralNumber);
-                    }
+                    SetPlayerSelectShip(selectShipNum, true, globals()->gPlayerAdmiralNumber);
                 }
             } else {
                 selectShipNum = GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber);
@@ -877,9 +869,7 @@ void PlayerShipHandleClick(Point where, int button) {
                         kCanThink | kCanAcceptBuild,
                         0, selectShipNum, 1);
                 if (selectShipNum >= 0) {
-                    if (!NETWORK_ON) {
-                        SetPlayerSelectShip(selectShipNum, false, globals()->gPlayerAdmiralNumber);
-                    }
+                    SetPlayerSelectShip(selectShipNum, false, globals()->gPlayerAdmiralNumber);
                 }
             }
         }
