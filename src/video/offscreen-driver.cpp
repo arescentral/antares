@@ -138,6 +138,7 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
             _pix(kAttrs),
             _context(_pix.c_obj(), NULL),
             _buffer(Preferences::preferences()->screen_size(), 4),
+            _set_context(*this),
             _setup(*this),
             _output_dir(output_dir),
             _loop(driver, initial) {
@@ -165,12 +166,17 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
   private:
     cgl::PixelFormat _pix;
     cgl::Context _context;
+    struct SetContext {
+        SetContext(OffscreenVideoDriver::MainLoop& loop) {
+            cgl::check(CGLSetCurrentContext(loop._context.c_obj()));
+        }
+    };
+    SetContext _set_context;
     Framebuffer _fb;
     Renderbuffer _rb;
     SnapshotBuffer _buffer;
     struct Setup {
         Setup(OffscreenVideoDriver::MainLoop& loop) {
-            cgl::check(CGLSetCurrentContext(loop._context.c_obj()));
             glBindFramebuffer(GL_FRAMEBUFFER, loop._fb.id);
             glBindRenderbuffer(GL_RENDERBUFFER, loop._rb.id);
             glRenderbufferStorage(
