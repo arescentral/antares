@@ -543,26 +543,6 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     gAbsoluteScale = kTimesTwoScale;
     globals()->gSynchValue = 0;
 
-    if (NETWORK_ON) {
-#ifdef NETSPROCKET_AVAILABLE
-        if (IAmHosting()) {
-            globals()->gThisScenarioNumber = which;
-            gRandomSeed = Randomize(32760);
-            SendStartMessage();
-        } else {
-            globals()->gThisScenarioNumber = -1;
-            gRandomSeed = -1;
-            if ((globals()->gThisScenarioNumber == -1) && (gRandomSeed == -1)) {
-                if (WaitForAllStart() == false) {
-                    StopNetworking();
-                    return false;
-                }
-            }
-            which = globals()->gThisScenarioNumber;
-        }
-#endif
-    }
-
     gThisScenario = scenario;
 
     {
@@ -586,53 +566,23 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     }
 
     for (int i = 0; i < gThisScenario->playerNum; i++) {
-        if (NETWORK_ON) {
-#ifdef NETSPROCKET_AVAILABLE
-            if (gThisScenario->player[i].playerType == kComputerPlayer) {
-                gAdmiralNumbers[i] = MakeNewAdmiral(
-                        kNoShip, kNoDestinationObject, kNoDestinationType,
-                        kAIsComputer, gThisScenario->player[i].playerRace,
-                        gThisScenario->player[i].nameResID,
-                        gThisScenario->player[i].nameStrNum,
-                        gThisScenario->player[i].earningPower);
-                PayAdmiral(gAdmiralNumbers[i], mLongToFixed(5000));
-            } else if (GetPlayerRace(i) >= 0) {
-                if (i == globals()->gPlayerAdmiralNumber) {
-                    admiralType = 0;
-                } else {
-                    admiralType = kAIsRemote;
-                }
-                gAdmiralNumbers[i] = MakeNewAdmiral(
-                        kNoShip, kNoDestinationObject,
-                        kNoDestinationType, kAIsHuman | admiralType,
-                        GetRaceIDFromNum(GetPlayerRace(i)),
-                        gThisScenario->player[i].nameResID,
-                        gThisScenario->player[i].nameStrNum,
-                        gThisScenario->player[i].earningPower);
-                PayAdmiral(gAdmiralNumbers[i], mLongToFixed(5000));
-                SetAdmiralColor(gAdmiralNumbers[i], GetPlayerColor(i));
-                SetAdmiralName(gAdmiralNumbers[i], (anyCharType *)GetPlayerName(i));
-            }
-#endif  // NETSPROCKET_AVAILABLE
+        if (gThisScenario->player[i].playerType == kSingleHumanPlayer) {
+            gAdmiralNumbers[i] = MakeNewAdmiral(
+                    kNoShip, kNoDestinationObject, kNoDestinationType,
+                    kAIsHuman, gThisScenario->player[i].playerRace,
+                    gThisScenario->player[i].nameResID,
+                    gThisScenario->player[i].nameStrNum,
+                    gThisScenario->player[i].earningPower);
+            PayAdmiral(gAdmiralNumbers[i], mLongToFixed(5000));
+            globals()->gPlayerAdmiralNumber = gAdmiralNumbers[i];
         } else {
-            if (gThisScenario->player[i].playerType == kSingleHumanPlayer) {
-                gAdmiralNumbers[i] = MakeNewAdmiral(
-                        kNoShip, kNoDestinationObject, kNoDestinationType,
-                        kAIsHuman, gThisScenario->player[i].playerRace,
-                        gThisScenario->player[i].nameResID,
-                        gThisScenario->player[i].nameStrNum,
-                        gThisScenario->player[i].earningPower);
-                PayAdmiral(gAdmiralNumbers[i], mLongToFixed(5000));
-                globals()->gPlayerAdmiralNumber = gAdmiralNumbers[i];
-            } else {
-                gAdmiralNumbers[i] = MakeNewAdmiral(
-                        kNoShip, kNoDestinationObject, kNoDestinationType,
-                        kAIsComputer, gThisScenario->player[i].playerRace,
-                        gThisScenario->player[i].nameResID,
-                        gThisScenario->player[i].nameStrNum,
-                        gThisScenario->player[i].earningPower);
-                PayAdmiral(gAdmiralNumbers[i], mLongToFixed(5000));
-            }
+            gAdmiralNumbers[i] = MakeNewAdmiral(
+                    kNoShip, kNoDestinationObject, kNoDestinationType,
+                    kAIsComputer, gThisScenario->player[i].playerRace,
+                    gThisScenario->player[i].nameResID,
+                    gThisScenario->player[i].nameStrNum,
+                    gThisScenario->player[i].earningPower);
+            PayAdmiral(gAdmiralNumbers[i], mLongToFixed(5000));
         }
     }
 
