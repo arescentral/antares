@@ -84,10 +84,7 @@ void AddActionMedia(objectActionType *action, uint8_t color);
 
 void SetAllBaseObjectsUnchecked() {
     baseObjectType  *aBase = mGetBaseObjectPtr(0);
-    int32_t         count;
-
-    for ( count = 0; count < globals()->maxBaseObject; count++)
-    {
+    for (int32_t count = 0; count < globals()->maxBaseObject; count++) {
         aBase->internalFlags = 0;
         aBase++;
     }
@@ -96,41 +93,36 @@ void SetAllBaseObjectsUnchecked() {
 void CheckBaseObjectMedia(baseObjectType *aBase, uint8_t color) {
     baseObjectType  *weapon;
 
-    if ( !(aBase->internalFlags & (0x00000001 << color)))
-    {
+    if (!(aBase->internalFlags & (0x00000001 << color))) {
         aBase->internalFlags |= (0x00000001 << color);
-        if ( aBase->attributes & kCanThink)
-        {
-            if ( aBase->pixResID != kNoSpriteTable)
-                KeepPixTable( aBase->pixResID +
-                    (color << kSpriteTableColorShift));
-        } else
-        {
-            if ( aBase->pixResID != kNoSpriteTable)
-                KeepPixTable( aBase->pixResID);
+        if (aBase->attributes & kCanThink) {
+            if (aBase->pixResID != kNoSpriteTable) {
+                KeepPixTable(aBase->pixResID + (color << kSpriteTableColorShift));
+            }
+        } else {
+            if (aBase->pixResID != kNoSpriteTable) {
+                KeepPixTable(aBase->pixResID);
+            }
         }
 
-        CheckActionMedia( aBase->destroyAction, (aBase->destroyActionNum & kDestroyActionNotMask), color);
-        CheckActionMedia( aBase->expireAction, (aBase->expireActionNum & kDestroyActionNotMask), color);
-        CheckActionMedia( aBase->createAction, aBase->createActionNum, color);
-        CheckActionMedia( aBase->collideAction, aBase->collideActionNum, color);
-        CheckActionMedia( aBase->activateAction, (aBase->activateActionNum & kPeriodicActionNotMask), color);
-        CheckActionMedia( aBase->arriveAction, aBase->arriveActionNum, color);
+        CheckActionMedia(aBase->destroyAction, (aBase->destroyActionNum & kDestroyActionNotMask), color);
+        CheckActionMedia(aBase->expireAction, (aBase->expireActionNum & kDestroyActionNotMask), color);
+        CheckActionMedia(aBase->createAction, aBase->createActionNum, color);
+        CheckActionMedia(aBase->collideAction, aBase->collideActionNum, color);
+        CheckActionMedia(aBase->activateAction, (aBase->activateActionNum & kPeriodicActionNotMask), color);
+        CheckActionMedia(aBase->arriveAction, aBase->arriveActionNum, color);
 
-        if ( aBase->pulse != kNoWeapon)
-        {
-            weapon = mGetBaseObjectPtr( aBase->pulse);
-            CheckBaseObjectMedia( weapon, color);
+        if (aBase->pulse != kNoWeapon) {
+            weapon = mGetBaseObjectPtr(aBase->pulse);
+            CheckBaseObjectMedia(weapon, color);
         }
-        if ( aBase->beam != kNoWeapon)
-        {
-            weapon = mGetBaseObjectPtr( aBase->beam);
-            CheckBaseObjectMedia( weapon, color);
+        if (aBase->beam != kNoWeapon) {
+            weapon = mGetBaseObjectPtr(aBase->beam);
+            CheckBaseObjectMedia(weapon, color);
         }
-        if ( aBase->special != kNoWeapon)
-        {
-            weapon = mGetBaseObjectPtr( aBase->special);
-            CheckBaseObjectMedia( weapon, color);
+        if (aBase->special != kNoWeapon) {
+            weapon = mGetBaseObjectPtr(aBase->special);
+            CheckBaseObjectMedia(weapon, color);
         }
     }
 }
@@ -138,56 +130,47 @@ void CheckBaseObjectMedia(baseObjectType *aBase, uint8_t color) {
 void CheckActionMedia(int32_t whichAction, int32_t actionNum, uint8_t color) {
     baseObjectType      *baseObject;
     objectActionType    *action = mGetObjectActionPtr(whichAction);
-    bool             OKtoExecute;
+    bool                OKtoExecute;
     int32_t             count;
 
-    while ((actionNum > 0) && (action->verb != kNoAction))
-    {
-        switch ( action->verb)
-        {
+    while ((actionNum > 0) && (action->verb != kNoAction)) {
+        switch (action->verb) {
             case kCreateObject:
             case kCreateObjectSetDest:
-                baseObject = mGetBaseObjectPtr( action->argument.createObject.whichBaseType);
-                CheckBaseObjectMedia( baseObject, color);
+                baseObject = mGetBaseObjectPtr(action->argument.createObject.whichBaseType);
+                CheckBaseObjectMedia(baseObject, color);
                 break;
 
             case kPlaySound:
-                for (   count = action->argument.playSound.idMinimum;
-                        count <= (action->argument.playSound.idMinimum +
-                                    action->argument.playSound.idRange);
-                        count++)
-                {
-                    KeepSound( count); // FIX to check for range of sounds
+                for (int32_t i = action->argument.playSound.idMinimum;
+                     i <= (action->argument.playSound.idMinimum +
+                               action->argument.playSound.idRange);
+                     i++) {
+                    KeepSound(i); // FIX to check for range of sounds
                 }
                 break;
 
             case kAlter:
-                switch( action->argument.alterObject.alterType)
-                {
+                switch(action->argument.alterObject.alterType) {
                     case kAlterBaseType:
-                        baseObject = mGetBaseObjectPtr( action->argument.alterObject.minimum);
-                        CheckBaseObjectMedia( baseObject, color);
+                        baseObject = mGetBaseObjectPtr(action->argument.alterObject.minimum);
+                        CheckBaseObjectMedia(baseObject, color);
                         break;
 
                     case kAlterOwner:
                         baseObject = mGetBaseObjectPtr(0);
-                        for ( count = 0; count < globals()->maxBaseObject; count++)
-                        {
+                        for (int32_t count = 0; count < globals()->maxBaseObject; count++) {
                             OKtoExecute = false;
-                            if ( action->exclusiveFilter == 0xffffffff)
-                            {
-                                if (    (action->inclusiveFilter & kLevelKeyTagMask) ==
-                                            ( baseObject->buildFlags & kLevelKeyTagMask)
-                                    )
-                                {
+                            if (action->exclusiveFilter == 0xffffffff) {
+                                if ((action->inclusiveFilter & kLevelKeyTagMask) ==
+                                    (baseObject->buildFlags & kLevelKeyTagMask)) {
                                     OKtoExecute = true;
                                 }
-                            } else if ( ( action->inclusiveFilter & baseObject->attributes) == action->inclusiveFilter)
-                            {
+                            } else if ((action->inclusiveFilter & baseObject->attributes) ==
+                                       action->inclusiveFilter) {
                                 OKtoExecute = true;
                             }
-                            if ( OKtoExecute)
-                            {
+                            if (OKtoExecute) {
                                 baseObject->internalFlags |= kOwnerMayChangeFlag;
                             }
                             baseObject++;
@@ -196,7 +179,6 @@ void CheckActionMedia(int32_t whichAction, int32_t actionNum, uint8_t color) {
 
                     default:
                         break;
-
                 }
                 break;
 
@@ -212,48 +194,40 @@ void CheckActionMedia(int32_t whichAction, int32_t actionNum, uint8_t color) {
 }
 
 void AddBaseObjectMedia(int32_t whichBase, uint8_t color) {
-    baseObjectType      *aBase = mGetBaseObjectPtr( whichBase);
+    baseObjectType      *aBase = mGetBaseObjectPtr(whichBase);
 
-    if ( !(aBase->internalFlags & (0x00000001 << color)))
-    {
+    if (!(aBase->internalFlags & (0x00000001 << color))) {
         aBase->internalFlags |= (0x00000001 << color);
-        if ( aBase->pixResID != kNoSpriteTable)
-        {
-            if ( aBase->attributes & kCanThink)
-            {
-                AddPixTable( aBase->pixResID +
-                    (color << kSpriteTableColorShift));
-            } else
-            {
-                AddPixTable( aBase->pixResID);      // moves mem
+        if (aBase->pixResID != kNoSpriteTable) {
+            if (aBase->attributes & kCanThink) {
+                AddPixTable(aBase->pixResID + (color << kSpriteTableColorShift));
+            } else {
+                AddPixTable(aBase->pixResID);      // moves mem
             }
-            aBase = mGetBaseObjectPtr( whichBase);
+            aBase = mGetBaseObjectPtr(whichBase);
         }
 
-        AddBaseObjectActionMedia( whichBase, kDestroyActionType, color);
-        AddBaseObjectActionMedia( whichBase, kExpireActionType, color);
-        AddBaseObjectActionMedia( whichBase, kCreateActionType, color);
-        AddBaseObjectActionMedia( whichBase, kCollideActionType, color);
-        AddBaseObjectActionMedia( whichBase, kActivateActionType, color);
-        AddBaseObjectActionMedia( whichBase, kArriveActionType, color);
+        AddBaseObjectActionMedia(whichBase, kDestroyActionType, color);
+        AddBaseObjectActionMedia(whichBase, kExpireActionType, color);
+        AddBaseObjectActionMedia(whichBase, kCreateActionType, color);
+        AddBaseObjectActionMedia(whichBase, kCollideActionType, color);
+        AddBaseObjectActionMedia(whichBase, kActivateActionType, color);
+        AddBaseObjectActionMedia(whichBase, kArriveActionType, color);
 
-        aBase = mGetBaseObjectPtr( whichBase);
-        if ( aBase->pulse != kNoWeapon)
-        {
-            aBase = mGetBaseObjectPtr( whichBase);
-            AddBaseObjectMedia( aBase->pulse, color);
+        aBase = mGetBaseObjectPtr(whichBase);
+        if (aBase->pulse != kNoWeapon) {
+            aBase = mGetBaseObjectPtr(whichBase);
+            AddBaseObjectMedia(aBase->pulse, color);
         }
-        aBase = mGetBaseObjectPtr( whichBase);
-        if ( aBase->beam != kNoWeapon)
-        {
-            aBase = mGetBaseObjectPtr( whichBase);
-            AddBaseObjectMedia( aBase->beam, color);
+        aBase = mGetBaseObjectPtr(whichBase);
+        if (aBase->beam != kNoWeapon) {
+            aBase = mGetBaseObjectPtr(whichBase);
+            AddBaseObjectMedia(aBase->beam, color);
         }
-        aBase = mGetBaseObjectPtr( whichBase);
-        if ( aBase->special != kNoWeapon)
-        {
-            aBase = mGetBaseObjectPtr( whichBase);
-            AddBaseObjectMedia( aBase->special, color);
+        aBase = mGetBaseObjectPtr(whichBase);
+        if (aBase->special != kNoWeapon) {
+            aBase = mGetBaseObjectPtr(whichBase);
+            AddBaseObjectMedia(aBase->special, color);
         }
     }
 }
@@ -261,31 +235,45 @@ void AddBaseObjectMedia(int32_t whichBase, uint8_t color) {
 void mGetActionFromBaseTypeNum(
         objectActionType*& mactPtr, baseObjectType* mbaseObjPtr, int32_t mactionType,
         int32_t mactionNum) {
-    if ( (mactionType) == kDestroyActionType)
-    {
-        if ( mactionNum >= ((mbaseObjPtr)->destroyActionNum & kDestroyActionNotMask)) mactPtr = NULL;
-        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->destroyAction + implicit_cast<int32_t>(mactionNum));
-    } else if ( (mactionType) == kExpireActionType)
-    {
-        if ( mactionNum >= ((mbaseObjPtr)->expireActionNum  & kDestroyActionNotMask)) mactPtr = NULL;
-        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->expireAction + implicit_cast<int32_t>(mactionNum));
-    } else if ( (mactionType) == kCreateActionType)
-    {
-        if ( mactionNum >= (mbaseObjPtr)->createActionNum) mactPtr = NULL;
-        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->createAction + implicit_cast<int32_t>(mactionNum));
-    } else if ( (mactionType) == kCollideActionType)
-    {
-        if ( mactionNum >= (mbaseObjPtr)->collideActionNum) mactPtr = NULL;
-        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->collideAction + implicit_cast<int32_t>(mactionNum));
-    } else if ( (mactionType) == kActivateActionType)
-    {
-        if ( mactionNum >= ((mbaseObjPtr)->activateActionNum & kPeriodicActionNotMask)) mactPtr = NULL;
-        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->activateAction + implicit_cast<int32_t>(mactionNum));
-    } else if ( (mactionType) == kArriveActionType)
-    {
-        if ( mactionNum >= (mbaseObjPtr)->arriveActionNum) mactPtr = NULL;
-        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->arriveAction + implicit_cast<int32_t>(mactionNum));
-    } else mactPtr = NULL;
+    if (mactionType == kDestroyActionType) {
+        if (mactionNum >= (mbaseObjPtr->destroyActionNum & kDestroyActionNotMask)) {
+            mactPtr = NULL;
+        } else {
+            mactPtr = mGetObjectActionPtr((mbaseObjPtr)->destroyAction + mactionNum);
+        }
+    } else if (mactionType == kExpireActionType) {
+        if (mactionNum >= (mbaseObjPtr->expireActionNum  & kDestroyActionNotMask)) {
+            mactPtr = NULL;
+        } else {
+            mactPtr = mGetObjectActionPtr(mbaseObjPtr->expireAction + mactionNum);
+        }
+    } else if (mactionType == kCreateActionType) {
+        if (mactionNum >= mbaseObjPtr->createActionNum) {
+            mactPtr = NULL;
+        } else {
+            mactPtr = mGetObjectActionPtr(mbaseObjPtr->createAction + mactionNum);
+        }
+    } else if (mactionType == kCollideActionType) {
+        if (mactionNum >= mbaseObjPtr->collideActionNum) {
+            mactPtr = NULL;
+        } else {
+            mactPtr = mGetObjectActionPtr((mbaseObjPtr)->collideAction + mactionNum);
+        }
+    } else if (mactionType == kActivateActionType) {
+        if (mactionNum >= (mbaseObjPtr->activateActionNum & kPeriodicActionNotMask)) {
+            mactPtr = NULL;
+        } else {
+            mactPtr = mGetObjectActionPtr((mbaseObjPtr)->activateAction + mactionNum);
+        }
+    } else if (mactionType == kArriveActionType) {
+        if (mactionNum >= mbaseObjPtr->arriveActionNum) {
+            mactPtr = NULL;
+        } else {
+            mactPtr = mGetObjectActionPtr(mbaseObjPtr->arriveAction + mactionNum);
+        }
+    } else {
+        mactPtr = NULL;
+    }
 }
 
 void AddBaseObjectActionMedia(int32_t whichBase, int32_t whichType, uint8_t color) {
@@ -293,14 +281,13 @@ void AddBaseObjectActionMedia(int32_t whichBase, int32_t whichType, uint8_t colo
     int32_t             count = 0;
     objectActionType    *action = NULL;
 
-    do
-    {
-        baseObject = mGetBaseObjectPtr( whichBase);
-        mGetActionFromBaseTypeNum( action, baseObject, whichType, count);
+    do {
+        baseObject = mGetBaseObjectPtr(whichBase);
+        mGetActionFromBaseTypeNum(action, baseObject, whichType, count);
 
-        AddActionMedia( action, color);
+        AddActionMedia(action, color);
         count++;
-    } while ( action != NULL);
+    } while (action != NULL);
 }
 
 void AddActionMedia(objectActionType *action, uint8_t color) {
@@ -308,75 +295,66 @@ void AddActionMedia(objectActionType *action, uint8_t color) {
     int32_t             count = 0, l1, l2;
     bool             OKtoExecute;
 
-    if ( action != NULL)
-    {
-        switch ( action->verb)
-        {
-            case kCreateObject:
-            case kCreateObjectSetDest:
-                AddBaseObjectMedia( action->argument.createObject.whichBaseType, color);
-                break;
+    if (action == NULL) {
+        return;
+    }
+    switch (action->verb) {
+        case kCreateObject:
+        case kCreateObjectSetDest:
+            AddBaseObjectMedia(action->argument.createObject.whichBaseType, color);
+            break;
 
-            case kPlaySound:
-                l1 = action->argument.playSound.idMinimum;
-                l2 = action->argument.playSound.idMinimum +
-                        action->argument.playSound.idRange;
-                for ( count = l1; count <= l2; count++)
-                {
-                    AddSound( count); // moves mem
-                }
-                break;
+        case kPlaySound:
+            l1 = action->argument.playSound.idMinimum;
+            l2 = action->argument.playSound.idMinimum +
+                    action->argument.playSound.idRange;
+            for (int32_t count = l1; count <= l2; count++) {
+                AddSound(count); // moves mem
+            }
+            break;
 
-            case kNoAction:
-                action = NULL;   // get us out of loop
-                break;
+        case kNoAction:
+            action = NULL;   // get us out of loop
+            break;
 
-            case kAlter:
-                switch( action->argument.alterObject.alterType)
-                {
-                    case kAlterBaseType:
-                        AddBaseObjectMedia( action->argument.alterObject.minimum, color);
-                        break;
+        case kAlter:
+            switch(action->argument.alterObject.alterType) {
+                case kAlterBaseType:
+                    AddBaseObjectMedia(action->argument.alterObject.minimum, color);
+                    break;
 
-                    case kAlterOwner:
-                        baseObject = mGetBaseObjectPtr(0);
-                        for ( count = 0; count < globals()->maxBaseObject; count++)
-                        {
-                            OKtoExecute = false;
-                            if ( action->exclusiveFilter == 0xffffffff)
-                            {
-                                if (    (action->inclusiveFilter & kLevelKeyTagMask) ==
-                                            ( baseObject->buildFlags & kLevelKeyTagMask)
-                                    )
-                                {
-                                    OKtoExecute = true;
-                                }
-                            } else if ( ( action->inclusiveFilter & baseObject->attributes) == action->inclusiveFilter)
-                            {
+                case kAlterOwner:
+                    baseObject = mGetBaseObjectPtr(0);
+                    for (int32_t count = 0; count < globals()->maxBaseObject; count++) {
+                        OKtoExecute = false;
+                        if (action->exclusiveFilter == 0xffffffff) {
+                            if ((action->inclusiveFilter & kLevelKeyTagMask) ==
+                                (baseObject->buildFlags & kLevelKeyTagMask)) {
                                 OKtoExecute = true;
                             }
-                            if ( OKtoExecute)
-                            {
-                                baseObject->internalFlags |= kOwnerMayChangeFlag;
-                            }
-                            baseObject++;
+                        } else if ((action->inclusiveFilter & baseObject->attributes) == action->inclusiveFilter) {
+                            OKtoExecute = true;
                         }
-                        break;
-                }
-                break;
+                        if (OKtoExecute) {
+                            baseObject->internalFlags |= kOwnerMayChangeFlag;
+                        }
+                        baseObject++;
+                    }
+                    break;
+            }
+            break;
 
-            case kMakeSparks:
-            case kDie:
-            default:
-                break;
-        }
+        case kMakeSparks:
+        case kDie:
+        default:
+            break;
     }
 }
 
 void GetInitialCoord(Scenario::InitialObject *initial, coordPointType *coord, int32_t rotation) {
     int32_t lcos, lsin, lscrap;
 
-    mAddAngle( rotation, 90);
+    mAddAngle(rotation, 90);
     GetRotPoint(&lcos, &lsin, rotation);
     lcos = -lcos;
     lsin = -lsin;
@@ -964,270 +942,232 @@ void CheckScenarioConditions(int32_t timePass) {
     Point                   offset(0, 0);
     bool                 conditionTrue = false;
 
-#pragma unused( timePass)
+    condition = gThisScenario->condition(0);
+    for (int32_t i = 0; i < gThisScenario->conditionNum; i++) {
+        if (!(condition->flags & kTrueOnlyOnce) || !(condition->flags & kHasBeenTrue)) {
+            conditionTrue = false;
+            switch(condition->condition) {
+                case kCounterCondition:
+                    l = mGetRealAdmiralNum(condition->conditionArgument.counter.whichPlayer);
+                    if (GetAdmiralScore(l, condition->conditionArgument.counter.whichCounter) ==
+                        condition->conditionArgument.counter.amount) {
+                        conditionTrue = true;
+                    }
+                    break;
 
-        condition = gThisScenario->condition(0);
-        for ( i = 0; i < gThisScenario->conditionNum; i++)
-        {
-            if ( (!(condition->flags & kTrueOnlyOnce)) || ( !(condition->flags & kHasBeenTrue)))
-            {
-                conditionTrue = false;
-                switch( condition->condition)
-                {
-                    case kCounterCondition:
-                        l = mGetRealAdmiralNum(condition->conditionArgument.counter.whichPlayer);
-                        if ( GetAdmiralScore( l, condition->conditionArgument.counter.whichCounter) ==
-                            condition->conditionArgument.counter.amount)
-                        {
+                case kCounterGreaterCondition:
+                    l = mGetRealAdmiralNum(condition->conditionArgument.counter.whichPlayer);
+                    if (GetAdmiralScore(l, condition->conditionArgument.counter.whichCounter) >=
+                        condition->conditionArgument.counter.amount) {
+                        conditionTrue = true;
+                    }
+                    break;
+
+                case kCounterNotCondition:
+                    l = mGetRealAdmiralNum(condition->conditionArgument.counter.whichPlayer);
+                    if (GetAdmiralScore(l, condition->conditionArgument.counter.whichCounter) !=
+                        condition->conditionArgument.counter.amount) {
+                        conditionTrue = true;
+                    }
+                    break;
+
+                case kDestructionCondition:
+                    sObject = GetObjectFromInitialNumber(condition->conditionArgument.longValue);
+                    if (sObject == NULL) {
+                        conditionTrue = true;
+                    }
+                    break;
+
+                case kOwnerCondition:
+                    sObject = GetObjectFromInitialNumber(condition->subjectObject);
+                    if (sObject != NULL) {
+                        l = mGetRealAdmiralNum(condition->conditionArgument.longValue);
+                        if (l == sObject->owner) {
                             conditionTrue = true;
                         }
-                        break;
+                    }
+                    break;
 
-                    case kCounterGreaterCondition:
-                        l = mGetRealAdmiralNum(condition->conditionArgument.counter.whichPlayer);
-                        if ( GetAdmiralScore( l, condition->conditionArgument.counter.whichCounter) >=
-                            condition->conditionArgument.counter.amount)
-                        {
-                            conditionTrue = true;
-                        }
-                        break;
+                case kTimeCondition:
+                    if (globals()->gGameTime >=
+                            ticks_to_usecs(condition->conditionArgument.longValue)) {
+                        conditionTrue = true;
+                    }
+                    break;
 
-                    case kCounterNotCondition:
-                        l = mGetRealAdmiralNum(condition->conditionArgument.counter.whichPlayer);
-                        if ( GetAdmiralScore( l, condition->conditionArgument.counter.whichCounter) !=
-                            condition->conditionArgument.counter.amount)
-                        {
-                            conditionTrue = true;
-                        }
-                        break;
-
-                    case kDestructionCondition:
-                        sObject = GetObjectFromInitialNumber(
-                                condition->conditionArgument.longValue);
-                        if (sObject == NULL) {
-                            conditionTrue = true;
-                        }
-                        break;
-
-                    case kOwnerCondition:
-                        sObject = GetObjectFromInitialNumber(condition->subjectObject);
-                        if (sObject != NULL) {
-                            l = mGetRealAdmiralNum(condition->conditionArgument.longValue);
-                            if ( l == sObject->owner)
-                            {
-                                conditionTrue = true;
-                            }
-
-                        }
-                        break;
-
-                    case kTimeCondition:
-                        if (globals()->gGameTime >=
-                                ticks_to_usecs(condition->conditionArgument.longValue)) {
-                            conditionTrue = true;
-                        }
-                        break;
-
-                    case kProximityCondition:
-                        sObject = GetObjectFromInitialNumber(condition->subjectObject);
-                        if (sObject != NULL) {
-                            dObject = GetObjectFromInitialNumber(condition->directObject);
-                            if (dObject != NULL) {
-                                difference = ABS<int>( sObject->location.h - dObject->location.h);
-                                dcalc = difference;
-                                difference =  ABS<int>( sObject->location.v - dObject->location.v);
-                                distance = difference;
-
-                                if (( dcalc < kMaximumRelevantDistance) && ( distance < kMaximumRelevantDistance))
-                                {
-                                    distance = distance * distance + dcalc * dcalc;
-                                    if ( distance < condition->conditionArgument.unsignedLongValue)
-                                    {
-                                        conditionTrue = true;
-                                    } else
-                                    {
-                                    }
-                                }
-                            }
-                        }
-                        break;
-
-                    case kDistanceGreaterCondition:
-                        sObject = GetObjectFromInitialNumber(condition->subjectObject);
-                        if (sObject != NULL) {
-                            dObject = GetObjectFromInitialNumber(condition->directObject);
-                            if (dObject != NULL) {
-                                difference = ABS<int>( sObject->location.h - dObject->location.h);
-                                dcalc = difference;
-                                difference =  ABS<int>( sObject->location.v - dObject->location.v);
-                                distance = difference;
-
-                                if (( dcalc < kMaximumRelevantDistance) && ( distance < kMaximumRelevantDistance))
-                                {
-                                    distance = distance * distance + dcalc * dcalc;
-                                    if ( distance >= condition->conditionArgument.unsignedLongValue)
-                                    {
-                                        conditionTrue = true;
-                                    } else
-                                    {
-                                    }
-                                }
-                            }
-                        }
-                        break;
-
-                    case kHalfHealthCondition:
-                        sObject = GetObjectFromInitialNumber(condition->subjectObject);
-                        if (sObject == NULL) {
-                            conditionTrue = true;
-                        } else if ( sObject->health <= ( sObject->baseType->health >> 1))
-                        {
-                            conditionTrue = true;
-                        }
-                        break;
-
-                    case kIsAuxiliaryObject:
-                        sObject = GetObjectFromInitialNumber(condition->subjectObject);
-                        if (sObject != NULL) {
-                            l = GetAdmiralConsiderObject( globals()->gPlayerAdmiralNumber);
-                            if ( l >= 0)
-                            {
-                                dObject = mGetSpaceObjectPtr(l);
-                                if ( dObject == sObject)
-                                {
-                                    conditionTrue = true;
-                                }
-                            }
-                        }
-                        break;
-
-                    case kIsTargetObject:
-                        sObject = GetObjectFromInitialNumber(condition->subjectObject);
-                        if (sObject != NULL) {
-                            l = GetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber);
-                            if ( l >= 0)
-                            {
-                                dObject = mGetSpaceObjectPtr(l);
-                                if ( dObject == sObject)
-                                {
-                                    conditionTrue = true;
-                                }
-                            }
-                        }
-                        break;
-
-                    case kVelocityLessThanEqualToCondition:
-                        sObject = GetObjectFromInitialNumber(condition->subjectObject);
-                        if (sObject != NULL) {
-                            if (( (ABS(sObject->velocity.h)) < condition->conditionArgument.longValue) &&
-                                ( (ABS(sObject->velocity.v)) < condition->conditionArgument.longValue))
-                            {
-                                conditionTrue = true;
-                            }
-                        }
-                        break;
-
-                    case kNoShipsLeftCondition:
-                        if ( GetAdmiralShipsLeft( condition->conditionArgument.longValue) <= 0)
-                        {
-                            conditionTrue = true;
-                        }
-                        break;
-
-                    case kCurrentMessageCondition:
-                        {
-                            if (Messages::current() == (condition->conditionArgument.location.h +
-                                condition->conditionArgument.location.v - 1))
-                            {
-                                conditionTrue = true;
-                            }
-
-                        }
-                        break;
-
-                    case kCurrentComputerCondition:
-                        if (( globals()->gMiniScreenData.currentScreen ==
-                            condition->conditionArgument.location.h) &&
-                            ((condition->conditionArgument.location.v < 0) ||
-                                (globals()->gMiniScreenData.selectLine ==
-                                    condition->conditionArgument.location.v)))
-                        {
-                            conditionTrue = true;
-                        }
-                        break;
-
-                    case kZoomLevelCondition:
-                        if ( globals()->gZoomMode ==
-                            condition->conditionArgument.longValue)
-                        {
-                            conditionTrue = true;
-                        }
-                        break;
-
-                    case kAutopilotCondition:
-                        conditionTrue = IsPlayerShipOnAutoPilot();
-
-                        break;
-
-                    case kNotAutopilotCondition:
-                        conditionTrue = !IsPlayerShipOnAutoPilot();
-                        break;
-
-                    case kObjectIsBeingBuilt:
-                        {
-
-                            destBalanceType     *buildAtObject = NULL;
-
-                            buildAtObject = mGetDestObjectBalancePtr( GetAdmiralBuildAtObject( globals()->gPlayerAdmiralNumber));
-                            if ( buildAtObject != NULL)
-                            {
-                                if ( buildAtObject->totalBuildTime > 0)
-                                {
-                                    conditionTrue = true;
-                                }
-                            }
-                        }
-                        break;
-
-                    case kDirectIsSubjectTarget:
-                        sObject = GetObjectFromInitialNumber(condition->subjectObject);
+                case kProximityCondition:
+                    sObject = GetObjectFromInitialNumber(condition->subjectObject);
+                    if (sObject != NULL) {
                         dObject = GetObjectFromInitialNumber(condition->directObject);
-                        if ((sObject != NULL) && (dObject != NULL)) {
-                            if ( sObject->destObjectID == dObject->id)
-                                conditionTrue = true;
+                        if (dObject != NULL) {
+                            difference = ABS<int>(sObject->location.h - dObject->location.h);
+                            dcalc = difference;
+                            difference =  ABS<int>(sObject->location.v - dObject->location.v);
+                            distance = difference;
+
+                            if ((dcalc < kMaximumRelevantDistance) && (distance < kMaximumRelevantDistance)) {
+                                distance = distance * distance + dcalc * dcalc;
+                                if (distance < condition->conditionArgument.unsignedLongValue) {
+                                    conditionTrue = true;
+                                }
+                            }
                         }
-                        break;
+                    }
+                    break;
 
-                    case kSubjectIsPlayerCondition:
-                        sObject = GetObjectFromInitialNumber(condition->subjectObject);
-                        if (sObject != NULL) {
-                            if ( sObject->entryNumber == globals()->gPlayerShipNumber)
-                                conditionTrue = true;
+                case kDistanceGreaterCondition:
+                    sObject = GetObjectFromInitialNumber(condition->subjectObject);
+                    if (sObject != NULL) {
+                        dObject = GetObjectFromInitialNumber(condition->directObject);
+                        if (dObject != NULL) {
+                            difference = ABS<int>(sObject->location.h - dObject->location.h);
+                            dcalc = difference;
+                            difference =  ABS<int>(sObject->location.v - dObject->location.v);
+                            distance = difference;
+
+                            if ((dcalc < kMaximumRelevantDistance)
+                                    && (distance < kMaximumRelevantDistance)) {
+                                distance = distance * distance + dcalc * dcalc;
+                                if (distance >= condition->conditionArgument.unsignedLongValue) {
+                                    conditionTrue = true;
+                                }
+                            }
                         }
-                        break;
+                    }
+                    break;
 
-                    default:
-                        break;
+                case kHalfHealthCondition:
+                    sObject = GetObjectFromInitialNumber(condition->subjectObject);
+                    if (sObject == NULL) {
+                        conditionTrue = true;
+                    } else if (sObject->health <= (sObject->baseType->health >> 1)) {
+                        conditionTrue = true;
+                    }
+                    break;
 
-                }
-                if ( conditionTrue)
-                {
-                    condition->flags |= kHasBeenTrue;
+                case kIsAuxiliaryObject:
+                    sObject = GetObjectFromInitialNumber(condition->subjectObject);
+                    if (sObject != NULL) {
+                        l = GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber);
+                        if (l >= 0) {
+                            dObject = mGetSpaceObjectPtr(l);
+                            if (dObject == sObject) {
+                                conditionTrue = true;
+                            }
+                        }
+                    }
+                    break;
+
+                case kIsTargetObject:
+                    sObject = GetObjectFromInitialNumber(condition->subjectObject);
+                    if (sObject != NULL) {
+                        l = GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber);
+                        if (l >= 0) {
+                            dObject = mGetSpaceObjectPtr(l);
+                            if (dObject == sObject) {
+                                conditionTrue = true;
+                            }
+                        }
+                    }
+                    break;
+
+                case kVelocityLessThanEqualToCondition:
+                    sObject = GetObjectFromInitialNumber(condition->subjectObject);
+                    if (sObject != NULL) {
+                        if (((ABS(sObject->velocity.h)) < condition->conditionArgument.longValue) &&
+                            ((ABS(sObject->velocity.v)) < condition->conditionArgument.longValue)) {
+                            conditionTrue = true;
+                        }
+                    }
+                    break;
+
+                case kNoShipsLeftCondition:
+                    if (GetAdmiralShipsLeft(condition->conditionArgument.longValue) <= 0) {
+                        conditionTrue = true;
+                    }
+                    break;
+
+                case kCurrentMessageCondition:
+                    if (Messages::current() == (condition->conditionArgument.location.h +
+                        condition->conditionArgument.location.v - 1)) {
+                        conditionTrue = true;
+                    }
+                    break;
+
+                case kCurrentComputerCondition:
+                    if ((globals()->gMiniScreenData.currentScreen ==
+                        condition->conditionArgument.location.h) &&
+                        ((condition->conditionArgument.location.v < 0) ||
+                            (globals()->gMiniScreenData.selectLine ==
+                                condition->conditionArgument.location.v))) {
+                        conditionTrue = true;
+                    }
+                    break;
+
+                case kZoomLevelCondition:
+                    if (globals()->gZoomMode == condition->conditionArgument.longValue) {
+                        conditionTrue = true;
+                    }
+                    break;
+
+                case kAutopilotCondition:
+                    conditionTrue = IsPlayerShipOnAutoPilot();
+                    break;
+
+                case kNotAutopilotCondition:
+                    conditionTrue = !IsPlayerShipOnAutoPilot();
+                    break;
+
+                case kObjectIsBeingBuilt:
+                    {
+                        destBalanceType     *buildAtObject = NULL;
+
+                        buildAtObject = mGetDestObjectBalancePtr(GetAdmiralBuildAtObject(globals()->gPlayerAdmiralNumber));
+                        if (buildAtObject != NULL) {
+                            if (buildAtObject->totalBuildTime > 0) {
+                                conditionTrue = true;
+                            }
+                        }
+                    }
+                    break;
+
+                case kDirectIsSubjectTarget:
                     sObject = GetObjectFromInitialNumber(condition->subjectObject);
                     dObject = GetObjectFromInitialNumber(condition->directObject);
-                    ExecuteObjectActions( condition->startVerb, condition->verbNum,
-                        sObject, dObject, &offset, true);
-                }
+                    if ((sObject != NULL) && (dObject != NULL)) {
+                        if (sObject->destObjectID == dObject->id) {
+                            conditionTrue = true;
+                        }
+                    }
+                    break;
+
+                case kSubjectIsPlayerCondition:
+                    sObject = GetObjectFromInitialNumber(condition->subjectObject);
+                    if (sObject != NULL) {
+                        if (sObject->entryNumber == globals()->gPlayerShipNumber) {
+                            conditionTrue = true;
+                        }
+                    }
+                    break;
+
+                default:
+                    break;
+
             }
-            condition++;
+            if (conditionTrue) {
+                condition->flags |= kHasBeenTrue;
+                sObject = GetObjectFromInitialNumber(condition->subjectObject);
+                dObject = GetObjectFromInitialNumber(condition->directObject);
+                ExecuteObjectActions(
+                        condition->startVerb, condition->verbNum, sObject, dObject, &offset, true);
+            }
         }
+        condition++;
+    }
 }
 
 int32_t GetRealAdmiralNumber(int32_t whichAdmiral) {
-    int32_t result;
-
-    result = mGetRealAdmiralNum( whichAdmiral);
-    return( result);
+    return mGetRealAdmiralNum(whichAdmiral);
 }
 
 void UnhideInitialObject(int32_t whichInitial) {
@@ -1244,26 +1184,23 @@ void UnhideInitialObject(int32_t whichInitial) {
     initial = gThisScenario->initial(whichInitial);
     anObject = GetObjectFromInitialNumber(whichInitial);
     if (anObject == NULL) {
-        GetInitialCoord( initial, &coord, gScenarioRotation);
+        GetInitialCoord(initial, &coord, gScenarioRotation);
 
-        if ( initial->owner > kScenarioNoOwner)
+        if (initial->owner > kScenarioNoOwner) {
             owner = gAdmiralNumbers[initial->owner];
-        else owner = kScenarioNoOwner;
+        } else {
+            owner = kScenarioNoOwner;
+        }
 
-        specialAttributes = initial->attributes & ( ~kInitialAttributesMask);
-        if ( initial->attributes & kIsPlayerShip)
-        {
-            if ( GetAdmiralFlagship( owner) == NULL)
-            {
-                if ( owner == globals()->gPlayerAdmiralNumber)
-                {
+        specialAttributes = initial->attributes & ~kInitialAttributesMask;
+        if (initial->attributes & kIsPlayerShip) {
+            if (GetAdmiralFlagship(owner) == NULL) {
+                if (owner == globals()->gPlayerAdmiralNumber) {
                     specialAttributes |= kIsHumanControlled;
-                } else
-                {
+                } else {
                     specialAttributes &= ~kIsPlayerShip;
                 }
-            } else // we already have a flagship; this should not override
-            {
+            } else { // we already have a flagship; this should not override
                 specialAttributes &= ~kIsPlayerShip;
             }
         }
@@ -1271,66 +1208,55 @@ void UnhideInitialObject(int32_t whichInitial) {
 
         type = initial->type;
         // TODO(sfiera): remap objects in networked games.
-        initial->realObjectNumber = newShipNum = CreateAnySpaceObject( type, &v, &coord, 0, owner,
-                                            specialAttributes,
-                                            initial->spriteIDOverride);
+        initial->realObjectNumber = newShipNum = CreateAnySpaceObject(
+                type, &v, &coord, 0, owner, specialAttributes, initial->spriteIDOverride);
 
         anObject = mGetSpaceObjectPtr(newShipNum);
         initial = gThisScenario->initial(whichInitial);
 
-        if ( anObject->attributes & kIsDestination)
-        {
-            anObject->destinationObject = MakeNewDestination( newShipNum, initial->canBuild,
-                initial->earning, initial->nameResID, initial->nameStrNum);
+        if (anObject->attributes & kIsDestination) {
+            anObject->destinationObject = MakeNewDestination(
+                    newShipNum, initial->canBuild, initial->earning, initial->nameResID,
+                    initial->nameStrNum);
 
-            if ( owner >= 0)
-            {
-                if ( initial->canBuild[0] >= 0)
-                {
-                    if ( GetAdmiralConsiderObject( owner) < 0)
-                        SetAdmiralConsiderObject( owner, newShipNum);
-                    if ( GetAdmiralBuildAtObject( owner) < 0)
-                    {
-                        SetAdmiralBuildAtObject( owner, newShipNum);
+            if (owner >= 0) {
+                if (initial->canBuild[0] >= 0) {
+                    if (GetAdmiralConsiderObject(owner) < 0) {
+                        SetAdmiralConsiderObject(owner, newShipNum);
                     }
-                    if ( GetAdmiralDestinationObject( owner) < 0)
-                    {
-                        SetAdmiralDestinationObject( owner, newShipNum, kObjectDestinationType);
+                    if (GetAdmiralBuildAtObject(owner) < 0) {
+                        SetAdmiralBuildAtObject(owner, newShipNum);
+                    }
+                    if (GetAdmiralDestinationObject(owner) < 0) {
+                        SetAdmiralDestinationObject(owner, newShipNum, kObjectDestinationType);
                     }
                 }
             }
         }
 
         initial->realObjectID = anObject->id;
-        if (( initial->attributes & kIsPlayerShip) &&
-            ( GetAdmiralFlagship( owner) == NULL))
-        {
-            SetAdmiralFlagship( owner, newShipNum);
-            if ( owner == globals()->gPlayerAdmiralNumber)
-            {
-                ResetPlayerShip( newShipNum);
+        if ((initial->attributes & kIsPlayerShip) && (GetAdmiralFlagship(owner) == NULL)) {
+            SetAdmiralFlagship(owner, newShipNum);
+            if (owner == globals()->gPlayerAdmiralNumber) {
+                ResetPlayerShip(newShipNum);
             }
         }
 
-        if ( initial->initialDestination >= 0)
-        {
+        if (initial->initialDestination >= 0) {
             // only objects controlled by an Admiral can have destinations
-            if ( initial->owner > kScenarioNoOwner)
-            {
+            if (initial->owner > kScenarioNoOwner) {
                 // get the correct admiral #
 
                 owner = gAdmiralNumbers[initial->owner];
 
                 // INITIAL IS BEING CHANGED HERE
                 initial = gThisScenario->initial(initial->initialDestination);
-                if ( initial->realObjectNumber >= 0)
-                {
-                    saveDest = GetAdmiralDestinationObject( owner); // save the original dest
+                if (initial->realObjectNumber >= 0) {
+                    saveDest = GetAdmiralDestinationObject(owner); // save the original dest
 
                     // set the admiral's dest object to the mapped initial dest object
-                    SetAdmiralDestinationObject( owner,
-                        initial->realObjectNumber,
-                        kObjectDestinationType);
+                    SetAdmiralDestinationObject(
+                            owner, initial->realObjectNumber, kObjectDestinationType);
 
                     // now give the mapped initial object the admiral's destination
 
@@ -1338,11 +1264,10 @@ void UnhideInitialObject(int32_t whichInitial) {
                     anObject = mGetSpaceObjectPtr(initial->realObjectNumber);
                     specialAttributes = anObject->attributes; // preserve the attributes
                     anObject->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
-                    SetObjectDestination( anObject, NULL);
+                    SetObjectDestination(anObject, NULL);
                     anObject->attributes = specialAttributes;
 
-                    SetAdmiralDestinationObject( owner, saveDest, kObjectDestinationType);
-
+                    SetAdmiralDestinationObject(owner, saveDest, kObjectDestinationType);
                 }
             }
         }
@@ -1409,28 +1334,26 @@ void GetScenarioFullScaleAndCorner(
     Point           coord, otherCoord, tempCoord;
     Scenario::InitialObject     *initial;
 
-
-#pragma unused( rotation)
     mustFit = bounds->bottom - bounds->top;
-    if ( ( bounds->right - bounds->left) < mustFit) mustFit = bounds->right - bounds->left;
+    if ((bounds->right - bounds->left) < mustFit) mustFit = bounds->right - bounds->left;
 
     biggest = 0;
-    for ( count = 0; count < scenario->initialNum; count++)
+    for (int32_t count = 0; count < scenario->initialNum; count++)
     {
         initial = scenario->initial(count);
-        if ( !(initial->attributes & kInitiallyHidden))
-        {
-            GetInitialCoord( initial, reinterpret_cast<coordPointType *>(&coord), gScenarioRotation);
+        if (!(initial->attributes & kInitiallyHidden)) {
+            GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&coord), gScenarioRotation);
 
-            for ( otherCount = 0; otherCount < scenario->initialNum; otherCount++)
-            {
+            for (int32_t otherCount = 0; otherCount < scenario->initialNum; otherCount++) {
                 initial = scenario->initial(otherCount);
-                GetInitialCoord( initial, reinterpret_cast<coordPointType *>(&otherCoord), gScenarioRotation);
+                GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&otherCoord), gScenarioRotation);
 
-                if ( ABS( otherCoord.h - coord.h) > biggest)
-                    biggest = ABS( otherCoord.h - coord.h);
-                if ( ABS( otherCoord.v - coord.v) > biggest)
-                    biggest = ABS( otherCoord.v - coord.v);
+                if (ABS(otherCoord.h - coord.h) > biggest) {
+                    biggest = ABS(otherCoord.h - coord.h);
+                }
+                if (ABS(otherCoord.v - coord.v) > biggest) {
+                    biggest = ABS(otherCoord.v - coord.v);
+                }
             }
         }
     }
@@ -1445,35 +1368,38 @@ void GetScenarioFullScaleAndCorner(
     coord.h = kUniversalCenter;
     coord.v = kUniversalCenter;
     initial = scenario->initial(0);
-    for ( count = 0; count < scenario->initialNum; count++)
+    for (int32_t count = 0; count < scenario->initialNum; count++)
     {
-        if ( !(initial->attributes & kInitiallyHidden))
-        {
-            GetInitialCoord( initial, reinterpret_cast<coordPointType *>(&tempCoord), gScenarioRotation);
+        if (!(initial->attributes & kInitiallyHidden)) {
+            GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&tempCoord), gScenarioRotation);
 
-            if ( (tempCoord.h) < coord.h)
+            if (tempCoord.h < coord.h) {
                 coord.h = tempCoord.h;
-            if ( (tempCoord.v) < coord.v)
+            }
+            if (tempCoord.v < coord.v) {
                 coord.v = tempCoord.v;
+            }
 
-            if ( (tempCoord.h) > otherCoord.h)
+            if (tempCoord.h > otherCoord.h) {
                 otherCoord.h = tempCoord.h;
-            if ( (tempCoord.v) > otherCoord.v)
+            }
+            if (tempCoord.v > otherCoord.v) {
                 otherCoord.v = tempCoord.v;
+            }
         }
         initial++;
     }
 
-    biggest = ( bounds->right - bounds->left);
+    biggest = bounds->right - bounds->left;
     biggest *= SCALE_SCALE;
     biggest /= *scale;
     biggest /= 2;
-    corner->h = ( coord.h + ( otherCoord.h - coord.h) / 2) - biggest;
-    biggest = ( bounds->bottom - bounds->top);
+    corner->h = (coord.h + (otherCoord.h - coord.h) / 2) - biggest;
+    biggest = (bounds->bottom - bounds->top);
     biggest *= SCALE_SCALE;
     biggest /= *scale;
     biggest /= 2;
-    corner->v = ( coord.v + ( otherCoord.v - coord.v) / 2) - biggest;
+    corner->v = (coord.v + (otherCoord.v - coord.v) / 2) - biggest;
 
 }
 
@@ -1490,7 +1416,7 @@ coordPointType Translate_Coord_To_Scenario_Rotation(int32_t h, int32_t v) {
     int32_t lcos, lsin, lscrap, angle = gScenarioRotation;
     coordPointType coord;
 
-    mAddAngle( angle, 90);
+    mAddAngle(angle, 90);
     GetRotPoint(&lcos, &lsin, angle);
     lcos = -lcos;
     lsin = -lsin;
