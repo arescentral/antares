@@ -1166,10 +1166,6 @@ void CheckScenarioConditions(int32_t timePass) {
     }
 }
 
-int32_t GetRealAdmiralNumber(int32_t whichAdmiral) {
-    return mGetRealAdmiralNum(whichAdmiral);
-}
-
 void UnhideInitialObject(int32_t whichInitial) {
     Scenario::InitialObject     *initial;
     spaceObjectType         *anObject = NULL;
