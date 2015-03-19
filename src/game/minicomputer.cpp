@@ -1031,19 +1031,11 @@ void draw_mini_ship_data(
     }
 }
 
-void MiniComputerDoAccept( void)
-
-{
-    if (true) {  // TODO(sfiera): if non-networked.
-        MiniComputerExecute( globals()->gMiniScreenData.currentScreen,
-            globals()->gMiniScreenData.selectLine, globals()->gPlayerAdmiralNumber);
-    } else {
-#ifdef NETSPROCKET_AVAILABLE
-        if ( !SendMenuMessage( globals()->gGameTime + gNetLatency, globals()->gMiniScreenData.currentScreen,
-            globals()->gMiniScreenData.selectLine))
-            StopNetworking();
-#endif  // NETSPROCKET_AVAILABLE
-    }
+void MiniComputerDoAccept() {
+    MiniComputerExecute(
+            globals()->gMiniScreenData.currentScreen,
+            globals()->gMiniScreenData.selectLine,
+            globals()->gPlayerAdmiralNumber);
 }
 
 void MiniComputerExecute( int32_t whichPage, int32_t whichLine, int32_t whichAdmiral)

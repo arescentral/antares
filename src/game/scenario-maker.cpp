@@ -65,8 +65,6 @@ const int16_t kScenarioInitialResID     = 500;
 const int16_t kScenarioConditionResID   = 500;
 const int16_t kScenarioBriefResID       = 500;
 
-const bool NETWORK_ON = false;
-
 const int32_t kOwnerMayChangeFlag   = 0x80000000;
 const int32_t kAnyOwnerColorFlag    = 0x0000ffff;
 
@@ -543,26 +541,6 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     gAbsoluteScale = kTimesTwoScale;
     globals()->gSynchValue = 0;
 
-    if (NETWORK_ON) {
-#ifdef NETSPROCKET_AVAILABLE
-        if (IAmHosting()) {
-            globals()->gThisScenarioNumber = which;
-            gRandomSeed = Randomize(32760);
-            SendStartMessage();
-        } else {
-            globals()->gThisScenarioNumber = -1;
-            gRandomSeed = -1;
-            if ((globals()->gThisScenarioNumber == -1) && (gRandomSeed == -1)) {
-                if (WaitForAllStart() == false) {
-                    StopNetworking();
-                    return false;
-                }
-            }
-            which = globals()->gThisScenarioNumber;
-        }
-#endif
-    }
-
     gThisScenario = scenario;
 
     {
@@ -586,53 +564,23 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     }
 
     for (int i = 0; i < gThisScenario->playerNum; i++) {
-        if (NETWORK_ON) {
-#ifdef NETSPROCKET_AVAILABLE
-            if (gThisScenario->player[i].playerType == kComputerPlayer) {
-                gAdmiralNumbers[i] = MakeNewAdmiral(
-                        kNoShip, kNoDestinationObject, kNoDestinationType,
-                        kAIsComputer, gThisScenario->player[i].playerRace,
-                        gThisScenario->player[i].nameResID,
-                        gThisScenario->player[i].nameStrNum,
-                        gThisScenario->player[i].earningPower);
-                PayAdmiral(gAdmiralNumbers[i], mLongToFixed(5000));
-            } else if (GetPlayerRace(i) >= 0) {
-                if (i == globals()->gPlayerAdmiralNumber) {
-                    admiralType = 0;
-                } else {
-                    admiralType = kAIsRemote;
-                }
-                gAdmiralNumbers[i] = MakeNewAdmiral(
-                        kNoShip, kNoDestinationObject,
-                        kNoDestinationType, kAIsHuman | admiralType,
-                        GetRaceIDFromNum(GetPlayerRace(i)),
-                        gThisScenario->player[i].nameResID,
-                        gThisScenario->player[i].nameStrNum,
-                        gThisScenario->player[i].earningPower);
-                PayAdmiral(gAdmiralNumbers[i], mLongToFixed(5000));
-                SetAdmiralColor(gAdmiralNumbers[i], GetPlayerColor(i));
-                SetAdmiralName(gAdmiralNumbers[i], (anyCharType *)GetPlayerName(i));
-            }
-#endif  // NETSPROCKET_AVAILABLE
+        if (gThisScenario->player[i].playerType == kSingleHumanPlayer) {
+            gAdmiralNumbers[i] = MakeNewAdmiral(
+                    kNoShip, kNoDestinationObject, kNoDestinationType,
+                    kAIsHuman, gThisScenario->player[i].playerRace,
+                    gThisScenario->player[i].nameResID,
+                    gThisScenario->player[i].nameStrNum,
+                    gThisScenario->player[i].earningPower);
+            PayAdmiral(gAdmiralNumbers[i], mLongToFixed(5000));
+            globals()->gPlayerAdmiralNumber = gAdmiralNumbers[i];
         } else {
-            if (gThisScenario->player[i].playerType == kSingleHumanPlayer) {
-                gAdmiralNumbers[i] = MakeNewAdmiral(
-                        kNoShip, kNoDestinationObject, kNoDestinationType,
-                        kAIsHuman, gThisScenario->player[i].playerRace,
-                        gThisScenario->player[i].nameResID,
-                        gThisScenario->player[i].nameStrNum,
-                        gThisScenario->player[i].earningPower);
-                PayAdmiral(gAdmiralNumbers[i], mLongToFixed(5000));
-                globals()->gPlayerAdmiralNumber = gAdmiralNumbers[i];
-            } else {
-                gAdmiralNumbers[i] = MakeNewAdmiral(
-                        kNoShip, kNoDestinationObject, kNoDestinationType,
-                        kAIsComputer, gThisScenario->player[i].playerRace,
-                        gThisScenario->player[i].nameResID,
-                        gThisScenario->player[i].nameStrNum,
-                        gThisScenario->player[i].earningPower);
-                PayAdmiral(gAdmiralNumbers[i], mLongToFixed(5000));
-            }
+            gAdmiralNumbers[i] = MakeNewAdmiral(
+                    kNoShip, kNoDestinationObject, kNoDestinationType,
+                    kAIsComputer, gThisScenario->player[i].playerRace,
+                    gThisScenario->player[i].nameResID,
+                    gThisScenario->player[i].nameStrNum,
+                    gThisScenario->player[i].earningPower);
+            PayAdmiral(gAdmiralNumbers[i], mLongToFixed(5000));
         }
     }
 
@@ -696,16 +644,13 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         Scenario::InitialObject* initial = gThisScenario->initial(i);
         // get the base object equiv
         baseObjectType* baseObject = mGetBaseObjectPtr(initial->type);
-        if (NETWORK_ON && (GetAdmiralRace(initial->owner) >= 0)
-                && (!(initial->attributes & kFixedRace))) {
-            int32_t baseClass = baseObject->baseClass;
-            int32_t race = GetAdmiralRace(initial->owner);
-            int32_t newShipNum;
-            mGetBaseObjectFromClassRace(baseObject, newShipNum, baseClass, race);
-            if (baseObject == NULL) {
-                baseObject = mGetBaseObjectPtr(initial->type);
-            }
-        }
+
+        // TODO(sfiera): remap objects in networked games.  Applies if:
+        //               * this is a net game
+        //               * owner has a positive race.
+        //               * the snit is not flagged kFixedRace.
+        //               * mGetBaseObjectFromClassRace() can map it.
+
         // check the media for this object
         if (baseObject->attributes & kIsDestination) {
             for (int i = 0; i < gThisScenario->playerNum; i++) {
@@ -785,16 +730,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         // get the base object equiv
         int32_t type = initial->type;
         baseObjectType* baseObject = mGetBaseObjectPtr(type);
-        if (NETWORK_ON && (GetAdmiralRace(initial->owner) >= 0)
-                && (!(initial->attributes & kFixedRace))) {
-            int32_t baseClass = baseObject->baseClass;
-            int32_t race = GetAdmiralRace(initial->owner);
-            mGetBaseObjectFromClassRace(baseObject, type, baseClass, race);
-            if (baseObject == NULL) {
-                baseObject = mGetBaseObjectPtr(initial->type);
-                type = initial->type;
-            }
-        }
+        // TODO(sfiera): remap objects in networked games.
         // check the media for this object
         if (baseObject->attributes & kIsDestination) {
             for (int j = 0; j < gThisScenario->playerNum; j++) {
@@ -903,11 +839,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                     if (owner == globals()->gPlayerAdmiralNumber) {
                         specialAttributes |= kIsHumanControlled;
                     } else {
-                        if (NETWORK_ON) {
-                            specialAttributes |= kIsRemote;
-                        } else {
-                            specialAttributes &= ~kIsPlayerShip;
-                        }
+                        specialAttributes &= ~kIsPlayerShip;
                     }
                 } else {
                     specialAttributes &= ~kIsPlayerShip;
@@ -915,17 +847,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             }
 
             int32_t type = initial->type;
-            if (NETWORK_ON && (GetAdmiralRace(initial->owner) >= 0)
-                    && (!(initial->attributes & kFixedRace))) {
-                baseObjectType* baseObject = mGetBaseObjectPtr(type);
-                int32_t baseClass = baseObject->baseClass;
-                int32_t race = GetAdmiralRace(initial->owner);
-                mGetBaseObjectFromClassRace(baseObject, type, baseClass, race);
-                if (baseObject == NULL) {
-                    baseObject = mGetBaseObjectPtr(initial->type);
-                    type = initial->type;
-                }
-            }
+            // TODO(sfiera): remap object in networked games.
             fixedPointType v = {0, 0};
             int32_t newShipNum;
             initial->realObjectNumber = newShipNum = CreateAnySpaceObject(
@@ -944,10 +866,6 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 SetAdmiralFlagship(owner, newShipNum);
                 if (owner == globals()->gPlayerAdmiralNumber) {
                     ResetPlayerShip(newShipNum);
-                } else {
-                    if (NETWORK_ON) {
-                        anObject->attributes |= kIsRemote;
-                    }
                 }
             }
 
@@ -1342,10 +1260,7 @@ void UnhideInitialObject(int32_t whichInitial) {
                     specialAttributes |= kIsHumanControlled;
                 } else
                 {
-                    if (NETWORK_ON)
-                        specialAttributes |= kIsRemote;
-                    else
-                        specialAttributes &= ~kIsPlayerShip;
+                    specialAttributes &= ~kIsPlayerShip;
                 }
             } else // we already have a flagship; this should not override
             {
@@ -1355,15 +1270,7 @@ void UnhideInitialObject(int32_t whichInitial) {
 
 
         type = initial->type;
-        if (NETWORK_ON && (GetAdmiralRace( initial->owner) >= 0) &&
-            ( !(initial->attributes & kFixedRace)))
-        {
-            baseObject = mGetBaseObjectPtr( type);
-            baseClass = baseObject->baseClass;
-            race = GetAdmiralRace( initial->owner);
-            mGetBaseObjectFromClassRace( baseObject, type, baseClass, race);
-            if ( baseObject == NULL) type = initial->type;
-        }
+        // TODO(sfiera): remap objects in networked games.
         initial->realObjectNumber = newShipNum = CreateAnySpaceObject( type, &v, &coord, 0, owner,
                                             specialAttributes,
                                             initial->spriteIDOverride);

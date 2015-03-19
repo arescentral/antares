@@ -61,8 +61,6 @@ namespace antares {
 
 namespace {
 
-const bool NETWORK_ON = false;
-
 const int32_t kSendMessageVOffset = 20;
 const int32_t kCursorBoundsSize = 16;  // should be same in instruments.c
 
@@ -580,22 +578,13 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
                 StringSlice sliced = message->slice(1, message->size() - 2);
                 int cheat = GetCheatNumFromString(sliced);
                 if (cheat > 0) {
-                    if (NETWORK_ON) {
-#ifdef NETSPROCKET_AVAILABLE
-                        SendCheatMessage(cheat);
-#endif  // NETSPROCKET_AVAILABLE
-                    } else {
-                        ExecuteCheat(cheat, globals()->gPlayerAdmiralNumber);
-                    }
+                    ExecuteCheat(cheat, globals()->gPlayerAdmiralNumber);
                 } else if (!sliced.empty()) {
                     if (globals()->gActiveCheats[globals()->gPlayerAdmiralNumber] & kNameObjectBit)
                     {
                         SetAdmiralBuildAtName(globals()->gPlayerAdmiralNumber, sliced);
                         globals()->gActiveCheats[globals()->gPlayerAdmiralNumber] &= ~kNameObjectBit;
                     }
-#ifdef NETSPROCKET_AVAILABLE
-                    SendInGameTextMessage(sliced);
-#endif  // NETSPROCKET_AVAILABLE
                 }
                 Labels::set_position(
                         gSendMessageLabel,
@@ -696,18 +685,7 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
         if (gDestKeyTime > 45) {
             if ((theShip->attributes & kCanBeDestination)
                     && (!globals()->destKeyUsedForSelection)) {
-                if (!NETWORK_ON) {
-                    target_self();
-                } else {
-#ifdef NETSPROCKET_AVAILABLE
-                    if (!SendSelectMessage(
-                                globals()->gGameTime + gNetLatency,
-                                globals()->gPlayerShipNumber,
-                                true)) {
-                        StopNetworking();
-                    }
-#endif  // NETSPROCKET_AVAILABLE
-                }
+                target_self();
             }
         }
         gDestKeyTime = 0;
@@ -760,21 +738,10 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
                     bool is_target = (gTheseKeys & kDestinationKey)
                         || (selectShip->owner != globals()->gPlayerAdmiralNumber)
                         || (globals()->hotKey_target);
-                    if (!NETWORK_ON) {
-                        SetPlayerSelectShip(
-                                globals()->hotKey[hot_key].objectNum,
-                                is_target,
-                                globals()->gPlayerAdmiralNumber);
-                    } else {
-#ifdef NETSPROCKET_AVAILABLE
-                        if (!SendSelectMessage(
-                                    globals()->gGameTime + gNetLatency,
-                                    globals()->hotKey[hot_key].objectNum,
-                                    is_target)) {
-                            StopNetworking();
-                        }
-#endif  // NETSPROCKET_AVAILABLE
-                    }
+                    SetPlayerSelectShip(
+                            globals()->hotKey[hot_key].objectNum,
+                            is_target,
+                            globals()->gPlayerAdmiralNumber);
                 } else {
                     globals()->hotKey[hot_key].objectNum = -1;
                 }
@@ -893,14 +860,7 @@ void PlayerShipHandleClick(Point where, int button) {
                         kCanBeDestination | kIsDestination,//kCanThink | kIsDestination,
                         0, selectShipNum, 0);
                 if (selectShipNum >= 0) {
-                    if (!NETWORK_ON) {
-                        SetPlayerSelectShip(selectShipNum, true, globals()->gPlayerAdmiralNumber);
-                    } else {
-#ifdef NETSPROCKET_AVAILABLE
-                        if (!SendSelectMessage(globals()->gGameTime + gNetLatency, selectShipNum, true))
-                            StopNetworking();
-#endif  // NETSPROCKET_AVAILABLE
-                    }
+                    SetPlayerSelectShip(selectShipNum, true, globals()->gPlayerAdmiralNumber);
                 }
             } else {
                 selectShipNum = GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber);
@@ -909,14 +869,7 @@ void PlayerShipHandleClick(Point where, int button) {
                         kCanThink | kCanAcceptBuild,
                         0, selectShipNum, 1);
                 if (selectShipNum >= 0) {
-                    if (!NETWORK_ON) {
-                        SetPlayerSelectShip(selectShipNum, false, globals()->gPlayerAdmiralNumber);
-                    } else {
-#ifdef NETSPROCKET_AVAILABLE
-                        if (!SendSelectMessage(globals()->gGameTime + gNetLatency, selectShipNum, false))
-                            StopNetworking();
-#endif  // NETSPROCKET_AVAILABLE
-                    }
+                    SetPlayerSelectShip(selectShipNum, false, globals()->gPlayerAdmiralNumber);
                 }
             }
         }
