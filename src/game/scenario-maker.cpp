@@ -91,18 +91,14 @@ void SetAllBaseObjectsUnchecked() {
 }
 
 void CheckBaseObjectMedia(baseObjectType *aBase, uint8_t color) {
-    baseObjectType  *weapon;
-
     if (!(aBase->internalFlags & (0x00000001 << color))) {
         aBase->internalFlags |= (0x00000001 << color);
-        if (aBase->attributes & kCanThink) {
-            if (aBase->pixResID != kNoSpriteTable) {
-                KeepPixTable(aBase->pixResID + (color << kSpriteTableColorShift));
+        if (aBase->pixResID != kNoSpriteTable) {
+            int16_t id = aBase->pixResID;
+            if (aBase->attributes & kCanThink) {
+                id += color << kSpriteTableColorShift;
             }
-        } else {
-            if (aBase->pixResID != kNoSpriteTable) {
-                KeepPixTable(aBase->pixResID);
-            }
+            KeepPixTable(id);
         }
 
         CheckActionMedia(aBase->destroyAction, (aBase->destroyActionNum & kDestroyActionNotMask), color);
@@ -112,55 +108,48 @@ void CheckBaseObjectMedia(baseObjectType *aBase, uint8_t color) {
         CheckActionMedia(aBase->activateAction, (aBase->activateActionNum & kPeriodicActionNotMask), color);
         CheckActionMedia(aBase->arriveAction, aBase->arriveActionNum, color);
 
-        if (aBase->pulse != kNoWeapon) {
-            weapon = mGetBaseObjectPtr(aBase->pulse);
-            CheckBaseObjectMedia(weapon, color);
-        }
-        if (aBase->beam != kNoWeapon) {
-            weapon = mGetBaseObjectPtr(aBase->beam);
-            CheckBaseObjectMedia(weapon, color);
-        }
-        if (aBase->special != kNoWeapon) {
-            weapon = mGetBaseObjectPtr(aBase->special);
-            CheckBaseObjectMedia(weapon, color);
+        for (int32_t object : {aBase->pulse, aBase->beam, aBase->special}) {
+            if (object != kNoWeapon) {
+                baseObjectType* weapon = mGetBaseObjectPtr(object);
+                CheckBaseObjectMedia(weapon, color);
+            }
         }
     }
 }
 
 void CheckActionMedia(int32_t whichAction, int32_t actionNum, uint8_t color) {
-    baseObjectType      *baseObject;
-    objectActionType    *action = mGetObjectActionPtr(whichAction);
-    bool                OKtoExecute;
-    int32_t             count;
-
-    while ((actionNum > 0) && (action->verb != kNoAction)) {
+    objectActionType* begin = mGetObjectActionPtr(whichAction);
+    objectActionType* end = begin + actionNum;
+    for (auto* action = begin; action != end; ++action) {
         switch (action->verb) {
-            case kCreateObject:
-            case kCreateObjectSetDest:
-                baseObject = mGetBaseObjectPtr(action->argument.createObject.whichBaseType);
-                CheckBaseObjectMedia(baseObject, color);
-                break;
+            case kNoAction:
+              return;
 
-            case kPlaySound:
-                for (int32_t i = action->argument.playSound.idMinimum;
-                     i <= (action->argument.playSound.idMinimum +
-                               action->argument.playSound.idRange);
-                     i++) {
+            case kCreateObject:
+            case kCreateObjectSetDest: {
+                const auto& arg = action->argument.createObject;
+                CheckBaseObjectMedia(mGetBaseObjectPtr(arg.whichBaseType), color);
+            } break;
+
+            case kPlaySound: {
+                const auto& arg = action->argument.playSound;
+                int32_t end = arg.idMinimum + arg.idRange + 1;
+                for (int32_t i = arg.idMinimum; i != end; ++i) {
                     KeepSound(i); // FIX to check for range of sounds
                 }
-                break;
+            } break;
 
-            case kAlter:
-                switch(action->argument.alterObject.alterType) {
+            case kAlter: {
+                const auto& arg = action->argument.alterObject;
+                switch (arg.alterType) {
                     case kAlterBaseType:
-                        baseObject = mGetBaseObjectPtr(action->argument.alterObject.minimum);
-                        CheckBaseObjectMedia(baseObject, color);
+                        CheckBaseObjectMedia(mGetBaseObjectPtr(arg.minimum), color);
                         break;
 
-                    case kAlterOwner:
-                        baseObject = mGetBaseObjectPtr(0);
+                    case kAlterOwner: {
+                        baseObjectType* baseObject = mGetBaseObjectPtr(0);
                         for (int32_t count = 0; count < globals()->maxBaseObject; count++) {
-                            OKtoExecute = false;
+                            bool OKtoExecute = false;
                             if (action->exclusiveFilter == 0xffffffff) {
                                 if ((action->inclusiveFilter & kLevelKeyTagMask) ==
                                     (baseObject->buildFlags & kLevelKeyTagMask)) {
@@ -175,21 +164,16 @@ void CheckActionMedia(int32_t whichAction, int32_t actionNum, uint8_t color) {
                             }
                             baseObject++;
                         }
-                        break;
+                    } break;
 
                     default:
                         break;
                 }
-                break;
+            } break;
 
-            case kMakeSparks:
-            case kNoAction:
-            case kDie:
             default:
                 break;
         }
-        actionNum--;
-        action++;
     }
 }
 
@@ -199,12 +183,11 @@ void AddBaseObjectMedia(int32_t whichBase, uint8_t color) {
     if (!(aBase->internalFlags & (0x00000001 << color))) {
         aBase->internalFlags |= (0x00000001 << color);
         if (aBase->pixResID != kNoSpriteTable) {
+            int16_t id = aBase->pixResID;
             if (aBase->attributes & kCanThink) {
-                AddPixTable(aBase->pixResID + (color << kSpriteTableColorShift));
-            } else {
-                AddPixTable(aBase->pixResID);      // moves mem
+                id += color << kSpriteTableColorShift;
             }
-            aBase = mGetBaseObjectPtr(whichBase);
+            AddPixTable(id);
         }
 
         AddBaseObjectActionMedia(whichBase, kDestroyActionType, color);
@@ -214,80 +197,54 @@ void AddBaseObjectMedia(int32_t whichBase, uint8_t color) {
         AddBaseObjectActionMedia(whichBase, kActivateActionType, color);
         AddBaseObjectActionMedia(whichBase, kArriveActionType, color);
 
-        aBase = mGetBaseObjectPtr(whichBase);
-        if (aBase->pulse != kNoWeapon) {
-            aBase = mGetBaseObjectPtr(whichBase);
-            AddBaseObjectMedia(aBase->pulse, color);
-        }
-        aBase = mGetBaseObjectPtr(whichBase);
-        if (aBase->beam != kNoWeapon) {
-            aBase = mGetBaseObjectPtr(whichBase);
-            AddBaseObjectMedia(aBase->beam, color);
-        }
-        aBase = mGetBaseObjectPtr(whichBase);
-        if (aBase->special != kNoWeapon) {
-            aBase = mGetBaseObjectPtr(whichBase);
-            AddBaseObjectMedia(aBase->special, color);
+        for (int32_t weapon : {aBase->pulse, aBase->beam, aBase->special}) {
+            if (weapon != kNoWeapon) {
+                AddBaseObjectMedia(weapon, color);
+            }
         }
     }
 }
 
-void mGetActionFromBaseTypeNum(
-        objectActionType*& mactPtr, baseObjectType* mbaseObjPtr, int32_t mactionType,
-        int32_t mactionNum) {
+objectActionType* mGetActionFromBaseTypeNum(
+        const baseObjectType& mbaseObjPtr, int32_t mactionType, int32_t mactionNum) {
     if (mactionType == kDestroyActionType) {
-        if (mactionNum >= (mbaseObjPtr->destroyActionNum & kDestroyActionNotMask)) {
-            mactPtr = NULL;
-        } else {
-            mactPtr = mGetObjectActionPtr((mbaseObjPtr)->destroyAction + mactionNum);
+        if (mactionNum < (mbaseObjPtr.destroyActionNum & kDestroyActionNotMask)) {
+            return mGetObjectActionPtr(mbaseObjPtr.destroyAction + mactionNum);
         }
     } else if (mactionType == kExpireActionType) {
-        if (mactionNum >= (mbaseObjPtr->expireActionNum  & kDestroyActionNotMask)) {
-            mactPtr = NULL;
-        } else {
-            mactPtr = mGetObjectActionPtr(mbaseObjPtr->expireAction + mactionNum);
+        if (mactionNum < (mbaseObjPtr.expireActionNum  & kDestroyActionNotMask)) {
+            return mGetObjectActionPtr(mbaseObjPtr.expireAction + mactionNum);
         }
     } else if (mactionType == kCreateActionType) {
-        if (mactionNum >= mbaseObjPtr->createActionNum) {
-            mactPtr = NULL;
-        } else {
-            mactPtr = mGetObjectActionPtr(mbaseObjPtr->createAction + mactionNum);
+        if (mactionNum < mbaseObjPtr.createActionNum) {
+            return mGetObjectActionPtr(mbaseObjPtr.createAction + mactionNum);
         }
     } else if (mactionType == kCollideActionType) {
-        if (mactionNum >= mbaseObjPtr->collideActionNum) {
-            mactPtr = NULL;
-        } else {
-            mactPtr = mGetObjectActionPtr((mbaseObjPtr)->collideAction + mactionNum);
+        if (mactionNum < mbaseObjPtr.collideActionNum) {
+            return mGetObjectActionPtr(mbaseObjPtr.collideAction + mactionNum);
         }
     } else if (mactionType == kActivateActionType) {
-        if (mactionNum >= (mbaseObjPtr->activateActionNum & kPeriodicActionNotMask)) {
-            mactPtr = NULL;
-        } else {
-            mactPtr = mGetObjectActionPtr((mbaseObjPtr)->activateAction + mactionNum);
+        if (mactionNum < (mbaseObjPtr.activateActionNum & kPeriodicActionNotMask)) {
+            return mGetObjectActionPtr(mbaseObjPtr.activateAction + mactionNum);
         }
     } else if (mactionType == kArriveActionType) {
-        if (mactionNum >= mbaseObjPtr->arriveActionNum) {
-            mactPtr = NULL;
-        } else {
-            mactPtr = mGetObjectActionPtr(mbaseObjPtr->arriveAction + mactionNum);
+        if (mactionNum < mbaseObjPtr.arriveActionNum) {
+            return mGetObjectActionPtr(mbaseObjPtr.arriveAction + mactionNum);
         }
-    } else {
-        mactPtr = NULL;
     }
+    return nullptr;
 }
 
 void AddBaseObjectActionMedia(int32_t whichBase, int32_t whichType, uint8_t color) {
-    baseObjectType      *baseObject = NULL;
-    int32_t             count = 0;
-    objectActionType    *action = NULL;
-
-    do {
-        baseObject = mGetBaseObjectPtr(whichBase);
-        mGetActionFromBaseTypeNum(action, baseObject, whichType, count);
+    for (int count = 0; ; ++count) {
+        const baseObjectType& baseObject = *mGetBaseObjectPtr(whichBase);
+        auto* action = mGetActionFromBaseTypeNum(baseObject, whichType, count);
+        if (!action) {
+            break;
+        }
 
         AddActionMedia(action, color);
-        count++;
-    } while (action != NULL);
+    }
 }
 
 void AddActionMedia(objectActionType *action, uint8_t color) {
@@ -598,30 +555,23 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         }
 
         for (int i = 0; i < gThisScenario->playerNum; i++) {
-            baseObjectType* baseObject = mGetBaseObjectPtr(globals()->scenarioFileInfo.energyBlobID);
-            if (baseObject != NULL) {
-                CheckBaseObjectMedia(baseObject, 0);   // special case; always neutral
-            }
-            baseObject = mGetBaseObjectPtr(globals()->scenarioFileInfo.warpInFlareID);
-            if (baseObject != NULL) {
-                CheckBaseObjectMedia(baseObject, 0); // special case; always neutral
-            }
-            baseObject = mGetBaseObjectPtr(globals()->scenarioFileInfo.warpOutFlareID);
-            if (baseObject != NULL) {
-                CheckBaseObjectMedia(baseObject, 0); // special case; always neutral
-            }
-            baseObject = mGetBaseObjectPtr(globals()->scenarioFileInfo.playerBodyID);
-            if (baseObject != NULL) {
-                CheckBaseObjectMedia(baseObject, GetAdmiralColor(i));
+            int32_t blessed[][2] = {
+                {globals()->scenarioFileInfo.energyBlobID, 0},  // always neutral
+                {globals()->scenarioFileInfo.warpInFlareID, 0},  // always neutral
+                {globals()->scenarioFileInfo.warpOutFlareID, 0},  // always neutral
+                {globals()->scenarioFileInfo.playerBodyID, GetAdmiralColor(i)},
+            };
+            for (auto id_color : blessed) {
+                baseObjectType* baseObject = mGetBaseObjectPtr(id_color[0]);
+                CheckBaseObjectMedia(baseObject, id_color[1]);
             }
         }
     }
 
     if ((0 <= step) && (step < gThisScenario->initialNum)) {
         int i = step;
-        Scenario::InitialObject* initial = gThisScenario->initial(i);
-        // get the base object equiv
-        baseObjectType* baseObject = mGetBaseObjectPtr(initial->type);
+        const Scenario::InitialObject& initial = *gThisScenario->initial(i);
+        baseObjectType* baseObject = mGetBaseObjectPtr(initial.type);
 
         // TODO(sfiera): remap objects in networked games.  Applies if:
         //               * this is a net game
@@ -635,16 +585,16 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 CheckBaseObjectMedia(baseObject, GetAdmiralColor(i));
             }
         } else {
-            CheckBaseObjectMedia(baseObject, GetAdmiralColor(initial->owner));
+            CheckBaseObjectMedia(baseObject, GetAdmiralColor(initial.owner));
         }
 
         // check any objects this object can build
         for (int i = 0; i < kMaxTypeBaseCanBuild; i++) {
-            if (initial->canBuild[i] != kNoClass) {
+            if (initial.canBuild[i] != kNoClass) {
                 // check for each player
                 for (int j = 0; j < gThisScenario->playerNum; j++) {
                     int32_t newShipNum;
-                    mGetBaseObjectFromClassRace(baseObject, newShipNum, initial->canBuild[i], GetAdmiralRace(j));
+                    mGetBaseObjectFromClassRace(baseObject, newShipNum, initial.canBuild[i], GetAdmiralRace(j));
                     if (baseObject != NULL) {
                         CheckBaseObjectMedia(baseObject, GetAdmiralColor(j));
                     }
