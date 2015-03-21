@@ -611,21 +611,14 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         RemoveAllUnusedPixTables();
 
         for (int i = 0; i < gThisScenario->playerNum; i++) {
-            baseObjectType* baseObject = mGetBaseObjectPtr(globals()->scenarioFileInfo.energyBlobID);
-            if (baseObject != NULL) {
-                AddBaseObjectMedia(globals()->scenarioFileInfo.energyBlobID, 0); // special case; always neutral
-            }
-            baseObject = mGetBaseObjectPtr(globals()->scenarioFileInfo.warpInFlareID);
-            if (baseObject != NULL) {
-                AddBaseObjectMedia(globals()->scenarioFileInfo.warpInFlareID, 0); // special case; always neutral
-            }
-            baseObject = mGetBaseObjectPtr(globals()->scenarioFileInfo.warpOutFlareID);
-            if (baseObject != NULL) {
-                AddBaseObjectMedia(globals()->scenarioFileInfo.warpOutFlareID, 0); // special case; always neutral
-            }
-            baseObject = mGetBaseObjectPtr(globals()->scenarioFileInfo.playerBodyID);
-            if (baseObject != NULL) {
-                AddBaseObjectMedia(globals()->scenarioFileInfo.playerBodyID, GetAdmiralColor(i));
+            int32_t blessed[][2] = {
+                {globals()->scenarioFileInfo.energyBlobID, 0},  // always neutral
+                {globals()->scenarioFileInfo.warpInFlareID, 0},  // always neutral
+                {globals()->scenarioFileInfo.warpOutFlareID, 0},  // always neutral
+                {globals()->scenarioFileInfo.playerBodyID, GetAdmiralColor(i)},
+            };
+            for (auto id_color : blessed) {
+                AddBaseObjectMedia(id_color[0], id_color[1]);
             }
         }
     }
