@@ -149,17 +149,7 @@ void CheckActionMedia(int32_t whichAction, int32_t actionNum, uint8_t color) {
                     case kAlterOwner: {
                         baseObjectType* baseObject = mGetBaseObjectPtr(0);
                         for (int32_t count = 0; count < globals()->maxBaseObject; count++) {
-                            bool OKtoExecute = false;
-                            if (action->exclusiveFilter == 0xffffffff) {
-                                if ((action->inclusiveFilter & kLevelKeyTagMask) ==
-                                    (baseObject->buildFlags & kLevelKeyTagMask)) {
-                                    OKtoExecute = true;
-                                }
-                            } else if ((action->inclusiveFilter & baseObject->attributes) ==
-                                       action->inclusiveFilter) {
-                                OKtoExecute = true;
-                            }
-                            if (OKtoExecute) {
+                            if (action_filter_applies_to(*action, *baseObject)) {
                                 baseObject->internalFlags |= kOwnerMayChangeFlag;
                             }
                             baseObject++;
@@ -250,7 +240,6 @@ void AddBaseObjectActionMedia(int32_t whichBase, int32_t whichType, uint8_t colo
 void AddActionMedia(objectActionType *action, uint8_t color) {
     baseObjectType      *baseObject = NULL;
     int32_t             count = 0, l1, l2;
-    bool             OKtoExecute;
 
     if (action == NULL) {
         return;
@@ -283,16 +272,7 @@ void AddActionMedia(objectActionType *action, uint8_t color) {
                 case kAlterOwner:
                     baseObject = mGetBaseObjectPtr(0);
                     for (int32_t count = 0; count < globals()->maxBaseObject; count++) {
-                        OKtoExecute = false;
-                        if (action->exclusiveFilter == 0xffffffff) {
-                            if ((action->inclusiveFilter & kLevelKeyTagMask) ==
-                                (baseObject->buildFlags & kLevelKeyTagMask)) {
-                                OKtoExecute = true;
-                            }
-                        } else if ((action->inclusiveFilter & baseObject->attributes) == action->inclusiveFilter) {
-                            OKtoExecute = true;
-                        }
-                        if (OKtoExecute) {
+                        if (action_filter_applies_to(*action, *baseObject)) {
                             baseObject->internalFlags |= kOwnerMayChangeFlag;
                         }
                         baseObject++;
