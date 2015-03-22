@@ -78,7 +78,6 @@ vector<Scenario::BriefPoint> gScenarioBriefData;
 int32_t gScenarioRotation = 0;
 int32_t gAdmiralNumbers[kMaxPlayerNum];
 
-void CheckActionMedia(int32_t whichAction, int32_t actionNum, uint8_t color);
 void AddBaseObjectActionMedia(int32_t whichBase, int32_t whichType, uint8_t color);
 void AddActionMedia(objectActionType *action, uint8_t color);
 
@@ -87,83 +86,6 @@ void SetAllBaseObjectsUnchecked() {
     for (int32_t count = 0; count < globals()->maxBaseObject; count++) {
         aBase->internalFlags = 0;
         aBase++;
-    }
-}
-
-void CheckBaseObjectMedia(baseObjectType *aBase, uint8_t color) {
-    if (!(aBase->internalFlags & (0x00000001 << color))) {
-        aBase->internalFlags |= (0x00000001 << color);
-        if (aBase->pixResID != kNoSpriteTable) {
-            int16_t id = aBase->pixResID;
-            if (aBase->attributes & kCanThink) {
-                id += color << kSpriteTableColorShift;
-            }
-            KeepPixTable(id);
-        }
-
-        CheckActionMedia(aBase->destroyAction, (aBase->destroyActionNum & kDestroyActionNotMask), color);
-        CheckActionMedia(aBase->expireAction, (aBase->expireActionNum & kDestroyActionNotMask), color);
-        CheckActionMedia(aBase->createAction, aBase->createActionNum, color);
-        CheckActionMedia(aBase->collideAction, aBase->collideActionNum, color);
-        CheckActionMedia(aBase->activateAction, (aBase->activateActionNum & kPeriodicActionNotMask), color);
-        CheckActionMedia(aBase->arriveAction, aBase->arriveActionNum, color);
-
-        for (int32_t object : {aBase->pulse, aBase->beam, aBase->special}) {
-            if (object != kNoWeapon) {
-                baseObjectType* weapon = mGetBaseObjectPtr(object);
-                CheckBaseObjectMedia(weapon, color);
-            }
-        }
-    }
-}
-
-void CheckActionMedia(int32_t whichAction, int32_t actionNum, uint8_t color) {
-    objectActionType* begin = mGetObjectActionPtr(whichAction);
-    objectActionType* end = begin + actionNum;
-    for (auto* action = begin; action != end; ++action) {
-        switch (action->verb) {
-            case kNoAction:
-              return;
-
-            case kCreateObject:
-            case kCreateObjectSetDest: {
-                const auto& arg = action->argument.createObject;
-                CheckBaseObjectMedia(mGetBaseObjectPtr(arg.whichBaseType), color);
-            } break;
-
-            case kPlaySound: {
-                const auto& arg = action->argument.playSound;
-                int32_t end = arg.idMinimum + arg.idRange + 1;
-                for (int32_t i = arg.idMinimum; i != end; ++i) {
-                    KeepSound(i); // FIX to check for range of sounds
-                }
-            } break;
-
-            case kAlter: {
-                const auto& arg = action->argument.alterObject;
-                switch (arg.alterType) {
-                    case kAlterBaseType:
-                        CheckBaseObjectMedia(mGetBaseObjectPtr(arg.minimum), color);
-                        break;
-
-                    case kAlterOwner: {
-                        baseObjectType* baseObject = mGetBaseObjectPtr(0);
-                        for (int32_t count = 0; count < globals()->maxBaseObject; count++) {
-                            if (action_filter_applies_to(*action, *baseObject)) {
-                                baseObject->internalFlags |= kOwnerMayChangeFlag;
-                            }
-                            baseObject++;
-                        }
-                    } break;
-
-                    default:
-                        break;
-                }
-            } break;
-
-            default:
-                break;
-        }
     }
 }
 
@@ -509,7 +431,10 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     SetAllSoundsNoKeep();
     SetAllPixTablesNoKeep();
 
-    *max = gThisScenario->initialNum * 4L
+    RemoveAllUnusedSounds();
+    RemoveAllUnusedPixTables();
+
+    *max = gThisScenario->initialNum * 3L
          + 1
          + (gThisScenario->startTime & kScenario_StartTimeMask); // for each run through the initial num
 
@@ -519,8 +444,6 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
 void construct_scenario(const Scenario* scenario, int32_t* current) {
     int32_t step = *current;
     if (step == 0) {
-        // for each initial object
-
         if (globals()->scenarioFileInfo.energyBlobID < 0) {
             throw Exception("No energy blob defined");
         }
@@ -534,82 +457,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             throw Exception("No player body defined");
         }
 
-        for (int i = 0; i < gThisScenario->playerNum; i++) {
-            int32_t blessed[][2] = {
-                {globals()->scenarioFileInfo.energyBlobID, 0},  // always neutral
-                {globals()->scenarioFileInfo.warpInFlareID, 0},  // always neutral
-                {globals()->scenarioFileInfo.warpOutFlareID, 0},  // always neutral
-                {globals()->scenarioFileInfo.playerBodyID, GetAdmiralColor(i)},
-            };
-            for (auto id_color : blessed) {
-                baseObjectType* baseObject = mGetBaseObjectPtr(id_color[0]);
-                CheckBaseObjectMedia(baseObject, id_color[1]);
-            }
-        }
-    }
-
-    if ((0 <= step) && (step < gThisScenario->initialNum)) {
-        int i = step;
-        const Scenario::InitialObject& initial = *gThisScenario->initial(i);
-        baseObjectType* baseObject = mGetBaseObjectPtr(initial.type);
-
-        // TODO(sfiera): remap objects in networked games.  Applies if:
-        //               * this is a net game
-        //               * owner has a positive race.
-        //               * the snit is not flagged kFixedRace.
-        //               * mGetBaseObjectFromClassRace() can map it.
-
-        // check the media for this object
-        if (baseObject->attributes & kIsDestination) {
-            for (int i = 0; i < gThisScenario->playerNum; i++) {
-                CheckBaseObjectMedia(baseObject, GetAdmiralColor(i));
-            }
-        } else {
-            CheckBaseObjectMedia(baseObject, GetAdmiralColor(initial.owner));
-        }
-
-        // check any objects this object can build
-        for (int i = 0; i < kMaxTypeBaseCanBuild; i++) {
-            if (initial.canBuild[i] != kNoClass) {
-                // check for each player
-                for (int j = 0; j < gThisScenario->playerNum; j++) {
-                    int32_t newShipNum;
-                    mGetBaseObjectFromClassRace(baseObject, newShipNum, initial.canBuild[i], GetAdmiralRace(j));
-                    if (baseObject != NULL) {
-                        CheckBaseObjectMedia(baseObject, GetAdmiralColor(j));
-                    }
-                }
-            }
-        }
-        (*current)++;
-        return;
-    }
-    step -= gThisScenario->initialNum;
-
-    // check media for all condition actions
-    if (step == 0) {
-        Scenario::Condition* condition = gThisScenario->condition(0);
-        for (int i = 0; i < gThisScenario->conditionNum; i++) {
-            CheckActionMedia(condition->startVerb, condition->verbNum, 0);
-            condition = gThisScenario->condition(i);
-        }
-
-        // make sure we check things whose owner may change
-        for (int i = 0; i < globals()->maxBaseObject; i++) {
-            baseObjectType* baseObject = mGetBaseObjectPtr(i);
-            if ((baseObject->internalFlags & kOwnerMayChangeFlag)
-                    && (baseObject->internalFlags & kAnyOwnerColorFlag)) {
-                for (int j = 0; j < gThisScenario->playerNum; j++) {
-                    CheckBaseObjectMedia(baseObject, GetAdmiralColor(i));
-                }
-            }
-        }
-
-        SetAllBaseObjectsUnchecked();
-
-        RemoveAllUnusedSounds();
-        RemoveAllUnusedPixTables();
-
+        // check media for all condition actions
         for (int i = 0; i < gThisScenario->playerNum; i++) {
             int32_t blessed[][2] = {
                 {globals()->scenarioFileInfo.energyBlobID, 0},  // always neutral
