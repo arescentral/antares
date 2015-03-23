@@ -315,6 +315,219 @@ bool Scenario::Condition::true_yet() const {
     return flags & kHasBeenTrue;
 }
 
+bool Scenario::Condition::is_true() const {
+    spaceObjectType* sObject = nullptr;
+    spaceObjectType* dObject = nullptr;
+    int32_t i, l, difference;
+    uint32_t distance, dcalc;
+
+    switch (condition) {
+        case kCounterCondition:
+            l = mGetRealAdmiralNum(conditionArgument.counter.whichPlayer);
+            if (GetAdmiralScore(l, conditionArgument.counter.whichCounter) ==
+                conditionArgument.counter.amount) {
+                return true;
+            }
+            break;
+
+        case kCounterGreaterCondition:
+            l = mGetRealAdmiralNum(conditionArgument.counter.whichPlayer);
+            if (GetAdmiralScore(l, conditionArgument.counter.whichCounter) >=
+                conditionArgument.counter.amount) {
+                return true;
+            }
+            break;
+
+        case kCounterNotCondition:
+            l = mGetRealAdmiralNum(conditionArgument.counter.whichPlayer);
+            if (GetAdmiralScore(l, conditionArgument.counter.whichCounter) !=
+                conditionArgument.counter.amount) {
+                return true;
+            }
+            break;
+
+        case kDestructionCondition:
+            sObject = GetObjectFromInitialNumber(conditionArgument.longValue);
+            if (sObject == NULL) {
+                return true;
+            }
+            break;
+
+        case kOwnerCondition:
+            sObject = GetObjectFromInitialNumber(subjectObject);
+            if (sObject != NULL) {
+                l = mGetRealAdmiralNum(conditionArgument.longValue);
+                if (l == sObject->owner) {
+                    return true;
+                }
+            }
+            break;
+
+        case kTimeCondition:
+            if (globals()->gGameTime >=
+                    ticks_to_usecs(conditionArgument.longValue)) {
+                return true;
+            }
+            break;
+
+        case kProximityCondition:
+            sObject = GetObjectFromInitialNumber(subjectObject);
+            if (sObject != NULL) {
+                dObject = GetObjectFromInitialNumber(directObject);
+                if (dObject != NULL) {
+                    difference = ABS<int>(sObject->location.h - dObject->location.h);
+                    dcalc = difference;
+                    difference =  ABS<int>(sObject->location.v - dObject->location.v);
+                    distance = difference;
+
+                    if ((dcalc < kMaximumRelevantDistance) && (distance < kMaximumRelevantDistance)) {
+                        distance = distance * distance + dcalc * dcalc;
+                        if (distance < conditionArgument.unsignedLongValue) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            break;
+
+        case kDistanceGreaterCondition:
+            sObject = GetObjectFromInitialNumber(subjectObject);
+            if (sObject != NULL) {
+                dObject = GetObjectFromInitialNumber(directObject);
+                if (dObject != NULL) {
+                    difference = ABS<int>(sObject->location.h - dObject->location.h);
+                    dcalc = difference;
+                    difference =  ABS<int>(sObject->location.v - dObject->location.v);
+                    distance = difference;
+
+                    if ((dcalc < kMaximumRelevantDistance)
+                            && (distance < kMaximumRelevantDistance)) {
+                        distance = distance * distance + dcalc * dcalc;
+                        if (distance >= conditionArgument.unsignedLongValue) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            break;
+
+        case kHalfHealthCondition:
+            sObject = GetObjectFromInitialNumber(subjectObject);
+            if (sObject == NULL) {
+                return true;
+            } else if (sObject->health <= (sObject->baseType->health >> 1)) {
+                return true;
+            }
+            break;
+
+        case kIsAuxiliaryObject:
+            sObject = GetObjectFromInitialNumber(subjectObject);
+            if (sObject != NULL) {
+                l = GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber);
+                if (l >= 0) {
+                    dObject = mGetSpaceObjectPtr(l);
+                    if (dObject == sObject) {
+                        return true;
+                    }
+                }
+            }
+            break;
+
+        case kIsTargetObject:
+            sObject = GetObjectFromInitialNumber(subjectObject);
+            if (sObject != NULL) {
+                l = GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber);
+                if (l >= 0) {
+                    dObject = mGetSpaceObjectPtr(l);
+                    if (dObject == sObject) {
+                        return true;
+                    }
+                }
+            }
+            break;
+
+        case kVelocityLessThanEqualToCondition:
+            sObject = GetObjectFromInitialNumber(subjectObject);
+            if (sObject != NULL) {
+                if (((ABS(sObject->velocity.h)) < conditionArgument.longValue) &&
+                    ((ABS(sObject->velocity.v)) < conditionArgument.longValue)) {
+                    return true;
+                }
+            }
+            break;
+
+        case kNoShipsLeftCondition:
+            if (GetAdmiralShipsLeft(conditionArgument.longValue) <= 0) {
+                return true;
+            }
+            break;
+
+        case kCurrentMessageCondition:
+            if (Messages::current() == (conditionArgument.location.h +
+                conditionArgument.location.v - 1)) {
+                return true;
+            }
+            break;
+
+        case kCurrentComputerCondition:
+            if ((globals()->gMiniScreenData.currentScreen ==
+                conditionArgument.location.h) &&
+                ((conditionArgument.location.v < 0) ||
+                    (globals()->gMiniScreenData.selectLine ==
+                        conditionArgument.location.v))) {
+                return true;
+            }
+            break;
+
+        case kZoomLevelCondition:
+            if (globals()->gZoomMode == conditionArgument.longValue) {
+                return true;
+            }
+            break;
+
+        case kAutopilotCondition:
+            return IsPlayerShipOnAutoPilot();
+            break;
+
+        case kNotAutopilotCondition:
+            return !IsPlayerShipOnAutoPilot();
+            break;
+
+        case kObjectIsBeingBuilt:
+            {
+                destBalanceType     *buildAtObject = NULL;
+
+                buildAtObject = mGetDestObjectBalancePtr(GetAdmiralBuildAtObject(globals()->gPlayerAdmiralNumber));
+                if (buildAtObject != NULL) {
+                    if (buildAtObject->totalBuildTime > 0) {
+                        return true;
+                    }
+                }
+            }
+            break;
+
+        case kDirectIsSubjectTarget:
+            sObject = GetObjectFromInitialNumber(subjectObject);
+            dObject = GetObjectFromInitialNumber(directObject);
+            if ((sObject != NULL) && (dObject != NULL)) {
+                if (sObject->destObjectID == dObject->id) {
+                    return true;
+                }
+            }
+            break;
+
+        case kSubjectIsPlayerCondition:
+            sObject = GetObjectFromInitialNumber(subjectObject);
+            if (sObject != NULL) {
+                if (sObject->entryNumber == globals()->gPlayerShipNumber) {
+                    return true;
+                }
+            }
+            break;
+    }
+    return false;
+}
+
 void ScenarioMakerInit() {
     {
         Resource rsrc("scenario-info", "nlAG", 128);
@@ -695,234 +908,17 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
 }
 
 void CheckScenarioConditions(int32_t timePass) {
-    Scenario::Condition     *condition = NULL;
-    spaceObjectType         *sObject = NULL, *dObject = NULL;
-    int32_t                 i, l, difference;
-    uint32_t                distance, dcalc;
-    Point                   offset(0, 0);
-    bool                 conditionTrue = false;
-
-    condition = gThisScenario->condition(0);
     for (int32_t i = 0; i < gThisScenario->conditionNum; i++) {
-        if (!(condition->flags & kTrueOnlyOnce) || !(condition->flags & kHasBeenTrue)) {
-            conditionTrue = false;
-            switch(condition->condition) {
-                case kCounterCondition:
-                    l = mGetRealAdmiralNum(condition->conditionArgument.counter.whichPlayer);
-                    if (GetAdmiralScore(l, condition->conditionArgument.counter.whichCounter) ==
-                        condition->conditionArgument.counter.amount) {
-                        conditionTrue = true;
-                    }
-                    break;
-
-                case kCounterGreaterCondition:
-                    l = mGetRealAdmiralNum(condition->conditionArgument.counter.whichPlayer);
-                    if (GetAdmiralScore(l, condition->conditionArgument.counter.whichCounter) >=
-                        condition->conditionArgument.counter.amount) {
-                        conditionTrue = true;
-                    }
-                    break;
-
-                case kCounterNotCondition:
-                    l = mGetRealAdmiralNum(condition->conditionArgument.counter.whichPlayer);
-                    if (GetAdmiralScore(l, condition->conditionArgument.counter.whichCounter) !=
-                        condition->conditionArgument.counter.amount) {
-                        conditionTrue = true;
-                    }
-                    break;
-
-                case kDestructionCondition:
-                    sObject = GetObjectFromInitialNumber(condition->conditionArgument.longValue);
-                    if (sObject == NULL) {
-                        conditionTrue = true;
-                    }
-                    break;
-
-                case kOwnerCondition:
-                    sObject = GetObjectFromInitialNumber(condition->subjectObject);
-                    if (sObject != NULL) {
-                        l = mGetRealAdmiralNum(condition->conditionArgument.longValue);
-                        if (l == sObject->owner) {
-                            conditionTrue = true;
-                        }
-                    }
-                    break;
-
-                case kTimeCondition:
-                    if (globals()->gGameTime >=
-                            ticks_to_usecs(condition->conditionArgument.longValue)) {
-                        conditionTrue = true;
-                    }
-                    break;
-
-                case kProximityCondition:
-                    sObject = GetObjectFromInitialNumber(condition->subjectObject);
-                    if (sObject != NULL) {
-                        dObject = GetObjectFromInitialNumber(condition->directObject);
-                        if (dObject != NULL) {
-                            difference = ABS<int>(sObject->location.h - dObject->location.h);
-                            dcalc = difference;
-                            difference =  ABS<int>(sObject->location.v - dObject->location.v);
-                            distance = difference;
-
-                            if ((dcalc < kMaximumRelevantDistance) && (distance < kMaximumRelevantDistance)) {
-                                distance = distance * distance + dcalc * dcalc;
-                                if (distance < condition->conditionArgument.unsignedLongValue) {
-                                    conditionTrue = true;
-                                }
-                            }
-                        }
-                    }
-                    break;
-
-                case kDistanceGreaterCondition:
-                    sObject = GetObjectFromInitialNumber(condition->subjectObject);
-                    if (sObject != NULL) {
-                        dObject = GetObjectFromInitialNumber(condition->directObject);
-                        if (dObject != NULL) {
-                            difference = ABS<int>(sObject->location.h - dObject->location.h);
-                            dcalc = difference;
-                            difference =  ABS<int>(sObject->location.v - dObject->location.v);
-                            distance = difference;
-
-                            if ((dcalc < kMaximumRelevantDistance)
-                                    && (distance < kMaximumRelevantDistance)) {
-                                distance = distance * distance + dcalc * dcalc;
-                                if (distance >= condition->conditionArgument.unsignedLongValue) {
-                                    conditionTrue = true;
-                                }
-                            }
-                        }
-                    }
-                    break;
-
-                case kHalfHealthCondition:
-                    sObject = GetObjectFromInitialNumber(condition->subjectObject);
-                    if (sObject == NULL) {
-                        conditionTrue = true;
-                    } else if (sObject->health <= (sObject->baseType->health >> 1)) {
-                        conditionTrue = true;
-                    }
-                    break;
-
-                case kIsAuxiliaryObject:
-                    sObject = GetObjectFromInitialNumber(condition->subjectObject);
-                    if (sObject != NULL) {
-                        l = GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber);
-                        if (l >= 0) {
-                            dObject = mGetSpaceObjectPtr(l);
-                            if (dObject == sObject) {
-                                conditionTrue = true;
-                            }
-                        }
-                    }
-                    break;
-
-                case kIsTargetObject:
-                    sObject = GetObjectFromInitialNumber(condition->subjectObject);
-                    if (sObject != NULL) {
-                        l = GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber);
-                        if (l >= 0) {
-                            dObject = mGetSpaceObjectPtr(l);
-                            if (dObject == sObject) {
-                                conditionTrue = true;
-                            }
-                        }
-                    }
-                    break;
-
-                case kVelocityLessThanEqualToCondition:
-                    sObject = GetObjectFromInitialNumber(condition->subjectObject);
-                    if (sObject != NULL) {
-                        if (((ABS(sObject->velocity.h)) < condition->conditionArgument.longValue) &&
-                            ((ABS(sObject->velocity.v)) < condition->conditionArgument.longValue)) {
-                            conditionTrue = true;
-                        }
-                    }
-                    break;
-
-                case kNoShipsLeftCondition:
-                    if (GetAdmiralShipsLeft(condition->conditionArgument.longValue) <= 0) {
-                        conditionTrue = true;
-                    }
-                    break;
-
-                case kCurrentMessageCondition:
-                    if (Messages::current() == (condition->conditionArgument.location.h +
-                        condition->conditionArgument.location.v - 1)) {
-                        conditionTrue = true;
-                    }
-                    break;
-
-                case kCurrentComputerCondition:
-                    if ((globals()->gMiniScreenData.currentScreen ==
-                        condition->conditionArgument.location.h) &&
-                        ((condition->conditionArgument.location.v < 0) ||
-                            (globals()->gMiniScreenData.selectLine ==
-                                condition->conditionArgument.location.v))) {
-                        conditionTrue = true;
-                    }
-                    break;
-
-                case kZoomLevelCondition:
-                    if (globals()->gZoomMode == condition->conditionArgument.longValue) {
-                        conditionTrue = true;
-                    }
-                    break;
-
-                case kAutopilotCondition:
-                    conditionTrue = IsPlayerShipOnAutoPilot();
-                    break;
-
-                case kNotAutopilotCondition:
-                    conditionTrue = !IsPlayerShipOnAutoPilot();
-                    break;
-
-                case kObjectIsBeingBuilt:
-                    {
-                        destBalanceType     *buildAtObject = NULL;
-
-                        buildAtObject = mGetDestObjectBalancePtr(GetAdmiralBuildAtObject(globals()->gPlayerAdmiralNumber));
-                        if (buildAtObject != NULL) {
-                            if (buildAtObject->totalBuildTime > 0) {
-                                conditionTrue = true;
-                            }
-                        }
-                    }
-                    break;
-
-                case kDirectIsSubjectTarget:
-                    sObject = GetObjectFromInitialNumber(condition->subjectObject);
-                    dObject = GetObjectFromInitialNumber(condition->directObject);
-                    if ((sObject != NULL) && (dObject != NULL)) {
-                        if (sObject->destObjectID == dObject->id) {
-                            conditionTrue = true;
-                        }
-                    }
-                    break;
-
-                case kSubjectIsPlayerCondition:
-                    sObject = GetObjectFromInitialNumber(condition->subjectObject);
-                    if (sObject != NULL) {
-                        if (sObject->entryNumber == globals()->gPlayerShipNumber) {
-                            conditionTrue = true;
-                        }
-                    }
-                    break;
-
-                default:
-                    break;
-
-            }
-            if (conditionTrue) {
-                condition->flags |= kHasBeenTrue;
-                sObject = GetObjectFromInitialNumber(condition->subjectObject);
-                dObject = GetObjectFromInitialNumber(condition->directObject);
-                ExecuteObjectActions(
-                        condition->startVerb, condition->verbNum, sObject, dObject, &offset, true);
+        auto c = gThisScenario->condition(i);
+        if (!(c->flags & kTrueOnlyOnce) || !(c->flags & kHasBeenTrue)) {
+            if (c->is_true()) {
+                c->flags |= kHasBeenTrue;
+                auto sObject = GetObjectFromInitialNumber(c->subjectObject);
+                auto dObject = GetObjectFromInitialNumber(c->directObject);
+                Point offset;
+                ExecuteObjectActions(c->startVerb, c->verbNum, sObject, dObject, &offset, true);
             }
         }
-        condition++;
     }
 }
 

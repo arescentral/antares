@@ -215,6 +215,7 @@ struct Scenario::Condition {
 
     static const size_t byte_size = 38;
 
+    bool is_true() const;
     bool true_yet() const;
     void set_true_yet(bool state);
 };
