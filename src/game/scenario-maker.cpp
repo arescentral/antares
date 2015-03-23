@@ -303,6 +303,11 @@ int32_t Scenario::epilogue_id() const {
     return epilogueID;
 }
 
+bool Scenario::Condition::active() const {
+    return !(flags & kTrueOnlyOnce)
+        || !(flags & kHasBeenTrue);
+}
+
 void Scenario::Condition::set_true_yet(bool state) {
     if (state) {
         flags |= kHasBeenTrue;
@@ -910,14 +915,12 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
 void CheckScenarioConditions(int32_t timePass) {
     for (int32_t i = 0; i < gThisScenario->conditionNum; i++) {
         auto c = gThisScenario->condition(i);
-        if (!(c->flags & kTrueOnlyOnce) || !(c->flags & kHasBeenTrue)) {
-            if (c->is_true()) {
-                c->flags |= kHasBeenTrue;
-                auto sObject = GetObjectFromInitialNumber(c->subjectObject);
-                auto dObject = GetObjectFromInitialNumber(c->directObject);
-                Point offset;
-                ExecuteObjectActions(c->startVerb, c->verbNum, sObject, dObject, &offset, true);
-            }
+        if (c->active() && c->is_true()) {
+            c->set_true_yet(true);
+            auto sObject = GetObjectFromInitialNumber(c->subjectObject);
+            auto dObject = GetObjectFromInitialNumber(c->directObject);
+            Point offset;
+            ExecuteObjectActions(c->startVerb, c->verbNum, sObject, dObject, &offset, true);
         }
     }
 }
