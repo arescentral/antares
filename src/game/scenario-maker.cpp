@@ -926,105 +926,92 @@ void CheckScenarioConditions(int32_t timePass) {
 }
 
 void UnhideInitialObject(int32_t whichInitial) {
-    Scenario::InitialObject     *initial;
-    spaceObjectType         *anObject = NULL;
-    coordPointType          coord;
-    fixedPointType          v = {0, 0};
-    uint32_t                specialAttributes;
-    int32_t                 newShipNum, owner, type, saveDest, baseClass, race;
-    baseObjectType          *baseObject;
+    auto initial = gThisScenario->initial(whichInitial);
+    if (GetObjectFromInitialNumber(whichInitial)) {
+        return;  // Already visible.
+    }
 
-    v.h = 0;
-    v.v = 0;
-    initial = gThisScenario->initial(whichInitial);
-    anObject = GetObjectFromInitialNumber(whichInitial);
-    if (anObject == NULL) {
-        GetInitialCoord(initial, &coord, gScenarioRotation);
+    coordPointType coord;
+    GetInitialCoord(initial, &coord, gScenarioRotation);
 
-        if (initial->owner > kScenarioNoOwner) {
-            owner = gAdmiralNumbers[initial->owner];
-        } else {
-            owner = kScenarioNoOwner;
-        }
+    int32_t owner = kScenarioNoOwner;
+    if (initial->owner > kScenarioNoOwner) {
+        owner = gAdmiralNumbers[initial->owner];
+    }
 
-        specialAttributes = initial->attributes & ~kInitialAttributesMask;
-        if (initial->attributes & kIsPlayerShip) {
-            if (GetAdmiralFlagship(owner) == NULL) {
-                if (owner == globals()->gPlayerAdmiralNumber) {
-                    specialAttributes |= kIsHumanControlled;
-                } else {
-                    specialAttributes &= ~kIsPlayerShip;
-                }
-            } else { // we already have a flagship; this should not override
+    uint32_t specialAttributes = initial->attributes & ~kInitialAttributesMask;
+    if (initial->attributes & kIsPlayerShip) {
+        if (GetAdmiralFlagship(owner) == NULL) {
+            if (owner == globals()->gPlayerAdmiralNumber) {
+                specialAttributes |= kIsHumanControlled;
+            } else {
                 specialAttributes &= ~kIsPlayerShip;
             }
+        } else { // we already have a flagship; this should not override
+            specialAttributes &= ~kIsPlayerShip;
         }
+    }
 
 
-        type = initial->type;
-        // TODO(sfiera): remap objects in networked games.
-        initial->realObjectNumber = newShipNum = CreateAnySpaceObject(
-                type, &v, &coord, 0, owner, specialAttributes, initial->spriteIDOverride);
+    int32_t type = initial->type;
+    // TODO(sfiera): remap objects in networked games.
+    fixedPointType v = {0, 0};
+    int32_t newShipNum = CreateAnySpaceObject(
+            type, &v, &coord, 0, owner, specialAttributes, initial->spriteIDOverride);
+    initial->realObjectNumber = newShipNum;
 
-        anObject = mGetSpaceObjectPtr(newShipNum);
-        initial = gThisScenario->initial(whichInitial);
+    auto anObject = mGetSpaceObjectPtr(newShipNum);
 
-        if (anObject->attributes & kIsDestination) {
-            anObject->destinationObject = MakeNewDestination(
-                    newShipNum, initial->canBuild, initial->earning, initial->nameResID,
-                    initial->nameStrNum);
+    if (anObject->attributes & kIsDestination) {
+        anObject->destinationObject = MakeNewDestination(
+                newShipNum, initial->canBuild, initial->earning, initial->nameResID,
+                initial->nameStrNum);
 
-            if (owner >= 0) {
-                if (initial->canBuild[0] >= 0) {
-                    if (GetAdmiralConsiderObject(owner) < 0) {
-                        SetAdmiralConsiderObject(owner, newShipNum);
-                    }
-                    if (GetAdmiralBuildAtObject(owner) < 0) {
-                        SetAdmiralBuildAtObject(owner, newShipNum);
-                    }
-                    if (GetAdmiralDestinationObject(owner) < 0) {
-                        SetAdmiralDestinationObject(owner, newShipNum, kObjectDestinationType);
-                    }
+        if (owner >= 0) {
+            if (initial->canBuild[0] >= 0) {
+                if (GetAdmiralConsiderObject(owner) < 0) {
+                    SetAdmiralConsiderObject(owner, newShipNum);
+                }
+                if (GetAdmiralBuildAtObject(owner) < 0) {
+                    SetAdmiralBuildAtObject(owner, newShipNum);
+                }
+                if (GetAdmiralDestinationObject(owner) < 0) {
+                    SetAdmiralDestinationObject(owner, newShipNum, kObjectDestinationType);
                 }
             }
         }
+    }
 
-        initial->realObjectID = anObject->id;
-        if ((initial->attributes & kIsPlayerShip) && (GetAdmiralFlagship(owner) == NULL)) {
-            SetAdmiralFlagship(owner, newShipNum);
-            if (owner == globals()->gPlayerAdmiralNumber) {
-                ResetPlayerShip(newShipNum);
-            }
+    initial->realObjectID = anObject->id;
+    if ((initial->attributes & kIsPlayerShip) && (GetAdmiralFlagship(owner) == NULL)) {
+        SetAdmiralFlagship(owner, newShipNum);
+        if (owner == globals()->gPlayerAdmiralNumber) {
+            ResetPlayerShip(newShipNum);
         }
+    }
 
-        if (initial->initialDestination >= 0) {
-            // only objects controlled by an Admiral can have destinations
-            if (initial->owner > kScenarioNoOwner) {
-                // get the correct admiral #
+    if ((initial->initialDestination >= 0)
+            && (initial->owner > kScenarioNoOwner)) {
+        // get the correct admiral #
+        int32_t owner = gAdmiralNumbers[initial->owner];
 
-                owner = gAdmiralNumbers[initial->owner];
+        auto target = gThisScenario->initial(initial->initialDestination);
+        if (target->realObjectNumber >= 0) {
+            int32_t saveDest = GetAdmiralDestinationObject(owner); // save the original dest
 
-                // INITIAL IS BEING CHANGED HERE
-                initial = gThisScenario->initial(initial->initialDestination);
-                if (initial->realObjectNumber >= 0) {
-                    saveDest = GetAdmiralDestinationObject(owner); // save the original dest
+            // set the admiral's dest object to the mapped initial dest object
+            SetAdmiralDestinationObject(
+                    owner, target->realObjectNumber, kObjectDestinationType);
 
-                    // set the admiral's dest object to the mapped initial dest object
-                    SetAdmiralDestinationObject(
-                            owner, initial->realObjectNumber, kObjectDestinationType);
+            // now give the mapped initial object the admiral's destination
 
-                    // now give the mapped initial object the admiral's destination
+            anObject = mGetSpaceObjectPtr(initial->realObjectNumber);
+            specialAttributes = anObject->attributes; // preserve the attributes
+            anObject->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
+            SetObjectDestination(anObject, NULL);
+            anObject->attributes = specialAttributes;
 
-                    initial = gThisScenario->initial(whichInitial);
-                    anObject = mGetSpaceObjectPtr(initial->realObjectNumber);
-                    specialAttributes = anObject->attributes; // preserve the attributes
-                    anObject->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
-                    SetObjectDestination(anObject, NULL);
-                    anObject->attributes = specialAttributes;
-
-                    SetAdmiralDestinationObject(owner, saveDest, kObjectDestinationType);
-                }
-            }
+            SetAdmiralDestinationObject(owner, saveDest, kObjectDestinationType);
         }
     }
 }
