@@ -65,8 +65,10 @@ const int16_t kScenarioInitialResID     = 500;
 const int16_t kScenarioConditionResID   = 500;
 const int16_t kScenarioBriefResID       = 500;
 
-const int32_t kOwnerMayChangeFlag   = 0x80000000;
-const int32_t kAnyOwnerColorFlag    = 0x0000ffff;
+const uint32_t kNeutralColorNeededFlag   = 0x00010000u;
+const uint32_t kAnyColorNeededFlag       = 0xffff0000u;
+const uint32_t kNeutralColorLoadedFlag   = 0x00000001u;
+const uint32_t kAnyColorLoadedFlag       = 0x0000ffffu;
 
 const int16_t kLevelNameID = 4600;
 static StringList* level_names;
@@ -78,8 +80,9 @@ vector<Scenario::BriefPoint> gScenarioBriefData;
 int32_t gScenarioRotation = 0;
 int32_t gAdmiralNumbers[kMaxPlayerNum];
 
-void AddBaseObjectActionMedia(int32_t whichBase, int32_t whichType, uint8_t color);
-void AddActionMedia(objectActionType *action, uint8_t color);
+void AddBaseObjectActionMedia(
+        int32_t whichBase, int32_t whichType, uint8_t color, uint32_t all_colors);
+void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors);
 
 void SetAllBaseObjectsUnchecked() {
     baseObjectType  *aBase = mGetBaseObjectPtr(0);
@@ -89,29 +92,35 @@ void SetAllBaseObjectsUnchecked() {
     }
 }
 
-void AddBaseObjectMedia(int32_t whichBase, uint8_t color) {
+void AddBaseObjectMedia(int32_t whichBase, uint8_t color, uint32_t all_colors) {
     baseObjectType      *aBase = mGetBaseObjectPtr(whichBase);
 
-    if (!(aBase->internalFlags & (0x00000001 << color))) {
-        aBase->internalFlags |= (0x00000001 << color);
+    if (!(aBase->attributes & kCanThink)) {
+        color = GRAY;
+    }
+    aBase->internalFlags |= (kNeutralColorNeededFlag << color);
+    for (int i = 0; i < 16; ++i) {
+        if (aBase->internalFlags & (kNeutralColorLoadedFlag << i)) {
+            continue;  // color already loaded.
+        } else if (!(aBase->internalFlags & (kNeutralColorNeededFlag << i))) {
+            continue;  // color not needed.
+        }
+
         if (aBase->pixResID != kNoSpriteTable) {
-            int16_t id = aBase->pixResID;
-            if (aBase->attributes & kCanThink) {
-                id += color << kSpriteTableColorShift;
-            }
+            int16_t id = aBase->pixResID + (i << kSpriteTableColorShift);
             AddPixTable(id);
         }
 
-        AddBaseObjectActionMedia(whichBase, kDestroyActionType, color);
-        AddBaseObjectActionMedia(whichBase, kExpireActionType, color);
-        AddBaseObjectActionMedia(whichBase, kCreateActionType, color);
-        AddBaseObjectActionMedia(whichBase, kCollideActionType, color);
-        AddBaseObjectActionMedia(whichBase, kActivateActionType, color);
-        AddBaseObjectActionMedia(whichBase, kArriveActionType, color);
+        AddBaseObjectActionMedia(whichBase, kDestroyActionType, i, all_colors);
+        AddBaseObjectActionMedia(whichBase, kExpireActionType, i, all_colors);
+        AddBaseObjectActionMedia(whichBase, kCreateActionType, i, all_colors);
+        AddBaseObjectActionMedia(whichBase, kCollideActionType, i, all_colors);
+        AddBaseObjectActionMedia(whichBase, kActivateActionType, i, all_colors);
+        AddBaseObjectActionMedia(whichBase, kArriveActionType, i, all_colors);
 
         for (int32_t weapon : {aBase->pulse, aBase->beam, aBase->special}) {
             if (weapon != kNoWeapon) {
-                AddBaseObjectMedia(weapon, color);
+                AddBaseObjectMedia(weapon, i, all_colors);
             }
         }
     }
@@ -147,7 +156,8 @@ objectActionType* mGetActionFromBaseTypeNum(
     return nullptr;
 }
 
-void AddBaseObjectActionMedia(int32_t whichBase, int32_t whichType, uint8_t color) {
+void AddBaseObjectActionMedia(
+        int32_t whichBase, int32_t whichType, uint8_t color, uint32_t all_colors) {
     for (int count = 0; ; ++count) {
         const baseObjectType& baseObject = *mGetBaseObjectPtr(whichBase);
         auto* action = mGetActionFromBaseTypeNum(baseObject, whichType, count);
@@ -155,11 +165,11 @@ void AddBaseObjectActionMedia(int32_t whichBase, int32_t whichType, uint8_t colo
             break;
         }
 
-        AddActionMedia(action, color);
+        AddActionMedia(action, color, all_colors);
     }
 }
 
-void AddActionMedia(objectActionType *action, uint8_t color) {
+void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors) {
     baseObjectType      *baseObject = NULL;
     int32_t             count = 0, l1, l2;
 
@@ -169,7 +179,7 @@ void AddActionMedia(objectActionType *action, uint8_t color) {
     switch (action->verb) {
         case kCreateObject:
         case kCreateObjectSetDest:
-            AddBaseObjectMedia(action->argument.createObject.whichBaseType, color);
+            AddBaseObjectMedia(action->argument.createObject.whichBaseType, color, all_colors);
             break;
 
         case kPlaySound:
@@ -188,14 +198,17 @@ void AddActionMedia(objectActionType *action, uint8_t color) {
         case kAlter:
             switch(action->argument.alterObject.alterType) {
                 case kAlterBaseType:
-                    AddBaseObjectMedia(action->argument.alterObject.minimum, color);
+                    AddBaseObjectMedia(action->argument.alterObject.minimum, color, all_colors);
                     break;
 
                 case kAlterOwner:
                     baseObject = mGetBaseObjectPtr(0);
                     for (int32_t count = 0; count < globals()->maxBaseObject; count++) {
                         if (action_filter_applies_to(*action, *baseObject)) {
-                            baseObject->internalFlags |= kOwnerMayChangeFlag;
+                            baseObject->internalFlags |= all_colors;
+                        }
+                        if (baseObject->internalFlags & kAnyColorLoadedFlag) {
+                            AddBaseObjectMedia(count, color, all_colors);
                         }
                         baseObject++;
                     }
@@ -443,6 +456,11 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
 
 void construct_scenario(const Scenario* scenario, int32_t* current) {
     int32_t step = *current;
+    uint32_t all_colors = kNeutralColorNeededFlag;
+    for (int k = 0; k < gThisScenario->playerNum; k++) {
+        all_colors |= kNeutralColorNeededFlag << GetAdmiralColor(k);
+    }
+
     if (step == 0) {
         if (globals()->scenarioFileInfo.energyBlobID < 0) {
             throw Exception("No energy blob defined");
@@ -457,16 +475,17 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             throw Exception("No player body defined");
         }
 
-        // check media for all condition actions
+        // Load the four blessed objects.  The player's body is needed
+        // in all colors; the other three are needed only as neutral
+        // objects by default.
+        mGetBaseObjectPtr(globals()->scenarioFileInfo.playerBodyID)->internalFlags |= all_colors;
         for (int i = 0; i < gThisScenario->playerNum; i++) {
-            int32_t blessed[][2] = {
-                {globals()->scenarioFileInfo.energyBlobID, 0},  // always neutral
-                {globals()->scenarioFileInfo.warpInFlareID, 0},  // always neutral
-                {globals()->scenarioFileInfo.warpOutFlareID, 0},  // always neutral
-                {globals()->scenarioFileInfo.playerBodyID, GetAdmiralColor(i)},
+            const auto& info = globals()->scenarioFileInfo;
+            int32_t blessed[] = {
+                info.energyBlobID, info.warpInFlareID, info.warpOutFlareID, info.playerBodyID,
             };
-            for (auto id_color : blessed) {
-                AddBaseObjectMedia(id_color[0], id_color[1]);
+            for (auto id : blessed) {
+                AddBaseObjectMedia(id, GRAY, all_colors);
             }
         }
     }
@@ -475,23 +494,21 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         int i = step;
 
         Scenario::InitialObject* initial = gThisScenario->initial(i);
-
-        // get the base object equiv
         int32_t type = initial->type;
         baseObjectType* baseObject = mGetBaseObjectPtr(type);
         // TODO(sfiera): remap objects in networked games.
-        // check the media for this object
-        if (baseObject->attributes & kIsDestination) {
-            for (int j = 0; j < gThisScenario->playerNum; j++) {
-                AddBaseObjectMedia(type, GetAdmiralColor(j));
-            }
-        } else {
-            AddBaseObjectMedia(type, GetAdmiralColor(initial->owner));
-        }
 
-        // we may have just moved memory, so let's make sure our ptrs are correct
-        initial = gThisScenario->initial(i);
-        baseObject = mGetBaseObjectPtr(type);
+        // Load the media for this object
+        //
+        // I don't think that it's necessary to treat kIsDestination
+        // objects specially here.  If their ownership can change, there
+        // will be a transport or something that does it, and we will
+        // mark the necessity of having all colors through action
+        // checking.
+        if (baseObject->attributes & kIsDestination) {
+            baseObject->internalFlags |= all_colors;
+        }
+        AddBaseObjectMedia(type, GetAdmiralColor(initial->owner), all_colors);
 
         // make sure we're not overriding the sprite
         if (initial->spriteIDOverride >= 0) {
@@ -516,7 +533,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                     mGetBaseObjectFromClassRace(
                             baseObject, newShipNum, initial->canBuild[j], GetAdmiralRace(k));
                     if (baseObject != NULL) {
-                        AddBaseObjectMedia(newShipNum, GetAdmiralColor(k));
+                        AddBaseObjectMedia(newShipNum, GetAdmiralColor(k), all_colors);
                     }
                 }
             }
@@ -536,18 +553,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 for (int j = 0; j < condition->verbNum; j++) {
                     condition = gThisScenario->condition(i);
                     action = mGetObjectActionPtr(condition->startVerb + j);
-                    AddActionMedia(action, 0);
-                }
-            }
-        }
-
-        // make sure we check things whose owner may change
-        for (int i = 0; i < globals()->maxBaseObject; i++) {
-            baseObjectType* baseObject = mGetBaseObjectPtr(i);
-            if ((baseObject->internalFlags & kOwnerMayChangeFlag) 
-                    && (baseObject->internalFlags & kAnyOwnerColorFlag)) {
-                for (int j = 0; j < gThisScenario->playerNum; j++) {
-                    AddBaseObjectMedia(i, GetAdmiralColor(j));
+                    AddActionMedia(action, GRAY, all_colors);
                 }
             }
         }

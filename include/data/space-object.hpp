@@ -595,7 +595,7 @@ struct baseObjectType {
     int16_t             pictPortraitResID;
     int16_t             reserved2;
     int32_t             reserved3;
-    int32_t             internalFlags;
+    uint32_t            internalFlags;
 
     static const int byte_size = 318;
 };
