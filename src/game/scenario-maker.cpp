@@ -666,7 +666,6 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     for (int i = 0; i < gThisScenario->playerNum; i++) {
         if (gThisScenario->player[i].playerType == kSingleHumanPlayer) {
             gAdmiralNumbers[i] = MakeNewAdmiral(
-                    kNoShip, kNoDestinationObject, kNoDestinationType,
                     kAIsHuman, gThisScenario->player[i].playerRace,
                     gThisScenario->player[i].nameResID,
                     gThisScenario->player[i].nameStrNum,
@@ -675,7 +674,6 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
             globals()->gPlayerAdmiralNumber = gAdmiralNumbers[i];
         } else {
             gAdmiralNumbers[i] = MakeNewAdmiral(
-                    kNoShip, kNoDestinationObject, kNoDestinationType,
                     kAIsComputer, gThisScenario->player[i].playerRace,
                     gThisScenario->player[i].nameResID,
                     gThisScenario->player[i].nameStrNum,

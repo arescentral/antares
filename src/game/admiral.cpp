@@ -128,8 +128,8 @@ admiralType* mGetAdmiralPtr(int32_t mwhichAdmiral) {
 }
 
 int32_t MakeNewAdmiral(
-        int32_t flagship, int32_t destinationObject, destinationType dType, uint32_t attributes,
-        int32_t race, int16_t nameResID, int16_t nameStrNum, Fixed earningPower) {
+        uint32_t attributes, int32_t race, int16_t nameResID, int16_t nameStrNum,
+        Fixed earningPower) {
     int32_t n = 0;
     spaceObjectType* destObject;
 
@@ -147,23 +147,13 @@ int32_t MakeNewAdmiral(
     a->attributes = attributes;
     a->earningPower = earningPower;
 
-    a->destinationObject = destinationObject;
-    if (destinationObject >= 0) {
-        destObject = mGetSpaceObjectPtr(destinationObject);
-        a->destinationObjectID = destObject->id;
-    } else {
-        a->destinationObjectID = -1;
-    }
+    a->destinationObject = kNoDestinationObject;
+    a->destinationObjectID = -1;
 
-    a->flagship = flagship;
-    if (flagship >= 0) {
-        destObject = mGetSpaceObjectPtr(flagship);
-        a->flagshipID = destObject->id;
-    } else {
-        a->flagshipID = -1;
-    }
+    a->flagship = kNoShip;
+    a->flagshipID = -1;
 
-    a->destType = dType;
+    a->destType = kNoDestinationType;
     a->race = race;
     a->color = 0;
     a->blitzkrieg = 1200;  // about a 2 minute blitzkrieg
