@@ -127,9 +127,7 @@ admiralType* mGetAdmiralPtr(int32_t mwhichAdmiral) {
     return globals()->gAdmiralData.get() + mwhichAdmiral;
 }
 
-int32_t MakeNewAdmiral(
-        uint32_t attributes, int32_t race, int16_t nameResID, int16_t nameStrNum,
-        Fixed earningPower) {
+int32_t MakeNewAdmiral(uint32_t attributes, const Scenario::Player& player) {
     int32_t n = 0;
     spaceObjectType* destObject;
 
@@ -145,7 +143,7 @@ int32_t MakeNewAdmiral(
 
     a->active = true;
     a->attributes = attributes;
-    a->earningPower = earningPower;
+    a->earningPower = player.earningPower;
 
     a->destinationObject = kNoDestinationObject;
     a->destinationObjectID = -1;
@@ -154,7 +152,7 @@ int32_t MakeNewAdmiral(
     a->flagshipID = -1;
 
     a->destType = kNoDestinationType;
-    a->race = race;
+    a->race = player.playerRace;
     a->color = 0;
     a->blitzkrieg = 1200;  // about a 2 minute blitzkrieg
     a->cash = a->kills = a->losses = a->saveGoal = 0;
@@ -171,8 +169,8 @@ int32_t MakeNewAdmiral(
     a->hopeToBuild = -1;
     a->shipsLeft = 0;
 
-    if ((nameResID >= 0)) {
-        a->name.assign(StringList(nameResID).at(nameStrNum - 1));
+    if ((player.nameResID >= 0)) {
+        a->name.assign(StringList(player.nameResID).at(player.nameStrNum - 1));
         if (a->name.size() > kAdmiralNameLen) {
             a->name.resize(kAdmiralNameLen);
         }

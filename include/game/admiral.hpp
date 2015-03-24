@@ -128,9 +128,7 @@ void ResetAllDestObjectData();
 destBalanceType* mGetDestObjectBalancePtr(int32_t whichObject);
 admiralType* mGetAdmiralPtr(int32_t mwhichAdmiral);
 
-int32_t MakeNewAdmiral(
-        uint32_t attributes, int32_t race, int16_t nameResID, int16_t nameStrNum,
-        Fixed earningPower);
+int32_t MakeNewAdmiral(uint32_t attributes, const Scenario::Player& player);
 int32_t MakeNewDestination(
         int32_t whichObject, int32_t* canBuildType, Fixed earn, int16_t nameResID,
         int16_t nameStrNum);

@@ -665,19 +665,11 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
 
     for (int i = 0; i < gThisScenario->playerNum; i++) {
         if (gThisScenario->player[i].playerType == kSingleHumanPlayer) {
-            gAdmiralNumbers[i] = MakeNewAdmiral(
-                    kAIsHuman, gThisScenario->player[i].playerRace,
-                    gThisScenario->player[i].nameResID,
-                    gThisScenario->player[i].nameStrNum,
-                    gThisScenario->player[i].earningPower);
+            gAdmiralNumbers[i] = MakeNewAdmiral(kAIsHuman, gThisScenario->player[i]);
             PayAdmiral(gAdmiralNumbers[i], mLongToFixed(5000));
             globals()->gPlayerAdmiralNumber = gAdmiralNumbers[i];
         } else {
-            gAdmiralNumbers[i] = MakeNewAdmiral(
-                    kAIsComputer, gThisScenario->player[i].playerRace,
-                    gThisScenario->player[i].nameResID,
-                    gThisScenario->player[i].nameStrNum,
-                    gThisScenario->player[i].earningPower);
+            gAdmiralNumbers[i] = MakeNewAdmiral(kAIsComputer, gThisScenario->player[i]);
             PayAdmiral(gAdmiralNumbers[i], mLongToFixed(5000));
         }
     }
