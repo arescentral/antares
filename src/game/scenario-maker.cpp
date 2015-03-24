@@ -242,6 +242,38 @@ void GetInitialCoord(Scenario::InitialObject *initial, coordPointType *coord, in
     coord->v += lscrap;
 }
 
+void set_initial_destination(const Scenario::InitialObject* initial, bool preserve) {
+    if ((initial->realObjectNumber < 0)                 // hasn't been created yet
+            || (initial->initialDestination < 0)        // doesn't have a target
+            || (initial->owner == kScenarioNoOwner)) {  // doesn't have an owner
+        return;
+    }
+
+    // get the correct admiral #
+    int32_t owner = gAdmiralNumbers[initial->owner];
+
+    auto target = gThisScenario->initial(initial->initialDestination);
+    if (target->realObjectNumber >= 0) {
+        int32_t saveDest = GetAdmiralDestinationObject(owner); // save the original dest
+
+        // set the admiral's dest object to the mapped initial dest object
+        SetAdmiralDestinationObject(
+                owner, target->realObjectNumber, kObjectDestinationType);
+
+        // now give the mapped initial object the admiral's destination
+
+        spaceObjectType* object = mGetSpaceObjectPtr(initial->realObjectNumber);
+        uint32_t specialAttributes = object->attributes; // preserve the attributes
+        object->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
+        SetObjectDestination(object, NULL);
+        object->attributes = specialAttributes;
+
+        if (preserve) {
+            SetAdmiralDestinationObject(owner, saveDest, kObjectDestinationType);
+        }
+    }
+}
+
 }  // namespace
 
 const Scenario* gThisScenario = NULL;
@@ -845,33 +877,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
 
     // double back and set up any defined initial destinations
     if ((0 <= step) && (step < gThisScenario->initialNum)) {
-        int i = step;
-
-        Scenario::InitialObject* initial = gThisScenario->initial(i);
-        // Skip:
-        if ((initial->realObjectNumber < 0)  // objects that haven't been created yet,
-                || (initial->initialDestination < 0)  // objects with no initial destination, and
-                || (initial->owner == kScenarioNoOwner)) {  // objects with no owner.
-            (*current)++;
-            return;
-        }
-
-        // get the correct admiral #
-
-        int32_t owner = gAdmiralNumbers[initial->owner];
-        Scenario::InitialObject* dest = gThisScenario->initial(initial->initialDestination);
-
-        // set the admiral's dest object to the mapped initial dest object
-        SetAdmiralDestinationObject(
-                owner, dest->realObjectNumber, kObjectDestinationType);
-
-        // now give the mapped initial object the admiral's destination
-        spaceObjectType* anObject = mGetSpaceObjectPtr(initial->realObjectNumber);
-        int32_t specialAttributes = anObject->attributes; // preserve the attributes
-        anObject->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
-        SetObjectDestination(anObject, NULL);
-        anObject->attributes = specialAttributes;
-
+        set_initial_destination(gThisScenario->initial(step), false);
         (*current)++;
         return;
     }
@@ -990,30 +996,7 @@ void UnhideInitialObject(int32_t whichInitial) {
         }
     }
 
-    if ((initial->initialDestination >= 0)
-            && (initial->owner > kScenarioNoOwner)) {
-        // get the correct admiral #
-        int32_t owner = gAdmiralNumbers[initial->owner];
-
-        auto target = gThisScenario->initial(initial->initialDestination);
-        if (target->realObjectNumber >= 0) {
-            int32_t saveDest = GetAdmiralDestinationObject(owner); // save the original dest
-
-            // set the admiral's dest object to the mapped initial dest object
-            SetAdmiralDestinationObject(
-                    owner, target->realObjectNumber, kObjectDestinationType);
-
-            // now give the mapped initial object the admiral's destination
-
-            anObject = mGetSpaceObjectPtr(initial->realObjectNumber);
-            specialAttributes = anObject->attributes; // preserve the attributes
-            anObject->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
-            SetObjectDestination(anObject, NULL);
-            anObject->attributes = specialAttributes;
-
-            SetAdmiralDestinationObject(owner, saveDest, kObjectDestinationType);
-        }
-    }
+    set_initial_destination(initial, true);
 }
 
 spaceObjectType *GetObjectFromInitialNumber(int32_t initialNumber) {
