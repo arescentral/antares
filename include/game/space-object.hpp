@@ -42,6 +42,14 @@ void ChangeObjectBaseType( spaceObjectType *, int32_t, int32_t, bool);
 void AddActionToQueue( objectActionType *, int32_t, int32_t, int32_t, spaceObjectType *,
                         spaceObjectType *, Point*);
 void ExecuteActionQueue(int32_t);
+
+// Returns true iff {in,ex}clusive_filter() allows `action` to run over
+// `target`. The baseObject version uses the default attributes of the
+// object, and the spaceObject version uses the actual attributes in
+// effect (e.g. kStaticDestination or kOnAutopilot).
+bool action_filter_applies_to(const objectActionType& action, const baseObjectType& target);
+bool action_filter_applies_to(const objectActionType& action, const spaceObjectType& target);
+
 void ExecuteObjectActions(int32_t, int32_t, spaceObjectType *, spaceObjectType *, Point*, bool);
 int32_t CreateAnySpaceObject(int32_t, fixedPointType *, coordPointType *, int32_t, int32_t, uint32_t,
                             int16_t);

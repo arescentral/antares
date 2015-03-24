@@ -1178,6 +1178,22 @@ void ExecuteActionQueue( int32_t unitsToDo)
     }
 }
 
+bool action_filter_applies_to(const objectActionType& action, const baseObjectType& target) {
+    if (action.exclusiveFilter == 0xffffffff) {
+        return ((action.inclusiveFilter ^ target.buildFlags) & kLevelKeyTagMask) == 0;
+    } else {
+        return (action.inclusiveFilter & target.attributes) == action.inclusiveFilter;
+    }
+}
+
+bool action_filter_applies_to(const objectActionType& action, const spaceObjectType& target) {
+    if (action.exclusiveFilter == 0xffffffff) {
+        return ((action.inclusiveFilter ^ target.baseType->buildFlags) & kLevelKeyTagMask) == 0;
+    } else {
+        return (action.inclusiveFilter & target.attributes) == action.inclusiveFilter;
+    }
+}
+
 void ExecuteObjectActions( int32_t whichAction, int32_t actionNum,
                 spaceObjectType *sObject, spaceObjectType *dObject, Point* offset,
                 bool allowDelay)
@@ -1263,34 +1279,10 @@ void ExecuteObjectActions( int32_t whichAction, int32_t actionNum,
                             ( dObject->owner == sObject->owner)
                         )
                     )
-                )
-        {
-            if ( action->exclusiveFilter == 0xffffffff)
-            {
-                if (    (action->inclusiveFilter & kLevelKeyTagMask) ==
-                            ( dObject->baseType->buildFlags & kLevelKeyTagMask)
-                    )
-                {
-                    OKtoExecute = true;
-                }
-            } else if ( ( action->inclusiveFilter & dObject->attributes) == action->inclusiveFilter)
-            {
-                OKtoExecute = true;
-            }
-
+                ) {
+            OKtoExecute = action_filter_applies_to(*action, *dObject);
         }
-/*
-        if (    ( anObject == nil) ||
-                (( action->exclusiveFilter == 0xffffffff) &&
-                    ((action->inclusiveFilter & kLevelKeyTagMask) ==
-                        ( anObject->baseType->buildFlags & kLevelKeyTagMask))) ||
-                (((action->inclusiveFilter == 0) ||
-                    ((action->inclusiveFilter & anObject->attributes) == action->inclusiveFilter))
-                    && (( action->owner == 0) || (( action->owner == 1) &&
-                    (anObject->owner == sObject->owner)) || (( action->owner == -1) && ( anObject->owner
-                    != sObject->owner))) && ( anObject != nil))
-            )
-*/
+
         if ( OKtoExecute)
         {
             switch ( action->verb)
