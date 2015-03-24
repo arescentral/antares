@@ -118,7 +118,7 @@ void AddBaseObjectMedia(int32_t whichBase, uint8_t color, uint32_t all_colors) {
         AddBaseObjectActionMedia(whichBase, kActivateActionType, i, all_colors);
         AddBaseObjectActionMedia(whichBase, kArriveActionType, i, all_colors);
 
-        for (int32_t weapon : {aBase->pulse, aBase->beam, aBase->special}) {
+        for (int32_t weapon: {aBase->pulse, aBase->beam, aBase->special}) {
             if (weapon != kNoWeapon) {
                 AddBaseObjectMedia(weapon, i, all_colors);
             }
@@ -734,7 +734,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             int32_t blessed[] = {
                 info.energyBlobID, info.warpInFlareID, info.warpOutFlareID, info.playerBodyID,
             };
-            for (auto id : blessed) {
+            for (auto id: blessed) {
                 AddBaseObjectMedia(id, GRAY, all_colors);
             }
         }
