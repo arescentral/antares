@@ -27,6 +27,7 @@
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
+#include "game/action.hpp"
 #include "game/admiral.hpp"
 #include "game/beam.hpp"
 #include "game/globals.hpp"
@@ -916,7 +917,7 @@ void CheckScenarioConditions(int32_t timePass) {
             auto sObject = GetObjectFromInitialNumber(c->subjectObject);
             auto dObject = GetObjectFromInitialNumber(c->directObject);
             Point offset;
-            ExecuteObjectActions(c->startVerb, c->verbNum, sObject, dObject, &offset, true);
+            execute_actions(c->startVerb, c->verbNum, sObject, dObject, &offset, true);
         }
     }
 }

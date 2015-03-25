@@ -21,6 +21,7 @@
 #include "config/keys.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
+#include "game/action.hpp"
 #include "game/admiral.hpp"
 #include "game/globals.hpp"
 #include "game/messages.hpp"
@@ -494,9 +495,10 @@ void NonplayerShipThink( int32_t timePass)
                         anObject->pulseTime = weaponObject->frame.weapon.fireTime;
                         if ( weaponObject->frame.weapon.ammo > 0)
                             anObject->pulseAmmo--;
-                        ExecuteObjectActions( weaponObject->activateAction,
-                                            weaponObject->activateActionNum, anObject,
-                                            targetObject, &offset, true);
+                        execute_actions(
+                                weaponObject->activateAction,
+                                weaponObject->activateActionNum,
+                                anObject, targetObject, &offset, true);
                     }
                 }
                 if ( anObject->beamTime > 0) anObject->beamTime -= timePass;
@@ -530,9 +532,10 @@ void NonplayerShipThink( int32_t timePass)
 
                         anObject->beamTime = weaponObject->frame.weapon.fireTime;
                         if ( weaponObject->frame.weapon.ammo > 0) anObject->beamAmmo--;
-                        ExecuteObjectActions( weaponObject->activateAction,
-                                            weaponObject->activateActionNum, anObject,
-                                            targetObject, &offset, true);
+                        execute_actions(
+                                weaponObject->activateAction,
+                                weaponObject->activateActionNum,
+                                anObject, targetObject, &offset, true);
                     }
 
                 }
@@ -574,9 +577,10 @@ void NonplayerShipThink( int32_t timePass)
                             targetObject = gSpaceObjectData.get() + anObject->targetObjectNumber;
                         } else targetObject = nil;
                         */
-                        ExecuteObjectActions( weaponObject->activateAction,
-                                            weaponObject->activateActionNum, anObject,
-                                            targetObject, NULL, true);
+                        execute_actions(
+                                weaponObject->activateAction,
+                                weaponObject->activateActionNum,
+                                anObject, targetObject, NULL, true);
                     }
                 }
 
@@ -809,12 +813,10 @@ uint32_t ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *b
                         if ( !(anObject->runTimeFlags & kHasArrived))
                         {
                             offset.h = offset.v = 0;
-                            ExecuteObjectActions(
+                            execute_actions(
                                 baseObject->arriveAction,
                                 baseObject->arriveActionNum,
-                                anObject,
-                                anObject->destObjectPtr,
-                                &offset, true);
+                                anObject, anObject->destObjectPtr, &offset, true);
                             anObject->runTimeFlags |= kHasArrived;
                         }
                     }
@@ -1111,12 +1113,10 @@ uint32_t ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *b
                                 kHasArrived))
                             {
                                 offset.h = offset.v = 0;
-                                ExecuteObjectActions(
+                                execute_actions(
                                     baseObject->arriveAction,
                                     baseObject->arriveActionNum,
-                                        anObject,
-                                        anObject->destObjectPtr,
-                                        &offset, true);
+                                    anObject, anObject->destObjectPtr, &offset, true);
                                 anObject->runTimeFlags |= kHasArrived;
                             }
                         }
@@ -1593,10 +1593,10 @@ uint32_t ThinkObjectLandingPresence( spaceObjectType *anObject)
 
     if ( (anObject->presenceData & kPresenceDataLoWordMask) <= 0)
     {
-        ExecuteObjectActions( anObject->baseType->expireAction,
-                            anObject->baseType->expireActionNum
-                             & kDestroyActionNotMask,
-                            anObject, targetObject, NULL, true);
+        execute_actions(
+                anObject->baseType->expireAction,
+                anObject->baseType->expireActionNum & kDestroyActionNotMask,
+                anObject, targetObject, NULL, true);
         anObject->active = kObjectToBeFreed;
 
     } else if ( anObject->sprite != NULL)
@@ -2165,9 +2165,10 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
 
         if ( sObject->active == kObjectInUse)
         {
-            ExecuteObjectActions( sObject->baseType->collideAction,
-                                sObject->baseType->collideActionNum,
-                                sObject, anObject, NULL, true);
+            execute_actions(
+                    sObject->baseType->collideAction,
+                    sObject->baseType->collideActionNum,
+                    sObject, anObject, NULL, true);
         }
 
         if ( anObject->owner == globals()->gPlayerAdmiralNumber)

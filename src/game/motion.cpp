@@ -24,6 +24,7 @@
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "drawing/sprite-handling.hpp"
+#include "game/action.hpp"
 #include "game/globals.hpp"
 #include "game/non-player-ship.hpp"
 #include "game/player-ship.hpp"
@@ -644,10 +645,10 @@ void CollideSpaceObjects() {
     //              if ( aObject->attributes & kIsBeam)
     //                  aObject->frame.beam.killMe = true;
 
-                    ExecuteObjectActions( aObject->baseType->expireAction,
-                            aObject->baseType->expireActionNum
-                             & kDestroyActionNotMask, aObject, NULL, NULL, true);
-
+                    execute_actions(
+                            aObject->baseType->expireAction,
+                            aObject->baseType->expireActionNum & kDestroyActionNotMask,
+                            aObject, NULL, NULL, true);
                 }
             }
 
@@ -656,8 +657,10 @@ void CollideSpaceObjects() {
                 aObject->periodicTime--;
                 if ( aObject->periodicTime <= 0)
                 {
-                    ExecuteObjectActions( aObject->baseType->activateAction, aObject->baseType->activateActionNum &
-                        kPeriodicActionNotMask, aObject, NULL, NULL, true);
+                    execute_actions(
+                            aObject->baseType->activateAction,
+                            aObject->baseType->activateActionNum & kPeriodicActionNotMask,
+                            aObject, NULL, NULL, true);
                     aObject->periodicTime = ((aObject->baseType->activateActionNum & kPeriodicActionTimeMask) >>
                         kPeriodicActionTimeShift) +
                         aObject->randomSeed.next(
