@@ -787,16 +787,7 @@ void execute_actions(
         int32_t whichAction, int32_t actionNum, spaceObjectType *subject, spaceObjectType *object,
         Point* offset, bool allowDelay) {
     spaceObjectType *focus, *originalSObject = subject, *originalDObject = object;
-    baseObjectType  *baseObject;
-    int16_t         angle;
-    fixedPointType  fpoint;
-    int32_t         l;
-    uint32_t        ul1;
-    Fixed           f, f2;
-    coordPointType  newLocation;
-    Point           location;
     bool         OKtoExecute, checkConditions = false;
-    Fixed           aFixed;
 
     if ( whichAction < 0) return;
     const auto begin = mGetObjectActionPtr(whichAction);
