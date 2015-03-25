@@ -786,27 +786,32 @@ static void assume_initial_object(objectActionType* action, spaceObjectType* foc
 void execute_actions(
         int32_t whichAction, int32_t actionNum, spaceObjectType *subject, spaceObjectType *object,
         Point* offset, bool allowDelay) {
-    spaceObjectType *focus, *originalSObject = subject, *originalDObject = object;
-    bool         OKtoExecute, checkConditions = false;
+    if (whichAction < 0) {
+        return;
+    }
 
-    if ( whichAction < 0) return;
+    spaceObjectType* const original_subject = subject;
+    spaceObjectType* const original_object = object;
+    bool checkConditions = false;
+
     const auto begin = mGetObjectActionPtr(whichAction);
     const auto end = begin + actionNum;
     for (auto action = begin; action != end; ++action) {
         if (action->verb == kNoAction) {
             break;
         }
-        if ( action->initialSubjectOverride != kNoShip)
+        if (action->initialSubjectOverride != kNoShip) {
             subject = GetObjectFromInitialNumber( action->initialSubjectOverride);
-        else
-            subject = originalSObject;
-        if ( action->initialDirectOverride != kNoShip)
+        } else {
+            subject = original_subject;
+        }
+        if (action->initialDirectOverride != kNoShip) {
             object = GetObjectFromInitialNumber( action->initialDirectOverride);
-         else
-            object = originalDObject;
+        } else {
+            object = original_object;
+        }
 
-        if (( action->delay > 0) && ( allowDelay))
-        {
+        if ((action->delay > 0) && allowDelay) {
             queue_action(
                     action, action - mGetObjectActionPtr(0), end - action,
                     action->delay, subject, object, offset);
@@ -814,10 +819,11 @@ void execute_actions(
         }
         allowDelay = true;
 
-        focus = object;
-        if (( action->reflexive) || ( focus == NULL)) focus = subject;
+        auto focus = object;
+        if (action->reflexive || !focus) {
+            focus = subject;
+        }
 
-        OKtoExecute = false;
         // This pair of conditions is a workaround for a bug which
         // manifests itself for example in the implementation of "Hold
         // Position".  When an object is instructed to hold position, it
@@ -842,33 +848,18 @@ void execute_actions(
         if (subject == NULL) {
             subject = &kZeroSpaceObject;
         }
-        if (focus == NULL) {
-        }
 
         if (focus == NULL) {
-            OKtoExecute = true;
             focus = &kZeroSpaceObject;
-        } else if ( ( action->owner == 0) ||
-                    (
-                        (
-                            ( action->owner == -1) &&
-                            ( object->owner != subject->owner)
-                        ) ||
-                        (
-                            ( action->owner == 1) &&
-                            ( object->owner == subject->owner)
-                        )
-                    )
-                ) {
-            OKtoExecute = action_filter_applies_to(*action, *object);
-        }
-
-        if (!OKtoExecute) {
+        } else if ((action->owner < -1)
+                || ((action->owner == -1) && (object->owner == subject->owner))
+                || ((action->owner == 1) && (object->owner != subject->owner))
+                || (action->owner > 1)
+                || !action_filter_applies_to(*action, *object)) {
             continue;
         }
 
-        switch ( action->verb)
-        {
+        switch (action->verb) {
             case kCreateObject:
             case kCreateObjectSetDest:  create_object(action, focus, subject, offset); break;
             case kPlaySound:            play_sound(action, focus); break;
@@ -899,7 +890,9 @@ void execute_actions(
         }
     }
 
-    if ( checkConditions) CheckScenarioConditions( 0);
+    if (checkConditions) {
+        CheckScenarioConditions(0);
+    }
 }
 
 void reset_action_queue() {
