@@ -35,6 +35,9 @@ void execute_actions(
         spaceObjectType *sObject, spaceObjectType *dObject, Point* offset,
         bool allowDelay);
 
+void reset_action_queue();
+void execute_action_queue(int32_t);
+
 }  // namespace antares
 
 #endif // ANTARES_GAME_ACTION_HPP_

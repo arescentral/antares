@@ -631,7 +631,7 @@ void ScenarioMakerInit() {
 
 bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     ResetAllSpaceObjects();
-    ResetActionQueueData();
+    reset_action_queue();
     Beams::reset();
     ResetAllSprites();
     Labels::reset();
@@ -889,7 +889,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             MoveSpaceObjects(kDecideEveryCycles);
             NonplayerShipThink(kDecideEveryCycles);
             AdmiralThink();
-            ExecuteActionQueue(kDecideEveryCycles);
+            execute_action_queue(kDecideEveryCycles);
             CollideSpaceObjects();
             x++;
             if (x == 30) {

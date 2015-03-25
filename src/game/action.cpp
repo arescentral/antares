@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "game/space-object.hpp"
+#include "game/action.hpp"
 
 #include <sfz/sfz.hpp>
 
@@ -34,6 +34,7 @@
 #include "game/motion.hpp"
 #include "game/player-ship.hpp"
 #include "game/scenario-maker.hpp"
+#include "game/space-object.hpp"
 #include "game/starfield.hpp"
 #include "math/macros.hpp"
 #include "math/random.hpp"
@@ -52,8 +53,36 @@ using std::unique_ptr;
 
 namespace antares {
 
+const size_t kActionQueueLength     = 120;
+
+struct actionQueueType {
+    objectActionType            *action;
+    int32_t                         actionNum;
+    int32_t                         actionToDo;
+    int32_t                         scheduledTime;
+    actionQueueType         *nextActionQueue;
+    int32_t                         nextActionQueueNum;
+    spaceObjectType         *subjectObject;
+    int32_t                         subjectObjectNum;
+    int32_t                         subjectObjectID;
+    spaceObjectType         *directObject;
+    int32_t                         directObjectNum;
+    int32_t                         directObjectID;
+    Point                       offset;
+};
+
+static actionQueueType* gFirstActionQueue = NULL;
+static int32_t gFirstActionQueueNumber = -1;
+
+static unique_ptr<actionQueueType[]> gActionQueueData;
+
 static baseObjectType kZeroBaseObject;
 static spaceObjectType kZeroSpaceObject = {0, &kZeroBaseObject};
+
+static void queue_action(
+        objectActionType *action, int32_t actionNumber, int32_t actionToDo,
+        int32_t delayTime, spaceObjectType *subjectObject,
+        spaceObjectType *directObject, Point* offset);
 
 bool action_filter_applies_to(const objectActionType& action, const baseObjectType& target) {
     if (action.exclusiveFilter == 0xffffffff) {
@@ -102,8 +131,7 @@ void execute_actions(
 
         if (( action->delay > 0) && ( allowDelay))
         {
-            AddActionToQueue( action, whichAction, actionNum,
-                        action->delay, sObject, dObject, offset);
+            queue_action(action, whichAction, actionNum, action->delay, sObject, dObject, offset);
             return;
         }
         allowDelay = true;
@@ -939,6 +967,167 @@ void execute_actions(
     }
 
     if ( checkConditions) CheckScenarioConditions( 0);
+}
+
+void reset_action_queue() {
+    gActionQueueData.reset(new actionQueueType[kActionQueueLength]);
+    actionQueueType *action = gActionQueueData.get();
+    int32_t         i;
+
+    gFirstActionQueueNumber = -1;
+    gFirstActionQueue = NULL;
+
+    for ( i = 0; i < kActionQueueLength; i++)
+    {
+        action->actionNum = -1;
+        action->actionToDo = 0;
+        action->action = NULL;
+        action->nextActionQueueNum = -1;
+        action->nextActionQueue = NULL;
+        action->scheduledTime = -1;
+        action->subjectObject = NULL;
+        action->subjectObjectNum = -1;
+        action->subjectObjectID = -1;
+        action->directObject = NULL;
+        action->directObjectNum = -1;
+        action->directObjectID = -1;
+        action->offset.h = action->offset.v = 0;
+        action++;
+    }
+}
+
+static void queue_action(
+        objectActionType *action, int32_t actionNumber, int32_t actionToDo,
+        int32_t delayTime, spaceObjectType *subjectObject,
+        spaceObjectType *directObject, Point* offset) {
+    int32_t             queueNumber = 0;
+    actionQueueType     *actionQueue = gActionQueueData.get(),
+                        *nextQueue = gFirstActionQueue, *previousQueue = NULL;
+
+    while (( actionQueue->action != NULL) && ( queueNumber < kActionQueueLength))
+    {
+        actionQueue++;
+        queueNumber++;
+    }
+
+    if ( queueNumber == kActionQueueLength) return;
+    actionQueue->action = action;
+    actionQueue->actionNum = actionNumber;
+    actionQueue->scheduledTime = delayTime;
+    actionQueue->subjectObject = subjectObject;
+    actionQueue->actionToDo = actionToDo;
+
+    if ( offset == NULL)
+    {
+        actionQueue->offset.h = actionQueue->offset.v = 0;
+    } else
+    {
+        actionQueue->offset.h = offset->h;
+        actionQueue->offset.v = offset->v;
+    }
+
+    if ( subjectObject != NULL)
+    {
+        actionQueue->subjectObjectNum = subjectObject->entryNumber;
+        actionQueue->subjectObjectID = subjectObject->id;
+    } else
+    {
+        actionQueue->subjectObjectNum = -1;
+        actionQueue->subjectObjectID = -1;
+    }
+    actionQueue->directObject = directObject;
+    if ( directObject != NULL)
+    {
+        actionQueue->directObjectNum = directObject->entryNumber;
+        actionQueue->directObjectID = directObject->id;
+    } else
+    {
+        actionQueue->directObjectNum = -1;
+        actionQueue->directObjectID = -1;
+    }
+
+    while (( nextQueue != NULL) && ( nextQueue->scheduledTime < delayTime))
+    {
+        previousQueue = nextQueue;
+        nextQueue = nextQueue->nextActionQueue;
+    }
+    if ( previousQueue == NULL)
+    {
+        actionQueue->nextActionQueue = gFirstActionQueue;
+        actionQueue->nextActionQueueNum = gFirstActionQueueNumber;
+        gFirstActionQueue = actionQueue;
+        gFirstActionQueueNumber = queueNumber;
+    } else
+    {
+        actionQueue->nextActionQueue = previousQueue->nextActionQueue;
+        actionQueue->nextActionQueueNum = previousQueue->nextActionQueueNum;
+
+        previousQueue->nextActionQueue = actionQueue;
+        previousQueue->nextActionQueueNum = queueNumber;
+    }
+}
+
+void execute_action_queue(int32_t unitsToDo) {
+//  actionQueueType     *actionQueue = gFirstActionQueue;
+    actionQueueType     *actionQueue = gActionQueueData.get();
+    int32_t                     subjectid, directid, i;
+
+    for ( i = 0; i < kActionQueueLength; i++)
+    {
+        if ( actionQueue->action != NULL)
+        {
+            actionQueue->scheduledTime -= unitsToDo;
+        }
+        actionQueue++;
+    }
+
+    actionQueue = gFirstActionQueue;
+    while (( gFirstActionQueue != NULL) &&
+        ( gFirstActionQueue->action != NULL) &&
+        ( gFirstActionQueue->scheduledTime <= 0))
+    {
+        subjectid = -1;
+        directid = -1;
+        if ( gFirstActionQueue->subjectObject != NULL)
+        {
+            if ( gFirstActionQueue->subjectObject->active)
+                subjectid = gFirstActionQueue->subjectObject->id;
+        }
+
+        if ( gFirstActionQueue->directObject != NULL)
+        {
+            if ( gFirstActionQueue->directObject->active)
+                directid = gFirstActionQueue->directObject->id;
+        }
+        if (( subjectid == gFirstActionQueue->subjectObjectID) &&
+            ( directid == gFirstActionQueue->directObjectID))
+        {
+            execute_actions(
+                    gFirstActionQueue->actionNum,
+                    gFirstActionQueue->actionToDo,
+                    gFirstActionQueue->subjectObject, gFirstActionQueue->directObject,
+                    &(gFirstActionQueue->offset), false);
+        }
+        gFirstActionQueue->actionNum = -1;
+        gFirstActionQueue->actionToDo = 0;
+        gFirstActionQueue->action = NULL;
+        gFirstActionQueue->scheduledTime = -1;
+        gFirstActionQueue->subjectObject = NULL;
+        gFirstActionQueue->subjectObjectNum = -1;
+        gFirstActionQueue->subjectObjectID = -1;
+        gFirstActionQueue->directObject = NULL;
+        gFirstActionQueue->directObjectNum = -1;
+        gFirstActionQueue->directObjectID = -1;
+        gFirstActionQueue->offset.h = gFirstActionQueue->offset.v = 0;
+
+        actionQueue = gFirstActionQueue;
+
+        gFirstActionQueueNumber = gFirstActionQueue->nextActionQueueNum;
+        gFirstActionQueue = gFirstActionQueue->nextActionQueue;
+
+        actionQueue->nextActionQueueNum = -1;
+        actionQueue->nextActionQueue = NULL;
+    }
 }
 
 }  // namespace antares

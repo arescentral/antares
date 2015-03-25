@@ -53,8 +53,6 @@ using std::unique_ptr;
 
 namespace antares {
 
-const size_t kActionQueueLength     = 120;
-
 const uint8_t kFriendlyColor        = GREEN;
 const uint8_t kHostileColor         = RED;
 const uint8_t kNeutralColor         = SKY_BLUE;
@@ -66,32 +64,12 @@ static const int16_t kSpaceObjectShortNameResID     = 5001;
 static StringList* space_object_names;
 static StringList* space_object_short_names;
 
-struct actionQueueType {
-    objectActionType            *action;
-    int32_t                         actionNum;
-    int32_t                         actionToDo;
-    int32_t                         scheduledTime;
-    actionQueueType         *nextActionQueue;
-    int32_t                         nextActionQueueNum;
-    spaceObjectType         *subjectObject;
-    int32_t                         subjectObjectNum;
-    int32_t                         subjectObjectID;
-    spaceObjectType         *directObject;
-    int32_t                         directObjectNum;
-    int32_t                         directObjectID;
-    Point                       offset;
-};
-
 spaceObjectType* gRootObject = NULL;
 int32_t gRootObjectNumber = -1;
-
-static actionQueueType* gFirstActionQueue = NULL;
-static int32_t gFirstActionQueueNumber = -1;
 
 static unique_ptr<spaceObjectType[]> gSpaceObjectData;
 static unique_ptr<baseObjectType[]> gBaseObjectData;
 static unique_ptr<objectActionType[]> gObjectActionData;
-static unique_ptr<actionQueueType[]> gActionQueueData;
 
 void SpaceObjectHandlingInit() {
     bool correctBaseObjectColor = false;
@@ -126,22 +104,14 @@ void SpaceObjectHandlingInit() {
         }
     }
 
-    gActionQueueData.reset(new actionQueueType[kActionQueueLength]);
     if (correctBaseObjectColor) {
         CorrectAllBaseObjectColor();
     }
     ResetAllSpaceObjects();
-    ResetActionQueueData();
+    reset_action_queue();
 
     space_object_names = new StringList(kSpaceObjectNameResID);
     space_object_short_names = new StringList(kSpaceObjectShortNameResID);
-}
-
-void CleanupSpaceObjectHandling() {
-    gBaseObjectData.reset();
-    gSpaceObjectData.reset();
-    gObjectActionData.reset();
-    gActionQueueData.reset();
 }
 
 void ResetAllSpaceObjects() {
@@ -238,33 +208,6 @@ void ResetAllSpaceObjects() {
         anObject->periodicTime = 0;
 */
         anObject++;
-    }
-}
-
-void ResetActionQueueData( void)
-{
-    actionQueueType *action = gActionQueueData.get();
-    int32_t         i;
-
-    gFirstActionQueueNumber = -1;
-    gFirstActionQueue = NULL;
-
-    for ( i = 0; i < kActionQueueLength; i++)
-    {
-        action->actionNum = -1;
-        action->actionToDo = 0;
-        action->action = NULL;
-        action->nextActionQueueNum = -1;
-        action->nextActionQueue = NULL;
-        action->scheduledTime = -1;
-        action->subjectObject = NULL;
-        action->subjectObjectNum = -1;
-        action->subjectObjectID = -1;
-        action->directObject = NULL;
-        action->directObjectNum = -1;
-        action->directObjectID = -1;
-        action->offset.h = action->offset.v = 0;
-        action++;
     }
 }
 
@@ -1041,142 +984,6 @@ void ChangeObjectBaseType( spaceObjectType *dObject, int32_t whichBaseObject,
         }
     }
 
-}
-
-void AddActionToQueue( objectActionType *action, int32_t actionNumber, int32_t actionToDo,
-                        int32_t delayTime, spaceObjectType *subjectObject,
-                        spaceObjectType *directObject, Point* offset)
-{
-    int32_t             queueNumber = 0;
-    actionQueueType     *actionQueue = gActionQueueData.get(),
-                        *nextQueue = gFirstActionQueue, *previousQueue = NULL;
-
-    while (( actionQueue->action != NULL) && ( queueNumber < kActionQueueLength))
-    {
-        actionQueue++;
-        queueNumber++;
-    }
-
-    if ( queueNumber == kActionQueueLength) return;
-    actionQueue->action = action;
-    actionQueue->actionNum = actionNumber;
-    actionQueue->scheduledTime = delayTime;
-    actionQueue->subjectObject = subjectObject;
-    actionQueue->actionToDo = actionToDo;
-
-    if ( offset == NULL)
-    {
-        actionQueue->offset.h = actionQueue->offset.v = 0;
-    } else
-    {
-        actionQueue->offset.h = offset->h;
-        actionQueue->offset.v = offset->v;
-    }
-
-    if ( subjectObject != NULL)
-    {
-        actionQueue->subjectObjectNum = subjectObject->entryNumber;
-        actionQueue->subjectObjectID = subjectObject->id;
-    } else
-    {
-        actionQueue->subjectObjectNum = -1;
-        actionQueue->subjectObjectID = -1;
-    }
-    actionQueue->directObject = directObject;
-    if ( directObject != NULL)
-    {
-        actionQueue->directObjectNum = directObject->entryNumber;
-        actionQueue->directObjectID = directObject->id;
-    } else
-    {
-        actionQueue->directObjectNum = -1;
-        actionQueue->directObjectID = -1;
-    }
-
-    while (( nextQueue != NULL) && ( nextQueue->scheduledTime < delayTime))
-    {
-        previousQueue = nextQueue;
-        nextQueue = nextQueue->nextActionQueue;
-    }
-    if ( previousQueue == NULL)
-    {
-        actionQueue->nextActionQueue = gFirstActionQueue;
-        actionQueue->nextActionQueueNum = gFirstActionQueueNumber;
-        gFirstActionQueue = actionQueue;
-        gFirstActionQueueNumber = queueNumber;
-    } else
-    {
-        actionQueue->nextActionQueue = previousQueue->nextActionQueue;
-        actionQueue->nextActionQueueNum = previousQueue->nextActionQueueNum;
-
-        previousQueue->nextActionQueue = actionQueue;
-        previousQueue->nextActionQueueNum = queueNumber;
-    }
-}
-
-void ExecuteActionQueue( int32_t unitsToDo)
-
-{
-//  actionQueueType     *actionQueue = gFirstActionQueue;
-    actionQueueType     *actionQueue = gActionQueueData.get();
-    int32_t                     subjectid, directid, i;
-
-    for ( i = 0; i < kActionQueueLength; i++)
-    {
-        if ( actionQueue->action != NULL)
-        {
-            actionQueue->scheduledTime -= unitsToDo;
-        }
-        actionQueue++;
-    }
-
-    actionQueue = gFirstActionQueue;
-    while (( gFirstActionQueue != NULL) &&
-        ( gFirstActionQueue->action != NULL) &&
-        ( gFirstActionQueue->scheduledTime <= 0))
-    {
-        subjectid = -1;
-        directid = -1;
-        if ( gFirstActionQueue->subjectObject != NULL)
-        {
-            if ( gFirstActionQueue->subjectObject->active)
-                subjectid = gFirstActionQueue->subjectObject->id;
-        }
-
-        if ( gFirstActionQueue->directObject != NULL)
-        {
-            if ( gFirstActionQueue->directObject->active)
-                directid = gFirstActionQueue->directObject->id;
-        }
-        if (( subjectid == gFirstActionQueue->subjectObjectID) &&
-            ( directid == gFirstActionQueue->directObjectID))
-        {
-            execute_actions(
-                    gFirstActionQueue->actionNum,
-                    gFirstActionQueue->actionToDo,
-                    gFirstActionQueue->subjectObject, gFirstActionQueue->directObject,
-                    &(gFirstActionQueue->offset), false);
-        }
-        gFirstActionQueue->actionNum = -1;
-        gFirstActionQueue->actionToDo = 0;
-        gFirstActionQueue->action = NULL;
-        gFirstActionQueue->scheduledTime = -1;
-        gFirstActionQueue->subjectObject = NULL;
-        gFirstActionQueue->subjectObjectNum = -1;
-        gFirstActionQueue->subjectObjectID = -1;
-        gFirstActionQueue->directObject = NULL;
-        gFirstActionQueue->directObjectNum = -1;
-        gFirstActionQueue->directObjectID = -1;
-        gFirstActionQueue->offset.h = gFirstActionQueue->offset.v = 0;
-
-        actionQueue = gFirstActionQueue;
-
-        gFirstActionQueueNumber = gFirstActionQueue->nextActionQueueNum;
-        gFirstActionQueue = gFirstActionQueue->nextActionQueue;
-
-        actionQueue->nextActionQueueNum = -1;
-        actionQueue->nextActionQueue = NULL;
-    }
 }
 
 int32_t CreateAnySpaceObject( int32_t whichBase, fixedPointType *velocity,
