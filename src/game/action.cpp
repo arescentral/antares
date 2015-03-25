@@ -100,13 +100,788 @@ bool action_filter_applies_to(const objectActionType& action, const spaceObjectT
     }
 }
 
+static void create_object(
+        objectActionType* action, spaceObjectType* sObject, spaceObjectType* anObject,
+        Point* offset) {
+    auto baseObject = mGetBaseObjectPtr( action->argument.createObject.whichBaseType);
+    auto end = action->argument.createObject.howManyMinimum;
+    if ( action->argument.createObject.howManyRange > 0)
+        end += anObject->randomSeed.next(
+                action->argument.createObject.howManyRange);
+    while ( end > 0)
+    {
+        fixedPointType fpoint;
+        if ( action->argument.createObject.velocityRelative)
+            fpoint = anObject->velocity;
+        else
+            fpoint.h = fpoint.v = 0;
+        int32_t l = 0;
+        if  ( baseObject->attributes & kAutoTarget)
+        {
+            l = sObject->targetAngle;
+        } else if ( action->argument.createObject.directionRelative)
+            l = anObject->direction;
+        /*
+           l += baseObject->initialDirection;
+           if ( baseObject->initialDirectionRange > 0)
+           l += anObject->randomSeed.next(baseObject->initialDirectionRange);
+           */
+        coordPointType newLocation = anObject->location;
+        if ( offset != NULL)
+        {
+            newLocation.h += offset->h;
+            newLocation.v += offset->v;
+        }
+
+        if ( action->argument.createObject.randomDistance > 0)
+        {
+            newLocation.h += anObject->randomSeed.next(
+                    action->argument.createObject.randomDistance << 1)
+                - action->argument.createObject.randomDistance;
+            newLocation.v += anObject->randomSeed.next(
+                    action->argument.createObject.randomDistance << 1)
+                - action->argument.createObject.randomDistance;
+        }
+
+        //                      l = CreateAnySpaceObject( action->argument.createObject.whichBaseType, &fpoint,
+        //                              &newLocation, l, anObject->owner, 0, nil, -1, -1, -1);
+        l = CreateAnySpaceObject( action->argument.createObject.whichBaseType, &fpoint,
+                &newLocation, l, anObject->owner, 0, -1);
+
+        if ( l >= 0)
+        {
+            spaceObjectType *newObject = mGetSpaceObjectPtr(l);
+            if ( newObject->attributes & kCanAcceptDestination)
+            {
+                uint32_t ul1 = newObject->attributes;
+                newObject->attributes &= ~kStaticDestination;
+                if ( newObject->owner >= 0)
+                {
+                    if ( action->reflexive)
+                    {
+                        if ( action->verb != kCreateObjectSetDest)
+                            SetObjectDestination( newObject, anObject);
+                        else if ( anObject->destObjectPtr != NULL)
+                        {
+                            SetObjectDestination( newObject, anObject->destObjectPtr);
+                        }
+                    }
+                } else if ( action->reflexive)
+                {
+                    newObject->destObjectPtr = anObject;
+                    newObject->timeFromOrigin = kTimeToCheckHome;
+                    newObject->runTimeFlags &= ~kHasArrived;
+                    newObject->destinationObject = anObject->entryNumber; //a->destinationObject;
+                    newObject->destObjectDest = anObject->destinationObject;
+                    newObject->destObjectID = anObject->id;
+                    newObject->destObjectDestID = anObject->destObjectID;
+
+                }
+                newObject->attributes = ul1;
+            }
+            newObject->targetObjectNumber = anObject->targetObjectNumber;
+            newObject->targetObjectID = anObject->targetObjectID;
+            newObject->closestObject = newObject->targetObjectNumber;
+
+            //
+            //  ugly though it is, we have to fill in the rest of
+            //  a new beam's fields after it's created.
+            //
+
+            if ( newObject->attributes & kIsBeam)
+            {
+                if ( newObject->frame.beam.beam->beamKind !=
+                        eKineticBeamKind)
+                    // special beams need special post-creation acts
+                {
+                    Beams::set_attributes(newObject, anObject);
+                }
+            }
+        }
+
+        end--;
+    }
+}
+
+static void play_sound(objectActionType* action, spaceObjectType* anObject) {
+    auto l = action->argument.playSound.volumeMinimum;
+    auto angle = action->argument.playSound.idMinimum;
+    if ( action->argument.playSound.idRange > 0)
+    {
+        angle += anObject->randomSeed.next(
+                action->argument.playSound.idRange + 1);
+    }
+    if ( !action->argument.playSound.absolute)
+    {
+        mPlayDistanceSound(l, anObject, angle, action->argument.playSound.persistence, static_cast<soundPriorityType>(action->argument.playSound.priority));
+    } else
+    {
+        PlayVolumeSound( angle, l,
+                action->argument.playSound.persistence,
+                static_cast<soundPriorityType>(action->argument.playSound.priority));
+    }
+}
+
+static void make_sparks(objectActionType* action, spaceObjectType* anObject) {
+    if ( anObject->sprite != NULL)
+    {
+        Point location;
+        location.h = anObject->sprite->where.h;
+        location.v = anObject->sprite->where.v;
+        globals()->starfield.make_sparks(
+                action->argument.makeSparks.howMany,        // sparkNum
+                action->argument.makeSparks.speed,          // sparkSpeed
+                action->argument.makeSparks.velocityRange,  // velocity
+                action->argument.makeSparks.color,          // COLOR
+                &location);                                 // location
+    } else
+    {
+        int32_t l = ( anObject->location.h - gGlobalCorner.h) * gAbsoluteScale;
+        l >>= SHIFT_SCALE;
+        Point location;
+        if (( l > -kSpriteMaxSize) && ( l < kSpriteMaxSize))
+            location.h = l + viewport.left;
+        else
+            location.h = -kSpriteMaxSize;
+
+        l = (anObject->location.v - gGlobalCorner.v) * gAbsoluteScale;
+        l >>= SHIFT_SCALE; /*+ CLIP_TOP*/;
+        if (( l > -kSpriteMaxSize) && ( l < kSpriteMaxSize))
+            location.v = l + viewport.top;
+        else
+            location.v = -kSpriteMaxSize;
+
+        globals()->starfield.make_sparks(
+                action->argument.makeSparks.howMany,        // sparkNum
+                action->argument.makeSparks.speed,          // sparkSpeed
+                action->argument.makeSparks.velocityRange,  // velocity
+                action->argument.makeSparks.color,          // COLOR
+                &location);                                 // location
+    }
+}
+
+static void die(objectActionType* action, spaceObjectType* anObject, spaceObjectType* sObject) {
+    switch ( action->argument.killObject.dieType)
+    {
+        case kDieExpire:
+            if ( sObject != NULL)
+            {
+                // if the object is occupied by a human, eject him since he can't die
+                if (( sObject->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
+                    (!(sObject->baseType->destroyActionNum & kDestroyActionDontDieFlag)))
+                {
+                    CreateFloatingBodyOfPlayer( sObject);
+                }
+
+                if ( sObject->baseType->expireAction >= 0)
+                {
+//                                  ExecuteObjectActions(
+//                                      sObject->baseType->expireAction,
+//                                      sObject->baseType->expireActionNum
+//                                       & kDestroyActionNotMask,
+//                                      sObject, dObject, offset, allowDelay);
+                }
+                sObject->active = kObjectToBeFreed;
+            }
+            break;
+
+        case kDieDestroy:
+            if ( sObject != NULL)
+            {
+                // if the object is occupied by a human, eject him since he can't die
+                if (( sObject->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
+                    (!(sObject->baseType->destroyActionNum & kDestroyActionDontDieFlag)))
+                {
+                    CreateFloatingBodyOfPlayer( sObject);
+                }
+
+                DestroyObject( sObject);
+            }
+            break;
+
+        default:
+            // if the object is occupied by a human, eject him since he can't die
+            if (( anObject->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
+                (!(anObject->baseType->destroyActionNum & kDestroyActionDontDieFlag)))
+            {
+                CreateFloatingBodyOfPlayer( anObject);
+            }
+            anObject->active = kObjectToBeFreed;
+            break;
+    }
+}
+
+static void nil_target(objectActionType* action, spaceObjectType* anObject) {
+    anObject->targetObjectNumber = kNoShip;
+    anObject->targetObjectID = kNoShip;
+    anObject->lastTarget = kNoShip;
+}
+
+static void alter(
+        objectActionType* action,
+        spaceObjectType* anObject, spaceObjectType* sObject, spaceObjectType* dObject) {
+    int32_t l;
+    Fixed f, f2, aFixed;
+    int16_t angle;
+    coordPointType newLocation;
+    baseObjectType* baseObject;
+    switch( action->argument.alterObject.alterType)
+    {
+        case kAlterDamage:
+            AlterObjectHealth( anObject,
+                action->argument.alterObject.minimum);
+            break;
+
+        case kAlterEnergy:
+            AlterObjectEnergy( anObject,
+                action->argument.alterObject.minimum);
+            break;
+
+        /*
+        case 919191://kAlterSpecial:
+            anObject->specialType = action->argument.alterObject.minimum;
+            baseObject = mGetBaseObjectPtr( anObject->specialType);
+            anObject->specialAmmo = baseObject->frame.weapon.ammo;
+            anObject->specialTime = anObject->specialPosition = 0;
+            if ( baseObject->frame.weapon.range > anObject->longestWeaponRange)
+                anObject->longestWeaponRange = baseObject->frame.weapon.range;
+            if ( baseObject->frame.weapon.range < anObject->shortestWeaponRange)
+                anObject->shortestWeaponRange = baseObject->frame.weapon.range;
+            break;
+        */
+
+        case kAlterHidden:
+            l = 0;
+            do
+            {
+                UnhideInitialObject( action->argument.alterObject.minimum + l);
+                l++;
+            } while ( l <= action->argument.alterObject.range);
+            break;
+
+        case kAlterCloak:
+            AlterObjectCloakState( anObject, true);
+            break;
+
+        case kAlterSpin:
+            if ( anObject->attributes & kCanTurn)
+            {
+                if ( anObject->attributes & kShapeFromDirection)
+                {
+                    f = mMultiplyFixed( anObject->baseType->frame.rotation.maxTurnRate,
+                                    action->argument.alterObject.minimum +
+                                    anObject->randomSeed.next(
+                                        action->argument.alterObject.range));
+                } else
+                {
+                    f = mMultiplyFixed( 2 /*kDefaultTurnRate*/,
+                                    action->argument.alterObject.minimum +
+                                    anObject->randomSeed.next(
+                                        action->argument.alterObject.range));
+                }
+                f2 = anObject->baseType->mass;
+                if ( f2 == 0) f = -1;
+                else
+                {
+                    f = mDivideFixed( f, f2);
+                }
+                anObject->turnVelocity = f;
+                /*
+                anObject->frame.rotation.turnVelocity =
+                        mMultiplyFixed( anObject->baseType->frame.rotation.maxTurnRate,
+                            action->argument.alterObject.minimum);
+
+                anObject->frame.rotation.turnVelocity += anObject->randomSeed(f);
+                */
+            }
+            break;
+
+        case kAlterOffline:
+            f = action->argument.alterObject.minimum +
+                anObject->randomSeed.next(action->argument.alterObject.range);
+            f2 = anObject->baseType->mass;
+            if ( f2 == 0) anObject->offlineTime = -1;
+            else
+            {
+                anObject->offlineTime = mDivideFixed( f, f2);
+            }
+            anObject->offlineTime = mFixedToLong( anObject->offlineTime);
+            break;
+
+        case kAlterVelocity:
+            if ( sObject != NULL)
+            {
+                // active (non-reflexive) altering of velocity means a PUSH, just like
+                //  two objects colliding.  Negative velocity = slow down
+                if ((dObject != NULL) && (dObject != &kZeroSpaceObject)) {
+                    if ( action->argument.alterObject.relative)
+                    {
+                        if (( dObject->baseType->mass > 0) &&
+                            ( dObject->maxVelocity > 0))
+                        {
+                            if ( action->argument.alterObject.minimum >= 0)
+                            {
+                                // if the minimum >= 0, then PUSH the object like collision
+                                f = sObject->velocity.h - dObject->velocity.h;
+                                f /= dObject->baseType->mass;
+                                f <<= 6L;
+                                dObject->velocity.h += f;
+                                f = sObject->velocity.v - dObject->velocity.v;
+                                f /= dObject->baseType->mass;
+                                f <<= 6L;
+                                dObject->velocity.v += f;
+
+                                // make sure we're not going faster than our top speed
+
+                                if ( dObject->velocity.h == 0)
+                                {
+                                    if ( dObject->velocity.v < 0)
+                                        angle = 180;
+                                    else angle = 0;
+                                } else
+                                {
+                                    aFixed = MyFixRatio( dObject->velocity.h, dObject->velocity.v);
+
+                                    angle = AngleFromSlope( aFixed);
+                                    if ( dObject->velocity.h > 0) angle += 180;
+                                    if ( angle >= 360) angle -= 360;
+                                }
+                            } else
+                            {
+                                // if the minumum < 0, then STOP the object like applying breaks
+                                f = dObject->velocity.h;
+                                f = mMultiplyFixed( f, action->argument.alterObject.minimum);
+//                                              f /= dObject->baseType->mass;
+//                                              f <<= 6L;
+                                dObject->velocity.h += f;
+                                f = dObject->velocity.v;
+                                f = mMultiplyFixed( f, action->argument.alterObject.minimum);
+//                                              f /= dObject->baseType->mass;
+//                                              f <<= 6L;
+                                dObject->velocity.v += f;
+
+                                // make sure we're not going faster than our top speed
+
+                                if ( dObject->velocity.h == 0)
+                                {
+                                    if ( dObject->velocity.v < 0)
+                                        angle = 180;
+                                    else angle = 0;
+                                } else
+                                {
+                                    aFixed = MyFixRatio( dObject->velocity.h, dObject->velocity.v);
+
+                                    angle = AngleFromSlope( aFixed);
+                                    if ( dObject->velocity.h > 0) angle += 180;
+                                    if ( angle >= 360) angle -= 360;
+                                }
+                            }
+
+                            // get the maxthrust of new vector
+
+                            GetRotPoint(&f, &f2, angle);
+
+                            f = mMultiplyFixed( dObject->maxVelocity, f);
+                            f2 = mMultiplyFixed( dObject->maxVelocity, f2);
+
+                            if ( f < 0)
+                            {
+                                if ( dObject->velocity.h < f)
+                                    dObject->velocity.h = f;
+                            } else
+                            {
+                                if ( dObject->velocity.h > f)
+                                    dObject->velocity.h = f;
+                            }
+
+                            if ( f2 < 0)
+                            {
+                                if ( dObject->velocity.v < f2)
+                                    dObject->velocity.v = f2;
+                            } else
+                            {
+                                if ( dObject->velocity.v > f2)
+                                    dObject->velocity.v = f2;
+                            }
+                        }
+                    } else
+                    {
+                        GetRotPoint(&f, &f2, sObject->direction);
+                        f = mMultiplyFixed( action->argument.alterObject.minimum, f);
+                        f2 = mMultiplyFixed( action->argument.alterObject.minimum, f2);
+                        anObject->velocity.h = f;
+                        anObject->velocity.v = f2;
+                    }
+                } else
+                // reflexive alter velocity means a burst of speed in the direction
+                // the object is facing, where negative speed means backwards. Object can
+                // excede its max velocity.
+                // Minimum value is absolute speed in direction.
+                {
+                    GetRotPoint(&f, &f2, anObject->direction);
+                    f = mMultiplyFixed( action->argument.alterObject.minimum, f);
+                    f2 = mMultiplyFixed( action->argument.alterObject.minimum, f2);
+                    if ( action->argument.alterObject.relative)
+                    {
+                        anObject->velocity.h += f;
+                        anObject->velocity.v += f2;
+                    } else
+                    {
+                        anObject->velocity.h = f;
+                        anObject->velocity.v = f2;
+                    }
+                }
+
+            }
+            break;
+
+        case kAlterMaxVelocity:
+            if ( action->argument.alterObject.minimum < 0)
+            {
+                anObject->maxVelocity = anObject->baseType->maxVelocity;
+            } else
+            {
+                anObject->maxVelocity =
+                    action->argument.alterObject.minimum;
+            }
+            break;
+
+        case kAlterThrust:
+            f = action->argument.alterObject.minimum +
+                anObject->randomSeed.next(action->argument.alterObject.range);
+            if ( action->argument.alterObject.relative)
+            {
+                anObject->thrust += f;
+            } else
+            {
+                anObject->thrust = f;
+            }
+            break;
+
+        case kAlterBaseType:
+            if ((action->reflexive)
+                    || ((dObject != NULL) && (dObject != &kZeroSpaceObject)))
+            ChangeObjectBaseType( anObject, action->argument.alterObject.minimum, -1,
+                action->argument.alterObject.relative);
+            break;
+
+        case kAlterOwner:
+/*                          anObject->owner = action->argument.alterObject.minimum;
+            if ( anObject->attributes & kIsDestination)
+                RecalcAllAdmiralBuildData();
+*/
+            if ( action->argument.alterObject.relative)
+            {
+                // if it's relative AND reflexive, we take the direct
+                // object's owner, since relative & reflexive would
+                // do nothing.
+                if ((action->reflexive) && (dObject != NULL)
+                        && (dObject != &kZeroSpaceObject))
+                    AlterObjectOwner( anObject, dObject->owner, true);
+                else
+                    AlterObjectOwner( anObject, sObject->owner, true);
+            } else
+            {
+                AlterObjectOwner( anObject,
+                        action->argument.alterObject.minimum, false);
+            }
+            break;
+
+        case kAlterConditionTrueYet:
+            if ( action->argument.alterObject.range <= 0)
+            {
+                gThisScenario->condition(action->argument.alterObject.minimum)
+                    ->set_true_yet(action->argument.alterObject.relative);
+            } else
+            {
+                for (
+                        l = action->argument.alterObject.minimum;
+                        l <=    (
+                                    action->argument.alterObject.minimum +
+                                    action->argument.alterObject.range
+                                )
+                                ;
+                        l++
+                    )
+                {
+                    gThisScenario->condition(l)->set_true_yet(
+                            action->argument.alterObject.relative);
+                }
+
+            }
+            break;
+
+        case kAlterOccupation:
+            AlterObjectOccupation( anObject, sObject->owner, action->argument.alterObject.minimum, true);
+            break;
+
+        case kAlterAbsoluteCash:
+            if ( action->argument.alterObject.relative)
+            {
+                if (anObject != &kZeroSpaceObject) {
+                    PayAdmiralAbsolute( anObject->owner, action->argument.alterObject.minimum);
+                }
+            } else
+            {
+                PayAdmiralAbsolute( action->argument.alterObject.range,
+                    action->argument.alterObject.minimum);
+            }
+            break;
+
+        case kAlterAge:
+            l = action->argument.alterObject.minimum +
+                anObject->randomSeed.next(action->argument.alterObject.range);
+
+            if ( action->argument.alterObject.relative)
+            {
+                if ( anObject->age >= 0)
+                {
+                    anObject->age += l;
+
+                    if ( anObject->age < 0) anObject->age = 0;
+                } else
+                {
+                    anObject->age += l;
+                }
+            } else
+            {
+                anObject->age = l;
+            }
+            break;
+
+        case kAlterLocation:
+            if ( action->argument.alterObject.relative)
+            {
+                if ((dObject == NULL) && (dObject != &kZeroSpaceObject)) {
+                    newLocation.h = sObject->location.h;
+                    newLocation.v = sObject->location.v;
+                } else {
+                    newLocation.h = dObject->location.h;
+                    newLocation.v = dObject->location.v;
+                }
+            } else
+            {
+                newLocation.h = newLocation.v = 0;
+            }
+            newLocation.h += anObject->randomSeed.next(
+                    action->argument.alterObject.minimum << 1)
+                - action->argument.alterObject.minimum;
+            newLocation.v += anObject->randomSeed.next(
+                    action->argument.alterObject.minimum << 1)
+                - action->argument.alterObject.minimum;
+            anObject->location.h = newLocation.h;
+            anObject->location.v = newLocation.v;
+            break;
+
+        case kAlterAbsoluteLocation:
+            if ( action->argument.alterObject.relative)
+            {
+                anObject->location.h += action->argument.alterObject.minimum;
+                anObject->location.v += action->argument.alterObject.range;
+            } else
+            {
+                anObject->location = Translate_Coord_To_Scenario_Rotation(
+                    action->argument.alterObject.minimum,
+                    action->argument.alterObject.range);
+            }
+            break;
+
+        case kAlterWeapon1:
+            anObject->pulseType = action->argument.alterObject.minimum;
+            if ( anObject->pulseType != kNoWeapon)
+            {
+                baseObject = anObject->pulseBase =
+                    mGetBaseObjectPtr( anObject->pulseType);
+                anObject->pulseAmmo =
+                    baseObject->frame.weapon.ammo;
+                anObject->pulseTime =
+                    anObject->pulsePosition = 0;
+                if ( baseObject->frame.weapon.range > anObject->longestWeaponRange)
+                    anObject->longestWeaponRange = baseObject->frame.weapon.range;
+                if ( baseObject->frame.weapon.range < anObject->shortestWeaponRange)
+                    anObject->shortestWeaponRange = baseObject->frame.weapon.range;
+            } else
+            {
+                anObject->pulseBase = NULL;
+                anObject->pulseAmmo = 0;
+                anObject->pulseTime = 0;
+            }
+            break;
+
+        case kAlterWeapon2:
+            anObject->beamType = action->argument.alterObject.minimum;
+            if ( anObject->beamType != kNoWeapon)
+            {
+                baseObject = anObject->beamBase =
+                    mGetBaseObjectPtr( anObject->beamType);
+                anObject->beamAmmo =
+                    baseObject->frame.weapon.ammo;
+                anObject->beamTime =
+                    anObject->beamPosition = 0;
+                if ( baseObject->frame.weapon.range > anObject->longestWeaponRange)
+                    anObject->longestWeaponRange = baseObject->frame.weapon.range;
+                if ( baseObject->frame.weapon.range < anObject->shortestWeaponRange)
+                    anObject->shortestWeaponRange = baseObject->frame.weapon.range;
+            } else
+            {
+                anObject->beamBase = NULL;
+                anObject->beamAmmo = 0;
+                anObject->beamTime = 0;
+            }
+            break;
+
+        case kAlterSpecial:
+            anObject->specialType = action->argument.alterObject.minimum;
+            if ( anObject->specialType != kNoWeapon)
+            {
+                baseObject = anObject->specialBase =
+                    mGetBaseObjectPtr( anObject->specialType);
+                anObject->specialAmmo =
+                    baseObject->frame.weapon.ammo;
+                anObject->specialTime =
+                    anObject->specialPosition = 0;
+                if ( baseObject->frame.weapon.range > anObject->longestWeaponRange)
+                    anObject->longestWeaponRange = baseObject->frame.weapon.range;
+                if ( baseObject->frame.weapon.range < anObject->shortestWeaponRange)
+                    anObject->shortestWeaponRange = baseObject->frame.weapon.range;
+            } else
+            {
+                anObject->specialBase = NULL;
+                anObject->specialAmmo = 0;
+                anObject->specialTime = 0;
+            }
+            break;
+
+        case kAlterLevelKeyTag:
+            break;
+
+        default:
+            break;
+
+    }
+}
+
+static void land_at(
+        objectActionType* action, spaceObjectType* anObject, spaceObjectType* sObject) {
+    // even though this is never a reflexive verb, we only effect ourselves
+    if ( sObject->attributes & ( kIsPlayerShip | kRemoteOrHuman))
+    {
+        CreateFloatingBodyOfPlayer( sObject);
+    }
+    sObject->presenceState = kLandingPresence;
+    sObject->presenceData = sObject->baseType->naturalScale |
+        (action->argument.landAt.landingSpeed << kPresenceDataHiWordShift);
+}
+
+static void enter_warp(
+        objectActionType* action, spaceObjectType* anObject, spaceObjectType* sObject) {
+    sObject->presenceState = kWarpInPresence;
+//                  sObject->presenceData = action->argument.enterWarp.warpSpeed;
+    sObject->presenceData = sObject->baseType->warpSpeed;
+    sObject->attributes &= ~kOccupiesSpace;
+    fixedPointType newVel = {0, 0};
+//                  CreateAnySpaceObject( globals()->scenarioFileInfo.warpInFlareID, &(newVel),
+//                      &(sObject->location), sObject->direction, kNoOwner, 0, nil, -1, -1, -1);
+    CreateAnySpaceObject( globals()->scenarioFileInfo.warpInFlareID, &(newVel),
+        &(sObject->location), sObject->direction, kNoOwner, 0, -1);
+}
+
+static void change_score(objectActionType* action, spaceObjectType* anObject) {
+    int32_t l;
+    if (( action->argument.changeScore.whichPlayer == -1) && (anObject != &kZeroSpaceObject))
+        l = anObject->owner;
+    else
+    {
+        l = mGetRealAdmiralNum( action->argument.changeScore.whichPlayer);
+    }
+    if ( l >= 0)
+    {
+        AlterAdmiralScore( l, action->argument.changeScore.whichScore, action->argument.changeScore.amount);
+    }
+}
+
+static void declare_winner(objectActionType* action, spaceObjectType* anObject) {
+    int32_t l;
+    if (( action->argument.declareWinner.whichPlayer == -1) && (anObject != &kZeroSpaceObject))
+        l = anObject->owner;
+    else
+    {
+        l = mGetRealAdmiralNum( action->argument.declareWinner.whichPlayer);
+    }
+    DeclareWinner( l, action->argument.declareWinner.nextLevel, action->argument.declareWinner.textID);
+}
+
+static void display_message(objectActionType* action, spaceObjectType* anObject) {
+    Messages::start(
+            action->argument.displayMessage.resID,
+            (action->argument.displayMessage.resID +
+             action->argument.displayMessage.pageNum - 1));
+}
+
+static void set_destination(
+        objectActionType* action, spaceObjectType* anObject, spaceObjectType* sObject) {
+    uint32_t ul1 = sObject->attributes;
+    sObject->attributes &= ~kStaticDestination;
+    SetObjectDestination( sObject, anObject);
+    sObject->attributes = ul1;
+}
+
+static void activate_special(
+        objectActionType* action, spaceObjectType* anObject, spaceObjectType* sObject) {
+    ActivateObjectSpecial( sObject);
+}
+
+static void color_flash(objectActionType* action, spaceObjectType* anObject) {
+    uint8_t tinyColor = GetTranslateColorShade(
+            action->argument.colorFlash.color,
+            action->argument.colorFlash.shade);
+    globals()->transitions.start_boolean(
+            action->argument.colorFlash.length,
+            action->argument.colorFlash.length, tinyColor);
+}
+
+static void enable_keys(objectActionType* action, spaceObjectType* anObject) {
+    globals()->keyMask = globals()->keyMask & ~action->argument.keys.keyMask;
+}
+
+static void disable_keys(objectActionType* action, spaceObjectType* anObject) {
+    globals()->keyMask = globals()->keyMask | action->argument.keys.keyMask;
+}
+
+static void set_zoom(objectActionType* action, spaceObjectType* anObject) {
+    if (action->argument.zoom.zoomLevel != globals()->gZoomMode)
+    {
+        globals()->gZoomMode = static_cast<ZoomType>(action->argument.zoom.zoomLevel);
+        PlayVolumeSound(  kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+        StringList strings(kMessageStringID);
+        StringSlice string = strings.at(globals()->gZoomMode + kZoomStringOffset - 1);
+        Messages::set_status(string, kStatusLabelColor);
+    }
+}
+
+static void computer_select(objectActionType* action, spaceObjectType* anObject) {
+    MiniComputer_SetScreenAndLineHack( action->argument.computerSelect.screenNumber,
+            action->argument.computerSelect.lineNumber);
+}
+
+static void assume_initial_object(objectActionType* action, spaceObjectType* anObject) {
+    Scenario::InitialObject *initialObject;
+
+    initialObject = gThisScenario->initial(action->argument.assumeInitial.whichInitialObject+GetAdmiralScore(0, 0));
+    if ( initialObject != NULL)
+    {
+        initialObject->realObjectID = anObject->id;
+        initialObject->realObjectNumber = anObject->entryNumber;
+    }
+}
+
 void execute_actions(
         int32_t whichAction, int32_t actionNum, spaceObjectType *sObject, spaceObjectType *dObject,
         Point* offset, bool allowDelay) {
     spaceObjectType *anObject, *originalSObject = sObject, *originalDObject = dObject;
     baseObjectType  *baseObject;
     int16_t         angle;
-    fixedPointType  fpoint, newVel;
+    fixedPointType  fpoint;
     int32_t         l;
     uint32_t        ul1;
     Fixed           f, f2;
@@ -114,7 +889,6 @@ void execute_actions(
     Point           location;
     bool         OKtoExecute, checkConditions = false;
     Fixed           aFixed;
-    uint8_t         tinyColor;
 
     if ( whichAction < 0) return;
     const auto begin = mGetObjectActionPtr(whichAction);
@@ -197,772 +971,31 @@ void execute_actions(
         switch ( action->verb)
         {
             case kCreateObject:
-            case kCreateObjectSetDest: {
-                baseObject = mGetBaseObjectPtr( action->argument.createObject.whichBaseType);
-                int16_t end = action->argument.createObject.howManyMinimum;
-                if ( action->argument.createObject.howManyRange > 0)
-                    end += anObject->randomSeed.next(
-                            action->argument.createObject.howManyRange);
-                while ( end > 0)
-                {
-                    if ( action->argument.createObject.velocityRelative)
-                        fpoint = anObject->velocity;
-                    else
-                        fpoint.h = fpoint.v = 0;
-                    l = 0;
-                    if  ( baseObject->attributes & kAutoTarget)
-                    {
-                        l = sObject->targetAngle;
-                    } else if ( action->argument.createObject.directionRelative)
-                            l = anObject->direction;
-                    /*
-                    l += baseObject->initialDirection;
-                    if ( baseObject->initialDirectionRange > 0)
-                        l += anObject->randomSeed.next(baseObject->initialDirectionRange);
-                    */
-                    newLocation = anObject->location;
-                    if ( offset != NULL)
-                    {
-                        newLocation.h += offset->h;
-                        newLocation.v += offset->v;
-                    }
+            case kCreateObjectSetDest:  create_object(action, anObject, sObject, offset); break;
+            case kPlaySound:            play_sound(action, anObject); break;
+            case kMakeSparks:           make_sparks(action, anObject); break;
+            case kDie:                  die(action, anObject, sObject); break;
+            case kNilTarget:            nil_target(action, anObject); break;
+            case kAlter:                alter(action, anObject, sObject, dObject); break;
+            case kLandAt:               land_at(action, anObject, sObject); break;
+            case kEnterWarp:            enter_warp(action, anObject, sObject); break;
+            case kChangeScore:          change_score(action, anObject); break;
+            case kDeclareWinner:        declare_winner(action, anObject); break;
+            case kDisplayMessage:       display_message(action, anObject); break;
+            case kSetDestination:       set_destination(action, anObject, sObject); break;
+            case kActivateSpecial:      activate_special(action, anObject, sObject); break;
+            case kColorFlash:           color_flash(action, anObject); break;
+            case kEnableKeys:           enable_keys(action, anObject); break;
+            case kDisableKeys:          disable_keys(action, anObject); break;
+            case kSetZoom:              set_zoom(action, anObject); break;
+            case kComputerSelect:       computer_select(action, anObject); break;
+            case kAssumeInitialObject:  assume_initial_object(action, anObject); break;
+        }
 
-                    if ( action->argument.createObject.randomDistance > 0)
-                    {
-                        newLocation.h += anObject->randomSeed.next(
-                                action->argument.createObject.randomDistance << 1)
-                            - action->argument.createObject.randomDistance;
-                        newLocation.v += anObject->randomSeed.next(
-                                action->argument.createObject.randomDistance << 1)
-                            - action->argument.createObject.randomDistance;
-                    }
-
-//                      l = CreateAnySpaceObject( action->argument.createObject.whichBaseType, &fpoint,
-//                              &newLocation, l, anObject->owner, 0, nil, -1, -1, -1);
-                    l = CreateAnySpaceObject( action->argument.createObject.whichBaseType, &fpoint,
-                            &newLocation, l, anObject->owner, 0, -1);
-
-                    if ( l >= 0)
-                    {
-                        spaceObjectType *newObject = mGetSpaceObjectPtr(l);
-                        if ( newObject->attributes & kCanAcceptDestination)
-                        {
-                            ul1 = newObject->attributes;
-                            newObject->attributes &= ~kStaticDestination;
-                            if ( newObject->owner >= 0)
-                            {
-                                if ( action->reflexive)
-                                {
-                                    if ( action->verb != kCreateObjectSetDest)
-                                        SetObjectDestination( newObject, anObject);
-                                    else if ( anObject->destObjectPtr != NULL)
-                                    {
-                                        SetObjectDestination( newObject, anObject->destObjectPtr);
-                                    }
-                                }
-                            } else if ( action->reflexive)
-                            {
-                                newObject->destObjectPtr = anObject;
-                                newObject->timeFromOrigin = kTimeToCheckHome;
-                                newObject->runTimeFlags &= ~kHasArrived;
-                                newObject->destinationObject = anObject->entryNumber; //a->destinationObject;
-                                newObject->destObjectDest = anObject->destinationObject;
-                                newObject->destObjectID = anObject->id;
-                                newObject->destObjectDestID = anObject->destObjectID;
-
-                            }
-                            newObject->attributes = ul1;
-                        }
-                        newObject->targetObjectNumber = anObject->targetObjectNumber;
-                        newObject->targetObjectID = anObject->targetObjectID;
-                        newObject->closestObject = newObject->targetObjectNumber;
-
-                        //
-                        //  ugly though it is, we have to fill in the rest of
-                        //  a new beam's fields after it's created.
-                        //
-
-                        if ( newObject->attributes & kIsBeam)
-                        {
-                            if ( newObject->frame.beam.beam->beamKind !=
-                                eKineticBeamKind)
-                            // special beams need special post-creation acts
-                            {
-                                Beams::set_attributes(newObject, anObject);
-                            }
-                        }
-                    }
-
-                    end--;
-                }
-            } break;
-
-            case kPlaySound:
-                l = action->argument.playSound.volumeMinimum;
-                angle = action->argument.playSound.idMinimum;
-                if ( action->argument.playSound.idRange > 0)
-                {
-                    angle += anObject->randomSeed.next(
-                        action->argument.playSound.idRange + 1);
-                }
-                if ( !action->argument.playSound.absolute)
-                {
-                    mPlayDistanceSound(l, anObject, angle, action->argument.playSound.persistence, static_cast<soundPriorityType>(action->argument.playSound.priority));
-                } else
-                {
-                    PlayVolumeSound( angle, l,
-                                action->argument.playSound.persistence,
-                                static_cast<soundPriorityType>(action->argument.playSound.priority));
-                }
-
-                break;
-
-            case kMakeSparks:
-                if ( anObject->sprite != NULL)
-                {
-                    location.h = anObject->sprite->where.h;
-                    location.v = anObject->sprite->where.v;
-                    globals()->starfield.make_sparks(
-                            action->argument.makeSparks.howMany,        // sparkNum
-                            action->argument.makeSparks.speed,          // sparkSpeed
-                            action->argument.makeSparks.velocityRange,  // velocity
-                            action->argument.makeSparks.color,          // COLOR
-                            &location);                                 // location
-                } else
-                {
-                    l = ( anObject->location.h - gGlobalCorner.h) * gAbsoluteScale;
-                    l >>= SHIFT_SCALE;
-                    if (( l > -kSpriteMaxSize) && ( l < kSpriteMaxSize))
-                        location.h = l + viewport.left;
-                    else
-                        location.h = -kSpriteMaxSize;
-
-                    l = (anObject->location.v - gGlobalCorner.v) * gAbsoluteScale;
-                    l >>= SHIFT_SCALE; /*+ CLIP_TOP*/;
-                    if (( l > -kSpriteMaxSize) && ( l < kSpriteMaxSize))
-                        location.v = l + viewport.top;
-                    else
-                        location.v = -kSpriteMaxSize;
-
-                    globals()->starfield.make_sparks(
-                            action->argument.makeSparks.howMany,        // sparkNum
-                            action->argument.makeSparks.speed,          // sparkSpeed
-                            action->argument.makeSparks.velocityRange,  // velocity
-                            action->argument.makeSparks.color,          // COLOR
-                            &location);                                 // location
-                }
-                break;
-
-            case kDie:
-//                  if ( anObject->attributes & kIsBeam)
-//                      anObject->frame.beam.killMe = true;
-                switch ( action->argument.killObject.dieType)
-                {
-                    case kDieExpire:
-                        if ( sObject != NULL)
-                        {
-                            // if the object is occupied by a human, eject him since he can't die
-                            if (( sObject->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
-                                (!(sObject->baseType->destroyActionNum & kDestroyActionDontDieFlag)))
-                            {
-                                CreateFloatingBodyOfPlayer( sObject);
-                            }
-
-                            if ( sObject->baseType->expireAction >= 0)
-                            {
-//                                  ExecuteObjectActions(
-//                                      sObject->baseType->expireAction,
-//                                      sObject->baseType->expireActionNum
-//                                       & kDestroyActionNotMask,
-//                                      sObject, dObject, offset, allowDelay);
-                            }
-                            sObject->active = kObjectToBeFreed;
-                        }
-                        break;
-
-                    case kDieDestroy:
-                        if ( sObject != NULL)
-                        {
-                            // if the object is occupied by a human, eject him since he can't die
-                            if (( sObject->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
-                                (!(sObject->baseType->destroyActionNum & kDestroyActionDontDieFlag)))
-                            {
-                                CreateFloatingBodyOfPlayer( sObject);
-                            }
-
-                            DestroyObject( sObject);
-                        }
-                        break;
-
-                    default:
-                        // if the object is occupied by a human, eject him since he can't die
-                        if (( anObject->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
-                            (!(anObject->baseType->destroyActionNum & kDestroyActionDontDieFlag)))
-                        {
-                            CreateFloatingBodyOfPlayer( anObject);
-                        }
-                        anObject->active = kObjectToBeFreed;
-                        break;
-                }
-                break;
-
-            case kNilTarget:
-                anObject->targetObjectNumber = kNoShip;
-                anObject->targetObjectID = kNoShip;
-                anObject->lastTarget = kNoShip;
-                break;
-
-            case kAlter:
-                switch( action->argument.alterObject.alterType)
-                {
-                    case kAlterDamage:
-                        AlterObjectHealth( anObject,
-                            action->argument.alterObject.minimum);
-                        break;
-
-                    case kAlterEnergy:
-                        AlterObjectEnergy( anObject,
-                            action->argument.alterObject.minimum);
-                        break;
-
-                    /*
-                    case 919191://kAlterSpecial:
-                        anObject->specialType = action->argument.alterObject.minimum;
-                        baseObject = mGetBaseObjectPtr( anObject->specialType);
-                        anObject->specialAmmo = baseObject->frame.weapon.ammo;
-                        anObject->specialTime = anObject->specialPosition = 0;
-                        if ( baseObject->frame.weapon.range > anObject->longestWeaponRange)
-                            anObject->longestWeaponRange = baseObject->frame.weapon.range;
-                        if ( baseObject->frame.weapon.range < anObject->shortestWeaponRange)
-                            anObject->shortestWeaponRange = baseObject->frame.weapon.range;
-                        break;
-                    */
-
-                    case kAlterHidden:
-                        l = 0;
-                        do
-                        {
-                            UnhideInitialObject( action->argument.alterObject.minimum + l);
-                            l++;
-                        } while ( l <= action->argument.alterObject.range);
-                        break;
-
-                    case kAlterCloak:
-                        AlterObjectCloakState( anObject, true);
-                        break;
-
-                    case kAlterSpin:
-                        if ( anObject->attributes & kCanTurn)
-                        {
-                            if ( anObject->attributes & kShapeFromDirection)
-                            {
-                                f = mMultiplyFixed( anObject->baseType->frame.rotation.maxTurnRate,
-                                                action->argument.alterObject.minimum +
-                                                anObject->randomSeed.next(
-                                                    action->argument.alterObject.range));
-                            } else
-                            {
-                                f = mMultiplyFixed( 2 /*kDefaultTurnRate*/,
-                                                action->argument.alterObject.minimum +
-                                                anObject->randomSeed.next(
-                                                    action->argument.alterObject.range));
-                            }
-                            f2 = anObject->baseType->mass;
-                            if ( f2 == 0) f = -1;
-                            else
-                            {
-                                f = mDivideFixed( f, f2);
-                            }
-                            anObject->turnVelocity = f;
-                            /*
-                            anObject->frame.rotation.turnVelocity =
-                                    mMultiplyFixed( anObject->baseType->frame.rotation.maxTurnRate,
-                                        action->argument.alterObject.minimum);
-
-                            anObject->frame.rotation.turnVelocity += anObject->randomSeed(f);
-                            */
-                        }
-                        break;
-
-                    case kAlterOffline:
-                        f = action->argument.alterObject.minimum +
-                            anObject->randomSeed.next(action->argument.alterObject.range);
-                        f2 = anObject->baseType->mass;
-                        if ( f2 == 0) anObject->offlineTime = -1;
-                        else
-                        {
-                            anObject->offlineTime = mDivideFixed( f, f2);
-                        }
-                        anObject->offlineTime = mFixedToLong( anObject->offlineTime);
-                        break;
-
-                    case kAlterVelocity:
-                        if ( sObject != NULL)
-                        {
-                            // active (non-reflexive) altering of velocity means a PUSH, just like
-                            //  two objects colliding.  Negative velocity = slow down
-                            if ((dObject != NULL) && (dObject != &kZeroSpaceObject)) {
-                                if ( action->argument.alterObject.relative)
-                                {
-                                    if (( dObject->baseType->mass > 0) &&
-                                        ( dObject->maxVelocity > 0))
-                                    {
-                                        if ( action->argument.alterObject.minimum >= 0)
-                                        {
-                                            // if the minimum >= 0, then PUSH the object like collision
-                                            f = sObject->velocity.h - dObject->velocity.h;
-                                            f /= dObject->baseType->mass;
-                                            f <<= 6L;
-                                            dObject->velocity.h += f;
-                                            f = sObject->velocity.v - dObject->velocity.v;
-                                            f /= dObject->baseType->mass;
-                                            f <<= 6L;
-                                            dObject->velocity.v += f;
-
-                                            // make sure we're not going faster than our top speed
-
-                                            if ( dObject->velocity.h == 0)
-                                            {
-                                                if ( dObject->velocity.v < 0)
-                                                    angle = 180;
-                                                else angle = 0;
-                                            } else
-                                            {
-                                                aFixed = MyFixRatio( dObject->velocity.h, dObject->velocity.v);
-
-                                                angle = AngleFromSlope( aFixed);
-                                                if ( dObject->velocity.h > 0) angle += 180;
-                                                if ( angle >= 360) angle -= 360;
-                                            }
-                                        } else
-                                        {
-                                            // if the minumum < 0, then STOP the object like applying breaks
-                                            f = dObject->velocity.h;
-                                            f = mMultiplyFixed( f, action->argument.alterObject.minimum);
-//                                              f /= dObject->baseType->mass;
-//                                              f <<= 6L;
-                                            dObject->velocity.h += f;
-                                            f = dObject->velocity.v;
-                                            f = mMultiplyFixed( f, action->argument.alterObject.minimum);
-//                                              f /= dObject->baseType->mass;
-//                                              f <<= 6L;
-                                            dObject->velocity.v += f;
-
-                                            // make sure we're not going faster than our top speed
-
-                                            if ( dObject->velocity.h == 0)
-                                            {
-                                                if ( dObject->velocity.v < 0)
-                                                    angle = 180;
-                                                else angle = 0;
-                                            } else
-                                            {
-                                                aFixed = MyFixRatio( dObject->velocity.h, dObject->velocity.v);
-
-                                                angle = AngleFromSlope( aFixed);
-                                                if ( dObject->velocity.h > 0) angle += 180;
-                                                if ( angle >= 360) angle -= 360;
-                                            }
-                                        }
-
-                                        // get the maxthrust of new vector
-
-                                        GetRotPoint(&f, &f2, angle);
-
-                                        f = mMultiplyFixed( dObject->maxVelocity, f);
-                                        f2 = mMultiplyFixed( dObject->maxVelocity, f2);
-
-                                        if ( f < 0)
-                                        {
-                                            if ( dObject->velocity.h < f)
-                                                dObject->velocity.h = f;
-                                        } else
-                                        {
-                                            if ( dObject->velocity.h > f)
-                                                dObject->velocity.h = f;
-                                        }
-
-                                        if ( f2 < 0)
-                                        {
-                                            if ( dObject->velocity.v < f2)
-                                                dObject->velocity.v = f2;
-                                        } else
-                                        {
-                                            if ( dObject->velocity.v > f2)
-                                                dObject->velocity.v = f2;
-                                        }
-                                    }
-                                } else
-                                {
-                                    GetRotPoint(&f, &f2, sObject->direction);
-                                    f = mMultiplyFixed( action->argument.alterObject.minimum, f);
-                                    f2 = mMultiplyFixed( action->argument.alterObject.minimum, f2);
-                                    anObject->velocity.h = f;
-                                    anObject->velocity.v = f2;
-                                }
-                            } else
-                            // reflexive alter velocity means a burst of speed in the direction
-                            // the object is facing, where negative speed means backwards. Object can
-                            // excede its max velocity.
-                            // Minimum value is absolute speed in direction.
-                            {
-                                GetRotPoint(&f, &f2, anObject->direction);
-                                f = mMultiplyFixed( action->argument.alterObject.minimum, f);
-                                f2 = mMultiplyFixed( action->argument.alterObject.minimum, f2);
-                                if ( action->argument.alterObject.relative)
-                                {
-                                    anObject->velocity.h += f;
-                                    anObject->velocity.v += f2;
-                                } else
-                                {
-                                    anObject->velocity.h = f;
-                                    anObject->velocity.v = f2;
-                                }
-                            }
-
-                        }
-                        break;
-
-                    case kAlterMaxVelocity:
-                        if ( action->argument.alterObject.minimum < 0)
-                        {
-                            anObject->maxVelocity = anObject->baseType->maxVelocity;
-                        } else
-                        {
-                            anObject->maxVelocity =
-                                action->argument.alterObject.minimum;
-                        }
-                        break;
-
-                    case kAlterThrust:
-                        f = action->argument.alterObject.minimum +
-                            anObject->randomSeed.next(action->argument.alterObject.range);
-                        if ( action->argument.alterObject.relative)
-                        {
-                            anObject->thrust += f;
-                        } else
-                        {
-                            anObject->thrust = f;
-                        }
-                        break;
-
-                    case kAlterBaseType:
-                        if ((action->reflexive)
-                                || ((dObject != NULL) && (dObject != &kZeroSpaceObject)))
-                        ChangeObjectBaseType( anObject, action->argument.alterObject.minimum, -1,
-                            action->argument.alterObject.relative);
-                        break;
-
-                    case kAlterOwner:
-/*                          anObject->owner = action->argument.alterObject.minimum;
-                        if ( anObject->attributes & kIsDestination)
-                            RecalcAllAdmiralBuildData();
-*/
-                        if ( action->argument.alterObject.relative)
-                        {
-                            // if it's relative AND reflexive, we take the direct
-                            // object's owner, since relative & reflexive would
-                            // do nothing.
-                            if ((action->reflexive) && (dObject != NULL)
-                                    && (dObject != &kZeroSpaceObject))
-                                AlterObjectOwner( anObject, dObject->owner, true);
-                            else
-                                AlterObjectOwner( anObject, sObject->owner, true);
-                        } else
-                        {
-                            AlterObjectOwner( anObject,
-                                    action->argument.alterObject.minimum, false);
-                        }
-                        break;
-
-                    case kAlterConditionTrueYet:
-                        if ( action->argument.alterObject.range <= 0)
-                        {
-                            gThisScenario->condition(action->argument.alterObject.minimum)
-                                ->set_true_yet(action->argument.alterObject.relative);
-                        } else
-                        {
-                            for (
-                                    l = action->argument.alterObject.minimum;
-                                    l <=    (
-                                                action->argument.alterObject.minimum +
-                                                action->argument.alterObject.range
-                                            )
-                                            ;
-                                    l++
-                                )
-                            {
-                                gThisScenario->condition(l)->set_true_yet(
-                                        action->argument.alterObject.relative);
-                            }
-
-                        }
-                        break;
-
-                    case kAlterOccupation:
-                        AlterObjectOccupation( anObject, sObject->owner, action->argument.alterObject.minimum, true);
-                        break;
-
-                    case kAlterAbsoluteCash:
-                        if ( action->argument.alterObject.relative)
-                        {
-                            if (anObject != &kZeroSpaceObject) {
-                                PayAdmiralAbsolute( anObject->owner, action->argument.alterObject.minimum);
-                            }
-                        } else
-                        {
-                            PayAdmiralAbsolute( action->argument.alterObject.range,
-                                action->argument.alterObject.minimum);
-                        }
-                        break;
-
-                    case kAlterAge:
-                        l = action->argument.alterObject.minimum +
-                            anObject->randomSeed.next(action->argument.alterObject.range);
-
-                        if ( action->argument.alterObject.relative)
-                        {
-                            if ( anObject->age >= 0)
-                            {
-                                anObject->age += l;
-
-                                if ( anObject->age < 0) anObject->age = 0;
-                            } else
-                            {
-                                anObject->age += l;
-                            }
-                        } else
-                        {
-                            anObject->age = l;
-                        }
-                        break;
-
-                    case kAlterLocation:
-                        if ( action->argument.alterObject.relative)
-                        {
-                            if ((dObject == NULL) && (dObject != &kZeroSpaceObject)) {
-                                newLocation.h = sObject->location.h;
-                                newLocation.v = sObject->location.v;
-                            } else {
-                                newLocation.h = dObject->location.h;
-                                newLocation.v = dObject->location.v;
-                            }
-                        } else
-                        {
-                            newLocation.h = newLocation.v = 0;
-                        }
-                        newLocation.h += anObject->randomSeed.next(
-                                action->argument.alterObject.minimum << 1)
-                            - action->argument.alterObject.minimum;
-                        newLocation.v += anObject->randomSeed.next(
-                                action->argument.alterObject.minimum << 1)
-                            - action->argument.alterObject.minimum;
-                        anObject->location.h = newLocation.h;
-                        anObject->location.v = newLocation.v;
-                        break;
-
-                    case kAlterAbsoluteLocation:
-                        if ( action->argument.alterObject.relative)
-                        {
-                            anObject->location.h += action->argument.alterObject.minimum;
-                            anObject->location.v += action->argument.alterObject.range;
-                        } else
-                        {
-                            anObject->location = Translate_Coord_To_Scenario_Rotation(
-                                action->argument.alterObject.minimum,
-                                action->argument.alterObject.range);
-                        }
-                        break;
-
-                    case kAlterWeapon1:
-                        anObject->pulseType = action->argument.alterObject.minimum;
-                        if ( anObject->pulseType != kNoWeapon)
-                        {
-                            baseObject = anObject->pulseBase =
-                                mGetBaseObjectPtr( anObject->pulseType);
-                            anObject->pulseAmmo =
-                                baseObject->frame.weapon.ammo;
-                            anObject->pulseTime =
-                                anObject->pulsePosition = 0;
-                            if ( baseObject->frame.weapon.range > anObject->longestWeaponRange)
-                                anObject->longestWeaponRange = baseObject->frame.weapon.range;
-                            if ( baseObject->frame.weapon.range < anObject->shortestWeaponRange)
-                                anObject->shortestWeaponRange = baseObject->frame.weapon.range;
-                        } else
-                        {
-                            anObject->pulseBase = NULL;
-                            anObject->pulseAmmo = 0;
-                            anObject->pulseTime = 0;
-                        }
-                        break;
-
-                    case kAlterWeapon2:
-                        anObject->beamType = action->argument.alterObject.minimum;
-                        if ( anObject->beamType != kNoWeapon)
-                        {
-                            baseObject = anObject->beamBase =
-                                mGetBaseObjectPtr( anObject->beamType);
-                            anObject->beamAmmo =
-                                baseObject->frame.weapon.ammo;
-                            anObject->beamTime =
-                                anObject->beamPosition = 0;
-                            if ( baseObject->frame.weapon.range > anObject->longestWeaponRange)
-                                anObject->longestWeaponRange = baseObject->frame.weapon.range;
-                            if ( baseObject->frame.weapon.range < anObject->shortestWeaponRange)
-                                anObject->shortestWeaponRange = baseObject->frame.weapon.range;
-                        } else
-                        {
-                            anObject->beamBase = NULL;
-                            anObject->beamAmmo = 0;
-                            anObject->beamTime = 0;
-                        }
-                        break;
-
-                    case kAlterSpecial:
-                        anObject->specialType = action->argument.alterObject.minimum;
-                        if ( anObject->specialType != kNoWeapon)
-                        {
-                            baseObject = anObject->specialBase =
-                                mGetBaseObjectPtr( anObject->specialType);
-                            anObject->specialAmmo =
-                                baseObject->frame.weapon.ammo;
-                            anObject->specialTime =
-                                anObject->specialPosition = 0;
-                            if ( baseObject->frame.weapon.range > anObject->longestWeaponRange)
-                                anObject->longestWeaponRange = baseObject->frame.weapon.range;
-                            if ( baseObject->frame.weapon.range < anObject->shortestWeaponRange)
-                                anObject->shortestWeaponRange = baseObject->frame.weapon.range;
-                        } else
-                        {
-                            anObject->specialBase = NULL;
-                            anObject->specialAmmo = 0;
-                            anObject->specialTime = 0;
-                        }
-                        break;
-
-                    case kAlterLevelKeyTag:
-                        break;
-
-                    default:
-                        break;
-
-                }
-                break;
-
-            case kLandAt:
-                // even though this is never a reflexive verb, we only effect ourselves
-                if ( sObject->attributes & ( kIsPlayerShip | kRemoteOrHuman))
-                {
-                    CreateFloatingBodyOfPlayer( sObject);
-                }
-                sObject->presenceState = kLandingPresence;
-                sObject->presenceData = sObject->baseType->naturalScale |
-                    (action->argument.landAt.landingSpeed << kPresenceDataHiWordShift);
-                break;
-
-            case kEnterWarp:
-                sObject->presenceState = kWarpInPresence;
-//                  sObject->presenceData = action->argument.enterWarp.warpSpeed;
-                sObject->presenceData = sObject->baseType->warpSpeed;
-                sObject->attributes &= ~kOccupiesSpace;
-                newVel.h = newVel.v = 0;
-//                  CreateAnySpaceObject( globals()->scenarioFileInfo.warpInFlareID, &(newVel),
-//                      &(sObject->location), sObject->direction, kNoOwner, 0, nil, -1, -1, -1);
-                CreateAnySpaceObject( globals()->scenarioFileInfo.warpInFlareID, &(newVel),
-                    &(sObject->location), sObject->direction, kNoOwner, 0, -1);
-                break;
-
+        switch (action->verb) {
             case kChangeScore:
-                if (( action->argument.changeScore.whichPlayer == -1) && (anObject != &kZeroSpaceObject))
-                    l = anObject->owner;
-                else
-                {
-                    l = mGetRealAdmiralNum( action->argument.changeScore.whichPlayer);
-                }
-                if ( l >= 0)
-                {
-                    AlterAdmiralScore( l, action->argument.changeScore.whichScore, action->argument.changeScore.amount);
-                    checkConditions = true;
-                }
-                break;
-
-            case kDeclareWinner:
-                if (( action->argument.declareWinner.whichPlayer == -1) && (anObject != &kZeroSpaceObject))
-                    l = anObject->owner;
-                else
-                {
-                    l = mGetRealAdmiralNum( action->argument.declareWinner.whichPlayer);
-                }
-                DeclareWinner( l, action->argument.declareWinner.nextLevel, action->argument.declareWinner.textID);
-                break;
-
             case kDisplayMessage:
-                Messages::start(
-                        action->argument.displayMessage.resID,
-                        (action->argument.displayMessage.resID +
-                         action->argument.displayMessage.pageNum - 1));
                 checkConditions = true;
-
-                break;
-
-            case kSetDestination:
-                ul1 = sObject->attributes;
-                sObject->attributes &= ~kStaticDestination;
-                SetObjectDestination( sObject, anObject);
-                sObject->attributes = ul1;
-                break;
-
-            case kActivateSpecial:
-                ActivateObjectSpecial( sObject);
-                break;
-
-            case kColorFlash:
-                tinyColor = GetTranslateColorShade(action->argument.colorFlash.color, action->argument.colorFlash.shade);
-                globals()->transitions.start_boolean(
-                        action->argument.colorFlash.length,
-                        action->argument.colorFlash.length, tinyColor);
-                break;
-
-            case kEnableKeys:
-                globals()->keyMask = globals()->keyMask &
-                                                ~action->argument.keys.keyMask;
-                break;
-
-            case kDisableKeys:
-                globals()->keyMask = globals()->keyMask |
-                                                action->argument.keys.keyMask;
-                break;
-
-            case kSetZoom:
-                if (action->argument.zoom.zoomLevel != globals()->gZoomMode)
-                {
-                    globals()->gZoomMode = static_cast<ZoomType>(action->argument.zoom.zoomLevel);
-                    PlayVolumeSound(  kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
-                    StringList strings(kMessageStringID);
-                    StringSlice string = strings.at(globals()->gZoomMode + kZoomStringOffset - 1);
-                    Messages::set_status(string, kStatusLabelColor);
-                }
-                break;
-
-            case kComputerSelect:
-                MiniComputer_SetScreenAndLineHack( action->argument.computerSelect.screenNumber,
-                    action->argument.computerSelect.lineNumber);
-                break;
-
-            case kAssumeInitialObject:
-            {
-                Scenario::InitialObject *initialObject;
-
-                initialObject = gThisScenario->initial(action->argument.assumeInitial.whichInitialObject+GetAdmiralScore(0, 0));
-                if ( initialObject != NULL)
-                {
-                    initialObject->realObjectID = anObject->id;
-                    initialObject->realObjectNumber = anObject->entryNumber;
-                }
-            }
-                break;
-
-            default:
                 break;
         }
     }
