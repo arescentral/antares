@@ -48,6 +48,7 @@ using sfz::Exception;
 using sfz::ReadSource;
 using sfz::String;
 using sfz::StringSlice;
+using sfz::range;
 using sfz::read;
 using std::unique_ptr;
 
@@ -320,107 +321,73 @@ static void nil_target(objectActionType* action, spaceObjectType* anObject) {
 static void alter(
         objectActionType* action,
         spaceObjectType* anObject, spaceObjectType* sObject, spaceObjectType* dObject) {
+    const auto alter = action->argument.alterObject;
     int32_t l;
     Fixed f, f2, aFixed;
     int16_t angle;
     coordPointType newLocation;
     baseObjectType* baseObject;
-    switch( action->argument.alterObject.alterType)
-    {
+    switch (alter.alterType) {
         case kAlterDamage:
-            AlterObjectHealth( anObject,
-                action->argument.alterObject.minimum);
+            AlterObjectHealth(anObject, alter.minimum);
             break;
 
         case kAlterEnergy:
-            AlterObjectEnergy( anObject,
-                action->argument.alterObject.minimum);
+            AlterObjectEnergy(anObject, alter.minimum);
             break;
-
-        /*
-        case 919191://kAlterSpecial:
-            anObject->specialType = action->argument.alterObject.minimum;
-            baseObject = mGetBaseObjectPtr( anObject->specialType);
-            anObject->specialAmmo = baseObject->frame.weapon.ammo;
-            anObject->specialTime = anObject->specialPosition = 0;
-            if ( baseObject->frame.weapon.range > anObject->longestWeaponRange)
-                anObject->longestWeaponRange = baseObject->frame.weapon.range;
-            if ( baseObject->frame.weapon.range < anObject->shortestWeaponRange)
-                anObject->shortestWeaponRange = baseObject->frame.weapon.range;
-            break;
-        */
 
         case kAlterHidden:
-            l = 0;
-            do
-            {
-                UnhideInitialObject( action->argument.alterObject.minimum + l);
-                l++;
-            } while ( l <= action->argument.alterObject.range);
+            // Preserves old behavior; shouldn't really be adding one to alter.range.
+            for (auto i: range(alter.minimum, alter.minimum + alter.range + 1)) {
+                UnhideInitialObject(i);
+            }
             break;
 
         case kAlterCloak:
-            AlterObjectCloakState( anObject, true);
+            AlterObjectCloakState(anObject, true);
             break;
 
         case kAlterSpin:
-            if ( anObject->attributes & kCanTurn)
-            {
-                if ( anObject->attributes & kShapeFromDirection)
-                {
-                    f = mMultiplyFixed( anObject->baseType->frame.rotation.maxTurnRate,
-                                    action->argument.alterObject.minimum +
-                                    anObject->randomSeed.next(
-                                        action->argument.alterObject.range));
-                } else
-                {
-                    f = mMultiplyFixed( 2 /*kDefaultTurnRate*/,
-                                    action->argument.alterObject.minimum +
-                                    anObject->randomSeed.next(
-                                        action->argument.alterObject.range));
+            if (anObject->attributes & kCanTurn) {
+                if (anObject->attributes & kShapeFromDirection) {
+                    f = mMultiplyFixed(
+                            anObject->baseType->frame.rotation.maxTurnRate,
+                            alter.minimum + anObject->randomSeed.next(alter.range));
+                } else {
+                    f = mMultiplyFixed(
+                            2 /*kDefaultTurnRate*/,
+                            alter.minimum + anObject->randomSeed.next(alter.range));
                 }
                 f2 = anObject->baseType->mass;
-                if ( f2 == 0) f = -1;
-                else
-                {
-                    f = mDivideFixed( f, f2);
+                if (f2 == 0) {
+                    f = -1;
+                } else {
+                    f = mDivideFixed(f, f2);
                 }
                 anObject->turnVelocity = f;
-                /*
-                anObject->frame.rotation.turnVelocity =
-                        mMultiplyFixed( anObject->baseType->frame.rotation.maxTurnRate,
-                            action->argument.alterObject.minimum);
-
-                anObject->frame.rotation.turnVelocity += anObject->randomSeed(f);
-                */
             }
             break;
 
         case kAlterOffline:
-            f = action->argument.alterObject.minimum +
-                anObject->randomSeed.next(action->argument.alterObject.range);
+            f = alter.minimum + anObject->randomSeed.next(alter.range);
             f2 = anObject->baseType->mass;
-            if ( f2 == 0) anObject->offlineTime = -1;
-            else
-            {
-                anObject->offlineTime = mDivideFixed( f, f2);
+            if (f2 == 0) {
+                anObject->offlineTime = -1;
+            } else {
+                anObject->offlineTime = mDivideFixed(f, f2);
             }
-            anObject->offlineTime = mFixedToLong( anObject->offlineTime);
+            anObject->offlineTime = mFixedToLong(anObject->offlineTime);
             break;
 
         case kAlterVelocity:
-            if ( sObject != NULL)
-            {
+            if (sObject) {
                 // active (non-reflexive) altering of velocity means a PUSH, just like
                 //  two objects colliding.  Negative velocity = slow down
-                if ((dObject != NULL) && (dObject != &kZeroSpaceObject)) {
-                    if ( action->argument.alterObject.relative)
-                    {
-                        if (( dObject->baseType->mass > 0) &&
-                            ( dObject->maxVelocity > 0))
-                        {
-                            if ( action->argument.alterObject.minimum >= 0)
-                            {
+                if (dObject && (dObject != &kZeroSpaceObject)) {
+                    if (alter.relative) {
+                        if ((dObject->baseType->mass > 0) &&
+                            (dObject->maxVelocity > 0)) {
+                            if (alter.minimum >= 0) {
                                 // if the minimum >= 0, then PUSH the object like collision
                                 f = sObject->velocity.h - dObject->velocity.h;
                                 f /= dObject->baseType->mass;
@@ -433,275 +400,223 @@ static void alter(
 
                                 // make sure we're not going faster than our top speed
 
-                                if ( dObject->velocity.h == 0)
-                                {
-                                    if ( dObject->velocity.v < 0)
+                                if (dObject->velocity.h == 0) {
+                                    if (dObject->velocity.v < 0) {
                                         angle = 180;
-                                    else angle = 0;
-                                } else
-                                {
-                                    aFixed = MyFixRatio( dObject->velocity.h, dObject->velocity.v);
+                                    } else {
+                                        angle = 0;
+                                    }
+                                } else {
+                                    aFixed = MyFixRatio(dObject->velocity.h, dObject->velocity.v);
 
-                                    angle = AngleFromSlope( aFixed);
-                                    if ( dObject->velocity.h > 0) angle += 180;
-                                    if ( angle >= 360) angle -= 360;
+                                    angle = AngleFromSlope(aFixed);
+                                    if (dObject->velocity.h > 0) {
+                                        angle += 180;
+                                    }
+                                    if (angle >= 360) {
+                                        angle -= 360;
+                                    }
                                 }
-                            } else
-                            {
+                            } else {
                                 // if the minumum < 0, then STOP the object like applying breaks
                                 f = dObject->velocity.h;
-                                f = mMultiplyFixed( f, action->argument.alterObject.minimum);
-//                                              f /= dObject->baseType->mass;
-//                                              f <<= 6L;
+                                f = mMultiplyFixed(f, alter.minimum);
                                 dObject->velocity.h += f;
                                 f = dObject->velocity.v;
-                                f = mMultiplyFixed( f, action->argument.alterObject.minimum);
-//                                              f /= dObject->baseType->mass;
-//                                              f <<= 6L;
+                                f = mMultiplyFixed(f, alter.minimum);
                                 dObject->velocity.v += f;
 
                                 // make sure we're not going faster than our top speed
-
-                                if ( dObject->velocity.h == 0)
-                                {
-                                    if ( dObject->velocity.v < 0)
+                                if (dObject->velocity.h == 0) {
+                                    if (dObject->velocity.v < 0) {
                                         angle = 180;
-                                    else angle = 0;
-                                } else
-                                {
-                                    aFixed = MyFixRatio( dObject->velocity.h, dObject->velocity.v);
+                                    } else {
+                                        angle = 0;
+                                    }
+                                } else {
+                                    aFixed = MyFixRatio(dObject->velocity.h, dObject->velocity.v);
 
-                                    angle = AngleFromSlope( aFixed);
-                                    if ( dObject->velocity.h > 0) angle += 180;
-                                    if ( angle >= 360) angle -= 360;
+                                    angle = AngleFromSlope(aFixed);
+                                    if (dObject->velocity.h > 0) {
+                                        angle += 180;
+                                    }
+                                    if (angle >= 360) {
+                                        angle -= 360;
+                                    }
                                 }
                             }
 
                             // get the maxthrust of new vector
-
                             GetRotPoint(&f, &f2, angle);
+                            f = mMultiplyFixed(dObject->maxVelocity, f);
+                            f2 = mMultiplyFixed(dObject->maxVelocity, f2);
 
-                            f = mMultiplyFixed( dObject->maxVelocity, f);
-                            f2 = mMultiplyFixed( dObject->maxVelocity, f2);
-
-                            if ( f < 0)
-                            {
-                                if ( dObject->velocity.h < f)
+                            if (f < 0) {
+                                if (dObject->velocity.h < f) {
                                     dObject->velocity.h = f;
-                            } else
-                            {
-                                if ( dObject->velocity.h > f)
+                                }
+                            } else {
+                                if (dObject->velocity.h > f) {
                                     dObject->velocity.h = f;
+                                }
                             }
 
-                            if ( f2 < 0)
-                            {
-                                if ( dObject->velocity.v < f2)
+                            if (f2 < 0) {
+                                if (dObject->velocity.v < f2) {
                                     dObject->velocity.v = f2;
-                            } else
-                            {
-                                if ( dObject->velocity.v > f2)
+                                }
+                            } else {
+                                if (dObject->velocity.v > f2) {
                                     dObject->velocity.v = f2;
+                                }
                             }
                         }
-                    } else
-                    {
+                    } else {
                         GetRotPoint(&f, &f2, sObject->direction);
-                        f = mMultiplyFixed( action->argument.alterObject.minimum, f);
-                        f2 = mMultiplyFixed( action->argument.alterObject.minimum, f2);
+                        f = mMultiplyFixed(alter.minimum, f);
+                        f2 = mMultiplyFixed(alter.minimum, f2);
                         anObject->velocity.h = f;
                         anObject->velocity.v = f2;
                     }
-                } else
-                // reflexive alter velocity means a burst of speed in the direction
-                // the object is facing, where negative speed means backwards. Object can
-                // excede its max velocity.
-                // Minimum value is absolute speed in direction.
-                {
+                } else {
+                    // reflexive alter velocity means a burst of speed in the direction
+                    // the object is facing, where negative speed means backwards. Object can
+                    // excede its max velocity.
+                    // Minimum value is absolute speed in direction.
                     GetRotPoint(&f, &f2, anObject->direction);
-                    f = mMultiplyFixed( action->argument.alterObject.minimum, f);
-                    f2 = mMultiplyFixed( action->argument.alterObject.minimum, f2);
-                    if ( action->argument.alterObject.relative)
-                    {
+                    f = mMultiplyFixed(alter.minimum, f);
+                    f2 = mMultiplyFixed(alter.minimum, f2);
+                    if (alter.relative) {
                         anObject->velocity.h += f;
                         anObject->velocity.v += f2;
-                    } else
-                    {
+                    } else {
                         anObject->velocity.h = f;
                         anObject->velocity.v = f2;
                     }
                 }
-
             }
             break;
 
         case kAlterMaxVelocity:
-            if ( action->argument.alterObject.minimum < 0)
-            {
+            if (alter.minimum < 0) {
                 anObject->maxVelocity = anObject->baseType->maxVelocity;
-            } else
-            {
-                anObject->maxVelocity =
-                    action->argument.alterObject.minimum;
+            } else {
+                anObject->maxVelocity = alter.minimum;
             }
             break;
 
         case kAlterThrust:
-            f = action->argument.alterObject.minimum +
-                anObject->randomSeed.next(action->argument.alterObject.range);
-            if ( action->argument.alterObject.relative)
-            {
+            f = alter.minimum + anObject->randomSeed.next(alter.range);
+            if (alter.relative) {
                 anObject->thrust += f;
-            } else
-            {
+            } else {
                 anObject->thrust = f;
             }
             break;
 
         case kAlterBaseType:
-            if ((action->reflexive)
-                    || ((dObject != NULL) && (dObject != &kZeroSpaceObject)))
-            ChangeObjectBaseType( anObject, action->argument.alterObject.minimum, -1,
-                action->argument.alterObject.relative);
+            if (action->reflexive || (dObject && (dObject != &kZeroSpaceObject)))
+            ChangeObjectBaseType(anObject, alter.minimum, -1, alter.relative);
             break;
 
         case kAlterOwner:
-/*                          anObject->owner = action->argument.alterObject.minimum;
-            if ( anObject->attributes & kIsDestination)
-                RecalcAllAdmiralBuildData();
-*/
-            if ( action->argument.alterObject.relative)
-            {
+            if (alter.relative) {
                 // if it's relative AND reflexive, we take the direct
                 // object's owner, since relative & reflexive would
                 // do nothing.
-                if ((action->reflexive) && (dObject != NULL)
-                        && (dObject != &kZeroSpaceObject))
-                    AlterObjectOwner( anObject, dObject->owner, true);
-                else
-                    AlterObjectOwner( anObject, sObject->owner, true);
-            } else
-            {
-                AlterObjectOwner( anObject,
-                        action->argument.alterObject.minimum, false);
+                if (action->reflexive && dObject && (dObject != &kZeroSpaceObject)) {
+                    AlterObjectOwner(anObject, dObject->owner, true);
+                } else {
+                    AlterObjectOwner(anObject, sObject->owner, true);
+                }
+            } else {
+                AlterObjectOwner(anObject, alter.minimum, false);
             }
             break;
 
         case kAlterConditionTrueYet:
-            if ( action->argument.alterObject.range <= 0)
-            {
-                gThisScenario->condition(action->argument.alterObject.minimum)
-                    ->set_true_yet(action->argument.alterObject.relative);
-            } else
-            {
-                for (
-                        l = action->argument.alterObject.minimum;
-                        l <=    (
-                                    action->argument.alterObject.minimum +
-                                    action->argument.alterObject.range
-                                )
-                                ;
-                        l++
-                    )
-                {
-                    gThisScenario->condition(l)->set_true_yet(
-                            action->argument.alterObject.relative);
+            if (alter.range <= 0) {
+                gThisScenario->condition(alter.minimum)->set_true_yet(alter.relative);
+            } else {
+                for (auto l: range(alter.minimum, alter.minimum + alter.range + 1)) {
+                    gThisScenario->condition(l)->set_true_yet(alter.relative);
                 }
-
             }
             break;
 
         case kAlterOccupation:
-            AlterObjectOccupation( anObject, sObject->owner, action->argument.alterObject.minimum, true);
+            AlterObjectOccupation(anObject, sObject->owner, alter.minimum, true);
             break;
 
         case kAlterAbsoluteCash:
-            if ( action->argument.alterObject.relative)
-            {
+            if (alter.relative) {
                 if (anObject != &kZeroSpaceObject) {
-                    PayAdmiralAbsolute( anObject->owner, action->argument.alterObject.minimum);
+                    PayAdmiralAbsolute(anObject->owner, alter.minimum);
                 }
-            } else
-            {
-                PayAdmiralAbsolute( action->argument.alterObject.range,
-                    action->argument.alterObject.minimum);
+            } else {
+                PayAdmiralAbsolute(alter.range, alter.minimum);
             }
             break;
 
         case kAlterAge:
-            l = action->argument.alterObject.minimum +
-                anObject->randomSeed.next(action->argument.alterObject.range);
+            l = alter.minimum + anObject->randomSeed.next(alter.range);
 
-            if ( action->argument.alterObject.relative)
-            {
-                if ( anObject->age >= 0)
-                {
+            if (alter.relative) {
+                if (anObject->age >= 0) {
                     anObject->age += l;
 
-                    if ( anObject->age < 0) anObject->age = 0;
-                } else
-                {
+                    if (anObject->age < 0) {
+                        anObject->age = 0;
+                    }
+                } else {
                     anObject->age += l;
                 }
-            } else
-            {
+            } else {
                 anObject->age = l;
             }
             break;
 
         case kAlterLocation:
-            if ( action->argument.alterObject.relative)
-            {
-                if ((dObject == NULL) && (dObject != &kZeroSpaceObject)) {
+            if (alter.relative) {
+                if (dObject && (dObject != &kZeroSpaceObject)) {
                     newLocation.h = sObject->location.h;
                     newLocation.v = sObject->location.v;
                 } else {
                     newLocation.h = dObject->location.h;
                     newLocation.v = dObject->location.v;
                 }
-            } else
-            {
+            } else {
                 newLocation.h = newLocation.v = 0;
             }
-            newLocation.h += anObject->randomSeed.next(
-                    action->argument.alterObject.minimum << 1)
-                - action->argument.alterObject.minimum;
-            newLocation.v += anObject->randomSeed.next(
-                    action->argument.alterObject.minimum << 1)
-                - action->argument.alterObject.minimum;
+            newLocation.h += anObject->randomSeed.next(alter.minimum << 1) - alter.minimum;
+            newLocation.v += anObject->randomSeed.next(alter.minimum << 1) - alter.minimum;
             anObject->location.h = newLocation.h;
             anObject->location.v = newLocation.v;
             break;
 
         case kAlterAbsoluteLocation:
-            if ( action->argument.alterObject.relative)
-            {
-                anObject->location.h += action->argument.alterObject.minimum;
-                anObject->location.v += action->argument.alterObject.range;
-            } else
-            {
+            if (alter.relative) {
+                anObject->location.h += alter.minimum;
+                anObject->location.v += alter.range;
+            } else {
                 anObject->location = Translate_Coord_To_Scenario_Rotation(
-                    action->argument.alterObject.minimum,
-                    action->argument.alterObject.range);
+                    alter.minimum, alter.range);
             }
             break;
 
         case kAlterWeapon1:
-            anObject->pulseType = action->argument.alterObject.minimum;
-            if ( anObject->pulseType != kNoWeapon)
-            {
-                baseObject = anObject->pulseBase =
-                    mGetBaseObjectPtr( anObject->pulseType);
-                anObject->pulseAmmo =
-                    baseObject->frame.weapon.ammo;
-                anObject->pulseTime =
-                    anObject->pulsePosition = 0;
-                if ( baseObject->frame.weapon.range > anObject->longestWeaponRange)
+            anObject->pulseType = alter.minimum;
+            if (anObject->pulseType != kNoWeapon) {
+                baseObject = anObject->pulseBase = mGetBaseObjectPtr(anObject->pulseType);
+                anObject->pulseAmmo = baseObject->frame.weapon.ammo;
+                anObject->pulseTime = anObject->pulsePosition = 0;
+                if (baseObject->frame.weapon.range > anObject->longestWeaponRange) {
                     anObject->longestWeaponRange = baseObject->frame.weapon.range;
-                if ( baseObject->frame.weapon.range < anObject->shortestWeaponRange)
+                }
+                if (baseObject->frame.weapon.range < anObject->shortestWeaponRange) {
                     anObject->shortestWeaponRange = baseObject->frame.weapon.range;
-            } else
-            {
+                }
+            } else {
                 anObject->pulseBase = NULL;
                 anObject->pulseAmmo = 0;
                 anObject->pulseTime = 0;
@@ -709,21 +624,18 @@ static void alter(
             break;
 
         case kAlterWeapon2:
-            anObject->beamType = action->argument.alterObject.minimum;
-            if ( anObject->beamType != kNoWeapon)
-            {
-                baseObject = anObject->beamBase =
-                    mGetBaseObjectPtr( anObject->beamType);
-                anObject->beamAmmo =
-                    baseObject->frame.weapon.ammo;
-                anObject->beamTime =
-                    anObject->beamPosition = 0;
-                if ( baseObject->frame.weapon.range > anObject->longestWeaponRange)
+            anObject->beamType = alter.minimum;
+            if (anObject->beamType != kNoWeapon) {
+                baseObject = anObject->beamBase = mGetBaseObjectPtr(anObject->beamType);
+                anObject->beamAmmo = baseObject->frame.weapon.ammo;
+                anObject->beamTime = anObject->beamPosition = 0;
+                if (baseObject->frame.weapon.range > anObject->longestWeaponRange) {
                     anObject->longestWeaponRange = baseObject->frame.weapon.range;
-                if ( baseObject->frame.weapon.range < anObject->shortestWeaponRange)
+                }
+                if (baseObject->frame.weapon.range < anObject->shortestWeaponRange) {
                     anObject->shortestWeaponRange = baseObject->frame.weapon.range;
-            } else
-            {
+                }
+            } else {
                 anObject->beamBase = NULL;
                 anObject->beamAmmo = 0;
                 anObject->beamTime = 0;
@@ -731,21 +643,18 @@ static void alter(
             break;
 
         case kAlterSpecial:
-            anObject->specialType = action->argument.alterObject.minimum;
-            if ( anObject->specialType != kNoWeapon)
-            {
-                baseObject = anObject->specialBase =
-                    mGetBaseObjectPtr( anObject->specialType);
-                anObject->specialAmmo =
-                    baseObject->frame.weapon.ammo;
-                anObject->specialTime =
-                    anObject->specialPosition = 0;
-                if ( baseObject->frame.weapon.range > anObject->longestWeaponRange)
+            anObject->specialType = alter.minimum;
+            if (anObject->specialType != kNoWeapon) {
+                baseObject = anObject->specialBase = mGetBaseObjectPtr(anObject->specialType);
+                anObject->specialAmmo = baseObject->frame.weapon.ammo;
+                anObject->specialTime = anObject->specialPosition = 0;
+                if (baseObject->frame.weapon.range > anObject->longestWeaponRange) {
                     anObject->longestWeaponRange = baseObject->frame.weapon.range;
-                if ( baseObject->frame.weapon.range < anObject->shortestWeaponRange)
+                }
+                if (baseObject->frame.weapon.range < anObject->shortestWeaponRange) {
                     anObject->shortestWeaponRange = baseObject->frame.weapon.range;
-            } else
-            {
+                }
+            } else {
                 anObject->specialBase = NULL;
                 anObject->specialAmmo = 0;
                 anObject->specialTime = 0;
@@ -757,7 +666,6 @@ static void alter(
 
         default:
             break;
-
     }
 }
 
