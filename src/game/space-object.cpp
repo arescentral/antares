@@ -1390,92 +1390,69 @@ void AlterObjectCloakState( spaceObjectType *anObject, bool cloak)
     }
 }
 
-void DestroyObject( spaceObjectType *anObject)
-
-{
-    int16_t energyNum, i;
-    spaceObjectType *fixObject;
-
-    if ( anObject->active == kObjectInUse)
-    {
-        if ( anObject->attributes & kNeutralDeath)
-        {
-            anObject->health = anObject->baseType->health;
-            // if anyone is targeting it, they should stop
-            fixObject = gSpaceObjectData.get();
-            for ( i = 0; i < kMaxSpaceObject; i++)
-            {
-                if (( fixObject->attributes & kCanAcceptDestination) && ( fixObject->active !=
-                    kObjectAvailable))
-                {
-                    if ( fixObject->targetObjectNumber == anObject->entryNumber)
-                    {
-                        fixObject->targetObjectNumber = kNoDestinationObject;
-                    }
-                }
-                fixObject++;
-            }
-
-            AlterObjectOwner( anObject, -1, true);
-            anObject->attributes &= ~(kHated | kCanEngage | kCanCollide | kCanBeHit);
-            execute_actions(
-                    anObject->baseType->destroyAction,
-                    anObject->baseType->destroyActionNum & kDestroyActionNotMask,
-                    anObject, NULL, NULL, true);
-        } else
-        {
-            AddKillToAdmiral( anObject);
-            if ( anObject->attributes & kReleaseEnergyOnDeath)
-            {
-                energyNum = anObject->energy / kEnergyPodAmount;
-                while ( energyNum > 0)
-                {
-
-//                  CreateAnySpaceObject( globals()->scenarioFileInfo.energyBlobID, &(anObject->velocity),
-//                      &(anObject->location), anObject->direction, kNoOwner, 0, nil, -1, -1, -1);
-                    CreateAnySpaceObject( globals()->scenarioFileInfo.energyBlobID, &(anObject->velocity),
-                        &(anObject->location), anObject->direction, kNoOwner, 0, -1);
-                    energyNum--;
+void DestroyObject(spaceObjectType* anObject) {
+    if (anObject->active != kObjectInUse) {
+        return;
+    } else if (anObject->attributes & kNeutralDeath) {
+        anObject->health = anObject->baseType->health;
+        // if anyone is targeting it, they should stop
+        for (int16_t i = 0; i < kMaxSpaceObject; i++) {
+            auto& fixObject = gSpaceObjectData[i];
+            if ((fixObject.attributes & kCanAcceptDestination)
+                    && (fixObject.active != kObjectAvailable)) {
+                if (fixObject.targetObjectNumber == anObject->entryNumber) {
+                    fixObject.targetObjectNumber = kNoDestinationObject;
                 }
             }
-
-            // if it's a destination, we keep anyone from thinking they have it as a destination
-            // (all at once since this should be very rare)
-            if (( anObject->attributes & kIsDestination) &&
-                (!(anObject->baseType->destroyActionNum & kDestroyActionDontDieFlag)))
-            {
-                RemoveDestination( anObject->destinationObject);
-                fixObject = gSpaceObjectData.get();
-                for ( i = 0; i < kMaxSpaceObject; i++)
-                {
-                    if (( fixObject->attributes & kCanAcceptDestination) && ( fixObject->active !=
-                        kObjectAvailable))
-                    {
-                        if ( fixObject->destinationObject == anObject->entryNumber)
-                        {
-                            fixObject->destinationObject = kNoDestinationObject;
-                            fixObject->destObjectPtr = NULL;
-                            fixObject->attributes &= ~kStaticDestination;
-                        }
-                    }
-                    fixObject++;
-                }
-            }
-
-            execute_actions(
-                    anObject->baseType->destroyAction,
-                    anObject->baseType->destroyActionNum & kDestroyActionNotMask,
-                    anObject, NULL, NULL, true);
-
-            if ( anObject->attributes & kCanAcceptDestination) RemoveObjectFromDestination( anObject);
-            if (!(anObject->baseType->destroyActionNum & kDestroyActionDontDieFlag))
-                anObject->active = kObjectToBeFreed;
-
-    //      if ( anObject->attributes & kIsEndgameObject)
-    //          CheckEndgame();
         }
-    } else
-    {
+
+        AlterObjectOwner(anObject, -1, true);
+        anObject->attributes &= ~(kHated | kCanEngage | kCanCollide | kCanBeHit);
+        execute_actions(
+                anObject->baseType->destroyAction,
+                anObject->baseType->destroyActionNum & kDestroyActionNotMask,
+                anObject, NULL, NULL, true);
+    } else {
+        AddKillToAdmiral(anObject);
+        if (anObject->attributes & kReleaseEnergyOnDeath) {
+            int16_t energyNum = anObject->energy / kEnergyPodAmount;
+            while (energyNum > 0) {
+                CreateAnySpaceObject(
+                        globals()->scenarioFileInfo.energyBlobID, &(anObject->velocity),
+                        &(anObject->location), anObject->direction, kNoOwner, 0, -1);
+                energyNum--;
+            }
+        }
+
+        // if it's a destination, we keep anyone from thinking they have it as a destination
+        // (all at once since this should be very rare)
+        if ((anObject->attributes & kIsDestination) &&
+                !(anObject->baseType->destroyActionNum & kDestroyActionDontDieFlag)) {
+            RemoveDestination(anObject->destinationObject);
+            for (int16_t i = 0; i < kMaxSpaceObject; i++) {
+                auto& fixObject = gSpaceObjectData[i];
+                if ((fixObject.attributes & kCanAcceptDestination)
+                        && (fixObject.active != kObjectAvailable)) {
+                    if (fixObject.destinationObject == anObject->entryNumber) {
+                        fixObject.destinationObject = kNoDestinationObject;
+                        fixObject.destObjectPtr = NULL;
+                        fixObject.attributes &= ~kStaticDestination;
+                    }
+                }
+            }
+        }
+
+        execute_actions(
+                anObject->baseType->destroyAction,
+                anObject->baseType->destroyActionNum & kDestroyActionNotMask,
+                anObject, NULL, NULL, true);
+
+        if (anObject->attributes & kCanAcceptDestination) {
+            RemoveObjectFromDestination(anObject);
+        }
+        if (!(anObject->baseType->destroyActionNum & kDestroyActionDontDieFlag)) {
+            anObject->active = kObjectToBeFreed;
+        }
     }
 }
 
