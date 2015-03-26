@@ -715,14 +715,13 @@ static void assume_initial_object(objectActionType* action, spaceObjectType* foc
 }
 
 void execute_actions(
-        int32_t whichAction, int32_t actionNum, spaceObjectType *subject, spaceObjectType *object,
+        int32_t whichAction, int32_t actionNum,
+        spaceObjectType* const original_subject, spaceObjectType* const original_object,
         Point* offset, bool allowDelay) {
     if (whichAction < 0) {
         return;
     }
 
-    spaceObjectType* const original_subject = subject;
-    spaceObjectType* const original_object = object;
     bool checkConditions = false;
 
     const auto begin = mGetObjectActionPtr(whichAction);
@@ -731,15 +730,13 @@ void execute_actions(
         if (action->verb == kNoAction) {
             break;
         }
+        spaceObjectType* subject = original_subject;
         if (action->initialSubjectOverride != kNoShip) {
-            subject = GetObjectFromInitialNumber( action->initialSubjectOverride);
-        } else {
-            subject = original_subject;
+            subject = GetObjectFromInitialNumber(action->initialSubjectOverride);
         }
+        spaceObjectType* object = original_object;
         if (action->initialDirectOverride != kNoShip) {
-            object = GetObjectFromInitialNumber( action->initialDirectOverride);
-        } else {
-            object = original_object;
+            object = GetObjectFromInitialNumber(action->initialDirectOverride);
         }
 
         if ((action->delay > 0) && allowDelay) {
