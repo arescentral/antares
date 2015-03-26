@@ -104,211 +104,150 @@ bool action_filter_applies_to(const objectActionType& action, const spaceObjectT
 static void create_object(
         objectActionType* action, spaceObjectType* subject, spaceObjectType* focus,
         Point* offset) {
-    auto baseObject = mGetBaseObjectPtr( action->argument.createObject.whichBaseType);
-    auto end = action->argument.createObject.howManyMinimum;
-    if ( action->argument.createObject.howManyRange > 0)
-        end += focus->randomSeed.next(
-                action->argument.createObject.howManyRange);
-    while ( end > 0)
-    {
-        fixedPointType fpoint;
-        if ( action->argument.createObject.velocityRelative)
-            fpoint = focus->velocity;
-        else
-            fpoint.h = fpoint.v = 0;
-        int32_t l = 0;
-        if  ( baseObject->attributes & kAutoTarget)
-        {
-            l = subject->targetAngle;
-        } else if ( action->argument.createObject.directionRelative)
-            l = focus->direction;
-        /*
-           l += baseObject->initialDirection;
-           if ( baseObject->initialDirectionRange > 0)
-           l += focus->randomSeed.next(baseObject->initialDirectionRange);
-           */
-        coordPointType newLocation = focus->location;
-        if ( offset != NULL)
-        {
-            newLocation.h += offset->h;
-            newLocation.v += offset->v;
+    const auto& create = action->argument.createObject;
+    const int32_t type = create.whichBaseType;
+    const auto baseObject = mGetBaseObjectPtr(type);
+    auto count = create.howManyMinimum;
+    if (create.howManyRange > 0) {
+        count += focus->randomSeed.next(create.howManyRange);
+    }
+    for (int i = 0; i < count; ++i) {
+        fixedPointType vel = {0, 0};
+        if (create.velocityRelative) {
+            vel = focus->velocity;
+        }
+        int32_t direction = 0;
+        if (baseObject->attributes & kAutoTarget) {
+            direction = subject->targetAngle;
+        } else if (create.directionRelative) {
+            direction = focus->direction;
+        }
+        coordPointType at = focus->location;
+        if (offset != NULL) {
+            at.h += offset->h;
+            at.v += offset->v;
         }
 
-        if ( action->argument.createObject.randomDistance > 0)
-        {
-            newLocation.h += focus->randomSeed.next(
-                    action->argument.createObject.randomDistance << 1)
-                - action->argument.createObject.randomDistance;
-            newLocation.v += focus->randomSeed.next(
-                    action->argument.createObject.randomDistance << 1)
-                - action->argument.createObject.randomDistance;
+        const int32_t distance = create.randomDistance;
+        if (distance > 0) {
+            at.h += focus->randomSeed.next(distance * 2) - distance;
+            at.v += focus->randomSeed.next(distance * 2) - distance;
         }
 
-        //                      l = CreateAnySpaceObject( action->argument.createObject.whichBaseType, &fpoint,
-        //                              &newLocation, l, focus->owner, 0, nil, -1, -1, -1);
-        l = CreateAnySpaceObject( action->argument.createObject.whichBaseType, &fpoint,
-                &newLocation, l, focus->owner, 0, -1);
+        int32_t n = CreateAnySpaceObject(type, &vel, &at, direction, focus->owner, 0, -1);
+        if (n < 0) {
+            continue;
+        }
 
-        if ( l >= 0)
-        {
-            spaceObjectType *newObject = mGetSpaceObjectPtr(l);
-            if ( newObject->attributes & kCanAcceptDestination)
-            {
-                uint32_t ul1 = newObject->attributes;
-                newObject->attributes &= ~kStaticDestination;
-                if ( newObject->owner >= 0)
-                {
-                    if ( action->reflexive)
-                    {
-                        if ( action->verb != kCreateObjectSetDest)
-                            SetObjectDestination( newObject, focus);
-                        else if ( focus->destObjectPtr != NULL)
-                        {
-                            SetObjectDestination( newObject, focus->destObjectPtr);
-                        }
+        spaceObjectType* product = mGetSpaceObjectPtr(n);
+        if (product->attributes & kCanAcceptDestination) {
+            uint32_t save_attributes = product->attributes;
+            product->attributes &= ~kStaticDestination;
+            if (product->owner >= 0) {
+                if (action->reflexive) {
+                    if (action->verb != kCreateObjectSetDest) {
+                        SetObjectDestination(product, focus);
+                    } else if (focus->destObjectPtr) {
+                        SetObjectDestination(product, focus->destObjectPtr);
                     }
-                } else if ( action->reflexive)
-                {
-                    newObject->destObjectPtr = focus;
-                    newObject->timeFromOrigin = kTimeToCheckHome;
-                    newObject->runTimeFlags &= ~kHasArrived;
-                    newObject->destinationObject = focus->entryNumber; //a->destinationObject;
-                    newObject->destObjectDest = focus->destinationObject;
-                    newObject->destObjectID = focus->id;
-                    newObject->destObjectDestID = focus->destObjectID;
-
                 }
-                newObject->attributes = ul1;
+            } else if (action->reflexive) {
+                product->destObjectPtr = focus;
+                product->timeFromOrigin = kTimeToCheckHome;
+                product->runTimeFlags &= ~kHasArrived;
+                product->destinationObject = focus->entryNumber; //a->destinationObject;
+                product->destObjectDest = focus->destinationObject;
+                product->destObjectID = focus->id;
+                product->destObjectDestID = focus->destObjectID;
             }
-            newObject->targetObjectNumber = focus->targetObjectNumber;
-            newObject->targetObjectID = focus->targetObjectID;
-            newObject->closestObject = newObject->targetObjectNumber;
+            product->attributes = save_attributes;
+        }
+        product->targetObjectNumber = focus->targetObjectNumber;
+        product->targetObjectID = focus->targetObjectID;
+        product->closestObject = product->targetObjectNumber;
 
-            //
-            //  ugly though it is, we have to fill in the rest of
-            //  a new beam's fields after it's created.
-            //
-
-            if ( newObject->attributes & kIsBeam)
-            {
-                if ( newObject->frame.beam.beam->beamKind !=
-                        eKineticBeamKind)
-                    // special beams need special post-creation acts
-                {
-                    Beams::set_attributes(newObject, focus);
-                }
+        //  ugly though it is, we have to fill in the rest of
+        //  a new beam's fields after it's created.
+        if (product->attributes & kIsBeam) {
+            if (product->frame.beam.beam->beamKind != eKineticBeamKind) {
+                // special beams need special post-creation acts
+                Beams::set_attributes(product, focus);
             }
         }
-
-        end--;
     }
 }
 
 static void play_sound(objectActionType* action, spaceObjectType* focus) {
-    auto l = action->argument.playSound.volumeMinimum;
-    auto angle = action->argument.playSound.idMinimum;
-    if ( action->argument.playSound.idRange > 0)
-    {
-        angle += focus->randomSeed.next(
-                action->argument.playSound.idRange + 1);
+    const auto& sound = action->argument.playSound;
+    auto id = sound.idMinimum;
+    auto priority = static_cast<soundPriorityType>(sound.priority);
+    if (sound.idRange > 0) {
+        id += focus->randomSeed.next(sound.idRange + 1);
     }
-    if ( !action->argument.playSound.absolute)
-    {
-        mPlayDistanceSound(l, focus, angle, action->argument.playSound.persistence, static_cast<soundPriorityType>(action->argument.playSound.priority));
-    } else
-    {
-        PlayVolumeSound( angle, l,
-                action->argument.playSound.persistence,
-                static_cast<soundPriorityType>(action->argument.playSound.priority));
+    if (sound.absolute) {
+        PlayVolumeSound(id, sound.volumeMinimum, sound.persistence, priority);
+    } else {
+        mPlayDistanceSound(sound.volumeMinimum, focus, id, sound.persistence, priority);
     }
 }
 
 static void make_sparks(objectActionType* action, spaceObjectType* focus) {
-    if ( focus->sprite != NULL)
-    {
-        Point location;
+    const auto& sparks = action->argument.makeSparks;
+    Point location;
+    if (focus->sprite != NULL) {
         location.h = focus->sprite->where.h;
         location.v = focus->sprite->where.v;
-        globals()->starfield.make_sparks(
-                action->argument.makeSparks.howMany,        // sparkNum
-                action->argument.makeSparks.speed,          // sparkSpeed
-                action->argument.makeSparks.velocityRange,  // velocity
-                action->argument.makeSparks.color,          // COLOR
-                &location);                                 // location
-    } else
-    {
-        int32_t l = ( focus->location.h - gGlobalCorner.h) * gAbsoluteScale;
+    } else {
+        int32_t l = (focus->location.h - gGlobalCorner.h) * gAbsoluteScale;
         l >>= SHIFT_SCALE;
-        Point location;
-        if (( l > -kSpriteMaxSize) && ( l < kSpriteMaxSize))
+        if ((l > -kSpriteMaxSize) && (l < kSpriteMaxSize)) {
             location.h = l + viewport.left;
-        else
+        } else {
             location.h = -kSpriteMaxSize;
+        }
 
         l = (focus->location.v - gGlobalCorner.v) * gAbsoluteScale;
         l >>= SHIFT_SCALE; /*+ CLIP_TOP*/;
-        if (( l > -kSpriteMaxSize) && ( l < kSpriteMaxSize))
+        if ((l > -kSpriteMaxSize) && (l < kSpriteMaxSize)) {
             location.v = l + viewport.top;
-        else
+        } else {
             location.v = -kSpriteMaxSize;
-
-        globals()->starfield.make_sparks(
-                action->argument.makeSparks.howMany,        // sparkNum
-                action->argument.makeSparks.speed,          // sparkSpeed
-                action->argument.makeSparks.velocityRange,  // velocity
-                action->argument.makeSparks.color,          // COLOR
-                &location);                                 // location
+        }
     }
+    globals()->starfield.make_sparks(
+            sparks.howMany, sparks.speed, sparks.velocityRange, sparks.color, &location);
 }
 
 static void die(objectActionType* action, spaceObjectType* focus, spaceObjectType* subject) {
-    switch ( action->argument.killObject.dieType)
-    {
+    bool destroy = false;
+    switch (action->argument.killObject.dieType) {
         case kDieExpire:
-            if ( subject != NULL)
-            {
-                // if the object is occupied by a human, eject him since he can't die
-                if (( subject->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
-                    (!(subject->baseType->destroyActionNum & kDestroyActionDontDieFlag)))
-                {
-                    CreateFloatingBodyOfPlayer( subject);
-                }
-
-                if ( subject->baseType->expireAction >= 0)
-                {
-//                                  ExecuteObjectActions(
-//                                      subject->baseType->expireAction,
-//                                      subject->baseType->expireActionNum
-//                                       & kDestroyActionNotMask,
-//                                      subject, object, offset, allowDelay);
-                }
-                subject->active = kObjectToBeFreed;
+            if (subject) {
+                focus = subject;
+            } else {
+                return;
             }
             break;
 
         case kDieDestroy:
-            if ( subject != NULL)
-            {
-                // if the object is occupied by a human, eject him since he can't die
-                if (( subject->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
-                    (!(subject->baseType->destroyActionNum & kDestroyActionDontDieFlag)))
-                {
-                    CreateFloatingBodyOfPlayer( subject);
-                }
-
-                DestroyObject( subject);
+            if (subject) {
+                focus = subject;
+                destroy = true;
+            } else {
+                return;;
             }
             break;
+    }
 
-        default:
-            // if the object is occupied by a human, eject him since he can't die
-            if (( focus->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
-                (!(focus->baseType->destroyActionNum & kDestroyActionDontDieFlag)))
-            {
-                CreateFloatingBodyOfPlayer( focus);
-            }
-            focus->active = kObjectToBeFreed;
-            break;
+    // if the object is occupied by a human, eject him since he can't die
+    if ((focus->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
+            !(focus->baseType->destroyActionNum & kDestroyActionDontDieFlag)) {
+        CreateFloatingBodyOfPlayer(focus);
+    }
+    if (destroy) {
+        DestroyObject(focus);
+    } else {
+        focus->active = kObjectToBeFreed;
     }
 }
 
@@ -672,9 +611,8 @@ static void alter(
 static void land_at(
         objectActionType* action, spaceObjectType* focus, spaceObjectType* subject) {
     // even though this is never a reflexive verb, we only effect ourselves
-    if ( subject->attributes & ( kIsPlayerShip | kRemoteOrHuman))
-    {
-        CreateFloatingBodyOfPlayer( subject);
+    if (subject->attributes & (kIsPlayerShip | kRemoteOrHuman)) {
+        CreateFloatingBodyOfPlayer(subject);
     }
     subject->presenceState = kLandingPresence;
     subject->presenceData = subject->baseType->naturalScale |
@@ -684,59 +622,54 @@ static void land_at(
 static void enter_warp(
         objectActionType* action, spaceObjectType* focus, spaceObjectType* subject) {
     subject->presenceState = kWarpInPresence;
-//                  subject->presenceData = action->argument.enterWarp.warpSpeed;
     subject->presenceData = subject->baseType->warpSpeed;
     subject->attributes &= ~kOccupiesSpace;
     fixedPointType newVel = {0, 0};
-//                  CreateAnySpaceObject( globals()->scenarioFileInfo.warpInFlareID, &(newVel),
-//                      &(subject->location), subject->direction, kNoOwner, 0, nil, -1, -1, -1);
-    CreateAnySpaceObject( globals()->scenarioFileInfo.warpInFlareID, &(newVel),
-        &(subject->location), subject->direction, kNoOwner, 0, -1);
+    CreateAnySpaceObject(
+            globals()->scenarioFileInfo.warpInFlareID, &newVel,
+            &subject->location, subject->direction, kNoOwner, 0, -1);
 }
 
 static void change_score(objectActionType* action, spaceObjectType* focus) {
-    int32_t l;
-    if (( action->argument.changeScore.whichPlayer == -1) && (focus != &kZeroSpaceObject))
-        l = focus->owner;
-    else
-    {
-        l = mGetRealAdmiralNum( action->argument.changeScore.whichPlayer);
+    const auto& score = action->argument.changeScore;
+    int32_t admiral;
+    if ((score.whichPlayer == -1) && (focus != &kZeroSpaceObject)) {
+        admiral = focus->owner;
+    } else {
+        admiral = mGetRealAdmiralNum(score.whichPlayer);
     }
-    if ( l >= 0)
-    {
-        AlterAdmiralScore( l, action->argument.changeScore.whichScore, action->argument.changeScore.amount);
+    if (admiral >= 0) {
+        AlterAdmiralScore(admiral, score.whichScore, score.amount);
     }
 }
 
 static void declare_winner(objectActionType* action, spaceObjectType* focus) {
-    int32_t l;
-    if (( action->argument.declareWinner.whichPlayer == -1) && (focus != &kZeroSpaceObject))
-        l = focus->owner;
-    else
-    {
-        l = mGetRealAdmiralNum( action->argument.declareWinner.whichPlayer);
+    const auto& winner = action->argument.declareWinner;
+    int32_t admiral;
+    if ((winner.whichPlayer == -1) && (focus != &kZeroSpaceObject)) {
+        admiral = focus->owner;
+    } else {
+        admiral = mGetRealAdmiralNum(winner.whichPlayer);
     }
-    DeclareWinner( l, action->argument.declareWinner.nextLevel, action->argument.declareWinner.textID);
+    DeclareWinner(admiral, winner.nextLevel, winner.textID);
 }
 
 static void display_message(objectActionType* action, spaceObjectType* focus) {
-    Messages::start(
-            action->argument.displayMessage.resID,
-            (action->argument.displayMessage.resID +
-             action->argument.displayMessage.pageNum - 1));
+    const auto& message = action->argument.displayMessage;
+    Messages::start(message.resID, message.resID + message.pageNum - 1);
 }
 
 static void set_destination(
         objectActionType* action, spaceObjectType* focus, spaceObjectType* subject) {
-    uint32_t ul1 = subject->attributes;
+    uint32_t save_attributes = subject->attributes;
     subject->attributes &= ~kStaticDestination;
-    SetObjectDestination( subject, focus);
-    subject->attributes = ul1;
+    SetObjectDestination(subject, focus);
+    subject->attributes = save_attributes;
 }
 
 static void activate_special(
         objectActionType* action, spaceObjectType* focus, spaceObjectType* subject) {
-    ActivateObjectSpecial( subject);
+    ActivateObjectSpecial(subject);
 }
 
 static void color_flash(objectActionType* action, spaceObjectType* focus) {
@@ -757,10 +690,9 @@ static void disable_keys(objectActionType* action, spaceObjectType* focus) {
 }
 
 static void set_zoom(objectActionType* action, spaceObjectType* focus) {
-    if (action->argument.zoom.zoomLevel != globals()->gZoomMode)
-    {
+    if (action->argument.zoom.zoomLevel != globals()->gZoomMode) {
         globals()->gZoomMode = static_cast<ZoomType>(action->argument.zoom.zoomLevel);
-        PlayVolumeSound(  kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+        PlayVolumeSound(kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
         StringList strings(kMessageStringID);
         StringSlice string = strings.at(globals()->gZoomMode + kZoomStringOffset - 1);
         Messages::set_status(string, kStatusLabelColor);
@@ -768,16 +700,15 @@ static void set_zoom(objectActionType* action, spaceObjectType* focus) {
 }
 
 static void computer_select(objectActionType* action, spaceObjectType* focus) {
-    MiniComputer_SetScreenAndLineHack( action->argument.computerSelect.screenNumber,
+    MiniComputer_SetScreenAndLineHack(
+            action->argument.computerSelect.screenNumber,
             action->argument.computerSelect.lineNumber);
 }
 
 static void assume_initial_object(objectActionType* action, spaceObjectType* focus) {
-    Scenario::InitialObject *initialObject;
-
-    initialObject = gThisScenario->initial(action->argument.assumeInitial.whichInitialObject+GetAdmiralScore(0, 0));
-    if ( initialObject != NULL)
-    {
+    Scenario::InitialObject* initialObject = gThisScenario->initial(
+            action->argument.assumeInitial.whichInitialObject + GetAdmiralScore(0, 0));
+    if (initialObject) {
         initialObject->realObjectID = focus->id;
         initialObject->realObjectNumber = focus->entryNumber;
     }
