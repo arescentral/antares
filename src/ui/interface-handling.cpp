@@ -300,9 +300,9 @@ void CreateObjectDataText(String* text, int16_t id) {
             fixed(baseObject.frame.rotation.turnAcceleration));
 
     // now, check for weapons!
-    CreateWeaponDataText(&data, baseObject.pulse, values.at(kShipDataPulseStringNum));
-    CreateWeaponDataText(&data, baseObject.beam, values.at(kShipDataBeamStringNum));
-    CreateWeaponDataText(&data, baseObject.special, values.at(kShipDataSpecialStringNum));
+    CreateWeaponDataText(&data, baseObject.pulse.base, values.at(kShipDataPulseStringNum));
+    CreateWeaponDataText(&data, baseObject.beam.base, values.at(kShipDataBeamStringNum));
+    CreateWeaponDataText(&data, baseObject.special.base, values.at(kShipDataSpecialStringNum));
 
     print(*text, data);
 }

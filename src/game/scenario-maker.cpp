@@ -119,7 +119,7 @@ void AddBaseObjectMedia(int32_t whichBase, uint8_t color, uint32_t all_colors) {
         AddBaseObjectActionMedia(whichBase, kActivateActionType, i, all_colors);
         AddBaseObjectActionMedia(whichBase, kArriveActionType, i, all_colors);
 
-        for (int32_t weapon: {aBase->pulse, aBase->beam, aBase->special}) {
+        for (int32_t weapon: {aBase->pulse.base, aBase->beam.base, aBase->special.base}) {
             if (weapon != kNoWeapon) {
                 AddBaseObjectMedia(weapon, i, all_colors);
             }

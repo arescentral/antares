@@ -106,7 +106,7 @@ static void tick_pulse(spaceObjectType* anObject, spaceObjectType* targetObject,
                 AlterObjectCloakState( anObject, false);
             anObject->energy -= weaponObject->frame.weapon.energyCost;
             anObject->pulse.position++;
-            if ( anObject->pulse.position >= baseObject->pulsePositionNum)
+            if ( anObject->pulse.position >= baseObject->pulse.positionNum)
                 anObject->pulse.position = 0;
 
             h = anObject->direction;
@@ -115,10 +115,10 @@ static void tick_pulse(spaceObjectType* anObject, spaceObjectType* targetObject,
             fcos = -fcos;
             fsin = -fsin;
 
-            offset.h = mMultiplyFixed( baseObject->pulsePosition[anObject->pulse.position].h, fcos);
-            offset.h -= mMultiplyFixed( baseObject->pulsePosition[anObject->pulse.position].v, fsin);
-            offset.v = mMultiplyFixed( baseObject->pulsePosition[anObject->pulse.position].h, fsin);
-            offset.v += mMultiplyFixed( baseObject->pulsePosition[anObject->pulse.position].v, fcos);
+            offset.h = mMultiplyFixed( baseObject->pulse.position[anObject->pulse.position].h, fcos);
+            offset.h -= mMultiplyFixed( baseObject->pulse.position[anObject->pulse.position].v, fsin);
+            offset.v = mMultiplyFixed( baseObject->pulse.position[anObject->pulse.position].h, fsin);
+            offset.v += mMultiplyFixed( baseObject->pulse.position[anObject->pulse.position].v, fcos);
             offset.h = mFixedToLong( offset.h);
             offset.v = mFixedToLong( offset.v);
 
@@ -152,7 +152,7 @@ static void tick_beam(spaceObjectType* anObject, spaceObjectType* targetObject, 
                 AlterObjectCloakState( anObject, false);
             anObject->energy -= weaponObject->frame.weapon.energyCost;
             anObject->beam.position++;
-            if ( anObject->beam.position >= baseObject->beamPositionNum)
+            if ( anObject->beam.position >= baseObject->beam.positionNum)
                 anObject->beam.position = 0;
 
             h = anObject->direction;
@@ -161,10 +161,10 @@ static void tick_beam(spaceObjectType* anObject, spaceObjectType* targetObject, 
             fcos = -fcos;
             fsin = -fsin;
 
-            offset.h = mMultiplyFixed( baseObject->beamPosition[anObject->beam.position].h, fcos);
-            offset.h -= mMultiplyFixed( baseObject->beamPosition[anObject->beam.position].v, fsin);
-            offset.v = mMultiplyFixed( baseObject->beamPosition[anObject->beam.position].h, fsin);
-            offset.v += mMultiplyFixed( baseObject->beamPosition[anObject->beam.position].v, fcos);
+            offset.h = mMultiplyFixed( baseObject->beam.position[anObject->beam.position].h, fcos);
+            offset.h -= mMultiplyFixed( baseObject->beam.position[anObject->beam.position].v, fsin);
+            offset.v = mMultiplyFixed( baseObject->beam.position[anObject->beam.position].h, fsin);
+            offset.v += mMultiplyFixed( baseObject->beam.position[anObject->beam.position].v, fcos);
             offset.h = mFixedToLong( offset.h);
             offset.v = mFixedToLong( offset.v);
 
@@ -198,7 +198,7 @@ static void tick_special(spaceObjectType* anObject, spaceObjectType* targetObjec
             anObject->energy -= weaponObject->frame.weapon.energyCost;
             anObject->special.position++;
             if ( anObject->special.position >=
-                    baseObject->specialPositionNum)
+                    baseObject->special.positionNum)
                 anObject->special.position = 0;
 
             h = anObject->direction;
@@ -207,10 +207,10 @@ static void tick_special(spaceObjectType* anObject, spaceObjectType* targetObjec
             fcos = -fcos;
             fsin = -fsin;
 
-            offset.h = mMultiplyFixed( baseObject->specialPosition[anObject->special.position].h, fcos);
-            offset.h -= mMultiplyFixed( baseObject->specialPosition[anObject->special.position].v, fsin);
-            offset.v = mMultiplyFixed( baseObject->specialPosition[anObject->special.position].h, fsin);
-            offset.v += mMultiplyFixed( baseObject->specialPosition[anObject->special.position].v, fcos);
+            offset.h = mMultiplyFixed( baseObject->special.position[anObject->special.position].h, fcos);
+            offset.h -= mMultiplyFixed( baseObject->special.position[anObject->special.position].v, fsin);
+            offset.v = mMultiplyFixed( baseObject->special.position[anObject->special.position].h, fsin);
+            offset.v += mMultiplyFixed( baseObject->special.position[anObject->special.position].v, fcos);
             offset.h = mFixedToLong( offset.h);
             offset.v = mFixedToLong( offset.v);
 

@@ -723,15 +723,15 @@ static void InitSpaceObjectFromBaseObject(
         dObject->pixResID += (GetAdmiralColor( owner) << kSpriteTableColorShift);
     }
 
-    dObject->pulse.type = sObject->pulse;
+    dObject->pulse.type = sObject->pulse.base;
     if ( dObject->pulse.type != kNoWeapon)
         dObject->pulse.base = mGetBaseObjectPtr( dObject->pulse.type);
     else dObject->pulse.base = NULL;
-    dObject->beam.type = sObject->beam;
+    dObject->beam.type = sObject->beam.base;
     if ( dObject->beam.type != kNoWeapon)
         dObject->beam.base = mGetBaseObjectPtr( dObject->beam.type);
     else dObject->beam.base = NULL;
-    dObject->special.type = sObject->special;
+    dObject->special.type = sObject->special.base;
     if ( dObject->special.type != kNoWeapon)
         dObject->special.base = mGetBaseObjectPtr( dObject->special.type);
     else dObject->special.base = NULL;
@@ -865,15 +865,15 @@ void ChangeObjectBaseType( spaceObjectType *dObject, int32_t whichBaseObject,
         dObject->pixResID += (GetAdmiralColor( dObject->owner) << kSpriteTableColorShift);
     }
 
-    dObject->pulse.type = sObject->pulse;
+    dObject->pulse.type = sObject->pulse.base;
     if ( dObject->pulse.type != kNoWeapon)
         dObject->pulse.base = mGetBaseObjectPtr( dObject->pulse.type);
     else dObject->pulse.base = NULL;
-    dObject->beam.type = sObject->beam;
+    dObject->beam.type = sObject->beam.base;
     if ( dObject->beam.type != kNoWeapon)
         dObject->beam.base = mGetBaseObjectPtr( dObject->beam.type);
     else dObject->beam.base = NULL;
-    dObject->special.type = sObject->special;
+    dObject->special.type = sObject->special.base;
     if ( dObject->special.type != kNoWeapon)
         dObject->special.base = mGetBaseObjectPtr( dObject->special.type);
     else dObject->special.base = NULL;
@@ -1419,7 +1419,7 @@ void ActivateObjectSpecial(spaceObjectType* object) {
 
     object->energy -= weaponObject->frame.weapon.energyCost;
     object->special.position++;
-    if (object->special.position >= baseObject->specialPositionNum) {
+    if (object->special.position >= baseObject->special.positionNum) {
         object->special.position = 0;
     }
 
