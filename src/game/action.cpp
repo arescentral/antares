@@ -544,11 +544,11 @@ static void alter(
             break;
 
         case kAlterWeapon1:
-            focus->pulseType = alter.minimum;
-            if (focus->pulseType != kNoWeapon) {
-                baseObject = focus->pulseBase = mGetBaseObjectPtr(focus->pulseType);
-                focus->pulseAmmo = baseObject->frame.weapon.ammo;
-                focus->pulseTime = focus->pulsePosition = 0;
+            focus->pulse.type = alter.minimum;
+            if (focus->pulse.type != kNoWeapon) {
+                baseObject = focus->pulse.base = mGetBaseObjectPtr(focus->pulse.type);
+                focus->pulse.ammo = baseObject->frame.weapon.ammo;
+                focus->pulse.time = focus->pulse.position = 0;
                 if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
                     focus->longestWeaponRange = baseObject->frame.weapon.range;
                 }
@@ -556,18 +556,18 @@ static void alter(
                     focus->shortestWeaponRange = baseObject->frame.weapon.range;
                 }
             } else {
-                focus->pulseBase = NULL;
-                focus->pulseAmmo = 0;
-                focus->pulseTime = 0;
+                focus->pulse.base = NULL;
+                focus->pulse.ammo = 0;
+                focus->pulse.time = 0;
             }
             break;
 
         case kAlterWeapon2:
-            focus->beamType = alter.minimum;
-            if (focus->beamType != kNoWeapon) {
-                baseObject = focus->beamBase = mGetBaseObjectPtr(focus->beamType);
-                focus->beamAmmo = baseObject->frame.weapon.ammo;
-                focus->beamTime = focus->beamPosition = 0;
+            focus->beam.type = alter.minimum;
+            if (focus->beam.type != kNoWeapon) {
+                baseObject = focus->beam.base = mGetBaseObjectPtr(focus->beam.type);
+                focus->beam.ammo = baseObject->frame.weapon.ammo;
+                focus->beam.time = focus->beam.position = 0;
                 if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
                     focus->longestWeaponRange = baseObject->frame.weapon.range;
                 }
@@ -575,18 +575,18 @@ static void alter(
                     focus->shortestWeaponRange = baseObject->frame.weapon.range;
                 }
             } else {
-                focus->beamBase = NULL;
-                focus->beamAmmo = 0;
-                focus->beamTime = 0;
+                focus->beam.base = NULL;
+                focus->beam.ammo = 0;
+                focus->beam.time = 0;
             }
             break;
 
         case kAlterSpecial:
-            focus->specialType = alter.minimum;
-            if (focus->specialType != kNoWeapon) {
-                baseObject = focus->specialBase = mGetBaseObjectPtr(focus->specialType);
-                focus->specialAmmo = baseObject->frame.weapon.ammo;
-                focus->specialTime = focus->specialPosition = 0;
+            focus->special.type = alter.minimum;
+            if (focus->special.type != kNoWeapon) {
+                baseObject = focus->special.base = mGetBaseObjectPtr(focus->special.type);
+                focus->special.ammo = baseObject->frame.weapon.ammo;
+                focus->special.time = focus->special.position = 0;
                 if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
                     focus->longestWeaponRange = baseObject->frame.weapon.range;
                 }
@@ -594,9 +594,9 @@ static void alter(
                     focus->shortestWeaponRange = baseObject->frame.weapon.range;
                 }
             } else {
-                focus->specialBase = NULL;
-                focus->specialAmmo = 0;
-                focus->specialTime = 0;
+                focus->special.base = NULL;
+                focus->special.ammo = 0;
+                focus->special.time = 0;
             }
             break;
 

@@ -214,9 +214,9 @@ inline int32_t mGetLineNumFromV(int32_t mV) {
 inline void mCopyMiniSpaceObject(
         spaceObjectType& mdestobject, const spaceObjectType& msourceobject) {
     (mdestobject).id = (msourceobject).id;
-    (mdestobject).beamType = (msourceobject).beamType;
-    (mdestobject).pulseType = (msourceobject).pulseType;
-    (mdestobject).specialType = (msourceobject).specialType;
+    (mdestobject).beam.type = (msourceobject).beam.type;
+    (mdestobject).pulse.type = (msourceobject).pulse.type;
+    (mdestobject).special.type = (msourceobject).special.type;
     (mdestobject).destinationLocation.h = (msourceobject).destinationLocation.h;
     (mdestobject).destinationLocation.v = (msourceobject).destinationLocation.v;
     (mdestobject).destinationObject = (msourceobject).destinationObject;
@@ -310,9 +310,9 @@ void ClearMiniObjectData( void)
 
     o = mGetMiniObjectPtr( kMiniSelectObjectNum);
     o->id = -1;
-    o->beamType = -1;
-    o->pulseType = -1;
-    o->specialType = -1;
+    o->beam.type = -1;
+    o->pulse.type = -1;
+    o->special.type = -1;
     o->destinationLocation.h = o->destinationLocation.v = -1;
     o->destinationObject = -1;
     o->destObjectPtr = NULL;
@@ -325,9 +325,9 @@ void ClearMiniObjectData( void)
 
     o = mGetMiniObjectPtr( kMiniTargetObjectNum);
     o->id = -1;
-    o->beamType = -1;
-    o->pulseType = -1;
-    o->specialType = -1;
+    o->beam.type = -1;
+    o->pulse.type = -1;
+    o->special.type = -1;
     o->destinationLocation.h = o->destinationLocation.v = -1;
     o->destinationObject = -1;
     o->destObjectPtr = NULL;
@@ -658,9 +658,9 @@ void MiniComputerHandleNull( int32_t unitsToDo)
         } else
         {
             newObject.id = -1;
-            newObject.beamType = -1;
-            newObject.pulseType = -1;
-            newObject.specialType = -1;
+            newObject.beam.type = -1;
+            newObject.pulse.type = -1;
+            newObject.special.type = -1;
             newObject.destinationLocation.h = newObject.destinationLocation.v = -1;
             newObject.destinationObject = -1;
             newObject.destObjectPtr = NULL;
@@ -682,9 +682,9 @@ void MiniComputerHandleNull( int32_t unitsToDo)
         } else
         {
             newObject.id = -1;
-            newObject.beamType = -1;
-            newObject.pulseType = -1;
-            newObject.specialType = -1;
+            newObject.beam.type = -1;
+            newObject.pulse.type = -1;
+            newObject.special.type = -1;
             newObject.destinationLocation.h = newObject.destinationLocation.v = -1;
             newObject.destinationObject = -1;
             newObject.destObjectPtr = NULL;
@@ -971,8 +971,8 @@ void draw_mini_ship_data(
     color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
     // move to the 1st line in the selection miniscreen, write the name
-    if (newObject.beamType >= 0) {
-        String text(get_object_short_name(newObject.beamType));
+    if (newObject.beam.type >= 0) {
+        String text(get_object_short_name(newObject.beam.type));
         computer_font->draw_sprite(
                 Point(lRect.left, lRect.top + computer_font->ascent), text, color);
     }
@@ -983,8 +983,8 @@ void draw_mini_ship_data(
     color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
     // move to the 1st line in the selection miniscreen, write the name
-    if (newObject.pulseType >= 0) {
-        String text(get_object_short_name(newObject.pulseType));
+    if (newObject.pulse.type >= 0) {
+        String text(get_object_short_name(newObject.pulse.type));
         computer_font->draw_sprite(
                 Point(lRect.left, lRect.top + computer_font->ascent), text, color);
     }
@@ -997,8 +997,8 @@ void draw_mini_ship_data(
         color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
         // move to the 1st line in the selection miniscreen, write the name
-        if (newObject.specialType >= 0) {
-            String text(get_object_short_name(newObject.specialType));
+        if (newObject.special.type >= 0) {
+            String text(get_object_short_name(newObject.special.type));
             computer_font->draw_sprite(
                     Point(lRect.left, lRect.top + computer_font->ascent), text, color);
         }

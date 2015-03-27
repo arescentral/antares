@@ -93,21 +93,21 @@ static void tick_pulse(spaceObjectType* anObject, spaceObjectType* targetObject,
     Point           offset;
     baseObjectType* baseObject = anObject->baseType;
     baseObjectType* weaponObject;
-    if ( anObject->pulseTime > 0) anObject->pulseTime -= timePass;
-    if (( anObject->keysDown & kOneKey) && ( anObject->pulseTime <= 0) &&
-            ( anObject->pulseType != kNoWeapon))
+    if ( anObject->pulse.time > 0) anObject->pulse.time -= timePass;
+    if (( anObject->keysDown & kOneKey) && ( anObject->pulse.time <= 0) &&
+            ( anObject->pulse.type != kNoWeapon))
     {
-        weaponObject = anObject->pulseBase;
+        weaponObject = anObject->pulse.base;
         if (( anObject->energy >= weaponObject->frame.weapon.energyCost)
                 && (( weaponObject->frame.weapon.ammo < 0) ||
-                    ( anObject->pulseAmmo > 0)))
+                    ( anObject->pulse.ammo > 0)))
         {
             if ( anObject->cloakState > 0)
                 AlterObjectCloakState( anObject, false);
             anObject->energy -= weaponObject->frame.weapon.energyCost;
-            anObject->pulsePosition++;
-            if ( anObject->pulsePosition >= baseObject->pulsePositionNum)
-                anObject->pulsePosition = 0;
+            anObject->pulse.position++;
+            if ( anObject->pulse.position >= baseObject->pulsePositionNum)
+                anObject->pulse.position = 0;
 
             h = anObject->direction;
             mAddAngle( h, -90);
@@ -115,16 +115,16 @@ static void tick_pulse(spaceObjectType* anObject, spaceObjectType* targetObject,
             fcos = -fcos;
             fsin = -fsin;
 
-            offset.h = mMultiplyFixed( baseObject->pulsePosition[anObject->pulsePosition].h, fcos);
-            offset.h -= mMultiplyFixed( baseObject->pulsePosition[anObject->pulsePosition].v, fsin);
-            offset.v = mMultiplyFixed( baseObject->pulsePosition[anObject->pulsePosition].h, fsin);
-            offset.v += mMultiplyFixed( baseObject->pulsePosition[anObject->pulsePosition].v, fcos);
+            offset.h = mMultiplyFixed( baseObject->pulsePosition[anObject->pulse.position].h, fcos);
+            offset.h -= mMultiplyFixed( baseObject->pulsePosition[anObject->pulse.position].v, fsin);
+            offset.v = mMultiplyFixed( baseObject->pulsePosition[anObject->pulse.position].h, fsin);
+            offset.v += mMultiplyFixed( baseObject->pulsePosition[anObject->pulse.position].v, fcos);
             offset.h = mFixedToLong( offset.h);
             offset.v = mFixedToLong( offset.v);
 
-            anObject->pulseTime = weaponObject->frame.weapon.fireTime;
+            anObject->pulse.time = weaponObject->frame.weapon.fireTime;
             if ( weaponObject->frame.weapon.ammo > 0)
-                anObject->pulseAmmo--;
+                anObject->pulse.ammo--;
             execute_actions(
                     weaponObject->activateAction,
                     weaponObject->activateActionNum,
@@ -139,21 +139,21 @@ static void tick_beam(spaceObjectType* anObject, spaceObjectType* targetObject, 
     Point           offset;
     baseObjectType* baseObject = anObject->baseType;
     baseObjectType* weaponObject;
-    if ( anObject->beamTime > 0) anObject->beamTime -= timePass;
-    if (( anObject->keysDown & kTwoKey) && ( anObject->beamTime <= 0 ) &&
-        ( anObject->beamType != kNoWeapon) )
+    if ( anObject->beam.time > 0) anObject->beam.time -= timePass;
+    if (( anObject->keysDown & kTwoKey) && ( anObject->beam.time <= 0 ) &&
+        ( anObject->beam.type != kNoWeapon) )
     {
-        weaponObject = anObject->beamBase;
+        weaponObject = anObject->beam.base;
         if ( (anObject->energy >= weaponObject->frame.weapon.energyCost)
             && (( weaponObject->frame.weapon.ammo < 0) ||
-            ( anObject->beamAmmo > 0)))
+            ( anObject->beam.ammo > 0)))
         {
             if ( anObject->cloakState > 0)
                 AlterObjectCloakState( anObject, false);
             anObject->energy -= weaponObject->frame.weapon.energyCost;
-            anObject->beamPosition++;
-            if ( anObject->beamPosition >= baseObject->beamPositionNum)
-                anObject->beamPosition = 0;
+            anObject->beam.position++;
+            if ( anObject->beam.position >= baseObject->beamPositionNum)
+                anObject->beam.position = 0;
 
             h = anObject->direction;
             mAddAngle( h, -90);
@@ -161,15 +161,15 @@ static void tick_beam(spaceObjectType* anObject, spaceObjectType* targetObject, 
             fcos = -fcos;
             fsin = -fsin;
 
-            offset.h = mMultiplyFixed( baseObject->beamPosition[anObject->beamPosition].h, fcos);
-            offset.h -= mMultiplyFixed( baseObject->beamPosition[anObject->beamPosition].v, fsin);
-            offset.v = mMultiplyFixed( baseObject->beamPosition[anObject->beamPosition].h, fsin);
-            offset.v += mMultiplyFixed( baseObject->beamPosition[anObject->beamPosition].v, fcos);
+            offset.h = mMultiplyFixed( baseObject->beamPosition[anObject->beam.position].h, fcos);
+            offset.h -= mMultiplyFixed( baseObject->beamPosition[anObject->beam.position].v, fsin);
+            offset.v = mMultiplyFixed( baseObject->beamPosition[anObject->beam.position].h, fsin);
+            offset.v += mMultiplyFixed( baseObject->beamPosition[anObject->beam.position].v, fcos);
             offset.h = mFixedToLong( offset.h);
             offset.v = mFixedToLong( offset.v);
 
-            anObject->beamTime = weaponObject->frame.weapon.fireTime;
-            if ( weaponObject->frame.weapon.ammo > 0) anObject->beamAmmo--;
+            anObject->beam.time = weaponObject->frame.weapon.fireTime;
+            if ( weaponObject->frame.weapon.ammo > 0) anObject->beam.ammo--;
             execute_actions(
                     weaponObject->activateAction,
                     weaponObject->activateActionNum,
@@ -185,21 +185,21 @@ static void tick_special(spaceObjectType* anObject, spaceObjectType* targetObjec
     Point           offset;
     baseObjectType* baseObject = anObject->baseType;
     baseObjectType* weaponObject;
-    if ( anObject->specialTime > 0) anObject->specialTime -= timePass;
+    if ( anObject->special.time > 0) anObject->special.time -= timePass;
 
-    if (( anObject->keysDown & kEnterKey) && ( anObject->specialTime <= 0)
-        && ( anObject->specialType != kNoWeapon))
+    if (( anObject->keysDown & kEnterKey) && ( anObject->special.time <= 0)
+        && ( anObject->special.type != kNoWeapon))
     {
-        weaponObject = anObject->specialBase;
+        weaponObject = anObject->special.base;
         if ( (anObject->energy >= weaponObject->frame.weapon.energyCost)
             && (( weaponObject->frame.weapon.ammo < 0) ||
-            ( anObject->specialAmmo > 0)))
+            ( anObject->special.ammo > 0)))
         {
             anObject->energy -= weaponObject->frame.weapon.energyCost;
-            anObject->specialPosition++;
-            if ( anObject->specialPosition >=
+            anObject->special.position++;
+            if ( anObject->special.position >=
                     baseObject->specialPositionNum)
-                anObject->specialPosition = 0;
+                anObject->special.position = 0;
 
             h = anObject->direction;
             mAddAngle( h, -90);
@@ -207,16 +207,16 @@ static void tick_special(spaceObjectType* anObject, spaceObjectType* targetObjec
             fcos = -fcos;
             fsin = -fsin;
 
-            offset.h = mMultiplyFixed( baseObject->specialPosition[anObject->specialPosition].h, fcos);
-            offset.h -= mMultiplyFixed( baseObject->specialPosition[anObject->specialPosition].v, fsin);
-            offset.v = mMultiplyFixed( baseObject->specialPosition[anObject->specialPosition].h, fsin);
-            offset.v += mMultiplyFixed( baseObject->specialPosition[anObject->specialPosition].v, fcos);
+            offset.h = mMultiplyFixed( baseObject->specialPosition[anObject->special.position].h, fcos);
+            offset.h -= mMultiplyFixed( baseObject->specialPosition[anObject->special.position].v, fsin);
+            offset.v = mMultiplyFixed( baseObject->specialPosition[anObject->special.position].h, fsin);
+            offset.v += mMultiplyFixed( baseObject->specialPosition[anObject->special.position].v, fcos);
             offset.h = mFixedToLong( offset.h);
             offset.v = mFixedToLong( offset.v);
 
-            anObject->specialTime = weaponObject->frame.weapon.fireTime;
+            anObject->special.time = weaponObject->frame.weapon.fireTime;
             if ( weaponObject->frame.weapon.ammo > 0)
-                anObject->specialAmmo--;
+                anObject->special.ammo--;
             /*
             if ( anObject->targetObjectNumber >= 0)
             {
@@ -539,62 +539,62 @@ void NonplayerShipThink( int32_t timePass)
                             anObject->energy -= kHealthRatio;
                         }
 
-                        if ( anObject->pulseType != kNoWeapon)
+                        if ( anObject->pulse.type != kNoWeapon)
                         {
-                            if (( anObject->pulseAmmo <
-                                (anObject->pulseBase->frame.weapon.ammo >> 1)) &&
+                            if (( anObject->pulse.ammo <
+                                (anObject->pulse.base->frame.weapon.ammo >> 1)) &&
                                 ( anObject->energy >= kWeaponRatio))
                             {
-                                anObject->pulseCharge++;
+                                anObject->pulse.charge++;
                                 anObject->energy -= kWeaponRatio;
 
-                                if (( anObject->pulseBase->frame.weapon.restockCost >= 0)
-                                    && (anObject->pulseCharge >=
-                                    anObject->pulseBase->frame.weapon.restockCost))
+                                if (( anObject->pulse.base->frame.weapon.restockCost >= 0)
+                                    && (anObject->pulse.charge >=
+                                    anObject->pulse.base->frame.weapon.restockCost))
                                 {
-                                    anObject->pulseCharge -=
-                                        anObject->pulseBase->frame.weapon.restockCost;
-                                    anObject->pulseAmmo++;
+                                    anObject->pulse.charge -=
+                                        anObject->pulse.base->frame.weapon.restockCost;
+                                    anObject->pulse.ammo++;
                                 }
                             }
                         }
 
-                        if ( anObject->beamType != kNoWeapon)
+                        if ( anObject->beam.type != kNoWeapon)
                         {
-                            if (( anObject->beamAmmo <
-                                (anObject->beamBase->frame.weapon.ammo >> 1)) &&
+                            if (( anObject->beam.ammo <
+                                (anObject->beam.base->frame.weapon.ammo >> 1)) &&
                                 ( anObject->energy >= kWeaponRatio))
                             {
-                                anObject->beamCharge++;
+                                anObject->beam.charge++;
                                 anObject->energy -= kWeaponRatio;
 
-                                if ((anObject->beamBase->frame.weapon.restockCost >= 0) &&
-                                    ( anObject->beamCharge >=
-                                    anObject->beamBase->frame.weapon.restockCost))
+                                if ((anObject->beam.base->frame.weapon.restockCost >= 0) &&
+                                    ( anObject->beam.charge >=
+                                    anObject->beam.base->frame.weapon.restockCost))
                                 {
-                                    anObject->beamCharge -=
-                                        anObject->beamBase->frame.weapon.restockCost;
-                                    anObject->beamAmmo++;
+                                    anObject->beam.charge -=
+                                        anObject->beam.base->frame.weapon.restockCost;
+                                    anObject->beam.ammo++;
                                 }
                             }
                         }
 
-                        if ( anObject->specialType != kNoWeapon)
+                        if ( anObject->special.type != kNoWeapon)
                         {
-                            if (( anObject->specialAmmo <
-                                (anObject->specialBase->frame.weapon.ammo >> 1)) &&
+                            if (( anObject->special.ammo <
+                                (anObject->special.base->frame.weapon.ammo >> 1)) &&
                                 ( anObject->energy >= kWeaponRatio))
                             {
-                                anObject->specialCharge++;
+                                anObject->special.charge++;
                                 anObject->energy -= kWeaponRatio;
 
-                                if (( anObject->specialBase->frame.weapon.restockCost >= 0)
-                                    && ( anObject->specialCharge >=
-                                    anObject->specialBase->frame.weapon.restockCost))
+                                if (( anObject->special.base->frame.weapon.restockCost >= 0)
+                                    && ( anObject->special.charge >=
+                                    anObject->special.base->frame.weapon.restockCost))
                                 {
-                                    anObject->specialCharge -=
-                                        anObject->specialBase->frame.weapon.restockCost;
-                                    anObject->specialAmmo++;
+                                    anObject->special.charge -=
+                                        anObject->special.base->frame.weapon.restockCost;
+                                    anObject->special.ammo++;
                                 }
                             }
                         }
@@ -705,9 +705,9 @@ uint32_t ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *b
                 // try to evade, flee, run away
                 if ( anObject->attributes & kHasDirectionGoal)
                 {
-                    if ( anObject->beamType != kNoWeapon)
+                    if ( anObject->beam.type != kNoWeapon)
                     {
-                        weaponObject = anObject->beamBase;
+                        weaponObject = anObject->beam.base;
                         if ( weaponObject->frame.weapon.usage &
                             kUseForDefense)
                         {
@@ -715,9 +715,9 @@ uint32_t ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *b
                         }
                     }
 
-                    if ( anObject->pulseType != kNoWeapon)
+                    if ( anObject->pulse.type != kNoWeapon)
                     {
-                        weaponObject = anObject->pulseBase;
+                        weaponObject = anObject->pulse.base;
                         if ( weaponObject->frame.weapon.usage &
                             kUseForDefense)
                         {
@@ -725,9 +725,9 @@ uint32_t ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *b
                         }
                     }
 
-                    if ( anObject->specialType != kNoWeapon)
+                    if ( anObject->special.type != kNoWeapon)
                     {
-                        weaponObject = anObject->specialBase;
+                        weaponObject = anObject->special.base;
                         if ( weaponObject->frame.weapon.usage &
                             kUseForDefense)
                         {
@@ -892,9 +892,9 @@ uint32_t ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *b
                     {
                         if ( distance < static_cast<uint32_t>(anObject->longestWeaponRange))
                         {
-                            if ( anObject->beamType != kNoWeapon)
+                            if ( anObject->beam.type != kNoWeapon)
                             {
-                                weaponObject = anObject->beamBase;
+                                weaponObject = anObject->beam.base;
                                 if ( weaponObject->frame.weapon.usage &
                                     kUseForDefense)
                                 {
@@ -902,9 +902,9 @@ uint32_t ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *b
                                 }
                             }
 
-                            if ( anObject->pulseType != kNoWeapon)
+                            if ( anObject->pulse.type != kNoWeapon)
                             {
-                                weaponObject = anObject->pulseBase;
+                                weaponObject = anObject->pulse.base;
                                 if ( weaponObject->frame.weapon.usage &
                                     kUseForDefense)
                                 {
@@ -912,9 +912,9 @@ uint32_t ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *b
                                 }
                             }
 
-                            if ( anObject->specialType != kNoWeapon)
+                            if ( anObject->special.type != kNoWeapon)
                             {
-                                weaponObject = anObject->specialBase;
+                                weaponObject = anObject->special.base;
                                 if ( weaponObject->frame.weapon.usage &
                                     kUseForDefense)
                                 {
@@ -1097,11 +1097,11 @@ uint32_t ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *b
                     if ( theta < kEvadeAngle)
                         keysDown |= kUpKey;
                     anObject->lastTargetDistance = distance;
-                    if (( anObject->specialType != kNoWeapon) &&
+                    if (( anObject->special.type != kNoWeapon) &&
                         ( distance > kWarpInDistance)
                         && ( theta <= kDirectionError))
                     {
-                        if ( anObject->specialBase->frame.weapon.usage
+                        if ( anObject->special.base->frame.weapon.usage
                             & kUseForTransportation)
                         {
                             keysDown |= kEnterKey;
@@ -1186,9 +1186,9 @@ uint32_t ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *b
 
                 bestWeapon = NULL;
 
-                if ( anObject->beamType != kNoWeapon)
+                if ( anObject->beam.type != kNoWeapon)
                 {
-                    bestWeapon = weaponObject = anObject->beamBase;
+                    bestWeapon = weaponObject = anObject->beam.base;
                     if ( ( weaponObject->frame.weapon.usage &
                         kUseForAttacking) &&
                         ( static_cast<uint32_t>(weaponObject->frame.weapon.range) >=
@@ -1201,9 +1201,9 @@ uint32_t ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *b
                     }
                 }
 
-                if ( anObject->pulseType != kNoWeapon)
+                if ( anObject->pulse.type != kNoWeapon)
                 {
-                    weaponObject = anObject->pulseBase;
+                    weaponObject = anObject->pulse.base;
                     if ( ( weaponObject->frame.weapon.usage &
                         kUseForAttacking) &&
                         ( static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
@@ -1215,9 +1215,9 @@ uint32_t ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *b
                     }
                 }
 
-                if ( anObject->specialType != kNoWeapon)
+                if ( anObject->special.type != kNoWeapon)
                 {
-                    weaponObject = anObject->specialBase;
+                    weaponObject = anObject->special.base;
                     if ( ( weaponObject->frame.weapon.usage &
                         kUseForAttacking) &&
                         ( static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
@@ -2026,9 +2026,9 @@ uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *ta
 
         difference = anObject->longestWeaponRange;
 
-        if ( anObject->beamType != kNoWeapon)
+        if ( anObject->beam.type != kNoWeapon)
         {
-            bestWeapon = weaponObject = anObject->beamBase;
+            bestWeapon = weaponObject = anObject->beam.base;
             if ( ( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
                 ( static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
@@ -2041,9 +2041,9 @@ uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *ta
             }
         }
 
-        if ( anObject->pulseType != kNoWeapon)
+        if ( anObject->pulse.type != kNoWeapon)
         {
-            weaponObject = anObject->pulseBase;
+            weaponObject = anObject->pulse.base;
             if ( ( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
                 ( static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
@@ -2055,9 +2055,9 @@ uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *ta
             }
         }
 
-        if ( anObject->specialType != kNoWeapon)
+        if ( anObject->special.type != kNoWeapon)
         {
-            weaponObject = anObject->specialBase;
+            weaponObject = anObject->special.base;
             if ( ( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
                 ( static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
@@ -2118,9 +2118,9 @@ uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *ta
         beta = anObject->direction;
         beta = mAngleDifference( beta, angle);
 
-        if ( anObject->pulseType != kNoWeapon)
+        if ( anObject->pulse.type != kNoWeapon)
         {
-            weaponObject = anObject->pulseBase;
+            weaponObject = anObject->pulse.base;
             if (( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
                 (( ABS( beta) <= kShootAngle) ||
@@ -2131,9 +2131,9 @@ uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *ta
             }
         }
 
-        if ( anObject->beamType != kNoWeapon)
+        if ( anObject->beam.type != kNoWeapon)
         {
-            weaponObject = anObject->beamBase;
+            weaponObject = anObject->beam.base;
             if (( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
                 (( ABS( beta) <= kShootAngle) ||
@@ -2144,9 +2144,9 @@ uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *ta
             }
         }
 
-        if ( anObject->specialType != kNoWeapon)
+        if ( anObject->special.type != kNoWeapon)
         {
-            weaponObject = anObject->specialBase;
+            weaponObject = anObject->special.base;
             if (( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
                 (( ABS( beta) <= kShootAngle) ||

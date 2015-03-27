@@ -639,7 +639,7 @@ static void InitSpaceObjectFromBaseObject(
 
 
     dObject->energy = sObject->energy;
-    dObject->rechargeTime = dObject->pulseCharge = dObject->beamCharge = dObject->specialCharge = 0;
+    dObject->rechargeTime = dObject->pulse.charge = dObject->beam.charge = dObject->special.charge = 0;
     dObject->warpEnergyCollected = 0;
     dObject->battery = sObject->energy * kBatteryToEnergyRatio;
     dObject->owner = owner;
@@ -723,59 +723,59 @@ static void InitSpaceObjectFromBaseObject(
         dObject->pixResID += (GetAdmiralColor( owner) << kSpriteTableColorShift);
     }
 
-    dObject->pulseType = sObject->pulse;
-    if ( dObject->pulseType != kNoWeapon)
-        dObject->pulseBase = mGetBaseObjectPtr( dObject->pulseType);
-    else dObject->pulseBase = NULL;
-    dObject->beamType = sObject->beam;
-    if ( dObject->beamType != kNoWeapon)
-        dObject->beamBase = mGetBaseObjectPtr( dObject->beamType);
-    else dObject->beamBase = NULL;
-    dObject->specialType = sObject->special;
-    if ( dObject->specialType != kNoWeapon)
-        dObject->specialBase = mGetBaseObjectPtr( dObject->specialType);
-    else dObject->specialBase = NULL;
+    dObject->pulse.type = sObject->pulse;
+    if ( dObject->pulse.type != kNoWeapon)
+        dObject->pulse.base = mGetBaseObjectPtr( dObject->pulse.type);
+    else dObject->pulse.base = NULL;
+    dObject->beam.type = sObject->beam;
+    if ( dObject->beam.type != kNoWeapon)
+        dObject->beam.base = mGetBaseObjectPtr( dObject->beam.type);
+    else dObject->beam.base = NULL;
+    dObject->special.type = sObject->special;
+    if ( dObject->special.type != kNoWeapon)
+        dObject->special.base = mGetBaseObjectPtr( dObject->special.type);
+    else dObject->special.base = NULL;
     dObject->longestWeaponRange = 0;
     dObject->shortestWeaponRange = kMaximumRelevantDistance;
 
-    if ( dObject->pulseType != kNoWeapon)
+    if ( dObject->pulse.type != kNoWeapon)
     {
-        weaponBase = dObject->pulseBase;
-        dObject->pulseAmmo = weaponBase->frame.weapon.ammo;
-        dObject->pulseTime = dObject->pulsePosition = 0;
+        weaponBase = dObject->pulse.base;
+        dObject->pulse.ammo = weaponBase->frame.weapon.ammo;
+        dObject->pulse.time = dObject->pulse.position = 0;
         r = weaponBase->frame.weapon.range;
         if (( r > 0) && ( weaponBase->frame.weapon.usage & kUseForAttacking))
         {
             if ( r > dObject->longestWeaponRange) dObject->longestWeaponRange = r;
             if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
         }
-    } else dObject->pulseTime = 0;
+    } else dObject->pulse.time = 0;
 
-    if ( dObject->beamType != kNoWeapon)
+    if ( dObject->beam.type != kNoWeapon)
     {
-        weaponBase = dObject->beamBase;
-        dObject->beamAmmo = weaponBase->frame.weapon.ammo;
-        dObject->beamTime = dObject->beamPosition = 0;
+        weaponBase = dObject->beam.base;
+        dObject->beam.ammo = weaponBase->frame.weapon.ammo;
+        dObject->beam.time = dObject->beam.position = 0;
         r = weaponBase->frame.weapon.range;
         if (( r > 0) && ( weaponBase->frame.weapon.usage & kUseForAttacking))
         {
             if ( r > dObject->longestWeaponRange) dObject->longestWeaponRange = r;
             if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
         }
-    } else dObject->beamTime = 0;
+    } else dObject->beam.time = 0;
 
-    if ( dObject->specialType != kNoWeapon)
+    if ( dObject->special.type != kNoWeapon)
     {
-        weaponBase = dObject->specialBase;
-        dObject->specialAmmo = weaponBase->frame.weapon.ammo;
-        dObject->specialTime = dObject->specialPosition = 0;
+        weaponBase = dObject->special.base;
+        dObject->special.ammo = weaponBase->frame.weapon.ammo;
+        dObject->special.time = dObject->special.position = 0;
         r = weaponBase->frame.weapon.range;
         if (( r > 0) && ( weaponBase->frame.weapon.usage & kUseForAttacking))
         {
             if ( r > dObject->longestWeaponRange) dObject->longestWeaponRange = r;
             if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
         }
-    } else dObject->specialTime = 0;
+    } else dObject->special.time = 0;
 
     // if we don't have any weapon, then shortest range is 0 too
     if ( dObject->longestWeaponRange == 0) dObject->shortestWeaponRange = 0;
@@ -865,18 +865,18 @@ void ChangeObjectBaseType( spaceObjectType *dObject, int32_t whichBaseObject,
         dObject->pixResID += (GetAdmiralColor( dObject->owner) << kSpriteTableColorShift);
     }
 
-    dObject->pulseType = sObject->pulse;
-    if ( dObject->pulseType != kNoWeapon)
-        dObject->pulseBase = mGetBaseObjectPtr( dObject->pulseType);
-    else dObject->pulseBase = NULL;
-    dObject->beamType = sObject->beam;
-    if ( dObject->beamType != kNoWeapon)
-        dObject->beamBase = mGetBaseObjectPtr( dObject->beamType);
-    else dObject->beamBase = NULL;
-    dObject->specialType = sObject->special;
-    if ( dObject->specialType != kNoWeapon)
-        dObject->specialBase = mGetBaseObjectPtr( dObject->specialType);
-    else dObject->specialBase = NULL;
+    dObject->pulse.type = sObject->pulse;
+    if ( dObject->pulse.type != kNoWeapon)
+        dObject->pulse.base = mGetBaseObjectPtr( dObject->pulse.type);
+    else dObject->pulse.base = NULL;
+    dObject->beam.type = sObject->beam;
+    if ( dObject->beam.type != kNoWeapon)
+        dObject->beam.base = mGetBaseObjectPtr( dObject->beam.type);
+    else dObject->beam.base = NULL;
+    dObject->special.type = sObject->special;
+    if ( dObject->special.type != kNoWeapon)
+        dObject->special.base = mGetBaseObjectPtr( dObject->special.type);
+    else dObject->special.base = NULL;
     dObject->longestWeaponRange = 0;
     dObject->shortestWeaponRange = kMaximumRelevantDistance;
 
@@ -888,17 +888,17 @@ void ChangeObjectBaseType( spaceObjectType *dObject, int32_t whichBaseObject,
                     ((sObject->activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift));
     } else dObject->periodicTime = 0;
 
-    if ( dObject->pulseType != kNoWeapon)
+    if ( dObject->pulse.type != kNoWeapon)
     {
-        weaponBase = dObject->pulseBase;
+        weaponBase = dObject->pulse.base;
         if ( !relative)
         {
-            dObject->pulseAmmo = weaponBase->frame.weapon.ammo;
-            dObject->pulsePosition = 0;
-            if ( dObject->pulseTime < 0)
-                dObject->pulseTime = 0;
-            else if ( dObject->pulseTime > weaponBase->frame.weapon.fireTime)
-                dObject->pulseTime = weaponBase->frame.weapon.fireTime;
+            dObject->pulse.ammo = weaponBase->frame.weapon.ammo;
+            dObject->pulse.position = 0;
+            if ( dObject->pulse.time < 0)
+                dObject->pulse.time = 0;
+            else if ( dObject->pulse.time > weaponBase->frame.weapon.fireTime)
+                dObject->pulse.time = weaponBase->frame.weapon.fireTime;
         }
         r = weaponBase->frame.weapon.range;
         if (( r > 0) && ( weaponBase->frame.weapon.usage & kUseForAttacking))
@@ -906,19 +906,19 @@ void ChangeObjectBaseType( spaceObjectType *dObject, int32_t whichBaseObject,
             if ( r > dObject->longestWeaponRange) dObject->longestWeaponRange = r;
             if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
         }
-    } else dObject->pulseTime = 0;
+    } else dObject->pulse.time = 0;
 
-    if ( dObject->beamType != kNoWeapon)
+    if ( dObject->beam.type != kNoWeapon)
     {
-        weaponBase = dObject->beamBase;
+        weaponBase = dObject->beam.base;
         if ( !relative)
         {
-            dObject->beamAmmo = weaponBase->frame.weapon.ammo;
-            if ( dObject->beamTime < 0)
-                dObject->beamTime = 0;
-            else if ( dObject->beamTime > weaponBase->frame.weapon.fireTime)
-                dObject->beamTime = weaponBase->frame.weapon.fireTime;
-            dObject->beamPosition = 0;
+            dObject->beam.ammo = weaponBase->frame.weapon.ammo;
+            if ( dObject->beam.time < 0)
+                dObject->beam.time = 0;
+            else if ( dObject->beam.time > weaponBase->frame.weapon.fireTime)
+                dObject->beam.time = weaponBase->frame.weapon.fireTime;
+            dObject->beam.position = 0;
         }
         r = weaponBase->frame.weapon.range;
         if (( r > 0) && ( weaponBase->frame.weapon.usage & kUseForAttacking))
@@ -926,19 +926,19 @@ void ChangeObjectBaseType( spaceObjectType *dObject, int32_t whichBaseObject,
             if ( r > dObject->longestWeaponRange) dObject->longestWeaponRange = r;
             if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
         }
-    } else dObject->beamTime = 0;
+    } else dObject->beam.time = 0;
 
-    if ( dObject->specialType != kNoWeapon)
+    if ( dObject->special.type != kNoWeapon)
     {
-        weaponBase = dObject->specialBase;
+        weaponBase = dObject->special.base;
         if ( !relative)
         {
-            dObject->specialAmmo = weaponBase->frame.weapon.ammo;
-            dObject->specialPosition = 0;
-            if ( dObject->specialTime < 0)
-                dObject->specialTime = 0;
-            else if ( dObject->specialTime > weaponBase->frame.weapon.fireTime)
-                dObject->specialTime = weaponBase->frame.weapon.fireTime;
+            dObject->special.ammo = weaponBase->frame.weapon.ammo;
+            dObject->special.position = 0;
+            if ( dObject->special.time < 0)
+                dObject->special.time = 0;
+            else if ( dObject->special.time > weaponBase->frame.weapon.fireTime)
+                dObject->special.time = weaponBase->frame.weapon.fireTime;
         }
         r = weaponBase->frame.weapon.range;
         if (( r > 0) && ( weaponBase->frame.weapon.usage & kUseForAttacking))
@@ -946,7 +946,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, int32_t whichBaseObject,
             if ( r > dObject->longestWeaponRange) dObject->longestWeaponRange = r;
             if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
         }
-    } else dObject->specialTime = 0;
+    } else dObject->special.time = 0;
 
     // if we don't have any weapon, then shortest range is 0 too
     if ( dObject->longestWeaponRange == 0) dObject->shortestWeaponRange = 0;
@@ -1406,21 +1406,21 @@ void DestroyObject(spaceObjectType* object) {
 }
 
 void ActivateObjectSpecial(spaceObjectType* object) {
-    if ((object->specialTime > 0) || (object->specialType == kNoWeapon)) {
+    if ((object->special.time > 0) || (object->special.type == kNoWeapon)) {
         return;
     }
 
-    auto weaponObject = object->specialBase;
+    auto weaponObject = object->special.base;
     auto baseObject = object->baseType;
     if ((object->energy < weaponObject->frame.weapon.energyCost)
-            || ((weaponObject->frame.weapon.ammo >= 0) && (object->specialAmmo <= 0))) {
+            || ((weaponObject->frame.weapon.ammo >= 0) && (object->special.ammo <= 0))) {
         return;
     }
 
     object->energy -= weaponObject->frame.weapon.energyCost;
-    object->specialPosition++;
-    if (object->specialPosition >= baseObject->specialPositionNum) {
-        object->specialPosition = 0;
+    object->special.position++;
+    if (object->special.position >= baseObject->specialPositionNum) {
+        object->special.position = 0;
     }
 
     int16_t direction = object->direction;
@@ -1430,9 +1430,9 @@ void ActivateObjectSpecial(spaceObjectType* object) {
     fcos = -fcos;
     fsin = -fsin;
 
-    object->specialTime = weaponObject->frame.weapon.fireTime;
+    object->special.time = weaponObject->frame.weapon.fireTime;
     if (weaponObject->frame.weapon.ammo > 0) {
-        object->specialAmmo--;
+        object->special.ammo--;
     }
     execute_actions(
             weaponObject->activateAction,

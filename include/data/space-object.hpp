@@ -704,9 +704,6 @@ struct spaceObjectType {
     int32_t                 naturalScale;
     int32_t                 id;
     int16_t                 rechargeTime;
-    int16_t                 pulseCharge;
-    int16_t                 beamCharge;
-    int16_t                 specialCharge;
     int16_t                 active;
 
     int32_t                 warpEnergyCollected;
@@ -735,23 +732,17 @@ struct spaceObjectType {
     dutyType                duty;
     int                     pixResID;
 
-    baseObjectType          *pulseBase;
-    int32_t                 pulseType;
-    int32_t                 pulseTime;
-    int32_t                 pulseAmmo;
-    int32_t                 pulsePosition;
-
-    baseObjectType          *beamBase;
-    int32_t                 beamType;
-    int32_t                 beamTime;
-    int32_t                 beamAmmo;
-    int32_t                 beamPosition;
-
-    baseObjectType          *specialBase;
-    int32_t                 specialType;
-    int32_t                 specialTime;
-    int32_t                 specialAmmo;
-    int32_t                 specialPosition;
+    struct Weapon {
+        baseObjectType*         base;
+        int32_t                 type;
+        int32_t                 time;
+        int32_t                 ammo;
+        int32_t                 position;
+        int16_t                 charge;
+    };
+    Weapon                  pulse;
+    Weapon                  beam;
+    Weapon                  special;
 
     int32_t                 periodicTime;
     int32_t                 whichLabel;
