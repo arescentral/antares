@@ -93,21 +93,23 @@ static void tick_pulse(spaceObjectType* anObject, spaceObjectType* targetObject,
     Point           offset;
     baseObjectType* baseObject = anObject->baseType;
     baseObjectType* weaponObject;
-    if ( anObject->pulse.time > 0) anObject->pulse.time -= timePass;
-    if (( anObject->keysDown & kOneKey) && ( anObject->pulse.time <= 0) &&
-            ( anObject->pulse.type != kNoWeapon))
+    const auto& base_weapon = baseObject->pulse;
+    auto& weapon = anObject->pulse;
+    if ( weapon.time > 0) weapon.time -= timePass;
+    if (( anObject->keysDown & kOneKey) && ( weapon.time <= 0) &&
+            ( weapon.type != kNoWeapon))
     {
-        weaponObject = anObject->pulse.base;
+        weaponObject = weapon.base;
         if (( anObject->energy >= weaponObject->frame.weapon.energyCost)
                 && (( weaponObject->frame.weapon.ammo < 0) ||
-                    ( anObject->pulse.ammo > 0)))
+                    ( weapon.ammo > 0)))
         {
             if ( anObject->cloakState > 0)
                 AlterObjectCloakState( anObject, false);
             anObject->energy -= weaponObject->frame.weapon.energyCost;
-            anObject->pulse.position++;
-            if ( anObject->pulse.position >= baseObject->pulse.positionNum)
-                anObject->pulse.position = 0;
+            weapon.position++;
+            if ( weapon.position >= base_weapon.positionNum)
+                weapon.position = 0;
 
             h = anObject->direction;
             mAddAngle( h, -90);
@@ -115,16 +117,16 @@ static void tick_pulse(spaceObjectType* anObject, spaceObjectType* targetObject,
             fcos = -fcos;
             fsin = -fsin;
 
-            offset.h = mMultiplyFixed( baseObject->pulse.position[anObject->pulse.position].h, fcos);
-            offset.h -= mMultiplyFixed( baseObject->pulse.position[anObject->pulse.position].v, fsin);
-            offset.v = mMultiplyFixed( baseObject->pulse.position[anObject->pulse.position].h, fsin);
-            offset.v += mMultiplyFixed( baseObject->pulse.position[anObject->pulse.position].v, fcos);
+            offset.h = mMultiplyFixed( base_weapon.position[weapon.position].h, fcos);
+            offset.h -= mMultiplyFixed( base_weapon.position[weapon.position].v, fsin);
+            offset.v = mMultiplyFixed( base_weapon.position[weapon.position].h, fsin);
+            offset.v += mMultiplyFixed( base_weapon.position[weapon.position].v, fcos);
             offset.h = mFixedToLong( offset.h);
             offset.v = mFixedToLong( offset.v);
 
-            anObject->pulse.time = weaponObject->frame.weapon.fireTime;
+            weapon.time = weaponObject->frame.weapon.fireTime;
             if ( weaponObject->frame.weapon.ammo > 0)
-                anObject->pulse.ammo--;
+                weapon.ammo--;
             execute_actions(
                     weaponObject->activateAction,
                     weaponObject->activateActionNum,
@@ -139,21 +141,23 @@ static void tick_beam(spaceObjectType* anObject, spaceObjectType* targetObject, 
     Point           offset;
     baseObjectType* baseObject = anObject->baseType;
     baseObjectType* weaponObject;
-    if ( anObject->beam.time > 0) anObject->beam.time -= timePass;
-    if (( anObject->keysDown & kTwoKey) && ( anObject->beam.time <= 0 ) &&
-        ( anObject->beam.type != kNoWeapon) )
+    const auto& base_weapon = baseObject->beam;
+    auto& weapon = anObject->beam;
+    if ( weapon.time > 0) weapon.time -= timePass;
+    if (( anObject->keysDown & kTwoKey) && ( weapon.time <= 0 ) &&
+        ( weapon.type != kNoWeapon) )
     {
-        weaponObject = anObject->beam.base;
+        weaponObject = weapon.base;
         if ( (anObject->energy >= weaponObject->frame.weapon.energyCost)
             && (( weaponObject->frame.weapon.ammo < 0) ||
-            ( anObject->beam.ammo > 0)))
+            ( weapon.ammo > 0)))
         {
             if ( anObject->cloakState > 0)
                 AlterObjectCloakState( anObject, false);
             anObject->energy -= weaponObject->frame.weapon.energyCost;
-            anObject->beam.position++;
-            if ( anObject->beam.position >= baseObject->beam.positionNum)
-                anObject->beam.position = 0;
+            weapon.position++;
+            if ( weapon.position >= base_weapon.positionNum)
+                weapon.position = 0;
 
             h = anObject->direction;
             mAddAngle( h, -90);
@@ -161,15 +165,15 @@ static void tick_beam(spaceObjectType* anObject, spaceObjectType* targetObject, 
             fcos = -fcos;
             fsin = -fsin;
 
-            offset.h = mMultiplyFixed( baseObject->beam.position[anObject->beam.position].h, fcos);
-            offset.h -= mMultiplyFixed( baseObject->beam.position[anObject->beam.position].v, fsin);
-            offset.v = mMultiplyFixed( baseObject->beam.position[anObject->beam.position].h, fsin);
-            offset.v += mMultiplyFixed( baseObject->beam.position[anObject->beam.position].v, fcos);
+            offset.h = mMultiplyFixed( base_weapon.position[weapon.position].h, fcos);
+            offset.h -= mMultiplyFixed( base_weapon.position[weapon.position].v, fsin);
+            offset.v = mMultiplyFixed( base_weapon.position[weapon.position].h, fsin);
+            offset.v += mMultiplyFixed( base_weapon.position[weapon.position].v, fcos);
             offset.h = mFixedToLong( offset.h);
             offset.v = mFixedToLong( offset.v);
 
-            anObject->beam.time = weaponObject->frame.weapon.fireTime;
-            if ( weaponObject->frame.weapon.ammo > 0) anObject->beam.ammo--;
+            weapon.time = weaponObject->frame.weapon.fireTime;
+            if ( weaponObject->frame.weapon.ammo > 0) weapon.ammo--;
             execute_actions(
                     weaponObject->activateAction,
                     weaponObject->activateActionNum,
@@ -185,21 +189,23 @@ static void tick_special(spaceObjectType* anObject, spaceObjectType* targetObjec
     Point           offset;
     baseObjectType* baseObject = anObject->baseType;
     baseObjectType* weaponObject;
-    if ( anObject->special.time > 0) anObject->special.time -= timePass;
+    const auto& base_weapon = baseObject->special;
+    auto& weapon = anObject->special;
+    if ( weapon.time > 0) weapon.time -= timePass;
 
-    if (( anObject->keysDown & kEnterKey) && ( anObject->special.time <= 0)
-        && ( anObject->special.type != kNoWeapon))
+    if (( anObject->keysDown & kEnterKey) && ( weapon.time <= 0)
+        && ( weapon.type != kNoWeapon))
     {
-        weaponObject = anObject->special.base;
+        weaponObject = weapon.base;
         if ( (anObject->energy >= weaponObject->frame.weapon.energyCost)
             && (( weaponObject->frame.weapon.ammo < 0) ||
-            ( anObject->special.ammo > 0)))
+            ( weapon.ammo > 0)))
         {
             anObject->energy -= weaponObject->frame.weapon.energyCost;
-            anObject->special.position++;
-            if ( anObject->special.position >=
-                    baseObject->special.positionNum)
-                anObject->special.position = 0;
+            weapon.position++;
+            if ( weapon.position >=
+                    base_weapon.positionNum)
+                weapon.position = 0;
 
             h = anObject->direction;
             mAddAngle( h, -90);
@@ -207,16 +213,16 @@ static void tick_special(spaceObjectType* anObject, spaceObjectType* targetObjec
             fcos = -fcos;
             fsin = -fsin;
 
-            offset.h = mMultiplyFixed( baseObject->special.position[anObject->special.position].h, fcos);
-            offset.h -= mMultiplyFixed( baseObject->special.position[anObject->special.position].v, fsin);
-            offset.v = mMultiplyFixed( baseObject->special.position[anObject->special.position].h, fsin);
-            offset.v += mMultiplyFixed( baseObject->special.position[anObject->special.position].v, fcos);
+            offset.h = mMultiplyFixed( base_weapon.position[weapon.position].h, fcos);
+            offset.h -= mMultiplyFixed( base_weapon.position[weapon.position].v, fsin);
+            offset.v = mMultiplyFixed( base_weapon.position[weapon.position].h, fsin);
+            offset.v += mMultiplyFixed( base_weapon.position[weapon.position].v, fcos);
             offset.h = mFixedToLong( offset.h);
             offset.v = mFixedToLong( offset.v);
 
-            anObject->special.time = weaponObject->frame.weapon.fireTime;
+            weapon.time = weaponObject->frame.weapon.fireTime;
             if ( weaponObject->frame.weapon.ammo > 0)
-                anObject->special.ammo--;
+                weapon.ammo--;
             /*
             if ( anObject->targetObjectNumber >= 0)
             {
