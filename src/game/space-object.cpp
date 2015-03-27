@@ -1158,282 +1158,231 @@ int32_t GetNextObjectWithAttributes( int32_t startWith, uint32_t attributes, boo
     }
 }
 
-void AlterObjectHealth( spaceObjectType *anObject, int32_t health)
-
-{
-    if ( health <= 0)
-        anObject->health += health;
-    else
-    {
-        if ( anObject->health >= (2147483647 - health))
-            anObject->health = 2147483647;
-        else
-            anObject->health += health;
-    }
-    if ( anObject->health < 0)
-    {
-        DestroyObject( anObject);
-    }
-
-}
-
-void AlterObjectEnergy( spaceObjectType *anObject, int32_t energy)
-
-{
-    anObject->energy += energy;
-    if ( anObject->energy < 0)
-    {
-        anObject->energy = 0;
-    } else if ( anObject->energy > anObject->baseType->energy)
-    {
-        anObject->battery += ( anObject->energy - anObject->baseType->energy);
-        if ( anObject->battery > (anObject->baseType->energy * kBatteryToEnergyRatio))
-        {
-            PayAdmiral( anObject->owner, anObject->battery - (anObject->baseType->energy
-                * kBatteryToEnergyRatio));
-            anObject->battery = anObject->baseType->energy * kBatteryToEnergyRatio;
-        }
-        anObject->energy = anObject->baseType->energy;
-    }
-
-}
-
-void AlterObjectBattery( spaceObjectType *anObject, int32_t energy)
-
-{
-    anObject->battery += energy;
-    if ( anObject->battery > (anObject->baseType->energy * kBatteryToEnergyRatio))
-    {
-        PayAdmiral( anObject->owner, anObject->battery - (anObject->baseType->energy
-            * kBatteryToEnergyRatio));
-        anObject->battery = anObject->baseType->energy * kBatteryToEnergyRatio;
-    }
-}
-
-
-void AlterObjectOwner( spaceObjectType *anObject, int32_t owner, bool message)
-
-{
-    spaceObjectType *fixObject = NULL;
-    int32_t         i, originalOwner = anObject->owner;
-    RgbColor        tinyColor;
-    uint8_t         tinyShade;
-
-    if ( anObject->owner != owner)
-    {
-        // if the object is occupied by a human, eject him since he can't change sides
-        if (( anObject->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
-            (!(anObject->baseType->destroyActionNum & kDestroyActionDontDieFlag)))
-        {
-            CreateFloatingBodyOfPlayer( anObject);
-        }
-
-        anObject->owner = owner;
-
-        if (( owner >= 0) && ( anObject->attributes & kIsDestination))
-        {
-            if ( GetAdmiralConsiderObject( owner) < 0)
-                SetAdmiralConsiderObject( owner, anObject->entryNumber);
-
-            if ( GetAdmiralBuildAtObject( owner) < 0)
-            {
-                if ( BaseHasSomethingToBuild( anObject->entryNumber))
-                    SetAdmiralBuildAtObject( owner, anObject->entryNumber);
-            }
-            if ( GetAdmiralDestinationObject( owner) < 0)
-                SetAdmiralDestinationObject( owner, anObject->entryNumber, kObjectDestinationType);
-
-        }
-
-        if ( anObject->attributes & kNeutralDeath)
-            anObject->attributes = anObject->baseType->attributes;
-
-        if (( anObject->sprite != NULL)/* && ( anObject->baseType->tinySize != 0)*/)
-        {
-            switch( anObject->sprite->whichLayer)
-            {
-                case kFirstSpriteLayer:
-                    tinyShade = MEDIUM;
-                    break;
-
-                case kMiddleSpriteLayer:
-                    tinyShade = LIGHT;
-                    break;
-
-                case kLastSpriteLayer:
-                    tinyShade = VERY_LIGHT;
-                    break;
-
-                default:
-                    tinyShade = DARK;
-                    break;
-            }
-
-            if ( owner == globals()->gPlayerAdmiralNumber)
-            {
-                tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
-            } else if ( owner <= kNoOwner)
-            {
-                tinyColor = GetRGBTranslateColorShade(kNeutralColor, tinyShade);
-            } else
-            {
-                tinyColor = GetRGBTranslateColorShade(kHostileColor, tinyShade);
-            }
-            anObject->tinyColor = anObject->sprite->tinyColor = tinyColor;
-
-            if ( anObject->attributes & kCanThink)
-            {
-                NatePixTable* pixTable;
-
-                if (( anObject->pixResID == anObject->baseType->pixResID) ||
-                    ( anObject->pixResID == (anObject->baseType->pixResID |
-                    (GetAdmiralColor( originalOwner)
-                    << kSpriteTableColorShift))))
-                {
-
-                    anObject->pixResID =
-                        anObject->baseType->pixResID | (GetAdmiralColor( owner)
-                        << kSpriteTableColorShift);
-
-                    pixTable = GetPixTable( anObject->pixResID);
-                    if (pixTable != NULL) {
-                        anObject->sprite->table = pixTable;
-                    }
-                }
-            }
-        }
-
-        anObject->remoteFoeStrength = anObject->remoteFriendStrength = anObject->escortStrength =
-            anObject->localFoeStrength = anObject->localFriendStrength = 0;
-        anObject->bestConsideredTargetValue = anObject->currentTargetValue = 0xffffffff;
-        anObject->bestConsideredTargetNumber = -1;
-
-        fixObject = gSpaceObjectData.get();
-        for ( i = 0; i < kMaxSpaceObject; i++)
-        {
-            if (( fixObject->destinationObject == anObject->entryNumber) && ( fixObject->active !=
-                kObjectAvailable) && ( fixObject->attributes & kCanThink))
-            {
-                fixObject->currentTargetValue = 0xffffffff;
-                if ( fixObject->owner != owner)
-                {
-                    anObject->remoteFoeStrength += fixObject->baseType->offenseValue;
-                } else
-                {
-                    anObject->remoteFriendStrength += fixObject->baseType->offenseValue;
-                    anObject->escortStrength += fixObject->baseType->offenseValue;
-                }
-            }
-            fixObject++;
-        }
-
-        if ( anObject->attributes & kIsDestination)
-        {
-            if (( anObject->attributes & kNeutralDeath)/* && ( owner >= 0)*/)
-            {
-                ClearAllOccupants( anObject->destinationObject, owner, anObject->baseType->initialAgeRange);
-            }
-            StopBuilding( anObject->destinationObject);
-            if (message) {
-                String destination_name(GetDestBalanceName(anObject->destinationObject));
-                if (owner >= 0) {
-                    String new_owner_name(GetAdmiralName(anObject->owner));
-                    Messages::add(format("{0} captured by {1}.", destination_name, new_owner_name));
-                } else if (originalOwner >= 0) { // must be since can't both be -1
-                    String old_owner_name(GetAdmiralName(originalOwner));
-                    Messages::add(format("{0} lost by {1}.", destination_name, old_owner_name));
-                }
-            }
+void AlterObjectHealth(spaceObjectType* object, int32_t health) {
+    if (health <= 0) {
+        object->health += health;
+    } else {
+        if (object->health >= (2147483647 - health)) {
+            object->health = 2147483647;
         } else {
-            if (message) {
-                StringSlice object_name = get_object_name(anObject->whichBaseObject);
-                if (owner >= 0) {
-                    String new_owner_name(GetAdmiralName(anObject->owner));
-                    Messages::add(format("{0} captured by {1}.", object_name, new_owner_name));
-                } else if (originalOwner >= 0) { // must be since can't both be -1
-                    String old_owner_name(GetAdmiralName(originalOwner));
-                    Messages::add(format("{0} lost by {1}.", object_name, old_owner_name));
+            object->health += health;
+        }
+    }
+    if (object->health < 0) {
+        DestroyObject(object);
+    }
+}
+
+void AlterObjectEnergy(spaceObjectType* object, int32_t energy) {
+    object->energy += energy;
+    if (object->energy < 0) {
+        object->energy = 0;
+    } else if (object->energy > object->baseType->energy) {
+        AlterObjectBattery(object, object->energy - object->baseType->energy);
+        object->energy = object->baseType->energy;
+    }
+}
+
+void AlterObjectBattery(spaceObjectType* object, int32_t energy) {
+    object->battery += energy;
+    if (object->battery > (object->baseType->energy * kBatteryToEnergyRatio)) {
+        PayAdmiral(
+                object->owner,
+                object->battery - (object->baseType->energy * kBatteryToEnergyRatio));
+        object->battery = object->baseType->energy * kBatteryToEnergyRatio;
+    }
+}
+
+
+void AlterObjectOwner(spaceObjectType* object, int32_t owner, bool message) {
+    if (object->owner == owner) {
+        return;
+    }
+
+    // if the object is occupied by a human, eject him since he can't change sides
+    if ((object->attributes & (kIsPlayerShip | kRemoteOrHuman))
+            && !(object->baseType->destroyActionNum & kDestroyActionDontDieFlag)) {
+        CreateFloatingBodyOfPlayer(object);
+    }
+
+    int32_t old_owner = object->owner;
+    object->owner = owner;
+
+    if ((owner >= 0) && (object->attributes & kIsDestination)) {
+        if (GetAdmiralConsiderObject(owner) < 0) {
+            SetAdmiralConsiderObject(owner, object->entryNumber);
+        }
+
+        if (GetAdmiralBuildAtObject(owner) < 0) {
+            if (BaseHasSomethingToBuild(object->entryNumber)) {
+                SetAdmiralBuildAtObject(owner, object->entryNumber);
+            }
+        }
+        if (GetAdmiralDestinationObject(owner) < 0) {
+            SetAdmiralDestinationObject(owner, object->entryNumber, kObjectDestinationType);
+        }
+    }
+
+    if (object->attributes & kNeutralDeath) {
+        object->attributes = object->baseType->attributes;
+    }
+
+    if (object->sprite != NULL) {
+        uint8_t tinyShade;
+        switch (object->sprite->whichLayer) {
+          case kFirstSpriteLayer:   tinyShade = MEDIUM; break;
+          case kMiddleSpriteLayer:  tinyShade = LIGHT; break;
+          case kLastSpriteLayer:    tinyShade = VERY_LIGHT; break;
+          default:                  tinyShade = DARK; break;
+        }
+
+        RgbColor tinyColor;
+        if (owner == globals()->gPlayerAdmiralNumber) {
+            tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
+        } else if (owner <= kNoOwner) {
+            tinyColor = GetRGBTranslateColorShade(kNeutralColor, tinyShade);
+        } else {
+            tinyColor = GetRGBTranslateColorShade(kHostileColor, tinyShade);
+        }
+        object->tinyColor = object->sprite->tinyColor = tinyColor;
+
+        if (object->attributes & kCanThink) {
+            NatePixTable* pixTable;
+
+            if ((object->pixResID == object->baseType->pixResID)
+                    || (object->pixResID == (object->baseType->pixResID |
+                                             (GetAdmiralColor(old_owner)
+                                              << kSpriteTableColorShift)))) {
+                object->pixResID =
+                    object->baseType->pixResID | (GetAdmiralColor(owner)
+                            << kSpriteTableColorShift);
+
+                pixTable = GetPixTable(object->pixResID);
+                if (pixTable != NULL) {
+                    object->sprite->table = pixTable;
                 }
             }
         }
-        if ( anObject->attributes & kIsDestination)
-            RecalcAllAdmiralBuildData();
     }
-//  if ( anObject->attributes & kIsEndgameObject) CheckEndgame();
-}
 
-void AlterObjectOccupation( spaceObjectType *anObject, int32_t owner, int32_t howMuch, bool message)
-{
-    if ( ( anObject->active) && ( anObject->attributes & kIsDestination) && ( anObject->attributes & kNeutralDeath))
-    {
-        if ( AlterDestinationObjectOccupation( anObject->destinationObject, owner, howMuch) >= anObject->baseType->initialAgeRange)
-        {
-            AlterObjectOwner( anObject, owner, message);
+    object->remoteFoeStrength = object->remoteFriendStrength = object->escortStrength =
+        object->localFoeStrength = object->localFriendStrength = 0;
+    object->bestConsideredTargetValue = object->currentTargetValue = 0xffffffff;
+    object->bestConsideredTargetNumber = -1;
+
+    for (int32_t i = 0; i < kMaxSpaceObject; i++) {
+        auto& fixObject = gSpaceObjectData[i];
+        if ((fixObject.destinationObject == object->entryNumber)
+                && (fixObject.active != kObjectAvailable)
+                && (fixObject.attributes & kCanThink)) {
+            fixObject.currentTargetValue = 0xffffffff;
+            if (fixObject.owner != owner) {
+                object->remoteFoeStrength += fixObject.baseType->offenseValue;
+            } else {
+                object->remoteFriendStrength += fixObject.baseType->offenseValue;
+                object->escortStrength += fixObject.baseType->offenseValue;
+            }
+        }
+    }
+
+    if (object->attributes & kIsDestination) {
+        if (object->attributes & kNeutralDeath) {
+            ClearAllOccupants(
+                    object->destinationObject, owner, object->baseType->initialAgeRange);
+        }
+        StopBuilding(object->destinationObject);
+        if (message) {
+            String destination_name(GetDestBalanceName(object->destinationObject));
+            if (owner >= 0) {
+                String new_owner_name(GetAdmiralName(object->owner));
+                Messages::add(format("{0} captured by {1}.", destination_name, new_owner_name));
+            } else if (old_owner >= 0) { // must be since can't both be -1
+                String old_owner_name(GetAdmiralName(old_owner));
+                Messages::add(format("{0} lost by {1}.", destination_name, old_owner_name));
+            }
+        }
+        RecalcAllAdmiralBuildData();
+    } else {
+        if (message) {
+            StringSlice object_name = get_object_name(object->whichBaseObject);
+            if (owner >= 0) {
+                String new_owner_name(GetAdmiralName(object->owner));
+                Messages::add(format("{0} captured by {1}.", object_name, new_owner_name));
+            } else if (old_owner >= 0) { // must be since can't both be -1
+                String old_owner_name(GetAdmiralName(old_owner));
+                Messages::add(format("{0} lost by {1}.", object_name, old_owner_name));
+            }
         }
     }
 }
 
-void AlterObjectCloakState( spaceObjectType *anObject, bool cloak)
-{
-    int32_t         longscrap = kMaxSoundVolume;
-
-    if ( (cloak) && ( anObject->cloakState == 0))
-    {
-        anObject->cloakState = 1;
-        mPlayDistanceSound(longscrap, anObject, kCloakOn, kMediumPersistence, kPrioritySound);
-
-    } else if (((!(cloak)) || ( anObject->attributes & kRemoteOrHuman)) &&
-            ( anObject->cloakState >= 250))
-    {
-        anObject->cloakState = kCloakOffStateMax;
-        mPlayDistanceSound(longscrap, anObject, kCloakOff, kMediumPersistence, kPrioritySound);
+void AlterObjectOccupation(
+        spaceObjectType* object, int32_t owner, int32_t howMuch, bool message) {
+    if (object->active
+            && (object->attributes & kIsDestination)
+            && (object->attributes & kNeutralDeath)) {
+        if (AlterDestinationObjectOccupation(object->destinationObject, owner, howMuch)
+                >= object->baseType->initialAgeRange) {
+            AlterObjectOwner(object, owner, message);
+        }
     }
 }
 
-void DestroyObject(spaceObjectType* anObject) {
-    if (anObject->active != kObjectInUse) {
+void AlterObjectCloakState(spaceObjectType* object, bool cloak) {
+    if (cloak && (object->cloakState == 0)) {
+        object->cloakState = 1;
+        mPlayDistanceSound(kMaxSoundVolume, object, kCloakOn, kMediumPersistence, kPrioritySound);
+    } else if ((!cloak || (object->attributes & kRemoteOrHuman))
+            && (object->cloakState >= 250)) {
+        object->cloakState = kCloakOffStateMax;
+        mPlayDistanceSound(kMaxSoundVolume, object, kCloakOff, kMediumPersistence, kPrioritySound);
+    }
+}
+
+void DestroyObject(spaceObjectType* object) {
+    if (object->active != kObjectInUse) {
         return;
-    } else if (anObject->attributes & kNeutralDeath) {
-        anObject->health = anObject->baseType->health;
+    } else if (object->attributes & kNeutralDeath) {
+        object->health = object->baseType->health;
         // if anyone is targeting it, they should stop
         for (int16_t i = 0; i < kMaxSpaceObject; i++) {
             auto& fixObject = gSpaceObjectData[i];
             if ((fixObject.attributes & kCanAcceptDestination)
                     && (fixObject.active != kObjectAvailable)) {
-                if (fixObject.targetObjectNumber == anObject->entryNumber) {
+                if (fixObject.targetObjectNumber == object->entryNumber) {
                     fixObject.targetObjectNumber = kNoDestinationObject;
                 }
             }
         }
 
-        AlterObjectOwner(anObject, -1, true);
-        anObject->attributes &= ~(kHated | kCanEngage | kCanCollide | kCanBeHit);
+        AlterObjectOwner(object, -1, true);
+        object->attributes &= ~(kHated | kCanEngage | kCanCollide | kCanBeHit);
         execute_actions(
-                anObject->baseType->destroyAction,
-                anObject->baseType->destroyActionNum & kDestroyActionNotMask,
-                anObject, NULL, NULL, true);
+                object->baseType->destroyAction,
+                object->baseType->destroyActionNum & kDestroyActionNotMask,
+                object, NULL, NULL, true);
     } else {
-        AddKillToAdmiral(anObject);
-        if (anObject->attributes & kReleaseEnergyOnDeath) {
-            int16_t energyNum = anObject->energy / kEnergyPodAmount;
+        AddKillToAdmiral(object);
+        if (object->attributes & kReleaseEnergyOnDeath) {
+            int16_t energyNum = object->energy / kEnergyPodAmount;
             while (energyNum > 0) {
                 CreateAnySpaceObject(
-                        globals()->scenarioFileInfo.energyBlobID, &(anObject->velocity),
-                        &(anObject->location), anObject->direction, kNoOwner, 0, -1);
+                        globals()->scenarioFileInfo.energyBlobID, &object->velocity,
+                        &object->location, object->direction, kNoOwner, 0, -1);
                 energyNum--;
             }
         }
 
         // if it's a destination, we keep anyone from thinking they have it as a destination
         // (all at once since this should be very rare)
-        if ((anObject->attributes & kIsDestination) &&
-                !(anObject->baseType->destroyActionNum & kDestroyActionDontDieFlag)) {
-            RemoveDestination(anObject->destinationObject);
+        if ((object->attributes & kIsDestination) &&
+                !(object->baseType->destroyActionNum & kDestroyActionDontDieFlag)) {
+            RemoveDestination(object->destinationObject);
             for (int16_t i = 0; i < kMaxSpaceObject; i++) {
                 auto& fixObject = gSpaceObjectData[i];
                 if ((fixObject.attributes & kCanAcceptDestination)
                         && (fixObject.active != kObjectAvailable)) {
-                    if (fixObject.destinationObject == anObject->entryNumber) {
+                    if (fixObject.destinationObject == object->entryNumber) {
                         fixObject.destinationObject = kNoDestinationObject;
                         fixObject.destObjectPtr = NULL;
                         fixObject.attributes &= ~kStaticDestination;
@@ -1443,98 +1392,68 @@ void DestroyObject(spaceObjectType* anObject) {
         }
 
         execute_actions(
-                anObject->baseType->destroyAction,
-                anObject->baseType->destroyActionNum & kDestroyActionNotMask,
-                anObject, NULL, NULL, true);
+                object->baseType->destroyAction,
+                object->baseType->destroyActionNum & kDestroyActionNotMask,
+                object, NULL, NULL, true);
 
-        if (anObject->attributes & kCanAcceptDestination) {
-            RemoveObjectFromDestination(anObject);
+        if (object->attributes & kCanAcceptDestination) {
+            RemoveObjectFromDestination(object);
         }
-        if (!(anObject->baseType->destroyActionNum & kDestroyActionDontDieFlag)) {
-            anObject->active = kObjectToBeFreed;
-        }
-    }
-}
-
-
-void ActivateObjectSpecial( spaceObjectType *anObject)
-{
-    baseObjectType  *weaponObject, *baseObject = anObject->baseType;
-    Point           offset;
-    int16_t         h;
-    Fixed           fcos, fsin;
-
-    if (( anObject->specialTime <= 0) && ( anObject->specialType != kNoWeapon))
-    {
-        weaponObject = anObject->specialBase;
-        if ( (anObject->energy >= weaponObject->frame.weapon.energyCost) &&
-            (( weaponObject->frame.weapon.ammo < 0) || ( anObject->specialAmmo > 0)))
-        {
-            anObject->energy -= weaponObject->frame.weapon.energyCost;
-            anObject->specialPosition++;
-            if ( anObject->specialPosition >= baseObject->specialPositionNum) anObject->specialPosition = 0;
-
-            h = anObject->direction;
-            mAddAngle( h, -90);
-            GetRotPoint(&fcos, &fsin, h);
-            fcos = -fcos;
-            fsin = -fsin;
-
-            offset.h = mMultiplyFixed( baseObject->specialPosition[anObject->specialPosition].h, fcos);
-            offset.h -= mMultiplyFixed( baseObject->specialPosition[anObject->specialPosition].v, fsin);
-            offset.v = mMultiplyFixed( baseObject->specialPosition[anObject->specialPosition].h, fsin);
-            offset.v += mMultiplyFixed( baseObject->specialPosition[anObject->specialPosition].v, fcos);
-            offset.h = mFixedToLong( offset.h);
-            offset.v = mFixedToLong( offset.v);
-
-            anObject->specialTime = weaponObject->frame.weapon.fireTime;
-            if ( weaponObject->frame.weapon.ammo > 0) anObject->specialAmmo--;
-            execute_actions(
-                    weaponObject->activateAction,
-                    weaponObject->activateActionNum,
-                    anObject, NULL, NULL, true);
+        if (!(object->baseType->destroyActionNum & kDestroyActionDontDieFlag)) {
+            object->active = kObjectToBeFreed;
         }
     }
 }
 
-void CreateFloatingBodyOfPlayer( spaceObjectType *anObject)
+void ActivateObjectSpecial(spaceObjectType* object) {
+    if ((object->specialTime > 0) || (object->specialType == kNoWeapon)) {
+        return;
+    }
 
-{
-    int32_t     count;
+    auto weaponObject = object->specialBase;
+    auto baseObject = object->baseType;
+    if ((object->energy < weaponObject->frame.weapon.energyCost)
+            || ((weaponObject->frame.weapon.ammo >= 0) && (object->specialAmmo <= 0))) {
+        return;
+    }
 
-//  count = CreateAnySpaceObject( globals()->scenarioFileInfo.playerBodyID, &(anObject->velocity),
-//      &(anObject->location), anObject->direction, anObject->owner, 0, nil, -1, -1, -1);
+    object->energy -= weaponObject->frame.weapon.energyCost;
+    object->specialPosition++;
+    if (object->specialPosition >= baseObject->specialPositionNum) {
+        object->specialPosition = 0;
+    }
 
+    int16_t direction = object->direction;
+    mAddAngle(direction, -90);
+    Fixed fcos, fsin;
+    GetRotPoint(&fcos, &fsin, direction);
+    fcos = -fcos;
+    fsin = -fsin;
+
+    object->specialTime = weaponObject->frame.weapon.fireTime;
+    if (weaponObject->frame.weapon.ammo > 0) {
+        object->specialAmmo--;
+    }
+    execute_actions(
+            weaponObject->activateAction,
+            weaponObject->activateActionNum,
+            object, NULL, NULL, true);
+}
+
+void CreateFloatingBodyOfPlayer(spaceObjectType* obj) {
+    const auto body = globals()->scenarioFileInfo.playerBodyID;
     // if we're already in a body, don't create a body from it
     // a body expiring is handled elsewhere
-    if ( anObject->whichBaseObject == globals()->scenarioFileInfo.playerBodyID) return;
+    if (obj->whichBaseObject == body) {
+        return;
+    }
 
-    count = CreateAnySpaceObject( globals()->scenarioFileInfo.playerBodyID, &(anObject->velocity),
-        &(anObject->location), anObject->direction, anObject->owner, 0, -1);
-    if ( count >= 0)
-    {
-/*      if (( anObject->owner == globals()->gPlayerAdmiralNumber) && ( anObject->attributes & kIsHumanControlled))
-        {
-            attributes = anObject->attributes & ( kIsHumanControlled | kIsPlayerShip);
-            anObject->attributes &= (~kIsHumanControlled) & (~kIsPlayerShip);
-            globals()->gPlayerShipNumber = count;
-            ResetScrollStars( globals()->gPlayerShipNumber);
-            anObject = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
-            anObject->attributes |= attributes;
-        } else
-        {
-            attributes = anObject->attributes & kIsRemote;
-            anObject->attributes &= ~kIsRemote;
-            anObject = gSpaceObjectData.get() + count;
-            anObject->attributes |= attributes;
-        }
-        SetAdmiralFlagship( anObject->owner, count);
-*/
-        ChangePlayerShipNumber( anObject->owner, count);
-
-    } else
-    {
-        PlayerShipBodyExpire( anObject, true);
+    int32_t ship_number = CreateAnySpaceObject(
+            body, &obj->velocity, &obj->location, obj->direction, obj->owner, 0, -1);
+    if (ship_number >= 0) {
+        ChangePlayerShipNumber(obj->owner, ship_number);
+    } else {
+        PlayerShipBodyExpire(obj, true);
     }
 }
 
