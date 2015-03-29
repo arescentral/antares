@@ -88,57 +88,60 @@ spaceObjectType *HackNewNonplayerShip( int32_t owner, int16_t type, Rect *bounds
 }
 
 static void tick_weapon(
-        spaceObjectType* anObject, spaceObjectType* targetObject, int32_t timePass,
+        spaceObjectType* subject, spaceObjectType* target, int32_t timePass,
         uint32_t key, const baseObjectType::Weapon& base_weapon, spaceObjectType::Weapon& weapon) {
-    int16_t         h;
-    Fixed           fcos, fsin;
-    baseObjectType* baseObject = anObject->baseType;
-    baseObjectType* weaponObject;
-    if ( weapon.time > 0) weapon.time -= timePass;
-    if (( anObject->keysDown & key) && ( weapon.time <= 0) &&
-            ( weapon.type != kNoWeapon))
-    {
-        weaponObject = weapon.base;
-        if (( anObject->energy >= weaponObject->frame.weapon.energyCost)
-                && (( weaponObject->frame.weapon.ammo < 0) ||
-                    ( weapon.ammo > 0)))
-        {
-            if (&weapon != &anObject->special) {
-                if ( anObject->cloakState > 0)
-                    AlterObjectCloakState( anObject, false);
-            }
-            anObject->energy -= weaponObject->frame.weapon.energyCost;
-            weapon.position++;
-            if ( weapon.position >= base_weapon.positionNum)
-                weapon.position = 0;
-
-            h = anObject->direction;
-            mAddAngle( h, -90);
-            GetRotPoint(&fcos, &fsin, h);
-            fcos = -fcos;
-            fsin = -fsin;
-
-            Point offset;
-            Point* at = nullptr;
-            if (&weapon != &anObject->special) {
-                offset.h = mMultiplyFixed( base_weapon.position[weapon.position].h, fcos);
-                offset.h -= mMultiplyFixed( base_weapon.position[weapon.position].v, fsin);
-                offset.v = mMultiplyFixed( base_weapon.position[weapon.position].h, fsin);
-                offset.v += mMultiplyFixed( base_weapon.position[weapon.position].v, fcos);
-                offset.h = mFixedToLong( offset.h);
-                offset.v = mFixedToLong( offset.v);
-                at = &offset;
-            }
-
-            weapon.time = weaponObject->frame.weapon.fireTime;
-            if ( weaponObject->frame.weapon.ammo > 0)
-                weapon.ammo--;
-            execute_actions(
-                    weaponObject->activateAction,
-                    weaponObject->activateActionNum,
-                    anObject, targetObject, at, true);
-        }
+    if (weapon.time > 0) {
+        weapon.time -= timePass;
     }
+    if (!(subject->keysDown & key)
+            || (weapon.time > 0)
+            || (weapon.type == kNoWeapon)) {
+        return;
+    }
+
+    baseObjectType* baseObject = subject->baseType;
+    baseObjectType* weaponObject = weapon.base;
+    if ((subject->energy < weaponObject->frame.weapon.energyCost)
+            || ((weaponObject->frame.weapon.ammo > 0) && (weapon.ammo <= 0))) {
+        return;
+    }
+    if ((&weapon != &subject->special)
+            && (subject->cloakState > 0)) {
+        AlterObjectCloakState(subject, false);
+    }
+    subject->energy -= weaponObject->frame.weapon.energyCost;
+    weapon.position++;
+    if (weapon.position >= base_weapon.positionNum) {
+        weapon.position = 0;
+    }
+
+    int16_t angle = subject->direction;
+    mAddAngle(angle, -90);
+    Fixed fcos, fsin;
+    GetRotPoint(&fcos, &fsin, angle);
+    fcos = -fcos;
+    fsin = -fsin;
+
+    Point offset;
+    Point* at = nullptr;
+    if (&weapon != &subject->special) {
+        offset.h = mMultiplyFixed(base_weapon.position[weapon.position].h, fcos);
+        offset.h -= mMultiplyFixed(base_weapon.position[weapon.position].v, fsin);
+        offset.v = mMultiplyFixed(base_weapon.position[weapon.position].h, fsin);
+        offset.v += mMultiplyFixed(base_weapon.position[weapon.position].v, fcos);
+        offset.h = mFixedToLong(offset.h);
+        offset.v = mFixedToLong(offset.v);
+        at = &offset;
+    }
+
+    weapon.time = weaponObject->frame.weapon.fireTime;
+    if (weaponObject->frame.weapon.ammo > 0) {
+        weapon.ammo--;
+    }
+    execute_actions(
+            weaponObject->activateAction,
+            weaponObject->activateActionNum,
+            subject, target, at, true);
 }
 
 static void tick_pulse(spaceObjectType* subject, spaceObjectType* target, int32_t timePass) {
