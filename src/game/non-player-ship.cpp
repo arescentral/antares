@@ -1978,51 +1978,46 @@ uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *ta
     return( keysDown);
 }
 
-void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
+void HitObject(spaceObjectType *anObject, spaceObjectType *sObject) {
+    if (anObject->active != kObjectInUse) {
+        return;
+    }
 
-{
-    if ( anObject->active == kObjectInUse)
-    {
-        anObject->timeFromOrigin = 0;
-        if (( (anObject->health - sObject->baseType->damage) < 0)
-            && ( anObject->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
-            (!(anObject->baseType->destroyActionNum & kDestroyActionDontDieFlag)))
-        {
-            CreateFloatingBodyOfPlayer( anObject);
-        }
-        AlterObjectHealth( anObject, -(sObject->baseType->damage));
-        if ( anObject->shieldColor != 0xFF)
-        {
-            anObject->hitState = ( anObject->health * kHitStateMax) / anObject->baseType->health;
-            anObject->hitState += 16;
-        }
+    anObject->timeFromOrigin = 0;
+    if (((anObject->health - sObject->baseType->damage) < 0)
+            && (anObject->attributes & (kIsPlayerShip | kRemoteOrHuman))
+            && !(anObject->baseType->destroyActionNum & kDestroyActionDontDieFlag)) {
+        CreateFloatingBodyOfPlayer( anObject);
+    }
+    AlterObjectHealth(anObject, -sObject->baseType->damage);
+    if (anObject->shieldColor != 0xFF) {
+        anObject->hitState = ( anObject->health * kHitStateMax) / anObject->baseType->health;
+        anObject->hitState += 16;
+    }
 
-        if ( anObject->cloakState > 0) anObject->cloakState = 1;
+    if (anObject->cloakState > 0) {
+        anObject->cloakState = 1;
+    }
 
-        if (anObject->health < 0) {
-            if ((anObject->owner == globals()->gPlayerAdmiralNumber)
-                    && (anObject->attributes & kCanAcceptDestination)) {
-                const StringSlice& object_name = get_object_name(anObject->whichBaseObject);
-                int count = CountObjectsOfBaseType(anObject->whichBaseObject, anObject->owner) - 1;
-                Messages::add(format(" {0} destroyed.  {1} remaining. ", object_name, count));
-            }
-        }
+    if (anObject->health < 0
+            && (anObject->owner == globals()->gPlayerAdmiralNumber)
+            && (anObject->attributes & kCanAcceptDestination)) {
+        const StringSlice& object_name = get_object_name(anObject->whichBaseObject);
+        int count = CountObjectsOfBaseType(anObject->whichBaseObject, anObject->owner) - 1;
+        Messages::add(format(" {0} destroyed.  {1} remaining. ", object_name, count));
+    }
 
-        if ( sObject->active == kObjectInUse)
-        {
-            execute_actions(
-                    sObject->baseType->collideAction,
-                    sObject->baseType->collideActionNum,
-                    sObject, anObject, NULL, true);
-        }
+    if (sObject->active == kObjectInUse) {
+        execute_actions(
+                sObject->baseType->collideAction,
+                sObject->baseType->collideActionNum,
+                sObject, anObject, NULL, true);
+    }
 
-        if ( anObject->owner == globals()->gPlayerAdmiralNumber)
-        {
-            if ((anObject->attributes & kIsHumanControlled) && ( sObject->baseType->damage > 0))
-            {
-                globals()->transitions.start_boolean(128, 128, WHITE);
-            }
-        }
+    if (anObject->owner == globals()->gPlayerAdmiralNumber
+            && (anObject->attributes & kIsHumanControlled)
+            && (sObject->baseType->damage > 0)) {
+        globals()->transitions.start_boolean(128, 128, WHITE);
     }
 }
 
