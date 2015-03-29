@@ -192,7 +192,7 @@ static void tick_special(spaceObjectType* subject, spaceObjectType* target, int3
 void NonplayerShipThink( int32_t timePass)
 {
     admiralType     *anAdmiral;
-    spaceObjectType *anObject, *targetObject;
+    spaceObjectType *targetObject;
     baseObjectType  *baseObject, *weaponObject;
     Point           offset;
     int32_t         count, difference;
@@ -237,10 +237,7 @@ void NonplayerShipThink( int32_t timePass)
 
 // it probably doesn't matter what order we do this in, but we'll do it in the "ideal" order anyway
 
-    anObject = gRootObject;
-
-    while ( anObject != NULL)
-    {
+    for (auto anObject = gRootObject; anObject; anObject = anObject->nextObject) {
         if (anObject->active)
         {
             globals()->gSynchValue += anObject->location.h;
@@ -525,8 +522,6 @@ void NonplayerShipThink( int32_t timePass)
 
             }
         }
-
-        anObject = anObject->nextObject;
     }
 }
 #endif  // kUseOldThinking
