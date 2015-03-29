@@ -594,30 +594,24 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
 }
 
 void CollideSpaceObjects() {
-    spaceObjectType         *sObject = NULL, *dObject = NULL, *aObject = NULL, *bObject = NULL,
-                            *player = NULL, *taObject, *tbObject;
     int32_t                    i = 0, j = 0, k, xs, xe, ys, ye, xd, yd, superx, supery, scaleCalc, difference;
-    int16_t                 cs, ce;
-    bool                 beamHit;
-    uint32_t                distance, dcalc/*,
-                            closestDist = kMaximumRelevantDistanceSquared + kMaximumRelevantDistanceSquared*/;
-    proximityUnitType       *proximityObject, *currentProximity;
+    uint32_t                distance, dcalc;
 
-    uint64_t                farthestDist, hugeDistance, wideScrap, closestDist;
-    farthestDist = 0;
-    closestDist = 0x7fffffffffffffffull;
+    uint64_t farthestDist = 0;
+    uint64_t closestDist = 0x7fffffffffffffffull;
+    uint64_t hugeDistance;
+    uint64_t wideScrap;
 
     // set up player info so we can find closest ship (for scaling)
+    spaceObjectType* player = nullptr;
     if (globals()->gPlayerShipNumber >= 0) {
         player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
-    } else {
-        player = NULL;
     }
     globals()->gClosestObject = 0;
     globals()->gFarthestObject = 0;
 
     // reset the collision grid
-    proximityObject = gProximityGrid.get();
+    proximityUnitType* proximityObject = gProximityGrid.get();
     for (i = 0; i < kProximityGridDataLength; i++) {
         proximityObject->nearObject = proximityObject->farObject = NULL;
         proximityObject++;
@@ -745,9 +739,9 @@ void CollideSpaceObjects() {
     proximityObject = gProximityGrid.get();
     for (j = 0; j < kProximitySuperSize; j++) {
         for (i = 0; i < kProximitySuperSize; i++) {
-            aObject = proximityObject->nearObject;
+            auto aObject = proximityObject->nearObject;
             while (aObject != NULL) {
-                taObject = aObject->nextNearObject;
+                const auto taObject = aObject->nextNearObject;
 
                 // this hack is to get the current bounds of the object in question
                 // it could be sped up by accessing the sprite table directly
@@ -780,8 +774,9 @@ void CollideSpaceObjects() {
                                                 aObject->scaledSize.v;
                 }
 
-                currentProximity = proximityObject;
+                auto currentProximity = proximityObject;
                 for (k = 0; k < kUnitsToCheckNumber; k++) {
+                    spaceObjectType* bObject;
                     if (k == 0) {
                         bObject = aObject->nextNearObject;
                         superx = aObject->collisionGrid.h;
@@ -800,7 +795,7 @@ void CollideSpaceObjects() {
                     }
                     if ((superx >= 0) && (supery >= 0)) {
                         while (bObject != NULL) {
-                            tbObject = bObject->nextNearObject;
+                            const auto tbObject = bObject->nextNearObject;
                             // this'll be true even ONLY if BOTH objects are not non-physical dest object
                             if (((bObject->attributes | aObject->attributes) & kCanCollide)
                                     && ((bObject->attributes | aObject->attributes) & kCanBeHit)
@@ -836,6 +831,9 @@ void CollideSpaceObjects() {
                                     bObject->absoluteBounds.bottom = bObject->absoluteBounds.top +
                                                                 bObject->scaledSize.v;
                                 }
+
+                                spaceObjectType* sObject;
+                                spaceObjectType* dObject;
                                 if (aObject->owner != bObject->owner) {
                                     if (!((bObject->attributes | aObject->attributes) & kIsBeam)) {
                                         dObject = aObject;
@@ -865,9 +863,9 @@ void CollideSpaceObjects() {
                                         xe = sObject->frame.beam.beam->lastGlobalLocation.h;
                                         ye = sObject->frame.beam.beam->lastGlobalLocation.v;
 
-                                        cs = mClipCode( xs, ys, dObject->absoluteBounds);
-                                        ce = mClipCode( xe, ye, dObject->absoluteBounds);
-                                        beamHit = true;
+                                        int16_t cs = mClipCode( xs, ys, dObject->absoluteBounds);
+                                        int16_t ce = mClipCode( xe, ye, dObject->absoluteBounds);
+                                        bool beamHit = true;
                                         if (sObject->active == kObjectToBeFreed) {
                                             cs = ce = 1;
                                             beamHit = false;
@@ -949,11 +947,12 @@ void CollideSpaceObjects() {
     proximityObject = gProximityGrid.get();
     for (j = 0; j < kProximitySuperSize; j++) {
         for (i = 0; i < kProximitySuperSize; i++) {
-            aObject = proximityObject->farObject;
+            auto aObject = proximityObject->farObject;
             while (aObject != NULL) {
-                taObject = aObject->nextFarObject;
-                currentProximity = proximityObject;
+                const auto taObject = aObject->nextFarObject;
+                auto currentProximity = proximityObject;
                 for (k = 0; k < kUnitsToCheckNumber; k++) {
+                    spaceObjectType* bObject;
                     if (k == 0) {
                         bObject = aObject->nextFarObject;
                         superx = aObject->distanceGrid.h;
@@ -966,7 +965,7 @@ void CollideSpaceObjects() {
                     }
                     if ((superx >= 0) && (supery >= 0)) {
                         while (bObject != NULL) {
-                            tbObject = bObject->nextFarObject;
+                            const auto tbObject = bObject->nextFarObject;
                             if ((bObject->owner != aObject->owner)
                                     && (bObject->distanceGrid.h == superx)
                                     && (bObject->distanceGrid.v == supery)
@@ -1075,7 +1074,7 @@ void CollideSpaceObjects() {
     const uint32_t seen_by_player = 1ul << globals()->gPlayerAdmiralNumber;
 
     for (i = 0; i < kMaxSpaceObject; i++) {
-        aObject = mGetSpaceObjectPtr(i);
+        auto aObject = mGetSpaceObjectPtr(i);
         if (aObject->active == kObjectToBeFreed) {
             if (aObject->attributes & kIsBeam) {
                 if (aObject->frame.beam.beam != NULL) {
@@ -1085,12 +1084,12 @@ void CollideSpaceObjects() {
                 aObject->attributes = 0;
                 aObject->nextNearObject = aObject->nextFarObject = NULL;
                 if (aObject->previousObject != NULL) {
-                    bObject = aObject->previousObject;
+                    auto bObject = aObject->previousObject;
                     bObject->nextObject = aObject->nextObject;
                     bObject->nextObjectNumber = aObject->nextObjectNumber;
                 }
                 if (aObject->nextObject != NULL) {
-                    bObject = aObject->nextObject;
+                    auto bObject = aObject->nextObject;
                     bObject->previousObject = aObject->previousObject;
                     bObject->previousObjectNumber = aObject->previousObjectNumber;
                 }
@@ -1110,12 +1109,12 @@ void CollideSpaceObjects() {
                 aObject->attributes = 0;
                 aObject->nextNearObject = aObject->nextFarObject = NULL;
                 if (aObject->previousObject != NULL) {
-                    bObject = aObject->previousObject;
+                    auto bObject = aObject->previousObject;
                     bObject->nextObject = aObject->nextObject;
                     bObject->nextObjectNumber = aObject->nextObjectNumber;
                 }
                 if (aObject->nextObject != NULL) {
-                    bObject = aObject->nextObject;
+                    auto bObject = aObject->nextObject;
                     bObject->previousObject = aObject->previousObject;
                     bObject->previousObjectNumber = aObject->previousObjectNumber;
                 }
@@ -1150,7 +1149,6 @@ void CollideSpaceObjects() {
         }
         aObject->lastLocation = aObject->location;
         aObject->lastDir = aObject->direction;
-        aObject++;
     }
 }
 
