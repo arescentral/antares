@@ -630,6 +630,9 @@ void CollideSpaceObjects() {
                         aObject->baseType->expireAction,
                         aObject->baseType->expireActionNum & kDestroyActionNotMask,
                         aObject, NULL, NULL, true);
+                if (!aObject->active) {
+                    continue;
+                }
             }
         }
 
@@ -644,6 +647,9 @@ void CollideSpaceObjects() {
                     ((aObject->baseType->activateActionNum & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift)
                     + aObject->randomSeed.next(
                             ((aObject->baseType->activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift));
+                if (!aObject->active) {
+                    continue;
+                }
             }
         }
 
