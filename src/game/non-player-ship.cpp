@@ -89,76 +89,30 @@ spaceObjectType *HackNewNonplayerShip( int32_t owner, int16_t type, Rect *bounds
 
 static void recharge(spaceObjectType* anObject) {
     auto baseObject = anObject->baseType;
-    if (( anObject->energy < (baseObject->energy - kEnergyChunk)) &&
-        ( anObject->battery > kEnergyChunk))
-    {
+    if ((anObject->energy < (baseObject->energy - kEnergyChunk))
+            && (anObject->battery > kEnergyChunk)) {
         anObject->battery -= kEnergyChunk;
         anObject->energy += kEnergyChunk;
     }
 
-    if (( anObject->health < ( baseObject->health >> 1)) &&
-        ( anObject->energy > kHealthRatio))
-    {
+    if ((anObject->health < (baseObject->health / 2))
+            && (anObject->energy > kHealthRatio)) {
         anObject->health++;
         anObject->energy -= kHealthRatio;
     }
 
-    if ( anObject->pulse.type != kNoWeapon)
-    {
-        if (( anObject->pulse.ammo <
-            (anObject->pulse.base->frame.weapon.ammo >> 1)) &&
-            ( anObject->energy >= kWeaponRatio))
-        {
-            anObject->pulse.charge++;
-            anObject->energy -= kWeaponRatio;
+    for (auto* weapon: {&anObject->pulse, &anObject->beam, &anObject->special}) {
+        if (weapon->type != kNoWeapon) {
+            if ((weapon->ammo < (weapon->base->frame.weapon.ammo >> 1))
+                    && (anObject->energy >= kWeaponRatio)) {
+                weapon->charge++;
+                anObject->energy -= kWeaponRatio;
 
-            if (( anObject->pulse.base->frame.weapon.restockCost >= 0)
-                && (anObject->pulse.charge >=
-                anObject->pulse.base->frame.weapon.restockCost))
-            {
-                anObject->pulse.charge -=
-                    anObject->pulse.base->frame.weapon.restockCost;
-                anObject->pulse.ammo++;
-            }
-        }
-    }
-
-    if ( anObject->beam.type != kNoWeapon)
-    {
-        if (( anObject->beam.ammo <
-            (anObject->beam.base->frame.weapon.ammo >> 1)) &&
-            ( anObject->energy >= kWeaponRatio))
-        {
-            anObject->beam.charge++;
-            anObject->energy -= kWeaponRatio;
-
-            if ((anObject->beam.base->frame.weapon.restockCost >= 0) &&
-                ( anObject->beam.charge >=
-                anObject->beam.base->frame.weapon.restockCost))
-            {
-                anObject->beam.charge -=
-                    anObject->beam.base->frame.weapon.restockCost;
-                anObject->beam.ammo++;
-            }
-        }
-    }
-
-    if ( anObject->special.type != kNoWeapon)
-    {
-        if (( anObject->special.ammo <
-            (anObject->special.base->frame.weapon.ammo >> 1)) &&
-            ( anObject->energy >= kWeaponRatio))
-        {
-            anObject->special.charge++;
-            anObject->energy -= kWeaponRatio;
-
-            if (( anObject->special.base->frame.weapon.restockCost >= 0)
-                && ( anObject->special.charge >=
-                anObject->special.base->frame.weapon.restockCost))
-            {
-                anObject->special.charge -=
-                    anObject->special.base->frame.weapon.restockCost;
-                anObject->special.ammo++;
+                if ((weapon->base->frame.weapon.restockCost >= 0)
+                        && (weapon->charge >= weapon->base->frame.weapon.restockCost)) {
+                    weapon->charge -= weapon->base->frame.weapon.restockCost;
+                    weapon->ammo++;
+                }
             }
         }
     }
