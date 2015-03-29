@@ -238,290 +238,292 @@ void NonplayerShipThink( int32_t timePass)
 // it probably doesn't matter what order we do this in, but we'll do it in the "ideal" order anyway
 
     for (auto anObject = gRootObject; anObject; anObject = anObject->nextObject) {
-        if (anObject->active)
+        if (!anObject->active) {
+            continue;
+        }
+
+        globals()->gSynchValue += anObject->location.h;
+        globals()->gSynchValue += anObject->location.v;
+
+        keysDown = anObject->keysDown & kSpecialKeyMask;
+
+        // pay the admiral if this is a destination object
+        //          if (( anObject->attributes & kIsDestination) && ( anObject->owner != kNoOwner))
+        //          {
+        //              PayAdmiral( anObject->owner, 1);
+        //          }
+
+        // strobe its symbol if it's not feeling well
+        if ( anObject->sprite != NULL)
         {
-            globals()->gSynchValue += anObject->location.h;
-            globals()->gSynchValue += anObject->location.v;
-
-            keysDown = anObject->keysDown & kSpecialKeyMask;
-
-            // pay the admiral if this is a destination object
-//          if (( anObject->attributes & kIsDestination) && ( anObject->owner != kNoOwner))
-//          {
-//              PayAdmiral( anObject->owner, 1);
-//          }
-
-            // strobe its symbol if it's not feeling well
-            if ( anObject->sprite != NULL)
+            if ((anObject->health > 0) && ( anObject->health <= ( anObject->baseType->health >> 2)))
             {
-                if ((anObject->health > 0) && ( anObject->health <= ( anObject->baseType->health >> 2)))
-                {
-                    if ( anObject->owner == globals()->gPlayerAdmiralNumber)
-                        anObject->sprite->tinyColor = friendSick;
-                    else if ( anObject->owner < 0)
-                        anObject->sprite->tinyColor = neutralSick;
-                    else
-                        anObject->sprite->tinyColor = foeSick;
-                } else
-                {
-                    anObject->sprite->tinyColor = anObject->tinyColor;
-                }
-            }
-
-            // if the object can think, or is human controlled
-            if ( anObject->attributes & ( kCanThink | kRemoteOrHuman))
+                if ( anObject->owner == globals()->gPlayerAdmiralNumber)
+                    anObject->sprite->tinyColor = friendSick;
+                else if ( anObject->owner < 0)
+                    anObject->sprite->tinyColor = neutralSick;
+                else
+                    anObject->sprite->tinyColor = foeSick;
+            } else
             {
-                // get the object's base object
-                baseObject = anObject->baseType;
-                anObject->targetAngle = anObject->directionGoal = anObject->direction;
-                // incremenent its admiral's # of ships
-                if ( anObject->owner > kNoOwner)
-                {
-                    anAdmiral = mGetAdmiralPtr( anObject->owner);
-                    anAdmiral->shipsLeft++;
-                }
-
-                switch( anObject->presenceState)
-                {
-                    case kNormalPresence:
-                        keysDown = ThinkObjectNormalPresence( anObject, baseObject, timePass);
-                        break;
-
-                    case kWarpingPresence:
-                        keysDown = ThinkObjectWarpingPresence( anObject);
-                        break;
-
-                    case kWarpInPresence:
-                        keysDown = ThinkObjectWarpInPresence( anObject);
-                        break;
-
-                    case kWarpOutPresence:
-                        keysDown = ThinkObjectWarpOutPresence( anObject, baseObject);
-                        break;
-
-                    case kLandingPresence:
-                        keysDown = ThinkObjectLandingPresence( anObject);
-                        break;
-
-                    case kTakeoffPresence:
-                        break;
-                }
-
-                if (( !(anObject->attributes & kRemoteOrHuman)) ||
-                    ( anObject->attributes & kOnAutoPilot))
-                {
-                    if ( anObject->attributes & kHasDirectionGoal)
-                    {
-                        if ( anObject->attributes & kShapeFromDirection)
-                        {
-                            if (( anObject->attributes & kIsGuided) &&
-                                ( anObject->targetObjectNumber != kNoShip))
-                            {
-                                difference = anObject->targetAngle - anObject->direction;
-                                if (( difference < -60) || ( difference > 60))
-                                {
-                                    anObject->targetObjectNumber = kNoShip;
-                                    anObject->targetObjectID = kNoShip;
-                                    anObject->directionGoal = anObject->direction;
-                                }
-                            }
-
-                            offset.h = mAngleDifference( anObject->directionGoal,
-                                        anObject->direction);
-                            offset.v = mFixedToLong( baseObject->frame.rotation.maxTurnRate << 1);
-                            difference = ABS( offset.h);
-                        } else
-                        {
-                            offset.h = mAngleDifference( anObject->directionGoal,
-                                        anObject->direction);
-                            offset.v = mFixedToLong( kDefaultTurnRate << 1);
-                            difference = ABS( offset.h);
-                        }
-                        if ( difference > offset.v)
-                        {
-                            if ( offset.h < 0)
-                                keysDown |= kRightKey;
-                            else if ( offset.h > 0) keysDown |= kLeftKey;
-                        }
-                    }
-    // and here?
-                    if ( !(anObject->keysDown & kManualOverrideFlag))
-                    {
-                        if ( anObject->closestDistance < kEngageRange)
-                        {
-                            // why do we only do this randomly when closest is within engagerange?
-                            // to simulate the innaccuracy of battle
-                            // (to keep things from wiggling, really)
-                            if  (
-                                    anObject->randomSeed.next(baseObject->skillDen)
-                                    <
-                                    baseObject->skillNum
-                                )
-                            {
-                                anObject->keysDown &= ~kMotionKeyMask;
-                                anObject->keysDown |= keysDown & kMotionKeyMask;
-                            }
-                            if (anObject->randomSeed.next(3) == 1) {
-                                anObject->keysDown &= ~kWeaponKeyMask;
-                                anObject->keysDown |= keysDown & kWeaponKeyMask;
-                            }
-                            {
-                                anObject->keysDown &= ~kMiscKeyMask;
-                                anObject->keysDown |= keysDown & kMiscKeyMask;
-                            }
-                        } else
-                        {
-                            anObject->keysDown = (anObject->keysDown & kSpecialKeyMask)
-                                | keysDown;
-                        }
-                    } else
-                    {
-                        anObject->keysDown &= ~kManualOverrideFlag;
-                    }
-                }
-
-                // Take care of any "keys" being pressed
-
-                if ( anObject->keysDown & kAdoptTargetKey)
-                {
-                    SetObjectDestination( anObject, NULL);
-                }
-
-                if ( anObject->keysDown & kAutoPilotKey)
-                {
-                    TogglePlayerAutoPilot( anObject);
-                }
-
-                if ( anObject->keysDown & kGiveCommandKey)
-                {
-                    PlayerShipGiveCommand( anObject->owner);
-                }
-
-                anObject->keysDown &= ~kSpecialKeyMask;
-
-                if ( anObject->offlineTime > 0)
-                {
-                    if (anObject->randomSeed.next(anObject->offlineTime) > 5) {
-                        anObject->keysDown = 0;
-                    }
-                    anObject->offlineTime--;
-                }
-
-                if ( ( anObject->attributes & kRemoteOrHuman) &&
-                    ( !(anObject->attributes & kCanThink)) && ( anObject->age < 120))
-                {
-                    PlayerShipBodyExpire( anObject, true);
-                }
-
-                if (( anObject->attributes & kHasDirectionGoal) &&
-                    ( anObject->offlineTime <= 0))
-                {
-                        if ( anObject->attributes & kShapeFromDirection)    // design flaw: can't have turn rate unless shapefromdirection
-                        {
-                            if ( anObject->keysDown & kLeftKey)
-                            {
-                                anObject->turnVelocity =
-                                    -baseObject->frame.rotation.maxTurnRate;
-                            } else if ( anObject->keysDown & kRightKey)
-                            {
-                                anObject->turnVelocity =
-                                    baseObject->frame.rotation.maxTurnRate;
-                            } else anObject->turnVelocity = 0;
-                        } else
-                        {
-                            if ( anObject->keysDown & kLeftKey)
-                            {
-                                anObject->turnVelocity = -kDefaultTurnRate;
-                            } else if ( anObject->keysDown & kRightKey)
-                            {
-                                anObject->turnVelocity = kDefaultTurnRate;
-                            } else anObject->turnVelocity = 0;
-                        }
-                }
-
-                if ( anObject->keysDown & kUpKey)
-                {
-
-                    if (!(( anObject->presenceState == kWarpInPresence) ||
-                        ( anObject->presenceState == kWarpingPresence) ||
-                        ( anObject->presenceState == kWarpOutPresence)))
-                    {
-                        anObject->thrust = baseObject->maxThrust;
-                    }
-                } else if ( anObject->keysDown & kDownKey)
-                {
-                    if (!(( anObject->presenceState == kWarpInPresence) ||
-                        ( anObject->presenceState == kWarpingPresence) ||
-                        ( anObject->presenceState == kWarpOutPresence)))
-                    {
-                        anObject->thrust = -baseObject->maxThrust;
-                    }
-                    anObject->thrust = -baseObject->maxThrust;
-                } else anObject->thrust = 0;
-
-                if ( anObject->rechargeTime < kRechargeSpeed)
-                {
-                    anObject->rechargeTime++;
-                } else
-                {
-                    anObject->rechargeTime = 0;
-
-                    if ( anObject->presenceState == kWarpingPresence)
-                    {
-                        anObject->energy -= 1;
-                        anObject->warpEnergyCollected += 1;
-                        if ( anObject->energy <= 0)
-                        {
-                            anObject->energy = 0;
-                        }
-                    }
-
-                    if (anObject->presenceState == kNormalPresence) {
-                        recharge(anObject);
-                    }
-                }
-
-                // targetObject is set for all three weapons -- do not change
-                if ( anObject->targetObjectNumber >= 0)
-                {
-                    targetObject = mGetSpaceObjectPtr(anObject->targetObjectNumber);
-                } else targetObject = NULL;
-
-                tick_pulse(anObject, targetObject, timePass);
-                tick_beam(anObject, targetObject, timePass);
-                tick_special(anObject, targetObject, timePass);
-
-                if (( anObject->keysDown & kWarpKey) && ( baseObject->warpSpeed > 0) &&
-                    ( anObject->energy > 0))
-                {
-                    if (( anObject->presenceState == kWarpingPresence) ||
-                        ( anObject->presenceState == kWarpOutPresence))
-                    {
-                        anObject->thrust = mMultiplyFixed( baseObject->maxThrust,
-                            anObject->presenceData);
-                    } else if (( anObject->presenceState == kNormalPresence) &&
-                        ( anObject->energy > ( anObject->baseType->energy >> kWarpInEnergyFactor)))
-                    {
-                        anObject->presenceState = kWarpInPresence;
-                        anObject->presenceData = 0;
-                    }
-                } else
-                {
-                    if ( anObject->presenceState == kWarpInPresence)
-                    {
-                        anObject->presenceState = kNormalPresence;
-                    } else if ( anObject->presenceState == kWarpingPresence)
-                    {
-                        anObject->presenceState = kWarpOutPresence;
-                    } else if ( anObject->presenceState == kWarpOutPresence)
-                    {
-                            anObject->thrust = mMultiplyFixed( baseObject->maxThrust,
-                                anObject->presenceData);
-                    }
-                }
-
+                anObject->sprite->tinyColor = anObject->tinyColor;
             }
         }
+
+        // if the object can think, or is human controlled
+        if (!(anObject->attributes & (kCanThink | kRemoteOrHuman))) {
+            continue;
+        }
+
+        // get the object's base object
+        baseObject = anObject->baseType;
+        anObject->targetAngle = anObject->directionGoal = anObject->direction;
+        // incremenent its admiral's # of ships
+        if ( anObject->owner > kNoOwner)
+        {
+            anAdmiral = mGetAdmiralPtr( anObject->owner);
+            anAdmiral->shipsLeft++;
+        }
+
+        switch( anObject->presenceState)
+        {
+          case kNormalPresence:
+            keysDown = ThinkObjectNormalPresence( anObject, baseObject, timePass);
+            break;
+
+          case kWarpingPresence:
+            keysDown = ThinkObjectWarpingPresence( anObject);
+            break;
+
+          case kWarpInPresence:
+            keysDown = ThinkObjectWarpInPresence( anObject);
+            break;
+
+          case kWarpOutPresence:
+            keysDown = ThinkObjectWarpOutPresence( anObject, baseObject);
+            break;
+
+          case kLandingPresence:
+            keysDown = ThinkObjectLandingPresence( anObject);
+            break;
+
+          case kTakeoffPresence:
+            break;
+        }
+
+        if (( !(anObject->attributes & kRemoteOrHuman)) ||
+                ( anObject->attributes & kOnAutoPilot))
+        {
+            if ( anObject->attributes & kHasDirectionGoal)
+            {
+                if ( anObject->attributes & kShapeFromDirection)
+                {
+                    if (( anObject->attributes & kIsGuided) &&
+                            ( anObject->targetObjectNumber != kNoShip))
+                    {
+                        difference = anObject->targetAngle - anObject->direction;
+                        if (( difference < -60) || ( difference > 60))
+                        {
+                            anObject->targetObjectNumber = kNoShip;
+                            anObject->targetObjectID = kNoShip;
+                            anObject->directionGoal = anObject->direction;
+                        }
+                    }
+
+                    offset.h = mAngleDifference( anObject->directionGoal,
+                            anObject->direction);
+                    offset.v = mFixedToLong( baseObject->frame.rotation.maxTurnRate << 1);
+                    difference = ABS( offset.h);
+                } else
+                {
+                    offset.h = mAngleDifference( anObject->directionGoal,
+                            anObject->direction);
+                    offset.v = mFixedToLong( kDefaultTurnRate << 1);
+                    difference = ABS( offset.h);
+                }
+                if ( difference > offset.v)
+                {
+                    if ( offset.h < 0)
+                        keysDown |= kRightKey;
+                    else if ( offset.h > 0) keysDown |= kLeftKey;
+                }
+            }
+            // and here?
+            if ( !(anObject->keysDown & kManualOverrideFlag))
+            {
+                if ( anObject->closestDistance < kEngageRange)
+                {
+                    // why do we only do this randomly when closest is within engagerange?
+                    // to simulate the innaccuracy of battle
+                    // (to keep things from wiggling, really)
+                    if  (
+                            anObject->randomSeed.next(baseObject->skillDen)
+                            <
+                            baseObject->skillNum
+                        )
+                    {
+                        anObject->keysDown &= ~kMotionKeyMask;
+                        anObject->keysDown |= keysDown & kMotionKeyMask;
+                    }
+                    if (anObject->randomSeed.next(3) == 1) {
+                        anObject->keysDown &= ~kWeaponKeyMask;
+                        anObject->keysDown |= keysDown & kWeaponKeyMask;
+                    }
+                    {
+                        anObject->keysDown &= ~kMiscKeyMask;
+                        anObject->keysDown |= keysDown & kMiscKeyMask;
+                    }
+                } else
+                {
+                    anObject->keysDown = (anObject->keysDown & kSpecialKeyMask)
+                        | keysDown;
+                }
+            } else
+            {
+                anObject->keysDown &= ~kManualOverrideFlag;
+            }
+        }
+
+        // Take care of any "keys" being pressed
+
+        if ( anObject->keysDown & kAdoptTargetKey)
+        {
+            SetObjectDestination( anObject, NULL);
+        }
+
+        if ( anObject->keysDown & kAutoPilotKey)
+        {
+            TogglePlayerAutoPilot( anObject);
+        }
+
+        if ( anObject->keysDown & kGiveCommandKey)
+        {
+            PlayerShipGiveCommand( anObject->owner);
+        }
+
+        anObject->keysDown &= ~kSpecialKeyMask;
+
+        if ( anObject->offlineTime > 0)
+        {
+            if (anObject->randomSeed.next(anObject->offlineTime) > 5) {
+                anObject->keysDown = 0;
+            }
+            anObject->offlineTime--;
+        }
+
+        if ( ( anObject->attributes & kRemoteOrHuman) &&
+                ( !(anObject->attributes & kCanThink)) && ( anObject->age < 120))
+        {
+            PlayerShipBodyExpire( anObject, true);
+        }
+
+        if (( anObject->attributes & kHasDirectionGoal) &&
+                ( anObject->offlineTime <= 0))
+        {
+            if ( anObject->attributes & kShapeFromDirection)    // design flaw: can't have turn rate unless shapefromdirection
+            {
+                if ( anObject->keysDown & kLeftKey)
+                {
+                    anObject->turnVelocity =
+                        -baseObject->frame.rotation.maxTurnRate;
+                } else if ( anObject->keysDown & kRightKey)
+                {
+                    anObject->turnVelocity =
+                        baseObject->frame.rotation.maxTurnRate;
+                } else anObject->turnVelocity = 0;
+            } else
+            {
+                if ( anObject->keysDown & kLeftKey)
+                {
+                    anObject->turnVelocity = -kDefaultTurnRate;
+                } else if ( anObject->keysDown & kRightKey)
+                {
+                    anObject->turnVelocity = kDefaultTurnRate;
+                } else anObject->turnVelocity = 0;
+            }
+        }
+
+        if ( anObject->keysDown & kUpKey)
+        {
+
+            if (!(( anObject->presenceState == kWarpInPresence) ||
+                        ( anObject->presenceState == kWarpingPresence) ||
+                        ( anObject->presenceState == kWarpOutPresence)))
+            {
+                anObject->thrust = baseObject->maxThrust;
+            }
+        } else if ( anObject->keysDown & kDownKey)
+        {
+            if (!(( anObject->presenceState == kWarpInPresence) ||
+                        ( anObject->presenceState == kWarpingPresence) ||
+                        ( anObject->presenceState == kWarpOutPresence)))
+            {
+                anObject->thrust = -baseObject->maxThrust;
+            }
+            anObject->thrust = -baseObject->maxThrust;
+        } else anObject->thrust = 0;
+
+        if ( anObject->rechargeTime < kRechargeSpeed)
+        {
+            anObject->rechargeTime++;
+        } else
+        {
+            anObject->rechargeTime = 0;
+
+            if ( anObject->presenceState == kWarpingPresence)
+            {
+                anObject->energy -= 1;
+                anObject->warpEnergyCollected += 1;
+                if ( anObject->energy <= 0)
+                {
+                    anObject->energy = 0;
+                }
+            }
+
+            if (anObject->presenceState == kNormalPresence) {
+                recharge(anObject);
+            }
+        }
+
+        // targetObject is set for all three weapons -- do not change
+        if ( anObject->targetObjectNumber >= 0)
+        {
+            targetObject = mGetSpaceObjectPtr(anObject->targetObjectNumber);
+        } else targetObject = NULL;
+
+        tick_pulse(anObject, targetObject, timePass);
+        tick_beam(anObject, targetObject, timePass);
+        tick_special(anObject, targetObject, timePass);
+
+        if (( anObject->keysDown & kWarpKey) && ( baseObject->warpSpeed > 0) &&
+                ( anObject->energy > 0))
+        {
+            if (( anObject->presenceState == kWarpingPresence) ||
+                    ( anObject->presenceState == kWarpOutPresence))
+            {
+                anObject->thrust = mMultiplyFixed( baseObject->maxThrust,
+                        anObject->presenceData);
+            } else if (( anObject->presenceState == kNormalPresence) &&
+                    ( anObject->energy > ( anObject->baseType->energy >> kWarpInEnergyFactor)))
+            {
+                anObject->presenceState = kWarpInPresence;
+                anObject->presenceData = 0;
+            }
+        } else
+        {
+            if ( anObject->presenceState == kWarpInPresence)
+            {
+                anObject->presenceState = kNormalPresence;
+            } else if ( anObject->presenceState == kWarpingPresence)
+            {
+                anObject->presenceState = kWarpOutPresence;
+            } else if ( anObject->presenceState == kWarpOutPresence)
+            {
+                anObject->thrust = mMultiplyFixed( baseObject->maxThrust,
+                        anObject->presenceData);
+            }
+        }
+
     }
 }
 #endif  // kUseOldThinking
