@@ -92,7 +92,6 @@ static void tick_weapon(
         uint32_t key, const baseObjectType::Weapon& base_weapon, spaceObjectType::Weapon& weapon) {
     int16_t         h;
     Fixed           fcos, fsin;
-    Point           offset;
     baseObjectType* baseObject = anObject->baseType;
     baseObjectType* weaponObject;
     if ( weapon.time > 0) weapon.time -= timePass;
@@ -104,8 +103,10 @@ static void tick_weapon(
                 && (( weaponObject->frame.weapon.ammo < 0) ||
                     ( weapon.ammo > 0)))
         {
-            if ( anObject->cloakState > 0)
-                AlterObjectCloakState( anObject, false);
+            if (&weapon != &anObject->special) {
+                if ( anObject->cloakState > 0)
+                    AlterObjectCloakState( anObject, false);
+            }
             anObject->energy -= weaponObject->frame.weapon.energyCost;
             weapon.position++;
             if ( weapon.position >= base_weapon.positionNum)
@@ -117,12 +118,17 @@ static void tick_weapon(
             fcos = -fcos;
             fsin = -fsin;
 
-            offset.h = mMultiplyFixed( base_weapon.position[weapon.position].h, fcos);
-            offset.h -= mMultiplyFixed( base_weapon.position[weapon.position].v, fsin);
-            offset.v = mMultiplyFixed( base_weapon.position[weapon.position].h, fsin);
-            offset.v += mMultiplyFixed( base_weapon.position[weapon.position].v, fcos);
-            offset.h = mFixedToLong( offset.h);
-            offset.v = mFixedToLong( offset.v);
+            Point offset;
+            Point* at = nullptr;
+            if (&weapon != &anObject->special) {
+                offset.h = mMultiplyFixed( base_weapon.position[weapon.position].h, fcos);
+                offset.h -= mMultiplyFixed( base_weapon.position[weapon.position].v, fsin);
+                offset.v = mMultiplyFixed( base_weapon.position[weapon.position].h, fsin);
+                offset.v += mMultiplyFixed( base_weapon.position[weapon.position].v, fcos);
+                offset.h = mFixedToLong( offset.h);
+                offset.v = mFixedToLong( offset.v);
+                at = &offset;
+            }
 
             weapon.time = weaponObject->frame.weapon.fireTime;
             if ( weaponObject->frame.weapon.ammo > 0)
@@ -130,7 +136,7 @@ static void tick_weapon(
             execute_actions(
                     weaponObject->activateAction,
                     weaponObject->activateActionNum,
-                    anObject, targetObject, &offset, true);
+                    anObject, targetObject, at, true);
         }
     }
 }
@@ -143,58 +149,8 @@ static void tick_beam(spaceObjectType* subject, spaceObjectType* target, int32_t
     tick_weapon(subject, target, timePass, kTwoKey, subject->baseType->beam, subject->beam);
 }
 
-static void tick_special(spaceObjectType* anObject, spaceObjectType* targetObject, int32_t timePass) {
-    int16_t         h;
-    Fixed           fcos, fsin;
-    Point           offset;
-    baseObjectType* baseObject = anObject->baseType;
-    baseObjectType* weaponObject;
-    const auto& base_weapon = baseObject->special;
-    auto& weapon = anObject->special;
-    if ( weapon.time > 0) weapon.time -= timePass;
-
-    if (( anObject->keysDown & kEnterKey) && ( weapon.time <= 0)
-        && ( weapon.type != kNoWeapon))
-    {
-        weaponObject = weapon.base;
-        if ( (anObject->energy >= weaponObject->frame.weapon.energyCost)
-            && (( weaponObject->frame.weapon.ammo < 0) ||
-            ( weapon.ammo > 0)))
-        {
-            anObject->energy -= weaponObject->frame.weapon.energyCost;
-            weapon.position++;
-            if ( weapon.position >=
-                    base_weapon.positionNum)
-                weapon.position = 0;
-
-            h = anObject->direction;
-            mAddAngle( h, -90);
-            GetRotPoint(&fcos, &fsin, h);
-            fcos = -fcos;
-            fsin = -fsin;
-
-            offset.h = mMultiplyFixed( base_weapon.position[weapon.position].h, fcos);
-            offset.h -= mMultiplyFixed( base_weapon.position[weapon.position].v, fsin);
-            offset.v = mMultiplyFixed( base_weapon.position[weapon.position].h, fsin);
-            offset.v += mMultiplyFixed( base_weapon.position[weapon.position].v, fcos);
-            offset.h = mFixedToLong( offset.h);
-            offset.v = mFixedToLong( offset.v);
-
-            weapon.time = weaponObject->frame.weapon.fireTime;
-            if ( weaponObject->frame.weapon.ammo > 0)
-                weapon.ammo--;
-            /*
-            if ( anObject->targetObjectNumber >= 0)
-            {
-                targetObject = gSpaceObjectData.get() + anObject->targetObjectNumber;
-            } else targetObject = nil;
-            */
-            execute_actions(
-                    weaponObject->activateAction,
-                    weaponObject->activateActionNum,
-                    anObject, targetObject, NULL, true);
-        }
-    }
+static void tick_special(spaceObjectType* subject, spaceObjectType* target, int32_t timePass) {
+    tick_weapon(subject, target, timePass, kEnterKey, subject->baseType->special, subject->special);
 }
 
 #ifdef kUseOldThinking
