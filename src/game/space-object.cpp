@@ -252,13 +252,6 @@ void mGetBaseObjectFromClassRace(
     }
 }
 
-/* AddSpaceObject:
-    Returns -1 if no object available, otherwise returns object #
-
-int AddSpaceObject( spaceObjectType *sourceObject, int32_t *canBuildType,
-                int16_t nameResID, int16_t nameStrNum)
-*/
-
 int AddSpaceObject( spaceObjectType *sourceObject)
 
 {
@@ -986,117 +979,64 @@ void ChangeObjectBaseType( spaceObjectType *dObject, int32_t whichBaseObject,
 
 }
 
-int32_t CreateAnySpaceObject( int32_t whichBase, fixedPointType *velocity,
-            coordPointType *location, int32_t direction, int32_t owner,
-            uint32_t specialAttributes, int16_t spriteIDOverride)
-
-{
-    spaceObjectType *madeObject = NULL, newObject, *player = NULL;
-    int32_t         newObjectNumber;
-    uint32_t        distance, dcalc, difference;
-    uint64_t        hugeDistance;
-
-    InitSpaceObjectFromBaseObject( &newObject, whichBase, {gRandomSeed.next(32766)},
-                                    direction, velocity, owner, spriteIDOverride);
+int32_t CreateAnySpaceObject(
+        int32_t whichBase, fixedPointType *velocity, coordPointType *location, int32_t direction,
+        int32_t owner, uint32_t specialAttributes, int16_t spriteIDOverride) {
+    spaceObjectType newObject;
+    InitSpaceObjectFromBaseObject(
+            &newObject, whichBase, {gRandomSeed.next(32766)}, direction, velocity, owner,
+            spriteIDOverride);
     newObject.location = *location;
-    if ( globals()->gPlayerShipNumber >= 0)
+    spaceObjectType* player = nullptr;
+    if (globals()->gPlayerShipNumber >= 0) {
         player = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
-    else player = NULL;
-    if (( player != NULL) && ( player->active))
-    {
-        difference = ABS<int>( player->location.h - newObject.location.h);
+    }
+    uint32_t distance, dcalc, difference;
+    uint64_t hugeDistance;
+    if (player && (player->active)) {
+        difference = ABS<int>(player->location.h - newObject.location.h);
         dcalc = difference;
-        difference =  ABS<int>( player->location.v - newObject.location.v);
+        difference =  ABS<int>(player->location.v - newObject.location.v);
         distance = difference;
-    } else
-    {
-        difference = ABS<int>( gGlobalCorner.h - newObject.location.h);
+    } else {
+        difference = ABS<int>(gGlobalCorner.h - newObject.location.h);
         dcalc = difference;
-        difference =  ABS<int>( gGlobalCorner.v - newObject.location.v);
+        difference =  ABS<int>(gGlobalCorner.v - newObject.location.v);
         distance = difference;
     }
-    /*
-    if (( dcalc > kMaximumRelevantDistance) ||
-        ( distance > kMaximumRelevantDistance))
-        distance = kMaximumRelevantDistance;
-    else distance = distance * distance + dcalc * dcalc;
-    */
-    /*
-    newObject.distanceFromPlayer = (double long)distance * (double long)distance +
-                                    (double long)dcalc * (double long)dcalc;;
-    */
-    if (( newObject.attributes & kCanCollide) ||
-                ( newObject.attributes & kCanBeHit) || ( newObject.attributes & kIsDestination) ||
-                ( newObject.attributes & kCanThink) || ( newObject.attributes &
-                kRemoteOrHuman))
-    {
-        if (( dcalc > kMaximumRelevantDistance) ||
-            ( distance > kMaximumRelevantDistance))
-        {
+    if ((newObject.attributes & kCanCollide)
+            || (newObject.attributes & kCanBeHit)
+            || (newObject.attributes & kIsDestination)
+            || (newObject.attributes & kCanThink)
+            || (newObject.attributes & kRemoteOrHuman)) {
+        if ((dcalc > kMaximumRelevantDistance)
+                || (distance > kMaximumRelevantDistance)) {
             hugeDistance = dcalc;    // must be positive
             MyWideMul(hugeDistance, hugeDistance, &hugeDistance);    // ppc automatically generates WideMultiply
             newObject.distanceFromPlayer = distance;
             MyWideMul(newObject.distanceFromPlayer, newObject.distanceFromPlayer, &newObject.distanceFromPlayer);
             newObject.distanceFromPlayer += hugeDistance;
-        }
-        else
-        {
+        } else {
             newObject.distanceFromPlayer = distance * distance + dcalc * dcalc;
         }
-    } else
-    {
+    } else {
         newObject.distanceFromPlayer = 0;
-        /*
-        if (( dcalc > kMaximumRelevantDistance) || ( distance > kMaximumRelevantDistance))
-            distance = kMaximumRelevantDistanceSquared;
-        else distance = distance * distance + dcalc * dcalc;
-        newObject.distanceFromPlayer.lo = distance;
-        */
     }
 
     newObject.sprite = NULL;
     newObject.id = gRandomSeed.next(16384);
 
-    if ( newObject.attributes & kCanTurn)
-    {
-    } else if ( newObject.attributes & kIsSelfAnimated)
-    {
-//      newObject.frame.animation.thisShape = 0; //direction;
-//      newObject.frame.animation.frameDirection = 1;
-    }else if ( newObject.attributes & kIsBeam)
-    {
-/*      newObject.frame.beam.lastGlobalLocation = *location;
-        newObject.frame.beam.killMe = false;
-
-        h = ( newObject.location.h - gGlobalCorner.h) * gAbsoluteScale;
-        h >>= SHIFT_SCALE;
-        newObject.frame.beam.thisLocation.left = h + CLIP_LEFT;
-        h = (newObject.location.v - gGlobalCorner.v) * gAbsoluteScale;
-        h >>= SHIFT_SCALE; //+ CLIP_TOP
-        newObject.frame.beam.thisLocation.top = h;
-
-        newObject.frame.beam.lastLocation.left = newObject.frame.beam.lastLocation.right =
-                newObject.frame.beam.thisLocation.left;
-        newObject.frame.beam.lastLocation.top = newObject.frame.beam.lastLocation.bottom =
-                newObject.frame.beam.thisLocation.top;
-*/  }
-
-//  newObjectNumber = AddSpaceObject( &newObject, canBuildType,
-//      nameResID, nameStrNum);
-    newObjectNumber = AddSpaceObject( &newObject);
-    if ( newObjectNumber == -1)
-    {
-        return ( -1);
-    } else
-    {
-        madeObject = gSpaceObjectData.get() + newObjectNumber;
-        madeObject->attributes |= specialAttributes;
-        execute_actions(
-                madeObject->baseType->createAction,
-                madeObject->baseType->createActionNum,
-                madeObject, NULL, NULL, true);
+    int32_t newObjectNumber = AddSpaceObject(&newObject);
+    if (newObjectNumber == -1) {
+        return -1;
     }
-    return( newObjectNumber);
+    spaceObjectType* madeObject = gSpaceObjectData.get() + newObjectNumber;
+    madeObject->attributes |= specialAttributes;
+    execute_actions(
+            madeObject->baseType->createAction,
+            madeObject->baseType->createActionNum,
+            madeObject, NULL, NULL, true);
+    return newObjectNumber;
 }
 
 int32_t CountObjectsOfBaseType( int32_t whichType, int32_t owner)
