@@ -87,16 +87,16 @@ spaceObjectType *HackNewNonplayerShip( int32_t owner, int16_t type, Rect *bounds
     return( NULL);
 }
 
-static void tick_pulse(spaceObjectType* anObject, spaceObjectType* targetObject, int32_t timePass) {
+static void tick_weapon(
+        spaceObjectType* anObject, spaceObjectType* targetObject, int32_t timePass,
+        uint32_t key, const baseObjectType::Weapon& base_weapon, spaceObjectType::Weapon& weapon) {
     int16_t         h;
     Fixed           fcos, fsin;
     Point           offset;
     baseObjectType* baseObject = anObject->baseType;
     baseObjectType* weaponObject;
-    const auto& base_weapon = baseObject->pulse;
-    auto& weapon = anObject->pulse;
     if ( weapon.time > 0) weapon.time -= timePass;
-    if (( anObject->keysDown & kOneKey) && ( weapon.time <= 0) &&
+    if (( anObject->keysDown & key) && ( weapon.time <= 0) &&
             ( weapon.type != kNoWeapon))
     {
         weaponObject = weapon.base;
@@ -135,52 +135,12 @@ static void tick_pulse(spaceObjectType* anObject, spaceObjectType* targetObject,
     }
 }
 
-static void tick_beam(spaceObjectType* anObject, spaceObjectType* targetObject, int32_t timePass) {
-    int16_t         h;
-    Fixed           fcos, fsin;
-    Point           offset;
-    baseObjectType* baseObject = anObject->baseType;
-    baseObjectType* weaponObject;
-    const auto& base_weapon = baseObject->beam;
-    auto& weapon = anObject->beam;
-    if ( weapon.time > 0) weapon.time -= timePass;
-    if (( anObject->keysDown & kTwoKey) && ( weapon.time <= 0 ) &&
-        ( weapon.type != kNoWeapon) )
-    {
-        weaponObject = weapon.base;
-        if ( (anObject->energy >= weaponObject->frame.weapon.energyCost)
-            && (( weaponObject->frame.weapon.ammo < 0) ||
-            ( weapon.ammo > 0)))
-        {
-            if ( anObject->cloakState > 0)
-                AlterObjectCloakState( anObject, false);
-            anObject->energy -= weaponObject->frame.weapon.energyCost;
-            weapon.position++;
-            if ( weapon.position >= base_weapon.positionNum)
-                weapon.position = 0;
+static void tick_pulse(spaceObjectType* subject, spaceObjectType* target, int32_t timePass) {
+    tick_weapon(subject, target, timePass, kOneKey, subject->baseType->pulse, subject->pulse);
+}
 
-            h = anObject->direction;
-            mAddAngle( h, -90);
-            GetRotPoint(&fcos, &fsin, h);
-            fcos = -fcos;
-            fsin = -fsin;
-
-            offset.h = mMultiplyFixed( base_weapon.position[weapon.position].h, fcos);
-            offset.h -= mMultiplyFixed( base_weapon.position[weapon.position].v, fsin);
-            offset.v = mMultiplyFixed( base_weapon.position[weapon.position].h, fsin);
-            offset.v += mMultiplyFixed( base_weapon.position[weapon.position].v, fcos);
-            offset.h = mFixedToLong( offset.h);
-            offset.v = mFixedToLong( offset.v);
-
-            weapon.time = weaponObject->frame.weapon.fireTime;
-            if ( weaponObject->frame.weapon.ammo > 0) weapon.ammo--;
-            execute_actions(
-                    weaponObject->activateAction,
-                    weaponObject->activateActionNum,
-                    anObject, targetObject, &offset, true);
-        }
-
-    }
+static void tick_beam(spaceObjectType* subject, spaceObjectType* target, int32_t timePass) {
+    tick_weapon(subject, target, timePass, kTwoKey, subject->baseType->beam, subject->beam);
 }
 
 static void tick_special(spaceObjectType* anObject, spaceObjectType* targetObject, int32_t timePass) {
