@@ -603,7 +603,6 @@ void CollideSpaceObjects() {
                             closestDist = kMaximumRelevantDistanceSquared + kMaximumRelevantDistanceSquared*/;
     proximityUnitType       *proximityObject, *currentProximity;
 
-    int32_t                    magicHack1 = 0, magicHack2 = 0, magicHack3 = 0;
     uint64_t                farthestDist, hugeDistance, wideScrap, closestDist;
     farthestDist = 0;
     closestDist = 0x7fffffffffffffffull;
@@ -624,8 +623,6 @@ void CollideSpaceObjects() {
         proximityObject++;
     }
 
-    magicHack1 = 123;
-    magicHack3 = 0;
     for (auto aObject = gRootObject; aObject; aObject = aObject->nextObject) {
         if (!aObject->active) {
             if (player && (player->active)) {
@@ -741,15 +738,6 @@ void CollideSpaceObjects() {
 
             if (aObject->sprite != NULL) {
                 aObject->sprite->tinySize = aObject->tinySize;
-                if (aObject->attributes & kIsSelfAnimated) {
-                    if (aObject->attributes & kAnimationCycle) {
-                        if (aObject->frame.animation.frameDirection > 0) {
-                            magicHack3 += (aObject->sprite->whichShape);
-                        } else {
-                            magicHack2 += (aObject->sprite->whichShape);
-                        }
-                    }
-                }
             }
         }
     }
