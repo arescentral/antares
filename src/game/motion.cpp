@@ -594,15 +594,9 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
 }
 
 void CollideSpaceObjects() {
-    int32_t                    i = 0, j = 0, k, xs, xe, ys, ye, xd, yd, superx, supery, scaleCalc, difference;
-    uint32_t                distance, dcalc;
-
+    // set up player info so we can find closest ship (for scaling)
     uint64_t farthestDist = 0;
     uint64_t closestDist = 0x7fffffffffffffffull;
-    uint64_t hugeDistance;
-    uint64_t wideScrap;
-
-    // set up player info so we can find closest ship (for scaling)
     spaceObjectType* player = nullptr;
     if (globals()->gPlayerShipNumber >= 0) {
         player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
@@ -612,7 +606,7 @@ void CollideSpaceObjects() {
 
     // reset the collision grid
     proximityUnitType* proximityObject = gProximityGrid.get();
-    for (i = 0; i < kProximityGridDataLength; i++) {
+    for (int32_t i = 0; i < kProximityGridDataLength; i++) {
         proximityObject->nearObject = proximityObject->farObject = NULL;
         proximityObject++;
     }
@@ -655,14 +649,12 @@ void CollideSpaceObjects() {
 
         if (player && (player->active)) {
             if (aObject->attributes & kAppearOnRadar) {
-                difference = ABS<int>( player->location.h - aObject->location.h);
-                dcalc = difference;
-                difference =  ABS<int>( player->location.v - aObject->location.v);
-                distance = difference;
-
+                uint32_t dcalc = ABS<int>( player->location.h - aObject->location.h);
+                uint32_t distance =  ABS<int>( player->location.v - aObject->location.v);
+                uint64_t hugeDistance;
                 if ((dcalc > kMaximumRelevantDistance)
                         || (distance > kMaximumRelevantDistance)) {
-                    wideScrap = dcalc;   // must be positive
+                    uint64_t wideScrap = dcalc;   // must be positive
                     MyWideMul( wideScrap, wideScrap, &hugeDistance);  // ppc automatically generates WideMultiply
                     wideScrap = distance;
                     MyWideMul( wideScrap, wideScrap, &wideScrap);
@@ -695,14 +687,14 @@ void CollideSpaceObjects() {
             aObject->absoluteBounds.right = aObject->absoluteBounds.left = 0;
 
             // xs = collision unit, xe = super unit
-            xs = aObject->location.h;
+            int32_t xs = aObject->location.h;
             xs >>= kCollisionUnitBitShift;
-            xe = xs >> kCollisionSuperExtraShift;
+            int32_t xe = xs >> kCollisionSuperExtraShift;
             xs &= kProximityUnitAndModulo;
 
-            ys = aObject->location.v;
+            int32_t ys = aObject->location.v;
             ys >>= kCollisionUnitBitShift;
-            ye = ys >> kCollisionSuperExtraShift;
+            int32_t ye = ys >> kCollisionSuperExtraShift;
             ys &= kProximityUnitAndModulo;
 
             proximityObject = gProximityGrid.get() + (ys << kProximityWidthMultiply) + xs;
@@ -737,8 +729,8 @@ void CollideSpaceObjects() {
     }
 
     proximityObject = gProximityGrid.get();
-    for (j = 0; j < kProximitySuperSize; j++) {
-        for (i = 0; i < kProximitySuperSize; i++) {
+    for (int32_t j = 0; j < kProximitySuperSize; j++) {
+        for (int32_t i = 0; i < kProximitySuperSize; i++) {
             auto aObject = proximityObject->nearObject;
             while (aObject != NULL) {
                 const auto taObject = aObject->nextNearObject;
@@ -750,7 +742,7 @@ void CollideSpaceObjects() {
                     const NatePixTable::Frame& frame
                         = aObject->sprite->table->at(aObject->sprite->whichShape);
 
-                    scaleCalc = (frame.width() * aObject->naturalScale);
+                    int32_t scaleCalc = (frame.width() * aObject->naturalScale);
                     scaleCalc >>= SHIFT_SCALE;
                     aObject->scaledSize.h = scaleCalc;
                     scaleCalc = (frame.height() * aObject->naturalScale);
@@ -775,8 +767,9 @@ void CollideSpaceObjects() {
                 }
 
                 auto currentProximity = proximityObject;
-                for (k = 0; k < kUnitsToCheckNumber; k++) {
+                for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
                     spaceObjectType* bObject;
+                    int32_t superx, supery;
                     if (k == 0) {
                         bObject = aObject->nextNearObject;
                         superx = aObject->collisionGrid.h;
@@ -808,7 +801,7 @@ void CollideSpaceObjects() {
                                     const NatePixTable::Frame& frame
                                         = bObject->sprite->table->at(bObject->sprite->whichShape);
 
-                                    scaleCalc = (frame.width() * bObject->naturalScale);
+                                    int32_t scaleCalc = (frame.width() * bObject->naturalScale);
                                     scaleCalc >>= SHIFT_SCALE;
                                     bObject->scaledSize.h = scaleCalc;
                                     scaleCalc = (frame.height() * bObject->naturalScale);
@@ -858,10 +851,10 @@ void CollideSpaceObjects() {
                                             dObject = bObject;
                                         }
 
-                                        xs = sObject->location.h;
-                                        ys = sObject->location.v;
-                                        xe = sObject->frame.beam.beam->lastGlobalLocation.h;
-                                        ye = sObject->frame.beam.beam->lastGlobalLocation.v;
+                                        int32_t xs = sObject->location.h;
+                                        int32_t ys = sObject->location.v;
+                                        int32_t xe = sObject->frame.beam.beam->lastGlobalLocation.h;
+                                        int32_t ye = sObject->frame.beam.beam->lastGlobalLocation.v;
 
                                         int16_t cs = mClipCode( xs, ys, dObject->absoluteBounds);
                                         int16_t ce = mClipCode( xe, ye, dObject->absoluteBounds);
@@ -876,8 +869,8 @@ void CollideSpaceObjects() {
                                                 beamHit = false;
                                                 break;
                                             }
-                                            xd = xe - xs;
-                                            yd = ye - ys;
+                                            int32_t xd = xe - xs;
+                                            int32_t yd = ye - ys;
                                             if (cs) {
                                                 if (cs & 8) {
                                                     ys += yd * ( dObject->absoluteBounds.left - xs) / xd;
@@ -945,14 +938,15 @@ void CollideSpaceObjects() {
     }
 
     proximityObject = gProximityGrid.get();
-    for (j = 0; j < kProximitySuperSize; j++) {
-        for (i = 0; i < kProximitySuperSize; i++) {
+    for (int32_t j = 0; j < kProximitySuperSize; j++) {
+        for (int32_t i = 0; i < kProximitySuperSize; i++) {
             auto aObject = proximityObject->farObject;
             while (aObject != NULL) {
                 const auto taObject = aObject->nextFarObject;
                 auto currentProximity = proximityObject;
-                for (k = 0; k < kUnitsToCheckNumber; k++) {
+                for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
                     spaceObjectType* bObject;
+                    int32_t superx, supery;
                     if (k == 0) {
                         bObject = aObject->nextFarObject;
                         superx = aObject->distanceGrid.h;
@@ -975,10 +969,8 @@ void CollideSpaceObjects() {
                                     && (( aObject->attributes & kCanThink)
                                         || ( aObject->attributes & kRemoteOrHuman)
                                         || ( aObject->attributes & kHated))) {
-                                difference = ABS<int>( bObject->location.h - aObject->location.h);
-                                dcalc = difference;
-                                difference =  ABS<int>( bObject->location.v - aObject->location.v);
-                                distance = difference;
+                                uint32_t dcalc = ABS<int>( bObject->location.h - aObject->location.h);
+                                uint32_t distance =  ABS<int>( bObject->location.v - aObject->location.v);
                                 if ((dcalc > kMaximumRelevantDistance)
                                         || (distance > kMaximumRelevantDistance)) {
                                     distance = kMaximumRelevantDistanceSquared;
@@ -1073,7 +1065,7 @@ void CollideSpaceObjects() {
     // here, it doesn't matter in what order we step through the table
     const uint32_t seen_by_player = 1ul << globals()->gPlayerAdmiralNumber;
 
-    for (i = 0; i < kMaxSpaceObject; i++) {
+    for (int32_t i = 0; i < kMaxSpaceObject; i++) {
         auto aObject = mGetSpaceObjectPtr(i);
         if (aObject->active == kObjectToBeFreed) {
             if (aObject->attributes & kIsBeam) {
