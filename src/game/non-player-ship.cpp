@@ -466,6 +466,33 @@ void NonplayerShipThink(int32_t timePass)
 }
 #endif  // kUseOldThinking
 
+uint32_t use_weapons_for_defense(spaceObjectType* obj) {
+    uint32_t keys = 0;
+
+    if (obj->pulse.type != kNoWeapon) {
+        auto weaponObject = obj->pulse.base;
+        if (weaponObject->frame.weapon.usage & kUseForDefense) {
+            keys |= kOneKey;
+        }
+    }
+
+    if (obj->beam.type != kNoWeapon) {
+        auto weaponObject = obj->beam.base;
+        if (weaponObject->frame.weapon.usage & kUseForDefense) {
+            keys |= kTwoKey;
+        }
+    }
+
+    if (obj->special.type != kNoWeapon) {
+        auto weaponObject = obj->special.base;
+        if (weaponObject->frame.weapon.usage & kUseForDefense) {
+            keys |= kEnterKey;
+        }
+    }
+
+    return keys;
+}
+
 uint32_t ThinkObjectNormalPresence(
         spaceObjectType *anObject, baseObjectType *baseObject, int32_t timePass) {
     uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask, distance, dcalc;
@@ -508,26 +535,7 @@ uint32_t ThinkObjectNormalPresence(
                         || (anObject->health <= targetObject->health))) {
                 // try to evade, flee, run away
                 if (anObject->attributes & kHasDirectionGoal) {
-                    if (anObject->beam.type != kNoWeapon) {
-                        weaponObject = anObject->beam.base;
-                        if (weaponObject->frame.weapon.usage & kUseForDefense) {
-                            keysDown |= kTwoKey;
-                        }
-                    }
-
-                    if (anObject->pulse.type != kNoWeapon) {
-                        weaponObject = anObject->pulse.base;
-                        if (weaponObject->frame.weapon.usage & kUseForDefense) {
-                            keysDown |= kOneKey;
-                        }
-                    }
-
-                    if (anObject->special.type != kNoWeapon) {
-                        weaponObject = anObject->special.base;
-                        if (weaponObject->frame.weapon.usage & kUseForDefense) {
-                            keysDown |= kEnterKey;
-                        }
-                    }
+                    keysDown |= use_weapons_for_defense(anObject);
 
                     anObject->directionGoal = targetObject->direction;
 
@@ -636,26 +644,7 @@ uint32_t ThinkObjectNormalPresence(
                     // try to evade, flee, run away
                     if (anObject->attributes & kHasDirectionGoal) {
                         if (distance < static_cast<uint32_t>(anObject->longestWeaponRange)) {
-                            if (anObject->beam.type != kNoWeapon) {
-                                weaponObject = anObject->beam.base;
-                                if (weaponObject->frame.weapon.usage & kUseForDefense) {
-                                    keysDown |= kTwoKey;
-                                }
-                            }
-
-                            if (anObject->pulse.type != kNoWeapon) {
-                                weaponObject = anObject->pulse.base;
-                                if (weaponObject->frame.weapon.usage & kUseForDefense) {
-                                    keysDown |= kOneKey;
-                                }
-                            }
-
-                            if (anObject->special.type != kNoWeapon) {
-                                weaponObject = anObject->special.base;
-                                if (weaponObject->frame.weapon.usage & kUseForDefense) {
-                                    keysDown |= kEnterKey;
-                                }
-                            }
+                            keysDown |= use_weapons_for_defense(anObject);
                         }
 
                         anObject->directionGoal = targetObject->direction;
