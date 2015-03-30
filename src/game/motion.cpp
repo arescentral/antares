@@ -605,10 +605,9 @@ void CollideSpaceObjects() {
     globals()->gFarthestObject = 0;
 
     // reset the collision grid
-    proximityUnitType* proximityObject = gProximityGrid.get();
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
+        auto proximityObject = &gProximityGrid[i];
         proximityObject->nearObject = proximityObject->farObject = NULL;
-        proximityObject++;
     }
 
     for (auto aObject = gRootObject; aObject; aObject = aObject->nextObject) {
@@ -703,7 +702,7 @@ void CollideSpaceObjects() {
             int32_t ye = ys >> kCollisionSuperExtraShift;
             ys &= kProximityUnitAndModulo;
 
-            proximityObject = gProximityGrid.get() + (ys << kProximityWidthMultiply) + xs;
+            auto proximityObject = gProximityGrid.get() + (ys << kProximityWidthMultiply) + xs;
             aObject->nextNearObject = proximityObject->nearObject;
             proximityObject->nearObject = aObject;
             aObject->collisionGrid.h = xe;
@@ -734,337 +733,338 @@ void CollideSpaceObjects() {
         }
     }
 
-    proximityObject = gProximityGrid.get();
-    for (int32_t j = 0; j < kProximitySuperSize; j++) {
-        for (int32_t i = 0; i < kProximitySuperSize; i++) {
-            auto aObject = proximityObject->nearObject;
-            while (aObject != NULL) {
-                const auto taObject = aObject->nextNearObject;
+    for (int32_t i = 0; i < kProximityGridDataLength; i++) {
+        auto proximityObject = &gProximityGrid[i];
+        auto aObject = proximityObject->nearObject;
+        for (spaceObjectType* taObject = aObject->nextNearObject; aObject;
+                aObject = taObject, taObject = aObject->nextNearObject) {
+            // this hack is to get the current bounds of the object in question
+            // it could be sped up by accessing the sprite table directly
+            if ((aObject->absoluteBounds.left >= aObject->absoluteBounds.right)
+                    && (aObject->sprite != NULL)) {
+                const NatePixTable::Frame& frame
+                    = aObject->sprite->table->at(aObject->sprite->whichShape);
 
-                // this hack is to get the current bounds of the object in question
-                // it could be sped up by accessing the sprite table directly
-                if ((aObject->absoluteBounds.left >= aObject->absoluteBounds.right)
-                        && (aObject->sprite != NULL)) {
-                    const NatePixTable::Frame& frame
-                        = aObject->sprite->table->at(aObject->sprite->whichShape);
+                int32_t scaleCalc = (frame.width() * aObject->naturalScale);
+                scaleCalc >>= SHIFT_SCALE;
+                aObject->scaledSize.h = scaleCalc;
+                scaleCalc = (frame.height() * aObject->naturalScale);
+                scaleCalc >>= SHIFT_SCALE;
+                aObject->scaledSize.v = scaleCalc;
 
-                    int32_t scaleCalc = (frame.width() * aObject->naturalScale);
-                    scaleCalc >>= SHIFT_SCALE;
-                    aObject->scaledSize.h = scaleCalc;
-                    scaleCalc = (frame.height() * aObject->naturalScale);
-                    scaleCalc >>= SHIFT_SCALE;
-                    aObject->scaledSize.v = scaleCalc;
+                scaleCalc = frame.center().h * aObject->naturalScale;
+                scaleCalc >>= SHIFT_SCALE;
+                aObject->scaledCornerOffset.h = -scaleCalc;
+                scaleCalc = frame.center().v * aObject->naturalScale;
+                scaleCalc >>= SHIFT_SCALE;
+                aObject->scaledCornerOffset.v = -scaleCalc;
 
-                    scaleCalc = frame.center().h * aObject->naturalScale;
-                    scaleCalc >>= SHIFT_SCALE;
-                    aObject->scaledCornerOffset.h = -scaleCalc;
-                    scaleCalc = frame.center().v * aObject->naturalScale;
-                    scaleCalc >>= SHIFT_SCALE;
-                    aObject->scaledCornerOffset.v = -scaleCalc;
-
-                    aObject->absoluteBounds.left = aObject->location.h +
-                                                aObject->scaledCornerOffset.h;
-                    aObject->absoluteBounds.right = aObject->absoluteBounds.left +
-                                                aObject->scaledSize.h;
-                    aObject->absoluteBounds.top = aObject->location.v +
-                                                aObject->scaledCornerOffset.v;
-                    aObject->absoluteBounds.bottom = aObject->absoluteBounds.top +
-                                                aObject->scaledSize.v;
-                }
-
-                auto currentProximity = proximityObject;
-                for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
-                    spaceObjectType* bObject;
-                    int32_t superx, supery;
-                    if (k == 0) {
-                        bObject = aObject->nextNearObject;
-                        superx = aObject->collisionGrid.h;
-                        supery = aObject->collisionGrid.v;
-                    } else {
-                        if (( proximityObject->unitsToCheck[k].adjacentUnit > 256)
-                                || ( proximityObject->unitsToCheck[k].adjacentUnit < -256)) {
-                            throw Exception(
-                                    "Internal error occurred during processing of adjacent "
-                                    "proximity units");
-                        }
-                        currentProximity += proximityObject->unitsToCheck[k].adjacentUnit;
-                        bObject = currentProximity->nearObject;
-                        superx = aObject->collisionGrid.h + proximityObject->unitsToCheck[k].superOffset.h;
-                        supery = aObject->collisionGrid.v + proximityObject->unitsToCheck[k].superOffset.v;
-                    }
-                    if ((superx >= 0) && (supery >= 0)) {
-                        while (bObject != NULL) {
-                            const auto tbObject = bObject->nextNearObject;
-                            // this'll be true even ONLY if BOTH objects are not non-physical dest object
-                            if (((bObject->attributes | aObject->attributes) & kCanCollide)
-                                    && ((bObject->attributes | aObject->attributes) & kCanBeHit)
-                                    && (bObject->collisionGrid.h == superx)
-                                    && (bObject->collisionGrid.v == supery)) {
-                                // this hack is to get the current bounds of the object in question
-                                // it could be sped up by accessing the sprite table directly
-                                if ((bObject->absoluteBounds.left >= bObject->absoluteBounds.right)
-                                        && (bObject->sprite != NULL)) {
-                                    const NatePixTable::Frame& frame
-                                        = bObject->sprite->table->at(bObject->sprite->whichShape);
-
-                                    int32_t scaleCalc = (frame.width() * bObject->naturalScale);
-                                    scaleCalc >>= SHIFT_SCALE;
-                                    bObject->scaledSize.h = scaleCalc;
-                                    scaleCalc = (frame.height() * bObject->naturalScale);
-                                    scaleCalc >>= SHIFT_SCALE;
-                                    bObject->scaledSize.v = scaleCalc;
-
-                                    scaleCalc = frame.center().h * bObject->naturalScale;
-                                    scaleCalc >>= SHIFT_SCALE;
-                                    bObject->scaledCornerOffset.h = -scaleCalc;
-                                    scaleCalc = frame.center().v * bObject->naturalScale;
-                                    scaleCalc >>= SHIFT_SCALE;
-                                    bObject->scaledCornerOffset.v = -scaleCalc;
-
-                                    bObject->absoluteBounds.left = bObject->location.h +
-                                                                bObject->scaledCornerOffset.h;
-                                    bObject->absoluteBounds.right = bObject->absoluteBounds.left +
-                                                                bObject->scaledSize.h;
-                                    bObject->absoluteBounds.top = bObject->location.v +
-                                                                bObject->scaledCornerOffset.v;
-                                    bObject->absoluteBounds.bottom = bObject->absoluteBounds.top +
-                                                                bObject->scaledSize.v;
-                                }
-
-                                spaceObjectType* sObject;
-                                spaceObjectType* dObject;
-                                if (aObject->owner != bObject->owner) {
-                                    if (!((bObject->attributes | aObject->attributes) & kIsBeam)) {
-                                        dObject = aObject;
-                                        sObject = bObject;
-                                        if (!((sObject->absoluteBounds.right < dObject->absoluteBounds.left) ||
-                                            (sObject->absoluteBounds.left > dObject->absoluteBounds.right) ||
-                                            (sObject->absoluteBounds.bottom < dObject->absoluteBounds.top) ||
-                                            (sObject->absoluteBounds.top > dObject->absoluteBounds.bottom))) {
-                                            if (( dObject->attributes & kCanBeHit) && ( sObject->attributes & kCanCollide)) {
-                                                HitObject( dObject, sObject);
-                                            }
-                                            if (( sObject->attributes & kCanBeHit) && ( dObject->attributes & kCanCollide)) {
-                                                HitObject( sObject, dObject);
-                                            }
-                                        }
-                                    } else {
-                                        if (bObject->attributes & kIsBeam) {
-                                            sObject = bObject;
-                                            dObject = aObject;
-                                        } else {
-                                            sObject = aObject;
-                                            dObject = bObject;
-                                        }
-
-                                        int32_t xs = sObject->location.h;
-                                        int32_t ys = sObject->location.v;
-                                        int32_t xe = sObject->frame.beam.beam->lastGlobalLocation.h;
-                                        int32_t ye = sObject->frame.beam.beam->lastGlobalLocation.v;
-
-                                        int16_t cs = mClipCode( xs, ys, dObject->absoluteBounds);
-                                        int16_t ce = mClipCode( xe, ye, dObject->absoluteBounds);
-                                        bool beamHit = true;
-                                        if (sObject->active == kObjectToBeFreed) {
-                                            cs = ce = 1;
-                                            beamHit = false;
-                                        }
-
-                                        while (cs | ce) {
-                                            if (cs & ce) {
-                                                beamHit = false;
-                                                break;
-                                            }
-                                            int32_t xd = xe - xs;
-                                            int32_t yd = ye - ys;
-                                            if (cs) {
-                                                if (cs & 8) {
-                                                    ys += yd * ( dObject->absoluteBounds.left - xs) / xd;
-                                                    xs = dObject->absoluteBounds.left;
-                                                } else
-                                                if (cs & 4) {
-                                                    ys += yd * ( dObject->absoluteBounds.right - 1 - xs) / xd;
-                                                    xs = dObject->absoluteBounds.right - 1;
-                                                } else
-                                                if (cs & 2) {
-                                                    xs += xd * ( dObject->absoluteBounds.top - ys) / yd;
-                                                    ys = dObject->absoluteBounds.top;
-                                                } else
-                                                if (cs & 1) {
-                                                    xs += xd * ( dObject->absoluteBounds.bottom - 1 - ys) / yd;
-                                                    ys = dObject->absoluteBounds.bottom - 1;
-                                                }
-                                                cs = mClipCode( xs, ys, dObject->absoluteBounds);
-                                            } else if (ce) {
-                                                if (ce & 8) {
-                                                    ye += yd * ( dObject->absoluteBounds.left - xe) / xd;
-                                                    xe = dObject->absoluteBounds.left;
-                                                } else if (ce & 4) {
-                                                    ye += yd * ( dObject->absoluteBounds.right - 1 - xe) / xd;
-                                                    xe = dObject->absoluteBounds.right - 1;
-                                                } else if (ce & 2) {
-                                                    xe += xd * ( dObject->absoluteBounds.top - ye) / yd;
-                                                    ye = dObject->absoluteBounds.top;
-                                                } else if (ce & 1) {
-                                                    xe += xd * ( dObject->absoluteBounds.bottom - 1 - ye) / yd;
-                                                    ye = dObject->absoluteBounds.bottom - 1;
-                                                }
-                                                ce = mClipCode( xe, ye, dObject->absoluteBounds);
-                                            }
-                                        }
-                                        if (beamHit) {
-                                            HitObject(dObject, sObject);
-                                        }
-                                    }
-                                }
-
-                                // check to see if the 2 objects occupy same physical space
-                                if  (((bObject->attributes & aObject->attributes) & kOccupiesSpace)
-                                        && (bObject->owner != aObject->owner)) {
-                                    dObject = aObject;
-                                    sObject = bObject;
-                                    if (!(( sObject->absoluteBounds.right < dObject->absoluteBounds.left) ||
-                                        ( sObject->absoluteBounds.left > dObject->absoluteBounds.right) ||
-                                        ( sObject->absoluteBounds.bottom < dObject->absoluteBounds.top) ||
-                                        ( sObject->absoluteBounds.top > dObject->absoluteBounds.bottom))) {
-                                        CorrectPhysicalSpace( aObject, bObject); // move them back till they don't touch
-                                    } else {
-                                        aObject->collideObject = bObject->collideObject = NULL;
-                                    }
-                                }
-                            }
-                            bObject = tbObject;
-                        }
-                    }
-                }
-                aObject = taObject;
+                aObject->absoluteBounds.left = aObject->location.h + aObject->scaledCornerOffset.h;
+                aObject->absoluteBounds.right = aObject->absoluteBounds.left + aObject->scaledSize.h;
+                aObject->absoluteBounds.top = aObject->location.v + aObject->scaledCornerOffset.v;
+                aObject->absoluteBounds.bottom = aObject->absoluteBounds.top + aObject->scaledSize.v;
             }
-            proximityObject++;
+
+            auto currentProximity = proximityObject;
+            for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
+                spaceObjectType* bObject;
+                int32_t superx, supery;
+                if (k == 0) {
+                    bObject = aObject->nextNearObject;
+                    superx = aObject->collisionGrid.h;
+                    supery = aObject->collisionGrid.v;
+                } else {
+                    if (( proximityObject->unitsToCheck[k].adjacentUnit > 256)
+                            || ( proximityObject->unitsToCheck[k].adjacentUnit < -256)) {
+                        throw Exception(
+                                "Internal error occurred during processing of adjacent "
+                                "proximity units");
+                    }
+                    currentProximity += proximityObject->unitsToCheck[k].adjacentUnit;
+                    bObject = currentProximity->nearObject;
+                    superx = aObject->collisionGrid.h + proximityObject->unitsToCheck[k].superOffset.h;
+                    supery = aObject->collisionGrid.v + proximityObject->unitsToCheck[k].superOffset.v;
+                }
+
+                if ((superx < 0) || (supery < 0)) {
+                    continue;
+                }
+
+                for (spaceObjectType* tbObject = bObject->nextNearObject; bObject;
+                        bObject = tbObject, tbObject = bObject->nextNearObject) {
+                    // this'll be true even ONLY if BOTH objects are not non-physical dest object
+                    if (!((bObject->attributes | aObject->attributes) & kCanCollide)
+                            || !((bObject->attributes | aObject->attributes) & kCanBeHit)
+                            || (bObject->collisionGrid.h != superx)
+                            || (bObject->collisionGrid.v != supery)) {
+                        continue;
+                    }
+
+                    // this hack is to get the current bounds of the object in question
+                    // it could be sped up by accessing the sprite table directly
+                    if ((bObject->absoluteBounds.left >= bObject->absoluteBounds.right)
+                            && (bObject->sprite != NULL)) {
+                        const NatePixTable::Frame& frame
+                            = bObject->sprite->table->at(bObject->sprite->whichShape);
+
+                        int32_t scaleCalc = (frame.width() * bObject->naturalScale);
+                        scaleCalc >>= SHIFT_SCALE;
+                        bObject->scaledSize.h = scaleCalc;
+                        scaleCalc = (frame.height() * bObject->naturalScale);
+                        scaleCalc >>= SHIFT_SCALE;
+                        bObject->scaledSize.v = scaleCalc;
+
+                        scaleCalc = frame.center().h * bObject->naturalScale;
+                        scaleCalc >>= SHIFT_SCALE;
+                        bObject->scaledCornerOffset.h = -scaleCalc;
+                        scaleCalc = frame.center().v * bObject->naturalScale;
+                        scaleCalc >>= SHIFT_SCALE;
+                        bObject->scaledCornerOffset.v = -scaleCalc;
+
+                        bObject->absoluteBounds.left = bObject->location.h +
+                            bObject->scaledCornerOffset.h;
+                        bObject->absoluteBounds.right = bObject->absoluteBounds.left +
+                            bObject->scaledSize.h;
+                        bObject->absoluteBounds.top = bObject->location.v +
+                            bObject->scaledCornerOffset.v;
+                        bObject->absoluteBounds.bottom = bObject->absoluteBounds.top +
+                            bObject->scaledSize.v;
+                    }
+
+                    if (aObject->owner == bObject->owner) {
+                        continue;
+                    }
+
+                    spaceObjectType* sObject;
+                    spaceObjectType* dObject;
+                    if (!((bObject->attributes | aObject->attributes) & kIsBeam)) {
+                        dObject = aObject;
+                        sObject = bObject;
+                        if (!((sObject->absoluteBounds.right < dObject->absoluteBounds.left) ||
+                                    (sObject->absoluteBounds.left > dObject->absoluteBounds.right) ||
+                                    (sObject->absoluteBounds.bottom < dObject->absoluteBounds.top) ||
+                                    (sObject->absoluteBounds.top > dObject->absoluteBounds.bottom))) {
+                            if (( dObject->attributes & kCanBeHit) && ( sObject->attributes & kCanCollide)) {
+                                HitObject( dObject, sObject);
+                            }
+                            if (( sObject->attributes & kCanBeHit) && ( dObject->attributes & kCanCollide)) {
+                                HitObject( sObject, dObject);
+                            }
+                        }
+                    } else {
+                        if (bObject->attributes & kIsBeam) {
+                            sObject = bObject;
+                            dObject = aObject;
+                        } else {
+                            sObject = aObject;
+                            dObject = bObject;
+                        }
+
+                        int32_t xs = sObject->location.h;
+                        int32_t ys = sObject->location.v;
+                        int32_t xe = sObject->frame.beam.beam->lastGlobalLocation.h;
+                        int32_t ye = sObject->frame.beam.beam->lastGlobalLocation.v;
+
+                        int16_t cs = mClipCode( xs, ys, dObject->absoluteBounds);
+                        int16_t ce = mClipCode( xe, ye, dObject->absoluteBounds);
+                        bool beamHit = true;
+                        if (sObject->active == kObjectToBeFreed) {
+                            cs = ce = 1;
+                            beamHit = false;
+                        }
+
+                        while (cs | ce) {
+                            if (cs & ce) {
+                                beamHit = false;
+                                break;
+                            }
+                            int32_t xd = xe - xs;
+                            int32_t yd = ye - ys;
+                            if (cs) {
+                                if (cs & 8) {
+                                    ys += yd * ( dObject->absoluteBounds.left - xs) / xd;
+                                    xs = dObject->absoluteBounds.left;
+                                } else
+                                    if (cs & 4) {
+                                        ys += yd * ( dObject->absoluteBounds.right - 1 - xs) / xd;
+                                        xs = dObject->absoluteBounds.right - 1;
+                                    } else
+                                        if (cs & 2) {
+                                            xs += xd * ( dObject->absoluteBounds.top - ys) / yd;
+                                            ys = dObject->absoluteBounds.top;
+                                        } else
+                                            if (cs & 1) {
+                                                xs += xd * ( dObject->absoluteBounds.bottom - 1 - ys) / yd;
+                                                ys = dObject->absoluteBounds.bottom - 1;
+                                            }
+                                cs = mClipCode( xs, ys, dObject->absoluteBounds);
+                            } else if (ce) {
+                                if (ce & 8) {
+                                    ye += yd * ( dObject->absoluteBounds.left - xe) / xd;
+                                    xe = dObject->absoluteBounds.left;
+                                } else if (ce & 4) {
+                                    ye += yd * ( dObject->absoluteBounds.right - 1 - xe) / xd;
+                                    xe = dObject->absoluteBounds.right - 1;
+                                } else if (ce & 2) {
+                                    xe += xd * ( dObject->absoluteBounds.top - ye) / yd;
+                                    ye = dObject->absoluteBounds.top;
+                                } else if (ce & 1) {
+                                    xe += xd * ( dObject->absoluteBounds.bottom - 1 - ye) / yd;
+                                    ye = dObject->absoluteBounds.bottom - 1;
+                                }
+                                ce = mClipCode( xe, ye, dObject->absoluteBounds);
+                            }
+                        }
+                        if (beamHit) {
+                            HitObject(dObject, sObject);
+                        }
+                    }
+
+                    if  (!((bObject->attributes & aObject->attributes) & kOccupiesSpace)
+                            || (bObject->owner == aObject->owner)) {
+                        // Either one or both objects doesn't occupy
+                        // space, or the collide action resulted in an
+                        // ownership change.  Don't need to push them
+                        // back.
+                        continue;
+                    }
+
+                    // check to see if the 2 objects occupy same physical space
+                    dObject = aObject;
+                    sObject = bObject;
+                    if ((sObject->absoluteBounds.right >= dObject->absoluteBounds.left)
+                            && (sObject->absoluteBounds.left <= dObject->absoluteBounds.right)
+                            && (sObject->absoluteBounds.bottom >= dObject->absoluteBounds.top)
+                            && (sObject->absoluteBounds.top <= dObject->absoluteBounds.bottom)) {
+                        // move them back till they don't touch
+                        CorrectPhysicalSpace( aObject, bObject);
+                    } else {
+                        aObject->collideObject = bObject->collideObject = NULL;
+                    }
+                }
+            }
         }
     }
 
-    proximityObject = gProximityGrid.get();
-    for (int32_t j = 0; j < kProximitySuperSize; j++) {
-        for (int32_t i = 0; i < kProximitySuperSize; i++) {
-            auto aObject = proximityObject->farObject;
-            while (aObject != NULL) {
-                const auto taObject = aObject->nextFarObject;
-                auto currentProximity = proximityObject;
-                for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
-                    spaceObjectType* bObject;
-                    int32_t superx, supery;
-                    if (k == 0) {
-                        bObject = aObject->nextFarObject;
-                        superx = aObject->distanceGrid.h;
-                        supery = aObject->distanceGrid.v;
-                    } else {
-                        currentProximity += proximityObject->unitsToCheck[k].adjacentUnit;
-                        bObject = currentProximity->farObject;
-                        superx = aObject->distanceGrid.h + proximityObject->unitsToCheck[k].superOffset.h;
-                        supery = aObject->distanceGrid.v + proximityObject->unitsToCheck[k].superOffset.v;
-                    }
-                    if ((superx >= 0) && (supery >= 0)) {
-                        while (bObject != NULL) {
-                            const auto tbObject = bObject->nextFarObject;
-                            if ((bObject->owner != aObject->owner)
-                                    && (bObject->distanceGrid.h == superx)
-                                    && (bObject->distanceGrid.v == supery)
-                                    && ((bObject->attributes & kCanThink)
-                                        || ( bObject->attributes & kRemoteOrHuman)
-                                        || ( bObject->attributes & kHated))
-                                    && (( aObject->attributes & kCanThink)
-                                        || ( aObject->attributes & kRemoteOrHuman)
-                                        || ( aObject->attributes & kHated))) {
-                                uint32_t dcalc = ABS<int>( bObject->location.h - aObject->location.h);
-                                uint32_t distance =  ABS<int>( bObject->location.v - aObject->location.v);
-                                if ((dcalc > kMaximumRelevantDistance)
-                                        || (distance > kMaximumRelevantDistance)) {
-                                    distance = kMaximumRelevantDistanceSquared;
-                                } else {
-                                    distance = distance * distance + dcalc * dcalc;
-                                }
+    for (int32_t i = 0; i < kProximityGridDataLength; i++) {
+        auto proximityObject = &gProximityGrid[i];
+        auto aObject = proximityObject->farObject;
+        for (spaceObjectType* taObject = aObject->nextFarObject; aObject;
+                aObject = taObject, taObject = aObject->nextFarObject) {
+            auto currentProximity = proximityObject;
+            for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
+                spaceObjectType* bObject;
+                int32_t superx, supery;
+                if (k == 0) {
+                    bObject = aObject->nextFarObject;
+                    superx = aObject->distanceGrid.h;
+                    supery = aObject->distanceGrid.v;
+                } else {
+                    currentProximity += proximityObject->unitsToCheck[k].adjacentUnit;
+                    bObject = currentProximity->farObject;
+                    superx = aObject->distanceGrid.h + proximityObject->unitsToCheck[k].superOffset.h;
+                    supery = aObject->distanceGrid.v + proximityObject->unitsToCheck[k].superOffset.v;
+                }
+                if ((superx < 0) || (supery < 0)) {
+                    continue;
+                }
 
-                                if (distance < kMaximumRelevantDistanceSquared) {
-                                    aObject->seenByPlayerFlags |= bObject->myPlayerFlag;
-                                    bObject->seenByPlayerFlags |= aObject->myPlayerFlag;
+                for (spaceObjectType* tbObject = bObject->nextFarObject; bObject;
+                        bObject = tbObject, tbObject = bObject->nextFarObject) {
+                    if ((bObject->owner != aObject->owner)
+                            && (bObject->distanceGrid.h == superx)
+                            && (bObject->distanceGrid.v == supery)
+                            && ((bObject->attributes & kCanThink)
+                                || ( bObject->attributes & kRemoteOrHuman)
+                                || ( bObject->attributes & kHated))
+                            && (( aObject->attributes & kCanThink)
+                                || ( aObject->attributes & kRemoteOrHuman)
+                                || ( aObject->attributes & kHated))) {
+                        uint32_t dcalc = ABS<int>( bObject->location.h - aObject->location.h);
+                        uint32_t distance =  ABS<int>( bObject->location.v - aObject->location.v);
+                        if ((dcalc > kMaximumRelevantDistance)
+                                || (distance > kMaximumRelevantDistance)) {
+                            distance = kMaximumRelevantDistanceSquared;
+                        } else {
+                            distance = distance * distance + dcalc * dcalc;
+                        }
 
-                                    if (bObject->attributes & kHideEffect) {
-                                        aObject->runTimeFlags |= kIsHidden;
-                                    }
+                        if (distance < kMaximumRelevantDistanceSquared) {
+                            aObject->seenByPlayerFlags |= bObject->myPlayerFlag;
+                            bObject->seenByPlayerFlags |= aObject->myPlayerFlag;
 
-                                    if (aObject->attributes & kHideEffect) {
-                                        bObject->runTimeFlags |= kIsHidden;
-                                    }
-                                }
-
-                                if  (
-                                        (
-                                            (aObject->baseType->buildFlags & kCanOnlyEngage) ||
-                                            (bObject->baseType->buildFlags & kOnlyEngagedBy)
-                                        ) &&
-                                        (
-                                            (
-                                                (aObject->baseType->buildFlags & kEngageKeyTagMask)
-                                                << kEngageKeyTagShift
-                                            ) !=
-                                            (
-                                                bObject->baseType->buildFlags & kLevelKeyTagMask
-                                            )
-                                        )
-                                    ) {
-                                    goto hackANoEngageMatch;
-                                }
-
-                                if ((distance < aObject->closestDistance) && (bObject->attributes & kPotentialTarget)) {
-                                    aObject->closestDistance = distance;
-                                    aObject->closestObject = bObject->entryNumber;
-                                }
-
-                            hackANoEngageMatch:
-                                if  (
-                                        (
-                                            (bObject->baseType->buildFlags & kCanOnlyEngage) ||
-                                            (aObject->baseType->buildFlags & kOnlyEngagedBy)
-                                        ) &&
-                                        (
-                                            (
-                                                (bObject->baseType->buildFlags & kEngageKeyTagMask)
-                                                << kEngageKeyTagShift
-                                            ) !=
-                                            (
-                                                aObject->baseType->buildFlags & kLevelKeyTagMask
-                                            )
-                                        )
-                                    ) {
-                                    goto hackBNoEngageMatch;
-                                }
-
-                                if (( distance < bObject->closestDistance) && ( aObject->attributes & kPotentialTarget)) {
-                                    bObject->closestDistance = distance;
-                                    bObject->closestObject = aObject->entryNumber;
-                                }
-                            hackBNoEngageMatch:
-                                bObject->localFoeStrength += aObject->localFriendStrength;
-                                bObject->localFriendStrength += aObject->localFoeStrength;
-
-                            } else if ((bObject->distanceGrid.h == superx)
-                                    && (bObject->distanceGrid.v == supery)
-                                    && ( k == 0)) {
-                                if (aObject->owner != bObject->owner) {
-                                    bObject->localFoeStrength += aObject->localFriendStrength;
-                                    bObject->localFriendStrength += aObject->localFoeStrength;
-                                } else {
-                                    bObject->localFoeStrength += aObject->localFoeStrength;
-                                    bObject->localFriendStrength += aObject->localFriendStrength;
-                                }
+                            if (bObject->attributes & kHideEffect) {
+                                aObject->runTimeFlags |= kIsHidden;
                             }
-                            bObject = tbObject;
+
+                            if (aObject->attributes & kHideEffect) {
+                                bObject->runTimeFlags |= kIsHidden;
+                            }
+                        }
+
+                        if  (
+                                (
+                                 (aObject->baseType->buildFlags & kCanOnlyEngage) ||
+                                 (bObject->baseType->buildFlags & kOnlyEngagedBy)
+                                ) &&
+                                (
+                                 (
+                                  (aObject->baseType->buildFlags & kEngageKeyTagMask)
+                                  << kEngageKeyTagShift
+                                 ) !=
+                                 (
+                                  bObject->baseType->buildFlags & kLevelKeyTagMask
+                                 )
+                                )
+                            ) {
+                            goto hackANoEngageMatch;
+                        }
+
+                        if ((distance < aObject->closestDistance) && (bObject->attributes & kPotentialTarget)) {
+                            aObject->closestDistance = distance;
+                            aObject->closestObject = bObject->entryNumber;
+                        }
+
+hackANoEngageMatch:
+                        if  (
+                                (
+                                 (bObject->baseType->buildFlags & kCanOnlyEngage) ||
+                                 (aObject->baseType->buildFlags & kOnlyEngagedBy)
+                                ) &&
+                                (
+                                 (
+                                  (bObject->baseType->buildFlags & kEngageKeyTagMask)
+                                  << kEngageKeyTagShift
+                                 ) !=
+                                 (
+                                  aObject->baseType->buildFlags & kLevelKeyTagMask
+                                 )
+                                )
+                            ) {
+                            goto hackBNoEngageMatch;
+                        }
+
+                        if (( distance < bObject->closestDistance) && ( aObject->attributes & kPotentialTarget)) {
+                            bObject->closestDistance = distance;
+                            bObject->closestObject = aObject->entryNumber;
+                        }
+hackBNoEngageMatch:
+                        bObject->localFoeStrength += aObject->localFriendStrength;
+                        bObject->localFriendStrength += aObject->localFoeStrength;
+
+                    } else if ((bObject->distanceGrid.h == superx)
+                            && (bObject->distanceGrid.v == supery)
+                            && ( k == 0)) {
+                        if (aObject->owner != bObject->owner) {
+                            bObject->localFoeStrength += aObject->localFriendStrength;
+                            bObject->localFriendStrength += aObject->localFoeStrength;
+                        } else {
+                            bObject->localFoeStrength += aObject->localFoeStrength;
+                            bObject->localFriendStrength += aObject->localFriendStrength;
                         }
                     }
                 }
-                aObject = taObject;
             }
-            proximityObject++;
         }
     }
 
