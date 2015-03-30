@@ -825,14 +825,12 @@ void execute_actions(
 
 void reset_action_queue() {
     gActionQueueData.reset(new actionQueueType[kActionQueueLength]);
-    actionQueueType *action = gActionQueueData.get();
-    int32_t         i;
 
     gFirstActionQueueNumber = -1;
     gFirstActionQueue = NULL;
 
-    for ( i = 0; i < kActionQueueLength; i++)
-    {
+    actionQueueType* action = gActionQueueData.get();
+    for (int32_t i = 0; i < kActionQueueLength; i++) {
         action->actionNum = -1;
         action->actionToDo = 0;
         action->action = NULL;
@@ -854,113 +852,92 @@ static void queue_action(
         objectActionType *action, int32_t actionNumber, int32_t actionToDo,
         int32_t delayTime, spaceObjectType *subjectObject,
         spaceObjectType *directObject, Point* offset) {
-    int32_t             queueNumber = 0;
-    actionQueueType     *actionQueue = gActionQueueData.get(),
-                        *nextQueue = gFirstActionQueue, *previousQueue = NULL;
-
-    while (( actionQueue->action != NULL) && ( queueNumber < kActionQueueLength))
-    {
+    int32_t queueNumber = 0;
+    actionQueueType* actionQueue = gActionQueueData.get();
+    while (actionQueue->action && (queueNumber < kActionQueueLength)) {
         actionQueue++;
         queueNumber++;
     }
 
-    if ( queueNumber == kActionQueueLength) return;
+    if (queueNumber == kActionQueueLength) {
+        return;
+    }
     actionQueue->action = action;
     actionQueue->actionNum = actionNumber;
     actionQueue->scheduledTime = delayTime;
-    actionQueue->subjectObject = subjectObject;
     actionQueue->actionToDo = actionToDo;
 
-    if ( offset == NULL)
-    {
-        actionQueue->offset.h = actionQueue->offset.v = 0;
-    } else
-    {
-        actionQueue->offset.h = offset->h;
-        actionQueue->offset.v = offset->v;
+    if (offset) {
+        actionQueue->offset = *offset;
+    } else {
+        actionQueue->offset = Point{0, 0};
     }
 
-    if ( subjectObject != NULL)
-    {
+    actionQueue->subjectObject = subjectObject;
+    if (subjectObject) {
         actionQueue->subjectObjectNum = subjectObject->entryNumber;
         actionQueue->subjectObjectID = subjectObject->id;
-    } else
-    {
+    } else {
         actionQueue->subjectObjectNum = -1;
         actionQueue->subjectObjectID = -1;
     }
+
     actionQueue->directObject = directObject;
-    if ( directObject != NULL)
-    {
+    if (directObject) {
         actionQueue->directObjectNum = directObject->entryNumber;
         actionQueue->directObjectID = directObject->id;
-    } else
-    {
+    } else {
         actionQueue->directObjectNum = -1;
         actionQueue->directObjectID = -1;
     }
 
-    while (( nextQueue != NULL) && ( nextQueue->scheduledTime < delayTime))
-    {
+    actionQueueType* previousQueue = NULL;
+    actionQueueType* nextQueue = gFirstActionQueue;
+    while (nextQueue && (nextQueue->scheduledTime < delayTime)) {
         previousQueue = nextQueue;
         nextQueue = nextQueue->nextActionQueue;
     }
-    if ( previousQueue == NULL)
-    {
-        actionQueue->nextActionQueue = gFirstActionQueue;
-        actionQueue->nextActionQueueNum = gFirstActionQueueNumber;
-        gFirstActionQueue = actionQueue;
-        gFirstActionQueueNumber = queueNumber;
-    } else
-    {
+    if (previousQueue) {
         actionQueue->nextActionQueue = previousQueue->nextActionQueue;
         actionQueue->nextActionQueueNum = previousQueue->nextActionQueueNum;
 
         previousQueue->nextActionQueue = actionQueue;
         previousQueue->nextActionQueueNum = queueNumber;
+    } else {
+        actionQueue->nextActionQueue = gFirstActionQueue;
+        actionQueue->nextActionQueueNum = gFirstActionQueueNumber;
+        gFirstActionQueue = actionQueue;
+        gFirstActionQueueNumber = queueNumber;
     }
 }
 
 void execute_action_queue(int32_t unitsToDo) {
-//  actionQueueType     *actionQueue = gFirstActionQueue;
-    actionQueueType     *actionQueue = gActionQueueData.get();
-    int32_t                     subjectid, directid, i;
-
-    for ( i = 0; i < kActionQueueLength; i++)
-    {
-        if ( actionQueue->action != NULL)
-        {
+    for (int32_t i = 0; i < kActionQueueLength; i++) {
+        auto actionQueue = &gActionQueueData[i];
+        if (actionQueue->action) {
             actionQueue->scheduledTime -= unitsToDo;
         }
-        actionQueue++;
     }
 
-    actionQueue = gFirstActionQueue;
-    while (( gFirstActionQueue != NULL) &&
-        ( gFirstActionQueue->action != NULL) &&
-        ( gFirstActionQueue->scheduledTime <= 0))
-    {
-        subjectid = -1;
-        directid = -1;
-        if ( gFirstActionQueue->subjectObject != NULL)
-        {
-            if ( gFirstActionQueue->subjectObject->active)
-                subjectid = gFirstActionQueue->subjectObject->id;
+    while (gFirstActionQueue
+            && gFirstActionQueue->action
+            && (gFirstActionQueue->scheduledTime <= 0)) {
+        int32_t subjectid = -1;
+        if (gFirstActionQueue->subjectObject && gFirstActionQueue->subjectObject->active) {
+            subjectid = gFirstActionQueue->subjectObject->id;
         }
 
-        if ( gFirstActionQueue->directObject != NULL)
-        {
-            if ( gFirstActionQueue->directObject->active)
-                directid = gFirstActionQueue->directObject->id;
+        int32_t directid = -1;
+        if (gFirstActionQueue->directObject && gFirstActionQueue->directObject->active) {
+            directid = gFirstActionQueue->directObject->id;
         }
-        if (( subjectid == gFirstActionQueue->subjectObjectID) &&
-            ( directid == gFirstActionQueue->directObjectID))
-        {
+        if ((subjectid == gFirstActionQueue->subjectObjectID)
+                && (directid == gFirstActionQueue->directObjectID)) {
             execute_actions(
                     gFirstActionQueue->actionNum,
                     gFirstActionQueue->actionToDo,
                     gFirstActionQueue->subjectObject, gFirstActionQueue->directObject,
-                    &(gFirstActionQueue->offset), false);
+                    &gFirstActionQueue->offset, false);
         }
         gFirstActionQueue->actionNum = -1;
         gFirstActionQueue->actionToDo = 0;
@@ -972,9 +949,9 @@ void execute_action_queue(int32_t unitsToDo) {
         gFirstActionQueue->directObject = NULL;
         gFirstActionQueue->directObjectNum = -1;
         gFirstActionQueue->directObjectID = -1;
-        gFirstActionQueue->offset.h = gFirstActionQueue->offset.v = 0;
+        gFirstActionQueue->offset = Point{0, 0};
 
-        actionQueue = gFirstActionQueue;
+        auto actionQueue = gFirstActionQueue;
 
         gFirstActionQueueNumber = gFirstActionQueue->nextActionQueueNum;
         gFirstActionQueue = gFirstActionQueue->nextActionQueue;
