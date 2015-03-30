@@ -669,6 +669,7 @@ static void set_destination(
 
 static void activate_special(
         objectActionType* action, spaceObjectType* focus, spaceObjectType* subject) {
+    // TODO(sfiera): replace with fire_weapon() if we can show it's OK.
     ActivateObjectSpecial(subject);
 }
 

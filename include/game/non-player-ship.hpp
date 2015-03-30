@@ -26,6 +26,9 @@
 namespace antares {
 
 spaceObjectType *HackNewNonplayerShip(int32_t, int16_t, Rect *);
+void fire_weapon(
+        spaceObjectType* subject, spaceObjectType* target,
+        const baseObjectType::Weapon& base_weapon, spaceObjectType::Weapon& weapon);
 void NonplayerShipThink(int32_t);
 void UpdateMyNonplayerShip( void);
 void HackShowShipID( void);

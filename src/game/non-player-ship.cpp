@@ -124,9 +124,15 @@ static void tick_weapon(
     if (weapon.time > 0) {
         weapon.time -= timePass;
     }
-    if (!(subject->keysDown & key)
-            || (weapon.time > 0)
-            || (weapon.type == kNoWeapon)) {
+    if (subject->keysDown & key) {
+        fire_weapon(subject, target, base_weapon, weapon);
+    }
+}
+
+void fire_weapon(
+        spaceObjectType* subject, spaceObjectType* target,
+        const baseObjectType::Weapon& base_weapon, spaceObjectType::Weapon& weapon) {
+    if ((weapon.time > 0) || (weapon.type == kNoWeapon)) {
         return;
     }
 
