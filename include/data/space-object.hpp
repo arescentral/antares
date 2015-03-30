@@ -628,7 +628,6 @@ struct spaceObjectType {
     coordPointType          location;
     coordPointType          lastLocation;
     int32_t                 lastDir;
-    spaceObjectType*        collideObject;
     Point                   collisionGrid;
     spaceObjectType*        nextNearObject;
     Point                   distanceGrid;

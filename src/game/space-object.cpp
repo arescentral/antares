@@ -293,7 +293,6 @@ int AddSpaceObject( spaceObjectType *sourceObject)
     *destObject = *sourceObject;
 
     destObject->lastLocation = destObject->location;
-    destObject->collideObject = NULL;
     destObject->lastLocation.h += 100000;
     destObject->lastLocation.v += 100000;
     destObject->lastDir = destObject->direction;

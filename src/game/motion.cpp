@@ -938,8 +938,6 @@ void CollideSpaceObjects() {
                             && (sObject->absoluteBounds.top <= dObject->absoluteBounds.bottom)) {
                         // move them back till they don't touch
                         CorrectPhysicalSpace( aObject, bObject);
-                    } else {
-                        aObject->collideObject = bObject->collideObject = NULL;
                     }
                 }
             }
