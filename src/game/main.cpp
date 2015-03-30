@@ -32,6 +32,7 @@
 #include "drawing/shapes.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "drawing/text.hpp"
+#include "game/action.hpp"
 #include "game/admiral.hpp"
 #include "game/beam.hpp"
 #include "game/cursor.hpp"
@@ -530,7 +531,7 @@ void GamePlay::fire_timer() {
 
             NonplayerShipThink( kDecideEveryCycles);
             AdmiralThink();
-            ExecuteActionQueue( kDecideEveryCycles);
+            execute_action_queue( kDecideEveryCycles);
 
             if (globals()->gInputSource && !globals()->gInputSource->next(_player_ship)) {
                 globals()->gGameOver = 1;

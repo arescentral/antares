@@ -538,14 +538,14 @@ void draw_instruments() {
         spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
         if (player->active) {
             draw_player_ammo(
-                ((player->pulseType >= 0) && (player->pulseBase->frame.weapon.ammo > 0))
-                ? player->pulseAmmo
+                ((player->pulse.type >= 0) && (player->pulse.base->frame.weapon.ammo > 0))
+                ? player->pulse.ammo
                 : -1,
-                ((player->beamType >= 0) && (player->beamBase->frame.weapon.ammo > 0))
-                ? player->beamAmmo
+                ((player->beam.type >= 0) && (player->beam.base->frame.weapon.ammo > 0))
+                ? player->beam.ammo
                 : -1,
-                ((player->specialType >= 0) && (player->specialBase->frame.weapon.ammo > 0))
-                ? player->specialAmmo
+                ((player->special.type >= 0) && (player->special.base->frame.weapon.ammo > 0))
+                ? player->special.ammo
                 : -1);
         }
     }

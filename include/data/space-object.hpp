@@ -548,22 +548,17 @@ struct baseObjectType {
     int32_t                 initialDirection;           // initial direction (usually relative)
     int32_t                 initialDirectionRange;      // random addition to initial direction
 
-    int32_t                 pulse;                      // pulse weapon baseObject #(kNoWeapon = none)
-    int32_t                 beam;                       // beam weapon baseObject #
-    int32_t                 special;                    // special weapon baseObject #
-
-    int32_t                 pulsePositionNum;           // # of places from which pulse can fire
-    int32_t                 beamPositionNum;            // # of places from which beam can fire
-    int32_t                 specialPositionNum;         // # of places from which special can fire
-
-    fixedPointType          pulsePosition[kMaxWeaponPosition];  // relative positions (unrotated) of fire points
-    fixedPointType          beamPosition[kMaxWeaponPosition];
-    fixedPointType          specialPosition[kMaxWeaponPosition];
+    struct Weapon {
+        int32_t base;                                   // kNoWeapon = none
+        int32_t positionNum;                            // # of places from which weapon can fire
+        fixedPointType position[kMaxWeaponPosition];    // relative positions (unrotated) of fire points
+    };
+    Weapon                  pulse;
+    Weapon                  beam;
+    Weapon                  special;
 
     Fixed                   friendDefecit;
     Fixed                   dangerThreshold;
-//  int32_t                 pulseDirection;             // direction relative to shooter
-//  int32_t                 beamDirection;              // direction relative to shooter
     int32_t                 specialDirection;           // direction relative to shooter
 
     int32_t                 arriveActionDistance;               // distance^2 at which arrive action is triggered on dest
@@ -633,7 +628,6 @@ struct spaceObjectType {
     coordPointType          location;
     coordPointType          lastLocation;
     int32_t                 lastDir;
-    spaceObjectType*        collideObject;
     Point                   collisionGrid;
     spaceObjectType*        nextNearObject;
     Point                   distanceGrid;
@@ -704,9 +698,6 @@ struct spaceObjectType {
     int32_t                 naturalScale;
     int32_t                 id;
     int16_t                 rechargeTime;
-    int16_t                 pulseCharge;
-    int16_t                 beamCharge;
-    int16_t                 specialCharge;
     int16_t                 active;
 
     int32_t                 warpEnergyCollected;
@@ -735,23 +726,17 @@ struct spaceObjectType {
     dutyType                duty;
     int                     pixResID;
 
-    baseObjectType          *pulseBase;
-    int32_t                 pulseType;
-    int32_t                 pulseTime;
-    int32_t                 pulseAmmo;
-    int32_t                 pulsePosition;
-
-    baseObjectType          *beamBase;
-    int32_t                 beamType;
-    int32_t                 beamTime;
-    int32_t                 beamAmmo;
-    int32_t                 beamPosition;
-
-    baseObjectType          *specialBase;
-    int32_t                 specialType;
-    int32_t                 specialTime;
-    int32_t                 specialAmmo;
-    int32_t                 specialPosition;
+    struct Weapon {
+        baseObjectType*         base;
+        int32_t                 type;
+        int32_t                 time;
+        int32_t                 ammo;
+        int32_t                 position;
+        int16_t                 charge;
+    };
+    Weapon                  pulse;
+    Weapon                  beam;
+    Weapon                  special;
 
     int32_t                 periodicTime;
     int32_t                 whichLabel;

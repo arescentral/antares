@@ -125,7 +125,8 @@
   , { "target_name": "libantares-game"
     , "type": "static_library"
     , "sources":
-      [ "src/game/admiral.cpp"
+      [ "src/game/action.cpp"
+      , "src/game/admiral.cpp"
       , "src/game/beam.cpp"
       , "src/game/cheat.cpp"
       , "src/game/cursor.cpp"

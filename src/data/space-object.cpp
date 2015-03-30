@@ -254,17 +254,17 @@ void read_from(ReadSource in, baseObjectType& object) {
     read(in, object.initialDirection);
     read(in, object.initialDirectionRange);
 
-    read(in, object.pulse);
-    read(in, object.beam);
-    read(in, object.special);
+    read(in, object.pulse.base);
+    read(in, object.beam.base);
+    read(in, object.special.base);
 
-    read(in, object.pulsePositionNum);
-    read(in, object.beamPositionNum);
-    read(in, object.specialPositionNum);
+    read(in, object.pulse.positionNum);
+    read(in, object.beam.positionNum);
+    read(in, object.special.positionNum);
 
-    read(in, object.pulsePosition, kMaxWeaponPosition);
-    read(in, object.beamPosition, kMaxWeaponPosition);
-    read(in, object.specialPosition, kMaxWeaponPosition);
+    read(in, object.pulse.position, kMaxWeaponPosition);
+    read(in, object.beam.position, kMaxWeaponPosition);
+    read(in, object.special.position, kMaxWeaponPosition);
 
     read(in, object.friendDefecit);
     read(in, object.dangerThreshold);

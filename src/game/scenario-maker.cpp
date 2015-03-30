@@ -27,6 +27,7 @@
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
+#include "game/action.hpp"
 #include "game/admiral.hpp"
 #include "game/beam.hpp"
 #include "game/globals.hpp"
@@ -118,7 +119,7 @@ void AddBaseObjectMedia(int32_t whichBase, uint8_t color, uint32_t all_colors) {
         AddBaseObjectActionMedia(whichBase, kActivateActionType, i, all_colors);
         AddBaseObjectActionMedia(whichBase, kArriveActionType, i, all_colors);
 
-        for (int32_t weapon: {aBase->pulse, aBase->beam, aBase->special}) {
+        for (int32_t weapon: {aBase->pulse.base, aBase->beam.base, aBase->special.base}) {
             if (weapon != kNoWeapon) {
                 AddBaseObjectMedia(weapon, i, all_colors);
             }
@@ -630,7 +631,7 @@ void ScenarioMakerInit() {
 
 bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     ResetAllSpaceObjects();
-    ResetActionQueueData();
+    reset_action_queue();
     Beams::reset();
     ResetAllSprites();
     Labels::reset();
@@ -888,7 +889,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             MoveSpaceObjects(kDecideEveryCycles);
             NonplayerShipThink(kDecideEveryCycles);
             AdmiralThink();
-            ExecuteActionQueue(kDecideEveryCycles);
+            execute_action_queue(kDecideEveryCycles);
             CollideSpaceObjects();
             x++;
             if (x == 30) {
@@ -916,7 +917,7 @@ void CheckScenarioConditions(int32_t timePass) {
             auto sObject = GetObjectFromInitialNumber(c->subjectObject);
             auto dObject = GetObjectFromInitialNumber(c->directObject);
             Point offset;
-            ExecuteObjectActions(c->startVerb, c->verbNum, sObject, dObject, &offset, true);
+            execute_actions(c->startVerb, c->verbNum, sObject, dObject, &offset, true);
         }
     }
 }
