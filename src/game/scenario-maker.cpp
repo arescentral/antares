@@ -105,6 +105,7 @@ void AddBaseObjectMedia(int32_t whichBase, uint8_t color, uint32_t all_colors) {
         } else if (!(aBase->internalFlags & (kNeutralColorNeededFlag << i))) {
             continue;  // color not needed.
         }
+        aBase->internalFlags |= kNeutralColorLoadedFlag << i;
 
         if (aBase->pixResID != kNoSpriteTable) {
             int16_t id = aBase->pixResID + (i << kSpriteTableColorShift);
