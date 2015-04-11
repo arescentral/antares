@@ -100,11 +100,6 @@ enum {
     kPotentialTarget        = kCanBeEngaged | kCanBeEvaded,
     kRemoteOrHuman          = kIsPlayerShip,
 
-    // for baseObjectTypes only: these bits have different functions in
-    // baseObjectTypes than they do in normal spaceObjectTypes.  However, they
-    // should never be turned on permanently!
-    kHaveCheckedMedia       = 0x00000008,  // we've checked its sounds & sprites
-
     // for initial objects only
     // kInitiallyExists should NOT be carried over to real objects!
     kInitiallyHidden        = 0x00000020,  // does it exist at first, or is it turned on later?
