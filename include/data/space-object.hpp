@@ -138,14 +138,11 @@ enum {
     kBuildFlagBit22             = 0x00200000,
     kOnlyEngagedBy              = 0x00400000,
     kCanOnlyEngage              = 0x00800000,
-    kEngageKeyTag1              = 0x01000000,
-    kEngageKeyTag2              = 0x02000000,
-    kEngageKeyTag3              = 0x04000000,
-    kEngageKeyTag4              = 0x08000000,
-    kLevelKeyTag1               = 0x10000000,
-    kLevelKeyTag2               = 0x20000000,
-    kLevelKeyTag3               = 0x40000000,
-    kLevelKeyTag4               = 0x80000000,
+
+    kEngageKeyTag               = 0x0f000000,
+    kEngageKeyTagShift          = 24,
+    kLevelKeyTag                = 0xf0000000,
+    kLevelKeyTagShift           = 28,
 };
 
 //
@@ -154,9 +151,6 @@ enum {
 // a special tag, matching to the high four bits of an baseObject's
 // build flag.
 //
-const uint32_t kLevelKeyTagMask      = 0xf0000000;
-const uint32_t kEngageKeyTagMask     = 0x0f000000;
-const int32_t kEngageKeyTagShift   = 4;
 
 enum {
     kStrongerThanTarget         = 0x00000001,
@@ -187,10 +181,9 @@ enum {
     kHardTargetIsFriend         = 0x02000000,
     kHardTargetIsNotBase        = 0x04000000,
     kHardTargetIsBase           = 0x08000000,
-    kOrderKeyTag1               = 0x10000000,
-    kOrderKeyTag2               = 0x20000000,
-    kOrderKeyTag3               = 0x40000000,
-    kOrderKeyTag4               = 0x80000000,
+
+    kOrderKeyTag                = 0xf0000000,
+    kOrderKeyTagShift           = 28,
 };
 
 // RUNTIME FLAG BITS
@@ -440,6 +433,7 @@ struct objectActionType {
     uint8_t                     reflexive;              // does it apply to object executing verb?
     uint32_t                    inclusiveFilter;        // if it has ALL these attributes, OK -- for non-reflective verbs
     uint32_t                    exclusiveFilter;        // don't execute if it has ANY of these
+    uint8_t                     levelKeyTag;
     int16_t                     owner;                  // 0 no matter, 1 same owner, -1 different owner
     uint32_t                    delay;
 //  uint32_t                    reserved1;
@@ -575,6 +569,9 @@ struct baseObjectType {
 
     uint32_t            buildFlags;
     uint32_t            orderFlags;
+    uint8_t             levelKeyTag;
+    uint8_t             engageKeyTag;
+    uint8_t             orderKeyTag;
     Fixed               buildRatio;
     uint32_t            buildTime;
 //  int32_t             reserved1;

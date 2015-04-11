@@ -1005,15 +1005,7 @@ void CollideSpaceObjects() {
                                  (aObject->baseType->buildFlags & kCanOnlyEngage) ||
                                  (bObject->baseType->buildFlags & kOnlyEngagedBy)
                                 ) &&
-                                (
-                                 (
-                                  (aObject->baseType->buildFlags & kEngageKeyTagMask)
-                                  << kEngageKeyTagShift
-                                 ) !=
-                                 (
-                                  bObject->baseType->buildFlags & kLevelKeyTagMask
-                                 )
-                                )
+                                (aObject->baseType->engageKeyTag != bObject->baseType->levelKeyTag)
                             ) {
                             goto hackANoEngageMatch;
                         }
@@ -1029,15 +1021,7 @@ hackANoEngageMatch:
                                  (bObject->baseType->buildFlags & kCanOnlyEngage) ||
                                  (aObject->baseType->buildFlags & kOnlyEngagedBy)
                                 ) &&
-                                (
-                                 (
-                                  (bObject->baseType->buildFlags & kEngageKeyTagMask)
-                                  << kEngageKeyTagShift
-                                 ) !=
-                                 (
-                                  aObject->baseType->buildFlags & kLevelKeyTagMask
-                                 )
-                                )
+                                (bObject->baseType->engageKeyTag != aObject->baseType->levelKeyTag)
                             ) {
                             goto hackBNoEngageMatch;
                         }

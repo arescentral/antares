@@ -1132,9 +1132,8 @@ void AdmiralThink() {
                 }
 
 
-                if (((anObject->baseType->orderFlags & kLevelKeyTagMask) != 0)
-                        && ((anObject->baseType->orderFlags & kLevelKeyTagMask)
-                            == (destObject->baseType->buildFlags & kLevelKeyTagMask))) {
+                if (anObject->baseType->orderKeyTag
+                        && (anObject->baseType->orderKeyTag == destObject->baseType->levelKeyTag)) {
                     thisValue <<= 3;
                 } else if (anObject->baseType->orderFlags & kHardMatchingFoe) {
                     thisValue = 0;
@@ -1218,10 +1217,8 @@ void AdmiralThink() {
                                             anObject = mGetSpaceObjectPtr(j);
                                             if ((anObject->active)
                                                     && (anObject->owner != i)
-                                                    && ((anObject->baseType->buildFlags
-                                                            & kLevelKeyTagMask)
-                                                        == (baseObject->orderFlags
-                                                            & kLevelKeyTagMask))) {
+                                                    && (anObject->baseType->levelKeyTag
+                                                        == baseObject->orderKeyTag)) {
                                                 thisValue = 1;
                                             }
                                         }

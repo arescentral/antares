@@ -35,6 +35,11 @@ void read_from(ReadSource in, objectActionType& action) {
     read(in, action.reflexive);
     read(in, action.inclusiveFilter);
     read(in, action.exclusiveFilter);
+    if (action.exclusiveFilter == 0xffffffff) {
+        action.levelKeyTag = (action.inclusiveFilter & kLevelKeyTag) >> kLevelKeyTagShift;
+    } else {
+        action.levelKeyTag = 0;
+    }
     read(in, action.owner);
     read(in, action.delay);
     read(in, action.initialSubjectOverride);
@@ -289,6 +294,11 @@ void read_from(ReadSource in, baseObjectType& object) {
 
     read(in, object.buildFlags);
     read(in, object.orderFlags);
+
+    object.levelKeyTag = (object.buildFlags & kLevelKeyTag) >> kLevelKeyTagShift;
+    object.engageKeyTag = (object.buildFlags & kEngageKeyTag) >> kEngageKeyTagShift;
+    object.orderKeyTag = (object.orderFlags & kOrderKeyTag) >> kOrderKeyTagShift;
+
     read(in, object.buildRatio);
     read(in, object.buildTime);
     read(in, object.skillNum);

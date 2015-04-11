@@ -93,7 +93,7 @@ static void queue_action(
 
 bool action_filter_applies_to(const objectActionType& action, const baseObjectType& target) {
     if (action.exclusiveFilter == 0xffffffff) {
-        return ((action.inclusiveFilter ^ target.buildFlags) & kLevelKeyTagMask) == 0;
+        return action.levelKeyTag == target.levelKeyTag;
     } else {
         return (action.inclusiveFilter & target.attributes) == action.inclusiveFilter;
     }
@@ -101,7 +101,7 @@ bool action_filter_applies_to(const objectActionType& action, const baseObjectTy
 
 bool action_filter_applies_to(const objectActionType& action, const spaceObjectType& target) {
     if (action.exclusiveFilter == 0xffffffff) {
-        return ((action.inclusiveFilter ^ target.baseType->buildFlags) & kLevelKeyTagMask) == 0;
+        return action.levelKeyTag == target.baseType->levelKeyTag;
     } else {
         return (action.inclusiveFilter & target.attributes) == action.inclusiveFilter;
     }
