@@ -18,6 +18,9 @@
       , "cxxflags": ["-Os"]
       , "defines": ["NDEBUG"]
       }
+    , "cov":
+      { "defines": ["DATA_COVERAGE"]
+      }
     }
   , "cxxflags":
     [ "-std=c++11"

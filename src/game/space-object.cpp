@@ -18,6 +18,7 @@
 
 #include "game/space-object.hpp"
 
+#include <set>
 #include <sfz/sfz.hpp>
 
 #include "data/resource.hpp"
@@ -49,6 +50,7 @@ using sfz::ReadSource;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::read;
+using std::set;
 using std::unique_ptr;
 
 namespace antares {
@@ -70,6 +72,10 @@ int32_t gRootObjectNumber = -1;
 static unique_ptr<spaceObjectType[]> gSpaceObjectData;
 static unique_ptr<baseObjectType[]> gBaseObjectData;
 static unique_ptr<objectActionType[]> gObjectActionData;
+
+#ifdef DATA_COVERAGE
+set<int32_t> covered_objects;
+#endif  // DATA_COVERAGE
 
 void SpaceObjectHandlingInit() {
     bool correctBaseObjectColor = false;
@@ -796,6 +802,15 @@ void ChangeObjectBaseType( spaceObjectType *dObject, int32_t whichBaseObject,
     int32_t         r;
     NatePixTable* spriteTable;
 
+#ifdef DATA_COVERAGE
+    covered_objects.insert(whichBaseObject);
+    for (int32_t weapon: {sObject->pulse.base, sObject->beam.base, sObject->special.base}) {
+        if (weapon != kNoWeapon) {
+            covered_objects.insert(weapon);
+        }
+    }
+#endif  // DATA_COVERAGE
+
     dObject->attributes = sObject->attributes | (dObject->attributes &
         (kIsHumanControlled | kIsRemote | kIsPlayerShip | kStaticDestination));
     dObject->baseType = sObject;
@@ -1029,6 +1044,17 @@ int32_t CreateAnySpaceObject(
     if (newObjectNumber == -1) {
         return -1;
     }
+
+#ifdef DATA_COVERAGE
+    covered_objects.insert(whichBase);
+    auto* base = mGetBaseObjectPtr(whichBase);
+    for (int32_t weapon: {base->pulse.base, base->beam.base, base->special.base}) {
+        if (weapon != kNoWeapon) {
+            covered_objects.insert(weapon);
+        }
+    }
+#endif  // DATA_COVERAGE
+
     spaceObjectType* madeObject = gSpaceObjectData.get() + newObjectNumber;
     madeObject->attributes |= specialAttributes;
     execute_actions(

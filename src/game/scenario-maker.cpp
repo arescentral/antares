@@ -19,6 +19,7 @@
 #include "game/scenario-maker.hpp"
 
 #include <vector>
+#include <set>
 #include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
@@ -55,6 +56,7 @@ using sfz::String;
 using sfz::StringSlice;
 using sfz::range;
 using sfz::read;
+using std::set;
 using std::vector;
 
 namespace antares {
@@ -81,6 +83,11 @@ vector<Scenario::BriefPoint> gScenarioBriefData;
 int32_t gScenarioRotation = 0;
 int32_t gAdmiralNumbers[kMaxPlayerNum];
 
+#ifdef DATA_COVERAGE
+set<int32_t> possible_objects;
+set<int32_t> possible_actions;
+#endif  // DATA_COVERAGE
+
 void AddBaseObjectActionMedia(
         int32_t whichBase, int32_t whichType, uint8_t color, uint32_t all_colors);
 void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors);
@@ -94,6 +101,9 @@ void SetAllBaseObjectsUnchecked() {
 }
 
 void AddBaseObjectMedia(int32_t whichBase, uint8_t color, uint32_t all_colors) {
+#ifdef DATA_COVERAGE
+    possible_objects.insert(whichBase);
+#endif  // DATA_COVERAGE
     baseObjectType      *aBase = mGetBaseObjectPtr(whichBase);
 
     if (!(aBase->attributes & kCanThink)) {
@@ -174,6 +184,9 @@ void AddBaseObjectActionMedia(
 void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors) {
     baseObjectType      *baseObject = NULL;
     int32_t             count = 0, l1, l2;
+#ifdef DATA_COVERAGE
+        possible_actions.insert(action - mGetObjectActionPtr(0));
+#endif  // DATA_COVERAGE
 
     if (action == NULL) {
         return;
@@ -876,6 +889,30 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
     step -= gThisScenario->initialNum;
 
     if (step == 0) {
+#ifdef DATA_COVERAGE
+        {
+            sfz::print(sfz::io::err, sfz::format("{{ \"level\": {0},\n", gThisScenario->chapter_number()));
+            const char* sep = "";
+            sfz::print(sfz::io::err, "  \"objects\": [");
+            for (auto object: possible_objects) {
+                sfz::print(sfz::io::err, sfz::format("{0}{1}", sep, object));
+                sep = ", ";
+            }
+            sfz::print(sfz::io::err, "],\n");
+            possible_objects.clear();
+
+            sep = "";
+            sfz::print(sfz::io::err, "  \"actions\": [");
+            for (auto action: possible_actions) {
+                sfz::print(sfz::io::err, sfz::format("{0}{1}", sep, action));
+                sep = ", ";
+            }
+            sfz::print(sfz::io::err, "]\n");
+            sfz::print(sfz::io::err, "}\n");
+            possible_actions.clear();
+        }
+#endif  // DATA_COVERAGE
+
         // set up all the admiral's destination objects
         RecalcAllAdmiralBuildData();
         Messages::clear();
