@@ -18,6 +18,7 @@
 
 #include "game/action.hpp"
 
+#include <set>
 #include <sfz/sfz.hpp>
 
 #include "data/resource.hpp"
@@ -50,6 +51,7 @@ using sfz::String;
 using sfz::StringSlice;
 using sfz::range;
 using sfz::read;
+using std::set;
 using std::unique_ptr;
 
 namespace antares {
@@ -79,6 +81,10 @@ static unique_ptr<actionQueueType[]> gActionQueueData;
 
 static baseObjectType kZeroBaseObject;
 static spaceObjectType kZeroSpaceObject = {0, &kZeroBaseObject};
+
+#ifdef DATA_COVERAGE
+set<int32_t> covered_actions;
+#endif  // DATA_COVERAGE
 
 static void queue_action(
         objectActionType *action, int32_t actionNumber, int32_t actionToDo,
@@ -728,6 +734,10 @@ void execute_actions(
     const auto begin = mGetObjectActionPtr(whichAction);
     const auto end = begin + actionNum;
     for (auto action = begin; action != end; ++action) {
+#ifdef DATA_COVERAGE
+        covered_actions.insert(action - mGetObjectActionPtr(0));
+#endif  // DATA_COVERAGE
+
         if (action->verb == kNoAction) {
             break;
         }

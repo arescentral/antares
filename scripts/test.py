@@ -9,29 +9,30 @@ import sys
 import tempfile
 
 
-def run(cmd):
+def run(name, cmd):
     sub = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output, _ = sub.communicate()
     if sub.returncode != 0:
-        sys.stderr.write("%s failed:\n" % os.path.basename(cmd[0]))
+        sys.stderr.write("%s: %s failed:\n" % (name, os.path.basename(cmd[0])))
         sys.stderr.write("====================\n")
         sys.stderr.write(output)
         sys.stderr.write("====================\n")
-        sys.exit(test.returncode)
+        return False
+    return True
 
 
 def unit_test(name, args=[]):
-    run(["out/cur/%s" % name] + args)
+    return run(name, ["out/cur/%s" % name] + args)
 
 
-def diff_test(cmd, expected):
+def diff_test(name, cmd, expected):
     with NamedTemporaryDir() as d:
-        run(cmd + ["--output=%s" % d])
-        run(["diff", "-ru", "-x.*", expected, d])
+        return (run(name, cmd + ["--output=%s" % d]) and
+                run(name, ["diff", "-ru", "-x.*", expected, d]))
 
 
 def data_test(name, args=[]):
-    diff_test(["out/cur/%s" % name] + args, "test/%s" % name)
+    return diff_test(name, ["out/cur/%s" % name] + args, "test/%s" % name)
 
 
 def offscreen_test(name, args=[]):
@@ -41,7 +42,7 @@ def offscreen_test(name, args=[]):
         expected = "test/smoke/%s" % name
     else:
         expected = "test/%s" % name
-    diff_test(cmd + args, expected)
+    return diff_test(name, cmd + args, expected)
 
 
 def replay_test(name, args=[]):
@@ -51,11 +52,11 @@ def replay_test(name, args=[]):
         expected = "test/smoke/%s" % name
     else:
         expected = "test/%s" % name
-    diff_test(cmd + args, expected)
+    return diff_test(name, cmd + args, expected)
 
 
 def call(args):
-    args[0](*args[1:])
+    return args[0](*args[1:])
 
 
 def main():
@@ -63,7 +64,7 @@ def main():
     assert not sys.argv[1:]
 
     pool = multiprocessing.pool.ThreadPool()
-    pool.map_async(call, [
+    result = pool.map_async(call, [
         (unit_test, "fixed-test"),
 
         (data_test, "build-pix"),
@@ -77,10 +78,14 @@ def main():
         (offscreen_test, "pause", ["--text"]),
 
         (replay_test, "and-it-feels-so-good"),
+        (replay_test, "astrotrash-plus"),
         (replay_test, "blood-toil-tears-sweat"),
         (replay_test, "hand-over-fist"),
+        (replay_test, "hornets-nest"),
         (replay_test, "make-way"),
+        (replay_test, "moons-for-goons"),
         (replay_test, "out-of-the-frying-pan"),
+        (replay_test, "shoplifter-1"),
         (replay_test, "space-race"),
         (replay_test, "the-left-hand"),
         (replay_test, "the-mothership-connection"),
@@ -90,8 +95,12 @@ def main():
         (replay_test, "you-should-have-seen-the-one-that-got-away"),
     ])
     pool.close()
-    pool.join()
-    print "All tests passed!"
+    result.wait()
+    if all(result.get()):
+        sys.stderr.write("All tests passed!\n")
+    else:
+        sys.stderr.write("Some tests failed.\n")
+        sys.exit(1)
 
 
 @contextlib.contextmanager
