@@ -78,25 +78,7 @@ set<int32_t> covered_objects;
 #endif  // DATA_COVERAGE
 
 void SpaceObjectHandlingInit() {
-    bool correctBaseObjectColor = false;
-
-    gSpaceObjectData.reset(new spaceObjectType[kMaxSpaceObject]);
-    if (gBaseObjectData.get() == NULL) {
-        Resource rsrc("objects", "bsob", kBaseObjectResID);
-        BytesSlice in(rsrc.data());
-        size_t count = rsrc.data().size() / baseObjectType::byte_size;
-        globals()->maxBaseObject = count;
-        gBaseObjectData.reset(new baseObjectType[count]);
-        for (size_t i = 0; i < count; ++i) {
-            read(in, gBaseObjectData[i]);
-        }
-        if (!in.empty()) {
-            throw Exception("didn't consume all of base object data");
-        }
-        correctBaseObjectColor = true;
-    }
-
-    if (gObjectActionData.get() == NULL) {
+    {
         Resource rsrc("object-actions", "obac", kObjectActionResID);
         BytesSlice in(rsrc.data());
         size_t count = rsrc.data().size() / objectActionType::byte_size;
@@ -110,9 +92,22 @@ void SpaceObjectHandlingInit() {
         }
     }
 
-    if (correctBaseObjectColor) {
-        CorrectAllBaseObjectColor();
+    gSpaceObjectData.reset(new spaceObjectType[kMaxSpaceObject]);
+    {
+        Resource rsrc("objects", "bsob", kBaseObjectResID);
+        BytesSlice in(rsrc.data());
+        size_t count = rsrc.data().size() / baseObjectType::byte_size;
+        globals()->maxBaseObject = count;
+        gBaseObjectData.reset(new baseObjectType[count]);
+        for (size_t i = 0; i < count; ++i) {
+            read(in, gBaseObjectData[i]);
+        }
+        if (!in.empty()) {
+            throw Exception("didn't consume all of base object data");
+        }
     }
+
+    CorrectAllBaseObjectColor();
     ResetAllSpaceObjects();
     reset_action_queue();
 
