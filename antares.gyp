@@ -71,7 +71,8 @@
   , { "target_name": "libantares-data"
     , "type": "static_library"
     , "sources":
-      [ "src/data/extractor.cpp"
+      [ "src/data/action.cpp"
+      , "src/data/extractor.cpp"
       , "src/data/interface.cpp"
       , "src/data/picture.cpp"
       , "src/data/races.cpp"
