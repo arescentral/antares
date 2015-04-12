@@ -21,6 +21,7 @@
 
 #include <sfz/sfz.hpp>
 
+#include "data/action.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
 #include "math/units.hpp"
@@ -208,8 +209,7 @@ struct Scenario::Condition {
     } conditionArgument;
     int32_t         subjectObject;      // initial object #
     int32_t         directObject;       // initial object #
-    int32_t         startVerb;
-    int32_t         verbNum;
+    ActionRef       action;
     uint32_t        flags;
     int32_t         direction;
 

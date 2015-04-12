@@ -802,10 +802,10 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
     if (step == 0) {
         for (int i = 0; i < gThisScenario->conditionNum; i++) {
             Scenario::Condition* condition = gThisScenario->condition(i);
-            objectActionType* action = mGetObjectActionPtr(condition->startVerb);
-            for (int j = 0; j < condition->verbNum; j++) {
+            objectActionType* action = mGetObjectActionPtr(condition->action.start);
+            for (int j = 0; j < condition->action.count; j++) {
                 condition = gThisScenario->condition(i);
-                action = mGetObjectActionPtr(condition->startVerb + j);
+                action = mGetObjectActionPtr(condition->action.start + j);
                 AddActionMedia(action, GRAY, all_colors);
             }
             condition->set_true_yet(condition->flags & kInitiallyTrue);
@@ -955,7 +955,7 @@ void CheckScenarioConditions(int32_t timePass) {
             auto sObject = GetObjectFromInitialNumber(c->subjectObject);
             auto dObject = GetObjectFromInitialNumber(c->directObject);
             Point offset;
-            ActionRef{c->startVerb, c->verbNum}(sObject, dObject, &offset);
+            c->action(sObject, dObject, &offset);
         }
     }
 }

@@ -98,8 +98,8 @@ void read_from(ReadSource in, Scenario::Condition& scenario_condition) {
     read(in, section, 12);
     read(in, scenario_condition.subjectObject);
     read(in, scenario_condition.directObject);
-    read(in, scenario_condition.startVerb);
-    read(in, scenario_condition.verbNum);
+    read(in, scenario_condition.action.start);
+    read(in, scenario_condition.action.count);
     read(in, scenario_condition.flags);
     read(in, scenario_condition.direction);
 
