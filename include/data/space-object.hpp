@@ -199,15 +199,6 @@ const uint32_t kPresenceDataHiWordMask = 0xffff0000;
 const uint32_t kPresenceDataLoWordMask = 0x0000ffff;
 const int32_t kPresenceDataHiWordShift = 16;
 
-const uint32_t kPeriodicActionTimeMask  = 0xff000000;
-const uint32_t kPeriodicActionRangeMask = 0x00ff0000;
-const uint32_t kPeriodicActionNotMask   = 0x0000ffff;
-const int32_t kPeriodicActionTimeShift  = 24;
-const int32_t kPeriodicActionRangeShift = 16;
-
-const uint32_t kDestroyActionNotMask        = 0x7fffffff;
-const uint32_t kDestroyActionDontDieFlag    = 0x80000000;
-
 struct spaceObjectType;
 
 enum objectVerbIDEnum {
@@ -564,6 +555,11 @@ struct baseObjectType {
     int32_t                 activateActionNum;
     int32_t                 arriveAction;   // what happens when object arrives at destination
     int32_t                 arriveActionNum;
+
+    bool                    destroyDontDie;
+    bool                    expireDontDie;
+    uint8_t                 activatePeriod;
+    uint8_t                 activatePeriodRange;
 
     objectFrameType         frame;
 

@@ -247,7 +247,7 @@ static void die(objectActionType* action, spaceObjectType* focus, spaceObjectTyp
 
     // if the object is occupied by a human, eject him since he can't die
     if ((focus->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
-            !(focus->baseType->destroyActionNum & kDestroyActionDontDieFlag)) {
+            !focus->baseType->destroyDontDie) {
         CreateFloatingBodyOfPlayer(focus);
     }
     if (destroy) {

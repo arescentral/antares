@@ -593,11 +593,9 @@ static void InitSpaceObjectFromBaseObject(
     } while ( dObject->id == -1);
 
     dObject->distanceGrid.h = dObject->distanceGrid.v = dObject->collisionGrid.h = dObject->collisionGrid.v = 0;
-    if ( sObject->activateActionNum & kPeriodicActionTimeMask)
-    {
-        dObject->periodicTime = ((sObject->activateActionNum & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift) +
-            dObject->randomSeed.next(
-                    ((sObject->activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift));
+    if (sObject->activatePeriod) {
+        dObject->periodicTime =
+            sObject->activatePeriod + dObject->randomSeed.next(sObject->activatePeriodRange);
     } else dObject->periodicTime = 0;
 
     r = sObject->initialDirection;
@@ -888,11 +886,9 @@ void ChangeObjectBaseType( spaceObjectType *dObject, int32_t whichBaseObject,
     dObject->shortestWeaponRange = kMaximumRelevantDistance;
 
     // check periodic time
-    if ( sObject->activateActionNum & kPeriodicActionTimeMask)
-    {
-        dObject->periodicTime = ((sObject->activateActionNum & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift) +
-            dObject->randomSeed.next(
-                    ((sObject->activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift));
+    if (sObject->activatePeriod) {
+        dObject->periodicTime =
+            sObject->activatePeriod + dObject->randomSeed.next(sObject->activatePeriodRange);
     } else dObject->periodicTime = 0;
 
     if ( dObject->pulse.type != kNoWeapon)
@@ -1166,7 +1162,7 @@ void AlterObjectOwner(spaceObjectType* object, int32_t owner, bool message) {
 
     // if the object is occupied by a human, eject him since he can't change sides
     if ((object->attributes & (kIsPlayerShip | kRemoteOrHuman))
-            && !(object->baseType->destroyActionNum & kDestroyActionDontDieFlag)) {
+            && !object->baseType->destroyDontDie) {
         CreateFloatingBodyOfPlayer(object);
     }
 
@@ -1324,7 +1320,7 @@ void DestroyObject(spaceObjectType* object) {
         object->attributes &= ~(kHated | kCanEngage | kCanCollide | kCanBeHit);
         execute_actions(
                 object->baseType->destroyAction,
-                object->baseType->destroyActionNum & kDestroyActionNotMask,
+                object->baseType->destroyActionNum,
                 object, NULL, NULL, true);
     } else {
         AddKillToAdmiral(object);
@@ -1341,7 +1337,7 @@ void DestroyObject(spaceObjectType* object) {
         // if it's a destination, we keep anyone from thinking they have it as a destination
         // (all at once since this should be very rare)
         if ((object->attributes & kIsDestination) &&
-                !(object->baseType->destroyActionNum & kDestroyActionDontDieFlag)) {
+                !object->baseType->destroyDontDie) {
             RemoveDestination(object->destinationObject);
             for (int16_t i = 0; i < kMaxSpaceObject; i++) {
                 auto& fixObject = gSpaceObjectData[i];
@@ -1358,13 +1354,13 @@ void DestroyObject(spaceObjectType* object) {
 
         execute_actions(
                 object->baseType->destroyAction,
-                object->baseType->destroyActionNum & kDestroyActionNotMask,
+                object->baseType->destroyActionNum,
                 object, NULL, NULL, true);
 
         if (object->attributes & kCanAcceptDestination) {
             RemoveObjectFromDestination(object);
         }
-        if (!(object->baseType->destroyActionNum & kDestroyActionDontDieFlag)) {
+        if (!object->baseType->destroyDontDie) {
             object->active = kObjectToBeFreed;
         }
     }

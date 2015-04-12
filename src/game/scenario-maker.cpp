@@ -141,11 +141,11 @@ void AddBaseObjectMedia(int32_t whichBase, uint8_t color, uint32_t all_colors) {
 objectActionType* mGetActionFromBaseTypeNum(
         const baseObjectType& mbaseObjPtr, int32_t mactionType, int32_t mactionNum) {
     if (mactionType == kDestroyActionType) {
-        if (mactionNum < (mbaseObjPtr.destroyActionNum & kDestroyActionNotMask)) {
+        if (mactionNum < mbaseObjPtr.destroyActionNum) {
             return mGetObjectActionPtr(mbaseObjPtr.destroyAction + mactionNum);
         }
     } else if (mactionType == kExpireActionType) {
-        if (mactionNum < (mbaseObjPtr.expireActionNum  & kDestroyActionNotMask)) {
+        if (mactionNum < mbaseObjPtr.expireActionNum) {
             return mGetObjectActionPtr(mbaseObjPtr.expireAction + mactionNum);
         }
     } else if (mactionType == kCreateActionType) {
@@ -157,7 +157,7 @@ objectActionType* mGetActionFromBaseTypeNum(
             return mGetObjectActionPtr(mbaseObjPtr.collideAction + mactionNum);
         }
     } else if (mactionType == kActivateActionType) {
-        if (mactionNum < (mbaseObjPtr.activateActionNum & kPeriodicActionNotMask)) {
+        if (mactionNum < mbaseObjPtr.activateActionNum) {
             return mGetObjectActionPtr(mbaseObjPtr.activateAction + mactionNum);
         }
     } else if (mactionType == kArriveActionType) {

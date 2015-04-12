@@ -1280,7 +1280,7 @@ uint32_t ThinkObjectLandingPresence( spaceObjectType *anObject)
     {
         execute_actions(
                 anObject->baseType->expireAction,
-                anObject->baseType->expireActionNum & kDestroyActionNotMask,
+                anObject->baseType->expireActionNum,
                 anObject, targetObject, NULL, true);
         anObject->active = kObjectToBeFreed;
 
@@ -1826,7 +1826,7 @@ void HitObject(spaceObjectType *anObject, spaceObjectType *sObject) {
     anObject->timeFromOrigin = 0;
     if (((anObject->health - sObject->baseType->damage) < 0)
             && (anObject->attributes & (kIsPlayerShip | kRemoteOrHuman))
-            && !(anObject->baseType->destroyActionNum & kDestroyActionDontDieFlag)) {
+            && !anObject->baseType->destroyDontDie) {
         CreateFloatingBodyOfPlayer( anObject);
     }
     AlterObjectHealth(anObject, -sObject->baseType->damage);

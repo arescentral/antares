@@ -28,6 +28,15 @@ using sfz::read;
 
 namespace antares {
 
+static const uint32_t kPeriodicActionTimeMask  = 0xff000000;
+static const uint32_t kPeriodicActionRangeMask = 0x00ff0000;
+static const uint32_t kPeriodicActionNotMask   = 0x0000ffff;
+static const int32_t kPeriodicActionTimeShift  = 24;
+static const int32_t kPeriodicActionRangeShift = 16;
+
+static const uint32_t kDestroyActionNotMask        = 0x7fffffff;
+static const uint32_t kDestroyActionDontDieFlag    = 0x80000000;
+
 void read_from(ReadSource in, objectActionType& action) {
     uint8_t section[24];
 
@@ -289,6 +298,14 @@ void read_from(ReadSource in, baseObjectType& object) {
     read(in, object.activateActionNum);
     read(in, object.arriveAction);
     read(in, object.arriveActionNum);
+
+    object.destroyDontDie = object.destroyActionNum & kDestroyActionDontDieFlag;
+    object.destroyActionNum &= kDestroyActionNotMask;
+    object.expireDontDie = object.expireActionNum & kDestroyActionDontDieFlag;
+    object.expireActionNum &= kDestroyActionNotMask;
+    object.activatePeriod = (object.activateActionNum & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift;
+    object.activatePeriodRange = (object.activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift;
+    object.activateActionNum &= kPeriodicActionNotMask;
 
     read(in, section, 32);
 

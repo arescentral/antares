@@ -621,13 +621,13 @@ void CollideSpaceObjects() {
         if (aObject->age >= 0) {
             aObject->age -= 3;
             if (aObject->age < 0) {
-                if (!(aObject->baseType->expireActionNum & kDestroyActionDontDieFlag)) {
+                if (!(aObject->baseType->expireDontDie)) {
                     aObject->active = kObjectToBeFreed;
                 }
 
                 execute_actions(
                         aObject->baseType->expireAction,
-                        aObject->baseType->expireActionNum & kDestroyActionNotMask,
+                        aObject->baseType->expireActionNum,
                         aObject, NULL, NULL, true);
                 if (!aObject->active) {
                     continue;
@@ -640,12 +640,11 @@ void CollideSpaceObjects() {
             if (aObject->periodicTime <= 0) {
                 execute_actions(
                         aObject->baseType->activateAction,
-                        aObject->baseType->activateActionNum & kPeriodicActionNotMask,
+                        aObject->baseType->activateActionNum,
                         aObject, NULL, NULL, true);
                 aObject->periodicTime =
-                    ((aObject->baseType->activateActionNum & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift)
-                    + aObject->randomSeed.next(
-                            ((aObject->baseType->activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift));
+                    aObject->baseType->activatePeriod
+                    + aObject->randomSeed.next(aObject->baseType->activatePeriodRange);
                 if (!aObject->active) {
                     continue;
                 }
