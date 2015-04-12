@@ -286,26 +286,26 @@ void read_from(ReadSource in, baseObjectType& object) {
 
     read(in, object.arriveActionDistance);
 
-    read(in, object.destroyAction);
-    read(in, object.destroyActionNum);
-    read(in, object.expireAction);
-    read(in, object.expireActionNum);
-    read(in, object.createAction);
-    read(in, object.createActionNum);
-    read(in, object.collideAction);
-    read(in, object.collideActionNum);
-    read(in, object.activateAction);
-    read(in, object.activateActionNum);
-    read(in, object.arriveAction);
-    read(in, object.arriveActionNum);
+    read(in, object.destroy.start);
+    read(in, object.destroy.count);
+    read(in, object.expire.start);
+    read(in, object.expire.count);
+    read(in, object.create.start);
+    read(in, object.create.count);
+    read(in, object.collide.start);
+    read(in, object.collide.count);
+    read(in, object.activate.start);
+    read(in, object.activate.count);
+    read(in, object.arrive.start);
+    read(in, object.arrive.count);
 
-    object.destroyDontDie = object.destroyActionNum & kDestroyActionDontDieFlag;
-    object.destroyActionNum &= kDestroyActionNotMask;
-    object.expireDontDie = object.expireActionNum & kDestroyActionDontDieFlag;
-    object.expireActionNum &= kDestroyActionNotMask;
-    object.activatePeriod = (object.activateActionNum & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift;
-    object.activatePeriodRange = (object.activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift;
-    object.activateActionNum &= kPeriodicActionNotMask;
+    object.destroyDontDie = object.destroy.count & kDestroyActionDontDieFlag;
+    object.destroy.count &= kDestroyActionNotMask;
+    object.expireDontDie = object.expire.count & kDestroyActionDontDieFlag;
+    object.expire.count &= kDestroyActionNotMask;
+    object.activatePeriod = (object.activate.count & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift;
+    object.activatePeriodRange = (object.activate.count & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift;
+    object.activate.count &= kPeriodicActionNotMask;
 
     read(in, section, 32);
 

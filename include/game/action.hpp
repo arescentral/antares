@@ -31,7 +31,7 @@ bool action_filter_applies_to(const objectActionType& action, const baseObjectTy
 bool action_filter_applies_to(const objectActionType& action, const spaceObjectType& target);
 
 void execute_actions(
-        int32_t whichAction, int32_t actionNum,
+        const ActionRef& action,
         spaceObjectType *sObject, spaceObjectType *dObject, Point* offset,
         bool allowDelay);
 

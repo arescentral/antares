@@ -328,10 +328,10 @@ void CreateWeaponDataText(String* text, int32_t whichWeapon, const StringSlice& 
 
     mostDamage = 0;
     isGuided = false;
-    if ( weaponObject->activateActionNum > 0)
+    if ( weaponObject->activate.count > 0)
     {
-        action = mGetObjectActionPtr(weaponObject->activateAction);
-        for ( actionNum = 0; actionNum < weaponObject->activateActionNum; actionNum++)
+        action = mGetObjectActionPtr(weaponObject->activate.start);
+        for ( actionNum = 0; actionNum < weaponObject->activate.count; actionNum++)
         {
             if (( action->verb == kCreateObject) || ( action->verb == kCreateObjectSetDest))
             {

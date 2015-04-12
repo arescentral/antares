@@ -141,28 +141,28 @@ void AddBaseObjectMedia(int32_t whichBase, uint8_t color, uint32_t all_colors) {
 objectActionType* mGetActionFromBaseTypeNum(
         const baseObjectType& mbaseObjPtr, int32_t mactionType, int32_t mactionNum) {
     if (mactionType == kDestroyActionType) {
-        if (mactionNum < mbaseObjPtr.destroyActionNum) {
-            return mGetObjectActionPtr(mbaseObjPtr.destroyAction + mactionNum);
+        if (mactionNum < mbaseObjPtr.destroy.count) {
+            return mGetObjectActionPtr(mbaseObjPtr.destroy.start + mactionNum);
         }
     } else if (mactionType == kExpireActionType) {
-        if (mactionNum < mbaseObjPtr.expireActionNum) {
-            return mGetObjectActionPtr(mbaseObjPtr.expireAction + mactionNum);
+        if (mactionNum < mbaseObjPtr.expire.count) {
+            return mGetObjectActionPtr(mbaseObjPtr.expire.start + mactionNum);
         }
     } else if (mactionType == kCreateActionType) {
-        if (mactionNum < mbaseObjPtr.createActionNum) {
-            return mGetObjectActionPtr(mbaseObjPtr.createAction + mactionNum);
+        if (mactionNum < mbaseObjPtr.create.count) {
+            return mGetObjectActionPtr(mbaseObjPtr.create.start + mactionNum);
         }
     } else if (mactionType == kCollideActionType) {
-        if (mactionNum < mbaseObjPtr.collideActionNum) {
-            return mGetObjectActionPtr(mbaseObjPtr.collideAction + mactionNum);
+        if (mactionNum < mbaseObjPtr.collide.count) {
+            return mGetObjectActionPtr(mbaseObjPtr.collide.start + mactionNum);
         }
     } else if (mactionType == kActivateActionType) {
-        if (mactionNum < mbaseObjPtr.activateActionNum) {
-            return mGetObjectActionPtr(mbaseObjPtr.activateAction + mactionNum);
+        if (mactionNum < mbaseObjPtr.activate.count) {
+            return mGetObjectActionPtr(mbaseObjPtr.activate.start + mactionNum);
         }
     } else if (mactionType == kArriveActionType) {
-        if (mactionNum < mbaseObjPtr.arriveActionNum) {
-            return mGetObjectActionPtr(mbaseObjPtr.arriveAction + mactionNum);
+        if (mactionNum < mbaseObjPtr.arrive.count) {
+            return mGetObjectActionPtr(mbaseObjPtr.arrive.start + mactionNum);
         }
     }
     return nullptr;
@@ -955,7 +955,7 @@ void CheckScenarioConditions(int32_t timePass) {
             auto sObject = GetObjectFromInitialNumber(c->subjectObject);
             auto dObject = GetObjectFromInitialNumber(c->directObject);
             Point offset;
-            execute_actions(c->startVerb, c->verbNum, sObject, dObject, &offset, true);
+            execute_actions(ActionRef{c->startVerb, c->verbNum}, sObject, dObject, &offset, true);
         }
     }
 }

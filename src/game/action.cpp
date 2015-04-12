@@ -60,8 +60,7 @@ const size_t kActionQueueLength     = 120;
 
 struct actionQueueType {
     objectActionType            *action;
-    int32_t                         actionNum;
-    int32_t                         actionToDo;
+    ActionRef                       actionRef;
     int32_t                         scheduledTime;
     actionQueueType         *nextActionQueue;
     int32_t                         nextActionQueueNum;
@@ -722,17 +721,17 @@ static void assume_initial_object(objectActionType* action, spaceObjectType* foc
 }
 
 void execute_actions(
-        int32_t whichAction, int32_t actionNum,
+        const ActionRef& action,
         spaceObjectType* const original_subject, spaceObjectType* const original_object,
         Point* offset, bool allowDelay) {
-    if (whichAction < 0) {
+    if (action.start < 0) {
         return;
     }
 
     bool checkConditions = false;
 
-    const auto begin = mGetObjectActionPtr(whichAction);
-    const auto end = begin + actionNum;
+    const auto begin = mGetObjectActionPtr(action.start);
+    const auto end = begin + action.count;
     for (auto action = begin; action != end; ++action) {
 #ifdef DATA_COVERAGE
         covered_actions.insert(action - mGetObjectActionPtr(0));
@@ -842,8 +841,8 @@ void reset_action_queue() {
 
     actionQueueType* action = gActionQueueData.get();
     for (int32_t i = 0; i < kActionQueueLength; i++) {
-        action->actionNum = -1;
-        action->actionToDo = 0;
+        action->actionRef.start = -1;
+        action->actionRef.count = 0;
         action->action = NULL;
         action->nextActionQueueNum = -1;
         action->nextActionQueue = NULL;
@@ -874,9 +873,9 @@ static void queue_action(
         return;
     }
     actionQueue->action = action;
-    actionQueue->actionNum = actionNumber;
+    actionQueue->actionRef.start = actionNumber;
     actionQueue->scheduledTime = delayTime;
-    actionQueue->actionToDo = actionToDo;
+    actionQueue->actionRef.count = actionToDo;
 
     if (offset) {
         actionQueue->offset = *offset;
@@ -945,13 +944,12 @@ void execute_action_queue(int32_t unitsToDo) {
         if ((subjectid == gFirstActionQueue->subjectObjectID)
                 && (directid == gFirstActionQueue->directObjectID)) {
             execute_actions(
-                    gFirstActionQueue->actionNum,
-                    gFirstActionQueue->actionToDo,
+                    gFirstActionQueue->actionRef,
                     gFirstActionQueue->subjectObject, gFirstActionQueue->directObject,
                     &gFirstActionQueue->offset, false);
         }
-        gFirstActionQueue->actionNum = -1;
-        gFirstActionQueue->actionToDo = 0;
+        gFirstActionQueue->actionRef.start = -1;
+        gFirstActionQueue->actionRef.count = 0;
         gFirstActionQueue->action = NULL;
         gFirstActionQueue->scheduledTime = -1;
         gFirstActionQueue->subjectObject = NULL;

@@ -489,6 +489,11 @@ void read_from(sfz::ReadSource in, objectFrameType::Animation& animation);
 void read_from(sfz::ReadSource in, objectFrameType::Beam& beam);
 void read_from(sfz::ReadSource in, objectFrameType::Weapon& weapon);
 
+struct ActionRef {
+    int32_t start;
+    int32_t count;
+};
+
 struct baseObjectType {
     uint32_t                attributes;                 // initial attributes (see flags)
     int32_t                 baseClass;
@@ -543,18 +548,12 @@ struct baseObjectType {
 
     int32_t                 arriveActionDistance;               // distance^2 at which arrive action is triggered on dest
 
-    int32_t                 destroyAction;  // what happens when object is destroyed
-    int32_t                 destroyActionNum;
-    int32_t                 expireAction;       // what happens when object expires
-    int32_t                 expireActionNum;
-    int32_t                 createAction;       // what happens when object is 1st made
-    int32_t                 createActionNum;
-    int32_t                 collideAction;  // what happens when object collides
-    int32_t                 collideActionNum;
-    int32_t                 activateAction; // what happens when object is activated
-    int32_t                 activateActionNum;
-    int32_t                 arriveAction;   // what happens when object arrives at destination
-    int32_t                 arriveActionNum;
+    ActionRef               destroy;
+    ActionRef               expire;
+    ActionRef               create;
+    ActionRef               collide;
+    ActionRef               activate;
+    ActionRef               arrive;
 
     bool                    destroyDontDie;
     bool                    expireDontDie;

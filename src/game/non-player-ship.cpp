@@ -175,10 +175,7 @@ void fire_weapon(
     if (weaponObject->frame.weapon.ammo > 0) {
         weapon.ammo--;
     }
-    execute_actions(
-            weaponObject->activateAction,
-            weaponObject->activateActionNum,
-            subject, target, at, true);
+    execute_actions(weaponObject->activate, subject, target, at, true);
 }
 
 static void tick_pulse(spaceObjectType* subject, spaceObjectType* target, int32_t timePass) {
@@ -616,12 +613,11 @@ uint32_t ThinkObjectNormalPresence(
 
             if (anObject->targetObjectNumber == anObject->destinationObject) {
                 if (distance < static_cast<uint32_t>(baseObject->arriveActionDistance)) {
-                    if (baseObject->arriveAction >= 0) {
+                    if (baseObject->arrive.start >= 0) {
                         if (!(anObject->runTimeFlags & kHasArrived)) {
                             offset.h = offset.v = 0;
                             execute_actions(
-                                baseObject->arriveAction,
-                                baseObject->arriveActionNum,
+                                baseObject->arrive,
                                 anObject, anObject->destObjectPtr, &offset, true);
                             anObject->runTimeFlags |= kHasArrived;
                         }
@@ -816,12 +812,11 @@ uint32_t ThinkObjectNormalPresence(
                     }
 
                     if (distance < static_cast<uint32_t>(baseObject->arriveActionDistance)) {
-                        if (baseObject->arriveAction >= 0) {
+                        if (baseObject->arrive.start >= 0) {
                             if (!(anObject->runTimeFlags & kHasArrived)) {
                                 offset.h = offset.v = 0;
                                 execute_actions(
-                                    baseObject->arriveAction,
-                                    baseObject->arriveActionNum,
+                                    baseObject->arrive,
                                     anObject, anObject->destObjectPtr, &offset, true);
                                 anObject->runTimeFlags |= kHasArrived;
                             }
@@ -1278,10 +1273,7 @@ uint32_t ThinkObjectLandingPresence( spaceObjectType *anObject)
 
     if ( (anObject->presenceData & kPresenceDataLoWordMask) <= 0)
     {
-        execute_actions(
-                anObject->baseType->expireAction,
-                anObject->baseType->expireActionNum,
-                anObject, targetObject, NULL, true);
+        execute_actions(anObject->baseType->expire, anObject, targetObject, NULL, true);
         anObject->active = kObjectToBeFreed;
 
     } else if ( anObject->sprite != NULL)
@@ -1848,10 +1840,7 @@ void HitObject(spaceObjectType *anObject, spaceObjectType *sObject) {
     }
 
     if (sObject->active == kObjectInUse) {
-        execute_actions(
-                sObject->baseType->collideAction,
-                sObject->baseType->collideActionNum,
-                sObject, anObject, NULL, true);
+        execute_actions(sObject->baseType->collide, sObject, anObject, NULL, true);
     }
 
     if (anObject->owner == globals()->gPlayerAdmiralNumber
