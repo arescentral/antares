@@ -175,7 +175,7 @@ void fire_weapon(
     if (weaponObject->frame.weapon.ammo > 0) {
         weapon.ammo--;
     }
-    execute_actions(weaponObject->activate, subject, target, at, true);
+    weaponObject->activate(subject, target, at);
 }
 
 static void tick_pulse(spaceObjectType* subject, spaceObjectType* target, int32_t timePass) {
@@ -616,9 +616,7 @@ uint32_t ThinkObjectNormalPresence(
                     if (baseObject->arrive.start >= 0) {
                         if (!(anObject->runTimeFlags & kHasArrived)) {
                             offset.h = offset.v = 0;
-                            execute_actions(
-                                baseObject->arrive,
-                                anObject, anObject->destObjectPtr, &offset, true);
+                            baseObject->arrive(anObject, anObject->destObjectPtr, &offset);
                             anObject->runTimeFlags |= kHasArrived;
                         }
                     }
@@ -815,9 +813,7 @@ uint32_t ThinkObjectNormalPresence(
                         if (baseObject->arrive.start >= 0) {
                             if (!(anObject->runTimeFlags & kHasArrived)) {
                                 offset.h = offset.v = 0;
-                                execute_actions(
-                                    baseObject->arrive,
-                                    anObject, anObject->destObjectPtr, &offset, true);
+                                baseObject->arrive(anObject, anObject->destObjectPtr, &offset);
                                 anObject->runTimeFlags |= kHasArrived;
                             }
                         }
@@ -1273,7 +1269,7 @@ uint32_t ThinkObjectLandingPresence( spaceObjectType *anObject)
 
     if ( (anObject->presenceData & kPresenceDataLoWordMask) <= 0)
     {
-        execute_actions(anObject->baseType->expire, anObject, targetObject, NULL, true);
+        anObject->baseType->expire(anObject, targetObject, NULL);
         anObject->active = kObjectToBeFreed;
 
     } else if ( anObject->sprite != NULL)
@@ -1840,7 +1836,7 @@ void HitObject(spaceObjectType *anObject, spaceObjectType *sObject) {
     }
 
     if (sObject->active == kObjectInUse) {
-        execute_actions(sObject->baseType->collide, sObject, anObject, NULL, true);
+        sObject->baseType->collide(sObject, anObject, NULL);
     }
 
     if (anObject->owner == globals()->gPlayerAdmiralNumber

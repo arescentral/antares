@@ -1048,7 +1048,7 @@ int32_t CreateAnySpaceObject(
 
     spaceObjectType* madeObject = gSpaceObjectData.get() + newObjectNumber;
     madeObject->attributes |= specialAttributes;
-    execute_actions(madeObject->baseType->create, madeObject, NULL, NULL, true);
+    madeObject->baseType->create(madeObject, NULL, NULL);
     return newObjectNumber;
 }
 
@@ -1310,7 +1310,7 @@ void DestroyObject(spaceObjectType* object) {
 
         AlterObjectOwner(object, -1, true);
         object->attributes &= ~(kHated | kCanEngage | kCanCollide | kCanBeHit);
-        execute_actions(object->baseType->destroy, object, NULL, NULL, true);
+        object->baseType->destroy(object, NULL, NULL);
     } else {
         AddKillToAdmiral(object);
         if (object->attributes & kReleaseEnergyOnDeath) {
@@ -1341,7 +1341,7 @@ void DestroyObject(spaceObjectType* object) {
             }
         }
 
-        execute_actions(object->baseType->destroy, object, NULL, NULL, true);
+        object->baseType->destroy(object, NULL, NULL);
 
         if (object->attributes & kCanAcceptDestination) {
             RemoveObjectFromDestination(object);
@@ -1381,7 +1381,7 @@ void ActivateObjectSpecial(spaceObjectType* object) {
     if (weaponObject->frame.weapon.ammo > 0) {
         object->special.ammo--;
     }
-    execute_actions(weaponObject->activate, object, NULL, NULL, true);
+    weaponObject->activate(object, NULL, NULL);
 }
 
 void CreateFloatingBodyOfPlayer(spaceObjectType* obj) {

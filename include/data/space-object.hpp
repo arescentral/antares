@@ -492,6 +492,8 @@ void read_from(sfz::ReadSource in, objectFrameType::Weapon& weapon);
 struct ActionRef {
     int32_t start;
     int32_t count;
+
+    void operator()(spaceObjectType *sObject, spaceObjectType *dObject, Point* offset) const;
 };
 
 struct baseObjectType {

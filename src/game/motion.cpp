@@ -625,7 +625,7 @@ void CollideSpaceObjects() {
                     aObject->active = kObjectToBeFreed;
                 }
 
-                execute_actions(aObject->baseType->expire, aObject, NULL, NULL, true);
+                aObject->baseType->expire(aObject, NULL, NULL);
                 if (!aObject->active) {
                     continue;
                 }
@@ -635,7 +635,7 @@ void CollideSpaceObjects() {
         if (aObject->periodicTime > 0) {
             aObject->periodicTime--;
             if (aObject->periodicTime <= 0) {
-                execute_actions(aObject->baseType->activate, aObject, NULL, NULL, true);
+                aObject->baseType->activate(aObject, NULL, NULL);
                 aObject->periodicTime =
                     aObject->baseType->activatePeriod
                     + aObject->randomSeed.next(aObject->baseType->activatePeriodRange);

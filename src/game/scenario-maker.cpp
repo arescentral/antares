@@ -955,7 +955,7 @@ void CheckScenarioConditions(int32_t timePass) {
             auto sObject = GetObjectFromInitialNumber(c->subjectObject);
             auto dObject = GetObjectFromInitialNumber(c->directObject);
             Point offset;
-            execute_actions(ActionRef{c->startVerb, c->verbNum}, sObject, dObject, &offset, true);
+            ActionRef{c->startVerb, c->verbNum}(sObject, dObject, &offset);
         }
     }
 }

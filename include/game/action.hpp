@@ -30,11 +30,6 @@ namespace antares {
 bool action_filter_applies_to(const objectActionType& action, const baseObjectType& target);
 bool action_filter_applies_to(const objectActionType& action, const spaceObjectType& target);
 
-void execute_actions(
-        const ActionRef& action,
-        spaceObjectType *sObject, spaceObjectType *dObject, Point* offset,
-        bool allowDelay);
-
 void reset_action_queue();
 void execute_action_queue(int32_t);
 

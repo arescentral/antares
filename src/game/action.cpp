@@ -720,7 +720,7 @@ static void assume_initial_object(objectActionType* action, spaceObjectType* foc
     }
 }
 
-void execute_actions(
+static void execute_actions(
         const ActionRef& action,
         spaceObjectType* const original_subject, spaceObjectType* const original_object,
         Point* offset, bool allowDelay) {
@@ -831,6 +831,11 @@ void execute_actions(
     if (checkConditions) {
         CheckScenarioConditions(0);
     }
+}
+
+void ActionRef::operator()(
+        spaceObjectType *sObject, spaceObjectType *dObject, Point* offset) const {
+    execute_actions(*this, sObject, dObject, offset, true);
 }
 
 void reset_action_queue() {
