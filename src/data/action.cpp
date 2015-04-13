@@ -216,4 +216,9 @@ void read_from(ReadSource in, argumentType::AssumeInitial& argument) {
     read(in, argument.whichInitialObject);
 }
 
+void read_from(sfz::ReadSource in, ActionRef& action) {
+    read(in, action.start);
+    read(in, action.count);
+}
+
 }  // namespace antares

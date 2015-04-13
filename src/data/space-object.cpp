@@ -98,18 +98,12 @@ void read_from(ReadSource in, baseObjectType& object) {
 
     read(in, object.arriveActionDistance);
 
-    read(in, object.destroy.start);
-    read(in, object.destroy.count);
-    read(in, object.expire.start);
-    read(in, object.expire.count);
-    read(in, object.create.start);
-    read(in, object.create.count);
-    read(in, object.collide.start);
-    read(in, object.collide.count);
-    read(in, object.activate.start);
-    read(in, object.activate.count);
-    read(in, object.arrive.start);
-    read(in, object.arrive.count);
+    read(in, object.destroy);
+    read(in, object.expire);
+    read(in, object.create);
+    read(in, object.collide);
+    read(in, object.activate);
+    read(in, object.arrive);
 
     object.destroyDontDie = object.destroy.count & kDestroyActionDontDieFlag;
     object.destroy.count &= kDestroyActionNotMask;

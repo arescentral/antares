@@ -262,6 +262,7 @@ struct ActionRef {
 
     void operator()(spaceObjectType *sObject, spaceObjectType *dObject, Point* offset) const;
 };
+void read_from(sfz::ReadSource in, ActionRef& action);
 
 }  // namespace antares
 
