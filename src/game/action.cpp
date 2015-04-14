@@ -678,6 +678,16 @@ static void activate_special(
     fire_weapon(subject, nullptr, subject->baseType->special, subject->special);
 }
 
+static void activate_pulse(
+        objectActionType* action, spaceObjectType* focus, spaceObjectType* subject) {
+    fire_weapon(subject, nullptr, subject->baseType->pulse, subject->pulse);
+}
+
+static void activate_beam(
+        objectActionType* action, spaceObjectType* focus, spaceObjectType* subject) {
+    fire_weapon(subject, nullptr, subject->baseType->beam, subject->beam);
+}
+
 static void color_flash(objectActionType* action, spaceObjectType* focus) {
     uint8_t tinyColor = GetTranslateColorShade(
             action->argument.colorFlash.color,
@@ -812,6 +822,8 @@ static void execute_actions(
             case kDisplayMessage:       display_message(action, focus); break;
             case kSetDestination:       set_destination(action, focus, subject); break;
             case kActivateSpecial:      activate_special(action, focus, subject); break;
+            case kActivatePulse:        activate_pulse(action, focus, subject); break;
+            case kActivateBeam:         activate_beam(action, focus, subject); break;
             case kColorFlash:           color_flash(action, focus); break;
             case kEnableKeys:           enable_keys(action, focus); break;
             case kDisableKeys:          disable_keys(action, focus); break;
