@@ -49,7 +49,6 @@ void AlterObjectOwner( spaceObjectType *, int32_t, bool);
 void AlterObjectOccupation( spaceObjectType *, int32_t, int32_t, bool);
 void AlterObjectCloakState( spaceObjectType *, bool);
 void DestroyObject( spaceObjectType *);
-void ActivateObjectSpecial( spaceObjectType *);
 void CreateFloatingBodyOfPlayer( spaceObjectType *);
 
 baseObjectType* mGetBaseObjectPtr(int32_t whichObject);

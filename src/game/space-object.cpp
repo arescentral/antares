@@ -1352,38 +1352,6 @@ void DestroyObject(spaceObjectType* object) {
     }
 }
 
-void ActivateObjectSpecial(spaceObjectType* object) {
-    if ((object->special.time > 0) || (object->special.type == kNoWeapon)) {
-        return;
-    }
-
-    auto weaponObject = object->special.base;
-    auto baseObject = object->baseType;
-    if ((object->energy < weaponObject->frame.weapon.energyCost)
-            || ((weaponObject->frame.weapon.ammo >= 0) && (object->special.ammo <= 0))) {
-        return;
-    }
-
-    object->energy -= weaponObject->frame.weapon.energyCost;
-    object->special.position++;
-    if (object->special.position >= baseObject->special.positionNum) {
-        object->special.position = 0;
-    }
-
-    int16_t direction = object->direction;
-    mAddAngle(direction, -90);
-    Fixed fcos, fsin;
-    GetRotPoint(&fcos, &fsin, direction);
-    fcos = -fcos;
-    fsin = -fsin;
-
-    object->special.time = weaponObject->frame.weapon.fireTime;
-    if (weaponObject->frame.weapon.ammo > 0) {
-        object->special.ammo--;
-    }
-    weaponObject->activate.run(object, NULL, NULL);
-}
-
 void CreateFloatingBodyOfPlayer(spaceObjectType* obj) {
     const auto body = globals()->scenarioFileInfo.playerBodyID;
     // if we're already in a body, don't create a body from it

@@ -33,6 +33,7 @@
 #include "game/messages.hpp"
 #include "game/minicomputer.hpp"
 #include "game/motion.hpp"
+#include "game/non-player-ship.hpp"
 #include "game/player-ship.hpp"
 #include "game/scenario-maker.hpp"
 #include "game/space-object.hpp"
@@ -674,8 +675,7 @@ static void set_destination(
 
 static void activate_special(
         objectActionType* action, spaceObjectType* focus, spaceObjectType* subject) {
-    // TODO(sfiera): replace with fire_weapon() if we can show it's OK.
-    ActivateObjectSpecial(subject);
+    fire_weapon(subject, nullptr, subject->baseType->special, subject->special);
 }
 
 static void color_flash(objectActionType* action, spaceObjectType* focus) {
