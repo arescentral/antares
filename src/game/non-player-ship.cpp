@@ -175,7 +175,7 @@ void fire_weapon(
     if (weaponObject->frame.weapon.ammo > 0) {
         weapon.ammo--;
     }
-    weaponObject->activate(subject, target, at);
+    weaponObject->activate.run(subject, target, at);
 }
 
 static void tick_pulse(spaceObjectType* subject, spaceObjectType* target, int32_t timePass) {
@@ -616,7 +616,7 @@ uint32_t ThinkObjectNormalPresence(
                     if (baseObject->arrive.start >= 0) {
                         if (!(anObject->runTimeFlags & kHasArrived)) {
                             offset.h = offset.v = 0;
-                            baseObject->arrive(anObject, anObject->destObjectPtr, &offset);
+                            baseObject->arrive.run(anObject, anObject->destObjectPtr, &offset);
                             anObject->runTimeFlags |= kHasArrived;
                         }
                     }
@@ -813,7 +813,7 @@ uint32_t ThinkObjectNormalPresence(
                         if (baseObject->arrive.start >= 0) {
                             if (!(anObject->runTimeFlags & kHasArrived)) {
                                 offset.h = offset.v = 0;
-                                baseObject->arrive(anObject, anObject->destObjectPtr, &offset);
+                                baseObject->arrive.run(anObject, anObject->destObjectPtr, &offset);
                                 anObject->runTimeFlags |= kHasArrived;
                             }
                         }
@@ -1269,7 +1269,7 @@ uint32_t ThinkObjectLandingPresence( spaceObjectType *anObject)
 
     if ( (anObject->presenceData & kPresenceDataLoWordMask) <= 0)
     {
-        anObject->baseType->expire(anObject, targetObject, NULL);
+        anObject->baseType->expire.run(anObject, targetObject, NULL);
         anObject->active = kObjectToBeFreed;
 
     } else if ( anObject->sprite != NULL)
@@ -1836,7 +1836,7 @@ void HitObject(spaceObjectType *anObject, spaceObjectType *sObject) {
     }
 
     if (sObject->active == kObjectInUse) {
-        sObject->baseType->collide(sObject, anObject, NULL);
+        sObject->baseType->collide.run(sObject, anObject, NULL);
     }
 
     if (anObject->owner == globals()->gPlayerAdmiralNumber

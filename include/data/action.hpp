@@ -260,7 +260,7 @@ struct ActionRef {
     int32_t start;
     int32_t count;
 
-    void operator()(spaceObjectType *sObject, spaceObjectType *dObject, Point* offset) const;
+    void run(spaceObjectType *sObject, spaceObjectType *dObject, Point* offset) const;
 };
 void read_from(sfz::ReadSource in, ActionRef& action);
 

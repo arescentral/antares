@@ -833,7 +833,7 @@ static void execute_actions(
     }
 }
 
-void ActionRef::operator()(
+void ActionRef::run(
         spaceObjectType *sObject, spaceObjectType *dObject, Point* offset) const {
     execute_actions(*this, sObject, dObject, offset, true);
 }
