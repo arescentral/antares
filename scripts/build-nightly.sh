@@ -14,7 +14,7 @@ ZIP=${ZIP-/usr/bin/zip}
 GSUTIL=${GSUTIL-/usr/bin/gsutil}
 
 # Before we start messing with the repo, make sure it's the right one.
-grep >/dev/null '^APPNAME = "Antares"$' wscript
+grep >/dev/null '"ANTARES_VERSION": ".*"' antares.gyp
 
 # Ensure that we are building from a clean and up-to-date checkout of
 # the "master" branch.  Remove untracked files.
@@ -25,18 +25,18 @@ $GIT submodule init
 $GIT submodule update
 $GIT clean -f
 
-# Check that there is a line 'VERSION = "..."' in the wscript file.
-# Append the string "-nightly" to the version.
-grep >/dev/null '^VERSION = ".*"$' wscript
-sed -i '' 's/^VERSION = "\(.*\)"$/VERSION = "\1-nightly"/' wscript
+# Check that there is a key "ANTARES_VERSION" in the gyp file.  Append
+# the string "-nightly" to the version.
+grep >/dev/null '"ANTARES_VERSION": ".*"' antares.gyp
+sed -i '' 's/"ANTARES_VERSION": "\(.*\)"/"ANTARES_VERSION": "\1-nightly"/' antares.gyp
 
 # Build Antares.  Note that we don't make any attempt to clean the
 # working directory before we build.
-./configure -m opt "$@"
-./waf
+MODE=opt ./configure "$@"
+make
 
 # Zip the product of the build.
-cd build/antares
+cd out/opt
 rm -f Antares-nightly.zip
 $ZIP -r Antares-nightly.zip Antares.app
 
