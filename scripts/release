@@ -19,8 +19,8 @@ ACTION=$1
 VERSION=$2
 
 if [[ $1 = start ]]; then
-    if [[ $(git rev-parse HEAD) != $(git rev-parse develop) ]]; then
-        echo >&2 "must be on develop"
+    if [[ $(git rev-parse HEAD) != $(git rev-parse master) ]]; then
+        echo >&2 "must be on master"
         exit 1
     fi
 elif [[ $1 = finish ]]; then
@@ -50,9 +50,9 @@ else
     update-gyp $VERSION
     update-readme $VERSION
     git commit antares.gyp README.rst -m "Release Antares $VERSION."
-    git checkout master
+    git checkout stable
     git merge --no-ff release/$VERSION
     git tag v$VERSION
-    git checkout develop
+    git checkout master
     git merge --no-ff release/$VERSION
 fi
