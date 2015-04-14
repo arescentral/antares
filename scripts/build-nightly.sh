@@ -17,9 +17,9 @@ GSUTIL=${GSUTIL-/usr/bin/gsutil}
 grep >/dev/null '^APPNAME = "Antares"$' wscript
 
 # Ensure that we are building from a clean and up-to-date checkout of
-# the "develop" branch.  Remove untracked files.
-$GIT checkout develop
-$GIT reset --hard develop
+# the "master" branch.  Remove untracked files.
+$GIT checkout master
+$GIT reset --hard master
 $GIT pull
 $GIT submodule init
 $GIT submodule update
