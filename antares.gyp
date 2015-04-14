@@ -1,6 +1,6 @@
 { "target_defaults":
   { "variables":
-    { "ANTARES_VERSION": "0.7.2"
+    { "ANTARES_VERSION": "0.7.3rc1"
     }
   , "cxxflags":
     [ "-Wall"
@@ -9,7 +9,7 @@
     , "-Wno-deprecated-declarations"
     ]
   , "xcode_settings":
-    { "ANTARES_VERSION": "0.7.2"
+    { "ANTARES_VERSION": "0.7.3rc1"
     , "SYSTEM_VERSION": "<(MACOSX_VERSION)"
     }
   , "include_dirs": ["include"]
