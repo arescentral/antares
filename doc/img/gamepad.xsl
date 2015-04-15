@@ -7,7 +7,7 @@
 
   <xsl:template match="/gamepad">
     <svg width="1300" height="750" version="1.0">
-      <g transform="translate(650,450)" style="font-size:32px;font-family:'Source Sans Pro';font-weight:200">
+      <g transform="translate(650,450)" style="font-size:32px;font-family:Source Sans Pro;font-weight:200">
         <xsl:apply-templates select="lt"/>
         <xsl:apply-templates select="rt"/>
         <g transform="translate(-379,-275)">

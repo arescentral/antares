@@ -7,5 +7,5 @@
   <b>Target Enemy</b>
   <x>Target Base</x>
   <y>Autopilot</y>
-  <lb color="#06c">Target Mode</lb>
+  <lb style="fill:#06c">Target Mode</lb>
 </gamepad>
