@@ -1,15 +1,15 @@
 [submodule "test"]
 	path = test
-	url = https://code.google.com/p/antares.testdata-text/
+	url = https://github.com/arescentral/antares-test-data.git
 [submodule "ext/libsfz"]
 	path = ext/libsfz
-	url = git://github.com/sfiera/libsfz.git
+	url = https://github.com/sfiera/libsfz.git
 [submodule "ext/libzipxx"]
 	path = ext/libzipxx
-	url = git://github.com/sfiera/libzipxx.git
+	url = https://github.com/sfiera/libzipxx.git
 [submodule "ext/rezin"]
 	path = ext/rezin
-	url = git://github.com/sfiera/rezin.git
+	url = https://github.com/sfiera/rezin.git
 [submodule "ext/gmock-gyp"]
 	path = ext/gmock-gyp
 	url = https://github.com/sfiera/gmock-gyp.git
@@ -18,7 +18,7 @@
 	url = https://github.com/sfiera/libpng-gyp.git
 [submodule "data"]
 	path = data
-	url = https://code.google.com/p/antares.data/
+	url = https://github.com/arescentral/antares-data.git
 [submodule "ext/libmodplug-gyp"]
 	path = ext/libmodplug-gyp
 	url = https://github.com/sfiera/libmodplug-gyp.git

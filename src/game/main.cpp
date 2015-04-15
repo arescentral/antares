@@ -21,6 +21,7 @@
 #include <fcntl.h>
 #include <math.h>
 #include <algorithm>
+#include <set>
 
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
@@ -32,6 +33,7 @@
 #include "drawing/shapes.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "drawing/text.hpp"
+#include "game/action.hpp"
 #include "game/admiral.hpp"
 #include "game/beam.hpp"
 #include "game/cursor.hpp"
@@ -70,6 +72,7 @@ using sfz::makedirs;
 using sfz::open;
 using std::max;
 using std::min;
+using std::set;
 using std::unique_ptr;
 
 namespace path = sfz::path;
@@ -79,6 +82,11 @@ namespace antares {
 Rect world;
 Rect play_screen;
 Rect viewport;
+
+#ifdef DATA_COVERAGE
+extern set<int32_t> covered_objects;
+extern set<int32_t> covered_actions;
+#endif  // DATA_COVERAGE
 
 class GamePlay : public Card {
   public:
@@ -239,6 +247,29 @@ void MainPlay::become_front() {
             StopAndUnloadSong();
         }
         _replay_builder.finish();
+#ifdef DATA_COVERAGE
+        {
+            sfz::print(sfz::io::err, sfz::format("{{ \"level\": {0},\n", gThisScenario->chapter_number()));
+            const char* sep = "";
+            sfz::print(sfz::io::err, "  \"objects\": [");
+            for (auto object: covered_objects) {
+                sfz::print(sfz::io::err, sfz::format("{0}{1}", sep, object));
+                sep = ", ";
+            }
+            sfz::print(sfz::io::err, "],\n");
+            covered_objects.clear();
+
+            sep = "";
+            sfz::print(sfz::io::err, "  \"actions\": [");
+            for (auto action: covered_actions) {
+                sfz::print(sfz::io::err, sfz::format("{0}{1}", sep, action));
+                sep = ", ";
+            }
+            sfz::print(sfz::io::err, "]\n");
+            sfz::print(sfz::io::err, "}\n");
+            covered_actions.clear();
+        }
+#endif  // DATA_COVERAGE
         stack()->pop(this);
         break;
     }
@@ -530,7 +561,7 @@ void GamePlay::fire_timer() {
 
             NonplayerShipThink( kDecideEveryCycles);
             AdmiralThink();
-            ExecuteActionQueue( kDecideEveryCycles);
+            execute_action_queue( kDecideEveryCycles);
 
             if (globals()->gInputSource && !globals()->gInputSource->next(_player_ship)) {
                 globals()->gGameOver = 1;

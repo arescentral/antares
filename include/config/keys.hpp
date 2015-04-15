@@ -333,6 +333,8 @@ inline bool mQuitKey2(const KeyMap& km)            { return mCommandKey(km); }
 inline bool mQuitKeys(const KeyMap& km)            { return mQuitKey1(km) && mQuitKey2(km); }
 inline bool mRestartResumeKey(const KeyMap& km)    { return mEscKey(km); }
 
+int key_digit(uint32_t k);
+
 }  // namespace antares
 
 #endif // ANTARES_CONFIG_KEYS_HPP_

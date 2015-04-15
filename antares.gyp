@@ -1,6 +1,6 @@
 { "target_defaults":
   { "variables":
-    { "ANTARES_VERSION": "0.7.2"
+    { "ANTARES_VERSION": "0.7.3"
     }
   , "cxxflags":
     [ "-Wall"
@@ -9,7 +9,7 @@
     , "-Wno-deprecated-declarations"
     ]
   , "xcode_settings":
-    { "ANTARES_VERSION": "0.7.2"
+    { "ANTARES_VERSION": "0.7.3"
     , "SYSTEM_VERSION": "<(MACOSX_VERSION)"
     }
   , "include_dirs": ["include"]
@@ -125,7 +125,8 @@
   , { "target_name": "libantares-game"
     , "type": "static_library"
     , "sources":
-      [ "src/game/admiral.cpp"
+      [ "src/game/action.cpp"
+      , "src/game/admiral.cpp"
       , "src/game/beam.cpp"
       , "src/game/cheat.cpp"
       , "src/game/cursor.cpp"

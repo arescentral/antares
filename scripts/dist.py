@@ -18,7 +18,7 @@ def main():
     " test **/.* **/*.zip **/*.pyc **/build ext/*/ext"
     " ext/gmock-waf/waf ext/libpng-waf/waf ext/libsfz/waf ext/libzipxx/waf ext/rezin/waf"
 
-    with zipfile.ZipFile(path, "w") as z:
+    with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
         for root, dirs, files in os.walk("."):
             root = root[2:]
             files[:] = [f for f in files if should_write(root, f)]

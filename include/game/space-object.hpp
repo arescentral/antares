@@ -30,19 +30,14 @@ extern spaceObjectType* gRootObject;
 extern int32_t gRootObjectNumber;
 
 void SpaceObjectHandlingInit( void);
-void CleanupSpaceObjectHandling( void);
 void ResetAllSpaceObjects( void);
-void ResetActionQueueData( void);
 int AddSpaceObject( spaceObjectType *);
 //int AddSpaceObject( spaceObjectType *, int32_t *, int16_t, int16_t);
 int AddNumberedSpaceObject( spaceObjectType *, int32_t);
 void RemoveAllSpaceObjects( void);
 void CorrectAllBaseObjectColor( void);
 void ChangeObjectBaseType( spaceObjectType *, int32_t, int32_t, bool);
-void AddActionToQueue( objectActionType *, int32_t, int32_t, int32_t, spaceObjectType *,
-                        spaceObjectType *, Point*);
-void ExecuteActionQueue(int32_t);
-void ExecuteObjectActions(int32_t, int32_t, spaceObjectType *, spaceObjectType *, Point*, bool);
+
 int32_t CreateAnySpaceObject(int32_t, fixedPointType *, coordPointType *, int32_t, int32_t, uint32_t,
                             int16_t);
 int32_t CountObjectsOfBaseType(int32_t, int32_t);

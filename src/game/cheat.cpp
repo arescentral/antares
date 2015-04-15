@@ -81,104 +81,79 @@ void ExecuteCheat( int16_t whichCheat, int32_t whichPlayer)
         return;
     }
 
-#ifdef NETSPROCKET_AVAILABLE
-    if ( GetAllNetPlayersCheating())
-#else
-    if ( true)
-#endif  // NETSPROCKET_AVAILABLE
+    switch( whichCheat)
     {
-        switch( whichCheat)
-        {
-            case kActivateCheatCheat:
-                for ( i = 0; i < kMaxPlayerNum; i++)
-                {
-                    globals()->gActiveCheats[i] = 0;
-                }
-                CheatFeedback( whichCheat, false, whichPlayer);
-                break;
-
-            case kPayMoneyCheat:
-                PayAdmiralAbsolute( whichPlayer, mLongToFixed( 5000));
-                PayAdmiralAbsolute( whichPlayer, mLongToFixed( 5000));
-                PayAdmiralAbsolute( whichPlayer, mLongToFixed( 5000));
-                CheatFeedback( whichCheat, true, whichPlayer);
-                break;
-
-            case kAutoPlayCheat:
-                if ( globals()->gActiveCheats[whichPlayer] & kAutoPlayBit)
-                {
-                    globals()->gActiveCheats[whichPlayer] &= ~kAutoPlayBit;
-                    CheatFeedback( whichCheat, false, whichPlayer);
-                    if ( whichPlayer == globals()->gPlayerAdmiralNumber)
-                    {
-//                      ChangePlayerShipNumber( whichPlayer, globals()->gPlayerShipNumber);
-                    }
-//                  SetAdmiralAttributes( whichPlayer, kAIsHuman);
-                } else
-                {
-                    globals()->gActiveCheats[whichPlayer] |= kAutoPlayBit;
-                    CheatFeedback( whichCheat, true, whichPlayer);
-                    if ( whichPlayer == globals()->gPlayerAdmiralNumber)
-                    {
-//                      ChangePlayerShipNumber( whichPlayer, globals()->gPlayerShipNumber);
-                    }
-//                  SetAdmiralAttributes( whichPlayer, kAIsComputer);
-                }
-                break;
-
-            case kBuildFastCheat:
-                if ( globals()->gActiveCheats[whichPlayer] & kBuildFastBit)
-                {
-                    globals()->gActiveCheats[whichPlayer] &= ~kBuildFastBit;
-                    CheatFeedback( whichCheat, false, whichPlayer);
-                } else
-                {
-                    globals()->gActiveCheats[whichPlayer] |= kBuildFastBit;
-                    CheatFeedback( whichCheat, true, whichPlayer);
-                }
-                break;
-
-            case kObserverCheat:
-                anObject = GetAdmiralFlagship( whichPlayer);
-                if ( anObject != NULL)
-                {
-                    anObject->attributes &= ~(kCanBeEngaged | kHated);
-                    CheatFeedback( whichCheat, true, whichPlayer);
-                }
-                break;
-
-            case kRaisePayRateCheat:
-                SetAdmiralEarningPower(
-                        whichPlayer, GetAdmiralEarningPower(whichPlayer) + 0x00000020);
-                CheatFeedbackPlus(
-                        whichCheat, true, whichPlayer, fixed(GetAdmiralEarningPower(whichPlayer)));
-                break;
-
-            case kLowerPayRateCheat:
-                SetAdmiralEarningPower(
-                        whichPlayer, GetAdmiralEarningPower(whichPlayer) - 0x00000020);
-                CheatFeedbackPlus(
-                        whichCheat, true, whichPlayer, fixed(GetAdmiralEarningPower(whichPlayer)));
-                break;
-        }
-    } else
-    {
-        if ( whichCheat == kActivateCheatCheat)
-        {
-            if ( globals()->gActiveCheats[whichPlayer] & kCheatActiveBit)
+        case kActivateCheatCheat:
+            for ( i = 0; i < kMaxPlayerNum; i++)
             {
-                for ( i = 0; i < kMaxPlayerNum; i++)
-                {
-                    globals()->gActiveCheats[i] = 0;
-                }
+                globals()->gActiveCheats[i] = 0;
+            }
+            CheatFeedback( whichCheat, false, whichPlayer);
+            break;
 
+        case kPayMoneyCheat:
+            PayAdmiralAbsolute( whichPlayer, mLongToFixed( 5000));
+            PayAdmiralAbsolute( whichPlayer, mLongToFixed( 5000));
+            PayAdmiralAbsolute( whichPlayer, mLongToFixed( 5000));
+            CheatFeedback( whichCheat, true, whichPlayer);
+            break;
+
+        case kAutoPlayCheat:
+            if ( globals()->gActiveCheats[whichPlayer] & kAutoPlayBit)
+            {
+                globals()->gActiveCheats[whichPlayer] &= ~kAutoPlayBit;
+                CheatFeedback( whichCheat, false, whichPlayer);
+                if ( whichPlayer == globals()->gPlayerAdmiralNumber)
+                {
+//                      ChangePlayerShipNumber( whichPlayer, globals()->gPlayerShipNumber);
+                }
+//                  SetAdmiralAttributes( whichPlayer, kAIsHuman);
+            } else
+            {
+                globals()->gActiveCheats[whichPlayer] |= kAutoPlayBit;
+                CheatFeedback( whichCheat, true, whichPlayer);
+                if ( whichPlayer == globals()->gPlayerAdmiralNumber)
+                {
+//                      ChangePlayerShipNumber( whichPlayer, globals()->gPlayerShipNumber);
+                }
+//                  SetAdmiralAttributes( whichPlayer, kAIsComputer);
+            }
+            break;
+
+        case kBuildFastCheat:
+            if ( globals()->gActiveCheats[whichPlayer] & kBuildFastBit)
+            {
+                globals()->gActiveCheats[whichPlayer] &= ~kBuildFastBit;
                 CheatFeedback( whichCheat, false, whichPlayer);
             } else
             {
-                globals()->gActiveCheats[whichPlayer] |= kCheatActiveBit;
+                globals()->gActiveCheats[whichPlayer] |= kBuildFastBit;
                 CheatFeedback( whichCheat, true, whichPlayer);
             }
-        }
+            break;
+
+        case kObserverCheat:
+            anObject = GetAdmiralFlagship( whichPlayer);
+            if ( anObject != NULL)
+            {
+                anObject->attributes &= ~(kCanBeEngaged | kHated);
+                CheatFeedback( whichCheat, true, whichPlayer);
+            }
+            break;
+
+        case kRaisePayRateCheat:
+            SetAdmiralEarningPower(
+                    whichPlayer, GetAdmiralEarningPower(whichPlayer) + 0x00000020);
+            CheatFeedbackPlus(
+                    whichCheat, true, whichPlayer, fixed(GetAdmiralEarningPower(whichPlayer)));
+            break;
+
+        case kLowerPayRateCheat:
+            SetAdmiralEarningPower(
+                    whichPlayer, GetAdmiralEarningPower(whichPlayer) - 0x00000020);
+            CheatFeedbackPlus(
+                    whichCheat, true, whichPlayer, fixed(GetAdmiralEarningPower(whichPlayer)));
+            break;
     }
 }
 
