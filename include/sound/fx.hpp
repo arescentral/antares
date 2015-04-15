@@ -50,10 +50,7 @@ const int16_t kLandingWoosh     = 513;
 const int16_t kCloakOff         = 522;
 const int16_t kCloakOn          = 523;
 const int16_t kKlaxon           = 525;
-const int16_t kWarpOne          = 526;
-const int16_t kWarpTwo          = 527;
-const int16_t kWarpThree        = 528;
-const int16_t kWarpFour         = 529;
+const int16_t kWarp[4]          = {526, 527, 528, 529};
 const int16_t kTeletype         = 535;
 
 class Sound;

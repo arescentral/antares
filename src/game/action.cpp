@@ -621,14 +621,15 @@ static void land_at(
         CreateFloatingBodyOfPlayer(subject);
     }
     subject->presenceState = kLandingPresence;
-    subject->presenceData = subject->baseType->naturalScale |
-        (action->argument.landAt.landingSpeed << kPresenceDataHiWordShift);
+    subject->presence.landing.speed = action->argument.landAt.landingSpeed;
+    subject->presence.landing.scale = subject->baseType->naturalScale;
 }
 
 static void enter_warp(
         objectActionType* action, spaceObjectType* focus, spaceObjectType* subject) {
     subject->presenceState = kWarpInPresence;
-    subject->presenceData = subject->baseType->warpSpeed;
+    subject->presence.warp_in.progress = 0;
+    subject->presence.warp_in.step = 0;
     subject->attributes &= ~kOccupiesSpace;
     fixedPointType newVel = {0, 0};
     CreateAnySpaceObject(

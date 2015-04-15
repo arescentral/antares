@@ -212,14 +212,13 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
 
                             // multiply by max velocity
 
-                            if (/*( anObject->presenceState == kWarpInPresence) ||*/
-                                ( anObject->presenceState == kWarpingPresence) ||
-                                ( anObject->presenceState == kWarpOutPresence))
-                            {
-                                fa = mMultiplyFixed( fa, anObject->presenceData);
-                                fb = mMultiplyFixed( fb, anObject->presenceData);
-                            } else
-                            {
+                            if (anObject->presenceState == kWarpingPresence) {
+                                fa = mMultiplyFixed( fa, anObject->presence.warping);
+                                fb = mMultiplyFixed( fb, anObject->presence.warping);
+                            } else if (anObject->presenceState == kWarpOutPresence) {
+                                fa = mMultiplyFixed( fa, anObject->presence.warp_out);
+                                fb = mMultiplyFixed( fb, anObject->presence.warp_out);
+                            } else {
                                 fa = mMultiplyFixed( anObject->maxVelocity, fa);
                                 fb = mMultiplyFixed( anObject->maxVelocity, fb);
                             }

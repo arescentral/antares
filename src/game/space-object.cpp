@@ -703,7 +703,6 @@ static void InitSpaceObjectFromBaseObject(
 
     dObject->closestObject = kNoShip;
     dObject->presenceState = kNormalPresence;
-    dObject->presenceData = 0;
 
     if ( spriteIDOverride == -1)
         dObject->pixResID = sObject->pixResID;

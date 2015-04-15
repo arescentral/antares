@@ -203,7 +203,6 @@ const int32_t kPresenceDataHiWordShift = 16;
 enum kPresenceStateType {
     kNormalPresence = 0,
     kLandingPresence = 1,
-    kTakeoffPresence = 2,
     kWarpInPresence = 3,
     kWarpingPresence = 4,
     kWarpOutPresence = 5
@@ -473,7 +472,18 @@ struct spaceObjectType {
     int32_t                 engageRange;            // either longestWeaponRange or kEngageRange
 
     kPresenceStateType      presenceState;
-    int32_t                 presenceData;
+    union {
+        struct {
+            int16_t speed;
+            int16_t scale;
+        } landing;
+        struct {
+            uint8_t step;
+            uint8_t progress;
+        } warp_in;
+        int32_t warping;
+        int32_t warp_out;
+    } presence;
 
     int32_t                 hitState;
     int32_t                 cloakState;

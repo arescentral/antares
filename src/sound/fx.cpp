@@ -60,10 +60,10 @@ void InitSoundFX() {
     AddSound(kCloakOn);
     AddSound(kCloakOff);
     AddSound(kKlaxon);
-    AddSound(kWarpOne);
-    AddSound(kWarpTwo);
-    AddSound(kWarpThree);
-    AddSound(kWarpFour);
+    AddSound(kWarp[0]);
+    AddSound(kWarp[1]);
+    AddSound(kWarp[2]);
+    AddSound(kWarp[3]);
     AddSound(kTeletype);
 }
 

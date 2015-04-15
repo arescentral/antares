@@ -292,9 +292,6 @@ void NonplayerShipThink(int32_t timePass)
           case kLandingPresence:
             keysDown = ThinkObjectLandingPresence(anObject);
             break;
-
-          case kTakeoffPresence:
-            break;
         }
 
         if (!(anObject->attributes & kRemoteOrHuman)
@@ -447,13 +444,17 @@ void NonplayerShipThink(int32_t timePass)
         if ((anObject->keysDown & kWarpKey)
                 && (baseObject->warpSpeed > 0)
                 && (anObject->energy > 0)) {
-            if ((anObject->presenceState == kWarpingPresence)
-                    || (anObject->presenceState == kWarpOutPresence)) {
-                anObject->thrust = mMultiplyFixed(baseObject->maxThrust, anObject->presenceData);
+            if (anObject->presenceState == kWarpingPresence) {
+                anObject->thrust = mMultiplyFixed(
+                        baseObject->maxThrust, anObject->presence.warping);
+            } else if (anObject->presenceState == kWarpOutPresence) {
+                anObject->thrust = mMultiplyFixed(
+                        baseObject->maxThrust, anObject->presence.warp_out);
             } else if ((anObject->presenceState == kNormalPresence)
                     && (anObject->energy > (anObject->baseType->energy >> kWarpInEnergyFactor))) {
                 anObject->presenceState = kWarpInPresence;
-                anObject->presenceData = 0;
+                anObject->presence.warp_in.step = 0;
+                anObject->presence.warp_in.progress = 0;
             }
         } else {
             if (anObject->presenceState == kWarpInPresence) {
@@ -461,7 +462,8 @@ void NonplayerShipThink(int32_t timePass)
             } else if (anObject->presenceState == kWarpingPresence) {
                 anObject->presenceState = kWarpOutPresence;
             } else if (anObject->presenceState == kWarpOutPresence) {
-                anObject->thrust = mMultiplyFixed(baseObject->maxThrust, anObject->presenceData);
+                anObject->thrust = mMultiplyFixed(
+                        baseObject->maxThrust, anObject->presence.warp_out);
             }
         }
 
@@ -936,56 +938,31 @@ uint32_t ThinkObjectWarpInPresence( spaceObjectType *anObject)
     {
         keysDown = kWarpKey;
     }
-    anObject->presenceData = ( anObject->presenceData & ~0x000000ff)
-        | (( anObject->presenceData & 0x000000ff) + kDecideEveryCycles);
-    if ( !(anObject->presenceData & 0x10000000))
-    {
-        longscrap = kMaxSoundVolume;
-        mPlayDistanceSound(longscrap, anObject, kWarpOne, kMediumPersistence, kPrioritySound);
-        anObject->presenceData |= 0x10000000;
-    } else if (( !(anObject->presenceData & 0x20000000)) &&
-        (( anObject->presenceData & 0x000000ff) > 25))
-    {
-        longscrap = kMaxSoundVolume;
-        mPlayDistanceSound(longscrap, anObject, kWarpTwo, kMediumPersistence, kPrioritySound);
-        anObject->presenceData |= 0x20000000;
-    } if (( !(anObject->presenceData & 0x40000000)) &&
-        (( anObject->presenceData & 0x000000ff) > 50))
-    {
-        longscrap = kMaxSoundVolume;
-        mPlayDistanceSound(longscrap, anObject, kWarpThree, kMediumPersistence, kPrioritySound);
-        anObject->presenceData |= 0x40000000;
-    } if (( !(anObject->presenceData & 0x80000000)) &&
-        (( anObject->presenceData & 0x000000ff) > 75))
-    {
-        longscrap = kMaxSoundVolume;
-        mPlayDistanceSound(longscrap, anObject, kWarpFour, kMediumPersistence, kPrioritySound);
-        anObject->presenceData |= 0x80000000;
+    auto& presence = anObject->presence.warp_in;
+    presence.progress += kDecideEveryCycles;
+    for (int i = 0; i < 4; ++i) {
+        if ((presence.step == i) && (presence.progress > (25 * i))) {
+            mPlayDistanceSound(
+                    kMaxSoundVolume, anObject, kWarp[i], kMediumPersistence, kPrioritySound);
+            ++presence.step;
+            break;
+        }
     }
 
-    if ( (anObject->presenceData & 0x000000ff) > 100)
-    {
+    if (presence.progress > 100) {
         anObject->energy -= anObject->baseType->energy >> kWarpInEnergyFactor;
         anObject->warpEnergyCollected += anObject->baseType->energy >> kWarpInEnergyFactor;
-        if ( anObject->energy <= 0)
-        {
+        if (anObject->energy <= 0) {
             anObject->presenceState = kNormalPresence;
             anObject->energy = 0;
-        } else
-        {
-
+        } else {
             anObject->presenceState = kWarpingPresence;
-            anObject->presenceData = anObject->baseType->warpSpeed;
+            anObject->presence.warping = anObject->baseType->warpSpeed;
             anObject->attributes &= ~kOccupiesSpace;
             newVel.h = newVel.v = 0;
-    /*
-            CreateAnySpaceObject( globals()->scenarioFileInfo.warpInFlareID, &(newVel),
-                &(anObject->location), anObject->direction, kNoOwner,
-                0, nil, -1, -1, -1);
-    */
-            CreateAnySpaceObject( globals()->scenarioFileInfo.warpInFlareID, &(newVel),
-                &(anObject->location), anObject->direction, kNoOwner,
-                0, -1);
+            CreateAnySpaceObject(
+                    globals()->scenarioFileInfo.warpInFlareID, &newVel, &anObject->location,
+                    anObject->direction, kNoOwner, 0, -1);
         }
     }
 
@@ -1046,8 +1023,8 @@ uint32_t ThinkObjectWarpOutPresence( spaceObjectType *anObject, baseObjectType *
     Fixed           calcv, fdist;
     fixedPointType  newVel;
 
-    anObject->presenceData -= mLongToFixed(kWarpAcceleration);
-    if ( anObject->presenceData < anObject->maxVelocity)
+    anObject->presence.warp_out -= mLongToFixed(kWarpAcceleration);
+    if ( anObject->presence.warp_out < anObject->maxVelocity)
     {
         AlterObjectBattery( anObject, anObject->warpEnergyCollected);
         anObject->warpEnergyCollected = 0;
@@ -1245,36 +1222,17 @@ uint32_t ThinkObjectLandingPresence( spaceObjectType *anObject)
             keysDown |= kUpKey;
         else keysDown |= kDownKey;
         anObject->lastTargetDistance = distance;
-    } else
-    {
+    } else {
         keysDown |= kDownKey;
-        anObject->presenceData =
-            (
-                (
-                    anObject->presenceData &
-                        kPresenceDataLoWordMask
-                ) -
-                (
-                    (
-                        anObject->presenceData &
-                            kPresenceDataHiWordMask
-                    )
-                    >> kPresenceDataHiWordShift
-                )
-            ) |
-            (
-                anObject->presenceData & kPresenceDataHiWordMask
-            );
+        anObject->presence.landing.scale -= anObject->presence.landing.speed;
     }
 
-    if ( (anObject->presenceData & kPresenceDataLoWordMask) <= 0)
-    {
+    if (anObject->presence.landing.scale <= 0) {
         anObject->baseType->expire.run(anObject, targetObject, NULL);
         anObject->active = kObjectToBeFreed;
-
-    } else if ( anObject->sprite != NULL)
-        anObject->sprite->scale = (anObject->presenceData &
-            kPresenceDataLoWordMask);
+    } else if (anObject->sprite) {
+        anObject->sprite->scale = anObject->presence.landing.scale;
+    }
 
     return( keysDown);
 }
