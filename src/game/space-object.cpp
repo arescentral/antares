@@ -127,7 +127,6 @@ void ResetAllSpaceObjects() {
         anObject->active = kObjectAvailable;
         anObject->sprite = NULL;
 /*      anObject->whichSprite = kNoSprite;
-        anObject->whichLabel = kNoLabel;
         anObject->entryNumber = i;
         anObject->baseType = nil;
         anObject->keysDown = 0;
@@ -204,7 +203,6 @@ void ResetAllSpaceObjects() {
         anObject->specialAmmo = 0;
         anObject->specialPosition = 0;
 
-        anObject->whichLabel = 0;
         anObject->offlineTime = 0;
         anObject->periodicTime = 0;
 */
@@ -414,7 +412,6 @@ int AddSpaceObject( spaceObjectType *sourceObject)
 
     destObject->active = kObjectInUse;
     destObject->nextNearObject = destObject->nextFarObject = NULL;
-    destObject->whichLabel = Labels::kNone;
     destObject->entryNumber = whichObject;
     destObject->cloakState = destObject->hitState = 0;
     destObject->duty = eNoDuty;
@@ -489,7 +486,6 @@ int AddNumberedSpaceObject( spaceObjectType *sourceObject, int32_t whichObject)
         destObject->scaledCornerOffset.v = -scaleCalc;
     } else destObject->sprite = nil;
     destObject->active = kObjectInUse;
-    destObject->whichLabel = kNoLabel;
     destObject->entryNumber = whichObject;
     return ( whichObject);
 */  return ( 0);

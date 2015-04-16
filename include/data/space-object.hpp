@@ -503,7 +503,6 @@ struct spaceObjectType {
     Weapon                  special;
 
     int32_t                 periodicTime;
-    int32_t                 whichLabel;
 
     uint32_t                myPlayerFlag;
     uint32_t                seenByPlayerFlags;
