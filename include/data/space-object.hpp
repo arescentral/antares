@@ -416,8 +416,6 @@ struct spaceObjectType {
     fixedPointType          velocity;
     Fixed                   thrust;
     Fixed                   maxVelocity;
-    Point                   scaledCornerOffset;
-    Point                   scaledSize;
     Rect                absoluteBounds;
     Random                  randomSeed;
 

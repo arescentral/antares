@@ -737,24 +737,19 @@ void CollideSpaceObjects() {
                 const NatePixTable::Frame& frame
                     = aObject->sprite->table->at(aObject->sprite->whichShape);
 
-                int32_t scaleCalc = (frame.width() * aObject->naturalScale);
-                scaleCalc >>= SHIFT_SCALE;
-                aObject->scaledSize.h = scaleCalc;
-                scaleCalc = (frame.height() * aObject->naturalScale);
-                scaleCalc >>= SHIFT_SCALE;
-                aObject->scaledSize.v = scaleCalc;
+                Size size = {
+                    (frame.width() * aObject->naturalScale) >> SHIFT_SCALE,
+                    (frame.height() * aObject->naturalScale) >> SHIFT_SCALE,
+                };
+                Point corner = {
+                    -((frame.center().h * aObject->naturalScale) >> SHIFT_SCALE),
+                    -((frame.center().v * aObject->naturalScale) >> SHIFT_SCALE),
+                };
 
-                scaleCalc = frame.center().h * aObject->naturalScale;
-                scaleCalc >>= SHIFT_SCALE;
-                aObject->scaledCornerOffset.h = -scaleCalc;
-                scaleCalc = frame.center().v * aObject->naturalScale;
-                scaleCalc >>= SHIFT_SCALE;
-                aObject->scaledCornerOffset.v = -scaleCalc;
-
-                aObject->absoluteBounds.left = aObject->location.h + aObject->scaledCornerOffset.h;
-                aObject->absoluteBounds.right = aObject->absoluteBounds.left + aObject->scaledSize.h;
-                aObject->absoluteBounds.top = aObject->location.v + aObject->scaledCornerOffset.v;
-                aObject->absoluteBounds.bottom = aObject->absoluteBounds.top + aObject->scaledSize.v;
+                aObject->absoluteBounds.left = aObject->location.h + corner.h;
+                aObject->absoluteBounds.right = aObject->absoluteBounds.left + size.width;
+                aObject->absoluteBounds.top = aObject->location.v + corner.v;
+                aObject->absoluteBounds.bottom = aObject->absoluteBounds.top + size.height;
             }
 
             auto currentProximity = proximityObject;
@@ -799,28 +794,19 @@ void CollideSpaceObjects() {
                         const NatePixTable::Frame& frame
                             = bObject->sprite->table->at(bObject->sprite->whichShape);
 
-                        int32_t scaleCalc = (frame.width() * bObject->naturalScale);
-                        scaleCalc >>= SHIFT_SCALE;
-                        bObject->scaledSize.h = scaleCalc;
-                        scaleCalc = (frame.height() * bObject->naturalScale);
-                        scaleCalc >>= SHIFT_SCALE;
-                        bObject->scaledSize.v = scaleCalc;
+                        Size size = {
+                            (frame.width() * bObject->naturalScale) >> SHIFT_SCALE,
+                            (frame.height() * bObject->naturalScale) >> SHIFT_SCALE,
+                        };
+                        Point corner = {
+                            -((frame.center().h * bObject->naturalScale) >> SHIFT_SCALE),
+                            -((frame.center().v * bObject->naturalScale) >> SHIFT_SCALE),
+                        };
 
-                        scaleCalc = frame.center().h * bObject->naturalScale;
-                        scaleCalc >>= SHIFT_SCALE;
-                        bObject->scaledCornerOffset.h = -scaleCalc;
-                        scaleCalc = frame.center().v * bObject->naturalScale;
-                        scaleCalc >>= SHIFT_SCALE;
-                        bObject->scaledCornerOffset.v = -scaleCalc;
-
-                        bObject->absoluteBounds.left = bObject->location.h +
-                            bObject->scaledCornerOffset.h;
-                        bObject->absoluteBounds.right = bObject->absoluteBounds.left +
-                            bObject->scaledSize.h;
-                        bObject->absoluteBounds.top = bObject->location.v +
-                            bObject->scaledCornerOffset.v;
-                        bObject->absoluteBounds.bottom = bObject->absoluteBounds.top +
-                            bObject->scaledSize.v;
+                        bObject->absoluteBounds.left = bObject->location.h + corner.h;
+                        bObject->absoluteBounds.right = bObject->absoluteBounds.left + size.width;
+                        bObject->absoluteBounds.top = bObject->location.v + corner.v;
+                        bObject->absoluteBounds.bottom = bObject->absoluteBounds.top + size.height;
                     }
 
                     if (aObject->owner == bObject->owner) {

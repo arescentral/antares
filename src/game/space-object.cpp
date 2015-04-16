@@ -161,8 +161,6 @@ void ResetAllSpaceObjects() {
         anObject->motionFraction.h = anObject->motionFraction.v = 0;
         anObject->velocity.h = anObject->velocity.v = 0;
         anObject->thrust = 0;
-        anObject->scaledCornerOffset.h = anObject->scaledCornerOffset.v = 0;
-        anObject->scaledSize.h = anObject->scaledSize.v = 0;
         anObject->absoluteBounds.left = anObject->absoluteBounds.right = 0;
         anObject->randomSeed = 0;
         anObject->health = 0;
@@ -362,28 +360,8 @@ int AddSpaceObject( spaceObjectType *sourceObject)
             destObject->active = kObjectAvailable;
             return( -1);
         }
-
-        const NatePixTable::Frame& frame
-            = destObject->sprite->table->at(destObject->sprite->whichShape);
-
-        scaleCalc = (frame.width() * destObject->naturalScale);
-        scaleCalc >>= SHIFT_SCALE;
-        destObject->scaledSize.h = scaleCalc;
-        scaleCalc = (frame.height() * destObject->naturalScale);
-        scaleCalc >>= SHIFT_SCALE;
-        destObject->scaledSize.v = scaleCalc;
-
-        scaleCalc = frame.center().h * destObject->naturalScale;
-        scaleCalc >>= SHIFT_SCALE;
-        destObject->scaledCornerOffset.h = -scaleCalc;
-        scaleCalc = frame.center().v * destObject->naturalScale;
-        scaleCalc >>= SHIFT_SCALE;
-        destObject->scaledCornerOffset.v = -scaleCalc;
-
     } else
     {
-        destObject->scaledCornerOffset.h = destObject->scaledCornerOffset.v = 0;
-        destObject->scaledSize.h = destObject->scaledSize.v = 0;
         destObject->sprite = NULL;
         destObject->whichSprite = kNoSprite;
     }
@@ -468,22 +446,6 @@ int AddNumberedSpaceObject( spaceObjectType *sourceObject, int32_t whichObject)
     {
         destObject->sprite = AddSprite( where, spriteTable, 0, destObject->naturalScale,
                             destObject->tinySize, destObject->tinyColor);
-
-        GetOldSpritePixData( destObject->sprite, &oldStyleSprite);
-
-        scaleCalc = (oldStyleSprite.width * destObject->naturalScale);
-        scaleCalc >>= SHIFT_SCALE;
-        destObject->scaledSize.h = scaleCalc;
-        scaleCalc = (oldStyleSprite.height * destObject->naturalScale);
-        scaleCalc >>= SHIFT_SCALE;
-        destObject->scaledSize.v = scaleCalc;
-
-        scaleCalc = oldStyleSprite.center.h * destObject->naturalScale;
-        scaleCalc >>= SHIFT_SCALE;
-        destObject->scaledCornerOffset.h = -scaleCalc;
-        scaleCalc = oldStyleSprite.center.v * destObject->naturalScale;
-        scaleCalc >>= SHIFT_SCALE;
-        destObject->scaledCornerOffset.v = -scaleCalc;
     } else destObject->sprite = nil;
     destObject->active = kObjectInUse;
     destObject->entryNumber = whichObject;
@@ -641,7 +603,7 @@ static void InitSpaceObjectFromBaseObject(
     dObject->bestConsideredTargetValue = dObject->currentTargetValue = 0xffffffff;
     dObject->bestConsideredTargetNumber = -1;
 
-    // not setting: scaledCornerOffset, scaledSize, absoluteBounds;
+    // not setting: absoluteBounds;
 
     if ( dObject->attributes & kCanTurn)
     {
