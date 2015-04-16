@@ -123,87 +123,8 @@ void ResetAllSpaceObjects() {
     gRootObjectNumber = -1;
     anObject = gSpaceObjectData.get();
     for (i = 0; i < kMaxSpaceObject; i++) {
-//      anObject->attributes = 0;
         anObject->active = kObjectAvailable;
         anObject->sprite = NULL;
-/*      anObject->whichSprite = kNoSprite;
-        anObject->entryNumber = i;
-        anObject->baseType = nil;
-        anObject->keysDown = 0;
-        anObject->tinySize = 0;
-        anObject->tinyColor = 0;
-        anObject->shieldColor = kNoTinyColor;
-        anObject->direction = 0;
-        anObject->location.h = anObject->location.v = 0;
-        anObject->collisionGrid.h = anObject->collisionGrid.v = 0;
-        anObject->nextNearObject = nil;
-        anObject->distanceGrid.h = anObject->distanceGrid.v = 0;
-        anObject->nextFarObject = nil;
-        anObject->previousObject = nil;
-        anObject->previousObjectNumber = -1;
-        anObject->nextObject = nil;
-        anObject->nextObjectNumber = -1;
-        anObject->runTimeFlags = 0;
-        anObject->myPlayerFlag = 0;
-        anObject->seenByPlayerFlags = 0xffffffff;
-        anObject->hostileTowardsFlags = 0;
-        anObject->destinationLocation.h = anObject->destinationLocation.v = kNoDestinationCoord;
-        anObject->destinationObject = kNoDestinationObject;
-        anObject->destObjectPtr = nil;
-        anObject->destObjectDest = 0;
-        anObject->destObjectID = 0;
-        anObject->remoteFoeStrength = anObject->remoteFriendStrength = anObject->escortStrength =
-            anObject->localFoeStrength = anObject->localFriendStrength = 0;
-        anObject->bestConsideredTargetValue = anObject->currentTargetValue = 0xffffffff;
-        anObject->bestConsideredTargetNumber = -1;
-
-        anObject->timeFromOrigin = 0;
-        anObject->motionFraction.h = anObject->motionFraction.v = 0;
-        anObject->velocity.h = anObject->velocity.v = 0;
-        anObject->thrust = 0;
-        anObject->absoluteBounds.left = anObject->absoluteBounds.right = 0;
-        anObject->randomSeed = 0;
-        anObject->health = 0;
-        anObject->energy = 0;
-        anObject->battery = 0;
-        anObject->rechargeTime = anObject->pulseCharge = anObject->beamCharge = anObject->specialCharge = 0;
-        anObject->warpEnergyCollected = 0;
-        anObject->owner = -1;
-        anObject->age = 0;
-        anObject->naturalScale = 0;
-        anObject->id = -1;
-        anObject->distanceFromPlayer.hi = anObject->distanceFromPlayer.lo = 0;
-        anObject->closestDistance = kMaximumRelevantDistanceSquared;
-        anObject->closestObject = kNoShip;
-        anObject->targetObjectNumber = -1;
-        anObject->targetObjectID = -1;
-        anObject->targetAngle = 0;
-        anObject->lastTarget = 0;
-        anObject->lastTargetDistance = 0;
-        anObject->longestWeaponRange = 0;
-        anObject->shortestWeaponRange = 0;
-        anObject->presenceState = kNormalPresence;
-        anObject->presenceData = 0;
-        anObject->pixResID = 0;
-        anObject->pulseBase = nil;
-        anObject->pulseType = 0;
-        anObject->pulseTime = 0;
-        anObject->pulseAmmo = 0;
-        anObject->pulsePosition = 0;
-        anObject->beamBase = nil;
-        anObject->beamType = 0;
-        anObject->beamTime = 0;
-        anObject->beamAmmo = 0;
-        anObject->beamPosition = 0;
-        anObject->specialBase = nil;
-        anObject->specialType = 0;
-        anObject->specialTime = 0;
-        anObject->specialAmmo = 0;
-        anObject->specialPosition = 0;
-
-        anObject->offlineTime = 0;
-        anObject->periodicTime = 0;
-*/
         anObject++;
     }
 }
@@ -392,63 +313,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
     destObject->cloakState = destObject->hitState = 0;
     destObject->duty = eNoDuty;
 
-//  if ( destObject->attributes & kCanThink)
-//      SetObjectDestination( destObject);
-//  else destObject->destinationObject = kNoDestinationObject;
-
-/*
-    if ( destObject->attributes & kIsDestination)
-        destObject->destinationObject = MakeNewDestination( whichObject, canBuildType,
-            mFloatToFixed( 1), nameResID, nameStrNum);
-*/
     return ( whichObject);
-}
-
-int AddNumberedSpaceObject( spaceObjectType *sourceObject, int32_t whichObject)
-
-{
-#pragma unused( sourceObject, whichObject)
-/*  spaceObjectType *destObject = nil;
-    Handle          spriteTable = nil;
-    Point           where;
-    spritePix       oldStyleSprite;
-    int32_t         scaleCalc;
-
-    destObject = gSpaceObjectData.get() + whichObject;
-
-    if ( whichObject == kMaxSpaceObject) return( -1);
-
-    if ( sourceObject->pixResID == kNoSpriteTable)
-    {
-        spriteTable = GetPixTable( sourceObject->pixResID);
-        if ( spriteTable == nil)
-        {
-            spriteTable = AddPixTable( sourceObject->pixResID);
-            if ( spriteTable == nil)
-            {
-                return (-1);
-            }
-
-        }
-    } else
-    {
-        spriteTable = nil;
-    }
-
-//  sourceObject->id = whichObject;
-    *destObject = *sourceObject;
-    where.h = destObject->location.h - gGlobalCorner.h + CLIP_LEFT;
-    where.v = destObject->location.v - gGlobalCorner.v; //+ CLIP_TOP
-    if ( destObject->sprite != nil) RemoveSprite( destObject->sprite);
-    if ( spriteTable != nil)
-    {
-        destObject->sprite = AddSprite( where, spriteTable, 0, destObject->naturalScale,
-                            destObject->tinySize, destObject->tinyColor);
-    } else destObject->sprite = nil;
-    destObject->active = kObjectInUse;
-    destObject->entryNumber = whichObject;
-    return ( whichObject);
-*/  return ( 0);
 }
 
 void RemoveAllSpaceObjects( void)
@@ -1023,47 +888,6 @@ int32_t CountObjectsOfBaseType( int32_t whichType, int32_t owner)
         anObject++;
     }
     return (result);
-}
-
-int32_t GetNextObjectWithAttributes( int32_t startWith, uint32_t attributes, bool exclude)
-
-{
-    int32_t original = startWith;
-    spaceObjectType *anObject;
-
-    anObject = gSpaceObjectData.get() + startWith;
-
-    if ( exclude)
-    {
-        do
-        {
-            startWith = anObject->nextObjectNumber;
-            anObject = anObject->nextObject;
-
-            if ( anObject == NULL)
-            {
-                startWith = gRootObjectNumber;
-                anObject = gRootObject;
-            }
-        } while (( anObject->attributes & attributes) && ( startWith != original));
-        if (( startWith == original) && ( anObject->attributes & attributes)) return ( -1);
-        else return( startWith);
-    } else
-    {
-        do
-        {
-            startWith = anObject->nextObjectNumber;
-            anObject = anObject->nextObject;
-
-            if ( anObject == NULL)
-            {
-                startWith = gRootObjectNumber;
-                anObject = gRootObject;
-            }
-        } while ((!( anObject->attributes & attributes)) && ( startWith != original));
-        if (( startWith == original) && (!( anObject->attributes & attributes))) return ( -1);
-        else return( startWith);
-    }
 }
 
 void AlterObjectHealth(spaceObjectType* object, int32_t health) {
