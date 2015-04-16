@@ -190,8 +190,6 @@ static void tick_special(spaceObjectType* subject, spaceObjectType* target, int3
     tick_weapon(subject, target, timePass, kEnterKey, subject->baseType->special, subject->special);
 }
 
-#ifdef kUseOldThinking
-#else   // if NOT kUseOldThinking
 void NonplayerShipThink(int32_t timePass)
 {
     admiralType     *anAdmiral;
@@ -469,7 +467,6 @@ void NonplayerShipThink(int32_t timePass)
 
     }
 }
-#endif  // kUseOldThinking
 
 uint32_t use_weapons_for_defense(spaceObjectType* obj) {
     uint32_t keys = 0;
