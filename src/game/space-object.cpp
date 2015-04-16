@@ -368,12 +368,11 @@ int AddSpaceObject( spaceObjectType *sourceObject)
 
     if ( destObject->attributes & kIsBeam)
     {
-        destObject->frame.beam.beam = Beams::add( &(destObject->location),
+        destObject->frame.beam = Beams::add( &(destObject->location),
             destObject->baseType->frame.beam.color,
             destObject->baseType->frame.beam.kind,
             destObject->baseType->frame.beam.accuracy,
-            destObject->baseType->frame.beam.range,
-            &(destObject->frame.beam.whichBeam));
+            destObject->baseType->frame.beam.range);
     }
 
     destObject->nextObject = gRootObject;

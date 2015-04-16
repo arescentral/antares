@@ -74,7 +74,7 @@ class Beams {
     static void reset();
     static beamType* add(
             coordPointType* location, uint8_t color, beamKindType kind, int32_t accuracy,
-            int32_t beam_range, int32_t* whichBeam);
+            int32_t beam_range);
     static void set_attributes(spaceObjectType* beamObject, spaceObjectType* sourceObject);
     static void update();
     static void draw();

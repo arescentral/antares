@@ -419,26 +419,14 @@ struct spaceObjectType {
     Rect                absoluteBounds;
     Random                  randomSeed;
 
-    union
-    {
-//      struct
-//      {
-            int32_t             directionGoal;
-            Fixed               turnVelocity;
-            Fixed               turnFraction;
-//      } rotation;
-        struct
-        {
+    union {
+        struct {
             int32_t             thisShape;
             Fixed               frameFraction;
             int32_t             frameDirection;
             Fixed               frameSpeed;
         } animation;
-        struct
-        {
-            int32_t             whichBeam;
-            beamType            *beam;
-        } beam;
+        beamType*               beam;
     } frame;
 
     int32_t                 health;

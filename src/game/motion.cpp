@@ -401,25 +401,25 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                     }
                 } else if ( anObject->attributes & kIsBeam)
                 {
-                    if ( anObject->frame.beam.beam != NULL)
+                    if ( anObject->frame.beam != NULL)
                     {
-                        anObject->frame.beam.beam->objectLocation =
+                        anObject->frame.beam->objectLocation =
                             anObject->location;
-                        if (( anObject->frame.beam.beam->beamKind ==
+                        if (( anObject->frame.beam->beamKind ==
                                 eStaticObjectToObjectKind) ||
-                                ( anObject->frame.beam.beam->beamKind ==
+                                ( anObject->frame.beam->beamKind ==
                                 eBoltObjectToObjectKind))
                         {
-                            if ( anObject->frame.beam.beam->toObject != NULL)
+                            if ( anObject->frame.beam->toObject != NULL)
                             {
                                 spaceObjectType *target =
-                                    anObject->frame.beam.beam->toObject;
+                                    anObject->frame.beam->toObject;
 
                                 if ((target->active) &&
-                                    (target->id == anObject->frame.beam.beam->toObjectID))
+                                    (target->id == anObject->frame.beam->toObjectID))
                                 {
                                     anObject->location =
-                                        anObject->frame.beam.beam->objectLocation =
+                                        anObject->frame.beam->objectLocation =
                                             target->location;
                                 } else
                                 {
@@ -427,49 +427,49 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                                 }
                             }
 
-                            if ( anObject->frame.beam.beam->fromObject != NULL)
+                            if ( anObject->frame.beam->fromObject != NULL)
                             {
                                 spaceObjectType *target =
-                                    anObject->frame.beam.beam->fromObject;
+                                    anObject->frame.beam->fromObject;
 
                                 if ((target->active) &&
-                                    ( target->id == anObject->frame.beam.beam->fromObjectID))
+                                    ( target->id == anObject->frame.beam->fromObjectID))
 
                                 {
-                                    anObject->frame.beam.beam->lastGlobalLocation =
-                                        anObject->frame.beam.beam->lastApparentLocation =
+                                    anObject->frame.beam->lastGlobalLocation =
+                                        anObject->frame.beam->lastApparentLocation =
                                             target->location;
                                 } else
                                 {
                                     anObject->active = kObjectToBeFreed;
                                 }
                             }
-                        } else if (( anObject->frame.beam.beam->beamKind ==
+                        } else if (( anObject->frame.beam->beamKind ==
                                 eStaticObjectToRelativeCoordKind) ||
-                                ( anObject->frame.beam.beam->beamKind ==
+                                ( anObject->frame.beam->beamKind ==
                                 eBoltObjectToRelativeCoordKind))
                         {
-                            if ( anObject->frame.beam.beam->fromObject != NULL)
+                            if ( anObject->frame.beam->fromObject != NULL)
                             {
                                 spaceObjectType *target =
-                                    anObject->frame.beam.beam->fromObject;
+                                    anObject->frame.beam->fromObject;
 
                                 if (( target->active) &&
-                                    ( target->id == anObject->frame.beam.beam->fromObjectID))
+                                    ( target->id == anObject->frame.beam->fromObjectID))
                                 {
-                                    anObject->frame.beam.beam->lastGlobalLocation =
-                                        anObject->frame.beam.beam->lastApparentLocation =
+                                    anObject->frame.beam->lastGlobalLocation =
+                                        anObject->frame.beam->lastApparentLocation =
                                             target->location;
 
                                     anObject->location.h =
-                                        anObject->frame.beam.beam->objectLocation.h =
+                                        anObject->frame.beam->objectLocation.h =
                                         target->location.h +
-                                        anObject->frame.beam.beam->toRelativeCoord.h;
+                                        anObject->frame.beam->toRelativeCoord.h;
 
                                     anObject->location.v =
-                                        anObject->frame.beam.beam->objectLocation.v =
+                                        anObject->frame.beam->objectLocation.v =
                                         target->location.v +
-                                        anObject->frame.beam.beam->toRelativeCoord.v;
+                                        anObject->frame.beam->toRelativeCoord.v;
                                 } else
                                 {
                                     anObject->active = kObjectToBeFreed;
@@ -477,7 +477,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                             }
                         } else
                         {
-    //                      anObject->frame.beam.beam->endLocation
+    //                      anObject->frame.beam->endLocation
                         }
                     } else {
                         throw Exception( "Unexpected error: a beam appears to be missing.");
@@ -840,8 +840,8 @@ void CollideSpaceObjects() {
 
                         int32_t xs = sObject->location.h;
                         int32_t ys = sObject->location.v;
-                        int32_t xe = sObject->frame.beam.beam->lastGlobalLocation.h;
-                        int32_t ye = sObject->frame.beam.beam->lastGlobalLocation.v;
+                        int32_t xe = sObject->frame.beam->lastGlobalLocation.h;
+                        int32_t ye = sObject->frame.beam->lastGlobalLocation.v;
 
                         int16_t cs = mClipCode( xs, ys, dObject->absoluteBounds);
                         int16_t ce = mClipCode( xe, ye, dObject->absoluteBounds);
@@ -1035,8 +1035,8 @@ hackBNoEngageMatch:
         auto aObject = mGetSpaceObjectPtr(i);
         if (aObject->active == kObjectToBeFreed) {
             if (aObject->attributes & kIsBeam) {
-                if (aObject->frame.beam.beam != NULL) {
-                    aObject->frame.beam.beam->killMe = true;
+                if (aObject->frame.beam != NULL) {
+                    aObject->frame.beam->killMe = true;
                 }
                 aObject->active = kObjectAvailable;
                 aObject->attributes = 0;
@@ -1102,7 +1102,7 @@ hackBNoEngageMatch:
                 }
             }
             if (aObject->attributes & kIsBeam) {
-                aObject->frame.beam.beam->lastGlobalLocation = aObject->location;
+                aObject->frame.beam->lastGlobalLocation = aObject->location;
             }
         }
         aObject->lastLocation = aObject->location;

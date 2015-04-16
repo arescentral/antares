@@ -44,13 +44,13 @@ const int kBeamNum          = 256;
 const int kBoltChangeTime   = 0;
 
 void DetermineBeamRelativeCoordFromAngle(spaceObjectType *beamObject, int16_t angle) {
-    Fixed range = mLongToFixed(beamObject->frame.beam.beam->range);
+    Fixed range = mLongToFixed(beamObject->frame.beam->range);
 
     mAddAngle(angle, -90);
     Fixed fcos, fsin;
     GetRotPoint(&fcos, &fsin, angle);
 
-    beamObject->frame.beam.beam->toRelativeCoord = Point(
+    beamObject->frame.beam->toRelativeCoord = Point(
             mFixedToLong(mMultiplyFixed(0, -fcos) - mMultiplyFixed(range, -fsin)),
             mFixedToLong(mMultiplyFixed(0, -fsin) + mMultiplyFixed(range, -fcos)));
 }
@@ -87,7 +87,7 @@ void Beams::reset() {
 
 beamType* Beams::add(
         coordPointType* location, uint8_t color, beamKindType kind, int32_t accuracy,
-        int32_t beam_range, int32_t* whichBeam) {
+        int32_t beam_range) {
     beamType* const beams = _data.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (!beam->active) {
@@ -117,17 +117,15 @@ beamType* Beams::add(
             beam->boltCycleTime = 0;
             beam->boltState = 0;
 
-            *whichBeam = beam - beams;
             return beam;
         }
     }
 
-    *whichBeam = -1;
     return NULL;
 }
 
 void Beams::set_attributes(spaceObjectType* beamObject, spaceObjectType* sourceObject) {
-    beamType& beam = *beamObject->frame.beam.beam;
+    beamType& beam = *beamObject->frame.beam;
     beam.fromObjectNumber = sourceObject->number();
     beam.fromObjectID = sourceObject->id;
     beam.fromObject = sourceObject;
