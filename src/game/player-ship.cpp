@@ -205,8 +205,8 @@ static void engage_autopilot() {
 }
 
 static void pick_object(
-        spaceObjectType* origin_ship, int32_t direction, bool destination,
-        int32_t attributes, int32_t nonattributes, int32_t select_ship_num, int friend_or_foe) {
+        spaceObjectType* origin_ship, int32_t direction, bool destination, int32_t attributes,
+        int32_t nonattributes, int32_t select_ship_num, Allegiance allegiance) {
     uint64_t huge_distance;
     if (select_ship_num >= 0) {
         spaceObjectType* select_ship = mGetSpaceObjectPtr(select_ship_num);
@@ -231,8 +231,8 @@ static void pick_object(
     }
 
     select_ship_num = GetManualSelectObject(
-            origin_ship, direction, 0, attributes, nonattributes, &huge_distance, select_ship_num,
-            friend_or_foe);
+            origin_ship, direction, attributes, nonattributes, &huge_distance, select_ship_num,
+            allegiance);
 
     if (select_ship_num >= 0) {
         if (destination) {
@@ -246,31 +246,31 @@ static void pick_object(
 static void select_friendly(spaceObjectType* origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, false, kCanBeDestination, kIsDestination,
-            GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber), 1);
+            GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber), FRIENDLY);
 }
 
 static void target_friendly(spaceObjectType* origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, true, kCanBeDestination, kIsDestination,
-            GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber), 1);
+            GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber), FRIENDLY);
 }
 
 static void target_hostile(spaceObjectType* origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, true, kCanBeDestination, kIsDestination,
-            GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber), -1);
+            GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber), HOSTILE);
 }
 
 static void select_base(spaceObjectType* origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, false, kCanAcceptBuild, 0,
-            GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber), 1);
+            GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber), FRIENDLY);
 }
 
 static void target_base(spaceObjectType* origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, true, kIsDestination, 0,
-            GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber), 0);
+            GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber), FRIENDLY_OR_HOSTILE);
 }
 
 static void target_self() {

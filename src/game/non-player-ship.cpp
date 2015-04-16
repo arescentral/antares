@@ -1759,123 +1759,102 @@ void HitObject(spaceObjectType *anObject, spaceObjectType *sObject) {
     }
 }
 
+static bool allegiance_is(Allegiance allegiance, int admiral, spaceObjectType* object) {
+    switch (allegiance) {
+      case FRIENDLY_OR_HOSTILE:
+        return true;
+      case FRIENDLY:
+        return object->owner == admiral;
+      case HOSTILE:
+        return object->owner != admiral;
+    }
+}
 
 // GetManualSelectObject:
 //  For the human player selecting a ship.  If friend or foe = 0, will get any ship.  If it's
 //  positive, will get only friendly ships.  If it's negative, only unfriendly ships.
 
 int32_t GetManualSelectObject(
-        spaceObjectType *sourceObject, int32_t direction, uint32_t inclusiveAttributes,
-        uint32_t anyOneAttribute, uint32_t exclusiveAttributes,
-        const uint64_t* fartherThan, int32_t currentShipNum, int16_t friendOrFoe) {
-    spaceObjectType *anObject;
-    int32_t         whichShip = 0, resultShip = -1, closestShip = -1, startShip = -1, hdif, vdif;
-    uint32_t        distance, dcalc, myOwnerFlag = 1 << sourceObject->owner;
-    int32_t         difference;
-    Fixed           slope;
-    int16_t         angle;
-//  const wide      kMaxAngleDistance = {0, 1073676289}; // kMaximumAngleDistance ^ 2
-    uint64_t        wideClosestDistance, wideFartherDistance, thisWideDistance, wideScrap;
-    uint8_t         thisDistanceState;
+        spaceObjectType *sourceObject, int32_t direction,
+        uint32_t inclusiveAttributes, uint32_t exclusiveAttributes,
+        const uint64_t* fartherThan, int32_t currentShipNum, Allegiance allegiance) {
+    const uint32_t myOwnerFlag = 1 << sourceObject->owner;
 
-    wideClosestDistance = 0x3fffffff3fffffffull;
-    wideFartherDistance = 0x3fffffff3fffffffull;
+    uint64_t wideClosestDistance = 0x3fffffff3fffffffull;
+    uint64_t wideFartherDistance = 0x3fffffff3fffffffull;
 
     // Here's what you've got to do next:
     // start with the currentShipNum
     // try to get any ship but the current ship
     // stop trying when we've made a full circle (we're back on currentShipNum)
 
-    whichShip = startShip = currentShipNum;
-    if ( whichShip >= 0)
-    {
+    spaceObjectType *anObject;
+    int32_t whichShip = currentShipNum;
+    int32_t startShip = currentShipNum;
+    if (whichShip >= 0) {
         anObject = mGetSpaceObjectPtr(startShip);
-        if ( anObject->active != kObjectInUse) // if it's not in the loop
-        {
+        if (anObject->active != kObjectInUse) { // if it's not in the loop
             anObject = gRootObject;
             startShip = whichShip = gRootObjectNumber;
         }
-
-    } else
-    {
+    } else {
         anObject = gRootObject;
         startShip = whichShip = gRootObjectNumber;
     }
 
-    do
-    {
-        if (( anObject->active) && ( anObject != sourceObject) &&
-            ( anObject->seenByPlayerFlags & myOwnerFlag) &&
-            (( anObject->attributes & inclusiveAttributes) == inclusiveAttributes) &&
-            (( anyOneAttribute == 0) || (( anObject->attributes & anyOneAttribute) != 0)) &&
-            ( !(anObject->attributes & exclusiveAttributes)) && ((( friendOrFoe < 0) &&
-            ( anObject->owner != sourceObject->owner)) || (( friendOrFoe > 0) &&
-            ( anObject->owner == sourceObject->owner)) || ( friendOrFoe == 0)))
-        {
-            difference = ABS<int>( sourceObject->location.h - anObject->location.h);
-            dcalc = difference;
-            difference =  ABS<int>( sourceObject->location.v - anObject->location.v);
-            distance = difference;
+    int32_t nextShipOut = -1, closestShip = -1;
+    do {
+        if (anObject->active
+                && (anObject != sourceObject)
+                && (anObject->seenByPlayerFlags & myOwnerFlag)
+                && (anObject->attributes & inclusiveAttributes)
+                && !(anObject->attributes & exclusiveAttributes)
+                && allegiance_is(allegiance, sourceObject->owner, anObject)) {
+            uint32_t xdiff = ABS<int>(sourceObject->location.h - anObject->location.h);
+            uint32_t ydiff = ABS<int>(sourceObject->location.v - anObject->location.v);
 
-            if (( dcalc > kMaximumRelevantDistance) ||
-                ( distance > kMaximumRelevantDistance))
-            {
-                wideScrap = dcalc;   // must be positive
-                MyWideMul( wideScrap, wideScrap, &thisWideDistance);  // ppc automatically generates WideMultiply
-                wideScrap = distance;
-                MyWideMul( wideScrap, wideScrap, &wideScrap);
-                thisWideDistance += wideScrap;
-            } else
-            {
-                thisWideDistance = distance * distance + dcalc * dcalc;
+            uint64_t thisWideDistance;
+            if ((xdiff > kMaximumRelevantDistance) || (ydiff > kMaximumRelevantDistance)) {
+                thisWideDistance
+                    = MyWideMul<uint64_t>(xdiff, xdiff)
+                    + MyWideMul<uint64_t>(ydiff, ydiff);
+            } else {
+                thisWideDistance = ydiff * ydiff + xdiff * xdiff;
             }
 
-            thisDistanceState = 0;
-            if (wideClosestDistance > thisWideDistance) {
-                thisDistanceState |= kCloserThanClosest;
-            }
+            // Nearer than the nearest candidate so far.
+            bool is_closest = thisWideDistance < wideClosestDistance;
 
-            if ((thisWideDistance > *fartherThan
-                        && wideFartherDistance > thisWideDistance)
-                    || (wideFartherDistance > thisWideDistance
-                        && thisWideDistance >= *fartherThan
-                        && whichShip > currentShipNum))
-            {
-                thisDistanceState |= kFartherThanFarther;
-            }
+            // Farther than *fartherThan, but nearer than any other candidate so far.
+            bool is_closest_far_object
+                = (thisWideDistance > *fartherThan)
+                && (wideFartherDistance > thisWideDistance);
 
-            if ( thisDistanceState)
-            {
-                hdif = sourceObject->location.h - anObject->location.h;
-                vdif = sourceObject->location.v - anObject->location.v;
-                while (((ABS(hdif)) > kMaximumAngleDistance) || ( (ABS(vdif)) > kMaximumAngleDistance))
-                {
+            if (is_closest || is_closest_far_object) {
+                int32_t hdif = sourceObject->location.h - anObject->location.h;
+                int32_t vdif = sourceObject->location.v - anObject->location.v;
+                while ((ABS(hdif) > kMaximumAngleDistance)
+                        || (ABS(vdif) > kMaximumAngleDistance)) {
                     hdif >>= 1;
                     vdif >>= 1;
                 }
 
-                slope = MyFixRatio(hdif, vdif);
-                angle = AngleFromSlope( slope);
+                int16_t angle = AngleFromSlope(MyFixRatio(hdif, vdif));
 
-                if ( hdif > 0)
-                    mAddAngle( angle, 180);
-                else if (( hdif == 0) &&
-                        ( vdif > 0))
+                if (hdif > 0) {
+                    mAddAngle(angle, 180);
+                } else if ((hdif == 0) && (vdif > 0)) {
                     angle = 0;
+                }
 
-                angle = mAngleDifference( angle, direction);
-
-                if ( ABS( angle) < 30)
-                {
-                    if ( thisDistanceState & kCloserThanClosest)
-                    {
+                if (ABS(mAngleDifference(angle, direction)) < 30) {
+                    if (is_closest) {
                         closestShip = whichShip;
                         wideClosestDistance = thisWideDistance;
                     }
 
-                    if ( thisDistanceState & kFartherThanFarther)
-                    {
-                        resultShip = whichShip;
+                    if (is_closest_far_object) {
+                        nextShipOut = whichShip;
                         wideFartherDistance = thisWideDistance;
                     }
                 }
@@ -1883,15 +1862,17 @@ int32_t GetManualSelectObject(
         }
         whichShip = anObject->nextObjectNumber;
         anObject = anObject->nextObject;
-        if ( anObject == NULL)
-        {
+        if (!anObject) {
             whichShip = gRootObjectNumber;
             anObject = gRootObject;
         }
-    } while ( whichShip != startShip);
-    if ((( resultShip == -1) && ( closestShip != -1)) || ( resultShip == currentShipNum)) resultShip = closestShip;
+    } while (whichShip != startShip);
 
-    return ( resultShip);
+    if (((nextShipOut == -1) && (closestShip != -1)) || (nextShipOut == currentShipNum)) {
+        nextShipOut = closestShip;
+    }
+
+    return nextShipOut;
 }
 
 int32_t GetSpritePointSelectObject( Rect *bounds, spaceObjectType *sourceObject, uint32_t inclusiveAttributes,
