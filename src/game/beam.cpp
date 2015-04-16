@@ -128,7 +128,7 @@ beamType* Beams::add(
 
 void Beams::set_attributes(spaceObjectType* beamObject, spaceObjectType* sourceObject) {
     beamType& beam = *beamObject->frame.beam.beam;
-    beam.fromObjectNumber = sourceObject->entryNumber;
+    beam.fromObjectNumber = sourceObject->number();
     beam.fromObjectID = sourceObject->id;
     beam.fromObject = sourceObject;
 
@@ -160,7 +160,7 @@ void Beams::set_attributes(spaceObjectType* beamObject, spaceObjectType* sourceO
                         - beam.accuracy
                         + beamObject->randomSeed.next(beam.accuracy << 1);
                 } else {
-                    beam.toObjectNumber = target->entryNumber;
+                    beam.toObjectNumber = target->number();
                     beam.toObjectID = target->id;
                     beam.toObject = target;
                 }

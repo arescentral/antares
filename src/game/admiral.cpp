@@ -718,7 +718,7 @@ void SetObjectDestination(spaceObjectType* o, spaceObjectType* overrideObject) {
             // add this object to its destination
             if (o != dObject) {
                 o->runTimeFlags &= ~kHasArrived;
-                o->destinationObject = dObject->entryNumber;
+                o->destinationObject = dObject->number();
                 o->destObjectPtr = dObject;
                 o->destObjectDest = dObject->destinationObject;
                 o->destObjectDestID = dObject->destObjectID;

@@ -364,7 +364,7 @@ struct spaceObjectType {
     uint32_t                attributes;
     baseObjectType          *baseType;
     int32_t                 whichBaseObject;
-    int32_t                 entryNumber;            // major hack?
+    int32_t                 number() const;
 
     uint32_t                keysDown;
 

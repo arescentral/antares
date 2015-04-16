@@ -216,7 +216,7 @@ void GetInitialObjectSpriteData(
 
         if ( sBounds == NULL) return;
         while ( (sBounds->objectIndex >= 0) &&
-            ( sBounds->objectIndex != sObject->entryNumber)) sBounds++;
+            ( sBounds->objectIndex != sObject->number())) sBounds++;
 
         if (sBounds->objectIndex < 0) {
             return;

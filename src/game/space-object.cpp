@@ -390,7 +390,6 @@ int AddSpaceObject( spaceObjectType *sourceObject)
 
     destObject->active = kObjectInUse;
     destObject->nextNearObject = destObject->nextFarObject = NULL;
-    destObject->entryNumber = whichObject;
     destObject->cloakState = destObject->hitState = 0;
     destObject->duty = eNoDuty;
 
@@ -1120,16 +1119,16 @@ void AlterObjectOwner(spaceObjectType* object, int32_t owner, bool message) {
 
     if ((owner >= 0) && (object->attributes & kIsDestination)) {
         if (GetAdmiralConsiderObject(owner) < 0) {
-            SetAdmiralConsiderObject(owner, object->entryNumber);
+            SetAdmiralConsiderObject(owner, object->number());
         }
 
         if (GetAdmiralBuildAtObject(owner) < 0) {
-            if (BaseHasSomethingToBuild(object->entryNumber)) {
-                SetAdmiralBuildAtObject(owner, object->entryNumber);
+            if (BaseHasSomethingToBuild(object->number())) {
+                SetAdmiralBuildAtObject(owner, object->number());
             }
         }
         if (GetAdmiralDestinationObject(owner) < 0) {
-            SetAdmiralDestinationObject(owner, object->entryNumber, kObjectDestinationType);
+            SetAdmiralDestinationObject(owner, object->number(), kObjectDestinationType);
         }
     }
 
@@ -1182,7 +1181,7 @@ void AlterObjectOwner(spaceObjectType* object, int32_t owner, bool message) {
 
     for (int32_t i = 0; i < kMaxSpaceObject; i++) {
         auto& fixObject = gSpaceObjectData[i];
-        if ((fixObject.destinationObject == object->entryNumber)
+        if ((fixObject.destinationObject == object->number())
                 && (fixObject.active != kObjectAvailable)
                 && (fixObject.attributes & kCanThink)) {
             fixObject.currentTargetValue = 0xffffffff;
@@ -1259,7 +1258,7 @@ void DestroyObject(spaceObjectType* object) {
             auto& fixObject = gSpaceObjectData[i];
             if ((fixObject.attributes & kCanAcceptDestination)
                     && (fixObject.active != kObjectAvailable)) {
-                if (fixObject.targetObjectNumber == object->entryNumber) {
+                if (fixObject.targetObjectNumber == object->number()) {
                     fixObject.targetObjectNumber = kNoDestinationObject;
                 }
             }
@@ -1289,7 +1288,7 @@ void DestroyObject(spaceObjectType* object) {
                 auto& fixObject = gSpaceObjectData[i];
                 if ((fixObject.attributes & kCanAcceptDestination)
                         && (fixObject.active != kObjectAvailable)) {
-                    if (fixObject.destinationObject == object->entryNumber) {
+                    if (fixObject.destinationObject == object->number()) {
                         fixObject.destinationObject = kNoDestinationObject;
                         fixObject.destObjectPtr = NULL;
                         fixObject.attributes &= ~kStaticDestination;
@@ -1332,6 +1331,10 @@ StringSlice get_object_name(int16_t id) {
 
 StringSlice get_object_short_name(int16_t id) {
     return space_object_short_names->at(id);
+}
+
+int32_t spaceObjectType::number() const {
+    return this - mGetSpaceObjectPtr(0);
 }
 
 }  // namespace antares

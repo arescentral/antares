@@ -1129,7 +1129,7 @@ int32_t HotKey_GetFromObject( spaceObjectType *object)
     if ( !object->active) return -1;
     while ( i < kHotKeyNum)
     {
-        if ( globals()->hotKey[i].objectNum == object->entryNumber)
+        if ( globals()->hotKey[i].objectNum == object->number())
         {
             if ( globals()->hotKey[i].objectID == object->id)
             {

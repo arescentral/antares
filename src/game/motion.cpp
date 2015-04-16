@@ -666,12 +666,12 @@ void CollideSpaceObjects() {
                             && ((globals()->gZoomMode != kNearestFoeZoom)
                                 || (aObject->owner != player->owner))) {
                         closestDist = hugeDistance;
-                        globals()->gClosestObject = aObject->entryNumber;
+                        globals()->gClosestObject = aObject->number();
                     }
                 }
                 if (hugeDistance > farthestDist) {
                     farthestDist = hugeDistance;
-                    globals()->gFarthestObject = aObject->entryNumber;
+                    globals()->gFarthestObject = aObject->number();
                 }
             }
         }
@@ -990,7 +990,7 @@ void CollideSpaceObjects() {
 
                         if ((distance < aObject->closestDistance) && (bObject->attributes & kPotentialTarget)) {
                             aObject->closestDistance = distance;
-                            aObject->closestObject = bObject->entryNumber;
+                            aObject->closestObject = bObject->number();
                         }
 
 hackANoEngageMatch:
@@ -1006,7 +1006,7 @@ hackANoEngageMatch:
 
                         if (( distance < bObject->closestDistance) && ( aObject->attributes & kPotentialTarget)) {
                             bObject->closestDistance = distance;
-                            bObject->closestObject = aObject->entryNumber;
+                            bObject->closestObject = aObject->number();
                         }
 hackBNoEngageMatch:
                         bObject->localFoeStrength += aObject->localFriendStrength;

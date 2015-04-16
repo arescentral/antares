@@ -571,7 +571,7 @@ bool Scenario::Condition::is_true() const {
         case kSubjectIsPlayerCondition:
             sObject = GetObjectFromInitialNumber(subjectObject);
             if (sObject != NULL) {
-                if (sObject->entryNumber == globals()->gPlayerShipNumber) {
+                if (sObject->number() == globals()->gPlayerShipNumber) {
                     return true;
                 }
             }

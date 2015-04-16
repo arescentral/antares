@@ -161,7 +161,7 @@ static void create_object(
                 product->destObjectPtr = focus;
                 product->timeFromOrigin = kTimeToCheckHome;
                 product->runTimeFlags &= ~kHasArrived;
-                product->destinationObject = focus->entryNumber; //a->destinationObject;
+                product->destinationObject = focus->number(); //a->destinationObject;
                 product->destObjectDest = focus->destinationObject;
                 product->destObjectID = focus->id;
                 product->destObjectDestID = focus->destObjectID;
@@ -727,7 +727,7 @@ static void assume_initial_object(objectActionType* action, spaceObjectType* foc
             action->argument.assumeInitial.whichInitialObject + GetAdmiralScore(0, 0));
     if (initialObject) {
         initialObject->realObjectID = focus->id;
-        initialObject->realObjectNumber = focus->entryNumber;
+        initialObject->realObjectNumber = focus->number();
     }
 }
 
@@ -903,7 +903,7 @@ static void queue_action(
 
     actionQueue->subjectObject = subjectObject;
     if (subjectObject) {
-        actionQueue->subjectObjectNum = subjectObject->entryNumber;
+        actionQueue->subjectObjectNum = subjectObject->number();
         actionQueue->subjectObjectID = subjectObject->id;
     } else {
         actionQueue->subjectObjectNum = -1;
@@ -912,7 +912,7 @@ static void queue_action(
 
     actionQueue->directObject = directObject;
     if (directObject) {
-        actionQueue->directObjectNum = directObject->entryNumber;
+        actionQueue->directObjectNum = directObject->number();
         actionQueue->directObjectID = directObject->id;
     } else {
         actionQueue->directObjectNum = -1;

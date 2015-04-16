@@ -141,7 +141,7 @@ int16_t Labels::add(
             label->visible = false;
         } else {
             label->visible = true;
-            label->whichObject = object->entryNumber;
+            label->whichObject = object->number();
         }
     } else {
         label->visible = true;
@@ -371,7 +371,7 @@ void Labels::set_object(int32_t which, spaceObjectType *object) {
     if (label->object != NULL) {
         label->age = 0;
         label->visible = true;
-        label->whichObject = object->entryNumber;
+        label->whichObject = object->number();
     } else {
         label->visible = false;
         label->age = 0;
