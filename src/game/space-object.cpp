@@ -606,202 +606,147 @@ static void InitSpaceObjectFromBaseObject(
 // Can you change the frame type? Like from a direction frame to a self-animated frame? I'm not sure...
 //
 
-void ChangeObjectBaseType( spaceObjectType *dObject, int32_t whichBaseObject,
-    int32_t spriteIDOverride, bool relative)
-
-{
-    baseObjectType  *sObject = mGetBaseObjectPtr( whichBaseObject), *weaponBase = NULL;
+void ChangeObjectBaseType(
+        spaceObjectType *obj, int32_t whichBaseObject, int32_t spriteIDOverride,
+        bool relative) {
+    baseObjectType  *base = mGetBaseObjectPtr(whichBaseObject);
     int16_t         angle;
     int32_t         r;
     NatePixTable* spriteTable;
 
 #ifdef DATA_COVERAGE
     covered_objects.insert(whichBaseObject);
-    for (int32_t weapon: {sObject->pulse.base, sObject->beam.base, sObject->special.base}) {
+    for (int32_t weapon: {base->pulse.base, base->beam.base, base->special.base}) {
         if (weapon != kNoWeapon) {
             covered_objects.insert(weapon);
         }
     }
 #endif  // DATA_COVERAGE
 
-    dObject->attributes = sObject->attributes | (dObject->attributes &
-        (kIsHumanControlled | kIsRemote | kIsPlayerShip | kStaticDestination));
-    dObject->baseType = sObject;
-    dObject->whichBaseObject = whichBaseObject;
-    dObject->tinySize = sObject->tinySize;
-    dObject->shieldColor = sObject->shieldColor;
-    dObject->layer = sObject->pixLayer;
+    obj->attributes =
+        base->attributes
+        | (obj->attributes & (kIsHumanControlled | kIsRemote | kIsPlayerShip | kStaticDestination));
+    obj->baseType = base;
+    obj->whichBaseObject = whichBaseObject;
+    obj->tinySize = base->tinySize;
+    obj->shieldColor = base->shieldColor;
+    obj->layer = base->pixLayer;
 
-    if ( dObject->attributes & kCanTurn)
-    {
-        dObject->directionGoal =
-            dObject->turnFraction = dObject->turnVelocity = 0;
-    }
-    if ( dObject->attributes & kIsSelfAnimated)
-    {
-        dObject->frame.animation.thisShape = sObject->frame.animation.frameShape;
-        if ( sObject->frame.animation.frameShapeRange > 0)
-        {
-            r = dObject->randomSeed.next(sObject->frame.animation.frameShapeRange);
-            dObject->frame.animation.thisShape += r;
+    if (obj->attributes & kCanTurn) {
+        obj->directionGoal = obj->turnFraction = obj->turnVelocity = 0;
+    } else if (obj->attributes & kIsSelfAnimated) {
+        obj->frame.animation.thisShape = base->frame.animation.frameShape;
+        if (base->frame.animation.frameShapeRange > 0) {
+            r = obj->randomSeed.next(base->frame.animation.frameShapeRange);
+            obj->frame.animation.thisShape += r;
         }
-        dObject->frame.animation.frameDirection =
-            sObject->frame.animation.frameDirection;
-        if ( sObject->frame.animation.frameDirectionRange == -1)
-        {
-            if (dObject->randomSeed.next(2) == 1) {
-                dObject->frame.animation.frameDirection = 1;
+        obj->frame.animation.frameDirection = base->frame.animation.frameDirection;
+        if (base->frame.animation.frameDirectionRange == -1) {
+            if (obj->randomSeed.next(2) == 1) {
+                obj->frame.animation.frameDirection = 1;
             }
-        } else if ( sObject->frame.animation.frameDirectionRange > 0)
-        {
-            dObject->frame.animation.frameDirection += dObject->randomSeed.next(
-                sObject->frame.animation.frameDirectionRange);
+        } else if (base->frame.animation.frameDirectionRange > 0) {
+            obj->frame.animation.frameDirection += obj->randomSeed.next(
+                base->frame.animation.frameDirectionRange);
         }
-        dObject->frame.animation.frameFraction = 0;
-        dObject->frame.animation.frameSpeed = sObject->frame.animation.frameSpeed;
-    } else if ( dObject->attributes & kIsBeam)
-    {
-//      dObject->frame.beam.killMe = false;
+        obj->frame.animation.frameFraction = 0;
+        obj->frame.animation.frameSpeed = base->frame.animation.frameSpeed;
     }
 
-    dObject->maxVelocity = sObject->maxVelocity;
+    obj->maxVelocity = base->maxVelocity;
 
-    dObject->age = sObject->initialAge + dObject->randomSeed.next(sObject->initialAgeRange);
+    obj->age = base->initialAge + obj->randomSeed.next(base->initialAgeRange);
 
-    dObject->naturalScale = sObject->naturalScale;
+    obj->naturalScale = base->naturalScale;
 
     // not setting id
 
-    dObject->active = kObjectInUse;
+    obj->active = kObjectInUse;
 
     // not setting sprite, targetObjectNumber, lastTarget, lastTargetDistance;
 
-    if ( spriteIDOverride == -1)
-        dObject->pixResID = sObject->pixResID;
-    else dObject->pixResID = spriteIDOverride;
-
-    if ( sObject->attributes & kCanThink)
-    {
-        dObject->pixResID += (GetAdmiralColor( dObject->owner) << kSpriteTableColorShift);
+    if (spriteIDOverride == -1) {
+        obj->pixResID = base->pixResID;
+    } else {
+        obj->pixResID = spriteIDOverride;
     }
 
-    dObject->pulse.type = sObject->pulse.base;
-    if ( dObject->pulse.type != kNoWeapon)
-        dObject->pulse.base = mGetBaseObjectPtr( dObject->pulse.type);
-    else dObject->pulse.base = NULL;
-    dObject->beam.type = sObject->beam.base;
-    if ( dObject->beam.type != kNoWeapon)
-        dObject->beam.base = mGetBaseObjectPtr( dObject->beam.type);
-    else dObject->beam.base = NULL;
-    dObject->special.type = sObject->special.base;
-    if ( dObject->special.type != kNoWeapon)
-        dObject->special.base = mGetBaseObjectPtr( dObject->special.type);
-    else dObject->special.base = NULL;
-    dObject->longestWeaponRange = 0;
-    dObject->shortestWeaponRange = kMaximumRelevantDistance;
+    if (base->attributes & kCanThink) {
+        obj->pixResID += (GetAdmiralColor(obj->owner) << kSpriteTableColorShift);
+    }
 
     // check periodic time
-    if (sObject->activatePeriod) {
-        dObject->periodicTime =
-            sObject->activatePeriod + dObject->randomSeed.next(sObject->activatePeriodRange);
-    } else dObject->periodicTime = 0;
+    obj->periodicTime = 0;
+    if (base->activatePeriod) {
+        obj->periodicTime = base->activatePeriod + obj->randomSeed.next(base->activatePeriodRange);
+    }
 
-    if ( dObject->pulse.type != kNoWeapon)
-    {
-        weaponBase = dObject->pulse.base;
-        if ( !relative)
-        {
-            dObject->pulse.ammo = weaponBase->frame.weapon.ammo;
-            dObject->pulse.position = 0;
-            if ( dObject->pulse.time < 0)
-                dObject->pulse.time = 0;
-            else if ( dObject->pulse.time > weaponBase->frame.weapon.fireTime)
-                dObject->pulse.time = weaponBase->frame.weapon.fireTime;
-        }
-        r = weaponBase->frame.weapon.range;
-        if (( r > 0) && ( weaponBase->frame.weapon.usage & kUseForAttacking))
-        {
-            if ( r > dObject->longestWeaponRange) dObject->longestWeaponRange = r;
-            if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
-        }
-    } else dObject->pulse.time = 0;
+    obj->pulse.type = base->pulse.base;
+    obj->beam.type = base->beam.base;
+    obj->special.type = base->special.base;
+    obj->pulse.base = obj->beam.base = obj->special.base = NULL;
+    obj->longestWeaponRange = 0;
+    obj->shortestWeaponRange = kMaximumRelevantDistance;
 
-    if ( dObject->beam.type != kNoWeapon)
-    {
-        weaponBase = dObject->beam.base;
-        if ( !relative)
-        {
-            dObject->beam.ammo = weaponBase->frame.weapon.ammo;
-            if ( dObject->beam.time < 0)
-                dObject->beam.time = 0;
-            else if ( dObject->beam.time > weaponBase->frame.weapon.fireTime)
-                dObject->beam.time = weaponBase->frame.weapon.fireTime;
-            dObject->beam.position = 0;
+    for (auto* weapon: {&obj->pulse, &obj->beam, &obj->special}) {
+        if (weapon->type == kNoWeapon) {
+            weapon->time = 0;
+            continue;
         }
-        r = weaponBase->frame.weapon.range;
-        if (( r > 0) && ( weaponBase->frame.weapon.usage & kUseForAttacking))
-        {
-            if ( r > dObject->longestWeaponRange) dObject->longestWeaponRange = r;
-            if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
-        }
-    } else dObject->beam.time = 0;
 
-    if ( dObject->special.type != kNoWeapon)
-    {
-        weaponBase = dObject->special.base;
-        if ( !relative)
-        {
-            dObject->special.ammo = weaponBase->frame.weapon.ammo;
-            dObject->special.position = 0;
-            if ( dObject->special.time < 0)
-                dObject->special.time = 0;
-            else if ( dObject->special.time > weaponBase->frame.weapon.fireTime)
-                dObject->special.time = weaponBase->frame.weapon.fireTime;
+        weapon->base = mGetBaseObjectPtr(weapon->type);
+        if (!relative) {
+            weapon->ammo = weapon->base->frame.weapon.ammo;
+            weapon->position = 0;
+            if (weapon->time < 0) {
+                weapon->time = 0;
+            } else if (weapon->time > weapon->base->frame.weapon.fireTime) {
+                weapon->time = weapon->base->frame.weapon.fireTime;
+            }
         }
-        r = weaponBase->frame.weapon.range;
-        if (( r > 0) && ( weaponBase->frame.weapon.usage & kUseForAttacking))
-        {
-            if ( r > dObject->longestWeaponRange) dObject->longestWeaponRange = r;
-            if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
+        r = weapon->base->frame.weapon.range;
+        if ((r > 0) && (weapon->base->frame.weapon.usage & kUseForAttacking)) {
+            if (r > obj->longestWeaponRange) {
+                obj->longestWeaponRange = r;
+            }
+            if (r < obj->shortestWeaponRange) {
+                obj->shortestWeaponRange = r;
+            }
         }
-    } else dObject->special.time = 0;
+    }
 
     // if we don't have any weapon, then shortest range is 0 too
-    if ( dObject->longestWeaponRange == 0) dObject->shortestWeaponRange = 0;
-    if ( dObject->longestWeaponRange > kEngageRange)
-        dObject->engageRange = dObject->longestWeaponRange;
-    else
-        dObject->engageRange = kEngageRange;
+    if (obj->longestWeaponRange == 0) obj->shortestWeaponRange = 0;
+    if (obj->longestWeaponRange > kEngageRange) {
+        obj->engageRange = obj->longestWeaponRange;
+    } else {
+        obj->engageRange = kEngageRange;
+    }
 
     // HANDLE THE NEW SPRITE DATA:
-    if ( dObject->pixResID != kNoSpriteTable)
-    {
-        spriteTable = GetPixTable( dObject->pixResID);
+    if (obj->pixResID != kNoSpriteTable) {
+        spriteTable = GetPixTable(obj->pixResID);
 
         if (spriteTable == NULL) {
             throw Exception("Couldn't load a requested sprite");
-            spriteTable = AddPixTable( dObject->pixResID);
+            spriteTable = AddPixTable(obj->pixResID);
         }
 
-        dObject->sprite->table = spriteTable;
-        dObject->sprite->tinySize = sObject->tinySize;
-        dObject->sprite->whichLayer = sObject->pixLayer;
-        dObject->sprite->scale = sObject->naturalScale;
+        obj->sprite->table = spriteTable;
+        obj->sprite->tinySize = base->tinySize;
+        obj->sprite->whichLayer = base->pixLayer;
+        obj->sprite->scale = base->naturalScale;
 
-        if ( dObject->attributes & kIsSelfAnimated)
-        {
-            dObject->sprite->whichShape = more_evil_fixed_to_long(dObject->frame.animation.thisShape);
-        } else if ( dObject->attributes & kShapeFromDirection)
-        {
-            angle = dObject->direction;
-            mAddAngle( angle, sObject->frame.rotation.rotRes >> 1);
-            dObject->sprite->whichShape = angle / sObject->frame.rotation.rotRes;
-        } else
-        {
-            dObject->sprite->whichShape = 0;
+        if (obj->attributes & kIsSelfAnimated) {
+            obj->sprite->whichShape = more_evil_fixed_to_long(obj->frame.animation.thisShape);
+        } else if (obj->attributes & kShapeFromDirection) {
+            angle = obj->direction;
+            mAddAngle(angle, base->frame.rotation.rotRes >> 1);
+            obj->sprite->whichShape = angle / base->frame.rotation.rotRes;
+        } else {
+            obj->sprite->whichShape = 0;
         }
     }
-
 }
 
 int32_t CreateAnySpaceObject(
@@ -872,22 +817,17 @@ int32_t CreateAnySpaceObject(
     return newObjectNumber;
 }
 
-int32_t CountObjectsOfBaseType( int32_t whichType, int32_t owner)
-
-{
-    int32_t count, result = 0;
-
-    spaceObjectType *anObject;
-
-    anObject = gSpaceObjectData.get();
-    for ( count = 0; count < kMaxSpaceObject; count++)
-    {
-        if (( anObject->active) &&
-            (( anObject->whichBaseObject == whichType) || ( whichType == -1)) &&
-            (( anObject->owner == owner) || ( owner == -1))) result++;
-        anObject++;
+int32_t CountObjectsOfBaseType(int32_t whichType, int32_t owner) {
+    int32_t result = 0;
+    for (int32_t i = 0; i < kMaxSpaceObject; ++i) {
+        auto anObject = mGetSpaceObjectPtr(i);
+        if (anObject->active
+                && ((whichType == -1) || (anObject->whichBaseObject == whichType))
+                && ((owner == -1) || (anObject->owner == owner))) {
+            ++result;
+        }
     }
-    return (result);
+    return result;
 }
 
 void AlterObjectHealth(spaceObjectType* object, int32_t health) {
