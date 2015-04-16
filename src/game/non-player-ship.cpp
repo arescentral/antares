@@ -1050,87 +1050,68 @@ uint32_t ThinkObjectWarpOutPresence( spaceObjectType *anObject, baseObjectType *
     return( keysDown);
 }
 
-uint32_t ThinkObjectLandingPresence( spaceObjectType *anObject)
-{
-    uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask, distance, dcalc;
-    spaceObjectType *targetObject = NULL;
-    coordPointType  dest;
-    int32_t         difference;
-    Fixed           slope;
-    int16_t         angle, theta, shortx, shorty;
+uint32_t ThinkObjectLandingPresence(spaceObjectType *anObject) {
+    uint32_t keysDown = 0;
 
-    keysDown = 0;
+    spaceObjectType* target = nullptr;
+    uint32_t distance;
+    int16_t theta = 0;
 
     // we repeat an object's normal action for having a destination
 
-    if (( anObject->attributes & kIsDestination) ||
-        (( anObject->destinationObject == kNoDestinationObject) &&
-        ( anObject->destinationLocation.h == kNoDestinationCoord)))
-    {
-        if (anObject->attributes & kOnAutoPilot)
-        {
-            TogglePlayerAutoPilot( anObject);
+    if ((anObject->attributes & kIsDestination)
+            || ((anObject->destinationObject == kNoDestinationObject)
+                && (anObject->destinationLocation.h == kNoDestinationCoord))) {
+        if (anObject->attributes & kOnAutoPilot) {
+            TogglePlayerAutoPilot(anObject);
         }
         keysDown |= kDownKey;
         distance = 0;
-    } else
-    {
-        if ( anObject->destinationObject != kNoDestinationObject)
-        {
-            targetObject = anObject->destObjectPtr;
-            if (( targetObject != NULL) && ( targetObject->active) &&
-                ( targetObject->id == anObject->destObjectID))
-            {
-                if ( targetObject->seenByPlayerFlags &
-                    anObject->myPlayerFlag)
-                {
-                    dest.h = targetObject->location.h;
-                    dest.v = targetObject->location.v;
+    } else {
+        coordPointType dest;
+        if (anObject->destinationObject != kNoDestinationObject) {
+            target = anObject->destObjectPtr;
+            if (target && target->active && (target->id == anObject->destObjectID)) {
+                if (target->seenByPlayerFlags & anObject->myPlayerFlag) {
+                    dest.h = target->location.h;
+                    dest.v = target->location.v;
                     anObject->destinationLocation.h = dest.h;
                     anObject->destinationLocation.v = dest.v;
-                } else
-                {
+                } else {
                     dest.h = anObject->destinationLocation.h;
                     dest.v = anObject->destinationLocation.v;
                 }
-                anObject->destObjectDest =
-                    targetObject->destinationObject;
-                anObject->destObjectDestID = targetObject->destObjectID;
-            } else
-            {
+                anObject->destObjectDest = target->destinationObject;
+                anObject->destObjectDestID = target->destObjectID;
+            } else {
                 anObject->duty = eNoDuty;
                 anObject->attributes &= ~kStaticDestination;
-                if ( targetObject == NULL)
-                {
+                if (!target) {
                     keysDown |= kDownKey;
                     anObject->destinationObject = kNoDestinationObject;
                     anObject->destObjectDest = kNoDestinationObject;
                     dest.h = anObject->location.h;
                     dest.v = anObject->location.v;
-                } else
-                {
-                    anObject->destinationObject =
-                        anObject->destObjectDest;
-                    if ( anObject->destinationObject !=
-                        kNoDestinationObject)
-                    {
-                        targetObject = mGetSpaceObjectPtr(anObject->destinationObject);
-                        if ( targetObject->id != anObject->destObjectDestID) targetObject = NULL;
-                    } else targetObject = NULL;
-                    if ( targetObject != NULL)
-                    {
-                        anObject->destObjectPtr = targetObject;
-                        anObject->destObjectID = targetObject->id;
-                        anObject->destObjectDest =
-                            targetObject->destinationObject;
-                        anObject->destObjectDestID = targetObject->destObjectID;
-                        dest.h = targetObject->location.h;
-                        dest.v = targetObject->location.v;
-                    } else
-                    {
+                } else {
+                    anObject->destinationObject = anObject->destObjectDest;
+                    if (anObject->destinationObject != kNoDestinationObject) {
+                        target = mGetSpaceObjectPtr(anObject->destinationObject);
+                        if (target->id != anObject->destObjectDestID) {
+                            target = NULL;
+                        }
+                    } else {
+                        target = NULL;
+                    }
+                    if (target != NULL) {
+                        anObject->destObjectPtr = target;
+                        anObject->destObjectID = target->id;
+                        anObject->destObjectDest = target->destinationObject;
+                        anObject->destObjectDestID = target->destObjectID;
+                        dest.h = target->location.h;
+                        dest.v = target->location.v;
+                    } else {
                         keysDown |= kDownKey;
-                        anObject->destinationObject =
-                            kNoDestinationObject;
+                        anObject->destinationObject = kNoDestinationObject;
                         anObject->destObjectDest = kNoDestinationObject;
                         anObject->destObjectPtr = NULL;
                         dest.h = anObject->location.h;
@@ -1138,86 +1119,63 @@ uint32_t ThinkObjectLandingPresence( spaceObjectType *anObject)
                     }
                 }
             }
-        } else // no destination object; just coords
-        {
-            if (anObject->attributes & kOnAutoPilot)
-            {
-                TogglePlayerAutoPilot( anObject);
+        } else { // no destination object; just coords
+            if (anObject->attributes & kOnAutoPilot) {
+                TogglePlayerAutoPilot(anObject);
             }
-            targetObject = NULL;
             dest.h = anObject->location.h;
             dest.v = anObject->location.v;
         }
 
-        difference = ABS<int>( dest.h - anObject->location.h);
-        dcalc = difference;
-        difference =  ABS<int>( dest.v - anObject->location.v);
-        distance = difference;
-        if (( dcalc > kMaximumAngleDistance) ||
-            ( distance > kMaximumAngleDistance))
-        {
-            if (( dcalc > kMaximumRelevantDistance) ||
-                ( distance > kMaximumRelevantDistance))
-            {
+        int16_t angle;
+        uint32_t xdiff = ABS<int>(dest.h - anObject->location.h);
+        uint32_t ydiff =  ABS<int>(dest.v - anObject->location.v);
+        if ((xdiff > kMaximumAngleDistance) || (ydiff > kMaximumAngleDistance)) {
+            if ((xdiff > kMaximumRelevantDistance) || (ydiff > kMaximumRelevantDistance)) {
                 distance = kMaximumRelevantDistanceSquared;
-            } else
-            {
-                distance = distance * distance + dcalc * dcalc;
+            } else {
+                distance = ydiff * ydiff + xdiff * xdiff;
             }
-            shortx = (anObject->location.h - dest.h) >> 4;
-            shorty = (anObject->location.v - dest.v) >> 4;
+            int16_t shortx = (anObject->location.h - dest.h) >> 4;
+            int16_t shorty = (anObject->location.v - dest.v) >> 4;
             // find angle between me & dest
-            slope = MyFixRatio( shortx, shorty);
-            angle = AngleFromSlope( slope);
-            if ( shortx > 0)
-            {
-                mAddAngle( angle, 180);
-            } else if (( shortx == 0) && ( shorty > 0))
-            {
+            Fixed slope = MyFixRatio(shortx, shorty);
+            angle = AngleFromSlope(slope);
+            if (shortx > 0) {
+                mAddAngle(angle, 180);
+            } else if ((shortx == 0) && (shorty > 0)) {
+                angle = 0;
+            }
+        } else {
+            distance = ydiff * ydiff + xdiff * xdiff;
+
+            // find angle between me & dest
+            Fixed slope = MyFixRatio(anObject->location.h - dest.h, anObject->location.v - dest.v);
+            angle = AngleFromSlope(slope);
+
+            if (dest.h < anObject->location.h) {
+                mAddAngle(angle, 180);
+            } else if ((anObject->location.h == dest.h) && (dest.v < anObject->location.v)) {
                 angle = 0;
             }
         }
-        else
-        {
-            distance = distance * distance + dcalc * dcalc;
 
-            // find angle between me & dest
-            slope = MyFixRatio(anObject->location.h - dest.h,
-                        anObject->location.v - dest.v);
-            angle = AngleFromSlope( slope);
-
-            if ( dest.h < anObject->location.h)
-                mAddAngle( angle, 180);
-            else if (( anObject->location.h == dest.h) &&
-                    ( dest.v < anObject->location.v))
-                angle = 0;
-        }
-
-        if ( anObject->attributes & kHasDirectionGoal)
-        {
-            theta = mAngleDifference( angle, anObject->directionGoal);
-            if ( ABS( theta) > kDirectionError)
-            {
+        if (anObject->attributes & kHasDirectionGoal) {
+            if (ABS(mAngleDifference(angle, anObject->directionGoal)) > kDirectionError) {
                 anObject->directionGoal = angle;
-
             }
-
-            theta = mAngleDifference( anObject->direction,
-                    anObject->directionGoal);
-            theta = ABS( theta);
-        } else
-        {
+            theta = ABS(mAngleDifference(anObject->direction, anObject->directionGoal));
+        } else {
             anObject->direction = angle;
-            theta = 0;
         }
-
-
     }
-    if ( distance > kLandingDistance)
-    {
-        if ( theta < kEvadeAngle)
+
+    if (distance > kLandingDistance) {
+        if (theta < kEvadeAngle) {
             keysDown |= kUpKey;
-        else keysDown |= kDownKey;
+        } else {
+            keysDown |= kDownKey;
+        }
         anObject->lastTargetDistance = distance;
     } else {
         keysDown |= kDownKey;
@@ -1225,13 +1183,13 @@ uint32_t ThinkObjectLandingPresence( spaceObjectType *anObject)
     }
 
     if (anObject->presence.landing.scale <= 0) {
-        anObject->baseType->expire.run(anObject, targetObject, NULL);
+        anObject->baseType->expire.run(anObject, target, NULL);
         anObject->active = kObjectToBeFreed;
     } else if (anObject->sprite) {
         anObject->sprite->scale = anObject->presence.landing.scale;
     }
 
-    return( keysDown);
+    return keysDown;
 }
 
 // this gets the distance & angle between an object and arbitrary coords
