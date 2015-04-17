@@ -1875,50 +1875,38 @@ int32_t GetManualSelectObject(
     return nextShipOut;
 }
 
-int32_t GetSpritePointSelectObject( Rect *bounds, spaceObjectType *sourceObject, uint32_t inclusiveAttributes,
-                            uint32_t anyOneAttribute, uint32_t exclusiveAttributes,
-                            int32_t currentShipNum, int16_t friendOrFoe)
+int32_t GetSpritePointSelectObject(
+        Rect *bounds, spaceObjectType *sourceObject,
+        uint32_t anyOneAttribute,
+        int32_t currentShipNum, Allegiance allegiance) {
+    const uint32_t myOwnerFlag = 1 << sourceObject->owner;
 
-{
-    int32_t         resultShip = -1, closestShip = -1;
-    uint32_t        myOwnerFlag = 1 << sourceObject->owner;
-
-
+    int32_t resultShip = -1, closestShip = -1;
     for (int32_t whichShip = 0; whichShip < kMaxSpaceObject; whichShip++) {
         spaceObjectType* anObject = mGetSpaceObjectPtr(whichShip);
-        if (( anObject->active) && ( anObject->sprite != NULL) &&
-            ( anObject->seenByPlayerFlags & myOwnerFlag) &&
-            (( anObject->attributes & inclusiveAttributes) == inclusiveAttributes) &&
-            (( anyOneAttribute == 0) || (( anObject->attributes & anyOneAttribute) != 0)) &&
-            ( !(anObject->attributes & exclusiveAttributes)) && ((( friendOrFoe < 0) &&
-            ( anObject->owner != sourceObject->owner)) || (( friendOrFoe > 0) &&
-            ( anObject->owner == sourceObject->owner)) || ( friendOrFoe == 0)))
-        {
-/*          if ( !((bounds->right < anObject->sprite->thisRect.left) || (bounds->bottom <
-                anObject->sprite->thisRect.top) || ( bounds->left > anObject->sprite->thisRect.right)
-                || ( bounds->top > anObject->sprite->thisRect.bottom)))
-            {
-                if ( anObject->sprite->thisRect.right > anObject->sprite->thisRect.left)
-                {
-                    if ( closestShip < 0) closestShip = whichShip;
-                    if (( whichShip > currentShipNum) && ( resultShip < 0)) resultShip = whichShip;
-                }
-            }
-*/          if ( !((bounds->right < anObject->sprite->where.h) || (bounds->bottom <
-                anObject->sprite->where.v) || ( bounds->left > anObject->sprite->where.h)
-                || ( bounds->top > anObject->sprite->where.v)))
-            {
-//              if ( anObject->sprite->thisRect.right > anObject->sprite->thisRect.left)
-                {
-                    if ( closestShip < 0) closestShip = whichShip;
-                    if (( whichShip > currentShipNum) && ( resultShip < 0)) resultShip = whichShip;
-                }
-            }
+        if (!anObject->active
+                || !anObject->sprite
+                || !(anObject->seenByPlayerFlags & myOwnerFlag)
+                || ((anyOneAttribute != 0) && ((anObject->attributes & anyOneAttribute) == 0))
+                || !allegiance_is(allegiance, sourceObject->owner, anObject)
+                || (bounds->right < anObject->sprite->where.h)
+                || (bounds->bottom < anObject->sprite->where.v)
+                || (bounds->left > anObject->sprite->where.h)
+                || (bounds->top > anObject->sprite->where.v)) {
+            continue;
+        }
+        if (closestShip < 0) {
+            closestShip = whichShip;
+        }
+        if ((whichShip > currentShipNum) && (resultShip < 0)) {
+            resultShip = whichShip;
         }
     }
-    if ((( resultShip == -1) && ( closestShip != -1)) || ( resultShip == currentShipNum)) resultShip = closestShip;
+    if (((resultShip == -1) && (closestShip != -1)) || (resultShip == currentShipNum)) {
+        resultShip = closestShip;
+    }
 
-    return ( resultShip);
+    return resultShip;
 }
 
 }  // namespace antares

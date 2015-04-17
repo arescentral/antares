@@ -856,18 +856,16 @@ void PlayerShipHandleClick(Point where, int button) {
                 selectShipNum = GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber);
 
                 selectShipNum = GetSpritePointSelectObject(
-                        &bounds, theShip, 0,
-                        kCanBeDestination | kIsDestination,//kCanThink | kIsDestination,
-                        0, selectShipNum, 0);
+                        &bounds, theShip, kCanBeDestination | kIsDestination,
+                        selectShipNum, FRIENDLY_OR_HOSTILE);
                 if (selectShipNum >= 0) {
                     SetPlayerSelectShip(selectShipNum, true, globals()->gPlayerAdmiralNumber);
                 }
             } else {
                 selectShipNum = GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber);
                 selectShipNum = GetSpritePointSelectObject(
-                        &bounds, theShip, 0,
-                        kCanThink | kCanAcceptBuild,
-                        0, selectShipNum, 1);
+                        &bounds, theShip, kCanThink | kCanAcceptBuild,
+                        selectShipNum, FRIENDLY);
                 if (selectShipNum >= 0) {
                     SetPlayerSelectShip(selectShipNum, false, globals()->gPlayerAdmiralNumber);
                 }

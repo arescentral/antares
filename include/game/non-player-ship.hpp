@@ -43,8 +43,10 @@ int32_t GetManualSelectObject(
         spaceObjectType *sourceObject, int32_t direction,
         uint32_t inclusiveAttributes, uint32_t exclusiveAttributes,
         const uint64_t* fartherThan, int32_t currentShipNum, Allegiance allegiance);
-int32_t GetSpritePointSelectObject( Rect *, spaceObjectType *, uint32_t,
-                            uint32_t, uint32_t, int32_t, int16_t);
+int32_t GetSpritePointSelectObject(
+        Rect *bounds, spaceObjectType *sourceObject,
+        uint32_t anyOneAttribute,
+        int32_t currentShipNum, Allegiance allegiance);
 
 }  // namespace antares
 
