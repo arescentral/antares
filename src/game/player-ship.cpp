@@ -864,7 +864,7 @@ void PlayerShipHandleClick(Point where, int button) {
             } else {
                 selectShipNum = GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber);
                 selectShipNum = GetSpritePointSelectObject(
-                        &bounds, theShip, kCanThink | kCanAcceptBuild,
+                        &bounds, theShip, kCanBeDestination | kCanAcceptBuild,
                         selectShipNum, FRIENDLY);
                 if (selectShipNum >= 0) {
                     SetPlayerSelectShip(selectShipNum, false, globals()->gPlayerAdmiralNumber);
