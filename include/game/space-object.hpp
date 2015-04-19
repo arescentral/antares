@@ -39,9 +39,6 @@ void ChangeObjectBaseType( spaceObjectType *, int32_t, int32_t, bool);
 int32_t CreateAnySpaceObject(int32_t, fixedPointType *, coordPointType *, int32_t, int32_t, uint32_t,
                             int16_t);
 int32_t CountObjectsOfBaseType(int32_t, int32_t);
-void AlterObjectHealth( spaceObjectType *, int32_t);
-void AlterObjectEnergy( spaceObjectType *, int32_t);
-void AlterObjectBattery( spaceObjectType *, int32_t);
 void AlterObjectOwner( spaceObjectType *, int32_t, bool);
 void AlterObjectOccupation( spaceObjectType *, int32_t, int32_t, bool);
 void AlterObjectCloakState( spaceObjectType *, bool);

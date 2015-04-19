@@ -59,8 +59,6 @@ const uint8_t kFriendlyColor        = GREEN;
 const uint8_t kHostileColor         = RED;
 const uint8_t kNeutralColor         = SKY_BLUE;
 
-const int32_t kBatteryToEnergyRatio = 5;
-
 static const int16_t kSpaceObjectNameResID          = 5000;
 static const int16_t kSpaceObjectShortNameResID     = 5001;
 static StringList* space_object_names;
@@ -450,10 +448,10 @@ static void InitSpaceObjectFromBaseObject(
         dObject->thrust = sObject->maxThrust;
 
 
-    dObject->energy = sObject->energy;
+    dObject->_energy = dObject->max_energy();
     dObject->rechargeTime = dObject->pulse.charge = dObject->beam.charge = dObject->special.charge = 0;
     dObject->warpEnergyCollected = 0;
-    dObject->battery = sObject->energy * kBatteryToEnergyRatio;
+    dObject->_battery = dObject->max_battery();
     dObject->owner = owner;
     dObject->destinationObject = kNoDestinationObject;
     dObject->destinationLocation.h = dObject->destinationLocation.v = kNoDestinationCoord;
@@ -502,7 +500,7 @@ static void InitSpaceObjectFromBaseObject(
 
     // not setting lastTimeUpdate;
 
-    dObject->health = sObject->health;
+    dObject->_health = dObject->max_health();
 
     // not setting owner
 
@@ -830,41 +828,36 @@ int32_t CountObjectsOfBaseType(int32_t whichType, int32_t owner) {
     return result;
 }
 
-void AlterObjectHealth(spaceObjectType* object, int32_t health) {
-    if (health <= 0) {
-        object->health += health;
+void spaceObjectType::alter_health(int32_t amount) {
+    if (amount <= 0) {
+        _health += amount;
+    } else if (_health >= (2147483647 - amount)) {
+        _health = 2147483647;
     } else {
-        if (object->health >= (2147483647 - health)) {
-            object->health = 2147483647;
-        } else {
-            object->health += health;
-        }
+        _health += amount;
     }
-    if (object->health < 0) {
-        DestroyObject(object);
+    if (_health < 0) {
+        DestroyObject(this);
     }
 }
 
-void AlterObjectEnergy(spaceObjectType* object, int32_t energy) {
-    object->energy += energy;
-    if (object->energy < 0) {
-        object->energy = 0;
-    } else if (object->energy > object->baseType->energy) {
-        AlterObjectBattery(object, object->energy - object->baseType->energy);
-        object->energy = object->baseType->energy;
+void spaceObjectType::alter_energy(int32_t amount) {
+    _energy += amount;
+    if (_energy < 0) {
+        _energy = 0;
+    } else if (_energy > max_energy()) {
+        alter_battery(_energy - max_energy());
+        _energy = max_energy();
     }
 }
 
-void AlterObjectBattery(spaceObjectType* object, int32_t energy) {
-    object->battery += energy;
-    if (object->battery > (object->baseType->energy * kBatteryToEnergyRatio)) {
-        PayAdmiral(
-                object->owner,
-                object->battery - (object->baseType->energy * kBatteryToEnergyRatio));
-        object->battery = object->baseType->energy * kBatteryToEnergyRatio;
+void spaceObjectType::alter_battery(int32_t amount) {
+    _battery += amount;
+    if (_battery > max_battery()) {
+        PayAdmiral(owner, _battery - max_battery());
+        _battery = max_battery();
     }
 }
-
 
 void AlterObjectOwner(spaceObjectType* object, int32_t owner, bool message) {
     if (object->owner == owner) {
@@ -1015,7 +1008,7 @@ void DestroyObject(spaceObjectType* object) {
     if (object->active != kObjectInUse) {
         return;
     } else if (object->attributes & kNeutralDeath) {
-        object->health = object->baseType->health;
+        object->_health = object->max_health();
         // if anyone is targeting it, they should stop
         for (int16_t i = 0; i < kMaxSpaceObject; i++) {
             auto& fixObject = gSpaceObjectData[i];
@@ -1033,7 +1026,7 @@ void DestroyObject(spaceObjectType* object) {
     } else {
         AddKillToAdmiral(object);
         if (object->attributes & kReleaseEnergyOnDeath) {
-            int16_t energyNum = object->energy / kEnergyPodAmount;
+            int16_t energyNum = object->energy() / kEnergyPodAmount;
             while (energyNum > 0) {
                 CreateAnySpaceObject(
                         globals()->scenarioFileInfo.energyBlobID, &object->velocity,
@@ -1098,6 +1091,15 @@ StringSlice get_object_short_name(int16_t id) {
 
 int32_t spaceObjectType::number() const {
     return this - mGetSpaceObjectPtr(0);
+}
+
+spaceObjectType::spaceObjectType() {
+    memset(this, 0, sizeof(*this));
+}
+
+spaceObjectType::spaceObjectType(baseObjectType* base):
+        spaceObjectType() {
+    baseType = base;
 }
 
 }  // namespace antares

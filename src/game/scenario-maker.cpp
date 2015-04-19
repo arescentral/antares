@@ -467,7 +467,7 @@ bool Scenario::Condition::is_true() const {
             sObject = GetObjectFromInitialNumber(subjectObject);
             if (sObject == NULL) {
                 return true;
-            } else if (sObject->health <= (sObject->baseType->health >> 1)) {
+            } else if (sObject->health() <= (sObject->max_health() >> 1)) {
                 return true;
             }
             break;

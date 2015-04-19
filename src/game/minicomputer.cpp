@@ -221,8 +221,8 @@ inline void mCopyMiniSpaceObject(
     (mdestobject).destinationLocation.v = (msourceobject).destinationLocation.v;
     (mdestobject).destinationObject = (msourceobject).destinationObject;
     (mdestobject).destObjectPtr = (msourceobject).destObjectPtr;
-    (mdestobject).health = (msourceobject).health;
-    (mdestobject).energy = (msourceobject).energy;
+    (mdestobject)._health = (msourceobject).health();
+    (mdestobject)._energy = (msourceobject).energy();
     (mdestobject).whichBaseObject = (msourceobject).whichBaseObject;
     (mdestobject).pixResID = (msourceobject).pixResID;
     (mdestobject).attributes = (msourceobject).attributes;
@@ -316,8 +316,8 @@ void ClearMiniObjectData( void)
     o->destinationLocation.h = o->destinationLocation.v = -1;
     o->destinationObject = -1;
     o->destObjectPtr = NULL;
-    o->health = 0;
-    o->energy = 0;
+    o->_health = 0;
+    o->_energy = 0;
     o->whichBaseObject = -1;
     o->pixResID = -1;
     o->attributes = 0;
@@ -331,8 +331,8 @@ void ClearMiniObjectData( void)
     o->destinationLocation.h = o->destinationLocation.v = -1;
     o->destinationObject = -1;
     o->destObjectPtr = NULL;
-    o->health = 0;
-    o->energy = 0;
+    o->_health = 0;
+    o->_energy = 0;
     o->whichBaseObject = -1;
     o->pixResID = -1;
     o->attributes = 0;
@@ -664,8 +664,8 @@ void MiniComputerHandleNull( int32_t unitsToDo)
             newObject.destinationLocation.h = newObject.destinationLocation.v = -1;
             newObject.destinationObject = -1;
             newObject.destObjectPtr = NULL;
-            newObject.health = 0;
-            newObject.energy = 0;
+            newObject._health = 0;
+            newObject._energy = 0;
             newObject.whichBaseObject = -1;
             newObject.pixResID = -1;
             newObject.attributes = 0;
@@ -688,8 +688,8 @@ void MiniComputerHandleNull( int32_t unitsToDo)
             newObject.destinationLocation.h = newObject.destinationLocation.v = -1;
             newObject.destinationObject = -1;
             newObject.destObjectPtr = NULL;
-            newObject.health = 0;
-            newObject.energy = 0;
+            newObject._health = 0;
+            newObject._energy = 0;
             newObject.whichBaseObject = -1;
             newObject.pixResID = -1;
             newObject.attributes = 0;
@@ -908,15 +908,15 @@ void draw_mini_ship_data(
     draw_vbracket(dRect, color);
 
     if (newObject.baseType != NULL) {
-        if ((newObject.baseType->health > 0) && (newObject.health > 0)) {
+        if ((newObject.max_health() > 0) && (newObject.health() > 0)) {
             Rect dRect;
             dRect.left = kMiniHealthLeft;
             dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
             dRect.right = dRect.left + kMiniBarWidth;
             dRect.bottom = dRect.top + kMiniIconHeight;
 
-            uint32_t tlong = newObject.health * kMiniBarHeight;
-            tlong /= newObject.baseType->health;
+            uint32_t tlong = newObject.health() * kMiniBarHeight;
+            tlong /= newObject.max_health();
 
             color = GetRGBTranslateColorShade(SKY_BLUE, DARK);
 
@@ -937,15 +937,15 @@ void draw_mini_ship_data(
     }
 
     if (newObject.baseType != NULL) {
-        if ((newObject.baseType->energy > 0) && (newObject.energy > 0)) {
+        if ((newObject.max_energy() > 0) && (newObject.energy() > 0)) {
             Rect dRect;
             dRect.left = kMiniEnergyLeft;
             dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
             dRect.right = dRect.left + kMiniBarWidth;
             dRect.bottom = dRect.top + kMiniIconHeight;
 
-            uint32_t tlong = newObject.energy * kMiniBarHeight;
-            tlong /= newObject.baseType->energy;
+            uint32_t tlong = newObject.energy() * kMiniBarHeight;
+            tlong /= newObject.max_energy();
 
             color = GetRGBTranslateColorShade(YELLOW, DARK);
 

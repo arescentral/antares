@@ -80,7 +80,7 @@ static int32_t gFirstActionQueueNumber = -1;
 static unique_ptr<actionQueueType[]> gActionQueueData;
 
 static baseObjectType kZeroBaseObject;
-static spaceObjectType kZeroSpaceObject = {0, &kZeroBaseObject};
+static spaceObjectType kZeroSpaceObject(&kZeroBaseObject);
 
 #ifdef DATA_COVERAGE
 set<int32_t> covered_actions;
@@ -274,11 +274,11 @@ static void alter(
     baseObjectType* baseObject;
     switch (alter.alterType) {
         case kAlterDamage:
-            AlterObjectHealth(focus, alter.minimum);
+            focus->alter_health(alter.minimum);
             break;
 
         case kAlterEnergy:
-            AlterObjectEnergy(focus, alter.minimum);
+            focus->alter_energy(alter.minimum);
             break;
 
         case kAlterHidden:

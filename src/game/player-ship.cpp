@@ -643,7 +643,7 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
         return;
     }
 
-    if (theShip->health < (theShip->baseType->health >> 2L)) {
+    if (theShip->health() < (theShip->baseType->health >> 2L)) {
          if (gAlarmCount < 0) {
             PlayVolumeSound(kKlaxon, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
             gAlarmCount = 0;

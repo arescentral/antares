@@ -87,26 +87,25 @@ spaceObjectType *HackNewNonplayerShip( int32_t owner, int16_t type, Rect *bounds
     return( NULL);
 }
 
-static void recharge(spaceObjectType* anObject) {
-    auto baseObject = anObject->baseType;
-    if ((anObject->energy < (baseObject->energy - kEnergyChunk))
-            && (anObject->battery > kEnergyChunk)) {
-        anObject->battery -= kEnergyChunk;
-        anObject->energy += kEnergyChunk;
+void spaceObjectType::recharge() {
+    if ((_energy < (max_energy() - kEnergyChunk))
+            && (_battery > kEnergyChunk)) {
+        _battery -= kEnergyChunk;
+        _energy += kEnergyChunk;
     }
 
-    if ((anObject->health < (baseObject->health / 2))
-            && (anObject->energy > kHealthRatio)) {
-        anObject->health++;
-        anObject->energy -= kHealthRatio;
+    if ((_health < (max_health() / 2))
+            && (_energy > kHealthRatio)) {
+        _health++;
+        _energy -= kHealthRatio;
     }
 
-    for (auto* weapon: {&anObject->pulse, &anObject->beam, &anObject->special}) {
+    for (auto* weapon: {&pulse, &beam, &special}) {
         if (weapon->type != kNoWeapon) {
             if ((weapon->ammo < (weapon->base->frame.weapon.ammo >> 1))
-                    && (anObject->energy >= kWeaponRatio)) {
+                    && (_energy >= kWeaponRatio)) {
                 weapon->charge++;
-                anObject->energy -= kWeaponRatio;
+                _energy -= kWeaponRatio;
 
                 if ((weapon->base->frame.weapon.restockCost >= 0)
                         && (weapon->charge >= weapon->base->frame.weapon.restockCost)) {
@@ -138,7 +137,7 @@ void fire_weapon(
 
     baseObjectType* baseObject = subject->baseType;
     baseObjectType* weaponObject = weapon.base;
-    if ((subject->energy < weaponObject->frame.weapon.energyCost)
+    if ((subject->energy() < weaponObject->frame.weapon.energyCost)
             || ((weaponObject->frame.weapon.ammo > 0) && (weapon.ammo <= 0))) {
         return;
     }
@@ -146,7 +145,7 @@ void fire_weapon(
             && (subject->cloakState > 0)) {
         AlterObjectCloakState(subject, false);
     }
-    subject->energy -= weaponObject->frame.weapon.energyCost;
+    subject->_energy -= weaponObject->frame.weapon.energyCost;
     weapon.position++;
     if (weapon.position >= base_weapon.positionNum) {
         weapon.position = 0;
@@ -243,7 +242,7 @@ void NonplayerShipThink(int32_t timePass)
 
         // strobe its symbol if it's not feeling well
         if (anObject->sprite) {
-            if ((anObject->health > 0) && (anObject->health <= (anObject->baseType->health >> 2))) {
+            if ((anObject->health() > 0) && (anObject->health() <= (anObject->max_health() >> 2))) {
                 if (anObject->owner == globals()->gPlayerAdmiralNumber) {
                     anObject->sprite->tinyColor = friendSick;
                 } else if (anObject->owner < 0) {
@@ -416,15 +415,15 @@ void NonplayerShipThink(int32_t timePass)
             anObject->rechargeTime = 0;
 
             if (anObject->presenceState == kWarpingPresence) {
-                anObject->energy -= 1;
+                anObject->_energy -= 1;
                 anObject->warpEnergyCollected += 1;
-                if (anObject->energy <= 0) {
-                    anObject->energy = 0;
+                if (anObject->_energy <= 0) {
+                    anObject->_energy = 0;
                 }
             }
 
             if (anObject->presenceState == kNormalPresence) {
-                recharge(anObject);
+                anObject->recharge();
             }
         }
 
@@ -441,7 +440,7 @@ void NonplayerShipThink(int32_t timePass)
 
         if ((anObject->keysDown & kWarpKey)
                 && (baseObject->warpSpeed > 0)
-                && (anObject->energy > 0)) {
+                && (anObject->energy() > 0)) {
             if (anObject->presenceState == kWarpingPresence) {
                 anObject->thrust = mMultiplyFixed(
                         baseObject->maxThrust, anObject->presence.warping);
@@ -449,7 +448,7 @@ void NonplayerShipThink(int32_t timePass)
                 anObject->thrust = mMultiplyFixed(
                         baseObject->maxThrust, anObject->presence.warp_out);
             } else if ((anObject->presenceState == kNormalPresence)
-                    && (anObject->energy > (anObject->baseType->energy >> kWarpInEnergyFactor))) {
+                    && (anObject->energy() > (anObject->max_energy() >> kWarpInEnergyFactor))) {
                 anObject->presenceState = kWarpInPresence;
                 anObject->presence.warp_in.step = 0;
                 anObject->presence.warp_in.progress = 0;
@@ -534,7 +533,7 @@ uint32_t ThinkObjectNormalPresence(
                     && (targetObject->attributes & kHated)
                     && (ABS(theta) < kParanoiaAngle)
                     && ((!(targetObject->attributes & kCanBeEngaged))
-                        || (anObject->health <= targetObject->health))) {
+                        || (anObject->health() <= targetObject->health()))) {
                 // try to evade, flee, run away
                 if (anObject->attributes & kHasDirectionGoal) {
                     keysDown |= use_weapons_for_defense(anObject);
@@ -789,7 +788,7 @@ uint32_t ThinkObjectNormalPresence(
                         }
                     }
                     if ((baseObject->warpSpeed > 0)
-                            && (anObject->energy > (anObject->baseType->energy >> kWarpInEnergyFactor))
+                            && (anObject->energy() > (anObject->max_energy() >> kWarpInEnergyFactor))
                             && (distance > kWarpInDistance)
                             && (theta <= kDirectionError)) {
                         keysDown |= kWarpKey;
@@ -947,11 +946,11 @@ uint32_t ThinkObjectWarpInPresence( spaceObjectType *anObject)
     }
 
     if (presence.progress > 100) {
-        anObject->energy -= anObject->baseType->energy >> kWarpInEnergyFactor;
-        anObject->warpEnergyCollected += anObject->baseType->energy >> kWarpInEnergyFactor;
-        if (anObject->energy <= 0) {
+        anObject->_energy -= anObject->max_energy() >> kWarpInEnergyFactor;
+        anObject->warpEnergyCollected += anObject->max_energy() >> kWarpInEnergyFactor;
+        if (anObject->energy() <= 0) {
             anObject->presenceState = kNormalPresence;
-            anObject->energy = 0;
+            anObject->_energy = 0;
         } else {
             anObject->presenceState = kWarpingPresence;
             anObject->presence.warping = anObject->baseType->warpSpeed;
@@ -973,8 +972,7 @@ uint32_t ThinkObjectWarpingPresence( spaceObjectType *anObject)
     spaceObjectType *targetObject = NULL;
     int16_t         angle, theta;
 
-    if ( anObject->energy <= 0)
-    {
+    if (anObject->energy() <= 0) {
         anObject->presenceState = kWarpOutPresence;
     }
     if (( !(anObject->attributes & kRemoteOrHuman)) ||
@@ -1023,7 +1021,7 @@ uint32_t ThinkObjectWarpOutPresence( spaceObjectType *anObject, baseObjectType *
     anObject->presence.warp_out -= mLongToFixed(kWarpAcceleration);
     if ( anObject->presence.warp_out < anObject->maxVelocity)
     {
-        AlterObjectBattery( anObject, anObject->warpEnergyCollected);
+        anObject->alter_battery(anObject->warpEnergyCollected);
         anObject->warpEnergyCollected = 0;
 
         anObject->presenceState = kNormalPresence;
@@ -1725,14 +1723,14 @@ void HitObject(spaceObjectType *anObject, spaceObjectType *sObject) {
     }
 
     anObject->timeFromOrigin = 0;
-    if (((anObject->health - sObject->baseType->damage) < 0)
+    if (((anObject->_health - sObject->baseType->damage) < 0)
             && (anObject->attributes & (kIsPlayerShip | kRemoteOrHuman))
             && !anObject->baseType->destroyDontDie) {
         CreateFloatingBodyOfPlayer( anObject);
     }
-    AlterObjectHealth(anObject, -sObject->baseType->damage);
+    anObject->alter_health(-sObject->baseType->damage);
     if (anObject->shieldColor != 0xFF) {
-        anObject->hitState = ( anObject->health * kHitStateMax) / anObject->baseType->health;
+        anObject->hitState = (anObject->health() * kHitStateMax) / anObject->max_health();
         anObject->hitState += 16;
     }
 
@@ -1740,7 +1738,7 @@ void HitObject(spaceObjectType *anObject, spaceObjectType *sObject) {
         anObject->cloakState = 1;
     }
 
-    if (anObject->health < 0
+    if (anObject->health() < 0
             && (anObject->owner == globals()->gPlayerAdmiralNumber)
             && (anObject->attributes & kCanAcceptDestination)) {
         const StringSlice& object_name = get_object_name(anObject->whichBaseObject);

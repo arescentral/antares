@@ -360,7 +360,11 @@ enum dutyType {
 //typedef beamTypeStruct;
 
 
-struct spaceObjectType {
+class spaceObjectType {
+  public:
+    spaceObjectType();
+    spaceObjectType(baseObjectType* baseType);
+
     uint32_t                attributes;
     baseObjectType          *baseType;
     int32_t                 whichBaseObject;
@@ -429,9 +433,24 @@ struct spaceObjectType {
         beamType*               beam;
     } frame;
 
-    int32_t                 health;
-    int32_t                 energy;
-    int32_t                 battery;
+    int32_t                 _health;
+    int32_t                 _energy;
+    int32_t                 _battery;
+
+    int32_t                 health() const { return _health; }
+    void                    alter_health(int32_t amount);
+    int32_t                 max_health() const { return baseType->health; }
+
+    int32_t                 energy() const { return _energy; }
+    void                    alter_energy(int32_t amount);
+    int32_t                 max_energy() const { return baseType->energy; }
+
+    int32_t                 battery() const { return _battery; }
+    void                    alter_battery(int32_t amount);
+    int32_t                 max_battery() const { return 5 * max_energy(); }
+
+    void                    recharge();
+
     int32_t                 owner;
     int32_t                 age;
     int32_t                 naturalScale;
