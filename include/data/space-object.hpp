@@ -365,61 +365,61 @@ class spaceObjectType {
 
     spaceObjectType() = default;
 
-    uint32_t                attributes;
-    baseObjectType          *baseType;
-    int32_t                 whichBaseObject;
+    uint32_t                attributes = 0;
+    baseObjectType          *baseType = nullptr;
+    int32_t                 whichBaseObject = -1;
     int32_t                 number() const;
 
-    uint32_t                keysDown;
+    uint32_t                keysDown = 0;
 
-    int32_t                 tinySize;
+    int32_t                 tinySize = 0;
     RgbColor                tinyColor;
 
-    int32_t                 direction;
-    int32_t                 directionGoal;
-    Fixed                   turnVelocity;
-    Fixed                   turnFraction;
+    int32_t                 direction = 0;
+    int32_t                 directionGoal = 0;
+    Fixed                   turnVelocity = 0;
+    Fixed                   turnFraction = 0;
 
-    int32_t                 offlineTime;
+    int32_t                 offlineTime = 0;
 
-    coordPointType          location;
-    coordPointType          lastLocation;
-    int32_t                 lastDir;
+    coordPointType          location = {0, 0};
+    coordPointType          lastLocation = {0, 0};
+    int32_t                 lastDir = 0;
     Point                   collisionGrid;
-    spaceObjectType*        nextNearObject;
+    spaceObjectType*        nextNearObject = nullptr;
     Point                   distanceGrid;
-    spaceObjectType*        nextFarObject;
-    spaceObjectType*        previousObject;
-    int32_t                 previousObjectNumber;
-    spaceObjectType*        nextObject;
-    int32_t                 nextObjectNumber;
+    spaceObjectType*        nextFarObject = nullptr;
+    spaceObjectType*        previousObject = nullptr;
+    int32_t                 previousObjectNumber = kNoShip;
+    spaceObjectType*        nextObject = nullptr;
+    int32_t                 nextObjectNumber = kNoShip;
 
-    int32_t                 runTimeFlags;       // distance from origin to destination
-    coordPointType          destinationLocation;// coords of our destination ( or kNoDestination)
-    int32_t                 destinationObject;  // which object?  or kNoDestinationObject -- or, if we're a dest, our corresponding destBalance for AI
-    spaceObjectType*        destObjectPtr;      // ptr to destination object
-    int32_t                 destObjectDest;     // # of our destination's destination in case it dies
-    int32_t                 destObjectID;       // ID of our dest object
-    int32_t                 destObjectDestID;   // id of our dest's destination
+    int32_t                 runTimeFlags = 0;               // distance from origin to destination
+    coordPointType          destinationLocation = {0, 0};   // coords of our destination ( or kNoDestination)
+    int32_t                 destinationObject = kNoShip;    // which object?  or kNoDestinationObject -- or, if we're a dest, our corresponding destBalance for AI
+    spaceObjectType*        destObjectPtr = nullptr;        // ptr to destination object
+    int32_t                 destObjectDest = kNoShip;       // # of our destination's destination in case it dies
+    int32_t                 destObjectID = kNoShip;         // ID of our dest object
+    int32_t                 destObjectDestID = kNoShip;     // id of our dest's destination
 
-    Fixed                   localFriendStrength;
-    Fixed                   localFoeStrength;
-    Fixed                   escortStrength;
-    Fixed                   remoteFriendStrength;
-    Fixed                   remoteFoeStrength;
+    Fixed                   localFriendStrength = 0;
+    Fixed                   localFoeStrength = 0;
+    Fixed                   escortStrength = 0;
+    Fixed                   remoteFriendStrength = 0;
+    Fixed                   remoteFoeStrength = 0;
 
-    Fixed                   bestConsideredTargetValue;
-    Fixed                   currentTargetValue;
-    int32_t                 bestConsideredTargetNumber;
+    Fixed                   bestConsideredTargetValue = 0xffffffff;
+    Fixed                   currentTargetValue = 0xffffffff;
+    int32_t                 bestConsideredTargetNumber = kNoShip;
 
-    int32_t                 timeFromOrigin;     // time it's been since we left
-    fixedPointType          idealLocationCalc;  // calced when we got origin
-    coordPointType          originLocation;     // coords of our origin
+    int32_t                 timeFromOrigin = 0;     // time it's been since we left
+    fixedPointType          idealLocationCalc = {0, 0};  // calced when we got origin
+    coordPointType          originLocation = {0, 0};     // coords of our origin
 
-    fixedPointType          motionFraction;
-    fixedPointType          velocity;
-    Fixed                   thrust;
-    Fixed                   maxVelocity;
+    fixedPointType          motionFraction = {0, 0};
+    fixedPointType          velocity = {0, 0};
+    Fixed                   thrust = 0;
+    Fixed                   maxVelocity = 0;
     Rect                absoluteBounds;
     Random                  randomSeed;
 
@@ -433,9 +433,9 @@ class spaceObjectType {
         beamType*               beam;
     } frame;
 
-    int32_t                 _health;
-    int32_t                 _energy;
-    int32_t                 _battery;
+    int32_t                 _health = 0;
+    int32_t                 _energy = 0;
+    int32_t                 _battery = 0;
 
     int32_t                 health() const { return _health; }
     void                    alter_health(int32_t amount);
@@ -452,32 +452,32 @@ class spaceObjectType {
     void                    recharge();
     bool                    collect_warp_energy(int32_t amount);
     void                    refund_warp_energy();
-    int32_t                 warpEnergyCollected;
+    int32_t                 warpEnergyCollected = 0;
 
-    int32_t                 owner;
-    int32_t                 age;
-    int32_t                 naturalScale;
-    int32_t                 id;
-    int16_t                 rechargeTime;
-    int16_t                 active;
+    int32_t                 owner = kNoOwner;
+    int32_t                 age = -1;
+    int32_t                 naturalScale = SCALE_SCALE;
+    int32_t                 id = kNoShip;
+    int16_t                 rechargeTime = 0;
+    int16_t                 active = kObjectAvailable;
 
-    int16_t                 layer;
-    spriteType              *sprite;
-    int32_t                 whichSprite;
+    int16_t                 layer = 0;
+    spriteType              *sprite = nullptr;
+    int32_t                 whichSprite = -1;
 
-    uint64_t                distanceFromPlayer;
-    uint32_t                closestDistance;
-    int32_t                 closestObject;
-    int32_t                 targetObjectNumber;
-    int32_t                 targetObjectID;
-    int32_t                 targetAngle;
-    int32_t                 lastTarget;
-    int32_t                 lastTargetDistance;
-    int32_t                 longestWeaponRange;
-    int32_t                 shortestWeaponRange;
-    int32_t                 engageRange;            // either longestWeaponRange or kEngageRange
+    uint64_t                distanceFromPlayer = 0;
+    uint32_t                closestDistance = kMaximumRelevantDistanceSquared;
+    int32_t                 closestObject = kNoShip;
+    int32_t                 targetObjectNumber = kNoShip;
+    int32_t                 targetObjectID = kNoShip;
+    int32_t                 targetAngle = 0;
+    int32_t                 lastTarget = kNoShip;
+    int32_t                 lastTargetDistance = 0;
+    int32_t                 longestWeaponRange = 0;
+    int32_t                 shortestWeaponRange = 0;
+    int32_t                 engageRange = kEngageRange;  // longestWeaponRange or kEngageRange
 
-    kPresenceStateType      presenceState;
+    kPresenceStateType      presenceState = kNormalPresence;
     union {
         struct {
             int16_t speed;
@@ -491,36 +491,37 @@ class spaceObjectType {
         int32_t warp_out;
     } presence;
 
-    int32_t                 hitState;
-    int32_t                 cloakState;
-    dutyType                duty;
-    int                     pixResID;
+    int32_t                 hitState = 0;
+    int32_t                 cloakState = 0;
+    dutyType                duty = eNoDuty;
+    int                     pixResID = -1;
 
     struct Weapon {
         baseObjectType*         base;
-        int32_t                 type;
-        int32_t                 time;
-        int32_t                 ammo;
-        int32_t                 position;
-        int16_t                 charge;
+        int32_t                 type = -1;
+        int32_t                 time = 0;
+        int32_t                 ammo = 0;
+        int32_t                 position = 0;
+        int16_t                 charge = 0;
     };
     Weapon                  pulse;
     Weapon                  beam;
     Weapon                  special;
 
-    int32_t                 periodicTime;
+    int32_t                 periodicTime = 0;
 
-    uint32_t                myPlayerFlag;
-    uint32_t                seenByPlayerFlags;
-    uint32_t                hostileTowardsFlags;
+    uint32_t                myPlayerFlag = 0x80000000;
+    uint32_t                seenByPlayerFlags = 0xffffffff;
+    uint32_t                hostileTowardsFlags = 0;
 
-    uint8_t                 shieldColor;
-    uint8_t                 originalColor;
+    uint8_t                 shieldColor = 0;
+    uint8_t                 originalColor = 0;
 
-    void init(
-            int32_t type, Random seed,
+    spaceObjectType(
+            int32_t type, Random seed, int32_t object_id,
+            const coordPointType& initial_location,
             int32_t relative_direction, fixedPointType *relative_velocity,
-            int32_t owner, int16_t spriteIDOverride);
+            int32_t new_owner, int16_t spriteIDOverride);
 
   private:
     enum ZeroObject { ZERO_OBJECT };

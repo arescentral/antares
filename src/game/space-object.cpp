@@ -50,6 +50,8 @@ using sfz::ReadSource;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::read;
+using std::max;
+using std::min;
 using std::set;
 using std::unique_ptr;
 
@@ -352,33 +354,34 @@ void CorrectAllBaseObjectColor( void)
 
 }
 
-void spaceObjectType::init(
-        int32_t type, Random seed,
+spaceObjectType::spaceObjectType(
+        int32_t type, Random seed, int32_t object_id,
+        const coordPointType& initial_location,
         int32_t relative_direction, fixedPointType *relative_velocity,
-        int32_t owner, int16_t spriteIDOverride) {
-    int16_t         i;
-    int32_t         l;
+        int32_t new_owner, int16_t spriteIDOverride) {
+    whichBaseObject     = type;
+    baseType            = mGetBaseObjectPtr(type);
+    active              = kObjectInUse;
+    randomSeed          = seed;
+    owner               = new_owner;
+    location            = initial_location;
+    id                  = object_id;
+    sprite              = nullptr;
 
-    offlineTime = 0;
+    attributes          = baseType->attributes;
+    shieldColor         = baseType->shieldColor;
+    tinySize            = baseType->tinySize;
+    layer               = baseType->pixLayer;
+    maxVelocity         = baseType->maxVelocity;
+    naturalScale        = baseType->naturalScale;
 
-    randomSeed = seed;
-    baseType = mGetBaseObjectPtr(type);
-    attributes = baseType->attributes;
-    whichBaseObject = type;
-    keysDown = 0;
-    timeFromOrigin = 0;
-    runTimeFlags = 0;
+    _health             = max_health();
+    _energy             = max_energy();
+    _battery            = max_battery();
+
     if (owner >= 0) {
         myPlayerFlag = 1 << owner;
-    } else {
-        myPlayerFlag = 0x80000000;
     }
-    seenByPlayerFlags = 0xffffffff;
-    hostileTowardsFlags = 0;
-    absoluteBounds = {0, 0, 0, 0};
-    shieldColor = baseType->shieldColor;
-    tinySize = baseType->tinySize;
-    layer = baseType->pixLayer;
 
     // We used to irrelevantly set 'id' here.  Now, we just cycle
     // through values to maintain replay-compatibility of randomSeed.
@@ -386,8 +389,6 @@ void spaceObjectType::init(
         continue;
     }
 
-    distanceGrid = collisionGrid = {0, 0};
-    periodicTime = 0;
     if (baseType->activatePeriod) {
         periodicTime = baseType->activatePeriod + randomSeed.next(baseType->activatePeriodRange);
     }
@@ -395,8 +396,7 @@ void spaceObjectType::init(
     direction = baseType->initialDirection;
     mAddAngle(direction, relative_direction);
     if (baseType->initialDirectionRange > 0) {
-        i = randomSeed.next(baseType->initialDirectionRange);
-        mAddAngle(direction, i);
+        mAddAngle(direction, randomSeed.next(baseType->initialDirectionRange));
     }
 
     Fixed f = baseType->initialVelocity;
@@ -412,39 +412,15 @@ void spaceObjectType::init(
         velocity.v += relative_velocity->v;
     }
 
-    maxVelocity = baseType->maxVelocity;
-
-    motionFraction = {0, 0};
-    if (attributes & (kCanThink | kRemoteOrHuman)) {
-        thrust = 0;
-    } else {
+    if (!(attributes & (kCanThink | kRemoteOrHuman))) {
         thrust = baseType->maxThrust;
     }
 
-    _energy = max_energy();
-    rechargeTime = pulse.charge = beam.charge = special.charge = 0;
-    warpEnergyCollected = 0;
-    _battery = max_battery();
-    this->owner = owner;
-    destinationObject = kNoDestinationObject;
-    destinationLocation = {0, 0};
-    destObjectPtr = NULL;
-    destObjectDest = kNoDestinationObject;
-    destObjectID = kNoDestinationObject;
-    destObjectDestID = kNoDestinationObject;
-    remoteFoeStrength = remoteFriendStrength = escortStrength =
-        localFoeStrength = localFriendStrength = 0;
-    bestConsideredTargetValue = currentTargetValue = 0xffffffff;
-    bestConsideredTargetNumber = -1;
-
-    // not setting: absoluteBounds;
-
-    directionGoal = turnFraction = turnVelocity = 0;
     if (attributes & kIsSelfAnimated) {
         frame.animation.thisShape = baseType->frame.animation.frameShape;
         if (baseType->frame.animation.frameShapeRange > 0) {
-            l = randomSeed.next(baseType->frame.animation.frameShapeRange);
-            frame.animation.thisShape += l;
+            frame.animation.thisShape +=
+                randomSeed.next(baseType->frame.animation.frameShapeRange);
         }
         frame.animation.frameDirection = baseType->frame.animation.frameDirection;
         if (baseType->frame.animation.frameDirectionRange == -1) {
@@ -459,31 +435,9 @@ void spaceObjectType::init(
         frame.animation.frameSpeed = baseType->frame.animation.frameSpeed;
     }
 
-    // not setting lastTimeUpdate;
-
-    _health = max_health();
-
-    // not setting owner
-
-    age = -1;
     if (baseType->initialAge >= 0) {
         age = baseType->initialAge + randomSeed.next(baseType->initialAgeRange);
     }
-    naturalScale = baseType->naturalScale;
-
-    // not setting id
-
-    active = kObjectInUse;
-    nextNearObject = nextFarObject = NULL;
-
-    // not setting sprite, targetObjectNumber, lastTarget, lastTargetDistance;
-
-    closestDistance = kMaximumRelevantDistanceSquared;
-    targetObjectNumber = lastTarget = targetObjectID = kNoShip;
-    lastTargetDistance = targetAngle = 0;
-
-    closestObject = kNoShip;
-    presenceState = kNormalPresence;
 
     if (spriteIDOverride == -1) {
         pixResID = baseType->pixResID;
@@ -501,33 +455,43 @@ void spaceObjectType::init(
     beam.base = mGetBaseObjectPtr(beam.type);
     special.type = baseType->special.base;
     special.base = mGetBaseObjectPtr(special.type);
+
     longestWeaponRange = 0;
     shortestWeaponRange = kMaximumRelevantDistance;
 
     for (auto weapon: {&pulse, &beam, &special}) {
         if (weapon->type != kNoWeapon) {
-            auto weaponBase = weapon->base;
-            weapon->ammo = weaponBase->frame.weapon.ammo;
-            int32_t r = weaponBase->frame.weapon.range;
-            if ((r > 0) && (weaponBase->frame.weapon.usage & kUseForAttacking)) {
-                if (r > longestWeaponRange) {
-                    longestWeaponRange = r;
-                }
-                if (r < shortestWeaponRange) {
-                    shortestWeaponRange = r;
-                }
+            const auto& frame = weapon->base->frame.weapon;
+            weapon->ammo = frame.ammo;
+            if ((frame.range > 0) && (frame.usage & kUseForAttacking)) {
+                longestWeaponRange = max(frame.range, longestWeaponRange);
+                shortestWeaponRange = min(frame.range, shortestWeaponRange);
             }
         }
-        weapon->time = weapon->position = 0;
     }
 
     // if we don't have any weapon, then shortest range is 0 too
-    if (longestWeaponRange == 0) {
-        shortestWeaponRange = 0;
-    }
-    engageRange = kEngageRange;
-    if (longestWeaponRange > kEngageRange) {
-        engageRange = longestWeaponRange;
+    shortestWeaponRange = min(longestWeaponRange, shortestWeaponRange);
+    engageRange = max(kEngageRange, longestWeaponRange);
+
+    if (attributes & (kCanCollide | kCanBeHit | kIsDestination | kCanThink | kRemoteOrHuman)) {
+        uint32_t ydiff, xdiff;
+        spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+        if (player && (player->active)) {
+            xdiff = ABS<int>(player->location.h - location.h);
+            ydiff = ABS<int>(player->location.v - location.v);
+        } else {
+            xdiff = ABS<int>(gGlobalCorner.h - location.h);
+            ydiff = ABS<int>(gGlobalCorner.v - location.v);
+        }
+        if ((xdiff > kMaximumRelevantDistance)
+                || (ydiff > kMaximumRelevantDistance)) {
+            distanceFromPlayer
+                = MyWideMul<uint64_t>(xdiff, xdiff)
+                + MyWideMul<uint64_t>(ydiff, ydiff);
+        } else {
+            distanceFromPlayer = ydiff * ydiff + xdiff * xdiff;
+        }
     }
 }
 
@@ -687,39 +651,10 @@ void ChangeObjectBaseType(
 int32_t CreateAnySpaceObject(
         int32_t whichBase, fixedPointType *velocity, coordPointType *location, int32_t direction,
         int32_t owner, uint32_t specialAttributes, int16_t spriteIDOverride) {
-    spaceObjectType newObject;
-    newObject.init(
-            whichBase, {gRandomSeed.next(32766)}, direction, velocity, owner, spriteIDOverride);
-    newObject.location = *location;
-
-    if ((newObject.attributes & kCanCollide)
-            || (newObject.attributes & kCanBeHit)
-            || (newObject.attributes & kIsDestination)
-            || (newObject.attributes & kCanThink)
-            || (newObject.attributes & kRemoteOrHuman)) {
-        uint32_t ydiff, xdiff;
-        spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
-        if (player && (player->active)) {
-            xdiff = ABS<int>(player->location.h - newObject.location.h);
-            ydiff = ABS<int>(player->location.v - newObject.location.v);
-        } else {
-            xdiff = ABS<int>(gGlobalCorner.h - newObject.location.h);
-            ydiff = ABS<int>(gGlobalCorner.v - newObject.location.v);
-        }
-        if ((xdiff > kMaximumRelevantDistance)
-                || (ydiff > kMaximumRelevantDistance)) {
-            newObject.distanceFromPlayer
-                = MyWideMul<uint64_t>(xdiff, xdiff)
-                + MyWideMul<uint64_t>(ydiff, ydiff);
-        } else {
-            newObject.distanceFromPlayer = ydiff * ydiff + xdiff * xdiff;
-        }
-    } else {
-        newObject.distanceFromPlayer = 0;
-    }
-
-    newObject.sprite = NULL;
-    newObject.id = gRandomSeed.next(16384);
+    Random random{gRandomSeed.next(32766)};
+    int32_t id = gRandomSeed.next(16384);
+    spaceObjectType newObject(
+            whichBase, random, id, *location, direction, velocity, owner, spriteIDOverride);
 
     int32_t newObjectNumber = AddSpaceObject(&newObject);
     if (newObjectNumber == -1) {
