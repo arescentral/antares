@@ -461,7 +461,6 @@ class spaceObjectType {
 
     int16_t                 layer = 0;
     spriteType              *sprite = nullptr;
-    int32_t                 whichSprite = -1;
 
     uint64_t                distanceFromPlayer = 0;
     uint32_t                closestDistance = kMaximumRelevantDistanceSquared;

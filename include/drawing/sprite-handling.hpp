@@ -104,7 +104,7 @@ NatePixTable* AddPixTable(int16_t resource_id);
 NatePixTable* GetPixTable(int16_t resource_id);
 spriteType *AddSprite(
         Point where, NatePixTable* table, int16_t resID, int16_t whichShape, int32_t scale, int32_t size,
-        int16_t layer, const RgbColor& color, int32_t *whichSprite);
+        int16_t layer, const RgbColor& color);
 void RemoveSprite(spriteType *);
 void draw_sprites();
 void CullSprites();

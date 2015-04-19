@@ -182,29 +182,21 @@ static spaceObjectType* AddSpaceObject(spaceObjectType *sourceObject) {
             spriteTable = GetPixTable(sourceObject->pixResID);
             if (!spriteTable) {
                 throw Exception("Received an unexpected request to load a sprite");
-                spriteTable = AddPixTable(sourceObject->pixResID);
-                if (!spriteTable) {
-                    return nullptr;
-                }
             }
         }
 
         *obj = *sourceObject;
 
-        Point where;
-        int32_t scaleCalc;
-        scaleCalc = (obj->location.h - gGlobalCorner.h) * gAbsoluteScale;
-        scaleCalc >>= SHIFT_SCALE;
-        where.h = scaleCalc + viewport.left;
-        scaleCalc = (obj->location.v - gGlobalCorner.v) * gAbsoluteScale;
-        scaleCalc >>= SHIFT_SCALE;
-        where.v = scaleCalc;
+        Point where(
+            ((obj->location.h - gGlobalCorner.h) * gAbsoluteScale >> SHIFT_SCALE) + viewport.left,
+            ((obj->location.v - gGlobalCorner.v) * gAbsoluteScale >> SHIFT_SCALE));
 
-        if (obj->sprite != NULL) {
+        if (obj->sprite) {
             RemoveSprite(obj->sprite);
         }
 
-        if (spriteTable != NULL) {
+        obj->sprite = NULL;
+        if (spriteTable) {
             uint8_t tinyShade;
             switch (obj->layer) {
                 case kFirstSpriteLayer:
@@ -247,7 +239,7 @@ static spaceObjectType* AddSpaceObject(spaceObjectType *sourceObject) {
 
             obj->sprite = AddSprite(
                     where, spriteTable, sourceObject->pixResID, whichShape, obj->naturalScale,
-                    obj->tinySize, obj->layer, tinyColor, &(obj->whichSprite));
+                    obj->tinySize, obj->layer, tinyColor);
             obj->tinyColor = tinyColor;
 
             if (obj->sprite == NULL) {
@@ -255,18 +247,12 @@ static spaceObjectType* AddSpaceObject(spaceObjectType *sourceObject) {
                 obj->active = kObjectAvailable;
                 return nullptr;
             }
-        } else {
-            obj->sprite = NULL;
-            obj->whichSprite = kNoSprite;
         }
 
         if (obj->attributes & kIsBeam) {
+            const auto& beam = obj->baseType->frame.beam;
             obj->frame.beam = Beams::add(
-                    &(obj->location),
-                    obj->baseType->frame.beam.color,
-                    obj->baseType->frame.beam.kind,
-                    obj->baseType->frame.beam.accuracy,
-                    obj->baseType->frame.beam.range);
+                    &(obj->location), beam.color, beam.kind, beam.accuracy, beam.range);
         }
 
         obj->nextObject = gRootObject;
@@ -279,11 +265,6 @@ static spaceObjectType* AddSpaceObject(spaceObjectType *sourceObject) {
         }
         gRootObject = obj;
         gRootObjectNumber = i;
-
-        obj->active = kObjectInUse;
-        obj->nextNearObject = obj->nextFarObject = NULL;
-        obj->cloakState = obj->hitState = 0;
-        obj->duty = eNoDuty;
 
         return obj;
     }
@@ -303,7 +284,6 @@ void RemoveAllSpaceObjects( void)
         {
             RemoveSprite( anObject->sprite);
             anObject->sprite = NULL;
-            anObject->whichSprite = kNoSprite;
         }
         anObject->active = kObjectAvailable;
         anObject->nextNearObject = anObject->nextFarObject = NULL;
