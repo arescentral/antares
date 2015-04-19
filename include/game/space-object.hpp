@@ -31,7 +31,6 @@ extern int32_t gRootObjectNumber;
 
 void SpaceObjectHandlingInit( void);
 void ResetAllSpaceObjects( void);
-int AddSpaceObject( spaceObjectType *);
 void RemoveAllSpaceObjects( void);
 void CorrectAllBaseObjectColor( void);
 void ChangeObjectBaseType( spaceObjectType *, int32_t, int32_t, bool);

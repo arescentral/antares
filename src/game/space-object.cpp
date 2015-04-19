@@ -170,7 +170,7 @@ void mGetBaseObjectFromClassRace(
     }
 }
 
-int AddSpaceObject(spaceObjectType *sourceObject) {
+static spaceObjectType* AddSpaceObject(spaceObjectType *sourceObject) {
     for (int i = 0; i < kMaxSpaceObject; ++i) {
         spaceObjectType* obj = mGetSpaceObjectPtr(i);
         if (obj->active) {
@@ -184,7 +184,7 @@ int AddSpaceObject(spaceObjectType *sourceObject) {
                 throw Exception("Received an unexpected request to load a sprite");
                 spriteTable = AddPixTable(sourceObject->pixResID);
                 if (!spriteTable) {
-                    return -1;
+                    return nullptr;
                 }
             }
         }
@@ -258,7 +258,7 @@ int AddSpaceObject(spaceObjectType *sourceObject) {
             if (obj->sprite == NULL) {
                 globals()->gGameOver = -1;
                 obj->active = kObjectAvailable;
-                return -1;
+                return nullptr;
             }
         } else {
             obj->sprite = NULL;
@@ -290,9 +290,9 @@ int AddSpaceObject(spaceObjectType *sourceObject) {
         obj->cloakState = obj->hitState = 0;
         obj->duty = eNoDuty;
 
-        return i;
+        return obj;
     }
-    return -1;
+    return nullptr;
 }
 
 void RemoveAllSpaceObjects( void)
@@ -656,8 +656,8 @@ int32_t CreateAnySpaceObject(
     spaceObjectType newObject(
             whichBase, random, id, *location, direction, velocity, owner, spriteIDOverride);
 
-    int32_t newObjectNumber = AddSpaceObject(&newObject);
-    if (newObjectNumber == -1) {
+    auto obj = AddSpaceObject(&newObject);
+    if (!obj) {
         return -1;
     }
 
@@ -671,10 +671,9 @@ int32_t CreateAnySpaceObject(
     }
 #endif  // DATA_COVERAGE
 
-    spaceObjectType* madeObject = gSpaceObjectData.get() + newObjectNumber;
-    madeObject->attributes |= specialAttributes;
-    madeObject->baseType->create.run(madeObject, NULL, NULL);
-    return newObjectNumber;
+    obj->attributes |= specialAttributes;
+    obj->baseType->create.run(obj, NULL, NULL);
+    return obj->number();
 }
 
 int32_t CountObjectsOfBaseType(int32_t whichType, int32_t owner) {
