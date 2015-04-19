@@ -191,11 +191,6 @@ static spaceObjectType* AddSpaceObject(spaceObjectType *sourceObject) {
 
         *obj = *sourceObject;
 
-        obj->lastLocation = obj->location;
-        obj->lastLocation.h += 100000;
-        obj->lastLocation.v += 100000;
-        obj->lastDir = obj->direction;
-
         Point where;
         int32_t scaleCalc;
         scaleCalc = (obj->location.h - gGlobalCorner.h) * gAbsoluteScale;

@@ -383,8 +383,6 @@ class spaceObjectType {
     int32_t                 offlineTime = 0;
 
     coordPointType          location = {0, 0};
-    coordPointType          lastLocation = {0, 0};
-    int32_t                 lastDir = 0;
     Point                   collisionGrid;
     spaceObjectType*        nextNearObject = nullptr;
     Point                   distanceGrid;

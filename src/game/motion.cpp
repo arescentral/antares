@@ -1105,8 +1105,6 @@ hackBNoEngageMatch:
                 aObject->frame.beam->lastGlobalLocation = aObject->location;
             }
         }
-        aObject->lastLocation = aObject->location;
-        aObject->lastDir = aObject->direction;
     }
 }
 
