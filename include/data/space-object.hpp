@@ -516,6 +516,11 @@ class spaceObjectType {
 
     uint8_t                 shieldColor;
     uint8_t                 originalColor;
+
+    void init(
+            int32_t type, Random seed,
+            int32_t relative_direction, fixedPointType *relative_velocity,
+            int32_t owner, int16_t spriteIDOverride);
 };
 
 }  // namespace antares

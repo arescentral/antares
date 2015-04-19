@@ -373,225 +373,180 @@ void CorrectAllBaseObjectColor( void)
 
 }
 
-static void InitSpaceObjectFromBaseObject(
-        spaceObjectType *dObject, int32_t  whichBaseObject, Random seed,
-        int32_t direction, fixedPointType *velocity, int32_t owner, int16_t spriteIDOverride) {
-    baseObjectType  *sObject = mGetBaseObjectPtr( whichBaseObject), *weaponBase = NULL;
+void spaceObjectType::init(
+        int32_t type, Random seed,
+        int32_t relative_direction, fixedPointType *relative_velocity,
+        int32_t owner, int16_t spriteIDOverride) {
     int16_t         i;
-    int32_t         r;
-    Fixed           f;
-    fixedPointType  newVel;
     int32_t         l;
 
-    dObject->offlineTime = 0;
+    offlineTime = 0;
 
-    dObject->randomSeed = seed;
-    dObject->attributes = sObject->attributes;
-    dObject->baseType = sObject;
-    dObject->whichBaseObject = whichBaseObject;
-    dObject->keysDown = 0;
-    dObject->timeFromOrigin = 0;
-    dObject->runTimeFlags = 0;
-    if ( owner >= 0)
-        dObject->myPlayerFlag = 1 << owner;
-    else dObject->myPlayerFlag = 0x80000000;
-    dObject->seenByPlayerFlags = 0xffffffff;
-    dObject->hostileTowardsFlags = 0;
-    dObject->absoluteBounds.left = dObject->absoluteBounds.right = 0;
-    dObject->shieldColor = sObject->shieldColor;
-    dObject->tinySize = sObject->tinySize;
-    dObject->layer = sObject->pixLayer;
-    do
-    {
-        dObject->id = dObject->randomSeed.next(32768);
-    } while ( dObject->id == -1);
-
-    dObject->distanceGrid.h = dObject->distanceGrid.v = dObject->collisionGrid.h = dObject->collisionGrid.v = 0;
-    if (sObject->activatePeriod) {
-        dObject->periodicTime =
-            sObject->activatePeriod + dObject->randomSeed.next(sObject->activatePeriodRange);
-    } else dObject->periodicTime = 0;
-
-    r = sObject->initialDirection;
-    mAddAngle( r, direction);
-    if ( sObject->initialDirectionRange > 0)
-    {
-        i = dObject->randomSeed.next(sObject->initialDirectionRange);
-        mAddAngle( r, i);
+    randomSeed = seed;
+    baseType = mGetBaseObjectPtr(type);
+    attributes = baseType->attributes;
+    whichBaseObject = type;
+    keysDown = 0;
+    timeFromOrigin = 0;
+    runTimeFlags = 0;
+    if (owner >= 0) {
+        myPlayerFlag = 1 << owner;
+    } else {
+        myPlayerFlag = 0x80000000;
     }
-    dObject->direction = r;
+    seenByPlayerFlags = 0xffffffff;
+    hostileTowardsFlags = 0;
+    absoluteBounds = {0, 0, 0, 0};
+    shieldColor = baseType->shieldColor;
+    tinySize = baseType->tinySize;
+    layer = baseType->pixLayer;
+    do {
+        id = randomSeed.next(32768);
+    } while (id == -1);
 
-    f = sObject->initialVelocity;
-    if ( sObject->initialVelocityRange > 0)
-    {
-        f += dObject->randomSeed.next(sObject->initialVelocityRange);
-    }
-    GetRotPoint(&newVel.h, &newVel.v, r);
-    newVel.h = mMultiplyFixed( newVel.h, f);
-    newVel.v = mMultiplyFixed( newVel.v, f);
-
-    if ( velocity != NULL)
-    {
-        newVel.h += velocity->h;
-        newVel.v += velocity->v;
+    distanceGrid = collisionGrid = {0, 0};
+    periodicTime = 0;
+    if (baseType->activatePeriod) {
+        periodicTime = baseType->activatePeriod + randomSeed.next(baseType->activatePeriodRange);
     }
 
-    dObject->velocity.h = newVel.h;
-    dObject->velocity.v = newVel.v;
-    dObject->maxVelocity = sObject->maxVelocity;
+    direction = baseType->initialDirection;
+    mAddAngle(direction, relative_direction);
+    if (baseType->initialDirectionRange > 0) {
+        i = randomSeed.next(baseType->initialDirectionRange);
+        mAddAngle(direction, i);
+    }
 
-    dObject->motionFraction.h = dObject->motionFraction.v = 0;
-    if ((dObject->attributes & kCanThink) ||
-            (dObject->attributes & kRemoteOrHuman))
-        dObject->thrust = 0;
-    else
-        dObject->thrust = sObject->maxThrust;
+    Fixed f = baseType->initialVelocity;
+    if (baseType->initialVelocityRange > 0) {
+        f += randomSeed.next(baseType->initialVelocityRange);
+    }
+    GetRotPoint(&velocity.h, &velocity.v, direction);
+    velocity.h = mMultiplyFixed(velocity.h, f);
+    velocity.v = mMultiplyFixed(velocity.v, f);
 
+    if (relative_velocity) {
+        velocity.h += relative_velocity->h;
+        velocity.v += relative_velocity->v;
+    }
 
-    dObject->_energy = dObject->max_energy();
-    dObject->rechargeTime = dObject->pulse.charge = dObject->beam.charge = dObject->special.charge = 0;
-    dObject->warpEnergyCollected = 0;
-    dObject->_battery = dObject->max_battery();
-    dObject->owner = owner;
-    dObject->destinationObject = kNoDestinationObject;
-    dObject->destinationLocation.h = dObject->destinationLocation.v = kNoDestinationCoord;
-    dObject->destObjectPtr = NULL;
-    dObject->destObjectDest = kNoDestinationObject;
-    dObject->destObjectID = kNoDestinationObject;
-    dObject->destObjectDestID = kNoDestinationObject;
-    dObject->remoteFoeStrength = dObject->remoteFriendStrength = dObject->escortStrength =
-        dObject->localFoeStrength = dObject->localFriendStrength = 0;
-    dObject->bestConsideredTargetValue = dObject->currentTargetValue = 0xffffffff;
-    dObject->bestConsideredTargetNumber = -1;
+    maxVelocity = baseType->maxVelocity;
+
+    motionFraction = {0, 0};
+    if (attributes & (kCanThink | kRemoteOrHuman)) {
+        thrust = 0;
+    } else {
+        thrust = baseType->maxThrust;
+    }
+
+    _energy = max_energy();
+    rechargeTime = pulse.charge = beam.charge = special.charge = 0;
+    warpEnergyCollected = 0;
+    _battery = max_battery();
+    this->owner = owner;
+    destinationObject = kNoDestinationObject;
+    destinationLocation = {0, 0};
+    destObjectPtr = NULL;
+    destObjectDest = kNoDestinationObject;
+    destObjectID = kNoDestinationObject;
+    destObjectDestID = kNoDestinationObject;
+    remoteFoeStrength = remoteFriendStrength = escortStrength =
+        localFoeStrength = localFriendStrength = 0;
+    bestConsideredTargetValue = currentTargetValue = 0xffffffff;
+    bestConsideredTargetNumber = -1;
 
     // not setting: absoluteBounds;
 
-    if ( dObject->attributes & kCanTurn)
-    {
-        dObject->directionGoal =
-            dObject->turnFraction = dObject->turnVelocity = 0;
-    }
-    if ( dObject->attributes & kIsSelfAnimated)
-    {
-        dObject->frame.animation.thisShape = sObject->frame.animation.frameShape;
-        if ( sObject->frame.animation.frameShapeRange > 0)
-        {
-            l = dObject->randomSeed.next(sObject->frame.animation.frameShapeRange);
-            dObject->frame.animation.thisShape += l;
+    directionGoal = turnFraction = turnVelocity = 0;
+    if (attributes & kIsSelfAnimated) {
+        frame.animation.thisShape = baseType->frame.animation.frameShape;
+        if (baseType->frame.animation.frameShapeRange > 0) {
+            l = randomSeed.next(baseType->frame.animation.frameShapeRange);
+            frame.animation.thisShape += l;
         }
-        dObject->frame.animation.frameDirection =
-            sObject->frame.animation.frameDirection;
-        if ( sObject->frame.animation.frameDirectionRange == -1)
-        {
-            if (dObject->randomSeed.next(2) == 1) {
-                dObject->frame.animation.frameDirection = 1;
+        frame.animation.frameDirection = baseType->frame.animation.frameDirection;
+        if (baseType->frame.animation.frameDirectionRange == -1) {
+            if (randomSeed.next(2) == 1) {
+                frame.animation.frameDirection = 1;
             }
-        } else if ( sObject->frame.animation.frameDirectionRange > 0)
-        {
-            dObject->frame.animation.frameDirection += dObject->randomSeed.next(
-                sObject->frame.animation.frameDirectionRange);
+        } else if (baseType->frame.animation.frameDirectionRange > 0) {
+            frame.animation.frameDirection += randomSeed.next(
+                baseType->frame.animation.frameDirectionRange);
         }
-        dObject->frame.animation.frameFraction = 0;
-        dObject->frame.animation.frameSpeed = sObject->frame.animation.frameSpeed;
-    } else if ( dObject->attributes & kIsBeam)
-    {
-//      dObject->frame.beam.killMe = false;
+        frame.animation.frameFraction = 0;
+        frame.animation.frameSpeed = baseType->frame.animation.frameSpeed;
     }
 
     // not setting lastTimeUpdate;
 
-    dObject->_health = dObject->max_health();
+    _health = max_health();
 
     // not setting owner
 
-    if ( sObject->initialAge >= 0)
-        dObject->age = sObject->initialAge + dObject->randomSeed.next(sObject->initialAgeRange);
-    else dObject->age = -1;
-    dObject->naturalScale = sObject->naturalScale;
+    age = -1;
+    if (baseType->initialAge >= 0) {
+        age = baseType->initialAge + randomSeed.next(baseType->initialAgeRange);
+    }
+    naturalScale = baseType->naturalScale;
 
     // not setting id
 
-    dObject->active = kObjectInUse;
-    dObject->nextNearObject = dObject->nextFarObject = NULL;
+    active = kObjectInUse;
+    nextNearObject = nextFarObject = NULL;
 
     // not setting sprite, targetObjectNumber, lastTarget, lastTargetDistance;
 
-    dObject->closestDistance = kMaximumRelevantDistanceSquared;
-    dObject->targetObjectNumber = dObject->lastTarget = dObject->targetObjectID = kNoShip;
-    dObject->lastTargetDistance = dObject->targetAngle = 0;
+    closestDistance = kMaximumRelevantDistanceSquared;
+    targetObjectNumber = lastTarget = targetObjectID = kNoShip;
+    lastTargetDistance = targetAngle = 0;
 
-    dObject->closestObject = kNoShip;
-    dObject->presenceState = kNormalPresence;
+    closestObject = kNoShip;
+    presenceState = kNormalPresence;
 
-    if ( spriteIDOverride == -1)
-        dObject->pixResID = sObject->pixResID;
-    else dObject->pixResID = spriteIDOverride;
-
-    if ( sObject->attributes & kCanThink)
-    {
-        dObject->pixResID += (GetAdmiralColor( owner) << kSpriteTableColorShift);
+    if (spriteIDOverride == -1) {
+        pixResID = baseType->pixResID;
+    } else {
+        pixResID = spriteIDOverride;
     }
 
-    dObject->pulse.type = sObject->pulse.base;
-    if ( dObject->pulse.type != kNoWeapon)
-        dObject->pulse.base = mGetBaseObjectPtr( dObject->pulse.type);
-    else dObject->pulse.base = NULL;
-    dObject->beam.type = sObject->beam.base;
-    if ( dObject->beam.type != kNoWeapon)
-        dObject->beam.base = mGetBaseObjectPtr( dObject->beam.type);
-    else dObject->beam.base = NULL;
-    dObject->special.type = sObject->special.base;
-    if ( dObject->special.type != kNoWeapon)
-        dObject->special.base = mGetBaseObjectPtr( dObject->special.type);
-    else dObject->special.base = NULL;
-    dObject->longestWeaponRange = 0;
-    dObject->shortestWeaponRange = kMaximumRelevantDistance;
+    if (baseType->attributes & kCanThink) {
+        pixResID += (GetAdmiralColor(owner) << kSpriteTableColorShift);
+    }
 
-    if ( dObject->pulse.type != kNoWeapon)
-    {
-        weaponBase = dObject->pulse.base;
-        dObject->pulse.ammo = weaponBase->frame.weapon.ammo;
-        dObject->pulse.time = dObject->pulse.position = 0;
-        r = weaponBase->frame.weapon.range;
-        if (( r > 0) && ( weaponBase->frame.weapon.usage & kUseForAttacking))
-        {
-            if ( r > dObject->longestWeaponRange) dObject->longestWeaponRange = r;
-            if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
-        }
-    } else dObject->pulse.time = 0;
+    pulse.type = baseType->pulse.base;
+    pulse.base = mGetBaseObjectPtr(pulse.type);
+    beam.type = baseType->beam.base;
+    beam.base = mGetBaseObjectPtr(beam.type);
+    special.type = baseType->special.base;
+    special.base = mGetBaseObjectPtr(special.type);
+    longestWeaponRange = 0;
+    shortestWeaponRange = kMaximumRelevantDistance;
 
-    if ( dObject->beam.type != kNoWeapon)
-    {
-        weaponBase = dObject->beam.base;
-        dObject->beam.ammo = weaponBase->frame.weapon.ammo;
-        dObject->beam.time = dObject->beam.position = 0;
-        r = weaponBase->frame.weapon.range;
-        if (( r > 0) && ( weaponBase->frame.weapon.usage & kUseForAttacking))
-        {
-            if ( r > dObject->longestWeaponRange) dObject->longestWeaponRange = r;
-            if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
+    for (auto weapon: {&pulse, &beam, &special}) {
+        if (weapon->type != kNoWeapon) {
+            auto weaponBase = weapon->base;
+            weapon->ammo = weaponBase->frame.weapon.ammo;
+            int32_t r = weaponBase->frame.weapon.range;
+            if ((r > 0) && (weaponBase->frame.weapon.usage & kUseForAttacking)) {
+                if (r > longestWeaponRange) {
+                    longestWeaponRange = r;
+                }
+                if (r < shortestWeaponRange) {
+                    shortestWeaponRange = r;
+                }
+            }
         }
-    } else dObject->beam.time = 0;
-
-    if ( dObject->special.type != kNoWeapon)
-    {
-        weaponBase = dObject->special.base;
-        dObject->special.ammo = weaponBase->frame.weapon.ammo;
-        dObject->special.time = dObject->special.position = 0;
-        r = weaponBase->frame.weapon.range;
-        if (( r > 0) && ( weaponBase->frame.weapon.usage & kUseForAttacking))
-        {
-            if ( r > dObject->longestWeaponRange) dObject->longestWeaponRange = r;
-            if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
-        }
-    } else dObject->special.time = 0;
+        weapon->time = weapon->position = 0;
+    }
 
     // if we don't have any weapon, then shortest range is 0 too
-    if ( dObject->longestWeaponRange == 0) dObject->shortestWeaponRange = 0;
-    if ( dObject->longestWeaponRange > kEngageRange)
-        dObject->engageRange = dObject->longestWeaponRange;
-    else
-        dObject->engageRange = kEngageRange;
+    if (longestWeaponRange == 0) {
+        shortestWeaponRange = 0;
+    }
+    engageRange = kEngageRange;
+    if (longestWeaponRange > kEngageRange) {
+        engageRange = longestWeaponRange;
+    }
 }
 
 //
@@ -751,9 +706,8 @@ int32_t CreateAnySpaceObject(
         int32_t whichBase, fixedPointType *velocity, coordPointType *location, int32_t direction,
         int32_t owner, uint32_t specialAttributes, int16_t spriteIDOverride) {
     spaceObjectType newObject;
-    InitSpaceObjectFromBaseObject(
-            &newObject, whichBase, {gRandomSeed.next(32766)}, direction, velocity, owner,
-            spriteIDOverride);
+    newObject.init(
+            whichBase, {gRandomSeed.next(32766)}, direction, velocity, owner, spriteIDOverride);
     newObject.location = *location;
     spaceObjectType* player = nullptr;
     if (globals()->gPlayerShipNumber >= 0) {
