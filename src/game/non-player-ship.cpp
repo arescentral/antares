@@ -415,11 +415,7 @@ void NonplayerShipThink(int32_t timePass)
             anObject->rechargeTime = 0;
 
             if (anObject->presenceState == kWarpingPresence) {
-                anObject->_energy -= 1;
-                anObject->warpEnergyCollected += 1;
-                if (anObject->_energy <= 0) {
-                    anObject->_energy = 0;
-                }
+                anObject->collect_warp_energy(1);
             }
 
             if (anObject->presenceState == kNormalPresence) {
@@ -946,12 +942,7 @@ uint32_t ThinkObjectWarpInPresence( spaceObjectType *anObject)
     }
 
     if (presence.progress > 100) {
-        anObject->_energy -= anObject->max_energy() >> kWarpInEnergyFactor;
-        anObject->warpEnergyCollected += anObject->max_energy() >> kWarpInEnergyFactor;
-        if (anObject->energy() <= 0) {
-            anObject->presenceState = kNormalPresence;
-            anObject->_energy = 0;
-        } else {
+        if (anObject->collect_warp_energy(anObject->max_energy() >> kWarpInEnergyFactor)) {
             anObject->presenceState = kWarpingPresence;
             anObject->presence.warping = anObject->baseType->warpSpeed;
             anObject->attributes &= ~kOccupiesSpace;
@@ -959,6 +950,9 @@ uint32_t ThinkObjectWarpInPresence( spaceObjectType *anObject)
             CreateAnySpaceObject(
                     globals()->scenarioFileInfo.warpInFlareID, &newVel, &anObject->location,
                     anObject->direction, kNoOwner, 0, -1);
+        } else {
+            anObject->presenceState = kNormalPresence;
+            anObject->_energy = 0;
         }
     }
 
@@ -1021,8 +1015,7 @@ uint32_t ThinkObjectWarpOutPresence( spaceObjectType *anObject, baseObjectType *
     anObject->presence.warp_out -= mLongToFixed(kWarpAcceleration);
     if ( anObject->presence.warp_out < anObject->maxVelocity)
     {
-        anObject->alter_battery(anObject->warpEnergyCollected);
-        anObject->warpEnergyCollected = 0;
+        anObject->refund_warp_energy();
 
         anObject->presenceState = kNormalPresence;
         anObject->attributes |=

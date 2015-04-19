@@ -450,6 +450,9 @@ class spaceObjectType {
     int32_t                 max_battery() const { return 5 * max_energy(); }
 
     void                    recharge();
+    bool                    collect_warp_energy(int32_t amount);
+    void                    refund_warp_energy();
+    int32_t                 warpEnergyCollected;
 
     int32_t                 owner;
     int32_t                 age;
@@ -457,8 +460,6 @@ class spaceObjectType {
     int32_t                 id;
     int16_t                 rechargeTime;
     int16_t                 active;
-
-    int32_t                 warpEnergyCollected;
 
     int16_t                 layer;
     spriteType              *sprite;

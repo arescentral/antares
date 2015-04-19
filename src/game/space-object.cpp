@@ -859,6 +859,23 @@ void spaceObjectType::alter_battery(int32_t amount) {
     }
 }
 
+bool spaceObjectType::collect_warp_energy(int32_t amount) {
+    if (amount >= _energy) {
+        warpEnergyCollected += _energy;
+        _energy = 0;
+        return false;
+    } else {
+        _energy -= amount;
+        warpEnergyCollected += amount;
+        return true;
+    }
+}
+
+void spaceObjectType::refund_warp_energy() {
+    alter_battery(warpEnergyCollected);
+    warpEnergyCollected = 0;
+}
+
 void AlterObjectOwner(spaceObjectType* object, int32_t owner, bool message) {
     if (object->owner == owner) {
         return;
