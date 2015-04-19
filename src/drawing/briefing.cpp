@@ -50,7 +50,7 @@ void GetInitialObjectSpriteData(
         coordPointType *corner, int32_t scale, int32_t *thisScale, Point *where, Rect *spriteRect);
 
 void GetRealObjectSpriteData(
-        coordPointType *realCoord, baseObjectType *baseObject, int32_t owner, int32_t spriteOverride,
+        coordPointType *realCoord, BaseObject* baseObject, int32_t owner, int32_t spriteOverride,
         int32_t maxSize, Rect *bounds, coordPointType *corner, int32_t scale, int32_t *thisScale,
         const NatePixTable::Frame** frame, Point *where, Rect *spriteRect);
 
@@ -201,7 +201,7 @@ void Briefing_Grid_Set(bool *grid, int32_t x, int32_t y, int32_t gridWidth, int3
 void GetInitialObjectSpriteData(
         const Scenario* scenario, int32_t whichObject, int32_t maxSize, Rect *bounds,
         coordPointType *corner, int32_t scale, int32_t *thisScale, Point *where, Rect *spriteRect) {
-    spaceObjectType         *sObject = NULL;
+    SpaceObject* sObject = NULL;
     briefingSpriteBoundsType    *sBounds = gBriefingSpriteBounds;
 
     spriteRect->right = spriteRect->left = -1;
@@ -216,7 +216,7 @@ void GetInitialObjectSpriteData(
 
         if ( sBounds == NULL) return;
         while ( (sBounds->objectIndex >= 0) &&
-            ( sBounds->objectIndex != sObject->entryNumber)) sBounds++;
+            ( sBounds->objectIndex != sObject->number())) sBounds++;
 
         if (sBounds->objectIndex < 0) {
             return;
@@ -226,7 +226,7 @@ void GetInitialObjectSpriteData(
 }
 
 void GetRealObjectSpriteData(
-        coordPointType *realCoord, baseObjectType *baseObject, int32_t owner, int32_t spriteOverride,
+        coordPointType *realCoord, BaseObject* baseObject, int32_t owner, int32_t spriteOverride,
         int32_t maxSize, Rect *bounds, coordPointType *corner, int32_t scale, int32_t *thisScale,
         const NatePixTable::Frame** frame, Point *where, Rect *spriteRect) {
     NatePixTable* pixTable;
@@ -319,7 +319,7 @@ static void render_briefing_with(
     int32_t        count, thisScale, gridWidth, gridHeight, i, j, color;
     Point       where;
     Rect    spriteRect, clipRect;
-    baseObjectType  *baseObject = NULL;
+    BaseObject*  baseObject = NULL;
     bool         *gridCells = NULL;
     briefingSpriteBoundsType    *sBounds = NULL;
 
@@ -348,7 +348,7 @@ static void render_briefing_with(
 
     for ( count = 0; count < kMaxSpaceObject; count++)
     {
-        spaceObjectType *anObject = mGetSpaceObjectPtr(count);
+        SpaceObject* anObject = mGetSpaceObjectPtr(count);
         if (( anObject->active == kObjectInUse) && ( anObject->sprite != NULL))
         {
             baseObject = anObject->baseType;

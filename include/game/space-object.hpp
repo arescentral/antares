@@ -26,38 +26,31 @@ namespace antares {
 const int16_t kBaseObjectResID      = 500;
 const int16_t kObjectActionResID    = 500;
 
-extern spaceObjectType* gRootObject;
+extern SpaceObject* gRootObject;
 extern int32_t gRootObjectNumber;
 
 void SpaceObjectHandlingInit( void);
 void ResetAllSpaceObjects( void);
-int AddSpaceObject( spaceObjectType *);
-//int AddSpaceObject( spaceObjectType *, int32_t *, int16_t, int16_t);
-int AddNumberedSpaceObject( spaceObjectType *, int32_t);
 void RemoveAllSpaceObjects( void);
 void CorrectAllBaseObjectColor( void);
-void ChangeObjectBaseType( spaceObjectType *, int32_t, int32_t, bool);
+void ChangeObjectBaseType( SpaceObject *, int32_t, int32_t, bool);
 
-int32_t CreateAnySpaceObject(int32_t, fixedPointType *, coordPointType *, int32_t, int32_t, uint32_t,
-                            int16_t);
+SpaceObject* CreateAnySpaceObject(
+        int32_t whichBase, fixedPointType *velocity, coordPointType *location, int32_t direction,
+        int32_t owner, uint32_t specialAttributes, int16_t spriteIDOverride);
 int32_t CountObjectsOfBaseType(int32_t, int32_t);
-int32_t GetNextObjectWithAttributes(int32_t, uint32_t, bool);
-void AlterObjectHealth( spaceObjectType *, int32_t);
-void AlterObjectEnergy( spaceObjectType *, int32_t);
-void AlterObjectBattery( spaceObjectType *, int32_t);
-void AlterObjectOwner( spaceObjectType *, int32_t, bool);
-void AlterObjectOccupation( spaceObjectType *, int32_t, int32_t, bool);
-void AlterObjectCloakState( spaceObjectType *, bool);
-void DestroyObject( spaceObjectType *);
-void ActivateObjectSpecial( spaceObjectType *);
-void CreateFloatingBodyOfPlayer( spaceObjectType *);
+void AlterObjectOwner( SpaceObject *, int32_t, bool);
+void AlterObjectOccupation( SpaceObject *, int32_t, int32_t, bool);
+void AlterObjectCloakState( SpaceObject *, bool);
+void DestroyObject( SpaceObject *);
+void CreateFloatingBodyOfPlayer( SpaceObject *);
 
-baseObjectType* mGetBaseObjectPtr(int32_t whichObject);
-spaceObjectType* mGetSpaceObjectPtr(int32_t whichObject);
+BaseObject* mGetBaseObjectPtr(int32_t whichObject);
+SpaceObject* mGetSpaceObjectPtr(int32_t whichObject);
 objectActionType* mGetObjectActionPtr(int32_t whichAction);
 
 void mGetBaseObjectFromClassRace(
-        baseObjectType*& mbaseObject, int32_t& mcount, int mbaseClass, int mbaseRace);
+        BaseObject*& mbaseObject, int32_t& mcount, int mbaseClass, int mbaseRace);
 
 sfz::StringSlice get_object_name(int16_t id);
 sfz::StringSlice get_object_short_name(int16_t id);

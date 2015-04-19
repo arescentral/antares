@@ -25,20 +25,28 @@
 
 namespace antares {
 
-spaceObjectType *HackNewNonplayerShip(int32_t, int16_t, Rect *);
+enum Allegiance {
+    FRIENDLY_OR_HOSTILE = 0,
+    FRIENDLY,
+    HOSTILE,
+};
+
+SpaceObject *HackNewNonplayerShip(int32_t, int16_t, Rect *);
 void fire_weapon(
-        spaceObjectType* subject, spaceObjectType* target,
-        const baseObjectType::Weapon& base_weapon, spaceObjectType::Weapon& weapon);
+        SpaceObject* subject, SpaceObject* target,
+        const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon);
 void NonplayerShipThink(int32_t);
 void UpdateMyNonplayerShip( void);
 void HackShowShipID( void);
-void HitObject( spaceObjectType *, spaceObjectType *);
+void HitObject( SpaceObject *, SpaceObject *);
 int32_t GetManualSelectObject(
-        spaceObjectType *sourceObject, int32_t direction, uint32_t inclusiveAttributes,
-        uint32_t anyOneAttribute, uint32_t exclusiveAttributes,
-        const uint64_t* fartherThan, int32_t currentShipNum, int16_t friendOrFoe);
-int32_t GetSpritePointSelectObject( Rect *, spaceObjectType *, uint32_t,
-                            uint32_t, uint32_t, int32_t, int16_t);
+        SpaceObject *sourceObject, int32_t direction,
+        uint32_t inclusiveAttributes, uint32_t exclusiveAttributes,
+        const uint64_t* fartherThan, int32_t currentShipNum, Allegiance allegiance);
+int32_t GetSpritePointSelectObject(
+        Rect *bounds, SpaceObject *sourceObject,
+        uint32_t anyOneAttribute,
+        int32_t currentShipNum, Allegiance allegiance);
 
 }  // namespace antares
 

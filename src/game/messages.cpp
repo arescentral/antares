@@ -570,7 +570,7 @@ void MessageLabel_Set_Special(int16_t id, const StringSlice& text) {
 
       case 'O':
         {
-            spaceObjectType* o = GetObjectFromInitialNumber(value);
+            SpaceObject* o = GetObjectFromInitialNumber(value);
             Labels::set_offset(id, -(Labels::get_width(id)/2), 64);
             Labels::set_object(id, o);
 

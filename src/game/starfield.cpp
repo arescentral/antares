@@ -46,7 +46,7 @@ const uint8_t kStarColor = GRAY;
 
 // This object is also used for the radar center, and for zoom to hostile and object modes.  It
 // would be preferable for it to be entirely private to the starfield.
-spaceObjectType* gScrollStarObject = NULL;
+SpaceObject* gScrollStarObject = NULL;
 
 namespace {
 

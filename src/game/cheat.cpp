@@ -72,7 +72,7 @@ int16_t GetCheatNumFromString(const StringSlice& s) {
 void ExecuteCheat( int16_t whichCheat, int32_t whichPlayer)
 {
     int32_t                    i;
-    spaceObjectType *anObject = NULL;
+    SpaceObject *anObject = NULL;
 
     if ( whichCheat == kNameObjectCheat)
     {

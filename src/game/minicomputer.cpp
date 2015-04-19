@@ -212,7 +212,7 @@ inline int32_t mGetLineNumFromV(int32_t mV) {
 
 // for copying the fields of a space object relevant to the miniscreens:
 inline void mCopyMiniSpaceObject(
-        spaceObjectType& mdestobject, const spaceObjectType& msourceobject) {
+        SpaceObject& mdestobject, const SpaceObject& msourceobject) {
     (mdestobject).id = (msourceobject).id;
     (mdestobject).beam.type = (msourceobject).beam.type;
     (mdestobject).pulse.type = (msourceobject).pulse.type;
@@ -221,8 +221,8 @@ inline void mCopyMiniSpaceObject(
     (mdestobject).destinationLocation.v = (msourceobject).destinationLocation.v;
     (mdestobject).destinationObject = (msourceobject).destinationObject;
     (mdestobject).destObjectPtr = (msourceobject).destObjectPtr;
-    (mdestobject).health = (msourceobject).health;
-    (mdestobject).energy = (msourceobject).energy;
+    (mdestobject)._health = (msourceobject).health();
+    (mdestobject)._energy = (msourceobject).energy();
     (mdestobject).whichBaseObject = (msourceobject).whichBaseObject;
     (mdestobject).pixResID = (msourceobject).pixResID;
     (mdestobject).attributes = (msourceobject).attributes;
@@ -245,7 +245,7 @@ inline void mCopyBlankLineString(miniScreenLineType* mline, StringSlice mstring)
     }
 }
 
-inline spaceObjectType* mGetMiniObjectPtr(int32_t mwhich) {
+inline SpaceObject* mGetMiniObjectPtr(int32_t mwhich) {
     return globals()->gMiniScreenData.objectData.get() + mwhich;
 }
 
@@ -263,7 +263,7 @@ void MiniScreenInit() {
     globals()->gMiniScreenData.clickLine = kMiniScreenNoLineSelected;
 
     globals()->gMiniScreenData.lineData.reset(new miniScreenLineType[kMiniScreenTrueLineNum]);
-    globals()->gMiniScreenData.objectData.reset(new spaceObjectType[kMiniObjectDataNum]);
+    globals()->gMiniScreenData.objectData.reset(new SpaceObject[kMiniObjectDataNum]);
 
     ClearMiniScreenLines();
     ClearMiniObjectData();
@@ -306,7 +306,7 @@ void ClearMiniScreenLines() {
 void ClearMiniObjectData( void)
 
 {
-    spaceObjectType *o;
+    SpaceObject *o;
 
     o = mGetMiniObjectPtr( kMiniSelectObjectNum);
     o->id = -1;
@@ -316,8 +316,8 @@ void ClearMiniObjectData( void)
     o->destinationLocation.h = o->destinationLocation.v = -1;
     o->destinationObject = -1;
     o->destObjectPtr = NULL;
-    o->health = 0;
-    o->energy = 0;
+    o->_health = 0;
+    o->_energy = 0;
     o->whichBaseObject = -1;
     o->pixResID = -1;
     o->attributes = 0;
@@ -331,8 +331,8 @@ void ClearMiniObjectData( void)
     o->destinationLocation.h = o->destinationLocation.v = -1;
     o->destinationObject = -1;
     o->destObjectPtr = NULL;
-    o->health = 0;
-    o->energy = 0;
+    o->_health = 0;
+    o->_energy = 0;
     o->whichBaseObject = -1;
     o->pixResID = -1;
     o->attributes = 0;
@@ -639,7 +639,7 @@ void MiniComputerHandleNull( int32_t unitsToDo)
 {
     destBalanceType     *buildAtObject = NULL;
     int32_t                count;
-    spaceObjectType     *realObject = NULL, *myObject = NULL, newObject;
+    SpaceObject     *realObject = NULL, *myObject = NULL, newObject;
 
     globals()->gMiniScreenData.pollTime += unitsToDo;
     if ( globals()->gMiniScreenData.pollTime > kMiniComputerPollTime)
@@ -664,8 +664,8 @@ void MiniComputerHandleNull( int32_t unitsToDo)
             newObject.destinationLocation.h = newObject.destinationLocation.v = -1;
             newObject.destinationObject = -1;
             newObject.destObjectPtr = NULL;
-            newObject.health = 0;
-            newObject.energy = 0;
+            newObject._health = 0;
+            newObject._energy = 0;
             newObject.whichBaseObject = -1;
             newObject.pixResID = -1;
             newObject.attributes = 0;
@@ -688,8 +688,8 @@ void MiniComputerHandleNull( int32_t unitsToDo)
             newObject.destinationLocation.h = newObject.destinationLocation.v = -1;
             newObject.destinationObject = -1;
             newObject.destObjectPtr = NULL;
-            newObject.health = 0;
-            newObject.energy = 0;
+            newObject._health = 0;
+            newObject._energy = 0;
             newObject.whichBaseObject = -1;
             newObject.pixResID = -1;
             newObject.attributes = 0;
@@ -720,7 +720,7 @@ void UpdateMiniScreenLines( void)
 {
     admiralType         *admiral = NULL;
     miniScreenLineType  *line = NULL;
-    baseObjectType      *buildObject = NULL;
+    BaseObject*         buildObject = NULL;
     int32_t                lineNum, count;
     Rect                mRect;
 
@@ -831,7 +831,7 @@ void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) 
 }
 
 void draw_mini_ship_data(
-        const spaceObjectType& newObject, uint8_t headerColor,
+        const SpaceObject& newObject, uint8_t headerColor,
         int16_t screenTop, int16_t whichString) {
     Rect lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, 0, 0, kMiniScreenWidth);
     RgbColor color = GetRGBTranslateColorShade(headerColor, LIGHT);
@@ -908,15 +908,15 @@ void draw_mini_ship_data(
     draw_vbracket(dRect, color);
 
     if (newObject.baseType != NULL) {
-        if ((newObject.baseType->health > 0) && (newObject.health > 0)) {
+        if ((newObject.max_health() > 0) && (newObject.health() > 0)) {
             Rect dRect;
             dRect.left = kMiniHealthLeft;
             dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
             dRect.right = dRect.left + kMiniBarWidth;
             dRect.bottom = dRect.top + kMiniIconHeight;
 
-            uint32_t tlong = newObject.health * kMiniBarHeight;
-            tlong /= newObject.baseType->health;
+            uint32_t tlong = newObject.health() * kMiniBarHeight;
+            tlong /= newObject.max_health();
 
             color = GetRGBTranslateColorShade(SKY_BLUE, DARK);
 
@@ -937,15 +937,15 @@ void draw_mini_ship_data(
     }
 
     if (newObject.baseType != NULL) {
-        if ((newObject.baseType->energy > 0) && (newObject.energy > 0)) {
+        if ((newObject.max_energy() > 0) && (newObject.energy() > 0)) {
             Rect dRect;
             dRect.left = kMiniEnergyLeft;
             dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
             dRect.right = dRect.left + kMiniBarWidth;
             dRect.bottom = dRect.top + kMiniIconHeight;
 
-            uint32_t tlong = newObject.energy * kMiniBarHeight;
-            tlong /= newObject.baseType->energy;
+            uint32_t tlong = newObject.energy() * kMiniBarHeight;
+            tlong /= newObject.max_energy();
 
             color = GetRGBTranslateColorShade(YELLOW, DARK);
 
@@ -1009,7 +1009,7 @@ void draw_mini_ship_data(
     // write the name
     if (newObject.destinationObject >= 0) {
         if (newObject.destObjectPtr != NULL) {
-            spaceObjectType* dObject = newObject.destObjectPtr;
+            SpaceObject* dObject = newObject.destObjectPtr;
 
             // get the color for writing the name
             if (dObject->owner == globals()->gPlayerAdmiralNumber) {
@@ -1041,7 +1041,7 @@ void MiniComputerDoAccept() {
 void MiniComputerExecute( int32_t whichPage, int32_t whichLine, int32_t whichAdmiral)
 
 {
-    spaceObjectType *anObject, *anotherObject;
+    SpaceObject *anObject, *anotherObject;
     int32_t            l;
 
     switch ( whichPage)
@@ -1246,7 +1246,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 // also sets up the values = base object num
 
 {
-    baseObjectType      *buildObject = NULL;
+    BaseObject*         buildObject = NULL;
     admiralType         *admiral = NULL;
     destBalanceType     *buildAtObject = NULL;
     miniScreenLineType  *line = NULL;
@@ -1338,7 +1338,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 int32_t MiniComputerGetPriceOfCurrentSelection( void)
 {
     miniScreenLineType  *line = NULL;
-    baseObjectType      *buildObject = NULL;
+    BaseObject*         buildObject = NULL;
 
     if (( globals()->gMiniScreenData.currentScreen != kBuildMiniScreen) ||
             ( globals()->gMiniScreenData.selectLine == kMiniScreenNoLineSelected))

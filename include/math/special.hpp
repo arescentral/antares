@@ -35,6 +35,11 @@ inline void MyWideMul(int32_t mlong1, int32_t mlong2, T* mwide) {
     *mwide = implicit_cast<int64_t>(mlong1) * implicit_cast<int64_t>(mlong2);
 }
 
+template <typename T>
+inline T MyWideMul(int32_t mlong1, int32_t mlong2) {
+    return implicit_cast<int64_t>(mlong1) * implicit_cast<int64_t>(mlong2);
+}
+
 int32_t AngleFromSlope(Fixed slope);
 
 }  // namespace antares

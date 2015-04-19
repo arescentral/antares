@@ -62,7 +62,7 @@ struct Labels::screenLabelType {
     bool                killMe;
     bool                visible;
     int32_t             whichObject;
-    spaceObjectType*    object;
+    SpaceObject*        object;
     bool                objectLink;     // true if label requires an object to be seen
     int32_t             lineNum;
     int32_t             lineHeight;
@@ -112,7 +112,7 @@ Labels::screenLabelType::screenLabelType() {
 }
 
 int16_t Labels::add(
-        int16_t h, int16_t v, int16_t hoff, int16_t voff, spaceObjectType* object, bool objectLink,
+        int16_t h, int16_t v, int16_t hoff, int16_t voff, SpaceObject* object, bool objectLink,
         uint8_t color) {
     screenLabelType* label = NULL;
 
@@ -141,7 +141,7 @@ int16_t Labels::add(
             label->visible = false;
         } else {
             label->visible = true;
-            label->whichObject = object->entryNumber;
+            label->whichObject = object->number();
         }
     } else {
         label->visible = true;
@@ -364,14 +364,14 @@ void Labels::update_positions(int32_t units_done) {
     }
 }
 
-void Labels::set_object(int32_t which, spaceObjectType *object) {
+void Labels::set_object(int32_t which, SpaceObject *object) {
     screenLabelType *label = data + which;
     label->object = object;
 
     if (label->object != NULL) {
         label->age = 0;
         label->visible = true;
-        label->whichObject = object->entryNumber;
+        label->whichObject = object->number();
     } else {
         label->visible = false;
         label->age = 0;

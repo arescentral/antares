@@ -93,7 +93,7 @@ void AddBaseObjectActionMedia(
 void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors);
 
 void SetAllBaseObjectsUnchecked() {
-    baseObjectType  *aBase = mGetBaseObjectPtr(0);
+    BaseObject* aBase = mGetBaseObjectPtr(0);
     for (int32_t count = 0; count < globals()->maxBaseObject; count++) {
         aBase->internalFlags = 0;
         aBase++;
@@ -104,7 +104,7 @@ void AddBaseObjectMedia(int32_t whichBase, uint8_t color, uint32_t all_colors) {
 #ifdef DATA_COVERAGE
     possible_objects.insert(whichBase);
 #endif  // DATA_COVERAGE
-    baseObjectType      *aBase = mGetBaseObjectPtr(whichBase);
+    BaseObject* aBase = mGetBaseObjectPtr(whichBase);
 
     if (!(aBase->attributes & kCanThink)) {
         color = GRAY;
@@ -139,30 +139,30 @@ void AddBaseObjectMedia(int32_t whichBase, uint8_t color, uint32_t all_colors) {
 }
 
 objectActionType* mGetActionFromBaseTypeNum(
-        const baseObjectType& mbaseObjPtr, int32_t mactionType, int32_t mactionNum) {
+        const BaseObject& mbaseObjPtr, int32_t mactionType, int32_t mactionNum) {
     if (mactionType == kDestroyActionType) {
-        if (mactionNum < (mbaseObjPtr.destroyActionNum & kDestroyActionNotMask)) {
-            return mGetObjectActionPtr(mbaseObjPtr.destroyAction + mactionNum);
+        if (mactionNum < mbaseObjPtr.destroy.count) {
+            return mGetObjectActionPtr(mbaseObjPtr.destroy.start + mactionNum);
         }
     } else if (mactionType == kExpireActionType) {
-        if (mactionNum < (mbaseObjPtr.expireActionNum  & kDestroyActionNotMask)) {
-            return mGetObjectActionPtr(mbaseObjPtr.expireAction + mactionNum);
+        if (mactionNum < mbaseObjPtr.expire.count) {
+            return mGetObjectActionPtr(mbaseObjPtr.expire.start + mactionNum);
         }
     } else if (mactionType == kCreateActionType) {
-        if (mactionNum < mbaseObjPtr.createActionNum) {
-            return mGetObjectActionPtr(mbaseObjPtr.createAction + mactionNum);
+        if (mactionNum < mbaseObjPtr.create.count) {
+            return mGetObjectActionPtr(mbaseObjPtr.create.start + mactionNum);
         }
     } else if (mactionType == kCollideActionType) {
-        if (mactionNum < mbaseObjPtr.collideActionNum) {
-            return mGetObjectActionPtr(mbaseObjPtr.collideAction + mactionNum);
+        if (mactionNum < mbaseObjPtr.collide.count) {
+            return mGetObjectActionPtr(mbaseObjPtr.collide.start + mactionNum);
         }
     } else if (mactionType == kActivateActionType) {
-        if (mactionNum < (mbaseObjPtr.activateActionNum & kPeriodicActionNotMask)) {
-            return mGetObjectActionPtr(mbaseObjPtr.activateAction + mactionNum);
+        if (mactionNum < mbaseObjPtr.activate.count) {
+            return mGetObjectActionPtr(mbaseObjPtr.activate.start + mactionNum);
         }
     } else if (mactionType == kArriveActionType) {
-        if (mactionNum < mbaseObjPtr.arriveActionNum) {
-            return mGetObjectActionPtr(mbaseObjPtr.arriveAction + mactionNum);
+        if (mactionNum < mbaseObjPtr.arrive.count) {
+            return mGetObjectActionPtr(mbaseObjPtr.arrive.start + mactionNum);
         }
     }
     return nullptr;
@@ -171,7 +171,7 @@ objectActionType* mGetActionFromBaseTypeNum(
 void AddBaseObjectActionMedia(
         int32_t whichBase, int32_t whichType, uint8_t color, uint32_t all_colors) {
     for (int count = 0; ; ++count) {
-        const baseObjectType& baseObject = *mGetBaseObjectPtr(whichBase);
+        const BaseObject& baseObject = *mGetBaseObjectPtr(whichBase);
         auto* action = mGetActionFromBaseTypeNum(baseObject, whichType, count);
         if (!action) {
             break;
@@ -182,7 +182,7 @@ void AddBaseObjectActionMedia(
 }
 
 void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors) {
-    baseObjectType      *baseObject = NULL;
+    BaseObject*         baseObject = NULL;
     int32_t             count = 0, l1, l2;
 #ifdef DATA_COVERAGE
         possible_actions.insert(action - mGetObjectActionPtr(0));
@@ -277,7 +277,7 @@ void set_initial_destination(const Scenario::InitialObject* initial, bool preser
 
         // now give the mapped initial object the admiral's destination
 
-        spaceObjectType* object = mGetSpaceObjectPtr(initial->realObjectNumber);
+        SpaceObject* object = mGetSpaceObjectPtr(initial->realObjectNumber);
         uint32_t specialAttributes = object->attributes; // preserve the attributes
         object->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
         SetObjectDestination(object, NULL);
@@ -368,8 +368,8 @@ bool Scenario::Condition::true_yet() const {
 }
 
 bool Scenario::Condition::is_true() const {
-    spaceObjectType* sObject = nullptr;
-    spaceObjectType* dObject = nullptr;
+    SpaceObject* sObject = nullptr;
+    SpaceObject* dObject = nullptr;
     int32_t i, l, difference;
     uint32_t distance, dcalc;
 
@@ -467,7 +467,7 @@ bool Scenario::Condition::is_true() const {
             sObject = GetObjectFromInitialNumber(subjectObject);
             if (sObject == NULL) {
                 return true;
-            } else if (sObject->health <= (sObject->baseType->health >> 1)) {
+            } else if (sObject->health() <= (sObject->max_health() >> 1)) {
                 return true;
             }
             break;
@@ -571,7 +571,7 @@ bool Scenario::Condition::is_true() const {
         case kSubjectIsPlayerCondition:
             sObject = GetObjectFromInitialNumber(subjectObject);
             if (sObject != NULL) {
-                if (sObject->entryNumber == globals()->gPlayerShipNumber) {
+                if (sObject->number() == globals()->gPlayerShipNumber) {
                     return true;
                 }
             }
@@ -750,7 +750,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
 
         Scenario::InitialObject* initial = gThisScenario->initial(i);
         int32_t type = initial->type;
-        baseObjectType* baseObject = mGetBaseObjectPtr(type);
+        BaseObject* baseObject = mGetBaseObjectPtr(type);
         // TODO(sfiera): remap objects in networked games.
 
         // Load the media for this object
@@ -802,10 +802,10 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
     if (step == 0) {
         for (int i = 0; i < gThisScenario->conditionNum; i++) {
             Scenario::Condition* condition = gThisScenario->condition(i);
-            objectActionType* action = mGetObjectActionPtr(condition->startVerb);
-            for (int j = 0; j < condition->verbNum; j++) {
+            objectActionType* action = mGetObjectActionPtr(condition->action.start);
+            for (int j = 0; j < condition->action.count; j++) {
                 condition = gThisScenario->condition(i);
-                action = mGetObjectActionPtr(condition->startVerb + j);
+                action = mGetObjectActionPtr(condition->action.start + j);
                 AddActionMedia(action, GRAY, all_colors);
             }
             condition->set_true_yet(condition->flags & kInitiallyTrue);
@@ -846,9 +846,9 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         int32_t newShipNum;
         initial->realObjectNumber = newShipNum = CreateAnySpaceObject(
                 type, &v, &coord, gScenarioRotation, owner, specialAttributes,
-                initial->spriteIDOverride);
+                initial->spriteIDOverride)->number();
 
-        spaceObjectType* anObject = mGetSpaceObjectPtr(newShipNum);
+        SpaceObject* anObject = mGetSpaceObjectPtr(newShipNum);
         if (anObject->attributes & kIsDestination) {
             anObject->destinationObject = MakeNewDestination(
                     newShipNum, initial->canBuild, initial->earning, initial->nameResID,
@@ -955,7 +955,7 @@ void CheckScenarioConditions(int32_t timePass) {
             auto sObject = GetObjectFromInitialNumber(c->subjectObject);
             auto dObject = GetObjectFromInitialNumber(c->directObject);
             Point offset;
-            execute_actions(c->startVerb, c->verbNum, sObject, dObject, &offset, true);
+            c->action.run(sObject, dObject, &offset);
         }
     }
 }
@@ -992,7 +992,7 @@ void UnhideInitialObject(int32_t whichInitial) {
     // TODO(sfiera): remap objects in networked games.
     fixedPointType v = {0, 0};
     int32_t newShipNum = CreateAnySpaceObject(
-            type, &v, &coord, 0, owner, specialAttributes, initial->spriteIDOverride);
+            type, &v, &coord, 0, owner, specialAttributes, initial->spriteIDOverride)->number();
     initial->realObjectNumber = newShipNum;
 
     auto anObject = mGetSpaceObjectPtr(newShipNum);
@@ -1028,11 +1028,11 @@ void UnhideInitialObject(int32_t whichInitial) {
     set_initial_destination(initial, true);
 }
 
-spaceObjectType *GetObjectFromInitialNumber(int32_t initialNumber) {
+SpaceObject *GetObjectFromInitialNumber(int32_t initialNumber) {
     if (initialNumber >= 0) {
         Scenario::InitialObject* initial = gThisScenario->initial(initialNumber);
         if (initial->realObjectNumber >= 0) {
-            spaceObjectType& object = *mGetSpaceObjectPtr(initial->realObjectNumber);
+            SpaceObject& object = *mGetSpaceObjectPtr(initial->realObjectNumber);
             if ((object.id != initial->realObjectID) || (object.active != kObjectInUse)) {
                 return NULL;
             }
@@ -1040,7 +1040,7 @@ spaceObjectType *GetObjectFromInitialNumber(int32_t initialNumber) {
         }
         return NULL;
     } else if (initialNumber == -2) {
-        spaceObjectType& object = *mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+        SpaceObject& object = *mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
         if ((!object.active) || (!(object.attributes & kCanThink))) {
             return NULL;
         }
