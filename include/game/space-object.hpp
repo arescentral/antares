@@ -45,12 +45,12 @@ void AlterObjectCloakState( SpaceObject *, bool);
 void DestroyObject( SpaceObject *);
 void CreateFloatingBodyOfPlayer( SpaceObject *);
 
-baseObjectType* mGetBaseObjectPtr(int32_t whichObject);
+BaseObject* mGetBaseObjectPtr(int32_t whichObject);
 SpaceObject* mGetSpaceObjectPtr(int32_t whichObject);
 objectActionType* mGetObjectActionPtr(int32_t whichAction);
 
 void mGetBaseObjectFromClassRace(
-        baseObjectType*& mbaseObject, int32_t& mcount, int mbaseClass, int mbaseRace);
+        BaseObject*& mbaseObject, int32_t& mcount, int mbaseClass, int mbaseRace);
 
 sfz::StringSlice get_object_name(int16_t id);
 sfz::StringSlice get_object_short_name(int16_t id);

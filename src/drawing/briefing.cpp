@@ -50,7 +50,7 @@ void GetInitialObjectSpriteData(
         coordPointType *corner, int32_t scale, int32_t *thisScale, Point *where, Rect *spriteRect);
 
 void GetRealObjectSpriteData(
-        coordPointType *realCoord, baseObjectType *baseObject, int32_t owner, int32_t spriteOverride,
+        coordPointType *realCoord, BaseObject* baseObject, int32_t owner, int32_t spriteOverride,
         int32_t maxSize, Rect *bounds, coordPointType *corner, int32_t scale, int32_t *thisScale,
         const NatePixTable::Frame** frame, Point *where, Rect *spriteRect);
 
@@ -226,7 +226,7 @@ void GetInitialObjectSpriteData(
 }
 
 void GetRealObjectSpriteData(
-        coordPointType *realCoord, baseObjectType *baseObject, int32_t owner, int32_t spriteOverride,
+        coordPointType *realCoord, BaseObject* baseObject, int32_t owner, int32_t spriteOverride,
         int32_t maxSize, Rect *bounds, coordPointType *corner, int32_t scale, int32_t *thisScale,
         const NatePixTable::Frame** frame, Point *where, Rect *spriteRect) {
     NatePixTable* pixTable;
@@ -319,7 +319,7 @@ static void render_briefing_with(
     int32_t        count, thisScale, gridWidth, gridHeight, i, j, color;
     Point       where;
     Rect    spriteRect, clipRect;
-    baseObjectType  *baseObject = NULL;
+    BaseObject*  baseObject = NULL;
     bool         *gridCells = NULL;
     briefingSpriteBoundsType    *sBounds = NULL;
 

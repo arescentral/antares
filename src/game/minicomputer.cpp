@@ -720,7 +720,7 @@ void UpdateMiniScreenLines( void)
 {
     admiralType         *admiral = NULL;
     miniScreenLineType  *line = NULL;
-    baseObjectType      *buildObject = NULL;
+    BaseObject*         buildObject = NULL;
     int32_t                lineNum, count;
     Rect                mRect;
 
@@ -1246,7 +1246,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 // also sets up the values = base object num
 
 {
-    baseObjectType      *buildObject = NULL;
+    BaseObject*         buildObject = NULL;
     admiralType         *admiral = NULL;
     destBalanceType     *buildAtObject = NULL;
     miniScreenLineType  *line = NULL;
@@ -1338,7 +1338,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 int32_t MiniComputerGetPriceOfCurrentSelection( void)
 {
     miniScreenLineType  *line = NULL;
-    baseObjectType      *buildObject = NULL;
+    BaseObject*         buildObject = NULL;
 
     if (( globals()->gMiniScreenData.currentScreen != kBuildMiniScreen) ||
             ( globals()->gMiniScreenData.selectLine == kMiniScreenNoLineSelected))

@@ -37,7 +37,7 @@ static const int32_t kPeriodicActionRangeShift = 16;
 static const uint32_t kDestroyActionNotMask        = 0x7fffffff;
 static const uint32_t kDestroyActionDontDieFlag    = 0x80000000;
 
-void read_from(ReadSource in, baseObjectType& object) {
+void read_from(ReadSource in, BaseObject& object) {
     uint8_t section[32];
 
     read(in, object.attributes);

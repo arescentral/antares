@@ -88,7 +88,7 @@ static void queue_action(
         int32_t delayTime, SpaceObject *subjectObject,
         SpaceObject *directObject, Point* offset);
 
-bool action_filter_applies_to(const objectActionType& action, const baseObjectType& target) {
+bool action_filter_applies_to(const objectActionType& action, const BaseObject& target) {
     if (action.exclusiveFilter == 0xffffffff) {
         return action.levelKeyTag == target.levelKeyTag;
     } else {
@@ -268,7 +268,7 @@ static void alter(
     Fixed f, f2, aFixed;
     int16_t angle;
     coordPointType newLocation;
-    baseObjectType* baseObject;
+    BaseObject* baseObject;
     switch (alter.alterType) {
         case kAlterDamage:
             focus->alter_health(alter.minimum);

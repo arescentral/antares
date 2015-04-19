@@ -84,7 +84,7 @@ struct destBalanceType {
 };
 
 struct admiralBuildType {
-    baseObjectType*     base;
+    BaseObject*         base;
     int32_t             baseNum;
     Fixed               chanceRange;
 };

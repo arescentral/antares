@@ -70,7 +70,7 @@ SpaceObject* gRootObject = NULL;
 int32_t gRootObjectNumber = -1;
 
 static unique_ptr<SpaceObject[]> gSpaceObjectData;
-static unique_ptr<baseObjectType[]> gBaseObjectData;
+static unique_ptr<BaseObject[]> gBaseObjectData;
 static unique_ptr<objectActionType[]> gObjectActionData;
 
 #ifdef DATA_COVERAGE
@@ -96,9 +96,9 @@ void SpaceObjectHandlingInit() {
     {
         Resource rsrc("objects", "bsob", kBaseObjectResID);
         BytesSlice in(rsrc.data());
-        size_t count = rsrc.data().size() / baseObjectType::byte_size;
+        size_t count = rsrc.data().size() / BaseObject::byte_size;
         globals()->maxBaseObject = count;
-        gBaseObjectData.reset(new baseObjectType[count]);
+        gBaseObjectData.reset(new BaseObject[count]);
         for (size_t i = 0; i < count; ++i) {
             read(in, gBaseObjectData[i]);
         }
@@ -129,7 +129,7 @@ void ResetAllSpaceObjects() {
     }
 }
 
-baseObjectType* mGetBaseObjectPtr(int32_t whichObject) {
+BaseObject* mGetBaseObjectPtr(int32_t whichObject) {
     if (whichObject >= 0) {
         return gBaseObjectData.get() + whichObject;
     }
@@ -151,7 +151,7 @@ objectActionType* mGetObjectActionPtr(int32_t whichAction) {
 }
 
 void mGetBaseObjectFromClassRace(
-        baseObjectType*& mbaseObject, int32_t& mcount, int mbaseClass, int mbaseRace) {
+        BaseObject*& mbaseObject, int32_t& mcount, int mbaseClass, int mbaseRace) {
     mcount = 0;
     if ( mbaseClass >= kLiteralClass)
     {
@@ -295,7 +295,7 @@ void RemoveAllSpaceObjects( void)
 void CorrectAllBaseObjectColor( void)
 
 {
-    baseObjectType  *aBase = gBaseObjectData.get();
+    BaseObject*     aBase = gBaseObjectData.get();
     int16_t         i;
 
     for ( i = 0; i < globals()->maxBaseObject; i++)
@@ -483,7 +483,7 @@ SpaceObject::SpaceObject(
 void ChangeObjectBaseType(
         SpaceObject *obj, int32_t whichBaseObject, int32_t spriteIDOverride,
         bool relative) {
-    baseObjectType  *base = mGetBaseObjectPtr(whichBaseObject);
+    BaseObject*     base = mGetBaseObjectPtr(whichBaseObject);
     int16_t         angle;
     int32_t         r;
     NatePixTable* spriteTable;
@@ -946,7 +946,7 @@ int32_t SpaceObject::number() const {
     return this - mGetSpaceObjectPtr(0);
 }
 
-static baseObjectType kZeroBaseObject;
+static BaseObject kZeroBaseObject;
 
 SpaceObject::SpaceObject(ZeroObject) {
     memset(this, 0, sizeof(*this));

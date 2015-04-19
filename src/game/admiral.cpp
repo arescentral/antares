@@ -272,7 +272,7 @@ void RemoveDestination(int32_t whichDestination) {
 void RecalcAllAdmiralBuildData() {
     admiralType* a = globals()->gAdmiralData.get();
     SpaceObject* anObject= NULL;
-    baseObjectType* baseObject = NULL;
+    BaseObject* baseObject = NULL;
     destBalanceType* d = mGetDestObjectBalancePtr(0);
     int32_t l;
 
@@ -798,7 +798,7 @@ void AdmiralThink() {
     destBalanceType* destBalance;
     int32_t origObject, origDest, baseNum, difference;
     Fixed  friendValue, foeValue, thisValue;
-    baseObjectType* baseObject;
+    BaseObject* baseObject;
     Point gridLoc;
 
     destBalance = mGetDestObjectBalancePtr(0);
@@ -1302,7 +1302,7 @@ void AdmiralBuildAtObject(int32_t whichAdmiral, int32_t baseTypeNum, int32_t whi
 bool AdmiralScheduleBuild(int32_t whichAdmiral, int32_t buildWhichType) {
     admiralType* admiral = globals()->gAdmiralData.get() + whichAdmiral;
     destBalanceType* buildAtDest = mGetDestObjectBalancePtr(admiral->buildAtObject);
-    baseObjectType* buildBaseObject = NULL;
+    BaseObject* buildBaseObject = NULL;
     int32_t            baseNum;
 
     GetAdmiralBuildAtObject(whichAdmiral);

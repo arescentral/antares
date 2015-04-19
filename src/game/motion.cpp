@@ -169,7 +169,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
     int16_t                 angle;
     uint32_t                shortDist, thisDist, longDist;
     SpaceObject*            anObject;
-    baseObjectType          *baseObject;
+    BaseObject*             baseObject;
 
     if ( unitsToDo == 0) return;
 

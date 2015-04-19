@@ -69,10 +69,10 @@ enum {
     kNeutralColor   = SKY_BLUE,
 };
 
-uint32_t ThinkObjectNormalPresence( SpaceObject *, baseObjectType *, int32_t);
+uint32_t ThinkObjectNormalPresence( SpaceObject *, BaseObject *, int32_t);
 uint32_t ThinkObjectWarpingPresence( SpaceObject *);
 uint32_t ThinkObjectWarpInPresence( SpaceObject *);
-uint32_t ThinkObjectWarpOutPresence( SpaceObject *, baseObjectType *);
+uint32_t ThinkObjectWarpOutPresence( SpaceObject *, BaseObject *);
 uint32_t ThinkObjectLandingPresence( SpaceObject *);
 void ThinkObjectGetCoordVector( SpaceObject *, coordPointType *, uint32_t *, int16_t *);
 void ThinkObjectGetCoordDistance( SpaceObject *, coordPointType *, uint32_t *);
@@ -119,7 +119,7 @@ void SpaceObject::recharge() {
 
 static void tick_weapon(
         SpaceObject* subject, SpaceObject* target, int32_t timePass,
-        uint32_t key, const baseObjectType::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
+        uint32_t key, const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
     if (weapon.time > 0) {
         weapon.time -= timePass;
     }
@@ -130,13 +130,13 @@ static void tick_weapon(
 
 void fire_weapon(
         SpaceObject* subject, SpaceObject* target,
-        const baseObjectType::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
+        const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
     if ((weapon.time > 0) || (weapon.type == kNoWeapon)) {
         return;
     }
 
-    baseObjectType* baseObject = subject->baseType;
-    baseObjectType* weaponObject = weapon.base;
+    BaseObject* baseObject = subject->baseType;
+    BaseObject* weaponObject = weapon.base;
     if ((subject->energy() < weaponObject->frame.weapon.energyCost)
             || ((weaponObject->frame.weapon.ammo > 0) && (weapon.ammo <= 0))) {
         return;
@@ -192,8 +192,9 @@ static void tick_special(SpaceObject* subject, SpaceObject* target, int32_t time
 void NonplayerShipThink(int32_t timePass)
 {
     admiralType     *anAdmiral;
-    SpaceObject *targetObject;
-    baseObjectType  *baseObject, *weaponObject;
+    SpaceObject*    targetObject;
+    BaseObject*     baseObject;
+    BaseObject*     weaponObject;
     Point           offset;
     int32_t         count, difference;
     uint32_t        keysDown;
@@ -483,10 +484,11 @@ uint32_t use_weapons_for_defense(SpaceObject* obj) {
 }
 
 uint32_t ThinkObjectNormalPresence(
-        SpaceObject *anObject, baseObjectType *baseObject, int32_t timePass) {
+        SpaceObject *anObject, BaseObject* baseObject, int32_t timePass) {
     uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask, distance, dcalc;
-    SpaceObject *targetObject;
-    baseObjectType  *bestWeapon, *weaponObject;
+    SpaceObject*    targetObject;
+    BaseObject*     bestWeapon;
+    BaseObject*     weaponObject;
     coordPointType  dest;
     int32_t         difference;
     Fixed           slope;
@@ -998,8 +1000,7 @@ uint32_t ThinkObjectWarpingPresence( SpaceObject *anObject)
     return( keysDown);
 }
 
-uint32_t ThinkObjectWarpOutPresence( SpaceObject *anObject, baseObjectType *baseObject)
-{
+uint32_t ThinkObjectWarpOutPresence(SpaceObject* anObject, BaseObject* baseObject) {
     uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask;
     Fixed           calcv, fdist;
     fixedPointType  newVel;
@@ -1534,7 +1535,8 @@ uint32_t ThinkObjectEngageTarget( SpaceObject *anObject, SpaceObject *targetObje
     uint32_t distance, int16_t *theta, int32_t timePass)
 {
     uint32_t        keysDown = 0;
-    baseObjectType  *bestWeapon, *weaponObject;
+    BaseObject*     bestWeapon;
+    BaseObject*     weaponObject;
     coordPointType  dest;
     int32_t         difference;
     int16_t         angle, beta;

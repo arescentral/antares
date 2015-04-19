@@ -93,7 +93,7 @@ void AddBaseObjectActionMedia(
 void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors);
 
 void SetAllBaseObjectsUnchecked() {
-    baseObjectType  *aBase = mGetBaseObjectPtr(0);
+    BaseObject* aBase = mGetBaseObjectPtr(0);
     for (int32_t count = 0; count < globals()->maxBaseObject; count++) {
         aBase->internalFlags = 0;
         aBase++;
@@ -104,7 +104,7 @@ void AddBaseObjectMedia(int32_t whichBase, uint8_t color, uint32_t all_colors) {
 #ifdef DATA_COVERAGE
     possible_objects.insert(whichBase);
 #endif  // DATA_COVERAGE
-    baseObjectType      *aBase = mGetBaseObjectPtr(whichBase);
+    BaseObject* aBase = mGetBaseObjectPtr(whichBase);
 
     if (!(aBase->attributes & kCanThink)) {
         color = GRAY;
@@ -139,7 +139,7 @@ void AddBaseObjectMedia(int32_t whichBase, uint8_t color, uint32_t all_colors) {
 }
 
 objectActionType* mGetActionFromBaseTypeNum(
-        const baseObjectType& mbaseObjPtr, int32_t mactionType, int32_t mactionNum) {
+        const BaseObject& mbaseObjPtr, int32_t mactionType, int32_t mactionNum) {
     if (mactionType == kDestroyActionType) {
         if (mactionNum < mbaseObjPtr.destroy.count) {
             return mGetObjectActionPtr(mbaseObjPtr.destroy.start + mactionNum);
@@ -171,7 +171,7 @@ objectActionType* mGetActionFromBaseTypeNum(
 void AddBaseObjectActionMedia(
         int32_t whichBase, int32_t whichType, uint8_t color, uint32_t all_colors) {
     for (int count = 0; ; ++count) {
-        const baseObjectType& baseObject = *mGetBaseObjectPtr(whichBase);
+        const BaseObject& baseObject = *mGetBaseObjectPtr(whichBase);
         auto* action = mGetActionFromBaseTypeNum(baseObject, whichType, count);
         if (!action) {
             break;
@@ -182,7 +182,7 @@ void AddBaseObjectActionMedia(
 }
 
 void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors) {
-    baseObjectType      *baseObject = NULL;
+    BaseObject*         baseObject = NULL;
     int32_t             count = 0, l1, l2;
 #ifdef DATA_COVERAGE
         possible_actions.insert(action - mGetObjectActionPtr(0));
@@ -750,7 +750,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
 
         Scenario::InitialObject* initial = gThisScenario->initial(i);
         int32_t type = initial->type;
-        baseObjectType* baseObject = mGetBaseObjectPtr(type);
+        BaseObject* baseObject = mGetBaseObjectPtr(type);
         // TODO(sfiera): remap objects in networked games.
 
         // Load the media for this object

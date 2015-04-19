@@ -52,7 +52,7 @@ struct miniScreenLineType {
     int32_t         whichStatus;
     int32_t         statusPlayer;
     int32_t         negativeValue;
-    baseObjectType* sourceData;
+    BaseObject*     sourceData;
 };
 
 void MiniScreenInit( void);

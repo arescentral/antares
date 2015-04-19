@@ -260,7 +260,7 @@ void read_from(sfz::ReadSource in, objectFrameType::Animation& animation);
 void read_from(sfz::ReadSource in, objectFrameType::Beam& beam);
 void read_from(sfz::ReadSource in, objectFrameType::Weapon& weapon);
 
-struct baseObjectType {
+struct BaseObject {
     uint32_t                attributes;                 // initial attributes (see flags)
     int32_t                 baseClass;
     int32_t                 baseRace;
@@ -347,7 +347,7 @@ struct baseObjectType {
 
     static const int byte_size = 318;
 };
-void read_from(sfz::ReadSource in, baseObjectType& object);
+void read_from(sfz::ReadSource in, BaseObject& object);
 
 enum dutyType {
     eNoDuty =           0,
@@ -366,7 +366,7 @@ class SpaceObject {
     SpaceObject() = default;
 
     uint32_t                attributes = 0;
-    baseObjectType          *baseType = nullptr;
+    BaseObject*             baseType = nullptr;
     int32_t                 whichBaseObject = -1;
     int32_t                 number() const;
 
@@ -494,7 +494,7 @@ class SpaceObject {
     int                     pixResID = -1;
 
     struct Weapon {
-        baseObjectType*         base;
+        BaseObject*             base;
         int32_t                 type = -1;
         int32_t                 time = 0;
         int32_t                 ammo = 0;
