@@ -79,9 +79,6 @@ static int32_t gFirstActionQueueNumber = -1;
 
 static unique_ptr<actionQueueType[]> gActionQueueData;
 
-static baseObjectType kZeroBaseObject;
-static spaceObjectType kZeroSpaceObject(&kZeroBaseObject);
-
 #ifdef DATA_COVERAGE
 set<int32_t> covered_actions;
 #endif  // DATA_COVERAGE
@@ -328,7 +325,7 @@ static void alter(
             if (subject) {
                 // active (non-reflexive) altering of velocity means a PUSH, just like
                 //  two objects colliding.  Negative velocity = slow down
-                if (object && (object != &kZeroSpaceObject)) {
+                if (object && (object != spaceObjectType::zero())) {
                     if (alter.relative) {
                         if ((object->baseType->mass > 0) &&
                             (object->maxVelocity > 0)) {
@@ -460,7 +457,7 @@ static void alter(
             break;
 
         case kAlterBaseType:
-            if (action->reflexive || (object && (object != &kZeroSpaceObject)))
+            if (action->reflexive || (object && (object != spaceObjectType::zero())))
             ChangeObjectBaseType(focus, alter.minimum, -1, alter.relative);
             break;
 
@@ -469,7 +466,7 @@ static void alter(
                 // if it's relative AND reflexive, we take the direct
                 // object's owner, since relative & reflexive would
                 // do nothing.
-                if (action->reflexive && object && (object != &kZeroSpaceObject)) {
+                if (action->reflexive && object && (object != spaceObjectType::zero())) {
                     AlterObjectOwner(focus, object->owner, true);
                 } else {
                     AlterObjectOwner(focus, subject->owner, true);
@@ -495,7 +492,7 @@ static void alter(
 
         case kAlterAbsoluteCash:
             if (alter.relative) {
-                if (focus != &kZeroSpaceObject) {
+                if (focus != spaceObjectType::zero()) {
                     PayAdmiralAbsolute(focus->owner, alter.minimum);
                 }
             } else {
@@ -523,7 +520,7 @@ static void alter(
 
         case kAlterLocation:
             if (alter.relative) {
-                if (object && (object != &kZeroSpaceObject)) {
+                if (object && (object != spaceObjectType::zero())) {
                     newLocation.h = subject->location.h;
                     newLocation.v = subject->location.v;
                 } else {
@@ -640,7 +637,7 @@ static void enter_warp(
 static void change_score(objectActionType* action, spaceObjectType* focus) {
     const auto& score = action->argument.changeScore;
     int32_t admiral;
-    if ((score.whichPlayer == -1) && (focus != &kZeroSpaceObject)) {
+    if ((score.whichPlayer == -1) && (focus != spaceObjectType::zero())) {
         admiral = focus->owner;
     } else {
         admiral = mGetRealAdmiralNum(score.whichPlayer);
@@ -653,7 +650,7 @@ static void change_score(objectActionType* action, spaceObjectType* focus) {
 static void declare_winner(objectActionType* action, spaceObjectType* focus) {
     const auto& winner = action->argument.declareWinner;
     int32_t admiral;
-    if ((winner.whichPlayer == -1) && (focus != &kZeroSpaceObject)) {
+    if ((winner.whichPlayer == -1) && (focus != spaceObjectType::zero())) {
         admiral = focus->owner;
     } else {
         admiral = mGetRealAdmiralNum(winner.whichPlayer);
@@ -792,14 +789,14 @@ static void execute_actions(
         // transports somehow, so we emulate the old behavior of
         // pointing to a zeroed-out object.
         if (object == NULL) {
-            object = &kZeroSpaceObject;
+            object = spaceObjectType::zero();
         }
         if (subject == NULL) {
-            subject = &kZeroSpaceObject;
+            subject = spaceObjectType::zero();
         }
 
         if (focus == NULL) {
-            focus = &kZeroSpaceObject;
+            focus = spaceObjectType::zero();
         } else if ((action->owner < -1)
                 || ((action->owner == -1) && (object->owner == subject->owner))
                 || ((action->owner == 1) && (object->owner != subject->owner))

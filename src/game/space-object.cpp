@@ -1037,13 +1037,16 @@ int32_t spaceObjectType::number() const {
     return this - mGetSpaceObjectPtr(0);
 }
 
-spaceObjectType::spaceObjectType() {
+static baseObjectType kZeroBaseObject;
+
+spaceObjectType::spaceObjectType(ZeroObject) {
     memset(this, 0, sizeof(*this));
+    baseType = &kZeroBaseObject;
 }
 
-spaceObjectType::spaceObjectType(baseObjectType* base):
-        spaceObjectType() {
-    baseType = base;
+spaceObjectType* spaceObjectType::zero() {
+    static spaceObjectType object(ZERO_OBJECT);
+    return &object;
 }
 
 }  // namespace antares

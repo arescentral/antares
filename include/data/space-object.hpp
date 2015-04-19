@@ -359,11 +359,11 @@ enum dutyType {
 
 //typedef beamTypeStruct;
 
-
 class spaceObjectType {
   public:
-    spaceObjectType();
-    spaceObjectType(baseObjectType* baseType);
+    static spaceObjectType* zero();
+
+    spaceObjectType() = default;
 
     uint32_t                attributes;
     baseObjectType          *baseType;
@@ -521,6 +521,10 @@ class spaceObjectType {
             int32_t type, Random seed,
             int32_t relative_direction, fixedPointType *relative_velocity,
             int32_t owner, int16_t spriteIDOverride);
+
+  private:
+    enum ZeroObject { ZERO_OBJECT };
+    spaceObjectType(ZeroObject);
 };
 
 }  // namespace antares
