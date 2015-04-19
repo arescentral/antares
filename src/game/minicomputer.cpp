@@ -212,7 +212,7 @@ inline int32_t mGetLineNumFromV(int32_t mV) {
 
 // for copying the fields of a space object relevant to the miniscreens:
 inline void mCopyMiniSpaceObject(
-        spaceObjectType& mdestobject, const spaceObjectType& msourceobject) {
+        SpaceObject& mdestobject, const SpaceObject& msourceobject) {
     (mdestobject).id = (msourceobject).id;
     (mdestobject).beam.type = (msourceobject).beam.type;
     (mdestobject).pulse.type = (msourceobject).pulse.type;
@@ -245,7 +245,7 @@ inline void mCopyBlankLineString(miniScreenLineType* mline, StringSlice mstring)
     }
 }
 
-inline spaceObjectType* mGetMiniObjectPtr(int32_t mwhich) {
+inline SpaceObject* mGetMiniObjectPtr(int32_t mwhich) {
     return globals()->gMiniScreenData.objectData.get() + mwhich;
 }
 
@@ -263,7 +263,7 @@ void MiniScreenInit() {
     globals()->gMiniScreenData.clickLine = kMiniScreenNoLineSelected;
 
     globals()->gMiniScreenData.lineData.reset(new miniScreenLineType[kMiniScreenTrueLineNum]);
-    globals()->gMiniScreenData.objectData.reset(new spaceObjectType[kMiniObjectDataNum]);
+    globals()->gMiniScreenData.objectData.reset(new SpaceObject[kMiniObjectDataNum]);
 
     ClearMiniScreenLines();
     ClearMiniObjectData();
@@ -306,7 +306,7 @@ void ClearMiniScreenLines() {
 void ClearMiniObjectData( void)
 
 {
-    spaceObjectType *o;
+    SpaceObject *o;
 
     o = mGetMiniObjectPtr( kMiniSelectObjectNum);
     o->id = -1;
@@ -639,7 +639,7 @@ void MiniComputerHandleNull( int32_t unitsToDo)
 {
     destBalanceType     *buildAtObject = NULL;
     int32_t                count;
-    spaceObjectType     *realObject = NULL, *myObject = NULL, newObject;
+    SpaceObject     *realObject = NULL, *myObject = NULL, newObject;
 
     globals()->gMiniScreenData.pollTime += unitsToDo;
     if ( globals()->gMiniScreenData.pollTime > kMiniComputerPollTime)
@@ -831,7 +831,7 @@ void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) 
 }
 
 void draw_mini_ship_data(
-        const spaceObjectType& newObject, uint8_t headerColor,
+        const SpaceObject& newObject, uint8_t headerColor,
         int16_t screenTop, int16_t whichString) {
     Rect lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, 0, 0, kMiniScreenWidth);
     RgbColor color = GetRGBTranslateColorShade(headerColor, LIGHT);
@@ -1009,7 +1009,7 @@ void draw_mini_ship_data(
     // write the name
     if (newObject.destinationObject >= 0) {
         if (newObject.destObjectPtr != NULL) {
-            spaceObjectType* dObject = newObject.destObjectPtr;
+            SpaceObject* dObject = newObject.destObjectPtr;
 
             // get the color for writing the name
             if (dObject->owner == globals()->gPlayerAdmiralNumber) {
@@ -1041,7 +1041,7 @@ void MiniComputerDoAccept() {
 void MiniComputerExecute( int32_t whichPage, int32_t whichLine, int32_t whichAdmiral)
 
 {
-    spaceObjectType *anObject, *anotherObject;
+    SpaceObject *anObject, *anotherObject;
     int32_t            l;
 
     switch ( whichPage)

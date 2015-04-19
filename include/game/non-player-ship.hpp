@@ -31,20 +31,20 @@ enum Allegiance {
     HOSTILE,
 };
 
-spaceObjectType *HackNewNonplayerShip(int32_t, int16_t, Rect *);
+SpaceObject *HackNewNonplayerShip(int32_t, int16_t, Rect *);
 void fire_weapon(
-        spaceObjectType* subject, spaceObjectType* target,
-        const baseObjectType::Weapon& base_weapon, spaceObjectType::Weapon& weapon);
+        SpaceObject* subject, SpaceObject* target,
+        const baseObjectType::Weapon& base_weapon, SpaceObject::Weapon& weapon);
 void NonplayerShipThink(int32_t);
 void UpdateMyNonplayerShip( void);
 void HackShowShipID( void);
-void HitObject( spaceObjectType *, spaceObjectType *);
+void HitObject( SpaceObject *, SpaceObject *);
 int32_t GetManualSelectObject(
-        spaceObjectType *sourceObject, int32_t direction,
+        SpaceObject *sourceObject, int32_t direction,
         uint32_t inclusiveAttributes, uint32_t exclusiveAttributes,
         const uint64_t* fartherThan, int32_t currentShipNum, Allegiance allegiance);
 int32_t GetSpritePointSelectObject(
-        Rect *bounds, spaceObjectType *sourceObject,
+        Rect *bounds, SpaceObject *sourceObject,
         uint32_t anyOneAttribute,
         int32_t currentShipNum, Allegiance allegiance);
 

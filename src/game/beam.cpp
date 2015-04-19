@@ -43,7 +43,7 @@ namespace {
 const int kBeamNum          = 256;
 const int kBoltChangeTime   = 0;
 
-void DetermineBeamRelativeCoordFromAngle(spaceObjectType *beamObject, int16_t angle) {
+void DetermineBeamRelativeCoordFromAngle(SpaceObject *beamObject, int16_t angle) {
     Fixed range = mLongToFixed(beamObject->frame.beam->range);
 
     mAddAngle(angle, -90);
@@ -124,14 +124,14 @@ beamType* Beams::add(
     return NULL;
 }
 
-void Beams::set_attributes(spaceObjectType* beamObject, spaceObjectType* sourceObject) {
+void Beams::set_attributes(SpaceObject* beamObject, SpaceObject* sourceObject) {
     beamType& beam = *beamObject->frame.beam;
     beam.fromObjectNumber = sourceObject->number();
     beam.fromObjectID = sourceObject->id;
     beam.fromObject = sourceObject;
 
     if (sourceObject->targetObjectNumber >= 0) {
-        spaceObjectType* target = mGetSpaceObjectPtr(sourceObject->targetObjectNumber);
+        SpaceObject* target = mGetSpaceObjectPtr(sourceObject->targetObjectNumber);
 
         if ((target->active) && (target->id == sourceObject->targetObjectID)) {
             const int32_t h = abs(implicit_cast<int32_t>(

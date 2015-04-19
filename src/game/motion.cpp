@@ -168,7 +168,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
     Fixed                   aFixed;
     int16_t                 angle;
     uint32_t                shortDist, thisDist, longDist;
-    spaceObjectType         *anObject;
+    SpaceObject*            anObject;
     baseObjectType          *baseObject;
 
     if ( unitsToDo == 0) return;
@@ -412,8 +412,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                         {
                             if ( anObject->frame.beam->toObject != NULL)
                             {
-                                spaceObjectType *target =
-                                    anObject->frame.beam->toObject;
+                                SpaceObject *target = anObject->frame.beam->toObject;
 
                                 if ((target->active) &&
                                     (target->id == anObject->frame.beam->toObjectID))
@@ -429,8 +428,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
 
                             if ( anObject->frame.beam->fromObject != NULL)
                             {
-                                spaceObjectType *target =
-                                    anObject->frame.beam->fromObject;
+                                SpaceObject *target = anObject->frame.beam->fromObject;
 
                                 if ((target->active) &&
                                     ( target->id == anObject->frame.beam->fromObjectID))
@@ -451,8 +449,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                         {
                             if ( anObject->frame.beam->fromObject != NULL)
                             {
-                                spaceObjectType *target =
-                                    anObject->frame.beam->fromObject;
+                                SpaceObject *target = anObject->frame.beam->fromObject;
 
                                 if (( target->active) &&
                                     ( target->id == anObject->frame.beam->fromObjectID))
@@ -596,7 +593,7 @@ void CollideSpaceObjects() {
     // set up player info so we can find closest ship (for scaling)
     uint64_t farthestDist = 0;
     uint64_t closestDist = 0x7fffffffffffffffull;
-    spaceObjectType* player = nullptr;
+    SpaceObject* player = nullptr;
     if (globals()->gPlayerShipNumber >= 0) {
         player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
     }
@@ -728,7 +725,7 @@ void CollideSpaceObjects() {
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
         auto proximityObject = &gProximityGrid[i];
         auto aObject = proximityObject->nearObject;
-        for (spaceObjectType* taObject = aObject->nextNearObject; aObject;
+        for (SpaceObject* taObject = aObject->nextNearObject; aObject;
                 aObject = taObject, taObject = aObject->nextNearObject) {
             // this hack is to get the current bounds of the object in question
             // it could be sped up by accessing the sprite table directly
@@ -754,7 +751,7 @@ void CollideSpaceObjects() {
 
             auto currentProximity = proximityObject;
             for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
-                spaceObjectType* bObject;
+                SpaceObject* bObject;
                 int32_t superx, supery;
                 if (k == 0) {
                     bObject = aObject->nextNearObject;
@@ -777,7 +774,7 @@ void CollideSpaceObjects() {
                     continue;
                 }
 
-                for (spaceObjectType* tbObject = bObject->nextNearObject; bObject;
+                for (SpaceObject* tbObject = bObject->nextNearObject; bObject;
                         bObject = tbObject, tbObject = bObject->nextNearObject) {
                     // this'll be true even ONLY if BOTH objects are not non-physical dest object
                     if (!((bObject->attributes | aObject->attributes) & kCanCollide)
@@ -813,8 +810,8 @@ void CollideSpaceObjects() {
                         continue;
                     }
 
-                    spaceObjectType* sObject;
-                    spaceObjectType* dObject;
+                    SpaceObject* sObject;
+                    SpaceObject* dObject;
                     if (!((bObject->attributes | aObject->attributes) & kIsBeam)) {
                         dObject = aObject;
                         sObject = bObject;
@@ -925,11 +922,11 @@ void CollideSpaceObjects() {
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
         auto proximityObject = &gProximityGrid[i];
         auto aObject = proximityObject->farObject;
-        for (spaceObjectType* taObject = aObject->nextFarObject; aObject;
+        for (SpaceObject* taObject = aObject->nextFarObject; aObject;
                 aObject = taObject, taObject = aObject->nextFarObject) {
             auto currentProximity = proximityObject;
             for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
-                spaceObjectType* bObject;
+                SpaceObject* bObject;
                 int32_t superx, supery;
                 if (k == 0) {
                     bObject = aObject->nextFarObject;
@@ -945,7 +942,7 @@ void CollideSpaceObjects() {
                     continue;
                 }
 
-                for (spaceObjectType* tbObject = bObject->nextFarObject; bObject;
+                for (SpaceObject* tbObject = bObject->nextFarObject; bObject;
                         bObject = tbObject, tbObject = bObject->nextFarObject) {
                     if ((bObject->owner != aObject->owner)
                             && (bObject->distanceGrid.h == superx)
@@ -1113,9 +1110,7 @@ hackBNoEngageMatch:
 //  collide.  For keeping objects which occupy space from occupying the
 //  same space.
 
-void CorrectPhysicalSpace( spaceObjectType *aObject, spaceObjectType *bObject)
-
-{
+void CorrectPhysicalSpace(SpaceObject *aObject, SpaceObject *bObject) {
     int32_t    ah, av, ad, bh, bv, bd, adir = kNoDir, bdir = kNoDir,
             h, v;
     fixedPointType  tvel;

@@ -140,7 +140,7 @@ void SetAdmiralColor(int32_t whichAdmiral, uint8_t color);
 uint8_t GetAdmiralColor(int32_t whichAdmiral);
 int32_t GetAdmiralRace(int32_t whichAdmiral);
 void SetAdmiralFlagship(int32_t whichAdmiral, int32_t whichShip);
-spaceObjectType* GetAdmiralFlagship(int32_t whichAdmiral);
+SpaceObject* GetAdmiralFlagship(int32_t whichAdmiral);
 void SetAdmiralEarningPower(int32_t whichAdmiral, Fixed power);
 Fixed GetAdmiralEarningPower(int32_t whichAdmiral);
 
@@ -159,9 +159,9 @@ sfz::StringSlice GetDestBalanceName(int32_t whichDestObject);
 sfz::StringSlice GetAdmiralName(int32_t whichAdmiral);
 void SetAdmiralName(int32_t whichAdmiral, sfz::StringSlice name);
 
-void SetObjectLocationDestination(spaceObjectType* o, coordPointType* where);
-void SetObjectDestination(spaceObjectType* o, spaceObjectType* overrideObject);
-void RemoveObjectFromDestination(spaceObjectType* o);
+void SetObjectLocationDestination(SpaceObject* o, coordPointType* where);
+void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject);
+void RemoveObjectFromDestination(SpaceObject* o);
 
 void AdmiralThink();
 void AdmiralBuildAtObject(int32_t whichAdmiral, int32_t baseTypeNum, int32_t whichDestObject);
@@ -175,7 +175,7 @@ int32_t GetAdmiralScore(int32_t whichAdmiral, int32_t whichScore);
 int32_t GetAdmiralShipsLeft(int32_t whichAdmiral);
 int32_t AlterDestinationObjectOccupation(int32_t whichDestination, int32_t whichAdmiral, int32_t amount);
 void ClearAllOccupants(int32_t whichDestination, int32_t whichAdmiral, int32_t fullAmount);
-void AddKillToAdmiral(spaceObjectType *anObject);
+void AddKillToAdmiral(SpaceObject *anObject);
 
 int32_t GetAdmiralLoss(int32_t whichAdmiral);
 int32_t GetAdmiralKill(int32_t whichAdmiral);

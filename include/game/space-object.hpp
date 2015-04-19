@@ -26,27 +26,27 @@ namespace antares {
 const int16_t kBaseObjectResID      = 500;
 const int16_t kObjectActionResID    = 500;
 
-extern spaceObjectType* gRootObject;
+extern SpaceObject* gRootObject;
 extern int32_t gRootObjectNumber;
 
 void SpaceObjectHandlingInit( void);
 void ResetAllSpaceObjects( void);
 void RemoveAllSpaceObjects( void);
 void CorrectAllBaseObjectColor( void);
-void ChangeObjectBaseType( spaceObjectType *, int32_t, int32_t, bool);
+void ChangeObjectBaseType( SpaceObject *, int32_t, int32_t, bool);
 
-spaceObjectType* CreateAnySpaceObject(
+SpaceObject* CreateAnySpaceObject(
         int32_t whichBase, fixedPointType *velocity, coordPointType *location, int32_t direction,
         int32_t owner, uint32_t specialAttributes, int16_t spriteIDOverride);
 int32_t CountObjectsOfBaseType(int32_t, int32_t);
-void AlterObjectOwner( spaceObjectType *, int32_t, bool);
-void AlterObjectOccupation( spaceObjectType *, int32_t, int32_t, bool);
-void AlterObjectCloakState( spaceObjectType *, bool);
-void DestroyObject( spaceObjectType *);
-void CreateFloatingBodyOfPlayer( spaceObjectType *);
+void AlterObjectOwner( SpaceObject *, int32_t, bool);
+void AlterObjectOccupation( SpaceObject *, int32_t, int32_t, bool);
+void AlterObjectCloakState( SpaceObject *, bool);
+void DestroyObject( SpaceObject *);
+void CreateFloatingBodyOfPlayer( SpaceObject *);
 
 baseObjectType* mGetBaseObjectPtr(int32_t whichObject);
-spaceObjectType* mGetSpaceObjectPtr(int32_t whichObject);
+SpaceObject* mGetSpaceObjectPtr(int32_t whichObject);
 objectActionType* mGetObjectActionPtr(int32_t whichAction);
 
 void mGetBaseObjectFromClassRace(

@@ -69,25 +69,25 @@ enum {
     kNeutralColor   = SKY_BLUE,
 };
 
-uint32_t ThinkObjectNormalPresence( spaceObjectType *, baseObjectType *, int32_t);
-uint32_t ThinkObjectWarpingPresence( spaceObjectType *);
-uint32_t ThinkObjectWarpInPresence( spaceObjectType *);
-uint32_t ThinkObjectWarpOutPresence( spaceObjectType *, baseObjectType *);
-uint32_t ThinkObjectLandingPresence( spaceObjectType *);
-void ThinkObjectGetCoordVector( spaceObjectType *, coordPointType *, uint32_t *, int16_t *);
-void ThinkObjectGetCoordDistance( spaceObjectType *, coordPointType *, uint32_t *);
-void ThinkObjectResolveDestination( spaceObjectType *, coordPointType *, spaceObjectType **);
-bool ThinkObjectResolveTarget( spaceObjectType *, coordPointType *, uint32_t *, spaceObjectType **);
-uint32_t ThinkObjectEngageTarget( spaceObjectType *, spaceObjectType *, uint32_t, int16_t *, int32_t);
+uint32_t ThinkObjectNormalPresence( SpaceObject *, baseObjectType *, int32_t);
+uint32_t ThinkObjectWarpingPresence( SpaceObject *);
+uint32_t ThinkObjectWarpInPresence( SpaceObject *);
+uint32_t ThinkObjectWarpOutPresence( SpaceObject *, baseObjectType *);
+uint32_t ThinkObjectLandingPresence( SpaceObject *);
+void ThinkObjectGetCoordVector( SpaceObject *, coordPointType *, uint32_t *, int16_t *);
+void ThinkObjectGetCoordDistance( SpaceObject *, coordPointType *, uint32_t *);
+void ThinkObjectResolveDestination( SpaceObject *, coordPointType *, SpaceObject **);
+bool ThinkObjectResolveTarget( SpaceObject *, coordPointType *, uint32_t *, SpaceObject **);
+uint32_t ThinkObjectEngageTarget( SpaceObject *, SpaceObject *, uint32_t, int16_t *, int32_t);
 
-spaceObjectType *HackNewNonplayerShip( int32_t owner, int16_t type, Rect *bounds)
+SpaceObject *HackNewNonplayerShip( int32_t owner, int16_t type, Rect *bounds)
 
 {
 #pragma unused( owner, type, bounds)
     return( NULL);
 }
 
-void spaceObjectType::recharge() {
+void SpaceObject::recharge() {
     if ((_energy < (max_energy() - kEnergyChunk))
             && (_battery > kEnergyChunk)) {
         _battery -= kEnergyChunk;
@@ -118,8 +118,8 @@ void spaceObjectType::recharge() {
 }
 
 static void tick_weapon(
-        spaceObjectType* subject, spaceObjectType* target, int32_t timePass,
-        uint32_t key, const baseObjectType::Weapon& base_weapon, spaceObjectType::Weapon& weapon) {
+        SpaceObject* subject, SpaceObject* target, int32_t timePass,
+        uint32_t key, const baseObjectType::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
     if (weapon.time > 0) {
         weapon.time -= timePass;
     }
@@ -129,8 +129,8 @@ static void tick_weapon(
 }
 
 void fire_weapon(
-        spaceObjectType* subject, spaceObjectType* target,
-        const baseObjectType::Weapon& base_weapon, spaceObjectType::Weapon& weapon) {
+        SpaceObject* subject, SpaceObject* target,
+        const baseObjectType::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
     if ((weapon.time > 0) || (weapon.type == kNoWeapon)) {
         return;
     }
@@ -177,22 +177,22 @@ void fire_weapon(
     weaponObject->activate.run(subject, target, at);
 }
 
-static void tick_pulse(spaceObjectType* subject, spaceObjectType* target, int32_t timePass) {
+static void tick_pulse(SpaceObject* subject, SpaceObject* target, int32_t timePass) {
     tick_weapon(subject, target, timePass, kOneKey, subject->baseType->pulse, subject->pulse);
 }
 
-static void tick_beam(spaceObjectType* subject, spaceObjectType* target, int32_t timePass) {
+static void tick_beam(SpaceObject* subject, SpaceObject* target, int32_t timePass) {
     tick_weapon(subject, target, timePass, kTwoKey, subject->baseType->beam, subject->beam);
 }
 
-static void tick_special(spaceObjectType* subject, spaceObjectType* target, int32_t timePass) {
+static void tick_special(SpaceObject* subject, SpaceObject* target, int32_t timePass) {
     tick_weapon(subject, target, timePass, kEnterKey, subject->baseType->special, subject->special);
 }
 
 void NonplayerShipThink(int32_t timePass)
 {
     admiralType     *anAdmiral;
-    spaceObjectType *targetObject;
+    SpaceObject *targetObject;
     baseObjectType  *baseObject, *weaponObject;
     Point           offset;
     int32_t         count, difference;
@@ -455,7 +455,7 @@ void NonplayerShipThink(int32_t timePass)
     }
 }
 
-uint32_t use_weapons_for_defense(spaceObjectType* obj) {
+uint32_t use_weapons_for_defense(SpaceObject* obj) {
     uint32_t keys = 0;
 
     if (obj->pulse.type != kNoWeapon) {
@@ -483,9 +483,9 @@ uint32_t use_weapons_for_defense(spaceObjectType* obj) {
 }
 
 uint32_t ThinkObjectNormalPresence(
-        spaceObjectType *anObject, baseObjectType *baseObject, int32_t timePass) {
+        SpaceObject *anObject, baseObjectType *baseObject, int32_t timePass) {
     uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask, distance, dcalc;
-    spaceObjectType *targetObject;
+    SpaceObject *targetObject;
     baseObjectType  *bestWeapon, *weaponObject;
     coordPointType  dest;
     int32_t         difference;
@@ -911,7 +911,7 @@ uint32_t ThinkObjectNormalPresence(
     return keysDown;
 }
 
-uint32_t ThinkObjectWarpInPresence( spaceObjectType *anObject)
+uint32_t ThinkObjectWarpInPresence( SpaceObject *anObject)
 {
     uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask;
     int32_t         longscrap;
@@ -951,11 +951,11 @@ uint32_t ThinkObjectWarpInPresence( spaceObjectType *anObject)
     return( keysDown);
 }
 
-uint32_t ThinkObjectWarpingPresence( spaceObjectType *anObject)
+uint32_t ThinkObjectWarpingPresence( SpaceObject *anObject)
 {
     uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask, distance;
     coordPointType  dest;
-    spaceObjectType *targetObject = NULL;
+    SpaceObject *targetObject = NULL;
     int16_t         angle, theta;
 
     if (anObject->energy() <= 0) {
@@ -998,7 +998,7 @@ uint32_t ThinkObjectWarpingPresence( spaceObjectType *anObject)
     return( keysDown);
 }
 
-uint32_t ThinkObjectWarpOutPresence( spaceObjectType *anObject, baseObjectType *baseObject)
+uint32_t ThinkObjectWarpOutPresence( SpaceObject *anObject, baseObjectType *baseObject)
 {
     uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask;
     Fixed           calcv, fdist;
@@ -1033,10 +1033,10 @@ uint32_t ThinkObjectWarpOutPresence( spaceObjectType *anObject, baseObjectType *
     return( keysDown);
 }
 
-uint32_t ThinkObjectLandingPresence(spaceObjectType *anObject) {
+uint32_t ThinkObjectLandingPresence(SpaceObject *anObject) {
     uint32_t keysDown = 0;
 
-    spaceObjectType* target = nullptr;
+    SpaceObject* target = nullptr;
     uint32_t distance;
     int16_t theta = 0;
 
@@ -1176,7 +1176,7 @@ uint32_t ThinkObjectLandingPresence(spaceObjectType *anObject) {
 }
 
 // this gets the distance & angle between an object and arbitrary coords
-void ThinkObjectGetCoordVector( spaceObjectType *anObject, coordPointType *dest, uint32_t *distance, int16_t *angle)
+void ThinkObjectGetCoordVector( SpaceObject *anObject, coordPointType *dest, uint32_t *distance, int16_t *angle)
 {
     int32_t         difference;
     uint32_t        dcalc;
@@ -1234,7 +1234,7 @@ void ThinkObjectGetCoordVector( spaceObjectType *anObject, coordPointType *dest,
     }
 }
 
-void ThinkObjectGetCoordDistance( spaceObjectType *anObject, coordPointType *dest, uint32_t *distance)
+void ThinkObjectGetCoordDistance( SpaceObject *anObject, coordPointType *dest, uint32_t *distance)
 {
     int32_t         difference;
     uint32_t        dcalc;
@@ -1266,7 +1266,7 @@ void ThinkObjectGetCoordDistance( spaceObjectType *anObject, coordPointType *des
 }
 
 // this resolves an object's destination to its coordinates, returned in dest
-void ThinkObjectResolveDestination( spaceObjectType *anObject, coordPointType *dest, spaceObjectType **targetObject)
+void ThinkObjectResolveDestination( SpaceObject *anObject, coordPointType *dest, SpaceObject **targetObject)
 {
     *targetObject = NULL;
 
@@ -1364,10 +1364,10 @@ void ThinkObjectResolveDestination( spaceObjectType *anObject, coordPointType *d
     }
 }
 
-bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
-    uint32_t *distance, spaceObjectType **targetObject)
+bool ThinkObjectResolveTarget( SpaceObject *anObject, coordPointType *dest,
+    uint32_t *distance, SpaceObject **targetObject)
 {
-    spaceObjectType *closestObject;
+    SpaceObject *closestObject;
 
     dest->h = dest->v = 0xffffffff;
     *distance = 0xffffffff;
@@ -1530,7 +1530,7 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
     }
 }
 
-uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *targetObject,
+uint32_t ThinkObjectEngageTarget( SpaceObject *anObject, SpaceObject *targetObject,
     uint32_t distance, int16_t *theta, int32_t timePass)
 {
     uint32_t        keysDown = 0;
@@ -1702,7 +1702,7 @@ uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *ta
     return( keysDown);
 }
 
-void HitObject(spaceObjectType *anObject, spaceObjectType *sObject) {
+void HitObject(SpaceObject *anObject, SpaceObject *sObject) {
     if (anObject->active != kObjectInUse) {
         return;
     }
@@ -1742,7 +1742,7 @@ void HitObject(spaceObjectType *anObject, spaceObjectType *sObject) {
     }
 }
 
-static bool allegiance_is(Allegiance allegiance, int admiral, spaceObjectType* object) {
+static bool allegiance_is(Allegiance allegiance, int admiral, SpaceObject* object) {
     switch (allegiance) {
       case FRIENDLY_OR_HOSTILE:
         return true;
@@ -1758,7 +1758,7 @@ static bool allegiance_is(Allegiance allegiance, int admiral, spaceObjectType* o
 //  positive, will get only friendly ships.  If it's negative, only unfriendly ships.
 
 int32_t GetManualSelectObject(
-        spaceObjectType *sourceObject, int32_t direction,
+        SpaceObject *sourceObject, int32_t direction,
         uint32_t inclusiveAttributes, uint32_t exclusiveAttributes,
         const uint64_t* fartherThan, int32_t currentShipNum, Allegiance allegiance) {
     const uint32_t myOwnerFlag = 1 << sourceObject->owner;
@@ -1771,7 +1771,7 @@ int32_t GetManualSelectObject(
     // try to get any ship but the current ship
     // stop trying when we've made a full circle (we're back on currentShipNum)
 
-    spaceObjectType *anObject;
+    SpaceObject *anObject;
     int32_t whichShip = currentShipNum;
     int32_t startShip = currentShipNum;
     if (whichShip >= 0) {
@@ -1859,14 +1859,14 @@ int32_t GetManualSelectObject(
 }
 
 int32_t GetSpritePointSelectObject(
-        Rect *bounds, spaceObjectType *sourceObject,
+        Rect *bounds, SpaceObject *sourceObject,
         uint32_t anyOneAttribute,
         int32_t currentShipNum, Allegiance allegiance) {
     const uint32_t myOwnerFlag = 1 << sourceObject->owner;
 
     int32_t resultShip = -1, closestShip = -1;
     for (int32_t whichShip = 0; whichShip < kMaxSpaceObject; whichShip++) {
-        spaceObjectType* anObject = mGetSpaceObjectPtr(whichShip);
+        SpaceObject* anObject = mGetSpaceObjectPtr(whichShip);
         if (!anObject->active
                 || !anObject->sprite
                 || !(anObject->seenByPlayerFlags & myOwnerFlag)

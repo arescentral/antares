@@ -24,7 +24,7 @@
 
 namespace antares {
 
-struct spaceObjectType;
+struct SpaceObject;
 
 const int32_t kMaxSparkAge = 1023;
 const int32_t kSparkAgeToShadeShift = 6;
@@ -46,7 +46,7 @@ struct scrollStarType {
     uint8_t         color;
 };
 
-extern spaceObjectType* gScrollStarObject;
+extern SpaceObject* gScrollStarObject;
 
 class Starfield {
   public:

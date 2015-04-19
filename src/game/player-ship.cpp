@@ -66,7 +66,7 @@ const int32_t kCursorBoundsSize = 16;  // should be same in instruments.c
 
 }  // namespace
 
-int32_t HotKey_GetFromObject( spaceObjectType *object);
+int32_t HotKey_GetFromObject( SpaceObject *object);
 void Update_LabelStrings_ForHotKeyChange( void);
 
 namespace {
@@ -78,7 +78,7 @@ static int32_t gAlarmCount = -1;
 static int32_t gSendMessageLabel = -1;
 
 struct HotKeySuffix {
-    spaceObjectType* space_object;
+    SpaceObject* space_object;
 };
 
 void print_to(PrintTarget out, const HotKeySuffix& suffix) {
@@ -97,7 +97,7 @@ void print_to(PrintTarget out, const HotKeySuffix& suffix) {
     print(out, format(" < {0} >", key_name));
 };
 
-HotKeySuffix hot_key_suffix(spaceObjectType* space_object) {
+HotKeySuffix hot_key_suffix(SpaceObject* space_object) {
     HotKeySuffix result = {space_object};
     return result;
 };
@@ -197,7 +197,7 @@ static void zoom_out() {
 }
 
 static void engage_autopilot() {
-    spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+    SpaceObject* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
     if (!(player->attributes & kOnAutoPilot)) {
         player->keysDown |= kAutoPilotKey;
     }
@@ -205,11 +205,11 @@ static void engage_autopilot() {
 }
 
 static void pick_object(
-        spaceObjectType* origin_ship, int32_t direction, bool destination, int32_t attributes,
+        SpaceObject* origin_ship, int32_t direction, bool destination, int32_t attributes,
         int32_t nonattributes, int32_t select_ship_num, Allegiance allegiance) {
     uint64_t huge_distance;
     if (select_ship_num >= 0) {
-        spaceObjectType* select_ship = mGetSpaceObjectPtr(select_ship_num);
+        SpaceObject* select_ship = mGetSpaceObjectPtr(select_ship_num);
         uint32_t difference = ABS<int>(origin_ship->location.h - select_ship->location.h);
         uint32_t dcalc = difference;
         difference =  ABS<int>(origin_ship->location.v - select_ship->location.v);
@@ -243,31 +243,31 @@ static void pick_object(
     }
 }
 
-static void select_friendly(spaceObjectType* origin_ship, int32_t direction) {
+static void select_friendly(SpaceObject* origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, false, kCanBeDestination, kIsDestination,
             GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber), FRIENDLY);
 }
 
-static void target_friendly(spaceObjectType* origin_ship, int32_t direction) {
+static void target_friendly(SpaceObject* origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, true, kCanBeDestination, kIsDestination,
             GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber), FRIENDLY);
 }
 
-static void target_hostile(spaceObjectType* origin_ship, int32_t direction) {
+static void target_hostile(SpaceObject* origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, true, kCanBeDestination, kIsDestination,
             GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber), HOSTILE);
 }
 
-static void select_base(spaceObjectType* origin_ship, int32_t direction) {
+static void select_base(SpaceObject* origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, false, kCanAcceptBuild, 0,
             GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber), FRIENDLY);
 }
 
-static void target_base(spaceObjectType* origin_ship, int32_t direction) {
+static void target_base(SpaceObject* origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, true, kIsDestination, 0,
             GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber), FRIENDLY_OR_HOSTILE);
@@ -367,7 +367,7 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
         return;
     }
 
-    spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+    SpaceObject* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
     if (_gamepad_state) {
         switch (event.button) {
           case Gamepad::A:
@@ -490,7 +490,7 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
         }
     }
 
-    spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+    SpaceObject* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
     switch (event.button) {
       case Gamepad::A:
         _gamepad_keys &= ~kUpKey;
@@ -541,7 +541,7 @@ bool PlayerShip::active() const {
     if (globals()->gPlayerShipNumber < 0) {
         return false;
     }
-    spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+    SpaceObject* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
     if (!(player->active && (player->attributes & kIsHumanControlled))) {
         return false;
     }
@@ -549,7 +549,7 @@ bool PlayerShip::active() const {
 }
 
 void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_message) {
-    spaceObjectType *theShip = NULL, *selectShip = NULL;
+    SpaceObject *theShip = NULL, *selectShip = NULL;
     baseObjectType  *baseObject = NULL;
     uint32_t        attributes;
 
@@ -835,7 +835,7 @@ int32_t PlayerShip::goal_direction() const {
 }
 
 void PlayerShipHandleClick(Point where, int button) {
-    spaceObjectType *theShip = NULL;
+    SpaceObject *theShip = NULL;
     int32_t         selectShipNum;
     Rect            bounds;
 
@@ -876,7 +876,7 @@ void PlayerShipHandleClick(Point where, int button) {
 
 void SetPlayerSelectShip( int32_t whichShip, bool target, int32_t admiralNumber)
 {
-    spaceObjectType *selectShip = mGetSpaceObjectPtr(whichShip),
+    SpaceObject *selectShip = mGetSpaceObjectPtr(whichShip),
                     *theShip = GetAdmiralFlagship( admiralNumber);
 
     if ( admiralNumber == globals()->gPlayerAdmiralNumber)
@@ -936,7 +936,7 @@ void SetPlayerSelectShip( int32_t whichShip, bool target, int32_t admiralNumber)
 
 void ChangePlayerShipNumber( int32_t whichAdmiral, int32_t newShipNumber)
 {
-    spaceObjectType *anObject = GetAdmiralFlagship( whichAdmiral);
+    SpaceObject *anObject = GetAdmiralFlagship( whichAdmiral);
     if (anObject == NULL) {
         throw Exception(format(
                     "whichAdmiral: {0}, newShipNumber: {1}",
@@ -982,7 +982,7 @@ void ChangePlayerShipNumber( int32_t whichAdmiral, int32_t newShipNumber)
     SetAdmiralFlagship( whichAdmiral, newShipNumber);
 }
 
-void TogglePlayerAutoPilot(spaceObjectType *theShip) {
+void TogglePlayerAutoPilot(SpaceObject *theShip) {
     if ( theShip->attributes & kOnAutoPilot)
     {
         theShip->attributes &= ~kOnAutoPilot;
@@ -1009,7 +1009,7 @@ void TogglePlayerAutoPilot(spaceObjectType *theShip) {
 
 bool IsPlayerShipOnAutoPilot( void)
 {
-    spaceObjectType *theShip;
+    SpaceObject *theShip;
 
     if ( globals()->gPlayerShipNumber < 0) return false;
     theShip = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
@@ -1019,7 +1019,7 @@ bool IsPlayerShipOnAutoPilot( void)
 
 void PlayerShipGiveCommand( int32_t whichAdmiral)
 {
-    spaceObjectType *selectShip;
+    SpaceObject *selectShip;
     int32_t selectShipNum = GetAdmiralConsiderObject( whichAdmiral);
 
     if ( selectShipNum >= 0)
@@ -1032,9 +1032,9 @@ void PlayerShipGiveCommand( int32_t whichAdmiral)
 }
 
 // bool sourceIsBody was hacked in to use this for xferring control
-void PlayerShipBodyExpire( spaceObjectType *theShip, bool sourceIsBody)
+void PlayerShipBodyExpire( SpaceObject *theShip, bool sourceIsBody)
 {
-    spaceObjectType *selectShip = NULL;
+    SpaceObject *selectShip = NULL;
     int32_t         selectShipNum;
 
     selectShipNum = GetAdmiralConsiderObject( theShip->owner);
@@ -1119,7 +1119,7 @@ void HandleTextMessageKeys(const KeyMap& keyMap, const KeyMap& lastKeyMap, bool 
     }
 }
 
-int32_t HotKey_GetFromObject( spaceObjectType *object)
+int32_t HotKey_GetFromObject( SpaceObject *object)
 {
     int32_t i = 0;
 
@@ -1141,7 +1141,7 @@ int32_t HotKey_GetFromObject( spaceObjectType *object)
 
 void Update_LabelStrings_ForHotKeyChange( void)
 {
-    spaceObjectType *selectShip;
+    SpaceObject *selectShip;
     int32_t         whichShip;
 
     whichShip = GetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber);

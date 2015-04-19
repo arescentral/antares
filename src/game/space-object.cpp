@@ -66,10 +66,10 @@ static const int16_t kSpaceObjectShortNameResID     = 5001;
 static StringList* space_object_names;
 static StringList* space_object_short_names;
 
-spaceObjectType* gRootObject = NULL;
+SpaceObject* gRootObject = NULL;
 int32_t gRootObjectNumber = -1;
 
-static unique_ptr<spaceObjectType[]> gSpaceObjectData;
+static unique_ptr<SpaceObject[]> gSpaceObjectData;
 static unique_ptr<baseObjectType[]> gBaseObjectData;
 static unique_ptr<objectActionType[]> gObjectActionData;
 
@@ -92,7 +92,7 @@ void SpaceObjectHandlingInit() {
         }
     }
 
-    gSpaceObjectData.reset(new spaceObjectType[kMaxSpaceObject]);
+    gSpaceObjectData.reset(new SpaceObject[kMaxSpaceObject]);
     {
         Resource rsrc("objects", "bsob", kBaseObjectResID);
         BytesSlice in(rsrc.data());
@@ -116,7 +116,7 @@ void SpaceObjectHandlingInit() {
 }
 
 void ResetAllSpaceObjects() {
-    spaceObjectType *anObject = NULL;
+    SpaceObject *anObject = NULL;
     int16_t         i;
 
     gRootObject = NULL;
@@ -136,7 +136,7 @@ baseObjectType* mGetBaseObjectPtr(int32_t whichObject) {
     return nullptr;
 }
 
-spaceObjectType* mGetSpaceObjectPtr(int32_t whichObject) {
+SpaceObject* mGetSpaceObjectPtr(int32_t whichObject) {
     if (whichObject >= 0) {
         return gSpaceObjectData.get() + whichObject;
     }
@@ -170,9 +170,9 @@ void mGetBaseObjectFromClassRace(
     }
 }
 
-static spaceObjectType* AddSpaceObject(spaceObjectType *sourceObject) {
+static SpaceObject* AddSpaceObject(SpaceObject *sourceObject) {
     for (int i = 0; i < kMaxSpaceObject; ++i) {
-        spaceObjectType* obj = mGetSpaceObjectPtr(i);
+        SpaceObject* obj = mGetSpaceObjectPtr(i);
         if (obj->active) {
             continue;
         }
@@ -274,7 +274,7 @@ static spaceObjectType* AddSpaceObject(spaceObjectType *sourceObject) {
 void RemoveAllSpaceObjects( void)
 
 {
-    spaceObjectType *anObject;
+    SpaceObject *anObject;
     int             i;
 
     anObject = gSpaceObjectData.get();
@@ -329,7 +329,7 @@ void CorrectAllBaseObjectColor( void)
 
 }
 
-spaceObjectType::spaceObjectType(
+SpaceObject::SpaceObject(
         int32_t type, Random seed, int32_t object_id,
         const coordPointType& initial_location,
         int32_t relative_direction, fixedPointType *relative_velocity,
@@ -451,7 +451,7 @@ spaceObjectType::spaceObjectType(
 
     if (attributes & (kCanCollide | kCanBeHit | kIsDestination | kCanThink | kRemoteOrHuman)) {
         uint32_t ydiff, xdiff;
-        spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+        SpaceObject* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
         if (player && (player->active)) {
             xdiff = ABS<int>(player->location.h - location.h);
             ydiff = ABS<int>(player->location.v - location.v);
@@ -481,7 +481,7 @@ spaceObjectType::spaceObjectType(
 //
 
 void ChangeObjectBaseType(
-        spaceObjectType *obj, int32_t whichBaseObject, int32_t spriteIDOverride,
+        SpaceObject *obj, int32_t whichBaseObject, int32_t spriteIDOverride,
         bool relative) {
     baseObjectType  *base = mGetBaseObjectPtr(whichBaseObject);
     int16_t         angle;
@@ -623,12 +623,12 @@ void ChangeObjectBaseType(
     }
 }
 
-spaceObjectType* CreateAnySpaceObject(
+SpaceObject* CreateAnySpaceObject(
         int32_t whichBase, fixedPointType *velocity, coordPointType *location, int32_t direction,
         int32_t owner, uint32_t specialAttributes, int16_t spriteIDOverride) {
     Random random{gRandomSeed.next(32766)};
     int32_t id = gRandomSeed.next(16384);
-    spaceObjectType newObject(
+    SpaceObject newObject(
             whichBase, random, id, *location, direction, velocity, owner, spriteIDOverride);
 
     auto obj = AddSpaceObject(&newObject);
@@ -664,7 +664,7 @@ int32_t CountObjectsOfBaseType(int32_t whichType, int32_t owner) {
     return result;
 }
 
-void spaceObjectType::alter_health(int32_t amount) {
+void SpaceObject::alter_health(int32_t amount) {
     if (amount <= 0) {
         _health += amount;
     } else if (_health >= (2147483647 - amount)) {
@@ -677,7 +677,7 @@ void spaceObjectType::alter_health(int32_t amount) {
     }
 }
 
-void spaceObjectType::alter_energy(int32_t amount) {
+void SpaceObject::alter_energy(int32_t amount) {
     _energy += amount;
     if (_energy < 0) {
         _energy = 0;
@@ -687,7 +687,7 @@ void spaceObjectType::alter_energy(int32_t amount) {
     }
 }
 
-void spaceObjectType::alter_battery(int32_t amount) {
+void SpaceObject::alter_battery(int32_t amount) {
     _battery += amount;
     if (_battery > max_battery()) {
         PayAdmiral(owner, _battery - max_battery());
@@ -695,7 +695,7 @@ void spaceObjectType::alter_battery(int32_t amount) {
     }
 }
 
-bool spaceObjectType::collect_warp_energy(int32_t amount) {
+bool SpaceObject::collect_warp_energy(int32_t amount) {
     if (amount >= _energy) {
         warpEnergyCollected += _energy;
         _energy = 0;
@@ -707,12 +707,12 @@ bool spaceObjectType::collect_warp_energy(int32_t amount) {
     }
 }
 
-void spaceObjectType::refund_warp_energy() {
+void SpaceObject::refund_warp_energy() {
     alter_battery(warpEnergyCollected);
     warpEnergyCollected = 0;
 }
 
-void AlterObjectOwner(spaceObjectType* object, int32_t owner, bool message) {
+void AlterObjectOwner(SpaceObject* object, int32_t owner, bool message) {
     if (object->owner == owner) {
         return;
     }
@@ -835,7 +835,7 @@ void AlterObjectOwner(spaceObjectType* object, int32_t owner, bool message) {
 }
 
 void AlterObjectOccupation(
-        spaceObjectType* object, int32_t owner, int32_t howMuch, bool message) {
+        SpaceObject* object, int32_t owner, int32_t howMuch, bool message) {
     if (object->active
             && (object->attributes & kIsDestination)
             && (object->attributes & kNeutralDeath)) {
@@ -846,7 +846,7 @@ void AlterObjectOccupation(
     }
 }
 
-void AlterObjectCloakState(spaceObjectType* object, bool cloak) {
+void AlterObjectCloakState(SpaceObject* object, bool cloak) {
     if (cloak && (object->cloakState == 0)) {
         object->cloakState = 1;
         mPlayDistanceSound(kMaxSoundVolume, object, kCloakOn, kMediumPersistence, kPrioritySound);
@@ -857,7 +857,7 @@ void AlterObjectCloakState(spaceObjectType* object, bool cloak) {
     }
 }
 
-void DestroyObject(spaceObjectType* object) {
+void DestroyObject(SpaceObject* object) {
     if (object->active != kObjectInUse) {
         return;
     } else if (object->attributes & kNeutralDeath) {
@@ -917,7 +917,7 @@ void DestroyObject(spaceObjectType* object) {
     }
 }
 
-void CreateFloatingBodyOfPlayer(spaceObjectType* obj) {
+void CreateFloatingBodyOfPlayer(SpaceObject* obj) {
     const auto body_type = globals()->scenarioFileInfo.playerBodyID;
     // if we're already in a body, don't create a body from it
     // a body expiring is handled elsewhere
@@ -942,19 +942,19 @@ StringSlice get_object_short_name(int16_t id) {
     return space_object_short_names->at(id);
 }
 
-int32_t spaceObjectType::number() const {
+int32_t SpaceObject::number() const {
     return this - mGetSpaceObjectPtr(0);
 }
 
 static baseObjectType kZeroBaseObject;
 
-spaceObjectType::spaceObjectType(ZeroObject) {
+SpaceObject::SpaceObject(ZeroObject) {
     memset(this, 0, sizeof(*this));
     baseType = &kZeroBaseObject;
 }
 
-spaceObjectType* spaceObjectType::zero() {
-    static spaceObjectType object(ZERO_OBJECT);
+SpaceObject* SpaceObject::zero() {
+    static SpaceObject object(ZERO_OBJECT);
     return &object;
 }
 

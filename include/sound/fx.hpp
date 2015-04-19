@@ -55,7 +55,7 @@ const int16_t kTeletype         = 535;
 
 class Sound;
 class SoundChannel;
-struct spaceObjectType;
+struct SpaceObject;
 
 enum soundPriorityType {
     kNoSound = 0,
@@ -96,7 +96,7 @@ void quiet_all();
 void SoundFXCleanup();
 
 void mPlayDistanceSound(
-        int32_t mvolume, spaceObjectType* mobjectptr, int32_t msoundid, int32_t msoundpersistence,
+        int32_t mvolume, SpaceObject* mobjectptr, int32_t msoundid, int32_t msoundpersistence,
         soundPriorityType msoundpriority);
 
 }  // namespace antares

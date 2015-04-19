@@ -25,7 +25,7 @@
 
 namespace antares {
 
-struct spaceObjectType;
+struct SpaceObject;
 
 typedef uint8_t beamKindType;
 enum beamKindEnum {
@@ -51,10 +51,10 @@ struct beamType {
     bool                active;
     int32_t             fromObjectNumber;
     int32_t             fromObjectID;
-    spaceObjectType*    fromObject;
+    SpaceObject*        fromObject;
     int32_t             toObjectNumber;
     int32_t             toObjectID;
-    spaceObjectType*    toObject;
+    SpaceObject*        toObject;
     Point               toRelativeCoord;
     uint32_t            boltRandomSeed;
     uint32_t            lastBoldRandomSeed;
@@ -75,7 +75,7 @@ class Beams {
     static beamType* add(
             coordPointType* location, uint8_t color, beamKindType kind, int32_t accuracy,
             int32_t beam_range);
-    static void set_attributes(spaceObjectType* beamObject, spaceObjectType* sourceObject);
+    static void set_attributes(SpaceObject* beamObject, SpaceObject* sourceObject);
     static void update();
     static void draw();
     static void show_all();

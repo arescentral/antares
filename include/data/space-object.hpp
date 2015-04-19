@@ -359,11 +359,11 @@ enum dutyType {
 
 //typedef beamTypeStruct;
 
-class spaceObjectType {
+class SpaceObject {
   public:
-    static spaceObjectType* zero();
+    static SpaceObject* zero();
 
-    spaceObjectType() = default;
+    SpaceObject() = default;
 
     uint32_t                attributes = 0;
     baseObjectType          *baseType = nullptr;
@@ -384,18 +384,18 @@ class spaceObjectType {
 
     coordPointType          location = {0, 0};
     Point                   collisionGrid;
-    spaceObjectType*        nextNearObject = nullptr;
+    SpaceObject*            nextNearObject = nullptr;
     Point                   distanceGrid;
-    spaceObjectType*        nextFarObject = nullptr;
-    spaceObjectType*        previousObject = nullptr;
+    SpaceObject*            nextFarObject = nullptr;
+    SpaceObject*            previousObject = nullptr;
     int32_t                 previousObjectNumber = kNoShip;
-    spaceObjectType*        nextObject = nullptr;
+    SpaceObject*            nextObject = nullptr;
     int32_t                 nextObjectNumber = kNoShip;
 
     int32_t                 runTimeFlags = 0;               // distance from origin to destination
     coordPointType          destinationLocation = {0, 0};   // coords of our destination ( or kNoDestination)
     int32_t                 destinationObject = kNoShip;    // which object?  or kNoDestinationObject -- or, if we're a dest, our corresponding destBalance for AI
-    spaceObjectType*        destObjectPtr = nullptr;        // ptr to destination object
+    SpaceObject*            destObjectPtr = nullptr;        // ptr to destination object
     int32_t                 destObjectDest = kNoShip;       // # of our destination's destination in case it dies
     int32_t                 destObjectID = kNoShip;         // ID of our dest object
     int32_t                 destObjectDestID = kNoShip;     // id of our dest's destination
@@ -514,7 +514,7 @@ class spaceObjectType {
     uint8_t                 shieldColor = 0;
     uint8_t                 originalColor = 0;
 
-    spaceObjectType(
+    SpaceObject(
             int32_t type, Random seed, int32_t object_id,
             const coordPointType& initial_location,
             int32_t relative_direction, fixedPointType *relative_velocity,
@@ -522,7 +522,7 @@ class spaceObjectType {
 
   private:
     enum ZeroObject { ZERO_OBJECT };
-    spaceObjectType(ZeroObject);
+    SpaceObject(ZeroObject);
 };
 
 }  // namespace antares

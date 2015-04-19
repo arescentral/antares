@@ -295,7 +295,7 @@ void UpdateRadar(int32_t unitsDone) {
 
             const int32_t rrange = globals()->gRadarRange >> 1L;
             for (int oCount = 0; oCount < kMaxSpaceObject; oCount++) {
-                spaceObjectType *anObject = mGetSpaceObjectPtr(oCount);
+                SpaceObject *anObject = mGetSpaceObjectPtr(oCount);
                 if (!anObject->active || (anObject == gScrollStarObject)) {
                     continue;
                 }
@@ -325,7 +325,7 @@ void UpdateRadar(int32_t unitsDone) {
       case kNearestFoeZoom:
       case kNearestAnythingZoom:
         {
-            spaceObjectType* anObject = mGetSpaceObjectPtr(globals()->gClosestObject);
+            SpaceObject* anObject = mGetSpaceObjectPtr(globals()->gClosestObject);
             uint64_t hugeDistance = anObject->distanceFromPlayer;
             if (hugeDistance == 0) { // if this is true, then we haven't calced its distance
                 uint64_t x_distance = ABS<int32_t>(gScrollStarObject->location.h - anObject->location.h);
@@ -363,7 +363,7 @@ void UpdateRadar(int32_t unitsDone) {
 
       case kSmallestZoom:
         {
-            spaceObjectType* anObject = mGetSpaceObjectPtr(globals()->gFarthestObject);
+            SpaceObject* anObject = mGetSpaceObjectPtr(globals()->gFarthestObject);
             uint64_t tempWide = anObject->distanceFromPlayer;
             bestScale = wsqrt(tempWide);
             if (bestScale == 0) bestScale = 1;
@@ -535,7 +535,7 @@ void draw_instruments() {
     right_instrument_sprite->draw(right_rect.left, right_rect.top);
 
     if (globals()->gPlayerShipNumber >= 0) {
-        spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+        SpaceObject* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
         if (player->active) {
             draw_player_ammo(
                 ((player->pulse.type >= 0) && (player->pulse.base->frame.weapon.ammo > 0))
@@ -550,7 +550,7 @@ void draw_instruments() {
         }
     }
 
-    spaceObjectType* o = gScrollStarObject;
+    SpaceObject* o = gScrollStarObject;
     draw_bar_indicator(kShieldBar, o->health(), o->max_health());
     draw_bar_indicator(kEnergyBar, o->energy(), o->max_energy());
     draw_bar_indicator(kBatteryBar, o->battery(), o->max_battery());

@@ -277,7 +277,7 @@ void set_initial_destination(const Scenario::InitialObject* initial, bool preser
 
         // now give the mapped initial object the admiral's destination
 
-        spaceObjectType* object = mGetSpaceObjectPtr(initial->realObjectNumber);
+        SpaceObject* object = mGetSpaceObjectPtr(initial->realObjectNumber);
         uint32_t specialAttributes = object->attributes; // preserve the attributes
         object->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
         SetObjectDestination(object, NULL);
@@ -368,8 +368,8 @@ bool Scenario::Condition::true_yet() const {
 }
 
 bool Scenario::Condition::is_true() const {
-    spaceObjectType* sObject = nullptr;
-    spaceObjectType* dObject = nullptr;
+    SpaceObject* sObject = nullptr;
+    SpaceObject* dObject = nullptr;
     int32_t i, l, difference;
     uint32_t distance, dcalc;
 
@@ -848,7 +848,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 type, &v, &coord, gScenarioRotation, owner, specialAttributes,
                 initial->spriteIDOverride)->number();
 
-        spaceObjectType* anObject = mGetSpaceObjectPtr(newShipNum);
+        SpaceObject* anObject = mGetSpaceObjectPtr(newShipNum);
         if (anObject->attributes & kIsDestination) {
             anObject->destinationObject = MakeNewDestination(
                     newShipNum, initial->canBuild, initial->earning, initial->nameResID,
@@ -1028,11 +1028,11 @@ void UnhideInitialObject(int32_t whichInitial) {
     set_initial_destination(initial, true);
 }
 
-spaceObjectType *GetObjectFromInitialNumber(int32_t initialNumber) {
+SpaceObject *GetObjectFromInitialNumber(int32_t initialNumber) {
     if (initialNumber >= 0) {
         Scenario::InitialObject* initial = gThisScenario->initial(initialNumber);
         if (initial->realObjectNumber >= 0) {
-            spaceObjectType& object = *mGetSpaceObjectPtr(initial->realObjectNumber);
+            SpaceObject& object = *mGetSpaceObjectPtr(initial->realObjectNumber);
             if ((object.id != initial->realObjectID) || (object.active != kObjectInUse)) {
                 return NULL;
             }
@@ -1040,7 +1040,7 @@ spaceObjectType *GetObjectFromInitialNumber(int32_t initialNumber) {
         }
         return NULL;
     } else if (initialNumber == -2) {
-        spaceObjectType& object = *mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+        SpaceObject& object = *mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
         if ((!object.active) || (!(object.attributes & kCanThink))) {
             return NULL;
         }

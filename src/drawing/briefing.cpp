@@ -201,7 +201,7 @@ void Briefing_Grid_Set(bool *grid, int32_t x, int32_t y, int32_t gridWidth, int3
 void GetInitialObjectSpriteData(
         const Scenario* scenario, int32_t whichObject, int32_t maxSize, Rect *bounds,
         coordPointType *corner, int32_t scale, int32_t *thisScale, Point *where, Rect *spriteRect) {
-    spaceObjectType         *sObject = NULL;
+    SpaceObject* sObject = NULL;
     briefingSpriteBoundsType    *sBounds = gBriefingSpriteBounds;
 
     spriteRect->right = spriteRect->left = -1;
@@ -348,7 +348,7 @@ static void render_briefing_with(
 
     for ( count = 0; count < kMaxSpaceObject; count++)
     {
-        spaceObjectType *anObject = mGetSpaceObjectPtr(count);
+        SpaceObject* anObject = mGetSpaceObjectPtr(count);
         if (( anObject->active == kObjectInUse) && ( anObject->sprite != NULL))
         {
             baseObject = anObject->baseType;

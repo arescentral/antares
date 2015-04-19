@@ -63,7 +63,7 @@ struct barIndicatorType {
 struct miniScreenLineType;
 struct miniComputerDataType {
     std::unique_ptr<miniScreenLineType[]> lineData;
-    std::unique_ptr<spaceObjectType[]> objectData;
+    std::unique_ptr<SpaceObject[]> objectData;
     int32_t                 selectLine;
     int32_t                 pollTime;
     int32_t                 buildTimeBarValue;

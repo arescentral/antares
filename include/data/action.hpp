@@ -27,7 +27,7 @@
 
 namespace antares {
 
-struct spaceObjectType;
+struct SpaceObject;
 
 enum objectVerbIDEnum {
     kNoAction = 0,
@@ -260,7 +260,7 @@ struct ActionRef {
     int32_t start;
     int32_t count;
 
-    void run(spaceObjectType *sObject, spaceObjectType *dObject, Point* offset) const;
+    void run(SpaceObject *sObject, SpaceObject *dObject, Point* offset) const;
 };
 void read_from(sfz::ReadSource in, ActionRef& action);
 
