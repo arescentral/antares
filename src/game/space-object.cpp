@@ -648,7 +648,7 @@ void ChangeObjectBaseType(
     }
 }
 
-int32_t CreateAnySpaceObject(
+spaceObjectType* CreateAnySpaceObject(
         int32_t whichBase, fixedPointType *velocity, coordPointType *location, int32_t direction,
         int32_t owner, uint32_t specialAttributes, int16_t spriteIDOverride) {
     Random random{gRandomSeed.next(32766)};
@@ -658,7 +658,7 @@ int32_t CreateAnySpaceObject(
 
     auto obj = AddSpaceObject(&newObject);
     if (!obj) {
-        return -1;
+        return nullptr;
     }
 
 #ifdef DATA_COVERAGE
@@ -673,7 +673,7 @@ int32_t CreateAnySpaceObject(
 
     obj->attributes |= specialAttributes;
     obj->baseType->create.run(obj, NULL, NULL);
-    return obj->number();
+    return obj;
 }
 
 int32_t CountObjectsOfBaseType(int32_t whichType, int32_t owner) {
@@ -943,17 +943,17 @@ void DestroyObject(spaceObjectType* object) {
 }
 
 void CreateFloatingBodyOfPlayer(spaceObjectType* obj) {
-    const auto body = globals()->scenarioFileInfo.playerBodyID;
+    const auto body_type = globals()->scenarioFileInfo.playerBodyID;
     // if we're already in a body, don't create a body from it
     // a body expiring is handled elsewhere
-    if (obj->whichBaseObject == body) {
+    if (obj->whichBaseObject == body_type) {
         return;
     }
 
-    int32_t ship_number = CreateAnySpaceObject(
-            body, &obj->velocity, &obj->location, obj->direction, obj->owner, 0, -1);
-    if (ship_number >= 0) {
-        ChangePlayerShipNumber(obj->owner, ship_number);
+    auto body = CreateAnySpaceObject(
+            body_type, &obj->velocity, &obj->location, obj->direction, obj->owner, 0, -1);
+    if (body) {
+        ChangePlayerShipNumber(obj->owner, body->number());
     } else {
         PlayerShipBodyExpire(obj, true);
     }

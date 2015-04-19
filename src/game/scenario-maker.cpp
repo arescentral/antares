@@ -846,7 +846,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         int32_t newShipNum;
         initial->realObjectNumber = newShipNum = CreateAnySpaceObject(
                 type, &v, &coord, gScenarioRotation, owner, specialAttributes,
-                initial->spriteIDOverride);
+                initial->spriteIDOverride)->number();
 
         spaceObjectType* anObject = mGetSpaceObjectPtr(newShipNum);
         if (anObject->attributes & kIsDestination) {
@@ -992,7 +992,7 @@ void UnhideInitialObject(int32_t whichInitial) {
     // TODO(sfiera): remap objects in networked games.
     fixedPointType v = {0, 0};
     int32_t newShipNum = CreateAnySpaceObject(
-            type, &v, &coord, 0, owner, specialAttributes, initial->spriteIDOverride);
+            type, &v, &coord, 0, owner, specialAttributes, initial->spriteIDOverride)->number();
     initial->realObjectNumber = newShipNum;
 
     auto anObject = mGetSpaceObjectPtr(newShipNum);

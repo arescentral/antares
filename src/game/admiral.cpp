@@ -1280,7 +1280,6 @@ void AdmiralBuildAtObject(int32_t whichAdmiral, int32_t baseTypeNum, int32_t whi
     admiralType* admiral = globals()->gAdmiralData.get() + whichAdmiral;
     destBalanceType* buildAtDest = mGetDestObjectBalancePtr(whichDestObject);
     spaceObjectType* buildAtObject = NULL;
-    int32_t            newObject;
     coordPointType  coord;
     fixedPointType  v = {0, 0};
 
@@ -1288,11 +1287,10 @@ void AdmiralBuildAtObject(int32_t whichAdmiral, int32_t baseTypeNum, int32_t whi
         buildAtObject = mGetSpaceObjectPtr(buildAtDest->whichObject);
         coord = buildAtObject->location;
 
-        newObject = CreateAnySpaceObject(baseTypeNum, &v, &coord, 0, whichAdmiral, 0, -1);
-
-        if (newObject >= 0) {
-            buildAtObject = mGetSpaceObjectPtr(newObject);
-            SetObjectDestination(buildAtObject, NULL);
+        spaceObjectType* newObject = CreateAnySpaceObject(
+                baseTypeNum, &v, &coord, 0, whichAdmiral, 0, -1);
+        if (newObject) {
+            SetObjectDestination(newObject, NULL);
             if (whichAdmiral == globals()->gPlayerAdmiralNumber) {
                 PlayVolumeSound(kComputerBeep2, kMediumVolume, kMediumPersistence,
                         kLowPrioritySound);

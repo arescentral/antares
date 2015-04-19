@@ -137,12 +137,12 @@ static void create_object(
             at.v += focus->randomSeed.next(distance * 2) - distance;
         }
 
-        int32_t n = CreateAnySpaceObject(type, &vel, &at, direction, focus->owner, 0, -1);
-        if (n < 0) {
+        spaceObjectType* product = CreateAnySpaceObject(
+                type, &vel, &at, direction, focus->owner, 0, -1);
+        if (!product) {
             continue;
         }
 
-        spaceObjectType* product = mGetSpaceObjectPtr(n);
         if (product->attributes & kCanAcceptDestination) {
             uint32_t save_attributes = product->attributes;
             product->attributes &= ~kStaticDestination;
