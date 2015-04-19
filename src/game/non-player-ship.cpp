@@ -399,11 +399,6 @@ void NonplayerShipThink(int32_t timePass)
                 anObject->thrust = baseObject->maxThrust;
             }
         } else if (anObject->keysDown & kDownKey) {
-            if ((anObject->presenceState != kWarpInPresence)
-                    && (anObject->presenceState != kWarpingPresence)
-                    && (anObject->presenceState != kWarpOutPresence)) {
-                anObject->thrust = -baseObject->maxThrust;
-            }
             anObject->thrust = -baseObject->maxThrust;
         } else {
             anObject->thrust = 0;
@@ -416,18 +411,15 @@ void NonplayerShipThink(int32_t timePass)
 
             if (anObject->presenceState == kWarpingPresence) {
                 anObject->collect_warp_energy(1);
-            }
-
-            if (anObject->presenceState == kNormalPresence) {
+            } else if (anObject->presenceState == kNormalPresence) {
                 anObject->recharge();
             }
         }
 
         // targetObject is set for all three weapons -- do not change
+        targetObject = nullptr;
         if (anObject->targetObjectNumber >= 0) {
             targetObject = mGetSpaceObjectPtr(anObject->targetObjectNumber);
-        } else {
-            targetObject = nullptr;
         }
 
         tick_pulse(anObject, targetObject, timePass);
