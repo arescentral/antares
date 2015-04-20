@@ -31,17 +31,14 @@ extern int32_t gRootObjectNumber;
 
 void SpaceObjectHandlingInit( void);
 void ResetAllSpaceObjects( void);
-int AddSpaceObject( spaceObjectType *);
 void RemoveAllSpaceObjects( void);
 void CorrectAllBaseObjectColor( void);
 void ChangeObjectBaseType( spaceObjectType *, int32_t, int32_t, bool);
 
-int32_t CreateAnySpaceObject(int32_t, fixedPointType *, coordPointType *, int32_t, int32_t, uint32_t,
-                            int16_t);
+spaceObjectType* CreateAnySpaceObject(
+        int32_t whichBase, fixedPointType *velocity, coordPointType *location, int32_t direction,
+        int32_t owner, uint32_t specialAttributes, int16_t spriteIDOverride);
 int32_t CountObjectsOfBaseType(int32_t, int32_t);
-void AlterObjectHealth( spaceObjectType *, int32_t);
-void AlterObjectEnergy( spaceObjectType *, int32_t);
-void AlterObjectBattery( spaceObjectType *, int32_t);
 void AlterObjectOwner( spaceObjectType *, int32_t, bool);
 void AlterObjectOccupation( spaceObjectType *, int32_t, int32_t, bool);
 void AlterObjectCloakState( spaceObjectType *, bool);

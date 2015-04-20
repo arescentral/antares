@@ -50,6 +50,8 @@ using sfz::ReadSource;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::read;
+using std::max;
+using std::min;
 using std::set;
 using std::unique_ptr;
 
@@ -58,8 +60,6 @@ namespace antares {
 const uint8_t kFriendlyColor        = GREEN;
 const uint8_t kHostileColor         = RED;
 const uint8_t kNeutralColor         = SKY_BLUE;
-
-const int32_t kBatteryToEnergyRatio = 5;
 
 static const int16_t kSpaceObjectNameResID          = 5000;
 static const int16_t kSpaceObjectShortNameResID     = 5001;
@@ -170,150 +170,105 @@ void mGetBaseObjectFromClassRace(
     }
 }
 
-int AddSpaceObject( spaceObjectType *sourceObject)
+static spaceObjectType* AddSpaceObject(spaceObjectType *sourceObject) {
+    for (int i = 0; i < kMaxSpaceObject; ++i) {
+        spaceObjectType* obj = mGetSpaceObjectPtr(i);
+        if (obj->active) {
+            continue;
+        }
 
-{
-    spaceObjectType *destObject = NULL;
-    int             whichObject = 0;
-    NatePixTable* spriteTable = NULL;
-    Point           where;
-    int32_t         scaleCalc;
-    RgbColor        tinyColor;
-    uint8_t         tinyShade;
-    int16_t         whichShape = 0, angle;
-
-    destObject = gSpaceObjectData.get();
-
-    while (( destObject->active) && ( whichObject < kMaxSpaceObject))
-    {
-        whichObject++;
-        destObject++;
-    }
-    if ( whichObject == kMaxSpaceObject)
-    {
-        return( -1);
-    }
-
-    if ( sourceObject->pixResID != kNoSpriteTable)
-    {
-        spriteTable = GetPixTable( sourceObject->pixResID);
-
-        if (spriteTable == NULL) {
-            throw Exception("Received an unexpected request to load a sprite");
-            spriteTable = AddPixTable( sourceObject->pixResID);
-            if (spriteTable == NULL) {
-                return -1;
+        NatePixTable* spriteTable = nullptr;
+        if (sourceObject->pixResID != kNoSpriteTable) {
+            spriteTable = GetPixTable(sourceObject->pixResID);
+            if (!spriteTable) {
+                throw Exception("Received an unexpected request to load a sprite");
             }
         }
-    }
 
-//  sourceObject->id = whichObject;
-    *destObject = *sourceObject;
+        *obj = *sourceObject;
 
-    destObject->lastLocation = destObject->location;
-    destObject->lastLocation.h += 100000;
-    destObject->lastLocation.v += 100000;
-    destObject->lastDir = destObject->direction;
+        Point where(
+            ((obj->location.h - gGlobalCorner.h) * gAbsoluteScale >> SHIFT_SCALE) + viewport.left,
+            ((obj->location.v - gGlobalCorner.v) * gAbsoluteScale >> SHIFT_SCALE));
 
-                scaleCalc = ( destObject->location.h - gGlobalCorner.h) * gAbsoluteScale;
-                scaleCalc >>= SHIFT_SCALE;
-                where.h = scaleCalc + viewport.left;
-                scaleCalc = (destObject->location.v - gGlobalCorner.v) * gAbsoluteScale;
-                scaleCalc >>= SHIFT_SCALE; /*+ CLIP_TOP*/;
-                where.v = scaleCalc;
-
-//  where.h = destObject->location.h - gGlobalCorner.h + CLIP_LEFT;
-//  where.v = destObject->location.v - gGlobalCorner.v /*+ CLIP_TOP*/;
-    if ( destObject->sprite != NULL) RemoveSprite( destObject->sprite);
-
-    if (spriteTable != NULL) {
-        switch( destObject->layer)
-        {
-            case kFirstSpriteLayer:
-                tinyShade = MEDIUM;
-                break;
-
-            case kMiddleSpriteLayer:
-                tinyShade = LIGHT;
-                break;
-
-            case kLastSpriteLayer:
-                tinyShade = VERY_LIGHT;
-                break;
-
-            default:
-                tinyShade = DARK;
-                break;
+        if (obj->sprite) {
+            RemoveSprite(obj->sprite);
         }
 
-        if ( destObject->tinySize == 0)
-        {
-            tinyColor = RgbColor::kClear;
-        } else if ( destObject->owner == globals()->gPlayerAdmiralNumber)
-        {
-            tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
-        } else if ( destObject->owner <= kNoOwner)
-        {
-            tinyColor = GetRGBTranslateColorShade(kNeutralColor, tinyShade);
-        } else
-        {
-            tinyColor = GetRGBTranslateColorShade(kHostileColor, tinyShade);
+        obj->sprite = NULL;
+        if (spriteTable) {
+            uint8_t tinyShade;
+            switch (obj->layer) {
+                case kFirstSpriteLayer:
+                    tinyShade = MEDIUM;
+                    break;
+
+                case kMiddleSpriteLayer:
+                    tinyShade = LIGHT;
+                    break;
+
+                case kLastSpriteLayer:
+                    tinyShade = VERY_LIGHT;
+                    break;
+
+                default:
+                    tinyShade = DARK;
+                    break;
+            }
+
+            RgbColor tinyColor;
+            if (obj->tinySize == 0) {
+                tinyColor = RgbColor::kClear;
+            } else if (obj->owner == globals()->gPlayerAdmiralNumber) {
+                tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
+            } else if (obj->owner <= kNoOwner) {
+                tinyColor = GetRGBTranslateColorShade(kNeutralColor, tinyShade);
+            } else {
+                tinyColor = GetRGBTranslateColorShade(kHostileColor, tinyShade);
+            }
+
+            int16_t whichShape = 0;
+            int16_t angle;
+            if (obj->attributes & kIsSelfAnimated) {
+                whichShape = more_evil_fixed_to_long(obj->frame.animation.thisShape);
+            } else if (obj->attributes & kShapeFromDirection) {
+                angle = obj->direction;
+                mAddAngle(angle, obj->baseType->frame.rotation.rotRes >> 1);
+                whichShape = angle / obj->baseType->frame.rotation.rotRes;
+            }
+
+            obj->sprite = AddSprite(
+                    where, spriteTable, sourceObject->pixResID, whichShape, obj->naturalScale,
+                    obj->tinySize, obj->layer, tinyColor);
+            obj->tinyColor = tinyColor;
+
+            if (obj->sprite == NULL) {
+                globals()->gGameOver = -1;
+                obj->active = kObjectAvailable;
+                return nullptr;
+            }
         }
 
-        if ( destObject->attributes & kIsSelfAnimated)
-        {
-            whichShape = more_evil_fixed_to_long(destObject->frame.animation.thisShape);
-        } else if ( destObject->attributes & kShapeFromDirection)
-        {
-            angle = destObject->direction;
-            mAddAngle( angle, destObject->baseType->frame.rotation.rotRes >> 1);
-            whichShape = angle / destObject->baseType->frame.rotation.rotRes;
+        if (obj->attributes & kIsBeam) {
+            const auto& beam = obj->baseType->frame.beam;
+            obj->frame.beam = Beams::add(
+                    &(obj->location), beam.color, beam.kind, beam.accuracy, beam.range);
         }
 
-        destObject->sprite = AddSprite( where, spriteTable, sourceObject->pixResID, whichShape,
-            destObject->naturalScale, destObject->tinySize, destObject->layer, tinyColor,
-            &(destObject->whichSprite));
-        destObject->tinyColor = tinyColor;
-
-        if ( destObject->sprite == NULL)
-        {
-            globals()->gGameOver = -1;
-            destObject->active = kObjectAvailable;
-            return( -1);
+        obj->nextObject = gRootObject;
+        obj->nextObjectNumber = gRootObjectNumber;
+        obj->previousObject = NULL;
+        obj->previousObjectNumber = -1;
+        if (gRootObject != NULL) {
+            gRootObject->previousObject = obj;
+            gRootObject->previousObjectNumber = i;
         }
-    } else
-    {
-        destObject->sprite = NULL;
-        destObject->whichSprite = kNoSprite;
+        gRootObject = obj;
+        gRootObjectNumber = i;
+
+        return obj;
     }
-
-    if ( destObject->attributes & kIsBeam)
-    {
-        destObject->frame.beam = Beams::add( &(destObject->location),
-            destObject->baseType->frame.beam.color,
-            destObject->baseType->frame.beam.kind,
-            destObject->baseType->frame.beam.accuracy,
-            destObject->baseType->frame.beam.range);
-    }
-
-    destObject->nextObject = gRootObject;
-    destObject->nextObjectNumber = gRootObjectNumber;
-    destObject->previousObject = NULL;
-    destObject->previousObjectNumber = -1;
-    if ( gRootObject != NULL)
-    {
-        gRootObject->previousObject = destObject;
-        gRootObject->previousObjectNumber = whichObject;
-    }
-    gRootObject = destObject;
-    gRootObjectNumber = whichObject;
-
-    destObject->active = kObjectInUse;
-    destObject->nextNearObject = destObject->nextFarObject = NULL;
-    destObject->cloakState = destObject->hitState = 0;
-    destObject->duty = eNoDuty;
-
-    return ( whichObject);
+    return nullptr;
 }
 
 void RemoveAllSpaceObjects( void)
@@ -329,7 +284,6 @@ void RemoveAllSpaceObjects( void)
         {
             RemoveSprite( anObject->sprite);
             anObject->sprite = NULL;
-            anObject->whichSprite = kNoSprite;
         }
         anObject->active = kObjectAvailable;
         anObject->nextNearObject = anObject->nextFarObject = NULL;
@@ -375,225 +329,145 @@ void CorrectAllBaseObjectColor( void)
 
 }
 
-static void InitSpaceObjectFromBaseObject(
-        spaceObjectType *dObject, int32_t  whichBaseObject, Random seed,
-        int32_t direction, fixedPointType *velocity, int32_t owner, int16_t spriteIDOverride) {
-    baseObjectType  *sObject = mGetBaseObjectPtr( whichBaseObject), *weaponBase = NULL;
-    int16_t         i;
-    int32_t         r;
-    Fixed           f;
-    fixedPointType  newVel;
-    int32_t         l;
+spaceObjectType::spaceObjectType(
+        int32_t type, Random seed, int32_t object_id,
+        const coordPointType& initial_location,
+        int32_t relative_direction, fixedPointType *relative_velocity,
+        int32_t new_owner, int16_t spriteIDOverride) {
+    whichBaseObject     = type;
+    baseType            = mGetBaseObjectPtr(type);
+    active              = kObjectInUse;
+    randomSeed          = seed;
+    owner               = new_owner;
+    location            = initial_location;
+    id                  = object_id;
+    sprite              = nullptr;
 
-    dObject->offlineTime = 0;
+    attributes          = baseType->attributes;
+    shieldColor         = baseType->shieldColor;
+    tinySize            = baseType->tinySize;
+    layer               = baseType->pixLayer;
+    maxVelocity         = baseType->maxVelocity;
+    naturalScale        = baseType->naturalScale;
 
-    dObject->randomSeed = seed;
-    dObject->attributes = sObject->attributes;
-    dObject->baseType = sObject;
-    dObject->whichBaseObject = whichBaseObject;
-    dObject->keysDown = 0;
-    dObject->timeFromOrigin = 0;
-    dObject->runTimeFlags = 0;
-    if ( owner >= 0)
-        dObject->myPlayerFlag = 1 << owner;
-    else dObject->myPlayerFlag = 0x80000000;
-    dObject->seenByPlayerFlags = 0xffffffff;
-    dObject->hostileTowardsFlags = 0;
-    dObject->absoluteBounds.left = dObject->absoluteBounds.right = 0;
-    dObject->shieldColor = sObject->shieldColor;
-    dObject->tinySize = sObject->tinySize;
-    dObject->layer = sObject->pixLayer;
-    do
-    {
-        dObject->id = dObject->randomSeed.next(32768);
-    } while ( dObject->id == -1);
+    _health             = max_health();
+    _energy             = max_energy();
+    _battery            = max_battery();
 
-    dObject->distanceGrid.h = dObject->distanceGrid.v = dObject->collisionGrid.h = dObject->collisionGrid.v = 0;
-    if (sObject->activatePeriod) {
-        dObject->periodicTime =
-            sObject->activatePeriod + dObject->randomSeed.next(sObject->activatePeriodRange);
-    } else dObject->periodicTime = 0;
-
-    r = sObject->initialDirection;
-    mAddAngle( r, direction);
-    if ( sObject->initialDirectionRange > 0)
-    {
-        i = dObject->randomSeed.next(sObject->initialDirectionRange);
-        mAddAngle( r, i);
-    }
-    dObject->direction = r;
-
-    f = sObject->initialVelocity;
-    if ( sObject->initialVelocityRange > 0)
-    {
-        f += dObject->randomSeed.next(sObject->initialVelocityRange);
-    }
-    GetRotPoint(&newVel.h, &newVel.v, r);
-    newVel.h = mMultiplyFixed( newVel.h, f);
-    newVel.v = mMultiplyFixed( newVel.v, f);
-
-    if ( velocity != NULL)
-    {
-        newVel.h += velocity->h;
-        newVel.v += velocity->v;
+    if (owner >= 0) {
+        myPlayerFlag = 1 << owner;
     }
 
-    dObject->velocity.h = newVel.h;
-    dObject->velocity.v = newVel.v;
-    dObject->maxVelocity = sObject->maxVelocity;
-
-    dObject->motionFraction.h = dObject->motionFraction.v = 0;
-    if ((dObject->attributes & kCanThink) ||
-            (dObject->attributes & kRemoteOrHuman))
-        dObject->thrust = 0;
-    else
-        dObject->thrust = sObject->maxThrust;
-
-
-    dObject->energy = sObject->energy;
-    dObject->rechargeTime = dObject->pulse.charge = dObject->beam.charge = dObject->special.charge = 0;
-    dObject->warpEnergyCollected = 0;
-    dObject->battery = sObject->energy * kBatteryToEnergyRatio;
-    dObject->owner = owner;
-    dObject->destinationObject = kNoDestinationObject;
-    dObject->destinationLocation.h = dObject->destinationLocation.v = kNoDestinationCoord;
-    dObject->destObjectPtr = NULL;
-    dObject->destObjectDest = kNoDestinationObject;
-    dObject->destObjectID = kNoDestinationObject;
-    dObject->destObjectDestID = kNoDestinationObject;
-    dObject->remoteFoeStrength = dObject->remoteFriendStrength = dObject->escortStrength =
-        dObject->localFoeStrength = dObject->localFriendStrength = 0;
-    dObject->bestConsideredTargetValue = dObject->currentTargetValue = 0xffffffff;
-    dObject->bestConsideredTargetNumber = -1;
-
-    // not setting: absoluteBounds;
-
-    if ( dObject->attributes & kCanTurn)
-    {
-        dObject->directionGoal =
-            dObject->turnFraction = dObject->turnVelocity = 0;
+    // We used to irrelevantly set 'id' here.  Now, we just cycle
+    // through values to maintain replay-compatibility of randomSeed.
+    while (randomSeed.next(32768) == -1) {
+        continue;
     }
-    if ( dObject->attributes & kIsSelfAnimated)
-    {
-        dObject->frame.animation.thisShape = sObject->frame.animation.frameShape;
-        if ( sObject->frame.animation.frameShapeRange > 0)
-        {
-            l = dObject->randomSeed.next(sObject->frame.animation.frameShapeRange);
-            dObject->frame.animation.thisShape += l;
+
+    if (baseType->activatePeriod) {
+        periodicTime = baseType->activatePeriod + randomSeed.next(baseType->activatePeriodRange);
+    }
+
+    direction = baseType->initialDirection;
+    mAddAngle(direction, relative_direction);
+    if (baseType->initialDirectionRange > 0) {
+        mAddAngle(direction, randomSeed.next(baseType->initialDirectionRange));
+    }
+
+    Fixed f = baseType->initialVelocity;
+    if (baseType->initialVelocityRange > 0) {
+        f += randomSeed.next(baseType->initialVelocityRange);
+    }
+    GetRotPoint(&velocity.h, &velocity.v, direction);
+    velocity.h = mMultiplyFixed(velocity.h, f);
+    velocity.v = mMultiplyFixed(velocity.v, f);
+
+    if (relative_velocity) {
+        velocity.h += relative_velocity->h;
+        velocity.v += relative_velocity->v;
+    }
+
+    if (!(attributes & (kCanThink | kRemoteOrHuman))) {
+        thrust = baseType->maxThrust;
+    }
+
+    if (attributes & kIsSelfAnimated) {
+        frame.animation.thisShape = baseType->frame.animation.frameShape;
+        if (baseType->frame.animation.frameShapeRange > 0) {
+            frame.animation.thisShape +=
+                randomSeed.next(baseType->frame.animation.frameShapeRange);
         }
-        dObject->frame.animation.frameDirection =
-            sObject->frame.animation.frameDirection;
-        if ( sObject->frame.animation.frameDirectionRange == -1)
-        {
-            if (dObject->randomSeed.next(2) == 1) {
-                dObject->frame.animation.frameDirection = 1;
+        frame.animation.frameDirection = baseType->frame.animation.frameDirection;
+        if (baseType->frame.animation.frameDirectionRange == -1) {
+            if (randomSeed.next(2) == 1) {
+                frame.animation.frameDirection = 1;
             }
-        } else if ( sObject->frame.animation.frameDirectionRange > 0)
-        {
-            dObject->frame.animation.frameDirection += dObject->randomSeed.next(
-                sObject->frame.animation.frameDirectionRange);
+        } else if (baseType->frame.animation.frameDirectionRange > 0) {
+            frame.animation.frameDirection += randomSeed.next(
+                baseType->frame.animation.frameDirectionRange);
         }
-        dObject->frame.animation.frameFraction = 0;
-        dObject->frame.animation.frameSpeed = sObject->frame.animation.frameSpeed;
-    } else if ( dObject->attributes & kIsBeam)
-    {
-//      dObject->frame.beam.killMe = false;
+        frame.animation.frameFraction = 0;
+        frame.animation.frameSpeed = baseType->frame.animation.frameSpeed;
     }
 
-    // not setting lastTimeUpdate;
-
-    dObject->health = sObject->health;
-
-    // not setting owner
-
-    if ( sObject->initialAge >= 0)
-        dObject->age = sObject->initialAge + dObject->randomSeed.next(sObject->initialAgeRange);
-    else dObject->age = -1;
-    dObject->naturalScale = sObject->naturalScale;
-
-    // not setting id
-
-    dObject->active = kObjectInUse;
-    dObject->nextNearObject = dObject->nextFarObject = NULL;
-
-    // not setting sprite, targetObjectNumber, lastTarget, lastTargetDistance;
-
-    dObject->closestDistance = kMaximumRelevantDistanceSquared;
-    dObject->targetObjectNumber = dObject->lastTarget = dObject->targetObjectID = kNoShip;
-    dObject->lastTargetDistance = dObject->targetAngle = 0;
-
-    dObject->closestObject = kNoShip;
-    dObject->presenceState = kNormalPresence;
-
-    if ( spriteIDOverride == -1)
-        dObject->pixResID = sObject->pixResID;
-    else dObject->pixResID = spriteIDOverride;
-
-    if ( sObject->attributes & kCanThink)
-    {
-        dObject->pixResID += (GetAdmiralColor( owner) << kSpriteTableColorShift);
+    if (baseType->initialAge >= 0) {
+        age = baseType->initialAge + randomSeed.next(baseType->initialAgeRange);
     }
 
-    dObject->pulse.type = sObject->pulse.base;
-    if ( dObject->pulse.type != kNoWeapon)
-        dObject->pulse.base = mGetBaseObjectPtr( dObject->pulse.type);
-    else dObject->pulse.base = NULL;
-    dObject->beam.type = sObject->beam.base;
-    if ( dObject->beam.type != kNoWeapon)
-        dObject->beam.base = mGetBaseObjectPtr( dObject->beam.type);
-    else dObject->beam.base = NULL;
-    dObject->special.type = sObject->special.base;
-    if ( dObject->special.type != kNoWeapon)
-        dObject->special.base = mGetBaseObjectPtr( dObject->special.type);
-    else dObject->special.base = NULL;
-    dObject->longestWeaponRange = 0;
-    dObject->shortestWeaponRange = kMaximumRelevantDistance;
+    if (spriteIDOverride == -1) {
+        pixResID = baseType->pixResID;
+    } else {
+        pixResID = spriteIDOverride;
+    }
 
-    if ( dObject->pulse.type != kNoWeapon)
-    {
-        weaponBase = dObject->pulse.base;
-        dObject->pulse.ammo = weaponBase->frame.weapon.ammo;
-        dObject->pulse.time = dObject->pulse.position = 0;
-        r = weaponBase->frame.weapon.range;
-        if (( r > 0) && ( weaponBase->frame.weapon.usage & kUseForAttacking))
-        {
-            if ( r > dObject->longestWeaponRange) dObject->longestWeaponRange = r;
-            if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
-        }
-    } else dObject->pulse.time = 0;
+    if (baseType->attributes & kCanThink) {
+        pixResID += (GetAdmiralColor(owner) << kSpriteTableColorShift);
+    }
 
-    if ( dObject->beam.type != kNoWeapon)
-    {
-        weaponBase = dObject->beam.base;
-        dObject->beam.ammo = weaponBase->frame.weapon.ammo;
-        dObject->beam.time = dObject->beam.position = 0;
-        r = weaponBase->frame.weapon.range;
-        if (( r > 0) && ( weaponBase->frame.weapon.usage & kUseForAttacking))
-        {
-            if ( r > dObject->longestWeaponRange) dObject->longestWeaponRange = r;
-            if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
-        }
-    } else dObject->beam.time = 0;
+    pulse.type = baseType->pulse.base;
+    pulse.base = mGetBaseObjectPtr(pulse.type);
+    beam.type = baseType->beam.base;
+    beam.base = mGetBaseObjectPtr(beam.type);
+    special.type = baseType->special.base;
+    special.base = mGetBaseObjectPtr(special.type);
 
-    if ( dObject->special.type != kNoWeapon)
-    {
-        weaponBase = dObject->special.base;
-        dObject->special.ammo = weaponBase->frame.weapon.ammo;
-        dObject->special.time = dObject->special.position = 0;
-        r = weaponBase->frame.weapon.range;
-        if (( r > 0) && ( weaponBase->frame.weapon.usage & kUseForAttacking))
-        {
-            if ( r > dObject->longestWeaponRange) dObject->longestWeaponRange = r;
-            if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
+    longestWeaponRange = 0;
+    shortestWeaponRange = kMaximumRelevantDistance;
+
+    for (auto weapon: {&pulse, &beam, &special}) {
+        if (weapon->type != kNoWeapon) {
+            const auto& frame = weapon->base->frame.weapon;
+            weapon->ammo = frame.ammo;
+            if ((frame.range > 0) && (frame.usage & kUseForAttacking)) {
+                longestWeaponRange = max(frame.range, longestWeaponRange);
+                shortestWeaponRange = min(frame.range, shortestWeaponRange);
+            }
         }
-    } else dObject->special.time = 0;
+    }
 
     // if we don't have any weapon, then shortest range is 0 too
-    if ( dObject->longestWeaponRange == 0) dObject->shortestWeaponRange = 0;
-    if ( dObject->longestWeaponRange > kEngageRange)
-        dObject->engageRange = dObject->longestWeaponRange;
-    else
-        dObject->engageRange = kEngageRange;
+    shortestWeaponRange = min(longestWeaponRange, shortestWeaponRange);
+    engageRange = max(kEngageRange, longestWeaponRange);
+
+    if (attributes & (kCanCollide | kCanBeHit | kIsDestination | kCanThink | kRemoteOrHuman)) {
+        uint32_t ydiff, xdiff;
+        spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+        if (player && (player->active)) {
+            xdiff = ABS<int>(player->location.h - location.h);
+            ydiff = ABS<int>(player->location.v - location.v);
+        } else {
+            xdiff = ABS<int>(gGlobalCorner.h - location.h);
+            ydiff = ABS<int>(gGlobalCorner.v - location.v);
+        }
+        if ((xdiff > kMaximumRelevantDistance)
+                || (ydiff > kMaximumRelevantDistance)) {
+            distanceFromPlayer
+                = MyWideMul<uint64_t>(xdiff, xdiff)
+                + MyWideMul<uint64_t>(ydiff, ydiff);
+        } else {
+            distanceFromPlayer = ydiff * ydiff + xdiff * xdiff;
+        }
+    }
 }
 
 //
@@ -748,56 +622,17 @@ void ChangeObjectBaseType(
     }
 }
 
-int32_t CreateAnySpaceObject(
+spaceObjectType* CreateAnySpaceObject(
         int32_t whichBase, fixedPointType *velocity, coordPointType *location, int32_t direction,
         int32_t owner, uint32_t specialAttributes, int16_t spriteIDOverride) {
-    spaceObjectType newObject;
-    InitSpaceObjectFromBaseObject(
-            &newObject, whichBase, {gRandomSeed.next(32766)}, direction, velocity, owner,
-            spriteIDOverride);
-    newObject.location = *location;
-    spaceObjectType* player = nullptr;
-    if (globals()->gPlayerShipNumber >= 0) {
-        player = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
-    }
-    uint32_t distance, dcalc, difference;
-    uint64_t hugeDistance;
-    if (player && (player->active)) {
-        difference = ABS<int>(player->location.h - newObject.location.h);
-        dcalc = difference;
-        difference =  ABS<int>(player->location.v - newObject.location.v);
-        distance = difference;
-    } else {
-        difference = ABS<int>(gGlobalCorner.h - newObject.location.h);
-        dcalc = difference;
-        difference =  ABS<int>(gGlobalCorner.v - newObject.location.v);
-        distance = difference;
-    }
-    if ((newObject.attributes & kCanCollide)
-            || (newObject.attributes & kCanBeHit)
-            || (newObject.attributes & kIsDestination)
-            || (newObject.attributes & kCanThink)
-            || (newObject.attributes & kRemoteOrHuman)) {
-        if ((dcalc > kMaximumRelevantDistance)
-                || (distance > kMaximumRelevantDistance)) {
-            hugeDistance = dcalc;    // must be positive
-            MyWideMul(hugeDistance, hugeDistance, &hugeDistance);    // ppc automatically generates WideMultiply
-            newObject.distanceFromPlayer = distance;
-            MyWideMul(newObject.distanceFromPlayer, newObject.distanceFromPlayer, &newObject.distanceFromPlayer);
-            newObject.distanceFromPlayer += hugeDistance;
-        } else {
-            newObject.distanceFromPlayer = distance * distance + dcalc * dcalc;
-        }
-    } else {
-        newObject.distanceFromPlayer = 0;
-    }
+    Random random{gRandomSeed.next(32766)};
+    int32_t id = gRandomSeed.next(16384);
+    spaceObjectType newObject(
+            whichBase, random, id, *location, direction, velocity, owner, spriteIDOverride);
 
-    newObject.sprite = NULL;
-    newObject.id = gRandomSeed.next(16384);
-
-    int32_t newObjectNumber = AddSpaceObject(&newObject);
-    if (newObjectNumber == -1) {
-        return -1;
+    auto obj = AddSpaceObject(&newObject);
+    if (!obj) {
+        return nullptr;
     }
 
 #ifdef DATA_COVERAGE
@@ -810,10 +645,9 @@ int32_t CreateAnySpaceObject(
     }
 #endif  // DATA_COVERAGE
 
-    spaceObjectType* madeObject = gSpaceObjectData.get() + newObjectNumber;
-    madeObject->attributes |= specialAttributes;
-    madeObject->baseType->create.run(madeObject, NULL, NULL);
-    return newObjectNumber;
+    obj->attributes |= specialAttributes;
+    obj->baseType->create.run(obj, NULL, NULL);
+    return obj;
 }
 
 int32_t CountObjectsOfBaseType(int32_t whichType, int32_t owner) {
@@ -829,41 +663,53 @@ int32_t CountObjectsOfBaseType(int32_t whichType, int32_t owner) {
     return result;
 }
 
-void AlterObjectHealth(spaceObjectType* object, int32_t health) {
-    if (health <= 0) {
-        object->health += health;
+void spaceObjectType::alter_health(int32_t amount) {
+    if (amount <= 0) {
+        _health += amount;
+    } else if (_health >= (2147483647 - amount)) {
+        _health = 2147483647;
     } else {
-        if (object->health >= (2147483647 - health)) {
-            object->health = 2147483647;
-        } else {
-            object->health += health;
-        }
+        _health += amount;
     }
-    if (object->health < 0) {
-        DestroyObject(object);
+    if (_health < 0) {
+        DestroyObject(this);
     }
 }
 
-void AlterObjectEnergy(spaceObjectType* object, int32_t energy) {
-    object->energy += energy;
-    if (object->energy < 0) {
-        object->energy = 0;
-    } else if (object->energy > object->baseType->energy) {
-        AlterObjectBattery(object, object->energy - object->baseType->energy);
-        object->energy = object->baseType->energy;
+void spaceObjectType::alter_energy(int32_t amount) {
+    _energy += amount;
+    if (_energy < 0) {
+        _energy = 0;
+    } else if (_energy > max_energy()) {
+        alter_battery(_energy - max_energy());
+        _energy = max_energy();
     }
 }
 
-void AlterObjectBattery(spaceObjectType* object, int32_t energy) {
-    object->battery += energy;
-    if (object->battery > (object->baseType->energy * kBatteryToEnergyRatio)) {
-        PayAdmiral(
-                object->owner,
-                object->battery - (object->baseType->energy * kBatteryToEnergyRatio));
-        object->battery = object->baseType->energy * kBatteryToEnergyRatio;
+void spaceObjectType::alter_battery(int32_t amount) {
+    _battery += amount;
+    if (_battery > max_battery()) {
+        PayAdmiral(owner, _battery - max_battery());
+        _battery = max_battery();
     }
 }
 
+bool spaceObjectType::collect_warp_energy(int32_t amount) {
+    if (amount >= _energy) {
+        warpEnergyCollected += _energy;
+        _energy = 0;
+        return false;
+    } else {
+        _energy -= amount;
+        warpEnergyCollected += amount;
+        return true;
+    }
+}
+
+void spaceObjectType::refund_warp_energy() {
+    alter_battery(warpEnergyCollected);
+    warpEnergyCollected = 0;
+}
 
 void AlterObjectOwner(spaceObjectType* object, int32_t owner, bool message) {
     if (object->owner == owner) {
@@ -1014,7 +860,7 @@ void DestroyObject(spaceObjectType* object) {
     if (object->active != kObjectInUse) {
         return;
     } else if (object->attributes & kNeutralDeath) {
-        object->health = object->baseType->health;
+        object->_health = object->max_health();
         // if anyone is targeting it, they should stop
         for (int16_t i = 0; i < kMaxSpaceObject; i++) {
             auto& fixObject = gSpaceObjectData[i];
@@ -1032,7 +878,7 @@ void DestroyObject(spaceObjectType* object) {
     } else {
         AddKillToAdmiral(object);
         if (object->attributes & kReleaseEnergyOnDeath) {
-            int16_t energyNum = object->energy / kEnergyPodAmount;
+            int16_t energyNum = object->energy() / kEnergyPodAmount;
             while (energyNum > 0) {
                 CreateAnySpaceObject(
                         globals()->scenarioFileInfo.energyBlobID, &object->velocity,
@@ -1071,17 +917,17 @@ void DestroyObject(spaceObjectType* object) {
 }
 
 void CreateFloatingBodyOfPlayer(spaceObjectType* obj) {
-    const auto body = globals()->scenarioFileInfo.playerBodyID;
+    const auto body_type = globals()->scenarioFileInfo.playerBodyID;
     // if we're already in a body, don't create a body from it
     // a body expiring is handled elsewhere
-    if (obj->whichBaseObject == body) {
+    if (obj->whichBaseObject == body_type) {
         return;
     }
 
-    int32_t ship_number = CreateAnySpaceObject(
-            body, &obj->velocity, &obj->location, obj->direction, obj->owner, 0, -1);
-    if (ship_number >= 0) {
-        ChangePlayerShipNumber(obj->owner, ship_number);
+    auto body = CreateAnySpaceObject(
+            body_type, &obj->velocity, &obj->location, obj->direction, obj->owner, 0, -1);
+    if (body) {
+        ChangePlayerShipNumber(obj->owner, body->number());
     } else {
         PlayerShipBodyExpire(obj, true);
     }
@@ -1097,6 +943,18 @@ StringSlice get_object_short_name(int16_t id) {
 
 int32_t spaceObjectType::number() const {
     return this - mGetSpaceObjectPtr(0);
+}
+
+static baseObjectType kZeroBaseObject;
+
+spaceObjectType::spaceObjectType(ZeroObject) {
+    memset(this, 0, sizeof(*this));
+    baseType = &kZeroBaseObject;
+}
+
+spaceObjectType* spaceObjectType::zero() {
+    static spaceObjectType object(ZERO_OBJECT);
+    return &object;
 }
 
 }  // namespace antares

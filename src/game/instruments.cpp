@@ -550,10 +550,10 @@ void draw_instruments() {
         }
     }
 
-    baseObjectType* base = gScrollStarObject->baseType;
-    draw_bar_indicator(kShieldBar, gScrollStarObject->health, base->health);
-    draw_bar_indicator(kEnergyBar, gScrollStarObject->energy, base->energy);
-    draw_bar_indicator(kBatteryBar, gScrollStarObject->battery, base->energy * 5);
+    spaceObjectType* o = gScrollStarObject;
+    draw_bar_indicator(kShieldBar, o->health(), o->max_health());
+    draw_bar_indicator(kEnergyBar, o->energy(), o->max_energy());
+    draw_bar_indicator(kBatteryBar, o->battery(), o->max_battery());
     draw_build_time_bar(globals()->gMiniScreenData.buildTimeBarValue);
     draw_money();
     draw_radar();

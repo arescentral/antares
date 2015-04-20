@@ -205,8 +205,8 @@ static void engage_autopilot() {
 }
 
 static void pick_object(
-        spaceObjectType* origin_ship, int32_t direction, bool destination,
-        int32_t attributes, int32_t nonattributes, int32_t select_ship_num, int friend_or_foe) {
+        spaceObjectType* origin_ship, int32_t direction, bool destination, int32_t attributes,
+        int32_t nonattributes, int32_t select_ship_num, Allegiance allegiance) {
     uint64_t huge_distance;
     if (select_ship_num >= 0) {
         spaceObjectType* select_ship = mGetSpaceObjectPtr(select_ship_num);
@@ -231,8 +231,8 @@ static void pick_object(
     }
 
     select_ship_num = GetManualSelectObject(
-            origin_ship, direction, 0, attributes, nonattributes, &huge_distance, select_ship_num,
-            friend_or_foe);
+            origin_ship, direction, attributes, nonattributes, &huge_distance, select_ship_num,
+            allegiance);
 
     if (select_ship_num >= 0) {
         if (destination) {
@@ -246,31 +246,31 @@ static void pick_object(
 static void select_friendly(spaceObjectType* origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, false, kCanBeDestination, kIsDestination,
-            GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber), 1);
+            GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber), FRIENDLY);
 }
 
 static void target_friendly(spaceObjectType* origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, true, kCanBeDestination, kIsDestination,
-            GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber), 1);
+            GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber), FRIENDLY);
 }
 
 static void target_hostile(spaceObjectType* origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, true, kCanBeDestination, kIsDestination,
-            GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber), -1);
+            GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber), HOSTILE);
 }
 
 static void select_base(spaceObjectType* origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, false, kCanAcceptBuild, 0,
-            GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber), 1);
+            GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber), FRIENDLY);
 }
 
 static void target_base(spaceObjectType* origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, true, kIsDestination, 0,
-            GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber), 0);
+            GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber), FRIENDLY_OR_HOSTILE);
 }
 
 static void target_self() {
@@ -643,7 +643,7 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
         return;
     }
 
-    if (theShip->health < (theShip->baseType->health >> 2L)) {
+    if (theShip->health() < (theShip->baseType->health >> 2L)) {
          if (gAlarmCount < 0) {
             PlayVolumeSound(kKlaxon, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
             gAlarmCount = 0;
@@ -856,18 +856,16 @@ void PlayerShipHandleClick(Point where, int button) {
                 selectShipNum = GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber);
 
                 selectShipNum = GetSpritePointSelectObject(
-                        &bounds, theShip, 0,
-                        kCanBeDestination | kIsDestination,//kCanThink | kIsDestination,
-                        0, selectShipNum, 0);
+                        &bounds, theShip, kCanBeDestination | kIsDestination,
+                        selectShipNum, FRIENDLY_OR_HOSTILE);
                 if (selectShipNum >= 0) {
                     SetPlayerSelectShip(selectShipNum, true, globals()->gPlayerAdmiralNumber);
                 }
             } else {
                 selectShipNum = GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber);
                 selectShipNum = GetSpritePointSelectObject(
-                        &bounds, theShip, 0,
-                        kCanThink | kCanAcceptBuild,
-                        0, selectShipNum, 1);
+                        &bounds, theShip, kCanBeDestination | kCanAcceptBuild,
+                        selectShipNum, FRIENDLY);
                 if (selectShipNum >= 0) {
                     SetPlayerSelectShip(selectShipNum, false, globals()->gPlayerAdmiralNumber);
                 }
