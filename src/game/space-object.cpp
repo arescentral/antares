@@ -631,10 +631,9 @@ void ChangeObjectBaseType(
     obj->tinySize = base->tinySize;
     obj->shieldColor = base->shieldColor;
     obj->layer = base->pixLayer;
+    obj->directionGoal = obj->turnFraction = obj->turnVelocity = 0;
 
-    if (obj->attributes & kCanTurn) {
-        obj->directionGoal = obj->turnFraction = obj->turnVelocity = 0;
-    } else if (obj->attributes & kIsSelfAnimated) {
+    if (obj->attributes & kIsSelfAnimated) {
         obj->frame.animation.thisShape = base->frame.animation.frameShape;
         if (base->frame.animation.frameShapeRange > 0) {
             r = obj->randomSeed.next(base->frame.animation.frameShapeRange);
