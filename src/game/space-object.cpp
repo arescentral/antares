@@ -188,8 +188,8 @@ static SpaceObject* AddSpaceObject(SpaceObject *sourceObject) {
         *obj = *sourceObject;
 
         Point where(
-            ((obj->location.h - gGlobalCorner.h) * gAbsoluteScale >> SHIFT_SCALE) + viewport.left,
-            ((obj->location.v - gGlobalCorner.v) * gAbsoluteScale >> SHIFT_SCALE));
+                (int32_t((obj->location.h - gGlobalCorner.h) * gAbsoluteScale) >> SHIFT_SCALE) + viewport.left,
+                (int32_t((obj->location.v - gGlobalCorner.v) * gAbsoluteScale) >> SHIFT_SCALE));
 
         if (obj->sprite) {
             RemoveSprite(obj->sprite);
@@ -505,10 +505,9 @@ void ChangeObjectBaseType(
     obj->tinySize = base->tinySize;
     obj->shieldColor = base->shieldColor;
     obj->layer = base->pixLayer;
+    obj->directionGoal = obj->turnFraction = obj->turnVelocity = 0;
 
-    if (obj->attributes & kCanTurn) {
-        obj->directionGoal = obj->turnFraction = obj->turnVelocity = 0;
-    } else if (obj->attributes & kIsSelfAnimated) {
+    if (obj->attributes & kIsSelfAnimated) {
         obj->frame.animation.thisShape = base->frame.animation.frameShape;
         if (base->frame.animation.frameShapeRange > 0) {
             r = obj->randomSeed.next(base->frame.animation.frameShapeRange);
