@@ -188,8 +188,8 @@ static spaceObjectType* AddSpaceObject(spaceObjectType *sourceObject) {
         *obj = *sourceObject;
 
         Point where(
-            ((obj->location.h - gGlobalCorner.h) * gAbsoluteScale >> SHIFT_SCALE) + viewport.left,
-            ((obj->location.v - gGlobalCorner.v) * gAbsoluteScale >> SHIFT_SCALE));
+                (int32_t((obj->location.h - gGlobalCorner.h) * gAbsoluteScale) >> SHIFT_SCALE) + viewport.left,
+                (int32_t((obj->location.v - gGlobalCorner.v) * gAbsoluteScale) >> SHIFT_SCALE));
 
         if (obj->sprite) {
             RemoveSprite(obj->sprite);
