@@ -41,7 +41,7 @@ enum {
 };
 
 Scenario* mGetScenario(int32_t num);
-int32_t mGetRealAdmiralNum(int32_t mplayernum);
+Handle<Admiral> mGetRealAdmiralNum(int32_t mplayernum);
 
 void ScenarioMakerInit();
 bool start_construct_scenario(const Scenario* scenario, int32_t* max);

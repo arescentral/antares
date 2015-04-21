@@ -1012,7 +1012,7 @@ void draw_mini_ship_data(
             SpaceObject* dObject = newObject.destObjectPtr;
 
             // get the color for writing the name
-            if (dObject->owner == globals()->gPlayerAdmiral->number()) {
+            if (dObject->owner == globals()->gPlayerAdmiral) {
                 color = GetRGBTranslateColorShade(GREEN, VERY_LIGHT);
             } else {
                 color = GetRGBTranslateColorShade(RED, VERY_LIGHT);

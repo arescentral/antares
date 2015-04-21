@@ -185,8 +185,8 @@ int32_t MakeNewDestination(
                 d->occupied[j] = 0;
             }
 
-            if (object->owner >= 0) {
-                d->occupied[object->owner] = object->baseType->initialAgeRange;
+            if (object->owner.number() >= 0) {
+                d->occupied[object->owner.number()] = object->baseType->initialAgeRange;
             }
         }
 
@@ -255,8 +255,8 @@ void RecalcAllAdmiralBuildData() {
     for (int i = 0; i < kMaxDestObject; i++) {
         if (d->whichObject != kDestNoObject) {
             anObject = mGetSpaceObjectPtr(d->whichObject);
-            if (anObject->owner >= 0) {
-                a = gAdmiralData.get() + anObject->owner;
+            if (anObject->owner.number() >= 0) {
+                const auto& a = anObject->owner;
                 for (int k = 0; k < kMaxTypeBaseCanBuild; k++) {
                     if (d->canBuildType[k] >= 0) {
                         int j = 0;
@@ -437,7 +437,7 @@ int32_t GetAdmiralConsiderObject(Handle<Admiral> a) {
         anObject = mGetSpaceObjectPtr(a->considerShip());
         if ((anObject->id == a->considerShipID())
                 && (anObject->active == kObjectInUse)
-                && (anObject->owner == a.number())) {
+                && (anObject->owner == a)) {
             return a->considerShip();
         } else {
             a->considerShip() = -1;
@@ -457,7 +457,7 @@ int32_t GetAdmiralBuildAtObject(Handle<Admiral> a) {
         destBalanceType* destBalance = mGetDestObjectBalancePtr(a->buildAtObject());
         if (destBalance->whichObject >= 0) {
             SpaceObject* anObject = mGetSpaceObjectPtr(destBalance->whichObject);
-            if (anObject->owner != a.number()) {
+            if (anObject->owner != a) {
                 a->buildAtObject() = kNoShip;
             }
         } else {
@@ -514,7 +514,7 @@ StringSlice GetAdmiralName(Handle<Admiral> a) {
 
 void SetObjectLocationDestination(SpaceObject *o, coordPointType *where) {
     // if the object does not have an alliance, then something is wrong here--forget it
-    if (o->owner <= kNoOwner) {
+    if (o->owner.number() <= kNoOwner) {
         o->destinationObject = kNoDestinationObject;
         o->destObjectDest = kNoDestinationObject;
         o->destObjectID = -1;
@@ -537,11 +537,11 @@ void SetObjectLocationDestination(SpaceObject *o, coordPointType *where) {
     }
 
     // if the owner is not legal, something is very very wrong
-    if ((o->owner < 0) || (o->owner >= kMaxPlayerNum)) {
+    if ((o->owner.number() < 0) || (o->owner.number() >= kMaxPlayerNum)) {
         return;
     }
 
-    Admiral* a = gAdmiralData.get() + o->owner;
+    const auto& a = o->owner;
 
     // if the admiral is not legal, or the admiral has no destination, then forget about it
     if (!a->active()) {
@@ -577,7 +577,7 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
     SpaceObject* dObject = overrideObject;
 
     // if the object does not have an alliance, then something is wrong here--forget it
-    if (o->owner <= kNoOwner) {
+    if (o->owner.number() <= kNoOwner) {
         o->destinationObject = kNoDestinationObject;
         o->destObjectDest = kNoDestinationObject;
         o->destObjectID = -1;
@@ -600,12 +600,12 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
     }
 
     // if the owner is not legal, something is very very wrong
-    if ((o->owner < 0) || (o->owner >= kMaxPlayerNum)) {
+    if ((o->owner.number() < 0) || (o->owner.number() >= kMaxPlayerNum)) {
         return;
     }
 
     // get the admiral
-    Admiral* a = gAdmiralData.get() + o->owner;
+    const auto& a = o->owner;
 
     // if the admiral is not legal, or the admiral has no destination, then forget about it
     if ((dObject == NULL) &&
@@ -733,7 +733,7 @@ void AdmiralThink() {
         }
 
         anObject = mGetSpaceObjectPtr(destBalance->whichObject);
-        if (anObject && (anObject->owner >= 0)) {
+        if (anObject && (anObject->owner.number() >= 0)) {
             PayAdmiral(anObject->owner, destBalance->earn);
         }
         destBalance++;
@@ -767,7 +767,7 @@ void Admiral::think() {
             _blitzkrieg = 0 - (gRandomSeed.next(1200) + 1200);
             for (int j = 0; j < kMaxSpaceObject; j++) {
                 anObject = mGetSpaceObjectPtr(j);
-                if (anObject->owner == number()) {
+                if (anObject->owner.get() == this) {
                     anObject->currentTargetValue = 0x00000000;
                 }
             }
@@ -779,7 +779,7 @@ void Admiral::think() {
             _blitzkrieg = gRandomSeed.next(1200) + 1200;
             for (int j = 0; j < kMaxSpaceObject; j++) {
                 anObject = mGetSpaceObjectPtr(j);
-                if (anObject->owner == number()) {
+                if (anObject->owner.get() == this) {
                     anObject->currentTargetValue = 0x00000000;
                 }
             }
@@ -874,7 +874,7 @@ void Admiral::think() {
                         anObject = anObject->nextObject;
                         _considerShipID = anObject->id;
                     }
-                } while (((anObject->owner != number())
+                } while (((anObject->owner.get() != this)
                             || (!(anObject->attributes & kCanAcceptDestination))
                             || (anObject->active != kObjectInUse))
                         && (_considerShip != origObject));
@@ -889,7 +889,7 @@ void Admiral::think() {
                 && (_destinationObject != origDest));
 
         // if our object is legal and our destination is legal
-        if ((anObject->owner == number())
+        if ((anObject->owner.get() == this)
                 && (anObject->attributes & kCanAcceptDestination)
                 && (anObject->active == kObjectInUse)
                 && (destObject->attributes & (kCanBeDestination))
@@ -974,7 +974,7 @@ void Admiral::think() {
                 if (anObject->baseType->orderFlags & kHardTargetIsFoe) {
                     thisValue = 0;
                 }
-            } else if (destObject->owner >= 0) {
+            } else if (destObject->owner.number() >= 0) {
                 if ((anObject->duty == eGuardDuty) || (anObject->duty == eNoDuty)) {
                     if (destObject->attributes & kIsDestination) {
                         if (foeValue < friendValue) {
@@ -1108,7 +1108,7 @@ void Admiral::think() {
             }
             if (destBalance->whichObject >= 0) {
                 anObject = mGetSpaceObjectPtr(destBalance->whichObject);
-                if ((anObject->owner != number())
+                if ((anObject->owner.get() != this)
                         || (!(anObject->attributes & kCanAcceptBuild))) {
                     anObject = NULL;
                 }
@@ -1139,7 +1139,7 @@ void Admiral::think() {
                                 for (int j = 0; j < kMaxSpaceObject; ++j) {
                                     anObject = mGetSpaceObjectPtr(j);
                                     if ((anObject->active)
-                                            && (anObject->owner == number())
+                                            && (anObject->owner.get() == this)
                                             && (anObject->whichBaseObject == baseNum)
                                             && (anObject->escortStrength <
                                                 baseObject->friendDefecit)) {
@@ -1154,7 +1154,7 @@ void Admiral::think() {
                                 for (int j = 0; j < kMaxSpaceObject; j++) {
                                     anObject = mGetSpaceObjectPtr(j);
                                     if ((anObject->active)
-                                            && (anObject->owner != number())
+                                            && (anObject->owner.get() != this)
                                             && (anObject->baseType->levelKeyTag
                                                 == baseObject->orderKeyTag)) {
                                         thisValue = 1;
@@ -1312,7 +1312,7 @@ void AddKillToAdmiral(SpaceObject* anObject) {
     const auto& admiral = globals()->gPlayerAdmiral;
 
     if (anObject->attributes & kCanAcceptDestination) {
-        if (anObject->owner == globals()->gPlayerAdmiral->number()) {
+        if (anObject->owner == globals()->gPlayerAdmiral) {
             admiral->losses()++;
         } else {
             admiral->kills()++;

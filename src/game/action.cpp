@@ -146,7 +146,7 @@ static void create_object(
         if (product->attributes & kCanAcceptDestination) {
             uint32_t save_attributes = product->attributes;
             product->attributes &= ~kStaticDestination;
-            if (product->owner >= 0) {
+            if (product->owner.number() >= 0) {
                 if (action->reflexive) {
                     if (action->verb != kCreateObjectSetDest) {
                         SetObjectDestination(product, focus);
@@ -636,26 +636,26 @@ static void enter_warp(
 
 static void change_score(objectActionType* action, SpaceObject* focus) {
     const auto& score = action->argument.changeScore;
-    int32_t admiral;
+    Handle<Admiral> admiral;
     if ((score.whichPlayer == -1) && (focus != SpaceObject::zero())) {
         admiral = focus->owner;
     } else {
         admiral = mGetRealAdmiralNum(score.whichPlayer);
     }
-    if (admiral >= 0) {
+    if (admiral.number() >= 0) {
         AlterAdmiralScore(admiral, score.whichScore, score.amount);
     }
 }
 
 static void declare_winner(objectActionType* action, SpaceObject* focus) {
     const auto& winner = action->argument.declareWinner;
-    int32_t admiral;
+    Handle<Admiral> admiral;
     if ((winner.whichPlayer == -1) && (focus != SpaceObject::zero())) {
         admiral = focus->owner;
     } else {
         admiral = mGetRealAdmiralNum(winner.whichPlayer);
     }
-    DeclareWinner(admiral, winner.nextLevel, winner.textID);
+    DeclareWinner(admiral.number(), winner.nextLevel, winner.textID);
 }
 
 static void display_message(objectActionType* action, SpaceObject* focus) {

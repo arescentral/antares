@@ -297,8 +297,8 @@ Scenario* mGetScenario(int32_t num) {
     return &gScenarioData[num];
 }
 
-int32_t mGetRealAdmiralNum(int32_t mplayernum) {
-    return gAdmiralNumbers[mplayernum];
+Handle<Admiral> mGetRealAdmiralNum(int32_t mplayernum) {
+    return Handle<Admiral>(gAdmiralNumbers[mplayernum]);
 }
 
 Scenario::InitialObject* Scenario::initial(size_t at) const {
@@ -371,28 +371,29 @@ bool Scenario::Condition::is_true() const {
     SpaceObject* sObject = nullptr;
     SpaceObject* dObject = nullptr;
     int32_t i, l, difference;
+    Handle<Admiral> a;
     uint32_t distance, dcalc;
 
     switch (condition) {
         case kCounterCondition:
-            l = mGetRealAdmiralNum(conditionArgument.counter.whichPlayer);
-            if (GetAdmiralScore(l, conditionArgument.counter.whichCounter) ==
+            a = mGetRealAdmiralNum(conditionArgument.counter.whichPlayer);
+            if (GetAdmiralScore(a, conditionArgument.counter.whichCounter) ==
                 conditionArgument.counter.amount) {
                 return true;
             }
             break;
 
         case kCounterGreaterCondition:
-            l = mGetRealAdmiralNum(conditionArgument.counter.whichPlayer);
-            if (GetAdmiralScore(l, conditionArgument.counter.whichCounter) >=
+            a = mGetRealAdmiralNum(conditionArgument.counter.whichPlayer);
+            if (GetAdmiralScore(a, conditionArgument.counter.whichCounter) >=
                 conditionArgument.counter.amount) {
                 return true;
             }
             break;
 
         case kCounterNotCondition:
-            l = mGetRealAdmiralNum(conditionArgument.counter.whichPlayer);
-            if (GetAdmiralScore(l, conditionArgument.counter.whichCounter) !=
+            a = mGetRealAdmiralNum(conditionArgument.counter.whichPlayer);
+            if (GetAdmiralScore(a, conditionArgument.counter.whichCounter) !=
                 conditionArgument.counter.amount) {
                 return true;
             }
@@ -408,8 +409,8 @@ bool Scenario::Condition::is_true() const {
         case kOwnerCondition:
             sObject = GetObjectFromInitialNumber(subjectObject);
             if (sObject != NULL) {
-                l = mGetRealAdmiralNum(conditionArgument.longValue);
-                if (l == sObject->owner) {
+                a = mGetRealAdmiralNum(conditionArgument.longValue);
+                if (a == sObject->owner) {
                     return true;
                 }
             }

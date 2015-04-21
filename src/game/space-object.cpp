@@ -219,9 +219,9 @@ static SpaceObject* AddSpaceObject(SpaceObject *sourceObject) {
             RgbColor tinyColor;
             if (obj->tinySize == 0) {
                 tinyColor = RgbColor::kClear;
-            } else if (obj->owner == globals()->gPlayerAdmiral->number()) {
+            } else if (obj->owner == globals()->gPlayerAdmiral) {
                 tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
-            } else if (obj->owner <= kNoOwner) {
+            } else if (obj->owner.number() <= kNoOwner) {
                 tinyColor = GetRGBTranslateColorShade(kNeutralColor, tinyShade);
             } else {
                 tinyColor = GetRGBTranslateColorShade(kHostileColor, tinyShade);
@@ -333,7 +333,7 @@ SpaceObject::SpaceObject(
         int32_t type, Random seed, int32_t object_id,
         const coordPointType& initial_location,
         int32_t relative_direction, fixedPointType *relative_velocity,
-        int32_t new_owner, int16_t spriteIDOverride) {
+        Handle<Admiral> new_owner, int16_t spriteIDOverride) {
     whichBaseObject     = type;
     baseType            = mGetBaseObjectPtr(type);
     active              = kObjectInUse;
@@ -354,8 +354,8 @@ SpaceObject::SpaceObject(
     _energy             = max_energy();
     _battery            = max_battery();
 
-    if (owner >= 0) {
-        myPlayerFlag = 1 << owner;
+    if (owner.number() >= 0) {
+        myPlayerFlag = 1 << owner.number();
     }
 
     // We used to irrelevantly set 'id' here.  Now, we just cycle
@@ -624,7 +624,7 @@ void ChangeObjectBaseType(
 
 SpaceObject* CreateAnySpaceObject(
         int32_t whichBase, fixedPointType *velocity, coordPointType *location, int32_t direction,
-        int32_t owner, uint32_t specialAttributes, int16_t spriteIDOverride) {
+        Handle<Admiral> owner, uint32_t specialAttributes, int16_t spriteIDOverride) {
     Random random{gRandomSeed.next(32766)};
     int32_t id = gRandomSeed.next(16384);
     SpaceObject newObject(
@@ -650,13 +650,13 @@ SpaceObject* CreateAnySpaceObject(
     return obj;
 }
 
-int32_t CountObjectsOfBaseType(int32_t whichType, int32_t owner) {
+int32_t CountObjectsOfBaseType(int32_t whichType, Handle<Admiral> owner) {
     int32_t result = 0;
     for (int32_t i = 0; i < kMaxSpaceObject; ++i) {
         auto anObject = mGetSpaceObjectPtr(i);
         if (anObject->active
                 && ((whichType == -1) || (anObject->whichBaseObject == whichType))
-                && ((owner == -1) || (anObject->owner == owner))) {
+                && ((owner.number() == -1) || (anObject->owner == owner))) {
             ++result;
         }
     }
@@ -711,7 +711,7 @@ void SpaceObject::refund_warp_energy() {
     warpEnergyCollected = 0;
 }
 
-void AlterObjectOwner(SpaceObject* object, int32_t owner, bool message) {
+void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message) {
     if (object->owner == owner) {
         return;
     }
@@ -722,10 +722,10 @@ void AlterObjectOwner(SpaceObject* object, int32_t owner, bool message) {
         CreateFloatingBodyOfPlayer(object);
     }
 
-    int32_t old_owner = object->owner;
+    Handle<Admiral> old_owner = object->owner;
     object->owner = owner;
 
-    if ((owner >= 0) && (object->attributes & kIsDestination)) {
+    if ((owner.number() >= 0) && (object->attributes & kIsDestination)) {
         if (GetAdmiralConsiderObject(owner) < 0) {
             SetAdmiralConsiderObject(owner, object->number());
         }
@@ -754,9 +754,9 @@ void AlterObjectOwner(SpaceObject* object, int32_t owner, bool message) {
         }
 
         RgbColor tinyColor;
-        if (owner == globals()->gPlayerAdmiral->number()) {
+        if (owner == globals()->gPlayerAdmiral) {
             tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
-        } else if (owner <= kNoOwner) {
+        } else if (owner.number() <= kNoOwner) {
             tinyColor = GetRGBTranslateColorShade(kNeutralColor, tinyShade);
         } else {
             tinyColor = GetRGBTranslateColorShade(kHostileColor, tinyShade);
@@ -810,10 +810,10 @@ void AlterObjectOwner(SpaceObject* object, int32_t owner, bool message) {
         StopBuilding(object->destinationObject);
         if (message) {
             String destination_name(GetDestBalanceName(object->destinationObject));
-            if (owner >= 0) {
+            if (owner.number() >= 0) {
                 String new_owner_name(GetAdmiralName(object->owner));
                 Messages::add(format("{0} captured by {1}.", destination_name, new_owner_name));
-            } else if (old_owner >= 0) { // must be since can't both be -1
+            } else if (old_owner.number() >= 0) { // must be since can't both be -1
                 String old_owner_name(GetAdmiralName(old_owner));
                 Messages::add(format("{0} lost by {1}.", destination_name, old_owner_name));
             }
@@ -822,10 +822,10 @@ void AlterObjectOwner(SpaceObject* object, int32_t owner, bool message) {
     } else {
         if (message) {
             StringSlice object_name = get_object_name(object->whichBaseObject);
-            if (owner >= 0) {
+            if (owner.number() >= 0) {
                 String new_owner_name(GetAdmiralName(object->owner));
                 Messages::add(format("{0} captured by {1}.", object_name, new_owner_name));
-            } else if (old_owner >= 0) { // must be since can't both be -1
+            } else if (old_owner.number() >= 0) { // must be since can't both be -1
                 String old_owner_name(GetAdmiralName(old_owner));
                 Messages::add(format("{0} lost by {1}.", object_name, old_owner_name));
             }
@@ -834,7 +834,7 @@ void AlterObjectOwner(SpaceObject* object, int32_t owner, bool message) {
 }
 
 void AlterObjectOccupation(
-        SpaceObject* object, int32_t owner, int32_t howMuch, bool message) {
+        SpaceObject* object, Handle<Admiral> owner, int32_t howMuch, bool message) {
     if (object->active
             && (object->attributes & kIsDestination)
             && (object->attributes & kNeutralDeath)) {
@@ -927,7 +927,7 @@ void CreateFloatingBodyOfPlayer(SpaceObject* obj) {
     auto body = CreateAnySpaceObject(
             body_type, &obj->velocity, &obj->location, obj->direction, obj->owner, 0, -1);
     if (body) {
-        ChangePlayerShipNumber(obj->owner, body->number());
+        ChangePlayerShipNumber(obj->owner.number(), body->number());
     } else {
         PlayerShipBodyExpire(obj, true);
     }

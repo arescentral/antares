@@ -50,7 +50,7 @@ void GetInitialObjectSpriteData(
         coordPointType *corner, int32_t scale, int32_t *thisScale, Point *where, Rect *spriteRect);
 
 void GetRealObjectSpriteData(
-        coordPointType *realCoord, BaseObject* baseObject, int32_t owner, int32_t spriteOverride,
+        coordPointType *realCoord, BaseObject* baseObject, Handle<Admiral> owner, int32_t spriteOverride,
         int32_t maxSize, Rect *bounds, coordPointType *corner, int32_t scale, int32_t *thisScale,
         const NatePixTable::Frame** frame, Point *where, Rect *spriteRect);
 
@@ -226,7 +226,7 @@ void GetInitialObjectSpriteData(
 }
 
 void GetRealObjectSpriteData(
-        coordPointType *realCoord, BaseObject* baseObject, int32_t owner, int32_t spriteOverride,
+        coordPointType *realCoord, BaseObject* baseObject, Handle<Admiral> owner, int32_t spriteOverride,
         int32_t maxSize, Rect *bounds, coordPointType *corner, int32_t scale, int32_t *thisScale,
         const NatePixTable::Frame** frame, Point *where, Rect *spriteRect) {
     NatePixTable* pixTable;
@@ -372,9 +372,9 @@ static void render_briefing_with(
                     BriefingSprite_UseLocation(
                             *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
 
-                    if (anObject->owner == 0) {
+                    if (anObject->owner.number() == 0) {
                         color = GREEN;
-                    } else if (anObject->owner < 0) {
+                    } else if (anObject->owner.number() < 0) {
                         color = BLUE;
                     } else {
                         color = RED;
@@ -405,9 +405,9 @@ static void render_briefing_with(
                     BriefingSprite_UseLocation(
                             *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
 
-                    if (anObject->owner == 0) {
+                    if (anObject->owner.number() == 0) {
                         color = GREEN;
-                    } else if (anObject->owner < 0) {
+                    } else if (anObject->owner.number() < 0) {
                         color = BLUE;
                     } else {
                         color = RED;

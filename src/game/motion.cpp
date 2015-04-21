@@ -548,7 +548,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                         anObject->sprite->style = spriteColor;
                         anObject->sprite->styleColor = RgbColor::kClear;
                         anObject->sprite->styleData = anObject->cloakState;
-                        if ( anObject->owner == globals()->gPlayerAdmiral->number())
+                        if ( anObject->owner == globals()->gPlayerAdmiral)
                             anObject->sprite->styleData -=
                                 anObject->sprite->styleData >> 2;
                     } else if ( anObject->cloakState < 0)
@@ -564,7 +564,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                             anObject->sprite->style = spriteColor;
                             anObject->sprite->styleColor = RgbColor::kClear;
                             anObject->sprite->styleData = -anObject->cloakState;
-                            if ( anObject->owner == globals()->gPlayerAdmiral->number())
+                            if ( anObject->owner == globals()->gPlayerAdmiral)
                                 anObject->sprite->styleData -=
                                     anObject->sprite->styleData >> 2;
                         }

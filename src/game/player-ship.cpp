@@ -736,7 +736,7 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
                 if ((selectShip->active)
                         && (selectShip->id == globals()->hotKey[hot_key].objectID)) {
                     bool is_target = (gTheseKeys & kDestinationKey)
-                        || (selectShip->owner != globals()->gPlayerAdmiral->number())
+                        || (selectShip->owner != globals()->gPlayerAdmiral)
                         || (globals()->hotKey_target);
                     SetPlayerSelectShip(
                             globals()->hotKey[hot_key].objectNum,
@@ -986,7 +986,7 @@ void TogglePlayerAutoPilot(SpaceObject *theShip) {
     if ( theShip->attributes & kOnAutoPilot)
     {
         theShip->attributes &= ~kOnAutoPilot;
-        if ((theShip->owner == globals()->gPlayerAdmiral->number()) &&
+        if ((theShip->owner == globals()->gPlayerAdmiral) &&
             ( theShip->attributes & kIsHumanControlled))
         {
             StringList strings(kMessageStringID);
@@ -997,7 +997,7 @@ void TogglePlayerAutoPilot(SpaceObject *theShip) {
     {
         SetObjectDestination( theShip, NULL);
         theShip->attributes |= kOnAutoPilot;
-        if ((theShip->owner == globals()->gPlayerAdmiral->number()) &&
+        if ((theShip->owner == globals()->gPlayerAdmiral) &&
             ( theShip->attributes & kIsHumanControlled))
         {
             StringList strings(kMessageStringID);
@@ -1083,7 +1083,7 @@ void PlayerShipBodyExpire( SpaceObject *theShip, bool sourceIsBody)
         {
             globals()->gGameOver = -180;
         }
-        if (theShip->owner == globals()->gPlayerAdmiral->number()) {
+        if (theShip->owner == globals()->gPlayerAdmiral) {
             globals()->gScenarioWinner.text = kScenarioNoShipTextID + gThisScenario->levelNameStrNum;
         } else {
             globals()->gScenarioWinner.text = 10050 + gThisScenario->levelNameStrNum;
@@ -1091,7 +1091,7 @@ void PlayerShipBodyExpire( SpaceObject *theShip, bool sourceIsBody)
         SetAdmiralFlagship( theShip->owner, -1);
     } else if ( selectShip != NULL)
     {
-        ChangePlayerShipNumber( theShip->owner, selectShipNum);
+        ChangePlayerShipNumber( theShip->owner.number(), selectShipNum);
     }
 }
 

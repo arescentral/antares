@@ -452,7 +452,7 @@ class SpaceObject {
     void                    refund_warp_energy();
     int32_t                 warpEnergyCollected = 0;
 
-    int32_t                 owner = kNoOwner;
+    Handle<Admiral>         owner;
     int32_t                 age = -1;
     int32_t                 naturalScale = SCALE_SCALE;
     int32_t                 id = kNoShip;
@@ -518,7 +518,7 @@ class SpaceObject {
             int32_t type, Random seed, int32_t object_id,
             const coordPointType& initial_location,
             int32_t relative_direction, fixedPointType *relative_velocity,
-            int32_t new_owner, int16_t spriteIDOverride);
+            Handle<Admiral> new_owner, int16_t spriteIDOverride);
 
   private:
     enum ZeroObject { ZERO_OBJECT };
