@@ -72,33 +72,8 @@ void AdmiralCleanup() {
 }
 
 void ResetAllAdmirals() {
-    Admiral* a = gAdmiralData.get();
-
     for (int i = 0; i < kMaxPlayerNum; ++i) {
-        a->active = false;
-        a->attributes = 0;
-        a->destinationObject = kNoDestinationObject;
-        a->destinationObjectID = -1;
-        a->flagship = kNoShip;
-        a->flagshipID = -1;
-        a->destType = kNoDestinationType;
-        a->considerShip = a->considerDestination = kNoShip;
-        a->considerShipID = -1;
-        a->buildAtObject = kNoShip;
-        a->cash = a->kills = a->losses =a->saveGoal = 0;
-        a->thisFreeEscortStrength = a->lastFreeEscortStrength = 0;
-        a->blitzkrieg = 0;
-        a->shipsLeft = 0;
-        for (int j = 0; j < kAdmiralScoreNum; ++j) {
-            a->score[j] = 0;
-        }
-
-        for (int j = 0; j < kMaxNumAdmiralCanBuild; ++j) {
-            a->canBuildType[j].baseNum = -1;
-            a->canBuildType[j].base = NULL;
-            a->canBuildType[j].chanceRange = -1;
-        }
-        a++;
+        gAdmiralData[i] = Admiral();
         globals()->gActiveCheats[i] = 0;
     }
 }
@@ -136,54 +111,34 @@ int Admiral::number() const {
     return this - gAdmiralData.get();
 }
 
-Admiral* Admiral::make(uint32_t attributes, const Scenario::Player& player) {
-    int32_t n = 0;
-    SpaceObject* destObject;
-
-    Admiral* a = gAdmiralData.get();
-    while ((a->active) && (n < kMaxPlayerNum)) {
-        a++;
-        n++;
+static Admiral* next_free_admiral() {
+    for (int i = 0; i < kMaxPlayerNum; ++i) {
+        Admiral& a = gAdmiralData[i];
+        if (!a.active) {
+            return &a;
+        }
     }
+    return nullptr;
+}
 
-    if (n == kMaxPlayerNum) {
+Admiral* Admiral::make(uint32_t attributes, const Scenario::Player& player) {
+    Admiral* a = next_free_admiral();
+    if (!a) {
         return nullptr;
     }
 
+    *a = Admiral();
     a->active = true;
     a->attributes = attributes;
     a->earningPower = player.earningPower;
-
-    a->destinationObject = kNoDestinationObject;
-    a->destinationObjectID = -1;
-
-    a->flagship = kNoShip;
-    a->flagshipID = -1;
-
-    a->destType = kNoDestinationType;
     a->race = player.playerRace;
-    a->color = 0;
-    a->blitzkrieg = 1200;  // about a 2 minute blitzkrieg
-    a->cash = a->kills = a->losses = a->saveGoal = 0;
-    a->thisFreeEscortStrength = a->lastFreeEscortStrength = 0;
-    for (int i = 0; i < kAdmiralScoreNum; i++) {
-        a->score[i] = 0;
-    }
-    for (int i = 0; i < kMaxNumAdmiralCanBuild; i++) {
-        a->canBuildType[i].baseNum = -1;
-        a->canBuildType[i].base = NULL;
-        a->canBuildType[i].chanceRange = -1;
-    }
-    a->totalBuildChance = 0;
-    a->hopeToBuild = -1;
-    a->shipsLeft = 0;
-
     if ((player.nameResID >= 0)) {
         a->name.assign(StringList(player.nameResID).at(player.nameStrNum - 1));
         if (a->name.size() > kAdmiralNameLen) {
             a->name.resize(kAdmiralNameLen);
         }
     }
+
     // for now set strategy balance to 0 -- we may want to calc this if player added on the fly?
     return a;
 }

@@ -84,9 +84,9 @@ struct destBalanceType {
 };
 
 struct admiralBuildType {
-    BaseObject*         base;
-    int32_t             baseNum;
-    Fixed               chanceRange;
+    BaseObject*         base = nullptr;
+    int32_t             baseNum = -1;
+    Fixed               chanceRange = -1;
 };
 
 struct Admiral {
@@ -96,31 +96,31 @@ struct Admiral {
     int                 number() const;
 
     uint32_t            attributes;
-    int32_t             destinationObject;
-    int32_t             destinationObjectID;
-    int32_t             flagship;
-    int32_t             flagshipID;
-    int32_t             considerShip;
-    int32_t             considerShipID;
-    int32_t             considerDestination;
-    int32_t             buildAtObject; // # of destination object to build at
-    int32_t             race;
-    destinationType     destType;
-    Fixed               cash;
-    Fixed               saveGoal;
-    Fixed               earningPower;
-    int32_t             kills;
-    int32_t             losses;
-    int32_t             shipsLeft;
-    int32_t             score[kAdmiralScoreNum];
-    int32_t             blitzkrieg;
-    Fixed               lastFreeEscortStrength;
-    Fixed               thisFreeEscortStrength;
+    int32_t             destinationObject = kNoDestinationObject;
+    int32_t             destinationObjectID = -1;
+    int32_t             flagship = kNoShip;
+    int32_t             flagshipID = -1;
+    int32_t             considerShip = kNoShip;
+    int32_t             considerShipID = -1;
+    int32_t             considerDestination = kNoShip;
+    int32_t             buildAtObject = -1; // # of destination object to build at
+    int32_t             race = -1;
+    destinationType     destType = kNoDestinationType;
+    Fixed               cash = 0;
+    Fixed               saveGoal = 0;
+    Fixed               earningPower = 0;
+    int32_t             kills = 0;
+    int32_t             losses = 0;
+    int32_t             shipsLeft = 0;
+    int32_t             score[kAdmiralScoreNum] = {};
+    int32_t             blitzkrieg = 1200;
+    Fixed               lastFreeEscortStrength = 0;
+    Fixed               thisFreeEscortStrength = 0;
     admiralBuildType    canBuildType[kMaxNumAdmiralCanBuild];
-    Fixed               totalBuildChance;
-    int32_t             hopeToBuild;
-    uint8_t             color;
-    bool                active;
+    Fixed               totalBuildChance = 0;
+    int32_t             hopeToBuild = -1;
+    uint8_t             color = 0;
+    bool                active = false;
     sfz::String         name;
 };
 
