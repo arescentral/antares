@@ -472,7 +472,7 @@ static void alter(
                     AlterObjectOwner(focus, subject->owner, true);
                 }
             } else {
-                AlterObjectOwner(focus, alter.minimum, false);
+                AlterObjectOwner(focus, Handle<Admiral>(alter.minimum), false);
             }
             break;
 
@@ -496,7 +496,7 @@ static void alter(
                     PayAdmiralAbsolute(focus->owner, alter.minimum);
                 }
             } else {
-                PayAdmiralAbsolute(alter.range, alter.minimum);
+                PayAdmiralAbsolute(Handle<Admiral>(alter.range), alter.minimum);
             }
             break;
 
@@ -631,7 +631,7 @@ static void enter_warp(
     fixedPointType newVel = {0, 0};
     CreateAnySpaceObject(
             globals()->scenarioFileInfo.warpInFlareID, &newVel,
-            &subject->location, subject->direction, kNoOwner, 0, -1);
+            &subject->location, subject->direction, Handle<Admiral>(-1), 0, -1);
 }
 
 static void change_score(objectActionType* action, SpaceObject* focus) {
@@ -655,7 +655,7 @@ static void declare_winner(objectActionType* action, SpaceObject* focus) {
     } else {
         admiral = mGetRealAdmiralNum(winner.whichPlayer);
     }
-    DeclareWinner(admiral.number(), winner.nextLevel, winner.textID);
+    DeclareWinner(admiral, winner.nextLevel, winner.textID);
 }
 
 static void display_message(objectActionType* action, SpaceObject* focus) {
@@ -720,8 +720,9 @@ static void computer_select(objectActionType* action, SpaceObject* focus) {
 }
 
 static void assume_initial_object(objectActionType* action, SpaceObject* focus) {
+    Handle<Admiral> player1(0);
     Scenario::InitialObject* initialObject = gThisScenario->initial(
-            action->argument.assumeInitial.whichInitialObject + GetAdmiralScore(0, 0));
+            action->argument.assumeInitial.whichInitialObject + GetAdmiralScore(player1, 0));
     if (initialObject) {
         initialObject->realObjectID = focus->id;
         initialObject->realObjectNumber = focus->number();

@@ -236,9 +236,9 @@ static void pick_object(
 
     if (select_ship_num >= 0) {
         if (destination) {
-            SetPlayerSelectShip(select_ship_num, true, globals()->gPlayerAdmiral->number());
+            SetPlayerSelectShip(select_ship_num, true, globals()->gPlayerAdmiral);
         } else {
-            SetPlayerSelectShip(select_ship_num, false, globals()->gPlayerAdmiral->number());
+            SetPlayerSelectShip(select_ship_num, false, globals()->gPlayerAdmiral);
         }
     }
 }
@@ -246,35 +246,35 @@ static void pick_object(
 static void select_friendly(SpaceObject* origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, false, kCanBeDestination, kIsDestination,
-            GetAdmiralConsiderObject(globals()->gPlayerAdmiral->number()), FRIENDLY);
+            GetAdmiralConsiderObject(globals()->gPlayerAdmiral), FRIENDLY);
 }
 
 static void target_friendly(SpaceObject* origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, true, kCanBeDestination, kIsDestination,
-            GetAdmiralDestinationObject(globals()->gPlayerAdmiral->number()), FRIENDLY);
+            GetAdmiralDestinationObject(globals()->gPlayerAdmiral), FRIENDLY);
 }
 
 static void target_hostile(SpaceObject* origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, true, kCanBeDestination, kIsDestination,
-            GetAdmiralDestinationObject(globals()->gPlayerAdmiral->number()), HOSTILE);
+            GetAdmiralDestinationObject(globals()->gPlayerAdmiral), HOSTILE);
 }
 
 static void select_base(SpaceObject* origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, false, kCanAcceptBuild, 0,
-            GetAdmiralConsiderObject(globals()->gPlayerAdmiral->number()), FRIENDLY);
+            GetAdmiralConsiderObject(globals()->gPlayerAdmiral), FRIENDLY);
 }
 
 static void target_base(SpaceObject* origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, true, kIsDestination, 0,
-            GetAdmiralDestinationObject(globals()->gPlayerAdmiral->number()), FRIENDLY_OR_HOSTILE);
+            GetAdmiralDestinationObject(globals()->gPlayerAdmiral), FRIENDLY_OR_HOSTILE);
 }
 
 static void target_self() {
-    SetPlayerSelectShip(globals()->gPlayerShipNumber, true, globals()->gPlayerAdmiral->number());
+    SetPlayerSelectShip(globals()->gPlayerShipNumber, true, globals()->gPlayerAdmiral);
 }
 
 void PlayerShip::key_down(const KeyDownEvent& event) {
@@ -578,12 +578,12 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
                 StringSlice sliced = message->slice(1, message->size() - 2);
                 int cheat = GetCheatNumFromString(sliced);
                 if (cheat > 0) {
-                    ExecuteCheat(cheat, globals()->gPlayerAdmiral->number());
+                    ExecuteCheat(cheat, globals()->gPlayerAdmiral);
                 } else if (!sliced.empty()) {
-                    if (globals()->gActiveCheats[globals()->gPlayerAdmiral->number()] & kNameObjectBit)
+                    if (globals()->gActiveCheats[globals()->gPlayerAdmiral] & kNameObjectBit)
                     {
-                        SetAdmiralBuildAtName(globals()->gPlayerAdmiral->number(), sliced);
-                        globals()->gActiveCheats[globals()->gPlayerAdmiral->number()] &= ~kNameObjectBit;
+                        SetAdmiralBuildAtName(globals()->gPlayerAdmiral, sliced);
+                        globals()->gActiveCheats[globals()->gPlayerAdmiral] &= ~kNameObjectBit;
                     }
                 }
                 Labels::set_position(
@@ -741,7 +741,7 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
                     SetPlayerSelectShip(
                             globals()->hotKey[hot_key].objectNum,
                             is_target,
-                            globals()->gPlayerAdmiral->number());
+                            globals()->gPlayerAdmiral);
                 } else {
                     globals()->hotKey[hot_key].objectNum = -1;
                 }
@@ -853,33 +853,32 @@ void PlayerShipHandleClick(Point where, int button) {
             bounds.bottom = where.v + kCursorBoundsSize;
 
             if ((theShip->keysDown & kDestinationKey) || (button == 1)) {
-                selectShipNum = GetAdmiralDestinationObject(globals()->gPlayerAdmiral->number());
+                selectShipNum = GetAdmiralDestinationObject(globals()->gPlayerAdmiral);
 
                 selectShipNum = GetSpritePointSelectObject(
                         &bounds, theShip, kCanBeDestination | kIsDestination,
                         selectShipNum, FRIENDLY_OR_HOSTILE);
                 if (selectShipNum >= 0) {
-                    SetPlayerSelectShip(selectShipNum, true, globals()->gPlayerAdmiral->number());
+                    SetPlayerSelectShip(selectShipNum, true, globals()->gPlayerAdmiral);
                 }
             } else {
-                selectShipNum = GetAdmiralConsiderObject(globals()->gPlayerAdmiral->number());
+                selectShipNum = GetAdmiralConsiderObject(globals()->gPlayerAdmiral);
                 selectShipNum = GetSpritePointSelectObject(
                         &bounds, theShip, kCanBeDestination | kCanAcceptBuild,
                         selectShipNum, FRIENDLY);
                 if (selectShipNum >= 0) {
-                    SetPlayerSelectShip(selectShipNum, false, globals()->gPlayerAdmiral->number());
+                    SetPlayerSelectShip(selectShipNum, false, globals()->gPlayerAdmiral);
                 }
             }
         }
     }
 }
 
-void SetPlayerSelectShip( int32_t whichShip, bool target, int32_t admiralNumber)
-{
+void SetPlayerSelectShip(int32_t whichShip, bool target, Handle<Admiral> admiralNumber) {
     SpaceObject *selectShip = mGetSpaceObjectPtr(whichShip),
                     *theShip = GetAdmiralFlagship( admiralNumber);
 
-    if ( admiralNumber == globals()->gPlayerAdmiral->number())
+    if ( admiralNumber == globals()->gPlayerAdmiral)
     {
         globals()->lastSelectedObject = whichShip;
         globals()->lastSelectedObjectID = selectShip->id;
@@ -887,7 +886,7 @@ void SetPlayerSelectShip( int32_t whichShip, bool target, int32_t admiralNumber)
     }
     if (target) {
         SetAdmiralDestinationObject( admiralNumber, whichShip, kObjectDestinationType);
-        if (admiralNumber == globals()->gPlayerAdmiral->number()) {
+        if (admiralNumber == globals()->gPlayerAdmiral) {
             Labels::set_object( gDestinationLabel, selectShip);
             if (whichShip == globals()->gPlayerShipNumber) {
                 Labels::set_age(gDestinationLabel, Labels::kVisibleTime);
@@ -910,7 +909,7 @@ void SetPlayerSelectShip( int32_t whichShip, bool target, int32_t admiralNumber)
         }
     } else {
         SetAdmiralConsiderObject(admiralNumber, whichShip);
-        if (admiralNumber == globals()->gPlayerAdmiral->number()) {
+        if (admiralNumber == globals()->gPlayerAdmiral) {
             Labels::set_object(globals()->gSelectionLabel, selectShip);
             if (whichShip == globals()->gPlayerShipNumber) {
                 Labels::set_age(globals()->gSelectionLabel, Labels::kVisibleTime);
@@ -963,12 +962,10 @@ void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, int32_t newShipNumber)
 //      else
 //          anObject->attributes |= kIsPlayerShip;
 
-        if ( newShipNumber == GetAdmiralConsiderObject( globals()->gPlayerAdmiral->number()))
-        {
+        if (newShipNumber == GetAdmiralConsiderObject(globals()->gPlayerAdmiral)) {
             Labels::set_age( globals()->gSelectionLabel, Labels::kVisibleTime);
         }
-        if ( newShipNumber == GetAdmiralDestinationObject( globals()->gPlayerAdmiral->number()))
-        {
+        if (newShipNumber == GetAdmiralDestinationObject(globals()->gPlayerAdmiral)) {
             Labels::set_age( gDestinationLabel, Labels::kVisibleTime);
         }
     } else
@@ -1141,11 +1138,11 @@ void Update_LabelStrings_ForHotKeyChange( void)
     SpaceObject *selectShip;
     int32_t         whichShip;
 
-    whichShip = GetAdmiralDestinationObject( globals()->gPlayerAdmiral->number());
+    whichShip = GetAdmiralDestinationObject(globals()->gPlayerAdmiral);
     if (whichShip >= 0) {
         selectShip = mGetSpaceObjectPtr(whichShip);
 
-//      if ( admiralNumber == globals()->gPlayerAdmiral->number())
+//      if ( admiralNumber == globals()->gPlayerAdmiral)
         {
             Labels::set_object( gDestinationLabel, selectShip);
             if (whichShip == globals()->gPlayerShipNumber) {
@@ -1163,10 +1160,10 @@ void Update_LabelStrings_ForHotKeyChange( void)
         }
     }
 
-    whichShip = GetAdmiralConsiderObject( globals()->gPlayerAdmiral->number());
+    whichShip = GetAdmiralConsiderObject(globals()->gPlayerAdmiral);
     if (whichShip >= 0) {
         selectShip = mGetSpaceObjectPtr(whichShip);
-//      if ( admiralNumber == globals()->gPlayerAdmiral->number())
+//      if ( admiralNumber == globals()->gPlayerAdmiral)
         {
             Labels::set_object( globals()->gSelectionLabel, selectShip);
             if (whichShip == globals()->gPlayerShipNumber) {

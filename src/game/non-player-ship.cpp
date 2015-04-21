@@ -943,7 +943,7 @@ uint32_t ThinkObjectWarpInPresence( SpaceObject *anObject)
             newVel.h = newVel.v = 0;
             CreateAnySpaceObject(
                     globals()->scenarioFileInfo.warpInFlareID, &newVel, &anObject->location,
-                    anObject->direction, kNoOwner, 0, -1);
+                    anObject->direction, Handle<Admiral>(-1), 0, -1);
         } else {
             anObject->presenceState = kNormalPresence;
             anObject->_energy = 0;
@@ -1028,8 +1028,7 @@ uint32_t ThinkObjectWarpOutPresence(SpaceObject* anObject, BaseObject* baseObjec
 
 
         CreateAnySpaceObject( globals()->scenarioFileInfo.warpOutFlareID, &(newVel),
-            &(anObject->location), anObject->direction, kNoOwner, 0,
-            -1);
+            &(anObject->location), anObject->direction, Handle<Admiral>(-1), 0, -1);
     }
     return( keysDown);
 }

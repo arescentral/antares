@@ -46,7 +46,7 @@ Handle<Admiral> mGetRealAdmiralNum(int32_t mplayernum);
 void ScenarioMakerInit();
 bool start_construct_scenario(const Scenario* scenario, int32_t* max);
 void construct_scenario(const Scenario* scenario, int32_t* current);
-void DeclareWinner(int32_t whichPlayer, int32_t nextLevel, int32_t textID);
+void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textID);
 void CheckScenarioConditions(int32_t timePass);
 void UnhideInitialObject(int32_t whichInitial);
 SpaceObject *GetObjectFromInitialNumber(int32_t initialNumber);

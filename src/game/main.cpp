@@ -685,10 +685,11 @@ void GamePlay::fire_timer() {
             stack()->pop(this);
         } else {
             _state = DEBRIEFING;
+            const auto& a = globals()->gPlayerAdmiral;
             stack()->push(new DebriefingScreen(
                         globals()->gScenarioWinner.text, *_seconds, gThisScenario->parTime,
-                        GetAdmiralLoss(0), gThisScenario->parLosses,
-                        GetAdmiralKill(0), gThisScenario->parKills));
+                        GetAdmiralLoss(a), gThisScenario->parLosses,
+                        GetAdmiralKill(a), gThisScenario->parKills));
         }
         break;
 

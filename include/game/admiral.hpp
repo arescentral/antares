@@ -92,7 +92,7 @@ struct admiralBuildType {
 class Admiral {
   public:
     static Admiral*     get(int i);
-    static Admiral*     make(uint32_t attributes, const Scenario::Player& player);
+    static Handle<Admiral>  make(uint32_t attributes, const Scenario::Player& player);
 
     int                 number() const;
 

@@ -121,10 +121,10 @@ static Admiral* next_free_admiral() {
     return nullptr;
 }
 
-Admiral* Admiral::make(uint32_t attributes, const Scenario::Player& player) {
+Handle<Admiral> Admiral::make(uint32_t attributes, const Scenario::Player& player) {
     Admiral* a = next_free_admiral();
     if (!a) {
-        return nullptr;
+        return Handle<Admiral>(-1);
     }
 
     *a = Admiral();
@@ -140,7 +140,7 @@ Admiral* Admiral::make(uint32_t attributes, const Scenario::Player& player) {
     }
 
     // for now set strategy balance to 0 -- we may want to calc this if player added on the fly?
-    return a;
+    return Handle<Admiral>(a->number());
 }
 
 int32_t MakeNewDestination(
@@ -1176,7 +1176,7 @@ void Admiral::think() {
                     mGetBaseObjectFromClassRace(baseObject, baseNum, _hopeToBuild,
                             _race);
                     if (_cash >= mLongToFixed(baseObject->price)) {
-                        AdmiralScheduleBuild(number(), j);
+                        AdmiralScheduleBuild(Handle<Admiral>(this), j);
                         _hopeToBuild = -1;
                         _saveGoal = 0;
                     } else {
@@ -1200,7 +1200,7 @@ void AdmiralBuildAtObject(Handle<Admiral> admiral, int32_t baseTypeNum, int32_t 
         coord = buildAtObject->location;
 
         SpaceObject* newObject = CreateAnySpaceObject(
-                baseTypeNum, &v, &coord, 0, admiral.number(), 0, -1);
+                baseTypeNum, &v, &coord, 0, admiral, 0, -1);
         if (newObject) {
             SetObjectDestination(newObject, NULL);
             if (admiral == globals()->gPlayerAdmiral) {

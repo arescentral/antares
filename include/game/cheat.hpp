@@ -21,6 +21,8 @@
 
 #include <sfz/sfz.hpp>
 
+#include "game/globals.hpp"
+
 namespace antares {
 
 enum {
@@ -61,7 +63,7 @@ enum {
 void AresCheatInit();
 void CleanupAresCheat();
 int16_t GetCheatNumFromString(const sfz::StringSlice& string);
-void ExecuteCheat( int16_t, int32_t);
+void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer);
 
 }  // namespace antares
 
