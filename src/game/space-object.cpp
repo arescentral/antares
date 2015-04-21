@@ -927,7 +927,7 @@ void CreateFloatingBodyOfPlayer(SpaceObject* obj) {
     auto body = CreateAnySpaceObject(
             body_type, &obj->velocity, &obj->location, obj->direction, obj->owner, 0, -1);
     if (body) {
-        ChangePlayerShipNumber(obj->owner.number(), body->number());
+        ChangePlayerShipNumber(obj->owner, body->number());
     } else {
         PlayerShipBodyExpire(obj, true);
     }

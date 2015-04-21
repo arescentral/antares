@@ -314,7 +314,7 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
         zoom_shortcut(kSmallestZoom);
         break;
       case kTransferKeyNum:
-        MiniComputerExecute(3, 1, globals()->gPlayerAdmiral->number());
+        MiniComputerExecute(3, 1, globals()->gPlayerAdmiral);
         break;
       default:
         if (key < kKeyControlNum) {
@@ -406,7 +406,7 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
             if (_gamepad_state & TARGET_BUMPER) {
                 target_self();
             } else {
-                MiniComputerExecute(3, 1, globals()->gPlayerAdmiral->number());
+                MiniComputerExecute(3, 1, globals()->gPlayerAdmiral);
             }
             return;
         }
@@ -934,17 +934,15 @@ void SetPlayerSelectShip( int32_t whichShip, bool target, int32_t admiralNumber)
 // assumes that newShipNumber is the number of a valid (legal, living) ship and that
 // gPlayerShip already points to the current, legal living ship
 
-void ChangePlayerShipNumber( int32_t whichAdmiral, int32_t newShipNumber)
-{
+void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, int32_t newShipNumber) {
     SpaceObject *anObject = GetAdmiralFlagship( whichAdmiral);
     if (anObject == NULL) {
         throw Exception(format(
                     "whichAdmiral: {0}, newShipNumber: {1}",
-                    whichAdmiral, newShipNumber));
+                    whichAdmiral.number(), newShipNumber));
     }
 
-    if ( whichAdmiral == globals()->gPlayerAdmiral->number())
-    {
+    if (whichAdmiral == globals()->gPlayerAdmiral) {
         anObject->attributes &= (~kIsHumanControlled) & (~kIsPlayerShip);
         if ( newShipNumber != globals()->gPlayerShipNumber)
         {
@@ -957,7 +955,7 @@ void ChangePlayerShipNumber( int32_t whichAdmiral, int32_t newShipNumber)
         if (anObject == NULL) {
             throw Exception(format(
                         "whichAdmiral: {0}, newShipNumber: {1}, gPlayerShipNumber: {2}",
-                        whichAdmiral, newShipNumber, globals()->gPlayerShipNumber));
+                        whichAdmiral.number(), newShipNumber, globals()->gPlayerShipNumber));
         }
 
 //      if ( !(globals()->gActiveCheats[whichAdmiral] & kAutoPlayBit))
@@ -1017,8 +1015,7 @@ bool IsPlayerShipOnAutoPilot( void)
     else return false;
 }
 
-void PlayerShipGiveCommand( int32_t whichAdmiral)
-{
+void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral) {
     SpaceObject *selectShip;
     int32_t selectShipNum = GetAdmiralConsiderObject( whichAdmiral);
 
@@ -1026,7 +1023,7 @@ void PlayerShipGiveCommand( int32_t whichAdmiral)
     {
         selectShip = mGetSpaceObjectPtr(selectShipNum);
         SetObjectDestination( selectShip, NULL);
-        if ( whichAdmiral == globals()->gPlayerAdmiral->number())
+        if ( whichAdmiral == globals()->gPlayerAdmiral)
             PlayVolumeSound(  kMorseBeepSound, kMediumVolume, kMediumPersistence, kLowPrioritySound);
     }
 }
@@ -1091,7 +1088,7 @@ void PlayerShipBodyExpire( SpaceObject *theShip, bool sourceIsBody)
         SetAdmiralFlagship( theShip->owner, -1);
     } else if ( selectShip != NULL)
     {
-        ChangePlayerShipNumber( theShip->owner.number(), selectShipNum);
+        ChangePlayerShipNumber(theShip->owner, selectShipNum);
     }
 }
 

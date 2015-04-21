@@ -73,7 +73,7 @@ void draw_mini_ship_data(
         const SpaceObject& newObject, uint8_t headerColor,
         int16_t screenTop, int16_t whichString);
 void MiniComputerDoAccept( void);
-void MiniComputerExecute(int32_t, int32_t, int32_t);
+void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral);
 void MiniComputerDoCancel( void);
 void MiniComputerSetBuildStrings( void);
 void MiniComputerHandleClick( Point);

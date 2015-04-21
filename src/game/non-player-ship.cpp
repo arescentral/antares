@@ -354,7 +354,7 @@ void NonplayerShipThink(int32_t timePass)
             TogglePlayerAutoPilot(anObject);
         }
         if (anObject->keysDown & kGiveCommandKey) {
-            PlayerShipGiveCommand(anObject->owner.number());
+            PlayerShipGiveCommand(anObject->owner);
         }
         anObject->keysDown &= ~kSpecialKeyMask;
 

@@ -1035,20 +1035,17 @@ void MiniComputerDoAccept() {
     MiniComputerExecute(
             globals()->gMiniScreenData.currentScreen,
             globals()->gMiniScreenData.selectLine,
-            globals()->gPlayerAdmiral->number());
+            globals()->gPlayerAdmiral);
 }
 
-void MiniComputerExecute( int32_t whichPage, int32_t whichLine, int32_t whichAdmiral)
-
-{
+void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral) {
     SpaceObject *anObject, *anotherObject;
     int32_t            l;
 
     switch ( whichPage)
     {
         case kMainMiniScreen:
-            if ( whichAdmiral == globals()->gPlayerAdmiral->number())
-            {
+            if (whichAdmiral == globals()->gPlayerAdmiral) {
                 switch ( whichLine)
                 {
                     case kMainMiniBuild:
@@ -1086,13 +1083,12 @@ void MiniComputerExecute( int32_t whichPage, int32_t whichLine, int32_t whichAdm
                     if (AdmiralScheduleBuild( whichAdmiral,
                         whichLine - kBuildScreenFirstTypeLine) == false)
                     {
-                        if ( whichAdmiral == globals()->gPlayerAdmiral->number())
+                        if (whichAdmiral == globals()->gPlayerAdmiral)
                             mPlayBeepBad();
                     }
                 } else
                 {
-                    if ( whichAdmiral == globals()->gPlayerAdmiral->number())
-                    {
+                    if (whichAdmiral == globals()->gPlayerAdmiral) {
                         Messages::set_status("Maximum number of ships built", ORANGE);
                     }
                 }
@@ -1119,7 +1115,7 @@ void MiniComputerExecute( int32_t whichPage, int32_t whichLine, int32_t whichAdm
                                 || ( !(anotherObject->attributes & kCanBeDestination))
                                 || ( anObject->active != kObjectInUse))
                             {
-                                if ( whichAdmiral == globals()->gPlayerAdmiral->number())
+                                if (whichAdmiral == globals()->gPlayerAdmiral)
                                     mPlayBeepBad();
                             } else
                             {
@@ -1197,8 +1193,7 @@ void MiniComputerExecute( int32_t whichPage, int32_t whichLine, int32_t whichAdm
 
         case kMessageMiniScreen:
             if ( globals()->keyMask & kComputerMessageMenu) return;
-            if ( whichAdmiral == globals()->gPlayerAdmiral->number())
-            {
+            if (whichAdmiral == globals()->gPlayerAdmiral) {
                 switch ( whichLine)
                 {
                     case kMessageMiniNext:
