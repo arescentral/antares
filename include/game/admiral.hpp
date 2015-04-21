@@ -157,14 +157,12 @@ class Admiral {
     sfz::String         _name;
 };
 
-
 void AdmiralInit();
 void AdmiralCleanup();
 void ResetAllAdmirals();
 void ResetAllDestObjectData();
 
 destBalanceType* mGetDestObjectBalancePtr(int32_t whichObject);
-Admiral* mGetAdmiralPtr(int32_t mwhichAdmiral);
 
 int32_t MakeNewDestination(
         int32_t whichObject, int32_t* canBuildType, Fixed earn, int16_t nameResID,

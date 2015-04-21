@@ -24,6 +24,7 @@
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/text.hpp"
+#include "game/admiral.hpp"
 #include "game/cursor.hpp"
 #include "game/globals.hpp"
 #include "video/driver.hpp"
@@ -290,7 +291,7 @@ void Labels::update_positions(int32_t units_done) {
                     }
 
                     if (!(label->object->seenByPlayerFlags &
-                                (1 << globals()->gPlayerAdmiralNumber))) {
+                                (1 << globals()->gPlayerAdmiral->number()))) {
                         isOffScreen = true;
                     }
 

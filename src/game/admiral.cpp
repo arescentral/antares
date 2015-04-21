@@ -1219,7 +1219,7 @@ void AdmiralBuildAtObject(int32_t whichAdmiral, int32_t baseTypeNum, int32_t whi
                 baseTypeNum, &v, &coord, 0, whichAdmiral, 0, -1);
         if (newObject) {
             SetObjectDestination(newObject, NULL);
-            if (whichAdmiral == globals()->gPlayerAdmiralNumber) {
+            if (whichAdmiral == globals()->gPlayerAdmiral->number()) {
                 PlayVolumeSound(kComputerBeep2, kMediumVolume, kMediumPersistence,
                         kLowPrioritySound);
             }
@@ -1336,10 +1336,10 @@ void ClearAllOccupants(int32_t whichDestination, int32_t whichAdmiral, int32_t f
 
 void AddKillToAdmiral(SpaceObject* anObject) {
     // only for player
-    Admiral* admiral = gAdmiralData.get() + globals()->gPlayerAdmiralNumber;
+    Admiral* admiral = gAdmiralData.get() + globals()->gPlayerAdmiral->number();
 
     if (anObject->attributes & kCanAcceptDestination) {
-        if (anObject->owner == globals()->gPlayerAdmiralNumber) {
+        if (anObject->owner == globals()->gPlayerAdmiral->number()) {
             admiral->losses()++;
         } else {
             admiral->kills()++;

@@ -83,6 +83,24 @@ struct scrollStarType;
 class InputSource;
 class StringList;
 
+template <typename T>
+class Handle {
+  public:
+    Handle(): _number(-1) { }
+    explicit Handle(int number): _number(number) { }
+    explicit Handle(T* pointer): _number(pointer ? pointer->number() : nullptr) { }
+    int number() const { return _number; }
+    T* get() const { return T::get(_number); }
+    T& operator*() const { return *get(); }
+    T* operator->() const { return get(); }
+  private:
+    int _number;
+};
+template <typename T>
+inline bool operator==(Handle<T> x, Handle<T> y) { return x.number() == y.number(); }
+template <typename T>
+inline bool operator!=(Handle<T> x, Handle<T> y) { return !(x == y); }
+
 struct ScenarioWinnerType {
     int8_t next;
     int16_t text;
@@ -107,7 +125,7 @@ struct aresGlobalType {
     int32_t         gSelectionLabel;
     ZoomType        gZoomMode;
     ZoomType        gPreviousZoomMode;
-    int32_t         gPlayerAdmiralNumber;
+    Handle<Admiral> gPlayerAdmiral;
     ScenarioWinnerType gScenarioWinner;
 
     int32_t         gRadarCount;            // = 0;

@@ -650,7 +650,7 @@ void MiniComputerHandleNull( int32_t unitsToDo)
         // handle control/command/selected object
 
         myObject = mGetMiniObjectPtr( kMiniSelectObjectNum);
-        count = GetAdmiralConsiderObject( globals()->gPlayerAdmiralNumber);
+        count = GetAdmiralConsiderObject( globals()->gPlayerAdmiral->number());
         if ( count >= 0)
         {
             realObject = mGetSpaceObjectPtr(count);
@@ -674,7 +674,7 @@ void MiniComputerHandleNull( int32_t unitsToDo)
         mCopyMiniSpaceObject(*myObject, newObject);
 
         myObject = mGetMiniObjectPtr( kMiniTargetObjectNum);
-        count = GetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber);
+        count = GetAdmiralDestinationObject( globals()->gPlayerAdmiral->number());
         if ( count >= 0)
         {
             realObject = mGetSpaceObjectPtr(count);
@@ -697,7 +697,7 @@ void MiniComputerHandleNull( int32_t unitsToDo)
         }
         mCopyMiniSpaceObject(*myObject, newObject);
 
-        int build_at = GetAdmiralBuildAtObject(globals()->gPlayerAdmiralNumber);
+        int build_at = GetAdmiralBuildAtObject(globals()->gPlayerAdmiral->number());
         if (build_at >= 0) {
             buildAtObject = mGetDestObjectBalancePtr(build_at);
             if (buildAtObject->totalBuildTime > 0) {
@@ -718,7 +718,6 @@ void MiniComputerHandleNull( int32_t unitsToDo)
 void UpdateMiniScreenLines( void)
 
 {
-    Admiral*            admiral = NULL;
     miniScreenLineType  *line = NULL;
     BaseObject*         buildObject = NULL;
     int32_t                lineNum, count;
@@ -728,12 +727,12 @@ void UpdateMiniScreenLines( void)
                         kMiniScreenBottom + globals()->gInstrumentTop);
     switch( globals()->gMiniScreenData.currentScreen)
     {
-        case kBuildMiniScreen:
-            admiral = mGetAdmiralPtr(globals()->gPlayerAdmiralNumber);
+        case kBuildMiniScreen: {
+            const auto& admiral = globals()->gPlayerAdmiral;
             line = globals()->gMiniScreenData.lineData.get() +
                 kBuildScreenWhereNameLine;
             if ( line->value !=
-                GetAdmiralBuildAtObject( globals()->gPlayerAdmiralNumber))
+                GetAdmiralBuildAtObject(admiral->number()))
             {
                 if ( globals()->gMiniScreenData.selectLine !=
                         kMiniScreenNoLineSelected)
@@ -745,7 +744,7 @@ void UpdateMiniScreenLines( void)
                         kMiniScreenNoLineSelected;
                 }
                 MiniComputerSetBuildStrings();
-            } else if ( GetAdmiralBuildAtObject( globals()->gPlayerAdmiralNumber)
+            } else if ( GetAdmiralBuildAtObject(admiral->number())
                 >= 0)
             {
                 line = globals()->gMiniScreenData.lineData.get() + kBuildScreenFirstTypeLine;
@@ -784,6 +783,7 @@ void UpdateMiniScreenLines( void)
             }
 
             break;
+        }
 
         case kStatusMiniScreen:
             for ( count = kStatusMiniScreenFirstLine; count <
@@ -1012,7 +1012,7 @@ void draw_mini_ship_data(
             SpaceObject* dObject = newObject.destObjectPtr;
 
             // get the color for writing the name
-            if (dObject->owner == globals()->gPlayerAdmiralNumber) {
+            if (dObject->owner == globals()->gPlayerAdmiral->number()) {
                 color = GetRGBTranslateColorShade(GREEN, VERY_LIGHT);
             } else {
                 color = GetRGBTranslateColorShade(RED, VERY_LIGHT);
@@ -1035,7 +1035,7 @@ void MiniComputerDoAccept() {
     MiniComputerExecute(
             globals()->gMiniScreenData.currentScreen,
             globals()->gMiniScreenData.selectLine,
-            globals()->gPlayerAdmiralNumber);
+            globals()->gPlayerAdmiral->number());
 }
 
 void MiniComputerExecute( int32_t whichPage, int32_t whichLine, int32_t whichAdmiral)
@@ -1047,7 +1047,7 @@ void MiniComputerExecute( int32_t whichPage, int32_t whichLine, int32_t whichAdm
     switch ( whichPage)
     {
         case kMainMiniScreen:
-            if ( whichAdmiral == globals()->gPlayerAdmiralNumber)
+            if ( whichAdmiral == globals()->gPlayerAdmiral->number())
             {
                 switch ( whichLine)
                 {
@@ -1086,12 +1086,12 @@ void MiniComputerExecute( int32_t whichPage, int32_t whichLine, int32_t whichAdm
                     if (AdmiralScheduleBuild( whichAdmiral,
                         whichLine - kBuildScreenFirstTypeLine) == false)
                     {
-                        if ( whichAdmiral == globals()->gPlayerAdmiralNumber)
+                        if ( whichAdmiral == globals()->gPlayerAdmiral->number())
                             mPlayBeepBad();
                     }
                 } else
                 {
-                    if ( whichAdmiral == globals()->gPlayerAdmiralNumber)
+                    if ( whichAdmiral == globals()->gPlayerAdmiral->number())
                     {
                         Messages::set_status("Maximum number of ships built", ORANGE);
                     }
@@ -1119,7 +1119,7 @@ void MiniComputerExecute( int32_t whichPage, int32_t whichLine, int32_t whichAdm
                                 || ( !(anotherObject->attributes & kCanBeDestination))
                                 || ( anObject->active != kObjectInUse))
                             {
-                                if ( whichAdmiral == globals()->gPlayerAdmiralNumber)
+                                if ( whichAdmiral == globals()->gPlayerAdmiral->number())
                                     mPlayBeepBad();
                             } else
                             {
@@ -1197,7 +1197,7 @@ void MiniComputerExecute( int32_t whichPage, int32_t whichLine, int32_t whichAdm
 
         case kMessageMiniScreen:
             if ( globals()->keyMask & kComputerMessageMenu) return;
-            if ( whichAdmiral == globals()->gPlayerAdmiralNumber)
+            if ( whichAdmiral == globals()->gPlayerAdmiral->number())
             {
                 switch ( whichLine)
                 {
@@ -1247,7 +1247,6 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 
 {
     BaseObject*         buildObject = NULL;
-    Admiral*            admiral = NULL;
     destBalanceType     *buildAtObject = NULL;
     miniScreenLineType  *line = NULL;
     int32_t                count, baseNum, lineNum, buildAtObjectNum;
@@ -1259,11 +1258,11 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
     globals()->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
     if ( globals()->gMiniScreenData.currentScreen == kBuildMiniScreen)
     {
-        admiral = mGetAdmiralPtr(globals()->gPlayerAdmiralNumber);
+        const auto& admiral = globals()->gPlayerAdmiral;
         line = globals()->gMiniScreenData.lineData.get() +
             kBuildScreenWhereNameLine;
         buildAtObjectNum =
-            GetAdmiralBuildAtObject( globals()->gPlayerAdmiralNumber);
+            GetAdmiralBuildAtObject( globals()->gPlayerAdmiral->number());
         line->value = buildAtObjectNum;
 
         if ( buildAtObjectNum >= 0)

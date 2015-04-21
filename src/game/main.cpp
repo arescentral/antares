@@ -438,7 +438,7 @@ void GamePlay::become_front() {
           case PlayAgainScreen::SKIP:
             *_game_result = WIN_GAME;
             globals()->gGameOver = 1;
-            globals()->gScenarioWinner.player = globals()->gPlayerAdmiralNumber;
+            globals()->gScenarioWinner.player = globals()->gPlayerAdmiral->number();
             globals()->gScenarioWinner.next = gThisScenario->chapter_number() + 1;
             globals()->gScenarioWinner.text = -1;
             stack()->pop(this);
@@ -666,7 +666,7 @@ void GamePlay::fire_timer() {
         *_seconds = thisTime / 1000000; // divide by a million to get seconds
 
         if (*_game_result == NO_GAME) {
-            if (globals()->gScenarioWinner.player == globals()->gPlayerAdmiralNumber) {
+            if (globals()->gScenarioWinner.player == globals()->gPlayerAdmiral->number()) {
                 *_game_result = WIN_GAME;
             } else {
                 *_game_result = LOSE_GAME;

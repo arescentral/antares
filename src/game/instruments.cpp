@@ -431,7 +431,7 @@ void draw_radar() {
 
 // SHOW ME THE MONEY
 static void draw_money() {
-    const Admiral* const admiral = mGetAdmiralPtr(globals()->gPlayerAdmiralNumber);
+    auto& admiral = globals()->gPlayerAdmiral;
     const int cash = clamp(admiral->cash(), 0, kMaxMoneyValue - 1);
     globals()->gBarIndicator[kFineMoneyBar].thisValue
         = (cash % kFineMoneyBarMod) / kFineMoneyBarValue;

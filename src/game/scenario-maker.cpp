@@ -475,7 +475,7 @@ bool Scenario::Condition::is_true() const {
         case kIsAuxiliaryObject:
             sObject = GetObjectFromInitialNumber(subjectObject);
             if (sObject != NULL) {
-                l = GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber);
+                l = GetAdmiralConsiderObject(globals()->gPlayerAdmiral->number());
                 if (l >= 0) {
                     dObject = mGetSpaceObjectPtr(l);
                     if (dObject == sObject) {
@@ -488,7 +488,7 @@ bool Scenario::Condition::is_true() const {
         case kIsTargetObject:
             sObject = GetObjectFromInitialNumber(subjectObject);
             if (sObject != NULL) {
-                l = GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber);
+                l = GetAdmiralDestinationObject(globals()->gPlayerAdmiral->number());
                 if (l >= 0) {
                     dObject = mGetSpaceObjectPtr(l);
                     if (dObject == sObject) {
@@ -549,7 +549,7 @@ bool Scenario::Condition::is_true() const {
             {
                 destBalanceType     *buildAtObject = NULL;
 
-                buildAtObject = mGetDestObjectBalancePtr(GetAdmiralBuildAtObject(globals()->gPlayerAdmiralNumber));
+                buildAtObject = mGetDestObjectBalancePtr(GetAdmiralBuildAtObject(globals()->gPlayerAdmiral->number()));
                 if (buildAtObject != NULL) {
                     if (buildAtObject->totalBuildTime > 0) {
                         return true;
@@ -682,7 +682,7 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
         if (gThisScenario->player[i].playerType == kSingleHumanPlayer) {
             gAdmiralNumbers[i] = Admiral::make(kAIsHuman, gThisScenario->player[i])->number();
             PayAdmiral(gAdmiralNumbers[i], mLongToFixed(5000));
-            globals()->gPlayerAdmiralNumber = gAdmiralNumbers[i];
+            globals()->gPlayerAdmiral = Handle<Admiral>(gAdmiralNumbers[i]);
         } else {
             gAdmiralNumbers[i] = Admiral::make(kAIsComputer, gThisScenario->player[i])->number();
             PayAdmiral(gAdmiralNumbers[i], mLongToFixed(5000));
@@ -835,7 +835,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         if (initial->attributes & kIsPlayerShip) {
             specialAttributes &= ~kIsPlayerShip;
             if ((GetAdmiralFlagship(owner) == NULL)
-                    && (owner == globals()->gPlayerAdmiralNumber)) {
+                    && (owner == globals()->gPlayerAdmiral->number())) {
                 specialAttributes |= kIsHumanControlled | kIsPlayerShip;
             }
         }
@@ -859,7 +859,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         if ((initial->attributes & kIsPlayerShip)
                 && (GetAdmiralFlagship(owner) == NULL)) {
             SetAdmiralFlagship(owner, newShipNum);
-            if (owner == globals()->gPlayerAdmiralNumber) {
+            if (owner == globals()->gPlayerAdmiral->number()) {
                 ResetPlayerShip(newShipNum);
             }
         }
@@ -977,7 +977,7 @@ void UnhideInitialObject(int32_t whichInitial) {
     uint32_t specialAttributes = initial->attributes & ~kInitialAttributesMask;
     if (initial->attributes & kIsPlayerShip) {
         if (GetAdmiralFlagship(owner) == NULL) {
-            if (owner == globals()->gPlayerAdmiralNumber) {
+            if (owner == globals()->gPlayerAdmiral->number()) {
                 specialAttributes |= kIsHumanControlled;
             } else {
                 specialAttributes &= ~kIsPlayerShip;
@@ -1020,7 +1020,7 @@ void UnhideInitialObject(int32_t whichInitial) {
     initial->realObjectID = anObject->id;
     if ((initial->attributes & kIsPlayerShip) && (GetAdmiralFlagship(owner) == NULL)) {
         SetAdmiralFlagship(owner, newShipNum);
-        if (owner == globals()->gPlayerAdmiralNumber) {
+        if (owner == globals()->gPlayerAdmiral->number()) {
             ResetPlayerShip(newShipNum);
         }
     }

@@ -103,7 +103,7 @@ void ExecuteCheat( int16_t whichCheat, int32_t whichPlayer)
             {
                 globals()->gActiveCheats[whichPlayer] &= ~kAutoPlayBit;
                 CheatFeedback( whichCheat, false, whichPlayer);
-                if ( whichPlayer == globals()->gPlayerAdmiralNumber)
+                if ( whichPlayer == globals()->gPlayerAdmiral->number())
                 {
 //                      ChangePlayerShipNumber( whichPlayer, globals()->gPlayerShipNumber);
                 }
@@ -112,7 +112,7 @@ void ExecuteCheat( int16_t whichCheat, int32_t whichPlayer)
             {
                 globals()->gActiveCheats[whichPlayer] |= kAutoPlayBit;
                 CheatFeedback( whichCheat, true, whichPlayer);
-                if ( whichPlayer == globals()->gPlayerAdmiralNumber)
+                if ( whichPlayer == globals()->gPlayerAdmiral->number())
                 {
 //                      ChangePlayerShipNumber( whichPlayer, globals()->gPlayerShipNumber);
                 }

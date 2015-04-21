@@ -219,7 +219,7 @@ static SpaceObject* AddSpaceObject(SpaceObject *sourceObject) {
             RgbColor tinyColor;
             if (obj->tinySize == 0) {
                 tinyColor = RgbColor::kClear;
-            } else if (obj->owner == globals()->gPlayerAdmiralNumber) {
+            } else if (obj->owner == globals()->gPlayerAdmiral->number()) {
                 tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
             } else if (obj->owner <= kNoOwner) {
                 tinyColor = GetRGBTranslateColorShade(kNeutralColor, tinyShade);
@@ -754,7 +754,7 @@ void AlterObjectOwner(SpaceObject* object, int32_t owner, bool message) {
         }
 
         RgbColor tinyColor;
-        if (owner == globals()->gPlayerAdmiralNumber) {
+        if (owner == globals()->gPlayerAdmiral->number()) {
             tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
         } else if (owner <= kNoOwner) {
             tinyColor = GetRGBTranslateColorShade(kNeutralColor, tinyShade);
