@@ -125,7 +125,15 @@ destBalanceType* mGetDestObjectBalancePtr(int32_t whichObject) {
 }
 
 Admiral* mGetAdmiralPtr(int32_t mwhichAdmiral) {
-    return gAdmiralData.get() + mwhichAdmiral;
+    return Admiral::get(mwhichAdmiral);
+}
+
+Admiral* Admiral::get(int i) {
+    return &gAdmiralData[i];
+}
+
+int Admiral::number() const {
+    return this - gAdmiralData.get();
 }
 
 int32_t MakeNewAdmiral(uint32_t attributes, const Scenario::Player& player) {

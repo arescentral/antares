@@ -90,6 +90,9 @@ struct admiralBuildType {
 };
 
 struct Admiral {
+    static Admiral*     get(int i);
+    int                 number() const;
+
     uint32_t            attributes;
     int32_t             destinationObject;
     int32_t             destinationObjectID;
