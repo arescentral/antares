@@ -96,6 +96,8 @@ class Admiral {
 
     int                 number() const;
 
+    void                think();
+
     uint32_t&           attributes() { return _attributes; }
     int32_t&            destinationObject() { return _destinationObject; }
     int32_t&            destinationObjectID() { return _destinationObjectID; }
