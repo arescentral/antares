@@ -771,434 +771,436 @@ void Admiral::think() {
     BaseObject* baseObject;
     Point gridLoc;
 
-        if ((_attributes & kAIsComputer) && (!(_attributes & kAIsRemote))) {
-            if (_blitzkrieg > 0) {
-                _blitzkrieg--;
-                if (_blitzkrieg <= 0) {
-                    // Really 48:
-                    _blitzkrieg = 0 - (gRandomSeed.next(1200) + 1200);
-                    for (int j = 0; j < kMaxSpaceObject; j++) {
-                        anObject = mGetSpaceObjectPtr(j);
-                        if (anObject->owner == number()) {
-                            anObject->currentTargetValue = 0x00000000;
-                        }
-                    }
-                }
-            } else {
-                _blitzkrieg++;
-                if (_blitzkrieg >= 0) {
-                    // Really 48:
-                    _blitzkrieg = gRandomSeed.next(1200) + 1200;
-                    for (int j = 0; j < kMaxSpaceObject; j++) {
-                        anObject = mGetSpaceObjectPtr(j);
-                        if (anObject->owner == number()) {
-                            anObject->currentTargetValue = 0x00000000;
-                        }
-                    }
+    if (!(_attributes & kAIsComputer) || (_attributes & kAIsRemote)) {
+        return;
+    }
+
+    if (_blitzkrieg > 0) {
+        _blitzkrieg--;
+        if (_blitzkrieg <= 0) {
+            // Really 48:
+            _blitzkrieg = 0 - (gRandomSeed.next(1200) + 1200);
+            for (int j = 0; j < kMaxSpaceObject; j++) {
+                anObject = mGetSpaceObjectPtr(j);
+                if (anObject->owner == number()) {
+                    anObject->currentTargetValue = 0x00000000;
                 }
             }
-
-            // get the current object
-            if (_considerShip < 0) {
-                _considerShip = gRootObjectNumber;
-                anObject = mGetSpaceObjectPtr(_considerShip);
-                _considerShipID = anObject->id;
-            } else {
-                anObject = mGetSpaceObjectPtr(_considerShip);
+        }
+    } else {
+        _blitzkrieg++;
+        if (_blitzkrieg >= 0) {
+            // Really 48:
+            _blitzkrieg = gRandomSeed.next(1200) + 1200;
+            for (int j = 0; j < kMaxSpaceObject; j++) {
+                anObject = mGetSpaceObjectPtr(j);
+                if (anObject->owner == number()) {
+                    anObject->currentTargetValue = 0x00000000;
+                }
             }
+        }
+    }
 
+    // get the current object
+    if (_considerShip < 0) {
+        _considerShip = gRootObjectNumber;
+        anObject = mGetSpaceObjectPtr(_considerShip);
+        _considerShipID = anObject->id;
+    } else {
+        anObject = mGetSpaceObjectPtr(_considerShip);
+    }
+
+    if (_destinationObject < 0) {
+        _destinationObject = gRootObjectNumber;
+    }
+
+    if (anObject->active != kObjectInUse) {
+        _considerShip = gRootObjectNumber;
+        anObject = mGetSpaceObjectPtr(_considerShip);
+        _considerShipID = anObject->id;
+    }
+
+    if (_destinationObject >= 0) {
+        destObject = mGetSpaceObjectPtr(_destinationObject);
+        if (destObject->active != kObjectInUse) {
+            destObject = gRootObject;
+            _destinationObject = gRootObjectNumber;
+        }
+        origDest = _destinationObject;
+        do {
+            _destinationObject = destObject->nextObjectNumber;
+
+            // if we've gone through all of the objects
             if (_destinationObject < 0) {
+                // ********************************
+                // SHIP MUST DECIDE, THEN INCREASE CONSIDER SHIP
+                // ********************************
+                if ((anObject->duty != eEscortDuty)
+                        && (anObject->duty != eHostileBaseDuty)
+                        && (anObject->bestConsideredTargetValue >
+                            anObject->currentTargetValue)) {
+                    _destinationObject = anObject->bestConsideredTargetNumber;
+                    _destType = kObjectDestinationType;
+                    if (_destinationObject >= 0) {
+                        destObject = mGetSpaceObjectPtr(_destinationObject);
+                        if (destObject->active == kObjectInUse) {
+                            _destinationObjectID = destObject->id;
+                            anObject->currentTargetValue
+                                = anObject->bestConsideredTargetValue;
+                            thisValue = anObject->randomSeed.next(
+                                    mFloatToFixed(0.5))
+                                - mFloatToFixed(0.25);
+                            thisValue = mMultiplyFixed(
+                                    thisValue, anObject->currentTargetValue);
+                            anObject->currentTargetValue += thisValue;
+                            SetObjectDestination(anObject, NULL);
+                        }
+                    }
+                    _destType = kNoDestinationType;
+                }
+
+                if ((anObject->duty != eEscortDuty)
+                        && (anObject->duty != eHostileBaseDuty)) {
+                    _thisFreeEscortStrength += anObject->baseType->offenseValue;
+                }
+
+                anObject->bestConsideredTargetValue = 0xffffffff;
+                // start back with 1st ship
                 _destinationObject = gRootObjectNumber;
-            }
+                destObject = gRootObject;
 
-            if (anObject->active != kObjectInUse) {
-                _considerShip = gRootObjectNumber;
+                // >>> INCREASE CONSIDER SHIP
+                origObject = _considerShip;
                 anObject = mGetSpaceObjectPtr(_considerShip);
-                _considerShipID = anObject->id;
+                if (anObject->active != kObjectInUse) {
+                    anObject = gRootObject;
+                    _considerShip = gRootObjectNumber;
+                    _considerShipID = anObject->id;
+                }
+                do {
+                    _considerShip = anObject->nextObjectNumber;
+                    if (_considerShip < 0) {
+                        _considerShip = gRootObjectNumber;
+                        anObject = gRootObject;
+                        _considerShipID = anObject->id;
+                        _lastFreeEscortStrength = _thisFreeEscortStrength;
+                        _thisFreeEscortStrength = 0;
+                    } else {
+                        anObject = anObject->nextObject;
+                        _considerShipID = anObject->id;
+                    }
+                } while (((anObject->owner != number())
+                            || (!(anObject->attributes & kCanAcceptDestination))
+                            || (anObject->active != kObjectInUse))
+                        && (_considerShip != origObject));
+            } else {
+                destObject = destObject->nextObject;
+            }
+            _destinationObjectID = destObject->id;
+        } while (((!(destObject->attributes & (kCanBeDestination)))
+                    || (_destinationObject == _considerShip)
+                    || (destObject->active != kObjectInUse)
+                    || (!(destObject->attributes & kCanBeDestination)))
+                && (_destinationObject != origDest));
+
+        // if our object is legal and our destination is legal
+        if ((anObject->owner == number())
+                && (anObject->attributes & kCanAcceptDestination)
+                && (anObject->active == kObjectInUse)
+                && (destObject->attributes & (kCanBeDestination))
+                && (destObject->active == kObjectInUse)
+                && ((anObject->owner != destObject->owner)
+                    || (anObject->baseType->destinationClass <
+                        destObject->baseType->destinationClass))) {
+            gridLoc = destObject->distanceGrid;
+            stepObject = otherDestObject = destObject;
+            while (stepObject->nextFarObject != NULL) {
+                if ((stepObject->distanceGrid.h == gridLoc.h)
+                        && (stepObject->distanceGrid.v == gridLoc.v)) {
+                    otherDestObject = stepObject;
+                }
+                stepObject = stepObject->nextFarObject;
+            }
+            if (otherDestObject->owner == anObject->owner) {
+                friendValue = otherDestObject->localFriendStrength;
+                foeValue = otherDestObject->localFoeStrength;
+            } else {
+                foeValue = otherDestObject->localFriendStrength;
+                friendValue = otherDestObject->localFoeStrength;
             }
 
-            if (_destinationObject >= 0) {
-                destObject = mGetSpaceObjectPtr(_destinationObject);
-                if (destObject->active != kObjectInUse) {
-                    destObject = gRootObject;
-                    _destinationObject = gRootObjectNumber;
-                }
-                origDest = _destinationObject;
-                do {
-                    _destinationObject = destObject->nextObjectNumber;
 
-                    // if we've gone through all of the objects
-                    if (_destinationObject < 0) {
-                        // ********************************
-                        // SHIP MUST DECIDE, THEN INCREASE CONSIDER SHIP
-                        // ********************************
-                        if ((anObject->duty != eEscortDuty)
-                                && (anObject->duty != eHostileBaseDuty)
-                                && (anObject->bestConsideredTargetValue >
-                                    anObject->currentTargetValue)) {
-                            _destinationObject = anObject->bestConsideredTargetNumber;
-                            _destType = kObjectDestinationType;
-                            if (_destinationObject >= 0) {
-                                destObject = mGetSpaceObjectPtr(_destinationObject);
-                                if (destObject->active == kObjectInUse) {
-                                    _destinationObjectID = destObject->id;
-                                    anObject->currentTargetValue
-                                        = anObject->bestConsideredTargetValue;
-                                    thisValue = anObject->randomSeed.next(
-                                            mFloatToFixed(0.5))
-                                        - mFloatToFixed(0.25);
-                                    thisValue = mMultiplyFixed(
-                                            thisValue, anObject->currentTargetValue);
-                                    anObject->currentTargetValue += thisValue;
-                                    SetObjectDestination(anObject, NULL);
-                                }
-                            }
-                            _destType = kNoDestinationType;
-                        }
-
-                        if ((anObject->duty != eEscortDuty)
-                                && (anObject->duty != eHostileBaseDuty)) {
-                            _thisFreeEscortStrength += anObject->baseType->offenseValue;
-                        }
-
-                        anObject->bestConsideredTargetValue = 0xffffffff;
-                        // start back with 1st ship
-                        _destinationObject = gRootObjectNumber;
-                        destObject = gRootObject;
-
-                        // >>> INCREASE CONSIDER SHIP
-                        origObject = _considerShip;
-                        anObject = mGetSpaceObjectPtr(_considerShip);
-                        if (anObject->active != kObjectInUse) {
-                            anObject = gRootObject;
-                            _considerShip = gRootObjectNumber;
-                            _considerShipID = anObject->id;
-                        }
-                        do {
-                            _considerShip = anObject->nextObjectNumber;
-                            if (_considerShip < 0) {
-                                _considerShip = gRootObjectNumber;
-                                anObject = gRootObject;
-                                _considerShipID = anObject->id;
-                                _lastFreeEscortStrength = _thisFreeEscortStrength;
-                                _thisFreeEscortStrength = 0;
-                            } else {
-                                anObject = anObject->nextObject;
-                                _considerShipID = anObject->id;
-                            }
-                        } while (((anObject->owner != number())
-                                    || (!(anObject->attributes & kCanAcceptDestination))
-                                    || (anObject->active != kObjectInUse))
-                                && (_considerShip != origObject));
-                    } else {
-                        destObject = destObject->nextObject;
-                    }
-                    _destinationObjectID = destObject->id;
-                } while (((!(destObject->attributes & (kCanBeDestination)))
-                            || (_destinationObject == _considerShip)
-                            || (destObject->active != kObjectInUse)
-                            || (!(destObject->attributes & kCanBeDestination)))
-                        && (_destinationObject != origDest));
-
-            // if our object is legal and our destination is legal
-            if ((anObject->owner == number())
-                    && (anObject->attributes & kCanAcceptDestination)
-                    && (anObject->active == kObjectInUse)
-                    && (destObject->attributes & (kCanBeDestination))
-                    && (destObject->active == kObjectInUse)
-                    && ((anObject->owner != destObject->owner)
-                        || (anObject->baseType->destinationClass <
-                            destObject->baseType->destinationClass))) {
-                gridLoc = destObject->distanceGrid;
-                stepObject = otherDestObject = destObject;
-                while (stepObject->nextFarObject != NULL) {
-                    if ((stepObject->distanceGrid.h == gridLoc.h)
-                            && (stepObject->distanceGrid.v == gridLoc.v)) {
-                        otherDestObject = stepObject;
-                    }
-                    stepObject = stepObject->nextFarObject;
-                }
-                if (otherDestObject->owner == anObject->owner) {
-                    friendValue = otherDestObject->localFriendStrength;
-                    foeValue = otherDestObject->localFoeStrength;
-                } else {
-                    foeValue = otherDestObject->localFriendStrength;
-                    friendValue = otherDestObject->localFoeStrength;
-                }
-
-
-                thisValue = kUnimportantTarget;
-                if (destObject->owner == anObject->owner) {
-                    if (destObject->attributes & kIsDestination) {
-                        if (destObject->escortStrength < destObject->baseType->friendDefecit) {
-                            thisValue = kAbsolutelyEssential;
-                        } else if (foeValue) {
-                            if (foeValue >= friendValue) {
-                                thisValue = kMostImportantTarget;
-                            } else if (foeValue > (friendValue >> 1)) {
-                                thisValue = kVeryImportantTarget;
-                            } else {
-                                thisValue = kUnimportantTarget;
-                            }
-                        } else {
-                            if ((_blitzkrieg > 0) && (anObject->duty == eGuardDuty)) {
-                                thisValue = kUnimportantTarget;
-                            } else {
-                                if (foeValue > 0) {
-                                    thisValue = kSomewhatImportantTarget;
-                                } else {
-                                    thisValue = kUnimportantTarget;
-                                }
-                            }
-                        }
-                        if (anObject->baseType->orderFlags & kTargetIsBase) {
-                            thisValue <<= 3;
-                        }
-                        if (anObject->baseType->orderFlags & kHardTargetIsNotBase) {
-                            thisValue = 0;
-                        }
-                    } else {
-                        if (destObject->baseType->destinationClass
-                                > anObject->baseType->destinationClass) {
-                            if (foeValue > friendValue) {
-                                thisValue = kMostImportantTarget;
-                            } else {
-                                if (destObject->escortStrength
-                                        < destObject->baseType->friendDefecit) {
-                                    thisValue = kMostImportantTarget;
-                                } else {
-                                    thisValue = kUnimportantTarget;
-                                }
-                            }
+            thisValue = kUnimportantTarget;
+            if (destObject->owner == anObject->owner) {
+                if (destObject->attributes & kIsDestination) {
+                    if (destObject->escortStrength < destObject->baseType->friendDefecit) {
+                        thisValue = kAbsolutelyEssential;
+                    } else if (foeValue) {
+                        if (foeValue >= friendValue) {
+                            thisValue = kMostImportantTarget;
+                        } else if (foeValue > (friendValue >> 1)) {
+                            thisValue = kVeryImportantTarget;
                         } else {
                             thisValue = kUnimportantTarget;
                         }
-                        if (anObject->baseType->orderFlags & kTargetIsNotBase) {
-                            thisValue <<= 3;
-                        }
-                        if (anObject->baseType->orderFlags & kHardTargetIsBase) {
-                            thisValue = 0;
-                        }
-                    }
-                    if (anObject->baseType->orderFlags & kTargetIsFriend) {
-                        thisValue <<= 3;
-                    }
-                    if (anObject->baseType->orderFlags & kHardTargetIsFoe) {
-                        thisValue = 0;
-                    }
-                } else if (destObject->owner >= 0) {
-                    if ((anObject->duty == eGuardDuty) || (anObject->duty == eNoDuty)) {
-                        if (destObject->attributes & kIsDestination) {
-                            if (foeValue < friendValue) {
-                                thisValue = kMostImportantTarget;
-                            } else {
-                                thisValue = kSomewhatImportantTarget;
-                            }
-                            if (_blitzkrieg > 0) {
-                                thisValue <<= 2;
-                            }
-                            if (anObject->baseType->orderFlags & kTargetIsBase) {
-                                thisValue <<= 3;
-                            }
-
-                            if (anObject->baseType->orderFlags & kHardTargetIsNotBase) {
-                                thisValue = 0;
-                            }
+                    } else {
+                        if ((_blitzkrieg > 0) && (anObject->duty == eGuardDuty)) {
+                            thisValue = kUnimportantTarget;
                         } else {
-                            if (friendValue) {
-                                if (friendValue < foeValue) {
-                                    thisValue = kSomewhatImportantTarget;
-                                } else {
-                                    thisValue = kUnimportantTarget;
-                                }
+                            if (foeValue > 0) {
+                                thisValue = kSomewhatImportantTarget;
                             } else {
-                                thisValue = kLeastImportantTarget;
-                            }
-                            if (anObject->baseType->orderFlags & kTargetIsNotBase) {
-                                thisValue <<= 1;
-                            }
-
-                            if (anObject->baseType->orderFlags & kHardTargetIsBase) {
-                                thisValue = 0;
+                                thisValue = kUnimportantTarget;
                             }
                         }
                     }
-                    if (anObject->baseType->orderFlags & kTargetIsFoe) {
+                    if (anObject->baseType->orderFlags & kTargetIsBase) {
                         thisValue <<= 3;
                     }
-                    if (anObject->baseType->orderFlags & kHardTargetIsFriend) {
+                    if (anObject->baseType->orderFlags & kHardTargetIsNotBase) {
                         thisValue = 0;
                     }
                 } else {
+                    if (destObject->baseType->destinationClass
+                            > anObject->baseType->destinationClass) {
+                        if (foeValue > friendValue) {
+                            thisValue = kMostImportantTarget;
+                        } else {
+                            if (destObject->escortStrength
+                                    < destObject->baseType->friendDefecit) {
+                                thisValue = kMostImportantTarget;
+                            } else {
+                                thisValue = kUnimportantTarget;
+                            }
+                        }
+                    } else {
+                        thisValue = kUnimportantTarget;
+                    }
+                    if (anObject->baseType->orderFlags & kTargetIsNotBase) {
+                        thisValue <<= 3;
+                    }
+                    if (anObject->baseType->orderFlags & kHardTargetIsBase) {
+                        thisValue = 0;
+                    }
+                }
+                if (anObject->baseType->orderFlags & kTargetIsFriend) {
+                    thisValue <<= 3;
+                }
+                if (anObject->baseType->orderFlags & kHardTargetIsFoe) {
+                    thisValue = 0;
+                }
+            } else if (destObject->owner >= 0) {
+                if ((anObject->duty == eGuardDuty) || (anObject->duty == eNoDuty)) {
                     if (destObject->attributes & kIsDestination) {
-                        thisValue = kVeryImportantTarget;
+                        if (foeValue < friendValue) {
+                            thisValue = kMostImportantTarget;
+                        } else {
+                            thisValue = kSomewhatImportantTarget;
+                        }
                         if (_blitzkrieg > 0) {
                             thisValue <<= 2;
                         }
                         if (anObject->baseType->orderFlags & kTargetIsBase) {
                             thisValue <<= 3;
                         }
+
                         if (anObject->baseType->orderFlags & kHardTargetIsNotBase) {
                             thisValue = 0;
                         }
                     } else {
-                        if (anObject->baseType->orderFlags & kTargetIsNotBase) {
-                            thisValue <<= 3;
+                        if (friendValue) {
+                            if (friendValue < foeValue) {
+                                thisValue = kSomewhatImportantTarget;
+                            } else {
+                                thisValue = kUnimportantTarget;
+                            }
+                        } else {
+                            thisValue = kLeastImportantTarget;
                         }
+                        if (anObject->baseType->orderFlags & kTargetIsNotBase) {
+                            thisValue <<= 1;
+                        }
+
                         if (anObject->baseType->orderFlags & kHardTargetIsBase) {
                             thisValue = 0;
                         }
                     }
-                    if (anObject->baseType->orderFlags & kTargetIsFoe) {
-                        thisValue <<= 3;
-                    }
-                    if (anObject->baseType->orderFlags & kHardTargetIsFriend) {
-                        thisValue = 0;
-                    }
                 }
-
-                difference = ABS(implicit_cast<int32_t>(destObject->location.h)
-                        - implicit_cast<int32_t>(anObject->location.h));
-                gridLoc.h = difference;
-                difference =  ABS(implicit_cast<int32_t>(destObject->location.v)
-                        - implicit_cast<int32_t>(anObject->location.v));
-                gridLoc.v = difference;
-
-                if ((gridLoc.h < kMaximumRelevantDistance)
-                        && (gridLoc.v < kMaximumRelevantDistance)) {
-                    if (anObject->baseType->orderFlags & kTargetIsLocal) {
+                if (anObject->baseType->orderFlags & kTargetIsFoe) {
+                    thisValue <<= 3;
+                }
+                if (anObject->baseType->orderFlags & kHardTargetIsFriend) {
+                    thisValue = 0;
+                }
+            } else {
+                if (destObject->attributes & kIsDestination) {
+                    thisValue = kVeryImportantTarget;
+                    if (_blitzkrieg > 0) {
+                        thisValue <<= 2;
+                    }
+                    if (anObject->baseType->orderFlags & kTargetIsBase) {
                         thisValue <<= 3;
                     }
-                    if (anObject->baseType->orderFlags & kHardTargetIsRemote) {
+                    if (anObject->baseType->orderFlags & kHardTargetIsNotBase) {
                         thisValue = 0;
                     }
                 } else {
-                    if (anObject->baseType->orderFlags & kTargetIsRemote) {
+                    if (anObject->baseType->orderFlags & kTargetIsNotBase) {
                         thisValue <<= 3;
                     }
-                    if (anObject->baseType->orderFlags & kHardTargetIsLocal) {
+                    if (anObject->baseType->orderFlags & kHardTargetIsBase) {
                         thisValue = 0;
                     }
                 }
-
-
-                if (anObject->baseType->orderKeyTag
-                        && (anObject->baseType->orderKeyTag == destObject->baseType->levelKeyTag)) {
+                if (anObject->baseType->orderFlags & kTargetIsFoe) {
                     thisValue <<= 3;
-                } else if (anObject->baseType->orderFlags & kHardMatchingFoe) {
+                }
+                if (anObject->baseType->orderFlags & kHardTargetIsFriend) {
                     thisValue = 0;
                 }
+            }
 
-                if (thisValue > 0) {
-                    thisValue += anObject->randomSeed.next(thisValue >> 1) - (thisValue >> 2);
+            difference = ABS(implicit_cast<int32_t>(destObject->location.h)
+                    - implicit_cast<int32_t>(anObject->location.h));
+            gridLoc.h = difference;
+            difference =  ABS(implicit_cast<int32_t>(destObject->location.v)
+                    - implicit_cast<int32_t>(anObject->location.v));
+            gridLoc.v = difference;
+
+            if ((gridLoc.h < kMaximumRelevantDistance)
+                    && (gridLoc.v < kMaximumRelevantDistance)) {
+                if (anObject->baseType->orderFlags & kTargetIsLocal) {
+                    thisValue <<= 3;
                 }
-                if (thisValue > anObject->bestConsideredTargetValue) {
-                    anObject->bestConsideredTargetValue = thisValue;
-                    anObject->bestConsideredTargetNumber = _destinationObject;
+                if (anObject->baseType->orderFlags & kHardTargetIsRemote) {
+                    thisValue = 0;
+                }
+            } else {
+                if (anObject->baseType->orderFlags & kTargetIsRemote) {
+                    thisValue <<= 3;
+                }
+                if (anObject->baseType->orderFlags & kHardTargetIsLocal) {
+                    thisValue = 0;
                 }
             }
+
+
+            if (anObject->baseType->orderKeyTag
+                    && (anObject->baseType->orderKeyTag == destObject->baseType->levelKeyTag)) {
+                thisValue <<= 3;
+            } else if (anObject->baseType->orderFlags & kHardMatchingFoe) {
+                thisValue = 0;
+            }
+
+            if (thisValue > 0) {
+                thisValue += anObject->randomSeed.next(thisValue >> 1) - (thisValue >> 2);
+            }
+            if (thisValue > anObject->bestConsideredTargetValue) {
+                anObject->bestConsideredTargetValue = thisValue;
+                anObject->bestConsideredTargetNumber = _destinationObject;
+            }
         }
+    }
 
-        // if we've saved enough for our dreams
-        if (_cash > _saveGoal) {
-                _saveGoal = 0;
+    // if we've saved enough for our dreams
+    if (_cash > _saveGoal) {
+        _saveGoal = 0;
 
-                // consider what ship to build
-                if (_buildAtObject < 0) {
-                    _buildAtObject = 0;
+        // consider what ship to build
+        if (_buildAtObject < 0) {
+            _buildAtObject = 0;
+        }
+        origDest = _buildAtObject;
+        destBalance = mGetDestObjectBalancePtr(_buildAtObject);
+
+        // try to find the next destination object that we own & that can build
+        do {
+            _buildAtObject++;
+            destBalance++;
+            if (_buildAtObject >= kMaxDestObject) {
+                _buildAtObject = 0;
+                destBalance = mGetDestObjectBalancePtr(0);
+            }
+            if (destBalance->whichObject >= 0) {
+                anObject = mGetSpaceObjectPtr(destBalance->whichObject);
+                if ((anObject->owner != number())
+                        || (!(anObject->attributes & kCanAcceptBuild))) {
+                    anObject = NULL;
                 }
-                origDest = _buildAtObject;
-                destBalance = mGetDestObjectBalancePtr(_buildAtObject);
+            } else anObject = NULL;
+        } while ((anObject == NULL) && (_buildAtObject != origDest));
 
-                // try to find the next destination object that we own & that can build
-                do {
-                    _buildAtObject++;
-                    destBalance++;
-                    if (_buildAtObject >= kMaxDestObject) {
-                        _buildAtObject = 0;
-                        destBalance = mGetDestObjectBalancePtr(0);
-                    }
-                    if (destBalance->whichObject >= 0) {
-                        anObject = mGetSpaceObjectPtr(destBalance->whichObject);
-                        if ((anObject->owner != number())
-                                || (!(anObject->attributes & kCanAcceptBuild))) {
-                            anObject = NULL;
+        // if we have a legal object
+        if (anObject != NULL) {
+            if (destBalance->buildTime <= 0) {
+                if (_hopeToBuild < 0) {
+                    int k = 0;
+                    while ((_hopeToBuild < 0) && (k < 7)) {
+                        k++;
+                        // choose something to build
+                        thisValue = gRandomSeed.next(_totalBuildChance);
+                        friendValue = 0xffffffff; // equals the highest qualifying object
+                        for (int j = 0; j < kMaxNumAdmiralCanBuild; ++j) {
+                            if ((_canBuildType[j].chanceRange <= thisValue)
+                                    && (_canBuildType[j].chanceRange > friendValue)) {
+                                friendValue = _canBuildType[j].chanceRange;
+                                _hopeToBuild = _canBuildType[j].baseNum;
+                            }
                         }
-                    } else anObject = NULL;
-                } while ((anObject == NULL) && (_buildAtObject != origDest));
-
-                // if we have a legal object
-                if (anObject != NULL) {
-                    if (destBalance->buildTime <= 0) {
-                        if (_hopeToBuild < 0) {
-                            int k = 0;
-                            while ((_hopeToBuild < 0) && (k < 7)) {
-                                k++;
-                                // choose something to build
-                                thisValue = gRandomSeed.next(_totalBuildChance);
-                                friendValue = 0xffffffff; // equals the highest qualifying object
-                                for (int j = 0; j < kMaxNumAdmiralCanBuild; ++j) {
-                                    if ((_canBuildType[j].chanceRange <= thisValue)
-                                            && (_canBuildType[j].chanceRange > friendValue)) {
-                                        friendValue = _canBuildType[j].chanceRange;
-                                        _hopeToBuild = _canBuildType[j].baseNum;
-                                    }
-                                }
-                                if (_hopeToBuild >= 0) {
-                                    mGetBaseObjectFromClassRace(
-                                            baseObject, baseNum, _hopeToBuild, _race);
-                                    if (baseObject->buildFlags & kSufficientEscortsExist) {
-                                        for (int j = 0; j < kMaxSpaceObject; ++j) {
-                                            anObject = mGetSpaceObjectPtr(j);
-                                            if ((anObject->active)
-                                                    && (anObject->owner == number())
-                                                    && (anObject->whichBaseObject == baseNum)
-                                                    && (anObject->escortStrength <
-                                                        baseObject->friendDefecit)) {
-                                                _hopeToBuild = -1;
-                                                j = kMaxSpaceObject;
-                                            }
-                                        }
-                                    }
-
-                                    if (baseObject->buildFlags & kMatchingFoeExists) {
-                                        thisValue = 0;
-                                        for (int j = 0; j < kMaxSpaceObject; j++) {
-                                            anObject = mGetSpaceObjectPtr(j);
-                                            if ((anObject->active)
-                                                    && (anObject->owner != number())
-                                                    && (anObject->baseType->levelKeyTag
-                                                        == baseObject->orderKeyTag)) {
-                                                thisValue = 1;
-                                            }
-                                        }
-                                        if (!thisValue) {
-                                            _hopeToBuild = -1;
-                                        }
+                        if (_hopeToBuild >= 0) {
+                            mGetBaseObjectFromClassRace(
+                                    baseObject, baseNum, _hopeToBuild, _race);
+                            if (baseObject->buildFlags & kSufficientEscortsExist) {
+                                for (int j = 0; j < kMaxSpaceObject; ++j) {
+                                    anObject = mGetSpaceObjectPtr(j);
+                                    if ((anObject->active)
+                                            && (anObject->owner == number())
+                                            && (anObject->whichBaseObject == baseNum)
+                                            && (anObject->escortStrength <
+                                                baseObject->friendDefecit)) {
+                                        _hopeToBuild = -1;
+                                        j = kMaxSpaceObject;
                                     }
                                 }
                             }
-                        }
-                        int j = 0;
-                        while ((destBalance->canBuildType[j] != _hopeToBuild)
-                                && (j < kMaxTypeBaseCanBuild)) {
-                            j++;
-                        }
-                        if ((j < kMaxTypeBaseCanBuild) && (_hopeToBuild != kNoShip)) {
-                            mGetBaseObjectFromClassRace(baseObject, baseNum, _hopeToBuild,
-                                    _race);
-                            if (_cash >= mLongToFixed(baseObject->price)) {
-                                AdmiralScheduleBuild(number(), j);
-                                _hopeToBuild = -1;
-                                _saveGoal = 0;
-                            } else {
-                                _saveGoal = mLongToFixed(baseObject->price);
+
+                            if (baseObject->buildFlags & kMatchingFoeExists) {
+                                thisValue = 0;
+                                for (int j = 0; j < kMaxSpaceObject; j++) {
+                                    anObject = mGetSpaceObjectPtr(j);
+                                    if ((anObject->active)
+                                            && (anObject->owner != number())
+                                            && (anObject->baseType->levelKeyTag
+                                                == baseObject->orderKeyTag)) {
+                                        thisValue = 1;
+                                    }
+                                }
+                                if (!thisValue) {
+                                    _hopeToBuild = -1;
+                                }
                             }
-                        } // otherwise just wait until we get to it
+                        }
                     }
                 }
+                int j = 0;
+                while ((destBalance->canBuildType[j] != _hopeToBuild)
+                        && (j < kMaxTypeBaseCanBuild)) {
+                    j++;
+                }
+                if ((j < kMaxTypeBaseCanBuild) && (_hopeToBuild != kNoShip)) {
+                    mGetBaseObjectFromClassRace(baseObject, baseNum, _hopeToBuild,
+                            _race);
+                    if (_cash >= mLongToFixed(baseObject->price)) {
+                        AdmiralScheduleBuild(number(), j);
+                        _hopeToBuild = -1;
+                        _saveGoal = 0;
+                    } else {
+                        _saveGoal = mLongToFixed(baseObject->price);
+                    }
+                } // otherwise just wait until we get to it
             }
         }
+    }
 }
 
 // assumes you can afford it & base has time
