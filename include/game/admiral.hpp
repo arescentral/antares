@@ -91,6 +91,8 @@ struct admiralBuildType {
 
 struct Admiral {
     static Admiral*     get(int i);
+    static Admiral*     make(uint32_t attributes, const Scenario::Player& player);
+
     int                 number() const;
 
     uint32_t            attributes;
@@ -131,7 +133,6 @@ void ResetAllDestObjectData();
 destBalanceType* mGetDestObjectBalancePtr(int32_t whichObject);
 Admiral* mGetAdmiralPtr(int32_t mwhichAdmiral);
 
-int32_t MakeNewAdmiral(uint32_t attributes, const Scenario::Player& player);
 int32_t MakeNewDestination(
         int32_t whichObject, int32_t* canBuildType, Fixed earn, int16_t nameResID,
         int16_t nameStrNum);

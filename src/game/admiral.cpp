@@ -136,7 +136,7 @@ int Admiral::number() const {
     return this - gAdmiralData.get();
 }
 
-int32_t MakeNewAdmiral(uint32_t attributes, const Scenario::Player& player) {
+Admiral* Admiral::make(uint32_t attributes, const Scenario::Player& player) {
     int32_t n = 0;
     SpaceObject* destObject;
 
@@ -147,7 +147,7 @@ int32_t MakeNewAdmiral(uint32_t attributes, const Scenario::Player& player) {
     }
 
     if (n == kMaxPlayerNum) {
-        return kNoFreeAdmiral;
+        return nullptr;
     }
 
     a->active = true;
@@ -185,7 +185,7 @@ int32_t MakeNewAdmiral(uint32_t attributes, const Scenario::Player& player) {
         }
     }
     // for now set strategy balance to 0 -- we may want to calc this if player added on the fly?
-    return n;
+    return a;
 }
 
 int32_t MakeNewDestination(
