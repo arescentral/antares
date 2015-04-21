@@ -756,7 +756,7 @@ void UpdateMiniScreenLines( void)
                     buildObject = line->sourceData;
                     if ( buildObject != NULL)
                     {
-                        if ( buildObject->price > mFixedToLong(admiral->cash))
+                        if ( buildObject->price > mFixedToLong(admiral->cash()))
                         {
                             if ( line->selectable != selectDim)
                             {
@@ -1276,13 +1276,13 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 
             for ( count = 0; count < kMaxShipCanBuild; count++)
             {
-                mGetBaseObjectFromClassRace( buildObject, baseNum, buildAtObject->canBuildType[count], admiral->race);
+                mGetBaseObjectFromClassRace( buildObject, baseNum, buildAtObject->canBuildType[count], admiral->race());
                 line->value = baseNum;
                 line->sourceData = buildObject;
                 if ( buildObject != NULL)
                 {
                     mCopyBlankLineString(line, get_object_name(baseNum));
-                    if ( buildObject->price > mFixedToLong(admiral->cash))
+                    if ( buildObject->price > mFixedToLong(admiral->cash()))
                         line->selectable = selectDim;
                     else line->selectable = selectable;
                     if ( globals()->gMiniScreenData.selectLine == kMiniScreenNoLineSelected)

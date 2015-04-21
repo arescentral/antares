@@ -226,7 +226,7 @@ void NonplayerShipThink(int32_t timePass)
     }
 
     for (int32_t count = 0; count < kMaxPlayerNum; count++) {
-        mGetAdmiralPtr(count)->shipsLeft = 0;
+        mGetAdmiralPtr(count)->shipsLeft() = 0;
     }
 
     // it probably doesn't matter what order we do this in, but we'll do
@@ -267,7 +267,7 @@ void NonplayerShipThink(int32_t timePass)
 
         // incremenent its admiral's # of ships
         if (anObject->owner > kNoOwner) {
-            mGetAdmiralPtr(anObject->owner)->shipsLeft++;
+            mGetAdmiralPtr(anObject->owner)->shipsLeft()++;
         }
 
         switch (anObject->presenceState) {

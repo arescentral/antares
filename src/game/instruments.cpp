@@ -432,7 +432,7 @@ void draw_radar() {
 // SHOW ME THE MONEY
 static void draw_money() {
     const Admiral* const admiral = mGetAdmiralPtr(globals()->gPlayerAdmiralNumber);
-    const int cash = clamp(admiral->cash, 0, kMaxMoneyValue - 1);
+    const int cash = clamp(admiral->cash(), 0, kMaxMoneyValue - 1);
     globals()->gBarIndicator[kFineMoneyBar].thisValue
         = (cash % kFineMoneyBarMod) / kFineMoneyBarValue;
     const int price = MiniComputerGetPriceOfCurrentSelection() / kFineMoneyBarValue;
@@ -495,7 +495,7 @@ static void draw_money() {
     globals()->gBarIndicator[kFineMoneyBar].thisValue = second_threshold;
 
     barIndicatorType* gross = globals()->gBarIndicator + kGrossMoneyBar;
-    gross->thisValue = (admiral->cash / kGrossMoneyBarValue);
+    gross->thisValue = (admiral->cash() / kGrossMoneyBarValue);
 
     box = Rect(0, 0, kGrossMoneyBarWidth, kGrossMoneyBarHeight - 1);
     box.offset(play_screen.right + kGrossMoneyLeft + kGrossMoneyHBuffer,

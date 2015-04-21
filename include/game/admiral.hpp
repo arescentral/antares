@@ -89,39 +89,70 @@ struct admiralBuildType {
     Fixed               chanceRange = -1;
 };
 
-struct Admiral {
+class Admiral {
+  public:
     static Admiral*     get(int i);
     static Admiral*     make(uint32_t attributes, const Scenario::Player& player);
 
     int                 number() const;
 
-    uint32_t            attributes;
-    int32_t             destinationObject = kNoDestinationObject;
-    int32_t             destinationObjectID = -1;
-    int32_t             flagship = kNoShip;
-    int32_t             flagshipID = -1;
-    int32_t             considerShip = kNoShip;
-    int32_t             considerShipID = -1;
-    int32_t             considerDestination = kNoShip;
-    int32_t             buildAtObject = -1; // # of destination object to build at
-    int32_t             race = -1;
-    destinationType     destType = kNoDestinationType;
-    Fixed               cash = 0;
-    Fixed               saveGoal = 0;
-    Fixed               earningPower = 0;
-    int32_t             kills = 0;
-    int32_t             losses = 0;
-    int32_t             shipsLeft = 0;
-    int32_t             score[kAdmiralScoreNum] = {};
-    int32_t             blitzkrieg = 1200;
-    Fixed               lastFreeEscortStrength = 0;
-    Fixed               thisFreeEscortStrength = 0;
-    admiralBuildType    canBuildType[kMaxNumAdmiralCanBuild];
-    Fixed               totalBuildChance = 0;
-    int32_t             hopeToBuild = -1;
-    uint8_t             color = 0;
-    bool                active = false;
-    sfz::String         name;
+    uint32_t&           attributes() { return _attributes; }
+    int32_t&            destinationObject() { return _destinationObject; }
+    int32_t&            destinationObjectID() { return _destinationObjectID; }
+    int32_t&            flagship() { return _flagship; }
+    int32_t&            flagshipID() { return _flagshipID; }
+    int32_t&            considerShip() { return _considerShip; }
+    int32_t&            considerShipID() { return _considerShipID; }
+    int32_t&            considerDestination() { return _considerDestination; }
+    int32_t&            buildAtObject() { return _buildAtObject; } // # of destination object to build at
+    int32_t&            race() { return _race; }
+    destinationType&    destType() { return _destType; }
+    Fixed               cash() const { return _cash; }
+    Fixed&              cash() { return _cash; }
+    Fixed&              saveGoal() { return _saveGoal; }
+    Fixed&              earningPower() { return _earningPower; }
+    int32_t&            kills() { return _kills; }
+    int32_t&            losses() { return _losses; }
+    int32_t&            shipsLeft() { return _shipsLeft; }
+    int32_t*            score() { return _score; }
+    int32_t&            blitzkrieg() { return _blitzkrieg; }
+    Fixed&              lastFreeEscortStrength() { return _lastFreeEscortStrength; }
+    Fixed&              thisFreeEscortStrength() { return _thisFreeEscortStrength; }
+    admiralBuildType*   canBuildType() { return _canBuildType; };
+    Fixed&              totalBuildChance() { return _totalBuildChance; }
+    int32_t&            hopeToBuild() { return _hopeToBuild; }
+    uint8_t&            color() { return _color; }
+    bool&               active() { return _active; }
+    sfz::StringSlice    name() { return _name; }
+
+  private:
+    uint32_t            _attributes;
+    int32_t             _destinationObject = kNoDestinationObject;
+    int32_t             _destinationObjectID = -1;
+    int32_t             _flagship = kNoShip;
+    int32_t             _flagshipID = -1;
+    int32_t             _considerShip = kNoShip;
+    int32_t             _considerShipID = -1;
+    int32_t             _considerDestination = kNoShip;
+    int32_t             _buildAtObject = -1; // # of destination object to build at
+    int32_t             _race = -1;
+    destinationType     _destType = kNoDestinationType;
+    Fixed               _cash = 0;
+    Fixed               _saveGoal = 0;
+    Fixed               _earningPower = 0;
+    int32_t             _kills = 0;
+    int32_t             _losses = 0;
+    int32_t             _shipsLeft = 0;
+    int32_t             _score[kAdmiralScoreNum] = {};
+    int32_t             _blitzkrieg = 1200;
+    Fixed               _lastFreeEscortStrength = 0;
+    Fixed               _thisFreeEscortStrength = 0;
+    admiralBuildType    _canBuildType[kMaxNumAdmiralCanBuild];
+    Fixed               _totalBuildChance = 0;
+    int32_t             _hopeToBuild = -1;
+    uint8_t             _color = 0;
+    bool                _active = false;
+    sfz::String         _name;
 };
 
 
@@ -139,8 +170,6 @@ int32_t MakeNewDestination(
 void RemoveDestination(int32_t whichDestination);
 void RecalcAllAdmiralBuildData();
 
-void SetAdmiralAttributes(int32_t whichAdmiral, uint32_t attributes);
-void SetAdmiralColor(int32_t whichAdmiral, uint8_t color);
 uint8_t GetAdmiralColor(int32_t whichAdmiral);
 int32_t GetAdmiralRace(int32_t whichAdmiral);
 void SetAdmiralFlagship(int32_t whichAdmiral, int32_t whichShip);
@@ -157,11 +186,9 @@ bool BaseHasSomethingToBuild(int32_t whichObject);
 int32_t GetAdmiralBuildAtObject(int32_t whichAdmiral);
 void SetAdmiralBuildAtObject(int32_t whichAdmiral, int32_t whichObject);
 
-sfz::StringSlice GetAdmiralBuildAtName(int32_t whichAdmiral);
 void SetAdmiralBuildAtName(int32_t whichAdmiral, sfz::StringSlice name);
 sfz::StringSlice GetDestBalanceName(int32_t whichDestObject);
 sfz::StringSlice GetAdmiralName(int32_t whichAdmiral);
-void SetAdmiralName(int32_t whichAdmiral, sfz::StringSlice name);
 
 void SetObjectLocationDestination(SpaceObject* o, coordPointType* where);
 void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject);
