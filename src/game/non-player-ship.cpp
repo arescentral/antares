@@ -191,7 +191,7 @@ static void tick_special(SpaceObject* subject, SpaceObject* target, int32_t time
 
 void NonplayerShipThink(int32_t timePass)
 {
-    admiralType     *anAdmiral;
+    Admiral*        anAdmiral;
     SpaceObject*    targetObject;
     BaseObject*     baseObject;
     BaseObject*     weaponObject;

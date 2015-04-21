@@ -59,7 +59,7 @@ unique_ptr<destBalanceType[]> gDestBalanceData;
 }  // namespace
 
 void AdmiralInit() {
-    globals()->gAdmiralData.reset(new admiralType[kMaxPlayerNum]);
+    globals()->gAdmiralData.reset(new Admiral[kMaxPlayerNum]);
     ResetAllAdmirals();
     gDestBalanceData.reset(new destBalanceType[kMaxDestObject]);
     ResetAllDestObjectData();
@@ -71,7 +71,7 @@ void AdmiralCleanup() {
 }
 
 void ResetAllAdmirals() {
-    admiralType* a = globals()->gAdmiralData.get();
+    Admiral* a = globals()->gAdmiralData.get();
 
     for (int i = 0; i < kMaxPlayerNum; ++i) {
         a->active = false;
@@ -123,7 +123,7 @@ destBalanceType* mGetDestObjectBalancePtr(int32_t whichObject) {
     return gDestBalanceData.get() + whichObject;
 }
 
-admiralType* mGetAdmiralPtr(int32_t mwhichAdmiral) {
+Admiral* mGetAdmiralPtr(int32_t mwhichAdmiral) {
     return globals()->gAdmiralData.get() + mwhichAdmiral;
 }
 
@@ -131,7 +131,7 @@ int32_t MakeNewAdmiral(uint32_t attributes, const Scenario::Player& player) {
     int32_t n = 0;
     SpaceObject* destObject;
 
-    admiralType* a = globals()->gAdmiralData.get();
+    Admiral* a = globals()->gAdmiralData.get();
     while ((a->active) && (n < kMaxPlayerNum)) {
         a++;
         n++;
@@ -232,7 +232,7 @@ int32_t MakeNewDestination(
 
 void RemoveDestination(int32_t whichDestination) {
     destBalanceType* d = mGetDestObjectBalancePtr(whichDestination);
-    admiralType* a;
+    Admiral* a;
 
     if ((whichDestination >= 0) && (whichDestination < kMaxDestObject)) {
         a = globals()->gAdmiralData.get();
@@ -270,7 +270,7 @@ void RemoveDestination(int32_t whichDestination) {
 }
 
 void RecalcAllAdmiralBuildData() {
-    admiralType* a = globals()->gAdmiralData.get();
+    Admiral* a = globals()->gAdmiralData.get();
     SpaceObject* anObject= NULL;
     BaseObject* baseObject = NULL;
     destBalanceType* d = mGetDestObjectBalancePtr(0);
@@ -327,12 +327,12 @@ void RecalcAllAdmiralBuildData() {
 }
 
 void SetAdmiralAttributes(int32_t whichAdmiral, uint32_t attributes) {
-    admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* a = globals()->gAdmiralData.get() + whichAdmiral;
     a->attributes = attributes;
 }
 
 void SetAdmiralColor(int32_t whichAdmiral, uint8_t color) {
-    admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* a = globals()->gAdmiralData.get() + whichAdmiral;
     a->color = color;
 }
 
@@ -340,7 +340,7 @@ uint8_t GetAdmiralColor(int32_t whichAdmiral) {
     if (whichAdmiral < 0) {
         return 0;
     }
-    admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* a = globals()->gAdmiralData.get() + whichAdmiral;
     return a->color;
 }
 
@@ -348,7 +348,7 @@ int32_t GetAdmiralRace(int32_t whichAdmiral) {
     if (whichAdmiral < 0) {
         return -1;
     }
-    admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* a = globals()->gAdmiralData.get() + whichAdmiral;
     return a->race;
 }
 
@@ -356,7 +356,7 @@ void SetAdmiralFlagship(int32_t whichAdmiral, int32_t whichShip) {
     if (whichAdmiral < 0) {
         throw Exception ("Can't set flagship of -1 admiral.");
     }
-    admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* a = globals()->gAdmiralData.get() + whichAdmiral;
     if (whichShip >= 0) {
         a->flagship = whichShip;
         SpaceObject* anObject = mGetSpaceObjectPtr(whichShip);
@@ -370,7 +370,7 @@ SpaceObject* GetAdmiralFlagship(int32_t whichAdmiral) {
     if (whichAdmiral < 0) {
         return NULL;
     }
-    admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* a = globals()->gAdmiralData.get() + whichAdmiral;
     if (a->flagship == kNoShip) {
         return NULL;
     }
@@ -384,14 +384,14 @@ SpaceObject* GetAdmiralFlagship(int32_t whichAdmiral) {
 
 void SetAdmiralEarningPower(int32_t whichAdmiral, Fixed power) {
     if (whichAdmiral >= 0) {
-        admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
+        Admiral* a = globals()->gAdmiralData.get() + whichAdmiral;
         a->earningPower = power;
     }
 }
 
 Fixed GetAdmiralEarningPower(int32_t whichAdmiral) {
     if (whichAdmiral >= 0) {
-        admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
+        Admiral* a = globals()->gAdmiralData.get() + whichAdmiral;
         return a->earningPower;
     } else {
         return 0;
@@ -399,7 +399,7 @@ Fixed GetAdmiralEarningPower(int32_t whichAdmiral) {
 }
 
 void SetAdmiralDestinationObject(int32_t whichAdmiral, int32_t whichObject, destinationType dType) {
-    admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* a = globals()->gAdmiralData.get() + whichAdmiral;
     a->destinationObject = whichObject;
     if (whichObject >= 0) {
         SpaceObject* destObject = mGetSpaceObjectPtr(whichObject);
@@ -411,7 +411,7 @@ void SetAdmiralDestinationObject(int32_t whichAdmiral, int32_t whichObject, dest
 }
 
 int32_t GetAdmiralDestinationObject(int32_t whichAdmiral) {
-    admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* a = globals()->gAdmiralData.get() + whichAdmiral;
 
     if (a->destinationObject < 0) {
         return (a->destinationObject);
@@ -435,7 +435,7 @@ void SetAdmiralConsiderObject(int32_t whichAdmiral, int32_t whichObject) {
     if (whichAdmiral < 0) {
         throw Exception("Can't set consider ship for -1 admiral.");
     }
-    admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* a = globals()->gAdmiralData.get() + whichAdmiral;
     a->considerShip = whichObject;
     if (whichObject >= 0) {
         a->considerShipID = anObject->id;
@@ -484,7 +484,7 @@ bool BaseHasSomethingToBuild(int32_t whichObject) {
 }
 
 int32_t GetAdmiralConsiderObject(int32_t whichAdmiral) {
-    admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* a = globals()->gAdmiralData.get() + whichAdmiral;
     SpaceObject* anObject;
 
     if (whichAdmiral < 0) {
@@ -510,7 +510,7 @@ int32_t GetAdmiralConsiderObject(int32_t whichAdmiral) {
 }
 
 int32_t GetAdmiralBuildAtObject(int32_t whichAdmiral) {
-    admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* a = globals()->gAdmiralData.get() + whichAdmiral;
     if (a->buildAtObject >= 0) {
         destBalanceType* destBalance = mGetDestObjectBalancePtr(a->buildAtObject);
         if (destBalance->whichObject >= 0) {
@@ -532,7 +532,7 @@ void SetAdmiralBuildAtObject(int32_t whichAdmiral, int32_t whichObject) {
     if (whichAdmiral < 0) {
         throw Exception("Can't set consider ship for -1 admiral.");
     }
-    admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* a = globals()->gAdmiralData.get() + whichAdmiral;
     if (whichObject >= 0) {
         if (anObject->attributes & kCanAcceptBuild) {
             int buildAtNum = 0;
@@ -554,13 +554,13 @@ void SetAdmiralBuildAtObject(int32_t whichAdmiral, int32_t whichObject) {
 }
 
 StringSlice GetAdmiralBuildAtName(int32_t whichAdmiral) {
-    admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* a = globals()->gAdmiralData.get() + whichAdmiral;
     destBalanceType* destObject = mGetDestObjectBalancePtr(a->buildAtObject);
     return destObject->name;
 }
 
 void SetAdmiralBuildAtName(int32_t whichAdmiral, StringSlice name) {
-    admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* a = globals()->gAdmiralData.get() + whichAdmiral;
     destBalanceType* destObject = mGetDestObjectBalancePtr(a->buildAtObject);
     destObject->name.assign(name.slice(0, min<size_t>(name.size(), kDestinationNameLen)));
 }
@@ -572,7 +572,7 @@ StringSlice GetDestBalanceName(int32_t whichDestObject) {
 
 StringSlice GetAdmiralName(int32_t whichAdmiral) {
     if ((whichAdmiral >= 0) && (whichAdmiral < kMaxPlayerNum)) {
-        admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
+        Admiral* a = globals()->gAdmiralData.get() + whichAdmiral;
         return a->name;
     } else {
         return NULL;
@@ -581,7 +581,7 @@ StringSlice GetAdmiralName(int32_t whichAdmiral) {
 
 void SetAdmiralName(int32_t whichAdmiral, StringSlice name) {
     if ((whichAdmiral >= 0) && (whichAdmiral < kMaxPlayerNum)) {
-        admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
+        Admiral* a = globals()->gAdmiralData.get() + whichAdmiral;
         a->name.assign(name.slice(0, min<size_t>(name.size(), kAdmiralNameLen)));
     }
 }
@@ -615,7 +615,7 @@ void SetObjectLocationDestination(SpaceObject *o, coordPointType *where) {
         return;
     }
 
-    admiralType* a = globals()->gAdmiralData.get() + o->owner;
+    Admiral* a = globals()->gAdmiralData.get() + o->owner;
 
     // if the admiral is not legal, or the admiral has no destination, then forget about it
     if (!a->active) {
@@ -679,7 +679,7 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
     }
 
     // get the admiral
-    admiralType* a = globals()->gAdmiralData.get() + o->owner;
+    Admiral* a = globals()->gAdmiralData.get() + o->owner;
 
     // if the admiral is not legal, or the admiral has no destination, then forget about it
     if ((dObject == NULL) &&
@@ -790,7 +790,7 @@ void RemoveObjectFromDestination(SpaceObject* o) {
 }
 
 void AdmiralThink() {
-    admiralType* a =globals()->gAdmiralData.get();
+    Admiral* a =globals()->gAdmiralData.get();
     SpaceObject* anObject;
     SpaceObject* destObject;
     SpaceObject* otherDestObject;
@@ -1277,7 +1277,7 @@ Fixed HackGetObjectStrength(SpaceObject* anObject) {
 
 // assumes you can afford it & base has time
 void AdmiralBuildAtObject(int32_t whichAdmiral, int32_t baseTypeNum, int32_t whichDestObject) {
-    admiralType* admiral = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* admiral = globals()->gAdmiralData.get() + whichAdmiral;
     destBalanceType* buildAtDest = mGetDestObjectBalancePtr(whichDestObject);
     SpaceObject* buildAtObject = NULL;
     coordPointType  coord;
@@ -1300,7 +1300,7 @@ void AdmiralBuildAtObject(int32_t whichAdmiral, int32_t baseTypeNum, int32_t whi
 }
 
 bool AdmiralScheduleBuild(int32_t whichAdmiral, int32_t buildWhichType) {
-    admiralType* admiral = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* admiral = globals()->gAdmiralData.get() + whichAdmiral;
     destBalanceType* buildAtDest = mGetDestObjectBalancePtr(admiral->buildAtObject);
     BaseObject* buildBaseObject = NULL;
     int32_t            baseNum;
@@ -1336,7 +1336,7 @@ void StopBuilding(int32_t whichDestObject) {
 }
 
 void PayAdmiral(int32_t whichAdmiral, Fixed howMuch) {
-    admiralType* admiral = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* admiral = globals()->gAdmiralData.get() + whichAdmiral;
 
     if ((whichAdmiral >= 0) && (whichAdmiral < kMaxPlayerNum)) {
         admiral->cash += mMultiplyFixed(howMuch, admiral->earningPower);
@@ -1344,7 +1344,7 @@ void PayAdmiral(int32_t whichAdmiral, Fixed howMuch) {
 }
 
 void PayAdmiralAbsolute(int32_t whichAdmiral, Fixed howMuch) {
-    admiralType* admiral = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* admiral = globals()->gAdmiralData.get() + whichAdmiral;
 
     if ((whichAdmiral >= 0) && (whichAdmiral < kMaxPlayerNum)) {
         admiral->cash += howMuch;
@@ -1355,7 +1355,7 @@ void PayAdmiralAbsolute(int32_t whichAdmiral, Fixed howMuch) {
 }
 
 void AlterAdmiralScore(int32_t whichAdmiral, int32_t whichScore, int32_t amount) {
-    admiralType* admiral = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* admiral = globals()->gAdmiralData.get() + whichAdmiral;
 
     if ((whichAdmiral >= 0) && (whichAdmiral < kMaxPlayerNum)
             && (whichScore >= 0) && (whichScore < kAdmiralScoreNum)) {
@@ -1364,7 +1364,7 @@ void AlterAdmiralScore(int32_t whichAdmiral, int32_t whichScore, int32_t amount)
 }
 
 int32_t GetAdmiralScore(int32_t whichAdmiral, int32_t whichScore) {
-    admiralType* admiral = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* admiral = globals()->gAdmiralData.get() + whichAdmiral;
 
     if ((whichAdmiral >= 0) && (whichAdmiral < kMaxPlayerNum)
             && (whichScore >= 0) && (whichScore < kAdmiralScoreNum)) {
@@ -1375,7 +1375,7 @@ int32_t GetAdmiralScore(int32_t whichAdmiral, int32_t whichScore) {
 }
 
 int32_t GetAdmiralShipsLeft(int32_t whichAdmiral) {
-    admiralType* admiral = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* admiral = globals()->gAdmiralData.get() + whichAdmiral;
 
     if ((whichAdmiral >= 0) && (whichAdmiral < kMaxPlayerNum)) {
         return admiral->shipsLeft;
@@ -1408,7 +1408,7 @@ void ClearAllOccupants(int32_t whichDestination, int32_t whichAdmiral, int32_t f
 
 void AddKillToAdmiral(SpaceObject* anObject) {
     // only for player
-    admiralType* admiral = globals()->gAdmiralData.get() + globals()->gPlayerAdmiralNumber;
+    Admiral* admiral = globals()->gAdmiralData.get() + globals()->gPlayerAdmiralNumber;
 
     if (anObject->attributes & kCanAcceptDestination) {
         if (anObject->owner == globals()->gPlayerAdmiralNumber) {
@@ -1420,7 +1420,7 @@ void AddKillToAdmiral(SpaceObject* anObject) {
 }
 
 int32_t GetAdmiralLoss(int32_t whichAdmiral) {
-    admiralType* admiral = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* admiral = globals()->gAdmiralData.get() + whichAdmiral;
 
     if ((whichAdmiral >= 0) && (whichAdmiral < kMaxPlayerNum)) {
         return admiral->losses;
@@ -1430,7 +1430,7 @@ int32_t GetAdmiralLoss(int32_t whichAdmiral) {
 }
 
 int32_t GetAdmiralKill(int32_t whichAdmiral) {
-    admiralType* admiral = globals()->gAdmiralData.get() + whichAdmiral;
+    Admiral* admiral = globals()->gAdmiralData.get() + whichAdmiral;
 
     if ((whichAdmiral >= 0) && (whichAdmiral < kMaxPlayerNum)) {
         return admiral->kills;

@@ -718,7 +718,7 @@ void MiniComputerHandleNull( int32_t unitsToDo)
 void UpdateMiniScreenLines( void)
 
 {
-    admiralType         *admiral = NULL;
+    Admiral*            admiral = NULL;
     miniScreenLineType  *line = NULL;
     BaseObject*         buildObject = NULL;
     int32_t                lineNum, count;
@@ -1247,7 +1247,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 
 {
     BaseObject*         buildObject = NULL;
-    admiralType         *admiral = NULL;
+    Admiral*            admiral = NULL;
     destBalanceType     *buildAtObject = NULL;
     miniScreenLineType  *line = NULL;
     int32_t                count, baseNum, lineNum, buildAtObjectNum;

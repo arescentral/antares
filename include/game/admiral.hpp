@@ -89,7 +89,7 @@ struct admiralBuildType {
     Fixed               chanceRange;
 };
 
-struct admiralType {
+struct Admiral {
     uint32_t            attributes;
     int32_t             destinationObject;
     int32_t             destinationObjectID;
@@ -126,7 +126,7 @@ void ResetAllAdmirals();
 void ResetAllDestObjectData();
 
 destBalanceType* mGetDestObjectBalancePtr(int32_t whichObject);
-admiralType* mGetAdmiralPtr(int32_t mwhichAdmiral);
+Admiral* mGetAdmiralPtr(int32_t mwhichAdmiral);
 
 int32_t MakeNewAdmiral(uint32_t attributes, const Scenario::Player& player);
 int32_t MakeNewDestination(

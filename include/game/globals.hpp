@@ -76,7 +76,7 @@ struct hotKeyType {
     int32_t     objectID;
 };
 
-struct admiralType;
+struct Admiral;
 struct destBalanceType;
 struct proximityUnitType;
 struct scrollStarType;
@@ -97,7 +97,7 @@ struct aresGlobalType {
     uint32_t        gSynchValue;
     std::unique_ptr<InputSource> gInputSource;
     int32_t         gGameOver;
-    std::unique_ptr<admiralType[]>       gAdmiralData;
+    std::unique_ptr<Admiral[]>       gAdmiralData;
     int64_t         gGameTime;
     uint64_t        gLastTime;
     int32_t         gClosestObject;
