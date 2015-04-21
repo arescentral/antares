@@ -170,46 +170,46 @@ int32_t MakeNewDestination(
 void RemoveDestination(int32_t whichDestination);
 void RecalcAllAdmiralBuildData();
 
-uint8_t GetAdmiralColor(int32_t whichAdmiral);
-int32_t GetAdmiralRace(int32_t whichAdmiral);
-void SetAdmiralFlagship(int32_t whichAdmiral, int32_t whichShip);
-SpaceObject* GetAdmiralFlagship(int32_t whichAdmiral);
-void SetAdmiralEarningPower(int32_t whichAdmiral, Fixed power);
-Fixed GetAdmiralEarningPower(int32_t whichAdmiral);
+uint8_t GetAdmiralColor(Handle<Admiral> whichAdmiral);
+int32_t GetAdmiralRace(Handle<Admiral> whichAdmiral);
+void SetAdmiralFlagship(Handle<Admiral> whichAdmiral, int32_t whichShip);
+SpaceObject* GetAdmiralFlagship(Handle<Admiral> whichAdmiral);
+void SetAdmiralEarningPower(Handle<Admiral> whichAdmiral, Fixed power);
+Fixed GetAdmiralEarningPower(Handle<Admiral> whichAdmiral);
 
-void SetAdmiralDestinationObject(int32_t whichAdmiral, int32_t whichObject, destinationType dType);
-int32_t GetAdmiralDestinationObject(int32_t whichAdmiral);
-void SetAdmiralConsiderObject(int32_t whichAdmiral, int32_t whichObject);
-int32_t GetAdmiralConsiderObject(int32_t whichAdmiral);
+void SetAdmiralDestinationObject(Handle<Admiral> whichAdmiral, int32_t whichObject, destinationType dType);
+int32_t GetAdmiralDestinationObject(Handle<Admiral> whichAdmiral);
+void SetAdmiralConsiderObject(Handle<Admiral> whichAdmiral, int32_t whichObject);
+int32_t GetAdmiralConsiderObject(Handle<Admiral> whichAdmiral);
 
 bool BaseHasSomethingToBuild(int32_t whichObject);
-int32_t GetAdmiralBuildAtObject(int32_t whichAdmiral);
-void SetAdmiralBuildAtObject(int32_t whichAdmiral, int32_t whichObject);
+int32_t GetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral);
+void SetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral, int32_t whichObject);
 
-void SetAdmiralBuildAtName(int32_t whichAdmiral, sfz::StringSlice name);
+void SetAdmiralBuildAtName(Handle<Admiral> whichAdmiral, sfz::StringSlice name);
 sfz::StringSlice GetDestBalanceName(int32_t whichDestObject);
-sfz::StringSlice GetAdmiralName(int32_t whichAdmiral);
+sfz::StringSlice GetAdmiralName(Handle<Admiral> whichAdmiral);
 
 void SetObjectLocationDestination(SpaceObject* o, coordPointType* where);
 void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject);
 void RemoveObjectFromDestination(SpaceObject* o);
 
 void AdmiralThink();
-void AdmiralBuildAtObject(int32_t whichAdmiral, int32_t baseTypeNum, int32_t whichDestObject);
-bool AdmiralScheduleBuild(int32_t whichAdmiral, int32_t buildWhichType);
+void AdmiralBuildAtObject(Handle<Admiral> whichAdmiral, int32_t baseTypeNum, int32_t whichDestObject);
+bool AdmiralScheduleBuild(Handle<Admiral> whichAdmiral, int32_t buildWhichType);
 void StopBuilding(int32_t whichDestObject);
 
-void PayAdmiral(int32_t whichAdmiral, Fixed howMuch);
-void PayAdmiralAbsolute(int32_t whichAdmiral, Fixed howMuch);
-void AlterAdmiralScore(int32_t whichAdmiral, int32_t whichScore, int32_t amount);
-int32_t GetAdmiralScore(int32_t whichAdmiral, int32_t whichScore);
-int32_t GetAdmiralShipsLeft(int32_t whichAdmiral);
-int32_t AlterDestinationObjectOccupation(int32_t whichDestination, int32_t whichAdmiral, int32_t amount);
-void ClearAllOccupants(int32_t whichDestination, int32_t whichAdmiral, int32_t fullAmount);
+void PayAdmiral(Handle<Admiral> whichAdmiral, Fixed howMuch);
+void PayAdmiralAbsolute(Handle<Admiral> whichAdmiral, Fixed howMuch);
+void AlterAdmiralScore(Handle<Admiral> whichAdmiral, int32_t whichScore, int32_t amount);
+int32_t GetAdmiralScore(Handle<Admiral> whichAdmiral, int32_t whichScore);
+int32_t GetAdmiralShipsLeft(Handle<Admiral> whichAdmiral);
+int32_t AlterDestinationObjectOccupation(int32_t whichDestination, Handle<Admiral> whichAdmiral, int32_t amount);
+void ClearAllOccupants(int32_t whichDestination, Handle<Admiral> whichAdmiral, int32_t fullAmount);
 void AddKillToAdmiral(SpaceObject *anObject);
 
-int32_t GetAdmiralLoss(int32_t whichAdmiral);
-int32_t GetAdmiralKill(int32_t whichAdmiral);
+int32_t GetAdmiralLoss(Handle<Admiral> whichAdmiral);
+int32_t GetAdmiralKill(Handle<Admiral> whichAdmiral);
 
 }  // namespace antares
 
