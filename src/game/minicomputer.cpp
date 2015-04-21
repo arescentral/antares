@@ -729,7 +729,7 @@ void UpdateMiniScreenLines( void)
     switch( globals()->gMiniScreenData.currentScreen)
     {
         case kBuildMiniScreen:
-            admiral = globals()->gAdmiralData.get() + globals()->gPlayerAdmiralNumber;
+            admiral = mGetAdmiralPtr(globals()->gPlayerAdmiralNumber);
             line = globals()->gMiniScreenData.lineData.get() +
                 kBuildScreenWhereNameLine;
             if ( line->value !=
@@ -1259,7 +1259,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
     globals()->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
     if ( globals()->gMiniScreenData.currentScreen == kBuildMiniScreen)
     {
-        admiral = globals()->gAdmiralData.get() + globals()->gPlayerAdmiralNumber;
+        admiral = mGetAdmiralPtr(globals()->gPlayerAdmiralNumber);
         line = globals()->gMiniScreenData.lineData.get() +
             kBuildScreenWhereNameLine;
         buildAtObjectNum =
