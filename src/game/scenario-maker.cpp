@@ -676,7 +676,7 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
 
     // *** BEGIN INIT ADMIRALS ***
     for (int i = 0; i < kMaxPlayerNum; i++) {
-        gAdmiralNumbers[i] = Handle<Admiral>(-1);
+        gAdmiralNumbers[i] = Admiral::none();
     }
 
     for (int i = 0; i < gThisScenario->playerNum; i++) {
@@ -827,7 +827,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         coordPointType coord;
         GetInitialCoord(initial, &coord, gScenarioRotation);
 
-        Handle<Admiral> owner;
+        Handle<Admiral> owner = Admiral::none();
         if (initial->owner > kScenarioNoOwner) {
             owner = gAdmiralNumbers[initial->owner];
         }
@@ -970,7 +970,7 @@ void UnhideInitialObject(int32_t whichInitial) {
     coordPointType coord;
     GetInitialCoord(initial, &coord, gScenarioRotation);
 
-    Handle<Admiral> owner;
+    Handle<Admiral> owner = Admiral::none();
     if (initial->owner > kScenarioNoOwner) {
         owner = gAdmiralNumbers[initial->owner];
     }

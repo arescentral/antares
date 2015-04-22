@@ -95,6 +95,7 @@ class Admiral {
     static void         reset();
     static Admiral*     get(int i);
     static Handle<Admiral>  make(uint32_t attributes, const Scenario::Player& player);
+    static Handle<Admiral>  none() { return Handle<Admiral>(-1); }
 
     int                 number() const;
 

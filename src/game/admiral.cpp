@@ -118,7 +118,7 @@ static Admiral* next_free_admiral() {
 Handle<Admiral> Admiral::make(uint32_t attributes, const Scenario::Player& player) {
     Admiral* a = next_free_admiral();
     if (!a) {
-        return Handle<Admiral>(-1);
+        return none();
     }
 
     *a = Admiral();

@@ -631,7 +631,7 @@ static void enter_warp(
     fixedPointType newVel = {0, 0};
     CreateAnySpaceObject(
             globals()->scenarioFileInfo.warpInFlareID, &newVel,
-            &subject->location, subject->direction, Handle<Admiral>(-1), 0, -1);
+            &subject->location, subject->direction, Admiral::none(), 0, -1);
 }
 
 static void change_score(objectActionType* action, SpaceObject* focus) {

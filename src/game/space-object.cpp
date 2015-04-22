@@ -872,7 +872,7 @@ void DestroyObject(SpaceObject* object) {
             }
         }
 
-        AlterObjectOwner(object, Handle<Admiral>(-1), true);
+        AlterObjectOwner(object, Admiral::none(), true);
         object->attributes &= ~(kHated | kCanEngage | kCanCollide | kCanBeHit);
         object->baseType->destroy.run(object, NULL, NULL);
     } else {
@@ -882,7 +882,7 @@ void DestroyObject(SpaceObject* object) {
             while (energyNum > 0) {
                 CreateAnySpaceObject(
                         globals()->scenarioFileInfo.energyBlobID, &object->velocity,
-                        &object->location, object->direction, Handle<Admiral>(-1), 0, -1);
+                        &object->location, object->direction, Admiral::none(), 0, -1);
                 energyNum--;
             }
         }

@@ -1073,8 +1073,7 @@ void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> w
             if ( globals()->keyMask & kComputerBuildMenu) return;
             if ( whichLine != kMiniScreenNoLineSelected)
             {
-                const Handle<Admiral> neutral;
-                if (CountObjectsOfBaseType(-1, neutral) < (kMaxSpaceObject - kMaxShipBuffer)) {
+                if (CountObjectsOfBaseType(-1, Admiral::none()) < (kMaxSpaceObject - kMaxShipBuffer)) {
                     if (AdmiralScheduleBuild( whichAdmiral,
                         whichLine - kBuildScreenFirstTypeLine) == false)
                     {
