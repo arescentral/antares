@@ -50,7 +50,7 @@ struct miniScreenLineType {
     int32_t         value;      // for keeping track of changing values
     int32_t         statusType;
     int32_t         whichStatus;
-    int32_t         statusPlayer;
+    Handle<Admiral> statusPlayer;
     int32_t         negativeValue;
     BaseObject*     sourceData;
 };

@@ -259,12 +259,12 @@ void GetInitialCoord(Scenario::InitialObject *initial, coordPointType *coord, in
 void set_initial_destination(const Scenario::InitialObject* initial, bool preserve) {
     if ((initial->realObjectNumber < 0)                 // hasn't been created yet
             || (initial->initialDestination < 0)        // doesn't have a target
-            || (initial->owner == kScenarioNoOwner)) {  // doesn't have an owner
+            || (!initial->owner.get())) {               // doesn't have an owner
         return;
     }
 
     // get the correct admiral #
-    Handle<Admiral> owner = Handle<Admiral>(initial->owner);
+    Handle<Admiral> owner = initial->owner;
 
     auto target = gThisScenario->initial(initial->initialDestination);
     if (target->realObjectNumber >= 0) {
@@ -371,7 +371,7 @@ bool Scenario::Condition::is_true() const {
 
     switch (condition) {
         case kCounterCondition:
-            a = Handle<Admiral>(conditionArgument.counter.whichPlayer);
+            a = conditionArgument.counter.whichPlayer;
             if (GetAdmiralScore(a, conditionArgument.counter.whichCounter) ==
                 conditionArgument.counter.amount) {
                 return true;
@@ -379,7 +379,7 @@ bool Scenario::Condition::is_true() const {
             break;
 
         case kCounterGreaterCondition:
-            a = Handle<Admiral>(conditionArgument.counter.whichPlayer);
+            a = conditionArgument.counter.whichPlayer;
             if (GetAdmiralScore(a, conditionArgument.counter.whichCounter) >=
                 conditionArgument.counter.amount) {
                 return true;
@@ -387,7 +387,7 @@ bool Scenario::Condition::is_true() const {
             break;
 
         case kCounterNotCondition:
-            a = Handle<Admiral>(conditionArgument.counter.whichPlayer);
+            a = conditionArgument.counter.whichPlayer;
             if (GetAdmiralScore(a, conditionArgument.counter.whichCounter) !=
                 conditionArgument.counter.amount) {
                 return true;
@@ -740,7 +740,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         int i = step;
 
         Scenario::InitialObject* initial = gThisScenario->initial(i);
-        Handle<Admiral> owner(initial->owner);
+        Handle<Admiral> owner = initial->owner;
         int32_t type = initial->type;
         BaseObject* baseObject = mGetBaseObjectPtr(type);
         // TODO(sfiera): remap objects in networked games.
@@ -818,8 +818,8 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         GetInitialCoord(initial, &coord, gScenarioRotation);
 
         Handle<Admiral> owner = Admiral::none();
-        if (initial->owner > kScenarioNoOwner) {
-            owner = Handle<Admiral>(initial->owner);
+        if (initial->owner.get()) {
+            owner = initial->owner;
         }
 
         int32_t specialAttributes = initial->attributes & (~kInitialAttributesMask);
@@ -961,8 +961,8 @@ void UnhideInitialObject(int32_t whichInitial) {
     GetInitialCoord(initial, &coord, gScenarioRotation);
 
     Handle<Admiral> owner = Admiral::none();
-    if (initial->owner > kScenarioNoOwner) {
-        owner = Handle<Admiral>(initial->owner);
+    if (initial->owner.get()) {
+        owner = initial->owner;
     }
 
     uint32_t specialAttributes = initial->attributes & ~kInitialAttributesMask;

@@ -21,6 +21,7 @@
 
 #include <sfz/sfz.hpp>
 
+#include "data/handle.hpp"
 #include "data/scenario.hpp"
 #include "data/space-object.hpp"
 #include "math/fixed.hpp"

@@ -23,6 +23,7 @@
 #include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
+#include "data/handle.hpp"
 #include "data/scenario.hpp"
 #include "drawing/color.hpp"
 #include "game/starfield.hpp"
@@ -82,24 +83,6 @@ struct proximityUnitType;
 struct scrollStarType;
 class InputSource;
 class StringList;
-
-template <typename T>
-class Handle {
-  public:
-    Handle(): _number(-1) { }
-    explicit Handle(int number): _number(number) { }
-    explicit Handle(T* pointer): _number(pointer ? pointer->number() : -1) { }
-    int number() const { return _number; }
-    T* get() const { return T::get(_number); }
-    T& operator*() const { return *get(); }
-    T* operator->() const { return get(); }
-  private:
-    int _number;
-};
-template <typename T>
-inline bool operator==(Handle<T> x, Handle<T> y) { return x.number() == y.number(); }
-template <typename T>
-inline bool operator!=(Handle<T> x, Handle<T> y) { return !(x == y); }
 
 struct ScenarioWinnerType {
     int8_t next;

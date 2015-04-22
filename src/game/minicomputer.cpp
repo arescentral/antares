@@ -1433,7 +1433,7 @@ void MiniComputerSetStatusStrings() {
                 if (partition(player_number_string, "\\", sourceString)) {
                     int32_t value;
                     if (string_to_int<int32_t>(player_number_string, value)) {
-                        line->statusPlayer = value;
+                        line->statusPlayer = Handle<Admiral>(value);
                     }
                 }
 
@@ -1542,13 +1542,13 @@ int32_t MiniComputerGetStatusValue( int32_t whichLine)
 
         case kIntegerValue:
         case kSmallFixedValue:
-            return GetAdmiralScore(Handle<Admiral>(line->statusPlayer), line->whichStatus);
+            return GetAdmiralScore(line->statusPlayer, line->whichStatus);
             break;
 
         case kIntegerMinusValue:
         case kSmallFixedMinusValue:
             return line->negativeValue
-                - GetAdmiralScore(Handle<Admiral>(line->statusPlayer), line->whichStatus);
+                - GetAdmiralScore(line->statusPlayer, line->whichStatus);
             break;
 
         default:

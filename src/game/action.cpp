@@ -636,11 +636,9 @@ static void enter_warp(
 
 static void change_score(objectActionType* action, SpaceObject* focus) {
     const auto& score = action->argument.changeScore;
-    Handle<Admiral> admiral;
-    if ((score.whichPlayer == -1) && (focus != SpaceObject::zero())) {
-        admiral = focus->owner;
-    } else {
-        admiral = Handle<Admiral>(score.whichPlayer);
+    Handle<Admiral> admiral = focus->owner;
+    if ((score.whichPlayer.get()) || (focus == SpaceObject::zero())) {
+        admiral = score.whichPlayer;
     }
     if (admiral.number() >= 0) {
         AlterAdmiralScore(admiral, score.whichScore, score.amount);
@@ -649,11 +647,9 @@ static void change_score(objectActionType* action, SpaceObject* focus) {
 
 static void declare_winner(objectActionType* action, SpaceObject* focus) {
     const auto& winner = action->argument.declareWinner;
-    Handle<Admiral> admiral;
-    if ((winner.whichPlayer == -1) && (focus != SpaceObject::zero())) {
-        admiral = focus->owner;
-    } else {
-        admiral = Handle<Admiral>(winner.whichPlayer);
+    Handle<Admiral> admiral = focus->owner;
+    if ((winner.whichPlayer.get()) || (focus == SpaceObject::zero())) {
+        admiral = winner.whichPlayer;
     }
     DeclareWinner(admiral, winner.nextLevel, winner.textID);
 }
