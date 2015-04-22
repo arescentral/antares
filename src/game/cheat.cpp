@@ -91,9 +91,9 @@ void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
             break;
 
         case kPayMoneyCheat:
-            PayAdmiralAbsolute( whichPlayer, mLongToFixed( 5000));
-            PayAdmiralAbsolute( whichPlayer, mLongToFixed( 5000));
-            PayAdmiralAbsolute( whichPlayer, mLongToFixed( 5000));
+            whichPlayer->pay_absolute(mLongToFixed(5000));
+            whichPlayer->pay_absolute(mLongToFixed(5000));
+            whichPlayer->pay_absolute(mLongToFixed(5000));
             CheatFeedback( whichCheat, true, whichPlayer);
             break;
 

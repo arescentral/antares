@@ -100,6 +100,8 @@ class Admiral {
 
     void                think();
     bool                build(int32_t buildWhichType);
+    void                pay(Fixed howMuch);
+    void                pay_absolute(Fixed howMuch);
 
     uint32_t&           attributes() { return _attributes; }
     int32_t&            destinationObject() { return _destinationObject; }
@@ -200,8 +202,6 @@ void RemoveObjectFromDestination(SpaceObject* o);
 void AdmiralThink();
 void StopBuilding(int32_t whichDestObject);
 
-void PayAdmiral(Handle<Admiral> whichAdmiral, Fixed howMuch);
-void PayAdmiralAbsolute(Handle<Admiral> whichAdmiral, Fixed howMuch);
 void AlterAdmiralScore(Handle<Admiral> whichAdmiral, int32_t whichScore, int32_t amount);
 int32_t GetAdmiralScore(Handle<Admiral> whichAdmiral, int32_t whichScore);
 int32_t GetAdmiralShipsLeft(Handle<Admiral> whichAdmiral);

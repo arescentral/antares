@@ -689,7 +689,9 @@ void SpaceObject::alter_energy(int32_t amount) {
 void SpaceObject::alter_battery(int32_t amount) {
     _battery += amount;
     if (_battery > max_battery()) {
-        PayAdmiral(owner, _battery - max_battery());
+        if (owner.get()) {
+            owner->pay(_battery - max_battery());
+        }
         _battery = max_battery();
     }
 }

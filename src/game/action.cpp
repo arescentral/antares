@@ -491,12 +491,18 @@ static void alter(
             break;
 
         case kAlterAbsoluteCash:
-            if (alter.relative) {
-                if (focus != SpaceObject::zero()) {
-                    PayAdmiralAbsolute(focus->owner, alter.minimum);
+            {
+                Handle<Admiral> admiral;
+                if (alter.relative) {
+                    if (focus != SpaceObject::zero()) {
+                        admiral = focus->owner;
+                    }
+                } else {
+                    admiral = Handle<Admiral>(alter.range);
                 }
-            } else {
-                PayAdmiralAbsolute(Handle<Admiral>(alter.range), alter.minimum);
+                if (admiral.get()) {
+                    admiral->pay(alter.minimum);
+                }
             }
             break;
 

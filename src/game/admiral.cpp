@@ -737,7 +737,7 @@ void AdmiralThink() {
 
         anObject = mGetSpaceObjectPtr(destBalance->whichObject);
         if (anObject && anObject->owner.get()) {
-            PayAdmiral(anObject->owner, destBalance->earn);
+            anObject->owner->pay(destBalance->earn);
         }
         destBalance++;
     }
@@ -1227,18 +1227,14 @@ void StopBuilding(int32_t whichDestObject) {
     destObject->buildObjectBaseNum = kNoShip;
 }
 
-void PayAdmiral(Handle<Admiral> admiral, Fixed howMuch) {
-    if (admiral.get()) {
-        admiral->cash() += mMultiplyFixed(howMuch, admiral->earningPower());
-    }
+void Admiral::pay(Fixed howMuch) {
+    pay_absolute(mMultiplyFixed(howMuch, _earningPower));
 }
 
-void PayAdmiralAbsolute(Handle<Admiral> admiral, Fixed howMuch) {
-    if (admiral.get()) {
-        admiral->cash() += howMuch;
-        if (admiral->cash() < 0) {
-            admiral->cash() = 0;
-        }
+void Admiral::pay_absolute(Fixed howMuch) {
+    _cash += howMuch;
+    if (_cash < 0) {
+        _cash = 0;
     }
 }
 
