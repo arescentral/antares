@@ -663,7 +663,7 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
         }
     }
 
-    globals()->gScenarioWinner.player = -1;
+    globals()->gScenarioWinner.player = Admiral::none();
     globals()->gScenarioWinner.next = -1;
     globals()->gScenarioWinner.text = -1;
 
@@ -856,7 +856,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         }
 
         if (anObject->attributes & kIsDestination) {
-            if (owner.number() >= 0) {
+            if (owner.get()) {
                 if (initial->canBuild[0] >= 0) {
                     if (GetAdmiralBuildAtObject(owner) < 0) {
                         SetAdmiralConsiderObject(owner, newShipNum);
@@ -993,7 +993,7 @@ void UnhideInitialObject(int32_t whichInitial) {
                 newShipNum, initial->canBuild, initial->earning, initial->nameResID,
                 initial->nameStrNum);
 
-        if (owner.number() >= 0) {
+        if (owner.get()) {
             if (initial->canBuild[0] >= 0) {
                 if (GetAdmiralConsiderObject(owner) < 0) {
                     SetAdmiralConsiderObject(owner, newShipNum);
@@ -1041,7 +1041,7 @@ SpaceObject *GetObjectFromInitialNumber(int32_t initialNumber) {
 }
 
 void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textID) {
-    if (whichPlayer.number() < 0) {
+    if (!whichPlayer.get()) {
         // if there's no winner, we want to exit immediately
         if (nextLevel >= 0) {
             globals()->gScenarioWinner.next = nextLevel;
@@ -1053,8 +1053,8 @@ void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textI
         }
         globals()->gGameOver = 1;
     } else {
-        if (globals()->gScenarioWinner.player == -1) {
-            globals()->gScenarioWinner.player = whichPlayer.number();
+        if (!globals()->gScenarioWinner.player.get()) {
+            globals()->gScenarioWinner.player = whichPlayer;
             globals()->gScenarioWinner.text = textID;
             if (nextLevel >= 0) {
                 globals()->gScenarioWinner.next = nextLevel;

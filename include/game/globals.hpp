@@ -87,7 +87,7 @@ class StringList;
 struct ScenarioWinnerType {
     int8_t next;
     int16_t text;
-    int8_t player;
+    Handle<Admiral> player;
 };
 
 struct aresGlobalType {

@@ -146,7 +146,7 @@ static void create_object(
         if (product->attributes & kCanAcceptDestination) {
             uint32_t save_attributes = product->attributes;
             product->attributes &= ~kStaticDestination;
-            if (product->owner.number() >= 0) {
+            if (product->owner.get()) {
                 if (action->reflexive) {
                     if (action->verb != kCreateObjectSetDest) {
                         SetObjectDestination(product, focus);
@@ -640,7 +640,7 @@ static void change_score(objectActionType* action, SpaceObject* focus) {
     if ((score.whichPlayer.get()) || (focus == SpaceObject::zero())) {
         admiral = score.whichPlayer;
     }
-    if (admiral.number() >= 0) {
+    if (admiral.get()) {
         AlterAdmiralScore(admiral, score.whichScore, score.amount);
     }
 }

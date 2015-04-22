@@ -221,10 +221,10 @@ static SpaceObject* AddSpaceObject(SpaceObject *sourceObject) {
                 tinyColor = RgbColor::kClear;
             } else if (obj->owner == globals()->gPlayerAdmiral) {
                 tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
-            } else if (obj->owner.number() <= kNoOwner) {
-                tinyColor = GetRGBTranslateColorShade(kNeutralColor, tinyShade);
-            } else {
+            } else if (obj->owner.get()) {
                 tinyColor = GetRGBTranslateColorShade(kHostileColor, tinyShade);
+            } else {
+                tinyColor = GetRGBTranslateColorShade(kNeutralColor, tinyShade);
             }
 
             int16_t whichShape = 0;
@@ -354,7 +354,7 @@ SpaceObject::SpaceObject(
     _energy             = max_energy();
     _battery            = max_battery();
 
-    if (owner.number() >= 0) {
+    if (owner.get()) {
         myPlayerFlag = 1 << owner.number();
     }
 
@@ -656,7 +656,7 @@ int32_t CountObjectsOfBaseType(int32_t whichType, Handle<Admiral> owner) {
         auto anObject = mGetSpaceObjectPtr(i);
         if (anObject->active
                 && ((whichType == -1) || (anObject->whichBaseObject == whichType))
-                && ((owner.number() == -1) || (anObject->owner == owner))) {
+                && (!owner.get() || (anObject->owner == owner))) {
             ++result;
         }
     }
@@ -725,7 +725,7 @@ void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message) 
     Handle<Admiral> old_owner = object->owner;
     object->owner = owner;
 
-    if ((owner.number() >= 0) && (object->attributes & kIsDestination)) {
+    if (owner.get() && (object->attributes & kIsDestination)) {
         if (GetAdmiralConsiderObject(owner) < 0) {
             SetAdmiralConsiderObject(owner, object->number());
         }
@@ -756,10 +756,10 @@ void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message) 
         RgbColor tinyColor;
         if (owner == globals()->gPlayerAdmiral) {
             tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
-        } else if (owner.number() <= kNoOwner) {
-            tinyColor = GetRGBTranslateColorShade(kNeutralColor, tinyShade);
-        } else {
+        } else if (owner.get()) {
             tinyColor = GetRGBTranslateColorShade(kHostileColor, tinyShade);
+        } else {
+            tinyColor = GetRGBTranslateColorShade(kNeutralColor, tinyShade);
         }
         object->tinyColor = object->sprite->tinyColor = tinyColor;
 
@@ -810,10 +810,10 @@ void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message) 
         StopBuilding(object->destinationObject);
         if (message) {
             String destination_name(GetDestBalanceName(object->destinationObject));
-            if (owner.number() >= 0) {
+            if (owner.get()) {
                 String new_owner_name(GetAdmiralName(object->owner));
                 Messages::add(format("{0} captured by {1}.", destination_name, new_owner_name));
-            } else if (old_owner.number() >= 0) { // must be since can't both be -1
+            } else if (old_owner.get()) { // must be since can't both be -1
                 String old_owner_name(GetAdmiralName(old_owner));
                 Messages::add(format("{0} lost by {1}.", destination_name, old_owner_name));
             }
@@ -822,10 +822,10 @@ void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message) 
     } else {
         if (message) {
             StringSlice object_name = get_object_name(object->whichBaseObject);
-            if (owner.number() >= 0) {
+            if (owner.get()) {
                 String new_owner_name(GetAdmiralName(object->owner));
                 Messages::add(format("{0} captured by {1}.", object_name, new_owner_name));
-            } else if (old_owner.number() >= 0) { // must be since can't both be -1
+            } else if (old_owner.get()) { // must be since can't both be -1
                 String old_owner_name(GetAdmiralName(old_owner));
                 Messages::add(format("{0} lost by {1}.", object_name, old_owner_name));
             }

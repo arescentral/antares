@@ -1027,7 +1027,7 @@ hackBNoEngageMatch:
     }
 
     // here, it doesn't matter in what order we step through the table
-    const uint32_t seen_by_player = 1ul << globals()->gPlayerAdmiral->number();
+    const uint32_t seen_by_player = 1ul << globals()->gPlayerAdmiral.number();
 
     for (int32_t i = 0; i < kMaxSpaceObject; i++) {
         auto aObject = mGetSpaceObjectPtr(i);

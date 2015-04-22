@@ -246,10 +246,10 @@ void NonplayerShipThink(int32_t timePass)
             if ((anObject->health() > 0) && (anObject->health() <= (anObject->max_health() >> 2))) {
                 if (anObject->owner == globals()->gPlayerAdmiral) {
                     anObject->sprite->tinyColor = friendSick;
-                } else if (anObject->owner.number() < 0) {
-                    anObject->sprite->tinyColor = neutralSick;
-                } else {
+                } else if (anObject->owner.get()) {
                     anObject->sprite->tinyColor = foeSick;
+                } else {
+                    anObject->sprite->tinyColor = neutralSick;
                 }
             } else {
                 anObject->sprite->tinyColor = anObject->tinyColor;
@@ -266,7 +266,7 @@ void NonplayerShipThink(int32_t timePass)
         anObject->targetAngle = anObject->directionGoal = anObject->direction;
 
         // incremenent its admiral's # of ships
-        if (anObject->owner.number() > kNoOwner) {
+        if (anObject->owner.get()) {
             anObject->owner->shipsLeft()++;
         }
 
@@ -1743,14 +1743,14 @@ void HitObject(SpaceObject *anObject, SpaceObject *sObject) {
     }
 }
 
-static bool allegiance_is(Allegiance allegiance, int admiral, SpaceObject* object) {
+static bool allegiance_is(Allegiance allegiance, Handle<Admiral> admiral, SpaceObject* object) {
     switch (allegiance) {
       case FRIENDLY_OR_HOSTILE:
         return true;
       case FRIENDLY:
-        return object->owner.number() == admiral;
+        return object->owner == admiral;
       case HOSTILE:
-        return object->owner.number() != admiral;
+        return object->owner != admiral;
     }
 }
 
@@ -1793,7 +1793,7 @@ int32_t GetManualSelectObject(
                 && (anObject->seenByPlayerFlags & myOwnerFlag)
                 && (anObject->attributes & inclusiveAttributes)
                 && !(anObject->attributes & exclusiveAttributes)
-                && allegiance_is(allegiance, sourceObject->owner.number(), anObject)) {
+                && allegiance_is(allegiance, sourceObject->owner, anObject)) {
             uint32_t xdiff = ABS<int>(sourceObject->location.h - anObject->location.h);
             uint32_t ydiff = ABS<int>(sourceObject->location.v - anObject->location.v);
 
@@ -1872,7 +1872,7 @@ int32_t GetSpritePointSelectObject(
                 || !anObject->sprite
                 || !(anObject->seenByPlayerFlags & myOwnerFlag)
                 || ((anyOneAttribute != 0) && ((anObject->attributes & anyOneAttribute) == 0))
-                || !allegiance_is(allegiance, sourceObject->owner.number(), anObject)
+                || !allegiance_is(allegiance, sourceObject->owner, anObject)
                 || (bounds->right < anObject->sprite->where.h)
                 || (bounds->bottom < anObject->sprite->where.v)
                 || (bounds->left > anObject->sprite->where.h)

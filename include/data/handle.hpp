@@ -28,7 +28,6 @@ class Handle {
   public:
     Handle(): _number(-1) { }
     explicit Handle(int number): _number(number) { }
-    explicit Handle(T* pointer): _number(pointer ? pointer->number() : -1) { }
     int number() const { return _number; }
     T* get() const { return T::get(_number); }
     T& operator*() const { return *get(); }

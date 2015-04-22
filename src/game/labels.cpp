@@ -291,7 +291,7 @@ void Labels::update_positions(int32_t units_done) {
                     }
 
                     if (!(label->object->seenByPlayerFlags &
-                                (1 << globals()->gPlayerAdmiral->number()))) {
+                                (1 << globals()->gPlayerAdmiral.number()))) {
                         isOffScreen = true;
                     }
 

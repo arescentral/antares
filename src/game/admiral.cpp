@@ -101,12 +101,8 @@ Admiral* Admiral::get(int i) {
     return nullptr;
 }
 
-int Admiral::number() const {
-    return this - gAdmiralData.get();
-}
-
 Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Scenario::Player& player) {
-    Admiral* a = &gAdmiralData[index];
+    Handle<Admiral> a(index);
     if (a->_active) {
         return none();
     }
@@ -123,7 +119,7 @@ Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Scenario::Pl
     }
 
     // for now set strategy balance to 0 -- we may want to calc this if player added on the fly?
-    return Handle<Admiral>(a->number());
+    return a;
 }
 
 int32_t MakeNewDestination(
@@ -168,7 +164,7 @@ int32_t MakeNewDestination(
                 d->occupied[j] = 0;
             }
 
-            if (object->owner.number() >= 0) {
+            if (object->owner.get()) {
                 d->occupied[object->owner.number()] = object->baseType->initialAgeRange;
             }
         }
@@ -238,7 +234,7 @@ void RecalcAllAdmiralBuildData() {
     for (int i = 0; i < kMaxDestObject; i++) {
         if (d->whichObject != kDestNoObject) {
             anObject = mGetSpaceObjectPtr(d->whichObject);
-            if (anObject->owner.number() >= 0) {
+            if (anObject->owner.get()) {
                 const auto& a = anObject->owner;
                 for (int k = 0; k < kMaxTypeBaseCanBuild; k++) {
                     if (d->canBuildType[k] >= 0) {
@@ -274,21 +270,21 @@ void RecalcAllAdmiralBuildData() {
 }
 
 uint8_t GetAdmiralColor(Handle<Admiral> a) {
-    if (a.number() < 0) {
+    if (!a.get()) {
         return 0;
     }
     return a->color();
 }
 
 int32_t GetAdmiralRace(Handle<Admiral> a) {
-    if (a.number() < 0) {
+    if (!a.get()) {
         return -1;
     }
     return a->race();
 }
 
 void SetAdmiralFlagship(Handle<Admiral> a, int32_t whichShip) {
-    if (a.number() < 0) {
+    if (!a.get()) {
         throw Exception ("Can't set flagship of -1 admiral.");
     }
     if (whichShip >= 0) {
@@ -301,7 +297,7 @@ void SetAdmiralFlagship(Handle<Admiral> a, int32_t whichShip) {
 }
 
 SpaceObject* GetAdmiralFlagship(Handle<Admiral> a) {
-    if (a.number() < 0) {
+    if (!a.get()) {
         return NULL;
     }
     if (a->flagship() == kNoShip) {
@@ -316,13 +312,13 @@ SpaceObject* GetAdmiralFlagship(Handle<Admiral> a) {
 }
 
 void SetAdmiralEarningPower(Handle<Admiral> a, Fixed power) {
-    if (a.number() >= 0) {
+    if (a.get()) {
         a->earningPower() = power;
     }
 }
 
 Fixed GetAdmiralEarningPower(Handle<Admiral> a) {
-    if (a.number() >= 0) {
+    if (a.get()) {
         return a->earningPower();
     } else {
         return 0;
@@ -360,7 +356,7 @@ void SetAdmiralConsiderObject(Handle<Admiral> a, int32_t whichObject) {
     SpaceObject* anObject= mGetSpaceObjectPtr(whichObject);
     destBalanceType* d = mGetDestObjectBalancePtr(0);
 
-    if (a.number() < 0) {
+    if (!a.get()) {
         throw Exception("Can't set consider ship for -1 admiral.");
     }
     a->considerShip() = whichObject;
@@ -413,7 +409,7 @@ bool BaseHasSomethingToBuild(int32_t whichObject) {
 int32_t GetAdmiralConsiderObject(Handle<Admiral> a) {
     SpaceObject* anObject;
 
-    if (a.number() < 0) {
+    if (!a.get()) {
         return -1;
     }
     if (a->considerShip() >= 0) {
@@ -454,7 +450,7 @@ void SetAdmiralBuildAtObject(Handle<Admiral> a, int32_t whichObject) {
     SpaceObject* anObject = mGetSpaceObjectPtr(whichObject);
     destBalanceType* d = mGetDestObjectBalancePtr(0);
 
-    if (a.number() < 0) {
+    if (!a.get()) {
         throw Exception("Can't set consider ship for -1 admiral.");
     }
     if (whichObject >= 0) {
@@ -488,7 +484,7 @@ StringSlice GetDestBalanceName(int32_t whichDestObject) {
 }
 
 StringSlice GetAdmiralName(Handle<Admiral> a) {
-    if ((a.number() >= 0) && (a.number() < kMaxPlayerNum)) {
+    if (a.get()) {
         return a->name();
     } else {
         return NULL;
@@ -520,7 +516,7 @@ void SetObjectLocationDestination(SpaceObject *o, coordPointType *where) {
     }
 
     // if the owner is not legal, something is very very wrong
-    if ((o->owner.number() < 0) || (o->owner.number() >= kMaxPlayerNum)) {
+    if (!o->owner.get()) {
         return;
     }
 
@@ -583,7 +579,7 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
     }
 
     // if the owner is not legal, something is very very wrong
-    if ((o->owner.number() < 0) || (o->owner.number() >= kMaxPlayerNum)) {
+    if (!o->owner.get()) {
         return;
     }
 
@@ -716,7 +712,7 @@ void AdmiralThink() {
         }
 
         anObject = mGetSpaceObjectPtr(destBalance->whichObject);
-        if (anObject && (anObject->owner.number() >= 0)) {
+        if (anObject && anObject->owner.get()) {
             PayAdmiral(anObject->owner, destBalance->earn);
         }
         destBalance++;
@@ -957,7 +953,7 @@ void Admiral::think() {
                 if (anObject->baseType->orderFlags & kHardTargetIsFoe) {
                     thisValue = 0;
                 }
-            } else if (destObject->owner.number() >= 0) {
+            } else if (destObject->owner.get()) {
                 if ((anObject->duty == eGuardDuty) || (anObject->duty == eNoDuty)) {
                     if (destObject->attributes & kIsDestination) {
                         if (foeValue < friendValue) {
@@ -1159,7 +1155,7 @@ void Admiral::think() {
                     mGetBaseObjectFromClassRace(baseObject, baseNum, _hopeToBuild,
                             _race);
                     if (_cash >= mLongToFixed(baseObject->price)) {
-                        AdmiralScheduleBuild(Handle<Admiral>(this), j);
+                        AdmiralScheduleBuild(Handle<Admiral>(this - gAdmiralData.get()), j);
                         _hopeToBuild = -1;
                         _saveGoal = 0;
                     } else {
@@ -1230,13 +1226,13 @@ void StopBuilding(int32_t whichDestObject) {
 }
 
 void PayAdmiral(Handle<Admiral> admiral, Fixed howMuch) {
-    if ((admiral.number() >= 0) && (admiral.number() < kMaxPlayerNum)) {
+    if (admiral.get()) {
         admiral->cash() += mMultiplyFixed(howMuch, admiral->earningPower());
     }
 }
 
 void PayAdmiralAbsolute(Handle<Admiral> admiral, Fixed howMuch) {
-    if ((admiral.number() >= 0) && (admiral.number() < kMaxPlayerNum)) {
+    if (admiral.get()) {
         admiral->cash() += howMuch;
         if (admiral->cash() < 0) {
             admiral->cash() = 0;
@@ -1245,15 +1241,13 @@ void PayAdmiralAbsolute(Handle<Admiral> admiral, Fixed howMuch) {
 }
 
 void AlterAdmiralScore(Handle<Admiral> admiral, int32_t whichScore, int32_t amount) {
-    if ((admiral.number() >= 0) && (admiral.number() < kMaxPlayerNum)
-            && (whichScore >= 0) && (whichScore < kAdmiralScoreNum)) {
+    if (admiral.get() && (whichScore >= 0) && (whichScore < kAdmiralScoreNum)) {
         admiral->score()[whichScore] += amount;
     }
 }
 
 int32_t GetAdmiralScore(Handle<Admiral> admiral, int32_t whichScore) {
-    if ((admiral.number() >= 0) && (admiral.number() < kMaxPlayerNum)
-            && (whichScore >= 0) && (whichScore < kAdmiralScoreNum)) {
+    if (admiral.get() && (whichScore >= 0) && (whichScore < kAdmiralScoreNum)) {
         return admiral->score()[whichScore];
     } else {
         return 0;
@@ -1261,7 +1255,7 @@ int32_t GetAdmiralScore(Handle<Admiral> admiral, int32_t whichScore) {
 }
 
 int32_t GetAdmiralShipsLeft(Handle<Admiral> admiral) {
-    if ((admiral.number() >= 0) && (admiral.number() < kMaxPlayerNum)) {
+    if (admiral.get()) {
         return admiral->shipsLeft();
     } else {
         return 0;
@@ -1271,7 +1265,7 @@ int32_t GetAdmiralShipsLeft(Handle<Admiral> admiral) {
 int32_t AlterDestinationObjectOccupation(int32_t whichDestination, Handle<Admiral> a, int32_t amount) {
     destBalanceType* d = mGetDestObjectBalancePtr(whichDestination);
 
-    if (a.number() >= 0) {
+    if (a.get()) {
         d->occupied[a.number()] += amount;
         return(d->occupied[a.number()]);
     } else {
@@ -1285,7 +1279,7 @@ void ClearAllOccupants(int32_t whichDestination, Handle<Admiral> a, int32_t full
     for (int i = 0; i < kMaxPlayerNum; i++) {
         d->occupied[i] = 0;
     }
-    if (a.number() >= 0) {
+    if (a.get()) {
         d->occupied[a.number()] = fullAmount;
     }
 }
@@ -1304,7 +1298,7 @@ void AddKillToAdmiral(SpaceObject* anObject) {
 }
 
 int32_t GetAdmiralLoss(Handle<Admiral> admiral) {
-    if ((admiral.number() >= 0) && (admiral.number() < kMaxPlayerNum)) {
+    if (admiral.get()) {
         return admiral->losses();
     } else {
         return 0;
@@ -1312,7 +1306,7 @@ int32_t GetAdmiralLoss(Handle<Admiral> admiral) {
 }
 
 int32_t GetAdmiralKill(Handle<Admiral> admiral) {
-    if ((admiral.number() >= 0) && (admiral.number() < kMaxPlayerNum)) {
+    if (admiral.get()) {
         return admiral->kills();
     } else {
         return 0;

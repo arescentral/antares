@@ -98,8 +98,6 @@ class Admiral {
     static Handle<Admiral>  make(int index, uint32_t attributes, const Scenario::Player& player);
     static Handle<Admiral>  none() { return Handle<Admiral>(-1); }
 
-    int                 number() const;
-
     void                think();
 
     uint32_t&           attributes() { return _attributes; }
