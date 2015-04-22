@@ -105,16 +105,6 @@ int Admiral::number() const {
     return this - gAdmiralData.get();
 }
 
-static Admiral* next_free_admiral() {
-    for (int i = 0; i < kMaxPlayerNum; ++i) {
-        Admiral& a = gAdmiralData[i];
-        if (!a.active()) {
-            return &a;
-        }
-    }
-    return nullptr;
-}
-
 Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Scenario::Player& player) {
     Admiral* a = &gAdmiralData[index];
     if (a->_active) {
