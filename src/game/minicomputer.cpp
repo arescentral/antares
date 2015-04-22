@@ -1542,13 +1542,13 @@ int32_t MiniComputerGetStatusValue( int32_t whichLine)
 
         case kIntegerValue:
         case kSmallFixedValue:
-            return GetAdmiralScore(mGetRealAdmiralNum(line->statusPlayer), line->whichStatus);
+            return GetAdmiralScore(Handle<Admiral>(line->statusPlayer), line->whichStatus);
             break;
 
         case kIntegerMinusValue:
         case kSmallFixedMinusValue:
             return line->negativeValue
-                - GetAdmiralScore(mGetRealAdmiralNum(line->statusPlayer), line->whichStatus);
+                - GetAdmiralScore(Handle<Admiral>(line->statusPlayer), line->whichStatus);
             break;
 
         default:

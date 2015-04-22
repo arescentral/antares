@@ -640,7 +640,7 @@ static void change_score(objectActionType* action, SpaceObject* focus) {
     if ((score.whichPlayer == -1) && (focus != SpaceObject::zero())) {
         admiral = focus->owner;
     } else {
-        admiral = mGetRealAdmiralNum(score.whichPlayer);
+        admiral = Handle<Admiral>(score.whichPlayer);
     }
     if (admiral.number() >= 0) {
         AlterAdmiralScore(admiral, score.whichScore, score.amount);
@@ -653,7 +653,7 @@ static void declare_winner(objectActionType* action, SpaceObject* focus) {
     if ((winner.whichPlayer == -1) && (focus != SpaceObject::zero())) {
         admiral = focus->owner;
     } else {
-        admiral = mGetRealAdmiralNum(winner.whichPlayer);
+        admiral = Handle<Admiral>(winner.whichPlayer);
     }
     DeclareWinner(admiral, winner.nextLevel, winner.textID);
 }

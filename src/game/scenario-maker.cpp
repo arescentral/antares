@@ -81,7 +81,6 @@ vector<Scenario::InitialObject> gScenarioInitialData;
 vector<Scenario::Condition> gScenarioConditionData;
 vector<Scenario::BriefPoint> gScenarioBriefData;
 int32_t gScenarioRotation = 0;
-Handle<Admiral> gAdmiralNumbers[kMaxPlayerNum];
 
 #ifdef DATA_COVERAGE
 set<int32_t> possible_objects;
@@ -265,7 +264,7 @@ void set_initial_destination(const Scenario::InitialObject* initial, bool preser
     }
 
     // get the correct admiral #
-    Handle<Admiral> owner = gAdmiralNumbers[initial->owner];
+    Handle<Admiral> owner = Handle<Admiral>(initial->owner);
 
     auto target = gThisScenario->initial(initial->initialDestination);
     if (target->realObjectNumber >= 0) {
@@ -295,10 +294,6 @@ const Scenario* gThisScenario = NULL;
 
 Scenario* mGetScenario(int32_t num) {
     return &gScenarioData[num];
-}
-
-Handle<Admiral> mGetRealAdmiralNum(int32_t mplayernum) {
-    return gAdmiralNumbers[mplayernum];
 }
 
 Scenario::InitialObject* Scenario::initial(size_t at) const {
@@ -376,7 +371,7 @@ bool Scenario::Condition::is_true() const {
 
     switch (condition) {
         case kCounterCondition:
-            a = mGetRealAdmiralNum(conditionArgument.counter.whichPlayer);
+            a = Handle<Admiral>(conditionArgument.counter.whichPlayer);
             if (GetAdmiralScore(a, conditionArgument.counter.whichCounter) ==
                 conditionArgument.counter.amount) {
                 return true;
@@ -384,7 +379,7 @@ bool Scenario::Condition::is_true() const {
             break;
 
         case kCounterGreaterCondition:
-            a = mGetRealAdmiralNum(conditionArgument.counter.whichPlayer);
+            a = Handle<Admiral>(conditionArgument.counter.whichPlayer);
             if (GetAdmiralScore(a, conditionArgument.counter.whichCounter) >=
                 conditionArgument.counter.amount) {
                 return true;
@@ -392,7 +387,7 @@ bool Scenario::Condition::is_true() const {
             break;
 
         case kCounterNotCondition:
-            a = mGetRealAdmiralNum(conditionArgument.counter.whichPlayer);
+            a = Handle<Admiral>(conditionArgument.counter.whichPlayer);
             if (GetAdmiralScore(a, conditionArgument.counter.whichCounter) !=
                 conditionArgument.counter.amount) {
                 return true;
@@ -409,7 +404,7 @@ bool Scenario::Condition::is_true() const {
         case kOwnerCondition:
             sObject = GetObjectFromInitialNumber(subjectObject);
             if (sObject != NULL) {
-                a = mGetRealAdmiralNum(conditionArgument.longValue);
+                a = Handle<Admiral>(conditionArgument.longValue);
                 if (a == sObject->owner) {
                     return true;
                 }
@@ -674,19 +669,14 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
 
     SetMiniScreenStatusStrList(gThisScenario->scoreStringResID);
 
-    // *** BEGIN INIT ADMIRALS ***
-    for (int i = 0; i < kMaxPlayerNum; i++) {
-        gAdmiralNumbers[i] = Admiral::none();
-    }
-
     for (int i = 0; i < gThisScenario->playerNum; i++) {
         if (gThisScenario->player[i].playerType == kSingleHumanPlayer) {
-            gAdmiralNumbers[i] = Admiral::make(i, kAIsHuman, gThisScenario->player[i]);
-            PayAdmiral(gAdmiralNumbers[i], mLongToFixed(5000));
-            globals()->gPlayerAdmiral = Handle<Admiral>(gAdmiralNumbers[i]);
+            auto admiral = Admiral::make(i, kAIsHuman, gThisScenario->player[i]);
+            PayAdmiral(admiral, mLongToFixed(5000));
+            globals()->gPlayerAdmiral = Handle<Admiral>(admiral);
         } else {
-            gAdmiralNumbers[i] = Admiral::make(i, kAIsComputer, gThisScenario->player[i]);
-            PayAdmiral(gAdmiralNumbers[i], mLongToFixed(5000));
+            auto admiral = Admiral::make(i, kAIsComputer, gThisScenario->player[i]);
+            PayAdmiral(admiral, mLongToFixed(5000));
         }
     }
 
@@ -829,7 +819,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
 
         Handle<Admiral> owner = Admiral::none();
         if (initial->owner > kScenarioNoOwner) {
-            owner = gAdmiralNumbers[initial->owner];
+            owner = Handle<Admiral>(initial->owner);
         }
 
         int32_t specialAttributes = initial->attributes & (~kInitialAttributesMask);
@@ -972,7 +962,7 @@ void UnhideInitialObject(int32_t whichInitial) {
 
     Handle<Admiral> owner = Admiral::none();
     if (initial->owner > kScenarioNoOwner) {
-        owner = gAdmiralNumbers[initial->owner];
+        owner = Handle<Admiral>(initial->owner);
     }
 
     uint32_t specialAttributes = initial->attributes & ~kInitialAttributesMask;
