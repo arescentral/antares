@@ -59,19 +59,14 @@ unique_ptr<Admiral[]> gAdmiralData;
 
 }  // namespace
 
-void AdmiralInit() {
+void Admiral::init() {
     gAdmiralData.reset(new Admiral[kMaxPlayerNum]);
-    ResetAllAdmirals();
+    reset();
     gDestBalanceData.reset(new destBalanceType[kMaxDestObject]);
     ResetAllDestObjectData();
 }
 
-void AdmiralCleanup() {
-    gAdmiralData.reset();
-    gDestBalanceData.reset();
-}
-
-void ResetAllAdmirals() {
+void Admiral::reset() {
     for (int i = 0; i < kMaxPlayerNum; ++i) {
         gAdmiralData[i] = Admiral();
         globals()->gActiveCheats[i] = 0;
@@ -99,12 +94,11 @@ destBalanceType* mGetDestObjectBalancePtr(int32_t whichObject) {
     return gDestBalanceData.get() + whichObject;
 }
 
-Admiral* mGetAdmiralPtr(int32_t mwhichAdmiral) {
-    return Admiral::get(mwhichAdmiral);
-}
-
 Admiral* Admiral::get(int i) {
-    return &gAdmiralData[i];
+    if ((0 <= i) && (i < kMaxPlayerNum)) {
+        return &gAdmiralData[i];
+    }
+    return nullptr;
 }
 
 int Admiral::number() const {

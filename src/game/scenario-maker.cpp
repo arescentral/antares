@@ -651,7 +651,7 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     ResetAllSprites();
     Labels::reset();
     ResetInstruments();
-    ResetAllAdmirals();
+    Admiral::reset();
     ResetAllDestObjectData();
     ResetMotionGlobals();
     gAbsoluteScale = kTimesTwoScale;

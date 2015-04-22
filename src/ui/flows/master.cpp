@@ -144,7 +144,7 @@ void Master::init() {
     InitSoundFX();
     MusicInit();
     InitMotion();
-    AdmiralInit();
+    Admiral::init();
     Beams::init();
 
     if (Preferences::preferences()->play_idle_music()) {

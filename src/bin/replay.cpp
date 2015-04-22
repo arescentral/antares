@@ -157,7 +157,7 @@ void ReplayMaster::init() {
     InitSoundFX();
     MusicInit();
     InitMotion();
-    AdmiralInit();
+    Admiral::init();
     Beams::init();
 }
 

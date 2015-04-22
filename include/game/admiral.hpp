@@ -91,6 +91,8 @@ struct admiralBuildType {
 
 class Admiral {
   public:
+    static void         init();
+    static void         reset();
     static Admiral*     get(int i);
     static Handle<Admiral>  make(uint32_t attributes, const Scenario::Player& player);
 
@@ -155,11 +157,11 @@ class Admiral {
     uint8_t             _color = 0;
     bool                _active = false;
     sfz::String         _name;
+
+  private:
+    Admiral() = default;
 };
 
-void AdmiralInit();
-void AdmiralCleanup();
-void ResetAllAdmirals();
 void ResetAllDestObjectData();
 
 destBalanceType* mGetDestObjectBalancePtr(int32_t whichObject);
