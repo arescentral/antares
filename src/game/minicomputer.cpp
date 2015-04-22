@@ -1074,11 +1074,10 @@ void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> w
             if ( whichLine != kMiniScreenNoLineSelected)
             {
                 if (CountObjectsOfBaseType(-1, Admiral::none()) < (kMaxSpaceObject - kMaxShipBuffer)) {
-                    if (AdmiralScheduleBuild( whichAdmiral,
-                        whichLine - kBuildScreenFirstTypeLine) == false)
-                    {
-                        if (whichAdmiral == globals()->gPlayerAdmiral)
+                    if (whichAdmiral->build(whichLine - kBuildScreenFirstTypeLine) == false) {
+                        if (whichAdmiral == globals()->gPlayerAdmiral) {
                             mPlayBeepBad();
+                        }
                     }
                 } else
                 {

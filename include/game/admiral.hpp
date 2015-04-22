@@ -99,6 +99,7 @@ class Admiral {
     static Handle<Admiral>  none() { return Handle<Admiral>(-1); }
 
     void                think();
+    bool                build(int32_t buildWhichType);
 
     uint32_t&           attributes() { return _attributes; }
     int32_t&            destinationObject() { return _destinationObject; }
@@ -197,8 +198,6 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject);
 void RemoveObjectFromDestination(SpaceObject* o);
 
 void AdmiralThink();
-void AdmiralBuildAtObject(Handle<Admiral> whichAdmiral, int32_t baseTypeNum, int32_t whichDestObject);
-bool AdmiralScheduleBuild(Handle<Admiral> whichAdmiral, int32_t buildWhichType);
 void StopBuilding(int32_t whichDestObject);
 
 void PayAdmiral(Handle<Admiral> whichAdmiral, Fixed howMuch);

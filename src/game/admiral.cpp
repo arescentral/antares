@@ -694,6 +694,30 @@ void RemoveObjectFromDestination(SpaceObject* o) {
     o->destObjectPtr = NULL;
 }
 
+// assumes you can afford it & base has time
+static void AdmiralBuildAtObject(
+        Handle<Admiral> admiral, int32_t baseTypeNum, int32_t whichDestObject) {
+    destBalanceType* buildAtDest = mGetDestObjectBalancePtr(whichDestObject);
+    SpaceObject* buildAtObject = NULL;
+    coordPointType  coord;
+    fixedPointType  v = {0, 0};
+
+    if ((baseTypeNum >= 0) && (admiral->buildAtObject() >= 0)) {
+        buildAtObject = mGetSpaceObjectPtr(buildAtDest->whichObject);
+        coord = buildAtObject->location;
+
+        SpaceObject* newObject = CreateAnySpaceObject(
+                baseTypeNum, &v, &coord, 0, admiral, 0, -1);
+        if (newObject) {
+            SetObjectDestination(newObject, NULL);
+            if (admiral == globals()->gPlayerAdmiral) {
+                PlayVolumeSound(kComputerBeep2, kMediumVolume, kMediumPersistence,
+                        kLowPrioritySound);
+            }
+        }
+    }
+}
+
 void AdmiralThink() {
     Admiral* a =gAdmiralData.get();
     SpaceObject* anObject;
@@ -1155,7 +1179,7 @@ void Admiral::think() {
                     mGetBaseObjectFromClassRace(baseObject, baseNum, _hopeToBuild,
                             _race);
                     if (_cash >= mLongToFixed(baseObject->price)) {
-                        AdmiralScheduleBuild(Handle<Admiral>(this - gAdmiralData.get()), j);
+                        Admiral::build(j);
                         _hopeToBuild = -1;
                         _saveGoal = 0;
                     } else {
@@ -1167,43 +1191,21 @@ void Admiral::think() {
     }
 }
 
-// assumes you can afford it & base has time
-void AdmiralBuildAtObject(Handle<Admiral> admiral, int32_t baseTypeNum, int32_t whichDestObject) {
-    destBalanceType* buildAtDest = mGetDestObjectBalancePtr(whichDestObject);
-    SpaceObject* buildAtObject = NULL;
-    coordPointType  coord;
-    fixedPointType  v = {0, 0};
-
-    if ((baseTypeNum >= 0) && (admiral->buildAtObject() >= 0)) {
-        buildAtObject = mGetSpaceObjectPtr(buildAtDest->whichObject);
-        coord = buildAtObject->location;
-
-        SpaceObject* newObject = CreateAnySpaceObject(
-                baseTypeNum, &v, &coord, 0, admiral, 0, -1);
-        if (newObject) {
-            SetObjectDestination(newObject, NULL);
-            if (admiral == globals()->gPlayerAdmiral) {
-                PlayVolumeSound(kComputerBeep2, kMediumVolume, kMediumPersistence,
-                        kLowPrioritySound);
-            }
-        }
-    }
-}
-
-bool AdmiralScheduleBuild(Handle<Admiral> admiral, int32_t buildWhichType) {
-    destBalanceType* buildAtDest = mGetDestObjectBalancePtr(admiral->buildAtObject());
+bool Admiral::build(int32_t buildWhichType) {
+    destBalanceType* buildAtDest = mGetDestObjectBalancePtr(_buildAtObject);
     BaseObject* buildBaseObject = NULL;
     int32_t            baseNum;
 
-    GetAdmiralBuildAtObject(admiral);
+    Handle<Admiral> self(this - gAdmiralData.get());
+    GetAdmiralBuildAtObject(self);
     if ((buildWhichType >= 0)
             && (buildWhichType < kMaxTypeBaseCanBuild)
-            && (admiral->buildAtObject() >= 0) && (buildAtDest->buildTime <= 0)) {
+            && (_buildAtObject >= 0) && (buildAtDest->buildTime <= 0)) {
         mGetBaseObjectFromClassRace(buildBaseObject, baseNum,
-                buildAtDest->canBuildType[buildWhichType], admiral->race());
-        if ((buildBaseObject != NULL) && (buildBaseObject->price <= mFixedToLong(admiral->cash()))) {
-            admiral->cash() -= (mLongToFixed(buildBaseObject->price));
-            if (globals()->gActiveCheats[admiral.number()] & kBuildFastBit) {
+                buildAtDest->canBuildType[buildWhichType], _race);
+        if ((buildBaseObject != NULL) && (buildBaseObject->price <= mFixedToLong(_cash))) {
+            _cash -= (mLongToFixed(buildBaseObject->price));
+            if (globals()->gActiveCheats[self.number()] & kBuildFastBit) {
                 buildAtDest->buildTime = 9;
                 buildAtDest->totalBuildTime = 9;
             } else {
