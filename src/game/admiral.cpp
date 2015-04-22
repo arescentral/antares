@@ -115,13 +115,12 @@ static Admiral* next_free_admiral() {
     return nullptr;
 }
 
-Handle<Admiral> Admiral::make(uint32_t attributes, const Scenario::Player& player) {
-    Admiral* a = next_free_admiral();
-    if (!a) {
+Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Scenario::Player& player) {
+    Admiral* a = &gAdmiralData[index];
+    if (a->_active) {
         return none();
     }
 
-    *a = Admiral();
     a->_active = true;
     a->_attributes = attributes;
     a->_earningPower = player.earningPower;
