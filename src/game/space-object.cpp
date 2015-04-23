@@ -728,8 +728,8 @@ void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message) 
     object->owner = owner;
 
     if (owner.get() && (object->attributes & kIsDestination)) {
-        if (GetAdmiralConsiderObject(owner) < 0) {
-            SetAdmiralConsiderObject(owner, object->number());
+        if (owner->control() < 0) {
+            owner->set_control(object->number());
         }
 
         if (GetAdmiralBuildAtObject(owner) < 0) {
@@ -737,8 +737,8 @@ void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message) 
                 SetAdmiralBuildAtObject(owner, object->number());
             }
         }
-        if (GetAdmiralDestinationObject(owner) < 0) {
-            SetAdmiralDestinationObject(owner, object->number());
+        if (owner->target() < 0) {
+            owner->set_target(object->number());
         }
     }
 

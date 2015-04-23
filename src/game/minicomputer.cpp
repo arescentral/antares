@@ -650,7 +650,7 @@ void MiniComputerHandleNull( int32_t unitsToDo)
         // handle control/command/selected object
 
         myObject = mGetMiniObjectPtr( kMiniSelectObjectNum);
-        count = GetAdmiralConsiderObject(globals()->gPlayerAdmiral);
+        count = globals()->gPlayerAdmiral->control();
         if ( count >= 0)
         {
             realObject = mGetSpaceObjectPtr(count);
@@ -674,7 +674,7 @@ void MiniComputerHandleNull( int32_t unitsToDo)
         mCopyMiniSpaceObject(*myObject, newObject);
 
         myObject = mGetMiniObjectPtr( kMiniTargetObjectNum);
-        count = GetAdmiralDestinationObject(globals()->gPlayerAdmiral);
+        count = globals()->gPlayerAdmiral->target();
         if ( count >= 0)
         {
             realObject = mGetSpaceObjectPtr(count);
@@ -1093,7 +1093,7 @@ void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> w
             switch ( whichLine)
             {
                 case kSpecialMiniTransfer:
-                    l = GetAdmiralConsiderObject( whichAdmiral);
+                    l = whichAdmiral->control();
                     anObject = whichAdmiral->flagship();
                     if ( anObject != NULL)
                     {
@@ -1122,7 +1122,7 @@ void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> w
                     break;
 
                 case kSpecialMiniFire1:
-                    l = GetAdmiralConsiderObject( whichAdmiral);
+                    l = whichAdmiral->control();
                     if (( l != kNoShip))
                     {
                         anObject = mGetSpaceObjectPtr(l);
@@ -1135,7 +1135,7 @@ void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> w
                     break;
 
                 case kSpecialMiniFire2:
-                    l = GetAdmiralConsiderObject( whichAdmiral);
+                    l = whichAdmiral->control();
                     if (( l != kNoShip))
                     {
                         anObject = mGetSpaceObjectPtr(l);
@@ -1148,7 +1148,7 @@ void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> w
                     break;
 
                 case kSpecialMiniFireSpecial:
-                    l = GetAdmiralConsiderObject( whichAdmiral);
+                    l = whichAdmiral->control();
                     if (( l != kNoShip))
                     {
                         anObject = mGetSpaceObjectPtr(l);
@@ -1161,7 +1161,7 @@ void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> w
                     break;
 
                 case kSpecialMiniHold:
-                    l = GetAdmiralConsiderObject( whichAdmiral);
+                    l = whichAdmiral->control();
                     if (( l != kNoShip))
                     {
                         anObject = mGetSpaceObjectPtr(l);
@@ -1170,7 +1170,7 @@ void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> w
                     break;
 
                 case kSpecialMiniGoToMe:
-                    l = GetAdmiralConsiderObject( whichAdmiral);
+                    l = whichAdmiral->control();
                     if (( l != kNoShip))
                     {
                         anObject = mGetSpaceObjectPtr(l);

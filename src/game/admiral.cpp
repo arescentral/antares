@@ -303,43 +303,35 @@ void Admiral::set_flagship(int32_t number) {
     }
 }
 
-void SetAdmiralDestinationObject(Handle<Admiral> a, int32_t whichObject) {
-    a->destinationObject() = whichObject;
+void Admiral::set_target(int32_t whichObject) {
+    _destinationObject = whichObject;
     if (whichObject >= 0) {
         SpaceObject* destObject = mGetSpaceObjectPtr(whichObject);
-        a->destinationObjectID() = destObject->id;
+        _destinationObjectID = destObject->id;
     } else {
-        a->destinationObjectID() = -1;
+        _destinationObjectID = -1;
     }
-    a->has_destination() = true;
+    _has_destination = true;
 }
 
-int32_t GetAdmiralDestinationObject(Handle<Admiral> a) {
-    if (a->destinationObject() < 0) {
-        return (a->destinationObject());
+int32_t Admiral::target() const {
+    if (_destinationObject >= 0) {
+        SpaceObject* destObject = mGetSpaceObjectPtr(_destinationObject);
+        if ((destObject->id == _destinationObjectID)
+                && (destObject->active == kObjectInUse)) {
+            return _destinationObject;
+        }
     }
-
-    SpaceObject* destObject = mGetSpaceObjectPtr(a->destinationObject());
-    if ((destObject->id == a->destinationObjectID())
-            && (destObject->active == kObjectInUse)) {
-        return a->destinationObject();
-    } else {
-        a->destinationObject() = -1;
-        a->destinationObjectID() = -1;
-        return -1;
-    }
+    return -1;
 }
 
-void SetAdmiralConsiderObject(Handle<Admiral> a, int32_t whichObject) {
-    SpaceObject* anObject= mGetSpaceObjectPtr(whichObject);
+void Admiral::set_control(int32_t whichObject) {
+    SpaceObject* anObject = mGetSpaceObjectPtr(whichObject);
     destBalanceType* d = mGetDestObjectBalancePtr(0);
 
-    if (!a.get()) {
-        throw Exception("Can't set consider ship for -1 admiral.");
-    }
-    a->considerShip() = whichObject;
+    _considerShip = whichObject;
     if (whichObject >= 0) {
-        a->considerShipID() = anObject->id;
+        _considerShipID = anObject->id;
         if (anObject->attributes & kCanAcceptBuild) {
             int buildAtNum = 0;
             while ((d->whichObject != whichObject) && (buildAtNum < kMaxDestObject)) {
@@ -352,13 +344,25 @@ void SetAdmiralConsiderObject(Handle<Admiral> a, int32_t whichObject) {
                     l++;
                 }
                 if (l < kMaxShipCanBuild) {
-                    a->buildAtObject() = buildAtNum;
+                    _buildAtObject = buildAtNum;
                 }
             }
         }
     } else {
-        a->considerShipID() = -1;
+        _considerShipID = -1;
     }
+}
+
+int32_t Admiral::control() const {
+    if (_considerShip >= 0) {
+        SpaceObject* anObject = mGetSpaceObjectPtr(_considerShip);
+        if ((anObject->id == _considerShipID)
+                && (anObject->active == kObjectInUse)
+                && (anObject->owner.get() == this)) {
+            return _considerShip;
+        }
+    }
+    return -1;
 }
 
 bool BaseHasSomethingToBuild(int32_t whichObject) {
@@ -382,31 +386,6 @@ bool BaseHasSomethingToBuild(int32_t whichObject) {
         }
     }
     return false;
-}
-
-int32_t GetAdmiralConsiderObject(Handle<Admiral> a) {
-    SpaceObject* anObject;
-
-    if (!a.get()) {
-        return -1;
-    }
-    if (a->considerShip() >= 0) {
-        anObject = mGetSpaceObjectPtr(a->considerShip());
-        if ((anObject->id == a->considerShipID())
-                && (anObject->active == kObjectInUse)
-                && (anObject->owner == a)) {
-            return a->considerShip();
-        } else {
-            a->considerShip() = -1;
-            a->considerShipID() = -1;
-            return -1;
-        }
-    } else {
-        if (a->considerShip() != -1) {
-            throw Exception("Strange Admiral Consider Ship");
-        }
-        return a->considerShip();
-    }
 }
 
 int32_t GetAdmiralBuildAtObject(Handle<Admiral> a) {

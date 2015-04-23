@@ -97,6 +97,11 @@ class Admiral {
     void                pay(Fixed howMuch);
     void                pay_absolute(Fixed howMuch);
 
+    int32_t             control() const;
+    int32_t             target() const;
+    void                set_control(int32_t number);
+    void                set_target(int32_t number);
+
     uint32_t&           attributes() { return _attributes; }
     bool&               has_destination() { return _has_destination; }
     int32_t&            destinationObject() { return _destinationObject; }
@@ -178,11 +183,6 @@ void RecalcAllAdmiralBuildData();
 
 uint8_t GetAdmiralColor(Handle<Admiral> whichAdmiral);
 int32_t GetAdmiralRace(Handle<Admiral> whichAdmiral);
-
-void SetAdmiralDestinationObject(Handle<Admiral> whichAdmiral, int32_t whichObject);
-int32_t GetAdmiralDestinationObject(Handle<Admiral> whichAdmiral);
-void SetAdmiralConsiderObject(Handle<Admiral> whichAdmiral, int32_t whichObject);
-int32_t GetAdmiralConsiderObject(Handle<Admiral> whichAdmiral);
 
 bool BaseHasSomethingToBuild(int32_t whichObject);
 int32_t GetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral);

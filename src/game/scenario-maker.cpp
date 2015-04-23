@@ -268,10 +268,10 @@ void set_initial_destination(const Scenario::InitialObject* initial, bool preser
 
     auto target = gThisScenario->initial(initial->initialDestination);
     if (target->realObjectNumber >= 0) {
-        int32_t saveDest = GetAdmiralDestinationObject(owner); // save the original dest
+        int32_t saveDest = owner->target(); // save the original dest
 
         // set the admiral's dest object to the mapped initial dest object
-        SetAdmiralDestinationObject(owner, target->realObjectNumber);
+        owner->set_target(target->realObjectNumber);
 
         // now give the mapped initial object the admiral's destination
 
@@ -282,7 +282,7 @@ void set_initial_destination(const Scenario::InitialObject* initial, bool preser
         object->attributes = specialAttributes;
 
         if (preserve) {
-            SetAdmiralDestinationObject(owner, saveDest);
+            owner->set_target(saveDest);
         }
     }
 }
@@ -470,7 +470,7 @@ bool Scenario::Condition::is_true() const {
         case kIsAuxiliaryObject:
             sObject = GetObjectFromInitialNumber(subjectObject);
             if (sObject != NULL) {
-                l = GetAdmiralConsiderObject(globals()->gPlayerAdmiral);
+                l = globals()->gPlayerAdmiral->control();
                 if (l >= 0) {
                     dObject = mGetSpaceObjectPtr(l);
                     if (dObject == sObject) {
@@ -483,7 +483,7 @@ bool Scenario::Condition::is_true() const {
         case kIsTargetObject:
             sObject = GetObjectFromInitialNumber(subjectObject);
             if (sObject != NULL) {
-                l = GetAdmiralDestinationObject(globals()->gPlayerAdmiral);
+                l = globals()->gPlayerAdmiral->target();
                 if (l >= 0) {
                     dObject = mGetSpaceObjectPtr(l);
                     if (dObject == sObject) {
@@ -857,8 +857,8 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             if (owner.get()) {
                 if (initial->canBuild[0] >= 0) {
                     if (GetAdmiralBuildAtObject(owner) < 0) {
-                        SetAdmiralConsiderObject(owner, newShipNum);
-                        SetAdmiralDestinationObject(owner, newShipNum);
+                        owner->set_control(newShipNum);
+                        owner->set_target(newShipNum);
                     }
                 }
             }
@@ -993,14 +993,14 @@ void UnhideInitialObject(int32_t whichInitial) {
 
         if (owner.get()) {
             if (initial->canBuild[0] >= 0) {
-                if (GetAdmiralConsiderObject(owner) < 0) {
-                    SetAdmiralConsiderObject(owner, newShipNum);
+                if (owner->control() < 0) {
+                    owner->set_control(newShipNum);
                 }
                 if (GetAdmiralBuildAtObject(owner) < 0) {
                     SetAdmiralBuildAtObject(owner, newShipNum);
                 }
-                if (GetAdmiralDestinationObject(owner) < 0) {
-                    SetAdmiralDestinationObject(owner, newShipNum);
+                if (owner->target() < 0) {
+                    owner->set_target(newShipNum);
                 }
             }
         }
