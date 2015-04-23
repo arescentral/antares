@@ -875,8 +875,8 @@ void PlayerShipHandleClick(Point where, int button) {
 }
 
 void SetPlayerSelectShip(int32_t whichShip, bool target, Handle<Admiral> admiralNumber) {
-    SpaceObject *selectShip = mGetSpaceObjectPtr(whichShip),
-                    *theShip = GetAdmiralFlagship( admiralNumber);
+    SpaceObject* selectShip = mGetSpaceObjectPtr(whichShip);
+    SpaceObject* theShip = admiralNumber->flagship();
 
     if ( admiralNumber == globals()->gPlayerAdmiral)
     {
@@ -934,7 +934,7 @@ void SetPlayerSelectShip(int32_t whichShip, bool target, Handle<Admiral> admiral
 // gPlayerShip already points to the current, legal living ship
 
 void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, int32_t newShipNumber) {
-    SpaceObject *anObject = GetAdmiralFlagship( whichAdmiral);
+    SpaceObject* anObject = whichAdmiral->flagship();
     if (anObject == NULL) {
         throw Exception(format(
                     "whichAdmiral: {0}, newShipNumber: {1}",
@@ -974,7 +974,7 @@ void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, int32_t newShipNumber)
         anObject = mGetSpaceObjectPtr(newShipNumber);
         anObject->attributes |= (kIsRemote | kIsPlayerShip);
     }
-    SetAdmiralFlagship( whichAdmiral, newShipNumber);
+    whichAdmiral->set_flagship(newShipNumber);
 }
 
 void TogglePlayerAutoPilot(SpaceObject *theShip) {
@@ -1082,7 +1082,9 @@ void PlayerShipBodyExpire( SpaceObject *theShip, bool sourceIsBody)
         } else {
             globals()->gScenarioWinner.text = 10050 + gThisScenario->levelNameStrNum;
         }
-        SetAdmiralFlagship( theShip->owner, -1);
+        if (theShip->owner.get()) {
+            theShip->owner->set_flagship(-1);
+        }
     } else if ( selectShip != NULL)
     {
         ChangePlayerShipNumber(theShip->owner, selectShipNum);

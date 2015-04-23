@@ -825,8 +825,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         int32_t specialAttributes = initial->attributes & (~kInitialAttributesMask);
         if (initial->attributes & kIsPlayerShip) {
             specialAttributes &= ~kIsPlayerShip;
-            if ((GetAdmiralFlagship(owner) == NULL)
-                    && (owner == globals()->gPlayerAdmiral)) {
+            if ((owner == globals()->gPlayerAdmiral) && !owner->flagship()) {
                 specialAttributes |= kIsHumanControlled | kIsPlayerShip;
             }
         }
@@ -848,8 +847,8 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         initial->realObjectID = anObject->id;
 
         if ((initial->attributes & kIsPlayerShip)
-                && (GetAdmiralFlagship(owner) == NULL)) {
-            SetAdmiralFlagship(owner, newShipNum);
+                && owner.get() && !owner->flagship()) {
+            owner->set_flagship(newShipNum);
             if (owner == globals()->gPlayerAdmiral) {
                 ResetPlayerShip(newShipNum);
             }
@@ -967,7 +966,7 @@ void UnhideInitialObject(int32_t whichInitial) {
 
     uint32_t specialAttributes = initial->attributes & ~kInitialAttributesMask;
     if (initial->attributes & kIsPlayerShip) {
-        if (GetAdmiralFlagship(owner) == NULL) {
+        if (owner.get() && !owner->flagship()) {
             if (owner == globals()->gPlayerAdmiral) {
                 specialAttributes |= kIsHumanControlled;
             } else {
@@ -1009,8 +1008,8 @@ void UnhideInitialObject(int32_t whichInitial) {
     }
 
     initial->realObjectID = anObject->id;
-    if ((initial->attributes & kIsPlayerShip) && (GetAdmiralFlagship(owner) == NULL)) {
-        SetAdmiralFlagship(owner, newShipNum);
+    if ((initial->attributes & kIsPlayerShip) && owner.get() && !owner->flagship()) {
+        owner->set_flagship(newShipNum);
         if (owner == globals()->gPlayerAdmiral) {
             ResetPlayerShip(newShipNum);
         }

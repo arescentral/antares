@@ -1094,7 +1094,7 @@ void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> w
             {
                 case kSpecialMiniTransfer:
                     l = GetAdmiralConsiderObject( whichAdmiral);
-                    anObject = GetAdmiralFlagship( whichAdmiral);
+                    anObject = whichAdmiral->flagship();
                     if ( anObject != NULL)
                     {
                         if ( l != kNoShip)
@@ -1174,7 +1174,7 @@ void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> w
                     if (( l != kNoShip))
                     {
                         anObject = mGetSpaceObjectPtr(l);
-                        anotherObject = GetAdmiralFlagship( whichAdmiral);
+                        anotherObject = whichAdmiral->flagship();
                         SetObjectLocationDestination( anObject, &(anotherObject->location));
                     }
                     break;

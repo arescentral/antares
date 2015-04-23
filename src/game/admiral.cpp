@@ -283,31 +283,23 @@ int32_t GetAdmiralRace(Handle<Admiral> a) {
     return a->race();
 }
 
-void SetAdmiralFlagship(Handle<Admiral> a, int32_t whichShip) {
-    if (!a.get()) {
-        throw Exception ("Can't set flagship of -1 admiral.");
+SpaceObject* Admiral::flagship() {
+    if (_flagship != kNoShip) {
+        SpaceObject* anObject = mGetSpaceObjectPtr(_flagship);
+        if (anObject->id == _flagshipID) {
+            return anObject;
+        }
     }
-    if (whichShip >= 0) {
-        a->flagship() = whichShip;
-        SpaceObject* anObject = mGetSpaceObjectPtr(whichShip);
-        a->flagshipID() = anObject->id;
-    } else {
-        a->flagshipID() = -1;
-    }
+    return nullptr;
 }
 
-SpaceObject* GetAdmiralFlagship(Handle<Admiral> a) {
-    if (!a.get()) {
-        return NULL;
-    }
-    if (a->flagship() == kNoShip) {
-        return NULL;
-    }
-    SpaceObject* anObject = mGetSpaceObjectPtr(a->flagship());
-    if (anObject->id == a->flagshipID()) {
-        return anObject;
+void Admiral::set_flagship(int32_t number) {
+    if (number >= 0) {
+        _flagship = number;
+        _flagshipID = mGetSpaceObjectPtr(number)->id;
     } else {
-        return NULL;
+        _flagship = kNoShip;
+        _flagshipID = -1;
     }
 }
 

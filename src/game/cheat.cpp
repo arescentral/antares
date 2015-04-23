@@ -132,7 +132,7 @@ void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
             break;
 
         case kObserverCheat:
-            anObject = GetAdmiralFlagship( whichPlayer);
+            anObject = whichPlayer->flagship();
             if ( anObject != NULL)
             {
                 anObject->attributes &= ~(kCanBeEngaged | kHated);

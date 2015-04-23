@@ -106,8 +106,12 @@ class Admiral {
     uint32_t&           attributes() { return _attributes; }
     int32_t&            destinationObject() { return _destinationObject; }
     int32_t&            destinationObjectID() { return _destinationObjectID; }
-    int32_t&            flagship() { return _flagship; }
-    int32_t&            flagshipID() { return _flagshipID; }
+
+    SpaceObject*        flagship();
+    int32_t             flagshipNumber() { return _flagship; }
+    int32_t             flagshipID() { return _flagshipID; }
+    void                set_flagship(int32_t number);
+
     int32_t&            considerShip() { return _considerShip; }
     int32_t&            considerShipID() { return _considerShipID; }
     int32_t&            considerDestination() { return _considerDestination; }
@@ -177,8 +181,6 @@ void RecalcAllAdmiralBuildData();
 
 uint8_t GetAdmiralColor(Handle<Admiral> whichAdmiral);
 int32_t GetAdmiralRace(Handle<Admiral> whichAdmiral);
-void SetAdmiralFlagship(Handle<Admiral> whichAdmiral, int32_t whichShip);
-SpaceObject* GetAdmiralFlagship(Handle<Admiral> whichAdmiral);
 void SetAdmiralEarningPower(Handle<Admiral> whichAdmiral, Fixed power);
 Fixed GetAdmiralEarningPower(Handle<Admiral> whichAdmiral);
 
