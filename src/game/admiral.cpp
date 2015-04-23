@@ -185,7 +185,7 @@ void RemoveDestination(int32_t whichDestination) {
                 if (a->destinationObject() == d->whichObject) {
                     a->destinationObject() = kNoDestinationObject;
                     a->destinationObjectID() = -1;
-                    a->destType() = kNoDestinationType;
+                    a->has_destination() = false;
                 }
                 if (a->considerDestination() == whichDestination) {
                     a->considerDestination() = kNoDestinationObject;
@@ -303,7 +303,7 @@ void Admiral::set_flagship(int32_t number) {
     }
 }
 
-void SetAdmiralDestinationObject(Handle<Admiral> a, int32_t whichObject, destinationType dType) {
+void SetAdmiralDestinationObject(Handle<Admiral> a, int32_t whichObject) {
     a->destinationObject() = whichObject;
     if (whichObject >= 0) {
         SpaceObject* destObject = mGetSpaceObjectPtr(whichObject);
@@ -311,7 +311,7 @@ void SetAdmiralDestinationObject(Handle<Admiral> a, int32_t whichObject, destina
     } else {
         a->destinationObjectID() = -1;
     }
-    a->destType() = dType;
+    a->has_destination() = true;
 }
 
 int32_t GetAdmiralDestinationObject(Handle<Admiral> a) {
@@ -567,7 +567,7 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
     // if the admiral is not legal, or the admiral has no destination, then forget about it
     if ((dObject == NULL) &&
             ((!a->active())
-             || (a->destType() == kNoDestinationType)
+             || !a->has_destination()
              || (a->destinationObject() == kNoDestinationObject)
              || (a->destinationObjectID() == o->id))) {
         o->destinationObject = kNoDestinationObject;
@@ -806,7 +806,7 @@ void Admiral::think() {
                         && (anObject->bestConsideredTargetValue >
                             anObject->currentTargetValue)) {
                     _destinationObject = anObject->bestConsideredTargetNumber;
-                    _destType = kObjectDestinationType;
+                    _has_destination = true;
                     if (_destinationObject >= 0) {
                         destObject = mGetSpaceObjectPtr(_destinationObject);
                         if (destObject->active == kObjectInUse) {
@@ -822,7 +822,7 @@ void Admiral::think() {
                             SetObjectDestination(anObject, NULL);
                         }
                     }
-                    _destType = kNoDestinationType;
+                    _has_destination = false;
                 }
 
                 if ((anObject->duty != eEscortDuty)

@@ -67,12 +67,6 @@ const int32_t kMaxDestObject = 10;  // we keep special track of dest objects for
 const int32_t kMaxNumAdmiralCanBuild = kMaxDestObject * kMaxTypeBaseCanBuild;
 const int32_t kAdmiralScoreNum = 3;
 
-enum destinationType {
-    kNoDestinationType,
-    kObjectDestinationType,
-    kCoordinateDestinationType
-};
-
 struct destBalanceType {
     int32_t             whichObject;
     int32_t             canBuildType[kMaxTypeBaseCanBuild];
@@ -104,6 +98,7 @@ class Admiral {
     void                pay_absolute(Fixed howMuch);
 
     uint32_t&           attributes() { return _attributes; }
+    bool&               has_destination() { return _has_destination; }
     int32_t&            destinationObject() { return _destinationObject; }
     int32_t&            destinationObjectID() { return _destinationObjectID; }
 
@@ -117,7 +112,6 @@ class Admiral {
     int32_t&            considerDestination() { return _considerDestination; }
     int32_t&            buildAtObject() { return _buildAtObject; } // # of destination object to build at
     int32_t&            race() { return _race; }
-    destinationType&    destType() { return _destType; }
     Fixed               cash() const { return _cash; }
     Fixed&              cash() { return _cash; }
     Fixed&              saveGoal() { return _saveGoal; }
@@ -141,6 +135,7 @@ class Admiral {
 
   private:
     uint32_t            _attributes;
+    bool                _has_destination = false;
     int32_t             _destinationObject = kNoDestinationObject;
     int32_t             _destinationObjectID = -1;
     int32_t             _flagship = kNoShip;
@@ -150,7 +145,6 @@ class Admiral {
     int32_t             _considerDestination = kNoShip;
     int32_t             _buildAtObject = -1; // # of destination object to build at
     int32_t             _race = -1;
-    destinationType     _destType = kNoDestinationType;
     Fixed               _cash = 0;
     Fixed               _saveGoal = 0;
     Fixed               _earning_power = 0;
@@ -185,7 +179,7 @@ void RecalcAllAdmiralBuildData();
 uint8_t GetAdmiralColor(Handle<Admiral> whichAdmiral);
 int32_t GetAdmiralRace(Handle<Admiral> whichAdmiral);
 
-void SetAdmiralDestinationObject(Handle<Admiral> whichAdmiral, int32_t whichObject, destinationType dType);
+void SetAdmiralDestinationObject(Handle<Admiral> whichAdmiral, int32_t whichObject);
 int32_t GetAdmiralDestinationObject(Handle<Admiral> whichAdmiral);
 void SetAdmiralConsiderObject(Handle<Admiral> whichAdmiral, int32_t whichObject);
 int32_t GetAdmiralConsiderObject(Handle<Admiral> whichAdmiral);

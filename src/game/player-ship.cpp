@@ -885,7 +885,7 @@ void SetPlayerSelectShip(int32_t whichShip, bool target, Handle<Admiral> admiral
         globals()->destKeyUsedForSelection = true;
     }
     if (target) {
-        SetAdmiralDestinationObject( admiralNumber, whichShip, kObjectDestinationType);
+        SetAdmiralDestinationObject(admiralNumber, whichShip);
         if (admiralNumber == globals()->gPlayerAdmiral) {
             Labels::set_object( gDestinationLabel, selectShip);
             if (whichShip == globals()->gPlayerShipNumber) {

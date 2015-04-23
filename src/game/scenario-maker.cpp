@@ -271,8 +271,7 @@ void set_initial_destination(const Scenario::InitialObject* initial, bool preser
         int32_t saveDest = GetAdmiralDestinationObject(owner); // save the original dest
 
         // set the admiral's dest object to the mapped initial dest object
-        SetAdmiralDestinationObject(
-                owner, target->realObjectNumber, kObjectDestinationType);
+        SetAdmiralDestinationObject(owner, target->realObjectNumber);
 
         // now give the mapped initial object the admiral's destination
 
@@ -283,7 +282,7 @@ void set_initial_destination(const Scenario::InitialObject* initial, bool preser
         object->attributes = specialAttributes;
 
         if (preserve) {
-            SetAdmiralDestinationObject(owner, saveDest, kObjectDestinationType);
+            SetAdmiralDestinationObject(owner, saveDest);
         }
     }
 }
@@ -859,7 +858,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 if (initial->canBuild[0] >= 0) {
                     if (GetAdmiralBuildAtObject(owner) < 0) {
                         SetAdmiralConsiderObject(owner, newShipNum);
-                        SetAdmiralDestinationObject(owner, newShipNum, kObjectDestinationType);
+                        SetAdmiralDestinationObject(owner, newShipNum);
                     }
                 }
             }
@@ -1001,7 +1000,7 @@ void UnhideInitialObject(int32_t whichInitial) {
                     SetAdmiralBuildAtObject(owner, newShipNum);
                 }
                 if (GetAdmiralDestinationObject(owner) < 0) {
-                    SetAdmiralDestinationObject(owner, newShipNum, kObjectDestinationType);
+                    SetAdmiralDestinationObject(owner, newShipNum);
                 }
             }
         }

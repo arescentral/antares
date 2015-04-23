@@ -738,7 +738,7 @@ void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message) 
             }
         }
         if (GetAdmiralDestinationObject(owner) < 0) {
-            SetAdmiralDestinationObject(owner, object->number(), kObjectDestinationType);
+            SetAdmiralDestinationObject(owner, object->number());
         }
     }
 
