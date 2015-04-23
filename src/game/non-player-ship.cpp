@@ -191,7 +191,7 @@ static void tick_special(SpaceObject* subject, SpaceObject* target, int32_t time
 
 void NonplayerShipThink(int32_t timePass)
 {
-    admiralType     *anAdmiral;
+    Admiral*        anAdmiral;
     SpaceObject*    targetObject;
     BaseObject*     baseObject;
     BaseObject*     weaponObject;
@@ -226,7 +226,7 @@ void NonplayerShipThink(int32_t timePass)
     }
 
     for (int32_t count = 0; count < kMaxPlayerNum; count++) {
-        mGetAdmiralPtr(count)->shipsLeft = 0;
+        Handle<Admiral>(count)->shipsLeft() = 0;
     }
 
     // it probably doesn't matter what order we do this in, but we'll do
@@ -244,12 +244,12 @@ void NonplayerShipThink(int32_t timePass)
         // strobe its symbol if it's not feeling well
         if (anObject->sprite) {
             if ((anObject->health() > 0) && (anObject->health() <= (anObject->max_health() >> 2))) {
-                if (anObject->owner == globals()->gPlayerAdmiralNumber) {
+                if (anObject->owner == globals()->gPlayerAdmiral) {
                     anObject->sprite->tinyColor = friendSick;
-                } else if (anObject->owner < 0) {
-                    anObject->sprite->tinyColor = neutralSick;
-                } else {
+                } else if (anObject->owner.get()) {
                     anObject->sprite->tinyColor = foeSick;
+                } else {
+                    anObject->sprite->tinyColor = neutralSick;
                 }
             } else {
                 anObject->sprite->tinyColor = anObject->tinyColor;
@@ -266,8 +266,8 @@ void NonplayerShipThink(int32_t timePass)
         anObject->targetAngle = anObject->directionGoal = anObject->direction;
 
         // incremenent its admiral's # of ships
-        if (anObject->owner > kNoOwner) {
-            mGetAdmiralPtr(anObject->owner)->shipsLeft++;
+        if (anObject->owner.get()) {
+            anObject->owner->shipsLeft()++;
         }
 
         switch (anObject->presenceState) {
@@ -943,7 +943,7 @@ uint32_t ThinkObjectWarpInPresence( SpaceObject *anObject)
             newVel.h = newVel.v = 0;
             CreateAnySpaceObject(
                     globals()->scenarioFileInfo.warpInFlareID, &newVel, &anObject->location,
-                    anObject->direction, kNoOwner, 0, -1);
+                    anObject->direction, Admiral::none(), 0, -1);
         } else {
             anObject->presenceState = kNormalPresence;
             anObject->_energy = 0;
@@ -1028,8 +1028,7 @@ uint32_t ThinkObjectWarpOutPresence(SpaceObject* anObject, BaseObject* baseObjec
 
 
         CreateAnySpaceObject( globals()->scenarioFileInfo.warpOutFlareID, &(newVel),
-            &(anObject->location), anObject->direction, kNoOwner, 0,
-            -1);
+            &(anObject->location), anObject->direction, Admiral::none(), 0, -1);
     }
     return( keysDown);
 }
@@ -1726,7 +1725,7 @@ void HitObject(SpaceObject *anObject, SpaceObject *sObject) {
     }
 
     if (anObject->health() < 0
-            && (anObject->owner == globals()->gPlayerAdmiralNumber)
+            && (anObject->owner == globals()->gPlayerAdmiral)
             && (anObject->attributes & kCanAcceptDestination)) {
         const StringSlice& object_name = get_object_name(anObject->whichBaseObject);
         int count = CountObjectsOfBaseType(anObject->whichBaseObject, anObject->owner) - 1;
@@ -1737,14 +1736,14 @@ void HitObject(SpaceObject *anObject, SpaceObject *sObject) {
         sObject->baseType->collide.run(sObject, anObject, NULL);
     }
 
-    if (anObject->owner == globals()->gPlayerAdmiralNumber
+    if (anObject->owner == globals()->gPlayerAdmiral
             && (anObject->attributes & kIsHumanControlled)
             && (sObject->baseType->damage > 0)) {
         globals()->transitions.start_boolean(128, 128, WHITE);
     }
 }
 
-static bool allegiance_is(Allegiance allegiance, int admiral, SpaceObject* object) {
+static bool allegiance_is(Allegiance allegiance, Handle<Admiral> admiral, SpaceObject* object) {
     switch (allegiance) {
       case FRIENDLY_OR_HOSTILE:
         return true;
@@ -1763,7 +1762,7 @@ int32_t GetManualSelectObject(
         SpaceObject *sourceObject, int32_t direction,
         uint32_t inclusiveAttributes, uint32_t exclusiveAttributes,
         const uint64_t* fartherThan, int32_t currentShipNum, Allegiance allegiance) {
-    const uint32_t myOwnerFlag = 1 << sourceObject->owner;
+    const uint32_t myOwnerFlag = 1 << sourceObject->owner.number();
 
     uint64_t wideClosestDistance = 0x3fffffff3fffffffull;
     uint64_t wideFartherDistance = 0x3fffffff3fffffffull;
@@ -1864,7 +1863,7 @@ int32_t GetSpritePointSelectObject(
         Rect *bounds, SpaceObject *sourceObject,
         uint32_t anyOneAttribute,
         int32_t currentShipNum, Allegiance allegiance) {
-    const uint32_t myOwnerFlag = 1 << sourceObject->owner;
+    const uint32_t myOwnerFlag = 1 << sourceObject->owner.number();
 
     int32_t resultShip = -1, closestShip = -1;
     for (int32_t whichShip = 0; whichShip < kMaxSpaceObject; whichShip++) {

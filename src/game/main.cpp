@@ -438,7 +438,7 @@ void GamePlay::become_front() {
           case PlayAgainScreen::SKIP:
             *_game_result = WIN_GAME;
             globals()->gGameOver = 1;
-            globals()->gScenarioWinner.player = globals()->gPlayerAdmiralNumber;
+            globals()->gScenarioWinner.player = globals()->gPlayerAdmiral;
             globals()->gScenarioWinner.next = gThisScenario->chapter_number() + 1;
             globals()->gScenarioWinner.text = -1;
             stack()->pop(this);
@@ -666,7 +666,7 @@ void GamePlay::fire_timer() {
         *_seconds = thisTime / 1000000; // divide by a million to get seconds
 
         if (*_game_result == NO_GAME) {
-            if (globals()->gScenarioWinner.player == globals()->gPlayerAdmiralNumber) {
+            if (globals()->gScenarioWinner.player == globals()->gPlayerAdmiral) {
                 *_game_result = WIN_GAME;
             } else {
                 *_game_result = LOSE_GAME;
@@ -685,10 +685,11 @@ void GamePlay::fire_timer() {
             stack()->pop(this);
         } else {
             _state = DEBRIEFING;
+            const auto& a = globals()->gPlayerAdmiral;
             stack()->push(new DebriefingScreen(
                         globals()->gScenarioWinner.text, *_seconds, gThisScenario->parTime,
-                        GetAdmiralLoss(0), gThisScenario->parLosses,
-                        GetAdmiralKill(0), gThisScenario->parKills));
+                        GetAdmiralLoss(a), gThisScenario->parLosses,
+                        GetAdmiralKill(a), gThisScenario->parKills));
         }
         break;
 

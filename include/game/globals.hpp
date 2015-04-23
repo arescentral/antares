@@ -23,6 +23,7 @@
 #include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
+#include "data/handle.hpp"
 #include "data/scenario.hpp"
 #include "drawing/color.hpp"
 #include "game/starfield.hpp"
@@ -76,7 +77,7 @@ struct hotKeyType {
     int32_t     objectID;
 };
 
-struct admiralType;
+struct Admiral;
 struct destBalanceType;
 struct proximityUnitType;
 struct scrollStarType;
@@ -86,7 +87,7 @@ class StringList;
 struct ScenarioWinnerType {
     int8_t next;
     int16_t text;
-    int8_t player;
+    Handle<Admiral> player;
 };
 
 struct aresGlobalType {
@@ -97,7 +98,6 @@ struct aresGlobalType {
     uint32_t        gSynchValue;
     std::unique_ptr<InputSource> gInputSource;
     int32_t         gGameOver;
-    std::unique_ptr<admiralType[]>       gAdmiralData;
     int64_t         gGameTime;
     uint64_t        gLastTime;
     int32_t         gClosestObject;
@@ -108,7 +108,7 @@ struct aresGlobalType {
     int32_t         gSelectionLabel;
     ZoomType        gZoomMode;
     ZoomType        gPreviousZoomMode;
-    int32_t         gPlayerAdmiralNumber;
+    Handle<Admiral> gPlayerAdmiral;
     ScenarioWinnerType gScenarioWinner;
 
     int32_t         gRadarCount;            // = 0;

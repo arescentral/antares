@@ -22,6 +22,7 @@
 #include <stdint.h>
 #include <sfz/sfz.hpp>
 
+#include "data/handle.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
 
@@ -101,6 +102,7 @@ typedef uint8_t dieVerbIDType;
 //
 
 union argumentType {
+    argumentType() { }
 
     // createObject: make another type of object appear
     struct CreateObject {
@@ -170,7 +172,7 @@ union argumentType {
 
     // Change score
     struct ChangeScore {
-        int32_t                 whichPlayer;    // in scenario's terms; -1 = owner of executor of action
+        Handle<Admiral>         whichPlayer;    // in scenario's terms; -1 = owner of executor of action
         int32_t                 whichScore;     // each player can have many "scores"
         int32_t                 amount;
     };
@@ -178,7 +180,7 @@ union argumentType {
 
     // Declare winner
     struct DeclareWinner {
-        int32_t                 whichPlayer;    // in scenario's terms; -1 = owner of executor of action
+        Handle<Admiral>         whichPlayer;    // in scenario's terms; -1 = owner of executor of action
         int32_t                 nextLevel;      // -1 = none
         int32_t                 textID;         // id of "debriefing" text
     };

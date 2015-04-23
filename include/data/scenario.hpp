@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 
 #include "data/action.hpp"
+#include "data/handle.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
 #include "math/units.hpp"
@@ -173,7 +174,7 @@ void print_to(sfz::PrintTarget out, ScenarioName name);
 
 struct Scenario::InitialObject {
     int32_t         type;
-    int32_t         owner;
+    Handle<Admiral> owner;
     int32_t         realObjectNumber;
     int32_t         realObjectID;
     Point           location;
@@ -194,7 +195,7 @@ void read_from(sfz::ReadSource in, Scenario::InitialObject& scenario_initial);
 
 struct Scenario::Condition {
     struct CounterArgument {
-        int32_t         whichPlayer;
+        Handle<Admiral> whichPlayer;
         int32_t         whichCounter;
         int32_t         amount;
     };

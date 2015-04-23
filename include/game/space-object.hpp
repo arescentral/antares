@@ -37,10 +37,11 @@ void ChangeObjectBaseType( SpaceObject *, int32_t, int32_t, bool);
 
 SpaceObject* CreateAnySpaceObject(
         int32_t whichBase, fixedPointType *velocity, coordPointType *location, int32_t direction,
-        int32_t owner, uint32_t specialAttributes, int16_t spriteIDOverride);
-int32_t CountObjectsOfBaseType(int32_t, int32_t);
-void AlterObjectOwner( SpaceObject *, int32_t, bool);
-void AlterObjectOccupation( SpaceObject *, int32_t, int32_t, bool);
+        Handle<Admiral> owner, uint32_t specialAttributes, int16_t spriteIDOverride);
+int32_t CountObjectsOfBaseType(int32_t whichType, Handle<Admiral> owner);
+void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message);
+void AlterObjectOccupation(
+        SpaceObject* object, Handle<Admiral> owner, int32_t howMuch, bool message);
 void AlterObjectCloakState( SpaceObject *, bool);
 void DestroyObject( SpaceObject *);
 void CreateFloatingBodyOfPlayer( SpaceObject *);

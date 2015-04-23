@@ -146,7 +146,7 @@ static void create_object(
         if (product->attributes & kCanAcceptDestination) {
             uint32_t save_attributes = product->attributes;
             product->attributes &= ~kStaticDestination;
-            if (product->owner >= 0) {
+            if (product->owner.get()) {
                 if (action->reflexive) {
                     if (action->verb != kCreateObjectSetDest) {
                         SetObjectDestination(product, focus);
@@ -472,7 +472,7 @@ static void alter(
                     AlterObjectOwner(focus, subject->owner, true);
                 }
             } else {
-                AlterObjectOwner(focus, alter.minimum, false);
+                AlterObjectOwner(focus, Handle<Admiral>(alter.minimum), false);
             }
             break;
 
@@ -491,12 +491,18 @@ static void alter(
             break;
 
         case kAlterAbsoluteCash:
-            if (alter.relative) {
-                if (focus != SpaceObject::zero()) {
-                    PayAdmiralAbsolute(focus->owner, alter.minimum);
+            {
+                Handle<Admiral> admiral;
+                if (alter.relative) {
+                    if (focus != SpaceObject::zero()) {
+                        admiral = focus->owner;
+                    }
+                } else {
+                    admiral = Handle<Admiral>(alter.range);
                 }
-            } else {
-                PayAdmiralAbsolute(alter.range, alter.minimum);
+                if (admiral.get()) {
+                    admiral->pay(alter.minimum);
+                }
             }
             break;
 
@@ -631,29 +637,25 @@ static void enter_warp(
     fixedPointType newVel = {0, 0};
     CreateAnySpaceObject(
             globals()->scenarioFileInfo.warpInFlareID, &newVel,
-            &subject->location, subject->direction, kNoOwner, 0, -1);
+            &subject->location, subject->direction, Admiral::none(), 0, -1);
 }
 
 static void change_score(objectActionType* action, SpaceObject* focus) {
     const auto& score = action->argument.changeScore;
-    int32_t admiral;
-    if ((score.whichPlayer == -1) && (focus != SpaceObject::zero())) {
-        admiral = focus->owner;
-    } else {
-        admiral = mGetRealAdmiralNum(score.whichPlayer);
+    Handle<Admiral> admiral = focus->owner;
+    if ((score.whichPlayer.get()) || (focus == SpaceObject::zero())) {
+        admiral = score.whichPlayer;
     }
-    if (admiral >= 0) {
+    if (admiral.get()) {
         AlterAdmiralScore(admiral, score.whichScore, score.amount);
     }
 }
 
 static void declare_winner(objectActionType* action, SpaceObject* focus) {
     const auto& winner = action->argument.declareWinner;
-    int32_t admiral;
-    if ((winner.whichPlayer == -1) && (focus != SpaceObject::zero())) {
-        admiral = focus->owner;
-    } else {
-        admiral = mGetRealAdmiralNum(winner.whichPlayer);
+    Handle<Admiral> admiral = focus->owner;
+    if ((winner.whichPlayer.get()) || (focus == SpaceObject::zero())) {
+        admiral = winner.whichPlayer;
     }
     DeclareWinner(admiral, winner.nextLevel, winner.textID);
 }
@@ -720,8 +722,9 @@ static void computer_select(objectActionType* action, SpaceObject* focus) {
 }
 
 static void assume_initial_object(objectActionType* action, SpaceObject* focus) {
+    Handle<Admiral> player1(0);
     Scenario::InitialObject* initialObject = gThisScenario->initial(
-            action->argument.assumeInitial.whichInitialObject + GetAdmiralScore(0, 0));
+            action->argument.assumeInitial.whichInitialObject + GetAdmiralScore(player1, 0));
     if (initialObject) {
         initialObject->realObjectID = focus->id;
         initialObject->realObjectNumber = focus->number();

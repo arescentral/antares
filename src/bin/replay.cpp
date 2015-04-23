@@ -101,10 +101,11 @@ class ReplayMaster : public Card {
                     sfz::write(outcome, rsrc.data());
                     if (_game_result == WIN_GAME) {
                         sfz::write(outcome, "\n\n");
+                        Handle<Admiral> player(0);
                         String text = DebriefingScreen::build_score_text(
                                 _seconds, gThisScenario->parTime,
-                                GetAdmiralLoss(0), gThisScenario->parLosses,
-                                GetAdmiralKill(0), gThisScenario->parKills);
+                                GetAdmiralLoss(player), gThisScenario->parLosses,
+                                GetAdmiralKill(player), gThisScenario->parKills);
                         sfz::write(outcome, utf8::encode(text));
                     }
                     sfz::write(outcome, "\n");
@@ -156,7 +157,7 @@ void ReplayMaster::init() {
     InitSoundFX();
     MusicInit();
     InitMotion();
-    AdmiralInit();
+    Admiral::init();
     Beams::init();
 }
 

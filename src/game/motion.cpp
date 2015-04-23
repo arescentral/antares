@@ -25,6 +25,7 @@
 #include "drawing/pix-table.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "game/action.hpp"
+#include "game/admiral.hpp"
 #include "game/globals.hpp"
 #include "game/non-player-ship.hpp"
 #include "game/player-ship.hpp"
@@ -547,7 +548,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                         anObject->sprite->style = spriteColor;
                         anObject->sprite->styleColor = RgbColor::kClear;
                         anObject->sprite->styleData = anObject->cloakState;
-                        if ( anObject->owner == globals()->gPlayerAdmiralNumber)
+                        if ( anObject->owner == globals()->gPlayerAdmiral)
                             anObject->sprite->styleData -=
                                 anObject->sprite->styleData >> 2;
                     } else if ( anObject->cloakState < 0)
@@ -563,7 +564,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                             anObject->sprite->style = spriteColor;
                             anObject->sprite->styleColor = RgbColor::kClear;
                             anObject->sprite->styleData = -anObject->cloakState;
-                            if ( anObject->owner == globals()->gPlayerAdmiralNumber)
+                            if ( anObject->owner == globals()->gPlayerAdmiral)
                                 anObject->sprite->styleData -=
                                     anObject->sprite->styleData >> 2;
                         }
@@ -1026,7 +1027,7 @@ hackBNoEngageMatch:
     }
 
     // here, it doesn't matter in what order we step through the table
-    const uint32_t seen_by_player = 1ul << globals()->gPlayerAdmiralNumber;
+    const uint32_t seen_by_player = 1ul << globals()->gPlayerAdmiral.number();
 
     for (int32_t i = 0; i < kMaxSpaceObject; i++) {
         auto aObject = mGetSpaceObjectPtr(i);

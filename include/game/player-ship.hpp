@@ -70,11 +70,11 @@ class PlayerShip : public EventReceiver {
 
 void ResetPlayerShip(int32_t);
 void PlayerShipHandleClick(Point where, int button);
-void SetPlayerSelectShip(int32_t, bool, int32_t);
-void ChangePlayerShipNumber(int32_t, int32_t);
+void SetPlayerSelectShip(int32_t whichShip, bool target, Handle<Admiral> admiralNumber);
+void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, int32_t newShipNumber);
 void TogglePlayerAutoPilot( SpaceObject *);
 bool IsPlayerShipOnAutoPilot( void);
-void PlayerShipGiveCommand(int32_t);
+void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral);
 void PlayerShipBodyExpire( SpaceObject *, bool);
 void HandleTextMessageKeys(const KeyMap&, const KeyMap&, bool *);
 

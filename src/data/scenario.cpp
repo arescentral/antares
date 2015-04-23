@@ -132,7 +132,7 @@ void read_from(ReadSource in, Scenario::Condition& scenario_condition) {
 }
 
 void read_from(ReadSource in, Scenario::Condition::CounterArgument& counter_argument) {
-    read(in, counter_argument.whichPlayer);
+    counter_argument.whichPlayer = Handle<Admiral>(read<int32_t>(in));
     read(in, counter_argument.whichCounter);
     read(in, counter_argument.amount);
 }
@@ -175,7 +175,7 @@ void read_from(ReadSource in, Scenario::BriefPoint::AbsoluteBrief& absolute_brie
 
 void read_from(ReadSource in, Scenario::InitialObject& scenario_initial) {
     read(in, scenario_initial.type);
-    read(in, scenario_initial.owner);
+    scenario_initial.owner = Handle<Admiral>(read<int32_t>(in));
     read(in, scenario_initial.realObjectNumber);
     read(in, scenario_initial.realObjectID);
     read(in, scenario_initial.location);

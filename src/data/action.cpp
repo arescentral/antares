@@ -178,13 +178,13 @@ void read_from(ReadSource in, argumentType::DisplayMessage& argument) {
 }
 
 void read_from(ReadSource in, argumentType::ChangeScore& argument) {
-    read(in, argument.whichPlayer);
+    argument.whichPlayer = Handle<Admiral>(read<int32_t>(in));
     read(in, argument.whichScore);
     read(in, argument.amount);
 }
 
 void read_from(ReadSource in, argumentType::DeclareWinner& argument) {
-    read(in, argument.whichPlayer);
+    argument.whichPlayer = Handle<Admiral>(read<int32_t>(in));
     read(in, argument.nextLevel);
     read(in, argument.textID);
 }
