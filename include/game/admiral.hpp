@@ -121,7 +121,10 @@ class Admiral {
     Fixed               cash() const { return _cash; }
     Fixed&              cash() { return _cash; }
     Fixed&              saveGoal() { return _saveGoal; }
-    Fixed&              earningPower() { return _earningPower; }
+
+    Fixed               earning_power() { return _earning_power; }
+    void                set_earning_power(Fixed value) { _earning_power = value; }
+
     int32_t&            kills() { return _kills; }
     int32_t&            losses() { return _losses; }
     int32_t&            shipsLeft() { return _shipsLeft; }
@@ -150,7 +153,7 @@ class Admiral {
     destinationType     _destType = kNoDestinationType;
     Fixed               _cash = 0;
     Fixed               _saveGoal = 0;
-    Fixed               _earningPower = 0;
+    Fixed               _earning_power = 0;
     int32_t             _kills = 0;
     int32_t             _losses = 0;
     int32_t             _shipsLeft = 0;
@@ -181,8 +184,6 @@ void RecalcAllAdmiralBuildData();
 
 uint8_t GetAdmiralColor(Handle<Admiral> whichAdmiral);
 int32_t GetAdmiralRace(Handle<Admiral> whichAdmiral);
-void SetAdmiralEarningPower(Handle<Admiral> whichAdmiral, Fixed power);
-Fixed GetAdmiralEarningPower(Handle<Admiral> whichAdmiral);
 
 void SetAdmiralDestinationObject(Handle<Admiral> whichAdmiral, int32_t whichObject, destinationType dType);
 int32_t GetAdmiralDestinationObject(Handle<Admiral> whichAdmiral);

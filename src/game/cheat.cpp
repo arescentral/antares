@@ -141,17 +141,13 @@ void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
             break;
 
         case kRaisePayRateCheat:
-            SetAdmiralEarningPower(
-                    whichPlayer, GetAdmiralEarningPower(whichPlayer) + 0x00000020);
-            CheatFeedbackPlus(
-                    whichCheat, true, whichPlayer, fixed(GetAdmiralEarningPower(whichPlayer)));
+            whichPlayer->set_earning_power(whichPlayer->earning_power() + 0x20);
+            CheatFeedbackPlus(whichCheat, true, whichPlayer, fixed(whichPlayer->earning_power()));
             break;
 
         case kLowerPayRateCheat:
-            SetAdmiralEarningPower(
-                    whichPlayer, GetAdmiralEarningPower(whichPlayer) - 0x00000020);
-            CheatFeedbackPlus(
-                    whichCheat, true, whichPlayer, fixed(GetAdmiralEarningPower(whichPlayer)));
+            whichPlayer->set_earning_power(whichPlayer->earning_power() - 0x20);
+            CheatFeedbackPlus(whichCheat, true, whichPlayer, fixed(whichPlayer->earning_power()));
             break;
     }
 }

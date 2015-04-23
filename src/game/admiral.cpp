@@ -109,7 +109,7 @@ Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Scenario::Pl
 
     a->_active = true;
     a->_attributes = attributes;
-    a->_earningPower = player.earningPower;
+    a->_earning_power = player.earningPower;
     a->_race = player.playerRace;
     if ((player.nameResID >= 0)) {
         a->_name.assign(StringList(player.nameResID).at(player.nameStrNum - 1));
@@ -300,20 +300,6 @@ void Admiral::set_flagship(int32_t number) {
     } else {
         _flagship = kNoShip;
         _flagshipID = -1;
-    }
-}
-
-void SetAdmiralEarningPower(Handle<Admiral> a, Fixed power) {
-    if (a.get()) {
-        a->earningPower() = power;
-    }
-}
-
-Fixed GetAdmiralEarningPower(Handle<Admiral> a) {
-    if (a.get()) {
-        return a->earningPower();
-    } else {
-        return 0;
     }
 }
 
@@ -1220,7 +1206,7 @@ void StopBuilding(int32_t whichDestObject) {
 }
 
 void Admiral::pay(Fixed howMuch) {
-    pay_absolute(mMultiplyFixed(howMuch, _earningPower));
+    pay_absolute(mMultiplyFixed(howMuch, _earning_power));
 }
 
 void Admiral::pay_absolute(Fixed howMuch) {
