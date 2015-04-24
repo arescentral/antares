@@ -898,7 +898,7 @@ void SetPlayerSelectShip(int32_t whichShip, bool target, Handle<Admiral> admiral
                 print(string, hot_key_suffix(selectShip));
                 Labels::set_string(gDestinationLabel, string);
             } else {
-                String string(get_object_name(selectShip->whichBaseObject));
+                String string(get_object_name(selectShip->base));
                 print(string, hot_key_suffix(selectShip));
                 Labels::set_string(gDestinationLabel, string);
             }
@@ -921,7 +921,7 @@ void SetPlayerSelectShip(int32_t whichShip, bool target, Handle<Admiral> admiral
                 print(string, hot_key_suffix(selectShip));
                 Labels::set_string(globals()->gSelectionLabel, string);
             } else {
-                String string(get_object_name(selectShip->whichBaseObject));
+                String string(get_object_name(selectShip->base));
                 print(string, hot_key_suffix(selectShip));
                 Labels::set_string(globals()->gSelectionLabel, string);
             }
@@ -1155,7 +1155,7 @@ void Update_LabelStrings_ForHotKeyChange( void)
                 print(string, hot_key_suffix(selectShip));
                 Labels::set_string(gDestinationLabel, string);
             } else {
-                String string(get_object_name(selectShip->whichBaseObject));
+                String string(get_object_name(selectShip->base));
                 print(string, hot_key_suffix(selectShip));
                 Labels::set_string(gDestinationLabel, string);
             }
@@ -1178,7 +1178,7 @@ void Update_LabelStrings_ForHotKeyChange( void)
                 print(string, hot_key_suffix(selectShip));
                 Labels::set_string(globals()->gSelectionLabel, string);
             } else {
-                String string(get_object_name(selectShip->whichBaseObject));
+                String string(get_object_name(selectShip->base));
                 print(string, hot_key_suffix(selectShip));
                 Labels::set_string(globals()->gSelectionLabel, string);
             }

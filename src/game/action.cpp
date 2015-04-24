@@ -554,7 +554,7 @@ static void alter(
 
         case kAlterWeapon1:
             focus->pulse.type = alter.minimum;
-            if (focus->pulse.type != kNoWeapon) {
+            if (focus->pulse.type.get()) {
                 baseObject = focus->pulse.base = mGetBaseObjectPtr(focus->pulse.type);
                 focus->pulse.ammo = baseObject->frame.weapon.ammo;
                 focus->pulse.time = focus->pulse.position = 0;
@@ -573,7 +573,7 @@ static void alter(
 
         case kAlterWeapon2:
             focus->beam.type = alter.minimum;
-            if (focus->beam.type != kNoWeapon) {
+            if (focus->beam.type.get()) {
                 baseObject = focus->beam.base = mGetBaseObjectPtr(focus->beam.type);
                 focus->beam.ammo = baseObject->frame.weapon.ammo;
                 focus->beam.time = focus->beam.position = 0;
@@ -592,7 +592,7 @@ static void alter(
 
         case kAlterSpecial:
             focus->special.type = alter.minimum;
-            if (focus->special.type != kNoWeapon) {
+            if (focus->special.type.get()) {
                 baseObject = focus->special.base = mGetBaseObjectPtr(focus->special.type);
                 focus->special.ammo = baseObject->frame.weapon.ammo;
                 focus->special.time = focus->special.position = 0;

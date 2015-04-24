@@ -223,7 +223,7 @@ inline void mCopyMiniSpaceObject(
     (mdestobject).destObjectPtr = (msourceobject).destObjectPtr;
     (mdestobject)._health = (msourceobject).health();
     (mdestobject)._energy = (msourceobject).energy();
-    (mdestobject).whichBaseObject = (msourceobject).whichBaseObject;
+    (mdestobject).base = (msourceobject).base;
     (mdestobject).pixResID = (msourceobject).pixResID;
     (mdestobject).attributes = (msourceobject).attributes;
     (mdestobject).location = (msourceobject).location;
@@ -318,7 +318,7 @@ void ClearMiniObjectData( void)
     o->destObjectPtr = NULL;
     o->_health = 0;
     o->_energy = 0;
-    o->whichBaseObject = -1;
+    o->base = BaseObject::none();
     o->pixResID = -1;
     o->attributes = 0;
     o->baseType = NULL;
@@ -333,7 +333,7 @@ void ClearMiniObjectData( void)
     o->destObjectPtr = NULL;
     o->_health = 0;
     o->_energy = 0;
-    o->whichBaseObject = -1;
+    o->base = BaseObject::none();
     o->pixResID = -1;
     o->attributes = 0;
     o->baseType = NULL;
@@ -666,7 +666,7 @@ void MiniComputerHandleNull( int32_t unitsToDo)
             newObject.destObjectPtr = NULL;
             newObject._health = 0;
             newObject._energy = 0;
-            newObject.whichBaseObject = -1;
+            newObject.base = BaseObject::none();
             newObject.pixResID = -1;
             newObject.attributes = 0;
             newObject.baseType = NULL;
@@ -690,7 +690,7 @@ void MiniComputerHandleNull( int32_t unitsToDo)
             newObject.destObjectPtr = NULL;
             newObject._health = 0;
             newObject._energy = 0;
-            newObject.whichBaseObject = -1;
+            newObject.base = BaseObject::none();
             newObject.pixResID = -1;
             newObject.attributes = 0;
             newObject.baseType = NULL;
@@ -855,12 +855,12 @@ void draw_mini_ship_data(
     } else {
         lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth);
 
-        if (newObject.whichBaseObject >= 0) {
+        if (newObject.base.get()) {
             // get the color for writing the name
             color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
             // move to the 1st line in the selection miniscreen, write the name
-            String text(get_object_short_name(newObject.whichBaseObject));
+            String text(get_object_short_name(newObject.base));
             computer_font->draw_sprite(
                     Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
                     text, color);
@@ -874,7 +874,7 @@ void draw_mini_ship_data(
     dRect.right = kMiniScreenLeft + kMiniIconWidth;
     dRect.bottom = dRect.top + kMiniIconHeight;
 
-    if ((newObject.whichBaseObject >= 0) && (newObject.pixResID >= 0)) {
+    if ((newObject.base.get()) && (newObject.pixResID >= 0)) {
         NatePixTable* pixTable = GetPixTable(newObject.pixResID);
 
         if (pixTable != NULL) {
@@ -967,7 +967,7 @@ void draw_mini_ship_data(
     color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
     // move to the 1st line in the selection miniscreen, write the name
-    if (newObject.beam.type >= 0) {
+    if (newObject.beam.type.get()) {
         String text(get_object_short_name(newObject.beam.type));
         computer_font->draw_sprite(
                 Point(lRect.left, lRect.top + computer_font->ascent), text, color);
@@ -979,7 +979,7 @@ void draw_mini_ship_data(
     color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
     // move to the 1st line in the selection miniscreen, write the name
-    if (newObject.pulse.type >= 0) {
+    if (newObject.pulse.type.get()) {
         String text(get_object_short_name(newObject.pulse.type));
         computer_font->draw_sprite(
                 Point(lRect.left, lRect.top + computer_font->ascent), text, color);
@@ -993,7 +993,7 @@ void draw_mini_ship_data(
         color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
         // move to the 1st line in the selection miniscreen, write the name
-        if (newObject.special.type >= 0) {
+        if (newObject.special.type.get()) {
             String text(get_object_short_name(newObject.special.type));
             computer_font->draw_sprite(
                     Point(lRect.left, lRect.top + computer_font->ascent), text, color);
@@ -1019,7 +1019,7 @@ void draw_mini_ship_data(
                 computer_font->draw_sprite(
                         Point(lRect.left, lRect.top + computer_font->ascent), text, color);
             } else {
-                String text(get_object_name(dObject->whichBaseObject));
+                String text(get_object_name(dObject->base));
                 computer_font->draw_sprite(
                         Point(lRect.left, lRect.top + computer_font->ascent), text, color);
             }

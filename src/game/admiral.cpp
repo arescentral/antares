@@ -1100,7 +1100,7 @@ void Admiral::think() {
                                     anObject = mGetSpaceObjectPtr(j);
                                     if ((anObject->active)
                                             && (anObject->owner.get() == this)
-                                            && (anObject->whichBaseObject == baseNum)
+                                            && (anObject->base == Handle<BaseObject>(baseNum))
                                             && (anObject->escortStrength <
                                                 baseObject->friendDefecit)) {
                                         _hopeToBuild = -1;

@@ -129,9 +129,9 @@ void ResetAllSpaceObjects() {
     }
 }
 
-BaseObject* mGetBaseObjectPtr(int32_t whichObject) {
-    if (whichObject >= 0) {
-        return gBaseObjectData.get() + whichObject;
+BaseObject* BaseObject::get(int number) {
+    if ((0 <= number) && (number < globals()->maxBaseObject)) {
+        return &gBaseObjectData[number];
     }
     return nullptr;
 }
@@ -330,12 +330,12 @@ void CorrectAllBaseObjectColor( void)
 }
 
 SpaceObject::SpaceObject(
-        int32_t type, Random seed, int32_t object_id,
+        Handle<BaseObject> type, Random seed, int32_t object_id,
         const coordPointType& initial_location,
         int32_t relative_direction, fixedPointType *relative_velocity,
         Handle<Admiral> new_owner, int16_t spriteIDOverride) {
-    whichBaseObject     = type;
-    baseType            = mGetBaseObjectPtr(type);
+    base                = type;
+    baseType            = type.get();
     active              = kObjectInUse;
     randomSeed          = seed;
     owner               = new_owner;
@@ -435,7 +435,7 @@ SpaceObject::SpaceObject(
     shortestWeaponRange = kMaximumRelevantDistance;
 
     for (auto weapon: {&pulse, &beam, &special}) {
-        if (weapon->type != kNoWeapon) {
+        if (weapon->type.get()) {
             const auto& frame = weapon->base->frame.weapon;
             weapon->ammo = frame.ammo;
             if ((frame.range > 0) && (frame.usage & kUseForAttacking)) {
@@ -481,18 +481,18 @@ SpaceObject::SpaceObject(
 //
 
 void ChangeObjectBaseType(
-        SpaceObject *obj, int32_t whichBaseObject, int32_t spriteIDOverride,
+        SpaceObject *obj, Handle<BaseObject> type, int32_t spriteIDOverride,
         bool relative) {
-    BaseObject*     base = mGetBaseObjectPtr(whichBaseObject);
+    BaseObject*     base = type.get();
     int16_t         angle;
     int32_t         r;
     NatePixTable* spriteTable;
 
 #ifdef DATA_COVERAGE
-    covered_objects.insert(whichBaseObject);
+    covered_objects.insert(type.number());
     for (int32_t weapon: {base->pulse.base, base->beam.base, base->special.base}) {
-        if (weapon != kNoWeapon) {
-            covered_objects.insert(weapon);
+        if (weapon.get()) {
+            covered_objects.insert(weapon.number());
         }
     }
 #endif  // DATA_COVERAGE
@@ -501,7 +501,7 @@ void ChangeObjectBaseType(
         base->attributes
         | (obj->attributes & (kIsHumanControlled | kIsRemote | kIsPlayerShip | kStaticDestination));
     obj->baseType = base;
-    obj->whichBaseObject = whichBaseObject;
+    obj->base = type;
     obj->tinySize = base->tinySize;
     obj->shieldColor = base->shieldColor;
     obj->layer = base->pixLayer;
@@ -562,7 +562,7 @@ void ChangeObjectBaseType(
     obj->shortestWeaponRange = kMaximumRelevantDistance;
 
     for (auto* weapon: {&obj->pulse, &obj->beam, &obj->special}) {
-        if (weapon->type == kNoWeapon) {
+        if (!weapon->type.get()) {
             weapon->time = 0;
             continue;
         }
@@ -623,8 +623,9 @@ void ChangeObjectBaseType(
 }
 
 SpaceObject* CreateAnySpaceObject(
-        int32_t whichBase, fixedPointType *velocity, coordPointType *location, int32_t direction,
-        Handle<Admiral> owner, uint32_t specialAttributes, int16_t spriteIDOverride) {
+        Handle<BaseObject> whichBase, fixedPointType *velocity, coordPointType *location,
+        int32_t direction, Handle<Admiral> owner, uint32_t specialAttributes,
+        int16_t spriteIDOverride) {
     Random random{gRandomSeed.next(32766)};
     int32_t id = gRandomSeed.next(16384);
     SpaceObject newObject(
@@ -639,8 +640,8 @@ SpaceObject* CreateAnySpaceObject(
     covered_objects.insert(whichBase);
     auto* base = mGetBaseObjectPtr(whichBase);
     for (int32_t weapon: {base->pulse.base, base->beam.base, base->special.base}) {
-        if (weapon != kNoWeapon) {
-            covered_objects.insert(weapon);
+        if (!weapon.get()) {
+            covered_objects.insert(weapon.number());
         }
     }
 #endif  // DATA_COVERAGE
@@ -650,12 +651,12 @@ SpaceObject* CreateAnySpaceObject(
     return obj;
 }
 
-int32_t CountObjectsOfBaseType(int32_t whichType, Handle<Admiral> owner) {
+int32_t CountObjectsOfBaseType(Handle<BaseObject> whichType, Handle<Admiral> owner) {
     int32_t result = 0;
     for (int32_t i = 0; i < kMaxSpaceObject; ++i) {
         auto anObject = mGetSpaceObjectPtr(i);
         if (anObject->active
-                && ((whichType == -1) || (anObject->whichBaseObject == whichType))
+                && (!whichType.get() || (anObject->base == whichType))
                 && (!owner.get() || (anObject->owner == owner))) {
             ++result;
         }
@@ -823,7 +824,7 @@ void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message) 
         RecalcAllAdmiralBuildData();
     } else {
         if (message) {
-            StringSlice object_name = get_object_name(object->whichBaseObject);
+            StringSlice object_name = get_object_name(object->base);
             if (owner.get()) {
                 String new_owner_name(GetAdmiralName(object->owner));
                 Messages::add(format("{0} captured by {1}.", object_name, new_owner_name));
@@ -922,7 +923,7 @@ void CreateFloatingBodyOfPlayer(SpaceObject* obj) {
     const auto body_type = globals()->scenarioFileInfo.playerBodyID;
     // if we're already in a body, don't create a body from it
     // a body expiring is handled elsewhere
-    if (obj->whichBaseObject == body_type) {
+    if (obj->base == body_type) {
         return;
     }
 
@@ -935,12 +936,12 @@ void CreateFloatingBodyOfPlayer(SpaceObject* obj) {
     }
 }
 
-StringSlice get_object_name(int16_t id) {
-    return space_object_names->at(id);
+StringSlice get_object_name(Handle<BaseObject> id) {
+    return space_object_names->at(id.number());
 }
 
-StringSlice get_object_short_name(int16_t id) {
-    return space_object_short_names->at(id);
+StringSlice get_object_short_name(Handle<BaseObject> id) {
+    return space_object_short_names->at(id.number());
 }
 
 int32_t SpaceObject::number() const {

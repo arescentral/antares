@@ -260,7 +260,11 @@ void read_from(sfz::ReadSource in, objectFrameType::Animation& animation);
 void read_from(sfz::ReadSource in, objectFrameType::Beam& beam);
 void read_from(sfz::ReadSource in, objectFrameType::Weapon& weapon);
 
-struct BaseObject {
+class BaseObject {
+  public:
+    static BaseObject* get(int number);
+    static Handle<BaseObject> none() { return Handle<BaseObject>(-1); }
+
     uint32_t                attributes;                 // initial attributes (see flags)
     int32_t                 baseClass;
     int32_t                 baseRace;
@@ -300,7 +304,7 @@ struct BaseObject {
     int32_t                 initialDirectionRange;      // random addition to initial direction
 
     struct Weapon {
-        int32_t base;                                   // kNoWeapon = none
+        Handle<BaseObject> base;
         int32_t positionNum;                            // # of places from which weapon can fire
         fixedPointType position[kMaxWeaponPosition];    // relative positions (unrotated) of fire points
     };
@@ -367,7 +371,7 @@ class SpaceObject {
 
     uint32_t                attributes = 0;
     BaseObject*             baseType = nullptr;
-    int32_t                 whichBaseObject = -1;
+    Handle<BaseObject>      base;
     int32_t                 number() const;
 
     uint32_t                keysDown = 0;
@@ -495,7 +499,7 @@ class SpaceObject {
 
     struct Weapon {
         BaseObject*             base;
-        int32_t                 type = -1;
+        Handle<BaseObject>      type;
         int32_t                 time = 0;
         int32_t                 ammo = 0;
         int32_t                 position = 0;
@@ -515,7 +519,7 @@ class SpaceObject {
     uint8_t                 originalColor = 0;
 
     SpaceObject(
-            int32_t type, Random seed, int32_t object_id,
+            Handle<BaseObject> type, Random seed, int32_t object_id,
             const coordPointType& initial_location,
             int32_t relative_direction, fixedPointType *relative_velocity,
             Handle<Admiral> new_owner, int16_t spriteIDOverride);

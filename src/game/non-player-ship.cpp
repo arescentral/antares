@@ -101,7 +101,7 @@ void SpaceObject::recharge() {
     }
 
     for (auto* weapon: {&pulse, &beam, &special}) {
-        if (weapon->type != kNoWeapon) {
+        if (weapon->type.get()) {
             if ((weapon->ammo < (weapon->base->frame.weapon.ammo >> 1))
                     && (_energy >= kWeaponRatio)) {
                 weapon->charge++;
@@ -131,7 +131,7 @@ static void tick_weapon(
 void fire_weapon(
         SpaceObject* subject, SpaceObject* target,
         const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
-    if ((weapon.time > 0) || (weapon.type == kNoWeapon)) {
+    if ((weapon.time > 0) || !weapon.type.get()) {
         return;
     }
 
@@ -459,21 +459,21 @@ void NonplayerShipThink(int32_t timePass)
 uint32_t use_weapons_for_defense(SpaceObject* obj) {
     uint32_t keys = 0;
 
-    if (obj->pulse.type != kNoWeapon) {
+    if (obj->pulse.type.get()) {
         auto weaponObject = obj->pulse.base;
         if (weaponObject->frame.weapon.usage & kUseForDefense) {
             keys |= kOneKey;
         }
     }
 
-    if (obj->beam.type != kNoWeapon) {
+    if (obj->beam.type.get()) {
         auto weaponObject = obj->beam.base;
         if (weaponObject->frame.weapon.usage & kUseForDefense) {
             keys |= kTwoKey;
         }
     }
 
-    if (obj->special.type != kNoWeapon) {
+    if (obj->special.type.get()) {
         auto weaponObject = obj->special.base;
         if (weaponObject->frame.weapon.usage & kUseForDefense) {
             keys |= kEnterKey;
@@ -770,7 +770,7 @@ uint32_t ThinkObjectNormalPresence(
                         keysDown |= kUpKey;
                     }
                     anObject->lastTargetDistance = distance;
-                    if ((anObject->special.type != kNoWeapon)
+                    if ((anObject->special.type.get())
                             && (distance > kWarpInDistance)
                             && (theta <= kDirectionError)) {
                         if (anObject->special.base->frame.weapon.usage & kUseForTransportation) {
@@ -840,7 +840,7 @@ uint32_t ThinkObjectNormalPresence(
 
                 bestWeapon = NULL;
 
-                if (anObject->beam.type != kNoWeapon) {
+                if (anObject->beam.type.get()) {
                     bestWeapon = weaponObject = anObject->beam.base;
                     if ((weaponObject->frame.weapon.usage & kUseForAttacking)
                             && (static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
@@ -850,7 +850,7 @@ uint32_t ThinkObjectNormalPresence(
                     }
                 }
 
-                if (anObject->pulse.type != kNoWeapon) {
+                if (anObject->pulse.type.get()) {
                     weaponObject = anObject->pulse.base;
                     if ((weaponObject->frame.weapon.usage & kUseForAttacking)
                             && (static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
@@ -860,7 +860,7 @@ uint32_t ThinkObjectNormalPresence(
                     }
                 }
 
-                if (anObject->special.type != kNoWeapon) {
+                if (anObject->special.type.get()) {
                     weaponObject = anObject->special.base;
                     if ((weaponObject->frame.weapon.usage & kUseForAttacking)
                             && (static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
@@ -1569,7 +1569,7 @@ uint32_t ThinkObjectEngageTarget( SpaceObject *anObject, SpaceObject *targetObje
 
         difference = anObject->longestWeaponRange;
 
-        if ( anObject->beam.type != kNoWeapon)
+        if ( anObject->beam.type.get())
         {
             bestWeapon = weaponObject = anObject->beam.base;
             if ( ( weaponObject->frame.weapon.usage &
@@ -1584,7 +1584,7 @@ uint32_t ThinkObjectEngageTarget( SpaceObject *anObject, SpaceObject *targetObje
             }
         }
 
-        if ( anObject->pulse.type != kNoWeapon)
+        if ( anObject->pulse.type.get())
         {
             weaponObject = anObject->pulse.base;
             if ( ( weaponObject->frame.weapon.usage &
@@ -1598,7 +1598,7 @@ uint32_t ThinkObjectEngageTarget( SpaceObject *anObject, SpaceObject *targetObje
             }
         }
 
-        if ( anObject->special.type != kNoWeapon)
+        if ( anObject->special.type.get())
         {
             weaponObject = anObject->special.base;
             if ( ( weaponObject->frame.weapon.usage &
@@ -1661,7 +1661,7 @@ uint32_t ThinkObjectEngageTarget( SpaceObject *anObject, SpaceObject *targetObje
         beta = anObject->direction;
         beta = mAngleDifference( beta, angle);
 
-        if ( anObject->pulse.type != kNoWeapon)
+        if ( anObject->pulse.type.get())
         {
             weaponObject = anObject->pulse.base;
             if (( weaponObject->frame.weapon.usage &
@@ -1674,7 +1674,7 @@ uint32_t ThinkObjectEngageTarget( SpaceObject *anObject, SpaceObject *targetObje
             }
         }
 
-        if ( anObject->beam.type != kNoWeapon)
+        if ( anObject->beam.type.get())
         {
             weaponObject = anObject->beam.base;
             if (( weaponObject->frame.weapon.usage &
@@ -1687,7 +1687,7 @@ uint32_t ThinkObjectEngageTarget( SpaceObject *anObject, SpaceObject *targetObje
             }
         }
 
-        if ( anObject->special.type != kNoWeapon)
+        if ( anObject->special.type.get())
         {
             weaponObject = anObject->special.base;
             if (( weaponObject->frame.weapon.usage &
@@ -1727,8 +1727,8 @@ void HitObject(SpaceObject *anObject, SpaceObject *sObject) {
     if (anObject->health() < 0
             && (anObject->owner == globals()->gPlayerAdmiral)
             && (anObject->attributes & kCanAcceptDestination)) {
-        const StringSlice& object_name = get_object_name(anObject->whichBaseObject);
-        int count = CountObjectsOfBaseType(anObject->whichBaseObject, anObject->owner) - 1;
+        const StringSlice& object_name = get_object_name(anObject->base);
+        int count = CountObjectsOfBaseType(anObject->base, anObject->owner) - 1;
         Messages::add(format(" {0} destroyed.  {1} remaining. ", object_name, count));
     }
 

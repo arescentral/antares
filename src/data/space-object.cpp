@@ -80,9 +80,9 @@ void read_from(ReadSource in, BaseObject& object) {
     read(in, object.initialDirection);
     read(in, object.initialDirectionRange);
 
-    read(in, object.pulse.base);
-    read(in, object.beam.base);
-    read(in, object.special.base);
+    object.pulse.base = Handle<BaseObject>(read<int32_t>(in));
+    object.beam.base = Handle<BaseObject>(read<int32_t>(in));
+    object.special.base = Handle<BaseObject>(read<int32_t>(in));
 
     read(in, object.pulse.positionNum);
     read(in, object.beam.positionNum);

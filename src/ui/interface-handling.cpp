@@ -130,7 +130,8 @@ int find_replace(String& data, int pos, const StringSlice& search, const PrintIt
 
 }  // namespace
 
-void CreateWeaponDataText(sfz::String* text, int32_t whichWeapon, const sfz::StringSlice& weaponName);
+void CreateWeaponDataText(
+        String* text, Handle<BaseObject> weaponObject, const StringSlice& weaponName);
 
 //
 // BothCommandAndQ:
@@ -307,18 +308,16 @@ void CreateObjectDataText(String* text, int16_t id) {
     print(*text, data);
 }
 
-void CreateWeaponDataText(String* text, int32_t whichWeapon, const StringSlice& weaponName) {
-    BaseObject* weaponObject;
+void CreateWeaponDataText(
+        String* text, Handle<BaseObject> weaponObject, const StringSlice& weaponName) {
     BaseObject* missileObject;
     int32_t             mostDamage, actionNum;
     objectActionType    *action;
     bool             isGuided = false;
 
-    if (whichWeapon == kNoShip) {
+    if (!weaponObject.get()) {
         return;
     }
-
-    weaponObject = mGetBaseObjectPtr(whichWeapon);
 
     // TODO(sfiera): catch exception.
     Resource rsrc("text", "txt", kWeaponDataTextID);
@@ -352,7 +351,7 @@ void CreateWeaponDataText(String* text, int32_t whichWeapon, const StringSlice& 
 
     // weapon name
     {
-        const StringSlice& name = get_object_name(whichWeapon);
+        const StringSlice& name = get_object_name(weaponObject);
         find_replace(data, 0, keys.at(kWeaponNameStringNum), name);
     }
 

@@ -88,7 +88,7 @@ set<int32_t> possible_actions;
 #endif  // DATA_COVERAGE
 
 void AddBaseObjectActionMedia(
-        int32_t whichBase, int32_t whichType, uint8_t color, uint32_t all_colors);
+        Handle<BaseObject> whichBase, int32_t whichType, uint8_t color, uint32_t all_colors);
 void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors);
 
 void SetAllBaseObjectsUnchecked() {
@@ -99,11 +99,11 @@ void SetAllBaseObjectsUnchecked() {
     }
 }
 
-void AddBaseObjectMedia(int32_t whichBase, uint8_t color, uint32_t all_colors) {
+void AddBaseObjectMedia(Handle<BaseObject> whichBase, uint8_t color, uint32_t all_colors) {
 #ifdef DATA_COVERAGE
-    possible_objects.insert(whichBase);
+    possible_objects.insert(whichBase.number());
 #endif  // DATA_COVERAGE
-    BaseObject* aBase = mGetBaseObjectPtr(whichBase);
+    BaseObject* aBase = whichBase.get();
 
     if (!(aBase->attributes & kCanThink)) {
         color = GRAY;
@@ -129,8 +129,8 @@ void AddBaseObjectMedia(int32_t whichBase, uint8_t color, uint32_t all_colors) {
         AddBaseObjectActionMedia(whichBase, kActivateActionType, i, all_colors);
         AddBaseObjectActionMedia(whichBase, kArriveActionType, i, all_colors);
 
-        for (int32_t weapon: {aBase->pulse.base, aBase->beam.base, aBase->special.base}) {
-            if (weapon != kNoWeapon) {
+        for (Handle<BaseObject> weapon: {aBase->pulse.base, aBase->beam.base, aBase->special.base}) {
+            if (weapon.get()) {
                 AddBaseObjectMedia(weapon, i, all_colors);
             }
         }
@@ -168,9 +168,9 @@ objectActionType* mGetActionFromBaseTypeNum(
 }
 
 void AddBaseObjectActionMedia(
-        int32_t whichBase, int32_t whichType, uint8_t color, uint32_t all_colors) {
+        Handle<BaseObject> whichBase, int32_t whichType, uint8_t color, uint32_t all_colors) {
     for (int count = 0; ; ++count) {
-        const BaseObject& baseObject = *mGetBaseObjectPtr(whichBase);
+        const BaseObject& baseObject = *whichBase;
         auto* action = mGetActionFromBaseTypeNum(baseObject, whichType, count);
         if (!action) {
             break;
@@ -707,26 +707,26 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
     }
 
     if (step == 0) {
-        if (globals()->scenarioFileInfo.energyBlobID < 0) {
+        if (!globals()->scenarioFileInfo.energyBlobID.get()) {
             throw Exception("No energy blob defined");
         }
-        if (globals()->scenarioFileInfo.warpInFlareID < 0) {
+        if (!globals()->scenarioFileInfo.warpInFlareID.get()) {
             throw Exception("No warp in flare defined");
         }
-        if (globals()->scenarioFileInfo.warpOutFlareID < 0) {
+        if (!globals()->scenarioFileInfo.warpOutFlareID.get()) {
             throw Exception("No warp out flare defined");
         }
-        if (globals()->scenarioFileInfo.playerBodyID < 0) {
+        if (!globals()->scenarioFileInfo.playerBodyID.get()) {
             throw Exception("No player body defined");
         }
 
         // Load the four blessed objects.  The player's body is needed
         // in all colors; the other three are needed only as neutral
         // objects by default.
-        mGetBaseObjectPtr(globals()->scenarioFileInfo.playerBodyID)->internalFlags |= all_colors;
+        globals()->scenarioFileInfo.playerBodyID->internalFlags |= all_colors;
         for (int i = 0; i < gThisScenario->playerNum; i++) {
             const auto& info = globals()->scenarioFileInfo;
-            int32_t blessed[] = {
+            Handle<BaseObject> blessed[] = {
                 info.energyBlobID, info.warpInFlareID, info.warpOutFlareID, info.playerBodyID,
             };
             for (auto id: blessed) {

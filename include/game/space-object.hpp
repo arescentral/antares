@@ -33,12 +33,14 @@ void SpaceObjectHandlingInit( void);
 void ResetAllSpaceObjects( void);
 void RemoveAllSpaceObjects( void);
 void CorrectAllBaseObjectColor( void);
-void ChangeObjectBaseType( SpaceObject *, int32_t, int32_t, bool);
+void ChangeObjectBaseType(
+        SpaceObject *obj, Handle<BaseObject> type, int32_t spriteIDOverride, bool relative);
 
 SpaceObject* CreateAnySpaceObject(
-        int32_t whichBase, fixedPointType *velocity, coordPointType *location, int32_t direction,
-        Handle<Admiral> owner, uint32_t specialAttributes, int16_t spriteIDOverride);
-int32_t CountObjectsOfBaseType(int32_t whichType, Handle<Admiral> owner);
+        Handle<BaseObject> whichBase, fixedPointType *velocity, coordPointType *location,
+        int32_t direction, Handle<Admiral> owner, uint32_t specialAttributes,
+        int16_t spriteIDOverride);
+int32_t CountObjectsOfBaseType(Handle<BaseObject> whichType, Handle<Admiral> owner);
 void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message);
 void AlterObjectOccupation(
         SpaceObject* object, Handle<Admiral> owner, int32_t howMuch, bool message);
@@ -46,15 +48,15 @@ void AlterObjectCloakState( SpaceObject *, bool);
 void DestroyObject( SpaceObject *);
 void CreateFloatingBodyOfPlayer( SpaceObject *);
 
-BaseObject* mGetBaseObjectPtr(int32_t whichObject);
+inline BaseObject* mGetBaseObjectPtr(Handle<BaseObject> whichObject) { return whichObject.get(); }
 SpaceObject* mGetSpaceObjectPtr(int32_t whichObject);
 objectActionType* mGetObjectActionPtr(int32_t whichAction);
 
 void mGetBaseObjectFromClassRace(
         BaseObject*& mbaseObject, int32_t& mcount, int mbaseClass, int mbaseRace);
 
-sfz::StringSlice get_object_name(int16_t id);
-sfz::StringSlice get_object_short_name(int16_t id);
+sfz::StringSlice get_object_name(Handle<BaseObject> id);
+sfz::StringSlice get_object_short_name(Handle<BaseObject> id);
 
 }  // namespace antares
 

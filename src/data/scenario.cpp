@@ -40,10 +40,10 @@ void read_pstr(ReadSource in, String& out) {
 }  // namespace
 
 void read_from(ReadSource in, scenarioInfoType& scenario_info) {
-    read(in, scenario_info.warpInFlareID);
-    read(in, scenario_info.warpOutFlareID);
-    read(in, scenario_info.playerBodyID);
-    read(in, scenario_info.energyBlobID);
+    scenario_info.warpInFlareID = Handle<BaseObject>(read<int32_t>(in));
+    scenario_info.warpOutFlareID = Handle<BaseObject>(read<int32_t>(in));
+    scenario_info.playerBodyID = Handle<BaseObject>(read<int32_t>(in));
+    scenario_info.energyBlobID = Handle<BaseObject>(read<int32_t>(in));
     read_pstr(in, scenario_info.downloadURLString);
     read_pstr(in, scenario_info.titleString);
     read_pstr(in, scenario_info.authorNameString);
