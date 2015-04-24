@@ -50,8 +50,7 @@ BaseObject* mGetBaseObjectPtr(int32_t whichObject);
 SpaceObject* mGetSpaceObjectPtr(int32_t whichObject);
 objectActionType* mGetObjectActionPtr(int32_t whichAction);
 
-void mGetBaseObjectFromClassRace(
-        BaseObject*& mbaseObject, int32_t& mcount, int mbaseClass, int mbaseRace);
+int32_t mGetBaseObjectFromClassRace(int class_, int race);
 
 sfz::StringSlice get_object_name(int16_t id);
 sfz::StringSlice get_object_short_name(int16_t id);

@@ -1262,7 +1262,9 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 
             for ( count = 0; count < kMaxShipCanBuild; count++)
             {
-                mGetBaseObjectFromClassRace( buildObject, baseNum, buildAtObject->canBuildType[count], admiral->race());
+                baseNum = mGetBaseObjectFromClassRace(
+                        buildAtObject->canBuildType[count], admiral->race());
+                buildObject = mGetBaseObjectPtr(baseNum);
                 line->value = baseNum;
                 line->sourceData = buildObject;
                 if ( buildObject != NULL)

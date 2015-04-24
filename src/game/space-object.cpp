@@ -150,24 +150,17 @@ objectActionType* mGetObjectActionPtr(int32_t whichAction) {
     return nullptr;
 }
 
-void mGetBaseObjectFromClassRace(
-        BaseObject*& mbaseObject, int32_t& mcount, int mbaseClass, int mbaseRace) {
-    mcount = 0;
-    if ( mbaseClass >= kLiteralClass)
-    {
-        mcount = mbaseClass - kLiteralClass;
-        mbaseObject = mGetBaseObjectPtr(mcount);
+int32_t mGetBaseObjectFromClassRace(int class_, int race) {
+    if (class_ >= kLiteralClass) {
+        return class_ - kLiteralClass;
     }
-    else
-    {
-        mbaseObject = mGetBaseObjectPtr( 0);
-        while (( mcount < globals()->maxBaseObject) && (( mbaseObject->baseClass != mbaseClass) || ( mbaseObject->baseRace != mbaseRace)))
-        {
-            mcount++;
-            mbaseObject++;
+    for (int i = 0; i < globals()->maxBaseObject; ++i) {
+        auto o = mGetBaseObjectPtr(i);
+        if ((o->baseClass == class_) && (o->baseRace == race)) {
+            return i;
         }
-        if ( mcount >= globals()->maxBaseObject) mbaseObject = NULL;
     }
+    return -1;
 }
 
 static SpaceObject* AddSpaceObject(SpaceObject *sourceObject) {
