@@ -244,8 +244,8 @@ void RecalcAllAdmiralBuildData() {
                             j++;
                         }
                         if (j == kMaxNumAdmiralCanBuild) {
-                            mGetBaseObjectFromClassRace(
-                                    baseObject, l, d->canBuildType[k], a->race());
+                            l = mGetBaseObjectFromClassRace(d->canBuildType[k], a->race());
+                            baseObject = mGetBaseObjectPtr(l);
                             j = 0;
                             while ((a->canBuildType()[j].baseNum != -1)
                                     && (j < kMaxNumAdmiralCanBuild)) {
@@ -1093,8 +1093,8 @@ void Admiral::think() {
                             }
                         }
                         if (_hopeToBuild >= 0) {
-                            mGetBaseObjectFromClassRace(
-                                    baseObject, baseNum, _hopeToBuild, _race);
+                            baseNum = mGetBaseObjectFromClassRace(_hopeToBuild, _race);
+                            baseObject = mGetBaseObjectPtr(baseNum);
                             if (baseObject->buildFlags & kSufficientEscortsExist) {
                                 for (int j = 0; j < kMaxSpaceObject; ++j) {
                                     anObject = mGetSpaceObjectPtr(j);
@@ -1133,8 +1133,8 @@ void Admiral::think() {
                     j++;
                 }
                 if ((j < kMaxTypeBaseCanBuild) && (_hopeToBuild != kNoShip)) {
-                    mGetBaseObjectFromClassRace(baseObject, baseNum, _hopeToBuild,
-                            _race);
+                    baseNum = mGetBaseObjectFromClassRace(_hopeToBuild, _race);
+                    baseObject = mGetBaseObjectPtr(baseNum);
                     if (_cash >= mLongToFixed(baseObject->price)) {
                         Admiral::build(j);
                         _hopeToBuild = -1;
@@ -1158,8 +1158,8 @@ bool Admiral::build(int32_t buildWhichType) {
     if ((buildWhichType >= 0)
             && (buildWhichType < kMaxTypeBaseCanBuild)
             && (_buildAtObject >= 0) && (buildAtDest->buildTime <= 0)) {
-        mGetBaseObjectFromClassRace(buildBaseObject, baseNum,
-                buildAtDest->canBuildType[buildWhichType], _race);
+        baseNum = mGetBaseObjectFromClassRace(buildAtDest->canBuildType[buildWhichType], _race);
+        buildBaseObject = mGetBaseObjectPtr(baseNum);
         if ((buildBaseObject != NULL) && (buildBaseObject->price <= mFixedToLong(_cash))) {
             _cash -= (mLongToFixed(buildBaseObject->price));
             if (globals()->gActiveCheats[self.number()] & kBuildFastBit) {

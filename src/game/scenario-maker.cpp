@@ -777,8 +777,9 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                     baseObject = mGetBaseObjectPtr(type);
                     int32_t newShipNum;
                     Handle<Admiral> a(k);
-                    mGetBaseObjectFromClassRace(
-                            baseObject, newShipNum, initial->canBuild[j], GetAdmiralRace(a));
+                    newShipNum = mGetBaseObjectFromClassRace(
+                            initial->canBuild[j], GetAdmiralRace(a));
+                    baseObject = mGetBaseObjectPtr(newShipNum);
                     if (baseObject != NULL) {
                         AddBaseObjectMedia(newShipNum, GetAdmiralColor(a), all_colors);
                     }
