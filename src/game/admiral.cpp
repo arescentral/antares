@@ -54,7 +54,7 @@ const Fixed kImportantTarget            = 0x00000140;
 const Fixed kSomewhatImportantTarget    = 0x00000120;
 const Fixed kAbsolutelyEssential        = 0x00008000;
 
-unique_ptr<destBalanceType[]> gDestBalanceData;
+unique_ptr<Destination[]> gDestBalanceData;
 unique_ptr<Admiral[]> gAdmiralData;
 
 }  // namespace
@@ -62,7 +62,7 @@ unique_ptr<Admiral[]> gAdmiralData;
 void Admiral::init() {
     gAdmiralData.reset(new Admiral[kMaxPlayerNum]);
     reset();
-    gDestBalanceData.reset(new destBalanceType[kMaxDestObject]);
+    gDestBalanceData.reset(new Destination[kMaxDestObject]);
     ResetAllDestObjectData();
 }
 
@@ -74,8 +74,8 @@ void Admiral::reset() {
 }
 
 void ResetAllDestObjectData() {
-    destBalanceType* d = mGetDestObjectBalancePtr(0);
     for (int i = 0; i < kMaxDestObject; ++i) {
+        auto d = Handle<Destination>(i);
         d->whichObject = kDestNoObject;
         d->name.clear();
         d->earn = d->totalBuildTime = d->buildTime = 0;
@@ -86,12 +86,30 @@ void ResetAllDestObjectData() {
         for (int j = 0; j < kMaxPlayerNum; ++j) {
             d->occupied[j] = 0;
         }
-        d++;
     }
 }
 
-destBalanceType* mGetDestObjectBalancePtr(int32_t whichObject) {
-    return gDestBalanceData.get() + whichObject;
+Destination* Destination::get(int i) {
+    return &gDestBalanceData[i];
+}
+
+Handle<Destination> Destination::with(Handle<SpaceObject> o) {
+    for (int i = 0; i < kMaxDestObject; ++i) {
+        auto d = Handle<Destination>(i);
+        if (d->whichObject == o) {
+            return d;
+        }
+    }
+    return Destination::none();
+}
+
+bool Destination::can_build() const {
+    for (int i = 0; i < kMaxShipCanBuild; ++i) {
+        if (canBuildType[i] != kNoShip) {
+            return true;
+        }
+    }
+    return false;
 }
 
 Admiral* Admiral::get(int i) {
@@ -122,84 +140,85 @@ Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Scenario::Pl
     return a;
 }
 
+static Handle<Destination> next_free_destination() {
+    for (int i = 0; i < kMaxDestObject; ++i) {
+        auto d = Handle<Destination>(i);
+        if (!d->whichObject.get()) {
+            return d;
+        }
+    }
+    return Destination::none();
+}
+
 int32_t MakeNewDestination(
         Handle<SpaceObject> object, int32_t* canBuildType, Fixed earn, int16_t nameResID,
         int16_t nameStrNum) {
-    int32_t i = 0;
-
-    destBalanceType* d = mGetDestObjectBalancePtr(0);
-    while ((i < kMaxDestObject) && d->whichObject.get()) {
-        i++;
-        d++;
-    }
-
-    if (i == kMaxDestObject) {
+    auto d = next_free_destination();
+    if (!d.get()) {
         return -1;
-    } else {
-        d->whichObject = object;
-        d->earn = earn;
-        d->totalBuildTime = d->buildTime = 0;
-
-        if (canBuildType != NULL) {
-            for (int j = 0; j < kMaxTypeBaseCanBuild; j++) {
-                d->canBuildType[j] = *canBuildType;
-                canBuildType++;
-            }
-        } else {
-            for (int j = 0; j < kMaxTypeBaseCanBuild; j++) {
-                d->canBuildType[j] = kNoShip;
-            }
-        }
-
-        if ((nameResID >= 0)) {
-            d->name.assign(StringList(nameResID).at(nameStrNum - 1));
-            if (d->name.size() > kDestinationNameLen) {
-                d->name.resize(kDestinationNameLen);
-            }
-        }
-
-        if (object->attributes & kNeutralDeath) {
-            for (int j = 0; j < kMaxPlayerNum; j++) {
-                d->occupied[j] = 0;
-            }
-
-            if (object->owner.get()) {
-                d->occupied[object->owner.number()] = object->baseType->initialAgeRange;
-            }
-        }
-
-        return i;
     }
+
+    d->whichObject = object;
+    d->earn = earn;
+    d->totalBuildTime = d->buildTime = 0;
+
+    if (canBuildType != NULL) {
+        for (int j = 0; j < kMaxTypeBaseCanBuild; j++) {
+            d->canBuildType[j] = *canBuildType;
+            canBuildType++;
+        }
+    } else {
+        for (int j = 0; j < kMaxTypeBaseCanBuild; j++) {
+            d->canBuildType[j] = kNoShip;
+        }
+    }
+
+    if ((nameResID >= 0)) {
+        d->name.assign(StringList(nameResID).at(nameStrNum - 1));
+        if (d->name.size() > kDestinationNameLen) {
+            d->name.resize(kDestinationNameLen);
+        }
+    }
+
+    if (object->attributes & kNeutralDeath) {
+        for (int j = 0; j < kMaxPlayerNum; j++) {
+            d->occupied[j] = 0;
+        }
+
+        if (object->owner.get()) {
+            d->occupied[object->owner.number()] = object->baseType->initialAgeRange;
+        }
+    }
+
+    return d.number();
 }
 
-void Admiral::remove_destination(int32_t which) {
-    auto d = mGetDestObjectBalancePtr(which);
+void Admiral::remove_destination(Handle<Destination> d) {
     if (_active) {
         if (_destinationObject == d->whichObject) {
             _destinationObject = kNoDestinationObject;
             _destinationObjectID = -1;
             _has_destination = false;
         }
-        if (_considerDestination == which) {
+        if (_considerDestination == d.number()) {
             _considerDestination = kNoDestinationObject;
         }
 
-        if (_buildAtObject == which) {
+        if (_buildAtObject == d.number()) {
             _buildAtObject = kNoShip;
         }
     }
 }
 
-void RemoveDestination(int32_t whichDestination) {
-    if ((whichDestination < 0) || (kMaxDestObject <= whichDestination)) {
+void RemoveDestination(Handle<Destination> d) {
+    if (!d.get()) {
         return;
     }
     for (int i = 0; i < kMaxPlayerNum; i++) {
-        Handle<Admiral>(i)->remove_destination(whichDestination);
+        Handle<Admiral>(i)->remove_destination(d);
     }
 
-    auto d = mGetDestObjectBalancePtr(whichDestination);
-    d->whichObject = kDestNoObject;
+    d->whichObject = SpaceObject::none();
     d->name.clear();
     d->earn = d->totalBuildTime = d->buildTime = 0;
     d->buildObjectBaseNum = BaseObject::none();
@@ -214,7 +233,6 @@ void RemoveDestination(int32_t whichDestination) {
 
 void RecalcAllAdmiralBuildData() {
     Admiral* a = gAdmiralData.get();
-    destBalanceType* d = mGetDestObjectBalancePtr(0);
 
     // first clear all the data
     for (int i = 0; i < kMaxPlayerNum; i++) {
@@ -229,6 +247,7 @@ void RecalcAllAdmiralBuildData() {
     }
 
     for (int i = 0; i < kMaxDestObject; i++) {
+        auto d = Handle<Destination>(i);
         if (d->whichObject.get()) {
             auto anObject = d->whichObject;
             if (anObject->owner.get()) {
@@ -261,7 +280,6 @@ void RecalcAllAdmiralBuildData() {
                 }
             }
         }
-        d++;
     }
 }
 
@@ -317,25 +335,13 @@ Handle<SpaceObject> Admiral::target() const {
 }
 
 void Admiral::set_control(Handle<SpaceObject> obj) {
-    destBalanceType* d = mGetDestObjectBalancePtr(0);
-
     _considerShip = obj;
     if (obj.get()) {
         _considerShipID = obj->id;
         if (obj->attributes & kCanAcceptBuild) {
-            int buildAtNum = 0;
-            while ((d->whichObject != obj) && (buildAtNum < kMaxDestObject)) {
-                buildAtNum++;
-                d++;
-            }
-            if (buildAtNum < kMaxDestObject) {
-                int l = 0;
-                while ((l < kMaxShipCanBuild) && (d->canBuildType[l] == kNoShip)) {
-                    l++;
-                }
-                if (l < kMaxShipCanBuild) {
-                    _buildAtObject = buildAtNum;
-                }
+            auto d = Destination::with(obj);
+            if (d.get() && d->can_build()) {
+                _buildAtObject = d.number();
             }
         }
     } else {
@@ -354,30 +360,16 @@ Handle<SpaceObject> Admiral::control() const {
 }
 
 bool BaseHasSomethingToBuild(Handle<SpaceObject> obj) {
-    destBalanceType* d = mGetDestObjectBalancePtr(0);
-
     if (obj->attributes & kCanAcceptBuild) {
-        int buildAtNum = 0;
-        while ((d->whichObject != obj) && (buildAtNum < kMaxDestObject)) {
-            buildAtNum++;
-            d++;
-        }
-        if (buildAtNum < kMaxDestObject) {
-            int l = 0;
-            while ((l < kMaxShipCanBuild) && (d->canBuildType[l] == kNoShip)) {
-                l++;
-            }
-            if (l < kMaxShipCanBuild) {
-                return true;
-            }
-        }
+        auto d = Destination::with(obj);
+        return d.get() && d->can_build();
     }
     return false;
 }
 
 int32_t GetAdmiralBuildAtObject(Handle<Admiral> a) {
     if (a->buildAtObject() >= 0) {
-        destBalanceType* destBalance = mGetDestObjectBalancePtr(a->buildAtObject());
+        auto destBalance = Handle<Destination>(a->buildAtObject());
         if (destBalance->whichObject.get()) {
             auto anObject = destBalance->whichObject;
             if (anObject->owner != a) {
@@ -391,39 +383,26 @@ int32_t GetAdmiralBuildAtObject(Handle<Admiral> a) {
 }
 
 void SetAdmiralBuildAtObject(Handle<Admiral> a, Handle<SpaceObject> obj) {
-    destBalanceType* d = mGetDestObjectBalancePtr(0);
-
     if (!a.get()) {
         throw Exception("Can't set consider ship for -1 admiral.");
     }
     if (obj.get()) {
         if (obj->attributes & kCanAcceptBuild) {
-            int buildAtNum = 0;
-            while ((d->whichObject != obj) && (buildAtNum < kMaxDestObject)) {
-                buildAtNum++;
-                d++;
-            }
-            if (buildAtNum < kMaxDestObject) {
-                int l = 0;
-                while ((l < kMaxShipCanBuild) && (d->canBuildType[l] == kNoShip)) {
-                    l++;
-                }
-                if (l < kMaxShipCanBuild) {
-                    a->buildAtObject() = buildAtNum;
-                }
+            auto d = Destination::with(obj);
+            if (d.get() && d->can_build()) {
+                a->buildAtObject() = d.number();
             }
         }
     }
 }
 
 void SetAdmiralBuildAtName(Handle<Admiral> a, StringSlice name) {
-    destBalanceType* destObject = mGetDestObjectBalancePtr(a->buildAtObject());
+    auto destObject = Handle<Destination>(a->buildAtObject());
     destObject->name.assign(name.slice(0, min<size_t>(name.size(), kDestinationNameLen)));
 }
 
-StringSlice GetDestBalanceName(int32_t whichDestObject) {
-    destBalanceType* destObject = mGetDestObjectBalancePtr(whichDestObject);
-    return (destObject->name);
+StringSlice GetDestBalanceName(Handle<Destination> whichDestObject) {
+    return whichDestObject->name;
 }
 
 StringSlice GetAdmiralName(Handle<Admiral> a) {
@@ -639,8 +618,7 @@ void RemoveObjectFromDestination(SpaceObject* o) {
 
 // assumes you can afford it & base has time
 static void AdmiralBuildAtObject(
-        Handle<Admiral> admiral, Handle<BaseObject> base, int32_t whichDestObject) {
-    destBalanceType* buildAtDest = mGetDestObjectBalancePtr(whichDestObject);
+        Handle<Admiral> admiral, Handle<BaseObject> base, Handle<Destination> buildAtDest) {
     SpaceObject* buildAtObject = NULL;
     coordPointType  coord;
     fixedPointType  v = {0, 0};
@@ -663,10 +641,9 @@ static void AdmiralBuildAtObject(
 void AdmiralThink() {
     Admiral* a =gAdmiralData.get();
     SpaceObject* anObject;
-    destBalanceType* destBalance;
 
-    destBalance = mGetDestObjectBalancePtr(0);
     for (int i = 0; i < kMaxDestObject; i++) {
+        auto destBalance = Handle<Destination>(i);
         destBalance->buildTime -= 10;
         if (destBalance->buildTime <= 0) {
             destBalance->buildTime = 0;
@@ -681,7 +658,6 @@ void AdmiralThink() {
         if (anObject && anObject->owner.get()) {
             anObject->owner->pay(destBalance->earn);
         }
-        destBalance++;
     }
 
     for (int i = 0; i < kMaxPlayerNum; i++) {
@@ -697,7 +673,7 @@ void Admiral::think() {
     Handle<SpaceObject> stepObject;
     Handle<SpaceObject> origDest;
     Handle<SpaceObject> origObject;
-    destBalanceType* destBalance;
+    Destination* destBalance;
     int32_t difference;
     Fixed  friendValue, foeValue, thisValue;
     Point gridLoc;
@@ -1133,7 +1109,7 @@ void Admiral::think() {
 }
 
 bool Admiral::build(int32_t buildWhichType) {
-    destBalanceType* buildAtDest = mGetDestObjectBalancePtr(_buildAtObject);
+    auto buildAtDest = Handle<Destination>(_buildAtObject);
 
     Handle<Admiral> self(this - gAdmiralData.get());
     if ((buildWhichType >= 0)
@@ -1156,10 +1132,7 @@ bool Admiral::build(int32_t buildWhichType) {
     return false;
 }
 
-void StopBuilding(int32_t whichDestObject) {
-    destBalanceType* destObject;
-
-    destObject = mGetDestObjectBalancePtr(whichDestObject);
+void StopBuilding(Handle<Destination> destObject) {
     destObject->totalBuildTime = destObject->buildTime = 0;
     destObject->buildObjectBaseNum = BaseObject::none();
 }
@@ -1197,20 +1170,17 @@ int32_t GetAdmiralShipsLeft(Handle<Admiral> admiral) {
     }
 }
 
-int32_t AlterDestinationObjectOccupation(int32_t whichDestination, Handle<Admiral> a, int32_t amount) {
-    destBalanceType* d = mGetDestObjectBalancePtr(whichDestination);
-
+int32_t AlterDestinationObjectOccupation(
+        Handle<Destination> d, Handle<Admiral> a, int32_t amount) {
     if (a.get()) {
         d->occupied[a.number()] += amount;
-        return(d->occupied[a.number()]);
+        return d->occupied[a.number()];
     } else {
         return -1;
     }
 }
 
-void ClearAllOccupants(int32_t whichDestination, Handle<Admiral> a, int32_t fullAmount) {
-    destBalanceType* d = mGetDestObjectBalancePtr(whichDestination);
-
+void ClearAllOccupants(Handle<Destination> d, Handle<Admiral> a, int32_t fullAmount) {
     for (int i = 0; i < kMaxPlayerNum; i++) {
         d->occupied[i] = 0;
     }

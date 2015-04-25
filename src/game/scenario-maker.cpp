@@ -539,7 +539,7 @@ bool Scenario::Condition::is_true() const {
 
         case kObjectIsBeingBuilt:
             {
-                destBalanceType     *buildAtObject = NULL;
+                Destination* buildAtObject = NULL;
 
                 buildAtObject = mGetDestObjectBalancePtr(GetAdmiralBuildAtObject(globals()->gPlayerAdmiral));
                 if (buildAtObject != NULL) {

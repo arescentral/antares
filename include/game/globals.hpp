@@ -78,7 +78,7 @@ struct hotKeyType {
 };
 
 struct Admiral;
-struct destBalanceType;
+struct Destination;
 struct proximityUnitType;
 struct scrollStarType;
 class InputSource;

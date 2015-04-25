@@ -637,7 +637,7 @@ void minicomputer_cancel() {
 void MiniComputerHandleNull( int32_t unitsToDo)
 
 {
-    destBalanceType     *buildAtObject = NULL;
+    Destination*     buildAtObject = NULL;
     SpaceObject     *myObject = NULL, newObject;
 
     globals()->gMiniScreenData.pollTime += unitsToDo;
@@ -1208,7 +1208,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 // also sets up the values = base object num
 
 {
-    destBalanceType     *buildAtObject = NULL;
+    Destination*        buildAtObject = NULL;
     miniScreenLineType  *line = NULL;
     int32_t                count, lineNum;
     Rect                mRect;

@@ -67,7 +67,11 @@ const int32_t kMaxDestObject = 10;  // we keep special track of dest objects for
 const int32_t kMaxNumAdmiralCanBuild = kMaxDestObject * kMaxTypeBaseCanBuild;
 const int32_t kAdmiralScoreNum = 3;
 
-struct destBalanceType {
+struct Destination {
+    static Destination* get(int i);
+    static Handle<Destination> with(Handle<SpaceObject> o);
+    static Handle<Destination> none() { return Handle<Destination>(-1); }
+
     Handle<SpaceObject> whichObject;
     int32_t             canBuildType[kMaxTypeBaseCanBuild];
     int32_t             occupied[kMaxPlayerNum];
@@ -76,6 +80,8 @@ struct destBalanceType {
     int32_t             totalBuildTime;
     Handle<BaseObject>  buildObjectBaseNum;
     sfz::String         name;
+
+    bool                can_build() const;  // Can build anything.
 };
 
 struct admiralBuildType {
@@ -96,7 +102,7 @@ class Admiral {
     bool                build(int32_t buildWhichType);
     void                pay(Fixed howMuch);
     void                pay_absolute(Fixed howMuch);
-    void                remove_destination(int32_t which);
+    void                remove_destination(Handle<Destination> d);
 
     Handle<SpaceObject> control() const;
     Handle<SpaceObject> target() const;
@@ -174,12 +180,12 @@ class Admiral {
 
 void ResetAllDestObjectData();
 
-destBalanceType* mGetDestObjectBalancePtr(int32_t whichObject);
+inline Destination* mGetDestObjectBalancePtr(Handle<Destination> d) { return d.get(); }
 
 int32_t MakeNewDestination(
         Handle<SpaceObject> object, int32_t* canBuildType, Fixed earn, int16_t nameResID,
         int16_t nameStrNum);
-void RemoveDestination(int32_t whichDestination);
+void RemoveDestination(Handle<Destination> d);
 void RecalcAllAdmiralBuildData();
 
 uint8_t GetAdmiralColor(Handle<Admiral> whichAdmiral);
@@ -190,7 +196,7 @@ int32_t GetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral);
 void SetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral, Handle<SpaceObject> obj);
 
 void SetAdmiralBuildAtName(Handle<Admiral> whichAdmiral, sfz::StringSlice name);
-sfz::StringSlice GetDestBalanceName(int32_t whichDestObject);
+sfz::StringSlice GetDestBalanceName(Handle<Destination> whichDestObject);
 sfz::StringSlice GetAdmiralName(Handle<Admiral> whichAdmiral);
 
 void SetObjectLocationDestination(SpaceObject* o, coordPointType* where);
@@ -198,13 +204,15 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject);
 void RemoveObjectFromDestination(SpaceObject* o);
 
 void AdmiralThink();
-void StopBuilding(int32_t whichDestObject);
+void StopBuilding(Handle<Destination> whichDestObject);
 
 void AlterAdmiralScore(Handle<Admiral> whichAdmiral, int32_t whichScore, int32_t amount);
 int32_t GetAdmiralScore(Handle<Admiral> whichAdmiral, int32_t whichScore);
 int32_t GetAdmiralShipsLeft(Handle<Admiral> whichAdmiral);
-int32_t AlterDestinationObjectOccupation(int32_t whichDestination, Handle<Admiral> whichAdmiral, int32_t amount);
-void ClearAllOccupants(int32_t whichDestination, Handle<Admiral> whichAdmiral, int32_t fullAmount);
+int32_t AlterDestinationObjectOccupation(
+        Handle<Destination> whichDestination, Handle<Admiral> whichAdmiral, int32_t amount);
+void ClearAllOccupants(
+        Handle<Destination> whichDestination, Handle<Admiral> whichAdmiral, int32_t fullAmount);
 void AddKillToAdmiral(SpaceObject *anObject);
 
 int32_t GetAdmiralLoss(Handle<Admiral> whichAdmiral);
