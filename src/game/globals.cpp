@@ -50,8 +50,8 @@ aresGlobalType::aresGlobalType() {
     gKeyMapBufferBottom = 0;
     gGameOver = 1;
     gGameTime = 0;
-    gClosestObject = 0;
-    gFarthestObject = 0;
+    gClosestObject = Handle<SpaceObject>(0);
+    gFarthestObject = Handle<SpaceObject>(0);
     gCenterScaleH = 0;
     gCenterScaleV = 0;
     gPlayerShipNumber = 0;

@@ -325,7 +325,7 @@ void UpdateRadar(int32_t unitsDone) {
       case kNearestFoeZoom:
       case kNearestAnythingZoom:
         {
-            SpaceObject* anObject = mGetSpaceObjectPtr(globals()->gClosestObject);
+            auto anObject = globals()->gClosestObject;
             uint64_t hugeDistance = anObject->distanceFromPlayer;
             if (hugeDistance == 0) { // if this is true, then we haven't calced its distance
                 uint64_t x_distance = ABS<int32_t>(gScrollStarObject->location.h - anObject->location.h);
@@ -363,7 +363,7 @@ void UpdateRadar(int32_t unitsDone) {
 
       case kSmallestZoom:
         {
-            SpaceObject* anObject = mGetSpaceObjectPtr(globals()->gFarthestObject);
+            auto anObject = globals()->gFarthestObject;
             uint64_t tempWide = anObject->distanceFromPlayer;
             bestScale = wsqrt(tempWide);
             if (bestScale == 0) bestScale = 1;

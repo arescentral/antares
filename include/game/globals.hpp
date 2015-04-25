@@ -100,8 +100,8 @@ struct aresGlobalType {
     int32_t         gGameOver;
     int64_t         gGameTime;
     uint64_t        gLastTime;
-    int32_t         gClosestObject;
-    int32_t         gFarthestObject;
+    Handle<SpaceObject> gClosestObject;
+    Handle<SpaceObject> gFarthestObject;
     int32_t         gCenterScaleH;
     int32_t         gCenterScaleV;
     int32_t         gPlayerShipNumber;
