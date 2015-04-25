@@ -498,8 +498,7 @@ class SpaceObject {
     int                     pixResID = -1;
 
     struct Weapon {
-        BaseObject*             base;
-        Handle<BaseObject>      type;
+        Handle<BaseObject>      base;
         int32_t                 time = 0;
         int32_t                 ammo = 0;
         int32_t                 position = 0;

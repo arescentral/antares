@@ -417,18 +417,15 @@ SpaceObject::SpaceObject(
         pixResID += (GetAdmiralColor(owner) << kSpriteTableColorShift);
     }
 
-    pulse.type = baseType->pulse.base;
-    pulse.base = mGetBaseObjectPtr(pulse.type);
-    beam.type = baseType->beam.base;
-    beam.base = mGetBaseObjectPtr(beam.type);
-    special.type = baseType->special.base;
-    special.base = mGetBaseObjectPtr(special.type);
+    pulse.base = baseType->pulse.base;
+    beam.base = baseType->beam.base;
+    special.base = baseType->special.base;
 
     longestWeaponRange = 0;
     shortestWeaponRange = kMaximumRelevantDistance;
 
     for (auto weapon: {&pulse, &beam, &special}) {
-        if (weapon->type.get()) {
+        if (weapon->base.get()) {
             const auto& frame = weapon->base->frame.weapon;
             weapon->ammo = frame.ammo;
             if ((frame.range > 0) && (frame.usage & kUseForAttacking)) {
@@ -547,20 +544,18 @@ void ChangeObjectBaseType(
         obj->periodicTime = base->activatePeriod + obj->randomSeed.next(base->activatePeriodRange);
     }
 
-    obj->pulse.type = base->pulse.base;
-    obj->beam.type = base->beam.base;
-    obj->special.type = base->special.base;
-    obj->pulse.base = obj->beam.base = obj->special.base = NULL;
+    obj->pulse.base = base->pulse.base;
+    obj->beam.base = base->beam.base;
+    obj->special.base = base->special.base;
     obj->longestWeaponRange = 0;
     obj->shortestWeaponRange = kMaximumRelevantDistance;
 
     for (auto* weapon: {&obj->pulse, &obj->beam, &obj->special}) {
-        if (!weapon->type.get()) {
+        if (!weapon->base.get()) {
             weapon->time = 0;
             continue;
         }
 
-        weapon->base = mGetBaseObjectPtr(weapon->type);
         if (!relative) {
             weapon->ammo = weapon->base->frame.weapon.ammo;
             weapon->position = 0;

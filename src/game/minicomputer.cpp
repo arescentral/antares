@@ -214,9 +214,9 @@ inline int32_t mGetLineNumFromV(int32_t mV) {
 inline void mCopyMiniSpaceObject(
         SpaceObject& mdestobject, const SpaceObject& msourceobject) {
     (mdestobject).id = (msourceobject).id;
-    (mdestobject).beam.type = (msourceobject).beam.type;
-    (mdestobject).pulse.type = (msourceobject).pulse.type;
-    (mdestobject).special.type = (msourceobject).special.type;
+    (mdestobject).beam.base = (msourceobject).beam.base;
+    (mdestobject).pulse.base = (msourceobject).pulse.base;
+    (mdestobject).special.base = (msourceobject).special.base;
     (mdestobject).destinationLocation.h = (msourceobject).destinationLocation.h;
     (mdestobject).destinationLocation.v = (msourceobject).destinationLocation.v;
     (mdestobject).destinationObject = (msourceobject).destinationObject;
@@ -310,9 +310,9 @@ void ClearMiniObjectData( void)
 
     o = mGetMiniObjectPtr( kMiniSelectObjectNum);
     o->id = -1;
-    o->beam.type = -1;
-    o->pulse.type = -1;
-    o->special.type = -1;
+    o->beam.base = BaseObject::none();
+    o->pulse.base = BaseObject::none();
+    o->special.base = BaseObject::none();
     o->destinationLocation.h = o->destinationLocation.v = -1;
     o->destinationObject = -1;
     o->destObjectPtr = NULL;
@@ -325,9 +325,9 @@ void ClearMiniObjectData( void)
 
     o = mGetMiniObjectPtr( kMiniTargetObjectNum);
     o->id = -1;
-    o->beam.type = -1;
-    o->pulse.type = -1;
-    o->special.type = -1;
+    o->beam.base = BaseObject::none();
+    o->pulse.base = BaseObject::none();
+    o->special.base = BaseObject::none();
     o->destinationLocation.h = o->destinationLocation.v = -1;
     o->destinationObject = -1;
     o->destObjectPtr = NULL;
@@ -658,9 +658,9 @@ void MiniComputerHandleNull( int32_t unitsToDo)
         } else
         {
             newObject.id = -1;
-            newObject.beam.type = -1;
-            newObject.pulse.type = -1;
-            newObject.special.type = -1;
+            newObject.beam.base = BaseObject::none();
+            newObject.pulse.base = BaseObject::none();
+            newObject.special.base = BaseObject::none();
             newObject.destinationLocation.h = newObject.destinationLocation.v = -1;
             newObject.destinationObject = -1;
             newObject.destObjectPtr = NULL;
@@ -682,9 +682,9 @@ void MiniComputerHandleNull( int32_t unitsToDo)
         } else
         {
             newObject.id = -1;
-            newObject.beam.type = -1;
-            newObject.pulse.type = -1;
-            newObject.special.type = -1;
+            newObject.beam.base = BaseObject::none();
+            newObject.pulse.base = BaseObject::none();
+            newObject.special.base = BaseObject::none();
             newObject.destinationLocation.h = newObject.destinationLocation.v = -1;
             newObject.destinationObject = -1;
             newObject.destObjectPtr = NULL;
@@ -967,8 +967,8 @@ void draw_mini_ship_data(
     color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
     // move to the 1st line in the selection miniscreen, write the name
-    if (newObject.beam.type.get()) {
-        String text(get_object_short_name(newObject.beam.type));
+    if (newObject.beam.base.get()) {
+        String text(get_object_short_name(newObject.beam.base));
         computer_font->draw_sprite(
                 Point(lRect.left, lRect.top + computer_font->ascent), text, color);
     }
@@ -979,8 +979,8 @@ void draw_mini_ship_data(
     color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
     // move to the 1st line in the selection miniscreen, write the name
-    if (newObject.pulse.type.get()) {
-        String text(get_object_short_name(newObject.pulse.type));
+    if (newObject.pulse.base.get()) {
+        String text(get_object_short_name(newObject.pulse.base));
         computer_font->draw_sprite(
                 Point(lRect.left, lRect.top + computer_font->ascent), text, color);
     }
@@ -993,8 +993,8 @@ void draw_mini_ship_data(
         color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
         // move to the 1st line in the selection miniscreen, write the name
-        if (newObject.special.type.get()) {
-            String text(get_object_short_name(newObject.special.type));
+        if (newObject.special.base.get()) {
+            String text(get_object_short_name(newObject.special.base));
             computer_font->draw_sprite(
                     Point(lRect.left, lRect.top + computer_font->ascent), text, color);
         }
@@ -1073,7 +1073,7 @@ void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> w
             if ( globals()->keyMask & kComputerBuildMenu) return;
             if ( whichLine != kMiniScreenNoLineSelected)
             {
-                if (CountObjectsOfBaseType(-1, Admiral::none()) < (kMaxSpaceObject - kMaxShipBuffer)) {
+                if (CountObjectsOfBaseType(BaseObject::none(), Admiral::none()) < (kMaxSpaceObject - kMaxShipBuffer)) {
                     if (whichAdmiral->build(whichLine - kBuildScreenFirstTypeLine) == false) {
                         if (whichAdmiral == globals()->gPlayerAdmiral) {
                             mPlayBeepBad();
@@ -1324,7 +1324,6 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 int32_t MiniComputerGetPriceOfCurrentSelection( void)
 {
     miniScreenLineType  *line = NULL;
-    BaseObject*         buildObject = NULL;
 
     if (( globals()->gMiniScreenData.currentScreen != kBuildMiniScreen) ||
             ( globals()->gMiniScreenData.selectLine == kMiniScreenNoLineSelected))
@@ -1335,7 +1334,7 @@ int32_t MiniComputerGetPriceOfCurrentSelection( void)
 
         if ( line->value < 0) return( 0);
 
-        buildObject = mGetBaseObjectPtr( line->value);
+        auto buildObject = Handle<BaseObject>(line->value);
 
         if ( buildObject->price < 0) return( 0);
 

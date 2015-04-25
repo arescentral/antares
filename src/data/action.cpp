@@ -126,7 +126,7 @@ void read_from(ReadSource in, objectActionType& action) {
 }
 
 void read_from(ReadSource in, argumentType::CreateObject& argument) {
-    read(in, argument.whichBaseType);
+    argument.whichBaseType = Handle<BaseObject>(read<int32_t>(in));
     read(in, argument.howManyMinimum);
     read(in, argument.howManyRange);
     read(in, argument.velocityRelative);

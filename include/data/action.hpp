@@ -106,7 +106,7 @@ union argumentType {
 
     // createObject: make another type of object appear
     struct CreateObject {
-        int32_t                 whichBaseType;      // what type
+        Handle<BaseObject>      whichBaseType;      // what type
         int32_t                 howManyMinimum;     // # to make min
         int32_t                 howManyRange;       // # to make range
         uint8_t                 velocityRelative;   // is velocity relative to creator?

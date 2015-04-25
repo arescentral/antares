@@ -101,7 +101,7 @@ void SpaceObject::recharge() {
     }
 
     for (auto* weapon: {&pulse, &beam, &special}) {
-        if (weapon->type.get()) {
+        if (weapon->base.get()) {
             if ((weapon->ammo < (weapon->base->frame.weapon.ammo >> 1))
                     && (_energy >= kWeaponRatio)) {
                 weapon->charge++;
@@ -131,12 +131,11 @@ static void tick_weapon(
 void fire_weapon(
         SpaceObject* subject, SpaceObject* target,
         const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
-    if ((weapon.time > 0) || !weapon.type.get()) {
+    if ((weapon.time > 0) || !weapon.base.get()) {
         return;
     }
 
-    BaseObject* baseObject = subject->baseType;
-    BaseObject* weaponObject = weapon.base;
+    auto weaponObject = weapon.base;
     if ((subject->energy() < weaponObject->frame.weapon.energyCost)
             || ((weaponObject->frame.weapon.ammo > 0) && (weapon.ammo <= 0))) {
         return;
@@ -194,7 +193,6 @@ void NonplayerShipThink(int32_t timePass)
     Admiral*        anAdmiral;
     SpaceObject*    targetObject;
     BaseObject*     baseObject;
-    BaseObject*     weaponObject;
     Point           offset;
     int32_t         count, difference;
     uint32_t        keysDown;
@@ -459,21 +457,21 @@ void NonplayerShipThink(int32_t timePass)
 uint32_t use_weapons_for_defense(SpaceObject* obj) {
     uint32_t keys = 0;
 
-    if (obj->pulse.type.get()) {
+    if (obj->pulse.base.get()) {
         auto weaponObject = obj->pulse.base;
         if (weaponObject->frame.weapon.usage & kUseForDefense) {
             keys |= kOneKey;
         }
     }
 
-    if (obj->beam.type.get()) {
+    if (obj->beam.base.get()) {
         auto weaponObject = obj->beam.base;
         if (weaponObject->frame.weapon.usage & kUseForDefense) {
             keys |= kTwoKey;
         }
     }
 
-    if (obj->special.type.get()) {
+    if (obj->special.base.get()) {
         auto weaponObject = obj->special.base;
         if (weaponObject->frame.weapon.usage & kUseForDefense) {
             keys |= kEnterKey;
@@ -487,8 +485,6 @@ uint32_t ThinkObjectNormalPresence(
         SpaceObject *anObject, BaseObject* baseObject, int32_t timePass) {
     uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask, distance, dcalc;
     SpaceObject*    targetObject;
-    BaseObject*     bestWeapon;
-    BaseObject*     weaponObject;
     coordPointType  dest;
     int32_t         difference;
     Fixed           slope;
@@ -770,7 +766,7 @@ uint32_t ThinkObjectNormalPresence(
                         keysDown |= kUpKey;
                     }
                     anObject->lastTargetDistance = distance;
-                    if ((anObject->special.type.get())
+                    if ((anObject->special.base.get())
                             && (distance > kWarpInDistance)
                             && (theta <= kDirectionError)) {
                         if (anObject->special.base->frame.weapon.usage & kUseForTransportation) {
@@ -838,10 +834,10 @@ uint32_t ThinkObjectNormalPresence(
 
                 difference = anObject->longestWeaponRange;
 
-                bestWeapon = NULL;
+                auto bestWeapon = BaseObject::none();
 
-                if (anObject->beam.type.get()) {
-                    bestWeapon = weaponObject = anObject->beam.base;
+                if (anObject->beam.base.get()) {
+                    auto weaponObject = bestWeapon = anObject->beam.base;
                     if ((weaponObject->frame.weapon.usage & kUseForAttacking)
                             && (static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
                             && (weaponObject->frame.weapon.range < difference)) {
@@ -850,8 +846,8 @@ uint32_t ThinkObjectNormalPresence(
                     }
                 }
 
-                if (anObject->pulse.type.get()) {
-                    weaponObject = anObject->pulse.base;
+                if (anObject->pulse.base.get()) {
+                    auto weaponObject = anObject->pulse.base;
                     if ((weaponObject->frame.weapon.usage & kUseForAttacking)
                             && (static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
                             && (weaponObject->frame.weapon.range < difference)) {
@@ -860,8 +856,8 @@ uint32_t ThinkObjectNormalPresence(
                     }
                 }
 
-                if (anObject->special.type.get()) {
-                    weaponObject = anObject->special.base;
+                if (anObject->special.base.get()) {
+                    auto weaponObject = anObject->special.base;
                     if ((weaponObject->frame.weapon.usage & kUseForAttacking)
                             && (static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
                             && (weaponObject->frame.weapon.range < difference)) {
@@ -872,7 +868,7 @@ uint32_t ThinkObjectNormalPresence(
 
                 // offset dest for anticipated position -- overkill?
 
-                if (bestWeapon) {
+                if (bestWeapon.get()) {
                     dcalc = lsqrt(distance);
 
                     calcv = targetObject->velocity.h - anObject->velocity.h;
@@ -1534,8 +1530,6 @@ uint32_t ThinkObjectEngageTarget( SpaceObject *anObject, SpaceObject *targetObje
     uint32_t distance, int16_t *theta, int32_t timePass)
 {
     uint32_t        keysDown = 0;
-    BaseObject*     bestWeapon;
-    BaseObject*     weaponObject;
     coordPointType  dest;
     int32_t         difference;
     int16_t         angle, beta;
@@ -1567,11 +1561,11 @@ uint32_t ThinkObjectEngageTarget( SpaceObject *anObject, SpaceObject *targetObje
             anObject->timeFromOrigin += timePass;
         }
 
+        auto bestWeapon = BaseObject::none();
         difference = anObject->longestWeaponRange;
 
-        if ( anObject->beam.type.get())
-        {
-            bestWeapon = weaponObject = anObject->beam.base;
+        if (anObject->beam.base.get()) {
+            auto weaponObject = bestWeapon = anObject->beam.base;
             if ( ( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
                 ( static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
@@ -1584,9 +1578,8 @@ uint32_t ThinkObjectEngageTarget( SpaceObject *anObject, SpaceObject *targetObje
             }
         }
 
-        if ( anObject->pulse.type.get())
-        {
-            weaponObject = anObject->pulse.base;
+        if (anObject->pulse.base.get()) {
+            auto weaponObject = anObject->pulse.base;
             if ( ( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
                 ( static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
@@ -1598,9 +1591,8 @@ uint32_t ThinkObjectEngageTarget( SpaceObject *anObject, SpaceObject *targetObje
             }
         }
 
-        if ( anObject->special.type.get())
-        {
-            weaponObject = anObject->special.base;
+        if (anObject->special.base.get()) {
+            auto weaponObject = anObject->special.base;
             if ( ( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
                 ( static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
@@ -1661,9 +1653,8 @@ uint32_t ThinkObjectEngageTarget( SpaceObject *anObject, SpaceObject *targetObje
         beta = anObject->direction;
         beta = mAngleDifference( beta, angle);
 
-        if ( anObject->pulse.type.get())
-        {
-            weaponObject = anObject->pulse.base;
+        if (anObject->pulse.base.get()) {
+            auto weaponObject = anObject->pulse.base;
             if (( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
                 (( ABS( beta) <= kShootAngle) ||
@@ -1674,9 +1665,8 @@ uint32_t ThinkObjectEngageTarget( SpaceObject *anObject, SpaceObject *targetObje
             }
         }
 
-        if ( anObject->beam.type.get())
-        {
-            weaponObject = anObject->beam.base;
+        if (anObject->beam.base.get()) {
+            auto weaponObject = anObject->beam.base;
             if (( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
                 (( ABS( beta) <= kShootAngle) ||
@@ -1687,9 +1677,8 @@ uint32_t ThinkObjectEngageTarget( SpaceObject *anObject, SpaceObject *targetObje
             }
         }
 
-        if ( anObject->special.type.get())
-        {
-            weaponObject = anObject->special.base;
+        if (anObject->special.base.get()) {
+            auto weaponObject = anObject->special.base;
             if (( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
                 (( ABS( beta) <= kShootAngle) ||

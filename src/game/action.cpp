@@ -108,8 +108,7 @@ static void create_object(
         objectActionType* action, SpaceObject* subject, SpaceObject* focus,
         Point* offset) {
     const auto& create = action->argument.createObject;
-    const int32_t type = create.whichBaseType;
-    const auto baseObject = mGetBaseObjectPtr(type);
+    const auto baseObject = create.whichBaseType;
     auto count = create.howManyMinimum;
     if (create.howManyRange > 0) {
         count += focus->randomSeed.next(create.howManyRange);
@@ -138,7 +137,7 @@ static void create_object(
         }
 
         SpaceObject* product = CreateAnySpaceObject(
-                type, &vel, &at, direction, focus->owner, 0, -1);
+                baseObject, &vel, &at, direction, focus->owner, 0, -1);
         if (!product) {
             continue;
         }
@@ -268,7 +267,6 @@ static void alter(
     Fixed f, f2, aFixed;
     int16_t angle;
     coordPointType newLocation;
-    BaseObject* baseObject;
     switch (alter.alterType) {
         case kAlterDamage:
             focus->alter_health(alter.minimum);
@@ -458,7 +456,7 @@ static void alter(
 
         case kAlterBaseType:
             if (action->reflexive || (object && (object != SpaceObject::zero())))
-            ChangeObjectBaseType(focus, alter.minimum, -1, alter.relative);
+            ChangeObjectBaseType(focus, Handle<BaseObject>(alter.minimum), -1, alter.relative);
             break;
 
         case kAlterOwner:
@@ -553,9 +551,9 @@ static void alter(
             break;
 
         case kAlterWeapon1:
-            focus->pulse.type = alter.minimum;
-            if (focus->pulse.type.get()) {
-                baseObject = focus->pulse.base = mGetBaseObjectPtr(focus->pulse.type);
+            focus->pulse.base = Handle<BaseObject>(alter.minimum);
+            if (focus->pulse.base.get()) {
+                auto baseObject = focus->pulse.base;
                 focus->pulse.ammo = baseObject->frame.weapon.ammo;
                 focus->pulse.time = focus->pulse.position = 0;
                 if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
@@ -565,16 +563,16 @@ static void alter(
                     focus->shortestWeaponRange = baseObject->frame.weapon.range;
                 }
             } else {
-                focus->pulse.base = NULL;
+                focus->pulse.base = BaseObject::none();
                 focus->pulse.ammo = 0;
                 focus->pulse.time = 0;
             }
             break;
 
         case kAlterWeapon2:
-            focus->beam.type = alter.minimum;
-            if (focus->beam.type.get()) {
-                baseObject = focus->beam.base = mGetBaseObjectPtr(focus->beam.type);
+            focus->beam.base = Handle<BaseObject>(alter.minimum);
+            if (focus->beam.base.get()) {
+                auto baseObject = focus->beam.base;
                 focus->beam.ammo = baseObject->frame.weapon.ammo;
                 focus->beam.time = focus->beam.position = 0;
                 if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
@@ -584,16 +582,16 @@ static void alter(
                     focus->shortestWeaponRange = baseObject->frame.weapon.range;
                 }
             } else {
-                focus->beam.base = NULL;
+                focus->beam.base = BaseObject::none();
                 focus->beam.ammo = 0;
                 focus->beam.time = 0;
             }
             break;
 
         case kAlterSpecial:
-            focus->special.type = alter.minimum;
-            if (focus->special.type.get()) {
-                baseObject = focus->special.base = mGetBaseObjectPtr(focus->special.type);
+            focus->special.base = Handle<BaseObject>(alter.minimum);
+            if (focus->special.base.get()) {
+                auto baseObject = focus->special.base;
                 focus->special.ammo = baseObject->frame.weapon.ammo;
                 focus->special.time = focus->special.position = 0;
                 if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
@@ -603,7 +601,7 @@ static void alter(
                     focus->shortestWeaponRange = baseObject->frame.weapon.range;
                 }
             } else {
-                focus->special.base = NULL;
+                focus->special.base = BaseObject::none();
                 focus->special.ammo = 0;
                 focus->special.time = 0;
             }

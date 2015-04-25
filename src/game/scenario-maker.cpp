@@ -92,10 +92,9 @@ void AddBaseObjectActionMedia(
 void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors);
 
 void SetAllBaseObjectsUnchecked() {
-    BaseObject* aBase = mGetBaseObjectPtr(0);
-    for (int32_t count = 0; count < globals()->maxBaseObject; count++) {
+    for (int32_t i = 0; i < globals()->maxBaseObject; i++) {
+        auto aBase = Handle<BaseObject>(i);
         aBase->internalFlags = 0;
-        aBase++;
     }
 }
 
@@ -181,7 +180,6 @@ void AddBaseObjectActionMedia(
 }
 
 void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors) {
-    BaseObject*         baseObject = NULL;
     int32_t             count = 0, l1, l2;
 #ifdef DATA_COVERAGE
         possible_actions.insert(action - mGetObjectActionPtr(0));
@@ -212,19 +210,20 @@ void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors
         case kAlter:
             switch(action->argument.alterObject.alterType) {
                 case kAlterBaseType:
-                    AddBaseObjectMedia(action->argument.alterObject.minimum, color, all_colors);
+                    AddBaseObjectMedia(
+                            Handle<BaseObject>(action->argument.alterObject.minimum),
+                            color, all_colors);
                     break;
 
                 case kAlterOwner:
-                    baseObject = mGetBaseObjectPtr(0);
-                    for (int32_t count = 0; count < globals()->maxBaseObject; count++) {
+                    for (int32_t i = 0; i < globals()->maxBaseObject; i++) {
+                        auto baseObject = Handle<BaseObject>(i);
                         if (action_filter_applies_to(*action, *baseObject)) {
                             baseObject->internalFlags |= all_colors;
                         }
                         if (baseObject->internalFlags & kAnyColorLoadedFlag) {
-                            AddBaseObjectMedia(count, color, all_colors);
+                            AddBaseObjectMedia(baseObject, color, all_colors);
                         }
-                        baseObject++;
                     }
                     break;
             }
@@ -740,8 +739,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
 
         Scenario::InitialObject* initial = gThisScenario->initial(i);
         Handle<Admiral> owner = initial->owner;
-        int32_t type = initial->type;
-        BaseObject* baseObject = mGetBaseObjectPtr(type);
+        auto baseObject = Handle<BaseObject>(initial->type);
         // TODO(sfiera): remap objects in networked games.
 
         // Load the media for this object
@@ -754,7 +752,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         if (baseObject->attributes & kIsDestination) {
             baseObject->internalFlags |= all_colors;
         }
-        AddBaseObjectMedia(type, GetAdmiralColor(owner), all_colors);
+        AddBaseObjectMedia(baseObject, GetAdmiralColor(owner), all_colors);
 
         // make sure we're not overriding the sprite
         if (initial->spriteIDOverride >= 0) {
@@ -826,7 +824,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             }
         }
 
-        int32_t type = initial->type;
+        auto type = Handle<BaseObject>(initial->type);
         // TODO(sfiera): remap object in networked games.
         fixedPointType v = {0, 0};
         int32_t newShipNum;
@@ -974,7 +972,7 @@ void UnhideInitialObject(int32_t whichInitial) {
     }
 
 
-    int32_t type = initial->type;
+    auto type = Handle<BaseObject>(initial->type);
     // TODO(sfiera): remap objects in networked games.
     fixedPointType v = {0, 0};
     int32_t newShipNum = CreateAnySpaceObject(

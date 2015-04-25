@@ -28,7 +28,7 @@ template <typename T>
 class Handle {
   public:
     Handle(): _number(-1) { }
-    Handle(int number): _number(number) { }
+    explicit Handle(int number): _number(number) { }
     int number() const { return _number; }
     T* get() const { return T::get(_number); }
     T& operator*() const { return *get(); }
