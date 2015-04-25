@@ -1043,14 +1043,14 @@ void PlayerShipBodyExpire( SpaceObject *theShip, bool sourceIsBody)
     }
     if (!selectShip.get()) {
         selectShip = gRootObject;
-        selectShipNum = gRootObjectNumber;
+        selectShipNum = gRootObject.number();
         while (selectShip.get()
                 && ((selectShip->active != kObjectInUse)
                     || (selectShip->attributes & kStaticDestination)
                     || (!((selectShip->attributes & kCanThink) &&
                             (selectShip->attributes & kCanAcceptDestination)))
                     || (selectShip->owner != theShip->owner))) {
-            selectShipNum = selectShip->nextObjectNumber;
+            selectShipNum = selectShip->nextObject.number();
             selectShip = selectShip->nextObject;
         }
     }

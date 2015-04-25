@@ -182,7 +182,7 @@ void RemoveDestination(int32_t whichDestination) {
 
         for (int i = 0; i < kMaxPlayerNum; i++) {
             if (a->active()) {
-                if (a->destinationObject() == d->whichObject) {
+                if (a->destinationObject().number() == d->whichObject) {
                     a->destinationObject() = kNoDestinationObject;
                     a->destinationObjectID() = -1;
                     a->has_destination() = false;
@@ -312,11 +312,11 @@ void Admiral::set_target(int32_t whichObject) {
 }
 
 int32_t Admiral::target() const {
-    if (_destinationObject >= 0) {
+    if (_destinationObject.get()) {
         SpaceObject* destObject = mGetSpaceObjectPtr(_destinationObject);
         if ((destObject->id == _destinationObjectID)
                 && (destObject->active == kObjectInUse)) {
-            return _destinationObject;
+            return _destinationObject.number();
         }
     }
     return -1;
@@ -351,12 +351,12 @@ void Admiral::set_control(int32_t whichObject) {
 }
 
 int32_t Admiral::control() const {
-    if (_considerShip >= 0) {
+    if (_considerShip.get()) {
         SpaceObject* anObject = mGetSpaceObjectPtr(_considerShip);
         if ((anObject->id == _considerShipID)
                 && (anObject->active == kObjectInUse)
                 && (anObject->owner.get() == this)) {
-            return _considerShip;
+            return _considerShip.number();
         }
     }
     return -1;
@@ -544,7 +544,7 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
     if ((dObject == NULL) &&
             ((!a->active())
              || !a->has_destination()
-             || (a->destinationObject() == kNoDestinationObject)
+             || !a->destinationObject().get()
              || (a->destinationObjectID() == o->id))) {
         o->destinationObject = kNoDestinationObject;
         o->destObjectDest = kNoDestinationObject;
@@ -706,8 +706,10 @@ void Admiral::think() {
     Handle<SpaceObject> destObject;
     Handle<SpaceObject> otherDestObject;
     Handle<SpaceObject> stepObject;
+    Handle<SpaceObject> origDest;
+    Handle<SpaceObject> origObject;
     destBalanceType* destBalance;
-    int32_t origObject, origDest, difference;
+    int32_t difference;
     Fixed  friendValue, foeValue, thisValue;
     Point gridLoc;
 
@@ -742,36 +744,34 @@ void Admiral::think() {
     }
 
     // get the current object
-    if (_considerShip < 0) {
-        _considerShip = gRootObjectNumber;
-        anObject = Handle<SpaceObject>(_considerShip);
+    if (!_considerShip.get()) {
+        _considerShip = anObject = gRootObject;
         _considerShipID = anObject->id;
     } else {
-        anObject = Handle<SpaceObject>(_considerShip);
+        anObject = _considerShip;
     }
 
-    if (_destinationObject < 0) {
-        _destinationObject = gRootObjectNumber;
+    if (!_destinationObject.get()) {
+        _destinationObject = gRootObject;
     }
 
     if (anObject->active != kObjectInUse) {
-        _considerShip = gRootObjectNumber;
-        anObject = Handle<SpaceObject>(_considerShip);
+        _considerShip = anObject = gRootObject;
         _considerShipID = anObject->id;
     }
 
-    if (_destinationObject >= 0) {
+    if (_destinationObject.get()) {
         destObject = Handle<SpaceObject>(_destinationObject);
         if (destObject->active != kObjectInUse) {
             destObject = gRootObject;
-            _destinationObject = gRootObjectNumber;
+            _destinationObject = gRootObject;
         }
         origDest = _destinationObject;
         do {
-            _destinationObject = destObject->nextObjectNumber;
+            _destinationObject = destObject->nextObject;
 
             // if we've gone through all of the objects
-            if (_destinationObject < 0) {
+            if (!_destinationObject.get()) {
                 // ********************************
                 // SHIP MUST DECIDE, THEN INCREASE CONSIDER SHIP
                 // ********************************
@@ -781,7 +781,7 @@ void Admiral::think() {
                             anObject->currentTargetValue)) {
                     _destinationObject = anObject->bestConsideredTargetNumber;
                     _has_destination = true;
-                    if (_destinationObject >= 0) {
+                    if (_destinationObject.get()) {
                         destObject = Handle<SpaceObject>(_destinationObject);
                         if (destObject->active == kObjectInUse) {
                             _destinationObjectID = destObject->id;
@@ -806,7 +806,7 @@ void Admiral::think() {
 
                 anObject->bestConsideredTargetValue = 0xffffffff;
                 // start back with 1st ship
-                _destinationObject = gRootObjectNumber;
+                _destinationObject = gRootObject;
                 destObject = gRootObject;
 
                 // >>> INCREASE CONSIDER SHIP
@@ -814,13 +814,13 @@ void Admiral::think() {
                 anObject = Handle<SpaceObject>(_considerShip);
                 if (anObject->active != kObjectInUse) {
                     anObject = gRootObject;
-                    _considerShip = gRootObjectNumber;
+                    _considerShip = gRootObject;
                     _considerShipID = anObject->id;
                 }
                 do {
-                    _considerShip = anObject->nextObjectNumber;
-                    if (_considerShip < 0) {
-                        _considerShip = gRootObjectNumber;
+                    _considerShip = anObject->nextObject;
+                    if (!_considerShip.get()) {
+                        _considerShip = gRootObject;
                         anObject = gRootObject;
                         _considerShipID = anObject->id;
                         _lastFreeEscortStrength = _thisFreeEscortStrength;
@@ -1037,7 +1037,7 @@ void Admiral::think() {
             }
             if (thisValue > anObject->bestConsideredTargetValue) {
                 anObject->bestConsideredTargetValue = thisValue;
-                anObject->bestConsideredTargetNumber = _destinationObject;
+                anObject->bestConsideredTargetNumber = _destinationObject.number();
             }
         }
     }
@@ -1070,7 +1070,7 @@ void Admiral::think() {
             } else {
                 anObject = SpaceObject::none();
             }
-        } while (!anObject.get() && (_buildAtObject != origDest));
+        } while (!anObject.get() && (_buildAtObject != origDest.number()));
 
         // if we have a legal object
         if (anObject.get()) {

@@ -67,7 +67,6 @@ static StringList* space_object_names;
 static StringList* space_object_short_names;
 
 Handle<SpaceObject> gRootObject;
-int32_t gRootObjectNumber = -1;
 
 static unique_ptr<SpaceObject[]> gSpaceObjectData;
 static unique_ptr<BaseObject[]> gBaseObjectData;
@@ -120,7 +119,6 @@ void ResetAllSpaceObjects() {
     int16_t         i;
 
     gRootObject = SpaceObject::none();
-    gRootObjectNumber = -1;
     anObject = gSpaceObjectData.get();
     for (i = 0; i < kMaxSpaceObject; i++) {
         anObject->active = kObjectAvailable;
@@ -249,15 +247,11 @@ static SpaceObject* AddSpaceObject(SpaceObject *sourceObject) {
         }
 
         obj->nextObject = gRootObject;
-        obj->nextObjectNumber = gRootObjectNumber;
         obj->previousObject = SpaceObject::none();
-        obj->previousObjectNumber = -1;
         if (gRootObject.get()) {
             gRootObject->previousObject = obj;
-            gRootObject->previousObjectNumber = i;
         }
         gRootObject = obj;
-        gRootObjectNumber = i;
 
         return obj.get();
     }

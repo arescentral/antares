@@ -395,9 +395,7 @@ class SpaceObject {
     Point                   distanceGrid;
     SpaceObject*            nextFarObject = nullptr;
     Handle<SpaceObject>     previousObject;
-    int32_t                 previousObjectNumber = kNoShip;
     Handle<SpaceObject>     nextObject;
-    int32_t                 nextObjectNumber = kNoShip;
 
     int32_t                 runTimeFlags = 0;               // distance from origin to destination
     coordPointType          destinationLocation = {0, 0};   // coords of our destination ( or kNoDestination)

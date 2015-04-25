@@ -27,7 +27,6 @@ const int16_t kBaseObjectResID      = 500;
 const int16_t kObjectActionResID    = 500;
 
 extern Handle<SpaceObject> gRootObject;
-extern int32_t gRootObjectNumber;
 
 void SpaceObjectHandlingInit( void);
 void ResetAllSpaceObjects( void);

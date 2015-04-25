@@ -1769,11 +1769,11 @@ int32_t GetManualSelectObject(
         anObject = Handle<SpaceObject>(startShip);
         if (anObject->active != kObjectInUse) { // if it's not in the loop
             anObject = gRootObject;
-            startShip = whichShip = gRootObjectNumber;
+            startShip = whichShip = gRootObject.number();
         }
     } else {
         anObject = gRootObject;
-        startShip = whichShip = gRootObjectNumber;
+        startShip = whichShip = gRootObject.number();
     }
 
     int32_t nextShipOut = -1, closestShip = -1;
@@ -1834,10 +1834,10 @@ int32_t GetManualSelectObject(
                 }
             }
         }
-        whichShip = anObject->nextObjectNumber;
+        whichShip = anObject->nextObject.number();
         anObject = anObject->nextObject;
         if (!anObject.get()) {
-            whichShip = gRootObjectNumber;
+            whichShip = gRootObject.number();
             anObject = gRootObject;
         }
     } while (whichShip != startShip);

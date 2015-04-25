@@ -104,7 +104,7 @@ class Admiral {
 
     uint32_t&           attributes() { return _attributes; }
     bool&               has_destination() { return _has_destination; }
-    int32_t&            destinationObject() { return _destinationObject; }
+    Handle<SpaceObject>&destinationObject() { return _destinationObject; }
     int32_t&            destinationObjectID() { return _destinationObjectID; }
 
     SpaceObject*        flagship();
@@ -112,7 +112,7 @@ class Admiral {
     int32_t             flagshipID() { return _flagshipID; }
     void                set_flagship(int32_t number);
 
-    int32_t&            considerShip() { return _considerShip; }
+    Handle<SpaceObject>&considerShip() { return _considerShip; }
     int32_t&            considerShipID() { return _considerShipID; }
     int32_t&            considerDestination() { return _considerDestination; }
     int32_t&            buildAtObject() { return _buildAtObject; } // # of destination object to build at
@@ -141,11 +141,11 @@ class Admiral {
   private:
     uint32_t            _attributes;
     bool                _has_destination = false;
-    int32_t             _destinationObject = kNoDestinationObject;
+    Handle<SpaceObject> _destinationObject;
     int32_t             _destinationObjectID = -1;
     int32_t             _flagship = kNoShip;
     int32_t             _flagshipID = -1;
-    int32_t             _considerShip = kNoShip;
+    Handle<SpaceObject> _considerShip;
     int32_t             _considerShipID = -1;
     int32_t             _considerDestination = kNoShip;
     int32_t             _buildAtObject = -1; // # of destination object to build at

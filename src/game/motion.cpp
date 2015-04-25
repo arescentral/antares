@@ -1038,21 +1038,16 @@ hackBNoEngageMatch:
                 if (aObject->previousObject.get()) {
                     auto bObject = aObject->previousObject;
                     bObject->nextObject = aObject->nextObject;
-                    bObject->nextObjectNumber = aObject->nextObjectNumber;
                 }
                 if (aObject->nextObject.get()) {
                     auto bObject = aObject->nextObject;
                     bObject->previousObject = aObject->previousObject;
-                    bObject->previousObjectNumber = aObject->previousObjectNumber;
                 }
                 if (gRootObject == aObject) {
                     gRootObject = aObject->nextObject;
-                    gRootObjectNumber = aObject->nextObjectNumber;
                 }
                 aObject->nextObject = SpaceObject::none();
-                aObject->nextObjectNumber = -1;
                 aObject->previousObject = SpaceObject::none();
-                aObject->previousObjectNumber = -1;
             } else {
                 aObject->active = kObjectAvailable;
                 if (aObject->sprite != NULL) {
@@ -1063,21 +1058,16 @@ hackBNoEngageMatch:
                 if (aObject->previousObject.get()) {
                     auto bObject = aObject->previousObject;
                     bObject->nextObject = aObject->nextObject;
-                    bObject->nextObjectNumber = aObject->nextObjectNumber;
                 }
                 if (aObject->nextObject.get()) {
                     auto bObject = aObject->nextObject;
                     bObject->previousObject = aObject->previousObject;
-                    bObject->previousObjectNumber = aObject->previousObjectNumber;
                 }
                 if (gRootObject == aObject) {
                     gRootObject = aObject->nextObject;
-                    gRootObjectNumber = aObject->nextObjectNumber;
                 }
                 aObject->nextObject = SpaceObject::none();
-                aObject->nextObjectNumber = -1;
                 aObject->previousObject = SpaceObject::none();
-                aObject->previousObjectNumber = -1;
             }
         }
 
