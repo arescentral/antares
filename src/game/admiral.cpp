@@ -93,16 +93,6 @@ Destination* Destination::get(int i) {
     return &gDestBalanceData[i];
 }
 
-Handle<Destination> Destination::with(Handle<SpaceObject> o) {
-    for (int i = 0; i < kMaxDestObject; ++i) {
-        auto d = Handle<Destination>(i);
-        if (d->whichObject == o) {
-            return d;
-        }
-    }
-    return Destination::none();
-}
-
 bool Destination::can_build() const {
     for (int i = 0; i < kMaxShipCanBuild; ++i) {
         if (canBuildType[i] != kNoShip) {
@@ -339,7 +329,7 @@ void Admiral::set_control(Handle<SpaceObject> obj) {
     if (obj.get()) {
         _considerShipID = obj->id;
         if (obj->attributes & kCanAcceptBuild) {
-            auto d = Destination::with(obj);
+            auto d = obj->asDestination;
             if (d.get() && d->can_build()) {
                 _buildAtObject = d.number();
             }
@@ -361,7 +351,7 @@ Handle<SpaceObject> Admiral::control() const {
 
 bool BaseHasSomethingToBuild(Handle<SpaceObject> obj) {
     if (obj->attributes & kCanAcceptBuild) {
-        auto d = Destination::with(obj);
+        auto d = obj->asDestination;
         return d.get() && d->can_build();
     }
     return false;
@@ -388,7 +378,7 @@ void SetAdmiralBuildAtObject(Handle<Admiral> a, Handle<SpaceObject> obj) {
     }
     if (obj.get()) {
         if (obj->attributes & kCanAcceptBuild) {
-            auto d = Destination::with(obj);
+            auto d = obj->asDestination;
             if (d.get() && d->can_build()) {
                 a->buildAtObject() = d.number();
             }

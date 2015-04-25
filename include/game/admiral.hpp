@@ -69,7 +69,6 @@ const int32_t kAdmiralScoreNum = 3;
 
 struct Destination {
     static Destination* get(int i);
-    static Handle<Destination> with(Handle<SpaceObject> o);
     static Handle<Destination> none() { return Handle<Destination>(-1); }
 
     Handle<SpaceObject> whichObject;
