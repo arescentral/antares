@@ -68,14 +68,15 @@ class PlayerShip : public EventReceiver {
     int32_t _control_direction;
 };
 
-void ResetPlayerShip(int32_t);
+void ResetPlayerShip(Handle<SpaceObject> which);
 void PlayerShipHandleClick(Point where, int button);
-void SetPlayerSelectShip(int32_t whichShip, bool target, Handle<Admiral> admiralNumber);
-void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, int32_t newShipNumber);
+void SetPlayerSelectShip(
+        Handle<SpaceObject> whichShip, bool target, Handle<Admiral> admiralNumber);
+void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, Handle<SpaceObject> newShip);
 void TogglePlayerAutoPilot( SpaceObject *);
 bool IsPlayerShipOnAutoPilot( void);
 void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral);
-void PlayerShipBodyExpire( SpaceObject *, bool);
+void PlayerShipBodyExpire(Handle<SpaceObject> theShip, bool sourceIsBody);
 void HandleTextMessageKeys(const KeyMap&, const KeyMap&, bool *);
 
 }  // namespace antares

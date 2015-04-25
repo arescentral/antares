@@ -911,7 +911,7 @@ void CreateFloatingBodyOfPlayer(SpaceObject* obj) {
     if (body) {
         ChangePlayerShipNumber(obj->owner, body->number());
     } else {
-        PlayerShipBodyExpire(obj, true);
+        PlayerShipBodyExpire(obj->number(), true);
     }
 }
 

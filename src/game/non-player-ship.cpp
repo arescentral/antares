@@ -366,7 +366,7 @@ void NonplayerShipThink(int32_t timePass)
         if ((anObject->attributes & kRemoteOrHuman)
                 && (!(anObject->attributes & kCanThink))
                 && (anObject->age < 120)) {
-            PlayerShipBodyExpire(anObject.get(), true);
+            PlayerShipBodyExpire(anObject, true);
         }
 
         if ((anObject->attributes & kHasDirectionGoal)

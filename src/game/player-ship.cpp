@@ -66,7 +66,7 @@ const int32_t kCursorBoundsSize = 16;  // should be same in instruments.c
 
 }  // namespace
 
-int32_t HotKey_GetFromObject( SpaceObject *object);
+int32_t HotKey_GetFromObject(Handle<SpaceObject> object);
 void Update_LabelStrings_ForHotKeyChange( void);
 
 namespace {
@@ -78,7 +78,7 @@ static int32_t gAlarmCount = -1;
 static int32_t gSendMessageLabel = -1;
 
 struct HotKeySuffix {
-    SpaceObject* space_object;
+    Handle<SpaceObject> space_object;
 };
 
 void print_to(PrintTarget out, const HotKeySuffix& suffix) {
@@ -97,15 +97,15 @@ void print_to(PrintTarget out, const HotKeySuffix& suffix) {
     print(out, format(" < {0} >", key_name));
 };
 
-HotKeySuffix hot_key_suffix(SpaceObject* space_object) {
+HotKeySuffix hot_key_suffix(Handle<SpaceObject> space_object) {
     HotKeySuffix result = {space_object};
     return result;
 };
 
 }  // namespace
 
-void ResetPlayerShip(int32_t which) {
-    globals()->gPlayerShipNumber = which;
+void ResetPlayerShip(Handle<SpaceObject> which) {
+    globals()->gPlayerShipNumber = which.number();
     globals()->gSelectionLabel = Labels::add(0, 0, 0, 10, SpaceObject::none(), true, YELLOW);
     gDestinationLabel = Labels::add(0, 0, 0, -20, SpaceObject::none(), true, SKY_BLUE);
     gSendMessageLabel = Labels::add(200, 200, 0, 30, SpaceObject::none(), false, GREEN);
@@ -119,7 +119,7 @@ void ResetPlayerShip(int32_t which) {
     globals()->gKeyMapBufferTop = globals()->gKeyMapBufferBottom = 0;
 
     for (int h = 0; h < kHotKeyNum; h++) {
-        globals()->hotKey[h].objectNum = -1;
+        globals()->hotKey[h].object = SpaceObject::none();
         globals()->hotKey[h].objectID = -1;
     }
     globals()->hotKeyDownTime = 0;
@@ -235,9 +235,9 @@ static void pick_object(
 
     if (select_ship.get()) {
         if (destination) {
-            SetPlayerSelectShip(select_ship.number(), true, globals()->gPlayerAdmiral);
+            SetPlayerSelectShip(select_ship, true, globals()->gPlayerAdmiral);
         } else {
-            SetPlayerSelectShip(select_ship.number(), false, globals()->gPlayerAdmiral);
+            SetPlayerSelectShip(select_ship, false, globals()->gPlayerAdmiral);
         }
     }
 }
@@ -273,7 +273,8 @@ static void target_base(Handle<SpaceObject> origin_ship, int32_t direction) {
 }
 
 static void target_self() {
-    SetPlayerSelectShip(globals()->gPlayerShipNumber, true, globals()->gPlayerAdmiral);
+    SetPlayerSelectShip(
+            Handle<SpaceObject>(globals()->gPlayerShipNumber), true, globals()->gPlayerAdmiral);
 }
 
 void PlayerShip::key_down(const KeyDownEvent& event) {
@@ -712,12 +713,11 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
         globals()->lastHotKey = -1;
 
         if (globals()->hotKeyDownTime > 45) {
-            if (globals()->lastSelectedObject >= 0) {
-                selectShip = mGetSpaceObjectPtr(globals()->lastSelectedObject);
+            if (globals()->lastSelectedObject.get()) {
+                auto selectShip = globals()->lastSelectedObject;
 
                 if (selectShip->active) {
-                    globals()->hotKey[hot_key].objectNum = globals()->lastSelectedObject;
-
+                    globals()->hotKey[hot_key].object = globals()->lastSelectedObject;
                     globals()->hotKey[hot_key].objectID = globals()->lastSelectedObjectID;
                     Update_LabelStrings_ForHotKeyChange();
                     PlayVolumeSound(
@@ -727,19 +727,19 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
             }
         } else {
             globals()->destKeyUsedForSelection = true;
-            if (globals()->hotKey[hot_key].objectNum >= 0) {
-                selectShip = mGetSpaceObjectPtr(globals()->hotKey[hot_key].objectNum);
+            if (globals()->hotKey[hot_key].object.get()) {
+                auto selectShip = globals()->hotKey[hot_key].object;
                 if ((selectShip->active)
                         && (selectShip->id == globals()->hotKey[hot_key].objectID)) {
                     bool is_target = (gTheseKeys & kDestinationKey)
                         || (selectShip->owner != globals()->gPlayerAdmiral)
                         || (globals()->hotKey_target);
                     SetPlayerSelectShip(
-                            globals()->hotKey[hot_key].objectNum,
+                            globals()->hotKey[hot_key].object,
                             is_target,
                             globals()->gPlayerAdmiral);
                 } else {
-                    globals()->hotKey[hot_key].objectNum = -1;
+                    globals()->hotKey[hot_key].object = SpaceObject::none();
                 }
             }
             globals()->hotKeyDownTime = 0;
@@ -853,7 +853,7 @@ void PlayerShipHandleClick(Point where, int button) {
                         &bounds, theShip, kCanBeDestination | kIsDestination,
                         target, FRIENDLY_OR_HOSTILE);
                 if (selectShipNum.get()) {
-                    SetPlayerSelectShip(selectShipNum.number(), true, globals()->gPlayerAdmiral);
+                    SetPlayerSelectShip(selectShipNum, true, globals()->gPlayerAdmiral);
                 }
             } else {
                 auto control = globals()->gPlayerAdmiral->control();
@@ -861,14 +861,15 @@ void PlayerShipHandleClick(Point where, int button) {
                         &bounds, theShip, kCanBeDestination | kCanAcceptBuild,
                         control, FRIENDLY);
                 if (selectShipNum.get()) {
-                    SetPlayerSelectShip(selectShipNum.number(), false, globals()->gPlayerAdmiral);
+                    SetPlayerSelectShip(selectShipNum, false, globals()->gPlayerAdmiral);
                 }
             }
         }
     }
 }
 
-void SetPlayerSelectShip(int32_t whichShip, bool target, Handle<Admiral> admiralNumber) {
+void SetPlayerSelectShip(
+        Handle<SpaceObject> whichShip, bool target, Handle<Admiral> admiralNumber) {
     Handle<SpaceObject> selectShip = Handle<SpaceObject>(whichShip);
     Handle<SpaceObject> theShip = admiralNumber->flagship();
 
@@ -882,18 +883,18 @@ void SetPlayerSelectShip(int32_t whichShip, bool target, Handle<Admiral> admiral
         admiralNumber->set_target(whichShip);
         if (admiralNumber == globals()->gPlayerAdmiral) {
             Labels::set_object(gDestinationLabel, selectShip);
-            if (whichShip == globals()->gPlayerShipNumber) {
+            if (whichShip == Handle<SpaceObject>(globals()->gPlayerShipNumber)) {
                 Labels::set_age(gDestinationLabel, Labels::kVisibleTime);
             }
             PlayVolumeSound(
                     kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
             if (selectShip->attributes & kIsDestination) {
                 String string(GetDestBalanceName(selectShip->destinationObject));
-                print(string, hot_key_suffix(selectShip.get()));
+                print(string, hot_key_suffix(selectShip));
                 Labels::set_string(gDestinationLabel, string);
             } else {
                 String string(get_object_name(selectShip->base));
-                print(string, hot_key_suffix(selectShip.get()));
+                print(string, hot_key_suffix(selectShip));
                 Labels::set_string(gDestinationLabel, string);
             }
         }
@@ -905,18 +906,18 @@ void SetPlayerSelectShip(int32_t whichShip, bool target, Handle<Admiral> admiral
         admiralNumber->set_control(whichShip);
         if (admiralNumber == globals()->gPlayerAdmiral) {
             Labels::set_object(globals()->gSelectionLabel, selectShip);
-            if (whichShip == globals()->gPlayerShipNumber) {
+            if (whichShip == Handle<SpaceObject>(globals()->gPlayerShipNumber)) {
                 Labels::set_age(globals()->gSelectionLabel, Labels::kVisibleTime);
             }
             PlayVolumeSound(
                     kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
             if (selectShip->attributes & kIsDestination) {
                 String string(GetDestBalanceName(selectShip->destinationObject));
-                print(string, hot_key_suffix(selectShip.get()));
+                print(string, hot_key_suffix(selectShip));
                 Labels::set_string(globals()->gSelectionLabel, string);
             } else {
                 String string(get_object_name(selectShip->base));
-                print(string, hot_key_suffix(selectShip.get()));
+                print(string, hot_key_suffix(selectShip));
                 Labels::set_string(globals()->gSelectionLabel, string);
             }
         }
@@ -927,19 +928,19 @@ void SetPlayerSelectShip(int32_t whichShip, bool target, Handle<Admiral> admiral
 // assumes that newShipNumber is the number of a valid (legal, living) ship and that
 // gPlayerShip already points to the current, legal living ship
 
-void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, int32_t newShipNumber) {
+void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, Handle<SpaceObject> newShip) {
     auto anObject = whichAdmiral->flagship();
     if (!anObject.get()) {
         throw Exception(format(
-                    "whichAdmiral: {0}, newShipNumber: {1}",
-                    whichAdmiral.number(), newShipNumber));
+                    "whichAdmiral: {0}, newShip: {1}",
+                    whichAdmiral.number(), newShip.number()));
     }
 
     if (whichAdmiral == globals()->gPlayerAdmiral) {
         anObject->attributes &= (~kIsHumanControlled) & (~kIsPlayerShip);
-        if ( newShipNumber != globals()->gPlayerShipNumber)
+        if (newShip.number() != globals()->gPlayerShipNumber)
         {
-            globals()->gPlayerShipNumber = newShipNumber;
+            globals()->gPlayerShipNumber = newShip.number();
             globals()->starfield.reset(globals()->gPlayerShipNumber);
         }
 
@@ -947,25 +948,25 @@ void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, int32_t newShipNumber)
         anObject = Handle<SpaceObject>(globals()->gPlayerShipNumber);
         if (!anObject.get()) {
             throw Exception(format(
-                        "whichAdmiral: {0}, newShipNumber: {1}, gPlayerShipNumber: {2}",
-                        whichAdmiral.number(), newShipNumber, globals()->gPlayerShipNumber));
+                        "whichAdmiral: {0}, newShip: {1}, gPlayerShipNumber: {2}",
+                        whichAdmiral.number(), newShip.number(), globals()->gPlayerShipNumber));
         }
 
         anObject->attributes |= (kIsHumanControlled) | (kIsPlayerShip);
 
-        if (newShipNumber == globals()->gPlayerAdmiral->control().number()) {
+        if (newShip == globals()->gPlayerAdmiral->control()) {
             Labels::set_age( globals()->gSelectionLabel, Labels::kVisibleTime);
         }
-        if (newShipNumber == globals()->gPlayerAdmiral->target().number()) {
+        if (newShip == globals()->gPlayerAdmiral->target()) {
             Labels::set_age( gDestinationLabel, Labels::kVisibleTime);
         }
     } else
     {
         anObject->attributes &= ~(kIsRemote | kIsPlayerShip);
-        anObject = Handle<SpaceObject>(newShipNumber);
+        anObject = newShip;
         anObject->attributes |= (kIsRemote | kIsPlayerShip);
     }
-    whichAdmiral->set_flagship(newShipNumber);
+    whichAdmiral->set_flagship(newShip);
 }
 
 void TogglePlayerAutoPilot(SpaceObject *theShip) {
@@ -1004,7 +1005,6 @@ bool IsPlayerShipOnAutoPilot( void)
 }
 
 void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral) {
-    SpaceObject *selectShip;
     auto control = whichAdmiral->control();
 
     if (control.get()) {
@@ -1015,8 +1015,7 @@ void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral) {
 }
 
 // bool sourceIsBody was hacked in to use this for xferring control
-void PlayerShipBodyExpire( SpaceObject *theShip, bool sourceIsBody)
-{
+void PlayerShipBodyExpire(Handle<SpaceObject> theShip, bool sourceIsBody) {
     auto selectShip = theShip->owner->control();
 
     if (selectShip.get()) {
@@ -1081,15 +1080,14 @@ void HandleTextMessageKeys(const KeyMap& keyMap, const KeyMap& lastKeyMap, bool 
     }
 }
 
-int32_t HotKey_GetFromObject( SpaceObject *object)
-{
+int32_t HotKey_GetFromObject(Handle<SpaceObject> object) {
     int32_t i = 0;
 
-    if ( object == NULL) return -1;
+    if (!object.get()) return -1;
     if ( !object->active) return -1;
     while ( i < kHotKeyNum)
     {
-        if ( globals()->hotKey[i].objectNum == object->number())
+        if ( globals()->hotKey[i].object == object)
         {
             if ( globals()->hotKey[i].objectID == object->id)
             {
@@ -1111,11 +1109,11 @@ void Update_LabelStrings_ForHotKeyChange( void)
         }
         if (target->attributes & kIsDestination) {
             String string(GetDestBalanceName(target->destinationObject));
-            print(string, hot_key_suffix(target.get()));
+            print(string, hot_key_suffix(target));
             Labels::set_string(gDestinationLabel, string);
         } else {
             String string(get_object_name(target->base));
-            print(string, hot_key_suffix(target.get()));
+            print(string, hot_key_suffix(target));
             Labels::set_string(gDestinationLabel, string);
         }
     }
@@ -1130,11 +1128,11 @@ void Update_LabelStrings_ForHotKeyChange( void)
                 kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
         if (control->attributes & kIsDestination) {
             String string(GetDestBalanceName(control->destinationObject));
-            print(string, hot_key_suffix(control.get()));
+            print(string, hot_key_suffix(control));
             Labels::set_string(globals()->gSelectionLabel, string);
         } else {
             String string(get_object_name(control->base));
-            print(string, hot_key_suffix(control.get()));
+            print(string, hot_key_suffix(control));
             Labels::set_string(globals()->gSelectionLabel, string);
         }
     }

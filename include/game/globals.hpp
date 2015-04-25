@@ -73,8 +73,8 @@ struct miniComputerDataType {
 };
 
 struct hotKeyType {
-    int32_t     objectNum;
-    int32_t     objectID;
+    Handle<SpaceObject>     object;
+    int32_t                 objectID;
 };
 
 struct Admiral;
@@ -152,7 +152,7 @@ struct aresGlobalType {
     int32_t         hotKeyDownTime;
     int32_t         lastHotKey;
 
-    int32_t         lastSelectedObject;
+    Handle<SpaceObject>     lastSelectedObject;
     int32_t         lastSelectedObjectID;
     bool         destKeyUsedForSelection;
     bool         hotKey_target;

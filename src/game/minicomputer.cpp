@@ -1100,7 +1100,7 @@ void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> w
                                 ChangePlayerShipNumber(whichAdmiral, control.number());
                             }
                         } else {
-                            PlayerShipBodyExpire(flagship.get(), false);
+                            PlayerShipBodyExpire(flagship, false);
                         }
                     }
                     break;
