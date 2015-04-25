@@ -22,6 +22,7 @@
 namespace antares {
 
 struct Admiral;
+struct BaseObject;
 
 template <typename T>
 class Handle {

@@ -256,18 +256,16 @@ void update_mission_brief_point(
     populate_inline_picts(dataItem->bounds(), text, dataItem->style, inlinePict);
 }
 
-void CreateObjectDataText(String* text, int16_t id) {
+void CreateObjectDataText(String* text, Handle<BaseObject> object) {
     Resource rsrc("text", "txt", kShipDataTextID);
     String data(utf8::decode(rsrc.data()));
-
-    const BaseObject& baseObject = *mGetBaseObjectPtr(id);
 
     StringList keys(kShipDataKeyStringID);
     StringList values(kShipDataNameID);
 
     // *** Replace place-holders in text with real data, using the fabulous find_replace routine
     // an object or a ship?
-    if ( baseObject.attributes & kCanThink) {
+    if (object->attributes & kCanThink) {
         const StringSlice& name = values.at(0);
         find_replace(data, 0, keys.at(kShipOrObjectStringNum), name);
     } else {
@@ -277,40 +275,39 @@ void CreateObjectDataText(String* text, int16_t id) {
 
     // ship name
     {
-        const StringSlice& name = get_object_name(id);
+        const StringSlice& name = get_object_name(object);
         find_replace(data, 0, keys.at(kShipTypeStringNum), name);
     }
 
     // ship mass
-    find_replace(data, 0, keys.at(kMassStringNum), fixed(baseObject.mass));
+    find_replace(data, 0, keys.at(kMassStringNum), fixed(object->mass));
 
     // ship shields
-    find_replace(data, 0, keys.at(kShieldStringNum), baseObject.health);
+    find_replace(data, 0, keys.at(kShieldStringNum), object->health);
 
     // light speed
-    find_replace(data, 0, keys.at(kHasLightStringNum), baseObject.warpSpeed);
+    find_replace(data, 0, keys.at(kHasLightStringNum), object->warpSpeed);
 
     // max velocity
-    find_replace(data, 0, keys.at(kMaxSpeedStringNum), fixed(baseObject.maxVelocity));
+    find_replace(data, 0, keys.at(kMaxSpeedStringNum), fixed(object->maxVelocity));
 
     // thrust
-    find_replace(data, 0, keys.at(kThrustStringNum), fixed(baseObject.maxThrust));
+    find_replace(data, 0, keys.at(kThrustStringNum), fixed(object->maxThrust));
 
     // par turn
     find_replace(data, 0, keys.at(kTurnStringNum),
-            fixed(baseObject.frame.rotation.turnAcceleration));
+            fixed(object->frame.rotation.turnAcceleration));
 
     // now, check for weapons!
-    CreateWeaponDataText(&data, baseObject.pulse.base, values.at(kShipDataPulseStringNum));
-    CreateWeaponDataText(&data, baseObject.beam.base, values.at(kShipDataBeamStringNum));
-    CreateWeaponDataText(&data, baseObject.special.base, values.at(kShipDataSpecialStringNum));
+    CreateWeaponDataText(&data, object->pulse.base, values.at(kShipDataPulseStringNum));
+    CreateWeaponDataText(&data, object->beam.base, values.at(kShipDataBeamStringNum));
+    CreateWeaponDataText(&data, object->special.base, values.at(kShipDataSpecialStringNum));
 
     print(*text, data);
 }
 
 void CreateWeaponDataText(
         String* text, Handle<BaseObject> weaponObject, const StringSlice& weaponName) {
-    BaseObject* missileObject;
     int32_t             mostDamage, actionNum;
     objectActionType    *action;
     bool             isGuided = false;
@@ -335,7 +332,7 @@ void CreateWeaponDataText(
         {
             if (( action->verb == kCreateObject) || ( action->verb == kCreateObjectSetDest))
             {
-                missileObject = mGetBaseObjectPtr(action->argument.createObject.whichBaseType);
+                Handle<BaseObject> missileObject = action->argument.createObject.whichBaseType;
                 if ( missileObject->attributes & kIsGuided) isGuided = true;
                 if ( missileObject->damage > mostDamage) mostDamage = missileObject->damage;
             }

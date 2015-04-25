@@ -115,9 +115,10 @@ void BriefingScreen::mouse_down(const MouseDownEvent& event) {
         if (_inline_pict[i].bounds.contains(event.where())) {
             const int pict_id = _inline_pict[i].id;
             for (int i = 0; i < globals()->maxBaseObject; ++i) {
-                if (mGetBaseObjectPtr(i)->pictPortraitResID == pict_id) {
+                auto obj = Handle<BaseObject>(i);
+                if (obj->pictPortraitResID == pict_id) {
                     stack()->push(new ObjectDataScreen(
-                                event.where(), i, ObjectDataScreen::MOUSE, event.button()));
+                                event.where(), obj, ObjectDataScreen::MOUSE, event.button()));
                     return;
                 }
             }
@@ -332,8 +333,9 @@ void BriefingScreen::show_object_data(int index, ObjectDataScreen::Trigger trigg
         const int pict_id = _inline_pict[index].id;
         const Point origin = _inline_pict[index].bounds.center();
         for (int i = 0; i < globals()->maxBaseObject; ++i) {
-            if (mGetBaseObjectPtr(i)->pictPortraitResID == pict_id) {
-                stack()->push(new ObjectDataScreen(origin, i, trigger, which));
+            auto obj = Handle<BaseObject>(i);
+            if (obj->pictPortraitResID == pict_id) {
+                stack()->push(new ObjectDataScreen(origin, obj, trigger, which));
                 return;
             }
         }
