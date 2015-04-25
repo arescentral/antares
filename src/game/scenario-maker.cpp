@@ -739,7 +739,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
 
         Scenario::InitialObject* initial = gThisScenario->initial(i);
         Handle<Admiral> owner = initial->owner;
-        auto baseObject = Handle<BaseObject>(initial->type);
+        auto baseObject = initial->type;
         // TODO(sfiera): remap objects in networked games.
 
         // Load the media for this object
@@ -824,7 +824,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             }
         }
 
-        auto type = Handle<BaseObject>(initial->type);
+        auto type = initial->type;
         // TODO(sfiera): remap object in networked games.
         fixedPointType v = {0, 0};
         int32_t newShipNum;
@@ -972,7 +972,7 @@ void UnhideInitialObject(int32_t whichInitial) {
     }
 
 
-    auto type = Handle<BaseObject>(initial->type);
+    auto type = initial->type;
     // TODO(sfiera): remap objects in networked games.
     fixedPointType v = {0, 0};
     int32_t newShipNum = CreateAnySpaceObject(

@@ -174,7 +174,7 @@ struct ScenarioName { int16_t string_id; };
 void print_to(sfz::PrintTarget out, ScenarioName name);
 
 struct Scenario::InitialObject {
-    int32_t         type;
+    Handle<BaseObject>  type;
     Handle<Admiral> owner;
     int32_t         realObjectNumber;
     int32_t         realObjectID;
