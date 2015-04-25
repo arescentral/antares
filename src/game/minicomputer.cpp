@@ -638,8 +638,7 @@ void MiniComputerHandleNull( int32_t unitsToDo)
 
 {
     destBalanceType     *buildAtObject = NULL;
-    int32_t                count;
-    SpaceObject     *realObject = NULL, *myObject = NULL, newObject;
+    SpaceObject     *myObject = NULL, newObject;
 
     globals()->gMiniScreenData.pollTime += unitsToDo;
     if ( globals()->gMiniScreenData.pollTime > kMiniComputerPollTime)
@@ -650,13 +649,10 @@ void MiniComputerHandleNull( int32_t unitsToDo)
         // handle control/command/selected object
 
         myObject = mGetMiniObjectPtr( kMiniSelectObjectNum);
-        count = globals()->gPlayerAdmiral->control();
-        if ( count >= 0)
-        {
-            realObject = mGetSpaceObjectPtr(count);
-            mCopyMiniSpaceObject( newObject, *realObject);
-        } else
-        {
+        auto control = globals()->gPlayerAdmiral->control();
+        if (control.get()) {
+            mCopyMiniSpaceObject(newObject, *control);
+        } else {
             newObject.id = -1;
             newObject.beam.base = BaseObject::none();
             newObject.pulse.base = BaseObject::none();
@@ -674,13 +670,10 @@ void MiniComputerHandleNull( int32_t unitsToDo)
         mCopyMiniSpaceObject(*myObject, newObject);
 
         myObject = mGetMiniObjectPtr( kMiniTargetObjectNum);
-        count = globals()->gPlayerAdmiral->target();
-        if ( count >= 0)
-        {
-            realObject = mGetSpaceObjectPtr(count);
-            mCopyMiniSpaceObject( newObject, *realObject);
-        } else
-        {
+        auto target = globals()->gPlayerAdmiral->target();
+        if (target.get()) {
+            mCopyMiniSpaceObject(newObject, *target);
+        } else {
             newObject.id = -1;
             newObject.beam.base = BaseObject::none();
             newObject.pulse.base = BaseObject::none();
@@ -697,7 +690,7 @@ void MiniComputerHandleNull( int32_t unitsToDo)
         }
         mCopyMiniSpaceObject(*myObject, newObject);
 
-        int build_at = GetAdmiralBuildAtObject(globals()->gPlayerAdmiral);
+        auto build_at = GetAdmiralBuildAtObject(globals()->gPlayerAdmiral);
         if (build_at >= 0) {
             buildAtObject = mGetDestObjectBalancePtr(build_at);
             if (buildAtObject->totalBuildTime > 0) {
@@ -1033,8 +1026,7 @@ void MiniComputerDoAccept() {
 }
 
 void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral) {
-    SpaceObject *anObject, *anotherObject;
-    int32_t            l;
+    SpaceObject *anotherObject;
 
     switch ( whichPage)
     {
@@ -1090,92 +1082,76 @@ void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> w
             if ( globals()->keyMask & kComputerSpecialMenu) return;
             switch ( whichLine)
             {
-                case kSpecialMiniTransfer:
-                    l = whichAdmiral->control();
-                    anObject = whichAdmiral->flagship();
-                    if ( anObject != NULL)
-                    {
-                        if ( l != kNoShip)
-                        {
-                            anotherObject = mGetSpaceObjectPtr(l);
-                            if (( anotherObject->active != kObjectInUse) ||
-                                ( !(anotherObject->attributes & kCanThink)) ||
-                                ( anotherObject->attributes & kStaticDestination)
-                                || ( anotherObject->owner != anObject->owner) ||
-                                (!(anotherObject->attributes & kCanAcceptDestination))
-                                || ( !(anotherObject->attributes & kCanBeDestination))
-                                || ( anObject->active != kObjectInUse))
-                            {
-                                if (whichAdmiral == globals()->gPlayerAdmiral)
+                case kSpecialMiniTransfer: {
+                    auto control = whichAdmiral->control();
+                    auto flagship = whichAdmiral->flagship();
+                    if (flagship.get()) {
+                        if (control.get()) {
+                            if (!(control->attributes & kCanThink)
+                                    || (control->attributes & kStaticDestination)
+                                    || (control->owner != flagship->owner)
+                                    || !(control->attributes & kCanAcceptDestination)
+                                    || !(control->attributes & kCanBeDestination)
+                                    || (flagship->active != kObjectInUse)) {
+                                if (whichAdmiral == globals()->gPlayerAdmiral) {
                                     mPlayBeepBad();
-                            } else
-                            {
-                                ChangePlayerShipNumber( whichAdmiral, l);
+                                }
+                            } else {
+                                ChangePlayerShipNumber(whichAdmiral, control.number());
                             }
-                        } else
-                        {
-                            PlayerShipBodyExpire( anObject, false);
+                        } else {
+                            PlayerShipBodyExpire(flagship.get(), false);
                         }
                     }
                     break;
+                }
 
-                case kSpecialMiniFire1:
-                    l = whichAdmiral->control();
-                    if (( l != kNoShip))
-                    {
-                        anObject = mGetSpaceObjectPtr(l);
-                        if (( anObject->active) &&
-                            (anObject->attributes & ( kCanAcceptDestination)))
-                        {
-                            anObject->keysDown |= kOneKey | kManualOverrideFlag;
+                case kSpecialMiniFire1: {
+                    auto control = whichAdmiral->control();
+                    if (control.get()) {
+                        if (control->attributes & kCanAcceptDestination) {
+                            control->keysDown |= kOneKey | kManualOverrideFlag;
                         }
                     }
                     break;
+                }
 
-                case kSpecialMiniFire2:
-                    l = whichAdmiral->control();
-                    if (( l != kNoShip))
-                    {
-                        anObject = mGetSpaceObjectPtr(l);
-                        if (( anObject->active) &&
-                            (anObject->attributes & ( kCanAcceptDestination)))
-                        {
-                            anObject->keysDown |= kTwoKey | kManualOverrideFlag;
+                case kSpecialMiniFire2: {
+                    auto control = whichAdmiral->control();
+                    if (control.get()) {
+                        if (control->attributes & kCanAcceptDestination) {
+                            control->keysDown |= kTwoKey | kManualOverrideFlag;
                         }
                     }
                     break;
+                }
 
-                case kSpecialMiniFireSpecial:
-                    l = whichAdmiral->control();
-                    if (( l != kNoShip))
-                    {
-                        anObject = mGetSpaceObjectPtr(l);
-                        if (( anObject->active) &&
-                            (anObject->attributes & ( kCanAcceptDestination)))
-                        {
-                            anObject->keysDown |= kEnterKey | kManualOverrideFlag;
+                case kSpecialMiniFireSpecial: {
+                    auto control = whichAdmiral->control();
+                    if (control.get()) {
+                        if (control->attributes & kCanAcceptDestination) {
+                            control->keysDown |= kEnterKey | kManualOverrideFlag;
                         }
                     }
                     break;
+                }
 
-                case kSpecialMiniHold:
-                    l = whichAdmiral->control();
-                    if (( l != kNoShip))
-                    {
-                        anObject = mGetSpaceObjectPtr(l);
-                        SetObjectLocationDestination( anObject, &(anObject->location));
+                case kSpecialMiniHold: {
+                    auto control = whichAdmiral->control();
+                    if (control.get()) {
+                        SetObjectLocationDestination(control.get(), &control->location);
                     }
                     break;
+                }
 
-                case kSpecialMiniGoToMe:
-                    l = whichAdmiral->control();
-                    if (( l != kNoShip))
-                    {
-                        anObject = mGetSpaceObjectPtr(l);
-                        anotherObject = whichAdmiral->flagship();
-                        SetObjectLocationDestination( anObject, &(anotherObject->location));
+                case kSpecialMiniGoToMe: {
+                    auto control = whichAdmiral->control();
+                    if (control.get()) {
+                        auto flagship = whichAdmiral->flagship();
+                        SetObjectLocationDestination(control.get(), &flagship->location);
                     }
                     break;
+                }
 
                 default:
                     break;
@@ -1234,7 +1210,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 {
     destBalanceType     *buildAtObject = NULL;
     miniScreenLineType  *line = NULL;
-    int32_t                count, lineNum, buildAtObjectNum;
+    int32_t                count, lineNum;
     Rect                mRect;
 
     mRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
@@ -1246,11 +1222,10 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
         const auto& admiral = globals()->gPlayerAdmiral;
         line = globals()->gMiniScreenData.lineData.get() +
             kBuildScreenWhereNameLine;
-        buildAtObjectNum = GetAdmiralBuildAtObject(globals()->gPlayerAdmiral);
+        auto buildAtObjectNum = GetAdmiralBuildAtObject(globals()->gPlayerAdmiral);
         line->value = buildAtObjectNum;
 
-        if ( buildAtObjectNum >= 0)
-        {
+        if (buildAtObjectNum >= 0) {
             buildAtObject = mGetDestObjectBalancePtr( buildAtObjectNum);
             mCopyBlankLineString( line, buildAtObject->name);
 

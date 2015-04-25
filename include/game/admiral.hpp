@@ -68,7 +68,7 @@ const int32_t kMaxNumAdmiralCanBuild = kMaxDestObject * kMaxTypeBaseCanBuild;
 const int32_t kAdmiralScoreNum = 3;
 
 struct destBalanceType {
-    int32_t             whichObject;
+    Handle<SpaceObject> whichObject;
     int32_t             canBuildType[kMaxTypeBaseCanBuild];
     int32_t             occupied[kMaxPlayerNum];
     Fixed               earn;
@@ -98,20 +98,20 @@ class Admiral {
     void                pay_absolute(Fixed howMuch);
     void                remove_destination(int32_t which);
 
-    int32_t             control() const;
-    int32_t             target() const;
-    void                set_control(int32_t number);
-    void                set_target(int32_t number);
+    Handle<SpaceObject> control() const;
+    Handle<SpaceObject> target() const;
+    void                set_control(Handle<SpaceObject> object);
+    void                set_target(Handle<SpaceObject> object);
 
     uint32_t&           attributes() { return _attributes; }
     bool                has_destination() { return _has_destination; }
     Handle<SpaceObject> destinationObject() { return _destinationObject; }
     int32_t             destinationObjectID() { return _destinationObjectID; }
 
-    SpaceObject*        flagship();
-    int32_t             flagshipNumber() { return _flagship; }
+    Handle<SpaceObject> flagship();
+    int32_t             flagshipNumber() { return _flagship.number(); }
     int32_t             flagshipID() { return _flagshipID; }
-    void                set_flagship(int32_t number);
+    void                set_flagship(Handle<SpaceObject> object);
 
     Handle<SpaceObject> considerShip() { return _considerShip; }
     int32_t             considerShipID() { return _considerShipID; }
@@ -144,7 +144,7 @@ class Admiral {
     bool                _has_destination = false;
     Handle<SpaceObject> _destinationObject;
     int32_t             _destinationObjectID = -1;
-    int32_t             _flagship = kNoShip;
+    Handle<SpaceObject> _flagship;
     int32_t             _flagshipID = -1;
     Handle<SpaceObject> _considerShip;
     int32_t             _considerShipID = -1;
@@ -177,7 +177,7 @@ void ResetAllDestObjectData();
 destBalanceType* mGetDestObjectBalancePtr(int32_t whichObject);
 
 int32_t MakeNewDestination(
-        int32_t whichObject, int32_t* canBuildType, Fixed earn, int16_t nameResID,
+        Handle<SpaceObject> object, int32_t* canBuildType, Fixed earn, int16_t nameResID,
         int16_t nameStrNum);
 void RemoveDestination(int32_t whichDestination);
 void RecalcAllAdmiralBuildData();
@@ -185,9 +185,9 @@ void RecalcAllAdmiralBuildData();
 uint8_t GetAdmiralColor(Handle<Admiral> whichAdmiral);
 int32_t GetAdmiralRace(Handle<Admiral> whichAdmiral);
 
-bool BaseHasSomethingToBuild(int32_t whichObject);
+bool BaseHasSomethingToBuild(Handle<SpaceObject> obj);
 int32_t GetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral);
-void SetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral, int32_t whichObject);
+void SetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral, Handle<SpaceObject> obj);
 
 void SetAdmiralBuildAtName(Handle<Admiral> whichAdmiral, sfz::StringSlice name);
 sfz::StringSlice GetDestBalanceName(int32_t whichDestObject);

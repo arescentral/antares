@@ -71,7 +71,6 @@ int16_t GetCheatNumFromString(const StringSlice& s) {
 
 void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
     int32_t                    i;
-    SpaceObject *anObject = NULL;
 
     if ( whichCheat == kNameObjectCheat)
     {
@@ -132,10 +131,8 @@ void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
             break;
 
         case kObserverCheat:
-            anObject = whichPlayer->flagship();
-            if ( anObject != NULL)
-            {
-                anObject->attributes &= ~(kCanBeEngaged | kHated);
+            if (whichPlayer->flagship().get()) {
+                whichPlayer->flagship()->attributes &= ~(kCanBeEngaged | kHated);
                 CheatFeedback( whichCheat, true, whichPlayer);
             }
             break;

@@ -265,7 +265,7 @@ void set_initial_destination(const Scenario::InitialObject* initial, bool preser
 
     auto target = gThisScenario->initial(initial->initialDestination);
     if (target->realObjectNumber >= 0) {
-        int32_t saveDest = owner->target(); // save the original dest
+        auto saveDest = owner->target(); // save the original dest
 
         // set the admiral's dest object to the mapped initial dest object
         owner->set_target(target->realObjectNumber);
@@ -361,7 +361,7 @@ bool Scenario::Condition::true_yet() const {
 bool Scenario::Condition::is_true() const {
     SpaceObject* sObject = nullptr;
     SpaceObject* dObject = nullptr;
-    int32_t i, l, difference;
+    int32_t i, difference;
     Handle<Admiral> a;
     uint32_t distance, dcalc;
 
@@ -467,8 +467,8 @@ bool Scenario::Condition::is_true() const {
         case kIsAuxiliaryObject:
             sObject = GetObjectFromInitialNumber(subjectObject);
             if (sObject != NULL) {
-                l = globals()->gPlayerAdmiral->control();
-                if (l >= 0) {
+                auto l = globals()->gPlayerAdmiral->control();
+                if (l.get()) {
                     dObject = mGetSpaceObjectPtr(l);
                     if (dObject == sObject) {
                         return true;
@@ -480,8 +480,8 @@ bool Scenario::Condition::is_true() const {
         case kIsTargetObject:
             sObject = GetObjectFromInitialNumber(subjectObject);
             if (sObject != NULL) {
-                l = globals()->gPlayerAdmiral->target();
-                if (l >= 0) {
+                auto l = globals()->gPlayerAdmiral->target();
+                if (l.get()) {
                     dObject = mGetSpaceObjectPtr(l);
                     if (dObject == sObject) {
                         return true;
@@ -817,7 +817,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         int32_t specialAttributes = initial->attributes & (~kInitialAttributesMask);
         if (initial->attributes & kIsPlayerShip) {
             specialAttributes &= ~kIsPlayerShip;
-            if ((owner == globals()->gPlayerAdmiral) && !owner->flagship()) {
+            if ((owner == globals()->gPlayerAdmiral) && !owner->flagship().get()) {
                 specialAttributes |= kIsHumanControlled | kIsPlayerShip;
             }
         }
@@ -839,7 +839,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         initial->realObjectID = anObject->id;
 
         if ((initial->attributes & kIsPlayerShip)
-                && owner.get() && !owner->flagship()) {
+                && owner.get() && !owner->flagship().get()) {
             owner->set_flagship(newShipNum);
             if (owner == globals()->gPlayerAdmiral) {
                 ResetPlayerShip(newShipNum);
@@ -958,7 +958,7 @@ void UnhideInitialObject(int32_t whichInitial) {
 
     uint32_t specialAttributes = initial->attributes & ~kInitialAttributesMask;
     if (initial->attributes & kIsPlayerShip) {
-        if (owner.get() && !owner->flagship()) {
+        if (owner.get() && !owner->flagship().get()) {
             if (owner == globals()->gPlayerAdmiral) {
                 specialAttributes |= kIsHumanControlled;
             } else {
@@ -986,13 +986,13 @@ void UnhideInitialObject(int32_t whichInitial) {
 
         if (owner.get()) {
             if (initial->canBuild[0] >= 0) {
-                if (owner->control() < 0) {
+                if (!owner->control().get()) {
                     owner->set_control(newShipNum);
                 }
                 if (GetAdmiralBuildAtObject(owner) < 0) {
                     SetAdmiralBuildAtObject(owner, newShipNum);
                 }
-                if (owner->target() < 0) {
+                if (!owner->target().get()) {
                     owner->set_target(newShipNum);
                 }
             }
@@ -1000,7 +1000,7 @@ void UnhideInitialObject(int32_t whichInitial) {
     }
 
     initial->realObjectID = anObject->id;
-    if ((initial->attributes & kIsPlayerShip) && owner.get() && !owner->flagship()) {
+    if ((initial->attributes & kIsPlayerShip) && owner.get() && !owner->flagship().get()) {
         owner->set_flagship(newShipNum);
         if (owner == globals()->gPlayerAdmiral) {
             ResetPlayerShip(newShipNum);

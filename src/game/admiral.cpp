@@ -123,13 +123,12 @@ Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Scenario::Pl
 }
 
 int32_t MakeNewDestination(
-        int32_t whichObject, int32_t* canBuildType, Fixed earn, int16_t nameResID,
+        Handle<SpaceObject> object, int32_t* canBuildType, Fixed earn, int16_t nameResID,
         int16_t nameStrNum) {
     int32_t i = 0;
-    SpaceObject* object = mGetSpaceObjectPtr(whichObject);
 
     destBalanceType* d = mGetDestObjectBalancePtr(0);
-    while ((i < kMaxDestObject) && (d->whichObject != kDestNoObject)) {
+    while ((i < kMaxDestObject) && d->whichObject.get()) {
         i++;
         d++;
     }
@@ -137,7 +136,7 @@ int32_t MakeNewDestination(
     if (i == kMaxDestObject) {
         return -1;
     } else {
-        d->whichObject = whichObject;
+        d->whichObject = object;
         d->earn = earn;
         d->totalBuildTime = d->buildTime = 0;
 
@@ -176,7 +175,7 @@ int32_t MakeNewDestination(
 void Admiral::remove_destination(int32_t which) {
     auto d = mGetDestObjectBalancePtr(which);
     if (_active) {
-        if (_destinationObject.number() == d->whichObject) {
+        if (_destinationObject == d->whichObject) {
             _destinationObject = kNoDestinationObject;
             _destinationObjectID = -1;
             _has_destination = false;
@@ -215,7 +214,6 @@ void RemoveDestination(int32_t whichDestination) {
 
 void RecalcAllAdmiralBuildData() {
     Admiral* a = gAdmiralData.get();
-    SpaceObject* anObject= NULL;
     destBalanceType* d = mGetDestObjectBalancePtr(0);
 
     // first clear all the data
@@ -231,8 +229,8 @@ void RecalcAllAdmiralBuildData() {
     }
 
     for (int i = 0; i < kMaxDestObject; i++) {
-        if (d->whichObject != kDestNoObject) {
-            anObject = mGetSpaceObjectPtr(d->whichObject);
+        if (d->whichObject.get()) {
+            auto anObject = d->whichObject;
             if (anObject->owner.get()) {
                 const auto& a = anObject->owner;
                 for (int k = 0; k < kMaxTypeBaseCanBuild; k++) {
@@ -281,58 +279,52 @@ int32_t GetAdmiralRace(Handle<Admiral> a) {
     return a->race();
 }
 
-SpaceObject* Admiral::flagship() {
-    if (_flagship != kNoShip) {
-        SpaceObject* anObject = mGetSpaceObjectPtr(_flagship);
-        if (anObject->id == _flagshipID) {
-            return anObject;
+Handle<SpaceObject> Admiral::flagship() {
+    if (_flagship.get()) {
+        if (_flagship->id == _flagshipID) {
+            return _flagship;
         }
     }
-    return nullptr;
+    return SpaceObject::none();
 }
 
-void Admiral::set_flagship(int32_t number) {
-    if (number >= 0) {
-        _flagship = number;
-        _flagshipID = mGetSpaceObjectPtr(number)->id;
+void Admiral::set_flagship(Handle<SpaceObject> object) {
+    _flagship = object;
+    if (object.get()) {
+        _flagshipID = object->id;
     } else {
-        _flagship = kNoShip;
         _flagshipID = -1;
     }
 }
 
-void Admiral::set_target(int32_t whichObject) {
-    _destinationObject = whichObject;
-    if (whichObject >= 0) {
-        SpaceObject* destObject = mGetSpaceObjectPtr(whichObject);
-        _destinationObjectID = destObject->id;
+void Admiral::set_target(Handle<SpaceObject> obj) {
+    _destinationObject = obj;
+    if (obj.get()) {
+        _destinationObjectID = obj->id;
     } else {
         _destinationObjectID = -1;
     }
     _has_destination = true;
 }
 
-int32_t Admiral::target() const {
-    if (_destinationObject.get()) {
-        SpaceObject* destObject = mGetSpaceObjectPtr(_destinationObject);
-        if ((destObject->id == _destinationObjectID)
-                && (destObject->active == kObjectInUse)) {
-            return _destinationObject.number();
-        }
+Handle<SpaceObject> Admiral::target() const {
+    if (_destinationObject.get()
+            && (_destinationObject->id == _destinationObjectID)
+            && (_destinationObject->active == kObjectInUse)) {
+        return _destinationObject;
     }
-    return -1;
+    return SpaceObject::none();
 }
 
-void Admiral::set_control(int32_t whichObject) {
-    SpaceObject* anObject = mGetSpaceObjectPtr(whichObject);
+void Admiral::set_control(Handle<SpaceObject> obj) {
     destBalanceType* d = mGetDestObjectBalancePtr(0);
 
-    _considerShip = whichObject;
-    if (whichObject >= 0) {
-        _considerShipID = anObject->id;
-        if (anObject->attributes & kCanAcceptBuild) {
+    _considerShip = obj;
+    if (obj.get()) {
+        _considerShipID = obj->id;
+        if (obj->attributes & kCanAcceptBuild) {
             int buildAtNum = 0;
-            while ((d->whichObject != whichObject) && (buildAtNum < kMaxDestObject)) {
+            while ((d->whichObject != obj) && (buildAtNum < kMaxDestObject)) {
                 buildAtNum++;
                 d++;
             }
@@ -351,25 +343,22 @@ void Admiral::set_control(int32_t whichObject) {
     }
 }
 
-int32_t Admiral::control() const {
-    if (_considerShip.get()) {
-        SpaceObject* anObject = mGetSpaceObjectPtr(_considerShip);
-        if ((anObject->id == _considerShipID)
-                && (anObject->active == kObjectInUse)
-                && (anObject->owner.get() == this)) {
-            return _considerShip.number();
-        }
+Handle<SpaceObject> Admiral::control() const {
+    if (_considerShip.get()
+            && (_considerShip->id == _considerShipID)
+            && (_considerShip->active == kObjectInUse)
+            && (_considerShip->owner.get() == this)) {
+        return _considerShip;
     }
-    return -1;
+    return SpaceObject::none();
 }
 
-bool BaseHasSomethingToBuild(int32_t whichObject) {
+bool BaseHasSomethingToBuild(Handle<SpaceObject> obj) {
     destBalanceType* d = mGetDestObjectBalancePtr(0);
-    SpaceObject* anObject= mGetSpaceObjectPtr(whichObject);
 
-    if (anObject->attributes & kCanAcceptBuild) {
+    if (obj->attributes & kCanAcceptBuild) {
         int buildAtNum = 0;
-        while ((d->whichObject != whichObject) && (buildAtNum < kMaxDestObject)) {
+        while ((d->whichObject != obj) && (buildAtNum < kMaxDestObject)) {
             buildAtNum++;
             d++;
         }
@@ -389,8 +378,8 @@ bool BaseHasSomethingToBuild(int32_t whichObject) {
 int32_t GetAdmiralBuildAtObject(Handle<Admiral> a) {
     if (a->buildAtObject() >= 0) {
         destBalanceType* destBalance = mGetDestObjectBalancePtr(a->buildAtObject());
-        if (destBalance->whichObject >= 0) {
-            SpaceObject* anObject = mGetSpaceObjectPtr(destBalance->whichObject);
+        if (destBalance->whichObject.get()) {
+            auto anObject = destBalance->whichObject;
             if (anObject->owner != a) {
                 a->buildAtObject() = kNoShip;
             }
@@ -401,17 +390,16 @@ int32_t GetAdmiralBuildAtObject(Handle<Admiral> a) {
     return a->buildAtObject();
 }
 
-void SetAdmiralBuildAtObject(Handle<Admiral> a, int32_t whichObject) {
-    SpaceObject* anObject = mGetSpaceObjectPtr(whichObject);
+void SetAdmiralBuildAtObject(Handle<Admiral> a, Handle<SpaceObject> obj) {
     destBalanceType* d = mGetDestObjectBalancePtr(0);
 
     if (!a.get()) {
         throw Exception("Can't set consider ship for -1 admiral.");
     }
-    if (whichObject >= 0) {
-        if (anObject->attributes & kCanAcceptBuild) {
+    if (obj.get()) {
+        if (obj->attributes & kCanAcceptBuild) {
             int buildAtNum = 0;
-            while ((d->whichObject != whichObject) && (buildAtNum < kMaxDestObject)) {
+            while ((d->whichObject != obj) && (buildAtNum < kMaxDestObject)) {
                 buildAtNum++;
                 d++;
             }
@@ -1062,7 +1050,7 @@ void Admiral::think() {
                 _buildAtObject = 0;
                 destBalance = mGetDestObjectBalancePtr(0);
             }
-            if (destBalance->whichObject >= 0) {
+            if (destBalance->whichObject.get()) {
                 anObject = Handle<SpaceObject>(destBalance->whichObject);
                 if ((anObject->owner.get() != this)
                         || (!(anObject->attributes & kCanAcceptBuild))) {
@@ -1148,7 +1136,6 @@ bool Admiral::build(int32_t buildWhichType) {
     destBalanceType* buildAtDest = mGetDestObjectBalancePtr(_buildAtObject);
 
     Handle<Admiral> self(this - gAdmiralData.get());
-    GetAdmiralBuildAtObject(self);
     if ((buildWhichType >= 0)
             && (buildWhichType < kMaxTypeBaseCanBuild)
             && (_buildAtObject >= 0) && (buildAtDest->buildTime <= 0)) {
