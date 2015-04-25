@@ -205,11 +205,10 @@ static void engage_autopilot() {
 }
 
 static void pick_object(
-        SpaceObject* origin_ship, int32_t direction, bool destination, int32_t attributes,
-        int32_t nonattributes, int32_t select_ship_num, Allegiance allegiance) {
+        Handle<SpaceObject> origin_ship, int32_t direction, bool destination, int32_t attributes,
+        int32_t nonattributes, Handle<SpaceObject> select_ship, Allegiance allegiance) {
     uint64_t huge_distance;
-    if (select_ship_num >= 0) {
-        SpaceObject* select_ship = mGetSpaceObjectPtr(select_ship_num);
+    if (select_ship.get()) {
         uint32_t difference = ABS<int>(origin_ship->location.h - select_ship->location.h);
         uint32_t dcalc = difference;
         difference =  ABS<int>(origin_ship->location.v - select_ship->location.v);
@@ -230,47 +229,47 @@ static void pick_object(
         huge_distance = 0;
     }
 
-    select_ship_num = GetManualSelectObject(
-            origin_ship, direction, attributes, nonattributes, &huge_distance, select_ship_num,
+    select_ship = GetManualSelectObject(
+            origin_ship, direction, attributes, nonattributes, &huge_distance, select_ship,
             allegiance);
 
-    if (select_ship_num >= 0) {
+    if (select_ship.get()) {
         if (destination) {
-            SetPlayerSelectShip(select_ship_num, true, globals()->gPlayerAdmiral);
+            SetPlayerSelectShip(select_ship.number(), true, globals()->gPlayerAdmiral);
         } else {
-            SetPlayerSelectShip(select_ship_num, false, globals()->gPlayerAdmiral);
+            SetPlayerSelectShip(select_ship.number(), false, globals()->gPlayerAdmiral);
         }
     }
 }
 
-static void select_friendly(SpaceObject* origin_ship, int32_t direction) {
+static void select_friendly(Handle<SpaceObject> origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, false, kCanBeDestination, kIsDestination,
-            globals()->gPlayerAdmiral->control().number(), FRIENDLY);
+            globals()->gPlayerAdmiral->control(), FRIENDLY);
 }
 
-static void target_friendly(SpaceObject* origin_ship, int32_t direction) {
+static void target_friendly(Handle<SpaceObject> origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, true, kCanBeDestination, kIsDestination,
-            globals()->gPlayerAdmiral->target().number(), FRIENDLY);
+            globals()->gPlayerAdmiral->target(), FRIENDLY);
 }
 
-static void target_hostile(SpaceObject* origin_ship, int32_t direction) {
+static void target_hostile(Handle<SpaceObject> origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, true, kCanBeDestination, kIsDestination,
-            globals()->gPlayerAdmiral->target().number(), HOSTILE);
+            globals()->gPlayerAdmiral->target(), HOSTILE);
 }
 
-static void select_base(SpaceObject* origin_ship, int32_t direction) {
+static void select_base(Handle<SpaceObject> origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, false, kCanAcceptBuild, 0,
-            globals()->gPlayerAdmiral->control().number(), FRIENDLY);
+            globals()->gPlayerAdmiral->control(), FRIENDLY);
 }
 
-static void target_base(SpaceObject* origin_ship, int32_t direction) {
+static void target_base(Handle<SpaceObject> origin_ship, int32_t direction) {
     pick_object(
             origin_ship, direction, true, kIsDestination, 0,
-            globals()->gPlayerAdmiral->target().number(), FRIENDLY_OR_HOSTILE);
+            globals()->gPlayerAdmiral->target(), FRIENDLY_OR_HOSTILE);
 }
 
 static void target_self() {
@@ -367,7 +366,7 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
         return;
     }
 
-    SpaceObject* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+    auto player = Handle<SpaceObject>(globals()->gPlayerShipNumber);
     if (_gamepad_state) {
         switch (event.button) {
           case Gamepad::A:
@@ -549,7 +548,7 @@ bool PlayerShip::active() const {
 }
 
 void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_message) {
-    SpaceObject *theShip = NULL, *selectShip = NULL;
+    SpaceObject *selectShip = NULL;
     uint32_t        attributes;
 
     if (globals()->gPlayerShipNumber < 0) {
@@ -636,7 +635,7 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
     //  this implements the often requested feature of having a shortcut for
     //  transfering control.
 
-    theShip = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+    auto theShip = Handle<SpaceObject>(globals()->gPlayerShipNumber);
 
     if (!theShip->active) {
         return;
@@ -832,7 +831,6 @@ int32_t PlayerShip::goal_direction() const {
 }
 
 void PlayerShipHandleClick(Point where, int button) {
-    SpaceObject *theShip = NULL;
     Rect            bounds;
 
     if (globals()->keyMask & kMouseMask) {
@@ -841,7 +839,7 @@ void PlayerShipHandleClick(Point where, int button) {
 
     gDestKeyTime = -1;
     if (globals()->gPlayerShipNumber >= 0) {
-        theShip = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+        auto theShip = Handle<SpaceObject>(globals()->gPlayerShipNumber);
         if ((theShip->active) && (theShip->attributes & kIsHumanControlled)) {
             bounds.left = where.h - kCursorBoundsSize;
             bounds.top = where.v - kCursorBoundsSize;
@@ -853,17 +851,17 @@ void PlayerShipHandleClick(Point where, int button) {
 
                 auto selectShipNum = GetSpritePointSelectObject(
                         &bounds, theShip, kCanBeDestination | kIsDestination,
-                        target.number(), FRIENDLY_OR_HOSTILE);
-                if (selectShipNum >= 0) {
-                    SetPlayerSelectShip(selectShipNum, true, globals()->gPlayerAdmiral);
+                        target, FRIENDLY_OR_HOSTILE);
+                if (selectShipNum.get()) {
+                    SetPlayerSelectShip(selectShipNum.number(), true, globals()->gPlayerAdmiral);
                 }
             } else {
                 auto control = globals()->gPlayerAdmiral->control();
                 auto selectShipNum = GetSpritePointSelectObject(
                         &bounds, theShip, kCanBeDestination | kCanAcceptBuild,
-                        control.number(), FRIENDLY);
-                if (selectShipNum >= 0) {
-                    SetPlayerSelectShip(selectShipNum, false, globals()->gPlayerAdmiral);
+                        control, FRIENDLY);
+                if (selectShipNum.get()) {
+                    SetPlayerSelectShip(selectShipNum.number(), false, globals()->gPlayerAdmiral);
                 }
             }
         }

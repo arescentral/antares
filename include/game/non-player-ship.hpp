@@ -39,14 +39,14 @@ void NonplayerShipThink(int32_t);
 void UpdateMyNonplayerShip( void);
 void HackShowShipID( void);
 void HitObject( SpaceObject *, SpaceObject *);
-int32_t GetManualSelectObject(
-        SpaceObject *sourceObject, int32_t direction,
+Handle<SpaceObject> GetManualSelectObject(
+        Handle<SpaceObject> sourceObject, int32_t direction,
         uint32_t inclusiveAttributes, uint32_t exclusiveAttributes,
-        const uint64_t* fartherThan, int32_t currentShipNum, Allegiance allegiance);
-int32_t GetSpritePointSelectObject(
-        Rect *bounds, SpaceObject *sourceObject,
+        const uint64_t* fartherThan, Handle<SpaceObject> currentShip, Allegiance allegiance);
+Handle<SpaceObject> GetSpritePointSelectObject(
+        Rect *bounds, Handle<SpaceObject> sourceObject,
         uint32_t anyOneAttribute,
-        int32_t currentShipNum, Allegiance allegiance);
+        Handle<SpaceObject> currentShip, Allegiance allegiance);
 
 }  // namespace antares
 

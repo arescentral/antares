@@ -1748,38 +1748,38 @@ static bool allegiance_is(
 //  For the human player selecting a ship.  If friend or foe = 0, will get any ship.  If it's
 //  positive, will get only friendly ships.  If it's negative, only unfriendly ships.
 
-int32_t GetManualSelectObject(
-        SpaceObject *sourceObject, int32_t direction,
+Handle<SpaceObject> GetManualSelectObject(
+        Handle<SpaceObject> sourceObject, int32_t direction,
         uint32_t inclusiveAttributes, uint32_t exclusiveAttributes,
-        const uint64_t* fartherThan, int32_t currentShipNum, Allegiance allegiance) {
+        const uint64_t* fartherThan, Handle<SpaceObject> currentShip, Allegiance allegiance) {
     const uint32_t myOwnerFlag = 1 << sourceObject->owner.number();
 
     uint64_t wideClosestDistance = 0x3fffffff3fffffffull;
     uint64_t wideFartherDistance = 0x3fffffff3fffffffull;
 
     // Here's what you've got to do next:
-    // start with the currentShipNum
+    // start with the currentShip
     // try to get any ship but the current ship
-    // stop trying when we've made a full circle (we're back on currentShipNum)
+    // stop trying when we've made a full circle (we're back on currentShip)
 
     Handle<SpaceObject> anObject;
-    int32_t whichShip = currentShipNum;
-    int32_t startShip = currentShipNum;
-    if (whichShip >= 0) {
-        anObject = Handle<SpaceObject>(startShip);
+    auto whichShip = currentShip;
+    auto startShip = currentShip;
+    if (whichShip.get()) {
+        anObject = startShip;
         if (anObject->active != kObjectInUse) { // if it's not in the loop
             anObject = gRootObject;
-            startShip = whichShip = gRootObject.number();
+            startShip = whichShip = gRootObject;
         }
     } else {
         anObject = gRootObject;
-        startShip = whichShip = gRootObject.number();
+        startShip = whichShip = gRootObject;
     }
 
-    int32_t nextShipOut = -1, closestShip = -1;
+    Handle<SpaceObject> nextShipOut, closestShip;
     do {
         if (anObject->active
-                && (anObject.get() != sourceObject)
+                && (anObject != sourceObject)
                 && (anObject->seenByPlayerFlags & myOwnerFlag)
                 && (anObject->attributes & inclusiveAttributes)
                 && !(anObject->attributes & exclusiveAttributes)
@@ -1842,20 +1842,20 @@ int32_t GetManualSelectObject(
         }
     } while (whichShip != startShip);
 
-    if (((nextShipOut == -1) && (closestShip != -1)) || (nextShipOut == currentShipNum)) {
+    if ((!nextShipOut.get() && closestShip.get()) || (nextShipOut == currentShip)) {
         nextShipOut = closestShip;
     }
 
     return nextShipOut;
 }
 
-int32_t GetSpritePointSelectObject(
-        Rect *bounds, SpaceObject *sourceObject,
+Handle<SpaceObject> GetSpritePointSelectObject(
+        Rect *bounds, Handle<SpaceObject> sourceObject,
         uint32_t anyOneAttribute,
-        int32_t currentShipNum, Allegiance allegiance) {
+        Handle<SpaceObject> currentShip, Allegiance allegiance) {
     const uint32_t myOwnerFlag = 1 << sourceObject->owner.number();
 
-    int32_t resultShip = -1, closestShip = -1;
+    Handle<SpaceObject> resultShip, closestShip;
     for (int32_t whichShip = 0; whichShip < kMaxSpaceObject; whichShip++) {
         auto anObject = Handle<SpaceObject>(whichShip);
         if (!anObject->active
@@ -1869,14 +1869,14 @@ int32_t GetSpritePointSelectObject(
                 || (bounds->top > anObject->sprite->where.v)) {
             continue;
         }
-        if (closestShip < 0) {
-            closestShip = whichShip;
+        if (!closestShip.get()) {
+            closestShip = anObject;
         }
-        if ((whichShip > currentShipNum) && (resultShip < 0)) {
-            resultShip = whichShip;
+        if ((anObject.number() > currentShip.number()) && !resultShip.get()) {
+            resultShip = anObject;
         }
     }
-    if (((resultShip == -1) && (closestShip != -1)) || (resultShip == currentShipNum)) {
+    if ((!resultShip.get() && closestShip.get()) || (resultShip == currentShip)) {
         resultShip = closestShip;
     }
 
