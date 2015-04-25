@@ -173,42 +173,43 @@ int32_t MakeNewDestination(
     }
 }
 
+void Admiral::remove_destination(int32_t which) {
+    auto d = mGetDestObjectBalancePtr(which);
+    if (_active) {
+        if (_destinationObject.number() == d->whichObject) {
+            _destinationObject = kNoDestinationObject;
+            _destinationObjectID = -1;
+            _has_destination = false;
+        }
+        if (_considerDestination == which) {
+            _considerDestination = kNoDestinationObject;
+        }
+
+        if (_buildAtObject == which) {
+            _buildAtObject = kNoShip;
+        }
+    }
+}
+
 void RemoveDestination(int32_t whichDestination) {
-    destBalanceType* d = mGetDestObjectBalancePtr(whichDestination);
-    Admiral* a;
+    if ((whichDestination < 0) || (kMaxDestObject <= whichDestination)) {
+        return;
+    }
+    for (int i = 0; i < kMaxPlayerNum; i++) {
+        Handle<Admiral>(i)->remove_destination(whichDestination);
+    }
 
-    if ((whichDestination >= 0) && (whichDestination < kMaxDestObject)) {
-        a = gAdmiralData.get();
+    auto d = mGetDestObjectBalancePtr(whichDestination);
+    d->whichObject = kDestNoObject;
+    d->name.clear();
+    d->earn = d->totalBuildTime = d->buildTime = 0;
+    d->buildObjectBaseNum = BaseObject::none();
+    for (int i = 0; i < kMaxTypeBaseCanBuild; i++) {
+        d->canBuildType[i] = kNoShip;
+    }
 
-        for (int i = 0; i < kMaxPlayerNum; i++) {
-            if (a->active()) {
-                if (a->destinationObject().number() == d->whichObject) {
-                    a->destinationObject() = kNoDestinationObject;
-                    a->destinationObjectID() = -1;
-                    a->has_destination() = false;
-                }
-                if (a->considerDestination() == whichDestination) {
-                    a->considerDestination() = kNoDestinationObject;
-                }
-
-                if (a->buildAtObject() == whichDestination) {
-                    a->buildAtObject() = kNoShip;
-                }
-            }
-            a++;
-        }
-
-        d->whichObject = kDestNoObject;
-        d->name.clear();
-        d->earn = d->totalBuildTime = d->buildTime = 0;
-        d->buildObjectBaseNum = BaseObject::none();
-        for (int i = 0; i < kMaxTypeBaseCanBuild; i++) {
-            d->canBuildType[i] = kNoShip;
-        }
-
-        for (int i = 0; i < kMaxPlayerNum; i++) {
-            d->occupied[i] = 0;
-        }
+    for (int i = 0; i < kMaxPlayerNum; i++) {
+        d->occupied[i] = 0;
     }
 }
 

@@ -96,6 +96,7 @@ class Admiral {
     bool                build(int32_t buildWhichType);
     void                pay(Fixed howMuch);
     void                pay_absolute(Fixed howMuch);
+    void                remove_destination(int32_t which);
 
     int32_t             control() const;
     int32_t             target() const;
@@ -103,18 +104,18 @@ class Admiral {
     void                set_target(int32_t number);
 
     uint32_t&           attributes() { return _attributes; }
-    bool&               has_destination() { return _has_destination; }
-    Handle<SpaceObject>&destinationObject() { return _destinationObject; }
-    int32_t&            destinationObjectID() { return _destinationObjectID; }
+    bool                has_destination() { return _has_destination; }
+    Handle<SpaceObject> destinationObject() { return _destinationObject; }
+    int32_t             destinationObjectID() { return _destinationObjectID; }
 
     SpaceObject*        flagship();
     int32_t             flagshipNumber() { return _flagship; }
     int32_t             flagshipID() { return _flagshipID; }
     void                set_flagship(int32_t number);
 
-    Handle<SpaceObject>&considerShip() { return _considerShip; }
-    int32_t&            considerShipID() { return _considerShipID; }
-    int32_t&            considerDestination() { return _considerDestination; }
+    Handle<SpaceObject> considerShip() { return _considerShip; }
+    int32_t             considerShipID() { return _considerShipID; }
+    int32_t             considerDestination() { return _considerDestination; }
     int32_t&            buildAtObject() { return _buildAtObject; } // # of destination object to build at
     int32_t&            race() { return _race; }
     Fixed               cash() const { return _cash; }
