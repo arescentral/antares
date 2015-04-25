@@ -88,7 +88,7 @@ set<int32_t> possible_actions;
 #endif  // DATA_COVERAGE
 
 void AddBaseObjectActionMedia(
-        Handle<BaseObject> whichBase, int32_t whichType, uint8_t color, uint32_t all_colors);
+        Handle<BaseObject> base, int32_t whichType, uint8_t color, uint32_t all_colors);
 void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors);
 
 void SetAllBaseObjectsUnchecked() {
@@ -98,37 +98,36 @@ void SetAllBaseObjectsUnchecked() {
     }
 }
 
-void AddBaseObjectMedia(Handle<BaseObject> whichBase, uint8_t color, uint32_t all_colors) {
+void AddBaseObjectMedia(Handle<BaseObject> base, uint8_t color, uint32_t all_colors) {
 #ifdef DATA_COVERAGE
-    possible_objects.insert(whichBase.number());
+    possible_objects.insert(base.number());
 #endif  // DATA_COVERAGE
-    BaseObject* aBase = whichBase.get();
 
-    if (!(aBase->attributes & kCanThink)) {
+    if (!(base->attributes & kCanThink)) {
         color = GRAY;
     }
-    aBase->internalFlags |= (kNeutralColorNeededFlag << color);
+    base->internalFlags |= (kNeutralColorNeededFlag << color);
     for (int i = 0; i < 16; ++i) {
-        if (aBase->internalFlags & (kNeutralColorLoadedFlag << i)) {
+        if (base->internalFlags & (kNeutralColorLoadedFlag << i)) {
             continue;  // color already loaded.
-        } else if (!(aBase->internalFlags & (kNeutralColorNeededFlag << i))) {
+        } else if (!(base->internalFlags & (kNeutralColorNeededFlag << i))) {
             continue;  // color not needed.
         }
-        aBase->internalFlags |= kNeutralColorLoadedFlag << i;
+        base->internalFlags |= kNeutralColorLoadedFlag << i;
 
-        if (aBase->pixResID != kNoSpriteTable) {
-            int16_t id = aBase->pixResID + (i << kSpriteTableColorShift);
+        if (base->pixResID != kNoSpriteTable) {
+            int16_t id = base->pixResID + (i << kSpriteTableColorShift);
             AddPixTable(id);
         }
 
-        AddBaseObjectActionMedia(whichBase, kDestroyActionType, i, all_colors);
-        AddBaseObjectActionMedia(whichBase, kExpireActionType, i, all_colors);
-        AddBaseObjectActionMedia(whichBase, kCreateActionType, i, all_colors);
-        AddBaseObjectActionMedia(whichBase, kCollideActionType, i, all_colors);
-        AddBaseObjectActionMedia(whichBase, kActivateActionType, i, all_colors);
-        AddBaseObjectActionMedia(whichBase, kArriveActionType, i, all_colors);
+        AddBaseObjectActionMedia(base, kDestroyActionType, i, all_colors);
+        AddBaseObjectActionMedia(base, kExpireActionType, i, all_colors);
+        AddBaseObjectActionMedia(base, kCreateActionType, i, all_colors);
+        AddBaseObjectActionMedia(base, kCollideActionType, i, all_colors);
+        AddBaseObjectActionMedia(base, kActivateActionType, i, all_colors);
+        AddBaseObjectActionMedia(base, kArriveActionType, i, all_colors);
 
-        for (Handle<BaseObject> weapon: {aBase->pulse.base, aBase->beam.base, aBase->special.base}) {
+        for (Handle<BaseObject> weapon: {base->pulse.base, base->beam.base, base->special.base}) {
             if (weapon.get()) {
                 AddBaseObjectMedia(weapon, i, all_colors);
             }
@@ -137,40 +136,39 @@ void AddBaseObjectMedia(Handle<BaseObject> whichBase, uint8_t color, uint32_t al
 }
 
 objectActionType* mGetActionFromBaseTypeNum(
-        const BaseObject& mbaseObjPtr, int32_t mactionType, int32_t mactionNum) {
+        Handle<BaseObject> base, int32_t mactionType, int32_t mactionNum) {
     if (mactionType == kDestroyActionType) {
-        if (mactionNum < mbaseObjPtr.destroy.count) {
-            return mGetObjectActionPtr(mbaseObjPtr.destroy.start + mactionNum);
+        if (mactionNum < base->destroy.count) {
+            return mGetObjectActionPtr(base->destroy.start + mactionNum);
         }
     } else if (mactionType == kExpireActionType) {
-        if (mactionNum < mbaseObjPtr.expire.count) {
-            return mGetObjectActionPtr(mbaseObjPtr.expire.start + mactionNum);
+        if (mactionNum < base->expire.count) {
+            return mGetObjectActionPtr(base->expire.start + mactionNum);
         }
     } else if (mactionType == kCreateActionType) {
-        if (mactionNum < mbaseObjPtr.create.count) {
-            return mGetObjectActionPtr(mbaseObjPtr.create.start + mactionNum);
+        if (mactionNum < base->create.count) {
+            return mGetObjectActionPtr(base->create.start + mactionNum);
         }
     } else if (mactionType == kCollideActionType) {
-        if (mactionNum < mbaseObjPtr.collide.count) {
-            return mGetObjectActionPtr(mbaseObjPtr.collide.start + mactionNum);
+        if (mactionNum < base->collide.count) {
+            return mGetObjectActionPtr(base->collide.start + mactionNum);
         }
     } else if (mactionType == kActivateActionType) {
-        if (mactionNum < mbaseObjPtr.activate.count) {
-            return mGetObjectActionPtr(mbaseObjPtr.activate.start + mactionNum);
+        if (mactionNum < base->activate.count) {
+            return mGetObjectActionPtr(base->activate.start + mactionNum);
         }
     } else if (mactionType == kArriveActionType) {
-        if (mactionNum < mbaseObjPtr.arrive.count) {
-            return mGetObjectActionPtr(mbaseObjPtr.arrive.start + mactionNum);
+        if (mactionNum < base->arrive.count) {
+            return mGetObjectActionPtr(base->arrive.start + mactionNum);
         }
     }
     return nullptr;
 }
 
 void AddBaseObjectActionMedia(
-        Handle<BaseObject> whichBase, int32_t whichType, uint8_t color, uint32_t all_colors) {
+        Handle<BaseObject> base, int32_t whichType, uint8_t color, uint32_t all_colors) {
     for (int count = 0; ; ++count) {
-        const BaseObject& baseObject = *whichBase;
-        auto* action = mGetActionFromBaseTypeNum(baseObject, whichType, count);
+        auto* action = mGetActionFromBaseTypeNum(base, whichType, count);
         if (!action) {
             break;
         }
@@ -218,7 +216,7 @@ void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors
                 case kAlterOwner:
                     for (int32_t i = 0; i < globals()->maxBaseObject; i++) {
                         auto baseObject = Handle<BaseObject>(i);
-                        if (action_filter_applies_to(*action, *baseObject)) {
+                        if (action_filter_applies_to(*action, baseObject)) {
                             baseObject->internalFlags |= all_colors;
                         }
                         if (baseObject->internalFlags & kAnyColorLoadedFlag) {

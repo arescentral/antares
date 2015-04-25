@@ -288,11 +288,11 @@ void RemoveAllSpaceObjects( void)
 void CorrectAllBaseObjectColor( void)
 
 {
-    BaseObject*     aBase = gBaseObjectData.get();
     int16_t         i;
 
     for ( i = 0; i < globals()->maxBaseObject; i++)
     {
+        auto aBase = Handle<BaseObject>(i);
         if (( aBase->shieldColor != 0xFF) && ( aBase->shieldColor != 0))
         {
             aBase->shieldColor = GetTranslateColorShade(aBase->shieldColor, 15);
@@ -317,7 +317,6 @@ void CorrectAllBaseObjectColor( void)
             aBase->frame.animation.frameShape = mLongToFixed(aBase->frame.animation.frameShape);
             aBase->frame.animation.frameShapeRange = mLongToFixed(aBase->frame.animation.frameShapeRange);
         }
-        aBase++;
     }
 
 }
@@ -471,9 +470,8 @@ SpaceObject::SpaceObject(
 //
 
 void ChangeObjectBaseType(
-        SpaceObject *obj, Handle<BaseObject> type, int32_t spriteIDOverride,
+        SpaceObject *obj, Handle<BaseObject> base, int32_t spriteIDOverride,
         bool relative) {
-    BaseObject*     base = type.get();
     int16_t         angle;
     int32_t         r;
     NatePixTable* spriteTable;
@@ -490,8 +488,8 @@ void ChangeObjectBaseType(
     obj->attributes =
         base->attributes
         | (obj->attributes & (kIsHumanControlled | kIsRemote | kIsPlayerShip | kStaticDestination));
-    obj->baseType = base;
-    obj->base = type;
+    obj->baseType = base.get();
+    obj->base = base;
     obj->tinySize = base->tinySize;
     obj->shieldColor = base->shieldColor;
     obj->layer = base->pixLayer;
@@ -625,9 +623,8 @@ SpaceObject* CreateAnySpaceObject(
     }
 
 #ifdef DATA_COVERAGE
-    covered_objects.insert(whichBase);
-    auto* base = mGetBaseObjectPtr(whichBase);
-    for (int32_t weapon: {base->pulse.base, base->beam.base, base->special.base}) {
+    covered_objects.insert(whichBase.number());
+    for (auto weapon: {whichBase->pulse.base, whichBase->beam.base, whichBase->special.base}) {
         if (!weapon.get()) {
             covered_objects.insert(weapon.number());
         }

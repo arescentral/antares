@@ -550,7 +550,6 @@ bool PlayerShip::active() const {
 
 void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_message) {
     SpaceObject *theShip = NULL, *selectShip = NULL;
-    BaseObject*     baseObject = NULL;
     uint32_t        attributes;
 
     if (globals()->gPlayerShipNumber < 0) {
@@ -663,8 +662,6 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
     if (!(theShip->attributes & kIsHumanControlled)) {
         return;
     }
-
-    baseObject = theShip->baseType;
 
     minicomputer_handle_keys(gTheseKeys, gLastKeys, false);
 

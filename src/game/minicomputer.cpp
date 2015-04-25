@@ -298,7 +298,7 @@ void ClearMiniScreenLines() {
         c->selectable = cannotSelect;
         c->underline = false;
         c->lineKind = plainLineKind;
-        c->sourceData = NULL;
+        c->sourceData = BaseObject::none();
         c++;
     }
 }
@@ -719,7 +719,6 @@ void UpdateMiniScreenLines( void)
 
 {
     miniScreenLineType  *line = NULL;
-    BaseObject*         buildObject = NULL;
     int32_t                lineNum, count;
     Rect                mRect;
 
@@ -748,9 +747,8 @@ void UpdateMiniScreenLines( void)
 
                 for ( count = 0; count < kMaxShipCanBuild; count++)
                 {
-                    buildObject = line->sourceData;
-                    if ( buildObject != NULL)
-                    {
+                    auto buildObject = line->sourceData;
+                    if (buildObject.get()) {
                         if ( buildObject->price > mFixedToLong(admiral->cash()))
                         {
                             if ( line->selectable != selectDim)
@@ -1234,7 +1232,6 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 // also sets up the values = base object num
 
 {
-    BaseObject*         buildObject = NULL;
     destBalanceType     *buildAtObject = NULL;
     miniScreenLineType  *line = NULL;
     int32_t                count, lineNum, buildAtObjectNum;
@@ -1265,7 +1262,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
                 auto buildObject = mGetBaseObjectFromClassRace(
                         buildAtObject->canBuildType[count], admiral->race());
                 line->value = buildObject.number();
-                line->sourceData = buildObject.get();
+                line->sourceData = buildObject;
                 if (buildObject.get()) {
                     mCopyBlankLineString(line, get_object_name(buildObject));
                     if ( buildObject->price > mFixedToLong(admiral->cash()))

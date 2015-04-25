@@ -69,10 +69,11 @@ enum {
     kNeutralColor   = SKY_BLUE,
 };
 
-uint32_t ThinkObjectNormalPresence( SpaceObject *, BaseObject *, int32_t);
+uint32_t ThinkObjectNormalPresence(
+        SpaceObject *anObject, Handle<BaseObject> baseObject, int32_t timePass);
 uint32_t ThinkObjectWarpingPresence( SpaceObject *);
 uint32_t ThinkObjectWarpInPresence( SpaceObject *);
-uint32_t ThinkObjectWarpOutPresence( SpaceObject *, BaseObject *);
+uint32_t ThinkObjectWarpOutPresence(SpaceObject* anObject, Handle<BaseObject> baseObject);
 uint32_t ThinkObjectLandingPresence( SpaceObject *);
 void ThinkObjectGetCoordVector( SpaceObject *, coordPointType *, uint32_t *, int16_t *);
 void ThinkObjectGetCoordDistance( SpaceObject *, coordPointType *, uint32_t *);
@@ -192,7 +193,6 @@ void NonplayerShipThink(int32_t timePass)
 {
     Admiral*        anAdmiral;
     SpaceObject*    targetObject;
-    BaseObject*     baseObject;
     Point           offset;
     int32_t         count, difference;
     uint32_t        keysDown;
@@ -260,7 +260,7 @@ void NonplayerShipThink(int32_t timePass)
         }
 
         // get the object's base object
-        baseObject = anObject->baseType;
+        auto baseObject = anObject->base;
         anObject->targetAngle = anObject->directionGoal = anObject->direction;
 
         // incremenent its admiral's # of ships
@@ -482,7 +482,7 @@ uint32_t use_weapons_for_defense(SpaceObject* obj) {
 }
 
 uint32_t ThinkObjectNormalPresence(
-        SpaceObject *anObject, BaseObject* baseObject, int32_t timePass) {
+        SpaceObject *anObject, Handle<BaseObject> baseObject, int32_t timePass) {
     uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask, distance, dcalc;
     SpaceObject*    targetObject;
     coordPointType  dest;
@@ -996,7 +996,7 @@ uint32_t ThinkObjectWarpingPresence( SpaceObject *anObject)
     return( keysDown);
 }
 
-uint32_t ThinkObjectWarpOutPresence(SpaceObject* anObject, BaseObject* baseObject) {
+uint32_t ThinkObjectWarpOutPresence(SpaceObject* anObject, Handle<BaseObject> baseObject) {
     uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask;
     Fixed           calcv, fdist;
     fixedPointType  newVel;

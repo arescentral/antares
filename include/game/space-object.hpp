@@ -34,7 +34,7 @@ void ResetAllSpaceObjects( void);
 void RemoveAllSpaceObjects( void);
 void CorrectAllBaseObjectColor( void);
 void ChangeObjectBaseType(
-        SpaceObject *obj, Handle<BaseObject> type, int32_t spriteIDOverride, bool relative);
+        SpaceObject *obj, Handle<BaseObject> base, int32_t spriteIDOverride, bool relative);
 
 SpaceObject* CreateAnySpaceObject(
         Handle<BaseObject> whichBase, fixedPointType *velocity, coordPointType *location,
@@ -48,7 +48,6 @@ void AlterObjectCloakState( SpaceObject *, bool);
 void DestroyObject( SpaceObject *);
 void CreateFloatingBodyOfPlayer( SpaceObject *);
 
-inline BaseObject* mGetBaseObjectPtr(Handle<BaseObject> whichObject) { return whichObject.get(); }
 SpaceObject* mGetSpaceObjectPtr(int32_t whichObject);
 objectActionType* mGetObjectActionPtr(int32_t whichAction);
 

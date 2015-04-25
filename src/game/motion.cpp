@@ -170,7 +170,6 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
     int16_t                 angle;
     uint32_t                shortDist, thisDist, longDist;
     SpaceObject*            anObject;
-    BaseObject*             baseObject;
 
     if ( unitsToDo == 0) return;
 
@@ -181,7 +180,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
         {
             if ( anObject->active == kObjectInUse)
             {
-                baseObject = anObject->baseType;
+                auto baseObject = anObject->base;
 
 //              if  ( !( anObject->attributes & kIsStationary))
                 if (( anObject->maxVelocity != 0) || ( anObject->attributes & kCanTurn))
@@ -500,7 +499,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
     {
         if ( anObject->active == kObjectInUse)
         {
-            baseObject = anObject->baseType;
+            auto baseObject = anObject->base;
 
             if ( !(anObject->attributes & kIsBeam) && ( anObject->sprite != NULL))
             {

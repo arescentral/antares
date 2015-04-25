@@ -88,11 +88,11 @@ static void queue_action(
         int32_t delayTime, SpaceObject *subjectObject,
         SpaceObject *directObject, Point* offset);
 
-bool action_filter_applies_to(const objectActionType& action, const BaseObject& target) {
+bool action_filter_applies_to(const objectActionType& action, Handle<BaseObject> target) {
     if (action.exclusiveFilter == 0xffffffff) {
-        return action.levelKeyTag == target.levelKeyTag;
+        return action.levelKeyTag == target->levelKeyTag;
     } else {
-        return (action.inclusiveFilter & target.attributes) == action.inclusiveFilter;
+        return (action.inclusiveFilter & target->attributes) == action.inclusiveFilter;
     }
 }
 
