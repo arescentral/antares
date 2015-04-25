@@ -130,8 +130,8 @@ void Beams::set_attributes(SpaceObject* beamObject, SpaceObject* sourceObject) {
     beam.fromObjectID = sourceObject->id;
     beam.fromObject = sourceObject;
 
-    if (sourceObject->targetObjectNumber >= 0) {
-        SpaceObject* target = mGetSpaceObjectPtr(sourceObject->targetObjectNumber);
+    if (sourceObject->targetObject.get()) {
+        auto target = sourceObject->targetObject;
 
         if ((target->active) && (target->id == sourceObject->targetObjectID)) {
             const int32_t h = abs(implicit_cast<int32_t>(
@@ -160,7 +160,7 @@ void Beams::set_attributes(SpaceObject* beamObject, SpaceObject* sourceObject) {
                 } else {
                     beam.toObjectNumber = target->number();
                     beam.toObjectID = target->id;
-                    beam.toObject = target;
+                    beam.toObject = target.get();
                 }
             }
         } else { // target not valid

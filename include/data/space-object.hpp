@@ -469,11 +469,11 @@ class SpaceObject {
 
     uint64_t                distanceFromPlayer = 0;
     uint32_t                closestDistance = kMaximumRelevantDistanceSquared;
-    int32_t                 closestObject = kNoShip;
-    int32_t                 targetObjectNumber = kNoShip;
+    Handle<SpaceObject>     closestObject;
+    Handle<SpaceObject>     targetObject;
     int32_t                 targetObjectID = kNoShip;
     int32_t                 targetAngle = 0;
-    int32_t                 lastTarget = kNoShip;
+    Handle<SpaceObject>     lastTarget;
     int32_t                 lastTargetDistance = 0;
     int32_t                 longestWeaponRange = 0;
     int32_t                 shortestWeaponRange = 0;

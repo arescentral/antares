@@ -848,8 +848,8 @@ void DestroyObject(SpaceObject* object) {
             auto& fixObject = gSpaceObjectData[i];
             if ((fixObject.attributes & kCanAcceptDestination)
                     && (fixObject.active != kObjectAvailable)) {
-                if (fixObject.targetObjectNumber == object->number()) {
-                    fixObject.targetObjectNumber = kNoDestinationObject;
+                if (fixObject.targetObject.get() == object) {
+                    fixObject.targetObject = SpaceObject::none();
                 }
             }
         }

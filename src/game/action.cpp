@@ -164,9 +164,9 @@ static void create_object(
             }
             product->attributes = save_attributes;
         }
-        product->targetObjectNumber = focus->targetObjectNumber;
+        product->targetObject = focus->targetObject;
         product->targetObjectID = focus->targetObjectID;
-        product->closestObject = product->targetObjectNumber;
+        product->closestObject = product->targetObject;
 
         //  ugly though it is, we have to fill in the rest of
         //  a new beam's fields after it's created.
@@ -254,7 +254,7 @@ static void die(objectActionType* action, SpaceObject* focus, SpaceObject* subje
 }
 
 static void nil_target(objectActionType* action, SpaceObject* focus) {
-    focus->targetObjectNumber = kNoShip;
+    focus->targetObject = SpaceObject::none();
     focus->targetObjectID = kNoShip;
     focus->lastTarget = kNoShip;
 }
