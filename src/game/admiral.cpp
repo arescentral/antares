@@ -79,7 +79,7 @@ void ResetAllDestObjectData() {
         d->whichObject = kDestNoObject;
         d->name.clear();
         d->earn = d->totalBuildTime = d->buildTime = 0;
-        d->buildObjectBaseNum = kNoShip;
+        d->buildObjectBaseNum = BaseObject::none();
         for (int j = 0; j < kMaxTypeBaseCanBuild; ++j) {
             d->canBuildType[j] = kNoShip;
         }
@@ -201,7 +201,7 @@ void RemoveDestination(int32_t whichDestination) {
         d->whichObject = kDestNoObject;
         d->name.clear();
         d->earn = d->totalBuildTime = d->buildTime = 0;
-        d->buildObjectBaseNum = kNoShip;
+        d->buildObjectBaseNum = BaseObject::none();
         for (int i = 0; i < kMaxTypeBaseCanBuild; i++) {
             d->canBuildType[i] = kNoShip;
         }
@@ -215,15 +215,13 @@ void RemoveDestination(int32_t whichDestination) {
 void RecalcAllAdmiralBuildData() {
     Admiral* a = gAdmiralData.get();
     SpaceObject* anObject= NULL;
-    BaseObject* baseObject = NULL;
     destBalanceType* d = mGetDestObjectBalancePtr(0);
-    int32_t l;
 
     // first clear all the data
     for (int i = 0; i < kMaxPlayerNum; i++) {
         for (int j = 0; j < kMaxNumAdmiralCanBuild; j++) {
             a->canBuildType()[j].baseNum = -1;
-            a->canBuildType()[j].base = NULL;
+            a->canBuildType()[j].base = BaseObject::none();
             a->canBuildType()[j].chanceRange = -1;
         }
         a->totalBuildChance() = 0;
@@ -244,8 +242,7 @@ void RecalcAllAdmiralBuildData() {
                             j++;
                         }
                         if (j == kMaxNumAdmiralCanBuild) {
-                            l = mGetBaseObjectFromClassRace(d->canBuildType[k], a->race());
-                            baseObject = mGetBaseObjectPtr(l);
+                            auto baseObject = mGetBaseObjectFromClassRace(d->canBuildType[k], a->race());
                             j = 0;
                             while ((a->canBuildType()[j].baseNum != -1)
                                     && (j < kMaxNumAdmiralCanBuild)) {
@@ -257,7 +254,7 @@ void RecalcAllAdmiralBuildData() {
                             a->canBuildType()[j].baseNum = d->canBuildType[k];
                             a->canBuildType()[j].base = baseObject;
                             a->canBuildType()[j].chanceRange = a->totalBuildChance();
-                            if (baseObject != NULL) {
+                            if (baseObject.get()) {
                                 a->totalBuildChance() += baseObject->buildRatio;
                             }
                         }
@@ -653,18 +650,17 @@ void RemoveObjectFromDestination(SpaceObject* o) {
 
 // assumes you can afford it & base has time
 static void AdmiralBuildAtObject(
-        Handle<Admiral> admiral, int32_t baseTypeNum, int32_t whichDestObject) {
+        Handle<Admiral> admiral, Handle<BaseObject> base, int32_t whichDestObject) {
     destBalanceType* buildAtDest = mGetDestObjectBalancePtr(whichDestObject);
     SpaceObject* buildAtObject = NULL;
     coordPointType  coord;
     fixedPointType  v = {0, 0};
 
-    if ((baseTypeNum >= 0) && (admiral->buildAtObject() >= 0)) {
+    if (base.get() && (admiral->buildAtObject() >= 0)) {
         buildAtObject = mGetSpaceObjectPtr(buildAtDest->whichObject);
         coord = buildAtObject->location;
 
-        SpaceObject* newObject = CreateAnySpaceObject(
-                baseTypeNum, &v, &coord, 0, admiral, 0, -1);
+        SpaceObject* newObject = CreateAnySpaceObject(base, &v, &coord, 0, admiral, 0, -1);
         if (newObject) {
             SetObjectDestination(newObject, NULL);
             if (admiral == globals()->gPlayerAdmiral) {
@@ -685,10 +681,10 @@ void AdmiralThink() {
         destBalance->buildTime -= 10;
         if (destBalance->buildTime <= 0) {
             destBalance->buildTime = 0;
-            if (destBalance->buildObjectBaseNum != kNoShip) {
+            if (destBalance->buildObjectBaseNum.get()) {
                 anObject = mGetSpaceObjectPtr(destBalance->whichObject);
                 AdmiralBuildAtObject(anObject->owner, destBalance->buildObjectBaseNum, i);
-                destBalance->buildObjectBaseNum = kNoShip;
+                destBalance->buildObjectBaseNum = BaseObject::none();
             }
         }
 
@@ -711,9 +707,8 @@ void Admiral::think() {
     SpaceObject* otherDestObject;
     SpaceObject* stepObject;
     destBalanceType* destBalance;
-    int32_t origObject, origDest, baseNum, difference;
+    int32_t origObject, origDest, difference;
     Fixed  friendValue, foeValue, thisValue;
-    BaseObject* baseObject;
     Point gridLoc;
 
     if (!(_attributes & kAIsComputer) || (_attributes & kAIsRemote)) {
@@ -1093,14 +1088,13 @@ void Admiral::think() {
                             }
                         }
                         if (_hopeToBuild >= 0) {
-                            baseNum = mGetBaseObjectFromClassRace(_hopeToBuild, _race);
-                            baseObject = mGetBaseObjectPtr(baseNum);
+                            auto baseObject = mGetBaseObjectFromClassRace(_hopeToBuild, _race);
                             if (baseObject->buildFlags & kSufficientEscortsExist) {
                                 for (int j = 0; j < kMaxSpaceObject; ++j) {
                                     anObject = mGetSpaceObjectPtr(j);
                                     if ((anObject->active)
                                             && (anObject->owner.get() == this)
-                                            && (anObject->base == Handle<BaseObject>(baseNum))
+                                            && (anObject->base == baseObject)
                                             && (anObject->escortStrength <
                                                 baseObject->friendDefecit)) {
                                         _hopeToBuild = -1;
@@ -1133,8 +1127,7 @@ void Admiral::think() {
                     j++;
                 }
                 if ((j < kMaxTypeBaseCanBuild) && (_hopeToBuild != kNoShip)) {
-                    baseNum = mGetBaseObjectFromClassRace(_hopeToBuild, _race);
-                    baseObject = mGetBaseObjectPtr(baseNum);
+                    auto baseObject = mGetBaseObjectFromClassRace(_hopeToBuild, _race);
                     if (_cash >= mLongToFixed(baseObject->price)) {
                         Admiral::build(j);
                         _hopeToBuild = -1;
@@ -1150,17 +1143,14 @@ void Admiral::think() {
 
 bool Admiral::build(int32_t buildWhichType) {
     destBalanceType* buildAtDest = mGetDestObjectBalancePtr(_buildAtObject);
-    BaseObject* buildBaseObject = NULL;
-    int32_t            baseNum;
 
     Handle<Admiral> self(this - gAdmiralData.get());
     GetAdmiralBuildAtObject(self);
     if ((buildWhichType >= 0)
             && (buildWhichType < kMaxTypeBaseCanBuild)
             && (_buildAtObject >= 0) && (buildAtDest->buildTime <= 0)) {
-        baseNum = mGetBaseObjectFromClassRace(buildAtDest->canBuildType[buildWhichType], _race);
-        buildBaseObject = mGetBaseObjectPtr(baseNum);
-        if ((buildBaseObject != NULL) && (buildBaseObject->price <= mFixedToLong(_cash))) {
+        auto buildBaseObject = mGetBaseObjectFromClassRace(buildAtDest->canBuildType[buildWhichType], _race);
+        if (buildBaseObject.get() && (buildBaseObject->price <= mFixedToLong(_cash))) {
             _cash -= (mLongToFixed(buildBaseObject->price));
             if (globals()->gActiveCheats[self.number()] & kBuildFastBit) {
                 buildAtDest->buildTime = 9;
@@ -1169,7 +1159,7 @@ bool Admiral::build(int32_t buildWhichType) {
                 buildAtDest->buildTime = buildBaseObject->buildTime;
                 buildAtDest->totalBuildTime = buildAtDest->buildTime;
             }
-            buildAtDest->buildObjectBaseNum = baseNum;
+            buildAtDest->buildObjectBaseNum = buildBaseObject;
             return true;
         }
     }
@@ -1181,7 +1171,7 @@ void StopBuilding(int32_t whichDestObject) {
 
     destObject = mGetDestObjectBalancePtr(whichDestObject);
     destObject->totalBuildTime = destObject->buildTime = 0;
-    destObject->buildObjectBaseNum = kNoShip;
+    destObject->buildObjectBaseNum = BaseObject::none();
 }
 
 void Admiral::pay(Fixed howMuch) {

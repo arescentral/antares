@@ -1237,7 +1237,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
     BaseObject*         buildObject = NULL;
     destBalanceType     *buildAtObject = NULL;
     miniScreenLineType  *line = NULL;
-    int32_t                count, baseNum, lineNum, buildAtObjectNum;
+    int32_t                count, lineNum, buildAtObjectNum;
     Rect                mRect;
 
     mRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
@@ -1262,14 +1262,12 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 
             for ( count = 0; count < kMaxShipCanBuild; count++)
             {
-                baseNum = mGetBaseObjectFromClassRace(
+                auto buildObject = mGetBaseObjectFromClassRace(
                         buildAtObject->canBuildType[count], admiral->race());
-                buildObject = mGetBaseObjectPtr(baseNum);
-                line->value = baseNum;
-                line->sourceData = buildObject;
-                if ( buildObject != NULL)
-                {
-                    mCopyBlankLineString(line, get_object_name(baseNum));
+                line->value = buildObject.number();
+                line->sourceData = buildObject.get();
+                if (buildObject.get()) {
+                    mCopyBlankLineString(line, get_object_name(buildObject));
                     if ( buildObject->price > mFixedToLong(admiral->cash()))
                         line->selectable = selectDim;
                     else line->selectable = selectable;

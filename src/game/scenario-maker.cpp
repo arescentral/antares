@@ -773,15 +773,11 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             if (initial->canBuild[j] != kNoClass) {
                 // check for each player
                 for (int k = 0; k < gThisScenario->playerNum; k++) {
-                    initial = gThisScenario->initial(i);
-                    baseObject = mGetBaseObjectPtr(type);
-                    int32_t newShipNum;
-                    Handle<Admiral> a(k);
-                    newShipNum = mGetBaseObjectFromClassRace(
+                    auto a = Handle<Admiral>(k);
+                    auto baseObject = mGetBaseObjectFromClassRace(
                             initial->canBuild[j], GetAdmiralRace(a));
-                    baseObject = mGetBaseObjectPtr(newShipNum);
-                    if (baseObject != NULL) {
-                        AddBaseObjectMedia(newShipNum, GetAdmiralColor(a), all_colors);
+                    if (baseObject.get()) {
+                        AddBaseObjectMedia(baseObject, GetAdmiralColor(a), all_colors);
                     }
                 }
             }

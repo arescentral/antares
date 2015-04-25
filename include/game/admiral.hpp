@@ -74,12 +74,12 @@ struct destBalanceType {
     Fixed               earn;
     int32_t             buildTime;
     int32_t             totalBuildTime;
-    int32_t             buildObjectBaseNum;
+    Handle<BaseObject>  buildObjectBaseNum;
     sfz::String         name;
 };
 
 struct admiralBuildType {
-    BaseObject*         base = nullptr;
+    Handle<BaseObject>  base;
     int32_t             baseNum = -1;
     Fixed               chanceRange = -1;
 };

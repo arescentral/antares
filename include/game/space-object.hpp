@@ -52,7 +52,7 @@ inline BaseObject* mGetBaseObjectPtr(Handle<BaseObject> whichObject) { return wh
 SpaceObject* mGetSpaceObjectPtr(int32_t whichObject);
 objectActionType* mGetObjectActionPtr(int32_t whichAction);
 
-int32_t mGetBaseObjectFromClassRace(int class_, int race);
+Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, int race);
 
 sfz::StringSlice get_object_name(Handle<BaseObject> id);
 sfz::StringSlice get_object_short_name(Handle<BaseObject> id);
