@@ -805,29 +805,29 @@ void CollideSpaceObjects() {
                         continue;
                     }
 
-                    SpaceObject* sObject;
-                    SpaceObject* dObject;
+                    Handle<SpaceObject> sObject;
+                    Handle<SpaceObject> dObject;
                     if (!((bObject->attributes | aObject->attributes) & kIsBeam)) {
-                        dObject = aObject;
-                        sObject = bObject;
+                        dObject = aObject->number();
+                        sObject = bObject->number();
                         if (!((sObject->absoluteBounds.right < dObject->absoluteBounds.left) ||
                                     (sObject->absoluteBounds.left > dObject->absoluteBounds.right) ||
                                     (sObject->absoluteBounds.bottom < dObject->absoluteBounds.top) ||
                                     (sObject->absoluteBounds.top > dObject->absoluteBounds.bottom))) {
                             if (( dObject->attributes & kCanBeHit) && ( sObject->attributes & kCanCollide)) {
-                                HitObject( dObject, sObject);
+                                HitObject(dObject->number(), sObject->number());
                             }
                             if (( sObject->attributes & kCanBeHit) && ( dObject->attributes & kCanCollide)) {
-                                HitObject( sObject, dObject);
+                                HitObject(sObject->number(), dObject->number());
                             }
                         }
                     } else {
                         if (bObject->attributes & kIsBeam) {
-                            sObject = bObject;
-                            dObject = aObject;
+                            sObject = bObject->number();
+                            dObject = aObject->number();
                         } else {
-                            sObject = aObject;
-                            dObject = bObject;
+                            sObject = aObject->number();
+                            dObject = bObject->number();
                         }
 
                         int32_t xs = sObject->location.h;
@@ -886,7 +886,7 @@ void CollideSpaceObjects() {
                             }
                         }
                         if (beamHit) {
-                            HitObject(dObject, sObject);
+                            HitObject(dObject->number(), sObject->number());
                         }
                     }
 
@@ -900,14 +900,14 @@ void CollideSpaceObjects() {
                     }
 
                     // check to see if the 2 objects occupy same physical space
-                    dObject = aObject;
-                    sObject = bObject;
+                    dObject = aObject->number();
+                    sObject = bObject->number();
                     if ((sObject->absoluteBounds.right >= dObject->absoluteBounds.left)
                             && (sObject->absoluteBounds.left <= dObject->absoluteBounds.right)
                             && (sObject->absoluteBounds.bottom >= dObject->absoluteBounds.top)
                             && (sObject->absoluteBounds.top <= dObject->absoluteBounds.bottom)) {
                         // move them back till they don't touch
-                        CorrectPhysicalSpace( aObject, bObject);
+                        CorrectPhysicalSpace(aObject->number(), bObject->number());
                     }
                 }
             }
@@ -1095,7 +1095,7 @@ hackBNoEngageMatch:
 //  collide.  For keeping objects which occupy space from occupying the
 //  same space.
 
-void CorrectPhysicalSpace(SpaceObject *aObject, SpaceObject *bObject) {
+void CorrectPhysicalSpace(Handle<SpaceObject> aObject, Handle<SpaceObject> bObject) {
     int32_t    ah, av, ad, bh, bv, bd, adir = kNoDir, bdir = kNoDir,
             h, v;
     fixedPointType  tvel;

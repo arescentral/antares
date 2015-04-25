@@ -1692,7 +1692,7 @@ uint32_t ThinkObjectEngageTarget( SpaceObject *anObject, SpaceObject *targetObje
     return( keysDown);
 }
 
-void HitObject(SpaceObject *anObject, SpaceObject *sObject) {
+void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
     if (anObject->active != kObjectInUse) {
         return;
     }
@@ -1701,7 +1701,7 @@ void HitObject(SpaceObject *anObject, SpaceObject *sObject) {
     if (((anObject->_health - sObject->baseType->damage) < 0)
             && (anObject->attributes & (kIsPlayerShip | kRemoteOrHuman))
             && !anObject->baseType->destroyDontDie) {
-        CreateFloatingBodyOfPlayer( anObject);
+        CreateFloatingBodyOfPlayer(anObject.get());
     }
     anObject->alter_health(-sObject->baseType->damage);
     if (anObject->shieldColor != 0xFF) {
@@ -1722,7 +1722,7 @@ void HitObject(SpaceObject *anObject, SpaceObject *sObject) {
     }
 
     if (sObject->active == kObjectInUse) {
-        sObject->baseType->collide.run(sObject, anObject, NULL);
+        sObject->baseType->collide.run(sObject.get(), anObject.get(), NULL);
     }
 
     if (anObject->owner == globals()->gPlayerAdmiral

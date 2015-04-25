@@ -44,7 +44,7 @@ void ResetMotionGlobals();
 void MotionCleanup();
 void MoveSpaceObjects(const int32_t unitsToDo);
 void CollideSpaceObjects();
-void CorrectPhysicalSpace( SpaceObject *, SpaceObject *);
+void CorrectPhysicalSpace(Handle<SpaceObject> aObject, Handle<SpaceObject> bObject);
 
 }  // namespace antares
 

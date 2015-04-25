@@ -38,7 +38,7 @@ void fire_weapon(
 void NonplayerShipThink(int32_t);
 void UpdateMyNonplayerShip( void);
 void HackShowShipID( void);
-void HitObject( SpaceObject *, SpaceObject *);
+void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject);
 Handle<SpaceObject> GetManualSelectObject(
         Handle<SpaceObject> sourceObject, int32_t direction,
         uint32_t inclusiveAttributes, uint32_t exclusiveAttributes,
