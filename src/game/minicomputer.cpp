@@ -637,7 +637,7 @@ void minicomputer_cancel() {
 void MiniComputerHandleNull( int32_t unitsToDo)
 
 {
-    Destination*     buildAtObject = NULL;
+    Handle<Destination> buildAtObject;
     SpaceObject     *myObject = NULL, newObject;
 
     globals()->gMiniScreenData.pollTime += unitsToDo;
@@ -692,7 +692,7 @@ void MiniComputerHandleNull( int32_t unitsToDo)
 
         auto build_at = GetAdmiralBuildAtObject(globals()->gPlayerAdmiral);
         if (build_at >= 0) {
-            buildAtObject = mGetDestObjectBalancePtr(build_at);
+            buildAtObject = build_at;
             if (buildAtObject->totalBuildTime > 0) {
                 int progress = buildAtObject->buildTime * kMiniBuildTimeHeight;
                 progress /= buildAtObject->totalBuildTime;
@@ -1208,7 +1208,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 // also sets up the values = base object num
 
 {
-    Destination*        buildAtObject = NULL;
+    Handle<Destination> buildAtObject;
     miniScreenLineType  *line = NULL;
     int32_t                count, lineNum;
     Rect                mRect;
@@ -1226,7 +1226,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
         line->value = buildAtObjectNum;
 
         if (buildAtObjectNum >= 0) {
-            buildAtObject = mGetDestObjectBalancePtr( buildAtObjectNum);
+            buildAtObject = buildAtObjectNum;
             mCopyBlankLineString( line, buildAtObject->name);
 
             line = globals()->gMiniScreenData.lineData.get() + kBuildScreenFirstTypeLine;

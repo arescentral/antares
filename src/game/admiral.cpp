@@ -150,12 +150,12 @@ static Handle<Destination> next_free_destination() {
     return Destination::none();
 }
 
-int32_t MakeNewDestination(
+Handle<Destination> MakeNewDestination(
         Handle<SpaceObject> object, int32_t* canBuildType, Fixed earn, int16_t nameResID,
         int16_t nameStrNum) {
     auto d = next_free_destination();
     if (!d.get()) {
-        return -1;
+        return Destination::none();
     }
 
     d->whichObject = object;
@@ -190,7 +190,7 @@ int32_t MakeNewDestination(
         }
     }
 
-    return d.number();
+    return d;
 }
 
 void Admiral::remove_destination(Handle<Destination> d) {
@@ -673,7 +673,6 @@ void Admiral::think() {
     Handle<SpaceObject> stepObject;
     Handle<SpaceObject> origDest;
     Handle<SpaceObject> origObject;
-    Destination* destBalance;
     int32_t difference;
     Fixed  friendValue, foeValue, thisValue;
     Point gridLoc;
@@ -1016,7 +1015,7 @@ void Admiral::think() {
             _buildAtObject = 0;
         }
         origDest = _buildAtObject;
-        destBalance = mGetDestObjectBalancePtr(_buildAtObject);
+        Destination* destBalance = mGetDestObjectBalancePtr(_buildAtObject);
 
         // try to find the next destination object that we own & that can build
         do {

@@ -537,18 +537,15 @@ bool Scenario::Condition::is_true() const {
             return !IsPlayerShipOnAutoPilot();
             break;
 
-        case kObjectIsBeingBuilt:
-            {
-                Destination* buildAtObject = NULL;
-
-                buildAtObject = mGetDestObjectBalancePtr(GetAdmiralBuildAtObject(globals()->gPlayerAdmiral));
-                if (buildAtObject != NULL) {
-                    if (buildAtObject->totalBuildTime > 0) {
-                        return true;
-                    }
+        case kObjectIsBeingBuilt: {
+            auto buildAtObject = Handle<Destination>(GetAdmiralBuildAtObject(globals()->gPlayerAdmiral));
+            if (buildAtObject.get()) {
+                if (buildAtObject->totalBuildTime > 0) {
+                    return true;
                 }
             }
             break;
+        }
 
         case kDirectIsSubjectTarget:
             sObject = GetObjectFromInitialNumber(subjectObject);
@@ -834,7 +831,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         if (anObject->attributes & kIsDestination) {
             anObject->destinationObject = MakeNewDestination(
                     newShipNum, initial->canBuild, initial->earning, initial->nameResID,
-                    initial->nameStrNum);
+                    initial->nameStrNum).number();
         }
         initial->realObjectID = anObject->id;
 
@@ -982,7 +979,7 @@ void UnhideInitialObject(int32_t whichInitial) {
     if (anObject->attributes & kIsDestination) {
         anObject->destinationObject = MakeNewDestination(
                 newShipNum, initial->canBuild, initial->earning, initial->nameResID,
-                initial->nameStrNum);
+                initial->nameStrNum).number();
 
         if (owner.get()) {
             if (initial->canBuild[0] >= 0) {

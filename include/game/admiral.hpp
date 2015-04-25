@@ -182,7 +182,7 @@ void ResetAllDestObjectData();
 
 inline Destination* mGetDestObjectBalancePtr(Handle<Destination> d) { return d.get(); }
 
-int32_t MakeNewDestination(
+Handle<Destination> MakeNewDestination(
         Handle<SpaceObject> object, int32_t* canBuildType, Fixed earn, int16_t nameResID,
         int16_t nameStrNum);
 void RemoveDestination(Handle<Destination> d);
