@@ -604,7 +604,7 @@ uint32_t ThinkObjectNormalPresence(
                 }
             }
 
-            if (anObject->targetObject == Handle<SpaceObject>(anObject->destinationObject)) {
+            if (anObject->targetObject == anObject->destObject) {
                 if (distance < static_cast<uint32_t>(baseObject->arriveActionDistance)) {
                     if (baseObject->arrive.start >= 0) {
                         if (!(anObject->runTimeFlags & kHasArrived)) {
@@ -671,7 +671,7 @@ uint32_t ThinkObjectNormalPresence(
             }
             ///--->>> END TARGETING <<<---///
             if ((anObject->attributes & kIsDestination)
-                    || ((anObject->destinationObject == kNoDestinationObject)
+                    || (!anObject->destObject.get()
                         && (anObject->destinationLocation.h == kNoDestinationCoord))) {
                 if (anObject->attributes & kOnAutoPilot) {
                     TogglePlayerAutoPilot(anObject.get());
@@ -679,8 +679,8 @@ uint32_t ThinkObjectNormalPresence(
                 keysDown |= kDownKey;
                 anObject->timeFromOrigin = 0;
             } else {
-                if (anObject->destinationObject != kNoDestinationObject) {
-                    targetObject = Handle<SpaceObject>(anObject->destinationObject);
+                if (anObject->destObject.get()) {
+                    targetObject = anObject->destObject;
                     if (targetObject.get()
                             && targetObject->active
                             && (targetObject->id == anObject->destObjectID)) {
@@ -697,7 +697,7 @@ uint32_t ThinkObjectNormalPresence(
                             dest.v =
                                 anObject->destinationLocation.v;
                         }
-                        anObject->destObjectDest = targetObject->destinationObject;
+                        anObject->destObjectDest = targetObject->destObject;
                         anObject->destObjectDestID = targetObject->destObjectID;
                     } else {
                         anObject->duty = eNoDuty;
@@ -705,16 +705,16 @@ uint32_t ThinkObjectNormalPresence(
                         if (!targetObject.get()) {
                             keysDown |= kDownKey;
                             anObject->destObjectDest = kNoDestinationObject;
-                            anObject->destinationObject = kNoDestinationObject;
+                            anObject->destObject = kNoDestinationObject;
                             dest.h = anObject->location.h;
                             dest.v = anObject->location.v;
                             if (anObject->attributes & kOnAutoPilot) {
                                 TogglePlayerAutoPilot(anObject.get());
                             }
                         } else {
-                            anObject->destinationObject = anObject->destObjectDest;
-                            if (anObject->destinationObject != kNoDestinationObject) {
-                                targetObject = Handle<SpaceObject>(anObject->destinationObject);
+                            anObject->destObject = anObject->destObjectDest;
+                            if (anObject->destObject.get()) {
+                                targetObject = anObject->destObject;
                                 if (targetObject->id != anObject->destObjectDestID) {
                                     targetObject = SpaceObject::none();
                                 }
@@ -724,14 +724,14 @@ uint32_t ThinkObjectNormalPresence(
                             if (targetObject.get()) {
                                 anObject->destObjectPtr = targetObject.get();
                                 anObject->destObjectID = targetObject->id;
-                                anObject->destObjectDest = targetObject->destinationObject;
+                                anObject->destObjectDest = targetObject->destObject;
                                 anObject->destObjectDestID = targetObject->destObjectID;
                                 dest.h = targetObject->location.h;
                                 dest.v = targetObject->location.v;
                             } else {
                                 anObject->duty = eNoDuty;
                                 keysDown |= kDownKey;
-                                anObject->destinationObject = kNoDestinationObject;
+                                anObject->destObject = kNoDestinationObject;
                                 anObject->destObjectDest = kNoDestinationObject;
                                 anObject->destObjectPtr = NULL;
                                 dest.h = anObject->location.h;
@@ -1045,7 +1045,7 @@ uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
     // we repeat an object's normal action for having a destination
 
     if ((anObject->attributes & kIsDestination)
-            || ((anObject->destinationObject == kNoDestinationObject)
+            || (!anObject->destObject.get()
                 && (anObject->destinationLocation.h == kNoDestinationCoord))) {
         if (anObject->attributes & kOnAutoPilot) {
             TogglePlayerAutoPilot(anObject.get());
@@ -1054,8 +1054,8 @@ uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
         distance = 0;
     } else {
         coordPointType dest;
-        if (anObject->destinationObject != kNoDestinationObject) {
-            target = Handle<SpaceObject>(anObject->destinationObject);
+        if (anObject->destObject.get()) {
+            target = anObject->destObject;
             if (target.get() && target->active && (target->id == anObject->destObjectID)) {
                 if (target->seenByPlayerFlags & anObject->myPlayerFlag) {
                     dest.h = target->location.h;
@@ -1066,21 +1066,21 @@ uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
                     dest.h = anObject->destinationLocation.h;
                     dest.v = anObject->destinationLocation.v;
                 }
-                anObject->destObjectDest = target->destinationObject;
+                anObject->destObjectDest = target->destObject;
                 anObject->destObjectDestID = target->destObjectID;
             } else {
                 anObject->duty = eNoDuty;
                 anObject->attributes &= ~kStaticDestination;
                 if (!target.get()) {
                     keysDown |= kDownKey;
-                    anObject->destinationObject = kNoDestinationObject;
+                    anObject->destObject = kNoDestinationObject;
                     anObject->destObjectDest = kNoDestinationObject;
                     dest.h = anObject->location.h;
                     dest.v = anObject->location.v;
                 } else {
-                    anObject->destinationObject = anObject->destObjectDest;
-                    if (anObject->destinationObject != kNoDestinationObject) {
-                        target = Handle<SpaceObject>(anObject->destinationObject);
+                    anObject->destObject = anObject->destObjectDest;
+                    if (anObject->destObject.get()) {
+                        target = anObject->destObject;
                         if (target->id != anObject->destObjectDestID) {
                             target = SpaceObject::none();
                         }
@@ -1090,13 +1090,13 @@ uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
                     if (target.get()) {
                         anObject->destObjectPtr = target.get();
                         anObject->destObjectID = target->id;
-                        anObject->destObjectDest = target->destinationObject;
+                        anObject->destObjectDest = target->destObject;
                         anObject->destObjectDestID = target->destObjectID;
                         dest.h = target->location.h;
                         dest.v = target->location.v;
                     } else {
                         keysDown |= kDownKey;
-                        anObject->destinationObject = kNoDestinationObject;
+                        anObject->destObject = kNoDestinationObject;
                         anObject->destObjectDest = kNoDestinationObject;
                         anObject->destObjectPtr = NULL;
                         dest.h = anObject->location.h;
@@ -1272,10 +1272,9 @@ void ThinkObjectResolveDestination(
         Handle<SpaceObject> anObject, coordPointType *dest, Handle<SpaceObject>* targetObject) {
     *targetObject = SpaceObject::none();
 
-    if (( anObject->attributes & kIsDestination) ||
-        (( anObject->destinationObject == kNoDestinationObject) &&
-        ( anObject->destinationLocation.h == kNoDestinationCoord)))
-    {
+    if ((anObject->attributes & kIsDestination)
+            || ((!anObject->destObject.get())
+                && (anObject->destinationLocation.h == kNoDestinationCoord))) {
         if (anObject->attributes & kOnAutoPilot)
         {
             TogglePlayerAutoPilot(anObject.get());
@@ -1284,9 +1283,8 @@ void ThinkObjectResolveDestination(
         dest->v = anObject->location.v;
     } else
     {
-        if ( anObject->destinationObject != kNoDestinationObject)
-        {
-            *targetObject = Handle<SpaceObject>(anObject->destinationObject);
+        if (anObject->destObject.get()) {
+            *targetObject = anObject->destObject;
             if ((*targetObject).get()
                     && ((*targetObject)->active)
                     && ((*targetObject)->id == anObject->destObjectID)) {
@@ -1302,26 +1300,23 @@ void ThinkObjectResolveDestination(
                     dest->h = anObject->destinationLocation.h;
                     dest->v = anObject->destinationLocation.v;
                 }
-                anObject->destObjectDest =
-                    (*targetObject)->destinationObject;
+                anObject->destObjectDest = (*targetObject)->destObject;
                 anObject->destObjectDestID = (*targetObject)->destObjectID;
             } else
             {
                 anObject->duty = eNoDuty;
                 anObject->attributes &= ~kStaticDestination;
                 if (!(*targetObject).get()) {
-                    anObject->destinationObject = kNoDestinationObject;
+                    anObject->destObject = kNoDestinationObject;
                     anObject->destObjectDest = kNoDestinationObject;
                     dest->h = anObject->location.h;
                     dest->v = anObject->location.v;
                 } else
                 {
-                    anObject->destinationObject =
-                        anObject->destObjectDest;
-                    if ( anObject->destinationObject !=
-                        kNoDestinationObject)
+                    anObject->destObject = anObject->destObjectDest;
+                    if (anObject->destObject.get())
                     {
-                        (*targetObject) = Handle<SpaceObject>(anObject->destinationObject);
+                        (*targetObject) = anObject->destObject;
                         if ((*targetObject)->id != anObject->destObjectDestID) {
                             *targetObject = SpaceObject::none();
                         }
@@ -1331,16 +1326,14 @@ void ThinkObjectResolveDestination(
                     if ((*targetObject).get()) {
                         anObject->destObjectPtr = (*targetObject).get();
                         anObject->destObjectID = (*targetObject)->id;
-                        anObject->destObjectDest =
-                            (*targetObject)->destinationObject;
+                        anObject->destObjectDest = (*targetObject)->destObject;
                         anObject->destObjectDestID = (*targetObject)->destObjectID;
                         dest->h = (*targetObject)->location.h;
                         dest->v = (*targetObject)->location.v;
                     } else
                     {
                         anObject->duty = eNoDuty;
-                        anObject->destinationObject =
-                            kNoDestinationObject;
+                        anObject->destObject = kNoDestinationObject;
                         anObject->destObjectDest = kNoDestinationObject;
                         anObject->destObjectPtr = NULL;
                         dest->h = anObject->location.h;

@@ -884,7 +884,7 @@ void SetPlayerSelectShip(
             PlayVolumeSound(
                     kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
             if (selectShip->attributes & kIsDestination) {
-                String string(GetDestBalanceName(selectShip->destinationObject));
+                String string(GetDestBalanceName(selectShip->asDestination));
                 print(string, hot_key_suffix(selectShip));
                 Labels::set_string(gDestinationLabel, string);
             } else {
@@ -907,7 +907,7 @@ void SetPlayerSelectShip(
             PlayVolumeSound(
                     kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
             if (selectShip->attributes & kIsDestination) {
-                String string(GetDestBalanceName(selectShip->destinationObject));
+                String string(GetDestBalanceName(selectShip->asDestination));
                 print(string, hot_key_suffix(selectShip));
                 Labels::set_string(globals()->gSelectionLabel, string);
             } else {
@@ -1099,7 +1099,7 @@ void Update_LabelStrings_ForHotKeyChange( void)
             Labels::set_age(gDestinationLabel, Labels::kVisibleTime);
         }
         if (target->attributes & kIsDestination) {
-            String string(GetDestBalanceName(target->destinationObject));
+            String string(GetDestBalanceName(target->asDestination));
             print(string, hot_key_suffix(target));
             Labels::set_string(gDestinationLabel, string);
         } else {
@@ -1118,7 +1118,7 @@ void Update_LabelStrings_ForHotKeyChange( void)
         PlayVolumeSound(
                 kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
         if (control->attributes & kIsDestination) {
-            String string(GetDestBalanceName(control->destinationObject));
+            String string(GetDestBalanceName(control->asDestination));
             print(string, hot_key_suffix(control));
             Labels::set_string(globals()->gSelectionLabel, string);
         } else {

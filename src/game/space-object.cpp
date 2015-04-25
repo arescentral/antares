@@ -771,7 +771,7 @@ void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message) 
 
     for (int32_t i = 0; i < kMaxSpaceObject; i++) {
         auto& fixObject = gSpaceObjectData[i];
-        if ((fixObject.destinationObject == object->number())
+        if ((fixObject.destObject.get() == object)
                 && (fixObject.active != kObjectAvailable)
                 && (fixObject.attributes & kCanThink)) {
             fixObject.currentTargetValue = 0xffffffff;
@@ -786,12 +786,11 @@ void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message) 
 
     if (object->attributes & kIsDestination) {
         if (object->attributes & kNeutralDeath) {
-            ClearAllOccupants(
-                    object->destinationObject, owner, object->baseType->initialAgeRange);
+            ClearAllOccupants(object->asDestination, owner, object->baseType->initialAgeRange);
         }
-        StopBuilding(object->destinationObject);
+        StopBuilding(object->asDestination);
         if (message) {
-            String destination_name(GetDestBalanceName(object->destinationObject));
+            String destination_name(GetDestBalanceName(object->asDestination));
             if (owner.get()) {
                 String new_owner_name(GetAdmiralName(object->owner));
                 Messages::add(format("{0} captured by {1}.", destination_name, new_owner_name));
@@ -820,7 +819,7 @@ void AlterObjectOccupation(
     if (object->active
             && (object->attributes & kIsDestination)
             && (object->attributes & kNeutralDeath)) {
-        if (AlterDestinationObjectOccupation(object->destinationObject, owner, howMuch)
+        if (AlterDestinationObjectOccupation(object->asDestination, owner, howMuch)
                 >= object->baseType->initialAgeRange) {
             AlterObjectOwner(object, owner, message);
         }
@@ -873,13 +872,13 @@ void DestroyObject(SpaceObject* object) {
         // (all at once since this should be very rare)
         if ((object->attributes & kIsDestination) &&
                 !object->baseType->destroyDontDie) {
-            RemoveDestination(object->destinationObject);
+            RemoveDestination(object->asDestination);
             for (int16_t i = 0; i < kMaxSpaceObject; i++) {
                 auto& fixObject = gSpaceObjectData[i];
                 if ((fixObject.attributes & kCanAcceptDestination)
                         && (fixObject.active != kObjectAvailable)) {
-                    if (fixObject.destinationObject == object->number()) {
-                        fixObject.destinationObject = kNoDestinationObject;
+                    if (fixObject.destObject.get() == object) {
+                        fixObject.destObject = kNoDestinationObject;
                         fixObject.destObjectPtr = NULL;
                         fixObject.attributes &= ~kStaticDestination;
                     }

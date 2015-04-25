@@ -157,8 +157,8 @@ static void create_object(
                 product->destObjectPtr = focus;
                 product->timeFromOrigin = kTimeToCheckHome;
                 product->runTimeFlags &= ~kHasArrived;
-                product->destinationObject = focus->number(); //a->destinationObject;
-                product->destObjectDest = focus->destinationObject;
+                product->destObject = focus->number(); //a->destinationObject;
+                product->destObjectDest = focus->destObject;
                 product->destObjectID = focus->id;
                 product->destObjectDestID = focus->destObjectID;
             }

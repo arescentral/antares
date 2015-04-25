@@ -416,7 +416,7 @@ StringSlice GetAdmiralName(Handle<Admiral> a) {
 void SetObjectLocationDestination(SpaceObject *o, coordPointType *where) {
     // if the object does not have an alliance, then something is wrong here--forget it
     if (o->owner.number() <= kNoOwner) {
-        o->destinationObject = kNoDestinationObject;
+        o->destObject = kNoDestinationObject;
         o->destObjectDest = kNoDestinationObject;
         o->destObjectID = -1;
         o->destObjectPtr = NULL;
@@ -446,7 +446,7 @@ void SetObjectLocationDestination(SpaceObject *o, coordPointType *where) {
 
     // if the admiral is not legal, or the admiral has no destination, then forget about it
     if (!a->active()) {
-        o->destinationObject = kNoDestinationObject;
+        o->destObject = kNoDestinationObject;
         o->destObjectDest = kNoDestinationObject;
         o->destObjectPtr = NULL;
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
@@ -462,12 +462,12 @@ void SetObjectLocationDestination(SpaceObject *o, coordPointType *where) {
         }
 
         // remove this object from its destination
-        if (o->destinationObject != kNoDestinationObject) {
+        if (o->destObject.get()) {
             RemoveObjectFromDestination(o);
         }
 
         o->destinationLocation = o->originLocation = *where;
-        o->destinationObject = kNoDestinationObject;
+        o->destObject = kNoDestinationObject;
         o->destObjectPtr = NULL;
         o->timeFromOrigin = 0;
         o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
@@ -479,7 +479,7 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
 
     // if the object does not have an alliance, then something is wrong here--forget it
     if (o->owner.number() <= kNoOwner) {
-        o->destinationObject = kNoDestinationObject;
+        o->destObject = kNoDestinationObject;
         o->destObjectDest = kNoDestinationObject;
         o->destObjectID = -1;
         o->destObjectPtr = NULL;
@@ -514,7 +514,7 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
              || !a->has_destination()
              || !a->destinationObject().get()
              || (a->destinationObjectID() == o->id))) {
-        o->destinationObject = kNoDestinationObject;
+        o->destObject = kNoDestinationObject;
         o->destObjectDest = kNoDestinationObject;
         o->destObjectPtr = NULL;
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
@@ -538,16 +538,16 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
                 o->timeFromOrigin = 0;
             }
             // remove this object from its destination
-            if (o->destinationObject != kNoDestinationObject) {
+            if (o->destObject.get()) {
                 RemoveObjectFromDestination(o);
             }
 
             // add this object to its destination
             if (o != dObject) {
                 o->runTimeFlags &= ~kHasArrived;
-                o->destinationObject = dObject->number();
+                o->destObject = dObject->number();
                 o->destObjectPtr = dObject;
-                o->destObjectDest = dObject->destinationObject;
+                o->destObjectDest = dObject->destObject;
                 o->destObjectDestID = dObject->destObjectID;
                 o->destObjectID = dObject->id;
 
@@ -576,7 +576,7 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
                     }
                 }
             } else {
-                o->destinationObject = kNoDestinationObject;
+                o->destObject = kNoDestinationObject;
                 o->destObjectDest = kNoDestinationObject;
                 o->destObjectPtr = NULL;
                 o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
@@ -585,7 +585,7 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
                 o->originLocation = o->location;
             }
         } else {
-            o->destinationObject = kNoDestinationObject;
+            o->destObject = kNoDestinationObject;
             o->destObjectDest = kNoDestinationObject;
             o->destObjectPtr = NULL;
             o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
@@ -598,7 +598,7 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
 
 void RemoveObjectFromDestination(SpaceObject* o) {
     SpaceObject* dObject = o;
-    if ((o->destinationObject != kNoDestinationObject) && (o->destObjectPtr != NULL)) {
+    if (o->destObject.get() && (o->destObjectPtr != NULL)) {
         dObject = o->destObjectPtr;
         if (dObject->id == o->destObjectID) {
             if (dObject->owner == o->owner) {
@@ -610,7 +610,7 @@ void RemoveObjectFromDestination(SpaceObject* o) {
         }
     }
 
-    o->destinationObject = kNoDestinationObject;
+    o->destObject = kNoDestinationObject;
     o->destObjectDest = kNoDestinationObject;
     o->destObjectID = -1;
     o->destObjectPtr = NULL;

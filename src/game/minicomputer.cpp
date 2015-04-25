@@ -219,8 +219,9 @@ inline void mCopyMiniSpaceObject(
     (mdestobject).special.base = (msourceobject).special.base;
     (mdestobject).destinationLocation.h = (msourceobject).destinationLocation.h;
     (mdestobject).destinationLocation.v = (msourceobject).destinationLocation.v;
-    (mdestobject).destinationObject = (msourceobject).destinationObject;
+    (mdestobject).destObject = (msourceobject).destObject;
     (mdestobject).destObjectPtr = (msourceobject).destObjectPtr;
+    (mdestobject).asDestination = (msourceobject).asDestination;
     (mdestobject)._health = (msourceobject).health();
     (mdestobject)._energy = (msourceobject).energy();
     (mdestobject).base = (msourceobject).base;
@@ -314,8 +315,9 @@ void ClearMiniObjectData( void)
     o->pulse.base = BaseObject::none();
     o->special.base = BaseObject::none();
     o->destinationLocation.h = o->destinationLocation.v = -1;
-    o->destinationObject = -1;
+    o->destObject = -1;
     o->destObjectPtr = NULL;
+    o->asDestination = -1;
     o->_health = 0;
     o->_energy = 0;
     o->base = BaseObject::none();
@@ -329,8 +331,9 @@ void ClearMiniObjectData( void)
     o->pulse.base = BaseObject::none();
     o->special.base = BaseObject::none();
     o->destinationLocation.h = o->destinationLocation.v = -1;
-    o->destinationObject = -1;
+    o->destObject = -1;
     o->destObjectPtr = NULL;
+    o->asDestination = -1;
     o->_health = 0;
     o->_energy = 0;
     o->base = BaseObject::none();
@@ -658,8 +661,9 @@ void MiniComputerHandleNull( int32_t unitsToDo)
             newObject.pulse.base = BaseObject::none();
             newObject.special.base = BaseObject::none();
             newObject.destinationLocation.h = newObject.destinationLocation.v = -1;
-            newObject.destinationObject = -1;
+            newObject.destObject = -1;
             newObject.destObjectPtr = NULL;
+            newObject.asDestination = -1;
             newObject._health = 0;
             newObject._energy = 0;
             newObject.base = BaseObject::none();
@@ -679,8 +683,9 @@ void MiniComputerHandleNull( int32_t unitsToDo)
             newObject.pulse.base = BaseObject::none();
             newObject.special.base = BaseObject::none();
             newObject.destinationLocation.h = newObject.destinationLocation.v = -1;
-            newObject.destinationObject = -1;
+            newObject.destObject = -1;
             newObject.destObjectPtr = NULL;
+            newObject.asDestination = -1;
             newObject._health = 0;
             newObject._energy = 0;
             newObject.base = BaseObject::none();
@@ -839,7 +844,7 @@ void draw_mini_ship_data(
         color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
         // move to the 1st line in the selection miniscreen
-        String text(GetDestBalanceName(newObject.destinationObject));
+        String text(GetDestBalanceName(newObject.asDestination));
         computer_font->draw_sprite(
                 Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
                 text, color);
@@ -994,7 +999,7 @@ void draw_mini_ship_data(
     lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniDestLineNum, 0, kMiniScreenWidth);
 
     // write the name
-    if (newObject.destinationObject >= 0) {
+    if (newObject.destObject.get()) {
         if (newObject.destObjectPtr != NULL) {
             SpaceObject* dObject = newObject.destObjectPtr;
 
@@ -1006,7 +1011,7 @@ void draw_mini_ship_data(
             }
 
             if (dObject->attributes & kIsDestination) {
-                String text(GetDestBalanceName(dObject->destinationObject));
+                String text(GetDestBalanceName(dObject->asDestination));
                 computer_font->draw_sprite(
                         Point(lRect.left, lRect.top + computer_font->ascent), text, color);
             } else {

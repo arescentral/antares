@@ -829,9 +829,9 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
 
         SpaceObject* anObject = mGetSpaceObjectPtr(newShipNum);
         if (anObject->attributes & kIsDestination) {
-            anObject->destinationObject = MakeNewDestination(
+            anObject->asDestination = MakeNewDestination(
                     newShipNum, initial->canBuild, initial->earning, initial->nameResID,
-                    initial->nameStrNum).number();
+                    initial->nameStrNum);
         }
         initial->realObjectID = anObject->id;
 
@@ -977,9 +977,9 @@ void UnhideInitialObject(int32_t whichInitial) {
     auto anObject = mGetSpaceObjectPtr(newShipNum);
 
     if (anObject->attributes & kIsDestination) {
-        anObject->destinationObject = MakeNewDestination(
+        anObject->asDestination = MakeNewDestination(
                 newShipNum, initial->canBuild, initial->earning, initial->nameResID,
-                initial->nameStrNum).number();
+                initial->nameStrNum);
 
         if (owner.get()) {
             if (initial->canBuild[0] >= 0) {
