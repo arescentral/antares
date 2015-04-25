@@ -121,7 +121,7 @@ class Admiral {
     Handle<SpaceObject> considerShip() { return _considerShip; }
     int32_t             considerShipID() { return _considerShipID; }
     int32_t             considerDestination() { return _considerDestination; }
-    int32_t&            buildAtObject() { return _buildAtObject; } // # of destination object to build at
+    Handle<Destination>&buildAtObject() { return _buildAtObject; } // # of destination object to build at
     int32_t&            race() { return _race; }
     Fixed               cash() const { return _cash; }
     Fixed&              cash() { return _cash; }
@@ -154,7 +154,7 @@ class Admiral {
     Handle<SpaceObject> _considerShip;
     int32_t             _considerShipID = -1;
     int32_t             _considerDestination = kNoShip;
-    int32_t             _buildAtObject = -1; // # of destination object to build at
+    Handle<Destination> _buildAtObject = -1; // # of destination object to build at
     int32_t             _race = -1;
     Fixed               _cash = 0;
     Fixed               _saveGoal = 0;

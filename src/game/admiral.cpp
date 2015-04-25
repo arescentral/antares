@@ -90,7 +90,10 @@ void ResetAllDestObjectData() {
 }
 
 Destination* Destination::get(int i) {
-    return &gDestBalanceData[i];
+    if ((0 <= i) && (i < kMaxDestObject)) {
+        return &gDestBalanceData[i];
+    }
+    return nullptr;
 }
 
 bool Destination::can_build() const {
@@ -194,8 +197,8 @@ void Admiral::remove_destination(Handle<Destination> d) {
             _considerDestination = kNoDestinationObject;
         }
 
-        if (_buildAtObject == d.number()) {
-            _buildAtObject = kNoShip;
+        if (_buildAtObject == d) {
+            _buildAtObject = Destination::none();
         }
     }
 }
@@ -331,7 +334,7 @@ void Admiral::set_control(Handle<SpaceObject> obj) {
         if (obj->attributes & kCanAcceptBuild) {
             auto d = obj->asDestination;
             if (d.get() && d->can_build()) {
-                _buildAtObject = d.number();
+                _buildAtObject = d;
             }
         }
     } else {
@@ -358,8 +361,8 @@ bool BaseHasSomethingToBuild(Handle<SpaceObject> obj) {
 }
 
 int32_t GetAdmiralBuildAtObject(Handle<Admiral> a) {
-    if (a->buildAtObject() >= 0) {
-        auto destBalance = Handle<Destination>(a->buildAtObject());
+    auto destBalance = a->buildAtObject();
+    if (destBalance.get()) {
         if (destBalance->whichObject.get()) {
             auto anObject = destBalance->whichObject;
             if (anObject->owner != a) {
@@ -369,7 +372,7 @@ int32_t GetAdmiralBuildAtObject(Handle<Admiral> a) {
             a->buildAtObject() = kNoShip;
         }
     }
-    return a->buildAtObject();
+    return a->buildAtObject().number();
 }
 
 void SetAdmiralBuildAtObject(Handle<Admiral> a, Handle<SpaceObject> obj) {
@@ -380,14 +383,14 @@ void SetAdmiralBuildAtObject(Handle<Admiral> a, Handle<SpaceObject> obj) {
         if (obj->attributes & kCanAcceptBuild) {
             auto d = obj->asDestination;
             if (d.get() && d->can_build()) {
-                a->buildAtObject() = d.number();
+                a->buildAtObject() = d;
             }
         }
     }
 }
 
 void SetAdmiralBuildAtName(Handle<Admiral> a, StringSlice name) {
-    auto destObject = Handle<Destination>(a->buildAtObject());
+    auto destObject = a->buildAtObject();
     destObject->name.assign(name.slice(0, min<size_t>(name.size(), kDestinationNameLen)));
 }
 
@@ -609,13 +612,9 @@ void RemoveObjectFromDestination(SpaceObject* o) {
 // assumes you can afford it & base has time
 static void AdmiralBuildAtObject(
         Handle<Admiral> admiral, Handle<BaseObject> base, Handle<Destination> buildAtDest) {
-    SpaceObject* buildAtObject = NULL;
-    coordPointType  coord;
     fixedPointType  v = {0, 0};
-
-    if (base.get() && (admiral->buildAtObject() >= 0)) {
-        buildAtObject = mGetSpaceObjectPtr(buildAtDest->whichObject);
-        coord = buildAtObject->location;
+    if (base.get()) {
+        auto coord = buildAtDest->whichObject->location;
 
         SpaceObject* newObject = CreateAnySpaceObject(base, &v, &coord, 0, admiral, 0, -1);
         if (newObject) {
@@ -1000,17 +999,16 @@ void Admiral::think() {
         _saveGoal = 0;
 
         // consider what ship to build
-        if (_buildAtObject < 0) {
-            _buildAtObject = 0;
+        if (!_buildAtObject.get()) {
+            _buildAtObject = Handle<Destination>(0);
         }
 
         // try to find the next destination object that we own & that can build
         auto anObject = SpaceObject::none();
-        auto begin = _buildAtObject + 1;
+        auto begin = _buildAtObject.number() + 1;
         auto end = begin + kMaxDestObject;
         for (int i = begin; i < end; ++i) {
-            _buildAtObject = i % kMaxDestObject;
-            auto d = Handle<Destination>(_buildAtObject);
+            auto d =_buildAtObject = Handle<Destination>(i % kMaxDestObject);
             if (d->whichObject.get()
                     && (d->whichObject->owner.get() == this)
                     && (d->whichObject->attributes & kCanAcceptBuild)) {
@@ -1092,23 +1090,23 @@ void Admiral::think() {
 }
 
 bool Admiral::build(int32_t buildWhichType) {
-    auto buildAtDest = Handle<Destination>(_buildAtObject);
-
+    auto dest = _buildAtObject;
     Handle<Admiral> self(this - gAdmiralData.get());
     if ((buildWhichType >= 0)
             && (buildWhichType < kMaxTypeBaseCanBuild)
-            && (_buildAtObject >= 0) && (buildAtDest->buildTime <= 0)) {
-        auto buildBaseObject = mGetBaseObjectFromClassRace(buildAtDest->canBuildType[buildWhichType], _race);
+            && (dest.get())
+            && (dest->buildTime <= 0)) {
+        auto buildBaseObject = mGetBaseObjectFromClassRace(dest->canBuildType[buildWhichType], _race);
         if (buildBaseObject.get() && (buildBaseObject->price <= mFixedToLong(_cash))) {
             _cash -= (mLongToFixed(buildBaseObject->price));
             if (globals()->gActiveCheats[self.number()] & kBuildFastBit) {
-                buildAtDest->buildTime = 9;
-                buildAtDest->totalBuildTime = 9;
+                dest->buildTime = 9;
+                dest->totalBuildTime = 9;
             } else {
-                buildAtDest->buildTime = buildBaseObject->buildTime;
-                buildAtDest->totalBuildTime = buildAtDest->buildTime;
+                dest->buildTime = buildBaseObject->buildTime;
+                dest->totalBuildTime = dest->buildTime;
             }
-            buildAtDest->buildObjectBaseNum = buildBaseObject;
+            dest->buildObjectBaseNum = buildBaseObject;
             return true;
         }
     }
