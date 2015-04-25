@@ -661,7 +661,6 @@ void Admiral::think() {
     Handle<SpaceObject> destObject;
     Handle<SpaceObject> otherDestObject;
     Handle<SpaceObject> stepObject;
-    Handle<SpaceObject> origDest;
     Handle<SpaceObject> origObject;
     int32_t difference;
     Fixed  friendValue, foeValue, thisValue;
@@ -720,7 +719,7 @@ void Admiral::think() {
             destObject = gRootObject;
             _destinationObject = gRootObject;
         }
-        origDest = _destinationObject;
+        auto origDest = _destinationObject;
         do {
             _destinationObject = destObject->nextObject;
 
@@ -1004,30 +1003,25 @@ void Admiral::think() {
         if (_buildAtObject < 0) {
             _buildAtObject = 0;
         }
-        origDest = _buildAtObject;
-        Destination* destBalance = mGetDestObjectBalancePtr(_buildAtObject);
 
         // try to find the next destination object that we own & that can build
-        do {
-            _buildAtObject++;
-            destBalance++;
-            if (_buildAtObject >= kMaxDestObject) {
-                _buildAtObject = 0;
-                destBalance = mGetDestObjectBalancePtr(0);
+        auto anObject = SpaceObject::none();
+        auto begin = _buildAtObject + 1;
+        auto end = begin + kMaxDestObject;
+        for (int i = begin; i < end; ++i) {
+            _buildAtObject = i % kMaxDestObject;
+            auto d = Handle<Destination>(_buildAtObject);
+            if (d->whichObject.get()
+                    && (d->whichObject->owner.get() == this)
+                    && (d->whichObject->attributes & kCanAcceptBuild)) {
+                anObject = d->whichObject;
+                break;
             }
-            if (destBalance->whichObject.get()) {
-                anObject = Handle<SpaceObject>(destBalance->whichObject);
-                if ((anObject->owner.get() != this)
-                        || (!(anObject->attributes & kCanAcceptBuild))) {
-                    anObject = SpaceObject::none();
-                }
-            } else {
-                anObject = SpaceObject::none();
-            }
-        } while (!anObject.get() && (_buildAtObject != origDest.number()));
+        }
 
         // if we have a legal object
         if (anObject.get()) {
+            auto destBalance = anObject->asDestination;
             if (destBalance->buildTime <= 0) {
                 if (_hopeToBuild < 0) {
                     int k = 0;

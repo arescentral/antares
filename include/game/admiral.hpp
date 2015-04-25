@@ -179,8 +179,6 @@ class Admiral {
 
 void ResetAllDestObjectData();
 
-inline Destination* mGetDestObjectBalancePtr(Handle<Destination> d) { return d.get(); }
-
 Handle<Destination> MakeNewDestination(
         Handle<SpaceObject> object, int32_t* canBuildType, Fixed earn, int16_t nameResID,
         int16_t nameStrNum);
