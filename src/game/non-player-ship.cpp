@@ -704,8 +704,8 @@ uint32_t ThinkObjectNormalPresence(
                         anObject->attributes &= ~kStaticDestination;
                         if (!targetObject.get()) {
                             keysDown |= kDownKey;
-                            anObject->destObjectDest = kNoDestinationObject;
-                            anObject->destObject = kNoDestinationObject;
+                            anObject->destObjectDest = SpaceObject::none();
+                            anObject->destObject = SpaceObject::none();
                             dest.h = anObject->location.h;
                             dest.v = anObject->location.v;
                             if (anObject->attributes & kOnAutoPilot) {
@@ -731,8 +731,8 @@ uint32_t ThinkObjectNormalPresence(
                             } else {
                                 anObject->duty = eNoDuty;
                                 keysDown |= kDownKey;
-                                anObject->destObject = kNoDestinationObject;
-                                anObject->destObjectDest = kNoDestinationObject;
+                                anObject->destObject = SpaceObject::none();
+                                anObject->destObjectDest = SpaceObject::none();
                                 anObject->destObjectPtr = NULL;
                                 dest.h = anObject->location.h;
                                 dest.v = anObject->location.v;
@@ -1073,8 +1073,8 @@ uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
                 anObject->attributes &= ~kStaticDestination;
                 if (!target.get()) {
                     keysDown |= kDownKey;
-                    anObject->destObject = kNoDestinationObject;
-                    anObject->destObjectDest = kNoDestinationObject;
+                    anObject->destObject = SpaceObject::none();
+                    anObject->destObjectDest = SpaceObject::none();
                     dest.h = anObject->location.h;
                     dest.v = anObject->location.v;
                 } else {
@@ -1096,8 +1096,8 @@ uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
                         dest.v = target->location.v;
                     } else {
                         keysDown |= kDownKey;
-                        anObject->destObject = kNoDestinationObject;
-                        anObject->destObjectDest = kNoDestinationObject;
+                        anObject->destObject = SpaceObject::none();
+                        anObject->destObjectDest = SpaceObject::none();
                         anObject->destObjectPtr = NULL;
                         dest.h = anObject->location.h;
                         dest.v = anObject->location.v;
@@ -1307,8 +1307,8 @@ void ThinkObjectResolveDestination(
                 anObject->duty = eNoDuty;
                 anObject->attributes &= ~kStaticDestination;
                 if (!(*targetObject).get()) {
-                    anObject->destObject = kNoDestinationObject;
-                    anObject->destObjectDest = kNoDestinationObject;
+                    anObject->destObject = SpaceObject::none();
+                    anObject->destObjectDest = SpaceObject::none();
                     dest->h = anObject->location.h;
                     dest->v = anObject->location.v;
                 } else
@@ -1333,8 +1333,8 @@ void ThinkObjectResolveDestination(
                     } else
                     {
                         anObject->duty = eNoDuty;
-                        anObject->destObject = kNoDestinationObject;
-                        anObject->destObjectDest = kNoDestinationObject;
+                        anObject->destObject = SpaceObject::none();
+                        anObject->destObjectDest = SpaceObject::none();
                         anObject->destObjectPtr = NULL;
                         dest->h = anObject->location.h;
                         dest->v = anObject->location.v;
@@ -1820,11 +1820,9 @@ Handle<SpaceObject> GetManualSelectObject(
                 }
             }
         }
-        whichShip = anObject->nextObject.number();
-        anObject = anObject->nextObject;
+        whichShip = anObject = anObject->nextObject;
         if (!anObject.get()) {
-            whichShip = gRootObject.number();
-            anObject = gRootObject;
+            whichShip = anObject = gRootObject;
         }
     } while (whichShip != startShip);
 

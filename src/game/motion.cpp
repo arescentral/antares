@@ -668,7 +668,7 @@ void CollideSpaceObjects() {
         if (aObject->attributes & kConsiderDistanceAttributes) {
             aObject->localFriendStrength = aObject->baseType->offenseValue;
             aObject->localFoeStrength = 0;
-            aObject->closestObject = -1;
+            aObject->closestObject = SpaceObject::none();
             aObject->closestDistance = kMaximumRelevantDistanceSquared;
             aObject->absoluteBounds.right = aObject->absoluteBounds.left = 0;
 
@@ -805,26 +805,26 @@ void CollideSpaceObjects() {
                     Handle<SpaceObject> sObject;
                     Handle<SpaceObject> dObject;
                     if (!((bObject->attributes | aObject->attributes) & kIsBeam)) {
-                        dObject = aObject->number();
-                        sObject = bObject->number();
+                        dObject = Handle<SpaceObject>(aObject->number());
+                        sObject = Handle<SpaceObject>(bObject->number());
                         if (!((sObject->absoluteBounds.right < dObject->absoluteBounds.left) ||
                                     (sObject->absoluteBounds.left > dObject->absoluteBounds.right) ||
                                     (sObject->absoluteBounds.bottom < dObject->absoluteBounds.top) ||
                                     (sObject->absoluteBounds.top > dObject->absoluteBounds.bottom))) {
                             if (( dObject->attributes & kCanBeHit) && ( sObject->attributes & kCanCollide)) {
-                                HitObject(dObject->number(), sObject->number());
+                                HitObject(dObject, sObject);
                             }
                             if (( sObject->attributes & kCanBeHit) && ( dObject->attributes & kCanCollide)) {
-                                HitObject(sObject->number(), dObject->number());
+                                HitObject(sObject, dObject);
                             }
                         }
                     } else {
                         if (bObject->attributes & kIsBeam) {
-                            sObject = bObject->number();
-                            dObject = aObject->number();
+                            sObject = Handle<SpaceObject>(bObject->number());
+                            dObject = Handle<SpaceObject>(aObject->number());
                         } else {
-                            sObject = aObject->number();
-                            dObject = bObject->number();
+                            sObject = Handle<SpaceObject>(aObject->number());
+                            dObject = Handle<SpaceObject>(bObject->number());
                         }
 
                         int32_t xs = sObject->location.h;
@@ -883,7 +883,7 @@ void CollideSpaceObjects() {
                             }
                         }
                         if (beamHit) {
-                            HitObject(dObject->number(), sObject->number());
+                            HitObject(dObject, sObject);
                         }
                     }
 
@@ -897,14 +897,16 @@ void CollideSpaceObjects() {
                     }
 
                     // check to see if the 2 objects occupy same physical space
-                    dObject = aObject->number();
-                    sObject = bObject->number();
+                    dObject = Handle<SpaceObject>(aObject->number());
+                    sObject = Handle<SpaceObject>(bObject->number());
                     if ((sObject->absoluteBounds.right >= dObject->absoluteBounds.left)
                             && (sObject->absoluteBounds.left <= dObject->absoluteBounds.right)
                             && (sObject->absoluteBounds.bottom >= dObject->absoluteBounds.top)
                             && (sObject->absoluteBounds.top <= dObject->absoluteBounds.bottom)) {
                         // move them back till they don't touch
-                        CorrectPhysicalSpace(aObject->number(), bObject->number());
+                        CorrectPhysicalSpace(
+                                Handle<SpaceObject>(aObject->number()),
+                                Handle<SpaceObject>(bObject->number()));
                     }
                 }
             }
@@ -979,7 +981,7 @@ void CollideSpaceObjects() {
 
                         if ((distance < aObject->closestDistance) && (bObject->attributes & kPotentialTarget)) {
                             aObject->closestDistance = distance;
-                            aObject->closestObject = bObject->number();
+                            aObject->closestObject = Handle<SpaceObject>(bObject->number());
                         }
 
 hackANoEngageMatch:
@@ -995,7 +997,7 @@ hackANoEngageMatch:
 
                         if (( distance < bObject->closestDistance) && ( aObject->attributes & kPotentialTarget)) {
                             bObject->closestDistance = distance;
-                            bObject->closestObject = aObject->number();
+                            bObject->closestObject = Handle<SpaceObject>(aObject->number());
                         }
 hackBNoEngageMatch:
                         bObject->localFoeStrength += aObject->localFriendStrength;

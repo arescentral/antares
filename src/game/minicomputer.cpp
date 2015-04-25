@@ -315,9 +315,9 @@ void ClearMiniObjectData( void)
     o->pulse.base = BaseObject::none();
     o->special.base = BaseObject::none();
     o->destinationLocation.h = o->destinationLocation.v = -1;
-    o->destObject = -1;
+    o->destObject = SpaceObject::none();
     o->destObjectPtr = NULL;
-    o->asDestination = -1;
+    o->asDestination = Destination::none();
     o->_health = 0;
     o->_energy = 0;
     o->base = BaseObject::none();
@@ -331,9 +331,9 @@ void ClearMiniObjectData( void)
     o->pulse.base = BaseObject::none();
     o->special.base = BaseObject::none();
     o->destinationLocation.h = o->destinationLocation.v = -1;
-    o->destObject = -1;
+    o->destObject = SpaceObject::none();
     o->destObjectPtr = NULL;
-    o->asDestination = -1;
+    o->asDestination = Destination::none();
     o->_health = 0;
     o->_energy = 0;
     o->base = BaseObject::none();
@@ -661,9 +661,9 @@ void MiniComputerHandleNull( int32_t unitsToDo)
             newObject.pulse.base = BaseObject::none();
             newObject.special.base = BaseObject::none();
             newObject.destinationLocation.h = newObject.destinationLocation.v = -1;
-            newObject.destObject = -1;
+            newObject.destObject = SpaceObject::none();
             newObject.destObjectPtr = NULL;
-            newObject.asDestination = -1;
+            newObject.asDestination = Destination::none();
             newObject._health = 0;
             newObject._energy = 0;
             newObject.base = BaseObject::none();
@@ -683,9 +683,9 @@ void MiniComputerHandleNull( int32_t unitsToDo)
             newObject.pulse.base = BaseObject::none();
             newObject.special.base = BaseObject::none();
             newObject.destinationLocation.h = newObject.destinationLocation.v = -1;
-            newObject.destObject = -1;
+            newObject.destObject = SpaceObject::none();
             newObject.destObjectPtr = NULL;
-            newObject.asDestination = -1;
+            newObject.asDestination = Destination::none();
             newObject._health = 0;
             newObject._energy = 0;
             newObject.base = BaseObject::none();
@@ -697,7 +697,7 @@ void MiniComputerHandleNull( int32_t unitsToDo)
 
         auto build_at = GetAdmiralBuildAtObject(globals()->gPlayerAdmiral);
         if (build_at >= 0) {
-            buildAtObject = build_at;
+            buildAtObject = Handle<Destination>(build_at);
             if (buildAtObject->totalBuildTime > 0) {
                 int progress = buildAtObject->buildTime * kMiniBuildTimeHeight;
                 progress /= buildAtObject->totalBuildTime;
@@ -1102,7 +1102,7 @@ void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> w
                                     mPlayBeepBad();
                                 }
                             } else {
-                                ChangePlayerShipNumber(whichAdmiral, control.number());
+                                ChangePlayerShipNumber(whichAdmiral, control);
                             }
                         } else {
                             PlayerShipBodyExpire(flagship, false);
@@ -1231,7 +1231,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
         line->value = buildAtObjectNum;
 
         if (buildAtObjectNum >= 0) {
-            buildAtObject = buildAtObjectNum;
+            buildAtObject = Handle<Destination>(buildAtObjectNum);
             mCopyBlankLineString( line, buildAtObject->name);
 
             line = globals()->gMiniScreenData.lineData.get() + kBuildScreenFirstTypeLine;

@@ -708,17 +708,18 @@ void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message) 
     object->owner = owner;
 
     if (owner.get() && (object->attributes & kIsDestination)) {
+        auto handle = Handle<SpaceObject>(object->number());
         if (!owner->control().get()) {
-            owner->set_control(object->number());
+            owner->set_control(handle);
         }
 
         if (GetAdmiralBuildAtObject(owner) < 0) {
-            if (BaseHasSomethingToBuild(object->number())) {
-                SetAdmiralBuildAtObject(owner, object->number());
+            if (BaseHasSomethingToBuild(handle)) {
+                SetAdmiralBuildAtObject(owner, handle);
             }
         }
         if (!owner->target().get()) {
-            owner->set_target(object->number());
+            owner->set_target(handle);
         }
     }
 
@@ -878,7 +879,7 @@ void DestroyObject(SpaceObject* object) {
                 if ((fixObject.attributes & kCanAcceptDestination)
                         && (fixObject.active != kObjectAvailable)) {
                     if (fixObject.destObject.get() == object) {
-                        fixObject.destObject = kNoDestinationObject;
+                        fixObject.destObject = SpaceObject::none();
                         fixObject.destObjectPtr = NULL;
                         fixObject.attributes &= ~kStaticDestination;
                     }
@@ -905,12 +906,13 @@ void CreateFloatingBodyOfPlayer(SpaceObject* obj) {
         return;
     }
 
-    auto body = CreateAnySpaceObject(
+    auto o = CreateAnySpaceObject(
             body_type, &obj->velocity, &obj->location, obj->direction, obj->owner, 0, -1);
-    if (body) {
-        ChangePlayerShipNumber(obj->owner, body->number());
+    auto body = o ? Handle<SpaceObject>(o->number()) : SpaceObject::none();
+    if (body.get()) {
+        ChangePlayerShipNumber(obj->owner, body);
     } else {
-        PlayerShipBodyExpire(obj->number(), true);
+        PlayerShipBodyExpire(Handle<SpaceObject>(obj->number()), true);
     }
 }
 

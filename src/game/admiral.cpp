@@ -76,7 +76,7 @@ void Admiral::reset() {
 void ResetAllDestObjectData() {
     for (int i = 0; i < kMaxDestObject; ++i) {
         auto d = Handle<Destination>(i);
-        d->whichObject = kDestNoObject;
+        d->whichObject = SpaceObject::none();
         d->name.clear();
         d->earn = d->totalBuildTime = d->buildTime = 0;
         d->buildObjectBaseNum = BaseObject::none();
@@ -189,7 +189,7 @@ Handle<Destination> MakeNewDestination(
 void Admiral::remove_destination(Handle<Destination> d) {
     if (_active) {
         if (_destinationObject == d->whichObject) {
-            _destinationObject = kNoDestinationObject;
+            _destinationObject = SpaceObject::none();
             _destinationObjectID = -1;
             _has_destination = false;
         }
@@ -366,10 +366,10 @@ int32_t GetAdmiralBuildAtObject(Handle<Admiral> a) {
         if (destBalance->whichObject.get()) {
             auto anObject = destBalance->whichObject;
             if (anObject->owner != a) {
-                a->buildAtObject() = kNoShip;
+                a->buildAtObject() = Destination::none();
             }
         } else {
-            a->buildAtObject() = kNoShip;
+            a->buildAtObject() = Destination::none();
         }
     }
     return a->buildAtObject().number();
@@ -409,8 +409,8 @@ StringSlice GetAdmiralName(Handle<Admiral> a) {
 void SetObjectLocationDestination(SpaceObject *o, coordPointType *where) {
     // if the object does not have an alliance, then something is wrong here--forget it
     if (o->owner.number() <= kNoOwner) {
-        o->destObject = kNoDestinationObject;
-        o->destObjectDest = kNoDestinationObject;
+        o->destObject = SpaceObject::none();
+        o->destObjectDest = SpaceObject::none();
         o->destObjectID = -1;
         o->destObjectPtr = NULL;
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
@@ -439,8 +439,8 @@ void SetObjectLocationDestination(SpaceObject *o, coordPointType *where) {
 
     // if the admiral is not legal, or the admiral has no destination, then forget about it
     if (!a->active()) {
-        o->destObject = kNoDestinationObject;
-        o->destObjectDest = kNoDestinationObject;
+        o->destObject = SpaceObject::none();
+        o->destObjectDest = SpaceObject::none();
         o->destObjectPtr = NULL;
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
         o->timeFromOrigin = 0;
@@ -460,7 +460,7 @@ void SetObjectLocationDestination(SpaceObject *o, coordPointType *where) {
         }
 
         o->destinationLocation = o->originLocation = *where;
-        o->destObject = kNoDestinationObject;
+        o->destObject = SpaceObject::none();
         o->destObjectPtr = NULL;
         o->timeFromOrigin = 0;
         o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
@@ -472,8 +472,8 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
 
     // if the object does not have an alliance, then something is wrong here--forget it
     if (o->owner.number() <= kNoOwner) {
-        o->destObject = kNoDestinationObject;
-        o->destObjectDest = kNoDestinationObject;
+        o->destObject = SpaceObject::none();
+        o->destObjectDest = SpaceObject::none();
         o->destObjectID = -1;
         o->destObjectPtr = NULL;
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
@@ -507,8 +507,8 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
              || !a->has_destination()
              || !a->destinationObject().get()
              || (a->destinationObjectID() == o->id))) {
-        o->destObject = kNoDestinationObject;
-        o->destObjectDest = kNoDestinationObject;
+        o->destObject = SpaceObject::none();
+        o->destObjectDest = SpaceObject::none();
         o->destObjectPtr = NULL;
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
         o->timeFromOrigin = 0;
@@ -538,7 +538,7 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
             // add this object to its destination
             if (o != dObject.get()) {
                 o->runTimeFlags &= ~kHasArrived;
-                o->destObject = dObject->number();
+                o->destObject = dObject;
                 o->destObjectPtr = dObject.get();
                 o->destObjectDest = dObject->destObject;
                 o->destObjectDestID = dObject->destObjectID;
@@ -569,8 +569,8 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
                     }
                 }
             } else {
-                o->destObject = kNoDestinationObject;
-                o->destObjectDest = kNoDestinationObject;
+                o->destObject = SpaceObject::none();
+                o->destObjectDest = SpaceObject::none();
                 o->destObjectPtr = NULL;
                 o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
                 o->timeFromOrigin = 0;
@@ -578,8 +578,8 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
                 o->originLocation = o->location;
             }
         } else {
-            o->destObject = kNoDestinationObject;
-            o->destObjectDest = kNoDestinationObject;
+            o->destObject = SpaceObject::none();
+            o->destObjectDest = SpaceObject::none();
             o->destObjectPtr = NULL;
             o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
             o->timeFromOrigin = 0;
@@ -603,8 +603,8 @@ void RemoveObjectFromDestination(SpaceObject* o) {
         }
     }
 
-    o->destObject = kNoDestinationObject;
-    o->destObjectDest = kNoDestinationObject;
+    o->destObject = SpaceObject::none();
+    o->destObjectDest = SpaceObject::none();
     o->destObjectID = -1;
     o->destObjectPtr = NULL;
 }
@@ -637,7 +637,7 @@ void AdmiralThink() {
             destBalance->buildTime = 0;
             if (destBalance->buildObjectBaseNum.get()) {
                 auto anObject = Handle<SpaceObject>(destBalance->whichObject);
-                AdmiralBuildAtObject(anObject->owner, destBalance->buildObjectBaseNum, i);
+                AdmiralBuildAtObject(anObject->owner, destBalance->buildObjectBaseNum, destBalance);
                 destBalance->buildObjectBaseNum = BaseObject::none();
             }
         }
@@ -730,7 +730,7 @@ void Admiral::think() {
                         && (anObject->duty != eHostileBaseDuty)
                         && (anObject->bestConsideredTargetValue >
                             anObject->currentTargetValue)) {
-                    _destinationObject = anObject->bestConsideredTargetNumber;
+                    _destinationObject = Handle<SpaceObject>(anObject->bestConsideredTargetNumber);
                     _has_destination = true;
                     if (_destinationObject.get()) {
                         destObject = Handle<SpaceObject>(_destinationObject);

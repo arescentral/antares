@@ -1040,10 +1040,10 @@ void PlayerShipBodyExpire(Handle<SpaceObject> theShip, bool sourceIsBody) {
             globals()->gScenarioWinner.text = 10050 + gThisScenario->levelNameStrNum;
         }
         if (theShip->owner.get()) {
-            theShip->owner->set_flagship(-1);
+            theShip->owner->set_flagship(SpaceObject::none());
         }
     } else if (selectShip.get()) {
-        ChangePlayerShipNumber(theShip->owner, selectShip.number());
+        ChangePlayerShipNumber(theShip->owner, selectShip);
     }
 }
 

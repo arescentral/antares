@@ -157,7 +157,7 @@ static void create_object(
                 product->destObjectPtr = focus;
                 product->timeFromOrigin = kTimeToCheckHome;
                 product->runTimeFlags &= ~kHasArrived;
-                product->destObject = focus->number(); //a->destinationObject;
+                product->destObject = Handle<SpaceObject>(focus->number()); //a->destinationObject;
                 product->destObjectDest = focus->destObject;
                 product->destObjectID = focus->id;
                 product->destObjectDestID = focus->destObjectID;
@@ -256,7 +256,7 @@ static void die(objectActionType* action, SpaceObject* focus, SpaceObject* subje
 static void nil_target(objectActionType* action, SpaceObject* focus) {
     focus->targetObject = SpaceObject::none();
     focus->targetObjectID = kNoShip;
-    focus->lastTarget = kNoShip;
+    focus->lastTarget = SpaceObject::none();
 }
 
 static void alter(

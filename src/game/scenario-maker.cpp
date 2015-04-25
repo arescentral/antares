@@ -268,7 +268,7 @@ void set_initial_destination(const Scenario::InitialObject* initial, bool preser
         auto saveDest = owner->target(); // save the original dest
 
         // set the admiral's dest object to the mapped initial dest object
-        owner->set_target(target->realObjectNumber);
+        owner->set_target(Handle<SpaceObject>(target->realObjectNumber));
 
         // now give the mapped initial object the admiral's destination
 
@@ -828,16 +828,16 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         auto anObject = Handle<SpaceObject>(newShipNum);
         if (anObject->attributes & kIsDestination) {
             anObject->asDestination = MakeNewDestination(
-                    newShipNum, initial->canBuild, initial->earning, initial->nameResID,
+                    anObject, initial->canBuild, initial->earning, initial->nameResID,
                     initial->nameStrNum);
         }
         initial->realObjectID = anObject->id;
 
         if ((initial->attributes & kIsPlayerShip)
                 && owner.get() && !owner->flagship().get()) {
-            owner->set_flagship(newShipNum);
+            owner->set_flagship(anObject);
             if (owner == globals()->gPlayerAdmiral) {
-                ResetPlayerShip(newShipNum);
+                ResetPlayerShip(anObject);
             }
         }
 
@@ -845,8 +845,8 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             if (owner.get()) {
                 if (initial->canBuild[0] >= 0) {
                     if (GetAdmiralBuildAtObject(owner) < 0) {
-                        owner->set_control(newShipNum);
-                        owner->set_target(newShipNum);
+                        owner->set_control(anObject);
+                        owner->set_target(anObject);
                     }
                 }
             }
@@ -976,19 +976,19 @@ void UnhideInitialObject(int32_t whichInitial) {
 
     if (anObject->attributes & kIsDestination) {
         anObject->asDestination = MakeNewDestination(
-                newShipNum, initial->canBuild, initial->earning, initial->nameResID,
+                anObject, initial->canBuild, initial->earning, initial->nameResID,
                 initial->nameStrNum);
 
         if (owner.get()) {
             if (initial->canBuild[0] >= 0) {
                 if (!owner->control().get()) {
-                    owner->set_control(newShipNum);
+                    owner->set_control(anObject);
                 }
                 if (GetAdmiralBuildAtObject(owner) < 0) {
-                    SetAdmiralBuildAtObject(owner, newShipNum);
+                    SetAdmiralBuildAtObject(owner, anObject);
                 }
                 if (!owner->target().get()) {
-                    owner->set_target(newShipNum);
+                    owner->set_target(anObject);
                 }
             }
         }
@@ -996,9 +996,9 @@ void UnhideInitialObject(int32_t whichInitial) {
 
     initial->realObjectID = anObject->id;
     if ((initial->attributes & kIsPlayerShip) && owner.get() && !owner->flagship().get()) {
-        owner->set_flagship(newShipNum);
+        owner->set_flagship(anObject);
         if (owner == globals()->gPlayerAdmiral) {
-            ResetPlayerShip(newShipNum);
+            ResetPlayerShip(anObject);
         }
     }
 
