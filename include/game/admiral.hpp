@@ -189,7 +189,7 @@ uint8_t GetAdmiralColor(Handle<Admiral> whichAdmiral);
 int32_t GetAdmiralRace(Handle<Admiral> whichAdmiral);
 
 bool BaseHasSomethingToBuild(Handle<SpaceObject> obj);
-int32_t GetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral);
+Handle<Destination> GetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral);
 void SetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral, Handle<SpaceObject> obj);
 
 void SetAdmiralBuildAtName(Handle<Admiral> whichAdmiral, sfz::StringSlice name);

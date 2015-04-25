@@ -713,7 +713,7 @@ void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message) 
             owner->set_control(handle);
         }
 
-        if (GetAdmiralBuildAtObject(owner) < 0) {
+        if (!GetAdmiralBuildAtObject(owner).get()) {
             if (BaseHasSomethingToBuild(handle)) {
                 SetAdmiralBuildAtObject(owner, handle);
             }

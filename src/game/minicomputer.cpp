@@ -696,11 +696,10 @@ void MiniComputerHandleNull( int32_t unitsToDo)
         mCopyMiniSpaceObject(*myObject, newObject);
 
         auto build_at = GetAdmiralBuildAtObject(globals()->gPlayerAdmiral);
-        if (build_at >= 0) {
-            buildAtObject = Handle<Destination>(build_at);
-            if (buildAtObject->totalBuildTime > 0) {
-                int progress = buildAtObject->buildTime * kMiniBuildTimeHeight;
-                progress /= buildAtObject->totalBuildTime;
+        if (build_at.get()) {
+            if (build_at->totalBuildTime > 0) {
+                int progress = build_at->buildTime * kMiniBuildTimeHeight;
+                progress /= build_at->totalBuildTime;
                 globals()->gMiniScreenData.buildTimeBarValue = progress;
             } else {
                 globals()->gMiniScreenData.buildTimeBarValue = 0;
@@ -728,7 +727,7 @@ void UpdateMiniScreenLines( void)
             const auto& admiral = globals()->gPlayerAdmiral;
             line = globals()->gMiniScreenData.lineData.get() +
                 kBuildScreenWhereNameLine;
-            if (line->value != GetAdmiralBuildAtObject(admiral)) {
+            if (line->value != GetAdmiralBuildAtObject(admiral).number()) {
                 if ( globals()->gMiniScreenData.selectLine !=
                         kMiniScreenNoLineSelected)
                 {
@@ -739,7 +738,7 @@ void UpdateMiniScreenLines( void)
                         kMiniScreenNoLineSelected;
                 }
                 MiniComputerSetBuildStrings();
-            } else if (GetAdmiralBuildAtObject(admiral) >= 0) {
+            } else if (GetAdmiralBuildAtObject(admiral).get()) {
                 line = globals()->gMiniScreenData.lineData.get() + kBuildScreenFirstTypeLine;
                 lineNum = kBuildScreenFirstTypeLine;
 
@@ -1227,11 +1226,10 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
         const auto& admiral = globals()->gPlayerAdmiral;
         line = globals()->gMiniScreenData.lineData.get() +
             kBuildScreenWhereNameLine;
-        auto buildAtObjectNum = GetAdmiralBuildAtObject(globals()->gPlayerAdmiral);
-        line->value = buildAtObjectNum;
+        auto buildAtObject = GetAdmiralBuildAtObject(globals()->gPlayerAdmiral);
+        line->value = buildAtObject.number();
 
-        if (buildAtObjectNum >= 0) {
-            buildAtObject = Handle<Destination>(buildAtObjectNum);
+        if (buildAtObject.get()) {
             mCopyBlankLineString( line, buildAtObject->name);
 
             line = globals()->gMiniScreenData.lineData.get() + kBuildScreenFirstTypeLine;

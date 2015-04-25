@@ -536,7 +536,7 @@ bool Scenario::Condition::is_true() const {
             break;
 
         case kObjectIsBeingBuilt: {
-            auto buildAtObject = Handle<Destination>(GetAdmiralBuildAtObject(globals()->gPlayerAdmiral));
+            auto buildAtObject = GetAdmiralBuildAtObject(globals()->gPlayerAdmiral);
             if (buildAtObject.get()) {
                 if (buildAtObject->totalBuildTime > 0) {
                     return true;
@@ -844,7 +844,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         if (anObject->attributes & kIsDestination) {
             if (owner.get()) {
                 if (initial->canBuild[0] >= 0) {
-                    if (GetAdmiralBuildAtObject(owner) < 0) {
+                    if (!GetAdmiralBuildAtObject(owner).get()) {
                         owner->set_control(anObject);
                         owner->set_target(anObject);
                     }
@@ -984,7 +984,7 @@ void UnhideInitialObject(int32_t whichInitial) {
                 if (!owner->control().get()) {
                     owner->set_control(anObject);
                 }
-                if (GetAdmiralBuildAtObject(owner) < 0) {
+                if (!GetAdmiralBuildAtObject(owner).get()) {
                     SetAdmiralBuildAtObject(owner, anObject);
                 }
                 if (!owner->target().get()) {

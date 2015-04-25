@@ -360,7 +360,7 @@ bool BaseHasSomethingToBuild(Handle<SpaceObject> obj) {
     return false;
 }
 
-int32_t GetAdmiralBuildAtObject(Handle<Admiral> a) {
+Handle<Destination> GetAdmiralBuildAtObject(Handle<Admiral> a) {
     auto destBalance = a->buildAtObject();
     if (destBalance.get()) {
         if (destBalance->whichObject.get()) {
@@ -372,7 +372,7 @@ int32_t GetAdmiralBuildAtObject(Handle<Admiral> a) {
             a->buildAtObject() = Destination::none();
         }
     }
-    return a->buildAtObject().number();
+    return a->buildAtObject();
 }
 
 void SetAdmiralBuildAtObject(Handle<Admiral> a, Handle<SpaceObject> obj) {
