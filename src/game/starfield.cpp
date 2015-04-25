@@ -46,7 +46,7 @@ const uint8_t kStarColor = GRAY;
 
 // This object is also used for the radar center, and for zoom to hostile and object modes.  It
 // would be preferable for it to be entirely private to the starfield.
-SpaceObject* gScrollStarObject = NULL;
+Handle<SpaceObject> gScrollStarObject;
 
 namespace {
 
@@ -64,10 +64,10 @@ Starfield::Starfield():
     }
 }
 
-void Starfield::reset(int32_t which_object) {
-    gScrollStarObject = mGetSpaceObjectPtr(which_object);
+void Starfield::reset(Handle<SpaceObject> which_object) {
+    gScrollStarObject = which_object;
 
-    if (gScrollStarObject == NULL) {
+    if (!gScrollStarObject.get()) {
         return;
     }
 
@@ -120,7 +120,7 @@ void Starfield::prepare_to_move() {
 }
 
 void Starfield::move(int32_t by_units) {
-    if ((gScrollStarObject == NULL) || !gScrollStarObject->active) {
+    if (!gScrollStarObject.get() || !gScrollStarObject->active) {
         return;
     }
 

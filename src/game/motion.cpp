@@ -306,7 +306,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                 } // if ( object is not stationary)
 
 //              if ( anObject->attributes & kIsPlayerShip)
-                if (anObject.get() == gScrollStarObject) {
+                if (anObject == gScrollStarObject) {
                     gGlobalCorner.h = anObject->location.h - (globals()->gCenterScaleH / gAbsoluteScale);
                     gGlobalCorner.v = anObject->location.v - (globals()->gCenterScaleV / gAbsoluteScale);
                 }
@@ -656,7 +656,7 @@ void CollideSpaceObjects() {
                     aObject->distanceFromPlayer = hugeDistance;
                 }
                 if (closestDist > hugeDistance) {
-                    if ((aObject.get() != gScrollStarObject)
+                    if ((aObject != gScrollStarObject)
                             && ((globals()->gZoomMode != kNearestFoeZoom)
                                 || (aObject->owner != player->owner))) {
                         closestDist = hugeDistance;
