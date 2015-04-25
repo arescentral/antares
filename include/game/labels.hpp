@@ -33,8 +33,8 @@ class Labels {
     static void init();
     static void reset();
     static int16_t add(
-            int16_t h, int16_t v, int16_t hoff, int16_t voff, SpaceObject* object, bool objectLink,
-            uint8_t color);
+            int16_t h, int16_t v, int16_t hoff, int16_t voff, Handle<SpaceObject> object,
+            bool objectLink, uint8_t color);
     static void remove(int32_t);
     static void draw();
     static void update_contents(int32_t units_done);
@@ -42,7 +42,7 @@ class Labels {
     static void show_all();
 
     static void set_position(int32_t, int16_t, int16_t);
-    static void set_object(int32_t, SpaceObject *);
+    static void set_object(int32_t which, Handle<SpaceObject> object);
     static void set_age(int32_t, int32_t);
     static void set_string(int32_t which, const sfz::StringSlice& string);
     static void clear_string(int32_t which);

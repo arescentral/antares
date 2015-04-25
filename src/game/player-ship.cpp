@@ -106,9 +106,9 @@ HotKeySuffix hot_key_suffix(SpaceObject* space_object) {
 
 void ResetPlayerShip(int32_t which) {
     globals()->gPlayerShipNumber = which;
-    globals()->gSelectionLabel = Labels::add(0, 0, 0, 10, NULL, true, YELLOW);
-    gDestinationLabel = Labels::add(0, 0, 0, -20, NULL, true, SKY_BLUE);
-    gSendMessageLabel = Labels::add(200, 200, 0, 30, NULL, false, GREEN);
+    globals()->gSelectionLabel = Labels::add(0, 0, 0, 10, SpaceObject::none(), true, YELLOW);
+    gDestinationLabel = Labels::add(0, 0, 0, -20, SpaceObject::none(), true, SKY_BLUE);
+    gSendMessageLabel = Labels::add(200, 200, 0, 30, SpaceObject::none(), false, GREEN);
     globals()->starfield.reset(globals()->gPlayerShipNumber);
     gAlarmCount = -1;
     globals()->gAutoPilotOff = true;
@@ -883,7 +883,7 @@ void SetPlayerSelectShip(int32_t whichShip, bool target, Handle<Admiral> admiral
     if (target) {
         admiralNumber->set_target(whichShip);
         if (admiralNumber == globals()->gPlayerAdmiral) {
-            Labels::set_object(gDestinationLabel, selectShip.get());
+            Labels::set_object(gDestinationLabel, selectShip);
             if (whichShip == globals()->gPlayerShipNumber) {
                 Labels::set_age(gDestinationLabel, Labels::kVisibleTime);
             }
@@ -906,7 +906,7 @@ void SetPlayerSelectShip(int32_t whichShip, bool target, Handle<Admiral> admiral
     } else {
         admiralNumber->set_control(whichShip);
         if (admiralNumber == globals()->gPlayerAdmiral) {
-            Labels::set_object(globals()->gSelectionLabel, selectShip.get());
+            Labels::set_object(globals()->gSelectionLabel, selectShip);
             if (whichShip == globals()->gPlayerShipNumber) {
                 Labels::set_age(globals()->gSelectionLabel, Labels::kVisibleTime);
             }
@@ -1107,7 +1107,7 @@ void Update_LabelStrings_ForHotKeyChange( void)
 {
     auto target = globals()->gPlayerAdmiral->target();
     if (target.get()) {
-        Labels::set_object(gDestinationLabel, target.get());
+        Labels::set_object(gDestinationLabel, target);
         if (target.number() == globals()->gPlayerShipNumber) {
             Labels::set_age(gDestinationLabel, Labels::kVisibleTime);
         }
@@ -1124,7 +1124,7 @@ void Update_LabelStrings_ForHotKeyChange( void)
 
     auto control = globals()->gPlayerAdmiral->control();
     if (control.get()) {
-        Labels::set_object( globals()->gSelectionLabel, control.get());
+        Labels::set_object(globals()->gSelectionLabel, control);
         if (control.number() == globals()->gPlayerShipNumber) {
             Labels::set_age(globals()->gSelectionLabel, Labels::kVisibleTime);
         }

@@ -143,13 +143,13 @@ void Messages::init() {
     long_message_data = new longMessageType;
 
     message_label_num = Labels::add(
-            kMessageScreenLeft, kMessageScreenTop, 0, 0, NULL, false, kMessageColor);
+            kMessageScreenLeft, kMessageScreenTop, 0, 0, SpaceObject::none(), false, kMessageColor);
 
     if (message_label_num < 0) {
         throw Exception("Couldn't add a screen label.");
     }
     status_label_num = Labels::add(
-            kStatusLabelLeft, kStatusLabelTop, 0, 0, NULL, false, kStatusLabelColor);
+            kStatusLabelLeft, kStatusLabelTop, 0, 0, SpaceObject::none(), false, kStatusLabelColor);
     if (status_label_num < 0) {
         throw Exception("Couldn't add a screen label.");
     }
@@ -181,9 +181,9 @@ void Messages::clear() {
     std::queue<sfz::String> empty;
     swap(message_data, empty);
     message_label_num = Labels::add(
-            kMessageScreenLeft, kMessageScreenTop, 0, 0, NULL, false, kMessageColor);
+            kMessageScreenLeft, kMessageScreenTop, 0, 0, SpaceObject::none(), false, kMessageColor);
     status_label_num = Labels::add(
-            kStatusLabelLeft, kStatusLabelTop, 0, 0, NULL, false, kStatusLabelColor);
+            kStatusLabelLeft, kStatusLabelTop, 0, 0, SpaceObject::none(), false, kStatusLabelColor);
 
     tmessage = long_message_data;
     tmessage->startResID = -1;
@@ -200,7 +200,7 @@ void Messages::clear() {
     tmessage->lastLabelMessage = false;
     tmessage->retro_text.reset();
     viewport.bottom = play_screen.bottom;
-    tmessage->labelMessageID = Labels::add(0, 0, 0, 0, NULL, false, SKY_BLUE);
+    tmessage->labelMessageID = Labels::add(0, 0, 0, 0, SpaceObject::none(), false, SKY_BLUE);
     Labels::set_keep_on_screen_anyway( tmessage->labelMessageID, true);
 }
 
@@ -570,7 +570,7 @@ void MessageLabel_Set_Special(int16_t id, const StringSlice& text) {
 
       case 'O':
         {
-            SpaceObject* o = GetObjectFromInitialNumber(value);
+            auto o = Handle<SpaceObject>(GetObjectFromInitialNumber(value)->number());
             Labels::set_offset(id, -(Labels::get_width(id)/2), 64);
             Labels::set_object(id, o);
 

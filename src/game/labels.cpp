@@ -62,8 +62,7 @@ struct Labels::screenLabelType {
     bool                active;
     bool                killMe;
     bool                visible;
-    int32_t             whichObject;
-    SpaceObject*        object;
+    Handle<SpaceObject> object;
     bool                objectLink;     // true if label requires an object to be seen
     int32_t             lineNum;
     int32_t             lineHeight;
@@ -87,8 +86,7 @@ void Labels::zero(Labels::screenLabelType& label) {
     label.text.clear();
     label.active = false;
     label.killMe = false;
-    label.whichObject = kNoShip;
-    label.object = NULL;
+    label.object = SpaceObject::none();
     label.visible = false;
     label.age = 0;
     label.objectLink = true;
@@ -113,8 +111,8 @@ Labels::screenLabelType::screenLabelType() {
 }
 
 int16_t Labels::add(
-        int16_t h, int16_t v, int16_t hoff, int16_t voff, SpaceObject* object, bool objectLink,
-        uint8_t color) {
+        int16_t h, int16_t v, int16_t hoff, int16_t voff, Handle<SpaceObject> object,
+        bool objectLink, uint8_t color) {
     screenLabelType* label = NULL;
 
     for (int i = 0; i < kMaxLabelNum; ++i) {
@@ -138,12 +136,7 @@ int16_t Labels::add(
     label->keepOnScreenAnyway = false;
     label->attachedHintLine = false;
     if (objectLink) {
-        if (label->object == NULL) {
-            label->visible = false;
-        } else {
-            label->visible = true;
-            label->whichObject = object->number();
-        }
+        label->visible = bool(label->object.get());
     } else {
         label->visible = true;
     }
@@ -159,7 +152,7 @@ void Labels::remove(int32_t which) {
     label->text.clear();
     label->active = false;
     label->killMe = false;
-    label->object = NULL;
+    label->object = SpaceObject::none();
     label->width = label->height = label->lineNum = label->lineHeight = 0;
 }
 
@@ -264,7 +257,7 @@ void Labels::update_positions(int32_t units_done) {
         screenLabelType *label = data + i;
         bool isOffScreen = false;
         if ((label->active) && (!label->killMe)) {
-            if ((label->object != NULL) && (label->object->sprite != NULL)) {
+            if (label->object.get() && (label->object->sprite != NULL)) {
                 if (label->object->active) {
                     label->where.h = label->object->sprite->where.h + label->offset.h;
 
@@ -348,7 +341,7 @@ void Labels::update_positions(int32_t units_done) {
                 if (label->age <= 0) {
                     label->visible = false;
                     label->age = 0;
-                    label->object = NULL;
+                    label->object = SpaceObject::none();
                     label->text.clear();
                     if (label->attachedHintLine) {
                         HintLine::hide();
@@ -365,19 +358,11 @@ void Labels::update_positions(int32_t units_done) {
     }
 }
 
-void Labels::set_object(int32_t which, SpaceObject *object) {
+void Labels::set_object(int32_t which, Handle<SpaceObject> object) {
     screenLabelType *label = data + which;
     label->object = object;
-
-    if (label->object != NULL) {
-        label->age = 0;
-        label->visible = true;
-        label->whichObject = object->number();
-    } else {
-        label->visible = false;
-        label->age = 0;
-        label->whichObject = kNoShip;
-    }
+    label->visible = bool(object.get());
+    label->age = 0;
 }
 
 void Labels::set_age(int32_t which, int32_t age) {
