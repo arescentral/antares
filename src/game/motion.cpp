@@ -588,10 +588,7 @@ void CollideSpaceObjects() {
     // set up player info so we can find closest ship (for scaling)
     uint64_t farthestDist = 0;
     uint64_t closestDist = 0x7fffffffffffffffull;
-    SpaceObject* player = nullptr;
-    if (globals()->gPlayerShipNumber >= 0) {
-        player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
-    }
+    auto player = globals()->gPlayerShip;
     globals()->gClosestObject = Handle<SpaceObject>(0);
     globals()->gFarthestObject = Handle<SpaceObject>(0);
 
@@ -603,7 +600,7 @@ void CollideSpaceObjects() {
 
     for (auto aObject = gRootObject; aObject.get(); aObject = aObject->nextObject) {
         if (!aObject->active) {
-            if (player && (player->active)) {
+            if (player.get() && player->active) {
                 aObject->distanceFromPlayer = 0x7fffffffffffffffull;
             }
             continue;
@@ -636,7 +633,7 @@ void CollideSpaceObjects() {
             }
         }
 
-        if (player && (player->active)) {
+        if (player.get() && player->active) {
             if (aObject->attributes & kAppearOnRadar) {
                 uint32_t dcalc = ABS<int>( player->location.h - aObject->location.h);
                 uint32_t distance =  ABS<int>( player->location.v - aObject->location.v);

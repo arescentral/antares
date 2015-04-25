@@ -534,8 +534,8 @@ void draw_instruments() {
     left_instrument_sprite->draw(left_rect.left, left_rect.top);
     right_instrument_sprite->draw(right_rect.left, right_rect.top);
 
-    if (globals()->gPlayerShipNumber >= 0) {
-        SpaceObject* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+    if (globals()->gPlayerShip.get()) {
+        auto player = globals()->gPlayerShip;
         if (player->active) {
             draw_player_ammo(
                 (player->pulse.base.get() && (player->pulse.base->frame.weapon.ammo > 0))

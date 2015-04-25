@@ -563,7 +563,7 @@ bool Scenario::Condition::is_true() const {
         case kSubjectIsPlayerCondition:
             sObject = GetObjectFromInitialNumber(subjectObject);
             if (sObject != NULL) {
-                if (sObject->number() == globals()->gPlayerShipNumber) {
+                if (Handle<SpaceObject>(sObject->number()) == globals()->gPlayerShip) {
                     return true;
                 }
             }
@@ -1022,11 +1022,11 @@ SpaceObject *GetObjectFromInitialNumber(int32_t initialNumber) {
         }
         return NULL;
     } else if (initialNumber == -2) {
-        SpaceObject& object = *mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
-        if ((!object.active) || (!(object.attributes & kCanThink))) {
+        auto object = globals()->gPlayerShip;
+        if (!object->active || !(object->attributes & kCanThink)) {
             return NULL;
         }
-        return &object;
+        return object.get();
     }
     return NULL;
 }

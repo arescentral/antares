@@ -271,18 +271,13 @@ void mPlayDistanceSound(
         int32_t mdistance = mobjectptr->distanceFromPlayer;
         uint32_t mul1;
         uint32_t mul2;
-        SpaceObject* mplayerobjectptr;
+        auto player = globals()->gPlayerShip;
 
         if (mdistance == 0) {
-            if (globals()->gPlayerShipNumber >= 0) {
-                mplayerobjectptr = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
-            } else {
-                mplayerobjectptr = NULL;
-            }
-            if ((mplayerobjectptr != NULL) && (mplayerobjectptr->active)) {
-                mul1 = ABS<int>(mplayerobjectptr->location.h - mobjectptr->location.h);
+            if (player.get() && player->active) {
+                mul1 = ABS<int>(player->location.h - mobjectptr->location.h);
                 mul2 = mul1;
-                mul1 =  ABS<int>(mplayerobjectptr->location.v - mobjectptr->location.v);
+                mul1 =  ABS<int>(player->location.v - mobjectptr->location.v);
                 mdistance = mul1;
                 if ((mul2 < kMaximumRelevantDistance) && (mdistance < kMaximumRelevantDistance)) {
                     mdistance = mdistance * mdistance + mul2 * mul2;
@@ -300,10 +295,10 @@ void mPlayDistanceSound(
                 }
                 if (mvolume > 0) {
                     PlayLocalizedSound(
-                            mplayerobjectptr->location.h, mplayerobjectptr->location.v,
+                            player->location.h, player->location.v,
                             mobjectptr->location.h, mobjectptr->location.v,
-                            mplayerobjectptr->velocity.h - mobjectptr->velocity.h,
-                            mplayerobjectptr->velocity.v - mobjectptr->velocity.v,
+                            player->velocity.h - mobjectptr->velocity.h,
+                            player->velocity.v - mobjectptr->velocity.v,
                             msoundid, mvolume, msoundpersistence, msoundpriority);
                 }
             } else {
@@ -343,18 +338,13 @@ void mPlayDistanceSound(
                     mvolume = ((1920 - mdistance) * mvolume) / 1920;
                 }
             }
-            if (globals()->gPlayerShipNumber >= 0) {
-                mplayerobjectptr = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
-            } else {
-                mplayerobjectptr = NULL;
-            }
-            if ((mplayerobjectptr != NULL) && (mplayerobjectptr->active)) {
+            if (player.get() && player->active) {
                 if (mvolume > 0) {
                     PlayLocalizedSound(
-                            mplayerobjectptr->location.h, mplayerobjectptr->location.v,
+                            player->location.h, player->location.v,
                             mobjectptr->location.h, mobjectptr->location.v,
-                            mplayerobjectptr->velocity.h - mobjectptr->velocity.h,
-                            mplayerobjectptr->velocity.v - mobjectptr->velocity.v,
+                            player->velocity.h - mobjectptr->velocity.h,
+                            player->velocity.v - mobjectptr->velocity.v,
                             msoundid, mvolume, msoundpersistence, msoundpriority);
                 }
             } else {

@@ -434,8 +434,8 @@ SpaceObject::SpaceObject(
 
     if (attributes & (kCanCollide | kCanBeHit | kIsDestination | kCanThink | kRemoteOrHuman)) {
         uint32_t ydiff, xdiff;
-        SpaceObject* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
-        if (player && (player->active)) {
+        auto player = globals()->gPlayerShip;
+        if (player.get() && player->active) {
             xdiff = ABS<int>(player->location.h - location.h);
             ydiff = ABS<int>(player->location.v - location.v);
         } else {

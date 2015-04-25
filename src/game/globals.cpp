@@ -54,7 +54,7 @@ aresGlobalType::aresGlobalType() {
     gFarthestObject = Handle<SpaceObject>(0);
     gCenterScaleH = 0;
     gCenterScaleV = 0;
-    gPlayerShipNumber = 0;
+    gPlayerShip = Handle<SpaceObject>(0);
     gSelectionLabel = -1;
     gZoomMode = kTimesTwoZoom;
     gPreviousZoomMode = kNearestFoeZoom;

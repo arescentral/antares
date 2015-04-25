@@ -101,20 +101,10 @@ void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
             {
                 globals()->gActiveCheats[whichPlayer.number()] &= ~kAutoPlayBit;
                 CheatFeedback( whichCheat, false, whichPlayer);
-                if ( whichPlayer == globals()->gPlayerAdmiral)
-                {
-//                      ChangePlayerShipNumber( whichPlayer, globals()->gPlayerShipNumber);
-                }
-//                  SetAdmiralAttributes( whichPlayer, kAIsHuman);
             } else
             {
                 globals()->gActiveCheats[whichPlayer.number()] |= kAutoPlayBit;
                 CheatFeedback( whichCheat, true, whichPlayer);
-                if ( whichPlayer == globals()->gPlayerAdmiral)
-                {
-//                      ChangePlayerShipNumber( whichPlayer, globals()->gPlayerShipNumber);
-                }
-//                  SetAdmiralAttributes( whichPlayer, kAIsComputer);
             }
             break;
 

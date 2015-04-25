@@ -105,11 +105,11 @@ HotKeySuffix hot_key_suffix(Handle<SpaceObject> space_object) {
 }  // namespace
 
 void ResetPlayerShip(Handle<SpaceObject> which) {
-    globals()->gPlayerShipNumber = which.number();
+    globals()->gPlayerShip = which;
     globals()->gSelectionLabel = Labels::add(0, 0, 0, 10, SpaceObject::none(), true, YELLOW);
     gDestinationLabel = Labels::add(0, 0, 0, -20, SpaceObject::none(), true, SKY_BLUE);
     gSendMessageLabel = Labels::add(200, 200, 0, 30, SpaceObject::none(), false, GREEN);
-    globals()->starfield.reset(globals()->gPlayerShipNumber);
+    globals()->starfield.reset(globals()->gPlayerShip);
     gAlarmCount = -1;
     globals()->gAutoPilotOff = true;
     globals()->keyMask = 0;
@@ -197,7 +197,7 @@ static void zoom_out() {
 }
 
 static void engage_autopilot() {
-    SpaceObject* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+    auto player = globals()->gPlayerShip;
     if (!(player->attributes & kOnAutoPilot)) {
         player->keysDown |= kAutoPilotKey;
     }
@@ -273,8 +273,7 @@ static void target_base(Handle<SpaceObject> origin_ship, int32_t direction) {
 }
 
 static void target_self() {
-    SetPlayerSelectShip(
-            Handle<SpaceObject>(globals()->gPlayerShipNumber), true, globals()->gPlayerAdmiral);
+    SetPlayerSelectShip(globals()->gPlayerShip, true, globals()->gPlayerAdmiral);
 }
 
 void PlayerShip::key_down(const KeyDownEvent& event) {
@@ -367,7 +366,7 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
         return;
     }
 
-    auto player = Handle<SpaceObject>(globals()->gPlayerShipNumber);
+    auto player = globals()->gPlayerShip;
     if (_gamepad_state) {
         switch (event.button) {
           case Gamepad::A:
@@ -490,7 +489,7 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
         }
     }
 
-    SpaceObject* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+    auto player = globals()->gPlayerShip;
     switch (event.button) {
       case Gamepad::A:
         _gamepad_keys &= ~kUpKey;
@@ -538,21 +537,17 @@ void PlayerShip::gamepad_stick(const GamepadStickEvent& event) {
 }
 
 bool PlayerShip::active() const {
-    if (globals()->gPlayerShipNumber < 0) {
-        return false;
-    }
-    SpaceObject* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
-    if (!(player->active && (player->attributes & kIsHumanControlled))) {
-        return false;
-    }
-    return true;
+    auto player = globals()->gPlayerShip;
+    return player.get()
+        && player->active
+        && (player->attributes & kIsHumanControlled);
 }
 
 void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_message) {
     SpaceObject *selectShip = NULL;
     uint32_t        attributes;
 
-    if (globals()->gPlayerShipNumber < 0) {
+    if (!globals()->gPlayerShip.get()) {
         return;
     }
 
@@ -636,7 +631,7 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
     //  this implements the often requested feature of having a shortcut for
     //  transfering control.
 
-    auto theShip = Handle<SpaceObject>(globals()->gPlayerShipNumber);
+    auto theShip = globals()->gPlayerShip;
 
     if (!theShip->active) {
         return;
@@ -838,8 +833,8 @@ void PlayerShipHandleClick(Point where, int button) {
     }
 
     gDestKeyTime = -1;
-    if (globals()->gPlayerShipNumber >= 0) {
-        auto theShip = Handle<SpaceObject>(globals()->gPlayerShipNumber);
+    if (globals()->gPlayerShip.get()) {
+        auto theShip = globals()->gPlayerShip;
         if ((theShip->active) && (theShip->attributes & kIsHumanControlled)) {
             bounds.left = where.h - kCursorBoundsSize;
             bounds.top = where.v - kCursorBoundsSize;
@@ -883,7 +878,7 @@ void SetPlayerSelectShip(
         admiralNumber->set_target(whichShip);
         if (admiralNumber == globals()->gPlayerAdmiral) {
             Labels::set_object(gDestinationLabel, selectShip);
-            if (whichShip == Handle<SpaceObject>(globals()->gPlayerShipNumber)) {
+            if (whichShip == globals()->gPlayerShip) {
                 Labels::set_age(gDestinationLabel, Labels::kVisibleTime);
             }
             PlayVolumeSound(
@@ -906,7 +901,7 @@ void SetPlayerSelectShip(
         admiralNumber->set_control(whichShip);
         if (admiralNumber == globals()->gPlayerAdmiral) {
             Labels::set_object(globals()->gSelectionLabel, selectShip);
-            if (whichShip == Handle<SpaceObject>(globals()->gPlayerShipNumber)) {
+            if (whichShip == globals()->gPlayerShip) {
                 Labels::set_age(globals()->gSelectionLabel, Labels::kVisibleTime);
             }
             PlayVolumeSound(
@@ -938,18 +933,18 @@ void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, Handle<SpaceObject> ne
 
     if (whichAdmiral == globals()->gPlayerAdmiral) {
         anObject->attributes &= (~kIsHumanControlled) & (~kIsPlayerShip);
-        if (newShip.number() != globals()->gPlayerShipNumber)
+        if (newShip != globals()->gPlayerShip)
         {
-            globals()->gPlayerShipNumber = newShip.number();
-            globals()->starfield.reset(globals()->gPlayerShipNumber);
+            globals()->gPlayerShip = newShip;
+            globals()->starfield.reset(newShip);
         }
 
 
-        anObject = Handle<SpaceObject>(globals()->gPlayerShipNumber);
+        anObject = globals()->gPlayerShip;
         if (!anObject.get()) {
             throw Exception(format(
-                        "whichAdmiral: {0}, newShip: {1}, gPlayerShipNumber: {2}",
-                        whichAdmiral.number(), newShip.number(), globals()->gPlayerShipNumber));
+                        "whichAdmiral: {0}, newShip: {1}, gPlayerShip: {2}",
+                        whichAdmiral.number(), newShip.number(), globals()->gPlayerShip.number()));
         }
 
         anObject->attributes |= (kIsHumanControlled) | (kIsPlayerShip);
@@ -994,14 +989,10 @@ void TogglePlayerAutoPilot(SpaceObject *theShip) {
     }
 }
 
-bool IsPlayerShipOnAutoPilot( void)
-{
-    SpaceObject *theShip;
-
-    if ( globals()->gPlayerShipNumber < 0) return false;
-    theShip = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
-    if ( theShip->attributes & kOnAutoPilot) return true;
-    else return false;
+bool IsPlayerShipOnAutoPilot() {
+    auto player = globals()->gPlayerShip;
+    return player.get()
+        && (player->attributes & kOnAutoPilot);
 }
 
 void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral) {
@@ -1104,7 +1095,7 @@ void Update_LabelStrings_ForHotKeyChange( void)
     auto target = globals()->gPlayerAdmiral->target();
     if (target.get()) {
         Labels::set_object(gDestinationLabel, target);
-        if (target.number() == globals()->gPlayerShipNumber) {
+        if (target == globals()->gPlayerShip) {
             Labels::set_age(gDestinationLabel, Labels::kVisibleTime);
         }
         if (target->attributes & kIsDestination) {
@@ -1121,7 +1112,7 @@ void Update_LabelStrings_ForHotKeyChange( void)
     auto control = globals()->gPlayerAdmiral->control();
     if (control.get()) {
         Labels::set_object(globals()->gSelectionLabel, control);
-        if (control.number() == globals()->gPlayerShipNumber) {
+        if (control == globals()->gPlayerShip) {
             Labels::set_age(globals()->gSelectionLabel, Labels::kVisibleTime);
         }
         PlayVolumeSound(
