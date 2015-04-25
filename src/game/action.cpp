@@ -673,17 +673,17 @@ static void set_destination(
 
 static void activate_special(
         objectActionType* action, SpaceObject* focus, SpaceObject* subject) {
-    fire_weapon(subject, nullptr, subject->baseType->special, subject->special);
+    fire_weapon(Handle<SpaceObject>(subject->number()), nullptr, subject->baseType->special, subject->special);
 }
 
 static void activate_pulse(
         objectActionType* action, SpaceObject* focus, SpaceObject* subject) {
-    fire_weapon(subject, nullptr, subject->baseType->pulse, subject->pulse);
+    fire_weapon(Handle<SpaceObject>(subject->number()), nullptr, subject->baseType->pulse, subject->pulse);
 }
 
 static void activate_beam(
         objectActionType* action, SpaceObject* focus, SpaceObject* subject) {
-    fire_weapon(subject, nullptr, subject->baseType->beam, subject->beam);
+    fire_weapon(Handle<SpaceObject>(subject->number()), nullptr, subject->baseType->beam, subject->beam);
 }
 
 static void color_flash(objectActionType* action, SpaceObject* focus) {

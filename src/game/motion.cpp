@@ -169,15 +169,14 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
     Fixed                   aFixed;
     int16_t                 angle;
     uint32_t                shortDist, thisDist, longDist;
-    SpaceObject*            anObject;
+    Handle<SpaceObject>     anObject;
 
     if ( unitsToDo == 0) return;
 
     for ( jl = 0; jl < unitsToDo; jl++)
     {
         anObject = gRootObject;
-        while ( anObject != NULL)
-        {
+        while (anObject.get()) {
             if ( anObject->active == kObjectInUse)
             {
                 auto baseObject = anObject->base;
@@ -307,8 +306,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                 } // if ( object is not stationary)
 
 //              if ( anObject->attributes & kIsPlayerShip)
-                if ( anObject == gScrollStarObject)
-                {
+                if (anObject.get() == gScrollStarObject) {
                     gGlobalCorner.h = anObject->location.h - (globals()->gCenterScaleH / gAbsoluteScale);
                     gGlobalCorner.v = anObject->location.v - (globals()->gCenterScaleV / gAbsoluteScale);
                 }
@@ -495,8 +493,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
     longDist = 0;
     anObject = gRootObject;
 
-    while ( anObject != NULL)
-    {
+    while (anObject.get()) {
         if ( anObject->active == kObjectInUse)
         {
             auto baseObject = anObject->base;
@@ -606,7 +603,7 @@ void CollideSpaceObjects() {
         proximityObject->nearObject = proximityObject->farObject = NULL;
     }
 
-    for (auto aObject = gRootObject; aObject; aObject = aObject->nextObject) {
+    for (auto aObject = gRootObject; aObject.get(); aObject = aObject->nextObject) {
         if (!aObject->active) {
             if (player && (player->active)) {
                 aObject->distanceFromPlayer = 0x7fffffffffffffffull;
@@ -621,7 +618,7 @@ void CollideSpaceObjects() {
                     aObject->active = kObjectToBeFreed;
                 }
 
-                aObject->baseType->expire.run(aObject, NULL, NULL);
+                aObject->baseType->expire.run(aObject.get(), NULL, NULL);
                 if (!aObject->active) {
                     continue;
                 }
@@ -631,7 +628,7 @@ void CollideSpaceObjects() {
         if (aObject->periodicTime > 0) {
             aObject->periodicTime--;
             if (aObject->periodicTime <= 0) {
-                aObject->baseType->activate.run(aObject, NULL, NULL);
+                aObject->baseType->activate.run(aObject.get(), NULL, NULL);
                 aObject->periodicTime =
                     aObject->baseType->activatePeriod
                     + aObject->randomSeed.next(aObject->baseType->activatePeriodRange);
@@ -659,7 +656,7 @@ void CollideSpaceObjects() {
                     aObject->distanceFromPlayer = hugeDistance;
                 }
                 if (closestDist > hugeDistance) {
-                    if ((aObject != gScrollStarObject)
+                    if ((aObject.get() != gScrollStarObject)
                             && ((globals()->gZoomMode != kNearestFoeZoom)
                                 || (aObject->owner != player->owner))) {
                         closestDist = hugeDistance;
@@ -693,7 +690,7 @@ void CollideSpaceObjects() {
 
             auto proximityObject = gProximityGrid.get() + (ys << kProximityWidthMultiply) + xs;
             aObject->nextNearObject = proximityObject->nearObject;
-            proximityObject->nearObject = aObject;
+            proximityObject->nearObject = aObject.get();
             aObject->collisionGrid.h = xe;
             aObject->collisionGrid.v = ye;
 
@@ -707,7 +704,7 @@ void CollideSpaceObjects() {
 
             proximityObject = gProximityGrid.get() + (ye << kProximityWidthMultiply) + xe;
             aObject->nextFarObject = proximityObject->farObject;
-            proximityObject->farObject = aObject;
+            proximityObject->farObject = aObject.get();
             aObject->distanceGrid.h = xs;
             aObject->distanceGrid.v = ys;
 
@@ -1029,7 +1026,7 @@ hackBNoEngageMatch:
     const uint32_t seen_by_player = 1ul << globals()->gPlayerAdmiral.number();
 
     for (int32_t i = 0; i < kMaxSpaceObject; i++) {
-        auto aObject = mGetSpaceObjectPtr(i);
+        auto aObject = Handle<SpaceObject>(i);
         if (aObject->active == kObjectToBeFreed) {
             if (aObject->attributes & kIsBeam) {
                 if (aObject->frame.beam != NULL) {
@@ -1038,12 +1035,12 @@ hackBNoEngageMatch:
                 aObject->active = kObjectAvailable;
                 aObject->attributes = 0;
                 aObject->nextNearObject = aObject->nextFarObject = NULL;
-                if (aObject->previousObject != NULL) {
+                if (aObject->previousObject.get()) {
                     auto bObject = aObject->previousObject;
                     bObject->nextObject = aObject->nextObject;
                     bObject->nextObjectNumber = aObject->nextObjectNumber;
                 }
-                if (aObject->nextObject != NULL) {
+                if (aObject->nextObject.get()) {
                     auto bObject = aObject->nextObject;
                     bObject->previousObject = aObject->previousObject;
                     bObject->previousObjectNumber = aObject->previousObjectNumber;
@@ -1052,9 +1049,9 @@ hackBNoEngageMatch:
                     gRootObject = aObject->nextObject;
                     gRootObjectNumber = aObject->nextObjectNumber;
                 }
-                aObject->nextObject = NULL;
+                aObject->nextObject = SpaceObject::none();
                 aObject->nextObjectNumber = -1;
-                aObject->previousObject = NULL;
+                aObject->previousObject = SpaceObject::none();
                 aObject->previousObjectNumber = -1;
             } else {
                 aObject->active = kObjectAvailable;
@@ -1063,12 +1060,12 @@ hackBNoEngageMatch:
                 }
                 aObject->attributes = 0;
                 aObject->nextNearObject = aObject->nextFarObject = NULL;
-                if (aObject->previousObject != NULL) {
+                if (aObject->previousObject.get()) {
                     auto bObject = aObject->previousObject;
                     bObject->nextObject = aObject->nextObject;
                     bObject->nextObjectNumber = aObject->nextObjectNumber;
                 }
-                if (aObject->nextObject != NULL) {
+                if (aObject->nextObject.get()) {
                     auto bObject = aObject->nextObject;
                     bObject->previousObject = aObject->previousObject;
                     bObject->previousObjectNumber = aObject->previousObjectNumber;
@@ -1077,9 +1074,9 @@ hackBNoEngageMatch:
                     gRootObject = aObject->nextObject;
                     gRootObjectNumber = aObject->nextObjectNumber;
                 }
-                aObject->nextObject = NULL;
+                aObject->nextObject = SpaceObject::none();
                 aObject->nextObjectNumber = -1;
-                aObject->previousObject = NULL;
+                aObject->previousObject = SpaceObject::none();
                 aObject->previousObjectNumber = -1;
             }
         }

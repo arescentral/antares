@@ -702,10 +702,10 @@ void AdmiralThink() {
 }
 
 void Admiral::think() {
-    SpaceObject* anObject;
-    SpaceObject* destObject;
-    SpaceObject* otherDestObject;
-    SpaceObject* stepObject;
+    Handle<SpaceObject> anObject;
+    Handle<SpaceObject> destObject;
+    Handle<SpaceObject> otherDestObject;
+    Handle<SpaceObject> stepObject;
     destBalanceType* destBalance;
     int32_t origObject, origDest, difference;
     Fixed  friendValue, foeValue, thisValue;
@@ -721,7 +721,7 @@ void Admiral::think() {
             // Really 48:
             _blitzkrieg = 0 - (gRandomSeed.next(1200) + 1200);
             for (int j = 0; j < kMaxSpaceObject; j++) {
-                anObject = mGetSpaceObjectPtr(j);
+                anObject = Handle<SpaceObject>(j);
                 if (anObject->owner.get() == this) {
                     anObject->currentTargetValue = 0x00000000;
                 }
@@ -733,7 +733,7 @@ void Admiral::think() {
             // Really 48:
             _blitzkrieg = gRandomSeed.next(1200) + 1200;
             for (int j = 0; j < kMaxSpaceObject; j++) {
-                anObject = mGetSpaceObjectPtr(j);
+                anObject = Handle<SpaceObject>(j);
                 if (anObject->owner.get() == this) {
                     anObject->currentTargetValue = 0x00000000;
                 }
@@ -744,10 +744,10 @@ void Admiral::think() {
     // get the current object
     if (_considerShip < 0) {
         _considerShip = gRootObjectNumber;
-        anObject = mGetSpaceObjectPtr(_considerShip);
+        anObject = Handle<SpaceObject>(_considerShip);
         _considerShipID = anObject->id;
     } else {
-        anObject = mGetSpaceObjectPtr(_considerShip);
+        anObject = Handle<SpaceObject>(_considerShip);
     }
 
     if (_destinationObject < 0) {
@@ -756,12 +756,12 @@ void Admiral::think() {
 
     if (anObject->active != kObjectInUse) {
         _considerShip = gRootObjectNumber;
-        anObject = mGetSpaceObjectPtr(_considerShip);
+        anObject = Handle<SpaceObject>(_considerShip);
         _considerShipID = anObject->id;
     }
 
     if (_destinationObject >= 0) {
-        destObject = mGetSpaceObjectPtr(_destinationObject);
+        destObject = Handle<SpaceObject>(_destinationObject);
         if (destObject->active != kObjectInUse) {
             destObject = gRootObject;
             _destinationObject = gRootObjectNumber;
@@ -782,7 +782,7 @@ void Admiral::think() {
                     _destinationObject = anObject->bestConsideredTargetNumber;
                     _has_destination = true;
                     if (_destinationObject >= 0) {
-                        destObject = mGetSpaceObjectPtr(_destinationObject);
+                        destObject = Handle<SpaceObject>(_destinationObject);
                         if (destObject->active == kObjectInUse) {
                             _destinationObjectID = destObject->id;
                             anObject->currentTargetValue
@@ -793,7 +793,7 @@ void Admiral::think() {
                             thisValue = mMultiplyFixed(
                                     thisValue, anObject->currentTargetValue);
                             anObject->currentTargetValue += thisValue;
-                            SetObjectDestination(anObject, NULL);
+                            SetObjectDestination(anObject.get(), NULL);
                         }
                     }
                     _has_destination = false;
@@ -811,7 +811,7 @@ void Admiral::think() {
 
                 // >>> INCREASE CONSIDER SHIP
                 origObject = _considerShip;
-                anObject = mGetSpaceObjectPtr(_considerShip);
+                anObject = Handle<SpaceObject>(_considerShip);
                 if (anObject->active != kObjectInUse) {
                     anObject = gRootObject;
                     _considerShip = gRootObjectNumber;
@@ -859,7 +859,7 @@ void Admiral::think() {
                         && (stepObject->distanceGrid.v == gridLoc.v)) {
                     otherDestObject = stepObject;
                 }
-                stepObject = stepObject->nextFarObject;
+                stepObject = Handle<SpaceObject>(stepObject->nextFarObject->number());
             }
             if (otherDestObject->owner == anObject->owner) {
                 friendValue = otherDestObject->localFriendStrength;
@@ -1062,16 +1062,18 @@ void Admiral::think() {
                 destBalance = mGetDestObjectBalancePtr(0);
             }
             if (destBalance->whichObject >= 0) {
-                anObject = mGetSpaceObjectPtr(destBalance->whichObject);
+                anObject = Handle<SpaceObject>(destBalance->whichObject);
                 if ((anObject->owner.get() != this)
                         || (!(anObject->attributes & kCanAcceptBuild))) {
-                    anObject = NULL;
+                    anObject = SpaceObject::none();
                 }
-            } else anObject = NULL;
-        } while ((anObject == NULL) && (_buildAtObject != origDest));
+            } else {
+                anObject = SpaceObject::none();
+            }
+        } while (!anObject.get() && (_buildAtObject != origDest));
 
         // if we have a legal object
-        if (anObject != NULL) {
+        if (anObject.get()) {
             if (destBalance->buildTime <= 0) {
                 if (_hopeToBuild < 0) {
                     int k = 0;
@@ -1091,7 +1093,7 @@ void Admiral::think() {
                             auto baseObject = mGetBaseObjectFromClassRace(_hopeToBuild, _race);
                             if (baseObject->buildFlags & kSufficientEscortsExist) {
                                 for (int j = 0; j < kMaxSpaceObject; ++j) {
-                                    anObject = mGetSpaceObjectPtr(j);
+                                    anObject = Handle<SpaceObject>(j);
                                     if ((anObject->active)
                                             && (anObject->owner.get() == this)
                                             && (anObject->base == baseObject)
@@ -1106,7 +1108,7 @@ void Admiral::think() {
                             if (baseObject->buildFlags & kMatchingFoeExists) {
                                 thisValue = 0;
                                 for (int j = 0; j < kMaxSpaceObject; j++) {
-                                    anObject = mGetSpaceObjectPtr(j);
+                                    anObject = Handle<SpaceObject>(j);
                                     if ((anObject->active)
                                             && (anObject->owner.get() != this)
                                             && (anObject->baseType->levelKeyTag

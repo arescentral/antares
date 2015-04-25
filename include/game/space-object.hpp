@@ -26,7 +26,7 @@ namespace antares {
 const int16_t kBaseObjectResID      = 500;
 const int16_t kObjectActionResID    = 500;
 
-extern SpaceObject* gRootObject;
+extern Handle<SpaceObject> gRootObject;
 extern int32_t gRootObjectNumber;
 
 void SpaceObjectHandlingInit( void);
@@ -48,7 +48,7 @@ void AlterObjectCloakState( SpaceObject *, bool);
 void DestroyObject( SpaceObject *);
 void CreateFloatingBodyOfPlayer( SpaceObject *);
 
-SpaceObject* mGetSpaceObjectPtr(int32_t whichObject);
+inline SpaceObject* mGetSpaceObjectPtr(Handle<SpaceObject> o) { return o.get(); }
 objectActionType* mGetObjectActionPtr(int32_t whichAction);
 
 Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, int race);

@@ -66,7 +66,7 @@ static const int16_t kSpaceObjectShortNameResID     = 5001;
 static StringList* space_object_names;
 static StringList* space_object_short_names;
 
-SpaceObject* gRootObject = NULL;
+Handle<SpaceObject> gRootObject;
 int32_t gRootObjectNumber = -1;
 
 static unique_ptr<SpaceObject[]> gSpaceObjectData;
@@ -119,7 +119,7 @@ void ResetAllSpaceObjects() {
     SpaceObject *anObject = NULL;
     int16_t         i;
 
-    gRootObject = NULL;
+    gRootObject = SpaceObject::none();
     gRootObjectNumber = -1;
     anObject = gSpaceObjectData.get();
     for (i = 0; i < kMaxSpaceObject; i++) {
@@ -136,9 +136,9 @@ BaseObject* BaseObject::get(int number) {
     return nullptr;
 }
 
-SpaceObject* mGetSpaceObjectPtr(int32_t whichObject) {
-    if (whichObject >= 0) {
-        return gSpaceObjectData.get() + whichObject;
+SpaceObject* SpaceObject::get(int32_t number) {
+    if ((0 <= number) && (number < kMaxSpaceObject)) {
+        return gSpaceObjectData.get() + number;
     }
     return nullptr;
 }
@@ -165,7 +165,7 @@ Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, int race) {
 
 static SpaceObject* AddSpaceObject(SpaceObject *sourceObject) {
     for (int i = 0; i < kMaxSpaceObject; ++i) {
-        SpaceObject* obj = mGetSpaceObjectPtr(i);
+        auto obj = Handle<SpaceObject>(i);
         if (obj->active) {
             continue;
         }
@@ -250,16 +250,16 @@ static SpaceObject* AddSpaceObject(SpaceObject *sourceObject) {
 
         obj->nextObject = gRootObject;
         obj->nextObjectNumber = gRootObjectNumber;
-        obj->previousObject = NULL;
+        obj->previousObject = SpaceObject::none();
         obj->previousObjectNumber = -1;
-        if (gRootObject != NULL) {
+        if (gRootObject.get()) {
             gRootObject->previousObject = obj;
             gRootObject->previousObjectNumber = i;
         }
         gRootObject = obj;
         gRootObjectNumber = i;
 
-        return obj;
+        return obj.get();
     }
     return nullptr;
 }

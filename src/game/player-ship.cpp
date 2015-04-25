@@ -1025,51 +1025,36 @@ void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral) {
 // bool sourceIsBody was hacked in to use this for xferring control
 void PlayerShipBodyExpire( SpaceObject *theShip, bool sourceIsBody)
 {
-    SpaceObject *selectShip = NULL;
+    Handle<SpaceObject> selectShip;
     int32_t         selectShipNum;
 
     selectShipNum = theShip->owner->control();
 
     if ( selectShipNum >= 0)
     {
-        selectShip = mGetSpaceObjectPtr(selectShipNum);
+        selectShip = Handle<SpaceObject>(selectShipNum);
         if (( selectShip->active != kObjectInUse) ||
             ( !(selectShip->attributes & kCanThink)) ||
             ( selectShip->attributes & kStaticDestination)
             || ( selectShip->owner != theShip->owner) ||
             (!(selectShip->attributes & kCanAcceptDestination))
             )
-            selectShip = NULL;
+            selectShip = SpaceObject::none();
     }
-    if ( selectShip == NULL)
-    {
-//      selectShip = gSpaceObjectData.get();
-//      selectShipNum = 0;
+    if (!selectShip.get()) {
         selectShip = gRootObject;
         selectShipNum = gRootObjectNumber;
-        while ( ( selectShip != NULL) &&
-                (
-                    ( selectShip->active != kObjectInUse)
-                    ||
-                    ( selectShip->attributes & kStaticDestination)
-                    ||
-                    (
-                        !(
-                            (selectShip->attributes & kCanThink) &&
-                            (selectShip->attributes & kCanAcceptDestination)
-                        )
-                    )
-                    ||
-                    ( selectShip->owner != theShip->owner)
-                )
-            )
-        {
+        while (selectShip.get()
+                && ((selectShip->active != kObjectInUse)
+                    || (selectShip->attributes & kStaticDestination)
+                    || (!((selectShip->attributes & kCanThink) &&
+                            (selectShip->attributes & kCanAcceptDestination)))
+                    || (selectShip->owner != theShip->owner))) {
             selectShipNum = selectShip->nextObjectNumber;
             selectShip = selectShip->nextObject;
         }
     }
-    if (( selectShip == NULL) && ( sourceIsBody))
-    {
+    if (!selectShip.get() && sourceIsBody) {
         if ( globals()->gGameOver >= 0)
         {
             globals()->gGameOver = -180;
@@ -1082,8 +1067,7 @@ void PlayerShipBodyExpire( SpaceObject *theShip, bool sourceIsBody)
         if (theShip->owner.get()) {
             theShip->owner->set_flagship(-1);
         }
-    } else if ( selectShip != NULL)
-    {
+    } else if (selectShip.get()) {
         ChangePlayerShipNumber(theShip->owner, selectShipNum);
     }
 }

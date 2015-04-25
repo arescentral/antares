@@ -365,6 +365,9 @@ enum dutyType {
 
 class SpaceObject {
   public:
+    static SpaceObject* get(int number);
+    static Handle<SpaceObject> none() { return Handle<SpaceObject>(-1); }
+
     static SpaceObject* zero();
 
     SpaceObject() = default;
@@ -391,9 +394,9 @@ class SpaceObject {
     SpaceObject*            nextNearObject = nullptr;
     Point                   distanceGrid;
     SpaceObject*            nextFarObject = nullptr;
-    SpaceObject*            previousObject = nullptr;
+    Handle<SpaceObject>     previousObject;
     int32_t                 previousObjectNumber = kNoShip;
-    SpaceObject*            nextObject = nullptr;
+    Handle<SpaceObject>     nextObject;
     int32_t                 nextObjectNumber = kNoShip;
 
     int32_t                 runTimeFlags = 0;               // distance from origin to destination

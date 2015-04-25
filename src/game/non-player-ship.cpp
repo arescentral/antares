@@ -119,7 +119,7 @@ void SpaceObject::recharge() {
 }
 
 static void tick_weapon(
-        SpaceObject* subject, SpaceObject* target, int32_t timePass,
+        Handle<SpaceObject> subject, SpaceObject* target, int32_t timePass,
         uint32_t key, const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
     if (weapon.time > 0) {
         weapon.time -= timePass;
@@ -130,7 +130,7 @@ static void tick_weapon(
 }
 
 void fire_weapon(
-        SpaceObject* subject, SpaceObject* target,
+        Handle<SpaceObject> subject, SpaceObject* target,
         const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
     if ((weapon.time > 0) || !weapon.base.get()) {
         return;
@@ -143,7 +143,7 @@ void fire_weapon(
     }
     if ((&weapon != &subject->special)
             && (subject->cloakState > 0)) {
-        AlterObjectCloakState(subject, false);
+        AlterObjectCloakState(subject.get(), false);
     }
     subject->_energy -= weaponObject->frame.weapon.energyCost;
     weapon.position++;
@@ -174,18 +174,18 @@ void fire_weapon(
     if (weaponObject->frame.weapon.ammo > 0) {
         weapon.ammo--;
     }
-    weaponObject->activate.run(subject, target, at);
+    weaponObject->activate.run(subject.get(), target, at);
 }
 
-static void tick_pulse(SpaceObject* subject, SpaceObject* target, int32_t timePass) {
+static void tick_pulse(Handle<SpaceObject> subject, SpaceObject* target, int32_t timePass) {
     tick_weapon(subject, target, timePass, kOneKey, subject->baseType->pulse, subject->pulse);
 }
 
-static void tick_beam(SpaceObject* subject, SpaceObject* target, int32_t timePass) {
+static void tick_beam(Handle<SpaceObject> subject, SpaceObject* target, int32_t timePass) {
     tick_weapon(subject, target, timePass, kTwoKey, subject->baseType->beam, subject->beam);
 }
 
-static void tick_special(SpaceObject* subject, SpaceObject* target, int32_t timePass) {
+static void tick_special(Handle<SpaceObject> subject, SpaceObject* target, int32_t timePass) {
     tick_weapon(subject, target, timePass, kEnterKey, subject->baseType->special, subject->special);
 }
 
@@ -229,7 +229,7 @@ void NonplayerShipThink(int32_t timePass)
 
     // it probably doesn't matter what order we do this in, but we'll do
     // it in the "ideal" order anyway
-    for (auto anObject = gRootObject; anObject; anObject = anObject->nextObject) {
+    for (auto anObject = gRootObject; anObject.get(); anObject = anObject->nextObject) {
         if (!anObject->active) {
             continue;
         }
@@ -270,23 +270,23 @@ void NonplayerShipThink(int32_t timePass)
 
         switch (anObject->presenceState) {
           case kNormalPresence:
-            keysDown = ThinkObjectNormalPresence(anObject, baseObject, timePass);
+            keysDown = ThinkObjectNormalPresence(anObject.get(), baseObject, timePass);
             break;
 
           case kWarpingPresence:
-            keysDown = ThinkObjectWarpingPresence(anObject);
+            keysDown = ThinkObjectWarpingPresence(anObject.get());
             break;
 
           case kWarpInPresence:
-            keysDown = ThinkObjectWarpInPresence(anObject);
+            keysDown = ThinkObjectWarpInPresence(anObject.get());
             break;
 
           case kWarpOutPresence:
-            keysDown = ThinkObjectWarpOutPresence(anObject, baseObject);
+            keysDown = ThinkObjectWarpOutPresence(anObject.get(), baseObject);
             break;
 
           case kLandingPresence:
-            keysDown = ThinkObjectLandingPresence(anObject);
+            keysDown = ThinkObjectLandingPresence(anObject.get());
             break;
         }
 
@@ -346,10 +346,10 @@ void NonplayerShipThink(int32_t timePass)
 
         // Take care of any "keys" being pressed
         if (anObject->keysDown & kAdoptTargetKey) {
-            SetObjectDestination(anObject, NULL);
+            SetObjectDestination(anObject.get(), NULL);
         }
         if (anObject->keysDown & kAutoPilotKey) {
-            TogglePlayerAutoPilot(anObject);
+            TogglePlayerAutoPilot(anObject.get());
         }
         if (anObject->keysDown & kGiveCommandKey) {
             PlayerShipGiveCommand(anObject->owner);
@@ -366,7 +366,7 @@ void NonplayerShipThink(int32_t timePass)
         if ((anObject->attributes & kRemoteOrHuman)
                 && (!(anObject->attributes & kCanThink))
                 && (anObject->age < 120)) {
-            PlayerShipBodyExpire(anObject, true);
+            PlayerShipBodyExpire(anObject.get(), true);
         }
 
         if ((anObject->attributes & kHasDirectionGoal)
@@ -1732,7 +1732,8 @@ void HitObject(SpaceObject *anObject, SpaceObject *sObject) {
     }
 }
 
-static bool allegiance_is(Allegiance allegiance, Handle<Admiral> admiral, SpaceObject* object) {
+static bool allegiance_is(
+        Allegiance allegiance, Handle<Admiral> admiral, Handle<SpaceObject> object) {
     switch (allegiance) {
       case FRIENDLY_OR_HOSTILE:
         return true;
@@ -1761,11 +1762,11 @@ int32_t GetManualSelectObject(
     // try to get any ship but the current ship
     // stop trying when we've made a full circle (we're back on currentShipNum)
 
-    SpaceObject *anObject;
+    Handle<SpaceObject> anObject;
     int32_t whichShip = currentShipNum;
     int32_t startShip = currentShipNum;
     if (whichShip >= 0) {
-        anObject = mGetSpaceObjectPtr(startShip);
+        anObject = Handle<SpaceObject>(startShip);
         if (anObject->active != kObjectInUse) { // if it's not in the loop
             anObject = gRootObject;
             startShip = whichShip = gRootObjectNumber;
@@ -1778,7 +1779,7 @@ int32_t GetManualSelectObject(
     int32_t nextShipOut = -1, closestShip = -1;
     do {
         if (anObject->active
-                && (anObject != sourceObject)
+                && (anObject.get() != sourceObject)
                 && (anObject->seenByPlayerFlags & myOwnerFlag)
                 && (anObject->attributes & inclusiveAttributes)
                 && !(anObject->attributes & exclusiveAttributes)
@@ -1835,7 +1836,7 @@ int32_t GetManualSelectObject(
         }
         whichShip = anObject->nextObjectNumber;
         anObject = anObject->nextObject;
-        if (!anObject) {
+        if (!anObject.get()) {
             whichShip = gRootObjectNumber;
             anObject = gRootObject;
         }
@@ -1856,7 +1857,7 @@ int32_t GetSpritePointSelectObject(
 
     int32_t resultShip = -1, closestShip = -1;
     for (int32_t whichShip = 0; whichShip < kMaxSpaceObject; whichShip++) {
-        SpaceObject* anObject = mGetSpaceObjectPtr(whichShip);
+        auto anObject = Handle<SpaceObject>(whichShip);
         if (!anObject->active
                 || !anObject->sprite
                 || !(anObject->seenByPlayerFlags & myOwnerFlag)
