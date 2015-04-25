@@ -154,7 +154,7 @@ class Admiral {
     Handle<SpaceObject> _considerShip;
     int32_t             _considerShipID = -1;
     int32_t             _considerDestination = kNoShip;
-    Handle<Destination> _buildAtObject = -1; // # of destination object to build at
+    Handle<Destination> _buildAtObject; // # of destination object to build at
     int32_t             _race = -1;
     Fixed               _cash = 0;
     Fixed               _saveGoal = 0;

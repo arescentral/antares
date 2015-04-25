@@ -468,7 +468,7 @@ void SetObjectLocationDestination(SpaceObject *o, coordPointType *where) {
 }
 
 void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
-    SpaceObject* dObject = overrideObject;
+    auto dObject = Handle<SpaceObject>(overrideObject->number());
 
     // if the object does not have an alliance, then something is wrong here--forget it
     if (o->owner.number() <= kNoOwner) {
@@ -502,7 +502,7 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
     const auto& a = o->owner;
 
     // if the admiral is not legal, or the admiral has no destination, then forget about it
-    if ((dObject == NULL) &&
+    if (!dObject.get() &&
             ((!a->active())
              || !a->has_destination()
              || !a->destinationObject().get()
@@ -518,8 +518,8 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
         // the object is OK, the admiral is OK, then go about setting its destination
 
         // first make sure we're still looking at the same object
-        if (dObject == NULL) {
-            dObject = mGetSpaceObjectPtr(a->destinationObject());
+        if (!dObject.get()) {
+            dObject = a->destinationObject();
         }
 
         if ((dObject->active == kObjectInUse) &&
@@ -536,10 +536,10 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
             }
 
             // add this object to its destination
-            if (o != dObject) {
+            if (o != dObject.get()) {
                 o->runTimeFlags &= ~kHasArrived;
                 o->destObject = dObject->number();
-                o->destObjectPtr = dObject;
+                o->destObjectPtr = dObject.get();
                 o->destObjectDest = dObject->destObject;
                 o->destObjectDestID = dObject->destObjectID;
                 o->destObjectID = dObject->id;
@@ -629,7 +629,6 @@ static void AdmiralBuildAtObject(
 
 void AdmiralThink() {
     Admiral* a =gAdmiralData.get();
-    SpaceObject* anObject;
 
     for (int i = 0; i < kMaxDestObject; i++) {
         auto destBalance = Handle<Destination>(i);
@@ -637,14 +636,14 @@ void AdmiralThink() {
         if (destBalance->buildTime <= 0) {
             destBalance->buildTime = 0;
             if (destBalance->buildObjectBaseNum.get()) {
-                anObject = mGetSpaceObjectPtr(destBalance->whichObject);
+                auto anObject = Handle<SpaceObject>(destBalance->whichObject);
                 AdmiralBuildAtObject(anObject->owner, destBalance->buildObjectBaseNum, i);
                 destBalance->buildObjectBaseNum = BaseObject::none();
             }
         }
 
-        anObject = mGetSpaceObjectPtr(destBalance->whichObject);
-        if (anObject && anObject->owner.get()) {
+        auto anObject = Handle<SpaceObject>(destBalance->whichObject);
+        if (anObject.get() && anObject->owner.get()) {
             anObject->owner->pay(destBalance->earn);
         }
     }

@@ -347,7 +347,7 @@ static void render_briefing_with(
 
     for ( count = 0; count < kMaxSpaceObject; count++)
     {
-        SpaceObject* anObject = mGetSpaceObjectPtr(count);
+        auto anObject = Handle<SpaceObject>(count);
         if (( anObject->active == kObjectInUse) && ( anObject->sprite != NULL))
         {
             auto baseObject = anObject->base;

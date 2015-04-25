@@ -633,7 +633,7 @@ SpaceObject* CreateAnySpaceObject(
 int32_t CountObjectsOfBaseType(Handle<BaseObject> whichType, Handle<Admiral> owner) {
     int32_t result = 0;
     for (int32_t i = 0; i < kMaxSpaceObject; ++i) {
-        auto anObject = mGetSpaceObjectPtr(i);
+        auto anObject = Handle<SpaceObject>(i);
         if (anObject->active
                 && (!whichType.get() || (anObject->base == whichType))
                 && (!owner.get() || (anObject->owner == owner))) {
@@ -923,7 +923,7 @@ StringSlice get_object_short_name(Handle<BaseObject> id) {
 }
 
 int32_t SpaceObject::number() const {
-    return this - mGetSpaceObjectPtr(0);
+    return this - gSpaceObjectData.get();
 }
 
 static BaseObject kZeroBaseObject;

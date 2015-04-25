@@ -47,7 +47,6 @@ void AlterObjectCloakState( SpaceObject *, bool);
 void DestroyObject( SpaceObject *);
 void CreateFloatingBodyOfPlayer( SpaceObject *);
 
-inline SpaceObject* mGetSpaceObjectPtr(Handle<SpaceObject> o) { return o.get(); }
 objectActionType* mGetObjectActionPtr(int32_t whichAction);
 
 Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, int race);

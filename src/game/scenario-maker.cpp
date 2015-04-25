@@ -272,10 +272,10 @@ void set_initial_destination(const Scenario::InitialObject* initial, bool preser
 
         // now give the mapped initial object the admiral's destination
 
-        SpaceObject* object = mGetSpaceObjectPtr(initial->realObjectNumber);
+        auto object = Handle<SpaceObject>(initial->realObjectNumber);
         uint32_t specialAttributes = object->attributes; // preserve the attributes
         object->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
-        SetObjectDestination(object, NULL);
+        SetObjectDestination(object.get(), NULL);
         object->attributes = specialAttributes;
 
         if (preserve) {
@@ -467,10 +467,9 @@ bool Scenario::Condition::is_true() const {
         case kIsAuxiliaryObject:
             sObject = GetObjectFromInitialNumber(subjectObject);
             if (sObject != NULL) {
-                auto l = globals()->gPlayerAdmiral->control();
-                if (l.get()) {
-                    dObject = mGetSpaceObjectPtr(l);
-                    if (dObject == sObject) {
+                auto dObject = globals()->gPlayerAdmiral->control();
+                if (dObject.get()) {
+                    if (dObject.get() == sObject) {
                         return true;
                     }
                 }
@@ -480,10 +479,9 @@ bool Scenario::Condition::is_true() const {
         case kIsTargetObject:
             sObject = GetObjectFromInitialNumber(subjectObject);
             if (sObject != NULL) {
-                auto l = globals()->gPlayerAdmiral->target();
-                if (l.get()) {
-                    dObject = mGetSpaceObjectPtr(l);
-                    if (dObject == sObject) {
+                auto dObject = globals()->gPlayerAdmiral->target();
+                if (dObject.get()) {
+                    if (dObject.get() == sObject) {
                         return true;
                     }
                 }
@@ -827,7 +825,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 type, &v, &coord, gScenarioRotation, owner, specialAttributes,
                 initial->spriteIDOverride)->number();
 
-        SpaceObject* anObject = mGetSpaceObjectPtr(newShipNum);
+        auto anObject = Handle<SpaceObject>(newShipNum);
         if (anObject->attributes & kIsDestination) {
             anObject->asDestination = MakeNewDestination(
                     newShipNum, initial->canBuild, initial->earning, initial->nameResID,
@@ -974,7 +972,7 @@ void UnhideInitialObject(int32_t whichInitial) {
             type, &v, &coord, 0, owner, specialAttributes, initial->spriteIDOverride)->number();
     initial->realObjectNumber = newShipNum;
 
-    auto anObject = mGetSpaceObjectPtr(newShipNum);
+    auto anObject = Handle<SpaceObject>(newShipNum);
 
     if (anObject->attributes & kIsDestination) {
         anObject->asDestination = MakeNewDestination(
@@ -1011,11 +1009,11 @@ SpaceObject *GetObjectFromInitialNumber(int32_t initialNumber) {
     if (initialNumber >= 0) {
         Scenario::InitialObject* initial = gThisScenario->initial(initialNumber);
         if (initial->realObjectNumber >= 0) {
-            SpaceObject& object = *mGetSpaceObjectPtr(initial->realObjectNumber);
-            if ((object.id != initial->realObjectID) || (object.active != kObjectInUse)) {
+            auto object = Handle<SpaceObject>(initial->realObjectNumber);
+            if ((object->id != initial->realObjectID) || (object->active != kObjectInUse)) {
                 return NULL;
             }
-            return &object;
+            return object.get();
         }
         return NULL;
     } else if (initialNumber == -2) {
