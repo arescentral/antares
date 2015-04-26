@@ -795,12 +795,12 @@ void Admiral::think() {
                         destObject->baseType->destinationClass))) {
             gridLoc = destObject->distanceGrid;
             stepObject = otherDestObject = destObject;
-            while (stepObject->nextFarObject != NULL) {
+            while (stepObject->nextFarObject.get()) {
                 if ((stepObject->distanceGrid.h == gridLoc.h)
                         && (stepObject->distanceGrid.v == gridLoc.v)) {
                     otherDestObject = stepObject;
                 }
-                stepObject = Handle<SpaceObject>(stepObject->nextFarObject->number());
+                stepObject = stepObject->nextFarObject;
             }
             if (otherDestObject->owner == anObject->owner) {
                 friendValue = otherDestObject->localFriendStrength;

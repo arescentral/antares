@@ -393,9 +393,9 @@ class SpaceObject {
 
     coordPointType          location = {0, 0};
     Point                   collisionGrid;
-    SpaceObject*            nextNearObject = nullptr;
+    Handle<SpaceObject>     nextNearObject;
     Point                   distanceGrid;
-    SpaceObject*            nextFarObject = nullptr;
+    Handle<SpaceObject>     nextFarObject;
     Handle<SpaceObject>     previousObject;
     Handle<SpaceObject>     nextObject;
 

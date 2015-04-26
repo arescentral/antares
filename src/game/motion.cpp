@@ -99,7 +99,7 @@ void InitMotion() {
     {
         for ( x = 0; x < kProximitySuperSize; x++)
         {
-            p->nearObject = p->farObject = NULL;
+            p->nearObject = p->farObject = SpaceObject::none();
             adjacentAdd = 0;
             for ( i = 0; i < kUnitsToCheckNumber; i++)
             {
@@ -154,7 +154,7 @@ void ResetMotionGlobals( void)
     proximityObject = gProximityGrid.get();
     for ( i = 0; i < kProximityGridDataLength; i++)
     {
-        proximityObject->nearObject = proximityObject->farObject = NULL;
+        proximityObject->nearObject = proximityObject->farObject = SpaceObject::none();
         proximityObject++;
     }
 }
@@ -595,7 +595,7 @@ void CollideSpaceObjects() {
     // reset the collision grid
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
         auto proximityObject = &gProximityGrid[i];
-        proximityObject->nearObject = proximityObject->farObject = NULL;
+        proximityObject->nearObject = proximityObject->farObject = SpaceObject::none();
     }
 
     for (auto aObject = gRootObject; aObject.get(); aObject = aObject->nextObject) {
@@ -685,7 +685,7 @@ void CollideSpaceObjects() {
 
             auto proximityObject = gProximityGrid.get() + (ys << kProximityWidthMultiply) + xs;
             aObject->nextNearObject = proximityObject->nearObject;
-            proximityObject->nearObject = aObject.get();
+            proximityObject->nearObject = aObject;
             aObject->collisionGrid.h = xe;
             aObject->collisionGrid.v = ye;
 
@@ -699,7 +699,7 @@ void CollideSpaceObjects() {
 
             proximityObject = gProximityGrid.get() + (ye << kProximityWidthMultiply) + xe;
             aObject->nextFarObject = proximityObject->farObject;
-            proximityObject->farObject = aObject.get();
+            proximityObject->farObject = aObject;
             aObject->distanceGrid.h = xs;
             aObject->distanceGrid.v = ys;
 
@@ -716,9 +716,10 @@ void CollideSpaceObjects() {
 
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
         auto proximityObject = &gProximityGrid[i];
-        auto aObject = proximityObject->nearObject;
-        for (SpaceObject* taObject = aObject->nextNearObject; aObject;
-                aObject = taObject, taObject = aObject->nextNearObject) {
+        auto taObject = proximityObject->nearObject;
+        for (auto aObject = taObject; aObject.get(); aObject = taObject) {
+            taObject = aObject->nextNearObject;
+
             // this hack is to get the current bounds of the object in question
             // it could be sped up by accessing the sprite table directly
             if ((aObject->absoluteBounds.left >= aObject->absoluteBounds.right)
@@ -743,10 +744,10 @@ void CollideSpaceObjects() {
 
             auto currentProximity = proximityObject;
             for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
-                SpaceObject* bObject;
+                Handle<SpaceObject> tbObject;
                 int32_t superx, supery;
                 if (k == 0) {
-                    bObject = aObject->nextNearObject;
+                    tbObject = aObject->nextNearObject;
                     superx = aObject->collisionGrid.h;
                     supery = aObject->collisionGrid.v;
                 } else {
@@ -757,7 +758,7 @@ void CollideSpaceObjects() {
                                 "proximity units");
                     }
                     currentProximity += proximityObject->unitsToCheck[k].adjacentUnit;
-                    bObject = currentProximity->nearObject;
+                    tbObject = currentProximity->nearObject;
                     superx = aObject->collisionGrid.h + proximityObject->unitsToCheck[k].superOffset.h;
                     supery = aObject->collisionGrid.v + proximityObject->unitsToCheck[k].superOffset.v;
                 }
@@ -766,8 +767,8 @@ void CollideSpaceObjects() {
                     continue;
                 }
 
-                for (SpaceObject* tbObject = bObject->nextNearObject; bObject;
-                        bObject = tbObject, tbObject = bObject->nextNearObject) {
+                for (auto bObject = tbObject; bObject.get(); bObject = tbObject) {
+                    tbObject = bObject->nextNearObject;
                     // this'll be true even ONLY if BOTH objects are not non-physical dest object
                     if (!((bObject->attributes | aObject->attributes) & kCanCollide)
                             || !((bObject->attributes | aObject->attributes) & kCanBeHit)
@@ -805,8 +806,8 @@ void CollideSpaceObjects() {
                     Handle<SpaceObject> sObject;
                     Handle<SpaceObject> dObject;
                     if (!((bObject->attributes | aObject->attributes) & kIsBeam)) {
-                        dObject = Handle<SpaceObject>(aObject->number());
-                        sObject = Handle<SpaceObject>(bObject->number());
+                        dObject = aObject;
+                        sObject = bObject;
                         if (!((sObject->absoluteBounds.right < dObject->absoluteBounds.left) ||
                                     (sObject->absoluteBounds.left > dObject->absoluteBounds.right) ||
                                     (sObject->absoluteBounds.bottom < dObject->absoluteBounds.top) ||
@@ -820,11 +821,11 @@ void CollideSpaceObjects() {
                         }
                     } else {
                         if (bObject->attributes & kIsBeam) {
-                            sObject = Handle<SpaceObject>(bObject->number());
-                            dObject = Handle<SpaceObject>(aObject->number());
+                            sObject = bObject;
+                            dObject = aObject;
                         } else {
-                            sObject = Handle<SpaceObject>(aObject->number());
-                            dObject = Handle<SpaceObject>(bObject->number());
+                            sObject = aObject;
+                            dObject = bObject;
                         }
 
                         int32_t xs = sObject->location.h;
@@ -897,16 +898,14 @@ void CollideSpaceObjects() {
                     }
 
                     // check to see if the 2 objects occupy same physical space
-                    dObject = Handle<SpaceObject>(aObject->number());
-                    sObject = Handle<SpaceObject>(bObject->number());
+                    dObject = aObject;
+                    sObject = bObject;
                     if ((sObject->absoluteBounds.right >= dObject->absoluteBounds.left)
                             && (sObject->absoluteBounds.left <= dObject->absoluteBounds.right)
                             && (sObject->absoluteBounds.bottom >= dObject->absoluteBounds.top)
                             && (sObject->absoluteBounds.top <= dObject->absoluteBounds.bottom)) {
                         // move them back till they don't touch
-                        CorrectPhysicalSpace(
-                                Handle<SpaceObject>(aObject->number()),
-                                Handle<SpaceObject>(bObject->number()));
+                        CorrectPhysicalSpace(aObject, bObject);
                     }
                 }
             }
@@ -915,20 +914,20 @@ void CollideSpaceObjects() {
 
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
         auto proximityObject = &gProximityGrid[i];
-        auto aObject = proximityObject->farObject;
-        for (SpaceObject* taObject = aObject->nextFarObject; aObject;
-                aObject = taObject, taObject = aObject->nextFarObject) {
+        auto taObject = proximityObject->farObject;
+        for (auto aObject = taObject; aObject.get(); aObject = taObject) {
+            taObject = aObject->nextFarObject;
             auto currentProximity = proximityObject;
             for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
-                SpaceObject* bObject;
+                Handle<SpaceObject> tbObject;
                 int32_t superx, supery;
                 if (k == 0) {
-                    bObject = aObject->nextFarObject;
+                    tbObject = aObject->nextFarObject;
                     superx = aObject->distanceGrid.h;
                     supery = aObject->distanceGrid.v;
                 } else {
                     currentProximity += proximityObject->unitsToCheck[k].adjacentUnit;
-                    bObject = currentProximity->farObject;
+                    tbObject = currentProximity->farObject;
                     superx = aObject->distanceGrid.h + proximityObject->unitsToCheck[k].superOffset.h;
                     supery = aObject->distanceGrid.v + proximityObject->unitsToCheck[k].superOffset.v;
                 }
@@ -936,8 +935,8 @@ void CollideSpaceObjects() {
                     continue;
                 }
 
-                for (SpaceObject* tbObject = bObject->nextFarObject; bObject;
-                        bObject = tbObject, tbObject = bObject->nextFarObject) {
+                for (auto bObject = tbObject; bObject.get(); bObject = tbObject) {
+                    tbObject = bObject->nextFarObject;
                     if ((bObject->owner != aObject->owner)
                             && (bObject->distanceGrid.h == superx)
                             && (bObject->distanceGrid.v == supery)
@@ -981,7 +980,7 @@ void CollideSpaceObjects() {
 
                         if ((distance < aObject->closestDistance) && (bObject->attributes & kPotentialTarget)) {
                             aObject->closestDistance = distance;
-                            aObject->closestObject = Handle<SpaceObject>(bObject->number());
+                            aObject->closestObject = bObject;
                         }
 
 hackANoEngageMatch:
@@ -997,7 +996,7 @@ hackANoEngageMatch:
 
                         if (( distance < bObject->closestDistance) && ( aObject->attributes & kPotentialTarget)) {
                             bObject->closestDistance = distance;
-                            bObject->closestObject = Handle<SpaceObject>(aObject->number());
+                            bObject->closestObject = aObject;
                         }
 hackBNoEngageMatch:
                         bObject->localFoeStrength += aObject->localFriendStrength;
@@ -1030,7 +1029,7 @@ hackBNoEngageMatch:
                 }
                 aObject->active = kObjectAvailable;
                 aObject->attributes = 0;
-                aObject->nextNearObject = aObject->nextFarObject = NULL;
+                aObject->nextNearObject = aObject->nextFarObject = SpaceObject::none();
                 if (aObject->previousObject.get()) {
                     auto bObject = aObject->previousObject;
                     bObject->nextObject = aObject->nextObject;
@@ -1050,7 +1049,7 @@ hackBNoEngageMatch:
                     aObject->sprite->killMe = true;
                 }
                 aObject->attributes = 0;
-                aObject->nextNearObject = aObject->nextFarObject = NULL;
+                aObject->nextNearObject = aObject->nextFarObject = SpaceObject::none();
                 if (aObject->previousObject.get()) {
                     auto bObject = aObject->previousObject;
                     bObject->nextObject = aObject->nextObject;

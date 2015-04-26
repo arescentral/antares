@@ -265,7 +265,7 @@ void RemoveAllSpaceObjects() {
             obj->sprite = NULL;
         }
         obj->active = kObjectAvailable;
-        obj->nextNearObject = obj->nextFarObject = NULL;
+        obj->nextNearObject = obj->nextFarObject = SpaceObject::none();
         obj->attributes = 0;
     }
 }
