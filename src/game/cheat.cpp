@@ -74,7 +74,7 @@ void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
 
     if ( whichCheat == kNameObjectCheat)
     {
-        globals()->gActiveCheats[whichPlayer.number()] |= kNameObjectBit;
+        whichPlayer->cheats() |= kNameObjectBit;
         CheatFeedback( whichCheat, true, whichPlayer);
         return;
     }
@@ -82,9 +82,8 @@ void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
     switch( whichCheat)
     {
         case kActivateCheatCheat:
-            for ( i = 0; i < kMaxPlayerNum; i++)
-            {
-                globals()->gActiveCheats[i] = 0;
+            for (auto adm: Admiral::all()) {
+                adm->cheats() = 0;
             }
             CheatFeedback( whichCheat, false, whichPlayer);
             break;
@@ -97,27 +96,13 @@ void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
             break;
 
         case kAutoPlayCheat:
-            if ( globals()->gActiveCheats[whichPlayer.number()] & kAutoPlayBit)
-            {
-                globals()->gActiveCheats[whichPlayer.number()] &= ~kAutoPlayBit;
-                CheatFeedback( whichCheat, false, whichPlayer);
-            } else
-            {
-                globals()->gActiveCheats[whichPlayer.number()] |= kAutoPlayBit;
-                CheatFeedback( whichCheat, true, whichPlayer);
-            }
+            whichPlayer->cheats() ^= kAutoPlayBit;
+            CheatFeedback(whichCheat, whichPlayer->cheats() & kAutoPlayBit, whichPlayer);
             break;
 
         case kBuildFastCheat:
-            if ( globals()->gActiveCheats[whichPlayer.number()] & kBuildFastBit)
-            {
-                globals()->gActiveCheats[whichPlayer.number()] &= ~kBuildFastBit;
-                CheatFeedback( whichCheat, false, whichPlayer);
-            } else
-            {
-                globals()->gActiveCheats[whichPlayer.number()] |= kBuildFastBit;
-                CheatFeedback( whichCheat, true, whichPlayer);
-            }
+            whichPlayer->cheats() ^= kBuildFastBit;
+            CheatFeedback(whichCheat, whichPlayer->cheats() & kBuildFastBit, whichPlayer);
             break;
 
         case kObserverCheat:

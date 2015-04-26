@@ -42,9 +42,6 @@ void init_globals() {
 }
 
 aresGlobalType::aresGlobalType() {
-    for (int player = 0; player < kMaxPlayerNum; player++) {
-        gActiveCheats[player] = 0;
-    }
     gKeyMapBuffer = new KeyMap[kKeyMapBufferNum];
     gKeyMapBufferTop = 0;
     gKeyMapBufferBottom = 0;

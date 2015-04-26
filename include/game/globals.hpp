@@ -94,7 +94,6 @@ struct aresGlobalType {
     aresGlobalType();
     ~aresGlobalType();
 
-    uint32_t        gActiveCheats[kMaxPlayerNum];
     uint32_t        gSynchValue;
     std::unique_ptr<InputSource> gInputSource;
     int32_t         gGameOver;

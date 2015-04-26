@@ -69,7 +69,6 @@ void Admiral::init() {
 void Admiral::reset() {
     for (auto a: Admiral::all()) {
         *a = Admiral();
-        globals()->gActiveCheats[a.number()] = 0;
     }
 }
 
@@ -1072,7 +1071,7 @@ bool Admiral::build(int32_t buildWhichType) {
         auto buildBaseObject = mGetBaseObjectFromClassRace(dest->canBuildType[buildWhichType], _race);
         if (buildBaseObject.get() && (buildBaseObject->price <= mFixedToLong(_cash))) {
             _cash -= (mLongToFixed(buildBaseObject->price));
-            if (globals()->gActiveCheats[self.number()] & kBuildFastBit) {
+            if (_cheats & kBuildFastBit) {
                 dest->buildTime = 9;
                 dest->totalBuildTime = 9;
             } else {

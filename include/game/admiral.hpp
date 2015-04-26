@@ -145,6 +145,7 @@ class Admiral {
     uint8_t&            color() { return _color; }
     bool&               active() { return _active; }
     sfz::StringSlice    name() { return _name; }
+    uint32_t&           cheats() { return _cheats; }
 
   private:
     uint32_t            _attributes;
@@ -173,6 +174,7 @@ class Admiral {
     int32_t             _hopeToBuild = -1;
     uint8_t             _color = 0;
     bool                _active = false;
+    uint32_t            _cheats = 0;
     sfz::String         _name;
 
   private:
