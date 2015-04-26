@@ -254,7 +254,7 @@ void GetInitialCoord(Scenario::InitialObject *initial, coordPointType *coord, in
 }
 
 void set_initial_destination(const Scenario::InitialObject* initial, bool preserve) {
-    if ((initial->realObjectNumber < 0)                 // hasn't been created yet
+    if (!initial->realObject.get()                      // hasn't been created yet
             || (initial->initialDestination < 0)        // doesn't have a target
             || (!initial->owner.get())) {               // doesn't have an owner
         return;
@@ -264,15 +264,15 @@ void set_initial_destination(const Scenario::InitialObject* initial, bool preser
     Handle<Admiral> owner = initial->owner;
 
     auto target = gThisScenario->initial(initial->initialDestination);
-    if (target->realObjectNumber >= 0) {
+    if (target->realObject.get()) {
         auto saveDest = owner->target(); // save the original dest
 
         // set the admiral's dest object to the mapped initial dest object
-        owner->set_target(Handle<SpaceObject>(target->realObjectNumber));
+        owner->set_target(target->realObject);
 
         // now give the mapped initial object the admiral's destination
 
-        auto object = Handle<SpaceObject>(initial->realObjectNumber);
+        auto object = initial->realObject;
         uint32_t specialAttributes = object->attributes; // preserve the attributes
         object->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
         SetObjectDestination(object.get(), NULL);
@@ -359,8 +359,6 @@ bool Scenario::Condition::true_yet() const {
 }
 
 bool Scenario::Condition::is_true() const {
-    SpaceObject* sObject = nullptr;
-    SpaceObject* dObject = nullptr;
     int32_t i, difference;
     Handle<Admiral> a;
     uint32_t distance, dcalc;
@@ -390,179 +388,129 @@ bool Scenario::Condition::is_true() const {
             }
             break;
 
-        case kDestructionCondition:
-            sObject = GetObjectFromInitialNumber(conditionArgument.longValue);
-            if (sObject == NULL) {
-                return true;
-            }
-            break;
+        case kDestructionCondition: {
+            auto sObject = GetObjectFromInitialNumber(conditionArgument.longValue);
+            return !sObject.get();
+        }
 
-        case kOwnerCondition:
-            sObject = GetObjectFromInitialNumber(subjectObject);
-            if (sObject != NULL) {
-                a = Handle<Admiral>(conditionArgument.longValue);
-                if (a == sObject->owner) {
-                    return true;
-                }
-            }
-            break;
+        case kOwnerCondition: {
+            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            auto a = Handle<Admiral>(conditionArgument.longValue);
+            return sObject.get()
+                && (a == sObject->owner);
+        }
 
         case kTimeCondition:
-            if (globals()->gGameTime >=
-                    ticks_to_usecs(conditionArgument.longValue)) {
-                return true;
-            }
-            break;
+            return globals()->gGameTime >= ticks_to_usecs(conditionArgument.longValue);
 
-        case kProximityCondition:
-            sObject = GetObjectFromInitialNumber(subjectObject);
-            if (sObject != NULL) {
-                dObject = GetObjectFromInitialNumber(directObject);
-                if (dObject != NULL) {
-                    difference = ABS<int>(sObject->location.h - dObject->location.h);
-                    dcalc = difference;
-                    difference =  ABS<int>(sObject->location.v - dObject->location.v);
-                    distance = difference;
+        case kProximityCondition: {
+            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            auto dObject = GetObjectFromInitialNumber(directObject);
+            if (sObject.get() && dObject.get()) {
+                difference = ABS<int>(sObject->location.h - dObject->location.h);
+                dcalc = difference;
+                difference =  ABS<int>(sObject->location.v - dObject->location.v);
+                distance = difference;
 
-                    if ((dcalc < kMaximumRelevantDistance) && (distance < kMaximumRelevantDistance)) {
-                        distance = distance * distance + dcalc * dcalc;
-                        if (distance < conditionArgument.unsignedLongValue) {
-                            return true;
-                        }
-                    }
-                }
-            }
-            break;
-
-        case kDistanceGreaterCondition:
-            sObject = GetObjectFromInitialNumber(subjectObject);
-            if (sObject != NULL) {
-                dObject = GetObjectFromInitialNumber(directObject);
-                if (dObject != NULL) {
-                    difference = ABS<int>(sObject->location.h - dObject->location.h);
-                    dcalc = difference;
-                    difference =  ABS<int>(sObject->location.v - dObject->location.v);
-                    distance = difference;
-
-                    if ((dcalc < kMaximumRelevantDistance)
-                            && (distance < kMaximumRelevantDistance)) {
-                        distance = distance * distance + dcalc * dcalc;
-                        if (distance >= conditionArgument.unsignedLongValue) {
-                            return true;
-                        }
-                    }
-                }
-            }
-            break;
-
-        case kHalfHealthCondition:
-            sObject = GetObjectFromInitialNumber(subjectObject);
-            if (sObject == NULL) {
-                return true;
-            } else if (sObject->health() <= (sObject->max_health() >> 1)) {
-                return true;
-            }
-            break;
-
-        case kIsAuxiliaryObject:
-            sObject = GetObjectFromInitialNumber(subjectObject);
-            if (sObject != NULL) {
-                auto dObject = globals()->gPlayerAdmiral->control();
-                if (dObject.get()) {
-                    if (dObject.get() == sObject) {
+                if ((dcalc < kMaximumRelevantDistance) && (distance < kMaximumRelevantDistance)) {
+                    distance = distance * distance + dcalc * dcalc;
+                    if (distance < conditionArgument.unsignedLongValue) {
                         return true;
                     }
-                }
-            }
-            break;
-
-        case kIsTargetObject:
-            sObject = GetObjectFromInitialNumber(subjectObject);
-            if (sObject != NULL) {
-                auto dObject = globals()->gPlayerAdmiral->target();
-                if (dObject.get()) {
-                    if (dObject.get() == sObject) {
-                        return true;
-                    }
-                }
-            }
-            break;
-
-        case kVelocityLessThanEqualToCondition:
-            sObject = GetObjectFromInitialNumber(subjectObject);
-            if (sObject != NULL) {
-                if (((ABS(sObject->velocity.h)) < conditionArgument.longValue) &&
-                    ((ABS(sObject->velocity.v)) < conditionArgument.longValue)) {
-                    return true;
-                }
-            }
-            break;
-
-        case kNoShipsLeftCondition:
-            if (GetAdmiralShipsLeft(Handle<Admiral>(conditionArgument.longValue)) <= 0) {
-                return true;
-            }
-            break;
-
-        case kCurrentMessageCondition:
-            if (Messages::current() == (conditionArgument.location.h +
-                conditionArgument.location.v - 1)) {
-                return true;
-            }
-            break;
-
-        case kCurrentComputerCondition:
-            if ((globals()->gMiniScreenData.currentScreen ==
-                conditionArgument.location.h) &&
-                ((conditionArgument.location.v < 0) ||
-                    (globals()->gMiniScreenData.selectLine ==
-                        conditionArgument.location.v))) {
-                return true;
-            }
-            break;
-
-        case kZoomLevelCondition:
-            if (globals()->gZoomMode == conditionArgument.longValue) {
-                return true;
-            }
-            break;
-
-        case kAutopilotCondition:
-            return IsPlayerShipOnAutoPilot();
-            break;
-
-        case kNotAutopilotCondition:
-            return !IsPlayerShipOnAutoPilot();
-            break;
-
-        case kObjectIsBeingBuilt: {
-            auto buildAtObject = GetAdmiralBuildAtObject(globals()->gPlayerAdmiral);
-            if (buildAtObject.get()) {
-                if (buildAtObject->totalBuildTime > 0) {
-                    return true;
                 }
             }
             break;
         }
 
-        case kDirectIsSubjectTarget:
-            sObject = GetObjectFromInitialNumber(subjectObject);
-            dObject = GetObjectFromInitialNumber(directObject);
-            if ((sObject != NULL) && (dObject != NULL)) {
-                if (sObject->destObjectID == dObject->id) {
-                    return true;
-                }
-            }
-            break;
+        case kDistanceGreaterCondition: {
+            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            auto dObject = GetObjectFromInitialNumber(directObject);
+            if (sObject.get() && dObject.get()) {
+                difference = ABS<int>(sObject->location.h - dObject->location.h);
+                dcalc = difference;
+                difference =  ABS<int>(sObject->location.v - dObject->location.v);
+                distance = difference;
 
-        case kSubjectIsPlayerCondition:
-            sObject = GetObjectFromInitialNumber(subjectObject);
-            if (sObject != NULL) {
-                if (Handle<SpaceObject>(sObject->number()) == globals()->gPlayerShip) {
-                    return true;
+                if ((dcalc < kMaximumRelevantDistance)
+                        && (distance < kMaximumRelevantDistance)) {
+                    distance = distance * distance + dcalc * dcalc;
+                    if (distance >= conditionArgument.unsignedLongValue) {
+                        return true;
+                    }
                 }
             }
             break;
+        }
+
+        case kHalfHealthCondition: {
+            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            return !sObject.get()
+                || (sObject->health() <= (sObject->max_health() >> 1));
+        }
+
+        case kIsAuxiliaryObject: {
+            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            auto dObject = globals()->gPlayerAdmiral->control();
+            return sObject.get()
+                && dObject.get()
+                && (dObject == sObject);
+        }
+
+        case kIsTargetObject: {
+            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            auto dObject = globals()->gPlayerAdmiral->target();
+            return sObject.get()
+                && dObject.get()
+                && (dObject == sObject);
+        }
+
+        case kVelocityLessThanEqualToCondition: {
+            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            return sObject.get()
+                && ((ABS(sObject->velocity.h)) < conditionArgument.longValue)
+                && ((ABS(sObject->velocity.v)) < conditionArgument.longValue);
+        }
+
+        case kNoShipsLeftCondition:
+            return GetAdmiralShipsLeft(Handle<Admiral>(conditionArgument.longValue)) <= 0;
+
+        case kCurrentMessageCondition:
+            return Messages::current()
+                == (conditionArgument.location.h + conditionArgument.location.v - 1);
+
+        case kCurrentComputerCondition:
+            return (globals()->gMiniScreenData.currentScreen == conditionArgument.location.h)
+                && ((conditionArgument.location.v < 0)
+                        || (globals()->gMiniScreenData.selectLine == conditionArgument.location.v));
+
+        case kZoomLevelCondition:
+            return globals()->gZoomMode == conditionArgument.longValue;
+
+        case kAutopilotCondition:
+            return IsPlayerShipOnAutoPilot();
+
+        case kNotAutopilotCondition:
+            return !IsPlayerShipOnAutoPilot();
+
+        case kObjectIsBeingBuilt: {
+            auto buildAtObject = GetAdmiralBuildAtObject(globals()->gPlayerAdmiral);
+            return buildAtObject.get() && (buildAtObject->totalBuildTime > 0);
+        }
+
+        case kDirectIsSubjectTarget: {
+            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            auto dObject = GetObjectFromInitialNumber(directObject);
+            return sObject.get()
+                && dObject.get()
+                && (sObject->destObject == dObject)
+                && (sObject->destObjectID == dObject->id);
+        }
+
+        case kSubjectIsPlayerCondition: {
+            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            return sObject.get()
+                && (sObject == globals()->gPlayerShip);
+        }
     }
     return false;
 }
@@ -796,7 +744,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         Scenario::InitialObject* initial = gThisScenario->initial(step);
 
         if (initial->attributes & kInitiallyHidden) {
-            initial->realObjectNumber = -1;
+            initial->realObject = SpaceObject::none();
             (*current)++;
             return;
         }
@@ -820,12 +768,10 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         auto type = initial->type;
         // TODO(sfiera): remap object in networked games.
         fixedPointType v = {0, 0};
-        int32_t newShipNum;
-        initial->realObjectNumber = newShipNum = CreateAnySpaceObject(
+        auto anObject = initial->realObject = Handle<SpaceObject>(CreateAnySpaceObject(
                 type, &v, &coord, gScenarioRotation, owner, specialAttributes,
-                initial->spriteIDOverride)->number();
+                initial->spriteIDOverride)->number());
 
-        auto anObject = Handle<SpaceObject>(newShipNum);
         if (anObject->attributes & kIsDestination) {
             anObject->asDestination = MakeNewDestination(
                     anObject, initial->canBuild, initial->earning, initial->nameResID,
@@ -932,14 +878,14 @@ void CheckScenarioConditions(int32_t timePass) {
             auto sObject = GetObjectFromInitialNumber(c->subjectObject);
             auto dObject = GetObjectFromInitialNumber(c->directObject);
             Point offset;
-            c->action.run(sObject, dObject, &offset);
+            c->action.run(sObject.get(), dObject.get(), &offset);
         }
     }
 }
 
 void UnhideInitialObject(int32_t whichInitial) {
     auto initial = gThisScenario->initial(whichInitial);
-    if (GetObjectFromInitialNumber(whichInitial)) {
+    if (GetObjectFromInitialNumber(whichInitial).get()) {
         return;  // Already visible.
     }
 
@@ -968,9 +914,8 @@ void UnhideInitialObject(int32_t whichInitial) {
     auto type = initial->type;
     // TODO(sfiera): remap objects in networked games.
     fixedPointType v = {0, 0};
-    int32_t newShipNum = CreateAnySpaceObject(
-            type, &v, &coord, 0, owner, specialAttributes, initial->spriteIDOverride)->number();
-    initial->realObjectNumber = newShipNum;
+    auto newShipNum = initial->realObject = Handle<SpaceObject>(CreateAnySpaceObject(
+            type, &v, &coord, 0, owner, specialAttributes, initial->spriteIDOverride)->number());
 
     auto anObject = Handle<SpaceObject>(newShipNum);
 
@@ -1005,25 +950,25 @@ void UnhideInitialObject(int32_t whichInitial) {
     set_initial_destination(initial, true);
 }
 
-SpaceObject *GetObjectFromInitialNumber(int32_t initialNumber) {
+Handle<SpaceObject> GetObjectFromInitialNumber(int32_t initialNumber) {
     if (initialNumber >= 0) {
         Scenario::InitialObject* initial = gThisScenario->initial(initialNumber);
-        if (initial->realObjectNumber >= 0) {
-            auto object = Handle<SpaceObject>(initial->realObjectNumber);
+        if (initial->realObject.get()) {
+            auto object = initial->realObject;
             if ((object->id != initial->realObjectID) || (object->active != kObjectInUse)) {
-                return NULL;
+                return SpaceObject::none();
             }
-            return object.get();
+            return object;
         }
-        return NULL;
+        return SpaceObject::none();
     } else if (initialNumber == -2) {
         auto object = globals()->gPlayerShip;
         if (!object->active || !(object->attributes & kCanThink)) {
-            return NULL;
+            return SpaceObject::none();
         }
-        return object.get();
+        return object;
     }
-    return NULL;
+    return SpaceObject::none();
 }
 
 void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textID) {

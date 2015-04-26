@@ -48,7 +48,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current);
 void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textID);
 void CheckScenarioConditions(int32_t timePass);
 void UnhideInitialObject(int32_t whichInitial);
-SpaceObject *GetObjectFromInitialNumber(int32_t initialNumber);
+Handle<SpaceObject> GetObjectFromInitialNumber(int32_t initialNumber);
 void GetScenarioFullScaleAndCorner(
         const Scenario* scenario, int32_t rotation, coordPointType *corner, int32_t *scale,
         Rect *bounds);

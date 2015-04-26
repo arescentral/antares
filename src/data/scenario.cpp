@@ -176,7 +176,8 @@ void read_from(ReadSource in, Scenario::BriefPoint::AbsoluteBrief& absolute_brie
 void read_from(ReadSource in, Scenario::InitialObject& scenario_initial) {
     scenario_initial.type = Handle<BaseObject>(read<int32_t>(in));
     scenario_initial.owner = Handle<Admiral>(read<int32_t>(in));
-    read(in, scenario_initial.realObjectNumber);
+    in.shift(4);
+    scenario_initial.realObject = Handle<SpaceObject>(-1);
     read(in, scenario_initial.realObjectID);
     read(in, scenario_initial.location);
     read(in, scenario_initial.earning);

@@ -176,7 +176,7 @@ void print_to(sfz::PrintTarget out, ScenarioName name);
 struct Scenario::InitialObject {
     Handle<BaseObject>  type;
     Handle<Admiral> owner;
-    int32_t         realObjectNumber;
+    Handle<SpaceObject> realObject;
     int32_t         realObjectID;
     Point           location;
     Fixed           earning;

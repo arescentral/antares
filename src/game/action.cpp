@@ -725,7 +725,7 @@ static void assume_initial_object(objectActionType* action, SpaceObject* focus) 
             action->argument.assumeInitial.whichInitialObject + GetAdmiralScore(player1, 0));
     if (initialObject) {
         initialObject->realObjectID = focus->id;
-        initialObject->realObjectNumber = focus->number();
+        initialObject->realObject = Handle<SpaceObject>(focus->number());
     }
 }
 
@@ -751,11 +751,11 @@ static void execute_actions(
         }
         SpaceObject* subject = original_subject;
         if (action->initialSubjectOverride != kNoShip) {
-            subject = GetObjectFromInitialNumber(action->initialSubjectOverride);
+            subject = GetObjectFromInitialNumber(action->initialSubjectOverride).get();
         }
         SpaceObject* object = original_object;
         if (action->initialDirectOverride != kNoShip) {
-            object = GetObjectFromInitialNumber(action->initialDirectOverride);
+            object = GetObjectFromInitialNumber(action->initialDirectOverride).get();
         }
 
         if ((action->delay > 0) && allowDelay) {

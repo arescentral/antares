@@ -201,14 +201,13 @@ void Briefing_Grid_Set(bool *grid, int32_t x, int32_t y, int32_t gridWidth, int3
 void GetInitialObjectSpriteData(
         const Scenario* scenario, int32_t whichObject, int32_t maxSize, Rect *bounds,
         coordPointType *corner, int32_t scale, int32_t *thisScale, Point *where, Rect *spriteRect) {
-    SpaceObject* sObject = NULL;
     briefingSpriteBoundsType    *sBounds = gBriefingSpriteBounds;
 
     spriteRect->right = spriteRect->left = -1;
 
-    sObject = GetObjectFromInitialNumber(whichObject);
+    auto sObject = GetObjectFromInitialNumber(whichObject);
 
-    if (sObject != NULL) {
+    if (sObject.get()) {
         const NatePixTable::Frame* frame = NULL;
         GetRealObjectSpriteData(
                 &(sObject->location), sObject->base, sObject->owner, sObject->pixResID,
@@ -216,7 +215,7 @@ void GetInitialObjectSpriteData(
 
         if ( sBounds == NULL) return;
         while ( (sBounds->objectIndex >= 0) &&
-            ( sBounds->objectIndex != sObject->number())) sBounds++;
+            ( sBounds->objectIndex != sObject.number())) sBounds++;
 
         if (sBounds->objectIndex < 0) {
             return;
