@@ -95,16 +95,16 @@ bool action_filter_applies_to(const objectActionType& action, Handle<BaseObject>
     }
 }
 
-bool action_filter_applies_to(const objectActionType& action, const SpaceObject& target) {
+bool action_filter_applies_to(const objectActionType& action, Handle<SpaceObject> target) {
     if (action.exclusiveFilter == 0xffffffff) {
-        return action.levelKeyTag == target.baseType->levelKeyTag;
+        return action.levelKeyTag == target->baseType->levelKeyTag;
     } else {
-        return (action.inclusiveFilter & target.attributes) == action.inclusiveFilter;
+        return (action.inclusiveFilter & target->attributes) == action.inclusiveFilter;
     }
 }
 
 static void create_object(
-        objectActionType* action, SpaceObject* subject, SpaceObject* focus,
+        objectActionType* action, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Point* offset) {
     const auto& create = action->argument.createObject;
     const auto baseObject = create.whichBaseType;
@@ -147,16 +147,16 @@ static void create_object(
             if (product->owner.get()) {
                 if (action->reflexive) {
                     if (action->verb != kCreateObjectSetDest) {
-                        SetObjectDestination(product.get(), focus);
+                        SetObjectDestination(product.get(), focus.get());
                     } else if (focus->destObjectPtr) {
                         SetObjectDestination(product.get(), focus->destObjectPtr);
                     }
                 }
             } else if (action->reflexive) {
-                product->destObjectPtr = focus;
+                product->destObjectPtr = focus.get();
                 product->timeFromOrigin = kTimeToCheckHome;
                 product->runTimeFlags &= ~kHasArrived;
-                product->destObject = Handle<SpaceObject>(focus->number()); //a->destinationObject;
+                product->destObject = focus; //a->destinationObject;
                 product->destObjectDest = focus->destObject;
                 product->destObjectID = focus->id;
                 product->destObjectDestID = focus->destObjectID;
@@ -172,13 +172,13 @@ static void create_object(
         if (product->attributes & kIsBeam) {
             if (product->frame.beam->beamKind != eKineticBeamKind) {
                 // special beams need special post-creation acts
-                Beams::set_attributes(product.get(), focus);
+                Beams::set_attributes(product.get(), focus.get());
             }
         }
     }
 }
 
-static void play_sound(objectActionType* action, SpaceObject* focus) {
+static void play_sound(objectActionType* action, Handle<SpaceObject> focus) {
     const auto& sound = action->argument.playSound;
     auto id = sound.idMinimum;
     auto priority = static_cast<soundPriorityType>(sound.priority);
@@ -188,11 +188,11 @@ static void play_sound(objectActionType* action, SpaceObject* focus) {
     if (sound.absolute) {
         PlayVolumeSound(id, sound.volumeMinimum, sound.persistence, priority);
     } else {
-        mPlayDistanceSound(sound.volumeMinimum, focus, id, sound.persistence, priority);
+        mPlayDistanceSound(sound.volumeMinimum, focus.get(), id, sound.persistence, priority);
     }
 }
 
-static void make_sparks(objectActionType* action, SpaceObject* focus) {
+static void make_sparks(objectActionType* action, Handle<SpaceObject> focus) {
     const auto& sparks = action->argument.makeSparks;
     Point location;
     if (focus->sprite != NULL) {
@@ -219,11 +219,11 @@ static void make_sparks(objectActionType* action, SpaceObject* focus) {
             sparks.howMany, sparks.speed, sparks.velocityRange, sparks.color, &location);
 }
 
-static void die(objectActionType* action, SpaceObject* focus, SpaceObject* subject) {
+static void die(objectActionType* action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
     bool destroy = false;
     switch (action->argument.killObject.dieType) {
         case kDieExpire:
-            if (subject) {
+            if (subject.get()) {
                 focus = subject;
             } else {
                 return;
@@ -231,7 +231,7 @@ static void die(objectActionType* action, SpaceObject* focus, SpaceObject* subje
             break;
 
         case kDieDestroy:
-            if (subject) {
+            if (subject.get()) {
                 focus = subject;
                 destroy = true;
             } else {
@@ -243,18 +243,18 @@ static void die(objectActionType* action, SpaceObject* focus, SpaceObject* subje
     // if the object is occupied by a human, eject him since he can't die
     if ((focus->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
             !focus->baseType->destroyDontDie) {
-        CreateFloatingBodyOfPlayer(Handle<SpaceObject>(focus->number()));
+        CreateFloatingBodyOfPlayer(focus);
     }
     if (destroy) {
-        if (focus != nullptr) {
-            DestroyObject(Handle<SpaceObject>(focus->number()));
+        if (focus.get()) {
+            DestroyObject(focus);
         }
     } else {
         focus->active = kObjectToBeFreed;
     }
 }
 
-static void nil_target(objectActionType* action, SpaceObject* focus) {
+static void nil_target(objectActionType* action, Handle<SpaceObject> focus) {
     focus->targetObject = SpaceObject::none();
     focus->targetObjectID = kNoShip;
     focus->lastTarget = SpaceObject::none();
@@ -262,7 +262,7 @@ static void nil_target(objectActionType* action, SpaceObject* focus) {
 
 static void alter(
         objectActionType* action,
-        SpaceObject* focus, SpaceObject* subject, SpaceObject* object) {
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
     int32_t l;
     Fixed f, f2, aFixed;
@@ -285,7 +285,7 @@ static void alter(
             break;
 
         case kAlterCloak:
-            AlterObjectCloakState(focus, true);
+            AlterObjectCloakState(focus.get(), true);
             break;
 
         case kAlterSpin:
@@ -321,10 +321,10 @@ static void alter(
             break;
 
         case kAlterVelocity:
-            if (subject) {
+            if (subject.get()) {
                 // active (non-reflexive) altering of velocity means a PUSH, just like
                 //  two objects colliding.  Negative velocity = slow down
-                if (object && (object != nullptr)) {
+                if (object.get()) {
                     if (alter.relative) {
                         if ((object->baseType->mass > 0) &&
                             (object->maxVelocity > 0)) {
@@ -456,24 +456,23 @@ static void alter(
             break;
 
         case kAlterBaseType:
-            if (action->reflexive || (object && (object != nullptr)))
-            ChangeObjectBaseType(focus, Handle<BaseObject>(alter.minimum), -1, alter.relative);
+            if (action->reflexive || object.get())
+            ChangeObjectBaseType(focus.get(), Handle<BaseObject>(alter.minimum), -1, alter.relative);
             break;
 
         case kAlterOwner:
-            if (focus != nullptr) {
-                auto o = Handle<SpaceObject>(focus->number());
+            if (focus.get()) {
                 if (alter.relative) {
                     // if it's relative AND reflexive, we take the direct
                     // object's owner, since relative & reflexive would
                     // do nothing.
-                    if (action->reflexive && o.get() && (object != nullptr)) {
-                        AlterObjectOwner(o, object->owner, true);
+                    if (action->reflexive && focus.get() && object.get()) {
+                        AlterObjectOwner(focus, object->owner, true);
                     } else {
-                        AlterObjectOwner(o, subject->owner, true);
+                        AlterObjectOwner(focus, subject->owner, true);
                     }
                 } else {
-                    AlterObjectOwner(o, Handle<Admiral>(alter.minimum), false);
+                    AlterObjectOwner(focus, Handle<Admiral>(alter.minimum), false);
                 }
             }
             break;
@@ -489,8 +488,8 @@ static void alter(
             break;
 
         case kAlterOccupation:
-            if (focus != nullptr) {
-                AlterObjectOccupation(Handle<SpaceObject>(focus->number()), subject->owner, alter.minimum, true);
+            if (focus.get()) {
+                AlterObjectOccupation(focus, subject->owner, alter.minimum, true);
             }
             break;
 
@@ -498,7 +497,7 @@ static void alter(
             {
                 Handle<Admiral> admiral;
                 if (alter.relative) {
-                    if (focus != nullptr) {
+                    if (focus.get()) {
                         admiral = focus->owner;
                     }
                 } else {
@@ -530,7 +529,7 @@ static void alter(
 
         case kAlterLocation:
             if (alter.relative) {
-                if (object && (object != nullptr)) {
+                if (object.get()) {
                     newLocation.h = subject->location.h;
                     newLocation.v = subject->location.v;
                 } else {
@@ -622,10 +621,10 @@ static void alter(
 }
 
 static void land_at(
-        objectActionType* action, SpaceObject* focus, SpaceObject* subject) {
+        objectActionType* action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
     // even though this is never a reflexive verb, we only effect ourselves
     if (subject->attributes & (kIsPlayerShip | kRemoteOrHuman)) {
-        CreateFloatingBodyOfPlayer(Handle<SpaceObject>(subject->number()));
+        CreateFloatingBodyOfPlayer(subject);
     }
     subject->presenceState = kLandingPresence;
     subject->presence.landing.speed = action->argument.landAt.landingSpeed;
@@ -633,7 +632,7 @@ static void land_at(
 }
 
 static void enter_warp(
-        objectActionType* action, SpaceObject* focus, SpaceObject* subject) {
+        objectActionType* action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
     subject->presenceState = kWarpInPresence;
     subject->presence.warp_in.progress = 0;
     subject->presence.warp_in.step = 0;
@@ -644,10 +643,10 @@ static void enter_warp(
             &subject->location, subject->direction, Admiral::none(), 0, -1);
 }
 
-static void change_score(objectActionType* action, SpaceObject* focus) {
+static void change_score(objectActionType* action, Handle<SpaceObject> focus) {
     const auto& score = action->argument.changeScore;
     Handle<Admiral> admiral = score.whichPlayer;
-    if ((!score.whichPlayer.get() && (focus != nullptr))) {
+    if ((!score.whichPlayer.get() && focus.get())) {
         admiral = focus->owner;
     }
     if (admiral.get()) {
@@ -655,44 +654,44 @@ static void change_score(objectActionType* action, SpaceObject* focus) {
     }
 }
 
-static void declare_winner(objectActionType* action, SpaceObject* focus) {
+static void declare_winner(objectActionType* action, Handle<SpaceObject> focus) {
     const auto& winner = action->argument.declareWinner;
     Handle<Admiral> admiral = winner.whichPlayer;
-    if ((!winner.whichPlayer.get() && (focus != nullptr))) {
+    if ((!winner.whichPlayer.get() && focus.get())) {
         admiral = focus->owner;
     }
     DeclareWinner(admiral, winner.nextLevel, winner.textID);
 }
 
-static void display_message(objectActionType* action, SpaceObject* focus) {
+static void display_message(objectActionType* action, Handle<SpaceObject> focus) {
     const auto& message = action->argument.displayMessage;
     Messages::start(message.resID, message.resID + message.pageNum - 1);
 }
 
 static void set_destination(
-        objectActionType* action, SpaceObject* focus, SpaceObject* subject) {
+        objectActionType* action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
     uint32_t save_attributes = subject->attributes;
     subject->attributes &= ~kStaticDestination;
-    SetObjectDestination(subject, focus);
+    SetObjectDestination(subject.get(), focus.get());
     subject->attributes = save_attributes;
 }
 
 static void activate_special(
-        objectActionType* action, SpaceObject* focus, SpaceObject* subject) {
-    fire_weapon(Handle<SpaceObject>(subject->number()), SpaceObject::none(), subject->baseType->special, subject->special);
+        objectActionType* action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
+    fire_weapon(subject, SpaceObject::none(), subject->baseType->special, subject->special);
 }
 
 static void activate_pulse(
-        objectActionType* action, SpaceObject* focus, SpaceObject* subject) {
-    fire_weapon(Handle<SpaceObject>(subject->number()), SpaceObject::none(), subject->baseType->pulse, subject->pulse);
+        objectActionType* action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
+    fire_weapon(subject, SpaceObject::none(), subject->baseType->pulse, subject->pulse);
 }
 
 static void activate_beam(
-        objectActionType* action, SpaceObject* focus, SpaceObject* subject) {
-    fire_weapon(Handle<SpaceObject>(subject->number()), SpaceObject::none(), subject->baseType->beam, subject->beam);
+        objectActionType* action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
+    fire_weapon(subject, SpaceObject::none(), subject->baseType->beam, subject->beam);
 }
 
-static void color_flash(objectActionType* action, SpaceObject* focus) {
+static void color_flash(objectActionType* action, Handle<SpaceObject> focus) {
     uint8_t tinyColor = GetTranslateColorShade(
             action->argument.colorFlash.color,
             action->argument.colorFlash.shade);
@@ -701,15 +700,15 @@ static void color_flash(objectActionType* action, SpaceObject* focus) {
             action->argument.colorFlash.length, tinyColor);
 }
 
-static void enable_keys(objectActionType* action, SpaceObject* focus) {
+static void enable_keys(objectActionType* action, Handle<SpaceObject> focus) {
     globals()->keyMask = globals()->keyMask & ~action->argument.keys.keyMask;
 }
 
-static void disable_keys(objectActionType* action, SpaceObject* focus) {
+static void disable_keys(objectActionType* action, Handle<SpaceObject> focus) {
     globals()->keyMask = globals()->keyMask | action->argument.keys.keyMask;
 }
 
-static void set_zoom(objectActionType* action, SpaceObject* focus) {
+static void set_zoom(objectActionType* action, Handle<SpaceObject> focus) {
     if (action->argument.zoom.zoomLevel != globals()->gZoomMode) {
         globals()->gZoomMode = static_cast<ZoomType>(action->argument.zoom.zoomLevel);
         PlayVolumeSound(kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
@@ -719,19 +718,19 @@ static void set_zoom(objectActionType* action, SpaceObject* focus) {
     }
 }
 
-static void computer_select(objectActionType* action, SpaceObject* focus) {
+static void computer_select(objectActionType* action, Handle<SpaceObject> focus) {
     MiniComputer_SetScreenAndLineHack(
             action->argument.computerSelect.screenNumber,
             action->argument.computerSelect.lineNumber);
 }
 
-static void assume_initial_object(objectActionType* action, SpaceObject* focus) {
+static void assume_initial_object(objectActionType* action, Handle<SpaceObject> focus) {
     Handle<Admiral> player1(0);
     Scenario::InitialObject* initialObject = gThisScenario->initial(
             action->argument.assumeInitial.whichInitialObject + GetAdmiralScore(player1, 0));
     if (initialObject) {
         initialObject->realObjectID = focus->id;
-        initialObject->realObject = Handle<SpaceObject>(focus->number());
+        initialObject->realObject = focus;
     }
 }
 
@@ -772,45 +771,42 @@ static void execute_actions(
         }
         allowDelay = true;
 
-        auto subj_ptr = subject.get();
-        auto obj_ptr = object.get();
-
-        auto focus = obj_ptr;
-        if (action->reflexive || !focus) {
-            focus = subj_ptr;
+        auto focus = object;
+        if (action->reflexive || !focus.get()) {
+            focus = subject;
         }
 
-        if (obj_ptr && subj_ptr) {
+        if (object.get() && subject.get()) {
             if ((action->owner < -1)
-                    || ((action->owner == -1) && (obj_ptr->owner == subj_ptr->owner))
-                    || ((action->owner == 1) && (obj_ptr->owner != subj_ptr->owner))
+                    || ((action->owner == -1) && (object->owner == subject->owner))
+                    || ((action->owner == 1) && (object->owner != subject->owner))
                     || (action->owner > 1)) {
                 continue;
             }
         }
 
         if ((action->inclusiveFilter || action->exclusiveFilter)
-                && (!obj_ptr || !action_filter_applies_to(*action, *obj_ptr))) {
+                && (!object.get() || !action_filter_applies_to(*action, object))) {
             continue;
         }
 
         switch (action->verb) {
             case kCreateObject:
-            case kCreateObjectSetDest:  create_object(action, focus, subj_ptr, offset); break;
+            case kCreateObjectSetDest:  create_object(action, focus, subject, offset); break;
             case kPlaySound:            play_sound(action, focus); break;
             case kMakeSparks:           make_sparks(action, focus); break;
-            case kDie:                  die(action, focus, subj_ptr); break;
+            case kDie:                  die(action, focus, subject); break;
             case kNilTarget:            nil_target(action, focus); break;
-            case kAlter:                alter(action, focus, subj_ptr, obj_ptr); break;
-            case kLandAt:               land_at(action, focus, subj_ptr); break;
-            case kEnterWarp:            enter_warp(action, focus, subj_ptr); break;
+            case kAlter:                alter(action, focus, subject, object); break;
+            case kLandAt:               land_at(action, focus, subject); break;
+            case kEnterWarp:            enter_warp(action, focus, subject); break;
             case kChangeScore:          change_score(action, focus); break;
             case kDeclareWinner:        declare_winner(action, focus); break;
             case kDisplayMessage:       display_message(action, focus); break;
-            case kSetDestination:       set_destination(action, focus, subj_ptr); break;
-            case kActivateSpecial:      activate_special(action, focus, subj_ptr); break;
-            case kActivatePulse:        activate_pulse(action, focus, subj_ptr); break;
-            case kActivateBeam:         activate_beam(action, focus, subj_ptr); break;
+            case kSetDestination:       set_destination(action, focus, subject); break;
+            case kActivateSpecial:      activate_special(action, focus, subject); break;
+            case kActivatePulse:        activate_pulse(action, focus, subject); break;
+            case kActivateBeam:         activate_beam(action, focus, subject); break;
             case kColorFlash:           color_flash(action, focus); break;
             case kEnableKeys:           enable_keys(action, focus); break;
             case kDisableKeys:          disable_keys(action, focus); break;
