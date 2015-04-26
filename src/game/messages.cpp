@@ -142,13 +142,13 @@ void Messages::init() {
     antares::clear(message_data);
     long_message_data = new longMessageType;
 
-    message_label_num = Labels::add(
+    message_label_num = Label::add(
             kMessageScreenLeft, kMessageScreenTop, 0, 0, SpaceObject::none(), false, kMessageColor);
 
     if (message_label_num < 0) {
         throw Exception("Couldn't add a screen label.");
     }
-    status_label_num = Labels::add(
+    status_label_num = Label::add(
             kStatusLabelLeft, kStatusLabelTop, 0, 0, SpaceObject::none(), false, kStatusLabelColor);
     if (status_label_num < 0) {
         throw Exception("Couldn't add a screen label.");
@@ -180,9 +180,9 @@ void Messages::clear() {
     time_count = 0;
     std::queue<sfz::String> empty;
     swap(message_data, empty);
-    message_label_num = Labels::add(
+    message_label_num = Label::add(
             kMessageScreenLeft, kMessageScreenTop, 0, 0, SpaceObject::none(), false, kMessageColor);
-    status_label_num = Labels::add(
+    status_label_num = Label::add(
             kStatusLabelLeft, kStatusLabelTop, 0, 0, SpaceObject::none(), false, kStatusLabelColor);
 
     tmessage = long_message_data;
@@ -200,8 +200,8 @@ void Messages::clear() {
     tmessage->lastLabelMessage = false;
     tmessage->retro_text.reset();
     viewport.bottom = play_screen.bottom;
-    tmessage->labelMessageID = Labels::add(0, 0, 0, 0, SpaceObject::none(), false, SKY_BLUE);
-    Labels::set_keep_on_screen_anyway( tmessage->labelMessageID, true);
+    tmessage->labelMessageID = Label::add(0, 0, 0, 0, SpaceObject::none(), false, SKY_BLUE);
+    Label::set_keep_on_screen_anyway( tmessage->labelMessageID, true);
 }
 
 void Messages::add(const sfz::PrintItem& message) {
@@ -345,14 +345,14 @@ void Messages::draw_long_message(int32_t time_pass) {
         // }
 
         if ((tmessage->lastResID >= 0) && (tmessage->lastLabelMessage)) {
-            Labels::set_age(tmessage->labelMessageID, 1);
+            Label::set_age(tmessage->labelMessageID, 1);
         }
 
         // draw in offscreen world
         if ((tmessage->currentResID >= 0) && ( tmessage->stage == kShowStage)) {
             if (tmessage->retro_text.get() != NULL) {
                 if (tmessage->labelMessage) {
-                    Labels::set_age(tmessage->labelMessageID, 0);
+                    Label::set_age(tmessage->labelMessageID, 0);
 
                     if (tmessage->retro_text.get() != NULL) {
                         MessageLabel_Set_Special(tmessage->labelMessageID, tmessage->text);
@@ -458,26 +458,26 @@ void Messages::draw_message_screen(int32_t by_units) {
         const String& message = message_data.front();
 
         if (time_count < kRaiseTime) {
-            Labels::set_position(
+            Label::set_position(
                     message_label_num, kMessageScreenLeft,
                     viewport.bottom - time_count);
         } else if (time_count > kLowerTime) {
-            Labels::set_position(
+            Label::set_position(
                     message_label_num, kMessageScreenLeft,
                     viewport.bottom - (kMessageDisplayTime - time_count));
         }
 
-        Labels::set_string(message_label_num, message);
+        Label::set_string(message_label_num, message);
     } else {
-        Labels::clear_string(message_label_num);
+        Label::clear_string(message_label_num);
         time_count = 0;
     }
 }
 
 void Messages::set_status(const StringSlice& status, uint8_t color) {
-    Labels::set_color(status_label_num, color);
-    Labels::set_string(status_label_num, status);
-    Labels::set_age(status_label_num, kStatusLabelAge);
+    Label::set_color(status_label_num, color);
+    Label::set_string(status_label_num, status);
+    Label::set_age(status_label_num, kStatusLabelAge);
 }
 
 int16_t Messages::current() {
@@ -552,34 +552,34 @@ void MessageLabel_Set_Special(int16_t id, const StringSlice& text) {
         ++it;
     }
 
-    Labels::set_string(id, message);
-    Labels::set_keep_on_screen_anyway(id, true);
+    Label::set_string(id, message);
+    Label::set_keep_on_screen_anyway(id, true);
 
     switch (whichType) {
       case 'R':
-        Labels::set_offset(id, 0, 0);
-        Labels::set_position(
-                id, play_screen.right - (Labels::get_width(id)+10),
+        Label::set_offset(id, 0, 0);
+        Label::set_position(
+                id, play_screen.right - (Label::get_width(id)+10),
                 globals()->gInstrumentTop + value);
         break;
 
       case 'L':
-        Labels::set_offset(id, 0, 0);
-        Labels::set_position(id, 138, globals()->gInstrumentTop + value);
+        Label::set_offset(id, 0, 0);
+        Label::set_position(id, 138, globals()->gInstrumentTop + value);
         break;
 
       case 'O':
         {
             auto o = GetObjectFromInitialNumber(value);
-            Labels::set_offset(id, -(Labels::get_width(id)/2), 64);
-            Labels::set_object(id, o);
+            Label::set_offset(id, -(Label::get_width(id)/2), 64);
+            Label::set_object(id, o);
 
             hintLine = true;
         }
         break;
     }
     attachPoint.v -= 2;
-    Labels::set_attached_hint_line(id, hintLine, attachPoint);
+    Label::set_attached_hint_line(id, hintLine, attachPoint);
 }
 
 void Messages::draw_message() {

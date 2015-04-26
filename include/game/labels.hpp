@@ -25,7 +25,7 @@
 
 namespace antares {
 
-class Labels {
+class Label {
   public:
     static const int32_t kNone = -1;
     static const int32_t kVisibleTime = 60;
@@ -56,9 +56,25 @@ class Labels {
     static void recalc_size(int32_t);
 
   private:
-    struct screenLabelType;
-    static void zero(screenLabelType& label);
-    static screenLabelType* data;
+    Point               where;
+    Point               offset;
+    Rect                thisRect = Rect(0, 0, -1, -1);
+    int32_t             width;
+    int32_t             height;
+    int32_t             age = 0;
+    sfz::String         text;
+    uint8_t             color;
+    bool                active = false;
+    bool                killMe = false;
+    bool                visible = false;
+    Handle<SpaceObject> object;
+    bool                objectLink = true;     // true if label requires an object to be seen
+    int32_t             lineNum = 1;
+    int32_t             lineHeight;
+    bool                keepOnScreenAnyway = false; // if not attached to object, keep on screen if it's off
+    bool                attachedHintLine = false;
+    Point               attachedToWhere;
+    int32_t             retroCount = -1;
 };
 
 }  // namespace antares

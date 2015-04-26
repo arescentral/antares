@@ -106,9 +106,9 @@ HotKeySuffix hot_key_suffix(Handle<SpaceObject> space_object) {
 
 void ResetPlayerShip(Handle<SpaceObject> which) {
     globals()->gPlayerShip = which;
-    globals()->gSelectionLabel = Labels::add(0, 0, 0, 10, SpaceObject::none(), true, YELLOW);
-    gDestinationLabel = Labels::add(0, 0, 0, -20, SpaceObject::none(), true, SKY_BLUE);
-    gSendMessageLabel = Labels::add(200, 200, 0, 30, SpaceObject::none(), false, GREEN);
+    globals()->gSelectionLabel = Label::add(0, 0, 0, 10, SpaceObject::none(), true, YELLOW);
+    gDestinationLabel = Label::add(0, 0, 0, -20, SpaceObject::none(), true, SKY_BLUE);
+    gSendMessageLabel = Label::add(200, 200, 0, 30, SpaceObject::none(), false, GREEN);
     globals()->starfield.reset(globals()->gPlayerShip);
     gAlarmCount = -1;
     globals()->gAutoPilotOff = true;
@@ -562,7 +562,7 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
             globals()->gKeyMapBufferBottom = 0;
         }
         if (*enterMessage) {
-            String* message = Labels::get_string(gSendMessageLabel);
+            String* message = Label::get_string(gSendMessageLabel);
             if (message->empty()) {
                 message->assign("<>");
             }
@@ -579,12 +579,12 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
                         globals()->gActiveCheats[globals()->gPlayerAdmiral] &= ~kNameObjectBit;
                     }
                 }
-                Labels::set_position(
+                Label::set_position(
                         gSendMessageLabel,
                         viewport.left + ((viewport.width() / 2)),
                         viewport.top + ((play_screen.height() / 2)) +
                         kSendMessageVOffset);
-                Labels::recalc_size(gSendMessageLabel);
+                Label::recalc_size(gSendMessageLabel);
             } else {
                 if ((mDeleteKey(*bufMap)) || (mLeftArrowKey(*bufMap))) {
                     if (message->size() > 2) {
@@ -613,8 +613,8 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
                 {
                     strlen -= (strlen + width) - (viewport.right);
                 }
-                Labels::recalc_size(gSendMessageLabel);
-                Labels::set_position(gSendMessageLabel, strlen, viewport.top +
+                Label::recalc_size(gSendMessageLabel);
+                Label::set_position(gSendMessageLabel, strlen, viewport.top +
                     ((play_screen.height() / 2) + kSendMessageVOffset));
             }
         } else {
@@ -885,9 +885,9 @@ void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> 
 
     if (adm == globals()->gPlayerAdmiral) {
         PlayVolumeSound(kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
-        Labels::set_object(label, ship);
+        Label::set_object(label, ship);
         if (ship == globals()->gPlayerShip) {
-            Labels::set_age(label, Labels::kVisibleTime);
+            Label::set_age(label, Label::kVisibleTime);
         }
         String string;
         if (ship->attributes & kIsDestination) {
@@ -896,7 +896,7 @@ void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> 
             string.assign(get_object_name(ship->base));
         }
         print(string, hot_key_suffix(ship));
-        Labels::set_string(label, string);
+        Label::set_string(label, string);
     }
 }
 
@@ -928,10 +928,10 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
         flagship->attributes |= kIsHumanControlled | kIsPlayerShip;
 
         if (newShip == globals()->gPlayerAdmiral->control()) {
-            Labels::set_age( globals()->gSelectionLabel, Labels::kVisibleTime);
+            Label::set_age( globals()->gSelectionLabel, Label::kVisibleTime);
         }
         if (newShip == globals()->gPlayerAdmiral->target()) {
-            Labels::set_age( gDestinationLabel, Labels::kVisibleTime);
+            Label::set_age( gDestinationLabel, Label::kVisibleTime);
         }
     } else {
         flagship->attributes &= ~(kIsRemote | kIsPlayerShip);
@@ -1070,37 +1070,37 @@ void Update_LabelStrings_ForHotKeyChange( void)
 {
     auto target = globals()->gPlayerAdmiral->target();
     if (target.get()) {
-        Labels::set_object(gDestinationLabel, target);
+        Label::set_object(gDestinationLabel, target);
         if (target == globals()->gPlayerShip) {
-            Labels::set_age(gDestinationLabel, Labels::kVisibleTime);
+            Label::set_age(gDestinationLabel, Label::kVisibleTime);
         }
         if (target->attributes & kIsDestination) {
             String string(GetDestBalanceName(target->asDestination));
             print(string, hot_key_suffix(target));
-            Labels::set_string(gDestinationLabel, string);
+            Label::set_string(gDestinationLabel, string);
         } else {
             String string(get_object_name(target->base));
             print(string, hot_key_suffix(target));
-            Labels::set_string(gDestinationLabel, string);
+            Label::set_string(gDestinationLabel, string);
         }
     }
 
     auto control = globals()->gPlayerAdmiral->control();
     if (control.get()) {
-        Labels::set_object(globals()->gSelectionLabel, control);
+        Label::set_object(globals()->gSelectionLabel, control);
         if (control == globals()->gPlayerShip) {
-            Labels::set_age(globals()->gSelectionLabel, Labels::kVisibleTime);
+            Label::set_age(globals()->gSelectionLabel, Label::kVisibleTime);
         }
         PlayVolumeSound(
                 kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
         if (control->attributes & kIsDestination) {
             String string(GetDestBalanceName(control->asDestination));
             print(string, hot_key_suffix(control));
-            Labels::set_string(globals()->gSelectionLabel, string);
+            Label::set_string(globals()->gSelectionLabel, string);
         } else {
             String string(get_object_name(control->base));
             print(string, hot_key_suffix(control));
-            Labels::set_string(globals()->gSelectionLabel, string);
+            Label::set_string(globals()->gSelectionLabel, string);
         }
     }
 }
