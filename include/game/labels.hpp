@@ -28,7 +28,11 @@ namespace antares {
 class Label {
   public:
     static const int32_t kNone = -1;
+    static const int32_t kMaxLabelNum = 16;
     static const int32_t kVisibleTime = 60;
+
+    static Label* get(int number);
+    static HandleList<Label> all() { return {0, kMaxLabelNum}; }
 
     static void init();
     static void reset();
@@ -56,6 +60,8 @@ class Label {
     static void recalc_size(int32_t);
 
   private:
+    static Handle<Label> next_free_label();
+
     Point               where;
     Point               offset;
     Rect                thisRect = Rect(0, 0, -1, -1);

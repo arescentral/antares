@@ -42,8 +42,6 @@ namespace antares {
 
 namespace {
 
-const int32_t kMaxLabelNum = 16;
-
 const int32_t kLabelBuffer = 4;
 const int32_t kLabelInnerSpace = 3;
 const int32_t kLabelTotalInnerSpace = kLabelInnerSpace << 1;
@@ -57,31 +55,39 @@ static void Auto_Animate_Line( Point *source, Point *dest);
 
 static unique_ptr<Label[]> data;
 
+Label* Label::get(int number) {
+    if ((0 <= number) && (number < kMaxLabelNum)) {
+        return &data[number];
+    }
+    return nullptr;
+}
+
 void Label::init() {
     data.reset(new Label[kMaxLabelNum]);
 }
 
 void Label::reset() {
-    for (int i = 0; i < kMaxLabelNum; ++i) {
-        data[i] = Label();
+    for (auto label: all()) {
+        *label = Label();
     }
+}
+
+Handle<Label> Label::next_free_label() {
+    for (auto label: all()) {
+        if (!label->active) {
+            return label;
+        }
+    }
+    return Handle<Label>(-1);
 }
 
 int16_t Label::add(
         int16_t h, int16_t v, int16_t hoff, int16_t voff, Handle<SpaceObject> object,
         bool objectLink, uint8_t color) {
-    Label* label = NULL;
-
-    for (int i = 0; i < kMaxLabelNum; ++i) {
-        if (!data[i].active) {
-            label = &data[i];
-            break;
-        }
-    }
-    if (label == NULL) {
+    auto label = next_free_label();
+    if (!label.get()) {
         return -1;  // no free label
     }
-    int label_num = label - data.get();
 
     label->active = true;
     label->killMe = false;
@@ -100,7 +106,7 @@ int16_t Label::add(
     label->text.clear();
     label->lineNum = label->lineHeight = label->width = label->height = 0;
 
-    return label_num;
+    return label.number();
 }
 
 void Label::remove(int32_t which) {
@@ -114,9 +120,7 @@ void Label::remove(int32_t which) {
 }
 
 void Label::draw() {
-    for (int i = 0; i < kMaxLabelNum; ++i) {
-        Label* const label = &data[i];
-
+    for (auto label: all()) {
         // We anchor the image at the corner of the rect instead of label->where.  In some cases,
         // label->where is changed between update_all_label_contents() and draw time, but the rect
         // remains unchanged.  Since that function used to do this drawing, the rect's corner is
@@ -159,8 +163,7 @@ void Label::draw() {
 
 void Label::update_contents(int32_t units_done) {
     Rect clip = viewport;
-    for (int i = 0; i < kMaxLabelNum; ++i) {
-        Label* const label = &data[i];
+    for (auto label: all()) {
         if (!label->active || label->killMe || (label->text.empty()) || !label->visible) {
             label->thisRect.left = label->thisRect.right = 0;
             continue;
@@ -189,8 +192,7 @@ void Label::update_contents(int32_t units_done) {
 }
 
 void Label::show_all() {
-    for (int i = 0; i < kMaxLabelNum; i++) {
-        Label *label = &data[i];
+    for (auto label: all()) {
         if (label->active && label->visible) {
             if (label->killMe) {
                 label->active = false;
@@ -210,8 +212,7 @@ void Label::update_positions(int32_t units_done) {
             viewport.left + kLabelBuffer, viewport.top + kLabelBuffer,
             viewport.right - kLabelBuffer, viewport.bottom - kLabelBuffer);
 
-    for (int i = 0; i < kMaxLabelNum; i++) {
-        Label *label = &data[i];
+    for (auto label: all()) {
         bool isOffScreen = false;
         if ((label->active) && (!label->killMe)) {
             if (label->object.get() && (label->object->sprite != NULL)) {
@@ -269,7 +270,7 @@ void Label::update_positions(int32_t units_done) {
                         HintLine::show(source, dest, label->color, DARK);
                     }
                 } else {
-                    Label::set_string(i, "");
+                    Label::set_string(label.number(), "");
                     if (label->attachedHintLine) {
                         HintLine::hide();
                     }
