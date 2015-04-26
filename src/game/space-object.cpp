@@ -70,7 +70,7 @@ Handle<SpaceObject> gRootObject;
 
 static unique_ptr<SpaceObject[]> gSpaceObjectData;
 static unique_ptr<BaseObject[]> gBaseObjectData;
-static unique_ptr<objectActionType[]> gObjectActionData;
+static unique_ptr<Action[]> gObjectActionData;
 
 #ifdef DATA_COVERAGE
 set<int32_t> covered_objects;
@@ -80,9 +80,9 @@ void SpaceObjectHandlingInit() {
     {
         Resource rsrc("object-actions", "obac", kObjectActionResID);
         BytesSlice in(rsrc.data());
-        size_t count = rsrc.data().size() / objectActionType::byte_size;
+        size_t count = rsrc.data().size() / Action::byte_size;
         globals()->maxObjectAction = count;
-        gObjectActionData.reset(new objectActionType[count]);
+        gObjectActionData.reset(new Action[count]);
         for (size_t i = 0; i < count; ++i) {
             read(in, gObjectActionData[i]);
         }
@@ -136,7 +136,7 @@ SpaceObject* SpaceObject::get(int32_t number) {
     return nullptr;
 }
 
-objectActionType* mGetObjectActionPtr(int32_t whichAction) {
+Action* mGetObjectActionPtr(int32_t whichAction) {
     if (whichAction >= 0) {
         return gObjectActionData.get() + whichAction;
     }

@@ -28,7 +28,7 @@ using sfz::read;
 
 namespace antares {
 
-void read_from(ReadSource in, objectActionType& action) {
+void read_from(ReadSource in, Action& action) {
     uint8_t section[24];
 
     read(in, action.verb);

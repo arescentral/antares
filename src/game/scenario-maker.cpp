@@ -89,7 +89,7 @@ set<int32_t> possible_actions;
 
 void AddBaseObjectActionMedia(
         Handle<BaseObject> base, int32_t whichType, uint8_t color, uint32_t all_colors);
-void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors);
+void AddActionMedia(Action* action, uint8_t color, uint32_t all_colors);
 
 void SetAllBaseObjectsUnchecked() {
     for (auto aBase: BaseObject::all()) {
@@ -134,7 +134,7 @@ void AddBaseObjectMedia(Handle<BaseObject> base, uint8_t color, uint32_t all_col
     }
 }
 
-objectActionType* mGetActionFromBaseTypeNum(
+Action* mGetActionFromBaseTypeNum(
         Handle<BaseObject> base, int32_t mactionType, int32_t mactionNum) {
     if (mactionType == kDestroyActionType) {
         if (mactionNum < base->destroy.count) {
@@ -176,7 +176,7 @@ void AddBaseObjectActionMedia(
     }
 }
 
-void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors) {
+void AddActionMedia(Action* action, uint8_t color, uint32_t all_colors) {
     int32_t             count = 0, l1, l2;
 #ifdef DATA_COVERAGE
         possible_actions.insert(action - mGetObjectActionPtr(0));
@@ -731,7 +731,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
     if (step == 0) {
         for (int i = 0; i < gThisScenario->conditionNum; i++) {
             Scenario::Condition* condition = gThisScenario->condition(i);
-            objectActionType* action = mGetObjectActionPtr(condition->action.start);
+            Action* action = mGetObjectActionPtr(condition->action.start);
             for (int j = 0; j < condition->action.count; j++) {
                 condition = gThisScenario->condition(i);
                 action = mGetObjectActionPtr(condition->action.start + j);

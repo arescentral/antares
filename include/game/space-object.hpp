@@ -47,7 +47,7 @@ void AlterObjectCloakState(Handle<SpaceObject> object, bool cloak);
 void DestroyObject(Handle<SpaceObject> object);
 void CreateFloatingBodyOfPlayer(Handle<SpaceObject> obj);
 
-objectActionType* mGetObjectActionPtr(int32_t whichAction);
+Action* mGetObjectActionPtr(int32_t whichAction);
 
 Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, int race);
 

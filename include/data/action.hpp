@@ -96,7 +96,7 @@ enum dieVerbIDEnum {
 typedef uint8_t dieVerbIDType;
 
 //
-// objectActionType:
+// Action:
 //  Defines any action that an object can take.  Conditions that can cause an action to execute are:
 //  destroy, expire, create, collide, activate, or message.
 //
@@ -240,7 +240,7 @@ void read_from(sfz::ReadSource in, argumentType::Zoom& argument);
 void read_from(sfz::ReadSource in, argumentType::ComputerSelect& argument);
 void read_from(sfz::ReadSource in, argumentType::AssumeInitial& argument);
 
-struct objectActionType {
+struct Action {
     objectVerbIDType            verb;                   // what is this verb?
     uint8_t                     reflexive;              // does it apply to object executing verb?
     uint32_t                    inclusiveFilter;        // if it has ALL these attributes, OK -- for non-reflective verbs
@@ -256,7 +256,7 @@ struct objectActionType {
 
     static const size_t byte_size = 48;
 };
-void read_from(sfz::ReadSource in, objectActionType& action);
+void read_from(sfz::ReadSource in, Action& action);
 
 struct ActionRef {
     int32_t start;

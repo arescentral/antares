@@ -309,7 +309,7 @@ void CreateObjectDataText(String* text, Handle<BaseObject> object) {
 void CreateWeaponDataText(
         String* text, Handle<BaseObject> weaponObject, const StringSlice& weaponName) {
     int32_t             mostDamage, actionNum;
-    objectActionType    *action;
+    Action* action;
     bool             isGuided = false;
 
     if (!weaponObject.get()) {
