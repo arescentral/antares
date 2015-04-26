@@ -259,12 +259,13 @@ struct Action {
 void read_from(sfz::ReadSource in, Action& action);
 
 struct ActionRef {
+    ActionRef(): start(-1), end(-1) { }
+    ActionRef(int32_t start, int32_t end): start(start), end(end) { }
     int32_t start;
-    int32_t count;
+    int32_t end;
 
     void run(Handle<SpaceObject> sObject, Handle<SpaceObject> dObject, Point* offset) const;
 };
-void read_from(sfz::ReadSource in, ActionRef& action);
 
 }  // namespace antares
 

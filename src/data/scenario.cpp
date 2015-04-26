@@ -90,6 +90,13 @@ void read_from(ReadSource in, Scenario::Player& scenario_player) {
     in.shift(2);
 }
 
+static void read_action(sfz::ReadSource in, Scenario::Condition& condition) {
+    auto start = read<int32_t>(in);
+    auto count = read<int32_t>(in);
+    auto end = (start >= 0) ? (start + count) : start;
+    condition.action = {start, end};
+}
+
 void read_from(ReadSource in, Scenario::Condition& scenario_condition) {
     uint8_t section[12];
 
@@ -98,7 +105,7 @@ void read_from(ReadSource in, Scenario::Condition& scenario_condition) {
     read(in, section, 12);
     read(in, scenario_condition.subjectObject);
     read(in, scenario_condition.directObject);
-    read(in, scenario_condition.action);
+    read_action(in, scenario_condition);
     read(in, scenario_condition.flags);
     read(in, scenario_condition.direction);
 

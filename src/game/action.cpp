@@ -734,14 +734,10 @@ static void execute_actions(
         const ActionRef& action,
         const Handle<SpaceObject> original_subject, const Handle<SpaceObject> original_object,
         Point* offset, bool allowDelay) {
-    if (action.start < 0) {
-        return;
-    }
-
     bool checkConditions = false;
 
     const auto begin = mGetObjectActionPtr(action.start);
-    const auto end = begin + action.count;
+    const auto end = mGetObjectActionPtr(action.end);
     for (auto action = begin; action != end; ++action) {
 #ifdef DATA_COVERAGE
         covered_actions.insert(action - mGetObjectActionPtr(0));
@@ -838,7 +834,7 @@ void reset_action_queue() {
     actionQueueType* action = gActionQueueData.get();
     for (int32_t i = 0; i < kActionQueueLength; i++) {
         action->actionRef.start = -1;
-        action->actionRef.count = 0;
+        action->actionRef.end = -1;
         action->action = NULL;
         action->nextActionQueueNum = -1;
         action->nextActionQueue = NULL;
@@ -870,7 +866,7 @@ static void queue_action(
     actionQueue->action = action;
     actionQueue->actionRef.start = actionNumber;
     actionQueue->scheduledTime = delayTime;
-    actionQueue->actionRef.count = actionToDo;
+    actionQueue->actionRef.end = actionNumber + actionToDo;
 
     if (offset) {
         actionQueue->offset = *offset;
@@ -944,7 +940,7 @@ void execute_action_queue(int32_t unitsToDo) {
                     &gFirstActionQueue->offset, false);
         }
         gFirstActionQueue->actionRef.start = -1;
-        gFirstActionQueue->actionRef.count = 0;
+        gFirstActionQueue->actionRef.end = -1;
         gFirstActionQueue->action = NULL;
         gFirstActionQueue->scheduledTime = -1;
         gFirstActionQueue->subjectObject = SpaceObject::none();

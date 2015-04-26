@@ -308,8 +308,7 @@ void CreateObjectDataText(String* text, Handle<BaseObject> object) {
 
 void CreateWeaponDataText(
         String* text, Handle<BaseObject> weaponObject, const StringSlice& weaponName) {
-    int32_t             mostDamage, actionNum;
-    Action* action;
+    int32_t             mostDamage;
     bool             isGuided = false;
 
     if (!weaponObject.get()) {
@@ -325,18 +324,15 @@ void CreateWeaponDataText(
 
     mostDamage = 0;
     isGuided = false;
-    if ( weaponObject->activate.count > 0)
-    {
-        action = mGetObjectActionPtr(weaponObject->activate.start);
-        for ( actionNum = 0; actionNum < weaponObject->activate.count; actionNum++)
-        {
+    if (weaponObject->activate.end > weaponObject->activate.start) {
+        for (int i = weaponObject->activate.start; i < weaponObject->activate.end; ++i) {
+            auto action = mGetObjectActionPtr(i);
             if (( action->verb == kCreateObject) || ( action->verb == kCreateObjectSetDest))
             {
                 Handle<BaseObject> missileObject = action->argument.createObject.whichBaseType;
                 if ( missileObject->attributes & kIsGuided) isGuided = true;
                 if ( missileObject->damage > mostDamage) mostDamage = missileObject->damage;
             }
-            action++;
         }
     }
 
