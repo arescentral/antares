@@ -663,8 +663,7 @@ void Admiral::think() {
         if (_blitzkrieg <= 0) {
             // Really 48:
             _blitzkrieg = 0 - (gRandomSeed.next(1200) + 1200);
-            for (int j = 0; j < kMaxSpaceObject; j++) {
-                anObject = Handle<SpaceObject>(j);
+            for (auto anObject: SpaceObject::all()) {
                 if (anObject->owner.get() == this) {
                     anObject->currentTargetValue = 0x00000000;
                 }
@@ -675,8 +674,7 @@ void Admiral::think() {
         if (_blitzkrieg >= 0) {
             // Really 48:
             _blitzkrieg = gRandomSeed.next(1200) + 1200;
-            for (int j = 0; j < kMaxSpaceObject; j++) {
-                anObject = Handle<SpaceObject>(j);
+            for (auto anObject: SpaceObject::all()) {
                 if (anObject->owner.get() == this) {
                     anObject->currentTargetValue = 0x00000000;
                 }
@@ -1027,23 +1025,21 @@ void Admiral::think() {
                         if (_hopeToBuild >= 0) {
                             auto baseObject = mGetBaseObjectFromClassRace(_hopeToBuild, _race);
                             if (baseObject->buildFlags & kSufficientEscortsExist) {
-                                for (int j = 0; j < kMaxSpaceObject; ++j) {
-                                    anObject = Handle<SpaceObject>(j);
+                                for (auto anObject: SpaceObject::all()) {
                                     if ((anObject->active)
                                             && (anObject->owner.get() == this)
                                             && (anObject->base == baseObject)
                                             && (anObject->escortStrength <
                                                 baseObject->friendDefecit)) {
                                         _hopeToBuild = -1;
-                                        j = kMaxSpaceObject;
+                                        break;
                                     }
                                 }
                             }
 
                             if (baseObject->buildFlags & kMatchingFoeExists) {
                                 thisValue = 0;
-                                for (int j = 0; j < kMaxSpaceObject; j++) {
-                                    anObject = Handle<SpaceObject>(j);
+                                for (auto anObject: SpaceObject::all()) {
                                     if ((anObject->active)
                                             && (anObject->owner.get() != this)
                                             && (anObject->baseType->levelKeyTag

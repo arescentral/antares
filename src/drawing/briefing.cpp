@@ -315,7 +315,7 @@ template <typename Renderer>
 static void render_briefing_with(
         const Renderer& renderer, int32_t maxSize, Rect *bounds,
         coordPointType *corner, int32_t scale) {
-    int32_t        count, thisScale, gridWidth, gridHeight, i, j, color;
+    int32_t        thisScale, gridWidth, gridHeight, i, j, color;
     Point       where;
     Rect    spriteRect, clipRect;
     bool         *gridCells = NULL;
@@ -344,9 +344,7 @@ static void render_briefing_with(
     if ( gBriefingSpriteBounds == NULL) return;
     sBounds = gBriefingSpriteBounds;
 
-    for ( count = 0; count < kMaxSpaceObject; count++)
-    {
-        auto anObject = Handle<SpaceObject>(count);
+    for (auto anObject: SpaceObject::all()) {
         if (( anObject->active == kObjectInUse) && ( anObject->sprite != NULL))
         {
             auto baseObject = anObject->base;
@@ -381,7 +379,7 @@ static void render_briefing_with(
                     renderer.draw(*frame, where, thisScale, &spriteRect, clipRect);
 
                     sBounds->bounds = spriteRect;
-                    sBounds->objectIndex = count;
+                    sBounds->objectIndex = anObject.number();
                     sBounds++;
                 }
             } else {
@@ -419,7 +417,7 @@ static void render_briefing_with(
                             light_color, dark_color);
 
                     sBounds->bounds = spriteRect;
-                    sBounds->objectIndex = count;
+                    sBounds->objectIndex = anObject.number();
                     sBounds++;
                 }
             }

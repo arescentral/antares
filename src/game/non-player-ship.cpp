@@ -1840,8 +1840,7 @@ Handle<SpaceObject> GetSpritePointSelectObject(
     const uint32_t myOwnerFlag = 1 << sourceObject->owner.number();
 
     Handle<SpaceObject> resultShip, closestShip;
-    for (int32_t whichShip = 0; whichShip < kMaxSpaceObject; whichShip++) {
-        auto anObject = Handle<SpaceObject>(whichShip);
+    for (auto anObject: SpaceObject::all()) {
         if (!anObject->active
                 || !anObject->sprite
                 || !(anObject->seenByPlayerFlags & myOwnerFlag)

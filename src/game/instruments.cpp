@@ -294,8 +294,7 @@ void UpdateRadar(int32_t unitsDone) {
             globals()->gRadarCount = globals()->gRadarSpeed;
 
             const int32_t rrange = globals()->gRadarRange >> 1L;
-            for (int oCount = 0; oCount < kMaxSpaceObject; oCount++) {
-                auto anObject = Handle<SpaceObject>(oCount);
+            for (auto anObject: SpaceObject::all()) {
                 if (!anObject->active || (anObject == gScrollStarObject)) {
                     continue;
                 }
