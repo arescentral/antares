@@ -92,8 +92,7 @@ void AddBaseObjectActionMedia(
 void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors);
 
 void SetAllBaseObjectsUnchecked() {
-    for (int32_t i = 0; i < globals()->maxBaseObject; i++) {
-        auto aBase = Handle<BaseObject>(i);
+    for (auto aBase: BaseObject::all()) {
         aBase->internalFlags = 0;
     }
 }
@@ -214,8 +213,7 @@ void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors
                     break;
 
                 case kAlterOwner:
-                    for (int32_t i = 0; i < globals()->maxBaseObject; i++) {
-                        auto baseObject = Handle<BaseObject>(i);
+                    for (auto baseObject: BaseObject::all()) {
                         if (action_filter_applies_to(*action, baseObject)) {
                             baseObject->internalFlags |= all_colors;
                         }
@@ -612,7 +610,7 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
         if (gThisScenario->player[i].playerType == kSingleHumanPlayer) {
             auto admiral = Admiral::make(i, kAIsHuman, gThisScenario->player[i]);
             admiral->pay(mLongToFixed(5000));
-            globals()->gPlayerAdmiral = Handle<Admiral>(admiral);
+            globals()->gPlayerAdmiral = admiral;
         } else {
             auto admiral = Admiral::make(i, kAIsComputer, gThisScenario->player[i]);
             admiral->pay(mLongToFixed(5000));

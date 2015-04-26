@@ -67,15 +67,14 @@ void Admiral::init() {
 }
 
 void Admiral::reset() {
-    for (int i = 0; i < kMaxPlayerNum; ++i) {
-        gAdmiralData[i] = Admiral();
-        globals()->gActiveCheats[i] = 0;
+    for (auto a: Admiral::all()) {
+        *a = Admiral();
+        globals()->gActiveCheats[a.number()] = 0;
     }
 }
 
 void ResetAllDestObjectData() {
-    for (int i = 0; i < kMaxDestObject; ++i) {
-        auto d = Handle<Destination>(i);
+    for (auto d: Destination::all()) {
         d->whichObject = SpaceObject::none();
         d->name.clear();
         d->earn = d->totalBuildTime = d->buildTime = 0;
@@ -134,8 +133,7 @@ Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Scenario::Pl
 }
 
 static Handle<Destination> next_free_destination() {
-    for (int i = 0; i < kMaxDestObject; ++i) {
-        auto d = Handle<Destination>(i);
+    for (auto d: Destination::all()) {
         if (!d->whichObject.get()) {
             return d;
         }
@@ -207,8 +205,8 @@ void RemoveDestination(Handle<Destination> d) {
     if (!d.get()) {
         return;
     }
-    for (int i = 0; i < kMaxPlayerNum; i++) {
-        Handle<Admiral>(i)->remove_destination(d);
+    for (auto a: Admiral::all()) {
+        a->remove_destination(d);
     }
 
     d->whichObject = SpaceObject::none();
@@ -225,10 +223,8 @@ void RemoveDestination(Handle<Destination> d) {
 }
 
 void RecalcAllAdmiralBuildData() {
-    Admiral* a = gAdmiralData.get();
-
     // first clear all the data
-    for (int i = 0; i < kMaxPlayerNum; i++) {
+    for (auto a: Admiral::all()) {
         for (int j = 0; j < kMaxNumAdmiralCanBuild; j++) {
             a->canBuildType()[j].baseNum = -1;
             a->canBuildType()[j].base = BaseObject::none();
@@ -236,11 +232,9 @@ void RecalcAllAdmiralBuildData() {
         }
         a->totalBuildChance() = 0;
         a->hopeToBuild() = -1;
-        a++;
     }
 
-    for (int i = 0; i < kMaxDestObject; i++) {
-        auto d = Handle<Destination>(i);
+    for (auto d: Destination::all()) {
         if (d->whichObject.get()) {
             auto anObject = d->whichObject;
             if (anObject->owner.get()) {
@@ -628,10 +622,7 @@ static void AdmiralBuildAtObject(
 }
 
 void AdmiralThink() {
-    Admiral* a =gAdmiralData.get();
-
-    for (int i = 0; i < kMaxDestObject; i++) {
-        auto destBalance = Handle<Destination>(i);
+    for (auto destBalance: Destination::all()) {
         destBalance->buildTime -= 10;
         if (destBalance->buildTime <= 0) {
             destBalance->buildTime = 0;
@@ -648,9 +639,8 @@ void AdmiralThink() {
         }
     }
 
-    for (int i = 0; i < kMaxPlayerNum; i++) {
+    for (auto a: Admiral::all()) {
         a->think();
-        a++;
     }
 }
 

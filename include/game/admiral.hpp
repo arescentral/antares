@@ -70,6 +70,7 @@ const int32_t kAdmiralScoreNum = 3;
 struct Destination {
     static Destination* get(int i);
     static Handle<Destination> none() { return Handle<Destination>(-1); }
+    static HandleList<Destination> all() { return HandleList<Destination>(0, kMaxDestObject); }
 
     Handle<SpaceObject> whichObject;
     int32_t             canBuildType[kMaxTypeBaseCanBuild];
@@ -96,6 +97,7 @@ class Admiral {
     static Admiral*     get(int i);
     static Handle<Admiral>  make(int index, uint32_t attributes, const Scenario::Player& player);
     static Handle<Admiral>  none() { return Handle<Admiral>(-1); }
+    static HandleList<Admiral> all() { return HandleList<Admiral>(0, kMaxPlayerNum); }
 
     void                think();
     bool                build(int32_t buildWhichType);

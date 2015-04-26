@@ -264,6 +264,7 @@ class BaseObject {
   public:
     static BaseObject* get(int number);
     static Handle<BaseObject> none() { return Handle<BaseObject>(-1); }
+    static HandleList<BaseObject> all() { return HandleList<BaseObject>(0, globals()->maxBaseObject); }
 
     uint32_t                attributes;                 // initial attributes (see flags)
     int32_t                 baseClass;
@@ -367,6 +368,7 @@ class SpaceObject {
   public:
     static SpaceObject* get(int number);
     static Handle<SpaceObject> none() { return Handle<SpaceObject>(-1); }
+    static HandleList<SpaceObject> all() { return HandleList<SpaceObject>(0, kMaxSpaceObject); }
 
     static SpaceObject* zero();
 

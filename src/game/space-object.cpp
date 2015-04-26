@@ -115,15 +115,10 @@ void SpaceObjectHandlingInit() {
 }
 
 void ResetAllSpaceObjects() {
-    SpaceObject *anObject = NULL;
-    int16_t         i;
-
     gRootObject = SpaceObject::none();
-    anObject = gSpaceObjectData.get();
-    for (i = 0; i < kMaxSpaceObject; i++) {
+    for (auto anObject: SpaceObject::all()) {
         anObject->active = kObjectAvailable;
         anObject->sprite = NULL;
-        anObject++;
     }
 }
 
@@ -152,8 +147,7 @@ Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, int race) {
     if (class_ >= kLiteralClass) {
         return Handle<BaseObject>(class_ - kLiteralClass);
     }
-    for (int i = 0; i < globals()->maxBaseObject; ++i) {
-        auto o = Handle<BaseObject>(i);
+    for (auto o: BaseObject::all()) {
         if ((o->baseClass == class_) && (o->baseRace == race)) {
             return o;
         }
@@ -162,8 +156,7 @@ Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, int race) {
 }
 
 static Handle<SpaceObject> next_free_space_object() {
-    for (int i = 0; i < kMaxSpaceObject; ++i) {
-        auto obj = Handle<SpaceObject>(i);
+    for (auto obj: SpaceObject::all()) {
         if (!obj->active) {
             return obj;
         }
@@ -265,24 +258,15 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
     return obj;
 }
 
-void RemoveAllSpaceObjects( void)
-
-{
-    SpaceObject *anObject;
-    int             i;
-
-    anObject = gSpaceObjectData.get();
-    for ( i = 0; i < kMaxSpaceObject; i++)
-    {
-        if ( anObject->sprite != NULL)
-        {
-            RemoveSprite( anObject->sprite);
-            anObject->sprite = NULL;
+void RemoveAllSpaceObjects() {
+    for (auto obj: SpaceObject::all()) {
+        if (obj->sprite != NULL) {
+            RemoveSprite(obj->sprite);
+            obj->sprite = NULL;
         }
-        anObject->active = kObjectAvailable;
-        anObject->nextNearObject = anObject->nextFarObject = NULL;
-        anObject->attributes = 0;
-        anObject++;
+        obj->active = kObjectAvailable;
+        obj->nextNearObject = obj->nextFarObject = NULL;
+        obj->attributes = 0;
     }
 }
 
@@ -291,9 +275,7 @@ void CorrectAllBaseObjectColor( void)
 {
     int16_t         i;
 
-    for ( i = 0; i < globals()->maxBaseObject; i++)
-    {
-        auto aBase = Handle<BaseObject>(i);
+    for (auto aBase: BaseObject::all()) {
         if (( aBase->shieldColor != 0xFF) && ( aBase->shieldColor != 0))
         {
             aBase->shieldColor = GetTranslateColorShade(aBase->shieldColor, 15);
@@ -639,8 +621,7 @@ Handle<SpaceObject> CreateAnySpaceObject(
 
 int32_t CountObjectsOfBaseType(Handle<BaseObject> whichType, Handle<Admiral> owner) {
     int32_t result = 0;
-    for (int32_t i = 0; i < kMaxSpaceObject; ++i) {
-        auto anObject = Handle<SpaceObject>(i);
+    for (auto anObject: SpaceObject::all()) {
         if (anObject->active
                 && (!whichType.get() || (anObject->base == whichType))
                 && (!owner.get() || (anObject->owner == owner))) {
@@ -777,17 +758,16 @@ void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message) 
     object->bestConsideredTargetValue = object->currentTargetValue = 0xffffffff;
     object->bestConsideredTargetNumber = -1;
 
-    for (int32_t i = 0; i < kMaxSpaceObject; i++) {
-        auto& fixObject = gSpaceObjectData[i];
-        if ((fixObject.destObject.get() == object)
-                && (fixObject.active != kObjectAvailable)
-                && (fixObject.attributes & kCanThink)) {
-            fixObject.currentTargetValue = 0xffffffff;
-            if (fixObject.owner != owner) {
-                object->remoteFoeStrength += fixObject.baseType->offenseValue;
+    for (auto fixObject: SpaceObject::all()) {
+        if ((fixObject->destObject.get() == object)
+                && (fixObject->active != kObjectAvailable)
+                && (fixObject->attributes & kCanThink)) {
+            fixObject->currentTargetValue = 0xffffffff;
+            if (fixObject->owner != owner) {
+                object->remoteFoeStrength += fixObject->baseType->offenseValue;
             } else {
-                object->remoteFriendStrength += fixObject.baseType->offenseValue;
-                object->escortStrength += fixObject.baseType->offenseValue;
+                object->remoteFriendStrength += fixObject->baseType->offenseValue;
+                object->escortStrength += fixObject->baseType->offenseValue;
             }
         }
     }
@@ -851,12 +831,11 @@ void DestroyObject(SpaceObject* object) {
     } else if (object->attributes & kNeutralDeath) {
         object->_health = object->max_health();
         // if anyone is targeting it, they should stop
-        for (int16_t i = 0; i < kMaxSpaceObject; i++) {
-            auto& fixObject = gSpaceObjectData[i];
-            if ((fixObject.attributes & kCanAcceptDestination)
-                    && (fixObject.active != kObjectAvailable)) {
-                if (fixObject.targetObject.get() == object) {
-                    fixObject.targetObject = SpaceObject::none();
+        for (auto fixObject: SpaceObject::all()) {
+            if ((fixObject->attributes & kCanAcceptDestination)
+                    && (fixObject->active != kObjectAvailable)) {
+                if (fixObject->targetObject.get() == object) {
+                    fixObject->targetObject = SpaceObject::none();
                 }
             }
         }
@@ -881,14 +860,13 @@ void DestroyObject(SpaceObject* object) {
         if ((object->attributes & kIsDestination) &&
                 !object->baseType->destroyDontDie) {
             RemoveDestination(object->asDestination);
-            for (int16_t i = 0; i < kMaxSpaceObject; i++) {
-                auto& fixObject = gSpaceObjectData[i];
-                if ((fixObject.attributes & kCanAcceptDestination)
-                        && (fixObject.active != kObjectAvailable)) {
-                    if (fixObject.destObject.get() == object) {
-                        fixObject.destObject = SpaceObject::none();
-                        fixObject.destObjectPtr = NULL;
-                        fixObject.attributes &= ~kStaticDestination;
+            for (auto fixObject: SpaceObject::all()) {
+                if ((fixObject->attributes & kCanAcceptDestination)
+                        && (fixObject->active != kObjectAvailable)) {
+                    if (fixObject->destObject.get() == object) {
+                        fixObject->destObject = SpaceObject::none();
+                        fixObject->destObjectPtr = NULL;
+                        fixObject->attributes &= ~kStaticDestination;
                     }
                 }
             }

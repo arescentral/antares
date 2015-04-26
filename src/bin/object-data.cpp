@@ -91,8 +91,7 @@ int main(int argc, char** argv) {
     SpaceObjectHandlingInit();
 
     ObjectDataBuilder builder(output_dir);
-    for (int id = 0; id < globals()->maxBaseObject; ++id) {
-        auto object = Handle<BaseObject>(id);
+    for (auto object: BaseObject::all()) {
         const int pict_id = object->pictPortraitResID;
         if (pict_id <= 0) {
             continue;

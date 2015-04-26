@@ -1022,8 +1022,7 @@ hackBNoEngageMatch:
     // here, it doesn't matter in what order we step through the table
     const uint32_t seen_by_player = 1ul << globals()->gPlayerAdmiral.number();
 
-    for (int32_t i = 0; i < kMaxSpaceObject; i++) {
-        auto aObject = Handle<SpaceObject>(i);
+    for (auto aObject: SpaceObject::all()) {
         if (aObject->active == kObjectToBeFreed) {
             if (aObject->attributes & kIsBeam) {
                 if (aObject->frame.beam != NULL) {
