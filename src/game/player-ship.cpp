@@ -877,7 +877,7 @@ void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> 
         label = gDestinationLabel;
 
         if (!(flagship->attributes & kOnAutoPilot)) {
-            SetObjectDestination(flagship.get(), NULL);
+            SetObjectDestination(flagship, SpaceObject::none());
         }
     } else {
         adm->set_control(ship);
@@ -942,7 +942,7 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
     adm->set_flagship(newShip);
 }
 
-void TogglePlayerAutoPilot(SpaceObject *theShip) {
+void TogglePlayerAutoPilot(Handle<SpaceObject> theShip) {
     if ( theShip->attributes & kOnAutoPilot)
     {
         theShip->attributes &= ~kOnAutoPilot;
@@ -953,9 +953,8 @@ void TogglePlayerAutoPilot(SpaceObject *theShip) {
             StringSlice string = strings.at(kAutoPilotOffString - 1);
             Messages::set_status(string, kStatusLabelColor);
         }
-    } else
-    {
-        SetObjectDestination( theShip, NULL);
+    } else {
+        SetObjectDestination(theShip, SpaceObject::none());
         theShip->attributes |= kOnAutoPilot;
         if ((theShip->owner == globals()->gPlayerAdmiral) &&
             ( theShip->attributes & kIsHumanControlled))
@@ -977,7 +976,7 @@ void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral) {
     auto control = whichAdmiral->control();
 
     if (control.get()) {
-        SetObjectDestination(control.get(), NULL);
+        SetObjectDestination(control, SpaceObject::none());
         if ( whichAdmiral == globals()->gPlayerAdmiral)
             PlayVolumeSound(  kMorseBeepSound, kMediumVolume, kMediumPersistence, kLowPrioritySound);
     }

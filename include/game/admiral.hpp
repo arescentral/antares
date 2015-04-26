@@ -198,9 +198,9 @@ void SetAdmiralBuildAtName(Handle<Admiral> whichAdmiral, sfz::StringSlice name);
 sfz::StringSlice GetDestBalanceName(Handle<Destination> whichDestObject);
 sfz::StringSlice GetAdmiralName(Handle<Admiral> whichAdmiral);
 
-void SetObjectLocationDestination(SpaceObject* o, coordPointType* where);
-void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject);
-void RemoveObjectFromDestination(SpaceObject* o);
+void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType* where);
+void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObject);
+void RemoveObjectFromDestination(Handle<SpaceObject> o);
 
 void AdmiralThink();
 void StopBuilding(Handle<Destination> whichDestObject);
@@ -212,7 +212,7 @@ int32_t AlterDestinationObjectOccupation(
         Handle<Destination> whichDestination, Handle<Admiral> whichAdmiral, int32_t amount);
 void ClearAllOccupants(
         Handle<Destination> whichDestination, Handle<Admiral> whichAdmiral, int32_t fullAmount);
-void AddKillToAdmiral(SpaceObject *anObject);
+void AddKillToAdmiral(Handle<SpaceObject> anObject);
 
 int32_t GetAdmiralLoss(Handle<Admiral> whichAdmiral);
 int32_t GetAdmiralKill(Handle<Admiral> whichAdmiral);

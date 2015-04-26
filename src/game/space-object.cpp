@@ -755,7 +755,7 @@ void AlterObjectOwner(Handle<SpaceObject> object, Handle<Admiral> owner, bool me
     object->remoteFoeStrength = object->remoteFriendStrength = object->escortStrength =
         object->localFoeStrength = object->localFriendStrength = 0;
     object->bestConsideredTargetValue = object->currentTargetValue = 0xffffffff;
-    object->bestConsideredTargetNumber = -1;
+    object->bestConsideredTargetNumber = SpaceObject::none();
 
     for (auto fixObject: SpaceObject::all()) {
         if ((fixObject->destObject == object)
@@ -843,7 +843,7 @@ void DestroyObject(Handle<SpaceObject> object) {
         object->attributes &= ~(kHated | kCanEngage | kCanCollide | kCanBeHit);
         object->baseType->destroy.run(object, SpaceObject::none(), NULL);
     } else {
-        AddKillToAdmiral(object.get());
+        AddKillToAdmiral(object);
         if (object->attributes & kReleaseEnergyOnDeath) {
             int16_t energyNum = object->energy() / kEnergyPodAmount;
             while (energyNum > 0) {
@@ -874,7 +874,7 @@ void DestroyObject(Handle<SpaceObject> object) {
         object->baseType->destroy.run(object, SpaceObject::none(), NULL);
 
         if (object->attributes & kCanAcceptDestination) {
-            RemoveObjectFromDestination(object.get());
+            RemoveObjectFromDestination(object);
         }
         if (!object->baseType->destroyDontDie) {
             object->active = kObjectToBeFreed;

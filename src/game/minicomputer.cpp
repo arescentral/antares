@@ -1143,7 +1143,7 @@ void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> w
                 case kSpecialMiniHold: {
                     auto control = whichAdmiral->control();
                     if (control.get()) {
-                        SetObjectLocationDestination(control.get(), &control->location);
+                        SetObjectLocationDestination(control, &control->location);
                     }
                     break;
                 }
@@ -1152,7 +1152,7 @@ void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> w
                     auto control = whichAdmiral->control();
                     if (control.get()) {
                         auto flagship = whichAdmiral->flagship();
-                        SetObjectLocationDestination(control.get(), &flagship->location);
+                        SetObjectLocationDestination(control, &flagship->location);
                     }
                     break;
                 }

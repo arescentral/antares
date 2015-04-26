@@ -273,7 +273,7 @@ void set_initial_destination(const Scenario::InitialObject* initial, bool preser
         auto object = initial->realObject;
         uint32_t specialAttributes = object->attributes; // preserve the attributes
         object->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
-        SetObjectDestination(object.get(), NULL);
+        SetObjectDestination(object, SpaceObject::none());
         object->attributes = specialAttributes;
 
         if (preserve) {

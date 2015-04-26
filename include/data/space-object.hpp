@@ -414,7 +414,7 @@ class SpaceObject {
 
     Fixed                   bestConsideredTargetValue = 0xffffffff;
     Fixed                   currentTargetValue = 0xffffffff;
-    int32_t                 bestConsideredTargetNumber = kNoShip;
+    Handle<SpaceObject>     bestConsideredTargetNumber;
 
     int32_t                 timeFromOrigin = 0;     // time it's been since we left
     fixedPointType          idealLocationCalc = {0, 0};  // calced when we got origin

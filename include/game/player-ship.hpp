@@ -73,7 +73,7 @@ void PlayerShipHandleClick(Point where, int button);
 void SetPlayerSelectShip(
         Handle<SpaceObject> whichShip, bool target, Handle<Admiral> admiralNumber);
 void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, Handle<SpaceObject> newShip);
-void TogglePlayerAutoPilot( SpaceObject *);
+void TogglePlayerAutoPilot(Handle<SpaceObject> theShip);
 bool IsPlayerShipOnAutoPilot( void);
 void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral);
 void PlayerShipBodyExpire(Handle<SpaceObject> theShip, bool sourceIsBody);

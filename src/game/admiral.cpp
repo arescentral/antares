@@ -400,7 +400,7 @@ StringSlice GetAdmiralName(Handle<Admiral> a) {
     }
 }
 
-void SetObjectLocationDestination(SpaceObject *o, coordPointType *where) {
+void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType *where) {
     // if the object does not have an alliance, then something is wrong here--forget it
     if (o->owner.number() <= kNoOwner) {
         o->destObject = SpaceObject::none();
@@ -461,8 +461,8 @@ void SetObjectLocationDestination(SpaceObject *o, coordPointType *where) {
     }
 }
 
-void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
-    auto dObject = Handle<SpaceObject>(overrideObject->number());
+void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObject) {
+    auto dObject = overrideObject;
 
     // if the object does not have an alliance, then something is wrong here--forget it
     if (o->owner.number() <= kNoOwner) {
@@ -483,7 +483,7 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
     }
 
     // if this object has a locked destination, then forget it
-    if ((o->attributes & kStaticDestination) && (overrideObject == NULL)) {
+    if ((o->attributes & kStaticDestination) && !overrideObject.get()) {
         return;
     }
 
@@ -518,7 +518,7 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
 
         if ((dObject->active == kObjectInUse) &&
                 ((dObject->id == a->destinationObjectID())
-                 || (overrideObject != NULL))) {
+                 || overrideObject.get())) {
             if (o->attributes & kCanAcceptDestination) {
                 o->timeFromOrigin = kTimeToCheckHome;
             } else {
@@ -530,7 +530,7 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
             }
 
             // add this object to its destination
-            if (o != dObject.get()) {
+            if (o != dObject) {
                 o->runTimeFlags &= ~kHasArrived;
                 o->destObject = dObject;
                 o->destObjectPtr = dObject.get();
@@ -583,10 +583,9 @@ void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject) {
     }
 }
 
-void RemoveObjectFromDestination(SpaceObject* o) {
-    SpaceObject* dObject = o;
+void RemoveObjectFromDestination(Handle<SpaceObject> o) {
     if (o->destObject.get() && (o->destObjectPtr != NULL)) {
-        dObject = o->destObjectPtr;
+        auto dObject = o->destObjectPtr;
         if (dObject->id == o->destObjectID) {
             if (dObject->owner == o->owner) {
                 dObject->remoteFriendStrength -= o->baseType->offenseValue;
@@ -612,7 +611,7 @@ static void AdmiralBuildAtObject(
 
         auto newObject = CreateAnySpaceObject(base, &v, &coord, 0, admiral, 0, -1);
         if (newObject.get()) {
-            SetObjectDestination(newObject.get(), NULL);
+            SetObjectDestination(newObject, SpaceObject::none());
             if (admiral == globals()->gPlayerAdmiral) {
                 PlayVolumeSound(kComputerBeep2, kMediumVolume, kMediumPersistence,
                         kLowPrioritySound);
@@ -717,7 +716,7 @@ void Admiral::think() {
                         && (anObject->duty != eHostileBaseDuty)
                         && (anObject->bestConsideredTargetValue >
                             anObject->currentTargetValue)) {
-                    _destinationObject = Handle<SpaceObject>(anObject->bestConsideredTargetNumber);
+                    _destinationObject = anObject->bestConsideredTargetNumber;
                     _has_destination = true;
                     if (_destinationObject.get()) {
                         destObject = _destinationObject;
@@ -731,7 +730,7 @@ void Admiral::think() {
                             thisValue = mMultiplyFixed(
                                     thisValue, anObject->currentTargetValue);
                             anObject->currentTargetValue += thisValue;
-                            SetObjectDestination(anObject.get(), NULL);
+                            SetObjectDestination(anObject, SpaceObject::none());
                         }
                     }
                     _has_destination = false;
@@ -974,7 +973,7 @@ void Admiral::think() {
             }
             if (thisValue > anObject->bestConsideredTargetValue) {
                 anObject->bestConsideredTargetValue = thisValue;
-                anObject->bestConsideredTargetNumber = _destinationObject.number();
+                anObject->bestConsideredTargetNumber = _destinationObject;
             }
         }
     }
@@ -1153,7 +1152,7 @@ void ClearAllOccupants(Handle<Destination> d, Handle<Admiral> a, int32_t fullAmo
     }
 }
 
-void AddKillToAdmiral(SpaceObject* anObject) {
+void AddKillToAdmiral(Handle<SpaceObject> anObject) {
     // only for player
     const auto& admiral = globals()->gPlayerAdmiral;
 

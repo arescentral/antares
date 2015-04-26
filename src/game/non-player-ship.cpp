@@ -355,10 +355,10 @@ void NonplayerShipThink(int32_t timePass)
 
         // Take care of any "keys" being pressed
         if (anObject->keysDown & kAdoptTargetKey) {
-            SetObjectDestination(anObject.get(), NULL);
+            SetObjectDestination(anObject, SpaceObject::none());
         }
         if (anObject->keysDown & kAutoPilotKey) {
-            TogglePlayerAutoPilot(anObject.get());
+            TogglePlayerAutoPilot(anObject);
         }
         if (anObject->keysDown & kGiveCommandKey) {
             PlayerShipGiveCommand(anObject->owner);
@@ -674,7 +674,7 @@ uint32_t ThinkObjectNormalPresence(
                     || (!anObject->destObject.get()
                         && (anObject->destinationLocation.h == kNoDestinationCoord))) {
                 if (anObject->attributes & kOnAutoPilot) {
-                    TogglePlayerAutoPilot(anObject.get());
+                    TogglePlayerAutoPilot(anObject);
                 }
                 keysDown |= kDownKey;
                 anObject->timeFromOrigin = 0;
@@ -709,7 +709,7 @@ uint32_t ThinkObjectNormalPresence(
                             dest.h = anObject->location.h;
                             dest.v = anObject->location.v;
                             if (anObject->attributes & kOnAutoPilot) {
-                                TogglePlayerAutoPilot(anObject.get());
+                                TogglePlayerAutoPilot(anObject);
                             }
                         } else {
                             anObject->destObject = anObject->destObjectDest;
@@ -737,14 +737,14 @@ uint32_t ThinkObjectNormalPresence(
                                 dest.h = anObject->location.h;
                                 dest.v = anObject->location.v;
                                 if (anObject->attributes & kOnAutoPilot) {
-                                    TogglePlayerAutoPilot(anObject.get());
+                                    TogglePlayerAutoPilot(anObject);
                                 }
                             }
                         }
                     }
                 } else { // no destination object; just coords
                     if (anObject->attributes & kOnAutoPilot) {
-                        TogglePlayerAutoPilot(anObject.get());
+                        TogglePlayerAutoPilot(anObject);
                     }
                     targetObject = SpaceObject::none();
                     dest.h = anObject->destinationLocation.h;
@@ -1048,7 +1048,7 @@ uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
             || (!anObject->destObject.get()
                 && (anObject->destinationLocation.h == kNoDestinationCoord))) {
         if (anObject->attributes & kOnAutoPilot) {
-            TogglePlayerAutoPilot(anObject.get());
+            TogglePlayerAutoPilot(anObject);
         }
         keysDown |= kDownKey;
         distance = 0;
@@ -1106,7 +1106,7 @@ uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
             }
         } else { // no destination object; just coords
             if (anObject->attributes & kOnAutoPilot) {
-                TogglePlayerAutoPilot(anObject.get());
+                TogglePlayerAutoPilot(anObject);
             }
             dest.h = anObject->location.h;
             dest.v = anObject->location.v;
@@ -1277,7 +1277,7 @@ void ThinkObjectResolveDestination(
                 && (anObject->destinationLocation.h == kNoDestinationCoord))) {
         if (anObject->attributes & kOnAutoPilot)
         {
-            TogglePlayerAutoPilot(anObject.get());
+            TogglePlayerAutoPilot(anObject);
         }
         dest->h = anObject->location.h;
         dest->v = anObject->location.v;
@@ -1348,7 +1348,7 @@ void ThinkObjectResolveDestination(
             {
                 if (anObject->attributes & kOnAutoPilot)
                 {
-                    TogglePlayerAutoPilot(anObject.get());
+                    TogglePlayerAutoPilot(anObject);
                 }
                 dest->h = anObject->location.h;
                 dest->v = anObject->location.v;
