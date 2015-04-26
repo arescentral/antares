@@ -136,9 +136,9 @@ static void create_object(
             at.v += focus->randomSeed.next(distance * 2) - distance;
         }
 
-        SpaceObject* product = CreateAnySpaceObject(
+        auto product = CreateAnySpaceObject(
                 baseObject, &vel, &at, direction, focus->owner, 0, -1);
-        if (!product) {
+        if (!product.get()) {
             continue;
         }
 
@@ -148,9 +148,9 @@ static void create_object(
             if (product->owner.get()) {
                 if (action->reflexive) {
                     if (action->verb != kCreateObjectSetDest) {
-                        SetObjectDestination(product, focus);
+                        SetObjectDestination(product.get(), focus);
                     } else if (focus->destObjectPtr) {
-                        SetObjectDestination(product, focus->destObjectPtr);
+                        SetObjectDestination(product.get(), focus->destObjectPtr);
                     }
                 }
             } else if (action->reflexive) {
@@ -173,7 +173,7 @@ static void create_object(
         if (product->attributes & kIsBeam) {
             if (product->frame.beam->beamKind != eKineticBeamKind) {
                 // special beams need special post-creation acts
-                Beams::set_attributes(product, focus);
+                Beams::set_attributes(product.get(), focus);
             }
         }
     }

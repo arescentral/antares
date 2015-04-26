@@ -35,7 +35,7 @@ void CorrectAllBaseObjectColor( void);
 void ChangeObjectBaseType(
         SpaceObject *obj, Handle<BaseObject> base, int32_t spriteIDOverride, bool relative);
 
-SpaceObject* CreateAnySpaceObject(
+Handle<SpaceObject> CreateAnySpaceObject(
         Handle<BaseObject> whichBase, fixedPointType *velocity, coordPointType *location,
         int32_t direction, Handle<Admiral> owner, uint32_t specialAttributes,
         int16_t spriteIDOverride);

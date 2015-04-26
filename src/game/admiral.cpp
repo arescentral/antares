@@ -616,9 +616,9 @@ static void AdmiralBuildAtObject(
     if (base.get()) {
         auto coord = buildAtDest->whichObject->location;
 
-        SpaceObject* newObject = CreateAnySpaceObject(base, &v, &coord, 0, admiral, 0, -1);
-        if (newObject) {
-            SetObjectDestination(newObject, NULL);
+        auto newObject = CreateAnySpaceObject(base, &v, &coord, 0, admiral, 0, -1);
+        if (newObject.get()) {
+            SetObjectDestination(newObject.get(), NULL);
             if (admiral == globals()->gPlayerAdmiral) {
                 PlayVolumeSound(kComputerBeep2, kMediumVolume, kMediumPersistence,
                         kLowPrioritySound);

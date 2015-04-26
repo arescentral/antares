@@ -161,7 +161,7 @@ Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, int race) {
     return BaseObject::none();
 }
 
-static SpaceObject* AddSpaceObject(SpaceObject *sourceObject) {
+static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
     for (int i = 0; i < kMaxSpaceObject; ++i) {
         auto obj = Handle<SpaceObject>(i);
         if (obj->active) {
@@ -236,7 +236,7 @@ static SpaceObject* AddSpaceObject(SpaceObject *sourceObject) {
             if (obj->sprite == NULL) {
                 globals()->gGameOver = -1;
                 obj->active = kObjectAvailable;
-                return nullptr;
+                return SpaceObject::none();
             }
         }
 
@@ -253,9 +253,9 @@ static SpaceObject* AddSpaceObject(SpaceObject *sourceObject) {
         }
         gRootObject = obj;
 
-        return obj.get();
+        return obj;
     }
-    return nullptr;
+    return SpaceObject::none();
 }
 
 void RemoveAllSpaceObjects( void)
@@ -602,7 +602,7 @@ void ChangeObjectBaseType(
     }
 }
 
-SpaceObject* CreateAnySpaceObject(
+Handle<SpaceObject> CreateAnySpaceObject(
         Handle<BaseObject> whichBase, fixedPointType *velocity, coordPointType *location,
         int32_t direction, Handle<Admiral> owner, uint32_t specialAttributes,
         int16_t spriteIDOverride) {
@@ -612,8 +612,8 @@ SpaceObject* CreateAnySpaceObject(
             whichBase, random, id, *location, direction, velocity, owner, spriteIDOverride);
 
     auto obj = AddSpaceObject(&newObject);
-    if (!obj) {
-        return nullptr;
+    if (!obj.get()) {
+        return SpaceObject::none();
     }
 
 #ifdef DATA_COVERAGE
@@ -626,7 +626,7 @@ SpaceObject* CreateAnySpaceObject(
 #endif  // DATA_COVERAGE
 
     obj->attributes |= specialAttributes;
-    obj->baseType->create.run(obj, NULL, NULL);
+    obj->baseType->create.run(obj.get(), NULL, NULL);
     return obj;
 }
 
@@ -906,9 +906,8 @@ void CreateFloatingBodyOfPlayer(SpaceObject* obj) {
         return;
     }
 
-    auto o = CreateAnySpaceObject(
+    auto body = CreateAnySpaceObject(
             body_type, &obj->velocity, &obj->location, obj->direction, obj->owner, 0, -1);
-    auto body = o ? Handle<SpaceObject>(o->number()) : SpaceObject::none();
     if (body.get()) {
         ChangePlayerShipNumber(obj->owner, body);
     } else {
