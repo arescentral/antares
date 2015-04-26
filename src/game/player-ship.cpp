@@ -863,59 +863,41 @@ void PlayerShipHandleClick(Point where, int button) {
     }
 }
 
-void SetPlayerSelectShip(
-        Handle<SpaceObject> whichShip, bool target, Handle<Admiral> admiralNumber) {
-    Handle<SpaceObject> selectShip = Handle<SpaceObject>(whichShip);
-    Handle<SpaceObject> theShip = admiralNumber->flagship();
+void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> adm) {
+    Handle<SpaceObject> flagship = adm->flagship();
+    int32_t label;
 
-    if ( admiralNumber == globals()->gPlayerAdmiral)
-    {
-        globals()->lastSelectedObject = whichShip;
-        globals()->lastSelectedObjectID = selectShip->id;
+    if (adm == globals()->gPlayerAdmiral) {
+        globals()->lastSelectedObject = ship;
+        globals()->lastSelectedObjectID = ship->id;
         globals()->destKeyUsedForSelection = true;
     }
     if (target) {
-        admiralNumber->set_target(whichShip);
-        if (admiralNumber == globals()->gPlayerAdmiral) {
-            Labels::set_object(gDestinationLabel, selectShip);
-            if (whichShip == globals()->gPlayerShip) {
-                Labels::set_age(gDestinationLabel, Labels::kVisibleTime);
-            }
-            PlayVolumeSound(
-                    kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
-            if (selectShip->attributes & kIsDestination) {
-                String string(GetDestBalanceName(selectShip->asDestination));
-                print(string, hot_key_suffix(selectShip));
-                Labels::set_string(gDestinationLabel, string);
-            } else {
-                String string(get_object_name(selectShip->base));
-                print(string, hot_key_suffix(selectShip));
-                Labels::set_string(gDestinationLabel, string);
-            }
-        }
+        adm->set_target(ship);
+        label = gDestinationLabel;
 
-        if (!(theShip->attributes & kOnAutoPilot)) {
-            SetObjectDestination(theShip.get(), NULL);
+        if (!(flagship->attributes & kOnAutoPilot)) {
+            SetObjectDestination(flagship.get(), NULL);
         }
     } else {
-        admiralNumber->set_control(whichShip);
-        if (admiralNumber == globals()->gPlayerAdmiral) {
-            Labels::set_object(globals()->gSelectionLabel, selectShip);
-            if (whichShip == globals()->gPlayerShip) {
-                Labels::set_age(globals()->gSelectionLabel, Labels::kVisibleTime);
-            }
-            PlayVolumeSound(
-                    kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
-            if (selectShip->attributes & kIsDestination) {
-                String string(GetDestBalanceName(selectShip->asDestination));
-                print(string, hot_key_suffix(selectShip));
-                Labels::set_string(globals()->gSelectionLabel, string);
-            } else {
-                String string(get_object_name(selectShip->base));
-                print(string, hot_key_suffix(selectShip));
-                Labels::set_string(globals()->gSelectionLabel, string);
-            }
+        adm->set_control(ship);
+        label = globals()->gSelectionLabel;
+    }
+
+    if (adm == globals()->gPlayerAdmiral) {
+        PlayVolumeSound(kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
+        Labels::set_object(label, ship);
+        if (ship == globals()->gPlayerShip) {
+            Labels::set_age(label, Labels::kVisibleTime);
         }
+        String string;
+        if (ship->attributes & kIsDestination) {
+            string.assign(GetDestBalanceName(ship->asDestination));
+        } else {
+            string.assign(get_object_name(ship->base));
+        }
+        print(string, hot_key_suffix(ship));
+        Labels::set_string(label, string);
     }
 }
 
@@ -923,31 +905,28 @@ void SetPlayerSelectShip(
 // assumes that newShipNumber is the number of a valid (legal, living) ship and that
 // gPlayerShip already points to the current, legal living ship
 
-void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, Handle<SpaceObject> newShip) {
-    auto anObject = whichAdmiral->flagship();
-    if (!anObject.get()) {
-        throw Exception(format(
-                    "whichAdmiral: {0}, newShip: {1}",
-                    whichAdmiral.number(), newShip.number()));
+void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
+    auto flagship = adm->flagship();
+    if (!flagship.get()) {
+        throw Exception(format("adm: {0}, newShip: {1}", adm.number(), newShip.number()));
     }
 
-    if (whichAdmiral == globals()->gPlayerAdmiral) {
-        anObject->attributes &= (~kIsHumanControlled) & (~kIsPlayerShip);
+    if (adm == globals()->gPlayerAdmiral) {
+        flagship->attributes &= (~kIsHumanControlled) & (~kIsPlayerShip);
         if (newShip != globals()->gPlayerShip)
         {
             globals()->gPlayerShip = newShip;
             globals()->starfield.reset(newShip);
         }
 
-
-        anObject = globals()->gPlayerShip;
-        if (!anObject.get()) {
+        flagship = globals()->gPlayerShip;
+        if (!flagship.get()) {
             throw Exception(format(
-                        "whichAdmiral: {0}, newShip: {1}, gPlayerShip: {2}",
-                        whichAdmiral.number(), newShip.number(), globals()->gPlayerShip.number()));
+                        "adm: {0}, newShip: {1}, gPlayerShip: {2}",
+                        adm.number(), newShip.number(), globals()->gPlayerShip.number()));
         }
 
-        anObject->attributes |= (kIsHumanControlled) | (kIsPlayerShip);
+        flagship->attributes |= kIsHumanControlled | kIsPlayerShip;
 
         if (newShip == globals()->gPlayerAdmiral->control()) {
             Labels::set_age( globals()->gSelectionLabel, Labels::kVisibleTime);
@@ -955,13 +934,12 @@ void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, Handle<SpaceObject> ne
         if (newShip == globals()->gPlayerAdmiral->target()) {
             Labels::set_age( gDestinationLabel, Labels::kVisibleTime);
         }
-    } else
-    {
-        anObject->attributes &= ~(kIsRemote | kIsPlayerShip);
-        anObject = newShip;
-        anObject->attributes |= (kIsRemote | kIsPlayerShip);
+    } else {
+        flagship->attributes &= ~(kIsRemote | kIsPlayerShip);
+        flagship = newShip;
+        flagship->attributes |= (kIsRemote | kIsPlayerShip);
     }
-    whichAdmiral->set_flagship(newShip);
+    adm->set_flagship(newShip);
 }
 
 void TogglePlayerAutoPilot(SpaceObject *theShip) {
