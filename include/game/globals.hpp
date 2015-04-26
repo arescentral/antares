@@ -104,7 +104,7 @@ struct aresGlobalType {
     int32_t         gCenterScaleH;
     int32_t         gCenterScaleV;
     Handle<SpaceObject> gPlayerShip;
-    int32_t         gSelectionLabel;
+    Handle<Label>   gSelectionLabel;
     ZoomType        gZoomMode;
     ZoomType        gPreviousZoomMode;
     Handle<Admiral> gPlayerAdmiral;

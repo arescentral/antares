@@ -22,6 +22,7 @@
 #include <queue>
 #include <sfz/sfz.hpp>
 
+#include "data/handle.hpp"
 #include "drawing/color.hpp"
 #include "drawing/styled-text.hpp"
 #include "math/geometry.hpp"
@@ -60,8 +61,8 @@ class Messages {
     static std::queue<sfz::String> message_data;
     static longMessageType* long_message_data;
     static int32_t time_count;
-    static int32_t message_label_num;
-    static int32_t status_label_num;
+    static Handle<Label> message_label_num;
+    static Handle<Label> status_label_num;
 };
 
 }  // namespace antares

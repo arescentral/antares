@@ -32,32 +32,33 @@ class Label {
     static const int32_t kVisibleTime = 60;
 
     static Label* get(int number);
+    static Handle<Label> none() { return Handle<Label>(-1); }
     static HandleList<Label> all() { return {0, kMaxLabelNum}; }
 
     static void init();
     static void reset();
-    static int16_t add(
+    static Handle<Label> add(
             int16_t h, int16_t v, int16_t hoff, int16_t voff, Handle<SpaceObject> object,
             bool objectLink, uint8_t color);
-    static void remove(int32_t);
+    static void remove(Handle<Label> which);
     static void draw();
     static void update_contents(int32_t units_done);
     static void update_positions(int32_t units_done);
     static void show_all();
 
-    static void set_position(int32_t, int16_t, int16_t);
-    static void set_object(int32_t which, Handle<SpaceObject> object);
-    static void set_age(int32_t, int32_t);
-    static void set_string(int32_t which, const sfz::StringSlice& string);
-    static void clear_string(int32_t which);
-    static void set_color(int32_t, uint8_t);
-    static void set_offset(int32_t which, int32_t hoff, int32_t voff);
-    static int32_t get_width(int32_t which);
-    static void set_keep_on_screen_anyway(int32_t which, bool keepOnScreenAnyWay);
-    static void set_attached_hint_line(int32_t which, bool attachedHintLine, Point toWhere);
-    static sfz::String* get_string(int32_t);  // TODO(sfiera): encapsulate.
+    static void set_position(Handle<Label> which, int16_t h, int16_t v);
+    static void set_object(Handle<Label> which, Handle<SpaceObject> object);
+    static void set_age(Handle<Label> which, int32_t age);
+    static void set_string(Handle<Label> which, const sfz::StringSlice& string);
+    static void clear_string(Handle<Label> which);
+    static void set_color(Handle<Label> which, uint8_t color);
+    static void set_offset(Handle<Label> which, int32_t hoff, int32_t voff);
+    static int32_t get_width(Handle<Label> which);
+    static void set_keep_on_screen_anyway(Handle<Label> which, bool keepOnScreenAnyWay);
+    static void set_attached_hint_line(Handle<Label> which, bool attachedHintLine, Point toWhere);
+    static sfz::String* get_string(Handle<Label> which);  // TODO(sfiera): encapsulate.
 
-    static void recalc_size(int32_t);
+    static void recalc_size(Handle<Label> which);
 
   private:
     static Handle<Label> next_free_label();

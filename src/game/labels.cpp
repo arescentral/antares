@@ -78,15 +78,15 @@ Handle<Label> Label::next_free_label() {
             return label;
         }
     }
-    return Handle<Label>(-1);
+    return Label::none();
 }
 
-int16_t Label::add(
+Handle<Label> Label::add(
         int16_t h, int16_t v, int16_t hoff, int16_t voff, Handle<SpaceObject> object,
         bool objectLink, uint8_t color) {
     auto label = next_free_label();
     if (!label.get()) {
-        return -1;  // no free label
+        return Label::none();  // no free label
     }
 
     label->active = true;
@@ -106,11 +106,10 @@ int16_t Label::add(
     label->text.clear();
     label->lineNum = label->lineHeight = label->width = label->height = 0;
 
-    return label.number();
+    return label;
 }
 
-void Label::remove(int32_t which) {
-    Label *label = &data[which];
+void Label::remove(Handle<Label> label) {
     label->thisRect = Rect(0, 0, -1, -1);
     label->text.clear();
     label->active = false;
@@ -201,8 +200,7 @@ void Label::show_all() {
     }
 }
 
-void Label::set_position(int32_t which, int16_t h, int16_t v) {
-    Label *label = &data[which];
+void Label::set_position(Handle<Label> label, int16_t h, int16_t v) {
     label->where = label->offset;
     label->where.offset(h, v);
 }
@@ -270,7 +268,7 @@ void Label::update_positions(int32_t units_done) {
                         HintLine::show(source, dest, label->color, DARK);
                     }
                 } else {
-                    Label::set_string(label.number(), "");
+                    Label::set_string(label, "");
                     if (label->attachedHintLine) {
                         HintLine::hide();
                     }
@@ -316,44 +314,37 @@ void Label::update_positions(int32_t units_done) {
     }
 }
 
-void Label::set_object(int32_t which, Handle<SpaceObject> object) {
-    Label *label = &data[which];
+void Label::set_object(Handle<Label> label, Handle<SpaceObject> object) {
     label->object = object;
     label->visible = bool(object.get());
     label->age = 0;
 }
 
-void Label::set_age(int32_t which, int32_t age) {
-    Label *label = &data[which];
+void Label::set_age(Handle<Label> label, int32_t age) {
     label->age = age;
     label->visible = true;
 }
 
-void Label::set_string(int32_t which, const StringSlice& string) {
-    Label *label = &data[which];
+void Label::set_string(Handle<Label> label, const StringSlice& string) {
     label->text.assign(string);
-    Label::recalc_size( which);
+    Label::recalc_size(label);
 }
 
-void Label::clear_string(int32_t which) {
-    Label *label = &data[which];
+void Label::clear_string(Handle<Label> label) {
     label->text.clear();
     label->width = label->height = 0;
 }
 
-void Label::set_color(int32_t which, uint8_t color) {
-    Label *label = &data[which];
+void Label::set_color(Handle<Label> label, uint8_t color) {
     label->color = color;
 }
 
-void Label::set_keep_on_screen_anyway(int32_t which, bool keepOnScreenAnyway) {
-    Label *label = &data[which];
+void Label::set_keep_on_screen_anyway(Handle<Label> label, bool keepOnScreenAnyway) {
     label->keepOnScreenAnyway = keepOnScreenAnyway;
     label->retroCount = 0;
 }
 
-void Label::set_attached_hint_line(int32_t which, bool attachedHintLine, Point toWhere) {
-    Label *label = &data[which];
+void Label::set_attached_hint_line(Handle<Label> label, bool attachedHintLine, Point toWhere) {
     if (label->attachedHintLine) {
         HintLine::hide();
     }
@@ -362,25 +353,21 @@ void Label::set_attached_hint_line(int32_t which, bool attachedHintLine, Point t
     label->retroCount = 0;
 }
 
-void Label::set_offset(int32_t which, int32_t hoff, int32_t voff) {
-    Label *label = &data[which];
+void Label::set_offset(Handle<Label> label, int32_t hoff, int32_t voff) {
     label->offset.h = hoff;
     label->offset.v = voff;
 }
 
-int32_t Label::get_width(int32_t which) {
-    Label *label = &data[which];
+int32_t Label::get_width(Handle<Label> label) {
     return label->width;
 }
 
-String* Label::get_string( int32_t which) {
-    Label *label = &data[which];
+String* Label::get_string(Handle<Label> label) {
     return &label->text;
 }
 
 // do this if you mess with its string
-void Label::recalc_size(int32_t which) {
-    Label *label = &data[which];
+void Label::recalc_size(Handle<Label> label) {
     int lineNum = String_Count_Lines(label->text);
 
     if (lineNum > 1) {

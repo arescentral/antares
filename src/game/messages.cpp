@@ -125,16 +125,16 @@ struct Messages::longMessageType {
     int32_t                 at_char;
     bool                 labelMessage;
     bool                 lastLabelMessage;
-    int16_t                 labelMessageID;
+    Handle<Label>           labelMessageID;
 };
 
 std::queue<sfz::String> Messages::message_data;
 Messages::longMessageType* Messages::long_message_data;
 int32_t Messages::time_count;
-int32_t Messages::message_label_num;
-int32_t Messages::status_label_num;
+Handle<Label> Messages::message_label_num;
+Handle<Label> Messages::status_label_num;
 
-void MessageLabel_Set_Special(int16_t id, const StringSlice& text);
+void MessageLabel_Set_Special(Handle<Label> id, const StringSlice& text);
 
 void Messages::init() {
     longMessageType *tmessage = NULL;
@@ -145,12 +145,12 @@ void Messages::init() {
     message_label_num = Label::add(
             kMessageScreenLeft, kMessageScreenTop, 0, 0, SpaceObject::none(), false, kMessageColor);
 
-    if (message_label_num < 0) {
+    if (!message_label_num.get()) {
         throw Exception("Couldn't add a screen label.");
     }
     status_label_num = Label::add(
             kStatusLabelLeft, kStatusLabelTop, 0, 0, SpaceObject::none(), false, kStatusLabelColor);
-    if (status_label_num < 0) {
+    if (!status_label_num.get()) {
         throw Exception("Couldn't add a screen label.");
     }
 
@@ -171,7 +171,7 @@ void Messages::init() {
     tmessage->newStringMessage = false;
     tmessage->labelMessage = false;
     tmessage->lastLabelMessage = false;
-    tmessage->labelMessageID = -1;
+    tmessage->labelMessageID = Label::none();
 }
 
 void Messages::clear() {
@@ -497,7 +497,7 @@ int16_t Messages::current() {
 //  t = one of three characters: 'L' for left, 'R' for right, and 'O' for object
 //  nnn... are digits specifying value (distance from top, or initial object #)
 //
-void MessageLabel_Set_Special(int16_t id, const StringSlice& text) {
+void MessageLabel_Set_Special(Handle<Label> label, const StringSlice& text) {
     char whichType;
     int32_t value = 0;
     Point attachPoint;
@@ -552,34 +552,34 @@ void MessageLabel_Set_Special(int16_t id, const StringSlice& text) {
         ++it;
     }
 
-    Label::set_string(id, message);
-    Label::set_keep_on_screen_anyway(id, true);
+    Label::set_string(label, message);
+    Label::set_keep_on_screen_anyway(label, true);
 
     switch (whichType) {
       case 'R':
-        Label::set_offset(id, 0, 0);
+        Label::set_offset(label, 0, 0);
         Label::set_position(
-                id, play_screen.right - (Label::get_width(id)+10),
+                label, play_screen.right - (Label::get_width(label)+10),
                 globals()->gInstrumentTop + value);
         break;
 
       case 'L':
-        Label::set_offset(id, 0, 0);
-        Label::set_position(id, 138, globals()->gInstrumentTop + value);
+        Label::set_offset(label, 0, 0);
+        Label::set_position(label, 138, globals()->gInstrumentTop + value);
         break;
 
       case 'O':
         {
             auto o = GetObjectFromInitialNumber(value);
-            Label::set_offset(id, -(Label::get_width(id)/2), 64);
-            Label::set_object(id, o);
+            Label::set_offset(label, -(Label::get_width(label)/2), 64);
+            Label::set_object(label, o);
 
             hintLine = true;
         }
         break;
     }
     attachPoint.v -= 2;
-    Label::set_attached_hint_line(id, hintLine, attachPoint);
+    Label::set_attached_hint_line(label, hintLine, attachPoint);
 }
 
 void Messages::draw_message() {

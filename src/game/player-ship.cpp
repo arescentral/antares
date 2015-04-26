@@ -73,9 +73,9 @@ namespace {
 
 static KeyMap gLastKeyMap;
 static int32_t gDestKeyTime = 0;
-static int32_t gDestinationLabel = -1;
+static Handle<Label> gDestinationLabel;
 static int32_t gAlarmCount = -1;
-static int32_t gSendMessageLabel = -1;
+static Handle<Label> gSendMessageLabel;
 
 struct HotKeySuffix {
     Handle<SpaceObject> space_object;
@@ -864,7 +864,7 @@ void PlayerShipHandleClick(Point where, int button) {
 
 void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> adm) {
     Handle<SpaceObject> flagship = adm->flagship();
-    int32_t label;
+    Handle<Label> label;
 
     if (adm == globals()->gPlayerAdmiral) {
         globals()->lastSelectedObject = ship;

@@ -25,6 +25,7 @@ namespace antares {
 
 struct Admiral;
 struct BaseObject;
+class Label;
 struct SpaceObject;
 
 template <typename T>
