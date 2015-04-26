@@ -240,11 +240,11 @@ static void die(Handle<Action> action, Handle<SpaceObject> focus, Handle<SpaceOb
     // if the object is occupied by a human, eject him since he can't die
     if ((focus->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
             !focus->baseType->destroyDontDie) {
-        CreateFloatingBodyOfPlayer(focus);
+        focus->create_floating_player_body();
     }
     if (destroy) {
         if (focus.get()) {
-            DestroyObject(focus);
+            focus->destroy();
         }
     } else {
         focus->active = kObjectToBeFreed;
@@ -282,7 +282,7 @@ static void alter(
             break;
 
         case kAlterCloak:
-            AlterObjectCloakState(focus, true);
+            focus->set_cloak(true);
             break;
 
         case kAlterSpin:
@@ -453,8 +453,9 @@ static void alter(
             break;
 
         case kAlterBaseType:
-            if (action->reflexive || object.get())
-            ChangeObjectBaseType(focus, Handle<BaseObject>(alter.minimum), -1, alter.relative);
+            if (action->reflexive || object.get()) {
+                focus->change_base_type(Handle<BaseObject>(alter.minimum), -1, alter.relative);
+            }
             break;
 
         case kAlterOwner:
@@ -464,12 +465,12 @@ static void alter(
                     // object's owner, since relative & reflexive would
                     // do nothing.
                     if (action->reflexive && focus.get() && object.get()) {
-                        AlterObjectOwner(focus, object->owner, true);
+                        focus->set_owner(object->owner, true);
                     } else {
-                        AlterObjectOwner(focus, subject->owner, true);
+                        focus->set_owner(subject->owner, true);
                     }
                 } else {
-                    AlterObjectOwner(focus, Handle<Admiral>(alter.minimum), false);
+                    focus->set_owner(Handle<Admiral>(alter.minimum), false);
                 }
             }
             break;
@@ -486,7 +487,7 @@ static void alter(
 
         case kAlterOccupation:
             if (focus.get()) {
-                AlterObjectOccupation(focus, subject->owner, alter.minimum, true);
+                focus->alter_occupation(subject->owner, alter.minimum, true);
             }
             break;
 
@@ -620,7 +621,7 @@ static void alter(
 static void land_at(Handle<Action> action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
     // even though this is never a reflexive verb, we only effect ourselves
     if (subject->attributes & (kIsPlayerShip | kRemoteOrHuman)) {
-        CreateFloatingBodyOfPlayer(subject);
+        subject->create_floating_player_body();
     }
     subject->presenceState = kLandingPresence;
     subject->presence.landing.speed = action->argument.landAt.landingSpeed;

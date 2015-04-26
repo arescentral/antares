@@ -443,7 +443,7 @@ SpaceObject::SpaceObject(
 }
 
 //
-// ChangeObjectBaseType:
+// change_base_type:
 // This is a very RISKY procedure. You probably shouldn't change anything fundamental about the object--
 // meaning, attributes that change the way the object behaves, or the way other objects treat this object--
 // so don't, for instance, give something the kCanThink attribute if it couldn't before.
@@ -452,9 +452,9 @@ SpaceObject::SpaceObject(
 // Can you change the frame type? Like from a direction frame to a self-animated frame? I'm not sure...
 //
 
-void ChangeObjectBaseType(
-        Handle<SpaceObject> obj, Handle<BaseObject> base, int32_t spriteIDOverride,
-        bool relative) {
+void SpaceObject::change_base_type(
+        Handle<BaseObject> base, int32_t spriteIDOverride, bool relative) {
+    auto obj = this;
     int16_t         angle;
     int32_t         r;
     NatePixTable* spriteTable;
@@ -640,7 +640,7 @@ void SpaceObject::alter_health(int32_t amount) {
         _health += amount;
     }
     if (_health < 0) {
-        DestroyObject(Handle<SpaceObject>(number()));
+        destroy();
     }
 }
 
@@ -681,7 +681,8 @@ void SpaceObject::refund_warp_energy() {
     warpEnergyCollected = 0;
 }
 
-void AlterObjectOwner(Handle<SpaceObject> object, Handle<Admiral> owner, bool message) {
+void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
+    auto object = Handle<SpaceObject>(number());
     if (object->owner == owner) {
         return;
     }
@@ -689,7 +690,7 @@ void AlterObjectOwner(Handle<SpaceObject> object, Handle<Admiral> owner, bool me
     // if the object is occupied by a human, eject him since he can't change sides
     if ((object->attributes & (kIsPlayerShip | kRemoteOrHuman))
             && !object->baseType->destroyDontDie) {
-        CreateFloatingBodyOfPlayer(object);
+        object->create_floating_player_body();
     }
 
     Handle<Admiral> old_owner = object->owner;
@@ -801,19 +802,20 @@ void AlterObjectOwner(Handle<SpaceObject> object, Handle<Admiral> owner, bool me
     }
 }
 
-void AlterObjectOccupation(
-        Handle<SpaceObject> object, Handle<Admiral> owner, int32_t howMuch, bool message) {
+void SpaceObject::alter_occupation(Handle<Admiral> owner, int32_t howMuch, bool message) {
+    auto object = this;
     if (object->active
             && (object->attributes & kIsDestination)
             && (object->attributes & kNeutralDeath)) {
         if (AlterDestinationObjectOccupation(object->asDestination, owner, howMuch)
                 >= object->baseType->initialAgeRange) {
-            AlterObjectOwner(object, owner, message);
+            object->set_owner(owner, message);
         }
     }
 }
 
-void AlterObjectCloakState(Handle<SpaceObject> object, bool cloak) {
+void SpaceObject::set_cloak(bool cloak) {
+    auto object = Handle<SpaceObject>(number());
     if (cloak && (object->cloakState == 0)) {
         object->cloakState = 1;
         mPlayDistanceSound(kMaxSoundVolume, object, kCloakOn, kMediumPersistence, kPrioritySound);
@@ -824,7 +826,8 @@ void AlterObjectCloakState(Handle<SpaceObject> object, bool cloak) {
     }
 }
 
-void DestroyObject(Handle<SpaceObject> object) {
+void SpaceObject::destroy() {
+    auto object = Handle<SpaceObject>(number());
     if (object->active != kObjectInUse) {
         return;
     } else if (object->attributes & kNeutralDeath) {
@@ -839,7 +842,7 @@ void DestroyObject(Handle<SpaceObject> object) {
             }
         }
 
-        AlterObjectOwner(object, Admiral::none(), true);
+        object->set_owner(Admiral::none(), true);
         object->attributes &= ~(kHated | kCanEngage | kCanCollide | kCanBeHit);
         exec(object->baseType->destroy, object, SpaceObject::none(), NULL);
     } else {
@@ -881,7 +884,8 @@ void DestroyObject(Handle<SpaceObject> object) {
     }
 }
 
-void CreateFloatingBodyOfPlayer(Handle<SpaceObject> obj) {
+void SpaceObject::create_floating_player_body() {
+    auto obj = Handle<SpaceObject>(number());
     const auto body_type = globals()->scenarioFileInfo.playerBodyID;
     // if we're already in a body, don't create a body from it
     // a body expiring is handled elsewhere

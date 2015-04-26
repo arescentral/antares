@@ -143,7 +143,7 @@ void fire_weapon(
     }
     if ((&weapon != &subject->special)
             && (subject->cloakState > 0)) {
-        AlterObjectCloakState(subject, false);
+        subject->set_cloak(false);
     }
     subject->_energy -= weaponObject->frame.weapon.energyCost;
     weapon.position++;
@@ -1674,7 +1674,7 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
     if (((anObject->_health - sObject->baseType->damage) < 0)
             && (anObject->attributes & (kIsPlayerShip | kRemoteOrHuman))
             && !anObject->baseType->destroyDontDie) {
-        CreateFloatingBodyOfPlayer(anObject);
+        anObject->create_floating_player_body();
     }
     anObject->alter_health(-sObject->baseType->damage);
     if (anObject->shieldColor != 0xFF) {
