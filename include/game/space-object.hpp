@@ -33,7 +33,7 @@ void ResetAllSpaceObjects( void);
 void RemoveAllSpaceObjects( void);
 void CorrectAllBaseObjectColor( void);
 void ChangeObjectBaseType(
-        SpaceObject *obj, Handle<BaseObject> base, int32_t spriteIDOverride, bool relative);
+        Handle<SpaceObject> obj, Handle<BaseObject> base, int32_t spriteIDOverride, bool relative);
 
 Handle<SpaceObject> CreateAnySpaceObject(
         Handle<BaseObject> whichBase, fixedPointType *velocity, coordPointType *location,
@@ -43,7 +43,7 @@ int32_t CountObjectsOfBaseType(Handle<BaseObject> whichType, Handle<Admiral> own
 void AlterObjectOwner(Handle<SpaceObject> object, Handle<Admiral> owner, bool message);
 void AlterObjectOccupation(
         Handle<SpaceObject> object, Handle<Admiral> owner, int32_t howMuch, bool message);
-void AlterObjectCloakState( SpaceObject *, bool);
+void AlterObjectCloakState(Handle<SpaceObject> object, bool cloak);
 void DestroyObject(Handle<SpaceObject> object);
 void CreateFloatingBodyOfPlayer(Handle<SpaceObject> obj);
 

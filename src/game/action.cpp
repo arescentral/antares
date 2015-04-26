@@ -285,7 +285,7 @@ static void alter(
             break;
 
         case kAlterCloak:
-            AlterObjectCloakState(focus.get(), true);
+            AlterObjectCloakState(focus, true);
             break;
 
         case kAlterSpin:
@@ -457,7 +457,7 @@ static void alter(
 
         case kAlterBaseType:
             if (action->reflexive || object.get())
-            ChangeObjectBaseType(focus.get(), Handle<BaseObject>(alter.minimum), -1, alter.relative);
+            ChangeObjectBaseType(focus, Handle<BaseObject>(alter.minimum), -1, alter.relative);
             break;
 
         case kAlterOwner:

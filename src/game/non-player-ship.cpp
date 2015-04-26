@@ -150,7 +150,7 @@ void fire_weapon(
     }
     if ((&weapon != &subject->special)
             && (subject->cloakState > 0)) {
-        AlterObjectCloakState(subject.get(), false);
+        AlterObjectCloakState(subject, false);
     }
     subject->_energy -= weaponObject->frame.weapon.energyCost;
     weapon.position++;

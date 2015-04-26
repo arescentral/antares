@@ -453,7 +453,7 @@ SpaceObject::SpaceObject(
 //
 
 void ChangeObjectBaseType(
-        SpaceObject *obj, Handle<BaseObject> base, int32_t spriteIDOverride,
+        Handle<SpaceObject> obj, Handle<BaseObject> base, int32_t spriteIDOverride,
         bool relative) {
     int16_t         angle;
     int32_t         r;
@@ -813,14 +813,14 @@ void AlterObjectOccupation(
     }
 }
 
-void AlterObjectCloakState(SpaceObject* object, bool cloak) {
+void AlterObjectCloakState(Handle<SpaceObject> object, bool cloak) {
     if (cloak && (object->cloakState == 0)) {
         object->cloakState = 1;
-        mPlayDistanceSound(kMaxSoundVolume, object, kCloakOn, kMediumPersistence, kPrioritySound);
+        mPlayDistanceSound(kMaxSoundVolume, object.get(), kCloakOn, kMediumPersistence, kPrioritySound);
     } else if ((!cloak || (object->attributes & kRemoteOrHuman))
             && (object->cloakState >= 250)) {
         object->cloakState = kCloakOffStateMax;
-        mPlayDistanceSound(kMaxSoundVolume, object, kCloakOff, kMediumPersistence, kPrioritySound);
+        mPlayDistanceSound(kMaxSoundVolume, object.get(), kCloakOff, kMediumPersistence, kPrioritySound);
     }
 }
 
