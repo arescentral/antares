@@ -627,13 +627,13 @@ void AdmiralThink() {
         if (destBalance->buildTime <= 0) {
             destBalance->buildTime = 0;
             if (destBalance->buildObjectBaseNum.get()) {
-                auto anObject = Handle<SpaceObject>(destBalance->whichObject);
+                auto anObject = destBalance->whichObject;
                 AdmiralBuildAtObject(anObject->owner, destBalance->buildObjectBaseNum, destBalance);
                 destBalance->buildObjectBaseNum = BaseObject::none();
             }
         }
 
-        auto anObject = Handle<SpaceObject>(destBalance->whichObject);
+        auto anObject = destBalance->whichObject;
         if (anObject.get() && anObject->owner.get()) {
             anObject->owner->pay(destBalance->earn);
         }
@@ -700,10 +700,9 @@ void Admiral::think() {
     }
 
     if (_destinationObject.get()) {
-        destObject = Handle<SpaceObject>(_destinationObject);
+        destObject = _destinationObject;
         if (destObject->active != kObjectInUse) {
-            destObject = gRootObject;
-            _destinationObject = gRootObject;
+            destObject = _destinationObject = gRootObject;
         }
         auto origDest = _destinationObject;
         do {
@@ -721,7 +720,7 @@ void Admiral::think() {
                     _destinationObject = Handle<SpaceObject>(anObject->bestConsideredTargetNumber);
                     _has_destination = true;
                     if (_destinationObject.get()) {
-                        destObject = Handle<SpaceObject>(_destinationObject);
+                        destObject = _destinationObject;
                         if (destObject->active == kObjectInUse) {
                             _destinationObjectID = destObject->id;
                             anObject->currentTargetValue
@@ -749,8 +748,7 @@ void Admiral::think() {
                 destObject = gRootObject;
 
                 // >>> INCREASE CONSIDER SHIP
-                origObject = _considerShip;
-                anObject = Handle<SpaceObject>(_considerShip);
+                origObject = anObject =_considerShip;
                 if (anObject->active != kObjectInUse) {
                     anObject = gRootObject;
                     _considerShip = gRootObject;
