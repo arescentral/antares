@@ -19,6 +19,8 @@
 #ifndef ANTARES_DATA_HANDLE_HPP_
 #define ANTARES_DATA_HANDLE_HPP_
 
+#include <stdlib.h>
+
 namespace antares {
 
 struct Admiral;
@@ -45,7 +47,9 @@ inline bool operator!=(Handle<T> x, Handle<T> y) { return !(x == y); }
 template <typename T>
 class HandleList {
   public:
+    HandleList(): HandleList(-1, -1) { }
     HandleList(int begin, int end): _begin(begin), _end(end) { }
+    size_t size() const { return _end - _begin; }
     class iterator {
         friend class HandleList;
       public:

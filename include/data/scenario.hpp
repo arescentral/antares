@@ -211,7 +211,7 @@ struct Scenario::Condition {
     } conditionArgument;
     int32_t         subjectObject;      // initial object #
     int32_t         directObject;       // initial object #
-    ActionRef       action;
+    HandleList<Action>  action;
     uint32_t        flags;
     int32_t         direction;
 

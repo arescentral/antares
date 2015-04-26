@@ -61,7 +61,7 @@ const size_t kActionQueueLength     = 120;
 
 struct actionQueueType {
     Action*                         action;
-    ActionRef                       actionRef;
+    HandleList<Action>              actionRef;
     int32_t                         scheduledTime;
     actionQueueType*                nextActionQueue;
     int32_t                         nextActionQueueNum;
@@ -731,14 +731,12 @@ static void assume_initial_object(Action* action, Handle<SpaceObject> focus) {
 }
 
 static void execute_actions(
-        const ActionRef& action,
+        const HandleList<Action>& actions,
         const Handle<SpaceObject> original_subject, const Handle<SpaceObject> original_object,
         Point* offset, bool allowDelay) {
     bool checkConditions = false;
 
-    const auto begin = mGetObjectActionPtr(action.start);
-    const auto end = mGetObjectActionPtr(action.end);
-    for (auto action = begin; action != end; ++action) {
+    for (auto action: actions) {
 #ifdef DATA_COVERAGE
         covered_actions.insert(action - mGetObjectActionPtr(0));
 #endif  // DATA_COVERAGE
@@ -757,7 +755,9 @@ static void execute_actions(
 
         if ((action->delay > 0) && allowDelay) {
             queue_action(
-                    action, action - mGetObjectActionPtr(0), end - action,
+                    action.get(),
+                    action.number(),
+                    (*actions.end()).number() - action.number(),
                     action->delay, subject, object, offset);
             return;
         }
@@ -784,27 +784,27 @@ static void execute_actions(
 
         switch (action->verb) {
             case kCreateObject:
-            case kCreateObjectSetDest:  create_object(action, focus, subject, offset); break;
-            case kPlaySound:            play_sound(action, focus); break;
-            case kMakeSparks:           make_sparks(action, focus); break;
-            case kDie:                  die(action, focus, subject); break;
-            case kNilTarget:            nil_target(action, focus); break;
-            case kAlter:                alter(action, focus, subject, object); break;
-            case kLandAt:               land_at(action, focus, subject); break;
-            case kEnterWarp:            enter_warp(action, focus, subject); break;
-            case kChangeScore:          change_score(action, focus); break;
-            case kDeclareWinner:        declare_winner(action, focus); break;
-            case kDisplayMessage:       display_message(action, focus); break;
-            case kSetDestination:       set_destination(action, focus, subject); break;
-            case kActivateSpecial:      activate_special(action, focus, subject); break;
-            case kActivatePulse:        activate_pulse(action, focus, subject); break;
-            case kActivateBeam:         activate_beam(action, focus, subject); break;
-            case kColorFlash:           color_flash(action, focus); break;
-            case kEnableKeys:           enable_keys(action, focus); break;
-            case kDisableKeys:          disable_keys(action, focus); break;
-            case kSetZoom:              set_zoom(action, focus); break;
-            case kComputerSelect:       computer_select(action, focus); break;
-            case kAssumeInitialObject:  assume_initial_object(action, focus); break;
+            case kCreateObjectSetDest:  create_object(action.get(), focus, subject, offset); break;
+            case kPlaySound:            play_sound(action.get(), focus); break;
+            case kMakeSparks:           make_sparks(action.get(), focus); break;
+            case kDie:                  die(action.get(), focus, subject); break;
+            case kNilTarget:            nil_target(action.get(), focus); break;
+            case kAlter:                alter(action.get(), focus, subject, object); break;
+            case kLandAt:               land_at(action.get(), focus, subject); break;
+            case kEnterWarp:            enter_warp(action.get(), focus, subject); break;
+            case kChangeScore:          change_score(action.get(), focus); break;
+            case kDeclareWinner:        declare_winner(action.get(), focus); break;
+            case kDisplayMessage:       display_message(action.get(), focus); break;
+            case kSetDestination:       set_destination(action.get(), focus, subject); break;
+            case kActivateSpecial:      activate_special(action.get(), focus, subject); break;
+            case kActivatePulse:        activate_pulse(action.get(), focus, subject); break;
+            case kActivateBeam:         activate_beam(action.get(), focus, subject); break;
+            case kColorFlash:           color_flash(action.get(), focus); break;
+            case kEnableKeys:           enable_keys(action.get(), focus); break;
+            case kDisableKeys:          disable_keys(action.get(), focus); break;
+            case kSetZoom:              set_zoom(action.get(), focus); break;
+            case kComputerSelect:       computer_select(action.get(), focus); break;
+            case kAssumeInitialObject:  assume_initial_object(action.get(), focus); break;
         }
 
         switch (action->verb) {
@@ -820,9 +820,10 @@ static void execute_actions(
     }
 }
 
-void ActionRef::run(
-        Handle<SpaceObject> sObject, Handle<SpaceObject> dObject, Point* offset) const {
-    execute_actions(*this, sObject, dObject, offset, true);
+void exec(
+        HandleList<Action> actions, Handle<SpaceObject> sObject, Handle<SpaceObject> dObject,
+        Point* offset) {
+    execute_actions(actions, sObject, dObject, offset, true);
 }
 
 void reset_action_queue() {
@@ -833,8 +834,7 @@ void reset_action_queue() {
 
     actionQueueType* action = gActionQueueData.get();
     for (int32_t i = 0; i < kActionQueueLength; i++) {
-        action->actionRef.start = -1;
-        action->actionRef.end = -1;
+        action->actionRef = {-1, -1};
         action->action = NULL;
         action->nextActionQueueNum = -1;
         action->nextActionQueue = NULL;
@@ -864,9 +864,8 @@ static void queue_action(
         return;
     }
     actionQueue->action = action;
-    actionQueue->actionRef.start = actionNumber;
+    actionQueue->actionRef = {actionNumber, actionNumber + actionToDo};
     actionQueue->scheduledTime = delayTime;
-    actionQueue->actionRef.end = actionNumber + actionToDo;
 
     if (offset) {
         actionQueue->offset = *offset;
@@ -939,8 +938,7 @@ void execute_action_queue(int32_t unitsToDo) {
                     gFirstActionQueue->subjectObject, gFirstActionQueue->directObject,
                     &gFirstActionQueue->offset, false);
         }
-        gFirstActionQueue->actionRef.start = -1;
-        gFirstActionQueue->actionRef.end = -1;
+        gFirstActionQueue->actionRef = {-1, -1};
         gFirstActionQueue->action = NULL;
         gFirstActionQueue->scheduledTime = -1;
         gFirstActionQueue->subjectObject = SpaceObject::none();

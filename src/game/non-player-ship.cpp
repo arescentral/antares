@@ -174,7 +174,7 @@ void fire_weapon(
     if (weaponObject->frame.weapon.ammo > 0) {
         weapon.ammo--;
     }
-    weaponObject->activate.run(subject, target, at);
+    exec(weaponObject->activate, subject, target, at);
 }
 
 static void tick_pulse(
@@ -599,10 +599,10 @@ uint32_t ThinkObjectNormalPresence(
 
             if (anObject->targetObject == anObject->destObject) {
                 if (distance < static_cast<uint32_t>(baseObject->arriveActionDistance)) {
-                    if (baseObject->arrive.start >= 0) {
+                    if (baseObject->arrive.size() > 0) {
                         if (!(anObject->runTimeFlags & kHasArrived)) {
                             offset.h = offset.v = 0;
-                            baseObject->arrive.run(anObject, anObject->destObject, &offset);
+                            exec(baseObject->arrive, anObject, anObject->destObject, &offset);
                             anObject->runTimeFlags |= kHasArrived;
                         }
                     }
@@ -794,10 +794,10 @@ uint32_t ThinkObjectNormalPresence(
                     }
 
                     if (distance < static_cast<uint32_t>(baseObject->arriveActionDistance)) {
-                        if (baseObject->arrive.start >= 0) {
+                        if (baseObject->arrive.size() > 0) {
                             if (!(anObject->runTimeFlags & kHasArrived)) {
                                 offset.h = offset.v = 0;
-                                baseObject->arrive.run(anObject, anObject->destObject, &offset);
+                                exec(baseObject->arrive, anObject, anObject->destObject, &offset);
                                 anObject->runTimeFlags |= kHasArrived;
                             }
                         }
@@ -1157,7 +1157,7 @@ uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
     }
 
     if (anObject->presence.landing.scale <= 0) {
-        anObject->baseType->expire.run(anObject, target, NULL);
+        exec(anObject->baseType->expire, anObject, target, NULL);
         anObject->active = kObjectToBeFreed;
     } else if (anObject->sprite) {
         anObject->sprite->scale = anObject->presence.landing.scale;
@@ -1695,7 +1695,7 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
     }
 
     if (sObject->active == kObjectInUse) {
-        sObject->baseType->collide.run(sObject, anObject, NULL);
+        exec(sObject->baseType->collide, sObject, anObject, NULL);
     }
 
     if (anObject->owner == globals()->gPlayerAdmiral

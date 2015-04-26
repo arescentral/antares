@@ -136,9 +136,9 @@ SpaceObject* SpaceObject::get(int32_t number) {
     return nullptr;
 }
 
-Action* mGetObjectActionPtr(int32_t whichAction) {
-    if (whichAction >= 0) {
-        return gObjectActionData.get() + whichAction;
+Action* Action::get(int32_t number) {
+    if ((0 <= number) && (number < globals()->maxObjectAction)) {
+        return &gObjectActionData[number];
     }
     return nullptr;
 }
@@ -615,7 +615,7 @@ Handle<SpaceObject> CreateAnySpaceObject(
 #endif  // DATA_COVERAGE
 
     obj->attributes |= specialAttributes;
-    obj->baseType->create.run(obj, SpaceObject::none(), NULL);
+    exec(obj->baseType->create, obj, SpaceObject::none(), NULL);
     return obj;
 }
 
@@ -841,7 +841,7 @@ void DestroyObject(Handle<SpaceObject> object) {
 
         AlterObjectOwner(object, Admiral::none(), true);
         object->attributes &= ~(kHated | kCanEngage | kCanCollide | kCanBeHit);
-        object->baseType->destroy.run(object, SpaceObject::none(), NULL);
+        exec(object->baseType->destroy, object, SpaceObject::none(), NULL);
     } else {
         AddKillToAdmiral(object);
         if (object->attributes & kReleaseEnergyOnDeath) {
@@ -870,7 +870,7 @@ void DestroyObject(Handle<SpaceObject> object) {
             }
         }
 
-        object->baseType->destroy.run(object, SpaceObject::none(), NULL);
+        exec(object->baseType->destroy, object, SpaceObject::none(), NULL);
 
         if (object->attributes & kCanAcceptDestination) {
             RemoveObjectFromDestination(object);

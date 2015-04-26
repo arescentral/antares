@@ -241,6 +241,8 @@ void read_from(sfz::ReadSource in, argumentType::ComputerSelect& argument);
 void read_from(sfz::ReadSource in, argumentType::AssumeInitial& argument);
 
 struct Action {
+    static Action* get(int number);
+
     objectVerbIDType            verb;                   // what is this verb?
     uint8_t                     reflexive;              // does it apply to object executing verb?
     uint32_t                    inclusiveFilter;        // if it has ALL these attributes, OK -- for non-reflective verbs
@@ -257,15 +259,6 @@ struct Action {
     static const size_t byte_size = 48;
 };
 void read_from(sfz::ReadSource in, Action& action);
-
-struct ActionRef {
-    ActionRef(): start(-1), end(-1) { }
-    ActionRef(int32_t start, int32_t end): start(start), end(end) { }
-    int32_t start;
-    int32_t end;
-
-    void run(Handle<SpaceObject> sObject, Handle<SpaceObject> dObject, Point* offset) const;
-};
 
 }  // namespace antares
 

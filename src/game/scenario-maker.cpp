@@ -134,45 +134,24 @@ void AddBaseObjectMedia(Handle<BaseObject> base, uint8_t color, uint32_t all_col
     }
 }
 
-Action* mGetActionFromBaseTypeNum(
-        Handle<BaseObject> base, int32_t mactionType, int32_t mactionNum) {
-    if (mactionType == kDestroyActionType) {
-        if (base->destroy.start + mactionNum < base->destroy.end) {
-            return mGetObjectActionPtr(base->destroy.start + mactionNum);
-        }
-    } else if (mactionType == kExpireActionType) {
-        if (base->expire.start + mactionNum < base->expire.end) {
-            return mGetObjectActionPtr(base->expire.start + mactionNum);
-        }
-    } else if (mactionType == kCreateActionType) {
-        if (base->create.start + mactionNum < base->create.end) {
-            return mGetObjectActionPtr(base->create.start + mactionNum);
-        }
-    } else if (mactionType == kCollideActionType) {
-        if (base->collide.start + mactionNum < base->collide.end) {
-            return mGetObjectActionPtr(base->collide.start + mactionNum);
-        }
-    } else if (mactionType == kActivateActionType) {
-        if (base->activate.start + mactionNum < base->activate.end) {
-            return mGetObjectActionPtr(base->activate.start + mactionNum);
-        }
-    } else if (mactionType == kArriveActionType) {
-        if (base->arrive.start + mactionNum < base->arrive.end) {
-            return mGetObjectActionPtr(base->arrive.start + mactionNum);
-        }
+HandleList<Action> action_list(Handle<BaseObject> base, int32_t type) {
+    switch (type) {
+        case kDestroyActionType: return base->destroy;
+        case kExpireActionType: return base->expire;
+        case kCreateActionType: return base->create;
+        case kCollideActionType: return base->collide;
+        case kActivateActionType: return base->activate;
+        case kArriveActionType: return base->arrive;
+        default: return {-1, -1};
     }
-    return nullptr;
 }
 
 void AddBaseObjectActionMedia(
         Handle<BaseObject> base, int32_t whichType, uint8_t color, uint32_t all_colors) {
-    for (int count = 0; ; ++count) {
-        auto* action = mGetActionFromBaseTypeNum(base, whichType, count);
-        if (!action) {
-            break;
+    for (auto action: action_list(base, whichType)) {
+        if (action.get()) {
+            AddActionMedia(action.get(), color, all_colors);
         }
-
-        AddActionMedia(action, color, all_colors);
     }
 }
 
@@ -731,11 +710,8 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
     if (step == 0) {
         for (int i = 0; i < gThisScenario->conditionNum; i++) {
             Scenario::Condition* condition = gThisScenario->condition(i);
-            Action* action = mGetObjectActionPtr(condition->action.start);
-            for (int j = condition->action.start; j < condition->action.end; j++) {
-                condition = gThisScenario->condition(i);
-                action = mGetObjectActionPtr(j);
-                AddActionMedia(action, GRAY, all_colors);
+            for (auto action: condition->action) {
+                AddActionMedia(action.get(), GRAY, all_colors);
             }
             condition->set_true_yet(condition->flags & kInitiallyTrue);
         }
@@ -879,7 +855,7 @@ void CheckScenarioConditions(int32_t timePass) {
             auto sObject = GetObjectFromInitialNumber(c->subjectObject);
             auto dObject = GetObjectFromInitialNumber(c->directObject);
             Point offset;
-            c->action.run(sObject, dObject, &offset);
+            exec(c->action, sObject, dObject, &offset);
         }
     }
 }

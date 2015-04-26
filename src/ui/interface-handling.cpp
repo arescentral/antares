@@ -324,9 +324,8 @@ void CreateWeaponDataText(
 
     mostDamage = 0;
     isGuided = false;
-    if (weaponObject->activate.end > weaponObject->activate.start) {
-        for (int i = weaponObject->activate.start; i < weaponObject->activate.end; ++i) {
-            auto action = mGetObjectActionPtr(i);
+    if (weaponObject->activate.size() > 0) {
+        for (auto action: weaponObject->activate) {
             if (( action->verb == kCreateObject) || ( action->verb == kCreateObjectSetDest))
             {
                 Handle<BaseObject> missileObject = action->argument.createObject.whichBaseType;

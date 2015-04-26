@@ -319,12 +319,12 @@ class BaseObject {
 
     int32_t                 arriveActionDistance;               // distance^2 at which arrive action is triggered on dest
 
-    ActionRef               destroy;
-    ActionRef               expire;
-    ActionRef               create;
-    ActionRef               collide;
-    ActionRef               activate;
-    ActionRef               arrive;
+    HandleList<Action>      destroy;
+    HandleList<Action>      expire;
+    HandleList<Action>      create;
+    HandleList<Action>      collide;
+    HandleList<Action>      activate;
+    HandleList<Action>      arrive;
 
     bool                    destroyDontDie;
     bool                    expireDontDie;
