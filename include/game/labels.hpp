@@ -40,28 +40,27 @@ class Label {
     static Handle<Label> add(
             int16_t h, int16_t v, int16_t hoff, int16_t voff, Handle<SpaceObject> object,
             bool objectLink, uint8_t color);
-    static void remove(Handle<Label> which);
     static void draw();
     static void update_contents(int32_t units_done);
     static void update_positions(int32_t units_done);
     static void show_all();
 
-    static void set_position(Handle<Label> which, int16_t h, int16_t v);
-    static void set_object(Handle<Label> which, Handle<SpaceObject> object);
-    static void set_age(Handle<Label> which, int32_t age);
-    static void set_string(Handle<Label> which, const sfz::StringSlice& string);
-    static void clear_string(Handle<Label> which);
-    static void set_color(Handle<Label> which, uint8_t color);
-    static void set_offset(Handle<Label> which, int32_t hoff, int32_t voff);
-    static int32_t get_width(Handle<Label> which);
-    static void set_keep_on_screen_anyway(Handle<Label> which, bool keepOnScreenAnyWay);
-    static void set_attached_hint_line(Handle<Label> which, bool attachedHintLine, Point toWhere);
-    static sfz::String* get_string(Handle<Label> which);  // TODO(sfiera): encapsulate.
+    void remove();
 
-    static void recalc_size(Handle<Label> which);
+    void set_position(int16_t h, int16_t v);
+    void set_object(Handle<SpaceObject> object);
+    void set_age(int32_t age);
+    void set_string(const sfz::StringSlice& string);
+    void clear_string();
+    void set_color(uint8_t color);
+    void set_offset(int32_t hoff, int32_t voff);
+    int32_t get_width() { return width; }
+    void set_keep_on_screen_anyway(bool keepOnScreenAnyWay);
+    void set_attached_hint_line(bool attachedHintLine, Point toWhere);
 
   private:
     static Handle<Label> next_free_label();
+    void recalc_size();
 
     Point               where;
     Point               offset;

@@ -109,13 +109,13 @@ Handle<Label> Label::add(
     return label;
 }
 
-void Label::remove(Handle<Label> label) {
-    label->thisRect = Rect(0, 0, -1, -1);
-    label->text.clear();
-    label->active = false;
-    label->killMe = false;
-    label->object = SpaceObject::none();
-    label->width = label->height = label->lineNum = label->lineHeight = 0;
+void Label::remove() {
+    thisRect = Rect(0, 0, -1, -1);
+    text.clear();
+    active = false;
+    killMe = false;
+    object = SpaceObject::none();
+    width = height = lineNum = lineHeight = 0;
 }
 
 void Label::draw() {
@@ -200,9 +200,9 @@ void Label::show_all() {
     }
 }
 
-void Label::set_position(Handle<Label> label, int16_t h, int16_t v) {
-    label->where = label->offset;
-    label->where.offset(h, v);
+void Label::set_position(int16_t h, int16_t v) {
+    where = offset;
+    where.offset(h, v);
 }
 
 void Label::update_positions(int32_t units_done) {
@@ -268,7 +268,7 @@ void Label::update_positions(int32_t units_done) {
                         HintLine::show(source, dest, label->color, DARK);
                     }
                 } else {
-                    Label::set_string(label, "");
+                    label->set_string("");
                     if (label->attachedHintLine) {
                         HintLine::hide();
                     }
@@ -314,80 +314,72 @@ void Label::update_positions(int32_t units_done) {
     }
 }
 
-void Label::set_object(Handle<Label> label, Handle<SpaceObject> object) {
-    label->object = object;
-    label->visible = bool(object.get());
-    label->age = 0;
+void Label::set_object(Handle<SpaceObject> object) {
+    this->object = object;
+    visible = bool(object.get());
+    age = 0;
 }
 
-void Label::set_age(Handle<Label> label, int32_t age) {
-    label->age = age;
-    label->visible = true;
+void Label::set_age(int32_t age) {
+    this->age = age;
+    visible = true;
 }
 
-void Label::set_string(Handle<Label> label, const StringSlice& string) {
-    label->text.assign(string);
-    Label::recalc_size(label);
+void Label::set_string(const StringSlice& string) {
+    text.assign(string);
+    recalc_size();
 }
 
-void Label::clear_string(Handle<Label> label) {
-    label->text.clear();
-    label->width = label->height = 0;
+void Label::clear_string() {
+    text.clear();
+    width = height = 0;
 }
 
-void Label::set_color(Handle<Label> label, uint8_t color) {
-    label->color = color;
+void Label::set_color(uint8_t color) {
+    this->color = color;
 }
 
-void Label::set_keep_on_screen_anyway(Handle<Label> label, bool keepOnScreenAnyway) {
-    label->keepOnScreenAnyway = keepOnScreenAnyway;
-    label->retroCount = 0;
+void Label::set_keep_on_screen_anyway(bool keepOnScreenAnyway) {
+    this->keepOnScreenAnyway = keepOnScreenAnyway;
+    retroCount = 0;
 }
 
-void Label::set_attached_hint_line(Handle<Label> label, bool attachedHintLine, Point toWhere) {
-    if (label->attachedHintLine) {
+void Label::set_attached_hint_line(bool attachedHintLine, Point toWhere) {
+    if (attachedHintLine) {
         HintLine::hide();
     }
-    label->attachedHintLine = attachedHintLine;
-    label->attachedToWhere = toWhere;
-    label->retroCount = 0;
+    this->attachedHintLine = attachedHintLine;
+    attachedToWhere = toWhere;
+    retroCount = 0;
 }
 
-void Label::set_offset(Handle<Label> label, int32_t hoff, int32_t voff) {
-    label->offset.h = hoff;
-    label->offset.v = voff;
-}
-
-int32_t Label::get_width(Handle<Label> label) {
-    return label->width;
-}
-
-String* Label::get_string(Handle<Label> label) {
-    return &label->text;
+void Label::set_offset(int32_t hoff, int32_t voff) {
+    offset.h = hoff;
+    offset.v = voff;
 }
 
 // do this if you mess with its string
-void Label::recalc_size(Handle<Label> label) {
-    int lineNum = String_Count_Lines(label->text);
+void Label::recalc_size() {
+    int lineNum = String_Count_Lines(text);
 
     if (lineNum > 1) {
-        label->lineNum = lineNum;
+        this->lineNum = lineNum;
         int maxWidth = 0;
         for (int i = 1; i <= lineNum; i++) {
-            StringSlice text = String_Get_Nth_Line(label->text, i);
+            StringSlice text = String_Get_Nth_Line(this->text, i);
             int32_t width = tactical_font->string_width(text);
             if (width > maxWidth) {
                 maxWidth = width;
             }
         }
-        label->width = maxWidth + kLabelTotalInnerSpace;
-        label->height = (tactical_font->height * lineNum) + kLabelTotalInnerSpace;
-        label->lineHeight = tactical_font->height;
+        width = maxWidth + kLabelTotalInnerSpace;
+        height = (tactical_font->height * lineNum) + kLabelTotalInnerSpace;
+        lineHeight = tactical_font->height;
     } else {
-        label->lineNum = 1;
-        label->width = tactical_font->string_width(label->text) + kLabelTotalInnerSpace;
-        label->height = tactical_font->height + kLabelTotalInnerSpace;
-        label->lineHeight = tactical_font->height;
+        lineNum = 1;
+        width = tactical_font->string_width(text) + kLabelTotalInnerSpace;
+        height = tactical_font->height + kLabelTotalInnerSpace;
+        lineHeight = tactical_font->height;
     }
 }
 

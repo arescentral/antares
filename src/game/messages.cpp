@@ -201,7 +201,7 @@ void Messages::clear() {
     tmessage->retro_text.reset();
     viewport.bottom = play_screen.bottom;
     tmessage->labelMessageID = Label::add(0, 0, 0, 0, SpaceObject::none(), false, SKY_BLUE);
-    Label::set_keep_on_screen_anyway( tmessage->labelMessageID, true);
+    tmessage->labelMessageID->set_keep_on_screen_anyway(true);
 }
 
 void Messages::add(const sfz::PrintItem& message) {
@@ -345,14 +345,14 @@ void Messages::draw_long_message(int32_t time_pass) {
         // }
 
         if ((tmessage->lastResID >= 0) && (tmessage->lastLabelMessage)) {
-            Label::set_age(tmessage->labelMessageID, 1);
+            tmessage->labelMessageID->set_age(1);
         }
 
         // draw in offscreen world
         if ((tmessage->currentResID >= 0) && ( tmessage->stage == kShowStage)) {
             if (tmessage->retro_text.get() != NULL) {
                 if (tmessage->labelMessage) {
-                    Label::set_age(tmessage->labelMessageID, 0);
+                    tmessage->labelMessageID->set_age(0);
 
                     if (tmessage->retro_text.get() != NULL) {
                         MessageLabel_Set_Special(tmessage->labelMessageID, tmessage->text);
@@ -458,26 +458,23 @@ void Messages::draw_message_screen(int32_t by_units) {
         const String& message = message_data.front();
 
         if (time_count < kRaiseTime) {
-            Label::set_position(
-                    message_label_num, kMessageScreenLeft,
-                    viewport.bottom - time_count);
+            message_label_num->set_position(kMessageScreenLeft, viewport.bottom - time_count);
         } else if (time_count > kLowerTime) {
-            Label::set_position(
-                    message_label_num, kMessageScreenLeft,
-                    viewport.bottom - (kMessageDisplayTime - time_count));
+            message_label_num->set_position(
+                    kMessageScreenLeft, viewport.bottom - (kMessageDisplayTime - time_count));
         }
 
-        Label::set_string(message_label_num, message);
+        message_label_num->set_string(message);
     } else {
-        Label::clear_string(message_label_num);
+        message_label_num->clear_string();
         time_count = 0;
     }
 }
 
 void Messages::set_status(const StringSlice& status, uint8_t color) {
-    Label::set_color(status_label_num, color);
-    Label::set_string(status_label_num, status);
-    Label::set_age(status_label_num, kStatusLabelAge);
+    status_label_num->set_color(color);
+    status_label_num->set_string(status);
+    status_label_num->set_age(kStatusLabelAge);
 }
 
 int16_t Messages::current() {
@@ -552,34 +549,34 @@ void MessageLabel_Set_Special(Handle<Label> label, const StringSlice& text) {
         ++it;
     }
 
-    Label::set_string(label, message);
-    Label::set_keep_on_screen_anyway(label, true);
+    label->set_string(message);
+    label->set_keep_on_screen_anyway(true);
 
     switch (whichType) {
       case 'R':
-        Label::set_offset(label, 0, 0);
-        Label::set_position(
-                label, play_screen.right - (Label::get_width(label)+10),
+        label->set_offset(0, 0);
+        label->set_position(
+                play_screen.right - (label->get_width()+10),
                 globals()->gInstrumentTop + value);
         break;
 
       case 'L':
-        Label::set_offset(label, 0, 0);
-        Label::set_position(label, 138, globals()->gInstrumentTop + value);
+        label->set_offset(0, 0);
+        label->set_position(138, globals()->gInstrumentTop + value);
         break;
 
       case 'O':
         {
             auto o = GetObjectFromInitialNumber(value);
-            Label::set_offset(label, -(Label::get_width(label)/2), 64);
-            Label::set_object(label, o);
+            label->set_offset(-(label->get_width()/2), 64);
+            label->set_object(o);
 
             hintLine = true;
         }
         break;
     }
     attachPoint.v -= 2;
-    Label::set_attached_hint_line(label, hintLine, attachPoint);
+    label->set_attached_hint_line(hintLine, attachPoint);
 }
 
 void Messages::draw_message() {
