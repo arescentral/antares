@@ -50,7 +50,7 @@ void GetInitialObjectSpriteData(
         coordPointType *corner, int32_t scale, int32_t *thisScale, Point *where, Rect *spriteRect);
 
 void GetRealObjectSpriteData(
-        coordPointType *realCoord, BaseObject* baseObject, Handle<Admiral> owner, int32_t spriteOverride,
+        coordPointType *realCoord, Handle<BaseObject> baseObject, Handle<Admiral> owner, int32_t spriteOverride,
         int32_t maxSize, Rect *bounds, coordPointType *corner, int32_t scale, int32_t *thisScale,
         const NatePixTable::Frame** frame, Point *where, Rect *spriteRect);
 
@@ -201,22 +201,21 @@ void Briefing_Grid_Set(bool *grid, int32_t x, int32_t y, int32_t gridWidth, int3
 void GetInitialObjectSpriteData(
         const Scenario* scenario, int32_t whichObject, int32_t maxSize, Rect *bounds,
         coordPointType *corner, int32_t scale, int32_t *thisScale, Point *where, Rect *spriteRect) {
-    SpaceObject* sObject = NULL;
     briefingSpriteBoundsType    *sBounds = gBriefingSpriteBounds;
 
     spriteRect->right = spriteRect->left = -1;
 
-    sObject = GetObjectFromInitialNumber(whichObject);
+    auto sObject = GetObjectFromInitialNumber(whichObject);
 
-    if (sObject != NULL) {
+    if (sObject.get()) {
         const NatePixTable::Frame* frame = NULL;
         GetRealObjectSpriteData(
-                &(sObject->location), sObject->baseType, sObject->owner, sObject->pixResID,
+                &(sObject->location), sObject->base, sObject->owner, sObject->pixResID,
                 maxSize, bounds, corner, scale, thisScale, &frame, where, spriteRect);
 
         if ( sBounds == NULL) return;
         while ( (sBounds->objectIndex >= 0) &&
-            ( sBounds->objectIndex != sObject->number())) sBounds++;
+            ( sBounds->objectIndex != sObject.number())) sBounds++;
 
         if (sBounds->objectIndex < 0) {
             return;
@@ -226,7 +225,7 @@ void GetInitialObjectSpriteData(
 }
 
 void GetRealObjectSpriteData(
-        coordPointType *realCoord, BaseObject* baseObject, Handle<Admiral> owner, int32_t spriteOverride,
+        coordPointType *realCoord, Handle<BaseObject> baseObject, Handle<Admiral> owner, int32_t spriteOverride,
         int32_t maxSize, Rect *bounds, coordPointType *corner, int32_t scale, int32_t *thisScale,
         const NatePixTable::Frame** frame, Point *where, Rect *spriteRect) {
     NatePixTable* pixTable;
@@ -316,10 +315,9 @@ template <typename Renderer>
 static void render_briefing_with(
         const Renderer& renderer, int32_t maxSize, Rect *bounds,
         coordPointType *corner, int32_t scale) {
-    int32_t        count, thisScale, gridWidth, gridHeight, i, j, color;
+    int32_t        thisScale, gridWidth, gridHeight, i, j, color;
     Point       where;
     Rect    spriteRect, clipRect;
-    BaseObject*  baseObject = NULL;
     bool         *gridCells = NULL;
     briefingSpriteBoundsType    *sBounds = NULL;
 
@@ -346,16 +344,14 @@ static void render_briefing_with(
     if ( gBriefingSpriteBounds == NULL) return;
     sBounds = gBriefingSpriteBounds;
 
-    for ( count = 0; count < kMaxSpaceObject; count++)
-    {
-        SpaceObject* anObject = mGetSpaceObjectPtr(count);
+    for (auto anObject: SpaceObject::all()) {
         if (( anObject->active == kObjectInUse) && ( anObject->sprite != NULL))
         {
-            baseObject = anObject->baseType;
+            auto baseObject = anObject->base;
             if (baseObject->maxVelocity == 0) {
                 const NatePixTable::Frame* frame = NULL;
                 GetRealObjectSpriteData( &(anObject->location),
-                    anObject->baseType, anObject->owner,
+                    anObject->base, anObject->owner,
                     anObject->pixResID, maxSize, bounds, corner, scale,
                     &thisScale, &frame, &where, &spriteRect);
                 if (frame != NULL) {
@@ -383,13 +379,13 @@ static void render_briefing_with(
                     renderer.draw(*frame, where, thisScale, &spriteRect, clipRect);
 
                     sBounds->bounds = spriteRect;
-                    sBounds->objectIndex = count;
+                    sBounds->objectIndex = anObject.number();
                     sBounds++;
                 }
             } else {
                 const NatePixTable::Frame* frame = NULL;
                 GetRealObjectSpriteData(
-                        &(anObject->location), anObject->baseType, anObject->owner,
+                        &(anObject->location), anObject->base, anObject->owner,
                         anObject->pixResID, maxSize / 2, bounds, corner, scale, &thisScale,
                         &frame, &where, &spriteRect);
                 if (frame != NULL) {
@@ -421,7 +417,7 @@ static void render_briefing_with(
                             light_color, dark_color);
 
                     sBounds->bounds = spriteRect;
-                    sBounds->objectIndex = count;
+                    sBounds->objectIndex = anObject.number();
                     sBounds++;
                 }
             }

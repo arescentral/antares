@@ -73,12 +73,12 @@ struct miniComputerDataType {
 };
 
 struct hotKeyType {
-    int32_t     objectNum;
-    int32_t     objectID;
+    Handle<SpaceObject>     object;
+    int32_t                 objectID;
 };
 
 struct Admiral;
-struct destBalanceType;
+struct Destination;
 struct proximityUnitType;
 struct scrollStarType;
 class InputSource;
@@ -94,18 +94,17 @@ struct aresGlobalType {
     aresGlobalType();
     ~aresGlobalType();
 
-    uint32_t        gActiveCheats[kMaxPlayerNum];
     uint32_t        gSynchValue;
     std::unique_ptr<InputSource> gInputSource;
     int32_t         gGameOver;
     int64_t         gGameTime;
     uint64_t        gLastTime;
-    int32_t         gClosestObject;
-    int32_t         gFarthestObject;
+    Handle<SpaceObject> gClosestObject;
+    Handle<SpaceObject> gFarthestObject;
     int32_t         gCenterScaleH;
     int32_t         gCenterScaleV;
-    int32_t         gPlayerShipNumber;
-    int32_t         gSelectionLabel;
+    Handle<SpaceObject> gPlayerShip;
+    Handle<Label>   gSelectionLabel;
     ZoomType        gZoomMode;
     ZoomType        gPreviousZoomMode;
     Handle<Admiral> gPlayerAdmiral;
@@ -152,7 +151,7 @@ struct aresGlobalType {
     int32_t         hotKeyDownTime;
     int32_t         lastHotKey;
 
-    int32_t         lastSelectedObject;
+    Handle<SpaceObject>     lastSelectedObject;
     int32_t         lastSelectedObjectID;
     bool         destKeyUsedForSelection;
     bool         hotKey_target;

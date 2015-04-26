@@ -31,8 +31,8 @@ struct adjacentUnitType {
 };
 
 struct proximityUnitType {
-    SpaceObject*            nearObject;                         // for collision checking
-    SpaceObject*            farObject;                          // for distance checking
+    Handle<SpaceObject>     nearObject;                         // for collision checking
+    Handle<SpaceObject>     farObject;                          // for distance checking
     adjacentUnitType        unitsToCheck[kUnitsToCheckNumber];  // adjacent units to check
 };
 
@@ -44,7 +44,7 @@ void ResetMotionGlobals();
 void MotionCleanup();
 void MoveSpaceObjects(const int32_t unitsToDo);
 void CollideSpaceObjects();
-void CorrectPhysicalSpace( SpaceObject *, SpaceObject *);
+void CorrectPhysicalSpace(Handle<SpaceObject> aObject, Handle<SpaceObject> bObject);
 
 }  // namespace antares
 

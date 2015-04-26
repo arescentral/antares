@@ -22,6 +22,7 @@
 // NonPlayerShip.h
 
 #include "data/space-object.hpp"
+#include "game/space-object.hpp"
 
 namespace antares {
 
@@ -31,22 +32,21 @@ enum Allegiance {
     HOSTILE,
 };
 
-SpaceObject *HackNewNonplayerShip(int32_t, int16_t, Rect *);
 void fire_weapon(
-        SpaceObject* subject, SpaceObject* target,
+        Handle<SpaceObject> subject, Handle<SpaceObject> target,
         const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon);
 void NonplayerShipThink(int32_t);
 void UpdateMyNonplayerShip( void);
 void HackShowShipID( void);
-void HitObject( SpaceObject *, SpaceObject *);
-int32_t GetManualSelectObject(
-        SpaceObject *sourceObject, int32_t direction,
+void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject);
+Handle<SpaceObject> GetManualSelectObject(
+        Handle<SpaceObject> sourceObject, int32_t direction,
         uint32_t inclusiveAttributes, uint32_t exclusiveAttributes,
-        const uint64_t* fartherThan, int32_t currentShipNum, Allegiance allegiance);
-int32_t GetSpritePointSelectObject(
-        Rect *bounds, SpaceObject *sourceObject,
+        const uint64_t* fartherThan, Handle<SpaceObject> currentShip, Allegiance allegiance);
+Handle<SpaceObject> GetSpritePointSelectObject(
+        Rect *bounds, Handle<SpaceObject> sourceObject,
         uint32_t anyOneAttribute,
-        int32_t currentShipNum, Allegiance allegiance);
+        Handle<SpaceObject> currentShip, Allegiance allegiance);
 
 }  // namespace antares
 

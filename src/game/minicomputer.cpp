@@ -214,16 +214,16 @@ inline int32_t mGetLineNumFromV(int32_t mV) {
 inline void mCopyMiniSpaceObject(
         SpaceObject& mdestobject, const SpaceObject& msourceobject) {
     (mdestobject).id = (msourceobject).id;
-    (mdestobject).beam.type = (msourceobject).beam.type;
-    (mdestobject).pulse.type = (msourceobject).pulse.type;
-    (mdestobject).special.type = (msourceobject).special.type;
+    (mdestobject).beam.base = (msourceobject).beam.base;
+    (mdestobject).pulse.base = (msourceobject).pulse.base;
+    (mdestobject).special.base = (msourceobject).special.base;
     (mdestobject).destinationLocation.h = (msourceobject).destinationLocation.h;
     (mdestobject).destinationLocation.v = (msourceobject).destinationLocation.v;
-    (mdestobject).destinationObject = (msourceobject).destinationObject;
-    (mdestobject).destObjectPtr = (msourceobject).destObjectPtr;
+    (mdestobject).destObject = (msourceobject).destObject;
+    (mdestobject).asDestination = (msourceobject).asDestination;
     (mdestobject)._health = (msourceobject).health();
     (mdestobject)._energy = (msourceobject).energy();
-    (mdestobject).whichBaseObject = (msourceobject).whichBaseObject;
+    (mdestobject).base = (msourceobject).base;
     (mdestobject).pixResID = (msourceobject).pixResID;
     (mdestobject).attributes = (msourceobject).attributes;
     (mdestobject).location = (msourceobject).location;
@@ -298,7 +298,7 @@ void ClearMiniScreenLines() {
         c->selectable = cannotSelect;
         c->underline = false;
         c->lineKind = plainLineKind;
-        c->sourceData = NULL;
+        c->sourceData = BaseObject::none();
         c++;
     }
 }
@@ -310,30 +310,30 @@ void ClearMiniObjectData( void)
 
     o = mGetMiniObjectPtr( kMiniSelectObjectNum);
     o->id = -1;
-    o->beam.type = -1;
-    o->pulse.type = -1;
-    o->special.type = -1;
+    o->beam.base = BaseObject::none();
+    o->pulse.base = BaseObject::none();
+    o->special.base = BaseObject::none();
     o->destinationLocation.h = o->destinationLocation.v = -1;
-    o->destinationObject = -1;
-    o->destObjectPtr = NULL;
+    o->destObject = SpaceObject::none();
+    o->asDestination = Destination::none();
     o->_health = 0;
     o->_energy = 0;
-    o->whichBaseObject = -1;
+    o->base = BaseObject::none();
     o->pixResID = -1;
     o->attributes = 0;
     o->baseType = NULL;
 
     o = mGetMiniObjectPtr( kMiniTargetObjectNum);
     o->id = -1;
-    o->beam.type = -1;
-    o->pulse.type = -1;
-    o->special.type = -1;
+    o->beam.base = BaseObject::none();
+    o->pulse.base = BaseObject::none();
+    o->special.base = BaseObject::none();
     o->destinationLocation.h = o->destinationLocation.v = -1;
-    o->destinationObject = -1;
-    o->destObjectPtr = NULL;
+    o->destObject = SpaceObject::none();
+    o->asDestination = Destination::none();
     o->_health = 0;
     o->_energy = 0;
-    o->whichBaseObject = -1;
+    o->base = BaseObject::none();
     o->pixResID = -1;
     o->attributes = 0;
     o->baseType = NULL;
@@ -637,9 +637,8 @@ void minicomputer_cancel() {
 void MiniComputerHandleNull( int32_t unitsToDo)
 
 {
-    destBalanceType     *buildAtObject = NULL;
-    int32_t                count;
-    SpaceObject     *realObject = NULL, *myObject = NULL, newObject;
+    Handle<Destination> buildAtObject;
+    SpaceObject     *myObject = NULL, newObject;
 
     globals()->gMiniScreenData.pollTime += unitsToDo;
     if ( globals()->gMiniScreenData.pollTime > kMiniComputerPollTime)
@@ -650,23 +649,20 @@ void MiniComputerHandleNull( int32_t unitsToDo)
         // handle control/command/selected object
 
         myObject = mGetMiniObjectPtr( kMiniSelectObjectNum);
-        count = globals()->gPlayerAdmiral->control();
-        if ( count >= 0)
-        {
-            realObject = mGetSpaceObjectPtr(count);
-            mCopyMiniSpaceObject( newObject, *realObject);
-        } else
-        {
+        auto control = globals()->gPlayerAdmiral->control();
+        if (control.get()) {
+            mCopyMiniSpaceObject(newObject, *control);
+        } else {
             newObject.id = -1;
-            newObject.beam.type = -1;
-            newObject.pulse.type = -1;
-            newObject.special.type = -1;
+            newObject.beam.base = BaseObject::none();
+            newObject.pulse.base = BaseObject::none();
+            newObject.special.base = BaseObject::none();
             newObject.destinationLocation.h = newObject.destinationLocation.v = -1;
-            newObject.destinationObject = -1;
-            newObject.destObjectPtr = NULL;
+            newObject.destObject = SpaceObject::none();
+            newObject.asDestination = Destination::none();
             newObject._health = 0;
             newObject._energy = 0;
-            newObject.whichBaseObject = -1;
+            newObject.base = BaseObject::none();
             newObject.pixResID = -1;
             newObject.attributes = 0;
             newObject.baseType = NULL;
@@ -674,35 +670,31 @@ void MiniComputerHandleNull( int32_t unitsToDo)
         mCopyMiniSpaceObject(*myObject, newObject);
 
         myObject = mGetMiniObjectPtr( kMiniTargetObjectNum);
-        count = globals()->gPlayerAdmiral->target();
-        if ( count >= 0)
-        {
-            realObject = mGetSpaceObjectPtr(count);
-            mCopyMiniSpaceObject( newObject, *realObject);
-        } else
-        {
+        auto target = globals()->gPlayerAdmiral->target();
+        if (target.get()) {
+            mCopyMiniSpaceObject(newObject, *target);
+        } else {
             newObject.id = -1;
-            newObject.beam.type = -1;
-            newObject.pulse.type = -1;
-            newObject.special.type = -1;
+            newObject.beam.base = BaseObject::none();
+            newObject.pulse.base = BaseObject::none();
+            newObject.special.base = BaseObject::none();
             newObject.destinationLocation.h = newObject.destinationLocation.v = -1;
-            newObject.destinationObject = -1;
-            newObject.destObjectPtr = NULL;
+            newObject.destObject = SpaceObject::none();
+            newObject.asDestination = Destination::none();
             newObject._health = 0;
             newObject._energy = 0;
-            newObject.whichBaseObject = -1;
+            newObject.base = BaseObject::none();
             newObject.pixResID = -1;
             newObject.attributes = 0;
             newObject.baseType = NULL;
         }
         mCopyMiniSpaceObject(*myObject, newObject);
 
-        int build_at = GetAdmiralBuildAtObject(globals()->gPlayerAdmiral);
-        if (build_at >= 0) {
-            buildAtObject = mGetDestObjectBalancePtr(build_at);
-            if (buildAtObject->totalBuildTime > 0) {
-                int progress = buildAtObject->buildTime * kMiniBuildTimeHeight;
-                progress /= buildAtObject->totalBuildTime;
+        auto build_at = GetAdmiralBuildAtObject(globals()->gPlayerAdmiral);
+        if (build_at.get()) {
+            if (build_at->totalBuildTime > 0) {
+                int progress = build_at->buildTime * kMiniBuildTimeHeight;
+                progress /= build_at->totalBuildTime;
                 globals()->gMiniScreenData.buildTimeBarValue = progress;
             } else {
                 globals()->gMiniScreenData.buildTimeBarValue = 0;
@@ -719,7 +711,6 @@ void UpdateMiniScreenLines( void)
 
 {
     miniScreenLineType  *line = NULL;
-    BaseObject*         buildObject = NULL;
     int32_t                lineNum, count;
     Rect                mRect;
 
@@ -731,7 +722,7 @@ void UpdateMiniScreenLines( void)
             const auto& admiral = globals()->gPlayerAdmiral;
             line = globals()->gMiniScreenData.lineData.get() +
                 kBuildScreenWhereNameLine;
-            if (line->value != GetAdmiralBuildAtObject(admiral)) {
+            if (line->value != GetAdmiralBuildAtObject(admiral).number()) {
                 if ( globals()->gMiniScreenData.selectLine !=
                         kMiniScreenNoLineSelected)
                 {
@@ -742,15 +733,14 @@ void UpdateMiniScreenLines( void)
                         kMiniScreenNoLineSelected;
                 }
                 MiniComputerSetBuildStrings();
-            } else if (GetAdmiralBuildAtObject(admiral) >= 0) {
+            } else if (GetAdmiralBuildAtObject(admiral).get()) {
                 line = globals()->gMiniScreenData.lineData.get() + kBuildScreenFirstTypeLine;
                 lineNum = kBuildScreenFirstTypeLine;
 
                 for ( count = 0; count < kMaxShipCanBuild; count++)
                 {
-                    buildObject = line->sourceData;
-                    if ( buildObject != NULL)
-                    {
+                    auto buildObject = line->sourceData;
+                    if (buildObject.get()) {
                         if ( buildObject->price > mFixedToLong(admiral->cash()))
                         {
                             if ( line->selectable != selectDim)
@@ -848,19 +838,19 @@ void draw_mini_ship_data(
         color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
         // move to the 1st line in the selection miniscreen
-        String text(GetDestBalanceName(newObject.destinationObject));
+        String text(GetDestBalanceName(newObject.asDestination));
         computer_font->draw_sprite(
                 Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
                 text, color);
     } else {
         lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth);
 
-        if (newObject.whichBaseObject >= 0) {
+        if (newObject.base.get()) {
             // get the color for writing the name
             color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
             // move to the 1st line in the selection miniscreen, write the name
-            String text(get_object_short_name(newObject.whichBaseObject));
+            String text(get_object_short_name(newObject.base));
             computer_font->draw_sprite(
                     Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
                     text, color);
@@ -874,7 +864,7 @@ void draw_mini_ship_data(
     dRect.right = kMiniScreenLeft + kMiniIconWidth;
     dRect.bottom = dRect.top + kMiniIconHeight;
 
-    if ((newObject.whichBaseObject >= 0) && (newObject.pixResID >= 0)) {
+    if ((newObject.base.get()) && (newObject.pixResID >= 0)) {
         NatePixTable* pixTable = GetPixTable(newObject.pixResID);
 
         if (pixTable != NULL) {
@@ -967,8 +957,8 @@ void draw_mini_ship_data(
     color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
     // move to the 1st line in the selection miniscreen, write the name
-    if (newObject.beam.type >= 0) {
-        String text(get_object_short_name(newObject.beam.type));
+    if (newObject.beam.base.get()) {
+        String text(get_object_short_name(newObject.beam.base));
         computer_font->draw_sprite(
                 Point(lRect.left, lRect.top + computer_font->ascent), text, color);
     }
@@ -979,8 +969,8 @@ void draw_mini_ship_data(
     color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
     // move to the 1st line in the selection miniscreen, write the name
-    if (newObject.pulse.type >= 0) {
-        String text(get_object_short_name(newObject.pulse.type));
+    if (newObject.pulse.base.get()) {
+        String text(get_object_short_name(newObject.pulse.base));
         computer_font->draw_sprite(
                 Point(lRect.left, lRect.top + computer_font->ascent), text, color);
     }
@@ -993,8 +983,8 @@ void draw_mini_ship_data(
         color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
         // move to the 1st line in the selection miniscreen, write the name
-        if (newObject.special.type >= 0) {
-            String text(get_object_short_name(newObject.special.type));
+        if (newObject.special.base.get()) {
+            String text(get_object_short_name(newObject.special.base));
             computer_font->draw_sprite(
                     Point(lRect.left, lRect.top + computer_font->ascent), text, color);
         }
@@ -1003,26 +993,24 @@ void draw_mini_ship_data(
     lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniDestLineNum, 0, kMiniScreenWidth);
 
     // write the name
-    if (newObject.destinationObject >= 0) {
-        if (newObject.destObjectPtr != NULL) {
-            SpaceObject* dObject = newObject.destObjectPtr;
+    if (newObject.destObject.get()) {
+        auto dObject = newObject.destObject;
 
-            // get the color for writing the name
-            if (dObject->owner == globals()->gPlayerAdmiral) {
-                color = GetRGBTranslateColorShade(GREEN, VERY_LIGHT);
-            } else {
-                color = GetRGBTranslateColorShade(RED, VERY_LIGHT);
-            }
+        // get the color for writing the name
+        if (dObject->owner == globals()->gPlayerAdmiral) {
+            color = GetRGBTranslateColorShade(GREEN, VERY_LIGHT);
+        } else {
+            color = GetRGBTranslateColorShade(RED, VERY_LIGHT);
+        }
 
-            if (dObject->attributes & kIsDestination) {
-                String text(GetDestBalanceName(dObject->destinationObject));
-                computer_font->draw_sprite(
-                        Point(lRect.left, lRect.top + computer_font->ascent), text, color);
-            } else {
-                String text(get_object_name(dObject->whichBaseObject));
-                computer_font->draw_sprite(
-                        Point(lRect.left, lRect.top + computer_font->ascent), text, color);
-            }
+        if (dObject->attributes & kIsDestination) {
+            String text(GetDestBalanceName(dObject->asDestination));
+            computer_font->draw_sprite(
+                    Point(lRect.left, lRect.top + computer_font->ascent), text, color);
+        } else {
+            String text(get_object_name(dObject->base));
+            computer_font->draw_sprite(
+                    Point(lRect.left, lRect.top + computer_font->ascent), text, color);
         }
     }
 }
@@ -1035,8 +1023,7 @@ void MiniComputerDoAccept() {
 }
 
 void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral) {
-    SpaceObject *anObject, *anotherObject;
-    int32_t            l;
+    SpaceObject *anotherObject;
 
     switch ( whichPage)
     {
@@ -1073,7 +1060,7 @@ void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> w
             if ( globals()->keyMask & kComputerBuildMenu) return;
             if ( whichLine != kMiniScreenNoLineSelected)
             {
-                if (CountObjectsOfBaseType(-1, Admiral::none()) < (kMaxSpaceObject - kMaxShipBuffer)) {
+                if (CountObjectsOfBaseType(BaseObject::none(), Admiral::none()) < (kMaxSpaceObject - kMaxShipBuffer)) {
                     if (whichAdmiral->build(whichLine - kBuildScreenFirstTypeLine) == false) {
                         if (whichAdmiral == globals()->gPlayerAdmiral) {
                             mPlayBeepBad();
@@ -1092,92 +1079,76 @@ void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> w
             if ( globals()->keyMask & kComputerSpecialMenu) return;
             switch ( whichLine)
             {
-                case kSpecialMiniTransfer:
-                    l = whichAdmiral->control();
-                    anObject = whichAdmiral->flagship();
-                    if ( anObject != NULL)
-                    {
-                        if ( l != kNoShip)
-                        {
-                            anotherObject = mGetSpaceObjectPtr(l);
-                            if (( anotherObject->active != kObjectInUse) ||
-                                ( !(anotherObject->attributes & kCanThink)) ||
-                                ( anotherObject->attributes & kStaticDestination)
-                                || ( anotherObject->owner != anObject->owner) ||
-                                (!(anotherObject->attributes & kCanAcceptDestination))
-                                || ( !(anotherObject->attributes & kCanBeDestination))
-                                || ( anObject->active != kObjectInUse))
-                            {
-                                if (whichAdmiral == globals()->gPlayerAdmiral)
+                case kSpecialMiniTransfer: {
+                    auto control = whichAdmiral->control();
+                    auto flagship = whichAdmiral->flagship();
+                    if (flagship.get()) {
+                        if (control.get()) {
+                            if (!(control->attributes & kCanThink)
+                                    || (control->attributes & kStaticDestination)
+                                    || (control->owner != flagship->owner)
+                                    || !(control->attributes & kCanAcceptDestination)
+                                    || !(control->attributes & kCanBeDestination)
+                                    || (flagship->active != kObjectInUse)) {
+                                if (whichAdmiral == globals()->gPlayerAdmiral) {
                                     mPlayBeepBad();
-                            } else
-                            {
-                                ChangePlayerShipNumber( whichAdmiral, l);
+                                }
+                            } else {
+                                ChangePlayerShipNumber(whichAdmiral, control);
                             }
-                        } else
-                        {
-                            PlayerShipBodyExpire( anObject, false);
+                        } else {
+                            PlayerShipBodyExpire(flagship, false);
                         }
                     }
                     break;
+                }
 
-                case kSpecialMiniFire1:
-                    l = whichAdmiral->control();
-                    if (( l != kNoShip))
-                    {
-                        anObject = mGetSpaceObjectPtr(l);
-                        if (( anObject->active) &&
-                            (anObject->attributes & ( kCanAcceptDestination)))
-                        {
-                            anObject->keysDown |= kOneKey | kManualOverrideFlag;
+                case kSpecialMiniFire1: {
+                    auto control = whichAdmiral->control();
+                    if (control.get()) {
+                        if (control->attributes & kCanAcceptDestination) {
+                            control->keysDown |= kOneKey | kManualOverrideFlag;
                         }
                     }
                     break;
+                }
 
-                case kSpecialMiniFire2:
-                    l = whichAdmiral->control();
-                    if (( l != kNoShip))
-                    {
-                        anObject = mGetSpaceObjectPtr(l);
-                        if (( anObject->active) &&
-                            (anObject->attributes & ( kCanAcceptDestination)))
-                        {
-                            anObject->keysDown |= kTwoKey | kManualOverrideFlag;
+                case kSpecialMiniFire2: {
+                    auto control = whichAdmiral->control();
+                    if (control.get()) {
+                        if (control->attributes & kCanAcceptDestination) {
+                            control->keysDown |= kTwoKey | kManualOverrideFlag;
                         }
                     }
                     break;
+                }
 
-                case kSpecialMiniFireSpecial:
-                    l = whichAdmiral->control();
-                    if (( l != kNoShip))
-                    {
-                        anObject = mGetSpaceObjectPtr(l);
-                        if (( anObject->active) &&
-                            (anObject->attributes & ( kCanAcceptDestination)))
-                        {
-                            anObject->keysDown |= kEnterKey | kManualOverrideFlag;
+                case kSpecialMiniFireSpecial: {
+                    auto control = whichAdmiral->control();
+                    if (control.get()) {
+                        if (control->attributes & kCanAcceptDestination) {
+                            control->keysDown |= kEnterKey | kManualOverrideFlag;
                         }
                     }
                     break;
+                }
 
-                case kSpecialMiniHold:
-                    l = whichAdmiral->control();
-                    if (( l != kNoShip))
-                    {
-                        anObject = mGetSpaceObjectPtr(l);
-                        SetObjectLocationDestination( anObject, &(anObject->location));
+                case kSpecialMiniHold: {
+                    auto control = whichAdmiral->control();
+                    if (control.get()) {
+                        SetObjectLocationDestination(control, &control->location);
                     }
                     break;
+                }
 
-                case kSpecialMiniGoToMe:
-                    l = whichAdmiral->control();
-                    if (( l != kNoShip))
-                    {
-                        anObject = mGetSpaceObjectPtr(l);
-                        anotherObject = whichAdmiral->flagship();
-                        SetObjectLocationDestination( anObject, &(anotherObject->location));
+                case kSpecialMiniGoToMe: {
+                    auto control = whichAdmiral->control();
+                    if (control.get()) {
+                        auto flagship = whichAdmiral->flagship();
+                        SetObjectLocationDestination(control, &flagship->location);
                     }
                     break;
+                }
 
                 default:
                     break;
@@ -1234,10 +1205,9 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 // also sets up the values = base object num
 
 {
-    BaseObject*         buildObject = NULL;
-    destBalanceType     *buildAtObject = NULL;
+    Handle<Destination> buildAtObject;
     miniScreenLineType  *line = NULL;
-    int32_t                count, baseNum, lineNum, buildAtObjectNum;
+    int32_t                count, lineNum;
     Rect                mRect;
 
     mRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
@@ -1249,12 +1219,10 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
         const auto& admiral = globals()->gPlayerAdmiral;
         line = globals()->gMiniScreenData.lineData.get() +
             kBuildScreenWhereNameLine;
-        buildAtObjectNum = GetAdmiralBuildAtObject(globals()->gPlayerAdmiral);
-        line->value = buildAtObjectNum;
+        auto buildAtObject = GetAdmiralBuildAtObject(globals()->gPlayerAdmiral);
+        line->value = buildAtObject.number();
 
-        if ( buildAtObjectNum >= 0)
-        {
-            buildAtObject = mGetDestObjectBalancePtr( buildAtObjectNum);
+        if (buildAtObject.get()) {
             mCopyBlankLineString( line, buildAtObject->name);
 
             line = globals()->gMiniScreenData.lineData.get() + kBuildScreenFirstTypeLine;
@@ -1262,14 +1230,12 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 
             for ( count = 0; count < kMaxShipCanBuild; count++)
             {
-                baseNum = mGetBaseObjectFromClassRace(
+                auto buildObject = mGetBaseObjectFromClassRace(
                         buildAtObject->canBuildType[count], admiral->race());
-                buildObject = mGetBaseObjectPtr(baseNum);
-                line->value = baseNum;
+                line->value = buildObject.number();
                 line->sourceData = buildObject;
-                if ( buildObject != NULL)
-                {
-                    mCopyBlankLineString(line, get_object_name(baseNum));
+                if (buildObject.get()) {
+                    mCopyBlankLineString(line, get_object_name(buildObject));
                     if ( buildObject->price > mFixedToLong(admiral->cash()))
                         line->selectable = selectDim;
                     else line->selectable = selectable;
@@ -1326,7 +1292,6 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 int32_t MiniComputerGetPriceOfCurrentSelection( void)
 {
     miniScreenLineType  *line = NULL;
-    BaseObject*         buildObject = NULL;
 
     if (( globals()->gMiniScreenData.currentScreen != kBuildMiniScreen) ||
             ( globals()->gMiniScreenData.selectLine == kMiniScreenNoLineSelected))
@@ -1337,7 +1302,7 @@ int32_t MiniComputerGetPriceOfCurrentSelection( void)
 
         if ( line->value < 0) return( 0);
 
-        buildObject = mGetBaseObjectPtr( line->value);
+        auto buildObject = Handle<BaseObject>(line->value);
 
         if ( buildObject->price < 0) return( 0);
 

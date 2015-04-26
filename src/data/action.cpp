@@ -28,7 +28,7 @@ using sfz::read;
 
 namespace antares {
 
-void read_from(ReadSource in, objectActionType& action) {
+void read_from(ReadSource in, Action& action) {
     uint8_t section[24];
 
     read(in, action.verb);
@@ -126,7 +126,7 @@ void read_from(ReadSource in, objectActionType& action) {
 }
 
 void read_from(ReadSource in, argumentType::CreateObject& argument) {
-    read(in, argument.whichBaseType);
+    argument.whichBaseType = Handle<BaseObject>(read<int32_t>(in));
     read(in, argument.howManyMinimum);
     read(in, argument.howManyRange);
     read(in, argument.velocityRelative);
@@ -214,11 +214,6 @@ void read_from(ReadSource in, argumentType::ComputerSelect& argument) {
 
 void read_from(ReadSource in, argumentType::AssumeInitial& argument) {
     read(in, argument.whichInitialObject);
-}
-
-void read_from(sfz::ReadSource in, ActionRef& action) {
-    read(in, action.start);
-    read(in, action.count);
 }
 
 }  // namespace antares

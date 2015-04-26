@@ -88,106 +88,80 @@ set<int32_t> possible_actions;
 #endif  // DATA_COVERAGE
 
 void AddBaseObjectActionMedia(
-        int32_t whichBase, int32_t whichType, uint8_t color, uint32_t all_colors);
-void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors);
+        Handle<BaseObject> base, int32_t whichType, uint8_t color, uint32_t all_colors);
+void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors);
 
 void SetAllBaseObjectsUnchecked() {
-    BaseObject* aBase = mGetBaseObjectPtr(0);
-    for (int32_t count = 0; count < globals()->maxBaseObject; count++) {
+    for (auto aBase: BaseObject::all()) {
         aBase->internalFlags = 0;
-        aBase++;
     }
 }
 
-void AddBaseObjectMedia(int32_t whichBase, uint8_t color, uint32_t all_colors) {
+void AddBaseObjectMedia(Handle<BaseObject> base, uint8_t color, uint32_t all_colors) {
 #ifdef DATA_COVERAGE
-    possible_objects.insert(whichBase);
+    possible_objects.insert(base.number());
 #endif  // DATA_COVERAGE
-    BaseObject* aBase = mGetBaseObjectPtr(whichBase);
 
-    if (!(aBase->attributes & kCanThink)) {
+    if (!(base->attributes & kCanThink)) {
         color = GRAY;
     }
-    aBase->internalFlags |= (kNeutralColorNeededFlag << color);
+    base->internalFlags |= (kNeutralColorNeededFlag << color);
     for (int i = 0; i < 16; ++i) {
-        if (aBase->internalFlags & (kNeutralColorLoadedFlag << i)) {
+        if (base->internalFlags & (kNeutralColorLoadedFlag << i)) {
             continue;  // color already loaded.
-        } else if (!(aBase->internalFlags & (kNeutralColorNeededFlag << i))) {
+        } else if (!(base->internalFlags & (kNeutralColorNeededFlag << i))) {
             continue;  // color not needed.
         }
-        aBase->internalFlags |= kNeutralColorLoadedFlag << i;
+        base->internalFlags |= kNeutralColorLoadedFlag << i;
 
-        if (aBase->pixResID != kNoSpriteTable) {
-            int16_t id = aBase->pixResID + (i << kSpriteTableColorShift);
+        if (base->pixResID != kNoSpriteTable) {
+            int16_t id = base->pixResID + (i << kSpriteTableColorShift);
             AddPixTable(id);
         }
 
-        AddBaseObjectActionMedia(whichBase, kDestroyActionType, i, all_colors);
-        AddBaseObjectActionMedia(whichBase, kExpireActionType, i, all_colors);
-        AddBaseObjectActionMedia(whichBase, kCreateActionType, i, all_colors);
-        AddBaseObjectActionMedia(whichBase, kCollideActionType, i, all_colors);
-        AddBaseObjectActionMedia(whichBase, kActivateActionType, i, all_colors);
-        AddBaseObjectActionMedia(whichBase, kArriveActionType, i, all_colors);
+        AddBaseObjectActionMedia(base, kDestroyActionType, i, all_colors);
+        AddBaseObjectActionMedia(base, kExpireActionType, i, all_colors);
+        AddBaseObjectActionMedia(base, kCreateActionType, i, all_colors);
+        AddBaseObjectActionMedia(base, kCollideActionType, i, all_colors);
+        AddBaseObjectActionMedia(base, kActivateActionType, i, all_colors);
+        AddBaseObjectActionMedia(base, kArriveActionType, i, all_colors);
 
-        for (int32_t weapon: {aBase->pulse.base, aBase->beam.base, aBase->special.base}) {
-            if (weapon != kNoWeapon) {
+        for (Handle<BaseObject> weapon: {base->pulse.base, base->beam.base, base->special.base}) {
+            if (weapon.get()) {
                 AddBaseObjectMedia(weapon, i, all_colors);
             }
         }
     }
 }
 
-objectActionType* mGetActionFromBaseTypeNum(
-        const BaseObject& mbaseObjPtr, int32_t mactionType, int32_t mactionNum) {
-    if (mactionType == kDestroyActionType) {
-        if (mactionNum < mbaseObjPtr.destroy.count) {
-            return mGetObjectActionPtr(mbaseObjPtr.destroy.start + mactionNum);
-        }
-    } else if (mactionType == kExpireActionType) {
-        if (mactionNum < mbaseObjPtr.expire.count) {
-            return mGetObjectActionPtr(mbaseObjPtr.expire.start + mactionNum);
-        }
-    } else if (mactionType == kCreateActionType) {
-        if (mactionNum < mbaseObjPtr.create.count) {
-            return mGetObjectActionPtr(mbaseObjPtr.create.start + mactionNum);
-        }
-    } else if (mactionType == kCollideActionType) {
-        if (mactionNum < mbaseObjPtr.collide.count) {
-            return mGetObjectActionPtr(mbaseObjPtr.collide.start + mactionNum);
-        }
-    } else if (mactionType == kActivateActionType) {
-        if (mactionNum < mbaseObjPtr.activate.count) {
-            return mGetObjectActionPtr(mbaseObjPtr.activate.start + mactionNum);
-        }
-    } else if (mactionType == kArriveActionType) {
-        if (mactionNum < mbaseObjPtr.arrive.count) {
-            return mGetObjectActionPtr(mbaseObjPtr.arrive.start + mactionNum);
-        }
+HandleList<Action> action_list(Handle<BaseObject> base, int32_t type) {
+    switch (type) {
+        case kDestroyActionType: return base->destroy;
+        case kExpireActionType: return base->expire;
+        case kCreateActionType: return base->create;
+        case kCollideActionType: return base->collide;
+        case kActivateActionType: return base->activate;
+        case kArriveActionType: return base->arrive;
+        default: return {-1, -1};
     }
-    return nullptr;
 }
 
 void AddBaseObjectActionMedia(
-        int32_t whichBase, int32_t whichType, uint8_t color, uint32_t all_colors) {
-    for (int count = 0; ; ++count) {
-        const BaseObject& baseObject = *mGetBaseObjectPtr(whichBase);
-        auto* action = mGetActionFromBaseTypeNum(baseObject, whichType, count);
-        if (!action) {
-            break;
+        Handle<BaseObject> base, int32_t whichType, uint8_t color, uint32_t all_colors) {
+    for (auto action: action_list(base, whichType)) {
+        if (action.get()) {
+            AddActionMedia(action, color, all_colors);
         }
-
-        AddActionMedia(action, color, all_colors);
     }
 }
 
-void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors) {
-    BaseObject*         baseObject = NULL;
+void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors) {
     int32_t             count = 0, l1, l2;
 #ifdef DATA_COVERAGE
         possible_actions.insert(action - mGetObjectActionPtr(0));
 #endif  // DATA_COVERAGE
 
-    if (action == NULL) {
+    if (!action.get()) {
         return;
     }
     switch (action->verb) {
@@ -205,34 +179,25 @@ void AddActionMedia(objectActionType *action, uint8_t color, uint32_t all_colors
             }
             break;
 
-        case kNoAction:
-            action = NULL;   // get us out of loop
-            break;
-
         case kAlter:
             switch(action->argument.alterObject.alterType) {
                 case kAlterBaseType:
-                    AddBaseObjectMedia(action->argument.alterObject.minimum, color, all_colors);
+                    AddBaseObjectMedia(
+                            Handle<BaseObject>(action->argument.alterObject.minimum),
+                            color, all_colors);
                     break;
 
                 case kAlterOwner:
-                    baseObject = mGetBaseObjectPtr(0);
-                    for (int32_t count = 0; count < globals()->maxBaseObject; count++) {
-                        if (action_filter_applies_to(*action, *baseObject)) {
+                    for (auto baseObject: BaseObject::all()) {
+                        if (action_filter_applies_to(*action, baseObject)) {
                             baseObject->internalFlags |= all_colors;
                         }
                         if (baseObject->internalFlags & kAnyColorLoadedFlag) {
-                            AddBaseObjectMedia(count, color, all_colors);
+                            AddBaseObjectMedia(baseObject, color, all_colors);
                         }
-                        baseObject++;
                     }
                     break;
             }
-            break;
-
-        case kMakeSparks:
-        case kDie:
-        default:
             break;
     }
 }
@@ -257,7 +222,7 @@ void GetInitialCoord(Scenario::InitialObject *initial, coordPointType *coord, in
 }
 
 void set_initial_destination(const Scenario::InitialObject* initial, bool preserve) {
-    if ((initial->realObjectNumber < 0)                 // hasn't been created yet
+    if (!initial->realObject.get()                      // hasn't been created yet
             || (initial->initialDestination < 0)        // doesn't have a target
             || (!initial->owner.get())) {               // doesn't have an owner
         return;
@@ -267,18 +232,18 @@ void set_initial_destination(const Scenario::InitialObject* initial, bool preser
     Handle<Admiral> owner = initial->owner;
 
     auto target = gThisScenario->initial(initial->initialDestination);
-    if (target->realObjectNumber >= 0) {
-        int32_t saveDest = owner->target(); // save the original dest
+    if (target->realObject.get()) {
+        auto saveDest = owner->target(); // save the original dest
 
         // set the admiral's dest object to the mapped initial dest object
-        owner->set_target(target->realObjectNumber);
+        owner->set_target(target->realObject);
 
         // now give the mapped initial object the admiral's destination
 
-        SpaceObject* object = mGetSpaceObjectPtr(initial->realObjectNumber);
+        auto object = initial->realObject;
         uint32_t specialAttributes = object->attributes; // preserve the attributes
         object->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
-        SetObjectDestination(object, NULL);
+        SetObjectDestination(object, SpaceObject::none());
         object->attributes = specialAttributes;
 
         if (preserve) {
@@ -362,9 +327,7 @@ bool Scenario::Condition::true_yet() const {
 }
 
 bool Scenario::Condition::is_true() const {
-    SpaceObject* sObject = nullptr;
-    SpaceObject* dObject = nullptr;
-    int32_t i, l, difference;
+    int32_t i, difference;
     Handle<Admiral> a;
     uint32_t distance, dcalc;
 
@@ -393,184 +356,129 @@ bool Scenario::Condition::is_true() const {
             }
             break;
 
-        case kDestructionCondition:
-            sObject = GetObjectFromInitialNumber(conditionArgument.longValue);
-            if (sObject == NULL) {
-                return true;
-            }
-            break;
+        case kDestructionCondition: {
+            auto sObject = GetObjectFromInitialNumber(conditionArgument.longValue);
+            return !sObject.get();
+        }
 
-        case kOwnerCondition:
-            sObject = GetObjectFromInitialNumber(subjectObject);
-            if (sObject != NULL) {
-                a = Handle<Admiral>(conditionArgument.longValue);
-                if (a == sObject->owner) {
-                    return true;
-                }
-            }
-            break;
+        case kOwnerCondition: {
+            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            auto a = Handle<Admiral>(conditionArgument.longValue);
+            return sObject.get()
+                && (a == sObject->owner);
+        }
 
         case kTimeCondition:
-            if (globals()->gGameTime >=
-                    ticks_to_usecs(conditionArgument.longValue)) {
-                return true;
-            }
-            break;
+            return globals()->gGameTime >= ticks_to_usecs(conditionArgument.longValue);
 
-        case kProximityCondition:
-            sObject = GetObjectFromInitialNumber(subjectObject);
-            if (sObject != NULL) {
-                dObject = GetObjectFromInitialNumber(directObject);
-                if (dObject != NULL) {
-                    difference = ABS<int>(sObject->location.h - dObject->location.h);
-                    dcalc = difference;
-                    difference =  ABS<int>(sObject->location.v - dObject->location.v);
-                    distance = difference;
+        case kProximityCondition: {
+            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            auto dObject = GetObjectFromInitialNumber(directObject);
+            if (sObject.get() && dObject.get()) {
+                difference = ABS<int>(sObject->location.h - dObject->location.h);
+                dcalc = difference;
+                difference =  ABS<int>(sObject->location.v - dObject->location.v);
+                distance = difference;
 
-                    if ((dcalc < kMaximumRelevantDistance) && (distance < kMaximumRelevantDistance)) {
-                        distance = distance * distance + dcalc * dcalc;
-                        if (distance < conditionArgument.unsignedLongValue) {
-                            return true;
-                        }
-                    }
-                }
-            }
-            break;
-
-        case kDistanceGreaterCondition:
-            sObject = GetObjectFromInitialNumber(subjectObject);
-            if (sObject != NULL) {
-                dObject = GetObjectFromInitialNumber(directObject);
-                if (dObject != NULL) {
-                    difference = ABS<int>(sObject->location.h - dObject->location.h);
-                    dcalc = difference;
-                    difference =  ABS<int>(sObject->location.v - dObject->location.v);
-                    distance = difference;
-
-                    if ((dcalc < kMaximumRelevantDistance)
-                            && (distance < kMaximumRelevantDistance)) {
-                        distance = distance * distance + dcalc * dcalc;
-                        if (distance >= conditionArgument.unsignedLongValue) {
-                            return true;
-                        }
-                    }
-                }
-            }
-            break;
-
-        case kHalfHealthCondition:
-            sObject = GetObjectFromInitialNumber(subjectObject);
-            if (sObject == NULL) {
-                return true;
-            } else if (sObject->health() <= (sObject->max_health() >> 1)) {
-                return true;
-            }
-            break;
-
-        case kIsAuxiliaryObject:
-            sObject = GetObjectFromInitialNumber(subjectObject);
-            if (sObject != NULL) {
-                l = globals()->gPlayerAdmiral->control();
-                if (l >= 0) {
-                    dObject = mGetSpaceObjectPtr(l);
-                    if (dObject == sObject) {
+                if ((dcalc < kMaximumRelevantDistance) && (distance < kMaximumRelevantDistance)) {
+                    distance = distance * distance + dcalc * dcalc;
+                    if (distance < conditionArgument.unsignedLongValue) {
                         return true;
                     }
                 }
             }
             break;
+        }
 
-        case kIsTargetObject:
-            sObject = GetObjectFromInitialNumber(subjectObject);
-            if (sObject != NULL) {
-                l = globals()->gPlayerAdmiral->target();
-                if (l >= 0) {
-                    dObject = mGetSpaceObjectPtr(l);
-                    if (dObject == sObject) {
+        case kDistanceGreaterCondition: {
+            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            auto dObject = GetObjectFromInitialNumber(directObject);
+            if (sObject.get() && dObject.get()) {
+                difference = ABS<int>(sObject->location.h - dObject->location.h);
+                dcalc = difference;
+                difference =  ABS<int>(sObject->location.v - dObject->location.v);
+                distance = difference;
+
+                if ((dcalc < kMaximumRelevantDistance)
+                        && (distance < kMaximumRelevantDistance)) {
+                    distance = distance * distance + dcalc * dcalc;
+                    if (distance >= conditionArgument.unsignedLongValue) {
                         return true;
                     }
                 }
             }
             break;
+        }
 
-        case kVelocityLessThanEqualToCondition:
-            sObject = GetObjectFromInitialNumber(subjectObject);
-            if (sObject != NULL) {
-                if (((ABS(sObject->velocity.h)) < conditionArgument.longValue) &&
-                    ((ABS(sObject->velocity.v)) < conditionArgument.longValue)) {
-                    return true;
-                }
-            }
-            break;
+        case kHalfHealthCondition: {
+            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            return !sObject.get()
+                || (sObject->health() <= (sObject->max_health() >> 1));
+        }
+
+        case kIsAuxiliaryObject: {
+            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            auto dObject = globals()->gPlayerAdmiral->control();
+            return sObject.get()
+                && dObject.get()
+                && (dObject == sObject);
+        }
+
+        case kIsTargetObject: {
+            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            auto dObject = globals()->gPlayerAdmiral->target();
+            return sObject.get()
+                && dObject.get()
+                && (dObject == sObject);
+        }
+
+        case kVelocityLessThanEqualToCondition: {
+            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            return sObject.get()
+                && ((ABS(sObject->velocity.h)) < conditionArgument.longValue)
+                && ((ABS(sObject->velocity.v)) < conditionArgument.longValue);
+        }
 
         case kNoShipsLeftCondition:
-            if (GetAdmiralShipsLeft(Handle<Admiral>(conditionArgument.longValue)) <= 0) {
-                return true;
-            }
-            break;
+            return GetAdmiralShipsLeft(Handle<Admiral>(conditionArgument.longValue)) <= 0;
 
         case kCurrentMessageCondition:
-            if (Messages::current() == (conditionArgument.location.h +
-                conditionArgument.location.v - 1)) {
-                return true;
-            }
-            break;
+            return Messages::current()
+                == (conditionArgument.location.h + conditionArgument.location.v - 1);
 
         case kCurrentComputerCondition:
-            if ((globals()->gMiniScreenData.currentScreen ==
-                conditionArgument.location.h) &&
-                ((conditionArgument.location.v < 0) ||
-                    (globals()->gMiniScreenData.selectLine ==
-                        conditionArgument.location.v))) {
-                return true;
-            }
-            break;
+            return (globals()->gMiniScreenData.currentScreen == conditionArgument.location.h)
+                && ((conditionArgument.location.v < 0)
+                        || (globals()->gMiniScreenData.selectLine == conditionArgument.location.v));
 
         case kZoomLevelCondition:
-            if (globals()->gZoomMode == conditionArgument.longValue) {
-                return true;
-            }
-            break;
+            return globals()->gZoomMode == conditionArgument.longValue;
 
         case kAutopilotCondition:
             return IsPlayerShipOnAutoPilot();
-            break;
 
         case kNotAutopilotCondition:
             return !IsPlayerShipOnAutoPilot();
-            break;
 
-        case kObjectIsBeingBuilt:
-            {
-                destBalanceType     *buildAtObject = NULL;
+        case kObjectIsBeingBuilt: {
+            auto buildAtObject = GetAdmiralBuildAtObject(globals()->gPlayerAdmiral);
+            return buildAtObject.get() && (buildAtObject->totalBuildTime > 0);
+        }
 
-                buildAtObject = mGetDestObjectBalancePtr(GetAdmiralBuildAtObject(globals()->gPlayerAdmiral));
-                if (buildAtObject != NULL) {
-                    if (buildAtObject->totalBuildTime > 0) {
-                        return true;
-                    }
-                }
-            }
-            break;
+        case kDirectIsSubjectTarget: {
+            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            auto dObject = GetObjectFromInitialNumber(directObject);
+            return sObject.get()
+                && dObject.get()
+                && (sObject->destObject == dObject)
+                && (sObject->destObjectID == dObject->id);
+        }
 
-        case kDirectIsSubjectTarget:
-            sObject = GetObjectFromInitialNumber(subjectObject);
-            dObject = GetObjectFromInitialNumber(directObject);
-            if ((sObject != NULL) && (dObject != NULL)) {
-                if (sObject->destObjectID == dObject->id) {
-                    return true;
-                }
-            }
-            break;
-
-        case kSubjectIsPlayerCondition:
-            sObject = GetObjectFromInitialNumber(subjectObject);
-            if (sObject != NULL) {
-                if (sObject->number() == globals()->gPlayerShipNumber) {
-                    return true;
-                }
-            }
-            break;
+        case kSubjectIsPlayerCondition: {
+            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            return sObject.get()
+                && (sObject == globals()->gPlayerShip);
+        }
     }
     return false;
 }
@@ -643,7 +551,7 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     reset_action_queue();
     Beams::reset();
     ResetAllSprites();
-    Labels::reset();
+    Label::reset();
     ResetInstruments();
     Admiral::reset();
     ResetAllDestObjectData();
@@ -672,7 +580,7 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
         if (gThisScenario->player[i].playerType == kSingleHumanPlayer) {
             auto admiral = Admiral::make(i, kAIsHuman, gThisScenario->player[i]);
             admiral->pay(mLongToFixed(5000));
-            globals()->gPlayerAdmiral = Handle<Admiral>(admiral);
+            globals()->gPlayerAdmiral = admiral;
         } else {
             auto admiral = Admiral::make(i, kAIsComputer, gThisScenario->player[i]);
             admiral->pay(mLongToFixed(5000));
@@ -702,31 +610,33 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
 void construct_scenario(const Scenario* scenario, int32_t* current) {
     int32_t step = *current;
     uint32_t all_colors = kNeutralColorNeededFlag;
-    for (int k = 0; k < gThisScenario->playerNum; k++) {
-        all_colors |= kNeutralColorNeededFlag << GetAdmiralColor(Handle<Admiral>(k));
+    for (auto adm: Admiral::all()) {
+        if (adm->active()) {
+            all_colors |= kNeutralColorNeededFlag << GetAdmiralColor(adm);
+        }
     }
 
     if (step == 0) {
-        if (globals()->scenarioFileInfo.energyBlobID < 0) {
+        if (!globals()->scenarioFileInfo.energyBlobID.get()) {
             throw Exception("No energy blob defined");
         }
-        if (globals()->scenarioFileInfo.warpInFlareID < 0) {
+        if (!globals()->scenarioFileInfo.warpInFlareID.get()) {
             throw Exception("No warp in flare defined");
         }
-        if (globals()->scenarioFileInfo.warpOutFlareID < 0) {
+        if (!globals()->scenarioFileInfo.warpOutFlareID.get()) {
             throw Exception("No warp out flare defined");
         }
-        if (globals()->scenarioFileInfo.playerBodyID < 0) {
+        if (!globals()->scenarioFileInfo.playerBodyID.get()) {
             throw Exception("No player body defined");
         }
 
         // Load the four blessed objects.  The player's body is needed
         // in all colors; the other three are needed only as neutral
         // objects by default.
-        mGetBaseObjectPtr(globals()->scenarioFileInfo.playerBodyID)->internalFlags |= all_colors;
+        globals()->scenarioFileInfo.playerBodyID->internalFlags |= all_colors;
         for (int i = 0; i < gThisScenario->playerNum; i++) {
             const auto& info = globals()->scenarioFileInfo;
-            int32_t blessed[] = {
+            Handle<BaseObject> blessed[] = {
                 info.energyBlobID, info.warpInFlareID, info.warpOutFlareID, info.playerBodyID,
             };
             for (auto id: blessed) {
@@ -740,8 +650,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
 
         Scenario::InitialObject* initial = gThisScenario->initial(i);
         Handle<Admiral> owner = initial->owner;
-        int32_t type = initial->type;
-        BaseObject* baseObject = mGetBaseObjectPtr(type);
+        auto baseObject = initial->type;
         // TODO(sfiera): remap objects in networked games.
 
         // Load the media for this object
@@ -754,7 +663,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         if (baseObject->attributes & kIsDestination) {
             baseObject->internalFlags |= all_colors;
         }
-        AddBaseObjectMedia(type, GetAdmiralColor(owner), all_colors);
+        AddBaseObjectMedia(baseObject, GetAdmiralColor(owner), all_colors);
 
         // make sure we're not overriding the sprite
         if (initial->spriteIDOverride >= 0) {
@@ -772,16 +681,13 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             initial = gThisScenario->initial(i);
             if (initial->canBuild[j] != kNoClass) {
                 // check for each player
-                for (int k = 0; k < gThisScenario->playerNum; k++) {
-                    initial = gThisScenario->initial(i);
-                    baseObject = mGetBaseObjectPtr(type);
-                    int32_t newShipNum;
-                    Handle<Admiral> a(k);
-                    newShipNum = mGetBaseObjectFromClassRace(
-                            initial->canBuild[j], GetAdmiralRace(a));
-                    baseObject = mGetBaseObjectPtr(newShipNum);
-                    if (baseObject != NULL) {
-                        AddBaseObjectMedia(newShipNum, GetAdmiralColor(a), all_colors);
+                for (auto a: Admiral::all()) {
+                    if (a->active()) {
+                        auto baseObject = mGetBaseObjectFromClassRace(
+                                initial->canBuild[j], GetAdmiralRace(a));
+                        if (baseObject.get()) {
+                            AddBaseObjectMedia(baseObject, GetAdmiralColor(a), all_colors);
+                        }
                     }
                 }
             }
@@ -795,10 +701,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
     if (step == 0) {
         for (int i = 0; i < gThisScenario->conditionNum; i++) {
             Scenario::Condition* condition = gThisScenario->condition(i);
-            objectActionType* action = mGetObjectActionPtr(condition->action.start);
-            for (int j = 0; j < condition->action.count; j++) {
-                condition = gThisScenario->condition(i);
-                action = mGetObjectActionPtr(condition->action.start + j);
+            for (auto action: condition->action) {
                 AddActionMedia(action, GRAY, all_colors);
             }
             condition->set_true_yet(condition->flags & kInitiallyTrue);
@@ -809,7 +712,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         Scenario::InitialObject* initial = gThisScenario->initial(step);
 
         if (initial->attributes & kInitiallyHidden) {
-            initial->realObjectNumber = -1;
+            initial->realObject = SpaceObject::none();
             (*current)++;
             return;
         }
@@ -825,41 +728,39 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         int32_t specialAttributes = initial->attributes & (~kInitialAttributesMask);
         if (initial->attributes & kIsPlayerShip) {
             specialAttributes &= ~kIsPlayerShip;
-            if ((owner == globals()->gPlayerAdmiral) && !owner->flagship()) {
+            if ((owner == globals()->gPlayerAdmiral) && !owner->flagship().get()) {
                 specialAttributes |= kIsHumanControlled | kIsPlayerShip;
             }
         }
 
-        int32_t type = initial->type;
+        auto type = initial->type;
         // TODO(sfiera): remap object in networked games.
         fixedPointType v = {0, 0};
-        int32_t newShipNum;
-        initial->realObjectNumber = newShipNum = CreateAnySpaceObject(
+        auto anObject = initial->realObject = CreateAnySpaceObject(
                 type, &v, &coord, gScenarioRotation, owner, specialAttributes,
-                initial->spriteIDOverride)->number();
+                initial->spriteIDOverride);
 
-        SpaceObject* anObject = mGetSpaceObjectPtr(newShipNum);
         if (anObject->attributes & kIsDestination) {
-            anObject->destinationObject = MakeNewDestination(
-                    newShipNum, initial->canBuild, initial->earning, initial->nameResID,
+            anObject->asDestination = MakeNewDestination(
+                    anObject, initial->canBuild, initial->earning, initial->nameResID,
                     initial->nameStrNum);
         }
         initial->realObjectID = anObject->id;
 
         if ((initial->attributes & kIsPlayerShip)
-                && owner.get() && !owner->flagship()) {
-            owner->set_flagship(newShipNum);
+                && owner.get() && !owner->flagship().get()) {
+            owner->set_flagship(anObject);
             if (owner == globals()->gPlayerAdmiral) {
-                ResetPlayerShip(newShipNum);
+                ResetPlayerShip(anObject);
             }
         }
 
         if (anObject->attributes & kIsDestination) {
             if (owner.get()) {
                 if (initial->canBuild[0] >= 0) {
-                    if (GetAdmiralBuildAtObject(owner) < 0) {
-                        owner->set_control(newShipNum);
-                        owner->set_target(newShipNum);
+                    if (!GetAdmiralBuildAtObject(owner).get()) {
+                        owner->set_control(anObject);
+                        owner->set_target(anObject);
                     }
                 }
             }
@@ -945,14 +846,14 @@ void CheckScenarioConditions(int32_t timePass) {
             auto sObject = GetObjectFromInitialNumber(c->subjectObject);
             auto dObject = GetObjectFromInitialNumber(c->directObject);
             Point offset;
-            c->action.run(sObject, dObject, &offset);
+            exec(c->action, sObject, dObject, &offset);
         }
     }
 }
 
 void UnhideInitialObject(int32_t whichInitial) {
     auto initial = gThisScenario->initial(whichInitial);
-    if (GetObjectFromInitialNumber(whichInitial)) {
+    if (GetObjectFromInitialNumber(whichInitial).get()) {
         return;  // Already visible.
     }
 
@@ -966,7 +867,7 @@ void UnhideInitialObject(int32_t whichInitial) {
 
     uint32_t specialAttributes = initial->attributes & ~kInitialAttributesMask;
     if (initial->attributes & kIsPlayerShip) {
-        if (owner.get() && !owner->flagship()) {
+        if (owner.get() && !owner->flagship().get()) {
             if (owner == globals()->gPlayerAdmiral) {
                 specialAttributes |= kIsHumanControlled;
             } else {
@@ -978,65 +879,62 @@ void UnhideInitialObject(int32_t whichInitial) {
     }
 
 
-    int32_t type = initial->type;
+    auto type = initial->type;
     // TODO(sfiera): remap objects in networked games.
     fixedPointType v = {0, 0};
-    int32_t newShipNum = CreateAnySpaceObject(
-            type, &v, &coord, 0, owner, specialAttributes, initial->spriteIDOverride)->number();
-    initial->realObjectNumber = newShipNum;
-
-    auto anObject = mGetSpaceObjectPtr(newShipNum);
+    auto anObject = initial->realObject = CreateAnySpaceObject(
+            type, &v, &coord, 0, owner, specialAttributes, initial->spriteIDOverride);
 
     if (anObject->attributes & kIsDestination) {
-        anObject->destinationObject = MakeNewDestination(
-                newShipNum, initial->canBuild, initial->earning, initial->nameResID,
+        anObject->asDestination = MakeNewDestination(
+                anObject, initial->canBuild, initial->earning, initial->nameResID,
                 initial->nameStrNum);
 
         if (owner.get()) {
             if (initial->canBuild[0] >= 0) {
-                if (owner->control() < 0) {
-                    owner->set_control(newShipNum);
+                if (!owner->control().get()) {
+                    owner->set_control(anObject);
                 }
-                if (GetAdmiralBuildAtObject(owner) < 0) {
-                    SetAdmiralBuildAtObject(owner, newShipNum);
+                if (!GetAdmiralBuildAtObject(owner).get()) {
+                    SetAdmiralBuildAtObject(owner, anObject);
                 }
-                if (owner->target() < 0) {
-                    owner->set_target(newShipNum);
+                if (!owner->target().get()) {
+                    owner->set_target(anObject);
                 }
             }
         }
     }
 
     initial->realObjectID = anObject->id;
-    if ((initial->attributes & kIsPlayerShip) && owner.get() && !owner->flagship()) {
-        owner->set_flagship(newShipNum);
+    if ((initial->attributes & kIsPlayerShip) && owner.get() && !owner->flagship().get()) {
+        owner->set_flagship(anObject);
         if (owner == globals()->gPlayerAdmiral) {
-            ResetPlayerShip(newShipNum);
+            ResetPlayerShip(anObject);
         }
     }
 
     set_initial_destination(initial, true);
 }
 
-SpaceObject *GetObjectFromInitialNumber(int32_t initialNumber) {
+Handle<SpaceObject> GetObjectFromInitialNumber(int32_t initialNumber) {
     if (initialNumber >= 0) {
         Scenario::InitialObject* initial = gThisScenario->initial(initialNumber);
-        if (initial->realObjectNumber >= 0) {
-            SpaceObject& object = *mGetSpaceObjectPtr(initial->realObjectNumber);
-            if ((object.id != initial->realObjectID) || (object.active != kObjectInUse)) {
-                return NULL;
+        if (initial->realObject.get()) {
+            auto object = initial->realObject;
+            if ((object->id != initial->realObjectID) || (object->active != kObjectInUse)) {
+                return SpaceObject::none();
             }
-            return &object;
+            return object;
         }
-        return NULL;
+        return SpaceObject::none();
     } else if (initialNumber == -2) {
-        SpaceObject& object = *mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
-        if ((!object.active) || (!(object.attributes & kCanThink))) {
-            return NULL;
+        auto object = globals()->gPlayerShip;
+        if (!object->active || !(object->attributes & kCanThink)) {
+            return SpaceObject::none();
         }
-        return &object;
+        return object;
     }
-    return NULL;
+    return SpaceObject::none();
 }
 
 void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textID) {

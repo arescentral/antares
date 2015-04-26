@@ -19,6 +19,7 @@
 #ifndef ANTARES_GAME_STARFIELD_HPP_
 #define ANTARES_GAME_STARFIELD_HPP_
 
+#include "data/handle.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
 
@@ -46,7 +47,7 @@ struct scrollStarType {
     uint8_t         color;
 };
 
-extern SpaceObject* gScrollStarObject;
+extern Handle<SpaceObject> gScrollStarObject;
 
 class Starfield {
   public:
@@ -56,7 +57,7 @@ class Starfield {
     static const int32_t kSparkStarOffset = kScrollStarNum;
 
     Starfield();
-    void reset(int32_t which_object);
+    void reset(Handle<SpaceObject> which_object);
     void make_sparks(
             int32_t sparkNum, int32_t sparkSpeed, Fixed maxVelocity, uint8_t color,
             Point* location);

@@ -59,12 +59,13 @@ Rect object_data_bounds(Point origin, Size size) {
 
 }  // namespace
 
-ObjectDataScreen::ObjectDataScreen(Point origin, int32_t object_id, Trigger trigger, int which):
+ObjectDataScreen::ObjectDataScreen(
+        Point origin, Handle<BaseObject> object, Trigger trigger, int which):
         _trigger(trigger),
         _which(which),
         _state(TYPING) {
     String text;
-    CreateObjectDataText(&text, object_id);
+    CreateObjectDataText(&text, object);
     _text.reset(new StyledText(button_font));
     _text->set_fore_color(GetRGBTranslateColorShade(GREEN, VERY_LIGHT));
     _text->set_back_color(GetRGBTranslateColorShade(GREEN, DARKEST));

@@ -27,12 +27,15 @@ namespace antares {
 // `target`. The baseObject version uses the default attributes of the
 // object, and the spaceObject version uses the actual attributes in
 // effect (e.g. kStaticDestination or kOnAutopilot).
-bool action_filter_applies_to(const objectActionType& action, const BaseObject& target);
-bool action_filter_applies_to(const objectActionType& action, const SpaceObject& target);
+bool action_filter_applies_to(const Action& action, Handle<BaseObject> target);
+bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target);
+
+void exec(
+        HandleList<Action> actions, Handle<SpaceObject> sObject, Handle<SpaceObject> dObject,
+        Point* offset);
 
 void reset_action_queue();
 void execute_action_queue(int32_t);
-
 }  // namespace antares
 
 #endif // ANTARES_GAME_ACTION_HPP_

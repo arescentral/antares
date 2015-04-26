@@ -26,6 +26,7 @@
 #include "game/input-source.hpp"
 #include "game/minicomputer.hpp"
 #include "game/motion.hpp"
+#include "game/space-object.hpp"
 #include "game/starfield.hpp"
 #include "sound/driver.hpp"
 
@@ -42,20 +43,16 @@ void init_globals() {
 }
 
 aresGlobalType::aresGlobalType() {
-    for (int player = 0; player < kMaxPlayerNum; player++) {
-        gActiveCheats[player] = 0;
-    }
     gKeyMapBuffer = new KeyMap[kKeyMapBufferNum];
     gKeyMapBufferTop = 0;
     gKeyMapBufferBottom = 0;
     gGameOver = 1;
     gGameTime = 0;
-    gClosestObject = 0;
-    gFarthestObject = 0;
+    gClosestObject = Handle<SpaceObject>(0);
+    gFarthestObject = Handle<SpaceObject>(0);
     gCenterScaleH = 0;
     gCenterScaleV = 0;
-    gPlayerShipNumber = 0;
-    gSelectionLabel = -1;
+    gPlayerShip = Handle<SpaceObject>(0);
     gZoomMode = kTimesTwoZoom;
     gPreviousZoomMode = kNearestFoeZoom;
     gRadarCount = 0;

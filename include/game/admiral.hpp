@@ -67,19 +67,25 @@ const int32_t kMaxDestObject = 10;  // we keep special track of dest objects for
 const int32_t kMaxNumAdmiralCanBuild = kMaxDestObject * kMaxTypeBaseCanBuild;
 const int32_t kAdmiralScoreNum = 3;
 
-struct destBalanceType {
-    int32_t             whichObject;
+struct Destination {
+    static Destination* get(int i);
+    static Handle<Destination> none() { return Handle<Destination>(-1); }
+    static HandleList<Destination> all() { return HandleList<Destination>(0, kMaxDestObject); }
+
+    Handle<SpaceObject> whichObject;
     int32_t             canBuildType[kMaxTypeBaseCanBuild];
     int32_t             occupied[kMaxPlayerNum];
     Fixed               earn;
     int32_t             buildTime;
     int32_t             totalBuildTime;
-    int32_t             buildObjectBaseNum;
+    Handle<BaseObject>  buildObjectBaseNum;
     sfz::String         name;
+
+    bool                can_build() const;  // Can build anything.
 };
 
 struct admiralBuildType {
-    BaseObject*         base = nullptr;
+    Handle<BaseObject>  base;
     int32_t             baseNum = -1;
     Fixed               chanceRange = -1;
 };
@@ -91,31 +97,33 @@ class Admiral {
     static Admiral*     get(int i);
     static Handle<Admiral>  make(int index, uint32_t attributes, const Scenario::Player& player);
     static Handle<Admiral>  none() { return Handle<Admiral>(-1); }
+    static HandleList<Admiral> all() { return HandleList<Admiral>(0, kMaxPlayerNum); }
 
     void                think();
     bool                build(int32_t buildWhichType);
     void                pay(Fixed howMuch);
     void                pay_absolute(Fixed howMuch);
+    void                remove_destination(Handle<Destination> d);
 
-    int32_t             control() const;
-    int32_t             target() const;
-    void                set_control(int32_t number);
-    void                set_target(int32_t number);
+    Handle<SpaceObject> control() const;
+    Handle<SpaceObject> target() const;
+    void                set_control(Handle<SpaceObject> object);
+    void                set_target(Handle<SpaceObject> object);
 
     uint32_t&           attributes() { return _attributes; }
-    bool&               has_destination() { return _has_destination; }
-    int32_t&            destinationObject() { return _destinationObject; }
-    int32_t&            destinationObjectID() { return _destinationObjectID; }
+    bool                has_destination() { return _has_destination; }
+    Handle<SpaceObject> destinationObject() { return _destinationObject; }
+    int32_t             destinationObjectID() { return _destinationObjectID; }
 
-    SpaceObject*        flagship();
-    int32_t             flagshipNumber() { return _flagship; }
+    Handle<SpaceObject> flagship();
+    int32_t             flagshipNumber() { return _flagship.number(); }
     int32_t             flagshipID() { return _flagshipID; }
-    void                set_flagship(int32_t number);
+    void                set_flagship(Handle<SpaceObject> object);
 
-    int32_t&            considerShip() { return _considerShip; }
-    int32_t&            considerShipID() { return _considerShipID; }
-    int32_t&            considerDestination() { return _considerDestination; }
-    int32_t&            buildAtObject() { return _buildAtObject; } // # of destination object to build at
+    Handle<SpaceObject> considerShip() { return _considerShip; }
+    int32_t             considerShipID() { return _considerShipID; }
+    int32_t             considerDestination() { return _considerDestination; }
+    Handle<Destination>&buildAtObject() { return _buildAtObject; } // # of destination object to build at
     int32_t&            race() { return _race; }
     Fixed               cash() const { return _cash; }
     Fixed&              cash() { return _cash; }
@@ -137,18 +145,19 @@ class Admiral {
     uint8_t&            color() { return _color; }
     bool&               active() { return _active; }
     sfz::StringSlice    name() { return _name; }
+    uint32_t&           cheats() { return _cheats; }
 
   private:
     uint32_t            _attributes;
     bool                _has_destination = false;
-    int32_t             _destinationObject = kNoDestinationObject;
+    Handle<SpaceObject> _destinationObject;
     int32_t             _destinationObjectID = -1;
-    int32_t             _flagship = kNoShip;
+    Handle<SpaceObject> _flagship;
     int32_t             _flagshipID = -1;
-    int32_t             _considerShip = kNoShip;
+    Handle<SpaceObject> _considerShip;
     int32_t             _considerShipID = -1;
     int32_t             _considerDestination = kNoShip;
-    int32_t             _buildAtObject = -1; // # of destination object to build at
+    Handle<Destination> _buildAtObject; // # of destination object to build at
     int32_t             _race = -1;
     Fixed               _cash = 0;
     Fixed               _saveGoal = 0;
@@ -165,6 +174,7 @@ class Admiral {
     int32_t             _hopeToBuild = -1;
     uint8_t             _color = 0;
     bool                _active = false;
+    uint32_t            _cheats = 0;
     sfz::String         _name;
 
   private:
@@ -173,38 +183,38 @@ class Admiral {
 
 void ResetAllDestObjectData();
 
-destBalanceType* mGetDestObjectBalancePtr(int32_t whichObject);
-
-int32_t MakeNewDestination(
-        int32_t whichObject, int32_t* canBuildType, Fixed earn, int16_t nameResID,
+Handle<Destination> MakeNewDestination(
+        Handle<SpaceObject> object, int32_t* canBuildType, Fixed earn, int16_t nameResID,
         int16_t nameStrNum);
-void RemoveDestination(int32_t whichDestination);
+void RemoveDestination(Handle<Destination> d);
 void RecalcAllAdmiralBuildData();
 
 uint8_t GetAdmiralColor(Handle<Admiral> whichAdmiral);
 int32_t GetAdmiralRace(Handle<Admiral> whichAdmiral);
 
-bool BaseHasSomethingToBuild(int32_t whichObject);
-int32_t GetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral);
-void SetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral, int32_t whichObject);
+bool BaseHasSomethingToBuild(Handle<SpaceObject> obj);
+Handle<Destination> GetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral);
+void SetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral, Handle<SpaceObject> obj);
 
 void SetAdmiralBuildAtName(Handle<Admiral> whichAdmiral, sfz::StringSlice name);
-sfz::StringSlice GetDestBalanceName(int32_t whichDestObject);
+sfz::StringSlice GetDestBalanceName(Handle<Destination> whichDestObject);
 sfz::StringSlice GetAdmiralName(Handle<Admiral> whichAdmiral);
 
-void SetObjectLocationDestination(SpaceObject* o, coordPointType* where);
-void SetObjectDestination(SpaceObject* o, SpaceObject* overrideObject);
-void RemoveObjectFromDestination(SpaceObject* o);
+void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType* where);
+void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObject);
+void RemoveObjectFromDestination(Handle<SpaceObject> o);
 
 void AdmiralThink();
-void StopBuilding(int32_t whichDestObject);
+void StopBuilding(Handle<Destination> whichDestObject);
 
 void AlterAdmiralScore(Handle<Admiral> whichAdmiral, int32_t whichScore, int32_t amount);
 int32_t GetAdmiralScore(Handle<Admiral> whichAdmiral, int32_t whichScore);
 int32_t GetAdmiralShipsLeft(Handle<Admiral> whichAdmiral);
-int32_t AlterDestinationObjectOccupation(int32_t whichDestination, Handle<Admiral> whichAdmiral, int32_t amount);
-void ClearAllOccupants(int32_t whichDestination, Handle<Admiral> whichAdmiral, int32_t fullAmount);
-void AddKillToAdmiral(SpaceObject *anObject);
+int32_t AlterDestinationObjectOccupation(
+        Handle<Destination> whichDestination, Handle<Admiral> whichAdmiral, int32_t amount);
+void ClearAllOccupants(
+        Handle<Destination> whichDestination, Handle<Admiral> whichAdmiral, int32_t fullAmount);
+void AddKillToAdmiral(Handle<SpaceObject> anObject);
 
 int32_t GetAdmiralLoss(Handle<Admiral> whichAdmiral);
 int32_t GetAdmiralKill(Handle<Admiral> whichAdmiral);

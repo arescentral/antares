@@ -251,7 +251,7 @@ void ResetInstruments() {
 }
 
 void UpdateRadar(int32_t unitsDone) {
-    if (gScrollStarObject == NULL) {
+    if (!gScrollStarObject.get()) {
         globals()->radar_is_functioning = false;
     } else if (gScrollStarObject->offlineTime <= 0) {
         globals()->radar_is_functioning = true;
@@ -264,7 +264,7 @@ void UpdateRadar(int32_t unitsDone) {
     }
     globals()->gRadarCount -= unitsDone;
 
-    if ((gScrollStarObject == NULL) || !gScrollStarObject->active) {
+    if (!gScrollStarObject.get() || !gScrollStarObject->active) {
         return;
     }
 
@@ -294,8 +294,7 @@ void UpdateRadar(int32_t unitsDone) {
             globals()->gRadarCount = globals()->gRadarSpeed;
 
             const int32_t rrange = globals()->gRadarRange >> 1L;
-            for (int oCount = 0; oCount < kMaxSpaceObject; oCount++) {
-                SpaceObject *anObject = mGetSpaceObjectPtr(oCount);
+            for (auto anObject: SpaceObject::all()) {
                 if (!anObject->active || (anObject == gScrollStarObject)) {
                     continue;
                 }
@@ -325,7 +324,7 @@ void UpdateRadar(int32_t unitsDone) {
       case kNearestFoeZoom:
       case kNearestAnythingZoom:
         {
-            SpaceObject* anObject = mGetSpaceObjectPtr(globals()->gClosestObject);
+            auto anObject = globals()->gClosestObject;
             uint64_t hugeDistance = anObject->distanceFromPlayer;
             if (hugeDistance == 0) { // if this is true, then we haven't calced its distance
                 uint64_t x_distance = ABS<int32_t>(gScrollStarObject->location.h - anObject->location.h);
@@ -363,7 +362,7 @@ void UpdateRadar(int32_t unitsDone) {
 
       case kSmallestZoom:
         {
-            SpaceObject* anObject = mGetSpaceObjectPtr(globals()->gFarthestObject);
+            auto anObject = globals()->gFarthestObject;
             uint64_t tempWide = anObject->distanceFromPlayer;
             bestScale = wsqrt(tempWide);
             if (bestScale == 0) bestScale = 1;
@@ -534,23 +533,23 @@ void draw_instruments() {
     left_instrument_sprite->draw(left_rect.left, left_rect.top);
     right_instrument_sprite->draw(right_rect.left, right_rect.top);
 
-    if (globals()->gPlayerShipNumber >= 0) {
-        SpaceObject* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+    if (globals()->gPlayerShip.get()) {
+        auto player = globals()->gPlayerShip;
         if (player->active) {
             draw_player_ammo(
-                ((player->pulse.type >= 0) && (player->pulse.base->frame.weapon.ammo > 0))
+                (player->pulse.base.get() && (player->pulse.base->frame.weapon.ammo > 0))
                 ? player->pulse.ammo
                 : -1,
-                ((player->beam.type >= 0) && (player->beam.base->frame.weapon.ammo > 0))
+                (player->beam.base.get() && (player->beam.base->frame.weapon.ammo > 0))
                 ? player->beam.ammo
                 : -1,
-                ((player->special.type >= 0) && (player->special.base->frame.weapon.ammo > 0))
+                (player->special.base.get() && (player->special.base->frame.weapon.ammo > 0))
                 ? player->special.ammo
                 : -1);
         }
     }
 
-    SpaceObject* o = gScrollStarObject;
+    auto o = gScrollStarObject;
     draw_bar_indicator(kShieldBar, o->health(), o->max_health());
     draw_bar_indicator(kEnergyBar, o->energy(), o->max_energy());
     draw_bar_indicator(kBatteryBar, o->battery(), o->max_battery());
@@ -598,7 +597,7 @@ static void update_triangle(SiteData& site, int32_t direction, int32_t distance,
 }
 
 void update_site(bool replay) {
-    if (gScrollStarObject == NULL) {
+    if (!gScrollStarObject.get()) {
         site.should_draw = false;
     } else if (!(gScrollStarObject->active && (gScrollStarObject->sprite != NULL))) {
         site.should_draw = false;
@@ -641,7 +640,7 @@ void draw_site(const PlayerShip& player) {
 
 void update_sector_lines() {
     should_draw_sector_lines = false;
-    if (gScrollStarObject != NULL) {
+    if (gScrollStarObject.get()) {
         if (gScrollStarObject->offlineTime <= 0) {
             should_draw_sector_lines = true;
         } else if (Randomize(gScrollStarObject->offlineTime) < 5) {

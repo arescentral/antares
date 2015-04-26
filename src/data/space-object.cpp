@@ -37,6 +37,55 @@ static const int32_t kPeriodicActionRangeShift = 16;
 static const uint32_t kDestroyActionNotMask        = 0x7fffffff;
 static const uint32_t kDestroyActionDontDieFlag    = 0x80000000;
 
+static void read_destroy(ReadSource in, BaseObject& object) {
+    auto start = read<int32_t>(in);
+    auto count = read<int32_t>(in);
+    object.destroyDontDie = count & kDestroyActionDontDieFlag;
+    count &= kDestroyActionNotMask;
+    auto end = (start >= 0) ? (start + count) : start;
+    object.destroy = {start, end};
+}
+
+static void read_expire(ReadSource in, BaseObject& object) {
+    auto start = read<int32_t>(in);
+    auto count = read<int32_t>(in);
+    object.expireDontDie = count & kDestroyActionDontDieFlag;
+    count &= kDestroyActionNotMask;
+    auto end = (start >= 0) ? (start + count) : start;
+    object.expire = {start, end};
+}
+
+static void read_create(ReadSource in, BaseObject& object) {
+    auto start = read<int32_t>(in);
+    auto count = read<int32_t>(in);
+    auto end = (start >= 0) ? (start + count) : start;
+    object.create = {start, end};
+}
+
+static void read_collide(ReadSource in, BaseObject& object) {
+    auto start = read<int32_t>(in);
+    auto count = read<int32_t>(in);
+    auto end = (start >= 0) ? (start + count) : start;
+    object.collide = {start, end};
+}
+
+static void read_activate(ReadSource in, BaseObject& object) {
+    auto start = read<int32_t>(in);
+    auto count = read<int32_t>(in);
+    object.activatePeriod = (count & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift;
+    object.activatePeriodRange = (count & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift;
+    count &= kPeriodicActionNotMask;
+    auto end = (start >= 0) ? (start + count) : start;
+    object.activate = {start, end};
+}
+
+static void read_arrive(ReadSource in, BaseObject& object) {
+    auto start = read<int32_t>(in);
+    auto count = read<int32_t>(in);
+    auto end = (start >= 0) ? (start + count) : start;
+    object.arrive = {start, end};
+}
+
 void read_from(ReadSource in, BaseObject& object) {
     uint8_t section[32];
 
@@ -80,9 +129,9 @@ void read_from(ReadSource in, BaseObject& object) {
     read(in, object.initialDirection);
     read(in, object.initialDirectionRange);
 
-    read(in, object.pulse.base);
-    read(in, object.beam.base);
-    read(in, object.special.base);
+    object.pulse.base = Handle<BaseObject>(read<int32_t>(in));
+    object.beam.base = Handle<BaseObject>(read<int32_t>(in));
+    object.special.base = Handle<BaseObject>(read<int32_t>(in));
 
     read(in, object.pulse.positionNum);
     read(in, object.beam.positionNum);
@@ -98,20 +147,12 @@ void read_from(ReadSource in, BaseObject& object) {
 
     read(in, object.arriveActionDistance);
 
-    read(in, object.destroy);
-    read(in, object.expire);
-    read(in, object.create);
-    read(in, object.collide);
-    read(in, object.activate);
-    read(in, object.arrive);
-
-    object.destroyDontDie = object.destroy.count & kDestroyActionDontDieFlag;
-    object.destroy.count &= kDestroyActionNotMask;
-    object.expireDontDie = object.expire.count & kDestroyActionDontDieFlag;
-    object.expire.count &= kDestroyActionNotMask;
-    object.activatePeriod = (object.activate.count & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift;
-    object.activatePeriodRange = (object.activate.count & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift;
-    object.activate.count &= kPeriodicActionNotMask;
+    read_destroy(in, object);
+    read_expire(in, object);
+    read_create(in, object);
+    read_collide(in, object);
+    read_activate(in, object);
+    read_arrive(in, object);
 
     read(in, section, 32);
 

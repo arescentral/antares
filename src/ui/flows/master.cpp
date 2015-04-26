@@ -134,7 +134,7 @@ void Master::init() {
     gRandomSeed.seed = _seed;
 
     InitDirectText();
-    Labels::init();
+    Label::init();
     Messages::init();
     InstrumentInit();
     SpriteHandlingInit();

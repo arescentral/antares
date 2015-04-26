@@ -30,6 +30,7 @@
 namespace antares {
 
 struct ScenarioName;
+class BaseObject;
 
 const size_t kMaxPlayerNum                 = 4;
 
@@ -61,10 +62,10 @@ const int32_t kInitiallyTrue    = 0x00000002;
 const int32_t kHasBeenTrue      = 0x00000004;
 
 struct scenarioInfoType {
-    int32_t         warpInFlareID;
-    int32_t         warpOutFlareID;
-    int32_t         playerBodyID;
-    int32_t         energyBlobID;
+    Handle<BaseObject>  warpInFlareID;
+    Handle<BaseObject>  warpOutFlareID;
+    Handle<BaseObject>  playerBodyID;
+    Handle<BaseObject>  energyBlobID;
     sfz::String     downloadURLString;
     sfz::String     titleString;
     sfz::String     authorNameString;
@@ -173,9 +174,9 @@ struct ScenarioName { int16_t string_id; };
 void print_to(sfz::PrintTarget out, ScenarioName name);
 
 struct Scenario::InitialObject {
-    int32_t         type;
+    Handle<BaseObject>  type;
     Handle<Admiral> owner;
-    int32_t         realObjectNumber;
+    Handle<SpaceObject> realObject;
     int32_t         realObjectID;
     Point           location;
     Fixed           earning;
@@ -210,7 +211,7 @@ struct Scenario::Condition {
     } conditionArgument;
     int32_t         subjectObject;      // initial object #
     int32_t         directObject;       // initial object #
-    ActionRef       action;
+    HandleList<Action>  action;
     uint32_t        flags;
     int32_t         direction;
 

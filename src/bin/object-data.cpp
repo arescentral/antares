@@ -49,9 +49,9 @@ class ObjectDataBuilder {
     ObjectDataBuilder(const Optional<String>& output_dir)
             : _output_dir(output_dir) { }
 
-    void save(int id, int pict_id) {
+    void save(Handle<BaseObject> object, int pict_id) {
         String data;
-        CreateObjectDataText(&data, id);
+        CreateObjectDataText(&data, object);
         if (_output_dir.has()) {
             String path(format("{0}/{1}.txt", *_output_dir, dec(pict_id, 5)));
             ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
@@ -91,12 +91,12 @@ int main(int argc, char** argv) {
     SpaceObjectHandlingInit();
 
     ObjectDataBuilder builder(output_dir);
-    for (int id = 0; id < globals()->maxBaseObject; ++id) {
-        const int pict_id = mGetBaseObjectPtr(id)->pictPortraitResID;
+    for (auto object: BaseObject::all()) {
+        const int pict_id = object->pictPortraitResID;
         if (pict_id <= 0) {
             continue;
         }
-        builder.save(id, pict_id);
+        builder.save(object, pict_id);
     }
 
     return 0;

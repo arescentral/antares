@@ -96,7 +96,7 @@ enum dieVerbIDEnum {
 typedef uint8_t dieVerbIDType;
 
 //
-// objectActionType:
+// Action:
 //  Defines any action that an object can take.  Conditions that can cause an action to execute are:
 //  destroy, expire, create, collide, activate, or message.
 //
@@ -106,7 +106,7 @@ union argumentType {
 
     // createObject: make another type of object appear
     struct CreateObject {
-        int32_t                 whichBaseType;      // what type
+        Handle<BaseObject>      whichBaseType;      // what type
         int32_t                 howManyMinimum;     // # to make min
         int32_t                 howManyRange;       // # to make range
         uint8_t                 velocityRelative;   // is velocity relative to creator?
@@ -240,7 +240,9 @@ void read_from(sfz::ReadSource in, argumentType::Zoom& argument);
 void read_from(sfz::ReadSource in, argumentType::ComputerSelect& argument);
 void read_from(sfz::ReadSource in, argumentType::AssumeInitial& argument);
 
-struct objectActionType {
+struct Action {
+    static Action* get(int number);
+
     objectVerbIDType            verb;                   // what is this verb?
     uint8_t                     reflexive;              // does it apply to object executing verb?
     uint32_t                    inclusiveFilter;        // if it has ALL these attributes, OK -- for non-reflective verbs
@@ -256,15 +258,7 @@ struct objectActionType {
 
     static const size_t byte_size = 48;
 };
-void read_from(sfz::ReadSource in, objectActionType& action);
-
-struct ActionRef {
-    int32_t start;
-    int32_t count;
-
-    void run(SpaceObject *sObject, SpaceObject *dObject, Point* offset) const;
-};
-void read_from(sfz::ReadSource in, ActionRef& action);
+void read_from(sfz::ReadSource in, Action& action);
 
 }  // namespace antares
 

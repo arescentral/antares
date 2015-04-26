@@ -147,7 +147,7 @@ void ReplayMaster::init() {
 
     RotationInit();
     InitDirectText();
-    Labels::init();
+    Label::init();
     Messages::init();
     InstrumentInit();
     SpriteHandlingInit();
