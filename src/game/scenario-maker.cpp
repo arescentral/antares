@@ -914,10 +914,8 @@ void UnhideInitialObject(int32_t whichInitial) {
     auto type = initial->type;
     // TODO(sfiera): remap objects in networked games.
     fixedPointType v = {0, 0};
-    auto newShipNum = initial->realObject = CreateAnySpaceObject(
+    auto anObject = initial->realObject = CreateAnySpaceObject(
             type, &v, &coord, 0, owner, specialAttributes, initial->spriteIDOverride);
-
-    auto anObject = Handle<SpaceObject>(newShipNum);
 
     if (anObject->attributes & kIsDestination) {
         anObject->asDestination = MakeNewDestination(

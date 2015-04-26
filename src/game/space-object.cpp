@@ -161,101 +161,108 @@ Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, int race) {
     return BaseObject::none();
 }
 
-static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
+static Handle<SpaceObject> next_free_space_object() {
     for (int i = 0; i < kMaxSpaceObject; ++i) {
         auto obj = Handle<SpaceObject>(i);
-        if (obj->active) {
-            continue;
+        if (!obj->active) {
+            return obj;
         }
-
-        NatePixTable* spriteTable = nullptr;
-        if (sourceObject->pixResID != kNoSpriteTable) {
-            spriteTable = GetPixTable(sourceObject->pixResID);
-            if (!spriteTable) {
-                throw Exception("Received an unexpected request to load a sprite");
-            }
-        }
-
-        *obj = *sourceObject;
-
-        Point where(
-                (int32_t((obj->location.h - gGlobalCorner.h) * gAbsoluteScale) >> SHIFT_SCALE) + viewport.left,
-                (int32_t((obj->location.v - gGlobalCorner.v) * gAbsoluteScale) >> SHIFT_SCALE));
-
-        if (obj->sprite) {
-            RemoveSprite(obj->sprite);
-        }
-
-        obj->sprite = NULL;
-        if (spriteTable) {
-            uint8_t tinyShade;
-            switch (obj->layer) {
-                case kFirstSpriteLayer:
-                    tinyShade = MEDIUM;
-                    break;
-
-                case kMiddleSpriteLayer:
-                    tinyShade = LIGHT;
-                    break;
-
-                case kLastSpriteLayer:
-                    tinyShade = VERY_LIGHT;
-                    break;
-
-                default:
-                    tinyShade = DARK;
-                    break;
-            }
-
-            RgbColor tinyColor;
-            if (obj->tinySize == 0) {
-                tinyColor = RgbColor::kClear;
-            } else if (obj->owner == globals()->gPlayerAdmiral) {
-                tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
-            } else if (obj->owner.get()) {
-                tinyColor = GetRGBTranslateColorShade(kHostileColor, tinyShade);
-            } else {
-                tinyColor = GetRGBTranslateColorShade(kNeutralColor, tinyShade);
-            }
-
-            int16_t whichShape = 0;
-            int16_t angle;
-            if (obj->attributes & kIsSelfAnimated) {
-                whichShape = more_evil_fixed_to_long(obj->frame.animation.thisShape);
-            } else if (obj->attributes & kShapeFromDirection) {
-                angle = obj->direction;
-                mAddAngle(angle, obj->baseType->frame.rotation.rotRes >> 1);
-                whichShape = angle / obj->baseType->frame.rotation.rotRes;
-            }
-
-            obj->sprite = AddSprite(
-                    where, spriteTable, sourceObject->pixResID, whichShape, obj->naturalScale,
-                    obj->tinySize, obj->layer, tinyColor);
-            obj->tinyColor = tinyColor;
-
-            if (obj->sprite == NULL) {
-                globals()->gGameOver = -1;
-                obj->active = kObjectAvailable;
-                return SpaceObject::none();
-            }
-        }
-
-        if (obj->attributes & kIsBeam) {
-            const auto& beam = obj->baseType->frame.beam;
-            obj->frame.beam = Beams::add(
-                    &(obj->location), beam.color, beam.kind, beam.accuracy, beam.range);
-        }
-
-        obj->nextObject = gRootObject;
-        obj->previousObject = SpaceObject::none();
-        if (gRootObject.get()) {
-            gRootObject->previousObject = obj;
-        }
-        gRootObject = obj;
-
-        return obj;
     }
     return SpaceObject::none();
+}
+
+static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
+    auto obj = next_free_space_object();
+    if (!obj.get()) {
+        return SpaceObject::none();
+    }
+
+    NatePixTable* spriteTable = nullptr;
+    if (sourceObject->pixResID != kNoSpriteTable) {
+        spriteTable = GetPixTable(sourceObject->pixResID);
+        if (!spriteTable) {
+            throw Exception("Received an unexpected request to load a sprite");
+        }
+    }
+
+    *obj = *sourceObject;
+
+    Point where(
+            (int32_t((obj->location.h - gGlobalCorner.h) * gAbsoluteScale) >> SHIFT_SCALE) + viewport.left,
+            (int32_t((obj->location.v - gGlobalCorner.v) * gAbsoluteScale) >> SHIFT_SCALE));
+
+    if (obj->sprite) {
+        RemoveSprite(obj->sprite);
+    }
+
+    obj->sprite = NULL;
+    if (spriteTable) {
+        uint8_t tinyShade;
+        switch (obj->layer) {
+            case kFirstSpriteLayer:
+                tinyShade = MEDIUM;
+                break;
+
+            case kMiddleSpriteLayer:
+                tinyShade = LIGHT;
+                break;
+
+            case kLastSpriteLayer:
+                tinyShade = VERY_LIGHT;
+                break;
+
+            default:
+                tinyShade = DARK;
+                break;
+        }
+
+        RgbColor tinyColor;
+        if (obj->tinySize == 0) {
+            tinyColor = RgbColor::kClear;
+        } else if (obj->owner == globals()->gPlayerAdmiral) {
+            tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
+        } else if (obj->owner.get()) {
+            tinyColor = GetRGBTranslateColorShade(kHostileColor, tinyShade);
+        } else {
+            tinyColor = GetRGBTranslateColorShade(kNeutralColor, tinyShade);
+        }
+
+        int16_t whichShape = 0;
+        int16_t angle;
+        if (obj->attributes & kIsSelfAnimated) {
+            whichShape = more_evil_fixed_to_long(obj->frame.animation.thisShape);
+        } else if (obj->attributes & kShapeFromDirection) {
+            angle = obj->direction;
+            mAddAngle(angle, obj->baseType->frame.rotation.rotRes >> 1);
+            whichShape = angle / obj->baseType->frame.rotation.rotRes;
+        }
+
+        obj->sprite = AddSprite(
+                where, spriteTable, sourceObject->pixResID, whichShape, obj->naturalScale,
+                obj->tinySize, obj->layer, tinyColor);
+        obj->tinyColor = tinyColor;
+
+        if (obj->sprite == NULL) {
+            globals()->gGameOver = -1;
+            obj->active = kObjectAvailable;
+            return SpaceObject::none();
+        }
+    }
+
+    if (obj->attributes & kIsBeam) {
+        const auto& beam = obj->baseType->frame.beam;
+        obj->frame.beam = Beams::add(
+                &(obj->location), beam.color, beam.kind, beam.accuracy, beam.range);
+    }
+
+    obj->nextObject = gRootObject;
+    obj->previousObject = SpaceObject::none();
+    if (gRootObject.get()) {
+        gRootObject->previousObject = obj;
+    }
+    gRootObject = obj;
+
+    return obj;
 }
 
 void RemoveAllSpaceObjects( void)
