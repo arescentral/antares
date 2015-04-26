@@ -65,10 +65,10 @@ struct actionQueueType {
     int32_t                         scheduledTime;
     actionQueueType*                nextActionQueue;
     int32_t                         nextActionQueueNum;
-    SpaceObject*                    subjectObject;
+    Handle<SpaceObject>             subjectObject;
     int32_t                         subjectObjectNum;
     int32_t                         subjectObjectID;
-    SpaceObject*                    directObject;
+    Handle<SpaceObject>             directObject;
     int32_t                         directObjectNum;
     int32_t                         directObjectID;
     Point                           offset;
@@ -84,9 +84,8 @@ set<int32_t> covered_actions;
 #endif  // DATA_COVERAGE
 
 static void queue_action(
-        objectActionType *action, int32_t actionNumber, int32_t actionToDo,
-        int32_t delayTime, SpaceObject *subjectObject,
-        SpaceObject *directObject, Point* offset);
+        objectActionType *action, int32_t actionNumber, int32_t actionToDo, int32_t delayTime,
+        Handle<SpaceObject> subjectObject, Handle<SpaceObject> directObject, Point* offset);
 
 bool action_filter_applies_to(const objectActionType& action, Handle<BaseObject> target) {
     if (action.exclusiveFilter == 0xffffffff) {
@@ -244,10 +243,12 @@ static void die(objectActionType* action, SpaceObject* focus, SpaceObject* subje
     // if the object is occupied by a human, eject him since he can't die
     if ((focus->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
             !focus->baseType->destroyDontDie) {
-        CreateFloatingBodyOfPlayer(focus);
+        CreateFloatingBodyOfPlayer(Handle<SpaceObject>(focus->number()));
     }
     if (destroy) {
-        DestroyObject(focus);
+        if (focus != SpaceObject::zero()) {
+            DestroyObject(Handle<SpaceObject>(focus->number()));
+        }
     } else {
         focus->active = kObjectToBeFreed;
     }
@@ -460,17 +461,20 @@ static void alter(
             break;
 
         case kAlterOwner:
-            if (alter.relative) {
-                // if it's relative AND reflexive, we take the direct
-                // object's owner, since relative & reflexive would
-                // do nothing.
-                if (action->reflexive && object && (object != SpaceObject::zero())) {
-                    AlterObjectOwner(focus, object->owner, true);
+            if (focus != SpaceObject::zero()) {
+                auto o = Handle<SpaceObject>(focus->number());
+                if (alter.relative) {
+                    // if it's relative AND reflexive, we take the direct
+                    // object's owner, since relative & reflexive would
+                    // do nothing.
+                    if (action->reflexive && o.get() && (object != SpaceObject::zero())) {
+                        AlterObjectOwner(o, object->owner, true);
+                    } else {
+                        AlterObjectOwner(o, subject->owner, true);
+                    }
                 } else {
-                    AlterObjectOwner(focus, subject->owner, true);
+                    AlterObjectOwner(o, Handle<Admiral>(alter.minimum), false);
                 }
-            } else {
-                AlterObjectOwner(focus, Handle<Admiral>(alter.minimum), false);
             }
             break;
 
@@ -485,7 +489,9 @@ static void alter(
             break;
 
         case kAlterOccupation:
-            AlterObjectOccupation(focus, subject->owner, alter.minimum, true);
+            if (focus != SpaceObject::zero()) {
+                AlterObjectOccupation(Handle<SpaceObject>(focus->number()), subject->owner, alter.minimum, true);
+            }
             break;
 
         case kAlterAbsoluteCash:
@@ -619,7 +625,7 @@ static void land_at(
         objectActionType* action, SpaceObject* focus, SpaceObject* subject) {
     // even though this is never a reflexive verb, we only effect ourselves
     if (subject->attributes & (kIsPlayerShip | kRemoteOrHuman)) {
-        CreateFloatingBodyOfPlayer(subject);
+        CreateFloatingBodyOfPlayer(Handle<SpaceObject>(subject->number()));
     }
     subject->presenceState = kLandingPresence;
     subject->presence.landing.speed = action->argument.landAt.landingSpeed;
@@ -673,17 +679,17 @@ static void set_destination(
 
 static void activate_special(
         objectActionType* action, SpaceObject* focus, SpaceObject* subject) {
-    fire_weapon(Handle<SpaceObject>(subject->number()), nullptr, subject->baseType->special, subject->special);
+    fire_weapon(Handle<SpaceObject>(subject->number()), SpaceObject::none(), subject->baseType->special, subject->special);
 }
 
 static void activate_pulse(
         objectActionType* action, SpaceObject* focus, SpaceObject* subject) {
-    fire_weapon(Handle<SpaceObject>(subject->number()), nullptr, subject->baseType->pulse, subject->pulse);
+    fire_weapon(Handle<SpaceObject>(subject->number()), SpaceObject::none(), subject->baseType->pulse, subject->pulse);
 }
 
 static void activate_beam(
         objectActionType* action, SpaceObject* focus, SpaceObject* subject) {
-    fire_weapon(Handle<SpaceObject>(subject->number()), nullptr, subject->baseType->beam, subject->beam);
+    fire_weapon(Handle<SpaceObject>(subject->number()), SpaceObject::none(), subject->baseType->beam, subject->beam);
 }
 
 static void color_flash(objectActionType* action, SpaceObject* focus) {
@@ -731,7 +737,7 @@ static void assume_initial_object(objectActionType* action, SpaceObject* focus) 
 
 static void execute_actions(
         const ActionRef& action,
-        SpaceObject* const original_subject, SpaceObject* const original_object,
+        const Handle<SpaceObject> original_subject, const Handle<SpaceObject> original_object,
         Point* offset, bool allowDelay) {
     if (action.start < 0) {
         return;
@@ -749,13 +755,13 @@ static void execute_actions(
         if (action->verb == kNoAction) {
             break;
         }
-        SpaceObject* subject = original_subject;
+        auto subject = original_subject;
         if (action->initialSubjectOverride != kNoShip) {
-            subject = GetObjectFromInitialNumber(action->initialSubjectOverride).get();
+            subject = GetObjectFromInitialNumber(action->initialSubjectOverride);
         }
-        SpaceObject* object = original_object;
+        auto object = original_object;
         if (action->initialDirectOverride != kNoShip) {
-            object = GetObjectFromInitialNumber(action->initialDirectOverride).get();
+            object = GetObjectFromInitialNumber(action->initialDirectOverride);
         }
 
         if ((action->delay > 0) && allowDelay) {
@@ -766,9 +772,12 @@ static void execute_actions(
         }
         allowDelay = true;
 
-        auto focus = object;
+        auto subj_ptr = subject.get();
+        auto obj_ptr = object.get();
+
+        auto focus = obj_ptr;
         if (action->reflexive || !focus) {
-            focus = subject;
+            focus = subj_ptr;
         }
 
         // This pair of conditions is a workaround for a bug which
@@ -789,40 +798,40 @@ static void execute_actions(
         // doesn't have flags.  But we need to prevent it in the case of
         // transports somehow, so we emulate the old behavior of
         // pointing to a zeroed-out object.
-        if (object == NULL) {
-            object = SpaceObject::zero();
+        if (obj_ptr == NULL) {
+            obj_ptr = SpaceObject::zero();
         }
-        if (subject == NULL) {
-            subject = SpaceObject::zero();
+        if (subj_ptr == NULL) {
+            subj_ptr = SpaceObject::zero();
         }
 
         if (focus == NULL) {
             focus = SpaceObject::zero();
         } else if ((action->owner < -1)
-                || ((action->owner == -1) && (object->owner == subject->owner))
-                || ((action->owner == 1) && (object->owner != subject->owner))
+                || ((action->owner == -1) && (obj_ptr->owner == subj_ptr->owner))
+                || ((action->owner == 1) && (obj_ptr->owner != subj_ptr->owner))
                 || (action->owner > 1)
-                || !action_filter_applies_to(*action, *object)) {
+                || !action_filter_applies_to(*action, *obj_ptr)) {
             continue;
         }
 
         switch (action->verb) {
             case kCreateObject:
-            case kCreateObjectSetDest:  create_object(action, focus, subject, offset); break;
+            case kCreateObjectSetDest:  create_object(action, focus, subj_ptr, offset); break;
             case kPlaySound:            play_sound(action, focus); break;
             case kMakeSparks:           make_sparks(action, focus); break;
-            case kDie:                  die(action, focus, subject); break;
+            case kDie:                  die(action, focus, subj_ptr); break;
             case kNilTarget:            nil_target(action, focus); break;
-            case kAlter:                alter(action, focus, subject, object); break;
-            case kLandAt:               land_at(action, focus, subject); break;
-            case kEnterWarp:            enter_warp(action, focus, subject); break;
+            case kAlter:                alter(action, focus, subj_ptr, obj_ptr); break;
+            case kLandAt:               land_at(action, focus, subj_ptr); break;
+            case kEnterWarp:            enter_warp(action, focus, subj_ptr); break;
             case kChangeScore:          change_score(action, focus); break;
             case kDeclareWinner:        declare_winner(action, focus); break;
             case kDisplayMessage:       display_message(action, focus); break;
-            case kSetDestination:       set_destination(action, focus, subject); break;
-            case kActivateSpecial:      activate_special(action, focus, subject); break;
-            case kActivatePulse:        activate_pulse(action, focus, subject); break;
-            case kActivateBeam:         activate_beam(action, focus, subject); break;
+            case kSetDestination:       set_destination(action, focus, subj_ptr); break;
+            case kActivateSpecial:      activate_special(action, focus, subj_ptr); break;
+            case kActivatePulse:        activate_pulse(action, focus, subj_ptr); break;
+            case kActivateBeam:         activate_beam(action, focus, subj_ptr); break;
             case kColorFlash:           color_flash(action, focus); break;
             case kEnableKeys:           enable_keys(action, focus); break;
             case kDisableKeys:          disable_keys(action, focus); break;
@@ -845,7 +854,7 @@ static void execute_actions(
 }
 
 void ActionRef::run(
-        SpaceObject *sObject, SpaceObject *dObject, Point* offset) const {
+        Handle<SpaceObject> sObject, Handle<SpaceObject> dObject, Point* offset) const {
     execute_actions(*this, sObject, dObject, offset, true);
 }
 
@@ -863,10 +872,10 @@ void reset_action_queue() {
         action->nextActionQueueNum = -1;
         action->nextActionQueue = NULL;
         action->scheduledTime = -1;
-        action->subjectObject = NULL;
+        action->subjectObject = SpaceObject::none();
         action->subjectObjectNum = -1;
         action->subjectObjectID = -1;
-        action->directObject = NULL;
+        action->directObject = SpaceObject::none();
         action->directObjectNum = -1;
         action->directObjectID = -1;
         action->offset.h = action->offset.v = 0;
@@ -875,9 +884,8 @@ void reset_action_queue() {
 }
 
 static void queue_action(
-        objectActionType *action, int32_t actionNumber, int32_t actionToDo,
-        int32_t delayTime, SpaceObject *subjectObject,
-        SpaceObject *directObject, Point* offset) {
+        objectActionType *action, int32_t actionNumber, int32_t actionToDo, int32_t delayTime,
+        Handle<SpaceObject> subjectObject, Handle<SpaceObject> directObject, Point* offset) {
     int32_t queueNumber = 0;
     actionQueueType* actionQueue = gActionQueueData.get();
     while (actionQueue->action && (queueNumber < kActionQueueLength)) {
@@ -900,7 +908,7 @@ static void queue_action(
     }
 
     actionQueue->subjectObject = subjectObject;
-    if (subjectObject) {
+    if (subjectObject.get()) {
         actionQueue->subjectObjectNum = subjectObject->number();
         actionQueue->subjectObjectID = subjectObject->id;
     } else {
@@ -909,7 +917,7 @@ static void queue_action(
     }
 
     actionQueue->directObject = directObject;
-    if (directObject) {
+    if (directObject.get()) {
         actionQueue->directObjectNum = directObject->number();
         actionQueue->directObjectID = directObject->id;
     } else {
@@ -949,12 +957,12 @@ void execute_action_queue(int32_t unitsToDo) {
             && gFirstActionQueue->action
             && (gFirstActionQueue->scheduledTime <= 0)) {
         int32_t subjectid = -1;
-        if (gFirstActionQueue->subjectObject && gFirstActionQueue->subjectObject->active) {
+        if (gFirstActionQueue->subjectObject.get() && gFirstActionQueue->subjectObject->active) {
             subjectid = gFirstActionQueue->subjectObject->id;
         }
 
         int32_t directid = -1;
-        if (gFirstActionQueue->directObject && gFirstActionQueue->directObject->active) {
+        if (gFirstActionQueue->directObject.get() && gFirstActionQueue->directObject->active) {
             directid = gFirstActionQueue->directObject->id;
         }
         if ((subjectid == gFirstActionQueue->subjectObjectID)
@@ -968,10 +976,10 @@ void execute_action_queue(int32_t unitsToDo) {
         gFirstActionQueue->actionRef.count = 0;
         gFirstActionQueue->action = NULL;
         gFirstActionQueue->scheduledTime = -1;
-        gFirstActionQueue->subjectObject = NULL;
+        gFirstActionQueue->subjectObject = SpaceObject::none();
         gFirstActionQueue->subjectObjectNum = -1;
         gFirstActionQueue->subjectObjectID = -1;
-        gFirstActionQueue->directObject = NULL;
+        gFirstActionQueue->directObject = SpaceObject::none();
         gFirstActionQueue->directObjectNum = -1;
         gFirstActionQueue->directObjectID = -1;
         gFirstActionQueue->offset = Point{0, 0};

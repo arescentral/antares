@@ -615,7 +615,7 @@ Handle<SpaceObject> CreateAnySpaceObject(
 #endif  // DATA_COVERAGE
 
     obj->attributes |= specialAttributes;
-    obj->baseType->create.run(obj.get(), NULL, NULL);
+    obj->baseType->create.run(obj, SpaceObject::none(), NULL);
     return obj;
 }
 
@@ -640,7 +640,7 @@ void SpaceObject::alter_health(int32_t amount) {
         _health += amount;
     }
     if (_health < 0) {
-        DestroyObject(this);
+        DestroyObject(Handle<SpaceObject>(number()));
     }
 }
 
@@ -681,7 +681,7 @@ void SpaceObject::refund_warp_energy() {
     warpEnergyCollected = 0;
 }
 
-void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message) {
+void AlterObjectOwner(Handle<SpaceObject> object, Handle<Admiral> owner, bool message) {
     if (object->owner == owner) {
         return;
     }
@@ -696,18 +696,17 @@ void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message) 
     object->owner = owner;
 
     if (owner.get() && (object->attributes & kIsDestination)) {
-        auto handle = Handle<SpaceObject>(object->number());
         if (!owner->control().get()) {
-            owner->set_control(handle);
+            owner->set_control(object);
         }
 
         if (!GetAdmiralBuildAtObject(owner).get()) {
-            if (BaseHasSomethingToBuild(handle)) {
-                SetAdmiralBuildAtObject(owner, handle);
+            if (BaseHasSomethingToBuild(object)) {
+                SetAdmiralBuildAtObject(owner, object);
             }
         }
         if (!owner->target().get()) {
-            owner->set_target(handle);
+            owner->set_target(object);
         }
     }
 
@@ -759,7 +758,7 @@ void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message) 
     object->bestConsideredTargetNumber = -1;
 
     for (auto fixObject: SpaceObject::all()) {
-        if ((fixObject->destObject.get() == object)
+        if ((fixObject->destObject == object)
                 && (fixObject->active != kObjectAvailable)
                 && (fixObject->attributes & kCanThink)) {
             fixObject->currentTargetValue = 0xffffffff;
@@ -803,7 +802,7 @@ void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message) 
 }
 
 void AlterObjectOccupation(
-        SpaceObject* object, Handle<Admiral> owner, int32_t howMuch, bool message) {
+        Handle<SpaceObject> object, Handle<Admiral> owner, int32_t howMuch, bool message) {
     if (object->active
             && (object->attributes & kIsDestination)
             && (object->attributes & kNeutralDeath)) {
@@ -825,7 +824,7 @@ void AlterObjectCloakState(SpaceObject* object, bool cloak) {
     }
 }
 
-void DestroyObject(SpaceObject* object) {
+void DestroyObject(Handle<SpaceObject> object) {
     if (object->active != kObjectInUse) {
         return;
     } else if (object->attributes & kNeutralDeath) {
@@ -834,7 +833,7 @@ void DestroyObject(SpaceObject* object) {
         for (auto fixObject: SpaceObject::all()) {
             if ((fixObject->attributes & kCanAcceptDestination)
                     && (fixObject->active != kObjectAvailable)) {
-                if (fixObject->targetObject.get() == object) {
+                if (fixObject->targetObject == object) {
                     fixObject->targetObject = SpaceObject::none();
                 }
             }
@@ -842,9 +841,9 @@ void DestroyObject(SpaceObject* object) {
 
         AlterObjectOwner(object, Admiral::none(), true);
         object->attributes &= ~(kHated | kCanEngage | kCanCollide | kCanBeHit);
-        object->baseType->destroy.run(object, NULL, NULL);
+        object->baseType->destroy.run(object, SpaceObject::none(), NULL);
     } else {
-        AddKillToAdmiral(object);
+        AddKillToAdmiral(object.get());
         if (object->attributes & kReleaseEnergyOnDeath) {
             int16_t energyNum = object->energy() / kEnergyPodAmount;
             while (energyNum > 0) {
@@ -863,7 +862,7 @@ void DestroyObject(SpaceObject* object) {
             for (auto fixObject: SpaceObject::all()) {
                 if ((fixObject->attributes & kCanAcceptDestination)
                         && (fixObject->active != kObjectAvailable)) {
-                    if (fixObject->destObject.get() == object) {
+                    if (fixObject->destObject == object) {
                         fixObject->destObject = SpaceObject::none();
                         fixObject->destObjectPtr = NULL;
                         fixObject->attributes &= ~kStaticDestination;
@@ -872,10 +871,10 @@ void DestroyObject(SpaceObject* object) {
             }
         }
 
-        object->baseType->destroy.run(object, NULL, NULL);
+        object->baseType->destroy.run(object, SpaceObject::none(), NULL);
 
         if (object->attributes & kCanAcceptDestination) {
-            RemoveObjectFromDestination(object);
+            RemoveObjectFromDestination(object.get());
         }
         if (!object->baseType->destroyDontDie) {
             object->active = kObjectToBeFreed;
@@ -883,7 +882,7 @@ void DestroyObject(SpaceObject* object) {
     }
 }
 
-void CreateFloatingBodyOfPlayer(SpaceObject* obj) {
+void CreateFloatingBodyOfPlayer(Handle<SpaceObject> obj) {
     const auto body_type = globals()->scenarioFileInfo.playerBodyID;
     // if we're already in a body, don't create a body from it
     // a body expiring is handled elsewhere
@@ -896,7 +895,7 @@ void CreateFloatingBodyOfPlayer(SpaceObject* obj) {
     if (body.get()) {
         ChangePlayerShipNumber(obj->owner, body);
     } else {
-        PlayerShipBodyExpire(Handle<SpaceObject>(obj->number()), true);
+        PlayerShipBodyExpire(obj, true);
     }
 }
 

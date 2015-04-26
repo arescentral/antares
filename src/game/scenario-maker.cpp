@@ -876,7 +876,7 @@ void CheckScenarioConditions(int32_t timePass) {
             auto sObject = GetObjectFromInitialNumber(c->subjectObject);
             auto dObject = GetObjectFromInitialNumber(c->directObject);
             Point offset;
-            c->action.run(sObject.get(), dObject.get(), &offset);
+            c->action.run(sObject, dObject, &offset);
         }
     }
 }

@@ -40,12 +40,12 @@ Handle<SpaceObject> CreateAnySpaceObject(
         int32_t direction, Handle<Admiral> owner, uint32_t specialAttributes,
         int16_t spriteIDOverride);
 int32_t CountObjectsOfBaseType(Handle<BaseObject> whichType, Handle<Admiral> owner);
-void AlterObjectOwner(SpaceObject* object, Handle<Admiral> owner, bool message);
+void AlterObjectOwner(Handle<SpaceObject> object, Handle<Admiral> owner, bool message);
 void AlterObjectOccupation(
-        SpaceObject* object, Handle<Admiral> owner, int32_t howMuch, bool message);
+        Handle<SpaceObject> object, Handle<Admiral> owner, int32_t howMuch, bool message);
 void AlterObjectCloakState( SpaceObject *, bool);
-void DestroyObject( SpaceObject *);
-void CreateFloatingBodyOfPlayer( SpaceObject *);
+void DestroyObject(Handle<SpaceObject> object);
+void CreateFloatingBodyOfPlayer(Handle<SpaceObject> obj);
 
 objectActionType* mGetObjectActionPtr(int32_t whichAction);
 

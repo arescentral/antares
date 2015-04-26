@@ -132,12 +132,12 @@ static void tick_weapon(
         weapon.time -= timePass;
     }
     if (subject->keysDown & key) {
-        fire_weapon(subject, target.get(), base_weapon, weapon);
+        fire_weapon(subject, target, base_weapon, weapon);
     }
 }
 
 void fire_weapon(
-        Handle<SpaceObject> subject, SpaceObject* target,
+        Handle<SpaceObject> subject, Handle<SpaceObject> target,
         const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
     if ((weapon.time > 0) || !weapon.base.get()) {
         return;
@@ -181,7 +181,7 @@ void fire_weapon(
     if (weaponObject->frame.weapon.ammo > 0) {
         weapon.ammo--;
     }
-    weaponObject->activate.run(subject.get(), target, at);
+    weaponObject->activate.run(subject, target, at);
 }
 
 static void tick_pulse(
@@ -609,7 +609,7 @@ uint32_t ThinkObjectNormalPresence(
                     if (baseObject->arrive.start >= 0) {
                         if (!(anObject->runTimeFlags & kHasArrived)) {
                             offset.h = offset.v = 0;
-                            baseObject->arrive.run(anObject.get(), anObject->destObjectPtr, &offset);
+                            baseObject->arrive.run(anObject, anObject->destObject, &offset);
                             anObject->runTimeFlags |= kHasArrived;
                         }
                     }
@@ -806,7 +806,7 @@ uint32_t ThinkObjectNormalPresence(
                         if (baseObject->arrive.start >= 0) {
                             if (!(anObject->runTimeFlags & kHasArrived)) {
                                 offset.h = offset.v = 0;
-                                baseObject->arrive.run(anObject.get(), anObject->destObjectPtr, &offset);
+                                baseObject->arrive.run(anObject, anObject->destObject, &offset);
                                 anObject->runTimeFlags |= kHasArrived;
                             }
                         }
@@ -1168,7 +1168,7 @@ uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
     }
 
     if (anObject->presence.landing.scale <= 0) {
-        anObject->baseType->expire.run(anObject.get(), target.get(), NULL);
+        anObject->baseType->expire.run(anObject, target, NULL);
         anObject->active = kObjectToBeFreed;
     } else if (anObject->sprite) {
         anObject->sprite->scale = anObject->presence.landing.scale;
@@ -1687,7 +1687,7 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
     if (((anObject->_health - sObject->baseType->damage) < 0)
             && (anObject->attributes & (kIsPlayerShip | kRemoteOrHuman))
             && !anObject->baseType->destroyDontDie) {
-        CreateFloatingBodyOfPlayer(anObject.get());
+        CreateFloatingBodyOfPlayer(anObject);
     }
     anObject->alter_health(-sObject->baseType->damage);
     if (anObject->shieldColor != 0xFF) {
@@ -1708,7 +1708,7 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
     }
 
     if (sObject->active == kObjectInUse) {
-        sObject->baseType->collide.run(sObject.get(), anObject.get(), NULL);
+        sObject->baseType->collide.run(sObject, anObject, NULL);
     }
 
     if (anObject->owner == globals()->gPlayerAdmiral
