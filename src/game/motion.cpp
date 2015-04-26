@@ -408,9 +408,8 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                                 ( anObject->frame.beam->beamKind ==
                                 eBoltObjectToObjectKind))
                         {
-                            if ( anObject->frame.beam->toObject != NULL)
-                            {
-                                SpaceObject *target = anObject->frame.beam->toObject;
+                            if (anObject->frame.beam->toObject.get()) {
+                                auto target = anObject->frame.beam->toObject;
 
                                 if ((target->active) &&
                                     (target->id == anObject->frame.beam->toObjectID))
@@ -424,9 +423,8 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                                 }
                             }
 
-                            if ( anObject->frame.beam->fromObject != NULL)
-                            {
-                                SpaceObject *target = anObject->frame.beam->fromObject;
+                            if (anObject->frame.beam->fromObject.get()) {
+                                auto target = anObject->frame.beam->fromObject;
 
                                 if ((target->active) &&
                                     ( target->id == anObject->frame.beam->fromObjectID))
@@ -445,9 +443,8 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                                 ( anObject->frame.beam->beamKind ==
                                 eBoltObjectToRelativeCoordKind))
                         {
-                            if ( anObject->frame.beam->fromObject != NULL)
-                            {
-                                SpaceObject *target = anObject->frame.beam->fromObject;
+                            if (anObject->frame.beam->fromObject.get()) {
+                                auto target = anObject->frame.beam->fromObject;
 
                                 if (( target->active) &&
                                     ( target->id == anObject->frame.beam->fromObjectID))

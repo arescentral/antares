@@ -172,7 +172,7 @@ static void create_object(
         if (product->attributes & kIsBeam) {
             if (product->frame.beam->beamKind != eKineticBeamKind) {
                 // special beams need special post-creation acts
-                Beams::set_attributes(product.get(), focus.get());
+                Beams::set_attributes(product, focus);
             }
         }
     }

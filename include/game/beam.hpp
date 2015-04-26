@@ -21,6 +21,7 @@
 
 #include <stdint.h>
 
+#include "data/handle.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
@@ -51,10 +52,10 @@ struct beamType {
     bool                active;
     int32_t             fromObjectNumber;
     int32_t             fromObjectID;
-    SpaceObject*        fromObject;
+    Handle<SpaceObject> fromObject;
     int32_t             toObjectNumber;
     int32_t             toObjectID;
-    SpaceObject*        toObject;
+    Handle<SpaceObject> toObject;
     Point               toRelativeCoord;
     uint32_t            boltRandomSeed;
     uint32_t            lastBoldRandomSeed;
@@ -75,7 +76,7 @@ class Beams {
     static beamType* add(
             coordPointType* location, uint8_t color, beamKindType kind, int32_t accuracy,
             int32_t beam_range);
-    static void set_attributes(SpaceObject* beamObject, SpaceObject* sourceObject);
+    static void set_attributes(Handle<SpaceObject> beamObject, Handle<SpaceObject> sourceObject);
     static void update();
     static void draw();
     static void show_all();

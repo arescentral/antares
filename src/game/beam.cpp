@@ -43,7 +43,7 @@ namespace {
 const int kBeamNum          = 256;
 const int kBoltChangeTime   = 0;
 
-void DetermineBeamRelativeCoordFromAngle(SpaceObject *beamObject, int16_t angle) {
+void DetermineBeamRelativeCoordFromAngle(Handle<SpaceObject> beamObject, int16_t angle) {
     Fixed range = mLongToFixed(beamObject->frame.beam->range);
 
     mAddAngle(angle, -90);
@@ -109,9 +109,9 @@ beamType* Beams::add(
             beam->accuracy = accuracy;
             beam->range = beam_range;
             beam->fromObjectNumber = beam->fromObjectID = -1;
-            beam->fromObject = NULL;
+            beam->fromObject = SpaceObject::none();
             beam->toObjectNumber = beam->toObjectID = -1;
-            beam->toObject = NULL;
+            beam->toObject = SpaceObject::none();
             beam->toRelativeCoord = Point(0, 0);
             beam->boltRandomSeed = 0;
             beam->boltCycleTime = 0;
@@ -124,7 +124,7 @@ beamType* Beams::add(
     return NULL;
 }
 
-void Beams::set_attributes(SpaceObject* beamObject, SpaceObject* sourceObject) {
+void Beams::set_attributes(Handle<SpaceObject> beamObject, Handle<SpaceObject> sourceObject) {
     beamType& beam = *beamObject->frame.beam;
     beam.fromObjectNumber = sourceObject->number();
     beam.fromObjectID = sourceObject->id;
@@ -160,7 +160,7 @@ void Beams::set_attributes(SpaceObject* beamObject, SpaceObject* sourceObject) {
                 } else {
                     beam.toObjectNumber = target->number();
                     beam.toObjectID = target->id;
-                    beam.toObject = target.get();
+                    beam.toObject = target;
                 }
             }
         } else { // target not valid
