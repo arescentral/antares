@@ -22,6 +22,7 @@
 // NonPlayerShip.h
 
 #include "data/space-object.hpp"
+#include "game/space-object.hpp"
 
 namespace antares {
 

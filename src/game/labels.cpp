@@ -27,6 +27,7 @@
 #include "game/admiral.hpp"
 #include "game/cursor.hpp"
 #include "game/globals.hpp"
+#include "game/space-object.hpp"
 #include "video/driver.hpp"
 
 using sfz::Rune;

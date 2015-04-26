@@ -25,6 +25,7 @@
 #include "game/globals.hpp"
 #include "game/messages.hpp"
 #include "game/player-ship.hpp"
+#include "game/space-object.hpp"
 #include "math/fixed.hpp"
 
 using sfz::BytesSlice;

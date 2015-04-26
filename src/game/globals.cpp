@@ -26,6 +26,7 @@
 #include "game/input-source.hpp"
 #include "game/minicomputer.hpp"
 #include "game/motion.hpp"
+#include "game/space-object.hpp"
 #include "game/starfield.hpp"
 #include "sound/driver.hpp"
 
