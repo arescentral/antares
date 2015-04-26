@@ -640,8 +640,10 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
 void construct_scenario(const Scenario* scenario, int32_t* current) {
     int32_t step = *current;
     uint32_t all_colors = kNeutralColorNeededFlag;
-    for (int k = 0; k < gThisScenario->playerNum; k++) {
-        all_colors |= kNeutralColorNeededFlag << GetAdmiralColor(Handle<Admiral>(k));
+    for (auto adm: Admiral::all()) {
+        if (adm->active()) {
+            all_colors |= kNeutralColorNeededFlag << GetAdmiralColor(adm);
+        }
     }
 
     if (step == 0) {
@@ -709,12 +711,13 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             initial = gThisScenario->initial(i);
             if (initial->canBuild[j] != kNoClass) {
                 // check for each player
-                for (int k = 0; k < gThisScenario->playerNum; k++) {
-                    auto a = Handle<Admiral>(k);
-                    auto baseObject = mGetBaseObjectFromClassRace(
-                            initial->canBuild[j], GetAdmiralRace(a));
-                    if (baseObject.get()) {
-                        AddBaseObjectMedia(baseObject, GetAdmiralColor(a), all_colors);
+                for (auto a: Admiral::all()) {
+                    if (a->active()) {
+                        auto baseObject = mGetBaseObjectFromClassRace(
+                                initial->canBuild[j], GetAdmiralRace(a));
+                        if (baseObject.get()) {
+                            AddBaseObjectMedia(baseObject, GetAdmiralColor(a), all_colors);
+                        }
                     }
                 }
             }
