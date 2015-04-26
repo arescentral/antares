@@ -89,7 +89,7 @@ set<int32_t> possible_actions;
 
 void AddBaseObjectActionMedia(
         Handle<BaseObject> base, int32_t whichType, uint8_t color, uint32_t all_colors);
-void AddActionMedia(Action* action, uint8_t color, uint32_t all_colors);
+void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors);
 
 void SetAllBaseObjectsUnchecked() {
     for (auto aBase: BaseObject::all()) {
@@ -150,18 +150,18 @@ void AddBaseObjectActionMedia(
         Handle<BaseObject> base, int32_t whichType, uint8_t color, uint32_t all_colors) {
     for (auto action: action_list(base, whichType)) {
         if (action.get()) {
-            AddActionMedia(action.get(), color, all_colors);
+            AddActionMedia(action, color, all_colors);
         }
     }
 }
 
-void AddActionMedia(Action* action, uint8_t color, uint32_t all_colors) {
+void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors) {
     int32_t             count = 0, l1, l2;
 #ifdef DATA_COVERAGE
         possible_actions.insert(action - mGetObjectActionPtr(0));
 #endif  // DATA_COVERAGE
 
-    if (action == NULL) {
+    if (!action.get()) {
         return;
     }
     switch (action->verb) {
@@ -177,10 +177,6 @@ void AddActionMedia(Action* action, uint8_t color, uint32_t all_colors) {
             for (int32_t count = l1; count <= l2; count++) {
                 AddSound(count); // moves mem
             }
-            break;
-
-        case kNoAction:
-            action = NULL;   // get us out of loop
             break;
 
         case kAlter:
@@ -202,11 +198,6 @@ void AddActionMedia(Action* action, uint8_t color, uint32_t all_colors) {
                     }
                     break;
             }
-            break;
-
-        case kMakeSparks:
-        case kDie:
-        default:
             break;
     }
 }
@@ -711,7 +702,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         for (int i = 0; i < gThisScenario->conditionNum; i++) {
             Scenario::Condition* condition = gThisScenario->condition(i);
             for (auto action: condition->action) {
-                AddActionMedia(action.get(), GRAY, all_colors);
+                AddActionMedia(action, GRAY, all_colors);
             }
             condition->set_true_yet(condition->flags & kInitiallyTrue);
         }

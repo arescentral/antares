@@ -47,8 +47,6 @@ void AlterObjectCloakState(Handle<SpaceObject> object, bool cloak);
 void DestroyObject(Handle<SpaceObject> object);
 void CreateFloatingBodyOfPlayer(Handle<SpaceObject> obj);
 
-inline Action* mGetObjectActionPtr(int32_t whichAction) { return Action::get(whichAction); }
-
 Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, int race);
 
 sfz::StringSlice get_object_name(Handle<BaseObject> id);
