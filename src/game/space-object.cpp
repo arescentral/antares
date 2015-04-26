@@ -911,16 +911,4 @@ int32_t SpaceObject::number() const {
     return this - gSpaceObjectData.get();
 }
 
-static BaseObject kZeroBaseObject;
-
-SpaceObject::SpaceObject(ZeroObject) {
-    memset(this, 0, sizeof(*this));
-    baseType = &kZeroBaseObject;
-}
-
-SpaceObject* SpaceObject::zero() {
-    static SpaceObject object(ZERO_OBJECT);
-    return &object;
-}
-
 }  // namespace antares

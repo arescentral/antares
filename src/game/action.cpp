@@ -246,7 +246,7 @@ static void die(objectActionType* action, SpaceObject* focus, SpaceObject* subje
         CreateFloatingBodyOfPlayer(Handle<SpaceObject>(focus->number()));
     }
     if (destroy) {
-        if (focus != SpaceObject::zero()) {
+        if (focus != nullptr) {
             DestroyObject(Handle<SpaceObject>(focus->number()));
         }
     } else {
@@ -324,7 +324,7 @@ static void alter(
             if (subject) {
                 // active (non-reflexive) altering of velocity means a PUSH, just like
                 //  two objects colliding.  Negative velocity = slow down
-                if (object && (object != SpaceObject::zero())) {
+                if (object && (object != nullptr)) {
                     if (alter.relative) {
                         if ((object->baseType->mass > 0) &&
                             (object->maxVelocity > 0)) {
@@ -456,18 +456,18 @@ static void alter(
             break;
 
         case kAlterBaseType:
-            if (action->reflexive || (object && (object != SpaceObject::zero())))
+            if (action->reflexive || (object && (object != nullptr)))
             ChangeObjectBaseType(focus, Handle<BaseObject>(alter.minimum), -1, alter.relative);
             break;
 
         case kAlterOwner:
-            if (focus != SpaceObject::zero()) {
+            if (focus != nullptr) {
                 auto o = Handle<SpaceObject>(focus->number());
                 if (alter.relative) {
                     // if it's relative AND reflexive, we take the direct
                     // object's owner, since relative & reflexive would
                     // do nothing.
-                    if (action->reflexive && o.get() && (object != SpaceObject::zero())) {
+                    if (action->reflexive && o.get() && (object != nullptr)) {
                         AlterObjectOwner(o, object->owner, true);
                     } else {
                         AlterObjectOwner(o, subject->owner, true);
@@ -489,7 +489,7 @@ static void alter(
             break;
 
         case kAlterOccupation:
-            if (focus != SpaceObject::zero()) {
+            if (focus != nullptr) {
                 AlterObjectOccupation(Handle<SpaceObject>(focus->number()), subject->owner, alter.minimum, true);
             }
             break;
@@ -498,7 +498,7 @@ static void alter(
             {
                 Handle<Admiral> admiral;
                 if (alter.relative) {
-                    if (focus != SpaceObject::zero()) {
+                    if (focus != nullptr) {
                         admiral = focus->owner;
                     }
                 } else {
@@ -530,7 +530,7 @@ static void alter(
 
         case kAlterLocation:
             if (alter.relative) {
-                if (object && (object != SpaceObject::zero())) {
+                if (object && (object != nullptr)) {
                     newLocation.h = subject->location.h;
                     newLocation.v = subject->location.v;
                 } else {
@@ -646,9 +646,9 @@ static void enter_warp(
 
 static void change_score(objectActionType* action, SpaceObject* focus) {
     const auto& score = action->argument.changeScore;
-    Handle<Admiral> admiral = focus->owner;
-    if ((score.whichPlayer.get()) || (focus == SpaceObject::zero())) {
-        admiral = score.whichPlayer;
+    Handle<Admiral> admiral = score.whichPlayer;
+    if ((!score.whichPlayer.get() && (focus != nullptr))) {
+        admiral = focus->owner;
     }
     if (admiral.get()) {
         AlterAdmiralScore(admiral, score.whichScore, score.amount);
@@ -657,9 +657,9 @@ static void change_score(objectActionType* action, SpaceObject* focus) {
 
 static void declare_winner(objectActionType* action, SpaceObject* focus) {
     const auto& winner = action->argument.declareWinner;
-    Handle<Admiral> admiral = focus->owner;
-    if ((winner.whichPlayer.get()) || (focus == SpaceObject::zero())) {
-        admiral = winner.whichPlayer;
+    Handle<Admiral> admiral = winner.whichPlayer;
+    if ((!winner.whichPlayer.get() && (focus != nullptr))) {
+        admiral = focus->owner;
     }
     DeclareWinner(admiral, winner.nextLevel, winner.textID);
 }
@@ -780,38 +780,17 @@ static void execute_actions(
             focus = subj_ptr;
         }
 
-        // This pair of conditions is a workaround for a bug which
-        // manifests itself for example in the implementation of "Hold
-        // Position".  When an object is instructed to hold position, it
-        // gains its own location as its destination, triggering its
-        // arrive action, but its target is nulled out.
-        //
-        // Arrive actions are typically only specified on objects with
-        // non-zero order flags (so that a transport won't attempt to
-        // land on a bunker station, for example).  So, back when Ares
-        // ran without protected memory, and NULL pointed to a
-        // zeroed-out area of the address space, the flags would prevent
-        // the arrive action from triggering.
-        //
-        // It's not correct to always inhibit the action here, because
-        // the arrive action should be triggered when the focus
-        // doesn't have flags.  But we need to prevent it in the case of
-        // transports somehow, so we emulate the old behavior of
-        // pointing to a zeroed-out object.
-        if (obj_ptr == NULL) {
-            obj_ptr = SpaceObject::zero();
-        }
-        if (subj_ptr == NULL) {
-            subj_ptr = SpaceObject::zero();
+        if (obj_ptr && subj_ptr) {
+            if ((action->owner < -1)
+                    || ((action->owner == -1) && (obj_ptr->owner == subj_ptr->owner))
+                    || ((action->owner == 1) && (obj_ptr->owner != subj_ptr->owner))
+                    || (action->owner > 1)) {
+                continue;
+            }
         }
 
-        if (focus == NULL) {
-            focus = SpaceObject::zero();
-        } else if ((action->owner < -1)
-                || ((action->owner == -1) && (obj_ptr->owner == subj_ptr->owner))
-                || ((action->owner == 1) && (obj_ptr->owner != subj_ptr->owner))
-                || (action->owner > 1)
-                || !action_filter_applies_to(*action, *obj_ptr)) {
+        if ((action->inclusiveFilter || action->exclusiveFilter)
+                && (!obj_ptr || !action_filter_applies_to(*action, *obj_ptr))) {
             continue;
         }
 

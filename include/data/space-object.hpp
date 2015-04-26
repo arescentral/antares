@@ -370,8 +370,6 @@ class SpaceObject {
     static Handle<SpaceObject> none() { return Handle<SpaceObject>(-1); }
     static HandleList<SpaceObject> all() { return HandleList<SpaceObject>(0, kMaxSpaceObject); }
 
-    static SpaceObject* zero();
-
     SpaceObject() = default;
 
     uint32_t                attributes = 0;
@@ -526,10 +524,6 @@ class SpaceObject {
             const coordPointType& initial_location,
             int32_t relative_direction, fixedPointType *relative_velocity,
             Handle<Admiral> new_owner, int16_t spriteIDOverride);
-
-  private:
-    enum ZeroObject { ZERO_OBJECT };
-    SpaceObject(ZeroObject);
 };
 
 }  // namespace antares
