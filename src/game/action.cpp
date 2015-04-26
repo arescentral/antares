@@ -148,12 +148,11 @@ static void create_object(
                 if (action->reflexive) {
                     if (action->verb != kCreateObjectSetDest) {
                         SetObjectDestination(product, focus);
-                    } else if (focus->destObjectPtr) {
+                    } else if (focus->destObject.get()) {
                         SetObjectDestination(product, focus->destObject);
                     }
                 }
             } else if (action->reflexive) {
-                product->destObjectPtr = focus.get();
                 product->timeFromOrigin = kTimeToCheckHome;
                 product->runTimeFlags &= ~kHasArrived;
                 product->destObject = focus; //a->destinationObject;
@@ -188,7 +187,7 @@ static void play_sound(objectActionType* action, Handle<SpaceObject> focus) {
     if (sound.absolute) {
         PlayVolumeSound(id, sound.volumeMinimum, sound.persistence, priority);
     } else {
-        mPlayDistanceSound(sound.volumeMinimum, focus.get(), id, sound.persistence, priority);
+        mPlayDistanceSound(sound.volumeMinimum, focus, id, sound.persistence, priority);
     }
 }
 

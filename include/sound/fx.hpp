@@ -21,6 +21,7 @@
 
 #include <stdint.h>
 
+#include "data/handle.hpp"
 #include "math/fixed.hpp"
 
 namespace antares {
@@ -96,8 +97,8 @@ void quiet_all();
 void SoundFXCleanup();
 
 void mPlayDistanceSound(
-        int32_t mvolume, SpaceObject* mobjectptr, int32_t msoundid, int32_t msoundpersistence,
-        soundPriorityType msoundpriority);
+        int32_t mvolume, Handle<SpaceObject> mobjectptr, int32_t msoundid,
+        int32_t msoundpersistence, soundPriorityType msoundpriority);
 
 }  // namespace antares
 

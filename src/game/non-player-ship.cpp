@@ -88,13 +88,6 @@ uint32_t ThinkObjectEngageTarget(
         Handle<SpaceObject> anObject, Handle<SpaceObject> targetObject,
         uint32_t distance, int16_t *theta, int32_t timePass);
 
-SpaceObject *HackNewNonplayerShip( int32_t owner, int16_t type, Rect *bounds)
-
-{
-#pragma unused( owner, type, bounds)
-    return( NULL);
-}
-
 void SpaceObject::recharge() {
     if ((_energy < (max_energy() - kEnergyChunk))
             && (_battery > kEnergyChunk)) {
@@ -722,7 +715,6 @@ uint32_t ThinkObjectNormalPresence(
                                 targetObject = SpaceObject::none();
                             }
                             if (targetObject.get()) {
-                                anObject->destObjectPtr = targetObject.get();
                                 anObject->destObjectID = targetObject->id;
                                 anObject->destObjectDest = targetObject->destObject;
                                 anObject->destObjectDestID = targetObject->destObjectID;
@@ -733,7 +725,6 @@ uint32_t ThinkObjectNormalPresence(
                                 keysDown |= kDownKey;
                                 anObject->destObject = SpaceObject::none();
                                 anObject->destObjectDest = SpaceObject::none();
-                                anObject->destObjectPtr = NULL;
                                 dest.h = anObject->location.h;
                                 dest.v = anObject->location.v;
                                 if (anObject->attributes & kOnAutoPilot) {
@@ -933,7 +924,7 @@ uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
     for (int i = 0; i < 4; ++i) {
         if ((presence.step == i) && (presence.progress > (25 * i))) {
             mPlayDistanceSound(
-                    kMaxSoundVolume, anObject.get(), kWarp[i], kMediumPersistence, kPrioritySound);
+                    kMaxSoundVolume, anObject, kWarp[i], kMediumPersistence, kPrioritySound);
             ++presence.step;
             break;
         }
@@ -1088,7 +1079,6 @@ uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
                         target = SpaceObject::none();
                     }
                     if (target.get()) {
-                        anObject->destObjectPtr = target.get();
                         anObject->destObjectID = target->id;
                         anObject->destObjectDest = target->destObject;
                         anObject->destObjectDestID = target->destObjectID;
@@ -1098,7 +1088,6 @@ uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
                         keysDown |= kDownKey;
                         anObject->destObject = SpaceObject::none();
                         anObject->destObjectDest = SpaceObject::none();
-                        anObject->destObjectPtr = NULL;
                         dest.h = anObject->location.h;
                         dest.v = anObject->location.v;
                     }
@@ -1324,7 +1313,6 @@ void ThinkObjectResolveDestination(
                         *targetObject = SpaceObject::none();
                     }
                     if ((*targetObject).get()) {
-                        anObject->destObjectPtr = (*targetObject).get();
                         anObject->destObjectID = (*targetObject)->id;
                         anObject->destObjectDest = (*targetObject)->destObject;
                         anObject->destObjectDestID = (*targetObject)->destObjectID;
@@ -1335,7 +1323,6 @@ void ThinkObjectResolveDestination(
                         anObject->duty = eNoDuty;
                         anObject->destObject = SpaceObject::none();
                         anObject->destObjectDest = SpaceObject::none();
-                        anObject->destObjectPtr = NULL;
                         dest->h = anObject->location.h;
                         dest->v = anObject->location.v;
                     }

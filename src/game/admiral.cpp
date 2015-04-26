@@ -406,7 +406,6 @@ void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType *where) 
         o->destObject = SpaceObject::none();
         o->destObjectDest = SpaceObject::none();
         o->destObjectID = -1;
-        o->destObjectPtr = NULL;
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
         o->timeFromOrigin = 0;
         o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
@@ -435,7 +434,6 @@ void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType *where) 
     if (!a->active()) {
         o->destObject = SpaceObject::none();
         o->destObjectDest = SpaceObject::none();
-        o->destObjectPtr = NULL;
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
         o->timeFromOrigin = 0;
         o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
@@ -455,7 +453,6 @@ void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType *where) 
 
         o->destinationLocation = o->originLocation = *where;
         o->destObject = SpaceObject::none();
-        o->destObjectPtr = NULL;
         o->timeFromOrigin = 0;
         o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
     }
@@ -469,7 +466,6 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
         o->destObject = SpaceObject::none();
         o->destObjectDest = SpaceObject::none();
         o->destObjectID = -1;
-        o->destObjectPtr = NULL;
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
         o->timeFromOrigin = 0;
         o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
@@ -503,7 +499,6 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
              || (a->destinationObjectID() == o->id))) {
         o->destObject = SpaceObject::none();
         o->destObjectDest = SpaceObject::none();
-        o->destObjectPtr = NULL;
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
         o->timeFromOrigin = 0;
         o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
@@ -533,7 +528,6 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
             if (o != dObject) {
                 o->runTimeFlags &= ~kHasArrived;
                 o->destObject = dObject;
-                o->destObjectPtr = dObject.get();
                 o->destObjectDest = dObject->destObject;
                 o->destObjectDestID = dObject->destObjectID;
                 o->destObjectID = dObject->id;
@@ -565,7 +559,6 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
             } else {
                 o->destObject = SpaceObject::none();
                 o->destObjectDest = SpaceObject::none();
-                o->destObjectPtr = NULL;
                 o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
                 o->timeFromOrigin = 0;
                 o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
@@ -574,7 +567,6 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
         } else {
             o->destObject = SpaceObject::none();
             o->destObjectDest = SpaceObject::none();
-            o->destObjectPtr = NULL;
             o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
             o->timeFromOrigin = 0;
             o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
@@ -584,8 +576,8 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
 }
 
 void RemoveObjectFromDestination(Handle<SpaceObject> o) {
-    if (o->destObject.get() && (o->destObjectPtr != NULL)) {
-        auto dObject = o->destObjectPtr;
+    if (o->destObject.get()) {
+        auto dObject = o->destObject;
         if (dObject->id == o->destObjectID) {
             if (dObject->owner == o->owner) {
                 dObject->remoteFriendStrength -= o->baseType->offenseValue;
@@ -599,7 +591,6 @@ void RemoveObjectFromDestination(Handle<SpaceObject> o) {
     o->destObject = SpaceObject::none();
     o->destObjectDest = SpaceObject::none();
     o->destObjectID = -1;
-    o->destObjectPtr = NULL;
 }
 
 // assumes you can afford it & base has time

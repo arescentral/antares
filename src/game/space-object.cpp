@@ -816,11 +816,11 @@ void AlterObjectOccupation(
 void AlterObjectCloakState(Handle<SpaceObject> object, bool cloak) {
     if (cloak && (object->cloakState == 0)) {
         object->cloakState = 1;
-        mPlayDistanceSound(kMaxSoundVolume, object.get(), kCloakOn, kMediumPersistence, kPrioritySound);
+        mPlayDistanceSound(kMaxSoundVolume, object, kCloakOn, kMediumPersistence, kPrioritySound);
     } else if ((!cloak || (object->attributes & kRemoteOrHuman))
             && (object->cloakState >= 250)) {
         object->cloakState = kCloakOffStateMax;
-        mPlayDistanceSound(kMaxSoundVolume, object.get(), kCloakOff, kMediumPersistence, kPrioritySound);
+        mPlayDistanceSound(kMaxSoundVolume, object, kCloakOff, kMediumPersistence, kPrioritySound);
     }
 }
 
@@ -864,7 +864,6 @@ void DestroyObject(Handle<SpaceObject> object) {
                         && (fixObject->active != kObjectAvailable)) {
                     if (fixObject->destObject == object) {
                         fixObject->destObject = SpaceObject::none();
-                        fixObject->destObjectPtr = NULL;
                         fixObject->attributes &= ~kStaticDestination;
                     }
                 }

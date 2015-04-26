@@ -265,8 +265,8 @@ void quiet_all() {
 //
 
 void mPlayDistanceSound(
-        int32_t mvolume, SpaceObject* mobjectptr, int32_t msoundid, int32_t msoundpersistence,
-        soundPriorityType msoundpriority) {
+        int32_t mvolume, Handle<SpaceObject> mobjectptr, int32_t msoundid,
+        int32_t msoundpersistence, soundPriorityType msoundpriority) {
     if (mobjectptr->distanceFromPlayer < kMaximumRelevantDistanceSquared) {
         int32_t mdistance = mobjectptr->distanceFromPlayer;
         uint32_t mul1;

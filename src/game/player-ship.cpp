@@ -544,7 +544,6 @@ bool PlayerShip::active() const {
 }
 
 void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_message) {
-    SpaceObject *selectShip = NULL;
     uint32_t        attributes;
 
     if (!globals()->gPlayerShip.get()) {

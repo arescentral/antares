@@ -400,7 +400,6 @@ class SpaceObject {
     int32_t                 runTimeFlags = 0;               // distance from origin to destination
     coordPointType          destinationLocation = {0, 0};   // coords of our destination ( or kNoDestination)
     Handle<SpaceObject>     destObject;                     // target of this object.
-    SpaceObject*            destObjectPtr = nullptr;        // ptr to destination object
     Handle<SpaceObject>     destObjectDest;                 // # of our destination's destination in case it dies
     Handle<Destination>     asDestination;                  // If this object kIsDestination.
     int32_t                 destObjectID = kNoShip;         // ID of our dest object
