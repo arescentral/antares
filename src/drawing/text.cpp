@@ -194,15 +194,10 @@ Font::Font(StringSlice name):
     }
     FontVisitor::State state;
     json.accept(FontVisitor(state, _glyph_table, logicalWidth, height, ascent, _glyphs));
+    recolor();
 
     if (VideoDriver::driver()) {
-        for (const auto& kv: _glyphs) {
-            ArrayPixMap pix(kv.second.width(), kv.second.height());
-            pix.fill(RgbColor::kClear);
-            draw_internal(Point(0, ascent), kv.first, RgbColor::kWhite, &pix);
-            _sprites[kv.first] = VideoDriver::driver()->new_sprite(
-                    format("/fonts/{0}/{1}", name, hex(kv.first, 2)), pix);
-        }
+        _sprite = VideoDriver::driver()->new_sprite(format("/fonts/{0}", name), _glyph_table);
     }
 }
 
@@ -220,23 +215,41 @@ void Font::draw(Point origin, Rune r, RgbColor color, PixMap* pix) const {
     draw_internal(origin, r, color, pix);
 }
 
+void Font::recolor() {
+    for (size_t y = 0; y < _glyph_table.size().height; ++y) {
+        for (size_t x = 0; x < _glyph_table.size().width; ++x) {
+            if (_glyph_table.get(x, y).red < 255) {
+                _glyph_table.set(x, y, RgbColor::kWhite);
+            } else {
+                _glyph_table.set(x, y, RgbColor::kClear);
+            }
+        }
+    }
+}
+
 void Font::draw_internal(Point origin, Rune r, RgbColor color, PixMap* pix) const {
     origin.v -= ascent;
     Rect glyph = glyph_rect(r);
     for (size_t y = 0; y < glyph.height(); ++y) {
         for (size_t x = 0; x < glyph.width(); ++x) {
-            if (_glyph_table.get(glyph.left + x, glyph.top + y).red < 255) {
+            if (_glyph_table.get(glyph.left + x, glyph.top + y).alpha > 0) {
                 pix->set(origin.h + x, origin.v + y, color);
             }
         }
     }
 }
 
-void Font::draw_sprite(Point origin, sfz::StringSlice string, RgbColor color) const {
-    origin.offset(0, -ascent);
+void Font::draw_sprite(Point cursor, sfz::StringSlice string, RgbColor color) const {
+    cursor.offset(0, -ascent);
     for (size_t i = 0; i < string.size(); ++i) {
-        _sprites.find(string.at(i))->second->draw_shaded(origin.h, origin.v, color);
-        origin.offset(char_width(string.at(i)), 0);
+        auto it = _glyphs.find(string.at(i));
+        if (it == _glyphs.end()) {
+            continue;
+        }
+        auto& glyph = it->second;
+        Rect rect(cursor, glyph.size());
+        _sprite->draw_cropped(rect, glyph.origin(), color);
+        cursor.offset(char_width(string.at(i)), 0);
     }
 }
 

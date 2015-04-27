@@ -36,19 +36,20 @@ class Font {
 
     void draw(Point origin, sfz::Rune r, RgbColor color, PixMap* pix) const;
 
-    void draw_sprite(Point origin, sfz::StringSlice string, RgbColor color) const;
+    void draw_sprite(Point cursor, sfz::StringSlice string, RgbColor color) const;
 
     int32_t logicalWidth;
     int32_t height;
     int32_t ascent;
 
   private:
+    void recolor();
     void draw_internal(Point origin, sfz::Rune r, RgbColor color, PixMap* pix) const;
     Rect glyph_rect(sfz::Rune r) const;
 
     ArrayPixMap _glyph_table;
     std::map<sfz::Rune, Rect> _glyphs;
-    std::map<sfz::Rune, std::unique_ptr<Sprite>> _sprites;
+    std::unique_ptr<Sprite> _sprite;
 
     DISALLOW_COPY_AND_ASSIGN(Font);
 };
