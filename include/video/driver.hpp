@@ -99,9 +99,26 @@ class Sprite {
     }
 
   private:
+    friend class Quads;
+
     Rect rect(int32_t x, int32_t y) const {
         return Rect(x, y, x + size().width, y + size().height);
     }
+
+    virtual void begin_quads() const { }
+    virtual void end_quads() const { }
+    virtual void draw_quad(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
+        draw_cropped(draw_rect, origin, tint);
+    }
+};
+
+class Quads {
+  public:
+    Quads(const Sprite& sprite);
+    ~Quads();
+    void draw(const Rect& draw_rect, Point origin, const RgbColor& tint);
+  private:
+    const Sprite& _sprite;
 };
 
 }  // namespace antares

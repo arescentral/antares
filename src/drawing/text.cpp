@@ -223,15 +223,11 @@ Rect Font::glyph_rect(Rune r) const {
 
 void Font::draw(Point cursor, sfz::StringSlice string, RgbColor color) const {
     cursor.offset(0, -ascent);
+    Quads quads(*_sprite);
     for (size_t i = 0; i < string.size(); ++i) {
-        auto it = _glyphs.find(string.at(i));
-        if (it == _glyphs.end()) {
-            continue;
-        }
-        auto& glyph = it->second;
-        Rect rect(cursor, glyph.size());
-        _sprite->draw_cropped(rect, glyph.origin(), color);
-        cursor.offset(char_width(string.at(i)), 0);
+        auto glyph = glyph_rect(string.at(i));
+        quads.draw(Rect(cursor, glyph.size()), glyph.origin(), color);
+        cursor.offset(glyph.width(), 0);
     }
 }
 

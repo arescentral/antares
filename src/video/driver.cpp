@@ -47,4 +47,17 @@ VideoDriver* VideoDriver::driver() {
 
 Sprite::~Sprite() { }
 
+Quads::Quads(const Sprite& sprite):
+        _sprite(sprite) {
+    _sprite.begin_quads();
+}
+
+Quads::~Quads() {
+    _sprite.end_quads();
+}
+
+void Quads::draw(const Rect& draw_rect, Point origin, const RgbColor& tint) {
+    _sprite.draw_quad(draw_rect, origin, tint);
+}
+
 }  // namespace antares
