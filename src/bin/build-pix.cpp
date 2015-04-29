@@ -45,16 +45,27 @@ namespace args = sfz::args;
 namespace antares {
 namespace {
 
-class DrawSprite : public Card {
+class SizePix : public Card {
   public:
-    DrawSprite(const PixMap& pix): _pix(pix) { }
-
-    virtual void draw() const {
-        VideoDriver::driver()->new_sprite("-", _pix)->draw(0, 0);
-    }
+    SizePix(int id, int32_t width, int32_t* height): _id(id), _width(width), _height(height) { }
+    virtual void become_front() { InitDirectText(); }
+    virtual void draw() const { *_height = BuildPix(_id, _width).size().height; }
 
   private:
-    const PixMap& _pix;
+    const int _id;
+    const int32_t _width;
+    int32_t* const _height;
+};
+
+class DrawPix : public Card {
+  public:
+    DrawPix(int id, int32_t width): _id(id), _width(width) { }
+    virtual void become_front() { InitDirectText(); }
+    virtual void draw() const { BuildPix(_id, _width).draw({0, 0}); }
+
+  private:
+    const int _id;
+    const int32_t _width;
 };
 
 class PixBuilder {
@@ -62,12 +73,22 @@ class PixBuilder {
     PixBuilder(const Optional<String>& output_dir)
             : _output_dir(output_dir) { }
 
-    void save(int id, int width) {
-        unique_ptr<PixMap> pix(build_pix(id, width));
-        Preferences::preferences()->set_screen_size({width, pix->size().height});
-        OffscreenVideoDriver off(Preferences::preferences()->screen_size(), _output_dir);
-        if (_output_dir.has()) {
-            off.capture(new DrawSprite(*pix), format("{0}.png", dec(id, 5)));
+    void save(int id, int32_t width) {
+        Size size = {width, 480};
+
+        // One time to figure out the height of the output.
+        // (we need an active, looping offscreen driver for this)
+        {
+            Preferences::preferences()->set_screen_size(size);
+            OffscreenVideoDriver off(Preferences::preferences()->screen_size(), {});
+            off.capture(new SizePix(id, width, &size.height), format("{0}.png", dec(id, 5)));
+        }
+
+        // One time for real, with a driver sized appropriately.
+        {
+            Preferences::preferences()->set_screen_size(size);
+            OffscreenVideoDriver off(Preferences::preferences()->screen_size(), _output_dir);
+            off.capture(new DrawPix(id, width), format("{0}.png", dec(id, 5)));
         }
     }
 
@@ -97,7 +118,6 @@ int main(int argc, char* const* argv) {
     }
 
     NullPrefsDriver prefs;
-    InitDirectText();
 
     PixBuilder builder(output_dir);
     builder.save(3020, 450);  // Gaitori prologue

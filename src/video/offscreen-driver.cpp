@@ -155,6 +155,9 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
     }
 
     void snapshot_to(PrintItem relpath) {
+        if (!takes_snapshots()) {
+            return;
+        }
         glReadPixels(
                 0, 0, _buffer.width(), _buffer.height(), GL_BGRA, GL_UNSIGNED_BYTE,
                 _buffer.mutable_data());
