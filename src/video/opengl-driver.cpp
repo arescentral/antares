@@ -178,25 +178,9 @@ class OpenGlSprite : public Sprite {
     }
 
     virtual void draw_cropped(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
-        Rect texture_rect(origin, draw_rect.size());
-        texture_rect.offset(1, 1);
-
-        glColor4ub(tint.red, tint.green, tint.blue, 255);
-        glUniform1i(_uniforms.color_mode, 3);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
-        gl_check();
-        glBegin(GL_QUADS);
-        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.left, texture_rect.top);
-        glVertex2f(draw_rect.left, draw_rect.top);
-        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.left, texture_rect.bottom);
-        glVertex2f(draw_rect.left, draw_rect.bottom);
-        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.right, texture_rect.bottom);
-        glVertex2f(draw_rect.right, draw_rect.bottom);
-        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.right, texture_rect.top);
-        glVertex2f(draw_rect.right, draw_rect.top);
-        glEnd();
-        gl_check();
+        begin_quads();
+        draw_quad(draw_rect, origin, tint);
+        end_quads();
     }
 
     virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const {
@@ -253,6 +237,34 @@ class OpenGlSprite : public Sprite {
         glVertex2f(draw_rect.right, draw_rect.top);
         glEnd();
         gl_check();
+    }
+
+    virtual void begin_quads() const {
+        glUniform1i(_uniforms.color_mode, 3);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
+        gl_check();
+        glBegin(GL_QUADS);
+    }
+
+    virtual void end_quads() const {
+        glEnd();
+        gl_check();
+    }
+
+    virtual void draw_quad(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
+        Rect texture_rect(origin, draw_rect.size());
+        texture_rect.offset(1, 1);
+
+        glColor4ub(tint.red, tint.green, tint.blue, 255);
+        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.left, texture_rect.top);
+        glVertex2f(draw_rect.left, draw_rect.top);
+        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.left, texture_rect.bottom);
+        glVertex2f(draw_rect.left, draw_rect.bottom);
+        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.right, texture_rect.bottom);
+        glVertex2f(draw_rect.right, draw_rect.bottom);
+        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.right, texture_rect.top);
+        glVertex2f(draw_rect.right, draw_rect.top);
     }
 
     struct Texture {
