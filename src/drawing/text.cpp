@@ -175,6 +175,18 @@ struct FontVisitor : public JsonDefaultVisitor {
     }
 };
 
+void recolor(PixMap& glyph_table) {
+    for (size_t y = 0; y < glyph_table.size().height; ++y) {
+        for (size_t x = 0; x < glyph_table.size().width; ++x) {
+            if (glyph_table.get(x, y).red < 255) {
+                glyph_table.set(x, y, RgbColor::kWhite);
+            } else {
+                glyph_table.set(x, y, RgbColor::kClear);
+            }
+        }
+    }
+}
+
 }  // namespace
 
 const Font* tactical_font;
@@ -183,8 +195,7 @@ const Font* button_font;
 const Font* title_font;
 const Font* small_button_font;
 
-Font::Font(StringSlice name):
-        _glyph_table(0, 0) {
+Font::Font(StringSlice name) {
     String path(format("fonts/{0}.json", name));
     Resource rsrc(path);
     String rsrc_string(utf8::decode(rsrc.data()));
@@ -193,12 +204,11 @@ Font::Font(StringSlice name):
         throw Exception("invalid JSON");
     }
     FontVisitor::State state;
-    json.accept(FontVisitor(state, _glyph_table, logicalWidth, height, ascent, _glyphs));
-    recolor();
+    ArrayPixMap glyph_table(0, 0);
+    json.accept(FontVisitor(state, glyph_table, logicalWidth, height, ascent, _glyphs));
+    recolor(glyph_table);
 
-    if (VideoDriver::driver()) {
-        _sprite = VideoDriver::driver()->new_sprite(format("/fonts/{0}", name), _glyph_table);
-    }
+    _sprite = VideoDriver::driver()->new_sprite(format("/fonts/{0}", name), glyph_table);
 }
 
 Font::~Font() { }
@@ -211,35 +221,7 @@ Rect Font::glyph_rect(Rune r) const {
     return it->second;
 }
 
-void Font::draw(Point origin, Rune r, RgbColor color, PixMap* pix) const {
-    draw_internal(origin, r, color, pix);
-}
-
-void Font::recolor() {
-    for (size_t y = 0; y < _glyph_table.size().height; ++y) {
-        for (size_t x = 0; x < _glyph_table.size().width; ++x) {
-            if (_glyph_table.get(x, y).red < 255) {
-                _glyph_table.set(x, y, RgbColor::kWhite);
-            } else {
-                _glyph_table.set(x, y, RgbColor::kClear);
-            }
-        }
-    }
-}
-
-void Font::draw_internal(Point origin, Rune r, RgbColor color, PixMap* pix) const {
-    origin.v -= ascent;
-    Rect glyph = glyph_rect(r);
-    for (size_t y = 0; y < glyph.height(); ++y) {
-        for (size_t x = 0; x < glyph.width(); ++x) {
-            if (_glyph_table.get(glyph.left + x, glyph.top + y).alpha > 0) {
-                pix->set(origin.h + x, origin.v + y, color);
-            }
-        }
-    }
-}
-
-void Font::draw_sprite(Point cursor, sfz::StringSlice string, RgbColor color) const {
+void Font::draw(Point cursor, sfz::StringSlice string, RgbColor color) const {
     cursor.offset(0, -ascent);
     for (size_t i = 0; i < string.size(); ++i) {
         auto it = _glyphs.find(string.at(i));

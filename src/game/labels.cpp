@@ -148,15 +148,15 @@ void Label::draw() {
             for (int j = 1; j <= label->lineNum; j++) {
                 StringSlice line = String_Get_Nth_Line(text, j);
 
-                tactical_font->draw_sprite(Point(at.h + 1, at.v + 1), line, RgbColor::kBlack);
-                tactical_font->draw_sprite(Point(at.h - 1, at.v - 1), line, RgbColor::kBlack);
-                tactical_font->draw_sprite(at, line, light);
+                tactical_font->draw(Point(at.h + 1, at.v + 1), line, RgbColor::kBlack);
+                tactical_font->draw(Point(at.h - 1, at.v - 1), line, RgbColor::kBlack);
+                tactical_font->draw(at, line, light);
 
                 at.offset(0, label->lineHeight);
             }
         } else {
-            tactical_font->draw_sprite(Point(at.h + 1, at.v + 1), text, RgbColor::kBlack);
-            tactical_font->draw_sprite(at, text, light);
+            tactical_font->draw(Point(at.h + 1, at.v + 1), text, RgbColor::kBlack);
+            tactical_font->draw(at, text, light);
         }
     }
 }
