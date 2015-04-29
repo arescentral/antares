@@ -237,8 +237,8 @@ void main(int argc, char** argv) {
         TextVideoDriver video(screen_size, scheduler, output_dir);
         video.loop(new ReplayMaster(replay_file.data(), output_dir));
     } else {
-        OffscreenVideoDriver video(screen_size, scheduler, output_dir);
-        video.loop(new ReplayMaster(replay_file.data(), output_dir));
+        OffscreenVideoDriver video(screen_size, output_dir);
+        video.loop(new ReplayMaster(replay_file.data(), output_dir), scheduler);
     }
 }
 

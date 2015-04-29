@@ -37,6 +37,7 @@
 using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::Optional;
+using sfz::PrintItem;
 using sfz::ScopedFd;
 using sfz::String;
 using sfz::StringSlice;
@@ -48,6 +49,7 @@ using std::greater;
 using std::max;
 using std::unique_ptr;
 
+namespace path = sfz::path;
 namespace utf8 = sfz::utf8;
 
 namespace antares {
@@ -149,12 +151,15 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
     }
 
     void snapshot(int64_t ticks) {
+        snapshot_to(format("screens/{0}.png", dec(ticks, 6)));
+    }
+
+    void snapshot_to(PrintItem relpath) {
         glReadPixels(
                 0, 0, _buffer.width(), _buffer.height(), GL_BGRA, GL_UNSIGNED_BYTE,
                 _buffer.mutable_data());
-        String dir(format("{0}/screens", *_output_dir));
-        makedirs(dir, 0755);
-        String path(format("{0}/{1}.png", dir, dec(ticks, 6)));
+        String path(format("{0}/{1}", *_output_dir, relpath));
+        makedirs(path::dirname(path), 0755);
         ScopedFd file(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
         write(file, _buffer);
     }
@@ -190,15 +195,21 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
     OpenGlVideoDriver::MainLoop _loop;
 };
 
-OffscreenVideoDriver::OffscreenVideoDriver(
-        Size screen_size, EventScheduler& scheduler, const Optional<String>& output_dir):
+OffscreenVideoDriver::OffscreenVideoDriver(Size screen_size, const Optional<String>& output_dir):
         _screen_size(screen_size),
-        _output_dir(output_dir),
-        _scheduler(scheduler) { }
+        _output_dir(output_dir) { }
 
-void OffscreenVideoDriver::loop(Card* initial) {
+void OffscreenVideoDriver::loop(Card* initial, EventScheduler& scheduler) {
+    _scheduler = &scheduler;
     MainLoop loop(*this, _output_dir, initial);
-    _scheduler.loop(loop);
+    _scheduler->loop(loop);
+    _scheduler = nullptr;
+}
+
+void OffscreenVideoDriver::capture(Card* card, PrintItem path) {
+    MainLoop loop(*this, _output_dir, card);
+    loop.draw();
+    loop.snapshot_to(path);
 }
 
 }  // namespace antares

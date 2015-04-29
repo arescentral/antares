@@ -25,6 +25,7 @@
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/text.hpp"
+#include "video/offscreen-driver.hpp"
 
 using sfz::Optional;
 using sfz::ScopedFd;
@@ -44,6 +45,18 @@ namespace args = sfz::args;
 namespace antares {
 namespace {
 
+class DrawSprite : public Card {
+  public:
+    DrawSprite(const PixMap& pix): _pix(pix) { }
+
+    virtual void draw() const {
+        VideoDriver::driver()->new_sprite("-", _pix)->draw(0, 0);
+    }
+
+  private:
+    const PixMap& _pix;
+};
+
 class PixBuilder {
   public:
     PixBuilder(const Optional<String>& output_dir)
@@ -51,10 +64,10 @@ class PixBuilder {
 
     void save(int id, int width) {
         unique_ptr<PixMap> pix(build_pix(id, width));
-        if (_output_dir.has() && (pix.get() != NULL)) {
-            const String path(format("{0}/{1}.png", *_output_dir, dec(id, 5)));
-            ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-            write(fd, *pix);
+        Preferences::preferences()->set_screen_size({width, pix->size().height});
+        OffscreenVideoDriver off(Preferences::preferences()->screen_size(), _output_dir);
+        if (_output_dir.has()) {
+            off.capture(new DrawSprite(*pix), format("{0}.png", dec(id, 5)));
         }
     }
 
