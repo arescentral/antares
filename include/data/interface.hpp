@@ -50,6 +50,7 @@ class InterfaceItem {
 
     InterfaceItem(InterfaceItem&&) = default;
     InterfaceItem& operator=(InterfaceItem&&) = default;
+    virtual ~InterfaceItem() {}
 
     const int id;
     const Rect& bounds() const { return _bounds; }
