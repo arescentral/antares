@@ -30,29 +30,28 @@ namespace antares {
 class OffscreenVideoDriver : public OpenGlVideoDriver {
     class MainLoop;
   public:
-    OffscreenVideoDriver(
-            Size screen_size, EventScheduler& scheduler,
-            const sfz::Optional<sfz::String>& output_dir);
+    OffscreenVideoDriver(Size screen_size, const sfz::Optional<sfz::String>& output_dir);
 
     virtual Size viewport_size() const { return _screen_size; }
     virtual Size screen_size() const { return _screen_size; }
 
-    virtual bool button(int which) { return _scheduler.button(which); }
-    virtual Point get_mouse() { return _scheduler.get_mouse(); }
-    virtual void get_keys(KeyMap* k) { _scheduler.get_keys(k); }
-    virtual InputMode input_mode() const { return _scheduler.input_mode(); }
+    virtual bool button(int which) { return _scheduler->button(which); }
+    virtual Point get_mouse() { return _scheduler->get_mouse(); }
+    virtual void get_keys(KeyMap* k) { _scheduler->get_keys(k); }
+    virtual InputMode input_mode() const { return _scheduler->input_mode(); }
 
-    virtual int ticks() const { return _scheduler.ticks(); }
-    virtual int usecs() const { return _scheduler.usecs(); }
+    virtual int ticks() const { return _scheduler->ticks(); }
+    virtual int usecs() const { return _scheduler->usecs(); }
     virtual int64_t double_click_interval_usecs() const { return 0.5e6; }
 
-    void loop(Card* initial);
+    void loop(Card* initial, EventScheduler& scheduler);
+    void capture(Card* card, sfz::PrintItem path);
 
   private:
     const Size _screen_size;
     const sfz::Optional<sfz::String> _output_dir;
 
-    EventScheduler& _scheduler;
+    EventScheduler* _scheduler = nullptr;
 
     DISALLOW_COPY_AND_ASSIGN(OffscreenVideoDriver);
 };

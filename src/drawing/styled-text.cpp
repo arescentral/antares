@@ -308,12 +308,6 @@ void StyledText::draw(const Rect& bounds) const {
     }
 }
 
-void StyledText::draw(PixMap* pix, const Rect& bounds) const {
-    for (size_t i = 0; i < _chars.size(); ++i) {
-        draw_char(pix, bounds, i);
-    }
-}
-
 void StyledText::draw_char(const Rect& bounds, int index) const {
     const int line_height = _font->height + _line_spacing;
     const int char_adjust = _font->ascent + _line_spacing;
@@ -331,7 +325,7 @@ void StyledText::draw_char(const Rect& bounds, int index) const {
                 VideoDriver::driver()->fill_rect(char_rect, ch.back_color);
             }
             String str(1, ch.character);
-            _font->draw_sprite(Point(corner.h, corner.v + char_adjust), str, ch.fore_color);
+            _font->draw(Point(corner.h, corner.v + char_adjust), str, ch.fore_color);
         }
         break;
 
@@ -361,56 +355,6 @@ void StyledText::draw_char(const Rect& bounds, int index) const {
             Rect line_rect(0, 0, bounds.width() - ch.h, line_height);
             line_rect.offset(corner.h, corner.v);
             VideoDriver::driver()->fill_rect(line_rect, ch.back_color);
-        }
-        break;
-
-      case DELAY:
-        break;
-    }
-}
-
-void StyledText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
-    const int line_height = _font->height + _line_spacing;
-    const int char_adjust = _font->ascent + _line_spacing;
-    const StyledChar& ch = _chars[index];
-    Point corner(bounds.left + ch.h, bounds.top + ch.v);
-
-    switch (ch.special) {
-      case NONE:
-      case WORD_BREAK:
-        {
-            if (ch.back_color != RgbColor::kBlack) {
-                Rect char_rect(0, 0, _font->char_width(ch.character), line_height);
-                char_rect.offset(corner.h, corner.v);
-                pix->view(char_rect).fill(ch.back_color);
-            }
-            _font->draw(Point(corner.h, corner.v + char_adjust), ch.character, ch.fore_color, pix);
-        }
-        break;
-
-      case TAB:
-        if (ch.back_color != RgbColor::kBlack) {
-            Rect tab_rect(0, 0, tab_width() - (ch.h % tab_width()), line_height);
-            tab_rect.offset(corner.h, corner.v);
-            pix->view(tab_rect).fill(ch.back_color);
-        }
-        break;
-
-      case PICTURE:
-        {
-            const inlinePictType& inline_pict = _inline_picts[ch.character];
-            Rect pict_bounds = inline_pict.bounds;
-            pict_bounds.offset(bounds.left, bounds.top + _line_spacing);
-            Picture pict(inline_pict.id);
-            pix->view(pict_bounds).copy(pict);
-        }
-        break;
-
-      case LINE_BREAK:
-        if (ch.back_color != RgbColor::kBlack) {
-            Rect line_rect(0, 0, bounds.width() - ch.h, line_height);
-            line_rect.offset(corner.h, corner.v);
-            pix->view(line_rect).fill(ch.back_color);
         }
         break;
 

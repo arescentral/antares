@@ -21,6 +21,7 @@
 
 #include <sfz/sfz.hpp>
 
+#include "drawing/build-pix.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
 
@@ -46,6 +47,7 @@ class ScrollTextScreen : public Card {
     virtual void draw() const;
 
   private:
+    BuildPix _build_pix;
     std::unique_ptr<Sprite> _sprite;
     const double _speed;
     const bool _play_song;

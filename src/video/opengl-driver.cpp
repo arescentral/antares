@@ -177,11 +177,12 @@ class OpenGlSprite : public Sprite {
         draw_internal(draw_rect);
     }
 
-    virtual void draw_cropped(const Rect& draw_rect, Point origin) const {
+    virtual void draw_cropped(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
         Rect texture_rect(origin, draw_rect.size());
         texture_rect.offset(1, 1);
 
-        glUniform1i(_uniforms.color_mode, 2);
+        glColor4ub(tint.red, tint.green, tint.blue, 255);
+        glUniform1i(_uniforms.color_mode, 3);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
         gl_check();

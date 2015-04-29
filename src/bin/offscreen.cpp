@@ -116,8 +116,8 @@ void main(int argc, char* const* argv) {
         TextVideoDriver video(Preferences::preferences()->screen_size(), scheduler, output_dir);
         video.loop(new Master(14586));
     } else {
-        OffscreenVideoDriver video(Preferences::preferences()->screen_size(), scheduler, output_dir);
-        video.loop(new Master(14586));
+        OffscreenVideoDriver video(Preferences::preferences()->screen_size(), output_dir);
+        video.loop(new Master(14586), scheduler);
     }
 }
 

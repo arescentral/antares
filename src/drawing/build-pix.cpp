@@ -24,7 +24,6 @@
 #include "data/picture.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
-#include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 
 using sfz::BytesSlice;
@@ -42,101 +41,90 @@ namespace antares {
 
 namespace {
 
-class PixBuilder {
+class PixDraw {
   public:
-    PixBuilder(ArrayPixMap* pix)
-            : _pix(pix) { }
+    PixDraw(Point origin, int32_t width)
+            : _bounds(origin, {width, 0}) { }
 
-    void set_background(int id) {
-        _background.reset(new Picture(id));
-        _background_start = _pix->size().height;
+    void set_background(const Sprite& sprite) {
+        _background = &sprite;
+        _background_start = _bounds.height();
     }
 
-    void add_picture(int id) {
-        Picture pict(id);
-        extend(pict.size().height);
-        Rect dest = pict.size().as_rect();
+    void add_picture(const Sprite& sprite) {
         Rect surround(
-                0, _pix->size().height - pict.size().height,
-                _pix->size().width, _pix->size().height);
+            _bounds.left, _bounds.bottom, _bounds.right, _bounds.bottom + sprite.size().height);
+        extend(sprite.size().height);
+        Rect dest = sprite.size().as_rect();
         dest.center_in(surround);
-        _pix->view(dest).copy(pict);
+        sprite.draw(dest);
     }
 
-    void add_text(const StringSlice& text) {
-        RgbColor red;
-        red = GetRGBTranslateColorShade(RED, VERY_LIGHT);
-        StyledText retro(title_font);
-        retro.set_fore_color(red);
-        retro.set_retro_text(text);
-        retro.wrap_to(_pix->size().width - 11, 0, 2);
-
-        Rect dest(0, 0, _pix->size().width, retro.height());
-        dest.offset(0, _pix->size().height);
+    void add_text(const StyledText& text) {
+        Rect dest(_bounds.origin(), {_bounds.width(), text.height()});
+        dest.offset(0, _bounds.height());
         dest.inset(6, 0);
-
-        extend(retro.height());
-        retro.draw(_pix, dest);
+        extend(text.height());
+        text.draw(dest);
     }
 
   private:
     void extend(int height) {
-        const int old_height = _pix->size().height;
-        const int new_height = old_height + height;
-        _pix->resize(Size(_pix->size().width, new_height));
+        const int top = _bounds.bottom;
+        _bounds.bottom += height;
+        const int bottom = _bounds.bottom;
 
-        if (_background.get()) {
-            Rect clip(0, old_height, _pix->size().width, new_height);
-            Rect dest = _background->size().as_rect();
+        if (_background) {
+            Rect clip(_bounds.left, top, _bounds.right, bottom);
+            Rect dest(_bounds.origin(), _background->size());
             while (dest.top < clip.bottom) {
                 if (dest.bottom > clip.top) {
                     Rect clipped_dest = dest;
                     clipped_dest.clip_to(clip);
-                    Rect source(
-                            clipped_dest.left, clipped_dest.top % dest.height(),
-                            clipped_dest.right, ((clipped_dest.bottom - 1) % dest.height()) + 1);
-                    _pix->view(clipped_dest).copy(_background->view(source));
+                    Point origin(
+                            clipped_dest.left - _bounds.left,
+                            (clipped_dest.top - _bounds.top) % dest.height());
+                    _background->draw_cropped(clipped_dest, origin);
                 }
                 dest.offset(0, dest.height());
             }
         }
     }
 
-    ArrayPixMap* _pix;
+    Rect _bounds;
 
-    unique_ptr<Picture> _background;
+    const Sprite* _background;
     int _background_start;
 };
 
 }  // namespace
 
-unique_ptr<PixMap> build_pix(int text_id, int width) {
-    unique_ptr<ArrayPixMap> pix(new ArrayPixMap(width, 0));
-    PixBuilder build(pix.get());
+BuildPix::BuildPix(int text_id, int width):
+        _size({width, 0}) {
     Resource rsrc("text", "txt", text_id);
 
-    vector<String> lines;
     BytesSlice data = rsrc.data();
     String text(utf8::decode(data));
     bool in_section_header = (text.size() >= 2) && (text.slice(0, 2) == "#+");
     size_t start = 0;
     const size_t end = text.size();
+    vector<String> raw_lines;
     for (size_t i = start; i != end; ++i) {
         if (((end - i) >= 3) && (text.slice(i, 3) == "\n#+")) {
-            lines.emplace_back(text.slice(start, i - start));
+            raw_lines.emplace_back(text.slice(start, i - start));
             start = i + 1;
             in_section_header = true;
         } else if (in_section_header && (text.at(i) == '\n')) {
-            lines.emplace_back(text.slice(start, i - start));
+            raw_lines.emplace_back(text.slice(start, i - start));
             start = i + 1;
             in_section_header = false;
         }
     }
     if (start != end) {
-        lines.emplace_back(text.slice(start));
+        raw_lines.emplace_back(text.slice(start));
     }
 
-    for (const auto& line: lines) {
+    for (const auto& line: raw_lines) {
         if (line.size() >= 2 && line.slice(0, 2) == "#+") {
             if (line.size() > 2) {
                 if (line.at(2) == 'B') {
@@ -146,21 +134,53 @@ unique_ptr<PixMap> build_pix(int text_id, int width) {
                             throw Exception(format("malformed header line {0}", quote(line)));
                         }
                     }
-                    build.set_background(id);
+                    Picture pict(id);
+                    _lines.push_back(Line{
+                        Line::BACKGROUND,
+                        VideoDriver::driver()->new_sprite("-", pict),
+                        nullptr,
+                    });
                 } else {
                     int32_t id;
                     if (!string_to_int(line.slice(2), id)) {
                         throw Exception(format("malformed header line {0}", quote(line)));
                     }
-                    build.add_picture(id);
+                    Picture pict(id);
+                    _lines.push_back(Line{
+                        Line::PICTURE,
+                        VideoDriver::driver()->new_sprite("-", pict),
+                        nullptr,
+                    });
                 }
             }
         } else {
-            build.add_text(line);
+            unique_ptr<StyledText> styled(new StyledText(title_font));
+            auto red = GetRGBTranslateColorShade(RED, VERY_LIGHT);
+            styled->set_fore_color(red);
+            styled->set_retro_text(line);
+            styled->wrap_to(_size.width - 11, 0, 2);
+            _lines.push_back(Line{Line::TEXT, nullptr, std::move(styled)});
         }
     }
 
-    return unique_ptr<PixMap>(pix.release());
+    for (const auto& line: _lines) {
+        switch (line.type) {
+            case Line::PICTURE: _size.height += line.sprite->size().height; break;
+            case Line::TEXT: _size.height += line.text->height(); break;
+            case Line::BACKGROUND: break;
+        }
+    }
+}
+
+void BuildPix::draw(Point origin) const {
+    PixDraw draw(origin, _size.width);
+    for (const auto& line: _lines) {
+        switch (line.type) {
+            case Line::PICTURE: draw.add_picture(*line.sprite); break;
+            case Line::TEXT: draw.add_text(*line.text); break;
+            case Line::BACKGROUND: draw.set_background(*line.sprite); break;
+        }
+    }
 }
 
 }  // namespace antares

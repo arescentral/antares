@@ -70,7 +70,7 @@ const Font* interface_font(interfaceStyleType style) {
 
 void DrawInterfaceString(
         Point p, StringSlice s, interfaceStyleType style, const RgbColor& color) {
-    interface_font(style)->draw_sprite(p, s, color);
+    interface_font(style)->draw(p, s, color);
 }
 
 int16_t GetInterfaceStringWidth(const StringSlice& s, interfaceStyleType style) {

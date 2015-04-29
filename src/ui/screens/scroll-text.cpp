@@ -37,19 +37,17 @@ const int kScrollTextHeight = 200;
 
 }  // namespace
 
-ScrollTextScreen::ScrollTextScreen(int text_id, int width, double speed)
-        : _sprite(VideoDriver::driver()->new_sprite(
-                      format("/x/scroll_text/{0}", text_id), *build_pix(text_id, width))),
-          _speed(speed),
-          _play_song(false),
-          _song_id(0) { }
+ScrollTextScreen::ScrollTextScreen(int text_id, int width, double speed):
+        _build_pix(BuildPix(text_id, width)),
+        _speed(speed),
+        _play_song(false),
+        _song_id(0) { }
 
-ScrollTextScreen::ScrollTextScreen(int text_id, int width, double speed, int song_id)
-        : _sprite(VideoDriver::driver()->new_sprite(
-                  format("/x/scroll_text/{0}", text_id), *build_pix(text_id, width))),
-          _speed(speed),
-          _play_song(true),
-          _song_id(song_id) { }
+ScrollTextScreen::ScrollTextScreen(int text_id, int width, double speed, int song_id):
+        _build_pix(BuildPix(text_id, width)),
+        _speed(speed),
+        _play_song(true),
+        _song_id(song_id) { }
 
 void ScrollTextScreen::become_front() {
     // If a song was requested, play it.
@@ -68,7 +66,7 @@ void ScrollTextScreen::become_front() {
     _clip = Rect(0, 0, world.width(), kScrollTextHeight);
     _clip.center_in(world);
 
-    _position = _sprite->size().as_rect();
+    _position = _build_pix.size().as_rect();
     _position.center_in(_clip);
     _position.offset(0, _clip.bottom - _position.top);
 }
@@ -113,7 +111,7 @@ void ScrollTextScreen::fire_timer() {
 }
 
 void ScrollTextScreen::draw() const {
-    _sprite->draw(_position.left, _position.top);
+    _build_pix.draw(_position.origin());
     VideoDriver::driver()->fill_rect(
             Rect(world.left, world.top, world.right, _clip.top), RgbColor::kBlack);
     VideoDriver::driver()->fill_rect(

@@ -358,7 +358,7 @@ class PauseScreen : public Card {
             }
             draw_vbracket(_bracket_bounds, light_green);
 
-            title_font->draw_sprite(_text_origin, _pause_string, light_green);
+            title_font->draw(_text_origin, _pause_string, light_green);
         }
         if (asleep()) {
             VideoDriver::driver()->fill_rect(world, RgbColor(63, 0, 0, 0));

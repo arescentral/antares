@@ -86,7 +86,6 @@ int main(int argc, char** argv) {
     }
 
     NullPrefsDriver prefs;
-    InitDirectText();
     init_globals();
     SpaceObjectHandlingInit();
 

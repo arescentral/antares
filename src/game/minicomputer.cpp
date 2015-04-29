@@ -443,7 +443,7 @@ void draw_mini_screen() {
             else
                 textcolor = GetRGBTranslateColorShade(lineColor, VERY_LIGHT);
         }
-        computer_font->draw_sprite(
+        computer_font->draw(
                 Point(
                     mRect.left + kMiniScreenLeftBuffer,
                     mRect.top + (count + lineCorrect) * computer_font->height + computer_font->ascent),
@@ -800,7 +800,7 @@ static void draw_player_ammo_in_rect(int32_t value, int8_t hue, const Rect& rect
             '\0',
         };
         Point origin(rect.left + kMiniAmmoTextHBuffer, rect.bottom - 1);
-        computer_font->draw_sprite(origin, digits, text_color);
+        computer_font->draw(origin, digits, text_color);
     }
 }
 
@@ -827,7 +827,7 @@ void draw_mini_ship_data(
     draw_shaded_rect(lRect, color, lightcolor, darkcolor);
 
     String text(mini_data_strings->at(whichString - 1));
-    computer_font->draw_sprite(
+    computer_font->draw(
             Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
             text, RgbColor::kBlack);
 
@@ -839,7 +839,7 @@ void draw_mini_ship_data(
 
         // move to the 1st line in the selection miniscreen
         String text(GetDestBalanceName(newObject.asDestination));
-        computer_font->draw_sprite(
+        computer_font->draw(
                 Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
                 text, color);
     } else {
@@ -851,7 +851,7 @@ void draw_mini_ship_data(
 
             // move to the 1st line in the selection miniscreen, write the name
             String text(get_object_short_name(newObject.base));
-            computer_font->draw_sprite(
+            computer_font->draw(
                     Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
                     text, color);
         }
@@ -959,8 +959,7 @@ void draw_mini_ship_data(
     // move to the 1st line in the selection miniscreen, write the name
     if (newObject.beam.base.get()) {
         String text(get_object_short_name(newObject.beam.base));
-        computer_font->draw_sprite(
-                Point(lRect.left, lRect.top + computer_font->ascent), text, color);
+        computer_font->draw(Point(lRect.left, lRect.top + computer_font->ascent), text, color);
     }
 
     lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
@@ -971,8 +970,7 @@ void draw_mini_ship_data(
     // move to the 1st line in the selection miniscreen, write the name
     if (newObject.pulse.base.get()) {
         String text(get_object_short_name(newObject.pulse.base));
-        computer_font->draw_sprite(
-                Point(lRect.left, lRect.top + computer_font->ascent), text, color);
+        computer_font->draw(Point(lRect.left, lRect.top + computer_font->ascent), text, color);
     }
 
     // Don't show special weapons of destination objects.
@@ -985,8 +983,7 @@ void draw_mini_ship_data(
         // move to the 1st line in the selection miniscreen, write the name
         if (newObject.special.base.get()) {
             String text(get_object_short_name(newObject.special.base));
-            computer_font->draw_sprite(
-                    Point(lRect.left, lRect.top + computer_font->ascent), text, color);
+            computer_font->draw(Point(lRect.left, lRect.top + computer_font->ascent), text, color);
         }
     }
 
@@ -1005,12 +1002,10 @@ void draw_mini_ship_data(
 
         if (dObject->attributes & kIsDestination) {
             String text(GetDestBalanceName(dObject->asDestination));
-            computer_font->draw_sprite(
-                    Point(lRect.left, lRect.top + computer_font->ascent), text, color);
+            computer_font->draw(Point(lRect.left, lRect.top + computer_font->ascent), text, color);
         } else {
             String text(get_object_name(dObject->base));
-            computer_font->draw_sprite(
-                    Point(lRect.left, lRect.top + computer_font->ascent), text, color);
+            computer_font->draw(Point(lRect.left, lRect.top + computer_font->ascent), text, color);
         }
     }
 }
