@@ -68,6 +68,13 @@ class VideoDriver {
     virtual void draw_plus(const Rect& rect, const RgbColor& color) = 0;
 
     static VideoDriver* driver();
+
+  private:
+    friend class Rects;
+
+    virtual void begin_rects() { }
+    virtual void end_rects() { }
+    virtual void batch_rect(const Rect& rect, const RgbColor& color) { fill_rect(rect, color); }
 };
 
 class Sprite {
@@ -110,6 +117,13 @@ class Sprite {
     virtual void draw_quad(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
         draw_cropped(draw_rect, origin, tint);
     }
+};
+
+class Rects {
+  public:
+    Rects();
+    ~Rects();
+    void fill(const Rect& rect, const RgbColor& color) const;
 };
 
 class Quads {

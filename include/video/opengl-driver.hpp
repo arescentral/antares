@@ -78,6 +78,10 @@ class OpenGlVideoDriver : public VideoDriver {
     virtual Size screen_size() const = 0;
 
   private:
+    virtual void begin_rects();
+    virtual void end_rects();
+    virtual void batch_rect(const Rect& rect, const RgbColor& color);
+
     Random _static_seed;
 
     Uniforms _uniforms;

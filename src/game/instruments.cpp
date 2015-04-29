@@ -473,21 +473,22 @@ static void draw_money() {
         second_threshold = globals()->gBarIndicator[kFineMoneyBar].thisValue;
     }
 
+    Rects rects;
     for (int i = 0; i < kFineMoneyBarNum; ++i) {
         if (i < first_threshold) {
             if ((i % 5) != 0) {
-                VideoDriver::driver()->fill_rect(box, first_color_minor);
+                rects.fill(box, first_color_minor);
             } else {
-                VideoDriver::driver()->fill_rect(box, first_color_major);
+                rects.fill(box, first_color_major);
             }
         } else if (i < second_threshold) {
             if ((i % 5) != 0) {
-                VideoDriver::driver()->fill_rect(box, second_color_minor);
+                rects.fill(box, second_color_minor);
             } else {
-                VideoDriver::driver()->fill_rect(box, second_color_major);
+                rects.fill(box, second_color_major);
             }
         } else {
-            VideoDriver::driver()->fill_rect(box, third_color);
+            rects.fill(box, third_color);
         }
         box.offset(0, kFineMoneyBarHeight);
     }
@@ -504,9 +505,9 @@ static void draw_money() {
     const RgbColor dark = GetRGBTranslateColorShade(kGrossMoneyColor, VERY_DARK);
     for (int i = 0; i < kGrossMoneyBarNum; ++i) {
         if (i < gross->thisValue) {
-            VideoDriver::driver()->fill_rect(box, light);
+            rects.fill(box, light);
         } else {
-            VideoDriver::driver()->fill_rect(box, dark);
+            rects.fill(box, dark);
         }
         box.offset(0, kGrossMoneyBarHeight);
     }

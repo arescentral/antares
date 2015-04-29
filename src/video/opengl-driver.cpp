@@ -292,15 +292,27 @@ unique_ptr<Sprite> OpenGlVideoDriver::new_sprite(PrintItem name, const PixMap& c
     return unique_ptr<Sprite>(new OpenGlSprite(name, content, _uniforms));
 }
 
-void OpenGlVideoDriver::fill_rect(const Rect& rect, const RgbColor& color) {
+void OpenGlVideoDriver::begin_rects() {
     glUniform1i(_uniforms.color_mode, 0);
-    glColor4ub(color.red, color.green, color.blue, color.alpha);
     glBegin(GL_QUADS);
+}
+
+void OpenGlVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
+    glColor4ub(color.red, color.green, color.blue, color.alpha);
     glVertex2f(rect.right, rect.top);
     glVertex2f(rect.left, rect.top);
     glVertex2f(rect.left, rect.bottom);
     glVertex2f(rect.right, rect.bottom);
+}
+
+void OpenGlVideoDriver::end_rects() {
     glEnd();
+}
+
+void OpenGlVideoDriver::fill_rect(const Rect& rect, const RgbColor& color) {
+    begin_rects();
+    batch_rect(rect, color);
+    end_rects();
 }
 
 void OpenGlVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {

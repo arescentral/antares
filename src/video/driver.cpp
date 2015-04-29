@@ -47,6 +47,18 @@ VideoDriver* VideoDriver::driver() {
 
 Sprite::~Sprite() { }
 
+Rects::Rects() {
+    VideoDriver::driver()->begin_rects();
+}
+
+Rects::~Rects() {
+    VideoDriver::driver()->end_rects();
+}
+
+void Rects::fill(const Rect& rect, const RgbColor& color) const {
+    VideoDriver::driver()->batch_rect(rect, color);
+}
+
 Quads::Quads(const Sprite& sprite):
         _sprite(sprite) {
     _sprite.begin_quads();
