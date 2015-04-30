@@ -212,18 +212,6 @@ void TextVideoDriver::draw_point(const Point& at, const RgbColor& color) {
 }
 
 void TextVideoDriver::draw_line(const Point& from, const Point& to, const RgbColor& color) {
-    if ((from.h == to.h) || (from.v == to.v)) {
-        Rect rect(
-                min(from.h, to.h), min(from.v, to.v),
-                max(from.h, to.h) + 1, max(from.v, to.v) + 1);
-        fill_rect(rect, color);
-    } else {
-        PrintItem args[] = {from.h, from.v, to.h, to.v, hex(color)};
-        log("line", args);
-    }
-}
-
-void TextVideoDriver::batch_line(const Point& from, const Point& to, const RgbColor& color) {
     PrintItem args[] = {from.h, from.v, to.h, to.v, hex(color)};
     log("line", args);
 }

@@ -341,23 +341,6 @@ void OpenGlVideoDriver::draw_point(const Point& at, const RgbColor& color) {
 void OpenGlVideoDriver::draw_line(const Point& from, const Point& to, const RgbColor& color) {
     glUniform1i(_uniforms.color_mode, 0);
 
-    // Shortcut: when `from` == `to`, we can draw just a point.
-    if (from == to) {
-        draw_point(from, color);
-        return;
-    }
-
-    // Shortcut: when one of the dimensions of `from` and `to` matches, we can draw a rect.  This
-    // gives more predictable results than using GL_LINES: the OpenGL standard is not strict about
-    // how to render lines, and may give bad results at the endpoints.
-    if ((from.h == to.h) || (from.v == to.v)) {
-        Rect rect(
-                min(from.h, to.h), min(from.v, to.v),
-                max(from.h, to.h) + 1, max(from.v, to.v) + 1);
-        fill_rect(rect, color);
-        return;
-    }
-
     //
     // Adjust `from` and `to` points that we draw all of the pixels that we're supposed to.
     //

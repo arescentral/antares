@@ -383,8 +383,8 @@ void draw_mini_screen() {
             const RgbColor color = GetRGBTranslateColorShade(lineColor, MEDIUM);
             int32_t y = mRect.top + (count + lineCorrect) * computer_font->height
                       + computer_font->ascent;
-            VideoDriver::driver()->draw_line(
-                    Point(mRect.left, y), Point(mRect.right - 2, y), color);
+            VideoDriver::driver()->fill_rect(
+                    {mRect.left, y, mRect.right - 1, y + 1}, color);
         }
 
         if ( c->hiliteLeft < c->hiliteRight)

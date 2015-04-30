@@ -57,8 +57,6 @@ class TextVideoDriver : public VideoDriver {
     class MainLoop;
     class Sprite;
 
-    virtual void batch_line(const Point& from, const Point& to, const RgbColor& color);
-
     void add_arg(sfz::StringSlice arg, std::vector<std::pair<size_t, size_t>>& args);
     void dup_arg(size_t index, std::vector<std::pair<size_t, size_t>>& args);
     sfz::StringSlice last_arg(size_t index) const;

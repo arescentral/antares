@@ -100,33 +100,27 @@ void draw_vbracket(const Rect& rect, const RgbColor& color) {
     Point ll(rect.left, rect.bottom - 1);
     Point lr(rect.right - 1, rect.bottom - 1);
 
-    VideoDriver::driver()->draw_line(ul, ur, color);
-    VideoDriver::driver()->draw_line(ul, Point(ul.h, ul.v + 1), color);
-    VideoDriver::driver()->draw_line(ur, Point(ur.h, ur.v + 1), color);
+    Rects rects;
+    rects.fill({rect.left, rect.top, rect.right, rect.top + 1}, color);
+    rects.fill({rect.left, rect.top, rect.left + 1, rect.top + 2}, color);
+    rects.fill({rect.right - 1, rect.top, rect.right, rect.top + 2}, color);
 
-    VideoDriver::driver()->draw_line(ll, lr, color);
-    VideoDriver::driver()->draw_line(ll, Point(ll.h, ll.v - 1), color);
-    VideoDriver::driver()->draw_line(lr, Point(lr.h, lr.v - 1), color);
+    rects.fill({rect.left, rect.bottom - 1, rect.right, rect.bottom}, color);
+    rects.fill({rect.left, rect.bottom - 2, rect.left + 1, rect.bottom}, color);
+    rects.fill({rect.right - 1, rect.bottom - 2, rect.right, rect.bottom}, color);
 }
 
 void draw_shaded_rect(
         Rect rect,
         const RgbColor& fill_color, const RgbColor& light_color, const RgbColor& dark_color) {
-    rect.right--;
-    rect.bottom--;
+    Rects rects;
+    rects.fill({rect.left, rect.top, rect.left + 1, rect.bottom}, light_color);
+    rects.fill({rect.left, rect.top, rect.right, rect.top + 1}, light_color);
 
-    VideoDriver::driver()->draw_line(
-            Point(rect.left, rect.bottom), Point(rect.left, rect.top), light_color);
-    VideoDriver::driver()->draw_line(
-        Point(rect.left, rect.top), Point(rect.right, rect.top), light_color);
+    rects.fill({rect.right - 1, rect.top, rect.right, rect.bottom}, dark_color);
+    rects.fill({rect.left, rect.bottom - 1, rect.right, rect.bottom}, dark_color);
 
-    VideoDriver::driver()->draw_line(
-        Point(rect.right, rect.top), Point(rect.right, rect.bottom), dark_color);
-    VideoDriver::driver()->draw_line(
-        Point(rect.right, rect.bottom), Point(rect.left, rect.bottom), dark_color);
-    rect.left++;
-    rect.top++;
-
+    rect.inset(1, 1);
     if ((rect.height() > 0) && (rect.width() > 0)) {
         VideoDriver::driver()->fill_rect(rect, fill_color);
     }

@@ -660,8 +660,9 @@ void update_sector_lines() {
 }
 
 void draw_sector_lines() {
-    int32_t         *l;
-    uint32_t        size, level, x, h, division;
+    Rects rects;
+    int32_t         *l, x;
+    uint32_t        size, level, h, division;
     RgbColor        color;
 
     size = kSubSectorSize / 4;
@@ -690,7 +691,8 @@ void draw_sector_lines() {
                 color = GetRGBTranslateColorShade(BLUE, kSectorLineBrightness);
             }
 
-            VideoDriver::driver()->draw_line(Point(x, viewport.top), Point(x, viewport.bottom), color);
+            // TODO(sfiera): +1 on bottom no longer needed.
+            rects.fill({x, viewport.top, x + 1, viewport.bottom + 1}, color);
             *l = x;
             l += 2;
             division += level;
@@ -715,7 +717,8 @@ void draw_sector_lines() {
                 color = GetRGBTranslateColorShade(BLUE, kSectorLineBrightness);
             }
 
-            VideoDriver::driver()->draw_line(Point(viewport.left, x), Point(viewport.right, x), color);
+            // TODO(sfiera): +1 on right no longer needed.
+            rects.fill({viewport.left, x, viewport.right + 1, x + 1}, color);
             *l = x;
             l += 2;
 
@@ -751,7 +754,9 @@ void InstrumentsHandleMouseStillDown(const GameCursor& cursor) {
 
 void draw_arbitrary_sector_lines(
         const coordPointType& corner, int32_t scale, int32_t minSectorSize, const Rect& bounds) {
-    uint32_t        size, level, x, h, division;
+    Rects rects;
+    uint32_t        size, level, h, division;
+    int32_t         x;
     RgbColor        color;
 
     size = kSubSectorSize >> 2L;
@@ -787,8 +792,7 @@ void draw_arbitrary_sector_lines(
             color = GetRGBTranslateColorShade(BLUE, DARKER);
         }
 
-        VideoDriver::driver()->draw_line(
-                Point(x, bounds.top), Point(x, bounds.bottom - 1), color);
+        rects.fill({x, bounds.top, x + 1, bounds.bottom}, color);
         division += level;
         division &= 0x0000000f;
         x += h;
@@ -815,8 +819,7 @@ void draw_arbitrary_sector_lines(
             color = GetRGBTranslateColorShade(BLUE, DARKER);
         }
 
-        VideoDriver::driver()->draw_line(
-                Point(bounds.left, x), Point(bounds.right - 1, x), color);
+        rects.fill({bounds.left, x, bounds.right, x + 1}, color);
         division += level;
         division &= 0x0000000f;
         x += h;
