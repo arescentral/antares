@@ -67,7 +67,7 @@ Lines::~Lines() {
     VideoDriver::driver()->end_lines();
 }
 
-void Lines::draw(const Point& from, const Point& to, const RgbColor& color) {
+void Lines::draw(const Point& from, const Point& to, const RgbColor& color) const {
     VideoDriver::driver()->batch_line(from, to, color);
 }
 
@@ -92,7 +92,7 @@ Quads::~Quads() {
     _sprite.end_quads();
 }
 
-void Quads::draw(const Rect& draw_rect, Point origin, const RgbColor& tint) {
+void Quads::draw(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
     _sprite.draw_quad(draw_rect, origin, tint);
 }
 

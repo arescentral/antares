@@ -142,7 +142,7 @@ class Lines {
   public:
     Lines();
     ~Lines();
-    void draw(const Point& from, const Point& to, const RgbColor& color);
+    void draw(const Point& from, const Point& to, const RgbColor& color) const;
 };
 
 class Rects {
@@ -156,7 +156,7 @@ class Quads {
   public:
     Quads(const Sprite& sprite);
     ~Quads();
-    void draw(const Rect& draw_rect, Point origin, const RgbColor& tint);
+    void draw(const Rect& draw_rect, Point origin, const RgbColor& tint) const;
   private:
     const Sprite& _sprite;
 };

@@ -350,13 +350,16 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
         }
     }
 
-    for (size_t i = begin; i < end; ++i) {
-        const StyledChar& ch = _chars[i];
-        Point corner = bounds.origin();
-        if (ch.special == NONE) {
-            _font->draw(
-                    Point(bounds.left + ch.h, bounds.top + ch.v + char_adjust),
-                    String(1, ch.character), ch.fore_color);
+    {
+        Quads quads(*_font->sprite);
+        for (size_t i = begin; i < end; ++i) {
+            const StyledChar& ch = _chars[i];
+            Point corner = bounds.origin();
+            if (ch.special == NONE) {
+                _font->draw(
+                        quads, Point(bounds.left + ch.h, bounds.top + ch.v + char_adjust),
+                        String(1, ch.character), ch.fore_color);
+            }
         }
     }
 
