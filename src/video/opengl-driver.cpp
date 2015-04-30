@@ -307,6 +307,7 @@ void OpenGlVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
 
 void OpenGlVideoDriver::end_rects() {
     glEnd();
+    gl_check();
 }
 
 void OpenGlVideoDriver::fill_rect(const Rect& rect, const RgbColor& color) {
