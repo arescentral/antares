@@ -339,9 +339,18 @@ void OpenGlVideoDriver::draw_point(const Point& at, const RgbColor& color) {
     glEnd();
 }
 
-void OpenGlVideoDriver::draw_line(const Point& from, const Point& to, const RgbColor& color) {
+void OpenGlVideoDriver::begin_lines() {
     glUniform1i(_uniforms.color_mode, 0);
+    glBegin(GL_LINES);
+}
 
+void OpenGlVideoDriver::end_lines() {
+    glEnd();
+    gl_check();
+}
+
+void OpenGlVideoDriver::batch_line(
+        const Point& from, const Point& to, const RgbColor& color) {
     //
     // Adjust `from` and `to` points that we draw all of the pixels that we're supposed to.
     //
@@ -381,10 +390,14 @@ void OpenGlVideoDriver::draw_line(const Point& from, const Point& to, const RgbC
     }
 
     glColor4ub(color.red, color.green, color.blue, color.alpha);
-    glBegin(GL_LINES);
     glVertex2f(x1, y1);
     glVertex2f(x2, y2);
-    glEnd();
+}
+
+void OpenGlVideoDriver::draw_line(const Point& from, const Point& to, const RgbColor& color) {
+    begin_lines();
+    draw_line(from, to, color);
+    end_lines();
 }
 
 void OpenGlVideoDriver::draw_triangle(const Rect& rect, const RgbColor& color) {
