@@ -47,6 +47,30 @@ VideoDriver* VideoDriver::driver() {
 
 Sprite::~Sprite() { }
 
+Points::Points() {
+    VideoDriver::driver()->begin_points();
+}
+
+Points::~Points() {
+    VideoDriver::driver()->end_points();
+}
+
+void Points::draw(const Point& at, const RgbColor& color) const {
+    VideoDriver::driver()->batch_point(at, color);
+}
+
+Lines::Lines() {
+    VideoDriver::driver()->begin_lines();
+}
+
+Lines::~Lines() {
+    VideoDriver::driver()->end_lines();
+}
+
+void Lines::draw(const Point& from, const Point& to, const RgbColor& color) {
+    VideoDriver::driver()->batch_line(from, to, color);
+}
+
 Rects::Rects() {
     VideoDriver::driver()->begin_rects();
 }

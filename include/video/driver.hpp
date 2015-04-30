@@ -70,7 +70,19 @@ class VideoDriver {
     static VideoDriver* driver();
 
   private:
+    friend class Points;
+    friend class Lines;
     friend class Rects;
+
+    virtual void begin_points() { }
+    virtual void end_points() { }
+    virtual void batch_point(const Point& at, const RgbColor& color) { draw_point(at, color); }
+
+    virtual void begin_lines() { }
+    virtual void end_lines() { }
+    virtual void batch_line(const Point& from, const Point& to, const RgbColor& color) {
+        draw_line(from, to, color);
+    }
 
     virtual void begin_rects() { }
     virtual void end_rects() { }
@@ -117,6 +129,20 @@ class Sprite {
     virtual void draw_quad(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
         draw_cropped(draw_rect, origin, tint);
     }
+};
+
+class Points {
+  public:
+    Points();
+    ~Points();
+    void draw(const Point& at, const RgbColor& color) const;
+};
+
+class Lines {
+  public:
+    Lines();
+    ~Lines();
+    void draw(const Point& from, const Point& to, const RgbColor& color);
 };
 
 class Rects {

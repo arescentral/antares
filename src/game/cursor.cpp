@@ -159,20 +159,21 @@ void GameCursor::draw() const {
 
 void HintLine::draw() {
     if (show_hint_line) {
+        Lines lines;
         Point start = hint_line_start;
         Point end = hint_line_end;
 
         start.offset(0, 2);
         end.offset(0, 2);
-        VideoDriver::driver()->draw_line(start, end, hint_line_color_dark);
+        lines.draw(start, end, hint_line_color_dark);
 
         start.offset(0, -1);
         end.offset(0, -1);
-        VideoDriver::driver()->draw_line(start, end, hint_line_color);
+        lines.draw(start, end, hint_line_color);
 
         start.offset(0, -1);
         end.offset(0, -1);
-        VideoDriver::driver()->draw_line(start, end, hint_line_color);
+        lines.draw(start, end, hint_line_color);
     }
 }
 

@@ -267,10 +267,13 @@ void BriefingScreen::build_brief_point() {
 }
 
 void BriefingScreen::draw_system_map() const {
-    for (int i = 0; i < _system_stars.size(); ++i) {
-        const Star& star = _system_stars[i];
-        RgbColor star_color = GetRGBTranslateColorShade(GRAY, star.shade + DARKEST);
-        VideoDriver::driver()->draw_point(star.location, star_color);
+    {
+        Points points;
+        for (int i = 0; i < _system_stars.size(); ++i) {
+            const Star& star = _system_stars[i];
+            RgbColor star_color = GetRGBTranslateColorShade(GRAY, star.shade + DARKEST);
+            points.draw(star.location, star_color);
+        }
     }
 
     coordPointType corner;

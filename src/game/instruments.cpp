@@ -417,10 +417,11 @@ void draw_radar() {
             color = GetRGBTranslateColorShade(kRadarColor, ((kRadarColorSteps * globals()->gRadarCount) / globals()->gRadarSpeed) + 1);
         }
 
+        Points points;
         for (int rcount = 0; rcount < kRadarBlipNum; rcount++) {
             Point* lp = gRadarBlipData.get() + rcount;
             if (lp->h >= 0) {
-                VideoDriver::driver()->draw_point(*lp, color);
+                points.draw(*lp, color);
             }
         }
     } else {
@@ -615,9 +616,10 @@ void update_site(bool replay) {
 
 void draw_site(const PlayerShip& player) {
     if (site.should_draw) {
-        VideoDriver::driver()->draw_line(site.a, site.b, site.light);
-        VideoDriver::driver()->draw_line(site.a, site.c, site.light);
-        VideoDriver::driver()->draw_line(site.b, site.c, site.dark);
+        Lines lines;
+        lines.draw(site.a, site.b, site.light);
+        lines.draw(site.a, site.c, site.light);
+        lines.draw(site.b, site.c, site.dark);
 
         SiteData control = {};
         if (player.show_select()) {
@@ -632,9 +634,9 @@ void draw_site(const PlayerShip& player) {
         if (control.should_draw) {
             update_triangle(
                     control, player.control_direction(), kSiteDistance - 3, kSiteSize - 6);
-            VideoDriver::driver()->draw_line(control.a, control.b, control.light);
-            VideoDriver::driver()->draw_line(control.a, control.c, control.light);
-            VideoDriver::driver()->draw_line(control.b, control.c, control.dark);
+            lines.draw(control.a, control.b, control.light);
+            lines.draw(control.a, control.c, control.light);
+            lines.draw(control.b, control.c, control.dark);
         }
     }
 }
