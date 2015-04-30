@@ -331,12 +331,24 @@ void OpenGlVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
     glEnd();
 }
 
-void OpenGlVideoDriver::draw_point(const Point& at, const RgbColor& color) {
+void OpenGlVideoDriver::begin_points() {
     glUniform1i(_uniforms.color_mode, 0);
-    glColor4ub(color.red, color.green, color.blue, color.alpha);
     glBegin(GL_POINTS);
-    glVertex2f(at.h + 0.5, at.v + 0.5);
+}
+
+void OpenGlVideoDriver::end_points() {
     glEnd();
+}
+
+void OpenGlVideoDriver::batch_point(const Point& at, const RgbColor& color) {
+    glColor4ub(color.red, color.green, color.blue, color.alpha);
+    glVertex2f(at.h + 0.5, at.v + 0.5);
+}
+
+void OpenGlVideoDriver::draw_point(const Point& at, const RgbColor& color) {
+    begin_points();
+    batch_point(at, color);
+    end_points();
 }
 
 void OpenGlVideoDriver::begin_lines() {

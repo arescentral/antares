@@ -78,6 +78,10 @@ class OpenGlVideoDriver : public VideoDriver {
     virtual Size screen_size() const = 0;
 
   private:
+    virtual void begin_points();
+    virtual void end_points();
+    virtual void batch_point(const Point& at, const RgbColor& color);
+
     virtual void begin_lines();
     virtual void end_lines();
     virtual void batch_line(const Point& from, const Point& to, const RgbColor& color);
