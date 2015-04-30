@@ -122,7 +122,7 @@ void draw_shaded_rect(
 
     rect.inset(1, 1);
     if ((rect.height() > 0) && (rect.width() > 0)) {
-        VideoDriver::driver()->fill_rect(rect, fill_color);
+        rects.fill(rect, fill_color);
     }
 }
 
