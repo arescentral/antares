@@ -303,7 +303,11 @@ const std::vector<inlinePictType>& StyledText::inline_picts() const {
 }
 
 void StyledText::draw(const Rect& bounds) const {
-    for (size_t i = 0; i < _chars.size(); ++i) {
+    draw_range(bounds, 0, _chars.size());
+}
+
+void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
+    for (size_t i = begin; i < end; ++i) {
         draw_char(bounds, i);
     }
 }

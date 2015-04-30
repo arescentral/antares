@@ -594,9 +594,7 @@ void Messages::draw_message() {
     Rect bounds(viewport.left, viewport.bottom, viewport.right, play_screen.bottom);
     bounds.inset(kHBuffer, 0);
     bounds.top += kLongMessageVPad;
-    for (int i = 0; i < long_message_data->at_char; ++i) {
-        long_message_data->retro_text->draw_char(bounds, i);
-    }
+    long_message_data->retro_text->draw_range(bounds, 0, long_message_data->at_char);
     // The final char is a newline; don't display a cursor rect for it.
     if ((0 < long_message_data->at_char)
             && (long_message_data->at_char < (long_message_data->retro_text->size() - 1))) {
