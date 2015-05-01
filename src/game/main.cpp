@@ -355,8 +355,8 @@ class PauseScreen : public Card {
                 for (int32_t y = _bracket_bounds.top + 2; y < _bracket_bounds.bottom; y += 2) {
                     rects.fill({_bracket_bounds.left, y, _bracket_bounds.right, y + 1}, dark_green);
                 }
+                draw_vbracket(rects, _bracket_bounds, light_green);
             }
-            draw_vbracket(_bracket_bounds, light_green);
 
             title_font->draw(_text_origin, _pause_string, light_green);
         }

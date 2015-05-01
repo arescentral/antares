@@ -918,6 +918,7 @@ void GetArbitrarySingleSectorBounds(coordPointType *corner, coordPointType *loca
 }
 
 static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
+    Rects rects;
     if (value > max) {
         value = max;
     }
@@ -948,7 +949,7 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
         const RgbColor fill_color = GetRGBTranslateColorShade(hue, DARK);
         const RgbColor light_color = GetRGBTranslateColorShade(hue, MEDIUM);
         const RgbColor dark_color = GetRGBTranslateColorShade(hue, DARKER);
-        draw_shaded_rect(top_bar, fill_color, light_color, dark_color);
+        draw_shaded_rect(rects, top_bar, fill_color, light_color, dark_color);
     }
 
     if (graphicValue > 0) {
@@ -957,7 +958,7 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
         const RgbColor fill_color = GetRGBTranslateColorShade(hue, LIGHTER);
         const RgbColor light_color = GetRGBTranslateColorShade(hue, VERY_LIGHT);
         const RgbColor dark_color = GetRGBTranslateColorShade(hue, MEDIUM);
-        draw_shaded_rect(bottom_bar, fill_color, light_color, dark_color);
+        draw_shaded_rect(rects, bottom_bar, fill_color, light_color, dark_color);
     }
 
     globals()->gBarIndicator[which].thisValue = value;
@@ -967,13 +968,14 @@ void draw_build_time_bar(int32_t value) {
     if (value < 0) {
         return;
     }
+    Rects rects;
     value = kMiniBuildTimeHeight - value;
 
     const Rect clip = mini_build_time_rect();
 
     {
         const RgbColor color = GetRGBTranslateColorShade(PALE_PURPLE, MEDIUM);
-        draw_vbracket(clip, color);
+        draw_vbracket(rects, clip, color);
     }
 
     Rect bar = clip;
@@ -981,13 +983,13 @@ void draw_build_time_bar(int32_t value) {
 
     {
         const RgbColor color = GetRGBTranslateColorShade(PALE_PURPLE, DARK);
-        VideoDriver::driver()->fill_rect(bar, color);
+        rects.fill(bar, color);
     }
 
     if (value > 0) {
         bar.top += value;
         const RgbColor color = GetRGBTranslateColorShade(PALE_PURPLE, LIGHT);
-        VideoDriver::driver()->fill_rect(bar, color);
+        rects.fill(bar, color);
     }
 }
 

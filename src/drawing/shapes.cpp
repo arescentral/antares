@@ -94,13 +94,12 @@ void draw_compat_diamond(PixMap *destPix, const RgbColor& color) {
     }
 }
 
-void draw_vbracket(const Rect& rect, const RgbColor& color) {
+void draw_vbracket(const Rects& rects, const Rect& rect, const RgbColor& color) {
     Point ul(rect.left, rect.top);
     Point ur(rect.right - 1, rect.top);
     Point ll(rect.left, rect.bottom - 1);
     Point lr(rect.right - 1, rect.bottom - 1);
 
-    Rects rects;
     rects.fill({rect.left, rect.top, rect.right, rect.top + 1}, color);
     rects.fill({rect.left, rect.top, rect.left + 1, rect.top + 2}, color);
     rects.fill({rect.right - 1, rect.top, rect.right, rect.top + 2}, color);
@@ -111,9 +110,8 @@ void draw_vbracket(const Rect& rect, const RgbColor& color) {
 }
 
 void draw_shaded_rect(
-        Rect rect,
+        const Rects& rects, Rect rect,
         const RgbColor& fill_color, const RgbColor& light_color, const RgbColor& dark_color) {
-    Rects rects;
     rects.fill({rect.left, rect.top, rect.left + 1, rect.bottom}, light_color);
     rects.fill({rect.left, rect.top, rect.right, rect.top + 1}, light_color);
 
@@ -124,6 +122,16 @@ void draw_shaded_rect(
     if ((rect.height() > 0) && (rect.width() > 0)) {
         rects.fill(rect, fill_color);
     }
+}
+
+void draw_shaded_rect(
+        const Rects& rects, Rect rect,
+        uint8_t hue, uint8_t fill_color, uint8_t light_color, uint8_t dark_color) {
+    draw_shaded_rect(
+            rects, rect,
+            GetRGBTranslateColorShade(hue, fill_color),
+            GetRGBTranslateColorShade(hue, light_color),
+            GetRGBTranslateColorShade(hue, dark_color));
 }
 
 }  // namespace antares

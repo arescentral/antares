@@ -170,7 +170,7 @@ void DebriefingScreen::draw() const {
     RgbColor bracket_color = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
     Rect bracket_bounds = _score_bounds;
     bracket_bounds.inset(-2, -2);
-    draw_vbracket(bracket_bounds, bracket_color);
+    draw_vbracket(Rects(), bracket_bounds, bracket_color);
 }
 
 void DebriefingScreen::mouse_down(const MouseDownEvent& event) {
