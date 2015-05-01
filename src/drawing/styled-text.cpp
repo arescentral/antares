@@ -393,7 +393,7 @@ void StyledText::color_cursor(const Rect& bounds, int index, const RgbColor& col
     char_rect.offset(corner.h, corner.v);
     char_rect.clip_to(bounds);
     if ((char_rect.width() > 0) && (char_rect.height() > 0)) {
-        VideoDriver::driver()->fill_rect(char_rect, color);
+        Rects().fill(char_rect, color);
     }
 }
 

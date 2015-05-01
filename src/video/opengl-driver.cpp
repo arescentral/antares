@@ -310,12 +310,6 @@ void OpenGlVideoDriver::end_rects() {
     gl_check();
 }
 
-void OpenGlVideoDriver::fill_rect(const Rect& rect, const RgbColor& color) {
-    begin_rects();
-    batch_rect(rect, color);
-    end_rects();
-}
-
 void OpenGlVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
     glUniform1i(_uniforms.color_mode, 1);
     glColor4ub(color.red, color.green, color.blue, color.alpha);

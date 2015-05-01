@@ -126,9 +126,10 @@ void LoadingScreen::overlay() const {
     const RgbColor& light = GetRGBTranslateColorShade(kLoadingScreenColor, LIGHT);
     const RgbColor& dark = GetRGBTranslateColorShade(kLoadingScreenColor, DARK);
     Rect bar = item(0).bounds();
-    VideoDriver::driver()->fill_rect(bar, dark);
+    Rects rects;
+    rects.fill(bar, dark);
     bar.right = bar.left + (bar.width() * _current / _max);
-    VideoDriver::driver()->fill_rect(bar, light);
+    rects.fill(bar, light);
 }
 
 }  // namespace antares

@@ -321,7 +321,7 @@ void BriefingScreen::draw_brief_point() const {
 
     Rect bounds;
     GetAnyInterfaceItemGraphicBounds(_data_item, &bounds);
-    VideoDriver::driver()->fill_rect(bounds, RgbColor::kBlack);
+    Rects().fill(bounds, RgbColor::kBlack);
     draw_interface_item(_data_item, KEYBOARD_MOUSE);
     vector<inlinePictType> unused;
     draw_text_in_rect(_data_item.bounds(), _text, _data_item.style, _data_item.hue, unused);

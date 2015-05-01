@@ -135,9 +135,9 @@ void ObjectDataScreen::draw() const {
     Rect outside = _bounds;
     outside.inset(-8, -4);
     const RgbColor light_green = GetRGBTranslateColorShade(GREEN, VERY_LIGHT);
-    VideoDriver::driver()->fill_rect(outside, light_green);
+    Rects().fill(outside, light_green);
     outside.inset(1, 1);
-    VideoDriver::driver()->fill_rect(outside, RgbColor::kBlack);
+    Rects().fill(outside, RgbColor::kBlack);
     _text->draw_range(_bounds, 0, _typed_chars);
     if (_typed_chars < _text->size()) {
         _text->draw_cursor(_bounds, _typed_chars);

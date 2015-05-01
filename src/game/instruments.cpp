@@ -403,11 +403,14 @@ void draw_radar() {
     const RgbColor very_dark = GetRGBTranslateColorShade(kRadarColor, VERY_DARK);
     if (globals()->radar_is_functioning) {
         Rect radar = bounds;
-        VideoDriver::driver()->fill_rect(radar, very_light);
-        radar.inset(1, 1);
-        VideoDriver::driver()->fill_rect(radar, darkest);
-        if ((view_range.width() > 0) && (view_range.height() > 0)) {
-            VideoDriver::driver()->fill_rect(view_range, very_dark);
+        {
+            Rects rects;
+            rects.fill(radar, very_light);
+            radar.inset(1, 1);
+            rects.fill(radar, darkest);
+            if ((view_range.width() > 0) && (view_range.height() > 0)) {
+                rects.fill(view_range, very_dark);
+            }
         }
 
         RgbColor color;
@@ -425,7 +428,7 @@ void draw_radar() {
             }
         }
     } else {
-        VideoDriver::driver()->fill_rect(bounds, darkest);
+        Rects().fill(bounds, darkest);
     }
 }
 

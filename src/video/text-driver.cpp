@@ -193,7 +193,7 @@ std::unique_ptr<Sprite> TextVideoDriver::new_sprite(sfz::PrintItem name, const P
     return std::unique_ptr<antares::Sprite>(new Sprite(name, *this, content.size()));
 }
 
-void TextVideoDriver::fill_rect(const Rect& rect, const RgbColor& color) {
+void TextVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
     if (!world.intersects(rect)) {
         return;
     }
