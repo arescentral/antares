@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <sfz/sfz.hpp>
 
+#include "data/picture.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "game/globals.hpp"
@@ -40,6 +41,7 @@ using sfz::hex;
 using sfz::read;
 using sfz::string_to_json;
 using std::map;
+using std::unique_ptr;
 
 namespace utf8 = sfz::utf8;
 
@@ -57,6 +59,18 @@ enum {
     kButtonSmallFontResID   = 5005,
 };
 
+void recolor(PixMap& glyph_table) {
+    for (size_t y = 0; y < glyph_table.size().height; ++y) {
+        for (size_t x = 0; x < glyph_table.size().width; ++x) {
+            if (glyph_table.get(x, y).red < 255) {
+                glyph_table.set(x, y, RgbColor::kWhite);
+            } else {
+                glyph_table.set(x, y, RgbColor::kClear);
+            }
+        }
+    }
+}
+
 struct FontVisitor : public JsonDefaultVisitor {
     enum StateEnum {
         NEW,
@@ -72,17 +86,17 @@ struct FontVisitor : public JsonDefaultVisitor {
         State(): state(NEW) { }
     };
     State& state;
-    ArrayPixMap& image;
+    unique_ptr<Sprite>& sprite;
     int32_t& logical_width;
     int32_t& height;
     int32_t& ascent;
     map<Rune, Rect>& glyphs;
 
-    FontVisitor(State& state, ArrayPixMap& image,
+    FontVisitor(State& state, unique_ptr<Sprite>& sprite,
                 int32_t& logical_width, int32_t& height, int32_t& ascent,
                 map<Rune, Rect>& glyphs):
             state(state),
-            image(image),
+            sprite(sprite),
             logical_width(logical_width),
             height(height),
             ascent(ascent),
@@ -144,15 +158,14 @@ struct FontVisitor : public JsonDefaultVisitor {
 
     virtual void visit_string(const StringSlice& value) const {
         switch (state.state) {
-          case IMAGE:
-            {
-                Resource rsrc(value);
-                BytesSlice data = rsrc.data();
-                read(data, image);
+            case IMAGE: {
+                Picture glyph_table(value);
+                recolor(glyph_table);
+                sprite = VideoDriver::driver()->new_sprite(format("/{0}", value), glyph_table);
+                break;
             }
-            break;
-          default:
-            return visit_default("string");
+            default:
+                return visit_default("string");
         }
     }
 
@@ -175,18 +188,6 @@ struct FontVisitor : public JsonDefaultVisitor {
     }
 };
 
-void recolor(PixMap& glyph_table) {
-    for (size_t y = 0; y < glyph_table.size().height; ++y) {
-        for (size_t x = 0; x < glyph_table.size().width; ++x) {
-            if (glyph_table.get(x, y).red < 255) {
-                glyph_table.set(x, y, RgbColor::kWhite);
-            } else {
-                glyph_table.set(x, y, RgbColor::kClear);
-            }
-        }
-    }
-}
-
 }  // namespace
 
 const Font* tactical_font;
@@ -204,11 +205,7 @@ Font::Font(StringSlice name) {
         throw Exception("invalid JSON");
     }
     FontVisitor::State state;
-    ArrayPixMap glyph_table(0, 0);
-    json.accept(FontVisitor(state, glyph_table, logicalWidth, height, ascent, _glyphs));
-    recolor(glyph_table);
-
-    sprite = VideoDriver::driver()->new_sprite(format("/fonts/{0}", name), glyph_table);
+    json.accept(FontVisitor(state, sprite, logicalWidth, height, ascent, _glyphs));
 }
 
 Font::~Font() { }
