@@ -67,7 +67,7 @@ Range<T*> slice(T* array, size_t start, size_t end) {
 }
 
 static void draw_tiny_square(const Rect& rect, const RgbColor& color) {
-    VideoDriver::driver()->fill_rect(rect, color);
+    Rects().fill(rect, color);
 }
 
 static void draw_tiny_triangle(const Rect& rect, const RgbColor& color) {

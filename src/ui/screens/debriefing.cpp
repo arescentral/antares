@@ -158,10 +158,8 @@ void DebriefingScreen::resign_front() {
 
 void DebriefingScreen::draw() const {
     next()->draw();
-    VideoDriver::driver()->fill_rect(_pix_bounds, RgbColor::kBlack);
-    for (int i = 0; i < _typed_chars; ++i) {
-        _score->draw_char(_score_bounds, i);
-    }
+    Rects().fill(_pix_bounds, RgbColor::kBlack);
+    _score->draw_range(_score_bounds, 0, _typed_chars);
     Rect interface_bounds = _message_bounds;
     interface_bounds.offset(_pix_bounds.left, _pix_bounds.top);
     draw_interface_item(_data_item, KEYBOARD_MOUSE);
@@ -172,7 +170,7 @@ void DebriefingScreen::draw() const {
     RgbColor bracket_color = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
     Rect bracket_bounds = _score_bounds;
     bracket_bounds.inset(-2, -2);
-    draw_vbracket(bracket_bounds, bracket_color);
+    draw_vbracket(Rects(), bracket_bounds, bracket_color);
 }
 
 void DebriefingScreen::mouse_down(const MouseDownEvent& event) {

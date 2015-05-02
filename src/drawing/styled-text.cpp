@@ -303,43 +303,70 @@ const std::vector<inlinePictType>& StyledText::inline_picts() const {
 }
 
 void StyledText::draw(const Rect& bounds) const {
-    for (size_t i = 0; i < _chars.size(); ++i) {
-        draw_char(bounds, i);
-    }
+    draw_range(bounds, 0, _chars.size());
 }
 
-void StyledText::draw_char(const Rect& bounds, int index) const {
+void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
     const int line_height = _font->height + _line_spacing;
     const int char_adjust = _font->ascent + _line_spacing;
-    const StyledChar& ch = _chars[index];
-    Point corner(bounds.left, bounds.top);
+    {
+        Rects rects;
+        for (size_t i = begin; i < end; ++i) {
+            const StyledChar& ch = _chars[i];
+            Point corner = bounds.origin();
 
-    switch (ch.special) {
-      case NONE:
-      case WORD_BREAK:
-        {
-            corner.offset(ch.h, ch.v);
-            if (ch.back_color != RgbColor::kBlack) {
-                Rect char_rect(0, 0, _font->char_width(ch.character), line_height);
-                char_rect.offset(corner.h, corner.v);
-                VideoDriver::driver()->fill_rect(char_rect, ch.back_color);
+            switch (ch.special) {
+              case NONE:
+              case WORD_BREAK:
+                corner.offset(ch.h, ch.v);
+                if (ch.back_color != RgbColor::kBlack) {
+                    Rect char_rect(0, 0, _font->char_width(ch.character), line_height);
+                    char_rect.offset(corner.h, corner.v);
+                    rects.fill(char_rect, ch.back_color);
+                }
+                break;
+
+              case TAB:
+                corner.offset(ch.h, ch.v);
+                if (ch.back_color != RgbColor::kBlack) {
+                    Rect tab_rect(0, 0, tab_width() - (ch.h % tab_width()), line_height);
+                    tab_rect.offset(corner.h, corner.v);
+                    rects.fill(tab_rect, ch.back_color);
+                }
+                break;
+
+              case LINE_BREAK:
+                corner.offset(ch.h, ch.v);
+                if (ch.back_color != RgbColor::kBlack) {
+                    Rect line_rect(0, 0, bounds.width() - ch.h, line_height);
+                    line_rect.offset(corner.h, corner.v);
+                    rects.fill(line_rect, ch.back_color);
+                }
+                break;
+
+              default:
+                break;
             }
-            String str(1, ch.character);
-            _font->draw(Point(corner.h, corner.v + char_adjust), str, ch.fore_color);
         }
-        break;
+    }
 
-      case TAB:
-        corner.offset(ch.h, ch.v);
-        if (ch.back_color != RgbColor::kBlack) {
-            Rect tab_rect(0, 0, tab_width() - (ch.h % tab_width()), line_height);
-            tab_rect.offset(corner.h, corner.v);
-            VideoDriver::driver()->fill_rect(tab_rect, ch.back_color);
+    {
+        Quads quads(*_font->sprite);
+        for (size_t i = begin; i < end; ++i) {
+            const StyledChar& ch = _chars[i];
+            Point corner = bounds.origin();
+            if (ch.special == NONE) {
+                _font->draw(
+                        quads, Point(bounds.left + ch.h, bounds.top + ch.v + char_adjust),
+                        String(1, ch.character), ch.fore_color);
+            }
         }
-        break;
+    }
 
-      case PICTURE:
-        {
+    for (size_t i = begin; i < end; ++i) {
+        const StyledChar& ch = _chars[i];
+        Point corner = bounds.origin();
+        if (ch.special == PICTURE) {
             const inlinePictType& inline_pict = _inline_picts[ch.character];
             corner.offset(inline_pict.bounds.left, inline_pict.bounds.top + _line_spacing);
             Picture pict(inline_pict.id);
@@ -347,20 +374,11 @@ void StyledText::draw_char(const Rect& bounds, int index) const {
                         format("/pictures/{0}.png", inline_pict.id), pict));
             sprite->draw(corner.h, corner.v);
         }
-        break;
-
-      case LINE_BREAK:
-        corner.offset(ch.h, ch.v);
-        if (ch.back_color != RgbColor::kBlack) {
-            Rect line_rect(0, 0, bounds.width() - ch.h, line_height);
-            line_rect.offset(corner.h, corner.v);
-            VideoDriver::driver()->fill_rect(line_rect, ch.back_color);
-        }
-        break;
-
-      case DELAY:
-        break;
     }
+}
+
+void StyledText::draw_char(const Rect& bounds, int index) const {
+    draw_range(bounds, index, index + 1);
 }
 
 void StyledText::draw_cursor(const Rect& bounds, int index) const {
@@ -375,7 +393,7 @@ void StyledText::color_cursor(const Rect& bounds, int index, const RgbColor& col
     char_rect.offset(corner.h, corner.v);
     char_rect.clip_to(bounds);
     if ((char_rect.width() > 0) && (char_rect.height() > 0)) {
-        VideoDriver::driver()->fill_rect(char_rect, color);
+        Rects().fill(char_rect, color);
     }
 }
 

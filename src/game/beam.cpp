@@ -240,6 +240,7 @@ void Beams::update() {
 }
 
 void Beams::draw() {
+    Lines lines;
     beamType* const beams = _data.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
@@ -248,12 +249,12 @@ void Beams::draw() {
                     if ((beam->beamKind == eBoltObjectToObjectKind)
                             || (beam->beamKind == eBoltObjectToRelativeCoordKind)) {
                         for (int j: range(1, kBoltPointNum)) {
-                            VideoDriver::driver()->draw_line(
+                            lines.draw(
                                     beam->thisBoltPoint[j-1], beam->thisBoltPoint[j],
                                     GetRGBTranslateColor(beam->color));
                         }
                     } else {
-                        VideoDriver::driver()->draw_line(
+                        lines.draw(
                                 Point(beam->thisLocation.left, beam->thisLocation.top),
                                 Point(beam->thisLocation.right, beam->thisLocation.bottom),
                                 GetRGBTranslateColor(beam->color));

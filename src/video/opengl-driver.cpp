@@ -39,6 +39,7 @@ using sfz::PrintItem;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
+using sfz::hex;
 using sfz::print;
 using std::min;
 using std::max;
@@ -111,12 +112,92 @@ static const GLchar* kShaderSource =
     "    }\n"
     "}\n";
 
-void gl_check() {
-    int error = glGetError();
-    if (error != GL_NO_ERROR) {
-        throw Exception(error);
+#ifndef NDEBUG
+
+static const char* _gl_error_string(GLenum err) {
+    switch (err) {
+        case GL_NO_ERROR: return "GL_NO_ERROR";
+        case GL_INVALID_ENUM: return "GL_INVALID_ENUM";
+        case GL_INVALID_VALUE: return "GL_INVALID_VALUE";
+        case GL_INVALID_OPERATION: return "GL_INVALID_OPERATION";
+        case GL_STACK_OVERFLOW: return "GL_STACK_OVERFLOW";
+        case GL_STACK_UNDERFLOW: return "GL_STACK_UNDERFLOW";
+        case GL_OUT_OF_MEMORY: return "GL_OUT_OF_MEMORY";
+        case GL_TABLE_TOO_LARGE: return "GL_TABLE_TOO_LARGE";
+        default: return "?";
     }
 }
+
+static void _gl_check(const char* fn, const char* file, int line) {
+    int error = glGetError();
+    if (error != GL_NO_ERROR) {
+        print(io::err, format("{0}: {1} ({2}:{3})\n", fn, _gl_error_string(error), file, line));
+    }
+}
+
+template <typename T>
+static T _gl_check(T t, const char* fn, const char* file, int line) {
+    _gl_check(fn, file, line);
+    return t;
+}
+
+#define _GL(FN, ...) \
+    ( FN ( __VA_ARGS__ ) \
+    , _gl_check( #FN , __FILE__ , __LINE__ ) \
+    )
+#define _GLV(FN, ...) _gl_check( FN ( __VA_ARGS__ ), #FN , __FILE__ , __LINE__ )
+
+#define glActiveTexture(texture)                _GL(glActiveTexture, texture)
+#define glAttachShader(program, shader)         _GL(glAttachShader, program, shader)
+// Skip glBegin().
+#define glBindTexture(target, texture)          _GL(glBindTexture, target, texture)
+#define glBlendFunc(sfactor, dfactor)           _GL(glBlendFunc, sfactor, dfactor)
+#define glClear(mask)                           _GL(glClear, mask)
+#define glClearColor(red, green, blue, alpha)   _GL(glClearColor, red, green, blue, alpha)
+// Skip glColor4ub().
+#define glCompileShader(shader)                 _GL(glCompileShader, shader)
+#define glCreateProgram()                       _GLV(glCreateProgram)
+#define glCreateShader(shaderType)              _GLV(glCreateShader, shaderType)
+#define glDeleteTextures(n, textures)           _GL(glDeleteTextures, n, textures)
+#define glDisable(cap)                          _GL(glDisable, cap)
+#define glEnable(cap)                           _GL(glEnable, cap)
+#define glEnd()                                 _GL(glEnd)
+#define glFinish()                              _GL(glFinish)
+#define glGenTextures(n, textures)              _GL(glGenTextures, n, textures)
+// Skip glGetError().
+#define glGetProgramInfoLog(program, maxLength, length, infoLog) \
+    _GL(glGetProgramInfoLog, program, maxLength, length, infoLog)
+#define glGetProgramiv(program, pname, params)  _GL(glGetProgramiv, program, pname, params)
+#define glGetShaderInfoLog(shader, maxLength, length, infoLog) \
+    _GL(glGetShaderInfoLog, shader, maxLength, length, infoLog)
+#define glGetShaderiv(shader, pname, params)    _GL(glGetShaderiv, shader, pname, params)
+#define glGetUniformLocation(program, name)     _GLV(glGetUniformLocation, program, name)
+// Skip glIsShader().
+#define glLinkProgram(program)                  _GL(glLinkProgram, program)
+#define glLoadIdentity()                        _GL(glLoadIdentity)
+#define glMatrixMode(mode)                      _GL(glMatrixMode, mode)
+// Skip glMultiTexCoord2f().
+#define glPixelStorei(pname, param)             _GL(glPixelStorei, pname, param)
+#define glPopMatrix()                           _GL(glPopMatrix)
+#define glPushMatrix()                          _GL(glPushMatrix)
+#define glScalef(x, y, z)                       _GL(glScalef, x, y, z)
+#define glShaderSource(shader, count, string, length) \
+    _GL(glShaderSource, shader, count, string, length)
+#define glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels) \
+    _GL(glTexImage2D, target, level, internalformat, width, height, border, format, type, pixels)
+#define glTextureRangeAPPLE(target, length, pointer) \
+    _GL(glTextureRangeAPPLE, target, length, pointer)
+#define glTranslatef(x, y, z)                   _GL(glTranslatef, x, y, z)
+#define glUniform1f(location, v0)               _GL(glUniform1f, location, v0)
+#define glUniform1i(location, v0)               _GL(glUniform1i, location, v0)
+#define glUniform2f(location, v0, v1)           _GL(glUniform2f, location, v0, v1)
+#define glUniform4f(location, v0, v1, v2, v3)   _GL(glUniform4f, location, v0, v1, v2, v3)
+#define glUseProgram(program)                   _GL(glUseProgram, program)
+#define glValidateProgram(program)              _GL(glValidateProgram, program)
+// glVertex2f().
+#define glViewport(x, y, width, height)         _GL(glViewport, x, y, width, height)
+
+#endif  // NDEBUG
 
 void gl_log(GLint object) {
     GLint log_size;
@@ -178,25 +259,9 @@ class OpenGlSprite : public Sprite {
     }
 
     virtual void draw_cropped(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
-        Rect texture_rect(origin, draw_rect.size());
-        texture_rect.offset(1, 1);
-
-        glColor4ub(tint.red, tint.green, tint.blue, 255);
-        glUniform1i(_uniforms.color_mode, 3);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
-        gl_check();
-        glBegin(GL_QUADS);
-        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.left, texture_rect.top);
-        glVertex2f(draw_rect.left, draw_rect.top);
-        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.left, texture_rect.bottom);
-        glVertex2f(draw_rect.left, draw_rect.bottom);
-        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.right, texture_rect.bottom);
-        glVertex2f(draw_rect.right, draw_rect.bottom);
-        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.right, texture_rect.top);
-        glVertex2f(draw_rect.right, draw_rect.top);
-        glEnd();
-        gl_check();
+        begin_quads();
+        draw_quad(draw_rect, origin, tint);
+        end_quads();
     }
 
     virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const {
@@ -237,7 +302,6 @@ class OpenGlSprite : public Sprite {
         const int32_t h = _size.height;
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
-        gl_check();
         glBegin(GL_QUADS);
         glMultiTexCoord2f(GL_TEXTURE0, 1, 1);
         glMultiTexCoord2f(GL_TEXTURE1, draw_rect.left, draw_rect.top);
@@ -252,7 +316,32 @@ class OpenGlSprite : public Sprite {
         glMultiTexCoord2f(GL_TEXTURE1, draw_rect.right, draw_rect.top);
         glVertex2f(draw_rect.right, draw_rect.top);
         glEnd();
-        gl_check();
+    }
+
+    virtual void begin_quads() const {
+        glUniform1i(_uniforms.color_mode, 3);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
+        glBegin(GL_QUADS);
+    }
+
+    virtual void end_quads() const {
+        glEnd();
+    }
+
+    virtual void draw_quad(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
+        Rect texture_rect(origin, draw_rect.size());
+        texture_rect.offset(1, 1);
+
+        glColor4ub(tint.red, tint.green, tint.blue, 255);
+        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.left, texture_rect.top);
+        glVertex2f(draw_rect.left, draw_rect.top);
+        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.left, texture_rect.bottom);
+        glVertex2f(draw_rect.left, draw_rect.bottom);
+        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.right, texture_rect.bottom);
+        glVertex2f(draw_rect.right, draw_rect.bottom);
+        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.right, texture_rect.top);
+        glVertex2f(draw_rect.right, draw_rect.top);
     }
 
     struct Texture {
@@ -280,14 +369,20 @@ unique_ptr<Sprite> OpenGlVideoDriver::new_sprite(PrintItem name, const PixMap& c
     return unique_ptr<Sprite>(new OpenGlSprite(name, content, _uniforms));
 }
 
-void OpenGlVideoDriver::fill_rect(const Rect& rect, const RgbColor& color) {
+void OpenGlVideoDriver::begin_rects() {
     glUniform1i(_uniforms.color_mode, 0);
-    glColor4ub(color.red, color.green, color.blue, color.alpha);
     glBegin(GL_QUADS);
+}
+
+void OpenGlVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
+    glColor4ub(color.red, color.green, color.blue, color.alpha);
     glVertex2f(rect.right, rect.top);
     glVertex2f(rect.left, rect.top);
     glVertex2f(rect.left, rect.bottom);
     glVertex2f(rect.right, rect.bottom);
+}
+
+void OpenGlVideoDriver::end_rects() {
     glEnd();
 }
 
@@ -306,34 +401,37 @@ void OpenGlVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
     glEnd();
 }
 
-void OpenGlVideoDriver::draw_point(const Point& at, const RgbColor& color) {
+void OpenGlVideoDriver::begin_points() {
     glUniform1i(_uniforms.color_mode, 0);
-    glColor4ub(color.red, color.green, color.blue, color.alpha);
     glBegin(GL_POINTS);
-    glVertex2f(at.h + 0.5, at.v + 0.5);
+}
+
+void OpenGlVideoDriver::end_points() {
     glEnd();
 }
 
-void OpenGlVideoDriver::draw_line(const Point& from, const Point& to, const RgbColor& color) {
+void OpenGlVideoDriver::batch_point(const Point& at, const RgbColor& color) {
+    glColor4ub(color.red, color.green, color.blue, color.alpha);
+    glVertex2f(at.h + 0.5, at.v + 0.5);
+}
+
+void OpenGlVideoDriver::draw_point(const Point& at, const RgbColor& color) {
+    begin_points();
+    batch_point(at, color);
+    end_points();
+}
+
+void OpenGlVideoDriver::begin_lines() {
     glUniform1i(_uniforms.color_mode, 0);
+    glBegin(GL_LINES);
+}
 
-    // Shortcut: when `from` == `to`, we can draw just a point.
-    if (from == to) {
-        draw_point(from, color);
-        return;
-    }
+void OpenGlVideoDriver::end_lines() {
+    glEnd();
+}
 
-    // Shortcut: when one of the dimensions of `from` and `to` matches, we can draw a rect.  This
-    // gives more predictable results than using GL_LINES: the OpenGL standard is not strict about
-    // how to render lines, and may give bad results at the endpoints.
-    if ((from.h == to.h) || (from.v == to.v)) {
-        Rect rect(
-                min(from.h, to.h), min(from.v, to.v),
-                max(from.h, to.h) + 1, max(from.v, to.v) + 1);
-        fill_rect(rect, color);
-        return;
-    }
-
+void OpenGlVideoDriver::batch_line(
+        const Point& from, const Point& to, const RgbColor& color) {
     //
     // Adjust `from` and `to` points that we draw all of the pixels that we're supposed to.
     //
@@ -373,10 +471,14 @@ void OpenGlVideoDriver::draw_line(const Point& from, const Point& to, const RgbC
     }
 
     glColor4ub(color.red, color.green, color.blue, color.alpha);
-    glBegin(GL_LINES);
     glVertex2f(x1, y1);
     glVertex2f(x2, y2);
-    glEnd();
+}
+
+void OpenGlVideoDriver::draw_line(const Point& from, const Point& to, const RgbColor& color) {
+    begin_lines();
+    draw_line(from, to, color);
+    end_lines();
 }
 
 void OpenGlVideoDriver::draw_triangle(const Rect& rect, const RgbColor& color) {
@@ -441,7 +543,6 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
         gl_log(shader);
         throw Exception("compilation failed");
     }
-    gl_check();
 
     GLuint program = glCreateProgram();
     glAttachShader(program, shader);
@@ -453,7 +554,6 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
         gl_log(program);
         throw Exception("linking failed");
     }
-    gl_check();
 
     driver._uniforms.color_mode = glGetUniformLocation(program, kShaderColorModeUniform);
     driver._uniforms.sprite = glGetUniformLocation(program, kShaderSpriteUniform);
@@ -463,7 +563,6 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     driver._uniforms.outline_color = glGetUniformLocation(program, kShaderOutlineColorUniform);
     driver._uniforms.seed = glGetUniformLocation(program, kShaderSeedUniform);
     glUseProgram(program);
-    gl_check();
 
     GLuint static_texture;
     glGenTextures(1, &static_texture);
@@ -482,11 +581,9 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     glTexImage2D(
             GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, size, size, 0, GL_LUMINANCE_ALPHA,
             GL_UNSIGNED_BYTE, static_data.get());
-    gl_check();
 
     glUniform1i(driver._uniforms.sprite, 0);
     glUniform1i(driver._uniforms.static_image, 1);
-    gl_check();
 }
 
 OpenGlVideoDriver::MainLoop::MainLoop(OpenGlVideoDriver& driver, Card* initial):
@@ -514,8 +611,6 @@ void OpenGlVideoDriver::MainLoop::draw() {
     seed <<= 8;
     seed += _driver._static_seed.next(256);
     glUniform1i(_driver._uniforms.seed, seed);
-
-    gl_check();
 
     _stack.top()->draw();
 

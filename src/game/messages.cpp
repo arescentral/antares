@@ -587,16 +587,17 @@ void Messages::draw_message() {
     const RgbColor& dark_blue = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
     const RgbColor& light_blue = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
     Rect message_bounds(play_screen.left, viewport.bottom, play_screen.right, play_screen.bottom);
-    VideoDriver::driver()->fill_rect(message_bounds, light_blue);
-    message_bounds.inset(0, 1);
-    VideoDriver::driver()->fill_rect(message_bounds, dark_blue);
+    {
+        Rects rects;
+        rects.fill(message_bounds, light_blue);
+        message_bounds.inset(0, 1);
+        rects.fill(message_bounds, dark_blue);
+    }
 
     Rect bounds(viewport.left, viewport.bottom, viewport.right, play_screen.bottom);
     bounds.inset(kHBuffer, 0);
     bounds.top += kLongMessageVPad;
-    for (int i = 0; i < long_message_data->at_char; ++i) {
-        long_message_data->retro_text->draw_char(bounds, i);
-    }
+    long_message_data->retro_text->draw_range(bounds, 0, long_message_data->at_char);
     // The final char is a newline; don't display a cursor rect for it.
     if ((0 < long_message_data->at_char)
             && (long_message_data->at_char < (long_message_data->retro_text->size() - 1))) {

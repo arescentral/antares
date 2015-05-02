@@ -118,9 +118,7 @@ void LoadingScreen::overlay() const {
     Rect bounds(0, 0, _name_text->auto_width(), _name_text->height());
     bounds.center_in(above_content);
 
-    for (int32_t i = 0; i < _chars_typed; ++i) {
-        _name_text->draw_char(bounds, i);
-    }
+    _name_text->draw_range(bounds, 0, _chars_typed);
     if (_chars_typed < _name_text->size()) {
         _name_text->draw_cursor(bounds, _chars_typed);
     }
@@ -128,9 +126,10 @@ void LoadingScreen::overlay() const {
     const RgbColor& light = GetRGBTranslateColorShade(kLoadingScreenColor, LIGHT);
     const RgbColor& dark = GetRGBTranslateColorShade(kLoadingScreenColor, DARK);
     Rect bar = item(0).bounds();
-    VideoDriver::driver()->fill_rect(bar, dark);
+    Rects rects;
+    rects.fill(bar, dark);
     bar.right = bar.left + (bar.width() * _current / _max);
-    VideoDriver::driver()->fill_rect(bar, light);
+    rects.fill(bar, light);
 }
 
 }  // namespace antares

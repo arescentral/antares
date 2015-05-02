@@ -47,4 +47,53 @@ VideoDriver* VideoDriver::driver() {
 
 Sprite::~Sprite() { }
 
+Points::Points() {
+    VideoDriver::driver()->begin_points();
+}
+
+Points::~Points() {
+    VideoDriver::driver()->end_points();
+}
+
+void Points::draw(const Point& at, const RgbColor& color) const {
+    VideoDriver::driver()->batch_point(at, color);
+}
+
+Lines::Lines() {
+    VideoDriver::driver()->begin_lines();
+}
+
+Lines::~Lines() {
+    VideoDriver::driver()->end_lines();
+}
+
+void Lines::draw(const Point& from, const Point& to, const RgbColor& color) const {
+    VideoDriver::driver()->batch_line(from, to, color);
+}
+
+Rects::Rects() {
+    VideoDriver::driver()->begin_rects();
+}
+
+Rects::~Rects() {
+    VideoDriver::driver()->end_rects();
+}
+
+void Rects::fill(const Rect& rect, const RgbColor& color) const {
+    VideoDriver::driver()->batch_rect(rect, color);
+}
+
+Quads::Quads(const Sprite& sprite):
+        _sprite(sprite) {
+    _sprite.begin_quads();
+}
+
+Quads::~Quads() {
+    _sprite.end_quads();
+}
+
+void Quads::draw(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
+    _sprite.draw_quad(draw_rect, origin, tint);
+}
+
 }  // namespace antares

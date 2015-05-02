@@ -88,15 +88,12 @@ void BriefingScreen::overlay() const {
             const Point star = _star_rect.center();
             RgbColor gold = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
             _star_map->draw_cropped(_bounds, Point(0, 2));
-            draw_vbracket(_star_rect, gold);
-            VideoDriver::driver()->draw_line(
-                    Point(star.h, _bounds.top), Point(star.h, _star_rect.top), gold);
-            VideoDriver::driver()->draw_line(
-                    Point(star.h, _star_rect.bottom), Point(star.h, _bounds.bottom), gold);
-            VideoDriver::driver()->draw_line(
-                    Point(_bounds.left, star.v), Point(_star_rect.left, star.v), gold);
-            VideoDriver::driver()->draw_line(
-                    Point(_star_rect.right - 1, star.v), Point(_bounds.right, star.v), gold);
+            Rects rects;
+            draw_vbracket(rects, _star_rect, gold);
+            rects.fill({star.h, _bounds.top, star.h + 1, _star_rect.top + 1}, gold);
+            rects.fill({star.h, _star_rect.bottom, star.h + 1, _bounds.bottom + 1}, gold);
+            rects.fill({_bounds.left, star.v, _star_rect.left + 1, star.v + 1}, gold);
+            rects.fill({_star_rect.right - 1, star.v, _bounds.right + 1, star.v + 1}, gold);
         }
         break;
 
@@ -267,10 +264,13 @@ void BriefingScreen::build_brief_point() {
 }
 
 void BriefingScreen::draw_system_map() const {
-    for (int i = 0; i < _system_stars.size(); ++i) {
-        const Star& star = _system_stars[i];
-        RgbColor star_color = GetRGBTranslateColorShade(GRAY, star.shade + DARKEST);
-        VideoDriver::driver()->draw_point(star.location, star_color);
+    {
+        Points points;
+        for (int i = 0; i < _system_stars.size(); ++i) {
+            const Star& star = _system_stars[i];
+            RgbColor star_color = GetRGBTranslateColorShade(GRAY, star.shade + DARKEST);
+            points.draw(star.location, star_color);
+        }
     }
 
     coordPointType corner;
@@ -285,35 +285,43 @@ void BriefingScreen::draw_brief_point() const {
     draw_system_map();
 
     if (!_highlight_rect.empty()) {
+        Rects rects;
         const RgbColor very_light = GetRGBTranslateColorShade(kMissionDataHiliteColor, VERY_LIGHT);
-        VideoDriver::driver()->draw_line(
-                Point(_highlight_rect.left, _highlight_rect.top),
-                Point(_highlight_rect.right - 1, _highlight_rect.top),
+        rects.fill(
+                {_highlight_rect.left, _highlight_rect.top,
+                _highlight_rect.right, _highlight_rect.top + 1},
                 very_light);
-        VideoDriver::driver()->draw_line(
-                Point(_highlight_rect.right - 1, _highlight_rect.top),
-                Point(_highlight_rect.right - 1, _highlight_rect.bottom - 1),
+        rects.fill(
+                {_highlight_rect.right - 1, _highlight_rect.top,
+                _highlight_rect.right, _highlight_rect.bottom},
                 very_light);
-        VideoDriver::driver()->draw_line(
-                Point(_highlight_rect.right - 1, _highlight_rect.bottom - 1),
-                Point(_highlight_rect.left, _highlight_rect.bottom - 1),
+        rects.fill(
+                {_highlight_rect.left, _highlight_rect.bottom - 1,
+                _highlight_rect.right, _highlight_rect.bottom},
                 very_light);
-        VideoDriver::driver()->draw_line(
-                Point(_highlight_rect.left, _highlight_rect.bottom - 1),
-                Point(_highlight_rect.left, _highlight_rect.top),
+        rects.fill(
+                {_highlight_rect.left, _highlight_rect.top,
+                _highlight_rect.left + 1, _highlight_rect.bottom},
                 very_light);
 
         const RgbColor medium = GetRGBTranslateColorShade(kMissionDataHiliteColor, MEDIUM);
         for (size_t i = 0; i < _highlight_lines.size(); ++i) {
+            using std::swap;
             Point p1 = _highlight_lines[i].first;
             Point p2 = _highlight_lines[i].second;
-            VideoDriver::driver()->draw_line(p1, p2, medium);
+            if (p1.h > p2.h) {
+                swap(p1.h, p2.h);
+            }
+            if (p1.v > p2.v) {
+                swap(p1.v, p2.v);
+            }
+            rects.fill({p1.h, p1.v, p2.h + 1, p2.v + 1}, medium);
         }
     }
 
     Rect bounds;
     GetAnyInterfaceItemGraphicBounds(_data_item, &bounds);
-    VideoDriver::driver()->fill_rect(bounds, RgbColor::kBlack);
+    Rects().fill(bounds, RgbColor::kBlack);
     draw_interface_item(_data_item, KEYBOARD_MOUSE);
     vector<inlinePictType> unused;
     draw_text_in_rect(_data_item.bounds(), _text, _data_item.style, _data_item.hue, unused);

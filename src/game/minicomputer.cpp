@@ -343,112 +343,113 @@ void ClearMiniObjectData( void)
 }
 
 void draw_mini_screen() {
-    Rect                mRect;
-    Rect            lRect, cRect;
-    miniScreenLineType  *c;
-    RgbColor            color, lightcolor, darkcolor, textcolor;
-    uint8_t             lineColor = kMiniScreenColor;
-    int32_t                count, lineCorrect = 0;
-
-    lRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
-                kMiniScreenBottom + globals()->gInstrumentTop);
-    color = GetRGBTranslateColorShade(kMiniScreenColor, DARKEST);
-    cRect = lRect;
-    VideoDriver::driver()->fill_rect(cRect, color);
-
-    mRect.left = kMiniScreenLeft;
-    mRect.top = kMiniScreenTop + globals()->gInstrumentTop;
-    mRect.right = kMiniScreenRight;
-    mRect.bottom = kMiniScreenBottom + globals()->gInstrumentTop;
-
-    c = globals()->gMiniScreenData.lineData.get();
-
-    for ( count = 0; count < kMiniScreenTrueLineNum; count++)
     {
-        if ( count == kMiniScreenCharHeight)
-        {
-            lRect.left = mRect.left = kButBoxLeft;
-            lRect.top = mRect.top = kButBoxTop + globals()->gInstrumentTop;
-            lRect.right = mRect.right = kButBoxRight;
-            lRect.bottom = mRect.bottom = kButBoxBottom + globals()->gInstrumentTop;
-            color = GetRGBTranslateColorShade(kMiniButColor, DARKEST);
-            cRect = lRect;
-            VideoDriver::driver()->fill_rect(cRect, color);
-            lineCorrect = -kMiniScreenCharHeight;
-            lineColor = kMiniButColor;
-        }
-
-        if ( c->underline)
-        {
-            const RgbColor color = GetRGBTranslateColorShade(lineColor, MEDIUM);
-            int32_t y = mRect.top + (count + lineCorrect) * computer_font->height
-                      + computer_font->ascent;
-            VideoDriver::driver()->draw_line(
-                    Point(mRect.left, y), Point(mRect.right - 2, y), color);
-        }
-
-        if ( c->hiliteLeft < c->hiliteRight)
-        {
-            if ( c->selectable == selectDim)
-                textcolor = GetRGBTranslateColorShade(lineColor, VERY_DARK);
-            else
-                textcolor = GetRGBTranslateColorShade(lineColor, VERY_LIGHT);
-            switch( c->lineKind)
-            {
-                case plainLineKind:
-                    if ( c->hiliteRight > c->hiliteLeft)
-                    {
-                        cRect.left = c->hiliteLeft;
-                        cRect.top = mRect.top + (( count + lineCorrect) * ( computer_font->height /* * 2 */));
-                        cRect.right = c->hiliteRight;
-                        cRect.bottom = cRect.top + computer_font->height /* * 2 */;
-//                      color = GetTranslateColorShade( lineColor, DARK);
-                        color = GetRGBTranslateColorShade(lineColor, DARK);
-                        lightcolor = GetRGBTranslateColorShade(lineColor, MEDIUM);
-                        darkcolor = GetRGBTranslateColorShade(lineColor, DARKER);
-                        draw_shaded_rect(cRect, color, lightcolor, darkcolor);
-                    }
-                    break;
-
-                case buttonOffLineKind:
-                    cRect.left = c->hiliteLeft - 2;
-                    cRect.top = lRect.top + (( count + lineCorrect) * ( computer_font->height /* * 2 */));
-                    cRect.right = c->hiliteRight + 2;
-                    cRect.bottom = cRect.top + computer_font->height /* * 2 */;
-
-                    color = GetRGBTranslateColorShade(lineColor, MEDIUM);
-                    lightcolor = GetRGBTranslateColorShade(lineColor, LIGHT);
-                    darkcolor = GetRGBTranslateColorShade(lineColor, DARK);
-                    draw_shaded_rect(cRect, color, lightcolor, darkcolor);
-                    break;
-
-                case buttonOnLineKind:
-                    cRect.left = c->hiliteLeft - 2;
-                    cRect.top = lRect.top + (( count + lineCorrect) * ( computer_font->height /* * 2 */));
-                    cRect.right = lRect.right; //c->hiliteRight + 2;
-                    cRect.bottom = cRect.top + computer_font->height /* * 2 */;
-
-                    color = GetRGBTranslateColorShade(lineColor, LIGHT);
-                    lightcolor = GetRGBTranslateColorShade(lineColor, VERY_LIGHT);
-                    darkcolor = GetRGBTranslateColorShade(lineColor, MEDIUM);
-                    draw_shaded_rect(cRect, color, lightcolor, darkcolor);
-                    textcolor = RgbColor::kBlack;
-                    break;
-
+        Rects rects;
+        for (int32_t count = 0; count < kMiniScreenTrueLineNum; count++) {
+            auto c = &globals()->gMiniScreenData.lineData[count];
+            Rect mRect = Rect(
+                    kMiniScreenLeft,
+                    kMiniScreenTop + globals()->gInstrumentTop,
+                    kMiniScreenRight,
+                    kMiniScreenBottom + globals()->gInstrumentTop);
+            uint8_t lineColor = kMiniScreenColor;
+            int32_t lineCorrect = 0;
+            if (count < kMiniScreenCharHeight) {
+                if (count == 0) {
+                    auto color = GetRGBTranslateColorShade(kMiniScreenColor, DARKEST);
+                    rects.fill(mRect, color);
+                }
+            } else {
+                mRect = Rect(
+                        kButBoxLeft,
+                        kButBoxTop + globals()->gInstrumentTop,
+                        kButBoxRight,
+                        kButBoxBottom + globals()->gInstrumentTop);
+                lineCorrect = -kMiniScreenCharHeight;
+                lineColor = kMiniButColor;
+                if (count == kMiniScreenCharHeight) {
+                    auto color = GetRGBTranslateColorShade(kMiniButColor, DARKEST);
+                    rects.fill(mRect, color);
+                }
             }
-        } else
-        {
-            if ( c->selectable == selectDim)
-                textcolor = GetRGBTranslateColorShade(lineColor, MEDIUM);
-            else
-                textcolor = GetRGBTranslateColorShade(lineColor, VERY_LIGHT);
+
+            if (c->underline) {
+                const RgbColor color = GetRGBTranslateColorShade(lineColor, MEDIUM);
+                int32_t y = mRect.top + (count + lineCorrect) * computer_font->height
+                    + computer_font->ascent;
+                rects.fill({mRect.left, y, mRect.right - 1, y + 1}, color);
+            }
+
+            if (c->hiliteLeft < c->hiliteRight) {
+                Rect cRect;
+                switch (c->lineKind) {
+                  case plainLineKind:
+                    cRect.left = c->hiliteLeft;
+                    cRect.top = mRect.top + ((count + lineCorrect) * computer_font->height);
+                    cRect.right = c->hiliteRight;
+                    cRect.bottom = cRect.top + computer_font->height;
+                    draw_shaded_rect(rects, cRect, lineColor, DARK, MEDIUM, DARKER);
+                    break;
+
+                  case buttonOffLineKind:
+                    cRect.left = c->hiliteLeft - 2;
+                    cRect.top = mRect.top + ((count + lineCorrect) * computer_font->height);
+                    cRect.right = c->hiliteRight + 2;
+                    cRect.bottom = cRect.top + computer_font->height;
+                    draw_shaded_rect(rects, cRect, lineColor, MEDIUM, LIGHT, DARK);
+                    break;
+
+                  case buttonOnLineKind:
+                    cRect.left = c->hiliteLeft - 2;
+                    cRect.top = mRect.top + ((count + lineCorrect) * computer_font->height);
+                    cRect.right = mRect.right;
+                    cRect.bottom = cRect.top + computer_font->height;
+                    draw_shaded_rect(rects, cRect, lineColor, LIGHT, VERY_LIGHT, MEDIUM);
+                    break;
+                }
+            }
         }
-        computer_font->draw(
-                Point(
-                    mRect.left + kMiniScreenLeftBuffer,
-                    mRect.top + (count + lineCorrect) * computer_font->height + computer_font->ascent),
-                c->string, textcolor);
-        c++;
+    }
+
+    {
+        Quads quads(*computer_font->sprite);
+        for (int32_t count = 0; count < kMiniScreenTrueLineNum; count++) {
+            auto c = &globals()->gMiniScreenData.lineData[count];
+            Rect mRect = Rect(
+                        kMiniScreenLeft,
+                        kMiniScreenTop + globals()->gInstrumentTop,
+                        kMiniScreenRight,
+                        kMiniScreenBottom + globals()->gInstrumentTop);
+            uint8_t lineColor = kMiniScreenColor;
+            int32_t lineCorrect = 0;
+            if (count >= kMiniScreenCharHeight) {
+                mRect = Rect(
+                        kButBoxLeft,
+                        kButBoxTop + globals()->gInstrumentTop,
+                        kButBoxRight,
+                        kButBoxBottom + globals()->gInstrumentTop);
+                lineCorrect = -kMiniScreenCharHeight;
+                lineColor = kMiniButColor;
+            }
+
+            RgbColor textcolor = GetRGBTranslateColorShade(lineColor, VERY_LIGHT);
+            if (c->hiliteLeft < c->hiliteRight) {
+                if (c->lineKind == buttonOnLineKind) {
+                    textcolor = RgbColor::kBlack;
+                } else if (c->selectable == selectDim) {
+                    textcolor = GetRGBTranslateColorShade(lineColor, VERY_DARK);
+                }
+            } else if (c->selectable == selectDim) {
+                textcolor = GetRGBTranslateColorShade(lineColor, MEDIUM);
+            }
+
+            computer_font->draw(
+                    quads,
+                    Point(
+                        mRect.left + kMiniScreenLeftBuffer,
+                        mRect.top + (count + lineCorrect) * computer_font->height + computer_font->ascent),
+                    c->string, textcolor);
+        }
     }
 
     draw_mini_ship_data(*mGetMiniObjectPtr(kMiniSelectObjectNum), YELLOW, kMiniSelectTop, kMiniSelectObjectNum + 1);
@@ -824,7 +825,7 @@ void draw_mini_ship_data(
     RgbColor lightcolor = GetRGBTranslateColorShade(headerColor, VERY_LIGHT);
     RgbColor darkcolor = GetRGBTranslateColorShade(headerColor, MEDIUM);
 
-    draw_shaded_rect(lRect, color, lightcolor, darkcolor);
+    draw_shaded_rect(Rects(), lRect, color, lightcolor, darkcolor);
 
     String text(mini_data_strings->at(whichString - 1));
     computer_font->draw(
@@ -891,10 +892,11 @@ void draw_mini_ship_data(
     }
 
     color = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);
-    draw_vbracket(dRect, color);
+    draw_vbracket(Rects(), dRect, color);
 
     if (newObject.baseType != NULL) {
         if ((newObject.max_health() > 0) && (newObject.health() > 0)) {
+            Rects rects;
             Rect dRect;
             dRect.left = kMiniHealthLeft;
             dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
@@ -910,20 +912,21 @@ void draw_mini_ship_data(
             lRect.top = dRect.top + 2;
             lRect.right = dRect.right - 2;
             lRect.bottom = dRect.bottom - 2 - tlong;
-            VideoDriver::driver()->fill_rect(lRect, color);
+            rects.fill(lRect, color);
 
             color = GetRGBTranslateColorShade(SKY_BLUE, LIGHT);
             lRect.top = dRect.bottom - 2 - tlong;
             lRect.bottom = dRect.bottom - 2;
-            VideoDriver::driver()->fill_rect(lRect, color);
+            rects.fill(lRect, color);
 
             color = GetRGBTranslateColorShade(SKY_BLUE, MEDIUM);
-            draw_vbracket(dRect, color);
+            draw_vbracket(rects, dRect, color);
         }
     }
 
     if (newObject.baseType != NULL) {
         if ((newObject.max_energy() > 0) && (newObject.energy() > 0)) {
+            Rects rects;
             Rect dRect;
             dRect.left = kMiniEnergyLeft;
             dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
@@ -939,15 +942,15 @@ void draw_mini_ship_data(
             lRect.top = dRect.top + 2;
             lRect.right = dRect.right - 2;
             lRect.bottom = dRect.bottom - 2 - tlong;
-            VideoDriver::driver()->fill_rect(lRect, color);
+            rects.fill(lRect, color);
 
             color = GetRGBTranslateColorShade(YELLOW, LIGHT);
             lRect.top = dRect.bottom - 2 - tlong;
             lRect.bottom = dRect.bottom - 2;
-            VideoDriver::driver()->fill_rect(lRect, color);
+            rects.fill(lRect, color);
 
             color = GetRGBTranslateColorShade(YELLOW, MEDIUM);
-            draw_vbracket(dRect, color);
+            draw_vbracket(rects, dRect, color);
         }
     }
 

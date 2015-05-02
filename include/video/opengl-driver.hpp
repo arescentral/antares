@@ -37,7 +37,6 @@ class OpenGlVideoDriver : public VideoDriver {
     OpenGlVideoDriver();
 
     virtual std::unique_ptr<Sprite> new_sprite(sfz::PrintItem name, const PixMap& content);
-    virtual void fill_rect(const Rect& rect, const RgbColor& color);
     virtual void dither_rect(const Rect& rect, const RgbColor& color);
     virtual void draw_point(const Point& at, const RgbColor& color);
     virtual void draw_line(const Point& from, const Point& to, const RgbColor& color);
@@ -78,6 +77,18 @@ class OpenGlVideoDriver : public VideoDriver {
     virtual Size screen_size() const = 0;
 
   private:
+    virtual void begin_points();
+    virtual void end_points();
+    virtual void batch_point(const Point& at, const RgbColor& color);
+
+    virtual void begin_lines();
+    virtual void end_lines();
+    virtual void batch_line(const Point& from, const Point& to, const RgbColor& color);
+
+    virtual void begin_rects();
+    virtual void end_rects();
+    virtual void batch_rect(const Rect& rect, const RgbColor& color);
+
     Random _static_seed;
 
     Uniforms _uniforms;

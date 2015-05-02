@@ -112,10 +112,9 @@ void ScrollTextScreen::fire_timer() {
 
 void ScrollTextScreen::draw() const {
     _build_pix.draw(_position.origin());
-    VideoDriver::driver()->fill_rect(
-            Rect(world.left, world.top, world.right, _clip.top), RgbColor::kBlack);
-    VideoDriver::driver()->fill_rect(
-            Rect(world.left, _clip.bottom, world.right, world.bottom), RgbColor::kBlack);
+    Rects rects;
+    rects.fill(Rect(world.left, world.top, world.right, _clip.top), RgbColor::kBlack);
+    rects.fill(Rect(world.left, _clip.bottom, world.right, world.bottom), RgbColor::kBlack);
 }
 
 }  // namespace antares

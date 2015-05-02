@@ -208,7 +208,7 @@ Font::Font(StringSlice name) {
     json.accept(FontVisitor(state, glyph_table, logicalWidth, height, ascent, _glyphs));
     recolor(glyph_table);
 
-    _sprite = VideoDriver::driver()->new_sprite(format("/fonts/{0}", name), glyph_table);
+    sprite = VideoDriver::driver()->new_sprite(format("/fonts/{0}", name), glyph_table);
 }
 
 Font::~Font() { }
@@ -222,16 +222,15 @@ Rect Font::glyph_rect(Rune r) const {
 }
 
 void Font::draw(Point cursor, sfz::StringSlice string, RgbColor color) const {
+    draw(Quads(*sprite), cursor, string, color);
+}
+
+void Font::draw(const Quads& quads, Point cursor, sfz::StringSlice string, RgbColor color) const {
     cursor.offset(0, -ascent);
     for (size_t i = 0; i < string.size(); ++i) {
-        auto it = _glyphs.find(string.at(i));
-        if (it == _glyphs.end()) {
-            continue;
-        }
-        auto& glyph = it->second;
-        Rect rect(cursor, glyph.size());
-        _sprite->draw_cropped(rect, glyph.origin(), color);
-        cursor.offset(char_width(string.at(i)), 0);
+        auto glyph = glyph_rect(string.at(i));
+        quads.draw(Rect(cursor, glyph.size()), glyph.origin(), color);
+        cursor.offset(glyph.width(), 0);
     }
 }
 

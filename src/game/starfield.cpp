@@ -270,9 +270,29 @@ void Starfield::draw() const {
     const RgbColor fastColor = GetRGBTranslateColorShade(kStarColor, LIGHTER);
 
     switch (gScrollStarObject->presenceState) {
-      default:
-        if (!_warp_stars) {
-            // we're not warping in any way
+        default:
+            if (!_warp_stars) {
+                Points points;
+                // we're not warping in any way
+                for (const scrollStarType* star: range(_stars, _stars + kScrollStarNum)) {
+                    if (star->speed != kNoStar) {
+                        const RgbColor* color = &slowColor;
+                        if (star->speed == kMediumStarSpeed) {
+                            color = &mediumColor;
+                        } else if (star->speed == kFastStarSpeed) {
+                            color = &fastColor;
+                        }
+
+                        points.draw(star->location, *color);
+                    }
+                }
+                break;
+            }
+
+        case kWarpInPresence:
+        case kWarpOutPresence:
+        case kWarpingPresence: {
+            Lines lines;
             for (const scrollStarType* star: range(_stars, _stars + kScrollStarNum)) {
                 if (star->speed != kNoStar) {
                     const RgbColor* color = &slowColor;
@@ -282,38 +302,21 @@ void Starfield::draw() const {
                         color = &fastColor;
                     }
 
-                    VideoDriver::driver()->draw_point(star->location, *color);
+                    if (star->age > 1) {
+                        lines.draw(star->location, star->oldLocation, *color);
+                    }
                 }
             }
+            break;
         }
-        break;
-
-      case kWarpInPresence:
-      case kWarpOutPresence:
-      case kWarpingPresence:
-        for (const scrollStarType* star: range(_stars, _stars + kScrollStarNum)) {
-            if (star->speed != kNoStar) {
-                const RgbColor* color = &slowColor;
-                if (star->speed == kMediumStarSpeed) {
-                    color = &mediumColor;
-                } else if (star->speed == kFastStarSpeed) {
-                    color = &fastColor;
-                }
-
-                if (star->age > 1) {
-                    VideoDriver::driver()->draw_line(
-                            star->location, star->oldLocation, *color);
-                }
-            }
-        }
-        break;
     }
 
+    Points points;
     for (const scrollStarType* star: range(_stars + kSparkStarOffset, _stars + kAllStarNum)) {
         if ((star->speed != kNoStar) && (star->age > 0)) {
             const RgbColor color = GetRGBTranslateColorShade(
                     star->color, (star->age >> kSparkAgeToShadeShift) + 1);
-            VideoDriver::driver()->draw_point(star->location, color);
+            points.draw(star->location, color);
         }
     }
 }

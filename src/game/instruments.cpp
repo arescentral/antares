@@ -403,11 +403,14 @@ void draw_radar() {
     const RgbColor very_dark = GetRGBTranslateColorShade(kRadarColor, VERY_DARK);
     if (globals()->radar_is_functioning) {
         Rect radar = bounds;
-        VideoDriver::driver()->fill_rect(radar, very_light);
-        radar.inset(1, 1);
-        VideoDriver::driver()->fill_rect(radar, darkest);
-        if ((view_range.width() > 0) && (view_range.height() > 0)) {
-            VideoDriver::driver()->fill_rect(view_range, very_dark);
+        {
+            Rects rects;
+            rects.fill(radar, very_light);
+            radar.inset(1, 1);
+            rects.fill(radar, darkest);
+            if ((view_range.width() > 0) && (view_range.height() > 0)) {
+                rects.fill(view_range, very_dark);
+            }
         }
 
         RgbColor color;
@@ -417,14 +420,15 @@ void draw_radar() {
             color = GetRGBTranslateColorShade(kRadarColor, ((kRadarColorSteps * globals()->gRadarCount) / globals()->gRadarSpeed) + 1);
         }
 
+        Points points;
         for (int rcount = 0; rcount < kRadarBlipNum; rcount++) {
             Point* lp = gRadarBlipData.get() + rcount;
             if (lp->h >= 0) {
-                VideoDriver::driver()->draw_point(*lp, color);
+                points.draw(*lp, color);
             }
         }
     } else {
-        VideoDriver::driver()->fill_rect(bounds, darkest);
+        Rects().fill(bounds, darkest);
     }
 }
 
@@ -473,21 +477,22 @@ static void draw_money() {
         second_threshold = globals()->gBarIndicator[kFineMoneyBar].thisValue;
     }
 
+    Rects rects;
     for (int i = 0; i < kFineMoneyBarNum; ++i) {
         if (i < first_threshold) {
             if ((i % 5) != 0) {
-                VideoDriver::driver()->fill_rect(box, first_color_minor);
+                rects.fill(box, first_color_minor);
             } else {
-                VideoDriver::driver()->fill_rect(box, first_color_major);
+                rects.fill(box, first_color_major);
             }
         } else if (i < second_threshold) {
             if ((i % 5) != 0) {
-                VideoDriver::driver()->fill_rect(box, second_color_minor);
+                rects.fill(box, second_color_minor);
             } else {
-                VideoDriver::driver()->fill_rect(box, second_color_major);
+                rects.fill(box, second_color_major);
             }
         } else {
-            VideoDriver::driver()->fill_rect(box, third_color);
+            rects.fill(box, third_color);
         }
         box.offset(0, kFineMoneyBarHeight);
     }
@@ -504,9 +509,9 @@ static void draw_money() {
     const RgbColor dark = GetRGBTranslateColorShade(kGrossMoneyColor, VERY_DARK);
     for (int i = 0; i < kGrossMoneyBarNum; ++i) {
         if (i < gross->thisValue) {
-            VideoDriver::driver()->fill_rect(box, light);
+            rects.fill(box, light);
         } else {
-            VideoDriver::driver()->fill_rect(box, dark);
+            rects.fill(box, dark);
         }
         box.offset(0, kGrossMoneyBarHeight);
     }
@@ -614,9 +619,10 @@ void update_site(bool replay) {
 
 void draw_site(const PlayerShip& player) {
     if (site.should_draw) {
-        VideoDriver::driver()->draw_line(site.a, site.b, site.light);
-        VideoDriver::driver()->draw_line(site.a, site.c, site.light);
-        VideoDriver::driver()->draw_line(site.b, site.c, site.dark);
+        Lines lines;
+        lines.draw(site.a, site.b, site.light);
+        lines.draw(site.a, site.c, site.light);
+        lines.draw(site.b, site.c, site.dark);
 
         SiteData control = {};
         if (player.show_select()) {
@@ -631,9 +637,9 @@ void draw_site(const PlayerShip& player) {
         if (control.should_draw) {
             update_triangle(
                     control, player.control_direction(), kSiteDistance - 3, kSiteSize - 6);
-            VideoDriver::driver()->draw_line(control.a, control.b, control.light);
-            VideoDriver::driver()->draw_line(control.a, control.c, control.light);
-            VideoDriver::driver()->draw_line(control.b, control.c, control.dark);
+            lines.draw(control.a, control.b, control.light);
+            lines.draw(control.a, control.c, control.light);
+            lines.draw(control.b, control.c, control.dark);
         }
     }
 }
@@ -657,8 +663,9 @@ void update_sector_lines() {
 }
 
 void draw_sector_lines() {
-    int32_t         *l;
-    uint32_t        size, level, x, h, division;
+    Rects rects;
+    int32_t         *l, x;
+    uint32_t        size, level, h, division;
     RgbColor        color;
 
     size = kSubSectorSize / 4;
@@ -687,7 +694,8 @@ void draw_sector_lines() {
                 color = GetRGBTranslateColorShade(BLUE, kSectorLineBrightness);
             }
 
-            VideoDriver::driver()->draw_line(Point(x, viewport.top), Point(x, viewport.bottom), color);
+            // TODO(sfiera): +1 on bottom no longer needed.
+            rects.fill({x, viewport.top, x + 1, viewport.bottom + 1}, color);
             *l = x;
             l += 2;
             division += level;
@@ -712,7 +720,8 @@ void draw_sector_lines() {
                 color = GetRGBTranslateColorShade(BLUE, kSectorLineBrightness);
             }
 
-            VideoDriver::driver()->draw_line(Point(viewport.left, x), Point(viewport.right, x), color);
+            // TODO(sfiera): +1 on right no longer needed.
+            rects.fill({viewport.left, x, viewport.right + 1, x + 1}, color);
             *l = x;
             l += 2;
 
@@ -748,7 +757,9 @@ void InstrumentsHandleMouseStillDown(const GameCursor& cursor) {
 
 void draw_arbitrary_sector_lines(
         const coordPointType& corner, int32_t scale, int32_t minSectorSize, const Rect& bounds) {
-    uint32_t        size, level, x, h, division;
+    Rects rects;
+    uint32_t        size, level, h, division;
+    int32_t         x;
     RgbColor        color;
 
     size = kSubSectorSize >> 2L;
@@ -784,8 +795,7 @@ void draw_arbitrary_sector_lines(
             color = GetRGBTranslateColorShade(BLUE, DARKER);
         }
 
-        VideoDriver::driver()->draw_line(
-                Point(x, bounds.top), Point(x, bounds.bottom - 1), color);
+        rects.fill({x, bounds.top, x + 1, bounds.bottom}, color);
         division += level;
         division &= 0x0000000f;
         x += h;
@@ -812,8 +822,7 @@ void draw_arbitrary_sector_lines(
             color = GetRGBTranslateColorShade(BLUE, DARKER);
         }
 
-        VideoDriver::driver()->draw_line(
-                Point(bounds.left, x), Point(bounds.right - 1, x), color);
+        rects.fill({bounds.left, x, bounds.right, x + 1}, color);
         division += level;
         division &= 0x0000000f;
         x += h;
@@ -912,6 +921,7 @@ void GetArbitrarySingleSectorBounds(coordPointType *corner, coordPointType *loca
 }
 
 static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
+    Rects rects;
     if (value > max) {
         value = max;
     }
@@ -942,7 +952,7 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
         const RgbColor fill_color = GetRGBTranslateColorShade(hue, DARK);
         const RgbColor light_color = GetRGBTranslateColorShade(hue, MEDIUM);
         const RgbColor dark_color = GetRGBTranslateColorShade(hue, DARKER);
-        draw_shaded_rect(top_bar, fill_color, light_color, dark_color);
+        draw_shaded_rect(rects, top_bar, fill_color, light_color, dark_color);
     }
 
     if (graphicValue > 0) {
@@ -951,7 +961,7 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
         const RgbColor fill_color = GetRGBTranslateColorShade(hue, LIGHTER);
         const RgbColor light_color = GetRGBTranslateColorShade(hue, VERY_LIGHT);
         const RgbColor dark_color = GetRGBTranslateColorShade(hue, MEDIUM);
-        draw_shaded_rect(bottom_bar, fill_color, light_color, dark_color);
+        draw_shaded_rect(rects, bottom_bar, fill_color, light_color, dark_color);
     }
 
     globals()->gBarIndicator[which].thisValue = value;
@@ -961,13 +971,14 @@ void draw_build_time_bar(int32_t value) {
     if (value < 0) {
         return;
     }
+    Rects rects;
     value = kMiniBuildTimeHeight - value;
 
     const Rect clip = mini_build_time_rect();
 
     {
         const RgbColor color = GetRGBTranslateColorShade(PALE_PURPLE, MEDIUM);
-        draw_vbracket(clip, color);
+        draw_vbracket(rects, clip, color);
     }
 
     Rect bar = clip;
@@ -975,13 +986,13 @@ void draw_build_time_bar(int32_t value) {
 
     {
         const RgbColor color = GetRGBTranslateColorShade(PALE_PURPLE, DARK);
-        VideoDriver::driver()->fill_rect(bar, color);
+        rects.fill(bar, color);
     }
 
     if (value > 0) {
         bar.top += value;
         const RgbColor color = GetRGBTranslateColorShade(PALE_PURPLE, LIGHT);
-        VideoDriver::driver()->fill_rect(bar, color);
+        rects.fill(bar, color);
     }
 }
 

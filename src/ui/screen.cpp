@@ -110,7 +110,7 @@ void InterfaceScreen::draw() const {
     }
 
     copy_area.offset(_bounds.left, _bounds.top);
-    VideoDriver::driver()->fill_rect(copy_area, RgbColor::kBlack);
+    Rects().fill(copy_area, RgbColor::kBlack);
 
     for (const auto& item: _items) {
         draw_interface_item(*item, VideoDriver::driver()->input_mode(), _bounds.origin());

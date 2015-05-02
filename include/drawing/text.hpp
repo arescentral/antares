@@ -26,6 +26,8 @@
 
 namespace antares {
 
+class Quads;
+
 class Font {
   public:
     Font(sfz::StringSlice name);
@@ -35,7 +37,9 @@ class Font {
     int32_t string_width(sfz::StringSlice s) const;
 
     void draw(Point cursor, sfz::StringSlice string, RgbColor color) const;
+    void draw(const Quads& quads, Point cursor, sfz::StringSlice string, RgbColor color) const;
 
+    std::unique_ptr<Sprite> sprite;
     int32_t logicalWidth;
     int32_t height;
     int32_t ascent;
@@ -44,7 +48,6 @@ class Font {
     Rect glyph_rect(sfz::Rune r) const;
 
     std::map<sfz::Rune, Rect> _glyphs;
-    std::unique_ptr<Sprite> _sprite;
 
     DISALLOW_COPY_AND_ASSIGN(Font);
 };

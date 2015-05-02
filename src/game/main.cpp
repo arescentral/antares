@@ -350,18 +350,18 @@ class PauseScreen : public Card {
             const RgbColor& light_green = GetRGBTranslateColorShade(GREEN, LIGHTER);
             const RgbColor& dark_green = GetRGBTranslateColorShade(GREEN, DARKER);
 
-            for (int32_t y = _bracket_bounds.top + 2; y < _bracket_bounds.bottom; y += 2) {
-                VideoDriver::driver()->draw_line(
-                        Point(_bracket_bounds.left, y),
-                        Point(_bracket_bounds.right - 1, y),
-                        dark_green);
+            {
+                Rects rects;
+                for (int32_t y = _bracket_bounds.top + 2; y < _bracket_bounds.bottom; y += 2) {
+                    rects.fill({_bracket_bounds.left, y, _bracket_bounds.right, y + 1}, dark_green);
+                }
+                draw_vbracket(rects, _bracket_bounds, light_green);
             }
-            draw_vbracket(_bracket_bounds, light_green);
 
             title_font->draw(_text_origin, _pause_string, light_green);
         }
         if (asleep()) {
-            VideoDriver::driver()->fill_rect(world, RgbColor(63, 0, 0, 0));
+            Rects().fill(world, RgbColor(63, 0, 0, 0));
         }
     }
 

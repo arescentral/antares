@@ -102,32 +102,28 @@ enum inlineKindType {
     kVClearPictKind = 2
 };
 
-inline void mDrawPuffUpRect(Rect r, uint8_t mcolor, int mshade) {
+inline void mDrawPuffUpRect(const Rects& rects, Rect r, uint8_t mcolor, int mshade) {
     const RgbColor color = GetRGBTranslateColorShade(mcolor, mshade);
-    VideoDriver::driver()->fill_rect(r, color);
+    rects.fill(r, color);
     const RgbColor lighter = GetRGBTranslateColorShade(mcolor, mshade + kLighterColor);
-    VideoDriver::driver()->fill_rect(Rect(r.left, r.top, r.left + 1, r.bottom), lighter);
-    VideoDriver::driver()->fill_rect(Rect(r.left, r.top, r.right - 1, r.top + 1), lighter);
+    rects.fill(Rect(r.left, r.top, r.left + 1, r.bottom), lighter);
+    rects.fill(Rect(r.left, r.top, r.right - 1, r.top + 1), lighter);
     const RgbColor darker = GetRGBTranslateColorShade(mcolor, mshade + kDarkerColor);
-    VideoDriver::driver()->fill_rect(Rect(r.right - 1, r.top, r.right, r.bottom), darker);
-    VideoDriver::driver()->fill_rect(Rect(r.left + 1, r.bottom - 1, r.right, r.bottom), darker);
+    rects.fill(Rect(r.right - 1, r.top, r.right, r.bottom), darker);
+    rects.fill(Rect(r.left + 1, r.bottom - 1, r.right, r.bottom), darker);
 }
 
-inline void mDrawPuffDownRect(Rect r, uint8_t mcolor, int mshade) {
-    VideoDriver::driver()->fill_rect(r, RgbColor::kBlack);
+inline void mDrawPuffDownRect(const Rects& rects, Rect r, uint8_t mcolor, int mshade) {
+    rects.fill(r, RgbColor::kBlack);
     const RgbColor darker = GetRGBTranslateColorShade(mcolor, mshade + kDarkerColor);
-    VideoDriver::driver()->fill_rect(
-            Rect(r.left - 1, r.top - 1, r.left, r.bottom + 1), darker);
-    VideoDriver::driver()->fill_rect(
-            Rect(r.left - 1, r.top - 1, r.right, r.top), darker);
+    rects.fill(Rect(r.left - 1, r.top - 1, r.left, r.bottom + 1), darker);
+    rects.fill(Rect(r.left - 1, r.top - 1, r.right, r.top), darker);
     const RgbColor lighter = GetRGBTranslateColorShade(mcolor, mshade + kLighterColor);
-    VideoDriver::driver()->fill_rect(
-            Rect(r.right, r.top - 1, r.right + 1, r.bottom + 1), lighter);
-    VideoDriver::driver()->fill_rect(
-            Rect(r.left, r.bottom, r.right + 1, r.bottom + 1), lighter);
+    rects.fill(Rect(r.right, r.top - 1, r.right + 1, r.bottom + 1), lighter);
+    rects.fill(Rect(r.left, r.bottom, r.right + 1, r.bottom + 1), lighter);
 }
 
-inline void mDrawPuffUpTopBorder(Rect r, uint8_t hue, int shade, int h_border) {
+inline void mDrawPuffUpTopBorder(const Rects& rects, Rect r, uint8_t hue, int shade, int h_border) {
     // For historical reasons, this function assumes r has closed intervals.
     ++r.right;
     ++r.bottom;
@@ -136,28 +132,22 @@ inline void mDrawPuffUpTopBorder(Rect r, uint8_t hue, int shade, int h_border) {
             r.left - h_border, r.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight,
             r.right + h_border, r.top - kInterfaceVLipHeight);
     const RgbColor color = GetRGBTranslateColorShade(hue, shade);
-    VideoDriver::driver()->fill_rect(Rect(outer.left, outer.top, r.left, r.top), color);
-    VideoDriver::driver()->fill_rect(Rect(r.right, outer.top, outer.right, r.top), color);
-    VideoDriver::driver()->fill_rect(Rect(r.left, outer.top, r.right, outer.bottom), color);
+    rects.fill(Rect(outer.left, outer.top, r.left, r.top), color);
+    rects.fill(Rect(r.right, outer.top, outer.right, r.top), color);
+    rects.fill(Rect(r.left, outer.top, r.right, outer.bottom), color);
 
     const RgbColor darker = GetRGBTranslateColorShade(hue, shade + kDarkerColor);
-    VideoDriver::driver()->fill_rect(
-            Rect(outer.left, r.top, r.left + 1, r.top + 1), darker);
-    VideoDriver::driver()->fill_rect(
-            Rect(r.left, outer.bottom, r.right, outer.bottom + 1), darker);
-    VideoDriver::driver()->fill_rect(
-            Rect(r.right - 1, r.top, outer.right, r.top + 1), darker);
-    VideoDriver::driver()->fill_rect(
-            Rect(outer.right - 1, outer.top + 1, outer.right, r.top), darker);
+    rects.fill(Rect(outer.left, r.top, r.left + 1, r.top + 1), darker);
+    rects.fill(Rect(r.left, outer.bottom, r.right, outer.bottom + 1), darker);
+    rects.fill(Rect(r.right - 1, r.top, outer.right, r.top + 1), darker);
+    rects.fill(Rect(outer.right - 1, outer.top + 1, outer.right, r.top), darker);
 
     const RgbColor lighter = GetRGBTranslateColorShade(hue, shade + kLighterColor);
-    VideoDriver::driver()->fill_rect(
-            Rect(outer.left, outer.top, outer.left + 1, r.top), lighter);
-    VideoDriver::driver()->fill_rect(
-            Rect(outer.left, outer.top, outer.right, outer.top + 1), lighter);
+    rects.fill(Rect(outer.left, outer.top, outer.left + 1, r.top), lighter);
+    rects.fill(Rect(outer.left, outer.top, outer.right, outer.top + 1), lighter);
 }
 
-inline void mDrawPuffUpBottomBorder(Rect r, uint8_t hue, int shade, int h_border) {
+inline void mDrawPuffUpBottomBorder(const Rects& rects, Rect r, uint8_t hue, int shade, int h_border) {
     // For historical reasons, this function assumes r has closed intervals.
     ++r.right;
     ++r.bottom;
@@ -167,72 +157,67 @@ inline void mDrawPuffUpBottomBorder(Rect r, uint8_t hue, int shade, int h_border
             r.right + h_border, r.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
 
     const RgbColor color = GetRGBTranslateColorShade(hue, shade);
-    VideoDriver::driver()->fill_rect(Rect(outer.left, r.bottom, r.left, outer.bottom), color);
-    VideoDriver::driver()->fill_rect(Rect(r.right, r.bottom, outer.right, outer.bottom), color);
-    VideoDriver::driver()->fill_rect(Rect(r.left, outer.top, r.right, outer.bottom), color);
+    rects.fill(Rect(outer.left, r.bottom, r.left, outer.bottom), color);
+    rects.fill(Rect(r.right, r.bottom, outer.right, outer.bottom), color);
+    rects.fill(Rect(r.left, outer.top, r.right, outer.bottom), color);
 
     const RgbColor lighter = GetRGBTranslateColorShade(hue, shade + kLighterColor);
-    VideoDriver::driver()->fill_rect(
-            Rect(outer.left, r.bottom - 1, outer.left + 1, outer.bottom), lighter);
-    VideoDriver::driver()->fill_rect(
-            Rect(outer.left, r.bottom - 1, r.left + 1, r.bottom), lighter);
-    VideoDriver::driver()->fill_rect(
-            Rect(r.left, outer.top - 1, r.right, outer.top), lighter);
-    VideoDriver::driver()->fill_rect(
-            Rect(r.right - 1, r.bottom - 1, outer.right, r.bottom), lighter);
+    rects.fill(Rect(outer.left, r.bottom - 1, outer.left + 1, outer.bottom), lighter);
+    rects.fill(Rect(outer.left, r.bottom - 1, r.left + 1, r.bottom), lighter);
+    rects.fill(Rect(r.left, outer.top - 1, r.right, outer.top), lighter);
+    rects.fill(Rect(r.right - 1, r.bottom - 1, outer.right, r.bottom), lighter);
 
     const RgbColor darker = GetRGBTranslateColorShade(hue, shade + kDarkerColor);
-    VideoDriver::driver()->fill_rect(
-            Rect(outer.left + 1, outer.bottom - 1, outer.right, outer.bottom), darker);
-    VideoDriver::driver()->fill_rect(
-            Rect(outer.right - 1, r.bottom - 1, outer.right, outer.bottom), darker);
+    rects.fill(Rect(outer.left + 1, outer.bottom - 1, outer.right, outer.bottom), darker);
+    rects.fill(Rect(outer.right - 1, r.bottom - 1, outer.right, outer.bottom), darker);
 }
 
-inline void mDrawPuffUpTBorder(Rect r, uint8_t mcolor, int mshade, int msheight, int h_border) {
+inline void mDrawPuffUpTBorder(const Rects& rects, Rect r, uint8_t mcolor, int mshade, int msheight, int h_border) {
     ++r.right;
     ++r.bottom;
 
     const RgbColor color = GetRGBTranslateColorShade(mcolor, mshade);
-    VideoDriver::driver()->fill_rect(Rect(
+    rects.fill(Rect(
                 r.left - h_border, r.top + msheight, r.left + 1,
                 r.top + msheight + kLabelBottomHeight + 1), color);
-    VideoDriver::driver()->fill_rect(Rect(
+    rects.fill(Rect(
                 r.right - 1, r.top + msheight, r.right + h_border,
                 r.top + msheight + kLabelBottomHeight + 1), color);
-    VideoDriver::driver()->fill_rect(Rect(
+    rects.fill(Rect(
                 r.left, r.top + msheight + kInterfaceVLipHeight, r.right,
                 r.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight + 1), color);
 
     const RgbColor lighter = GetRGBTranslateColorShade(mcolor, mshade + kLighterColor);
-    VideoDriver::driver()->fill_rect(Rect(
+    rects.fill(Rect(
                 r.left - h_border, r.top + msheight, r.left - h_border + 1,
                 r.top + msheight + kLabelBottomHeight + 1), lighter);
-    VideoDriver::driver()->fill_rect(Rect(
+    rects.fill(Rect(
                 r.left - h_border, r.top + msheight, r.left + 1, r.top + msheight + 1), lighter);
-    VideoDriver::driver()->fill_rect(Rect(
+    rects.fill(Rect(
                 r.left, r.top + msheight + kInterfaceVLipHeight, r.right,
                 r.top + msheight + kInterfaceVLipHeight + 1), lighter);
-    VideoDriver::driver()->fill_rect(Rect(
+    rects.fill(Rect(
                 r.right - 1, r.top + msheight, r.right + h_border - 1,
                 r.top + msheight + 1), lighter);
 
     const RgbColor darker = GetRGBTranslateColorShade(mcolor, mshade + kDarkerColor);
-    VideoDriver::driver()->fill_rect(Rect(
+    rects.fill(Rect(
                 r.left - h_border + 1, r.top + msheight + kLabelBottomHeight, r.left + 1,
                 r.top + msheight + kLabelBottomHeight + 1), darker);
-    VideoDriver::driver()->fill_rect(Rect(
+    rects.fill(Rect(
                 r.left, r.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight, r.right,
                 r.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight + 1), darker);
-    VideoDriver::driver()->fill_rect(Rect(
+    rects.fill(Rect(
                 r.right - 1, r.top + msheight + kLabelBottomHeight, r.right + h_border,
                 r.top + msheight + kLabelBottomHeight + 1), darker);
-    VideoDriver::driver()->fill_rect(Rect(
+    rects.fill(Rect(
                 r.right + h_border - 1, r.top + msheight, r.right + h_border,
                 r.top + msheight + kLabelBottomHeight + 1), darker);
 }
 
 template <typename T>
 void draw_plain_rect(Point origin, const T& item) {
+    Rects rects;
     Rect            tRect, uRect;
     int16_t         vcenter, thisHBorder = kInterfaceSmallHBorder;
     uint8_t         color = item.hue;
@@ -249,10 +234,10 @@ void draw_plain_rect(Point origin, const T& item) {
     tRect.bottom += kInterfaceContentBuffer;
 
     // top border
-    mDrawPuffUpTopBorder(tRect, color, DARK, thisHBorder);
+    mDrawPuffUpTopBorder(rects, tRect, color, DARK, thisHBorder);
     // bottom border
 
-    mDrawPuffUpBottomBorder(tRect, color, DARK, thisHBorder);
+    mDrawPuffUpBottomBorder(rects, tRect, color, DARK, thisHBorder);
 
     // main part left border
 
@@ -262,13 +247,13 @@ void draw_plain_rect(Point origin, const T& item) {
         tRect.top + kInterfaceHTop,
         tRect.left + 1,
         tRect.top + vcenter - kInterfaceVLipHeight + 1);
-    mDrawPuffUpRect( uRect, color, DARKER);
+    mDrawPuffUpRect(rects, uRect, color, DARKER);
 
     uRect = Rect(tRect.left - thisHBorder,
         tRect.bottom - vcenter + kInterfaceVLipHeight,
         tRect.left + 1,
         tRect.bottom - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, color, VERY_DARK);
+    mDrawPuffUpRect(rects, uRect, color, VERY_DARK);
 
     // right border
 
@@ -276,16 +261,17 @@ void draw_plain_rect(Point origin, const T& item) {
         tRect.top + kInterfaceHTop,
         tRect.right + thisHBorder + 1,
         tRect.top + vcenter - kInterfaceVLipHeight + 1);
-    mDrawPuffUpRect( uRect, color, DARKER);
+    mDrawPuffUpRect(rects, uRect, color, DARKER);
 
     uRect = Rect(tRect.right,
         tRect.bottom - vcenter + kInterfaceVLipHeight,
         tRect.right + thisHBorder + 1,
         tRect.bottom - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, color, VERY_DARK);
+    mDrawPuffUpRect(rects, uRect, color, VERY_DARK);
 }
 
 void draw_tab_box(Point origin, const TabBox& item) {
+    Rects rects;
     Rect                uRect;
     int16_t             vcenter, h_border = kInterfaceSmallHBorder;
     uint8_t             shade;
@@ -307,40 +293,30 @@ void draw_tab_box(Point origin, const TabBox& item) {
     // top border
     shade = MEDIUM;
     const RgbColor rgb = GetRGBTranslateColorShade(color, shade);
-    VideoDriver::driver()->fill_rect(
-            Rect(outer.left, outer.top, r.left, r.top), rgb);
-    VideoDriver::driver()->fill_rect(
-            Rect(r.right, outer.top, outer.right, r.top), rgb);
-    VideoDriver::driver()->fill_rect(
-            Rect(r.left, outer.top, r.left + 6, outer.bottom), rgb);
-    VideoDriver::driver()->fill_rect(
-            Rect(r.right - top_right_border_size, outer.top, r.right, outer.bottom), rgb);
+    rects.fill(Rect(outer.left, outer.top, r.left, r.top), rgb);
+    rects.fill(Rect(r.right, outer.top, outer.right, r.top), rgb);
+    rects.fill(Rect(r.left, outer.top, r.left + 6, outer.bottom), rgb);
+    rects.fill(Rect(r.right - top_right_border_size, outer.top, r.right, outer.bottom), rgb);
 
     const RgbColor darker = GetRGBTranslateColorShade(color, shade + kDarkerColor);
-    VideoDriver::driver()->fill_rect(
-            Rect(outer.left, r.top, r.left + 1, r.top + 1), darker);
-    VideoDriver::driver()->fill_rect(
-            Rect(r.left, outer.bottom, r.left + 6, outer.bottom + 1), darker);
-    VideoDriver::driver()->fill_rect(
+    rects.fill(Rect(outer.left, r.top, r.left + 1, r.top + 1), darker);
+    rects.fill(Rect(r.left, outer.bottom, r.left + 6, outer.bottom + 1), darker);
+    rects.fill(
             Rect(r.right - top_right_border_size, outer.bottom, r.right + 1, outer.bottom + 1),
             darker);
-    VideoDriver::driver()->fill_rect(
-            Rect(r.right, r.top, outer.right + 1, r.top + 1), darker);
-    VideoDriver::driver()->fill_rect(
-            Rect(outer.right, outer.top, outer.right + 1, r.top), darker);
+    rects.fill(Rect(r.right, r.top, outer.right + 1, r.top + 1), darker);
+    rects.fill(Rect(outer.right, outer.top, outer.right + 1, r.top), darker);
 
     const RgbColor lighter = GetRGBTranslateColorShade(color, shade + kLighterColor);
-    VideoDriver::driver()->fill_rect(
-            Rect(outer.left, outer.top, outer.left + 1, r.top), lighter);
-    VideoDriver::driver()->fill_rect(
-            Rect(outer.left, outer.top, r.left + 6, outer.top + 1), lighter);
-    VideoDriver::driver()->fill_rect(
+    rects.fill(Rect(outer.left, outer.top, outer.left + 1, r.top), lighter);
+    rects.fill(Rect(outer.left, outer.top, r.left + 6, outer.top + 1), lighter);
+    rects.fill(
             Rect(r.right - top_right_border_size, outer.top, outer.right + 1, outer.top + 1),
             lighter);
 
     // bottom border
 
-    mDrawPuffUpBottomBorder(r, color, DARK, h_border);
+    mDrawPuffUpBottomBorder(rects, r, color, DARK, h_border);
 
     // main part left border
 
@@ -350,13 +326,13 @@ void draw_tab_box(Point origin, const TabBox& item) {
         r.top + kInterfaceHTop,
         r.left + 1,
         r.top + vcenter - kInterfaceVLipHeight + 1);
-    mDrawPuffUpRect(uRect, color, DARKER);
+    mDrawPuffUpRect(rects, uRect, color, DARKER);
 
     uRect = Rect(outer.left,
         r.bottom - vcenter + kInterfaceVLipHeight,
         r.left + 1,
         r.bottom - kInterfaceHTop + 1);
-    mDrawPuffUpRect(uRect, color, VERY_DARK);
+    mDrawPuffUpRect(rects, uRect, color, VERY_DARK);
 
     // right border
 
@@ -364,13 +340,13 @@ void draw_tab_box(Point origin, const TabBox& item) {
         r.top + kInterfaceHTop,
         outer.right + 1,
         r.top + vcenter - kInterfaceVLipHeight + 1);
-    mDrawPuffUpRect(uRect, color, DARKER);
+    mDrawPuffUpRect(rects, uRect, color, DARKER);
 
     uRect = Rect(r.right,
         r.bottom - vcenter + kInterfaceVLipHeight,
         outer.right + 1,
         r.bottom - kInterfaceHTop + 1);
-    mDrawPuffUpRect(uRect, color, VERY_DARK);
+    mDrawPuffUpRect(rects, uRect, color, VERY_DARK);
 }
 
 void draw_button(Point origin, InputMode mode, const PlainButton& item) {
@@ -379,56 +355,58 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
     uint8_t         shade;
     RgbColor        color;
 
-    if (item.style == kLarge) {
-        thisHBorder = kInterfaceLargeHBorder;
-    }
-    tRect = item.bounds();
-    tRect.offset(origin.h, origin.v);
+    {
+        Rects rects;
+        if (item.style == kLarge) {
+            thisHBorder = kInterfaceLargeHBorder;
+        }
+        tRect = item.bounds();
+        tRect.offset(origin.h, origin.v);
 
-    uRect = tRect;
-    uRect.right++;
-    uRect.bottom++;
+        uRect = tRect;
+        uRect.right++;
+        uRect.bottom++;
 
-    tRect.left -= kInterfaceContentBuffer;
-    tRect.top -= kInterfaceContentBuffer;
-    tRect.right += kInterfaceContentBuffer;
-    tRect.bottom += kInterfaceContentBuffer;
+        tRect.left -= kInterfaceContentBuffer;
+        tRect.top -= kInterfaceContentBuffer;
+        tRect.right += kInterfaceContentBuffer;
+        tRect.bottom += kInterfaceContentBuffer;
 
-    // top border
+        // top border
 
-    if (item.status == kDimmed) {
-        shade = VERY_DARK;
-    } else {
-        shade = MEDIUM;
-    }
-
-    mDrawPuffUpTopBorder(tRect, item.hue, shade, thisHBorder);
-    // bottom border
-
-    mDrawPuffUpBottomBorder(tRect, item.hue, shade, thisHBorder);
-
-    // side border top
-
-    vcenter = ( tRect.bottom - tRect.top) / 2;
-
-    uRect = Rect(tRect.left - thisHBorder, tRect.top + kInterfaceHTop, tRect.left + 1,
-            tRect.bottom - kInterfaceHTop + 1);
-    vRect = Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
-            tRect.bottom - kInterfaceHTop + 1);
-    if (item.status == kIH_Hilite) {
-        shade = LIGHT;
-        mDrawPuffUpRect(uRect, item.hue, shade);
-        mDrawPuffUpRect(vRect, item.hue, shade);
-    } else {
         if (item.status == kDimmed) {
             shade = VERY_DARK;
         } else {
-            shade = MEDIUM + kSlightlyLighterColor;
+            shade = MEDIUM;
         }
-        mDrawPuffUpRect(uRect, item.hue, shade);
-        mDrawPuffUpRect(vRect, item.hue, shade);
-    }
 
+        mDrawPuffUpTopBorder(rects, tRect, item.hue, shade, thisHBorder);
+        // bottom border
+
+        mDrawPuffUpBottomBorder(rects, tRect, item.hue, shade, thisHBorder);
+
+        // side border top
+
+        vcenter = ( tRect.bottom - tRect.top) / 2;
+
+        uRect = Rect(tRect.left - thisHBorder, tRect.top + kInterfaceHTop, tRect.left + 1,
+                tRect.bottom - kInterfaceHTop + 1);
+        vRect = Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
+                tRect.bottom - kInterfaceHTop + 1);
+        if (item.status == kIH_Hilite) {
+            shade = LIGHT;
+            mDrawPuffUpRect(rects, uRect, item.hue, shade);
+            mDrawPuffUpRect(rects, vRect, item.hue, shade);
+        } else {
+            if (item.status == kDimmed) {
+                shade = VERY_DARK;
+            } else {
+                shade = MEDIUM + kSlightlyLighterColor;
+            }
+            mDrawPuffUpRect(rects, uRect, item.hue, shade);
+            mDrawPuffUpRect(rects, vRect, item.hue, shade);
+        }
+    }
 
     bool draw_shortcut = false;
     String shortcut_text;
@@ -454,7 +432,7 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
                         tRect.bottom - kInterfaceContentBuffer + 1);
 
         color = GetRGBTranslateColorShade(item.hue, shade);
-        VideoDriver::driver()->fill_rect(uRect, color);
+        Rects().fill(uRect, color);
 
         if (item.status == kIH_Hilite) {
             color = GetRGBTranslateColorShade(item.hue, DARKEST);
@@ -470,6 +448,7 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
     } else {
         // draw the key code
         {
+            Rects rects;
             if (item.status == kDimmed)
                 shade = VERY_DARK;
             else shade = LIGHT;
@@ -478,7 +457,7 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
             uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                     tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 1,
                     tRect.bottom - kInterfaceContentBuffer + 1);
-            mDrawPuffUpRect(uRect, item.hue, shade);
+            mDrawPuffUpRect(rects, uRect, item.hue, shade);
 
             if (item.status == kIH_Hilite)
                 shade = LIGHT;
@@ -489,7 +468,7 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
                     tRect.right - kInterfaceContentBuffer + 1,
                     tRect.bottom - kInterfaceContentBuffer + 1);
             color = GetRGBTranslateColorShade(item.hue, shade);
-            VideoDriver::driver()->fill_rect(vRect, color);
+            rects.fill(vRect, color);
 
             swidth = GetInterfaceStringWidth(shortcut_text, item.style);
             swidth = uRect.left + ( uRect.right - uRect.left) / 2 - swidth / 2;
@@ -498,11 +477,11 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
             } else {
                 color = GetRGBTranslateColorShade(item.hue, DARKEST);
             }
-
-            DrawInterfaceString(
-                    Point(swidth, uRect.top + GetInterfaceFontAscent(item.style)),
-                    shortcut_text, item.style, color);
         }
+
+        DrawInterfaceString(
+                Point(swidth, uRect.top + GetInterfaceFontAscent(item.style)),
+                shortcut_text, item.style, color);
 
         // draw the button title
         {
@@ -548,7 +527,7 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
         shade = MEDIUM;
     }
 
-    mDrawPuffUpTopBorder(tRect, item.hue, shade, h_border);
+    mDrawPuffUpTopBorder(Rects(), tRect, item.hue, shade, h_border);
 
     // side border top
 
@@ -561,34 +540,33 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
             tRect.right, tRect.top + kInterfaceHTop, tRect.right + h_border + 1,
             tRect.bottom - kInterfaceHTop + 1);
     if (!item.on) {
+        Rects rects;
         if (item.status == kIH_Hilite) {
             shade = LIGHT;
-            mDrawPuffUpRect(left, item.hue, shade);
-            mDrawPuffUpRect(right, item.hue, shade);
+            mDrawPuffUpRect(rects, left, item.hue, shade);
+            mDrawPuffUpRect(rects, right, item.hue, shade);
         } else {
             if (item.status == kDimmed) {
                 shade = VERY_DARK;
             }
             else shade = DARK;
-            mDrawPuffUpRect(left, item.hue, shade);
-            mDrawPuffUpRect(right, item.hue, shade);
+            mDrawPuffUpRect(rects, left, item.hue, shade);
+            mDrawPuffUpRect(rects, right, item.hue, shade);
         }
         left = Rect(left.left, left.bottom, left.right, left.bottom + 3);
         right = Rect(right.left, right.bottom, right.right, right.bottom + 3);
-        VideoDriver::driver()->fill_rect(left, RgbColor::kBlack);
-        VideoDriver::driver()->fill_rect(right, RgbColor::kBlack);
+        rects.fill(left, RgbColor::kBlack);
+        rects.fill(right, RgbColor::kBlack);
         shade = MEDIUM;
         color = GetRGBTranslateColorShade(item.hue, shade);
-        VideoDriver::driver()->fill_rect(
-                Rect(left.left - 3, left.bottom, right.right + 3, left.bottom + 3), color);
+        rects.fill(Rect(left.left - 3, left.bottom, right.right + 3, left.bottom + 3), color);
 
         const RgbColor lighter = GetRGBTranslateColorShade(item.hue, shade + kLighterColor);
-        VideoDriver::driver()->fill_rect(
-                Rect(left.left - 3, left.bottom - 1, right.right + 3, left.bottom), lighter);
+        rects.fill(Rect(left.left - 3, left.bottom - 1, right.right + 3, left.bottom), lighter);
         const RgbColor darker = GetRGBTranslateColorShade(item.hue, shade + kDarkerColor);
-        VideoDriver::driver()->fill_rect(
-                Rect(left.left - 3, left.bottom + 3, right.right + 3, left.bottom + 4), darker);
+        rects.fill(Rect(left.left - 3, left.bottom + 3, right.right + 3, left.bottom + 4), darker);
     } else {
+        Rects rects;
         if (item.status == kIH_Hilite) {
             shade = LIGHT;
         } else if (item.status == kDimmed) {
@@ -599,43 +577,33 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
         left.bottom += 7;
         right.bottom += 7;
         color = GetRGBTranslateColorShade(item.hue, shade);
-        VideoDriver::driver()->fill_rect(left, color);
-        VideoDriver::driver()->fill_rect(right, color);
+        rects.fill(left, color);
+        rects.fill(right, color);
 
         const RgbColor lighter = GetRGBTranslateColorShade(item.hue, shade + kLighterColor);
-        VideoDriver::driver()->fill_rect(
-                Rect(left.left, left.top, left.right - 1, left.top + 1), lighter);
-        VideoDriver::driver()->fill_rect(
-                Rect(left.left, left.top, left.left + 1, left.bottom - 5), lighter);
-        VideoDriver::driver()->fill_rect(
-                Rect(left.left - 3, left.bottom - 5, left.left + 1, left.bottom - 4), lighter);
-        VideoDriver::driver()->fill_rect(
-                Rect(right.left, right.top, right.right - 1, right.top + 1), lighter);
-        VideoDriver::driver()->fill_rect(
-                Rect(right.right, right.bottom - 5, right.right + 3, right.bottom - 4), lighter);
-        VideoDriver::driver()->fill_rect(
-                Rect(right.left, right.top, right.left + 1, right.bottom - 1), lighter);
+        rects.fill(Rect(left.left, left.top, left.right - 1, left.top + 1), lighter);
+        rects.fill(Rect(left.left, left.top, left.left + 1, left.bottom - 5), lighter);
+        rects.fill(Rect(left.left - 3, left.bottom - 5, left.left + 1, left.bottom - 4), lighter);
+        rects.fill(Rect(right.left, right.top, right.right - 1, right.top + 1), lighter);
+        rects.fill(Rect(right.right, right.bottom - 5, right.right + 3, right.bottom - 4), lighter);
+        rects.fill(Rect(right.left, right.top, right.left + 1, right.bottom - 1), lighter);
 
         const RgbColor darker = GetRGBTranslateColorShade(item.hue, shade + kDarkerColor);
-        VideoDriver::driver()->fill_rect(
-                Rect(left.left - 3, left.bottom - 1, left.right, left.bottom), darker);
-        VideoDriver::driver()->fill_rect(
-                Rect(left.right - 1, left.top, left.right, left.bottom), darker);
-        VideoDriver::driver()->fill_rect(
-                Rect(right.right - 1, right.top, right.right, right.bottom - 4), darker);
-        VideoDriver::driver()->fill_rect(
-                Rect(right.left, right.bottom - 1, right.right + 3, right.bottom), darker);
+        rects.fill(Rect(left.left - 3, left.bottom - 1, left.right, left.bottom), darker);
+        rects.fill(Rect(left.right - 1, left.top, left.right, left.bottom), darker);
+        rects.fill(Rect(right.right - 1, right.top, right.right, right.bottom - 4), darker);
+        rects.fill(Rect(right.left, right.bottom - 1, right.right + 3, right.bottom), darker);
 
         Rect uRect(left.left - 3, left.bottom - 4, left.right - 1, left.bottom - 1);
         const RgbColor color = GetRGBTranslateColorShade(item.hue, shade);
-        VideoDriver::driver()->fill_rect(uRect, color);
+        rects.fill(uRect, color);
         Rect vRect(right.left + 1, right.bottom - 4, right.right + 3, right.bottom - 1);
-        VideoDriver::driver()->fill_rect(vRect, color);
+        rects.fill(vRect, color);
         uRect.top--;
         uRect.bottom++;
         uRect.left = uRect.right + 1;
         uRect.right = vRect.left - 1;
-        VideoDriver::driver()->fill_rect(uRect, RgbColor::kBlack);
+        rects.fill(uRect, RgbColor::kBlack);
     }
 
     if (item.key == 0) {
@@ -655,7 +623,7 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
                         tRect.right - kInterfaceContentBuffer + 1,
                         tRect.bottom - kInterfaceContentBuffer + 1);
         color = GetRGBTranslateColorShade(item.hue, shade);
-        VideoDriver::driver()->fill_rect(uRect, color);
+        Rects().fill(uRect, color);
 
         if (!item.on) {
             if (item.status == kIH_Hilite) {
@@ -691,7 +659,7 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
                 tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                 tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 1,
                 tRect.bottom - kInterfaceContentBuffer + 1);
-        mDrawPuffUpRect(uRect, item.hue, shade);
+        mDrawPuffUpRect(Rects(), uRect, item.hue, shade);
 
         if (item.on) {
             shade = MEDIUM;
@@ -706,7 +674,7 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
                 tRect.right - kInterfaceContentBuffer + 1,
                 tRect.bottom - kInterfaceContentBuffer + 1);
         color = GetRGBTranslateColorShade(item.hue, shade);
-        VideoDriver::driver()->fill_rect(vRect, color);
+        Rects().fill(vRect, color);
 
         swidth = GetInterfaceStringWidth(s, item.style);
         swidth = uRect.left + (uRect.right - uRect.left) / 2 - swidth / 2;
@@ -889,10 +857,10 @@ void draw_checkbox(Point origin, const CheckboxButton& item) {
         shade = VERY_DARK;
     else shade = MEDIUM;
 
-    mDrawPuffUpTopBorder(tRect, item.hue, shade, thisHBorder);
+    mDrawPuffUpTopBorder(Rects(), tRect, item.hue, shade, thisHBorder);
     // bottom border
 
-    mDrawPuffUpBottomBorder(tRect, item.hue, shade, thisHBorder);
+    mDrawPuffUpBottomBorder(Rects(), tRect, item.hue, shade, thisHBorder);
 
     // side border top
 
@@ -915,27 +883,27 @@ void draw_checkbox(Point origin, const CheckboxButton& item) {
 
     if (item.status == kIH_Hilite) {
         shade = LIGHT;
-        mDrawPuffUpRect(uRect, item.hue, shade);
-        mDrawPuffUpRect(vRect, item.hue, shade);
-        mDrawPuffUpRect(wRect, item.hue, shade);
+        mDrawPuffUpRect(Rects(), uRect, item.hue, shade);
+        mDrawPuffUpRect(Rects(), vRect, item.hue, shade);
+        mDrawPuffUpRect(Rects(), wRect, item.hue, shade);
         wRect.inset(3, 3);
-        mDrawPuffDownRect(wRect, item.hue, shade);
+        mDrawPuffDownRect(Rects(), wRect, item.hue, shade);
         wRect.inset(1, 1);
         if ( !item.on) {
             color = RgbColor::kBlack;
         } else {
             color = GetRGBTranslateColorShade(item.hue, VERY_LIGHT);
         }
-        VideoDriver::driver()->fill_rect(wRect, color);
+        Rects().fill(wRect, color);
     } else {
         if ( item.status == kDimmed)
             shade = VERY_DARK;
         else shade = MEDIUM + kSlightlyLighterColor;
-        mDrawPuffUpRect( uRect, item.hue, shade);
-        mDrawPuffUpRect( vRect, item.hue, shade);
-        mDrawPuffUpRect( wRect, item.hue, shade);
+        mDrawPuffUpRect(Rects(), uRect, item.hue, shade);
+        mDrawPuffUpRect(Rects(), vRect, item.hue, shade);
+        mDrawPuffUpRect(Rects(), wRect, item.hue, shade);
         wRect.inset(3, 3);
-        mDrawPuffDownRect( wRect, item.hue, shade);
+        mDrawPuffDownRect(Rects(), wRect, item.hue, shade);
         wRect.inset(1, 1);
         if (!item.on) {
             color = RgbColor::kBlack;
@@ -944,7 +912,7 @@ void draw_checkbox(Point origin, const CheckboxButton& item) {
         } else {
             color = GetRGBTranslateColorShade(item.hue, MEDIUM);
         }
-        VideoDriver::driver()->fill_rect(wRect, color);
+        Rects().fill(wRect, color);
     }
 
     uRect = Rect(tRect.left +  kInterfaceContentBuffer,
@@ -959,7 +927,7 @@ void draw_checkbox(Point origin, const CheckboxButton& item) {
                     tRect.right - kInterfaceContentBuffer + 1,
                     tRect.bottom - kInterfaceContentBuffer + 1);
     color = GetRGBTranslateColorShade(item.hue, shade);
-    VideoDriver::driver()->fill_rect(uRect, color);
+    Rects().fill(uRect, color);
 
     if (item.status == kIH_Hilite) {
         color = GetRGBTranslateColorShade(item.hue, DARKEST);
@@ -995,10 +963,10 @@ void draw_labeled_box(Point origin, const LabeledRect& item) {
 
     shade = DARK;
 
-    mDrawPuffUpTopBorder(tRect, item.hue, shade, thisHBorder);
+    mDrawPuffUpTopBorder(Rects(), tRect, item.hue, shade, thisHBorder);
     // bottom border
 
-    mDrawPuffUpBottomBorder(tRect, item.hue, shade, thisHBorder);
+    mDrawPuffUpBottomBorder(Rects(), tRect, item.hue, shade, thisHBorder);
 
     // draw the string
 
@@ -1012,7 +980,7 @@ void draw_labeled_box(Point origin, const LabeledRect& item) {
         tRect.right - swidth - kInterfaceTextHBuffer + 1,
         tRect.top + sheight - kInterfaceHTop);
     color = GetRGBTranslateColorShade(item.hue, VERY_DARK);
-    VideoDriver::driver()->fill_rect(uRect, color);
+    Rects().fill(uRect, color);
 
     color = GetRGBTranslateColorShade(item.hue, LIGHT);
 
@@ -1030,7 +998,7 @@ void draw_labeled_box(Point origin, const LabeledRect& item) {
     uRect = Rect(tRect.left - thisHBorder,
             tRect.top + kInterfaceHTop,
             tRect.left + 1, tRect.top + sheight - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, item.hue, shade);
+    mDrawPuffUpRect(Rects(), uRect, item.hue, shade);
 
     // string right border
 
@@ -1039,16 +1007,16 @@ void draw_labeled_box(Point origin, const LabeledRect& item) {
         tRect.top + kInterfaceHTop,
         tRect.right - 2,
         tRect.top + sheight - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, item.hue, shade);
+    mDrawPuffUpRect(Rects(), uRect, item.hue, shade);
     uRect = Rect(tRect.right,
         tRect.top + kInterfaceHTop,
         tRect.right + thisHBorder + 1,
         tRect.top + sheight - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, item.hue, shade);
+    mDrawPuffUpRect(Rects(), uRect, item.hue, shade);
 
     // string bottom border
 
-    mDrawPuffUpTBorder(tRect, item.hue, DARK, sheight, thisHBorder);
+    mDrawPuffUpTBorder(Rects(), tRect, item.hue, DARK, sheight, thisHBorder);
 
     // main part left border
 
@@ -1060,13 +1028,13 @@ void draw_labeled_box(Point origin, const LabeledRect& item) {
         tRect.top + kInterfaceHTop,
         tRect.left + 1,
         tRect.top + vcenter - kInterfaceVLipHeight + 1);
-    mDrawPuffUpRect( uRect, item.hue, DARKER);
+    mDrawPuffUpRect(Rects(), uRect, item.hue, DARKER);
 
     uRect = Rect(tRect.left - thisHBorder,
         tRect.bottom - vcenter + kInterfaceVLipHeight,
         tRect.left + 1,
         tRect.bottom - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, item.hue, VERY_DARK);
+    mDrawPuffUpRect(Rects(), uRect, item.hue, VERY_DARK);
 
     // right border
 
@@ -1074,13 +1042,13 @@ void draw_labeled_box(Point origin, const LabeledRect& item) {
         tRect.top + kInterfaceHTop,
         tRect.right + thisHBorder + 1,
         tRect.top + vcenter - kInterfaceVLipHeight + 1);
-    mDrawPuffUpRect( uRect, item.hue, DARKER);
+    mDrawPuffUpRect(Rects(), uRect, item.hue, DARKER);
 
     uRect = Rect(tRect.right,
         tRect.bottom - vcenter + kInterfaceVLipHeight,
         tRect.right + thisHBorder + 1,
         tRect.bottom - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, item.hue, VERY_DARK);
+    mDrawPuffUpRect(Rects(), uRect, item.hue, VERY_DARK);
 }
 
 void draw_text_rect(Point origin, const TextRect& item) {

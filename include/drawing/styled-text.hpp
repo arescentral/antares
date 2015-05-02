@@ -51,6 +51,7 @@ class StyledText {
     const std::vector<inlinePictType>& inline_picts() const;
 
     void draw(const Rect& bounds) const;
+    void draw_range(const Rect& bounds, int begin, int end) const;
     void draw_char(const Rect& bounds, int index) const;
 
     void draw_cursor(const Rect& bounds, int index) const;
