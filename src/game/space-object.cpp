@@ -460,8 +460,8 @@ void SpaceObject::change_base_type(
     NatePixTable* spriteTable;
 
 #ifdef DATA_COVERAGE
-    covered_objects.insert(type.number());
-    for (int32_t weapon: {base->pulse.base, base->beam.base, base->special.base}) {
+    covered_objects.insert(base.number());
+    for (auto weapon: {base->pulse.base, base->beam.base, base->special.base}) {
         if (weapon.get()) {
             covered_objects.insert(weapon.number());
         }
