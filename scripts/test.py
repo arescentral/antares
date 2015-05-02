@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import argparse
 import contextlib
 import multiprocessing.pool
 import os
@@ -21,7 +22,7 @@ def run(name, cmd):
     return True
 
 
-def unit_test(name, args=[]):
+def unit_test(opts, name, args=[]):
     return run(name, ["out/cur/%s" % name] + args)
 
 
@@ -31,13 +32,13 @@ def diff_test(name, cmd, expected):
                 run(name, ["diff", "-ru", "-x.*", expected, d]))
 
 
-def data_test(name, args=[]):
+def data_test(opts, name, args=[]):
     return diff_test(name, ["out/cur/%s" % name] + args, "test/%s" % name)
 
 
-def offscreen_test(name, args=[]):
+def offscreen_test(opts, name, args=[]):
     cmd = ["out/cur/offscreen", name]
-    if bool(os.environ.get("SMOKE", "")):
+    if opts.smoke:
         cmd.append("--text")
         expected = "test/smoke/%s" % name
     else:
@@ -45,9 +46,9 @@ def offscreen_test(name, args=[]):
     return diff_test(name, cmd + args, expected)
 
 
-def replay_test(name, args=[]):
+def replay_test(opts, name, args=[]):
     cmd = ["out/cur/replay", "test/%s.NLRP" % name, "--text"]
-    if bool(os.environ.get("SMOKE", "")):
+    if opts.smoke:
         cmd.append("--smoke")
         expected = "test/smoke/%s" % name
     else:
@@ -60,39 +61,40 @@ def call(args):
 
 
 def main():
-    args = sys.argv[1:]
-    assert not sys.argv[1:]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--smoke", action="store_true")
+    opts = parser.parse_args()
 
     pool = multiprocessing.pool.ThreadPool()
     result = pool.map_async(call, [
-        (unit_test, "fixed-test"),
+        (unit_test, opts, "fixed-test"),
 
-        (data_test, "build-pix"),
-        (data_test, "object-data"),
-        (data_test, "shapes"),
-        (data_test, "tint"),
+        (data_test, opts, "build-pix"),
+        (data_test, opts, "object-data"),
+        (data_test, opts, "shapes"),
+        (data_test, opts, "tint"),
 
-        (offscreen_test, "main-screen"),
-        (offscreen_test, "mission-briefing", ["--text"]),
-        (offscreen_test, "options"),
-        (offscreen_test, "pause", ["--text"]),
+        (offscreen_test, opts, "main-screen"),
+        (offscreen_test, opts, "mission-briefing", ["--text"]),
+        (offscreen_test, opts, "options"),
+        (offscreen_test, opts, "pause", ["--text"]),
 
-        (replay_test, "and-it-feels-so-good"),
-        (replay_test, "astrotrash-plus"),
-        (replay_test, "blood-toil-tears-sweat"),
-        (replay_test, "hand-over-fist"),
-        (replay_test, "hornets-nest"),
-        (replay_test, "make-way"),
-        (replay_test, "moons-for-goons"),
-        (replay_test, "out-of-the-frying-pan"),
-        (replay_test, "shoplifter-1"),
-        (replay_test, "space-race"),
-        (replay_test, "the-left-hand"),
-        (replay_test, "the-mothership-connection"),
-        (replay_test, "the-stars-have-ears"),
-        (replay_test, "while-the-iron-is-hot"),
-        (replay_test, "yo-ho-ho"),
-        (replay_test, "you-should-have-seen-the-one-that-got-away"),
+        (replay_test, opts, "and-it-feels-so-good"),
+        (replay_test, opts, "astrotrash-plus"),
+        (replay_test, opts, "blood-toil-tears-sweat"),
+        (replay_test, opts, "hand-over-fist"),
+        (replay_test, opts, "hornets-nest"),
+        (replay_test, opts, "make-way"),
+        (replay_test, opts, "moons-for-goons"),
+        (replay_test, opts, "out-of-the-frying-pan"),
+        (replay_test, opts, "shoplifter-1"),
+        (replay_test, opts, "space-race"),
+        (replay_test, opts, "the-left-hand"),
+        (replay_test, opts, "the-mothership-connection"),
+        (replay_test, opts, "the-stars-have-ears"),
+        (replay_test, opts, "while-the-iron-is-hot"),
+        (replay_test, opts, "yo-ho-ho"),
+        (replay_test, opts, "you-should-have-seen-the-one-that-got-away"),
     ])
     pool.close()
     result.wait()
