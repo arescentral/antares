@@ -8,6 +8,7 @@ os.chdir(os.path.dirname(sys.argv[0]))
 progname = sys.argv[0]
 parser = argparse.ArgumentParser()
 parser.add_argument("-m", "--mode", type=unicode, choices="dbg dev opt cov".split(), default="opt")
+parser.add_argument("--coverage", action="store_true", default=False)
 args, remainder = parser.parse_known_args()
 
 try:
@@ -27,5 +28,7 @@ cmd = [
     "--include=defaults.gypi",
     "--format=ninja",
     "--depth=.",
-] + remainder
+]
+cmd += ["-D", "COVERAGE=%s" % ("1" if args.coverage else "")]
+cmd += remainder
 os.execvp(cmd[0], cmd)
