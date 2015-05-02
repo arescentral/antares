@@ -81,8 +81,11 @@ def call(args):
 
 
 def main():
+    test_types = "unit data offscreen replay".split()
     parser = argparse.ArgumentParser()
     parser.add_argument("--smoke", action="store_true")
+    parser.add_argument("-t", "--type", action="append", choices=test_types)
+    parser.add_argument("test", nargs="*")
     opts = parser.parse_args()
 
     lock = multiprocessing.Lock()
@@ -117,6 +120,20 @@ def main():
         (replay_test, opts, lock, "yo-ho-ho"),
         (replay_test, opts, lock, "you-should-have-seen-the-one-that-got-away"),
     ]
+
+    if opts.test:
+        test_map = dict((t[3], t) for t in tests)
+        tests = [test_map[test] for test in opts.test]
+
+    if opts.type:
+        if "unit" not in opts.type:
+            tests = [t for t in tests if t[0] != unit_test]
+        if "data" not in opts.type:
+            tests = [t for t in tests if t[0] != data_test]
+        if "offscreen" not in opts.type:
+            tests = [t for t in tests if t[0] != offscreen_test]
+        if "replay" not in opts.type:
+            tests = [t for t in tests if t[0] != replay_test]
 
     sys.stderr.write("Running %d tests:\n" % len(tests))
     start = time.time()
