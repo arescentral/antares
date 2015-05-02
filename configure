@@ -1,15 +1,34 @@
-#!/bin/bash
+#!/usr/bin/env python
 
-set -o errexit
-set -o nounset
+import argparse
+import os
+import sys
 
-MODE=${MODE-opt}
-DEPTH=$(dirname "$0")
-mkdir -p out
-rm -f out/cur
-ln -s "$MODE" out/cur
-exec gyp \
-    --include=defaults.gypi \
-    --format=ninja \
-    --depth="$DEPTH" \
-    "$@"
+os.chdir(os.path.dirname(sys.argv[0]))
+progname = sys.argv[0]
+parser = argparse.ArgumentParser()
+parser.add_argument("-m", "--mode", type=unicode, choices="dbg dev opt cov".split(), default="opt")
+parser.add_argument("--coverage", action="store_true", default=False)
+args, remainder = parser.parse_known_args()
+
+try:
+    os.makedirs("out")
+except OSError as e:
+    if e.errno != 17:
+        raise
+
+try:
+    os.unlink("out/cur")
+except OSError as e:
+    pass
+os.symlink(args.mode, "out/cur")
+
+cmd = [
+    "gyp",
+    "--include=defaults.gypi",
+    "--format=ninja",
+    "--depth=.",
+]
+cmd += ["-D", "COVERAGE=%s" % ("1" if args.coverage else "")]
+cmd += remainder
+os.execvp(cmd[0], cmd)

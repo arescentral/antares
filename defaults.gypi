@@ -18,9 +18,6 @@
       , "cxxflags": ["-Os"]
       , "defines": ["NDEBUG"]
       }
-    , "cov":
-      { "defines": ["DATA_COVERAGE"]
-      }
     }
   , "cxxflags":
     [ "-std=c++11"
@@ -34,6 +31,12 @@
     , "CLANG_CXX_LIBRARY": "libc++"
     , "SDKROOT": "macosx<(MACOSX_VERSION)"
     }
+  , "conditions":
+    [ [ "COVERAGE != ''"
+      , { "defines": ["DATA_COVERAGE=<(COVERAGE)"]
+        }
+      ]
+    ]
   }
 }
 # -*- mode: python; tab-width: 2 -*-

@@ -158,7 +158,7 @@ void AddBaseObjectActionMedia(
 void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors) {
     int32_t             count = 0, l1, l2;
 #ifdef DATA_COVERAGE
-        possible_actions.insert(action - mGetObjectActionPtr(0));
+        possible_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
     if (!action.get()) {

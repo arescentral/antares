@@ -738,7 +738,7 @@ static void execute_actions(
 
     for (auto action: actions) {
 #ifdef DATA_COVERAGE
-        covered_actions.insert(action - mGetObjectActionPtr(0));
+        covered_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
         if (action->verb == kNoAction) {

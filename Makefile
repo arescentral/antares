@@ -6,6 +6,9 @@ all:
 test: all
 	scripts/test.py
 
+smoke-test: all
+	scripts/test.py --smoke
+
 clean:
 	@$(NINJA) -t clean
 
