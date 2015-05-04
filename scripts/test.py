@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import collections
 import contextlib
 import cStringIO
 import multiprocessing.pool
@@ -160,10 +161,22 @@ def main():
 def handle_queue(queue, tests):
     pending = len(tests)
     failed = 0
+    completed = []
+    in_progress = collections.OrderedDict()
     while pending:
         msg = queue.get()
+        for _ in in_progress:
+            sys.stderr.write("\033[1A\033[2K")
+        for _ in completed:
+            sys.stderr.write("\033[1A\033[2K")
         name, cmd, params = msg[0], msg[1], msg[2:]
-        if cmd in [PASSED, FAILED, EXCEPT]:
+        if cmd in START:
+            print_name = name
+            if len(print_name) > 36:
+                print_name = name[:33] + "..."
+            in_progress[name] = "  %-40s ...\n" % print_name
+        elif cmd in [PASSED, FAILED, EXCEPT]:
+            del in_progress[name]
             duration, output = params
             if cmd == PASSED:
                 color = 32
@@ -175,10 +188,15 @@ def handle_queue(queue, tests):
                 sys.stderr.write(output)
                 sys.stderr.write("====================\n")
             rstr = "\033[1;%dm%s\033[0m" % (color, cmd)
-            if len(name) > 36:
-                name = name[:33] + "..."
-            sys.stderr.write("  %-40s %s in %0.2fs\n" % (name, rstr, duration))
+            print_name = name
+            if len(print_name) > 36:
+                print_name = name[:33] + "..."
+            completed.append("  %-40s %s in %0.2fs\n" % (print_name, rstr, duration))
             pending -= 1
+        for line in completed:
+            sys.stderr.write(line)
+        for line in in_progress.values():
+            sys.stderr.write(line)
     return failed
 
 
