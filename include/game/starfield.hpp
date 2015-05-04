@@ -47,8 +47,6 @@ struct scrollStarType {
     uint8_t         color;
 };
 
-extern Handle<SpaceObject> gScrollStarObject;
-
 class Starfield {
   public:
     static const int32_t kScrollStarNum = 125;
