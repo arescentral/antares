@@ -212,7 +212,7 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
         RgbColor tinyColor;
         if (obj->tinySize == 0) {
             tinyColor = RgbColor::kClear;
-        } else if (obj->owner == globals()->gPlayerAdmiral) {
+        } else if (obj->owner == g.admiral) {
             tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
         } else if (obj->owner.get()) {
             tinyColor = GetRGBTranslateColorShade(kHostileColor, tinyShade);
@@ -423,7 +423,7 @@ SpaceObject::SpaceObject(
 
     if (attributes & (kCanCollide | kCanBeHit | kIsDestination | kCanThink | kRemoteOrHuman)) {
         uint32_t ydiff, xdiff;
-        auto player = globals()->gPlayerShip;
+        auto player = g.ship;
         if (player.get() && player->active) {
             xdiff = ABS<int>(player->location.h - location.h);
             ydiff = ABS<int>(player->location.v - location.v);
@@ -725,7 +725,7 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
         }
 
         RgbColor tinyColor;
-        if (owner == globals()->gPlayerAdmiral) {
+        if (owner == g.admiral) {
             tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
         } else if (owner.get()) {
             tinyColor = GetRGBTranslateColorShade(kHostileColor, tinyShade);

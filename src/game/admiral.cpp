@@ -602,7 +602,7 @@ static void AdmiralBuildAtObject(
         auto newObject = CreateAnySpaceObject(base, &v, &coord, 0, admiral, 0, -1);
         if (newObject.get()) {
             SetObjectDestination(newObject, SpaceObject::none());
-            if (admiral == globals()->gPlayerAdmiral) {
+            if (admiral == g.admiral) {
                 PlayVolumeSound(kComputerBeep2, kMediumVolume, kMediumPersistence,
                         kLowPrioritySound);
             }
@@ -1144,10 +1144,10 @@ void ClearAllOccupants(Handle<Destination> d, Handle<Admiral> a, int32_t fullAmo
 
 void AddKillToAdmiral(Handle<SpaceObject> anObject) {
     // only for player
-    const auto& admiral = globals()->gPlayerAdmiral;
+    const auto& admiral = g.admiral;
 
     if (anObject->attributes & kCanAcceptDestination) {
-        if (anObject->owner == globals()->gPlayerAdmiral) {
+        if (anObject->owner == g.admiral) {
             admiral->losses()++;
         } else {
             admiral->kills()++;

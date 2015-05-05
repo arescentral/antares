@@ -418,7 +418,7 @@ bool Scenario::Condition::is_true() const {
 
         case kIsAuxiliaryObject: {
             auto sObject = GetObjectFromInitialNumber(subjectObject);
-            auto dObject = globals()->gPlayerAdmiral->control();
+            auto dObject = g.admiral->control();
             return sObject.get()
                 && dObject.get()
                 && (dObject == sObject);
@@ -426,7 +426,7 @@ bool Scenario::Condition::is_true() const {
 
         case kIsTargetObject: {
             auto sObject = GetObjectFromInitialNumber(subjectObject);
-            auto dObject = globals()->gPlayerAdmiral->target();
+            auto dObject = g.admiral->target();
             return sObject.get()
                 && dObject.get()
                 && (dObject == sObject);
@@ -461,7 +461,7 @@ bool Scenario::Condition::is_true() const {
             return !IsPlayerShipOnAutoPilot();
 
         case kObjectIsBeingBuilt: {
-            auto buildAtObject = GetAdmiralBuildAtObject(globals()->gPlayerAdmiral);
+            auto buildAtObject = GetAdmiralBuildAtObject(g.admiral);
             return buildAtObject.get() && (buildAtObject->totalBuildTime > 0);
         }
 
@@ -477,7 +477,7 @@ bool Scenario::Condition::is_true() const {
         case kSubjectIsPlayerCondition: {
             auto sObject = GetObjectFromInitialNumber(subjectObject);
             return sObject.get()
-                && (sObject == globals()->gPlayerShip);
+                && (sObject == g.ship);
         }
     }
     return false;
@@ -580,7 +580,7 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
         if (gThisScenario->player[i].playerType == kSingleHumanPlayer) {
             auto admiral = Admiral::make(i, kAIsHuman, gThisScenario->player[i]);
             admiral->pay(mLongToFixed(5000));
-            globals()->gPlayerAdmiral = admiral;
+            g.admiral = admiral;
         } else {
             auto admiral = Admiral::make(i, kAIsComputer, gThisScenario->player[i]);
             admiral->pay(mLongToFixed(5000));
@@ -728,7 +728,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         int32_t specialAttributes = initial->attributes & (~kInitialAttributesMask);
         if (initial->attributes & kIsPlayerShip) {
             specialAttributes &= ~kIsPlayerShip;
-            if ((owner == globals()->gPlayerAdmiral) && !owner->flagship().get()) {
+            if ((owner == g.admiral) && !owner->flagship().get()) {
                 specialAttributes |= kIsHumanControlled | kIsPlayerShip;
             }
         }
@@ -750,7 +750,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         if ((initial->attributes & kIsPlayerShip)
                 && owner.get() && !owner->flagship().get()) {
             owner->set_flagship(anObject);
-            if (owner == globals()->gPlayerAdmiral) {
+            if (owner == g.admiral) {
                 ResetPlayerShip(anObject);
             }
         }
@@ -868,7 +868,7 @@ void UnhideInitialObject(int32_t whichInitial) {
     uint32_t specialAttributes = initial->attributes & ~kInitialAttributesMask;
     if (initial->attributes & kIsPlayerShip) {
         if (owner.get() && !owner->flagship().get()) {
-            if (owner == globals()->gPlayerAdmiral) {
+            if (owner == g.admiral) {
                 specialAttributes |= kIsHumanControlled;
             } else {
                 specialAttributes &= ~kIsPlayerShip;
@@ -908,7 +908,7 @@ void UnhideInitialObject(int32_t whichInitial) {
     initial->realObjectID = anObject->id;
     if ((initial->attributes & kIsPlayerShip) && owner.get() && !owner->flagship().get()) {
         owner->set_flagship(anObject);
-        if (owner == globals()->gPlayerAdmiral) {
+        if (owner == g.admiral) {
             ResetPlayerShip(anObject);
         }
     }
@@ -928,7 +928,7 @@ Handle<SpaceObject> GetObjectFromInitialNumber(int32_t initialNumber) {
         }
         return SpaceObject::none();
     } else if (initialNumber == -2) {
-        auto object = globals()->gPlayerShip;
+        auto object = g.ship;
         if (!object->active || !(object->attributes & kCanThink)) {
             return SpaceObject::none();
         }

@@ -60,7 +60,7 @@ Starfield::Starfield():
 }
 
 void Starfield::reset(Handle<SpaceObject> which_object) {
-    if (!globals()->gPlayerShip.get()) {
+    if (!g.ship.get()) {
         return;
     }
 
@@ -113,34 +113,34 @@ void Starfield::prepare_to_move() {
 }
 
 void Starfield::move(int32_t by_units) {
-    if (!globals()->gPlayerShip.get() || !globals()->gPlayerShip->active) {
+    if (!g.ship.get() || !g.ship->active) {
         return;
     }
 
     const fixedPointType slowVelocity = {
         scale_by(
-                mMultiplyFixed(globals()->gPlayerShip->velocity.h, kSlowStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.h, kSlowStarFraction) * by_units,
                 gAbsoluteScale),
         scale_by(
-                mMultiplyFixed(globals()->gPlayerShip->velocity.v, kSlowStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.v, kSlowStarFraction) * by_units,
                 gAbsoluteScale),
     };
 
     const fixedPointType mediumVelocity = {
         scale_by(
-                mMultiplyFixed(globals()->gPlayerShip->velocity.h, kMediumStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.h, kMediumStarFraction) * by_units,
                 gAbsoluteScale),
         scale_by(
-                mMultiplyFixed(globals()->gPlayerShip->velocity.v, kMediumStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.v, kMediumStarFraction) * by_units,
                 gAbsoluteScale),
     };
 
     const fixedPointType fastVelocity = {
         scale_by(
-                mMultiplyFixed(globals()->gPlayerShip->velocity.h, kFastStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.h, kFastStarFraction) * by_units,
                 gAbsoluteScale),
         scale_by(
-                mMultiplyFixed(globals()->gPlayerShip->velocity.v, kFastStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.v, kFastStarFraction) * by_units,
                 gAbsoluteScale),
     };
 
@@ -262,7 +262,7 @@ void Starfield::draw() const {
     const RgbColor mediumColor = GetRGBTranslateColorShade(kStarColor, LIGHT);
     const RgbColor fastColor = GetRGBTranslateColorShade(kStarColor, LIGHTER);
 
-    switch (globals()->gPlayerShip->presenceState) {
+    switch (g.ship->presenceState) {
         default:
             if (!_warp_stars) {
                 Points points;
@@ -315,9 +315,9 @@ void Starfield::draw() const {
 }
 
 void Starfield::show() {
-    if ((globals()->gPlayerShip->presenceState != kWarpInPresence)
-            && (globals()->gPlayerShip->presenceState != kWarpOutPresence)
-            && (globals()->gPlayerShip->presenceState != kWarpingPresence)) {
+    if ((g.ship->presenceState != kWarpInPresence)
+            && (g.ship->presenceState != kWarpOutPresence)
+            && (g.ship->presenceState != kWarpingPresence)) {
         if (_warp_stars) {
             // we were warping but now are not; erase warped stars
             _warp_stars = false;
