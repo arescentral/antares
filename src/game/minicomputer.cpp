@@ -1094,8 +1094,6 @@ void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> w
                             } else {
                                 ChangePlayerShipNumber(whichAdmiral, control);
                             }
-                        } else {
-                            PlayerShipBodyExpire(flagship, false);
                         }
                     }
                     break;

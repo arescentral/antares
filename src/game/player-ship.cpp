@@ -981,8 +981,7 @@ void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral) {
     }
 }
 
-// bool sourceIsBody was hacked in to use this for xferring control
-void PlayerShipBodyExpire(Handle<SpaceObject> theShip, bool sourceIsBody) {
+void PlayerShipBodyExpire(Handle<SpaceObject> theShip) {
     auto selectShip = theShip->owner->control();
 
     if (selectShip.get()) {
@@ -1005,7 +1004,9 @@ void PlayerShipBodyExpire(Handle<SpaceObject> theShip, bool sourceIsBody) {
             selectShip = selectShip->nextObject;
         }
     }
-    if (!selectShip.get() && sourceIsBody) {
+    if (selectShip.get()) {
+        ChangePlayerShipNumber(theShip->owner, selectShip);
+    } else {
         if ( globals()->gGameOver >= 0)
         {
             globals()->gGameOver = -180;
@@ -1018,8 +1019,6 @@ void PlayerShipBodyExpire(Handle<SpaceObject> theShip, bool sourceIsBody) {
         if (theShip->owner.get()) {
             theShip->owner->set_flagship(SpaceObject::none());
         }
-    } else if (selectShip.get()) {
-        ChangePlayerShipNumber(theShip->owner, selectShip);
     }
 }
 

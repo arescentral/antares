@@ -898,7 +898,7 @@ void SpaceObject::create_floating_player_body() {
     if (body.get()) {
         ChangePlayerShipNumber(obj->owner, body);
     } else {
-        PlayerShipBodyExpire(obj, true);
+        PlayerShipBodyExpire(obj);
     }
 }
 

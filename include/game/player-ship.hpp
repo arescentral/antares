@@ -76,7 +76,7 @@ void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, Handle<SpaceObject> ne
 void TogglePlayerAutoPilot(Handle<SpaceObject> theShip);
 bool IsPlayerShipOnAutoPilot( void);
 void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral);
-void PlayerShipBodyExpire(Handle<SpaceObject> theShip, bool sourceIsBody);
+void PlayerShipBodyExpire(Handle<SpaceObject> theShip);
 void HandleTextMessageKeys(const KeyMap&, const KeyMap&, bool *);
 
 }  // namespace antares
