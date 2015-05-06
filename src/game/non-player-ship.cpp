@@ -203,7 +203,7 @@ void NonplayerShipThink(int32_t timePass)
     RgbColor        friendSick, foeSick, neutralSick;
     uint32_t        sickCount = usecs_to_ticks(globals()->gGameTime) / 9;
 
-    globals()->gSynchValue = gRandomSeed.seed;
+    globals()->gSynchValue = g.random.seed;
     sickCount &= 0x00000003;
     if (sickCount == 0) {
         friendSick = GetRGBTranslateColorShade(kFriendlyColor, MEDIUM);

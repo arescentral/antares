@@ -29,8 +29,6 @@ Random global_seed = {static_cast<int32_t>(0x84744901)};
 
 }  // namespace
 
-Random gRandomSeed = {14586};
-
 static int32_t Random() {
     return global_seed.next(0x8000);
 }

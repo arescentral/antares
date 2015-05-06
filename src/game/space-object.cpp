@@ -592,8 +592,8 @@ Handle<SpaceObject> CreateAnySpaceObject(
         Handle<BaseObject> whichBase, fixedPointType *velocity, coordPointType *location,
         int32_t direction, Handle<Admiral> owner, uint32_t specialAttributes,
         int16_t spriteIDOverride) {
-    Random random{gRandomSeed.next(32766)};
-    int32_t id = gRandomSeed.next(16384);
+    Random random{g.random.next(32766)};
+    int32_t id = g.random.next(16384);
     SpaceObject newObject(
             whichBase, random, id, *location, direction, velocity, owner, spriteIDOverride);
 

@@ -27,6 +27,7 @@
 #include "data/scenario.hpp"
 #include "drawing/color.hpp"
 #include "game/starfield.hpp"
+#include "math/random.hpp"
 #include "sound/fx.hpp"
 #include "video/transitions.hpp"
 
@@ -91,6 +92,8 @@ struct ScenarioWinnerType {
 };
 
 struct GlobalState {
+    Random random;  // Global random number generator.
+
     std::unique_ptr<Admiral[]> admirals;  // All admirals (whether active or not).
     Handle<Admiral> admiral;              // Local player.
 

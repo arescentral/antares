@@ -84,7 +84,7 @@ class ReplayMaster : public Card {
             init();
             Randomize(4);  // For the decision to replay intro.
             _game_result = NO_GAME;
-            gRandomSeed.seed = _random_seed;
+            g.random.seed = _random_seed;
             globals()->gInputSource.reset(new ReplayInputSource(&_replay_data));
             stack()->push(new MainPlay(
                         GetScenarioPtrFromChapter(_replay_data.chapter_id), true, false,

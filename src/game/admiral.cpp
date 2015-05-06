@@ -632,7 +632,7 @@ void Admiral::think() {
         _blitzkrieg--;
         if (_blitzkrieg <= 0) {
             // Really 48:
-            _blitzkrieg = 0 - (gRandomSeed.next(1200) + 1200);
+            _blitzkrieg = 0 - (g.random.next(1200) + 1200);
             for (auto anObject: SpaceObject::all()) {
                 if (anObject->owner.get() == this) {
                     anObject->currentTargetValue = 0x00000000;
@@ -643,7 +643,7 @@ void Admiral::think() {
         _blitzkrieg++;
         if (_blitzkrieg >= 0) {
             // Really 48:
-            _blitzkrieg = gRandomSeed.next(1200) + 1200;
+            _blitzkrieg = g.random.next(1200) + 1200;
             for (auto anObject: SpaceObject::all()) {
                 if (anObject->owner.get() == this) {
                     anObject->currentTargetValue = 0x00000000;
@@ -981,7 +981,7 @@ void Admiral::think() {
                     while ((_hopeToBuild < 0) && (k < 7)) {
                         k++;
                         // choose something to build
-                        thisValue = gRandomSeed.next(_totalBuildChance);
+                        thisValue = g.random.next(_totalBuildChance);
                         friendValue = 0xffffffff; // equals the highest qualifying object
                         for (int j = 0; j < kMaxNumAdmiralCanBuild; ++j) {
                             if ((_canBuildType[j].chanceRange <= thisValue)

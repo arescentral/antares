@@ -168,7 +168,7 @@ void MainPlay::become_front() {
                     Preferences::preferences()->scenario_identifier(),
                     String(u32_to_version(globals()->scenarioFileInfo.version)),
                     _scenario->chapter_number(),
-                    gRandomSeed.seed);
+                    g.random.seed);
 
             if (Preferences::preferences()->play_idle_music()) {
                 LoadSong(3000);
