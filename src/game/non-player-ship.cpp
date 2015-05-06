@@ -231,7 +231,7 @@ void NonplayerShipThink(int32_t timePass)
 
     // it probably doesn't matter what order we do this in, but we'll do
     // it in the "ideal" order anyway
-    for (auto anObject = gRootObject; anObject.get(); anObject = anObject->nextObject) {
+    for (auto anObject = g.root; anObject.get(); anObject = anObject->nextObject) {
         if (!anObject->active) {
             continue;
         }
@@ -1741,12 +1741,12 @@ Handle<SpaceObject> GetManualSelectObject(
     if (whichShip.get()) {
         anObject = startShip;
         if (anObject->active != kObjectInUse) { // if it's not in the loop
-            anObject = gRootObject;
-            startShip = whichShip = gRootObject;
+            anObject = g.root;
+            startShip = whichShip = g.root;
         }
     } else {
-        anObject = gRootObject;
-        startShip = whichShip = gRootObject;
+        anObject = g.root;
+        startShip = whichShip = g.root;
     }
 
     Handle<SpaceObject> nextShipOut, closestShip;
@@ -1809,7 +1809,7 @@ Handle<SpaceObject> GetManualSelectObject(
         }
         whichShip = anObject = anObject->nextObject;
         if (!anObject.get()) {
-            whichShip = anObject = gRootObject;
+            whichShip = anObject = g.root;
         }
     } while (whichShip != startShip);
 

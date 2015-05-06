@@ -994,7 +994,7 @@ void PlayerShipBodyExpire(Handle<SpaceObject> theShip) {
             selectShip = SpaceObject::none();
     }
     if (!selectShip.get()) {
-        selectShip = gRootObject;
+        selectShip = g.root;
         while (selectShip.get()
                 && ((selectShip->active != kObjectInUse)
                     || (selectShip->attributes & kStaticDestination)

@@ -175,7 +175,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
 
     for ( jl = 0; jl < unitsToDo; jl++)
     {
-        anObject = gRootObject;
+        anObject = g.root;
         while (anObject.get()) {
             if ( anObject->active == kObjectInUse)
             {
@@ -486,7 +486,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
 // !!!!!!!!
     shortDist = thisDist = static_cast<uint32_t>(kMaximumRelevantDistanceSquared) * 2;
     longDist = 0;
-    anObject = gRootObject;
+    anObject = g.root;
 
     while (anObject.get()) {
         if ( anObject->active == kObjectInUse)
@@ -595,7 +595,7 @@ void CollideSpaceObjects() {
         proximityObject->nearObject = proximityObject->farObject = SpaceObject::none();
     }
 
-    for (auto aObject = gRootObject; aObject.get(); aObject = aObject->nextObject) {
+    for (auto aObject = g.root; aObject.get(); aObject = aObject->nextObject) {
         if (!aObject->active) {
             if (player.get() && player->active) {
                 aObject->distanceFromPlayer = 0x7fffffffffffffffull;

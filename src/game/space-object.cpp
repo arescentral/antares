@@ -66,8 +66,6 @@ static const int16_t kSpaceObjectShortNameResID     = 5001;
 static StringList* space_object_names;
 static StringList* space_object_short_names;
 
-Handle<SpaceObject> gRootObject;
-
 static unique_ptr<SpaceObject[]> gSpaceObjectData;
 static unique_ptr<BaseObject[]> gBaseObjectData;
 static unique_ptr<Action[]> gObjectActionData;
@@ -115,7 +113,7 @@ void SpaceObjectHandlingInit() {
 }
 
 void ResetAllSpaceObjects() {
-    gRootObject = SpaceObject::none();
+    g.root = SpaceObject::none();
     for (auto anObject: SpaceObject::all()) {
         anObject->active = kObjectAvailable;
         anObject->sprite = NULL;
@@ -248,12 +246,12 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
                 &(obj->location), beam.color, beam.kind, beam.accuracy, beam.range);
     }
 
-    obj->nextObject = gRootObject;
+    obj->nextObject = g.root;
     obj->previousObject = SpaceObject::none();
-    if (gRootObject.get()) {
-        gRootObject->previousObject = obj;
+    if (g.root.get()) {
+        g.root->previousObject = obj;
     }
-    gRootObject = obj;
+    g.root = obj;
 
     return obj;
 }
@@ -905,8 +903,8 @@ void SpaceObject::free() {
         auto bObject = nextObject;
         bObject->previousObject = previousObject;
     }
-    if (gRootObject.get() == this) {
-        gRootObject = nextObject;
+    if (g.root.get() == this) {
+        g.root = nextObject;
     }
     nextObject = SpaceObject::none();
     previousObject = SpaceObject::none();

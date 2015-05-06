@@ -204,8 +204,6 @@ class SpaceObject {
     uint8_t                 originalColor = 0;
 };
 
-extern Handle<SpaceObject> gRootObject;
-
 void SpaceObjectHandlingInit( void);
 void ResetAllSpaceObjects( void);
 void RemoveAllSpaceObjects( void);

@@ -655,25 +655,25 @@ void Admiral::think() {
 
     // get the current object
     if (!_considerShip.get()) {
-        _considerShip = anObject = gRootObject;
+        _considerShip = anObject = g.root;
         _considerShipID = anObject->id;
     } else {
         anObject = _considerShip;
     }
 
     if (!_destinationObject.get()) {
-        _destinationObject = gRootObject;
+        _destinationObject = g.root;
     }
 
     if (anObject->active != kObjectInUse) {
-        _considerShip = anObject = gRootObject;
+        _considerShip = anObject = g.root;
         _considerShipID = anObject->id;
     }
 
     if (_destinationObject.get()) {
         destObject = _destinationObject;
         if (destObject->active != kObjectInUse) {
-            destObject = _destinationObject = gRootObject;
+            destObject = _destinationObject = g.root;
         }
         auto origDest = _destinationObject;
         do {
@@ -715,21 +715,21 @@ void Admiral::think() {
 
                 anObject->bestConsideredTargetValue = 0xffffffff;
                 // start back with 1st ship
-                _destinationObject = gRootObject;
-                destObject = gRootObject;
+                _destinationObject = g.root;
+                destObject = g.root;
 
                 // >>> INCREASE CONSIDER SHIP
                 origObject = anObject =_considerShip;
                 if (anObject->active != kObjectInUse) {
-                    anObject = gRootObject;
-                    _considerShip = gRootObject;
+                    anObject = g.root;
+                    _considerShip = g.root;
                     _considerShipID = anObject->id;
                 }
                 do {
                     _considerShip = anObject->nextObject;
                     if (!_considerShip.get()) {
-                        _considerShip = gRootObject;
-                        anObject = gRootObject;
+                        _considerShip = g.root;
+                        anObject = g.root;
                         _considerShipID = anObject->id;
                         _lastFreeEscortStrength = _thisFreeEscortStrength;
                         _thisFreeEscortStrength = 0;

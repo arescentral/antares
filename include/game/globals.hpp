@@ -93,6 +93,7 @@ struct ScenarioWinnerType {
 struct GlobalState {
     Handle<SpaceObject> ship;
     Handle<Admiral> admiral;
+    Handle<SpaceObject> root;
 };
 
 extern GlobalState g;
