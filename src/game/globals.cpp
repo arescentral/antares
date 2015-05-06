@@ -33,6 +33,7 @@
 namespace antares {
 
 static aresGlobalType* gAresGlobal;
+GlobalState g;
 
 aresGlobalType* globals() {
     return gAresGlobal;
@@ -52,7 +53,7 @@ aresGlobalType::aresGlobalType() {
     gFarthestObject = Handle<SpaceObject>(0);
     gCenterScaleH = 0;
     gCenterScaleV = 0;
-    gPlayerShip = Handle<SpaceObject>(0);
+    g.ship = Handle<SpaceObject>(0);
     gZoomMode = kTimesTwoZoom;
     gPreviousZoomMode = kNearestFoeZoom;
     gRadarCount = 0;

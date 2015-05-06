@@ -54,6 +54,7 @@ class SpaceObject {
     void set_cloak(bool cloak);
     void alter_occupation(Handle<Admiral> owner, int32_t howMuch, bool message);
     void destroy();
+    void free();
     void create_floating_player_body();
 
     uint32_t                attributes = 0;

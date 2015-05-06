@@ -90,6 +90,13 @@ struct ScenarioWinnerType {
     Handle<Admiral> player;
 };
 
+struct GlobalState {
+    Handle<SpaceObject> ship;
+    Handle<Admiral> admiral;
+};
+
+extern GlobalState g;
+
 struct aresGlobalType {
     aresGlobalType();
     ~aresGlobalType();
@@ -103,11 +110,9 @@ struct aresGlobalType {
     Handle<SpaceObject> gFarthestObject;
     int32_t         gCenterScaleH;
     int32_t         gCenterScaleV;
-    Handle<SpaceObject> gPlayerShip;
     Handle<Label>   gSelectionLabel;
     ZoomType        gZoomMode;
     ZoomType        gPreviousZoomMode;
-    Handle<Admiral> gPlayerAdmiral;
     ScenarioWinnerType gScenarioWinner;
 
     int32_t         gRadarCount;            // = 0;

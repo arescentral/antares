@@ -115,10 +115,8 @@ class Admiral {
     Handle<SpaceObject> destinationObject() { return _destinationObject; }
     int32_t             destinationObjectID() { return _destinationObjectID; }
 
-    Handle<SpaceObject> flagship();
-    int32_t             flagshipNumber() { return _flagship.number(); }
-    int32_t             flagshipID() { return _flagshipID; }
-    void                set_flagship(Handle<SpaceObject> object);
+    Handle<SpaceObject> flagship() { return _flagship; }
+    void                set_flagship(Handle<SpaceObject> object) { _flagship = object; }
 
     Handle<SpaceObject> considerShip() { return _considerShip; }
     int32_t             considerShipID() { return _considerShipID; }

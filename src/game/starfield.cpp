@@ -43,11 +43,6 @@ const Fixed kFastStarFraction   = 0x00000100;   // 1.000
 
 const uint8_t kStarColor = GRAY;
 
-
-// This object is also used for the radar center, and for zoom to hostile and object modes.  It
-// would be preferable for it to be entirely private to the starfield.
-Handle<SpaceObject> gScrollStarObject;
-
 namespace {
 
 inline int32_t RandomStarSpeed() {
@@ -65,9 +60,7 @@ Starfield::Starfield():
 }
 
 void Starfield::reset(Handle<SpaceObject> which_object) {
-    gScrollStarObject = which_object;
-
-    if (!gScrollStarObject.get()) {
+    if (!g.ship.get()) {
         return;
     }
 
@@ -120,34 +113,34 @@ void Starfield::prepare_to_move() {
 }
 
 void Starfield::move(int32_t by_units) {
-    if (!gScrollStarObject.get() || !gScrollStarObject->active) {
+    if (!g.ship.get() || !g.ship->active) {
         return;
     }
 
     const fixedPointType slowVelocity = {
         scale_by(
-                mMultiplyFixed(gScrollStarObject->velocity.h, kSlowStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.h, kSlowStarFraction) * by_units,
                 gAbsoluteScale),
         scale_by(
-                mMultiplyFixed(gScrollStarObject->velocity.v, kSlowStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.v, kSlowStarFraction) * by_units,
                 gAbsoluteScale),
     };
 
     const fixedPointType mediumVelocity = {
         scale_by(
-                mMultiplyFixed(gScrollStarObject->velocity.h, kMediumStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.h, kMediumStarFraction) * by_units,
                 gAbsoluteScale),
         scale_by(
-                mMultiplyFixed(gScrollStarObject->velocity.v, kMediumStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.v, kMediumStarFraction) * by_units,
                 gAbsoluteScale),
     };
 
     const fixedPointType fastVelocity = {
         scale_by(
-                mMultiplyFixed(gScrollStarObject->velocity.h, kFastStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.h, kFastStarFraction) * by_units,
                 gAbsoluteScale),
         scale_by(
-                mMultiplyFixed(gScrollStarObject->velocity.v, kFastStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.v, kFastStarFraction) * by_units,
                 gAbsoluteScale),
     };
 
@@ -269,7 +262,7 @@ void Starfield::draw() const {
     const RgbColor mediumColor = GetRGBTranslateColorShade(kStarColor, LIGHT);
     const RgbColor fastColor = GetRGBTranslateColorShade(kStarColor, LIGHTER);
 
-    switch (gScrollStarObject->presenceState) {
+    switch (g.ship->presenceState) {
         default:
             if (!_warp_stars) {
                 Points points;
@@ -322,9 +315,9 @@ void Starfield::draw() const {
 }
 
 void Starfield::show() {
-    if ((gScrollStarObject->presenceState != kWarpInPresence)
-            && (gScrollStarObject->presenceState != kWarpOutPresence)
-            && (gScrollStarObject->presenceState != kWarpingPresence)) {
+    if ((g.ship->presenceState != kWarpInPresence)
+            && (g.ship->presenceState != kWarpOutPresence)
+            && (g.ship->presenceState != kWarpingPresence)) {
         if (_warp_stars) {
             // we were warping but now are not; erase warped stars
             _warp_stars = false;

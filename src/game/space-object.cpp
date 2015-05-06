@@ -212,7 +212,7 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
         RgbColor tinyColor;
         if (obj->tinySize == 0) {
             tinyColor = RgbColor::kClear;
-        } else if (obj->owner == globals()->gPlayerAdmiral) {
+        } else if (obj->owner == g.admiral) {
             tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
         } else if (obj->owner.get()) {
             tinyColor = GetRGBTranslateColorShade(kHostileColor, tinyShade);
@@ -423,7 +423,7 @@ SpaceObject::SpaceObject(
 
     if (attributes & (kCanCollide | kCanBeHit | kIsDestination | kCanThink | kRemoteOrHuman)) {
         uint32_t ydiff, xdiff;
-        auto player = globals()->gPlayerShip;
+        auto player = g.ship;
         if (player.get() && player->active) {
             xdiff = ABS<int>(player->location.h - location.h);
             ydiff = ABS<int>(player->location.v - location.v);
@@ -725,7 +725,7 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
         }
 
         RgbColor tinyColor;
-        if (owner == globals()->gPlayerAdmiral) {
+        if (owner == g.admiral) {
             tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
         } else if (owner.get()) {
             tinyColor = GetRGBTranslateColorShade(kHostileColor, tinyShade);
@@ -884,6 +884,42 @@ void SpaceObject::destroy() {
     }
 }
 
+void SpaceObject::free() {
+    if (attributes & kIsBeam) {
+        if (frame.beam != NULL) {
+            frame.beam->killMe = true;
+        }
+    } else {
+        if (sprite != NULL) {
+            sprite->killMe = true;
+        }
+    }
+    active = kObjectAvailable;
+    attributes = 0;
+    nextNearObject = nextFarObject = SpaceObject::none();
+    if (previousObject.get()) {
+        auto bObject = previousObject;
+        bObject->nextObject = nextObject;
+    }
+    if (nextObject.get()) {
+        auto bObject = nextObject;
+        bObject->previousObject = previousObject;
+    }
+    if (gRootObject.get() == this) {
+        gRootObject = nextObject;
+    }
+    nextObject = SpaceObject::none();
+    previousObject = SpaceObject::none();
+
+    // Unlink admirals' flagships, so we don't need to track the id of
+    // each admiral's flagship.
+    for (auto adm: Admiral::all()) {
+        if (adm->flagship().get() == this) {
+            adm->set_flagship(SpaceObject::none());
+        }
+    }
+}
+
 void SpaceObject::create_floating_player_body() {
     auto obj = Handle<SpaceObject>(number());
     const auto body_type = globals()->scenarioFileInfo.playerBodyID;
@@ -898,7 +934,7 @@ void SpaceObject::create_floating_player_body() {
     if (body.get()) {
         ChangePlayerShipNumber(obj->owner, body);
     } else {
-        PlayerShipBodyExpire(obj, true);
+        PlayerShipBodyExpire(obj);
     }
 }
 

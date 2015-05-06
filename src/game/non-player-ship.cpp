@@ -244,7 +244,7 @@ void NonplayerShipThink(int32_t timePass)
         // strobe its symbol if it's not feeling well
         if (anObject->sprite) {
             if ((anObject->health() > 0) && (anObject->health() <= (anObject->max_health() >> 2))) {
-                if (anObject->owner == globals()->gPlayerAdmiral) {
+                if (anObject->owner == g.admiral) {
                     anObject->sprite->tinyColor = friendSick;
                 } else if (anObject->owner.get()) {
                     anObject->sprite->tinyColor = foeSick;
@@ -368,7 +368,7 @@ void NonplayerShipThink(int32_t timePass)
         if ((anObject->attributes & kRemoteOrHuman)
                 && (!(anObject->attributes & kCanThink))
                 && (anObject->age < 120)) {
-            PlayerShipBodyExpire(anObject, true);
+            PlayerShipBodyExpire(anObject);
         }
 
         if ((anObject->attributes & kHasDirectionGoal)
@@ -1687,7 +1687,7 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
     }
 
     if (anObject->health() < 0
-            && (anObject->owner == globals()->gPlayerAdmiral)
+            && (anObject->owner == g.admiral)
             && (anObject->attributes & kCanAcceptDestination)) {
         const StringSlice& object_name = get_object_name(anObject->base);
         int count = CountObjectsOfBaseType(anObject->base, anObject->owner) - 1;
@@ -1698,7 +1698,7 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
         exec(sObject->baseType->collide, sObject, anObject, NULL);
     }
 
-    if (anObject->owner == globals()->gPlayerAdmiral
+    if (anObject->owner == g.admiral
             && (anObject->attributes & kIsHumanControlled)
             && (sObject->baseType->damage > 0)) {
         globals()->transitions.start_boolean(128, 128, WHITE);

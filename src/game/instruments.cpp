@@ -251,12 +251,12 @@ void ResetInstruments() {
 }
 
 void UpdateRadar(int32_t unitsDone) {
-    if (!gScrollStarObject.get()) {
+    if (!g.ship.get()) {
         globals()->radar_is_functioning = false;
-    } else if (gScrollStarObject->offlineTime <= 0) {
+    } else if (g.ship->offlineTime <= 0) {
         globals()->radar_is_functioning = true;
     } else {
-        globals()->radar_is_functioning = (Randomize(gScrollStarObject->offlineTime) < 5);
+        globals()->radar_is_functioning = (Randomize(g.ship->offlineTime) < 5);
     }
 
     if (unitsDone < 0) {
@@ -264,7 +264,7 @@ void UpdateRadar(int32_t unitsDone) {
     }
     globals()->gRadarCount -= unitsDone;
 
-    if (!gScrollStarObject.get() || !gScrollStarObject->active) {
+    if (!g.ship.get() || !g.ship->active) {
         return;
     }
 
@@ -277,7 +277,7 @@ void UpdateRadar(int32_t unitsDone) {
             Rect radar = bounds;
             radar.inset(1, 1);
 
-            int32_t dx = gScrollStarObject->location.h - gGlobalCorner.h;
+            int32_t dx = g.ship->location.h - gGlobalCorner.h;
             dx = dx * kRadarSize / globals()->gRadarRange;
             view_range = Rect(-dx, -dx, dx, dx);
             view_range.center_in(bounds);
@@ -295,11 +295,11 @@ void UpdateRadar(int32_t unitsDone) {
 
             const int32_t rrange = globals()->gRadarRange >> 1L;
             for (auto anObject: SpaceObject::all()) {
-                if (!anObject->active || (anObject == gScrollStarObject)) {
+                if (!anObject->active || (anObject == g.ship)) {
                     continue;
                 }
-                int x = anObject->location.h - gScrollStarObject->location.h;
-                int y = anObject->location.v - gScrollStarObject->location.v;
+                int x = anObject->location.h - g.ship->location.h;
+                int y = anObject->location.v - g.ship->location.v;
                 if ((x < -rrange) || (x >= rrange) || (y < -rrange) || (y >= rrange)) {
                     continue;
                 }
@@ -327,8 +327,8 @@ void UpdateRadar(int32_t unitsDone) {
             auto anObject = globals()->gClosestObject;
             uint64_t hugeDistance = anObject->distanceFromPlayer;
             if (hugeDistance == 0) { // if this is true, then we haven't calced its distance
-                uint64_t x_distance = ABS<int32_t>(gScrollStarObject->location.h - anObject->location.h);
-                uint64_t y_distance = ABS<int32_t>(gScrollStarObject->location.v - anObject->location.v);
+                uint64_t x_distance = ABS<int32_t>(g.ship->location.h - anObject->location.h);
+                uint64_t y_distance = ABS<int32_t>(g.ship->location.v - anObject->location.v);
 
                 hugeDistance = y_distance * y_distance + x_distance * x_distance;
             }
@@ -434,7 +434,7 @@ void draw_radar() {
 
 // SHOW ME THE MONEY
 static void draw_money() {
-    auto& admiral = globals()->gPlayerAdmiral;
+    auto& admiral = g.admiral;
     const int cash = clamp(admiral->cash(), 0, kMaxMoneyValue - 1);
     globals()->gBarIndicator[kFineMoneyBar].thisValue
         = (cash % kFineMoneyBarMod) / kFineMoneyBarValue;
@@ -538,8 +538,8 @@ void draw_instruments() {
     left_instrument_sprite->draw(left_rect.left, left_rect.top);
     right_instrument_sprite->draw(right_rect.left, right_rect.top);
 
-    if (globals()->gPlayerShip.get()) {
-        auto player = globals()->gPlayerShip;
+    if (g.ship.get()) {
+        auto player = g.ship;
         if (player->active) {
             draw_player_ammo(
                 (player->pulse.base.get() && (player->pulse.base->frame.weapon.ammo > 0))
@@ -554,7 +554,7 @@ void draw_instruments() {
         }
     }
 
-    auto o = gScrollStarObject;
+    auto o = g.ship;
     draw_bar_indicator(kShieldBar, o->health(), o->max_health());
     draw_bar_indicator(kEnergyBar, o->energy(), o->max_energy());
     draw_bar_indicator(kBatteryBar, o->battery(), o->max_battery());
@@ -577,7 +577,7 @@ static void update_triangle(SiteData& site, int32_t direction, int32_t distance,
     fb = mMultiplyFixed(fc, fb);
 
     Point a(mFixedToLong(fa), mFixedToLong(fb));
-    a.offset(gScrollStarObject->sprite->where.h, gScrollStarObject->sprite->where.v);
+    a.offset(g.ship->sprite->where.h, g.ship->sprite->where.v);
     site.a = a;
 
     count = direction;
@@ -602,18 +602,18 @@ static void update_triangle(SiteData& site, int32_t direction, int32_t distance,
 }
 
 void update_site(bool replay) {
-    if (!gScrollStarObject.get()) {
+    if (!g.ship.get()) {
         site.should_draw = false;
-    } else if (!(gScrollStarObject->active && (gScrollStarObject->sprite != NULL))) {
+    } else if (!(g.ship->active && (g.ship->sprite != NULL))) {
         site.should_draw = false;
-    } else if (gScrollStarObject->offlineTime <= 0) {
+    } else if (g.ship->offlineTime <= 0) {
         site.should_draw = true;
     } else {
-        site.should_draw = (Randomize(gScrollStarObject->offlineTime) < 5);
+        site.should_draw = (Randomize(g.ship->offlineTime) < 5);
     }
 
     if (site.should_draw) {
-        update_triangle(site, gScrollStarObject->direction, kSiteDistance, kSiteSize);
+        update_triangle(site, g.ship->direction, kSiteDistance, kSiteSize);
     }
 }
 
@@ -646,10 +646,10 @@ void draw_site(const PlayerShip& player) {
 
 void update_sector_lines() {
     should_draw_sector_lines = false;
-    if (gScrollStarObject.get()) {
-        if (gScrollStarObject->offlineTime <= 0) {
+    if (g.ship.get()) {
+        if (g.ship->offlineTime <= 0) {
             should_draw_sector_lines = true;
-        } else if (Randomize(gScrollStarObject->offlineTime) < 5) {
+        } else if (Randomize(g.ship->offlineTime) < 5) {
             should_draw_sector_lines = true;
         }
     }

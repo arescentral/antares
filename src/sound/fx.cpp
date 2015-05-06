@@ -271,7 +271,7 @@ void mPlayDistanceSound(
         int32_t mdistance = mobjectptr->distanceFromPlayer;
         uint32_t mul1;
         uint32_t mul2;
-        auto player = globals()->gPlayerShip;
+        auto player = g.ship;
 
         if (mdistance == 0) {
             if (player.get() && player->active) {

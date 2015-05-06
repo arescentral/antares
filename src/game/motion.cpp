@@ -306,7 +306,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                 } // if ( object is not stationary)
 
 //              if ( anObject->attributes & kIsPlayerShip)
-                if (anObject == gScrollStarObject) {
+                if (anObject == g.ship) {
                     gGlobalCorner.h = anObject->location.h - (globals()->gCenterScaleH / gAbsoluteScale);
                     gGlobalCorner.v = anObject->location.v - (globals()->gCenterScaleV / gAbsoluteScale);
                 }
@@ -539,7 +539,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                         anObject->sprite->style = spriteColor;
                         anObject->sprite->styleColor = RgbColor::kClear;
                         anObject->sprite->styleData = anObject->cloakState;
-                        if ( anObject->owner == globals()->gPlayerAdmiral)
+                        if ( anObject->owner == g.admiral)
                             anObject->sprite->styleData -=
                                 anObject->sprite->styleData >> 2;
                     } else if ( anObject->cloakState < 0)
@@ -555,7 +555,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                             anObject->sprite->style = spriteColor;
                             anObject->sprite->styleColor = RgbColor::kClear;
                             anObject->sprite->styleData = -anObject->cloakState;
-                            if ( anObject->owner == globals()->gPlayerAdmiral)
+                            if ( anObject->owner == g.admiral)
                                 anObject->sprite->styleData -=
                                     anObject->sprite->styleData >> 2;
                         }
@@ -585,7 +585,7 @@ void CollideSpaceObjects() {
     // set up player info so we can find closest ship (for scaling)
     uint64_t farthestDist = 0;
     uint64_t closestDist = 0x7fffffffffffffffull;
-    auto player = globals()->gPlayerShip;
+    auto player = g.ship;
     globals()->gClosestObject = Handle<SpaceObject>(0);
     globals()->gFarthestObject = Handle<SpaceObject>(0);
 
@@ -648,7 +648,7 @@ void CollideSpaceObjects() {
                     aObject->distanceFromPlayer = hugeDistance;
                 }
                 if (closestDist > hugeDistance) {
-                    if ((aObject != gScrollStarObject)
+                    if ((aObject != g.ship)
                             && ((globals()->gZoomMode != kNearestFoeZoom)
                                 || (aObject->owner != player->owner))) {
                         closestDist = hugeDistance;
@@ -1016,54 +1016,12 @@ hackBNoEngageMatch:
     }
 
     // here, it doesn't matter in what order we step through the table
-    const uint32_t seen_by_player = 1ul << globals()->gPlayerAdmiral.number();
+    const uint32_t seen_by_player = 1ul << g.admiral.number();
 
     for (auto aObject: SpaceObject::all()) {
         if (aObject->active == kObjectToBeFreed) {
-            if (aObject->attributes & kIsBeam) {
-                if (aObject->frame.beam != NULL) {
-                    aObject->frame.beam->killMe = true;
-                }
-                aObject->active = kObjectAvailable;
-                aObject->attributes = 0;
-                aObject->nextNearObject = aObject->nextFarObject = SpaceObject::none();
-                if (aObject->previousObject.get()) {
-                    auto bObject = aObject->previousObject;
-                    bObject->nextObject = aObject->nextObject;
-                }
-                if (aObject->nextObject.get()) {
-                    auto bObject = aObject->nextObject;
-                    bObject->previousObject = aObject->previousObject;
-                }
-                if (gRootObject == aObject) {
-                    gRootObject = aObject->nextObject;
-                }
-                aObject->nextObject = SpaceObject::none();
-                aObject->previousObject = SpaceObject::none();
-            } else {
-                aObject->active = kObjectAvailable;
-                if (aObject->sprite != NULL) {
-                    aObject->sprite->killMe = true;
-                }
-                aObject->attributes = 0;
-                aObject->nextNearObject = aObject->nextFarObject = SpaceObject::none();
-                if (aObject->previousObject.get()) {
-                    auto bObject = aObject->previousObject;
-                    bObject->nextObject = aObject->nextObject;
-                }
-                if (aObject->nextObject.get()) {
-                    auto bObject = aObject->nextObject;
-                    bObject->previousObject = aObject->previousObject;
-                }
-                if (gRootObject == aObject) {
-                    gRootObject = aObject->nextObject;
-                }
-                aObject->nextObject = SpaceObject::none();
-                aObject->previousObject = SpaceObject::none();
-            }
-        }
-
-        if (aObject->active) {
+            aObject->free();
+        } else if (aObject->active) {
             if ((aObject->attributes & kConsiderDistanceAttributes)
                     && (!(aObject->attributes & kIsDestination))) {
                 if (aObject->runTimeFlags & kIsCloaked) {
