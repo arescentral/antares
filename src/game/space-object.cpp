@@ -66,7 +66,6 @@ static const int16_t kSpaceObjectShortNameResID     = 5001;
 static StringList* space_object_names;
 static StringList* space_object_short_names;
 
-static unique_ptr<SpaceObject[]> gSpaceObjectData;
 static unique_ptr<BaseObject[]> gBaseObjectData;
 static unique_ptr<Action[]> gObjectActionData;
 
@@ -89,7 +88,7 @@ void SpaceObjectHandlingInit() {
         }
     }
 
-    gSpaceObjectData.reset(new SpaceObject[kMaxSpaceObject]);
+    g.objects.reset(new SpaceObject[kMaxSpaceObject]);
     {
         Resource rsrc("objects", "bsob", kBaseObjectResID);
         BytesSlice in(rsrc.data());
@@ -129,7 +128,7 @@ BaseObject* BaseObject::get(int number) {
 
 SpaceObject* SpaceObject::get(int32_t number) {
     if ((0 <= number) && (number < kMaxSpaceObject)) {
-        return gSpaceObjectData.get() + number;
+        return &g.objects[number];
     }
     return nullptr;
 }
@@ -945,7 +944,7 @@ StringSlice get_object_short_name(Handle<BaseObject> id) {
 }
 
 int32_t SpaceObject::number() const {
-    return this - gSpaceObjectData.get();
+    return this - g.objects.get();
 }
 
 }  // namespace antares

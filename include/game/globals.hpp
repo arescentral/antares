@@ -93,7 +93,9 @@ struct ScenarioWinnerType {
 struct GlobalState {
     Handle<SpaceObject> ship;
     Handle<Admiral> admiral;
+
     Handle<SpaceObject> root;
+    std::unique_ptr<SpaceObject[]> objects;
 };
 
 extern GlobalState g;
