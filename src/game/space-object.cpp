@@ -910,6 +910,14 @@ void SpaceObject::free() {
     }
     nextObject = SpaceObject::none();
     previousObject = SpaceObject::none();
+
+    // Unlink admirals' flagships, so we don't need to track the id of
+    // each admiral's flagship.
+    for (auto adm: Admiral::all()) {
+        if (adm->flagship().get() == this) {
+            adm->set_flagship(SpaceObject::none());
+        }
+    }
 }
 
 void SpaceObject::create_floating_player_body() {

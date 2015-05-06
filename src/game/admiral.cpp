@@ -283,24 +283,6 @@ int32_t GetAdmiralRace(Handle<Admiral> a) {
     return a->race();
 }
 
-Handle<SpaceObject> Admiral::flagship() {
-    if (_flagship.get()) {
-        if (_flagship->id == _flagshipID) {
-            return _flagship;
-        }
-    }
-    return SpaceObject::none();
-}
-
-void Admiral::set_flagship(Handle<SpaceObject> object) {
-    _flagship = object;
-    if (object.get()) {
-        _flagshipID = object->id;
-    } else {
-        _flagshipID = -1;
-    }
-}
-
 void Admiral::set_target(Handle<SpaceObject> obj) {
     _destinationObject = obj;
     if (obj.get()) {
