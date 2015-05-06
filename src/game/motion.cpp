@@ -1020,50 +1020,8 @@ hackBNoEngageMatch:
 
     for (auto aObject: SpaceObject::all()) {
         if (aObject->active == kObjectToBeFreed) {
-            if (aObject->attributes & kIsBeam) {
-                if (aObject->frame.beam != NULL) {
-                    aObject->frame.beam->killMe = true;
-                }
-                aObject->active = kObjectAvailable;
-                aObject->attributes = 0;
-                aObject->nextNearObject = aObject->nextFarObject = SpaceObject::none();
-                if (aObject->previousObject.get()) {
-                    auto bObject = aObject->previousObject;
-                    bObject->nextObject = aObject->nextObject;
-                }
-                if (aObject->nextObject.get()) {
-                    auto bObject = aObject->nextObject;
-                    bObject->previousObject = aObject->previousObject;
-                }
-                if (gRootObject == aObject) {
-                    gRootObject = aObject->nextObject;
-                }
-                aObject->nextObject = SpaceObject::none();
-                aObject->previousObject = SpaceObject::none();
-            } else {
-                aObject->active = kObjectAvailable;
-                if (aObject->sprite != NULL) {
-                    aObject->sprite->killMe = true;
-                }
-                aObject->attributes = 0;
-                aObject->nextNearObject = aObject->nextFarObject = SpaceObject::none();
-                if (aObject->previousObject.get()) {
-                    auto bObject = aObject->previousObject;
-                    bObject->nextObject = aObject->nextObject;
-                }
-                if (aObject->nextObject.get()) {
-                    auto bObject = aObject->nextObject;
-                    bObject->previousObject = aObject->previousObject;
-                }
-                if (gRootObject == aObject) {
-                    gRootObject = aObject->nextObject;
-                }
-                aObject->nextObject = SpaceObject::none();
-                aObject->previousObject = SpaceObject::none();
-            }
-        }
-
-        if (aObject->active) {
+            aObject->free();
+        } else if (aObject->active) {
             if ((aObject->attributes & kConsiderDistanceAttributes)
                     && (!(aObject->attributes & kIsDestination))) {
                 if (aObject->runTimeFlags & kIsCloaked) {

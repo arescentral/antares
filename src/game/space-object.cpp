@@ -884,6 +884,34 @@ void SpaceObject::destroy() {
     }
 }
 
+void SpaceObject::free() {
+    if (attributes & kIsBeam) {
+        if (frame.beam != NULL) {
+            frame.beam->killMe = true;
+        }
+    } else {
+        if (sprite != NULL) {
+            sprite->killMe = true;
+        }
+    }
+    active = kObjectAvailable;
+    attributes = 0;
+    nextNearObject = nextFarObject = SpaceObject::none();
+    if (previousObject.get()) {
+        auto bObject = previousObject;
+        bObject->nextObject = nextObject;
+    }
+    if (nextObject.get()) {
+        auto bObject = nextObject;
+        bObject->previousObject = previousObject;
+    }
+    if (gRootObject.get() == this) {
+        gRootObject = nextObject;
+    }
+    nextObject = SpaceObject::none();
+    previousObject = SpaceObject::none();
+}
+
 void SpaceObject::create_floating_player_body() {
     auto obj = Handle<SpaceObject>(number());
     const auto body_type = globals()->scenarioFileInfo.playerBodyID;
