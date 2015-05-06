@@ -91,11 +91,11 @@ struct ScenarioWinnerType {
 };
 
 struct GlobalState {
-    Handle<SpaceObject> ship;
-    Handle<Admiral> admiral;
+    Handle<Admiral> admiral;              // Local player.
 
-    Handle<SpaceObject> root;
-    std::unique_ptr<SpaceObject[]> objects;
+    std::unique_ptr<SpaceObject[]> objects;  // All space objects (whether active or not).
+    Handle<SpaceObject> ship;                // Local player's flagship.
+    Handle<SpaceObject> root;                // Head of LL of active objs, in creation time order.
 };
 
 extern GlobalState g;
