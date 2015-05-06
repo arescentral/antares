@@ -91,6 +91,7 @@ struct ScenarioWinnerType {
 };
 
 struct GlobalState {
+    std::unique_ptr<Admiral[]> admirals;  // All admirals (whether active or not).
     Handle<Admiral> admiral;              // Local player.
 
     std::unique_ptr<SpaceObject[]> objects;  // All space objects (whether active or not).

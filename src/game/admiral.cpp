@@ -55,12 +55,11 @@ const Fixed kSomewhatImportantTarget    = 0x00000120;
 const Fixed kAbsolutelyEssential        = 0x00008000;
 
 unique_ptr<Destination[]> gDestBalanceData;
-unique_ptr<Admiral[]> gAdmiralData;
 
 }  // namespace
 
 void Admiral::init() {
-    gAdmiralData.reset(new Admiral[kMaxPlayerNum]);
+    g.admirals.reset(new Admiral[kMaxPlayerNum]);
     reset();
     gDestBalanceData.reset(new Destination[kMaxDestObject]);
     ResetAllDestObjectData();
@@ -105,7 +104,7 @@ bool Destination::can_build() const {
 
 Admiral* Admiral::get(int i) {
     if ((0 <= i) && (i < kMaxPlayerNum)) {
-        return &gAdmiralData[i];
+        return &g.admirals[i];
     }
     return nullptr;
 }
@@ -1045,7 +1044,6 @@ void Admiral::think() {
 
 bool Admiral::build(int32_t buildWhichType) {
     auto dest = _buildAtObject;
-    Handle<Admiral> self(this - gAdmiralData.get());
     if ((buildWhichType >= 0)
             && (buildWhichType < kMaxTypeBaseCanBuild)
             && (dest.get())
