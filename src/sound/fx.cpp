@@ -45,6 +45,7 @@ void InitSoundFX() {
     for (int i = 0; i < kMaxChannelNum; i++) {
         globals()->gChannel[i].soundAge = 0;
         globals()->gChannel[i].soundPriority = kNoSound;
+        globals()->gChannel[i].soundVolume = 0;
         globals()->gChannel[i].whichSound = -1;
         globals()->gChannel[i].channelPtr = SoundDriver::driver()->open_channel();
     }
@@ -67,9 +68,70 @@ void InitSoundFX() {
     AddSound(kTeletype);
 }
 
+// see if there's a channel with the same sound at same or lower volume
+static bool same_sound_channel(
+        int& channel, int16_t id, uint8_t amplitude, soundPriorityType priority) {
+    if (priority > kVeryLowPrioritySound) {
+        for (int i = 0; i < kMaxChannelNum; ++i) {
+            if ((globals()->gChannel[i].whichSound == id) &&
+                (globals()->gChannel[i].soundVolume <= amplitude)) {
+                channel = i;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// see if there's a channel at lower volume
+static bool quieter_channel(int& channel, uint8_t amplitude) {
+    for (int i = 0; i < kMaxChannelNum; ++i) {
+        if (globals()->gChannel[i].soundVolume < amplitude) {
+            channel = i;
+            return true;
+        }
+    }
+    return false;
+}
+
+// see if there's a channel at lower priority
+static bool lower_priority_channel(int& channel, soundPriorityType priority) {
+    for (int i = 0; i < kMaxChannelNum; ++i) {
+        if (globals()->gChannel[i].soundPriority < priority) {
+            channel = i;
+            return true;
+        }
+    }
+    return false;
+}
+
+// take the oldest sound if past minimum persistence
+static bool oldest_available_channel(int& channel) {
+    int32_t oldestSoundTime = -ticks_to_usecs(kLongPersistence);
+    bool result = false;
+    for (int i = 0; i < kMaxChannelNum; ++i) {
+        if ((globals()->gChannel[i].soundAge > 0)
+                && (globals()->gChannel[i].soundAge > oldestSoundTime)) {
+            oldestSoundTime = globals()->gChannel[i].soundAge;
+            channel = i;
+            result = true;
+        }
+    }
+    return result;
+}
+
+static bool best_channel(
+        int& channel,
+        int16_t sound_id, uint8_t amplitude, int16_t persistence, soundPriorityType priority) {
+    return same_sound_channel(channel, sound_id, amplitude, priority)
+        || quieter_channel(channel, amplitude)
+        || lower_priority_channel(channel, priority)
+        || oldest_available_channel(channel);
+}
+
 void PlayVolumeSound(
         int16_t whichSoundID, uint8_t amplitude, int16_t persistence, soundPriorityType priority) {
-    int32_t oldestSoundTime = -ticks_to_usecs(kLongPersistence), whichChannel = -1;
+    int32_t whichChannel = -1;
     // TODO(sfiera): don't play sound at all if the game is muted.
     if (amplitude > 0) {
         int timeDif = VideoDriver::driver()->usecs() - globals()->gLastSoundTime;
@@ -77,77 +139,30 @@ void PlayVolumeSound(
             globals()->gChannel[count].soundAge += timeDif;
         }
 
-        // if not see if there's another channel with the same sound at same or lower volume
-        int count = 0;
-        if (priority > kVeryLowPrioritySound) {
-            while ((count < kMaxChannelNum) && (whichChannel == -1)) {
-                if ((globals()->gChannel[count].whichSound == whichSoundID) &&
-                    (globals()->gChannel[count].soundVolume <= amplitude)) {
-                    whichChannel = count;
-                }
-                count++;
-            }
-        }
-
-        // if not see if there's another channel at lower volume
-        if (whichChannel == -1) {
-            count = 0;
-            while ((count < kMaxChannelNum) && (whichChannel == -1)) {
-                if (globals()->gChannel[count].soundVolume < amplitude) {
-                    whichChannel = count;
-                }
-                count++;
-            }
-        }
-
-        // if not see if there's another channel at lower priority
-        if (whichChannel == -1) {
-            count = 0;
-            while ((count < kMaxChannelNum) && (whichChannel == -1)) {
-                if (globals()->gChannel[count].soundPriority < priority) {
-                    whichChannel = count;
-                }
-                count++;
-            }
-        }
-
-        // if not, take the oldest sound if past minimum persistence
-        if (whichChannel == -1) {
-            count = 0;
-            while (count < kMaxChannelNum) {
-                if ((globals()->gChannel[count].soundAge > 0)
-                        && (globals()->gChannel[count].soundAge > oldestSoundTime)) {
-                    oldestSoundTime = globals()->gChannel[count].soundAge;
-                    whichChannel = count;
-                }
-                count++;
-            }
-        }
-
-        // we're not checking for importance
-
         globals()->gLastSoundTime = VideoDriver::driver()->usecs();
+
+        if (!best_channel(whichChannel, whichSoundID, amplitude, persistence, priority)) {
+            return;
+        }
 
         int whichSound = 0;
         while ((globals()->gSound[whichSound].id != whichSoundID) && (whichSound < kSoundNum)) {
             whichSound++;
         }
         if (whichSound == kSoundNum) {
-            whichChannel = -1;
+            return;
         }
 
-        if (whichChannel >= 0) {
-            globals()->gChannel[whichChannel].whichSound = whichSoundID;
-            globals()->gChannel[whichChannel].soundAge = -ticks_to_usecs(persistence);
-            globals()->gChannel[whichChannel].soundPriority = priority;
-            globals()->gChannel[whichChannel].soundVolume = amplitude;
+        globals()->gChannel[whichChannel].whichSound = whichSoundID;
+        globals()->gChannel[whichChannel].soundAge = -ticks_to_usecs(persistence);
+        globals()->gChannel[whichChannel].soundPriority = priority;
+        globals()->gChannel[whichChannel].soundVolume = amplitude;
 
-            globals()->gChannel[whichChannel].channelPtr->quiet();
+        globals()->gChannel[whichChannel].channelPtr->quiet();
 
-            globals()->gChannel[whichChannel].channelPtr->amp(amplitude);
-            globals()->gChannel[whichChannel].channelPtr->activate();
-            globals()->gSound[whichSound].soundHandle->play();
-        }
+        globals()->gChannel[whichChannel].channelPtr->amp(amplitude);
+        globals()->gChannel[whichChannel].channelPtr->activate();
+        globals()->gSound[whichSound].soundHandle->play();
     }
 }
 
