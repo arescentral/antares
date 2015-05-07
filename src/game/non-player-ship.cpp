@@ -201,7 +201,7 @@ void NonplayerShipThink(int32_t timePass)
     int16_t         h;
     Fixed           fcos, fsin;
     RgbColor        friendSick, foeSick, neutralSick;
-    uint32_t        sickCount = usecs_to_ticks(globals()->gGameTime) / 9;
+    uint32_t        sickCount = usecs_to_ticks(g.time) / 9;
 
     globals()->gSynchValue = g.random.seed;
     sickCount &= 0x00000003;

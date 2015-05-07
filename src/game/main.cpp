@@ -508,12 +508,12 @@ void GamePlay::fire_timer() {
     int64_t newGameTime = thisTime + _scenario_start_time;
 
     if ((mNOFFastMotionKey(_key_map)) && !_entering_message) {
-        newGameTime = add_ticks(globals()->gGameTime, 12);
+        newGameTime = add_ticks(g.time, 12);
         thisTime = newGameTime - _scenario_start_time;
         globals()->gLastTime = scrapTime - thisTime;
     }
 
-    int unitsPassed = usecs_to_ticks(newGameTime - globals()->gGameTime);
+    int unitsPassed = usecs_to_ticks(newGameTime - g.time);
     int unitsDone = unitsPassed;
 
     if (unitsPassed <= 0) {
@@ -526,7 +526,7 @@ void GamePlay::fire_timer() {
     if (_player_paused) {
         _player_paused = false;
         unitsDone = unitsPassed = 0;
-        newGameTime = globals()->gGameTime;
+        newGameTime = g.time;
         thisTime = newGameTime - _scenario_start_time;
         globals()->gLastTime = scrapTime - thisTime;
     }
@@ -553,7 +553,7 @@ void GamePlay::fire_timer() {
             MoveSpaceObjects(unitsToDo);
         }
 
-        globals()->gGameTime = add_ticks(globals()->gGameTime, unitsToDo);
+        g.time = add_ticks(g.time, unitsToDo);
 
         if ( _decide_cycle == kDecideEveryCycles) {
             // everything in here gets executed once every kDecideEveryCycles
@@ -577,12 +577,12 @@ void GamePlay::fire_timer() {
                     if (!_left_mouse_down) {
                         int64_t double_click_interval
                             = VideoDriver::driver()->double_click_interval_usecs();
-                        if ((globals()->gGameTime - _last_click_time) <= double_click_interval) {
+                        if ((g.time - _last_click_time) <= double_click_interval) {
                             InstrumentsHandleDoubleClick(_cursor);
                             _last_click_time -= double_click_interval;
                         } else {
                             InstrumentsHandleClick(_cursor);
-                            _last_click_time = globals()->gGameTime;
+                            _last_click_time = g.time;
                         }
                         _left_mouse_down = true;
                     } else {

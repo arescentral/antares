@@ -369,7 +369,7 @@ bool Scenario::Condition::is_true() const {
         }
 
         case kTimeCondition:
-            return globals()->gGameTime >= ticks_to_usecs(conditionArgument.longValue);
+            return g.time >= ticks_to_usecs(conditionArgument.longValue);
 
         case kProximityCondition: {
             auto sObject = GetObjectFromInitialNumber(subjectObject);
@@ -812,9 +812,9 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         const int64_t start_ticks
             = (gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple;
         const int64_t start_time = add_ticks(0, start_ticks);
-        globals()->gGameTime = 0;
+        g.time = 0;
         for (int64_t i = 0; i < start_ticks; ++i) {
-            globals()->gGameTime = add_ticks(globals()->gGameTime, 1);
+            g.time = add_ticks(g.time, 1);
             MoveSpaceObjects(kDecideEveryCycles);
             NonplayerShipThink(kDecideEveryCycles);
             AdmiralThink();
@@ -831,7 +831,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 (*current)++;
             }
         }
-        globals()->gGameTime = start_time;
+        g.time = start_time;
 
         (*current)++;
         return;

@@ -48,7 +48,7 @@ aresGlobalType::aresGlobalType() {
     gKeyMapBufferTop = 0;
     gKeyMapBufferBottom = 0;
     gGameOver = 1;
-    gGameTime = 0;
+    g.time = 0;
     gClosestObject = Handle<SpaceObject>(0);
     gFarthestObject = Handle<SpaceObject>(0);
     gCenterScaleH = 0;

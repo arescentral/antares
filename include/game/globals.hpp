@@ -92,6 +92,7 @@ struct ScenarioWinnerType {
 };
 
 struct GlobalState {
+    int64_t time;   // Current game time.
     Random random;  // Global random number generator.
 
     std::unique_ptr<Admiral[]> admirals;  // All admirals (whether active or not).
@@ -111,7 +112,6 @@ struct aresGlobalType {
     uint32_t        gSynchValue;
     std::unique_ptr<InputSource> gInputSource;
     int32_t         gGameOver;
-    int64_t         gGameTime;
     uint64_t        gLastTime;
     Handle<SpaceObject> gClosestObject;
     Handle<SpaceObject> gFarthestObject;
