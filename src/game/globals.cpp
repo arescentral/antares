@@ -57,8 +57,6 @@ aresGlobalType::aresGlobalType() {
     gZoomMode = kTimesTwoZoom;
     gPreviousZoomMode = kNearestFoeZoom;
     gRadarCount = 0;
-    gRadarSpeed = 30;
-    gRadarRange = kRadarSize * 50;
     radar_is_functioning = false;
     gWhichScaleNum = 0;
     gLastScale = SCALE_SCALE;
@@ -69,10 +67,7 @@ aresGlobalType::aresGlobalType() {
     gamepad_names.reset(new StringList(Gamepad::NAMES));
     gamepad_long_names.reset(new StringList(Gamepad::LONG_NAMES));
     gAutoPilotOff = true;
-    levelNum = 31;
     keyMask = 0;
-    gSerialNumerator = 0;
-    gSerialDenominator = 0;
 
     hotKeyDownTime = -1;
 }

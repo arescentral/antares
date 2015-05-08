@@ -123,8 +123,6 @@ struct aresGlobalType {
     ScenarioWinnerType gScenarioWinner;
 
     int32_t         gRadarCount;            // = 0;
-    int32_t         gRadarSpeed;            // = 30;
-    int32_t         gRadarRange;            // kRadarSize * 50;
     bool            radar_is_functioning;
     int32_t         gWhichScaleNum;         // = 0;
     int32_t         gLastScale;             // = SCALE_SCALE;
@@ -145,10 +143,7 @@ struct aresGlobalType {
     int32_t         gKeyMapBufferTop;       // = 0;
     int32_t         gKeyMapBufferBottom;    // = 0;
     KeyMap          gLastMessageKeyMap;
-    uint32_t        gSerialNumerator;
-    uint32_t        gSerialDenominator;
     bool         gAutoPilotOff;          // hack for turning off auto in netgame
-    int32_t         levelNum;
     uint32_t        keyMask;
     scenarioInfoType    scenarioFileInfo;   // x-ares; for factory +
                                             // 3rd party files

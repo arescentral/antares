@@ -49,6 +49,8 @@ namespace antares {
 const int32_t kPanelHeight      = 480;
 
 const int32_t kRadarScale       = 50;
+const int32_t kRadarRange       = kRadarSize * kRadarScale;
+const int32_t kRadarSpeed       = 30;
 const int32_t kRadarBlipNum     = 50;
 const uint8_t kRadarColor     = GREEN;
 
@@ -205,8 +207,6 @@ void ResetInstruments() {
     Point           *lp;
 
     globals()->gRadarCount = 0;
-    globals()->gRadarSpeed = 30;
-    globals()->gRadarRange = kRadarSize * 50;
     globals()->gLastScale = gAbsoluteScale = SCALE_SCALE;
     globals()->gWhichScaleNum = 0;
     gLastGlobalCorner.h = gLastGlobalCorner.v = 0;
@@ -292,9 +292,9 @@ void UpdateRadar(int32_t unitsDone) {
 
             Point* lp = gRadarBlipData.get();
             Point* end = lp + kRadarBlipNum;
-            globals()->gRadarCount = globals()->gRadarSpeed;
+            globals()->gRadarCount = kRadarSpeed;
 
-            const int32_t rrange = globals()->gRadarRange >> 1L;
+            const int32_t rrange = kRadarRange >> 1L;
             for (auto anObject: SpaceObject::all()) {
                 if (!anObject->active || (anObject == g.ship)) {
                     continue;
@@ -304,8 +304,8 @@ void UpdateRadar(int32_t unitsDone) {
                 if ((x < -rrange) || (x >= rrange) || (y < -rrange) || (y >= rrange)) {
                     continue;
                 }
-                Point p(x * kRadarSize / globals()->gRadarRange,
-                        y * kRadarSize / globals()->gRadarRange);
+                Point p(x * kRadarSize / kRadarRange,
+                        y * kRadarSize / kRadarRange);
                 p.offset(kRadarCenter + kRadarLeft,
                         kRadarCenter + kRadarTop + globals()->gInstrumentTop);
                 if (!radar.contains(p)) {
@@ -418,7 +418,7 @@ void draw_radar() {
         if (globals()->gRadarCount <= 0) {
             color = very_dark;
         } else {
-            color = GetRGBTranslateColorShade(kRadarColor, ((kRadarColorSteps * globals()->gRadarCount) / globals()->gRadarSpeed) + 1);
+            color = GetRGBTranslateColorShade(kRadarColor, ((kRadarColorSteps * globals()->gRadarCount) / kRadarSpeed) + 1);
         }
 
         Points points;
