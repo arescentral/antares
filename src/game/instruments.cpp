@@ -48,6 +48,7 @@ namespace antares {
 
 const int32_t kPanelHeight      = 480;
 
+const int32_t kRadarScale       = 50;
 const int32_t kRadarBlipNum     = 50;
 const uint8_t kRadarColor     = GREEN;
 
@@ -278,7 +279,7 @@ void UpdateRadar(int32_t unitsDone) {
             radar.inset(1, 1);
 
             int32_t dx = g.ship->location.h - gGlobalCorner.h;
-            dx = dx * kRadarSize / globals()->gRadarRange;
+            dx = dx / kRadarScale;
             view_range = Rect(-dx, -dx, dx, dx);
             view_range.center_in(bounds);
             view_range.offset(1, 1);
