@@ -143,9 +143,6 @@ struct aresGlobalType {
     uint32_t        keyMask;
     scenarioInfoType    scenarioFileInfo;   // x-ares; for factory +
                                             // 3rd party files
-    int32_t         maxScenarioBrief;
-    int32_t         maxScenarioCondition;
-    int32_t         maxScenarioInitial;
     int32_t         maxBaseObject;
     int32_t         maxObjectAction;
     int32_t         scenarioNum;

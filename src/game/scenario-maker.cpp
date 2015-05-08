@@ -514,7 +514,6 @@ void ScenarioMakerInit() {
             read(in, initial);
             gScenarioInitialData.push_back(initial);
         }
-        globals()->maxScenarioInitial = gScenarioInitialData.size();
     }
 
     {
@@ -526,7 +525,6 @@ void ScenarioMakerInit() {
             read(in, condition);
             gScenarioConditionData.push_back(condition);
         }
-        globals()->maxScenarioCondition = gScenarioConditionData.size();
     }
 
     {
@@ -538,7 +536,6 @@ void ScenarioMakerInit() {
             read(in, brief_point);
             gScenarioBriefData.push_back(brief_point);
         }
-        globals()->maxScenarioBrief = gScenarioBriefData.size();
     }
 
     InitRaces();
