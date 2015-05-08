@@ -66,6 +66,8 @@ static const int16_t kSpaceObjectShortNameResID     = 5001;
 static StringList* space_object_names;
 static StringList* space_object_short_names;
 
+int BaseObject::size = 0;
+int Action::size = 0;
 static unique_ptr<BaseObject[]> gBaseObjectData;
 static unique_ptr<Action[]> gObjectActionData;
 
@@ -78,7 +80,7 @@ void SpaceObjectHandlingInit() {
         Resource rsrc("object-actions", "obac", kObjectActionResID);
         BytesSlice in(rsrc.data());
         size_t count = rsrc.data().size() / Action::byte_size;
-        globals()->maxObjectAction = count;
+        Action::size = count;
         gObjectActionData.reset(new Action[count]);
         for (size_t i = 0; i < count; ++i) {
             read(in, gObjectActionData[i]);
@@ -93,7 +95,7 @@ void SpaceObjectHandlingInit() {
         Resource rsrc("objects", "bsob", kBaseObjectResID);
         BytesSlice in(rsrc.data());
         size_t count = rsrc.data().size() / BaseObject::byte_size;
-        globals()->maxBaseObject = count;
+        BaseObject::size = count;
         gBaseObjectData.reset(new BaseObject[count]);
         for (size_t i = 0; i < count; ++i) {
             read(in, gBaseObjectData[i]);
@@ -120,7 +122,7 @@ void ResetAllSpaceObjects() {
 }
 
 BaseObject* BaseObject::get(int number) {
-    if ((0 <= number) && (number < globals()->maxBaseObject)) {
+    if ((0 <= number) && (number < size)) {
         return &gBaseObjectData[number];
     }
     return nullptr;
@@ -134,7 +136,7 @@ SpaceObject* SpaceObject::get(int32_t number) {
 }
 
 Action* Action::get(int32_t number) {
-    if ((0 <= number) && (number < globals()->maxObjectAction)) {
+    if ((0 <= number) && (number < size)) {
         return &gObjectActionData[number];
     }
     return nullptr;
