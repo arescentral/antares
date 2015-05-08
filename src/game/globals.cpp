@@ -33,6 +33,7 @@
 namespace antares {
 
 static aresGlobalType* gAresGlobal;
+
 GlobalState g;
 
 aresGlobalType* globals() {
@@ -41,6 +42,12 @@ aresGlobalType* globals() {
 
 void init_globals() {
     gAresGlobal = new aresGlobalType;
+
+    g.time = 0;
+    g.ship = Handle<SpaceObject>(0);
+
+    Keys::init();
+    Gamepad::init();
 }
 
 aresGlobalType::aresGlobalType() {
@@ -48,12 +55,10 @@ aresGlobalType::aresGlobalType() {
     gKeyMapBufferTop = 0;
     gKeyMapBufferBottom = 0;
     gGameOver = 1;
-    g.time = 0;
     gClosestObject = Handle<SpaceObject>(0);
     gFarthestObject = Handle<SpaceObject>(0);
     gCenterScaleH = 0;
     gCenterScaleV = 0;
-    g.ship = Handle<SpaceObject>(0);
     gZoomMode = kTimesTwoZoom;
     gPreviousZoomMode = kNearestFoeZoom;
     gRadarCount = 0;
@@ -62,10 +67,6 @@ aresGlobalType::aresGlobalType() {
     gLastScale = SCALE_SCALE;
     gInstrumentTop = 0;
     gLastSoundTime = 0;
-    key_names.reset(new StringList(KEY_NAMES));
-    key_long_names.reset(new StringList(KEY_LONG_NAMES));
-    gamepad_names.reset(new StringList(Gamepad::NAMES));
-    gamepad_long_names.reset(new StringList(Gamepad::LONG_NAMES));
     gAutoPilotOff = true;
     keyMask = 0;
 

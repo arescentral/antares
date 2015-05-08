@@ -134,10 +134,6 @@ struct aresGlobalType {
     smartSoundChannel   gChannel[kMaxChannelNum];
     int32_t         gLastSoundTime;         // = 0
     std::unique_ptr<StringList>        gAresCheatStrings;
-    std::unique_ptr<StringList>         key_names;
-    std::unique_ptr<StringList>         key_long_names;
-    std::unique_ptr<StringList>         gamepad_names;
-    std::unique_ptr<StringList>         gamepad_long_names;
 
     KeyMap*         gKeyMapBuffer;          // = NewPtr( sizeof (KeyMap) * (int32_t)kKeyMapBufferNum;
     int32_t         gKeyMapBufferTop;       // = 0;

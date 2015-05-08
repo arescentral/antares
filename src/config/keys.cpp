@@ -26,6 +26,14 @@
 
 namespace antares {
 
+static std::unique_ptr<StringList> key_names;
+static std::unique_ptr<StringList> key_long_names;
+
+void Keys::init() {
+    key_names.reset(new StringList(KEY_NAMES));
+    key_long_names.reset(new StringList(KEY_LONG_NAMES));
+}
+
 KeyMap::KeyMap(): _data{} {}
 
 bool KeyMap::get(size_t index) const {
@@ -84,13 +92,13 @@ bool CommandKey() {
 }
 
 void GetKeyNumName(int key_num, sfz::String* out) {
-    out->assign(globals()->key_names->at(key_num - 1));
+    out->assign(key_names->at(key_num - 1));
 }
 
 bool GetKeyNameNum(sfz::StringSlice name, int& out) {
     bool result = false;
-    for (int i = 0; i < globals()->key_names->size(); ++i) {
-        if (globals()->key_names->at(i) == name) {
+    for (int i = 0; i < key_names->size(); ++i) {
+        if (key_names->at(i) == name) {
             out = i + 1;
             result = true;
         }
