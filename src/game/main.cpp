@@ -418,16 +418,16 @@ void GamePlay::become_front() {
           case PlayAgainScreen::QUIT:
             *_game_result = QUIT_GAME;
             g.game_over = true;
-            globals()->gScenarioWinner.next = -1;
-            globals()->gScenarioWinner.text = -1;
+            g.next_level = -1;
+            g.victory_text = -1;
             stack()->pop(this);
             break;
 
           case PlayAgainScreen::RESTART:
             *_game_result = RESTART_GAME;
             g.game_over = true;
-            globals()->gScenarioWinner.next = -1;
-            globals()->gScenarioWinner.text = -1;
+            g.next_level = -1;
+            g.victory_text = -1;
             stack()->pop(this);
             break;
 
@@ -438,9 +438,9 @@ void GamePlay::become_front() {
           case PlayAgainScreen::SKIP:
             *_game_result = WIN_GAME;
             g.game_over = true;
-            globals()->gScenarioWinner.player = g.admiral;
-            globals()->gScenarioWinner.next = gThisScenario->chapter_number() + 1;
-            globals()->gScenarioWinner.text = -1;
+            g.victor = g.admiral;
+            g.next_level = gThisScenario->chapter_number() + 1;
+            g.victory_text = -1;
             stack()->pop(this);
             break;
 
@@ -663,7 +663,7 @@ void GamePlay::fire_timer() {
         *_seconds = thisTime / 1000000; // divide by a million to get seconds
 
         if (*_game_result == NO_GAME) {
-            if (globals()->gScenarioWinner.player == g.admiral) {
+            if (g.victor == g.admiral) {
                 *_game_result = WIN_GAME;
             } else {
                 *_game_result = LOSE_GAME;
@@ -678,24 +678,24 @@ void GamePlay::fire_timer() {
         break;
 
       case WIN_GAME:
-        if (_replay || (globals()->gScenarioWinner.text == -1)) {
+        if (_replay || (g.victory_text >= 0)) {
             stack()->pop(this);
         } else {
             _state = DEBRIEFING;
             const auto& a = g.admiral;
             stack()->push(new DebriefingScreen(
-                        globals()->gScenarioWinner.text, *_seconds, gThisScenario->parTime,
+                        g.victory_text, *_seconds, gThisScenario->parTime,
                         GetAdmiralLoss(a), gThisScenario->parLosses,
                         GetAdmiralKill(a), gThisScenario->parKills));
         }
         break;
 
       case LOSE_GAME:
-        if (_replay || (globals()->gScenarioWinner.text == -1)) {
+        if (_replay || (g.victory_text >= 0)) {
             stack()->pop(this);
         } else {
             _state = DEBRIEFING;
-            stack()->push(new DebriefingScreen(globals()->gScenarioWinner.text));
+            stack()->push(new DebriefingScreen(g.victory_text));
         }
         break;
 

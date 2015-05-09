@@ -567,9 +567,9 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
         }
     }
 
-    globals()->gScenarioWinner.player = Admiral::none();
-    globals()->gScenarioWinner.next = -1;
-    globals()->gScenarioWinner.text = -1;
+    g.victor = Admiral::none();
+    g.next_level = -1;
+    g.victory_text = -1;
 
     SetMiniScreenStatusStrList(gThisScenario->scoreStringResID);
 
@@ -937,25 +937,15 @@ Handle<SpaceObject> GetObjectFromInitialNumber(int32_t initialNumber) {
 void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textID) {
     if (!whichPlayer.get()) {
         // if there's no winner, we want to exit immediately
-        if (nextLevel >= 0) {
-            globals()->gScenarioWinner.next = nextLevel;
-        } else {
-            globals()->gScenarioWinner.next = -1;
-        }
-        if (textID >= 0) {
-            globals()->gScenarioWinner.text = textID;
-        }
+        g.next_level = nextLevel;
+        g.victory_text = textID;
         g.game_over = true;
         g.game_over_at = g.time;
     } else {
-        if (!globals()->gScenarioWinner.player.get()) {
-            globals()->gScenarioWinner.player = whichPlayer;
-            globals()->gScenarioWinner.text = textID;
-            if (nextLevel >= 0) {
-                globals()->gScenarioWinner.next = nextLevel;
-            } else {
-                globals()->gScenarioWinner.next = -1;
-            }
+        if (!g.victor.get()) {
+            g.victor = whichPlayer;
+            g.victory_text = textID;
+            g.next_level = nextLevel;
             if (!g.game_over) {
                 g.game_over = true;
                 g.game_over_at = add_ticks(g.time, 180);

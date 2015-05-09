@@ -85,12 +85,6 @@ struct scrollStarType;
 class InputSource;
 class StringList;
 
-struct ScenarioWinnerType {
-    int8_t next;
-    int16_t text;
-    Handle<Admiral> player;
-};
-
 struct GlobalState {
     int64_t  time;    // Current game time.
     Random   random;  // Global random number generator.
@@ -102,8 +96,11 @@ struct GlobalState {
     Handle<SpaceObject>             ship;     // Local player's flagship.
     Handle<SpaceObject>             root;     // Head of LL of active objs, in creation time order.
 
-    bool     game_over;     // True if an admiral won or lost the level.
-    int64_t  game_over_at;  // The time to stop the game (ignored unless game_over).
+    bool             game_over;     // True if an admiral won or lost the level.
+    int64_t          game_over_at;  // The time to stop the game (ignored unless game_over).
+    Handle<Admiral>  victor;        // The winner (or none).
+    int              next_level;    // Next level (or -1 for none).
+    int16_t          victory_text;  // Text resource to show in debriefing.
 };
 
 extern GlobalState g;
@@ -122,7 +119,6 @@ struct aresGlobalType {
     Handle<Label>   gSelectionLabel;
     ZoomType        gZoomMode;
     ZoomType        gPreviousZoomMode;
-    ScenarioWinnerType gScenarioWinner;
 
     int32_t         gRadarCount;            // = 0;
     bool            radar_is_functioning;

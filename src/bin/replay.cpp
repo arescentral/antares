@@ -96,8 +96,8 @@ class ReplayMaster : public Card {
                 String path(format("{0}/debriefing.txt", *_output_path));
                 makedirs(path::dirname(path), 0755);
                 ScopedFd outcome(open(path, O_WRONLY | O_CREAT, 0644));
-                if ((globals()->gScenarioWinner.text >= 0)) {
-                    Resource rsrc("text", "txt", globals()->gScenarioWinner.text);
+                if ((g.victory_text >= 0)) {
+                    Resource rsrc("text", "txt", g.victory_text);
                     sfz::write(outcome, rsrc.data());
                     if (_game_result == WIN_GAME) {
                         sfz::write(outcome, "\n\n");

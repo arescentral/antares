@@ -1011,9 +1011,9 @@ void PlayerShipBodyExpire(Handle<SpaceObject> theShip) {
             g.game_over_at = add_ticks(g.time, 180);
         }
         if (theShip->owner == g.admiral) {
-            globals()->gScenarioWinner.text = kScenarioNoShipTextID + gThisScenario->levelNameStrNum;
+            g.victory_text = kScenarioNoShipTextID + gThisScenario->levelNameStrNum;
         } else {
-            globals()->gScenarioWinner.text = 10050 + gThisScenario->levelNameStrNum;
+            g.victory_text = 10050 + gThisScenario->levelNameStrNum;
         }
         if (theShip->owner.get()) {
             theShip->owner->set_flagship(SpaceObject::none());
