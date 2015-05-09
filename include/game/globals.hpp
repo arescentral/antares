@@ -92,18 +92,18 @@ struct ScenarioWinnerType {
 };
 
 struct GlobalState {
-    int64_t time;   // Current game time.
-    Random random;  // Global random number generator.
+    int64_t  time;    // Current game time.
+    Random   random;  // Global random number generator.
 
-    std::unique_ptr<Admiral[]> admirals;  // All admirals (whether active or not).
-    Handle<Admiral> admiral;              // Local player.
+    std::unique_ptr<Admiral[]>  admirals;  // All admirals (whether active or not).
+    Handle<Admiral>             admiral;   // Local player.
 
-    std::unique_ptr<SpaceObject[]> objects;  // All space objects (whether active or not).
-    Handle<SpaceObject> ship;                // Local player's flagship.
-    Handle<SpaceObject> root;                // Head of LL of active objs, in creation time order.
+    std::unique_ptr<SpaceObject[]>  objects;  // All space objects (whether active or not).
+    Handle<SpaceObject>             ship;     // Local player's flagship.
+    Handle<SpaceObject>             root;     // Head of LL of active objs, in creation time order.
 
-    bool game_over;        // True if an admiral won or lost the level.
-    int64_t game_over_at;  // The time to stop the game (ignored unless game_over).
+    bool     game_over;     // True if an admiral won or lost the level.
+    int64_t  game_over_at;  // The time to stop the game (ignored unless game_over).
 };
 
 extern GlobalState g;
