@@ -103,17 +103,14 @@ beamType* Beams::add(
             beam->thisLocation = Rect(0, 0, 0, 0);
             beam->thisLocation.offset(h + viewport.left, v + viewport.top);
 
-            beam->lastLocation = beam->thisLocation;
-
             beam->beamKind = kind;
             beam->accuracy = accuracy;
             beam->range = beam_range;
-            beam->fromObjectNumber = beam->fromObjectID = -1;
+            beam->fromObjectID = -1;
             beam->fromObject = SpaceObject::none();
-            beam->toObjectNumber = beam->toObjectID = -1;
+            beam->toObjectID = -1;
             beam->toObject = SpaceObject::none();
             beam->toRelativeCoord = Point(0, 0);
-            beam->boltRandomSeed = 0;
             beam->boltCycleTime = 0;
             beam->boltState = 0;
 
@@ -126,7 +123,6 @@ beamType* Beams::add(
 
 void Beams::set_attributes(Handle<SpaceObject> beamObject, Handle<SpaceObject> sourceObject) {
     beamType& beam = *beamObject->frame.beam;
-    beam.fromObjectNumber = sourceObject->number();
     beam.fromObjectID = sourceObject->id;
     beam.fromObject = sourceObject;
 
@@ -158,7 +154,6 @@ void Beams::set_attributes(Handle<SpaceObject> beamObject, Handle<SpaceObject> s
                         - beam.accuracy
                         + beamObject->randomSeed.next(beam.accuracy << 1);
                 } else {
-                    beam.toObjectNumber = target->number();
                     beam.toObjectID = target->id;
                     beam.toObject = target;
                 }
@@ -280,7 +275,6 @@ void Beams::show_all() {
                     }
                 }
             }
-            beam->lastLocation = beam->thisLocation;
         }
     }
 }
@@ -292,7 +286,6 @@ void Beams::cull() {
                 if (beam->killMe) {
                     beam->active = false;
                 }
-                beam->lastLocation = beam->thisLocation;
         }
     }
 }

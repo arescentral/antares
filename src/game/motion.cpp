@@ -467,9 +467,6 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                                     anObject->active = kObjectToBeFreed;
                                 }
                             }
-                        } else
-                        {
-    //                      anObject->frame.beam->endLocation
                         }
                     } else {
                         throw Exception( "Unexpected error: a beam appears to be missing.");
