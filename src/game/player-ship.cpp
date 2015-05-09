@@ -114,7 +114,6 @@ void ResetPlayerShip(Handle<SpaceObject> which) {
     globals()->gAutoPilotOff = true;
     globals()->keyMask = 0;
     gLastKeyMap.clear();
-    globals()->gLastMessageKeyMap.clear();
     globals()->gZoomMode = kNearestFoeZoom;
 
     for (int h = 0; h < kHotKeyNum; h++) {
@@ -313,6 +312,9 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
         break;
       case kTransferKeyNum:
         MiniComputerExecute(3, 1, g.admiral);
+        break;
+      case kMessageNextKeyNum:
+        Messages::advance();
         break;
       default:
         if (key < kKeyControlNum) {
@@ -657,12 +659,6 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
     }
 
     minicomputer_handle_keys(gTheseKeys, gLastKeys, false);
-
-    if ((mMessageNextKey(_keys))
-            && (!(mMessageNextKey(gLastKeyMap)))
-            && (!enter_message)) {
-        Messages::advance();
-    }
 
     uint32_t dcalc = kSelectFriendKey | kSelectFoeKey | kSelectBaseKey;
     attributes = gTheseKeys & dcalc;

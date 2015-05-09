@@ -136,7 +136,6 @@ struct aresGlobalType {
     smartSoundHandle    gSound[kSoundNum];
     smartSoundChannel   gChannel[kMaxChannelNum];
 
-    KeyMap          gLastMessageKeyMap;
     bool         gAutoPilotOff;          // hack for turning off auto in netgame
     uint32_t        keyMask;
     scenarioInfoType    scenarioFileInfo;   // x-ares; for factory +
