@@ -54,14 +54,12 @@ const Fixed kImportantTarget            = 0x00000140;
 const Fixed kSomewhatImportantTarget    = 0x00000120;
 const Fixed kAbsolutelyEssential        = 0x00008000;
 
-unique_ptr<Destination[]> gDestBalanceData;
-
 }  // namespace
 
 void Admiral::init() {
     g.admirals.reset(new Admiral[kMaxPlayerNum]);
     reset();
-    gDestBalanceData.reset(new Destination[kMaxDestObject]);
+    g.destinations.reset(new Destination[kMaxDestObject]);
     ResetAllDestObjectData();
 }
 
@@ -88,7 +86,7 @@ void ResetAllDestObjectData() {
 
 Destination* Destination::get(int i) {
     if ((0 <= i) && (i < kMaxDestObject)) {
-        return &gDestBalanceData[i];
+        return &g.destinations[i];
     }
     return nullptr;
 }

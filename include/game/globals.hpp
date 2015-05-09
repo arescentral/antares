@@ -97,7 +97,8 @@ struct GlobalState {
     Handle<SpaceObject>             ship;     // Local player's flagship.
     Handle<SpaceObject>             root;     // Head of LL of active objs, in creation time order.
 
-    std::unique_ptr<beamType[]>  beams;  // Auxiliary info for kIsBeam objects.
+    std::unique_ptr<beamType[]>     beams;         // Auxiliary info for kIsBeam objects.
+    std::unique_ptr<Destination[]>  destinations;  // Auxiliary info for kIsDestination objects.
 
     bool             game_over;     // True if an admiral won or lost the level.
     int64_t          game_over_at;  // The time to stop the game (ignored unless game_over).
