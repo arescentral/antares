@@ -68,18 +68,16 @@ int32_t scale(int32_t value, int32_t scale) {
 
 }  // namespace
 
-std::unique_ptr<beamType[]> Beams::_data;
-
 beamType::beamType():
         killMe(false),
         active(false) { }
 
 void Beams::init() {
-    _data.reset(new beamType[kBeamNum]);
+    g.beams.reset(new beamType[kBeamNum]);
 }
 
 void Beams::reset() {
-    beamType* const beams = _data.get();
+    beamType* const beams = g.beams.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         clear(*beam);
     }
@@ -88,7 +86,7 @@ void Beams::reset() {
 beamType* Beams::add(
         coordPointType* location, uint8_t color, beamKindType kind, int32_t accuracy,
         int32_t beam_range) {
-    beamType* const beams = _data.get();
+    beamType* const beams = g.beams.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (!beam->active) {
             beam->lastGlobalLocation = *location;
@@ -177,7 +175,7 @@ void Beams::set_attributes(Handle<SpaceObject> beamObject, Handle<SpaceObject> s
 }
 
 void Beams::update() {
-    beamType* const beams = _data.get();
+    beamType* const beams = g.beams.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
             if (beam->lastApparentLocation != beam->objectLocation) {
@@ -236,7 +234,7 @@ void Beams::update() {
 
 void Beams::draw() {
     Lines lines;
-    beamType* const beams = _data.get();
+    beamType* const beams = g.beams.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
             if (!beam->killMe) {
@@ -261,7 +259,7 @@ void Beams::draw() {
 }
 
 void Beams::show_all() {
-    beamType* const beams = _data.get();
+    beamType* const beams = g.beams.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
             if (beam->killMe) {
@@ -280,7 +278,7 @@ void Beams::show_all() {
 }
 
 void Beams::cull() {
-    beamType* const beams = _data.get();
+    beamType* const beams = g.beams.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
                 if (beam->killMe) {

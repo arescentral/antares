@@ -79,6 +79,7 @@ struct hotKeyType {
 };
 
 struct Admiral;
+struct beamType;
 struct Destination;
 struct proximityUnitType;
 struct scrollStarType;
@@ -95,6 +96,8 @@ struct GlobalState {
     std::unique_ptr<SpaceObject[]>  objects;  // All space objects (whether active or not).
     Handle<SpaceObject>             ship;     // Local player's flagship.
     Handle<SpaceObject>             root;     // Head of LL of active objs, in creation time order.
+
+    std::unique_ptr<beamType[]>  beams;  // Auxiliary info for kIsBeam objects.
 
     bool             game_over;     // True if an admiral won or lost the level.
     int64_t          game_over_at;  // The time to stop the game (ignored unless game_over).

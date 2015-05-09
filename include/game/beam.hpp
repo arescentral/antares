@@ -75,8 +75,6 @@ class Beams {
     static void draw();
     static void show_all();
     static void cull();
-  private:
-    static std::unique_ptr<beamType[]> _data;
 };
 
 }  // namespace antares
