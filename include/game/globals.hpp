@@ -134,7 +134,6 @@ struct aresGlobalType {
     std::unique_ptr<StringList>          gMissionStatusStrList;
     smartSoundHandle    gSound[kSoundNum];
     smartSoundChannel   gChannel[kMaxChannelNum];
-    int32_t         gLastSoundTime;         // = 0
 
     KeyMap          gLastMessageKeyMap;
     bool         gAutoPilotOff;          // hack for turning off auto in netgame

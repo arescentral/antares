@@ -62,7 +62,6 @@ aresGlobalType::aresGlobalType() {
     gWhichScaleNum = 0;
     gLastScale = SCALE_SCALE;
     gInstrumentTop = 0;
-    gLastSoundTime = 0;
     gAutoPilotOff = true;
     keyMask = 0;
 

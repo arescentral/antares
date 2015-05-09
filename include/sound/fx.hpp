@@ -69,7 +69,7 @@ enum soundPriorityType {
 
 struct smartSoundChannel {
     int32_t             whichSound;
-    int32_t             soundAge;
+    int64_t             reserved_until;
     int16_t             soundVolume;
     soundPriorityType   soundPriority;
     std::unique_ptr<SoundChannel> channelPtr;

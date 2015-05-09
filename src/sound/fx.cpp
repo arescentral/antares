@@ -43,7 +43,7 @@ const double kHackRangeMultiplier = 0.0025;
 
 void InitSoundFX() {
     for (int i = 0; i < kMaxChannelNum; i++) {
-        globals()->gChannel[i].soundAge = 0;
+        globals()->gChannel[i].reserved_until = 0;
         globals()->gChannel[i].soundPriority = kNoSound;
         globals()->gChannel[i].soundVolume = 0;
         globals()->gChannel[i].whichSound = -1;
@@ -107,12 +107,13 @@ static bool lower_priority_channel(int& channel, soundPriorityType priority) {
 
 // take the oldest sound if past minimum persistence
 static bool oldest_available_channel(int& channel) {
-    int32_t oldestSoundTime = -ticks_to_usecs(kLongPersistence);
+    int64_t oldestSoundTime = 0;
     bool result = false;
     for (int i = 0; i < kMaxChannelNum; ++i) {
-        if ((globals()->gChannel[i].soundAge > 0)
-                && (globals()->gChannel[i].soundAge > oldestSoundTime)) {
-            oldestSoundTime = globals()->gChannel[i].soundAge;
+        auto past_reservation =
+            VideoDriver::driver()->usecs() - globals()->gChannel[i].reserved_until;
+        if (past_reservation > oldestSoundTime) {
+            oldestSoundTime = past_reservation;
             channel = i;
             result = true;
         }
@@ -134,13 +135,6 @@ void PlayVolumeSound(
     int32_t whichChannel = -1;
     // TODO(sfiera): don't play sound at all if the game is muted.
     if (amplitude > 0) {
-        int timeDif = VideoDriver::driver()->usecs() - globals()->gLastSoundTime;
-        for (int count = 0; count < kMaxChannelNum; count++) {
-            globals()->gChannel[count].soundAge += timeDif;
-        }
-
-        globals()->gLastSoundTime = VideoDriver::driver()->usecs();
-
         if (!best_channel(whichChannel, whichSoundID, amplitude, persistence, priority)) {
             return;
         }
@@ -154,7 +148,7 @@ void PlayVolumeSound(
         }
 
         globals()->gChannel[whichChannel].whichSound = whichSoundID;
-        globals()->gChannel[whichChannel].soundAge = -ticks_to_usecs(persistence);
+        globals()->gChannel[whichChannel].reserved_until = VideoDriver::driver()->usecs() + ticks_to_usecs(persistence);
         globals()->gChannel[whichChannel].soundPriority = priority;
         globals()->gChannel[whichChannel].soundVolume = amplitude;
 
