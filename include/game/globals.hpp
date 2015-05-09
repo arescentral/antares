@@ -135,9 +135,6 @@ struct aresGlobalType {
     int32_t         gLastSoundTime;         // = 0
     std::unique_ptr<StringList>        gAresCheatStrings;
 
-    KeyMap*         gKeyMapBuffer;          // = NewPtr( sizeof (KeyMap) * (int32_t)kKeyMapBufferNum;
-    int32_t         gKeyMapBufferTop;       // = 0;
-    int32_t         gKeyMapBufferBottom;    // = 0;
     KeyMap          gLastMessageKeyMap;
     bool         gAutoPilotOff;          // hack for turning off auto in netgame
     uint32_t        keyMask;

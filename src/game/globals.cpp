@@ -51,9 +51,6 @@ void init_globals() {
 }
 
 aresGlobalType::aresGlobalType() {
-    gKeyMapBuffer = new KeyMap[kKeyMapBufferNum];
-    gKeyMapBufferTop = 0;
-    gKeyMapBufferBottom = 0;
     gGameOver = 1;
     gClosestObject = Handle<SpaceObject>(0);
     gFarthestObject = Handle<SpaceObject>(0);

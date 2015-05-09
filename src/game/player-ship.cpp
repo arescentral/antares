@@ -116,7 +116,6 @@ void ResetPlayerShip(Handle<SpaceObject> which) {
     gLastKeyMap.clear();
     globals()->gLastMessageKeyMap.clear();
     globals()->gZoomMode = kNearestFoeZoom;
-    globals()->gKeyMapBufferTop = globals()->gKeyMapBufferBottom = 0;
 
     for (int h = 0; h < kHotKeyNum; h++) {
         globals()->hotKey[h].object = SpaceObject::none();
@@ -1019,30 +1018,6 @@ void PlayerShipBodyExpire(Handle<SpaceObject> theShip) {
         if (theShip->owner.get()) {
             theShip->owner->set_flagship(SpaceObject::none());
         }
-    }
-}
-
-void HandleTextMessageKeys(const KeyMap& keyMap, const KeyMap& lastKeyMap, bool *enterMessage) {
-    bool         newKeys = false, anyKeys = false;
-    KeyMap          *bufferMap;
-
-    newKeys = (lastKeyMap != keyMap);
-    anyKeys = keyMap.any();
-
-    if ( newKeys)
-    {
-        if (( *enterMessage) && anyKeys)
-            PlayVolumeSound(  kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
-        bufferMap = globals()->gKeyMapBuffer + globals()->gKeyMapBufferTop;
-        bufferMap->copy(keyMap);
-        if ( mReturnKey( keyMap))
-        {
-            if ( *enterMessage) *enterMessage = false;
-            else *enterMessage = true;
-        }
-        globals()->gKeyMapBufferTop++;
-        if ( globals()->gKeyMapBufferTop >= kKeyMapBufferNum)
-            globals()->gKeyMapBufferTop = 0;
     }
 }
 
