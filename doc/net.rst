@@ -145,6 +145,16 @@ intended heading of the ship is what will cause problems; thrust,
 weapons, and warp state can all probably be assumed to be unchanged
 without further input.
 
+Stableness
+~~~~~~~~~~
+
+Sometimes, an input will reference an object in head_ that has not yet
+appeared in tail_.  Currently, the ID of an object is based on the
+global random number generator, which means that it's likely that remote
+events will result in a different identifier.  We need stable
+identifiers to use instead of ID; probably, the tuple `(basetype,
+creation_time)` is sufficient.
+
 Pausing
 -------
 
@@ -164,6 +174,13 @@ We could go a few ways on this:
     time until unpausing.
 
 Honestly, the first option seems best.
+
+Sounds
+------
+
+Do we only consider head_ for sounds, or do we try to track remote
+changes?  The latter seems hard, and maybe not even possible with the
+OpenAL API.
 
 Malice
 ------
