@@ -204,7 +204,7 @@ void ResetInstruments() {
     int32_t         *l, i;
     Point           *lp;
 
-    globals()->gRadarCount = 0;
+    g.radar_count = 0;
     globals()->gLastScale = gAbsoluteScale = SCALE_SCALE;
     globals()->gWhichScaleNum = 0;
     gLastGlobalCorner.h = gLastGlobalCorner.v = 0;
@@ -239,17 +239,17 @@ void ResetInstruments() {
 
 void UpdateRadar(int32_t unitsDone) {
     if (!g.ship.get()) {
-        globals()->radar_is_functioning = false;
+        g.radar_on = false;
     } else if (g.ship->offlineTime <= 0) {
-        globals()->radar_is_functioning = true;
+        g.radar_on = true;
     } else {
-        globals()->radar_is_functioning = (Randomize(g.ship->offlineTime) < 5);
+        g.radar_on = (Randomize(g.ship->offlineTime) < 5);
     }
 
     if (unitsDone < 0) {
         unitsDone = 0;
     }
-    globals()->gRadarCount -= unitsDone;
+    g.radar_count -= unitsDone;
 
     if (!g.ship.get() || !g.ship->active) {
         return;
@@ -259,8 +259,8 @@ void UpdateRadar(int32_t unitsDone) {
     bounds.offset(0, globals()->gInstrumentTop);
     bounds.inset(1, 1);
 
-    if (globals()->radar_is_functioning) {
-        if (globals()->gRadarCount <= 0) {
+    if (g.radar_on) {
+        if (g.radar_count <= 0) {
             Rect radar = bounds;
             radar.inset(1, 1);
 
@@ -278,7 +278,7 @@ void UpdateRadar(int32_t unitsDone) {
 
             Point* lp = gRadarBlipData.get();
             Point* end = lp + kRadarBlipNum;
-            globals()->gRadarCount = kRadarSpeed;
+            g.radar_count = kRadarSpeed;
 
             const int32_t rrange = kRadarRange >> 1L;
             for (auto anObject: SpaceObject::all()) {
@@ -388,7 +388,7 @@ void draw_radar() {
     const RgbColor very_light = GetRGBTranslateColorShade(kRadarColor, VERY_LIGHT);
     const RgbColor darkest = GetRGBTranslateColorShade(kRadarColor, DARKEST);
     const RgbColor very_dark = GetRGBTranslateColorShade(kRadarColor, VERY_DARK);
-    if (globals()->radar_is_functioning) {
+    if (g.radar_on) {
         Rect radar = bounds;
         {
             Rects rects;
@@ -401,10 +401,10 @@ void draw_radar() {
         }
 
         RgbColor color;
-        if (globals()->gRadarCount <= 0) {
+        if (g.radar_count <= 0) {
             color = very_dark;
         } else {
-            color = GetRGBTranslateColorShade(kRadarColor, ((kRadarColorSteps * globals()->gRadarCount) / kRadarSpeed) + 1);
+            color = GetRGBTranslateColorShade(kRadarColor, ((kRadarColorSteps * g.radar_count) / kRadarSpeed) + 1);
         }
 
         Points points;

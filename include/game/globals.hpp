@@ -107,6 +107,9 @@ struct GlobalState {
     Handle<Admiral>  victor;        // The winner (or none).
     int              next_level;    // Next level (or -1 for none).
     int16_t          victory_text;  // Text resource to show in debriefing.
+
+    int32_t  radar_count;  // Counts down to a radar pulse every 5/6 seconds.
+    bool     radar_on;     // Maybe false if player ship is offline.
 };
 
 extern GlobalState g;
@@ -124,8 +127,6 @@ struct aresGlobalType {
     ZoomType        gZoomMode;
     ZoomType        gPreviousZoomMode;
 
-    int32_t         gRadarCount;            // = 0;
-    bool            radar_is_functioning;
     int32_t         gWhichScaleNum;         // = 0;
     int32_t         gLastScale;             // = SCALE_SCALE;
     int32_t         gInstrumentTop;         // = 0;
