@@ -45,14 +45,14 @@ void init_globals() {
 
     g.time = 0;
     g.ship = Handle<SpaceObject>(0);
+    g.closest = Handle<SpaceObject>(0);
+    g.farthest = Handle<SpaceObject>(0);
 
     Keys::init();
     Gamepad::init();
 }
 
 aresGlobalType::aresGlobalType() {
-    gClosestObject = Handle<SpaceObject>(0);
-    gFarthestObject = Handle<SpaceObject>(0);
     gCenterScaleH = 0;
     gCenterScaleV = 0;
     gZoomMode = kTimesTwoZoom;

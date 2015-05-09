@@ -148,8 +148,8 @@ void ResetMotionGlobals( void)
     int32_t                i;
 
     gGlobalCorner.h = gGlobalCorner.v = 0;
-    globals()->gClosestObject = Handle<SpaceObject>(0);
-    globals()->gFarthestObject = Handle<SpaceObject>(0);
+    g.closest = Handle<SpaceObject>(0);
+    g.farthest = Handle<SpaceObject>(0);
 
     proximityObject = gProximityGrid.get();
     for ( i = 0; i < kProximityGridDataLength; i++)
@@ -583,8 +583,8 @@ void CollideSpaceObjects() {
     uint64_t farthestDist = 0;
     uint64_t closestDist = 0x7fffffffffffffffull;
     auto player = g.ship;
-    globals()->gClosestObject = Handle<SpaceObject>(0);
-    globals()->gFarthestObject = Handle<SpaceObject>(0);
+    g.closest = Handle<SpaceObject>(0);
+    g.farthest = Handle<SpaceObject>(0);
 
     // reset the collision grid
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
@@ -649,12 +649,12 @@ void CollideSpaceObjects() {
                             && ((globals()->gZoomMode != kNearestFoeZoom)
                                 || (aObject->owner != player->owner))) {
                         closestDist = hugeDistance;
-                        globals()->gClosestObject = aObject;
+                        g.closest = aObject;
                     }
                 }
                 if (hugeDistance > farthestDist) {
                     farthestDist = hugeDistance;
-                    globals()->gFarthestObject = aObject;
+                    g.farthest = aObject;
                 }
             }
         }

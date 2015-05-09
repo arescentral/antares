@@ -93,9 +93,11 @@ struct GlobalState {
     std::unique_ptr<Admiral[]>  admirals;  // All admirals (whether active or not).
     Handle<Admiral>             admiral;   // Local player.
 
-    std::unique_ptr<SpaceObject[]>  objects;  // All space objects (whether active or not).
-    Handle<SpaceObject>             ship;     // Local player's flagship.
-    Handle<SpaceObject>             root;     // Head of LL of active objs, in creation time order.
+    std::unique_ptr<SpaceObject[]>  objects;   // All space objects (whether active or not).
+    Handle<SpaceObject>             ship;      // Local player's flagship.
+    Handle<SpaceObject>             root;      // Head of LL of active objs, in creation time order.
+    Handle<SpaceObject>             closest;   // Nearest object or hostile, depending on zoom.
+    Handle<SpaceObject>             farthest;  // Farthest object (sufficient for zoom-to-all).
 
     std::unique_ptr<beamType[]>     beams;         // Auxiliary info for kIsBeam objects.
     std::unique_ptr<Destination[]>  destinations;  // Auxiliary info for kIsDestination objects.
@@ -116,8 +118,6 @@ struct aresGlobalType {
     uint32_t        gSynchValue;
     std::unique_ptr<InputSource> gInputSource;
     uint64_t        gLastTime;
-    Handle<SpaceObject> gClosestObject;
-    Handle<SpaceObject> gFarthestObject;
     int32_t         gCenterScaleH;
     int32_t         gCenterScaleV;
     Handle<Label>   gSelectionLabel;
