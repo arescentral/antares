@@ -129,7 +129,6 @@ static unique_ptr<Sprite> left_instrument_sprite;
 static unique_ptr<Sprite> right_instrument_sprite;
 static unique_ptr<Point[]> gRadarBlipData;
 static unique_ptr<int32_t[]> gScaleList;
-static unique_ptr<int32_t[]> gSectorLineData;
 static bool should_draw_sector_lines = false;
 static Rect view_range;
 
@@ -162,7 +161,6 @@ void InstrumentInit() {
 
     gRadarBlipData.reset(new Point[kRadarBlipNum]);
     gScaleList.reset(new int32_t[kScaleListNum]);
-    gSectorLineData.reset(new int32_t[kMaxSectorLine * 4]);
     ResetInstruments();
 
     // Initialize and crop left and right instrument picts.
@@ -237,18 +235,6 @@ void ResetInstruments() {
         lp++;
     }
 
-    l = gSectorLineData.get();
-    for (int count: range(kMaxSectorLine)) {
-        static_cast<void>(count);
-        *l = -1;
-        l++;
-        *l = -1;
-        l++;
-        *l = -1;
-        l++;
-        *l = -1;
-        l++;
-    }
 }
 
 void UpdateRadar(int32_t unitsDone) {
@@ -665,7 +651,7 @@ void update_sector_lines() {
 
 void draw_sector_lines() {
     Rects rects;
-    int32_t         *l, x;
+    int32_t         x;
     uint32_t        size, level, h, division;
     RgbColor        color;
 
@@ -683,7 +669,6 @@ void draw_sector_lines() {
     division = ((gLastGlobalCorner.h + x) >> kSubSectorShift) & 0x0000000f;
     x = ((x * globals()->gLastScale) >> SHIFT_SCALE) + viewport.left;
 
-    l = gSectorLineData.get();
     if (should_draw_sector_lines) {
         while ((x < implicit_cast<uint32_t>(viewport.right)) && (h > 0)) {
             RgbColor color;
@@ -697,8 +682,6 @@ void draw_sector_lines() {
 
             // TODO(sfiera): +1 on bottom no longer needed.
             rects.fill({x, viewport.top, x + 1, viewport.bottom + 1}, color);
-            *l = x;
-            l += 2;
             division += level;
             division &= 0x0000000f;
             x += h;
@@ -709,7 +692,6 @@ void draw_sector_lines() {
     division = ((gLastGlobalCorner.v + x) >> kSubSectorShift) & 0x0000000f;
     x = ((x * globals()->gLastScale) >> SHIFT_SCALE) + viewport.top;
 
-    l = gSectorLineData.get() + (kMaxSectorLine * 2);
     if (should_draw_sector_lines) {
         while ((x < implicit_cast<uint32_t>(viewport.bottom)) && (h > 0)) {
             RgbColor color;
@@ -723,8 +705,6 @@ void draw_sector_lines() {
 
             // TODO(sfiera): +1 on right no longer needed.
             rects.fill({viewport.left, x, viewport.right + 1, x + 1}, color);
-            *l = x;
-            l += 2;
 
             division += level;
             division &= 0x0000000f;
