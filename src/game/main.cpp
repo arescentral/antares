@@ -162,7 +162,7 @@ void MainPlay::become_front() {
         {
             _state = LOADING;
             RemoveAllSpaceObjects();
-            globals()->gGameOver = 0;
+            g.game_over = false;
 
             _replay_builder.init(
                     Preferences::preferences()->scenario_identifier(),
@@ -417,7 +417,7 @@ void GamePlay::become_front() {
         switch (_play_again) {
           case PlayAgainScreen::QUIT:
             *_game_result = QUIT_GAME;
-            globals()->gGameOver = 1;
+            g.game_over = true;
             globals()->gScenarioWinner.next = -1;
             globals()->gScenarioWinner.text = -1;
             stack()->pop(this);
@@ -425,7 +425,7 @@ void GamePlay::become_front() {
 
           case PlayAgainScreen::RESTART:
             *_game_result = RESTART_GAME;
-            globals()->gGameOver = 1;
+            g.game_over = true;
             globals()->gScenarioWinner.next = -1;
             globals()->gScenarioWinner.text = -1;
             stack()->pop(this);
@@ -437,7 +437,7 @@ void GamePlay::become_front() {
 
           case PlayAgainScreen::SKIP:
             *_game_result = WIN_GAME;
-            globals()->gGameOver = 1;
+            g.game_over = true;
             globals()->gScenarioWinner.player = g.admiral;
             globals()->gScenarioWinner.next = gThisScenario->chapter_number() + 1;
             globals()->gScenarioWinner.text = -1;
@@ -531,12 +531,6 @@ void GamePlay::fire_timer() {
         globals()->gLastTime = scrapTime - thisTime;
     }
 
-    if (globals()->gGameOver < 0) {
-        globals()->gGameOver += unitsPassed;
-        if ( globals()->gGameOver == 0)
-            globals()->gGameOver = 1;
-    }
-
     while (unitsPassed > 0) {
         int unitsToDo = unitsPassed;
         if (unitsToDo > kMaxTimePerCycle) {
@@ -564,7 +558,8 @@ void GamePlay::fire_timer() {
             execute_action_queue( kDecideEveryCycles);
 
             if (globals()->gInputSource && !globals()->gInputSource->next(_player_ship)) {
-                globals()->gGameOver = 1;
+                g.game_over = true;
+                g.game_over_at = g.time;
             }
             _replay_builder.next();
             _player_ship.update(kDecideEveryCycles, _cursor, _entering_message);
@@ -572,7 +567,8 @@ void GamePlay::fire_timer() {
             if (VideoDriver::driver()->button(0)) {
                 if (_replay) {
                     *_game_result = QUIT_GAME;
-                    globals()->gGameOver = 1;
+                    g.game_over = true;
+                    g.game_over_at = g.time;
                 } else {
                     if (!_left_mouse_down) {
                         int64_t double_click_interval
@@ -597,7 +593,8 @@ void GamePlay::fire_timer() {
             if (VideoDriver::driver()->button(1)) {
                 if (_replay) {
                     *_game_result = QUIT_GAME;
-                    globals()->gGameOver = 1;
+                    g.game_over = true;
+                    g.game_over_at = g.time;
                 } else {
                     if (!_right_mouse_down) {
                         PlayerShipHandleClick(VideoDriver::driver()->get_mouse(), 1);
@@ -660,7 +657,7 @@ void GamePlay::fire_timer() {
     UpdateRadar(unitsDone);
     globals()->transitions.update_boolean(unitsDone);
 
-    if (globals()->gGameOver > 0) {
+    if (g.game_over && (g.time >= g.game_over_at)) {
         thisTime = now_usecs();
         thisTime -= globals()->gLastTime;
         *_seconds = thisTime / 1000000; // divide by a million to get seconds
@@ -717,7 +714,8 @@ void GamePlay::caps_lock(const CapsLockEvent& event) {
 void GamePlay::key_down(const KeyDownEvent& event) {
     if (globals()->gInputSource) {
         *_game_result = QUIT_GAME;
-        globals()->gGameOver = 1;
+        g.game_over = true;
+        g.game_over_at = g.time;
         return;
     }
 
@@ -768,7 +766,8 @@ void GamePlay::mouse_move(const MouseMoveEvent& event) {
 void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
     if (globals()->gInputSource) {
         *_game_result = QUIT_GAME;
-        globals()->gGameOver = 1;
+        g.game_over = true;
+        g.game_over_at = g.time;
         return;
     }
 

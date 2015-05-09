@@ -101,6 +101,9 @@ struct GlobalState {
     std::unique_ptr<SpaceObject[]> objects;  // All space objects (whether active or not).
     Handle<SpaceObject> ship;                // Local player's flagship.
     Handle<SpaceObject> root;                // Head of LL of active objs, in creation time order.
+
+    bool game_over;        // True if an admiral won or lost the level.
+    int64_t game_over_at;  // The time to stop the game (ignored unless game_over).
 };
 
 extern GlobalState g;
@@ -111,7 +114,6 @@ struct aresGlobalType {
 
     uint32_t        gSynchValue;
     std::unique_ptr<InputSource> gInputSource;
-    int32_t         gGameOver;
     uint64_t        gLastTime;
     Handle<SpaceObject> gClosestObject;
     Handle<SpaceObject> gFarthestObject;

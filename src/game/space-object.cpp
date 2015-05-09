@@ -235,7 +235,8 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
         obj->tinyColor = tinyColor;
 
         if (obj->sprite == NULL) {
-            globals()->gGameOver = -1;
+            g.game_over = true;
+            g.game_over_at = g.time;
             obj->active = kObjectAvailable;
             return SpaceObject::none();
         }

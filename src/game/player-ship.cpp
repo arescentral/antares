@@ -1006,9 +1006,9 @@ void PlayerShipBodyExpire(Handle<SpaceObject> theShip) {
     if (selectShip.get()) {
         ChangePlayerShipNumber(theShip->owner, selectShip);
     } else {
-        if ( globals()->gGameOver >= 0)
-        {
-            globals()->gGameOver = -180;
+        if (!g.game_over) {
+            g.game_over = true;
+            g.game_over_at = add_ticks(g.time, 180);
         }
         if (theShip->owner == g.admiral) {
             globals()->gScenarioWinner.text = kScenarioNoShipTextID + gThisScenario->levelNameStrNum;

@@ -945,7 +945,8 @@ void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textI
         if (textID >= 0) {
             globals()->gScenarioWinner.text = textID;
         }
-        globals()->gGameOver = 1;
+        g.game_over = true;
+        g.game_over_at = g.time;
     } else {
         if (!globals()->gScenarioWinner.player.get()) {
             globals()->gScenarioWinner.player = whichPlayer;
@@ -955,8 +956,9 @@ void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textI
             } else {
                 globals()->gScenarioWinner.next = -1;
             }
-            if (globals()->gGameOver >= 0) {
-                globals()->gGameOver = -180;
+            if (!g.game_over) {
+                g.game_over = true;
+                g.game_over_at = add_ticks(g.time, 180);
             }
         }
     }

@@ -51,7 +51,6 @@ void init_globals() {
 }
 
 aresGlobalType::aresGlobalType() {
-    gGameOver = 1;
     gClosestObject = Handle<SpaceObject>(0);
     gFarthestObject = Handle<SpaceObject>(0);
     gCenterScaleH = 0;
