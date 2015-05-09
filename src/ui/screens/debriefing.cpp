@@ -159,7 +159,9 @@ void DebriefingScreen::resign_front() {
 void DebriefingScreen::draw() const {
     next()->draw();
     Rects().fill(_pix_bounds, RgbColor::kBlack);
-    _score->draw_range(_score_bounds, 0, _typed_chars);
+    if (_score) {
+        _score->draw_range(_score_bounds, 0, _typed_chars);
+    }
     Rect interface_bounds = _message_bounds;
     interface_bounds.offset(_pix_bounds.left, _pix_bounds.top);
     draw_interface_item(_data_item, KEYBOARD_MOUSE);
