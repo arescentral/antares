@@ -23,6 +23,7 @@
 #include "data/resource.hpp"
 #include "data/scenario.hpp"
 #include "game/globals.hpp"
+#include "lang/defines.hpp"
 
 using sfz::BytesSlice;
 using sfz::Exception;
@@ -32,13 +33,9 @@ using std::unique_ptr;
 
 namespace antares {
 
-namespace {
+static const int16_t kRaceResID = 500;
 
-const int16_t kRaceResID = 500;
-
-unique_ptr<Race[]> gRaceData;
-
-}  // namespace
+static ANTARES_GLOBAL unique_ptr<Race[]> gRaceData;
 
 void InitRaces() {
     if (gRaceData.get() == NULL) {

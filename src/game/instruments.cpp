@@ -31,6 +31,7 @@
 #include "game/motion.hpp"
 #include "game/player-ship.hpp"
 #include "game/space-object.hpp"
+#include "lang/defines.hpp"
 #include "math/macros.hpp"
 #include "math/random.hpp"
 #include "math/rotation.hpp"
@@ -48,6 +49,9 @@ namespace antares {
 
 const int32_t kPanelHeight      = 480;
 
+const int32_t kRadarScale       = 50;
+const int32_t kRadarRange       = kRadarSize * kRadarScale;
+const int32_t kRadarSpeed       = 30;
 const int32_t kRadarBlipNum     = 50;
 const uint8_t kRadarColor     = GREEN;
 
@@ -121,21 +125,28 @@ const int32_t kSectorLineBrightness = DARKER;
 
 namespace {
 
-static coordPointType          gLastGlobalCorner;
-static unique_ptr<Sprite> left_instrument_sprite;
-static unique_ptr<Sprite> right_instrument_sprite;
-static unique_ptr<Point[]> gRadarBlipData;
-static unique_ptr<int32_t[]> gScaleList;
-static unique_ptr<int32_t[]> gSectorLineData;
-static bool should_draw_sector_lines = false;
-static Rect view_range;
+struct barIndicatorType {
+    int16_t top;
+    int32_t thisValue;
+    uint8_t color;
+};
+
+static ANTARES_GLOBAL coordPointType          gLastGlobalCorner;
+static ANTARES_GLOBAL unique_ptr<Sprite> left_instrument_sprite;
+static ANTARES_GLOBAL unique_ptr<Sprite> right_instrument_sprite;
+static ANTARES_GLOBAL unique_ptr<int32_t[]> gScaleList;
+static ANTARES_GLOBAL int32_t gWhichScaleNum;
+static ANTARES_GLOBAL int32_t gLastScale;
+static ANTARES_GLOBAL bool should_draw_sector_lines = false;
+static ANTARES_GLOBAL Rect view_range;
+static ANTARES_GLOBAL barIndicatorType gBarIndicator[kBarIndicatorNum];
 
 struct SiteData {
     bool should_draw;
     Point a, b, c;
     RgbColor light, dark;
 };
-static SiteData site;
+static ANTARES_GLOBAL SiteData site;
 
 template <typename T>
 T clamp(T value, T min, T max) {
@@ -157,9 +168,8 @@ static void draw_build_time_bar(int32_t value);
 void InstrumentInit() {
     globals()->gInstrumentTop = (world.height() / 2) - ( kPanelHeight / 2);
 
-    gRadarBlipData.reset(new Point[kRadarBlipNum]);
+    g.radar_blips.reset(new Point[kRadarBlipNum]);
     gScaleList.reset(new int32_t[kScaleListNum]);
-    gSectorLineData.reset(new int32_t[kMaxSectorLine * 4]);
     ResetInstruments();
 
     // Initialize and crop left and right instrument picts.
@@ -195,7 +205,7 @@ void InstrumentInit() {
 }
 
 void InstrumentCleanup() {
-    gRadarBlipData.reset();
+    g.radar_blips.reset();
     MiniScreenCleanup();
 }
 
@@ -203,11 +213,9 @@ void ResetInstruments() {
     int32_t         *l, i;
     Point           *lp;
 
-    globals()->gRadarCount = 0;
-    globals()->gRadarSpeed = 30;
-    globals()->gRadarRange = kRadarSize * 50;
-    globals()->gLastScale = gAbsoluteScale = SCALE_SCALE;
-    globals()->gWhichScaleNum = 0;
+    g.radar_count = 0;
+    gLastScale = gAbsoluteScale = SCALE_SCALE;
+    gWhichScaleNum = 0;
     gLastGlobalCorner.h = gLastGlobalCorner.v = 0;
     l = gScaleList.get();
     for (i = 0; i < kScaleListNum; i++) {
@@ -217,52 +225,40 @@ void ResetInstruments() {
 
     for ( i = 0; i < kBarIndicatorNum; i++)
     {
-        globals()->gBarIndicator[i].thisValue = -1;
+        gBarIndicator[i].thisValue = -1;
     }
     // the shield bar
-    globals()->gBarIndicator[kShieldBar].top = 359 + globals()->gInstrumentTop;
-    globals()->gBarIndicator[kShieldBar].color = SKY_BLUE;
+    gBarIndicator[kShieldBar].top = 359 + globals()->gInstrumentTop;
+    gBarIndicator[kShieldBar].color = SKY_BLUE;
 
-    globals()->gBarIndicator[kEnergyBar].top = 231 + globals()->gInstrumentTop;
-    globals()->gBarIndicator[kEnergyBar].color = GOLD;
+    gBarIndicator[kEnergyBar].top = 231 + globals()->gInstrumentTop;
+    gBarIndicator[kEnergyBar].color = GOLD;
 
-    globals()->gBarIndicator[kBatteryBar].top = 103 + globals()->gInstrumentTop;
-    globals()->gBarIndicator[kBatteryBar].color = SALMON;
+    gBarIndicator[kBatteryBar].top = 103 + globals()->gInstrumentTop;
+    gBarIndicator[kBatteryBar].color = SALMON;
 
-    lp = gRadarBlipData.get();
+    lp = g.radar_blips.get();
     for ( i = 0; i < kRadarBlipNum; i++)
     {
         lp->h = -1;
         lp++;
     }
 
-    l = gSectorLineData.get();
-    for (int count: range(kMaxSectorLine)) {
-        static_cast<void>(count);
-        *l = -1;
-        l++;
-        *l = -1;
-        l++;
-        *l = -1;
-        l++;
-        *l = -1;
-        l++;
-    }
 }
 
 void UpdateRadar(int32_t unitsDone) {
     if (!g.ship.get()) {
-        globals()->radar_is_functioning = false;
+        g.radar_on = false;
     } else if (g.ship->offlineTime <= 0) {
-        globals()->radar_is_functioning = true;
+        g.radar_on = true;
     } else {
-        globals()->radar_is_functioning = (Randomize(g.ship->offlineTime) < 5);
+        g.radar_on = (Randomize(g.ship->offlineTime) < 5);
     }
 
     if (unitsDone < 0) {
         unitsDone = 0;
     }
-    globals()->gRadarCount -= unitsDone;
+    g.radar_count -= unitsDone;
 
     if (!g.ship.get() || !g.ship->active) {
         return;
@@ -272,28 +268,28 @@ void UpdateRadar(int32_t unitsDone) {
     bounds.offset(0, globals()->gInstrumentTop);
     bounds.inset(1, 1);
 
-    if (globals()->radar_is_functioning) {
-        if (globals()->gRadarCount <= 0) {
+    if (g.radar_on) {
+        if (g.radar_count <= 0) {
             Rect radar = bounds;
             radar.inset(1, 1);
 
             int32_t dx = g.ship->location.h - gGlobalCorner.h;
-            dx = dx * kRadarSize / globals()->gRadarRange;
+            dx = dx / kRadarScale;
             view_range = Rect(-dx, -dx, dx, dx);
             view_range.center_in(bounds);
             view_range.offset(1, 1);
             view_range.clip_to(radar);
 
             for (int i = 0; i < kRadarBlipNum; ++i) {
-                Point* lp = gRadarBlipData.get() + i;
+                Point* lp = g.radar_blips.get() + i;
                 lp->h = -1;
             }
 
-            Point* lp = gRadarBlipData.get();
+            Point* lp = g.radar_blips.get();
             Point* end = lp + kRadarBlipNum;
-            globals()->gRadarCount = globals()->gRadarSpeed;
+            g.radar_count = kRadarSpeed;
 
-            const int32_t rrange = globals()->gRadarRange >> 1L;
+            const int32_t rrange = kRadarRange >> 1L;
             for (auto anObject: SpaceObject::all()) {
                 if (!anObject->active || (anObject == g.ship)) {
                     continue;
@@ -303,8 +299,8 @@ void UpdateRadar(int32_t unitsDone) {
                 if ((x < -rrange) || (x >= rrange) || (y < -rrange) || (y >= rrange)) {
                     continue;
                 }
-                Point p(x * kRadarSize / globals()->gRadarRange,
-                        y * kRadarSize / globals()->gRadarRange);
+                Point p(x * kRadarSize / kRadarRange,
+                        y * kRadarSize / kRadarRange);
                 p.offset(kRadarCenter + kRadarLeft,
                         kRadarCenter + kRadarTop + globals()->gInstrumentTop);
                 if (!radar.contains(p)) {
@@ -324,7 +320,7 @@ void UpdateRadar(int32_t unitsDone) {
       case kNearestFoeZoom:
       case kNearestAnythingZoom:
         {
-            auto anObject = globals()->gClosestObject;
+            auto anObject = g.closest;
             uint64_t hugeDistance = anObject->distanceFromPlayer;
             if (hugeDistance == 0) { // if this is true, then we haven't calced its distance
                 uint64_t x_distance = ABS<int32_t>(g.ship->location.h - anObject->location.h);
@@ -362,7 +358,7 @@ void UpdateRadar(int32_t unitsDone) {
 
       case kSmallestZoom:
         {
-            auto anObject = globals()->gFarthestObject;
+            auto anObject = g.farthest;
             uint64_t tempWide = anObject->distanceFromPlayer;
             bestScale = wsqrt(tempWide);
             if (bestScale == 0) bestScale = 1;
@@ -375,11 +371,11 @@ void UpdateRadar(int32_t unitsDone) {
 
     int32_t* scaleval;
     for (int x = 0; x < unitsDone; x++) {
-        scaleval = gScaleList.get() + globals()->gWhichScaleNum;
+        scaleval = gScaleList.get() + gWhichScaleNum;
         *scaleval = bestScale;
-        globals()->gWhichScaleNum++;
-        if (globals()->gWhichScaleNum == kScaleListNum) {
-            globals()->gWhichScaleNum = 0;
+        gWhichScaleNum++;
+        if (gWhichScaleNum == kScaleListNum) {
+            gWhichScaleNum = 0;
         }
     }
 
@@ -401,7 +397,7 @@ void draw_radar() {
     const RgbColor very_light = GetRGBTranslateColorShade(kRadarColor, VERY_LIGHT);
     const RgbColor darkest = GetRGBTranslateColorShade(kRadarColor, DARKEST);
     const RgbColor very_dark = GetRGBTranslateColorShade(kRadarColor, VERY_DARK);
-    if (globals()->radar_is_functioning) {
+    if (g.radar_on) {
         Rect radar = bounds;
         {
             Rects rects;
@@ -414,15 +410,15 @@ void draw_radar() {
         }
 
         RgbColor color;
-        if (globals()->gRadarCount <= 0) {
+        if (g.radar_count <= 0) {
             color = very_dark;
         } else {
-            color = GetRGBTranslateColorShade(kRadarColor, ((kRadarColorSteps * globals()->gRadarCount) / globals()->gRadarSpeed) + 1);
+            color = GetRGBTranslateColorShade(kRadarColor, ((kRadarColorSteps * g.radar_count) / kRadarSpeed) + 1);
         }
 
         Points points;
         for (int rcount = 0; rcount < kRadarBlipNum; rcount++) {
-            Point* lp = gRadarBlipData.get() + rcount;
+            Point* lp = g.radar_blips.get() + rcount;
             if (lp->h >= 0) {
                 points.draw(*lp, color);
             }
@@ -436,7 +432,7 @@ void draw_radar() {
 static void draw_money() {
     auto& admiral = g.admiral;
     const int cash = clamp(admiral->cash(), 0, kMaxMoneyValue - 1);
-    globals()->gBarIndicator[kFineMoneyBar].thisValue
+    gBarIndicator[kFineMoneyBar].thisValue
         = (cash % kFineMoneyBarMod) / kFineMoneyBarValue;
     const int price = MiniComputerGetPriceOfCurrentSelection() / kFineMoneyBarValue;
 
@@ -461,20 +457,20 @@ static void draw_money() {
     // Third section: money we don't have and don't need for the current selection.
     RgbColor third_color = GetRGBTranslateColorShade(kFineMoneyColor, VERY_DARK);
 
-    if (globals()->gBarIndicator[kFineMoneyBar].thisValue < price) {
+    if (gBarIndicator[kFineMoneyBar].thisValue < price) {
         first_color_major = GetRGBTranslateColorShade(kFineMoneyColor, VERY_LIGHT);
         first_color_minor = GetRGBTranslateColorShade(kFineMoneyColor, LIGHT);
         second_color_major = GetRGBTranslateColorShade(kFineMoneyNeedColor, MEDIUM);
         second_color_minor = GetRGBTranslateColorShade(kFineMoneyNeedColor, DARK);
-        first_threshold = globals()->gBarIndicator[kFineMoneyBar].thisValue;
+        first_threshold = gBarIndicator[kFineMoneyBar].thisValue;
         second_threshold = price;
     } else {
         first_color_major = GetRGBTranslateColorShade(kFineMoneyColor, VERY_LIGHT);
         first_color_minor = GetRGBTranslateColorShade(kFineMoneyColor, LIGHT);
         second_color_major = GetRGBTranslateColorShade(kFineMoneyUseColor, VERY_LIGHT);
         second_color_minor = GetRGBTranslateColorShade(kFineMoneyUseColor, LIGHT);
-        first_threshold = globals()->gBarIndicator[kFineMoneyBar].thisValue - price;
-        second_threshold = globals()->gBarIndicator[kFineMoneyBar].thisValue;
+        first_threshold = gBarIndicator[kFineMoneyBar].thisValue - price;
+        second_threshold = gBarIndicator[kFineMoneyBar].thisValue;
     }
 
     Rects rects;
@@ -496,9 +492,9 @@ static void draw_money() {
         }
         box.offset(0, kFineMoneyBarHeight);
     }
-    globals()->gBarIndicator[kFineMoneyBar].thisValue = second_threshold;
+    gBarIndicator[kFineMoneyBar].thisValue = second_threshold;
 
-    barIndicatorType* gross = globals()->gBarIndicator + kGrossMoneyBar;
+    barIndicatorType* gross = gBarIndicator + kGrossMoneyBar;
     gross->thisValue = (admiral->cash() / kGrossMoneyBarValue);
 
     box = Rect(0, 0, kGrossMoneyBarWidth, kGrossMoneyBarHeight - 1);
@@ -654,17 +650,17 @@ void update_sector_lines() {
         }
     }
 
-    if ((globals()->gLastScale < kBlipThreshhold) != (gAbsoluteScale < kBlipThreshhold)) {
+    if ((gLastScale < kBlipThreshhold) != (gAbsoluteScale < kBlipThreshhold)) {
         PlayVolumeSound(kComputerBeep4, kMediumVolume, kMediumPersistence, kLowPrioritySound);
     }
 
-    globals()->gLastScale = gAbsoluteScale;
+    gLastScale = gAbsoluteScale;
     gLastGlobalCorner = gGlobalCorner;
 }
 
 void draw_sector_lines() {
     Rects rects;
-    int32_t         *l, x;
+    int32_t         x;
     uint32_t        size, level, h, division;
     RgbColor        color;
 
@@ -673,16 +669,15 @@ void draw_sector_lines() {
     do {
         level *= 2;
         size *= 4;
-        h = (size * globals()->gLastScale) >> SHIFT_SCALE;
+        h = (size * gLastScale) >> SHIFT_SCALE;
     } while (h < kMinGraphicSectorSize);
     level /= 2;
     level *= level;
 
     x = size - (gLastGlobalCorner.h & (size - 1));
     division = ((gLastGlobalCorner.h + x) >> kSubSectorShift) & 0x0000000f;
-    x = ((x * globals()->gLastScale) >> SHIFT_SCALE) + viewport.left;
+    x = ((x * gLastScale) >> SHIFT_SCALE) + viewport.left;
 
-    l = gSectorLineData.get();
     if (should_draw_sector_lines) {
         while ((x < implicit_cast<uint32_t>(viewport.right)) && (h > 0)) {
             RgbColor color;
@@ -696,8 +691,6 @@ void draw_sector_lines() {
 
             // TODO(sfiera): +1 on bottom no longer needed.
             rects.fill({x, viewport.top, x + 1, viewport.bottom + 1}, color);
-            *l = x;
-            l += 2;
             division += level;
             division &= 0x0000000f;
             x += h;
@@ -706,9 +699,8 @@ void draw_sector_lines() {
 
     x = size - (gLastGlobalCorner.v & (size - 1));
     division = ((gLastGlobalCorner.v + x) >> kSubSectorShift) & 0x0000000f;
-    x = ((x * globals()->gLastScale) >> SHIFT_SCALE) + viewport.top;
+    x = ((x * gLastScale) >> SHIFT_SCALE) + viewport.top;
 
-    l = gSectorLineData.get() + (kMaxSectorLine * 2);
     if (should_draw_sector_lines) {
         while ((x < implicit_cast<uint32_t>(viewport.bottom)) && (h > 0)) {
             RgbColor color;
@@ -722,8 +714,6 @@ void draw_sector_lines() {
 
             // TODO(sfiera): +1 on right no longer needed.
             rects.fill({viewport.left, x, viewport.right + 1, x + 1}, color);
-            *l = x;
-            l += 2;
 
             division += level;
             division &= 0x0000000f;
@@ -941,11 +931,11 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
     RgbColor        color, lightColor, darkColor;
     Rect            rrect;
 
-    int8_t hue = globals()->gBarIndicator[which].color;
+    int8_t hue = gBarIndicator[which].color;
     Rect bar(0, 0, kBarIndicatorWidth, kBarIndicatorHeight);
     bar.offset(
             kBarIndicatorLeft + play_screen.right,
-            globals()->gBarIndicator[which].top);
+            gBarIndicator[which].top);
     if (graphicValue < kBarIndicatorHeight) {
         Rect top_bar = bar;
         top_bar.bottom = top_bar.bottom - graphicValue;
@@ -964,7 +954,7 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
         draw_shaded_rect(rects, bottom_bar, fill_color, light_color, dark_color);
     }
 
-    globals()->gBarIndicator[which].thisValue = value;
+    gBarIndicator[which].thisValue = value;
 }
 
 void draw_build_time_bar(int32_t value) {

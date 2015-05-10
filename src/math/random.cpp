@@ -20,16 +20,11 @@
 
 #include "config/preferences.hpp"
 #include "game/globals.hpp"
+#include "lang/defines.hpp"
 
 namespace antares {
 
-namespace {
-
-Random global_seed = {static_cast<int32_t>(0x84744901)};
-
-}  // namespace
-
-Random gRandomSeed = {14586};
+static ANTARES_GLOBAL Random global_seed = {static_cast<int32_t>(0x84744901)};
 
 static int32_t Random() {
     return global_seed.next(0x8000);

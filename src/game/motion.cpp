@@ -30,6 +30,7 @@
 #include "game/non-player-ship.hpp"
 #include "game/player-ship.hpp"
 #include "game/space-object.hpp"
+#include "lang/defines.hpp"
 #include "math/macros.hpp"
 #include "math/random.hpp"
 #include "math/rotation.hpp"
@@ -65,7 +66,7 @@ const int32_t kConsiderDistanceAttributes = (
 const uint32_t kThinkiverseTopLeft       = (kUniversalCenter - (2 * 65534)); // universe for thinking or owned objects
 const uint32_t kThinkiverseBottomRight   = (kUniversalCenter + (2 * 65534));
 
-static Point            cAdjacentUnits[] = {
+static ANTARES_GLOBAL Point            cAdjacentUnits[] = {
     Point(0, 0),
     Point(1, 0),
     Point(-1, 1),
@@ -73,8 +74,8 @@ static Point            cAdjacentUnits[] = {
     Point(1, 1)
 };
 
-coordPointType          gGlobalCorner;
-static unique_ptr<proximityUnitType[]> gProximityGrid;
+ANTARES_GLOBAL coordPointType          gGlobalCorner;
+static ANTARES_GLOBAL unique_ptr<proximityUnitType[]> gProximityGrid;
 
 // for the macro mRanged, time is assumed to be a int32_t game ticks, velocity a fixed, result int32_t, scratch fixed
 inline void mRange(int32_t& result, int32_t time, Fixed velocity, Fixed& scratch) {
@@ -148,8 +149,8 @@ void ResetMotionGlobals( void)
     int32_t                i;
 
     gGlobalCorner.h = gGlobalCorner.v = 0;
-    globals()->gClosestObject = Handle<SpaceObject>(0);
-    globals()->gFarthestObject = Handle<SpaceObject>(0);
+    g.closest = Handle<SpaceObject>(0);
+    g.farthest = Handle<SpaceObject>(0);
 
     proximityObject = gProximityGrid.get();
     for ( i = 0; i < kProximityGridDataLength; i++)
@@ -175,7 +176,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
 
     for ( jl = 0; jl < unitsToDo; jl++)
     {
-        anObject = gRootObject;
+        anObject = g.root;
         while (anObject.get()) {
             if ( anObject->active == kObjectInUse)
             {
@@ -467,9 +468,6 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                                     anObject->active = kObjectToBeFreed;
                                 }
                             }
-                        } else
-                        {
-    //                      anObject->frame.beam->endLocation
                         }
                     } else {
                         throw Exception( "Unexpected error: a beam appears to be missing.");
@@ -486,7 +484,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
 // !!!!!!!!
     shortDist = thisDist = static_cast<uint32_t>(kMaximumRelevantDistanceSquared) * 2;
     longDist = 0;
-    anObject = gRootObject;
+    anObject = g.root;
 
     while (anObject.get()) {
         if ( anObject->active == kObjectInUse)
@@ -586,8 +584,8 @@ void CollideSpaceObjects() {
     uint64_t farthestDist = 0;
     uint64_t closestDist = 0x7fffffffffffffffull;
     auto player = g.ship;
-    globals()->gClosestObject = Handle<SpaceObject>(0);
-    globals()->gFarthestObject = Handle<SpaceObject>(0);
+    g.closest = Handle<SpaceObject>(0);
+    g.farthest = Handle<SpaceObject>(0);
 
     // reset the collision grid
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
@@ -595,7 +593,7 @@ void CollideSpaceObjects() {
         proximityObject->nearObject = proximityObject->farObject = SpaceObject::none();
     }
 
-    for (auto aObject = gRootObject; aObject.get(); aObject = aObject->nextObject) {
+    for (auto aObject = g.root; aObject.get(); aObject = aObject->nextObject) {
         if (!aObject->active) {
             if (player.get() && player->active) {
                 aObject->distanceFromPlayer = 0x7fffffffffffffffull;
@@ -652,12 +650,12 @@ void CollideSpaceObjects() {
                             && ((globals()->gZoomMode != kNearestFoeZoom)
                                 || (aObject->owner != player->owner))) {
                         closestDist = hugeDistance;
-                        globals()->gClosestObject = aObject;
+                        g.closest = aObject;
                     }
                 }
                 if (hugeDistance > farthestDist) {
                     farthestDist = hugeDistance;
-                    globals()->gFarthestObject = aObject;
+                    g.farthest = aObject;
                 }
             }
         }

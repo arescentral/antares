@@ -201,9 +201,9 @@ void NonplayerShipThink(int32_t timePass)
     int16_t         h;
     Fixed           fcos, fsin;
     RgbColor        friendSick, foeSick, neutralSick;
-    uint32_t        sickCount = usecs_to_ticks(globals()->gGameTime) / 9;
+    uint32_t        sickCount = usecs_to_ticks(g.time) / 9;
 
-    globals()->gSynchValue = gRandomSeed.seed;
+    g.sync = g.random.seed;
     sickCount &= 0x00000003;
     if (sickCount == 0) {
         friendSick = GetRGBTranslateColorShade(kFriendlyColor, MEDIUM);
@@ -231,13 +231,13 @@ void NonplayerShipThink(int32_t timePass)
 
     // it probably doesn't matter what order we do this in, but we'll do
     // it in the "ideal" order anyway
-    for (auto anObject = gRootObject; anObject.get(); anObject = anObject->nextObject) {
+    for (auto anObject = g.root; anObject.get(); anObject = anObject->nextObject) {
         if (!anObject->active) {
             continue;
         }
 
-        globals()->gSynchValue += anObject->location.h;
-        globals()->gSynchValue += anObject->location.v;
+        g.sync += anObject->location.h;
+        g.sync += anObject->location.v;
 
         keysDown = anObject->keysDown & kSpecialKeyMask;
 
@@ -1741,12 +1741,12 @@ Handle<SpaceObject> GetManualSelectObject(
     if (whichShip.get()) {
         anObject = startShip;
         if (anObject->active != kObjectInUse) { // if it's not in the loop
-            anObject = gRootObject;
-            startShip = whichShip = gRootObject;
+            anObject = g.root;
+            startShip = whichShip = g.root;
         }
     } else {
-        anObject = gRootObject;
-        startShip = whichShip = gRootObject;
+        anObject = g.root;
+        startShip = whichShip = g.root;
     }
 
     Handle<SpaceObject> nextShipOut, closestShip;
@@ -1809,7 +1809,7 @@ Handle<SpaceObject> GetManualSelectObject(
         }
         whichShip = anObject = anObject->nextObject;
         if (!anObject.get()) {
-            whichShip = anObject = gRootObject;
+            whichShip = anObject = g.root;
         }
     } while (whichShip != startShip);
 

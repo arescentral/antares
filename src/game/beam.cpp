@@ -68,18 +68,16 @@ int32_t scale(int32_t value, int32_t scale) {
 
 }  // namespace
 
-std::unique_ptr<beamType[]> Beams::_data;
-
 beamType::beamType():
         killMe(false),
         active(false) { }
 
 void Beams::init() {
-    _data.reset(new beamType[kBeamNum]);
+    g.beams.reset(new beamType[kBeamNum]);
 }
 
 void Beams::reset() {
-    beamType* const beams = _data.get();
+    beamType* const beams = g.beams.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         clear(*beam);
     }
@@ -88,7 +86,7 @@ void Beams::reset() {
 beamType* Beams::add(
         coordPointType* location, uint8_t color, beamKindType kind, int32_t accuracy,
         int32_t beam_range) {
-    beamType* const beams = _data.get();
+    beamType* const beams = g.beams.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (!beam->active) {
             beam->lastGlobalLocation = *location;
@@ -103,17 +101,14 @@ beamType* Beams::add(
             beam->thisLocation = Rect(0, 0, 0, 0);
             beam->thisLocation.offset(h + viewport.left, v + viewport.top);
 
-            beam->lastLocation = beam->thisLocation;
-
             beam->beamKind = kind;
             beam->accuracy = accuracy;
             beam->range = beam_range;
-            beam->fromObjectNumber = beam->fromObjectID = -1;
+            beam->fromObjectID = -1;
             beam->fromObject = SpaceObject::none();
-            beam->toObjectNumber = beam->toObjectID = -1;
+            beam->toObjectID = -1;
             beam->toObject = SpaceObject::none();
             beam->toRelativeCoord = Point(0, 0);
-            beam->boltRandomSeed = 0;
             beam->boltCycleTime = 0;
             beam->boltState = 0;
 
@@ -126,7 +121,6 @@ beamType* Beams::add(
 
 void Beams::set_attributes(Handle<SpaceObject> beamObject, Handle<SpaceObject> sourceObject) {
     beamType& beam = *beamObject->frame.beam;
-    beam.fromObjectNumber = sourceObject->number();
     beam.fromObjectID = sourceObject->id;
     beam.fromObject = sourceObject;
 
@@ -158,7 +152,6 @@ void Beams::set_attributes(Handle<SpaceObject> beamObject, Handle<SpaceObject> s
                         - beam.accuracy
                         + beamObject->randomSeed.next(beam.accuracy << 1);
                 } else {
-                    beam.toObjectNumber = target->number();
                     beam.toObjectID = target->id;
                     beam.toObject = target;
                 }
@@ -182,7 +175,7 @@ void Beams::set_attributes(Handle<SpaceObject> beamObject, Handle<SpaceObject> s
 }
 
 void Beams::update() {
-    beamType* const beams = _data.get();
+    beamType* const beams = g.beams.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
             if (beam->lastApparentLocation != beam->objectLocation) {
@@ -241,7 +234,7 @@ void Beams::update() {
 
 void Beams::draw() {
     Lines lines;
-    beamType* const beams = _data.get();
+    beamType* const beams = g.beams.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
             if (!beam->killMe) {
@@ -266,7 +259,7 @@ void Beams::draw() {
 }
 
 void Beams::show_all() {
-    beamType* const beams = _data.get();
+    beamType* const beams = g.beams.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
             if (beam->killMe) {
@@ -280,19 +273,17 @@ void Beams::show_all() {
                     }
                 }
             }
-            beam->lastLocation = beam->thisLocation;
         }
     }
 }
 
 void Beams::cull() {
-    beamType* const beams = _data.get();
+    beamType* const beams = g.beams.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
                 if (beam->killMe) {
                     beam->active = false;
                 }
-                beam->lastLocation = beam->thisLocation;
         }
     }
 }

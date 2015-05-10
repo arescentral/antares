@@ -26,6 +26,7 @@
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/sprite-handling.hpp"
+#include "lang/defines.hpp"
 #include "game/action.hpp"
 #include "game/admiral.hpp"
 #include "game/beam.hpp"
@@ -63,17 +64,16 @@ const uint8_t kNeutralColor         = SKY_BLUE;
 
 static const int16_t kSpaceObjectNameResID          = 5000;
 static const int16_t kSpaceObjectShortNameResID     = 5001;
-static StringList* space_object_names;
-static StringList* space_object_short_names;
+static ANTARES_GLOBAL StringList* space_object_names;
+static ANTARES_GLOBAL StringList* space_object_short_names;
 
-Handle<SpaceObject> gRootObject;
-
-static unique_ptr<SpaceObject[]> gSpaceObjectData;
-static unique_ptr<BaseObject[]> gBaseObjectData;
-static unique_ptr<Action[]> gObjectActionData;
+int ANTARES_GLOBAL BaseObject::size = 0;
+int ANTARES_GLOBAL Action::size = 0;
+static ANTARES_GLOBAL unique_ptr<BaseObject[]> gBaseObjectData;
+static ANTARES_GLOBAL unique_ptr<Action[]> gObjectActionData;
 
 #ifdef DATA_COVERAGE
-set<int32_t> covered_objects;
+ANTARES_GLOBAL set<int32_t> covered_objects;
 #endif  // DATA_COVERAGE
 
 void SpaceObjectHandlingInit() {
@@ -81,7 +81,7 @@ void SpaceObjectHandlingInit() {
         Resource rsrc("object-actions", "obac", kObjectActionResID);
         BytesSlice in(rsrc.data());
         size_t count = rsrc.data().size() / Action::byte_size;
-        globals()->maxObjectAction = count;
+        Action::size = count;
         gObjectActionData.reset(new Action[count]);
         for (size_t i = 0; i < count; ++i) {
             read(in, gObjectActionData[i]);
@@ -91,12 +91,12 @@ void SpaceObjectHandlingInit() {
         }
     }
 
-    gSpaceObjectData.reset(new SpaceObject[kMaxSpaceObject]);
+    g.objects.reset(new SpaceObject[kMaxSpaceObject]);
     {
         Resource rsrc("objects", "bsob", kBaseObjectResID);
         BytesSlice in(rsrc.data());
         size_t count = rsrc.data().size() / BaseObject::byte_size;
-        globals()->maxBaseObject = count;
+        BaseObject::size = count;
         gBaseObjectData.reset(new BaseObject[count]);
         for (size_t i = 0; i < count; ++i) {
             read(in, gBaseObjectData[i]);
@@ -115,7 +115,7 @@ void SpaceObjectHandlingInit() {
 }
 
 void ResetAllSpaceObjects() {
-    gRootObject = SpaceObject::none();
+    g.root = SpaceObject::none();
     for (auto anObject: SpaceObject::all()) {
         anObject->active = kObjectAvailable;
         anObject->sprite = NULL;
@@ -123,7 +123,7 @@ void ResetAllSpaceObjects() {
 }
 
 BaseObject* BaseObject::get(int number) {
-    if ((0 <= number) && (number < globals()->maxBaseObject)) {
+    if ((0 <= number) && (number < size)) {
         return &gBaseObjectData[number];
     }
     return nullptr;
@@ -131,13 +131,13 @@ BaseObject* BaseObject::get(int number) {
 
 SpaceObject* SpaceObject::get(int32_t number) {
     if ((0 <= number) && (number < kMaxSpaceObject)) {
-        return gSpaceObjectData.get() + number;
+        return &g.objects[number];
     }
     return nullptr;
 }
 
 Action* Action::get(int32_t number) {
-    if ((0 <= number) && (number < globals()->maxObjectAction)) {
+    if ((0 <= number) && (number < size)) {
         return &gObjectActionData[number];
     }
     return nullptr;
@@ -236,7 +236,8 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
         obj->tinyColor = tinyColor;
 
         if (obj->sprite == NULL) {
-            globals()->gGameOver = -1;
+            g.game_over = true;
+            g.game_over_at = g.time;
             obj->active = kObjectAvailable;
             return SpaceObject::none();
         }
@@ -248,12 +249,12 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
                 &(obj->location), beam.color, beam.kind, beam.accuracy, beam.range);
     }
 
-    obj->nextObject = gRootObject;
+    obj->nextObject = g.root;
     obj->previousObject = SpaceObject::none();
-    if (gRootObject.get()) {
-        gRootObject->previousObject = obj;
+    if (g.root.get()) {
+        g.root->previousObject = obj;
     }
-    gRootObject = obj;
+    g.root = obj;
 
     return obj;
 }
@@ -595,8 +596,8 @@ Handle<SpaceObject> CreateAnySpaceObject(
         Handle<BaseObject> whichBase, fixedPointType *velocity, coordPointType *location,
         int32_t direction, Handle<Admiral> owner, uint32_t specialAttributes,
         int16_t spriteIDOverride) {
-    Random random{gRandomSeed.next(32766)};
-    int32_t id = gRandomSeed.next(16384);
+    Random random{g.random.next(32766)};
+    int32_t id = g.random.next(16384);
     SpaceObject newObject(
             whichBase, random, id, *location, direction, velocity, owner, spriteIDOverride);
 
@@ -905,8 +906,8 @@ void SpaceObject::free() {
         auto bObject = nextObject;
         bObject->previousObject = previousObject;
     }
-    if (gRootObject.get() == this) {
-        gRootObject = nextObject;
+    if (g.root.get() == this) {
+        g.root = nextObject;
     }
     nextObject = SpaceObject::none();
     previousObject = SpaceObject::none();
@@ -947,7 +948,7 @@ StringSlice get_object_short_name(Handle<BaseObject> id) {
 }
 
 int32_t SpaceObject::number() const {
-    return this - gSpaceObjectData.get();
+    return this - g.objects.get();
 }
 
 }  // namespace antares

@@ -264,7 +264,7 @@ class BaseObject {
   public:
     static BaseObject* get(int number);
     static Handle<BaseObject> none() { return Handle<BaseObject>(-1); }
-    static HandleList<BaseObject> all() { return HandleList<BaseObject>(0, globals()->maxBaseObject); }
+    static HandleList<BaseObject> all() { return HandleList<BaseObject>(0, size); }
 
     uint32_t                attributes;                 // initial attributes (see flags)
     int32_t                 baseClass;
@@ -351,6 +351,10 @@ class BaseObject {
     uint32_t            internalFlags;
 
     static const int byte_size = 318;
+
+  private:
+    friend void SpaceObjectHandlingInit();
+    static int size;
 };
 void read_from(sfz::ReadSource in, BaseObject& object);
 

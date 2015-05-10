@@ -26,6 +26,7 @@
 #include "game/messages.hpp"
 #include "game/player-ship.hpp"
 #include "game/space-object.hpp"
+#include "lang/defines.hpp"
 #include "math/fixed.hpp"
 
 using sfz::BytesSlice;
@@ -33,6 +34,7 @@ using sfz::PrintItem;
 using sfz::Rune;
 using sfz::String;
 using sfz::StringSlice;
+using std::unique_ptr;
 
 namespace antares {
 
@@ -51,15 +53,17 @@ const int16_t kBuildFastCheat       = 6;
 const int16_t kRaisePayRateCheat    = 7;  // determines your payscale
 const int16_t kLowerPayRateCheat    = 8;
 
+static ANTARES_GLOBAL unique_ptr<StringList> gAresCheatStrings;
+
 void CheatFeedback(int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer);
 void CheatFeedbackPlus(int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer, PrintItem extra);
 
 void AresCheatInit() {
-    globals()->gAresCheatStrings.reset(new StringList(kCheatStringListID));
+    gAresCheatStrings.reset(new StringList(kCheatStringListID));
 }
 
 void CleanupAresCheat() {
-    globals()->gAresCheatStrings.reset();
+    gAresCheatStrings.reset();
 }
 
 int16_t GetCheatNumFromString(const StringSlice& s) {
@@ -67,7 +71,7 @@ int16_t GetCheatNumFromString(const StringSlice& s) {
     for (Rune r: s) {
         code_string.append(1, r + kCheatCodeValue);
     }
-    return globals()->gAresCheatStrings.get()->index_of(code_string) + 1;
+    return gAresCheatStrings.get()->index_of(code_string) + 1;
 }
 
 void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {

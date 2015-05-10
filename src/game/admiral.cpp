@@ -54,15 +54,12 @@ const Fixed kImportantTarget            = 0x00000140;
 const Fixed kSomewhatImportantTarget    = 0x00000120;
 const Fixed kAbsolutelyEssential        = 0x00008000;
 
-unique_ptr<Destination[]> gDestBalanceData;
-unique_ptr<Admiral[]> gAdmiralData;
-
 }  // namespace
 
 void Admiral::init() {
-    gAdmiralData.reset(new Admiral[kMaxPlayerNum]);
+    g.admirals.reset(new Admiral[kMaxPlayerNum]);
     reset();
-    gDestBalanceData.reset(new Destination[kMaxDestObject]);
+    g.destinations.reset(new Destination[kMaxDestObject]);
     ResetAllDestObjectData();
 }
 
@@ -89,7 +86,7 @@ void ResetAllDestObjectData() {
 
 Destination* Destination::get(int i) {
     if ((0 <= i) && (i < kMaxDestObject)) {
-        return &gDestBalanceData[i];
+        return &g.destinations[i];
     }
     return nullptr;
 }
@@ -105,7 +102,7 @@ bool Destination::can_build() const {
 
 Admiral* Admiral::get(int i) {
     if ((0 <= i) && (i < kMaxPlayerNum)) {
-        return &gAdmiralData[i];
+        return &g.admirals[i];
     }
     return nullptr;
 }
@@ -633,7 +630,7 @@ void Admiral::think() {
         _blitzkrieg--;
         if (_blitzkrieg <= 0) {
             // Really 48:
-            _blitzkrieg = 0 - (gRandomSeed.next(1200) + 1200);
+            _blitzkrieg = 0 - (g.random.next(1200) + 1200);
             for (auto anObject: SpaceObject::all()) {
                 if (anObject->owner.get() == this) {
                     anObject->currentTargetValue = 0x00000000;
@@ -644,7 +641,7 @@ void Admiral::think() {
         _blitzkrieg++;
         if (_blitzkrieg >= 0) {
             // Really 48:
-            _blitzkrieg = gRandomSeed.next(1200) + 1200;
+            _blitzkrieg = g.random.next(1200) + 1200;
             for (auto anObject: SpaceObject::all()) {
                 if (anObject->owner.get() == this) {
                     anObject->currentTargetValue = 0x00000000;
@@ -655,25 +652,25 @@ void Admiral::think() {
 
     // get the current object
     if (!_considerShip.get()) {
-        _considerShip = anObject = gRootObject;
+        _considerShip = anObject = g.root;
         _considerShipID = anObject->id;
     } else {
         anObject = _considerShip;
     }
 
     if (!_destinationObject.get()) {
-        _destinationObject = gRootObject;
+        _destinationObject = g.root;
     }
 
     if (anObject->active != kObjectInUse) {
-        _considerShip = anObject = gRootObject;
+        _considerShip = anObject = g.root;
         _considerShipID = anObject->id;
     }
 
     if (_destinationObject.get()) {
         destObject = _destinationObject;
         if (destObject->active != kObjectInUse) {
-            destObject = _destinationObject = gRootObject;
+            destObject = _destinationObject = g.root;
         }
         auto origDest = _destinationObject;
         do {
@@ -715,21 +712,21 @@ void Admiral::think() {
 
                 anObject->bestConsideredTargetValue = 0xffffffff;
                 // start back with 1st ship
-                _destinationObject = gRootObject;
-                destObject = gRootObject;
+                _destinationObject = g.root;
+                destObject = g.root;
 
                 // >>> INCREASE CONSIDER SHIP
                 origObject = anObject =_considerShip;
                 if (anObject->active != kObjectInUse) {
-                    anObject = gRootObject;
-                    _considerShip = gRootObject;
+                    anObject = g.root;
+                    _considerShip = g.root;
                     _considerShipID = anObject->id;
                 }
                 do {
                     _considerShip = anObject->nextObject;
                     if (!_considerShip.get()) {
-                        _considerShip = gRootObject;
-                        anObject = gRootObject;
+                        _considerShip = g.root;
+                        anObject = g.root;
                         _considerShipID = anObject->id;
                         _lastFreeEscortStrength = _thisFreeEscortStrength;
                         _thisFreeEscortStrength = 0;
@@ -982,7 +979,7 @@ void Admiral::think() {
                     while ((_hopeToBuild < 0) && (k < 7)) {
                         k++;
                         // choose something to build
-                        thisValue = gRandomSeed.next(_totalBuildChance);
+                        thisValue = g.random.next(_totalBuildChance);
                         friendValue = 0xffffffff; // equals the highest qualifying object
                         for (int j = 0; j < kMaxNumAdmiralCanBuild; ++j) {
                             if ((_canBuildType[j].chanceRange <= thisValue)
@@ -1045,7 +1042,6 @@ void Admiral::think() {
 
 bool Admiral::build(int32_t buildWhichType) {
     auto dest = _buildAtObject;
-    Handle<Admiral> self(this - gAdmiralData.get());
     if ((buildWhichType >= 0)
             && (buildWhichType < kMaxTypeBaseCanBuild)
             && (dest.get())

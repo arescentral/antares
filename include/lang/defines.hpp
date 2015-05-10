@@ -16,21 +16,9 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_MATH_RANDOM_HPP_
-#define ANTARES_MATH_RANDOM_HPP_
+#ifndef ANTARES_LANG_DEFINES_HPP_
+#define ANTARES_LANG_DEFINES_HPP_
 
-#include <stdint.h>
+#define ANTARES_GLOBAL
 
-namespace antares {
-
-struct Random {
-    int32_t seed;
-
-    int16_t next(int16_t range);
-};
-
-int Randomize(int range);
-
-}  // namespace antares
-
-#endif // ANTARES_MATH_RANDOM_HPP_
+#endif  // ANTARES_LANG_DEFINES_HPP_

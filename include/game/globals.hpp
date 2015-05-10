@@ -27,6 +27,7 @@
 #include "data/scenario.hpp"
 #include "drawing/color.hpp"
 #include "game/starfield.hpp"
+#include "math/random.hpp"
 #include "sound/fx.hpp"
 #include "video/transitions.hpp"
 
@@ -54,13 +55,6 @@ enum ZoomType {
     kSmallestZoom           = 7,
 };
 
-struct barIndicatorType {
-    int16_t         top;
-    int32_t         thisValue;
-    uint8_t         color;
-    bool         automatic;      // if it's automatic, it is redrawn automatically
-};
-
 struct miniScreenLineType;
 struct miniComputerDataType {
     std::unique_ptr<miniScreenLineType[]> lineData;
@@ -78,21 +72,48 @@ struct hotKeyType {
 };
 
 struct Admiral;
+struct beamType;
 struct Destination;
 struct proximityUnitType;
 struct scrollStarType;
+struct spriteType;
 class InputSource;
 class StringList;
 
-struct ScenarioWinnerType {
-    int8_t next;
-    int16_t text;
-    Handle<Admiral> player;
-};
-
 struct GlobalState {
-    Handle<SpaceObject> ship;
-    Handle<Admiral> admiral;
+    uint32_t  sync;    // Indicates when net games are desynchronized.
+    int64_t   time;    // Current game time.
+    Random    random;  // Global random number generator.
+
+    std::unique_ptr<Admiral[]>  admirals;  // All admirals (whether active or not).
+    Handle<Admiral>             admiral;   // Local player.
+
+    std::unique_ptr<SpaceObject[]>  objects;   // All space objects (whether active or not).
+    Handle<SpaceObject>             ship;      // Local player's flagship.
+    Handle<SpaceObject>             root;      // Head of LL of active objs, in creation time order.
+    Handle<SpaceObject>             closest;   // Nearest object or hostile, depending on zoom.
+    Handle<SpaceObject>             farthest;  // Farthest object (sufficient for zoom-to-all).
+
+    std::unique_ptr<beamType[]>     beams;         // Auxiliary info for kIsBeam objects.
+    std::unique_ptr<Destination[]>  destinations;  // Auxiliary info for kIsDestination objects.
+    std::unique_ptr<spriteType[]>   sprites;       // Auxiliary info for objects with sprites.
+
+    bool             game_over;     // True if an admiral won or lost the level.
+    int64_t          game_over_at;  // The time to stop the game (ignored unless game_over).
+    Handle<Admiral>  victor;        // The winner (or none).
+    int              next_level;    // Next level (or -1 for none).
+    int16_t          victory_text;  // Text resource to show in debriefing.
+
+    int32_t                  radar_count;  // Counts down to a radar pulse every 5/6 seconds.
+    std::unique_ptr<Point[]> radar_blips;  // Screen locations of radar blips.
+    bool                     radar_on;     // Maybe false if player ship is offline.
+
+    std::unique_ptr<Label[]>  labels;
+    Handle<Label>             control_label;  // Local player's current control object.
+    Handle<Label>             target_label;   // Local player's current target object.
+    Handle<Label>             message_label;  // Destroyed, captured, lost messages.
+    Handle<Label>             status_label;   // Autopilot, zoom, low shields messages.
+    Handle<Label>             send_label;     // Message local player is currently entering.
 };
 
 extern GlobalState g;
@@ -101,55 +122,21 @@ struct aresGlobalType {
     aresGlobalType();
     ~aresGlobalType();
 
-    uint32_t        gSynchValue;
     std::unique_ptr<InputSource> gInputSource;
-    int32_t         gGameOver;
-    int64_t         gGameTime;
     uint64_t        gLastTime;
-    Handle<SpaceObject> gClosestObject;
-    Handle<SpaceObject> gFarthestObject;
     int32_t         gCenterScaleH;
     int32_t         gCenterScaleV;
-    Handle<Label>   gSelectionLabel;
     ZoomType        gZoomMode;
-    ZoomType        gPreviousZoomMode;
-    ScenarioWinnerType gScenarioWinner;
 
-    int32_t         gRadarCount;            // = 0;
-    int32_t         gRadarSpeed;            // = 30;
-    int32_t         gRadarRange;            // kRadarSize * 50;
-    bool            radar_is_functioning;
-    int32_t         gWhichScaleNum;         // = 0;
-    int32_t         gLastScale;             // = SCALE_SCALE;
     int32_t         gInstrumentTop;         // = 0;
-    barIndicatorType    gBarIndicator[ kBarIndicatorNum];
     miniComputerDataType    gMiniScreenData;
-    std::unique_ptr<StringList>          gMissionStatusStrList;
     smartSoundHandle    gSound[kSoundNum];
     smartSoundChannel   gChannel[kMaxChannelNum];
-    int32_t         gLastSoundTime;         // = 0
-    std::unique_ptr<StringList>        gAresCheatStrings;
-    std::unique_ptr<StringList>         key_names;
-    std::unique_ptr<StringList>         key_long_names;
-    std::unique_ptr<StringList>         gamepad_names;
-    std::unique_ptr<StringList>         gamepad_long_names;
 
-    KeyMap*         gKeyMapBuffer;          // = NewPtr( sizeof (KeyMap) * (int32_t)kKeyMapBufferNum;
-    int32_t         gKeyMapBufferTop;       // = 0;
-    int32_t         gKeyMapBufferBottom;    // = 0;
-    KeyMap          gLastMessageKeyMap;
-    uint32_t        gSerialNumerator;
-    uint32_t        gSerialDenominator;
     bool         gAutoPilotOff;          // hack for turning off auto in netgame
-    int32_t         levelNum;
     uint32_t        keyMask;
     scenarioInfoType    scenarioFileInfo;   // x-ares; for factory +
                                             // 3rd party files
-    int32_t         maxScenarioBrief;
-    int32_t         maxScenarioCondition;
-    int32_t         maxScenarioInitial;
-    int32_t         maxBaseObject;
-    int32_t         maxObjectAction;
     int32_t         scenarioNum;
 
     hotKeyType      hotKey[kHotKeyNum];

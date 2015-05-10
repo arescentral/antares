@@ -49,6 +49,7 @@
 #include "game/scenario-maker.hpp"
 #include "game/starfield.hpp"
 #include "game/time.hpp"
+#include "lang/defines.hpp"
 #include "math/units.hpp"
 #include "sound/driver.hpp"
 #include "sound/fx.hpp"
@@ -79,9 +80,9 @@ namespace path = sfz::path;
 
 namespace antares {
 
-Rect world;
-Rect play_screen;
-Rect viewport;
+ANTARES_GLOBAL Rect world;
+ANTARES_GLOBAL Rect play_screen;
+ANTARES_GLOBAL Rect viewport;
 
 #ifdef DATA_COVERAGE
 extern set<int32_t> covered_objects;
@@ -162,13 +163,13 @@ void MainPlay::become_front() {
         {
             _state = LOADING;
             RemoveAllSpaceObjects();
-            globals()->gGameOver = 0;
+            g.game_over = false;
 
             _replay_builder.init(
                     Preferences::preferences()->scenario_identifier(),
                     String(u32_to_version(globals()->scenarioFileInfo.version)),
                     _scenario->chapter_number(),
-                    gRandomSeed.seed);
+                    g.random.seed);
 
             if (Preferences::preferences()->play_idle_music()) {
                 LoadSong(3000);
@@ -417,17 +418,17 @@ void GamePlay::become_front() {
         switch (_play_again) {
           case PlayAgainScreen::QUIT:
             *_game_result = QUIT_GAME;
-            globals()->gGameOver = 1;
-            globals()->gScenarioWinner.next = -1;
-            globals()->gScenarioWinner.text = -1;
+            g.game_over = true;
+            g.next_level = -1;
+            g.victory_text = -1;
             stack()->pop(this);
             break;
 
           case PlayAgainScreen::RESTART:
             *_game_result = RESTART_GAME;
-            globals()->gGameOver = 1;
-            globals()->gScenarioWinner.next = -1;
-            globals()->gScenarioWinner.text = -1;
+            g.game_over = true;
+            g.next_level = -1;
+            g.victory_text = -1;
             stack()->pop(this);
             break;
 
@@ -437,10 +438,10 @@ void GamePlay::become_front() {
 
           case PlayAgainScreen::SKIP:
             *_game_result = WIN_GAME;
-            globals()->gGameOver = 1;
-            globals()->gScenarioWinner.player = g.admiral;
-            globals()->gScenarioWinner.next = gThisScenario->chapter_number() + 1;
-            globals()->gScenarioWinner.text = -1;
+            g.game_over = true;
+            g.victor = g.admiral;
+            g.next_level = gThisScenario->chapter_number() + 1;
+            g.victory_text = -1;
             stack()->pop(this);
             break;
 
@@ -508,12 +509,12 @@ void GamePlay::fire_timer() {
     int64_t newGameTime = thisTime + _scenario_start_time;
 
     if ((mNOFFastMotionKey(_key_map)) && !_entering_message) {
-        newGameTime = add_ticks(globals()->gGameTime, 12);
+        newGameTime = add_ticks(g.time, 12);
         thisTime = newGameTime - _scenario_start_time;
         globals()->gLastTime = scrapTime - thisTime;
     }
 
-    int unitsPassed = usecs_to_ticks(newGameTime - globals()->gGameTime);
+    int unitsPassed = usecs_to_ticks(newGameTime - g.time);
     int unitsDone = unitsPassed;
 
     if (unitsPassed <= 0) {
@@ -526,15 +527,9 @@ void GamePlay::fire_timer() {
     if (_player_paused) {
         _player_paused = false;
         unitsDone = unitsPassed = 0;
-        newGameTime = globals()->gGameTime;
+        newGameTime = g.time;
         thisTime = newGameTime - _scenario_start_time;
         globals()->gLastTime = scrapTime - thisTime;
-    }
-
-    if (globals()->gGameOver < 0) {
-        globals()->gGameOver += unitsPassed;
-        if ( globals()->gGameOver == 0)
-            globals()->gGameOver = 1;
     }
 
     while (unitsPassed > 0) {
@@ -553,7 +548,7 @@ void GamePlay::fire_timer() {
             MoveSpaceObjects(unitsToDo);
         }
 
-        globals()->gGameTime = add_ticks(globals()->gGameTime, unitsToDo);
+        g.time = add_ticks(g.time, unitsToDo);
 
         if ( _decide_cycle == kDecideEveryCycles) {
             // everything in here gets executed once every kDecideEveryCycles
@@ -564,7 +559,8 @@ void GamePlay::fire_timer() {
             execute_action_queue( kDecideEveryCycles);
 
             if (globals()->gInputSource && !globals()->gInputSource->next(_player_ship)) {
-                globals()->gGameOver = 1;
+                g.game_over = true;
+                g.game_over_at = g.time;
             }
             _replay_builder.next();
             _player_ship.update(kDecideEveryCycles, _cursor, _entering_message);
@@ -572,17 +568,18 @@ void GamePlay::fire_timer() {
             if (VideoDriver::driver()->button(0)) {
                 if (_replay) {
                     *_game_result = QUIT_GAME;
-                    globals()->gGameOver = 1;
+                    g.game_over = true;
+                    g.game_over_at = g.time;
                 } else {
                     if (!_left_mouse_down) {
                         int64_t double_click_interval
                             = VideoDriver::driver()->double_click_interval_usecs();
-                        if ((globals()->gGameTime - _last_click_time) <= double_click_interval) {
+                        if ((g.time - _last_click_time) <= double_click_interval) {
                             InstrumentsHandleDoubleClick(_cursor);
                             _last_click_time -= double_click_interval;
                         } else {
                             InstrumentsHandleClick(_cursor);
-                            _last_click_time = globals()->gGameTime;
+                            _last_click_time = g.time;
                         }
                         _left_mouse_down = true;
                     } else {
@@ -597,7 +594,8 @@ void GamePlay::fire_timer() {
             if (VideoDriver::driver()->button(1)) {
                 if (_replay) {
                     *_game_result = QUIT_GAME;
-                    globals()->gGameOver = 1;
+                    g.game_over = true;
+                    g.game_over_at = g.time;
                 } else {
                     if (!_right_mouse_down) {
                         PlayerShipHandleClick(VideoDriver::driver()->get_mouse(), 1);
@@ -660,13 +658,13 @@ void GamePlay::fire_timer() {
     UpdateRadar(unitsDone);
     globals()->transitions.update_boolean(unitsDone);
 
-    if (globals()->gGameOver > 0) {
+    if (g.game_over && (g.time >= g.game_over_at)) {
         thisTime = now_usecs();
         thisTime -= globals()->gLastTime;
         *_seconds = thisTime / 1000000; // divide by a million to get seconds
 
         if (*_game_result == NO_GAME) {
-            if (globals()->gScenarioWinner.player == g.admiral) {
+            if (g.victor == g.admiral) {
                 *_game_result = WIN_GAME;
             } else {
                 *_game_result = LOSE_GAME;
@@ -681,24 +679,24 @@ void GamePlay::fire_timer() {
         break;
 
       case WIN_GAME:
-        if (_replay || (globals()->gScenarioWinner.text == -1)) {
+        if (_replay || (g.victory_text >= 0)) {
             stack()->pop(this);
         } else {
             _state = DEBRIEFING;
             const auto& a = g.admiral;
             stack()->push(new DebriefingScreen(
-                        globals()->gScenarioWinner.text, *_seconds, gThisScenario->parTime,
+                        g.victory_text, *_seconds, gThisScenario->parTime,
                         GetAdmiralLoss(a), gThisScenario->parLosses,
                         GetAdmiralKill(a), gThisScenario->parKills));
         }
         break;
 
       case LOSE_GAME:
-        if (_replay || (globals()->gScenarioWinner.text == -1)) {
+        if (_replay || (g.victory_text >= 0)) {
             stack()->pop(this);
         } else {
             _state = DEBRIEFING;
-            stack()->push(new DebriefingScreen(globals()->gScenarioWinner.text));
+            stack()->push(new DebriefingScreen(g.victory_text));
         }
         break;
 
@@ -717,7 +715,8 @@ void GamePlay::caps_lock(const CapsLockEvent& event) {
 void GamePlay::key_down(const KeyDownEvent& event) {
     if (globals()->gInputSource) {
         *_game_result = QUIT_GAME;
-        globals()->gGameOver = 1;
+        g.game_over = true;
+        g.game_over_at = g.time;
         return;
     }
 
@@ -768,7 +767,8 @@ void GamePlay::mouse_move(const MouseMoveEvent& event) {
 void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
     if (globals()->gInputSource) {
         *_game_result = QUIT_GAME;
-        globals()->gGameOver = 1;
+        g.game_over = true;
+        g.game_over_at = g.time;
         return;
     }
 

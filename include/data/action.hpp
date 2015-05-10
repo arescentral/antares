@@ -257,6 +257,10 @@ struct Action {
     argumentType                argument;
 
     static const size_t byte_size = 48;
+
+  private:
+    friend void SpaceObjectHandlingInit();
+    static int size;
 };
 void read_from(sfz::ReadSource in, Action& action);
 

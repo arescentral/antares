@@ -42,6 +42,7 @@
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
 #include "lang/casts.hpp"
+#include "lang/defines.hpp"
 #include "math/macros.hpp"
 #include "math/random.hpp"
 #include "math/rotation.hpp"
@@ -74,17 +75,17 @@ const uint32_t kNeutralColorLoadedFlag   = 0x00000001u;
 const uint32_t kAnyColorLoadedFlag       = 0x0000ffffu;
 
 const int16_t kLevelNameID = 4600;
-static StringList* level_names;
+static ANTARES_GLOBAL StringList* level_names;
 
-vector<Scenario> gScenarioData;
-vector<Scenario::InitialObject> gScenarioInitialData;
-vector<Scenario::Condition> gScenarioConditionData;
-vector<Scenario::BriefPoint> gScenarioBriefData;
-int32_t gScenarioRotation = 0;
+ANTARES_GLOBAL vector<Scenario> gScenarioData;
+ANTARES_GLOBAL vector<Scenario::InitialObject> gScenarioInitialData;
+ANTARES_GLOBAL vector<Scenario::Condition> gScenarioConditionData;
+ANTARES_GLOBAL vector<Scenario::BriefPoint> gScenarioBriefData;
+ANTARES_GLOBAL int32_t gScenarioRotation = 0;
 
 #ifdef DATA_COVERAGE
-set<int32_t> possible_objects;
-set<int32_t> possible_actions;
+ANTARES_GLOBAL set<int32_t> possible_objects;
+ANTARES_GLOBAL set<int32_t> possible_actions;
 #endif  // DATA_COVERAGE
 
 void AddBaseObjectActionMedia(
@@ -369,7 +370,7 @@ bool Scenario::Condition::is_true() const {
         }
 
         case kTimeCondition:
-            return globals()->gGameTime >= ticks_to_usecs(conditionArgument.longValue);
+            return g.time >= ticks_to_usecs(conditionArgument.longValue);
 
         case kProximityCondition: {
             auto sObject = GetObjectFromInitialNumber(subjectObject);
@@ -514,7 +515,6 @@ void ScenarioMakerInit() {
             read(in, initial);
             gScenarioInitialData.push_back(initial);
         }
-        globals()->maxScenarioInitial = gScenarioInitialData.size();
     }
 
     {
@@ -526,7 +526,6 @@ void ScenarioMakerInit() {
             read(in, condition);
             gScenarioConditionData.push_back(condition);
         }
-        globals()->maxScenarioCondition = gScenarioConditionData.size();
     }
 
     {
@@ -538,7 +537,6 @@ void ScenarioMakerInit() {
             read(in, brief_point);
             gScenarioBriefData.push_back(brief_point);
         }
-        globals()->maxScenarioBrief = gScenarioBriefData.size();
     }
 
     InitRaces();
@@ -557,22 +555,22 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     ResetAllDestObjectData();
     ResetMotionGlobals();
     gAbsoluteScale = kTimesTwoScale;
-    globals()->gSynchValue = 0;
+    g.sync = 0;
 
     gThisScenario = scenario;
 
     {
         int32_t angle = gThisScenario->angle();
         if (angle < 0) {
-            gScenarioRotation = gRandomSeed.next(ROT_POS);
+            gScenarioRotation = g.random.next(ROT_POS);
         } else {
             gScenarioRotation = angle;
         }
     }
 
-    globals()->gScenarioWinner.player = Admiral::none();
-    globals()->gScenarioWinner.next = -1;
-    globals()->gScenarioWinner.text = -1;
+    g.victor = Admiral::none();
+    g.next_level = -1;
+    g.victory_text = -1;
 
     SetMiniScreenStatusStrList(gThisScenario->scoreStringResID);
 
@@ -812,9 +810,9 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         const int64_t start_ticks
             = (gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple;
         const int64_t start_time = add_ticks(0, start_ticks);
-        globals()->gGameTime = 0;
+        g.time = 0;
         for (int64_t i = 0; i < start_ticks; ++i) {
-            globals()->gGameTime = add_ticks(globals()->gGameTime, 1);
+            g.time = add_ticks(g.time, 1);
             MoveSpaceObjects(kDecideEveryCycles);
             NonplayerShipThink(kDecideEveryCycles);
             AdmiralThink();
@@ -831,7 +829,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 (*current)++;
             }
         }
-        globals()->gGameTime = start_time;
+        g.time = start_time;
 
         (*current)++;
         return;
@@ -940,26 +938,18 @@ Handle<SpaceObject> GetObjectFromInitialNumber(int32_t initialNumber) {
 void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textID) {
     if (!whichPlayer.get()) {
         // if there's no winner, we want to exit immediately
-        if (nextLevel >= 0) {
-            globals()->gScenarioWinner.next = nextLevel;
-        } else {
-            globals()->gScenarioWinner.next = -1;
-        }
-        if (textID >= 0) {
-            globals()->gScenarioWinner.text = textID;
-        }
-        globals()->gGameOver = 1;
+        g.next_level = nextLevel;
+        g.victory_text = textID;
+        g.game_over = true;
+        g.game_over_at = g.time;
     } else {
-        if (!globals()->gScenarioWinner.player.get()) {
-            globals()->gScenarioWinner.player = whichPlayer;
-            globals()->gScenarioWinner.text = textID;
-            if (nextLevel >= 0) {
-                globals()->gScenarioWinner.next = nextLevel;
-            } else {
-                globals()->gScenarioWinner.next = -1;
-            }
-            if (globals()->gGameOver >= 0) {
-                globals()->gGameOver = -180;
+        if (!g.victor.get()) {
+            g.victor = whichPlayer;
+            g.victory_text = textID;
+            g.next_level = nextLevel;
+            if (!g.game_over) {
+                g.game_over = true;
+                g.game_over_at = add_ticks(g.time, 180);
             }
         }
     }

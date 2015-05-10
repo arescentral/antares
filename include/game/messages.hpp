@@ -61,8 +61,6 @@ class Messages {
     static std::queue<sfz::String> message_data;
     static longMessageType* long_message_data;
     static int32_t time_count;
-    static Handle<Label> message_label_num;
-    static Handle<Label> status_label_num;
 };
 
 }  // namespace antares

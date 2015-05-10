@@ -26,20 +26,17 @@
 #include "game/globals.hpp"
 #include "game/scenario-maker.hpp"
 #include "game/space-object.hpp"
+#include "lang/defines.hpp"
 #include "video/driver.hpp"
 
 using sfz::Exception;
+using std::vector;
 
 namespace antares {
 
 const int32_t kBriefing_Grid_Size = 16;
 
-struct briefingSpriteBoundsType {
-    Rect    bounds;
-    int32_t objectIndex;
-};
-
-static briefingSpriteBoundsType* gBriefingSpriteBounds = NULL;
+static ANTARES_GLOBAL vector<Rect> gBriefingSpriteBounds;
 
 Point BriefingSprite_GetBestLocation(
         const NatePixTable::Frame& frame, int32_t scale, Point fromWhere, bool *grid, int32_t gridWidth,
@@ -201,26 +198,17 @@ void Briefing_Grid_Set(bool *grid, int32_t x, int32_t y, int32_t gridWidth, int3
 void GetInitialObjectSpriteData(
         const Scenario* scenario, int32_t whichObject, int32_t maxSize, Rect *bounds,
         coordPointType *corner, int32_t scale, int32_t *thisScale, Point *where, Rect *spriteRect) {
-    briefingSpriteBoundsType    *sBounds = gBriefingSpriteBounds;
-
     spriteRect->right = spriteRect->left = -1;
 
     auto sObject = GetObjectFromInitialNumber(whichObject);
 
-    if (sObject.get()) {
+    if (sObject.get() && sObject->active) {
         const NatePixTable::Frame* frame = NULL;
         GetRealObjectSpriteData(
                 &(sObject->location), sObject->base, sObject->owner, sObject->pixResID,
                 maxSize, bounds, corner, scale, thisScale, &frame, where, spriteRect);
 
-        if ( sBounds == NULL) return;
-        while ( (sBounds->objectIndex >= 0) &&
-            ( sBounds->objectIndex != sObject.number())) sBounds++;
-
-        if (sBounds->objectIndex < 0) {
-            return;
-        }
-        *spriteRect = sBounds->bounds;
+        *spriteRect = gBriefingSpriteBounds[sObject.number()];
     }
 }
 
@@ -317,9 +305,8 @@ static void render_briefing_with(
         coordPointType *corner, int32_t scale) {
     int32_t        thisScale, gridWidth, gridHeight, i, j, color;
     Point       where;
-    Rect    spriteRect, clipRect;
+    Rect    clipRect;
     bool         *gridCells = NULL;
-    briefingSpriteBoundsType    *sBounds = NULL;
 
     gridWidth = (bounds->right - bounds->left) / kBriefing_Grid_Size;
     gridHeight = (bounds->bottom - bounds->top) / kBriefing_Grid_Size;
@@ -335,16 +322,12 @@ static void render_briefing_with(
         }
     }
 
-    if ( gBriefingSpriteBounds != NULL) {
-        delete[] gBriefingSpriteBounds;
-    }
-
-    gBriefingSpriteBounds = new briefingSpriteBoundsType[kMaxSpaceObject];
-
-    if ( gBriefingSpriteBounds == NULL) return;
-    sBounds = gBriefingSpriteBounds;
+    gBriefingSpriteBounds.resize(kMaxSpaceObject);
 
     for (auto anObject: SpaceObject::all()) {
+        Rect& rect = gBriefingSpriteBounds[anObject.number()];
+        rect = Rect(0, 0, 0, 0);
+        Rect spriteRect;
         if (( anObject->active == kObjectInUse) && ( anObject->sprite != NULL))
         {
             auto baseObject = anObject->base;
@@ -378,9 +361,7 @@ static void render_briefing_with(
 
                     renderer.draw(*frame, where, thisScale, &spriteRect, clipRect);
 
-                    sBounds->bounds = spriteRect;
-                    sBounds->objectIndex = anObject.number();
-                    sBounds++;
+                    rect = spriteRect;
                 }
             } else {
                 const NatePixTable::Frame* frame = NULL;
@@ -416,36 +397,15 @@ static void render_briefing_with(
                             *frame, where, thisScale, &spriteRect, clipRect,
                             light_color, dark_color);
 
-                    sBounds->bounds = spriteRect;
-                    sBounds->objectIndex = anObject.number();
-                    sBounds++;
+                    rect = spriteRect;
                 }
             }
         }
     }
-    sBounds->objectIndex = -1;
     if (gridCells != NULL) {
         delete[] gridCells;
     }
 }
-
-struct PixMapRenderer {
-    PixMap* pix;
-    void outline(
-            const NatePixTable::Frame& frame, Point where, int32_t scale, Rect* sprite_rect,
-            Rect clip_rect, RgbColor outline_color, RgbColor fill_color) const {
-        *sprite_rect = scale_sprite_rect(frame, where, scale);
-        // OutlineScaleSpritePixInPixMap(
-        //         frame, where, scale, sprite_rect, clip_rect, pix, outline_color, fill_color);
-    }
-    void draw(
-            const NatePixTable::Frame& frame, Point where, int32_t scale,
-            Rect* sprite_rect, Rect clip_rect) const {
-        *sprite_rect = scale_sprite_rect(frame, where, scale);
-        // OptScaleSpritePixInPixMap(
-        //         frame, where, scale, sprite_rect, clip_rect, pix);
-    }
-};
 
 struct DriverRenderer {
     Point origin;
@@ -466,12 +426,6 @@ struct DriverRenderer {
         frame.sprite().draw(draw_rect);
     }
 };
-
-void Briefing_Objects_Render(
-        PixMap* destmap, int32_t maxSize, Rect *bounds, coordPointType *corner, int32_t scale) {
-    PixMapRenderer renderer = {destmap};
-    render_briefing_with(renderer, maxSize, bounds, corner, scale);
-}
 
 void draw_briefing_objects(
         Point origin, int32_t maxSize, Rect bounds, coordPointType corner, int32_t scale) {

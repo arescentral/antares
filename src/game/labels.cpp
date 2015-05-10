@@ -28,6 +28,7 @@
 #include "game/cursor.hpp"
 #include "game/globals.hpp"
 #include "game/space-object.hpp"
+#include "lang/defines.hpp"
 #include "video/driver.hpp"
 
 using sfz::Rune;
@@ -54,17 +55,15 @@ static int32_t String_Count_Lines(const StringSlice& s);
 static StringSlice String_Get_Nth_Line(const StringSlice& source, int32_t nth);
 static void Auto_Animate_Line( Point *source, Point *dest);
 
-static unique_ptr<Label[]> data;
-
 Label* Label::get(int number) {
     if ((0 <= number) && (number < kMaxLabelNum)) {
-        return &data[number];
+        return &g.labels[number];
     }
     return nullptr;
 }
 
 void Label::init() {
-    data.reset(new Label[kMaxLabelNum]);
+    g.labels.reset(new Label[kMaxLabelNum]);
 }
 
 void Label::reset() {
@@ -409,7 +408,7 @@ static StringSlice String_Get_Nth_Line(const StringSlice& source, int32_t nth) {
 }
 
 static void Auto_Animate_Line( Point *source, Point *dest) {
-    switch ((usecs_to_ticks(globals()->gGameTime) >> 3) & 0x03) {
+    switch ((usecs_to_ticks(g.time) >> 3) & 0x03) {
         case 0:
             dest->h = source->h + ((dest->h - source->h) >> 2);
             dest->v = source->v + ((dest->v - source->v) >> 2);

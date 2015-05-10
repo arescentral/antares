@@ -24,16 +24,19 @@
 #include "drawing/sprite-handling.hpp"
 #include "game/admiral.hpp"
 #include "game/input-source.hpp"
+#include "game/labels.hpp"
 #include "game/minicomputer.hpp"
 #include "game/motion.hpp"
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
+#include "lang/defines.hpp"
 #include "sound/driver.hpp"
 
 namespace antares {
 
-static aresGlobalType* gAresGlobal;
-GlobalState g;
+static ANTARES_GLOBAL aresGlobalType* gAresGlobal;
+
+ANTARES_GLOBAL GlobalState g;
 
 aresGlobalType* globals() {
     return gAresGlobal;
@@ -41,38 +44,23 @@ aresGlobalType* globals() {
 
 void init_globals() {
     gAresGlobal = new aresGlobalType;
+
+    g.time = 0;
+    g.ship = Handle<SpaceObject>(0);
+    g.closest = Handle<SpaceObject>(0);
+    g.farthest = Handle<SpaceObject>(0);
+
+    Keys::init();
+    Gamepad::init();
 }
 
 aresGlobalType::aresGlobalType() {
-    gKeyMapBuffer = new KeyMap[kKeyMapBufferNum];
-    gKeyMapBufferTop = 0;
-    gKeyMapBufferBottom = 0;
-    gGameOver = 1;
-    gGameTime = 0;
-    gClosestObject = Handle<SpaceObject>(0);
-    gFarthestObject = Handle<SpaceObject>(0);
     gCenterScaleH = 0;
     gCenterScaleV = 0;
-    g.ship = Handle<SpaceObject>(0);
     gZoomMode = kTimesTwoZoom;
-    gPreviousZoomMode = kNearestFoeZoom;
-    gRadarCount = 0;
-    gRadarSpeed = 30;
-    gRadarRange = kRadarSize * 50;
-    radar_is_functioning = false;
-    gWhichScaleNum = 0;
-    gLastScale = SCALE_SCALE;
     gInstrumentTop = 0;
-    gLastSoundTime = 0;
-    key_names.reset(new StringList(KEY_NAMES));
-    key_long_names.reset(new StringList(KEY_LONG_NAMES));
-    gamepad_names.reset(new StringList(Gamepad::NAMES));
-    gamepad_long_names.reset(new StringList(Gamepad::LONG_NAMES));
     gAutoPilotOff = true;
-    levelNum = 31;
     keyMask = 0;
-    gSerialNumerator = 0;
-    gSerialDenominator = 0;
 
     hotKeyDownTime = -1;
 }

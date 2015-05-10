@@ -84,7 +84,7 @@ class ReplayMaster : public Card {
             init();
             Randomize(4);  // For the decision to replay intro.
             _game_result = NO_GAME;
-            gRandomSeed.seed = _random_seed;
+            g.random.seed = _random_seed;
             globals()->gInputSource.reset(new ReplayInputSource(&_replay_data));
             stack()->push(new MainPlay(
                         GetScenarioPtrFromChapter(_replay_data.chapter_id), true, false,
@@ -96,8 +96,8 @@ class ReplayMaster : public Card {
                 String path(format("{0}/debriefing.txt", *_output_path));
                 makedirs(path::dirname(path), 0755);
                 ScopedFd outcome(open(path, O_WRONLY | O_CREAT, 0644));
-                if ((globals()->gScenarioWinner.text >= 0)) {
-                    Resource rsrc("text", "txt", globals()->gScenarioWinner.text);
+                if ((g.victory_text >= 0)) {
+                    Resource rsrc("text", "txt", g.victory_text);
                     sfz::write(outcome, rsrc.data());
                     if (_game_result == WIN_GAME) {
                         sfz::write(outcome, "\n\n");

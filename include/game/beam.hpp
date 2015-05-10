@@ -42,23 +42,17 @@ static const int kBoltPointNum = 10;
 struct beamType {
     beamKindType        beamKind;
     Rect                thisLocation;
-    Rect                lastLocation;
     coordPointType      lastGlobalLocation;
     coordPointType      objectLocation;
     coordPointType      lastApparentLocation;
-    coordPointType      endLocation;
     uint8_t             color;
     bool                killMe;
     bool                active;
-    int32_t             fromObjectNumber;
     int32_t             fromObjectID;
     Handle<SpaceObject> fromObject;
-    int32_t             toObjectNumber;
     int32_t             toObjectID;
     Handle<SpaceObject> toObject;
     Point               toRelativeCoord;
-    uint32_t            boltRandomSeed;
-    uint32_t            lastBoldRandomSeed;
     int32_t             boltCycleTime;
     int32_t             boltState;
     int32_t             accuracy;
@@ -81,8 +75,6 @@ class Beams {
     static void draw();
     static void show_all();
     static void cull();
-  private:
-    static std::unique_ptr<beamType[]> _data;
 };
 
 }  // namespace antares

@@ -20,15 +20,13 @@
 
 #include <sfz/sfz.hpp>
 
+#include "lang/defines.hpp"
+
 using sfz::Exception;
 
 namespace antares {
 
-namespace {
-
-VideoDriver* video_driver = NULL;
-
-}  // namespace
+static ANTARES_GLOBAL VideoDriver* video_driver = NULL;
 
 VideoDriver::VideoDriver() {
     if (video_driver) {
