@@ -132,8 +132,6 @@ struct Messages::longMessageType {
 ANTARES_GLOBAL std::queue<sfz::String> Messages::message_data;
 ANTARES_GLOBAL Messages::longMessageType* Messages::long_message_data;
 ANTARES_GLOBAL int32_t Messages::time_count;
-ANTARES_GLOBAL Handle<Label> Messages::message_label_num;
-ANTARES_GLOBAL Handle<Label> Messages::status_label_num;
 
 void MessageLabel_Set_Special(Handle<Label> id, const StringSlice& text);
 
@@ -143,15 +141,15 @@ void Messages::init() {
     antares::clear(message_data);
     long_message_data = new longMessageType;
 
-    message_label_num = Label::add(
+    g.message_label = Label::add(
             kMessageScreenLeft, kMessageScreenTop, 0, 0, SpaceObject::none(), false, kMessageColor);
 
-    if (!message_label_num.get()) {
+    if (!g.message_label.get()) {
         throw Exception("Couldn't add a screen label.");
     }
-    status_label_num = Label::add(
+    g.status_label = Label::add(
             kStatusLabelLeft, kStatusLabelTop, 0, 0, SpaceObject::none(), false, kStatusLabelColor);
-    if (!status_label_num.get()) {
+    if (!g.status_label.get()) {
         throw Exception("Couldn't add a screen label.");
     }
 
@@ -181,9 +179,9 @@ void Messages::clear() {
     time_count = 0;
     std::queue<sfz::String> empty;
     swap(message_data, empty);
-    message_label_num = Label::add(
+    g.message_label = Label::add(
             kMessageScreenLeft, kMessageScreenTop, 0, 0, SpaceObject::none(), false, kMessageColor);
-    status_label_num = Label::add(
+    g.status_label = Label::add(
             kStatusLabelLeft, kStatusLabelTop, 0, 0, SpaceObject::none(), false, kStatusLabelColor);
 
     tmessage = long_message_data;
@@ -459,23 +457,23 @@ void Messages::draw_message_screen(int32_t by_units) {
         const String& message = message_data.front();
 
         if (time_count < kRaiseTime) {
-            message_label_num->set_position(kMessageScreenLeft, viewport.bottom - time_count);
+            g.message_label->set_position(kMessageScreenLeft, viewport.bottom - time_count);
         } else if (time_count > kLowerTime) {
-            message_label_num->set_position(
+            g.message_label->set_position(
                     kMessageScreenLeft, viewport.bottom - (kMessageDisplayTime - time_count));
         }
 
-        message_label_num->set_string(message);
+        g.message_label->set_string(message);
     } else {
-        message_label_num->clear_string();
+        g.message_label->clear_string();
         time_count = 0;
     }
 }
 
 void Messages::set_status(const StringSlice& status, uint8_t color) {
-    status_label_num->set_color(color);
-    status_label_num->set_string(status);
-    status_label_num->set_age(kStatusLabelAge);
+    g.status_label->set_color(color);
+    g.status_label->set_string(status);
+    g.status_label->set_age(kStatusLabelAge);
 }
 
 int16_t Messages::current() {

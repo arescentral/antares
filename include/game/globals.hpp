@@ -105,6 +105,13 @@ struct GlobalState {
     int32_t                  radar_count;  // Counts down to a radar pulse every 5/6 seconds.
     std::unique_ptr<Point[]> radar_blips;  // Screen locations of radar blips.
     bool                     radar_on;     // Maybe false if player ship is offline.
+
+    std::unique_ptr<Label[]>  labels;
+    Handle<Label>             control_label;  // Local player's current control object.
+    Handle<Label>             target_label;   // Local player's current target object.
+    Handle<Label>             message_label;  // Destroyed, captured, lost messages.
+    Handle<Label>             status_label;   // Autopilot, zoom, low shields messages.
+    Handle<Label>             send_label;     // Message local player is currently entering.
 };
 
 extern GlobalState g;

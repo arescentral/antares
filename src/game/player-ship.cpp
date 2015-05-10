@@ -75,9 +75,6 @@ namespace {
 static ANTARES_GLOBAL int32_t gDestKeyTime = 0;
 static ANTARES_GLOBAL int32_t gAlarmCount = -1;
 static ANTARES_GLOBAL ZoomType gPreviousZoomMode;
-static ANTARES_GLOBAL Handle<Label> gSelectionLabel;
-static ANTARES_GLOBAL Handle<Label> gDestinationLabel;
-static ANTARES_GLOBAL Handle<Label> gSendMessageLabel;
 
 struct HotKeySuffix {
     Handle<SpaceObject> space_object;
@@ -108,9 +105,9 @@ HotKeySuffix hot_key_suffix(Handle<SpaceObject> space_object) {
 
 void ResetPlayerShip(Handle<SpaceObject> which) {
     g.ship = which;
-    gSelectionLabel = Label::add(0, 0, 0, 10, SpaceObject::none(), true, YELLOW);
-    gDestinationLabel = Label::add(0, 0, 0, -20, SpaceObject::none(), true, SKY_BLUE);
-    gSendMessageLabel = Label::add(200, 200, 0, 30, SpaceObject::none(), false, GREEN);
+    g.control_label = Label::add(0, 0, 0, 10, SpaceObject::none(), true, YELLOW);
+    g.target_label = Label::add(0, 0, 0, -20, SpaceObject::none(), true, SKY_BLUE);
+    g.send_label = Label::add(200, 200, 0, 30, SpaceObject::none(), false, GREEN);
     globals()->starfield.reset(g.ship);
     gAlarmCount = -1;
     globals()->gAutoPilotOff = true;
@@ -565,7 +562,7 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
             globals()->gKeyMapBufferBottom = 0;
         }
         if (*enterMessage) {
-            String* message = Label::get_string(gSendMessageLabel);
+            String* message = Label::get_string(g.send_label);
             if (message->empty()) {
                 message->assign("<>");
             }
@@ -583,11 +580,11 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
                     }
                 }
                 Label::set_position(
-                        gSendMessageLabel,
+                        g.send_label,
                         viewport.left + ((viewport.width() / 2)),
                         viewport.top + ((play_screen.height() / 2)) +
                         kSendMessageVOffset);
-                Label::recalc_size(gSendMessageLabel);
+                Label::recalc_size(g.send_label);
             } else {
                 if ((mDeleteKey(*bufMap)) || (mLeftArrowKey(*bufMap))) {
                     if (message->size() > 2) {
@@ -616,8 +613,8 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
                 {
                     strlen -= (strlen + width) - (viewport.right);
                 }
-                Label::recalc_size(gSendMessageLabel);
-                Label::set_position(gSendMessageLabel, strlen, viewport.top +
+                Label::recalc_size(g.send_label);
+                Label::set_position(g.send_label, strlen, viewport.top +
                     ((play_screen.height() / 2) + kSendMessageVOffset));
             }
         } else {
@@ -869,14 +866,14 @@ void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> 
     }
     if (target) {
         adm->set_target(ship);
-        label = gDestinationLabel;
+        label = g.target_label;
 
         if (!(flagship->attributes & kOnAutoPilot)) {
             SetObjectDestination(flagship, SpaceObject::none());
         }
     } else {
         adm->set_control(ship);
-        label = gSelectionLabel;
+        label = g.control_label;
     }
 
     if (adm == g.admiral) {
@@ -924,10 +921,10 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
         flagship->attributes |= kIsHumanControlled | kIsPlayerShip;
 
         if (newShip == g.admiral->control()) {
-             gSelectionLabel->set_age(Label::kVisibleTime);
+             g.control_label->set_age(Label::kVisibleTime);
         }
         if (newShip == g.admiral->target()) {
-             gDestinationLabel->set_age(Label::kVisibleTime);
+             g.target_label->set_age(Label::kVisibleTime);
         }
     } else {
         flagship->attributes &= ~(kIsRemote | kIsPlayerShip);
@@ -1041,37 +1038,37 @@ void Update_LabelStrings_ForHotKeyChange( void)
 {
     auto target = g.admiral->target();
     if (target.get()) {
-        gDestinationLabel->set_object(target);
+        g.target_label->set_object(target);
         if (target == g.ship) {
-            gDestinationLabel->set_age(Label::kVisibleTime);
+            g.target_label->set_age(Label::kVisibleTime);
         }
         if (target->attributes & kIsDestination) {
             String string(GetDestBalanceName(target->asDestination));
             print(string, hot_key_suffix(target));
-            gDestinationLabel->set_string(string);
+            g.target_label->set_string(string);
         } else {
             String string(get_object_name(target->base));
             print(string, hot_key_suffix(target));
-            gDestinationLabel->set_string(string);
+            g.target_label->set_string(string);
         }
     }
 
     auto control = g.admiral->control();
     if (control.get()) {
-        gSelectionLabel->set_object(control);
+        g.control_label->set_object(control);
         if (control == g.ship) {
-            gSelectionLabel->set_age(Label::kVisibleTime);
+            g.control_label->set_age(Label::kVisibleTime);
         }
         PlayVolumeSound(
                 kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
         if (control->attributes & kIsDestination) {
             String string(GetDestBalanceName(control->asDestination));
             print(string, hot_key_suffix(control));
-            gSelectionLabel->set_string(string);
+            g.control_label->set_string(string);
         } else {
             String string(get_object_name(control->base));
             print(string, hot_key_suffix(control));
-            gSelectionLabel->set_string(string);
+            g.control_label->set_string(string);
         }
     }
 }

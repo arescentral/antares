@@ -24,6 +24,7 @@
 #include "drawing/sprite-handling.hpp"
 #include "game/admiral.hpp"
 #include "game/input-source.hpp"
+#include "game/labels.hpp"
 #include "game/minicomputer.hpp"
 #include "game/motion.hpp"
 #include "game/space-object.hpp"
