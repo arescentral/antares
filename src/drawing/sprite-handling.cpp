@@ -25,6 +25,7 @@
 #include "drawing/shapes.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
+#include "lang/defines.hpp"
 #include "math/random.hpp"
 #include "math/rotation.hpp"
 #include "video/driver.hpp"
@@ -106,12 +107,11 @@ struct pixTableType {
 static ANTARES_GLOBAL pixTableType gPixTable[kMaxPixTableEntry];
 
 int32_t ANTARES_GLOBAL gAbsoluteScale = MIN_SCALE;
-static ANTARES_GLOBAL unique_ptr<spriteType[]> gSpriteTable;
 
 void SpriteHandlingInit() {
     ResetAllPixTables();
 
-    gSpriteTable.reset(new spriteType[kMaxSpriteNum]);
+    g.sprites.reset(new spriteType[kMaxSpriteNum]);
     ResetAllSprites();
 
     for (int i = 0; i < 4000; ++i) {
@@ -131,7 +131,7 @@ spriteType::spriteType()
 
 void ResetAllSprites() {
     for (int i: range(kMaxSpriteNum)) {
-        zero(&gSpriteTable[i]);
+        zero(&g.sprites[i]);
     }
 }
 
@@ -200,7 +200,7 @@ NatePixTable* GetPixTable(int16_t resource_id) {
 spriteType *AddSprite(
         Point where, NatePixTable* table, int16_t resID, int16_t whichShape, int32_t scale, int32_t size,
         int16_t layer, const RgbColor& color) {
-    for (spriteType* sprite: range(gSpriteTable.get(), gSpriteTable.get() + kMaxSpriteNum)) {
+    for (spriteType* sprite: range(g.sprites.get(), g.sprites.get() + kMaxSpriteNum)) {
         if (sprite->table == NULL) {
             sprite->where = where;
             sprite->table = table;
@@ -250,7 +250,7 @@ void draw_sprites() {
     if (gAbsoluteScale >= kBlipThreshhold) {
         for (int layer: range<int>(kFirstSpriteLayer, kLastSpriteLayer + 1)) {
             for (int i: range(kMaxSpriteNum)) {
-                spriteType* aSprite = &gSpriteTable[i];
+                spriteType* aSprite = &g.sprites[i];
                 if ((aSprite->table != NULL)
                         && !aSprite->killMe
                         && (aSprite->whichLayer == layer)) {
@@ -283,7 +283,7 @@ void draw_sprites() {
     } else {
         for (int layer: range<int>(kFirstSpriteLayer, kLastSpriteLayer + 1)) {
             for (int i: range(kMaxSpriteNum)) {
-                spriteType* aSprite = &gSpriteTable[i];
+                spriteType* aSprite = &g.sprites[i];
                 int tinySize = aSprite->tinySize & kBlipSizeMask;
                 if ((aSprite->table != NULL)
                         && !aSprite->killMe
@@ -305,7 +305,7 @@ void draw_sprites() {
 
 void CullSprites() {
     for (int i: range(kMaxSpriteNum)) {
-        spriteType* aSprite = &gSpriteTable[i];
+        spriteType* aSprite = &g.sprites[i];
         if (aSprite->table != NULL) {
             if (aSprite->killMe) {
                 RemoveSprite(aSprite);
