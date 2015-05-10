@@ -68,7 +68,13 @@ BriefingScreen::BriefingScreen(const Scenario* scenario, bool* cancelled)
           _briefing_point_count(_scenario->brief_point_size() + 2),
           _data_item(data_item(item(MAP_RECT))) {
     build_star_map();
-    build_system_map();
+    for (int i = 0; i < 500; ++i) {
+        Star star;
+        star.shade = Randomize(kVisibleShadeNum);
+        star.location.h = _bounds.left + Randomize(_bounds.width());
+        star.location.v = _bounds.top + Randomize(_bounds.height());
+        _system_stars.push_back(star);
+    }
 }
 
 BriefingScreen::~BriefingScreen() { }
@@ -225,26 +231,6 @@ void BriefingScreen::build_star_map() {
         _star_rect.offset(0, pix_bounds.bottom - _star_rect.bottom);
     }
     _star_rect.offset(_bounds.left, _bounds.top);
-}
-
-void BriefingScreen::build_system_map() {
-    ArrayPixMap pix(_bounds.width(), _bounds.height());
-    Rect pix_bounds = pix.size().as_rect();
-    pix.fill(RgbColor::kClear);
-
-    // Draw 500 randomized stars.
-    for (int i = 0; i < 500; ++i) {
-        Star star;
-        star.shade = Randomize(kVisibleShadeNum);
-        star.location.h = _bounds.left + Randomize(_bounds.width());
-        star.location.v = _bounds.top + Randomize(_bounds.height());
-        _system_stars.push_back(star);
-    }
-
-    coordPointType corner;
-    int32_t scale;
-    GetScenarioFullScaleAndCorner(_scenario, 0, &corner, &scale, &pix_bounds);
-    Briefing_Objects_Render(&pix, 32, &pix_bounds, &corner, scale);
 }
 
 void BriefingScreen::build_brief_point() {

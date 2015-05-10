@@ -60,7 +60,6 @@ class BriefingScreen : public InterfaceScreen {
     };
 
     void build_star_map();
-    void build_system_map();
     void build_brief_point();
 
     void draw_system_map() const;

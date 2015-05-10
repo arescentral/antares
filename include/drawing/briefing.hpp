@@ -26,8 +26,6 @@ namespace antares {
 struct Scenario;
 class PixMap;
 
-void Briefing_Objects_Render(
-        PixMap* destmap, int32_t maxSize, Rect *bounds, coordPointType *corner, int32_t scale);
 void draw_briefing_objects(
         Point origin, int32_t maxSize, Rect bounds, coordPointType corner, int32_t scale);
 

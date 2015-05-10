@@ -430,24 +430,6 @@ static void render_briefing_with(
     }
 }
 
-struct PixMapRenderer {
-    PixMap* pix;
-    void outline(
-            const NatePixTable::Frame& frame, Point where, int32_t scale, Rect* sprite_rect,
-            Rect clip_rect, RgbColor outline_color, RgbColor fill_color) const {
-        *sprite_rect = scale_sprite_rect(frame, where, scale);
-        // OutlineScaleSpritePixInPixMap(
-        //         frame, where, scale, sprite_rect, clip_rect, pix, outline_color, fill_color);
-    }
-    void draw(
-            const NatePixTable::Frame& frame, Point where, int32_t scale,
-            Rect* sprite_rect, Rect clip_rect) const {
-        *sprite_rect = scale_sprite_rect(frame, where, scale);
-        // OptScaleSpritePixInPixMap(
-        //         frame, where, scale, sprite_rect, clip_rect, pix);
-    }
-};
-
 struct DriverRenderer {
     Point origin;
     void outline(
@@ -467,12 +449,6 @@ struct DriverRenderer {
         frame.sprite().draw(draw_rect);
     }
 };
-
-void Briefing_Objects_Render(
-        PixMap* destmap, int32_t maxSize, Rect *bounds, coordPointType *corner, int32_t scale) {
-    PixMapRenderer renderer = {destmap};
-    render_briefing_with(renderer, maxSize, bounds, corner, scale);
-}
 
 void draw_briefing_objects(
         Point origin, int32_t maxSize, Rect bounds, coordPointType corner, int32_t scale) {
