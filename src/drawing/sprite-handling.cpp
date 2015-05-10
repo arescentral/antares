@@ -103,10 +103,10 @@ struct pixTableType {
     int                             resID;
     bool                            keepMe;
 };
-static pixTableType gPixTable[kMaxPixTableEntry];
+static ANTARES_GLOBAL pixTableType gPixTable[kMaxPixTableEntry];
 
-int32_t gAbsoluteScale = MIN_SCALE;
-static unique_ptr<spriteType[]> gSpriteTable;
+int32_t ANTARES_GLOBAL gAbsoluteScale = MIN_SCALE;
+static ANTARES_GLOBAL unique_ptr<spriteType[]> gSpriteTable;
 
 void SpriteHandlingInit() {
     ResetAllPixTables();
