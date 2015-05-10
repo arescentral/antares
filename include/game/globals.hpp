@@ -123,7 +123,6 @@ struct aresGlobalType {
     uint64_t        gLastTime;
     int32_t         gCenterScaleH;
     int32_t         gCenterScaleV;
-    Handle<Label>   gSelectionLabel;
     ZoomType        gZoomMode;
     ZoomType        gPreviousZoomMode;
 

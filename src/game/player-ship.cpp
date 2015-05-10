@@ -74,8 +74,9 @@ namespace {
 
 static ANTARES_GLOBAL KeyMap gLastKeyMap;
 static ANTARES_GLOBAL int32_t gDestKeyTime = 0;
-static ANTARES_GLOBAL Handle<Label> gDestinationLabel;
 static ANTARES_GLOBAL int32_t gAlarmCount = -1;
+static ANTARES_GLOBAL Handle<Label> gSelectionLabel;
+static ANTARES_GLOBAL Handle<Label> gDestinationLabel;
 static ANTARES_GLOBAL Handle<Label> gSendMessageLabel;
 
 struct HotKeySuffix {
@@ -107,7 +108,7 @@ HotKeySuffix hot_key_suffix(Handle<SpaceObject> space_object) {
 
 void ResetPlayerShip(Handle<SpaceObject> which) {
     g.ship = which;
-    globals()->gSelectionLabel = Label::add(0, 0, 0, 10, SpaceObject::none(), true, YELLOW);
+    gSelectionLabel = Label::add(0, 0, 0, 10, SpaceObject::none(), true, YELLOW);
     gDestinationLabel = Label::add(0, 0, 0, -20, SpaceObject::none(), true, SKY_BLUE);
     gSendMessageLabel = Label::add(200, 200, 0, 30, SpaceObject::none(), false, GREEN);
     globals()->starfield.reset(g.ship);
@@ -876,7 +877,7 @@ void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> 
         }
     } else {
         adm->set_control(ship);
-        label = globals()->gSelectionLabel;
+        label = gSelectionLabel;
     }
 
     if (adm == g.admiral) {
@@ -924,7 +925,7 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
         flagship->attributes |= kIsHumanControlled | kIsPlayerShip;
 
         if (newShip == g.admiral->control()) {
-             globals()->gSelectionLabel->set_age(Label::kVisibleTime);
+             gSelectionLabel->set_age(Label::kVisibleTime);
         }
         if (newShip == g.admiral->target()) {
              gDestinationLabel->set_age(Label::kVisibleTime);
@@ -1058,20 +1059,20 @@ void Update_LabelStrings_ForHotKeyChange( void)
 
     auto control = g.admiral->control();
     if (control.get()) {
-        globals()->gSelectionLabel->set_object(control);
+        gSelectionLabel->set_object(control);
         if (control == g.ship) {
-            globals()->gSelectionLabel->set_age(Label::kVisibleTime);
+            gSelectionLabel->set_age(Label::kVisibleTime);
         }
         PlayVolumeSound(
                 kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
         if (control->attributes & kIsDestination) {
             String string(GetDestBalanceName(control->asDestination));
             print(string, hot_key_suffix(control));
-            globals()->gSelectionLabel->set_string(string);
+            gSelectionLabel->set_string(string);
         } else {
             String string(get_object_name(control->base));
             print(string, hot_key_suffix(control));
-            globals()->gSelectionLabel->set_string(string);
+            gSelectionLabel->set_string(string);
         }
     }
 }
