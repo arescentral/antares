@@ -19,12 +19,18 @@
 #ifndef ANTARES_DRAWING_BRIEFING_HPP_
 #define ANTARES_DRAWING_BRIEFING_HPP_
 
+#include "data/handle.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
 
 struct Scenario;
 class PixMap;
+
+struct BriefingSpriteBounds {
+    Rect                bounds;
+    Handle<SpaceObject> object;
+};
 
 void draw_briefing_objects(
         Point origin, int32_t maxSize, Rect bounds, coordPointType corner, int32_t scale);
