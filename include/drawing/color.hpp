@@ -77,9 +77,12 @@ class RgbColor {
     static const RgbColor kWhite;
     static const RgbColor kClear;
 
-    RgbColor();
-    RgbColor(uint8_t red, uint8_t green, uint8_t blue);
-    RgbColor(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue);
+    constexpr RgbColor():
+        RgbColor(0xFF, 0x00, 0x00, 0x00) { }
+    constexpr RgbColor(uint8_t red, uint8_t green, uint8_t blue):
+        RgbColor(0xFF, red, green, blue) { }
+    constexpr RgbColor(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue):
+        alpha(alpha), red(red), green(green), blue(blue) { }
     static RgbColor tint(uint8_t color, uint8_t value);
 
     static const RgbColor& at(uint8_t index);
