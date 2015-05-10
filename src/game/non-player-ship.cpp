@@ -203,7 +203,7 @@ void NonplayerShipThink(int32_t timePass)
     RgbColor        friendSick, foeSick, neutralSick;
     uint32_t        sickCount = usecs_to_ticks(g.time) / 9;
 
-    globals()->gSynchValue = g.random.seed;
+    g.sync = g.random.seed;
     sickCount &= 0x00000003;
     if (sickCount == 0) {
         friendSick = GetRGBTranslateColorShade(kFriendlyColor, MEDIUM);
@@ -236,8 +236,8 @@ void NonplayerShipThink(int32_t timePass)
             continue;
         }
 
-        globals()->gSynchValue += anObject->location.h;
-        globals()->gSynchValue += anObject->location.v;
+        g.sync += anObject->location.h;
+        g.sync += anObject->location.v;
 
         keysDown = anObject->keysDown & kSpecialKeyMask;
 

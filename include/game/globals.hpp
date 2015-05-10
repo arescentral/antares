@@ -87,8 +87,9 @@ class InputSource;
 class StringList;
 
 struct GlobalState {
-    int64_t  time;    // Current game time.
-    Random   random;  // Global random number generator.
+    uint32_t  sync;    // Indicates when net games are desynchronized.
+    int64_t   time;    // Current game time.
+    Random    random;  // Global random number generator.
 
     std::unique_ptr<Admiral[]>  admirals;  // All admirals (whether active or not).
     Handle<Admiral>             admiral;   // Local player.
@@ -118,7 +119,6 @@ struct aresGlobalType {
     aresGlobalType();
     ~aresGlobalType();
 
-    uint32_t        gSynchValue;
     std::unique_ptr<InputSource> gInputSource;
     uint64_t        gLastTime;
     int32_t         gCenterScaleH;

@@ -554,7 +554,7 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     ResetAllDestObjectData();
     ResetMotionGlobals();
     gAbsoluteScale = kTimesTwoScale;
-    globals()->gSynchValue = 0;
+    g.sync = 0;
 
     gThisScenario = scenario;
 
