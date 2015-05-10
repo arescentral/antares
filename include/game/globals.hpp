@@ -102,8 +102,9 @@ struct GlobalState {
     int              next_level;    // Next level (or -1 for none).
     int16_t          victory_text;  // Text resource to show in debriefing.
 
-    int32_t  radar_count;  // Counts down to a radar pulse every 5/6 seconds.
-    bool     radar_on;     // Maybe false if player ship is offline.
+    int32_t                  radar_count;  // Counts down to a radar pulse every 5/6 seconds.
+    std::unique_ptr<Point[]> radar_blips;  // Screen locations of radar blips.
+    bool                     radar_on;     // Maybe false if player ship is offline.
 };
 
 extern GlobalState g;

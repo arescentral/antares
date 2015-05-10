@@ -134,7 +134,6 @@ struct barIndicatorType {
 static ANTARES_GLOBAL coordPointType          gLastGlobalCorner;
 static ANTARES_GLOBAL unique_ptr<Sprite> left_instrument_sprite;
 static ANTARES_GLOBAL unique_ptr<Sprite> right_instrument_sprite;
-static ANTARES_GLOBAL unique_ptr<Point[]> gRadarBlipData;
 static ANTARES_GLOBAL unique_ptr<int32_t[]> gScaleList;
 static ANTARES_GLOBAL int32_t gWhichScaleNum;
 static ANTARES_GLOBAL int32_t gLastScale;
@@ -169,7 +168,7 @@ static void draw_build_time_bar(int32_t value);
 void InstrumentInit() {
     globals()->gInstrumentTop = (world.height() / 2) - ( kPanelHeight / 2);
 
-    gRadarBlipData.reset(new Point[kRadarBlipNum]);
+    g.radar_blips.reset(new Point[kRadarBlipNum]);
     gScaleList.reset(new int32_t[kScaleListNum]);
     ResetInstruments();
 
@@ -206,7 +205,7 @@ void InstrumentInit() {
 }
 
 void InstrumentCleanup() {
-    gRadarBlipData.reset();
+    g.radar_blips.reset();
     MiniScreenCleanup();
 }
 
@@ -238,7 +237,7 @@ void ResetInstruments() {
     gBarIndicator[kBatteryBar].top = 103 + globals()->gInstrumentTop;
     gBarIndicator[kBatteryBar].color = SALMON;
 
-    lp = gRadarBlipData.get();
+    lp = g.radar_blips.get();
     for ( i = 0; i < kRadarBlipNum; i++)
     {
         lp->h = -1;
@@ -282,11 +281,11 @@ void UpdateRadar(int32_t unitsDone) {
             view_range.clip_to(radar);
 
             for (int i = 0; i < kRadarBlipNum; ++i) {
-                Point* lp = gRadarBlipData.get() + i;
+                Point* lp = g.radar_blips.get() + i;
                 lp->h = -1;
             }
 
-            Point* lp = gRadarBlipData.get();
+            Point* lp = g.radar_blips.get();
             Point* end = lp + kRadarBlipNum;
             g.radar_count = kRadarSpeed;
 
@@ -419,7 +418,7 @@ void draw_radar() {
 
         Points points;
         for (int rcount = 0; rcount < kRadarBlipNum; rcount++) {
-            Point* lp = gRadarBlipData.get() + rcount;
+            Point* lp = g.radar_blips.get() + rcount;
             if (lp->h >= 0) {
                 points.draw(*lp, color);
             }
