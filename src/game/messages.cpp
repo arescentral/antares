@@ -28,6 +28,7 @@
 #include "game/globals.hpp"
 #include "game/labels.hpp"
 #include "game/scenario-maker.hpp"
+#include "lang/defines.hpp"
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
@@ -128,11 +129,11 @@ struct Messages::longMessageType {
     Handle<Label>           labelMessageID;
 };
 
-std::queue<sfz::String> Messages::message_data;
-Messages::longMessageType* Messages::long_message_data;
-int32_t Messages::time_count;
-Handle<Label> Messages::message_label_num;
-Handle<Label> Messages::status_label_num;
+ANTARES_GLOBAL std::queue<sfz::String> Messages::message_data;
+ANTARES_GLOBAL Messages::longMessageType* Messages::long_message_data;
+ANTARES_GLOBAL int32_t Messages::time_count;
+ANTARES_GLOBAL Handle<Label> Messages::message_label_num;
+ANTARES_GLOBAL Handle<Label> Messages::status_label_num;
 
 void MessageLabel_Set_Special(Handle<Label> id, const StringSlice& text);
 

@@ -21,6 +21,7 @@
 #include <sfz/sfz.hpp>
 
 #include "data/resource.hpp"
+#include "lang/defines.hpp"
 #include "math/macros.hpp"
 
 using sfz::BytesSlice;
@@ -30,7 +31,7 @@ using sfz::read;
 namespace antares {
 
 const int kRotTableSize = 720;
-static int32_t gRotTable[kRotTableSize];
+static ANTARES_GLOBAL int32_t gRotTable[kRotTableSize];
 
 void RotationInit() {
     Resource rsrc("rotation-table");

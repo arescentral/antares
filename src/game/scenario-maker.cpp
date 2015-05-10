@@ -42,6 +42,7 @@
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
 #include "lang/casts.hpp"
+#include "lang/defines.hpp"
 #include "math/macros.hpp"
 #include "math/random.hpp"
 #include "math/rotation.hpp"
@@ -74,17 +75,17 @@ const uint32_t kNeutralColorLoadedFlag   = 0x00000001u;
 const uint32_t kAnyColorLoadedFlag       = 0x0000ffffu;
 
 const int16_t kLevelNameID = 4600;
-static StringList* level_names;
+static ANTARES_GLOBAL StringList* level_names;
 
-vector<Scenario> gScenarioData;
-vector<Scenario::InitialObject> gScenarioInitialData;
-vector<Scenario::Condition> gScenarioConditionData;
-vector<Scenario::BriefPoint> gScenarioBriefData;
-int32_t gScenarioRotation = 0;
+ANTARES_GLOBAL vector<Scenario> gScenarioData;
+ANTARES_GLOBAL vector<Scenario::InitialObject> gScenarioInitialData;
+ANTARES_GLOBAL vector<Scenario::Condition> gScenarioConditionData;
+ANTARES_GLOBAL vector<Scenario::BriefPoint> gScenarioBriefData;
+ANTARES_GLOBAL int32_t gScenarioRotation = 0;
 
 #ifdef DATA_COVERAGE
-set<int32_t> possible_objects;
-set<int32_t> possible_actions;
+ANTARES_GLOBAL set<int32_t> possible_objects;
+ANTARES_GLOBAL set<int32_t> possible_actions;
 #endif  // DATA_COVERAGE
 
 void AddBaseObjectActionMedia(

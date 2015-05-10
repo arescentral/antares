@@ -49,6 +49,7 @@
 #include "game/scenario-maker.hpp"
 #include "game/starfield.hpp"
 #include "game/time.hpp"
+#include "lang/defines.hpp"
 #include "math/units.hpp"
 #include "sound/driver.hpp"
 #include "sound/fx.hpp"
@@ -79,9 +80,9 @@ namespace path = sfz::path;
 
 namespace antares {
 
-Rect world;
-Rect play_screen;
-Rect viewport;
+ANTARES_GLOBAL Rect world;
+ANTARES_GLOBAL Rect play_screen;
+ANTARES_GLOBAL Rect viewport;
 
 #ifdef DATA_COVERAGE
 extern set<int32_t> covered_objects;

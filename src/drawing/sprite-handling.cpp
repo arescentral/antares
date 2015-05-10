@@ -54,8 +54,6 @@ const uint32_t kFramedSquareBlip    = 0x00000040;
 const uint32_t kBlipSizeMask        = 0x0000000f;
 const uint32_t kBlipTypeMask        = 0x000000f0;
 
-static map<uint8_t, Sprite*> tiny_sprites;
-
 template <typename T>
 void zero(T* t) {
     *t = T();

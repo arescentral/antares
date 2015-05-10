@@ -19,6 +19,7 @@
 #include "sound/music.hpp"
 
 #include "config/preferences.hpp"
+#include "lang/defines.hpp"
 #include "sound/driver.hpp"
 
 using sfz::format;
@@ -26,13 +27,9 @@ using std::unique_ptr;
 
 namespace antares {
 
-namespace {
-
-bool playing = false;
-unique_ptr<Sound> song;
-unique_ptr<SoundChannel> channel;
-
-}  // namespace
+static ANTARES_GLOBAL bool playing = false;
+static ANTARES_GLOBAL unique_ptr<Sound> song;
+static ANTARES_GLOBAL unique_ptr<SoundChannel> channel;
 
 void MusicInit() {
     playing = false;

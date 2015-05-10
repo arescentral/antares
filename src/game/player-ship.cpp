@@ -41,6 +41,7 @@
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
 #include "game/time.hpp"
+#include "lang/defines.hpp"
 #include "math/fixed.hpp"
 #include "math/macros.hpp"
 #include "math/rotation.hpp"
@@ -71,11 +72,11 @@ void Update_LabelStrings_ForHotKeyChange( void);
 
 namespace {
 
-static KeyMap gLastKeyMap;
-static int32_t gDestKeyTime = 0;
-static Handle<Label> gDestinationLabel;
-static int32_t gAlarmCount = -1;
-static Handle<Label> gSendMessageLabel;
+static ANTARES_GLOBAL KeyMap gLastKeyMap;
+static ANTARES_GLOBAL int32_t gDestKeyTime = 0;
+static ANTARES_GLOBAL Handle<Label> gDestinationLabel;
+static ANTARES_GLOBAL int32_t gAlarmCount = -1;
+static ANTARES_GLOBAL Handle<Label> gSendMessageLabel;
 
 struct HotKeySuffix {
     Handle<SpaceObject> space_object;

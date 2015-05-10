@@ -30,6 +30,7 @@
 #include "game/non-player-ship.hpp"
 #include "game/player-ship.hpp"
 #include "game/space-object.hpp"
+#include "lang/defines.hpp"
 #include "math/macros.hpp"
 #include "math/random.hpp"
 #include "math/rotation.hpp"
@@ -65,7 +66,7 @@ const int32_t kConsiderDistanceAttributes = (
 const uint32_t kThinkiverseTopLeft       = (kUniversalCenter - (2 * 65534)); // universe for thinking or owned objects
 const uint32_t kThinkiverseBottomRight   = (kUniversalCenter + (2 * 65534));
 
-static Point            cAdjacentUnits[] = {
+static ANTARES_GLOBAL Point            cAdjacentUnits[] = {
     Point(0, 0),
     Point(1, 0),
     Point(-1, 1),
@@ -73,8 +74,8 @@ static Point            cAdjacentUnits[] = {
     Point(1, 1)
 };
 
-coordPointType          gGlobalCorner;
-static unique_ptr<proximityUnitType[]> gProximityGrid;
+ANTARES_GLOBAL coordPointType          gGlobalCorner;
+static ANTARES_GLOBAL unique_ptr<proximityUnitType[]> gProximityGrid;
 
 // for the macro mRanged, time is assumed to be a int32_t game ticks, velocity a fixed, result int32_t, scratch fixed
 inline void mRange(int32_t& result, int32_t time, Fixed velocity, Fixed& scratch) {

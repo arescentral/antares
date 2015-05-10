@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 
 #include "lang/casts.hpp"
+#include "lang/defines.hpp"
 
 using sfz::ReadSource;
 using sfz::WriteTarget;
@@ -31,7 +32,7 @@ using sfz::write;
 
 namespace antares {
 
-static RgbColor colors[256] = {
+static ANTARES_GLOBAL RgbColor colors[256] = {
     RgbColor(255, 255, 255),
     RgbColor(32, 0, 0),
     RgbColor(224, 224, 224),
@@ -305,9 +306,9 @@ static RgbColor colors[256] = {
     RgbColor(0, 0, 0),
 };
 
-const RgbColor RgbColor::kBlack(0xFF, 0x00, 0x00, 0x00);
-const RgbColor RgbColor::kWhite(0xFF, 0xFF, 0xFF, 0xFF);
-const RgbColor RgbColor::kClear(0x00, 0x00, 0x00, 0x00);
+ANTARES_GLOBAL const RgbColor RgbColor::kBlack(0xFF, 0x00, 0x00, 0x00);
+ANTARES_GLOBAL const RgbColor RgbColor::kWhite(0xFF, 0xFF, 0xFF, 0xFF);
+ANTARES_GLOBAL const RgbColor RgbColor::kClear(0x00, 0x00, 0x00, 0x00);
 
 RgbColor::RgbColor()
         : alpha(0xFF),

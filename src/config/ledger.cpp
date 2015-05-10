@@ -24,6 +24,7 @@
 #include <sfz/sfz.hpp>
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
+#include "lang/defines.hpp"
 
 using sfz::Bytes;
 using sfz::Exception;
@@ -50,11 +51,7 @@ namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-namespace {
-
-Ledger* ledger;
-
-}  // namespace
+static ANTARES_GLOBAL Ledger* ledger;
 
 Ledger::Ledger() {
     if (antares::ledger) {

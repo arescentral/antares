@@ -26,6 +26,7 @@
 #include "game/messages.hpp"
 #include "game/player-ship.hpp"
 #include "game/space-object.hpp"
+#include "lang/defines.hpp"
 #include "math/fixed.hpp"
 
 using sfz::BytesSlice;
@@ -52,7 +53,7 @@ const int16_t kBuildFastCheat       = 6;
 const int16_t kRaisePayRateCheat    = 7;  // determines your payscale
 const int16_t kLowerPayRateCheat    = 8;
 
-static unique_ptr<StringList> gAresCheatStrings;
+static ANTARES_GLOBAL unique_ptr<StringList> gAresCheatStrings;
 
 void CheatFeedback(int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer);
 void CheatFeedbackPlus(int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer, PrintItem extra);

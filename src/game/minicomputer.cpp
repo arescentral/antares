@@ -36,6 +36,7 @@
 #include "game/scenario-maker.hpp"
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
+#include "lang/defines.hpp"
 #include "math/fixed.hpp"
 #include "sound/fx.hpp"
 #include "video/driver.hpp"
@@ -90,7 +91,7 @@ const int32_t kNoLineButton         = -1;
 const int32_t kInLineButton         = kCompAcceptKeyNum;
 const int32_t kOutLineButton        = kCompCancelKeyNum;
 
-static StringList* mini_data_strings;
+static ANTARES_GLOBAL StringList* mini_data_strings;
 
 enum {
     kMainMiniScreen     = 1,

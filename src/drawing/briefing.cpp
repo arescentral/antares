@@ -26,6 +26,7 @@
 #include "game/globals.hpp"
 #include "game/scenario-maker.hpp"
 #include "game/space-object.hpp"
+#include "lang/defines.hpp"
 #include "video/driver.hpp"
 
 using sfz::Exception;
@@ -39,7 +40,7 @@ struct briefingSpriteBoundsType {
     int32_t objectIndex;
 };
 
-static briefingSpriteBoundsType* gBriefingSpriteBounds = NULL;
+static ANTARES_GLOBAL briefingSpriteBoundsType* gBriefingSpriteBounds = NULL;
 
 Point BriefingSprite_GetBestLocation(
         const NatePixTable::Frame& frame, int32_t scale, Point fromWhere, bool *grid, int32_t gridWidth,

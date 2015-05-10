@@ -22,12 +22,13 @@
 
 #include "data/string-list.hpp"
 #include "game/globals.hpp"
+#include "lang/defines.hpp"
 #include "video/driver.hpp"
 
 namespace antares {
 
-static std::unique_ptr<StringList> key_names;
-static std::unique_ptr<StringList> key_long_names;
+static ANTARES_GLOBAL std::unique_ptr<StringList> key_names;
+static ANTARES_GLOBAL std::unique_ptr<StringList> key_long_names;
 
 void Keys::init() {
     key_names.reset(new StringList(KEY_NAMES));

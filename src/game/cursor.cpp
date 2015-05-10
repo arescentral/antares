@@ -24,6 +24,7 @@
 #include "drawing/pix-table.hpp"
 #include "game/globals.hpp"
 #include "game/time.hpp"
+#include "lang/defines.hpp"
 #include "video/driver.hpp"
 
 using sfz::Exception;
@@ -95,11 +96,11 @@ void GameCursor::wake() {
     _show_crosshairs_until = now_usecs() + kTimeout;
 }
 
-bool HintLine::show_hint_line = false;
-Point HintLine::hint_line_start;
-Point HintLine::hint_line_end;
-RgbColor HintLine::hint_line_color;
-RgbColor HintLine::hint_line_color_dark;
+ANTARES_GLOBAL bool HintLine::show_hint_line = false;
+ANTARES_GLOBAL Point HintLine::hint_line_start;
+ANTARES_GLOBAL Point HintLine::hint_line_end;
+ANTARES_GLOBAL RgbColor HintLine::hint_line_color;
+ANTARES_GLOBAL RgbColor HintLine::hint_line_color_dark;
 
 void HintLine::show(Point fromWhere, Point toWhere, uint8_t color, uint8_t brightness) {
     hint_line_start = fromWhere;

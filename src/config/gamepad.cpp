@@ -20,6 +20,7 @@
 
 #include "data/string-list.hpp"
 #include "game/globals.hpp"
+#include "lang/defines.hpp"
 
 using sfz::String;
 using sfz::StringSlice;
@@ -27,8 +28,8 @@ using sfz::range;
 
 namespace antares {
 
-static std::unique_ptr<StringList> gamepad_names;
-static std::unique_ptr<StringList> gamepad_long_names;
+static ANTARES_GLOBAL std::unique_ptr<StringList> gamepad_names;
+static ANTARES_GLOBAL std::unique_ptr<StringList> gamepad_long_names;
 
 void Gamepad::init() {
     gamepad_names.reset(new StringList(Gamepad::NAMES));

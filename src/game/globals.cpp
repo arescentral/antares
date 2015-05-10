@@ -28,13 +28,14 @@
 #include "game/motion.hpp"
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
+#include "lang/defines.hpp"
 #include "sound/driver.hpp"
 
 namespace antares {
 
-static aresGlobalType* gAresGlobal;
+static ANTARES_GLOBAL aresGlobalType* gAresGlobal;
 
-GlobalState g;
+ANTARES_GLOBAL GlobalState g;
 
 aresGlobalType* globals() {
     return gAresGlobal;

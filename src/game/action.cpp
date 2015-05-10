@@ -38,6 +38,7 @@
 #include "game/scenario-maker.hpp"
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
+#include "lang/defines.hpp"
 #include "math/macros.hpp"
 #include "math/random.hpp"
 #include "math/rotation.hpp"
@@ -73,13 +74,13 @@ struct actionQueueType {
     Point                           offset;
 };
 
-static actionQueueType* gFirstActionQueue = NULL;
-static int32_t gFirstActionQueueNumber = -1;
+static ANTARES_GLOBAL actionQueueType* gFirstActionQueue = NULL;
+static ANTARES_GLOBAL int32_t gFirstActionQueueNumber = -1;
 
-static unique_ptr<actionQueueType[]> gActionQueueData;
+static ANTARES_GLOBAL unique_ptr<actionQueueType[]> gActionQueueData;
 
 #ifdef DATA_COVERAGE
-set<int32_t> covered_actions;
+ANTARES_GLOBAL set<int32_t> covered_actions;
 #endif  // DATA_COVERAGE
 
 static void queue_action(

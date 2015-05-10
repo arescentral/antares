@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 
 #include "lang/casts.hpp"
+#include "lang/defines.hpp"
 #include "video/driver.hpp"
 
 using sfz::Bytes;
@@ -38,14 +39,10 @@ namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-namespace {
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // SoundDriver
 
-SoundDriver* sound_driver = NULL;
-
-}  // namespace
+static ANTARES_GLOBAL SoundDriver* sound_driver = NULL;
 
 SoundDriver::SoundDriver() {
     if (antares::sound_driver) {

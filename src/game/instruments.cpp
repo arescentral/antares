@@ -31,6 +31,7 @@
 #include "game/motion.hpp"
 #include "game/player-ship.hpp"
 #include "game/space-object.hpp"
+#include "lang/defines.hpp"
 #include "math/macros.hpp"
 #include "math/random.hpp"
 #include "math/rotation.hpp"
@@ -124,20 +125,20 @@ const int32_t kSectorLineBrightness = DARKER;
 
 namespace {
 
-static coordPointType          gLastGlobalCorner;
-static unique_ptr<Sprite> left_instrument_sprite;
-static unique_ptr<Sprite> right_instrument_sprite;
-static unique_ptr<Point[]> gRadarBlipData;
-static unique_ptr<int32_t[]> gScaleList;
-static bool should_draw_sector_lines = false;
-static Rect view_range;
+static ANTARES_GLOBAL coordPointType          gLastGlobalCorner;
+static ANTARES_GLOBAL unique_ptr<Sprite> left_instrument_sprite;
+static ANTARES_GLOBAL unique_ptr<Sprite> right_instrument_sprite;
+static ANTARES_GLOBAL unique_ptr<Point[]> gRadarBlipData;
+static ANTARES_GLOBAL unique_ptr<int32_t[]> gScaleList;
+static ANTARES_GLOBAL bool should_draw_sector_lines = false;
+static ANTARES_GLOBAL Rect view_range;
 
 struct SiteData {
     bool should_draw;
     Point a, b, c;
     RgbColor light, dark;
 };
-static SiteData site;
+static ANTARES_GLOBAL SiteData site;
 
 template <typename T>
 T clamp(T value, T min, T max) {

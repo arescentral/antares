@@ -26,6 +26,7 @@
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/sprite-handling.hpp"
+#include "lang/defines.hpp"
 #include "game/action.hpp"
 #include "game/admiral.hpp"
 #include "game/beam.hpp"
@@ -63,16 +64,16 @@ const uint8_t kNeutralColor         = SKY_BLUE;
 
 static const int16_t kSpaceObjectNameResID          = 5000;
 static const int16_t kSpaceObjectShortNameResID     = 5001;
-static StringList* space_object_names;
-static StringList* space_object_short_names;
+static ANTARES_GLOBAL StringList* space_object_names;
+static ANTARES_GLOBAL StringList* space_object_short_names;
 
-int BaseObject::size = 0;
-int Action::size = 0;
-static unique_ptr<BaseObject[]> gBaseObjectData;
-static unique_ptr<Action[]> gObjectActionData;
+int ANTARES_GLOBAL BaseObject::size = 0;
+int ANTARES_GLOBAL Action::size = 0;
+static ANTARES_GLOBAL unique_ptr<BaseObject[]> gBaseObjectData;
+static ANTARES_GLOBAL unique_ptr<Action[]> gObjectActionData;
 
 #ifdef DATA_COVERAGE
-set<int32_t> covered_objects;
+ANTARES_GLOBAL set<int32_t> covered_objects;
 #endif  // DATA_COVERAGE
 
 void SpaceObjectHandlingInit() {
