@@ -31,6 +31,7 @@
 #include "math/geometry.hpp"
 #include "math/random.hpp"
 #include "ui/card.hpp"
+#include "video/glsl/fragment.hpp"
 
 #include "game/time.hpp"
 
@@ -51,66 +52,13 @@ namespace antares {
 
 namespace {
 
-static const char kShaderColorModeUniform[] = "color_mode";
-static const char kShaderSpriteUniform[] = "sprite";
-static const char kShaderStaticImageUniform[] = "static_image";
-static const char kShaderStaticFractionUniform[] = "static_fraction";
-static const char kShaderUnitUniform[] = "unit";
-static const char kShaderOutlineColorUniform[] = "outline_color";
-static const char kShaderSeedUniform[] = "seed";
-static const GLchar* kShaderSource =
-    "#version 120\n"
-    "uniform int color_mode;\n"
-    "uniform sampler2DRect sprite;\n"
-    "uniform sampler2D static_image;\n"
-    "uniform float static_fraction;\n"
-    "uniform vec2 unit;\n"
-    "uniform vec4 outline_color;\n"
-    "uniform int seed;\n"
-    "\n"
-    "void main() {\n"
-    "    vec2 uv = gl_TexCoord[0].xy;\n"
-    "    vec4 sprite_color = texture2DRect(sprite, uv);\n"
-    "    if (color_mode == 0) {\n"
-    "        gl_FragColor = gl_Color;\n"
-    "    } else if (color_mode == 1) {\n"
-    "        if (mod(floor(gl_TexCoord[1].s) + floor(gl_TexCoord[1].t), 2) == 1) {\n"
-    "            gl_FragColor = gl_Color;\n"
-    "        } else {\n"
-    "            gl_FragColor = vec4(0, 0, 0, 0);\n"
-    "        }\n"
-    "    } else if (color_mode == 2) {\n"
-    "        gl_FragColor = sprite_color;\n"
-    "    } else if (color_mode == 3) {\n"
-    "        gl_FragColor = gl_Color * sprite_color;\n"
-    "    } else if (color_mode == 4) {\n"
-    "        vec2 uv2 = (gl_TexCoord[1].xy + vec2(seed / 256, seed)) * vec2(1.0/256, 1.0/256);\n"
-    "        vec4 static_color = texture2D(static_image, uv2);\n"
-    "        if (static_color.w <= static_fraction) {\n"
-    "            vec4 sprite_alpha = vec4(1, 1, 1, sprite_color.w);\n"
-    "            gl_FragColor = gl_Color * sprite_alpha;\n"
-    "        } else {\n"
-    "            gl_FragColor = sprite_color;\n"
-    "        }\n"
-    "    } else if (color_mode == 5) {\n"
-    "        float neighborhood =\n"
-    "                texture2DRect(sprite, uv + vec2(-unit.s, -unit.t)).w +\n"
-    "                texture2DRect(sprite, uv + vec2(-unit.s,       0)).w +\n"
-    "                texture2DRect(sprite, uv + vec2(-unit.s,  unit.t)).w +\n"
-    "                texture2DRect(sprite, uv + vec2(      0, -unit.t)).w +\n"
-    "                texture2DRect(sprite, uv + vec2(      0,  unit.t)).w +\n"
-    "                texture2DRect(sprite, uv + vec2( unit.s, -unit.t)).w +\n"
-    "                texture2DRect(sprite, uv + vec2( unit.s,       0)).w +\n"
-    "                texture2DRect(sprite, uv + vec2( unit.s,  unit.t)).w;\n"
-    "        if (sprite_color.w > (neighborhood / 8)) {\n"
-    "            gl_FragColor = outline_color;\n"
-    "        } else if (sprite_color.w > 0) {\n"
-    "            gl_FragColor = gl_Color;\n"
-    "        } else {\n"
-    "            gl_FragColor = vec4(0, 0, 0, 0);\n"
-    "        }\n"
-    "    }\n"
-    "}\n";
+static const char kShaderColorModeUniform[]       = "color_mode";
+static const char kShaderSpriteUniform[]          = "sprite";
+static const char kShaderStaticImageUniform[]     = "static_image";
+static const char kShaderStaticFractionUniform[]  = "static_fraction";
+static const char kShaderUnitUniform[]            = "unit";
+static const char kShaderOutlineColorUniform[]    = "outline_color";
+static const char kShaderSeedUniform[]            = "seed";
 
 #ifndef NDEBUG
 
@@ -535,7 +483,8 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
     GLuint shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(shader, 1, &kShaderSource, NULL);
+    const GLchar* fragment_source = glsl::fragment;
+    glShaderSource(shader, 1, &fragment_source, NULL);
     glCompileShader(shader);
     GLint compiled;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);

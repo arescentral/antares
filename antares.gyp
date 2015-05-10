@@ -12,7 +12,7 @@
     { "ANTARES_VERSION": "0.7.3"
     , "SYSTEM_VERSION": "<(MACOSX_VERSION)"
     }
-  , "include_dirs": ["include"]
+  , "include_dirs": ["include", "<(INTERMEDIATE_DIR)/include"]
   }
 
 , "targets":
@@ -232,6 +232,27 @@
       [ "src/video/driver.cpp"
       , "src/video/opengl-driver.cpp"
       , "src/video/transitions.cpp"
+      , "<(INTERMEDIATE_DIR)/src/video/glsl/fragment.cpp"
+      ]
+    , "actions":
+      [ { "action_name": "fragment"
+        , "message": "Embedding GLSL fragment shader"
+        , "inputs":
+          [ "scripts/embed.py"
+          , "src/video/glsl/fragment.frag"
+          ]
+        , "outputs":
+          [ "<(INTERMEDIATE_DIR)/include/video/glsl/fragment.hpp"
+          , "<(INTERMEDIATE_DIR)/src/video/glsl/fragment.cpp"
+          ]
+        , "action":
+          [ "python"
+          , "scripts/embed.py"
+          , "src/video/glsl/fragment.frag"
+          , "<@(_outputs)"
+          , "antares::glsl::fragment"
+          ]
+        }
       ]
     , "dependencies":
       [ "<(DEPTH)/ext/libpng-gyp/libpng.gyp:libpng"
