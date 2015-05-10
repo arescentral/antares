@@ -55,13 +55,6 @@ enum ZoomType {
     kSmallestZoom           = 7,
 };
 
-struct barIndicatorType {
-    int16_t         top;
-    int32_t         thisValue;
-    uint8_t         color;
-    bool         automatic;      // if it's automatic, it is redrawn automatically
-};
-
 struct miniScreenLineType;
 struct miniComputerDataType {
     std::unique_ptr<miniScreenLineType[]> lineData;
@@ -124,14 +117,9 @@ struct aresGlobalType {
     int32_t         gCenterScaleH;
     int32_t         gCenterScaleV;
     ZoomType        gZoomMode;
-    ZoomType        gPreviousZoomMode;
 
-    int32_t         gWhichScaleNum;         // = 0;
-    int32_t         gLastScale;             // = SCALE_SCALE;
     int32_t         gInstrumentTop;         // = 0;
-    barIndicatorType    gBarIndicator[ kBarIndicatorNum];
     miniComputerDataType    gMiniScreenData;
-    std::unique_ptr<StringList>          gMissionStatusStrList;
     smartSoundHandle    gSound[kSoundNum];
     smartSoundChannel   gChannel[kMaxChannelNum];
 

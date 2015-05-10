@@ -75,6 +75,7 @@ namespace {
 static ANTARES_GLOBAL KeyMap gLastKeyMap;
 static ANTARES_GLOBAL int32_t gDestKeyTime = 0;
 static ANTARES_GLOBAL int32_t gAlarmCount = -1;
+static ANTARES_GLOBAL ZoomType gPreviousZoomMode;
 static ANTARES_GLOBAL Handle<Label> gSelectionLabel;
 static ANTARES_GLOBAL Handle<Label> gDestinationLabel;
 static ANTARES_GLOBAL Handle<Label> gSendMessageLabel;
@@ -117,6 +118,7 @@ void ResetPlayerShip(Handle<SpaceObject> which) {
     globals()->keyMask = 0;
     gLastKeyMap.clear();
     globals()->gZoomMode = kNearestFoeZoom;
+    gPreviousZoomMode = kNearestFoeZoom;
 
     for (int h = 0; h < kHotKeyNum; h++) {
         globals()->hotKey[h].object = SpaceObject::none();
@@ -169,8 +171,8 @@ static void zoom_shortcut(ZoomType zoom) {
     if (globals()->keyMask & kShortcutZoomMask) {
         return;
     }
-    ZoomType previous = globals()->gPreviousZoomMode;
-    globals()->gPreviousZoomMode = globals()->gZoomMode;
+    ZoomType previous = gPreviousZoomMode;
+    gPreviousZoomMode = globals()->gZoomMode;
     if (globals()->gZoomMode == zoom) {
         zoom_to(previous);
     } else {

@@ -125,13 +125,22 @@ const int32_t kSectorLineBrightness = DARKER;
 
 namespace {
 
+struct barIndicatorType {
+    int16_t top;
+    int32_t thisValue;
+    uint8_t color;
+};
+
 static ANTARES_GLOBAL coordPointType          gLastGlobalCorner;
 static ANTARES_GLOBAL unique_ptr<Sprite> left_instrument_sprite;
 static ANTARES_GLOBAL unique_ptr<Sprite> right_instrument_sprite;
 static ANTARES_GLOBAL unique_ptr<Point[]> gRadarBlipData;
 static ANTARES_GLOBAL unique_ptr<int32_t[]> gScaleList;
+static ANTARES_GLOBAL int32_t gWhichScaleNum;
+static ANTARES_GLOBAL int32_t gLastScale;
 static ANTARES_GLOBAL bool should_draw_sector_lines = false;
 static ANTARES_GLOBAL Rect view_range;
+static ANTARES_GLOBAL barIndicatorType gBarIndicator[kBarIndicatorNum];
 
 struct SiteData {
     bool should_draw;
@@ -206,8 +215,8 @@ void ResetInstruments() {
     Point           *lp;
 
     g.radar_count = 0;
-    globals()->gLastScale = gAbsoluteScale = SCALE_SCALE;
-    globals()->gWhichScaleNum = 0;
+    gLastScale = gAbsoluteScale = SCALE_SCALE;
+    gWhichScaleNum = 0;
     gLastGlobalCorner.h = gLastGlobalCorner.v = 0;
     l = gScaleList.get();
     for (i = 0; i < kScaleListNum; i++) {
@@ -217,17 +226,17 @@ void ResetInstruments() {
 
     for ( i = 0; i < kBarIndicatorNum; i++)
     {
-        globals()->gBarIndicator[i].thisValue = -1;
+        gBarIndicator[i].thisValue = -1;
     }
     // the shield bar
-    globals()->gBarIndicator[kShieldBar].top = 359 + globals()->gInstrumentTop;
-    globals()->gBarIndicator[kShieldBar].color = SKY_BLUE;
+    gBarIndicator[kShieldBar].top = 359 + globals()->gInstrumentTop;
+    gBarIndicator[kShieldBar].color = SKY_BLUE;
 
-    globals()->gBarIndicator[kEnergyBar].top = 231 + globals()->gInstrumentTop;
-    globals()->gBarIndicator[kEnergyBar].color = GOLD;
+    gBarIndicator[kEnergyBar].top = 231 + globals()->gInstrumentTop;
+    gBarIndicator[kEnergyBar].color = GOLD;
 
-    globals()->gBarIndicator[kBatteryBar].top = 103 + globals()->gInstrumentTop;
-    globals()->gBarIndicator[kBatteryBar].color = SALMON;
+    gBarIndicator[kBatteryBar].top = 103 + globals()->gInstrumentTop;
+    gBarIndicator[kBatteryBar].color = SALMON;
 
     lp = gRadarBlipData.get();
     for ( i = 0; i < kRadarBlipNum; i++)
@@ -363,11 +372,11 @@ void UpdateRadar(int32_t unitsDone) {
 
     int32_t* scaleval;
     for (int x = 0; x < unitsDone; x++) {
-        scaleval = gScaleList.get() + globals()->gWhichScaleNum;
+        scaleval = gScaleList.get() + gWhichScaleNum;
         *scaleval = bestScale;
-        globals()->gWhichScaleNum++;
-        if (globals()->gWhichScaleNum == kScaleListNum) {
-            globals()->gWhichScaleNum = 0;
+        gWhichScaleNum++;
+        if (gWhichScaleNum == kScaleListNum) {
+            gWhichScaleNum = 0;
         }
     }
 
@@ -424,7 +433,7 @@ void draw_radar() {
 static void draw_money() {
     auto& admiral = g.admiral;
     const int cash = clamp(admiral->cash(), 0, kMaxMoneyValue - 1);
-    globals()->gBarIndicator[kFineMoneyBar].thisValue
+    gBarIndicator[kFineMoneyBar].thisValue
         = (cash % kFineMoneyBarMod) / kFineMoneyBarValue;
     const int price = MiniComputerGetPriceOfCurrentSelection() / kFineMoneyBarValue;
 
@@ -449,20 +458,20 @@ static void draw_money() {
     // Third section: money we don't have and don't need for the current selection.
     RgbColor third_color = GetRGBTranslateColorShade(kFineMoneyColor, VERY_DARK);
 
-    if (globals()->gBarIndicator[kFineMoneyBar].thisValue < price) {
+    if (gBarIndicator[kFineMoneyBar].thisValue < price) {
         first_color_major = GetRGBTranslateColorShade(kFineMoneyColor, VERY_LIGHT);
         first_color_minor = GetRGBTranslateColorShade(kFineMoneyColor, LIGHT);
         second_color_major = GetRGBTranslateColorShade(kFineMoneyNeedColor, MEDIUM);
         second_color_minor = GetRGBTranslateColorShade(kFineMoneyNeedColor, DARK);
-        first_threshold = globals()->gBarIndicator[kFineMoneyBar].thisValue;
+        first_threshold = gBarIndicator[kFineMoneyBar].thisValue;
         second_threshold = price;
     } else {
         first_color_major = GetRGBTranslateColorShade(kFineMoneyColor, VERY_LIGHT);
         first_color_minor = GetRGBTranslateColorShade(kFineMoneyColor, LIGHT);
         second_color_major = GetRGBTranslateColorShade(kFineMoneyUseColor, VERY_LIGHT);
         second_color_minor = GetRGBTranslateColorShade(kFineMoneyUseColor, LIGHT);
-        first_threshold = globals()->gBarIndicator[kFineMoneyBar].thisValue - price;
-        second_threshold = globals()->gBarIndicator[kFineMoneyBar].thisValue;
+        first_threshold = gBarIndicator[kFineMoneyBar].thisValue - price;
+        second_threshold = gBarIndicator[kFineMoneyBar].thisValue;
     }
 
     Rects rects;
@@ -484,9 +493,9 @@ static void draw_money() {
         }
         box.offset(0, kFineMoneyBarHeight);
     }
-    globals()->gBarIndicator[kFineMoneyBar].thisValue = second_threshold;
+    gBarIndicator[kFineMoneyBar].thisValue = second_threshold;
 
-    barIndicatorType* gross = globals()->gBarIndicator + kGrossMoneyBar;
+    barIndicatorType* gross = gBarIndicator + kGrossMoneyBar;
     gross->thisValue = (admiral->cash() / kGrossMoneyBarValue);
 
     box = Rect(0, 0, kGrossMoneyBarWidth, kGrossMoneyBarHeight - 1);
@@ -642,11 +651,11 @@ void update_sector_lines() {
         }
     }
 
-    if ((globals()->gLastScale < kBlipThreshhold) != (gAbsoluteScale < kBlipThreshhold)) {
+    if ((gLastScale < kBlipThreshhold) != (gAbsoluteScale < kBlipThreshhold)) {
         PlayVolumeSound(kComputerBeep4, kMediumVolume, kMediumPersistence, kLowPrioritySound);
     }
 
-    globals()->gLastScale = gAbsoluteScale;
+    gLastScale = gAbsoluteScale;
     gLastGlobalCorner = gGlobalCorner;
 }
 
@@ -661,14 +670,14 @@ void draw_sector_lines() {
     do {
         level *= 2;
         size *= 4;
-        h = (size * globals()->gLastScale) >> SHIFT_SCALE;
+        h = (size * gLastScale) >> SHIFT_SCALE;
     } while (h < kMinGraphicSectorSize);
     level /= 2;
     level *= level;
 
     x = size - (gLastGlobalCorner.h & (size - 1));
     division = ((gLastGlobalCorner.h + x) >> kSubSectorShift) & 0x0000000f;
-    x = ((x * globals()->gLastScale) >> SHIFT_SCALE) + viewport.left;
+    x = ((x * gLastScale) >> SHIFT_SCALE) + viewport.left;
 
     if (should_draw_sector_lines) {
         while ((x < implicit_cast<uint32_t>(viewport.right)) && (h > 0)) {
@@ -691,7 +700,7 @@ void draw_sector_lines() {
 
     x = size - (gLastGlobalCorner.v & (size - 1));
     division = ((gLastGlobalCorner.v + x) >> kSubSectorShift) & 0x0000000f;
-    x = ((x * globals()->gLastScale) >> SHIFT_SCALE) + viewport.top;
+    x = ((x * gLastScale) >> SHIFT_SCALE) + viewport.top;
 
     if (should_draw_sector_lines) {
         while ((x < implicit_cast<uint32_t>(viewport.bottom)) && (h > 0)) {
@@ -923,11 +932,11 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
     RgbColor        color, lightColor, darkColor;
     Rect            rrect;
 
-    int8_t hue = globals()->gBarIndicator[which].color;
+    int8_t hue = gBarIndicator[which].color;
     Rect bar(0, 0, kBarIndicatorWidth, kBarIndicatorHeight);
     bar.offset(
             kBarIndicatorLeft + play_screen.right,
-            globals()->gBarIndicator[which].top);
+            gBarIndicator[which].top);
     if (graphicValue < kBarIndicatorHeight) {
         Rect top_bar = bar;
         top_bar.bottom = top_bar.bottom - graphicValue;
@@ -946,7 +955,7 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
         draw_shaded_rect(rects, bottom_bar, fill_color, light_color, dark_color);
     }
 
-    globals()->gBarIndicator[which].thisValue = value;
+    gBarIndicator[which].thisValue = value;
 }
 
 void draw_build_time_bar(int32_t value) {

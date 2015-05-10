@@ -92,6 +92,7 @@ const int32_t kInLineButton         = kCompAcceptKeyNum;
 const int32_t kOutLineButton        = kCompCancelKeyNum;
 
 static ANTARES_GLOBAL StringList* mini_data_strings;
+static ANTARES_GLOBAL std::unique_ptr<StringList> gMissionStatusStrList;
 
 enum {
     kMainMiniScreen     = 1,
@@ -282,12 +283,12 @@ void MiniScreenCleanup() {
 void SetMiniScreenStatusStrList(int16_t strID) {
     DisposeMiniScreenStatusStrList();
     if (strID > 0) {
-        globals()->gMissionStatusStrList.reset(new StringList(strID));
+        gMissionStatusStrList.reset(new StringList(strID));
     }
 }
 
 void DisposeMiniScreenStatusStrList( void) {
-    globals()->gMissionStatusStrList.reset();
+    gMissionStatusStrList.reset();
 }
 
 void ClearMiniScreenLines() {
@@ -1337,7 +1338,7 @@ void MiniComputerSetStatusStrings() {
 
     miniScreenLineType  *line;
 
-    if (globals()->gMissionStatusStrList.get() == NULL) {
+    if (gMissionStatusStrList.get() == NULL) {
         for (int count = kStatusMiniScreenFirstLine; count < kMiniScreenCharHeight; count++) {
             line = globals()->gMiniScreenData.lineData.get() + count;
             line->statusType = kNoStatusData;
@@ -1351,11 +1352,11 @@ void MiniComputerSetStatusStrings() {
         line = globals()->gMiniScreenData.lineData.get() + count;
 
         if (implicit_cast<size_t>(count - kStatusMiniScreenFirstLine) <
-                globals()->gMissionStatusStrList->size()) {
+                gMissionStatusStrList->size()) {
             // we have some data for this line to interpret
 
             StringSlice sourceString =
-                globals()->gMissionStatusStrList->at(count - kStatusMiniScreenFirstLine);
+                gMissionStatusStrList->at(count - kStatusMiniScreenFirstLine);
 
             if (sourceString.at(0) == '_') {
                 line->underline = true;
