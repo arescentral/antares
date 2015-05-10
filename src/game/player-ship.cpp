@@ -72,7 +72,6 @@ void Update_LabelStrings_ForHotKeyChange( void);
 
 namespace {
 
-static ANTARES_GLOBAL KeyMap gLastKeyMap;
 static ANTARES_GLOBAL int32_t gDestKeyTime = 0;
 static ANTARES_GLOBAL int32_t gAlarmCount = -1;
 static ANTARES_GLOBAL ZoomType gPreviousZoomMode;
@@ -116,7 +115,6 @@ void ResetPlayerShip(Handle<SpaceObject> which) {
     gAlarmCount = -1;
     globals()->gAutoPilotOff = true;
     globals()->keyMask = 0;
-    gLastKeyMap.clear();
     globals()->gZoomMode = kNearestFoeZoom;
     gPreviousZoomMode = kNearestFoeZoom;
 
@@ -799,7 +797,6 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
         theShip->keysDown &= ~kWarpKey;
     }
 
-    gLastKeyMap.copy(_keys);
     gLastKeys = gTheseKeys;
 }
 
