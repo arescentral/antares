@@ -60,6 +60,15 @@ static const char kShaderUnitUniform[]            = "unit";
 static const char kShaderOutlineColorUniform[]    = "outline_color";
 static const char kShaderSeedUniform[]            = "seed";
 
+enum {
+    FILL_MODE            = 0,
+    DITHER_MODE          = 1,
+    DRAW_SPRITE_MODE     = 2,
+    TINT_SPRITE_MODE     = 3,
+    STATIC_SPRITE_MODE   = 4,
+    OUTLINE_SPRITE_MODE  = 5,
+};
+
 #ifndef NDEBUG
 
 static const char* _gl_error_string(GLenum err) {
@@ -202,7 +211,7 @@ class OpenGlSprite : public Sprite {
     }
 
     virtual void draw(const Rect& draw_rect) const {
-        glUniform1i(_uniforms.color_mode, 2);
+        glUniform1i(_uniforms.color_mode, DRAW_SPRITE_MODE);
         draw_internal(draw_rect);
     }
 
@@ -214,13 +223,13 @@ class OpenGlSprite : public Sprite {
 
     virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const {
         glColor4ub(tint.red, tint.green, tint.blue, 255);
-        glUniform1i(_uniforms.color_mode, 3);
+        glUniform1i(_uniforms.color_mode, TINT_SPRITE_MODE);
         draw_internal(draw_rect);
     }
 
     virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const {
         glColor4ub(color.red, color.green, color.blue, color.alpha);
-        glUniform1i(_uniforms.color_mode, 4);
+        glUniform1i(_uniforms.color_mode, STATIC_SPRITE_MODE);
         glUniform1f(_uniforms.static_fraction, frac / 255.0);
         draw_internal(draw_rect);
     }
@@ -228,7 +237,7 @@ class OpenGlSprite : public Sprite {
     virtual void draw_outlined(
             const Rect& draw_rect, const RgbColor& outline_color,
             const RgbColor& fill_color) const {
-        glUniform1i(_uniforms.color_mode, 5);
+        glUniform1i(_uniforms.color_mode, OUTLINE_SPRITE_MODE);
         glUniform2f(
                 _uniforms.unit,
                 double(_size.width) / draw_rect.width(),
@@ -267,7 +276,7 @@ class OpenGlSprite : public Sprite {
     }
 
     virtual void begin_quads() const {
-        glUniform1i(_uniforms.color_mode, 3);
+        glUniform1i(_uniforms.color_mode, TINT_SPRITE_MODE);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
         glBegin(GL_QUADS);
@@ -318,7 +327,7 @@ unique_ptr<Sprite> OpenGlVideoDriver::new_sprite(PrintItem name, const PixMap& c
 }
 
 void OpenGlVideoDriver::begin_rects() {
-    glUniform1i(_uniforms.color_mode, 0);
+    glUniform1i(_uniforms.color_mode, FILL_MODE);
     glBegin(GL_QUADS);
 }
 
@@ -335,7 +344,7 @@ void OpenGlVideoDriver::end_rects() {
 }
 
 void OpenGlVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
-    glUniform1i(_uniforms.color_mode, 1);
+    glUniform1i(_uniforms.color_mode, DITHER_MODE);
     glColor4ub(color.red, color.green, color.blue, color.alpha);
     glBegin(GL_QUADS);
     glMultiTexCoord2f(GL_TEXTURE1, rect.right, rect.top);
@@ -350,7 +359,7 @@ void OpenGlVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
 }
 
 void OpenGlVideoDriver::begin_points() {
-    glUniform1i(_uniforms.color_mode, 0);
+    glUniform1i(_uniforms.color_mode, FILL_MODE);
     glBegin(GL_POINTS);
 }
 
@@ -370,7 +379,7 @@ void OpenGlVideoDriver::draw_point(const Point& at, const RgbColor& color) {
 }
 
 void OpenGlVideoDriver::begin_lines() {
-    glUniform1i(_uniforms.color_mode, 0);
+    glUniform1i(_uniforms.color_mode, FILL_MODE);
     glBegin(GL_LINES);
 }
 
