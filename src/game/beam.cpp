@@ -68,26 +68,26 @@ int32_t scale(int32_t value, int32_t scale) {
 
 }  // namespace
 
-beamType::beamType():
+Beam::Beam():
         killMe(false),
         active(false) { }
 
 void Beams::init() {
-    g.beams.reset(new beamType[kBeamNum]);
+    g.beams.reset(new Beam[kBeamNum]);
 }
 
 void Beams::reset() {
-    beamType* const beams = g.beams.get();
-    for (beamType* beam: range(beams, beams + kBeamNum)) {
+    Beam* const beams = g.beams.get();
+    for (Beam* beam: range(beams, beams + kBeamNum)) {
         clear(*beam);
     }
 }
 
-beamType* Beams::add(
+Beam* Beams::add(
         coordPointType* location, uint8_t color, beamKindType kind, int32_t accuracy,
         int32_t beam_range) {
-    beamType* const beams = g.beams.get();
-    for (beamType* beam: range(beams, beams + kBeamNum)) {
+    Beam* const beams = g.beams.get();
+    for (Beam* beam: range(beams, beams + kBeamNum)) {
         if (!beam->active) {
             beam->lastGlobalLocation = *location;
             beam->objectLocation = *location;
@@ -120,7 +120,7 @@ beamType* Beams::add(
 }
 
 void Beams::set_attributes(Handle<SpaceObject> beamObject, Handle<SpaceObject> sourceObject) {
-    beamType& beam = *beamObject->frame.beam;
+    Beam& beam = *beamObject->frame.beam;
     beam.fromObjectID = sourceObject->id;
     beam.fromObject = sourceObject;
 
@@ -175,8 +175,8 @@ void Beams::set_attributes(Handle<SpaceObject> beamObject, Handle<SpaceObject> s
 }
 
 void Beams::update() {
-    beamType* const beams = g.beams.get();
-    for (beamType* beam: range(beams, beams + kBeamNum)) {
+    Beam* const beams = g.beams.get();
+    for (Beam* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
             if (beam->lastApparentLocation != beam->objectLocation) {
                 beam->thisLocation = Rect(
@@ -234,8 +234,8 @@ void Beams::update() {
 
 void Beams::draw() {
     Lines lines;
-    beamType* const beams = g.beams.get();
-    for (beamType* beam: range(beams, beams + kBeamNum)) {
+    Beam* const beams = g.beams.get();
+    for (Beam* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
             if (!beam->killMe) {
                 if (beam->color) {
@@ -259,8 +259,8 @@ void Beams::draw() {
 }
 
 void Beams::show_all() {
-    beamType* const beams = g.beams.get();
-    for (beamType* beam: range(beams, beams + kBeamNum)) {
+    Beam* const beams = g.beams.get();
+    for (Beam* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
             if (beam->killMe) {
                 beam->active = false;
@@ -278,8 +278,8 @@ void Beams::show_all() {
 }
 
 void Beams::cull() {
-    beamType* const beams = g.beams.get();
-    for (beamType* beam: range(beams, beams + kBeamNum)) {
+    Beam* const beams = g.beams.get();
+    for (Beam* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
                 if (beam->killMe) {
                     beam->active = false;

@@ -72,7 +72,7 @@ struct hotKeyType {
 };
 
 struct Admiral;
-struct beamType;
+struct Beam;
 struct Destination;
 struct proximityUnitType;
 struct scrollStarType;
@@ -94,7 +94,7 @@ struct GlobalState {
     Handle<SpaceObject>             closest;   // Nearest object or hostile, depending on zoom.
     Handle<SpaceObject>             farthest;  // Farthest object (sufficient for zoom-to-all).
 
-    std::unique_ptr<beamType[]>     beams;         // Auxiliary info for kIsBeam objects.
+    std::unique_ptr<Beam[]>         beams;         // Auxiliary info for kIsBeam objects.
     std::unique_ptr<Destination[]>  destinations;  // Auxiliary info for kIsDestination objects.
     std::unique_ptr<spriteType[]>   sprites;       // Auxiliary info for objects with sprites.
 

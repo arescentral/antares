@@ -34,8 +34,6 @@ enum dutyType {
     eHostileBaseDuty =  4
 };
 
-//typedef beamTypeStruct;
-
 class SpaceObject {
   public:
     static SpaceObject* get(int number);
@@ -118,7 +116,7 @@ class SpaceObject {
             int32_t             frameDirection;
             Fixed               frameSpeed;
         } animation;
-        beamType*               beam;
+        Beam*                   beam;
     } frame;
 
     int32_t                 _health = 0;

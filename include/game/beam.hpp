@@ -39,7 +39,7 @@ enum beamKindEnum {
 
 static const int kBoltPointNum = 10;
 
-struct beamType {
+struct Beam {
     beamKindType        beamKind;
     Rect                thisLocation;
     coordPointType      lastGlobalLocation;
@@ -60,14 +60,14 @@ struct beamType {
     Point               thisBoltPoint[kBoltPointNum];
     Point               lastBoltPoint[kBoltPointNum];
 
-    beamType();
+    Beam();
 };
 
 class Beams {
   public:
     static void init();
     static void reset();
-    static beamType* add(
+    static Beam* add(
             coordPointType* location, uint8_t color, beamKindType kind, int32_t accuracy,
             int32_t beam_range);
     static void set_attributes(Handle<SpaceObject> beamObject, Handle<SpaceObject> sourceObject);
