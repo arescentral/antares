@@ -887,7 +887,7 @@ void SpaceObject::destroy() {
 
 void SpaceObject::free() {
     if (attributes & kIsBeam) {
-        if (frame.beam != NULL) {
+        if (frame.beam.get()) {
             frame.beam->killMe = true;
         }
     } else {

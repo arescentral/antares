@@ -109,14 +109,14 @@ class SpaceObject {
     Rect                absoluteBounds;
     Random                  randomSeed;
 
-    union {
+    struct {
         struct {
             int32_t             thisShape;
             Fixed               frameFraction;
             int32_t             frameDirection;
             Fixed               frameSpeed;
         } animation;
-        Beam*                   beam;
+        Handle<Beam>            beam;
     } frame;
 
     int32_t                 _health = 0;

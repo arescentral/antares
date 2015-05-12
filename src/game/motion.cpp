@@ -400,8 +400,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                     }
                 } else if ( anObject->attributes & kIsBeam)
                 {
-                    if ( anObject->frame.beam != NULL)
-                    {
+                    if (anObject->frame.beam.get()) {
                         anObject->frame.beam->objectLocation =
                             anObject->location;
                         if (( anObject->frame.beam->beamKind ==

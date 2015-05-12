@@ -40,6 +40,12 @@ enum beamKindEnum {
 static const int kBoltPointNum = 10;
 
 struct Beam {
+    static Beam* get(int number);
+    static Handle<Beam> none() { return Handle<Beam>(-1); }
+    static HandleList<Beam> all() { return HandleList<Beam>(0, size); }
+
+    Beam();
+
     beamKindType        beamKind;
     Rect                thisLocation;
     coordPointType      lastGlobalLocation;
@@ -60,14 +66,16 @@ struct Beam {
     Point               thisBoltPoint[kBoltPointNum];
     Point               lastBoltPoint[kBoltPointNum];
 
-    Beam();
+  private:
+    friend class Beams;
+    const static size_t size = 256;
 };
 
 class Beams {
   public:
     static void init();
     static void reset();
-    static Beam* add(
+    static Handle<Beam> add(
             coordPointType* location, uint8_t color, beamKindType kind, int32_t accuracy,
             int32_t beam_range);
     static void set_attributes(Handle<SpaceObject> beamObject, Handle<SpaceObject> sourceObject);
