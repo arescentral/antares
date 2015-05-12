@@ -45,7 +45,7 @@ void Cursor::draw() const {
 void Cursor::draw_at(Point where) const {
     if (world.contains(where)) {
         where.offset(-_sprite.at(0).center().h, -_sprite.at(0).center().v);
-        _sprite.at(0).sprite().draw(where.h, where.v);
+        _sprite.at(0).texture().draw(where.h, where.v);
     }
 }
 

@@ -175,9 +175,9 @@ void gl_log(GLint object) {
     print(io::err, format("object {0} log: {1}\n", object, (const char*)log.get()));
 }
 
-class OpenGlSprite : public Sprite {
+class OpenGlTextureImpl : public Texture::Impl {
   public:
-    OpenGlSprite(PrintItem name, const PixMap& image, const OpenGlVideoDriver::Uniforms& uniforms)
+    OpenGlTextureImpl(PrintItem name, const PixMap& image, const OpenGlVideoDriver::Uniforms& uniforms)
             : _name(name),
               _size(image.size()),
               _uniforms(uniforms) {
@@ -314,7 +314,7 @@ class OpenGlSprite : public Sprite {
     Size _size;
     const OpenGlVideoDriver::Uniforms& _uniforms;
 
-    DISALLOW_COPY_AND_ASSIGN(OpenGlSprite);
+    DISALLOW_COPY_AND_ASSIGN(OpenGlTextureImpl);
 };
 
 }  // namespace
@@ -322,8 +322,8 @@ class OpenGlSprite : public Sprite {
 OpenGlVideoDriver::OpenGlVideoDriver()
         : _static_seed{0} { }
 
-Texture OpenGlVideoDriver::new_sprite(PrintItem name, const PixMap& content) {
-    return Texture(new OpenGlSprite(name, content, _uniforms));
+Texture OpenGlVideoDriver::texture(PrintItem name, const PixMap& content) {
+    return unique_ptr<Texture::Impl>(new OpenGlTextureImpl(name, content, _uniforms));
 }
 
 void OpenGlVideoDriver::begin_rects() {
@@ -446,9 +446,9 @@ void OpenGlVideoDriver::draw_triangle(const Rect& rect, const RgbColor& color) {
         ArrayPixMap pix(size, size);
         pix.fill(RgbColor::kClear);
         draw_triangle_up(&pix, RgbColor::kWhite);
-        _triangles[size] = new_sprite("", pix);
+        _triangles[size] = texture("", pix);
     }
-    _triangles[size]->draw_shaded(to, color);
+    _triangles[size].draw_shaded(to, color);
 }
 
 void OpenGlVideoDriver::draw_diamond(const Rect& rect, const RgbColor& color) {
@@ -459,9 +459,9 @@ void OpenGlVideoDriver::draw_diamond(const Rect& rect, const RgbColor& color) {
         ArrayPixMap pix(size, size);
         pix.fill(RgbColor::kClear);
         draw_compat_diamond(&pix, RgbColor::kWhite);
-        _diamonds[size] = new_sprite("", pix);
+        _diamonds[size] = texture("", pix);
     }
-    _diamonds[size]->draw_shaded(to, color);
+    _diamonds[size].draw_shaded(to, color);
 }
 
 void OpenGlVideoDriver::draw_plus(const Rect& rect, const RgbColor& color) {
@@ -472,9 +472,9 @@ void OpenGlVideoDriver::draw_plus(const Rect& rect, const RgbColor& color) {
         ArrayPixMap pix(size, size);
         pix.fill(RgbColor::kClear);
         draw_compat_plus(&pix, RgbColor::kWhite);
-        _pluses[size] = new_sprite("", pix);
+        _pluses[size] = texture("", pix);
     }
-    _pluses[size]->draw_shaded(to, color);
+    _pluses[size].draw_shaded(to, color);
 }
 
 OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {

@@ -93,7 +93,7 @@ void BriefingScreen::overlay() const {
         {
             const Point star = _star_rect.center();
             RgbColor gold = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
-            _star_map->draw_cropped(_bounds, Point(0, 2));
+            _star_map.draw_cropped(_bounds, Point(0, 2));
             Rects rects;
             draw_vbracket(rects, _star_rect, gold);
             rects.fill({star.h, _bounds.top, star.h + 1, _star_rect.top + 1}, gold);
@@ -209,7 +209,7 @@ void BriefingScreen::handle_button(Button& button) {
 
 void BriefingScreen::build_star_map() {
     Picture pict(kStarMapPictId);
-    _star_map = VideoDriver::driver()->new_sprite(format("/pictures/{0}.png", kStarMapPictId), pict);
+    _star_map = VideoDriver::driver()->texture(format("/pictures/{0}.png", kStarMapPictId), pict);
     Rect pix_bounds = pict.size().as_rect();
     pix_bounds.offset(0, 2);
     pix_bounds.bottom -= 3;

@@ -268,12 +268,12 @@ void draw_sprites() {
 
                     switch (aSprite->style) {
                       case spriteNormal:
-                        frame.sprite().draw(draw_rect);
+                        frame.texture().draw(draw_rect);
                         break;
 
                       case spriteColor:
                         Randomize(63);
-                        frame.sprite().draw_static(
+                        frame.texture().draw_static(
                                 draw_rect, aSprite->styleColor, aSprite->styleData);
                         break;
                     }

@@ -42,7 +42,7 @@ class TextVideoDriver : public VideoDriver {
     virtual int usecs() const { return _scheduler.usecs(); }
     virtual int64_t double_click_interval_usecs() const { return 0.5e6; }
 
-    virtual Texture new_sprite(sfz::PrintItem name, const PixMap& content);
+    virtual Texture texture(sfz::PrintItem name, const PixMap& content);
     virtual void dither_rect(const Rect& rect, const RgbColor& color);
     virtual void draw_point(const Point& at, const RgbColor& color);
     virtual void draw_line(const Point& from, const Point& to, const RgbColor& color);
@@ -54,7 +54,7 @@ class TextVideoDriver : public VideoDriver {
 
   private:
     class MainLoop;
-    class Sprite;
+    class TextureImpl;
 
     virtual void batch_rect(const Rect& rect, const RgbColor& color);
 

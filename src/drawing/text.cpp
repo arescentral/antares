@@ -161,7 +161,7 @@ struct FontVisitor : public JsonDefaultVisitor {
             case IMAGE: {
                 Picture glyph_table(value);
                 recolor(glyph_table);
-                texture = VideoDriver::driver()->new_sprite(format("/{0}", value), glyph_table);
+                texture = VideoDriver::driver()->texture(format("/{0}", value), glyph_table);
                 break;
             }
             default:
@@ -219,7 +219,7 @@ Rect Font::glyph_rect(Rune r) const {
 }
 
 void Font::draw(Point cursor, sfz::StringSlice string, RgbColor color) const {
-    draw(Quads(*texture), cursor, string, color);
+    draw(Quads(texture), cursor, string, color);
 }
 
 void Font::draw(const Quads& quads, Point cursor, sfz::StringSlice string, RgbColor color) const {

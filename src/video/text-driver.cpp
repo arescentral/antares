@@ -76,9 +76,9 @@ void print_to(PrintTarget target, HexColor color) {
 
 }  // namespace
 
-class TextVideoDriver::Sprite : public antares::Sprite {
+class TextVideoDriver::TextureImpl : public Texture::Impl {
   public:
-    Sprite(PrintItem name, TextVideoDriver& driver, Size size):
+    TextureImpl(PrintItem name, TextVideoDriver& driver, Size size):
             _name(name),
             _driver(driver),
             _size(size) { }
@@ -189,8 +189,8 @@ TextVideoDriver::TextVideoDriver(
         _scheduler(scheduler),
         _output_dir(output_dir) { }
 
-Texture TextVideoDriver::new_sprite(sfz::PrintItem name, const PixMap& content) {
-    return Texture(new Sprite(name, *this, content.size()));
+Texture TextVideoDriver::texture(sfz::PrintItem name, const PixMap& content) {
+    return std::unique_ptr<Texture::Impl>(new TextureImpl(name, *this, content.size()));
 }
 
 void TextVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {

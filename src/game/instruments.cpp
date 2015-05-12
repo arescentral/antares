@@ -182,7 +182,7 @@ void InstrumentInit() {
             from.offset(0, (pict.size().height - world.height()) / 2);
         }
         pix_map.view(to).copy(pict.view(from));
-        left_instrument_texture = VideoDriver::driver()->new_sprite(
+        left_instrument_texture = VideoDriver::driver()->texture(
                 format("/pictures/{0}.png", kInstLeftPictID), pix_map);
     }
     {
@@ -194,7 +194,7 @@ void InstrumentInit() {
             from.offset(0, (pict.size().height - world.height()) / 2);
         }
         pix_map.view(to).copy(pict.view(from));
-        right_instrument_texture = VideoDriver::driver()->new_sprite(
+        right_instrument_texture = VideoDriver::driver()->texture(
                 format("/pictures/{0}.png", kInstRightPictID), pix_map);
     }
 
@@ -531,8 +531,8 @@ void draw_instruments() {
         right_rect.inset(0, (world.height() - 768) / 2);
     }
 
-    left_instrument_texture->draw(left_rect.left, left_rect.top);
-    right_instrument_texture->draw(right_rect.left, right_rect.top);
+    left_instrument_texture.draw(left_rect.left, left_rect.top);
+    right_instrument_texture.draw(right_rect.left, right_rect.top);
 
     if (g.ship.get()) {
         auto player = g.ship;

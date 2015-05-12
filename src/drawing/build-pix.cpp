@@ -46,18 +46,18 @@ class PixDraw {
     PixDraw(Point origin, int32_t width)
             : _bounds(origin, {width, 0}) { }
 
-    void set_background(const Sprite& sprite) {
-        _background = &sprite;
+    void set_background(const Texture& texture) {
+        _background = &texture;
         _background_start = _bounds.height();
     }
 
-    void add_picture(const Sprite& sprite) {
+    void add_picture(const Texture& texture) {
         Rect surround(
-            _bounds.left, _bounds.bottom, _bounds.right, _bounds.bottom + sprite.size().height);
-        extend(sprite.size().height);
-        Rect dest = sprite.size().as_rect();
+            _bounds.left, _bounds.bottom, _bounds.right, _bounds.bottom + texture.size().height);
+        extend(texture.size().height);
+        Rect dest = texture.size().as_rect();
         dest.center_in(surround);
-        sprite.draw(dest);
+        texture.draw(dest);
     }
 
     void add_text(const StyledText& text) {
@@ -93,7 +93,7 @@ class PixDraw {
 
     Rect _bounds;
 
-    const Sprite* _background;
+    const Texture* _background;
     int _background_start;
 };
 
@@ -137,7 +137,7 @@ BuildPix::BuildPix(int text_id, int width):
                     Picture pict(id);
                     _lines.push_back(Line{
                         Line::BACKGROUND,
-                        VideoDriver::driver()->new_sprite("-", pict),
+                        VideoDriver::driver()->texture("-", pict),
                         nullptr,
                     });
                 } else {
@@ -148,7 +148,7 @@ BuildPix::BuildPix(int text_id, int width):
                     Picture pict(id);
                     _lines.push_back(Line{
                         Line::PICTURE,
-                        VideoDriver::driver()->new_sprite("-", pict),
+                        VideoDriver::driver()->texture("-", pict),
                         nullptr,
                     });
                 }
@@ -165,7 +165,7 @@ BuildPix::BuildPix(int text_id, int width):
 
     for (const auto& line: _lines) {
         switch (line.type) {
-            case Line::PICTURE: _size.height += line.texture->size().height; break;
+            case Line::PICTURE: _size.height += line.texture.size().height; break;
             case Line::TEXT: _size.height += line.text->height(); break;
             case Line::BACKGROUND: break;
         }
@@ -176,9 +176,9 @@ void BuildPix::draw(Point origin) const {
     PixDraw draw(origin, _size.width);
     for (const auto& line: _lines) {
         switch (line.type) {
-            case Line::PICTURE: draw.add_picture(*line.texture); break;
+            case Line::PICTURE: draw.add_picture(line.texture); break;
             case Line::TEXT: draw.add_text(*line.text); break;
-            case Line::BACKGROUND: draw.set_background(*line.texture); break;
+            case Line::BACKGROUND: draw.set_background(line.texture); break;
         }
     }
 }

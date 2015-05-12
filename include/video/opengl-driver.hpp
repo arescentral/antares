@@ -36,7 +36,7 @@ class OpenGlVideoDriver : public VideoDriver {
   public:
     OpenGlVideoDriver();
 
-    virtual Texture new_sprite(sfz::PrintItem name, const PixMap& content);
+    virtual Texture texture(sfz::PrintItem name, const PixMap& content);
     virtual void dither_rect(const Rect& rect, const RgbColor& color);
     virtual void draw_point(const Point& at, const RgbColor& color);
     virtual void draw_line(const Point& from, const Point& to, const RgbColor& color);

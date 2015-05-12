@@ -351,7 +351,7 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
     }
 
     {
-        Quads quads(*_font->texture);
+        Quads quads(_font->texture);
         for (size_t i = begin; i < end; ++i) {
             const StyledChar& ch = _chars[i];
             Point corner = bounds.origin();
@@ -370,9 +370,9 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
             const inlinePictType& inline_pict = _inline_picts[ch.character];
             corner.offset(inline_pict.bounds.left, inline_pict.bounds.top + _line_spacing);
             Picture pict(inline_pict.id);
-            Texture texture(VideoDriver::driver()->new_sprite(
+            Texture texture(VideoDriver::driver()->texture(
                         format("/pictures/{0}.png", inline_pict.id), pict));
-            texture->draw(corner.h, corner.v);
+            texture.draw(corner.h, corner.v);
         }
     }
 }

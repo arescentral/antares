@@ -56,7 +56,7 @@ class NatePixTable::Frame {
     uint16_t height() const;
     Point center() const;
     const PixMap& pix_map() const;
-    const Sprite& sprite() const;
+    const Texture& texture() const;
 
   private:
     void load_image(const PixMap& pix);
