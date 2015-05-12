@@ -76,7 +76,7 @@ struct Beam;
 struct Destination;
 struct proximityUnitType;
 struct scrollStarType;
-struct spriteType;
+struct Sprite;
 class InputSource;
 class StringList;
 
@@ -96,7 +96,7 @@ struct GlobalState {
 
     std::unique_ptr<Beam[]>         beams;         // Auxiliary info for kIsBeam objects.
     std::unique_ptr<Destination[]>  destinations;  // Auxiliary info for kIsDestination objects.
-    std::unique_ptr<spriteType[]>   sprites;       // Auxiliary info for objects with sprites.
+    std::unique_ptr<Sprite[]>       sprites;       // Auxiliary info for objects with sprites.
 
     bool             game_over;     // True if an admiral won or lost the level.
     int64_t          game_over_at;  // The time to stop the game (ignored unless game_over).

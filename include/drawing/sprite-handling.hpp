@@ -65,7 +65,7 @@ enum spriteStyleType {
 
 typedef void (*draw_tiny_t)(const Rect& rect, const RgbColor& color);
 
-struct spriteType {
+struct Sprite {
     Point           where;
     NatePixTable*   table;
     int16_t         resID;
@@ -80,7 +80,7 @@ struct spriteType {
     bool            killMe;
     draw_tiny_t     draw_tiny;
 
-    spriteType();
+    Sprite();
 };
 
 extern int32_t gAbsoluteScale;
@@ -102,10 +102,10 @@ void KeepPixTable(int16_t resource_id);
 void RemoveAllUnusedPixTables();
 NatePixTable* AddPixTable(int16_t resource_id);
 NatePixTable* GetPixTable(int16_t resource_id);
-spriteType *AddSprite(
+Sprite *AddSprite(
         Point where, NatePixTable* table, int16_t resID, int16_t whichShape, int32_t scale, int32_t size,
         int16_t layer, const RgbColor& color);
-void RemoveSprite(spriteType *);
+void RemoveSprite(Sprite *);
 void draw_sprites();
 void CullSprites();
 

@@ -148,7 +148,7 @@ class SpaceObject {
     int16_t                 active = kObjectAvailable;
 
     int16_t                 layer = 0;
-    spriteType              *sprite = nullptr;
+    Sprite*                 sprite = nullptr;
 
     uint64_t                distanceFromPlayer = 0;
     uint32_t                closestDistance = kMaximumRelevantDistanceSquared;
