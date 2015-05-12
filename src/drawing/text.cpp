@@ -86,17 +86,17 @@ struct FontVisitor : public JsonDefaultVisitor {
         State(): state(NEW) { }
     };
     State& state;
-    unique_ptr<Sprite>& sprite;
+    Texture& texture;
     int32_t& logical_width;
     int32_t& height;
     int32_t& ascent;
     map<Rune, Rect>& glyphs;
 
-    FontVisitor(State& state, unique_ptr<Sprite>& sprite,
+    FontVisitor(State& state, Texture& texture,
                 int32_t& logical_width, int32_t& height, int32_t& ascent,
                 map<Rune, Rect>& glyphs):
             state(state),
-            sprite(sprite),
+            texture(texture),
             logical_width(logical_width),
             height(height),
             ascent(ascent),
@@ -161,7 +161,7 @@ struct FontVisitor : public JsonDefaultVisitor {
             case IMAGE: {
                 Picture glyph_table(value);
                 recolor(glyph_table);
-                sprite = VideoDriver::driver()->new_sprite(format("/{0}", value), glyph_table);
+                texture = VideoDriver::driver()->new_sprite(format("/{0}", value), glyph_table);
                 break;
             }
             default:
@@ -205,7 +205,7 @@ Font::Font(StringSlice name) {
         throw Exception("invalid JSON");
     }
     FontVisitor::State state;
-    json.accept(FontVisitor(state, sprite, logicalWidth, height, ascent, _glyphs));
+    json.accept(FontVisitor(state, texture, logicalWidth, height, ascent, _glyphs));
 }
 
 Font::~Font() { }
@@ -219,7 +219,7 @@ Rect Font::glyph_rect(Rune r) const {
 }
 
 void Font::draw(Point cursor, sfz::StringSlice string, RgbColor color) const {
-    draw(Quads(*sprite), cursor, string, color);
+    draw(Quads(*texture), cursor, string, color);
 }
 
 void Font::draw(const Quads& quads, Point cursor, sfz::StringSlice string, RgbColor color) const {

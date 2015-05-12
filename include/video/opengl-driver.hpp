@@ -36,7 +36,7 @@ class OpenGlVideoDriver : public VideoDriver {
   public:
     OpenGlVideoDriver();
 
-    virtual std::unique_ptr<Sprite> new_sprite(sfz::PrintItem name, const PixMap& content);
+    virtual Texture new_sprite(sfz::PrintItem name, const PixMap& content);
     virtual void dither_rect(const Rect& rect, const RgbColor& color);
     virtual void draw_point(const Point& at, const RgbColor& color);
     virtual void draw_line(const Point& from, const Point& to, const RgbColor& color);
@@ -93,9 +93,9 @@ class OpenGlVideoDriver : public VideoDriver {
 
     Uniforms _uniforms;
 
-    std::map<size_t, std::unique_ptr<Sprite>> _triangles;
-    std::map<size_t, std::unique_ptr<Sprite>> _diamonds;
-    std::map<size_t, std::unique_ptr<Sprite>> _pluses;
+    std::map<size_t, Texture> _triangles;
+    std::map<size_t, Texture> _diamonds;
+    std::map<size_t, Texture> _pluses;
 
     DISALLOW_COPY_AND_ASSIGN(OpenGlVideoDriver);
 };

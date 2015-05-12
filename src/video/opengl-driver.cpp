@@ -322,8 +322,8 @@ class OpenGlSprite : public Sprite {
 OpenGlVideoDriver::OpenGlVideoDriver()
         : _static_seed{0} { }
 
-unique_ptr<Sprite> OpenGlVideoDriver::new_sprite(PrintItem name, const PixMap& content) {
-    return unique_ptr<Sprite>(new OpenGlSprite(name, content, _uniforms));
+Texture OpenGlVideoDriver::new_sprite(PrintItem name, const PixMap& content) {
+    return Texture(new OpenGlSprite(name, content, _uniforms));
 }
 
 void OpenGlVideoDriver::begin_rects() {

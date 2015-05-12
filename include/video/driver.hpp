@@ -33,6 +33,8 @@ class KeyMap;
 class PixMap;
 class Sprite;
 
+typedef std::unique_ptr<Sprite> Texture;
+
 enum GameState {
     UNKNOWN,
     MAIN_SCREEN_INTERFACE,
@@ -58,7 +60,7 @@ class VideoDriver {
     virtual int usecs() const = 0;
     virtual int64_t double_click_interval_usecs() const = 0;
 
-    virtual std::unique_ptr<Sprite> new_sprite(sfz::PrintItem name, const PixMap& content) = 0;
+    virtual Texture new_sprite(sfz::PrintItem name, const PixMap& content) = 0;
     virtual void dither_rect(const Rect& rect, const RgbColor& color) = 0;
     virtual void draw_point(const Point& at, const RgbColor& color) = 0;
     virtual void draw_line(const Point& from, const Point& to, const RgbColor& color) = 0;

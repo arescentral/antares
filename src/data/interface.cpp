@@ -209,7 +209,7 @@ void TextRect::accept(const Visitor& visitor) const {
 PictureRect::PictureRect(int id, Rect bounds, StringSlice resource):
         InterfaceItem(id, bounds),
         picture(resource),
-        sprite(VideoDriver::driver()->new_sprite(format("/{0}", resource), picture)),
+        texture(VideoDriver::driver()->new_sprite(format("/{0}", resource), picture)),
         visible_bounds(false),
         hue(GRAY),
         style(kSmall) { }
