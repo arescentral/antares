@@ -213,7 +213,7 @@ void Label::update_positions(int32_t units_done) {
     for (auto label: all()) {
         bool isOffScreen = false;
         if ((label->active) && (!label->killMe)) {
-            if (label->object.get() && (label->object->sprite != NULL)) {
+            if (label->object.get() && label->object->sprite.get()) {
                 if (label->object->active) {
                     label->where.h = label->object->sprite->where.h + label->offset.h;
 

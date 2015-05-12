@@ -490,7 +490,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
         {
             auto baseObject = anObject->base;
 
-            if ( !(anObject->attributes & kIsBeam) && ( anObject->sprite != NULL))
+            if ( !(anObject->attributes & kIsBeam) && anObject->sprite.get())
             {
                 h = ( anObject->location.h - gGlobalCorner.h) * gAbsoluteScale;
                 h >>= SHIFT_SCALE;
@@ -702,7 +702,7 @@ void CollideSpaceObjects() {
             }
             aObject->runTimeFlags &= ~kIsHidden;
 
-            if (aObject->sprite != NULL) {
+            if (aObject->sprite.get()) {
                 aObject->sprite->tinySize = aObject->tinySize;
             }
         }
@@ -717,7 +717,7 @@ void CollideSpaceObjects() {
             // this hack is to get the current bounds of the object in question
             // it could be sped up by accessing the sprite table directly
             if ((aObject->absoluteBounds.left >= aObject->absoluteBounds.right)
-                    && (aObject->sprite != NULL)) {
+                    && aObject->sprite.get()) {
                 const NatePixTable::Frame& frame
                     = aObject->sprite->table->at(aObject->sprite->whichShape);
 
@@ -774,7 +774,7 @@ void CollideSpaceObjects() {
                     // this hack is to get the current bounds of the object in question
                     // it could be sped up by accessing the sprite table directly
                     if ((bObject->absoluteBounds.left >= bObject->absoluteBounds.right)
-                            && (bObject->sprite != NULL)) {
+                            && bObject->sprite.get()) {
                         const NatePixTable::Frame& frame
                             = bObject->sprite->table->at(bObject->sprite->whichShape);
 
@@ -1028,7 +1028,7 @@ hackBNoEngageMatch:
                 }
                 aObject->seenByPlayerFlags |= aObject->myPlayerFlag;
                 if (!(aObject->seenByPlayerFlags & seen_by_player)
-                        && aObject->sprite) {
+                        && aObject->sprite.get()) {
                     aObject->sprite->tinySize = 0;
                 }
             }

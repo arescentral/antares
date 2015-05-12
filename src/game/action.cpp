@@ -193,7 +193,7 @@ static void play_sound(Handle<Action> action, Handle<SpaceObject> focus) {
 static void make_sparks(Handle<Action> action, Handle<SpaceObject> focus) {
     const auto& sparks = action->argument.makeSparks;
     Point location;
-    if (focus->sprite != NULL) {
+    if (focus->sprite.get()) {
         location.h = focus->sprite->where.h;
         location.v = focus->sprite->where.v;
     } else {

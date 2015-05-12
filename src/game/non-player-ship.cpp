@@ -242,7 +242,7 @@ void NonplayerShipThink(int32_t timePass)
         keysDown = anObject->keysDown & kSpecialKeyMask;
 
         // strobe its symbol if it's not feeling well
-        if (anObject->sprite) {
+        if (anObject->sprite.get()) {
             if ((anObject->health() > 0) && (anObject->health() <= (anObject->max_health() >> 2))) {
                 if (anObject->owner == g.admiral) {
                     anObject->sprite->tinyColor = friendSick;
@@ -1159,7 +1159,7 @@ uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
     if (anObject->presence.landing.scale <= 0) {
         exec(anObject->baseType->expire, anObject, target, NULL);
         anObject->active = kObjectToBeFreed;
-    } else if (anObject->sprite) {
+    } else if (anObject->sprite.get()) {
         anObject->sprite->scale = anObject->presence.landing.scale;
     }
 
@@ -1829,7 +1829,7 @@ Handle<SpaceObject> GetSpritePointSelectObject(
     Handle<SpaceObject> resultShip, closestShip;
     for (auto anObject: SpaceObject::all()) {
         if (!anObject->active
-                || !anObject->sprite
+                || !anObject->sprite.get()
                 || !(anObject->seenByPlayerFlags & myOwnerFlag)
                 || ((anyOneAttribute != 0) && ((anObject->attributes & anyOneAttribute) == 0))
                 || !allegiance_is(allegiance, sourceObject->owner, anObject)

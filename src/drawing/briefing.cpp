@@ -328,7 +328,7 @@ static void render_briefing_with(
         Rect& rect = gBriefingSpriteBounds[anObject.number()];
         rect = Rect(0, 0, 0, 0);
         Rect spriteRect;
-        if (( anObject->active == kObjectInUse) && ( anObject->sprite != NULL))
+        if (( anObject->active == kObjectInUse) && ( anObject->sprite.get()))
         {
             auto baseObject = anObject->base;
             if (baseObject->maxVelocity == 0) {

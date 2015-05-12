@@ -600,7 +600,7 @@ static void update_triangle(SiteData& site, int32_t direction, int32_t distance,
 void update_site(bool replay) {
     if (!g.ship.get()) {
         site.should_draw = false;
-    } else if (!(g.ship->active && (g.ship->sprite != NULL))) {
+    } else if (!(g.ship->active && g.ship->sprite.get())) {
         site.should_draw = false;
     } else if (g.ship->offlineTime <= 0) {
         site.should_draw = true;
