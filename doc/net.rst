@@ -80,8 +80,12 @@ Every tick:
  4. head_ is updated as far the longest `input log`_ runs (which would
     be the local player's log).
 
-The net protocol loops independently of this.  At each iteration, to
-each peer_, for each player_, a node_ sends:
+Some things should happen only on the final iteration of step 4.  For
+example, sounds and the starfield should be updated as if head_ were the
+true state of the universe.
+
+The net protocol loops independently of the above.  At each iteration,
+to each peer_, for each player_, a node_ sends:
 
   * The leading timestamp of the local log_ for that player_.
   * Any input after the end of the peer_'s log_ for that player_.
@@ -111,17 +115,18 @@ not be sent at all; it is merely local state that gets baked into the
 abstract form of an order or transfer.
 
 Some forms of input are irrelevant to the net protocol (zoom, volume,
-dismissing messages) or impossible in net games (fast motion) and
-shouldn't be sent.
+dismissing messages) or impossible in net games (fast motion).  However,
+they should be part of the local input log, so that we can track local
+state appropriately.  It's probably easiest to send them so that we can
+assume that the local and remote version of an input log are the same.
 
 ..  note::
 
-    Some things that are listed above as not getting sent can be tested
-    in conditions (is control, is target, message displayed, computer
-    state, zoom level, on autopilot, not on autopilot, is player).
-    However, those conditions are broken on multiplayer anyway because
-    they test against the local player_ and would therefore cause
-    desync_.
+    Some things that are only needed locally can be tested in conditions
+    (is control, is target, message displayed, computer state, zoom
+    level, on autopilot, not on autopilot, is player).  However, those
+    conditions are broken on multiplayer anyway because they test
+    against the local player_ and would therefore cause desync_.
 
 `Input logs`_ are circular buffers.  The leading edge is filled either
 through local input or from the network.  The trailing edge is trimmed
@@ -198,8 +203,7 @@ malicious desync_, which is probably OK for now.
 Replays
 -------
 
-The `input logs`_ in a game are almost enough to make into a replay, but
-in a replay, we will want cosmetic things that don't need to be sent in
-real-time (minicomputer, selection, zoom).
+The `input logs`_ in a game have all the information we need to make a
+replay, so we should implement them as such.
 
 ..  -*- tab-width: 4; fill-column: 72 -*-
