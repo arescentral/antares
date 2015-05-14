@@ -43,7 +43,7 @@ VideoDriver* VideoDriver::driver() {
     return antares::video_driver;
 }
 
-Sprite::~Sprite() { }
+Texture::Impl::~Impl() { }
 
 Points::Points() {
     VideoDriver::driver()->begin_points();
@@ -81,17 +81,17 @@ void Rects::fill(const Rect& rect, const RgbColor& color) const {
     VideoDriver::driver()->batch_rect(rect, color);
 }
 
-Quads::Quads(const Sprite& sprite):
+Quads::Quads(const Texture& sprite):
         _sprite(sprite) {
-    _sprite.begin_quads();
+    _sprite._impl->begin_quads();
 }
 
 Quads::~Quads() {
-    _sprite.end_quads();
+    _sprite._impl->end_quads();
 }
 
 void Quads::draw(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
-    _sprite.draw_quad(draw_rect, origin, tint);
+    _sprite._impl->draw_quad(draw_rect, origin, tint);
 }
 
 }  // namespace antares

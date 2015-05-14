@@ -414,7 +414,7 @@ void draw_mini_screen() {
     }
 
     {
-        Quads quads(*computer_font->sprite);
+        Quads quads(computer_font->texture);
         for (int32_t count = 0; count < kMiniScreenTrueLineNum; count++) {
             auto c = &globals()->gMiniScreenData.lineData[count];
             Rect mRect = Rect(
@@ -889,7 +889,7 @@ void draw_mini_ship_data(
             }
             rect.center_in(dRect);
 
-            frame.sprite().draw(rect);
+            frame.texture().draw(rect);
         }
     }
 

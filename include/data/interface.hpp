@@ -23,10 +23,9 @@
 
 #include "math/geometry.hpp"
 #include "data/picture.hpp"
+#include "video/driver.hpp"
 
 namespace antares {
-
-class Sprite;
 
 enum interfaceItemStatusType {
     kDimmed = 1,
@@ -107,7 +106,7 @@ struct PictureRect : public InterfaceItem {
     virtual void accept(const Visitor& visitor) const;
 
     Picture                     picture;
-    std::unique_ptr<Sprite>     sprite;
+    Texture                     texture;
     bool                        visible_bounds;
     uint8_t                     hue;
     interfaceStyleType          style;

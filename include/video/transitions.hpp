@@ -23,6 +23,7 @@
 
 #include "drawing/color.hpp"
 #include "ui/card.hpp"
+#include "video/driver.hpp"
 
 namespace antares {
 
@@ -116,7 +117,7 @@ class PictFade : public Card {
     bool* _skipped;
     int64_t _wane_start;
 
-    std::unique_ptr<Sprite> _sprite;
+    Texture _texture;
 
     DISALLOW_COPY_AND_ASSIGN(PictFade);
 };

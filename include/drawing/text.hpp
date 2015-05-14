@@ -23,6 +23,7 @@
 
 #include "drawing/sprite-handling.hpp"
 #include "lang/casts.hpp"
+#include "video/driver.hpp"
 
 namespace antares {
 
@@ -39,7 +40,7 @@ class Font {
     void draw(Point cursor, sfz::StringSlice string, RgbColor color) const;
     void draw(const Quads& quads, Point cursor, sfz::StringSlice string, RgbColor color) const;
 
-    std::unique_ptr<Sprite> sprite;
+    Texture texture;
     int32_t logicalWidth;
     int32_t height;
     int32_t ascent;

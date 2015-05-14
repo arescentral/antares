@@ -31,7 +31,7 @@ namespace antares {
 class Card;
 class KeyMap;
 class PixMap;
-class Sprite;
+class Texture;
 
 enum GameState {
     UNKNOWN,
@@ -58,7 +58,7 @@ class VideoDriver {
     virtual int usecs() const = 0;
     virtual int64_t double_click_interval_usecs() const = 0;
 
-    virtual std::unique_ptr<Sprite> new_sprite(sfz::PrintItem name, const PixMap& content) = 0;
+    virtual Texture texture(sfz::PrintItem name, const PixMap& content) = 0;
     virtual void dither_rect(const Rect& rect, const RgbColor& color) = 0;
     virtual void draw_point(const Point& at, const RgbColor& color) = 0;
     virtual void draw_line(const Point& from, const Point& to, const RgbColor& color) = 0;
@@ -88,46 +88,75 @@ class VideoDriver {
     virtual void batch_rect(const Rect& rect, const RgbColor& color) = 0;
 };
 
-class Sprite {
+class Texture {
   public:
-    virtual ~Sprite();
-    virtual sfz::StringSlice name() const = 0;
-    virtual void draw(const Rect& draw_rect) const = 0;
-    virtual void draw_cropped(const Rect& draw_rect, Point origin, const RgbColor& tint=RgbColor::kWhite) const = 0;
-    virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const = 0;
-    virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const = 0;
-    virtual void draw_outlined(
-            const Rect& draw_rect, const RgbColor& outline_color,
-            const RgbColor& fill_color) const = 0;
-    virtual const Size& size() const = 0;
+    struct Impl {
+        virtual ~Impl();
+        virtual sfz::StringSlice name() const = 0;
+        virtual void draw(const Rect& draw_rect) const = 0;
+        virtual void draw_cropped(const Rect& draw_rect, Point origin, const RgbColor& tint) const = 0;
+        virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const = 0;
+        virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const = 0;
+        virtual void draw_outlined(
+                const Rect& draw_rect, const RgbColor& outline_color,
+                const RgbColor& fill_color) const = 0;
+        virtual const Size& size() const = 0;
 
-    virtual void draw(int32_t x, int32_t y) const {
-        draw(rect(x, y));
+        virtual void begin_quads() const { }
+        virtual void end_quads() const { }
+        virtual void draw_quad(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
+            draw_cropped(draw_rect, origin, tint);
+        }
+    };
+
+    Texture(std::nullptr_t n=nullptr) { }
+    Texture(std::unique_ptr<Impl> impl): _impl(std::move(impl)) { }
+
+    void draw(const Rect& draw_rect) const { _impl->draw(draw_rect); }
+    void draw(int32_t x, int32_t y) const { _impl->draw(rect(x, y)); }
+
+    void draw_cropped(
+            const Rect& draw_rect, Point origin, const RgbColor& tint=RgbColor::kWhite) const {
+        _impl->draw_cropped(draw_rect, origin, tint);
     }
-    virtual void draw_shaded(int32_t x, int32_t y, const RgbColor& tint) const {
-        draw_shaded(rect(x, y), tint);
+
+    void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const {
+        _impl->draw_static(draw_rect, color, frac);
     }
-    virtual void draw_static(int32_t x, int32_t y, const RgbColor& color, uint8_t frac) const {
-        draw_static(rect(x, y), color, frac);
+
+    void draw_outlined(
+            const Rect& draw_rect, const RgbColor& outline_color,
+            const RgbColor& fill_color) const {
+        _impl->draw_outlined(draw_rect, outline_color, fill_color);
     }
-    virtual void draw_outlined(
+
+    void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const {
+        _impl->draw_shaded(draw_rect, tint);
+    }
+    void draw_shaded(int32_t x, int32_t y, const RgbColor& tint) const {
+        _impl->draw_shaded(rect(x, y), tint);
+    }
+
+    void draw_static(int32_t x, int32_t y, const RgbColor& color, uint8_t frac) const {
+        _impl->draw_static(rect(x, y), color, frac);
+    }
+
+    void draw_outlined(
             int32_t x, int32_t y, const RgbColor& outline_color,
             const RgbColor& fill_color) const {
-        draw_outlined(rect(x, y), outline_color, fill_color);
+        _impl->draw_outlined(rect(x, y), outline_color, fill_color);
     }
+
+    const Size& size() const { return _impl->size(); }
 
   private:
     friend class Quads;
 
     Rect rect(int32_t x, int32_t y) const {
-        return Rect(x, y, x + size().width, y + size().height);
+        return Rect(x, y, x + _impl->size().width, y + _impl->size().height);
     }
 
-    virtual void begin_quads() const { }
-    virtual void end_quads() const { }
-    virtual void draw_quad(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
-        draw_cropped(draw_rect, origin, tint);
-    }
+    std::unique_ptr<Impl> _impl;
 };
 
 class Points {
@@ -153,11 +182,11 @@ class Rects {
 
 class Quads {
   public:
-    Quads(const Sprite& sprite);
+    Quads(const Texture& sprite);
     ~Quads();
     void draw(const Rect& draw_rect, Point origin, const RgbColor& tint) const;
   private:
-    const Sprite& _sprite;
+    const Texture& _sprite;
 };
 
 }  // namespace antares

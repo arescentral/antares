@@ -1102,7 +1102,7 @@ void draw_picture_rect(Point origin, const PictureRect& item) {
     if (item.visible_bounds) {
         draw_plain_rect(origin, item);
     }
-    item.sprite->draw(bounds.left, bounds.top);
+    item.texture.draw(bounds.left, bounds.top);
 }
 
 namespace {

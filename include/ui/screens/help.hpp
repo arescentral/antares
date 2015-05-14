@@ -26,8 +26,6 @@
 
 namespace antares {
 
-class Sprite;
-
 class HelpScreen : public InterfaceScreen {
   public:
     HelpScreen();

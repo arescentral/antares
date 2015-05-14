@@ -27,8 +27,6 @@
 
 namespace antares {
 
-class Sprite;
-
 class ScrollTextScreen : public Card {
   public:
     ScrollTextScreen(int text_id, int width, double speed);
@@ -48,7 +46,6 @@ class ScrollTextScreen : public Card {
 
   private:
     BuildPix _build_pix;
-    std::unique_ptr<Sprite> _sprite;
     const double _speed;
     const bool _play_song;
     const int _song_id;

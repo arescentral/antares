@@ -132,8 +132,8 @@ struct barIndicatorType {
 };
 
 static ANTARES_GLOBAL coordPointType          gLastGlobalCorner;
-static ANTARES_GLOBAL unique_ptr<Sprite> left_instrument_sprite;
-static ANTARES_GLOBAL unique_ptr<Sprite> right_instrument_sprite;
+static ANTARES_GLOBAL Texture left_instrument_texture;
+static ANTARES_GLOBAL Texture right_instrument_texture;
 static ANTARES_GLOBAL unique_ptr<int32_t[]> gScaleList;
 static ANTARES_GLOBAL int32_t gWhichScaleNum;
 static ANTARES_GLOBAL int32_t gLastScale;
@@ -182,7 +182,7 @@ void InstrumentInit() {
             from.offset(0, (pict.size().height - world.height()) / 2);
         }
         pix_map.view(to).copy(pict.view(from));
-        left_instrument_sprite = VideoDriver::driver()->new_sprite(
+        left_instrument_texture = VideoDriver::driver()->texture(
                 format("/pictures/{0}.png", kInstLeftPictID), pix_map);
     }
     {
@@ -194,7 +194,7 @@ void InstrumentInit() {
             from.offset(0, (pict.size().height - world.height()) / 2);
         }
         pix_map.view(to).copy(pict.view(from));
-        right_instrument_sprite = VideoDriver::driver()->new_sprite(
+        right_instrument_texture = VideoDriver::driver()->texture(
                 format("/pictures/{0}.png", kInstRightPictID), pix_map);
     }
 
@@ -531,8 +531,8 @@ void draw_instruments() {
         right_rect.inset(0, (world.height() - 768) / 2);
     }
 
-    left_instrument_sprite->draw(left_rect.left, left_rect.top);
-    right_instrument_sprite->draw(right_rect.left, right_rect.top);
+    left_instrument_texture.draw(left_rect.left, left_rect.top);
+    right_instrument_texture.draw(right_rect.left, right_rect.top);
 
     if (g.ship.get()) {
         auto player = g.ship;
@@ -600,7 +600,7 @@ static void update_triangle(SiteData& site, int32_t direction, int32_t distance,
 void update_site(bool replay) {
     if (!g.ship.get()) {
         site.should_draw = false;
-    } else if (!(g.ship->active && (g.ship->sprite != NULL))) {
+    } else if (!(g.ship->active && g.ship->sprite.get())) {
         site.should_draw = false;
     } else if (g.ship->offlineTime <= 0) {
         site.should_draw = true;

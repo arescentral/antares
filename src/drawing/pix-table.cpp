@@ -285,10 +285,10 @@ uint16_t NatePixTable::Frame::width() const { return _bounds.width(); }
 uint16_t NatePixTable::Frame::height() const { return _bounds.height(); }
 Point NatePixTable::Frame::center() const { return _bounds.origin(); }
 const PixMap& NatePixTable::Frame::pix_map() const { return _pix_map; }
-const Sprite& NatePixTable::Frame::sprite() const { return *_sprite; }
+const Texture& NatePixTable::Frame::texture() const { return _texture; }
 
 void NatePixTable::Frame::build(int16_t id, int frame) {
-    _sprite = VideoDriver::driver()->new_sprite(
+    _texture = VideoDriver::driver()->texture(
             format("/sprites/{0}.SMIV/{1}", id, frame), _pix_map);
 }
 

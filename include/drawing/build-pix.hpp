@@ -41,7 +41,7 @@ class BuildPix {
             BACKGROUND,
             TEXT,
         } type;
-        std::unique_ptr<Sprite> sprite;
+        Texture texture;
         std::unique_ptr<StyledText> text;
     };
     std::vector<Line> _lines;

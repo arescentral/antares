@@ -328,7 +328,7 @@ static void render_briefing_with(
         Rect& rect = gBriefingSpriteBounds[anObject.number()];
         rect = Rect(0, 0, 0, 0);
         Rect spriteRect;
-        if (( anObject->active == kObjectInUse) && ( anObject->sprite != NULL))
+        if (( anObject->active == kObjectInUse) && ( anObject->sprite.get()))
         {
             auto baseObject = anObject->base;
             if (baseObject->maxVelocity == 0) {
@@ -415,7 +415,7 @@ struct DriverRenderer {
         *sprite_rect = scale_sprite_rect(frame, where, scale);
         Rect draw_rect = *sprite_rect;
         draw_rect.offset(origin.h, origin.v);
-        frame.sprite().draw_outlined(draw_rect, outline_color, fill_color);
+        frame.texture().draw_outlined(draw_rect, outline_color, fill_color);
     }
     void draw(
             const NatePixTable::Frame& frame, Point where, int32_t scale,
@@ -423,7 +423,7 @@ struct DriverRenderer {
         *sprite_rect = scale_sprite_rect(frame, where, scale);
         Rect draw_rect = *sprite_rect;
         draw_rect.offset(origin.h, origin.v);
-        frame.sprite().draw(draw_rect);
+        frame.texture().draw(draw_rect);
     }
 };
 

@@ -19,6 +19,7 @@
 #ifndef ANTARES_DRAWING_SPRITE_HANDLING_HPP_
 #define ANTARES_DRAWING_SPRITE_HANDLING_HPP_
 
+#include "data/handle.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 
@@ -65,7 +66,14 @@ enum spriteStyleType {
 
 typedef void (*draw_tiny_t)(const Rect& rect, const RgbColor& color);
 
-struct spriteType {
+class Sprite {
+  public:
+    static Sprite* get(int number);
+    static Handle<Sprite> none() { return Handle<Sprite>(-1); }
+    static HandleList<Sprite> all() { return HandleList<Sprite>(0, size); }
+
+    Sprite();
+
     Point           where;
     NatePixTable*   table;
     int16_t         resID;
@@ -80,7 +88,9 @@ struct spriteType {
     bool            killMe;
     draw_tiny_t     draw_tiny;
 
-    spriteType();
+  private:
+    friend void SpriteHandlingInit();
+    static const size_t size = 500;
 };
 
 extern int32_t gAbsoluteScale;
@@ -102,10 +112,10 @@ void KeepPixTable(int16_t resource_id);
 void RemoveAllUnusedPixTables();
 NatePixTable* AddPixTable(int16_t resource_id);
 NatePixTable* GetPixTable(int16_t resource_id);
-spriteType *AddSprite(
+Handle<Sprite> AddSprite(
         Point where, NatePixTable* table, int16_t resID, int16_t whichShape, int32_t scale, int32_t size,
         int16_t layer, const RgbColor& color);
-void RemoveSprite(spriteType *);
+void RemoveSprite(Handle<Sprite> sprite);
 void draw_sprites();
 void CullSprites();
 

@@ -42,8 +42,6 @@ namespace antares {
 
 namespace {
 
-const size_t kMaxSpriteNum = 500;
-
 const size_t kMinVolatilePixTable = 1;  // sound 0 is always there; 1+ is volatile
 
 const uint32_t kSolidSquareBlip     = 0x00000000;
@@ -111,7 +109,7 @@ int32_t ANTARES_GLOBAL gAbsoluteScale = MIN_SCALE;
 void SpriteHandlingInit() {
     ResetAllPixTables();
 
-    g.sprites.reset(new spriteType[kMaxSpriteNum]);
+    g.sprites.reset(new Sprite[Sprite::size]);
     ResetAllSprites();
 
     for (int i = 0; i < 4000; ++i) {
@@ -119,7 +117,14 @@ void SpriteHandlingInit() {
     }
 }
 
-spriteType::spriteType()
+Sprite* Sprite::get(int number) {
+    if ((0 <= number) && (number < size)) {
+        return &g.sprites[number];
+    }
+    return nullptr;
+}
+
+Sprite::Sprite()
         : table(NULL),
           resID(-1),
           style(spriteNormal),
@@ -130,8 +135,8 @@ spriteType::spriteType()
           draw_tiny(NULL) { }
 
 void ResetAllSprites() {
-    for (int i: range(kMaxSpriteNum)) {
-        zero(&g.sprites[i]);
+    for (auto sprite: Sprite::all()) {
+        zero(sprite.get());
     }
 }
 
@@ -197,10 +202,10 @@ NatePixTable* GetPixTable(int16_t resource_id) {
     return NULL;
 }
 
-spriteType *AddSprite(
+Handle<Sprite> AddSprite(
         Point where, NatePixTable* table, int16_t resID, int16_t whichShape, int32_t scale, int32_t size,
         int16_t layer, const RgbColor& color) {
-    for (spriteType* sprite: range(g.sprites.get(), g.sprites.get() + kMaxSpriteNum)) {
+    for (Handle<Sprite> sprite: Sprite::all()) {
         if (sprite->table == NULL) {
             sprite->where = where;
             sprite->table = table;
@@ -220,13 +225,13 @@ spriteType *AddSprite(
         }
     }
 
-    return NULL;
+    return Sprite::none();
 }
 
-void RemoveSprite(spriteType *aSprite) {
-    aSprite->killMe = false;
-    aSprite->table = NULL;
-    aSprite->resID = -1;
+void RemoveSprite(Handle<Sprite> sprite) {
+    sprite->killMe = false;
+    sprite->table = NULL;
+    sprite->resID = -1;
 }
 
 int32_t scale_by(int32_t value, int32_t scale) {
@@ -249,8 +254,7 @@ Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t sc
 void draw_sprites() {
     if (gAbsoluteScale >= kBlipThreshhold) {
         for (int layer: range<int>(kFirstSpriteLayer, kLastSpriteLayer + 1)) {
-            for (int i: range(kMaxSpriteNum)) {
-                spriteType* aSprite = &g.sprites[i];
+            for (auto aSprite: Sprite::all()) {
                 if ((aSprite->table != NULL)
                         && !aSprite->killMe
                         && (aSprite->whichLayer == layer)) {
@@ -268,12 +272,12 @@ void draw_sprites() {
 
                     switch (aSprite->style) {
                       case spriteNormal:
-                        frame.sprite().draw(draw_rect);
+                        frame.texture().draw(draw_rect);
                         break;
 
                       case spriteColor:
                         Randomize(63);
-                        frame.sprite().draw_static(
+                        frame.texture().draw_static(
                                 draw_rect, aSprite->styleColor, aSprite->styleData);
                         break;
                     }
@@ -282,8 +286,7 @@ void draw_sprites() {
         }
     } else {
         for (int layer: range<int>(kFirstSpriteLayer, kLastSpriteLayer + 1)) {
-            for (int i: range(kMaxSpriteNum)) {
-                spriteType* aSprite = &g.sprites[i];
+            for (auto aSprite: Sprite::all()) {
                 int tinySize = aSprite->tinySize & kBlipSizeMask;
                 if ((aSprite->table != NULL)
                         && !aSprite->killMe
@@ -304,8 +307,7 @@ void draw_sprites() {
 // Asteroids before the player actually starts.
 
 void CullSprites() {
-    for (int i: range(kMaxSpriteNum)) {
-        spriteType* aSprite = &g.sprites[i];
+    for (auto aSprite: Sprite::all()) {
         if (aSprite->table != NULL) {
             if (aSprite->killMe) {
                 RemoveSprite(aSprite);

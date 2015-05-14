@@ -34,8 +34,6 @@ enum dutyType {
     eHostileBaseDuty =  4
 };
 
-//typedef beamTypeStruct;
-
 class SpaceObject {
   public:
     static SpaceObject* get(int number);
@@ -111,14 +109,14 @@ class SpaceObject {
     Rect                absoluteBounds;
     Random                  randomSeed;
 
-    union {
+    struct {
         struct {
             int32_t             thisShape;
             Fixed               frameFraction;
             int32_t             frameDirection;
             Fixed               frameSpeed;
         } animation;
-        beamType*               beam;
+        Handle<Beam>            beam;
     } frame;
 
     int32_t                 _health = 0;
@@ -150,7 +148,7 @@ class SpaceObject {
     int16_t                 active = kObjectAvailable;
 
     int16_t                 layer = 0;
-    spriteType              *sprite = nullptr;
+    Handle<Sprite>          sprite;
 
     uint64_t                distanceFromPlayer = 0;
     uint32_t                closestDistance = kMaximumRelevantDistanceSquared;

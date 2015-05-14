@@ -118,7 +118,7 @@ void ResetAllSpaceObjects() {
     g.root = SpaceObject::none();
     for (auto anObject: SpaceObject::all()) {
         anObject->active = kObjectAvailable;
-        anObject->sprite = NULL;
+        anObject->sprite = Sprite::none();
     }
 }
 
@@ -184,11 +184,11 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
             (int32_t((obj->location.h - gGlobalCorner.h) * gAbsoluteScale) >> SHIFT_SCALE) + viewport.left,
             (int32_t((obj->location.v - gGlobalCorner.v) * gAbsoluteScale) >> SHIFT_SCALE));
 
-    if (obj->sprite) {
+    if (obj->sprite.get()) {
         RemoveSprite(obj->sprite);
     }
 
-    obj->sprite = NULL;
+    obj->sprite = Sprite::none();
     if (spriteTable) {
         uint8_t tinyShade;
         switch (obj->layer) {
@@ -235,7 +235,7 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
                 obj->tinySize, obj->layer, tinyColor);
         obj->tinyColor = tinyColor;
 
-        if (obj->sprite == NULL) {
+        if (!obj->sprite.get()) {
             g.game_over = true;
             g.game_over_at = g.time;
             obj->active = kObjectAvailable;
@@ -261,9 +261,9 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
 
 void RemoveAllSpaceObjects() {
     for (auto obj: SpaceObject::all()) {
-        if (obj->sprite != NULL) {
+        if (obj->sprite.get()) {
             RemoveSprite(obj->sprite);
-            obj->sprite = NULL;
+            obj->sprite = Sprite::none();
         }
         obj->active = kObjectAvailable;
         obj->nextNearObject = obj->nextFarObject = SpaceObject::none();
@@ -317,7 +317,7 @@ SpaceObject::SpaceObject(
     owner               = new_owner;
     location            = initial_location;
     id                  = object_id;
-    sprite              = nullptr;
+    sprite              = Sprite::none();
 
     attributes          = baseType->attributes;
     shieldColor         = baseType->shieldColor;
@@ -716,7 +716,7 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
         object->attributes = object->baseType->attributes;
     }
 
-    if (object->sprite != NULL) {
+    if (object->sprite.get()) {
         uint8_t tinyShade;
         switch (object->sprite->whichLayer) {
           case kFirstSpriteLayer:   tinyShade = MEDIUM; break;
@@ -887,11 +887,11 @@ void SpaceObject::destroy() {
 
 void SpaceObject::free() {
     if (attributes & kIsBeam) {
-        if (frame.beam != NULL) {
+        if (frame.beam.get()) {
             frame.beam->killMe = true;
         }
     } else {
-        if (sprite != NULL) {
+        if (sprite.get()) {
             sprite->killMe = true;
         }
     }
