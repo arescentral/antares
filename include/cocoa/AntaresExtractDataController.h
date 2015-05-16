@@ -27,10 +27,14 @@
     NSString* _path;
     NSString* _scenario;
 
-    IBOutlet NSWindow* _window;
-    IBOutlet NSProgressIndicator* _progress_bar;
-    IBOutlet NSTextField* _status_field;
+    NSWindow* _window;
+    NSProgressIndicator* _progress_bar;
+    NSTextField* _status_field;
 }
+
+@property (strong) IBOutlet NSWindow* _window;
+@property (strong) IBOutlet NSProgressIndicator* _progress_bar;
+@property (strong) IBOutlet NSTextField* _status_field;
 
 - (id)initWithTarget:(id)target selector:(SEL)selector path:(NSString*)path;
 - (id)initWithTarget:(id)target selector:(SEL)selector scenario:(NSString*)scenario;

@@ -31,6 +31,10 @@ static void set_label(const char* status, void* userdata) {
 
 @implementation AntaresExtractDataController
 
+@synthesize _window;
+@synthesize _progress_bar;
+@synthesize _status_field;
+
 - (id)initWithTarget:(id)target selector:(SEL)selector path:(NSString*)path {
     if (!(self = [super init])) {
         return NULL;
@@ -39,7 +43,7 @@ static void set_label(const char* status, void* userdata) {
     _selector = selector;
     _path = [path retain];
     _scenario = nil;
-    if (![NSBundle loadNibNamed:@"ExtractData" owner:self]) {
+    if (![[NSBundle mainBundle] loadNibNamed:@"ExtractData" owner:self topLevelObjects:nil]) {
         [self release];
         return nil;
     }
@@ -54,7 +58,7 @@ static void set_label(const char* status, void* userdata) {
     _selector = selector;
     _path = nil;
     _scenario = [scenario retain];
-    if (![NSBundle loadNibNamed:@"ExtractData" owner:self]) {
+    if (![[NSBundle mainBundle] loadNibNamed:@"ExtractData" owner:self topLevelObjects:nil]) {
         [self release];
         return nil;
     }
