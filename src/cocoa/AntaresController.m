@@ -45,11 +45,10 @@
 // it's not worth doing anything fancier.
 static NSInteger compare_resolutions(id x, id y, void* unused) {
     (void)unused;
-
-    int x_width = [[x objectForKey:(NSString*)kCGDisplayWidth] intValue];
-    int x_height = [[x objectForKey:(NSString*)kCGDisplayHeight] intValue];
-    int y_width = [[y objectForKey:(NSString*)kCGDisplayWidth] intValue];
-    int y_height = [[y objectForKey:(NSString*)kCGDisplayHeight] intValue];
+    int x_width = CGDisplayModeGetWidth((CGDisplayModeRef)x);
+    int x_height = CGDisplayModeGetHeight((CGDisplayModeRef)x);
+    int y_width = CGDisplayModeGetWidth((CGDisplayModeRef)y);
+    int y_height = CGDisplayModeGetHeight((CGDisplayModeRef)y);
 
     if (x_height < y_height) {
         return NSOrderedAscending;
@@ -114,8 +113,8 @@ static NSURL* url(const char* utf8_bytes) {
     // Assumes that the sender's representedObject is a display mode
     // dictionary, as set below.  Updates user defaults with the width
     // and height of the selected resolution.
-    int width = [[[sender representedObject] objectForKey:(NSString*)kCGDisplayWidth] intValue];
-    int height = [[[sender representedObject] objectForKey:(NSString*)kCGDisplayHeight] intValue];
+    int width = CGDisplayModeGetWidth((CGDisplayModeRef)[sender representedObject]);
+    int height = CGDisplayModeGetHeight((CGDisplayModeRef)[sender representedObject]);;
     [[NSUserDefaults standardUserDefaults] setInteger:width forKey:kScreenWidth];
     [[NSUserDefaults standardUserDefaults] setInteger:height forKey:kScreenHeight];
 }
@@ -147,13 +146,14 @@ static NSURL* url(const char* utf8_bytes) {
 
     [_resolution_list removeAllItems];
     NSMutableArray* display_modes = [NSMutableArray
-        arrayWithArray:(NSArray*)CGDisplayAvailableModes(kCGDirectMainDisplay)];
+        arrayWithArray:
+            [(NSArray*)CGDisplayCopyAllDisplayModes(kCGDirectMainDisplay, nil) autorelease]];
     [display_modes sortUsingFunction:compare_resolutions context:nil];
     int i;
     for (i = 0; i < [display_modes count]; ++i) {
         NSDictionary* display_mode = [display_modes objectAtIndex:i];
-        int width = [[display_mode objectForKey:(NSString*)kCGDisplayWidth] intValue];
-        int height = [[display_mode objectForKey:(NSString*)kCGDisplayHeight] intValue];
+        int width = CGDisplayModeGetWidth((CGDisplayModeRef)display_mode);
+        int height = CGDisplayModeGetHeight((CGDisplayModeRef)display_mode);
 
         // Formatted string is as produced in the "Displays" pane in
         // System Preferences.
