@@ -20,6 +20,7 @@
 
 #include <fcntl.h>
 #include <glob.h>
+#include <time.h>
 #include <unistd.h>
 #include <sfz/sfz.hpp>
 
@@ -139,10 +140,12 @@ int64_t read_varint<int64_t>(ReadSource in) {
     return s64;
 }
 
+/*
 template <>
 size_t read_varint<size_t>(ReadSource in) {
     return read_varint<uint64_t>(in);
 }
+*/
 
 template <>
 int32_t read_varint<int32_t>(ReadSource in) {
@@ -283,12 +286,12 @@ static void cull_replays(size_t count) {
         glob(c_str.data(), 0, NULL, &g.data);
 
         map<int64_t, const char*> files;
-        for (int i = 0; i < g.data.gl_matchc; ++i) {
+        for (int i = 0; i < g.data.gl_pathc; ++i) {
             struct stat st;
             if (stat(g.data.gl_pathv[i], &st) < 0) {
                 continue;
             }
-            files[st.st_mtimespec.tv_sec] = g.data.gl_pathv[i];
+            files[st.st_mtime] = g.data.gl_pathv[i];
         }
         while (files.size() >= count) {
             if (unlink(files.begin()->second) < 0) {

@@ -18,10 +18,7 @@
 
 #include "data/resource.hpp"
 
-#include <CoreFoundation/CoreFoundation.h>
 #include <sfz/sfz.hpp>
-
-#include "cocoa/core-foundation.hpp"
 
 using sfz::String;
 

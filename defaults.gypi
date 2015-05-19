@@ -10,16 +10,18 @@
   , "configurations":
     { "dbg":
       { "cflags": ["-g"]
-      , "cxxflags": ["-g"]
       }
     , "dev": { }
     , "opt":
       { "cflags": ["-Os"]
-      , "cxxflags": ["-Os"]
       , "defines": ["NDEBUG"]
       }
     }
-  , "cxxflags":
+  , "cflags_cc":
+    [ "-std=c++11"
+    , "-stdlib=libc++"
+    ]
+  , "ldflags":
     [ "-std=c++11"
     , "-stdlib=libc++"
     ]

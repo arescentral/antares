@@ -55,6 +55,7 @@
       [ "src/config/gamepad.cpp"
       , "src/config/keys.cpp"
       , "src/config/ledger.cpp"
+      , "src/config/linux-dirs.cpp"
       , "src/config/mac-dirs.cpp"
       , "src/config/preferences.cpp"
       ]
@@ -63,6 +64,10 @@
     , "conditions":
       [ [ "OS != 'mac'"
         , { "sources!": ["src/config/mac-dirs.cpp"]
+          }
+        ]
+      , [ "OS != 'linux'"
+        , { "sources!": ["src/config/linux-dirs.cpp"]
           }
         ]
       ]
@@ -276,24 +281,6 @@
       ]
     }
 
-  , { "target_name": "offscreen"
-    , "type": "executable"
-    , "sources": ["src/bin/offscreen.cpp"]
-    , "dependencies": ["libantares-test"]
-    }
-
-  , { "target_name": "build-pix"
-    , "type": "executable"
-    , "sources": ["src/bin/build-pix.cpp"]
-    , "dependencies": ["libantares-test"]
-    }
-
-  , { "target_name": "extract-data"
-    , "type": "executable"
-    , "sources": ["src/bin/extract-data.cpp"]
-    , "dependencies": ["libantares-test"]
-    }
-
   , { "target_name": "hash-data"
     , "type": "executable"
     , "sources": ["src/bin/hash-data.cpp"]
@@ -309,12 +296,6 @@
   , { "target_name": "object-data"
     , "type": "executable"
     , "sources": ["src/bin/object-data.cpp"]
-    , "dependencies": ["libantares-test"]
-    }
-
-  , { "target_name": "replay"
-    , "type": "executable"
-    , "sources": ["src/bin/replay.cpp"]
     , "dependencies": ["libantares-test"]
     }
 
@@ -340,6 +321,12 @@
     , "defines": ["ANTARES_DATA=<(DEPTH)/data"]
     , "dependencies": ["libantares"]
     , "export_dependent_settings": ["libantares"]
+    , "conditions":
+      [ [ "OS == 'linux'"
+        , { "sources!": ["src/video/offscreen-driver.cpp"]  # Temporary.
+          }
+        ]
+      ]
     }
 
   , { "target_name": "fixed-test"
@@ -422,6 +409,30 @@
               , "$(SDKROOT)/System/Library/Frameworks/Cocoa.framework"
               ]
             }
+          }
+
+        , { "target_name": "extract-data"
+          , "type": "executable"
+          , "sources": ["src/bin/extract-data.cpp"]
+          , "dependencies": ["libantares-test"]
+          }
+
+        , { "target_name": "offscreen"
+          , "type": "executable"
+          , "sources": ["src/bin/offscreen.cpp"]
+          , "dependencies": ["libantares-test"]
+          }
+
+        , { "target_name": "replay"
+          , "type": "executable"
+          , "sources": ["src/bin/replay.cpp"]
+          , "dependencies": ["libantares-test"]
+          }
+
+        , { "target_name": "build-pix"
+          , "type": "executable"
+          , "sources": ["src/bin/build-pix.cpp"]
+          , "dependencies": ["libantares-test"]
           }
         ]
       }
