@@ -53,7 +53,7 @@ ReplayList::ReplayList() {
     CString c_str(str);
     glob(c_str.data(), 0, NULL, &g.data);
 
-    for (int i = 0; i < g.data.gl_matchc; ++i) {
+    for (int i = 0; i < g.data.gl_pathc; ++i) {
         const String path(utf8::decode(g.data.gl_pathv[i]));
         StringSlice basename = path::basename(path);
         StringSlice id_string = basename.slice(0, basename.size() - 5);

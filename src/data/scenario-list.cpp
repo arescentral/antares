@@ -78,7 +78,7 @@ ScenarioList::ScenarioList() {
 
     size_t prefix_len = dirs().scenarios.size() + 1;
     size_t suffix_len = info.size() + 1;
-    for (int i = 0; i < g.data.gl_matchc; ++i) {
+    for (int i = 0; i < g.data.gl_pathc; ++i) {
         const String path(utf8::decode(g.data.gl_pathv[i]));
         StringSlice identifier = path.slice(prefix_len, path.size() - prefix_len - suffix_len);
         if (identifier == factory_scenario.identifier) {

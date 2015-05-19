@@ -23,11 +23,8 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <algorithm>
-#include <OpenGL/OpenGL.h>
-#include <OpenGL/gl.h>
 #include <sfz/sfz.hpp>
 
-#include "cocoa/core-opengl.hpp"
 #include "config/preferences.hpp"
 #include "drawing/pix-map.hpp"
 #include "game/globals.hpp"
