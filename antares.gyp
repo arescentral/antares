@@ -186,8 +186,7 @@
       ]
     , "link_settings":
       { "libraries":
-        [ "$(SDKROOT)/System/Library/Frameworks/AudioToolbox.framework"
-        , "$(SDKROOT)/System/Library/Frameworks/OpenAL.framework"
+        [ "$(SDKROOT)/System/Library/Frameworks/OpenAL.framework"
         ]
       }
     , "conditions":
@@ -195,8 +194,7 @@
         , { "sources!": ["src/sound/openal-driver.cpp"]
           , "link_settings":
             { "libraries!":
-              [ "$(SDKROOT)/System/Library/Frameworks/AudioToolbox.framework"
-              , "$(SDKROOT)/System/Library/Frameworks/OpenAL.framework"
+              [ "$(SDKROOT)/System/Library/Frameworks/OpenAL.framework"
               ]
             }
           }
@@ -345,7 +343,8 @@
         [ { "target_name": "libantares-cocoa"
           , "type": "static_library"
           , "sources":
-            [ "src/cocoa/core-foundation.cpp"
+            [ "src/cocoa/audio-file.cpp"
+            , "src/cocoa/core-foundation.cpp"
             , "src/cocoa/core-opengl.cpp"
             , "src/cocoa/fullscreen.cpp"
             , "src/cocoa/http.cpp"
@@ -361,7 +360,8 @@
             ]
           , "link_settings":
             { "libraries":
-              [ "$(SDKROOT)/System/Library/Frameworks/CoreFoundation.framework"
+              [ "$(SDKROOT)/System/Library/Frameworks/AudioToolbox.framework"
+              , "$(SDKROOT)/System/Library/Frameworks/CoreFoundation.framework"
               , "$(SDKROOT)/System/Library/Frameworks/IOKit.framework"
               , "$(SDKROOT)/System/Library/Frameworks/OpenGL.framework"
               ]
