@@ -80,7 +80,9 @@ class ModPlugFile {
         }
     }
 
-    void convert(Bytes& data) const {
+    void convert(Bytes& data, ALenum& format, ALsizei& frequency) const {
+        format = AL_FORMAT_STEREO16;
+        frequency = 44100;
         uint8_t buffer[1024];
         ssize_t read;
         do {
@@ -109,19 +111,13 @@ class OpenAlSoundDriver::OpenAlSound : public Sound {
     virtual void play();
     virtual void loop();
 
-    void buffer(const AudioFile& audio_file) {
+    template <typename T>
+    void buffer(const T& file) {
         Bytes data;
         ALenum format;
         ALsizei frequency;
-        audio_file.convert(&data, &format, &frequency);
+        file.convert(data, format, frequency);
         alBufferData(_buffer, format, data.data(), data.size(), frequency);
-        check_al_error("alBufferData");
-    }
-
-    void buffer(const ModPlugFile& file) {
-        Bytes data;
-        file.convert(data);
-        alBufferData(_buffer, AL_FORMAT_STEREO16, data.data(), data.size(), 44100);
         check_al_error("alBufferData");
     }
 

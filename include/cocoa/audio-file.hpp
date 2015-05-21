@@ -32,7 +32,7 @@ class AudioFile {
 
     ~AudioFile();
 
-    void convert(sfz::Bytes* data, ALenum* format, ALsizei* frequency) const;
+    void convert(sfz::Bytes& data, ALenum& format, ALsizei& frequency) const;
 
     AudioFileID id() const { return _id; }
 

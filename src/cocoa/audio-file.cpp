@@ -56,7 +56,7 @@ class ExtAudioFile {
         ExtAudioFileDispose(_id);
     }
 
-    void convert(Bytes* data, ALenum* format, ALsizei* frequency);
+    void convert(Bytes& data, ALenum& format, ALsizei& frequency);
 
     ExtAudioFileRef id() const { return _id; }
 
@@ -79,12 +79,12 @@ AudioFile::~AudioFile() {
     AudioFileClose(_id);
 }
 
-void AudioFile::convert(Bytes* data, ALenum* format, ALsizei* frequency) const {
+void AudioFile::convert(Bytes& data, ALenum& format, ALsizei& frequency) const {
     ExtAudioFile ext(*this);
     ext.convert(data, format, frequency);
 }
 
-void ExtAudioFile::convert(Bytes* data, ALenum* format, ALsizei* frequency) {
+void ExtAudioFile::convert(Bytes& data, ALenum& format, ALsizei& frequency) {
     OSStatus err;
 
     // Read in the original file format.
@@ -94,11 +94,11 @@ void ExtAudioFile::convert(Bytes* data, ALenum* format, ALsizei* frequency) {
             &in_format);
     check_os_err(err, "ExtAudioFileGetProperty");
 
-    *frequency = in_format.mSampleRate;
+    frequency = in_format.mSampleRate;
     if (in_format.mChannelsPerFrame == 1) {
-        *format = AL_FORMAT_MONO16;
+        format = AL_FORMAT_MONO16;
     } else if (in_format.mChannelsPerFrame == 2) {
-        *format = AL_FORMAT_STEREO16;
+        format = AL_FORMAT_STEREO16;
     } else {
         throw Exception("audio file has more than two channels");
     }
@@ -127,12 +127,12 @@ void ExtAudioFile::convert(Bytes* data, ALenum* format, ALsizei* frequency) {
 
     // Read the converted frames into memory.
     UInt32 frame_count_32 = frame_count;
-    data->resize(frame_count * out_format.mBytesPerFrame);
+    data.resize(frame_count * out_format.mBytesPerFrame);
     AudioBufferList data_buffer;
     data_buffer.mNumberBuffers = 1;
-    data_buffer.mBuffers[0].mDataByteSize = data->size();
+    data_buffer.mBuffers[0].mDataByteSize = data.size();
     data_buffer.mBuffers[0].mNumberChannels = out_format.mChannelsPerFrame;
-    data_buffer.mBuffers[0].mData = data->data();
+    data_buffer.mBuffers[0].mData = data.data();
     err = ExtAudioFileRead(_id, &frame_count_32, &data_buffer);
     check_os_err(err, "ExtAudioFileRead");
 }
