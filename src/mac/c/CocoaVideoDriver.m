@@ -63,8 +63,7 @@ void antares_mouse_show() {
 }
 
 int64_t antares_double_click_interval_usecs() {
-    return GetDblTime() * 1000000 / 60;
-    // 10.6+: return [NSEvent doubleClickInterval] * 1e6;
+    return [NSEvent doubleClickInterval] * 1e6;
 }
 
 struct AntaresWindow {

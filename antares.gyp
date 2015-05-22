@@ -175,19 +175,21 @@
       , "src/sound/fx.cpp"
       , "src/sound/music.cpp"
       , "src/sound/openal-driver.cpp"
+      , "src/sound/sndfile.cpp"
       ]
     , "dependencies":
       [ "<(DEPTH)/ext/libmodplug-gyp/libmodplug.gyp:libmodplug"
       , "<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz"
+      , "<(DEPTH)/ext/libsndfile-gyp/libsndfile.gyp:libsndfile"
       ]
     , "export_dependent_settings":
       [ "<(DEPTH)/ext/libmodplug-gyp/libmodplug.gyp:libmodplug"
       , "<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz"
+      , "<(DEPTH)/ext/libsndfile-gyp/libsndfile.gyp:libsndfile"
       ]
     , "link_settings":
       { "libraries":
-        [ "$(SDKROOT)/System/Library/Frameworks/AudioToolbox.framework"
-        , "$(SDKROOT)/System/Library/Frameworks/OpenAL.framework"
+        [ "$(SDKROOT)/System/Library/Frameworks/OpenAL.framework"
         ]
       }
     , "conditions":
@@ -195,8 +197,7 @@
         , { "sources!": ["src/sound/openal-driver.cpp"]
           , "link_settings":
             { "libraries!":
-              [ "$(SDKROOT)/System/Library/Frameworks/AudioToolbox.framework"
-              , "$(SDKROOT)/System/Library/Frameworks/OpenAL.framework"
+              [ "$(SDKROOT)/System/Library/Frameworks/OpenAL.framework"
               ]
             }
           }
@@ -345,7 +346,8 @@
         [ { "target_name": "libantares-mac"
           , "type": "static_library"
           , "sources":
-            [ "src/mac/core-foundation.cpp"
+            [ "src/mac/audio-file.cpp"
+            , "src/mac/core-foundation.cpp"
             , "src/mac/core-opengl.cpp"
             , "src/mac/fullscreen.cpp"
             , "src/mac/http.cpp"
@@ -361,7 +363,8 @@
             ]
           , "link_settings":
             { "libraries":
-              [ "$(SDKROOT)/System/Library/Frameworks/CoreFoundation.framework"
+              [ "$(SDKROOT)/System/Library/Frameworks/AudioToolbox.framework"
+              , "$(SDKROOT)/System/Library/Frameworks/CoreFoundation.framework"
               , "$(SDKROOT)/System/Library/Frameworks/IOKit.framework"
               , "$(SDKROOT)/System/Library/Frameworks/OpenGL.framework"
               ]

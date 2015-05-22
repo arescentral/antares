@@ -22,3 +22,6 @@
 [submodule "ext/libmodplug-gyp"]
 	path = ext/libmodplug-gyp
 	url = https://github.com/sfiera/libmodplug-gyp.git
+[submodule "ext/libsndfile-gyp"]
+	path = ext/libsndfile-gyp
+	url = https://github.com/sfiera/libsndfile-gyp.git
