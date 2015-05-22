@@ -136,7 +136,7 @@ uint64_t read_varint<uint64_t, false>(ReadSource in) {
 
 template <>
 int64_t read_varint<int64_t, false>(ReadSource in) {
-    uint64_t u64 = read_varint<uint64_t>(in);
+    uint64_t u64 = read_varint<uint64_t, false>(in);
     int64_t s64 = u64 & 0x7fffffffffffffffULL;
     if (u64 & 0x8000000000000000ULL) {
         s64 += -0x8000000000000000ULL;
@@ -146,17 +146,17 @@ int64_t read_varint<int64_t, false>(ReadSource in) {
 
 template <>
 size_t read_varint<size_t, true>(ReadSource in) {
-    return read_varint<uint64_t>(in);
+    return read_varint<uint64_t, false>(in);
 }
 
 template <>
 int32_t read_varint<int32_t, false>(ReadSource in) {
-    return read_varint<int64_t>(in);
+    return read_varint<int64_t, false>(in);
 }
 
 template <>
 uint8_t read_varint<uint8_t, false>(ReadSource in) {
-    return read_varint<int64_t>(in);
+    return read_varint<int64_t, false>(in);
 }
 
 static void tag_string(WriteTarget out, uint64_t tag, const String& s) {
