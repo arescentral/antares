@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_COCOA_AUDIO_FILE_HPP_
-#define ANTARES_COCOA_AUDIO_FILE_HPP_
+#ifndef ANTARES_MAC_AUDIO_FILE_HPP_
+#define ANTARES_MAC_AUDIO_FILE_HPP_
 
 #include <AudioToolbox/AudioToolbox.h>
 #include <OpenAL/al.h>
@@ -51,4 +51,4 @@ class AudioFile {
 
 }  // namespace antares
 
-#endif  // ANTARES_COCOA_AUDIO_FILE_HPP_
+#endif  // ANTARES_MAC_AUDIO_FILE_HPP_

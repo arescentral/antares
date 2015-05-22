@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "cocoa/audio-file.hpp"
+#include "mac/audio-file.hpp"
 
 #include <AudioToolbox/AudioToolbox.h>
 #include <sfz/sfz.hpp>
