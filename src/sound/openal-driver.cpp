@@ -22,8 +22,8 @@
 #include <modplug.h>
 #include <sfz/sfz.hpp>
 
-#include "cocoa/audio-file.hpp"
 #include "data/resource.hpp"
+#include "sound/sndfile.hpp"
 
 using sfz::Bytes;
 using sfz::BytesSlice;
@@ -228,8 +228,7 @@ unique_ptr<Sound> OpenAlSoundDriver::open_sound(PrintItem path) {
         const char ext[6];
         void (*fn)(BytesSlice, OpenAlSound&);
     } fmts[] = {
-        {".aiff",   read_sound<AudioFile>},
-        {".mp3",    read_sound<AudioFile>},
+        {".aiff",   read_sound<Sndfile>},
         {".s3m",    read_sound<ModPlugFile>},
         {".xm",     read_sound<ModPlugFile>},
     };
@@ -242,6 +241,8 @@ unique_ptr<Sound> OpenAlSoundDriver::open_sound(PrintItem path) {
             fmt.fn(rsrc.data(), *sound);
             return std::move(sound);
         } catch (Exception& e) {
+            sfz::print(sfz::io::err, e.message());
+            sfz::print(sfz::io::err, "\n");
             continue;
         }
     }

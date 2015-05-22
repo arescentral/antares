@@ -175,6 +175,7 @@
       , "src/sound/fx.cpp"
       , "src/sound/music.cpp"
       , "src/sound/openal-driver.cpp"
+      , "src/sound/sndfile.cpp"
       ]
     , "dependencies":
       [ "<(DEPTH)/ext/libmodplug-gyp/libmodplug.gyp:libmodplug"
