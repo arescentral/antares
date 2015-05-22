@@ -19,18 +19,18 @@
   [ { "target_name": "libantares"
     , "type": "static_library"
     , "dependencies":
-      [ "libantares-cocoa"
-      , "libantares-config"
+      [ "libantares-config"
       , "libantares-data"
       , "libantares-drawing"
       , "libantares-game"
+      , "libantares-mac"
       , "libantares-math"
       , "libantares-sound"
       , "libantares-ui"
       , "libantares-video"
       ]
     , "export_dependent_settings":
-      [ "libantares-cocoa"
+      [ "libantares-mac"
       , "libantares-config"
       , "libantares-data"
       , "libantares-drawing"
@@ -42,8 +42,8 @@
       ]
     , "conditions":
       [ [ "OS != 'mac'"
-        , { "dependencies!": ["libantares-cocoa"]
-          , "export_dependent_settings!": ["libantares-cocoa"]
+        , { "dependencies!": ["libantares-mac"]
+          , "export_dependent_settings!": ["libantares-mac"]
           }
         ]
       ]
@@ -343,15 +343,15 @@
 , "conditions":
   [ [ "OS == 'mac'"
     , { "targets":
-        [ { "target_name": "libantares-cocoa"
+        [ { "target_name": "libantares-mac"
           , "type": "static_library"
           , "sources":
-            [ "src/cocoa/audio-file.cpp"
-            , "src/cocoa/core-foundation.cpp"
-            , "src/cocoa/core-opengl.cpp"
-            , "src/cocoa/fullscreen.cpp"
-            , "src/cocoa/http.cpp"
-            , "src/cocoa/windowed.cpp"
+            [ "src/mac/audio-file.cpp"
+            , "src/mac/core-foundation.cpp"
+            , "src/mac/core-opengl.cpp"
+            , "src/mac/fullscreen.cpp"
+            , "src/mac/http.cpp"
+            , "src/mac/windowed.cpp"
             ]
           , "dependencies":
             [ "<(DEPTH)/ext/libpng-gyp/libpng.gyp:libpng"
@@ -394,16 +394,16 @@
             , "resources/container-migration.plist"
             ]
           , "sources":
-            [ "src/cocoa/AntaresController.m"
-            , "src/cocoa/AntaresExtractDataController.m"
-            , "src/cocoa/main.m"
-            , "src/cocoa/prefs-driver.cpp"
-            , "src/cocoa/resource.cpp"
-            , "src/cocoa/video-driver.cpp"
-            , "src/cocoa/c/AntaresController.cpp"
-            , "src/cocoa/c/CocoaVideoDriver.m"
-            , "src/cocoa/c/DataExtractor.cpp"
-            , "src/cocoa/c/scenario-list.cpp"
+            [ "src/mac/AntaresController.m"
+            , "src/mac/AntaresExtractDataController.m"
+            , "src/mac/main.m"
+            , "src/mac/prefs-driver.cpp"
+            , "src/mac/resource.cpp"
+            , "src/mac/video-driver.cpp"
+            , "src/mac/c/AntaresController.cpp"
+            , "src/mac/c/CocoaVideoDriver.m"
+            , "src/mac/c/DataExtractor.cpp"
+            , "src/mac/c/scenario-list.cpp"
             ]
           , "dependencies": ["libantares"]
           , "link_settings":

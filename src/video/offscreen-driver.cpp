@@ -26,10 +26,10 @@
 #include <OpenGL/gl.h>
 #include <sfz/sfz.hpp>
 
-#include "cocoa/core-opengl.hpp"
 #include "config/preferences.hpp"
 #include "drawing/pix-map.hpp"
 #include "game/time.hpp"
+#include "mac/core-opengl.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
 #include "ui/event.hpp"
