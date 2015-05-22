@@ -179,10 +179,12 @@
     , "dependencies":
       [ "<(DEPTH)/ext/libmodplug-gyp/libmodplug.gyp:libmodplug"
       , "<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz"
+      , "<(DEPTH)/ext/libsndfile-gyp/libsndfile.gyp:libsndfile"
       ]
     , "export_dependent_settings":
       [ "<(DEPTH)/ext/libmodplug-gyp/libmodplug.gyp:libmodplug"
       , "<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz"
+      , "<(DEPTH)/ext/libsndfile-gyp/libsndfile.gyp:libsndfile"
       ]
     , "link_settings":
       { "libraries":
