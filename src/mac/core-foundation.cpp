@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "cocoa/core-foundation.hpp"
+#include "mac/core-foundation.hpp"
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <sfz/sfz.hpp>

@@ -21,7 +21,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <sfz/sfz.hpp>
 
-#include "cocoa/core-foundation.hpp"
+#include "mac/core-foundation.hpp"
 
 using sfz::Exception;
 using sfz::String;

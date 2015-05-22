@@ -16,13 +16,13 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "cocoa/AntaresController.h"
+#include "mac/AntaresController.h"
 
 #include <stdlib.h>
 #include <ApplicationServices/ApplicationServices.h>
-#include "cocoa/AntaresExtractDataController.h"
-#include "cocoa/c/AntaresController.h"
-#include "cocoa/c/scenario-list.h"
+#include "mac/AntaresExtractDataController.h"
+#include "mac/c/AntaresController.h"
+#include "mac/c/scenario-list.h"
 
 #define kScreenWidth @"ScreenWidth"
 #define kScreenHeight @"ScreenHeight"

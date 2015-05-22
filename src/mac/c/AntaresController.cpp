@@ -16,17 +16,17 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "cocoa/c/AntaresController.h"
+#include "mac/c/AntaresController.h"
 
 #include <stdlib.h>
 #include <sfz/sfz.hpp>
 
-#include "cocoa/core-foundation.hpp"
-#include "cocoa/prefs-driver.hpp"
-#include "cocoa/video-driver.hpp"
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "game/globals.hpp"
+#include "mac/core-foundation.hpp"
+#include "mac/prefs-driver.hpp"
+#include "mac/video-driver.hpp"
 #include "sound/openal-driver.hpp"
 #include "ui/card.hpp"
 #include "ui/flows/master.hpp"

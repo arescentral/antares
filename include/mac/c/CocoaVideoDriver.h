@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_COCOA_C_COCOA_VIDEO_DRIVER_H_
-#define ANTARES_COCOA_C_COCOA_VIDEO_DRIVER_H_
+#ifndef ANTARES_MAC_C_COCOA_VIDEO_DRIVER_H_
+#define ANTARES_MAC_C_COCOA_VIDEO_DRIVER_H_
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -77,4 +77,4 @@ void antares_event_translator_cancel(AntaresEventTranslator* translator);
 }  // extern "C"
 #endif
 
-#endif  // ANTARES_COCOA_C_COCOA_VIDEO_DRIVER_H_
+#endif  // ANTARES_MAC_C_COCOA_VIDEO_DRIVER_H_

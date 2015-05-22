@@ -16,12 +16,12 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "cocoa/prefs-driver.hpp"
+#include "mac/prefs-driver.hpp"
 
 #include <algorithm>
 #include <CoreFoundation/CoreFoundation.h>
 
-#include "cocoa/core-foundation.hpp"
+#include "mac/core-foundation.hpp"
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
 

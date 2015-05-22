@@ -16,14 +16,14 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_COCOA_FULLSCREEN_HPP_
-#define ANTARES_COCOA_FULLSCREEN_HPP_
+#ifndef ANTARES_MAC_FULLSCREEN_HPP_
+#define ANTARES_MAC_FULLSCREEN_HPP_
 
 #include <sfz/sfz.hpp>
 
 #include <ApplicationServices/ApplicationServices.h>
 
-#include "cocoa/windowed.hpp"
+#include "mac/windowed.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
@@ -65,4 +65,4 @@ class CocoaFullscreen {
 
 }  // namespace antares
 
-#endif  // ANTARES_COCOA_FULLSCREEN_HPP_
+#endif  // ANTARES_MAC_FULLSCREEN_HPP_

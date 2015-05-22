@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_COCOA_C_ANTARES_CONTROLLER_H_
-#define ANTARES_COCOA_C_ANTARES_CONTROLLER_H_
+#ifndef ANTARES_MAC_C_ANTARES_CONTROLLER_H_
+#define ANTARES_MAC_C_ANTARES_CONTROLLER_H_
 
 #include <CoreFoundation/CoreFoundation.h>
 
@@ -34,4 +34,4 @@ bool antares_controller_loop(AntaresDrivers* drivers, CFStringRef* error_message
 }  // extern "C"
 #endif
 
-#endif  // ANTARES_COCOA_C_ANTARES_CONTROLLER_H_
+#endif  // ANTARES_MAC_C_ANTARES_CONTROLLER_H_

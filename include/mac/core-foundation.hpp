@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_COCOA_CORE_FOUNDATION_HPP_
-#define ANTARES_COCOA_CORE_FOUNDATION_HPP_
+#ifndef ANTARES_MAC_CORE_FOUNDATION_HPP_
+#define ANTARES_MAC_CORE_FOUNDATION_HPP_
 
 #include <algorithm>
 #include <initializer_list>
@@ -211,4 +211,4 @@ class Url : public Object<CFURLRef> {
 }  // namespace cf
 }  // namespace antares
 
-#endif  // ANTARES_COCOA_CORE_FOUNDATION_HPP_
+#endif  // ANTARES_MAC_CORE_FOUNDATION_HPP_

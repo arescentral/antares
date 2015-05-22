@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_COCOA_CORE_OPENGL_HPP_
-#define ANTARES_COCOA_CORE_OPENGL_HPP_
+#ifndef ANTARES_MAC_CORE_OPENGL_HPP_
+#define ANTARES_MAC_CORE_OPENGL_HPP_
 
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
@@ -62,4 +62,4 @@ class Context {
 }  // namespace cgl
 }  // namespace antares
 
-#endif  // ANTARES_COCOA_CORE_OPENGL_HPP_
+#endif  // ANTARES_MAC_CORE_OPENGL_HPP_

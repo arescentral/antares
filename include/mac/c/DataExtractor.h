@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_COCOA_C_DATA_EXTRACTOR_H_
-#define ANTARES_COCOA_C_DATA_EXTRACTOR_H_
+#ifndef ANTARES_MAC_C_DATA_EXTRACTOR_H_
+#define ANTARES_MAC_C_DATA_EXTRACTOR_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,4 +38,4 @@ void antares_data_extractor_extract(
 }  // extern "C"
 #endif
 
-#endif  // ANTARES_COCOA_C_DATA_EXTRACTOR_H_
+#endif  // ANTARES_MAC_C_DATA_EXTRACTOR_H_

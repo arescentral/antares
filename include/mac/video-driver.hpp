@@ -16,16 +16,16 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_COCOA_VIDEO_DRIVER_HPP_
-#define ANTARES_COCOA_VIDEO_DRIVER_HPP_
+#ifndef ANTARES_MAC_VIDEO_DRIVER_HPP_
+#define ANTARES_MAC_VIDEO_DRIVER_HPP_
 
 #include <queue>
 #include <stack>
 #include <sfz/sfz.hpp>
 
-#include "cocoa/c/CocoaVideoDriver.h"
 #include "config/keys.hpp"
 #include "drawing/color.hpp"
+#include "mac/c/CocoaVideoDriver.h"
 #include "math/geometry.hpp"
 #include "ui/event-tracker.hpp"
 #include "video/opengl-driver.hpp"
@@ -79,4 +79,4 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
 
 }  // namespace antares
 
-#endif  // ANTARES_COCOA_VIDEO_DRIVER_HPP_
+#endif  // ANTARES_MAC_VIDEO_DRIVER_HPP_

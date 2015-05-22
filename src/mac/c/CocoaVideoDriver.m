@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "cocoa/c/CocoaVideoDriver.h"
+#include "mac/c/CocoaVideoDriver.h"
 
 #include <Carbon/Carbon.h>
 #include <Cocoa/Cocoa.h>

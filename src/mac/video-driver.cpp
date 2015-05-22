@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "cocoa/video-driver.hpp"
+#include "mac/video-driver.hpp"
 
 #include <stdlib.h>
 #include <strings.h>
@@ -28,12 +28,12 @@
 #include <sfz/sfz.hpp>
 #include <sys/time.h>
 
-#include "cocoa/c/CocoaVideoDriver.h"
-#include "cocoa/core-opengl.hpp"
-#include "cocoa/core-foundation.hpp"
-#include "cocoa/fullscreen.hpp"
-#include "cocoa/windowed.hpp"
 #include "game/time.hpp"
+#include "mac/c/CocoaVideoDriver.h"
+#include "mac/core-opengl.hpp"
+#include "mac/core-foundation.hpp"
+#include "mac/fullscreen.hpp"
+#include "mac/windowed.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
 #include "ui/event.hpp"

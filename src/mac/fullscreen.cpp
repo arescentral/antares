@@ -16,15 +16,15 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "cocoa/fullscreen.hpp"
+#include "mac/fullscreen.hpp"
 
 #include <ApplicationServices/ApplicationServices.h>
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
 #include <sfz/sfz.hpp>
 
-#include "cocoa/c/CocoaVideoDriver.h"
-#include "cocoa/core-opengl.hpp"
+#include "mac/c/CocoaVideoDriver.h"
+#include "mac/core-opengl.hpp"
 
 using sfz::Exception;
 

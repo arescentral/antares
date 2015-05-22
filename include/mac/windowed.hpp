@@ -16,12 +16,12 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_COCOA_WINDOWED_HPP_
-#define ANTARES_COCOA_WINDOWED_HPP_
+#ifndef ANTARES_MAC_WINDOWED_HPP_
+#define ANTARES_MAC_WINDOWED_HPP_
 
 #include <sfz/sfz.hpp>
 
-#include "cocoa/c/CocoaVideoDriver.h"
+#include "mac/c/CocoaVideoDriver.h"
 #include "math/geometry.hpp"
 
 namespace antares {
@@ -47,4 +47,4 @@ class CocoaWindowed {
 
 }  // namespace antares
 
-#endif  // ANTARES_COCOA_WINDOWED_HPP_
+#endif  // ANTARES_MAC_WINDOWED_HPP_

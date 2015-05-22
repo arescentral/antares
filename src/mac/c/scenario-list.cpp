@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "cocoa/c/scenario-list.h"
+#include "mac/c/scenario-list.h"
 
 #include <sfz/sfz.hpp>
 
