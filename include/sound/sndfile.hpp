@@ -19,9 +19,15 @@
 #ifndef ANTARES_SOUND_SNDFILE_HPP_
 #define ANTARES_SOUND_SNDFILE_HPP_
 
+#include <sfz/sfz.hpp>
+
+#ifdef __APPLE__
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
-#include <sfz/sfz.hpp>
+#else
+#include <AL/al.h>
+#include <AL/alc.h>
+#endif
 
 namespace antares {
 
