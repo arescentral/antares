@@ -20,8 +20,6 @@
 
 #include <stdint.h>
 #include <algorithm>
-#include <OpenGL/OpenGL.h>
-#include <OpenGL/gl.h>
 #include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
@@ -34,6 +32,16 @@
 #include "video/glsl/fragment.hpp"
 
 #include "game/time.hpp"
+
+#ifdef __APPLE__
+#include <OpenGL/OpenGL.h>
+#include <OpenGL/gl.h>
+#else
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glext.h>
+#endif
 
 using sfz::Exception;
 using sfz::PrintItem;
@@ -181,11 +189,11 @@ class OpenGlTextureImpl : public Texture::Impl {
             : _name(name),
               _size(image.size()),
               _uniforms(uniforms) {
-        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
-        glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glBindTexture(GL_TEXTURE_RECTANGLE, _texture.id);
+        glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 #if defined(__LITTLE_ENDIAN__)
         GLenum type = GL_UNSIGNED_INT_8_8_8_8;
 #elif defined(__BIG_ENDIAN__)
@@ -202,7 +210,7 @@ class OpenGlTextureImpl : public Texture::Impl {
         copy.fill(RgbColor::kClear);
         copy.view(Rect(1, 1, size.width - 1, size.height - 1)).copy(image);
         glTexImage2D(
-                GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, size.width, size.height,
+                GL_TEXTURE_RECTANGLE, 0, GL_RGBA, size.width, size.height,
                 0, GL_BGRA, type, copy.bytes());
     }
 
@@ -258,7 +266,7 @@ class OpenGlTextureImpl : public Texture::Impl {
         const int32_t w = _size.width;
         const int32_t h = _size.height;
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
+        glBindTexture(GL_TEXTURE_RECTANGLE, _texture.id);
         glBegin(GL_QUADS);
         glMultiTexCoord2f(GL_TEXTURE0, 1, 1);
         glMultiTexCoord2f(GL_TEXTURE1, draw_rect.left, draw_rect.top);
@@ -278,7 +286,7 @@ class OpenGlTextureImpl : public Texture::Impl {
     virtual void begin_quads() const {
         glUniform1i(_uniforms.color_mode, TINT_SPRITE_MODE);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
+        glBindTexture(GL_TEXTURE_RECTANGLE, _texture.id);
         glBegin(GL_QUADS);
     }
 
@@ -481,14 +489,14 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glClearColor(0, 0, 0, 1);
     glDisable(GL_TEXTURE_2D);
-    glEnable(GL_TEXTURE_RECTANGLE_EXT);
-    glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 1);
+    glEnable(GL_TEXTURE_RECTANGLE);
+    glBindTexture(GL_TEXTURE_RECTANGLE, 1);
     glEnable(GL_ALPHA_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glTextureRangeAPPLE(GL_TEXTURE_RECTANGLE_EXT, 0, NULL);
-    glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureRangeAPPLE(GL_TEXTURE_RECTANGLE, 0, NULL);
+    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
     GLuint shader = glCreateShader(GL_FRAGMENT_SHADER);

@@ -272,8 +272,7 @@
       }
     , "conditions":
       [ [ "OS != 'mac'"
-        , { "sources!": ["src/video/opengl-driver.cpp"]
-          , "link_settings":
+        , { "link_settings":
             { "libraries!": ["$(SDKROOT)/System/Library/Frameworks/OpenGL.framework"]
             }
           }
