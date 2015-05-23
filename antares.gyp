@@ -315,7 +315,8 @@
   , { "target_name": "libantares-test"
     , "type": "static_library"
     , "sources":
-      [ "src/test/resource.cpp"
+      [ "src/mac/offscreen.cpp"
+      , "src/test/resource.cpp"
       , "src/video/offscreen-driver.cpp"
       , "src/video/text-driver.cpp"
       ]
@@ -323,7 +324,11 @@
     , "dependencies": ["libantares"]
     , "export_dependent_settings": ["libantares"]
     , "conditions":
-      [ [ "OS == 'linux'"
+      [ [ "OS != 'mac'"
+        , { "sources!": ["src/mac/offscreen.cpp"]
+          }
+        ]
+      , [ "OS == 'linux'"
         , { "sources!": ["src/video/offscreen-driver.cpp"]  # Temporary.
           }
         ]

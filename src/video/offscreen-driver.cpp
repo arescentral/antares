@@ -29,7 +29,7 @@
 #include "config/preferences.hpp"
 #include "drawing/pix-map.hpp"
 #include "game/time.hpp"
-#include "mac/core-opengl.hpp"
+#include "mac/offscreen.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
 #include "ui/event.hpp"
@@ -93,12 +93,6 @@ void write_to(const WriteTarget& out, const SnapshotBuffer& buffer) {
     buffer.write_to(out);
 }
 
-static const CGLPixelFormatAttribute kAttrs[] = {
-    kCGLPFAColorSize, static_cast<CGLPixelFormatAttribute>(24),
-    kCGLPFAAccelerated,
-    static_cast<CGLPixelFormatAttribute>(0),
-};
-
 void gl_check() {
     GLenum error = glGetError();
     if (error != GL_NO_ERROR) {
@@ -137,10 +131,7 @@ struct Renderbuffer {
 class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
   public:
     MainLoop(OffscreenVideoDriver& driver, const Optional<String>& output_dir, Card* initial):
-            _pix(kAttrs),
-            _context(_pix.c_obj(), NULL),
             _buffer(Preferences::preferences()->screen_size(), 4),
-            _set_context(*this),
             _setup(*this),
             _output_dir(output_dir),
             _loop(driver, initial) {
@@ -172,14 +163,7 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
     Card* top() const { return _loop.top(); }
 
   private:
-    cgl::PixelFormat _pix;
-    cgl::Context _context;
-    struct SetContext {
-        SetContext(OffscreenVideoDriver::MainLoop& loop) {
-            cgl::check(CGLSetCurrentContext(loop._context.c_obj()));
-        }
-    };
-    SetContext _set_context;
+    Offscreen _offscreen;
     Framebuffer _fb;
     Renderbuffer _rb;
     SnapshotBuffer _buffer;
