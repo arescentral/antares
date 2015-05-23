@@ -53,6 +53,7 @@ namespace antares {
 
 namespace {
 
+static const char kShaderScreenUniform[]          = "screen";
 static const char kShaderColorModeUniform[]       = "color_mode";
 static const char kShaderSpriteUniform[]          = "sprite";
 static const char kShaderStaticImageUniform[]     = "static_image";
@@ -133,19 +134,14 @@ static T _gl_check(T t, const char* fn, const char* file, int line) {
 // Skip glIsShader().
 #define glLinkProgram(program)                  _GL(glLinkProgram, program)
 #define glLoadIdentity()                        _GL(glLoadIdentity)
-#define glMatrixMode(mode)                      _GL(glMatrixMode, mode)
 // Skip glMultiTexCoord2f().
 #define glPixelStorei(pname, param)             _GL(glPixelStorei, pname, param)
-#define glPopMatrix()                           _GL(glPopMatrix)
-#define glPushMatrix()                          _GL(glPushMatrix)
-#define glScalef(x, y, z)                       _GL(glScalef, x, y, z)
 #define glShaderSource(shader, count, string, length) \
     _GL(glShaderSource, shader, count, string, length)
 #define glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels) \
     _GL(glTexImage2D, target, level, internalformat, width, height, border, format, type, pixels)
 #define glTextureRangeAPPLE(target, length, pointer) \
     _GL(glTextureRangeAPPLE, target, length, pointer)
-#define glTranslatef(x, y, z)                   _GL(glTranslatef, x, y, z)
 #define glUniform1f(location, v0)               _GL(glUniform1f, location, v0)
 #define glUniform1i(location, v0)               _GL(glUniform1i, location, v0)
 #define glUniform2f(location, v0, v1)           _GL(glUniform2f, location, v0, v1)
@@ -520,6 +516,7 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
         throw Exception("linking failed");
     }
 
+    driver._uniforms.screen = glGetUniformLocation(program, kShaderScreenUniform);
     driver._uniforms.color_mode = glGetUniformLocation(program, kShaderColorModeUniform);
     driver._uniforms.sprite = glGetUniformLocation(program, kShaderSpriteUniform);
     driver._uniforms.static_image = glGetUniformLocation(program, kShaderStaticImageUniform);
@@ -547,6 +544,8 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
             GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, size, size, 0, GL_LUMINANCE_ALPHA,
             GL_UNSIGNED_BYTE, static_data.get());
 
+    auto screen = driver.viewport_size();
+    glUniform2f(driver._uniforms.screen, screen.width, screen.height);
     glUniform1i(driver._uniforms.sprite, 0);
     glUniform1i(driver._uniforms.static_image, 1);
 }
@@ -564,24 +563,13 @@ void OpenGlVideoDriver::MainLoop::draw() {
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
     glViewport(0, 0, _driver.viewport_size().width, _driver.viewport_size().height);
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
 
-    glTranslatef(-1.0, 1.0, 0.0);
-    glScalef(2.0, -2.0, 1.0);
-    glScalef(1.0 / _driver.screen_size().width, 1.0 / _driver.screen_size().height, 1.0);
     int32_t seed = {_driver._static_seed.next(256)};
     seed <<= 8;
     seed += _driver._static_seed.next(256);
     glUniform1i(_driver._uniforms.seed, seed);
 
     _stack.top()->draw();
-
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
 
     glFinish();
 }

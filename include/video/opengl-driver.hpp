@@ -45,6 +45,7 @@ class OpenGlVideoDriver : public VideoDriver {
     virtual void draw_plus(const Rect& rect, const RgbColor& color);
 
     struct Uniforms {
+        int screen;
         int color_mode;
         int sprite;
         int static_image;

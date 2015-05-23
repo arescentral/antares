@@ -21,8 +21,16 @@
 varying vec2 uv;
 varying vec4 color;
 
+uniform vec2 screen;
+
 void main() {
-    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+    mat4 transform = mat4(
+            2.0 / screen.x,  0,              0, 0,
+            0,              -2.0 / screen.y, 0, 0,
+            0,               0,              0, 0,
+           -1.0,             1.0,            0, 1);
+
+    gl_Position = transform * gl_Vertex;
     uv = gl_MultiTexCoord0.xy;
     color = gl_Color;
 }
