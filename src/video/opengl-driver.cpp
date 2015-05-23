@@ -32,6 +32,7 @@
 #include "math/random.hpp"
 #include "ui/card.hpp"
 #include "video/glsl/fragment.hpp"
+#include "video/glsl/vertex.hpp"
 
 #include "game/time.hpp"
 
@@ -477,6 +478,19 @@ void OpenGlVideoDriver::draw_plus(const Rect& rect, const RgbColor& color) {
     _pluses[size].draw_shaded(to, color);
 }
 
+static GLuint make_shader(GLenum shader_type, const GLchar* source) {
+    GLuint shader = glCreateShader(shader_type);
+    glShaderSource(shader, 1, &source, NULL);
+    glCompileShader(shader);
+    GLint compiled;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+    if (compiled == GL_FALSE) {
+        gl_log(shader);
+        throw Exception("compilation failed");
+    }
+    return shader;
+}
+
 OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glClearColor(0, 0, 0, 1);
@@ -491,19 +505,12 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
-    GLuint shader = glCreateShader(GL_FRAGMENT_SHADER);
-    const GLchar* fragment_source = glsl::fragment;
-    glShaderSource(shader, 1, &fragment_source, NULL);
-    glCompileShader(shader);
-    GLint compiled;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-    if (compiled == GL_FALSE) {
-        gl_log(shader);
-        throw Exception("compilation failed");
-    }
+    GLuint fragment = make_shader(GL_FRAGMENT_SHADER, glsl::fragment);
+    GLuint vertex = make_shader(GL_VERTEX_SHADER, glsl::vertex);
 
     GLuint program = glCreateProgram();
-    glAttachShader(program, shader);
+    glAttachShader(program, fragment);
+    glAttachShader(program, vertex);
     glLinkProgram(program);
     glValidateProgram(program);
     GLint linked;
