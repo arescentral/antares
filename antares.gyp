@@ -194,8 +194,7 @@
       }
     , "conditions":
       [ [ "OS != 'mac'"
-        , { "sources!": ["src/sound/openal-driver.cpp"]
-          , "link_settings":
+        , { "link_settings":
             { "libraries!":
               [ "$(SDKROOT)/System/Library/Frameworks/OpenAL.framework"
               ]
