@@ -151,6 +151,12 @@ static T _gl_check(T t, const char* fn, const char* file, int line) {
 // glVertex2f().
 #define glViewport(x, y, width, height)         _GL(glViewport, x, y, width, height)
 
+#define glEnableClientState(array)              _GL(glEnableClientState, array)
+#define glDisableClientState(array)             _GL(glDisableClientState, array)
+#define glDrawArrays(mode, first, count)        _GL(glDrawArrays, mode, first, count)
+#define glVertexPointer(size, type, stride, pointer) \
+        _GL(glVertexPointer, size, type, stride, pointer)
+
 #endif  // NDEBUG
 
 void gl_log(GLint object) {
@@ -321,44 +327,57 @@ Texture OpenGlVideoDriver::texture(PrintItem name, const PixMap& content) {
 
 void OpenGlVideoDriver::begin_rects() {
     glUniform1i(_uniforms.color_mode, FILL_MODE);
-    glBegin(GL_QUADS);
 }
 
 void OpenGlVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
     glColor4ub(color.red, color.green, color.blue, color.alpha);
-    glVertex2f(rect.right, rect.top);
-    glVertex2f(rect.left, rect.top);
-    glVertex2f(rect.left, rect.bottom);
-    glVertex2f(rect.right, rect.bottom);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    GLshort vertices[] = {
+        GLshort(rect.right), GLshort(rect.top),
+        GLshort(rect.left), GLshort(rect.top),
+        GLshort(rect.left), GLshort(rect.bottom),
+        GLshort(rect.right), GLshort(rect.bottom),
+    };
+    glVertexPointer(2, GL_SHORT, 0, vertices);
+    glDrawArrays(GL_QUADS, 0, 4);
+    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void OpenGlVideoDriver::end_rects() {
-    glEnd();
 }
 
 void OpenGlVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
     glUniform1i(_uniforms.color_mode, DITHER_MODE);
     glColor4ub(color.red, color.green, color.blue, color.alpha);
-    glBegin(GL_QUADS);
-    glVertex2f(rect.right, rect.top);
-    glVertex2f(rect.left, rect.top);
-    glVertex2f(rect.left, rect.bottom);
-    glVertex2f(rect.right, rect.bottom);
-    glEnd();
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    GLshort vertices[] = {
+        GLshort(rect.right), GLshort(rect.top),
+        GLshort(rect.left), GLshort(rect.top),
+        GLshort(rect.left), GLshort(rect.bottom),
+        GLshort(rect.right), GLshort(rect.bottom),
+    };
+    glVertexPointer(2, GL_SHORT, 0, vertices);
+    glDrawArrays(GL_QUADS, 0, 4);
+    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void OpenGlVideoDriver::begin_points() {
     glUniform1i(_uniforms.color_mode, FILL_MODE);
-    glBegin(GL_POINTS);
 }
 
 void OpenGlVideoDriver::end_points() {
-    glEnd();
 }
 
 void OpenGlVideoDriver::batch_point(const Point& at, const RgbColor& color) {
     glColor4ub(color.red, color.green, color.blue, color.alpha);
-    glVertex2f(at.h + 0.5, at.v + 0.5);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    GLfloat vertices[] = {GLfloat(at.h + 0.5), GLfloat(at.v + 0.5)};
+    glVertexPointer(2, GL_FLOAT, 0, vertices);
+    glDrawArrays(GL_POINTS, 0, 1);
+    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void OpenGlVideoDriver::draw_point(const Point& at, const RgbColor& color) {
@@ -369,11 +388,9 @@ void OpenGlVideoDriver::draw_point(const Point& at, const RgbColor& color) {
 
 void OpenGlVideoDriver::begin_lines() {
     glUniform1i(_uniforms.color_mode, FILL_MODE);
-    glBegin(GL_LINES);
 }
 
 void OpenGlVideoDriver::end_lines() {
-    glEnd();
 }
 
 void OpenGlVideoDriver::batch_line(
@@ -417,8 +434,12 @@ void OpenGlVideoDriver::batch_line(
     }
 
     glColor4ub(color.red, color.green, color.blue, color.alpha);
-    glVertex2f(x1, y1);
-    glVertex2f(x2, y2);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    GLfloat vertices[] = {x1, y1, x2, y2};
+    glVertexPointer(2, GL_FLOAT, 0, vertices);
+    glDrawArrays(GL_LINES, 0, 2);
+    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void OpenGlVideoDriver::draw_line(const Point& from, const Point& to, const RgbColor& color) {
