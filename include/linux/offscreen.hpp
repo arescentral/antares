@@ -19,6 +19,8 @@
 #ifndef ANTARES_LINUX_OFFSCREEN_HPP_
 #define ANTARES_LINUX_OFFSCREEN_HPP_
 
+#define GLX_GLXEXT_PROTOTYPES
+
 #include <memory>
 #include <GL/glx.h>
 #include <GL/glxext.h>
