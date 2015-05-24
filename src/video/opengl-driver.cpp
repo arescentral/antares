@@ -128,7 +128,6 @@ static T _gl_check(T t, const char* fn, const char* file, int line) {
 #define glBlendFunc(sfactor, dfactor)           _GL(glBlendFunc, sfactor, dfactor)
 #define glClear(mask)                           _GL(glClear, mask)
 #define glClearColor(red, green, blue, alpha)   _GL(glClearColor, red, green, blue, alpha)
-// Skip glColor4ub().
 #define glCompileShader(shader)                 _GL(glCompileShader, shader)
 #define glCreateProgram()                       _GLV(glCreateProgram)
 #define glCreateShader(shaderType)              _GLV(glCreateShader, shaderType)
@@ -227,7 +226,7 @@ class OpenGlTextureImpl : public Texture::Impl {
 
     virtual void draw(const Rect& draw_rect) const {
         _uniforms.color_mode.set(DRAW_SPRITE_MODE);
-        draw_internal(draw_rect);
+        draw_internal(draw_rect, RgbColor::kWhite);
     }
 
     virtual void draw_cropped(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
@@ -237,16 +236,14 @@ class OpenGlTextureImpl : public Texture::Impl {
     }
 
     virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const {
-        glColor4ub(tint.red, tint.green, tint.blue, 255);
         _uniforms.color_mode.set(TINT_SPRITE_MODE);
-        draw_internal(draw_rect);
+        draw_internal(draw_rect, tint);
     }
 
     virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const {
-        glColor4ub(color.red, color.green, color.blue, color.alpha);
         _uniforms.color_mode.set(STATIC_SPRITE_MODE);
         _uniforms.static_fraction.set(frac / 255.0f);
-        draw_internal(draw_rect);
+        draw_internal(draw_rect, color);
     }
 
     virtual void draw_outlined(
@@ -256,11 +253,10 @@ class OpenGlTextureImpl : public Texture::Impl {
         _uniforms.unit.set({
                 float(_size.width) / draw_rect.width(),
                 float(_size.height) / draw_rect.height()});
-        glColor4ub(fill_color.red, fill_color.green, fill_color.blue, fill_color.alpha);
         _uniforms.outline_color.set(
                 {outline_color.red / 255.0f, outline_color.green / 255.0f,
                 outline_color.blue / 255.0f, outline_color.alpha / 255.0f});
-        draw_internal(draw_rect);
+        draw_internal(draw_rect, fill_color);
     }
 
     virtual const Size& size() const {
@@ -268,8 +264,9 @@ class OpenGlTextureImpl : public Texture::Impl {
     }
 
   private:
-    virtual void draw_internal(const Rect& draw_rect) const {
+    virtual void draw_internal(const Rect& draw_rect, const RgbColor& tint) const {
         glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_COLOR_ARRAY);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
         GLshort vertices[] = {
@@ -279,6 +276,14 @@ class OpenGlTextureImpl : public Texture::Impl {
             GLshort(draw_rect.right), GLshort(draw_rect.top),
         };
         glVertexPointer(2, GL_SHORT, 0, vertices);
+
+        GLubyte colors[] = {
+            tint.red, tint.green, tint.blue, tint.alpha,
+            tint.red, tint.green, tint.blue, tint.alpha,
+            tint.red, tint.green, tint.blue, tint.alpha,
+            tint.red, tint.green, tint.blue, tint.alpha,
+        };
+        glColorPointer(4, GL_UNSIGNED_BYTE, 0, colors);
 
         const int32_t w = _size.width;
         const int32_t h = _size.height;
@@ -295,6 +300,7 @@ class OpenGlTextureImpl : public Texture::Impl {
         glDrawArrays(GL_QUADS, 0, 4);
 
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glDisableClientState(GL_COLOR_ARRAY);
         glDisableClientState(GL_VERTEX_ARRAY);
     }
 
@@ -308,9 +314,8 @@ class OpenGlTextureImpl : public Texture::Impl {
     }
 
     virtual void draw_quad(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
-        glColor4ub(tint.red, tint.green, tint.blue, 255);
-
         glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_COLOR_ARRAY);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
         GLshort vertices[] = {
@@ -320,6 +325,14 @@ class OpenGlTextureImpl : public Texture::Impl {
             GLshort(draw_rect.right), GLshort(draw_rect.top),
         };
         glVertexPointer(2, GL_SHORT, 0, vertices);
+
+        GLubyte colors[] = {
+            tint.red, tint.green, tint.blue, tint.alpha,
+            tint.red, tint.green, tint.blue, tint.alpha,
+            tint.red, tint.green, tint.blue, tint.alpha,
+            tint.red, tint.green, tint.blue, tint.alpha,
+        };
+        glColorPointer(4, GL_UNSIGNED_BYTE, 0, colors);
 
         Rect texture_rect(origin, draw_rect.size());
         texture_rect.offset(1, 1);
@@ -336,6 +349,7 @@ class OpenGlTextureImpl : public Texture::Impl {
         glDrawArrays(GL_QUADS, 0, 4);
 
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glDisableClientState(GL_COLOR_ARRAY);
         glDisableClientState(GL_VERTEX_ARRAY);
     }
 
@@ -369,9 +383,9 @@ void OpenGlVideoDriver::begin_rects() {
 }
 
 void OpenGlVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
-    glColor4ub(color.red, color.green, color.blue, color.alpha);
-
     glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+
     GLshort vertices[] = {
         GLshort(rect.right), GLshort(rect.top),
         GLshort(rect.left), GLshort(rect.top),
@@ -379,7 +393,18 @@ void OpenGlVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
         GLshort(rect.right), GLshort(rect.bottom),
     };
     glVertexPointer(2, GL_SHORT, 0, vertices);
+
+    GLubyte colors[] = {
+        color.red, color.green, color.blue, color.alpha,
+        color.red, color.green, color.blue, color.alpha,
+        color.red, color.green, color.blue, color.alpha,
+        color.red, color.green, color.blue, color.alpha,
+    };
+    glColorPointer(4, GL_UNSIGNED_BYTE, 0, colors);
+
     glDrawArrays(GL_QUADS, 0, 4);
+
+    glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
 }
 
@@ -388,9 +413,10 @@ void OpenGlVideoDriver::end_rects() {
 
 void OpenGlVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
     _uniforms.color_mode.set(DITHER_MODE);
-    glColor4ub(color.red, color.green, color.blue, color.alpha);
 
     glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+
     GLshort vertices[] = {
         GLshort(rect.right), GLshort(rect.top),
         GLshort(rect.left), GLshort(rect.top),
@@ -398,7 +424,18 @@ void OpenGlVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
         GLshort(rect.right), GLshort(rect.bottom),
     };
     glVertexPointer(2, GL_SHORT, 0, vertices);
+
+    GLubyte colors[] = {
+        color.red, color.green, color.blue, color.alpha,
+        color.red, color.green, color.blue, color.alpha,
+        color.red, color.green, color.blue, color.alpha,
+        color.red, color.green, color.blue, color.alpha,
+    };
+    glColorPointer(4, GL_UNSIGNED_BYTE, 0, colors);
+
     glDrawArrays(GL_QUADS, 0, 4);
+
+    glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
 }
 
@@ -410,12 +447,17 @@ void OpenGlVideoDriver::end_points() {
 }
 
 void OpenGlVideoDriver::batch_point(const Point& at, const RgbColor& color) {
-    glColor4ub(color.red, color.green, color.blue, color.alpha);
-
     glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
     GLfloat vertices[] = {GLfloat(at.h + 0.5), GLfloat(at.v + 0.5)};
     glVertexPointer(2, GL_FLOAT, 0, vertices);
+    GLubyte colors[] = {
+        color.red, color.green, color.blue, color.alpha,
+        color.red, color.green, color.blue, color.alpha,
+    };
+    glColorPointer(4, GL_UNSIGNED_BYTE, 0, colors);
     glDrawArrays(GL_POINTS, 0, 1);
+    glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
 }
 
@@ -472,12 +514,17 @@ void OpenGlVideoDriver::batch_line(
         y2 += 0.5f;
     }
 
-    glColor4ub(color.red, color.green, color.blue, color.alpha);
-
     glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
     GLfloat vertices[] = {x1, y1, x2, y2};
     glVertexPointer(2, GL_FLOAT, 0, vertices);
+    GLubyte colors[] = {
+        color.red, color.green, color.blue, color.alpha,
+        color.red, color.green, color.blue, color.alpha,
+    };
+    glColorPointer(4, GL_UNSIGNED_BYTE, 0, colors);
     glDrawArrays(GL_LINES, 0, 2);
+    glDisableClientState(GL_COLOR_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
 }
 
