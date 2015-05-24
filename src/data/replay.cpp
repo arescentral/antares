@@ -322,7 +322,7 @@ void ReplayBuilder::start() {
     char buffer[1024];
     if ((time(&t) < 0)
             || !localtime_r(&t, &tm)
-            || (strftime(buffer, 1024, "%+", &tm) <= 0)) {
+            || (strftime(buffer, 1024, "%c", &tm) <= 0)) {
         return;
     }
     sfz::String path(format("{0}/Replay {1}.nlrp", dirs().replays, utf8::decode(buffer)));
