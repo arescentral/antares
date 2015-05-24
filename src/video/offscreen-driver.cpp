@@ -94,6 +94,7 @@ void write_to(const WriteTarget& out, const SnapshotBuffer& buffer) {
 }
 
 static const CGLPixelFormatAttribute kAttrs[] = {
+    kCGLPFAOpenGLProfile, (CGLPixelFormatAttribute)kCGLOGLPVersion_3_2_Core,
     kCGLPFAColorSize, static_cast<CGLPixelFormatAttribute>(24),
     kCGLPFAAccelerated,
     static_cast<CGLPixelFormatAttribute>(0),
