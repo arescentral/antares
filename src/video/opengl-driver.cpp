@@ -688,7 +688,7 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
             GL_TEXTURE_2D, 0, GL_RG, size, size, 0, GL_RG,
             GL_UNSIGNED_BYTE, static_data.get());
 
-    auto screen = driver.viewport_size();
+    auto screen = driver.screen_size();
     driver._uniforms.screen.set({screen.width * 1.0f, screen.height * 1.0f});
     driver._uniforms.sprite.set(0);
     driver._uniforms.static_image.set(1);
