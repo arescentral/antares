@@ -16,15 +16,15 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#version 120
+#version 330 core
 
-attribute vec2 vertex;
-attribute vec4 in_color;
-attribute vec2 tex_coord;
+in vec2 vertex;
+in vec4 in_color;
+in vec2 tex_coord;
 
-varying vec2 uv;
-varying vec4 color;
-varying vec2 screen_position;
+out vec2 uv;
+out vec4 color;
+out vec2 screen_position;
 
 uniform vec2 screen;
 

@@ -162,6 +162,13 @@ static T _gl_check(T t, const char* fn, const char* file, int line) {
 #define glEnableClientState(array)              _GL(glEnableClientState, array)
 #define glDisableClientState(array)             _GL(glDisableClientState, array)
 #define glDrawArrays(mode, first, count)        _GL(glDrawArrays, mode, first, count)
+#define glGenBuffers(n, buffers)                _GL(glGenBuffers, n, buffers)
+#define glBindBuffer(target, buffer)            _GL(glBindBuffer, target, buffer)
+#define glBufferData(target, size, data, usage) _GL(glBufferData, target, size, data, usage)
+#define glVertexAttribPointer(index, size, type, normalized, stride, pointer) \
+    _GL(glVertexAttribPointer, index, size, type, normalized, stride, pointer)
+#define glEnableVertexAttribArray(index)        _GL(glEnableVertexAttribArray, index)
+#define glDisableVertexAttribArray(index)       _GL(glDisableVertexAttribArray, index)
 
 #endif  // NDEBUG
 
@@ -301,7 +308,7 @@ class OpenGlTextureImpl : public Texture::Impl {
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_RECTANGLE, _texture.id);
-        glDrawArrays(GL_QUADS, 0, 4);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
         glDeleteBuffers(3, vbuf);
 
@@ -361,7 +368,7 @@ class OpenGlTextureImpl : public Texture::Impl {
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_RECTANGLE, _texture.id);
-        glDrawArrays(GL_QUADS, 0, 4);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
         glDeleteBuffers(3, vbuf);
 
@@ -426,7 +433,7 @@ void OpenGlVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STREAM_DRAW);
     glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
 
-    glDrawArrays(GL_QUADS, 0, 4);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
     glDeleteBuffers(2, vbuf);
 
@@ -617,9 +624,6 @@ static GLuint make_shader(GLenum shader_type, const GLchar* source) {
 OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glClearColor(0, 0, 0, 1);
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_TEXTURE_RECTANGLE);
-    glBindTexture(GL_TEXTURE_RECTANGLE, 1);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -643,6 +647,10 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
         gl_log(program);
         throw Exception("linking failed");
     }
+
+    GLuint array;
+    glGenVertexArrays(1, &array);
+    glBindVertexArray(array);
 
     driver._uniforms.screen.load(program);
     driver._uniforms.color_mode.load(program);
