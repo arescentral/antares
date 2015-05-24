@@ -32,6 +32,20 @@ namespace antares {
 
 class Event;
 
+typedef int sampler2D;
+typedef int sampler2DRect;
+struct vec2 { float x, y; };
+struct vec4 { float x, y, z, w; };
+
+template <typename T>
+struct Uniform {
+    const char* name;
+    int location;
+
+    void load(int program);
+    void set(T value) const;
+};
+
 class OpenGlVideoDriver : public VideoDriver {
   public:
     OpenGlVideoDriver();
@@ -45,14 +59,14 @@ class OpenGlVideoDriver : public VideoDriver {
     virtual void draw_plus(const Rect& rect, const RgbColor& color);
 
     struct Uniforms {
-        int screen;
-        int color_mode;
-        int sprite;
-        int static_image;
-        int static_fraction;
-        int unit;
-        int outline_color;
-        int seed;
+        Uniform<vec2>           screen           = {"screen"};
+        Uniform<int>            color_mode       = {"color_mode"};
+        Uniform<sampler2DRect>  sprite           = {"sprite"};
+        Uniform<sampler2D>      static_image     = {"static_image"};
+        Uniform<float>          static_fraction  = {"static_fraction"};
+        Uniform<vec2>           unit             = {"unit"};
+        Uniform<vec4>           outline_color    = {"outline_color"};
+        Uniform<int>            seed             = {"seed"};
     };
 
   protected:

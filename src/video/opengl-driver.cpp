@@ -51,16 +51,32 @@ namespace io = sfz::io;
 
 namespace antares {
 
-namespace {
+template <typename T>
+void Uniform<T>::load(int program) {
+    location = glGetUniformLocation(program, name);
+}
 
-static const char kShaderScreenUniform[]          = "screen";
-static const char kShaderColorModeUniform[]       = "color_mode";
-static const char kShaderSpriteUniform[]          = "sprite";
-static const char kShaderStaticImageUniform[]     = "static_image";
-static const char kShaderStaticFractionUniform[]  = "static_fraction";
-static const char kShaderUnitUniform[]            = "unit";
-static const char kShaderOutlineColorUniform[]    = "outline_color";
-static const char kShaderSeedUniform[]            = "seed";
+template <>
+void Uniform<int>::set(int value) const {
+    glUniform1i(location, value);
+}
+
+template <>
+void Uniform<float>::set(float value) const {
+    glUniform1f(location, value);
+}
+
+template <>
+void Uniform<vec2>::set(vec2 value) const {
+    glUniform2f(location, value.x, value.y);
+}
+
+template <>
+void Uniform<vec4>::set(vec4 value) const {
+    glUniform4f(location, value.x, value.y, value.z, value.w);
+}
+
+namespace {
 
 enum {
     FILL_MODE            = 0,
@@ -210,7 +226,7 @@ class OpenGlTextureImpl : public Texture::Impl {
     }
 
     virtual void draw(const Rect& draw_rect) const {
-        glUniform1i(_uniforms.color_mode, DRAW_SPRITE_MODE);
+        _uniforms.color_mode.set(DRAW_SPRITE_MODE);
         draw_internal(draw_rect);
     }
 
@@ -222,29 +238,28 @@ class OpenGlTextureImpl : public Texture::Impl {
 
     virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const {
         glColor4ub(tint.red, tint.green, tint.blue, 255);
-        glUniform1i(_uniforms.color_mode, TINT_SPRITE_MODE);
+        _uniforms.color_mode.set(TINT_SPRITE_MODE);
         draw_internal(draw_rect);
     }
 
     virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const {
         glColor4ub(color.red, color.green, color.blue, color.alpha);
-        glUniform1i(_uniforms.color_mode, STATIC_SPRITE_MODE);
-        glUniform1f(_uniforms.static_fraction, frac / 255.0);
+        _uniforms.color_mode.set(STATIC_SPRITE_MODE);
+        _uniforms.static_fraction.set(frac / 255.0f);
         draw_internal(draw_rect);
     }
 
     virtual void draw_outlined(
             const Rect& draw_rect, const RgbColor& outline_color,
             const RgbColor& fill_color) const {
-        glUniform1i(_uniforms.color_mode, OUTLINE_SPRITE_MODE);
-        glUniform2f(
-                _uniforms.unit,
-                double(_size.width) / draw_rect.width(),
-                double(_size.height) / draw_rect.height());
+        _uniforms.color_mode.set(OUTLINE_SPRITE_MODE);
+        _uniforms.unit.set({
+                float(_size.width) / draw_rect.width(),
+                float(_size.height) / draw_rect.height()});
         glColor4ub(fill_color.red, fill_color.green, fill_color.blue, fill_color.alpha);
-        glUniform4f(
-                _uniforms.outline_color, outline_color.red / 255.0, outline_color.green / 255.0,
-                outline_color.blue / 255.0, outline_color.alpha / 255.0);
+        _uniforms.outline_color.set(
+                {outline_color.red / 255.0f, outline_color.green / 255.0f,
+                outline_color.blue / 255.0f, outline_color.alpha / 255.0f});
         draw_internal(draw_rect);
     }
 
@@ -284,7 +299,7 @@ class OpenGlTextureImpl : public Texture::Impl {
     }
 
     virtual void begin_quads() const {
-        glUniform1i(_uniforms.color_mode, TINT_SPRITE_MODE);
+        _uniforms.color_mode.set(TINT_SPRITE_MODE);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
     }
@@ -350,7 +365,7 @@ Texture OpenGlVideoDriver::texture(PrintItem name, const PixMap& content) {
 }
 
 void OpenGlVideoDriver::begin_rects() {
-    glUniform1i(_uniforms.color_mode, FILL_MODE);
+    _uniforms.color_mode.set(FILL_MODE);
 }
 
 void OpenGlVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
@@ -372,7 +387,7 @@ void OpenGlVideoDriver::end_rects() {
 }
 
 void OpenGlVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
-    glUniform1i(_uniforms.color_mode, DITHER_MODE);
+    _uniforms.color_mode.set(DITHER_MODE);
     glColor4ub(color.red, color.green, color.blue, color.alpha);
 
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -388,7 +403,7 @@ void OpenGlVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
 }
 
 void OpenGlVideoDriver::begin_points() {
-    glUniform1i(_uniforms.color_mode, FILL_MODE);
+    _uniforms.color_mode.set(FILL_MODE);
 }
 
 void OpenGlVideoDriver::end_points() {
@@ -411,7 +426,7 @@ void OpenGlVideoDriver::draw_point(const Point& at, const RgbColor& color) {
 }
 
 void OpenGlVideoDriver::begin_lines() {
-    glUniform1i(_uniforms.color_mode, FILL_MODE);
+    _uniforms.color_mode.set(FILL_MODE);
 }
 
 void OpenGlVideoDriver::end_lines() {
@@ -552,14 +567,14 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
         throw Exception("linking failed");
     }
 
-    driver._uniforms.screen = glGetUniformLocation(program, kShaderScreenUniform);
-    driver._uniforms.color_mode = glGetUniformLocation(program, kShaderColorModeUniform);
-    driver._uniforms.sprite = glGetUniformLocation(program, kShaderSpriteUniform);
-    driver._uniforms.static_image = glGetUniformLocation(program, kShaderStaticImageUniform);
-    driver._uniforms.static_fraction = glGetUniformLocation(program, kShaderStaticFractionUniform);
-    driver._uniforms.unit = glGetUniformLocation(program, kShaderUnitUniform);
-    driver._uniforms.outline_color = glGetUniformLocation(program, kShaderOutlineColorUniform);
-    driver._uniforms.seed = glGetUniformLocation(program, kShaderSeedUniform);
+    driver._uniforms.screen.load(program);
+    driver._uniforms.color_mode.load(program);
+    driver._uniforms.sprite.load(program);
+    driver._uniforms.static_image.load(program);
+    driver._uniforms.static_fraction.load(program);
+    driver._uniforms.unit.load(program);
+    driver._uniforms.outline_color.load(program);
+    driver._uniforms.seed.load(program);
     glUseProgram(program);
 
     GLuint static_texture;
@@ -581,9 +596,9 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
             GL_UNSIGNED_BYTE, static_data.get());
 
     auto screen = driver.viewport_size();
-    glUniform2f(driver._uniforms.screen, screen.width, screen.height);
-    glUniform1i(driver._uniforms.sprite, 0);
-    glUniform1i(driver._uniforms.static_image, 1);
+    driver._uniforms.screen.set({screen.width * 1.0f, screen.height * 1.0f});
+    driver._uniforms.sprite.set(0);
+    driver._uniforms.static_image.set(1);
 }
 
 OpenGlVideoDriver::MainLoop::MainLoop(OpenGlVideoDriver& driver, Card* initial):
@@ -603,7 +618,7 @@ void OpenGlVideoDriver::MainLoop::draw() {
     int32_t seed = {_driver._static_seed.next(256)};
     seed <<= 8;
     seed += _driver._static_seed.next(256);
-    glUniform1i(_driver._uniforms.seed, seed);
+    _driver._uniforms.seed.set(seed);
 
     _stack.top()->draw();
 
