@@ -165,8 +165,6 @@ static T _gl_check(T t, const char* fn, const char* file, int line) {
 #define glEnableClientState(array)              _GL(glEnableClientState, array)
 #define glDisableClientState(array)             _GL(glDisableClientState, array)
 #define glDrawArrays(mode, first, count)        _GL(glDrawArrays, mode, first, count)
-#define glVertexPointer(size, type, stride, pointer) \
-        _GL(glVertexPointer, size, type, stride, pointer)
 
 #endif  // NDEBUG
 
@@ -265,26 +263,34 @@ class OpenGlTextureImpl : public Texture::Impl {
 
   private:
     virtual void draw_internal(const Rect& draw_rect, const RgbColor& tint) const {
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glEnableClientState(GL_COLOR_ARRAY);
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
 
+        GLuint vbuf[3];
+        glGenBuffers(3, vbuf);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbuf[0]);
         GLshort vertices[] = {
             GLshort(draw_rect.left), GLshort(draw_rect.top),
             GLshort(draw_rect.left), GLshort(draw_rect.bottom),
             GLshort(draw_rect.right), GLshort(draw_rect.bottom),
             GLshort(draw_rect.right), GLshort(draw_rect.top),
         };
-        glVertexPointer(2, GL_SHORT, 0, vertices);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
+        glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, 0, nullptr);
 
+        glBindBuffer(GL_ARRAY_BUFFER, vbuf[1]);
         GLubyte colors[] = {
             tint.red, tint.green, tint.blue, tint.alpha,
             tint.red, tint.green, tint.blue, tint.alpha,
             tint.red, tint.green, tint.blue, tint.alpha,
             tint.red, tint.green, tint.blue, tint.alpha,
         };
-        glColorPointer(4, GL_UNSIGNED_BYTE, 0, colors);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STREAM_DRAW);
+        glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
 
+        glBindBuffer(GL_ARRAY_BUFFER, vbuf[2]);
         const int32_t w = _size.width;
         const int32_t h = _size.height;
         GLshort tex_coords[] = {
@@ -293,15 +299,18 @@ class OpenGlTextureImpl : public Texture::Impl {
             GLshort(w + 1), GLshort(h + 1),
             GLshort(w + 1), GLshort(1),
         };
-        glTexCoordPointer(2, GL_SHORT, 0, tex_coords);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(tex_coords), tex_coords, GL_STREAM_DRAW);
+        glVertexAttribPointer(2, 2, GL_SHORT, GL_FALSE, 0, nullptr);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
         glDrawArrays(GL_QUADS, 0, 4);
 
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-        glDisableClientState(GL_COLOR_ARRAY);
-        glDisableClientState(GL_VERTEX_ARRAY);
+        glDeleteBuffers(3, vbuf);
+
+        glDisableVertexAttribArray(2);
+        glDisableVertexAttribArray(1);
+        glDisableVertexAttribArray(0);
     }
 
     virtual void begin_quads() const {
@@ -314,43 +323,54 @@ class OpenGlTextureImpl : public Texture::Impl {
     }
 
     virtual void draw_quad(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glEnableClientState(GL_COLOR_ARRAY);
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
 
+        GLuint vbuf[3];
+        glGenBuffers(3, vbuf);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbuf[0]);
         GLshort vertices[] = {
             GLshort(draw_rect.left), GLshort(draw_rect.top),
             GLshort(draw_rect.left), GLshort(draw_rect.bottom),
             GLshort(draw_rect.right), GLshort(draw_rect.bottom),
             GLshort(draw_rect.right), GLshort(draw_rect.top),
         };
-        glVertexPointer(2, GL_SHORT, 0, vertices);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
+        glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, 0, nullptr);
 
+        glBindBuffer(GL_ARRAY_BUFFER, vbuf[1]);
         GLubyte colors[] = {
             tint.red, tint.green, tint.blue, tint.alpha,
             tint.red, tint.green, tint.blue, tint.alpha,
             tint.red, tint.green, tint.blue, tint.alpha,
             tint.red, tint.green, tint.blue, tint.alpha,
         };
-        glColorPointer(4, GL_UNSIGNED_BYTE, 0, colors);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STREAM_DRAW);
+        glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
 
         Rect texture_rect(origin, draw_rect.size());
         texture_rect.offset(1, 1);
+        glBindBuffer(GL_ARRAY_BUFFER, vbuf[2]);
         GLshort tex_coords[] = {
             GLshort(texture_rect.left), GLshort(texture_rect.top),
             GLshort(texture_rect.left), GLshort(texture_rect.bottom),
             GLshort(texture_rect.right), GLshort(texture_rect.bottom),
             GLshort(texture_rect.right), GLshort(texture_rect.top),
         };
-        glTexCoordPointer(2, GL_SHORT, 0, tex_coords);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(tex_coords), tex_coords, GL_STREAM_DRAW);
+        glVertexAttribPointer(2, 2, GL_SHORT, GL_FALSE, 0, nullptr);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
         glDrawArrays(GL_QUADS, 0, 4);
 
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-        glDisableClientState(GL_COLOR_ARRAY);
-        glDisableClientState(GL_VERTEX_ARRAY);
+        glDeleteBuffers(3, vbuf);
+
+        glDisableVertexAttribArray(2);
+        glDisableVertexAttribArray(1);
+        glDisableVertexAttribArray(0);
     }
 
     struct Texture {
@@ -383,29 +403,38 @@ void OpenGlVideoDriver::begin_rects() {
 }
 
 void OpenGlVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
 
+    GLuint vbuf[2];
+    glGenBuffers(2, vbuf);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbuf[0]);
     GLshort vertices[] = {
         GLshort(rect.right), GLshort(rect.top),
         GLshort(rect.left), GLshort(rect.top),
         GLshort(rect.left), GLshort(rect.bottom),
         GLshort(rect.right), GLshort(rect.bottom),
     };
-    glVertexPointer(2, GL_SHORT, 0, vertices);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
+    glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, 0, nullptr);
 
+    glBindBuffer(GL_ARRAY_BUFFER, vbuf[1]);
     GLubyte colors[] = {
         color.red, color.green, color.blue, color.alpha,
         color.red, color.green, color.blue, color.alpha,
         color.red, color.green, color.blue, color.alpha,
         color.red, color.green, color.blue, color.alpha,
     };
-    glColorPointer(4, GL_UNSIGNED_BYTE, 0, colors);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STREAM_DRAW);
+    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
 
     glDrawArrays(GL_QUADS, 0, 4);
 
-    glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
+    glDeleteBuffers(2, vbuf);
+
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(0);
 }
 
 void OpenGlVideoDriver::end_rects() {
@@ -413,30 +442,7 @@ void OpenGlVideoDriver::end_rects() {
 
 void OpenGlVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
     _uniforms.color_mode.set(DITHER_MODE);
-
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
-
-    GLshort vertices[] = {
-        GLshort(rect.right), GLshort(rect.top),
-        GLshort(rect.left), GLshort(rect.top),
-        GLshort(rect.left), GLshort(rect.bottom),
-        GLshort(rect.right), GLshort(rect.bottom),
-    };
-    glVertexPointer(2, GL_SHORT, 0, vertices);
-
-    GLubyte colors[] = {
-        color.red, color.green, color.blue, color.alpha,
-        color.red, color.green, color.blue, color.alpha,
-        color.red, color.green, color.blue, color.alpha,
-        color.red, color.green, color.blue, color.alpha,
-    };
-    glColorPointer(4, GL_UNSIGNED_BYTE, 0, colors);
-
-    glDrawArrays(GL_QUADS, 0, 4);
-
-    glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
+    batch_rect(rect, color);
 }
 
 void OpenGlVideoDriver::begin_points() {
@@ -447,18 +453,30 @@ void OpenGlVideoDriver::end_points() {
 }
 
 void OpenGlVideoDriver::batch_point(const Point& at, const RgbColor& color) {
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    GLuint vbuf[2];
+    glGenBuffers(2, vbuf);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbuf[0]);
     GLfloat vertices[] = {GLfloat(at.h + 0.5), GLfloat(at.v + 0.5)};
-    glVertexPointer(2, GL_FLOAT, 0, vertices);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbuf[1]);
     GLubyte colors[] = {
         color.red, color.green, color.blue, color.alpha,
-        color.red, color.green, color.blue, color.alpha,
     };
-    glColorPointer(4, GL_UNSIGNED_BYTE, 0, colors);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STREAM_DRAW);
+    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
+
     glDrawArrays(GL_POINTS, 0, 1);
-    glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
+
+    glDeleteBuffers(2, vbuf);
+
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(0);
 }
 
 void OpenGlVideoDriver::draw_point(const Point& at, const RgbColor& color) {
@@ -514,18 +532,31 @@ void OpenGlVideoDriver::batch_line(
         y2 += 0.5f;
     }
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    GLuint vbuf[2];
+    glGenBuffers(2, vbuf);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbuf[0]);
     GLfloat vertices[] = {x1, y1, x2, y2};
-    glVertexPointer(2, GL_FLOAT, 0, vertices);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbuf[1]);
     GLubyte colors[] = {
         color.red, color.green, color.blue, color.alpha,
         color.red, color.green, color.blue, color.alpha,
     };
-    glColorPointer(4, GL_UNSIGNED_BYTE, 0, colors);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STREAM_DRAW);
+    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
+
     glDrawArrays(GL_LINES, 0, 2);
-    glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_VERTEX_ARRAY);
+
+    glDeleteBuffers(2, vbuf);
+
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(0);
 }
 
 void OpenGlVideoDriver::draw_line(const Point& from, const Point& to, const RgbColor& color) {
@@ -605,6 +636,9 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     GLuint program = glCreateProgram();
     glAttachShader(program, fragment);
     glAttachShader(program, vertex);
+    glBindAttribLocation(program, 0, "vertex");
+    glBindAttribLocation(program, 1, "in_color");
+    glBindAttribLocation(program, 2, "tex_coord");
     glLinkProgram(program);
     glValidateProgram(program);
     GLint linked;

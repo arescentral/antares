@@ -18,6 +18,10 @@
 
 #version 120
 
+attribute vec2 vertex;
+attribute vec4 in_color;
+attribute vec2 tex_coord;
+
 varying vec2 uv;
 varying vec4 color;
 varying vec2 screen_position;
@@ -31,8 +35,8 @@ void main() {
             0,               0,              0, 0,
            -1.0,             1.0,            0, 1);
 
-    gl_Position = transform * gl_Vertex;
-    uv = gl_MultiTexCoord0.xy;
-    screen_position = gl_Vertex.xy;
-    color = gl_Color;
+    gl_Position = transform * vec4(vertex, 0, 1);
+    uv = tex_coord;
+    screen_position = vertex;
+    color = in_color;
 }
