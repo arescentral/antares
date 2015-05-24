@@ -22,17 +22,26 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <algorithm>
-#include <OpenGL/OpenGL.h>
-#include <OpenGL/gl.h>
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
 #include "drawing/pix-map.hpp"
 #include "game/time.hpp"
-#include "mac/offscreen.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
 #include "ui/event.hpp"
+
+#ifdef __APPLE__
+#include <OpenGL/OpenGL.h>
+#include <OpenGL/gl.h>
+#include "mac/offscreen.hpp"
+#else
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glext.h>
+#include "linux/offscreen.hpp"
+#endif
 
 using sfz::BytesSlice;
 using sfz::Exception;
@@ -131,6 +140,7 @@ struct Renderbuffer {
 class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
   public:
     MainLoop(OffscreenVideoDriver& driver, const Optional<String>& output_dir, Card* initial):
+            _offscreen(Preferences::preferences()->screen_size()),
             _buffer(Preferences::preferences()->screen_size(), 4),
             _setup(*this),
             _output_dir(output_dir),

@@ -27,9 +27,10 @@ static const CGLPixelFormatAttribute kAttrs[] = {
     static_cast<CGLPixelFormatAttribute>(0),
 };
 
-Offscreen::Offscreen():
+Offscreen::Offscreen(Size size):
         _pix(kAttrs),
         _context(_pix.c_obj(), nullptr) {
+    static_cast<void>(size);
     cgl::check(CGLSetCurrentContext(_context.c_obj()));
 }
 

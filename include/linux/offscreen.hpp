@@ -16,10 +16,14 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_MAC_OFFSCREEN_HPP_
-#define ANTARES_MAC_OFFSCREEN_HPP_
+#ifndef ANTARES_LINUX_OFFSCREEN_HPP_
+#define ANTARES_LINUX_OFFSCREEN_HPP_
 
-#include "mac/core-opengl.hpp"
+#include <memory>
+#include <GL/glx.h>
+#include <GL/glxext.h>
+#include <X11/Xlib.h>
+
 #include "math/geometry.hpp"
 
 namespace antares {
@@ -30,10 +34,18 @@ class Offscreen {
     ~Offscreen();
 
   private:
-    cgl::PixelFormat _pix;
-    cgl::Context _context;
+    struct ContextDestroyer {
+        Display* display;
+        void operator()(GLXContext context) {
+            glXDestroyContext(display, context);
+        }
+    };
+
+    std::unique_ptr<Display, decltype(&XCloseDisplay)> _display;
+    std::unique_ptr<GLXFBConfig[], decltype(&XFree)> _fb_configs;
+    std::unique_ptr<std::remove_pointer<GLXContext>::type, ContextDestroyer> _context;
 };
 
 }  // namespace antares
 
-#endif  // ANTARES_MAC_OFFSCREEN_HPP_
+#endif  // ANTARES_LINUX_OFFSCREEN_HPP_

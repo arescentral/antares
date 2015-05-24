@@ -287,12 +287,22 @@
       , "<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz"
       ]
     , "link_settings":
-      { "libraries": ["$(SDKROOT)/System/Library/Frameworks/OpenGL.framework"]
+      { "libraries":
+        [ "$(SDKROOT)/System/Library/Frameworks/OpenGL.framework"
+        , "-lGL"
+        , "-lX11"
+        ]
       }
     , "conditions":
       [ [ "OS != 'mac'"
         , { "link_settings":
             { "libraries!": ["$(SDKROOT)/System/Library/Frameworks/OpenGL.framework"]
+            }
+          }
+        ]
+      , [ "OS != 'linux'"
+        , { "link_settings":
+            { "libraries!": ["-lGL", "-lX11"]
             }
           }
         ]
@@ -332,7 +342,8 @@
   , { "target_name": "libantares-test"
     , "type": "static_library"
     , "sources":
-      [ "src/mac/offscreen.cpp"
+      [ "src/linux/offscreen.cpp"
+      , "src/mac/offscreen.cpp"
       , "src/test/resource.cpp"
       , "src/video/offscreen-driver.cpp"
       , "src/video/text-driver.cpp"
@@ -341,14 +352,8 @@
     , "dependencies": ["libantares"]
     , "export_dependent_settings": ["libantares"]
     , "conditions":
-      [ [ "OS != 'mac'"
-        , { "sources!": ["src/mac/offscreen.cpp"]
-          }
-        ]
-      , [ "OS == 'linux'"
-        , { "sources!": ["src/video/offscreen-driver.cpp"]  # Temporary.
-          }
-        ]
+      [ [ "OS != 'mac'" , { "sources!": ["src/mac/offscreen.cpp"] } ]
+      , [ "OS != 'linux'" , { "sources!": ["src/linux/offscreen.cpp"] } ]
       ]
     }
 
@@ -359,6 +364,24 @@
       [ "libantares-test"
       , "<(DEPTH)/ext/gmock-gyp/gmock.gyp:gmock_main"
       ]
+    }
+
+  , { "target_name": "offscreen"
+    , "type": "executable"
+    , "sources": ["src/bin/offscreen.cpp"]
+    , "dependencies": ["libantares-test"]
+    }
+
+  , { "target_name": "replay"
+    , "type": "executable"
+    , "sources": ["src/bin/replay.cpp"]
+    , "dependencies": ["libantares-test"]
+    }
+
+  , { "target_name": "build-pix"
+    , "type": "executable"
+    , "sources": ["src/bin/build-pix.cpp"]
+    , "dependencies": ["libantares-test"]
     }
   ]
 
@@ -439,24 +462,6 @@
         , { "target_name": "extract-data"
           , "type": "executable"
           , "sources": ["src/bin/extract-data.cpp"]
-          , "dependencies": ["libantares-test"]
-          }
-
-        , { "target_name": "offscreen"
-          , "type": "executable"
-          , "sources": ["src/bin/offscreen.cpp"]
-          , "dependencies": ["libantares-test"]
-          }
-
-        , { "target_name": "replay"
-          , "type": "executable"
-          , "sources": ["src/bin/replay.cpp"]
-          , "dependencies": ["libantares-test"]
-          }
-
-        , { "target_name": "build-pix"
-          , "type": "executable"
-          , "sources": ["src/bin/build-pix.cpp"]
           , "dependencies": ["libantares-test"]
           }
         ]

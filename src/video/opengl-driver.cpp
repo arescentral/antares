@@ -157,7 +157,7 @@ static T _gl_check(T t, const char* fn, const char* file, int line) {
     _GL(glShaderSource, shader, count, string, length)
 #define glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels) \
     _GL(glTexImage2D, target, level, internalformat, width, height, border, format, type, pixels)
-#define glTextureRangeAPPLE(target, length, pointer) \
+//#define glTextureRangeAPPLE(target, length, pointer) \
     _GL(glTextureRangeAPPLE, target, length, pointer)
 #define glUniform1f(location, v0)               _GL(glUniform1f, location, v0)
 #define glUniform1i(location, v0)               _GL(glUniform1i, location, v0)
