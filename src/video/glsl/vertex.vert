@@ -19,8 +19,8 @@
 #version 120
 
 varying vec2 uv;
-varying vec2 st;
 varying vec4 color;
+varying vec2 screen_position;
 
 uniform vec2 screen;
 
@@ -33,6 +33,6 @@ void main() {
 
     gl_Position = transform * gl_Vertex;
     uv = gl_MultiTexCoord0.xy;
-    st = gl_MultiTexCoord1.xy;
+    screen_position = gl_Vertex.xy;
     color = gl_Color;
 }

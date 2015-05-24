@@ -258,16 +258,12 @@ class OpenGlTextureImpl : public Texture::Impl {
         glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
         glBegin(GL_QUADS);
         glMultiTexCoord2f(GL_TEXTURE0, 1, 1);
-        glMultiTexCoord2f(GL_TEXTURE1, draw_rect.left, draw_rect.top);
         glVertex2f(draw_rect.left, draw_rect.top);
         glMultiTexCoord2f(GL_TEXTURE0, 1, h + 1);
-        glMultiTexCoord2f(GL_TEXTURE1, draw_rect.left, draw_rect.bottom);
         glVertex2f(draw_rect.left, draw_rect.bottom);
         glMultiTexCoord2f(GL_TEXTURE0, w + 1, h + 1);
-        glMultiTexCoord2f(GL_TEXTURE1, draw_rect.right, draw_rect.bottom);
         glVertex2f(draw_rect.right, draw_rect.bottom);
         glMultiTexCoord2f(GL_TEXTURE0, w + 1, 1);
-        glMultiTexCoord2f(GL_TEXTURE1, draw_rect.right, draw_rect.top);
         glVertex2f(draw_rect.right, draw_rect.top);
         glEnd();
     }
@@ -344,13 +340,9 @@ void OpenGlVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
     glUniform1i(_uniforms.color_mode, DITHER_MODE);
     glColor4ub(color.red, color.green, color.blue, color.alpha);
     glBegin(GL_QUADS);
-    glMultiTexCoord2f(GL_TEXTURE1, rect.right, rect.top);
     glVertex2f(rect.right, rect.top);
-    glMultiTexCoord2f(GL_TEXTURE1, rect.left, rect.top);
     glVertex2f(rect.left, rect.top);
-    glMultiTexCoord2f(GL_TEXTURE1, rect.left, rect.bottom);
     glVertex2f(rect.left, rect.bottom);
-    glMultiTexCoord2f(GL_TEXTURE1, rect.right, rect.bottom);
     glVertex2f(rect.right, rect.bottom);
     glEnd();
 }

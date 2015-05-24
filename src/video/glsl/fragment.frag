@@ -19,8 +19,8 @@
 #version 120
 
 varying vec2 uv;
-varying vec2 st;
 varying vec4 color;
+varying vec2 screen_position;
 
 uniform int            color_mode;
 uniform sampler2DRect  sprite;
@@ -42,7 +42,7 @@ void main() {
     if (color_mode == FILL_MODE) {
         gl_FragColor = color;
     } else if (color_mode == DITHER_MODE) {
-        if (mod(floor(st.s) + floor(st.t), 2) == 1) {
+        if (mod(floor(screen_position.s) + floor(screen_position.t), 2) == 1) {
             gl_FragColor = color;
         } else {
             gl_FragColor = vec4(0, 0, 0, 0);
@@ -52,7 +52,7 @@ void main() {
     } else if (color_mode == TINT_SPRITE_MODE) {
         gl_FragColor = color * sprite_color;
     } else if (color_mode == STATIC_SPRITE_MODE) {
-        vec2 uv2 = (st + vec2(seed / 256, seed)) * vec2(1.0/256, 1.0/256);
+        vec2 uv2 = (screen_position + vec2(seed / 256, seed)) * vec2(1.0/256, 1.0/256);
         vec4 static_color = texture2D(static_image, uv2);
         if (static_color.w <= static_fraction) {
             vec4 sprite_alpha = vec4(1, 1, 1, sprite_color.w);
