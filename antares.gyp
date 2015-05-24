@@ -238,6 +238,7 @@
       , "src/video/opengl-driver.cpp"
       , "src/video/transitions.cpp"
       , "<(INTERMEDIATE_DIR)/src/video/glsl/fragment.cpp"
+      , "<(INTERMEDIATE_DIR)/src/video/glsl/vertex.cpp"
       ]
     , "actions":
       [ { "action_name": "fragment"
@@ -256,6 +257,24 @@
           , "src/video/glsl/fragment.frag"
           , "<@(_outputs)"
           , "antares::glsl::fragment"
+          ]
+        }
+      , { "action_name": "vertex"
+        , "message": "Embedding GLSL vertex shader"
+        , "inputs":
+          [ "scripts/embed.py"
+          , "src/video/glsl/vertex.vert"
+          ]
+        , "outputs":
+          [ "<(INTERMEDIATE_DIR)/include/video/glsl/vertex.hpp"
+          , "<(INTERMEDIATE_DIR)/src/video/glsl/vertex.cpp"
+          ]
+        , "action":
+          [ "python"
+          , "scripts/embed.py"
+          , "src/video/glsl/vertex.vert"
+          , "<@(_outputs)"
+          , "antares::glsl::vertex"
           ]
         }
       ]

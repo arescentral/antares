@@ -30,12 +30,13 @@
 #include "math/random.hpp"
 #include "ui/card.hpp"
 #include "video/glsl/fragment.hpp"
+#include "video/glsl/vertex.hpp"
 
 #include "game/time.hpp"
 
 #ifdef __APPLE__
 #include <OpenGL/OpenGL.h>
-#include <OpenGL/gl.h>
+#include <OpenGL/gl3.h>
 #else
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
@@ -58,15 +59,32 @@ namespace io = sfz::io;
 
 namespace antares {
 
-namespace {
+template <typename T>
+void Uniform<T>::load(int program) {
+    location = glGetUniformLocation(program, name);
+}
 
-static const char kShaderColorModeUniform[]       = "color_mode";
-static const char kShaderSpriteUniform[]          = "sprite";
-static const char kShaderStaticImageUniform[]     = "static_image";
-static const char kShaderStaticFractionUniform[]  = "static_fraction";
-static const char kShaderUnitUniform[]            = "unit";
-static const char kShaderOutlineColorUniform[]    = "outline_color";
-static const char kShaderSeedUniform[]            = "seed";
+template <>
+void Uniform<int>::set(int value) const {
+    glUniform1i(location, value);
+}
+
+template <>
+void Uniform<float>::set(float value) const {
+    glUniform1f(location, value);
+}
+
+template <>
+void Uniform<vec2>::set(vec2 value) const {
+    glUniform2f(location, value.x, value.y);
+}
+
+template <>
+void Uniform<vec4>::set(vec4 value) const {
+    glUniform4f(location, value.x, value.y, value.z, value.w);
+}
+
+namespace {
 
 enum {
     FILL_MODE            = 0,
@@ -85,10 +103,7 @@ static const char* _gl_error_string(GLenum err) {
         case GL_INVALID_ENUM: return "GL_INVALID_ENUM";
         case GL_INVALID_VALUE: return "GL_INVALID_VALUE";
         case GL_INVALID_OPERATION: return "GL_INVALID_OPERATION";
-        case GL_STACK_OVERFLOW: return "GL_STACK_OVERFLOW";
-        case GL_STACK_UNDERFLOW: return "GL_STACK_UNDERFLOW";
         case GL_OUT_OF_MEMORY: return "GL_OUT_OF_MEMORY";
-        case GL_TABLE_TOO_LARGE: return "GL_TABLE_TOO_LARGE";
         default: return "?";
     }
 }
@@ -114,19 +129,16 @@ static T _gl_check(T t, const char* fn, const char* file, int line) {
 
 #define glActiveTexture(texture)                _GL(glActiveTexture, texture)
 #define glAttachShader(program, shader)         _GL(glAttachShader, program, shader)
-// Skip glBegin().
 #define glBindTexture(target, texture)          _GL(glBindTexture, target, texture)
 #define glBlendFunc(sfactor, dfactor)           _GL(glBlendFunc, sfactor, dfactor)
 #define glClear(mask)                           _GL(glClear, mask)
 #define glClearColor(red, green, blue, alpha)   _GL(glClearColor, red, green, blue, alpha)
-// Skip glColor4ub().
 #define glCompileShader(shader)                 _GL(glCompileShader, shader)
 #define glCreateProgram()                       _GLV(glCreateProgram)
 #define glCreateShader(shaderType)              _GLV(glCreateShader, shaderType)
 #define glDeleteTextures(n, textures)           _GL(glDeleteTextures, n, textures)
 #define glDisable(cap)                          _GL(glDisable, cap)
 #define glEnable(cap)                           _GL(glEnable, cap)
-#define glEnd()                                 _GL(glEnd)
 #define glFinish()                              _GL(glFinish)
 #define glGenTextures(n, textures)              _GL(glGenTextures, n, textures)
 // Skip glGetError().
@@ -140,27 +152,31 @@ static T _gl_check(T t, const char* fn, const char* file, int line) {
 // Skip glIsShader().
 #define glLinkProgram(program)                  _GL(glLinkProgram, program)
 #define glLoadIdentity()                        _GL(glLoadIdentity)
-#define glMatrixMode(mode)                      _GL(glMatrixMode, mode)
-// Skip glMultiTexCoord2f().
 #define glPixelStorei(pname, param)             _GL(glPixelStorei, pname, param)
-#define glPopMatrix()                           _GL(glPopMatrix)
-#define glPushMatrix()                          _GL(glPushMatrix)
-#define glScalef(x, y, z)                       _GL(glScalef, x, y, z)
 #define glShaderSource(shader, count, string, length) \
     _GL(glShaderSource, shader, count, string, length)
 #define glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels) \
     _GL(glTexImage2D, target, level, internalformat, width, height, border, format, type, pixels)
 #define glTextureRangeAPPLE(target, length, pointer) \
     _GL(glTextureRangeAPPLE, target, length, pointer)
-#define glTranslatef(x, y, z)                   _GL(glTranslatef, x, y, z)
 #define glUniform1f(location, v0)               _GL(glUniform1f, location, v0)
 #define glUniform1i(location, v0)               _GL(glUniform1i, location, v0)
 #define glUniform2f(location, v0, v1)           _GL(glUniform2f, location, v0, v1)
 #define glUniform4f(location, v0, v1, v2, v3)   _GL(glUniform4f, location, v0, v1, v2, v3)
 #define glUseProgram(program)                   _GL(glUseProgram, program)
 #define glValidateProgram(program)              _GL(glValidateProgram, program)
-// glVertex2f().
 #define glViewport(x, y, width, height)         _GL(glViewport, x, y, width, height)
+
+#define glEnableClientState(array)              _GL(glEnableClientState, array)
+#define glDisableClientState(array)             _GL(glDisableClientState, array)
+#define glDrawArrays(mode, first, count)        _GL(glDrawArrays, mode, first, count)
+#define glGenBuffers(n, buffers)                _GL(glGenBuffers, n, buffers)
+#define glBindBuffer(target, buffer)            _GL(glBindBuffer, target, buffer)
+#define glBufferData(target, size, data, usage) _GL(glBufferData, target, size, data, usage)
+#define glVertexAttribPointer(index, size, type, normalized, stride, pointer) \
+    _GL(glVertexAttribPointer, index, size, type, normalized, stride, pointer)
+#define glEnableVertexAttribArray(index)        _GL(glEnableVertexAttribArray, index)
+#define glDisableVertexAttribArray(index)       _GL(glDisableVertexAttribArray, index)
 
 #endif  // NDEBUG
 
@@ -219,8 +235,8 @@ class OpenGlTextureImpl : public Texture::Impl {
     }
 
     virtual void draw(const Rect& draw_rect) const {
-        glUniform1i(_uniforms.color_mode, DRAW_SPRITE_MODE);
-        draw_internal(draw_rect);
+        _uniforms.color_mode.set(DRAW_SPRITE_MODE);
+        draw_internal(draw_rect, RgbColor::kWhite);
     }
 
     virtual void draw_cropped(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
@@ -230,31 +246,27 @@ class OpenGlTextureImpl : public Texture::Impl {
     }
 
     virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const {
-        glColor4ub(tint.red, tint.green, tint.blue, 255);
-        glUniform1i(_uniforms.color_mode, TINT_SPRITE_MODE);
-        draw_internal(draw_rect);
+        _uniforms.color_mode.set(TINT_SPRITE_MODE);
+        draw_internal(draw_rect, tint);
     }
 
     virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const {
-        glColor4ub(color.red, color.green, color.blue, color.alpha);
-        glUniform1i(_uniforms.color_mode, STATIC_SPRITE_MODE);
-        glUniform1f(_uniforms.static_fraction, frac / 255.0);
-        draw_internal(draw_rect);
+        _uniforms.color_mode.set(STATIC_SPRITE_MODE);
+        _uniforms.static_fraction.set(frac / 255.0f);
+        draw_internal(draw_rect, color);
     }
 
     virtual void draw_outlined(
             const Rect& draw_rect, const RgbColor& outline_color,
             const RgbColor& fill_color) const {
-        glUniform1i(_uniforms.color_mode, OUTLINE_SPRITE_MODE);
-        glUniform2f(
-                _uniforms.unit,
-                double(_size.width) / draw_rect.width(),
-                double(_size.height) / draw_rect.height());
-        glColor4ub(fill_color.red, fill_color.green, fill_color.blue, fill_color.alpha);
-        glUniform4f(
-                _uniforms.outline_color, outline_color.red / 255.0, outline_color.green / 255.0,
-                outline_color.blue / 255.0, outline_color.alpha / 255.0);
-        draw_internal(draw_rect);
+        _uniforms.color_mode.set(OUTLINE_SPRITE_MODE);
+        _uniforms.unit.set({
+                float(_size.width) / draw_rect.width(),
+                float(_size.height) / draw_rect.height()});
+        _uniforms.outline_color.set(
+                {outline_color.red / 255.0f, outline_color.green / 255.0f,
+                outline_color.blue / 255.0f, outline_color.alpha / 255.0f});
+        draw_internal(draw_rect, fill_color);
     }
 
     virtual const Size& size() const {
@@ -262,51 +274,115 @@ class OpenGlTextureImpl : public Texture::Impl {
     }
 
   private:
-    virtual void draw_internal(const Rect& draw_rect) const {
+    virtual void draw_internal(const Rect& draw_rect, const RgbColor& tint) const {
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
+
+        GLuint vbuf[3];
+        glGenBuffers(3, vbuf);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbuf[0]);
+        GLshort vertices[] = {
+            GLshort(draw_rect.left), GLshort(draw_rect.top),
+            GLshort(draw_rect.left), GLshort(draw_rect.bottom),
+            GLshort(draw_rect.right), GLshort(draw_rect.bottom),
+            GLshort(draw_rect.right), GLshort(draw_rect.top),
+        };
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
+        glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, 0, nullptr);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbuf[1]);
+        GLubyte colors[] = {
+            tint.red, tint.green, tint.blue, tint.alpha,
+            tint.red, tint.green, tint.blue, tint.alpha,
+            tint.red, tint.green, tint.blue, tint.alpha,
+            tint.red, tint.green, tint.blue, tint.alpha,
+        };
+        glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STREAM_DRAW);
+        glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbuf[2]);
         const int32_t w = _size.width;
         const int32_t h = _size.height;
+        GLshort tex_coords[] = {
+            GLshort(1), GLshort(1),
+            GLshort(1), GLshort(h + 1),
+            GLshort(w + 1), GLshort(h + 1),
+            GLshort(w + 1), GLshort(1),
+        };
+        glBufferData(GL_ARRAY_BUFFER, sizeof(tex_coords), tex_coords, GL_STREAM_DRAW);
+        glVertexAttribPointer(2, 2, GL_SHORT, GL_FALSE, 0, nullptr);
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_RECTANGLE, _texture.id);
-        glBegin(GL_QUADS);
-        glMultiTexCoord2f(GL_TEXTURE0, 1, 1);
-        glMultiTexCoord2f(GL_TEXTURE1, draw_rect.left, draw_rect.top);
-        glVertex2f(draw_rect.left, draw_rect.top);
-        glMultiTexCoord2f(GL_TEXTURE0, 1, h + 1);
-        glMultiTexCoord2f(GL_TEXTURE1, draw_rect.left, draw_rect.bottom);
-        glVertex2f(draw_rect.left, draw_rect.bottom);
-        glMultiTexCoord2f(GL_TEXTURE0, w + 1, h + 1);
-        glMultiTexCoord2f(GL_TEXTURE1, draw_rect.right, draw_rect.bottom);
-        glVertex2f(draw_rect.right, draw_rect.bottom);
-        glMultiTexCoord2f(GL_TEXTURE0, w + 1, 1);
-        glMultiTexCoord2f(GL_TEXTURE1, draw_rect.right, draw_rect.top);
-        glVertex2f(draw_rect.right, draw_rect.top);
-        glEnd();
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+        glDeleteBuffers(3, vbuf);
+
+        glDisableVertexAttribArray(2);
+        glDisableVertexAttribArray(1);
+        glDisableVertexAttribArray(0);
     }
 
     virtual void begin_quads() const {
-        glUniform1i(_uniforms.color_mode, TINT_SPRITE_MODE);
+        _uniforms.color_mode.set(TINT_SPRITE_MODE);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_RECTANGLE, _texture.id);
-        glBegin(GL_QUADS);
     }
 
     virtual void end_quads() const {
-        glEnd();
     }
 
     virtual void draw_quad(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
+
+        GLuint vbuf[3];
+        glGenBuffers(3, vbuf);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbuf[0]);
+        GLshort vertices[] = {
+            GLshort(draw_rect.left), GLshort(draw_rect.top),
+            GLshort(draw_rect.left), GLshort(draw_rect.bottom),
+            GLshort(draw_rect.right), GLshort(draw_rect.bottom),
+            GLshort(draw_rect.right), GLshort(draw_rect.top),
+        };
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
+        glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, 0, nullptr);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbuf[1]);
+        GLubyte colors[] = {
+            tint.red, tint.green, tint.blue, tint.alpha,
+            tint.red, tint.green, tint.blue, tint.alpha,
+            tint.red, tint.green, tint.blue, tint.alpha,
+            tint.red, tint.green, tint.blue, tint.alpha,
+        };
+        glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STREAM_DRAW);
+        glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
+
         Rect texture_rect(origin, draw_rect.size());
         texture_rect.offset(1, 1);
+        glBindBuffer(GL_ARRAY_BUFFER, vbuf[2]);
+        GLshort tex_coords[] = {
+            GLshort(texture_rect.left), GLshort(texture_rect.top),
+            GLshort(texture_rect.left), GLshort(texture_rect.bottom),
+            GLshort(texture_rect.right), GLshort(texture_rect.bottom),
+            GLshort(texture_rect.right), GLshort(texture_rect.top),
+        };
+        glBufferData(GL_ARRAY_BUFFER, sizeof(tex_coords), tex_coords, GL_STREAM_DRAW);
+        glVertexAttribPointer(2, 2, GL_SHORT, GL_FALSE, 0, nullptr);
 
-        glColor4ub(tint.red, tint.green, tint.blue, 255);
-        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.left, texture_rect.top);
-        glVertex2f(draw_rect.left, draw_rect.top);
-        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.left, texture_rect.bottom);
-        glVertex2f(draw_rect.left, draw_rect.bottom);
-        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.right, texture_rect.bottom);
-        glVertex2f(draw_rect.right, draw_rect.bottom);
-        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.right, texture_rect.top);
-        glVertex2f(draw_rect.right, draw_rect.top);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_RECTANGLE, _texture.id);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+        glDeleteBuffers(3, vbuf);
+
+        glDisableVertexAttribArray(2);
+        glDisableVertexAttribArray(1);
+        glDisableVertexAttribArray(0);
     }
 
     struct Texture {
@@ -335,49 +411,84 @@ Texture OpenGlVideoDriver::texture(PrintItem name, const PixMap& content) {
 }
 
 void OpenGlVideoDriver::begin_rects() {
-    glUniform1i(_uniforms.color_mode, FILL_MODE);
-    glBegin(GL_QUADS);
+    _uniforms.color_mode.set(FILL_MODE);
 }
 
 void OpenGlVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
-    glColor4ub(color.red, color.green, color.blue, color.alpha);
-    glVertex2f(rect.right, rect.top);
-    glVertex2f(rect.left, rect.top);
-    glVertex2f(rect.left, rect.bottom);
-    glVertex2f(rect.right, rect.bottom);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    GLuint vbuf[2];
+    glGenBuffers(2, vbuf);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbuf[0]);
+    GLshort vertices[] = {
+        GLshort(rect.right), GLshort(rect.top),
+        GLshort(rect.left), GLshort(rect.top),
+        GLshort(rect.left), GLshort(rect.bottom),
+        GLshort(rect.right), GLshort(rect.bottom),
+    };
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
+    glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, 0, nullptr);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbuf[1]);
+    GLubyte colors[] = {
+        color.red, color.green, color.blue, color.alpha,
+        color.red, color.green, color.blue, color.alpha,
+        color.red, color.green, color.blue, color.alpha,
+        color.red, color.green, color.blue, color.alpha,
+    };
+    glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STREAM_DRAW);
+    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
+
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+    glDeleteBuffers(2, vbuf);
+
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(0);
 }
 
 void OpenGlVideoDriver::end_rects() {
-    glEnd();
 }
 
 void OpenGlVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
-    glUniform1i(_uniforms.color_mode, DITHER_MODE);
-    glColor4ub(color.red, color.green, color.blue, color.alpha);
-    glBegin(GL_QUADS);
-    glMultiTexCoord2f(GL_TEXTURE1, rect.right, rect.top);
-    glVertex2f(rect.right, rect.top);
-    glMultiTexCoord2f(GL_TEXTURE1, rect.left, rect.top);
-    glVertex2f(rect.left, rect.top);
-    glMultiTexCoord2f(GL_TEXTURE1, rect.left, rect.bottom);
-    glVertex2f(rect.left, rect.bottom);
-    glMultiTexCoord2f(GL_TEXTURE1, rect.right, rect.bottom);
-    glVertex2f(rect.right, rect.bottom);
-    glEnd();
+    _uniforms.color_mode.set(DITHER_MODE);
+    batch_rect(rect, color);
 }
 
 void OpenGlVideoDriver::begin_points() {
-    glUniform1i(_uniforms.color_mode, FILL_MODE);
-    glBegin(GL_POINTS);
+    _uniforms.color_mode.set(FILL_MODE);
 }
 
 void OpenGlVideoDriver::end_points() {
-    glEnd();
 }
 
 void OpenGlVideoDriver::batch_point(const Point& at, const RgbColor& color) {
-    glColor4ub(color.red, color.green, color.blue, color.alpha);
-    glVertex2f(at.h + 0.5, at.v + 0.5);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    GLuint vbuf[2];
+    glGenBuffers(2, vbuf);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbuf[0]);
+    GLfloat vertices[] = {GLfloat(at.h + 0.5), GLfloat(at.v + 0.5)};
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbuf[1]);
+    GLubyte colors[] = {
+        color.red, color.green, color.blue, color.alpha,
+    };
+    glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STREAM_DRAW);
+    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
+
+    glDrawArrays(GL_POINTS, 0, 1);
+
+    glDeleteBuffers(2, vbuf);
+
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(0);
 }
 
 void OpenGlVideoDriver::draw_point(const Point& at, const RgbColor& color) {
@@ -387,12 +498,10 @@ void OpenGlVideoDriver::draw_point(const Point& at, const RgbColor& color) {
 }
 
 void OpenGlVideoDriver::begin_lines() {
-    glUniform1i(_uniforms.color_mode, FILL_MODE);
-    glBegin(GL_LINES);
+    _uniforms.color_mode.set(FILL_MODE);
 }
 
 void OpenGlVideoDriver::end_lines() {
-    glEnd();
 }
 
 void OpenGlVideoDriver::batch_line(
@@ -435,9 +544,31 @@ void OpenGlVideoDriver::batch_line(
         y2 += 0.5f;
     }
 
-    glColor4ub(color.red, color.green, color.blue, color.alpha);
-    glVertex2f(x1, y1);
-    glVertex2f(x2, y2);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    GLuint vbuf[2];
+    glGenBuffers(2, vbuf);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbuf[0]);
+    GLfloat vertices[] = {x1, y1, x2, y2};
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbuf[1]);
+    GLubyte colors[] = {
+        color.red, color.green, color.blue, color.alpha,
+        color.red, color.green, color.blue, color.alpha,
+    };
+    glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STREAM_DRAW);
+    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
+
+    glDrawArrays(GL_LINES, 0, 2);
+
+    glDeleteBuffers(2, vbuf);
+
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(0);
 }
 
 void OpenGlVideoDriver::draw_line(const Point& from, const Point& to, const RgbColor& color) {
@@ -485,23 +616,9 @@ void OpenGlVideoDriver::draw_plus(const Rect& rect, const RgbColor& color) {
     _pluses[size].draw_shaded(to, color);
 }
 
-OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glClearColor(0, 0, 0, 1);
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_TEXTURE_RECTANGLE);
-    glBindTexture(GL_TEXTURE_RECTANGLE, 1);
-    glEnable(GL_ALPHA_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glTextureRangeAPPLE(GL_TEXTURE_RECTANGLE, 0, NULL);
-    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-
-    GLuint shader = glCreateShader(GL_FRAGMENT_SHADER);
-    const GLchar* fragment_source = glsl::fragment;
-    glShaderSource(shader, 1, &fragment_source, NULL);
+static GLuint make_shader(GLenum shader_type, const GLchar* source) {
+    GLuint shader = glCreateShader(shader_type);
+    glShaderSource(shader, 1, &source, NULL);
     glCompileShader(shader);
     GLint compiled;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
@@ -509,9 +626,27 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
         gl_log(shader);
         throw Exception("compilation failed");
     }
+    return shader;
+}
+
+OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glClearColor(0, 0, 0, 1);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+
+    GLuint fragment = make_shader(GL_FRAGMENT_SHADER, glsl::fragment);
+    GLuint vertex = make_shader(GL_VERTEX_SHADER, glsl::vertex);
 
     GLuint program = glCreateProgram();
-    glAttachShader(program, shader);
+    glAttachShader(program, fragment);
+    glAttachShader(program, vertex);
+    glBindAttribLocation(program, 0, "vertex");
+    glBindAttribLocation(program, 1, "in_color");
+    glBindAttribLocation(program, 2, "tex_coord");
     glLinkProgram(program);
     glValidateProgram(program);
     GLint linked;
@@ -521,13 +656,18 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
         throw Exception("linking failed");
     }
 
-    driver._uniforms.color_mode = glGetUniformLocation(program, kShaderColorModeUniform);
-    driver._uniforms.sprite = glGetUniformLocation(program, kShaderSpriteUniform);
-    driver._uniforms.static_image = glGetUniformLocation(program, kShaderStaticImageUniform);
-    driver._uniforms.static_fraction = glGetUniformLocation(program, kShaderStaticFractionUniform);
-    driver._uniforms.unit = glGetUniformLocation(program, kShaderUnitUniform);
-    driver._uniforms.outline_color = glGetUniformLocation(program, kShaderOutlineColorUniform);
-    driver._uniforms.seed = glGetUniformLocation(program, kShaderSeedUniform);
+    GLuint array;
+    glGenVertexArrays(1, &array);
+    glBindVertexArray(array);
+
+    driver._uniforms.screen.load(program);
+    driver._uniforms.color_mode.load(program);
+    driver._uniforms.sprite.load(program);
+    driver._uniforms.static_image.load(program);
+    driver._uniforms.static_fraction.load(program);
+    driver._uniforms.unit.load(program);
+    driver._uniforms.outline_color.load(program);
+    driver._uniforms.seed.load(program);
     glUseProgram(program);
 
     GLuint static_texture;
@@ -545,11 +685,13 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
         *(p++) = static_index.next(256);
     }
     glTexImage2D(
-            GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, size, size, 0, GL_LUMINANCE_ALPHA,
+            GL_TEXTURE_2D, 0, GL_RG, size, size, 0, GL_RG,
             GL_UNSIGNED_BYTE, static_data.get());
 
-    glUniform1i(driver._uniforms.sprite, 0);
-    glUniform1i(driver._uniforms.static_image, 1);
+    auto screen = driver.viewport_size();
+    driver._uniforms.screen.set({screen.width * 1.0f, screen.height * 1.0f});
+    driver._uniforms.sprite.set(0);
+    driver._uniforms.static_image.set(1);
 }
 
 OpenGlVideoDriver::MainLoop::MainLoop(OpenGlVideoDriver& driver, Card* initial):
@@ -563,26 +705,14 @@ void OpenGlVideoDriver::MainLoop::draw() {
     }
 
     glClear(GL_COLOR_BUFFER_BIT);
-    glLoadIdentity();
     glViewport(0, 0, _driver.viewport_size().width, _driver.viewport_size().height);
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
 
-    glTranslatef(-1.0, 1.0, 0.0);
-    glScalef(2.0, -2.0, 1.0);
-    glScalef(1.0 / _driver.screen_size().width, 1.0 / _driver.screen_size().height, 1.0);
     int32_t seed = {_driver._static_seed.next(256)};
     seed <<= 8;
     seed += _driver._static_seed.next(256);
-    glUniform1i(_driver._uniforms.seed, seed);
+    _driver._uniforms.seed.set(seed);
 
     _stack.top()->draw();
-
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
 
     glFinish();
 }

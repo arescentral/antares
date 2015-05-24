@@ -16,24 +16,27 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "mac/offscreen.hpp"
+#version 330 core
 
-namespace antares {
+in vec2 vertex;
+in vec4 in_color;
+in vec2 tex_coord;
 
-static const CGLPixelFormatAttribute kAttrs[] = {
-    kCGLPFAOpenGLProfile, (CGLPixelFormatAttribute)kCGLOGLPVersion_3_2_Core,
-    kCGLPFAColorSize, static_cast<CGLPixelFormatAttribute>(24),
-    kCGLPFAAccelerated,
-    static_cast<CGLPixelFormatAttribute>(0),
-};
+out vec2 uv;
+out vec4 color;
+out vec2 screen_position;
 
-Offscreen::Offscreen():
-        _pix(kAttrs),
-        _context(_pix.c_obj(), nullptr) {
-    cgl::check(CGLSetCurrentContext(_context.c_obj()));
+uniform vec2 screen;
+
+void main() {
+    mat4 transform = mat4(
+            2.0 / screen.x,  0,              0, 0,
+            0,              -2.0 / screen.y, 0, 0,
+            0,               0,              0, 0,
+           -1.0,             1.0,            0, 1);
+
+    gl_Position = transform * vec4(vertex, 0, 1);
+    uv = tex_coord;
+    screen_position = vertex;
+    color = in_color;
 }
-
-Offscreen::~Offscreen() {
-}
-
-}  // namespace antares
