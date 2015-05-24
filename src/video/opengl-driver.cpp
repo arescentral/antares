@@ -20,8 +20,6 @@
 
 #include <stdint.h>
 #include <algorithm>
-#include <OpenGL/OpenGL.h>
-#include <OpenGL/gl3.h>
 #include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
@@ -35,6 +33,16 @@
 #include "video/glsl/vertex.hpp"
 
 #include "game/time.hpp"
+
+#ifdef __APPLE__
+#include <OpenGL/OpenGL.h>
+#include <OpenGL/gl3.h>
+#else
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glext.h>
+#endif
 
 using sfz::Exception;
 using sfz::PrintItem;
@@ -149,7 +157,7 @@ static T _gl_check(T t, const char* fn, const char* file, int line) {
     _GL(glShaderSource, shader, count, string, length)
 #define glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels) \
     _GL(glTexImage2D, target, level, internalformat, width, height, border, format, type, pixels)
-#define glTextureRangeAPPLE(target, length, pointer) \
+//#define glTextureRangeAPPLE(target, length, pointer) \
     _GL(glTextureRangeAPPLE, target, length, pointer)
 #define glUniform1f(location, v0)               _GL(glUniform1f, location, v0)
 #define glUniform1i(location, v0)               _GL(glUniform1i, location, v0)

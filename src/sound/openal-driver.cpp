@@ -18,7 +18,6 @@
 
 #include "sound/openal-driver.hpp"
 
-#include <AudioToolbox/AudioToolbox.h>
 #include <modplug.h>
 #include <sfz/sfz.hpp>
 
