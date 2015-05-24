@@ -108,7 +108,6 @@ static T _gl_check(T t, const char* fn, const char* file, int line) {
 
 #define glActiveTexture(texture)                _GL(glActiveTexture, texture)
 #define glAttachShader(program, shader)         _GL(glAttachShader, program, shader)
-// Skip glBegin().
 #define glBindTexture(target, texture)          _GL(glBindTexture, target, texture)
 #define glBlendFunc(sfactor, dfactor)           _GL(glBlendFunc, sfactor, dfactor)
 #define glClear(mask)                           _GL(glClear, mask)
@@ -120,7 +119,6 @@ static T _gl_check(T t, const char* fn, const char* file, int line) {
 #define glDeleteTextures(n, textures)           _GL(glDeleteTextures, n, textures)
 #define glDisable(cap)                          _GL(glDisable, cap)
 #define glEnable(cap)                           _GL(glEnable, cap)
-#define glEnd()                                 _GL(glEnd)
 #define glFinish()                              _GL(glFinish)
 #define glGenTextures(n, textures)              _GL(glGenTextures, n, textures)
 // Skip glGetError().
@@ -134,7 +132,6 @@ static T _gl_check(T t, const char* fn, const char* file, int line) {
 // Skip glIsShader().
 #define glLinkProgram(program)                  _GL(glLinkProgram, program)
 #define glLoadIdentity()                        _GL(glLoadIdentity)
-// Skip glMultiTexCoord2f().
 #define glPixelStorei(pname, param)             _GL(glPixelStorei, pname, param)
 #define glShaderSource(shader, count, string, length) \
     _GL(glShaderSource, shader, count, string, length)
@@ -148,7 +145,6 @@ static T _gl_check(T t, const char* fn, const char* file, int line) {
 #define glUniform4f(location, v0, v1, v2, v3)   _GL(glUniform4f, location, v0, v1, v2, v3)
 #define glUseProgram(program)                   _GL(glUseProgram, program)
 #define glValidateProgram(program)              _GL(glValidateProgram, program)
-// glVertex2f().
 #define glViewport(x, y, width, height)         _GL(glViewport, x, y, width, height)
 
 #define glEnableClientState(array)              _GL(glEnableClientState, array)
@@ -258,46 +254,74 @@ class OpenGlTextureImpl : public Texture::Impl {
 
   private:
     virtual void draw_internal(const Rect& draw_rect) const {
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+        GLshort vertices[] = {
+            GLshort(draw_rect.left), GLshort(draw_rect.top),
+            GLshort(draw_rect.left), GLshort(draw_rect.bottom),
+            GLshort(draw_rect.right), GLshort(draw_rect.bottom),
+            GLshort(draw_rect.right), GLshort(draw_rect.top),
+        };
+        glVertexPointer(2, GL_SHORT, 0, vertices);
+
         const int32_t w = _size.width;
         const int32_t h = _size.height;
+        GLshort tex_coords[] = {
+            GLshort(1), GLshort(1),
+            GLshort(1), GLshort(h + 1),
+            GLshort(w + 1), GLshort(h + 1),
+            GLshort(w + 1), GLshort(1),
+        };
+        glTexCoordPointer(2, GL_SHORT, 0, tex_coords);
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
-        glBegin(GL_QUADS);
-        glMultiTexCoord2f(GL_TEXTURE0, 1, 1);
-        glVertex2f(draw_rect.left, draw_rect.top);
-        glMultiTexCoord2f(GL_TEXTURE0, 1, h + 1);
-        glVertex2f(draw_rect.left, draw_rect.bottom);
-        glMultiTexCoord2f(GL_TEXTURE0, w + 1, h + 1);
-        glVertex2f(draw_rect.right, draw_rect.bottom);
-        glMultiTexCoord2f(GL_TEXTURE0, w + 1, 1);
-        glVertex2f(draw_rect.right, draw_rect.top);
-        glEnd();
+        glDrawArrays(GL_QUADS, 0, 4);
+
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glDisableClientState(GL_VERTEX_ARRAY);
     }
 
     virtual void begin_quads() const {
         glUniform1i(_uniforms.color_mode, TINT_SPRITE_MODE);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
-        glBegin(GL_QUADS);
     }
 
     virtual void end_quads() const {
-        glEnd();
     }
 
     virtual void draw_quad(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
+        glColor4ub(tint.red, tint.green, tint.blue, 255);
+
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+        GLshort vertices[] = {
+            GLshort(draw_rect.left), GLshort(draw_rect.top),
+            GLshort(draw_rect.left), GLshort(draw_rect.bottom),
+            GLshort(draw_rect.right), GLshort(draw_rect.bottom),
+            GLshort(draw_rect.right), GLshort(draw_rect.top),
+        };
+        glVertexPointer(2, GL_SHORT, 0, vertices);
+
         Rect texture_rect(origin, draw_rect.size());
         texture_rect.offset(1, 1);
+        GLshort tex_coords[] = {
+            GLshort(texture_rect.left), GLshort(texture_rect.top),
+            GLshort(texture_rect.left), GLshort(texture_rect.bottom),
+            GLshort(texture_rect.right), GLshort(texture_rect.bottom),
+            GLshort(texture_rect.right), GLshort(texture_rect.top),
+        };
+        glTexCoordPointer(2, GL_SHORT, 0, tex_coords);
 
-        glColor4ub(tint.red, tint.green, tint.blue, 255);
-        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.left, texture_rect.top);
-        glVertex2f(draw_rect.left, draw_rect.top);
-        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.left, texture_rect.bottom);
-        glVertex2f(draw_rect.left, draw_rect.bottom);
-        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.right, texture_rect.bottom);
-        glVertex2f(draw_rect.right, draw_rect.bottom);
-        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.right, texture_rect.top);
-        glVertex2f(draw_rect.right, draw_rect.top);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
+        glDrawArrays(GL_QUADS, 0, 4);
+
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glDisableClientState(GL_VERTEX_ARRAY);
     }
 
     struct Texture {
