@@ -186,6 +186,10 @@ TextVideoDriver::TextVideoDriver(
         _scheduler(scheduler),
         _output_dir(output_dir) { }
 
+int TextVideoDriver::scale() const {
+    return 1;
+}
+
 Texture TextVideoDriver::texture(sfz::PrintItem name, const PixMap& content) {
     return std::unique_ptr<Texture::Impl>(new TextureImpl(name, *this, content.size()));
 }
