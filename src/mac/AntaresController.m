@@ -175,11 +175,16 @@ static NSURL* url(const char* utf8_bytes) {
         [menu_item setRepresentedObject:display_mode];
         [menu_item setTarget:self];
         [menu_item setAction:@selector(setResolutionFrom:)];
-        [[_resolution_list menu] addItem:menu_item];
 
-        if ((height <= user_height) && (width <= user_width)) {
-            best_resolution = [_resolution_list numberOfItems] - 1;
+        if (best_resolution < 1) {
+            if ((height <= user_height) && (width <= user_width)) {
+                best_resolution = [_resolution_list numberOfItems];
+            }
+        } else {
+            [menu_item setEnabled:NO];
         }
+
+        [[_resolution_list menu] addItem:menu_item];
     }
 
     // Select the best resolution from the list.  This doesn't trigger
@@ -190,6 +195,19 @@ static NSURL* url(const char* utf8_bytes) {
     [self setResolutionFrom:[_resolution_list itemAtIndex:best_resolution]];
 
     // TODO(sfiera): watch for resolution changes and update the list.
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem*)item {
+    NSScreen* main = [NSScreen mainScreen];
+    NSSize size;
+    if (_window_checkbox.intValue) {
+        size = main.frame.size;
+    } else {
+        size = [main convertRectToBacking:main.frame].size;
+    }
+    CGDisplayModeRef mode = (CGDisplayModeRef)[item representedObject];
+    return (CGDisplayModeGetWidth(mode) <= size.width)
+        && (CGDisplayModeGetHeight(mode) <= size.height);
 }
 
 - (void)setScenarioFrom:(NSMenuItem*)sender {
