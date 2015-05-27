@@ -53,6 +53,7 @@ class VideoDriver {
     virtual Point get_mouse() = 0;
     virtual void get_keys(KeyMap* k) = 0;
     virtual InputMode input_mode() const = 0;
+    virtual int scale() const = 0;
 
     virtual int ticks() const = 0;
     virtual int usecs() const = 0;
