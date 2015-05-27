@@ -90,8 +90,8 @@ Quads::~Quads() {
     _sprite._impl->end_quads();
 }
 
-void Quads::draw(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
-    _sprite._impl->draw_quad(draw_rect, origin, tint);
+void Quads::draw(const Rect& dest, const Rect& source, const RgbColor& tint) const {
+    _sprite._impl->draw_quad(dest, source, tint);
 }
 
 }  // namespace antares

@@ -84,7 +84,7 @@ class PixDraw {
                     Point origin(
                             clipped_dest.left - _bounds.left,
                             (clipped_dest.top - _bounds.top) % dest.height());
-                    _background->draw_cropped(clipped_dest, origin);
+                    _background->draw_cropped(clipped_dest, Rect(origin, clipped_dest.size()));
                 }
                 dest.offset(0, dest.height());
             }

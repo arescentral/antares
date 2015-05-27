@@ -95,7 +95,8 @@ class Texture {
         virtual ~Impl();
         virtual sfz::StringSlice name() const = 0;
         virtual void draw(const Rect& draw_rect) const = 0;
-        virtual void draw_cropped(const Rect& draw_rect, Point origin, const RgbColor& tint) const = 0;
+        virtual void draw_cropped(
+                const Rect& dest, const Rect& source, const RgbColor& tint) const = 0;
         virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const = 0;
         virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const = 0;
         virtual void draw_outlined(
@@ -105,8 +106,8 @@ class Texture {
 
         virtual void begin_quads() const { }
         virtual void end_quads() const { }
-        virtual void draw_quad(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
-            draw_cropped(draw_rect, origin, tint);
+        virtual void draw_quad(const Rect& dest, const Rect& source, const RgbColor& tint) const {
+            draw_cropped(dest, source, tint);
         }
     };
 
@@ -116,9 +117,8 @@ class Texture {
     void draw(const Rect& draw_rect) const { _impl->draw(draw_rect); }
     void draw(int32_t x, int32_t y) const { _impl->draw(rect(x, y)); }
 
-    void draw_cropped(
-            const Rect& draw_rect, Point origin, const RgbColor& tint=RgbColor::kWhite) const {
-        _impl->draw_cropped(draw_rect, origin, tint);
+    void draw_cropped(const Rect& dest, const Rect& source) const {
+        _impl->draw_cropped(dest, source, RgbColor::kWhite);
     }
 
     void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const {
@@ -185,7 +185,7 @@ class Quads {
   public:
     Quads(const Texture& sprite);
     ~Quads();
-    void draw(const Rect& draw_rect, Point origin, const RgbColor& tint) const;
+    void draw(const Rect& dest, const Rect& source, const RgbColor& tint) const;
   private:
     const Texture& _sprite;
 };

@@ -226,7 +226,7 @@ void Font::draw(const Quads& quads, Point cursor, sfz::StringSlice string, RgbCo
     cursor.offset(0, -ascent);
     for (size_t i = 0; i < string.size(); ++i) {
         auto glyph = glyph_rect(string.at(i));
-        quads.draw(Rect(cursor, glyph.size()), glyph.origin(), color);
+        quads.draw(Rect(cursor, glyph.size()), glyph, color);
         cursor.offset(glyph.width(), 0);
     }
 }

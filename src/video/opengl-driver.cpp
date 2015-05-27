@@ -239,9 +239,9 @@ class OpenGlTextureImpl : public Texture::Impl {
         draw_internal(draw_rect, RgbColor::kWhite);
     }
 
-    virtual void draw_cropped(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
+    virtual void draw_cropped(const Rect& dest, const Rect& source, const RgbColor& tint) const {
         begin_quads();
-        draw_quad(draw_rect, origin, tint);
+        draw_quad(dest, source, tint);
         end_quads();
     }
 
@@ -334,7 +334,7 @@ class OpenGlTextureImpl : public Texture::Impl {
     virtual void end_quads() const {
     }
 
-    virtual void draw_quad(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
+    virtual void draw_quad(const Rect& dest, const Rect& source, const RgbColor& tint) const {
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
         glEnableVertexAttribArray(2);
@@ -344,10 +344,10 @@ class OpenGlTextureImpl : public Texture::Impl {
 
         glBindBuffer(GL_ARRAY_BUFFER, vbuf[0]);
         GLshort vertices[] = {
-            GLshort(draw_rect.left), GLshort(draw_rect.top),
-            GLshort(draw_rect.left), GLshort(draw_rect.bottom),
-            GLshort(draw_rect.right), GLshort(draw_rect.bottom),
-            GLshort(draw_rect.right), GLshort(draw_rect.top),
+            GLshort(dest.left), GLshort(dest.top),
+            GLshort(dest.left), GLshort(dest.bottom),
+            GLshort(dest.right), GLshort(dest.bottom),
+            GLshort(dest.right), GLshort(dest.top),
         };
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
         glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, 0, nullptr);
@@ -362,7 +362,7 @@ class OpenGlTextureImpl : public Texture::Impl {
         glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STREAM_DRAW);
         glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
 
-        Rect texture_rect(origin, draw_rect.size());
+        Rect texture_rect = source;
         texture_rect.offset(1, 1);
         glBindBuffer(GL_ARRAY_BUFFER, vbuf[2]);
         GLshort tex_coords[] = {
