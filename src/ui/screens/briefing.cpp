@@ -93,7 +93,7 @@ void BriefingScreen::overlay() const {
         {
             const Point star = _star_rect.center();
             RgbColor gold = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
-            _star_map.draw_cropped(_bounds, Point(0, 2));
+            _star_map.draw_cropped(_bounds, Rect(Point(0, 2), _bounds.size()));
             Rects rects;
             draw_vbracket(rects, _star_rect, gold);
             rects.fill({star.h, _bounds.top, star.h + 1, _star_rect.top + 1}, gold);

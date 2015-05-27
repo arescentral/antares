@@ -93,15 +93,23 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
         _driver.log("draw", args);
     }
 
-    virtual void draw_cropped(const Rect& draw_rect, Point origin, const RgbColor& tint) const {
-        if (!world.intersects(draw_rect)) {
+    virtual void draw_cropped(const Rect& dest, const Rect& source, const RgbColor& tint) const {
+        if (!world.intersects(dest)) {
             return;
         }
-        PrintItem args[] = {
-            draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
-            origin.h, origin.v, hex(tint), _name,
-        };
-        _driver.log("crop", args);
+        if (source.size() == dest.size()) {
+            PrintItem args[] = {
+                dest.left, dest.top, dest.right, dest.bottom,
+                source.left, source.top, hex(tint), _name,
+            };
+            _driver.log("crop", args);
+        } else {
+            PrintItem args[] = {
+                dest.left, dest.top, dest.right, dest.bottom,
+                source.left, source.top, source.right, source.bottom, hex(tint), _name,
+            };
+            _driver.log("crop", args);
+        }
     }
 
     virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const {
