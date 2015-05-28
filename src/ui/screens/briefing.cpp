@@ -208,9 +208,8 @@ void BriefingScreen::handle_button(Button& button) {
 }
 
 void BriefingScreen::build_star_map() {
-    Picture pict(kStarMapPictId);
-    _star_map = VideoDriver::driver()->texture(format("/pictures/{0}.png", kStarMapPictId), pict);
-    Rect pix_bounds = pict.size().as_rect();
+    _star_map = Picture(kStarMapPictId).texture();
+    Rect pix_bounds = _star_map.size().as_rect();
     pix_bounds.offset(0, 2);
     pix_bounds.bottom -= 3;
     _bounds = pix_bounds;

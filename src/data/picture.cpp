@@ -19,22 +19,46 @@
 #include "data/picture.hpp"
 
 #include "data/resource.hpp"
+#include "video/driver.hpp"
 
 using sfz::BytesSlice;
+using sfz::Exception;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
 
 namespace antares {
 
-Picture::Picture(int32_t id):
-        Picture(String(format("pictures/{0}.png", id))) { }
+Picture::Picture(int32_t id, bool hidpi):
+        Picture(String(format("pictures/{0}", id))) { }
 
-Picture::Picture(StringSlice resource)
-        : ArrayPixMap(0, 0) {
-    Resource rsrc(resource);
-    BytesSlice in(rsrc.data());
-    read(in, *this);
+Picture::Picture(StringSlice resource, bool hidpi):
+        ArrayPixMap(0, 0),
+        _scale(hidpi ? VideoDriver::driver()->scale() : 1) {
+    while (true) {
+        try {
+            _path.assign(resource);
+            if (_scale > 1) {
+                _path.append(format("@{0}x.png", _scale));
+            } else {
+                _path.append(".png");
+            }
+            Resource rsrc(_path);
+            BytesSlice in(rsrc.data());
+            read(in, *this);
+            break;
+        } catch (Exception& e) {
+            if (_scale > 1) {
+                _scale >>= 1;
+            } else {
+                throw;
+            }
+        }
+    }
+}
+
+Texture Picture::texture() const {
+    return VideoDriver::driver()->texture(format("/{0}", _path), *this);
 }
 
 }  // namespace antares

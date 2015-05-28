@@ -371,7 +371,7 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
             corner.offset(inline_pict.bounds.left, inline_pict.bounds.top + _line_spacing);
             Picture pict(inline_pict.id);
             Texture texture(VideoDriver::driver()->texture(
-                        format("/pictures/{0}.png", inline_pict.id), pict));
+                        format("/{0}", pict.path()), pict));
             texture.draw(corner.h, corner.v);
         }
     }

@@ -183,7 +183,7 @@ void InstrumentInit() {
         }
         pix_map.view(to).copy(pict.view(from));
         left_instrument_texture = VideoDriver::driver()->texture(
-                format("/pictures/{0}.png", kInstLeftPictID), pix_map);
+                format("/{0}", pict.path()), pix_map);
     }
     {
         Picture pict(kInstRightPictID);
@@ -195,7 +195,7 @@ void InstrumentInit() {
         }
         pix_map.view(to).copy(pict.view(from));
         right_instrument_texture = VideoDriver::driver()->texture(
-                format("/pictures/{0}.png", kInstRightPictID), pix_map);
+                format("/{0}", pict.path()), pix_map);
     }
 
     site.light = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);

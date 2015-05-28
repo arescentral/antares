@@ -48,6 +48,7 @@ class Font {
   private:
     Rect glyph_rect(sfz::Rune r) const;
 
+    int _scale;
     std::map<sfz::Rune, Rect> _glyphs;
 
     DISALLOW_COPY_AND_ASSIGN(Font);
