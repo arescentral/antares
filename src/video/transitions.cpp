@@ -151,8 +151,7 @@ void ColorFade::draw() const {
 PictFade::PictFade(int pict_id, bool* skipped):
         _state(NEW),
         _skipped(skipped),
-        _texture(VideoDriver::driver()->texture(
-                    format("/pictures/{0}.png", pict_id), Picture(pict_id))) { }
+        _texture(Picture(pict_id).texture()) { }
 
 PictFade::~PictFade() { }
 

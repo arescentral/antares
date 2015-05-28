@@ -87,16 +87,18 @@ struct FontVisitor : public JsonDefaultVisitor {
     };
     State& state;
     Texture& texture;
+    int& scale;
     int32_t& logical_width;
     int32_t& height;
     int32_t& ascent;
     map<Rune, Rect>& glyphs;
 
-    FontVisitor(State& state, Texture& texture,
+    FontVisitor(State& state, Texture& texture, int& scale,
                 int32_t& logical_width, int32_t& height, int32_t& ascent,
                 map<Rune, Rect>& glyphs):
             state(state),
             texture(texture),
+            scale(scale),
             logical_width(logical_width),
             height(height),
             ascent(ascent),
@@ -159,9 +161,10 @@ struct FontVisitor : public JsonDefaultVisitor {
     virtual void visit_string(const StringSlice& value) const {
         switch (state.state) {
             case IMAGE: {
-                Picture glyph_table(value);
+                Picture glyph_table(value, true);
                 recolor(glyph_table);
-                texture = VideoDriver::driver()->texture(format("/{0}", value), glyph_table);
+                texture = glyph_table.texture();
+                scale = glyph_table.scale();
                 break;
             }
             default:
@@ -205,7 +208,7 @@ Font::Font(StringSlice name) {
         throw Exception("invalid JSON");
     }
     FontVisitor::State state;
-    json.accept(FontVisitor(state, texture, logicalWidth, height, ascent, _glyphs));
+    json.accept(FontVisitor(state, texture, _scale, logicalWidth, height, ascent, _glyphs));
 }
 
 Font::~Font() { }
@@ -226,7 +229,8 @@ void Font::draw(const Quads& quads, Point cursor, sfz::StringSlice string, RgbCo
     cursor.offset(0, -ascent);
     for (size_t i = 0; i < string.size(); ++i) {
         auto glyph = glyph_rect(string.at(i));
-        quads.draw(Rect(cursor, glyph.size()), glyph, color);
+        Rect scaled(glyph.left * _scale, glyph.top * _scale, glyph.right * _scale, glyph.bottom * _scale);
+        quads.draw(Rect(cursor, glyph.size()), scaled, color);
         cursor.offset(glyph.width(), 0);
     }
 }
