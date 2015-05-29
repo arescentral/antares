@@ -679,7 +679,7 @@ void GamePlay::fire_timer() {
         break;
 
       case WIN_GAME:
-        if (_replay || (g.victory_text >= 0)) {
+        if (_replay || (g.victory_text < 0)) {
             stack()->pop(this);
         } else {
             _state = DEBRIEFING;
@@ -692,7 +692,7 @@ void GamePlay::fire_timer() {
         break;
 
       case LOSE_GAME:
-        if (_replay || (g.victory_text >= 0)) {
+        if (_replay || (g.victory_text < 0)) {
             stack()->pop(this);
         } else {
             _state = DEBRIEFING;
