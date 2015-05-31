@@ -665,6 +665,7 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     glBindVertexArray(array);
 
     driver._uniforms.screen.load(program);
+    driver._uniforms.scale.load(program);
     driver._uniforms.color_mode.load(program);
     driver._uniforms.sprite.load(program);
     driver._uniforms.static_image.load(program);
@@ -694,6 +695,7 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
 
     auto screen = driver.screen_size();
     driver._uniforms.screen.set({screen.width * 1.0f, screen.height * 1.0f});
+    driver._uniforms.scale.set(driver.scale());
     driver._uniforms.sprite.set(0);
     driver._uniforms.static_image.set(1);
 }

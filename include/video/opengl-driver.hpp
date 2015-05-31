@@ -62,6 +62,7 @@ class OpenGlVideoDriver : public VideoDriver {
 
     struct Uniforms {
         Uniform<vec2>           screen           = {"screen"};
+        Uniform<int>            scale            = {"scale"};
         Uniform<int>            color_mode       = {"color_mode"};
         Uniform<sampler2DRect>  sprite           = {"sprite"};
         Uniform<sampler2D>      static_image     = {"static_image"};
