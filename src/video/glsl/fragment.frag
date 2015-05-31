@@ -53,7 +53,7 @@ void main() {
         gl_FragColor = color * sprite_color;
     } else if (color_mode == STATIC_SPRITE_MODE) {
         vec2 uv2 = (screen_position + vec2(seed / 256, seed)) * vec2(1.0/256, 1.0/256);
-        vec4 static_color = texture2D(static_image, uv2);
+        vec4 static_color = texture2D(static_image, uv2).rrrg;
         if (static_color.w <= static_fraction) {
             vec4 sprite_alpha = vec4(1, 1, 1, sprite_color.w);
             gl_FragColor = color * sprite_alpha;
