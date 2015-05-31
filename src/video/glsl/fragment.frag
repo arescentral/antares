@@ -24,6 +24,7 @@ in vec2 screen_position;
 
 out vec4 frag_color;
 
+uniform int            scale;
 uniform int            color_mode;
 uniform sampler2DRect  sprite;
 uniform sampler2D      static_image;
@@ -51,7 +52,8 @@ void main() {
     } else if (color_mode == TINT_SPRITE_MODE) {
         frag_color = color * sprite_color;
     } else if (color_mode == STATIC_SPRITE_MODE) {
-        vec2 uv2 = (screen_position + vec2(seed / 256, seed)) * vec2(1.0/256, 1.0/256);
+        float f = scale / 256.0;
+        vec2 uv2 = (screen_position + vec2(seed * f, seed)) * vec2(f, f);
         vec4 static_color = texture(static_image, uv2).rrrg;
         if (static_color.w <= static_fraction) {
             vec4 sprite_alpha = vec4(1, 1, 1, sprite_color.w);
