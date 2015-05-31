@@ -44,11 +44,8 @@ void main() {
     if (color_mode == FILL_MODE) {
         frag_color = color;
     } else if (color_mode == DITHER_MODE) {
-        if (mod(floor(screen_position.s) + floor(screen_position.t), 2) == 1) {
-            frag_color = color;
-        } else {
-            frag_color = vec4(0, 0, 0, 0);
-        }
+        frag_color = color;
+        frag_color.a /= 2;
     } else if (color_mode == DRAW_SPRITE_MODE) {
         frag_color = sprite_color;
     } else if (color_mode == TINT_SPRITE_MODE) {
