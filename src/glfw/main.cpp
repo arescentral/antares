@@ -37,7 +37,7 @@ String application_path() {
 
 void main(int argc, const char* argv[]) {
     NullPrefsDriver prefs;
-    NullLedger ledger;
+    DirectoryLedger ledger;
     OpenAlSoundDriver sound;
     GLFWVideoDriver({640, 480}).loop(new Master(time(NULL)));
 }
