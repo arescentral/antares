@@ -190,6 +190,7 @@
     , "link_settings":
       { "libraries":
         [ "$(SDKROOT)/System/Library/Frameworks/OpenAL.framework"
+        , "-lopenal"
         ]
       }
     , "conditions":
@@ -197,6 +198,14 @@
         , { "link_settings":
             { "libraries!":
               [ "$(SDKROOT)/System/Library/Frameworks/OpenAL.framework"
+              ]
+            }
+          }
+        ]
+      , [ "OS != 'linux'"
+        , { "link_settings":
+            { "libraries!":
+              [ "-lopenal"
               ]
             }
           }
