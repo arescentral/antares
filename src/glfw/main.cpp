@@ -35,18 +35,16 @@ String application_path() {
     return String("./data");
 }
 
-int main(int argc, const char* argv[]) {
+void main(int argc, const char* argv[]) {
     NullPrefsDriver prefs;
     NullLedger ledger;
     OpenAlSoundDriver sound;
-    GLFWVideoDriver video({640, 480});
-
-    video.loop(new Master(time(NULL)));
-    return 0;
+    GLFWVideoDriver({640, 480}).loop(new Master(time(NULL)));
 }
 
 }  // namespace antares
 
 int main(int argc, const char* argv[]) {
-    return antares::main(argc, argv);
+    antares::main(argc, argv);
+    return 0;
 }
