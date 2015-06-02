@@ -25,3 +25,6 @@
 [submodule "ext/libsndfile-gyp"]
 	path = ext/libsndfile-gyp
 	url = https://github.com/sfiera/libsndfile-gyp.git
+[submodule "ext/glfw"]
+	path = ext/glfw
+	url = https://github.com/sfiera/glfw-gyp

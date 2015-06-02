@@ -383,6 +383,19 @@
     , "sources": ["src/bin/build-pix.cpp"]
     , "dependencies": ["libantares-test"]
     }
+
+  , { "target_name": "antares-glfw"
+    , "product_name": "antares-glfw"
+    , "type": "executable"
+    , "sources":
+      [ "src/glfw/main.cpp"
+      , "src/glfw/video-driver.cpp"
+      ]
+    , "dependencies":
+      [ "libantares"
+      , "<(DEPTH)/ext/glfw/glfw.gyp:libglfw"
+      ]
+    }
   ]
 
 , "conditions":
