@@ -16,36 +16,21 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include <GLFW/glfw3.h>
+#ifndef ANTARES_CONFIG_FILE_PREFS_DRIVER_HPP_
+#define ANTARES_CONFIG_FILE_PREFS_DRIVER_HPP_
 
-#include <sfz/sfz.hpp>
-#include <time.h>
-
-#include "config/file-prefs-driver.hpp"
 #include "config/preferences.hpp"
-#include "config/ledger.hpp"
-#include "glfw/video-driver.hpp"
-#include "sound/openal-driver.hpp"
-#include "ui/flows/master.hpp"
-
-using sfz::String;
 
 namespace antares {
 
-String application_path() {
-    return String("./data");
-}
+class FilePrefsDriver : public PrefsDriver {
+  public:
+    FilePrefsDriver();
 
-void main(int argc, const char* argv[]) {
-    FilePrefsDriver prefs;
-    DirectoryLedger ledger;
-    OpenAlSoundDriver sound;
-    GLFWVideoDriver({640, 480}).loop(new Master(time(NULL)));
-}
+    virtual void load(Preferences* preferences);
+    virtual void save(const Preferences& preferences);
+};
 
 }  // namespace antares
 
-int main(int argc, const char* argv[]) {
-    antares::main(argc, argv);
-    return 0;
-}
+#endif // ANTARES_CONFIG_FILE_PREFS_DRIVER_HPP_

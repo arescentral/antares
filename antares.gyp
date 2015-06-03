@@ -52,7 +52,8 @@
   , { "target_name": "libantares-config"
     , "type": "static_library"
     , "sources":
-      [ "src/config/gamepad.cpp"
+      [ "src/config/file-prefs-driver.cpp"
+      , "src/config/gamepad.cpp"
       , "src/config/keys.cpp"
       , "src/config/ledger.cpp"
       , "src/config/linux-dirs.cpp"
