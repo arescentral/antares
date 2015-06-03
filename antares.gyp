@@ -52,7 +52,8 @@
   , { "target_name": "libantares-config"
     , "type": "static_library"
     , "sources":
-      [ "src/config/gamepad.cpp"
+      [ "src/config/file-prefs-driver.cpp"
+      , "src/config/gamepad.cpp"
       , "src/config/keys.cpp"
       , "src/config/ledger.cpp"
       , "src/config/linux-dirs.cpp"
@@ -190,6 +191,7 @@
     , "link_settings":
       { "libraries":
         [ "$(SDKROOT)/System/Library/Frameworks/OpenAL.framework"
+        , "-lopenal"
         ]
       }
     , "conditions":
@@ -197,6 +199,14 @@
         , { "link_settings":
             { "libraries!":
               [ "$(SDKROOT)/System/Library/Frameworks/OpenAL.framework"
+              ]
+            }
+          }
+        ]
+      , [ "OS != 'linux'"
+        , { "link_settings":
+            { "libraries!":
+              [ "-lopenal"
               ]
             }
           }
@@ -382,6 +392,19 @@
     , "type": "executable"
     , "sources": ["src/bin/build-pix.cpp"]
     , "dependencies": ["libantares-test"]
+    }
+
+  , { "target_name": "antares-glfw"
+    , "product_name": "antares-glfw"
+    , "type": "executable"
+    , "sources":
+      [ "src/glfw/main.cpp"
+      , "src/glfw/video-driver.cpp"
+      ]
+    , "dependencies":
+      [ "libantares"
+      , "<(DEPTH)/ext/glfw/glfw.gyp:libglfw"
+      ]
     }
   ]
 

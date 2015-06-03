@@ -32,6 +32,7 @@
     , "CLANG_CXX_LANGUAGE_STANDARD": "c++11"
     , "CLANG_CXX_LIBRARY": "libc++"
     , "SDKROOT": "macosx<(MACOSX_VERSION)"
+    , "MACOSX_DEPLOYMENT_TARGET": "<(MACOSX_VERSION)"
     }
   , "conditions":
     [ [ "COVERAGE != ''"

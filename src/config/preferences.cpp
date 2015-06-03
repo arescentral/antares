@@ -206,6 +206,14 @@ void Preferences::set_screen_size(Size size) {
     _screen_size = size;
 }
 
+void Preferences::set_screen_width(int32_t width) {
+    _screen_size.width = width;
+}
+
+void Preferences::set_screen_height(int32_t height) {
+    _screen_size.height = height;
+}
+
 void Preferences::set_scenario_identifier(StringSlice id) {
     _scenario_identifier.assign(id);
 }
