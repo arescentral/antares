@@ -37,7 +37,7 @@ class Event;
 
 class GLFWVideoDriver : public OpenGlVideoDriver {
   public:
-    GLFWVideoDriver(Size screen_size);
+    GLFWVideoDriver();
     virtual ~GLFWVideoDriver();
 
     virtual Size viewport_size() const { return _viewport_size; }

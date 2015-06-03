@@ -132,6 +132,8 @@ void FilePrefsDriver::load(Preferences* p) {
         }
 
         set_from<bool>(json, "video", "fullscreen", *p, &Preferences::set_fullscreen);
+        set_from<int>(json, "video", "width", *p, &Preferences::set_screen_width);
+        set_from<int>(json, "video", "height", *p, &Preferences::set_screen_height);
 
         set_from<int>(json, "sound", "volume", *p, &Preferences::set_volume);
         set_from<bool>(json, "sound", "speech", *p, &Preferences::set_speech_on);

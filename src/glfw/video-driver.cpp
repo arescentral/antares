@@ -23,6 +23,8 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include "config/preferences.hpp"
+
 using sfz::Exception;
 using sfz::String;
 using sfz::format;
@@ -68,8 +70,8 @@ static void throw_error(int code, const char* message) {
     throw Exception(format("{0}: {1}", code, utf8::decode(message)));
 }
 
-GLFWVideoDriver::GLFWVideoDriver(Size screen_size):
-        _screen_size(screen_size) {
+GLFWVideoDriver::GLFWVideoDriver():
+        _screen_size(Preferences::preferences()->screen_size()) {
     if (!glfwInit()) {
         throw Exception("glfwInit()");
     }
@@ -176,7 +178,17 @@ void GLFWVideoDriver::loop(Card* initial) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    _window = glfwCreateWindow(640, 480, "", NULL, NULL);
+    if (Preferences::preferences()->fullscreen()) {
+        auto monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+        glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+        glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+        glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+        glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+        _window = glfwCreateWindow(mode->width, mode->height, "", monitor, NULL);
+    } else {
+        _window = glfwCreateWindow(_screen_size.width, _screen_size.height, "", NULL, NULL);
+    }
     if (!_window) {
         throw Exception("glfwCreateWindow");
     }

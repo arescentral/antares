@@ -40,7 +40,7 @@ void main(int argc, const char* argv[]) {
     FilePrefsDriver prefs;
     DirectoryLedger ledger;
     OpenAlSoundDriver sound;
-    GLFWVideoDriver({640, 480}).loop(new Master(time(NULL)));
+    GLFWVideoDriver().loop(new Master(time(NULL)));
 }
 
 }  // namespace antares
