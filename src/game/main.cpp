@@ -104,7 +104,6 @@ class GamePlay : public Card {
 
     virtual void key_down(const KeyDownEvent& event);
     virtual void key_up(const KeyUpEvent& event);
-    virtual void caps_lock(const CapsLockEvent& event);
 
     virtual void mouse_down(const MouseDownEvent& event);
     virtual void mouse_up(const MouseUpEvent& event);
@@ -329,11 +328,13 @@ class PauseScreen : public Card {
     virtual void mouse_up(const MouseUpEvent& event) { wake(); }
     virtual void mouse_down(const MouseDownEvent& event) { wake(); }
     virtual void mouse_move(const MouseMoveEvent& event) { wake(); }
-    virtual void key_up(const KeyUpEvent& event) { wake(); }
     virtual void key_down(const KeyDownEvent& event) { wake(); }
 
-    virtual void caps_unlock(const CapsUnlockEvent& event) {
-        stack()->pop(this);
+    virtual void key_up(const KeyUpEvent& event) {
+        wake();
+        if (event.key() == Keys::CAPS_LOCK) {
+            stack()->pop(this);
+        }
     }
 
     virtual bool next_timer(int64_t& time) {
@@ -706,12 +707,6 @@ void GamePlay::fire_timer() {
     }
 }
 
-void GamePlay::caps_lock(const CapsLockEvent& event) {
-    _state = PAUSED;
-    _player_paused = true;
-    stack()->push(new PauseScreen);
-}
-
 void GamePlay::key_down(const KeyDownEvent& event) {
     if (globals()->gInputSource) {
         *_game_result = QUIT_GAME;
@@ -721,6 +716,12 @@ void GamePlay::key_down(const KeyDownEvent& event) {
     }
 
     switch (event.key()) {
+      case Keys::CAPS_LOCK:
+        _state = PAUSED;
+        _player_paused = true;
+        stack()->push(new PauseScreen);
+        return;
+
       case Keys::ESCAPE:
         {
             _state = PLAY_AGAIN;
