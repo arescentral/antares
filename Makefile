@@ -1,4 +1,6 @@
 NINJA=ninja -C out/cur
+MAC_BIN=out/cur/Antares.app/Contents/MacOS/Antares
+LINUX_BIN=out/cur/antares
 
 all:
 	@$(NINJA)
@@ -19,7 +21,8 @@ distclean:
 	rm -Rf out/
 
 run: all
-	out/cur/Antares.app/Contents/MacOS/Antares
+	@[ -f $(MAC_BIN) ] && $(MAC_BIN) || true
+	@[ ! -f $(MAC_BIN) ] && $(LINUX_BIN) || true
 
 sign:
 	codesign --force \
