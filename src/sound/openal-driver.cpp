@@ -240,8 +240,6 @@ unique_ptr<Sound> OpenAlSoundDriver::open_sound(PrintItem path) {
             fmt.fn(rsrc.data(), *sound);
             return std::move(sound);
         } catch (Exception& e) {
-            sfz::print(sfz::io::err, e.message());
-            sfz::print(sfz::io::err, "\n");
             continue;
         }
     }

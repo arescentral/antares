@@ -18,6 +18,7 @@
 
 #include <sfz/sfz.hpp>
 
+#include "config/dirs.hpp"
 #include "data/extractor.hpp"
 #include "net/http.hpp"
 
@@ -43,19 +44,17 @@ class PrintStatusObserver : public DataExtractor::Observer {
 };
 
 void ExtractDataMain(int argc, char* const* argv) {
-    args::Parser parser(argv[0], "Extracts game data from zip archives into a directory");
+    args::Parser parser(argv[0], "Downloads and extracts game data");
 
-    String source;
-    String dest;
+    String source(dirs().downloads);
+    String dest(dirs().scenarios);
     Optional<String> plugin;
-    parser.add_argument("source", store(source))
-        .help("directory in which to store or expect zip files")
-        .required();
-    parser.add_argument("dest", store(dest))
-        .help("place output in this directory")
-        .required();
     parser.add_argument("plugin", store(plugin))
         .help("a plugin to install (default: install factory scenario)");
+    parser.add_argument("-s", "--source", store(source))
+        .help("directory in which to store or expect zip files");
+    parser.add_argument("-d", "--dest", store(dest))
+        .help("place output in this directory");
     parser.add_argument("-h", "--help", help(parser, 0))
         .help("display this help screen");
 

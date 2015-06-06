@@ -23,6 +23,7 @@
       , "libantares-data"
       , "libantares-drawing"
       , "libantares-game"
+      , "libantares-linux"
       , "libantares-mac"
       , "libantares-math"
       , "libantares-sound"
@@ -30,11 +31,12 @@
       , "libantares-video"
       ]
     , "export_dependent_settings":
-      [ "libantares-mac"
-      , "libantares-config"
+      [ "libantares-config"
       , "libantares-data"
       , "libantares-drawing"
       , "libantares-game"
+      , "libantares-linux"
+      , "libantares-mac"
       , "libantares-math"
       , "libantares-sound"
       , "libantares-ui"
@@ -44,6 +46,11 @@
       [ [ "OS != 'mac'"
         , { "dependencies!": ["libantares-mac"]
           , "export_dependent_settings!": ["libantares-mac"]
+          }
+        ]
+      , [ "OS != 'linux'"
+        , { "dependencies!": ["libantares-linux"]
+          , "export_dependent_settings!": ["libantares-linux"]
           }
         ]
       ]
@@ -394,8 +401,7 @@
     , "dependencies": ["libantares-test"]
     }
 
-  , { "target_name": "antares-glfw"
-    , "product_name": "antares-glfw"
+  , { "target_name": "<(ANTARES_GLFW)"
     , "type": "executable"
     , "sources":
       [ "src/glfw/main.cpp"
@@ -406,11 +412,18 @@
       , "<(DEPTH)/ext/glfw/glfw.gyp:libglfw"
       ]
     }
+
+  , { "target_name": "antares-install-data"
+    , "type": "executable"
+    , "sources": ["src/bin/antares-install-data.cpp"]
+    , "dependencies": ["libantares"]
+    }
   ]
 
 , "conditions":
   [ [ "OS == 'mac'"
-    , { "targets":
+    , { "variables": { "ANTARES_GLFW": "antares-glfw" }
+      , "targets":
         [ { "target_name": "libantares-mac"
           , "type": "static_library"
           , "sources":
@@ -481,11 +494,29 @@
               ]
             }
           }
+        ]
+      }
+    ]
 
-        , { "target_name": "extract-data"
-          , "type": "executable"
-          , "sources": ["src/bin/extract-data.cpp"]
-          , "dependencies": ["libantares-test"]
+  , [ "OS == 'linux'"
+    , { "variables": { "ANTARES_GLFW": "antares" }
+      , "targets":
+        [ { "target_name": "libantares-linux"
+          , "type": "static_library"
+          , "sources":
+            [ "src/linux/http.cpp"
+            ]
+          , "dependencies":
+            [ "<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz"
+            ]
+          , "export_dependent_settings":
+            [ "<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz"
+            ]
+          , "link_settings":
+            { "libraries":
+              [ "-lneon"
+              ]
+            }
           }
         ]
       }

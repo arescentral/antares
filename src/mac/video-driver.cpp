@@ -119,12 +119,12 @@ struct CocoaVideoDriver::EventBridge {
 
     static void caps_lock(void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new CapsLockEvent(now_usecs()));
+        self->enqueue(new KeyDownEvent(now_usecs(), Keys::CAPS_LOCK));
     }
 
     static void caps_unlock(void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new CapsUnlockEvent(now_usecs()));
+        self->enqueue(new KeyUpEvent(now_usecs(), Keys::CAPS_LOCK));
     }
 
     static void hid_event(void* userdata, IOReturn result, void* sender, IOHIDValueRef value) {

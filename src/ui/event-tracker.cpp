@@ -46,14 +46,6 @@ void EventTracker::gamepad_stick(const GamepadStickEvent& event) {
     _input_mode = GAMEPAD;
 }
 
-void EventTracker::caps_lock(const CapsLockEvent& event) {
-    _input_mode = KEYBOARD_MOUSE;
-}
-
-void EventTracker::caps_unlock(const CapsUnlockEvent& event) {
-    _input_mode = KEYBOARD_MOUSE;
-}
-
 void EventTracker::mouse_down(const MouseDownEvent& event) {
     if (_strict && _button[event.button()]) {
         throw Exception("Received MouseDownEvent when mouse already down.");

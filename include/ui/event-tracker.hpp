@@ -37,8 +37,6 @@ class EventTracker : public EventReceiver {
     virtual void key_up(const KeyUpEvent& event);
     virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
     virtual void gamepad_stick(const GamepadStickEvent& event);
-    virtual void caps_lock(const CapsLockEvent& event);
-    virtual void caps_unlock(const CapsUnlockEvent& event);
     virtual void mouse_down(const MouseDownEvent& event);
     virtual void mouse_up(const MouseUpEvent& event);
     virtual void mouse_move(const MouseMoveEvent& event);
