@@ -23,6 +23,7 @@
       , "libantares-data"
       , "libantares-drawing"
       , "libantares-game"
+      , "libantares-linux"
       , "libantares-mac"
       , "libantares-math"
       , "libantares-sound"
@@ -30,11 +31,12 @@
       , "libantares-video"
       ]
     , "export_dependent_settings":
-      [ "libantares-mac"
-      , "libantares-config"
+      [ "libantares-config"
       , "libantares-data"
       , "libantares-drawing"
       , "libantares-game"
+      , "libantares-linux"
+      , "libantares-mac"
       , "libantares-math"
       , "libantares-sound"
       , "libantares-ui"
@@ -44,6 +46,11 @@
       [ [ "OS != 'mac'"
         , { "dependencies!": ["libantares-mac"]
           , "export_dependent_settings!": ["libantares-mac"]
+          }
+        ]
+      , [ "OS != 'linux'"
+        , { "dependencies!": ["libantares-linux"]
+          , "export_dependent_settings!": ["libantares-linux"]
           }
         ]
       ]
@@ -406,6 +413,12 @@
       , "<(DEPTH)/ext/glfw/glfw.gyp:libglfw"
       ]
     }
+
+  , { "target_name": "extract-data"
+    , "type": "executable"
+    , "sources": ["src/bin/extract-data.cpp"]
+    , "dependencies": ["libantares-test"]
+    }
   ]
 
 , "conditions":
@@ -481,11 +494,28 @@
               ]
             }
           }
+        ]
+      }
+    ]
 
-        , { "target_name": "extract-data"
-          , "type": "executable"
-          , "sources": ["src/bin/extract-data.cpp"]
-          , "dependencies": ["libantares-test"]
+  , [ "OS == 'linux'"
+    , { "targets":
+        [ { "target_name": "libantares-linux"
+          , "type": "static_library"
+          , "sources":
+            [ "src/linux/http.cpp"
+            ]
+          , "dependencies":
+            [ "<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz"
+            ]
+          , "export_dependent_settings":
+            [ "<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz"
+            ]
+          , "link_settings":
+            { "libraries":
+              [ "-lneon"
+              ]
+            }
           }
         ]
       }
