@@ -414,10 +414,10 @@
       ]
     }
 
-  , { "target_name": "extract-data"
+  , { "target_name": "antares-install-data"
     , "type": "executable"
-    , "sources": ["src/bin/extract-data.cpp"]
-    , "dependencies": ["libantares-test"]
+    , "sources": ["src/bin/antares-install-data.cpp"]
+    , "dependencies": ["libantares"]
     }
   ]
 
