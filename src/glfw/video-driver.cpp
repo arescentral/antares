@@ -186,6 +186,11 @@ void GLFWVideoDriver::loop(Card* initial) {
         glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
         glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
         _window = glfwCreateWindow(mode->width, mode->height, "", monitor, NULL);
+
+        int width;
+        do {
+            glfwGetFramebufferSize(_window, &width, nullptr);
+        } while (width % mode->width);
     } else {
         _window = glfwCreateWindow(_screen_size.width, _screen_size.height, "", NULL, NULL);
     }
