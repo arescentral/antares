@@ -401,8 +401,7 @@
     , "dependencies": ["libantares-test"]
     }
 
-  , { "target_name": "antares-glfw"
-    , "product_name": "antares-glfw"
+  , { "target_name": "<(ANTARES_GLFW)"
     , "type": "executable"
     , "sources":
       [ "src/glfw/main.cpp"
@@ -423,7 +422,8 @@
 
 , "conditions":
   [ [ "OS == 'mac'"
-    , { "targets":
+    , { "variables": { "ANTARES_GLFW": "antares-glfw" }
+      , "targets":
         [ { "target_name": "libantares-mac"
           , "type": "static_library"
           , "sources":
@@ -499,7 +499,8 @@
     ]
 
   , [ "OS == 'linux'"
-    , { "targets":
+    , { "variables": { "ANTARES_GLFW": "antares" }
+      , "targets":
         [ { "target_name": "libantares-linux"
           , "type": "static_library"
           , "sources":
