@@ -1,34 +1,60 @@
 #!/usr/bin/env python
 
 import argparse
+import glob
 import os
+import subprocess
 import sys
 
-os.chdir(os.path.dirname(sys.argv[0]))
-progname = sys.argv[0]
-parser = argparse.ArgumentParser()
-parser.add_argument("-m", "--mode", type=unicode, choices="dbg dev opt".split(), default="opt")
-parser.add_argument("--coverage", action="store_true", default=False)
-args, remainder = parser.parse_known_args()
+def main():
+    os.chdir(os.path.dirname(sys.argv[0]))
+    progname = sys.argv[0]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-m", "--mode", type=unicode, choices="dbg dev opt".split(), default="opt")
+    parser.add_argument("--coverage", action="store_true", default=False)
+    args, remainder = parser.parse_known_args()
 
-try:
-    os.makedirs("out")
-except OSError as e:
-    if e.errno != 17:
-        raise
+    submodules()
+    makedirs("out")
+    linkf(args.mode, "out/cur")
+    gyp(args, remainder)
 
-try:
-    os.unlink("out/cur")
-except OSError as e:
-    pass
-os.symlink(args.mode, "out/cur")
 
-cmd = [
-    "gyp",
-    "--include=defaults.gypi",
-    "--format=ninja",
-    "--depth=.",
-]
-cmd += ["-D", "COVERAGE=%s" % ("1" if args.coverage else "")]
-cmd += remainder
-os.execvp(cmd[0], cmd)
+def gyp(args, remainder):
+    cmd = [
+        "gyp",
+        "--include=defaults.gypi",
+        "--format=ninja",
+        "--depth=.",
+    ]
+    cmd += ["-D", "COVERAGE=%s" % ("1" if args.coverage else "")]
+    cmd += remainder
+    os.execvp(cmd[0], cmd)
+
+
+def submodules():
+    if all(glob.glob(os.path.join("ext", d, "*.gyp")) for d in os.listdir("ext")):
+        if os.path.exists("data/README.md"):
+            return
+    subprocess.call("git submodule init".split())
+    subprocess.call("git submodule update ext data".split())
+
+
+def makedirs(path):
+    try:
+        os.makedirs(path)
+    except OSError as e:
+        if e.errno != 17:
+            raise
+
+
+def linkf(dst, src):
+    try:
+        os.unlink(src)
+    except OSError as e:
+        pass
+    os.symlink(dst, src)
+
+
+if __name__ == "__main__":
+    main()
