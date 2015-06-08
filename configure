@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 
+from __future__ import division, print_function, unicode_literals
+
 import argparse
+import collections
 import glob
 import os
+import platform
 import subprocess
 import sys
+from scripts import cfg
 
 def main():
     os.chdir(os.path.dirname(sys.argv[0]))
@@ -14,46 +19,152 @@ def main():
     parser.add_argument("--coverage", action="store_true", default=False)
     args, remainder = parser.parse_known_args()
 
+    check_platform()
+    check_deps()
+
     submodules()
-    makedirs("out")
-    linkf(args.mode, "out/cur")
+    cfg.makedirs("out")
+    cfg.linkf(args.mode, "out/cur")
     gyp(args, remainder)
+    print("make(1) it so!")
 
 
-def gyp(args, remainder):
-    cmd = [
-        "gyp",
-        "--include=defaults.gypi",
-        "--format=ninja",
-        "--depth=.",
+def check_platform():
+    with cfg.step("checking platform") as msg:
+        if cfg.platform() in ["mac", "linux"]:
+            msg(cfg.platform(), color="green")
+        else:
+            msg(cfg.platform(), color="red")
+            print("\nSorry! Antares requires Mac OS X or Linux")
+            sys.exit(1)
+
+
+def check_deps():
+    checker = {
+        "mac": check_mac,
+        "linux": check_linux,
+    }[cfg.platform()]
+    checker()
+
+
+def check_mac():
+    with cfg.step("checking Mac OS X version") as msg:
+        ver = platform.mac_ver()[0]
+        ver = tuple(int(x) for x in ver.split(".")[:2])
+        if ver < (10, 9):
+            msg("%d.%d" % ver, color="red")
+            print("\nSorry! Antares requires Mac OS X 10.9+")
+            sys.exit(1)
+        msg("%d.%d" % ver, color="green")
+
+    missing = collections.OrderedDict()
+    if not check_clang():
+        missing["xcode"] = (
+                "* Xcode can be installed via the App Store:\n"
+                "    https://itunes.apple.com/en/app/xcode/id497799835\n"
+                "  After installing, open it and accept the license agreement\n")
+    if not check_gyp():
+        missing["gyp"] = (
+                "* gyp can be installed with Homebrew:\n"
+                "    $ brew install --HEAD scripts/gyp.rb\n")
+    if not check_ninja():
+        missing["ninja"] = (
+                "* ninja can be installed with Homebrew:\n"
+                "    $ brew install ninja\n")
+
+    if missing:
+        print("\nmissing dependencies: %s\n" % " ".join(missing.keys()))
+        for step in missing.values():
+            sys.stdout.write(step)
+        sys.exit(1)
+
+
+def check_linux():
+    with cfg.step("checking Linux distro") as msg:
+        distro = platform.linux_distribution()
+        if distro[0] == "Ubuntu":
+            msg(" ".join(distro), color="green")
+        else:
+            msg(" ".join(distro) + " (untested)", color="yellow")
+
+    missing = collections.OrderedDict()
+    if not check_clang():
+        missing["clang"] = "clang"
+        missing["libc++"] = "libc++-dev"
+    if not check_gyp():
+        missing["gyp"] = "gyp"
+    if not check_ninja():
+        missing["ninja"] = "ninja-build"
+
+    libs = [
+        ("gl", "libgl1-mesa-dev"),
+        ("glu", "libglu1-mesa-dev"),
+        ("neon", "libneon27-dev"),
+        ("openal", "libopenal-dev"),
+        ("x11", "libx11-dev"),
+        ("xcursor", "libxcursor-dev"),
+        ("xinerama", "libxinerama-dev"),
+        ("xrandr", "libxrandr-dev"),
+        ("xxf86vm", "libxxf86vm-dev"),
     ]
-    cmd += ["-D", "COVERAGE=%s" % ("1" if args.coverage else "")]
-    cmd += remainder
-    os.execvp(cmd[0], cmd)
+    for lib, dpkg in libs:
+        if not cfg.check_pkg(lib):
+            missing[lib] = dpkg
+
+    if missing:
+        print("\nmissing dependencies: %s" % " ".join(missing.keys()))
+        if len(missing) == 1:
+            print("\nOn Ubuntu, you can install it with:\n")
+        else:
+            print("\nOn Ubuntu, you can install them with:\n")
+        print("    $ sudo apt-get install %s" % (" ".join(missing.values())))
+        sys.exit(1)
+
+
+def check_clang():
+    """Compile a basic C++11, libc++ binary."""
+    return cfg.check_bin(
+            "clang -x c++ -std=c++11 -stdlib=libc++ - -o /dev/null".split(),
+            input="int main() { return 1; }")
+
+def check_gyp():
+    """Run gyp --help (it doesn't have --version)."""
+    return cfg.check_bin("gyp --help".split())
+
+def check_ninja():
+    """Run ninja --version.
+
+    GNU Ninja doesn't have a --version flag, so this check should fail
+    if the user accidentally installed ninja instead of ninja-build.
+    """
+    return cfg.check_bin("ninja --version".split())
 
 
 def submodules():
     if all(glob.glob(os.path.join("ext", d, "*.gyp")) for d in os.listdir("ext")):
         if os.path.exists("data/README.md"):
             return
-    subprocess.call("git submodule init".split())
-    subprocess.call("git submodule update ext data".split())
+    subprocess.check_call("git submodule init".split())
+    subprocess.check_call("git submodule update ext data".split())
 
 
-def makedirs(path):
-    try:
-        os.makedirs(path)
-    except OSError as e:
-        if e.errno != 17:
-            raise
+def gyp(args, remainder):
+    with cfg.step("configure mode") as msg:
+        msg(args.mode, color="green")
+    with cfg.step("generating build.ninja") as msg:
+        cmd = [
+            "gyp",
+            "--include=defaults.gypi",
+            "--format=ninja",
+            "--depth=.",
+        ]
+        cmd += ["-D", "COVERAGE=%s" % ("1" if args.coverage else "")]
+        cmd += remainder
 
-
-def linkf(dst, src):
-    try:
-        os.unlink(src)
-    except OSError as e:
-        pass
-    os.symlink(dst, src)
+        retcode = subprocess.call(cmd)
+        if retcode != 0:
+            msg("failed", color="red")
+            sys.exit(retcode)
 
 
 if __name__ == "__main__":
