@@ -96,20 +96,23 @@ def check_linux():
     if not check_ninja():
         missing["ninja"] = "ninja-build"
 
-    libs = [
-        ("gl", "libgl1-mesa-dev"),
-        ("glu", "libglu1-mesa-dev"),
-        ("neon", "libneon27-dev"),
-        ("openal", "libopenal-dev"),
-        ("x11", "libx11-dev"),
-        ("xcursor", "libxcursor-dev"),
-        ("xinerama", "libxinerama-dev"),
-        ("xrandr", "libxrandr-dev"),
-        ("xxf86vm", "libxxf86vm-dev"),
-    ]
-    for lib, dpkg in libs:
-        if not cfg.check_pkg(lib):
-            missing[lib] = dpkg
+    if check_pkg_config():
+        libs = [
+            ("gl", "libgl1-mesa-dev"),
+            ("glu", "libglu1-mesa-dev"),
+            ("neon", "libneon27-dev"),
+            ("openal", "libopenal-dev"),
+            ("x11", "libx11-dev"),
+            ("xcursor", "libxcursor-dev"),
+            ("xinerama", "libxinerama-dev"),
+            ("xrandr", "libxrandr-dev"),
+            ("xxf86vm", "libxxf86vm-dev"),
+        ]
+        for lib, dpkg in libs:
+            if not cfg.check_pkg(lib):
+                missing[lib] = dpkg
+    else:
+        missing["pkg-config"] = "pkg-config"
 
     if missing:
         print("\nmissing dependencies: %s" % " ".join(missing.keys()))
@@ -138,6 +141,10 @@ def check_ninja():
     if the user accidentally installed ninja instead of ninja-build.
     """
     return cfg.check_bin("ninja --version".split())
+
+def check_pkg_config():
+    """Run pkg-config --version."""
+    return cfg.check_bin("pkg-config --version".split())
 
 
 def submodules():
