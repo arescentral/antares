@@ -20,6 +20,7 @@ def main():
     args, remainder = parser.parse_known_args()
 
     check_platform()
+    check_arch()
     check_deps()
 
     submodules()
@@ -37,6 +38,18 @@ def check_platform():
             msg(cfg.platform(), color="red")
             print("\nSorry! Antares requires Mac OS X or Linux")
             sys.exit(1)
+
+
+def check_arch():
+    with cfg.step("checking architecture") as msg:
+        arch = platform.uname()[5]
+        if not arch:
+            msg("unknown", color="red")
+            sys.exit(1)
+        elif arch in ["x86_64", "i386"]:
+            msg(arch, color="green")
+        else:
+            msg(arch + " (untested)", color="yellow")
 
 
 def check_deps():
