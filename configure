@@ -89,6 +89,9 @@ def check_mac():
         print("\nmissing dependencies: %s\n" % " ".join(missing.keys()))
         for step in missing.values():
             sys.stdout.write(step)
+        if any("Homebrew" in v for v in missing.values()):
+            print("* Homebrew can be installed like so:")
+            print('    $ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
         sys.exit(1)
 
 
