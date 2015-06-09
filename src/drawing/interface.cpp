@@ -351,7 +351,7 @@ void draw_tab_box(Point origin, const TabBox& item) {
 
 void draw_button(Point origin, InputMode mode, const PlainButton& item) {
     Rect            tRect, uRect, vRect;
-    int16_t         vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
+    int16_t         swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     uint8_t         shade;
     RgbColor        color;
 
@@ -386,8 +386,6 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
         mDrawPuffUpBottomBorder(rects, tRect, item.hue, shade, thisHBorder);
 
         // side border top
-
-        vcenter = ( tRect.bottom - tRect.top) / 2;
 
         uRect = Rect(tRect.left - thisHBorder, tRect.top + kInterfaceHTop, tRect.left + 1,
                 tRect.bottom - kInterfaceHTop + 1);
@@ -504,7 +502,7 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
 
 void draw_tab_box_button(Point origin, const TabBoxButton& item) {
     Rect            tRect;
-    int16_t         vcenter, swidth, sheight, h_border = kInterfaceSmallHBorder;
+    int16_t         swidth, sheight, h_border = kInterfaceSmallHBorder;
     uint8_t         shade;
     RgbColor        color;
 
@@ -530,8 +528,6 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
     mDrawPuffUpTopBorder(Rects(), tRect, item.hue, shade, h_border);
 
     // side border top
-
-    vcenter = (tRect.bottom - tRect.top) / 2;
 
     Rect left(
             tRect.left - h_border, tRect.top + kInterfaceHTop, tRect.left + 1,
@@ -838,7 +834,7 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap
 
 void draw_checkbox(Point origin, const CheckboxButton& item) {
     Rect            tRect, uRect, vRect, wRect;
-    int16_t         vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
+    int16_t         swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     uint8_t         shade;
     RgbColor        color;
 
@@ -864,7 +860,6 @@ void draw_checkbox(Point origin, const CheckboxButton& item) {
 
     // side border top
 
-    vcenter = ( tRect.bottom - tRect.top) / 2;
     swidth = (tRect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight + kIndicatorVOffset);
     sheight = (tRect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight - kIndicatorVOffset) -
             swidth;
@@ -875,10 +870,8 @@ void draw_checkbox(Point origin, const CheckboxButton& item) {
     uRect = Rect(tRect.left - thisHBorder - kCheckIndicatorHOffset + 2,
             tRect.top + kInterfaceHTop,
             tRect.left + 1,
-            /*tRect.top + vcenter - kInterfaceVLipHeight + 1*/
             tRect.bottom - kInterfaceHTop + 1);
     vRect = Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
-            /*tRect.top + vcenter - kInterfaceVLipHeight + 1*/
             tRect.bottom - kInterfaceHTop + 1);
 
     if (item.status == kIH_Hilite) {

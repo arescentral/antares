@@ -239,8 +239,6 @@ void NonplayerShipThink(int32_t timePass)
         g.sync += anObject->location.h;
         g.sync += anObject->location.v;
 
-        keysDown = anObject->keysDown & kSpecialKeyMask;
-
         // strobe its symbol if it's not feeling well
         if (anObject->sprite.get()) {
             if ((anObject->health() > 0) && (anObject->health() <= (anObject->max_health() >> 2))) {

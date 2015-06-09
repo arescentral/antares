@@ -169,7 +169,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
     Fixed                   fh, fv, fa, fb, useThrust;
     Fixed                   aFixed;
     int16_t                 angle;
-    uint32_t                shortDist, thisDist, longDist;
+    uint32_t                thisDist;
     Handle<SpaceObject>     anObject;
 
     if ( unitsToDo == 0) return;
@@ -481,8 +481,6 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
 // nothing below can effect any object actions (expire actions get executed)
 // (but they can effect objects thinking)
 // !!!!!!!!
-    shortDist = thisDist = static_cast<uint32_t>(kMaximumRelevantDistanceSquared) * 2;
-    longDist = 0;
     anObject = g.root;
 
     while (anObject.get()) {
