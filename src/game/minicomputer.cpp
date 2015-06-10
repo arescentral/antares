@@ -1742,18 +1742,8 @@ void MiniComputerHandleMouseUp( Point where)
 
 {
     Rect        mRect;
-    int32_t        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
+    int32_t        lineNum;
     miniScreenLineType  *line;
-
-    line = globals()->gMiniScreenData.lineData.get();
-    scrap = 0;
-    while ( scrap < kMiniScreenTrueLineNum)
-    {
-        if ( line->whichButton == kInLineButton) inLineButtonLine = scrap;
-        else if ( line->whichButton == kOutLineButton) outLineButtonLine = scrap;
-        scrap++;
-        line++;
-    }
 
     mRect = Rect(kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
                 kButBoxBottom + globals()->gInstrumentTop);

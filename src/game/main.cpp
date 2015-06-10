@@ -618,10 +618,8 @@ void GamePlay::fire_timer() {
         unitsPassed -= unitsToDo;
     }
 
-    bool newKeyMap = false;
     _last_key_map.copy(_key_map);
     VideoDriver::driver()->get_keys(&_key_map);
-    newKeyMap = (_last_key_map != _key_map);
 
     if (!_replay && mVolumeDownKey(_key_map) && !mVolumeDownKey(_last_key_map)) {
         Preferences::preferences()->set_volume(Preferences::preferences()->volume() - 1);

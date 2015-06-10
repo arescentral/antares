@@ -376,7 +376,6 @@ void Label::recalc_size() {
         height = (tactical_font->height * lineNum) + kLabelTotalInnerSpace;
         lineHeight = tactical_font->height;
     } else {
-        lineNum = 1;
         width = tactical_font->string_width(text) + kLabelTotalInnerSpace;
         height = tactical_font->height + kLabelTotalInnerSpace;
         lineHeight = tactical_font->height;
