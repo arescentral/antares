@@ -93,9 +93,9 @@ Point GLFWVideoDriver::get_mouse() {
 }
 
 void GLFWVideoDriver::get_keys(KeyMap* k) {
-    for (auto i: range(GLFW_KEY_LAST)) {
-        if (auto key = kGLFWKeyToUSB[i]) {
-            k->set(key, glfwGetKey(_window, key));
+    for (auto glfw_key: range(GLFW_KEY_LAST)) {
+        if (auto usb_key = kGLFWKeyToUSB[glfw_key]) {
+            k->set(usb_key, glfwGetKey(_window, glfw_key));
         }
     }
 }
