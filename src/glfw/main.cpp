@@ -29,6 +29,11 @@
 #include "ui/flows/master.hpp"
 
 using sfz::String;
+using sfz::args::store;
+using sfz::args::store_const;
+
+namespace args = sfz::args;
+namespace io = sfz::io;
 
 namespace antares {
 
@@ -37,7 +42,30 @@ String application_path() {
 }
 
 void main(int argc, const char* argv[]) {
+    args::Parser parser(argv[0], "Runs Antares");
+
+    int width = 640;
+    int height = 480;
+    bool fullscreen = false;
+    parser.add_argument("-w", "--width", store(width))
+        .help("screen width (default: 640)");
+    parser.add_argument("-h", "--height", store(height))
+        .help("screen height (default: 480)");
+    parser.add_argument("-f", "--fullscreen", store_const(fullscreen, true))
+        .help("play in full screen mode (default: windowed)");
+
+    parser.add_argument("--help", help(parser, 0))
+        .help("display this help screen");
+
+    String error;
+    if (!parser.parse_args(argc - 1, argv + 1, error)) {
+        print(io::err, format("{0}: {1}\n", parser.name(), error));
+        exit(1);
+    }
+
     FilePrefsDriver prefs;
+    Preferences::preferences()->set_screen_size({width, height});
+    Preferences::preferences()->set_fullscreen(fullscreen);
     DirectoryLedger ledger;
     OpenAlSoundDriver sound;
     GLFWVideoDriver video;
