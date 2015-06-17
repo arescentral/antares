@@ -134,8 +134,6 @@ void GLFWVideoDriver::key(int key, int scancode, int action, int mods) {
     } else {
         return;
     }
-    _loop->draw();
-    glfwSwapBuffers(_window);
 }
 
 void GLFWVideoDriver::mouse_button(int button, int action, int mods) {
@@ -146,14 +144,10 @@ void GLFWVideoDriver::mouse_button(int button, int action, int mods) {
     } else {
         return;
     }
-    _loop->draw();
-    glfwSwapBuffers(_window);
 }
 
 void GLFWVideoDriver::mouse_move(double x, double y) {
     MouseMoveEvent(usecs(), Point(x, y)).send(_loop->top());
-    _loop->draw();
-    glfwSwapBuffers(_window);
 }
 
 void GLFWVideoDriver::key_callback(GLFWwindow* w, int key, int scancode, int action, int mods) {
@@ -214,6 +208,8 @@ void GLFWVideoDriver::loop(Card* initial) {
 
     while (!main_loop.done() && !glfwWindowShouldClose(_window)) {
         glfwPollEvents();
+        _loop->draw();
+        glfwSwapBuffers(_window);
         int64_t at;
         if (main_loop.top()->next_timer(at) && (usecs() > at)) {
             main_loop.top()->fire_timer();
