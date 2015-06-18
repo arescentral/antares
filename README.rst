@@ -22,6 +22,34 @@ plugins and multiplayer. These are considered features to be added after
 ..  _Ambrosia Software: http://www.ambrosiasw.com/
 ..  _list of them: https://github.com/arescentral/antares/issues?q=is%3Aissue+is%3Aopen+-milestone%3ALater+
 
+Building Antares
+----------------
+
+`The long version is here`_. The short version is::
+
+    $ ./configure
+    $ make
+
+You may need to install some extra software first; the configure script
+give you instructions if so.
+
+..  _the long version is here: http://arescentral.org/antares/contributing/building/
+
+Running Antares
+---------------
+
+The short version is::
+
+    $ make run
+
+On Mac, the launcher will let you choose video settings, and optionally
+a plugin to run.
+
+On Linux, you'll need to run `out/cur/antares-install-data` first.
+Afterwards, you may want to run `out/cur/antares` directly.  You can
+choose video settings with command line options; see `antares --help`.
+There's no plugin support yet.
+
 Links
 -----
 
