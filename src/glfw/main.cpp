@@ -24,6 +24,7 @@
 #include "config/file-prefs-driver.hpp"
 #include "config/preferences.hpp"
 #include "config/ledger.hpp"
+#include "data/scenario-list.hpp"
 #include "glfw/video-driver.hpp"
 #include "sound/openal-driver.hpp"
 #include "ui/flows/master.hpp"
@@ -31,6 +32,7 @@
 using sfz::String;
 using sfz::args::store;
 using sfz::args::store_const;
+using sfz::range;
 
 namespace args = sfz::args;
 namespace io = sfz::io;
@@ -66,6 +68,28 @@ void main(int argc, const char* argv[]) {
     FilePrefsDriver prefs;
     Preferences::preferences()->set_screen_size({width, height});
     Preferences::preferences()->set_fullscreen(fullscreen);
+
+    const auto& scenario = Preferences::preferences()->scenario_identifier();
+    bool have_scenario = false;
+    ScenarioList l;
+    for (auto i: range(l.size())) {
+        const auto& entry = l.at(i);
+        if (entry.identifier == scenario) {
+            if (entry.installed) {
+                have_scenario = true;
+                break;
+            } else {
+                print(io::err, format("{0}: factory scenario not installed\n\n", parser.name()));
+                print(io::err, format("Please run antares-install-data\n", parser.name()));
+                exit(1);
+            }
+        }
+    }
+    if (!have_scenario) {
+        print(io::err, format("{0}: {1}: scenario not installed\n", parser.name(), scenario));
+        exit(1);
+    }
+
     DirectoryLedger ledger;
     OpenAlSoundDriver sound;
     GLFWVideoDriver video;

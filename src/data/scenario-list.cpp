@@ -69,6 +69,7 @@ ScenarioList::ScenarioList() {
     factory_scenario.author.assign("Bigger Planet");
     factory_scenario.author_url.assign("http://www.biggerplanet.com");
     factory_scenario.version = u32_to_version(0x01010100);
+    factory_scenario.installed = false;
 
     ScopedGlob g;
     const StringSlice info("scenario-info/128.nlAG");
@@ -82,6 +83,7 @@ ScenarioList::ScenarioList() {
         const String path(utf8::decode(g.data.gl_pathv[i]));
         StringSlice identifier = path.slice(prefix_len, path.size() - prefix_len - suffix_len);
         if (identifier == factory_scenario.identifier) {
+            factory_scenario.installed = true;
             continue;
         }
 
@@ -97,6 +99,7 @@ ScenarioList::ScenarioList() {
         entry.author.assign(info.authorNameString);
         entry.author_url.assign(info.authorURLString);
         entry.version = u32_to_version(info.version);
+        entry.installed = true;
     }
 }
 
