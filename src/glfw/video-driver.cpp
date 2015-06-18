@@ -186,6 +186,7 @@ void GLFWVideoDriver::loop(Card* initial) {
             glfwGetFramebufferSize(_window, &width, nullptr);
         } while (width % mode->width);
     } else {
+        glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
         _window = glfwCreateWindow(_screen_size.width, _screen_size.height, "", NULL, NULL);
     }
     if (!_window) {
