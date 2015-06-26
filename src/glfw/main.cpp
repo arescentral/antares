@@ -24,11 +24,18 @@
 #include "config/file-prefs-driver.hpp"
 #include "config/preferences.hpp"
 #include "config/ledger.hpp"
+#include "data/scenario-list.hpp"
 #include "glfw/video-driver.hpp"
 #include "sound/openal-driver.hpp"
 #include "ui/flows/master.hpp"
 
 using sfz::String;
+using sfz::args::store;
+using sfz::args::store_const;
+using sfz::range;
+
+namespace args = sfz::args;
+namespace io = sfz::io;
 
 namespace antares {
 
@@ -37,7 +44,52 @@ String application_path() {
 }
 
 void main(int argc, const char* argv[]) {
+    args::Parser parser(argv[0], "Runs Antares");
+
+    int width = 640;
+    int height = 480;
+    bool fullscreen = false;
+    parser.add_argument("-w", "--width", store(width))
+        .help("screen width (default: 640)");
+    parser.add_argument("-h", "--height", store(height))
+        .help("screen height (default: 480)");
+    parser.add_argument("-f", "--fullscreen", store_const(fullscreen, true))
+        .help("play in full screen mode (default: windowed)");
+
+    parser.add_argument("--help", help(parser, 0))
+        .help("display this help screen");
+
+    String error;
+    if (!parser.parse_args(argc - 1, argv + 1, error)) {
+        print(io::err, format("{0}: {1}\n", parser.name(), error));
+        exit(1);
+    }
+
     FilePrefsDriver prefs;
+    Preferences::preferences()->set_screen_size({width, height});
+    Preferences::preferences()->set_fullscreen(fullscreen);
+
+    const auto& scenario = Preferences::preferences()->scenario_identifier();
+    bool have_scenario = false;
+    ScenarioList l;
+    for (auto i: range(l.size())) {
+        const auto& entry = l.at(i);
+        if (entry.identifier == scenario) {
+            if (entry.installed) {
+                have_scenario = true;
+                break;
+            } else {
+                print(io::err, format("{0}: factory scenario not installed\n\n", parser.name()));
+                print(io::err, format("Please run antares-install-data\n", parser.name()));
+                exit(1);
+            }
+        }
+    }
+    if (!have_scenario) {
+        print(io::err, format("{0}: {1}: scenario not installed\n", parser.name(), scenario));
+        exit(1);
+    }
+
     DirectoryLedger ledger;
     OpenAlSoundDriver sound;
     GLFWVideoDriver video;

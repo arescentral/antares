@@ -93,9 +93,9 @@ Point GLFWVideoDriver::get_mouse() {
 }
 
 void GLFWVideoDriver::get_keys(KeyMap* k) {
-    for (auto i: range(GLFW_KEY_LAST)) {
-        if (auto key = kGLFWKeyToUSB[i]) {
-            k->set(key, glfwGetKey(_window, key));
+    for (auto glfw_key: range(GLFW_KEY_LAST)) {
+        if (auto usb_key = kGLFWKeyToUSB[glfw_key]) {
+            k->set(usb_key, glfwGetKey(_window, glfw_key));
         }
     }
 }
@@ -134,8 +134,6 @@ void GLFWVideoDriver::key(int key, int scancode, int action, int mods) {
     } else {
         return;
     }
-    _loop->draw();
-    glfwSwapBuffers(_window);
 }
 
 void GLFWVideoDriver::mouse_button(int button, int action, int mods) {
@@ -146,14 +144,10 @@ void GLFWVideoDriver::mouse_button(int button, int action, int mods) {
     } else {
         return;
     }
-    _loop->draw();
-    glfwSwapBuffers(_window);
 }
 
 void GLFWVideoDriver::mouse_move(double x, double y) {
     MouseMoveEvent(usecs(), Point(x, y)).send(_loop->top());
-    _loop->draw();
-    glfwSwapBuffers(_window);
 }
 
 void GLFWVideoDriver::key_callback(GLFWwindow* w, int key, int scancode, int action, int mods) {
@@ -192,6 +186,7 @@ void GLFWVideoDriver::loop(Card* initial) {
             glfwGetFramebufferSize(_window, &width, nullptr);
         } while (width % mode->width);
     } else {
+        glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
         _window = glfwCreateWindow(_screen_size.width, _screen_size.height, "", NULL, NULL);
     }
     if (!_window) {
@@ -214,6 +209,8 @@ void GLFWVideoDriver::loop(Card* initial) {
 
     while (!main_loop.done() && !glfwWindowShouldClose(_window)) {
         glfwPollEvents();
+        _loop->draw();
+        glfwSwapBuffers(_window);
         int64_t at;
         if (main_loop.top()->next_timer(at) && (usecs() > at)) {
             main_loop.top()->fire_timer();

@@ -530,22 +530,16 @@ void OpenGlVideoDriver::batch_line(
     float x2 = to.h;
     if (x1 > x2) {
         x1 += 1.0f;
-    } else if (x1 < x2) {
-        x2 += 1.0f;
     } else {
-        x1 += 0.5f;
-        x2 += 0.5f;
+        x2 += 1.0f;
     }
 
     float y1 = from.v;
     float y2 = to.v;
     if (y1 > y2) {
         y1 += 1.0f;
-    } else if (y1 < y2) {
-        y2 += 1.0f;
     } else {
-        y1 += 0.5f;
-        y2 += 0.5f;
+        y2 += 1.0f;
     }
 
     glEnableVertexAttribArray(0);

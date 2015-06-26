@@ -30,4 +30,13 @@ sign:
 		--entitlements resources/entitlements.plist \
 		out/cur/Antares.app
 
+friends:
+	@echo "Sure! You can email me at sfiera@sfzmail.com."
+
+love:
+	@echo "Sorry, I'm not that kind of Makefile."
+
+time:
+	@echo "I've always got time for you."
+
 .PHONY: all clean dist distclean run sign test
