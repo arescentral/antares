@@ -58,6 +58,7 @@ struct Gamepad {
         LONG_NAMES  = 1003,
     };
 
+    static void init();
     static int16_t num(sfz::StringSlice name);
     static bool name(int16_t button, sfz::String& out);
 };

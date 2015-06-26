@@ -126,15 +126,13 @@ void Master::init() {
         world.right - kRightPanelWidth, world.bottom);
     viewport = play_screen;
 
-    // TODO(sfiera): set gRandomSeed.
-
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
 
     RotationInit();
-    gRandomSeed.seed = _seed;
+    g.random.seed = _seed;
 
     InitDirectText();
-    Labels::init();
+    Label::init();
     Messages::init();
     InstrumentInit();
     SpriteHandlingInit();
@@ -144,7 +142,7 @@ void Master::init() {
     InitSoundFX();
     MusicInit();
     InitMotion();
-    AdmiralInit();
+    Admiral::init();
     Beams::init();
 
     if (Preferences::preferences()->play_idle_music()) {

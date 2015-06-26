@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <sfz/sfz.hpp>
 
+#include "data/picture.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "game/globals.hpp"
@@ -40,6 +41,7 @@ using sfz::hex;
 using sfz::read;
 using sfz::string_to_json;
 using std::map;
+using std::unique_ptr;
 
 namespace utf8 = sfz::utf8;
 
@@ -57,6 +59,18 @@ enum {
     kButtonSmallFontResID   = 5005,
 };
 
+void recolor(PixMap& glyph_table) {
+    for (size_t y = 0; y < glyph_table.size().height; ++y) {
+        for (size_t x = 0; x < glyph_table.size().width; ++x) {
+            if (glyph_table.get(x, y).red < 255) {
+                glyph_table.set(x, y, RgbColor::kWhite);
+            } else {
+                glyph_table.set(x, y, RgbColor::kClear);
+            }
+        }
+    }
+}
+
 struct FontVisitor : public JsonDefaultVisitor {
     enum StateEnum {
         NEW,
@@ -72,17 +86,19 @@ struct FontVisitor : public JsonDefaultVisitor {
         State(): state(NEW) { }
     };
     State& state;
-    ArrayPixMap& image;
+    Texture& texture;
+    int& scale;
     int32_t& logical_width;
     int32_t& height;
     int32_t& ascent;
     map<Rune, Rect>& glyphs;
 
-    FontVisitor(State& state, ArrayPixMap& image,
+    FontVisitor(State& state, Texture& texture, int& scale,
                 int32_t& logical_width, int32_t& height, int32_t& ascent,
                 map<Rune, Rect>& glyphs):
             state(state),
-            image(image),
+            texture(texture),
+            scale(scale),
             logical_width(logical_width),
             height(height),
             ascent(ascent),
@@ -144,15 +160,15 @@ struct FontVisitor : public JsonDefaultVisitor {
 
     virtual void visit_string(const StringSlice& value) const {
         switch (state.state) {
-          case IMAGE:
-            {
-                Resource rsrc(value);
-                BytesSlice data = rsrc.data();
-                read(data, image);
+            case IMAGE: {
+                Picture glyph_table(value, true);
+                recolor(glyph_table);
+                texture = glyph_table.texture();
+                scale = glyph_table.scale();
+                break;
             }
-            break;
-          default:
-            return visit_default("string");
+            default:
+                return visit_default("string");
         }
     }
 
@@ -183,8 +199,7 @@ const Font* button_font;
 const Font* title_font;
 const Font* small_button_font;
 
-Font::Font(StringSlice name):
-        _glyph_table(0, 0) {
+Font::Font(StringSlice name) {
     String path(format("fonts/{0}.json", name));
     Resource rsrc(path);
     String rsrc_string(utf8::decode(rsrc.data()));
@@ -193,17 +208,7 @@ Font::Font(StringSlice name):
         throw Exception("invalid JSON");
     }
     FontVisitor::State state;
-    json.accept(FontVisitor(state, _glyph_table, logicalWidth, height, ascent, _glyphs));
-
-    if (VideoDriver::driver()) {
-        for (const auto& kv: _glyphs) {
-            ArrayPixMap pix(kv.second.width(), kv.second.height());
-            pix.fill(RgbColor::kClear);
-            draw_internal(Point(0, ascent), kv.first, RgbColor::kWhite, &pix);
-            _sprites[kv.first] = VideoDriver::driver()->new_sprite(
-                    format("/fonts/{0}/{1}", name, hex(kv.first, 2)), pix);
-        }
-    }
+    json.accept(FontVisitor(state, texture, _scale, logicalWidth, height, ascent, _glyphs));
 }
 
 Font::~Font() { }
@@ -216,27 +221,17 @@ Rect Font::glyph_rect(Rune r) const {
     return it->second;
 }
 
-void Font::draw(Point origin, Rune r, RgbColor color, PixMap* pix) const {
-    draw_internal(origin, r, color, pix);
+void Font::draw(Point cursor, sfz::StringSlice string, RgbColor color) const {
+    draw(Quads(texture), cursor, string, color);
 }
 
-void Font::draw_internal(Point origin, Rune r, RgbColor color, PixMap* pix) const {
-    origin.v -= ascent;
-    Rect glyph = glyph_rect(r);
-    for (size_t y = 0; y < glyph.height(); ++y) {
-        for (size_t x = 0; x < glyph.width(); ++x) {
-            if (_glyph_table.get(glyph.left + x, glyph.top + y).red < 255) {
-                pix->set(origin.h + x, origin.v + y, color);
-            }
-        }
-    }
-}
-
-void Font::draw_sprite(Point origin, sfz::StringSlice string, RgbColor color) const {
-    origin.offset(0, -ascent);
+void Font::draw(const Quads& quads, Point cursor, sfz::StringSlice string, RgbColor color) const {
+    cursor.offset(0, -ascent);
     for (size_t i = 0; i < string.size(); ++i) {
-        _sprites.find(string.at(i))->second->draw_shaded(origin.h, origin.v, color);
-        origin.offset(char_width(string.at(i)), 0);
+        auto glyph = glyph_rect(string.at(i));
+        Rect scaled(glyph.left * _scale, glyph.top * _scale, glyph.right * _scale, glyph.bottom * _scale);
+        quads.draw(Rect(cursor, glyph.size()), scaled, color);
+        cursor.offset(glyph.width(), 0);
     }
 }
 

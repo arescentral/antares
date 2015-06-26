@@ -24,6 +24,7 @@
 #include "drawing/pix-table.hpp"
 #include "game/globals.hpp"
 #include "game/time.hpp"
+#include "lang/defines.hpp"
 #include "video/driver.hpp"
 
 using sfz::Exception;
@@ -44,7 +45,7 @@ void Cursor::draw() const {
 void Cursor::draw_at(Point where) const {
     if (world.contains(where)) {
         where.offset(-_sprite.at(0).center().h, -_sprite.at(0).center().v);
-        _sprite.at(0).sprite().draw(where.h, where.v);
+        _sprite.at(0).texture().draw(where.h, where.v);
     }
 }
 
@@ -95,11 +96,11 @@ void GameCursor::wake() {
     _show_crosshairs_until = now_usecs() + kTimeout;
 }
 
-bool HintLine::show_hint_line = false;
-Point HintLine::hint_line_start;
-Point HintLine::hint_line_end;
-RgbColor HintLine::hint_line_color;
-RgbColor HintLine::hint_line_color_dark;
+ANTARES_GLOBAL bool HintLine::show_hint_line = false;
+ANTARES_GLOBAL Point HintLine::hint_line_start;
+ANTARES_GLOBAL Point HintLine::hint_line_end;
+ANTARES_GLOBAL RgbColor HintLine::hint_line_color;
+ANTARES_GLOBAL RgbColor HintLine::hint_line_color_dark;
 
 void HintLine::show(Point fromWhere, Point toWhere, uint8_t color, uint8_t brightness) {
     hint_line_start = fromWhere;
@@ -142,13 +143,14 @@ void GameCursor::draw() const {
         Point right_a = Point(std::max(viewport.left, where.h + kCursorBoundsSize), where.v);
         Point right_b = Point(clip_rect.right - 1, where.v);
 
+        Rects rects;
         if (top_a.h >= viewport.left) {
-            VideoDriver::driver()->draw_line(top_a, top_b, color);
-            VideoDriver::driver()->draw_line(bottom_a, bottom_b, color);
+            rects.fill({top_a.h, top_a.v, top_b.h + 1, top_b.v + 1}, color);
+            rects.fill({bottom_a.h, bottom_a.v, bottom_b.h + 1, bottom_b.v + 1}, color);
         }
-        VideoDriver::driver()->draw_line(right_a, right_b, color);
+        rects.fill({right_a.h, right_a.v, right_b.h + 1, right_b.v + 1}, color);
         if (left_b.h >= viewport.left) {
-            VideoDriver::driver()->draw_line(left_a, left_b, color);
+            rects.fill({left_a.h, left_a.v, left_b.h + 1, left_b.v + 1}, color);
         }
     }
 
@@ -159,20 +161,21 @@ void GameCursor::draw() const {
 
 void HintLine::draw() {
     if (show_hint_line) {
+        Lines lines;
         Point start = hint_line_start;
         Point end = hint_line_end;
 
         start.offset(0, 2);
         end.offset(0, 2);
-        VideoDriver::driver()->draw_line(start, end, hint_line_color_dark);
+        lines.draw(start, end, hint_line_color_dark);
 
         start.offset(0, -1);
         end.offset(0, -1);
-        VideoDriver::driver()->draw_line(start, end, hint_line_color);
+        lines.draw(start, end, hint_line_color);
 
         start.offset(0, -1);
         end.offset(0, -1);
-        VideoDriver::driver()->draw_line(start, end, hint_line_color);
+        lines.draw(start, end, hint_line_color);
     }
 }
 

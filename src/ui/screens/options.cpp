@@ -166,9 +166,10 @@ void SoundControlScreen::overlay() const {
             notch_bounds.left + notch_width, notch_bounds.bottom);
     notch.inset(3, 6);
 
+    Rects rects;
     for (int i = 0; i < volume; ++i) {
         const RgbColor color = GetRGBTranslateColorShade(PALE_PURPLE, 2 * (i + 1));
-        VideoDriver::driver()->fill_rect(notch, color);
+        rects.fill(notch, color);
         notch.offset(notch_width, 0);
     }
 }

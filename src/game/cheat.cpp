@@ -25,6 +25,8 @@
 #include "game/globals.hpp"
 #include "game/messages.hpp"
 #include "game/player-ship.hpp"
+#include "game/space-object.hpp"
+#include "lang/defines.hpp"
 #include "math/fixed.hpp"
 
 using sfz::BytesSlice;
@@ -32,6 +34,7 @@ using sfz::PrintItem;
 using sfz::Rune;
 using sfz::String;
 using sfz::StringSlice;
+using std::unique_ptr;
 
 namespace antares {
 
@@ -50,15 +53,17 @@ const int16_t kBuildFastCheat       = 6;
 const int16_t kRaisePayRateCheat    = 7;  // determines your payscale
 const int16_t kLowerPayRateCheat    = 8;
 
-void CheatFeedback(int16_t whichCheat, bool activate, int32_t whichPlayer);
-void CheatFeedbackPlus(int16_t whichCheat, bool activate, int32_t whichPlayer, PrintItem extra);
+static ANTARES_GLOBAL unique_ptr<StringList> gAresCheatStrings;
+
+void CheatFeedback(int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer);
+void CheatFeedbackPlus(int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer, PrintItem extra);
 
 void AresCheatInit() {
-    globals()->gAresCheatStrings.reset(new StringList(kCheatStringListID));
+    gAresCheatStrings.reset(new StringList(kCheatStringListID));
 }
 
 void CleanupAresCheat() {
-    globals()->gAresCheatStrings.reset();
+    gAresCheatStrings.reset();
 }
 
 int16_t GetCheatNumFromString(const StringSlice& s) {
@@ -66,17 +71,15 @@ int16_t GetCheatNumFromString(const StringSlice& s) {
     for (Rune r: s) {
         code_string.append(1, r + kCheatCodeValue);
     }
-    return globals()->gAresCheatStrings.get()->index_of(code_string) + 1;
+    return gAresCheatStrings.get()->index_of(code_string) + 1;
 }
 
-void ExecuteCheat( int16_t whichCheat, int32_t whichPlayer)
-{
+void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
     int32_t                    i;
-    spaceObjectType *anObject = NULL;
 
     if ( whichCheat == kNameObjectCheat)
     {
-        globals()->gActiveCheats[whichPlayer] |= kNameObjectBit;
+        whichPlayer->cheats() |= kNameObjectBit;
         CheatFeedback( whichCheat, true, whichPlayer);
         return;
     }
@@ -84,80 +87,49 @@ void ExecuteCheat( int16_t whichCheat, int32_t whichPlayer)
     switch( whichCheat)
     {
         case kActivateCheatCheat:
-            for ( i = 0; i < kMaxPlayerNum; i++)
-            {
-                globals()->gActiveCheats[i] = 0;
+            for (auto adm: Admiral::all()) {
+                adm->cheats() = 0;
             }
             CheatFeedback( whichCheat, false, whichPlayer);
             break;
 
         case kPayMoneyCheat:
-            PayAdmiralAbsolute( whichPlayer, mLongToFixed( 5000));
-            PayAdmiralAbsolute( whichPlayer, mLongToFixed( 5000));
-            PayAdmiralAbsolute( whichPlayer, mLongToFixed( 5000));
+            whichPlayer->pay_absolute(mLongToFixed(5000));
+            whichPlayer->pay_absolute(mLongToFixed(5000));
+            whichPlayer->pay_absolute(mLongToFixed(5000));
             CheatFeedback( whichCheat, true, whichPlayer);
             break;
 
         case kAutoPlayCheat:
-            if ( globals()->gActiveCheats[whichPlayer] & kAutoPlayBit)
-            {
-                globals()->gActiveCheats[whichPlayer] &= ~kAutoPlayBit;
-                CheatFeedback( whichCheat, false, whichPlayer);
-                if ( whichPlayer == globals()->gPlayerAdmiralNumber)
-                {
-//                      ChangePlayerShipNumber( whichPlayer, globals()->gPlayerShipNumber);
-                }
-//                  SetAdmiralAttributes( whichPlayer, kAIsHuman);
-            } else
-            {
-                globals()->gActiveCheats[whichPlayer] |= kAutoPlayBit;
-                CheatFeedback( whichCheat, true, whichPlayer);
-                if ( whichPlayer == globals()->gPlayerAdmiralNumber)
-                {
-//                      ChangePlayerShipNumber( whichPlayer, globals()->gPlayerShipNumber);
-                }
-//                  SetAdmiralAttributes( whichPlayer, kAIsComputer);
-            }
+            whichPlayer->cheats() ^= kAutoPlayBit;
+            CheatFeedback(whichCheat, whichPlayer->cheats() & kAutoPlayBit, whichPlayer);
             break;
 
         case kBuildFastCheat:
-            if ( globals()->gActiveCheats[whichPlayer] & kBuildFastBit)
-            {
-                globals()->gActiveCheats[whichPlayer] &= ~kBuildFastBit;
-                CheatFeedback( whichCheat, false, whichPlayer);
-            } else
-            {
-                globals()->gActiveCheats[whichPlayer] |= kBuildFastBit;
-                CheatFeedback( whichCheat, true, whichPlayer);
-            }
+            whichPlayer->cheats() ^= kBuildFastBit;
+            CheatFeedback(whichCheat, whichPlayer->cheats() & kBuildFastBit, whichPlayer);
             break;
 
         case kObserverCheat:
-            anObject = GetAdmiralFlagship( whichPlayer);
-            if ( anObject != NULL)
-            {
-                anObject->attributes &= ~(kCanBeEngaged | kHated);
+            if (whichPlayer->flagship().get()) {
+                whichPlayer->flagship()->attributes &= ~(kCanBeEngaged | kHated);
                 CheatFeedback( whichCheat, true, whichPlayer);
             }
             break;
 
         case kRaisePayRateCheat:
-            SetAdmiralEarningPower(
-                    whichPlayer, GetAdmiralEarningPower(whichPlayer) + 0x00000020);
-            CheatFeedbackPlus(
-                    whichCheat, true, whichPlayer, fixed(GetAdmiralEarningPower(whichPlayer)));
+            whichPlayer->set_earning_power(whichPlayer->earning_power() + 0x20);
+            CheatFeedbackPlus(whichCheat, true, whichPlayer, fixed(whichPlayer->earning_power()));
             break;
 
         case kLowerPayRateCheat:
-            SetAdmiralEarningPower(
-                    whichPlayer, GetAdmiralEarningPower(whichPlayer) - 0x00000020);
-            CheatFeedbackPlus(
-                    whichCheat, true, whichPlayer, fixed(GetAdmiralEarningPower(whichPlayer)));
+            whichPlayer->set_earning_power(whichPlayer->earning_power() - 0x20);
+            CheatFeedbackPlus(whichCheat, true, whichPlayer, fixed(whichPlayer->earning_power()));
             break;
     }
 }
 
-void CheatFeedback(int16_t whichCheat, bool activate, int32_t whichPlayer) {
+void CheatFeedback(int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer) {
     String admiral_name(GetAdmiralName(whichPlayer));
     String feedback;
     if (activate) {
@@ -169,7 +141,7 @@ void CheatFeedback(int16_t whichCheat, bool activate, int32_t whichPlayer) {
 }
 
 void CheatFeedbackPlus(
-        int16_t whichCheat, bool activate, int32_t whichPlayer, PrintItem extra) {
+        int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer, PrintItem extra) {
     String admiral_name(GetAdmiralName(whichPlayer));
     String feedback;
     if (activate) {

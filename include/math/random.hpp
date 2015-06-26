@@ -29,8 +29,6 @@ struct Random {
     int16_t next(int16_t range);
 };
 
-extern Random gRandomSeed;
-
 int Randomize(int range);
 
 }  // namespace antares

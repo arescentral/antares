@@ -26,9 +26,6 @@
 
 namespace antares {
 
-class PixMap;
-class Sprite;
-
 class DebriefingScreen : public Card {
   public:
     DebriefingScreen(int text_id);
@@ -67,8 +64,6 @@ class DebriefingScreen : public Card {
     Rect _pix_bounds;
     Rect _message_bounds;
     Rect _score_bounds;
-    std::unique_ptr<PixMap> _pix;
-    std::unique_ptr<Sprite> _sprite;
 
     int64_t _next_update;
     int _typed_chars;

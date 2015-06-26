@@ -175,6 +175,8 @@ struct Keys {
         // Miscellaneous.
         POWER       = 0x66,
     };
+
+    static void init();
 };
 
 enum {

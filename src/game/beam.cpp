@@ -40,17 +40,16 @@ namespace antares {
 
 namespace {
 
-const int kBeamNum          = 256;
 const int kBoltChangeTime   = 0;
 
-void DetermineBeamRelativeCoordFromAngle(spaceObjectType *beamObject, int16_t angle) {
-    Fixed range = mLongToFixed(beamObject->frame.beam.beam->range);
+void DetermineBeamRelativeCoordFromAngle(Handle<SpaceObject> beamObject, int16_t angle) {
+    Fixed range = mLongToFixed(beamObject->frame.beam->range);
 
     mAddAngle(angle, -90);
     Fixed fcos, fsin;
     GetRotPoint(&fcos, &fsin, angle);
 
-    beamObject->frame.beam.beam->toRelativeCoord = Point(
+    beamObject->frame.beam->toRelativeCoord = Point(
             mFixedToLong(mMultiplyFixed(0, -fcos) - mMultiplyFixed(range, -fsin)),
             mFixedToLong(mMultiplyFixed(0, -fsin) + mMultiplyFixed(range, -fcos)));
 }
@@ -68,28 +67,31 @@ int32_t scale(int32_t value, int32_t scale) {
 
 }  // namespace
 
-std::unique_ptr<beamType[]> Beams::_data;
+Beam* Beam::get(int number) {
+    if ((0 <= number) && (number <= size)) {
+        return &g.beams[number];
+    }
+    return nullptr;
+}
 
-beamType::beamType():
+Beam::Beam():
         killMe(false),
         active(false) { }
 
 void Beams::init() {
-    _data.reset(new beamType[kBeamNum]);
+    g.beams.reset(new Beam[Beam::size]);
 }
 
 void Beams::reset() {
-    beamType* const beams = _data.get();
-    for (beamType* beam: range(beams, beams + kBeamNum)) {
+    for (auto beam: Beam::all()) {
         clear(*beam);
     }
 }
 
-beamType* Beams::add(
+Handle<Beam> Beams::add(
         coordPointType* location, uint8_t color, beamKindType kind, int32_t accuracy,
-        int32_t beam_range, int32_t* whichBeam) {
-    beamType* const beams = _data.get();
-    for (beamType* beam: range(beams, beams + kBeamNum)) {
+        int32_t beam_range) {
+    for (auto beam: Beam::all()) {
         if (!beam->active) {
             beam->lastGlobalLocation = *location;
             beam->objectLocation = *location;
@@ -103,37 +105,31 @@ beamType* Beams::add(
             beam->thisLocation = Rect(0, 0, 0, 0);
             beam->thisLocation.offset(h + viewport.left, v + viewport.top);
 
-            beam->lastLocation = beam->thisLocation;
-
             beam->beamKind = kind;
             beam->accuracy = accuracy;
             beam->range = beam_range;
-            beam->fromObjectNumber = beam->fromObjectID = -1;
-            beam->fromObject = NULL;
-            beam->toObjectNumber = beam->toObjectID = -1;
-            beam->toObject = NULL;
+            beam->fromObjectID = -1;
+            beam->fromObject = SpaceObject::none();
+            beam->toObjectID = -1;
+            beam->toObject = SpaceObject::none();
             beam->toRelativeCoord = Point(0, 0);
-            beam->boltRandomSeed = 0;
             beam->boltCycleTime = 0;
             beam->boltState = 0;
 
-            *whichBeam = beam - beams;
             return beam;
         }
     }
 
-    *whichBeam = -1;
-    return NULL;
+    return Beam::none();
 }
 
-void Beams::set_attributes(spaceObjectType* beamObject, spaceObjectType* sourceObject) {
-    beamType& beam = *beamObject->frame.beam.beam;
-    beam.fromObjectNumber = sourceObject->entryNumber;
+void Beams::set_attributes(Handle<SpaceObject> beamObject, Handle<SpaceObject> sourceObject) {
+    Beam& beam = *beamObject->frame.beam;
     beam.fromObjectID = sourceObject->id;
     beam.fromObject = sourceObject;
 
-    if (sourceObject->targetObjectNumber >= 0) {
-        spaceObjectType* target = mGetSpaceObjectPtr(sourceObject->targetObjectNumber);
+    if (sourceObject->targetObject.get()) {
+        auto target = sourceObject->targetObject;
 
         if ((target->active) && (target->id == sourceObject->targetObjectID)) {
             const int32_t h = abs(implicit_cast<int32_t>(
@@ -160,7 +156,6 @@ void Beams::set_attributes(spaceObjectType* beamObject, spaceObjectType* sourceO
                         - beam.accuracy
                         + beamObject->randomSeed.next(beam.accuracy << 1);
                 } else {
-                    beam.toObjectNumber = target->entryNumber;
                     beam.toObjectID = target->id;
                     beam.toObject = target;
                 }
@@ -184,8 +179,7 @@ void Beams::set_attributes(spaceObjectType* beamObject, spaceObjectType* sourceO
 }
 
 void Beams::update() {
-    beamType* const beams = _data.get();
-    for (beamType* beam: range(beams, beams + kBeamNum)) {
+    for (auto beam: Beam::all()) {
         if (beam->active) {
             if (beam->lastApparentLocation != beam->objectLocation) {
                 beam->thisLocation = Rect(
@@ -242,20 +236,20 @@ void Beams::update() {
 }
 
 void Beams::draw() {
-    beamType* const beams = _data.get();
-    for (beamType* beam: range(beams, beams + kBeamNum)) {
+    Lines lines;
+    for (auto beam: Beam::all()) {
         if (beam->active) {
             if (!beam->killMe) {
                 if (beam->color) {
                     if ((beam->beamKind == eBoltObjectToObjectKind)
                             || (beam->beamKind == eBoltObjectToRelativeCoordKind)) {
                         for (int j: range(1, kBoltPointNum)) {
-                            VideoDriver::driver()->draw_line(
+                            lines.draw(
                                     beam->thisBoltPoint[j-1], beam->thisBoltPoint[j],
                                     GetRGBTranslateColor(beam->color));
                         }
                     } else {
-                        VideoDriver::driver()->draw_line(
+                        lines.draw(
                                 Point(beam->thisLocation.left, beam->thisLocation.top),
                                 Point(beam->thisLocation.right, beam->thisLocation.bottom),
                                 GetRGBTranslateColor(beam->color));
@@ -267,8 +261,7 @@ void Beams::draw() {
 }
 
 void Beams::show_all() {
-    beamType* const beams = _data.get();
-    for (beamType* beam: range(beams, beams + kBeamNum)) {
+    for (auto beam: Beam::all()) {
         if (beam->active) {
             if (beam->killMe) {
                 beam->active = false;
@@ -281,19 +274,16 @@ void Beams::show_all() {
                     }
                 }
             }
-            beam->lastLocation = beam->thisLocation;
         }
     }
 }
 
 void Beams::cull() {
-    beamType* const beams = _data.get();
-    for (beamType* beam: range(beams, beams + kBeamNum)) {
+    for (auto beam: Beam::all()) {
         if (beam->active) {
                 if (beam->killMe) {
                     beam->active = false;
                 }
-                beam->lastLocation = beam->thisLocation;
         }
     }
 }

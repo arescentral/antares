@@ -43,8 +43,9 @@ const double kHackRangeMultiplier = 0.0025;
 
 void InitSoundFX() {
     for (int i = 0; i < kMaxChannelNum; i++) {
-        globals()->gChannel[i].soundAge = 0;
+        globals()->gChannel[i].reserved_until = 0;
         globals()->gChannel[i].soundPriority = kNoSound;
+        globals()->gChannel[i].soundVolume = 0;
         globals()->gChannel[i].whichSound = -1;
         globals()->gChannel[i].channelPtr = SoundDriver::driver()->open_channel();
     }
@@ -60,94 +61,102 @@ void InitSoundFX() {
     AddSound(kCloakOn);
     AddSound(kCloakOff);
     AddSound(kKlaxon);
-    AddSound(kWarpOne);
-    AddSound(kWarpTwo);
-    AddSound(kWarpThree);
-    AddSound(kWarpFour);
+    AddSound(kWarp[0]);
+    AddSound(kWarp[1]);
+    AddSound(kWarp[2]);
+    AddSound(kWarp[3]);
     AddSound(kTeletype);
+}
+
+// see if there's a channel with the same sound at same or lower volume
+static bool same_sound_channel(
+        int& channel, int16_t id, uint8_t amplitude, soundPriorityType priority) {
+    if (priority > kVeryLowPrioritySound) {
+        for (int i = 0; i < kMaxChannelNum; ++i) {
+            if ((globals()->gChannel[i].whichSound == id) &&
+                (globals()->gChannel[i].soundVolume <= amplitude)) {
+                channel = i;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// see if there's a channel at lower volume
+static bool quieter_channel(int& channel, uint8_t amplitude) {
+    for (int i = 0; i < kMaxChannelNum; ++i) {
+        if (globals()->gChannel[i].soundVolume < amplitude) {
+            channel = i;
+            return true;
+        }
+    }
+    return false;
+}
+
+// see if there's a channel at lower priority
+static bool lower_priority_channel(int& channel, soundPriorityType priority) {
+    for (int i = 0; i < kMaxChannelNum; ++i) {
+        if (globals()->gChannel[i].soundPriority < priority) {
+            channel = i;
+            return true;
+        }
+    }
+    return false;
+}
+
+// take the oldest sound if past minimum persistence
+static bool oldest_available_channel(int& channel) {
+    int64_t oldestSoundTime = 0;
+    bool result = false;
+    for (int i = 0; i < kMaxChannelNum; ++i) {
+        auto past_reservation =
+            VideoDriver::driver()->usecs() - globals()->gChannel[i].reserved_until;
+        if (past_reservation > oldestSoundTime) {
+            oldestSoundTime = past_reservation;
+            channel = i;
+            result = true;
+        }
+    }
+    return result;
+}
+
+static bool best_channel(
+        int& channel,
+        int16_t sound_id, uint8_t amplitude, int16_t persistence, soundPriorityType priority) {
+    return same_sound_channel(channel, sound_id, amplitude, priority)
+        || quieter_channel(channel, amplitude)
+        || lower_priority_channel(channel, priority)
+        || oldest_available_channel(channel);
 }
 
 void PlayVolumeSound(
         int16_t whichSoundID, uint8_t amplitude, int16_t persistence, soundPriorityType priority) {
-    int32_t oldestSoundTime = -ticks_to_usecs(kLongPersistence), whichChannel = -1;
+    int32_t whichChannel = -1;
     // TODO(sfiera): don't play sound at all if the game is muted.
     if (amplitude > 0) {
-        int timeDif = VideoDriver::driver()->usecs() - globals()->gLastSoundTime;
-        for (int count = 0; count < kMaxChannelNum; count++) {
-            globals()->gChannel[count].soundAge += timeDif;
+        if (!best_channel(whichChannel, whichSoundID, amplitude, persistence, priority)) {
+            return;
         }
-
-        // if not see if there's another channel with the same sound at same or lower volume
-        int count = 0;
-        if (priority > kVeryLowPrioritySound) {
-            while ((count < kMaxChannelNum) && (whichChannel == -1)) {
-                if ((globals()->gChannel[count].whichSound == whichSoundID) &&
-                    (globals()->gChannel[count].soundVolume <= amplitude)) {
-                    whichChannel = count;
-                }
-                count++;
-            }
-        }
-
-        // if not see if there's another channel at lower volume
-        if (whichChannel == -1) {
-            count = 0;
-            while ((count < kMaxChannelNum) && (whichChannel == -1)) {
-                if (globals()->gChannel[count].soundVolume < amplitude) {
-                    whichChannel = count;
-                }
-                count++;
-            }
-        }
-
-        // if not see if there's another channel at lower priority
-        if (whichChannel == -1) {
-            count = 0;
-            while ((count < kMaxChannelNum) && (whichChannel == -1)) {
-                if (globals()->gChannel[count].soundPriority < priority) {
-                    whichChannel = count;
-                }
-                count++;
-            }
-        }
-
-        // if not, take the oldest sound if past minimum persistence
-        if (whichChannel == -1) {
-            count = 0;
-            while (count < kMaxChannelNum) {
-                if ((globals()->gChannel[count].soundAge > 0)
-                        && (globals()->gChannel[count].soundAge > oldestSoundTime)) {
-                    oldestSoundTime = globals()->gChannel[count].soundAge;
-                    whichChannel = count;
-                }
-                count++;
-            }
-        }
-
-        // we're not checking for importance
-
-        globals()->gLastSoundTime = VideoDriver::driver()->usecs();
 
         int whichSound = 0;
         while ((globals()->gSound[whichSound].id != whichSoundID) && (whichSound < kSoundNum)) {
             whichSound++;
         }
         if (whichSound == kSoundNum) {
-            whichChannel = -1;
+            return;
         }
 
-        if (whichChannel >= 0) {
-            globals()->gChannel[whichChannel].whichSound = whichSoundID;
-            globals()->gChannel[whichChannel].soundAge = -ticks_to_usecs(persistence);
-            globals()->gChannel[whichChannel].soundPriority = priority;
-            globals()->gChannel[whichChannel].soundVolume = amplitude;
+        globals()->gChannel[whichChannel].whichSound = whichSoundID;
+        globals()->gChannel[whichChannel].reserved_until = VideoDriver::driver()->usecs() + ticks_to_usecs(persistence);
+        globals()->gChannel[whichChannel].soundPriority = priority;
+        globals()->gChannel[whichChannel].soundVolume = amplitude;
 
-            globals()->gChannel[whichChannel].channelPtr->quiet();
+        globals()->gChannel[whichChannel].channelPtr->quiet();
 
-            globals()->gChannel[whichChannel].channelPtr->amp(amplitude);
-            globals()->gChannel[whichChannel].channelPtr->activate();
-            globals()->gSound[whichSound].soundHandle->play();
-        }
+        globals()->gChannel[whichChannel].channelPtr->amp(amplitude);
+        globals()->gChannel[whichChannel].channelPtr->activate();
+        globals()->gSound[whichSound].soundHandle->play();
     }
 }
 
@@ -265,24 +274,19 @@ void quiet_all() {
 //
 
 void mPlayDistanceSound(
-        int32_t mvolume, spaceObjectType* mobjectptr, int32_t msoundid, int32_t msoundpersistence,
-        soundPriorityType msoundpriority) {
+        int32_t mvolume, Handle<SpaceObject> mobjectptr, int32_t msoundid,
+        int32_t msoundpersistence, soundPriorityType msoundpriority) {
     if (mobjectptr->distanceFromPlayer < kMaximumRelevantDistanceSquared) {
         int32_t mdistance = mobjectptr->distanceFromPlayer;
         uint32_t mul1;
         uint32_t mul2;
-        spaceObjectType* mplayerobjectptr;
+        auto player = g.ship;
 
         if (mdistance == 0) {
-            if (globals()->gPlayerShipNumber >= 0) {
-                mplayerobjectptr = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
-            } else {
-                mplayerobjectptr = NULL;
-            }
-            if ((mplayerobjectptr != NULL) && (mplayerobjectptr->active)) {
-                mul1 = ABS<int>(mplayerobjectptr->location.h - mobjectptr->location.h);
+            if (player.get() && player->active) {
+                mul1 = ABS<int>(player->location.h - mobjectptr->location.h);
                 mul2 = mul1;
-                mul1 =  ABS<int>(mplayerobjectptr->location.v - mobjectptr->location.v);
+                mul1 =  ABS<int>(player->location.v - mobjectptr->location.v);
                 mdistance = mul1;
                 if ((mul2 < kMaximumRelevantDistance) && (mdistance < kMaximumRelevantDistance)) {
                     mdistance = mdistance * mdistance + mul2 * mul2;
@@ -300,10 +304,10 @@ void mPlayDistanceSound(
                 }
                 if (mvolume > 0) {
                     PlayLocalizedSound(
-                            mplayerobjectptr->location.h, mplayerobjectptr->location.v,
+                            player->location.h, player->location.v,
                             mobjectptr->location.h, mobjectptr->location.v,
-                            mplayerobjectptr->velocity.h - mobjectptr->velocity.h,
-                            mplayerobjectptr->velocity.v - mobjectptr->velocity.v,
+                            player->velocity.h - mobjectptr->velocity.h,
+                            player->velocity.v - mobjectptr->velocity.v,
                             msoundid, mvolume, msoundpersistence, msoundpriority);
                 }
             } else {
@@ -343,18 +347,13 @@ void mPlayDistanceSound(
                     mvolume = ((1920 - mdistance) * mvolume) / 1920;
                 }
             }
-            if (globals()->gPlayerShipNumber >= 0) {
-                mplayerobjectptr = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
-            } else {
-                mplayerobjectptr = NULL;
-            }
-            if ((mplayerobjectptr != NULL) && (mplayerobjectptr->active)) {
+            if (player.get() && player->active) {
                 if (mvolume > 0) {
                     PlayLocalizedSound(
-                            mplayerobjectptr->location.h, mplayerobjectptr->location.v,
+                            player->location.h, player->location.v,
                             mobjectptr->location.h, mobjectptr->location.v,
-                            mplayerobjectptr->velocity.h - mobjectptr->velocity.h,
-                            mplayerobjectptr->velocity.v - mobjectptr->velocity.v,
+                            player->velocity.h - mobjectptr->velocity.h,
+                            player->velocity.v - mobjectptr->velocity.v,
                             msoundid, mvolume, msoundpersistence, msoundpriority);
                 }
             } else {

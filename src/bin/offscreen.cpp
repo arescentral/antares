@@ -116,8 +116,8 @@ void main(int argc, char* const* argv) {
         TextVideoDriver video(Preferences::preferences()->screen_size(), scheduler, output_dir);
         video.loop(new Master(14586));
     } else {
-        OffscreenVideoDriver video(Preferences::preferences()->screen_size(), scheduler, output_dir);
-        video.loop(new Master(14586));
+        OffscreenVideoDriver video(Preferences::preferences()->screen_size(), output_dir);
+        video.loop(new Master(14586), scheduler);
     }
 }
 
@@ -223,7 +223,7 @@ void pause(EventScheduler& scheduler) {
     scheduler.schedule_snapshot(1980);
     scheduler.schedule_snapshot(2000);
 
-    scheduler.schedule_event(unique_ptr<Event>(new CapsLockEvent(2020)));
+    scheduler.schedule_key(Keys::CAPS_LOCK, 2020, 2140);
     scheduler.schedule_snapshot(2020);
     scheduler.schedule_snapshot(2040);
     scheduler.schedule_snapshot(2060);
@@ -231,7 +231,6 @@ void pause(EventScheduler& scheduler) {
     scheduler.schedule_snapshot(2100);
     scheduler.schedule_snapshot(2120);
     scheduler.schedule_snapshot(2140);
-    scheduler.schedule_event(unique_ptr<Event>(new CapsUnlockEvent(2140)));
 
     scheduler.schedule_snapshot(2160);
     scheduler.schedule_snapshot(2180);

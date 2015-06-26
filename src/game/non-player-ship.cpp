@@ -69,44 +69,44 @@ enum {
     kNeutralColor   = SKY_BLUE,
 };
 
-uint32_t ThinkObjectNormalPresence( spaceObjectType *, baseObjectType *, int32_t);
-uint32_t ThinkObjectWarpingPresence( spaceObjectType *);
-uint32_t ThinkObjectWarpInPresence( spaceObjectType *);
-uint32_t ThinkObjectWarpOutPresence( spaceObjectType *, baseObjectType *);
-uint32_t ThinkObjectLandingPresence( spaceObjectType *);
-void ThinkObjectGetCoordVector( spaceObjectType *, coordPointType *, uint32_t *, int16_t *);
-void ThinkObjectGetCoordDistance( spaceObjectType *, coordPointType *, uint32_t *);
-void ThinkObjectResolveDestination( spaceObjectType *, coordPointType *, spaceObjectType **);
-bool ThinkObjectResolveTarget( spaceObjectType *, coordPointType *, uint32_t *, spaceObjectType **);
-uint32_t ThinkObjectEngageTarget( spaceObjectType *, spaceObjectType *, uint32_t, int16_t *, int32_t);
+uint32_t ThinkObjectNormalPresence(
+        Handle<SpaceObject> anObject, Handle<BaseObject> baseObject, int32_t timePass);
+uint32_t ThinkObjectWarpingPresence(Handle<SpaceObject> anObject);
+uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject);
+uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, Handle<BaseObject> baseObject);
+uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject);
+void ThinkObjectGetCoordVector(
+        Handle<SpaceObject> anObject, coordPointType *dest, uint32_t *distance, int16_t *angle);
+void ThinkObjectGetCoordDistance(
+        Handle<SpaceObject> anObject, coordPointType *dest, uint32_t *distance);
+void ThinkObjectResolveDestination(
+        Handle<SpaceObject> anObject, coordPointType *dest, Handle<SpaceObject>* targetObject);
+bool ThinkObjectResolveTarget(
+        Handle<SpaceObject> anObject, coordPointType *dest,
+        uint32_t *distance, Handle<SpaceObject>* targetObject);
+uint32_t ThinkObjectEngageTarget(
+        Handle<SpaceObject> anObject, Handle<SpaceObject> targetObject,
+        uint32_t distance, int16_t *theta, int32_t timePass);
 
-spaceObjectType *HackNewNonplayerShip( int32_t owner, int16_t type, Rect *bounds)
-
-{
-#pragma unused( owner, type, bounds)
-    return( NULL);
-}
-
-static void recharge(spaceObjectType* anObject) {
-    auto baseObject = anObject->baseType;
-    if ((anObject->energy < (baseObject->energy - kEnergyChunk))
-            && (anObject->battery > kEnergyChunk)) {
-        anObject->battery -= kEnergyChunk;
-        anObject->energy += kEnergyChunk;
+void SpaceObject::recharge() {
+    if ((_energy < (max_energy() - kEnergyChunk))
+            && (_battery > kEnergyChunk)) {
+        _battery -= kEnergyChunk;
+        _energy += kEnergyChunk;
     }
 
-    if ((anObject->health < (baseObject->health / 2))
-            && (anObject->energy > kHealthRatio)) {
-        anObject->health++;
-        anObject->energy -= kHealthRatio;
+    if ((_health < (max_health() / 2))
+            && (_energy > kHealthRatio)) {
+        _health++;
+        _energy -= kHealthRatio;
     }
 
-    for (auto* weapon: {&anObject->pulse, &anObject->beam, &anObject->special}) {
-        if (weapon->type != kNoWeapon) {
+    for (auto* weapon: {&pulse, &beam, &special}) {
+        if (weapon->base.get()) {
             if ((weapon->ammo < (weapon->base->frame.weapon.ammo >> 1))
-                    && (anObject->energy >= kWeaponRatio)) {
+                    && (_energy >= kWeaponRatio)) {
                 weapon->charge++;
-                anObject->energy -= kWeaponRatio;
+                _energy -= kWeaponRatio;
 
                 if ((weapon->base->frame.weapon.restockCost >= 0)
                         && (weapon->charge >= weapon->base->frame.weapon.restockCost)) {
@@ -119,8 +119,8 @@ static void recharge(spaceObjectType* anObject) {
 }
 
 static void tick_weapon(
-        spaceObjectType* subject, spaceObjectType* target, int32_t timePass,
-        uint32_t key, const baseObjectType::Weapon& base_weapon, spaceObjectType::Weapon& weapon) {
+        Handle<SpaceObject> subject, Handle<SpaceObject> target, int32_t timePass,
+        uint32_t key, const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
     if (weapon.time > 0) {
         weapon.time -= timePass;
     }
@@ -130,23 +130,22 @@ static void tick_weapon(
 }
 
 void fire_weapon(
-        spaceObjectType* subject, spaceObjectType* target,
-        const baseObjectType::Weapon& base_weapon, spaceObjectType::Weapon& weapon) {
-    if ((weapon.time > 0) || (weapon.type == kNoWeapon)) {
+        Handle<SpaceObject> subject, Handle<SpaceObject> target,
+        const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
+    if ((weapon.time > 0) || !weapon.base.get()) {
         return;
     }
 
-    baseObjectType* baseObject = subject->baseType;
-    baseObjectType* weaponObject = weapon.base;
-    if ((subject->energy < weaponObject->frame.weapon.energyCost)
+    auto weaponObject = weapon.base;
+    if ((subject->energy() < weaponObject->frame.weapon.energyCost)
             || ((weaponObject->frame.weapon.ammo > 0) && (weapon.ammo <= 0))) {
         return;
     }
     if ((&weapon != &subject->special)
             && (subject->cloakState > 0)) {
-        AlterObjectCloakState(subject, false);
+        subject->set_cloak(false);
     }
-    subject->energy -= weaponObject->frame.weapon.energyCost;
+    subject->_energy -= weaponObject->frame.weapon.energyCost;
     weapon.position++;
     if (weapon.position >= base_weapon.positionNum) {
         weapon.position = 0;
@@ -175,40 +174,36 @@ void fire_weapon(
     if (weaponObject->frame.weapon.ammo > 0) {
         weapon.ammo--;
     }
-    execute_actions(
-            weaponObject->activateAction,
-            weaponObject->activateActionNum,
-            subject, target, at, true);
+    exec(weaponObject->activate, subject, target, at);
 }
 
-static void tick_pulse(spaceObjectType* subject, spaceObjectType* target, int32_t timePass) {
+static void tick_pulse(
+        Handle<SpaceObject> subject, Handle<SpaceObject> target, int32_t timePass) {
     tick_weapon(subject, target, timePass, kOneKey, subject->baseType->pulse, subject->pulse);
 }
 
-static void tick_beam(spaceObjectType* subject, spaceObjectType* target, int32_t timePass) {
+static void tick_beam(
+        Handle<SpaceObject> subject, Handle<SpaceObject> target, int32_t timePass) {
     tick_weapon(subject, target, timePass, kTwoKey, subject->baseType->beam, subject->beam);
 }
 
-static void tick_special(spaceObjectType* subject, spaceObjectType* target, int32_t timePass) {
+static void tick_special(
+        Handle<SpaceObject> subject, Handle<SpaceObject> target, int32_t timePass) {
     tick_weapon(subject, target, timePass, kEnterKey, subject->baseType->special, subject->special);
 }
 
-#ifdef kUseOldThinking
-#else   // if NOT kUseOldThinking
 void NonplayerShipThink(int32_t timePass)
 {
-    admiralType     *anAdmiral;
-    spaceObjectType *targetObject;
-    baseObjectType  *baseObject, *weaponObject;
+    Admiral*        anAdmiral;
     Point           offset;
     int32_t         count, difference;
     uint32_t        keysDown;
     int16_t         h;
     Fixed           fcos, fsin;
     RgbColor        friendSick, foeSick, neutralSick;
-    uint32_t        sickCount = usecs_to_ticks(globals()->gGameTime) / 9;
+    uint32_t        sickCount = usecs_to_ticks(g.time) / 9;
 
-    globals()->gSynchValue = gRandomSeed.seed;
+    g.sync = g.random.seed;
     sickCount &= 0x00000003;
     if (sickCount == 0) {
         friendSick = GetRGBTranslateColorShade(kFriendlyColor, MEDIUM);
@@ -231,30 +226,30 @@ void NonplayerShipThink(int32_t timePass)
     }
 
     for (int32_t count = 0; count < kMaxPlayerNum; count++) {
-        mGetAdmiralPtr(count)->shipsLeft = 0;
+        Handle<Admiral>(count)->shipsLeft() = 0;
     }
 
     // it probably doesn't matter what order we do this in, but we'll do
     // it in the "ideal" order anyway
-    for (auto anObject = gRootObject; anObject; anObject = anObject->nextObject) {
+    for (auto anObject = g.root; anObject.get(); anObject = anObject->nextObject) {
         if (!anObject->active) {
             continue;
         }
 
-        globals()->gSynchValue += anObject->location.h;
-        globals()->gSynchValue += anObject->location.v;
+        g.sync += anObject->location.h;
+        g.sync += anObject->location.v;
 
         keysDown = anObject->keysDown & kSpecialKeyMask;
 
         // strobe its symbol if it's not feeling well
-        if (anObject->sprite) {
-            if ((anObject->health > 0) && (anObject->health <= (anObject->baseType->health >> 2))) {
-                if (anObject->owner == globals()->gPlayerAdmiralNumber) {
+        if (anObject->sprite.get()) {
+            if ((anObject->health() > 0) && (anObject->health() <= (anObject->max_health() >> 2))) {
+                if (anObject->owner == g.admiral) {
                     anObject->sprite->tinyColor = friendSick;
-                } else if (anObject->owner < 0) {
-                    anObject->sprite->tinyColor = neutralSick;
-                } else {
+                } else if (anObject->owner.get()) {
                     anObject->sprite->tinyColor = foeSick;
+                } else {
+                    anObject->sprite->tinyColor = neutralSick;
                 }
             } else {
                 anObject->sprite->tinyColor = anObject->tinyColor;
@@ -267,12 +262,12 @@ void NonplayerShipThink(int32_t timePass)
         }
 
         // get the object's base object
-        baseObject = anObject->baseType;
+        auto baseObject = anObject->base;
         anObject->targetAngle = anObject->directionGoal = anObject->direction;
 
         // incremenent its admiral's # of ships
-        if (anObject->owner > kNoOwner) {
-            mGetAdmiralPtr(anObject->owner)->shipsLeft++;
+        if (anObject->owner.get()) {
+            anObject->owner->shipsLeft()++;
         }
 
         switch (anObject->presenceState) {
@@ -295,9 +290,6 @@ void NonplayerShipThink(int32_t timePass)
           case kLandingPresence:
             keysDown = ThinkObjectLandingPresence(anObject);
             break;
-
-          case kTakeoffPresence:
-            break;
         }
 
         if (!(anObject->attributes & kRemoteOrHuman)
@@ -305,10 +297,10 @@ void NonplayerShipThink(int32_t timePass)
             if (anObject->attributes & kHasDirectionGoal) {
                 if (anObject->attributes & kShapeFromDirection) {
                     if ((anObject->attributes & kIsGuided)
-                            && (anObject->targetObjectNumber != kNoShip)) {
+                            && anObject->targetObject.get()) {
                         difference = anObject->targetAngle - anObject->direction;
                         if ((difference < -60) || (difference > 60)) {
-                            anObject->targetObjectNumber = kNoShip;
+                            anObject->targetObject = SpaceObject::none();
                             anObject->targetObjectID = kNoShip;
                             anObject->directionGoal = anObject->direction;
                         }
@@ -356,7 +348,7 @@ void NonplayerShipThink(int32_t timePass)
 
         // Take care of any "keys" being pressed
         if (anObject->keysDown & kAdoptTargetKey) {
-            SetObjectDestination(anObject, NULL);
+            SetObjectDestination(anObject, SpaceObject::none());
         }
         if (anObject->keysDown & kAutoPilotKey) {
             TogglePlayerAutoPilot(anObject);
@@ -376,7 +368,7 @@ void NonplayerShipThink(int32_t timePass)
         if ((anObject->attributes & kRemoteOrHuman)
                 && (!(anObject->attributes & kCanThink))
                 && (anObject->age < 120)) {
-            PlayerShipBodyExpire(anObject, true);
+            PlayerShipBodyExpire(anObject);
         }
 
         if ((anObject->attributes & kHasDirectionGoal)
@@ -408,11 +400,6 @@ void NonplayerShipThink(int32_t timePass)
                 anObject->thrust = baseObject->maxThrust;
             }
         } else if (anObject->keysDown & kDownKey) {
-            if ((anObject->presenceState != kWarpInPresence)
-                    && (anObject->presenceState != kWarpingPresence)
-                    && (anObject->presenceState != kWarpOutPresence)) {
-                anObject->thrust = -baseObject->maxThrust;
-            }
             anObject->thrust = -baseObject->maxThrust;
         } else {
             anObject->thrust = 0;
@@ -424,23 +411,16 @@ void NonplayerShipThink(int32_t timePass)
             anObject->rechargeTime = 0;
 
             if (anObject->presenceState == kWarpingPresence) {
-                anObject->energy -= 1;
-                anObject->warpEnergyCollected += 1;
-                if (anObject->energy <= 0) {
-                    anObject->energy = 0;
-                }
-            }
-
-            if (anObject->presenceState == kNormalPresence) {
-                recharge(anObject);
+                anObject->collect_warp_energy(1);
+            } else if (anObject->presenceState == kNormalPresence) {
+                anObject->recharge();
             }
         }
 
         // targetObject is set for all three weapons -- do not change
-        if (anObject->targetObjectNumber >= 0) {
-            targetObject = mGetSpaceObjectPtr(anObject->targetObjectNumber);
-        } else {
-            targetObject = nullptr;
+        auto targetObject = SpaceObject::none();
+        if (anObject->targetObject.get()) {
+            targetObject = anObject->targetObject;
         }
 
         tick_pulse(anObject, targetObject, timePass);
@@ -449,14 +429,18 @@ void NonplayerShipThink(int32_t timePass)
 
         if ((anObject->keysDown & kWarpKey)
                 && (baseObject->warpSpeed > 0)
-                && (anObject->energy > 0)) {
-            if ((anObject->presenceState == kWarpingPresence)
-                    || (anObject->presenceState == kWarpOutPresence)) {
-                anObject->thrust = mMultiplyFixed(baseObject->maxThrust, anObject->presenceData);
+                && (anObject->energy() > 0)) {
+            if (anObject->presenceState == kWarpingPresence) {
+                anObject->thrust = mMultiplyFixed(
+                        baseObject->maxThrust, anObject->presence.warping);
+            } else if (anObject->presenceState == kWarpOutPresence) {
+                anObject->thrust = mMultiplyFixed(
+                        baseObject->maxThrust, anObject->presence.warp_out);
             } else if ((anObject->presenceState == kNormalPresence)
-                    && (anObject->energy > (anObject->baseType->energy >> kWarpInEnergyFactor))) {
+                    && (anObject->energy() > (anObject->max_energy() >> kWarpInEnergyFactor))) {
                 anObject->presenceState = kWarpInPresence;
-                anObject->presenceData = 0;
+                anObject->presence.warp_in.step = 0;
+                anObject->presence.warp_in.progress = 0;
             }
         } else {
             if (anObject->presenceState == kWarpInPresence) {
@@ -464,32 +448,32 @@ void NonplayerShipThink(int32_t timePass)
             } else if (anObject->presenceState == kWarpingPresence) {
                 anObject->presenceState = kWarpOutPresence;
             } else if (anObject->presenceState == kWarpOutPresence) {
-                anObject->thrust = mMultiplyFixed(baseObject->maxThrust, anObject->presenceData);
+                anObject->thrust = mMultiplyFixed(
+                        baseObject->maxThrust, anObject->presence.warp_out);
             }
         }
 
     }
 }
-#endif  // kUseOldThinking
 
-uint32_t use_weapons_for_defense(spaceObjectType* obj) {
+uint32_t use_weapons_for_defense(Handle<SpaceObject> obj) {
     uint32_t keys = 0;
 
-    if (obj->pulse.type != kNoWeapon) {
+    if (obj->pulse.base.get()) {
         auto weaponObject = obj->pulse.base;
         if (weaponObject->frame.weapon.usage & kUseForDefense) {
             keys |= kOneKey;
         }
     }
 
-    if (obj->beam.type != kNoWeapon) {
+    if (obj->beam.base.get()) {
         auto weaponObject = obj->beam.base;
         if (weaponObject->frame.weapon.usage & kUseForDefense) {
             keys |= kTwoKey;
         }
     }
 
-    if (obj->special.type != kNoWeapon) {
+    if (obj->special.base.get()) {
         auto weaponObject = obj->special.base;
         if (weaponObject->frame.weapon.usage & kUseForDefense) {
             keys |= kEnterKey;
@@ -500,11 +484,10 @@ uint32_t use_weapons_for_defense(spaceObjectType* obj) {
 }
 
 uint32_t ThinkObjectNormalPresence(
-        spaceObjectType *anObject, baseObjectType *baseObject, int32_t timePass) {
+        Handle<SpaceObject> anObject, Handle<BaseObject> baseObject, int32_t timePass) {
     uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask, distance, dcalc;
-    spaceObjectType *targetObject;
-    baseObjectType  *bestWeapon, *weaponObject;
     coordPointType  dest;
+    Handle<SpaceObject> targetObject;
     int32_t         difference;
     Fixed           slope;
     int16_t         angle, theta, beta;
@@ -520,7 +503,7 @@ uint32_t ThinkObjectNormalPresence(
         ThinkObjectResolveTarget(anObject, &dest, &distance, &targetObject);
 
         ///--->>> BEGIN TARGETING <<<---///
-        if ((anObject->targetObjectNumber != kNoShip)
+        if ((anObject->targetObject.get())
                 && ((anObject->attributes & kIsGuided)
                     || ((anObject->attributes & kCanEngage)
                         && !(anObject->attributes & kRemoteOrHuman)
@@ -538,7 +521,7 @@ uint32_t ThinkObjectNormalPresence(
                     && (targetObject->attributes & kHated)
                     && (ABS(theta) < kParanoiaAngle)
                     && ((!(targetObject->attributes & kCanBeEngaged))
-                        || (anObject->health <= targetObject->health))) {
+                        || (anObject->health() <= targetObject->health()))) {
                 // try to evade, flee, run away
                 if (anObject->attributes & kHasDirectionGoal) {
                     keysDown |= use_weapons_for_defense(anObject);
@@ -614,15 +597,12 @@ uint32_t ThinkObjectNormalPresence(
                 }
             }
 
-            if (anObject->targetObjectNumber == anObject->destinationObject) {
+            if (anObject->targetObject == anObject->destObject) {
                 if (distance < static_cast<uint32_t>(baseObject->arriveActionDistance)) {
-                    if (baseObject->arriveAction >= 0) {
+                    if (baseObject->arrive.size() > 0) {
                         if (!(anObject->runTimeFlags & kHasArrived)) {
                             offset.h = offset.v = 0;
-                            execute_actions(
-                                baseObject->arriveAction,
-                                baseObject->arriveActionNum,
-                                anObject, anObject->destObjectPtr, &offset, true);
+                            exec(baseObject->arrive, anObject, anObject->destObject, &offset);
                             anObject->runTimeFlags |= kHasArrived;
                         }
                     }
@@ -632,7 +612,7 @@ uint32_t ThinkObjectNormalPresence(
             keysDown |= kUpKey;
         } else {  // not guided & no target object or target object is out of engage range
             ///--->>> BEGIN TARGETING <<<---///
-            if ((anObject->targetObjectNumber != kNoShip)
+            if ((anObject->targetObject.get())
                     && (((!(anObject->attributes & kRemoteOrHuman))
                             && (distance < static_cast<uint32_t>(anObject->engageRange)))
                         || (anObject->attributes & kIsGuided))) {
@@ -684,7 +664,7 @@ uint32_t ThinkObjectNormalPresence(
             }
             ///--->>> END TARGETING <<<---///
             if ((anObject->attributes & kIsDestination)
-                    || ((anObject->destinationObject == kNoDestinationObject)
+                    || (!anObject->destObject.get()
                         && (anObject->destinationLocation.h == kNoDestinationCoord))) {
                 if (anObject->attributes & kOnAutoPilot) {
                     TogglePlayerAutoPilot(anObject);
@@ -692,9 +672,9 @@ uint32_t ThinkObjectNormalPresence(
                 keysDown |= kDownKey;
                 anObject->timeFromOrigin = 0;
             } else {
-                if (anObject->destinationObject != kNoDestinationObject) {
-                    targetObject = anObject->destObjectPtr;
-                    if (targetObject
+                if (anObject->destObject.get()) {
+                    targetObject = anObject->destObject;
+                    if (targetObject.get()
                             && targetObject->active
                             && (targetObject->id == anObject->destObjectID)) {
                         if (targetObject->seenByPlayerFlags & anObject->myPlayerFlag) {
@@ -710,43 +690,41 @@ uint32_t ThinkObjectNormalPresence(
                             dest.v =
                                 anObject->destinationLocation.v;
                         }
-                        anObject->destObjectDest = targetObject->destinationObject;
+                        anObject->destObjectDest = targetObject->destObject;
                         anObject->destObjectDestID = targetObject->destObjectID;
                     } else {
                         anObject->duty = eNoDuty;
                         anObject->attributes &= ~kStaticDestination;
-                        if (targetObject == NULL) {
+                        if (!targetObject.get()) {
                             keysDown |= kDownKey;
-                            anObject->destObjectDest = kNoDestinationObject;
-                            anObject->destinationObject = kNoDestinationObject;
+                            anObject->destObjectDest = SpaceObject::none();
+                            anObject->destObject = SpaceObject::none();
                             dest.h = anObject->location.h;
                             dest.v = anObject->location.v;
                             if (anObject->attributes & kOnAutoPilot) {
                                 TogglePlayerAutoPilot(anObject);
                             }
                         } else {
-                            anObject->destinationObject = anObject->destObjectDest;
-                            if (anObject->destinationObject != kNoDestinationObject) {
-                                targetObject = mGetSpaceObjectPtr(anObject->destinationObject);
+                            anObject->destObject = anObject->destObjectDest;
+                            if (anObject->destObject.get()) {
+                                targetObject = anObject->destObject;
                                 if (targetObject->id != anObject->destObjectDestID) {
-                                    targetObject = NULL;
+                                    targetObject = SpaceObject::none();
                                 }
                             } else {
-                                targetObject = NULL;
+                                targetObject = SpaceObject::none();
                             }
-                            if (targetObject) {
-                                anObject->destObjectPtr = targetObject;
+                            if (targetObject.get()) {
                                 anObject->destObjectID = targetObject->id;
-                                anObject->destObjectDest = targetObject->destinationObject;
+                                anObject->destObjectDest = targetObject->destObject;
                                 anObject->destObjectDestID = targetObject->destObjectID;
                                 dest.h = targetObject->location.h;
                                 dest.v = targetObject->location.v;
                             } else {
                                 anObject->duty = eNoDuty;
                                 keysDown |= kDownKey;
-                                anObject->destinationObject = kNoDestinationObject;
-                                anObject->destObjectDest = kNoDestinationObject;
-                                anObject->destObjectPtr = NULL;
+                                anObject->destObject = SpaceObject::none();
+                                anObject->destObjectDest = SpaceObject::none();
                                 dest.h = anObject->location.h;
                                 dest.v = anObject->location.v;
                                 if (anObject->attributes & kOnAutoPilot) {
@@ -759,7 +737,7 @@ uint32_t ThinkObjectNormalPresence(
                     if (anObject->attributes & kOnAutoPilot) {
                         TogglePlayerAutoPilot(anObject);
                     }
-                    targetObject = NULL;
+                    targetObject = SpaceObject::none();
                     dest.h = anObject->destinationLocation.h;
                     dest.v = anObject->destinationLocation.v;
                 }
@@ -788,7 +766,7 @@ uint32_t ThinkObjectNormalPresence(
                         keysDown |= kUpKey;
                     }
                     anObject->lastTargetDistance = distance;
-                    if ((anObject->special.type != kNoWeapon)
+                    if ((anObject->special.base.get())
                             && (distance > kWarpInDistance)
                             && (theta <= kDirectionError)) {
                         if (anObject->special.base->frame.weapon.usage & kUseForTransportation) {
@@ -796,13 +774,13 @@ uint32_t ThinkObjectNormalPresence(
                         }
                     }
                     if ((baseObject->warpSpeed > 0)
-                            && (anObject->energy > (anObject->baseType->energy >> kWarpInEnergyFactor))
+                            && (anObject->energy() > (anObject->max_energy() >> kWarpInEnergyFactor))
                             && (distance > kWarpInDistance)
                             && (theta <= kDirectionError)) {
                         keysDown |= kWarpKey;
                     }
                 } else {
-                    if ((targetObject != NULL)
+                    if (targetObject.get()
                             && (targetObject->owner == anObject->owner)
                             && (targetObject->attributes & anObject->attributes & kHasDirectionGoal)) {
                         anObject->directionGoal = targetObject->direction;
@@ -816,13 +794,10 @@ uint32_t ThinkObjectNormalPresence(
                     }
 
                     if (distance < static_cast<uint32_t>(baseObject->arriveActionDistance)) {
-                        if (baseObject->arriveAction >= 0) {
+                        if (baseObject->arrive.size() > 0) {
                             if (!(anObject->runTimeFlags & kHasArrived)) {
                                 offset.h = offset.v = 0;
-                                execute_actions(
-                                    baseObject->arriveAction,
-                                    baseObject->arriveActionNum,
-                                    anObject, anObject->destObjectPtr, &offset, true);
+                                exec(baseObject->arrive, anObject, anObject->destObject, &offset);
                                 anObject->runTimeFlags |= kHasArrived;
                             }
                         }
@@ -850,7 +825,7 @@ uint32_t ThinkObjectNormalPresence(
 
         if ((anObject->attributes & kCanEngage)
                 && (distance < static_cast<uint32_t>(anObject->engageRange))
-                && (anObject->targetObjectNumber != kNoShip)) {
+                && (anObject->targetObject.get())) {
             // if target is in our weapon range & we hate the object
             if ((distance < static_cast<uint32_t>(anObject->longestWeaponRange))
                     && (targetObject->attributes & kHated)) {
@@ -859,10 +834,10 @@ uint32_t ThinkObjectNormalPresence(
 
                 difference = anObject->longestWeaponRange;
 
-                bestWeapon = NULL;
+                auto bestWeapon = BaseObject::none();
 
-                if (anObject->beam.type != kNoWeapon) {
-                    bestWeapon = weaponObject = anObject->beam.base;
+                if (anObject->beam.base.get()) {
+                    auto weaponObject = bestWeapon = anObject->beam.base;
                     if ((weaponObject->frame.weapon.usage & kUseForAttacking)
                             && (static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
                             && (weaponObject->frame.weapon.range < difference)) {
@@ -871,8 +846,8 @@ uint32_t ThinkObjectNormalPresence(
                     }
                 }
 
-                if (anObject->pulse.type != kNoWeapon) {
-                    weaponObject = anObject->pulse.base;
+                if (anObject->pulse.base.get()) {
+                    auto weaponObject = anObject->pulse.base;
                     if ((weaponObject->frame.weapon.usage & kUseForAttacking)
                             && (static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
                             && (weaponObject->frame.weapon.range < difference)) {
@@ -881,8 +856,8 @@ uint32_t ThinkObjectNormalPresence(
                     }
                 }
 
-                if (anObject->special.type != kNoWeapon) {
-                    weaponObject = anObject->special.base;
+                if (anObject->special.base.get()) {
+                    auto weaponObject = anObject->special.base;
                     if ((weaponObject->frame.weapon.usage & kUseForAttacking)
                             && (static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
                             && (weaponObject->frame.weapon.range < difference)) {
@@ -893,7 +868,7 @@ uint32_t ThinkObjectNormalPresence(
 
                 // offset dest for anticipated position -- overkill?
 
-                if (bestWeapon) {
+                if (bestWeapon.get()) {
                     dcalc = lsqrt(distance);
 
                     calcv = targetObject->velocity.h - anObject->velocity.h;
@@ -934,8 +909,7 @@ uint32_t ThinkObjectNormalPresence(
     return keysDown;
 }
 
-uint32_t ThinkObjectWarpInPresence( spaceObjectType *anObject)
-{
+uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
     uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask;
     int32_t         longscrap;
     fixedPointType  newVel;
@@ -945,78 +919,49 @@ uint32_t ThinkObjectWarpInPresence( spaceObjectType *anObject)
     {
         keysDown = kWarpKey;
     }
-    anObject->presenceData = ( anObject->presenceData & ~0x000000ff)
-        | (( anObject->presenceData & 0x000000ff) + kDecideEveryCycles);
-    if ( !(anObject->presenceData & 0x10000000))
-    {
-        longscrap = kMaxSoundVolume;
-        mPlayDistanceSound(longscrap, anObject, kWarpOne, kMediumPersistence, kPrioritySound);
-        anObject->presenceData |= 0x10000000;
-    } else if (( !(anObject->presenceData & 0x20000000)) &&
-        (( anObject->presenceData & 0x000000ff) > 25))
-    {
-        longscrap = kMaxSoundVolume;
-        mPlayDistanceSound(longscrap, anObject, kWarpTwo, kMediumPersistence, kPrioritySound);
-        anObject->presenceData |= 0x20000000;
-    } if (( !(anObject->presenceData & 0x40000000)) &&
-        (( anObject->presenceData & 0x000000ff) > 50))
-    {
-        longscrap = kMaxSoundVolume;
-        mPlayDistanceSound(longscrap, anObject, kWarpThree, kMediumPersistence, kPrioritySound);
-        anObject->presenceData |= 0x40000000;
-    } if (( !(anObject->presenceData & 0x80000000)) &&
-        (( anObject->presenceData & 0x000000ff) > 75))
-    {
-        longscrap = kMaxSoundVolume;
-        mPlayDistanceSound(longscrap, anObject, kWarpFour, kMediumPersistence, kPrioritySound);
-        anObject->presenceData |= 0x80000000;
+    auto& presence = anObject->presence.warp_in;
+    presence.progress += kDecideEveryCycles;
+    for (int i = 0; i < 4; ++i) {
+        if ((presence.step == i) && (presence.progress > (25 * i))) {
+            mPlayDistanceSound(
+                    kMaxSoundVolume, anObject, kWarp[i], kMediumPersistence, kPrioritySound);
+            ++presence.step;
+            break;
+        }
     }
 
-    if ( (anObject->presenceData & 0x000000ff) > 100)
-    {
-        anObject->energy -= anObject->baseType->energy >> kWarpInEnergyFactor;
-        anObject->warpEnergyCollected += anObject->baseType->energy >> kWarpInEnergyFactor;
-        if ( anObject->energy <= 0)
-        {
-            anObject->presenceState = kNormalPresence;
-            anObject->energy = 0;
-        } else
-        {
-
+    if (presence.progress > 100) {
+        if (anObject->collect_warp_energy(anObject->max_energy() >> kWarpInEnergyFactor)) {
             anObject->presenceState = kWarpingPresence;
-            anObject->presenceData = anObject->baseType->warpSpeed;
+            anObject->presence.warping = anObject->baseType->warpSpeed;
             anObject->attributes &= ~kOccupiesSpace;
             newVel.h = newVel.v = 0;
-    /*
-            CreateAnySpaceObject( globals()->scenarioFileInfo.warpInFlareID, &(newVel),
-                &(anObject->location), anObject->direction, kNoOwner,
-                0, nil, -1, -1, -1);
-    */
-            CreateAnySpaceObject( globals()->scenarioFileInfo.warpInFlareID, &(newVel),
-                &(anObject->location), anObject->direction, kNoOwner,
-                0, -1);
+            CreateAnySpaceObject(
+                    globals()->scenarioFileInfo.warpInFlareID, &newVel, &anObject->location,
+                    anObject->direction, Admiral::none(), 0, -1);
+        } else {
+            anObject->presenceState = kNormalPresence;
+            anObject->_energy = 0;
         }
     }
 
     return( keysDown);
 }
 
-uint32_t ThinkObjectWarpingPresence( spaceObjectType *anObject)
-{
+uint32_t ThinkObjectWarpingPresence(Handle<SpaceObject> anObject) {
     uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask, distance;
     coordPointType  dest;
-    spaceObjectType *targetObject = NULL;
+    Handle<SpaceObject> targetObject;
     int16_t         angle, theta;
 
-    if ( anObject->energy <= 0)
-    {
+    if (anObject->energy() <= 0) {
         anObject->presenceState = kWarpOutPresence;
     }
     if (( !(anObject->attributes & kRemoteOrHuman)) ||
                 ( anObject->attributes & kOnAutoPilot))
     {
-        ThinkObjectResolveDestination( anObject, &dest, &targetObject);
-        ThinkObjectGetCoordVector( anObject, &dest, &distance, &angle);
+        ThinkObjectResolveDestination(anObject, &dest, &targetObject);
+        ThinkObjectGetCoordVector(anObject, &dest, &distance, &angle);
 
 
         if ( anObject->attributes & kHasDirectionGoal)
@@ -1033,8 +978,7 @@ uint32_t ThinkObjectWarpingPresence( spaceObjectType *anObject)
 
         if ( distance < anObject->baseType->warpOutDistance)
         {
-            if ( targetObject != NULL)
-            {
+            if (targetObject.get()) {
                 if (( targetObject->presenceState == kWarpInPresence)
                     || ( targetObject->presenceState == kWarpingPresence))
                 {
@@ -1049,17 +993,15 @@ uint32_t ThinkObjectWarpingPresence( spaceObjectType *anObject)
     return( keysDown);
 }
 
-uint32_t ThinkObjectWarpOutPresence( spaceObjectType *anObject, baseObjectType *baseObject)
-{
+uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, Handle<BaseObject> baseObject) {
     uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask;
     Fixed           calcv, fdist;
     fixedPointType  newVel;
 
-    anObject->presenceData -= mLongToFixed(kWarpAcceleration);
-    if ( anObject->presenceData < anObject->maxVelocity)
+    anObject->presence.warp_out -= mLongToFixed(kWarpAcceleration);
+    if ( anObject->presence.warp_out < anObject->maxVelocity)
     {
-        AlterObjectBattery( anObject, anObject->warpEnergyCollected);
-        anObject->warpEnergyCollected = 0;
+        anObject->refund_warp_energy();
 
         anObject->presenceState = kNormalPresence;
         anObject->attributes |=
@@ -1079,221 +1021,154 @@ uint32_t ThinkObjectWarpOutPresence( spaceObjectType *anObject, baseObjectType *
 
 
         CreateAnySpaceObject( globals()->scenarioFileInfo.warpOutFlareID, &(newVel),
-            &(anObject->location), anObject->direction, kNoOwner, 0,
-            -1);
+            &(anObject->location), anObject->direction, Admiral::none(), 0, -1);
     }
     return( keysDown);
 }
 
-uint32_t ThinkObjectLandingPresence( spaceObjectType *anObject)
-{
-    uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask, distance, dcalc;
-    spaceObjectType *targetObject = NULL;
-    coordPointType  dest;
-    int32_t         difference;
-    Fixed           slope;
-    int16_t         angle, theta, shortx, shorty;
+uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject) {
+    uint32_t keysDown = 0;
 
-    keysDown = 0;
+    Handle<SpaceObject> target;
+    uint32_t distance;
+    int16_t theta = 0;
 
     // we repeat an object's normal action for having a destination
 
-    if (( anObject->attributes & kIsDestination) ||
-        (( anObject->destinationObject == kNoDestinationObject) &&
-        ( anObject->destinationLocation.h == kNoDestinationCoord)))
-    {
-        if (anObject->attributes & kOnAutoPilot)
-        {
-            TogglePlayerAutoPilot( anObject);
+    if ((anObject->attributes & kIsDestination)
+            || (!anObject->destObject.get()
+                && (anObject->destinationLocation.h == kNoDestinationCoord))) {
+        if (anObject->attributes & kOnAutoPilot) {
+            TogglePlayerAutoPilot(anObject);
         }
         keysDown |= kDownKey;
         distance = 0;
-    } else
-    {
-        if ( anObject->destinationObject != kNoDestinationObject)
-        {
-            targetObject = anObject->destObjectPtr;
-            if (( targetObject != NULL) && ( targetObject->active) &&
-                ( targetObject->id == anObject->destObjectID))
-            {
-                if ( targetObject->seenByPlayerFlags &
-                    anObject->myPlayerFlag)
-                {
-                    dest.h = targetObject->location.h;
-                    dest.v = targetObject->location.v;
+    } else {
+        coordPointType dest;
+        if (anObject->destObject.get()) {
+            target = anObject->destObject;
+            if (target.get() && target->active && (target->id == anObject->destObjectID)) {
+                if (target->seenByPlayerFlags & anObject->myPlayerFlag) {
+                    dest.h = target->location.h;
+                    dest.v = target->location.v;
                     anObject->destinationLocation.h = dest.h;
                     anObject->destinationLocation.v = dest.v;
-                } else
-                {
+                } else {
                     dest.h = anObject->destinationLocation.h;
                     dest.v = anObject->destinationLocation.v;
                 }
-                anObject->destObjectDest =
-                    targetObject->destinationObject;
-                anObject->destObjectDestID = targetObject->destObjectID;
-            } else
-            {
+                anObject->destObjectDest = target->destObject;
+                anObject->destObjectDestID = target->destObjectID;
+            } else {
                 anObject->duty = eNoDuty;
                 anObject->attributes &= ~kStaticDestination;
-                if ( targetObject == NULL)
-                {
+                if (!target.get()) {
                     keysDown |= kDownKey;
-                    anObject->destinationObject = kNoDestinationObject;
-                    anObject->destObjectDest = kNoDestinationObject;
+                    anObject->destObject = SpaceObject::none();
+                    anObject->destObjectDest = SpaceObject::none();
                     dest.h = anObject->location.h;
                     dest.v = anObject->location.v;
-                } else
-                {
-                    anObject->destinationObject =
-                        anObject->destObjectDest;
-                    if ( anObject->destinationObject !=
-                        kNoDestinationObject)
-                    {
-                        targetObject = mGetSpaceObjectPtr(anObject->destinationObject);
-                        if ( targetObject->id != anObject->destObjectDestID) targetObject = NULL;
-                    } else targetObject = NULL;
-                    if ( targetObject != NULL)
-                    {
-                        anObject->destObjectPtr = targetObject;
-                        anObject->destObjectID = targetObject->id;
-                        anObject->destObjectDest =
-                            targetObject->destinationObject;
-                        anObject->destObjectDestID = targetObject->destObjectID;
-                        dest.h = targetObject->location.h;
-                        dest.v = targetObject->location.v;
-                    } else
-                    {
+                } else {
+                    anObject->destObject = anObject->destObjectDest;
+                    if (anObject->destObject.get()) {
+                        target = anObject->destObject;
+                        if (target->id != anObject->destObjectDestID) {
+                            target = SpaceObject::none();
+                        }
+                    } else {
+                        target = SpaceObject::none();
+                    }
+                    if (target.get()) {
+                        anObject->destObjectID = target->id;
+                        anObject->destObjectDest = target->destObject;
+                        anObject->destObjectDestID = target->destObjectID;
+                        dest.h = target->location.h;
+                        dest.v = target->location.v;
+                    } else {
                         keysDown |= kDownKey;
-                        anObject->destinationObject =
-                            kNoDestinationObject;
-                        anObject->destObjectDest = kNoDestinationObject;
-                        anObject->destObjectPtr = NULL;
+                        anObject->destObject = SpaceObject::none();
+                        anObject->destObjectDest = SpaceObject::none();
                         dest.h = anObject->location.h;
                         dest.v = anObject->location.v;
                     }
                 }
             }
-        } else // no destination object; just coords
-        {
-            if (anObject->attributes & kOnAutoPilot)
-            {
-                TogglePlayerAutoPilot( anObject);
+        } else { // no destination object; just coords
+            if (anObject->attributes & kOnAutoPilot) {
+                TogglePlayerAutoPilot(anObject);
             }
-            targetObject = NULL;
             dest.h = anObject->location.h;
             dest.v = anObject->location.v;
         }
 
-        difference = ABS<int>( dest.h - anObject->location.h);
-        dcalc = difference;
-        difference =  ABS<int>( dest.v - anObject->location.v);
-        distance = difference;
-        if (( dcalc > kMaximumAngleDistance) ||
-            ( distance > kMaximumAngleDistance))
-        {
-            if (( dcalc > kMaximumRelevantDistance) ||
-                ( distance > kMaximumRelevantDistance))
-            {
+        int16_t angle;
+        uint32_t xdiff = ABS<int>(dest.h - anObject->location.h);
+        uint32_t ydiff =  ABS<int>(dest.v - anObject->location.v);
+        if ((xdiff > kMaximumAngleDistance) || (ydiff > kMaximumAngleDistance)) {
+            if ((xdiff > kMaximumRelevantDistance) || (ydiff > kMaximumRelevantDistance)) {
                 distance = kMaximumRelevantDistanceSquared;
-            } else
-            {
-                distance = distance * distance + dcalc * dcalc;
+            } else {
+                distance = ydiff * ydiff + xdiff * xdiff;
             }
-            shortx = (anObject->location.h - dest.h) >> 4;
-            shorty = (anObject->location.v - dest.v) >> 4;
+            int16_t shortx = (anObject->location.h - dest.h) >> 4;
+            int16_t shorty = (anObject->location.v - dest.v) >> 4;
             // find angle between me & dest
-            slope = MyFixRatio( shortx, shorty);
-            angle = AngleFromSlope( slope);
-            if ( shortx > 0)
-            {
-                mAddAngle( angle, 180);
-            } else if (( shortx == 0) && ( shorty > 0))
-            {
+            Fixed slope = MyFixRatio(shortx, shorty);
+            angle = AngleFromSlope(slope);
+            if (shortx > 0) {
+                mAddAngle(angle, 180);
+            } else if ((shortx == 0) && (shorty > 0)) {
+                angle = 0;
+            }
+        } else {
+            distance = ydiff * ydiff + xdiff * xdiff;
+
+            // find angle between me & dest
+            Fixed slope = MyFixRatio(anObject->location.h - dest.h, anObject->location.v - dest.v);
+            angle = AngleFromSlope(slope);
+
+            if (dest.h < anObject->location.h) {
+                mAddAngle(angle, 180);
+            } else if ((anObject->location.h == dest.h) && (dest.v < anObject->location.v)) {
                 angle = 0;
             }
         }
-        else
-        {
-            distance = distance * distance + dcalc * dcalc;
 
-            // find angle between me & dest
-            slope = MyFixRatio(anObject->location.h - dest.h,
-                        anObject->location.v - dest.v);
-            angle = AngleFromSlope( slope);
-
-            if ( dest.h < anObject->location.h)
-                mAddAngle( angle, 180);
-            else if (( anObject->location.h == dest.h) &&
-                    ( dest.v < anObject->location.v))
-                angle = 0;
-        }
-
-        if ( anObject->attributes & kHasDirectionGoal)
-        {
-            theta = mAngleDifference( angle, anObject->directionGoal);
-            if ( ABS( theta) > kDirectionError)
-            {
+        if (anObject->attributes & kHasDirectionGoal) {
+            if (ABS(mAngleDifference(angle, anObject->directionGoal)) > kDirectionError) {
                 anObject->directionGoal = angle;
-
             }
-
-            theta = mAngleDifference( anObject->direction,
-                    anObject->directionGoal);
-            theta = ABS( theta);
-        } else
-        {
+            theta = ABS(mAngleDifference(anObject->direction, anObject->directionGoal));
+        } else {
             anObject->direction = angle;
-            theta = 0;
         }
-
-
     }
-    if ( distance > kLandingDistance)
-    {
-        if ( theta < kEvadeAngle)
+
+    if (distance > kLandingDistance) {
+        if (theta < kEvadeAngle) {
             keysDown |= kUpKey;
-        else keysDown |= kDownKey;
+        } else {
+            keysDown |= kDownKey;
+        }
         anObject->lastTargetDistance = distance;
-    } else
-    {
+    } else {
         keysDown |= kDownKey;
-        anObject->presenceData =
-            (
-                (
-                    anObject->presenceData &
-                        kPresenceDataLoWordMask
-                ) -
-                (
-                    (
-                        anObject->presenceData &
-                            kPresenceDataHiWordMask
-                    )
-                    >> kPresenceDataHiWordShift
-                )
-            ) |
-            (
-                anObject->presenceData & kPresenceDataHiWordMask
-            );
+        anObject->presence.landing.scale -= anObject->presence.landing.speed;
     }
 
-    if ( (anObject->presenceData & kPresenceDataLoWordMask) <= 0)
-    {
-        execute_actions(
-                anObject->baseType->expireAction,
-                anObject->baseType->expireActionNum & kDestroyActionNotMask,
-                anObject, targetObject, NULL, true);
+    if (anObject->presence.landing.scale <= 0) {
+        exec(anObject->baseType->expire, anObject, target, NULL);
         anObject->active = kObjectToBeFreed;
+    } else if (anObject->sprite.get()) {
+        anObject->sprite->scale = anObject->presence.landing.scale;
+    }
 
-    } else if ( anObject->sprite != NULL)
-        anObject->sprite->scale = (anObject->presenceData &
-            kPresenceDataLoWordMask);
-
-    return( keysDown);
+    return keysDown;
 }
 
 // this gets the distance & angle between an object and arbitrary coords
-void ThinkObjectGetCoordVector( spaceObjectType *anObject, coordPointType *dest, uint32_t *distance, int16_t *angle)
-{
+void ThinkObjectGetCoordVector(
+        Handle<SpaceObject> anObject, coordPointType *dest, uint32_t *distance, int16_t *angle) {
     int32_t         difference;
     uint32_t        dcalc;
     int16_t         shortx, shorty;
@@ -1350,8 +1225,8 @@ void ThinkObjectGetCoordVector( spaceObjectType *anObject, coordPointType *dest,
     }
 }
 
-void ThinkObjectGetCoordDistance( spaceObjectType *anObject, coordPointType *dest, uint32_t *distance)
-{
+void ThinkObjectGetCoordDistance(
+        Handle<SpaceObject> anObject, coordPointType *dest, uint32_t *distance) {
     int32_t         difference;
     uint32_t        dcalc;
 
@@ -1382,28 +1257,26 @@ void ThinkObjectGetCoordDistance( spaceObjectType *anObject, coordPointType *des
 }
 
 // this resolves an object's destination to its coordinates, returned in dest
-void ThinkObjectResolveDestination( spaceObjectType *anObject, coordPointType *dest, spaceObjectType **targetObject)
-{
-    *targetObject = NULL;
+void ThinkObjectResolveDestination(
+        Handle<SpaceObject> anObject, coordPointType *dest, Handle<SpaceObject>* targetObject) {
+    *targetObject = SpaceObject::none();
 
-    if (( anObject->attributes & kIsDestination) ||
-        (( anObject->destinationObject == kNoDestinationObject) &&
-        ( anObject->destinationLocation.h == kNoDestinationCoord)))
-    {
+    if ((anObject->attributes & kIsDestination)
+            || ((!anObject->destObject.get())
+                && (anObject->destinationLocation.h == kNoDestinationCoord))) {
         if (anObject->attributes & kOnAutoPilot)
         {
-            TogglePlayerAutoPilot( anObject);
+            TogglePlayerAutoPilot(anObject);
         }
         dest->h = anObject->location.h;
         dest->v = anObject->location.v;
     } else
     {
-        if ( anObject->destinationObject != kNoDestinationObject)
-        {
-            *targetObject = anObject->destObjectPtr;
-            if (( *targetObject != NULL) && ( (*targetObject)->active) &&
-                ( (*targetObject)->id == anObject->destObjectID))
-            {
+        if (anObject->destObject.get()) {
+            *targetObject = anObject->destObject;
+            if ((*targetObject).get()
+                    && ((*targetObject)->active)
+                    && ((*targetObject)->id == anObject->destObjectID)) {
                 if ( (*targetObject)->seenByPlayerFlags &
                     anObject->myPlayerFlag)
                 {
@@ -1416,45 +1289,40 @@ void ThinkObjectResolveDestination( spaceObjectType *anObject, coordPointType *d
                     dest->h = anObject->destinationLocation.h;
                     dest->v = anObject->destinationLocation.v;
                 }
-                anObject->destObjectDest =
-                    (*targetObject)->destinationObject;
+                anObject->destObjectDest = (*targetObject)->destObject;
                 anObject->destObjectDestID = (*targetObject)->destObjectID;
             } else
             {
                 anObject->duty = eNoDuty;
                 anObject->attributes &= ~kStaticDestination;
-                if ( (*targetObject) == NULL)
-                {
-                    anObject->destinationObject = kNoDestinationObject;
-                    anObject->destObjectDest = kNoDestinationObject;
+                if (!(*targetObject).get()) {
+                    anObject->destObject = SpaceObject::none();
+                    anObject->destObjectDest = SpaceObject::none();
                     dest->h = anObject->location.h;
                     dest->v = anObject->location.v;
                 } else
                 {
-                    anObject->destinationObject =
-                        anObject->destObjectDest;
-                    if ( anObject->destinationObject !=
-                        kNoDestinationObject)
+                    anObject->destObject = anObject->destObjectDest;
+                    if (anObject->destObject.get())
                     {
-                        (*targetObject) = mGetSpaceObjectPtr(anObject->destinationObject);
-                        if ( (*targetObject)->id != anObject->destObjectDestID) *targetObject = NULL;
-                    } else *targetObject = NULL;
-                    if ( *targetObject != NULL)
-                    {
-                        anObject->destObjectPtr = (*targetObject);
+                        (*targetObject) = anObject->destObject;
+                        if ((*targetObject)->id != anObject->destObjectDestID) {
+                            *targetObject = SpaceObject::none();
+                        }
+                    } else {
+                        *targetObject = SpaceObject::none();
+                    }
+                    if ((*targetObject).get()) {
                         anObject->destObjectID = (*targetObject)->id;
-                        anObject->destObjectDest =
-                            (*targetObject)->destinationObject;
+                        anObject->destObjectDest = (*targetObject)->destObject;
                         anObject->destObjectDestID = (*targetObject)->destObjectID;
                         dest->h = (*targetObject)->location.h;
                         dest->v = (*targetObject)->location.v;
                     } else
                     {
                         anObject->duty = eNoDuty;
-                        anObject->destinationObject =
-                            kNoDestinationObject;
-                        anObject->destObjectDest = kNoDestinationObject;
-                        anObject->destObjectPtr = NULL;
+                        anObject->destObject = SpaceObject::none();
+                        anObject->destObjectDest = SpaceObject::none();
                         dest->h = anObject->location.h;
                         dest->v = anObject->location.v;
                     }
@@ -1462,12 +1330,12 @@ void ThinkObjectResolveDestination( spaceObjectType *anObject, coordPointType *d
             }
         } else // no destination object; just coords
         {
-            (*targetObject) = NULL;
+            (*targetObject) = SpaceObject::none();
             if ( anObject->destinationLocation.h == kNoDestinationCoord)
             {
                 if (anObject->attributes & kOnAutoPilot)
                 {
-                    TogglePlayerAutoPilot( anObject);
+                    TogglePlayerAutoPilot(anObject);
                 }
                 dest->h = anObject->location.h;
                 dest->v = anObject->location.v;
@@ -1480,37 +1348,29 @@ void ThinkObjectResolveDestination( spaceObjectType *anObject, coordPointType *d
     }
 }
 
-bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
-    uint32_t *distance, spaceObjectType **targetObject)
-{
-    spaceObjectType *closestObject;
-
+bool ThinkObjectResolveTarget(
+        Handle<SpaceObject> anObject, coordPointType *dest,
+        uint32_t *distance, Handle<SpaceObject>* targetObject) {
     dest->h = dest->v = 0xffffffff;
     *distance = 0xffffffff;
 
-    if ( anObject->closestObject != kNoShip)
-    {
-        closestObject = mGetSpaceObjectPtr(anObject->closestObject);
-    } else closestObject = NULL;
+    auto closestObject = anObject->closestObject;
 
     // if we have no target  then
-    if (anObject->targetObjectNumber == kNoShip)
+    if (!anObject->targetObject.get())
     {
         // if the closest object is appropriate (if it exists, it should be, then
-        if (( closestObject != NULL) &&
-            ( closestObject->attributes & kPotentialTarget))
-        {
+        if (closestObject.get() && (closestObject->attributes & kPotentialTarget)) {
             // select closest object as target (and for now be satisfied with our direction
             if ( anObject->attributes & kHasDirectionGoal)
             {
                 anObject->directionGoal = anObject->direction;
             }
-            anObject->targetObjectNumber = anObject->closestObject;
+            anObject->targetObject = anObject->closestObject;
             anObject->targetObjectID = closestObject->id;
         } else // otherwise, no target, no closest, cancel
         {
-            closestObject = *targetObject = NULL;
-            anObject->targetObjectNumber = kNoShip;
+            *targetObject = anObject->targetObject = closestObject = SpaceObject::none();
             anObject->targetObjectID = kNoShip;
             dest->h = anObject->location.h;
             dest->v = anObject->location.v;
@@ -1520,10 +1380,9 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
     }
 
     // if we have a target of any kind (we must by now)
-    if ( anObject->targetObjectNumber != kNoShip)
-    {
+    if (anObject->targetObject.get()) {
         // make sure we're still talking about the same object
-        *targetObject = mGetSpaceObjectPtr(anObject->targetObjectNumber);
+        *targetObject = anObject->targetObject;
 
         // if the object is wrong or smells at all funny, then
         if  (
@@ -1551,16 +1410,13 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
             )
         {
             // if we have a closest ship
-            if ( anObject->closestObject != kNoShip)
-            {
+            if (anObject->closestObject.get()) {
                 // make it our target
-                anObject->targetObjectNumber = anObject->closestObject;
-                closestObject = *targetObject = mGetSpaceObjectPtr(anObject->targetObjectNumber);
+                *targetObject = anObject->targetObject = closestObject = anObject->closestObject;
                 anObject->targetObjectID = closestObject->id;
                 if ( !((*targetObject)->attributes & kPotentialTarget))
                 {   // cancel
-                    *targetObject = NULL;
-                    anObject->targetObjectNumber = kNoShip;
+                    *targetObject = anObject->targetObject = SpaceObject::none();
                     anObject->targetObjectID = kNoShip;
                     dest->h = anObject->location.h;
                     dest->v = anObject->location.v;
@@ -1569,8 +1425,7 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
                 }
             } else // no legal target, no closest, cancel
             {
-                closestObject = *targetObject = NULL;
-                anObject->targetObjectNumber = kNoShip;
+                *targetObject = anObject->targetObject = closestObject = SpaceObject::none();
                 anObject->targetObjectID = kNoShip;
                 dest->h = anObject->location.h;
                 dest->v = anObject->location.v;
@@ -1601,21 +1456,20 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
         dest->v = (*targetObject)->location.v;
 
         // if it's not the closest object & we have a closest object
-        if ((anObject->closestObject != kNoShip) &&
-            ( anObject->targetObjectNumber != anObject->closestObject)
+        if ((anObject->closestObject.get()) &&
+            ( anObject->targetObject != anObject->closestObject)
             && ( !(anObject->attributes & kIsGuided))
             && ( closestObject->attributes & kPotentialTarget))
         {
             // then calculate the distance
-            ThinkObjectGetCoordDistance( anObject, dest, distance);
+            ThinkObjectGetCoordDistance(anObject, dest, distance);
 
             if (( ( *distance >> 1L) > anObject->closestDistance) ||
                 ( ! (anObject->attributes & kCanEngage)) ||
                 ( anObject->attributes &
                 kRemoteOrHuman))
             {
-                anObject->targetObjectNumber = anObject->closestObject;
-                *targetObject = mGetSpaceObjectPtr(anObject->targetObjectNumber);
+                *targetObject = anObject->targetObject = anObject->closestObject;
                 anObject->targetObjectID = (*targetObject)->id;
                 dest->h = (*targetObject)->location.h;
                 dest->v = (*targetObject)->location.v;
@@ -1636,8 +1490,7 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
     } else // we don't have a target object
     {
         // set the distance to the engage range ie nothing to engage
-        closestObject = *targetObject = NULL;
-        anObject->targetObjectNumber = kNoShip;
+        *targetObject = anObject->targetObject = closestObject = SpaceObject::none();
         anObject->targetObjectID = kNoShip;
         dest->h = anObject->location.h;
         dest->v = anObject->location.v;
@@ -1646,11 +1499,10 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
     }
 }
 
-uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *targetObject,
-    uint32_t distance, int16_t *theta, int32_t timePass)
-{
+uint32_t ThinkObjectEngageTarget(
+        Handle<SpaceObject> anObject, Handle<SpaceObject> targetObject,
+        uint32_t distance, int16_t *theta, int32_t timePass) {
     uint32_t        keysDown = 0;
-    baseObjectType  *bestWeapon, *weaponObject;
     coordPointType  dest;
     int32_t         difference;
     int16_t         angle, beta;
@@ -1682,11 +1534,11 @@ uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *ta
             anObject->timeFromOrigin += timePass;
         }
 
+        auto bestWeapon = BaseObject::none();
         difference = anObject->longestWeaponRange;
 
-        if ( anObject->beam.type != kNoWeapon)
-        {
-            bestWeapon = weaponObject = anObject->beam.base;
+        if (anObject->beam.base.get()) {
+            auto weaponObject = bestWeapon = anObject->beam.base;
             if ( ( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
                 ( static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
@@ -1699,9 +1551,8 @@ uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *ta
             }
         }
 
-        if ( anObject->pulse.type != kNoWeapon)
-        {
-            weaponObject = anObject->pulse.base;
+        if (anObject->pulse.base.get()) {
+            auto weaponObject = anObject->pulse.base;
             if ( ( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
                 ( static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
@@ -1713,9 +1564,8 @@ uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *ta
             }
         }
 
-        if ( anObject->special.type != kNoWeapon)
-        {
-            weaponObject = anObject->special.base;
+        if (anObject->special.base.get()) {
+            auto weaponObject = anObject->special.base;
             if ( ( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
                 ( static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
@@ -1776,9 +1626,8 @@ uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *ta
         beta = anObject->direction;
         beta = mAngleDifference( beta, angle);
 
-        if ( anObject->pulse.type != kNoWeapon)
-        {
-            weaponObject = anObject->pulse.base;
+        if (anObject->pulse.base.get()) {
+            auto weaponObject = anObject->pulse.base;
             if (( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
                 (( ABS( beta) <= kShootAngle) ||
@@ -1789,9 +1638,8 @@ uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *ta
             }
         }
 
-        if ( anObject->beam.type != kNoWeapon)
-        {
-            weaponObject = anObject->beam.base;
+        if (anObject->beam.base.get()) {
+            auto weaponObject = anObject->beam.base;
             if (( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
                 (( ABS( beta) <= kShootAngle) ||
@@ -1802,9 +1650,8 @@ uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *ta
             }
         }
 
-        if ( anObject->special.type != kNoWeapon)
-        {
-            weaponObject = anObject->special.base;
+        if (anObject->special.base.get()) {
+            auto weaponObject = anObject->special.base;
             if (( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
                 (( ABS( beta) <= kShootAngle) ||
@@ -1818,20 +1665,20 @@ uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *ta
     return( keysDown);
 }
 
-void HitObject(spaceObjectType *anObject, spaceObjectType *sObject) {
+void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
     if (anObject->active != kObjectInUse) {
         return;
     }
 
     anObject->timeFromOrigin = 0;
-    if (((anObject->health - sObject->baseType->damage) < 0)
+    if (((anObject->_health - sObject->baseType->damage) < 0)
             && (anObject->attributes & (kIsPlayerShip | kRemoteOrHuman))
-            && !(anObject->baseType->destroyActionNum & kDestroyActionDontDieFlag)) {
-        CreateFloatingBodyOfPlayer( anObject);
+            && !anObject->baseType->destroyDontDie) {
+        anObject->create_floating_player_body();
     }
-    AlterObjectHealth(anObject, -sObject->baseType->damage);
+    anObject->alter_health(-sObject->baseType->damage);
     if (anObject->shieldColor != 0xFF) {
-        anObject->hitState = ( anObject->health * kHitStateMax) / anObject->baseType->health;
+        anObject->hitState = (anObject->health() * kHitStateMax) / anObject->max_health();
         anObject->hitState += 16;
     }
 
@@ -1839,207 +1686,171 @@ void HitObject(spaceObjectType *anObject, spaceObjectType *sObject) {
         anObject->cloakState = 1;
     }
 
-    if (anObject->health < 0
-            && (anObject->owner == globals()->gPlayerAdmiralNumber)
+    if (anObject->health() < 0
+            && (anObject->owner == g.admiral)
             && (anObject->attributes & kCanAcceptDestination)) {
-        const StringSlice& object_name = get_object_name(anObject->whichBaseObject);
-        int count = CountObjectsOfBaseType(anObject->whichBaseObject, anObject->owner) - 1;
+        const StringSlice& object_name = get_object_name(anObject->base);
+        int count = CountObjectsOfBaseType(anObject->base, anObject->owner) - 1;
         Messages::add(format(" {0} destroyed.  {1} remaining. ", object_name, count));
     }
 
     if (sObject->active == kObjectInUse) {
-        execute_actions(
-                sObject->baseType->collideAction,
-                sObject->baseType->collideActionNum,
-                sObject, anObject, NULL, true);
+        exec(sObject->baseType->collide, sObject, anObject, NULL);
     }
 
-    if (anObject->owner == globals()->gPlayerAdmiralNumber
+    if (anObject->owner == g.admiral
             && (anObject->attributes & kIsHumanControlled)
             && (sObject->baseType->damage > 0)) {
         globals()->transitions.start_boolean(128, 128, WHITE);
     }
 }
 
+static bool allegiance_is(
+        Allegiance allegiance, Handle<Admiral> admiral, Handle<SpaceObject> object) {
+    switch (allegiance) {
+      case FRIENDLY_OR_HOSTILE:
+        return true;
+      case FRIENDLY:
+        return object->owner == admiral;
+      case HOSTILE:
+        return object->owner != admiral;
+    }
+}
 
 // GetManualSelectObject:
 //  For the human player selecting a ship.  If friend or foe = 0, will get any ship.  If it's
 //  positive, will get only friendly ships.  If it's negative, only unfriendly ships.
 
-int32_t GetManualSelectObject(
-        spaceObjectType *sourceObject, int32_t direction, uint32_t inclusiveAttributes,
-        uint32_t anyOneAttribute, uint32_t exclusiveAttributes,
-        const uint64_t* fartherThan, int32_t currentShipNum, int16_t friendOrFoe) {
-    spaceObjectType *anObject;
-    int32_t         whichShip = 0, resultShip = -1, closestShip = -1, startShip = -1, hdif, vdif;
-    uint32_t        distance, dcalc, myOwnerFlag = 1 << sourceObject->owner;
-    int32_t         difference;
-    Fixed           slope;
-    int16_t         angle;
-//  const wide      kMaxAngleDistance = {0, 1073676289}; // kMaximumAngleDistance ^ 2
-    uint64_t        wideClosestDistance, wideFartherDistance, thisWideDistance, wideScrap;
-    uint8_t         thisDistanceState;
+Handle<SpaceObject> GetManualSelectObject(
+        Handle<SpaceObject> sourceObject, int32_t direction,
+        uint32_t inclusiveAttributes, uint32_t exclusiveAttributes,
+        const uint64_t* fartherThan, Handle<SpaceObject> currentShip, Allegiance allegiance) {
+    const uint32_t myOwnerFlag = 1 << sourceObject->owner.number();
 
-    wideClosestDistance = 0x3fffffff3fffffffull;
-    wideFartherDistance = 0x3fffffff3fffffffull;
+    uint64_t wideClosestDistance = 0x3fffffff3fffffffull;
+    uint64_t wideFartherDistance = 0x3fffffff3fffffffull;
 
     // Here's what you've got to do next:
-    // start with the currentShipNum
+    // start with the currentShip
     // try to get any ship but the current ship
-    // stop trying when we've made a full circle (we're back on currentShipNum)
+    // stop trying when we've made a full circle (we're back on currentShip)
 
-    whichShip = startShip = currentShipNum;
-    if ( whichShip >= 0)
-    {
-        anObject = mGetSpaceObjectPtr(startShip);
-        if ( anObject->active != kObjectInUse) // if it's not in the loop
-        {
-            anObject = gRootObject;
-            startShip = whichShip = gRootObjectNumber;
+    Handle<SpaceObject> anObject;
+    auto whichShip = currentShip;
+    auto startShip = currentShip;
+    if (whichShip.get()) {
+        anObject = startShip;
+        if (anObject->active != kObjectInUse) { // if it's not in the loop
+            anObject = g.root;
+            startShip = whichShip = g.root;
         }
-
-    } else
-    {
-        anObject = gRootObject;
-        startShip = whichShip = gRootObjectNumber;
+    } else {
+        anObject = g.root;
+        startShip = whichShip = g.root;
     }
 
-    do
-    {
-        if (( anObject->active) && ( anObject != sourceObject) &&
-            ( anObject->seenByPlayerFlags & myOwnerFlag) &&
-            (( anObject->attributes & inclusiveAttributes) == inclusiveAttributes) &&
-            (( anyOneAttribute == 0) || (( anObject->attributes & anyOneAttribute) != 0)) &&
-            ( !(anObject->attributes & exclusiveAttributes)) && ((( friendOrFoe < 0) &&
-            ( anObject->owner != sourceObject->owner)) || (( friendOrFoe > 0) &&
-            ( anObject->owner == sourceObject->owner)) || ( friendOrFoe == 0)))
-        {
-            difference = ABS<int>( sourceObject->location.h - anObject->location.h);
-            dcalc = difference;
-            difference =  ABS<int>( sourceObject->location.v - anObject->location.v);
-            distance = difference;
+    Handle<SpaceObject> nextShipOut, closestShip;
+    do {
+        if (anObject->active
+                && (anObject != sourceObject)
+                && (anObject->seenByPlayerFlags & myOwnerFlag)
+                && (anObject->attributes & inclusiveAttributes)
+                && !(anObject->attributes & exclusiveAttributes)
+                && allegiance_is(allegiance, sourceObject->owner, anObject)) {
+            uint32_t xdiff = ABS<int>(sourceObject->location.h - anObject->location.h);
+            uint32_t ydiff = ABS<int>(sourceObject->location.v - anObject->location.v);
 
-            if (( dcalc > kMaximumRelevantDistance) ||
-                ( distance > kMaximumRelevantDistance))
-            {
-                wideScrap = dcalc;   // must be positive
-                MyWideMul( wideScrap, wideScrap, &thisWideDistance);  // ppc automatically generates WideMultiply
-                wideScrap = distance;
-                MyWideMul( wideScrap, wideScrap, &wideScrap);
-                thisWideDistance += wideScrap;
-            } else
-            {
-                thisWideDistance = distance * distance + dcalc * dcalc;
+            uint64_t thisWideDistance;
+            if ((xdiff > kMaximumRelevantDistance) || (ydiff > kMaximumRelevantDistance)) {
+                thisWideDistance
+                    = MyWideMul<uint64_t>(xdiff, xdiff)
+                    + MyWideMul<uint64_t>(ydiff, ydiff);
+            } else {
+                thisWideDistance = ydiff * ydiff + xdiff * xdiff;
             }
 
-            thisDistanceState = 0;
-            if (wideClosestDistance > thisWideDistance) {
-                thisDistanceState |= kCloserThanClosest;
-            }
+            // Nearer than the nearest candidate so far.
+            bool is_closest = thisWideDistance < wideClosestDistance;
 
-            if ((thisWideDistance > *fartherThan
-                        && wideFartherDistance > thisWideDistance)
-                    || (wideFartherDistance > thisWideDistance
-                        && thisWideDistance >= *fartherThan
-                        && whichShip > currentShipNum))
-            {
-                thisDistanceState |= kFartherThanFarther;
-            }
+            // Farther than *fartherThan, but nearer than any other candidate so far.
+            bool is_closest_far_object
+                = (thisWideDistance > *fartherThan)
+                && (wideFartherDistance > thisWideDistance);
 
-            if ( thisDistanceState)
-            {
-                hdif = sourceObject->location.h - anObject->location.h;
-                vdif = sourceObject->location.v - anObject->location.v;
-                while (((ABS(hdif)) > kMaximumAngleDistance) || ( (ABS(vdif)) > kMaximumAngleDistance))
-                {
+            if (is_closest || is_closest_far_object) {
+                int32_t hdif = sourceObject->location.h - anObject->location.h;
+                int32_t vdif = sourceObject->location.v - anObject->location.v;
+                while ((ABS(hdif) > kMaximumAngleDistance)
+                        || (ABS(vdif) > kMaximumAngleDistance)) {
                     hdif >>= 1;
                     vdif >>= 1;
                 }
 
-                slope = MyFixRatio(hdif, vdif);
-                angle = AngleFromSlope( slope);
+                int16_t angle = AngleFromSlope(MyFixRatio(hdif, vdif));
 
-                if ( hdif > 0)
-                    mAddAngle( angle, 180);
-                else if (( hdif == 0) &&
-                        ( vdif > 0))
+                if (hdif > 0) {
+                    mAddAngle(angle, 180);
+                } else if ((hdif == 0) && (vdif > 0)) {
                     angle = 0;
+                }
 
-                angle = mAngleDifference( angle, direction);
-
-                if ( ABS( angle) < 30)
-                {
-                    if ( thisDistanceState & kCloserThanClosest)
-                    {
+                if (ABS(mAngleDifference(angle, direction)) < 30) {
+                    if (is_closest) {
                         closestShip = whichShip;
                         wideClosestDistance = thisWideDistance;
                     }
 
-                    if ( thisDistanceState & kFartherThanFarther)
-                    {
-                        resultShip = whichShip;
+                    if (is_closest_far_object) {
+                        nextShipOut = whichShip;
                         wideFartherDistance = thisWideDistance;
                     }
                 }
             }
         }
-        whichShip = anObject->nextObjectNumber;
-        anObject = anObject->nextObject;
-        if ( anObject == NULL)
-        {
-            whichShip = gRootObjectNumber;
-            anObject = gRootObject;
+        whichShip = anObject = anObject->nextObject;
+        if (!anObject.get()) {
+            whichShip = anObject = g.root;
         }
-    } while ( whichShip != startShip);
-    if ((( resultShip == -1) && ( closestShip != -1)) || ( resultShip == currentShipNum)) resultShip = closestShip;
+    } while (whichShip != startShip);
 
-    return ( resultShip);
+    if ((!nextShipOut.get() && closestShip.get()) || (nextShipOut == currentShip)) {
+        nextShipOut = closestShip;
+    }
+
+    return nextShipOut;
 }
 
-int32_t GetSpritePointSelectObject( Rect *bounds, spaceObjectType *sourceObject, uint32_t inclusiveAttributes,
-                            uint32_t anyOneAttribute, uint32_t exclusiveAttributes,
-                            int32_t currentShipNum, int16_t friendOrFoe)
+Handle<SpaceObject> GetSpritePointSelectObject(
+        Rect *bounds, Handle<SpaceObject> sourceObject,
+        uint32_t anyOneAttribute,
+        Handle<SpaceObject> currentShip, Allegiance allegiance) {
+    const uint32_t myOwnerFlag = 1 << sourceObject->owner.number();
 
-{
-    int32_t         resultShip = -1, closestShip = -1;
-    uint32_t        myOwnerFlag = 1 << sourceObject->owner;
-
-
-    for (int32_t whichShip = 0; whichShip < kMaxSpaceObject; whichShip++) {
-        spaceObjectType* anObject = mGetSpaceObjectPtr(whichShip);
-        if (( anObject->active) && ( anObject->sprite != NULL) &&
-            ( anObject->seenByPlayerFlags & myOwnerFlag) &&
-            (( anObject->attributes & inclusiveAttributes) == inclusiveAttributes) &&
-            (( anyOneAttribute == 0) || (( anObject->attributes & anyOneAttribute) != 0)) &&
-            ( !(anObject->attributes & exclusiveAttributes)) && ((( friendOrFoe < 0) &&
-            ( anObject->owner != sourceObject->owner)) || (( friendOrFoe > 0) &&
-            ( anObject->owner == sourceObject->owner)) || ( friendOrFoe == 0)))
-        {
-/*          if ( !((bounds->right < anObject->sprite->thisRect.left) || (bounds->bottom <
-                anObject->sprite->thisRect.top) || ( bounds->left > anObject->sprite->thisRect.right)
-                || ( bounds->top > anObject->sprite->thisRect.bottom)))
-            {
-                if ( anObject->sprite->thisRect.right > anObject->sprite->thisRect.left)
-                {
-                    if ( closestShip < 0) closestShip = whichShip;
-                    if (( whichShip > currentShipNum) && ( resultShip < 0)) resultShip = whichShip;
-                }
-            }
-*/          if ( !((bounds->right < anObject->sprite->where.h) || (bounds->bottom <
-                anObject->sprite->where.v) || ( bounds->left > anObject->sprite->where.h)
-                || ( bounds->top > anObject->sprite->where.v)))
-            {
-//              if ( anObject->sprite->thisRect.right > anObject->sprite->thisRect.left)
-                {
-                    if ( closestShip < 0) closestShip = whichShip;
-                    if (( whichShip > currentShipNum) && ( resultShip < 0)) resultShip = whichShip;
-                }
-            }
+    Handle<SpaceObject> resultShip, closestShip;
+    for (auto anObject: SpaceObject::all()) {
+        if (!anObject->active
+                || !anObject->sprite.get()
+                || !(anObject->seenByPlayerFlags & myOwnerFlag)
+                || ((anyOneAttribute != 0) && ((anObject->attributes & anyOneAttribute) == 0))
+                || !allegiance_is(allegiance, sourceObject->owner, anObject)
+                || (bounds->right < anObject->sprite->where.h)
+                || (bounds->bottom < anObject->sprite->where.v)
+                || (bounds->left > anObject->sprite->where.h)
+                || (bounds->top > anObject->sprite->where.v)) {
+            continue;
+        }
+        if (!closestShip.get()) {
+            closestShip = anObject;
+        }
+        if ((anObject.number() > currentShip.number()) && !resultShip.get()) {
+            resultShip = anObject;
         }
     }
-    if ((( resultShip == -1) && ( closestShip != -1)) || ( resultShip == currentShipNum)) resultShip = closestShip;
+    if ((!resultShip.get() && closestShip.get()) || (resultShip == currentShip)) {
+        resultShip = closestShip;
+    }
 
-    return ( resultShip);
+    return resultShip;
 }
 
 }  // namespace antares

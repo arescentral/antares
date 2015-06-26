@@ -39,6 +39,7 @@ class ScenarioList {
         sfz::String author;
         sfz::String author_url;
         Version version;
+        bool installed;
     };
 
     ScenarioList();

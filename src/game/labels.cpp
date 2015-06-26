@@ -24,8 +24,11 @@
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/text.hpp"
+#include "game/admiral.hpp"
 #include "game/cursor.hpp"
 #include "game/globals.hpp"
+#include "game/space-object.hpp"
+#include "lang/defines.hpp"
 #include "video/driver.hpp"
 
 using sfz::Rune;
@@ -41,91 +44,50 @@ namespace antares {
 
 namespace {
 
-const int32_t kMaxLabelNum = 16;
-
 const int32_t kLabelBuffer = 4;
 const int32_t kLabelInnerSpace = 3;
 const int32_t kLabelTotalInnerSpace = kLabelInnerSpace << 1;
 
 }  // namespace
 
-struct Labels::screenLabelType {
-    Point               where;
-    Point               offset;
-    Rect                thisRect;
-    int32_t             width;
-    int32_t             height;
-    int32_t             age;
-    sfz::String         text;
-    uint8_t             color;
-    bool                active;
-    bool                killMe;
-    bool                visible;
-    int32_t             whichObject;
-    spaceObjectType*    object;
-    bool                objectLink;     // true if label requires an object to be seen
-    int32_t             lineNum;
-    int32_t             lineHeight;
-    bool                keepOnScreenAnyway; // if not attached to object, keep on screen if it's off
-    bool                attachedHintLine;
-    Point               attachedToWhere;
-    int32_t             retroCount;
-
-    screenLabelType();
-};
-
 // local function prototypes
 static int32_t String_Count_Lines(const StringSlice& s);
 static StringSlice String_Get_Nth_Line(const StringSlice& source, int32_t nth);
 static void Auto_Animate_Line( Point *source, Point *dest);
 
-Labels::screenLabelType* Labels::data = nullptr;
-
-void Labels::zero(Labels::screenLabelType& label) {
-    label.thisRect = Rect(0, 0, -1, -1);
-    label.text.clear();
-    label.active = false;
-    label.killMe = false;
-    label.whichObject = kNoShip;
-    label.object = NULL;
-    label.visible = false;
-    label.age = 0;
-    label.objectLink = true;
-    label.lineNum = 1;
-    label.keepOnScreenAnyway = false;
-    label.attachedHintLine = false;
-    label.retroCount = -1;
+Label* Label::get(int number) {
+    if ((0 <= number) && (number < kMaxLabelNum)) {
+        return &g.labels[number];
+    }
+    return nullptr;
 }
 
-void Labels::init() {
-    data = new screenLabelType[kMaxLabelNum];
+void Label::init() {
+    g.labels.reset(new Label[kMaxLabelNum]);
 }
 
-void Labels::reset() {
-    for (int i = 0; i < kMaxLabelNum; ++i) {
-        zero(data[i]);
+void Label::reset() {
+    for (auto label: all()) {
+        *label = Label();
     }
 }
 
-Labels::screenLabelType::screenLabelType() {
-    zero(*this);
-}
-
-int16_t Labels::add(
-        int16_t h, int16_t v, int16_t hoff, int16_t voff, spaceObjectType* object, bool objectLink,
-        uint8_t color) {
-    screenLabelType* label = NULL;
-
-    for (int i = 0; i < kMaxLabelNum; ++i) {
-        if (!data[i].active) {
-            label = data + i;
-            break;
+Handle<Label> Label::next_free_label() {
+    for (auto label: all()) {
+        if (!label->active) {
+            return label;
         }
     }
-    if (label == NULL) {
-        return -1;  // no free label
+    return Label::none();
+}
+
+Handle<Label> Label::add(
+        int16_t h, int16_t v, int16_t hoff, int16_t voff, Handle<SpaceObject> object,
+        bool objectLink, uint8_t color) {
+    auto label = next_free_label();
+    if (!label.get()) {
+        return Label::none();  // no free label
     }
-    int label_num = label - data;
 
     label->active = true;
     label->killMe = false;
@@ -137,35 +99,27 @@ int16_t Labels::add(
     label->keepOnScreenAnyway = false;
     label->attachedHintLine = false;
     if (objectLink) {
-        if (label->object == NULL) {
-            label->visible = false;
-        } else {
-            label->visible = true;
-            label->whichObject = object->entryNumber;
-        }
+        label->visible = bool(label->object.get());
     } else {
         label->visible = true;
     }
     label->text.clear();
     label->lineNum = label->lineHeight = label->width = label->height = 0;
 
-    return label_num;
+    return label;
 }
 
-void Labels::remove(int32_t which) {
-    screenLabelType *label = data + which;
-    label->thisRect = Rect(0, 0, -1, -1);
-    label->text.clear();
-    label->active = false;
-    label->killMe = false;
-    label->object = NULL;
-    label->width = label->height = label->lineNum = label->lineHeight = 0;
+void Label::remove() {
+    thisRect = Rect(0, 0, -1, -1);
+    text.clear();
+    active = false;
+    killMe = false;
+    object = SpaceObject::none();
+    width = height = lineNum = lineHeight = 0;
 }
 
-void Labels::draw() {
-    for (int i = 0; i < kMaxLabelNum; ++i) {
-        screenLabelType* const label = data + i;
-
+void Label::draw() {
+    for (auto label: all()) {
         // We anchor the image at the corner of the rect instead of label->where.  In some cases,
         // label->where is changed between update_all_label_contents() and draw time, but the rect
         // remains unchanged.  Since that function used to do this drawing, the rect's corner is
@@ -193,23 +147,22 @@ void Labels::draw() {
             for (int j = 1; j <= label->lineNum; j++) {
                 StringSlice line = String_Get_Nth_Line(text, j);
 
-                tactical_font->draw_sprite(Point(at.h + 1, at.v + 1), line, RgbColor::kBlack);
-                tactical_font->draw_sprite(Point(at.h - 1, at.v - 1), line, RgbColor::kBlack);
-                tactical_font->draw_sprite(at, line, light);
+                tactical_font->draw(Point(at.h + 1, at.v + 1), line, RgbColor::kBlack);
+                tactical_font->draw(Point(at.h - 1, at.v - 1), line, RgbColor::kBlack);
+                tactical_font->draw(at, line, light);
 
                 at.offset(0, label->lineHeight);
             }
         } else {
-            tactical_font->draw_sprite(Point(at.h + 1, at.v + 1), text, RgbColor::kBlack);
-            tactical_font->draw_sprite(at, text, light);
+            tactical_font->draw(Point(at.h + 1, at.v + 1), text, RgbColor::kBlack);
+            tactical_font->draw(at, text, light);
         }
     }
 }
 
-void Labels::update_contents(int32_t units_done) {
+void Label::update_contents(int32_t units_done) {
     Rect clip = viewport;
-    for (int i = 0; i < kMaxLabelNum; ++i) {
-        screenLabelType* const label = data + i;
+    for (auto label: all()) {
         if (!label->active || label->killMe || (label->text.empty()) || !label->visible) {
             label->thisRect.left = label->thisRect.right = 0;
             continue;
@@ -237,9 +190,8 @@ void Labels::update_contents(int32_t units_done) {
     }
 }
 
-void Labels::show_all() {
-    for (int i = 0; i < kMaxLabelNum; i++) {
-        screenLabelType *label = data + i;
+void Label::show_all() {
+    for (auto label: all()) {
         if (label->active && label->visible) {
             if (label->killMe) {
                 label->active = false;
@@ -248,22 +200,20 @@ void Labels::show_all() {
     }
 }
 
-void Labels::set_position(int32_t which, int16_t h, int16_t v) {
-    screenLabelType *label = data + which;
-    label->where = label->offset;
-    label->where.offset(h, v);
+void Label::set_position(int16_t h, int16_t v) {
+    where = offset;
+    where.offset(h, v);
 }
 
-void Labels::update_positions(int32_t units_done) {
+void Label::update_positions(int32_t units_done) {
     const Rect label_limits(
             viewport.left + kLabelBuffer, viewport.top + kLabelBuffer,
             viewport.right - kLabelBuffer, viewport.bottom - kLabelBuffer);
 
-    for (int i = 0; i < kMaxLabelNum; i++) {
-        screenLabelType *label = data + i;
+    for (auto label: all()) {
         bool isOffScreen = false;
         if ((label->active) && (!label->killMe)) {
-            if ((label->object != NULL) && (label->object->sprite != NULL)) {
+            if (label->object.get() && label->object->sprite.get()) {
                 if (label->object->active) {
                     label->where.h = label->object->sprite->where.h + label->offset.h;
 
@@ -290,7 +240,7 @@ void Labels::update_positions(int32_t units_done) {
                     }
 
                     if (!(label->object->seenByPlayerFlags &
-                                (1 << globals()->gPlayerAdmiralNumber))) {
+                                (1 << g.admiral.number()))) {
                         isOffScreen = true;
                     }
 
@@ -318,7 +268,7 @@ void Labels::update_positions(int32_t units_done) {
                         HintLine::show(source, dest, label->color, DARK);
                     }
                 } else {
-                    Labels::set_string(i, "");
+                    label->set_string("");
                     if (label->attachedHintLine) {
                         HintLine::hide();
                     }
@@ -347,7 +297,7 @@ void Labels::update_positions(int32_t units_done) {
                 if (label->age <= 0) {
                     label->visible = false;
                     label->age = 0;
-                    label->object = NULL;
+                    label->object = SpaceObject::none();
                     label->text.clear();
                     if (label->attachedHintLine) {
                         HintLine::hide();
@@ -364,99 +314,72 @@ void Labels::update_positions(int32_t units_done) {
     }
 }
 
-void Labels::set_object(int32_t which, spaceObjectType *object) {
-    screenLabelType *label = data + which;
-    label->object = object;
-
-    if (label->object != NULL) {
-        label->age = 0;
-        label->visible = true;
-        label->whichObject = object->entryNumber;
-    } else {
-        label->visible = false;
-        label->age = 0;
-        label->whichObject = kNoShip;
-    }
+void Label::set_object(Handle<SpaceObject> object) {
+    this->object = object;
+    visible = bool(object.get());
+    age = 0;
 }
 
-void Labels::set_age(int32_t which, int32_t age) {
-    screenLabelType *label = data + which;
-    label->age = age;
-    label->visible = true;
+void Label::set_age(int32_t age) {
+    this->age = age;
+    visible = true;
 }
 
-void Labels::set_string(int32_t which, const StringSlice& string) {
-    screenLabelType *label = data + which;
-    label->text.assign(string);
-    Labels::recalc_size( which);
+void Label::set_string(const StringSlice& string) {
+    text.assign(string);
+    recalc_size();
 }
 
-void Labels::clear_string(int32_t which) {
-    screenLabelType *label = data + which;
-    label->text.clear();
-    label->width = label->height = 0;
+void Label::clear_string() {
+    text.clear();
+    width = height = 0;
 }
 
-void Labels::set_color(int32_t which, uint8_t color) {
-    screenLabelType *label = data + which;
-    label->color = color;
+void Label::set_color(uint8_t color) {
+    this->color = color;
 }
 
-void Labels::set_keep_on_screen_anyway(int32_t which, bool keepOnScreenAnyway) {
-    screenLabelType *label = data + which;
-    label->keepOnScreenAnyway = keepOnScreenAnyway;
-    label->retroCount = 0;
+void Label::set_keep_on_screen_anyway(bool keepOnScreenAnyway) {
+    this->keepOnScreenAnyway = keepOnScreenAnyway;
+    retroCount = 0;
 }
 
-void Labels::set_attached_hint_line(int32_t which, bool attachedHintLine, Point toWhere) {
-    screenLabelType *label = data + which;
-    if (label->attachedHintLine) {
+void Label::set_attached_hint_line(bool attachedHintLine, Point toWhere) {
+    if (attachedHintLine) {
         HintLine::hide();
     }
-    label->attachedHintLine = attachedHintLine;
-    label->attachedToWhere = toWhere;
-    label->retroCount = 0;
+    this->attachedHintLine = attachedHintLine;
+    attachedToWhere = toWhere;
+    retroCount = 0;
 }
 
-void Labels::set_offset(int32_t which, int32_t hoff, int32_t voff) {
-    screenLabelType *label = data + which;
-    label->offset.h = hoff;
-    label->offset.v = voff;
-}
-
-int32_t Labels::get_width(int32_t which) {
-    screenLabelType *label = data + which;
-    return label->width;
-}
-
-String* Labels::get_string( int32_t which) {
-    screenLabelType *label = data + which;
-    return &label->text;
+void Label::set_offset(int32_t hoff, int32_t voff) {
+    offset.h = hoff;
+    offset.v = voff;
 }
 
 // do this if you mess with its string
-void Labels::recalc_size(int32_t which) {
-    screenLabelType *label = data + which;
-    int lineNum = String_Count_Lines(label->text);
+void Label::recalc_size() {
+    int lineNum = String_Count_Lines(text);
 
     if (lineNum > 1) {
-        label->lineNum = lineNum;
+        this->lineNum = lineNum;
         int maxWidth = 0;
         for (int i = 1; i <= lineNum; i++) {
-            StringSlice text = String_Get_Nth_Line(label->text, i);
+            StringSlice text = String_Get_Nth_Line(this->text, i);
             int32_t width = tactical_font->string_width(text);
             if (width > maxWidth) {
                 maxWidth = width;
             }
         }
-        label->width = maxWidth + kLabelTotalInnerSpace;
-        label->height = (tactical_font->height * lineNum) + kLabelTotalInnerSpace;
-        label->lineHeight = tactical_font->height;
+        width = maxWidth + kLabelTotalInnerSpace;
+        height = (tactical_font->height * lineNum) + kLabelTotalInnerSpace;
+        lineHeight = tactical_font->height;
     } else {
-        label->lineNum = 1;
-        label->width = tactical_font->string_width(label->text) + kLabelTotalInnerSpace;
-        label->height = tactical_font->height + kLabelTotalInnerSpace;
-        label->lineHeight = tactical_font->height;
+        lineNum = 1;
+        width = tactical_font->string_width(text) + kLabelTotalInnerSpace;
+        height = tactical_font->height + kLabelTotalInnerSpace;
+        lineHeight = tactical_font->height;
     }
 }
 
@@ -485,7 +408,7 @@ static StringSlice String_Get_Nth_Line(const StringSlice& source, int32_t nth) {
 }
 
 static void Auto_Animate_Line( Point *source, Point *dest) {
-    switch ((usecs_to_ticks(globals()->gGameTime) >> 3) & 0x03) {
+    switch ((usecs_to_ticks(g.time) >> 3) & 0x03) {
         case 0:
             dest->h = source->h + ((dest->h - source->h) >> 2);
             dest->v = source->v + ((dest->v - source->v) >> 2);

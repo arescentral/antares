@@ -68,7 +68,13 @@ BriefingScreen::BriefingScreen(const Scenario* scenario, bool* cancelled)
           _briefing_point_count(_scenario->brief_point_size() + 2),
           _data_item(data_item(item(MAP_RECT))) {
     build_star_map();
-    build_system_map();
+    for (int i = 0; i < 500; ++i) {
+        Star star;
+        star.shade = Randomize(kVisibleShadeNum);
+        star.location.h = _bounds.left + Randomize(_bounds.width());
+        star.location.v = _bounds.top + Randomize(_bounds.height());
+        _system_stars.push_back(star);
+    }
 }
 
 BriefingScreen::~BriefingScreen() { }
@@ -87,16 +93,13 @@ void BriefingScreen::overlay() const {
         {
             const Point star = _star_rect.center();
             RgbColor gold = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
-            _star_map->draw_cropped(_bounds, Point(0, 2));
-            draw_vbracket(_star_rect, gold);
-            VideoDriver::driver()->draw_line(
-                    Point(star.h, _bounds.top), Point(star.h, _star_rect.top), gold);
-            VideoDriver::driver()->draw_line(
-                    Point(star.h, _star_rect.bottom), Point(star.h, _bounds.bottom), gold);
-            VideoDriver::driver()->draw_line(
-                    Point(_bounds.left, star.v), Point(_star_rect.left, star.v), gold);
-            VideoDriver::driver()->draw_line(
-                    Point(_star_rect.right - 1, star.v), Point(_bounds.right, star.v), gold);
+            _star_map.draw_cropped(_bounds, Rect(Point(0, 2), _bounds.size()));
+            Rects rects;
+            draw_vbracket(rects, _star_rect, gold);
+            rects.fill({star.h, _bounds.top, star.h + 1, _star_rect.top + 1}, gold);
+            rects.fill({star.h, _star_rect.bottom, star.h + 1, _bounds.bottom + 1}, gold);
+            rects.fill({_bounds.left, star.v, _star_rect.left + 1, star.v + 1}, gold);
+            rects.fill({_star_rect.right - 1, star.v, _bounds.right + 1, star.v + 1}, gold);
         }
         break;
 
@@ -114,10 +117,10 @@ void BriefingScreen::mouse_down(const MouseDownEvent& event) {
     for (size_t i = 0; i < _inline_pict.size(); ++i) {
         if (_inline_pict[i].bounds.contains(event.where())) {
             const int pict_id = _inline_pict[i].id;
-            for (int i = 0; i < globals()->maxBaseObject; ++i) {
-                if (mGetBaseObjectPtr(i)->pictPortraitResID == pict_id) {
+            for (auto obj: BaseObject::all()) {
+                if (obj->pictPortraitResID == pict_id) {
                     stack()->push(new ObjectDataScreen(
-                                event.where(), i, ObjectDataScreen::MOUSE, event.button()));
+                                event.where(), obj, ObjectDataScreen::MOUSE, event.button()));
                     return;
                 }
             }
@@ -205,9 +208,8 @@ void BriefingScreen::handle_button(Button& button) {
 }
 
 void BriefingScreen::build_star_map() {
-    Picture pict(kStarMapPictId);
-    _star_map = VideoDriver::driver()->new_sprite(format("/pictures/{0}.png", kStarMapPictId), pict);
-    Rect pix_bounds = pict.size().as_rect();
+    _star_map = Picture(kStarMapPictId).texture();
+    Rect pix_bounds = _star_map.size().as_rect();
     pix_bounds.offset(0, 2);
     pix_bounds.bottom -= 3;
     _bounds = pix_bounds;
@@ -230,26 +232,6 @@ void BriefingScreen::build_star_map() {
     _star_rect.offset(_bounds.left, _bounds.top);
 }
 
-void BriefingScreen::build_system_map() {
-    ArrayPixMap pix(_bounds.width(), _bounds.height());
-    Rect pix_bounds = pix.size().as_rect();
-    pix.fill(RgbColor::kClear);
-
-    // Draw 500 randomized stars.
-    for (int i = 0; i < 500; ++i) {
-        Star star;
-        star.shade = Randomize(kVisibleShadeNum);
-        star.location.h = _bounds.left + Randomize(_bounds.width());
-        star.location.v = _bounds.top + Randomize(_bounds.height());
-        _system_stars.push_back(star);
-    }
-
-    coordPointType corner;
-    int32_t scale;
-    GetScenarioFullScaleAndCorner(_scenario, 0, &corner, &scale, &pix_bounds);
-    Briefing_Objects_Render(&pix, 32, &pix_bounds, &corner, scale);
-}
-
 void BriefingScreen::build_brief_point() {
     if (_briefing_point >= BRIEFING_POINT_COUNT) {
         coordPointType corner;
@@ -267,10 +249,13 @@ void BriefingScreen::build_brief_point() {
 }
 
 void BriefingScreen::draw_system_map() const {
-    for (int i = 0; i < _system_stars.size(); ++i) {
-        const Star& star = _system_stars[i];
-        RgbColor star_color = GetRGBTranslateColorShade(GRAY, star.shade + DARKEST);
-        VideoDriver::driver()->draw_point(star.location, star_color);
+    {
+        Points points;
+        for (int i = 0; i < _system_stars.size(); ++i) {
+            const Star& star = _system_stars[i];
+            RgbColor star_color = GetRGBTranslateColorShade(GRAY, star.shade + DARKEST);
+            points.draw(star.location, star_color);
+        }
     }
 
     coordPointType corner;
@@ -285,35 +270,43 @@ void BriefingScreen::draw_brief_point() const {
     draw_system_map();
 
     if (!_highlight_rect.empty()) {
+        Rects rects;
         const RgbColor very_light = GetRGBTranslateColorShade(kMissionDataHiliteColor, VERY_LIGHT);
-        VideoDriver::driver()->draw_line(
-                Point(_highlight_rect.left, _highlight_rect.top),
-                Point(_highlight_rect.right - 1, _highlight_rect.top),
+        rects.fill(
+                {_highlight_rect.left, _highlight_rect.top,
+                _highlight_rect.right, _highlight_rect.top + 1},
                 very_light);
-        VideoDriver::driver()->draw_line(
-                Point(_highlight_rect.right - 1, _highlight_rect.top),
-                Point(_highlight_rect.right - 1, _highlight_rect.bottom - 1),
+        rects.fill(
+                {_highlight_rect.right - 1, _highlight_rect.top,
+                _highlight_rect.right, _highlight_rect.bottom},
                 very_light);
-        VideoDriver::driver()->draw_line(
-                Point(_highlight_rect.right - 1, _highlight_rect.bottom - 1),
-                Point(_highlight_rect.left, _highlight_rect.bottom - 1),
+        rects.fill(
+                {_highlight_rect.left, _highlight_rect.bottom - 1,
+                _highlight_rect.right, _highlight_rect.bottom},
                 very_light);
-        VideoDriver::driver()->draw_line(
-                Point(_highlight_rect.left, _highlight_rect.bottom - 1),
-                Point(_highlight_rect.left, _highlight_rect.top),
+        rects.fill(
+                {_highlight_rect.left, _highlight_rect.top,
+                _highlight_rect.left + 1, _highlight_rect.bottom},
                 very_light);
 
         const RgbColor medium = GetRGBTranslateColorShade(kMissionDataHiliteColor, MEDIUM);
         for (size_t i = 0; i < _highlight_lines.size(); ++i) {
+            using std::swap;
             Point p1 = _highlight_lines[i].first;
             Point p2 = _highlight_lines[i].second;
-            VideoDriver::driver()->draw_line(p1, p2, medium);
+            if (p1.h > p2.h) {
+                swap(p1.h, p2.h);
+            }
+            if (p1.v > p2.v) {
+                swap(p1.v, p2.v);
+            }
+            rects.fill({p1.h, p1.v, p2.h + 1, p2.v + 1}, medium);
         }
     }
 
     Rect bounds;
     GetAnyInterfaceItemGraphicBounds(_data_item, &bounds);
-    VideoDriver::driver()->fill_rect(bounds, RgbColor::kBlack);
+    Rects().fill(bounds, RgbColor::kBlack);
     draw_interface_item(_data_item, KEYBOARD_MOUSE);
     vector<inlinePictType> unused;
     draw_text_in_rect(_data_item.bounds(), _text, _data_item.style, _data_item.hue, unused);
@@ -331,9 +324,9 @@ void BriefingScreen::show_object_data(int index, ObjectDataScreen::Trigger trigg
     if (index < _inline_pict.size()) {
         const int pict_id = _inline_pict[index].id;
         const Point origin = _inline_pict[index].bounds.center();
-        for (int i = 0; i < globals()->maxBaseObject; ++i) {
-            if (mGetBaseObjectPtr(i)->pictPortraitResID == pict_id) {
-                stack()->push(new ObjectDataScreen(origin, i, trigger, which));
+        for (auto obj: BaseObject::all()) {
+            if (obj->pictPortraitResID == pict_id) {
+                stack()->push(new ObjectDataScreen(origin, obj, trigger, which));
                 return;
             }
         }

@@ -1,6 +1,6 @@
 { "target_defaults":
   { "variables":
-    { "ANTARES_VERSION": "0.7.3"
+    { "ANTARES_VERSION": "0.8.0"
     }
   , "cxxflags":
     [ "-Wall"
@@ -9,32 +9,34 @@
     , "-Wno-deprecated-declarations"
     ]
   , "xcode_settings":
-    { "ANTARES_VERSION": "0.7.3"
+    { "ANTARES_VERSION": "0.8.0"
     , "SYSTEM_VERSION": "<(MACOSX_VERSION)"
     }
-  , "include_dirs": ["include"]
+  , "include_dirs": ["include", "<(INTERMEDIATE_DIR)/include"]
   }
 
 , "targets":
   [ { "target_name": "libantares"
     , "type": "static_library"
     , "dependencies":
-      [ "libantares-cocoa"
-      , "libantares-config"
+      [ "libantares-config"
       , "libantares-data"
       , "libantares-drawing"
       , "libantares-game"
+      , "libantares-linux"
+      , "libantares-mac"
       , "libantares-math"
       , "libantares-sound"
       , "libantares-ui"
       , "libantares-video"
       ]
     , "export_dependent_settings":
-      [ "libantares-cocoa"
-      , "libantares-config"
+      [ "libantares-config"
       , "libantares-data"
       , "libantares-drawing"
       , "libantares-game"
+      , "libantares-linux"
+      , "libantares-mac"
       , "libantares-math"
       , "libantares-sound"
       , "libantares-ui"
@@ -42,8 +44,13 @@
       ]
     , "conditions":
       [ [ "OS != 'mac'"
-        , { "dependencies!": ["libantares-cocoa"]
-          , "export_dependent_settings!": ["libantares-cocoa"]
+        , { "dependencies!": ["libantares-mac"]
+          , "export_dependent_settings!": ["libantares-mac"]
+          }
+        ]
+      , [ "OS != 'linux'"
+        , { "dependencies!": ["libantares-linux"]
+          , "export_dependent_settings!": ["libantares-linux"]
           }
         ]
       ]
@@ -52,9 +59,11 @@
   , { "target_name": "libantares-config"
     , "type": "static_library"
     , "sources":
-      [ "src/config/gamepad.cpp"
+      [ "src/config/file-prefs-driver.cpp"
+      , "src/config/gamepad.cpp"
       , "src/config/keys.cpp"
       , "src/config/ledger.cpp"
+      , "src/config/linux-dirs.cpp"
       , "src/config/mac-dirs.cpp"
       , "src/config/preferences.cpp"
       ]
@@ -65,13 +74,18 @@
         , { "sources!": ["src/config/mac-dirs.cpp"]
           }
         ]
+      , [ "OS != 'linux'"
+        , { "sources!": ["src/config/linux-dirs.cpp"]
+          }
+        ]
       ]
     }
 
   , { "target_name": "libantares-data"
     , "type": "static_library"
     , "sources":
-      [ "src/data/extractor.cpp"
+      [ "src/data/action.cpp"
+      , "src/data/extractor.cpp"
       , "src/data/interface.cpp"
       , "src/data/picture.cpp"
       , "src/data/races.cpp"
@@ -169,28 +183,37 @@
       , "src/sound/fx.cpp"
       , "src/sound/music.cpp"
       , "src/sound/openal-driver.cpp"
+      , "src/sound/sndfile.cpp"
       ]
     , "dependencies":
       [ "<(DEPTH)/ext/libmodplug-gyp/libmodplug.gyp:libmodplug"
       , "<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz"
+      , "<(DEPTH)/ext/libsndfile-gyp/libsndfile.gyp:libsndfile"
       ]
     , "export_dependent_settings":
       [ "<(DEPTH)/ext/libmodplug-gyp/libmodplug.gyp:libmodplug"
       , "<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz"
+      , "<(DEPTH)/ext/libsndfile-gyp/libsndfile.gyp:libsndfile"
       ]
     , "link_settings":
       { "libraries":
-        [ "$(SDKROOT)/System/Library/Frameworks/AudioToolbox.framework"
-        , "$(SDKROOT)/System/Library/Frameworks/OpenAL.framework"
+        [ "$(SDKROOT)/System/Library/Frameworks/OpenAL.framework"
+        , "-lopenal"
         ]
       }
     , "conditions":
       [ [ "OS != 'mac'"
-        , { "sources!": ["src/sound/openal-driver.cpp"]
-          , "link_settings":
+        , { "link_settings":
             { "libraries!":
-              [ "$(SDKROOT)/System/Library/Frameworks/AudioToolbox.framework"
-              , "$(SDKROOT)/System/Library/Frameworks/OpenAL.framework"
+              [ "$(SDKROOT)/System/Library/Frameworks/OpenAL.framework"
+              ]
+            }
+          }
+        ]
+      , [ "OS != 'linux'"
+        , { "link_settings":
+            { "libraries!":
+              [ "-lopenal"
               ]
             }
           }
@@ -231,6 +254,46 @@
       [ "src/video/driver.cpp"
       , "src/video/opengl-driver.cpp"
       , "src/video/transitions.cpp"
+      , "<(INTERMEDIATE_DIR)/src/video/glsl/fragment.cpp"
+      , "<(INTERMEDIATE_DIR)/src/video/glsl/vertex.cpp"
+      ]
+    , "actions":
+      [ { "action_name": "fragment"
+        , "message": "Embedding GLSL fragment shader"
+        , "inputs":
+          [ "scripts/embed.py"
+          , "src/video/glsl/fragment.frag"
+          ]
+        , "outputs":
+          [ "<(INTERMEDIATE_DIR)/include/video/glsl/fragment.hpp"
+          , "<(INTERMEDIATE_DIR)/src/video/glsl/fragment.cpp"
+          ]
+        , "action":
+          [ "python"
+          , "scripts/embed.py"
+          , "src/video/glsl/fragment.frag"
+          , "<@(_outputs)"
+          , "antares::glsl::fragment"
+          ]
+        }
+      , { "action_name": "vertex"
+        , "message": "Embedding GLSL vertex shader"
+        , "inputs":
+          [ "scripts/embed.py"
+          , "src/video/glsl/vertex.vert"
+          ]
+        , "outputs":
+          [ "<(INTERMEDIATE_DIR)/include/video/glsl/vertex.hpp"
+          , "<(INTERMEDIATE_DIR)/src/video/glsl/vertex.cpp"
+          ]
+        , "action":
+          [ "python"
+          , "scripts/embed.py"
+          , "src/video/glsl/vertex.vert"
+          , "<@(_outputs)"
+          , "antares::glsl::vertex"
+          ]
+        }
       ]
     , "dependencies":
       [ "<(DEPTH)/ext/libpng-gyp/libpng.gyp:libpng"
@@ -241,35 +304,26 @@
       , "<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz"
       ]
     , "link_settings":
-      { "libraries": ["$(SDKROOT)/System/Library/Frameworks/OpenGL.framework"]
+      { "libraries":
+        [ "$(SDKROOT)/System/Library/Frameworks/OpenGL.framework"
+        , "-lGL"
+        , "-lX11"
+        ]
       }
     , "conditions":
       [ [ "OS != 'mac'"
-        , { "sources!": ["src/video/opengl-driver.cpp"]
-          , "link_settings":
+        , { "link_settings":
             { "libraries!": ["$(SDKROOT)/System/Library/Frameworks/OpenGL.framework"]
             }
           }
         ]
+      , [ "OS != 'linux'"
+        , { "link_settings":
+            { "libraries!": ["-lGL", "-lX11"]
+            }
+          }
+        ]
       ]
-    }
-
-  , { "target_name": "offscreen"
-    , "type": "executable"
-    , "sources": ["src/bin/offscreen.cpp"]
-    , "dependencies": ["libantares-test"]
-    }
-
-  , { "target_name": "build-pix"
-    , "type": "executable"
-    , "sources": ["src/bin/build-pix.cpp"]
-    , "dependencies": ["libantares-test"]
-    }
-
-  , { "target_name": "extract-data"
-    , "type": "executable"
-    , "sources": ["src/bin/extract-data.cpp"]
-    , "dependencies": ["libantares-test"]
     }
 
   , { "target_name": "hash-data"
@@ -290,12 +344,6 @@
     , "dependencies": ["libantares-test"]
     }
 
-  , { "target_name": "replay"
-    , "type": "executable"
-    , "sources": ["src/bin/replay.cpp"]
-    , "dependencies": ["libantares-test"]
-    }
-
   , { "target_name": "shapes"
     , "type": "executable"
     , "sources": ["src/bin/shapes.cpp"]
@@ -311,13 +359,19 @@
   , { "target_name": "libantares-test"
     , "type": "static_library"
     , "sources":
-      [ "src/test/resource.cpp"
+      [ "src/linux/offscreen.cpp"
+      , "src/mac/offscreen.cpp"
+      , "src/test/resource.cpp"
       , "src/video/offscreen-driver.cpp"
       , "src/video/text-driver.cpp"
       ]
     , "defines": ["ANTARES_DATA=<(DEPTH)/data"]
     , "dependencies": ["libantares"]
     , "export_dependent_settings": ["libantares"]
+    , "conditions":
+      [ [ "OS != 'mac'" , { "sources!": ["src/mac/offscreen.cpp"] } ]
+      , [ "OS != 'linux'" , { "sources!": ["src/linux/offscreen.cpp"] } ]
+      ]
     }
 
   , { "target_name": "fixed-test"
@@ -328,19 +382,57 @@
       , "<(DEPTH)/ext/gmock-gyp/gmock.gyp:gmock_main"
       ]
     }
+
+  , { "target_name": "offscreen"
+    , "type": "executable"
+    , "sources": ["src/bin/offscreen.cpp"]
+    , "dependencies": ["libantares-test"]
+    }
+
+  , { "target_name": "replay"
+    , "type": "executable"
+    , "sources": ["src/bin/replay.cpp"]
+    , "dependencies": ["libantares-test"]
+    }
+
+  , { "target_name": "build-pix"
+    , "type": "executable"
+    , "sources": ["src/bin/build-pix.cpp"]
+    , "dependencies": ["libantares-test"]
+    }
+
+  , { "target_name": "<(ANTARES_GLFW)"
+    , "type": "executable"
+    , "sources":
+      [ "src/glfw/main.cpp"
+      , "src/glfw/video-driver.cpp"
+      ]
+    , "dependencies":
+      [ "libantares"
+      , "<(DEPTH)/ext/glfw/glfw.gyp:libglfw"
+      ]
+    }
+
+  , { "target_name": "antares-install-data"
+    , "type": "executable"
+    , "sources": ["src/bin/antares-install-data.cpp"]
+    , "dependencies": ["libantares"]
+    }
   ]
 
 , "conditions":
   [ [ "OS == 'mac'"
-    , { "targets":
-        [ { "target_name": "libantares-cocoa"
+    , { "variables": { "ANTARES_GLFW": "antares-glfw" }
+      , "targets":
+        [ { "target_name": "libantares-mac"
           , "type": "static_library"
           , "sources":
-            [ "src/cocoa/core-foundation.cpp"
-            , "src/cocoa/core-opengl.cpp"
-            , "src/cocoa/fullscreen.cpp"
-            , "src/cocoa/http.cpp"
-            , "src/cocoa/windowed.cpp"
+            [ "src/mac/audio-file.cpp"
+            , "src/mac/core-foundation.cpp"
+            , "src/mac/core-opengl.cpp"
+            , "src/mac/fullscreen.cpp"
+            , "src/mac/http.cpp"
+            , "src/mac/windowed.cpp"
             ]
           , "dependencies":
             [ "<(DEPTH)/ext/libpng-gyp/libpng.gyp:libpng"
@@ -352,7 +444,8 @@
             ]
           , "link_settings":
             { "libraries":
-              [ "$(SDKROOT)/System/Library/Frameworks/CoreFoundation.framework"
+              [ "$(SDKROOT)/System/Library/Frameworks/AudioToolbox.framework"
+              , "$(SDKROOT)/System/Library/Frameworks/CoreFoundation.framework"
               , "$(SDKROOT)/System/Library/Frameworks/IOKit.framework"
               , "$(SDKROOT)/System/Library/Frameworks/OpenGL.framework"
               ]
@@ -382,22 +475,46 @@
             , "resources/container-migration.plist"
             ]
           , "sources":
-            [ "src/cocoa/AntaresController.m"
-            , "src/cocoa/AntaresExtractDataController.m"
-            , "src/cocoa/main.m"
-            , "src/cocoa/prefs-driver.cpp"
-            , "src/cocoa/resource.cpp"
-            , "src/cocoa/video-driver.cpp"
-            , "src/cocoa/c/AntaresController.cpp"
-            , "src/cocoa/c/CocoaVideoDriver.m"
-            , "src/cocoa/c/DataExtractor.cpp"
-            , "src/cocoa/c/scenario-list.cpp"
+            [ "src/mac/AntaresController.m"
+            , "src/mac/AntaresExtractDataController.m"
+            , "src/mac/main.m"
+            , "src/mac/prefs-driver.cpp"
+            , "src/mac/resource.cpp"
+            , "src/mac/video-driver.cpp"
+            , "src/mac/c/AntaresController.cpp"
+            , "src/mac/c/CocoaVideoDriver.m"
+            , "src/mac/c/DataExtractor.cpp"
+            , "src/mac/c/scenario-list.cpp"
             ]
           , "dependencies": ["libantares"]
           , "link_settings":
             { "libraries":
               [ "$(SDKROOT)/System/Library/Frameworks/Carbon.framework"
               , "$(SDKROOT)/System/Library/Frameworks/Cocoa.framework"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+
+  , [ "OS == 'linux'"
+    , { "variables": { "ANTARES_GLFW": "antares" }
+      , "targets":
+        [ { "target_name": "libantares-linux"
+          , "type": "static_library"
+          , "sources":
+            [ "src/linux/http.cpp"
+            ]
+          , "dependencies":
+            [ "<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz"
+            ]
+          , "export_dependent_settings":
+            [ "<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz"
+            ]
+          , "link_settings":
+            { "libraries":
+              [ "-lneon"
               ]
             }
           }

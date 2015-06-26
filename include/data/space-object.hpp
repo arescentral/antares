@@ -19,6 +19,7 @@
 #ifndef ANTARES_DATA_SPACE_OBJECT_HPP_
 #define ANTARES_DATA_SPACE_OBJECT_HPP_
 
+#include "data/action.hpp"
 #include "drawing/color.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "game/beam.hpp"
@@ -100,11 +101,6 @@ enum {
     kPotentialTarget        = kCanBeEngaged | kCanBeEvaded,
     kRemoteOrHuman          = kIsPlayerShip,
 
-    // for baseObjectTypes only: these bits have different functions in
-    // baseObjectTypes than they do in normal spaceObjectTypes.  However, they
-    // should never be turned on permanently!
-    kHaveCheckedMedia       = 0x00000008,  // we've checked its sounds & sprites
-
     // for initial objects only
     // kInitiallyExists should NOT be carried over to real objects!
     kInitiallyHidden        = 0x00000020,  // does it exist at first, or is it turned on later?
@@ -143,14 +139,11 @@ enum {
     kBuildFlagBit22             = 0x00200000,
     kOnlyEngagedBy              = 0x00400000,
     kCanOnlyEngage              = 0x00800000,
-    kEngageKeyTag1              = 0x01000000,
-    kEngageKeyTag2              = 0x02000000,
-    kEngageKeyTag3              = 0x04000000,
-    kEngageKeyTag4              = 0x08000000,
-    kLevelKeyTag1               = 0x10000000,
-    kLevelKeyTag2               = 0x20000000,
-    kLevelKeyTag3               = 0x40000000,
-    kLevelKeyTag4               = 0x80000000,
+
+    kEngageKeyTag               = 0x0f000000,
+    kEngageKeyTagShift          = 24,
+    kLevelKeyTag                = 0xf0000000,
+    kLevelKeyTagShift           = 28,
 };
 
 //
@@ -159,9 +152,6 @@ enum {
 // a special tag, matching to the high four bits of an baseObject's
 // build flag.
 //
-const uint32_t kLevelKeyTagMask      = 0xf0000000;
-const uint32_t kEngageKeyTagMask     = 0x0f000000;
-const int32_t kEngageKeyTagShift   = 4;
 
 enum {
     kStrongerThanTarget         = 0x00000001,
@@ -192,10 +182,9 @@ enum {
     kHardTargetIsFriend         = 0x02000000,
     kHardTargetIsNotBase        = 0x04000000,
     kHardTargetIsBase           = 0x08000000,
-    kOrderKeyTag1               = 0x10000000,
-    kOrderKeyTag2               = 0x20000000,
-    kOrderKeyTag3               = 0x40000000,
-    kOrderKeyTag4               = 0x80000000,
+
+    kOrderKeyTag                = 0xf0000000,
+    kOrderKeyTagShift           = 28,
 };
 
 // RUNTIME FLAG BITS
@@ -211,251 +200,13 @@ const uint32_t kPresenceDataHiWordMask = 0xffff0000;
 const uint32_t kPresenceDataLoWordMask = 0x0000ffff;
 const int32_t kPresenceDataHiWordShift = 16;
 
-const uint32_t kPeriodicActionTimeMask  = 0xff000000;
-const uint32_t kPeriodicActionRangeMask = 0x00ff0000;
-const uint32_t kPeriodicActionNotMask   = 0x0000ffff;
-const int32_t kPeriodicActionTimeShift  = 24;
-const int32_t kPeriodicActionRangeShift = 16;
-
-const uint32_t kDestroyActionNotMask        = 0x7fffffff;
-const uint32_t kDestroyActionDontDieFlag    = 0x80000000;
-
-struct spaceObjectType;
-
-enum objectVerbIDEnum {
-    kNoAction = 0,
-    kCreateObject = 1,
-    kPlaySound = 2,
-    kAlter = 3,
-    kMakeSparks = 4,
-    kReleaseEnergy = 5,
-    kLandAt = 6,
-    kEnterWarp = 7,
-    kDisplayMessage = 8,
-    kChangeScore = 9,
-    kDeclareWinner = 10,
-    kDie = 11,
-    kSetDestination = 12,
-    kActivateSpecial = 13,
-    kActivatePulse = 14,
-    kActivateBeam = 15,
-    kColorFlash = 16,
-    kCreateObjectSetDest = 17,      // creates an object with the same destination as anObject's (either subject or direct)
-    kNilTarget = 18,
-    kDisableKeys = 19,
-    kEnableKeys = 20,
-    kSetZoom = 21,
-    kComputerSelect = 22,           // selects a line & screen of the minicomputer
-    kAssumeInitialObject = 23       // assumes the identity of an intial object; for tutorial
-};
-typedef uint8_t objectVerbIDType;
-
-enum alterVerbIDType {
-    kAlterDamage = 0,
-    kAlterVelocity = 1,
-    kAlterThrust = 2,
-    kAlterMaxThrust = 3,
-    kAlterMaxVelocity = 4,
-    kAlterMaxTurnRate = 5,
-    kAlterLocation = 6,
-    kAlterScale = 7,
-    kAlterWeapon1 = 8,
-    kAlterWeapon2 = 9,
-    kAlterSpecial = 10,
-    kAlterEnergy = 11,
-    kAlterOwner = 12,
-    kAlterHidden = 13,
-    kAlterCloak = 14,
-    kAlterOffline = 15,
-    kAlterSpin = 16,
-    kAlterBaseType = 17,
-    kAlterConditionTrueYet = 18,    // relative = state, min = which condition basically force to recheck
-    kAlterOccupation = 19,          // for special neutral death objects
-    kAlterAbsoluteCash = 20,        // relative: true = cash to object : false = range = admiral who gets cash
-    kAlterAge = 21,
-    kAlterAttributes = 22,
-    kAlterLevelKeyTag = 23,
-    kAlterOrderKeyTag = 24,
-    kAlterEngageKeyTag = 25,
-    kAlterAbsoluteLocation = 26
-};
-
-enum dieVerbIDEnum {
-    kDieNone = 0,
-    kDieExpire = 1,
-    kDieDestroy = 2
-};
-typedef uint8_t dieVerbIDType;
-
 enum kPresenceStateType {
     kNormalPresence = 0,
     kLandingPresence = 1,
-    kTakeoffPresence = 2,
     kWarpInPresence = 3,
     kWarpingPresence = 4,
     kWarpOutPresence = 5
 };
-
-//
-// objectActionType:
-//  Defines any action that an object can take.  Conditions that can cause an action to execute are:
-//  destroy, expire, create, collide, activate, or message.
-//
-
-union argumentType {
-
-    // createObject: make another type of object appear
-    struct CreateObject {
-        int32_t                 whichBaseType;      // what type
-        int32_t                 howManyMinimum;     // # to make min
-        int32_t                 howManyRange;       // # to make range
-        uint8_t                 velocityRelative;   // is velocity relative to creator?
-        uint8_t                 directionRelative;  // determines initial heading
-        int32_t                 randomDistance;     // if not 0, then object will be created in random direction from 0 to this away
-    };
-    CreateObject createObject;
-
-    // playSound: play a sound effect
-    struct PlaySound {
-        uint8_t                 priority;
-        int32_t                 persistence;
-        uint8_t                 absolute;           // not distanced
-        int32_t                 volumeMinimum;
-        int32_t                 volumeRange;
-        int32_t                 idMinimum;
-        int32_t                 idRange;
-    };
-    PlaySound playSound;
-
-    // alterObject: change some attribute of an object
-    struct AlterObject {
-        uint8_t                 alterType;
-        uint8_t                 relative;
-        int32_t                 minimum;
-        int32_t                 range;
-    };
-    AlterObject alterObject;
-
-    // makeSpark
-    struct MakeSparks {
-        int32_t                 howMany;
-        int32_t                 speed;
-        Fixed                   velocityRange;
-        uint8_t                 color;
-    };
-    MakeSparks makeSparks;
-
-    // release energy
-    struct ReleaseEnergy {
-        Fixed                   percent;
-    };
-    ReleaseEnergy releaseEnergy;
-
-    // land at
-    struct LandAt {
-        int32_t                 landingSpeed;
-    };
-    LandAt landAt;
-
-    // enter warp
-    struct EnterWarp {
-        Fixed                   warpSpeed;
-    };
-    EnterWarp enterWarp;
-
-    // Display message
-    struct DisplayMessage {
-        int16_t                 resID;
-        int16_t                 pageNum;
-    };
-    DisplayMessage displayMessage;
-
-    // Change score
-    struct ChangeScore {
-        int32_t                 whichPlayer;    // in scenario's terms; -1 = owner of executor of action
-        int32_t                 whichScore;     // each player can have many "scores"
-        int32_t                 amount;
-    };
-    ChangeScore changeScore;
-
-    // Declare winner
-    struct DeclareWinner {
-        int32_t                 whichPlayer;    // in scenario's terms; -1 = owner of executor of action
-        int32_t                 nextLevel;      // -1 = none
-        int32_t                 textID;         // id of "debriefing" text
-    };
-    DeclareWinner declareWinner;
-
-    // killObject: cause object to expire
-    struct KillObject {
-        dieVerbIDType           dieType;
-    };
-    KillObject killObject;
-
-    // colorFlash: flash whole screen to a color
-    struct ColorFlash {
-        int32_t                 length;         // length of color flash
-        uint8_t                 color;          // color of flash
-        uint8_t                 shade;          // brightness of flash
-    };
-    ColorFlash colorFlash;
-
-    // keys: disable or enable keys/ for tutorial
-    struct Keys {
-        uint32_t                keyMask;
-    };
-    Keys keys;
-
-    // zoomLevel; manually set zoom level
-    struct Zoom {
-        int32_t                 zoomLevel;
-    };
-    Zoom zoom;
-
-    struct ComputerSelect {
-        int32_t                 screenNumber;
-        int32_t                 lineNumber;
-    };
-    ComputerSelect computerSelect;
-
-    struct AssumeInitial {
-        int32_t                 whichInitialObject;
-    };
-    AssumeInitial assumeInitial;
-};
-void read_from(sfz::ReadSource in, argumentType::CreateObject& argument);
-void read_from(sfz::ReadSource in, argumentType::PlaySound& argument);
-void read_from(sfz::ReadSource in, argumentType::AlterObject& argument);
-void read_from(sfz::ReadSource in, argumentType::MakeSparks& argument);
-void read_from(sfz::ReadSource in, argumentType::ReleaseEnergy& argument);
-void read_from(sfz::ReadSource in, argumentType::LandAt& argument);
-void read_from(sfz::ReadSource in, argumentType::EnterWarp& argument);
-void read_from(sfz::ReadSource in, argumentType::DisplayMessage& argument);
-void read_from(sfz::ReadSource in, argumentType::ChangeScore& argument);
-void read_from(sfz::ReadSource in, argumentType::DeclareWinner& argument);
-void read_from(sfz::ReadSource in, argumentType::KillObject& argument);
-void read_from(sfz::ReadSource in, argumentType::ColorFlash& argument);
-void read_from(sfz::ReadSource in, argumentType::Keys& argument);
-void read_from(sfz::ReadSource in, argumentType::Zoom& argument);
-void read_from(sfz::ReadSource in, argumentType::ComputerSelect& argument);
-void read_from(sfz::ReadSource in, argumentType::AssumeInitial& argument);
-
-struct objectActionType {
-    objectVerbIDType            verb;                   // what is this verb?
-    uint8_t                     reflexive;              // does it apply to object executing verb?
-    uint32_t                    inclusiveFilter;        // if it has ALL these attributes, OK -- for non-reflective verbs
-    uint32_t                    exclusiveFilter;        // don't execute if it has ANY of these
-    int16_t                     owner;                  // 0 no matter, 1 same owner, -1 different owner
-    uint32_t                    delay;
-//  uint32_t                    reserved1;
-    int16_t                     initialSubjectOverride;
-    int16_t                     initialDirectOverride;
-    uint32_t                    reserved2;
-    argumentType                argument;
-
-    static const size_t byte_size = 48;
-};
-void read_from(sfz::ReadSource in, objectActionType& action);
 
 union objectFrameType {
     // rotation: for objects whose shapes depend on their direction
@@ -509,7 +260,12 @@ void read_from(sfz::ReadSource in, objectFrameType::Animation& animation);
 void read_from(sfz::ReadSource in, objectFrameType::Beam& beam);
 void read_from(sfz::ReadSource in, objectFrameType::Weapon& weapon);
 
-struct baseObjectType {
+class BaseObject {
+  public:
+    static BaseObject* get(int number);
+    static Handle<BaseObject> none() { return Handle<BaseObject>(-1); }
+    static HandleList<BaseObject> all() { return HandleList<BaseObject>(0, size); }
+
     uint32_t                attributes;                 // initial attributes (see flags)
     int32_t                 baseClass;
     int32_t                 baseRace;
@@ -549,7 +305,7 @@ struct baseObjectType {
     int32_t                 initialDirectionRange;      // random addition to initial direction
 
     struct Weapon {
-        int32_t base;                                   // kNoWeapon = none
+        Handle<BaseObject> base;
         int32_t positionNum;                            // # of places from which weapon can fire
         fixedPointType position[kMaxWeaponPosition];    // relative positions (unrotated) of fire points
     };
@@ -563,23 +319,25 @@ struct baseObjectType {
 
     int32_t                 arriveActionDistance;               // distance^2 at which arrive action is triggered on dest
 
-    int32_t                 destroyAction;  // what happens when object is destroyed
-    int32_t                 destroyActionNum;
-    int32_t                 expireAction;       // what happens when object expires
-    int32_t                 expireActionNum;
-    int32_t                 createAction;       // what happens when object is 1st made
-    int32_t                 createActionNum;
-    int32_t                 collideAction;  // what happens when object collides
-    int32_t                 collideActionNum;
-    int32_t                 activateAction; // what happens when object is activated
-    int32_t                 activateActionNum;
-    int32_t                 arriveAction;   // what happens when object arrives at destination
-    int32_t                 arriveActionNum;
+    HandleList<Action>      destroy;
+    HandleList<Action>      expire;
+    HandleList<Action>      create;
+    HandleList<Action>      collide;
+    HandleList<Action>      activate;
+    HandleList<Action>      arrive;
+
+    bool                    destroyDontDie;
+    bool                    expireDontDie;
+    uint8_t                 activatePeriod;
+    uint8_t                 activatePeriodRange;
 
     objectFrameType         frame;
 
     uint32_t            buildFlags;
     uint32_t            orderFlags;
+    uint8_t             levelKeyTag;
+    uint8_t             engageKeyTag;
+    uint8_t             orderKeyTag;
     Fixed               buildRatio;
     uint32_t            buildTime;
 //  int32_t             reserved1;
@@ -593,161 +351,12 @@ struct baseObjectType {
     uint32_t            internalFlags;
 
     static const int byte_size = 318;
+
+  private:
+    friend void SpaceObjectHandlingInit();
+    static int size;
 };
-void read_from(sfz::ReadSource in, baseObjectType& object);
-
-enum dutyType {
-    eNoDuty =           0,
-    eEscortDuty =       1,
-    eGuardDuty =        2,
-    eAssaultDuty =      3,
-    eHostileBaseDuty =  4
-};
-
-//typedef beamTypeStruct;
-
-
-struct spaceObjectType {
-    uint32_t                attributes;
-    baseObjectType          *baseType;
-    int32_t                 whichBaseObject;
-    int32_t                 entryNumber;            // major hack?
-
-    uint32_t                keysDown;
-
-    int32_t                 tinySize;
-    RgbColor                tinyColor;
-
-    int32_t                 direction;
-    int32_t                 directionGoal;
-    Fixed                   turnVelocity;
-    Fixed                   turnFraction;
-
-    int32_t                 offlineTime;
-
-    coordPointType          location;
-    coordPointType          lastLocation;
-    int32_t                 lastDir;
-    Point                   collisionGrid;
-    spaceObjectType*        nextNearObject;
-    Point                   distanceGrid;
-    spaceObjectType*        nextFarObject;
-    spaceObjectType*        previousObject;
-    int32_t                 previousObjectNumber;
-    spaceObjectType*        nextObject;
-    int32_t                 nextObjectNumber;
-
-    int32_t                 runTimeFlags;       // distance from origin to destination
-    coordPointType          destinationLocation;// coords of our destination ( or kNoDestination)
-    int32_t                 destinationObject;  // which object?  or kNoDestinationObject -- or, if we're a dest, our corresponding destBalance for AI
-    spaceObjectType*        destObjectPtr;      // ptr to destination object
-    int32_t                 destObjectDest;     // # of our destination's destination in case it dies
-    int32_t                 destObjectID;       // ID of our dest object
-    int32_t                 destObjectDestID;   // id of our dest's destination
-
-    Fixed                   localFriendStrength;
-    Fixed                   localFoeStrength;
-    Fixed                   escortStrength;
-    Fixed                   remoteFriendStrength;
-    Fixed                   remoteFoeStrength;
-
-    Fixed                   bestConsideredTargetValue;
-    Fixed                   currentTargetValue;
-    int32_t                 bestConsideredTargetNumber;
-
-    int32_t                 timeFromOrigin;     // time it's been since we left
-    fixedPointType          idealLocationCalc;  // calced when we got origin
-    coordPointType          originLocation;     // coords of our origin
-
-    fixedPointType          motionFraction;
-    fixedPointType          velocity;
-    Fixed                   thrust;
-    Fixed                   maxVelocity;
-    Point                   scaledCornerOffset;
-    Point                   scaledSize;
-    Rect                absoluteBounds;
-    Random                  randomSeed;
-
-    union
-    {
-//      struct
-//      {
-            int32_t             directionGoal;
-            Fixed               turnVelocity;
-            Fixed               turnFraction;
-//      } rotation;
-        struct
-        {
-            int32_t             thisShape;
-            Fixed               frameFraction;
-            int32_t             frameDirection;
-            Fixed               frameSpeed;
-        } animation;
-        struct
-        {
-            int32_t             whichBeam;
-            beamType            *beam;
-        } beam;
-    } frame;
-
-    int32_t                 health;
-    int32_t                 energy;
-    int32_t                 battery;
-    int32_t                 owner;
-    int32_t                 age;
-    int32_t                 naturalScale;
-    int32_t                 id;
-    int16_t                 rechargeTime;
-    int16_t                 active;
-
-    int32_t                 warpEnergyCollected;
-
-    int16_t                 layer;
-    spriteType              *sprite;
-    int32_t                 whichSprite;
-
-    uint64_t                distanceFromPlayer;
-    uint32_t                closestDistance;
-    int32_t                 closestObject;
-    int32_t                 targetObjectNumber;
-    int32_t                 targetObjectID;
-    int32_t                 targetAngle;
-    int32_t                 lastTarget;
-    int32_t                 lastTargetDistance;
-    int32_t                 longestWeaponRange;
-    int32_t                 shortestWeaponRange;
-    int32_t                 engageRange;            // either longestWeaponRange or kEngageRange
-
-    kPresenceStateType      presenceState;
-    int32_t                 presenceData;
-
-    int32_t                 hitState;
-    int32_t                 cloakState;
-    dutyType                duty;
-    int                     pixResID;
-
-    struct Weapon {
-        baseObjectType*         base;
-        int32_t                 type;
-        int32_t                 time;
-        int32_t                 ammo;
-        int32_t                 position;
-        int16_t                 charge;
-    };
-    Weapon                  pulse;
-    Weapon                  beam;
-    Weapon                  special;
-
-    int32_t                 periodicTime;
-    int32_t                 whichLabel;
-
-    uint32_t                myPlayerFlag;
-    uint32_t                seenByPlayerFlags;
-    uint32_t                hostileTowardsFlags;
-
-    uint8_t                 shieldColor;
-    uint8_t                 originalColor;
-};
+void read_from(sfz::ReadSource in, BaseObject& object);
 
 }  // namespace antares
 

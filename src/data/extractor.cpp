@@ -20,6 +20,7 @@
 
 #include <fcntl.h>
 #include <math.h>
+#include <set>
 #include <stdint.h>
 #include <rezin/rezin.hpp>
 #include <sfz/sfz.hpp>
@@ -57,6 +58,7 @@ using sfz::range;
 using sfz::read;
 using sfz::tree_digest;
 using sfz::write;
+using std::set;
 using std::unique_ptr;
 using std::vector;
 using zipxx::ZipArchive;
@@ -69,7 +71,7 @@ namespace antares {
 
 namespace {
 
-bool verbatim(StringSlice, int16_t, BytesSlice data, WriteTarget out) {
+bool verbatim(StringSlice, bool, int16_t, BytesSlice data, WriteTarget out) {
     write(out, data);
     return true;
 }
@@ -92,7 +94,7 @@ int32_t nlrp_chapter(int16_t id) {
     throw Exception(format("invalid replay ID {0}", id));
 }
 
-bool convert_nlrp(StringSlice, int16_t id, BytesSlice data, WriteTarget out) {
+bool convert_nlrp(StringSlice, bool, int16_t id, BytesSlice data, WriteTarget out) {
     ReplayData replay;
     replay.scenario.identifier.assign("com.biggerplanet.ares");
     replay.scenario.version.assign("1.1.1");
@@ -125,7 +127,7 @@ bool convert_nlrp(StringSlice, int16_t id, BytesSlice data, WriteTarget out) {
     return true;
 }
 
-bool convert_pict(StringSlice, int16_t, BytesSlice data, WriteTarget out) {
+bool convert_pict(StringSlice, bool, int16_t, BytesSlice data, WriteTarget out) {
     rezin::Picture pict(data);
     if ((pict.version() == 2) && (pict.is_raster())) {
         write(out, png(pict));
@@ -134,7 +136,7 @@ bool convert_pict(StringSlice, int16_t, BytesSlice data, WriteTarget out) {
     return false;
 }
 
-bool convert_str(StringSlice, int16_t, BytesSlice data, WriteTarget out) {
+bool convert_str(StringSlice, bool, int16_t, BytesSlice data, WriteTarget out) {
     Options options;
     StringList list(data, options);
     String string(pretty_print(json(list)));
@@ -142,14 +144,14 @@ bool convert_str(StringSlice, int16_t, BytesSlice data, WriteTarget out) {
     return true;
 }
 
-bool convert_text(StringSlice, int16_t, BytesSlice data, WriteTarget out) {
+bool convert_text(StringSlice, bool, int16_t, BytesSlice data, WriteTarget out) {
     Options options;
     String string(options.decode(data));
     write(out, utf8::encode(string));
     return true;
 }
 
-bool convert_snd(StringSlice, int16_t, BytesSlice data, WriteTarget out) {
+bool convert_snd(StringSlice, bool, int16_t, BytesSlice data, WriteTarget out) {
     Sound snd(data);
     write(out, aiff(snd));
     return true;
@@ -220,7 +222,41 @@ static Json json(const Point& p) {
     return Json::object(json);
 }
 
-bool convert_smiv(StringSlice dir, int16_t id, BytesSlice data, WriteTarget out) {
+void alphatize(ArrayPixMap& image) {
+    // Find the brightest pixel in the image.
+    using std::max;
+    uint8_t brightest = 0;
+    for (int y: range(image.size().height)) {
+        for (int x: range(image.size().width)) {
+            auto p = image.get(x, y);
+            brightest = max(max(brightest, p.red), max(p.green, p.blue));
+        }
+    }
+
+    if (!brightest) {
+        return;
+    }
+
+    for (int y: range(image.size().height)) {
+        for (int x: range(image.size().width)) {
+            auto p = image.get(x, y);
+            if (p.alpha) {
+                // Brightest pixel has alpha of 255.
+                p.alpha = max(max(p.red, p.green), p.blue);
+                p.alpha = (p.alpha * 255) / brightest;
+                if (p.alpha) {
+                    // Un-premultiply alpha.
+                    p.red = (p.red * 255) / p.alpha;
+                    p.green = (p.green * 255) / p.alpha;
+                    p.blue = (p.blue * 255) / p.alpha;
+                }
+            }
+            image.set(x, y, p);
+        }
+    }
+}
+
+bool convert_smiv(StringSlice dir, bool factory, int16_t id, BytesSlice data, WriteTarget out) {
     BytesSlice header = data;
     header.shift(4);
     uint32_t size = read<uint32_t>(header);
@@ -288,6 +324,15 @@ bool convert_smiv(StringSlice dir, int16_t id, BytesSlice data, WriteTarget out)
         convert_overlay(dir, id, frame_data.slice(0, r.area()), overlay.view(r));
     }
 
+    set<int> alpha_sprites = {
+        504, 516, 517, 519, 522, 526, 541, 547, 548,
+        554, 557, 558, 580, 581, 584, 589, 598, 605,
+        606, 611, 613, 614, 620, 645, 653, 655, 656,
+    };
+    if (factory && (alpha_sprites.find(id) != alpha_sprites.end())) {
+        alphatize(image);
+    }
+
     String sprite_dir(format("{0}/{1}", dir, id));
     makedirs(sprite_dir, 0755);
 
@@ -316,7 +361,7 @@ struct ResourceFile {
         const char* resource;
         const char* output_directory;
         const char* output_extension;
-        bool (*convert)(StringSlice dir, int16_t id, BytesSlice data, WriteTarget out);
+        bool (*convert)(StringSlice dir, bool factory, int16_t id, BytesSlice data, WriteTarget out);
     } resources[16];
 };
 
@@ -376,7 +421,7 @@ static const ResourceFile::ExtractedResource kPluginFiles[] = {
 
 static const char kFactoryScenario[] = "com.biggerplanet.ares";
 static const char kDownloadBase[] = "http://downloads.arescentral.org";
-static const char kVersion[] = "13\n";
+static const char kVersion[] = "14\n";
 
 static const char kPluginVersionFile[] = "data/version";
 static const char kPluginVersion[] = "1\n";
@@ -566,7 +611,7 @@ void DataExtractor::extract_original(Observer* observer, const StringSlice& file
                 String output(format("{0}/com.biggerplanet.ares/{1}/{2}.{3}",
                             _output_dir, conversion.output_directory, entry.id(),
                             conversion.output_extension));
-                if (conversion.convert(path::dirname(output), entry.id(), entry.data(), data)) {
+                if (conversion.convert(path::dirname(output), true, entry.id(), entry.data(), data)) {
                     makedirs(path::dirname(output), 0755);
                     ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
                     write(fd, data.data(), data.size());
@@ -624,7 +669,7 @@ void DataExtractor::extract_plugin(Observer* observer) const {
                 String output(format("{0}/{1}/{2}/{3}.{4}",
                             _output_dir, _scenario, conversion.output_directory, id,
                             conversion.output_extension));
-                if (conversion.convert(path::dirname(output), id, file.data(), data)) {
+                if (conversion.convert(path::dirname(output), false, id, file.data(), data)) {
                     makedirs(path::dirname(output), 0755);
                     ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
                     write(fd, data.data(), data.size());

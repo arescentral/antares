@@ -20,15 +20,13 @@
 
 #include <sfz/sfz.hpp>
 
+#include "lang/defines.hpp"
+
 using sfz::Exception;
 
 namespace antares {
 
-namespace {
-
-VideoDriver* video_driver = NULL;
-
-}  // namespace
+static ANTARES_GLOBAL VideoDriver* video_driver = NULL;
 
 VideoDriver::VideoDriver() {
     if (video_driver) {
@@ -45,6 +43,55 @@ VideoDriver* VideoDriver::driver() {
     return antares::video_driver;
 }
 
-Sprite::~Sprite() { }
+Texture::Impl::~Impl() { }
+
+Points::Points() {
+    VideoDriver::driver()->begin_points();
+}
+
+Points::~Points() {
+    VideoDriver::driver()->end_points();
+}
+
+void Points::draw(const Point& at, const RgbColor& color) const {
+    VideoDriver::driver()->batch_point(at, color);
+}
+
+Lines::Lines() {
+    VideoDriver::driver()->begin_lines();
+}
+
+Lines::~Lines() {
+    VideoDriver::driver()->end_lines();
+}
+
+void Lines::draw(const Point& from, const Point& to, const RgbColor& color) const {
+    VideoDriver::driver()->batch_line(from, to, color);
+}
+
+Rects::Rects() {
+    VideoDriver::driver()->begin_rects();
+}
+
+Rects::~Rects() {
+    VideoDriver::driver()->end_rects();
+}
+
+void Rects::fill(const Rect& rect, const RgbColor& color) const {
+    VideoDriver::driver()->batch_rect(rect, color);
+}
+
+Quads::Quads(const Texture& sprite):
+        _sprite(sprite) {
+    _sprite._impl->begin_quads();
+}
+
+Quads::~Quads() {
+    _sprite._impl->end_quads();
+}
+
+void Quads::draw(const Rect& dest, const Rect& source, const RgbColor& tint) const {
+    _sprite._impl->draw_quad(dest, source, tint);
+}
 
 }  // namespace antares

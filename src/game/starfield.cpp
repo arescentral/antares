@@ -43,11 +43,6 @@ const Fixed kFastStarFraction   = 0x00000100;   // 1.000
 
 const uint8_t kStarColor = GRAY;
 
-
-// This object is also used for the radar center, and for zoom to hostile and object modes.  It
-// would be preferable for it to be entirely private to the starfield.
-spaceObjectType* gScrollStarObject = NULL;
-
 namespace {
 
 inline int32_t RandomStarSpeed() {
@@ -64,10 +59,8 @@ Starfield::Starfield():
     }
 }
 
-void Starfield::reset(int32_t which_object) {
-    gScrollStarObject = mGetSpaceObjectPtr(which_object);
-
-    if (gScrollStarObject == NULL) {
+void Starfield::reset(Handle<SpaceObject> which_object) {
+    if (!g.ship.get()) {
         return;
     }
 
@@ -120,34 +113,34 @@ void Starfield::prepare_to_move() {
 }
 
 void Starfield::move(int32_t by_units) {
-    if ((gScrollStarObject == NULL) || !gScrollStarObject->active) {
+    if (!g.ship.get() || !g.ship->active) {
         return;
     }
 
     const fixedPointType slowVelocity = {
         scale_by(
-                mMultiplyFixed(gScrollStarObject->velocity.h, kSlowStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.h, kSlowStarFraction) * by_units,
                 gAbsoluteScale),
         scale_by(
-                mMultiplyFixed(gScrollStarObject->velocity.v, kSlowStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.v, kSlowStarFraction) * by_units,
                 gAbsoluteScale),
     };
 
     const fixedPointType mediumVelocity = {
         scale_by(
-                mMultiplyFixed(gScrollStarObject->velocity.h, kMediumStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.h, kMediumStarFraction) * by_units,
                 gAbsoluteScale),
         scale_by(
-                mMultiplyFixed(gScrollStarObject->velocity.v, kMediumStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.v, kMediumStarFraction) * by_units,
                 gAbsoluteScale),
     };
 
     const fixedPointType fastVelocity = {
         scale_by(
-                mMultiplyFixed(gScrollStarObject->velocity.h, kFastStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.h, kFastStarFraction) * by_units,
                 gAbsoluteScale),
         scale_by(
-                mMultiplyFixed(gScrollStarObject->velocity.v, kFastStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.v, kFastStarFraction) * by_units,
                 gAbsoluteScale),
     };
 
@@ -269,10 +262,30 @@ void Starfield::draw() const {
     const RgbColor mediumColor = GetRGBTranslateColorShade(kStarColor, LIGHT);
     const RgbColor fastColor = GetRGBTranslateColorShade(kStarColor, LIGHTER);
 
-    switch (gScrollStarObject->presenceState) {
-      default:
-        if (!_warp_stars) {
-            // we're not warping in any way
+    switch (g.ship->presenceState) {
+        default:
+            if (!_warp_stars) {
+                Points points;
+                // we're not warping in any way
+                for (const scrollStarType* star: range(_stars, _stars + kScrollStarNum)) {
+                    if (star->speed != kNoStar) {
+                        const RgbColor* color = &slowColor;
+                        if (star->speed == kMediumStarSpeed) {
+                            color = &mediumColor;
+                        } else if (star->speed == kFastStarSpeed) {
+                            color = &fastColor;
+                        }
+
+                        points.draw(star->location, *color);
+                    }
+                }
+                break;
+            }
+
+        case kWarpInPresence:
+        case kWarpOutPresence:
+        case kWarpingPresence: {
+            Lines lines;
             for (const scrollStarType* star: range(_stars, _stars + kScrollStarNum)) {
                 if (star->speed != kNoStar) {
                     const RgbColor* color = &slowColor;
@@ -282,46 +295,29 @@ void Starfield::draw() const {
                         color = &fastColor;
                     }
 
-                    VideoDriver::driver()->draw_point(star->location, *color);
+                    if (star->age > 1) {
+                        lines.draw(star->location, star->oldLocation, *color);
+                    }
                 }
             }
+            break;
         }
-        break;
-
-      case kWarpInPresence:
-      case kWarpOutPresence:
-      case kWarpingPresence:
-        for (const scrollStarType* star: range(_stars, _stars + kScrollStarNum)) {
-            if (star->speed != kNoStar) {
-                const RgbColor* color = &slowColor;
-                if (star->speed == kMediumStarSpeed) {
-                    color = &mediumColor;
-                } else if (star->speed == kFastStarSpeed) {
-                    color = &fastColor;
-                }
-
-                if (star->age > 1) {
-                    VideoDriver::driver()->draw_line(
-                            star->location, star->oldLocation, *color);
-                }
-            }
-        }
-        break;
     }
 
+    Points points;
     for (const scrollStarType* star: range(_stars + kSparkStarOffset, _stars + kAllStarNum)) {
         if ((star->speed != kNoStar) && (star->age > 0)) {
             const RgbColor color = GetRGBTranslateColorShade(
                     star->color, (star->age >> kSparkAgeToShadeShift) + 1);
-            VideoDriver::driver()->draw_point(star->location, color);
+            points.draw(star->location, color);
         }
     }
 }
 
 void Starfield::show() {
-    if ((gScrollStarObject->presenceState != kWarpInPresence)
-            && (gScrollStarObject->presenceState != kWarpOutPresence)
-            && (gScrollStarObject->presenceState != kWarpingPresence)) {
+    if ((g.ship->presenceState != kWarpInPresence)
+            && (g.ship->presenceState != kWarpOutPresence)
+            && (g.ship->presenceState != kWarpingPresence)) {
         if (_warp_stars) {
             // we were warping but now are not; erase warped stars
             _warp_stars = false;

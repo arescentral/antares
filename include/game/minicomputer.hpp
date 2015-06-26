@@ -50,9 +50,9 @@ struct miniScreenLineType {
     int32_t         value;      // for keeping track of changing values
     int32_t         statusType;
     int32_t         whichStatus;
-    int32_t         statusPlayer;
+    Handle<Admiral> statusPlayer;
     int32_t         negativeValue;
-    baseObjectType* sourceData;
+    Handle<BaseObject>  sourceData;
 };
 
 void MiniScreenInit( void);
@@ -70,10 +70,10 @@ int32_t MiniComputerGetPriceOfCurrentSelection( void);
 void UpdateMiniScreenLines( void);
 void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special);
 void draw_mini_ship_data(
-        const spaceObjectType& newObject, uint8_t headerColor,
+        const SpaceObject& newObject, uint8_t headerColor,
         int16_t screenTop, int16_t whichString);
 void MiniComputerDoAccept( void);
-void MiniComputerExecute(int32_t, int32_t, int32_t);
+void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral);
 void MiniComputerDoCancel( void);
 void MiniComputerSetBuildStrings( void);
 void MiniComputerHandleClick( Point);

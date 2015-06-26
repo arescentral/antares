@@ -24,6 +24,7 @@
 #include "config/keys.hpp"
 #include "data/resource.hpp"
 #include "game/globals.hpp"
+#include "lang/defines.hpp"
 
 using sfz::BytesSlice;
 using sfz::Exception;
@@ -36,18 +37,14 @@ using std::unique_ptr;
 
 namespace antares {
 
-namespace {
-
 template <typename T>
-T clamp(T value, T lower, T upper) {
+static T clamp(T value, T lower, T upper) {
     return min(upper, max(lower, value));
 }
 
-Preferences* preferences = NULL;
+static ANTARES_GLOBAL Preferences* preferences = NULL;
 
-PrefsDriver* prefs_driver = NULL;
-
-}  // namespace
+static ANTARES_GLOBAL PrefsDriver* prefs_driver = NULL;
 
 Preferences* Preferences::preferences() {
     if (antares::preferences == NULL) {
@@ -207,6 +204,14 @@ void Preferences::set_fullscreen(bool fullscreen) {
 
 void Preferences::set_screen_size(Size size) {
     _screen_size = size;
+}
+
+void Preferences::set_screen_width(int32_t width) {
+    _screen_size.width = width;
+}
+
+void Preferences::set_screen_height(int32_t height) {
+    _screen_size.height = height;
 }
 
 void Preferences::set_scenario_identifier(StringSlice id) {

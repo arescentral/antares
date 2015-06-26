@@ -73,7 +73,7 @@ void Transitions::update_boolean(int32_t time_passed) {
 
 void Transitions::draw() const {
     if (_active) {
-        VideoDriver::driver()->fill_rect(world, _color);
+        Rects().fill(world, _color);
     }
 }
 
@@ -145,14 +145,13 @@ void ColorFade::draw() const {
     } else {
         fill_color.alpha = 0xff * (1.0 - fraction);
     }
-    VideoDriver::driver()->fill_rect(world, fill_color);
+    Rects().fill(world, fill_color);
 }
 
 PictFade::PictFade(int pict_id, bool* skipped):
         _state(NEW),
         _skipped(skipped),
-        _sprite(VideoDriver::driver()->new_sprite(
-                    format("/pictures/{0}.png", pict_id), Picture(pict_id))) { }
+        _texture(Picture(pict_id).texture()) { }
 
 PictFade::~PictFade() { }
 
@@ -214,9 +213,9 @@ void PictFade::fire_timer() {
 }
 
 void PictFade::draw() const {
-    Rect bounds = _sprite->size().as_rect();
+    Rect bounds = _texture.size().as_rect();
     bounds.center_in(world);
-    _sprite->draw(bounds.left, bounds.top);
+    _texture.draw(bounds.left, bounds.top);
 }
 
 void PictFade::wax() {

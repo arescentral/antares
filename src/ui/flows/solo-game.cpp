@@ -107,7 +107,7 @@ void SoloGame::handle_game_result() {
             if (epilogue > 0) {
                 // normal scrolltext song
                 int scroll_song = 4002;
-                if (globals()->gScenarioWinner.next == -1) {
+                if (g.next_level == -1) {
                     // we win but no next level? Play triumph song
                     scroll_song = 4003;
                 }
@@ -138,10 +138,10 @@ void SoloGame::epilogue_done() {
         StopAndUnloadSong();
     }
 
-    if (globals()->gScenarioWinner.next == -1) {
+    if (g.next_level < 0) {
         _scenario = NULL;
     } else {
-        _scenario = GetScenarioPtrFromChapter(globals()->gScenarioWinner.next);
+        _scenario = GetScenarioPtrFromChapter(g.next_level);
     }
 
     if (_scenario != NULL) {

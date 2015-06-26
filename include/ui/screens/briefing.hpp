@@ -30,7 +30,6 @@
 namespace antares {
 
 struct Scenario;
-class Sprite;
 
 class BriefingScreen : public InterfaceScreen {
   public:
@@ -60,7 +59,6 @@ class BriefingScreen : public InterfaceScreen {
     };
 
     void build_star_map();
-    void build_system_map();
     void build_brief_point();
 
     void draw_system_map() const;
@@ -78,7 +76,7 @@ class BriefingScreen : public InterfaceScreen {
 
     Rect _bounds;
 
-    std::unique_ptr<Sprite> _star_map;
+    Texture _star_map;
     Rect _star_rect;
 
     struct Star {

@@ -23,10 +23,9 @@
 #include <sfz/sfz.hpp>
 
 #include "drawing/pix-map.hpp"
+#include "video/driver.hpp"
 
 namespace antares {
-
-class Sprite;
 
 class NatePixTable {
   public:
@@ -57,7 +56,7 @@ class NatePixTable::Frame {
     uint16_t height() const;
     Point center() const;
     const PixMap& pix_map() const;
-    const Sprite& sprite() const;
+    const Texture& texture() const;
 
   private:
     void load_image(const PixMap& pix);
@@ -66,7 +65,7 @@ class NatePixTable::Frame {
 
     Rect _bounds;
     ArrayPixMap _pix_map;
-    std::unique_ptr<Sprite> _sprite;
+    Texture _texture;
 
     DISALLOW_COPY_AND_ASSIGN(Frame);
 };

@@ -21,6 +21,7 @@
 
 #include <sfz/sfz.hpp>
 
+#include "data/handle.hpp"
 #include "drawing/styled-text.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
@@ -32,7 +33,7 @@ class ObjectDataScreen : public Card {
   public:
     enum Trigger { MOUSE, KEY, GAMEPAD };
 
-    ObjectDataScreen(Point origin, int32_t object_id, Trigger trigger, int which);
+    ObjectDataScreen(Point origin, Handle<BaseObject> object, Trigger trigger, int which);
     ~ObjectDataScreen();
 
     virtual void become_front();

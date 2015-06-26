@@ -28,6 +28,7 @@
 #include "game/globals.hpp"
 #include "game/labels.hpp"
 #include "game/scenario-maker.hpp"
+#include "lang/defines.hpp"
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
@@ -125,16 +126,14 @@ struct Messages::longMessageType {
     int32_t                 at_char;
     bool                 labelMessage;
     bool                 lastLabelMessage;
-    int16_t                 labelMessageID;
+    Handle<Label>           labelMessageID;
 };
 
-std::queue<sfz::String> Messages::message_data;
-Messages::longMessageType* Messages::long_message_data;
-int32_t Messages::time_count;
-int32_t Messages::message_label_num;
-int32_t Messages::status_label_num;
+ANTARES_GLOBAL std::queue<sfz::String> Messages::message_data;
+ANTARES_GLOBAL Messages::longMessageType* Messages::long_message_data;
+ANTARES_GLOBAL int32_t Messages::time_count;
 
-void MessageLabel_Set_Special(int16_t id, const StringSlice& text);
+void MessageLabel_Set_Special(Handle<Label> id, const StringSlice& text);
 
 void Messages::init() {
     longMessageType *tmessage = NULL;
@@ -142,15 +141,15 @@ void Messages::init() {
     antares::clear(message_data);
     long_message_data = new longMessageType;
 
-    message_label_num = Labels::add(
-            kMessageScreenLeft, kMessageScreenTop, 0, 0, NULL, false, kMessageColor);
+    g.message_label = Label::add(
+            kMessageScreenLeft, kMessageScreenTop, 0, 0, SpaceObject::none(), false, kMessageColor);
 
-    if (message_label_num < 0) {
+    if (!g.message_label.get()) {
         throw Exception("Couldn't add a screen label.");
     }
-    status_label_num = Labels::add(
-            kStatusLabelLeft, kStatusLabelTop, 0, 0, NULL, false, kStatusLabelColor);
-    if (status_label_num < 0) {
+    g.status_label = Label::add(
+            kStatusLabelLeft, kStatusLabelTop, 0, 0, SpaceObject::none(), false, kStatusLabelColor);
+    if (!g.status_label.get()) {
         throw Exception("Couldn't add a screen label.");
     }
 
@@ -171,7 +170,7 @@ void Messages::init() {
     tmessage->newStringMessage = false;
     tmessage->labelMessage = false;
     tmessage->lastLabelMessage = false;
-    tmessage->labelMessageID = -1;
+    tmessage->labelMessageID = Label::none();
 }
 
 void Messages::clear() {
@@ -180,10 +179,10 @@ void Messages::clear() {
     time_count = 0;
     std::queue<sfz::String> empty;
     swap(message_data, empty);
-    message_label_num = Labels::add(
-            kMessageScreenLeft, kMessageScreenTop, 0, 0, NULL, false, kMessageColor);
-    status_label_num = Labels::add(
-            kStatusLabelLeft, kStatusLabelTop, 0, 0, NULL, false, kStatusLabelColor);
+    g.message_label = Label::add(
+            kMessageScreenLeft, kMessageScreenTop, 0, 0, SpaceObject::none(), false, kMessageColor);
+    g.status_label = Label::add(
+            kStatusLabelLeft, kStatusLabelTop, 0, 0, SpaceObject::none(), false, kStatusLabelColor);
 
     tmessage = long_message_data;
     tmessage->startResID = -1;
@@ -200,8 +199,8 @@ void Messages::clear() {
     tmessage->lastLabelMessage = false;
     tmessage->retro_text.reset();
     viewport.bottom = play_screen.bottom;
-    tmessage->labelMessageID = Labels::add(0, 0, 0, 0, NULL, false, SKY_BLUE);
-    Labels::set_keep_on_screen_anyway( tmessage->labelMessageID, true);
+    tmessage->labelMessageID = Label::add(0, 0, 0, 0, SpaceObject::none(), false, SKY_BLUE);
+    tmessage->labelMessageID->set_keep_on_screen_anyway(true);
 }
 
 void Messages::add(const sfz::PrintItem& message) {
@@ -345,14 +344,14 @@ void Messages::draw_long_message(int32_t time_pass) {
         // }
 
         if ((tmessage->lastResID >= 0) && (tmessage->lastLabelMessage)) {
-            Labels::set_age(tmessage->labelMessageID, 1);
+            tmessage->labelMessageID->set_age(1);
         }
 
         // draw in offscreen world
         if ((tmessage->currentResID >= 0) && ( tmessage->stage == kShowStage)) {
             if (tmessage->retro_text.get() != NULL) {
                 if (tmessage->labelMessage) {
-                    Labels::set_age(tmessage->labelMessageID, 0);
+                    tmessage->labelMessageID->set_age(0);
 
                     if (tmessage->retro_text.get() != NULL) {
                         MessageLabel_Set_Special(tmessage->labelMessageID, tmessage->text);
@@ -458,26 +457,23 @@ void Messages::draw_message_screen(int32_t by_units) {
         const String& message = message_data.front();
 
         if (time_count < kRaiseTime) {
-            Labels::set_position(
-                    message_label_num, kMessageScreenLeft,
-                    viewport.bottom - time_count);
+            g.message_label->set_position(kMessageScreenLeft, viewport.bottom - time_count);
         } else if (time_count > kLowerTime) {
-            Labels::set_position(
-                    message_label_num, kMessageScreenLeft,
-                    viewport.bottom - (kMessageDisplayTime - time_count));
+            g.message_label->set_position(
+                    kMessageScreenLeft, viewport.bottom - (kMessageDisplayTime - time_count));
         }
 
-        Labels::set_string(message_label_num, message);
+        g.message_label->set_string(message);
     } else {
-        Labels::clear_string(message_label_num);
+        g.message_label->clear_string();
         time_count = 0;
     }
 }
 
 void Messages::set_status(const StringSlice& status, uint8_t color) {
-    Labels::set_color(status_label_num, color);
-    Labels::set_string(status_label_num, status);
-    Labels::set_age(status_label_num, kStatusLabelAge);
+    g.status_label->set_color(color);
+    g.status_label->set_string(status);
+    g.status_label->set_age(kStatusLabelAge);
 }
 
 int16_t Messages::current() {
@@ -497,7 +493,7 @@ int16_t Messages::current() {
 //  t = one of three characters: 'L' for left, 'R' for right, and 'O' for object
 //  nnn... are digits specifying value (distance from top, or initial object #)
 //
-void MessageLabel_Set_Special(int16_t id, const StringSlice& text) {
+void MessageLabel_Set_Special(Handle<Label> label, const StringSlice& text) {
     char whichType;
     int32_t value = 0;
     Point attachPoint;
@@ -552,34 +548,34 @@ void MessageLabel_Set_Special(int16_t id, const StringSlice& text) {
         ++it;
     }
 
-    Labels::set_string(id, message);
-    Labels::set_keep_on_screen_anyway(id, true);
+    label->set_string(message);
+    label->set_keep_on_screen_anyway(true);
 
     switch (whichType) {
       case 'R':
-        Labels::set_offset(id, 0, 0);
-        Labels::set_position(
-                id, play_screen.right - (Labels::get_width(id)+10),
+        label->set_offset(0, 0);
+        label->set_position(
+                play_screen.right - (label->get_width()+10),
                 globals()->gInstrumentTop + value);
         break;
 
       case 'L':
-        Labels::set_offset(id, 0, 0);
-        Labels::set_position(id, 138, globals()->gInstrumentTop + value);
+        label->set_offset(0, 0);
+        label->set_position(138, globals()->gInstrumentTop + value);
         break;
 
       case 'O':
         {
-            spaceObjectType* o = GetObjectFromInitialNumber(value);
-            Labels::set_offset(id, -(Labels::get_width(id)/2), 64);
-            Labels::set_object(id, o);
+            auto o = GetObjectFromInitialNumber(value);
+            label->set_offset(-(label->get_width()/2), 64);
+            label->set_object(o);
 
             hintLine = true;
         }
         break;
     }
     attachPoint.v -= 2;
-    Labels::set_attached_hint_line(id, hintLine, attachPoint);
+    label->set_attached_hint_line(hintLine, attachPoint);
 }
 
 void Messages::draw_message() {
@@ -590,16 +586,17 @@ void Messages::draw_message() {
     const RgbColor& dark_blue = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
     const RgbColor& light_blue = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
     Rect message_bounds(play_screen.left, viewport.bottom, play_screen.right, play_screen.bottom);
-    VideoDriver::driver()->fill_rect(message_bounds, light_blue);
-    message_bounds.inset(0, 1);
-    VideoDriver::driver()->fill_rect(message_bounds, dark_blue);
+    {
+        Rects rects;
+        rects.fill(message_bounds, light_blue);
+        message_bounds.inset(0, 1);
+        rects.fill(message_bounds, dark_blue);
+    }
 
     Rect bounds(viewport.left, viewport.bottom, viewport.right, play_screen.bottom);
     bounds.inset(kHBuffer, 0);
     bounds.top += kLongMessageVPad;
-    for (int i = 0; i < long_message_data->at_char; ++i) {
-        long_message_data->retro_text->draw_char(bounds, i);
-    }
+    long_message_data->retro_text->draw_range(bounds, 0, long_message_data->at_char);
     // The final char is a newline; don't display a cursor rect for it.
     if ((0 < long_message_data->at_char)
             && (long_message_data->at_char < (long_message_data->retro_text->size() - 1))) {

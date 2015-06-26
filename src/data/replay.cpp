@@ -20,6 +20,7 @@
 
 #include <fcntl.h>
 #include <glob.h>
+#include <time.h>
 #include <unistd.h>
 #include <sfz/sfz.hpp>
 
@@ -113,11 +114,15 @@ static void tag_varint(WriteTarget out, uint64_t tag, uint64_t value) {
     write_varint(out, value);
 }
 
-template <typename T>
+// On mac, size_t is a distinct type.  On linux, it's the same as one
+// of the built-in integer types.  is_size_t lets us define methods for
+// both without getting a linker error for having a duplicate symbol.
+// It doesn't matter which version we use if they're the same.
+template <typename T, bool is_size_t=std::is_same<T, size_t>::value>
 static T read_varint(ReadSource in);
 
 template <>
-uint64_t read_varint<uint64_t>(ReadSource in) {
+uint64_t read_varint<uint64_t, false>(ReadSource in) {
     uint64_t byte;
     uint64_t value = 0;
     int shift = 0;
@@ -130,8 +135,8 @@ uint64_t read_varint<uint64_t>(ReadSource in) {
 }
 
 template <>
-int64_t read_varint<int64_t>(ReadSource in) {
-    uint64_t u64 = read_varint<uint64_t>(in);
+int64_t read_varint<int64_t, false>(ReadSource in) {
+    uint64_t u64 = read_varint<uint64_t, false>(in);
     int64_t s64 = u64 & 0x7fffffffffffffffULL;
     if (u64 & 0x8000000000000000ULL) {
         s64 += -0x8000000000000000ULL;
@@ -140,18 +145,18 @@ int64_t read_varint<int64_t>(ReadSource in) {
 }
 
 template <>
-size_t read_varint<size_t>(ReadSource in) {
-    return read_varint<uint64_t>(in);
+size_t read_varint<size_t, true>(ReadSource in) {
+    return read_varint<uint64_t, false>(in);
 }
 
 template <>
-int32_t read_varint<int32_t>(ReadSource in) {
-    return read_varint<int64_t>(in);
+int32_t read_varint<int32_t, false>(ReadSource in) {
+    return read_varint<int64_t, false>(in);
 }
 
 template <>
-uint8_t read_varint<uint8_t>(ReadSource in) {
-    return read_varint<int64_t>(in);
+uint8_t read_varint<uint8_t, false>(ReadSource in) {
+    return read_varint<int64_t, false>(in);
 }
 
 static void tag_string(WriteTarget out, uint64_t tag, const String& s) {
@@ -283,12 +288,12 @@ static void cull_replays(size_t count) {
         glob(c_str.data(), 0, NULL, &g.data);
 
         map<int64_t, const char*> files;
-        for (int i = 0; i < g.data.gl_matchc; ++i) {
+        for (int i = 0; i < g.data.gl_pathc; ++i) {
             struct stat st;
             if (stat(g.data.gl_pathv[i], &st) < 0) {
                 continue;
             }
-            files[st.st_mtimespec.tv_sec] = g.data.gl_pathv[i];
+            files[st.st_mtime] = g.data.gl_pathv[i];
         }
         while (files.size() >= count) {
             if (unlink(files.begin()->second) < 0) {
@@ -317,7 +322,7 @@ void ReplayBuilder::start() {
     char buffer[1024];
     if ((time(&t) < 0)
             || !localtime_r(&t, &tm)
-            || (strftime(buffer, 1024, "%+", &tm) <= 0)) {
+            || (strftime(buffer, 1024, "%c", &tm) <= 0)) {
         return;
     }
     sfz::String path(format("{0}/Replay {1}.nlrp", dirs().replays, utf8::decode(buffer)));

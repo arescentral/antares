@@ -55,6 +55,8 @@ class Preferences {
     void set_volume(int volume);
     void set_fullscreen(bool fullscreen);
     void set_screen_size(Size size);
+    void set_screen_width(int32_t width);
+    void set_screen_height(int32_t height);
     void set_scenario_identifier(sfz::StringSlice id);
 
   private:

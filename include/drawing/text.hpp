@@ -23,8 +23,11 @@
 
 #include "drawing/sprite-handling.hpp"
 #include "lang/casts.hpp"
+#include "video/driver.hpp"
 
 namespace antares {
+
+class Quads;
 
 class Font {
   public:
@@ -34,21 +37,19 @@ class Font {
     uint8_t char_width(sfz::Rune mchar) const;
     int32_t string_width(sfz::StringSlice s) const;
 
-    void draw(Point origin, sfz::Rune r, RgbColor color, PixMap* pix) const;
+    void draw(Point cursor, sfz::StringSlice string, RgbColor color) const;
+    void draw(const Quads& quads, Point cursor, sfz::StringSlice string, RgbColor color) const;
 
-    void draw_sprite(Point origin, sfz::StringSlice string, RgbColor color) const;
-
+    Texture texture;
     int32_t logicalWidth;
     int32_t height;
     int32_t ascent;
 
   private:
-    void draw_internal(Point origin, sfz::Rune r, RgbColor color, PixMap* pix) const;
     Rect glyph_rect(sfz::Rune r) const;
 
-    ArrayPixMap _glyph_table;
+    int _scale;
     std::map<sfz::Rune, Rect> _glyphs;
-    std::map<sfz::Rune, std::unique_ptr<Sprite>> _sprites;
 
     DISALLOW_COPY_AND_ASSIGN(Font);
 };

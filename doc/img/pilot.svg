@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1300" height="750" version="1.0"><g transform="translate(650,450)" style="font-size:32px;font-family:Source Sans Pro;font-weight:200"><g id="lt"><path d="M-220,-200L-300,-300H-600" style="fill:none;stroke:black;stroke-width:2px"/><text x="-600" y="-304" style="text-anchor:start">Fire Special</text></g><g id="rt"><path d="M220,-200L300,-300H600" style="fill:none;stroke:black;stroke-width:2px"/><text x="600" y="-304" style="text-anchor:end">Fire Main</text></g><g transform="translate(-379,-275)"><g transform="translate(379,0)">
+    <g>
+      <path d="M 279,57 L 275,41 C 273,33 273,32 270,30 C 237,8 199,-3 161,3 C 154,4 145,21 145,21 z" style="fill:#cccccc"/>
+      <path d="M -279,57 L -275,41 C -273,33 -273,32 -270,30 C -237,8 -199,-3 -161,3 C -154,4 -145,21 -145,21 z" style="fill:#cccccc"/>
+    </g>
+    <g>
+      <rect x="13" y="391" width="25" height="16" rx="3" ry="3" style="fill:#4d4d4d"/>
+      <rect x="-38" y="391" width="25" height="16" rx="3" ry="3" style="fill:#4d4d4d"/>
+      <rect x="-10" y="391" width="20" height="16" rx="3" ry="3" style="fill:#4d4d4d"/>
+    </g>
+    <path d="M 0,57 C -49,57 -90,54 -127,31 C -140,23 -157,19 -175,19 C -222,19 -277,43 -291,79 C -310,128 -376,324 -373,428 C -369,526 -354,546 -317,545 C -234,536 -225,488 -168,444 C -115,402 -78,400 0,400 C 78,400 115,402 168,444 C 225,488 234,536 317,545 C 354,546 369,526 373,428 C 376,324 310,128 291,79 C 277,43 222,19 175,19 C 157,19 140,23 127,31 C 90,54 49,57 0,57 z" style="fill:#eeeeee;stroke:#808080;stroke-width:8"/>
+    <path style="fill:#808080" d="M 0,376 C -70,376 -106,378 -141,398 C -216,438 -231,503 -310,545 C -233,534 -223,487 -168,444 C -115,402 -78,398 0,400 C 78,398 115,402 168,444 C 223,487 233,534 310,545 C 231,503 216,438 141,398 C 106,378 70,376 0,376 z"/>
+    <g transform="translate(0,137)">
+      <path style="fill:#dddddd" d="M 0,46 C 12,46 24,41 32,33 C 39,25 48,19 55,19 C 62,19 54,19 54,19 C 54,19 82,19 82,19 C 93,19 101,10 101,0 C 101,-11 93,-19 82,-19 C 82,-19 54,-19 54,-19 C 54,-19 62,-19 55,-19 C 48,-19 39,-25 32,-33 C 24,-42 12,-46 0,-46 C -13,-46 -25,-42 -33,-33 C -40,-25 -48,-19 -55,-19 C -62,-19 -55,-19 -55,-19 C -55,-19 -83,-19 -83,-19 C -93,-19 -102,-11 -102,0 C -102,10 -93,19 -83,19 C -83,19 -55,19 -55,19 C -55,19 -62,19 -55,19 C -48,19 -40,25 -33,33 C -25,41 -13,46 0,46 z"/>
+      <g>
+        <rect ry="16" rx="16" y="-15" x="60" height="30" width="37" style="fill:#f0f0f0"/>
+        <path d="M 73,9 L 89,0 L 73,-9 L 73,9 z" style="fill:#717171"/>
+      </g>
+      <g>
+        <rect ry="16" rx="16" y="-15" x="-97" height="30" width="37" style="fill:#f0f0f0"/>
+        <path d="M -73,9 L -89,0 L -73,-9 L -73,9 z" style="fill:#717171"/>
+      </g>
+      <circle cx="0" cy="0" r="42" fill="#555555"/>
+      <circle cx="0" cy="0" r="36" fill="#979797"/>
+      <path style="fill:#77ee77" d="M -20,-29 A 40,60 0 0 1 25,25 A 60,90 0 0 0 -20,-29 z"/>
+      <path style="fill:#77ee77" d="M 20,-29 A 40,60 0 0 0 -25,25 A 60,90 0 0 1 20,-29 z"/>
+    </g>
+    <g transform="translate(-109,252)">
+      <circle cx="0" cy="0" r="73" style="fill:#dfdfdf"/>
+      <circle cx="0" cy="0" r="61" style="fill:#333333"/>
+      <path d="M -16,-56 A 58.24,58.24 0 0 1 16,-56 A 40,40 0 0 0 56,-16 A 58.24,58.24 0 0 1 56,16 A 40,40 0 0 0 16,56 A 58.24,58.24 0 0 1 -16,56 A 40,40 0 0 0 -56,16 A 58.24,58.24 0 0 1 -56,-16 A 40,40 0 0 0 -16,-56 z" style="fill:#515151"/>
+    </g>
+    <g transform="translate(109,252)">
+      <circle cx="0" cy="0" r="57" style="fill:#dfdfdf"/>
+      <circle cx="0" cy="0" r="49" style="fill:#4d4d4d"/>
+      <circle cx="0" cy="0" r="35" style="fill:#333333"/>
+      <circle cx="-28" cy="0" r="4.5" style="fill:#9b9b9b"/>
+      <circle cx="28" cy="0" r="4.5" style="fill:#9b9b9b"/>
+      <circle cx="0" cy="-28" r="4.5" style="fill:#9b9b9b"/>
+      <circle cx="0" cy="28" r="4.5" style="fill:#9b9b9b"/>
+    </g>
+    <g transform="translate(-216,130)">
+      <circle cx="0" cy="0" r="57" style="fill:#dfdfdf"/>
+      <circle cx="0" cy="0" r="49" style="fill:#4d4d4d"/>
+      <circle cx="0" cy="0" r="35" style="fill:#333333"/>
+      <circle cx="-28" cy="0" r="4.5" style="fill:#9b9b9b"/>
+      <circle cx="28" cy="0" r="4.5" style="fill:#9b9b9b"/>
+      <circle cx="0" cy="-28" r="4.5" style="fill:#9b9b9b"/>
+      <circle cx="0" cy="28" r="4.5" style="fill:#9b9b9b"/>
+    </g>
+    <g transform="translate(216,130)">
+      <circle cx="54" cy="0" r="26" style="fill:#cc0000"/>
+      <circle cx="0" cy="54" r="26" style="fill:#66cc66"/>
+      <circle cx="-54" cy="0" r="26" style="fill:#0066cc"/>
+      <circle cx="0" cy="-54" r="26" style="fill:#eecc00"/>
+    </g>
+  </g></g><g id="back"><circle cx="-84" cy="-148" r="6"/><path d="M-84,-148L-160,-400H-450" style="fill:none;stroke:black;stroke-width:2px"/><text x="-450" y="-404" style="text-anchor:start">Next Message</text></g><g id="start"><circle cx="84" cy="-148" r="6"/><path d="M84,-148L160,-400H450" style="fill:none;stroke:black;stroke-width:2px"/><text x="450" y="-404" style="text-anchor:end">Pause</text></g><g id="lb"><circle cx="-220" cy="-270" r="6"/><path d="M-220,-270L-260,-350H-600" style="fill:none;stroke:black;stroke-width:2px"/><text x="-600" y="-354" style="text-anchor:start">Target Mode</text></g><g id="rb"><circle cx="220" cy="-270" r="6"/><path d="M220,-270L260,-350H600" style="fill:none;stroke:black;stroke-width:2px"/><text x="600" y="-354" style="text-anchor:end">Select Mode</text></g><g id="a"><circle cx="216" cy="-90" r="6"/><path d="M216,-90L390,-100H600" style="fill:none;stroke:black;stroke-width:2px"/><text x="600" y="-104" style="text-anchor:end">Thrust</text></g><g id="b"><circle cx="270" cy="-144" r="6"/><path d="M270,-144L370,-149H600" style="fill:none;stroke:black;stroke-width:2px"/><text x="600" y="-154" style="text-anchor:end">Brake</text></g><g id="x"><circle cx="162" cy="-144" r="6"/><path d="M162,-144L350,-200H600" style="fill:none;stroke:black;stroke-width:2px"/><text x="600" y="-204" style="text-anchor:end">Zoom Out</text></g><g id="y"><circle cx="216" cy="-198" r="6"/><path d="M216,-198L330,-250H600" style="fill:none;stroke:black;stroke-width:2px"/><text x="600" y="-254" style="text-anchor:end">Zoom In</text></g><g id="ls"><path d="M-239,-84A65,65 0,1,0 -277,-168L-350,-200H-600" style="fill:none;stroke:black;stroke-width:2px"/><text x="-600" y="-204" style="text-anchor:start">Rotate</text></g><g id="lsb"><circle cx="-216" cy="-145" r="6"/><path d="M-216,-145L-370,-149H-600" style="fill:none;stroke:black;stroke-width:2px"/><text x="-600" y="-154" style="text-anchor:start">Warp</text></g><g id="up"><circle cx="-109" cy="-68" r="6"/><path d="M-109,-68L-380,-49H-600" style="fill:none;stroke:black;stroke-width:2px"/><text x="-600" y="-54" style="text-anchor:start">Comp Up</text></g><g id="down"><circle cx="-109" cy="22" r="6"/><path d="M-109,22L-400,101H-600" style="fill:none;stroke:black;stroke-width:2px"/><text x="-600" y="96" style="text-anchor:start">Comp Down</text></g><g id="left"><circle cx="-154" cy="-23" r="6"/><path d="M-154,-23L-390,1H-600" style="fill:none;stroke:black;stroke-width:2px"/><text x="-600" y="-4" style="text-anchor:start">Comp Back</text></g><g id="right"><circle cx="-64" cy="-23" r="6"/><path d="M-64,-23L-400,51H-600" style="fill:none;stroke:black;stroke-width:2px"/><text x="-600" y="46" style="text-anchor:start">Comp Accept</text></g></g></svg>

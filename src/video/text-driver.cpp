@@ -18,15 +18,13 @@
 
 #include "video/text-driver.hpp"
 
+#include <algorithm>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <strings.h>
 #include <algorithm>
-#include <OpenGL/OpenGL.h>
-#include <OpenGL/gl.h>
 #include <sfz/sfz.hpp>
 
-#include "cocoa/core-opengl.hpp"
 #include "config/preferences.hpp"
 #include "drawing/pix-map.hpp"
 #include "game/globals.hpp"
@@ -46,6 +44,8 @@ using sfz::format;
 using sfz::print;
 using sfz::write;
 using std::make_pair;
+using std::max;
+using std::min;
 using std::pair;
 using std::vector;
 namespace utf8 = sfz::utf8;
@@ -73,9 +73,9 @@ void print_to(PrintTarget target, HexColor color) {
 
 }  // namespace
 
-class TextVideoDriver::Sprite : public antares::Sprite {
+class TextVideoDriver::TextureImpl : public Texture::Impl {
   public:
-    Sprite(PrintItem name, TextVideoDriver& driver, Size size):
+    TextureImpl(PrintItem name, TextVideoDriver& driver, Size size):
             _name(name),
             _driver(driver),
             _size(size) { }
@@ -93,15 +93,23 @@ class TextVideoDriver::Sprite : public antares::Sprite {
         _driver.log("draw", args);
     }
 
-    virtual void draw_cropped(const Rect& draw_rect, Point origin) const {
-        if (!world.intersects(draw_rect)) {
+    virtual void draw_cropped(const Rect& dest, const Rect& source, const RgbColor& tint) const {
+        if (!world.intersects(dest)) {
             return;
         }
-        PrintItem args[] = {
-            draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
-            origin.h, origin.v, _name,
-        };
-        _driver.log("crop", args);
+        if (source.size() == dest.size()) {
+            PrintItem args[] = {
+                dest.left, dest.top, dest.right, dest.bottom,
+                source.left, source.top, hex(tint), _name,
+            };
+            _driver.log("crop", args);
+        } else {
+            PrintItem args[] = {
+                dest.left, dest.top, dest.right, dest.bottom,
+                source.left, source.top, source.right, source.bottom, hex(tint), _name,
+            };
+            _driver.log("crop", args);
+        }
     }
 
     virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const {
@@ -186,11 +194,15 @@ TextVideoDriver::TextVideoDriver(
         _scheduler(scheduler),
         _output_dir(output_dir) { }
 
-std::unique_ptr<Sprite> TextVideoDriver::new_sprite(sfz::PrintItem name, const PixMap& content) {
-    return std::unique_ptr<antares::Sprite>(new Sprite(name, *this, content.size()));
+int TextVideoDriver::scale() const {
+    return 1;
 }
 
-void TextVideoDriver::fill_rect(const Rect& rect, const RgbColor& color) {
+Texture TextVideoDriver::texture(sfz::PrintItem name, const PixMap& content) {
+    return std::unique_ptr<Texture::Impl>(new TextureImpl(name, *this, content.size()));
+}
+
+void TextVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
     if (!world.intersects(rect)) {
         return;
     }

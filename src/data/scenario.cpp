@@ -40,10 +40,10 @@ void read_pstr(ReadSource in, String& out) {
 }  // namespace
 
 void read_from(ReadSource in, scenarioInfoType& scenario_info) {
-    read(in, scenario_info.warpInFlareID);
-    read(in, scenario_info.warpOutFlareID);
-    read(in, scenario_info.playerBodyID);
-    read(in, scenario_info.energyBlobID);
+    scenario_info.warpInFlareID = Handle<BaseObject>(read<int32_t>(in));
+    scenario_info.warpOutFlareID = Handle<BaseObject>(read<int32_t>(in));
+    scenario_info.playerBodyID = Handle<BaseObject>(read<int32_t>(in));
+    scenario_info.energyBlobID = Handle<BaseObject>(read<int32_t>(in));
     read_pstr(in, scenario_info.downloadURLString);
     read_pstr(in, scenario_info.titleString);
     read_pstr(in, scenario_info.authorNameString);
@@ -90,6 +90,13 @@ void read_from(ReadSource in, Scenario::Player& scenario_player) {
     in.shift(2);
 }
 
+static void read_action(sfz::ReadSource in, Scenario::Condition& condition) {
+    auto start = read<int32_t>(in);
+    auto count = read<int32_t>(in);
+    auto end = (start >= 0) ? (start + count) : start;
+    condition.action = {start, end};
+}
+
 void read_from(ReadSource in, Scenario::Condition& scenario_condition) {
     uint8_t section[12];
 
@@ -98,8 +105,7 @@ void read_from(ReadSource in, Scenario::Condition& scenario_condition) {
     read(in, section, 12);
     read(in, scenario_condition.subjectObject);
     read(in, scenario_condition.directObject);
-    read(in, scenario_condition.startVerb);
-    read(in, scenario_condition.verbNum);
+    read_action(in, scenario_condition);
     read(in, scenario_condition.flags);
     read(in, scenario_condition.direction);
 
@@ -133,7 +139,7 @@ void read_from(ReadSource in, Scenario::Condition& scenario_condition) {
 }
 
 void read_from(ReadSource in, Scenario::Condition::CounterArgument& counter_argument) {
-    read(in, counter_argument.whichPlayer);
+    counter_argument.whichPlayer = Handle<Admiral>(read<int32_t>(in));
     read(in, counter_argument.whichCounter);
     read(in, counter_argument.amount);
 }
@@ -175,9 +181,10 @@ void read_from(ReadSource in, Scenario::BriefPoint::AbsoluteBrief& absolute_brie
 }
 
 void read_from(ReadSource in, Scenario::InitialObject& scenario_initial) {
-    read(in, scenario_initial.type);
-    read(in, scenario_initial.owner);
-    read(in, scenario_initial.realObjectNumber);
+    scenario_initial.type = Handle<BaseObject>(read<int32_t>(in));
+    scenario_initial.owner = Handle<Admiral>(read<int32_t>(in));
+    in.shift(4);
+    scenario_initial.realObject = Handle<SpaceObject>(-1);
     read(in, scenario_initial.realObjectID);
     read(in, scenario_initial.location);
     read(in, scenario_initial.earning);

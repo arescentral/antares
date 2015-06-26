@@ -21,11 +21,12 @@
 
 #include <stdint.h>
 
+#include "data/handle.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
 
-struct spaceObjectType;
+struct SpaceObject;
 
 typedef uint8_t beamKindType;
 enum beamKindEnum {
@@ -38,26 +39,26 @@ enum beamKindEnum {
 
 static const int kBoltPointNum = 10;
 
-struct beamType {
+struct Beam {
+    static Beam* get(int number);
+    static Handle<Beam> none() { return Handle<Beam>(-1); }
+    static HandleList<Beam> all() { return HandleList<Beam>(0, size); }
+
+    Beam();
+
     beamKindType        beamKind;
     Rect                thisLocation;
-    Rect                lastLocation;
     coordPointType      lastGlobalLocation;
     coordPointType      objectLocation;
     coordPointType      lastApparentLocation;
-    coordPointType      endLocation;
     uint8_t             color;
     bool                killMe;
     bool                active;
-    int32_t             fromObjectNumber;
     int32_t             fromObjectID;
-    spaceObjectType*    fromObject;
-    int32_t             toObjectNumber;
+    Handle<SpaceObject> fromObject;
     int32_t             toObjectID;
-    spaceObjectType*    toObject;
+    Handle<SpaceObject> toObject;
     Point               toRelativeCoord;
-    uint32_t            boltRandomSeed;
-    uint32_t            lastBoldRandomSeed;
     int32_t             boltCycleTime;
     int32_t             boltState;
     int32_t             accuracy;
@@ -65,23 +66,23 @@ struct beamType {
     Point               thisBoltPoint[kBoltPointNum];
     Point               lastBoltPoint[kBoltPointNum];
 
-    beamType();
+  private:
+    friend class Beams;
+    const static size_t size = 256;
 };
 
 class Beams {
   public:
     static void init();
     static void reset();
-    static beamType* add(
+    static Handle<Beam> add(
             coordPointType* location, uint8_t color, beamKindType kind, int32_t accuracy,
-            int32_t beam_range, int32_t* whichBeam);
-    static void set_attributes(spaceObjectType* beamObject, spaceObjectType* sourceObject);
+            int32_t beam_range);
+    static void set_attributes(Handle<SpaceObject> beamObject, Handle<SpaceObject> sourceObject);
     static void update();
     static void draw();
     static void show_all();
     static void cull();
-  private:
-    static std::unique_ptr<beamType[]> _data;
 };
 
 }  // namespace antares

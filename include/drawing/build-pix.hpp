@@ -19,13 +19,34 @@
 #ifndef ANTARES_DRAWING_BUILD_PIX_HPP_
 #define ANTARES_DRAWING_BUILD_PIX_HPP_
 
-#include <memory>
+#include <vector>
+#include <sfz/sfz.hpp>
+#include "drawing/styled-text.hpp"
+#include "math/geometry.hpp"
+#include "video/driver.hpp"
 
 namespace antares {
 
-class PixMap;
+class BuildPix {
+  public:
+    BuildPix(int text_id, int width);
 
-std::unique_ptr<PixMap> build_pix(int text_id, int width);
+    Size size() const { return _size; }
+    void draw(Point origin) const;
+
+  private:
+    struct Line {
+        enum Type {
+            PICTURE,
+            BACKGROUND,
+            TEXT,
+        } type;
+        Texture texture;
+        std::unique_ptr<StyledText> text;
+    };
+    std::vector<Line> _lines;
+    Size _size;
+};
 
 }  // namespace antares
 

@@ -21,12 +21,11 @@
 
 #include <sfz/sfz.hpp>
 
+#include "drawing/build-pix.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
 
 namespace antares {
-
-class Sprite;
 
 class ScrollTextScreen : public Card {
   public:
@@ -46,7 +45,7 @@ class ScrollTextScreen : public Card {
     virtual void draw() const;
 
   private:
-    std::unique_ptr<Sprite> _sprite;
+    BuildPix _build_pix;
     const double _speed;
     const bool _play_song;
     const int _song_id;

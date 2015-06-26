@@ -84,7 +84,7 @@ class ReplayMaster : public Card {
             init();
             Randomize(4);  // For the decision to replay intro.
             _game_result = NO_GAME;
-            gRandomSeed.seed = _random_seed;
+            g.random.seed = _random_seed;
             globals()->gInputSource.reset(new ReplayInputSource(&_replay_data));
             stack()->push(new MainPlay(
                         GetScenarioPtrFromChapter(_replay_data.chapter_id), true, false,
@@ -96,15 +96,16 @@ class ReplayMaster : public Card {
                 String path(format("{0}/debriefing.txt", *_output_path));
                 makedirs(path::dirname(path), 0755);
                 ScopedFd outcome(open(path, O_WRONLY | O_CREAT, 0644));
-                if ((globals()->gScenarioWinner.text >= 0)) {
-                    Resource rsrc("text", "txt", globals()->gScenarioWinner.text);
+                if ((g.victory_text >= 0)) {
+                    Resource rsrc("text", "txt", g.victory_text);
                     sfz::write(outcome, rsrc.data());
                     if (_game_result == WIN_GAME) {
                         sfz::write(outcome, "\n\n");
+                        Handle<Admiral> player(0);
                         String text = DebriefingScreen::build_score_text(
                                 _seconds, gThisScenario->parTime,
-                                GetAdmiralLoss(0), gThisScenario->parLosses,
-                                GetAdmiralKill(0), gThisScenario->parKills);
+                                GetAdmiralLoss(player), gThisScenario->parLosses,
+                                GetAdmiralKill(player), gThisScenario->parKills);
                         sfz::write(outcome, utf8::encode(text));
                     }
                     sfz::write(outcome, "\n");
@@ -146,7 +147,7 @@ void ReplayMaster::init() {
 
     RotationInit();
     InitDirectText();
-    Labels::init();
+    Label::init();
     Messages::init();
     InstrumentInit();
     SpriteHandlingInit();
@@ -156,7 +157,7 @@ void ReplayMaster::init() {
     InitSoundFX();
     MusicInit();
     InitMotion();
-    AdmiralInit();
+    Admiral::init();
     Beams::init();
 }
 
@@ -236,8 +237,8 @@ void main(int argc, char** argv) {
         TextVideoDriver video(screen_size, scheduler, output_dir);
         video.loop(new ReplayMaster(replay_file.data(), output_dir));
     } else {
-        OffscreenVideoDriver video(screen_size, scheduler, output_dir);
-        video.loop(new ReplayMaster(replay_file.data(), output_dir));
+        OffscreenVideoDriver video(screen_size, output_dir);
+        video.loop(new ReplayMaster(replay_file.data(), output_dir), scheduler);
     }
 }
 

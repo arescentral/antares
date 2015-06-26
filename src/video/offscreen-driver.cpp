@@ -22,11 +22,8 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <algorithm>
-#include <OpenGL/OpenGL.h>
-#include <OpenGL/gl.h>
 #include <sfz/sfz.hpp>
 
-#include "cocoa/core-opengl.hpp"
 #include "config/preferences.hpp"
 #include "drawing/pix-map.hpp"
 #include "game/time.hpp"
@@ -34,9 +31,22 @@
 #include "ui/card.hpp"
 #include "ui/event.hpp"
 
+#ifdef __APPLE__
+#include <OpenGL/OpenGL.h>
+#include <OpenGL/gl.h>
+#include "mac/offscreen.hpp"
+#else
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include <GL/glext.h>
+#include "linux/offscreen.hpp"
+#endif
+
 using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::Optional;
+using sfz::PrintItem;
 using sfz::ScopedFd;
 using sfz::String;
 using sfz::StringSlice;
@@ -48,6 +58,7 @@ using std::greater;
 using std::max;
 using std::unique_ptr;
 
+namespace path = sfz::path;
 namespace utf8 = sfz::utf8;
 
 namespace antares {
@@ -91,12 +102,6 @@ void write_to(const WriteTarget& out, const SnapshotBuffer& buffer) {
     buffer.write_to(out);
 }
 
-static const CGLPixelFormatAttribute kAttrs[] = {
-    kCGLPFAColorSize, static_cast<CGLPixelFormatAttribute>(24),
-    kCGLPFAAccelerated,
-    static_cast<CGLPixelFormatAttribute>(0),
-};
-
 void gl_check() {
     GLenum error = glGetError();
     if (error != GL_NO_ERROR) {
@@ -135,10 +140,8 @@ struct Renderbuffer {
 class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
   public:
     MainLoop(OffscreenVideoDriver& driver, const Optional<String>& output_dir, Card* initial):
-            _pix(kAttrs),
-            _context(_pix.c_obj(), NULL),
+            _offscreen(Preferences::preferences()->screen_size()),
             _buffer(Preferences::preferences()->screen_size(), 4),
-            _set_context(*this),
             _setup(*this),
             _output_dir(output_dir),
             _loop(driver, initial) {
@@ -149,12 +152,18 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
     }
 
     void snapshot(int64_t ticks) {
+        snapshot_to(format("screens/{0}.png", dec(ticks, 6)));
+    }
+
+    void snapshot_to(PrintItem relpath) {
+        if (!takes_snapshots()) {
+            return;
+        }
         glReadPixels(
                 0, 0, _buffer.width(), _buffer.height(), GL_BGRA, GL_UNSIGNED_BYTE,
                 _buffer.mutable_data());
-        String dir(format("{0}/screens", *_output_dir));
-        makedirs(dir, 0755);
-        String path(format("{0}/{1}.png", dir, dec(ticks, 6)));
+        String path(format("{0}/{1}", *_output_dir, relpath));
+        makedirs(path::dirname(path), 0755);
         ScopedFd file(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
         write(file, _buffer);
     }
@@ -164,14 +173,7 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
     Card* top() const { return _loop.top(); }
 
   private:
-    cgl::PixelFormat _pix;
-    cgl::Context _context;
-    struct SetContext {
-        SetContext(OffscreenVideoDriver::MainLoop& loop) {
-            cgl::check(CGLSetCurrentContext(loop._context.c_obj()));
-        }
-    };
-    SetContext _set_context;
+    Offscreen _offscreen;
     Framebuffer _fb;
     Renderbuffer _rb;
     SnapshotBuffer _buffer;
@@ -190,15 +192,21 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
     OpenGlVideoDriver::MainLoop _loop;
 };
 
-OffscreenVideoDriver::OffscreenVideoDriver(
-        Size screen_size, EventScheduler& scheduler, const Optional<String>& output_dir):
+OffscreenVideoDriver::OffscreenVideoDriver(Size screen_size, const Optional<String>& output_dir):
         _screen_size(screen_size),
-        _output_dir(output_dir),
-        _scheduler(scheduler) { }
+        _output_dir(output_dir) { }
 
-void OffscreenVideoDriver::loop(Card* initial) {
+void OffscreenVideoDriver::loop(Card* initial, EventScheduler& scheduler) {
+    _scheduler = &scheduler;
     MainLoop loop(*this, _output_dir, initial);
-    _scheduler.loop(loop);
+    _scheduler->loop(loop);
+    _scheduler = nullptr;
+}
+
+void OffscreenVideoDriver::capture(Card* card, PrintItem path) {
+    MainLoop loop(*this, _output_dir, card);
+    loop.draw();
+    loop.snapshot_to(path);
 }
 
 }  // namespace antares

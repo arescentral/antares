@@ -10,19 +10,18 @@
   , "configurations":
     { "dbg":
       { "cflags": ["-g"]
-      , "cxxflags": ["-g"]
       }
     , "dev": { }
     , "opt":
       { "cflags": ["-Os"]
-      , "cxxflags": ["-Os"]
       , "defines": ["NDEBUG"]
       }
-    , "cov":
-      { "defines": ["DATA_COVERAGE"]
-      }
     }
-  , "cxxflags":
+  , "cflags_cc":
+    [ "-std=c++11"
+    , "-stdlib=libc++"
+    ]
+  , "ldflags":
     [ "-std=c++11"
     , "-stdlib=libc++"
     ]
@@ -33,7 +32,14 @@
     , "CLANG_CXX_LANGUAGE_STANDARD": "c++11"
     , "CLANG_CXX_LIBRARY": "libc++"
     , "SDKROOT": "macosx<(MACOSX_VERSION)"
+    , "MACOSX_DEPLOYMENT_TARGET": "<(MACOSX_VERSION)"
     }
+  , "conditions":
+    [ [ "COVERAGE != ''"
+      , { "defines": ["DATA_COVERAGE=<(COVERAGE)"]
+        }
+      ]
+    ]
   }
 }
 # -*- mode: python; tab-width: 2 -*-
