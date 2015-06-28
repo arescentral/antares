@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+
+gsutil cp "$@" gs://downloads.arescentral.org/Antares/
