@@ -56,6 +56,7 @@ else
     git tag v$VERSION
     MODE=opt ./configure
     make
+    make sign
     (cd out/opt && zip -r ../../Antares-$VERSION.zip Antares.app)
     scripts/dist.py
 
