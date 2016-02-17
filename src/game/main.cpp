@@ -131,8 +131,6 @@ class GamePlay : public Card {
     const Rect _play_area;
     const int64_t _scenario_start_time;
     const bool _command_and_q;
-    bool _left_mouse_down;
-    bool _right_mouse_down;
     bool _entering_message;
     bool _player_paused;
     KeyMap _key_map;
@@ -294,8 +292,6 @@ GamePlay::GamePlay(
                     (gThisScenario->startTime & kScenario_StartTimeMask)
                     * kScenarioTimeMultiple)),
         _command_and_q(BothCommandAndQ()),
-        _left_mouse_down(false),
-        _right_mouse_down(false),
         _entering_message(false),
         _player_paused(false),
         _decide_cycle(0),
@@ -566,47 +562,6 @@ void GamePlay::fire_timer() {
             _replay_builder.next();
             _player_ship.update(kDecideEveryCycles, _cursor, _entering_message);
 
-            if (VideoDriver::driver()->button(0)) {
-                if (_replay) {
-                    *_game_result = QUIT_GAME;
-                    g.game_over = true;
-                    g.game_over_at = g.time;
-                } else {
-                    if (!_left_mouse_down) {
-                        int64_t double_click_interval
-                            = VideoDriver::driver()->double_click_interval_usecs();
-                        if ((g.time - _last_click_time) <= double_click_interval) {
-                            InstrumentsHandleDoubleClick(_cursor);
-                            _last_click_time -= double_click_interval;
-                        } else {
-                            InstrumentsHandleClick(_cursor);
-                            _last_click_time = g.time;
-                        }
-                        _left_mouse_down = true;
-                    } else {
-                        InstrumentsHandleMouseStillDown(_cursor);
-                    }
-                }
-            } else if (_left_mouse_down) {
-                _left_mouse_down = false;
-                InstrumentsHandleMouseUp(_cursor);
-            }
-
-            if (VideoDriver::driver()->button(1)) {
-                if (_replay) {
-                    *_game_result = QUIT_GAME;
-                    g.game_over = true;
-                    g.game_over_at = g.time;
-                } else {
-                    if (!_right_mouse_down) {
-                        PlayerShipHandleClick(VideoDriver::driver()->get_mouse(), 1);
-                        _right_mouse_down = true;
-                    }
-                }
-            } else if (_right_mouse_down) {
-                _right_mouse_down = false;
-            }
-
             CollideSpaceObjects();
             _decide_cycle = 0;
             _scenario_check_time++;
@@ -753,10 +708,39 @@ void GamePlay::key_up(const KeyUpEvent& event) {
 
 void GamePlay::mouse_down(const MouseDownEvent& event) {
     _cursor.mouse_down(event);
+
+    if (_replay) {
+        *_game_result = QUIT_GAME;
+        g.game_over = true;
+        g.game_over_at = g.time;
+        return;
+    }
+
+    int64_t double_click_interval = VideoDriver::driver()->double_click_interval_usecs();
+    switch (event.button()) {
+        case 0:
+            if ((g.time - _last_click_time) <= double_click_interval) {
+                // TODO(sfiera): have driver handle double-click detection.
+                InstrumentsHandleDoubleClick(_cursor);
+                _last_click_time = 0;
+            } else {
+                InstrumentsHandleClick(_cursor);
+                _last_click_time = g.time;
+            }
+            break;
+        case 1:
+            PlayerShipHandleClick(VideoDriver::driver()->get_mouse(), 1);
+            break;
+    }
 }
 
 void GamePlay::mouse_up(const MouseUpEvent& event) {
     _cursor.mouse_up(event);
+
+    if (event.button() == 0) {
+        InstrumentsHandleMouseStillDown(_cursor);
+        InstrumentsHandleMouseUp(_cursor);
+    }
 }
 
 void GamePlay::mouse_move(const MouseMoveEvent& event) {
