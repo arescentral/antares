@@ -503,7 +503,7 @@ static void alter(
                     admiral = Handle<Admiral>(alter.range);
                 }
                 if (admiral.get()) {
-                    admiral->pay(alter.minimum);
+                    admiral->pay_absolute(alter.minimum);
                 }
             }
             break;
