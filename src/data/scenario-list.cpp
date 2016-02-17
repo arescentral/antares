@@ -82,8 +82,8 @@ ScenarioList::ScenarioList() {
     for (int i = 0; i < g.data.gl_pathc; ++i) {
         const String path(utf8::decode(g.data.gl_pathv[i]));
         StringSlice identifier = path.slice(prefix_len, path.size() - prefix_len - suffix_len);
-        if (identifier == factory_scenario.identifier) {
-            factory_scenario.installed = true;
+        if (identifier == _scenarios[0].identifier) {
+            _scenarios[0].installed = true;
             continue;
         }
 
