@@ -41,7 +41,6 @@ class TextVideoDriver : public VideoDriver {
 
     virtual int ticks() const { return _scheduler.ticks(); }
     virtual int usecs() const { return _scheduler.usecs(); }
-    virtual int64_t double_click_interval_usecs() const { return 0.5e6; }
 
     virtual Texture texture(sfz::PrintItem name, const PixMap& content);
     virtual void dither_rect(const Rect& rect, const RgbColor& color);

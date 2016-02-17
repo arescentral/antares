@@ -50,7 +50,6 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
 
     virtual int ticks() const;
     virtual int usecs() const;
-    virtual int64_t double_click_interval_usecs() const;
 
     void loop(Card* initial);
 
@@ -66,6 +65,8 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
     Size _viewport_size;
     GLFWwindow* _window;
     MainLoop* _loop;
+    int64_t _last_click_usecs;
+    int _last_click_count;
 
     DISALLOW_COPY_AND_ASSIGN(GLFWVideoDriver);
 };

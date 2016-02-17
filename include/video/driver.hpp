@@ -57,7 +57,6 @@ class VideoDriver {
 
     virtual int ticks() const = 0;
     virtual int usecs() const = 0;
-    virtual int64_t double_click_interval_usecs() const = 0;
 
     virtual Texture texture(sfz::PrintItem name, const PixMap& content) = 0;
     virtual void dither_rect(const Rect& rect, const RgbColor& color) = 0;

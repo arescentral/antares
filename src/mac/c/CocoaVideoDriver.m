@@ -62,10 +62,6 @@ void antares_mouse_show() {
     }
 }
 
-int64_t antares_double_click_interval_usecs() {
-    return [NSEvent doubleClickInterval] * 1e6;
-}
-
 struct AntaresWindow {
     int32_t screen_width;
     int32_t screen_height;
@@ -140,7 +136,7 @@ int32_t antares_window_viewport_height(const AntaresWindow* window) {
 }
 
 struct AntaresEventTranslator {
-    void (*mouse_down_callback)(int button, int32_t x, int32_t y, void* userdata);
+    void (*mouse_down_callback)(int button, int32_t x, int32_t y, int count, void* userdata);
     void* mouse_down_userdata;
 
     void (*mouse_up_callback)(int button, int32_t x, int32_t y, void* userdata);
@@ -227,7 +223,7 @@ void antares_get_mouse_button(AntaresEventTranslator* translator, int32_t* butto
 
 void antares_event_translator_set_mouse_down_callback(
         AntaresEventTranslator* translator,
-        void (*callback)(int button, int32_t x, int32_t y, void* userdata), void* userdata) {
+        void (*callback)(int button, int32_t x, int32_t y, int count, void* userdata), void* userdata) {
     translator->mouse_down_callback = callback;
     translator->mouse_down_userdata = userdata;
 }
@@ -297,7 +293,7 @@ static void mouse_down(AntaresEventTranslator* translator, NSEvent* event) {
     NSPoint where = translate_coords(translator, [event window], [event locationInWindow]);
     hide_unhide(translator->window, where);
     int button = button_for(event);
-    translator->mouse_down_callback(button, where.x, where.y, translator->mouse_down_userdata);
+    translator->mouse_down_callback(button, where.x, where.y, [event clickCount], translator->mouse_down_userdata);
 }
 
 static void mouse_up(AntaresEventTranslator* translator, NSEvent* event) {

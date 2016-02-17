@@ -48,7 +48,6 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
 
     virtual int ticks() const;
     virtual int usecs() const;
-    virtual int64_t double_click_interval_usecs() const;
 
     void loop(Card* initial);
 

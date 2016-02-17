@@ -55,7 +55,7 @@ void EventScheduler::schedule_key(int32_t key, int64_t down, int64_t up) {
 
 void EventScheduler::schedule_mouse(
         int button, const Point& where, int64_t down, int64_t up) {
-    schedule_event(unique_ptr<Event>(new MouseDownEvent(down, button, where)));
+    schedule_event(unique_ptr<Event>(new MouseDownEvent(down, button, 1, where)));
     schedule_event(unique_ptr<Event>(new MouseUpEvent(up, button, where)));
 }
 

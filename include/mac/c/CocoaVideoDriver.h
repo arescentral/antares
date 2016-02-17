@@ -33,7 +33,6 @@ void antares_menu_bar_hide();
 void antares_menu_bar_show();
 void antares_mouse_hide();
 void antares_mouse_show();
-int64_t antares_double_click_interval_usecs();
 
 typedef struct AntaresWindow AntaresWindow;
 AntaresWindow* antares_window_create(
@@ -56,7 +55,7 @@ void antares_get_mouse_button(AntaresEventTranslator* translator, int32_t* butto
 
 void antares_event_translator_set_mouse_down_callback(
         AntaresEventTranslator* translator,
-        void (*callback)(int button, int32_t x, int32_t y, void* userdata), void* userdata);
+        void (*callback)(int button, int32_t x, int32_t y, int count, void* userdata), void* userdata);
 void antares_event_translator_set_mouse_up_callback(
         AntaresEventTranslator* translator,
         void (*callback)(int button, int32_t x, int32_t y, void* userdata), void* userdata);

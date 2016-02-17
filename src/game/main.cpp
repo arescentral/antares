@@ -136,7 +136,6 @@ class GamePlay : public Card {
     KeyMap _key_map;
     KeyMap _last_key_map;
     uint32_t _decide_cycle;
-    int64_t _last_click_time;
     int _scenario_check_time;
     PlayAgainScreen::Item _play_again;
     PlayerShip _player_ship;
@@ -295,7 +294,6 @@ GamePlay::GamePlay(
         _entering_message(false),
         _player_paused(false),
         _decide_cycle(0),
-        _last_click_time(0),
         _scenario_check_time(0),
         _replay_builder(replay_builder) { }
 
@@ -716,20 +714,18 @@ void GamePlay::mouse_down(const MouseDownEvent& event) {
         return;
     }
 
-    int64_t double_click_interval = VideoDriver::driver()->double_click_interval_usecs();
     switch (event.button()) {
         case 0:
-            if ((g.time - _last_click_time) <= double_click_interval) {
-                // TODO(sfiera): have driver handle double-click detection.
+            if (event.count() == 2) {
                 InstrumentsHandleDoubleClick(_cursor);
-                _last_click_time = 0;
-            } else {
+            } else if (event.count() == 1) {
                 InstrumentsHandleClick(_cursor);
-                _last_click_time = g.time;
             }
             break;
         case 1:
-            PlayerShipHandleClick(VideoDriver::driver()->get_mouse(), 1);
+            if (event.count() == 1) {
+                PlayerShipHandleClick(VideoDriver::driver()->get_mouse(), 1);
+            }
             break;
     }
 }

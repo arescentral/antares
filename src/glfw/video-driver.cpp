@@ -71,7 +71,9 @@ static void throw_error(int code, const char* message) {
 }
 
 GLFWVideoDriver::GLFWVideoDriver():
-        _screen_size(Preferences::preferences()->screen_size()) {
+        _screen_size(Preferences::preferences()->screen_size()),
+        _last_click_usecs(0),
+        _last_click_count(0) {
     if (!glfwInit()) {
         throw Exception("glfwInit()");
     }
@@ -112,10 +114,6 @@ int GLFWVideoDriver::usecs() const {
     return glfwGetTime() * 1e6;
 }
 
-int64_t GLFWVideoDriver::double_click_interval_usecs() const {
-    return 500000;
-}
-
 void GLFWVideoDriver::key(int key, int scancode, int action, int mods) {
     if (key < 0) {
         return;
@@ -138,7 +136,13 @@ void GLFWVideoDriver::key(int key, int scancode, int action, int mods) {
 
 void GLFWVideoDriver::mouse_button(int button, int action, int mods) {
     if (action == GLFW_PRESS) {
-        MouseDownEvent(usecs(), button, get_mouse()).send(_loop->top());
+        if (usecs() <= (_last_click_usecs + 500000)) {
+            _last_click_count += 1;
+        } else {
+            _last_click_count = 1;
+        }
+        MouseDownEvent(usecs(), button, _last_click_count, get_mouse()).send(_loop->top());
+        _last_click_usecs = usecs();
     } else if (action == GLFW_RELEASE) {
         MouseUpEvent(usecs(), button, get_mouse()).send(_loop->top());
     } else {

@@ -150,14 +150,19 @@ class MouseButtonEvent : public MouseEvent {
 
 // Generated when a mouse button is pressed.
 //
-// This event has two fields:
+// This event has three fields:
 //  * button(): the mouse button that was pressed, as described in MouseButtonEvent.
 //  * where(): the location of the mouse press, as described in MouseEvent.
+//  * count(): the number of clicks, e.g. 2 for a double-click.
 class MouseDownEvent : public MouseButtonEvent {
   public:
-    MouseDownEvent(int64_t at, int button, const Point& where):
-            MouseButtonEvent(at, button, where) { }
+    MouseDownEvent(int64_t at, int button, int count, const Point& where):
+            MouseButtonEvent(at, button, where),
+            _count(count) { }
     virtual void send(EventReceiver* receiver) const;
+    int count() const { return _count; }
+  private:
+    int _count;
 };
 
 // Generated when a mouse button is released.
