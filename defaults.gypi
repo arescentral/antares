@@ -4,7 +4,8 @@
   ]
 , "target_defaults":
   { "variables":
-    { "MACOSX_VERSION": "10.9"
+    { "MACOSX_VERSION": "10.11"
+    , "MACOSX_TARGET": "10.7"
     }
   , "default_configuration": "opt"
   , "configurations":
@@ -44,7 +45,7 @@
     , "CLANG_CXX_LANGUAGE_STANDARD": "c++11"
     , "CLANG_CXX_LIBRARY": "libc++"
     , "SDKROOT": "macosx<(MACOSX_VERSION)"
-    , "MACOSX_DEPLOYMENT_TARGET": "<(MACOSX_VERSION)"
+    , "MACOSX_DEPLOYMENT_TARGET": "<(MACOSX_TARGET)"
     }
   , "conditions":
     [ [ "COVERAGE != ''"

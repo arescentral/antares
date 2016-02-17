@@ -10,7 +10,7 @@
     ]
   , "xcode_settings":
     { "ANTARES_VERSION": "0.8.0"
-    , "SYSTEM_VERSION": "<(MACOSX_VERSION)"
+    , "SYSTEM_VERSION": "<(MACOSX_TARGET)"
     }
   , "include_dirs": ["include", "<(INTERMEDIATE_DIR)/include"]
   }
