@@ -73,7 +73,6 @@ void Update_LabelStrings_ForHotKeyChange( void);
 namespace {
 
 static ANTARES_GLOBAL int32_t gDestKeyTime = 0;
-static ANTARES_GLOBAL int32_t gAlarmCount = -1;
 static ANTARES_GLOBAL ZoomType gPreviousZoomMode;
 
 struct HotKeySuffix {
@@ -109,7 +108,7 @@ void ResetPlayerShip(Handle<SpaceObject> which) {
     g.target_label = Label::add(0, 0, 0, -20, SpaceObject::none(), true, SKY_BLUE);
     g.send_label = Label::add(200, 200, 0, 30, SpaceObject::none(), false, GREEN);
     globals()->starfield.reset(g.ship);
-    gAlarmCount = -1;
+    globals()->next_klaxon = 0;
     globals()->keyMask = 0;
     globals()->gZoomMode = kNearestFoeZoom;
     gPreviousZoomMode = kNearestFoeZoom;
@@ -636,20 +635,17 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
     }
 
     if (theShip->health() < (theShip->baseType->health >> 2L)) {
-         if (gAlarmCount < 0) {
-            PlayVolumeSound(kKlaxon, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
-            gAlarmCount = 0;
-            Messages::set_status("WARNING: Shields Low", kStatusWarnColor);
-         } else {
-            gAlarmCount += timePass;
-            if (gAlarmCount > 125) {
+        if (g.time > globals()->next_klaxon) {
+            if (globals()->next_klaxon == 0) {
+                PlayVolumeSound(kKlaxon, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
+            } else {
                 PlayVolumeSound(kKlaxon, kMediumVolume, kMediumLongPersistence, kPrioritySound);
-                gAlarmCount = 0;
-                Messages::set_status("WARNING: Shields Low", kStatusWarnColor);
             }
+            Messages::set_status("WARNING: Shields Low", kStatusWarnColor);
+            globals()->next_klaxon = g.time + 2083333;
         }
     } else {
-        gAlarmCount = -1;
+        globals()->next_klaxon = 0;
     }
 
     if (!(theShip->attributes & kIsHumanControlled)) {

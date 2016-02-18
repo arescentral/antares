@@ -147,6 +147,8 @@ struct aresGlobalType {
     bool         destKeyUsedForSelection;
     bool         hotKey_target;
 
+    int64_t      next_klaxon;
+
     Starfield starfield;
     Transitions transitions;
 };
