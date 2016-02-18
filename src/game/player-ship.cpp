@@ -110,7 +110,6 @@ void ResetPlayerShip(Handle<SpaceObject> which) {
     g.send_label = Label::add(200, 200, 0, 30, SpaceObject::none(), false, GREEN);
     globals()->starfield.reset(g.ship);
     gAlarmCount = -1;
-    globals()->gAutoPilotOff = true;
     globals()->keyMask = 0;
     globals()->gZoomMode = kNearestFoeZoom;
     gPreviousZoomMode = kNearestFoeZoom;
@@ -756,19 +755,11 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
     }
 
     if (theShip->attributes & kOnAutoPilot) {
-        if ((globals()->gAutoPilotOff) && // no off request pending
-                ((gTheseKeys | _gamepad_keys) & (kUpKey | kDownKey | kLeftKey | kRightKey))) {
+        if ((gTheseKeys | _gamepad_keys) & (kUpKey | kDownKey | kLeftKey | kRightKey)) {
             theShip->keysDown = gTheseKeys | kAutoPilotKey;
-            globals()->gAutoPilotOff = false;
-        } else {
-            theShip->keysDown
-                = (theShip->keysDown & (~kMiscKeyMask))
-                | (gTheseKeys & (kMiscKeyMask));
         }
     } else {
         theShip->keysDown = gTheseKeys | _gamepad_keys;
-        globals()->gAutoPilotOff = true;
-
         if ((_gamepad_state == NO_BUMPER) && _control_active) {
             int difference = mAngleDifference(_control_direction, theShip->direction);
             if (abs(difference) < 15) {

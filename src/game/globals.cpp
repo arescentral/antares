@@ -59,7 +59,6 @@ aresGlobalType::aresGlobalType() {
     gCenterScaleV = 0;
     gZoomMode = kTimesTwoZoom;
     gInstrumentTop = 0;
-    gAutoPilotOff = true;
     keyMask = 0;
 
     hotKeyDownTime = -1;
