@@ -49,7 +49,6 @@ class VideoDriver {
   public:
     VideoDriver();
     virtual ~VideoDriver();
-    virtual bool button(int which) = 0;
     virtual Point get_mouse() = 0;
     virtual void get_keys(KeyMap* k) = 0;
     virtual InputMode input_mode() const = 0;
@@ -57,7 +56,6 @@ class VideoDriver {
 
     virtual int ticks() const = 0;
     virtual int usecs() const = 0;
-    virtual int64_t double_click_interval_usecs() const = 0;
 
     virtual Texture texture(sfz::PrintItem name, const PixMap& content) = 0;
     virtual void dither_rect(const Rect& rect, const RgbColor& color) = 0;

@@ -61,12 +61,6 @@ CocoaVideoDriver::CocoaVideoDriver(bool fullscreen, Size screen_size)
           _translator(screen_size.width, screen_size.height),
           _event_tracker(false) { }
 
-bool CocoaVideoDriver::button(int which) {
-    int32_t button;
-    antares_get_mouse_button(_translator.c_obj(), &button, which);
-    return button;
-}
-
 Point CocoaVideoDriver::get_mouse() {
     Point p;
     antares_get_mouse_location(_translator.c_obj(), &p.h, &p.v);
@@ -89,10 +83,6 @@ int CocoaVideoDriver::usecs() const {
     return antares::usecs() - _start_time;
 }
 
-int64_t CocoaVideoDriver::double_click_interval_usecs() const {
-    return antares_double_click_interval_usecs();
-}
-
 struct CocoaVideoDriver::EventBridge {
     EventTracker& event_tracker;
     MainLoop& main_loop;
@@ -102,9 +92,9 @@ struct CocoaVideoDriver::EventBridge {
 
     double gamepad[6];
 
-    static void mouse_down(int button, int32_t x, int32_t y, void* userdata) {
+    static void mouse_down(int button, int32_t x, int32_t y, int count, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new MouseDownEvent(now_usecs(), button, Point(x, y)));
+        self->enqueue(new MouseDownEvent(now_usecs(), button, count, Point(x, y)));
     }
 
     static void mouse_up(int button, int32_t x, int32_t y, void* userdata) {

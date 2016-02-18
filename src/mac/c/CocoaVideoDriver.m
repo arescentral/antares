@@ -62,10 +62,6 @@ void antares_mouse_show() {
     }
 }
 
-int64_t antares_double_click_interval_usecs() {
-    return [NSEvent doubleClickInterval] * 1e6;
-}
-
 struct AntaresWindow {
     int32_t screen_width;
     int32_t screen_height;
@@ -140,7 +136,7 @@ int32_t antares_window_viewport_height(const AntaresWindow* window) {
 }
 
 struct AntaresEventTranslator {
-    void (*mouse_down_callback)(int button, int32_t x, int32_t y, void* userdata);
+    void (*mouse_down_callback)(int button, int32_t x, int32_t y, int count, void* userdata);
     void* mouse_down_userdata;
 
     void (*mouse_up_callback)(int button, int32_t x, int32_t y, void* userdata);
@@ -162,22 +158,17 @@ struct AntaresEventTranslator {
     int32_t last_flags;
 };
 
-static NSPoint translate_coords(
-        AntaresEventTranslator* translator, NSWindow* from_window, NSPoint input) {
-    NSWindow* to_window = (translator->window != nil) ? translator->window->window : nil;
-    if (from_window != to_window) {
-        if (from_window != nil) {
-            input = [from_window convertBaseToScreen:input];
-        }
-        if (to_window != nil) {
-            input = [to_window convertScreenToBase:input];
-        }
+static bool translate_coords(AntaresEventTranslator* translator, NSEvent* event, NSPoint* p) {
+    if ([event window] != translator->window->window) {
+        return false;
     }
+    NSPoint input = [event locationInWindow];
     input = [translator->window->view convertPoint:input fromView:nil];
     NSSize view_size = [translator->window->view bounds].size;
     input.x = round(input.x / view_size.width * translator->screen_width);
     input.y = round(input.y / view_size.height * translator->screen_height);
-    return NSMakePoint(input.x, translator->screen_height - input.y);
+    *p = NSMakePoint(input.x, translator->screen_height - input.y);
+    return true;
 }
 
 AntaresEventTranslator* antares_event_translator_create(
@@ -201,33 +192,19 @@ void antares_event_translator_set_window(
 }
 
 void antares_get_mouse_location(AntaresEventTranslator* translator, int32_t* x, int32_t* y) {
-    NSPoint location = translate_coords(translator, nil, [NSEvent mouseLocation]);
-    *x = location.x;
-    *y = location.y;
-}
-
-void antares_get_mouse_button(AntaresEventTranslator* translator, int32_t* button, int which) {
-    switch (which) {
-      case 0:
-        *button = CGEventSourceButtonState(
-                kCGEventSourceStateCombinedSessionState, kCGMouseButtonLeft);
-        break;
-
-      case 1:
-        *button = CGEventSourceButtonState(
-                kCGEventSourceStateCombinedSessionState, kCGMouseButtonRight);
-        break;
-
-      case 2:
-        *button = CGEventSourceButtonState(
-                kCGEventSourceStateCombinedSessionState, kCGMouseButtonCenter);
-        break;
-    }
+    NSPoint location = [NSEvent mouseLocation];
+    NSRect r = NSMakeRect(location.x, location.y, 1, 1);
+    location = [translator->window->window convertRectFromScreen:r].origin;
+    location = [translator->window->view convertPoint:location fromView:nil];
+    NSSize view_size = [translator->window->view bounds].size;
+    *x = round(location.x / view_size.width * translator->screen_width);
+    *y = round(location.y / view_size.height * translator->screen_height);
+    *y = translator->screen_height - *y;
 }
 
 void antares_event_translator_set_mouse_down_callback(
         AntaresEventTranslator* translator,
-        void (*callback)(int button, int32_t x, int32_t y, void* userdata), void* userdata) {
+        void (*callback)(int button, int32_t x, int32_t y, int count, void* userdata), void* userdata) {
     translator->mouse_down_callback = callback;
     translator->mouse_down_userdata = userdata;
 }
@@ -294,21 +271,30 @@ static int button_for(NSEvent* event) {
 }
 
 static void mouse_down(AntaresEventTranslator* translator, NSEvent* event) {
-    NSPoint where = translate_coords(translator, [event window], [event locationInWindow]);
+    NSPoint where;
+    if (!translate_coords(translator, event, &where)) {
+        return;
+    }
     hide_unhide(translator->window, where);
     int button = button_for(event);
-    translator->mouse_down_callback(button, where.x, where.y, translator->mouse_down_userdata);
+    translator->mouse_down_callback(button, where.x, where.y, [event clickCount], translator->mouse_down_userdata);
 }
 
 static void mouse_up(AntaresEventTranslator* translator, NSEvent* event) {
-    NSPoint where = translate_coords(translator, [event window], [event locationInWindow]);
+    NSPoint where;
+    if (!translate_coords(translator, event, &where)) {
+        return;
+    }
     hide_unhide(translator->window, where);
     int button = button_for(event);
     translator->mouse_up_callback(button, where.x, where.y, translator->mouse_up_userdata);
 }
 
 static void mouse_move(AntaresEventTranslator* translator, NSEvent* event) {
-    NSPoint where = translate_coords(translator, [event window], [event locationInWindow]);
+    NSPoint where;
+    if (!translate_coords(translator, event, &where)) {
+        return;
+    }
     hide_unhide(translator->window, where);
     translator->mouse_move_callback(where.x, where.y, translator->mouse_move_userdata);
 }

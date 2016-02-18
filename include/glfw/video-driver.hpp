@@ -43,14 +43,12 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
     virtual Size viewport_size() const { return _viewport_size; }
     virtual Size screen_size() const { return _screen_size; }
 
-    virtual bool button(int which);
     virtual Point get_mouse();
     virtual void get_keys(KeyMap* k);
     virtual InputMode input_mode() const;
 
     virtual int ticks() const;
     virtual int usecs() const;
-    virtual int64_t double_click_interval_usecs() const;
 
     void loop(Card* initial);
 
@@ -66,6 +64,8 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
     Size _viewport_size;
     GLFWwindow* _window;
     MainLoop* _loop;
+    int64_t _last_click_usecs;
+    int _last_click_count;
 
     DISALLOW_COPY_AND_ASSIGN(GLFWVideoDriver);
 };
