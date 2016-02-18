@@ -41,7 +41,6 @@ class EventTracker : public EventReceiver {
     virtual void mouse_up(const MouseUpEvent& event);
     virtual void mouse_move(const MouseMoveEvent& event);
 
-    bool button(int which) const { return _button[which]; }
     const Point& mouse() const { return _mouse; }
     const KeyMap& keys() const { return _keys; }
     InputMode input_mode() const { return _input_mode; }

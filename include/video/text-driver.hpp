@@ -33,7 +33,6 @@ class TextVideoDriver : public VideoDriver {
             Size screen_size, EventScheduler& scheduler,
             const sfz::Optional<sfz::String>& output_dir);
 
-    virtual bool button(int which) { return _scheduler.button(which); }
     virtual Point get_mouse() { return _scheduler.get_mouse(); }
     virtual void get_keys(KeyMap* k) { _scheduler.get_keys(k); }
     virtual InputMode input_mode() const { return KEYBOARD_MOUSE; }

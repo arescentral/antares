@@ -84,10 +84,6 @@ GLFWVideoDriver::~GLFWVideoDriver() {
     glfwTerminate();
 }
 
-bool GLFWVideoDriver::button(int which) {
-    return glfwGetMouseButton(_window, which);
-}
-
 Point GLFWVideoDriver::get_mouse() {
     double x, y;
     glfwGetCursorPos(_window, &x, &y);

@@ -61,12 +61,6 @@ CocoaVideoDriver::CocoaVideoDriver(bool fullscreen, Size screen_size)
           _translator(screen_size.width, screen_size.height),
           _event_tracker(false) { }
 
-bool CocoaVideoDriver::button(int which) {
-    int32_t button;
-    antares_get_mouse_button(_translator.c_obj(), &button, which);
-    return button;
-}
-
 Point CocoaVideoDriver::get_mouse() {
     Point p;
     antares_get_mouse_location(_translator.c_obj(), &p.h, &p.v);

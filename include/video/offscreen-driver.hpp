@@ -35,7 +35,6 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
     virtual Size viewport_size() const { return _screen_size; }
     virtual Size screen_size() const { return _screen_size; }
 
-    virtual bool button(int which) { return _scheduler->button(which); }
     virtual Point get_mouse() { return _scheduler->get_mouse(); }
     virtual void get_keys(KeyMap* k) { _scheduler->get_keys(k); }
     virtual InputMode input_mode() const { return _scheduler->input_mode(); }

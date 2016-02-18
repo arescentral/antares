@@ -41,7 +41,6 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     virtual Size viewport_size() const { return _viewport_size; }
     virtual Size screen_size() const { return _screen_size; }
 
-    virtual bool button(int which);
     virtual Point get_mouse();
     virtual void get_keys(KeyMap* k);
     virtual InputMode input_mode() const;

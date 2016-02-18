@@ -202,25 +202,6 @@ void antares_get_mouse_location(AntaresEventTranslator* translator, int32_t* x, 
     *y = location.y;
 }
 
-void antares_get_mouse_button(AntaresEventTranslator* translator, int32_t* button, int which) {
-    switch (which) {
-      case 0:
-        *button = CGEventSourceButtonState(
-                kCGEventSourceStateCombinedSessionState, kCGMouseButtonLeft);
-        break;
-
-      case 1:
-        *button = CGEventSourceButtonState(
-                kCGEventSourceStateCombinedSessionState, kCGMouseButtonRight);
-        break;
-
-      case 2:
-        *button = CGEventSourceButtonState(
-                kCGEventSourceStateCombinedSessionState, kCGMouseButtonCenter);
-        break;
-    }
-}
-
 void antares_event_translator_set_mouse_down_callback(
         AntaresEventTranslator* translator,
         void (*callback)(int button, int32_t x, int32_t y, int count, void* userdata), void* userdata) {
