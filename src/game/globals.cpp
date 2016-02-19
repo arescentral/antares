@@ -37,6 +37,7 @@ namespace antares {
 static ANTARES_GLOBAL aresGlobalType* gAresGlobal;
 
 ANTARES_GLOBAL GlobalState g;
+ANTARES_GLOBAL ScenarioGlobals plug;
 
 aresGlobalType* globals() {
     return gAresGlobal;

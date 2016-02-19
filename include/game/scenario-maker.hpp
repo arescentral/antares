@@ -29,7 +29,6 @@ namespace antares {
 
 const int16_t kScenarioNoShipTextID = 10000;
 
-extern std::vector<Scenario> gScenarioData;
 extern const Scenario* gThisScenario;
 
 enum {

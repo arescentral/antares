@@ -90,7 +90,7 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
           case Keys::N_TIMES:
             _state = UNLOCKING;
             _unlock_chapter = 0;
-            _unlock_digits = ndigits(gScenarioData.size());
+            _unlock_digits = ndigits(plug.chapters.size());
             PlayVolumeSound(kCloakOn, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
             return;
         }
@@ -104,7 +104,7 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
             _unlock_chapter = (_unlock_chapter * 10) + digit;
             if (--_unlock_digits == 0) {
                 _state = SELECTING;
-                if (_unlock_chapter > gScenarioData.size()) {
+                if (_unlock_chapter > plug.chapters.size()) {
                     return;
                 }
                 PlayVolumeSound(kCloakOff, kMediumLoudVolume, kShortPersistence, kMustPlaySound);

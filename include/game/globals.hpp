@@ -25,6 +25,7 @@
 #include "config/keys.hpp"
 #include "data/handle.hpp"
 #include "data/scenario.hpp"
+#include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "game/starfield.hpp"
 #include "math/random.hpp"
@@ -118,6 +119,23 @@ struct GlobalState {
 
 extern GlobalState g;
 
+struct ScenarioGlobals {
+    scenarioInfoType                      meta;
+
+    std::vector<Scenario>                 chapters;
+    std::vector<Scenario::InitialObject>  initials;
+    std::vector<Scenario::Condition>      conditions;
+    std::vector<Scenario::BriefPoint>     briefings;
+
+    std::vector<BaseObject>               objects;
+    std::unique_ptr<StringList>           object_names;
+    std::unique_ptr<StringList>           object_short_names;
+
+    std::vector<Action>                   actions;
+};
+
+extern ScenarioGlobals plug;
+
 struct aresGlobalType {
     aresGlobalType();
     ~aresGlobalType();
@@ -133,8 +151,6 @@ struct aresGlobalType {
     miniComputerDataType    gMiniScreenData;
 
     uint32_t        keyMask;
-    scenarioInfoType    scenarioFileInfo;   // x-ares; for factory +
-                                            // 3rd party files
     hotKeyType      hotKey[kHotKeyNum];
     int32_t         hotKeyDownTime;
     int32_t         lastHotKey;

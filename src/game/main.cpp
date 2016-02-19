@@ -163,7 +163,7 @@ void MainPlay::become_front() {
 
             _replay_builder.init(
                     Preferences::preferences()->scenario_identifier(),
-                    String(u32_to_version(globals()->scenarioFileInfo.version)),
+                    String(u32_to_version(plug.meta.version)),
                     _scenario->chapter_number(),
                     g.random.seed);
 
