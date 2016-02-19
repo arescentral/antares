@@ -693,9 +693,7 @@ void CollideSpaceObjects() {
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
         auto proximityObject = &gProximityGrid[i];
         auto taObject = proximityObject->nearObject;
-        for (auto aObject = taObject; aObject.get(); aObject = taObject) {
-            taObject = aObject->nextNearObject;
-
+        for (auto aObject = taObject; aObject.get(); aObject = aObject->nextNearObject) {
             // this hack is to get the current bounds of the object in question
             // it could be sped up by accessing the sprite table directly
             if ((aObject->absoluteBounds.left >= aObject->absoluteBounds.right)
@@ -743,8 +741,7 @@ void CollideSpaceObjects() {
                     continue;
                 }
 
-                for (auto bObject = tbObject; bObject.get(); bObject = tbObject) {
-                    tbObject = bObject->nextNearObject;
+                for (auto bObject = tbObject; bObject.get(); bObject = bObject->nextNearObject) {
                     // this'll be true even ONLY if BOTH objects are not non-physical dest object
                     if (!((bObject->attributes | aObject->attributes) & kCanCollide)
                             || !((bObject->attributes | aObject->attributes) & kCanBeHit)
@@ -891,8 +888,7 @@ void CollideSpaceObjects() {
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
         auto proximityObject = &gProximityGrid[i];
         auto taObject = proximityObject->farObject;
-        for (auto aObject = taObject; aObject.get(); aObject = taObject) {
-            taObject = aObject->nextFarObject;
+        for (auto aObject = taObject; aObject.get(); aObject = aObject->nextFarObject) {
             auto currentProximity = proximityObject;
             for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
                 Handle<SpaceObject> tbObject;
@@ -911,8 +907,7 @@ void CollideSpaceObjects() {
                     continue;
                 }
 
-                for (auto bObject = tbObject; bObject.get(); bObject = tbObject) {
-                    tbObject = bObject->nextFarObject;
+                for (auto bObject = tbObject; bObject.get(); bObject = bObject->nextFarObject) {
                     if ((bObject->owner != aObject->owner)
                             && (bObject->distanceGrid.h == superx)
                             && (bObject->distanceGrid.v == supery)
