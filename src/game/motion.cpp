@@ -84,13 +84,17 @@ inline void mRange(int32_t& result, int32_t time, Fixed velocity, Fixed& scratch
     result = mFixedToLong( scratch);
 }
 
+Size center_scale() {
+    return {
+        (play_screen.width() / 2) * SCALE_SCALE,
+        (play_screen.height() / 2) * SCALE_SCALE,
+    };
+}
+
 void InitMotion() {
     int16_t                 x, y, i;
     proximityUnitType       *p;
     int32_t                    adjacentAdd = 0, ux, uy, sx, sy;
-
-    globals()->gCenterScaleH = (play_screen.width() / 2) * SCALE_SCALE;
-    globals()->gCenterScaleV = (play_screen.height() / 2) * SCALE_SCALE;
 
     gProximityGrid.reset(new proximityUnitType[kProximityGridDataLength]);
 
@@ -308,8 +312,8 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
 
 //              if ( anObject->attributes & kIsPlayerShip)
                 if (anObject == g.ship) {
-                    gGlobalCorner.h = anObject->location.h - (globals()->gCenterScaleH / gAbsoluteScale);
-                    gGlobalCorner.v = anObject->location.v - (globals()->gCenterScaleV / gAbsoluteScale);
+                    gGlobalCorner.h = anObject->location.h - (center_scale().width / gAbsoluteScale);
+                    gGlobalCorner.v = anObject->location.v - (center_scale().height / gAbsoluteScale);
                 }
 
                 // check to see if it's out of bounds

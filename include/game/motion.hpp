@@ -41,6 +41,8 @@ extern coordPointType gGlobalCorner;
 void InitMotion();
 void ResetMotionGlobals();
 
+Size center_scale();
+
 void MotionCleanup();
 void MoveSpaceObjects(const int32_t unitsToDo);
 void CollideSpaceObjects();

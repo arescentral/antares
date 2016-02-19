@@ -128,8 +128,6 @@ struct aresGlobalType {
     // forwards or back so that the same calculations still work.
     uint64_t        virtual_start;
 
-    int32_t         gCenterScaleH;
-    int32_t         gCenterScaleV;
     ZoomType        gZoomMode;
 
     int32_t         gInstrumentTop;         // = 0;

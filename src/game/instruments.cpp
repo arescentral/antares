@@ -330,7 +330,7 @@ void UpdateRadar(int32_t unitsDone) {
             }
             bestScale = wsqrt(hugeDistance);
             if (bestScale == 0) bestScale = 1;
-            bestScale = globals()->gCenterScaleV / bestScale;
+            bestScale = center_scale().height / bestScale;
             if (bestScale < SCALE_SCALE) bestScale = (bestScale >> 2L) + (bestScale >> 1L);
             bestScale = clamp<uint32_t>(bestScale, kMinimumAutoScale, SCALE_SCALE);
         }
@@ -362,7 +362,7 @@ void UpdateRadar(int32_t unitsDone) {
             uint64_t tempWide = anObject->distanceFromPlayer;
             bestScale = wsqrt(tempWide);
             if (bestScale == 0) bestScale = 1;
-            bestScale = globals()->gCenterScaleV / bestScale;
+            bestScale = center_scale().height / bestScale;
             if (bestScale < SCALE_SCALE) bestScale = (bestScale >> 2L) + (bestScale >> 1L);
             bestScale = clamp<uint32_t>(bestScale, kMinimumAutoScale, SCALE_SCALE);
         }

@@ -55,8 +55,6 @@ void init_globals() {
 }
 
 aresGlobalType::aresGlobalType() {
-    gCenterScaleH = 0;
-    gCenterScaleV = 0;
     gZoomMode = kTimesTwoZoom;
     gInstrumentTop = 0;
     keyMask = 0;
