@@ -123,7 +123,11 @@ struct aresGlobalType {
     ~aresGlobalType();
 
     std::unique_ptr<InputSource> gInputSource;
-    uint64_t        gLastTime;
+
+    // Start time of game in usecs.  But, if the player pauses or fast-forwards, it gets moved
+    // forwards or back so that the same calculations still work.
+    uint64_t        virtual_start;
+
     int32_t         gCenterScaleH;
     int32_t         gCenterScaleV;
     ZoomType        gZoomMode;
