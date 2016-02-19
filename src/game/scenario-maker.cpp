@@ -62,6 +62,8 @@ using std::vector;
 
 namespace antares {
 
+ANTARES_GLOBAL vector<Scenario> gScenarioData;
+
 namespace {
 
 const int16_t kScenarioResID            = 500;
@@ -77,7 +79,6 @@ const uint32_t kAnyColorLoadedFlag       = 0x0000ffffu;
 const int16_t kLevelNameID = 4600;
 static ANTARES_GLOBAL StringList* level_names;
 
-ANTARES_GLOBAL vector<Scenario> gScenarioData;
 ANTARES_GLOBAL vector<Scenario::InitialObject> gScenarioInitialData;
 ANTARES_GLOBAL vector<Scenario::Condition> gScenarioConditionData;
 ANTARES_GLOBAL vector<Scenario::BriefPoint> gScenarioBriefData;
@@ -255,7 +256,7 @@ void set_initial_destination(const Scenario::InitialObject* initial, bool preser
 
 }  // namespace
 
-const Scenario* gThisScenario = NULL;
+ANTARES_GLOBAL const Scenario* gThisScenario = NULL;
 
 Scenario* mGetScenario(int32_t num) {
     return &gScenarioData[num];
@@ -503,7 +504,6 @@ void ScenarioMakerInit() {
             read(in, scenario);
             gScenarioData.push_back(scenario);
         }
-        globals()->scenarioNum = gScenarioData.size();
     }
 
     {
