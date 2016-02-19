@@ -113,7 +113,7 @@ const int32_t kMaxMoneyValue        = kGrossMoneyBarValue * 7;
 
 Rect mini_build_time_rect() {
     Rect result(play_screen.right + 10, 8, play_screen.right + 22, 37);
-    result.offset(0, globals()->gInstrumentTop);
+    result.offset(0, instrument_top());
     return result;
 }
 
@@ -166,8 +166,6 @@ static void draw_money();
 static void draw_build_time_bar(int32_t value);
 
 void InstrumentInit() {
-    globals()->gInstrumentTop = (world.height() / 2) - ( kPanelHeight / 2);
-
     g.radar_blips.reset(new Point[kRadarBlipNum]);
     gScaleList.reset(new int32_t[kScaleListNum]);
     ResetInstruments();
@@ -204,6 +202,10 @@ void InstrumentInit() {
     MiniScreenInit();
 }
 
+int32_t instrument_top() {
+    return (world.height() / 2) - (kPanelHeight / 2);
+}
+
 void InstrumentCleanup() {
     g.radar_blips.reset();
     MiniScreenCleanup();
@@ -228,13 +230,13 @@ void ResetInstruments() {
         gBarIndicator[i].thisValue = -1;
     }
     // the shield bar
-    gBarIndicator[kShieldBar].top = 359 + globals()->gInstrumentTop;
+    gBarIndicator[kShieldBar].top = 359 + instrument_top();
     gBarIndicator[kShieldBar].color = SKY_BLUE;
 
-    gBarIndicator[kEnergyBar].top = 231 + globals()->gInstrumentTop;
+    gBarIndicator[kEnergyBar].top = 231 + instrument_top();
     gBarIndicator[kEnergyBar].color = GOLD;
 
-    gBarIndicator[kBatteryBar].top = 103 + globals()->gInstrumentTop;
+    gBarIndicator[kBatteryBar].top = 103 + instrument_top();
     gBarIndicator[kBatteryBar].color = SALMON;
 
     lp = g.radar_blips.get();
@@ -265,7 +267,7 @@ void UpdateRadar(int32_t unitsDone) {
     }
 
     Rect bounds(kRadarLeft, kRadarTop, kRadarRight, kRadarBottom);
-    bounds.offset(0, globals()->gInstrumentTop);
+    bounds.offset(0, instrument_top());
     bounds.inset(1, 1);
 
     if (g.radar_on) {
@@ -302,7 +304,7 @@ void UpdateRadar(int32_t unitsDone) {
                 Point p(x * kRadarSize / kRadarRange,
                         y * kRadarSize / kRadarRange);
                 p.offset(kRadarCenter + kRadarLeft,
-                        kRadarCenter + kRadarTop + globals()->gInstrumentTop);
+                        kRadarCenter + kRadarTop + instrument_top());
                 if (!radar.contains(p)) {
                     continue;
                 }
@@ -391,7 +393,7 @@ void UpdateRadar(int32_t unitsDone) {
 
 void draw_radar() {
     Rect bounds(kRadarLeft, kRadarTop, kRadarRight, kRadarBottom);
-    bounds.offset(0, globals()->gInstrumentTop);
+    bounds.offset(0, instrument_top());
     bounds.inset(1, 1);
 
     const RgbColor very_light = GetRGBTranslateColorShade(kRadarColor, VERY_LIGHT);
@@ -438,7 +440,7 @@ static void draw_money() {
 
     Rect box(0, 0, kFineMoneyBarWidth, kFineMoneyBarHeight - 1);
     box.offset(kFineMoneyLeft + kFineMoneyHBuffer + play_screen.right,
-            kFineMoneyTop + globals()->gInstrumentTop + kFineMoneyVBuffer);
+            kFineMoneyTop + instrument_top() + kFineMoneyVBuffer);
 
     // First section of the money bar: when we can afford the current selection, displays the
     // money which will remain after it is purchased.  When we cannot, displays the money we
@@ -499,7 +501,7 @@ static void draw_money() {
 
     box = Rect(0, 0, kGrossMoneyBarWidth, kGrossMoneyBarHeight - 1);
     box.offset(play_screen.right + kGrossMoneyLeft + kGrossMoneyHBuffer,
-            kGrossMoneyTop + globals()->gInstrumentTop + kGrossMoneyVBuffer);
+            kGrossMoneyTop + instrument_top() + kGrossMoneyVBuffer);
 
     const RgbColor light = GetRGBTranslateColorShade(kGrossMoneyColor, VERY_LIGHT);
     const RgbColor dark = GetRGBTranslateColorShade(kGrossMoneyColor, VERY_DARK);

@@ -29,6 +29,7 @@ class PlayerShip;
 const int32_t kMiniBuildTimeHeight = 25;
 
 void InstrumentInit();
+int32_t instrument_top();
 void UpdateRadar(int32_t);
 void InstrumentCleanup();
 void ResetInstruments();

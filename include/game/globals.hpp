@@ -130,7 +130,6 @@ struct aresGlobalType {
 
     ZoomType        gZoomMode;
 
-    int32_t         gInstrumentTop;         // = 0;
     miniComputerDataType    gMiniScreenData;
 
     uint32_t        keyMask;
