@@ -92,75 +92,55 @@ Size center_scale() {
 }
 
 void InitMotion() {
-    int16_t                 x, y, i;
-    proximityUnitType       *p;
-    int32_t                    adjacentAdd = 0, ux, uy, sx, sy;
-
     gProximityGrid.reset(new proximityUnitType[kProximityGridDataLength]);
 
     // initialize the proximityGrid & set up the needed lookups (see Notebook 2 p.34)
-    p = gProximityGrid.get();
-    for ( y = 0; y < kProximitySuperSize; y++)
-    {
-        for ( x = 0; x < kProximitySuperSize; x++)
-        {
+    for (int y = 0; y < kProximitySuperSize; y++) {
+        for (int x = 0; x < kProximitySuperSize; x++) {
+            proximityUnitType* p = &gProximityGrid[(y << kProximityWidthMultiply) + x];
             p->nearObject = p->farObject = SpaceObject::none();
-            adjacentAdd = 0;
-            for ( i = 0; i < kUnitsToCheckNumber; i++)
-            {
-                ux = x;
-                uy = y;
-                sx = sy = 0;
+            int32_t adjacentAdd = 0;
+            for (int i = 0; i < kUnitsToCheckNumber; i++) {
+                int32_t ux = x;
+                int32_t uy = y;
+                int32_t sx = 0, sy = 0;
 
                 ux += cAdjacentUnits[i].h;
-                if ( ux < 0)
-                {
+                if (ux < 0) {
                     ux += kProximitySuperSize;
                     sx--;
-                } else if ( ux >= kProximitySuperSize)
-                {
+                } else if (ux >= kProximitySuperSize) {
                     ux -= kProximitySuperSize;
                     sx++;
                 }
 
                 uy += cAdjacentUnits[i].v;
-                if ( uy < 0)
-                {
+                if (uy < 0) {
                     uy += kProximitySuperSize;
                     sy--;
-                } else if ( uy >= kProximitySuperSize)
-                {
+                } else if (uy >= kProximitySuperSize) {
                     uy -= kProximitySuperSize;
                     sy++;
                 }
                 p->unitsToCheck[i].adjacentUnit = (uy << kProximityWidthMultiply) + ux;
                 p->unitsToCheck[i].adjacentUnit -= adjacentAdd;
 
-
                 adjacentAdd += p->unitsToCheck[i].adjacentUnit;
 
                 p->unitsToCheck[i].superOffset.h = sx;
                 p->unitsToCheck[i].superOffset.v = sy;
             }
-            p++;
         }
     }
 }
 
-void ResetMotionGlobals( void)
-{
-    proximityUnitType   *proximityObject;
-    int32_t                i;
-
+void ResetMotionGlobals() {
     gGlobalCorner.h = gGlobalCorner.v = 0;
     g.closest = Handle<SpaceObject>(0);
     g.farthest = Handle<SpaceObject>(0);
 
-    proximityObject = gProximityGrid.get();
-    for ( i = 0; i < kProximityGridDataLength; i++)
-    {
-        proximityObject->nearObject = proximityObject->farObject = SpaceObject::none();
-        proximityObject++;
+    for (int i = 0; i < kProximityGridDataLength; i++) {
+        gProximityGrid[i].nearObject = gProximityGrid[i].farObject = SpaceObject::none();
     }
 }
 
