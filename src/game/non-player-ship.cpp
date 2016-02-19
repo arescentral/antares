@@ -935,7 +935,7 @@ uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
             anObject->attributes &= ~kOccupiesSpace;
             newVel.h = newVel.v = 0;
             CreateAnySpaceObject(
-                    globals()->scenarioFileInfo.warpInFlareID, &newVel, &anObject->location,
+                    plug.meta.warpInFlareID, &newVel, &anObject->location,
                     anObject->direction, Admiral::none(), 0, -1);
         } else {
             anObject->presenceState = kNormalPresence;
@@ -1018,7 +1018,7 @@ uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, Handle<BaseObj
         newVel.h = newVel.v = 0;
 
 
-        CreateAnySpaceObject( globals()->scenarioFileInfo.warpOutFlareID, &(newVel),
+        CreateAnySpaceObject(plug.meta.warpOutFlareID, &(newVel),
             &(anObject->location), anObject->direction, Admiral::none(), 0, -1);
     }
     return( keysDown);

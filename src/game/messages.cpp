@@ -26,6 +26,7 @@
 #include "drawing/sprite-handling.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
+#include "game/instruments.hpp"
 #include "game/labels.hpp"
 #include "game/scenario-maker.hpp"
 #include "lang/defines.hpp"
@@ -534,7 +535,7 @@ void MessageLabel_Set_Special(Handle<Label> label, const StringSlice& text) {
             attachPoint.v += *it - '0';
             ++it;
         }
-        attachPoint.v += globals()->gInstrumentTop;
+        attachPoint.v += instrument_top();
         if (attachPoint.h >= (kSmallScreenWidth - kRightPanelWidth)) {
             attachPoint.h = (attachPoint.h - (kSmallScreenWidth - kRightPanelWidth)) +
                 play_screen.right;
@@ -556,12 +557,12 @@ void MessageLabel_Set_Special(Handle<Label> label, const StringSlice& text) {
         label->set_offset(0, 0);
         label->set_position(
                 play_screen.right - (label->get_width()+10),
-                globals()->gInstrumentTop + value);
+                instrument_top() + value);
         break;
 
       case 'L':
         label->set_offset(0, 0);
-        label->set_position(138, globals()->gInstrumentTop + value);
+        label->set_position(138, instrument_top() + value);
         break;
 
       case 'O':

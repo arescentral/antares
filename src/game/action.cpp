@@ -636,7 +636,7 @@ static void enter_warp(Handle<Action> action, Handle<SpaceObject> focus, Handle<
     subject->attributes &= ~kOccupiesSpace;
     fixedPointType newVel = {0, 0};
     CreateAnySpaceObject(
-            globals()->scenarioFileInfo.warpInFlareID, &newVel,
+            plug.meta.warpInFlareID, &newVel,
             &subject->location, subject->direction, Admiral::none(), 0, -1);
 }
 

@@ -75,12 +75,7 @@ const uint32_t kNeutralColorLoadedFlag   = 0x00000001u;
 const uint32_t kAnyColorLoadedFlag       = 0x0000ffffu;
 
 const int16_t kLevelNameID = 4600;
-static ANTARES_GLOBAL StringList* level_names;
 
-ANTARES_GLOBAL vector<Scenario> gScenarioData;
-ANTARES_GLOBAL vector<Scenario::InitialObject> gScenarioInitialData;
-ANTARES_GLOBAL vector<Scenario::Condition> gScenarioConditionData;
-ANTARES_GLOBAL vector<Scenario::BriefPoint> gScenarioBriefData;
 ANTARES_GLOBAL int32_t gScenarioRotation = 0;
 
 #ifdef DATA_COVERAGE
@@ -255,22 +250,22 @@ void set_initial_destination(const Scenario::InitialObject* initial, bool preser
 
 }  // namespace
 
-const Scenario* gThisScenario = NULL;
+ANTARES_GLOBAL const Scenario* gThisScenario = NULL;
 
 Scenario* mGetScenario(int32_t num) {
-    return &gScenarioData[num];
+    return &plug.chapters[num];
 }
 
 Scenario::InitialObject* Scenario::initial(size_t at) const {
-    return &gScenarioInitialData[initialFirst + at];
+    return &plug.initials[initialFirst + at];
 }
 
 Scenario::Condition* Scenario::condition(size_t at) const {
-    return &gScenarioConditionData[conditionFirst + at];
+    return &plug.conditions[conditionFirst + at];
 }
 
 Scenario::BriefPoint* Scenario::brief_point(size_t at) const {
-    return &gScenarioBriefData[briefPointFirst + at];
+    return &plug.briefings[briefPointFirst + at];
 }
 
 size_t Scenario::brief_point_size() const {
@@ -299,7 +294,7 @@ ScenarioName Scenario::name() const {
 }
 
 void print_to(PrintTarget out, ScenarioName name) {
-    print(out, level_names->at(name.string_id - 1));
+    print(out, plug.chapter_names->at(name.string_id - 1));
 }
 
 int32_t Scenario::prologue_id() const {
@@ -488,60 +483,59 @@ void ScenarioMakerInit() {
     {
         Resource rsrc("scenario-info", "nlAG", 128);
         BytesSlice in(rsrc.data());
-        read(in, globals()->scenarioFileInfo);
+        read(in, plug.meta);
         if (!in.empty()) {
             throw Exception("didn't consume all of scenario file info data");
         }
     }
 
     {
-        gScenarioData.clear();
+        plug.chapters.clear();
         Resource rsrc("scenarios", "snro", kScenarioResID);
         BytesSlice in(rsrc.data());
         while (!in.empty()) {
             Scenario scenario;
             read(in, scenario);
-            gScenarioData.push_back(scenario);
+            plug.chapters.push_back(scenario);
         }
-        globals()->scenarioNum = gScenarioData.size();
     }
 
     {
-        gScenarioInitialData.clear();
+        plug.initials.clear();
         Resource rsrc("scenario-initial-objects", "snit", kScenarioInitialResID);
         BytesSlice in(rsrc.data());
         while (!in.empty()) {
             Scenario::InitialObject initial;
             read(in, initial);
-            gScenarioInitialData.push_back(initial);
+            plug.initials.push_back(initial);
         }
     }
 
     {
-        gScenarioConditionData.clear();
+        plug.conditions.clear();
         Resource rsrc("scenario-conditions", "sncd", kScenarioConditionResID);
         BytesSlice in(rsrc.data());
         while (!in.empty()) {
             Scenario::Condition condition;
             read(in, condition);
-            gScenarioConditionData.push_back(condition);
+            plug.conditions.push_back(condition);
         }
     }
 
     {
-        gScenarioBriefData.clear();
+        plug.briefings.clear();
         Resource rsrc("scenario-briefing-points", "snbf", kScenarioBriefResID);
         BytesSlice in(rsrc.data());
         while (!in.empty()) {
             Scenario::BriefPoint brief_point;
             read(in, brief_point);
-            gScenarioBriefData.push_back(brief_point);
+            plug.briefings.push_back(brief_point);
         }
     }
 
     InitRaces();
 
-    level_names = new StringList(kLevelNameID);
+    plug.chapter_names.reset(new StringList(kLevelNameID));
 }
 
 bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
@@ -615,27 +609,27 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
     }
 
     if (step == 0) {
-        if (!globals()->scenarioFileInfo.energyBlobID.get()) {
+        if (!plug.meta.energyBlobID.get()) {
             throw Exception("No energy blob defined");
         }
-        if (!globals()->scenarioFileInfo.warpInFlareID.get()) {
+        if (!plug.meta.warpInFlareID.get()) {
             throw Exception("No warp in flare defined");
         }
-        if (!globals()->scenarioFileInfo.warpOutFlareID.get()) {
+        if (!plug.meta.warpOutFlareID.get()) {
             throw Exception("No warp out flare defined");
         }
-        if (!globals()->scenarioFileInfo.playerBodyID.get()) {
+        if (!plug.meta.playerBodyID.get()) {
             throw Exception("No player body defined");
         }
 
         // Load the four blessed objects.  The player's body is needed
         // in all colors; the other three are needed only as neutral
         // objects by default.
-        globals()->scenarioFileInfo.playerBodyID->internalFlags |= all_colors;
+        plug.meta.playerBodyID->internalFlags |= all_colors;
         for (int i = 0; i < gThisScenario->playerNum; i++) {
-            const auto& info = globals()->scenarioFileInfo;
+            const auto& meta = plug.meta;
             Handle<BaseObject> blessed[] = {
-                info.energyBlobID, info.warpInFlareID, info.warpOutFlareID, info.playerBodyID,
+                meta.energyBlobID, meta.warpInFlareID, meta.warpOutFlareID, meta.playerBodyID,
             };
             for (auto id: blessed) {
                 AddBaseObjectMedia(id, GRAY, all_colors);
@@ -1036,7 +1030,7 @@ void GetScenarioFullScaleAndCorner(
 }
 
 const Scenario* GetScenarioPtrFromChapter(int32_t chapter) {
-    for (const Scenario& scenario: gScenarioData) {
+    for (const Scenario& scenario: plug.chapters) {
         if (scenario.chapter_number() == chapter) {
             return &scenario;
         }

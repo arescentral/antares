@@ -37,8 +37,6 @@ const size_t kMaxPlayerNum                 = 4;
 const int32_t kMaxTypeBaseCanBuild = 12;
 const int32_t kMaxShipCanBuild = 6;
 
-const size_t kRaceNum = 16;
-
 enum {
     kSingleHumanPlayer = 0,
     kNetworkHumanPlayer = 1,

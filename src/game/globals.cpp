@@ -37,6 +37,7 @@ namespace antares {
 static ANTARES_GLOBAL aresGlobalType* gAresGlobal;
 
 ANTARES_GLOBAL GlobalState g;
+ANTARES_GLOBAL ScenarioGlobals plug;
 
 aresGlobalType* globals() {
     return gAresGlobal;
@@ -55,11 +56,7 @@ void init_globals() {
 }
 
 aresGlobalType::aresGlobalType() {
-    gCenterScaleH = 0;
-    gCenterScaleV = 0;
     gZoomMode = kTimesTwoZoom;
-    gInstrumentTop = 0;
-    gAutoPilotOff = true;
     keyMask = 0;
 
     hotKeyDownTime = -1;

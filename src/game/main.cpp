@@ -163,7 +163,7 @@ void MainPlay::become_front() {
 
             _replay_builder.init(
                     Preferences::preferences()->scenario_identifier(),
-                    String(u32_to_version(globals()->scenarioFileInfo.version)),
+                    String(u32_to_version(plug.meta.version)),
                     _scenario->chapter_number(),
                     g.random.seed);
 
@@ -228,7 +228,7 @@ void MainPlay::become_front() {
                 SetSongVolume(kMusicVolume);
                 PlaySong();
             }
-            globals()->gLastTime = now_usecs();
+            globals()->virtual_start = now_usecs();
 
             if (!_replay) {
                 _replay_builder.start();
@@ -491,26 +491,20 @@ bool GamePlay::next_timer(int64_t& time) {
 }
 
 void GamePlay::fire_timer() {
-    uint64_t thisTime;
-    uint64_t scrapTime;
-
     while (_next_timer < now_usecs()) {
         _next_timer = add_ticks(_next_timer, 1);
     }
 
-    thisTime = now_usecs();
-    scrapTime = thisTime;
-    thisTime -= globals()->gLastTime;
-    int64_t newGameTime = thisTime + _scenario_start_time;
+    const int64_t now = now_usecs();
 
+    int unitsPassed, unitsDone;
     if ((mNOFFastMotionKey(_key_map)) && !_entering_message) {
-        newGameTime = add_ticks(g.time, 12);
-        thisTime = newGameTime - _scenario_start_time;
-        globals()->gLastTime = scrapTime - thisTime;
+        unitsDone = unitsPassed = 12;
+        globals()->virtual_start = now - (add_ticks(g.time, unitsPassed) - _scenario_start_time);
+    } else {
+        int64_t newGameTime = now - globals()->virtual_start + _scenario_start_time;
+        unitsDone = unitsPassed = usecs_to_ticks(newGameTime - g.time);
     }
-
-    int unitsPassed = usecs_to_ticks(newGameTime - g.time);
-    int unitsDone = unitsPassed;
 
     if (unitsPassed <= 0) {
         return;
@@ -522,9 +516,7 @@ void GamePlay::fire_timer() {
     if (_player_paused) {
         _player_paused = false;
         unitsDone = unitsPassed = 0;
-        newGameTime = g.time;
-        thisTime = newGameTime - _scenario_start_time;
-        globals()->gLastTime = scrapTime - thisTime;
+        globals()->virtual_start = now - (g.time - _scenario_start_time);
     }
 
     while (unitsPassed > 0) {
@@ -611,9 +603,7 @@ void GamePlay::fire_timer() {
     globals()->transitions.update_boolean(unitsDone);
 
     if (g.game_over && (g.time >= g.game_over_at)) {
-        thisTime = now_usecs();
-        thisTime -= globals()->gLastTime;
-        *_seconds = thisTime / 1000000; // divide by a million to get seconds
+        *_seconds = (g.time - _scenario_start_time) / 1e6;
 
         if (*_game_result == NO_GAME) {
             if (g.victor == g.admiral) {

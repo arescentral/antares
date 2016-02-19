@@ -25,6 +25,7 @@
 #include "game/globals.hpp"
 #include "game/motion.hpp"
 #include "game/space-object.hpp"
+#include "lang/defines.hpp"
 #include "math/macros.hpp"
 #include "math/special.hpp"
 #include "math/units.hpp"
@@ -41,13 +42,16 @@ const int kMinVolatileSound = 15;
 
 const double kHackRangeMultiplier = 0.0025;
 
+ANTARES_GLOBAL smartSoundHandle    gSound[kSoundNum];
+ANTARES_GLOBAL smartSoundChannel   gChannel[kMaxChannelNum];
+
 void InitSoundFX() {
     for (int i = 0; i < kMaxChannelNum; i++) {
-        globals()->gChannel[i].reserved_until = 0;
-        globals()->gChannel[i].soundPriority = kNoSound;
-        globals()->gChannel[i].soundVolume = 0;
-        globals()->gChannel[i].whichSound = -1;
-        globals()->gChannel[i].channelPtr = SoundDriver::driver()->open_channel();
+        gChannel[i].reserved_until = 0;
+        gChannel[i].soundPriority = kNoSound;
+        gChannel[i].soundVolume = 0;
+        gChannel[i].whichSound = -1;
+        gChannel[i].channelPtr = SoundDriver::driver()->open_channel();
     }
 
     ResetAllSounds();
@@ -73,8 +77,8 @@ static bool same_sound_channel(
         int& channel, int16_t id, uint8_t amplitude, soundPriorityType priority) {
     if (priority > kVeryLowPrioritySound) {
         for (int i = 0; i < kMaxChannelNum; ++i) {
-            if ((globals()->gChannel[i].whichSound == id) &&
-                (globals()->gChannel[i].soundVolume <= amplitude)) {
+            if ((gChannel[i].whichSound == id) &&
+                (gChannel[i].soundVolume <= amplitude)) {
                 channel = i;
                 return true;
             }
@@ -86,7 +90,7 @@ static bool same_sound_channel(
 // see if there's a channel at lower volume
 static bool quieter_channel(int& channel, uint8_t amplitude) {
     for (int i = 0; i < kMaxChannelNum; ++i) {
-        if (globals()->gChannel[i].soundVolume < amplitude) {
+        if (gChannel[i].soundVolume < amplitude) {
             channel = i;
             return true;
         }
@@ -97,7 +101,7 @@ static bool quieter_channel(int& channel, uint8_t amplitude) {
 // see if there's a channel at lower priority
 static bool lower_priority_channel(int& channel, soundPriorityType priority) {
     for (int i = 0; i < kMaxChannelNum; ++i) {
-        if (globals()->gChannel[i].soundPriority < priority) {
+        if (gChannel[i].soundPriority < priority) {
             channel = i;
             return true;
         }
@@ -111,7 +115,7 @@ static bool oldest_available_channel(int& channel) {
     bool result = false;
     for (int i = 0; i < kMaxChannelNum; ++i) {
         auto past_reservation =
-            VideoDriver::driver()->usecs() - globals()->gChannel[i].reserved_until;
+            VideoDriver::driver()->usecs() - gChannel[i].reserved_until;
         if (past_reservation > oldestSoundTime) {
             oldestSoundTime = past_reservation;
             channel = i;
@@ -140,23 +144,23 @@ void PlayVolumeSound(
         }
 
         int whichSound = 0;
-        while ((globals()->gSound[whichSound].id != whichSoundID) && (whichSound < kSoundNum)) {
+        while ((gSound[whichSound].id != whichSoundID) && (whichSound < kSoundNum)) {
             whichSound++;
         }
         if (whichSound == kSoundNum) {
             return;
         }
 
-        globals()->gChannel[whichChannel].whichSound = whichSoundID;
-        globals()->gChannel[whichChannel].reserved_until = VideoDriver::driver()->usecs() + ticks_to_usecs(persistence);
-        globals()->gChannel[whichChannel].soundPriority = priority;
-        globals()->gChannel[whichChannel].soundVolume = amplitude;
+        gChannel[whichChannel].whichSound = whichSoundID;
+        gChannel[whichChannel].reserved_until = VideoDriver::driver()->usecs() + ticks_to_usecs(persistence);
+        gChannel[whichChannel].soundPriority = priority;
+        gChannel[whichChannel].soundVolume = amplitude;
 
-        globals()->gChannel[whichChannel].channelPtr->quiet();
+        gChannel[whichChannel].channelPtr->quiet();
 
-        globals()->gChannel[whichChannel].channelPtr->amp(amplitude);
-        globals()->gChannel[whichChannel].channelPtr->activate();
-        globals()->gSound[whichSound].soundHandle->play();
+        gChannel[whichChannel].channelPtr->amp(amplitude);
+        gChannel[whichChannel].channelPtr->activate();
+        gSound[whichSound].soundHandle->play();
     }
 }
 
@@ -176,24 +180,24 @@ void PlayLocalizedSound(
 
 void SetAllSoundsNoKeep() {
     for (int count = kMinVolatileSound; count < kSoundNum; count++) {
-        globals()->gSound[count].keepMe = false;
+        gSound[count].keepMe = false;
     }
 }
 
 void RemoveAllUnusedSounds() {
     for (int count = kMinVolatileSound; count < kSoundNum; count++) {
-        if ((!globals()->gSound[count].keepMe) &&
-                (globals()->gSound[count].soundHandle.get() != NULL)) {
-            globals()->gSound[count].soundHandle.reset();
-            globals()->gSound[count].id = -1;
+        if ((!gSound[count].keepMe) &&
+                (gSound[count].soundHandle.get() != NULL)) {
+            gSound[count].soundHandle.reset();
+            gSound[count].id = -1;
         }
     }
 }
 
 void ResetAllSounds() {
     for (int count = 0; count < kSoundNum; count++) {
-        globals()->gSound[count].keepMe = false;
-        globals()->gSound[count].id = -1;
+        gSound[count].keepMe = false;
+        gSound[count].id = -1;
     }
 }
 
@@ -201,24 +205,24 @@ void KeepSound(int soundID) {
     int16_t whichSound;
 
     whichSound = 0;
-    while ((globals()->gSound[whichSound].id != soundID) && (whichSound < kSoundNum)) {
+    while ((gSound[whichSound].id != soundID) && (whichSound < kSoundNum)) {
         whichSound++;
     }
 
     if (whichSound < kSoundNum) {
-        globals()->gSound[whichSound].keepMe = true;
+        gSound[whichSound].keepMe = true;
     }
 }
 
 int AddSound(int soundID) {
     int whichSound = 0;
-    while ((globals()->gSound[whichSound].id != soundID) && (whichSound < kSoundNum)) {
+    while ((gSound[whichSound].id != soundID) && (whichSound < kSoundNum)) {
         whichSound++;
     }
 
     if (whichSound == kSoundNum) {
         whichSound = 0;
-        while ((globals()->gSound[whichSound].soundHandle.get() != NULL) &&
+        while ((gSound[whichSound].soundHandle.get() != NULL) &&
                 (whichSound < kSoundNum)) {
             whichSound++;
         }
@@ -227,26 +231,26 @@ int AddSound(int soundID) {
             throw Exception("Can't manage any more sounds");
         }
 
-        globals()->gSound[whichSound].soundHandle = SoundDriver::driver()->open_sound(
+        gSound[whichSound].soundHandle = SoundDriver::driver()->open_sound(
                 format("/sounds/{0}", soundID));
-        globals()->gSound[whichSound].id = soundID;
+        gSound[whichSound].id = soundID;
     }
     return whichSound;
 }
 
 void SoundFXCleanup() {
     for (int i = 0; i < kMaxChannelNum; i++) {
-        globals()->gChannel[i].channelPtr.reset();
+        gChannel[i].channelPtr.reset();
     }
 
     for (int i = 0; i < kSoundNum; i++) {
-        globals()->gSound[i].soundHandle.reset();
+        gSound[i].soundHandle.reset();
     }
 }
 
 void quiet_all() {
     for (int i = 0; i < kMaxChannelNum; i++) {
-        globals()->gChannel[i].channelPtr->quiet();
+        gChannel[i].channelPtr->quiet();
     }
 }
 

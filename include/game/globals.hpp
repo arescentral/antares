@@ -25,6 +25,7 @@
 #include "config/keys.hpp"
 #include "data/handle.hpp"
 #include "data/scenario.hpp"
+#include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "game/starfield.hpp"
 #include "math/random.hpp"
@@ -118,27 +119,41 @@ struct GlobalState {
 
 extern GlobalState g;
 
+struct ScenarioGlobals {
+    scenarioInfoType                      meta;
+
+    std::vector<Scenario>                 chapters;
+    std::unique_ptr<StringList>           chapter_names;
+    std::vector<Scenario::InitialObject>  initials;
+    std::vector<Scenario::Condition>      conditions;
+    std::vector<Scenario::BriefPoint>     briefings;
+
+    std::vector<BaseObject>               objects;
+    std::unique_ptr<StringList>           object_names;
+    std::unique_ptr<StringList>           object_short_names;
+
+    std::vector<Action>                   actions;
+
+    std::vector<Race>                     races;
+};
+
+extern ScenarioGlobals plug;
+
 struct aresGlobalType {
     aresGlobalType();
     ~aresGlobalType();
 
     std::unique_ptr<InputSource> gInputSource;
-    uint64_t        gLastTime;
-    int32_t         gCenterScaleH;
-    int32_t         gCenterScaleV;
+
+    // Start time of game in usecs.  But, if the player pauses or fast-forwards, it gets moved
+    // forwards or back so that the same calculations still work.
+    uint64_t        virtual_start;
+
     ZoomType        gZoomMode;
 
-    int32_t         gInstrumentTop;         // = 0;
     miniComputerDataType    gMiniScreenData;
-    smartSoundHandle    gSound[kSoundNum];
-    smartSoundChannel   gChannel[kMaxChannelNum];
 
-    bool         gAutoPilotOff;          // hack for turning off auto in netgame
     uint32_t        keyMask;
-    scenarioInfoType    scenarioFileInfo;   // x-ares; for factory +
-                                            // 3rd party files
-    int32_t         scenarioNum;
-
     hotKeyType      hotKey[kHotKeyNum];
     int32_t         hotKeyDownTime;
     int32_t         lastHotKey;
@@ -147,6 +162,8 @@ struct aresGlobalType {
     int32_t         lastSelectedObjectID;
     bool         destKeyUsedForSelection;
     bool         hotKey_target;
+
+    int64_t      next_klaxon;
 
     Starfield starfield;
     Transitions transitions;

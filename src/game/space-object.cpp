@@ -64,13 +64,9 @@ const uint8_t kNeutralColor         = SKY_BLUE;
 
 static const int16_t kSpaceObjectNameResID          = 5000;
 static const int16_t kSpaceObjectShortNameResID     = 5001;
-static ANTARES_GLOBAL StringList* space_object_names;
-static ANTARES_GLOBAL StringList* space_object_short_names;
 
 int ANTARES_GLOBAL BaseObject::size = 0;
 int ANTARES_GLOBAL Action::size = 0;
-static ANTARES_GLOBAL unique_ptr<BaseObject[]> gBaseObjectData;
-static ANTARES_GLOBAL unique_ptr<Action[]> gObjectActionData;
 
 #ifdef DATA_COVERAGE
 ANTARES_GLOBAL set<int32_t> covered_objects;
@@ -82,9 +78,9 @@ void SpaceObjectHandlingInit() {
         BytesSlice in(rsrc.data());
         size_t count = rsrc.data().size() / Action::byte_size;
         Action::size = count;
-        gObjectActionData.reset(new Action[count]);
+        plug.actions.resize(count);
         for (size_t i = 0; i < count; ++i) {
-            read(in, gObjectActionData[i]);
+            read(in, plug.actions[i]);
         }
         if (!in.empty()) {
             throw Exception("didn't consume all of object action data");
@@ -97,9 +93,9 @@ void SpaceObjectHandlingInit() {
         BytesSlice in(rsrc.data());
         size_t count = rsrc.data().size() / BaseObject::byte_size;
         BaseObject::size = count;
-        gBaseObjectData.reset(new BaseObject[count]);
+        plug.objects.resize(count);
         for (size_t i = 0; i < count; ++i) {
-            read(in, gBaseObjectData[i]);
+            read(in, plug.objects[i]);
         }
         if (!in.empty()) {
             throw Exception("didn't consume all of base object data");
@@ -110,8 +106,8 @@ void SpaceObjectHandlingInit() {
     ResetAllSpaceObjects();
     reset_action_queue();
 
-    space_object_names = new StringList(kSpaceObjectNameResID);
-    space_object_short_names = new StringList(kSpaceObjectShortNameResID);
+    plug.object_names.reset(new StringList(kSpaceObjectNameResID));
+    plug.object_short_names.reset(new StringList(kSpaceObjectShortNameResID));
 }
 
 void ResetAllSpaceObjects() {
@@ -124,7 +120,7 @@ void ResetAllSpaceObjects() {
 
 BaseObject* BaseObject::get(int number) {
     if ((0 <= number) && (number < size)) {
-        return &gBaseObjectData[number];
+        return &plug.objects[number];
     }
     return nullptr;
 }
@@ -138,7 +134,7 @@ SpaceObject* SpaceObject::get(int32_t number) {
 
 Action* Action::get(int32_t number) {
     if ((0 <= number) && (number < size)) {
-        return &gObjectActionData[number];
+        return &plug.actions[number];
     }
     return nullptr;
 }
@@ -852,7 +848,7 @@ void SpaceObject::destroy() {
             int16_t energyNum = object->energy() / kEnergyPodAmount;
             while (energyNum > 0) {
                 CreateAnySpaceObject(
-                        globals()->scenarioFileInfo.energyBlobID, &object->velocity,
+                        plug.meta.energyBlobID, &object->velocity,
                         &object->location, object->direction, Admiral::none(), 0, -1);
                 energyNum--;
             }
@@ -923,7 +919,7 @@ void SpaceObject::free() {
 
 void SpaceObject::create_floating_player_body() {
     auto obj = Handle<SpaceObject>(number());
-    const auto body_type = globals()->scenarioFileInfo.playerBodyID;
+    const auto body_type = plug.meta.playerBodyID;
     // if we're already in a body, don't create a body from it
     // a body expiring is handled elsewhere
     if (obj->base == body_type) {
@@ -940,11 +936,11 @@ void SpaceObject::create_floating_player_body() {
 }
 
 StringSlice get_object_name(Handle<BaseObject> id) {
-    return space_object_names->at(id.number());
+    return plug.object_names->at(id.number());
 }
 
 StringSlice get_object_short_name(Handle<BaseObject> id) {
-    return space_object_short_names->at(id.number());
+    return plug.object_short_names->at(id.number());
 }
 
 int32_t SpaceObject::number() const {
