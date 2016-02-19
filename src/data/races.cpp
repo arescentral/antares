@@ -35,33 +35,30 @@ namespace antares {
 
 static const int16_t kRaceResID = 500;
 
-static ANTARES_GLOBAL unique_ptr<Race[]> gRaceData;
-
 void InitRaces() {
-    if (gRaceData.get() == NULL) {
-        Resource rsrc("races", "race", kRaceResID);
-        BytesSlice in(rsrc.data());
-        size_t count = rsrc.data().size() / Race::byte_size;
-        if (count != kRaceNum) {
-            throw Exception("got unexpected number of races");
-        }
-        gRaceData.reset(new Race[count]);
-        for (size_t i = 0; i < count; ++i) {
-            read(in, gRaceData[i]);
-        }
-        if (!in.empty()) {
-            throw Exception("didn't consume all of race data");
-        }
+    if (!plug.races.empty()) {
+        return;
+    }
+
+    Resource rsrc("races", "race", kRaceResID);
+    BytesSlice in(rsrc.data());
+    size_t count = rsrc.data().size() / Race::byte_size;
+    plug.races.resize(count);
+    for (size_t i = 0; i < count; ++i) {
+        read(in, plug.races[i]);
+    }
+    if (!in.empty()) {
+        throw Exception("didn't consume all of race data");
     }
 }
 
 void CleanupRaces() {
-    gRaceData.reset();
+    plug.races.clear();
 }
 
 int16_t GetRaceIDFromNum(size_t raceNum) {
-    if (raceNum < kRaceNum) {
-        return gRaceData[raceNum].id;
+    if (raceNum < plug.races.size()) {
+        return plug.races[raceNum].id;
     } else {
         return -1;
     }

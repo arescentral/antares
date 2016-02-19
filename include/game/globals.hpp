@@ -123,6 +123,7 @@ struct ScenarioGlobals {
     scenarioInfoType                      meta;
 
     std::vector<Scenario>                 chapters;
+    std::unique_ptr<StringList>           chapter_names;
     std::vector<Scenario::InitialObject>  initials;
     std::vector<Scenario::Condition>      conditions;
     std::vector<Scenario::BriefPoint>     briefings;
@@ -132,6 +133,8 @@ struct ScenarioGlobals {
     std::unique_ptr<StringList>           object_short_names;
 
     std::vector<Action>                   actions;
+
+    std::vector<Race>                     races;
 };
 
 extern ScenarioGlobals plug;

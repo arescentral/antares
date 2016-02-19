@@ -75,7 +75,6 @@ const uint32_t kNeutralColorLoadedFlag   = 0x00000001u;
 const uint32_t kAnyColorLoadedFlag       = 0x0000ffffu;
 
 const int16_t kLevelNameID = 4600;
-static ANTARES_GLOBAL StringList* level_names;
 
 ANTARES_GLOBAL int32_t gScenarioRotation = 0;
 
@@ -295,7 +294,7 @@ ScenarioName Scenario::name() const {
 }
 
 void print_to(PrintTarget out, ScenarioName name) {
-    print(out, level_names->at(name.string_id - 1));
+    print(out, plug.chapter_names->at(name.string_id - 1));
 }
 
 int32_t Scenario::prologue_id() const {
@@ -536,7 +535,7 @@ void ScenarioMakerInit() {
 
     InitRaces();
 
-    level_names = new StringList(kLevelNameID);
+    plug.chapter_names.reset(new StringList(kLevelNameID));
 }
 
 bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
