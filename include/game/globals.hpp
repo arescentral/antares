@@ -132,8 +132,6 @@ struct aresGlobalType {
 
     int32_t         gInstrumentTop;         // = 0;
     miniComputerDataType    gMiniScreenData;
-    smartSoundHandle    gSound[kSoundNum];
-    smartSoundChannel   gChannel[kMaxChannelNum];
 
     uint32_t        keyMask;
     scenarioInfoType    scenarioFileInfo;   // x-ares; for factory +
