@@ -560,7 +560,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
     }
 }
 
-void CollideSpaceObjects() {
+void calc_misc() {
     // set up player info so we can find closest ship (for scaling)
     uint64_t farthestDist = 0;
     uint64_t closestDist = 0x7fffffffffffffffull;
@@ -689,7 +689,9 @@ void CollideSpaceObjects() {
             }
         }
     }
+}
 
+void calc_impacts() {
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
         auto proximityObject = &gProximityGrid[i];
         auto taObject = proximityObject->nearObject;
@@ -884,7 +886,15 @@ void CollideSpaceObjects() {
             }
         }
     }
+}
 
+// Sets the following properties on objects:
+//   * closestObject
+//   * closestDistance
+//   * localFriendStrength
+//   * localFoeStrength
+// Also sets seenByPlayerFlags and kIsHidden based on object proximity.
+void calc_locality() {
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
         auto proximityObject = &gProximityGrid[i];
         auto taObject = proximityObject->farObject;
@@ -971,32 +981,49 @@ void CollideSpaceObjects() {
             }
         }
     }
+}
 
+static void calc_visibility() {
     // here, it doesn't matter in what order we step through the table
-    const uint32_t seen_by_player = 1ul << g.admiral.number();
+    const uint32_t seen_by_me = 1ul << g.admiral.number();
 
-    for (auto aObject: SpaceObject::all()) {
-        if (aObject->active == kObjectToBeFreed) {
-            aObject->free();
-        } else if (aObject->active) {
-            if ((aObject->attributes & kConsiderDistanceAttributes)
-                    && (!(aObject->attributes & kIsDestination))) {
-                if (aObject->runTimeFlags & kIsCloaked) {
-                    aObject->seenByPlayerFlags = 0;
-                } else if (!(aObject->runTimeFlags & kIsHidden)) {
-                    aObject->seenByPlayerFlags = 0xffffffff;
+    for (auto o: SpaceObject::all()) {
+        if (o->active == kObjectToBeFreed) {
+            o->free();
+        } else if (o->active) {
+            if ((o->attributes & kConsiderDistanceAttributes)
+                    && (!(o->attributes & kIsDestination))) {
+                if (o->runTimeFlags & kIsCloaked) {
+                    o->seenByPlayerFlags = 0;
+                } else if (!(o->runTimeFlags & kIsHidden)) {
+                    o->seenByPlayerFlags = 0xffffffff;
                 }
-                aObject->seenByPlayerFlags |= aObject->myPlayerFlag;
-                if (!(aObject->seenByPlayerFlags & seen_by_player)
-                        && aObject->sprite.get()) {
-                    aObject->sprite->tinySize = 0;
+                o->seenByPlayerFlags |= o->myPlayerFlag;
+                if (!(o->seenByPlayerFlags & seen_by_me)
+                        && o->sprite.get()) {
+                    o->sprite->tinySize = 0;
                 }
-            }
-            if (aObject->attributes & kIsBeam) {
-                aObject->frame.beam->lastGlobalLocation = aObject->location;
             }
         }
     }
+}
+
+static void update_last_beam_locations() {
+    for (auto o: SpaceObject::all()) {
+        if (o->active == kObjectInUse) {
+            if (o->attributes & kIsBeam) {
+                o->frame.beam->lastGlobalLocation = o->location;
+            }
+        }
+    }
+}
+
+void CollideSpaceObjects() {
+    calc_misc();
+    calc_impacts();
+    calc_locality();
+    calc_visibility();
+    update_last_beam_locations();
 }
 
 // CorrectPhysicalSpace-- takes 2 objects that are colliding and moves them back 1
