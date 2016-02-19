@@ -66,13 +66,24 @@ const int32_t kConsiderDistanceAttributes = (
 const uint32_t kThinkiverseTopLeft       = (kUniversalCenter - (2 * 65534)); // universe for thinking or owned objects
 const uint32_t kThinkiverseBottomRight   = (kUniversalCenter + (2 * 65534));
 
-static ANTARES_GLOBAL Point            cAdjacentUnits[] = {
-    Point(0, 0),
-    Point(1, 0),
-    Point(-1, 1),
-    Point(0, 1),
-    Point(1, 1)
-};
+// kAdjacentUnits encodes the following set of locations relative to the
+// center:
+//
+//     # # #
+//     # 0 1
+//     2 3 4
+//
+// The point of this is, if we iterate through a grid such as
+// gProximityGrid, and at each cell, check the cell at each of these
+// relative locations, we will make a pairwise comparison between all
+// adjacent cells exactly once.
+//
+// InitMotion() turns the relative locations to relative indices, and
+// keeps that information in unitsToCheck[k].adjacentUnit.  If the
+// relative location would be outside the 16x16 grid of gProximityGrid,
+// then superOffset points into the adjacent grid, which is also the
+// same grid in a way I have yet to comprehend.
+const static Point kAdjacentUnits[] = {{0, 0}, {1, 0}, {-1, 1}, {0, 1}, {1, 1}};
 
 ANTARES_GLOBAL coordPointType          gGlobalCorner;
 static ANTARES_GLOBAL unique_ptr<proximityUnitType[]> gProximityGrid;
@@ -105,7 +116,7 @@ void InitMotion() {
                 int32_t uy = y;
                 int32_t sx = 0, sy = 0;
 
-                ux += cAdjacentUnits[i].h;
+                ux += kAdjacentUnits[i].h;
                 if (ux < 0) {
                     ux += kProximitySuperSize;
                     sx--;
@@ -114,7 +125,7 @@ void InitMotion() {
                     sx++;
                 }
 
-                uy += cAdjacentUnits[i].v;
+                uy += kAdjacentUnits[i].v;
                 if (uy < 0) {
                     uy += kProximitySuperSize;
                     sy--;
