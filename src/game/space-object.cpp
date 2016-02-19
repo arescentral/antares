@@ -935,6 +935,14 @@ void SpaceObject::create_floating_player_body() {
     }
 }
 
+bool SpaceObject::engages(const SpaceObject& b) const {
+    if ((baseType->buildFlags & kCanOnlyEngage) ||
+        (b.baseType->buildFlags & kOnlyEngagedBy)) {
+        return baseType->engageKeyTag == b.baseType->levelKeyTag;
+    }
+    return true;
+}
+
 StringSlice get_object_name(Handle<BaseObject> id) {
     return plug.object_names->at(id.number());
 }

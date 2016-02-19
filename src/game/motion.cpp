@@ -944,37 +944,20 @@ void CollideSpaceObjects() {
                             }
                         }
 
-                        if  (
-                                (
-                                 (aObject->baseType->buildFlags & kCanOnlyEngage) ||
-                                 (bObject->baseType->buildFlags & kOnlyEngagedBy)
-                                ) &&
-                                (aObject->baseType->engageKeyTag != bObject->baseType->levelKeyTag)
-                            ) {
-                            goto hackANoEngageMatch;
+                        if (aObject->engages(*bObject)) {
+                            if ((distance < aObject->closestDistance) && (bObject->attributes & kPotentialTarget)) {
+                                aObject->closestDistance = distance;
+                                aObject->closestObject = bObject;
+                            }
                         }
 
-                        if ((distance < aObject->closestDistance) && (bObject->attributes & kPotentialTarget)) {
-                            aObject->closestDistance = distance;
-                            aObject->closestObject = bObject;
+                        if (bObject->engages(*aObject)) {
+                            if (( distance < bObject->closestDistance) && ( aObject->attributes & kPotentialTarget)) {
+                                bObject->closestDistance = distance;
+                                bObject->closestObject = aObject;
+                            }
                         }
 
-hackANoEngageMatch:
-                        if  (
-                                (
-                                 (bObject->baseType->buildFlags & kCanOnlyEngage) ||
-                                 (aObject->baseType->buildFlags & kOnlyEngagedBy)
-                                ) &&
-                                (bObject->baseType->engageKeyTag != aObject->baseType->levelKeyTag)
-                            ) {
-                            goto hackBNoEngageMatch;
-                        }
-
-                        if (( distance < bObject->closestDistance) && ( aObject->attributes & kPotentialTarget)) {
-                            bObject->closestDistance = distance;
-                            bObject->closestObject = aObject;
-                        }
-hackBNoEngageMatch:
                         bObject->localFoeStrength += aObject->localFriendStrength;
                         bObject->localFriendStrength += aObject->localFoeStrength;
 
