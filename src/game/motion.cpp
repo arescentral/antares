@@ -860,21 +860,23 @@ void calc_impacts() {
                         // code we have now won't handle it.
                         continue;
                     } else if (aObject->attributes & kIsBeam) {
-                        if (beam_intersects(aObject, bObject)) {
+                        if (beam_intersects(aObject, bObject) && can_hit(aObject, bObject)) {
                             HitObject(bObject, aObject);
                         }
+                        continue;
                     } else if (bObject->attributes & kIsBeam) {
-                        if (beam_intersects(bObject, aObject)) {
+                        if (beam_intersects(bObject, aObject) && can_hit(bObject, aObject)) {
                             HitObject(aObject, bObject);
                         }
-                    } else {
-                        if (inclusive_intersect(aObject->absoluteBounds, bObject->absoluteBounds)) {
-                            if (can_hit(bObject, aObject)) {
-                                HitObject(aObject, bObject);
-                            }
-                            if (can_hit(aObject, bObject)) {
-                                HitObject(bObject, aObject);
-                            }
+                        continue;
+                    }
+
+                    if (inclusive_intersect(aObject->absoluteBounds, bObject->absoluteBounds)) {
+                        if (can_hit(bObject, aObject)) {
+                            HitObject(aObject, bObject);
+                        }
+                        if (can_hit(aObject, bObject)) {
+                            HitObject(bObject, aObject);
                         }
                     }
 
