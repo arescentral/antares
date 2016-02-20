@@ -798,7 +798,8 @@ static bool beam_intersects(const Handle<SpaceObject>& beam, const Handle<SpaceO
     }
 }
 
-void calc_impacts() {
+// Set absoluteBounds on all objects.
+void calc_bounds() {
     for (auto o = g.root; o.get(); o = o->nextObject) {
         if ((o->absoluteBounds.left >= o->absoluteBounds.right) && o->sprite.get()) {
             const NatePixTable::Frame& frame
@@ -819,7 +820,10 @@ void calc_impacts() {
             o->absoluteBounds.bottom = o->absoluteBounds.top + size.height;
         }
     }
+}
 
+// Call HitObject() and CorrectPhysicalSpace() for all colliding pairs of objects.
+void calc_impacts() {
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
         const auto& cell = gProximityGrid[i];
         for (auto aObject = cell.nearObject; aObject.get(); aObject = aObject->nextNearObject) {
@@ -1002,6 +1006,7 @@ static void update_last_beam_locations() {
 
 void CollideSpaceObjects() {
     calc_misc();
+    calc_bounds();
     calc_impacts();
     calc_locality();
     calc_visibility();
