@@ -32,13 +32,6 @@ inline T ABS(T x) {
     }
 }
 
-inline int mClipCode(int x, int y, const Rect& bounds) {
-    return ((x < bounds.left) << 3)
-        | ((x > (bounds.right - 1)) << 2)
-        | ((y < bounds.top) << 1)
-        | (y > ( bounds.bottom - 1));
-}
-
 }  // namespace antares
 
 #endif // ANTARES_MATH_MACROS_HPP_

@@ -698,6 +698,106 @@ bool inclusive_intersect(Rect x, Rect y) {
     return x.intersects(y);
 }
 
+static int mClipCode(int x, int y, const Rect& bounds) {
+    return ((x < bounds.left) << 3)
+        | ((x >= bounds.right) << 2)
+        | ((y < bounds.top) << 1)
+        | (y >= bounds.bottom);
+}
+
+static bool beam_intersects(const Handle<SpaceObject>& beam, const Handle<SpaceObject>& target) {
+    if (beam->active == kObjectToBeFreed) {
+        return false;
+    }
+
+    Point start(beam->location.h, beam->location.v);
+    Point end(beam->frame.beam->lastGlobalLocation.h, beam->frame.beam->lastGlobalLocation.v);
+
+    //
+    // Determine if the line segment defined by `{start, end}` passes
+    // through the rect `target->absoluteBounds`.
+    //
+    // Imagine dividing space up into nine areas based on the rect:
+    //
+    //    1010 | 0010 | 0110
+    //   ------########------
+    //    1000 # 0000 # 0100
+    //   ------########------
+    //    1001 | 0001 | 0101
+    //
+    // The binary numbers above are the clip code, which we compute for
+    // both `start` and `end`. There are a few cases we need to worry
+    // about:
+    //
+    //   1.  Either `start_clip` or `end_clip` is zero. In this case,
+    //       one endpoint lies within the rect, so the line definitely
+    //       definitely intersects it, and we run the collision.
+    //
+    //   2.  `start_clip & end_clip` is non-zero. In this case, both the
+    //       start and end points exceed some dimension of the rect;
+    //       they are both above, below, left, or right of it. In this
+    //       case, the line doesn't intersect, and we bail.
+    //
+    //   3.  `start_clip & end_clip` is zero, but neither of them is
+    //       itself zero. This has two sub-cases, and we now have to
+    //       figure out which it is.
+    //
+    // In this illustration, both A and B have clip code 1010, and both
+    // C and D have clip code 0101. In order to figure out if AC and BD
+    // intersect the rect, we walk forward the start points.
+    //
+    //     B A.|      |
+    //      \  E.     |
+    //       \ | ˙.   |
+    //        \|   ˙. |
+    //         F     ˙.
+    //         |\     |˙.
+    //   ------##H#####--G.-----
+    //         #  \   #    ˙.
+    //   ------####\###------˙.-
+    //         |    \ |        C
+    //         |     \|
+    //         |      \
+    //         |      |\
+    //         |      | D
+    //
+    // First, we move them forward horizontally, to E or F. These have
+    // clip code 0010, so we've made progress, but don't yet have an
+    // answer. Then we walk them forward vertically, to G and H. G has
+    // clip code 0100, so both C and G are right of the rect; we bail. H
+    // has clip code 0000; it's in the rect, and we run the collision.
+    //
+    int16_t end_clip = mClipCode(end.h, end.v, target->absoluteBounds);
+    if (!end_clip) {
+        return true;
+    }
+
+    while (true) {
+        int16_t start_clip = mClipCode(start.h, start.v, target->absoluteBounds);
+        if (!start_clip) {
+            return true;
+        } else if (start_clip & end_clip) {
+            return false;
+        }
+
+        int32_t xd = end.h - start.h;
+        int32_t yd = end.v - start.v;
+        if (start_clip & 8) {
+            start.v += yd * (target->absoluteBounds.left - start.h) / xd;
+            start.h = target->absoluteBounds.left;
+        } else if (start_clip & 4) {
+            start.v += yd * (target->absoluteBounds.right - 1 - start.h) / xd;
+            start.h = target->absoluteBounds.right - 1;
+        } else if (start_clip & 2) {
+            start.h += xd * (target->absoluteBounds.top - start.v) / yd;
+            start.v = target->absoluteBounds.top;
+        } else if (start_clip & 1) {
+            start.h += xd * (target->absoluteBounds.bottom - 1 - start.v) / yd;
+            start.v = target->absoluteBounds.bottom - 1;
+        }
+    }
+}
+
 void calc_impacts() {
     for (auto o = g.root; o.get(); o = o->nextObject) {
         if ((o->absoluteBounds.left >= o->absoluteBounds.right) && o->sprite.get()) {
@@ -767,67 +867,15 @@ void calc_impacts() {
                         if (bObject->attributes & kIsBeam) {
                             sObject = bObject;
                             dObject = aObject;
-                        } else {
+                        } else if (aObject->attributes & kIsBeam) {
                             sObject = aObject;
                             dObject = bObject;
+                        } else {
+                            // no reason beams can't intersect, but the
+                            // code we have now won't handle it.
+                            continue;
                         }
-
-                        int32_t xs = sObject->location.h;
-                        int32_t ys = sObject->location.v;
-                        int32_t xe = sObject->frame.beam->lastGlobalLocation.h;
-                        int32_t ye = sObject->frame.beam->lastGlobalLocation.v;
-
-                        int16_t cs = mClipCode( xs, ys, dObject->absoluteBounds);
-                        int16_t ce = mClipCode( xe, ye, dObject->absoluteBounds);
-                        bool beamHit = true;
-                        if (sObject->active == kObjectToBeFreed) {
-                            cs = ce = 1;
-                            beamHit = false;
-                        }
-
-                        while (cs | ce) {
-                            if (cs & ce) {
-                                beamHit = false;
-                                break;
-                            }
-                            int32_t xd = xe - xs;
-                            int32_t yd = ye - ys;
-                            if (cs) {
-                                if (cs & 8) {
-                                    ys += yd * ( dObject->absoluteBounds.left - xs) / xd;
-                                    xs = dObject->absoluteBounds.left;
-                                } else
-                                    if (cs & 4) {
-                                        ys += yd * ( dObject->absoluteBounds.right - 1 - xs) / xd;
-                                        xs = dObject->absoluteBounds.right - 1;
-                                    } else
-                                        if (cs & 2) {
-                                            xs += xd * ( dObject->absoluteBounds.top - ys) / yd;
-                                            ys = dObject->absoluteBounds.top;
-                                        } else
-                                            if (cs & 1) {
-                                                xs += xd * ( dObject->absoluteBounds.bottom - 1 - ys) / yd;
-                                                ys = dObject->absoluteBounds.bottom - 1;
-                                            }
-                                cs = mClipCode( xs, ys, dObject->absoluteBounds);
-                            } else if (ce) {
-                                if (ce & 8) {
-                                    ye += yd * ( dObject->absoluteBounds.left - xe) / xd;
-                                    xe = dObject->absoluteBounds.left;
-                                } else if (ce & 4) {
-                                    ye += yd * ( dObject->absoluteBounds.right - 1 - xe) / xd;
-                                    xe = dObject->absoluteBounds.right - 1;
-                                } else if (ce & 2) {
-                                    xe += xd * ( dObject->absoluteBounds.top - ye) / yd;
-                                    ye = dObject->absoluteBounds.top;
-                                } else if (ce & 1) {
-                                    xe += xd * ( dObject->absoluteBounds.bottom - 1 - ye) / yd;
-                                    ye = dObject->absoluteBounds.bottom - 1;
-                                }
-                                ce = mClipCode( xe, ye, dObject->absoluteBounds);
-                            }
-                        }
-                        if (beamHit) {
+                        if (beam_intersects(sObject, dObject)) {
                             HitObject(dObject, sObject);
                         }
                     }
