@@ -690,12 +690,17 @@ void calc_misc() {
 }
 
 // Collision uses inclusive rect bounds for historical reasons.
-bool inclusive_intersect(Rect x, Rect y) {
+static bool inclusive_intersect(Rect x, Rect y) {
     ++x.right;
     ++x.bottom;;
     ++y.right;
     ++y.bottom;
     return x.intersects(y);
+}
+
+static bool can_hit(const Handle<SpaceObject>& a, const Handle<SpaceObject>& b) {
+    return (a->attributes & kCanCollide)
+        && (b->attributes & kCanBeHit);
 }
 
 static int mClipCode(int x, int y, const Rect& bounds) {
@@ -850,33 +855,26 @@ void calc_impacts() {
                         continue;
                     }
 
-                    Handle<SpaceObject> sObject;
-                    Handle<SpaceObject> dObject;
-                    if (!((bObject->attributes | aObject->attributes) & kIsBeam)) {
-                        dObject = aObject;
-                        sObject = bObject;
-                        if (inclusive_intersect(dObject->absoluteBounds, sObject->absoluteBounds)) {
-                            if (( dObject->attributes & kCanBeHit) && ( sObject->attributes & kCanCollide)) {
-                                HitObject(dObject, sObject);
-                            }
-                            if (( sObject->attributes & kCanBeHit) && ( dObject->attributes & kCanCollide)) {
-                                HitObject(sObject, dObject);
-                            }
+                    if (aObject->attributes & bObject->attributes & kIsBeam) {
+                        // no reason beams can't intersect, but the
+                        // code we have now won't handle it.
+                        continue;
+                    } else if (aObject->attributes & kIsBeam) {
+                        if (beam_intersects(aObject, bObject)) {
+                            HitObject(bObject, aObject);
+                        }
+                    } else if (bObject->attributes & kIsBeam) {
+                        if (beam_intersects(bObject, aObject)) {
+                            HitObject(aObject, bObject);
                         }
                     } else {
-                        if (bObject->attributes & kIsBeam) {
-                            sObject = bObject;
-                            dObject = aObject;
-                        } else if (aObject->attributes & kIsBeam) {
-                            sObject = aObject;
-                            dObject = bObject;
-                        } else {
-                            // no reason beams can't intersect, but the
-                            // code we have now won't handle it.
-                            continue;
-                        }
-                        if (beam_intersects(sObject, dObject)) {
-                            HitObject(dObject, sObject);
+                        if (inclusive_intersect(aObject->absoluteBounds, bObject->absoluteBounds)) {
+                            if (can_hit(bObject, aObject)) {
+                                HitObject(aObject, bObject);
+                            }
+                            if (can_hit(aObject, bObject)) {
+                                HitObject(bObject, aObject);
+                            }
                         }
                     }
 
