@@ -698,11 +698,6 @@ static bool inclusive_intersect(Rect x, Rect y) {
     return x.intersects(y);
 }
 
-static bool can_hit(const Handle<SpaceObject>& a, const Handle<SpaceObject>& b) {
-    return (a->attributes & kCanCollide)
-        && (b->attributes & kCanBeHit);
-}
-
 static int mClipCode(int x, int y, const Rect& bounds) {
     return ((x < bounds.left) << 3)
         | ((x >= bounds.right) << 2)
@@ -860,38 +855,20 @@ void calc_impacts() {
                         // code we have now won't handle it.
                         continue;
                     } else if (aObject->attributes & kIsBeam) {
-                        if (beam_intersects(aObject, bObject) && can_hit(aObject, bObject)) {
+                        if (beam_intersects(aObject, bObject)) {
                             HitObject(bObject, aObject);
                         }
                         continue;
                     } else if (bObject->attributes & kIsBeam) {
-                        if (beam_intersects(bObject, aObject) && can_hit(bObject, aObject)) {
+                        if (beam_intersects(bObject, aObject)) {
                             HitObject(aObject, bObject);
                         }
                         continue;
                     }
 
                     if (inclusive_intersect(aObject->absoluteBounds, bObject->absoluteBounds)) {
-                        if (can_hit(bObject, aObject)) {
-                            HitObject(aObject, bObject);
-                        }
-                        if (can_hit(aObject, bObject)) {
-                            HitObject(bObject, aObject);
-                        }
-                    }
-
-                    if  (!((bObject->attributes & aObject->attributes) & kOccupiesSpace)
-                            || (bObject->owner == aObject->owner)) {
-                        // Either one or both objects doesn't occupy
-                        // space, or the collide action resulted in an
-                        // ownership change.  Don't need to push them
-                        // back.
-                        continue;
-                    }
-
-                    // check to see if the 2 objects occupy same physical space
-                    if (inclusive_intersect(bObject->absoluteBounds, aObject->absoluteBounds)) {
-                        // move them back till they don't touch
+                        HitObject(aObject, bObject);
+                        HitObject(bObject, aObject);
                         CorrectPhysicalSpace(aObject, bObject);
                     }
                 }
@@ -1037,6 +1014,12 @@ void CollideSpaceObjects() {
 //  same space.
 
 void CorrectPhysicalSpace(Handle<SpaceObject> aObject, Handle<SpaceObject> bObject) {
+    if (!(bObject->attributes & aObject->attributes & kOccupiesSpace)) {
+        return;  // no need; at least one object doesn't actually occupy space.
+    } else if (bObject->owner == aObject->owner) {
+        return;  // the collision changed the owner of one object, e.g. a flagpod.
+    }
+
     int32_t    ah, av, ad, bh, bv, bd, adir = kNoDir, bdir = kNoDir,
             h, v;
     fixedPointType  tvel;

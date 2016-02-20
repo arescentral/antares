@@ -1663,8 +1663,15 @@ uint32_t ThinkObjectEngageTarget(
     return( keysDown);
 }
 
+static bool can_hit(const Handle<SpaceObject>& a, const Handle<SpaceObject>& b) {
+    return (a->attributes & kCanCollide)
+        && (b->attributes & kCanBeHit);
+}
+
 void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
     if (anObject->active != kObjectInUse) {
+        return;
+    } else if (!can_hit(sObject, anObject)) {
         return;
     }
 
