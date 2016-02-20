@@ -78,7 +78,7 @@ const uint32_t kThinkiverseBottomRight   = (kUniversalCenter + (2 * 65534));
 // relative locations, we will make a pairwise comparison between all
 // adjacent cells exactly once.
 //
-// InitMotion() turns the relative locations to relative indices, and
+// InitMotion() turns the relative locations to absolute indices, and
 // keeps that information in unitsToCheck[k].adjacentUnit.  If the
 // relative location would be outside the 16x16 grid of gProximityGrid,
 // then superOffset points into the adjacent grid, which is also the
@@ -110,7 +110,6 @@ void InitMotion() {
         for (int x = 0; x < kProximitySuperSize; x++) {
             proximityUnitType* p = &gProximityGrid[(y << kProximityWidthMultiply) + x];
             p->nearObject = p->farObject = SpaceObject::none();
-            int32_t adjacentAdd = 0;
             for (int i = 0; i < kUnitsToCheckNumber; i++) {
                 int32_t ux = x;
                 int32_t uy = y;
@@ -134,10 +133,6 @@ void InitMotion() {
                     sy++;
                 }
                 p->unitsToCheck[i].adjacentUnit = (uy << kProximityWidthMultiply) + ux;
-                p->unitsToCheck[i].adjacentUnit -= adjacentAdd;
-
-                adjacentAdd += p->unitsToCheck[i].adjacentUnit;
-
                 p->unitsToCheck[i].superOffset.h = sx;
                 p->unitsToCheck[i].superOffset.v = sy;
             }
@@ -694,54 +689,52 @@ void calc_misc() {
     }
 }
 
+// Collision uses inclusive rect bounds for historical reasons.
+bool inclusive_intersect(Rect x, Rect y) {
+    ++x.right;
+    ++x.bottom;;
+    ++y.right;
+    ++y.bottom;
+    return x.intersects(y);
+}
+
 void calc_impacts() {
+    for (auto o = g.root; o.get(); o = o->nextObject) {
+        if ((o->absoluteBounds.left >= o->absoluteBounds.right) && o->sprite.get()) {
+            const NatePixTable::Frame& frame
+                = o->sprite->table->at(o->sprite->whichShape);
+
+            Size size = {
+                (frame.width() * o->naturalScale) >> SHIFT_SCALE,
+                (frame.height() * o->naturalScale) >> SHIFT_SCALE,
+            };
+            Point corner = {
+                -((frame.center().h * o->naturalScale) >> SHIFT_SCALE),
+                -((frame.center().v * o->naturalScale) >> SHIFT_SCALE),
+            };
+
+            o->absoluteBounds.left = o->location.h + corner.h;
+            o->absoluteBounds.right = o->absoluteBounds.left + size.width;
+            o->absoluteBounds.top = o->location.v + corner.v;
+            o->absoluteBounds.bottom = o->absoluteBounds.top + size.height;
+        }
+    }
+
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
-        auto proximityObject = &gProximityGrid[i];
-        for (auto aObject = proximityObject->nearObject; aObject.get(); aObject = aObject->nextNearObject) {
-            // this hack is to get the current bounds of the object in question
-            // it could be sped up by accessing the sprite table directly
-            if ((aObject->absoluteBounds.left >= aObject->absoluteBounds.right)
-                    && aObject->sprite.get()) {
-                const NatePixTable::Frame& frame
-                    = aObject->sprite->table->at(aObject->sprite->whichShape);
-
-                Size size = {
-                    (frame.width() * aObject->naturalScale) >> SHIFT_SCALE,
-                    (frame.height() * aObject->naturalScale) >> SHIFT_SCALE,
-                };
-                Point corner = {
-                    -((frame.center().h * aObject->naturalScale) >> SHIFT_SCALE),
-                    -((frame.center().v * aObject->naturalScale) >> SHIFT_SCALE),
-                };
-
-                aObject->absoluteBounds.left = aObject->location.h + corner.h;
-                aObject->absoluteBounds.right = aObject->absoluteBounds.left + size.width;
-                aObject->absoluteBounds.top = aObject->location.v + corner.v;
-                aObject->absoluteBounds.bottom = aObject->absoluteBounds.top + size.height;
-            }
-
-            auto currentProximity = proximityObject;
+        const auto& cell = gProximityGrid[i];
+        for (auto aObject = cell.nearObject; aObject.get(); aObject = aObject->nextNearObject) {
             for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
                 Handle<SpaceObject> tbObject;
-                int32_t superx, supery;
+                Point super = aObject->collisionGrid;
                 if (k == 0) {
                     tbObject = aObject->nextNearObject;
-                    superx = aObject->collisionGrid.h;
-                    supery = aObject->collisionGrid.v;
                 } else {
-                    if (( proximityObject->unitsToCheck[k].adjacentUnit > 256)
-                            || ( proximityObject->unitsToCheck[k].adjacentUnit < -256)) {
-                        throw Exception(
-                                "Internal error occurred during processing of adjacent "
-                                "proximity units");
-                    }
-                    currentProximity += proximityObject->unitsToCheck[k].adjacentUnit;
-                    tbObject = currentProximity->nearObject;
-                    superx = aObject->collisionGrid.h + proximityObject->unitsToCheck[k].superOffset.h;
-                    supery = aObject->collisionGrid.v + proximityObject->unitsToCheck[k].superOffset.v;
+                    const auto& adj = cell.unitsToCheck[k];
+                    tbObject = gProximityGrid[adj.adjacentUnit].nearObject;
+                    super.offset(adj.superOffset.h, adj.superOffset.v);
                 }
 
-                if ((superx < 0) || (supery < 0)) {
+                if ((super.h < 0) || (super.v < 0)) {
                     continue;
                 }
 
@@ -749,31 +742,8 @@ void calc_impacts() {
                     // this'll be true even ONLY if BOTH objects are not non-physical dest object
                     if (!((bObject->attributes | aObject->attributes) & kCanCollide)
                             || !((bObject->attributes | aObject->attributes) & kCanBeHit)
-                            || (bObject->collisionGrid.h != superx)
-                            || (bObject->collisionGrid.v != supery)) {
+                            || (bObject->collisionGrid != super)) {
                         continue;
-                    }
-
-                    // this hack is to get the current bounds of the object in question
-                    // it could be sped up by accessing the sprite table directly
-                    if ((bObject->absoluteBounds.left >= bObject->absoluteBounds.right)
-                            && bObject->sprite.get()) {
-                        const NatePixTable::Frame& frame
-                            = bObject->sprite->table->at(bObject->sprite->whichShape);
-
-                        Size size = {
-                            (frame.width() * bObject->naturalScale) >> SHIFT_SCALE,
-                            (frame.height() * bObject->naturalScale) >> SHIFT_SCALE,
-                        };
-                        Point corner = {
-                            -((frame.center().h * bObject->naturalScale) >> SHIFT_SCALE),
-                            -((frame.center().v * bObject->naturalScale) >> SHIFT_SCALE),
-                        };
-
-                        bObject->absoluteBounds.left = bObject->location.h + corner.h;
-                        bObject->absoluteBounds.right = bObject->absoluteBounds.left + size.width;
-                        bObject->absoluteBounds.top = bObject->location.v + corner.v;
-                        bObject->absoluteBounds.bottom = bObject->absoluteBounds.top + size.height;
                     }
 
                     if (aObject->owner == bObject->owner) {
@@ -785,10 +755,7 @@ void calc_impacts() {
                     if (!((bObject->attributes | aObject->attributes) & kIsBeam)) {
                         dObject = aObject;
                         sObject = bObject;
-                        if (!((sObject->absoluteBounds.right < dObject->absoluteBounds.left) ||
-                                    (sObject->absoluteBounds.left > dObject->absoluteBounds.right) ||
-                                    (sObject->absoluteBounds.bottom < dObject->absoluteBounds.top) ||
-                                    (sObject->absoluteBounds.top > dObject->absoluteBounds.bottom))) {
+                        if (inclusive_intersect(dObject->absoluteBounds, sObject->absoluteBounds)) {
                             if (( dObject->attributes & kCanBeHit) && ( sObject->attributes & kCanCollide)) {
                                 HitObject(dObject, sObject);
                             }
@@ -875,12 +842,7 @@ void calc_impacts() {
                     }
 
                     // check to see if the 2 objects occupy same physical space
-                    dObject = aObject;
-                    sObject = bObject;
-                    if ((sObject->absoluteBounds.right >= dObject->absoluteBounds.left)
-                            && (sObject->absoluteBounds.left <= dObject->absoluteBounds.right)
-                            && (sObject->absoluteBounds.bottom >= dObject->absoluteBounds.top)
-                            && (sObject->absoluteBounds.top <= dObject->absoluteBounds.bottom)) {
+                    if (inclusive_intersect(bObject->absoluteBounds, aObject->absoluteBounds)) {
                         // move them back till they don't touch
                         CorrectPhysicalSpace(aObject, bObject);
                     }
@@ -898,30 +860,25 @@ void calc_impacts() {
 // Also sets seenByPlayerFlags and kIsHidden based on object proximity.
 void calc_locality() {
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
-        auto proximityObject = &gProximityGrid[i];
-        for (auto aObject = proximityObject->farObject; aObject.get(); aObject = aObject->nextFarObject) {
-            auto currentProximity = proximityObject;
+        const auto& cell = gProximityGrid[i];
+        for (auto aObject = cell.farObject; aObject.get(); aObject = aObject->nextFarObject) {
             for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
                 Handle<SpaceObject> tbObject;
-                int32_t superx, supery;
+                Point super = aObject->distanceGrid;
                 if (k == 0) {
                     tbObject = aObject->nextFarObject;
-                    superx = aObject->distanceGrid.h;
-                    supery = aObject->distanceGrid.v;
                 } else {
-                    currentProximity += proximityObject->unitsToCheck[k].adjacentUnit;
-                    tbObject = currentProximity->farObject;
-                    superx = aObject->distanceGrid.h + proximityObject->unitsToCheck[k].superOffset.h;
-                    supery = aObject->distanceGrid.v + proximityObject->unitsToCheck[k].superOffset.v;
+                    const auto& adj = cell.unitsToCheck[k];
+                    tbObject = gProximityGrid[adj.adjacentUnit].farObject;
+                    super.offset(adj.superOffset.h, adj.superOffset.v);
                 }
-                if ((superx < 0) || (supery < 0)) {
+                if ((super.h < 0) || (super.v < 0)) {
                     continue;
                 }
 
                 for (auto bObject = tbObject; bObject.get(); bObject = bObject->nextFarObject) {
                     if ((bObject->owner != aObject->owner)
-                            && (bObject->distanceGrid.h == superx)
-                            && (bObject->distanceGrid.v == supery)
+                            && (bObject->distanceGrid == super)
                             && ((bObject->attributes & kCanThink)
                                 || ( bObject->attributes & kRemoteOrHuman)
                                 || ( bObject->attributes & kHated))
@@ -967,9 +924,8 @@ void calc_locality() {
                         bObject->localFoeStrength += aObject->localFriendStrength;
                         bObject->localFriendStrength += aObject->localFoeStrength;
 
-                    } else if ((bObject->distanceGrid.h == superx)
-                            && (bObject->distanceGrid.v == supery)
-                            && ( k == 0)) {
+                    } else if ((bObject->distanceGrid == super)
+                            && (k == 0)) {
                         if (aObject->owner != bObject->owner) {
                             bObject->localFoeStrength += aObject->localFriendStrength;
                             bObject->localFriendStrength += aObject->localFoeStrength;
