@@ -828,13 +828,11 @@ void calc_impacts() {
         const auto& cell = gProximityGrid[i];
         for (auto aObject = cell.nearObject; aObject.get(); aObject = aObject->nextNearObject) {
             for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
-                Handle<SpaceObject> tbObject;
+                Handle<SpaceObject> bObject = aObject->nextNearObject;
                 Point super = aObject->collisionGrid;
-                if (k == 0) {
-                    tbObject = aObject->nextNearObject;
-                } else {
+                if (k > 0) {
                     const auto& adj = cell.unitsToCheck[k];
-                    tbObject = gProximityGrid[adj.adjacentUnit].nearObject;
+                    bObject = gProximityGrid[adj.adjacentUnit].nearObject;
                     super.offset(adj.superOffset.h, adj.superOffset.v);
                 }
 
@@ -842,7 +840,7 @@ void calc_impacts() {
                     continue;
                 }
 
-                for (auto bObject = tbObject; bObject.get(); bObject = bObject->nextNearObject) {
+                for (; bObject.get(); bObject = bObject->nextNearObject) {
                     // this'll be true even ONLY if BOTH objects are not non-physical dest object
                     if (!((bObject->attributes | aObject->attributes) & kCanCollide)
                             || !((bObject->attributes | aObject->attributes) & kCanBeHit)
@@ -892,38 +890,39 @@ void calc_locality() {
         const auto& cell = gProximityGrid[i];
         for (auto aObject = cell.farObject; aObject.get(); aObject = aObject->nextFarObject) {
             for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
-                Handle<SpaceObject> tbObject;
+                Handle<SpaceObject> bObject = aObject->nextFarObject;
                 Point super = aObject->distanceGrid;
-                if (k == 0) {
-                    tbObject = aObject->nextFarObject;
-                } else {
+                if (k > 0) {
                     const auto& adj = cell.unitsToCheck[k];
-                    tbObject = gProximityGrid[adj.adjacentUnit].farObject;
+                    bObject = gProximityGrid[adj.adjacentUnit].farObject;
                     super.offset(adj.superOffset.h, adj.superOffset.v);
                 }
                 if ((super.h < 0) || (super.v < 0)) {
                     continue;
                 }
 
-                for (auto bObject = tbObject; bObject.get(); bObject = bObject->nextFarObject) {
+                for (; bObject.get(); bObject = bObject->nextFarObject) {
+                    if (bObject->distanceGrid != super) {
+                        continue;
+                    }
                     if ((bObject->owner != aObject->owner)
-                            && (bObject->distanceGrid == super)
                             && ((bObject->attributes & kCanThink)
-                                || ( bObject->attributes & kRemoteOrHuman)
-                                || ( bObject->attributes & kHated))
-                            && (( aObject->attributes & kCanThink)
-                                || ( aObject->attributes & kRemoteOrHuman)
-                                || ( aObject->attributes & kHated))) {
-                        uint32_t dcalc = ABS<int>( bObject->location.h - aObject->location.h);
-                        uint32_t distance =  ABS<int>( bObject->location.v - aObject->location.v);
-                        if ((dcalc > kMaximumRelevantDistance)
-                                || (distance > kMaximumRelevantDistance)) {
-                            distance = kMaximumRelevantDistanceSquared;
+                                || (bObject->attributes & kRemoteOrHuman)
+                                || (bObject->attributes & kHated))
+                            && ((aObject->attributes & kCanThink)
+                                || (aObject->attributes & kRemoteOrHuman)
+                                || (aObject->attributes & kHated))) {
+                        uint32_t x_dist = ABS<int>(bObject->location.h - aObject->location.h);
+                        uint32_t y_dist = ABS<int>(bObject->location.v - aObject->location.v);
+                        uint32_t dist;
+                        if ((x_dist > kMaximumRelevantDistance)
+                                || (y_dist > kMaximumRelevantDistance)) {
+                            dist = kMaximumRelevantDistanceSquared;
                         } else {
-                            distance = distance * distance + dcalc * dcalc;
+                            dist = (y_dist * y_dist) + (x_dist * x_dist);
                         }
 
-                        if (distance < kMaximumRelevantDistanceSquared) {
+                        if (dist < kMaximumRelevantDistanceSquared) {
                             aObject->seenByPlayerFlags |= bObject->myPlayerFlag;
                             bObject->seenByPlayerFlags |= aObject->myPlayerFlag;
 
@@ -937,24 +936,22 @@ void calc_locality() {
                         }
 
                         if (aObject->engages(*bObject)) {
-                            if ((distance < aObject->closestDistance) && (bObject->attributes & kPotentialTarget)) {
-                                aObject->closestDistance = distance;
+                            if ((dist < aObject->closestDistance) && (bObject->attributes & kPotentialTarget)) {
+                                aObject->closestDistance = dist;
                                 aObject->closestObject = bObject;
                             }
                         }
 
                         if (bObject->engages(*aObject)) {
-                            if (( distance < bObject->closestDistance) && ( aObject->attributes & kPotentialTarget)) {
-                                bObject->closestDistance = distance;
+                            if ((dist < bObject->closestDistance) && (aObject->attributes & kPotentialTarget)) {
+                                bObject->closestDistance = dist;
                                 bObject->closestObject = aObject;
                             }
                         }
 
                         bObject->localFoeStrength += aObject->localFriendStrength;
                         bObject->localFriendStrength += aObject->localFoeStrength;
-
-                    } else if ((bObject->distanceGrid == super)
-                            && (k == 0)) {
+                    } else if (k == 0) {
                         if (aObject->owner != bObject->owner) {
                             bObject->localFoeStrength += aObject->localFriendStrength;
                             bObject->localFriendStrength += aObject->localFoeStrength;
