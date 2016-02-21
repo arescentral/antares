@@ -566,13 +566,36 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
     }
 }
 
+static void age_object(const Handle<SpaceObject>& o) {
+    if (o->age >= 0) {
+        o->age -= 3;
+        if (o->age < 0) {
+            if (!(o->baseType->expireDontDie)) {
+                o->active = kObjectToBeFreed;
+            }
+
+            exec(o->baseType->expire, o, SpaceObject::none(), NULL);
+        }
+    }
+}
+
+static void activate_object(const Handle<SpaceObject>& o) {
+    if (o->periodicTime > 0) {
+        o->periodicTime--;
+        if (o->periodicTime <= 0) {
+            exec(o->baseType->activate, o, SpaceObject::none(), NULL);
+            o->periodicTime =
+                o->baseType->activatePeriod
+                + o->randomSeed.next(o->baseType->activatePeriodRange);
+        }
+    }
+}
+
 void calc_misc() {
     // set up player info so we can find closest ship (for scaling)
     uint64_t farthestDist = 0;
     uint64_t closestDist = 0x7fffffffffffffffull;
-    auto player = g.ship;
-    g.closest = Handle<SpaceObject>(0);
-    g.farthest = Handle<SpaceObject>(0);
+    g.closest = g.farthest = Handle<SpaceObject>(0);
 
     // reset the collision grid
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
@@ -581,7 +604,7 @@ void calc_misc() {
 
     for (auto aObject = g.root; aObject.get(); aObject = aObject->nextObject) {
         if (!aObject->active) {
-            if (player.get() && player->active) {
+            if (g.ship.get() && g.ship->active) {
                 aObject->distanceFromPlayer = 0x7fffffffffffffffull;
             }
         }
@@ -592,42 +615,26 @@ void calc_misc() {
             continue;
         }
 
-        if (aObject->age >= 0) {
-            aObject->age -= 3;
-            if (aObject->age < 0) {
-                if (!(aObject->baseType->expireDontDie)) {
-                    aObject->active = kObjectToBeFreed;
-                }
-
-                exec(aObject->baseType->expire, aObject, SpaceObject::none(), NULL);
-                if (!aObject->active) {
-                    continue;
-                }
-            }
+        age_object(aObject);
+        if (!aObject->active) {
+            continue;
         }
 
-        if (aObject->periodicTime > 0) {
-            aObject->periodicTime--;
-            if (aObject->periodicTime <= 0) {
-                exec(aObject->baseType->activate, aObject, SpaceObject::none(), NULL);
-                aObject->periodicTime =
-                    aObject->baseType->activatePeriod
-                    + aObject->randomSeed.next(aObject->baseType->activatePeriodRange);
-                if (!aObject->active) {
-                    continue;
-                }
-            }
+        activate_object(aObject);
+        if (!aObject->active) {
+            continue;
         }
 
-        if (player.get() && player->active) {
+        // Mark closest and farthest object relative to player, for zooming.
+        if (g.ship.get() && g.ship->active) {
             if (aObject->attributes & kAppearOnRadar) {
-                uint64_t hdiff = ABS<int>(player->location.h - aObject->location.h);
-                uint64_t vdiff = ABS<int>(player->location.v - aObject->location.v);
+                uint64_t hdiff = ABS<int>(g.ship->location.h - aObject->location.h);
+                uint64_t vdiff = ABS<int>(g.ship->location.v - aObject->location.v);
                 uint64_t dist = (vdiff * vdiff) + (hdiff * hdiff);
                 aObject->distanceFromPlayer = dist;
                 if ((dist < closestDist) && (aObject != g.ship)) {
                     if (!((globals()->gZoomMode == kNearestFoeZoom) &&
-                          (aObject->owner == player->owner))) {
+                          (aObject->owner == g.ship->owner))) {
                         closestDist = dist;
                         g.closest = aObject;
                     }
@@ -646,36 +653,28 @@ void calc_misc() {
             aObject->closestDistance = kMaximumRelevantDistanceSquared;
             aObject->absoluteBounds.right = aObject->absoluteBounds.left = 0;
 
-            // xs = collision unit, xe = super unit
-            int32_t xs = aObject->location.h;
-            xs >>= kCollisionUnitBitShift;
-            int32_t xe = xs >> kCollisionSuperExtraShift;
-            xs &= kProximityUnitAndModulo;
+            const auto& loc = aObject->location;
+            {
+                int32_t x1 = (loc.h >> kCollisionUnitBitShift) & kProximityUnitAndModulo;
+                int32_t x2 = loc.h >> kCollisionSuperUnitBitShift;
+                int32_t y1 = (loc.v >> kCollisionUnitBitShift) & kProximityUnitAndModulo;
+                int32_t y2 = loc.v >> kCollisionSuperUnitBitShift;
+                auto& proximityObject = gProximityGrid[(y1 << kProximityWidthMultiply) + x1];
+                aObject->nextNearObject = proximityObject.nearObject;
+                proximityObject.nearObject = aObject;
+                aObject->collisionGrid = {x2, y2};
+            }
 
-            int32_t ys = aObject->location.v;
-            ys >>= kCollisionUnitBitShift;
-            int32_t ye = ys >> kCollisionSuperExtraShift;
-            ys &= kProximityUnitAndModulo;
-
-            auto proximityObject = gProximityGrid.get() + (ys << kProximityWidthMultiply) + xs;
-            aObject->nextNearObject = proximityObject->nearObject;
-            proximityObject->nearObject = aObject;
-            aObject->collisionGrid.h = xe;
-            aObject->collisionGrid.v = ye;
-
-            xe >>= kDistanceUnitExtraShift;
-            xs = xe >> kDistanceSuperExtraShift;
-            xe &= kProximityUnitAndModulo;
-
-            ye >>= kDistanceUnitExtraShift;
-            ys = ye >> kDistanceSuperExtraShift;
-            ye &= kProximityUnitAndModulo;
-
-            proximityObject = gProximityGrid.get() + (ye << kProximityWidthMultiply) + xe;
-            aObject->nextFarObject = proximityObject->farObject;
-            proximityObject->farObject = aObject;
-            aObject->distanceGrid.h = xs;
-            aObject->distanceGrid.v = ys;
+            {
+                int32_t x3 = (loc.h >> kDistanceUnitBitShift) & kProximityUnitAndModulo;
+                int32_t x4 = loc.h >> kDistanceSuperUnitBitShift;
+                int32_t y3 = (loc.v >> kDistanceUnitBitShift) & kProximityUnitAndModulo;
+                int32_t y4 = loc.v >> kDistanceSuperUnitBitShift;
+                auto& proximityObject = gProximityGrid[(y3 << kProximityWidthMultiply) + x3];
+                aObject->nextFarObject = proximityObject.farObject;
+                proximityObject.farObject = aObject;
+                aObject->distanceGrid = {x4, y4};
+            }
 
             if (!(aObject->attributes & kIsDestination)) {
                 aObject->seenByPlayerFlags = 0x80000000;
