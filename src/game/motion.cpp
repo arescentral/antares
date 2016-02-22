@@ -570,8 +570,7 @@ void calc_misc() {
 
     // reset the collision grid
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
-        auto proximityObject = &gProximityGrid[i];
-        proximityObject->nearObject = proximityObject->farObject = SpaceObject::none();
+        gProximityGrid[i].nearObject = gProximityGrid[i].farObject = SpaceObject::none();
     }
 
     for (auto aObject = g.root; aObject.get(); aObject = aObject->nextObject) {
@@ -579,6 +578,11 @@ void calc_misc() {
             if (player.get() && player->active) {
                 aObject->distanceFromPlayer = 0x7fffffffffffffffull;
             }
+        }
+    }
+
+    for (auto aObject = g.root; aObject.get(); aObject = aObject->nextObject) {
+        if (!aObject->active) {
             continue;
         }
 
@@ -611,31 +615,19 @@ void calc_misc() {
 
         if (player.get() && player->active) {
             if (aObject->attributes & kAppearOnRadar) {
-                uint32_t dcalc = ABS<int>( player->location.h - aObject->location.h);
-                uint32_t distance =  ABS<int>( player->location.v - aObject->location.v);
-                uint64_t hugeDistance;
-                if ((dcalc > kMaximumRelevantDistance)
-                        || (distance > kMaximumRelevantDistance)) {
-                    uint64_t wideScrap = dcalc;   // must be positive
-                    MyWideMul( wideScrap, wideScrap, &hugeDistance);  // ppc automatically generates WideMultiply
-                    wideScrap = distance;
-                    MyWideMul( wideScrap, wideScrap, &wideScrap);
-                    hugeDistance += wideScrap;
-                    aObject->distanceFromPlayer = hugeDistance;
-                } else {
-                    hugeDistance = distance * distance + dcalc * dcalc;
-                    aObject->distanceFromPlayer = hugeDistance;
-                }
-                if (closestDist > hugeDistance) {
-                    if ((aObject != g.ship)
-                            && ((globals()->gZoomMode != kNearestFoeZoom)
-                                || (aObject->owner != player->owner))) {
-                        closestDist = hugeDistance;
+                uint64_t hdiff = ABS<int>(player->location.h - aObject->location.h);
+                uint64_t vdiff = ABS<int>(player->location.v - aObject->location.v);
+                uint64_t dist = (vdiff * vdiff) + (hdiff * hdiff);
+                aObject->distanceFromPlayer = dist;
+                if ((dist < closestDist) && (aObject != g.ship)) {
+                    if (!((globals()->gZoomMode == kNearestFoeZoom) &&
+                          (aObject->owner == player->owner))) {
+                        closestDist = dist;
                         g.closest = aObject;
                     }
                 }
-                if (hugeDistance > farthestDist) {
-                    farthestDist = hugeDistance;
+                if (dist > farthestDist) {
+                    farthestDist = dist;
                     g.farthest = aObject;
                 }
             }
@@ -694,8 +686,7 @@ void calc_misc() {
 void calc_impacts() {
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
         auto proximityObject = &gProximityGrid[i];
-        auto taObject = proximityObject->nearObject;
-        for (auto aObject = taObject; aObject.get(); aObject = aObject->nextNearObject) {
+        for (auto aObject = proximityObject->nearObject; aObject.get(); aObject = aObject->nextNearObject) {
             // this hack is to get the current bounds of the object in question
             // it could be sped up by accessing the sprite table directly
             if ((aObject->absoluteBounds.left >= aObject->absoluteBounds.right)
@@ -897,8 +888,7 @@ void calc_impacts() {
 void calc_locality() {
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
         auto proximityObject = &gProximityGrid[i];
-        auto taObject = proximityObject->farObject;
-        for (auto aObject = taObject; aObject.get(); aObject = aObject->nextFarObject) {
+        for (auto aObject = proximityObject->farObject; aObject.get(); aObject = aObject->nextFarObject) {
             auto currentProximity = proximityObject;
             for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
                 Handle<SpaceObject> tbObject;
