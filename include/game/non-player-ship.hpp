@@ -36,8 +36,6 @@ void fire_weapon(
         Handle<SpaceObject> subject, Handle<SpaceObject> target,
         const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon);
 void NonplayerShipThink();
-void UpdateMyNonplayerShip( void);
-void HackShowShipID( void);
 void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject);
 Handle<SpaceObject> GetManualSelectObject(
         Handle<SpaceObject> sourceObject, int32_t direction,
