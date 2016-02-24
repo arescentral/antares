@@ -81,7 +81,6 @@ namespace path = sfz::path;
 namespace antares {
 
 ANTARES_GLOBAL Rect world;
-ANTARES_GLOBAL Rect viewport;
 
 #ifdef DATA_COVERAGE
 extern set<int32_t> covered_objects;
@@ -92,6 +91,12 @@ Rect play_screen() {
     return Rect(
         world.left + kLeftPanelWidth, world.top,
         world.right - kRightPanelWidth, world.bottom);
+}
+
+Rect viewport() {
+    return Rect(
+        world.left + kLeftPanelWidth, world.top,
+        world.right - kRightPanelWidth, world.bottom - g.bottom_border);
 }
 
 class GamePlay : public Card {
@@ -290,7 +295,7 @@ GamePlay::GamePlay(
         _game_result(game_result),
         _seconds(seconds),
         _next_timer(add_ticks(now_usecs(), 1)),
-        _play_area(viewport.left, viewport.top, viewport.right, viewport.bottom),
+        _play_area(viewport().left, viewport().top, viewport().right, viewport().bottom),
         _scenario_start_time(add_ticks(
                     0,
                     (g.level->startTime & kScenario_StartTimeMask)

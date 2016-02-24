@@ -525,8 +525,8 @@ void DrawInstrumentPanel() {
 }
 
 void draw_instruments() {
-    Rect left_rect(world.left, world.top, viewport.left, world.bottom);
-    Rect right_rect(viewport.right, world.top, world.right, world.bottom);
+    Rect left_rect(world.left, world.top, viewport().left, world.bottom);
+    Rect right_rect(viewport().right, world.top, world.right, world.bottom);
 
     if (world.height() > 768) {
         left_rect.inset(0, (world.height() - 768) / 2);
@@ -678,10 +678,10 @@ void draw_sector_lines() {
 
     x = size - (gLastGlobalCorner.h & (size - 1));
     division = ((gLastGlobalCorner.h + x) >> kSubSectorShift) & 0x0000000f;
-    x = ((x * gLastScale) >> SHIFT_SCALE) + viewport.left;
+    x = ((x * gLastScale) >> SHIFT_SCALE) + viewport().left;
 
     if (should_draw_sector_lines) {
-        while ((x < implicit_cast<uint32_t>(viewport.right)) && (h > 0)) {
+        while ((x < implicit_cast<uint32_t>(viewport().right)) && (h > 0)) {
             RgbColor color;
             if (!division) {
                 color = GetRGBTranslateColorShade(GREEN, kSectorLineBrightness);
@@ -692,7 +692,7 @@ void draw_sector_lines() {
             }
 
             // TODO(sfiera): +1 on bottom no longer needed.
-            rects.fill({x, viewport.top, x + 1, viewport.bottom + 1}, color);
+            rects.fill({x, viewport().top, x + 1, viewport().bottom + 1}, color);
             division += level;
             division &= 0x0000000f;
             x += h;
@@ -701,10 +701,10 @@ void draw_sector_lines() {
 
     x = size - (gLastGlobalCorner.v & (size - 1));
     division = ((gLastGlobalCorner.v + x) >> kSubSectorShift) & 0x0000000f;
-    x = ((x * gLastScale) >> SHIFT_SCALE) + viewport.top;
+    x = ((x * gLastScale) >> SHIFT_SCALE) + viewport().top;
 
     if (should_draw_sector_lines) {
-        while ((x < implicit_cast<uint32_t>(viewport.bottom)) && (h > 0)) {
+        while ((x < implicit_cast<uint32_t>(viewport().bottom)) && (h > 0)) {
             RgbColor color;
             if (!division) {
                 color = GetRGBTranslateColorShade(GREEN, kSectorLineBrightness);
@@ -715,7 +715,7 @@ void draw_sector_lines() {
             }
 
             // TODO(sfiera): +1 on right no longer needed.
-            rects.fill({viewport.left, x, viewport.right + 1, x + 1}, color);
+            rects.fill({viewport().left, x, viewport().right + 1, x + 1}, color);
 
             division += level;
             division &= 0x0000000f;

@@ -199,7 +199,7 @@ void Messages::clear() {
     tmessage->labelMessage = false;
     tmessage->lastLabelMessage = false;
     tmessage->retro_text.reset();
-    viewport.bottom = play_screen().bottom;
+    g.bottom_border = 0;
     tmessage->labelMessageID = Label::add(0, 0, 0, 0, SpaceObject::none(), false, SKY_BLUE);
     tmessage->labelMessageID->set_keep_on_screen_anyway(true);
 }
@@ -251,7 +251,7 @@ void Messages::clip( void)
 
         if ( tmessage->lastResID >= 0)
         {
-            viewport.bottom = play_screen().bottom;
+            g.bottom_border = 0;
         }
 
         // draw in offscreen world
@@ -285,18 +285,18 @@ void Messages::clip( void)
                 tmessage->retro_text->set_retro_text(*textData);
                 tmessage->retro_text->set_tab_width(60);
                 tmessage->retro_text->wrap_to(
-                        viewport.width() - kHBuffer - tactical_font->logicalWidth + 1, 0, 0);
+                        viewport().width() - kHBuffer - tactical_font->logicalWidth + 1, 0, 0);
                 tmessage->textHeight = tmessage->retro_text->height();
                 tmessage->textHeight += kLongMessageVPadDouble;
                 tmessage->retro_origin = Point(
-                        viewport.left + kHBuffer,
-                        viewport.bottom + tactical_font->ascent + kLongMessageVPad);
+                        viewport().left + kHBuffer,
+                        viewport().bottom + tactical_font->ascent + kLongMessageVPad);
                 tmessage->at_char = 0;
 
                 if (tmessage->labelMessage == false) {
-                    viewport.bottom = play_screen().bottom - tmessage->textHeight;
+                    g.bottom_border = tmessage->textHeight;
                 } else {
-                    viewport.bottom = play_screen().bottom;
+                    g.bottom_border = 0;
                 }
                 tmessage->stage = kShowStage;
 
@@ -318,7 +318,7 @@ void Messages::clip( void)
                 */
             }
         } else {
-            viewport.bottom = play_screen().bottom;
+            g.bottom_border = 0;
             tmessage->stage = kClipStage;
         }
     }
@@ -458,10 +458,10 @@ void Messages::draw_message_screen(int32_t by_units) {
         const String& message = message_data.front();
 
         if (time_count < kRaiseTime) {
-            g.message_label->set_position(kMessageScreenLeft, viewport.bottom - time_count);
+            g.message_label->set_position(kMessageScreenLeft, viewport().bottom - time_count);
         } else if (time_count > kLowerTime) {
             g.message_label->set_position(
-                    kMessageScreenLeft, viewport.bottom - (kMessageDisplayTime - time_count));
+                    kMessageScreenLeft, viewport().bottom - (kMessageDisplayTime - time_count));
         }
 
         g.message_label->set_string(message);
@@ -580,13 +580,13 @@ void MessageLabel_Set_Special(Handle<Label> label, const StringSlice& text) {
 }
 
 void Messages::draw_message() {
-    if ((viewport.bottom == play_screen().bottom) || (long_message_data->currentResID < 0)) {
+    if ((g.bottom_border == 0) || (long_message_data->currentResID < 0)) {
         return;
     }
 
     const RgbColor& dark_blue = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
     const RgbColor& light_blue = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
-    Rect message_bounds(play_screen().left, viewport.bottom, play_screen().right, play_screen().bottom);
+    Rect message_bounds(play_screen().left, viewport().bottom, play_screen().right, play_screen().bottom);
     {
         Rects rects;
         rects.fill(message_bounds, light_blue);
@@ -594,7 +594,7 @@ void Messages::draw_message() {
         rects.fill(message_bounds, dark_blue);
     }
 
-    Rect bounds(viewport.left, viewport.bottom, viewport.right, play_screen().bottom);
+    Rect bounds(viewport().left, viewport().bottom, viewport().right, play_screen().bottom);
     bounds.inset(kHBuffer, 0);
     bounds.top += kLongMessageVPad;
     long_message_data->retro_text->draw_range(bounds, 0, long_message_data->at_char);

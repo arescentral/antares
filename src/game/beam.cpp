@@ -103,7 +103,7 @@ Handle<Beam> Beams::add(
             const int32_t h = scale(location->h - gGlobalCorner.h, gAbsoluteScale);
             const int32_t v = scale(location->v - gGlobalCorner.v, gAbsoluteScale);
             beam->thisLocation = Rect(0, 0, 0, 0);
-            beam->thisLocation.offset(h + viewport.left, v + viewport.top);
+            beam->thisLocation.offset(h + viewport().left, v + viewport().top);
 
             beam->beamKind = kind;
             beam->accuracy = accuracy;
@@ -187,7 +187,7 @@ void Beams::update() {
                         scale(beam->objectLocation.v - gGlobalCorner.v, gAbsoluteScale),
                         scale(beam->lastApparentLocation.h - gGlobalCorner.h, gAbsoluteScale),
                         scale(beam->lastApparentLocation.v - gGlobalCorner.v, gAbsoluteScale));
-                beam->thisLocation.offset(viewport.left, viewport.top);
+                beam->thisLocation.offset(viewport().left, viewport().top);
                 beam->lastApparentLocation = beam->objectLocation;
             }
 

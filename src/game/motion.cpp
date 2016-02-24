@@ -440,7 +440,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
         int32_t h = (o->location.h - gGlobalCorner.h) * gAbsoluteScale;
         h >>= SHIFT_SCALE;
         if ((h > -kSpriteMaxSize) && (h < kSpriteMaxSize)) {
-            sprite.where.h = h + viewport.left;
+            sprite.where.h = h + viewport().left;
         } else {
             sprite.where.h = -kSpriteMaxSize;
         }

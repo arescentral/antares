@@ -161,7 +161,7 @@ void Label::draw() {
 }
 
 void Label::update_contents(int32_t units_done) {
-    Rect clip = viewport;
+    Rect clip = viewport();
     for (auto label: all()) {
         if (!label->active || label->killMe || (label->text.empty()) || !label->visible) {
             label->thisRect.left = label->thisRect.right = 0;
@@ -207,8 +207,8 @@ void Label::set_position(int16_t h, int16_t v) {
 
 void Label::update_positions(int32_t units_done) {
     const Rect label_limits(
-            viewport.left + kLabelBuffer, viewport.top + kLabelBuffer,
-            viewport.right - kLabelBuffer, viewport.bottom - kLabelBuffer);
+            viewport().left + kLabelBuffer, viewport().top + kLabelBuffer,
+            viewport().right - kLabelBuffer, viewport().bottom - kLabelBuffer);
 
     for (auto label: all()) {
         bool isOffScreen = false;

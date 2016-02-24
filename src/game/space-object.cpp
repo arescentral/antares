@@ -174,7 +174,7 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
     *obj = *sourceObject;
 
     Point where(
-            (int32_t((obj->location.h - gGlobalCorner.h) * gAbsoluteScale) >> SHIFT_SCALE) + viewport.left,
+            (int32_t((obj->location.h - gGlobalCorner.h) * gAbsoluteScale) >> SHIFT_SCALE) + viewport().left,
             (int32_t((obj->location.v - gGlobalCorner.v) * gAbsoluteScale) >> SHIFT_SCALE));
 
     if (obj->sprite.get()) {
