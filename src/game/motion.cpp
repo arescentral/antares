@@ -95,6 +95,8 @@ static inline void mRange(int32_t& result, int32_t time, Fixed velocity, Fixed& 
     result = mFixedToLong( scratch);
 }
 
+static void correct_physical_space(Handle<SpaceObject> aObject, Handle<SpaceObject> bObject);
+
 Size center_scale() {
     return {
         (play_screen.width() / 2) * SCALE_SCALE,
@@ -777,7 +779,7 @@ static void calc_impacts() {
                     if (inclusive_intersect(aObject->absoluteBounds, bObject->absoluteBounds)) {
                         HitObject(aObject, bObject);
                         HitObject(bObject, aObject);
-                        CorrectPhysicalSpace(aObject, bObject);
+                        correct_physical_space(aObject, bObject);
                     }
                 }
             }
@@ -962,7 +964,7 @@ static void push(Handle<SpaceObject> aObject) {
 //  collide.  For keeping objects which occupy space from occupying the
 //  same space.
 
-void CorrectPhysicalSpace(Handle<SpaceObject> aObject, Handle<SpaceObject> bObject) {
+static void correct_physical_space(Handle<SpaceObject> aObject, Handle<SpaceObject> bObject) {
     if (!(bObject->attributes & aObject->attributes & kOccupiesSpace)) {
         return;  // no need; at least one object doesn't actually occupy space.
     } else if (bObject->owner == aObject->owner) {
