@@ -155,213 +155,190 @@ void MotionCleanup() {
 }
 
 void MoveSpaceObjects(const int32_t unitsToDo) {
-    int32_t                    i, h, v, jl;
-    Fixed                   fh, fv, fa, fb, useThrust;
-    Fixed                   aFixed;
-    int16_t                 angle;
-    uint32_t                thisDist;
-    Handle<SpaceObject>     anObject;
+    if (unitsToDo == 0) {
+        return;
+    }
 
-    if ( unitsToDo == 0) return;
-
-    for ( jl = 0; jl < unitsToDo; jl++)
-    {
-        anObject = g.root;
+    for (int32_t jl = 0; jl < unitsToDo; jl++) {
+        Handle<SpaceObject> anObject = g.root;
         while (anObject.get()) {
             if ( anObject->active == kObjectInUse)
             {
                 auto baseObject = anObject->base;
 
-//              if  ( !( anObject->attributes & kIsStationary))
-                if (( anObject->maxVelocity != 0) || ( anObject->attributes & kCanTurn))
-                {
-                    if ( anObject->attributes & kCanTurn)
-                    {
+                if ((anObject->maxVelocity != 0) || (anObject->attributes & kCanTurn)) {
+                    if (anObject->attributes & kCanTurn) {
                         anObject->turnFraction += anObject->turnVelocity;
 
-                        if ( anObject->turnFraction >= 0)
+                        int32_t h;
+                        if (anObject->turnFraction >= 0) {
                             h = more_evil_fixed_to_long(anObject->turnFraction + mFloatToFixed(0.5));
-                        else
+                        } else {
                             h = more_evil_fixed_to_long(anObject->turnFraction - mFloatToFixed(0.5)) + 1;
+                        }
                         anObject->direction += h;
                         anObject->turnFraction -= mLongToFixed(h);
 
-                        while ( anObject->direction >= ROT_POS)
+                        while (anObject->direction >= ROT_POS) {
                             anObject->direction -= ROT_POS;
-                        while ( anObject->direction < 0)
+                        }
+                        while (anObject->direction < 0) {
                             anObject->direction += ROT_POS;
+                        }
                     }
 
-                    if ( anObject->thrust != 0)
-                    {
-                        if ( anObject->thrust > 0)
-                        {
+                    if (anObject->thrust != 0) {
+                        Fixed fa, fb, useThrust;
+                        if (anObject->thrust > 0) {
                             // get the goal dh & dv
-
                             GetRotPoint(&fa, &fb, anObject->direction);
 
                             // multiply by max velocity
-
                             if (anObject->presenceState == kWarpingPresence) {
-                                fa = mMultiplyFixed( fa, anObject->presence.warping);
-                                fb = mMultiplyFixed( fb, anObject->presence.warping);
+                                fa = mMultiplyFixed(fa, anObject->presence.warping);
+                                fb = mMultiplyFixed(fb, anObject->presence.warping);
                             } else if (anObject->presenceState == kWarpOutPresence) {
-                                fa = mMultiplyFixed( fa, anObject->presence.warp_out);
-                                fb = mMultiplyFixed( fb, anObject->presence.warp_out);
+                                fa = mMultiplyFixed(fa, anObject->presence.warp_out);
+                                fb = mMultiplyFixed(fb, anObject->presence.warp_out);
                             } else {
-                                fa = mMultiplyFixed( anObject->maxVelocity, fa);
-                                fb = mMultiplyFixed( anObject->maxVelocity, fb);
+                                fa = mMultiplyFixed(anObject->maxVelocity, fa);
+                                fb = mMultiplyFixed(anObject->maxVelocity, fb);
                             }
 
                             // the difference between our actual vector and our goal vector is our new vector
-
                             fa = fa - anObject->velocity.h;
                             fb = fb - anObject->velocity.v;
-
                             useThrust = anObject->thrust;
-                        } else
-                        {
+                        } else {
                             fa = -anObject->velocity.h;
                             fb = -anObject->velocity.v;
-//                              useThrust = -(anObject->thrust>>1L);
                             useThrust = -anObject->thrust;
                         }
 
                         // get the angle of our new vector
-
-                        if ( fa == 0)
-                        {
-                            if ( fb < 0)
+                        int16_t angle;
+                        if (fa == 0) {
+                            if (fb < 0) {
                                 angle = 180;
-                            else angle = 0;
-                        } else
-                        {
-                            aFixed = MyFixRatio(fa, fb);
+                            } else {
+                                angle = 0;
+                            }
+                        } else {
+                            Fixed aFixed = MyFixRatio(fa, fb);
 
-                            angle = AngleFromSlope( aFixed);
-                            if ( fa > 0) angle += 180;
-                            if ( angle >= 360) angle -= 360;
+                            angle = AngleFromSlope(aFixed);
+                            if (fa > 0) {
+                                angle += 180;
+                            }
+                            if (angle >= 360) {
+                                angle -= 360;
+                            }
                         }
 
                         // get the maxthrust of new vector
-
+                        Fixed fh, fv;
                         GetRotPoint(&fh, &fv, angle);
 
-                        fh = mMultiplyFixed( useThrust, fh);
-                        fv = mMultiplyFixed( useThrust, fv);
+                        fh = mMultiplyFixed(useThrust, fh);
+                        fv = mMultiplyFixed(useThrust, fv);
 
                         // if our new vector excedes our max thrust, it must be limited
-
-                        if ( fh < 0)
-                        {
-                            if ( fa < fh)
+                        if (fh < 0) {
+                            if (fa < fh) {
                                 fa = fh;
-                        } else
-                        {
-                            if ( fa > fh)
+                            }
+                        } else {
+                            if (fa > fh) {
                                 fa = fh;
+                            }
                         }
 
-                        if ( fv < 0)
-                        {
-                            if ( fb < fv)
+                        if (fv < 0) {
+                            if (fb < fv) {
                                 fb = fv;
-                        } else
-                        {
-                            if ( fb > fv)
+                            }
+                        } else {
+                            if (fb > fv) {
                                 fb = fv;
+                            }
                         }
 
                         anObject->velocity.h += fa;
                         anObject->velocity.v += fb;
-
                     }
 
                     anObject->motionFraction.h += anObject->velocity.h;
                     anObject->motionFraction.v += anObject->velocity.v;
 
-                    if ( anObject->motionFraction.h >= 0)
+                    int32_t h;
+                    if (anObject->motionFraction.h >= 0) {
                         h = more_evil_fixed_to_long(anObject->motionFraction.h + mFloatToFixed(0.5));
-                    else
+                    } else {
                         h = more_evil_fixed_to_long(anObject->motionFraction.h - mFloatToFixed(0.5)) + 1;
+                    }
                     anObject->location.h -= h;
                     anObject->motionFraction.h -= mLongToFixed(h);
 
-                    if ( anObject->motionFraction.v >= 0)
+                    int32_t v;
+                    if (anObject->motionFraction.v >= 0) {
                         v = more_evil_fixed_to_long(anObject->motionFraction.v + mFloatToFixed(0.5));
-                    else
+                    } else {
                         v = more_evil_fixed_to_long(anObject->motionFraction.v - mFloatToFixed(0.5)) + 1;
+                    }
                     anObject->location.v -= v;
                     anObject->motionFraction.v -= mLongToFixed(v);
 
                 } // if ( object is not stationary)
 
-//              if ( anObject->attributes & kIsPlayerShip)
                 if (anObject == g.ship) {
                     gGlobalCorner.h = anObject->location.h - (center_scale().width / gAbsoluteScale);
                     gGlobalCorner.v = anObject->location.v - (center_scale().height / gAbsoluteScale);
                 }
 
                 // check to see if it's out of bounds
-
                 {
-                    if ( !(anObject->attributes & kDoesBounce))
-                    {
-                        if (( anObject->location.h < kThinkiverseTopLeft) ||
-                            ( anObject->location.v < kThinkiverseTopLeft) ||
-                            ( anObject->location.h > kThinkiverseBottomRight) ||
-                            ( anObject->location.v > kThinkiverseBottomRight))
-                        {
+                    if (!(anObject->attributes & kDoesBounce)) {
+                        if ((anObject->location.h < kThinkiverseTopLeft) ||
+                            (anObject->location.v < kThinkiverseTopLeft) ||
+                            (anObject->location.h > kThinkiverseBottomRight) ||
+                            (anObject->location.v > kThinkiverseBottomRight)) {
                             anObject->active = kObjectToBeFreed;
                         }
-                    } else
-                    {
-                        if ( anObject->location.h < kThinkiverseTopLeft)
-                        {
+                    } else {
+                        if (anObject->location.h < kThinkiverseTopLeft) {
                             anObject->location.h = kThinkiverseTopLeft;
                             anObject->velocity.h = -anObject->velocity.h;
-                        } else if ( anObject->location.h > kThinkiverseBottomRight)
-                        {
+                        } else if (anObject->location.h > kThinkiverseBottomRight) {
                             anObject->location.h = kThinkiverseBottomRight;
                             anObject->velocity.h = -anObject->velocity.h;
                         }
-                        if ( anObject->location.v < kThinkiverseTopLeft)
-                        {
+                        if (anObject->location.v < kThinkiverseTopLeft) {
                             anObject->location.v = kThinkiverseTopLeft;
                             anObject->velocity.v = -anObject->velocity.v;
-                        } else if ( anObject->location.v > kThinkiverseBottomRight)
-                        {
+                        } else if (anObject->location.v > kThinkiverseBottomRight) {
                             anObject->location.v = kThinkiverseBottomRight;
                             anObject->velocity.v = -anObject->velocity.v;
                         }
-
                     }
                 }
 
                 // deal with self-animating shapes
-                if ( anObject->attributes & kIsSelfAnimated)
-                {
-                    if ( baseObject->frame.animation.frameSpeed != 0)
-                    {
+                if (anObject->attributes & kIsSelfAnimated) {
+                    if (baseObject->frame.animation.frameSpeed != 0) {
                         anObject->frame.animation.thisShape +=
                             anObject->frame.animation.frameDirection *
                             anObject->frame.animation.frameSpeed;// * unitsToDo;
 
-                        i = 1;
-                        while (( anObject->frame.animation.thisShape >
+                        int32_t i = 1;
+                        while ((anObject->frame.animation.thisShape >
                             baseObject->frame.animation.lastShape) &&
-                            ( anObject->frame.animation.frameDirection > 0) &&
-                            ( i))
-                        {
-                            if ( anObject->attributes & kAnimationCycle)
-                            {
+                            (anObject->frame.animation.frameDirection > 0) &&
+                            i) {
+                            if (anObject->attributes & kAnimationCycle) {
                                 anObject->frame.animation.thisShape -=
-                                    ( baseObject->frame.animation.lastShape -
-                                    baseObject->frame.animation.firstShape) +
-                                    1;
-
-                            } else
-                            {
+                                    (baseObject->frame.animation.lastShape -
+                                    baseObject->frame.animation.firstShape) + 1;
+                            } else {
                                 i = 0;
                                 anObject->active = kObjectToBeFreed;
                                 anObject->frame.animation.thisShape =
@@ -369,46 +346,34 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                             }
                         }
 
-                        while (( anObject->frame.animation.thisShape <
+                        while ((anObject->frame.animation.thisShape <
                             baseObject->frame.animation.firstShape) &&
-                            ( anObject->frame.animation.frameDirection < 0) &&
-                            ( i))
-                        {
-                            if ( anObject->attributes & kAnimationCycle)
-                            {
+                            (anObject->frame.animation.frameDirection < 0) &&
+                            i) {
+                            if (anObject->attributes & kAnimationCycle) {
                                 anObject->frame.animation.thisShape +=
-                                    ( baseObject->frame.animation.lastShape -
+                                    (baseObject->frame.animation.lastShape -
                                     baseObject->frame.animation.firstShape) + 1;
-
-                            } else
-                            {
+                            } else {
                                 i = 0;
                                 anObject->active = kObjectToBeFreed;
                                 anObject->frame.animation.thisShape = baseObject->frame.animation.lastShape;
                             }
                         }
                     }
-                } else if ( anObject->attributes & kIsBeam)
-                {
+                } else if (anObject->attributes & kIsBeam) {
                     if (anObject->frame.beam.get()) {
-                        anObject->frame.beam->objectLocation =
-                            anObject->location;
-                        if (( anObject->frame.beam->beamKind ==
-                                eStaticObjectToObjectKind) ||
-                                ( anObject->frame.beam->beamKind ==
-                                eBoltObjectToObjectKind))
-                        {
+                        anObject->frame.beam->objectLocation = anObject->location;
+                        if ((anObject->frame.beam->beamKind == eStaticObjectToObjectKind) ||
+                                (anObject->frame.beam->beamKind == eBoltObjectToObjectKind)) {
                             if (anObject->frame.beam->toObject.get()) {
                                 auto target = anObject->frame.beam->toObject;
 
                                 if ((target->active) &&
-                                    (target->id == anObject->frame.beam->toObjectID))
-                                {
-                                    anObject->location =
-                                        anObject->frame.beam->objectLocation =
+                                        (target->id == anObject->frame.beam->toObjectID)) {
+                                    anObject->location = anObject->frame.beam->objectLocation =
                                             target->location;
-                                } else
-                                {
+                                } else {
                                     anObject->active = kObjectToBeFreed;
                                 }
                             }
@@ -417,43 +382,34 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
                                 auto target = anObject->frame.beam->fromObject;
 
                                 if ((target->active) &&
-                                    ( target->id == anObject->frame.beam->fromObjectID))
-
-                                {
+                                        (target->id == anObject->frame.beam->fromObjectID)) {
                                     anObject->frame.beam->lastGlobalLocation =
                                         anObject->frame.beam->lastApparentLocation =
-                                            target->location;
-                                } else
-                                {
+                                        target->location;
+                                } else {
                                     anObject->active = kObjectToBeFreed;
                                 }
                             }
-                        } else if (( anObject->frame.beam->beamKind ==
-                                eStaticObjectToRelativeCoordKind) ||
-                                ( anObject->frame.beam->beamKind ==
-                                eBoltObjectToRelativeCoordKind))
-                        {
+                        } else if ((anObject->frame.beam->beamKind ==
+                                    eStaticObjectToRelativeCoordKind) ||
+                                (anObject->frame.beam->beamKind == eBoltObjectToRelativeCoordKind)) {
                             if (anObject->frame.beam->fromObject.get()) {
                                 auto target = anObject->frame.beam->fromObject;
 
-                                if (( target->active) &&
-                                    ( target->id == anObject->frame.beam->fromObjectID))
-                                {
+                                if (target->active &&
+                                    (target->id == anObject->frame.beam->fromObjectID)) {
                                     anObject->frame.beam->lastGlobalLocation =
                                         anObject->frame.beam->lastApparentLocation =
-                                            target->location;
+                                        target->location;
 
-                                    anObject->location.h =
-                                        anObject->frame.beam->objectLocation.h =
+                                    anObject->location.h = anObject->frame.beam->objectLocation.h =
                                         target->location.h +
                                         anObject->frame.beam->toRelativeCoord.h;
 
-                                    anObject->location.v =
-                                        anObject->frame.beam->objectLocation.v =
+                                    anObject->location.v = anObject->frame.beam->objectLocation.v =
                                         target->location.v +
                                         anObject->frame.beam->toRelativeCoord.v;
-                                } else
-                                {
+                                } else {
                                     anObject->active = kObjectToBeFreed;
                                 }
                             }
@@ -471,93 +427,81 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
 // nothing below can effect any object actions (expire actions get executed)
 // (but they can effect objects thinking)
 // !!!!!!!!
-    anObject = g.root;
+    Handle<SpaceObject> anObject = g.root;
 
     while (anObject.get()) {
-        if ( anObject->active == kObjectInUse)
-        {
+        if (anObject->active == kObjectInUse) {
             auto baseObject = anObject->base;
 
-            if ( !(anObject->attributes & kIsBeam) && anObject->sprite.get())
-            {
-                h = ( anObject->location.h - gGlobalCorner.h) * gAbsoluteScale;
+            if (!(anObject->attributes & kIsBeam) && anObject->sprite.get()) {
+                int32_t h = (anObject->location.h - gGlobalCorner.h) * gAbsoluteScale;
                 h >>= SHIFT_SCALE;
-                if (( h > -kSpriteMaxSize) && ( h < kSpriteMaxSize))
+                if ((h > -kSpriteMaxSize) && ( h < kSpriteMaxSize)) {
                     anObject->sprite->where.h = h + viewport.left;
-                else
+                } else {
                     anObject->sprite->where.h = -kSpriteMaxSize;
+                }
 
                 h = (anObject->location.v - gGlobalCorner.v) * gAbsoluteScale;
                 h >>= SHIFT_SCALE; /*+ CLIP_TOP*/;
-                if (( h > -kSpriteMaxSize) && ( h < kSpriteMaxSize))
+                if ((h > -kSpriteMaxSize) && ( h < kSpriteMaxSize)) {
                     anObject->sprite->where.v = h;
-                else
+                } else {
                     anObject->sprite->where.v = -kSpriteMaxSize;
+                }
 
-
-                if ( anObject->hitState != 0)
-                {
+                if (anObject->hitState != 0) {
                     anObject->hitState -= unitsToDo << 2L;
-                    if ( anObject->hitState <= 0)
-                    {
+                    if (anObject->hitState <= 0) {
                         anObject->hitState = 0;
                         anObject->sprite->style = spriteNormal;
                         anObject->sprite->styleData = 0;
-                    } else
-                    {
+                    } else {
                         // we know it has sprite
                         anObject->sprite->style = spriteColor;
                         anObject->sprite->styleColor = GetRGBTranslateColor(anObject->shieldColor);
                         anObject->sprite->styleData = anObject->hitState;
                     }
-                } else
-                {
-                    if ( anObject->cloakState > 0)
-                    {
-                        if ( anObject->cloakState < kCloakOnStateMax)
-                        {
+                } else {
+                    if (anObject->cloakState > 0) {
+                        if (anObject->cloakState < kCloakOnStateMax) {
                             anObject->runTimeFlags |= kIsCloaked;
                             anObject->cloakState += unitsToDo << 2L;
-                            if ( anObject->cloakState > kCloakOnStateMax)
+                            if (anObject->cloakState > kCloakOnStateMax) {
                                 anObject->cloakState = kCloakOnStateMax;
+                            }
                         }
                         anObject->sprite->style = spriteColor;
                         anObject->sprite->styleColor = RgbColor::kClear;
                         anObject->sprite->styleData = anObject->cloakState;
-                        if ( anObject->owner == g.admiral)
-                            anObject->sprite->styleData -=
-                                anObject->sprite->styleData >> 2;
-                    } else if ( anObject->cloakState < 0)
-                    {
+                        if (anObject->owner == g.admiral) {
+                            anObject->sprite->styleData -= anObject->sprite->styleData >> 2;
+                        }
+                    } else if (anObject->cloakState < 0) {
                         anObject->cloakState += unitsToDo << 2L;
-                        if ( anObject->cloakState >= 0)
-                        {
+                        if (anObject->cloakState >= 0) {
                             anObject->runTimeFlags &= ~kIsCloaked;
                             anObject->cloakState = 0;
                             anObject->sprite->style = spriteNormal;
-                        } else
-                        {
+                        } else {
                             anObject->sprite->style = spriteColor;
                             anObject->sprite->styleColor = RgbColor::kClear;
                             anObject->sprite->styleData = -anObject->cloakState;
-                            if ( anObject->owner == g.admiral)
-                                anObject->sprite->styleData -=
-                                    anObject->sprite->styleData >> 2;
+                            if (anObject->owner == g.admiral) {
+                                anObject->sprite->styleData -= anObject->sprite->styleData >> 2;
+                            }
                         }
                     }
                 }
 
 
-                if ( anObject->attributes & kIsSelfAnimated)
-                {
-                    if ( baseObject->frame.animation.frameSpeed != 0)
-                    {
+                if (anObject->attributes & kIsSelfAnimated) {
+                    if (baseObject->frame.animation.frameSpeed != 0) {
                         anObject->sprite->whichShape = more_evil_fixed_to_long(anObject->frame.animation.thisShape);
                     }
-                } else if ( anObject->attributes & kShapeFromDirection)
-                {
-                    angle = anObject->direction;
-                    mAddAngle( angle, baseObject->frame.rotation.rotRes >> 1);
+                } else if (anObject->attributes & kShapeFromDirection) {
+                    int16_t angle = anObject->direction;
+                    mAddAngle(angle, baseObject->frame.rotation.rotRes >> 1);
                     anObject->sprite->whichShape = angle / baseObject->frame.rotation.rotRes;
                 }
             }
