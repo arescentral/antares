@@ -61,8 +61,6 @@ const int32_t kWeaponRatio          = 2;
 const int32_t kEnergyChunk          = kHealthRatio + (kWeaponRatio * 3);
 const int32_t kWarpInEnergyFactor   = 3;
 
-const int32_t kDefaultTurnRate      = 0x00000200;
-
 enum {
     kFriendlyColor  = GREEN,
     kHostileColor   = RED,
@@ -70,7 +68,7 @@ enum {
 };
 
 uint32_t ThinkObjectNormalPresence(
-        Handle<SpaceObject> anObject, Handle<BaseObject> baseObject, int32_t timePass);
+        Handle<SpaceObject> anObject, Handle<BaseObject> baseObject);
 uint32_t ThinkObjectWarpingPresence(Handle<SpaceObject> anObject);
 uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject);
 uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, Handle<BaseObject> baseObject);
@@ -86,7 +84,7 @@ bool ThinkObjectResolveTarget(
         uint32_t *distance, Handle<SpaceObject>* targetObject);
 uint32_t ThinkObjectEngageTarget(
         Handle<SpaceObject> anObject, Handle<SpaceObject> targetObject,
-        uint32_t distance, int16_t *theta, int32_t timePass);
+        uint32_t distance, int16_t *theta);
 
 void SpaceObject::recharge() {
     if ((_energy < (max_energy() - kEnergyChunk))
@@ -119,10 +117,10 @@ void SpaceObject::recharge() {
 }
 
 static void tick_weapon(
-        Handle<SpaceObject> subject, Handle<SpaceObject> target, int32_t timePass,
+        Handle<SpaceObject> subject, Handle<SpaceObject> target,
         uint32_t key, const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
     if (weapon.time > 0) {
-        weapon.time -= timePass;
+        weapon.time -= kDecideEveryCycles;
     }
     if (subject->keysDown & key) {
         fire_weapon(subject, target, base_weapon, weapon);
@@ -178,22 +176,21 @@ void fire_weapon(
 }
 
 static void tick_pulse(
-        Handle<SpaceObject> subject, Handle<SpaceObject> target, int32_t timePass) {
-    tick_weapon(subject, target, timePass, kOneKey, subject->baseType->pulse, subject->pulse);
+        Handle<SpaceObject> subject, Handle<SpaceObject> target) {
+    tick_weapon(subject, target, kOneKey, subject->baseType->pulse, subject->pulse);
 }
 
 static void tick_beam(
-        Handle<SpaceObject> subject, Handle<SpaceObject> target, int32_t timePass) {
-    tick_weapon(subject, target, timePass, kTwoKey, subject->baseType->beam, subject->beam);
+        Handle<SpaceObject> subject, Handle<SpaceObject> target) {
+    tick_weapon(subject, target, kTwoKey, subject->baseType->beam, subject->beam);
 }
 
 static void tick_special(
-        Handle<SpaceObject> subject, Handle<SpaceObject> target, int32_t timePass) {
-    tick_weapon(subject, target, timePass, kEnterKey, subject->baseType->special, subject->special);
+        Handle<SpaceObject> subject, Handle<SpaceObject> target) {
+    tick_weapon(subject, target, kEnterKey, subject->baseType->special, subject->special);
 }
 
-void NonplayerShipThink(int32_t timePass)
-{
+void NonplayerShipThink() {
     Admiral*        anAdmiral;
     Point           offset;
     int32_t         count, difference;
@@ -270,7 +267,7 @@ void NonplayerShipThink(int32_t timePass)
 
         switch (anObject->presenceState) {
           case kNormalPresence:
-            keysDown = ThinkObjectNormalPresence(anObject, baseObject, timePass);
+            keysDown = ThinkObjectNormalPresence(anObject, baseObject);
             break;
 
           case kWarpingPresence:
@@ -303,15 +300,10 @@ void NonplayerShipThink(int32_t timePass)
                             anObject->directionGoal = anObject->direction;
                         }
                     }
-
-                    offset.h = mAngleDifference(anObject->directionGoal, anObject->direction);
-                    offset.v = mFixedToLong(baseObject->frame.rotation.maxTurnRate << 1);
-                    difference = ABS(offset.h);
-                } else {
-                    offset.h = mAngleDifference(anObject->directionGoal, anObject->direction);
-                    offset.v = mFixedToLong(kDefaultTurnRate << 1);
-                    difference = ABS(offset.h);
                 }
+                offset.h = mAngleDifference(anObject->directionGoal, anObject->direction);
+                offset.v = mFixedToLong(anObject->turn_rate() << 1);
+                difference = ABS(offset.h);
                 if (difference > offset.v) {
                     if (offset.h < 0) {
                         keysDown |= kRightKey;
@@ -371,23 +363,12 @@ void NonplayerShipThink(int32_t timePass)
 
         if ((anObject->attributes & kHasDirectionGoal)
                 && (anObject->offlineTime <= 0)) {
-            // design flaw: can't have turn rate unless shapefromdirection
-            if (anObject->attributes & kShapeFromDirection) {
-                if (anObject->keysDown & kLeftKey) {
-                    anObject->turnVelocity = -baseObject->frame.rotation.maxTurnRate;
-                } else if (anObject->keysDown & kRightKey) {
-                    anObject->turnVelocity = baseObject->frame.rotation.maxTurnRate;
-                } else {
-                    anObject->turnVelocity = 0;
-                }
+            if (anObject->keysDown & kLeftKey) {
+                anObject->turnVelocity = -anObject->turn_rate();
+            } else if (anObject->keysDown & kRightKey) {
+                anObject->turnVelocity = anObject->turn_rate();
             } else {
-                if (anObject->keysDown & kLeftKey) {
-                    anObject->turnVelocity = -kDefaultTurnRate;
-                } else if (anObject->keysDown & kRightKey) {
-                    anObject->turnVelocity = kDefaultTurnRate;
-                } else {
-                    anObject->turnVelocity = 0;
-                }
+                anObject->turnVelocity = 0;
             }
         }
 
@@ -421,9 +402,9 @@ void NonplayerShipThink(int32_t timePass)
             targetObject = anObject->targetObject;
         }
 
-        tick_pulse(anObject, targetObject, timePass);
-        tick_beam(anObject, targetObject, timePass);
-        tick_special(anObject, targetObject, timePass);
+        tick_pulse(anObject, targetObject);
+        tick_beam(anObject, targetObject);
+        tick_special(anObject, targetObject);
 
         if ((anObject->keysDown & kWarpKey)
                 && (baseObject->warpSpeed > 0)
@@ -482,7 +463,7 @@ uint32_t use_weapons_for_defense(Handle<SpaceObject> obj) {
 }
 
 uint32_t ThinkObjectNormalPresence(
-        Handle<SpaceObject> anObject, Handle<BaseObject> baseObject, int32_t timePass) {
+        Handle<SpaceObject> anObject, Handle<BaseObject> baseObject) {
     uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask, distance, dcalc;
     coordPointType  dest;
     Handle<SpaceObject> targetObject;
@@ -508,7 +489,7 @@ uint32_t ThinkObjectNormalPresence(
                         && (distance < static_cast<uint32_t>(anObject->engageRange))
                         && (anObject->timeFromOrigin < kTimeToCheckHome)
                         && (targetObject->attributes & kCanBeEngaged)))) {
-            keysDown |= ThinkObjectEngageTarget(anObject, targetObject, distance, &theta, timePass);
+            keysDown |= ThinkObjectEngageTarget(anObject, targetObject, distance, &theta);
             ///--->>> END TARGETING <<<---///
 
             // if I'm in target object's range & it's looking at us & my health is less
@@ -614,7 +595,7 @@ uint32_t ThinkObjectNormalPresence(
                     && (((!(anObject->attributes & kRemoteOrHuman))
                             && (distance < static_cast<uint32_t>(anObject->engageRange)))
                         || (anObject->attributes & kIsGuided))) {
-                keysDown |= ThinkObjectEngageTarget(anObject, targetObject, distance, &theta, timePass);
+                keysDown |= ThinkObjectEngageTarget(anObject, targetObject, distance, &theta);
                 if ((targetObject->attributes & kCanBeEngaged)
                         && (anObject->attributes & kCanEngage)
                         && (distance < static_cast<uint32_t>(anObject->longestWeaponRange))
@@ -1499,7 +1480,7 @@ bool ThinkObjectResolveTarget(
 
 uint32_t ThinkObjectEngageTarget(
         Handle<SpaceObject> anObject, Handle<SpaceObject> targetObject,
-        uint32_t distance, int16_t *theta, int32_t timePass) {
+        uint32_t distance, int16_t *theta) {
     uint32_t        keysDown = 0;
     coordPointType  dest;
     int32_t         difference;
@@ -1529,7 +1510,7 @@ uint32_t ThinkObjectEngageTarget(
 
         if ( anObject->attributes & kCanAcceptDestination)
         {
-            anObject->timeFromOrigin += timePass;
+            anObject->timeFromOrigin += kDecideEveryCycles;
         }
 
         auto bestWeapon = BaseObject::none();
@@ -1663,8 +1644,15 @@ uint32_t ThinkObjectEngageTarget(
     return( keysDown);
 }
 
+static bool can_hit(const Handle<SpaceObject>& a, const Handle<SpaceObject>& b) {
+    return (a->attributes & kCanCollide)
+        && (b->attributes & kCanBeHit);
+}
+
 void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
     if (anObject->active != kObjectInUse) {
+        return;
+    } else if (!can_hit(sObject, anObject)) {
         return;
     }
 

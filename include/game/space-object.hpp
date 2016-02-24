@@ -55,6 +55,9 @@ class SpaceObject {
     void free();
     void create_floating_player_body();
 
+    bool engages(const SpaceObject& b) const;
+    Fixed turn_rate() const;
+
     uint32_t                attributes = 0;
     BaseObject*             baseType = nullptr;
     Handle<BaseObject>      base;

@@ -245,6 +245,26 @@ label3:
     return result;
 }
 
+int16_t ratio_to_angle(int32_t x, int32_t y) {
+    if (x == 0) {
+        if (y < 0) {
+            return 180;
+        } else {
+            return 0;
+        }
+    }
+
+    Fixed slope = MyFixRatio(x, y);
+    int16_t angle = AngleFromSlope(slope);
+    if (x > 0) {
+        angle += 180;
+    }
+    if (angle >= 360) {
+        angle -= 360;
+    }
+    return angle;
+}
+
 void read_from(ReadSource in, fixedPointType& point) {
     read(in, point.h);
     read(in, point.v);

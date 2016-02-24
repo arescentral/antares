@@ -38,7 +38,7 @@ class PlayerShip : public EventReceiver {
     virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
     virtual void gamepad_stick(const GamepadStickEvent& event);
 
-    void update(int64_t timePass, const GameCursor& cursor, bool enter_message);
+    void update(const GameCursor& cursor, bool enter_message);
 
     bool show_select() const;
     bool show_target() const;
