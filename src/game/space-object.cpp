@@ -65,6 +65,8 @@ const uint8_t kNeutralColor         = SKY_BLUE;
 static const int16_t kSpaceObjectNameResID          = 5000;
 static const int16_t kSpaceObjectShortNameResID     = 5001;
 
+const int32_t kDefaultTurnRate      = 0x00000200;
+
 int ANTARES_GLOBAL BaseObject::size = 0;
 int ANTARES_GLOBAL Action::size = 0;
 
@@ -941,6 +943,14 @@ bool SpaceObject::engages(const SpaceObject& b) const {
         return baseType->engageKeyTag == b.baseType->levelKeyTag;
     }
     return true;
+}
+
+Fixed SpaceObject::turn_rate() const {
+    // design flaw: can't have turn rate unless shapefromdirection
+    if (attributes & kShapeFromDirection) {
+        return baseType->frame.rotation.maxTurnRate;
+    }
+    return kDefaultTurnRate;
 }
 
 StringSlice get_object_name(Handle<BaseObject> id) {

@@ -61,8 +61,6 @@ const int32_t kWeaponRatio          = 2;
 const int32_t kEnergyChunk          = kHealthRatio + (kWeaponRatio * 3);
 const int32_t kWarpInEnergyFactor   = 3;
 
-const int32_t kDefaultTurnRate      = 0x00000200;
-
 enum {
     kFriendlyColor  = GREEN,
     kHostileColor   = RED,
@@ -303,15 +301,10 @@ void NonplayerShipThink(int32_t timePass)
                             anObject->directionGoal = anObject->direction;
                         }
                     }
-
-                    offset.h = mAngleDifference(anObject->directionGoal, anObject->direction);
-                    offset.v = mFixedToLong(baseObject->frame.rotation.maxTurnRate << 1);
-                    difference = ABS(offset.h);
-                } else {
-                    offset.h = mAngleDifference(anObject->directionGoal, anObject->direction);
-                    offset.v = mFixedToLong(kDefaultTurnRate << 1);
-                    difference = ABS(offset.h);
                 }
+                offset.h = mAngleDifference(anObject->directionGoal, anObject->direction);
+                offset.v = mFixedToLong(anObject->turn_rate() << 1);
+                difference = ABS(offset.h);
                 if (difference > offset.v) {
                     if (offset.h < 0) {
                         keysDown |= kRightKey;
@@ -371,23 +364,12 @@ void NonplayerShipThink(int32_t timePass)
 
         if ((anObject->attributes & kHasDirectionGoal)
                 && (anObject->offlineTime <= 0)) {
-            // design flaw: can't have turn rate unless shapefromdirection
-            if (anObject->attributes & kShapeFromDirection) {
-                if (anObject->keysDown & kLeftKey) {
-                    anObject->turnVelocity = -baseObject->frame.rotation.maxTurnRate;
-                } else if (anObject->keysDown & kRightKey) {
-                    anObject->turnVelocity = baseObject->frame.rotation.maxTurnRate;
-                } else {
-                    anObject->turnVelocity = 0;
-                }
+            if (anObject->keysDown & kLeftKey) {
+                anObject->turnVelocity = -anObject->turn_rate();
+            } else if (anObject->keysDown & kRightKey) {
+                anObject->turnVelocity = anObject->turn_rate();
             } else {
-                if (anObject->keysDown & kLeftKey) {
-                    anObject->turnVelocity = -kDefaultTurnRate;
-                } else if (anObject->keysDown & kRightKey) {
-                    anObject->turnVelocity = kDefaultTurnRate;
-                } else {
-                    anObject->turnVelocity = 0;
-                }
+                anObject->turnVelocity = 0;
             }
         }
 
