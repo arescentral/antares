@@ -521,9 +521,6 @@ void GamePlay::fire_timer() {
 
     while (unitsPassed > 0) {
         int unitsToDo = unitsPassed;
-        if (unitsToDo > kMaxTimePerCycle) {
-            unitsToDo = kMaxTimePerCycle;
-        }
         if ((_decide_cycle + unitsToDo) > kDecideEveryCycles) {
             unitsToDo = kDecideEveryCycles - _decide_cycle;
         }
