@@ -191,37 +191,31 @@ static void tick_special(
 }
 
 void NonplayerShipThink() {
-    Admiral*        anAdmiral;
-    Point           offset;
-    int32_t         count, difference;
-    uint32_t        keysDown;
-    int16_t         h;
-    Fixed           fcos, fsin;
-    RgbColor        friendSick, foeSick, neutralSick;
-    uint32_t        sickCount = usecs_to_ticks(g.time) / 9;
-
-    g.sync = g.random.seed;
-    sickCount &= 0x00000003;
-    if (sickCount == 0) {
-        friendSick = GetRGBTranslateColorShade(kFriendlyColor, MEDIUM);
-        foeSick = GetRGBTranslateColorShade(kHostileColor, MEDIUM);
-        neutralSick = GetRGBTranslateColorShade(kNeutralColor, MEDIUM);
-    } else if (sickCount == 1) {
-        friendSick = GetRGBTranslateColorShade(kFriendlyColor, DARK);
-        foeSick = GetRGBTranslateColorShade(kHostileColor, DARK);
-        neutralSick = GetRGBTranslateColorShade(kNeutralColor, DARK);
-    } else if (sickCount == 2) {
-        friendSick = GetRGBTranslateColorShade(kFriendlyColor, DARKER);
-        foeSick = GetRGBTranslateColorShade(kHostileColor, DARKER);
-        neutralSick = GetRGBTranslateColorShade(kNeutralColor, DARKER);
-    } else if (sickCount == 3) {
-        friendSick = GetRGBTranslateColorShade(kFriendlyColor, DARKEST);
-        foeSick = GetRGBTranslateColorShade(kHostileColor, DARKER-1);
-        neutralSick = GetRGBTranslateColorShade(kNeutralColor, DARKEST);
-    } else {
-        throw Exception("invalid value of sickCount");
+    RgbColor friendSick, foeSick, neutralSick;
+    switch ((usecs_to_ticks(g.time) / 9) % 4) {
+        case 0:
+            friendSick = GetRGBTranslateColorShade(kFriendlyColor, MEDIUM);
+            foeSick = GetRGBTranslateColorShade(kHostileColor, MEDIUM);
+            neutralSick = GetRGBTranslateColorShade(kNeutralColor, MEDIUM);
+            break;
+        case 1:
+            friendSick = GetRGBTranslateColorShade(kFriendlyColor, DARK);
+            foeSick = GetRGBTranslateColorShade(kHostileColor, DARK);
+            neutralSick = GetRGBTranslateColorShade(kNeutralColor, DARK);
+            break;
+        case 2:
+            friendSick = GetRGBTranslateColorShade(kFriendlyColor, DARKER);
+            foeSick = GetRGBTranslateColorShade(kHostileColor, DARKER);
+            neutralSick = GetRGBTranslateColorShade(kNeutralColor, DARKER);
+            break;
+        case 3:
+            friendSick = GetRGBTranslateColorShade(kFriendlyColor, DARKEST);
+            foeSick = GetRGBTranslateColorShade(kHostileColor, DARKER-1);
+            neutralSick = GetRGBTranslateColorShade(kNeutralColor, DARKEST);
+            break;
     }
 
+    g.sync = g.random.seed;
     for (int32_t count = 0; count < kMaxPlayerNum; count++) {
         Handle<Admiral>(count)->shipsLeft() = 0;
     }
@@ -265,6 +259,7 @@ void NonplayerShipThink() {
             anObject->owner->shipsLeft()++;
         }
 
+        uint32_t keysDown;
         switch (anObject->presenceState) {
           case kNormalPresence:
             keysDown = ThinkObjectNormalPresence(anObject, baseObject);
@@ -293,7 +288,7 @@ void NonplayerShipThink() {
                 if (anObject->attributes & kShapeFromDirection) {
                     if ((anObject->attributes & kIsGuided)
                             && anObject->targetObject.get()) {
-                        difference = anObject->targetAngle - anObject->direction;
+                        int32_t difference = anObject->targetAngle - anObject->direction;
                         if ((difference < -60) || (difference > 60)) {
                             anObject->targetObject = SpaceObject::none();
                             anObject->targetObjectID = kNoShip;
@@ -301,9 +296,10 @@ void NonplayerShipThink() {
                         }
                     }
                 }
+                Point offset;
                 offset.h = mAngleDifference(anObject->directionGoal, anObject->direction);
                 offset.v = mFixedToLong(anObject->turn_rate() << 1);
-                difference = ABS(offset.h);
+                int32_t difference = ABS(offset.h);
                 if (difference > offset.v) {
                     if (offset.h < 0) {
                         keysDown |= kRightKey;
