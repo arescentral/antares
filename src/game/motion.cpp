@@ -208,24 +208,7 @@ static void move(Handle<SpaceObject> anObject) {
         }
 
         // get the angle of our new vector
-        int16_t angle;
-        if (fa == 0) {
-            if (fb < 0) {
-                angle = 180;
-            } else {
-                angle = 0;
-            }
-        } else {
-            Fixed aFixed = MyFixRatio(fa, fb);
-
-            angle = AngleFromSlope(aFixed);
-            if (fa > 0) {
-                angle += 180;
-            }
-            if (angle >= 360) {
-                angle -= 360;
-            }
-        }
+        int16_t angle = ratio_to_angle(fa, fb);
 
         // get the maxthrust of new vector
         Fixed fh, fv;
@@ -950,7 +933,6 @@ void CorrectPhysicalSpace(Handle<SpaceObject> aObject, Handle<SpaceObject> bObje
     fixedPointType  tvel;
     Fixed           force, totalMass, tfix;
     int16_t         angle;
-    Fixed           aFixed;
 
     // calculate the new velocities
     force = ( bObject->velocity.h - aObject->velocity.h);
@@ -962,19 +944,7 @@ void CorrectPhysicalSpace(Handle<SpaceObject> aObject, Handle<SpaceObject> bObje
     ah = bObject->location.h - aObject->location.h;
     av = bObject->location.v - aObject->location.v;
 
-    if ( ah == 0)
-    {
-        if ( av < 0)
-            angle = 180;
-        else angle = 0;
-    } else
-    {
-        aFixed = MyFixRatio(ah, av);
-
-        angle = AngleFromSlope( aFixed);
-        if ( ah > 0) angle += 180;
-        if ( angle >= 360) angle -= 360;
-    }
+    angle = ratio_to_angle(ah, av);
     totalMass = aObject->baseType->mass + bObject->baseType->mass;  // svel = total mass
     tfix = aObject->baseType->mass;
     tfix = mMultiplyFixed( tfix, force);

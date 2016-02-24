@@ -28,6 +28,7 @@ uint32_t lsqrt(uint32_t n);
 uint64_t wsqrt(uint64_t n);
 
 Fixed MyFixRatio(int16_t, int16_t);
+int16_t ratio_to_angle(int32_t x, int32_t y);
 void MyMulDoubleLong(int32_t, int32_t, int64_t*);
 
 template <typename T>

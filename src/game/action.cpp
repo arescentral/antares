@@ -263,7 +263,7 @@ static void alter(
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
     int32_t l;
-    Fixed f, f2, aFixed;
+    Fixed f, f2;
     int16_t angle;
     coordPointType newLocation;
     switch (alter.alterType) {
@@ -338,24 +338,7 @@ static void alter(
                                 object->velocity.v += f;
 
                                 // make sure we're not going faster than our top speed
-
-                                if (object->velocity.h == 0) {
-                                    if (object->velocity.v < 0) {
-                                        angle = 180;
-                                    } else {
-                                        angle = 0;
-                                    }
-                                } else {
-                                    aFixed = MyFixRatio(object->velocity.h, object->velocity.v);
-
-                                    angle = AngleFromSlope(aFixed);
-                                    if (object->velocity.h > 0) {
-                                        angle += 180;
-                                    }
-                                    if (angle >= 360) {
-                                        angle -= 360;
-                                    }
-                                }
+                                angle = ratio_to_angle(object->velocity.h, object->velocity.v);
                             } else {
                                 // if the minumum < 0, then STOP the object like applying breaks
                                 f = object->velocity.h;
@@ -366,23 +349,7 @@ static void alter(
                                 object->velocity.v += f;
 
                                 // make sure we're not going faster than our top speed
-                                if (object->velocity.h == 0) {
-                                    if (object->velocity.v < 0) {
-                                        angle = 180;
-                                    } else {
-                                        angle = 0;
-                                    }
-                                } else {
-                                    aFixed = MyFixRatio(object->velocity.h, object->velocity.v);
-
-                                    angle = AngleFromSlope(aFixed);
-                                    if (object->velocity.h > 0) {
-                                        angle += 180;
-                                    }
-                                    if (angle >= 360) {
-                                        angle -= 360;
-                                    }
-                                }
+                                angle = ratio_to_angle(object->velocity.h, object->velocity.v);
                             }
 
                             // get the maxthrust of new vector
