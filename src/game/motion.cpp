@@ -89,7 +89,7 @@ ANTARES_GLOBAL coordPointType          gGlobalCorner;
 static ANTARES_GLOBAL unique_ptr<proximityUnitType[]> gProximityGrid;
 
 // for the macro mRanged, time is assumed to be a int32_t game ticks, velocity a fixed, result int32_t, scratch fixed
-inline void mRange(int32_t& result, int32_t time, Fixed velocity, Fixed& scratch) {
+static inline void mRange(int32_t& result, int32_t time, Fixed velocity, Fixed& scratch) {
     scratch = mLongToFixed( time);
     scratch = mMultiplyFixed (scratch, velocity);
     result = mFixedToLong( scratch);
@@ -591,7 +591,7 @@ static void activate_object(const Handle<SpaceObject>& o) {
     }
 }
 
-void calc_misc() {
+static void calc_misc() {
     // set up player info so we can find closest ship (for scaling)
     uint64_t farthestDist = 0;
     uint64_t closestDist = 0x7fffffffffffffffull;
@@ -798,7 +798,7 @@ static bool beam_intersects(const Handle<SpaceObject>& beam, const Handle<SpaceO
 }
 
 // Set absoluteBounds on all objects.
-void calc_bounds() {
+static void calc_bounds() {
     for (auto o = g.root; o.get(); o = o->nextObject) {
         if ((o->absoluteBounds.left >= o->absoluteBounds.right) && o->sprite.get()) {
             const NatePixTable::Frame& frame
@@ -822,7 +822,7 @@ void calc_bounds() {
 }
 
 // Call HitObject() and CorrectPhysicalSpace() for all colliding pairs of objects.
-void calc_impacts() {
+static void calc_impacts() {
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
         const auto& cell = gProximityGrid[i];
         for (auto aObject = cell.nearObject; aObject.get(); aObject = aObject->nextNearObject) {
@@ -884,7 +884,7 @@ void calc_impacts() {
 //   * localFriendStrength
 //   * localFoeStrength
 // Also sets seenByPlayerFlags and kIsHidden based on object proximity.
-void calc_locality() {
+static void calc_locality() {
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
         const auto& cell = gProximityGrid[i];
         for (auto aObject = cell.farObject; aObject.get(); aObject = aObject->nextFarObject) {
