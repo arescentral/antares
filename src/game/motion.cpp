@@ -88,13 +88,6 @@ const static Point kAdjacentUnits[] = {{0, 0}, {1, 0}, {-1, 1}, {0, 1}, {1, 1}};
 ANTARES_GLOBAL coordPointType          gGlobalCorner;
 static ANTARES_GLOBAL unique_ptr<proximityUnitType[]> gProximityGrid;
 
-// for the macro mRanged, time is assumed to be a int32_t game ticks, velocity a fixed, result int32_t, scratch fixed
-static inline void mRange(int32_t& result, int32_t time, Fixed velocity, Fixed& scratch) {
-    scratch = mLongToFixed( time);
-    scratch = mMultiplyFixed (scratch, velocity);
-    result = mFixedToLong( scratch);
-}
-
 static void correct_physical_space(Handle<SpaceObject> a, Handle<SpaceObject> b);
 
 Size center_scale() {
