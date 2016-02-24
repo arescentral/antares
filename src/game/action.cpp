@@ -875,11 +875,11 @@ static void queue_action(
     }
 }
 
-void execute_action_queue(int32_t unitsToDo) {
+void execute_action_queue() {
     for (int32_t i = 0; i < kActionQueueLength; i++) {
         auto actionQueue = &gActionQueueData[i];
         if (actionQueue->actionRef.size()) {
-            actionQueue->scheduledTime -= unitsToDo;
+            actionQueue->scheduledTime -= kDecideEveryCycles;
         }
     }
 

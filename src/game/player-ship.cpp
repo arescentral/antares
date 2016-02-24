@@ -541,7 +541,7 @@ bool PlayerShip::active() const {
         && (player->attributes & kIsHumanControlled);
 }
 
-void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_message) {
+void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
     uint32_t        attributes;
 
     if (!g.ship.get()) {
@@ -659,7 +659,7 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
 
     if (gTheseKeys & kDestinationKey) {
         if (gDestKeyTime >= 0) {
-            gDestKeyTime += timePass;
+            gDestKeyTime += kDecideEveryCycles;
         }
     } else {
         if (gDestKeyTime > 45) {
@@ -689,7 +689,7 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
                 globals()->hotKey_target = true;
             }
         } else {
-            globals()->hotKeyDownTime += timePass;
+            globals()->hotKeyDownTime += kDecideEveryCycles;
         }
     } else if (globals()->lastHotKey >= 0) {
         hot_key = globals()->lastHotKey;

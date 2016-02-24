@@ -541,16 +541,16 @@ void GamePlay::fire_timer() {
             // everything in here gets executed once every kDecideEveryCycles
             _player_paused = false;
 
-            NonplayerShipThink( kDecideEveryCycles);
+            NonplayerShipThink();
             AdmiralThink();
-            execute_action_queue( kDecideEveryCycles);
+            execute_action_queue();
 
             if (globals()->gInputSource && !globals()->gInputSource->next(_player_ship)) {
                 g.game_over = true;
                 g.game_over_at = g.time;
             }
             _replay_builder.next();
-            _player_ship.update(kDecideEveryCycles, _cursor, _entering_message);
+            _player_ship.update(_cursor, _entering_message);
 
             CollideSpaceObjects();
             _decide_cycle = 0;

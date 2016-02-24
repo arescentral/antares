@@ -35,7 +35,7 @@ void exec(
         Point* offset);
 
 void reset_action_queue();
-void execute_action_queue(int32_t);
+void execute_action_queue();
 }  // namespace antares
 
 #endif // ANTARES_GAME_ACTION_HPP_

@@ -806,11 +806,11 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         const int64_t start_time = add_ticks(0, start_ticks);
         g.time = 0;
         for (int64_t i = 0; i < start_ticks; ++i) {
-            g.time = add_ticks(g.time, 1);
+            g.time = add_ticks(g.time, 1);  // TODO(sfiera): not kDecideEveryCycles…?
             MoveSpaceObjects(kDecideEveryCycles);
-            NonplayerShipThink(kDecideEveryCycles);
+            NonplayerShipThink();
             AdmiralThink();
-            execute_action_queue(kDecideEveryCycles);
+            execute_action_queue();
             CollideSpaceObjects();
             x++;
             if (x == 30) {

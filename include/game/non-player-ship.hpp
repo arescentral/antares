@@ -35,7 +35,7 @@ enum Allegiance {
 void fire_weapon(
         Handle<SpaceObject> subject, Handle<SpaceObject> target,
         const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon);
-void NonplayerShipThink(int32_t);
+void NonplayerShipThink();
 void UpdateMyNonplayerShip( void);
 void HackShowShipID( void);
 void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject);
