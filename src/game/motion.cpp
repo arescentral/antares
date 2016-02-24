@@ -710,22 +710,14 @@ static bool beam_intersects(const Handle<SpaceObject>& beam, const Handle<SpaceO
 static void calc_bounds() {
     for (auto o = g.root; o.get(); o = o->nextObject) {
         if ((o->absoluteBounds.left >= o->absoluteBounds.right) && o->sprite.get()) {
-            const NatePixTable::Frame& frame
-                = o->sprite->table->at(o->sprite->whichShape);
-
-            Size size = {
-                (frame.width() * o->naturalScale) >> SHIFT_SCALE,
-                (frame.height() * o->naturalScale) >> SHIFT_SCALE,
-            };
-            Point corner = {
-                -((frame.center().h * o->naturalScale) >> SHIFT_SCALE),
-                -((frame.center().v * o->naturalScale) >> SHIFT_SCALE),
-            };
-
-            o->absoluteBounds.left = o->location.h + corner.h;
-            o->absoluteBounds.right = o->absoluteBounds.left + size.width;
-            o->absoluteBounds.top = o->location.v + corner.v;
-            o->absoluteBounds.bottom = o->absoluteBounds.top + size.height;
+            const NatePixTable::Frame& frame = o->sprite->table->at(o->sprite->whichShape);
+            o->absoluteBounds = Rect(
+                    Point(
+                        o->location.h - ((frame.center().h * o->naturalScale) >> SHIFT_SCALE),
+                        o->location.v - ((frame.center().v * o->naturalScale) >> SHIFT_SCALE)),
+                    Size(
+                        (frame.width() * o->naturalScale) >> SHIFT_SCALE,
+                        (frame.height() * o->naturalScale) >> SHIFT_SCALE));
         }
     }
 }
