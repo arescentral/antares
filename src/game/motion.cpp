@@ -916,6 +916,47 @@ void CollideSpaceObjects() {
     update_last_beam_locations();
 }
 
+static void adjust_velocity(Handle<SpaceObject> aObject, int16_t angle, Fixed totalMass, Fixed force) {
+    Fixed tfix = mMultiplyFixed(aObject->baseType->mass, force);
+    if (totalMass == 0) {
+        tfix = -1;
+    } else {
+        tfix = mDivideFixed(tfix, totalMass);
+    }
+    tfix += aObject->maxVelocity >> 1;
+    fixedPointType tvel;
+    GetRotPoint(&tvel.h, &tvel.v, angle);
+    tvel.h = mMultiplyFixed(tfix, tvel.h);
+    tvel.v = mMultiplyFixed(tfix, tvel.v);
+    aObject->velocity.v = tvel.v;
+    aObject->velocity.h = tvel.h;
+}
+
+static void push(Handle<SpaceObject> aObject) {
+    aObject->motionFraction.h += aObject->velocity.h;
+    aObject->motionFraction.v += aObject->velocity.v;
+
+    int32_t h;
+    if (aObject->motionFraction.h >= 0) {
+        h = more_evil_fixed_to_long(aObject->motionFraction.h + mFloatToFixed(0.5));
+    } else {
+        h = more_evil_fixed_to_long(aObject->motionFraction.h - mFloatToFixed(0.5)) + 1;
+    }
+    aObject->location.h -= h;
+    aObject->motionFraction.h -= mLongToFixed(h);
+
+    int32_t v;
+    if (aObject->motionFraction.v >= 0) {
+        v = more_evil_fixed_to_long(aObject->motionFraction.v + mFloatToFixed(0.5));
+    } else {
+        v = more_evil_fixed_to_long(aObject->motionFraction.v - mFloatToFixed(0.5)) + 1;
+    }
+    aObject->location.v -= v;
+    aObject->motionFraction.v -= mLongToFixed(v);
+
+    aObject->absoluteBounds.offset(-h, -v);
+}
+
 // CorrectPhysicalSpace-- takes 2 objects that are colliding and moves them back 1
 //  bresenham-style step at a time to their previous locations or until they don't
 //  collide.  For keeping objects which occupy space from occupying the
@@ -928,119 +969,30 @@ void CorrectPhysicalSpace(Handle<SpaceObject> aObject, Handle<SpaceObject> bObje
         return;  // the collision changed the owner of one object, e.g. a flagpod.
     }
 
-    int32_t    ah, av, ad, bh, bv, bd, adir = kNoDir, bdir = kNoDir,
-            h, v;
-    fixedPointType  tvel;
-    Fixed           force, totalMass, tfix;
-    int16_t         angle;
-
     // calculate the new velocities
-    force = ( bObject->velocity.h - aObject->velocity.h);
-    force = mMultiplyFixed( force, force);
-    totalMass = ( bObject->velocity.v - aObject->velocity.v);
-    totalMass = mMultiplyFixed( totalMass, totalMass);
-    force += totalMass;
-    force = lsqrt( force);  // tvel = force
-    ah = bObject->location.h - aObject->location.h;
-    av = bObject->location.v - aObject->location.v;
+    const Fixed dvx = bObject->velocity.h - aObject->velocity.h;
+    const Fixed dvy = bObject->velocity.v - aObject->velocity.v;
+    const Fixed force = lsqrt(mMultiplyFixed(dvx, dvx) + mMultiplyFixed(dvy, dvy));
+    const int32_t ah = bObject->location.h - aObject->location.h;
+    const int32_t av = bObject->location.v - aObject->location.v;
 
-    angle = ratio_to_angle(ah, av);
-    totalMass = aObject->baseType->mass + bObject->baseType->mass;  // svel = total mass
-    tfix = aObject->baseType->mass;
-    tfix = mMultiplyFixed( tfix, force);
-    if ( totalMass == 0) tfix = -1;
-    else
-    {
-        tfix = mDivideFixed( tfix, totalMass);
+    const Fixed totalMass = aObject->baseType->mass + bObject->baseType->mass;
+    int16_t angle = ratio_to_angle(ah, av);
+    adjust_velocity(aObject, angle, totalMass, force);
+    mAddAngle(angle, 180);
+    adjust_velocity(bObject, angle, totalMass, force);
+
+    if (!(aObject->velocity.h || aObject->velocity.v ||
+                bObject->velocity.h || bObject->velocity.v)) {
+        return;
     }
-    tfix += aObject->maxVelocity >> 1;
-    GetRotPoint(&tvel.h, &tvel.v, angle);
-    tvel.h = mMultiplyFixed( tfix, tvel.h);
-    tvel.v = mMultiplyFixed( tfix, tvel.v);
-//  tvel.h = mMultiplyFixed( aObject->baseType->maxVelocity, tvel.h);
-//  tvel.v = mMultiplyFixed( aObject->baseType->maxVelocity, tvel.v);
-    aObject->velocity.v = tvel.v;
-    aObject->velocity.h = tvel.h;
 
-    mAddAngle( angle, 180);
-    tfix = bObject->baseType->mass;
-    tfix = mMultiplyFixed( tfix, force);
-    if ( totalMass == 0) tfix = -1;
-    else
-    {
-        tfix = mDivideFixed( tfix, totalMass);
-    }
-    tfix += bObject->maxVelocity >> 1;
-    GetRotPoint(&tvel.h, &tvel.v, angle);
-    tvel.h = mMultiplyFixed( tfix, tvel.h);
-    tvel.v = mMultiplyFixed( tfix, tvel.v);
-//  tvel.h = mMultiplyFixed( bObject->baseType->maxVelocity, tvel.h);
-//  tvel.v = mMultiplyFixed( bObject->baseType->maxVelocity, tvel.v);
-    bObject->velocity.v = tvel.v;
-    bObject->velocity.h = tvel.h;
-
-    ah = aObject->location.h - aObject->absoluteBounds.left;
-    ad = aObject->absoluteBounds.right - aObject->location.h;
-    av = aObject->location.v - aObject->absoluteBounds.top;
-    adir = aObject->absoluteBounds.bottom - aObject->location.v;
-
-    bh = bObject->location.h - bObject->absoluteBounds.left;
-    bd = bObject->absoluteBounds.right - bObject->location.h;
-    bv = bObject->location.v - bObject->absoluteBounds.top;
-    bdir = bObject->absoluteBounds.bottom - bObject->location.v;
-
-    if ( (aObject->velocity.h || aObject->velocity.v || bObject->velocity.h ||
-        bObject->velocity.v))
-    {
-        while ((!(( aObject->absoluteBounds.right   <   bObject->absoluteBounds.left) ||
-                (   aObject->absoluteBounds.left    >   bObject->absoluteBounds.right) ||
-                (   aObject->absoluteBounds.bottom  <   bObject->absoluteBounds.top) ||
-                (   aObject->absoluteBounds.top     >   bObject->absoluteBounds.bottom))))
-        {
-            aObject->motionFraction.h += aObject->velocity.h;
-            aObject->motionFraction.v += aObject->velocity.v;
-
-            if ( aObject->motionFraction.h >= 0)
-                h = more_evil_fixed_to_long(aObject->motionFraction.h + mFloatToFixed(0.5));
-            else
-                h = more_evil_fixed_to_long(aObject->motionFraction.h - mFloatToFixed(0.5)) + 1;
-            aObject->location.h -= h;
-            aObject->motionFraction.h -= mLongToFixed(h);
-
-            if ( aObject->motionFraction.v >= 0)
-                v = more_evil_fixed_to_long(aObject->motionFraction.v + mFloatToFixed(0.5));
-            else
-                v = more_evil_fixed_to_long(aObject->motionFraction.v - mFloatToFixed(0.5)) + 1;
-            aObject->location.v -= v;
-            aObject->motionFraction.v -= mLongToFixed(v);
-
-            bObject->motionFraction.h += bObject->velocity.h;
-            bObject->motionFraction.v += bObject->velocity.v;
-
-            if ( bObject->motionFraction.h >= 0)
-                h = more_evil_fixed_to_long(bObject->motionFraction.h + mFloatToFixed(0.5));
-            else
-                h = more_evil_fixed_to_long(bObject->motionFraction.h - mFloatToFixed(0.5)) + 1;
-            bObject->location.h -= h;
-            bObject->motionFraction.h -= mLongToFixed(h);
-
-            if ( bObject->motionFraction.v >= 0)
-                v = more_evil_fixed_to_long(bObject->motionFraction.v + mFloatToFixed(0.5));
-            else
-                v = more_evil_fixed_to_long(bObject->motionFraction.v - mFloatToFixed(0.5)) + 1;
-            bObject->location.v -= v;
-            bObject->motionFraction.v -= mLongToFixed(v);
-
-            aObject->absoluteBounds.left = aObject->location.h - ah;
-            aObject->absoluteBounds.right = aObject->location.h + ad;
-            aObject->absoluteBounds.top = aObject->location.v - av;
-            aObject->absoluteBounds.bottom = aObject->location.v + adir;
-
-            bObject->absoluteBounds.left = bObject->location.h - bh;
-            bObject->absoluteBounds.right = bObject->location.h + bd;
-            bObject->absoluteBounds.top = bObject->location.v - bv;
-            bObject->absoluteBounds.bottom = bObject->location.v + bdir;
-        }
+    while (!((aObject->absoluteBounds.right   <   bObject->absoluteBounds.left) ||
+             (aObject->absoluteBounds.left    >   bObject->absoluteBounds.right) ||
+             (aObject->absoluteBounds.bottom  <   bObject->absoluteBounds.top) ||
+             (aObject->absoluteBounds.top     >   bObject->absoluteBounds.bottom))) {
+        push(aObject);
+        push(bObject);
     }
 }
 
