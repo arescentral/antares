@@ -112,7 +112,7 @@ const uint8_t kFineMoneyUseColor    = SKY_BLUE;
 const int32_t kMaxMoneyValue        = kGrossMoneyBarValue * 7;
 
 Rect mini_build_time_rect() {
-    Rect result(play_screen.right + 10, 8, play_screen.right + 22, 37);
+    Rect result(play_screen().right + 10, 8, play_screen().right + 22, 37);
     result.offset(0, instrument_top());
     return result;
 }
@@ -439,7 +439,7 @@ static void draw_money() {
     const int price = MiniComputerGetPriceOfCurrentSelection() / kFineMoneyBarValue;
 
     Rect box(0, 0, kFineMoneyBarWidth, kFineMoneyBarHeight - 1);
-    box.offset(kFineMoneyLeft + kFineMoneyHBuffer + play_screen.right,
+    box.offset(kFineMoneyLeft + kFineMoneyHBuffer + play_screen().right,
             kFineMoneyTop + instrument_top() + kFineMoneyVBuffer);
 
     // First section of the money bar: when we can afford the current selection, displays the
@@ -500,7 +500,7 @@ static void draw_money() {
     gross->thisValue = (admiral->cash() / kGrossMoneyBarValue);
 
     box = Rect(0, 0, kGrossMoneyBarWidth, kGrossMoneyBarHeight - 1);
-    box.offset(play_screen.right + kGrossMoneyLeft + kGrossMoneyHBuffer,
+    box.offset(play_screen().right + kGrossMoneyLeft + kGrossMoneyHBuffer,
             kGrossMoneyTop + instrument_top() + kGrossMoneyVBuffer);
 
     const RgbColor light = GetRGBTranslateColorShade(kGrossMoneyColor, VERY_LIGHT);
@@ -936,7 +936,7 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
     int8_t hue = gBarIndicator[which].color;
     Rect bar(0, 0, kBarIndicatorWidth, kBarIndicatorHeight);
     bar.offset(
-            kBarIndicatorLeft + play_screen.right,
+            kBarIndicatorLeft + play_screen().right,
             gBarIndicator[which].top);
     if (graphicValue < kBarIndicatorHeight) {
         Rect top_bar = bar;

@@ -199,7 +199,7 @@ void Messages::clear() {
     tmessage->labelMessage = false;
     tmessage->lastLabelMessage = false;
     tmessage->retro_text.reset();
-    viewport.bottom = play_screen.bottom;
+    viewport.bottom = play_screen().bottom;
     tmessage->labelMessageID = Label::add(0, 0, 0, 0, SpaceObject::none(), false, SKY_BLUE);
     tmessage->labelMessageID->set_keep_on_screen_anyway(true);
 }
@@ -251,7 +251,7 @@ void Messages::clip( void)
 
         if ( tmessage->lastResID >= 0)
         {
-            viewport.bottom = play_screen.bottom;
+            viewport.bottom = play_screen().bottom;
         }
 
         // draw in offscreen world
@@ -294,9 +294,9 @@ void Messages::clip( void)
                 tmessage->at_char = 0;
 
                 if (tmessage->labelMessage == false) {
-                    viewport.bottom = play_screen.bottom - tmessage->textHeight;
+                    viewport.bottom = play_screen().bottom - tmessage->textHeight;
                 } else {
-                    viewport.bottom = play_screen.bottom;
+                    viewport.bottom = play_screen().bottom;
                 }
                 tmessage->stage = kShowStage;
 
@@ -318,7 +318,7 @@ void Messages::clip( void)
                 */
             }
         } else {
-            viewport.bottom = play_screen.bottom;
+            viewport.bottom = play_screen().bottom;
             tmessage->stage = kClipStage;
         }
     }
@@ -538,7 +538,7 @@ void MessageLabel_Set_Special(Handle<Label> label, const StringSlice& text) {
         attachPoint.v += instrument_top();
         if (attachPoint.h >= (kSmallScreenWidth - kRightPanelWidth)) {
             attachPoint.h = (attachPoint.h - (kSmallScreenWidth - kRightPanelWidth)) +
-                play_screen.right;
+                play_screen().right;
         }
         ++it;
     }
@@ -556,7 +556,7 @@ void MessageLabel_Set_Special(Handle<Label> label, const StringSlice& text) {
       case 'R':
         label->set_offset(0, 0);
         label->set_position(
-                play_screen.right - (label->get_width()+10),
+                play_screen().right - (label->get_width()+10),
                 instrument_top() + value);
         break;
 
@@ -580,13 +580,13 @@ void MessageLabel_Set_Special(Handle<Label> label, const StringSlice& text) {
 }
 
 void Messages::draw_message() {
-    if ((viewport.bottom == play_screen.bottom) || (long_message_data->currentResID < 0)) {
+    if ((viewport.bottom == play_screen().bottom) || (long_message_data->currentResID < 0)) {
         return;
     }
 
     const RgbColor& dark_blue = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
     const RgbColor& light_blue = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
-    Rect message_bounds(play_screen.left, viewport.bottom, play_screen.right, play_screen.bottom);
+    Rect message_bounds(play_screen().left, viewport.bottom, play_screen().right, play_screen().bottom);
     {
         Rects rects;
         rects.fill(message_bounds, light_blue);
@@ -594,7 +594,7 @@ void Messages::draw_message() {
         rects.fill(message_bounds, dark_blue);
     }
 
-    Rect bounds(viewport.left, viewport.bottom, viewport.right, play_screen.bottom);
+    Rect bounds(viewport.left, viewport.bottom, viewport.right, play_screen().bottom);
     bounds.inset(kHBuffer, 0);
     bounds.top += kLongMessageVPad;
     long_message_data->retro_text->draw_range(bounds, 0, long_message_data->at_char);

@@ -81,13 +81,18 @@ namespace path = sfz::path;
 namespace antares {
 
 ANTARES_GLOBAL Rect world;
-ANTARES_GLOBAL Rect play_screen;
 ANTARES_GLOBAL Rect viewport;
 
 #ifdef DATA_COVERAGE
 extern set<int32_t> covered_objects;
 extern set<int32_t> covered_actions;
 #endif  // DATA_COVERAGE
+
+Rect play_screen() {
+    return Rect(
+        world.left + kLeftPanelWidth, world.top,
+        world.right - kRightPanelWidth, world.bottom);
+}
 
 class GamePlay : public Card {
   public:
@@ -304,7 +309,7 @@ class PauseScreen : public Card {
         _pause_string.assign(list.at(10));
         int32_t width = title_font->string_width(_pause_string);
         Rect bounds(0, 0, width, title_font->height);
-        bounds.center_in(play_screen);
+        bounds.center_in(play_screen());
         _text_origin = Point(bounds.left, bounds.top + title_font->ascent);
 
         bounds.inset(-4, -4);

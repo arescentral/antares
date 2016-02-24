@@ -92,8 +92,8 @@ static void correct_physical_space(Handle<SpaceObject> a, Handle<SpaceObject> b)
 
 Size center_scale() {
     return {
-        (play_screen.width() / 2) * SCALE_SCALE,
-        (play_screen.height() / 2) * SCALE_SCALE,
+        (play_screen().width() / 2) * SCALE_SCALE,
+        (play_screen().height() / 2) * SCALE_SCALE,
     };
 }
 

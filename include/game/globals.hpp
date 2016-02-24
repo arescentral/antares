@@ -175,7 +175,7 @@ aresGlobalType* globals();
 void init_globals();
 
 extern Rect world;
-extern Rect play_screen;
+Rect play_screen();
 extern Rect viewport;
 
 }  // namespace antares

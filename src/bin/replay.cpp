@@ -140,10 +140,7 @@ void ReplayMaster::init() {
     SoundDriver::driver()->set_global_volume(8);  // Max volume.
 
     world = Rect(Point(0, 0), Preferences::preferences()->screen_size());
-    play_screen = Rect(
-        world.left + kLeftPanelWidth, world.top,
-        world.right - kRightPanelWidth, world.bottom);
-    viewport = play_screen;
+    viewport = play_screen();
 
     RotationInit();
     InitDirectText();

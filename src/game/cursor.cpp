@@ -68,8 +68,8 @@ Point GameCursor::clamp(Point p) {
     }
     if (p.v < (viewport.top + kCursorBoundsSize)) {
         p.v = viewport.top + kCursorBoundsSize;
-    } else if (p.v > (play_screen.bottom - kCursorBoundsSize - 1)) {
-        p.v = play_screen.bottom - kCursorBoundsSize - 1;
+    } else if (p.v > (play_screen().bottom - kCursorBoundsSize - 1)) {
+        p.v = play_screen().bottom - kCursorBoundsSize - 1;
     }
     return p;
 }

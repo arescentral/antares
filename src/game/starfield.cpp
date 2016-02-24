@@ -65,8 +65,8 @@ void Starfield::reset(Handle<SpaceObject> which_object) {
     }
 
     for (scrollStarType* star: range(_stars, _stars + kScrollStarNum)) {
-        star->location.h = Randomize(play_screen.width()) + viewport.left;
-        star->location.v = Randomize(play_screen.height()) + viewport.top;
+        star->location.h = Randomize(play_screen().width()) + viewport.left;
+        star->location.v = Randomize(play_screen().height()) + viewport.top;
         star->motionFraction.h = star->motionFraction.v = 0;
 
         star->speed = RandomStarSpeed();
@@ -183,27 +183,27 @@ void Starfield::move(int32_t by_units) {
         star->motionFraction.v -= mLongToFixed(v);
 
         if ((star->location.h < viewport.left) && (star->oldLocation.h < viewport.left)) {
-            star->location.h += play_screen.width() - 1;
-            star->location.v = Randomize(play_screen.height()) + viewport.top;
+            star->location.h += play_screen().width() - 1;
+            star->location.v = Randomize(play_screen().height()) + viewport.top;
             star->motionFraction.h = star->motionFraction.v = 0;
             star->speed = RandomStarSpeed();
             star->age = 0;
         } else if ((star->location.h >= viewport.right) && (star->oldLocation.h >= viewport.right)) {
-            star->location.h -= play_screen.width();
-            star->location.v = Randomize(play_screen.height()) + viewport.top;
+            star->location.h -= play_screen().width();
+            star->location.v = Randomize(play_screen().height()) + viewport.top;
             star->motionFraction.h = star->motionFraction.v = 0;
             star->speed = RandomStarSpeed();
             star->age = 0;
         } else if ((star->location.v < viewport.top) && (star->oldLocation.v < viewport.top)) {
-            star->location.h = Randomize(play_screen.width()) + viewport.left;
-            star->location.v += play_screen.height() - 1;
+            star->location.h = Randomize(play_screen().width()) + viewport.left;
+            star->location.v += play_screen().height() - 1;
             star->motionFraction.h = star->motionFraction.v = 0;
             star->speed = RandomStarSpeed();
             star->age = 0;
-        } else if ((star->location.v >= play_screen.bottom)
-                && (star->oldLocation.v >= play_screen.bottom)) {
-            star->location.h = Randomize(play_screen.width()) + viewport.left;
-            star->location.v -= play_screen.height();
+        } else if ((star->location.v >= play_screen().bottom)
+                && (star->oldLocation.v >= play_screen().bottom)) {
+            star->location.h = Randomize(play_screen().width()) + viewport.left;
+            star->location.v -= play_screen().height();
             star->motionFraction.h = star->motionFraction.v = 0;
             star->speed = RandomStarSpeed();
             star->age = 0;

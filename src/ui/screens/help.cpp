@@ -39,7 +39,7 @@ namespace utf8 = sfz::utf8;
 namespace antares {
 
 HelpScreen::HelpScreen():
-        InterfaceScreen("help", play_screen, false),
+        InterfaceScreen("help", play_screen(), false),
         _text(computer_font) {
     // TODO(sfiera): top and bottom buffer of 1, not just top buffer of 2.
     offset((world.width() / 2) - (viewport.width() / 2), 2);
