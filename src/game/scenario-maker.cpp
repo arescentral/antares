@@ -227,7 +227,7 @@ void set_initial_destination(const Scenario::InitialObject* initial, bool preser
     // get the correct admiral #
     Handle<Admiral> owner = initial->owner;
 
-    auto target = gThisScenario->initial(initial->initialDestination);
+    auto target = g.level->initial(initial->initialDestination);
     if (target->realObject.get()) {
         auto saveDest = owner->target(); // save the original dest
 
@@ -249,8 +249,6 @@ void set_initial_destination(const Scenario::InitialObject* initial, bool preser
 }
 
 }  // namespace
-
-ANTARES_GLOBAL const Scenario* gThisScenario = NULL;
 
 Scenario* mGetScenario(int32_t num) {
     return &plug.chapters[num];
@@ -551,10 +549,10 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     gAbsoluteScale = kTimesTwoScale;
     g.sync = 0;
 
-    gThisScenario = scenario;
+    g.level = scenario;
 
     {
-        int32_t angle = gThisScenario->angle();
+        int32_t angle = g.level->angle();
         if (angle < 0) {
             gScenarioRotation = g.random.next(ROT_POS);
         } else {
@@ -566,15 +564,15 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     g.next_level = -1;
     g.victory_text = -1;
 
-    SetMiniScreenStatusStrList(gThisScenario->scoreStringResID);
+    SetMiniScreenStatusStrList(g.level->scoreStringResID);
 
-    for (int i = 0; i < gThisScenario->playerNum; i++) {
-        if (gThisScenario->player[i].playerType == kSingleHumanPlayer) {
-            auto admiral = Admiral::make(i, kAIsHuman, gThisScenario->player[i]);
+    for (int i = 0; i < g.level->playerNum; i++) {
+        if (g.level->player[i].playerType == kSingleHumanPlayer) {
+            auto admiral = Admiral::make(i, kAIsHuman, g.level->player[i]);
             admiral->pay(mLongToFixed(5000));
             g.admiral = admiral;
         } else {
-            auto admiral = Admiral::make(i, kAIsComputer, gThisScenario->player[i]);
+            auto admiral = Admiral::make(i, kAIsComputer, g.level->player[i]);
             admiral->pay(mLongToFixed(5000));
         }
     }
@@ -592,9 +590,9 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     RemoveAllUnusedSounds();
     RemoveAllUnusedPixTables();
 
-    *max = gThisScenario->initialNum * 3L
+    *max = g.level->initialNum * 3L
          + 1
-         + (gThisScenario->startTime & kScenario_StartTimeMask); // for each run through the initial num
+         + (g.level->startTime & kScenario_StartTimeMask); // for each run through the initial num
 
     return true;
 }
@@ -626,7 +624,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         // in all colors; the other three are needed only as neutral
         // objects by default.
         plug.meta.playerBodyID->internalFlags |= all_colors;
-        for (int i = 0; i < gThisScenario->playerNum; i++) {
+        for (int i = 0; i < g.level->playerNum; i++) {
             const auto& meta = plug.meta;
             Handle<BaseObject> blessed[] = {
                 meta.energyBlobID, meta.warpInFlareID, meta.warpOutFlareID, meta.playerBodyID,
@@ -637,10 +635,10 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         }
     }
 
-    if ((0 <= step) && (step < gThisScenario->initialNum)) {
+    if ((0 <= step) && (step < g.level->initialNum)) {
         int i = step;
 
-        Scenario::InitialObject* initial = gThisScenario->initial(i);
+        Scenario::InitialObject* initial = g.level->initial(i);
         Handle<Admiral> owner = initial->owner;
         auto baseObject = initial->type;
         // TODO(sfiera): remap objects in networked games.
@@ -670,7 +668,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
 
         // check any objects this object can build
         for (int j = 0; j < kMaxTypeBaseCanBuild; j++) {
-            initial = gThisScenario->initial(i);
+            initial = g.level->initial(i);
             if (initial->canBuild[j] != kNoClass) {
                 // check for each player
                 for (auto a: Admiral::all()) {
@@ -687,12 +685,12 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         (*current)++;
         return;
     }
-    step -= gThisScenario->initialNum;
+    step -= g.level->initialNum;
 
     // add media for all condition actions
     if (step == 0) {
-        for (int i = 0; i < gThisScenario->conditionNum; i++) {
-            Scenario::Condition* condition = gThisScenario->condition(i);
+        for (int i = 0; i < g.level->conditionNum; i++) {
+            Scenario::Condition* condition = g.level->condition(i);
             for (auto action: condition->action) {
                 AddActionMedia(action, GRAY, all_colors);
             }
@@ -700,8 +698,8 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         }
     }
 
-    if ((0 <= step) && (step < gThisScenario->initialNum)) {
-        Scenario::InitialObject* initial = gThisScenario->initial(step);
+    if ((0 <= step) && (step < g.level->initialNum)) {
+        Scenario::InitialObject* initial = g.level->initial(step);
 
         if (initial->attributes & kInitiallyHidden) {
             initial->realObject = SpaceObject::none();
@@ -761,20 +759,20 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         (*current)++;
         return;
     }
-    step -= gThisScenario->initialNum;
+    step -= g.level->initialNum;
 
     // double back and set up any defined initial destinations
-    if ((0 <= step) && (step < gThisScenario->initialNum)) {
-        set_initial_destination(gThisScenario->initial(step), false);
+    if ((0 <= step) && (step < g.level->initialNum)) {
+        set_initial_destination(g.level->initial(step), false);
         (*current)++;
         return;
     }
-    step -= gThisScenario->initialNum;
+    step -= g.level->initialNum;
 
     if (step == 0) {
 #ifdef DATA_COVERAGE
         {
-            sfz::print(sfz::io::err, sfz::format("{{ \"level\": {0},\n", gThisScenario->chapter_number()));
+            sfz::print(sfz::io::err, sfz::format("{{ \"level\": {0},\n", g.level->chapter_number()));
             const char* sep = "";
             sfz::print(sfz::io::err, "  \"objects\": [");
             for (auto object: possible_objects) {
@@ -802,7 +800,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
 
         int x = 0;
         const int64_t start_ticks
-            = (gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple;
+            = (g.level->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple;
         const int64_t start_time = add_ticks(0, start_ticks);
         g.time = 0;
         for (int64_t i = 0; i < start_ticks; ++i) {
@@ -831,8 +829,8 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
 }
 
 void CheckScenarioConditions(int32_t timePass) {
-    for (int32_t i = 0; i < gThisScenario->conditionNum; i++) {
-        auto c = gThisScenario->condition(i);
+    for (int32_t i = 0; i < g.level->conditionNum; i++) {
+        auto c = g.level->condition(i);
         if (c->active() && c->is_true()) {
             c->set_true_yet(true);
             auto sObject = GetObjectFromInitialNumber(c->subjectObject);
@@ -844,7 +842,7 @@ void CheckScenarioConditions(int32_t timePass) {
 }
 
 void UnhideInitialObject(int32_t whichInitial) {
-    auto initial = gThisScenario->initial(whichInitial);
+    auto initial = g.level->initial(whichInitial);
     if (GetObjectFromInitialNumber(whichInitial).get()) {
         return;  // Already visible.
     }
@@ -910,7 +908,7 @@ void UnhideInitialObject(int32_t whichInitial) {
 
 Handle<SpaceObject> GetObjectFromInitialNumber(int32_t initialNumber) {
     if (initialNumber >= 0) {
-        Scenario::InitialObject* initial = gThisScenario->initial(initialNumber);
+        Scenario::InitialObject* initial = g.level->initial(initialNumber);
         if (initial->realObject.get()) {
             auto object = initial->realObject;
             if ((object->id != initial->realObjectID) || (object->active != kObjectInUse)) {

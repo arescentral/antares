@@ -224,7 +224,7 @@ void MainPlay::become_front() {
             DrawInstrumentPanel();
 
             if (Preferences::preferences()->play_music_in_game()) {
-                LoadSong(gThisScenario->songID);
+                LoadSong(g.level->songID);
                 SetSongVolume(kMusicVolume);
                 PlaySong();
             }
@@ -246,7 +246,7 @@ void MainPlay::become_front() {
         _replay_builder.finish();
 #ifdef DATA_COVERAGE
         {
-            sfz::print(sfz::io::err, sfz::format("{{ \"level\": {0},\n", gThisScenario->chapter_number()));
+            sfz::print(sfz::io::err, sfz::format("{{ \"level\": {0},\n", g.level->chapter_number()));
             const char* sep = "";
             sfz::print(sfz::io::err, "  \"objects\": [");
             for (auto object: covered_objects) {
@@ -288,7 +288,7 @@ GamePlay::GamePlay(
         _play_area(viewport.left, viewport.top, viewport.right, viewport.bottom),
         _scenario_start_time(add_ticks(
                     0,
-                    (gThisScenario->startTime & kScenario_StartTimeMask)
+                    (g.level->startTime & kScenario_StartTimeMask)
                     * kScenarioTimeMultiple)),
         _command_and_q(BothCommandAndQ()),
         _entering_message(false),
@@ -435,7 +435,7 @@ void GamePlay::become_front() {
             *_game_result = WIN_GAME;
             g.game_over = true;
             g.victor = g.admiral;
-            g.next_level = gThisScenario->chapter_number() + 1;
+            g.next_level = g.level->chapter_number() + 1;
             g.victory_text = -1;
             stack()->pop(this);
             break;
@@ -624,9 +624,9 @@ void GamePlay::fire_timer() {
             _state = DEBRIEFING;
             const auto& a = g.admiral;
             stack()->push(new DebriefingScreen(
-                        g.victory_text, *_seconds, gThisScenario->parTime,
-                        GetAdmiralLoss(a), gThisScenario->parLosses,
-                        GetAdmiralKill(a), gThisScenario->parKills));
+                        g.victory_text, *_seconds, g.level->parTime,
+                        GetAdmiralLoss(a), g.level->parLosses,
+                        GetAdmiralKill(a), g.level->parKills));
         }
         break;
 
@@ -664,7 +664,7 @@ void GamePlay::key_down(const KeyDownEvent& event) {
         {
             _state = PLAY_AGAIN;
             _player_paused = true;
-            bool is_training = gThisScenario->startTime & kScenario_IsTraining_Bit;
+            bool is_training = g.level->startTime & kScenario_IsTraining_Bit;
             stack()->push(new PlayAgainScreen(true, is_training, &_play_again));
         }
         break;
@@ -743,7 +743,7 @@ void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
         {
             _state  = PLAY_AGAIN;
             _player_paused = true;
-            bool is_training = gThisScenario->startTime & kScenario_IsTraining_Bit;
+            bool is_training = g.level->startTime & kScenario_IsTraining_Bit;
             stack()->push(new PlayAgainScreen(true, is_training, &_play_again));
         }
         break;

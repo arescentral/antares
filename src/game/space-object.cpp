@@ -67,9 +67,6 @@ static const int16_t kSpaceObjectShortNameResID     = 5001;
 
 const int32_t kDefaultTurnRate      = 0x00000200;
 
-int ANTARES_GLOBAL BaseObject::size = 0;
-int ANTARES_GLOBAL Action::size = 0;
-
 #ifdef DATA_COVERAGE
 ANTARES_GLOBAL set<int32_t> covered_objects;
 #endif  // DATA_COVERAGE
@@ -79,7 +76,6 @@ void SpaceObjectHandlingInit() {
         Resource rsrc("object-actions", "obac", kObjectActionResID);
         BytesSlice in(rsrc.data());
         size_t count = rsrc.data().size() / Action::byte_size;
-        Action::size = count;
         plug.actions.resize(count);
         for (size_t i = 0; i < count; ++i) {
             read(in, plug.actions[i]);
@@ -94,7 +90,6 @@ void SpaceObjectHandlingInit() {
         Resource rsrc("objects", "bsob", kBaseObjectResID);
         BytesSlice in(rsrc.data());
         size_t count = rsrc.data().size() / BaseObject::byte_size;
-        BaseObject::size = count;
         plug.objects.resize(count);
         for (size_t i = 0; i < count; ++i) {
             read(in, plug.objects[i]);
@@ -121,7 +116,7 @@ void ResetAllSpaceObjects() {
 }
 
 BaseObject* BaseObject::get(int number) {
-    if ((0 <= number) && (number < size)) {
+    if ((0 <= number) && (number < plug.objects.size())) {
         return &plug.objects[number];
     }
     return nullptr;
@@ -135,7 +130,7 @@ SpaceObject* SpaceObject::get(int32_t number) {
 }
 
 Action* Action::get(int32_t number) {
-    if ((0 <= number) && (number < size)) {
+    if ((0 <= number) && (number < plug.actions.size())) {
         return &plug.actions[number];
     }
     return nullptr;

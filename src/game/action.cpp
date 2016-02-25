@@ -445,10 +445,10 @@ static void alter(
 
         case kAlterConditionTrueYet:
             if (alter.range <= 0) {
-                gThisScenario->condition(alter.minimum)->set_true_yet(alter.relative);
+                g.level->condition(alter.minimum)->set_true_yet(alter.relative);
             } else {
                 for (auto l: range(alter.minimum, alter.minimum + alter.range + 1)) {
-                    gThisScenario->condition(l)->set_true_yet(alter.relative);
+                    g.level->condition(l)->set_true_yet(alter.relative);
                 }
             }
             break;
@@ -690,7 +690,7 @@ static void computer_select(Handle<Action> action, Handle<SpaceObject> focus) {
 
 static void assume_initial_object(Handle<Action> action, Handle<SpaceObject> focus) {
     Handle<Admiral> player1(0);
-    Scenario::InitialObject* initialObject = gThisScenario->initial(
+    Scenario::InitialObject* initialObject = g.level->initial(
             action->argument.assumeInitial.whichInitialObject + GetAdmiralScore(player1, 0));
     if (initialObject) {
         initialObject->realObjectID = focus->id;
