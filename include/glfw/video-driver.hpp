@@ -56,11 +56,13 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
     void key(int key, int scancode, int action, int mods);
     void mouse_button(int button, int action, int mods);
     void mouse_move(double x, double y);
+    void window_size(int width, int height);
     static void key_callback(GLFWwindow* w, int key, int scancode, int action, int mods);
     static void mouse_button_callback(GLFWwindow* w, int button, int action, int mods);
     static void mouse_move_callback(GLFWwindow* w, double x, double y);
+    static void window_size_callback(GLFWwindow* w, int width, int height);
 
-    const Size _screen_size;
+    Size _screen_size;
     Size _viewport_size;
     GLFWwindow* _window;
     MainLoop* _loop;

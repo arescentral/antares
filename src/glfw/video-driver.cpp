@@ -71,7 +71,7 @@ static void throw_error(int code, const char* message) {
 }
 
 GLFWVideoDriver::GLFWVideoDriver():
-        _screen_size(Preferences::preferences()->screen_size()),
+        _screen_size(640, 480),
         _last_click_usecs(0),
         _last_click_count(0) {
     if (!glfwInit()) {
@@ -150,6 +150,11 @@ void GLFWVideoDriver::mouse_move(double x, double y) {
     MouseMoveEvent(usecs(), Point(x, y)).send(_loop->top());
 }
 
+void GLFWVideoDriver::window_size(int width, int height) {
+    _screen_size = {width, height};
+    glfwGetFramebufferSize(_window, &_viewport_size.width, &_viewport_size.height);
+}
+
 void GLFWVideoDriver::key_callback(GLFWwindow* w, int key, int scancode, int action, int mods) {
     GLFWVideoDriver* driver = reinterpret_cast<GLFWVideoDriver*>(glfwGetWindowUserPointer(w));
     driver->key(key, scancode, action, mods);
@@ -165,6 +170,11 @@ void GLFWVideoDriver::mouse_move_callback(GLFWwindow* w, double x, double y) {
     driver->mouse_move(x, y);
 }
 
+void GLFWVideoDriver::window_size_callback(GLFWwindow* w, int width, int height) {
+    GLFWVideoDriver* driver = reinterpret_cast<GLFWVideoDriver*>(glfwGetWindowUserPointer(w));
+    driver->window_size(width, height);
+}
+
 void GLFWVideoDriver::loop(Card* initial) {
     /* Create a windowed mode window and its OpenGL context */
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
@@ -172,23 +182,7 @@ void GLFWVideoDriver::loop(Card* initial) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    if (Preferences::preferences()->fullscreen()) {
-        auto monitor = glfwGetPrimaryMonitor();
-        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-        glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-        glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-        glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-        glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
-        _window = glfwCreateWindow(mode->width, mode->height, "", monitor, NULL);
-
-        int width;
-        do {
-            glfwGetFramebufferSize(_window, &width, nullptr);
-        } while (width % mode->width);
-    } else {
-        glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-        _window = glfwCreateWindow(_screen_size.width, _screen_size.height, "", NULL, NULL);
-    }
+    _window = glfwCreateWindow(_screen_size.width, _screen_size.height, "", NULL, NULL);
     if (!_window) {
         throw Exception("glfwCreateWindow");
     }
@@ -199,6 +193,7 @@ void GLFWVideoDriver::loop(Card* initial) {
     glfwSetKeyCallback(_window, key_callback);   
     glfwSetMouseButtonCallback(_window, mouse_button_callback);   
     glfwSetCursorPosCallback(_window, mouse_move_callback);   
+    glfwSetWindowSizeCallback(_window, window_size_callback);
 
     /* Make the _window's context current */
     glfwMakeContextCurrent(_window);
