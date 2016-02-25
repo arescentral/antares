@@ -45,7 +45,7 @@ using std::unique_ptr;
 namespace antares {
 
 SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Scenario** scenario)
-        : InterfaceScreen("select-level", world(), true),
+        : InterfaceScreen("select-level", {0, 0, 640, 480}, true),
           _state(SELECTING),
           _cancelled(cancelled),
           _scenario(scenario) {

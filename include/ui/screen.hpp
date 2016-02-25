@@ -57,6 +57,7 @@ class InterfaceScreen : public Card {
     void truncate(size_t size);
     void extend(const sfz::Json& json);
 
+    Point offset() const;
     size_t size() const;
     const InterfaceItem& item(int index) const;
     InterfaceItem& mutable_item(int index);

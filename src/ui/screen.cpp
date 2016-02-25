@@ -96,6 +96,7 @@ void InterfaceScreen::become_normal() {
 }
 
 void InterfaceScreen::draw() const {
+    Point off = offset();
     Rect copy_area;
     if (_full_screen) {
         copy_area = _bounds;
@@ -108,12 +109,12 @@ void InterfaceScreen::draw() const {
             copy_area.enlarge_to(r);
         }
     }
+    copy_area.offset(off.h, off.v);
 
-    copy_area.offset(_bounds.left, _bounds.top);
     Rects().fill(copy_area, RgbColor::kBlack);
 
     for (const auto& item: _items) {
-        draw_interface_item(*item, VideoDriver::driver()->input_mode(), _bounds.origin());
+        draw_interface_item(*item, VideoDriver::driver()->input_mode(), off);
     }
     overlay();
     if (stack()->top() == this) {
@@ -123,8 +124,9 @@ void InterfaceScreen::draw() const {
 
 void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
     Point where = event.where();
-    where.h -= _bounds.left;
-    where.v -= _bounds.top;
+    Point off = offset();
+    where.h -= _bounds.left + off.h;
+    where.v -= _bounds.top + off.v;
     if (event.button() != 0) {
         return;
     }
@@ -146,8 +148,9 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
 
 void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
     Point where = event.where();
-    where.h -= _bounds.left;
-    where.v -= _bounds.top;
+    Point off = offset();
+    where.h -= _bounds.left + off.h;
+    where.v -= _bounds.top + off.v;
     if (event.button() != 0) {
         return;
     }
@@ -239,6 +242,12 @@ void InterfaceScreen::extend(const Json& json) {
         _items.emplace_back(std::move(item));
         _items.back()->bounds().offset(offset_x, offset_y);
     }
+}
+
+Point InterfaceScreen::offset() const {
+    Rect bounds = _bounds;
+    bounds.center_in(VideoDriver::driver()->screen_size().as_rect());
+    return bounds.origin();
 }
 
 size_t InterfaceScreen::size() const {
