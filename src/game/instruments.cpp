@@ -170,31 +170,9 @@ void InstrumentInit() {
     gScaleList.reset(new int32_t[kScaleListNum]);
     ResetInstruments();
 
-    // Initialize and crop left and right instrument picts.
-    {
-        Picture pict(kInstLeftPictID);
-        ArrayPixMap pix_map(128, min(world().height(), pict.size().height));
-        Rect from(Point(0, 0), pix_map.size());
-        Rect to(Point(0, 0), pix_map.size());
-        if (pict.size().height > world().height()) {
-            from.offset(0, (pict.size().height - world().height()) / 2);
-        }
-        pix_map.view(to).copy(pict.view(from));
-        left_instrument_texture = VideoDriver::driver()->texture(
-                format("/{0}", pict.path()), pix_map);
-    }
-    {
-        Picture pict(kInstRightPictID);
-        ArrayPixMap pix_map(32, min(world().height(), pict.size().height));
-        Rect from(Point(0, 0), pix_map.size());
-        Rect to(Point(0, 0), pix_map.size());
-        if (pict.size().height > world().height()) {
-            from.offset(0, (pict.size().height - world().height()) / 2);
-        }
-        pix_map.view(to).copy(pict.view(from));
-        right_instrument_texture = VideoDriver::driver()->texture(
-                format("/{0}", pict.path()), pix_map);
-    }
+    // Initialize left and right instrument picts.
+    left_instrument_texture = Picture(kInstLeftPictID).texture();
+    right_instrument_texture = Picture(kInstRightPictID).texture();
 
     site.light = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);
     site.dark = GetRGBTranslateColorShade(PALE_GREEN, DARKER + kSlightlyDarkerColor);
@@ -528,10 +506,8 @@ void draw_instruments() {
     Rect left_rect(world().left, world().top, viewport().left, world().bottom);
     Rect right_rect(viewport().right, world().top, world().right, world().bottom);
 
-    if (world().height() > 768) {
-        left_rect.inset(0, (world().height() - 768) / 2);
-        right_rect.inset(0, (world().height() - 768) / 2);
-    }
+    left_rect.inset(0, (world().height() - 768) / 2);
+    right_rect.inset(0, (world().height() - 768) / 2);
 
     left_instrument_texture.draw(left_rect.left, left_rect.top);
     right_instrument_texture.draw(right_rect.left, right_rect.top);
