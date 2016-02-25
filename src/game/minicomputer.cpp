@@ -1497,7 +1497,7 @@ int32_t MiniComputerGetStatusValue( int32_t whichLine)
             break;
 
         case kTrueFalseCondition:
-            if (gThisScenario->condition(line->whichStatus)->true_yet()) {
+            if (g.level->condition(line->whichStatus)->true_yet()) {
                 return 1;
             } else {
                 return 0;

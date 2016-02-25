@@ -29,8 +29,6 @@ namespace antares {
 
 const int16_t kScenarioNoShipTextID = 10000;
 
-extern const Scenario* gThisScenario;
-
 enum {
     kDestroyActionType = 1,
     kExpireActionType = 2,
