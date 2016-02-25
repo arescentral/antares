@@ -120,8 +120,6 @@ void Master::init() {
 
     SoundDriver::driver()->set_global_volume(Preferences::preferences()->volume());
 
-    world = Rect(Point(0, 0), Preferences::preferences()->screen_size());
-
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
 
     RotationInit();

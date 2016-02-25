@@ -42,7 +42,7 @@ HelpScreen::HelpScreen():
         InterfaceScreen("help", play_screen(), false),
         _text(computer_font) {
     // TODO(sfiera): top and bottom buffer of 1, not just top buffer of 2.
-    offset((world.width() / 2) - (viewport().width() / 2), 2);
+    offset((world().width() / 2) - (viewport().width() / 2), 2);
 
     _bounds = item(BOX).bounds();
     _bounds.offset(viewport().left, 0);

@@ -80,23 +80,23 @@ namespace path = sfz::path;
 
 namespace antares {
 
-ANTARES_GLOBAL Rect world;
-
 #ifdef DATA_COVERAGE
 extern set<int32_t> covered_objects;
 extern set<int32_t> covered_actions;
 #endif  // DATA_COVERAGE
 
+Rect world() {
+    return Rect({0, 0}, VideoDriver::driver()->screen_size());
+}
+
 Rect play_screen() {
-    return Rect(
-        world.left + kLeftPanelWidth, world.top,
-        world.right - kRightPanelWidth, world.bottom);
+    const Size size = VideoDriver::driver()->screen_size();
+    return Rect(kLeftPanelWidth, 0, size.width - kRightPanelWidth, size.height);
 }
 
 Rect viewport() {
-    return Rect(
-        world.left + kLeftPanelWidth, world.top,
-        world.right - kRightPanelWidth, world.bottom - g.bottom_border);
+    const Size size = VideoDriver::driver()->screen_size();
+    return Rect(kLeftPanelWidth, 0, size.width - kRightPanelWidth, size.height - g.bottom_border);
 }
 
 class GamePlay : public Card {
@@ -367,7 +367,7 @@ class PauseScreen : public Card {
             title_font->draw(_text_origin, _pause_string, light_green);
         }
         if (asleep()) {
-            Rects().fill(world, RgbColor(63, 0, 0, 0));
+            Rects().fill(world(), RgbColor(63, 0, 0, 0));
         }
     }
 

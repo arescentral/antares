@@ -176,7 +176,7 @@ struct aresGlobalType {
 aresGlobalType* globals();
 void init_globals();
 
-extern Rect world;
+Rect world();
 Rect play_screen();
 Rect viewport();
 

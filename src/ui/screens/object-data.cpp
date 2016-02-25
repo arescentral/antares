@@ -40,7 +40,7 @@ const int64_t kTypingDelay = 1e6 / 60;
 Rect object_data_bounds(Point origin, Size size) {
     Rect bounds(Point(0, 0), size);
     bounds.center_in(Rect(origin, Size(0, 0)));
-    Rect inside = world;
+    Rect inside = world();
     inside.inset(9, 5);
     if (bounds.left < inside.left) {
         bounds.offset(inside.left - bounds.left, 0);

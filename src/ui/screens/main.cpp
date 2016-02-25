@@ -46,7 +46,7 @@ const int kTitleTextScrollWidth = 450;
 }  // namespace
 
 MainScreen::MainScreen():
-        InterfaceScreen("main", world, true),
+        InterfaceScreen("main", world(), true),
         _state(NORMAL) { }
 
 MainScreen::~MainScreen() { }

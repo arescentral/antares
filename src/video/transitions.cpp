@@ -73,7 +73,7 @@ void Transitions::update_boolean(int32_t time_passed) {
 
 void Transitions::draw() const {
     if (_active) {
-        Rects().fill(world, _color);
+        Rects().fill(world(), _color);
     }
 }
 
@@ -145,7 +145,7 @@ void ColorFade::draw() const {
     } else {
         fill_color.alpha = 0xff * (1.0 - fraction);
     }
-    Rects().fill(world, fill_color);
+    Rects().fill(world(), fill_color);
 }
 
 PictFade::PictFade(int pict_id, bool* skipped):
@@ -214,7 +214,7 @@ void PictFade::fire_timer() {
 
 void PictFade::draw() const {
     Rect bounds = _texture.size().as_rect();
-    bounds.center_in(world);
+    bounds.center_in(world());
     _texture.draw(bounds.left, bounds.top);
 }
 

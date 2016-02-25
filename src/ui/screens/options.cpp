@@ -76,7 +76,7 @@ void OptionsScreen::become_front() {
 }
 
 SoundControlScreen::SoundControlScreen(OptionsScreen::State* state, Preferences* preferences)
-        : InterfaceScreen("options/sound", world, true),
+        : InterfaceScreen("options/sound", world(), true),
           _state(state),
           _preferences(preferences) { }
 
@@ -203,7 +203,7 @@ static size_t get_tab_num(size_t key) {
 }
 
 KeyControlScreen::KeyControlScreen(OptionsScreen::State* state, Preferences* preferences)
-        : InterfaceScreen("options/keys", world, true),
+        : InterfaceScreen("options/keys", world(), true),
           _state(state),
           _preferences(preferences),
           _key_start(size()),

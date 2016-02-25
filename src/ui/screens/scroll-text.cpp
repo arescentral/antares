@@ -63,8 +63,8 @@ void ScrollTextScreen::become_front() {
     _start = now_usecs();
     _next_shift = _start;
 
-    _clip = Rect(0, 0, world.width(), kScrollTextHeight);
-    _clip.center_in(world);
+    _clip = Rect(0, 0, world().width(), kScrollTextHeight);
+    _clip.center_in(world());
 
     _position = _build_pix.size().as_rect();
     _position.center_in(_clip);
@@ -113,8 +113,8 @@ void ScrollTextScreen::fire_timer() {
 void ScrollTextScreen::draw() const {
     _build_pix.draw(_position.origin());
     Rects rects;
-    rects.fill(Rect(world.left, world.top, world.right, _clip.top), RgbColor::kBlack);
-    rects.fill(Rect(world.left, _clip.bottom, world.right, world.bottom), RgbColor::kBlack);
+    rects.fill(Rect(world().left, world().top, world().right, _clip.top), RgbColor::kBlack);
+    rects.fill(Rect(world().left, _clip.bottom, world().right, world().bottom), RgbColor::kBlack);
 }
 
 }  // namespace antares

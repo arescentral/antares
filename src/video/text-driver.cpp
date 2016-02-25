@@ -83,7 +83,7 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
     virtual StringSlice name() const { return _name; }
 
     virtual void draw(const Rect& draw_rect) const {
-        if (!world.intersects(draw_rect)) {
+        if (!world().intersects(draw_rect)) {
             return;
         }
         PrintItem args[] = {
@@ -94,7 +94,7 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
     }
 
     virtual void draw_cropped(const Rect& dest, const Rect& source, const RgbColor& tint) const {
-        if (!world.intersects(dest)) {
+        if (!world().intersects(dest)) {
             return;
         }
         if (source.size() == dest.size()) {
@@ -113,7 +113,7 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
     }
 
     virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const {
-        if (!world.intersects(draw_rect)) {
+        if (!world().intersects(draw_rect)) {
             return;
         }
         PrintItem args[] = {
@@ -124,7 +124,7 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
     }
 
     virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const {
-        if (!world.intersects(draw_rect)) {
+        if (!world().intersects(draw_rect)) {
             return;
         }
         PrintItem args[] = {
@@ -137,7 +137,7 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
     virtual void draw_outlined(
             const Rect& draw_rect, const RgbColor& outline_color,
             const RgbColor& fill_color) const {
-        if (!world.intersects(draw_rect)) {
+        if (!world().intersects(draw_rect)) {
             return;
         }
         PrintItem args[] = {
@@ -203,7 +203,7 @@ Texture TextVideoDriver::texture(sfz::PrintItem name, const PixMap& content) {
 }
 
 void TextVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
-    if (!world.intersects(rect)) {
+    if (!world().intersects(rect)) {
         return;
     }
     PrintItem args[] = {rect.left, rect.top, rect.right, rect.bottom, hex(color)};
@@ -226,7 +226,7 @@ void TextVideoDriver::draw_line(const Point& from, const Point& to, const RgbCol
 }
 
 void TextVideoDriver::draw_triangle(const Rect& rect, const RgbColor& color) {
-    if (!world.intersects(rect)) {
+    if (!world().intersects(rect)) {
         return;
     }
     PrintItem args[] = {rect.left, rect.top, rect.right, rect.bottom, hex(color)};
@@ -234,7 +234,7 @@ void TextVideoDriver::draw_triangle(const Rect& rect, const RgbColor& color) {
 }
 
 void TextVideoDriver::draw_diamond(const Rect& rect, const RgbColor& color) {
-    if (!world.intersects(rect)) {
+    if (!world().intersects(rect)) {
         return;
     }
     PrintItem args[] = {rect.left, rect.top, rect.right, rect.bottom, hex(color)};
@@ -242,7 +242,7 @@ void TextVideoDriver::draw_diamond(const Rect& rect, const RgbColor& color) {
 }
 
 void TextVideoDriver::draw_plus(const Rect& rect, const RgbColor& color) {
-    if (!world.intersects(rect)) {
+    if (!world().intersects(rect)) {
         return;
     }
     PrintItem args[] = {rect.left, rect.top, rect.right, rect.bottom, hex(color)};

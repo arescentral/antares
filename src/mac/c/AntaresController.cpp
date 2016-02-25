@@ -48,7 +48,6 @@ using antares::Preferences;
 using antares::PrefsDriver;
 using antares::SoundDriver;
 using antares::VideoDriver;
-using antares::world;
 
 namespace utf8 = sfz::utf8;
 
