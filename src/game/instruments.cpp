@@ -208,13 +208,13 @@ void ResetInstruments() {
         gBarIndicator[i].thisValue = -1;
     }
     // the shield bar
-    gBarIndicator[kShieldBar].top = 359 + instrument_top();
+    gBarIndicator[kShieldBar].top = 359;
     gBarIndicator[kShieldBar].color = SKY_BLUE;
 
-    gBarIndicator[kEnergyBar].top = 231 + instrument_top();
+    gBarIndicator[kEnergyBar].top = 231;
     gBarIndicator[kEnergyBar].color = GOLD;
 
-    gBarIndicator[kBatteryBar].top = 103 + instrument_top();
+    gBarIndicator[kBatteryBar].top = 103;
     gBarIndicator[kBatteryBar].color = SALMON;
 
     lp = g.radar_blips.get();
@@ -913,7 +913,7 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
     Rect bar(0, 0, kBarIndicatorWidth, kBarIndicatorHeight);
     bar.offset(
             kBarIndicatorLeft + play_screen().right,
-            gBarIndicator[which].top);
+            gBarIndicator[which].top + instrument_top());
     if (graphicValue < kBarIndicatorHeight) {
         Rect top_bar = bar;
         top_bar.bottom = top_bar.bottom - graphicValue;
