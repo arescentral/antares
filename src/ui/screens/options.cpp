@@ -156,6 +156,8 @@ void SoundControlScreen::handle_button(Button& button) {
 void SoundControlScreen::overlay() const {
     const int volume = _preferences->volume();
     Rect bounds = item(VOLUME_BOX).bounds();
+    Point off = offset();
+    bounds.offset(off.h, off.v);
 
     const int notch_width = bounds.width() / kMaxVolumePreference;
     const int notch_height = bounds.height() - 4;
@@ -338,7 +340,10 @@ void KeyControlScreen::overlay() const {
 
         const TextRect& box = dynamic_cast<const TextRect&>(item(CONFLICT_TEXT));
         vector<inlinePictType> pict;
-        draw_text_in_rect(box.bounds(), text, box.style, box.hue, pict);
+        Rect bounds = box.bounds();
+        Point off = offset();
+        bounds.offset(off.h, off.v);
+        draw_text_in_rect(bounds, text, box.style, box.hue, pict);
     }
 }
 
