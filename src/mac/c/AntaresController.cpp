@@ -58,9 +58,7 @@ struct AntaresDrivers {
     DirectoryLedger ledger;
 
     AntaresDrivers():
-            video(
-                    Preferences::preferences()->fullscreen(),
-                    Preferences::preferences()->screen_size()) { }
+            video(Preferences::preferences()->screen_size()) { }
 };
 
 namespace antares {

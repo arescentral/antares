@@ -36,7 +36,7 @@ class Event;
 
 class CocoaVideoDriver : public OpenGlVideoDriver {
   public:
-    CocoaVideoDriver(bool fullscreen, Size screen_size);
+    CocoaVideoDriver(Size screen_size);
 
     virtual Size viewport_size() const { return _viewport_size; }
     virtual Size screen_size() const { return _screen_size; }
@@ -53,7 +53,6 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
   private:
     const Size _screen_size;
     Size _viewport_size;
-    const bool _fullscreen;
     int64_t _start_time;
 
     struct EventBridge;

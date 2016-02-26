@@ -38,7 +38,7 @@ typedef struct AntaresWindow AntaresWindow;
 AntaresWindow* antares_window_create(
         CGLPixelFormatObj pixel_format, CGLContextObj context,
         int32_t screen_width, int32_t screen_height,
-        bool fullscreen, bool retina);
+        bool retina);
 void antares_window_destroy(AntaresWindow* window);
 int32_t antares_window_viewport_width(const AntaresWindow* window);
 int32_t antares_window_viewport_height(const AntaresWindow* window);

@@ -44,7 +44,6 @@ class Preferences {
     bool play_music_in_game() const;
     bool speech_on() const;
     int volume() const;
-    bool fullscreen() const;
     Size screen_size() const;
     sfz::StringSlice scenario_identifier() const;
 
@@ -53,7 +52,6 @@ class Preferences {
     void set_play_music_in_game(bool on);
     void set_speech_on(bool on);
     void set_volume(int volume);
-    void set_fullscreen(bool fullscreen);
     void set_screen_size(Size size);
     void set_screen_width(int32_t width);
     void set_screen_height(int32_t height);
@@ -67,7 +65,6 @@ class Preferences {
     bool                _play_music_in_game;
     bool                _speech_on;
     int16_t             _volume;
-    bool                _fullscreen;
     Size                _screen_size;
     sfz::String         _scenario_identifier;
 };

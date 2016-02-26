@@ -34,7 +34,7 @@ class CocoaWindowed {
   public:
     CocoaWindowed(
         const cgl::PixelFormat& pixel_format, const cgl::Context& context, Size screen_size,
-        bool fullscreen, bool retina);
+        bool retina);
     ~CocoaWindowed();
 
     AntaresWindow* window() const { return _window; }

@@ -131,7 +131,6 @@ void FilePrefsDriver::load(Preferences* p) {
             return;
         }
 
-        set_from<bool>(json, "video", "fullscreen", *p, &Preferences::set_fullscreen);
         set_from<int>(json, "video", "width", *p, &Preferences::set_screen_width);
         set_from<int>(json, "video", "height", *p, &Preferences::set_screen_height);
 
@@ -150,7 +149,6 @@ void FilePrefsDriver::load(Preferences* p) {
 
 void FilePrefsDriver::save(const Preferences& p) {
     StringMap<Json> video;
-    video["fullscreen"]  = Json::boolean(p.fullscreen());
     video["width"]       = Json::number(p.screen_size().width);
     video["height"]      = Json::number(p.screen_size().height);
 

@@ -74,7 +74,7 @@ struct AntaresWindow {
 AntaresWindow* antares_window_create(
         CGLPixelFormatObj pixel_format, CGLContextObj context,
         int32_t screen_width, int32_t screen_height,
-        bool fullscreen, bool retina) {
+        bool retina) {
     AntaresWindow* window = malloc(sizeof(AntaresWindow));
     window->screen_width = screen_width;
     window->screen_height = screen_height;
@@ -82,19 +82,8 @@ AntaresWindow* antares_window_create(
     window->context = [[NSOpenGLContext alloc] initWithCGLContextObj:context];
 
     NSRect screen_rect = [[NSScreen mainScreen] frame];
-    NSRect display_rect = NSMakeRect(0, 0, screen_width, screen_height);
-    NSRect window_rect;
-    int style_mask;
-    if (fullscreen) {
-        window_rect = screen_rect;
-        style_mask = NSBorderlessWindowMask;
-        GLint gl_size[2] = {screen_width, screen_height};
-        CGLSetParameter(context, kCGLCPSurfaceBackingSize, gl_size);
-        CGLEnable(context, kCGLCESurfaceBackingSize);
-    } else {
-        window_rect = display_rect;
-        style_mask = NSTitledWindowMask | NSMiniaturizableWindowMask;
-    }
+    NSRect window_rect = NSMakeRect(0, 0, screen_width, screen_height);
+    int style_mask = NSTitledWindowMask | NSMiniaturizableWindowMask;
 
     window->view = [[NSOpenGLView alloc] initWithFrame:window_rect
         pixelFormat:window->pixel_format];
@@ -110,11 +99,7 @@ AntaresWindow* antares_window_create(
     [window->window setAcceptsMouseMovedEvents:YES];
     [window->window setContentView:window->view];
     [window->window makeKeyAndOrderFront:NSApp];
-    if (fullscreen) {
-        [window->window setLevel:NSMainMenuWindowLevel+1];
-    } else {
-        [window->window center];
-    }
+    [window->window center];
     return window;
 }
 

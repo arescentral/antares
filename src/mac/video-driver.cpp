@@ -32,7 +32,6 @@
 #include "mac/c/CocoaVideoDriver.h"
 #include "mac/core-opengl.hpp"
 #include "mac/core-foundation.hpp"
-#include "mac/fullscreen.hpp"
 #include "mac/windowed.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
@@ -54,9 +53,8 @@ int64_t usecs() {
 
 }  // namespace
 
-CocoaVideoDriver::CocoaVideoDriver(bool fullscreen, Size screen_size)
+CocoaVideoDriver::CocoaVideoDriver(Size screen_size)
         : _screen_size(screen_size),
-          _fullscreen(fullscreen),
           _start_time(antares::usecs()),
           _translator(screen_size.width, screen_size.height),
           _event_tracker(false) { }
@@ -235,17 +233,9 @@ void CocoaVideoDriver::loop(Card* initial) {
 
     cgl::PixelFormat pixel_format(attrs);
     cgl::Context context(pixel_format.c_obj(), NULL);
-    unique_ptr<CocoaFullscreen> fullscreen;
-    unique_ptr<CocoaWindowed> windowed;
-    if (_fullscreen) {
-        fullscreen.reset(new CocoaFullscreen(pixel_format, context, _screen_size));
-        antares_event_translator_set_window(_translator.c_obj(), fullscreen->window());
-        _viewport_size = fullscreen->viewport_size();
-    } else {
-        windowed.reset(new CocoaWindowed(pixel_format, context, _screen_size, false, true));
-        antares_event_translator_set_window(_translator.c_obj(), windowed->window());
-        _viewport_size = windowed->viewport_size();
-    }
+    CocoaWindowed windowed(pixel_format, context, _screen_size, true);
+    antares_event_translator_set_window(_translator.c_obj(), windowed.window());
+    _viewport_size = windowed.viewport_size();
     GLint swap_interval = 1;
     CGLSetParameter(context.c_obj(), kCGLCPSwapInterval, &swap_interval);
     CGLSetCurrentContext(context.c_obj());

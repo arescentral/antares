@@ -32,10 +32,10 @@ namespace antares {
 
 CocoaWindowed::CocoaWindowed(
         const cgl::PixelFormat& pixel_format, const cgl::Context& context, Size screen_size,
-        bool fullscreen, bool retina):
+        bool retina):
         _window(antares_window_create(
                     pixel_format.c_obj(), context.c_obj(),
-                    screen_size.width, screen_size.height, fullscreen, retina)) { }
+                    screen_size.width, screen_size.height, retina)) { }
 
 CocoaWindowed::~CocoaWindowed() {
     antares_window_destroy(_window);
