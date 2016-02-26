@@ -63,8 +63,6 @@ void antares_mouse_show() {
 }
 
 struct AntaresWindow {
-    int32_t screen_width;
-    int32_t screen_height;
     NSOpenGLPixelFormat* pixel_format;
     NSOpenGLContext* context;
     NSOpenGLView* view;
@@ -76,14 +74,12 @@ AntaresWindow* antares_window_create(
         int32_t screen_width, int32_t screen_height,
         bool retina) {
     AntaresWindow* window = malloc(sizeof(AntaresWindow));
-    window->screen_width = screen_width;
-    window->screen_height = screen_height;
     window->pixel_format = [[NSOpenGLPixelFormat alloc] initWithCGLPixelFormatObj:pixel_format];
     window->context = [[NSOpenGLContext alloc] initWithCGLContextObj:context];
 
     NSRect screen_rect = [[NSScreen mainScreen] frame];
     NSRect window_rect = NSMakeRect(0, 0, screen_width, screen_height);
-    int style_mask = NSTitledWindowMask | NSMiniaturizableWindowMask;
+    int style_mask = NSTitledWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
 
     window->view = [[NSOpenGLView alloc] initWithFrame:window_rect
         pixelFormat:window->pixel_format];
@@ -226,9 +222,10 @@ static void hide_unhide(AntaresWindow* window, NSPoint location) {
     if (!window) {
         return;
     }
+    NSSize size = [window->view bounds].size;
     bool in_window =
         location.x >= 0 && location.y >= 0 &&
-        location.x < window->screen_width && location.y < window->screen_height;
+        location.x < size.width && location.y < size.height;
     if (in_window) {
         antares_mouse_hide();
     } else {
