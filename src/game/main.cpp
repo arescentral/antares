@@ -141,10 +141,9 @@ class GamePlay : public Card {
     const Rect _play_area;
     const int64_t _scenario_start_time;
     const bool _command_and_q;
+    bool _fast_motion;
     bool _entering_message;
     bool _player_paused;
-    KeyMap _key_map;
-    KeyMap _last_key_map;
     uint32_t _decide_cycle;
     int _scenario_check_time;
     PlayAgainScreen::Item _play_again;
@@ -301,6 +300,7 @@ GamePlay::GamePlay(
                     (g.level->startTime & kScenario_StartTimeMask)
                     * kScenarioTimeMultiple)),
         _command_and_q(BothCommandAndQ()),
+        _fast_motion(false),
         _entering_message(false),
         _player_paused(false),
         _decide_cycle(0),
@@ -464,11 +464,6 @@ void GamePlay::become_front() {
         }
         break;
     }
-    if ((_state == PLAYING) && !globals()->gInputSource) {
-        KeyMap keys;
-        VideoDriver::driver()->get_keys(&keys);
-        _player_ship.update_keys(keys);
-    }
 }
 
 void GamePlay::resign_front() {
@@ -508,7 +503,7 @@ void GamePlay::fire_timer() {
     const int64_t now = now_usecs();
 
     int unitsPassed, unitsDone;
-    if ((mNOFFastMotionKey(_key_map)) && !_entering_message) {
+    if (_fast_motion && !_entering_message) {
         unitsDone = unitsPassed = 12;
         globals()->virtual_start = now - (add_ticks(g.time, unitsPassed) - _scenario_start_time);
     } else {
@@ -568,25 +563,6 @@ void GamePlay::fire_timer() {
             }
         }
         unitsPassed -= unitsToDo;
-    }
-
-    _last_key_map.copy(_key_map);
-    VideoDriver::driver()->get_keys(&_key_map);
-
-    if (!_replay && mVolumeDownKey(_key_map) && !mVolumeDownKey(_last_key_map)) {
-        Preferences::preferences()->set_volume(Preferences::preferences()->volume() - 1);
-        SoundDriver::driver()->set_global_volume(Preferences::preferences()->volume());
-    }
-
-    if (!_replay && mVolumeUpKey(_key_map) && !mVolumeUpKey(_last_key_map)) {
-        Preferences::preferences()->set_volume(Preferences::preferences()->volume() + 1);
-        SoundDriver::driver()->set_global_volume(Preferences::preferences()->volume());
-    }
-
-    if (!_replay && mActionMusicKey(_key_map) && !mActionMusicKey(_last_key_map)) {
-        if (Preferences::preferences()->play_music_in_game()) {
-            ToggleSong();
-        }
     }
 
     MiniComputerHandleNull(unitsDone);
@@ -684,6 +660,18 @@ void GamePlay::key_down(const KeyDownEvent& event) {
             _state = HELP;
             _player_paused = true;
             stack()->push(new HelpScreen);
+        } else if (event.key() == Preferences::preferences()->key(kVolumeDownKeyNum) - 1) {
+            Preferences::preferences()->set_volume(Preferences::preferences()->volume() - 1);
+            SoundDriver::driver()->set_global_volume(Preferences::preferences()->volume());
+        } else if (event.key() == Preferences::preferences()->key(kVolumeUpKeyNum) - 1) {
+            Preferences::preferences()->set_volume(Preferences::preferences()->volume() + 1);
+            SoundDriver::driver()->set_global_volume(Preferences::preferences()->volume());
+        } else if (event.key() == Preferences::preferences()->key(kActionMusicKeyNum) - 1) {
+            if (Preferences::preferences()->play_music_in_game()) {
+                ToggleSong();
+            }
+        } else if (event.key() == Preferences::preferences()->key(kFastMotionKeyNum) - 1) {
+            _fast_motion = true;
         }
         break;
     }
@@ -695,6 +683,10 @@ void GamePlay::key_down(const KeyDownEvent& event) {
 void GamePlay::key_up(const KeyUpEvent& event) {
     if (globals()->gInputSource) {
         return;
+    }
+
+    if (event.key() == Preferences::preferences()->key(kFastMotionKeyNum) - 1) {
+        _fast_motion = false;
     }
 
     _player_ship.key_up(event);

@@ -226,7 +226,6 @@
     , "sources":
       [ "src/ui/card.cpp"
       , "src/ui/event-scheduler.cpp"
-      , "src/ui/event-tracker.cpp"
       , "src/ui/event.cpp"
       , "src/ui/flows/master.cpp"
       , "src/ui/flows/replay-game.cpp"

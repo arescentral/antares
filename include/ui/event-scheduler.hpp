@@ -25,7 +25,6 @@
 #include "config/keys.hpp"
 #include "math/units.hpp"
 #include "ui/card.hpp"
-#include "ui/event-tracker.hpp"
 #include "ui/event.hpp"
 
 namespace antares {
@@ -50,8 +49,7 @@ class EventScheduler {
 
     void loop(MainLoop& loop);
 
-    Point get_mouse() const { return _event_tracker.mouse(); }
-    void get_keys(KeyMap* k) const { k->copy(_event_tracker.keys()); }
+    Point get_mouse() const { return _mouse; }
     InputMode input_mode() const { return KEYBOARD_MOUSE; }
     int ticks() const { return _ticks; }
     int64_t usecs() const { return ticks_to_usecs(_ticks); }
@@ -65,7 +63,7 @@ class EventScheduler {
     int64_t _ticks;
     std::vector<int64_t> _snapshot_times;
     std::vector<std::unique_ptr<Event>> _event_heap;
-    EventTracker _event_tracker;
+    Point _mouse;
 
     DISALLOW_COPY_AND_ASSIGN(EventScheduler);
 };
