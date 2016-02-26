@@ -52,8 +52,7 @@ class ScrollTextScreen : public Card {
 
     int64_t _start;
     int64_t _next_shift;
-    Rect _clip;
-    Rect _position;
+    int32_t _position;
 
     DISALLOW_COPY_AND_ASSIGN(ScrollTextScreen);
 };

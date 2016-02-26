@@ -62,13 +62,7 @@ void ScrollTextScreen::become_front() {
 
     _start = now_usecs();
     _next_shift = _start;
-
-    _clip = Rect(0, 0, world().width(), kScrollTextHeight);
-    _clip.center_in(world());
-
-    _position = _build_pix.size().as_rect();
-    _position.center_in(_clip);
-    _position.offset(0, _clip.bottom - _position.top);
+    _position = -kScrollTextHeight;
 }
 
 void ScrollTextScreen::resign_front() {
@@ -102,19 +96,27 @@ void ScrollTextScreen::fire_timer() {
     int64_t now = now_usecs();
     while (_next_shift < now) {
         _next_shift += (1e6 / _speed);
-        _position.offset(0, -1);
+        ++_position;
     }
 
-    if (!_position.intersects(_clip)) {
+    if (_position >= _build_pix.size().height) {
         stack()->pop(this);
     }
 }
 
 void ScrollTextScreen::draw() const {
-    _build_pix.draw(_position.origin());
+    Rect world = VideoDriver::driver()->screen_size().as_rect();
+    Rect clip = Rect(0, 0, world.width(), kScrollTextHeight);
+    clip.center_in(world);
+
+    Rect position = _build_pix.size().as_rect();
+    position.center_in(clip);
+    position.offset(0, clip.top - position.top);
+    position.offset(0, -_position);
+    _build_pix.draw(position.origin());
     Rects rects;
-    rects.fill(Rect(world().left, world().top, world().right, _clip.top), RgbColor::kBlack);
-    rects.fill(Rect(world().left, _clip.bottom, world().right, world().bottom), RgbColor::kBlack);
+    rects.fill(Rect(world.left, world.top, world.right, clip.top), RgbColor::kBlack);
+    rects.fill(Rect(world.left, clip.bottom, world.right, world.bottom), RgbColor::kBlack);
 }
 
 }  // namespace antares
