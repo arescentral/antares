@@ -63,11 +63,26 @@ class AntaresWindow {
     ::AntaresWindow* _c_obj;
 };
 
+class InputModeTracker : public EventReceiver {
+  public:
+    InputModeTracker(InputMode* mode): _mode(mode) { }
+
+    virtual void key_down(const KeyDownEvent&) { *_mode = KEYBOARD_MOUSE; }
+    virtual void mouse_down(const MouseDownEvent&) { *_mode = KEYBOARD_MOUSE; }
+    virtual void mouse_move(const MouseMoveEvent&) { *_mode = KEYBOARD_MOUSE; }
+    virtual void gamepad_button_down(const GamepadButtonDownEvent&) { *_mode = GAMEPAD; }
+    virtual void gamepad_stick(const GamepadStickEvent&) { *_mode = GAMEPAD; }
+
+  private:
+    InputMode* _mode;
+
+    DISALLOW_COPY_AND_ASSIGN(InputModeTracker);
+};
+
 }  // namespace
 
 CocoaVideoDriver::CocoaVideoDriver()
-        : _start_time(antares::usecs()),
-          _event_tracker(false) { }
+        : _start_time(antares::usecs()) { }
 
 Size CocoaVideoDriver::viewport_size() const {
     return {
@@ -90,7 +105,7 @@ Point CocoaVideoDriver::get_mouse() {
 }
 
 InputMode CocoaVideoDriver::input_mode() const {
-    return _event_tracker.input_mode();
+    return _input_mode;
 }
 
 int CocoaVideoDriver::ticks() const {
@@ -102,7 +117,7 @@ int CocoaVideoDriver::usecs() const {
 }
 
 struct CocoaVideoDriver::EventBridge {
-    EventTracker& event_tracker;
+    InputMode& input_mode;
     MainLoop& main_loop;
     cgl::Context& context;
     EventTranslator& translator;
@@ -231,7 +246,8 @@ struct CocoaVideoDriver::EventBridge {
             return;
         }
         while (!event_queue.empty()) {
-            event_queue.front()->send(&event_tracker);
+            InputModeTracker tracker(&input_mode);
+            event_queue.front()->send(&tracker);
             event_queue.front()->send(main_loop.top());
             event_queue.pop();
         }
@@ -263,7 +279,7 @@ void CocoaVideoDriver::loop(Card* initial) {
     MainLoop main_loop(*this, initial);
     main_loop.draw();
     CGLFlushDrawable(context.c_obj());
-    EventBridge bridge = {_event_tracker, main_loop, context, _translator};
+    EventBridge bridge = {_input_mode, main_loop, context, _translator};
 
     antares_event_translator_set_mouse_down_callback(
             _translator.c_obj(), EventBridge::mouse_down, &bridge);

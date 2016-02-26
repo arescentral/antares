@@ -27,7 +27,6 @@
 #include "drawing/color.hpp"
 #include "mac/c/CocoaVideoDriver.h"
 #include "math/geometry.hpp"
-#include "ui/event-tracker.hpp"
 #include "video/opengl-driver.hpp"
 
 namespace antares {
@@ -65,7 +64,7 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     };
     EventTranslator _translator;
 
-    EventTracker _event_tracker;
+    InputMode _input_mode = KEYBOARD_MOUSE;
     AntaresWindow* _window = nullptr;
 
     DISALLOW_COPY_AND_ASSIGN(CocoaVideoDriver);

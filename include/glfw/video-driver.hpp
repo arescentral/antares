@@ -26,7 +26,6 @@
 #include "config/keys.hpp"
 #include "drawing/color.hpp"
 #include "math/geometry.hpp"
-#include "ui/event-tracker.hpp"
 #include "video/opengl-driver.hpp"
 
 struct GLFWwindow;

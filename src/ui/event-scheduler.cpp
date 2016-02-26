@@ -34,9 +34,27 @@ using std::unique_ptr;
 
 namespace antares {
 
+namespace {
+
+class MouseReader : public EventReceiver {
+  public:
+    MouseReader(Point* mouse): _mouse(mouse) { }
+
+    virtual void mouse_down(const MouseDownEvent& event) { *_mouse = event.where(); }
+    virtual void mouse_up(const MouseUpEvent& event) { *_mouse = event.where(); }
+    virtual void mouse_move(const MouseMoveEvent& event) { *_mouse = event.where(); }
+
+  private:
+    Point* _mouse;
+
+    DISALLOW_COPY_AND_ASSIGN(MouseReader);
+};
+
+}  // namespace
+
 EventScheduler::EventScheduler():
         _ticks(0),
-        _event_tracker(true) { }
+        _mouse(-1, -1) { }
 
 void EventScheduler::schedule_snapshot(int64_t at) {
     _snapshot_times.push_back(at);
@@ -70,7 +88,8 @@ void EventScheduler::loop(EventScheduler::MainLoop& loop) {
             pop_heap(_event_heap.begin(), _event_heap.end(), is_later);
             _event_heap.pop_back();
             advance_tick_count(loop, event->at());
-            event->send(&_event_tracker);
+            MouseReader mr(&_mouse);
+            event->send(&mr);
             event->send(loop.top());
         } else {
             if (!has_timer) {
