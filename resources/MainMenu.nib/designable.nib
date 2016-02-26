@@ -7,7 +7,7 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication"/>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
-        <customObject id="-3" userLabel="Application">
+        <customObject id="-3" userLabel="Application" customClass="NSObject">
             <connections>
                 <outlet property="delegate" destination="821" id="822"/>
             </connections>
@@ -96,7 +96,6 @@
             <connections>
                 <outlet property="_author_button" destination="843" id="866"/>
                 <outlet property="_no_show_again_checkbox" destination="829" id="868"/>
-                <outlet property="_resolution_list" destination="858" id="870"/>
                 <outlet property="_scenario_button" destination="844" id="867"/>
                 <outlet property="_scenario_list" destination="845" id="864"/>
                 <outlet property="_skip_checkbox" destination="829" id="881"/>
@@ -174,14 +173,14 @@ Gw
                             <tabViewItem label="Scenario" identifier="1" id="837">
                                 <view key="view" id="838">
                                     <rect key="frame" x="10" y="33" width="253" height="120"/>
-                                    <autoresizingMask key="autoresizingMask"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <popUpButton verticalHuggingPriority="750" id="845">
                                             <rect key="frame" x="14" y="93" width="225" height="26"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <popUpButtonCell key="cell" type="push" title="Ares" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="848" id="846">
                                                 <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                                <font key="font" metaFont="system"/>
+                                                <font key="font" metaFont="menu"/>
                                                 <menu key="menu" title="OtherViews" id="847">
                                                     <items>
                                                         <menuItem title="Ares" state="on" id="848"/>
@@ -247,38 +246,6 @@ Gw
                                                 <action selector="openScenarioURL:" target="821" id="873"/>
                                             </connections>
                                         </button>
-                                    </subviews>
-                                </view>
-                            </tabViewItem>
-                            <tabViewItem label="Video" identifier="2" id="836">
-                                <view key="view" id="855">
-                                    <rect key="frame" x="10" y="33" width="253" height="120"/>
-                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                    <subviews>
-                                        <popUpButton verticalHuggingPriority="750" id="858">
-                                            <rect key="frame" x="115" y="93" width="124" height="26"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <popUpButtonCell key="cell" type="push" title="1920 × 1200" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="861" id="859">
-                                                <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                                <font key="font" metaFont="system"/>
-                                                <menu key="menu" title="OtherViews" id="860">
-                                                    <items>
-                                                        <menuItem title="1920 × 1200" state="on" id="861">
-                                                            <modifierMask key="keyEquivalentModifierMask"/>
-                                                        </menuItem>
-                                                    </items>
-                                                </menu>
-                                            </popUpButtonCell>
-                                        </popUpButton>
-                                        <textField verticalHuggingPriority="750" id="857">
-                                            <rect key="frame" x="14" y="98" width="99" height="17"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Resolution:" id="862">
-                                                <font key="font" metaFont="system"/>
-                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                            </textFieldCell>
-                                        </textField>
                                     </subviews>
                                 </view>
                             </tabViewItem>
