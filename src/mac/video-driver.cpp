@@ -53,11 +53,11 @@ int64_t usecs() {
 class AntaresWindow {
   public:
     AntaresWindow(
-            const cgl::PixelFormat& pixel_format, const cgl::Context& context, Size screen_size,
-            bool retina):
+            const cgl::PixelFormat& pixel_format, const cgl::Context& context,
+            Size initial_screen_size, bool retina):
         _c_obj(antares_window_create(
                     pixel_format.c_obj(), context.c_obj(),
-                    screen_size.width, screen_size.height, retina)) { }
+                    initial_screen_size.width, initial_screen_size.height, retina)) { }
 
     ~AntaresWindow() { antares_window_destroy(_c_obj); }
 
@@ -69,10 +69,24 @@ class AntaresWindow {
 
 }  // namespace
 
-CocoaVideoDriver::CocoaVideoDriver(Size screen_size)
-        : _screen_size(screen_size),
+CocoaVideoDriver::CocoaVideoDriver(Size initial_screen_size)
+        : _initial_screen_size(initial_screen_size),
           _start_time(antares::usecs()),
           _event_tracker(false) { }
+
+Size CocoaVideoDriver::viewport_size() const {
+    return {
+        antares_window_viewport_width(_window),
+        antares_window_viewport_height(_window),
+    };
+}
+
+Size CocoaVideoDriver::screen_size() const {
+    return {
+        antares_window_screen_width(_window),
+        antares_window_screen_height(_window),
+    };
+}
 
 Point CocoaVideoDriver::get_mouse() {
     Point p;
@@ -248,13 +262,9 @@ void CocoaVideoDriver::loop(Card* initial) {
 
     cgl::PixelFormat pixel_format(attrs);
     cgl::Context context(pixel_format.c_obj(), NULL);
-    AntaresWindow window(pixel_format, context, _screen_size, true);
+    AntaresWindow window(pixel_format, context, _initial_screen_size, true);
     _window = window.c_obj();
     antares_event_translator_set_window(_translator.c_obj(), window.c_obj());
-    _viewport_size = {
-        antares_window_viewport_width(window.c_obj()),
-        antares_window_viewport_height(window.c_obj()),
-    };
     GLint swap_interval = 1;
     CGLSetParameter(context.c_obj(), kCGLCPSwapInterval, &swap_interval);
     CGLSetCurrentContext(context.c_obj());

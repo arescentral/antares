@@ -111,12 +111,19 @@ void antares_window_destroy(AntaresWindow* window) {
     free(window);
 }
 
+int32_t antares_window_screen_width(const AntaresWindow* window) {
+    return [window->view bounds].size.width;
+}
+
+int32_t antares_window_screen_height(const AntaresWindow* window) {
+    return [window->view bounds].size.height;
+}
+
 int32_t antares_window_viewport_width(const AntaresWindow* window) {
     return [window->view convertRectToBacking:[window->view bounds]].size.width;
 }
 
 int32_t antares_window_viewport_height(const AntaresWindow* window) {
-    // [self convertRectToBacking:[self bounds]];
     return [window->view convertRectToBacking:[window->view bounds]].size.height;
 }
 
