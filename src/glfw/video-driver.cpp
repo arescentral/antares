@@ -90,14 +90,6 @@ Point GLFWVideoDriver::get_mouse() {
     return {int(x), int(y)};
 }
 
-void GLFWVideoDriver::get_keys(KeyMap* k) {
-    for (auto glfw_key: range(GLFW_KEY_LAST)) {
-        if (auto usb_key = kGLFWKeyToUSB[glfw_key]) {
-            k->set(usb_key, glfwGetKey(_window, glfw_key));
-        }
-    }
-}
-
 InputMode GLFWVideoDriver::input_mode() const {
     return KEYBOARD_MOUSE;
 }

@@ -89,10 +89,6 @@ Point CocoaVideoDriver::get_mouse() {
     return p;
 }
 
-void CocoaVideoDriver::get_keys(KeyMap* keys) {
-    keys->copy(_event_tracker.keys());
-}
-
 InputMode CocoaVideoDriver::input_mode() const {
     return _event_tracker.input_mode();
 }

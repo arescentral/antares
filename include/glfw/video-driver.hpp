@@ -44,7 +44,6 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
     virtual Size screen_size() const { return _screen_size; }
 
     virtual Point get_mouse();
-    virtual void get_keys(KeyMap* k);
     virtual InputMode input_mode() const;
 
     virtual int ticks() const;

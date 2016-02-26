@@ -86,12 +86,6 @@ int GetKeyNumFromKeyMap(const KeyMap& key_map) {
     return 0;
 }
 
-bool CommandKey() {
-    KeyMap key_map;
-    VideoDriver::driver()->get_keys(&key_map);
-    return key_map.get(Keys::L_COMMAND);
-}
-
 void GetKeyNumName(int key_num, sfz::String* out) {
     out->assign(key_names->at(key_num - 1));
 }
@@ -108,16 +102,6 @@ bool GetKeyNameNum(sfz::StringSlice name, int& out) {
 }
 
 // returns true if any keys OTHER THAN POWER ON AND CAPS LOCK are down
-
-bool AnyRealKeyDown() {
-    KeyMap key_map;
-    VideoDriver::driver()->get_keys(&key_map);
-
-    key_map.set(Keys::POWER, false);
-    key_map.set(Keys::CAPS_LOCK, false);
-
-    return key_map.any();
-}
 
 bool AnyKeyButThisOne(const KeyMap& key_map, int key_num) {
     KeyMap others;

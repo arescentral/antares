@@ -51,7 +51,6 @@ class EventScheduler {
     void loop(MainLoop& loop);
 
     Point get_mouse() const { return _event_tracker.mouse(); }
-    void get_keys(KeyMap* k) const { k->copy(_event_tracker.keys()); }
     InputMode input_mode() const { return KEYBOARD_MOUSE; }
     int ticks() const { return _ticks; }
     int64_t usecs() const { return ticks_to_usecs(_ticks); }
