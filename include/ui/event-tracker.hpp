@@ -28,13 +28,10 @@ namespace antares {
 class EventTracker : public EventReceiver {
   public:
     EventTracker(bool strict):
-            _strict(strict),
-            _button{},
             _mouse(-1, -1),
             _input_mode(KEYBOARD_MOUSE) { }
 
     virtual void key_down(const KeyDownEvent& event);
-    virtual void key_up(const KeyUpEvent& event);
     virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
     virtual void gamepad_stick(const GamepadStickEvent& event);
     virtual void mouse_down(const MouseDownEvent& event);
@@ -42,14 +39,10 @@ class EventTracker : public EventReceiver {
     virtual void mouse_move(const MouseMoveEvent& event);
 
     const Point& mouse() const { return _mouse; }
-    const KeyMap& keys() const { return _keys; }
     InputMode input_mode() const { return _input_mode; }
 
   private:
-    const bool _strict;
-    bool _button[3];
     Point _mouse;
-    KeyMap _keys;
     InputMode _input_mode;
 
     DISALLOW_COPY_AND_ASSIGN(EventTracker);
