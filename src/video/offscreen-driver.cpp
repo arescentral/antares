@@ -140,8 +140,8 @@ struct Renderbuffer {
 class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
   public:
     MainLoop(OffscreenVideoDriver& driver, const Optional<String>& output_dir, Card* initial):
-            _offscreen(Preferences::preferences()->screen_size()),
-            _buffer(Preferences::preferences()->screen_size(), 4),
+            _offscreen(driver._screen_size),
+            _buffer(driver._screen_size, 4),
             _setup(*this),
             _output_dir(output_dir),
             _loop(driver, initial) {

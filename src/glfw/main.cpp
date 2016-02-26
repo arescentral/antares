@@ -48,10 +48,6 @@ void main(int argc, const char* argv[]) {
 
     int width = 640;
     int height = 480;
-    parser.add_argument("-w", "--width", store(width))
-        .help("screen width (default: 640)");
-    parser.add_argument("-h", "--height", store(height))
-        .help("screen height (default: 480)");
 
     parser.add_argument("--help", help(parser, 0))
         .help("display this help screen");
@@ -63,7 +59,6 @@ void main(int argc, const char* argv[]) {
     }
 
     FilePrefsDriver prefs;
-    Preferences::preferences()->set_screen_size({width, height});
 
     const auto& scenario = Preferences::preferences()->scenario_identifier();
     bool have_scenario = false;

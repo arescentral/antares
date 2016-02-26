@@ -104,7 +104,7 @@ int main(int argc, char* const* argv) {
 
     NullPrefsDriver prefs;
     EventScheduler scheduler;
-    TextVideoDriver video(Preferences::preferences()->screen_size(), scheduler, output_dir);
+    TextVideoDriver video({640, 480}, scheduler, output_dir);
     ShapeBuilder builder(output_dir);
     int16_t ids[] = {501, 510, 515, 532, 550, 551, 563, 567};
     for (int16_t id: ids) {

@@ -56,9 +56,6 @@ struct AntaresDrivers {
     CocoaVideoDriver video;
     OpenAlSoundDriver sound;
     DirectoryLedger ledger;
-
-    AntaresDrivers():
-            video(Preferences::preferences()->screen_size()) { }
 };
 
 namespace antares {

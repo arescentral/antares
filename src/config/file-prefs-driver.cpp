@@ -131,9 +131,6 @@ void FilePrefsDriver::load(Preferences* p) {
             return;
         }
 
-        set_from<int>(json, "video", "width", *p, &Preferences::set_screen_width);
-        set_from<int>(json, "video", "height", *p, &Preferences::set_screen_height);
-
         set_from<int>(json, "sound", "volume", *p, &Preferences::set_volume);
         set_from<bool>(json, "sound", "speech", *p, &Preferences::set_speech_on);
         set_from<bool>(json, "sound", "idle music", *p, &Preferences::set_play_idle_music);
@@ -148,10 +145,6 @@ void FilePrefsDriver::load(Preferences* p) {
 }
 
 void FilePrefsDriver::save(const Preferences& p) {
-    StringMap<Json> video;
-    video["width"]       = Json::number(p.screen_size().width);
-    video["height"]      = Json::number(p.screen_size().height);
-
     StringMap<Json> sound;
     sound["volume"]      = Json::number(p.volume());
     sound["speech"]      = Json::boolean(p.speech_on());
@@ -164,7 +157,6 @@ void FilePrefsDriver::save(const Preferences& p) {
     }
 
     StringMap<Json> all;
-    all["video"]  = Json::object(video);
     all["sound"]  = Json::object(sound);
     all["keys"]   = Json::object(keys);
 

@@ -52,12 +52,8 @@ int64_t usecs() {
 
 class AntaresWindow {
   public:
-    AntaresWindow(
-            const cgl::PixelFormat& pixel_format, const cgl::Context& context,
-            Size initial_screen_size, bool retina):
-        _c_obj(antares_window_create(
-                    pixel_format.c_obj(), context.c_obj(),
-                    initial_screen_size.width, initial_screen_size.height, retina)) { }
+    AntaresWindow(const cgl::PixelFormat& pixel_format, const cgl::Context& context):
+        _c_obj(antares_window_create(pixel_format.c_obj(), context.c_obj())) { }
 
     ~AntaresWindow() { antares_window_destroy(_c_obj); }
 
@@ -69,9 +65,8 @@ class AntaresWindow {
 
 }  // namespace
 
-CocoaVideoDriver::CocoaVideoDriver(Size initial_screen_size)
-        : _initial_screen_size(initial_screen_size),
-          _start_time(antares::usecs()),
+CocoaVideoDriver::CocoaVideoDriver()
+        : _start_time(antares::usecs()),
           _event_tracker(false) { }
 
 Size CocoaVideoDriver::viewport_size() const {
@@ -262,7 +257,7 @@ void CocoaVideoDriver::loop(Card* initial) {
 
     cgl::PixelFormat pixel_format(attrs);
     cgl::Context context(pixel_format.c_obj(), NULL);
-    AntaresWindow window(pixel_format, context, _initial_screen_size, true);
+    AntaresWindow window(pixel_format, context);
     _window = window.c_obj();
     antares_event_translator_set_window(_translator.c_obj(), window.c_obj());
     GLint swap_interval = 1;

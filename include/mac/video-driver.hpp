@@ -36,7 +36,7 @@ class Event;
 
 class CocoaVideoDriver : public OpenGlVideoDriver {
   public:
-    CocoaVideoDriver(Size initial_screen_size);
+    CocoaVideoDriver();
 
     virtual Size viewport_size() const;
     virtual Size screen_size() const;
@@ -51,7 +51,6 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     void loop(Card* initial);
 
   private:
-    const Size _initial_screen_size;
     int64_t _start_time;
 
     struct EventBridge;

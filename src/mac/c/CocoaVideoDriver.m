@@ -69,23 +69,17 @@ struct AntaresWindow {
     NSWindow* window;
 };
 
-AntaresWindow* antares_window_create(
-        CGLPixelFormatObj pixel_format, CGLContextObj context,
-        int32_t screen_width, int32_t screen_height,
-        bool retina) {
+AntaresWindow* antares_window_create(CGLPixelFormatObj pixel_format, CGLContextObj context) {
     AntaresWindow* window = malloc(sizeof(AntaresWindow));
     window->pixel_format = [[NSOpenGLPixelFormat alloc] initWithCGLPixelFormatObj:pixel_format];
     window->context = [[NSOpenGLContext alloc] initWithCGLContextObj:context];
 
-    NSRect screen_rect = [[NSScreen mainScreen] frame];
-    NSRect window_rect = NSMakeRect(0, 0, screen_width, screen_height);
+    NSRect window_rect = NSMakeRect(0, 0, 640, 480);
     int style_mask = NSTitledWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
 
     window->view = [[NSOpenGLView alloc] initWithFrame:window_rect
         pixelFormat:window->pixel_format];
-    if (retina) {
-        [window->view setWantsBestResolutionOpenGLSurface:YES];
-    }
+    [window->view setWantsBestResolutionOpenGLSurface:YES];
     [window->view setOpenGLContext:window->context];
 
     window->window = [[NSWindow alloc] initWithContentRect:window_rect

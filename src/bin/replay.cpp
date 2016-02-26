@@ -202,7 +202,6 @@ void main(int argc, char** argv) {
     }
 
     Preferences preferences;
-    preferences.set_screen_size(Size(width, height));
     preferences.set_play_music_in_game(true);
     NullPrefsDriver prefs(preferences);
 
@@ -222,16 +221,15 @@ void main(int argc, char** argv) {
     }
     NullLedger ledger;
 
-    Size screen_size = Preferences::preferences()->screen_size();
     MappedFile replay_file(replay_path);
     if (smoke) {
-        TextVideoDriver video(screen_size, scheduler, Optional<String>());
+        TextVideoDriver video({width, height}, scheduler, Optional<String>());
         video.loop(new ReplayMaster(replay_file.data(), output_dir));
     } else if (text) {
-        TextVideoDriver video(screen_size, scheduler, output_dir);
+        TextVideoDriver video({width, height}, scheduler, output_dir);
         video.loop(new ReplayMaster(replay_file.data(), output_dir));
     } else {
-        OffscreenVideoDriver video(screen_size, output_dir);
+        OffscreenVideoDriver video({width, height}, output_dir);
         video.loop(new ReplayMaster(replay_file.data(), output_dir), scheduler);
     }
 }
