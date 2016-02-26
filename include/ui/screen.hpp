@@ -61,7 +61,6 @@ class InterfaceScreen : public Card {
     size_t size() const;
     const InterfaceItem& item(int index) const;
     InterfaceItem& mutable_item(int index);
-    void offset(int offset_x, int offset_y);
 
   private:
     enum State {

@@ -44,7 +44,6 @@ class HelpScreen : public InterfaceScreen {
         BOX = 1,
     };
 
-    Rect _bounds;
     StyledText _text;
 
     DISALLOW_COPY_AND_ASSIGN(HelpScreen);
