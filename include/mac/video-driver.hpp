@@ -59,8 +59,7 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
 
     class EventTranslator {
       public:
-        EventTranslator(int32_t screen_width, int32_t screen_height):
-                _c_obj(antares_event_translator_create(screen_width, screen_height)) { }
+        EventTranslator(): _c_obj(antares_event_translator_create()) { }
         ~EventTranslator() { antares_event_translator_destroy(_c_obj); }
         AntaresEventTranslator* c_obj() const { return _c_obj; }
       private:

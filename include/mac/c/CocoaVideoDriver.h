@@ -44,8 +44,7 @@ int32_t antares_window_viewport_width(const AntaresWindow* window);
 int32_t antares_window_viewport_height(const AntaresWindow* window);
 
 typedef struct AntaresEventTranslator AntaresEventTranslator;
-AntaresEventTranslator* antares_event_translator_create(
-        int32_t screen_width, int32_t screen_height);
+AntaresEventTranslator* antares_event_translator_create();
 void antares_event_translator_destroy(AntaresEventTranslator* translator);
 
 void antares_event_translator_set_window(

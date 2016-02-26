@@ -136,8 +136,6 @@ struct AntaresEventTranslator {
     void (*caps_unlock_callback)(void* userdata);
     void* caps_unlock_userdata;
 
-    int32_t screen_width;
-    int32_t screen_height;
     AntaresWindow* window;
 
     int32_t last_flags;
@@ -150,18 +148,13 @@ static bool translate_coords(AntaresEventTranslator* translator, NSEvent* event,
     NSPoint input = [event locationInWindow];
     input = [translator->window->view convertPoint:input fromView:nil];
     NSSize view_size = [translator->window->view bounds].size;
-    input.x = round(input.x / view_size.width * translator->screen_width);
-    input.y = round(input.y / view_size.height * translator->screen_height);
-    *p = NSMakePoint(input.x, translator->screen_height - input.y);
+    *p = NSMakePoint(input.x, view_size.height - input.y);
     return true;
 }
 
-AntaresEventTranslator* antares_event_translator_create(
-        int32_t screen_width, int32_t screen_height) {
+AntaresEventTranslator* antares_event_translator_create() {
     AntaresEventTranslator* translator = malloc(sizeof(AntaresEventTranslator));
     memset(translator, 0, sizeof(AntaresEventTranslator));
-    translator->screen_width = screen_width;
-    translator->screen_height = screen_height;
     translator->window = nil;
     translator->last_flags = 0;
     return translator;
@@ -182,9 +175,9 @@ void antares_get_mouse_location(AntaresEventTranslator* translator, int32_t* x, 
     location = [translator->window->window convertRectFromScreen:r].origin;
     location = [translator->window->view convertPoint:location fromView:nil];
     NSSize view_size = [translator->window->view bounds].size;
-    *x = round(location.x / view_size.width * translator->screen_width);
-    *y = round(location.y / view_size.height * translator->screen_height);
-    *y = translator->screen_height - *y;
+    *x = round(location.x);
+    *y = round(location.y);
+    *y = view_size.height - *y;
 }
 
 void antares_event_translator_set_mouse_down_callback(

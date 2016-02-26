@@ -56,7 +56,6 @@ int64_t usecs() {
 CocoaVideoDriver::CocoaVideoDriver(Size screen_size)
         : _screen_size(screen_size),
           _start_time(antares::usecs()),
-          _translator(screen_size.width, screen_size.height),
           _event_tracker(false) { }
 
 Point CocoaVideoDriver::get_mouse() {
