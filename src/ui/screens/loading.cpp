@@ -125,7 +125,9 @@ void LoadingScreen::overlay() const {
 
     const RgbColor& light = GetRGBTranslateColorShade(kLoadingScreenColor, LIGHT);
     const RgbColor& dark = GetRGBTranslateColorShade(kLoadingScreenColor, DARK);
+    Point off = offset();
     Rect bar = item(0).bounds();
+    bar.offset(off.h, off.v);
     Rects rects;
     rects.fill(bar, dark);
     bar.right = bar.left + (bar.width() * _current / _max);
