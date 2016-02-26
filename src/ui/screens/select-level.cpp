@@ -45,7 +45,7 @@ using std::unique_ptr;
 namespace antares {
 
 SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Scenario** scenario)
-        : InterfaceScreen("select-level", world, true),
+        : InterfaceScreen("select-level", {0, 0, 640, 480}, true),
           _state(SELECTING),
           _cancelled(cancelled),
           _scenario(scenario) {
@@ -183,7 +183,10 @@ void SelectLevelScreen::draw_level_name() const {
     retro.set_retro_text(chapter_name);
     retro.wrap_to(440, 0, 2);
 
-    retro.draw(i.bounds());
+    Rect bounds = i.bounds();
+    Point off = offset();
+    bounds.offset(off.h, off.v);
+    retro.draw(bounds);
 }
 
 }  // namespace antares

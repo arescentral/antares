@@ -35,7 +35,7 @@ static const uint8_t kLoadingScreenColor = PALE_GREEN;
 static const int64_t kTypingDelay = 16667;
 
 LoadingScreen::LoadingScreen(const Scenario* scenario, bool* cancelled):
-        InterfaceScreen("loading", world, true),
+        InterfaceScreen("loading", {0, 0, 640, 480}, true),
         _state(TYPING),
         _scenario(scenario),
         _cancelled(cancelled),
@@ -113,7 +113,7 @@ void LoadingScreen::handle_button(Button& button) {
 
 void LoadingScreen::overlay() const {
     Rect above_content(0, 0, 640, 480);
-    above_content.center_in(world);
+    above_content.center_in(world());
     above_content.bottom = item(0).bounds().top;
     Rect bounds(0, 0, _name_text->auto_width(), _name_text->height());
     bounds.center_in(above_content);
@@ -125,7 +125,9 @@ void LoadingScreen::overlay() const {
 
     const RgbColor& light = GetRGBTranslateColorShade(kLoadingScreenColor, LIGHT);
     const RgbColor& dark = GetRGBTranslateColorShade(kLoadingScreenColor, DARK);
+    Point off = offset();
     Rect bar = item(0).bounds();
+    bar.offset(off.h, off.v);
     Rects rects;
     rects.fill(bar, dark);
     bar.right = bar.left + (bar.width() * _current / _max);

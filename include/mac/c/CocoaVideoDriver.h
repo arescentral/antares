@@ -35,17 +35,15 @@ void antares_mouse_hide();
 void antares_mouse_show();
 
 typedef struct AntaresWindow AntaresWindow;
-AntaresWindow* antares_window_create(
-        CGLPixelFormatObj pixel_format, CGLContextObj context,
-        int32_t screen_width, int32_t screen_height,
-        bool fullscreen, bool retina);
+AntaresWindow* antares_window_create(CGLPixelFormatObj pixel_format, CGLContextObj context);
 void antares_window_destroy(AntaresWindow* window);
+int32_t antares_window_screen_width(const AntaresWindow* window);
+int32_t antares_window_screen_height(const AntaresWindow* window);
 int32_t antares_window_viewport_width(const AntaresWindow* window);
 int32_t antares_window_viewport_height(const AntaresWindow* window);
 
 typedef struct AntaresEventTranslator AntaresEventTranslator;
-AntaresEventTranslator* antares_event_translator_create(
-        int32_t screen_width, int32_t screen_height);
+AntaresEventTranslator* antares_event_translator_create();
 void antares_event_translator_destroy(AntaresEventTranslator* translator);
 
 void antares_event_translator_set_window(

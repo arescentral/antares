@@ -36,10 +36,10 @@ class Event;
 
 class CocoaVideoDriver : public OpenGlVideoDriver {
   public:
-    CocoaVideoDriver(bool fullscreen, Size screen_size);
+    CocoaVideoDriver();
 
-    virtual Size viewport_size() const { return _viewport_size; }
-    virtual Size screen_size() const { return _screen_size; }
+    virtual Size viewport_size() const;
+    virtual Size screen_size() const;
 
     virtual Point get_mouse();
     virtual void get_keys(KeyMap* k);
@@ -51,17 +51,13 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     void loop(Card* initial);
 
   private:
-    const Size _screen_size;
-    Size _viewport_size;
-    const bool _fullscreen;
     int64_t _start_time;
 
     struct EventBridge;
 
     class EventTranslator {
       public:
-        EventTranslator(int32_t screen_width, int32_t screen_height):
-                _c_obj(antares_event_translator_create(screen_width, screen_height)) { }
+        EventTranslator(): _c_obj(antares_event_translator_create()) { }
         ~EventTranslator() { antares_event_translator_destroy(_c_obj); }
         AntaresEventTranslator* c_obj() const { return _c_obj; }
       private:
@@ -71,6 +67,7 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     EventTranslator _translator;
 
     EventTracker _event_tracker;
+    AntaresWindow* _window = nullptr;
 
     DISALLOW_COPY_AND_ASSIGN(CocoaVideoDriver);
 };

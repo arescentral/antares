@@ -200,7 +200,7 @@ static void make_sparks(Handle<Action> action, Handle<SpaceObject> focus) {
         int32_t l = (focus->location.h - gGlobalCorner.h) * gAbsoluteScale;
         l >>= SHIFT_SCALE;
         if ((l > -kSpriteMaxSize) && (l < kSpriteMaxSize)) {
-            location.h = l + viewport.left;
+            location.h = l + viewport().left;
         } else {
             location.h = -kSpriteMaxSize;
         }
@@ -208,7 +208,7 @@ static void make_sparks(Handle<Action> action, Handle<SpaceObject> focus) {
         l = (focus->location.v - gGlobalCorner.v) * gAbsoluteScale;
         l >>= SHIFT_SCALE; /*+ CLIP_TOP*/;
         if ((l > -kSpriteMaxSize) && (l < kSpriteMaxSize)) {
-            location.v = l + viewport.top;
+            location.v = l + viewport().top;
         } else {
             location.v = -kSpriteMaxSize;
         }

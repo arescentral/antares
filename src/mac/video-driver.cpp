@@ -32,8 +32,6 @@
 #include "mac/c/CocoaVideoDriver.h"
 #include "mac/core-opengl.hpp"
 #include "mac/core-foundation.hpp"
-#include "mac/fullscreen.hpp"
-#include "mac/windowed.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
 #include "ui/event.hpp"
@@ -52,14 +50,38 @@ int64_t usecs() {
     return tv.tv_sec * 1000000ll + tv.tv_usec;
 }
 
+class AntaresWindow {
+  public:
+    AntaresWindow(const cgl::PixelFormat& pixel_format, const cgl::Context& context):
+        _c_obj(antares_window_create(pixel_format.c_obj(), context.c_obj())) { }
+
+    ~AntaresWindow() { antares_window_destroy(_c_obj); }
+
+    ::AntaresWindow* c_obj() const { return _c_obj; }
+
+  private:
+    ::AntaresWindow* _c_obj;
+};
+
 }  // namespace
 
-CocoaVideoDriver::CocoaVideoDriver(bool fullscreen, Size screen_size)
-        : _screen_size(screen_size),
-          _fullscreen(fullscreen),
-          _start_time(antares::usecs()),
-          _translator(screen_size.width, screen_size.height),
+CocoaVideoDriver::CocoaVideoDriver()
+        : _start_time(antares::usecs()),
           _event_tracker(false) { }
+
+Size CocoaVideoDriver::viewport_size() const {
+    return {
+        antares_window_viewport_width(_window),
+        antares_window_viewport_height(_window),
+    };
+}
+
+Size CocoaVideoDriver::screen_size() const {
+    return {
+        antares_window_screen_width(_window),
+        antares_window_screen_height(_window),
+    };
+}
 
 Point CocoaVideoDriver::get_mouse() {
     Point p;
@@ -235,17 +257,9 @@ void CocoaVideoDriver::loop(Card* initial) {
 
     cgl::PixelFormat pixel_format(attrs);
     cgl::Context context(pixel_format.c_obj(), NULL);
-    unique_ptr<CocoaFullscreen> fullscreen;
-    unique_ptr<CocoaWindowed> windowed;
-    if (_fullscreen) {
-        fullscreen.reset(new CocoaFullscreen(pixel_format, context, _screen_size));
-        antares_event_translator_set_window(_translator.c_obj(), fullscreen->window());
-        _viewport_size = fullscreen->viewport_size();
-    } else {
-        windowed.reset(new CocoaWindowed(pixel_format, context, _screen_size, false, true));
-        antares_event_translator_set_window(_translator.c_obj(), windowed->window());
-        _viewport_size = windowed->viewport_size();
-    }
+    AntaresWindow window(pixel_format, context);
+    _window = window.c_obj();
+    antares_event_translator_set_window(_translator.c_obj(), window.c_obj());
     GLint swap_interval = 1;
     CGLSetParameter(context.c_obj(), kCGLCPSwapInterval, &swap_interval);
     CGLSetCurrentContext(context.c_obj());

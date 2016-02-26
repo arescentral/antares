@@ -27,7 +27,6 @@
 #define kScreenWidth @"ScreenWidth"
 #define kScreenHeight @"ScreenHeight"
 #define kScenario @"Scenario"
-#define kFullscreen @"Fullscreen"
 #define kSkipSettings @"SkipSettings"
 
 #define kIdentifier @"Identifier"
@@ -283,14 +282,9 @@ static NSURL* url(const char* utf8_bytes) {
 - (void)awakeFromNib {
     [self updateResolutionList];
     [self updateScenarioList];
-    bool windowed = 
-        [[NSUserDefaults standardUserDefaults] objectForKey:kFullscreen]
-        && ![[NSUserDefaults standardUserDefaults] boolForKey:kFullscreen];
-    [_window_checkbox setIntValue:windowed];
     bool skip_settings = 
         [[NSUserDefaults standardUserDefaults] boolForKey:kSkipSettings];
     [_skip_checkbox setIntValue:skip_settings];
-    [self setWindowedFrom:_window_checkbox];
 }
 
 - (IBAction)openScenarioURL:(id)sender {
@@ -299,11 +293,6 @@ static NSURL* url(const char* utf8_bytes) {
 
 - (IBAction)openAuthorURL:(id)sender {
     [[NSWorkspace sharedWorkspace] openURL:_author_url];
-}
-
-- (IBAction)setWindowedFrom:(id)sender {
-    bool fullscreen = ![sender intValue];
-    [[NSUserDefaults standardUserDefaults] setBool:fullscreen forKey:kFullscreen];
 }
 
 - (IBAction)setSkipSettingsFrom:(id)sender {

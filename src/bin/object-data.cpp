@@ -26,6 +26,7 @@
 #include "drawing/text.hpp"
 #include "game/space-object.hpp"
 #include "ui/interface-handling.hpp"
+#include "video/text-driver.hpp"
 
 using sfz::Optional;
 using sfz::ScopedFd;
@@ -86,6 +87,8 @@ int main(int argc, char** argv) {
     }
 
     NullPrefsDriver prefs;
+    EventScheduler scheduler;
+    TextVideoDriver video({640, 480}, scheduler, {});
     init_globals();
     SpaceObjectHandlingInit();
 

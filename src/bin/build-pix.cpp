@@ -79,15 +79,13 @@ class PixBuilder {
         // One time to figure out the height of the output.
         // (we need an active, looping offscreen driver for this)
         {
-            Preferences::preferences()->set_screen_size(size);
-            OffscreenVideoDriver off(Preferences::preferences()->screen_size(), {});
+            OffscreenVideoDriver off(size, {});
             off.capture(new SizePix(id, width, &size.height), format("{0}.png", dec(id, 5)));
         }
 
         // One time for real, with a driver sized appropriately.
         {
-            Preferences::preferences()->set_screen_size(size);
-            OffscreenVideoDriver off(Preferences::preferences()->screen_size(), _output_dir);
+            OffscreenVideoDriver off(size, _output_dir);
             off.capture(new DrawPix(id, width), format("{0}.png", dec(id, 5)));
         }
     }

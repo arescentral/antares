@@ -76,7 +76,7 @@ void OptionsScreen::become_front() {
 }
 
 SoundControlScreen::SoundControlScreen(OptionsScreen::State* state, Preferences* preferences)
-        : InterfaceScreen("options/sound", world, true),
+        : InterfaceScreen("options/sound", {0, 0, 640, 480}, true),
           _state(state),
           _preferences(preferences) { }
 
@@ -156,6 +156,8 @@ void SoundControlScreen::handle_button(Button& button) {
 void SoundControlScreen::overlay() const {
     const int volume = _preferences->volume();
     Rect bounds = item(VOLUME_BOX).bounds();
+    Point off = offset();
+    bounds.offset(off.h, off.v);
 
     const int notch_width = bounds.width() / kMaxVolumePreference;
     const int notch_height = bounds.height() - 4;
@@ -203,7 +205,7 @@ static size_t get_tab_num(size_t key) {
 }
 
 KeyControlScreen::KeyControlScreen(OptionsScreen::State* state, Preferences* preferences)
-        : InterfaceScreen("options/keys", world, true),
+        : InterfaceScreen("options/keys", {0, 0, 640, 480}, true),
           _state(state),
           _preferences(preferences),
           _key_start(size()),
@@ -338,7 +340,10 @@ void KeyControlScreen::overlay() const {
 
         const TextRect& box = dynamic_cast<const TextRect&>(item(CONFLICT_TEXT));
         vector<inlinePictType> pict;
-        draw_text_in_rect(box.bounds(), text, box.style, box.hue, pict);
+        Rect bounds = box.bounds();
+        Point off = offset();
+        bounds.offset(off.h, off.v);
+        draw_text_in_rect(bounds, text, box.style, box.hue, pict);
     }
 }
 

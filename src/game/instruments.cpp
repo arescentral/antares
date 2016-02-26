@@ -112,7 +112,7 @@ const uint8_t kFineMoneyUseColor    = SKY_BLUE;
 const int32_t kMaxMoneyValue        = kGrossMoneyBarValue * 7;
 
 Rect mini_build_time_rect() {
-    Rect result(play_screen.right + 10, 8, play_screen.right + 22, 37);
+    Rect result(play_screen().right + 10, 8, play_screen().right + 22, 37);
     result.offset(0, instrument_top());
     return result;
 }
@@ -170,31 +170,9 @@ void InstrumentInit() {
     gScaleList.reset(new int32_t[kScaleListNum]);
     ResetInstruments();
 
-    // Initialize and crop left and right instrument picts.
-    {
-        Picture pict(kInstLeftPictID);
-        ArrayPixMap pix_map(128, min(world.height(), pict.size().height));
-        Rect from(Point(0, 0), pix_map.size());
-        Rect to(Point(0, 0), pix_map.size());
-        if (pict.size().height > world.height()) {
-            from.offset(0, (pict.size().height - world.height()) / 2);
-        }
-        pix_map.view(to).copy(pict.view(from));
-        left_instrument_texture = VideoDriver::driver()->texture(
-                format("/{0}", pict.path()), pix_map);
-    }
-    {
-        Picture pict(kInstRightPictID);
-        ArrayPixMap pix_map(32, min(world.height(), pict.size().height));
-        Rect from(Point(0, 0), pix_map.size());
-        Rect to(Point(0, 0), pix_map.size());
-        if (pict.size().height > world.height()) {
-            from.offset(0, (pict.size().height - world.height()) / 2);
-        }
-        pix_map.view(to).copy(pict.view(from));
-        right_instrument_texture = VideoDriver::driver()->texture(
-                format("/{0}", pict.path()), pix_map);
-    }
+    // Initialize left and right instrument picts.
+    left_instrument_texture = Picture(kInstLeftPictID).texture();
+    right_instrument_texture = Picture(kInstRightPictID).texture();
 
     site.light = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);
     site.dark = GetRGBTranslateColorShade(PALE_GREEN, DARKER + kSlightlyDarkerColor);
@@ -203,7 +181,7 @@ void InstrumentInit() {
 }
 
 int32_t instrument_top() {
-    return (world.height() / 2) - (kPanelHeight / 2);
+    return (world().height() / 2) - (kPanelHeight / 2);
 }
 
 void InstrumentCleanup() {
@@ -230,13 +208,13 @@ void ResetInstruments() {
         gBarIndicator[i].thisValue = -1;
     }
     // the shield bar
-    gBarIndicator[kShieldBar].top = 359 + instrument_top();
+    gBarIndicator[kShieldBar].top = 359;
     gBarIndicator[kShieldBar].color = SKY_BLUE;
 
-    gBarIndicator[kEnergyBar].top = 231 + instrument_top();
+    gBarIndicator[kEnergyBar].top = 231;
     gBarIndicator[kEnergyBar].color = GOLD;
 
-    gBarIndicator[kBatteryBar].top = 103 + instrument_top();
+    gBarIndicator[kBatteryBar].top = 103;
     gBarIndicator[kBatteryBar].color = SALMON;
 
     lp = g.radar_blips.get();
@@ -439,7 +417,7 @@ static void draw_money() {
     const int price = MiniComputerGetPriceOfCurrentSelection() / kFineMoneyBarValue;
 
     Rect box(0, 0, kFineMoneyBarWidth, kFineMoneyBarHeight - 1);
-    box.offset(kFineMoneyLeft + kFineMoneyHBuffer + play_screen.right,
+    box.offset(kFineMoneyLeft + kFineMoneyHBuffer + play_screen().right,
             kFineMoneyTop + instrument_top() + kFineMoneyVBuffer);
 
     // First section of the money bar: when we can afford the current selection, displays the
@@ -500,7 +478,7 @@ static void draw_money() {
     gross->thisValue = (admiral->cash() / kGrossMoneyBarValue);
 
     box = Rect(0, 0, kGrossMoneyBarWidth, kGrossMoneyBarHeight - 1);
-    box.offset(play_screen.right + kGrossMoneyLeft + kGrossMoneyHBuffer,
+    box.offset(play_screen().right + kGrossMoneyLeft + kGrossMoneyHBuffer,
             kGrossMoneyTop + instrument_top() + kGrossMoneyVBuffer);
 
     const RgbColor light = GetRGBTranslateColorShade(kGrossMoneyColor, VERY_LIGHT);
@@ -525,13 +503,11 @@ void DrawInstrumentPanel() {
 }
 
 void draw_instruments() {
-    Rect left_rect(world.left, world.top, viewport.left, world.bottom);
-    Rect right_rect(viewport.right, world.top, world.right, world.bottom);
+    Rect left_rect(world().left, world().top, viewport().left, world().bottom);
+    Rect right_rect(viewport().right, world().top, world().right, world().bottom);
 
-    if (world.height() > 768) {
-        left_rect.inset(0, (world.height() - 768) / 2);
-        right_rect.inset(0, (world.height() - 768) / 2);
-    }
+    left_rect.inset(0, (world().height() - 768) / 2);
+    right_rect.inset(0, (world().height() - 768) / 2);
 
     left_instrument_texture.draw(left_rect.left, left_rect.top);
     right_instrument_texture.draw(right_rect.left, right_rect.top);
@@ -678,10 +654,10 @@ void draw_sector_lines() {
 
     x = size - (gLastGlobalCorner.h & (size - 1));
     division = ((gLastGlobalCorner.h + x) >> kSubSectorShift) & 0x0000000f;
-    x = ((x * gLastScale) >> SHIFT_SCALE) + viewport.left;
+    x = ((x * gLastScale) >> SHIFT_SCALE) + viewport().left;
 
     if (should_draw_sector_lines) {
-        while ((x < implicit_cast<uint32_t>(viewport.right)) && (h > 0)) {
+        while ((x < implicit_cast<uint32_t>(viewport().right)) && (h > 0)) {
             RgbColor color;
             if (!division) {
                 color = GetRGBTranslateColorShade(GREEN, kSectorLineBrightness);
@@ -692,7 +668,7 @@ void draw_sector_lines() {
             }
 
             // TODO(sfiera): +1 on bottom no longer needed.
-            rects.fill({x, viewport.top, x + 1, viewport.bottom + 1}, color);
+            rects.fill({x, viewport().top, x + 1, viewport().bottom + 1}, color);
             division += level;
             division &= 0x0000000f;
             x += h;
@@ -701,10 +677,10 @@ void draw_sector_lines() {
 
     x = size - (gLastGlobalCorner.v & (size - 1));
     division = ((gLastGlobalCorner.v + x) >> kSubSectorShift) & 0x0000000f;
-    x = ((x * gLastScale) >> SHIFT_SCALE) + viewport.top;
+    x = ((x * gLastScale) >> SHIFT_SCALE) + viewport().top;
 
     if (should_draw_sector_lines) {
-        while ((x < implicit_cast<uint32_t>(viewport.bottom)) && (h > 0)) {
+        while ((x < implicit_cast<uint32_t>(viewport().bottom)) && (h > 0)) {
             RgbColor color;
             if (!division) {
                 color = GetRGBTranslateColorShade(GREEN, kSectorLineBrightness);
@@ -715,7 +691,7 @@ void draw_sector_lines() {
             }
 
             // TODO(sfiera): +1 on right no longer needed.
-            rects.fill({viewport.left, x, viewport.right + 1, x + 1}, color);
+            rects.fill({viewport().left, x, viewport().right + 1, x + 1}, color);
 
             division += level;
             division &= 0x0000000f;
@@ -936,8 +912,8 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
     int8_t hue = gBarIndicator[which].color;
     Rect bar(0, 0, kBarIndicatorWidth, kBarIndicatorHeight);
     bar.offset(
-            kBarIndicatorLeft + play_screen.right,
-            gBarIndicator[which].top);
+            kBarIndicatorLeft + play_screen().right,
+            gBarIndicator[which].top + instrument_top());
     if (graphicValue < kBarIndicatorHeight) {
         Rect top_bar = bar;
         top_bar.bottom = top_bar.bottom - graphicValue;

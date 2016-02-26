@@ -687,9 +687,6 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
             GL_TEXTURE_2D, 0, GL_RG, size, size, 0, GL_RG,
             GL_UNSIGNED_BYTE, static_data.get());
 
-    auto screen = driver.screen_size();
-    driver._uniforms.screen.set({screen.width * 1.0f, screen.height * 1.0f});
-    driver._uniforms.scale.set(driver.scale());
     driver._uniforms.sprite.set(0);
     driver._uniforms.static_image.set(1);
 }
@@ -706,6 +703,10 @@ void OpenGlVideoDriver::MainLoop::draw() {
 
     glClear(GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, _driver.viewport_size().width, _driver.viewport_size().height);
+
+    auto screen = _driver.screen_size();
+    _driver._uniforms.screen.set({screen.width * 1.0f, screen.height * 1.0f});
+    _driver._uniforms.scale.set(_driver.scale());
 
     int32_t seed = {_driver._static_seed.next(256)};
     seed <<= 8;

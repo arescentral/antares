@@ -117,6 +117,8 @@ struct GlobalState {
     Handle<Label>             message_label;  // Destroyed, captured, lost messages.
     Handle<Label>             status_label;   // Autopilot, zoom, low shields messages.
     Handle<Label>             send_label;     // Message local player is currently entering.
+
+    int32_t                   bottom_border;  // When a message is being displayed.
 };
 
 extern GlobalState g;
@@ -174,9 +176,9 @@ struct aresGlobalType {
 aresGlobalType* globals();
 void init_globals();
 
-extern Rect world;
-extern Rect play_screen;
-extern Rect viewport;
+Rect world();
+Rect play_screen();
+Rect viewport();
 
 }  // namespace antares
 

@@ -48,7 +48,6 @@ using antares::Preferences;
 using antares::PrefsDriver;
 using antares::SoundDriver;
 using antares::VideoDriver;
-using antares::world;
 
 namespace utf8 = sfz::utf8;
 
@@ -57,11 +56,6 @@ struct AntaresDrivers {
     CocoaVideoDriver video;
     OpenAlSoundDriver sound;
     DirectoryLedger ledger;
-
-    AntaresDrivers():
-            video(
-                    Preferences::preferences()->fullscreen(),
-                    Preferences::preferences()->screen_size()) { }
 };
 
 namespace antares {

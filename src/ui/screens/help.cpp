@@ -39,14 +39,8 @@ namespace utf8 = sfz::utf8;
 namespace antares {
 
 HelpScreen::HelpScreen():
-        InterfaceScreen("help", play_screen, false),
+        InterfaceScreen("help", {128, 0, 608, 480}, false),
         _text(computer_font) {
-    // TODO(sfiera): top and bottom buffer of 1, not just top buffer of 2.
-    offset((world.width() / 2) - (viewport.width() / 2), 2);
-
-    _bounds = item(BOX).bounds();
-    _bounds.offset(viewport.left, 0);
-
     Resource rsrc("text", "txt", 6002);
     String text(utf8::decode(rsrc.data()));
     Replace_KeyCode_Strings_With_Actual_Key_Names(&text, 1000, 4);
@@ -56,7 +50,7 @@ HelpScreen::HelpScreen():
     _text.set_fore_color(fore);
     _text.set_back_color(back);
     _text.set_retro_text(text);
-    _text.wrap_to(_bounds.width(), 0, 0);
+    _text.wrap_to(item(BOX).bounds().width(), 0, 0);
 }
 
 HelpScreen::~HelpScreen() { }
@@ -81,7 +75,10 @@ void HelpScreen::handle_button(Button& button) {
 }
 
 void HelpScreen::overlay() const {
-    _text.draw(_bounds);
+    Rect bounds = item(BOX).bounds();
+    Point off = offset();
+    bounds.offset(off.h, off.v);
+    _text.draw(bounds);
 }
 
 }  // namespace antares

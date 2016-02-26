@@ -113,10 +113,10 @@ void main(int argc, char* const* argv) {
     }
 
     if (text) {
-        TextVideoDriver video(Preferences::preferences()->screen_size(), scheduler, output_dir);
+        TextVideoDriver video({640, 480}, scheduler, output_dir);
         video.loop(new Master(14586));
     } else {
-        OffscreenVideoDriver video(Preferences::preferences()->screen_size(), output_dir);
+        OffscreenVideoDriver video({640, 480}, output_dir);
         video.loop(new Master(14586), scheduler);
     }
 }

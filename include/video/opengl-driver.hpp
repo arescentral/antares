@@ -92,7 +92,6 @@ class OpenGlVideoDriver : public VideoDriver {
     };
 
     virtual Size viewport_size() const = 0;
-    virtual Size screen_size() const = 0;
 
   private:
     virtual void begin_points();

@@ -43,7 +43,7 @@ void Cursor::draw() const {
 }
 
 void Cursor::draw_at(Point where) const {
-    if (world.contains(where)) {
+    if (world().contains(where)) {
         where.offset(-_sprite.at(0).center().h, -_sprite.at(0).center().v);
         _sprite.at(0).texture().draw(where.h, where.v);
     }
@@ -63,31 +63,31 @@ Point GameCursor::clamped_location() {
 
 Point GameCursor::clamp(Point p) {
     // Do the cursor, too, unless this is a replay.
-    if (p.h > (viewport.right - kCursorBoundsSize - 1)) {
-        p.h = viewport.right - kCursorBoundsSize - 1;
+    if (p.h > (viewport().right - kCursorBoundsSize - 1)) {
+        p.h = viewport().right - kCursorBoundsSize - 1;
     }
-    if (p.v < (viewport.top + kCursorBoundsSize)) {
-        p.v = viewport.top + kCursorBoundsSize;
-    } else if (p.v > (play_screen.bottom - kCursorBoundsSize - 1)) {
-        p.v = play_screen.bottom - kCursorBoundsSize - 1;
+    if (p.v < (viewport().top + kCursorBoundsSize)) {
+        p.v = viewport().top + kCursorBoundsSize;
+    } else if (p.v > (play_screen().bottom - kCursorBoundsSize - 1)) {
+        p.v = play_screen().bottom - kCursorBoundsSize - 1;
     }
     return p;
 }
 
 void GameCursor::mouse_down(const MouseDownEvent& event) {
-    if (event.where().h >= viewport.left) {
+    if (event.where().h >= viewport().left) {
         wake();
     }
 }
 
 void GameCursor::mouse_up(const MouseUpEvent& event) {
-    if (event.where().h >= viewport.left) {
+    if (event.where().h >= viewport().left) {
         wake();
     }
 }
 
 void GameCursor::mouse_move(const MouseMoveEvent& event) {
-    if (event.where().h >= viewport.left) {
+    if (event.where().h >= viewport().left) {
         wake();
     }
 }
@@ -131,7 +131,7 @@ void GameCursor::draw() const {
 
     where = clamp(where);
     if (active()) {
-        const Rect clip_rect = viewport;
+        const Rect clip_rect = viewport();
         const RgbColor color = GetRGBTranslateColorShade(SKY_BLUE, MEDIUM);
 
         Point top_a = Point(where.h, clip_rect.top);
@@ -140,21 +140,21 @@ void GameCursor::draw() const {
         Point bottom_b = Point(where.h, clip_rect.bottom - 1);
         Point left_a = Point(clip_rect.left, where.v);
         Point left_b = Point((where.h - kCursorBoundsSize), where.v);
-        Point right_a = Point(std::max(viewport.left, where.h + kCursorBoundsSize), where.v);
+        Point right_a = Point(std::max(viewport().left, where.h + kCursorBoundsSize), where.v);
         Point right_b = Point(clip_rect.right - 1, where.v);
 
         Rects rects;
-        if (top_a.h >= viewport.left) {
+        if (top_a.h >= viewport().left) {
             rects.fill({top_a.h, top_a.v, top_b.h + 1, top_b.v + 1}, color);
             rects.fill({bottom_a.h, bottom_a.v, bottom_b.h + 1, bottom_b.v + 1}, color);
         }
         rects.fill({right_a.h, right_a.v, right_b.h + 1, right_b.v + 1}, color);
-        if (left_b.h >= viewport.left) {
+        if (left_b.h >= viewport().left) {
             rects.fill({left_a.h, left_a.v, left_b.h + 1, left_b.v + 1}, color);
         }
     }
 
-    if (where.h < viewport.left) {
+    if (where.h < viewport().left) {
         draw_at(where);
     }
 }

@@ -56,10 +56,8 @@ InterfaceScreen::InterfaceScreen(sfz::Json json, const Rect& bounds, bool full_s
         _full_screen(full_screen),
         _hit_button(nullptr) {
     _items = interface_items(0, json);
-    const int offset_x = (_bounds.width() / 2) - 320;
-    const int offset_y = (_bounds.height() / 2) - 240;
     for (auto& item: _items) {
-        item->bounds().offset(offset_x, offset_y);
+        item->bounds().offset(bounds.left, bounds.top);
     }
 }
 
@@ -96,6 +94,7 @@ void InterfaceScreen::become_normal() {
 }
 
 void InterfaceScreen::draw() const {
+    Point off = offset();
     Rect copy_area;
     if (_full_screen) {
         copy_area = _bounds;
@@ -108,12 +107,12 @@ void InterfaceScreen::draw() const {
             copy_area.enlarge_to(r);
         }
     }
+    copy_area.offset(off.h, off.v);
 
-    copy_area.offset(_bounds.left, _bounds.top);
     Rects().fill(copy_area, RgbColor::kBlack);
 
     for (const auto& item: _items) {
-        draw_interface_item(*item, VideoDriver::driver()->input_mode(), _bounds.origin());
+        draw_interface_item(*item, VideoDriver::driver()->input_mode(), off);
     }
     overlay();
     if (stack()->top() == this) {
@@ -123,8 +122,9 @@ void InterfaceScreen::draw() const {
 
 void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
     Point where = event.where();
-    where.h -= _bounds.left;
-    where.v -= _bounds.top;
+    Point off = offset();
+    where.h -= off.h;
+    where.v -= off.v;
     if (event.button() != 0) {
         return;
     }
@@ -146,8 +146,9 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
 
 void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
     Point where = event.where();
-    where.h -= _bounds.left;
-    where.v -= _bounds.top;
+    Point off = offset();
+    where.h -= _bounds.left + off.h;
+    where.v -= _bounds.top + off.v;
     if (event.button() != 0) {
         return;
     }
@@ -241,6 +242,12 @@ void InterfaceScreen::extend(const Json& json) {
     }
 }
 
+Point InterfaceScreen::offset() const {
+    Rect bounds = {0, 0, 640, 480};
+    bounds.center_in(VideoDriver::driver()->screen_size().as_rect());
+    return bounds.origin();
+}
+
 size_t InterfaceScreen::size() const {
     return _items.size();
 }
@@ -251,12 +258,6 @@ const InterfaceItem& InterfaceScreen::item(int i) const {
 
 InterfaceItem& InterfaceScreen::mutable_item(int i) {
     return *_items[i];
-}
-
-void InterfaceScreen::offset(int offset_x, int offset_y) {
-    for (auto& item: _items) {
-        item->bounds().offset(offset_x, offset_y);
-    }
 }
 
 }  // namespace antares

@@ -430,9 +430,7 @@
             [ "src/mac/audio-file.cpp"
             , "src/mac/core-foundation.cpp"
             , "src/mac/core-opengl.cpp"
-            , "src/mac/fullscreen.cpp"
             , "src/mac/http.cpp"
-            , "src/mac/windowed.cpp"
             ]
           , "dependencies":
             [ "<(DEPTH)/ext/libpng-gyp/libpng.gyp:libpng"

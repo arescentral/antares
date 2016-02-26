@@ -231,7 +231,7 @@ LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
     if (do_score) {
         text_bounds.bottom += kScoreTableHeight;
     }
-    text_bounds.center_in(viewport);
+    text_bounds.center_in(viewport());
 
     LabeledRect data_item = interface_item(text_bounds);
     _pix_bounds = pix_bounds(data_item);

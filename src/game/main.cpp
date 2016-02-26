@@ -80,14 +80,24 @@ namespace path = sfz::path;
 
 namespace antares {
 
-ANTARES_GLOBAL Rect world;
-ANTARES_GLOBAL Rect play_screen;
-ANTARES_GLOBAL Rect viewport;
-
 #ifdef DATA_COVERAGE
 extern set<int32_t> covered_objects;
 extern set<int32_t> covered_actions;
 #endif  // DATA_COVERAGE
+
+Rect world() {
+    return Rect({0, 0}, VideoDriver::driver()->screen_size());
+}
+
+Rect play_screen() {
+    const Size size = VideoDriver::driver()->screen_size();
+    return Rect(kLeftPanelWidth, 0, size.width - kRightPanelWidth, size.height);
+}
+
+Rect viewport() {
+    const Size size = VideoDriver::driver()->screen_size();
+    return Rect(kLeftPanelWidth, 0, size.width - kRightPanelWidth, size.height - g.bottom_border);
+}
 
 class GamePlay : public Card {
   public:
@@ -285,7 +295,7 @@ GamePlay::GamePlay(
         _game_result(game_result),
         _seconds(seconds),
         _next_timer(add_ticks(now_usecs(), 1)),
-        _play_area(viewport.left, viewport.top, viewport.right, viewport.bottom),
+        _play_area(viewport().left, viewport().top, viewport().right, viewport().bottom),
         _scenario_start_time(add_ticks(
                     0,
                     (g.level->startTime & kScenario_StartTimeMask)
@@ -304,7 +314,7 @@ class PauseScreen : public Card {
         _pause_string.assign(list.at(10));
         int32_t width = title_font->string_width(_pause_string);
         Rect bounds(0, 0, width, title_font->height);
-        bounds.center_in(play_screen);
+        bounds.center_in(play_screen());
         _text_origin = Point(bounds.left, bounds.top + title_font->ascent);
 
         bounds.inset(-4, -4);
@@ -357,7 +367,7 @@ class PauseScreen : public Card {
             title_font->draw(_text_origin, _pause_string, light_green);
         }
         if (asleep()) {
-            Rects().fill(world, RgbColor(63, 0, 0, 0));
+            Rects().fill(world(), RgbColor(63, 0, 0, 0));
         }
     }
 

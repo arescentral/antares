@@ -61,7 +61,7 @@ LabeledRect data_item(const InterfaceItem& map_rect) {
 }  // namespace
 
 BriefingScreen::BriefingScreen(const Scenario* scenario, bool* cancelled)
-        : InterfaceScreen("briefing", world, true),
+        : InterfaceScreen("briefing", {0, 0, 640, 480}, true),
           _scenario(scenario),
           _cancelled(cancelled),
           _briefing_point(0),
@@ -91,15 +91,20 @@ void BriefingScreen::overlay() const {
     switch (_briefing_point) {
       case STAR_MAP:
         {
-            const Point star = _star_rect.center();
+            Point off = offset();
+            Rect star_rect = _star_rect;
+            star_rect.offset(off.h, off.v);
+            const Point star = star_rect.center();
             RgbColor gold = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
-            _star_map.draw_cropped(_bounds, Rect(Point(0, 2), _bounds.size()));
+            Rect bounds = _bounds;
+            bounds.offset(off.h, off.v);
+            _star_map.draw_cropped(bounds, Rect(Point(0, 2), bounds.size()));
             Rects rects;
-            draw_vbracket(rects, _star_rect, gold);
-            rects.fill({star.h, _bounds.top, star.h + 1, _star_rect.top + 1}, gold);
-            rects.fill({star.h, _star_rect.bottom, star.h + 1, _bounds.bottom + 1}, gold);
-            rects.fill({_bounds.left, star.v, _star_rect.left + 1, star.v + 1}, gold);
-            rects.fill({_star_rect.right - 1, star.v, _bounds.right + 1, star.v + 1}, gold);
+            draw_vbracket(rects, star_rect, gold);
+            rects.fill({star.h, bounds.top, star.h + 1, star_rect.top + 1}, gold);
+            rects.fill({star.h, star_rect.bottom, star.h + 1, bounds.bottom + 1}, gold);
+            rects.fill({bounds.left, star.v, star_rect.left + 1, star.v + 1}, gold);
+            rects.fill({star_rect.right - 1, star.v, bounds.right + 1, star.v + 1}, gold);
         }
         break;
 
@@ -114,8 +119,11 @@ void BriefingScreen::overlay() const {
 }
 
 void BriefingScreen::mouse_down(const MouseDownEvent& event) {
+    Point off = offset();
+    Point where = event.where();
+    where.offset(-off.h, -off.v);
     for (size_t i = 0; i < _inline_pict.size(); ++i) {
-        if (_inline_pict[i].bounds.contains(event.where())) {
+        if (_inline_pict[i].bounds.contains(where)) {
             const int pict_id = _inline_pict[i].id;
             for (auto obj: BaseObject::all()) {
                 if (obj->pictPortraitResID == pict_id) {
@@ -249,12 +257,15 @@ void BriefingScreen::build_brief_point() {
 }
 
 void BriefingScreen::draw_system_map() const {
+    Point off = offset();
     {
         Points points;
         for (int i = 0; i < _system_stars.size(); ++i) {
             const Star& star = _system_stars[i];
             RgbColor star_color = GetRGBTranslateColorShade(GRAY, star.shade + DARKEST);
-            points.draw(star.location, star_color);
+            Point location = star.location;
+            location.offset(off.h, off.v);
+            points.draw(location, star_color);
         }
     }
 
@@ -262,38 +273,45 @@ void BriefingScreen::draw_system_map() const {
     int32_t scale;
     Rect pix_bounds = _bounds.size().as_rect();
     GetScenarioFullScaleAndCorner(_scenario, 0, &corner, &scale, &pix_bounds);
-    draw_arbitrary_sector_lines(corner, scale, 16, _bounds);
-    draw_briefing_objects(_bounds.origin(), 32, pix_bounds, corner, scale);
+    Rect bounds = _bounds;
+    bounds.offset(off.h, off.v);
+    draw_arbitrary_sector_lines(corner, scale, 16, bounds);
+    draw_briefing_objects(bounds.origin(), 32, pix_bounds, corner, scale);
 }
 
 void BriefingScreen::draw_brief_point() const {
     draw_system_map();
 
+    Point off = offset();
     if (!_highlight_rect.empty()) {
+        Rect highlight_rect = _highlight_rect;
+        highlight_rect.offset(off.h, off.v);
         Rects rects;
         const RgbColor very_light = GetRGBTranslateColorShade(kMissionDataHiliteColor, VERY_LIGHT);
         rects.fill(
-                {_highlight_rect.left, _highlight_rect.top,
-                _highlight_rect.right, _highlight_rect.top + 1},
+                {highlight_rect.left, highlight_rect.top,
+                highlight_rect.right, highlight_rect.top + 1},
                 very_light);
         rects.fill(
-                {_highlight_rect.right - 1, _highlight_rect.top,
-                _highlight_rect.right, _highlight_rect.bottom},
+                {highlight_rect.right - 1, highlight_rect.top,
+                highlight_rect.right, highlight_rect.bottom},
                 very_light);
         rects.fill(
-                {_highlight_rect.left, _highlight_rect.bottom - 1,
-                _highlight_rect.right, _highlight_rect.bottom},
+                {highlight_rect.left, highlight_rect.bottom - 1,
+                highlight_rect.right, highlight_rect.bottom},
                 very_light);
         rects.fill(
-                {_highlight_rect.left, _highlight_rect.top,
-                _highlight_rect.left + 1, _highlight_rect.bottom},
+                {highlight_rect.left, highlight_rect.top,
+                highlight_rect.left + 1, highlight_rect.bottom},
                 very_light);
 
         const RgbColor medium = GetRGBTranslateColorShade(kMissionDataHiliteColor, MEDIUM);
         for (size_t i = 0; i < _highlight_lines.size(); ++i) {
             using std::swap;
             Point p1 = _highlight_lines[i].first;
+            p1.offset(off.h, off.v);
             Point p2 = _highlight_lines[i].second;
+            p2.offset(off.h, off.v);
             if (p1.h > p2.h) {
                 swap(p1.h, p2.h);
             }
@@ -306,10 +324,13 @@ void BriefingScreen::draw_brief_point() const {
 
     Rect bounds;
     GetAnyInterfaceItemGraphicBounds(_data_item, &bounds);
+    bounds.offset(off.h, off.v);
     Rects().fill(bounds, RgbColor::kBlack);
-    draw_interface_item(_data_item, KEYBOARD_MOUSE);
+    draw_interface_item(_data_item, KEYBOARD_MOUSE, off);
     vector<inlinePictType> unused;
-    draw_text_in_rect(_data_item.bounds(), _text, _data_item.style, _data_item.hue, unused);
+    bounds = _data_item.bounds();
+    bounds.offset(off.h, off.v);
+    draw_text_in_rect(bounds, _text, _data_item.style, _data_item.hue, unused);
 }
 
 void BriefingScreen::show_object_data(int index, const KeyDownEvent& event) {
