@@ -69,6 +69,7 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     EventTranslator _translator;
 
     EventTracker _event_tracker;
+    AntaresWindow* _window = nullptr;
 
     DISALLOW_COPY_AND_ASSIGN(CocoaVideoDriver);
 };

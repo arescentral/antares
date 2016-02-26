@@ -32,7 +32,6 @@
 #include "mac/c/CocoaVideoDriver.h"
 #include "mac/core-opengl.hpp"
 #include "mac/core-foundation.hpp"
-#include "mac/windowed.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
 #include "ui/event.hpp"
@@ -50,6 +49,23 @@ int64_t usecs() {
     gettimeofday(&tv, NULL);
     return tv.tv_sec * 1000000ll + tv.tv_usec;
 }
+
+class AntaresWindow {
+  public:
+    AntaresWindow(
+            const cgl::PixelFormat& pixel_format, const cgl::Context& context, Size screen_size,
+            bool retina):
+        _c_obj(antares_window_create(
+                    pixel_format.c_obj(), context.c_obj(),
+                    screen_size.width, screen_size.height, retina)) { }
+
+    ~AntaresWindow() { antares_window_destroy(_c_obj); }
+
+    ::AntaresWindow* c_obj() const { return _c_obj; }
+
+  private:
+    ::AntaresWindow* _c_obj;
+};
 
 }  // namespace
 
@@ -232,9 +248,13 @@ void CocoaVideoDriver::loop(Card* initial) {
 
     cgl::PixelFormat pixel_format(attrs);
     cgl::Context context(pixel_format.c_obj(), NULL);
-    CocoaWindowed windowed(pixel_format, context, _screen_size, true);
-    antares_event_translator_set_window(_translator.c_obj(), windowed.window());
-    _viewport_size = windowed.viewport_size();
+    AntaresWindow window(pixel_format, context, _screen_size, true);
+    _window = window.c_obj();
+    antares_event_translator_set_window(_translator.c_obj(), window.c_obj());
+    _viewport_size = {
+        antares_window_viewport_width(window.c_obj()),
+        antares_window_viewport_height(window.c_obj()),
+    };
     GLint swap_interval = 1;
     CGLSetParameter(context.c_obj(), kCGLCPSwapInterval, &swap_interval);
     CGLSetCurrentContext(context.c_obj());
