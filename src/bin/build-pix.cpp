@@ -36,7 +36,9 @@ using sfz::args::store;
 using sfz::dec;
 using sfz::format;
 using sfz::write;
+using std::pair;
 using std::unique_ptr;
+using std::vector;
 
 namespace io = sfz::io;
 namespace utf8 = sfz::utf8;
@@ -45,56 +47,32 @@ namespace args = sfz::args;
 namespace antares {
 namespace {
 
-class SizePix : public Card {
-  public:
-    SizePix(int id, int32_t width, int32_t* height): _id(id), _width(width), _height(height) { }
-    virtual void become_front() { InitDirectText(); }
-    virtual void draw() const { *_height = BuildPix(_id, _width).size().height; }
-
-  private:
-    const int _id;
-    const int32_t _width;
-    int32_t* const _height;
-};
-
 class DrawPix : public Card {
   public:
-    DrawPix(int id, int32_t width): _id(id), _width(width) { }
-    virtual void become_front() { InitDirectText(); }
-    virtual void draw() const { BuildPix(_id, _width).draw({0, 0}); }
+    DrawPix(OffscreenVideoDriver& driver, int16_t id, int32_t width):
+            _driver(driver),
+            _id(id),
+            _width(width) { }
 
-  private:
-    const int _id;
-    const int32_t _width;
-};
-
-class PixBuilder {
-  public:
-    PixBuilder(const Optional<String>& output_dir)
-            : _output_dir(output_dir) { }
-
-    void save(int id, int32_t width) {
-        Size size = {width, 480};
-
-        // One time to figure out the height of the output.
-        // (we need an active, looping offscreen driver for this)
-        {
-            OffscreenVideoDriver off(size, {});
-            off.capture(new SizePix(id, width, &size.height), format("{0}.png", dec(id, 5)));
-        }
-
-        // One time for real, with a driver sized appropriately.
-        {
-            OffscreenVideoDriver off(size, _output_dir);
-            off.capture(new DrawPix(id, width), format("{0}.png", dec(id, 5)));
-        }
+    virtual void draw() const {
+        BuildPix pix(_id, _width);
+        pix.draw({0, 0});
+        _driver.set_capture_rect({0, 0, _width, pix.size().height});
     }
 
   private:
-    const Optional<String> _output_dir;
-
-    DISALLOW_COPY_AND_ASSIGN(PixBuilder);
+    OffscreenVideoDriver& _driver;
+    const int16_t _id;
+    const int32_t _width;
 };
+
+static void add(
+        vector<pair<unique_ptr<Card>, String>>& pix,
+        OffscreenVideoDriver& driver, int16_t id, int32_t width) {
+    pix.emplace_back(
+            unique_ptr<Card>(new DrawPix(driver, id, width)),
+            String(format("{0}.png", dec(id, 5))));
+}
 
 int main(int argc, char* const* argv) {
     args::Parser parser(argv[0], "Builds all of the scrolling text images in the game");
@@ -117,20 +95,23 @@ int main(int argc, char* const* argv) {
 
     NullPrefsDriver prefs;
 
-    PixBuilder builder(output_dir);
-    builder.save(3020, 450);  // Gaitori prologue
-    builder.save(3025, 450);  // Tutorial prologue
-    builder.save(3080, 450);  // Cantharan prologue
-    builder.save(3081, 450);  // Cantharan epilogue
-    builder.save(3120, 450);  // Salrilian prologue
-    builder.save(3211, 450);  // Game epilogue
-    builder.save(4063, 450);  // Bazidanese prologue
-    builder.save(4509, 450);  // Elejeetian prologue
-    builder.save(4606, 450);  // Audemedon prologue
-    builder.save(5600, 450);  // Story introduction
-    builder.save(6500, 540);  // Credits text
-    builder.save(6501, 450);  // Please register
-    builder.save(10199, 450);  // Unused Gaitori prologue
+    OffscreenVideoDriver off({540, 2000}, output_dir);
+    vector<pair<unique_ptr<Card>, String>> pix;
+    add(pix, off, 3020, 450);  // Gaitori prologue
+    add(pix, off, 3025, 450);  // Tutorial prologue
+    add(pix, off, 3080, 450);  // Cantharan prologue
+    add(pix, off, 3081, 450);  // Cantharan epilogue
+    add(pix, off, 3120, 450);  // Salrilian prologue
+    add(pix, off, 3211, 450);  // Game epilogue
+    add(pix, off, 4063, 450);  // Bazidanese prologue
+    add(pix, off, 4509, 450);  // Elejeetian prologue
+    add(pix, off, 4606, 450);  // Audemedon prologue
+    add(pix, off, 5600, 450);  // Story introduction
+    add(pix, off, 6500, 540);  // Credits text
+    add(pix, off, 6501, 450);  // Please register
+    add(pix, off, 10199, 450);  // Unused Gaitori prologue
+
+    off.capture(pix);
 
     return 0;
 }

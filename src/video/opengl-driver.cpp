@@ -201,10 +201,11 @@ void gl_log(GLint object) {
 
 class OpenGlTextureImpl : public Texture::Impl {
   public:
-    OpenGlTextureImpl(PrintItem name, const PixMap& image, const OpenGlVideoDriver::Uniforms& uniforms)
+    OpenGlTextureImpl(PrintItem name, const PixMap& image, const OpenGlVideoDriver::Uniforms& uniforms, GLuint vbuf[3])
             : _name(name),
               _size(image.size()),
-              _uniforms(uniforms) {
+              _uniforms(uniforms),
+              _vbuf(vbuf) {
         glBindTexture(GL_TEXTURE_RECTANGLE, _texture.id);
         glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -279,10 +280,7 @@ class OpenGlTextureImpl : public Texture::Impl {
         glEnableVertexAttribArray(1);
         glEnableVertexAttribArray(2);
 
-        GLuint vbuf[3];
-        glGenBuffers(3, vbuf);
-
-        glBindBuffer(GL_ARRAY_BUFFER, vbuf[0]);
+        glBindBuffer(GL_ARRAY_BUFFER, _vbuf[0]);
         GLshort vertices[] = {
             GLshort(draw_rect.left), GLshort(draw_rect.top),
             GLshort(draw_rect.left), GLshort(draw_rect.bottom),
@@ -292,7 +290,7 @@ class OpenGlTextureImpl : public Texture::Impl {
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
         glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, 0, nullptr);
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbuf[1]);
+        glBindBuffer(GL_ARRAY_BUFFER, _vbuf[1]);
         GLubyte colors[] = {
             tint.red, tint.green, tint.blue, tint.alpha,
             tint.red, tint.green, tint.blue, tint.alpha,
@@ -302,7 +300,7 @@ class OpenGlTextureImpl : public Texture::Impl {
         glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STREAM_DRAW);
         glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbuf[2]);
+        glBindBuffer(GL_ARRAY_BUFFER, _vbuf[2]);
         const int32_t w = _size.width;
         const int32_t h = _size.height;
         GLshort tex_coords[] = {
@@ -317,8 +315,6 @@ class OpenGlTextureImpl : public Texture::Impl {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_RECTANGLE, _texture.id);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-        glDeleteBuffers(3, vbuf);
 
         glDisableVertexAttribArray(2);
         glDisableVertexAttribArray(1);
@@ -339,10 +335,7 @@ class OpenGlTextureImpl : public Texture::Impl {
         glEnableVertexAttribArray(1);
         glEnableVertexAttribArray(2);
 
-        GLuint vbuf[3];
-        glGenBuffers(3, vbuf);
-
-        glBindBuffer(GL_ARRAY_BUFFER, vbuf[0]);
+        glBindBuffer(GL_ARRAY_BUFFER, _vbuf[0]);
         GLshort vertices[] = {
             GLshort(dest.left), GLshort(dest.top),
             GLshort(dest.left), GLshort(dest.bottom),
@@ -352,7 +345,7 @@ class OpenGlTextureImpl : public Texture::Impl {
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
         glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, 0, nullptr);
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbuf[1]);
+        glBindBuffer(GL_ARRAY_BUFFER, _vbuf[1]);
         GLubyte colors[] = {
             tint.red, tint.green, tint.blue, tint.alpha,
             tint.red, tint.green, tint.blue, tint.alpha,
@@ -364,7 +357,7 @@ class OpenGlTextureImpl : public Texture::Impl {
 
         Rect texture_rect = source;
         texture_rect.offset(1, 1);
-        glBindBuffer(GL_ARRAY_BUFFER, vbuf[2]);
+        glBindBuffer(GL_ARRAY_BUFFER, _vbuf[2]);
         GLshort tex_coords[] = {
             GLshort(texture_rect.left), GLshort(texture_rect.top),
             GLshort(texture_rect.left), GLshort(texture_rect.bottom),
@@ -377,8 +370,6 @@ class OpenGlTextureImpl : public Texture::Impl {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_RECTANGLE, _texture.id);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-        glDeleteBuffers(3, vbuf);
 
         glDisableVertexAttribArray(2);
         glDisableVertexAttribArray(1);
@@ -397,6 +388,7 @@ class OpenGlTextureImpl : public Texture::Impl {
     Texture _texture;
     Size _size;
     const OpenGlVideoDriver::Uniforms& _uniforms;
+    GLuint* _vbuf;
 
     DISALLOW_COPY_AND_ASSIGN(OpenGlTextureImpl);
 };
@@ -411,7 +403,7 @@ int OpenGlVideoDriver::scale() const {
 }
 
 Texture OpenGlVideoDriver::texture(PrintItem name, const PixMap& content) {
-    return unique_ptr<Texture::Impl>(new OpenGlTextureImpl(name, content, _uniforms));
+    return unique_ptr<Texture::Impl>(new OpenGlTextureImpl(name, content, _uniforms, _vbuf));
 }
 
 void OpenGlVideoDriver::begin_rects() {
@@ -422,10 +414,7 @@ void OpenGlVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
-    GLuint vbuf[2];
-    glGenBuffers(2, vbuf);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbuf[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbuf[0]);
     GLshort vertices[] = {
         GLshort(rect.right), GLshort(rect.top),
         GLshort(rect.left), GLshort(rect.top),
@@ -435,7 +424,7 @@ void OpenGlVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
     glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, 0, nullptr);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbuf[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbuf[1]);
     GLubyte colors[] = {
         color.red, color.green, color.blue, color.alpha,
         color.red, color.green, color.blue, color.alpha,
@@ -446,8 +435,6 @@ void OpenGlVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
     glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-    glDeleteBuffers(2, vbuf);
 
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(0);
@@ -472,15 +459,12 @@ void OpenGlVideoDriver::batch_point(const Point& at, const RgbColor& color) {
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
-    GLuint vbuf[2];
-    glGenBuffers(2, vbuf);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbuf[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbuf[0]);
     GLfloat vertices[] = {GLfloat(at.h + 0.5), GLfloat(at.v + 0.5)};
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbuf[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbuf[1]);
     GLubyte colors[] = {
         color.red, color.green, color.blue, color.alpha,
     };
@@ -488,8 +472,6 @@ void OpenGlVideoDriver::batch_point(const Point& at, const RgbColor& color) {
     glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
 
     glDrawArrays(GL_POINTS, 0, 1);
-
-    glDeleteBuffers(2, vbuf);
 
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(0);
@@ -545,15 +527,12 @@ void OpenGlVideoDriver::batch_line(
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
-    GLuint vbuf[2];
-    glGenBuffers(2, vbuf);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbuf[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbuf[0]);
     GLfloat vertices[] = {x1, y1, x2, y2};
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbuf[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbuf[1]);
     GLubyte colors[] = {
         color.red, color.green, color.blue, color.alpha,
         color.red, color.green, color.blue, color.alpha,
@@ -562,8 +541,6 @@ void OpenGlVideoDriver::batch_line(
     glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
 
     glDrawArrays(GL_LINES, 0, 2);
-
-    glDeleteBuffers(2, vbuf);
 
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(0);
@@ -657,6 +634,8 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     GLuint array;
     glGenVertexArrays(1, &array);
     glBindVertexArray(array);
+
+    glGenBuffers(3, driver._vbuf);
 
     driver._uniforms.screen.load(program);
     driver._uniforms.scale.load(program);

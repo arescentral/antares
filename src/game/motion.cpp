@@ -429,6 +429,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
 // nothing below can effect any object actions (expire actions get executed)
 // (but they can effect objects thinking)
 // !!!!!!!!
+    const Rect viewport = antares::viewport();
     for (Handle<SpaceObject> o = g.root; o.get(); o = o->nextObject) {
         if (o->active != kObjectInUse) {
             continue;
@@ -440,7 +441,7 @@ void MoveSpaceObjects(const int32_t unitsToDo) {
         int32_t h = (o->location.h - gGlobalCorner.h) * gAbsoluteScale;
         h >>= SHIFT_SCALE;
         if ((h > -kSpriteMaxSize) && (h < kSpriteMaxSize)) {
-            sprite.where.h = h + viewport().left;
+            sprite.where.h = h + viewport.left;
         } else {
             sprite.where.h = -kSpriteMaxSize;
         }
