@@ -36,7 +36,13 @@ enum dutyType {
 
 class SpaceObject {
   public:
-    static SpaceObject* get(int number);
+    static SpaceObject* get(int number) {
+        if ((0 <= number) && (number < kMaxSpaceObject)) {
+            return &g.objects[number];
+        }
+        return nullptr;
+    }
+
     static Handle<SpaceObject> none() { return Handle<SpaceObject>(-1); }
     static HandleList<SpaceObject> all() { return HandleList<SpaceObject>(0, kMaxSpaceObject); }
 

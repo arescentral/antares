@@ -122,13 +122,6 @@ BaseObject* BaseObject::get(int number) {
     return nullptr;
 }
 
-SpaceObject* SpaceObject::get(int32_t number) {
-    if ((0 <= number) && (number < kMaxSpaceObject)) {
-        return &g.objects[number];
-    }
-    return nullptr;
-}
-
 Action* Action::get(int32_t number) {
     if ((0 <= number) && (number < plug.actions.size())) {
         return &plug.actions[number];
