@@ -70,22 +70,6 @@ void print_to(PrintTarget target, HexColor color) {
     }
 }
 
-class File {
-  public:
-    File(int fd, const char* mode): _file(fdopen(fd, mode)) { }
-    ~File() { fclose(_file); }
-    void push(const sfz::BytesSlice& bytes) {
-        fwrite(bytes.data(), 1, bytes.size(), _file);
-    }
-    void push(size_t num, uint8_t byte) {
-        for (int i: sfz::range(num)) {
-            fwrite(&byte, 1, 1, _file);
-        }
-    }
-  private:
-    FILE* _file;
-};
-
 }  // namespace
 
 class TextVideoDriver::TextureImpl : public Texture::Impl {
@@ -185,8 +169,8 @@ class TextVideoDriver::MainLoop : public EventScheduler::MainLoop {
         String dir(format("{0}/screens", *_output_dir));
         makedirs(dir, 0755);
         String path(format("{0}/{1}.txt", dir, dec(ticks, 6)));
-        File file(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644), "w");
-        write(file, utf8::encode(_driver._log));
+        sfz::ScopedFd file(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
+        write(file, sfz::Bytes(utf8::encode(_driver._log)));
     }
 
     void draw() {
