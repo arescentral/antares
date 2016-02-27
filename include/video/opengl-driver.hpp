@@ -114,6 +114,8 @@ class OpenGlVideoDriver : public VideoDriver {
     std::map<size_t, Texture> _diamonds;
     std::map<size_t, Texture> _pluses;
 
+    uint32_t _vbuf[3];
+
     DISALLOW_COPY_AND_ASSIGN(OpenGlVideoDriver);
 };
 
