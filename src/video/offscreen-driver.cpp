@@ -26,6 +26,7 @@
 
 #include "config/preferences.hpp"
 #include "drawing/pix-map.hpp"
+#include "drawing/text.hpp"
 #include "game/time.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
@@ -56,6 +57,8 @@ using sfz::format;
 using sfz::range;
 using std::greater;
 using std::max;
+using std::pair;
+using std::unique_ptr;
 using std::vector;
 
 namespace path = sfz::path;
@@ -129,7 +132,7 @@ struct Renderbuffer {
 class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
   public:
     MainLoop(OffscreenVideoDriver& driver, const Optional<String>& output_dir, Card* initial):
-            _screen_size(driver._screen_size),
+            _driver(driver),
             _offscreen(driver._screen_size),
             _setup(*this),
             _output_dir(output_dir),
@@ -141,13 +144,14 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
     }
 
     void snapshot(int64_t ticks) {
-        snapshot_to(_screen_size.as_rect(), format("screens/{0}.png", dec(ticks, 6)));
+        snapshot_to(_driver._capture_rect, format("screens/{0}.png", dec(ticks, 6)));
     }
 
     void snapshot_to(Rect bounds, PrintItem relpath) {
         if (!takes_snapshots()) {
             return;
         }
+        bounds.offset(0, _driver._screen_size.height - bounds.height() - bounds.top);
         ArrayPixMap pix(bounds.size());
         _buffer.copy(bounds, pix);
         String path(format("{0}/{1}", *_output_dir, relpath));
@@ -161,7 +165,7 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
     Card* top() const { return _loop.top(); }
 
   private:
-    Size _screen_size;
+    const OffscreenVideoDriver& _driver;
     Offscreen _offscreen;
     Framebuffer _fb;
     Renderbuffer _rb;
@@ -171,7 +175,8 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
             glBindFramebuffer(GL_FRAMEBUFFER, loop._fb.id);
             glBindRenderbuffer(GL_RENDERBUFFER, loop._rb.id);
             glRenderbufferStorage(
-                    GL_RENDERBUFFER, GL_RGBA, loop._screen_size.width, loop._screen_size.height);
+                    GL_RENDERBUFFER, GL_RGBA,
+                    loop._driver._screen_size.width, loop._driver._screen_size.height);
             glFramebufferRenderbuffer(
                     GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, loop._rb.id);
         }
@@ -183,6 +188,7 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
 
 OffscreenVideoDriver::OffscreenVideoDriver(Size screen_size, const Optional<String>& output_dir):
         _screen_size(screen_size),
+        _capture_rect(screen_size.as_rect()),
         _output_dir(output_dir) { }
 
 void OffscreenVideoDriver::loop(Card* initial, EventScheduler& scheduler) {
@@ -192,10 +198,31 @@ void OffscreenVideoDriver::loop(Card* initial, EventScheduler& scheduler) {
     _scheduler = nullptr;
 }
 
-void OffscreenVideoDriver::capture(Card* card, PrintItem path) {
-    MainLoop loop(*this, _output_dir, card);
-    loop.draw();
-    loop.snapshot_to(_screen_size.as_rect(), path);
+namespace {
+
+class DummyCard: public Card {
+  public:
+    void become_front() {
+        if (!_inited) {
+            InitDirectText();
+            _inited = true;
+        }
+    }
+
+  private:
+    bool _inited = false;
+};
+
+}  // namespace
+
+void OffscreenVideoDriver::capture(vector<pair<unique_ptr<Card>, String>>& pix) {
+    MainLoop loop(*this, _output_dir, new DummyCard);
+    for (auto& p: pix) {
+        loop.top()->stack()->push(p.first.release());
+        loop.draw();
+        loop.snapshot_to(_capture_rect, p.second);
+        loop.top()->stack()->pop(loop.top());
+    }
 }
 
 }  // namespace antares

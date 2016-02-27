@@ -42,11 +42,13 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
     virtual int usecs() const { return _scheduler->usecs(); }
 
     void loop(Card* initial, EventScheduler& scheduler);
-    void capture(Card* card, sfz::PrintItem path);
+    void capture(std::vector<std::pair<std::unique_ptr<Card>, sfz::String>>& pix);
+    void set_capture_rect(Rect r) { _capture_rect = r; }
 
   private:
     const Size _screen_size;
     const sfz::Optional<sfz::String> _output_dir;
+    Rect _capture_rect;
 
     EventScheduler* _scheduler = nullptr;
 
