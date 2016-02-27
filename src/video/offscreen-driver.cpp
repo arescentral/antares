@@ -56,7 +56,7 @@ using sfz::format;
 using sfz::range;
 using std::greater;
 using std::max;
-using std::unique_ptr;
+using std::vector;
 
 namespace path = sfz::path;
 namespace utf8 = sfz::utf8;
@@ -67,40 +67,29 @@ namespace {
 
 class SnapshotBuffer {
   public:
-    SnapshotBuffer(Size screen_size, int32_t bytes_per_pixel):
-            _screen_size(screen_size),
-            _bytes_per_pixel(bytes_per_pixel),
-            _data(new uint8_t[width() * height() * bytes_per_pixel]) { }
+    SnapshotBuffer() { }
 
-    int32_t width() const { return _screen_size.width; }
-    int32_t height() const { return _screen_size.height; }
-    int32_t row_bytes() const { return width() * _bytes_per_pixel; }
-    void* mutable_data() { return _data.get(); }
-
-    void write_to(const WriteTarget& out) const {
-        ArrayPixMap pix(_screen_size.width, _screen_size.height);
-        uint8_t* p = _data.get();
-        for (int32_t y: range(_screen_size.height)) {
-            for (int32_t x: range(_screen_size.width)) {
+    void copy(Rect bounds, ArrayPixMap& pix) {
+        _data.resize(bounds.area() * 4);
+        Size size = bounds.size();
+        glReadPixels(
+                bounds.left, bounds.top, size.width, size.height,
+                GL_BGRA, GL_UNSIGNED_BYTE, _data.data());
+        uint8_t* p = _data.data();
+        for (int32_t y: range(size.height)) {
+            for (int32_t x: range(size.width)) {
                 uint8_t blue = *(p++);
                 uint8_t green = *(p++);
                 uint8_t red = *(p++);
                 ++p;
-                pix.set(x, _screen_size.height - y - 1, RgbColor(red, green, blue));
+                pix.set(x, size.height - y - 1, RgbColor(red, green, blue));
             }
         }
-        write(out, pix);
     }
 
   private:
-    const Size _screen_size;
-    const int32_t _bytes_per_pixel;
-    unique_ptr<uint8_t[]> _data;
+    vector<uint8_t> _data;
 };
-
-void write_to(const WriteTarget& out, const SnapshotBuffer& buffer) {
-    buffer.write_to(out);
-}
 
 void gl_check() {
     GLenum error = glGetError();
@@ -140,8 +129,8 @@ struct Renderbuffer {
 class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
   public:
     MainLoop(OffscreenVideoDriver& driver, const Optional<String>& output_dir, Card* initial):
+            _screen_size(driver._screen_size),
             _offscreen(driver._screen_size),
-            _buffer(driver._screen_size, 4),
             _setup(*this),
             _output_dir(output_dir),
             _loop(driver, initial) {
@@ -152,20 +141,19 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
     }
 
     void snapshot(int64_t ticks) {
-        snapshot_to(format("screens/{0}.png", dec(ticks, 6)));
+        snapshot_to(_screen_size.as_rect(), format("screens/{0}.png", dec(ticks, 6)));
     }
 
-    void snapshot_to(PrintItem relpath) {
+    void snapshot_to(Rect bounds, PrintItem relpath) {
         if (!takes_snapshots()) {
             return;
         }
-        glReadPixels(
-                0, 0, _buffer.width(), _buffer.height(), GL_BGRA, GL_UNSIGNED_BYTE,
-                _buffer.mutable_data());
+        ArrayPixMap pix(bounds.size());
+        _buffer.copy(bounds, pix);
         String path(format("{0}/{1}", *_output_dir, relpath));
         makedirs(path::dirname(path), 0755);
         ScopedFd file(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-        write(file, _buffer);
+        write(file, pix);
     }
 
     void draw() { _loop.draw(); }
@@ -173,6 +161,7 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
     Card* top() const { return _loop.top(); }
 
   private:
+    Size _screen_size;
     Offscreen _offscreen;
     Framebuffer _fb;
     Renderbuffer _rb;
@@ -182,7 +171,7 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
             glBindFramebuffer(GL_FRAMEBUFFER, loop._fb.id);
             glBindRenderbuffer(GL_RENDERBUFFER, loop._rb.id);
             glRenderbufferStorage(
-                    GL_RENDERBUFFER, GL_RGBA, loop._buffer.width(), loop._buffer.height());
+                    GL_RENDERBUFFER, GL_RGBA, loop._screen_size.width, loop._screen_size.height);
             glFramebufferRenderbuffer(
                     GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, loop._rb.id);
         }
@@ -206,7 +195,7 @@ void OffscreenVideoDriver::loop(Card* initial, EventScheduler& scheduler) {
 void OffscreenVideoDriver::capture(Card* card, PrintItem path) {
     MainLoop loop(*this, _output_dir, card);
     loop.draw();
-    loop.snapshot_to(path);
+    loop.snapshot_to(_screen_size.as_rect(), path);
 }
 
 }  // namespace antares
