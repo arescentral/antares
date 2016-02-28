@@ -409,7 +409,7 @@ static StringSlice String_Get_Nth_Line(const StringSlice& source, int32_t nth) {
 }
 
 static void Auto_Animate_Line( Point *source, Point *dest) {
-    switch ((usecs_to_ticks(g.time) >> 3) & 0x03) {
+    switch ((std::chrono::time_point_cast<ticks>(g.time).time_since_epoch().count() >> 3) & 0x03) {
         case 0:
             dest->h = source->h + ((dest->h - source->h) >> 2);
             dest->v = source->v + ((dest->v - source->v) >> 2);

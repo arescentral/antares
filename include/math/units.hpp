@@ -33,13 +33,6 @@ typedef std::chrono::time_point<GameStart, ticks> game_ticks;
 typedef std::chrono::time_point<Wall, std::chrono::microseconds> wall_time;
 typedef std::chrono::time_point<Wall, ticks> wall_ticks;
 
-// in microseconds--essentially one tick (1/60th of second)
-const int64_t kTimeUnit = 16667;
-
-inline int64_t ticks_to_usecs(int64_t ticks) { return ticks * kTimeUnit; }
-inline int64_t usecs_to_ticks(int64_t usecs) { return usecs / kTimeUnit; }
-inline int64_t usecs_to_ticks(game_time t) { return t.time_since_epoch().count() / kTimeUnit; }
-
 // every time this many cycles pass, we have to process player & computer decisions
 const ticks kDecideEveryCycles = ticks(3);
 

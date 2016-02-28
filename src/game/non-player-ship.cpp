@@ -192,7 +192,7 @@ static void tick_special(
 
 void NonplayerShipThink() {
     RgbColor friendSick, foeSick, neutralSick;
-    switch ((usecs_to_ticks(g.time) / 9) % 4) {
+    switch ((std::chrono::time_point_cast<ticks>(g.time).time_since_epoch().count() / 9) % 4) {
         case 0:
             friendSick = GetRGBTranslateColorShade(kFriendlyColor, MEDIUM);
             foeSick = GetRGBTranslateColorShade(kHostileColor, MEDIUM);
