@@ -55,7 +55,7 @@ void ReplayGame::become_front() {
             globals()->gInputSource.reset(new ReplayInputSource(&_data));
             swap(_random_seed, g.random);
             _game_result = NO_GAME;
-            _seconds = 0;
+            _seconds = std::chrono::seconds(0);
             stack()->push(new MainPlay(_scenario, true, true, &_game_result, &_seconds));
         }
         break;

@@ -51,7 +51,7 @@ class ReplayGame : public Card {
     Random _random_seed;
     const Scenario* _scenario;
     GameResult _game_result;
-    int32_t _seconds;
+    std::chrono::seconds _seconds;
 };
 
 }  // namespace antares

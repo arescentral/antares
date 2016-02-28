@@ -141,7 +141,7 @@ struct Scenario {
     int16_t                     briefPointFirst;
     int16_t                     starMapV;
     int16_t                     briefPointNum;  // use kScenarioBriefMask
-    int16_t                     parTime;
+    std::chrono::seconds        parTime;
     int16_t                     parKills;
     int16_t                     levelNameStrNum;
     Fixed                       parKillRatio;

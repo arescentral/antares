@@ -98,10 +98,11 @@ int score_high_target(double yours, double par, double value) {
 }
 
 int score(
-        int your_length, int par_length, int your_loss, int par_loss, int your_kill,
-        int par_kill) {
+        std::chrono::seconds your_length, std::chrono::seconds par_length,
+        int your_loss, int par_loss,
+        int your_kill, int par_kill) {
     int score = 0;
-    score += score_low_target(your_length, par_length, 50);
+    score += score_low_target(your_length.count(), par_length.count(), 50);
     score += score_low_target(your_loss, par_loss, 30);
     score += score_high_target(your_kill, par_kill, 20);
     return score;
@@ -123,7 +124,9 @@ DebriefingScreen::DebriefingScreen(int text_id) :
         _data_item(initialize(text_id, false)) { }
 
 DebriefingScreen::DebriefingScreen(
-        int text_id, int your_length, int par_length, int your_loss, int par_loss,
+        int text_id,
+        std::chrono::seconds your_length, std::chrono::seconds par_length,
+        int your_loss, int par_loss,
         int your_kill, int par_kill):
         _state(TYPING),
         _typed_chars(0),
@@ -239,23 +242,24 @@ LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
 }
 
 String DebriefingScreen::build_score_text(
-        int your_length, int par_length, int your_loss, int par_loss, int your_kill,
-        int par_kill) {
+        std::chrono::seconds your_length, std::chrono::seconds par_length,
+        int your_loss, int par_loss,
+        int your_kill, int par_kill) {
     Resource rsrc("text", "txt", 6000);
     String text(utf8::decode(rsrc.data()));
 
     StringList strings(6000);
 
-    const int your_mins = your_length / 60;
-    const int your_secs = your_length % 60;
-    const int par_mins = par_length / 60;
-    const int par_secs = par_length % 60;
+    const int your_mins = your_length.count() / 60;
+    const int your_secs = your_length.count() % 60;
+    const int par_mins = par_length.count() / 60;
+    const int par_secs = par_length.count() % 60;
     const int your_score = score(your_length, par_length, your_loss, par_loss, your_kill, par_kill);
     const int par_score = 100;
 
     string_replace(&text, strings.at(0), your_mins);
     string_replace(&text, strings.at(1), dec(your_secs, 2));
-    if (par_length > 0) {
+    if (par_length > std::chrono::seconds(0)) {
         string_replace(&text, strings.at(2), par_mins);
         String secs_string;
         print(secs_string, format(":{0}", dec(par_secs, 2)));

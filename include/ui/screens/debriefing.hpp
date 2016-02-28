@@ -32,7 +32,9 @@ class DebriefingScreen : public Card {
     DebriefingScreen(int text_id);
 
     DebriefingScreen(
-            int text_id, int your_length, int par_length, int your_loss, int par_loss,
+            int text_id,
+            std::chrono::seconds your_length, std::chrono::seconds par_length,
+            int your_loss, int par_loss,
             int your_kill, int par_kill);
 
     virtual void become_front();
@@ -47,8 +49,9 @@ class DebriefingScreen : public Card {
     virtual void fire_timer();
 
     static sfz::String build_score_text(
-            int your_length, int par_length, int your_loss, int par_loss, int your_kill,
-            int par_kill);
+            std::chrono::seconds your_length, std::chrono::seconds par_length,
+            int your_loss, int par_loss,
+            int your_kill, int par_kill);
     
   private:
     LabeledRect initialize(int text_id, bool do_score);

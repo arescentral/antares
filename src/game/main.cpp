@@ -102,7 +102,8 @@ Rect viewport() {
 class GamePlay : public Card {
   public:
     GamePlay(
-            bool replay, ReplayBuilder& replay_builder, GameResult* game_result, int32_t* seconds);
+            bool replay, ReplayBuilder& replay_builder, GameResult* game_result,
+            std::chrono::seconds* seconds);
 
     virtual void become_front();
     virtual void resign_front();
@@ -136,7 +137,7 @@ class GamePlay : public Card {
     GameCursor _cursor;
     const bool _replay;
     GameResult* const _game_result;
-    int32_t* const _seconds;
+    std::chrono::seconds* const _seconds;
     wall_time _next_timer;
     const Rect _play_area;
     const game_time _scenario_start_time;
@@ -153,7 +154,7 @@ class GamePlay : public Card {
 
 MainPlay::MainPlay(
         const Scenario* scenario, bool replay, bool show_loading_screen,
-        GameResult* game_result, int32_t* seconds):
+        GameResult* game_result, std::chrono::seconds* seconds):
     _state(NEW),
     _scenario(scenario),
     _replay(replay),
@@ -288,7 +289,8 @@ int new_replay_file() {
 }
 
 GamePlay::GamePlay(
-        bool replay, ReplayBuilder& replay_builder, GameResult* game_result, int32_t* seconds):
+        bool replay, ReplayBuilder& replay_builder, GameResult* game_result,
+        std::chrono::seconds* seconds):
         _state(PLAYING),
         _replay(replay),
         _game_result(game_result),
@@ -586,7 +588,7 @@ void GamePlay::fire_timer() {
     globals()->transitions.update_boolean(unitsDone);
 
     if (g.game_over && (g.time >= g.game_over_at)) {
-        *_seconds = (g.time - _scenario_start_time).count() / 1e6;
+        *_seconds = std::chrono::duration_cast<std::chrono::seconds>(g.time - _scenario_start_time);
 
         if (*_game_result == NO_GAME) {
             if (g.victor == g.admiral) {

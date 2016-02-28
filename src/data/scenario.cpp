@@ -70,7 +70,7 @@ void read_from(ReadSource in, Scenario& scenario) {
     read(in, scenario.briefPointFirst);
     read(in, scenario.starMapV);
     read(in, scenario.briefPointNum);
-    read(in, scenario.parTime);
+    scenario.parTime = std::chrono::seconds(read<int16_t>(in));
     in.shift(2);
     read(in, scenario.parKills);
     read(in, scenario.levelNameStrNum);
