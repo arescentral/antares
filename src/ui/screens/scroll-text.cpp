@@ -87,8 +87,8 @@ void ScrollTextScreen::gamepad_button_down(const GamepadButtonDownEvent& event) 
     stack()->pop(this);
 }
 
-bool ScrollTextScreen::next_timer(int64_t& time) {
-    time = _next_shift.time_since_epoch().count();
+bool ScrollTextScreen::next_timer(wall_time& time) {
+    time = _next_shift;
     return true;
 }
 

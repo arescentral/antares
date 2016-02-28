@@ -39,7 +39,7 @@ class ObjectDataScreen : public Card {
 
     virtual void become_front();
 
-    virtual bool next_timer(int64_t& time);
+    virtual bool next_timer(wall_time& time);
     virtual void fire_timer();
 
     virtual void mouse_up(const MouseUpEvent& event);

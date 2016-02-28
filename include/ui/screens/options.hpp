@@ -93,7 +93,7 @@ class KeyControlScreen : public InterfaceScreen {
     virtual void key_down(const KeyDownEvent& event);
     virtual void key_up(const KeyUpEvent& event);
 
-    virtual bool next_timer(int64_t& time);
+    virtual bool next_timer(wall_time& time);
     virtual void fire_timer();
 
     virtual void overlay() const;

@@ -43,7 +43,7 @@ void Card::draw() const {
     next()->draw();
 }
 
-bool Card::next_timer(int64_t& time) {
+bool Card::next_timer(wall_time& time) {
     static_cast<void>(time);
     return false;
 }

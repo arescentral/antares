@@ -115,8 +115,8 @@ void ColorFade::gamepad_button_down(const GamepadButtonDownEvent& event) {
     }
 }
 
-bool ColorFade::next_timer(int64_t& time) {
-    time = _next_event.time_since_epoch().count();
+bool ColorFade::next_timer(wall_time& time) {
+    time = _next_event;
     return true;
 }
 
@@ -198,9 +198,9 @@ void PictFade::key_down(const KeyDownEvent& event) {
     }
 }
 
-bool PictFade::next_timer(int64_t& time) {
+bool PictFade::next_timer(wall_time& time) {
     if (_state == FULL) {
-        time = _wane_start.time_since_epoch().count();
+        time = _wane_start;
         return true;
     }
     return false;

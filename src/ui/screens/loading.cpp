@@ -57,14 +57,14 @@ LoadingScreen::~LoadingScreen() {
 void LoadingScreen::become_front() {
 }
 
-bool LoadingScreen::next_timer(int64_t& time) {
+bool LoadingScreen::next_timer(wall_time& time) {
     switch (_state) {
       case TYPING:
       case DONE:
-        time = _next_update.time_since_epoch().count();
+        time = _next_update;
         return true;
       case LOADING:
-        time = 0;
+        time = wall_time();
         return true;
     }
     return false;

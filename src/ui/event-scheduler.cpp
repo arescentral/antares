@@ -79,9 +79,9 @@ void EventScheduler::schedule_mouse(
 
 void EventScheduler::loop(EventScheduler::MainLoop& loop) {
     while (!loop.done()) {
-        int64_t at_usecs;
+        wall_time at_usecs;
         const bool has_timer = loop.top()->next_timer(at_usecs);
-        const int64_t at_ticks = at_usecs * 60 / 1000000;
+        const int64_t at_ticks = at_usecs.time_since_epoch().count() * 60 / 1000000;
         if (!_event_heap.empty() && (!has_timer || (_event_heap.front()->at() <= at_ticks))) {
             unique_ptr<Event> event;
             swap(event, _event_heap.front());

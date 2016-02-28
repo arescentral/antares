@@ -83,9 +83,9 @@ void ObjectDataScreen::become_front() {
     _next_sound = _next_update;
 }
 
-bool ObjectDataScreen::next_timer(int64_t& time) {
+bool ObjectDataScreen::next_timer(wall_time& time) {
     if (_state == TYPING) {
-        time = _next_update.time_since_epoch().count();
+        time = _next_update;
         return true;
     }
     return false;

@@ -198,8 +198,8 @@ void GLFWVideoDriver::loop(Card* initial) {
         glfwPollEvents();
         _loop->draw();
         glfwSwapBuffers(_window);
-        int64_t at;
-        if (main_loop.top()->next_timer(at) && (usecs() > at)) {
+        wall_time at;
+        if (main_loop.top()->next_timer(at) && (wall_time(std::chrono::microseconds(usecs())) > at)) {
             main_loop.top()->fire_timer();
             main_loop.draw();
             glfwSwapBuffers(_window);

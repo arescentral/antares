@@ -243,9 +243,9 @@ void KeyControlScreen::key_up(const KeyUpEvent& event) {
     static_cast<void>(event);
 }
 
-bool KeyControlScreen::next_timer(int64_t& time) {
+bool KeyControlScreen::next_timer(wall_time& time) {
     if (_next_flash > wall_time()) {
-        time = _next_flash.time_since_epoch().count();
+        time = _next_flash;
         return true;
     }
     return false;

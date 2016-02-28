@@ -109,7 +109,7 @@ class GamePlay : public Card {
 
     virtual void draw() const;
 
-    virtual bool next_timer(int64_t& time);
+    virtual bool next_timer(wall_time& time);
     virtual void fire_timer();
 
     virtual void key_down(const KeyDownEvent& event);
@@ -344,8 +344,8 @@ class PauseScreen : public Card {
         }
     }
 
-    virtual bool next_timer(int64_t& time) {
-        time = std::min(_next_switch, _sleep_at).time_since_epoch().count();
+    virtual bool next_timer(wall_time& time) {
+        time = std::min(_next_switch, _sleep_at);
         return true;
     }
 
@@ -487,9 +487,9 @@ void GamePlay::draw() const {
     globals()->transitions.draw();
 }
 
-bool GamePlay::next_timer(int64_t& time) {
+bool GamePlay::next_timer(wall_time& time) {
     if (_state == PLAYING) {
-        time = _next_timer.time_since_epoch().count();
+        time = _next_timer;
         return true;
     }
     return false;

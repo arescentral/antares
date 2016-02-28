@@ -37,7 +37,7 @@ class LoadingScreen : public InterfaceScreen {
     ~LoadingScreen();
 
     virtual void become_front();
-    virtual bool next_timer(int64_t& time);
+    virtual bool next_timer(wall_time& time);
     virtual void fire_timer();
 
     void update(int32_t current, int32_t max);

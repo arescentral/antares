@@ -194,9 +194,9 @@ void DebriefingScreen::gamepad_button_down(const GamepadButtonDownEvent& event) 
     }
 }
 
-bool DebriefingScreen::next_timer(int64_t& time) {
+bool DebriefingScreen::next_timer(wall_time& time) {
     if (_state == TYPING) {
-        time = _next_update.time_since_epoch().count();
+        time = _next_update;
         return true;
     }
     return false;

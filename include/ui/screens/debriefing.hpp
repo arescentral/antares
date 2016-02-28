@@ -43,7 +43,7 @@ class DebriefingScreen : public Card {
     virtual void key_down(const KeyDownEvent& event);
     virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
 
-    virtual bool next_timer(int64_t& time);
+    virtual bool next_timer(wall_time& time);
     virtual void fire_timer();
 
     static sfz::String build_score_text(

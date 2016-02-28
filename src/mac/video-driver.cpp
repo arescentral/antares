@@ -318,10 +318,10 @@ void CocoaVideoDriver::loop(Card* initial) {
     IOHIDManagerRegisterInputValueCallback(hid_manager, EventBridge::hid_event, &bridge);
 
     while (!main_loop.done()) {
-        int64_t at;
+        wall_time at;
         if (main_loop.top()->next_timer(at)) {
-            at += _start_time;
-            if (antares_event_translator_next(_translator.c_obj(), at)) {
+            at += std::chrono::microseconds(_start_time);
+            if (antares_event_translator_next(_translator.c_obj(), at.time_since_epoch().count())) {
                 bridge.send_all();
             } else {
                 main_loop.top()->fire_timer();
@@ -329,8 +329,8 @@ void CocoaVideoDriver::loop(Card* initial) {
                 CGLFlushDrawable(context.c_obj());
             }
         } else {
-            at = std::numeric_limits<int64_t>::max();
-            antares_event_translator_next(_translator.c_obj(), at);
+            at = wall_time::max();
+            antares_event_translator_next(_translator.c_obj(), at.time_since_epoch().count());
             bridge.send_all();
         }
     }
