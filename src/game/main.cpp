@@ -238,7 +238,7 @@ void MainPlay::become_front() {
                 SetSongVolume(kMusicVolume);
                 PlaySong();
             }
-            globals()->virtual_start = now_usecs();
+            globals()->virtual_start = now();
 
             if (!_replay) {
                 _replay_builder.start();
@@ -295,7 +295,7 @@ GamePlay::GamePlay(
         _replay(replay),
         _game_result(game_result),
         _seconds(seconds),
-        _next_timer(now_usecs() + ticks(1)),
+        _next_timer(now() + ticks(1)),
         _play_area(viewport().left, viewport().top, viewport().right, viewport().bottom),
         _scenario_start_time(
                 (g.level->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple),
@@ -328,8 +328,8 @@ class PauseScreen : public Card {
         // TODO(sfiera): cancel any active transition.
         PlayVolumeSound(kComputerBeep4, kMaxSoundVolume, kShortPersistence, kMustPlaySound);
         _visible = true;
-        _next_switch = now_usecs() + kSwitchAfter;
-        _sleep_at = now_usecs() + kSleepAfter;
+        _next_switch = now() + kSwitchAfter;
+        _sleep_at = now() + kSleepAfter;
     }
 
     virtual void mouse_up(const MouseUpEvent& event) { wake(); }
@@ -376,7 +376,7 @@ class PauseScreen : public Card {
 
   private:
     void show_hide() {
-        const wall_time now = now_usecs();
+        const wall_time now = antares::now();
         while (_next_switch < now) {
             _visible = !_visible;
             _next_switch += kSwitchAfter;
@@ -384,11 +384,11 @@ class PauseScreen : public Card {
     }
 
     bool asleep() const {
-        return _sleep_at < now_usecs();
+        return _sleep_at < now();
     }
 
     void wake() {
-        _sleep_at = now_usecs() + kSleepAfter;
+        _sleep_at = now() + kSleepAfter;
     }
 
     bool _visible;
@@ -496,11 +496,11 @@ bool GamePlay::next_timer(wall_time& time) {
 }
 
 void GamePlay::fire_timer() {
-    while (_next_timer < now_usecs()) {
+    while (_next_timer < now()) {
         _next_timer = _next_timer + ticks(1);
     }
 
-    const wall_time now = now_usecs();
+    const wall_time now = antares::now();
 
     ticks unitsPassed, unitsDone;
     if (_fast_motion && !_entering_message) {

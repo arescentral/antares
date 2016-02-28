@@ -60,7 +60,7 @@ void ScrollTextScreen::become_front() {
         PlaySong();
     }
 
-    _start = now_usecs();
+    _start = now();
     _next_shift = _start;
     _position = -kScrollTextHeight;
 }
@@ -93,7 +93,7 @@ bool ScrollTextScreen::next_timer(wall_time& time) {
 }
 
 void ScrollTextScreen::fire_timer() {
-    wall_time now = now_usecs();
+    wall_time now = antares::now();
     while (_next_shift < now) {
         _next_shift += std::chrono::microseconds(int64_t(1000000 / _speed));
         ++_position;

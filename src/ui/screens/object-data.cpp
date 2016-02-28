@@ -79,7 +79,7 @@ ObjectDataScreen::~ObjectDataScreen() { }
 void ObjectDataScreen::become_front() {
     _state = TYPING;
     _typed_chars = 0;
-    _next_update = now_usecs() + kTypingDelay;
+    _next_update = now() + kTypingDelay;
     _next_sound = _next_update;
 }
 
@@ -92,7 +92,7 @@ bool ObjectDataScreen::next_timer(wall_time& time) {
 }
 
 void ObjectDataScreen::fire_timer() {
-    wall_time now = now_usecs();
+    wall_time now = antares::now();
     if (_next_sound <= now) {
         PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
         _next_sound += 3 * kTypingDelay;

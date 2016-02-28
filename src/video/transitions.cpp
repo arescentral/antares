@@ -87,7 +87,7 @@ ColorFade::ColorFade(
           _duration(duration) { }
 
 void ColorFade::become_front() {
-    _start = now_usecs();
+    _start = now();
     _next_event = _start + ticks(1);
 }
 
@@ -121,7 +121,7 @@ bool ColorFade::next_timer(wall_time& time) {
 }
 
 void ColorFade::fire_timer() {
-    wall_time now = now_usecs();
+    wall_time now = antares::now();
     while (_next_event < now) {
         _next_event = _next_event + ticks(1);
     }
@@ -133,7 +133,7 @@ void ColorFade::fire_timer() {
 
 void ColorFade::draw() const {
     next()->draw();
-    wall_time now = now_usecs();
+    wall_time now = antares::now();
     double fraction = static_cast<double>((now - _start).count()) / _duration.count();
     if (fraction > 1.0) {
         fraction = 1.0;
@@ -163,7 +163,7 @@ void PictFade::become_front() {
       case WAXING:
         if (!this->skip()) {
             _state = FULL;
-            _wane_start = now_usecs() + this->display_time();
+            _wane_start = now() + this->display_time();
             break;
         }
         // fall through.

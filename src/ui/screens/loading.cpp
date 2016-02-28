@@ -39,7 +39,7 @@ LoadingScreen::LoadingScreen(const Scenario* scenario, bool* cancelled):
         _state(TYPING),
         _scenario(scenario),
         _cancelled(cancelled),
-        _next_update(now_usecs() + kTypingDelay),
+        _next_update(now() + kTypingDelay),
         _chars_typed(0),
         _current(0),
         _max(1) {
@@ -73,7 +73,7 @@ bool LoadingScreen::next_timer(wall_time& time) {
 void LoadingScreen::fire_timer() {
     switch (_state) {
       case TYPING:
-        while (_next_update < now_usecs()) {
+        while (_next_update < now()) {
             if (_chars_typed >= _name_text->size()) {
                 _state = LOADING;
                 if (!start_construct_scenario(_scenario, &_max)) {
@@ -91,8 +91,8 @@ void LoadingScreen::fire_timer() {
         break;
 
       case LOADING:
-        _next_update = now_usecs() + kTypingDelay;
-        while (now_usecs() < _next_update) {
+        _next_update = now() + kTypingDelay;
+        while (now() < _next_update) {
             if (_current < _max) {
                 construct_scenario(_scenario, &_current);
             } else {

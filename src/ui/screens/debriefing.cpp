@@ -148,7 +148,7 @@ DebriefingScreen::DebriefingScreen(
 void DebriefingScreen::become_front() {
     _typed_chars = 0;
     if (_state == TYPING) {
-        _next_update = now_usecs() + kTypingDelay;
+        _next_update = now() + kTypingDelay;
     } else {
         _next_update = wall_time();
     }
@@ -210,7 +210,7 @@ void DebriefingScreen::fire_timer() {
         throw Exception(format("DebriefingScreen::fire_timer() called but _state is {0}", _state));
     }
     PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
-    wall_time now = now_usecs();
+    wall_time now = antares::now();
     while (_next_update <= now) {
         if (_typed_chars < _score->size()) {
             _next_update += kTypingDelay;

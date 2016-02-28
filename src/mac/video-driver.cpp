@@ -172,9 +172,9 @@ struct CocoaVideoDriver::EventBridge {
         }
 
         if (down) {
-            enqueue(new KeyDownEvent(now_usecs(), scan_code));
+            enqueue(new KeyDownEvent(_now(), scan_code));
         } else {
-            enqueue(new KeyUpEvent(now_usecs(), scan_code));
+            enqueue(new KeyUpEvent(_now(), scan_code));
         }
     }
 
@@ -185,9 +185,9 @@ struct CocoaVideoDriver::EventBridge {
         bool down = IOHIDValueGetIntegerValue(value);
         uint16_t usage = IOHIDElementGetUsage(element);
         if (down) {
-            enqueue(new GamepadButtonDownEvent(now_usecs(), usage));
+            enqueue(new GamepadButtonDownEvent(_now(), usage));
         } else {
-            enqueue(new GamepadButtonUpEvent(now_usecs(), usage));
+            enqueue(new GamepadButtonUpEvent(_now(), usage));
         }
     }
 
@@ -214,8 +214,7 @@ struct CocoaVideoDriver::EventBridge {
                 static const int x_component[] = {0, 0, -1, 3, 3, -1};
                 double x = gamepad[x_component[usage]];
                 double y = gamepad[x_component[usage] + 1];
-                enqueue(new GamepadStickEvent(
-                            now_usecs(), kHIDUsage_GD_X + x_component[usage], x, y));
+                enqueue(new GamepadStickEvent(_now(), kHIDUsage_GD_X + x_component[usage], x, y));
             }
             break;
           case kHIDUsage_GD_Z:

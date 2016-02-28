@@ -252,7 +252,7 @@ bool KeyControlScreen::next_timer(wall_time& time) {
 }
 
 void KeyControlScreen::fire_timer() {
-    wall_time now = now_usecs();
+    wall_time now = antares::now();
     while (_next_flash < now) {
         _next_flash += kFlashTime;
         _flashed_on = !_flashed_on;
@@ -415,7 +415,7 @@ void KeyControlScreen::update_conflicts() {
         _next_flash = wall_time();
         _flashed_on = false;
     } else if (_next_flash == wall_time()) {
-        _next_flash = now_usecs() + kFlashTime;
+        _next_flash = now() + kFlashTime;
         _flashed_on = true;
     }
 }

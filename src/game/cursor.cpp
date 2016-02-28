@@ -51,10 +51,10 @@ void Cursor::draw_at(Point where) const {
 
 GameCursor::GameCursor():
         show(true),
-        _show_crosshairs_until(now_usecs() + kTimeout) { }
+        _show_crosshairs_until(now() + kTimeout) { }
 
 bool GameCursor::active() const {
-    return show && (_show_crosshairs_until > now_usecs());
+    return show && (_show_crosshairs_until > now());
 }
 
 Point GameCursor::clamped_location() {
@@ -93,7 +93,7 @@ void GameCursor::mouse_move(const MouseMoveEvent& event) {
 }
 
 void GameCursor::wake() {
-    _show_crosshairs_until = now_usecs() + kTimeout;
+    _show_crosshairs_until = now() + kTimeout;
 }
 
 ANTARES_GLOBAL bool HintLine::show_hint_line = false;

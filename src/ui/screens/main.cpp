@@ -60,7 +60,7 @@ void MainScreen::become_front() {
             SetSongVolume(kMaxMusicVolume);
             PlaySong();
         }
-        _next_timer = (now_usecs() + kMainDemoTimeOutTime);
+        _next_timer = (now() + kMainDemoTimeOutTime);
         break;
       case QUITTING:
         stack()->pop(this);
@@ -85,32 +85,32 @@ void MainScreen::fire_timer() {
 
 void MainScreen::mouse_down(const MouseDownEvent& event) {
     InterfaceScreen::mouse_down(event);
-    _next_timer = (now_usecs() + kMainDemoTimeOutTime);
+    _next_timer = (now() + kMainDemoTimeOutTime);
 }
 
 void MainScreen::mouse_up(const MouseUpEvent& event) {
     InterfaceScreen::mouse_up(event);
-    _next_timer = (now_usecs() + kMainDemoTimeOutTime);
+    _next_timer = (now() + kMainDemoTimeOutTime);
 }
 
 void MainScreen::key_down(const KeyDownEvent& event) {
     InterfaceScreen::key_down(event);
-    _next_timer = (now_usecs() + kMainDemoTimeOutTime);
+    _next_timer = (now() + kMainDemoTimeOutTime);
 }
 
 void MainScreen::key_up(const KeyUpEvent& event) {
     InterfaceScreen::key_up(event);
-    _next_timer = (now_usecs() + kMainDemoTimeOutTime);
+    _next_timer = (now() + kMainDemoTimeOutTime);
 }
 
 void MainScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
     InterfaceScreen::gamepad_button_down(event);
-    _next_timer = (now_usecs() + kMainDemoTimeOutTime);
+    _next_timer = (now() + kMainDemoTimeOutTime);
 }
 
 void MainScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
     InterfaceScreen::gamepad_button_up(event);
-    _next_timer = (now_usecs() + kMainDemoTimeOutTime);
+    _next_timer = (now() + kMainDemoTimeOutTime);
 }
 
 void MainScreen::adjust_interface() {
