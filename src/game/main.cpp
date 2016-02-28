@@ -295,12 +295,10 @@ GamePlay::GamePlay(
         _replay(replay),
         _game_result(game_result),
         _seconds(seconds),
-        _next_timer(add_ticks(now_usecs(), 1)),
+        _next_timer(now_usecs() + ticks(1)),
         _play_area(viewport().left, viewport().top, viewport().right, viewport().bottom),
-        _scenario_start_time(std::chrono::microseconds(add_ticks(
-                    0,
-                    (g.level->startTime & kScenario_StartTimeMask)
-                    * kScenarioTimeMultiple))),
+        _scenario_start_time(
+                (g.level->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple),
         _command_and_q(BothCommandAndQ()),
         _fast_motion(false),
         _entering_message(false),
@@ -499,7 +497,7 @@ bool GamePlay::next_timer(wall_time& time) {
 
 void GamePlay::fire_timer() {
     while (_next_timer < now_usecs()) {
-        _next_timer = add_ticks(_next_timer, 1);
+        _next_timer = _next_timer + ticks(1);
     }
 
     const wall_time now = now_usecs();

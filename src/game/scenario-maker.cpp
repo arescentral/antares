@@ -799,12 +799,12 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         Messages::clear();
 
         int x = 0;
-        const int64_t start_ticks
+        const ticks start_ticks
             = (g.level->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple;
-        const int64_t start_time = add_ticks(0, start_ticks);
+        const game_time start_time(start_ticks);
         g.time = game_time();
-        for (int64_t i = 0; i < start_ticks; ++i) {
-            g.time = add_ticks(g.time, 1);  // TODO(sfiera): not kDecideEveryCycles…?
+        for (ticks i = ticks(0); i < start_ticks; ++i) {
+            g.time = g.time + ticks(1);  // TODO(sfiera): not kDecideEveryCycles…?
             MoveSpaceObjects(kDecideEveryCycles);
             NonplayerShipThink();
             AdmiralThink();
@@ -817,11 +817,11 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             }
             CullSprites();
             Beams::cull();
-            if ((i % kScenarioTimeMultiple) == 0) {
+            if ((i % kScenarioTimeMultiple) == ticks(0)) {
                 (*current)++;
             }
         }
-        g.time = game_time(std::chrono::microseconds(start_time));
+        g.time = start_time;
 
         (*current)++;
         return;
@@ -941,7 +941,7 @@ void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textI
             g.next_level = nextLevel;
             if (!g.game_over) {
                 g.game_over = true;
-                g.game_over_at = add_ticks(g.time, 180);
+                g.game_over_at = g.time + ticks(180);
             }
         }
     }
