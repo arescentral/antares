@@ -20,6 +20,7 @@
 #define ANTARES_GAME_SPACE_OBJECT_HPP_
 
 #include "data/space-object.hpp"
+#include "math/units.hpp"
 
 namespace antares {
 
@@ -107,7 +108,7 @@ class SpaceObject {
     Fixed                   currentTargetValue = 0xffffffff;
     Handle<SpaceObject>     bestConsideredTargetNumber;
 
-    int32_t                 timeFromOrigin = 0;     // time it's been since we left
+    ticks                   timeFromOrigin = ticks(0);     // time it's been since we left
     fixedPointType          idealLocationCalc = {0, 0};  // calced when we got origin
     coordPointType          originLocation = {0, 0};     // coords of our origin
 
@@ -179,7 +180,7 @@ class SpaceObject {
         } landing;
         struct {
             uint8_t step;
-            uint8_t progress;
+            ticks progress;
         } warp_in;
         int32_t warping;
         int32_t warp_out;
@@ -192,7 +193,7 @@ class SpaceObject {
 
     struct Weapon {
         Handle<BaseObject>      base;
-        int32_t                 time = 0;
+        ticks                   time = ticks(0);
         int32_t                 ammo = 0;
         int32_t                 position = 0;
         int16_t                 charge = 0;

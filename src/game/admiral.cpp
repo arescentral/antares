@@ -385,7 +385,7 @@ void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType *where) 
         o->destObjectDest = SpaceObject::none();
         o->destObjectID = -1;
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
-        o->timeFromOrigin = 0;
+        o->timeFromOrigin = ticks(0);
         o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
         o->originLocation = o->location;
         return;
@@ -413,15 +413,15 @@ void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType *where) 
         o->destObject = SpaceObject::none();
         o->destObjectDest = SpaceObject::none();
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
-        o->timeFromOrigin = 0;
+        o->timeFromOrigin = ticks(0);
         o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
         o->originLocation = o->location;
     } else {
         // the object is OK, the admiral is OK, then go about setting its destination
         if (o->attributes & kCanAcceptDestination) {
-            o->timeFromOrigin = kTimeToCheckHome;
+            o->timeFromOrigin = ticks(kTimeToCheckHome);
         } else {
-            o->timeFromOrigin = 0;
+            o->timeFromOrigin = ticks(0);
         }
 
         // remove this object from its destination
@@ -431,7 +431,7 @@ void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType *where) 
 
         o->destinationLocation = o->originLocation = *where;
         o->destObject = SpaceObject::none();
-        o->timeFromOrigin = 0;
+        o->timeFromOrigin = ticks(0);
         o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
     }
 }
@@ -445,7 +445,7 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
         o->destObjectDest = SpaceObject::none();
         o->destObjectID = -1;
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
-        o->timeFromOrigin = 0;
+        o->timeFromOrigin = ticks(0);
         o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
         o->originLocation = o->location;
         return;
@@ -478,7 +478,7 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
         o->destObject = SpaceObject::none();
         o->destObjectDest = SpaceObject::none();
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
-        o->timeFromOrigin = 0;
+        o->timeFromOrigin = ticks(0);
         o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
         o->originLocation = o->location;
     } else {
@@ -493,9 +493,9 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
                 ((dObject->id == a->destinationObjectID())
                  || overrideObject.get())) {
             if (o->attributes & kCanAcceptDestination) {
-                o->timeFromOrigin = kTimeToCheckHome;
+                o->timeFromOrigin = ticks(kTimeToCheckHome);
             } else {
-                o->timeFromOrigin = 0;
+                o->timeFromOrigin = ticks(0);
             }
             // remove this object from its destination
             if (o->destObject.get()) {
@@ -538,7 +538,7 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
                 o->destObject = SpaceObject::none();
                 o->destObjectDest = SpaceObject::none();
                 o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
-                o->timeFromOrigin = 0;
+                o->timeFromOrigin = ticks(0);
                 o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
                 o->originLocation = o->location;
             }
@@ -546,7 +546,7 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
             o->destObject = SpaceObject::none();
             o->destObjectDest = SpaceObject::none();
             o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
-            o->timeFromOrigin = 0;
+            o->timeFromOrigin = ticks(0);
             o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
             o->originLocation = o->location;
         }

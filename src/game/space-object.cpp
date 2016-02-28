@@ -520,17 +520,17 @@ void SpaceObject::change_base_type(
 
     for (auto* weapon: {&obj->pulse, &obj->beam, &obj->special}) {
         if (!weapon->base.get()) {
-            weapon->time = 0;
+            weapon->time = ticks(0);
             continue;
         }
 
         if (!relative) {
             weapon->ammo = weapon->base->frame.weapon.ammo;
             weapon->position = 0;
-            if (weapon->time < 0) {
-                weapon->time = 0;
-            } else if (weapon->time > weapon->base->frame.weapon.fireTime) {
-                weapon->time = weapon->base->frame.weapon.fireTime;
+            if (weapon->time < ticks(0)) {
+                weapon->time = ticks(0);
+            } else if (weapon->time > ticks(weapon->base->frame.weapon.fireTime)) {
+                weapon->time = ticks(weapon->base->frame.weapon.fireTime);
             }
         }
         r = weapon->base->frame.weapon.range;

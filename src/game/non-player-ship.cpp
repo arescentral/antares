@@ -119,8 +119,8 @@ void SpaceObject::recharge() {
 static void tick_weapon(
         Handle<SpaceObject> subject, Handle<SpaceObject> target,
         uint32_t key, const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
-    if (weapon.time > 0) {
-        weapon.time -= kDecideEveryCycles.count();
+    if (weapon.time > ticks(0)) {
+        weapon.time -= kDecideEveryCycles;
     }
     if (subject->keysDown & key) {
         fire_weapon(subject, target, base_weapon, weapon);
@@ -130,7 +130,7 @@ static void tick_weapon(
 void fire_weapon(
         Handle<SpaceObject> subject, Handle<SpaceObject> target,
         const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
-    if ((weapon.time > 0) || !weapon.base.get()) {
+    if ((weapon.time > ticks(0)) || !weapon.base.get()) {
         return;
     }
 
@@ -168,7 +168,7 @@ void fire_weapon(
         at = &offset;
     }
 
-    weapon.time = weaponObject->frame.weapon.fireTime;
+    weapon.time = ticks(weaponObject->frame.weapon.fireTime);
     if (weaponObject->frame.weapon.ammo > 0) {
         weapon.ammo--;
     }
@@ -415,7 +415,7 @@ void NonplayerShipThink() {
                     && (anObject->energy() > (anObject->max_energy() >> kWarpInEnergyFactor))) {
                 anObject->presenceState = kWarpInPresence;
                 anObject->presence.warp_in.step = 0;
-                anObject->presence.warp_in.progress = 0;
+                anObject->presence.warp_in.progress = ticks(0);
             }
         } else {
             if (anObject->presenceState == kWarpInPresence) {
@@ -483,7 +483,7 @@ uint32_t ThinkObjectNormalPresence(
                     || ((anObject->attributes & kCanEngage)
                         && !(anObject->attributes & kRemoteOrHuman)
                         && (distance < static_cast<uint32_t>(anObject->engageRange))
-                        && (anObject->timeFromOrigin < kTimeToCheckHome)
+                        && (anObject->timeFromOrigin < ticks(kTimeToCheckHome))
                         && (targetObject->attributes & kCanBeEngaged)))) {
             keysDown |= ThinkObjectEngageTarget(anObject, targetObject, distance, &theta);
             ///--->>> END TARGETING <<<---///
@@ -645,7 +645,7 @@ uint32_t ThinkObjectNormalPresence(
                     TogglePlayerAutoPilot(anObject);
                 }
                 keysDown |= kDownKey;
-                anObject->timeFromOrigin = 0;
+                anObject->timeFromOrigin = ticks(0);
             } else {
                 if (anObject->destObject.get()) {
                     targetObject = anObject->destObject;
@@ -733,7 +733,7 @@ uint32_t ThinkObjectNormalPresence(
                 }
 
                 if (distance < kEngageRange) {
-                    anObject->timeFromOrigin = 0;
+                    anObject->timeFromOrigin = ticks(0);
                 }
 
                 if (distance > static_cast<uint32_t>(baseObject->arriveActionDistance)) {
@@ -895,9 +895,9 @@ uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
         keysDown = kWarpKey;
     }
     auto& presence = anObject->presence.warp_in;
-    presence.progress += kDecideEveryCycles.count();
+    presence.progress += kDecideEveryCycles;
     for (int i = 0; i < 4; ++i) {
-        if ((presence.step == i) && (presence.progress > (25 * i))) {
+        if ((presence.step == i) && (presence.progress > ticks(25 * i))) {
             mPlayDistanceSound(
                     kMaxSoundVolume, anObject, kWarp[i], kMediumPersistence, kPrioritySound);
             ++presence.step;
@@ -905,7 +905,7 @@ uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
         }
     }
 
-    if (presence.progress > 100) {
+    if (presence.progress > ticks(100)) {
         if (anObject->collect_warp_energy(anObject->max_energy() >> kWarpInEnergyFactor)) {
             anObject->presenceState = kWarpingPresence;
             anObject->presence.warping = anObject->baseType->warpSpeed;
@@ -1506,7 +1506,7 @@ uint32_t ThinkObjectEngageTarget(
 
         if ( anObject->attributes & kCanAcceptDestination)
         {
-            anObject->timeFromOrigin += kDecideEveryCycles.count();
+            anObject->timeFromOrigin += kDecideEveryCycles;
         }
 
         auto bestWeapon = BaseObject::none();
@@ -1652,7 +1652,7 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
         return;
     }
 
-    anObject->timeFromOrigin = 0;
+    anObject->timeFromOrigin = ticks(0);
     if (((anObject->_health - sObject->baseType->damage) < 0)
             && (anObject->attributes & (kIsPlayerShip | kRemoteOrHuman))
             && !anObject->baseType->destroyDontDie) {

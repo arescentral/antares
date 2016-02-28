@@ -59,7 +59,7 @@ aresGlobalType::aresGlobalType() {
     gZoomMode = kTimesTwoZoom;
     keyMask = 0;
 
-    hotKeyDownTime = -1;
+    hotKeyDownTime = ticks(-1);
 }
 
 aresGlobalType::~aresGlobalType() {
