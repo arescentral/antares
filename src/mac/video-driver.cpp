@@ -107,10 +107,6 @@ InputMode CocoaVideoDriver::input_mode() const {
     return _input_mode;
 }
 
-wall_ticks CocoaVideoDriver::ticks() const {
-    return std::chrono::time_point_cast<antares::ticks>(usecs());
-}
-
 wall_time CocoaVideoDriver::usecs() const {
     return antares::usecs();
 }

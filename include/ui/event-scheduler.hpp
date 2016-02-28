@@ -51,7 +51,6 @@ class EventScheduler {
 
     Point get_mouse() const { return _mouse; }
     InputMode input_mode() const { return KEYBOARD_MOUSE; }
-    wall_ticks ticks() const { return _ticks; }
     wall_time usecs() const { return wall_time(_ticks); }
 
   private:

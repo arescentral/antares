@@ -93,10 +93,6 @@ InputMode GLFWVideoDriver::input_mode() const {
     return KEYBOARD_MOUSE;
 }
 
-wall_ticks GLFWVideoDriver::ticks() const {
-    return std::chrono::time_point_cast<antares::ticks>(usecs());
-}
-
 wall_time GLFWVideoDriver::usecs() const {
     return wall_time(std::chrono::microseconds(int64_t(glfwGetTime() * 1e6)));
 }

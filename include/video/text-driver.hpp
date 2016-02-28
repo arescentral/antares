@@ -36,7 +36,6 @@ class TextVideoDriver : public VideoDriver {
     virtual int scale() const;
     virtual Size screen_size() const { return _size; }
 
-    virtual wall_ticks ticks() const { return _scheduler->ticks(); }
     virtual wall_time usecs() const { return _scheduler->usecs(); }
 
     virtual Texture texture(sfz::PrintItem name, const PixMap& content);

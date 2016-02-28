@@ -55,7 +55,6 @@ class VideoDriver {
     virtual int scale() const = 0;
     virtual Size screen_size() const = 0;
 
-    virtual wall_ticks ticks() const = 0;
     virtual wall_time usecs() const = 0;
 
     virtual Texture texture(sfz::PrintItem name, const PixMap& content) = 0;
