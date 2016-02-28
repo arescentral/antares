@@ -59,12 +59,12 @@ void Transitions::start_boolean(int32_t in_speed, int32_t out_speed, uint8_t goa
     }
 }
 
-void Transitions::update_boolean(int32_t time_passed) {
+void Transitions::update_boolean(ticks time_passed) {
     if (_active) {
         if (_step < 0) {
-            _step += _in_speed * time_passed;
-        } else if ((_step + _out_speed * time_passed) < kEndAnimation) {
-            _step += _out_speed * time_passed;
+            _step += _in_speed * time_passed.count();
+        } else if ((_step + _out_speed * time_passed.count()) < kEndAnimation) {
+            _step += _out_speed * time_passed.count();
         } else {
             _active = false;
         }

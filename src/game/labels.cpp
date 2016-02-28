@@ -50,6 +50,8 @@ const int32_t kLabelTotalInnerSpace = kLabelInnerSpace << 1;
 
 }  // namespace
 
+const ticks Label::kVisibleTime = ticks(60);
+
 // local function prototypes
 static int32_t String_Count_Lines(const StringSlice& s);
 static StringSlice String_Get_Nth_Line(const StringSlice& source, int32_t nth);
@@ -160,7 +162,7 @@ void Label::draw() {
     }
 }
 
-void Label::update_contents(int32_t units_done) {
+void Label::update_contents(ticks units_done) {
     Rect clip = viewport();
     for (auto label: all()) {
         if (!label->active || label->killMe || (label->text.empty()) || !label->visible) {
@@ -180,7 +182,7 @@ void Label::update_contents(int32_t units_done) {
             // printing was tied to the frame rate before: 3 per frame.  Here, we've switched to 1
             // per tick, so this would be equivalent to the old code at 20 FPS.  The question is,
             // does it feel equivalent?  It only comes up in the tutorial.
-            label->retroCount += units_done;
+            label->retroCount += units_done.count();
             if (static_cast<size_t>(label->retroCount) > label->text.size()) {
                 label->retroCount = -1;
             } else {
@@ -205,7 +207,7 @@ void Label::set_position(int16_t h, int16_t v) {
     where.offset(h, v);
 }
 
-void Label::update_positions(int32_t units_done) {
+void Label::update_positions(ticks units_done) {
     const Rect label_limits(
             viewport().left + kLabelBuffer, viewport().top + kLabelBuffer,
             viewport().right - kLabelBuffer, viewport().bottom - kLabelBuffer);
@@ -246,11 +248,11 @@ void Label::update_positions(int32_t units_done) {
 
                     if (!label->keepOnScreenAnyway) {
                         if (isOffScreen) {
-                            if (label->age == 0) {
+                            if (label->age == ticks(0)) {
                                 label->age = -kVisibleTime;
                             }
-                        } else if (label->age < 0) {
-                            label->age = 0;
+                        } else if (label->age < ticks(0)) {
+                            label->age = ticks(0);
                             label->visible = true;
                         }
                     }
@@ -292,21 +294,21 @@ void Label::update_positions(int32_t units_done) {
                     HintLine::show(source, dest, label->color, VERY_LIGHT);
                 }
             }
-            if (label->age > 0) {
+            if (label->age > ticks(0)) {
                 label->age -= units_done;
-                if (label->age <= 0) {
+                if (label->age <= ticks(0)) {
                     label->visible = false;
-                    label->age = 0;
+                    label->age = ticks(0);
                     label->object = SpaceObject::none();
                     label->text.clear();
                     if (label->attachedHintLine) {
                         HintLine::hide();
                     }
                 }
-            } else if (label->age < 0) {
+            } else if (label->age < ticks(0)) {
                 label->age += units_done;
-                if (label->age >= 0) {
-                    label->age = 0;
+                if (label->age >= ticks(0)) {
+                    label->age = ticks(0);
                     label->visible = false;
                 }
             }
@@ -317,10 +319,10 @@ void Label::update_positions(int32_t units_done) {
 void Label::set_object(Handle<SpaceObject> object) {
     this->object = object;
     visible = bool(object.get());
-    age = 0;
+    age = ticks(0);
 }
 
-void Label::set_age(int32_t age) {
+void Label::set_age(ticks age) {
     this->age = age;
     visible = true;
 }

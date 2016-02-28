@@ -352,10 +352,10 @@ static void move_beam(Handle<SpaceObject> o) {
     }
 }
 
-static void update_static(Handle<SpaceObject> o, int unitsToDo) {
+static void update_static(Handle<SpaceObject> o, ticks unitsToDo) {
     auto& sprite = *o->sprite;
     if (o->hitState != 0) {
-        o->hitState -= unitsToDo << 2L;
+        o->hitState -= unitsToDo.count() << 2L;
         if (o->hitState <= 0) {
             o->hitState = 0;
             sprite.style = spriteNormal;
@@ -370,7 +370,7 @@ static void update_static(Handle<SpaceObject> o, int unitsToDo) {
         if (o->cloakState > 0) {
             if (o->cloakState < kCloakOnStateMax) {
                 o->runTimeFlags |= kIsCloaked;
-                o->cloakState += unitsToDo << 2L;
+                o->cloakState += unitsToDo.count() << 2L;
                 if (o->cloakState > kCloakOnStateMax) {
                     o->cloakState = kCloakOnStateMax;
                 }
@@ -382,7 +382,7 @@ static void update_static(Handle<SpaceObject> o, int unitsToDo) {
                 sprite.styleData -= sprite.styleData >> 2;
             }
         } else if (o->cloakState < 0) {
-            o->cloakState += unitsToDo << 2L;
+            o->cloakState += unitsToDo.count() << 2L;
             if (o->cloakState >= 0) {
                 o->runTimeFlags &= ~kIsCloaked;
                 o->cloakState = 0;
@@ -399,12 +399,12 @@ static void update_static(Handle<SpaceObject> o, int unitsToDo) {
     }
 }
 
-void MoveSpaceObjects(const int32_t unitsToDo) {
-    if (unitsToDo == 0) {
+void MoveSpaceObjects(const ticks unitsToDo) {
+    if (unitsToDo == ticks(0)) {
         return;
     }
 
-    for (int32_t jl = 0; jl < unitsToDo; jl++) {
+    for (ticks jl = ticks(0); jl < unitsToDo; jl++) {
         for (Handle<SpaceObject> o = g.root; o.get(); o = o->nextObject) {
             if (o->active != kObjectInUse) {
                 continue;

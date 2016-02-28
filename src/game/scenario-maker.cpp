@@ -805,7 +805,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         g.time = game_time();
         for (int64_t i = 0; i < start_ticks; ++i) {
             g.time = add_ticks(g.time, 1);  // TODO(sfiera): not kDecideEveryCycles…?
-            MoveSpaceObjects(kDecideEveryCycles.count());
+            MoveSpaceObjects(kDecideEveryCycles);
             NonplayerShipThink();
             AdmiralThink();
             execute_action_queue();

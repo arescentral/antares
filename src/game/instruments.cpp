@@ -51,7 +51,7 @@ const int32_t kPanelHeight      = 480;
 
 const int32_t kRadarScale       = 50;
 const int32_t kRadarRange       = kRadarSize * kRadarScale;
-const int32_t kRadarSpeed       = 30;
+const ticks   kRadarSpeed       = ticks(30);
 const int32_t kRadarBlipNum     = 50;
 const uint8_t kRadarColor     = GREEN;
 
@@ -193,7 +193,7 @@ void ResetInstruments() {
     int32_t         *l, i;
     Point           *lp;
 
-    g.radar_count = 0;
+    g.radar_count = ticks(0);
     gLastScale = gAbsoluteScale = SCALE_SCALE;
     gWhichScaleNum = 0;
     gLastGlobalCorner.h = gLastGlobalCorner.v = 0;
@@ -226,7 +226,7 @@ void ResetInstruments() {
 
 }
 
-void UpdateRadar(int32_t unitsDone) {
+void UpdateRadar(ticks unitsDone) {
     if (!g.ship.get()) {
         g.radar_on = false;
     } else if (g.ship->offlineTime <= 0) {
@@ -235,8 +235,8 @@ void UpdateRadar(int32_t unitsDone) {
         g.radar_on = (Randomize(g.ship->offlineTime) < 5);
     }
 
-    if (unitsDone < 0) {
-        unitsDone = 0;
+    if (unitsDone < ticks(0)) {
+        unitsDone = ticks(0);
     }
     g.radar_count -= unitsDone;
 
@@ -249,7 +249,7 @@ void UpdateRadar(int32_t unitsDone) {
     bounds.inset(1, 1);
 
     if (g.radar_on) {
-        if (g.radar_count <= 0) {
+        if (g.radar_count <= ticks(0)) {
             Rect radar = bounds;
             radar.inset(1, 1);
 
@@ -350,7 +350,7 @@ void UpdateRadar(int32_t unitsDone) {
     }
 
     int32_t* scaleval;
-    for (int x = 0; x < unitsDone; x++) {
+    for (ticks x = ticks(0); x < unitsDone; x++) {
         scaleval = gScaleList.get() + gWhichScaleNum;
         *scaleval = bestScale;
         gWhichScaleNum++;
@@ -390,7 +390,7 @@ void draw_radar() {
         }
 
         RgbColor color;
-        if (g.radar_count <= 0) {
+        if (g.radar_count <= ticks(0)) {
             color = very_dark;
         } else {
             color = GetRGBTranslateColorShade(kRadarColor, ((kRadarColorSteps * g.radar_count) / kRadarSpeed) + 1);
@@ -499,7 +499,7 @@ void DrawInstrumentPanel() {
     MakeMiniScreenFromIndString(1);
     ResetInstruments();
     ClearMiniObjectData();
-    UpdateRadar(100);
+    UpdateRadar(ticks(100));
 }
 
 void draw_instruments() {

@@ -62,7 +62,7 @@ struct miniComputerDataType {
     std::unique_ptr<miniScreenLineType[]> lineData;
     std::unique_ptr<SpaceObject[]> objectData;
     int32_t                 selectLine;
-    int32_t                 pollTime;
+    ticks                   pollTime;
     int32_t                 buildTimeBarValue;
     int32_t                 currentScreen;
     int32_t                 clickLine;
@@ -108,7 +108,7 @@ struct GlobalState {
     int              next_level;    // Next level (or -1 for none).
     int16_t          victory_text;  // Text resource to show in debriefing.
 
-    int32_t                  radar_count;  // Counts down to a radar pulse every 5/6 seconds.
+    ticks                    radar_count;  // Counts down to a radar pulse every 5/6 seconds.
     std::unique_ptr<Point[]> radar_blips;  // Screen locations of radar blips.
     bool                     radar_on;     // Maybe false if player ship is offline.
 

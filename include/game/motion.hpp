@@ -20,6 +20,7 @@
 #define ANTARES_GAME_MOTION_HPP_
 
 #include "data/space-object.hpp"
+#include "math/units.hpp"
 
 namespace antares {
 
@@ -44,7 +45,7 @@ void ResetMotionGlobals();
 Size center_scale();
 
 void MotionCleanup();
-void MoveSpaceObjects(const int32_t unitsToDo);
+void MoveSpaceObjects(ticks unitsToDo);
 void CollideSpaceObjects();
 
 }  // namespace antares

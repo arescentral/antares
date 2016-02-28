@@ -533,8 +533,8 @@ void GamePlay::fire_timer() {
 
         if (unitsToDo > ticks(0)) {
             // executed arbitrarily, but at least once every kDecideEveryCycles
-            globals()->starfield.move(unitsToDo.count());
-            MoveSpaceObjects(unitsToDo.count());
+            globals()->starfield.move(unitsToDo);
+            MoveSpaceObjects(unitsToDo);
         }
 
         g.time += unitsToDo;
@@ -565,15 +565,15 @@ void GamePlay::fire_timer() {
         unitsPassed -= unitsToDo;
     }
 
-    MiniComputerHandleNull(unitsDone.count());
+    MiniComputerHandleNull(unitsDone);
 
     Messages::clip();
-    Messages::draw_long_message( unitsDone.count());
+    Messages::draw_long_message(unitsDone);
 
     update_sector_lines();
     Beams::update();
-    Label::update_positions(unitsDone.count());
-    Label::update_contents(unitsDone.count());
+    Label::update_positions(unitsDone);
+    Label::update_contents(unitsDone);
     update_site(_replay);
 
     CullSprites();
@@ -581,9 +581,9 @@ void GamePlay::fire_timer() {
     Beams::show_all();
     globals()->starfield.show();
 
-    Messages::draw_message_screen(unitsDone.count());
-    UpdateRadar(unitsDone.count());
-    globals()->transitions.update_boolean(unitsDone.count());
+    Messages::draw_message_screen(unitsDone);
+    UpdateRadar(unitsDone);
+    globals()->transitions.update_boolean(unitsDone);
 
     if (g.game_over && (g.time >= g.game_over_at)) {
         *_seconds = (g.time - _scenario_start_time).count() / 1e6;
