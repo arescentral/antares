@@ -27,8 +27,11 @@ namespace antares {
 // Time units
 struct GameStart {};
 struct Wall {};
+typedef std::chrono::duration<std::chrono::microseconds::rep, std::ratio<16667, 1000000>> ticks;
 typedef std::chrono::time_point<GameStart, std::chrono::microseconds> game_time;
+typedef std::chrono::time_point<GameStart, ticks> game_ticks;
 typedef std::chrono::time_point<Wall, std::chrono::microseconds> wall_time;
+typedef std::chrono::time_point<Wall, ticks> wall_ticks;
 
 // in microseconds--essentially one tick (1/60th of second)
 const int64_t kTimeUnit = 16667;

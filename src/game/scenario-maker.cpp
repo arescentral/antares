@@ -363,7 +363,7 @@ bool Scenario::Condition::is_true() const {
         }
 
         case kTimeCondition:
-            return g.time.time_since_epoch().count() >= ticks_to_usecs(conditionArgument.longValue);
+            return g.time >= game_ticks(ticks(conditionArgument.longValue));
 
         case kProximityCondition: {
             auto sObject = GetObjectFromInitialNumber(subjectObject);

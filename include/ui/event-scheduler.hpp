@@ -51,16 +51,16 @@ class EventScheduler {
 
     Point get_mouse() const { return _mouse; }
     InputMode input_mode() const { return KEYBOARD_MOUSE; }
-    int ticks() const { return _ticks; }
-    int64_t usecs() const { return ticks_to_usecs(_ticks); }
+    int ticks() const { return _ticks.time_since_epoch().count(); }
+    int64_t usecs() const { return wall_time(_ticks).time_since_epoch().count(); }
 
   private:
-    void advance_tick_count(MainLoop& loop, int64_t ticks);
-    bool have_snapshots_before(int64_t ticks) const;
+    void advance_tick_count(MainLoop& loop, wall_ticks ticks);
+    bool have_snapshots_before(wall_ticks ticks) const;
 
     static bool is_later(const std::unique_ptr<Event>& x, const std::unique_ptr<Event>& y);
 
-    int64_t _ticks;
+    wall_ticks _ticks;
     std::vector<int64_t> _snapshot_times;
     std::vector<std::unique_ptr<Event>> _event_heap;
     Point _mouse;
