@@ -18,11 +18,6 @@
 , "targets":
   [ { "target_name": "libantares"
     , "type": "static_library"
-    , "sources":
-      [ "include/lang/casts.hpp"
-      , "include/lang/defines.hpp"
-      , "include/net/http.hpp"
-      ]
     , "dependencies":
       [ "libantares-config"
       , "libantares-data"
@@ -70,6 +65,14 @@
       , "include/config/keys.hpp"
       , "include/config/ledger.hpp"
       , "include/config/preferences.hpp"
+
+      # These don't really belong here, but there aren't any
+      # associated sources, and ninja doesn't like when you have a
+      # library with just includes in the sources list.
+      , "include/lang/casts.hpp"
+      , "include/lang/defines.hpp"
+      , "include/net/http.hpp"
+
       , "src/config/file-prefs-driver.cpp"
       , "src/config/gamepad.cpp"
       , "src/config/keys.cpp"
