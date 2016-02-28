@@ -29,6 +29,7 @@
 #include "drawing/color.hpp"
 #include "game/starfield.hpp"
 #include "math/random.hpp"
+#include "math/units.hpp"
 #include "sound/fx.hpp"
 #include "video/transitions.hpp"
 
@@ -82,9 +83,9 @@ class InputSource;
 class StringList;
 
 struct GlobalState {
-    uint32_t  sync;    // Indicates when net games are desynchronized.
-    int64_t   time;    // Current game time.
-    Random    random;  // Global random number generator.
+    uint32_t   sync;    // Indicates when net games are desynchronized.
+    game_time  time;    // Current game time.
+    Random     random;  // Global random number generator.
 
     const Scenario* level;
 

@@ -635,14 +635,14 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
     }
 
     if (theShip->health() < (theShip->baseType->health >> 2L)) {
-        if (g.time > globals()->next_klaxon) {
+        if (g.time.time_since_epoch().count() > globals()->next_klaxon) {
             if (globals()->next_klaxon == 0) {
                 PlayVolumeSound(kKlaxon, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
             } else {
                 PlayVolumeSound(kKlaxon, kMediumVolume, kMediumLongPersistence, kPrioritySound);
             }
             Messages::set_status("WARNING: Shields Low", kStatusWarnColor);
-            globals()->next_klaxon = g.time + 2083333;
+            globals()->next_klaxon = g.time.time_since_epoch().count() + 2083333;
         }
     } else {
         globals()->next_klaxon = 0;
@@ -989,7 +989,7 @@ void PlayerShipBodyExpire(Handle<SpaceObject> theShip) {
     } else {
         if (!g.game_over) {
             g.game_over = true;
-            g.game_over_at = add_ticks(g.time, 180);
+            g.game_over_at = add_ticks(g.time, 180).time_since_epoch().count();
         }
         if (theShip->owner == g.admiral) {
             g.victory_text = kScenarioNoShipTextID + g.level->levelNameStrNum;

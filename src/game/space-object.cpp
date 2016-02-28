@@ -223,7 +223,7 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
 
         if (!obj->sprite.get()) {
             g.game_over = true;
-            g.game_over_at = g.time;
+            g.game_over_at = g.time.time_since_epoch().count();
             obj->active = kObjectAvailable;
             return SpaceObject::none();
         }

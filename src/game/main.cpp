@@ -505,10 +505,10 @@ void GamePlay::fire_timer() {
     int unitsPassed, unitsDone;
     if (_fast_motion && !_entering_message) {
         unitsDone = unitsPassed = 12;
-        globals()->virtual_start = now - (add_ticks(g.time, unitsPassed) - _scenario_start_time);
+        globals()->virtual_start = now - (add_ticks(g.time, unitsPassed).time_since_epoch().count() - _scenario_start_time);
     } else {
         int64_t newGameTime = now - globals()->virtual_start + _scenario_start_time;
-        unitsDone = unitsPassed = usecs_to_ticks(newGameTime - g.time);
+        unitsDone = unitsPassed = usecs_to_ticks(newGameTime - g.time.time_since_epoch().count());
     }
 
     if (unitsPassed <= 0) {
@@ -521,7 +521,7 @@ void GamePlay::fire_timer() {
     if (_player_paused) {
         _player_paused = false;
         unitsDone = unitsPassed = 0;
-        globals()->virtual_start = now - (g.time - _scenario_start_time);
+        globals()->virtual_start = now - (g.time.time_since_epoch().count() - _scenario_start_time);
     }
 
     while (unitsPassed > 0) {
@@ -549,7 +549,7 @@ void GamePlay::fire_timer() {
 
             if (globals()->gInputSource && !globals()->gInputSource->next(_player_ship)) {
                 g.game_over = true;
-                g.game_over_at = g.time;
+                g.game_over_at = g.time.time_since_epoch().count();
             }
             _replay_builder.next();
             _player_ship.update(_cursor, _entering_message);
@@ -585,8 +585,8 @@ void GamePlay::fire_timer() {
     UpdateRadar(unitsDone);
     globals()->transitions.update_boolean(unitsDone);
 
-    if (g.game_over && (g.time >= g.game_over_at)) {
-        *_seconds = (g.time - _scenario_start_time) / 1e6;
+    if (g.game_over && (g.time.time_since_epoch().count() >= g.game_over_at)) {
+        *_seconds = (g.time.time_since_epoch().count() - _scenario_start_time) / 1e6;
 
         if (*_game_result == NO_GAME) {
             if (g.victor == g.admiral) {
@@ -635,7 +635,7 @@ void GamePlay::key_down(const KeyDownEvent& event) {
     if (globals()->gInputSource) {
         *_game_result = QUIT_GAME;
         g.game_over = true;
-        g.game_over_at = g.time;
+        g.game_over_at = g.time.time_since_epoch().count();
         return;
     }
 
@@ -699,7 +699,7 @@ void GamePlay::mouse_down(const MouseDownEvent& event) {
     if (_replay) {
         *_game_result = QUIT_GAME;
         g.game_over = true;
-        g.game_over_at = g.time;
+        g.game_over_at = g.time.time_since_epoch().count();
         return;
     }
 
@@ -736,7 +736,7 @@ void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
     if (globals()->gInputSource) {
         *_game_result = QUIT_GAME;
         g.game_over = true;
-        g.game_over_at = g.time;
+        g.game_over_at = g.time.time_since_epoch().count();
         return;
     }
 

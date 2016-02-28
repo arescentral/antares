@@ -363,7 +363,7 @@ bool Scenario::Condition::is_true() const {
         }
 
         case kTimeCondition:
-            return g.time >= ticks_to_usecs(conditionArgument.longValue);
+            return g.time.time_since_epoch().count() >= ticks_to_usecs(conditionArgument.longValue);
 
         case kProximityCondition: {
             auto sObject = GetObjectFromInitialNumber(subjectObject);
@@ -802,7 +802,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         const int64_t start_ticks
             = (g.level->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple;
         const int64_t start_time = add_ticks(0, start_ticks);
-        g.time = 0;
+        g.time = game_time();
         for (int64_t i = 0; i < start_ticks; ++i) {
             g.time = add_ticks(g.time, 1);  // TODO(sfiera): not kDecideEveryCycles…?
             MoveSpaceObjects(kDecideEveryCycles);
@@ -821,7 +821,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 (*current)++;
             }
         }
-        g.time = start_time;
+        g.time = game_time(std::chrono::microseconds(start_time));
 
         (*current)++;
         return;
@@ -933,7 +933,7 @@ void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textI
         g.next_level = nextLevel;
         g.victory_text = textID;
         g.game_over = true;
-        g.game_over_at = g.time;
+        g.game_over_at = g.time.time_since_epoch().count();
     } else {
         if (!g.victor.get()) {
             g.victor = whichPlayer;
@@ -941,7 +941,7 @@ void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textI
             g.next_level = nextLevel;
             if (!g.game_over) {
                 g.game_over = true;
-                g.game_over_at = add_ticks(g.time, 180);
+                g.game_over_at = add_ticks(g.time, 180).time_since_epoch().count();
             }
         }
     }

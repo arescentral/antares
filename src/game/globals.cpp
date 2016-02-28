@@ -46,7 +46,7 @@ aresGlobalType* globals() {
 void init_globals() {
     gAresGlobal = new aresGlobalType;
 
-    g.time = 0;
+    g.time = game_time();
     g.ship = Handle<SpaceObject>(0);
     g.closest = Handle<SpaceObject>(0);
     g.farthest = Handle<SpaceObject>(0);
