@@ -102,6 +102,10 @@ int GLFWVideoDriver::usecs() const {
     return glfwGetTime() * 1e6;
 }
 
+static wall_time wall() {
+    return wall_time(std::chrono::microseconds(int64_t(glfwGetTime() * 1e6)));
+}
+
 void GLFWVideoDriver::key(int key, int scancode, int action, int mods) {
     if (key < 0) {
         return;
@@ -114,9 +118,9 @@ void GLFWVideoDriver::key(int key, int scancode, int action, int mods) {
     GetKeyNumName(key + 1, &name);
     const char* actions[3] = {"release", "press", "repeat"};
     if (action == GLFW_PRESS) {
-        KeyDownEvent(usecs(), key).send(_loop->top());
+        KeyDownEvent(wall(), key).send(_loop->top());
     } else if (action == GLFW_RELEASE) {
-        KeyUpEvent(usecs(), key).send(_loop->top());
+        KeyUpEvent(wall(), key).send(_loop->top());
     } else {
         return;
     }
@@ -129,17 +133,17 @@ void GLFWVideoDriver::mouse_button(int button, int action, int mods) {
         } else {
             _last_click_count = 1;
         }
-        MouseDownEvent(usecs(), button, _last_click_count, get_mouse()).send(_loop->top());
+        MouseDownEvent(wall(), button, _last_click_count, get_mouse()).send(_loop->top());
         _last_click_usecs = usecs();
     } else if (action == GLFW_RELEASE) {
-        MouseUpEvent(usecs(), button, get_mouse()).send(_loop->top());
+        MouseUpEvent(wall(), button, get_mouse()).send(_loop->top());
     } else {
         return;
     }
 }
 
 void GLFWVideoDriver::mouse_move(double x, double y) {
-    MouseMoveEvent(usecs(), Point(x, y)).send(_loop->top());
+    MouseMoveEvent(wall(), Point(x, y)).send(_loop->top());
 }
 
 void GLFWVideoDriver::window_size(int width, int height) {

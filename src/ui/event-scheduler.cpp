@@ -67,27 +67,27 @@ void EventScheduler::schedule_event(unique_ptr<Event> event) {
 }
 
 void EventScheduler::schedule_key(int32_t key, int64_t down, int64_t up) {
-    schedule_event(unique_ptr<Event>(new KeyDownEvent(down, key)));
-    schedule_event(unique_ptr<Event>(new KeyUpEvent(up, key)));
+    schedule_event(unique_ptr<Event>(new KeyDownEvent(wall_time(std::chrono::microseconds(down * kTimeUnit)), key)));
+    schedule_event(unique_ptr<Event>(new KeyUpEvent(wall_time(std::chrono::microseconds(up * kTimeUnit)), key)));
 }
 
 void EventScheduler::schedule_mouse(
         int button, const Point& where, int64_t down, int64_t up) {
-    schedule_event(unique_ptr<Event>(new MouseDownEvent(down, button, 1, where)));
-    schedule_event(unique_ptr<Event>(new MouseUpEvent(up, button, where)));
+    schedule_event(unique_ptr<Event>(new MouseDownEvent(wall_time(std::chrono::microseconds(down * kTimeUnit)), button, 1, where)));
+    schedule_event(unique_ptr<Event>(new MouseUpEvent(wall_time(std::chrono::microseconds(up * kTimeUnit)), button, where)));
 }
 
 void EventScheduler::loop(EventScheduler::MainLoop& loop) {
     while (!loop.done()) {
         wall_time at_usecs;
         const bool has_timer = loop.top()->next_timer(at_usecs);
-        const int64_t at_ticks = at_usecs.time_since_epoch().count() * 60 / 1000000;
-        if (!_event_heap.empty() && (!has_timer || (_event_heap.front()->at() <= at_ticks))) {
+        const int64_t at_ticks = at_usecs.time_since_epoch().count() / kTimeUnit;
+        if (!_event_heap.empty() && (!has_timer || (_event_heap.front()->at() <= at_usecs))) {
             unique_ptr<Event> event;
             swap(event, _event_heap.front());
             pop_heap(_event_heap.begin(), _event_heap.end(), is_later);
             _event_heap.pop_back();
-            advance_tick_count(loop, event->at());
+            advance_tick_count(loop, event->at().time_since_epoch().count() / kTimeUnit);
             MouseReader mr(&_mouse);
             event->send(&mr);
             event->send(loop.top());

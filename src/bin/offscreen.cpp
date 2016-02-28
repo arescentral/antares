@@ -205,7 +205,7 @@ void mission_briefing(EventScheduler& scheduler, Ledger& ledger) {
 }
 
 void pause(EventScheduler& scheduler) {
-    scheduler.schedule_event(unique_ptr<Event>(new MouseMoveEvent(0, Point(320, 240))));
+    scheduler.schedule_event(unique_ptr<Event>(new MouseMoveEvent(wall_time(), Point(320, 240))));
 
     // Skip the intro.  Start the first tutorial and skip the prologue.
     scheduler.schedule_key(Keys::Q, 1756, 1757);

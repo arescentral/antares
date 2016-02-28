@@ -22,12 +22,12 @@
 
 namespace antares {
 
-Event::Event(int64_t at):
+Event::Event(wall_time at):
         _at(at) { }
 
 Event::~Event() { }
 
-int64_t Event::at() const {
+wall_time Event::at() const {
     return _at;
 }
 

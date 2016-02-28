@@ -134,9 +134,9 @@ PlayerShip::PlayerShip():
 void PlayerShip::update_keys(const KeyMap& keys) {
     for (int i = 0; i < 256; ++i) {
         if (keys.get(i) && ! _keys.get(i)) {
-            key_down(KeyDownEvent(now_usecs().time_since_epoch().count(), i));
+            key_down(KeyDownEvent(now_usecs(), i));
         } else if (_keys.get(i) && ! keys.get(i)) {
-            key_up(KeyUpEvent(now_usecs().time_since_epoch().count(), i));
+            key_up(KeyUpEvent(now_usecs(), i));
         }
     }
 }
