@@ -115,7 +115,7 @@ static bool oldest_available_channel(int& channel) {
     bool result = false;
     for (int i = 0; i < kMaxChannelNum; ++i) {
         auto past_reservation =
-            VideoDriver::driver()->usecs() - gChannel[i].reserved_until;
+            VideoDriver::driver()->now() - gChannel[i].reserved_until;
         if (past_reservation > oldestSoundTime) {
             oldestSoundTime = past_reservation;
             channel = i;
@@ -152,7 +152,7 @@ void PlayVolumeSound(
         }
 
         gChannel[whichChannel].whichSound = whichSoundID;
-        gChannel[whichChannel].reserved_until = VideoDriver::driver()->usecs() + ticks(persistence);
+        gChannel[whichChannel].reserved_until = VideoDriver::driver()->now() + ticks(persistence);
         gChannel[whichChannel].soundPriority = priority;
         gChannel[whichChannel].soundVolume = amplitude;
 

@@ -44,12 +44,6 @@ namespace antares {
 
 namespace {
 
-wall_time usecs() {
-    timeval tv;
-    gettimeofday(&tv, NULL);
-    return wall_time(std::chrono::microseconds(tv.tv_sec * 1000000ll + tv.tv_usec));
-}
-
 class AntaresWindow {
   public:
     AntaresWindow(const cgl::PixelFormat& pixel_format, const cgl::Context& context):
@@ -107,8 +101,8 @@ InputMode CocoaVideoDriver::input_mode() const {
     return _input_mode;
 }
 
-wall_time CocoaVideoDriver::usecs() const {
-    return antares::usecs();
+wall_time CocoaVideoDriver::now() const {
+    return _now();
 }
 
 struct CocoaVideoDriver::EventBridge {
@@ -122,27 +116,27 @@ struct CocoaVideoDriver::EventBridge {
 
     static void mouse_down(int button, int32_t x, int32_t y, int count, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new MouseDownEvent(now_usecs(), button, count, Point(x, y)));
+        self->enqueue(new MouseDownEvent(_now(), button, count, Point(x, y)));
     }
 
     static void mouse_up(int button, int32_t x, int32_t y, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new MouseUpEvent(now_usecs(), button, Point(x, y)));
+        self->enqueue(new MouseUpEvent(_now(), button, Point(x, y)));
     }
 
     static void mouse_move(int32_t x, int32_t y, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new MouseMoveEvent(now_usecs(), Point(x, y)));
+        self->enqueue(new MouseMoveEvent(_now(), Point(x, y)));
     }
 
     static void caps_lock(void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new KeyDownEvent(now_usecs(), Keys::CAPS_LOCK));
+        self->enqueue(new KeyDownEvent(_now(), Keys::CAPS_LOCK));
     }
 
     static void caps_unlock(void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new KeyUpEvent(now_usecs(), Keys::CAPS_LOCK));
+        self->enqueue(new KeyUpEvent(_now(), Keys::CAPS_LOCK));
     }
 
     static void hid_event(void* userdata, IOReturn result, void* sender, IOHIDValueRef value) {
@@ -328,6 +322,12 @@ void CocoaVideoDriver::loop(Card* initial) {
             bridge.send_all();
         }
     }
+}
+
+wall_time CocoaVideoDriver::_now() {
+    timeval tv;
+    gettimeofday(&tv, NULL);
+    return wall_time(std::chrono::microseconds(tv.tv_sec * 1000000ll + tv.tv_usec));
 }
 
 }  // namespace antares

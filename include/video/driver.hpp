@@ -55,7 +55,7 @@ class VideoDriver {
     virtual int scale() const = 0;
     virtual Size screen_size() const = 0;
 
-    virtual wall_time usecs() const = 0;
+    virtual wall_time now() const = 0;
 
     virtual Texture texture(sfz::PrintItem name, const PixMap& content) = 0;
     virtual void dither_rect(const Rect& rect, const RgbColor& color) = 0;
