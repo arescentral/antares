@@ -139,7 +139,7 @@ class GamePlay : public Card {
     int32_t* const _seconds;
     int64_t _next_timer;
     const Rect _play_area;
-    const int64_t _scenario_start_time;
+    const game_time _scenario_start_time;
     const bool _command_and_q;
     bool _fast_motion;
     bool _entering_message;
@@ -237,7 +237,7 @@ void MainPlay::become_front() {
                 SetSongVolume(kMusicVolume);
                 PlaySong();
             }
-            globals()->virtual_start = now_usecs();
+            globals()->virtual_start = game_time(std::chrono::microseconds(now_usecs()));
 
             if (!_replay) {
                 _replay_builder.start();
@@ -295,10 +295,10 @@ GamePlay::GamePlay(
         _seconds(seconds),
         _next_timer(add_ticks(now_usecs(), 1)),
         _play_area(viewport().left, viewport().top, viewport().right, viewport().bottom),
-        _scenario_start_time(add_ticks(
+        _scenario_start_time(std::chrono::microseconds(add_ticks(
                     0,
                     (g.level->startTime & kScenario_StartTimeMask)
-                    * kScenarioTimeMultiple)),
+                    * kScenarioTimeMultiple))),
         _command_and_q(BothCommandAndQ()),
         _fast_motion(false),
         _entering_message(false),
@@ -500,15 +500,15 @@ void GamePlay::fire_timer() {
         _next_timer = add_ticks(_next_timer, 1);
     }
 
-    const int64_t now = now_usecs();
+    const game_time now = game_time(std::chrono::microseconds(now_usecs()));
 
     int unitsPassed, unitsDone;
     if (_fast_motion && !_entering_message) {
         unitsDone = unitsPassed = 12;
-        globals()->virtual_start = now - (add_ticks(g.time, unitsPassed).time_since_epoch().count() - _scenario_start_time);
+        globals()->virtual_start = now - (add_ticks(g.time, unitsPassed) - _scenario_start_time);
     } else {
-        int64_t newGameTime = now - globals()->virtual_start + _scenario_start_time;
-        unitsDone = unitsPassed = usecs_to_ticks(newGameTime - g.time.time_since_epoch().count());
+        game_time newGameTime = now - globals()->virtual_start + _scenario_start_time;
+        unitsDone = unitsPassed = usecs_to_ticks((newGameTime - g.time).count());
     }
 
     if (unitsPassed <= 0) {
@@ -521,7 +521,7 @@ void GamePlay::fire_timer() {
     if (_player_paused) {
         _player_paused = false;
         unitsDone = unitsPassed = 0;
-        globals()->virtual_start = now - (g.time.time_since_epoch().count() - _scenario_start_time);
+        globals()->virtual_start = now - (g.time - _scenario_start_time);
     }
 
     while (unitsPassed > 0) {
@@ -549,7 +549,7 @@ void GamePlay::fire_timer() {
 
             if (globals()->gInputSource && !globals()->gInputSource->next(_player_ship)) {
                 g.game_over = true;
-                g.game_over_at = g.time.time_since_epoch().count();
+                g.game_over_at = g.time;
             }
             _replay_builder.next();
             _player_ship.update(_cursor, _entering_message);
@@ -585,8 +585,8 @@ void GamePlay::fire_timer() {
     UpdateRadar(unitsDone);
     globals()->transitions.update_boolean(unitsDone);
 
-    if (g.game_over && (g.time.time_since_epoch().count() >= g.game_over_at)) {
-        *_seconds = (g.time.time_since_epoch().count() - _scenario_start_time) / 1e6;
+    if (g.game_over && (g.time >= g.game_over_at)) {
+        *_seconds = (g.time - _scenario_start_time).count() / 1e6;
 
         if (*_game_result == NO_GAME) {
             if (g.victor == g.admiral) {
@@ -635,7 +635,7 @@ void GamePlay::key_down(const KeyDownEvent& event) {
     if (globals()->gInputSource) {
         *_game_result = QUIT_GAME;
         g.game_over = true;
-        g.game_over_at = g.time.time_since_epoch().count();
+        g.game_over_at = g.time;
         return;
     }
 
@@ -699,7 +699,7 @@ void GamePlay::mouse_down(const MouseDownEvent& event) {
     if (_replay) {
         *_game_result = QUIT_GAME;
         g.game_over = true;
-        g.game_over_at = g.time.time_since_epoch().count();
+        g.game_over_at = g.time;
         return;
     }
 
@@ -736,7 +736,7 @@ void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
     if (globals()->gInputSource) {
         *_game_result = QUIT_GAME;
         g.game_over = true;
-        g.game_over_at = g.time.time_since_epoch().count();
+        g.game_over_at = g.time;
         return;
     }
 

@@ -103,7 +103,7 @@ struct GlobalState {
     std::unique_ptr<Sprite[]>       sprites;       // Auxiliary info for objects with sprites.
 
     bool             game_over;     // True if an admiral won or lost the level.
-    int64_t          game_over_at;  // The time to stop the game (ignored unless game_over).
+    game_time        game_over_at;  // The time to stop the game (ignored unless game_over).
     Handle<Admiral>  victor;        // The winner (or none).
     int              next_level;    // Next level (or -1 for none).
     int16_t          victory_text;  // Text resource to show in debriefing.
@@ -152,7 +152,7 @@ struct aresGlobalType {
 
     // Start time of game in usecs.  But, if the player pauses or fast-forwards, it gets moved
     // forwards or back so that the same calculations still work.
-    uint64_t        virtual_start;
+    game_time       virtual_start;
 
     ZoomType        gZoomMode;
 
@@ -168,7 +168,7 @@ struct aresGlobalType {
     bool         destKeyUsedForSelection;
     bool         hotKey_target;
 
-    int64_t      next_klaxon;
+    game_time    next_klaxon;
 
     Starfield starfield;
     Transitions transitions;
