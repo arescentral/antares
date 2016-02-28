@@ -21,9 +21,11 @@
 
 #include <stdint.h>
 
+#include "math/units.hpp"
+
 namespace antares {
 
-int64_t now_usecs();
+wall_time now_usecs();
 
 }  // namespace antares
 

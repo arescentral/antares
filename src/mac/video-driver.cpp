@@ -127,27 +127,27 @@ struct CocoaVideoDriver::EventBridge {
 
     static void mouse_down(int button, int32_t x, int32_t y, int count, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new MouseDownEvent(now_usecs(), button, count, Point(x, y)));
+        self->enqueue(new MouseDownEvent(now_usecs().time_since_epoch().count(), button, count, Point(x, y)));
     }
 
     static void mouse_up(int button, int32_t x, int32_t y, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new MouseUpEvent(now_usecs(), button, Point(x, y)));
+        self->enqueue(new MouseUpEvent(now_usecs().time_since_epoch().count(), button, Point(x, y)));
     }
 
     static void mouse_move(int32_t x, int32_t y, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new MouseMoveEvent(now_usecs(), Point(x, y)));
+        self->enqueue(new MouseMoveEvent(now_usecs().time_since_epoch().count(), Point(x, y)));
     }
 
     static void caps_lock(void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new KeyDownEvent(now_usecs(), Keys::CAPS_LOCK));
+        self->enqueue(new KeyDownEvent(now_usecs().time_since_epoch().count(), Keys::CAPS_LOCK));
     }
 
     static void caps_unlock(void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new KeyUpEvent(now_usecs(), Keys::CAPS_LOCK));
+        self->enqueue(new KeyUpEvent(now_usecs().time_since_epoch().count(), Keys::CAPS_LOCK));
     }
 
     static void hid_event(void* userdata, IOReturn result, void* sender, IOHIDValueRef value) {
@@ -183,9 +183,9 @@ struct CocoaVideoDriver::EventBridge {
         }
 
         if (down) {
-            enqueue(new KeyDownEvent(now_usecs(), scan_code));
+            enqueue(new KeyDownEvent(now_usecs().time_since_epoch().count(), scan_code));
         } else {
-            enqueue(new KeyUpEvent(now_usecs(), scan_code));
+            enqueue(new KeyUpEvent(now_usecs().time_since_epoch().count(), scan_code));
         }
     }
 
@@ -196,9 +196,9 @@ struct CocoaVideoDriver::EventBridge {
         bool down = IOHIDValueGetIntegerValue(value);
         uint16_t usage = IOHIDElementGetUsage(element);
         if (down) {
-            enqueue(new GamepadButtonDownEvent(now_usecs(), usage));
+            enqueue(new GamepadButtonDownEvent(now_usecs().time_since_epoch().count(), usage));
         } else {
-            enqueue(new GamepadButtonUpEvent(now_usecs(), usage));
+            enqueue(new GamepadButtonUpEvent(now_usecs().time_since_epoch().count(), usage));
         }
     }
 
@@ -226,7 +226,7 @@ struct CocoaVideoDriver::EventBridge {
                 double x = gamepad[x_component[usage]];
                 double y = gamepad[x_component[usage] + 1];
                 enqueue(new GamepadStickEvent(
-                            now_usecs(), kHIDUsage_GD_X + x_component[usage], x, y));
+                            now_usecs().time_since_epoch().count(), kHIDUsage_GD_X + x_component[usage], x, y));
             }
             break;
           case kHIDUsage_GD_Z:

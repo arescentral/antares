@@ -32,7 +32,7 @@ namespace antares {
 
 static const int16_t kLevelNameID = 4600;
 static const uint8_t kLoadingScreenColor = PALE_GREEN;
-static const int64_t kTypingDelay = 16667;
+static const std::chrono::microseconds kTypingDelay(16667);
 
 LoadingScreen::LoadingScreen(const Scenario* scenario, bool* cancelled):
         InterfaceScreen("loading", {0, 0, 640, 480}, true),
@@ -61,7 +61,7 @@ bool LoadingScreen::next_timer(int64_t& time) {
     switch (_state) {
       case TYPING:
       case DONE:
-        time = _next_update;
+        time = _next_update.time_since_epoch().count();
         return true;
       case LOADING:
         time = 0;

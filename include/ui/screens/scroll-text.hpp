@@ -23,6 +23,7 @@
 
 #include "drawing/build-pix.hpp"
 #include "math/geometry.hpp"
+#include "math/units.hpp"
 #include "ui/card.hpp"
 
 namespace antares {
@@ -50,8 +51,8 @@ class ScrollTextScreen : public Card {
     const bool _play_song;
     const int _song_id;
 
-    int64_t _start;
-    int64_t _next_shift;
+    wall_time _start;
+    wall_time _next_shift;
     int32_t _position;
 
     DISALLOW_COPY_AND_ASSIGN(ScrollTextScreen);

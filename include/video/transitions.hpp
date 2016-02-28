@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
+#include "math/units.hpp"
 #include "ui/card.hpp"
 #include "video/driver.hpp"
 
@@ -76,8 +77,8 @@ class ColorFade : public Card {
     const bool _allow_skip;
     bool* _skipped;
 
-    int64_t _start;
-    int64_t _next_event;
+    wall_time _start;
+    wall_time _next_event;
     const int64_t _duration;
 
     DISALLOW_COPY_AND_ASSIGN(ColorFade);
@@ -98,8 +99,8 @@ class PictFade : public Card {
     virtual void draw() const;
 
   protected:
-    virtual int64_t fade_time() const;
-    virtual int64_t display_time() const;
+    virtual std::chrono::microseconds fade_time() const;
+    virtual std::chrono::microseconds display_time() const;
     virtual bool skip() const;
 
   private:
@@ -115,7 +116,7 @@ class PictFade : public Card {
 
     State _state;
     bool* _skipped;
-    int64_t _wane_start;
+    wall_time _wane_start;
 
     Texture _texture;
 

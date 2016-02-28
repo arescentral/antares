@@ -49,7 +49,7 @@ namespace antares {
 
 namespace {
 
-const int64_t kTypingDelay = 1e6 / 20;
+const std::chrono::microseconds kTypingDelay(1000000 / 20);
 const int kScoreTableHeight = 120;
 const int kTextWidth = 300;
 
@@ -119,7 +119,6 @@ unique_ptr<StyledText> style_score_text(String text) {
 
 DebriefingScreen::DebriefingScreen(int text_id) :
         _state(DONE),
-        _next_update(0),
         _typed_chars(0),
         _data_item(initialize(text_id, false)) { }
 
@@ -127,7 +126,6 @@ DebriefingScreen::DebriefingScreen(
         int text_id, int your_length, int par_length, int your_loss, int par_loss,
         int your_kill, int par_kill):
         _state(TYPING),
-        _next_update(0),
         _typed_chars(0),
         _data_item(initialize(text_id, true)) {
 
@@ -149,7 +147,7 @@ void DebriefingScreen::become_front() {
     if (_state == TYPING) {
         _next_update = now_usecs() + kTypingDelay;
     } else {
-        _next_update = 0;
+        _next_update = wall_time();
     }
 }
 
@@ -198,7 +196,7 @@ void DebriefingScreen::gamepad_button_down(const GamepadButtonDownEvent& event) 
 
 bool DebriefingScreen::next_timer(int64_t& time) {
     if (_state == TYPING) {
-        time = _next_update;
+        time = _next_update.time_since_epoch().count();
         return true;
     }
     return false;
@@ -209,13 +207,13 @@ void DebriefingScreen::fire_timer() {
         throw Exception(format("DebriefingScreen::fire_timer() called but _state is {0}", _state));
     }
     PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
-    int64_t now = now_usecs();
+    wall_time now = now_usecs();
     while (_next_update <= now) {
         if (_typed_chars < _score->size()) {
             _next_update += kTypingDelay;
             ++_typed_chars;
         } else {
-            _next_update = 0;
+            _next_update = wall_time();
             _state = DONE;
             break;
         }

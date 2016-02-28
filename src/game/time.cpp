@@ -23,8 +23,8 @@
 
 namespace antares {
 
-int64_t now_usecs() {
-    return VideoDriver::driver()->usecs();
+wall_time now_usecs() {
+    return wall_time(std::chrono::microseconds(VideoDriver::driver()->usecs()));
 }
 
 }  // namespace antares

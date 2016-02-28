@@ -137,7 +137,7 @@ class GamePlay : public Card {
     const bool _replay;
     GameResult* const _game_result;
     int32_t* const _seconds;
-    int64_t _next_timer;
+    wall_time _next_timer;
     const Rect _play_area;
     const game_time _scenario_start_time;
     const bool _command_and_q;
@@ -237,7 +237,7 @@ void MainPlay::become_front() {
                 SetSongVolume(kMusicVolume);
                 PlaySong();
             }
-            globals()->virtual_start = game_time(std::chrono::microseconds(now_usecs()));
+            globals()->virtual_start = now_usecs();
 
             if (!_replay) {
                 _replay_builder.start();
@@ -307,6 +307,9 @@ GamePlay::GamePlay(
         _scenario_check_time(0),
         _replay_builder(replay_builder) { }
 
+static const std::chrono::microseconds kSwitchAfter(1000000 / 3);
+static const std::chrono::microseconds kSleepAfter(60 * 1000000);
+
 class PauseScreen : public Card {
   public:
     PauseScreen() {
@@ -342,7 +345,7 @@ class PauseScreen : public Card {
     }
 
     virtual bool next_timer(int64_t& time) {
-        time = std::min(_next_switch, _sleep_at);
+        time = std::min(_next_switch, _sleep_at).time_since_epoch().count();
         return true;
     }
 
@@ -373,7 +376,7 @@ class PauseScreen : public Card {
 
   private:
     void show_hide() {
-        const int64_t now = now_usecs();
+        const wall_time now = now_usecs();
         while (_next_switch < now) {
             _visible = !_visible;
             _next_switch += kSwitchAfter;
@@ -388,12 +391,9 @@ class PauseScreen : public Card {
         _sleep_at = now_usecs() + kSleepAfter;
     }
 
-    static const int64_t kSwitchAfter = 1000000 / 3;
-    static const int64_t kSleepAfter = 60 * 1000000;
-
     bool _visible;
-    int64_t _next_switch;
-    int64_t _sleep_at;
+    wall_time _next_switch;
+    wall_time _sleep_at;
     String _pause_string;
     Point _text_origin;
     Rect _bracket_bounds;
@@ -489,7 +489,7 @@ void GamePlay::draw() const {
 
 bool GamePlay::next_timer(int64_t& time) {
     if (_state == PLAYING) {
-        time = _next_timer;
+        time = _next_timer.time_since_epoch().count();
         return true;
     }
     return false;
@@ -500,7 +500,7 @@ void GamePlay::fire_timer() {
         _next_timer = add_ticks(_next_timer, 1);
     }
 
-    const game_time now = game_time(std::chrono::microseconds(now_usecs()));
+    const wall_time now = now_usecs();
 
     int unitsPassed, unitsDone;
     if (_fast_motion && !_entering_message) {

@@ -84,7 +84,6 @@ ColorFade::ColorFade(
           _color(color),
           _allow_skip(allow_skip),
           _skipped(skipped),
-          _next_event(0.0),
           _duration(duration) { }
 
 void ColorFade::become_front() {
@@ -117,16 +116,16 @@ void ColorFade::gamepad_button_down(const GamepadButtonDownEvent& event) {
 }
 
 bool ColorFade::next_timer(int64_t& time) {
-    time = _next_event;
+    time = _next_event.time_since_epoch().count();
     return true;
 }
 
 void ColorFade::fire_timer() {
-    int64_t now = now_usecs();
+    wall_time now = now_usecs();
     while (_next_event < now) {
         _next_event = add_ticks(_next_event, 1);
     }
-    double fraction = static_cast<double>(now - _start) / _duration;
+    double fraction = static_cast<double>((now - _start).count()) / _duration;
     if (fraction >= 1.0) {
         stack()->pop(this);
     }
@@ -134,8 +133,8 @@ void ColorFade::fire_timer() {
 
 void ColorFade::draw() const {
     next()->draw();
-    int64_t now = now_usecs();
-    double fraction = static_cast<double>(now - _start) / _duration;
+    wall_time now = now_usecs();
+    double fraction = static_cast<double>((now - _start).count()) / _duration;
     if (fraction > 1.0) {
         fraction = 1.0;
     }
@@ -201,7 +200,7 @@ void PictFade::key_down(const KeyDownEvent& event) {
 
 bool PictFade::next_timer(int64_t& time) {
     if (_state == FULL) {
-        time = _wane_start;
+        time = _wane_start.time_since_epoch().count();
         return true;
     }
     return false;
@@ -220,22 +219,22 @@ void PictFade::draw() const {
 
 void PictFade::wax() {
     _state = WAXING;
-    stack()->push(new ColorFade(ColorFade::FROM_COLOR, RgbColor::kBlack, this->fade_time(), true,
+    stack()->push(new ColorFade(ColorFade::FROM_COLOR, RgbColor::kBlack, this->fade_time().count(), true,
                 _skipped));
 }
 
 void PictFade::wane() {
     _state = WANING;
-    stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::kBlack, this->fade_time(), true,
+    stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::kBlack, this->fade_time().count(), true,
                 _skipped));
 }
 
-int64_t PictFade::fade_time() const {
-    return 5e6 / 3;
+std::chrono::microseconds PictFade::fade_time() const {
+    return std::chrono::microseconds(5000000 / 3);
 }
 
-int64_t PictFade::display_time() const {
-    return 4e6 / 3;
+std::chrono::microseconds PictFade::display_time() const {
+    return std::chrono::microseconds(4000000 / 3);
 }
 
 bool PictFade::skip() const {

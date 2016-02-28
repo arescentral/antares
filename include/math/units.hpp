@@ -26,7 +26,9 @@ namespace antares {
 
 // Time units
 struct GameStart {};
+struct Wall {};
 typedef std::chrono::time_point<GameStart, std::chrono::microseconds> game_time;
+typedef std::chrono::time_point<Wall, std::chrono::microseconds> wall_time;
 
 // in microseconds--essentially one tick (1/60th of second)
 const int64_t kTimeUnit = 16667;
@@ -36,6 +38,7 @@ inline int64_t usecs_to_ticks(int64_t usecs) { return usecs / kTimeUnit; }
 inline int64_t usecs_to_ticks(game_time t) { return t.time_since_epoch().count() / kTimeUnit; }
 inline int64_t add_ticks(int64_t usecs, int ticks) { return usecs + (ticks * kTimeUnit); }
 inline game_time add_ticks(game_time t, int ticks) { return t + std::chrono::microseconds(ticks * kTimeUnit); }
+inline wall_time add_ticks(wall_time t, int ticks) { return t + std::chrono::microseconds(ticks * kTimeUnit); }
 
 // every time this many cycles pass, we have to process player & computer decisions
 const uint32_t kDecideEveryCycles = 3;

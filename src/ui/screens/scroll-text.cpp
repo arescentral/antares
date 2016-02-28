@@ -88,14 +88,14 @@ void ScrollTextScreen::gamepad_button_down(const GamepadButtonDownEvent& event) 
 }
 
 bool ScrollTextScreen::next_timer(int64_t& time) {
-    time = _next_shift;
+    time = _next_shift.time_since_epoch().count();
     return true;
 }
 
 void ScrollTextScreen::fire_timer() {
-    int64_t now = now_usecs();
+    wall_time now = now_usecs();
     while (_next_shift < now) {
-        _next_shift += (1e6 / _speed);
+        _next_shift += std::chrono::microseconds(int64_t(1000000 / _speed));
         ++_position;
     }
 

@@ -152,7 +152,7 @@ struct aresGlobalType {
 
     // Start time of game in usecs.  But, if the player pauses or fast-forwards, it gets moved
     // forwards or back so that the same calculations still work.
-    game_time       virtual_start;
+    wall_time       virtual_start;
 
     ZoomType        gZoomMode;
 

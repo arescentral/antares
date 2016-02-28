@@ -34,7 +34,7 @@ using std::unique_ptr;
 namespace antares {
 
 static const int kCursorBoundsSize = 16;
-static const int kTimeout = 1000000;
+static const std::chrono::microseconds kTimeout(1000000);
 
 Cursor::Cursor(): _sprite(500, GRAY) { }
 

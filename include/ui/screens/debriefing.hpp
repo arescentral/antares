@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 
 #include "drawing/styled-text.hpp"
+#include "math/units.hpp"
 #include "ui/card.hpp"
 
 namespace antares {
@@ -65,7 +66,7 @@ class DebriefingScreen : public Card {
     Rect _message_bounds;
     Rect _score_bounds;
 
-    int64_t _next_update;
+    wall_time _next_update;
     int _typed_chars;
 
     LabeledRect _data_item;

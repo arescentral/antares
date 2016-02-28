@@ -24,6 +24,7 @@
 
 #include "config/preferences.hpp"
 #include "data/string-list.hpp"
+#include "math/units.hpp"
 #include "ui/screen.hpp"
 
 namespace antares {
@@ -139,7 +140,7 @@ class KeyControlScreen : public InterfaceScreen {
     int32_t _selected_key;
     std::vector<std::pair<size_t, size_t>> _conflicts;
 
-    int64_t _next_flash;
+    wall_time _next_flash;
     bool _flashed_on;
 
     StringList _tabs;
