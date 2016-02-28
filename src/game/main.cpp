@@ -144,7 +144,7 @@ class GamePlay : public Card {
     bool _fast_motion;
     bool _entering_message;
     bool _player_paused;
-    uint32_t _decide_cycle;
+    ticks _decide_cycle;
     int _scenario_check_time;
     PlayAgainScreen::Item _play_again;
     PlayerShip _player_ship;
@@ -502,16 +502,16 @@ void GamePlay::fire_timer() {
 
     const wall_time now = now_usecs();
 
-    int unitsPassed, unitsDone;
+    ticks unitsPassed, unitsDone;
     if (_fast_motion && !_entering_message) {
-        unitsDone = unitsPassed = 12;
-        globals()->virtual_start = now - (add_ticks(g.time, unitsPassed) - _scenario_start_time);
+        unitsDone = unitsPassed = ticks(12);
+        globals()->virtual_start = now - (g.time + unitsPassed - _scenario_start_time);
     } else {
         game_time newGameTime = now - globals()->virtual_start + _scenario_start_time;
-        unitsDone = unitsPassed = usecs_to_ticks((newGameTime - g.time).count());
+        unitsDone = unitsPassed = std::chrono::duration_cast<ticks>(newGameTime - g.time);
     }
 
-    if (unitsPassed <= 0) {
+    if (unitsPassed <= ticks(0)) {
         return;
     }
 
@@ -520,24 +520,24 @@ void GamePlay::fire_timer() {
 
     if (_player_paused) {
         _player_paused = false;
-        unitsDone = unitsPassed = 0;
+        unitsDone = unitsPassed = ticks(0);
         globals()->virtual_start = now - (g.time - _scenario_start_time);
     }
 
-    while (unitsPassed > 0) {
-        int unitsToDo = unitsPassed;
+    while (unitsPassed > ticks(0)) {
+        ticks unitsToDo = unitsPassed;
         if ((_decide_cycle + unitsToDo) > kDecideEveryCycles) {
             unitsToDo = kDecideEveryCycles - _decide_cycle;
         }
         _decide_cycle += unitsToDo;
 
-        if (unitsToDo > 0) {
+        if (unitsToDo > ticks(0)) {
             // executed arbitrarily, but at least once every kDecideEveryCycles
-            globals()->starfield.move(unitsToDo);
-            MoveSpaceObjects(unitsToDo);
+            globals()->starfield.move(unitsToDo.count());
+            MoveSpaceObjects(unitsToDo.count());
         }
 
-        g.time = add_ticks(g.time, unitsToDo);
+        g.time += unitsToDo;
 
         if ( _decide_cycle == kDecideEveryCycles) {
             // everything in here gets executed once every kDecideEveryCycles
@@ -555,7 +555,7 @@ void GamePlay::fire_timer() {
             _player_ship.update(_cursor, _entering_message);
 
             CollideSpaceObjects();
-            _decide_cycle = 0;
+            _decide_cycle = ticks(0);
             _scenario_check_time++;
             if (_scenario_check_time == 30) {
                 _scenario_check_time = 0;
@@ -565,15 +565,15 @@ void GamePlay::fire_timer() {
         unitsPassed -= unitsToDo;
     }
 
-    MiniComputerHandleNull(unitsDone);
+    MiniComputerHandleNull(unitsDone.count());
 
     Messages::clip();
-    Messages::draw_long_message( unitsDone);
+    Messages::draw_long_message( unitsDone.count());
 
     update_sector_lines();
     Beams::update();
-    Label::update_positions(unitsDone);
-    Label::update_contents(unitsDone);
+    Label::update_positions(unitsDone.count());
+    Label::update_contents(unitsDone.count());
     update_site(_replay);
 
     CullSprites();
@@ -581,9 +581,9 @@ void GamePlay::fire_timer() {
     Beams::show_all();
     globals()->starfield.show();
 
-    Messages::draw_message_screen(unitsDone);
-    UpdateRadar(unitsDone);
-    globals()->transitions.update_boolean(unitsDone);
+    Messages::draw_message_screen(unitsDone.count());
+    UpdateRadar(unitsDone.count());
+    globals()->transitions.update_boolean(unitsDone.count());
 
     if (g.game_over && (g.time >= g.game_over_at)) {
         *_seconds = (g.time - _scenario_start_time).count() / 1e6;

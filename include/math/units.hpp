@@ -44,7 +44,7 @@ inline game_time add_ticks(game_time t, int ticks) { return t + std::chrono::mic
 inline wall_time add_ticks(wall_time t, int ticks) { return t + std::chrono::microseconds(ticks * kTimeUnit); }
 
 // every time this many cycles pass, we have to process player & computer decisions
-const uint32_t kDecideEveryCycles = 3;
+const ticks kDecideEveryCycles = ticks(3);
 
 // Spatial units
 
