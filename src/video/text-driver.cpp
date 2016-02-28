@@ -168,8 +168,8 @@ class TextVideoDriver::MainLoop : public EventScheduler::MainLoop {
         return _output_dir.has();
     }
 
-    void snapshot(int64_t ticks) {
-        snapshot_to(format("screens/{0}.txt", dec(ticks, 6)));
+    void snapshot(wall_ticks ticks) {
+        snapshot_to(format("screens/{0}.txt", dec(ticks.time_since_epoch().count(), 6)));
     }
 
     void snapshot_to(PrintItem relpath) {

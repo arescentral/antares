@@ -56,8 +56,8 @@ EventScheduler::EventScheduler():
         _mouse(-1, -1) { }
 
 void EventScheduler::schedule_snapshot(int64_t at) {
-    _snapshot_times.push_back(at);
-    push_heap(_snapshot_times.begin(), _snapshot_times.end(), greater<int64_t>());
+    _snapshot_times.push_back(wall_ticks(antares::ticks(at)));
+    push_heap(_snapshot_times.begin(), _snapshot_times.end(), greater<wall_ticks>());
 }
 
 void EventScheduler::schedule_event(unique_ptr<Event> event) {
@@ -104,9 +104,9 @@ void EventScheduler::advance_tick_count(EventScheduler::MainLoop& loop, wall_tic
     if (loop.takes_snapshots() && have_snapshots_before(ticks)) {
         loop.draw();
         while (have_snapshots_before(ticks)) {
-            _ticks = wall_ticks(antares::ticks(_snapshot_times.front()));
-            loop.snapshot(_ticks.time_since_epoch().count());
-            pop_heap(_snapshot_times.begin(), _snapshot_times.end(), greater<int64_t>());
+            _ticks = _snapshot_times.front();
+            loop.snapshot(_ticks);
+            pop_heap(_snapshot_times.begin(), _snapshot_times.end(), greater<wall_ticks>());
             _snapshot_times.pop_back();
         }
     }
@@ -114,7 +114,7 @@ void EventScheduler::advance_tick_count(EventScheduler::MainLoop& loop, wall_tic
 }
 
 bool EventScheduler::have_snapshots_before(wall_ticks ticks) const {
-    return !_snapshot_times.empty() && (_snapshot_times.front() < ticks.time_since_epoch().count());
+    return !_snapshot_times.empty() && (_snapshot_times.front() < ticks);
 }
 
 bool EventScheduler::is_later(const unique_ptr<Event>& x, const unique_ptr<Event>& y) {
