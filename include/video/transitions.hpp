@@ -57,8 +57,9 @@ class ColorFade : public Card {
         FROM_COLOR = 1,
     };
 
-    ColorFade(Direction direction, const RgbColor& color, int64_t duration, bool allow_skip,
-            bool* skipped);
+    ColorFade(
+            Direction direction, const RgbColor& color, std::chrono::microseconds duration,
+            bool allow_skip, bool* skipped);
 
     virtual void become_front();
 
@@ -79,7 +80,7 @@ class ColorFade : public Card {
 
     wall_time _start;
     wall_time _next_event;
-    const int64_t _duration;
+    const std::chrono::microseconds _duration;
 
     DISALLOW_COPY_AND_ASSIGN(ColorFade);
 };

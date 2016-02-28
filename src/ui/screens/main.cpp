@@ -130,7 +130,8 @@ void MainScreen::handle_button(antares::Button& button) {
       case QUIT:
         // 1-second fade-out.
         _state = QUITTING;
-        stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::kBlack, 1e6, false, NULL));
+        stack()->push(new ColorFade(
+                    ColorFade::TO_COLOR, RgbColor::kBlack, std::chrono::seconds(1), false, NULL));
         break;
 
       case DEMO:

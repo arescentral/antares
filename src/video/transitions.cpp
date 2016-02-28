@@ -78,8 +78,8 @@ void Transitions::draw() const {
 }
 
 ColorFade::ColorFade(
-        Direction direction, const RgbColor& color, int64_t duration, bool allow_skip,
-        bool* skipped)
+        Direction direction, const RgbColor& color, std::chrono::microseconds duration,
+        bool allow_skip, bool* skipped)
         : _direction(direction),
           _color(color),
           _allow_skip(allow_skip),
@@ -125,7 +125,7 @@ void ColorFade::fire_timer() {
     while (_next_event < now) {
         _next_event = add_ticks(_next_event, 1);
     }
-    double fraction = static_cast<double>((now - _start).count()) / _duration;
+    double fraction = static_cast<double>((now - _start).count()) / _duration.count();
     if (fraction >= 1.0) {
         stack()->pop(this);
     }
@@ -134,7 +134,7 @@ void ColorFade::fire_timer() {
 void ColorFade::draw() const {
     next()->draw();
     wall_time now = now_usecs();
-    double fraction = static_cast<double>((now - _start).count()) / _duration;
+    double fraction = static_cast<double>((now - _start).count()) / _duration.count();
     if (fraction > 1.0) {
         fraction = 1.0;
     }
@@ -219,13 +219,13 @@ void PictFade::draw() const {
 
 void PictFade::wax() {
     _state = WAXING;
-    stack()->push(new ColorFade(ColorFade::FROM_COLOR, RgbColor::kBlack, this->fade_time().count(), true,
+    stack()->push(new ColorFade(ColorFade::FROM_COLOR, RgbColor::kBlack, this->fade_time(), true,
                 _skipped));
 }
 
 void PictFade::wane() {
     _state = WANING;
-    stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::kBlack, this->fade_time().count(), true,
+    stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::kBlack, this->fade_time(), true,
                 _skipped));
 }
 
