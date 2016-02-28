@@ -49,11 +49,11 @@ class TitleScreenFade : public PictFade {
 
   protected:
     virtual std::chrono::microseconds fade_time() const {
-        return std::chrono::microseconds((*_fast ? 1000000 : 5000000) / 3);
+        return ticks(*_fast ? 20 : 100);
     }
 
     virtual std::chrono::microseconds display_time() const {
-        return std::chrono::microseconds(*_fast ? 1000000 : 5000000);
+        return ticks(*_fast ? 60 : 300);
     }
 
     virtual bool skip() const {

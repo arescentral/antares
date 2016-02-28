@@ -230,11 +230,11 @@ void PictFade::wane() {
 }
 
 std::chrono::microseconds PictFade::fade_time() const {
-    return std::chrono::microseconds(5000000 / 3);
+    return ticks(100);
 }
 
 std::chrono::microseconds PictFade::display_time() const {
-    return std::chrono::microseconds(4000000 / 3);
+    return ticks(80);
 }
 
 bool PictFade::skip() const {

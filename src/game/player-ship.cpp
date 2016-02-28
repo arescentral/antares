@@ -642,7 +642,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
                 PlayVolumeSound(kKlaxon, kMediumVolume, kMediumLongPersistence, kPrioritySound);
             }
             Messages::set_status("WARNING: Shields Low", kStatusWarnColor);
-            globals()->next_klaxon = g.time + std::chrono::microseconds(2083333);
+            globals()->next_klaxon = g.time + ticks(125);
         }
     } else {
         globals()->next_klaxon = game_time();
