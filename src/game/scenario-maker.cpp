@@ -592,7 +592,7 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
 
     *max = g.level->initialNum * 3L
          + 1
-         + (g.level->startTime & kScenario_StartTimeMask); // for each run through the initial num
+         + (g.level->startTime.time_since_epoch() / ticks(20)); // for each run through the initial num
 
     return true;
 }
@@ -799,11 +799,8 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         Messages::clear();
 
         ticks scenario_check_time = ticks(0);
-        const ticks start_ticks
-            = (g.level->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple;
-        const game_time start_time(start_ticks);
         // TODO(sfiera): not += kMajorTick…?
-        for (g.time = game_time(); g.time < start_time; g.time += kMinorTick) {
+        for (g.time = game_ticks(); g.time < g.level->startTime; g.time += kMinorTick) {
             MoveSpaceObjects(kMajorTick);
             NonplayerShipThink();
             AdmiralThink();
@@ -816,7 +813,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             }
             CullSprites();
             Beams::cull();
-            if ((g.time.time_since_epoch() % kScenarioTimeMultiple) == ticks(0)) {
+            if ((g.time.time_since_epoch() % ticks(20)) == ticks(0)) {
                 (*current)++;
             }
         }

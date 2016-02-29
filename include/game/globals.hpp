@@ -83,9 +83,9 @@ class InputSource;
 class StringList;
 
 struct GlobalState {
-    uint32_t   sync;    // Indicates when net games are desynchronized.
-    game_time  time;    // Current game time.
-    Random     random;  // Global random number generator.
+    uint32_t    sync;    // Indicates when net games are desynchronized.
+    game_ticks  time;    // Current game time.
+    Random      random;  // Global random number generator.
 
     const Scenario* level;
 

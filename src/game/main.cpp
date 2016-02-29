@@ -138,7 +138,6 @@ class GamePlay : public Card {
     secs* const _seconds;
     wall_time _next_timer;
     const Rect _play_area;
-    const game_time _scenario_start_time;
     const bool _command_and_q;
     bool _fast_motion;
     bool _entering_message;
@@ -294,8 +293,6 @@ GamePlay::GamePlay(
         _seconds(seconds),
         _next_timer(now() + kMinorTick),
         _play_area(viewport().left, viewport().top, viewport().right, viewport().bottom),
-        _scenario_start_time(
-                (g.level->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple),
         _command_and_q(BothCommandAndQ()),
         _fast_motion(false),
         _entering_message(false),
@@ -502,9 +499,9 @@ void GamePlay::fire_timer() {
     ticks unitsPassed, unitsDone;
     if (_fast_motion && !_entering_message) {
         unitsDone = unitsPassed = ticks(12);
-        globals()->virtual_start = now - (g.time + unitsPassed - _scenario_start_time);
+        globals()->virtual_start = now - (g.time + unitsPassed - g.level->startTime);
     } else {
-        game_time newGameTime = now - globals()->virtual_start + _scenario_start_time;
+        game_time newGameTime = now - globals()->virtual_start + g.level->startTime;
         unitsDone = unitsPassed = std::chrono::duration_cast<ticks>(newGameTime - g.time);
     }
 
@@ -518,7 +515,7 @@ void GamePlay::fire_timer() {
     if (_player_paused) {
         _player_paused = false;
         unitsDone = unitsPassed = ticks(0);
-        globals()->virtual_start = now - (g.time - _scenario_start_time);
+        globals()->virtual_start = now - (g.time - g.level->startTime);
     }
 
     while (unitsPassed > ticks(0)) {
@@ -583,7 +580,7 @@ void GamePlay::fire_timer() {
     globals()->transitions.update_boolean(unitsDone);
 
     if (g.game_over && (g.time >= g.game_over_at)) {
-        *_seconds = std::chrono::duration_cast<secs>(g.time - _scenario_start_time);
+        *_seconds = std::chrono::duration_cast<secs>(g.time - g.level->startTime);
 
         if (*_game_result == NO_GAME) {
             if (g.victor == g.admiral) {
@@ -644,12 +641,9 @@ void GamePlay::key_down(const KeyDownEvent& event) {
         return;
 
       case Keys::ESCAPE:
-        {
-            _state = PLAY_AGAIN;
-            _player_paused = true;
-            bool is_training = g.level->startTime & kScenario_IsTraining_Bit;
-            stack()->push(new PlayAgainScreen(true, is_training, &_play_again));
-        }
+        _state = PLAY_AGAIN;
+        _player_paused = true;
+        stack()->push(new PlayAgainScreen(true, g.level->is_training, &_play_again));
         break;
 
       default:
@@ -739,12 +733,9 @@ void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
 
     switch (event.button) {
       case Gamepad::START:
-        {
-            _state  = PLAY_AGAIN;
-            _player_paused = true;
-            bool is_training = g.level->startTime & kScenario_IsTraining_Bit;
-            stack()->push(new PlayAgainScreen(true, is_training, &_play_again));
-        }
+        _state  = PLAY_AGAIN;
+        _player_paused = true;
+        stack()->push(new PlayAgainScreen(true, g.level->is_training, &_play_again));
         break;
     }
 

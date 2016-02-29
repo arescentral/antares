@@ -28,6 +28,10 @@ namespace macroman = sfz::macroman;
 
 namespace antares {
 
+static const ticks kScenarioTimeMultiple = ticks(20);
+static const int16_t kScenario_StartTimeMask   = 0x7fff;
+static const int16_t kScenario_IsTraining_Bit  = 0x8000;
+
 namespace {
 
 void read_pstr(ReadSource in, String& out) {
@@ -76,7 +80,9 @@ void read_from(ReadSource in, Scenario& scenario) {
     read(in, scenario.levelNameStrNum);
     read(in, scenario.parKillRatio);
     read(in, scenario.parLosses);
-    read(in, scenario.startTime);
+    int16_t start_time = read<int16_t>(in);
+    scenario.startTime = game_ticks((start_time & kScenario_StartTimeMask) * kScenarioTimeMultiple);
+    scenario.is_training = start_time & kScenario_IsTraining_Bit;
 }
 
 void read_from(ReadSource in, Scenario::Player& scenario_player) {
