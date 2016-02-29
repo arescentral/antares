@@ -369,10 +369,8 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
         if (ch.special == PICTURE) {
             const inlinePictType& inline_pict = _inline_picts[ch.character];
             corner.offset(inline_pict.bounds.left, inline_pict.bounds.top + _line_spacing);
-            Picture pict(inline_pict.id);
-            Texture texture(VideoDriver::driver()->texture(
-                        format("/{0}", pict.path()), pict));
-            texture.draw(corner.h, corner.v);
+            // TODO(sfiera): load and save this texture in inline_pict.
+            Picture(inline_pict.id).texture().draw(corner.h, corner.v);
         }
     }
 }
