@@ -363,7 +363,17 @@ bool Scenario::Condition::is_true() const {
         }
 
         case kTimeCondition:
-            return g.time + g.level->startTime >= game_ticks(ticks(conditionArgument.longValue));
+            {
+                // Tricky: the original code for handling startTime counted g.time in major ticks,
+                // but new code uses minor ticks, as game/main.cpp does. So, time before the epoch
+                // (game start) counts as 1/3 towards time conditions to preserve old behavior.
+                ticks game_time = g.time.time_since_epoch();
+                ticks start_time = g.level->startTime / 3;
+                if (g.time < game_ticks()) {
+                    game_time /= 3;
+                }
+                return (game_time + start_time) >= ticks(conditionArgument.longValue);
+            }
 
         case kProximityCondition: {
             auto sObject = GetObjectFromInitialNumber(subjectObject);
@@ -592,7 +602,7 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
 
     *max = g.level->initialNum * 3L
          + 1
-         + (g.level->startTime / ticks(20)); // for each run through the initial num
+         + (g.level->startTime / secs(1)); // for each run through the initial num
 
     return true;
 }
@@ -799,8 +809,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         Messages::clear();
 
         ticks scenario_check_time = ticks(0);
-        // TODO(sfiera): not += kMajorTick…?
-        for (g.time = game_ticks(-g.level->startTime); g.time < game_ticks(); g.time += kMinorTick) {
+        for (g.time = game_ticks(-g.level->startTime); g.time < game_ticks(); g.time += kMajorTick) {
             MoveSpaceObjects(kMajorTick);
             NonplayerShipThink();
             AdmiralThink();
