@@ -499,9 +499,9 @@ void GamePlay::fire_timer() {
     ticks unitsPassed, unitsDone;
     if (_fast_motion && !_entering_message) {
         unitsDone = unitsPassed = ticks(12);
-        globals()->virtual_start = now - (g.time + unitsPassed - g.level->startTime);
+        globals()->virtual_start = now - (g.time + unitsPassed).time_since_epoch();
     } else {
-        game_time newGameTime = now - globals()->virtual_start + g.level->startTime;
+        game_time newGameTime = game_time(now - globals()->virtual_start);
         unitsDone = unitsPassed = std::chrono::duration_cast<ticks>(newGameTime - g.time);
     }
 
@@ -515,7 +515,7 @@ void GamePlay::fire_timer() {
     if (_player_paused) {
         _player_paused = false;
         unitsDone = unitsPassed = ticks(0);
-        globals()->virtual_start = now - (g.time - g.level->startTime);
+        globals()->virtual_start = (now - g.time.time_since_epoch());
     }
 
     while (unitsPassed > ticks(0)) {
@@ -580,7 +580,7 @@ void GamePlay::fire_timer() {
     globals()->transitions.update_boolean(unitsDone);
 
     if (g.game_over && (g.time >= g.game_over_at)) {
-        *_seconds = std::chrono::duration_cast<secs>(g.time - g.level->startTime);
+        *_seconds = std::chrono::duration_cast<secs>(g.time.time_since_epoch());
 
         if (*_game_result == NO_GAME) {
             if (g.victor == g.admiral) {

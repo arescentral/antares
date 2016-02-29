@@ -81,7 +81,7 @@ void read_from(ReadSource in, Scenario& scenario) {
     read(in, scenario.parKillRatio);
     read(in, scenario.parLosses);
     int16_t start_time = read<int16_t>(in);
-    scenario.startTime = game_ticks((start_time & kScenario_StartTimeMask) * kScenarioTimeMultiple);
+    scenario.startTime = (start_time & kScenario_StartTimeMask) * kScenarioTimeMultiple;
     scenario.is_training = start_time & kScenario_IsTraining_Bit;
 }
 

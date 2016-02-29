@@ -363,7 +363,7 @@ bool Scenario::Condition::is_true() const {
         }
 
         case kTimeCondition:
-            return g.time >= game_ticks(ticks(conditionArgument.longValue));
+            return g.time + g.level->startTime >= game_ticks(ticks(conditionArgument.longValue));
 
         case kProximityCondition: {
             auto sObject = GetObjectFromInitialNumber(subjectObject);
@@ -592,7 +592,7 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
 
     *max = g.level->initialNum * 3L
          + 1
-         + (g.level->startTime.time_since_epoch() / ticks(20)); // for each run through the initial num
+         + (g.level->startTime / ticks(20)); // for each run through the initial num
 
     return true;
 }
@@ -800,7 +800,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
 
         ticks scenario_check_time = ticks(0);
         // TODO(sfiera): not += kMajorTick…?
-        for (g.time = game_ticks(); g.time < g.level->startTime; g.time += kMinorTick) {
+        for (g.time = game_ticks(-g.level->startTime); g.time < game_ticks(); g.time += kMinorTick) {
             MoveSpaceObjects(kMajorTick);
             NonplayerShipThink();
             AdmiralThink();

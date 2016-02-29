@@ -141,7 +141,7 @@ struct Scenario {
     int16_t                     levelNameStrNum;
     Fixed                       parKillRatio;
     int16_t                     parLosses;
-    game_ticks                  startTime;
+    ticks                       startTime;
     bool                        is_training;
 
     static const size_t byte_size = 124;
