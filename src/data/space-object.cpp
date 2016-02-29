@@ -164,7 +164,7 @@ void read_from(ReadSource in, BaseObject& object) {
     object.orderKeyTag = (object.orderFlags & kOrderKeyTag) >> kOrderKeyTagShift;
 
     read(in, object.buildRatio);
-    object.buildTime = ticks(read<uint32_t>(in) / 10);
+    object.buildTime = 3 * ticks(read<uint32_t>(in) / 10);
     read(in, object.skillNum);
     read(in, object.skillDen);
     read(in, object.skillNumAdj);
