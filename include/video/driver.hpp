@@ -24,6 +24,7 @@
 
 #include "drawing/color.hpp"
 #include "math/geometry.hpp"
+#include "math/units.hpp"
 #include "ui/event.hpp"
 
 namespace antares {
@@ -54,8 +55,8 @@ class VideoDriver {
     virtual int scale() const = 0;
     virtual Size screen_size() const = 0;
 
-    virtual int ticks() const = 0;
-    virtual int usecs() const = 0;
+    virtual wall_ticks ticks() const = 0;
+    virtual wall_time usecs() const = 0;
 
     virtual Texture texture(sfz::PrintItem name, const PixMap& content) = 0;
     virtual void dither_rect(const Rect& rect, const RgbColor& color) = 0;

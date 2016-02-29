@@ -51,8 +51,8 @@ class EventScheduler {
 
     Point get_mouse() const { return _mouse; }
     InputMode input_mode() const { return KEYBOARD_MOUSE; }
-    int ticks() const { return _ticks.time_since_epoch().count(); }
-    int64_t usecs() const { return wall_time(_ticks).time_since_epoch().count(); }
+    wall_ticks ticks() const { return _ticks; }
+    wall_time usecs() const { return wall_time(_ticks); }
 
   private:
     void advance_tick_count(MainLoop& loop, wall_ticks ticks);

@@ -38,8 +38,8 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
     virtual Point get_mouse() { return _scheduler->get_mouse(); }
     virtual InputMode input_mode() const { return _scheduler->input_mode(); }
 
-    virtual int ticks() const { return _scheduler->ticks(); }
-    virtual int usecs() const { return _scheduler->usecs(); }
+    virtual wall_ticks ticks() const { return _scheduler->ticks(); }
+    virtual wall_time usecs() const { return _scheduler->usecs(); }
 
     void loop(Card* initial, EventScheduler& scheduler);
     void capture(std::vector<std::pair<std::unique_ptr<Card>, sfz::String>>& pix);

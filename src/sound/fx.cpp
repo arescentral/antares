@@ -47,7 +47,7 @@ ANTARES_GLOBAL smartSoundChannel   gChannel[kMaxChannelNum];
 
 void InitSoundFX() {
     for (int i = 0; i < kMaxChannelNum; i++) {
-        gChannel[i].reserved_until = 0;
+        gChannel[i].reserved_until = wall_time();
         gChannel[i].soundPriority = kNoSound;
         gChannel[i].soundVolume = 0;
         gChannel[i].whichSound = -1;
@@ -111,7 +111,7 @@ static bool lower_priority_channel(int& channel, soundPriorityType priority) {
 
 // take the oldest sound if past minimum persistence
 static bool oldest_available_channel(int& channel) {
-    int64_t oldestSoundTime = 0;
+    std::chrono::microseconds oldestSoundTime(0);
     bool result = false;
     for (int i = 0; i < kMaxChannelNum; ++i) {
         auto past_reservation =
@@ -152,7 +152,7 @@ void PlayVolumeSound(
         }
 
         gChannel[whichChannel].whichSound = whichSoundID;
-        gChannel[whichChannel].reserved_until = VideoDriver::driver()->usecs() + ticks_to_usecs(persistence);
+        gChannel[whichChannel].reserved_until = VideoDriver::driver()->usecs() + ticks(persistence);
         gChannel[whichChannel].soundPriority = priority;
         gChannel[whichChannel].soundVolume = amplitude;
 

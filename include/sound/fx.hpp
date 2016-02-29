@@ -23,6 +23,7 @@
 
 #include "data/handle.hpp"
 #include "math/fixed.hpp"
+#include "math/units.hpp"
 
 namespace antares {
 
@@ -69,7 +70,7 @@ enum soundPriorityType {
 
 struct smartSoundChannel {
     int32_t             whichSound;
-    int64_t             reserved_until;
+    wall_time           reserved_until;
     int16_t             soundVolume;
     soundPriorityType   soundPriority;
     std::unique_ptr<SoundChannel> channelPtr;

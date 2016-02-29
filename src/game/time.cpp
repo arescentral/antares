@@ -24,7 +24,7 @@
 namespace antares {
 
 wall_time now_usecs() {
-    return wall_time(std::chrono::microseconds(VideoDriver::driver()->usecs()));
+    return VideoDriver::driver()->usecs();
 }
 
 }  // namespace antares

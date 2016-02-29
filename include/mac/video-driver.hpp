@@ -43,14 +43,12 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     virtual Point get_mouse();
     virtual InputMode input_mode() const;
 
-    virtual int ticks() const;
-    virtual int usecs() const;
+    virtual wall_ticks ticks() const;
+    virtual wall_time usecs() const;
 
     void loop(Card* initial);
 
   private:
-    int64_t _start_time;
-
     struct EventBridge;
 
     class EventTranslator {

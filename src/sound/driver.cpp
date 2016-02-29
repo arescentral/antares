@@ -121,23 +121,23 @@ class LogSoundDriver::LogChannel : public SoundChannel {
 
     void play(StringSlice sound_path) {
         String line(
-                format("play\t{0}\t{1}\t{2}\n", _id, VideoDriver::driver()->ticks(), sound_path));
+                format("play\t{0}\t{1}\t{2}\n", _id, VideoDriver::driver()->ticks().time_since_epoch().count(), sound_path));
         write(_driver._sound_log, Bytes(utf8::encode(line)));
     }
 
     void loop(StringSlice sound_path) {
         String line(
-                format("loop\t{0}\t{1}\t{2}\n", _id, VideoDriver::driver()->ticks(), sound_path));
+                format("loop\t{0}\t{1}\t{2}\n", _id, VideoDriver::driver()->ticks().time_since_epoch().count(), sound_path));
         write(_driver._sound_log, Bytes(utf8::encode(line)));
     }
 
     virtual void amp(uint8_t volume) {
-        String line(format("amp\t{0}\t{1}\t{2}\n", _id, VideoDriver::driver()->ticks(), volume));
+        String line(format("amp\t{0}\t{1}\t{2}\n", _id, VideoDriver::driver()->ticks().time_since_epoch().count(), volume));
         write(_driver._sound_log, Bytes(utf8::encode(line)));
     }
 
     virtual void quiet() {
-        String line(format("quiet\t{0}\t{1}\n", _id, VideoDriver::driver()->ticks()));
+        String line(format("quiet\t{0}\t{1}\n", _id, VideoDriver::driver()->ticks().time_since_epoch().count()));
         write(_driver._sound_log, Bytes(utf8::encode(line)));
     }
 

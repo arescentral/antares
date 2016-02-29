@@ -44,10 +44,10 @@ namespace antares {
 
 namespace {
 
-int64_t usecs() {
+wall_time usecs() {
     timeval tv;
     gettimeofday(&tv, NULL);
-    return tv.tv_sec * 1000000ll + tv.tv_usec;
+    return wall_time(std::chrono::microseconds(tv.tv_sec * 1000000ll + tv.tv_usec));
 }
 
 class AntaresWindow {
@@ -81,8 +81,7 @@ class InputModeTracker : public EventReceiver {
 
 }  // namespace
 
-CocoaVideoDriver::CocoaVideoDriver()
-        : _start_time(antares::usecs()) { }
+CocoaVideoDriver::CocoaVideoDriver() { }
 
 Size CocoaVideoDriver::viewport_size() const {
     return {
@@ -108,12 +107,12 @@ InputMode CocoaVideoDriver::input_mode() const {
     return _input_mode;
 }
 
-int CocoaVideoDriver::ticks() const {
-    return usecs() * 60 / 1000000;
+wall_ticks CocoaVideoDriver::ticks() const {
+    return std::chrono::time_point_cast<antares::ticks>(usecs());
 }
 
-int CocoaVideoDriver::usecs() const {
-    return antares::usecs() - _start_time;
+wall_time CocoaVideoDriver::usecs() const {
+    return antares::usecs();
 }
 
 struct CocoaVideoDriver::EventBridge {
@@ -320,7 +319,6 @@ void CocoaVideoDriver::loop(Card* initial) {
     while (!main_loop.done()) {
         wall_time at;
         if (main_loop.top()->next_timer(at)) {
-            at += std::chrono::microseconds(_start_time);
             if (antares_event_translator_next(_translator.c_obj(), at.time_since_epoch().count())) {
                 bridge.send_all();
             } else {
