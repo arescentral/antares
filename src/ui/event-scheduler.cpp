@@ -94,7 +94,7 @@ void EventScheduler::loop(EventScheduler::MainLoop& loop) {
             if (!has_timer) {
                 throw Exception("Event heap empty and timer not set to fire.");
             }
-            advance_tick_count(loop, max(_ticks + antares::ticks(1), at_ticks));
+            advance_tick_count(loop, max(_ticks + kMinorTick, at_ticks));
             loop.top()->fire_timer();
         }
     }

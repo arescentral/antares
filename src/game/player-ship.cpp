@@ -659,7 +659,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
 
     if (gTheseKeys & kDestinationKey) {
         if (gDestKeyTime >= ticks(0)) {
-            gDestKeyTime += kDecideEveryCycles;
+            gDestKeyTime += kMajorTick;
         }
     } else {
         if (gDestKeyTime > ticks(45)) {
@@ -689,7 +689,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
                 globals()->hotKey_target = true;
             }
         } else {
-            globals()->hotKeyDownTime += kDecideEveryCycles;
+            globals()->hotKeyDownTime += kMajorTick;
         }
     } else if (globals()->lastHotKey >= 0) {
         hot_key = globals()->lastHotKey;

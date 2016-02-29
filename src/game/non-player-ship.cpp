@@ -120,7 +120,7 @@ static void tick_weapon(
         Handle<SpaceObject> subject, Handle<SpaceObject> target,
         uint32_t key, const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
     if (weapon.time > ticks(0)) {
-        weapon.time -= kDecideEveryCycles;
+        weapon.time -= kMajorTick;
     }
     if (subject->keysDown & key) {
         fire_weapon(subject, target, base_weapon, weapon);
@@ -895,7 +895,7 @@ uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
         keysDown = kWarpKey;
     }
     auto& presence = anObject->presence.warp_in;
-    presence.progress += kDecideEveryCycles;
+    presence.progress += kMajorTick;
     for (int i = 0; i < 4; ++i) {
         if ((presence.step == i) && (presence.progress > ticks(25 * i))) {
             mPlayDistanceSound(
@@ -1506,7 +1506,7 @@ uint32_t ThinkObjectEngageTarget(
 
         if ( anObject->attributes & kCanAcceptDestination)
         {
-            anObject->timeFromOrigin += kDecideEveryCycles;
+            anObject->timeFromOrigin += kMajorTick;
         }
 
         auto bestWeapon = BaseObject::none();

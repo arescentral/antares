@@ -471,7 +471,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
 
 static void age_object(const Handle<SpaceObject>& o) {
     if (o->age >= ticks(0)) {
-        o->age -= kDecideEveryCycles;
+        o->age -= kMajorTick;
         if (o->age < ticks(0)) {
             if (!(o->baseType->expireDontDie)) {
                 o->active = kObjectToBeFreed;

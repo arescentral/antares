@@ -24,9 +24,27 @@
 
 namespace antares {
 
+// The three units of time in Antares are the microsecond, the second,
+// and the tick.
+//
+// There are 60 ticks in a second. Also, every third tick is a major
+// tick, so there are 20 major ticks in a second. Major ticks are when
+// most things happen: ships collide, decisions are made, and actions
+// are executed. During the two minor ticks between major ticks, ships
+// and stars move, but don't collide. Minor ticks may be skipped if
+// drawing is slow, but will make the game look smoother if they aren't.
+//
+// Antares actually uses a unit for seconds that is slightly longer than
+// a second. There are exactly 16667 microseconds in a tick, and 60
+// ticks in a second, which gives us 1000020 microseconds in a second.
+// This makes it possible to implicitly convert seconds to ticks to
+// microseconds.
 typedef std::chrono::microseconds usecs;
 typedef std::chrono::duration<usecs::rep, std::ratio<1000020, 1000000>> secs;
 typedef std::chrono::duration<usecs::rep, std::ratio<16667, 1000000>> ticks;
+
+const ticks kMajorTick = ticks(3);
+const ticks kMinorTick = ticks(1);
 
 // Time units
 struct GameStart { typedef usecs duration; };
@@ -36,9 +54,6 @@ typedef std::chrono::time_point<GameStart> game_time;
 typedef std::chrono::time_point<GameStart, ticks> game_ticks;
 typedef std::chrono::time_point<Wall> wall_time;
 typedef std::chrono::time_point<Wall, ticks> wall_ticks;
-
-// every time this many cycles pass, we have to process player & computer decisions
-const ticks kDecideEveryCycles = ticks(3);
 
 // Spatial units
 

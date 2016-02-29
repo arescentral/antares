@@ -804,13 +804,13 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         const game_time start_time(start_ticks);
         g.time = game_time();
         for (ticks i = ticks(0); i < start_ticks; ++i) {
-            g.time = g.time + ticks(1);  // TODO(sfiera): not kDecideEveryCycles…?
-            MoveSpaceObjects(kDecideEveryCycles);
+            g.time = g.time + kMinorTick;  // TODO(sfiera): not kMajorTick…?
+            MoveSpaceObjects(kMajorTick);
             NonplayerShipThink();
             AdmiralThink();
             execute_action_queue();
             CollideSpaceObjects();
-            scenario_check_time += kDecideEveryCycles;
+            scenario_check_time += kMajorTick;
             if (scenario_check_time == ticks(90)) {
                 scenario_check_time = ticks(0);
                 CheckScenarioConditions();

@@ -345,7 +345,7 @@ void Messages::draw_long_message(ticks time_pass) {
         // }
 
         if ((tmessage->lastResID >= 0) && (tmessage->lastLabelMessage)) {
-            tmessage->labelMessageID->set_age(ticks(1));
+            tmessage->labelMessageID->set_age(kMinorTick);
         }
 
         // draw in offscreen world

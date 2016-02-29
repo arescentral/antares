@@ -882,7 +882,7 @@ void execute_action_queue() {
     for (int32_t i = 0; i < kActionQueueLength; i++) {
         auto actionQueue = &gActionQueueData[i];
         if (actionQueue->actionRef.size()) {
-            actionQueue->scheduledTime -= kDecideEveryCycles;
+            actionQueue->scheduledTime -= kMajorTick;
         }
     }
 

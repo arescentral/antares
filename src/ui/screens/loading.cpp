@@ -32,7 +32,7 @@ namespace antares {
 
 static const int16_t kLevelNameID = 4600;
 static const uint8_t kLoadingScreenColor = PALE_GREEN;
-static const ticks kTypingDelay = ticks(1);
+static const ticks kTypingDelay = kMinorTick;
 
 LoadingScreen::LoadingScreen(const Scenario* scenario, bool* cancelled):
         InterfaceScreen("loading", {0, 0, 640, 480}, true),

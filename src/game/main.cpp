@@ -292,7 +292,7 @@ GamePlay::GamePlay(
         _replay(replay),
         _game_result(game_result),
         _seconds(seconds),
-        _next_timer(now() + ticks(1)),
+        _next_timer(now() + kMinorTick),
         _play_area(viewport().left, viewport().top, viewport().right, viewport().bottom),
         _scenario_start_time(
                 (g.level->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple),
@@ -494,7 +494,7 @@ bool GamePlay::next_timer(wall_time& time) {
 
 void GamePlay::fire_timer() {
     while (_next_timer < now()) {
-        _next_timer = _next_timer + ticks(1);
+        _next_timer = _next_timer + kMinorTick;
     }
 
     const wall_time now = antares::now();
@@ -523,21 +523,21 @@ void GamePlay::fire_timer() {
 
     while (unitsPassed > ticks(0)) {
         ticks unitsToDo = unitsPassed;
-        if ((_decide_cycle + unitsToDo) > kDecideEveryCycles) {
-            unitsToDo = kDecideEveryCycles - _decide_cycle;
+        if ((_decide_cycle + unitsToDo) > kMajorTick) {
+            unitsToDo = kMajorTick - _decide_cycle;
         }
         _decide_cycle += unitsToDo;
 
         if (unitsToDo > ticks(0)) {
-            // executed arbitrarily, but at least once every kDecideEveryCycles
+            // executed arbitrarily, but at least once every major tick
             globals()->starfield.move(unitsToDo);
             MoveSpaceObjects(unitsToDo);
         }
 
         g.time += unitsToDo;
 
-        if ( _decide_cycle == kDecideEveryCycles) {
-            // everything in here gets executed once every kDecideEveryCycles
+        if ( _decide_cycle == kMajorTick) {
+            // everything in here gets executed once every major tick
             _player_paused = false;
 
             NonplayerShipThink();
@@ -553,7 +553,7 @@ void GamePlay::fire_timer() {
 
             CollideSpaceObjects();
             _decide_cycle = ticks(0);
-            _scenario_check_time += kDecideEveryCycles;
+            _scenario_check_time += kMajorTick;
             if (_scenario_check_time == ticks(90)) {
                 _scenario_check_time = ticks(0);
                 CheckScenarioConditions();
