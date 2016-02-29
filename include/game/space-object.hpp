@@ -151,7 +151,7 @@ class SpaceObject {
     int32_t                 warpEnergyCollected = 0;
 
     Handle<Admiral>         owner;
-    int32_t                 age = -1;
+    ticks                   age = ticks(-1);
     int32_t                 naturalScale = SCALE_SCALE;
     int32_t                 id = kNoShip;
     int16_t                 rechargeTime = 0;
@@ -202,7 +202,7 @@ class SpaceObject {
     Weapon                  beam;
     Weapon                  special;
 
-    int32_t                 periodicTime = 0;
+    ticks                   periodicTime = ticks(0);
 
     uint32_t                myPlayerFlag = 0x80000000;
     uint32_t                seenByPlayerFlags = 0xffffffff;

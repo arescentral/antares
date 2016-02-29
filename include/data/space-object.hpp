@@ -289,8 +289,8 @@ class BaseObject {
     int32_t                 damage;                     // damage caused by impact
     int32_t                 energy;                     // starting energy for material objects
 
-    int32_t                 initialAge;                 // starting minimum age
-    int32_t                 initialAgeRange;            // random addition to starting age --
+    ticks                   initialAge;                 // starting minimum age
+    ticks                   initialAgeRange;            // random addition to starting age --
                                                         // for neutral death objects =
                                                         // size of occupying force (HACK)
 
@@ -328,8 +328,8 @@ class BaseObject {
 
     bool                    destroyDontDie;
     bool                    expireDontDie;
-    uint8_t                 activatePeriod;
-    uint8_t                 activatePeriodRange;
+    ticks                   activatePeriod;
+    ticks                   activatePeriodRange;
 
     objectFrameType         frame;
 

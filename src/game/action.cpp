@@ -479,17 +479,17 @@ static void alter(
             l = alter.minimum + focus->randomSeed.next(alter.range);
 
             if (alter.relative) {
-                if (focus->age >= 0) {
-                    focus->age += l;
+                if (focus->age >= ticks(0)) {
+                    focus->age += ticks(l);
 
-                    if (focus->age < 0) {
-                        focus->age = 0;
+                    if (focus->age < ticks(0)) {
+                        focus->age = ticks(0);
                     }
                 } else {
-                    focus->age += l;
+                    focus->age += ticks(l);
                 }
             } else {
-                focus->age = l;
+                focus->age = ticks(l);
             }
             break;
 

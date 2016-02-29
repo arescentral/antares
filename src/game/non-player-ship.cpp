@@ -353,7 +353,7 @@ void NonplayerShipThink() {
 
         if ((anObject->attributes & kRemoteOrHuman)
                 && (!(anObject->attributes & kCanThink))
-                && (anObject->age < 120)) {
+                && (anObject->age < ticks(120))) {
             PlayerShipBodyExpire(anObject);
         }
 

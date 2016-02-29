@@ -72,8 +72,8 @@ static void read_collide(ReadSource in, BaseObject& object) {
 static void read_activate(ReadSource in, BaseObject& object) {
     auto start = read<int32_t>(in);
     auto count = read<int32_t>(in);
-    object.activatePeriod = (count & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift;
-    object.activatePeriodRange = (count & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift;
+    object.activatePeriod = ticks((count & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift);
+    object.activatePeriodRange = ticks((count & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift);
     count &= kPeriodicActionNotMask;
     auto end = (start >= 0) ? (start + count) : start;
     object.activate = {start, end};
@@ -115,8 +115,8 @@ void read_from(ReadSource in, BaseObject& object) {
     read(in, object.damage);
     read(in, object.energy);
 
-    read(in, object.initialAge);
-    read(in, object.initialAgeRange);
+    object.initialAge = ticks(read<int32_t>(in));
+    object.initialAgeRange = ticks(read<int32_t>(in));
 
     read(in, object.naturalScale);
 
