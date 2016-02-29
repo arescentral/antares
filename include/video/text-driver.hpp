@@ -29,17 +29,15 @@ namespace antares {
 
 class TextVideoDriver : public VideoDriver {
   public:
-    TextVideoDriver(
-            Size screen_size, EventScheduler& scheduler,
-            const sfz::Optional<sfz::String>& output_dir);
+    TextVideoDriver(Size screen_size, const sfz::Optional<sfz::String>& output_dir);
 
-    virtual Point get_mouse() { return _scheduler.get_mouse(); }
+    virtual Point get_mouse() { return _scheduler->get_mouse(); }
     virtual InputMode input_mode() const { return KEYBOARD_MOUSE; }
     virtual int scale() const;
     virtual Size screen_size() const { return _size; }
 
-    virtual int ticks() const { return _scheduler.ticks(); }
-    virtual int usecs() const { return _scheduler.usecs(); }
+    virtual int ticks() const { return _scheduler->ticks(); }
+    virtual int usecs() const { return _scheduler->usecs(); }
 
     virtual Texture texture(sfz::PrintItem name, const PixMap& content);
     virtual void dither_rect(const Rect& rect, const RgbColor& color);
@@ -49,7 +47,8 @@ class TextVideoDriver : public VideoDriver {
     virtual void draw_diamond(const Rect& rect, const RgbColor& color);
     virtual void draw_plus(const Rect& rect, const RgbColor& color);
 
-    void loop(Card* initial);
+    void loop(Card* initial, EventScheduler& scheduler);
+    void capture(std::vector<std::pair<std::unique_ptr<Card>, sfz::String>>& pix);
 
   private:
     class MainLoop;
@@ -65,11 +64,12 @@ class TextVideoDriver : public VideoDriver {
     void log(sfz::StringSlice command, sfz::PrintItem (&args)[size]);
 
     const Size _size;
-    EventScheduler& _scheduler;
     const sfz::Optional<sfz::String> _output_dir;
 
     sfz::String _log;
     std::vector<std::pair<size_t, size_t>> _last_args;
+
+    EventScheduler* _scheduler = nullptr;
 
     DISALLOW_COPY_AND_ASSIGN(TextVideoDriver);
 };

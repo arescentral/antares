@@ -223,11 +223,11 @@ void main(int argc, char** argv) {
 
     MappedFile replay_file(replay_path);
     if (smoke) {
-        TextVideoDriver video({width, height}, scheduler, Optional<String>());
-        video.loop(new ReplayMaster(replay_file.data(), output_dir));
+        TextVideoDriver video({width, height}, Optional<String>());
+        video.loop(new ReplayMaster(replay_file.data(), output_dir), scheduler);
     } else if (text) {
-        TextVideoDriver video({width, height}, scheduler, output_dir);
-        video.loop(new ReplayMaster(replay_file.data(), output_dir));
+        TextVideoDriver video({width, height}, output_dir);
+        video.loop(new ReplayMaster(replay_file.data(), output_dir), scheduler);
     } else {
         OffscreenVideoDriver video({width, height}, output_dir);
         video.loop(new ReplayMaster(replay_file.data(), output_dir), scheduler);

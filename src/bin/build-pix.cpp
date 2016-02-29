@@ -26,6 +26,7 @@
 #include "drawing/pix-map.hpp"
 #include "drawing/text.hpp"
 #include "video/offscreen-driver.hpp"
+#include "video/text-driver.hpp"
 
 using sfz::Optional;
 using sfz::ScopedFd;
@@ -33,6 +34,7 @@ using sfz::String;
 using sfz::StringSlice;
 using sfz::args::help;
 using sfz::args::store;
+using sfz::args::store_const;
 using sfz::dec;
 using sfz::format;
 using sfz::write;
@@ -49,7 +51,7 @@ namespace {
 
 class DrawPix : public Card {
   public:
-    DrawPix(OffscreenVideoDriver& driver, int16_t id, int32_t width):
+    DrawPix(OffscreenVideoDriver* driver, int16_t id, int32_t width):
             _driver(driver),
             _id(id),
             _width(width) { }
@@ -57,31 +59,28 @@ class DrawPix : public Card {
     virtual void draw() const {
         BuildPix pix(_id, _width);
         pix.draw({0, 0});
-        _driver.set_capture_rect({0, 0, _width, pix.size().height});
+        if (_driver) {
+            _driver->set_capture_rect({0, 0, _width, pix.size().height});
+        }
     }
 
   private:
-    OffscreenVideoDriver& _driver;
+    OffscreenVideoDriver* _driver;
     const int16_t _id;
     const int32_t _width;
 };
-
-static void add(
-        vector<pair<unique_ptr<Card>, String>>& pix,
-        OffscreenVideoDriver& driver, int16_t id, int32_t width) {
-    pix.emplace_back(
-            unique_ptr<Card>(new DrawPix(driver, id, width)),
-            String(format("{0}.png", dec(id, 5))));
-}
 
 int main(int argc, char* const* argv) {
     args::Parser parser(argv[0], "Builds all of the scrolling text images in the game");
 
     Optional<String> output_dir;
+    bool text = false;
     parser.add_argument("-o", "--output", store(output_dir))
         .help("place output in this directory");
     parser.add_argument("-h", "--help", help(parser, 0))
         .help("display this help screen");
+    parser.add_argument("-t", "--text", store_const(text, true))
+        .help("produce text output");
 
     String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
@@ -95,23 +94,40 @@ int main(int argc, char* const* argv) {
 
     NullPrefsDriver prefs;
 
-    OffscreenVideoDriver off({540, 2000}, output_dir);
-    vector<pair<unique_ptr<Card>, String>> pix;
-    add(pix, off, 3020, 450);  // Gaitori prologue
-    add(pix, off, 3025, 450);  // Tutorial prologue
-    add(pix, off, 3080, 450);  // Cantharan prologue
-    add(pix, off, 3081, 450);  // Cantharan epilogue
-    add(pix, off, 3120, 450);  // Salrilian prologue
-    add(pix, off, 3211, 450);  // Game epilogue
-    add(pix, off, 4063, 450);  // Bazidanese prologue
-    add(pix, off, 4509, 450);  // Elejeetian prologue
-    add(pix, off, 4606, 450);  // Audemedon prologue
-    add(pix, off, 5600, 450);  // Story introduction
-    add(pix, off, 6500, 540);  // Credits text
-    add(pix, off, 6501, 450);  // Please register
-    add(pix, off, 10199, 450);  // Unused Gaitori prologue
+    vector<pair<int, int>> specs = {
+        {3020, 450},  // Gaitori prologue
+        {3025, 450},  // Tutorial prologue
+        {3080, 450},  // Cantharan prologue
+        {3081, 450},  // Cantharan epilogue
+        {3120, 450},  // Salrilian prologue
+        {3211, 450},  // Game epilogue
+        {4063, 450},  // Bazidanese prologue
+        {4509, 450},  // Elejeetian prologue
+        {4606, 450},  // Audemedon prologue
+        {5600, 450},  // Story introduction
+        {6500, 540},  // Credits text
+        {6501, 450},  // Please register
+        {10199, 450},  // Unused Gaitori prologue
+    };
 
-    off.capture(pix);
+    vector<pair<unique_ptr<Card>, String>> pix;
+    if (text) {
+        TextVideoDriver video({540, 2000}, output_dir);
+        for (auto spec: specs) {
+            pix.emplace_back(
+                    unique_ptr<Card>(new DrawPix(nullptr, spec.first, spec.second)),
+                    String(format("{0}.txt", dec(spec.first, 5))));
+        }
+        video.capture(pix);
+    } else {
+        OffscreenVideoDriver video({540, 2000}, output_dir);
+        for (auto spec: specs) {
+            pix.emplace_back(
+                    unique_ptr<Card>(new DrawPix(&video, spec.first, spec.second)),
+                    String(format("{0}.png", dec(spec.first, 5))));
+        }
+        video.capture(pix);
+    }
 
     return 0;
 }

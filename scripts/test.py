@@ -39,8 +39,13 @@ def diff_test(queue, name, cmd, expected):
                 run(queue, name, ["diff", "-ru", "-x.*", expected, d]))
 
 
-def data_test(opts, queue, name, args=[]):
-    return diff_test(queue, name, ["out/cur/%s" % name] + args, "test/%s" % name)
+def data_test(opts, queue, name, args=[], smoke_args=[]):
+    if opts.smoke:
+        args += smoke_args
+        expected = "test/smoke/%s" % name
+    else:
+        expected = "test/%s" % name
+    return diff_test(queue, name, ["out/cur/%s" % name] + args, expected)
 
 
 def offscreen_test(opts, queue, name, args=[]):
@@ -68,14 +73,14 @@ def call(args):
     opts = args[1]
     queue = args[2]
     name = args[3]
-    args = list(*args[4:])
+    args = list(args[4:])
 
     sys.stdout = cStringIO.StringIO()
 
     queue.put((name, START,))
     try:
         start = time.time()
-        result = fn(opts, queue, name, args)
+        result = fn(opts, queue, name, *args)
         end = time.time()
         if result:
             queue.put((name, PASSED, end - start, sys.stdout.getvalue()))
@@ -100,7 +105,7 @@ def main():
     tests = [
         (unit_test, opts, queue, "fixed-test"),
 
-        (data_test, opts, queue, "build-pix"),
+        (data_test, opts, queue, "build-pix", [], ["--text"]),
         (data_test, opts, queue, "object-data"),
         (data_test, opts, queue, "shapes"),
         (data_test, opts, queue, "tint"),
