@@ -48,6 +48,7 @@ class TextVideoDriver : public VideoDriver {
     virtual void draw_plus(const Rect& rect, const RgbColor& color);
 
     void loop(Card* initial, EventScheduler& scheduler);
+    void capture(std::vector<std::pair<std::unique_ptr<Card>, sfz::String>>& pix);
 
   private:
     class MainLoop;

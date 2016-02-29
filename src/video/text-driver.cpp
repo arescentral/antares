@@ -27,6 +27,7 @@
 
 #include "config/preferences.hpp"
 #include "drawing/pix-map.hpp"
+#include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/time.hpp"
 #include "math/geometry.hpp"
@@ -46,7 +47,9 @@ using std::make_pair;
 using std::max;
 using std::min;
 using std::pair;
+using std::unique_ptr;
 using std::vector;
+namespace path = sfz::path;
 namespace utf8 = sfz::utf8;
 
 namespace antares {
@@ -166,9 +169,12 @@ class TextVideoDriver::MainLoop : public EventScheduler::MainLoop {
     }
 
     void snapshot(int64_t ticks) {
-        String dir(format("{0}/screens", *_output_dir));
-        makedirs(dir, 0755);
-        String path(format("{0}/{1}.txt", dir, dec(ticks, 6)));
+        snapshot_to(format("screens/{0}.txt", dec(ticks, 6)));
+    }
+
+    void snapshot_to(PrintItem relpath) {
+        String path(format("{0}/{1}", *_output_dir, relpath));
+        makedirs(path::dirname(path), 0755);
         sfz::ScopedFd file(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
         write(file, sfz::Bytes(utf8::encode(_driver._log)));
     }
@@ -251,6 +257,33 @@ void TextVideoDriver::loop(Card* initial, EventScheduler& scheduler) {
     MainLoop loop(*this, _output_dir, initial);
     _scheduler->loop(loop);
     _scheduler = nullptr;
+}
+
+namespace {
+
+class DummyCard: public Card {
+  public:
+    void become_front() {
+        if (!_inited) {
+            InitDirectText();
+            _inited = true;
+        }
+    }
+
+  private:
+    bool _inited = false;
+};
+
+}  // namespace
+
+void TextVideoDriver::capture(vector<pair<unique_ptr<Card>, String>>& pix) {
+    MainLoop loop(*this, _output_dir, new DummyCard);
+    for (auto& p: pix) {
+        loop.top()->stack()->push(p.first.release());
+        loop.draw();
+        loop.snapshot_to(p.second);
+        loop.top()->stack()->pop(loop.top());
+    }
 }
 
 void TextVideoDriver::add_arg(StringSlice arg, std::vector<std::pair<size_t, size_t>>& args) {
