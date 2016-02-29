@@ -341,7 +341,7 @@ void Messages::draw_long_message(ticks time_pass) {
         //
         // if ( !(globals()->gOptions & kOptionNetworkOn))
         // {
-            CheckScenarioConditions( 0);
+            CheckScenarioConditions();
         // }
 
         if ((tmessage->lastResID >= 0) && (tmessage->lastLabelMessage)) {

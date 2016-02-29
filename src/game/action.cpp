@@ -785,7 +785,7 @@ static void execute_actions(
     }
 
     if (checkConditions) {
-        CheckScenarioConditions(0);
+        CheckScenarioConditions();
     }
 }
 

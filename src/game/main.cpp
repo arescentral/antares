@@ -144,7 +144,7 @@ class GamePlay : public Card {
     bool _entering_message;
     bool _player_paused;
     ticks _decide_cycle;
-    int _scenario_check_time;
+    ticks _scenario_check_time;
     PlayAgainScreen::Item _play_again;
     PlayerShip _player_ship;
     ReplayBuilder& _replay_builder;
@@ -408,7 +408,7 @@ void GamePlay::become_front() {
         }
         HintLine::reset();
 
-        CheckScenarioConditions(0);
+        CheckScenarioConditions();
         break;
 
       case PAUSED:
@@ -553,10 +553,10 @@ void GamePlay::fire_timer() {
 
             CollideSpaceObjects();
             _decide_cycle = ticks(0);
-            _scenario_check_time++;
-            if (_scenario_check_time == 30) {
-                _scenario_check_time = 0;
-                CheckScenarioConditions( 0);
+            _scenario_check_time += kDecideEveryCycles;
+            if (_scenario_check_time == ticks(90)) {
+                _scenario_check_time = ticks(0);
+                CheckScenarioConditions();
             }
         }
         unitsPassed -= unitsToDo;

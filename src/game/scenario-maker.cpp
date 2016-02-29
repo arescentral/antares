@@ -798,7 +798,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         RecalcAllAdmiralBuildData();
         Messages::clear();
 
-        int x = 0;
+        ticks scenario_check_time = ticks(0);
         const ticks start_ticks
             = (g.level->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple;
         const game_time start_time(start_ticks);
@@ -810,10 +810,10 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             AdmiralThink();
             execute_action_queue();
             CollideSpaceObjects();
-            x++;
-            if (x == 30) {
-                x = 0;
-                CheckScenarioConditions(0);
+            scenario_check_time += kDecideEveryCycles;
+            if (scenario_check_time == ticks(90)) {
+                scenario_check_time = ticks(0);
+                CheckScenarioConditions();
             }
             CullSprites();
             Beams::cull();
@@ -828,7 +828,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
     }
 }
 
-void CheckScenarioConditions(int32_t timePass) {
+void CheckScenarioConditions() {
     for (int32_t i = 0; i < g.level->conditionNum; i++) {
         auto c = g.level->condition(i);
         if (c->active() && c->is_true()) {
