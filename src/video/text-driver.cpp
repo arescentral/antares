@@ -187,10 +187,8 @@ class TextVideoDriver::MainLoop : public EventScheduler::MainLoop {
     CardStack _stack;
 };
 
-TextVideoDriver::TextVideoDriver(
-        Size screen_size, EventScheduler& scheduler, const Optional<String>& output_dir):
+TextVideoDriver::TextVideoDriver(Size screen_size, const Optional<String>& output_dir):
         _size(screen_size),
-        _scheduler(scheduler),
         _output_dir(output_dir) { }
 
 int TextVideoDriver::scale() const {
@@ -248,9 +246,11 @@ void TextVideoDriver::draw_plus(const Rect& rect, const RgbColor& color) {
     log("plus", args);
 }
 
-void TextVideoDriver::loop(Card* initial) {
+void TextVideoDriver::loop(Card* initial, EventScheduler& scheduler) {
+    _scheduler = &scheduler;
     MainLoop loop(*this, _output_dir, initial);
-    _scheduler.loop(loop);
+    _scheduler->loop(loop);
+    _scheduler = nullptr;
 }
 
 void TextVideoDriver::add_arg(StringSlice arg, std::vector<std::pair<size_t, size_t>>& args) {

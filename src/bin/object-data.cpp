@@ -87,8 +87,7 @@ int main(int argc, char** argv) {
     }
 
     NullPrefsDriver prefs;
-    EventScheduler scheduler;
-    TextVideoDriver video({640, 480}, scheduler, {});
+    TextVideoDriver video({640, 480}, {});
     init_globals();
     SpaceObjectHandlingInit();
 
