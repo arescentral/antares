@@ -129,7 +129,7 @@ class ReplayMaster : public Card {
     ReplayData _replay_data;
     const int32_t _random_seed;
     GameResult _game_result;
-    std::chrono::seconds _seconds;
+    secs _seconds;
 
     DISALLOW_COPY_AND_ASSIGN(ReplayMaster);
 };

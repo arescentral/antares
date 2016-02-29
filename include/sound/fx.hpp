@@ -89,18 +89,17 @@ int AddSound(int sound_id);
 void RemoveAllUnusedSounds();
 void ResetAllSounds();
 void PlayVolumeSound(
-        int16_t whichSoundID, uint8_t amplitude, std::chrono::microseconds persistence,
-        soundPriorityType priority);
+        int16_t whichSoundID, uint8_t amplitude, usecs persistence, soundPriorityType priority);
 void PlayLocalizedSound(
         uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy,
         Fixed hvel, Fixed vvel, int16_t whichSoundID, int16_t amplitude,
-        std::chrono::microseconds persistence, soundPriorityType priority);
+        usecs persistence, soundPriorityType priority);
 void quiet_all();
 void SoundFXCleanup();
 
 void mPlayDistanceSound(
         int32_t mvolume, Handle<SpaceObject> mobjectptr, int32_t msoundid,
-        std::chrono::microseconds msoundpersistence, soundPriorityType msoundpriority);
+        usecs msoundpersistence, soundPriorityType msoundpriority);
 
 }  // namespace antares
 

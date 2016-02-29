@@ -95,7 +95,7 @@ bool ScrollTextScreen::next_timer(wall_time& time) {
 void ScrollTextScreen::fire_timer() {
     wall_time now = antares::now();
     while (_next_shift < now) {
-        _next_shift += std::chrono::microseconds(int64_t(1000000 / _speed));
+        _next_shift += usecs(int64_t(1000000 / _speed));
         ++_position;
     }
 

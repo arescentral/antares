@@ -58,7 +58,7 @@ class ColorFade : public Card {
     };
 
     ColorFade(
-            Direction direction, const RgbColor& color, std::chrono::microseconds duration,
+            Direction direction, const RgbColor& color, usecs duration,
             bool allow_skip, bool* skipped);
 
     virtual void become_front();
@@ -80,7 +80,7 @@ class ColorFade : public Card {
 
     wall_time _start;
     wall_time _next_event;
-    const std::chrono::microseconds _duration;
+    const usecs _duration;
 
     DISALLOW_COPY_AND_ASSIGN(ColorFade);
 };
@@ -100,8 +100,8 @@ class PictFade : public Card {
     virtual void draw() const;
 
   protected:
-    virtual std::chrono::microseconds fade_time() const;
-    virtual std::chrono::microseconds display_time() const;
+    virtual usecs fade_time() const;
+    virtual usecs display_time() const;
     virtual bool skip() const;
 
   private:

@@ -24,13 +24,17 @@
 
 namespace antares {
 
+typedef std::chrono::seconds secs;
+typedef std::chrono::microseconds usecs;
+typedef std::chrono::duration<usecs::rep, std::ratio<16667, 1000000>> ticks;
+
 // Time units
-struct GameStart {};
-struct Wall {};
-typedef std::chrono::duration<std::chrono::microseconds::rep, std::ratio<16667, 1000000>> ticks;
-typedef std::chrono::time_point<GameStart, std::chrono::microseconds> game_time;
+struct GameStart { typedef usecs duration; };
+struct Wall { typedef usecs duration; };
+
+typedef std::chrono::time_point<GameStart> game_time;
 typedef std::chrono::time_point<GameStart, ticks> game_ticks;
-typedef std::chrono::time_point<Wall, std::chrono::microseconds> wall_time;
+typedef std::chrono::time_point<Wall> wall_time;
 typedef std::chrono::time_point<Wall, ticks> wall_ticks;
 
 // every time this many cycles pass, we have to process player & computer decisions

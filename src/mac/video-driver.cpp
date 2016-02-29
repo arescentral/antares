@@ -326,7 +326,7 @@ void CocoaVideoDriver::loop(Card* initial) {
 wall_time CocoaVideoDriver::_now() {
     timeval tv;
     gettimeofday(&tv, NULL);
-    return wall_time(std::chrono::microseconds(tv.tv_sec * 1000000ll + tv.tv_usec));
+    return wall_time(usecs(tv.tv_sec * 1000000ll + tv.tv_usec));
 }
 
 }  // namespace antares

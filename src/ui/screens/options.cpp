@@ -189,7 +189,7 @@ OptionsScreen::State SoundControlScreen::button_state(int button) {
     }
 }
 
-static const std::chrono::microseconds kFlashTime(200000);
+static const usecs kFlashTime = usecs(200000);
 
 // Indices of the keys controlled by each tab.  The "Ship" tab specifies keys 0..7, the "Command"
 // tab specifies keys 8..18, and so on.

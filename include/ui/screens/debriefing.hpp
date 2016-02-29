@@ -33,7 +33,7 @@ class DebriefingScreen : public Card {
 
     DebriefingScreen(
             int text_id,
-            std::chrono::seconds your_length, std::chrono::seconds par_length,
+            secs your_length, secs par_length,
             int your_loss, int par_loss,
             int your_kill, int par_kill);
 
@@ -49,7 +49,7 @@ class DebriefingScreen : public Card {
     virtual void fire_timer();
 
     static sfz::String build_score_text(
-            std::chrono::seconds your_length, std::chrono::seconds par_length,
+            secs your_length, secs par_length,
             int your_loss, int par_loss,
             int your_kill, int par_kill);
     

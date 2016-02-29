@@ -49,7 +49,7 @@ namespace antares {
 
 namespace {
 
-const std::chrono::microseconds kTypingDelay(1000000 / 20);
+const usecs kTypingDelay = usecs(1000000 / 20);
 const int kScoreTableHeight = 120;
 const int kTextWidth = 300;
 
@@ -98,7 +98,7 @@ int score_high_target(double yours, double par, double value) {
 }
 
 int score(
-        std::chrono::seconds your_length, std::chrono::seconds par_length,
+        secs your_length, secs par_length,
         int your_loss, int par_loss,
         int your_kill, int par_kill) {
     int score = 0;
@@ -125,7 +125,7 @@ DebriefingScreen::DebriefingScreen(int text_id) :
 
 DebriefingScreen::DebriefingScreen(
         int text_id,
-        std::chrono::seconds your_length, std::chrono::seconds par_length,
+        secs your_length, secs par_length,
         int your_loss, int par_loss,
         int your_kill, int par_kill):
         _state(TYPING),
@@ -242,7 +242,7 @@ LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
 }
 
 String DebriefingScreen::build_score_text(
-        std::chrono::seconds your_length, std::chrono::seconds par_length,
+        secs your_length, secs par_length,
         int your_loss, int par_loss,
         int your_kill, int par_kill) {
     Resource rsrc("text", "txt", 6000);
@@ -259,7 +259,7 @@ String DebriefingScreen::build_score_text(
 
     string_replace(&text, strings.at(0), your_mins);
     string_replace(&text, strings.at(1), dec(your_secs, 2));
-    if (par_length > std::chrono::seconds(0)) {
+    if (par_length > secs(0)) {
         string_replace(&text, strings.at(2), par_mins);
         String secs_string;
         print(secs_string, format(":{0}", dec(par_secs, 2)));

@@ -40,7 +40,7 @@ namespace antares {
 
 namespace {
 
-const std::chrono::microseconds kMainDemoTimeOutTime(30000000);
+const secs kMainDemoTimeOutTime = secs(30);
 const int kTitleTextScrollWidth = 450;
 
 }  // namespace
@@ -131,7 +131,7 @@ void MainScreen::handle_button(antares::Button& button) {
         // 1-second fade-out.
         _state = QUITTING;
         stack()->push(new ColorFade(
-                    ColorFade::TO_COLOR, RgbColor::kBlack, std::chrono::seconds(1), false, NULL));
+                    ColorFade::TO_COLOR, RgbColor::kBlack, secs(1), false, NULL));
         break;
 
       case DEMO:

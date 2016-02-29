@@ -56,7 +56,7 @@ class SoloGame : public Card {
     bool _cancelled;
     const Scenario* _scenario;
     GameResult _game_result;
-    std::chrono::seconds _seconds;
+    secs _seconds;
     PlayAgainScreen::Item _play_again;
 };
 

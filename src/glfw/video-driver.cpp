@@ -94,7 +94,7 @@ InputMode GLFWVideoDriver::input_mode() const {
 }
 
 wall_time GLFWVideoDriver::now() const {
-    return wall_time(std::chrono::microseconds(int64_t(glfwGetTime() * 1e6)));
+    return wall_time(usecs(int64_t(glfwGetTime() * 1e6)));
 }
 
 void GLFWVideoDriver::key(int key, int scancode, int action, int mods) {
@@ -119,7 +119,7 @@ void GLFWVideoDriver::key(int key, int scancode, int action, int mods) {
 
 void GLFWVideoDriver::mouse_button(int button, int action, int mods) {
     if (action == GLFW_PRESS) {
-        if (now() <= (_last_click_usecs + std::chrono::microseconds(500000))) {
+        if (now() <= (_last_click_usecs + usecs(500000))) {
             _last_click_count += 1;
         } else {
             _last_click_count = 1;

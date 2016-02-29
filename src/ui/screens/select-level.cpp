@@ -139,8 +139,7 @@ void SelectLevelScreen::handle_button(Button& button) {
       case OK:
         _state = FADING_OUT;
         *_cancelled = false;
-        stack()->push(new ColorFade(
-                    ColorFade::TO_COLOR, RgbColor::kBlack, std::chrono::seconds(1), false, NULL));
+        stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::kBlack, secs(1), false, NULL));
         break;
 
       case CANCEL:

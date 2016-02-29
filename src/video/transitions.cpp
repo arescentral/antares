@@ -78,7 +78,7 @@ void Transitions::draw() const {
 }
 
 ColorFade::ColorFade(
-        Direction direction, const RgbColor& color, std::chrono::microseconds duration,
+        Direction direction, const RgbColor& color, usecs duration,
         bool allow_skip, bool* skipped)
         : _direction(direction),
           _color(color),
@@ -229,11 +229,11 @@ void PictFade::wane() {
                 _skipped));
 }
 
-std::chrono::microseconds PictFade::fade_time() const {
+usecs PictFade::fade_time() const {
     return ticks(100);
 }
 
-std::chrono::microseconds PictFade::display_time() const {
+usecs PictFade::display_time() const {
     return ticks(80);
 }
 

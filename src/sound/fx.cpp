@@ -111,7 +111,7 @@ static bool lower_priority_channel(int& channel, soundPriorityType priority) {
 
 // take the oldest sound if past minimum persistence
 static bool oldest_available_channel(int& channel) {
-    std::chrono::microseconds oldestSoundTime(0);
+    usecs oldestSoundTime(0);
     bool result = false;
     for (int i = 0; i < kMaxChannelNum; ++i) {
         auto past_reservation =
@@ -127,7 +127,7 @@ static bool oldest_available_channel(int& channel) {
 
 static bool best_channel(
         int& channel,
-        int16_t sound_id, uint8_t amplitude, std::chrono::microseconds persistence,
+        int16_t sound_id, uint8_t amplitude, usecs persistence,
         soundPriorityType priority) {
     return same_sound_channel(channel, sound_id, amplitude, priority)
         || quieter_channel(channel, amplitude)
@@ -136,7 +136,7 @@ static bool best_channel(
 }
 
 void PlayVolumeSound(
-        int16_t whichSoundID, uint8_t amplitude, std::chrono::microseconds persistence,
+        int16_t whichSoundID, uint8_t amplitude, usecs persistence,
         soundPriorityType priority) {
     int32_t whichChannel = -1;
     // TODO(sfiera): don't play sound at all if the game is muted.
@@ -169,7 +169,7 @@ void PlayVolumeSound(
 void PlayLocalizedSound(
         uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy,
         Fixed hvel, Fixed vvel, int16_t whichSoundID, int16_t amplitude,
-        std::chrono::microseconds persistence, soundPriorityType priority) {
+        usecs persistence, soundPriorityType priority) {
     static_cast<void>(sx);
     static_cast<void>(sy);
     static_cast<void>(dx);
@@ -281,7 +281,7 @@ void quiet_all() {
 
 void mPlayDistanceSound(
         int32_t mvolume, Handle<SpaceObject> mobjectptr, int32_t msoundid,
-        std::chrono::microseconds msoundpersistence, soundPriorityType msoundpriority) {
+        usecs msoundpersistence, soundPriorityType msoundpriority) {
     if (mobjectptr->distanceFromPlayer < kMaximumRelevantDistanceSquared) {
         int32_t mdistance = mobjectptr->distanceFromPlayer;
         uint32_t mul1;
