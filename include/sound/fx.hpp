@@ -37,10 +37,10 @@ const uint8_t kMediumVolume     = 128;
 const uint8_t kMediumLoudVolume = 192;
 const uint8_t kMaxSoundVolume   = 255;
 
-const int16_t kShortPersistence         = 10;      // in ticks
-const int16_t kMediumPersistence        = 20;
-const int16_t kMediumLongPersistence    = 40;
-const int16_t kLongPersistence          = 60;
+const ticks kShortPersistence         = ticks(10);      // in ticks
+const ticks kMediumPersistence        = ticks(20);
+const ticks kMediumLongPersistence    = ticks(40);
+const ticks kLongPersistence          = ticks(60);
 
 const int16_t kMorseBeepSound   = 506;  // ship receives order
 const int16_t kComputerBeep1    = 507;  // ship selected
@@ -89,17 +89,18 @@ int AddSound(int sound_id);
 void RemoveAllUnusedSounds();
 void ResetAllSounds();
 void PlayVolumeSound(
-        int16_t whichSoundID, uint8_t amplitude, int16_t persistence, soundPriorityType priority);
+        int16_t whichSoundID, uint8_t amplitude, std::chrono::microseconds persistence,
+        soundPriorityType priority);
 void PlayLocalizedSound(
         uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy,
         Fixed hvel, Fixed vvel, int16_t whichSoundID, int16_t amplitude,
-        int16_t persistence, soundPriorityType priority);
+        std::chrono::microseconds persistence, soundPriorityType priority);
 void quiet_all();
 void SoundFXCleanup();
 
 void mPlayDistanceSound(
         int32_t mvolume, Handle<SpaceObject> mobjectptr, int32_t msoundid,
-        int32_t msoundpersistence, soundPriorityType msoundpriority);
+        std::chrono::microseconds msoundpersistence, soundPriorityType msoundpriority);
 
 }  // namespace antares
 

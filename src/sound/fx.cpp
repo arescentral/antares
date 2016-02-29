@@ -127,7 +127,8 @@ static bool oldest_available_channel(int& channel) {
 
 static bool best_channel(
         int& channel,
-        int16_t sound_id, uint8_t amplitude, int16_t persistence, soundPriorityType priority) {
+        int16_t sound_id, uint8_t amplitude, std::chrono::microseconds persistence,
+        soundPriorityType priority) {
     return same_sound_channel(channel, sound_id, amplitude, priority)
         || quieter_channel(channel, amplitude)
         || lower_priority_channel(channel, priority)
@@ -135,7 +136,8 @@ static bool best_channel(
 }
 
 void PlayVolumeSound(
-        int16_t whichSoundID, uint8_t amplitude, int16_t persistence, soundPriorityType priority) {
+        int16_t whichSoundID, uint8_t amplitude, std::chrono::microseconds persistence,
+        soundPriorityType priority) {
     int32_t whichChannel = -1;
     // TODO(sfiera): don't play sound at all if the game is muted.
     if (amplitude > 0) {
@@ -152,7 +154,7 @@ void PlayVolumeSound(
         }
 
         gChannel[whichChannel].whichSound = whichSoundID;
-        gChannel[whichChannel].reserved_until = VideoDriver::driver()->now() + ticks(persistence);
+        gChannel[whichChannel].reserved_until = VideoDriver::driver()->now() + persistence;
         gChannel[whichChannel].soundPriority = priority;
         gChannel[whichChannel].soundVolume = amplitude;
 
@@ -167,7 +169,7 @@ void PlayVolumeSound(
 void PlayLocalizedSound(
         uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy,
         Fixed hvel, Fixed vvel, int16_t whichSoundID, int16_t amplitude,
-        int16_t persistence, soundPriorityType priority) {
+        std::chrono::microseconds persistence, soundPriorityType priority) {
     static_cast<void>(sx);
     static_cast<void>(sy);
     static_cast<void>(dx);
@@ -279,7 +281,7 @@ void quiet_all() {
 
 void mPlayDistanceSound(
         int32_t mvolume, Handle<SpaceObject> mobjectptr, int32_t msoundid,
-        int32_t msoundpersistence, soundPriorityType msoundpriority) {
+        std::chrono::microseconds msoundpersistence, soundPriorityType msoundpriority) {
     if (mobjectptr->distanceFromPlayer < kMaximumRelevantDistanceSquared) {
         int32_t mdistance = mobjectptr->distanceFromPlayer;
         uint32_t mul1;
