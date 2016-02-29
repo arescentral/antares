@@ -137,7 +137,7 @@ BuildPix::BuildPix(int text_id, int width):
                     Picture pict(id);
                     _lines.push_back(Line{
                         Line::BACKGROUND,
-                        VideoDriver::driver()->texture("-", pict),
+                        Picture(id).texture(),
                         nullptr,
                     });
                 } else {
@@ -148,7 +148,7 @@ BuildPix::BuildPix(int text_id, int width):
                     Picture pict(id);
                     _lines.push_back(Line{
                         Line::PICTURE,
-                        VideoDriver::driver()->texture("-", pict),
+                        Picture(id).texture(),
                         nullptr,
                     });
                 }
