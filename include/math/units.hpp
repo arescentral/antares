@@ -24,8 +24,8 @@
 
 namespace antares {
 
-typedef std::chrono::seconds secs;
 typedef std::chrono::microseconds usecs;
+typedef std::chrono::duration<usecs::rep, std::ratio<1000020, 1000000>> secs;
 typedef std::chrono::duration<usecs::rep, std::ratio<16667, 1000000>> ticks;
 
 // Time units
