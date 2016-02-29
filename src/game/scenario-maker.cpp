@@ -802,9 +802,8 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         const ticks start_ticks
             = (g.level->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple;
         const game_time start_time(start_ticks);
-        g.time = game_time();
-        for (ticks i = ticks(0); i < start_ticks; ++i) {
-            g.time = g.time + kMinorTick;  // TODO(sfiera): not kMajorTick…?
+        // TODO(sfiera): not += kMajorTick…?
+        for (g.time = game_time(); g.time < start_time; g.time += kMinorTick) {
             MoveSpaceObjects(kMajorTick);
             NonplayerShipThink();
             AdmiralThink();
@@ -817,11 +816,10 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             }
             CullSprites();
             Beams::cull();
-            if ((i % kScenarioTimeMultiple) == ticks(0)) {
+            if ((g.time.time_since_epoch() % kScenarioTimeMultiple) == ticks(0)) {
                 (*current)++;
             }
         }
-        g.time = start_time;
 
         (*current)++;
         return;
