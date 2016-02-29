@@ -73,7 +73,8 @@ void ResetAllDestObjectData() {
     for (auto d: Destination::all()) {
         d->whichObject = SpaceObject::none();
         d->name.clear();
-        d->earn = d->totalBuildTime = d->buildTime = 0;
+        d->earn = 0;
+        d->totalBuildTime = d->buildTime = usecs(0);
         d->buildObjectBaseNum = BaseObject::none();
         for (int j = 0; j < kMaxTypeBaseCanBuild; ++j) {
             d->canBuildType[j] = kNoShip;
@@ -147,7 +148,7 @@ Handle<Destination> MakeNewDestination(
 
     d->whichObject = object;
     d->earn = earn;
-    d->totalBuildTime = d->buildTime = 0;
+    d->totalBuildTime = d->buildTime = usecs(0);
 
     if (canBuildType != NULL) {
         for (int j = 0; j < kMaxTypeBaseCanBuild; j++) {
@@ -208,7 +209,8 @@ void RemoveDestination(Handle<Destination> d) {
 
     d->whichObject = SpaceObject::none();
     d->name.clear();
-    d->earn = d->totalBuildTime = d->buildTime = 0;
+    d->earn = 0;
+    d->totalBuildTime = d->buildTime = usecs(0);
     d->buildObjectBaseNum = BaseObject::none();
     for (int i = 0; i < kMaxTypeBaseCanBuild; i++) {
         d->canBuildType[i] = kNoShip;
@@ -592,9 +594,9 @@ static void AdmiralBuildAtObject(
 
 void AdmiralThink() {
     for (auto destBalance: Destination::all()) {
-        destBalance->buildTime -= 10;
-        if (destBalance->buildTime <= 0) {
-            destBalance->buildTime = 0;
+        destBalance->buildTime -= ticks(1);
+        if (destBalance->buildTime <= usecs(0)) {
+            destBalance->buildTime = usecs(0);
             if (destBalance->buildObjectBaseNum.get()) {
                 auto anObject = destBalance->whichObject;
                 AdmiralBuildAtObject(anObject->owner, destBalance->buildObjectBaseNum, destBalance);
@@ -974,7 +976,7 @@ void Admiral::think() {
         // if we have a legal object
         if (anObject.get()) {
             auto destBalance = anObject->asDestination;
-            if (destBalance->buildTime <= 0) {
+            if (destBalance->buildTime <= usecs(0)) {
                 if (_hopeToBuild < 0) {
                     int k = 0;
                     while ((_hopeToBuild < 0) && (k < 7)) {
@@ -1046,13 +1048,13 @@ bool Admiral::build(int32_t buildWhichType) {
     if ((buildWhichType >= 0)
             && (buildWhichType < kMaxTypeBaseCanBuild)
             && (dest.get())
-            && (dest->buildTime <= 0)) {
+            && (dest->buildTime <= usecs(0))) {
         auto buildBaseObject = mGetBaseObjectFromClassRace(dest->canBuildType[buildWhichType], _race);
         if (buildBaseObject.get() && (buildBaseObject->price <= mFixedToLong(_cash))) {
             _cash -= (mLongToFixed(buildBaseObject->price));
             if (_cheats & kBuildFastBit) {
-                dest->buildTime = 9;
-                dest->totalBuildTime = 9;
+                dest->buildTime = usecs(1);
+                dest->totalBuildTime = usecs(1);
             } else {
                 dest->buildTime = buildBaseObject->buildTime;
                 dest->totalBuildTime = dest->buildTime;
@@ -1065,7 +1067,7 @@ bool Admiral::build(int32_t buildWhichType) {
 }
 
 void StopBuilding(Handle<Destination> destObject) {
-    destObject->totalBuildTime = destObject->buildTime = 0;
+    destObject->totalBuildTime = destObject->buildTime = usecs(0);
     destObject->buildObjectBaseNum = BaseObject::none();
 }
 

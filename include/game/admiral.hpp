@@ -76,8 +76,8 @@ struct Destination {
     int32_t             canBuildType[kMaxTypeBaseCanBuild];
     int32_t             occupied[kMaxPlayerNum];
     Fixed               earn;
-    int32_t             buildTime;
-    int32_t             totalBuildTime;
+    usecs               buildTime;
+    usecs               totalBuildTime;
     Handle<BaseObject>  buildObjectBaseNum;
     sfz::String         name;
 

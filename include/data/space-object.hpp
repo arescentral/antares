@@ -339,7 +339,7 @@ class BaseObject {
     uint8_t             engageKeyTag;
     uint8_t             orderKeyTag;
     Fixed               buildRatio;
-    uint32_t            buildTime;
+    ticks               buildTime;
 //  int32_t             reserved1;
     uint8_t             skillNum;
     uint8_t             skillDen;
