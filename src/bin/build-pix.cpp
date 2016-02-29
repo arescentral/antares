@@ -95,22 +95,27 @@ int main(int argc, char* const* argv) {
 
     NullPrefsDriver prefs;
 
+    vector<pair<int, int>> specs = {
+        {3020, 450},  // Gaitori prologue
+        {3025, 450},  // Tutorial prologue
+        {3080, 450},  // Cantharan prologue
+        {3081, 450},  // Cantharan epilogue
+        {3120, 450},  // Salrilian prologue
+        {3211, 450},  // Game epilogue
+        {4063, 450},  // Bazidanese prologue
+        {4509, 450},  // Elejeetian prologue
+        {4606, 450},  // Audemedon prologue
+        {5600, 450},  // Story introduction
+        {6500, 540},  // Credits text
+        {6501, 450},  // Please register
+        {10199, 450},  // Unused Gaitori prologue
+    };
+
     OffscreenVideoDriver off({540, 2000}, output_dir);
     vector<pair<unique_ptr<Card>, String>> pix;
-    add(pix, off, 3020, 450);  // Gaitori prologue
-    add(pix, off, 3025, 450);  // Tutorial prologue
-    add(pix, off, 3080, 450);  // Cantharan prologue
-    add(pix, off, 3081, 450);  // Cantharan epilogue
-    add(pix, off, 3120, 450);  // Salrilian prologue
-    add(pix, off, 3211, 450);  // Game epilogue
-    add(pix, off, 4063, 450);  // Bazidanese prologue
-    add(pix, off, 4509, 450);  // Elejeetian prologue
-    add(pix, off, 4606, 450);  // Audemedon prologue
-    add(pix, off, 5600, 450);  // Story introduction
-    add(pix, off, 6500, 540);  // Credits text
-    add(pix, off, 6501, 450);  // Please register
-    add(pix, off, 10199, 450);  // Unused Gaitori prologue
-
+    for (auto spec: specs) {
+        add(pix, off, spec.first, spec.second);
+    }
     off.capture(pix);
 
     return 0;
