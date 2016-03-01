@@ -816,7 +816,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             execute_action_queue();
             CollideSpaceObjects();
             scenario_check_time += kMajorTick;
-            if (scenario_check_time == ticks(90)) {
+            if (scenario_check_time == kConditionTick) {
                 scenario_check_time = ticks(0);
                 CheckScenarioConditions();
             }

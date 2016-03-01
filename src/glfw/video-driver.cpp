@@ -34,6 +34,8 @@ namespace utf8 = sfz::utf8;
 
 namespace antares {
 
+static const ticks kDoubleClickInterval = ticks(30);
+
 static int kGLFWKeyToUSB[GLFW_KEY_LAST + 1] = {
     [GLFW_KEY_SPACE] = Keys::SPACE,
     [GLFW_KEY_APOSTROPHE] = Keys::QUOTE,
@@ -119,7 +121,7 @@ void GLFWVideoDriver::key(int key, int scancode, int action, int mods) {
 
 void GLFWVideoDriver::mouse_button(int button, int action, int mods) {
     if (action == GLFW_PRESS) {
-        if (now() <= (_last_click_usecs + ticks(30))) {
+        if (now() <= (_last_click_usecs + kDoubleClickInterval)) {
             _last_click_count += 1;
         } else {
             _last_click_count = 1;

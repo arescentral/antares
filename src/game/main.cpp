@@ -559,7 +559,7 @@ void GamePlay::fire_timer() {
             CollideSpaceObjects();
             _decide_cycle = ticks(0);
             _scenario_check_time += kMajorTick;
-            if (_scenario_check_time == ticks(90)) {
+            if (_scenario_check_time == kConditionTick) {
                 _scenario_check_time = ticks(0);
                 CheckScenarioConditions();
             }

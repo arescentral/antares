@@ -28,6 +28,9 @@
 
 namespace antares {
 
+const ticks kSlowScrollInterval = ticks(4);
+const ticks kFastScrollInterval = ticks(2);
+
 class ScrollTextScreen : public Card {
   public:
     ScrollTextScreen(int text_id, int width, ticks interval);

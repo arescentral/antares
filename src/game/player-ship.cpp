@@ -67,6 +67,9 @@ const int32_t kCursorBoundsSize = 16;  // should be same in instruments.c
 
 }  // namespace
 
+const static ticks kKlaxonInterval = ticks(125);
+const static ticks kKeyHoldDuration = ticks(45);
+
 int32_t HotKey_GetFromObject(Handle<SpaceObject> object);
 void Update_LabelStrings_ForHotKeyChange( void);
 
@@ -642,7 +645,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
                 PlayVolumeSound(kKlaxon, kMediumVolume, kMediumLongPersistence, kPrioritySound);
             }
             Messages::set_status("WARNING: Shields Low", kStatusWarnColor);
-            globals()->next_klaxon = g.time + ticks(125);
+            globals()->next_klaxon = g.time + kKlaxonInterval;
         }
     } else {
         globals()->next_klaxon = game_time();
@@ -662,7 +665,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
             gDestKeyTime += kMajorTick;
         }
     } else {
-        if (gDestKeyTime > ticks(45)) {
+        if (gDestKeyTime > kKeyHoldDuration) {
             if ((theShip->attributes & kCanBeDestination)
                     && (!globals()->destKeyUsedForSelection)) {
                 target_self();
@@ -695,7 +698,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
         hot_key = globals()->lastHotKey;
         globals()->lastHotKey = -1;
 
-        if (globals()->hotKeyDownTime > ticks(45)) {
+        if (globals()->hotKeyDownTime > kKeyHoldDuration) {
             if (globals()->lastSelectedObject.get()) {
                 auto selectShip = globals()->lastSelectedObject;
 

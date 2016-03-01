@@ -376,7 +376,7 @@ void Messages::draw_long_message(ticks time_pass) {
         if (tmessage->charDelayCount > ticks(0)) {
             PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
             while (tmessage->charDelayCount > ticks(0)) {
-                tmessage->charDelayCount -= ticks(3);
+                tmessage->charDelayCount -= kMajorTick;
             }
         }
         tmessage->at_char += time_pass.count();

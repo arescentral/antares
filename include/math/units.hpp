@@ -45,6 +45,7 @@ typedef std::chrono::duration<usecs::rep, std::ratio<16667, 1000000>> ticks;
 
 const ticks kMajorTick = ticks(3);
 const ticks kMinorTick = ticks(1);
+const ticks kConditionTick = ticks(90);
 
 // Time units
 struct GameStart { typedef usecs duration; };
