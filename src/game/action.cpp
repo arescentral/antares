@@ -64,7 +64,6 @@ struct actionQueueType {
     HandleList<Action>              actionRef;
     ticks                           scheduledTime;
     actionQueueType*                nextActionQueue;
-    int32_t                         nextActionQueueNum;
     Handle<SpaceObject>             subjectObject;
     int32_t                         subjectObjectNum;
     int32_t                         subjectObjectID;
@@ -75,7 +74,6 @@ struct actionQueueType {
 };
 
 static ANTARES_GLOBAL actionQueueType* gFirstActionQueue = NULL;
-static ANTARES_GLOBAL int32_t gFirstActionQueueNumber = -1;
 
 static ANTARES_GLOBAL unique_ptr<actionQueueType[]> gActionQueueData;
 
@@ -798,23 +796,11 @@ void exec(
 void reset_action_queue() {
     gActionQueueData.reset(new actionQueueType[kActionQueueLength]);
 
-    gFirstActionQueueNumber = -1;
     gFirstActionQueue = NULL;
 
     actionQueueType* action = gActionQueueData.get();
     for (int32_t i = 0; i < kActionQueueLength; i++) {
-        action->actionRef = {-1, -1};
-        action->nextActionQueueNum = -1;
-        action->nextActionQueue = NULL;
-        action->scheduledTime = ticks(-1);
-        action->subjectObject = SpaceObject::none();
-        action->subjectObjectNum = -1;
-        action->subjectObjectID = -1;
-        action->directObject = SpaceObject::none();
-        action->directObjectNum = -1;
-        action->directObjectID = -1;
-        action->offset.h = action->offset.v = 0;
-        action++;
+        (action++)->actionRef = {-1, -1};
     }
 }
 
@@ -866,15 +852,11 @@ static void queue_action(
     }
     if (previousQueue) {
         actionQueue->nextActionQueue = previousQueue->nextActionQueue;
-        actionQueue->nextActionQueueNum = previousQueue->nextActionQueueNum;
 
         previousQueue->nextActionQueue = actionQueue;
-        previousQueue->nextActionQueueNum = queueNumber;
     } else {
         actionQueue->nextActionQueue = gFirstActionQueue;
-        actionQueue->nextActionQueueNum = gFirstActionQueueNumber;
         gFirstActionQueue = actionQueue;
-        gFirstActionQueueNumber = queueNumber;
     }
 }
 
@@ -905,23 +887,9 @@ void execute_action_queue() {
                     gFirstActionQueue->subjectObject, gFirstActionQueue->directObject,
                     &gFirstActionQueue->offset, false);
         }
+
         gFirstActionQueue->actionRef = {-1, -1};
-        gFirstActionQueue->scheduledTime = ticks(-1);
-        gFirstActionQueue->subjectObject = SpaceObject::none();
-        gFirstActionQueue->subjectObjectNum = -1;
-        gFirstActionQueue->subjectObjectID = -1;
-        gFirstActionQueue->directObject = SpaceObject::none();
-        gFirstActionQueue->directObjectNum = -1;
-        gFirstActionQueue->directObjectID = -1;
-        gFirstActionQueue->offset = Point{0, 0};
-
-        auto actionQueue = gFirstActionQueue;
-
-        gFirstActionQueueNumber = gFirstActionQueue->nextActionQueueNum;
         gFirstActionQueue = gFirstActionQueue->nextActionQueue;
-
-        actionQueue->nextActionQueueNum = -1;
-        actionQueue->nextActionQueue = NULL;
     }
 }
 
