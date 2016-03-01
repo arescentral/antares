@@ -373,7 +373,7 @@ SpaceObject::SpaceObject(
     }
 
     if (baseType->initialAge >= ticks(0)) {
-        age = baseType->initialAge + ticks(randomSeed.next(baseType->initialAgeRange.count()));
+        age = baseType->initialAge + randomSeed.next(baseType->initialAgeRange);
     }
 
     if (spriteIDOverride == -1) {
@@ -486,7 +486,7 @@ void SpaceObject::change_base_type(
 
     obj->maxVelocity = base->maxVelocity;
 
-    obj->age = base->initialAge + ticks(obj->randomSeed.next(base->initialAgeRange.count()));
+    obj->age = base->initialAge + obj->randomSeed.next(base->initialAgeRange);
 
     obj->naturalScale = base->naturalScale;
 
@@ -509,7 +509,7 @@ void SpaceObject::change_base_type(
     // check periodic time
     obj->periodicTime = ticks(0);
     if (base->activatePeriod != ticks(0)) {
-        obj->periodicTime = base->activatePeriod + ticks(obj->randomSeed.next(base->activatePeriodRange.count()));
+        obj->periodicTime = base->activatePeriod + obj->randomSeed.next(base->activatePeriodRange);
     }
 
     obj->pulse.base = base->pulse.base;
