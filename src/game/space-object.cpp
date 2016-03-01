@@ -327,7 +327,7 @@ SpaceObject::SpaceObject(
     }
 
     if (baseType->activatePeriod != ticks(0)) {
-        periodicTime = baseType->activatePeriod + ticks(randomSeed.next(baseType->activatePeriodRange.count()));
+        periodicTime = baseType->activatePeriod + randomSeed.next(baseType->activatePeriodRange);
     }
 
     direction = baseType->initialDirection;
