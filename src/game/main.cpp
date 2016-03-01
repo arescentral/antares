@@ -233,8 +233,7 @@ void MainPlay::become_front() {
 
             _state = PLAYING;
 
-            ResetInstruments();
-            DrawInstrumentPanel();
+            set_up_instruments();
 
             if (Preferences::preferences()->play_music_in_game()) {
                 LoadSong(g.level->songID);

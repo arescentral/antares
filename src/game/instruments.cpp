@@ -493,13 +493,13 @@ static void draw_money() {
     }
 }
 
-void DrawInstrumentPanel() {
+void set_up_instruments() {
     globals()->gZoomMode = kNearestFoeZoom;
 
     MakeMiniScreenFromIndString(1);
     ResetInstruments();
     ClearMiniObjectData();
-    UpdateRadar(ticks(100));
+    UpdateRadar(ticks(100));  // full update
 }
 
 void draw_instruments() {

@@ -34,7 +34,7 @@ int32_t instrument_top();
 void UpdateRadar(ticks units);
 void InstrumentCleanup();
 void ResetInstruments();
-void DrawInstrumentPanel();
+void set_up_instruments();
 void draw_instruments();
 void EraseSite();
 void update_site(bool replay);
