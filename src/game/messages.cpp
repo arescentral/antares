@@ -53,7 +53,7 @@ const int32_t kMessageScreenBottom      = 475;
 
 const uint8_t kMessageColor             = RED;
 const ticks   kMessageMoveTime          = ticks(30);
-const ticks   kMessageDisplayTime       = (kMessageMoveTime * 2 + ticks(120));
+const ticks   kMessageDisplayTime       = (kMessageMoveTime * 2 + secs(2));
 const ticks   kLowerTime                = (kMessageDisplayTime - kMessageMoveTime);
 const ticks   kRaiseTime                = kMessageMoveTime;
 
@@ -61,7 +61,7 @@ const int32_t kDestinationLength        = 127;
 
 const int32_t kStatusLabelLeft          = 200;
 const int32_t kStatusLabelTop           = 50;
-const ticks   kStatusLabelAge           = ticks(120);
+const ticks   kStatusLabelAge           = secs(2);
 
 const int32_t kMaxRetroSize             = 10;
 const int32_t kLongMessageVPad          = 5;

@@ -307,7 +307,7 @@ GamePlay::GamePlay(
         _real_time(now()) { }
 
 static const usecs kSwitchAfter = usecs(1000000 / 3);
-static const usecs kSleepAfter = usecs(60 * 1000000);
+static const usecs kSleepAfter = secs(60);
 
 class PauseScreen : public Card {
   public:

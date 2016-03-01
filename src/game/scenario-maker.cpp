@@ -945,7 +945,7 @@ void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textI
             g.next_level = nextLevel;
             if (!g.game_over) {
                 g.game_over = true;
-                g.game_over_at = g.time + ticks(180);
+                g.game_over_at = g.time + secs(3);
             }
         }
     }

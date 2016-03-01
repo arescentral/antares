@@ -50,7 +50,7 @@ const int32_t kLabelTotalInnerSpace = kLabelInnerSpace << 1;
 
 }  // namespace
 
-const ticks Label::kVisibleTime = ticks(60);
+const ticks Label::kVisibleTime = secs(1);
 
 // local function prototypes
 static int32_t String_Count_Lines(const StringSlice& s);

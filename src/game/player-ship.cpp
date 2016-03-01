@@ -989,7 +989,7 @@ void PlayerShipBodyExpire(Handle<SpaceObject> theShip) {
     } else {
         if (!g.game_over) {
             g.game_over = true;
-            g.game_over_at = g.time + ticks(180);
+            g.game_over_at = g.time + secs(3);
         }
         if (theShip->owner == g.admiral) {
             g.victory_text = kScenarioNoShipTextID + g.level->levelNameStrNum;

@@ -140,7 +140,7 @@ enum {
     kMaxStatusTypeValue     = kSmallFixedMinusValue,
 };
 
-const ticks kMiniComputerPollTime   = ticks(60);
+const ticks kMiniComputerPollTime   = secs(1);
 
 const int32_t kMiniObjectDataNum    = 2;
 const int32_t kMiniSelectObjectNum  = 0;
