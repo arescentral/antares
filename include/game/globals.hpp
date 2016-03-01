@@ -161,7 +161,6 @@ struct aresGlobalType {
 
     Handle<SpaceObject>     lastSelectedObject;
     int32_t         lastSelectedObjectID;
-    bool         destKeyUsedForSelection;
     bool         hotKey_target;
 
     game_time    next_klaxon;
