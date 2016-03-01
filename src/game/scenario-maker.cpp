@@ -607,6 +607,148 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     return true;
 }
 
+static void load_blessed_objects(uint32_t all_colors) {
+    if (!plug.meta.energyBlobID.get()) {
+        throw Exception("No energy blob defined");
+    }
+    if (!plug.meta.warpInFlareID.get()) {
+        throw Exception("No warp in flare defined");
+    }
+    if (!plug.meta.warpOutFlareID.get()) {
+        throw Exception("No warp out flare defined");
+    }
+    if (!plug.meta.playerBodyID.get()) {
+        throw Exception("No player body defined");
+    }
+
+    // Load the four blessed objects.  The player's body is needed
+    // in all colors; the other three are needed only as neutral
+    // objects by default.
+    plug.meta.playerBodyID->internalFlags |= all_colors;
+    for (int i = 0; i < g.level->playerNum; i++) {
+        const auto& meta = plug.meta;
+        Handle<BaseObject> blessed[] = {
+            meta.energyBlobID, meta.warpInFlareID, meta.warpOutFlareID, meta.playerBodyID,
+        };
+        for (auto id: blessed) {
+            AddBaseObjectMedia(id, GRAY, all_colors);
+        }
+    }
+}
+
+static void load_initial(int i, uint32_t all_colors) {
+    Scenario::InitialObject* initial = g.level->initial(i);
+    Handle<Admiral> owner = initial->owner;
+    auto baseObject = initial->type;
+    // TODO(sfiera): remap objects in networked games.
+
+    // Load the media for this object
+    //
+    // I don't think that it's necessary to treat kIsDestination
+    // objects specially here.  If their ownership can change, there
+    // will be a transport or something that does it, and we will
+    // mark the necessity of having all colors through action
+    // checking.
+    if (baseObject->attributes & kIsDestination) {
+        baseObject->internalFlags |= all_colors;
+    }
+    AddBaseObjectMedia(baseObject, GetAdmiralColor(owner), all_colors);
+
+    // make sure we're not overriding the sprite
+    if (initial->spriteIDOverride >= 0) {
+        if (baseObject->attributes & kCanThink) {
+            AddPixTable(
+                    initial->spriteIDOverride +
+                    (GetAdmiralColor(owner) << kSpriteTableColorShift));
+        } else {
+            AddPixTable(initial->spriteIDOverride);
+        }
+    }
+
+    // check any objects this object can build
+    for (int j = 0; j < kMaxTypeBaseCanBuild; j++) {
+        initial = g.level->initial(i);
+        if (initial->canBuild[j] != kNoClass) {
+            // check for each player
+            for (auto a: Admiral::all()) {
+                if (a->active()) {
+                    auto baseObject = mGetBaseObjectFromClassRace(
+                            initial->canBuild[j], GetAdmiralRace(a));
+                    if (baseObject.get()) {
+                        AddBaseObjectMedia(baseObject, GetAdmiralColor(a), all_colors);
+                    }
+                }
+            }
+        }
+    }
+}
+
+static void load_condition(int i, uint32_t all_colors) {
+    Scenario::Condition* condition = g.level->condition(i);
+    for (auto action: condition->action) {
+        AddActionMedia(action, GRAY, all_colors);
+    }
+    condition->set_true_yet(condition->flags & kInitiallyTrue);
+}
+
+static void create_initial(int i, uint32_t all_colors) {
+    Scenario::InitialObject* initial = g.level->initial(i);
+
+    if (initial->attributes & kInitiallyHidden) {
+        initial->realObject = SpaceObject::none();
+        return;
+    }
+
+    coordPointType coord;
+    GetInitialCoord(initial, &coord, gScenarioRotation);
+
+    Handle<Admiral> owner = Admiral::none();
+    if (initial->owner.get()) {
+        owner = initial->owner;
+    }
+
+    int32_t specialAttributes = initial->attributes & (~kInitialAttributesMask);
+    if (initial->attributes & kIsPlayerShip) {
+        specialAttributes &= ~kIsPlayerShip;
+        if ((owner == g.admiral) && !owner->flagship().get()) {
+            specialAttributes |= kIsHumanControlled | kIsPlayerShip;
+        }
+    }
+
+    auto type = initial->type;
+    // TODO(sfiera): remap object in networked games.
+    fixedPointType v = {0, 0};
+    auto anObject = initial->realObject = CreateAnySpaceObject(
+            type, &v, &coord, gScenarioRotation, owner, specialAttributes,
+            initial->spriteIDOverride);
+
+    if (anObject->attributes & kIsDestination) {
+        anObject->asDestination = MakeNewDestination(
+                anObject, initial->canBuild, initial->earning, initial->nameResID,
+                initial->nameStrNum);
+    }
+    initial->realObjectID = anObject->id;
+
+    if ((initial->attributes & kIsPlayerShip)
+            && owner.get() && !owner->flagship().get()) {
+        owner->set_flagship(anObject);
+        if (owner == g.admiral) {
+            ResetPlayerShip(anObject);
+        }
+    }
+
+    if (anObject->attributes & kIsDestination) {
+        if (owner.get()) {
+            if (initial->canBuild[0] >= 0) {
+                if (!GetAdmiralBuildAtObject(owner).get()) {
+                    owner->set_control(anObject);
+                    owner->set_target(anObject);
+                }
+            }
+        }
+    }
+}
+
 void construct_scenario(const Scenario* scenario, int32_t* current) {
     int32_t step = *current;
     uint32_t all_colors = kNeutralColorNeededFlag;
@@ -617,193 +759,25 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
     }
 
     if (step == 0) {
-        if (!plug.meta.energyBlobID.get()) {
-            throw Exception("No energy blob defined");
-        }
-        if (!plug.meta.warpInFlareID.get()) {
-            throw Exception("No warp in flare defined");
-        }
-        if (!plug.meta.warpOutFlareID.get()) {
-            throw Exception("No warp out flare defined");
-        }
-        if (!plug.meta.playerBodyID.get()) {
-            throw Exception("No player body defined");
-        }
-
-        // Load the four blessed objects.  The player's body is needed
-        // in all colors; the other three are needed only as neutral
-        // objects by default.
-        plug.meta.playerBodyID->internalFlags |= all_colors;
-        for (int i = 0; i < g.level->playerNum; i++) {
-            const auto& meta = plug.meta;
-            Handle<BaseObject> blessed[] = {
-                meta.energyBlobID, meta.warpInFlareID, meta.warpOutFlareID, meta.playerBodyID,
-            };
-            for (auto id: blessed) {
-                AddBaseObjectMedia(id, GRAY, all_colors);
-            }
-        }
-    }
-
-    if ((0 <= step) && (step < g.level->initialNum)) {
-        int i = step;
-
-        Scenario::InitialObject* initial = g.level->initial(i);
-        Handle<Admiral> owner = initial->owner;
-        auto baseObject = initial->type;
-        // TODO(sfiera): remap objects in networked games.
-
-        // Load the media for this object
-        //
-        // I don't think that it's necessary to treat kIsDestination
-        // objects specially here.  If their ownership can change, there
-        // will be a transport or something that does it, and we will
-        // mark the necessity of having all colors through action
-        // checking.
-        if (baseObject->attributes & kIsDestination) {
-            baseObject->internalFlags |= all_colors;
-        }
-        AddBaseObjectMedia(baseObject, GetAdmiralColor(owner), all_colors);
-
-        // make sure we're not overriding the sprite
-        if (initial->spriteIDOverride >= 0) {
-            if (baseObject->attributes & kCanThink) {
-                AddPixTable(
-                        initial->spriteIDOverride +
-                        (GetAdmiralColor(owner) << kSpriteTableColorShift));
-            } else {
-                AddPixTable(initial->spriteIDOverride);
-            }
-        }
-
-        // check any objects this object can build
-        for (int j = 0; j < kMaxTypeBaseCanBuild; j++) {
-            initial = g.level->initial(i);
-            if (initial->canBuild[j] != kNoClass) {
-                // check for each player
-                for (auto a: Admiral::all()) {
-                    if (a->active()) {
-                        auto baseObject = mGetBaseObjectFromClassRace(
-                                initial->canBuild[j], GetAdmiralRace(a));
-                        if (baseObject.get()) {
-                            AddBaseObjectMedia(baseObject, GetAdmiralColor(a), all_colors);
-                        }
-                    }
-                }
-            }
-        }
-        (*current)++;
-        return;
-    }
-    step -= g.level->initialNum;
-
-    // add media for all condition actions
-    if (step == 0) {
+        load_blessed_objects(all_colors);
+        load_initial(step, all_colors);
+    } else if (step < g.level->initialNum) {
+        load_initial(step, all_colors);
+    } else if (step == g.level->initialNum) {
+        // add media for all condition actions
+        step -= g.level->initialNum;
         for (int i = 0; i < g.level->conditionNum; i++) {
-            Scenario::Condition* condition = g.level->condition(i);
-            for (auto action: condition->action) {
-                AddActionMedia(action, GRAY, all_colors);
-            }
-            condition->set_true_yet(condition->flags & kInitiallyTrue);
+            load_condition(i, all_colors);
         }
-    }
-
-    if ((0 <= step) && (step < g.level->initialNum)) {
-        Scenario::InitialObject* initial = g.level->initial(step);
-
-        if (initial->attributes & kInitiallyHidden) {
-            initial->realObject = SpaceObject::none();
-            (*current)++;
-            return;
-        }
-
-        coordPointType coord;
-        GetInitialCoord(initial, &coord, gScenarioRotation);
-
-        Handle<Admiral> owner = Admiral::none();
-        if (initial->owner.get()) {
-            owner = initial->owner;
-        }
-
-        int32_t specialAttributes = initial->attributes & (~kInitialAttributesMask);
-        if (initial->attributes & kIsPlayerShip) {
-            specialAttributes &= ~kIsPlayerShip;
-            if ((owner == g.admiral) && !owner->flagship().get()) {
-                specialAttributes |= kIsHumanControlled | kIsPlayerShip;
-            }
-        }
-
-        auto type = initial->type;
-        // TODO(sfiera): remap object in networked games.
-        fixedPointType v = {0, 0};
-        auto anObject = initial->realObject = CreateAnySpaceObject(
-                type, &v, &coord, gScenarioRotation, owner, specialAttributes,
-                initial->spriteIDOverride);
-
-        if (anObject->attributes & kIsDestination) {
-            anObject->asDestination = MakeNewDestination(
-                    anObject, initial->canBuild, initial->earning, initial->nameResID,
-                    initial->nameStrNum);
-        }
-        initial->realObjectID = anObject->id;
-
-        if ((initial->attributes & kIsPlayerShip)
-                && owner.get() && !owner->flagship().get()) {
-            owner->set_flagship(anObject);
-            if (owner == g.admiral) {
-                ResetPlayerShip(anObject);
-            }
-        }
-
-        if (anObject->attributes & kIsDestination) {
-            if (owner.get()) {
-                if (initial->canBuild[0] >= 0) {
-                    if (!GetAdmiralBuildAtObject(owner).get()) {
-                        owner->set_control(anObject);
-                        owner->set_target(anObject);
-                    }
-                }
-            }
-        }
-
-        (*current)++;
-        return;
-    }
-    step -= g.level->initialNum;
-
-    // double back and set up any defined initial destinations
-    if ((0 <= step) && (step < g.level->initialNum)) {
+        create_initial(step, all_colors);
+    } else if (step < (2 * g.level->initialNum)) {
+        step -= g.level->initialNum;
+        create_initial(step, all_colors);
+    } else if (step < (3 * g.level->initialNum)) {
+        // double back and set up any defined initial destinations
+        step -= (2 * g.level->initialNum);
         set_initial_destination(g.level->initial(step), false);
-        (*current)++;
-        return;
-    }
-    step -= g.level->initialNum;
-
-    if (step == 0) {
-#ifdef DATA_COVERAGE
-        {
-            sfz::print(sfz::io::err, sfz::format("{{ \"level\": {0},\n", g.level->chapter_number()));
-            const char* sep = "";
-            sfz::print(sfz::io::err, "  \"objects\": [");
-            for (auto object: possible_objects) {
-                sfz::print(sfz::io::err, sfz::format("{0}{1}", sep, object));
-                sep = ", ";
-            }
-            sfz::print(sfz::io::err, "],\n");
-            possible_objects.clear();
-
-            sep = "";
-            sfz::print(sfz::io::err, "  \"actions\": [");
-            for (auto action: possible_actions) {
-                sfz::print(sfz::io::err, sfz::format("{0}{1}", sep, action));
-                sep = ", ";
-            }
-            sfz::print(sfz::io::err, "]\n");
-            sfz::print(sfz::io::err, "}\n");
-            possible_actions.clear();
-        }
-#endif  // DATA_COVERAGE
-
+    } else {
         // set up all the admiral's destination objects
         RecalcAllAdmiralBuildData();
         Messages::clear();
@@ -825,10 +799,9 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 (*current)++;
             }
         }
-
-        (*current)++;
-        return;
     }
+    ++*current;
+    return;
 }
 
 void CheckScenarioConditions() {
