@@ -499,17 +499,16 @@ void GamePlay::fire_timer() {
         _next_timer = _next_timer + kMinorTick;
     }
 
-    ticks unitsPassed;
+    ticks unitsPassed = ticks(0);
+    wall_time new_now = now();
+    while (_real_time <= (new_now - kMinorTick)) {
+        unitsPassed += kMinorTick;
+        _real_time += kMinorTick;
+    }
+
     if (_fast_motion && !_entering_message) {
-        unitsPassed = ticks(12);
+        unitsPassed *= 12;
         _real_time = now();
-    } else {
-        unitsPassed = ticks(0);
-        wall_time new_now = now();
-        while (_real_time <= (new_now - kMinorTick)) {
-            unitsPassed += kMinorTick;
-            _real_time += kMinorTick;
-        }
     }
 
     if (unitsPassed <= ticks(0)) {
