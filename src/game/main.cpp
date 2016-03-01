@@ -520,7 +520,6 @@ void GamePlay::fire_timer() {
         _real_time = now();
     }
 
-    const ticks unitsDone = unitsPassed;
     while (unitsPassed > ticks(0)) {
         ticks unitsToDo = unitsPassed;
         ticks minor_ticks = g.time.time_since_epoch() % kMajorTick;
@@ -554,28 +553,29 @@ void GamePlay::fire_timer() {
                 CheckScenarioConditions();
             }
         }
+
+        MiniComputerHandleNull(unitsToDo);
+
+        Messages::clip();
+        Messages::draw_long_message(unitsToDo);
+
+        update_sector_lines();
+        Beams::update();
+        Label::update_positions(unitsToDo);
+        Label::update_contents(unitsToDo);
+        update_site(_replay);
+
+        CullSprites();
+        Label::show_all();
+        Beams::show_all();
+        globals()->starfield.show();
+
+        Messages::draw_message_screen(unitsToDo);
+        UpdateRadar(unitsToDo);
+        globals()->transitions.update_boolean(unitsToDo);
+
         unitsPassed -= unitsToDo;
     }
-
-    MiniComputerHandleNull(unitsDone);
-
-    Messages::clip();
-    Messages::draw_long_message(unitsDone);
-
-    update_sector_lines();
-    Beams::update();
-    Label::update_positions(unitsDone);
-    Label::update_contents(unitsDone);
-    update_site(_replay);
-
-    CullSprites();
-    Label::show_all();
-    Beams::show_all();
-    globals()->starfield.show();
-
-    Messages::draw_message_screen(unitsDone);
-    UpdateRadar(unitsDone);
-    globals()->transitions.update_boolean(unitsDone);
 
     if (g.game_over && (g.time >= g.game_over_at)) {
         *_seconds = std::chrono::duration_cast<secs>(g.time.time_since_epoch());
