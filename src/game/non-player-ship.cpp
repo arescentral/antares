@@ -483,7 +483,7 @@ uint32_t ThinkObjectNormalPresence(
                     || ((anObject->attributes & kCanEngage)
                         && !(anObject->attributes & kRemoteOrHuman)
                         && (distance < static_cast<uint32_t>(anObject->engageRange))
-                        && (anObject->timeFromOrigin < ticks(kTimeToCheckHome))
+                        && (anObject->timeFromOrigin < kTimeToCheckHome)
                         && (targetObject->attributes & kCanBeEngaged)))) {
             keysDown |= ThinkObjectEngageTarget(anObject, targetObject, distance, &theta);
             ///--->>> END TARGETING <<<---///

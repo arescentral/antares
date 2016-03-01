@@ -32,7 +32,7 @@ namespace antares {
 
 const int32_t kMaxSpaceObject           = 250;
 
-const int32_t kTimeToCheckHome          = 900;
+const ticks   kTimeToCheckHome          = secs(15);
 
 const int32_t kEnergyPodAmount          = 500;  // average (calced) of 500 energy units/pod
 

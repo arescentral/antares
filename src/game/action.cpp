@@ -150,7 +150,7 @@ static void create_object(
                     }
                 }
             } else if (action->reflexive) {
-                product->timeFromOrigin = ticks(kTimeToCheckHome);
+                product->timeFromOrigin = kTimeToCheckHome;
                 product->runTimeFlags &= ~kHasArrived;
                 product->destObject = focus; //a->destinationObject;
                 product->destObjectDest = focus->destObject;

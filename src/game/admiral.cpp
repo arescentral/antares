@@ -422,7 +422,7 @@ void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType *where) 
     } else {
         // the object is OK, the admiral is OK, then go about setting its destination
         if (o->attributes & kCanAcceptDestination) {
-            o->timeFromOrigin = ticks(kTimeToCheckHome);
+            o->timeFromOrigin = kTimeToCheckHome;
         } else {
             o->timeFromOrigin = ticks(0);
         }
@@ -496,7 +496,7 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
                 ((dObject->id == a->destinationObjectID())
                  || overrideObject.get())) {
             if (o->attributes & kCanAcceptDestination) {
-                o->timeFromOrigin = ticks(kTimeToCheckHome);
+                o->timeFromOrigin = kTimeToCheckHome;
             } else {
                 o->timeFromOrigin = ticks(0);
             }
