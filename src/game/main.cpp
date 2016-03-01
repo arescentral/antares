@@ -142,7 +142,6 @@ class GamePlay : public Card {
     bool _fast_motion;
     bool _entering_message;
     bool _player_paused;
-    ticks _decide_cycle;
     PlayAgainScreen::Item _play_again;
     PlayerShip _player_ship;
     ReplayBuilder& _replay_builder;
@@ -300,7 +299,6 @@ GamePlay::GamePlay(
         _fast_motion(false),
         _entering_message(false),
         _player_paused(false),
-        _decide_cycle(0),
         _replay_builder(replay_builder),
         _real_time(now()) { }
 
@@ -525,20 +523,18 @@ void GamePlay::fire_timer() {
     const ticks unitsDone = unitsPassed;
     while (unitsPassed > ticks(0)) {
         ticks unitsToDo = unitsPassed;
-        if ((_decide_cycle + unitsToDo) > kMajorTick) {
-            unitsToDo = kMajorTick - _decide_cycle;
+        ticks minor_ticks = g.time.time_since_epoch() % kMajorTick;
+        if (minor_ticks + unitsToDo > kMajorTick) {
+            unitsToDo = kMajorTick - minor_ticks;
         }
-        _decide_cycle += unitsToDo;
 
-        if (unitsToDo > ticks(0)) {
-            // executed arbitrarily, but at least once every major tick
-            globals()->starfield.move(unitsToDo);
-            MoveSpaceObjects(unitsToDo);
-        }
+        // executed arbitrarily, but at least once every major tick
+        globals()->starfield.move(unitsToDo);
+        MoveSpaceObjects(unitsToDo);
 
         g.time += unitsToDo;
 
-        if ( _decide_cycle == kMajorTick) {
+        if ((g.time.time_since_epoch() % kMajorTick) == ticks(0)) {
             // everything in here gets executed once every major tick
             _player_paused = false;
 
@@ -554,7 +550,6 @@ void GamePlay::fire_timer() {
             _player_ship.update(_cursor, _entering_message);
 
             CollideSpaceObjects();
-            _decide_cycle = ticks(0);
             if ((g.time.time_since_epoch() % kConditionTick) == ticks(0)) {
                 CheckScenarioConditions();
             }
