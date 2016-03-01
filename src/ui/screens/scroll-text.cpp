@@ -37,15 +37,15 @@ const int kScrollTextHeight = 200;
 
 }  // namespace
 
-ScrollTextScreen::ScrollTextScreen(int text_id, int width, double speed):
+ScrollTextScreen::ScrollTextScreen(int text_id, int width, ticks interval):
         _build_pix(BuildPix(text_id, width)),
-        _speed(speed),
+        _interval(interval),
         _play_song(false),
         _song_id(0) { }
 
-ScrollTextScreen::ScrollTextScreen(int text_id, int width, double speed, int song_id):
+ScrollTextScreen::ScrollTextScreen(int text_id, int width, ticks interval, int song_id):
         _build_pix(BuildPix(text_id, width)),
-        _speed(speed),
+        _interval(interval),
         _play_song(true),
         _song_id(song_id) { }
 
@@ -95,7 +95,7 @@ bool ScrollTextScreen::next_timer(wall_time& time) {
 void ScrollTextScreen::fire_timer() {
     wall_time now = antares::now();
     while (_next_shift < now) {
-        _next_shift += usecs(int64_t(1000000 / _speed));
+        _next_shift += _interval;
         ++_position;
     }
 

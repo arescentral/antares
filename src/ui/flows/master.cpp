@@ -96,7 +96,7 @@ void Master::become_front() {
       case TITLE_SCREEN_PICT:
         _state = INTRO_SCROLL;
         // TODO(sfiera): prevent the intro screen from displaying on subsequent launches.
-        stack()->push(new ScrollTextScreen(5600, 450, 15.0));
+        stack()->push(new ScrollTextScreen(5600, 450, ticks(4)));
         break;
 
       case INTRO_SCROLL:

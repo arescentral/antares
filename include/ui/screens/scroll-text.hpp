@@ -30,8 +30,8 @@ namespace antares {
 
 class ScrollTextScreen : public Card {
   public:
-    ScrollTextScreen(int text_id, int width, double speed);
-    ScrollTextScreen(int text_id, int width, double speed, int song_id);
+    ScrollTextScreen(int text_id, int width, ticks interval);
+    ScrollTextScreen(int text_id, int width, ticks interval, int song_id);
 
     virtual void become_front();
     virtual void resign_front();
@@ -47,7 +47,7 @@ class ScrollTextScreen : public Card {
 
   private:
     BuildPix _build_pix;
-    const double _speed;
+    const ticks _interval;
     const bool _play_song;
     const int _song_id;
 
