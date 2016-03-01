@@ -82,7 +82,7 @@ ANTARES_GLOBAL set<int32_t> covered_actions;
 #endif  // DATA_COVERAGE
 
 static void queue_action(
-        HandleList<Action> actions, int32_t delayTime,
+        HandleList<Action> actions, ticks delayTime,
         Handle<SpaceObject> subjectObject, Handle<SpaceObject> directObject, Point* offset);
 
 bool action_filter_applies_to(const Action& action, Handle<BaseObject> target) {
@@ -261,6 +261,7 @@ static void alter(
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
     int32_t l;
+    ticks t;
     Fixed f, f2;
     int16_t angle;
     coordPointType newLocation;
@@ -474,20 +475,20 @@ static void alter(
             break;
 
         case kAlterAge:
-            l = alter.minimum + focus->randomSeed.next(alter.range);
+            t = ticks(alter.minimum + focus->randomSeed.next(alter.range));
 
             if (alter.relative) {
                 if (focus->age >= ticks(0)) {
-                    focus->age += ticks(l);
+                    focus->age += t;
 
                     if (focus->age < ticks(0)) {
                         focus->age = ticks(0);
                     }
                 } else {
-                    focus->age += ticks(l);
+                    focus->age += t;
                 }
             } else {
-                focus->age = ticks(l);
+                focus->age = t;
             }
             break;
 
@@ -722,7 +723,7 @@ static void execute_actions(
             object = GetObjectFromInitialNumber(action->initialDirectOverride);
         }
 
-        if ((action->delay > 0) && allowDelay) {
+        if ((action->delay > ticks(0)) && allowDelay) {
             queue_action(
                     {action.number(), (*actions.end()).number()},
                     action->delay, subject, object, offset);
@@ -805,7 +806,7 @@ void reset_action_queue() {
 }
 
 static void queue_action(
-        HandleList<Action> actions, int32_t delayTime,
+        HandleList<Action> actions, ticks delayTime,
         Handle<SpaceObject> subjectObject, Handle<SpaceObject> directObject, Point* offset) {
     int32_t queueNumber = 0;
     actionQueueType* actionQueue = gActionQueueData.get();
@@ -818,7 +819,7 @@ static void queue_action(
         return;
     }
     actionQueue->actionRef = actions;
-    actionQueue->scheduledTime = ticks(delayTime);
+    actionQueue->scheduledTime = delayTime;
 
     if (offset) {
         actionQueue->offset = *offset;
@@ -846,7 +847,7 @@ static void queue_action(
 
     actionQueueType* previousQueue = NULL;
     actionQueueType* nextQueue = gFirstActionQueue;
-    while (nextQueue && (nextQueue->scheduledTime < ticks(delayTime))) {
+    while (nextQueue && (nextQueue->scheduledTime < delayTime)) {
         previousQueue = nextQueue;
         nextQueue = nextQueue->nextActionQueue;
     }

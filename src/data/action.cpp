@@ -41,7 +41,7 @@ void read_from(ReadSource in, Action& action) {
         action.levelKeyTag = 0;
     }
     read(in, action.owner);
-    read(in, action.delay);
+    action.delay = ticks(read<uint32_t>(in));
     read(in, action.initialSubjectOverride);
     read(in, action.initialDirectOverride);
     in.shift(4);
