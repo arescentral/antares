@@ -201,6 +201,7 @@ struct Scenario::Condition {
         Point               location;
         CounterArgument     counter;
         int32_t             longValue;
+        ticks               timeValue;
         uint32_t            unsignedLongValue;
     } conditionArgument;
     int32_t         subjectObject;      // initial object #

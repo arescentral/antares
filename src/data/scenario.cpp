@@ -124,11 +124,14 @@ void read_from(ReadSource in, Scenario::Condition& scenario_condition) {
 
       case kDestructionCondition:
       case kOwnerCondition:
-      case kTimeCondition:
       case kVelocityLessThanEqualToCondition:
       case kNoShipsLeftCondition:
       case kZoomLevelCondition:
         read(sub, scenario_condition.conditionArgument.longValue);
+        break;
+
+      case kTimeCondition:
+        scenario_condition.conditionArgument.timeValue = ticks(read<int32_t>(sub));
         break;
 
       case kProximityCondition:

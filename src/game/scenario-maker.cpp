@@ -372,7 +372,7 @@ bool Scenario::Condition::is_true() const {
                 if (g.time < game_ticks()) {
                     game_time /= 3;
                 }
-                return (game_time + start_time) >= ticks(conditionArgument.longValue);
+                return (game_time + start_time) >= conditionArgument.timeValue;
             }
 
         case kProximityCondition: {
