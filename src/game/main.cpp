@@ -496,13 +496,13 @@ void GamePlay::fire_timer() {
 
     const wall_time now = antares::now();
 
-    ticks unitsPassed, unitsDone;
+    ticks unitsPassed;
     if (_fast_motion && !_entering_message) {
-        unitsDone = unitsPassed = ticks(12);
+        unitsPassed = ticks(12);
         globals()->virtual_start = now - (g.time + unitsPassed).time_since_epoch();
     } else {
         game_time newGameTime = game_time(now - globals()->virtual_start);
-        unitsDone = unitsPassed = std::chrono::duration_cast<ticks>(newGameTime - g.time);
+        unitsPassed = std::chrono::duration_cast<ticks>(newGameTime - g.time);
     }
 
     if (unitsPassed <= ticks(0)) {
@@ -514,10 +514,11 @@ void GamePlay::fire_timer() {
 
     if (_player_paused) {
         _player_paused = false;
-        unitsDone = unitsPassed = ticks(0);
+        unitsPassed = ticks(0);
         globals()->virtual_start = (now - g.time.time_since_epoch());
     }
 
+    const ticks unitsDone = unitsPassed;
     while (unitsPassed > ticks(0)) {
         ticks unitsToDo = unitsPassed;
         if ((_decide_cycle + unitsToDo) > kMajorTick) {
