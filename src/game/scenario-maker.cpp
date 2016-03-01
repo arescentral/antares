@@ -783,14 +783,15 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         Messages::clear();
 
         game_ticks start_time = game_ticks(-g.level->startTime);
-        for (g.time = start_time; g.time < game_ticks(); g.time += kMajorTick) {
+        g.time = start_time;
+        for (g.time = start_time; g.time < game_ticks(); ) {
+            g.time += kMajorTick;
             MoveSpaceObjects(kMajorTick);
             NonplayerShipThink();
             AdmiralThink();
             execute_action_queue();
             CollideSpaceObjects();
-            // Compatibility: kMajorTick here preserves old behavior.
-            if (((g.time - start_time + kMajorTick) % kConditionTick) == ticks(0)) {
+            if (((g.time - start_time) % kConditionTick) == ticks(0)) {
                 CheckScenarioConditions();
             }
             CullSprites();
