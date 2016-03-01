@@ -130,7 +130,7 @@ void ResetPlayerShip(Handle<SpaceObject> which) {
     g.target_label = Label::add(0, 0, 0, -20, SpaceObject::none(), true, SKY_BLUE);
     g.send_label = Label::add(200, 200, 0, 30, SpaceObject::none(), false, GREEN);
     globals()->starfield.reset(g.ship);
-    globals()->next_klaxon = game_time();
+    globals()->next_klaxon = game_ticks();
     globals()->keyMask = 0;
     globals()->gZoomMode = kNearestFoeZoom;
     gPreviousZoomMode = kNearestFoeZoom;
@@ -656,7 +656,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
 
     if (theShip->health() < (theShip->baseType->health >> 2L)) {
         if (g.time > globals()->next_klaxon) {
-            if (globals()->next_klaxon == game_time()) {
+            if (globals()->next_klaxon == game_ticks()) {
                 PlayVolumeSound(kKlaxon, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
             } else {
                 PlayVolumeSound(kKlaxon, kMediumVolume, kMediumLongPersistence, kPrioritySound);
@@ -665,7 +665,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
             globals()->next_klaxon = g.time + kKlaxonInterval;
         }
     } else {
-        globals()->next_klaxon = game_time();
+        globals()->next_klaxon = game_ticks();
     }
 
     if (!(theShip->attributes & kIsHumanControlled)) {

@@ -103,7 +103,7 @@ struct GlobalState {
     std::unique_ptr<Sprite[]>       sprites;       // Auxiliary info for objects with sprites.
 
     bool             game_over;     // True if an admiral won or lost the level.
-    game_time        game_over_at;  // The time to stop the game (ignored unless game_over).
+    game_ticks       game_over_at;  // The time to stop the game (ignored unless game_over).
     Handle<Admiral>  victor;        // The winner (or none).
     int              next_level;    // Next level (or -1 for none).
     int16_t          victory_text;  // Text resource to show in debriefing.
@@ -160,7 +160,7 @@ struct aresGlobalType {
     Handle<SpaceObject>     lastSelectedObject;
     int32_t         lastSelectedObjectID;
 
-    game_time    next_klaxon;
+    game_ticks   next_klaxon;
 
     Starfield starfield;
     Transitions transitions;
