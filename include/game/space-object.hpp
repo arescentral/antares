@@ -193,7 +193,7 @@ class SpaceObject {
 
     struct Weapon {
         Handle<BaseObject>      base;
-        ticks                   time = ticks(0);
+        game_ticks              time;
         int32_t                 ammo = 0;
         int32_t                 position = 0;
         int16_t                 charge = 0;

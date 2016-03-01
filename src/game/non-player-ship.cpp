@@ -119,9 +119,6 @@ void SpaceObject::recharge() {
 static void tick_weapon(
         Handle<SpaceObject> subject, Handle<SpaceObject> target,
         uint32_t key, const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
-    if (weapon.time > ticks(0)) {
-        weapon.time -= kMajorTick;
-    }
     if (subject->keysDown & key) {
         fire_weapon(subject, target, base_weapon, weapon);
     }
@@ -130,7 +127,7 @@ static void tick_weapon(
 void fire_weapon(
         Handle<SpaceObject> subject, Handle<SpaceObject> target,
         const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
-    if ((weapon.time > ticks(0)) || !weapon.base.get()) {
+    if ((weapon.time > g.time) || !weapon.base.get()) {
         return;
     }
 
@@ -168,7 +165,7 @@ void fire_weapon(
         at = &offset;
     }
 
-    weapon.time = weaponObject->frame.weapon.fireTime;
+    weapon.time = g.time + weaponObject->frame.weapon.fireTime;
     if (weaponObject->frame.weapon.ammo > 0) {
         weapon.ammo--;
     }

@@ -525,7 +525,7 @@ static void alter(
             if (focus->pulse.base.get()) {
                 auto baseObject = focus->pulse.base;
                 focus->pulse.ammo = baseObject->frame.weapon.ammo;
-                focus->pulse.time = ticks(0);
+                focus->pulse.time = g.time;
                 focus->pulse.position = 0;
                 if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
                     focus->longestWeaponRange = baseObject->frame.weapon.range;
@@ -536,7 +536,7 @@ static void alter(
             } else {
                 focus->pulse.base = BaseObject::none();
                 focus->pulse.ammo = 0;
-                focus->pulse.time = ticks(0);
+                focus->pulse.time = g.time;
             }
             break;
 
@@ -545,7 +545,7 @@ static void alter(
             if (focus->beam.base.get()) {
                 auto baseObject = focus->beam.base;
                 focus->beam.ammo = baseObject->frame.weapon.ammo;
-                focus->beam.time = ticks(0);
+                focus->beam.time = g.time;
                 focus->beam.position = 0;
                 if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
                     focus->longestWeaponRange = baseObject->frame.weapon.range;
@@ -556,7 +556,7 @@ static void alter(
             } else {
                 focus->beam.base = BaseObject::none();
                 focus->beam.ammo = 0;
-                focus->beam.time = ticks(0);
+                focus->beam.time = g.time;
             }
             break;
 
@@ -565,7 +565,7 @@ static void alter(
             if (focus->special.base.get()) {
                 auto baseObject = focus->special.base;
                 focus->special.ammo = baseObject->frame.weapon.ammo;
-                focus->special.time = ticks(0);
+                focus->special.time = g.time;
                 focus->special.position = 0;
                 if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
                     focus->longestWeaponRange = baseObject->frame.weapon.range;
@@ -576,7 +576,7 @@ static void alter(
             } else {
                 focus->special.base = BaseObject::none();
                 focus->special.ammo = 0;
-                focus->special.time = ticks(0);
+                focus->special.time = g.time;
             }
             break;
 
