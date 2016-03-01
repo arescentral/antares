@@ -808,16 +808,15 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         RecalcAllAdmiralBuildData();
         Messages::clear();
 
-        ticks scenario_check_time = ticks(0);
-        for (g.time = game_ticks(-g.level->startTime); g.time < game_ticks(); g.time += kMajorTick) {
+        game_ticks start_time = game_ticks(-g.level->startTime);
+        for (g.time = start_time; g.time < game_ticks(); g.time += kMajorTick) {
             MoveSpaceObjects(kMajorTick);
             NonplayerShipThink();
             AdmiralThink();
             execute_action_queue();
             CollideSpaceObjects();
-            scenario_check_time += kMajorTick;
-            if (scenario_check_time == kConditionTick) {
-                scenario_check_time = ticks(0);
+            // Compatibility: kMajorTick here preserves old behavior.
+            if (((g.time - start_time + kMajorTick) % kConditionTick) == ticks(0)) {
                 CheckScenarioConditions();
             }
             CullSprites();

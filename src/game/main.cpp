@@ -143,7 +143,6 @@ class GamePlay : public Card {
     bool _entering_message;
     bool _player_paused;
     ticks _decide_cycle;
-    ticks _scenario_check_time;
     PlayAgainScreen::Item _play_again;
     PlayerShip _player_ship;
     ReplayBuilder& _replay_builder;
@@ -302,7 +301,6 @@ GamePlay::GamePlay(
         _entering_message(false),
         _player_paused(false),
         _decide_cycle(0),
-        _scenario_check_time(0),
         _replay_builder(replay_builder),
         _real_time(now()) { }
 
@@ -557,9 +555,7 @@ void GamePlay::fire_timer() {
 
             CollideSpaceObjects();
             _decide_cycle = ticks(0);
-            _scenario_check_time += kMajorTick;
-            if (_scenario_check_time == kConditionTick) {
-                _scenario_check_time = ticks(0);
+            if ((g.time.time_since_epoch() % kConditionTick) == ticks(0)) {
                 CheckScenarioConditions();
             }
         }
