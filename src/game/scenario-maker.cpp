@@ -749,6 +749,23 @@ static void create_initial(int i, uint32_t all_colors) {
     }
 }
 
+static void run_game_1s() {
+    game_ticks start_time = game_ticks(-g.level->startTime);
+    do {
+        g.time += kMajorTick;
+        MoveSpaceObjects(kMajorTick);
+        NonplayerShipThink();
+        AdmiralThink();
+        execute_action_queue();
+        CollideSpaceObjects();
+        if (((g.time - start_time) % kConditionTick) == ticks(0)) {
+            CheckScenarioConditions();
+        }
+        CullSprites();
+        Beams::cull();
+    } while ((g.time.time_since_epoch() % secs(1)) != ticks(0));
+}
+
 void construct_scenario(const Scenario* scenario, int32_t* current) {
     int32_t step = *current;
     uint32_t all_colors = kNeutralColorNeededFlag;
@@ -777,31 +794,12 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         // double back and set up any defined initial destinations
         step -= (2 * g.level->initialNum);
         set_initial_destination(g.level->initial(step), false);
-    } else {
-        // set up all the admiral's destination objects
-        step -= (3 * g.level->initialNum);
-        RecalcAllAdmiralBuildData();
+    } else if (step == (3 * g.level->initialNum)) {
+        RecalcAllAdmiralBuildData();  // set up all the admiral's destination objects
         Messages::clear();
-
-        game_ticks start_time = game_ticks(-g.level->startTime);
-        g.time = start_time;
-        while (step < g.level->startTime.count()) {
-            g.time += kMajorTick;
-            MoveSpaceObjects(kMajorTick);
-            NonplayerShipThink();
-            AdmiralThink();
-            execute_action_queue();
-            CollideSpaceObjects();
-            if (((g.time - start_time) % kConditionTick) == ticks(0)) {
-                CheckScenarioConditions();
-            }
-            CullSprites();
-            Beams::cull();
-            if ((g.time.time_since_epoch() % secs(1)) == ticks(0)) {
-                ++*current;
-                ++step;
-            }
-        }
+        g.time = game_ticks(-g.level->startTime);
+    } else {
+        run_game_1s();
     }
     ++*current;
     return;
