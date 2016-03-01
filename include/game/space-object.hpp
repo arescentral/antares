@@ -151,7 +151,8 @@ class SpaceObject {
     int32_t                 warpEnergyCollected = 0;
 
     Handle<Admiral>         owner;
-    ticks                   age = ticks(-1);
+    bool                    expires = false;
+    ticks                   expire_after = ticks(-1);
     int32_t                 naturalScale = SCALE_SCALE;
     int32_t                 id = kNoShip;
     ticks                   rechargeTime = ticks(0);

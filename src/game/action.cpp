@@ -478,17 +478,15 @@ static void alter(
             t = ticks(alter.minimum + focus->randomSeed.next(alter.range));
 
             if (alter.relative) {
-                if (focus->age >= ticks(0)) {
-                    focus->age += t;
-
-                    if (focus->age < ticks(0)) {
-                        focus->age = ticks(0);
-                    }
+                if (focus->expires) {
+                    focus->expire_after += t;
                 } else {
-                    focus->age += t;
+                    focus->expire_after += t;
+                    focus->expires = (focus->expire_after >= ticks(0));
                 }
             } else {
-                focus->age = t;
+                focus->expire_after = t;
+                focus->expires = (focus->expire_after >= ticks(0));
             }
             break;
 

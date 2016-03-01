@@ -373,7 +373,10 @@ SpaceObject::SpaceObject(
     }
 
     if (baseType->initialAge >= ticks(0)) {
-        age = baseType->initialAge + randomSeed.next(baseType->initialAgeRange);
+        expire_after = baseType->initialAge + randomSeed.next(baseType->initialAgeRange);
+        expires = true;
+    } else {
+        expires = false;
     }
 
     if (spriteIDOverride == -1) {
@@ -486,7 +489,17 @@ void SpaceObject::change_base_type(
 
     obj->maxVelocity = base->maxVelocity;
 
-    obj->age = base->initialAge + obj->randomSeed.next(base->initialAgeRange);
+    if (base->initialAge >= ticks(0)) {
+        obj->expire_after = base->initialAge + obj->randomSeed.next(base->initialAgeRange);
+        obj->expires = true;
+    } else {
+        obj->expires = false;
+
+        // Compatibility: discard a random number. Used to be that a
+        // random age was unconditionally generated, even for objects
+        // that wouldn't expire after altering their base-type.
+        obj->randomSeed.next(1);
+    }
 
     obj->naturalScale = base->naturalScale;
 
