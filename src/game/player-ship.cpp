@@ -81,7 +81,7 @@ enum DestKeyState {
     DEST_KEY_BLOCKED,  // down, but used for something else
 };
 static ANTARES_GLOBAL DestKeyState gDestKeyState = DEST_KEY_UP;
-static ANTARES_GLOBAL ticks gDestKeyTime = ticks(0);
+static ANTARES_GLOBAL wall_time gDestKeyTime;
 static ANTARES_GLOBAL ZoomType gPreviousZoomMode;
 
 struct HotKeySuffix {
@@ -667,17 +667,16 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
     attributes = gTheseKeys & dcalc;
 
     if (gTheseKeys & kDestinationKey) {
-        if (gDestKeyState != DEST_KEY_BLOCKED) {
-            gDestKeyTime += kMajorTick;
+        if (gDestKeyState == DEST_KEY_UP) {
             gDestKeyState = DEST_KEY_DOWN;
+            gDestKeyTime = now();
         }
     } else {
-        if ((gDestKeyState == DEST_KEY_DOWN) && (gDestKeyTime > kKeyHoldDuration)) {
-            if (theShip->attributes & kCanBeDestination) {
-                target_self();
-            }
+        if ((gDestKeyState == DEST_KEY_DOWN)
+                && (now() >= (gDestKeyTime + kKeyHoldDuration))
+                && (theShip->attributes & kCanBeDestination)) {
+            target_self();
         }
-        gDestKeyTime = ticks(0);
         gDestKeyState = DEST_KEY_UP;
     }
 
