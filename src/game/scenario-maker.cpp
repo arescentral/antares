@@ -602,7 +602,7 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
 
     *max = g.level->initialNum * 3L
          + 1
-         + (g.level->startTime / secs(1)); // for each run through the initial num
+         + g.level->startTime.count(); // for each run through the initial num
 
     return true;
 }
@@ -779,12 +779,13 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         set_initial_destination(g.level->initial(step), false);
     } else {
         // set up all the admiral's destination objects
+        step -= (3 * g.level->initialNum);
         RecalcAllAdmiralBuildData();
         Messages::clear();
 
         game_ticks start_time = game_ticks(-g.level->startTime);
         g.time = start_time;
-        for (g.time = start_time; g.time < game_ticks(); ) {
+        while (step < g.level->startTime.count()) {
             g.time += kMajorTick;
             MoveSpaceObjects(kMajorTick);
             NonplayerShipThink();
@@ -797,7 +798,8 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             CullSprites();
             Beams::cull();
             if ((g.time.time_since_epoch() % secs(1)) == ticks(0)) {
-                (*current)++;
+                ++*current;
+                ++step;
             }
         }
     }
