@@ -20,6 +20,7 @@
 #define ANTARES_GAME_SPACE_OBJECT_HPP_
 
 #include "data/space-object.hpp"
+#include "math/units.hpp"
 
 namespace antares {
 
@@ -107,7 +108,7 @@ class SpaceObject {
     Fixed                   currentTargetValue = 0xffffffff;
     Handle<SpaceObject>     bestConsideredTargetNumber;
 
-    int32_t                 timeFromOrigin = 0;     // time it's been since we left
+    ticks                   timeFromOrigin = ticks(0);     // time it's been since we left
     fixedPointType          idealLocationCalc = {0, 0};  // calced when we got origin
     coordPointType          originLocation = {0, 0};     // coords of our origin
 
@@ -150,10 +151,10 @@ class SpaceObject {
     int32_t                 warpEnergyCollected = 0;
 
     Handle<Admiral>         owner;
-    int32_t                 age = -1;
+    ticks                   age = ticks(-1);
     int32_t                 naturalScale = SCALE_SCALE;
     int32_t                 id = kNoShip;
-    int16_t                 rechargeTime = 0;
+    ticks                   rechargeTime = ticks(0);
     int16_t                 active = kObjectAvailable;
 
     int16_t                 layer = 0;
@@ -179,7 +180,7 @@ class SpaceObject {
         } landing;
         struct {
             uint8_t step;
-            uint8_t progress;
+            ticks progress;
         } warp_in;
         int32_t warping;
         int32_t warp_out;
@@ -192,7 +193,7 @@ class SpaceObject {
 
     struct Weapon {
         Handle<BaseObject>      base;
-        int32_t                 time = 0;
+        ticks                   time = ticks(0);
         int32_t                 ammo = 0;
         int32_t                 position = 0;
         int16_t                 charge = 0;
@@ -201,7 +202,7 @@ class SpaceObject {
     Weapon                  beam;
     Weapon                  special;
 
-    int32_t                 periodicTime = 0;
+    ticks                   periodicTime = ticks(0);
 
     uint32_t                myPlayerFlag = 0x80000000;
     uint32_t                seenByPlayerFlags = 0xffffffff;

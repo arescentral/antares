@@ -44,12 +44,6 @@ namespace antares {
 
 namespace {
 
-int64_t usecs() {
-    timeval tv;
-    gettimeofday(&tv, NULL);
-    return tv.tv_sec * 1000000ll + tv.tv_usec;
-}
-
 class AntaresWindow {
   public:
     AntaresWindow(const cgl::PixelFormat& pixel_format, const cgl::Context& context):
@@ -81,8 +75,7 @@ class InputModeTracker : public EventReceiver {
 
 }  // namespace
 
-CocoaVideoDriver::CocoaVideoDriver()
-        : _start_time(antares::usecs()) { }
+CocoaVideoDriver::CocoaVideoDriver() { }
 
 Size CocoaVideoDriver::viewport_size() const {
     return {
@@ -108,12 +101,8 @@ InputMode CocoaVideoDriver::input_mode() const {
     return _input_mode;
 }
 
-int CocoaVideoDriver::ticks() const {
-    return usecs() * 60 / 1000000;
-}
-
-int CocoaVideoDriver::usecs() const {
-    return antares::usecs() - _start_time;
+wall_time CocoaVideoDriver::now() const {
+    return _now();
 }
 
 struct CocoaVideoDriver::EventBridge {
@@ -127,27 +116,27 @@ struct CocoaVideoDriver::EventBridge {
 
     static void mouse_down(int button, int32_t x, int32_t y, int count, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new MouseDownEvent(now_usecs(), button, count, Point(x, y)));
+        self->enqueue(new MouseDownEvent(_now(), button, count, Point(x, y)));
     }
 
     static void mouse_up(int button, int32_t x, int32_t y, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new MouseUpEvent(now_usecs(), button, Point(x, y)));
+        self->enqueue(new MouseUpEvent(_now(), button, Point(x, y)));
     }
 
     static void mouse_move(int32_t x, int32_t y, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new MouseMoveEvent(now_usecs(), Point(x, y)));
+        self->enqueue(new MouseMoveEvent(_now(), Point(x, y)));
     }
 
     static void caps_lock(void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new KeyDownEvent(now_usecs(), Keys::CAPS_LOCK));
+        self->enqueue(new KeyDownEvent(_now(), Keys::CAPS_LOCK));
     }
 
     static void caps_unlock(void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->enqueue(new KeyUpEvent(now_usecs(), Keys::CAPS_LOCK));
+        self->enqueue(new KeyUpEvent(_now(), Keys::CAPS_LOCK));
     }
 
     static void hid_event(void* userdata, IOReturn result, void* sender, IOHIDValueRef value) {
@@ -183,9 +172,9 @@ struct CocoaVideoDriver::EventBridge {
         }
 
         if (down) {
-            enqueue(new KeyDownEvent(now_usecs(), scan_code));
+            enqueue(new KeyDownEvent(_now(), scan_code));
         } else {
-            enqueue(new KeyUpEvent(now_usecs(), scan_code));
+            enqueue(new KeyUpEvent(_now(), scan_code));
         }
     }
 
@@ -196,9 +185,9 @@ struct CocoaVideoDriver::EventBridge {
         bool down = IOHIDValueGetIntegerValue(value);
         uint16_t usage = IOHIDElementGetUsage(element);
         if (down) {
-            enqueue(new GamepadButtonDownEvent(now_usecs(), usage));
+            enqueue(new GamepadButtonDownEvent(_now(), usage));
         } else {
-            enqueue(new GamepadButtonUpEvent(now_usecs(), usage));
+            enqueue(new GamepadButtonUpEvent(_now(), usage));
         }
     }
 
@@ -225,8 +214,7 @@ struct CocoaVideoDriver::EventBridge {
                 static const int x_component[] = {0, 0, -1, 3, 3, -1};
                 double x = gamepad[x_component[usage]];
                 double y = gamepad[x_component[usage] + 1];
-                enqueue(new GamepadStickEvent(
-                            now_usecs(), kHIDUsage_GD_X + x_component[usage], x, y));
+                enqueue(new GamepadStickEvent(_now(), kHIDUsage_GD_X + x_component[usage], x, y));
             }
             break;
           case kHIDUsage_GD_Z:
@@ -318,10 +306,9 @@ void CocoaVideoDriver::loop(Card* initial) {
     IOHIDManagerRegisterInputValueCallback(hid_manager, EventBridge::hid_event, &bridge);
 
     while (!main_loop.done()) {
-        int64_t at;
+        wall_time at;
         if (main_loop.top()->next_timer(at)) {
-            at += _start_time;
-            if (antares_event_translator_next(_translator.c_obj(), at)) {
+            if (antares_event_translator_next(_translator.c_obj(), at.time_since_epoch().count())) {
                 bridge.send_all();
             } else {
                 main_loop.top()->fire_timer();
@@ -329,11 +316,17 @@ void CocoaVideoDriver::loop(Card* initial) {
                 CGLFlushDrawable(context.c_obj());
             }
         } else {
-            at = std::numeric_limits<int64_t>::max();
-            antares_event_translator_next(_translator.c_obj(), at);
+            at = wall_time::max();
+            antares_event_translator_next(_translator.c_obj(), at.time_since_epoch().count());
             bridge.send_all();
         }
     }
+}
+
+wall_time CocoaVideoDriver::_now() {
+    timeval tv;
+    gettimeofday(&tv, NULL);
+    return wall_time(usecs(tv.tv_sec * 1000000ll + tv.tv_usec));
 }
 
 }  // namespace antares

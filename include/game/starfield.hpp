@@ -22,6 +22,7 @@
 #include "data/handle.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
+#include "math/units.hpp"
 
 namespace antares {
 
@@ -60,7 +61,7 @@ class Starfield {
             int32_t sparkNum, int32_t sparkSpeed, Fixed maxVelocity, uint8_t color,
             Point* location);
     void prepare_to_move();
-    void move(int32_t by_units);
+    void move(ticks by_units);
     void draw() const;
     void show();
 

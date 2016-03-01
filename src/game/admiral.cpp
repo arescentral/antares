@@ -73,7 +73,8 @@ void ResetAllDestObjectData() {
     for (auto d: Destination::all()) {
         d->whichObject = SpaceObject::none();
         d->name.clear();
-        d->earn = d->totalBuildTime = d->buildTime = 0;
+        d->earn = 0;
+        d->totalBuildTime = d->buildTime = ticks(0);
         d->buildObjectBaseNum = BaseObject::none();
         for (int j = 0; j < kMaxTypeBaseCanBuild; ++j) {
             d->canBuildType[j] = kNoShip;
@@ -147,7 +148,7 @@ Handle<Destination> MakeNewDestination(
 
     d->whichObject = object;
     d->earn = earn;
-    d->totalBuildTime = d->buildTime = 0;
+    d->totalBuildTime = d->buildTime = ticks(0);
 
     if (canBuildType != NULL) {
         for (int j = 0; j < kMaxTypeBaseCanBuild; j++) {
@@ -173,7 +174,8 @@ Handle<Destination> MakeNewDestination(
         }
 
         if (object->owner.get()) {
-            d->occupied[object->owner.number()] = object->baseType->initialAgeRange;
+            // TODO(sfiera): put this property somewhere other than initialAgeRange.
+            d->occupied[object->owner.number()] = object->baseType->initialAgeRange.count();
         }
     }
 
@@ -207,7 +209,8 @@ void RemoveDestination(Handle<Destination> d) {
 
     d->whichObject = SpaceObject::none();
     d->name.clear();
-    d->earn = d->totalBuildTime = d->buildTime = 0;
+    d->earn = 0;
+    d->totalBuildTime = d->buildTime = ticks(0);
     d->buildObjectBaseNum = BaseObject::none();
     for (int i = 0; i < kMaxTypeBaseCanBuild; i++) {
         d->canBuildType[i] = kNoShip;
@@ -385,7 +388,7 @@ void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType *where) 
         o->destObjectDest = SpaceObject::none();
         o->destObjectID = -1;
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
-        o->timeFromOrigin = 0;
+        o->timeFromOrigin = ticks(0);
         o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
         o->originLocation = o->location;
         return;
@@ -413,15 +416,15 @@ void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType *where) 
         o->destObject = SpaceObject::none();
         o->destObjectDest = SpaceObject::none();
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
-        o->timeFromOrigin = 0;
+        o->timeFromOrigin = ticks(0);
         o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
         o->originLocation = o->location;
     } else {
         // the object is OK, the admiral is OK, then go about setting its destination
         if (o->attributes & kCanAcceptDestination) {
-            o->timeFromOrigin = kTimeToCheckHome;
+            o->timeFromOrigin = ticks(kTimeToCheckHome);
         } else {
-            o->timeFromOrigin = 0;
+            o->timeFromOrigin = ticks(0);
         }
 
         // remove this object from its destination
@@ -431,7 +434,7 @@ void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType *where) 
 
         o->destinationLocation = o->originLocation = *where;
         o->destObject = SpaceObject::none();
-        o->timeFromOrigin = 0;
+        o->timeFromOrigin = ticks(0);
         o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
     }
 }
@@ -445,7 +448,7 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
         o->destObjectDest = SpaceObject::none();
         o->destObjectID = -1;
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
-        o->timeFromOrigin = 0;
+        o->timeFromOrigin = ticks(0);
         o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
         o->originLocation = o->location;
         return;
@@ -478,7 +481,7 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
         o->destObject = SpaceObject::none();
         o->destObjectDest = SpaceObject::none();
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
-        o->timeFromOrigin = 0;
+        o->timeFromOrigin = ticks(0);
         o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
         o->originLocation = o->location;
     } else {
@@ -493,9 +496,9 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
                 ((dObject->id == a->destinationObjectID())
                  || overrideObject.get())) {
             if (o->attributes & kCanAcceptDestination) {
-                o->timeFromOrigin = kTimeToCheckHome;
+                o->timeFromOrigin = ticks(kTimeToCheckHome);
             } else {
-                o->timeFromOrigin = 0;
+                o->timeFromOrigin = ticks(0);
             }
             // remove this object from its destination
             if (o->destObject.get()) {
@@ -538,7 +541,7 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
                 o->destObject = SpaceObject::none();
                 o->destObjectDest = SpaceObject::none();
                 o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
-                o->timeFromOrigin = 0;
+                o->timeFromOrigin = ticks(0);
                 o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
                 o->originLocation = o->location;
             }
@@ -546,7 +549,7 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
             o->destObject = SpaceObject::none();
             o->destObjectDest = SpaceObject::none();
             o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
-            o->timeFromOrigin = 0;
+            o->timeFromOrigin = ticks(0);
             o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
             o->originLocation = o->location;
         }
@@ -591,9 +594,9 @@ static void AdmiralBuildAtObject(
 
 void AdmiralThink() {
     for (auto destBalance: Destination::all()) {
-        destBalance->buildTime -= 10;
-        if (destBalance->buildTime <= 0) {
-            destBalance->buildTime = 0;
+        destBalance->buildTime -= kMajorTick;
+        if (destBalance->buildTime <= ticks(0)) {
+            destBalance->buildTime = ticks(0);
             if (destBalance->buildObjectBaseNum.get()) {
                 auto anObject = destBalance->whichObject;
                 AdmiralBuildAtObject(anObject->owner, destBalance->buildObjectBaseNum, destBalance);
@@ -973,7 +976,7 @@ void Admiral::think() {
         // if we have a legal object
         if (anObject.get()) {
             auto destBalance = anObject->asDestination;
-            if (destBalance->buildTime <= 0) {
+            if (destBalance->buildTime <= ticks(0)) {
                 if (_hopeToBuild < 0) {
                     int k = 0;
                     while ((_hopeToBuild < 0) && (k < 7)) {
@@ -1045,13 +1048,13 @@ bool Admiral::build(int32_t buildWhichType) {
     if ((buildWhichType >= 0)
             && (buildWhichType < kMaxTypeBaseCanBuild)
             && (dest.get())
-            && (dest->buildTime <= 0)) {
+            && (dest->buildTime <= ticks(0))) {
         auto buildBaseObject = mGetBaseObjectFromClassRace(dest->canBuildType[buildWhichType], _race);
         if (buildBaseObject.get() && (buildBaseObject->price <= mFixedToLong(_cash))) {
             _cash -= (mLongToFixed(buildBaseObject->price));
             if (_cheats & kBuildFastBit) {
-                dest->buildTime = 9;
-                dest->totalBuildTime = 9;
+                dest->buildTime = kMinorTick;
+                dest->totalBuildTime = kMinorTick;
             } else {
                 dest->buildTime = buildBaseObject->buildTime;
                 dest->totalBuildTime = dest->buildTime;
@@ -1064,7 +1067,7 @@ bool Admiral::build(int32_t buildWhichType) {
 }
 
 void StopBuilding(Handle<Destination> destObject) {
-    destObject->totalBuildTime = destObject->buildTime = 0;
+    destObject->totalBuildTime = destObject->buildTime = ticks(0);
     destObject->buildObjectBaseNum = BaseObject::none();
 }
 

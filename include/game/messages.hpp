@@ -51,8 +51,8 @@ class Messages {
     static void set_status(const sfz::StringSlice& status, uint8_t color);
     static int16_t current();
 
-    static void draw_long_message(int32_t time_pass);
-    static void draw_message_screen(int32_t by_units);
+    static void draw_long_message(ticks time_pass);
+    static void draw_message_screen(ticks by_units);
     static void draw_message();
 
   private:
@@ -60,7 +60,7 @@ class Messages {
 
     static std::queue<sfz::String> message_data;
     static longMessageType* long_message_data;
-    static int32_t time_count;
+    static ticks time_count;
 };
 
 }  // namespace antares

@@ -129,7 +129,7 @@ class ReplayMaster : public Card {
     ReplayData _replay_data;
     const int32_t _random_seed;
     GameResult _game_result;
-    int32_t _seconds;
+    secs _seconds;
 
     DISALLOW_COPY_AND_ASSIGN(ReplayMaster);
 };
@@ -206,7 +206,7 @@ void main(int argc, char** argv) {
     NullPrefsDriver prefs(preferences);
 
     EventScheduler scheduler;
-    scheduler.schedule_event(unique_ptr<Event>(new MouseMoveEvent(0, Point(320, 240))));
+    scheduler.schedule_event(unique_ptr<Event>(new MouseMoveEvent(wall_time(), Point(320, 240))));
     // TODO(sfiera): add recurring snapshots to OffscreenVideoDriver.
     for (int64_t i = 1; i < 72000; i += interval) {
         scheduler.schedule_snapshot(i);

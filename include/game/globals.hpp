@@ -29,6 +29,7 @@
 #include "drawing/color.hpp"
 #include "game/starfield.hpp"
 #include "math/random.hpp"
+#include "math/units.hpp"
 #include "sound/fx.hpp"
 #include "video/transitions.hpp"
 
@@ -61,7 +62,7 @@ struct miniComputerDataType {
     std::unique_ptr<miniScreenLineType[]> lineData;
     std::unique_ptr<SpaceObject[]> objectData;
     int32_t                 selectLine;
-    int32_t                 pollTime;
+    ticks                   pollTime;
     int32_t                 buildTimeBarValue;
     int32_t                 currentScreen;
     int32_t                 clickLine;
@@ -82,9 +83,9 @@ class InputSource;
 class StringList;
 
 struct GlobalState {
-    uint32_t  sync;    // Indicates when net games are desynchronized.
-    int64_t   time;    // Current game time.
-    Random    random;  // Global random number generator.
+    uint32_t    sync;    // Indicates when net games are desynchronized.
+    game_ticks  time;    // Current game time.
+    Random      random;  // Global random number generator.
 
     const Scenario* level;
 
@@ -102,12 +103,12 @@ struct GlobalState {
     std::unique_ptr<Sprite[]>       sprites;       // Auxiliary info for objects with sprites.
 
     bool             game_over;     // True if an admiral won or lost the level.
-    int64_t          game_over_at;  // The time to stop the game (ignored unless game_over).
+    game_time        game_over_at;  // The time to stop the game (ignored unless game_over).
     Handle<Admiral>  victor;        // The winner (or none).
     int              next_level;    // Next level (or -1 for none).
     int16_t          victory_text;  // Text resource to show in debriefing.
 
-    int32_t                  radar_count;  // Counts down to a radar pulse every 5/6 seconds.
+    ticks                    radar_count;  // Counts down to a radar pulse every 5/6 seconds.
     std::unique_ptr<Point[]> radar_blips;  // Screen locations of radar blips.
     bool                     radar_on;     // Maybe false if player ship is offline.
 
@@ -149,17 +150,13 @@ struct aresGlobalType {
 
     std::unique_ptr<InputSource> gInputSource;
 
-    // Start time of game in usecs.  But, if the player pauses or fast-forwards, it gets moved
-    // forwards or back so that the same calculations still work.
-    uint64_t        virtual_start;
-
     ZoomType        gZoomMode;
 
     miniComputerDataType    gMiniScreenData;
 
     uint32_t        keyMask;
     hotKeyType      hotKey[kHotKeyNum];
-    int32_t         hotKeyDownTime;
+    ticks           hotKeyDownTime;
     int32_t         lastHotKey;
 
     Handle<SpaceObject>     lastSelectedObject;
@@ -167,7 +164,7 @@ struct aresGlobalType {
     bool         destKeyUsedForSelection;
     bool         hotKey_target;
 
-    int64_t      next_klaxon;
+    game_time    next_klaxon;
 
     Starfield starfield;
     Transitions transitions;

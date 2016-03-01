@@ -49,11 +49,6 @@ const int32_t kScenarioAngleShift = 8;
 
 const int32_t kScenarioNoOwner = -1;
 
-const int32_t kScenarioTimeMultiple = 20;
-
-const int16_t kScenario_StartTimeMask   = 0x7fff;
-const int16_t kScenario_IsTraining_Bit  = 0x8000;
-
 // condition flags
 const int32_t kTrueOnlyOnce     = 0x00000001;
 const int32_t kInitiallyTrue    = 0x00000002;
@@ -141,12 +136,13 @@ struct Scenario {
     int16_t                     briefPointFirst;
     int16_t                     starMapV;
     int16_t                     briefPointNum;  // use kScenarioBriefMask
-    int16_t                     parTime;
+    secs                        parTime;
     int16_t                     parKills;
     int16_t                     levelNameStrNum;
     Fixed                       parKillRatio;
     int16_t                     parLosses;
-    int16_t                     startTime;      // use kScenario_StartTimeMask
+    secs                        startTime;
+    bool                        is_training;
 
     static const size_t byte_size = 124;
 

@@ -53,12 +53,11 @@ class MouseReader : public EventReceiver {
 }  // namespace
 
 EventScheduler::EventScheduler():
-        _ticks(0),
         _mouse(-1, -1) { }
 
 void EventScheduler::schedule_snapshot(int64_t at) {
-    _snapshot_times.push_back(at);
-    push_heap(_snapshot_times.begin(), _snapshot_times.end(), greater<int64_t>());
+    _snapshot_times.push_back(wall_ticks(antares::ticks(at)));
+    push_heap(_snapshot_times.begin(), _snapshot_times.end(), greater<wall_ticks>());
 }
 
 void EventScheduler::schedule_event(unique_ptr<Event> event) {
@@ -67,27 +66,27 @@ void EventScheduler::schedule_event(unique_ptr<Event> event) {
 }
 
 void EventScheduler::schedule_key(int32_t key, int64_t down, int64_t up) {
-    schedule_event(unique_ptr<Event>(new KeyDownEvent(down, key)));
-    schedule_event(unique_ptr<Event>(new KeyUpEvent(up, key)));
+    schedule_event(unique_ptr<Event>(new KeyDownEvent(wall_time(antares::ticks(down)), key)));
+    schedule_event(unique_ptr<Event>(new KeyUpEvent(wall_time(antares::ticks(up)), key)));
 }
 
 void EventScheduler::schedule_mouse(
         int button, const Point& where, int64_t down, int64_t up) {
-    schedule_event(unique_ptr<Event>(new MouseDownEvent(down, button, 1, where)));
-    schedule_event(unique_ptr<Event>(new MouseUpEvent(up, button, where)));
+    schedule_event(unique_ptr<Event>(new MouseDownEvent(wall_time(antares::ticks(down)), button, 1, where)));
+    schedule_event(unique_ptr<Event>(new MouseUpEvent(wall_time(antares::ticks(up)), button, where)));
 }
 
 void EventScheduler::loop(EventScheduler::MainLoop& loop) {
     while (!loop.done()) {
-        int64_t at_usecs;
+        wall_time at_usecs;
         const bool has_timer = loop.top()->next_timer(at_usecs);
-        const int64_t at_ticks = at_usecs * 60 / 1000000;
-        if (!_event_heap.empty() && (!has_timer || (_event_heap.front()->at() <= at_ticks))) {
+        const wall_ticks at_ticks = std::chrono::time_point_cast<antares::ticks>(at_usecs);
+        if (!_event_heap.empty() && (!has_timer || (_event_heap.front()->at() <= at_usecs))) {
             unique_ptr<Event> event;
             swap(event, _event_heap.front());
             pop_heap(_event_heap.begin(), _event_heap.end(), is_later);
             _event_heap.pop_back();
-            advance_tick_count(loop, event->at());
+            advance_tick_count(loop, std::chrono::time_point_cast<antares::ticks>(event->at()));
             MouseReader mr(&_mouse);
             event->send(&mr);
             event->send(loop.top());
@@ -95,26 +94,26 @@ void EventScheduler::loop(EventScheduler::MainLoop& loop) {
             if (!has_timer) {
                 throw Exception("Event heap empty and timer not set to fire.");
             }
-            advance_tick_count(loop, max(_ticks + 1, at_ticks));
+            advance_tick_count(loop, max(_ticks + kMinorTick, at_ticks));
             loop.top()->fire_timer();
         }
     }
 }
 
-void EventScheduler::advance_tick_count(EventScheduler::MainLoop& loop, int64_t ticks) {
+void EventScheduler::advance_tick_count(EventScheduler::MainLoop& loop, wall_ticks ticks) {
     if (loop.takes_snapshots() && have_snapshots_before(ticks)) {
         loop.draw();
         while (have_snapshots_before(ticks)) {
             _ticks = _snapshot_times.front();
             loop.snapshot(_ticks);
-            pop_heap(_snapshot_times.begin(), _snapshot_times.end(), greater<int64_t>());
+            pop_heap(_snapshot_times.begin(), _snapshot_times.end(), greater<wall_ticks>());
             _snapshot_times.pop_back();
         }
     }
     _ticks = ticks;
 }
 
-bool EventScheduler::have_snapshots_before(int64_t ticks) const {
+bool EventScheduler::have_snapshots_before(wall_ticks ticks) const {
     return !_snapshot_times.empty() && (_snapshot_times.front() < ticks);
 }
 

@@ -49,7 +49,7 @@ namespace antares {
 
 namespace {
 
-const int64_t kTypingDelay = 1e6 / 20;
+const usecs kTypingDelay = kMajorTick;
 const int kScoreTableHeight = 120;
 const int kTextWidth = 300;
 
@@ -98,10 +98,11 @@ int score_high_target(double yours, double par, double value) {
 }
 
 int score(
-        int your_length, int par_length, int your_loss, int par_loss, int your_kill,
-        int par_kill) {
+        secs your_length, secs par_length,
+        int your_loss, int par_loss,
+        int your_kill, int par_kill) {
     int score = 0;
-    score += score_low_target(your_length, par_length, 50);
+    score += score_low_target(your_length.count(), par_length.count(), 50);
     score += score_low_target(your_loss, par_loss, 30);
     score += score_high_target(your_kill, par_kill, 20);
     return score;
@@ -119,15 +120,15 @@ unique_ptr<StyledText> style_score_text(String text) {
 
 DebriefingScreen::DebriefingScreen(int text_id) :
         _state(DONE),
-        _next_update(0),
         _typed_chars(0),
         _data_item(initialize(text_id, false)) { }
 
 DebriefingScreen::DebriefingScreen(
-        int text_id, int your_length, int par_length, int your_loss, int par_loss,
+        int text_id,
+        secs your_length, secs par_length,
+        int your_loss, int par_loss,
         int your_kill, int par_kill):
         _state(TYPING),
-        _next_update(0),
         _typed_chars(0),
         _data_item(initialize(text_id, true)) {
 
@@ -147,9 +148,9 @@ DebriefingScreen::DebriefingScreen(
 void DebriefingScreen::become_front() {
     _typed_chars = 0;
     if (_state == TYPING) {
-        _next_update = now_usecs() + kTypingDelay;
+        _next_update = now() + kTypingDelay;
     } else {
-        _next_update = 0;
+        _next_update = wall_time();
     }
 }
 
@@ -196,7 +197,7 @@ void DebriefingScreen::gamepad_button_down(const GamepadButtonDownEvent& event) 
     }
 }
 
-bool DebriefingScreen::next_timer(int64_t& time) {
+bool DebriefingScreen::next_timer(wall_time& time) {
     if (_state == TYPING) {
         time = _next_update;
         return true;
@@ -209,13 +210,13 @@ void DebriefingScreen::fire_timer() {
         throw Exception(format("DebriefingScreen::fire_timer() called but _state is {0}", _state));
     }
     PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
-    int64_t now = now_usecs();
+    wall_time now = antares::now();
     while (_next_update <= now) {
         if (_typed_chars < _score->size()) {
             _next_update += kTypingDelay;
             ++_typed_chars;
         } else {
-            _next_update = 0;
+            _next_update = wall_time();
             _state = DONE;
             break;
         }
@@ -241,23 +242,24 @@ LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
 }
 
 String DebriefingScreen::build_score_text(
-        int your_length, int par_length, int your_loss, int par_loss, int your_kill,
-        int par_kill) {
+        secs your_length, secs par_length,
+        int your_loss, int par_loss,
+        int your_kill, int par_kill) {
     Resource rsrc("text", "txt", 6000);
     String text(utf8::decode(rsrc.data()));
 
     StringList strings(6000);
 
-    const int your_mins = your_length / 60;
-    const int your_secs = your_length % 60;
-    const int par_mins = par_length / 60;
-    const int par_secs = par_length % 60;
+    const int your_mins = your_length.count() / 60;
+    const int your_secs = your_length.count() % 60;
+    const int par_mins = par_length.count() / 60;
+    const int par_secs = par_length.count() % 60;
     const int your_score = score(your_length, par_length, your_loss, par_loss, your_kill, par_kill);
     const int par_score = 100;
 
     string_replace(&text, strings.at(0), your_mins);
     string_replace(&text, strings.at(1), dec(your_secs, 2));
-    if (par_length > 0) {
+    if (par_length > secs(0)) {
         string_replace(&text, strings.at(2), par_mins);
         String secs_string;
         print(secs_string, format(":{0}", dec(par_secs, 2)));

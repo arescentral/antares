@@ -32,14 +32,14 @@ namespace antares {
 
 static const int16_t kLevelNameID = 4600;
 static const uint8_t kLoadingScreenColor = PALE_GREEN;
-static const int64_t kTypingDelay = 16667;
+static const ticks kTypingDelay = kMinorTick;
 
 LoadingScreen::LoadingScreen(const Scenario* scenario, bool* cancelled):
         InterfaceScreen("loading", {0, 0, 640, 480}, true),
         _state(TYPING),
         _scenario(scenario),
         _cancelled(cancelled),
-        _next_update(now_usecs() + kTypingDelay),
+        _next_update(now() + kTypingDelay),
         _chars_typed(0),
         _current(0),
         _max(1) {
@@ -57,14 +57,14 @@ LoadingScreen::~LoadingScreen() {
 void LoadingScreen::become_front() {
 }
 
-bool LoadingScreen::next_timer(int64_t& time) {
+bool LoadingScreen::next_timer(wall_time& time) {
     switch (_state) {
       case TYPING:
       case DONE:
         time = _next_update;
         return true;
       case LOADING:
-        time = 0;
+        time = wall_time();
         return true;
     }
     return false;
@@ -73,7 +73,7 @@ bool LoadingScreen::next_timer(int64_t& time) {
 void LoadingScreen::fire_timer() {
     switch (_state) {
       case TYPING:
-        while (_next_update < now_usecs()) {
+        while (_next_update < now()) {
             if (_chars_typed >= _name_text->size()) {
                 _state = LOADING;
                 if (!start_construct_scenario(_scenario, &_max)) {
@@ -91,8 +91,8 @@ void LoadingScreen::fire_timer() {
         break;
 
       case LOADING:
-        _next_update = now_usecs() + kTypingDelay;
-        while (now_usecs() < _next_update) {
+        _next_update = now() + kTypingDelay;
+        while (now() < _next_update) {
             if (_current < _max) {
                 construct_scenario(_scenario, &_current);
             } else {

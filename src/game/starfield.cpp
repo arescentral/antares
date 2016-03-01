@@ -112,7 +112,7 @@ void Starfield::prepare_to_move() {
     }
 }
 
-void Starfield::move(int32_t by_units) {
+void Starfield::move(ticks by_units) {
     if (!g.ship.get() || !g.ship->active) {
         return;
     }
@@ -122,28 +122,28 @@ void Starfield::move(int32_t by_units) {
 
     const fixedPointType slowVelocity = {
         scale_by(
-                mMultiplyFixed(g.ship->velocity.h, kSlowStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.h, kSlowStarFraction) * by_units.count(),
                 gAbsoluteScale),
         scale_by(
-                mMultiplyFixed(g.ship->velocity.v, kSlowStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.v, kSlowStarFraction) * by_units.count(),
                 gAbsoluteScale),
     };
 
     const fixedPointType mediumVelocity = {
         scale_by(
-                mMultiplyFixed(g.ship->velocity.h, kMediumStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.h, kMediumStarFraction) * by_units.count(),
                 gAbsoluteScale),
         scale_by(
-                mMultiplyFixed(g.ship->velocity.v, kMediumStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.v, kMediumStarFraction) * by_units.count(),
                 gAbsoluteScale),
     };
 
     const fixedPointType fastVelocity = {
         scale_by(
-                mMultiplyFixed(g.ship->velocity.h, kFastStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.h, kFastStarFraction) * by_units.count(),
                 gAbsoluteScale),
         scale_by(
-                mMultiplyFixed(g.ship->velocity.v, kFastStarFraction) * by_units,
+                mMultiplyFixed(g.ship->velocity.v, kFastStarFraction) * by_units.count(),
                 gAbsoluteScale),
     };
 
@@ -235,10 +235,10 @@ void Starfield::move(int32_t by_units) {
         if (star->speed == kNoStar) {
             continue;
         }
-        star->age -= star->speed * by_units;
+        star->age -= star->speed * by_units.count();
 
-        star->motionFraction.h += star->velocity.h * by_units + slowVelocity.h;
-        star->motionFraction.v += star->velocity.v * by_units + slowVelocity.v;
+        star->motionFraction.h += star->velocity.h * by_units.count() + slowVelocity.h;
+        star->motionFraction.v += star->velocity.v * by_units.count() + slowVelocity.v;
 
         int32_t h;
         if (star->motionFraction.h >= 0) {

@@ -143,8 +143,8 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
         return _output_dir.has();
     }
 
-    void snapshot(int64_t ticks) {
-        snapshot_to(_driver._capture_rect, format("screens/{0}.png", dec(ticks, 6)));
+    void snapshot(wall_ticks ticks) {
+        snapshot_to(_driver._capture_rect, format("screens/{0}.png", dec(ticks.time_since_epoch().count(), 6)));
     }
 
     void snapshot_to(Rect bounds, PrintItem relpath) {

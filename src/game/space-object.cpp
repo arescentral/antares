@@ -326,8 +326,8 @@ SpaceObject::SpaceObject(
         continue;
     }
 
-    if (baseType->activatePeriod) {
-        periodicTime = baseType->activatePeriod + randomSeed.next(baseType->activatePeriodRange);
+    if (baseType->activatePeriod != ticks(0)) {
+        periodicTime = baseType->activatePeriod + ticks(randomSeed.next(baseType->activatePeriodRange.count()));
     }
 
     direction = baseType->initialDirection;
@@ -372,8 +372,8 @@ SpaceObject::SpaceObject(
         frame.animation.frameSpeed = baseType->frame.animation.frameSpeed;
     }
 
-    if (baseType->initialAge >= 0) {
-        age = baseType->initialAge + randomSeed.next(baseType->initialAgeRange);
+    if (baseType->initialAge >= ticks(0)) {
+        age = baseType->initialAge + ticks(randomSeed.next(baseType->initialAgeRange.count()));
     }
 
     if (spriteIDOverride == -1) {
@@ -486,7 +486,7 @@ void SpaceObject::change_base_type(
 
     obj->maxVelocity = base->maxVelocity;
 
-    obj->age = base->initialAge + obj->randomSeed.next(base->initialAgeRange);
+    obj->age = base->initialAge + ticks(obj->randomSeed.next(base->initialAgeRange.count()));
 
     obj->naturalScale = base->naturalScale;
 
@@ -507,9 +507,9 @@ void SpaceObject::change_base_type(
     }
 
     // check periodic time
-    obj->periodicTime = 0;
-    if (base->activatePeriod) {
-        obj->periodicTime = base->activatePeriod + obj->randomSeed.next(base->activatePeriodRange);
+    obj->periodicTime = ticks(0);
+    if (base->activatePeriod != ticks(0)) {
+        obj->periodicTime = base->activatePeriod + ticks(obj->randomSeed.next(base->activatePeriodRange.count()));
     }
 
     obj->pulse.base = base->pulse.base;
@@ -520,17 +520,17 @@ void SpaceObject::change_base_type(
 
     for (auto* weapon: {&obj->pulse, &obj->beam, &obj->special}) {
         if (!weapon->base.get()) {
-            weapon->time = 0;
+            weapon->time = ticks(0);
             continue;
         }
 
         if (!relative) {
             weapon->ammo = weapon->base->frame.weapon.ammo;
             weapon->position = 0;
-            if (weapon->time < 0) {
-                weapon->time = 0;
-            } else if (weapon->time > weapon->base->frame.weapon.fireTime) {
-                weapon->time = weapon->base->frame.weapon.fireTime;
+            if (weapon->time < ticks(0)) {
+                weapon->time = ticks(0);
+            } else if (weapon->time > ticks(weapon->base->frame.weapon.fireTime)) {
+                weapon->time = ticks(weapon->base->frame.weapon.fireTime);
             }
         }
         r = weapon->base->frame.weapon.range;
@@ -761,7 +761,7 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
 
     if (object->attributes & kIsDestination) {
         if (object->attributes & kNeutralDeath) {
-            ClearAllOccupants(object->asDestination, owner, object->baseType->initialAgeRange);
+            ClearAllOccupants(object->asDestination, owner, object->baseType->initialAgeRange.count());
         }
         StopBuilding(object->asDestination);
         if (message) {
@@ -795,7 +795,7 @@ void SpaceObject::alter_occupation(Handle<Admiral> owner, int32_t howMuch, bool 
             && (object->attributes & kIsDestination)
             && (object->attributes & kNeutralDeath)) {
         if (AlterDestinationObjectOccupation(object->asDestination, owner, howMuch)
-                >= object->baseType->initialAgeRange) {
+                >= object->baseType->initialAgeRange.count()) {
             object->set_owner(owner, message);
         }
     }

@@ -24,6 +24,7 @@
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "math/geometry.hpp"
+#include "math/units.hpp"
 #include "ui/event.hpp"
 
 namespace antares {
@@ -61,7 +62,7 @@ class GameCursor : public Cursor, public EventReceiver {
     static Point clamp(Point p);
     void wake();
 
-    int64_t _show_crosshairs_until;
+    wall_time _show_crosshairs_until;
 };
 
 class HintLine {

@@ -29,7 +29,7 @@ class Label {
   public:
     static const int32_t kNone = -1;
     static const int32_t kMaxLabelNum = 16;
-    static const int32_t kVisibleTime = 60;
+    static const ticks kVisibleTime;
 
     static Label* get(int number);
     static Handle<Label> none() { return Handle<Label>(-1); }
@@ -41,15 +41,15 @@ class Label {
             int16_t h, int16_t v, int16_t hoff, int16_t voff, Handle<SpaceObject> object,
             bool objectLink, uint8_t color);
     static void draw();
-    static void update_contents(int32_t units_done);
-    static void update_positions(int32_t units_done);
+    static void update_contents(ticks units_done);
+    static void update_positions(ticks units_done);
     static void show_all();
 
     void remove();
 
     void set_position(int16_t h, int16_t v);
     void set_object(Handle<SpaceObject> object);
-    void set_age(int32_t age);
+    void set_age(ticks age);
     void set_string(const sfz::StringSlice& string);
     void clear_string();
     void set_color(uint8_t color);
@@ -67,7 +67,7 @@ class Label {
     Rect                thisRect = Rect(0, 0, -1, -1);
     int32_t             width;
     int32_t             height;
-    int32_t             age = 0;
+    ticks               age = ticks(0);
     sfz::String         text;
     uint8_t             color;
     bool                active = false;

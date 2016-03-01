@@ -20,6 +20,7 @@
 #define ANTARES_GAME_INSTRUMENTS_HPP_
 
 #include "drawing/sprite-handling.hpp"
+#include "math/units.hpp"
 
 namespace antares {
 
@@ -30,10 +31,10 @@ const int32_t kMiniBuildTimeHeight = 25;
 
 void InstrumentInit();
 int32_t instrument_top();
-void UpdateRadar(int32_t);
+void UpdateRadar(ticks units);
 void InstrumentCleanup();
 void ResetInstruments();
-void DrawInstrumentPanel();
+void set_up_instruments();
 void draw_instruments();
 void EraseSite();
 void update_site(bool replay);

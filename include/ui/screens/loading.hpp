@@ -24,6 +24,7 @@
 #include <sfz/sfz.hpp>
 
 #include "drawing/styled-text.hpp"
+#include "math/units.hpp"
 #include "ui/screen.hpp"
 
 namespace antares {
@@ -36,7 +37,7 @@ class LoadingScreen : public InterfaceScreen {
     ~LoadingScreen();
 
     virtual void become_front();
-    virtual bool next_timer(int64_t& time);
+    virtual bool next_timer(wall_time& time);
     virtual void fire_timer();
 
     void update(int32_t current, int32_t max);
@@ -57,7 +58,7 @@ class LoadingScreen : public InterfaceScreen {
     bool* const _cancelled;
 
     std::unique_ptr<StyledText> _name_text;
-    int64_t _next_update;
+    wall_time _next_update;
     int32_t _chars_typed;
 
     int32_t _current;

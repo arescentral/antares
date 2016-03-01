@@ -24,6 +24,7 @@
 
 #include "data/handle.hpp"
 #include "math/fixed.hpp"
+#include "math/units.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
@@ -118,7 +119,7 @@ union argumentType {
     // playSound: play a sound effect
     struct PlaySound {
         uint8_t                 priority;
-        int32_t                 persistence;
+        ticks                   persistence;
         uint8_t                 absolute;           // not distanced
         int32_t                 volumeMinimum;
         int32_t                 volumeRange;

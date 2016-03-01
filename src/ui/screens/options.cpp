@@ -189,7 +189,7 @@ OptionsScreen::State SoundControlScreen::button_state(int button) {
     }
 }
 
-static const int64_t kFlashTime = 0.2e6;
+static const usecs kFlashTime = ticks(12);
 
 // Indices of the keys controlled by each tab.  The "Ship" tab specifies keys 0..7, the "Command"
 // tab specifies keys 8..18, and so on.
@@ -210,7 +210,6 @@ KeyControlScreen::KeyControlScreen(OptionsScreen::State* state, Preferences* pre
           _preferences(preferences),
           _key_start(size()),
           _selected_key(-1),
-          _next_flash(0),
           _flashed_on(false),
           _tabs(2009),
           _keys(2005) {
@@ -244,8 +243,8 @@ void KeyControlScreen::key_up(const KeyUpEvent& event) {
     static_cast<void>(event);
 }
 
-bool KeyControlScreen::next_timer(int64_t& time) {
-    if (_next_flash > 0) {
+bool KeyControlScreen::next_timer(wall_time& time) {
+    if (_next_flash > wall_time()) {
         time = _next_flash;
         return true;
     }
@@ -253,7 +252,7 @@ bool KeyControlScreen::next_timer(int64_t& time) {
 }
 
 void KeyControlScreen::fire_timer() {
-    int64_t now = now_usecs();
+    wall_time now = antares::now();
     while (_next_flash < now) {
         _next_flash += kFlashTime;
         _flashed_on = !_flashed_on;
@@ -413,10 +412,10 @@ void KeyControlScreen::update_conflicts() {
     _conflicts.swap(new_conflicts);
 
     if (_conflicts.empty()) {
-        _next_flash = 0;
+        _next_flash = wall_time();
         _flashed_on = false;
-    } else if (_next_flash == 0) {
-        _next_flash = now_usecs() + kFlashTime;
+    } else if (_next_flash == wall_time()) {
+        _next_flash = now() + kFlashTime;
         _flashed_on = true;
     }
 }

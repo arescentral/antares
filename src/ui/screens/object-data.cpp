@@ -35,7 +35,7 @@ namespace antares {
 namespace {
 
 const int32_t kShipDataWidth = 240;
-const int64_t kTypingDelay = 1e6 / 60;
+const usecs kTypingDelay = kMinorTick;
 
 Rect object_data_bounds(Point origin, Size size) {
     Rect bounds(Point(0, 0), size);
@@ -79,11 +79,11 @@ ObjectDataScreen::~ObjectDataScreen() { }
 void ObjectDataScreen::become_front() {
     _state = TYPING;
     _typed_chars = 0;
-    _next_update = now_usecs() + kTypingDelay;
+    _next_update = now() + kTypingDelay;
     _next_sound = _next_update;
 }
 
-bool ObjectDataScreen::next_timer(int64_t& time) {
+bool ObjectDataScreen::next_timer(wall_time& time) {
     if (_state == TYPING) {
         time = _next_update;
         return true;
@@ -92,7 +92,7 @@ bool ObjectDataScreen::next_timer(int64_t& time) {
 }
 
 void ObjectDataScreen::fire_timer() {
-    int64_t now = now_usecs();
+    wall_time now = antares::now();
     if (_next_sound <= now) {
         PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
         _next_sound += 3 * kTypingDelay;
@@ -105,7 +105,7 @@ void ObjectDataScreen::fire_timer() {
             _next_update += kTypingDelay;
             ++_typed_chars;
         } else {
-            _next_update = 0;
+            _next_update = wall_time();
             _state = DONE;
             break;
         }

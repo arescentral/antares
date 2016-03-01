@@ -101,15 +101,14 @@ Rect viewport() {
 
 class GamePlay : public Card {
   public:
-    GamePlay(
-            bool replay, ReplayBuilder& replay_builder, GameResult* game_result, int32_t* seconds);
+    GamePlay(bool replay, ReplayBuilder& replay_builder, GameResult* game_result, secs* seconds);
 
     virtual void become_front();
     virtual void resign_front();
 
     virtual void draw() const;
 
-    virtual bool next_timer(int64_t& time);
+    virtual bool next_timer(wall_time& time);
     virtual void fire_timer();
 
     virtual void key_down(const KeyDownEvent& event);
@@ -136,24 +135,27 @@ class GamePlay : public Card {
     GameCursor _cursor;
     const bool _replay;
     GameResult* const _game_result;
-    int32_t* const _seconds;
-    int64_t _next_timer;
+    secs* const _seconds;
+    wall_time _next_timer;
     const Rect _play_area;
-    const int64_t _scenario_start_time;
     const bool _command_and_q;
     bool _fast_motion;
     bool _entering_message;
     bool _player_paused;
-    uint32_t _decide_cycle;
-    int _scenario_check_time;
     PlayAgainScreen::Item _play_again;
     PlayerShip _player_ship;
     ReplayBuilder& _replay_builder;
+
+    // The wall_time that g.time corresponds to. Under normal operation,
+    // this increases in lockstep with g.time, but during fast motion or
+    // paused games, it tracks now() without regard for the in-game
+    // clock.
+    wall_time _real_time;
 };
 
 MainPlay::MainPlay(
         const Scenario* scenario, bool replay, bool show_loading_screen,
-        GameResult* game_result, int32_t* seconds):
+        GameResult* game_result, secs* seconds):
     _state(NEW),
     _scenario(scenario),
     _replay(replay),
@@ -229,15 +231,13 @@ void MainPlay::become_front() {
 
             _state = PLAYING;
 
-            ResetInstruments();
-            DrawInstrumentPanel();
+            set_up_instruments();
 
             if (Preferences::preferences()->play_music_in_game()) {
                 LoadSong(g.level->songID);
                 SetSongVolume(kMusicVolume);
                 PlaySong();
             }
-            globals()->virtual_start = now_usecs();
 
             if (!_replay) {
                 _replay_builder.start();
@@ -288,24 +288,22 @@ int new_replay_file() {
 }
 
 GamePlay::GamePlay(
-        bool replay, ReplayBuilder& replay_builder, GameResult* game_result, int32_t* seconds):
+        bool replay, ReplayBuilder& replay_builder, GameResult* game_result, secs* seconds):
         _state(PLAYING),
         _replay(replay),
         _game_result(game_result),
         _seconds(seconds),
-        _next_timer(add_ticks(now_usecs(), 1)),
+        _next_timer(now() + kMinorTick),
         _play_area(viewport().left, viewport().top, viewport().right, viewport().bottom),
-        _scenario_start_time(add_ticks(
-                    0,
-                    (g.level->startTime & kScenario_StartTimeMask)
-                    * kScenarioTimeMultiple)),
         _command_and_q(BothCommandAndQ()),
         _fast_motion(false),
         _entering_message(false),
         _player_paused(false),
-        _decide_cycle(0),
-        _scenario_check_time(0),
-        _replay_builder(replay_builder) { }
+        _replay_builder(replay_builder),
+        _real_time(now()) { }
+
+static const usecs kSwitchAfter = usecs(1000000 / 3);  // TODO(sfiera): ticks(20)
+static const usecs kSleepAfter = secs(60);
 
 class PauseScreen : public Card {
   public:
@@ -325,8 +323,8 @@ class PauseScreen : public Card {
         // TODO(sfiera): cancel any active transition.
         PlayVolumeSound(kComputerBeep4, kMaxSoundVolume, kShortPersistence, kMustPlaySound);
         _visible = true;
-        _next_switch = now_usecs() + kSwitchAfter;
-        _sleep_at = now_usecs() + kSleepAfter;
+        _next_switch = now() + kSwitchAfter;
+        _sleep_at = now() + kSleepAfter;
     }
 
     virtual void mouse_up(const MouseUpEvent& event) { wake(); }
@@ -341,7 +339,7 @@ class PauseScreen : public Card {
         }
     }
 
-    virtual bool next_timer(int64_t& time) {
+    virtual bool next_timer(wall_time& time) {
         time = std::min(_next_switch, _sleep_at);
         return true;
     }
@@ -373,7 +371,7 @@ class PauseScreen : public Card {
 
   private:
     void show_hide() {
-        const int64_t now = now_usecs();
+        const wall_time now = antares::now();
         while (_next_switch < now) {
             _visible = !_visible;
             _next_switch += kSwitchAfter;
@@ -381,19 +379,16 @@ class PauseScreen : public Card {
     }
 
     bool asleep() const {
-        return _sleep_at < now_usecs();
+        return _sleep_at < now();
     }
 
     void wake() {
-        _sleep_at = now_usecs() + kSleepAfter;
+        _sleep_at = now() + kSleepAfter;
     }
 
-    static const int64_t kSwitchAfter = 1000000 / 3;
-    static const int64_t kSleepAfter = 60 * 1000000;
-
     bool _visible;
-    int64_t _next_switch;
-    int64_t _sleep_at;
+    wall_time _next_switch;
+    wall_time _sleep_at;
     String _pause_string;
     Point _text_origin;
     Rect _bracket_bounds;
@@ -411,7 +406,7 @@ void GamePlay::become_front() {
         }
         HintLine::reset();
 
-        CheckScenarioConditions(0);
+        CheckScenarioConditions();
         break;
 
       case PAUSED:
@@ -487,7 +482,7 @@ void GamePlay::draw() const {
     globals()->transitions.draw();
 }
 
-bool GamePlay::next_timer(int64_t& time) {
+bool GamePlay::next_timer(wall_time& time) {
     if (_state == PLAYING) {
         time = _next_timer;
         return true;
@@ -496,22 +491,23 @@ bool GamePlay::next_timer(int64_t& time) {
 }
 
 void GamePlay::fire_timer() {
-    while (_next_timer < now_usecs()) {
-        _next_timer = add_ticks(_next_timer, 1);
+    while (_next_timer < now()) {
+        _next_timer = _next_timer + kMinorTick;
     }
 
-    const int64_t now = now_usecs();
+    ticks unitsPassed = ticks(0);
+    wall_time new_now = now();
+    while (_real_time <= (new_now - kMinorTick)) {
+        unitsPassed += kMinorTick;
+        _real_time += kMinorTick;
+    }
 
-    int unitsPassed, unitsDone;
     if (_fast_motion && !_entering_message) {
-        unitsDone = unitsPassed = 12;
-        globals()->virtual_start = now - (add_ticks(g.time, unitsPassed) - _scenario_start_time);
-    } else {
-        int64_t newGameTime = now - globals()->virtual_start + _scenario_start_time;
-        unitsDone = unitsPassed = usecs_to_ticks(newGameTime - g.time);
+        unitsPassed *= 12;
+        _real_time = now();
     }
 
-    if (unitsPassed <= 0) {
+    if (unitsPassed <= ticks(0)) {
         return;
     }
 
@@ -520,27 +516,26 @@ void GamePlay::fire_timer() {
 
     if (_player_paused) {
         _player_paused = false;
-        unitsDone = unitsPassed = 0;
-        globals()->virtual_start = now - (g.time - _scenario_start_time);
+        unitsPassed = ticks(0);
+        _real_time = now();
     }
 
-    while (unitsPassed > 0) {
-        int unitsToDo = unitsPassed;
-        if ((_decide_cycle + unitsToDo) > kDecideEveryCycles) {
-            unitsToDo = kDecideEveryCycles - _decide_cycle;
-        }
-        _decide_cycle += unitsToDo;
-
-        if (unitsToDo > 0) {
-            // executed arbitrarily, but at least once every kDecideEveryCycles
-            globals()->starfield.move(unitsToDo);
-            MoveSpaceObjects(unitsToDo);
+    const ticks unitsDone = unitsPassed;
+    while (unitsPassed > ticks(0)) {
+        ticks unitsToDo = unitsPassed;
+        ticks minor_ticks = g.time.time_since_epoch() % kMajorTick;
+        if (minor_ticks + unitsToDo > kMajorTick) {
+            unitsToDo = kMajorTick - minor_ticks;
         }
 
-        g.time = add_ticks(g.time, unitsToDo);
+        // executed arbitrarily, but at least once every major tick
+        globals()->starfield.move(unitsToDo);
+        MoveSpaceObjects(unitsToDo);
 
-        if ( _decide_cycle == kDecideEveryCycles) {
-            // everything in here gets executed once every kDecideEveryCycles
+        g.time += unitsToDo;
+
+        if ((g.time.time_since_epoch() % kMajorTick) == ticks(0)) {
+            // everything in here gets executed once every major tick
             _player_paused = false;
 
             NonplayerShipThink();
@@ -555,11 +550,8 @@ void GamePlay::fire_timer() {
             _player_ship.update(_cursor, _entering_message);
 
             CollideSpaceObjects();
-            _decide_cycle = 0;
-            _scenario_check_time++;
-            if (_scenario_check_time == 30) {
-                _scenario_check_time = 0;
-                CheckScenarioConditions( 0);
+            if ((g.time.time_since_epoch() % kConditionTick) == ticks(0)) {
+                CheckScenarioConditions();
             }
         }
         unitsPassed -= unitsToDo;
@@ -568,7 +560,7 @@ void GamePlay::fire_timer() {
     MiniComputerHandleNull(unitsDone);
 
     Messages::clip();
-    Messages::draw_long_message( unitsDone);
+    Messages::draw_long_message(unitsDone);
 
     update_sector_lines();
     Beams::update();
@@ -586,7 +578,7 @@ void GamePlay::fire_timer() {
     globals()->transitions.update_boolean(unitsDone);
 
     if (g.game_over && (g.time >= g.game_over_at)) {
-        *_seconds = (g.time - _scenario_start_time) / 1e6;
+        *_seconds = std::chrono::duration_cast<secs>(g.time.time_since_epoch());
 
         if (*_game_result == NO_GAME) {
             if (g.victor == g.admiral) {
@@ -647,12 +639,9 @@ void GamePlay::key_down(const KeyDownEvent& event) {
         return;
 
       case Keys::ESCAPE:
-        {
-            _state = PLAY_AGAIN;
-            _player_paused = true;
-            bool is_training = g.level->startTime & kScenario_IsTraining_Bit;
-            stack()->push(new PlayAgainScreen(true, is_training, &_play_again));
-        }
+        _state = PLAY_AGAIN;
+        _player_paused = true;
+        stack()->push(new PlayAgainScreen(true, g.level->is_training, &_play_again));
         break;
 
       default:
@@ -742,12 +731,9 @@ void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
 
     switch (event.button) {
       case Gamepad::START:
-        {
-            _state  = PLAY_AGAIN;
-            _player_paused = true;
-            bool is_training = g.level->startTime & kScenario_IsTraining_Bit;
-            stack()->push(new PlayAgainScreen(true, is_training, &_play_again));
-        }
+        _state  = PLAY_AGAIN;
+        _player_paused = true;
+        stack()->push(new PlayAgainScreen(true, g.level->is_training, &_play_again));
         break;
     }
 

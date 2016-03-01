@@ -137,7 +137,7 @@ void read_from(ReadSource in, argumentType::CreateObject& argument) {
 void read_from(ReadSource in, argumentType::PlaySound& argument) {
     read(in, argument.priority);
     in.shift(1);
-    read(in, argument.persistence);
+    argument.persistence = ticks(read<int32_t>(in));
     read(in, argument.absolute);
     in.shift(1);
     read(in, argument.volumeMinimum);

@@ -52,16 +52,16 @@ const int32_t kMessageScreenRight       = 420;
 const int32_t kMessageScreenBottom      = 475;
 
 const uint8_t kMessageColor             = RED;
-const int32_t kMessageMoveTime          = 30;
-const int32_t kMessageDisplayTime       = (kMessageMoveTime * 2 + 120);
-const int32_t kLowerTime                = (kMessageDisplayTime - kMessageMoveTime);
-const int32_t kRaiseTime                = kMessageMoveTime;
+const ticks   kMessageMoveTime          = ticks(30);
+const ticks   kMessageDisplayTime       = (kMessageMoveTime * 2 + secs(2));
+const ticks   kLowerTime                = (kMessageDisplayTime - kMessageMoveTime);
+const ticks   kRaiseTime                = kMessageMoveTime;
 
 const int32_t kDestinationLength        = 127;
 
 const int32_t kStatusLabelLeft          = 200;
 const int32_t kStatusLabelTop           = 50;
-const int32_t kStatusLabelAge           = 120;
+const ticks   kStatusLabelAge           = secs(2);
 
 const int32_t kMaxRetroSize             = 10;
 const int32_t kLongMessageVPad          = 5;
@@ -103,7 +103,7 @@ enum longMessageStageType {
 
 struct Messages::longMessageType {
     longMessageStageType    stage;
-    int32_t                 charDelayCount;
+    ticks                   charDelayCount;
     Rect                    pictBounds;
     int32_t                 pictDelayCount;
     int32_t                 pictCurrentLeft;
@@ -132,7 +132,7 @@ struct Messages::longMessageType {
 
 ANTARES_GLOBAL std::queue<sfz::String> Messages::message_data;
 ANTARES_GLOBAL Messages::longMessageType* Messages::long_message_data;
-ANTARES_GLOBAL int32_t Messages::time_count;
+ANTARES_GLOBAL ticks Messages::time_count;
 
 void MessageLabel_Set_Special(Handle<Label> id, const StringSlice& text);
 
@@ -161,7 +161,7 @@ void Messages::init() {
     tmessage->stage = kNoStage;
     tmessage->textHeight = 0;
     tmessage->retro_text.reset();
-    tmessage->charDelayCount = 0;
+    tmessage->charDelayCount = ticks(0);
     tmessage->pictBounds.left = tmessage->pictBounds.right= 0;
     tmessage->pictCurrentLeft = 0;
     tmessage->pictCurrentTop = 0;
@@ -177,7 +177,7 @@ void Messages::init() {
 void Messages::clear() {
     longMessageType *tmessage;
 
-    time_count = 0;
+    time_count = ticks(0);
     std::queue<sfz::String> empty;
     swap(message_data, empty);
     g.message_label = Label::add(
@@ -230,7 +230,7 @@ void Messages::start(int16_t startResID, int16_t endResID) {
         tmessage->stage = kStartStage;
         tmessage->textHeight = 0;
         tmessage->retro_text.reset();
-        tmessage->charDelayCount = 0;
+        tmessage->charDelayCount = ticks(0);
         tmessage->pictBounds.left = tmessage->pictBounds.right= 0;
         // tmessage->pictDelayCount;
         tmessage->pictCurrentLeft = 0;
@@ -324,7 +324,7 @@ void Messages::clip( void)
     }
 }
 
-void Messages::draw_long_message(int32_t time_pass) {
+void Messages::draw_long_message(ticks time_pass) {
     Rect            tRect, uRect;
     Rect            lRect, cRect;
     longMessageType *tmessage;
@@ -341,18 +341,18 @@ void Messages::draw_long_message(int32_t time_pass) {
         //
         // if ( !(globals()->gOptions & kOptionNetworkOn))
         // {
-            CheckScenarioConditions( 0);
+            CheckScenarioConditions();
         // }
 
         if ((tmessage->lastResID >= 0) && (tmessage->lastLabelMessage)) {
-            tmessage->labelMessageID->set_age(1);
+            tmessage->labelMessageID->set_age(kMinorTick);
         }
 
         // draw in offscreen world
         if ((tmessage->currentResID >= 0) && ( tmessage->stage == kShowStage)) {
             if (tmessage->retro_text.get() != NULL) {
                 if (tmessage->labelMessage) {
-                    tmessage->labelMessageID->set_age(0);
+                    tmessage->labelMessageID->set_age(ticks(0));
 
                     if (tmessage->retro_text.get() != NULL) {
                         MessageLabel_Set_Special(tmessage->labelMessageID, tmessage->text);
@@ -370,16 +370,16 @@ void Messages::draw_long_message(int32_t time_pass) {
             && (tmessage->at_char < tmessage->retro_text->size())
             && (tmessage->stage == kShowStage)
             && !tmessage->labelMessage) {
-        time_pass = std::min(time_pass, tmessage->retro_text->size() - tmessage->at_char);
+        time_pass = std::min(time_pass, ticks(tmessage->retro_text->size() - tmessage->at_char));
         // Play teletype sound at least once every 3 ticks.
         tmessage->charDelayCount += time_pass;
-        if (tmessage->charDelayCount > 0) {
+        if (tmessage->charDelayCount > ticks(0)) {
             PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
-            while (tmessage->charDelayCount > 0) {
-                tmessage->charDelayCount -= 3;
+            while (tmessage->charDelayCount > ticks(0)) {
+                tmessage->charDelayCount -= kMajorTick;
             }
         }
-        tmessage->at_char += time_pass;
+        tmessage->at_char += time_pass.count();
     }
 }
 
@@ -442,13 +442,13 @@ void Messages::replay() {
 
 // WARNING: RELIES ON kMessageNullCharacter (SPACE CHARACTER #32) >> NOT WORLD-READY <<
 
-void Messages::draw_message_screen(int32_t by_units) {
+void Messages::draw_message_screen(ticks by_units) {
     // increase the amount of time current message has been shown
     time_count += by_units;
 
     // if it's been shown for too long, then get the next message
     if (time_count > kMessageDisplayTime) {
-        time_count = 0;
+        time_count = ticks(0);
         if (!message_data.empty()) {
             message_data.pop();
         }
@@ -458,16 +458,16 @@ void Messages::draw_message_screen(int32_t by_units) {
         const String& message = message_data.front();
 
         if (time_count < kRaiseTime) {
-            g.message_label->set_position(kMessageScreenLeft, viewport().bottom - time_count);
+            g.message_label->set_position(kMessageScreenLeft, viewport().bottom - time_count.count());
         } else if (time_count > kLowerTime) {
             g.message_label->set_position(
-                    kMessageScreenLeft, viewport().bottom - (kMessageDisplayTime - time_count));
+                    kMessageScreenLeft, viewport().bottom - (kMessageDisplayTime - time_count).count());
         }
 
         g.message_label->set_string(message);
     } else {
         g.message_label->clear_string();
-        time_count = 0;
+        time_count = ticks(0);
     }
 }
 

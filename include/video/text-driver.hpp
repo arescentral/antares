@@ -36,8 +36,7 @@ class TextVideoDriver : public VideoDriver {
     virtual int scale() const;
     virtual Size screen_size() const { return _size; }
 
-    virtual int ticks() const { return _scheduler->ticks(); }
-    virtual int usecs() const { return _scheduler->usecs(); }
+    virtual wall_time now() const { return _scheduler->now(); }
 
     virtual Texture texture(sfz::PrintItem name, const PixMap& content);
     virtual void dither_rect(const Rect& rect, const RgbColor& color);

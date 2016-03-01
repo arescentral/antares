@@ -40,8 +40,6 @@ namespace antares {
 
 namespace {
 
-const int kBoltChangeTime   = 0;
-
 void DetermineBeamRelativeCoordFromAngle(Handle<SpaceObject> beamObject, int16_t angle) {
     Fixed range = mLongToFixed(beamObject->frame.beam->range);
 
@@ -113,7 +111,6 @@ Handle<Beam> Beams::add(
             beam->toObjectID = -1;
             beam->toObject = SpaceObject::none();
             beam->toRelativeCoord = Point(0, 0);
-            beam->boltCycleTime = 0;
             beam->boltState = 0;
 
             return beam;
@@ -206,27 +203,23 @@ void Beams::update() {
                     }
                     if ((beam->beamKind == eBoltObjectToObjectKind)
                             || (beam->beamKind == eBoltObjectToRelativeCoordKind)) {
-                        beam->boltCycleTime++;
-                        if (beam->boltCycleTime > kBoltChangeTime) {
-                            beam->boltCycleTime = 0;
-                            beam->thisBoltPoint[0].h = beam->thisLocation.left;
-                            beam->thisBoltPoint[0].v = beam->thisLocation.top;
-                            beam->thisBoltPoint[kBoltPointNum - 1].h = beam->thisLocation.right;
-                            beam->thisBoltPoint[kBoltPointNum - 1].v = beam->thisLocation.bottom;
+                        beam->thisBoltPoint[0].h = beam->thisLocation.left;
+                        beam->thisBoltPoint[0].v = beam->thisLocation.top;
+                        beam->thisBoltPoint[kBoltPointNum - 1].h = beam->thisLocation.right;
+                        beam->thisBoltPoint[kBoltPointNum - 1].v = beam->thisLocation.bottom;
 
-                            int32_t inaccuracy = max(
-                                    abs(beam->thisLocation.width()),
-                                    abs(beam->thisLocation.height()))
-                                / kBoltPointNum / 2;
+                        int32_t inaccuracy = max(
+                                abs(beam->thisLocation.width()),
+                                abs(beam->thisLocation.height()))
+                            / kBoltPointNum / 2;
 
-                            for (int j: range(1, kBoltPointNum - 1)) {
-                                beam->thisBoltPoint[j].h = beam->thisLocation.left
-                                    + ((beam->thisLocation.width() * j) / kBoltPointNum)
-                                    - inaccuracy + Randomize(inaccuracy * 2);
-                                beam->thisBoltPoint[j].v = beam->thisLocation.top
-                                    + ((beam->thisLocation.height() * j) / kBoltPointNum)
-                                    - inaccuracy + Randomize(inaccuracy * 2);
-                            }
+                        for (int j: range(1, kBoltPointNum - 1)) {
+                            beam->thisBoltPoint[j].h = beam->thisLocation.left
+                                + ((beam->thisLocation.width() * j) / kBoltPointNum)
+                                - inaccuracy + Randomize(inaccuracy * 2);
+                            beam->thisBoltPoint[j].v = beam->thisLocation.top
+                                + ((beam->thisLocation.height() * j) / kBoltPointNum)
+                                - inaccuracy + Randomize(inaccuracy * 2);
                         }
                     }
                 }

@@ -45,8 +45,7 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
     virtual Point get_mouse();
     virtual InputMode input_mode() const;
 
-    virtual int ticks() const;
-    virtual int usecs() const;
+    virtual wall_time now() const;
 
     void loop(Card* initial);
 
@@ -64,7 +63,7 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
     Size _viewport_size;
     GLFWwindow* _window;
     MainLoop* _loop;
-    int64_t _last_click_usecs;
+    wall_time _last_click_usecs;
     int _last_click_count;
 
     DISALLOW_COPY_AND_ASSIGN(GLFWVideoDriver);

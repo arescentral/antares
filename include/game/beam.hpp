@@ -59,7 +59,6 @@ struct Beam {
     int32_t             toObjectID;
     Handle<SpaceObject> toObject;
     Point               toRelativeCoord;
-    int32_t             boltCycleTime;
     int32_t             boltState;
     int32_t             accuracy;
     int32_t             range;

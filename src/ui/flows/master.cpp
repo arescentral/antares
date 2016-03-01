@@ -48,12 +48,12 @@ class TitleScreenFade : public PictFade {
               _fast(fast) { }
 
   protected:
-    virtual int64_t fade_time() const {
-        return (*_fast ? 1e6 : 5e6) / 3;
+    virtual usecs fade_time() const {
+        return ticks(*_fast ? 20 : 100);
     }
 
-    virtual int64_t display_time() const {
-        return *_fast ? 1e6 : 5e6;
+    virtual usecs display_time() const {
+        return ticks(*_fast ? 60 : 300);
     }
 
     virtual bool skip() const {
@@ -96,7 +96,7 @@ void Master::become_front() {
       case TITLE_SCREEN_PICT:
         _state = INTRO_SCROLL;
         // TODO(sfiera): prevent the intro screen from displaying on subsequent launches.
-        stack()->push(new ScrollTextScreen(5600, 450, 15.0));
+        stack()->push(new ScrollTextScreen(5600, 450, kSlowScrollInterval));
         break;
 
       case INTRO_SCROLL:

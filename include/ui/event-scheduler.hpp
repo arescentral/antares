@@ -34,7 +34,7 @@ class EventScheduler {
     struct MainLoop {
         virtual ~MainLoop() { }
         virtual bool takes_snapshots() = 0;
-        virtual void snapshot(int64_t ticks) = 0;
+        virtual void snapshot(wall_ticks ticks) = 0;
         virtual void draw() = 0;
         virtual bool done() const = 0;
         virtual Card* top() const = 0;
@@ -51,17 +51,16 @@ class EventScheduler {
 
     Point get_mouse() const { return _mouse; }
     InputMode input_mode() const { return KEYBOARD_MOUSE; }
-    int ticks() const { return _ticks; }
-    int64_t usecs() const { return ticks_to_usecs(_ticks); }
+    wall_time now() const { return wall_time(_ticks); }
 
   private:
-    void advance_tick_count(MainLoop& loop, int64_t ticks);
-    bool have_snapshots_before(int64_t ticks) const;
+    void advance_tick_count(MainLoop& loop, wall_ticks ticks);
+    bool have_snapshots_before(wall_ticks ticks) const;
 
     static bool is_later(const std::unique_ptr<Event>& x, const std::unique_ptr<Event>& y);
 
-    int64_t _ticks;
-    std::vector<int64_t> _snapshot_times;
+    wall_ticks _ticks;
+    std::vector<wall_ticks> _snapshot_times;
     std::vector<std::unique_ptr<Event>> _event_heap;
     Point _mouse;
 

@@ -213,7 +213,6 @@
       , "src/game/scenario-maker.cpp"
       , "src/game/space-object.cpp"
       , "src/game/starfield.cpp"
-      , "src/game/time.cpp"
       ]
     , "dependencies": ["<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz"]
     , "export_dependent_settings": ["<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz"]

@@ -37,15 +37,15 @@ const int kScrollTextHeight = 200;
 
 }  // namespace
 
-ScrollTextScreen::ScrollTextScreen(int text_id, int width, double speed):
+ScrollTextScreen::ScrollTextScreen(int text_id, int width, ticks interval):
         _build_pix(BuildPix(text_id, width)),
-        _speed(speed),
+        _interval(interval),
         _play_song(false),
         _song_id(0) { }
 
-ScrollTextScreen::ScrollTextScreen(int text_id, int width, double speed, int song_id):
+ScrollTextScreen::ScrollTextScreen(int text_id, int width, ticks interval, int song_id):
         _build_pix(BuildPix(text_id, width)),
-        _speed(speed),
+        _interval(interval),
         _play_song(true),
         _song_id(song_id) { }
 
@@ -60,7 +60,7 @@ void ScrollTextScreen::become_front() {
         PlaySong();
     }
 
-    _start = now_usecs();
+    _start = now();
     _next_shift = _start;
     _position = -kScrollTextHeight;
 }
@@ -87,15 +87,15 @@ void ScrollTextScreen::gamepad_button_down(const GamepadButtonDownEvent& event) 
     stack()->pop(this);
 }
 
-bool ScrollTextScreen::next_timer(int64_t& time) {
+bool ScrollTextScreen::next_timer(wall_time& time) {
     time = _next_shift;
     return true;
 }
 
 void ScrollTextScreen::fire_timer() {
-    int64_t now = now_usecs();
+    wall_time now = antares::now();
     while (_next_shift < now) {
-        _next_shift += (1e6 / _speed);
+        _next_shift += _interval;
         ++_position;
     }
 

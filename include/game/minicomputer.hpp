@@ -65,7 +65,7 @@ void draw_mini_screen();
 void MakeMiniScreenFromIndString( int16_t);
 void minicomputer_handle_keys(uint32_t new_keys, uint32_t old_keys, bool cancel);
 void minicomputer_cancel();
-void MiniComputerHandleNull(int32_t);
+void MiniComputerHandleNull(ticks unitsToDo);
 int32_t MiniComputerGetPriceOfCurrentSelection( void);
 void UpdateMiniScreenLines( void);
 void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special);

@@ -67,12 +67,15 @@ const int32_t kCursorBoundsSize = 16;  // should be same in instruments.c
 
 }  // namespace
 
+const static ticks kKlaxonInterval = ticks(125);
+const static ticks kKeyHoldDuration = ticks(45);
+
 int32_t HotKey_GetFromObject(Handle<SpaceObject> object);
 void Update_LabelStrings_ForHotKeyChange( void);
 
 namespace {
 
-static ANTARES_GLOBAL int32_t gDestKeyTime = 0;
+static ANTARES_GLOBAL ticks gDestKeyTime = ticks(0);
 static ANTARES_GLOBAL ZoomType gPreviousZoomMode;
 
 struct HotKeySuffix {
@@ -108,7 +111,7 @@ void ResetPlayerShip(Handle<SpaceObject> which) {
     g.target_label = Label::add(0, 0, 0, -20, SpaceObject::none(), true, SKY_BLUE);
     g.send_label = Label::add(200, 200, 0, 30, SpaceObject::none(), false, GREEN);
     globals()->starfield.reset(g.ship);
-    globals()->next_klaxon = 0;
+    globals()->next_klaxon = game_time();
     globals()->keyMask = 0;
     globals()->gZoomMode = kNearestFoeZoom;
     gPreviousZoomMode = kNearestFoeZoom;
@@ -117,7 +120,7 @@ void ResetPlayerShip(Handle<SpaceObject> which) {
         globals()->hotKey[h].object = SpaceObject::none();
         globals()->hotKey[h].objectID = -1;
     }
-    globals()->hotKeyDownTime = 0;
+    globals()->hotKeyDownTime = ticks(0);
     globals()->lastHotKey = -1;
     globals()->destKeyUsedForSelection = false;
     globals()->hotKey_target = false;
@@ -134,9 +137,9 @@ PlayerShip::PlayerShip():
 void PlayerShip::update_keys(const KeyMap& keys) {
     for (int i = 0; i < 256; ++i) {
         if (keys.get(i) && ! _keys.get(i)) {
-            key_down(KeyDownEvent(now_usecs(), i));
+            key_down(KeyDownEvent(now(), i));
         } else if (_keys.get(i) && ! keys.get(i)) {
-            key_up(KeyUpEvent(now_usecs(), i));
+            key_up(KeyUpEvent(now(), i));
         }
     }
 }
@@ -636,16 +639,16 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
 
     if (theShip->health() < (theShip->baseType->health >> 2L)) {
         if (g.time > globals()->next_klaxon) {
-            if (globals()->next_klaxon == 0) {
+            if (globals()->next_klaxon == game_time()) {
                 PlayVolumeSound(kKlaxon, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
             } else {
                 PlayVolumeSound(kKlaxon, kMediumVolume, kMediumLongPersistence, kPrioritySound);
             }
             Messages::set_status("WARNING: Shields Low", kStatusWarnColor);
-            globals()->next_klaxon = g.time + 2083333;
+            globals()->next_klaxon = g.time + kKlaxonInterval;
         }
     } else {
-        globals()->next_klaxon = 0;
+        globals()->next_klaxon = game_time();
     }
 
     if (!(theShip->attributes & kIsHumanControlled)) {
@@ -658,17 +661,17 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
     attributes = gTheseKeys & dcalc;
 
     if (gTheseKeys & kDestinationKey) {
-        if (gDestKeyTime >= 0) {
-            gDestKeyTime += kDecideEveryCycles;
+        if (gDestKeyTime >= ticks(0)) {
+            gDestKeyTime += kMajorTick;
         }
     } else {
-        if (gDestKeyTime > 45) {
+        if (gDestKeyTime > kKeyHoldDuration) {
             if ((theShip->attributes & kCanBeDestination)
                     && (!globals()->destKeyUsedForSelection)) {
                 target_self();
             }
         }
-        gDestKeyTime = 0;
+        gDestKeyTime = ticks(0);
         globals()->destKeyUsedForSelection = false;
     }
 
@@ -683,19 +686,19 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
     if (hot_key >= 0) {
         if (hot_key != globals()->lastHotKey) {
             globals()->lastHotKey = hot_key;
-            globals()->hotKeyDownTime = 0;
+            globals()->hotKeyDownTime = ticks(0);
             globals()->hotKey_target = false;
             if (gTheseKeys & kDestinationKey) {
                 globals()->hotKey_target = true;
             }
         } else {
-            globals()->hotKeyDownTime += kDecideEveryCycles;
+            globals()->hotKeyDownTime += kMajorTick;
         }
     } else if (globals()->lastHotKey >= 0) {
         hot_key = globals()->lastHotKey;
         globals()->lastHotKey = -1;
 
-        if (globals()->hotKeyDownTime > 45) {
+        if (globals()->hotKeyDownTime > kKeyHoldDuration) {
             if (globals()->lastSelectedObject.get()) {
                 auto selectShip = globals()->lastSelectedObject;
 
@@ -725,14 +728,14 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
                     globals()->hotKey[hot_key].object = SpaceObject::none();
                 }
             }
-            globals()->hotKeyDownTime = 0;
+            globals()->hotKeyDownTime = ticks(0);
         }
     }
 // end new hotkey selection
 
     // for this we check lastKeys against theseKeys & relevent keys now being pressed
     if ((attributes) && (!(gLastKeys & attributes)) && (!cursor.active())) {
-        gDestKeyTime = -1;
+        gDestKeyTime = ticks(-1);
         if (gTheseKeys & kSelectFriendKey) {
             if (!(gTheseKeys & kDestinationKey)) {
                 select_friendly(theShip, theShip->direction);
@@ -774,7 +777,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
 
     if ((gTheseKeys & kWarpKey)
             && (gTheseKeys & kDestinationKey)) {
-        gDestKeyTime = -1;
+        gDestKeyTime = ticks(-1);
         if (!(gLastKeys & kWarpKey)) {
             engage_autopilot();
         }
@@ -811,7 +814,7 @@ void PlayerShipHandleClick(Point where, int button) {
         return;
     }
 
-    gDestKeyTime = -1;
+    gDestKeyTime = ticks(-1);
     if (g.ship.get()) {
         auto theShip = g.ship;
         if ((theShip->active) && (theShip->attributes & kIsHumanControlled)) {
@@ -989,7 +992,7 @@ void PlayerShipBodyExpire(Handle<SpaceObject> theShip) {
     } else {
         if (!g.game_over) {
             g.game_over = true;
-            g.game_over_at = add_ticks(g.time, 180);
+            g.game_over_at = g.time + secs(3);
         }
         if (theShip->owner == g.admiral) {
             g.victory_text = kScenarioNoShipTextID + g.level->levelNameStrNum;

@@ -140,7 +140,7 @@ enum {
     kMaxStatusTypeValue     = kSmallFixedMinusValue,
 };
 
-const int32_t kMiniComputerPollTime = 60;
+const ticks kMiniComputerPollTime   = secs(1);
 
 const int32_t kMiniObjectDataNum    = 2;
 const int32_t kMiniSelectObjectNum  = 0;
@@ -260,7 +260,7 @@ void MiniComputerMakeStatusString(int32_t which_line, String& string);
 void MiniScreenInit() {
     globals()->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
     globals()->gMiniScreenData.currentScreen = kMainMiniScreen;
-    globals()->gMiniScreenData.pollTime = 0;
+    globals()->gMiniScreenData.pollTime = ticks(0);
     globals()->gMiniScreenData.buildTimeBarValue = -1;
     globals()->gMiniScreenData.clickLine = kMiniScreenNoLineSelected;
 
@@ -341,7 +341,7 @@ void ClearMiniObjectData( void)
     o->baseType = NULL;
 
     globals()->gMiniScreenData.buildTimeBarValue = -1;
-    globals()->gMiniScreenData.pollTime = 0;
+    globals()->gMiniScreenData.pollTime = ticks(0);
 }
 
 void draw_mini_screen() {
@@ -637,16 +637,14 @@ void minicomputer_cancel() {
     minicomputer_handle_action(kOutLineButton, false, NULL);
 }
 
-void MiniComputerHandleNull( int32_t unitsToDo)
-
-{
+void MiniComputerHandleNull(ticks unitsToDo) {
     Handle<Destination> buildAtObject;
     SpaceObject     *myObject = NULL, newObject;
 
     globals()->gMiniScreenData.pollTime += unitsToDo;
     if ( globals()->gMiniScreenData.pollTime > kMiniComputerPollTime)
     {
-        globals()->gMiniScreenData.pollTime = 0;
+        globals()->gMiniScreenData.pollTime = ticks(0);
         UpdateMiniScreenLines();
 
         // handle control/command/selected object
@@ -695,9 +693,9 @@ void MiniComputerHandleNull( int32_t unitsToDo)
 
         auto build_at = GetAdmiralBuildAtObject(g.admiral);
         if (build_at.get()) {
-            if (build_at->totalBuildTime > 0) {
-                int progress = build_at->buildTime * kMiniBuildTimeHeight;
-                progress /= build_at->totalBuildTime;
+            if (build_at->totalBuildTime > ticks(0)) {
+                int progress = build_at->buildTime.count() * kMiniBuildTimeHeight;
+                progress /= build_at->totalBuildTime.count();
                 globals()->gMiniScreenData.buildTimeBarValue = progress;
             } else {
                 globals()->gMiniScreenData.buildTimeBarValue = 0;

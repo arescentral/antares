@@ -24,6 +24,7 @@
 #include "data/handle.hpp"
 #include "drawing/styled-text.hpp"
 #include "math/geometry.hpp"
+#include "math/units.hpp"
 #include "ui/card.hpp"
 #include "ui/event.hpp"
 
@@ -38,7 +39,7 @@ class ObjectDataScreen : public Card {
 
     virtual void become_front();
 
-    virtual bool next_timer(int64_t& time);
+    virtual bool next_timer(wall_time& time);
     virtual void fire_timer();
 
     virtual void mouse_up(const MouseUpEvent& event);
@@ -53,8 +54,8 @@ class ObjectDataScreen : public Card {
 
     enum State { TYPING, DONE };
     State _state;
-    int64_t _next_update;
-    int64_t _next_sound;
+    wall_time _next_update;
+    wall_time _next_sound;
     int _typed_chars;
 
     Rect _bounds;
