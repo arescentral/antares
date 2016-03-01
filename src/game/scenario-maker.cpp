@@ -822,7 +822,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             }
             CullSprites();
             Beams::cull();
-            if ((g.time.time_since_epoch() % ticks(20)) == ticks(0)) {
+            if ((g.time.time_since_epoch() % secs(1)) == ticks(0)) {
                 (*current)++;
             }
         }
