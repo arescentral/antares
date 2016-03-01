@@ -148,9 +148,11 @@ class GamePlay : public Card {
     PlayerShip _player_ship;
     ReplayBuilder& _replay_builder;
 
-    // Start time of game in usecs.  But, if the player pauses or fast-forwards, it gets moved
-    // forwards or back so that the same calculations still work.
-    wall_time _virtual_start;
+    // The wall_time that g.time corresponds to. Under normal operation,
+    // this increases in lockstep with g.time, but during fast motion or
+    // paused games, it tracks now() without regard for the in-game
+    // clock.
+    wall_time _real_time;
 };
 
 MainPlay::MainPlay(
@@ -303,7 +305,7 @@ GamePlay::GamePlay(
         _decide_cycle(0),
         _scenario_check_time(0),
         _replay_builder(replay_builder),
-        _virtual_start(now()) { }
+        _real_time(now()) { }
 
 static const usecs kSwitchAfter = usecs(1000000 / 3);
 static const usecs kSleepAfter = usecs(60 * 1000000);
@@ -498,15 +500,17 @@ void GamePlay::fire_timer() {
         _next_timer = _next_timer + kMinorTick;
     }
 
-    const wall_time now = antares::now();
-
     ticks unitsPassed;
     if (_fast_motion && !_entering_message) {
         unitsPassed = ticks(12);
-        _virtual_start = now - (g.time + unitsPassed).time_since_epoch();
+        _real_time = now();
     } else {
-        game_time newGameTime = game_time(now - _virtual_start);
-        unitsPassed = std::chrono::duration_cast<ticks>(newGameTime - g.time);
+        unitsPassed = ticks(0);
+        wall_time new_now = now();
+        while (_real_time <= (new_now - kMinorTick)) {
+            unitsPassed += kMinorTick;
+            _real_time += kMinorTick;
+        }
     }
 
     if (unitsPassed <= ticks(0)) {
@@ -519,7 +523,7 @@ void GamePlay::fire_timer() {
     if (_player_paused) {
         _player_paused = false;
         unitsPassed = ticks(0);
-        _virtual_start = (now - g.time.time_since_epoch());
+        _real_time = now();
     }
 
     const ticks unitsDone = unitsPassed;
