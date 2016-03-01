@@ -49,7 +49,7 @@ namespace antares {
 
 namespace {
 
-const usecs kTypingDelay = usecs(1000000 / 20);
+const usecs kTypingDelay = kMajorTick;
 const int kScoreTableHeight = 120;
 const int kTextWidth = 300;
 

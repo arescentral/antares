@@ -693,7 +693,7 @@ void MiniComputerHandleNull(ticks unitsToDo) {
 
         auto build_at = GetAdmiralBuildAtObject(g.admiral);
         if (build_at.get()) {
-            if (build_at->totalBuildTime > usecs(0)) {
+            if (build_at->totalBuildTime > ticks(0)) {
                 int progress = build_at->buildTime.count() * kMiniBuildTimeHeight;
                 progress /= build_at->totalBuildTime.count();
                 globals()->gMiniScreenData.buildTimeBarValue = progress;

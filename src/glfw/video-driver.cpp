@@ -119,7 +119,7 @@ void GLFWVideoDriver::key(int key, int scancode, int action, int mods) {
 
 void GLFWVideoDriver::mouse_button(int button, int action, int mods) {
     if (action == GLFW_PRESS) {
-        if (now() <= (_last_click_usecs + usecs(500000))) {
+        if (now() <= (_last_click_usecs + ticks(30))) {
             _last_click_count += 1;
         } else {
             _last_click_count = 1;

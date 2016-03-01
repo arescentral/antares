@@ -306,7 +306,7 @@ GamePlay::GamePlay(
         _replay_builder(replay_builder),
         _real_time(now()) { }
 
-static const usecs kSwitchAfter = usecs(1000000 / 3);
+static const usecs kSwitchAfter = usecs(1000000 / 3);  // TODO(sfiera): ticks(20)
 static const usecs kSleepAfter = secs(60);
 
 class PauseScreen : public Card {

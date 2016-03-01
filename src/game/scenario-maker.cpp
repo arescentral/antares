@@ -466,7 +466,7 @@ bool Scenario::Condition::is_true() const {
 
         case kObjectIsBeingBuilt: {
             auto buildAtObject = GetAdmiralBuildAtObject(g.admiral);
-            return buildAtObject.get() && (buildAtObject->totalBuildTime > usecs(0));
+            return buildAtObject.get() && (buildAtObject->totalBuildTime > ticks(0));
         }
 
         case kDirectIsSubjectTarget: {

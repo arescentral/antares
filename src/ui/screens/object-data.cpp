@@ -35,7 +35,7 @@ namespace antares {
 namespace {
 
 const int32_t kShipDataWidth = 240;
-const usecs kTypingDelay = usecs(1000000 / 60);
+const usecs kTypingDelay = kMinorTick;
 
 Rect object_data_bounds(Point origin, Size size) {
     Rect bounds(Point(0, 0), size);
