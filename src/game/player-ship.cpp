@@ -68,7 +68,8 @@ const int32_t kCursorBoundsSize = 16;  // should be same in instruments.c
 }  // namespace
 
 const static ticks kKlaxonInterval = ticks(125);
-const static ticks kKeyHoldDuration = ticks(45);
+const static ticks kDestKeyHoldDuration = ticks(45);
+const static ticks kHotKeyHoldDuration = ticks(51);  // Compatibility
 
 int32_t HotKey_GetFromObject(Handle<SpaceObject> object);
 void Update_LabelStrings_ForHotKeyChange( void);
@@ -80,9 +81,21 @@ enum DestKeyState {
     DEST_KEY_DOWN,     // down, and possibly usable for self-selection
     DEST_KEY_BLOCKED,  // down, but used for something else
 };
-static ANTARES_GLOBAL DestKeyState gDestKeyState = DEST_KEY_UP;
-static ANTARES_GLOBAL wall_time gDestKeyTime;
-static ANTARES_GLOBAL ZoomType gPreviousZoomMode;
+
+enum HotKeyState {
+    HOT_KEY_UP,
+    HOT_KEY_SELECT,
+    HOT_KEY_TARGET,
+};
+
+static ANTARES_GLOBAL DestKeyState  gDestKeyState = DEST_KEY_UP;
+static ANTARES_GLOBAL wall_time     gDestKeyTime;
+
+static ANTARES_GLOBAL HotKeyState   gHotKeyState = HOT_KEY_UP;
+static ANTARES_GLOBAL wall_time     gHotKeyTime;
+static ANTARES_GLOBAL int           gHotKeyNum;
+
+static ANTARES_GLOBAL ZoomType      gPreviousZoomMode;
 
 struct HotKeySuffix {
     Handle<SpaceObject> space_object;
@@ -126,10 +139,8 @@ void ResetPlayerShip(Handle<SpaceObject> which) {
         globals()->hotKey[h].object = SpaceObject::none();
         globals()->hotKey[h].objectID = -1;
     }
-    globals()->hotKeyDownTime = ticks(0);
-    globals()->lastHotKey = -1;
+    gHotKeyState = HOT_KEY_UP;
     gDestKeyState = DEST_KEY_UP;
-    globals()->hotKey_target = false;
 }
 
 PlayerShip::PlayerShip():
@@ -673,7 +684,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
         }
     } else {
         if ((gDestKeyState == DEST_KEY_DOWN)
-                && (now() >= (gDestKeyTime + kKeyHoldDuration))
+                && (now() >= (gDestKeyTime + kDestKeyHoldDuration))
                 && (theShip->attributes & kCanBeDestination)) {
             target_self();
         }
@@ -689,21 +700,21 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
     }
 
     if (hot_key >= 0) {
-        if (hot_key != globals()->lastHotKey) {
-            globals()->lastHotKey = hot_key;
-            globals()->hotKeyDownTime = ticks(0);
-            globals()->hotKey_target = false;
+        if (gHotKeyState == HOT_KEY_UP) {
+            gHotKeyTime = now();
+            gHotKeyNum = hot_key;
             if (gTheseKeys & kDestinationKey) {
-                globals()->hotKey_target = true;
+                gHotKeyState = HOT_KEY_TARGET;
+            } else {
+                gHotKeyState = HOT_KEY_SELECT;
             }
-        } else {
-            globals()->hotKeyDownTime += kMajorTick;
         }
-    } else if (globals()->lastHotKey >= 0) {
-        hot_key = globals()->lastHotKey;
-        globals()->lastHotKey = -1;
+    } else if (gHotKeyState != HOT_KEY_UP) {
+        hot_key = gHotKeyNum;
+        bool target = gHotKeyState == HOT_KEY_TARGET;
+        gHotKeyState = HOT_KEY_UP;
 
-        if (globals()->hotKeyDownTime > kKeyHoldDuration) {
+        if (now() >= gHotKeyTime + kHotKeyHoldDuration) {
             if (globals()->lastSelectedObject.get()) {
                 auto selectShip = globals()->lastSelectedObject;
 
@@ -724,7 +735,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
                         && (selectShip->id == globals()->hotKey[hot_key].objectID)) {
                     bool is_target = (gTheseKeys & kDestinationKey)
                         || (selectShip->owner != g.admiral)
-                        || (globals()->hotKey_target);
+                        || target;
                     SetPlayerSelectShip(
                             globals()->hotKey[hot_key].object,
                             is_target,
@@ -733,7 +744,6 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
                     globals()->hotKey[hot_key].object = SpaceObject::none();
                 }
             }
-            globals()->hotKeyDownTime = ticks(0);
         }
     }
 // end new hotkey selection

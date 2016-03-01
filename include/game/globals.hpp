@@ -156,12 +156,9 @@ struct aresGlobalType {
 
     uint32_t        keyMask;
     hotKeyType      hotKey[kHotKeyNum];
-    ticks           hotKeyDownTime;
-    int32_t         lastHotKey;
 
     Handle<SpaceObject>     lastSelectedObject;
     int32_t         lastSelectedObjectID;
-    bool         hotKey_target;
 
     game_time    next_klaxon;
 
