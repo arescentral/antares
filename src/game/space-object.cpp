@@ -529,8 +529,8 @@ void SpaceObject::change_base_type(
             weapon->position = 0;
             if (weapon->time < ticks(0)) {
                 weapon->time = ticks(0);
-            } else if (weapon->time > ticks(weapon->base->frame.weapon.fireTime)) {
-                weapon->time = ticks(weapon->base->frame.weapon.fireTime);
+            } else if (weapon->time > weapon->base->frame.weapon.fireTime) {
+                weapon->time = weapon->base->frame.weapon.fireTime;
             }
         }
         r = weapon->base->frame.weapon.range;

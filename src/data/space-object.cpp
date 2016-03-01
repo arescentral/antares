@@ -213,7 +213,7 @@ void read_from(ReadSource in, objectFrameType::Beam& beam) {
 void read_from(ReadSource in, objectFrameType::Weapon& weapon) {
     read(in, weapon.usage);
     read(in, weapon.energyCost);
-    read(in, weapon.fireTime);
+    weapon.fireTime = ticks(read<int32_t>(in));
     read(in, weapon.ammo);
     read(in, weapon.range);
     read(in, weapon.inverseSpeed);

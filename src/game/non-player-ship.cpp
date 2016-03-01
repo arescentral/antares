@@ -168,7 +168,7 @@ void fire_weapon(
         at = &offset;
     }
 
-    weapon.time = ticks(weaponObject->frame.weapon.fireTime);
+    weapon.time = weaponObject->frame.weapon.fireTime;
     if (weaponObject->frame.weapon.ammo > 0) {
         weapon.ammo--;
     }
