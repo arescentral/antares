@@ -154,7 +154,7 @@ class SpaceObject {
     ticks                   age = ticks(-1);
     int32_t                 naturalScale = SCALE_SCALE;
     int32_t                 id = kNoShip;
-    int16_t                 rechargeTime = 0;
+    ticks                   rechargeTime = ticks(0);
     int16_t                 active = kObjectAvailable;
 
     int16_t                 layer = 0;

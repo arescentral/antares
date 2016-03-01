@@ -55,7 +55,7 @@ const uint32_t kWarpInDistance      = 16777216;
 const int8_t kCloserThanClosest     = 0x01;
 const int8_t kFartherThanFarther    = 0x02;
 
-const int32_t kRechargeSpeed        = 4;
+const ticks kRechargeSpeed          = ticks(12);
 const int32_t kHealthRatio          = 5;
 const int32_t kWeaponRatio          = 2;
 const int32_t kEnergyChunk          = kHealthRatio + (kWeaponRatio * 3);
@@ -381,9 +381,9 @@ void NonplayerShipThink() {
         }
 
         if (anObject->rechargeTime < kRechargeSpeed) {
-            anObject->rechargeTime++;
+            anObject->rechargeTime += kMajorTick;
         } else {
-            anObject->rechargeTime = 0;
+            anObject->rechargeTime = ticks(0);
 
             if (anObject->presenceState == kWarpingPresence) {
                 anObject->collect_warp_energy(1);
