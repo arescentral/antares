@@ -571,17 +571,8 @@ void minicomputer_cancel() {
     minicomputer_handle_action(kOutLineButton, false, NULL);
 }
 
-void MiniComputerHandleNull(ticks unitsToDo) {
-    Handle<Destination> buildAtObject;
-
-    UpdateMiniScreenLines();
-}
-
-
 // only for updating volitile lines--doesn't draw whole screen!
-void UpdateMiniScreenLines( void)
-
-{
+void UpdateMiniScreenLines() {
     miniScreenLineType  *line = NULL;
     int32_t                lineNum, count;
     Rect                mRect;
