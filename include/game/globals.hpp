@@ -75,6 +75,7 @@ class MiniSpaceObject {
 
     int32_t max_health() const;
     int32_t max_energy() const;
+    sfz::StringSlice short_name() const;
 };
 
 struct miniScreenLineType;

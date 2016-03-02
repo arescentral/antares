@@ -936,6 +936,14 @@ void SpaceObject::create_floating_player_body() {
     }
 }
 
+sfz::StringSlice SpaceObject::name() const {
+    if (attributes & kIsDestination) {
+        return GetDestBalanceName(asDestination);
+    } else {
+        return get_object_name(base);
+    }
+}
+
 bool SpaceObject::engages(const SpaceObject& b) const {
     if ((baseType->buildFlags & kCanOnlyEngage) ||
         (b.baseType->buildFlags & kOnlyEngagedBy)) {

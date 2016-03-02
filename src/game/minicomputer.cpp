@@ -147,10 +147,10 @@ const int32_t kMiniSelectObjectNum  = 0;
 const int32_t kMiniSelectTop        = 180;
 
 const int32_t kMiniIconHeight       = 22;
-const int32_t kMiniIconWidth        = 24;
+const int32_t kMiniIconWidth        = 22;
 const int32_t kMiniIconLeft         = (kMiniScreenLeft + 2);
 
-const int32_t kMiniHealthLeft       = (kMiniIconLeft + kMiniIconWidth + 2);
+const int32_t kMiniHealthLeft       = (kMiniIconLeft + kMiniIconWidth + 4);
 const int32_t kMiniBarWidth         = 11;
 const int32_t kMiniBarHeight        = 18;
 
@@ -238,6 +238,14 @@ MiniSpaceObject::MiniSpaceObject(const SpaceObject& o) {
 
 int32_t MiniSpaceObject::max_health() const { return base->health; }
 int32_t MiniSpaceObject::max_energy() const { return base->energy; }
+
+StringSlice MiniSpaceObject::short_name() const {
+    if (attributes & kIsDestination) {
+        return GetDestBalanceName(asDestination);
+    } else {
+        return get_object_short_name(base);
+    }
+}
 
 void MiniComputerSetStatusStrings( void);
 int32_t MiniComputerGetStatusValue( int32_t);
@@ -747,52 +755,39 @@ void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) 
 void draw_mini_ship_data(
         const MiniSpaceObject& newObject, uint8_t headerColor,
         int16_t screenTop, int16_t whichString) {
-    Rect lRect = mini_screen_line_bounds(screenTop + instrument_top(), 0, 0, kMiniScreenWidth);
-    RgbColor color = GetRGBTranslateColorShade(headerColor, LIGHT);
-    RgbColor lightcolor = GetRGBTranslateColorShade(headerColor, VERY_LIGHT);
-    RgbColor darkcolor = GetRGBTranslateColorShade(headerColor, MEDIUM);
-
-    draw_shaded_rect(Rects(), lRect, color, lightcolor, darkcolor);
-
-    String text(mini_data_strings->at(whichString - 1));
-    computer_font->draw(
-            Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
-            text, RgbColor::kBlack);
-
-    if (newObject.attributes & kIsDestination) {
-        lRect = mini_screen_line_bounds(screenTop + instrument_top(), kMiniNameLineNum, 0, kMiniScreenWidth);
-
-        // get the color for writing the name
-        color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
-
-        // move to the 1st line in the selection miniscreen
-        String text(GetDestBalanceName(newObject.asDestination));
+    {
+        // "CONTROL" or "TARGET" label.
+        Rect bar = mini_screen_line_bounds(screenTop + instrument_top(), 0, 0, kMiniScreenWidth);
+        draw_shaded_rect(Rects(), bar, headerColor, LIGHT, VERY_LIGHT, MEDIUM);
+        String text(mini_data_strings->at(whichString - 1));
         computer_font->draw(
-                Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
-                text, color);
-    } else {
-        lRect = mini_screen_line_bounds(screenTop + instrument_top(), kMiniNameLineNum, 0, kMiniScreenWidth);
+                Point(bar.left + kMiniScreenLeftBuffer, bar.top + computer_font->ascent),
+                text, RgbColor::kBlack);
+    }
 
+    // Icon
+    Rect icon_rect = {
+        {kMiniIconLeft, screenTop + instrument_top() + MiniIconMacLineTop()},
+        {kMiniIconWidth, kMiniIconHeight},
+    };
+    if (!newObject.base.get()) {
+        draw_vbracket(Rects(), icon_rect, GetRGBTranslateColorShade(PALE_GREEN, MEDIUM));
+        return;
+    }
+
+    {
+        // Object name.
         if (newObject.base.get()) {
-            // get the color for writing the name
-            color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
-
-            // move to the 1st line in the selection miniscreen, write the name
-            String text(get_object_short_name(newObject.base));
+            Rect lRect = mini_screen_line_bounds(
+                    screenTop + instrument_top(), kMiniNameLineNum, 0, kMiniScreenWidth);
             computer_font->draw(
                     Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
-                    text, color);
+                    newObject.short_name(), GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT));
         }
     }
-    // set the rect for drawing the "icon" of the object type
-
-    Rect dRect;
-    dRect.left = kMiniIconLeft;
-    dRect.top = screenTop + instrument_top() + MiniIconMacLineTop();
-    dRect.right = kMiniScreenLeft + kMiniIconWidth;
-    dRect.bottom = dRect.top + kMiniIconHeight;
 
     if ((newObject.base.get()) && (newObject.pixResID >= 0)) {
+        // Icon
         NatePixTable* pixTable = GetPixTable(newObject.pixResID);
 
         if (pixTable != NULL) {
@@ -812,131 +807,107 @@ void draw_mini_ship_data(
                 rect.right = (rect.right * (kMiniIconHeight - 4)) / max_dimension;
                 rect.bottom = (rect.bottom * (kMiniIconHeight - 4)) / max_dimension;
             }
-            rect.center_in(dRect);
+            rect.center_in(icon_rect);
 
             frame.texture().draw(rect);
         }
     }
+    draw_vbracket(Rects(), icon_rect, GetRGBTranslateColorShade(PALE_GREEN, MEDIUM));
 
-    color = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);
-    draw_vbracket(Rects(), dRect, color);
-
-    if (newObject.base.get() != NULL) {
+    {
         if ((newObject.max_health() > 0) && (newObject._health > 0)) {
             Rects rects;
-            Rect dRect;
-            dRect.left = kMiniHealthLeft;
-            dRect.top = screenTop + instrument_top() + MiniIconMacLineTop();
-            dRect.right = dRect.left + kMiniBarWidth;
-            dRect.bottom = dRect.top + kMiniIconHeight;
+            Rect dRect = {
+                Point(kMiniHealthLeft, screenTop + instrument_top() + MiniIconMacLineTop()),
+                Size(kMiniBarWidth, kMiniIconHeight)
+            };
 
             uint32_t tlong = newObject._health * kMiniBarHeight;
             tlong /= newObject.max_health();
 
-            color = GetRGBTranslateColorShade(SKY_BLUE, DARK);
-
+            Rect lRect;
             lRect.left = dRect.left + 2;
             lRect.top = dRect.top + 2;
             lRect.right = dRect.right - 2;
             lRect.bottom = dRect.bottom - 2 - tlong;
-            rects.fill(lRect, color);
+            rects.fill(lRect, GetRGBTranslateColorShade(SKY_BLUE, DARK));
 
-            color = GetRGBTranslateColorShade(SKY_BLUE, LIGHT);
             lRect.top = dRect.bottom - 2 - tlong;
             lRect.bottom = dRect.bottom - 2;
-            rects.fill(lRect, color);
+            rects.fill(lRect, GetRGBTranslateColorShade(SKY_BLUE, LIGHT));
 
-            color = GetRGBTranslateColorShade(SKY_BLUE, MEDIUM);
-            draw_vbracket(rects, dRect, color);
+            draw_vbracket(rects, dRect, GetRGBTranslateColorShade(SKY_BLUE, MEDIUM));
         }
     }
 
-    if (newObject.base.get() != NULL) {
+    {
         if ((newObject.max_energy() > 0) && (newObject._energy > 0)) {
             Rects rects;
-            Rect dRect;
-            dRect.left = kMiniEnergyLeft;
-            dRect.top = screenTop + instrument_top() + MiniIconMacLineTop();
-            dRect.right = dRect.left + kMiniBarWidth;
-            dRect.bottom = dRect.top + kMiniIconHeight;
+            Rect dRect = {
+                Point(kMiniEnergyLeft, screenTop + instrument_top() + MiniIconMacLineTop()),
+                Size(kMiniBarWidth, kMiniIconHeight)
+            };
 
             uint32_t tlong = newObject._energy * kMiniBarHeight;
             tlong /= newObject.max_energy();
 
-            color = GetRGBTranslateColorShade(YELLOW, DARK);
-
+            Rect lRect;
             lRect.left = dRect.left + 2;
             lRect.top = dRect.top + 2;
             lRect.right = dRect.right - 2;
             lRect.bottom = dRect.bottom - 2 - tlong;
-            rects.fill(lRect, color);
+            rects.fill(lRect, GetRGBTranslateColorShade(YELLOW, DARK));
 
-            color = GetRGBTranslateColorShade(YELLOW, LIGHT);
             lRect.top = dRect.bottom - 2 - tlong;
             lRect.bottom = dRect.bottom - 2;
-            rects.fill(lRect, color);
+            rects.fill(lRect, GetRGBTranslateColorShade(YELLOW, LIGHT));
 
-            color = GetRGBTranslateColorShade(YELLOW, MEDIUM);
-            draw_vbracket(rects, dRect, color);
+            draw_vbracket(rects, dRect, GetRGBTranslateColorShade(YELLOW, MEDIUM));
         }
     }
 
-    lRect = mini_screen_line_bounds(screenTop + instrument_top(), kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
+    {
+        // Weapons
+        RgbColor color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
-    // get the color for writing the name
-    color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
+        if (newObject.beam.get()) {
+            Rect lRect = mini_screen_line_bounds(
+                    screenTop + instrument_top(), kMiniWeapon1LineNum,
+                    kMiniRightColumnLeft, kMiniScreenWidth);
+            computer_font->draw(
+                    Point(lRect.left, lRect.top + computer_font->ascent),
+                    get_object_short_name(newObject.beam), color);
+        }
 
-    // move to the 1st line in the selection miniscreen, write the name
-    if (newObject.beam.get()) {
-        String text(get_object_short_name(newObject.beam));
-        computer_font->draw(Point(lRect.left, lRect.top + computer_font->ascent), text, color);
-    }
+        if (newObject.pulse.get()) {
+            Rect lRect = mini_screen_line_bounds(
+                    screenTop + instrument_top(), kMiniWeapon2LineNum,
+                    kMiniRightColumnLeft, kMiniScreenWidth);
+            computer_font->draw(
+                    Point(lRect.left, lRect.top + computer_font->ascent),
+                    get_object_short_name(newObject.pulse), color);
+        }
 
-    lRect = mini_screen_line_bounds(screenTop + instrument_top(), kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-
-    // get the color for writing the name
-    color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
-
-    // move to the 1st line in the selection miniscreen, write the name
-    if (newObject.pulse.get()) {
-        String text(get_object_short_name(newObject.pulse));
-        computer_font->draw(Point(lRect.left, lRect.top + computer_font->ascent), text, color);
-    }
-
-    // Don't show special weapons of destination objects.
-    if (!(newObject.attributes & kIsDestination)) {
-        lRect = mini_screen_line_bounds(screenTop + instrument_top(), kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-
-        // get the color for writing the name
-        color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
-
-        // move to the 1st line in the selection miniscreen, write the name
-        if (newObject.special.get()) {
-            String text(get_object_short_name(newObject.special));
-            computer_font->draw(Point(lRect.left, lRect.top + computer_font->ascent), text, color);
+        // Don't show special weapons of destination objects.
+        if (!(newObject.attributes & kIsDestination)) {
+            if (newObject.special.get()) {
+                Rect lRect = mini_screen_line_bounds(
+                        screenTop + instrument_top(), kMiniWeapon3LineNum,
+                        kMiniRightColumnLeft, kMiniScreenWidth);
+                computer_font->draw(
+                        Point(lRect.left, lRect.top + computer_font->ascent),
+                        get_object_short_name(newObject.special), color);
+            }
         }
     }
-
-    lRect = mini_screen_line_bounds(screenTop + instrument_top(), kMiniDestLineNum, 0, kMiniScreenWidth);
 
     // write the name
     if (newObject.destObject.get()) {
-        auto dObject = newObject.destObject;
-
-        // get the color for writing the name
-        if (dObject->owner == g.admiral) {
-            color = GetRGBTranslateColorShade(GREEN, VERY_LIGHT);
-        } else {
-            color = GetRGBTranslateColorShade(RED, VERY_LIGHT);
-        }
-
-        if (dObject->attributes & kIsDestination) {
-            String text(GetDestBalanceName(dObject->asDestination));
-            computer_font->draw(Point(lRect.left, lRect.top + computer_font->ascent), text, color);
-        } else {
-            String text(get_object_name(dObject->base));
-            computer_font->draw(Point(lRect.left, lRect.top + computer_font->ascent), text, color);
-        }
+        auto dest = newObject.destObject;
+        bool friendly = (dest->owner == g.admiral);
+        RgbColor color = GetRGBTranslateColorShade(friendly ? GREEN : RED, VERY_LIGHT);
+        Rect lRect = mini_screen_line_bounds(screenTop + instrument_top(), kMiniDestLineNum, 0, kMiniScreenWidth);
+        computer_font->draw(Point(lRect.left, lRect.top + computer_font->ascent), dest->name(), color);
     }
 }
 
