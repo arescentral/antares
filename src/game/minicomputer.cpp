@@ -54,32 +54,19 @@ namespace antares {
 
 class MiniSpaceObject: private SpaceObject {
   public:
-    using SpaceObject::id;
     using SpaceObject::beam;
     using SpaceObject::pulse;
     using SpaceObject::special;
-    using SpaceObject::destinationLocation;
     using SpaceObject::destObject;
     using SpaceObject::asDestination;
     using SpaceObject::_health;
-    using SpaceObject::health;
     using SpaceObject::max_health;
     using SpaceObject::_energy;
-    using SpaceObject::energy;
     using SpaceObject::max_energy;
     using SpaceObject::base;
     using SpaceObject::pixResID;
     using SpaceObject::attributes;
-    using SpaceObject::baseType;
-    using SpaceObject::location;
     using SpaceObject::owner;
-    using SpaceObject::nextNearObject;
-    using SpaceObject::nextFarObject;
-    using SpaceObject::distanceGrid;
-    using SpaceObject::collisionGrid;
-    using SpaceObject::remoteFriendStrength;
-    using SpaceObject::remoteFoeStrength;
-    using SpaceObject::escortStrength;
 };
 
 namespace {
@@ -246,29 +233,17 @@ inline int32_t mGetLineNumFromV(int32_t mV) {
 template <typename T, typename U>
 inline void mCopyMiniSpaceObject(
         T& mdestobject, const U& msourceobject) {
-    (mdestobject).id = (msourceobject).id;
     (mdestobject).beam.base = (msourceobject).beam.base;
     (mdestobject).pulse.base = (msourceobject).pulse.base;
     (mdestobject).special.base = (msourceobject).special.base;
-    (mdestobject).destinationLocation.h = (msourceobject).destinationLocation.h;
-    (mdestobject).destinationLocation.v = (msourceobject).destinationLocation.v;
     (mdestobject).destObject = (msourceobject).destObject;
     (mdestobject).asDestination = (msourceobject).asDestination;
-    (mdestobject)._health = (msourceobject).health();
-    (mdestobject)._energy = (msourceobject).energy();
+    (mdestobject)._health = (msourceobject)._health;
+    (mdestobject)._energy = (msourceobject)._energy;
     (mdestobject).base = (msourceobject).base;
     (mdestobject).pixResID = (msourceobject).pixResID;
     (mdestobject).attributes = (msourceobject).attributes;
-    (mdestobject).location = (msourceobject).location;
     (mdestobject).owner = (msourceobject).owner;
-    (mdestobject).nextFarObject = (msourceobject).nextFarObject;
-    (mdestobject).distanceGrid = (msourceobject).distanceGrid;
-    (mdestobject).nextNearObject = (msourceobject).nextNearObject;
-    (mdestobject).collisionGrid = (msourceobject).collisionGrid;
-    (mdestobject).remoteFriendStrength = (msourceobject).remoteFriendStrength;
-    (mdestobject).remoteFoeStrength = (msourceobject).remoteFoeStrength;
-    (mdestobject).escortStrength = (msourceobject).escortStrength;
-    (mdestobject).baseType = (msourceobject).baseType;
 }
 
 inline void mCopyBlankLineString(miniScreenLineType* mline, StringSlice mstring) {
@@ -342,11 +317,9 @@ void ClearMiniObjectData( void)
     MiniSpaceObject *o;
 
     o = mGetMiniObjectPtr( kMiniSelectObjectNum);
-    o->id = -1;
     o->beam.base = BaseObject::none();
     o->pulse.base = BaseObject::none();
     o->special.base = BaseObject::none();
-    o->destinationLocation.h = o->destinationLocation.v = -1;
     o->destObject = SpaceObject::none();
     o->asDestination = Destination::none();
     o->_health = 0;
@@ -354,14 +327,11 @@ void ClearMiniObjectData( void)
     o->base = BaseObject::none();
     o->pixResID = -1;
     o->attributes = 0;
-    o->baseType = NULL;
 
     o = mGetMiniObjectPtr( kMiniTargetObjectNum);
-    o->id = -1;
     o->beam.base = BaseObject::none();
     o->pulse.base = BaseObject::none();
     o->special.base = BaseObject::none();
-    o->destinationLocation.h = o->destinationLocation.v = -1;
     o->destObject = SpaceObject::none();
     o->asDestination = Destination::none();
     o->_health = 0;
@@ -369,7 +339,6 @@ void ClearMiniObjectData( void)
     o->base = BaseObject::none();
     o->pixResID = -1;
     o->attributes = 0;
-    o->baseType = NULL;
 
     globals()->gMiniScreenData.buildTimeBarValue = -1;
     globals()->gMiniScreenData.pollTime = ticks(0);
@@ -685,11 +654,9 @@ void MiniComputerHandleNull(ticks unitsToDo) {
         if (control.get()) {
             mCopyMiniSpaceObject(newObject, *control);
         } else {
-            newObject.id = -1;
             newObject.beam.base = BaseObject::none();
             newObject.pulse.base = BaseObject::none();
             newObject.special.base = BaseObject::none();
-            newObject.destinationLocation.h = newObject.destinationLocation.v = -1;
             newObject.destObject = SpaceObject::none();
             newObject.asDestination = Destination::none();
             newObject._health = 0;
@@ -697,7 +664,6 @@ void MiniComputerHandleNull(ticks unitsToDo) {
             newObject.base = BaseObject::none();
             newObject.pixResID = -1;
             newObject.attributes = 0;
-            newObject.baseType = NULL;
         }
         mCopyMiniSpaceObject(*myObject, newObject);
 
@@ -706,11 +672,9 @@ void MiniComputerHandleNull(ticks unitsToDo) {
         if (target.get()) {
             mCopyMiniSpaceObject(newObject, *target);
         } else {
-            newObject.id = -1;
             newObject.beam.base = BaseObject::none();
             newObject.pulse.base = BaseObject::none();
             newObject.special.base = BaseObject::none();
-            newObject.destinationLocation.h = newObject.destinationLocation.v = -1;
             newObject.destObject = SpaceObject::none();
             newObject.asDestination = Destination::none();
             newObject._health = 0;
@@ -718,7 +682,6 @@ void MiniComputerHandleNull(ticks unitsToDo) {
             newObject.base = BaseObject::none();
             newObject.pixResID = -1;
             newObject.attributes = 0;
-            newObject.baseType = NULL;
         }
         mCopyMiniSpaceObject(*myObject, newObject);
 
@@ -902,7 +865,7 @@ void draw_mini_ship_data(
         if (pixTable != NULL) {
             int16_t whichShape;
             if (newObject.attributes & kIsSelfAnimated) {
-                whichShape = more_evil_fixed_to_long(newObject.baseType->frame.animation.firstShape);
+                whichShape = more_evil_fixed_to_long(newObject.base->frame.animation.firstShape);
             } else {
                 whichShape = 0;
             }
@@ -925,8 +888,8 @@ void draw_mini_ship_data(
     color = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);
     draw_vbracket(Rects(), dRect, color);
 
-    if (newObject.baseType != NULL) {
-        if ((newObject.max_health() > 0) && (newObject.health() > 0)) {
+    if (newObject.base.get() != NULL) {
+        if ((newObject.max_health() > 0) && (newObject._health > 0)) {
             Rects rects;
             Rect dRect;
             dRect.left = kMiniHealthLeft;
@@ -934,7 +897,7 @@ void draw_mini_ship_data(
             dRect.right = dRect.left + kMiniBarWidth;
             dRect.bottom = dRect.top + kMiniIconHeight;
 
-            uint32_t tlong = newObject.health() * kMiniBarHeight;
+            uint32_t tlong = newObject._health * kMiniBarHeight;
             tlong /= newObject.max_health();
 
             color = GetRGBTranslateColorShade(SKY_BLUE, DARK);
@@ -955,8 +918,8 @@ void draw_mini_ship_data(
         }
     }
 
-    if (newObject.baseType != NULL) {
-        if ((newObject.max_energy() > 0) && (newObject.energy() > 0)) {
+    if (newObject.base.get() != NULL) {
+        if ((newObject.max_energy() > 0) && (newObject._energy > 0)) {
             Rects rects;
             Rect dRect;
             dRect.left = kMiniEnergyLeft;
@@ -964,7 +927,7 @@ void draw_mini_ship_data(
             dRect.right = dRect.left + kMiniBarWidth;
             dRect.bottom = dRect.top + kMiniIconHeight;
 
-            uint32_t tlong = newObject.energy() * kMiniBarHeight;
+            uint32_t tlong = newObject._energy * kMiniBarHeight;
             tlong /= newObject.max_energy();
 
             color = GetRGBTranslateColorShade(YELLOW, DARK);
