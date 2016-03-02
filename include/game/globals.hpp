@@ -59,15 +59,20 @@ enum ZoomType {
 
 class MiniSpaceObject {
   public:
+    MiniSpaceObject() = default;
+    explicit MiniSpaceObject(const SpaceObject& o);
+
     Handle<BaseObject> base;
     Handle<BaseObject> beam, pulse, special;
     Handle<SpaceObject> destObject;
     Handle<Destination> asDestination;
-    int32_t _health;
-    int32_t _energy;
-    int pixResID;
-    uint32_t attributes;
     Handle<Admiral> owner;
+
+    int32_t _health = 0;
+    int32_t _energy = 0;
+    int pixResID = -1;
+    uint32_t attributes = 0;
+
     int32_t max_health() const;
     int32_t max_energy() const;
 };
