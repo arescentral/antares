@@ -52,21 +52,19 @@ using std::max;
 
 namespace antares {
 
-class MiniSpaceObject: private SpaceObject {
+class MiniSpaceObject {
   public:
-    using SpaceObject::beam;
-    using SpaceObject::pulse;
-    using SpaceObject::special;
-    using SpaceObject::destObject;
-    using SpaceObject::asDestination;
-    using SpaceObject::_health;
-    using SpaceObject::max_health;
-    using SpaceObject::_energy;
-    using SpaceObject::max_energy;
-    using SpaceObject::base;
-    using SpaceObject::pixResID;
-    using SpaceObject::attributes;
-    using SpaceObject::owner;
+    Handle<BaseObject> base;
+    struct { Handle<BaseObject> base; } beam, pulse, special;
+    Handle<SpaceObject> destObject;
+    Handle<Destination> asDestination;
+    int32_t _health;
+    int32_t _energy;
+    int pixResID;
+    uint32_t attributes;
+    Handle<Admiral> owner;
+    int32_t max_health() const { return base->health; }
+    int32_t max_energy() const { return base->energy; }
 };
 
 namespace {
