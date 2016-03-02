@@ -220,33 +220,7 @@ inline void mCopyBlankLineString(miniScreenLineType* mline, StringSlice mstring)
 }  // namespace
 
 static void draw_mini_ship_data(
-        const MiniSpaceObject& obj, uint8_t header_color, int16_t screen_top, StringSlice label);
-
-// for copying the fields of a space object relevant to the miniscreens:
-MiniSpaceObject::MiniSpaceObject(const SpaceObject& o) {
-    beam           = o.beam.base;
-    pulse          = o.pulse.base;
-    special        = o.special.base;
-    destObject     = o.destObject;
-    asDestination  = o.asDestination;
-    _health        = o._health;
-    _energy        = o._energy;
-    base           = o.base;
-    pixResID       = o.pixResID;
-    attributes     = o.attributes;
-    owner          = o.owner;
-}
-
-int32_t MiniSpaceObject::max_health() const { return base->health; }
-int32_t MiniSpaceObject::max_energy() const { return base->energy; }
-
-StringSlice MiniSpaceObject::short_name() const {
-    if (attributes & kIsDestination) {
-        return GetDestBalanceName(asDestination);
-    } else {
-        return get_object_short_name(base);
-    }
-}
+        Handle<SpaceObject> obj, uint8_t header_color, int16_t screen_top, StringSlice label);
 
 void MiniComputerSetStatusStrings( void);
 int32_t MiniComputerGetStatusValue( int32_t);
@@ -299,9 +273,6 @@ void ClearMiniScreenLines() {
 }
 
 void ClearMiniObjectData() {
-    globals()->gMiniScreenData.control = MiniSpaceObject();
-    globals()->gMiniScreenData.target = MiniSpaceObject();
-
     globals()->gMiniScreenData.buildTimeBarValue = -1;
 }
 
@@ -416,10 +387,10 @@ void draw_mini_screen() {
     }
 
     draw_mini_ship_data(
-            globals()->gMiniScreenData.control, YELLOW, kMiniSelectTop + instrument_top(),
+            g.admiral->control(), YELLOW, kMiniSelectTop + instrument_top(),
             mini_data_strings->at(0));
     draw_mini_ship_data(
-            globals()->gMiniScreenData.target, SKY_BLUE, kMiniTargetTop + instrument_top(),
+            g.admiral->target(), SKY_BLUE, kMiniTargetTop + instrument_top(),
             mini_data_strings->at(1));
 }
 
@@ -609,22 +580,6 @@ void MiniComputerHandleNull(ticks unitsToDo) {
 
     // handle control/command/selected object
 
-    auto mini_control = &globals()->gMiniScreenData.control;
-    auto control = g.admiral->control();
-    if (control.get()) {
-        *mini_control = MiniSpaceObject(*control);
-    } else {
-        *mini_control = MiniSpaceObject();
-    }
-
-    auto mini_target = &globals()->gMiniScreenData.target;
-    auto target = g.admiral->target();
-    if (target.get()) {
-        *mini_target = MiniSpaceObject(*target);
-    } else {
-        *mini_target = MiniSpaceObject();
-    }
-
     auto build_at = GetAdmiralBuildAtObject(g.admiral);
     if (build_at.get()) {
         if (build_at->totalBuildTime > ticks(0)) {
@@ -751,7 +706,7 @@ void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) 
 }
 
 static void draw_mini_ship_data(
-        const MiniSpaceObject& obj, uint8_t header_color, int16_t screen_top, StringSlice label) {
+        Handle<SpaceObject> obj, uint8_t header_color, int16_t screen_top, StringSlice label) {
     {
         // "CONTROL" or "TARGET" label.
         Rect bar = mini_screen_line_bounds(screen_top, 0, 0, kMiniScreenWidth);
@@ -766,29 +721,29 @@ static void draw_mini_ship_data(
         {kMiniIconLeft, screen_top + MiniIconMacLineTop()},
         {kMiniIconWidth, kMiniIconHeight},
     };
-    if (!obj.base.get()) {
+    if (!obj.get()) {
         draw_vbracket(Rects(), icon_rect, GetRGBTranslateColorShade(PALE_GREEN, MEDIUM));
         return;
     }
 
     {
         // Object name.
-        if (obj.base.get()) {
+        if (obj->base.get()) {
             Rect lRect = mini_screen_line_bounds(screen_top, kMiniNameLineNum, 0, kMiniScreenWidth);
             computer_font->draw(
                     Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
-                    obj.short_name(), GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT));
+                    obj->short_name(), GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT));
         }
     }
 
-    if ((obj.base.get()) && (obj.pixResID >= 0)) {
+    if ((obj->base.get()) && (obj->pixResID >= 0)) {
         // Icon
-        NatePixTable* pixTable = GetPixTable(obj.pixResID);
+        NatePixTable* pixTable = GetPixTable(obj->pixResID);
 
         if (pixTable != NULL) {
             int16_t whichShape;
-            if (obj.attributes & kIsSelfAnimated) {
-                whichShape = more_evil_fixed_to_long(obj.base->frame.animation.firstShape);
+            if (obj->attributes & kIsSelfAnimated) {
+                whichShape = more_evil_fixed_to_long(obj->base->frame.animation.firstShape);
             } else {
                 whichShape = 0;
             }
@@ -810,15 +765,15 @@ static void draw_mini_ship_data(
     draw_vbracket(Rects(), icon_rect, GetRGBTranslateColorShade(PALE_GREEN, MEDIUM));
 
     {
-        if ((obj.max_health() > 0) && (obj._health > 0)) {
+        if ((obj->max_health() > 0) && (obj->_health > 0)) {
             Rects rects;
             Rect dRect = {
                 Point(kMiniHealthLeft, screen_top + MiniIconMacLineTop()),
                 Size(kMiniBarWidth, kMiniIconHeight)
             };
 
-            uint32_t tlong = obj._health * kMiniBarHeight;
-            tlong /= obj.max_health();
+            uint32_t tlong = obj->_health * kMiniBarHeight;
+            tlong /= obj->max_health();
 
             Rect lRect;
             lRect.left = dRect.left + 2;
@@ -836,15 +791,15 @@ static void draw_mini_ship_data(
     }
 
     {
-        if ((obj.max_energy() > 0) && (obj._energy > 0)) {
+        if ((obj->max_energy() > 0) && (obj->_energy > 0)) {
             Rects rects;
             Rect dRect = {
                 Point(kMiniEnergyLeft, screen_top + MiniIconMacLineTop()),
                 Size(kMiniBarWidth, kMiniIconHeight)
             };
 
-            uint32_t tlong = obj._energy * kMiniBarHeight;
-            tlong /= obj.max_energy();
+            uint32_t tlong = obj->_energy * kMiniBarHeight;
+            tlong /= obj->max_energy();
 
             Rect lRect;
             lRect.left = dRect.left + 2;
@@ -865,37 +820,37 @@ static void draw_mini_ship_data(
         // Weapons
         RgbColor color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
-        if (obj.beam.get()) {
+        if (obj->beam.base.get()) {
             Rect lRect = mini_screen_line_bounds(
                     screen_top, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
             computer_font->draw(
                     Point(lRect.left, lRect.top + computer_font->ascent),
-                    get_object_short_name(obj.beam), color);
+                    get_object_short_name(obj->beam.base), color);
         }
 
-        if (obj.pulse.get()) {
+        if (obj->pulse.base.get()) {
             Rect lRect = mini_screen_line_bounds(
                     screen_top, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
             computer_font->draw(
                     Point(lRect.left, lRect.top + computer_font->ascent),
-                    get_object_short_name(obj.pulse), color);
+                    get_object_short_name(obj->pulse.base), color);
         }
 
         // Don't show special weapons of destination objects.
-        if (!(obj.attributes & kIsDestination)) {
-            if (obj.special.get()) {
+        if (!(obj->attributes & kIsDestination)) {
+            if (obj->special.base.get()) {
                 Rect lRect = mini_screen_line_bounds(
                         screen_top, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
                 computer_font->draw(
                         Point(lRect.left, lRect.top + computer_font->ascent),
-                        get_object_short_name(obj.special), color);
+                        get_object_short_name(obj->special.base), color);
             }
         }
     }
 
     // write the name
-    if (obj.destObject.get()) {
-        auto dest = obj.destObject;
+    if (obj->destObject.get()) {
+        auto dest = obj->destObject;
         bool friendly = (dest->owner == g.admiral);
         RgbColor color = GetRGBTranslateColorShade(friendly ? GREEN : RED, VERY_LIGHT);
         Rect lRect = mini_screen_line_bounds(screen_top, kMiniDestLineNum, 0, kMiniScreenWidth);

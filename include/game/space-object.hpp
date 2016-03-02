@@ -63,6 +63,7 @@ class SpaceObject {
     void create_floating_player_body();
 
     sfz::StringSlice name() const;
+    sfz::StringSlice short_name() const;
     bool engages(const SpaceObject& b) const;
     Fixed turn_rate() const;
 

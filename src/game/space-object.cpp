@@ -944,6 +944,14 @@ sfz::StringSlice SpaceObject::name() const {
     }
 }
 
+sfz::StringSlice SpaceObject::short_name() const {
+    if (attributes & kIsDestination) {
+        return GetDestBalanceName(asDestination);
+    } else {
+        return get_object_short_name(base);
+    }
+}
+
 bool SpaceObject::engages(const SpaceObject& b) const {
     if ((baseType->buildFlags & kCanOnlyEngage) ||
         (b.baseType->buildFlags & kOnlyEngagedBy)) {
