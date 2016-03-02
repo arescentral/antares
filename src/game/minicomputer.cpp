@@ -214,9 +214,9 @@ inline int32_t mGetLineNumFromV(int32_t mV) {
 
 // for copying the fields of a space object relevant to the miniscreens:
 inline void mCopyMiniSpaceObject(MiniSpaceObject& dst, const SpaceObject& src) {
-    dst.beam.base      = src.beam.base;
-    dst.pulse.base     = src.pulse.base;
-    dst.special.base   = src.special.base;
+    dst.beam           = src.beam.base;
+    dst.pulse          = src.pulse.base;
+    dst.special        = src.special.base;
     dst.destObject     = src.destObject;
     dst.asDestination  = src.asDestination;
     dst._health        = src._health;
@@ -296,9 +296,9 @@ void ClearMiniObjectData( void)
     MiniSpaceObject *o;
 
     o = &globals()->gMiniScreenData.control;
-    o->beam.base = BaseObject::none();
-    o->pulse.base = BaseObject::none();
-    o->special.base = BaseObject::none();
+    o->beam = BaseObject::none();
+    o->pulse = BaseObject::none();
+    o->special = BaseObject::none();
     o->destObject = SpaceObject::none();
     o->asDestination = Destination::none();
     o->_health = 0;
@@ -308,9 +308,9 @@ void ClearMiniObjectData( void)
     o->attributes = 0;
 
     o = &globals()->gMiniScreenData.target;
-    o->beam.base = BaseObject::none();
-    o->pulse.base = BaseObject::none();
-    o->special.base = BaseObject::none();
+    o->beam = BaseObject::none();
+    o->pulse = BaseObject::none();
+    o->special = BaseObject::none();
     o->destObject = SpaceObject::none();
     o->asDestination = Destination::none();
     o->_health = 0;
@@ -632,9 +632,9 @@ void MiniComputerHandleNull(ticks unitsToDo) {
         if (control.get()) {
             mCopyMiniSpaceObject(*mini_control, *control);
         } else {
-            mini_control->beam.base = BaseObject::none();
-            mini_control->pulse.base = BaseObject::none();
-            mini_control->special.base = BaseObject::none();
+            mini_control->beam = BaseObject::none();
+            mini_control->pulse = BaseObject::none();
+            mini_control->special = BaseObject::none();
             mini_control->destObject = SpaceObject::none();
             mini_control->asDestination = Destination::none();
             mini_control->_health = 0;
@@ -649,9 +649,9 @@ void MiniComputerHandleNull(ticks unitsToDo) {
         if (target.get()) {
             mCopyMiniSpaceObject(*mini_target, *target);
         } else {
-            mini_target->beam.base = BaseObject::none();
-            mini_target->pulse.base = BaseObject::none();
-            mini_target->special.base = BaseObject::none();
+            mini_target->beam = BaseObject::none();
+            mini_target->pulse = BaseObject::none();
+            mini_target->special = BaseObject::none();
             mini_target->destObject = SpaceObject::none();
             mini_target->asDestination = Destination::none();
             mini_target->_health = 0;
@@ -930,8 +930,8 @@ void draw_mini_ship_data(
     color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
     // move to the 1st line in the selection miniscreen, write the name
-    if (newObject.beam.base.get()) {
-        String text(get_object_short_name(newObject.beam.base));
+    if (newObject.beam.get()) {
+        String text(get_object_short_name(newObject.beam));
         computer_font->draw(Point(lRect.left, lRect.top + computer_font->ascent), text, color);
     }
 
@@ -941,8 +941,8 @@ void draw_mini_ship_data(
     color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
     // move to the 1st line in the selection miniscreen, write the name
-    if (newObject.pulse.base.get()) {
-        String text(get_object_short_name(newObject.pulse.base));
+    if (newObject.pulse.get()) {
+        String text(get_object_short_name(newObject.pulse));
         computer_font->draw(Point(lRect.left, lRect.top + computer_font->ascent), text, color);
     }
 
@@ -954,8 +954,8 @@ void draw_mini_ship_data(
         color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
         // move to the 1st line in the selection miniscreen, write the name
-        if (newObject.special.base.get()) {
-            String text(get_object_short_name(newObject.special.base));
+        if (newObject.special.get()) {
+            String text(get_object_short_name(newObject.special));
             computer_font->draw(Point(lRect.left, lRect.top + computer_font->ascent), text, color);
         }
     }

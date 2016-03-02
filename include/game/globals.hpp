@@ -60,7 +60,7 @@ enum ZoomType {
 class MiniSpaceObject {
   public:
     Handle<BaseObject> base;
-    struct { Handle<BaseObject> base; } beam, pulse, special;
+    Handle<BaseObject> beam, pulse, special;
     Handle<SpaceObject> destObject;
     Handle<Destination> asDestination;
     int32_t _health;
