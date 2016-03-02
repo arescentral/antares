@@ -274,7 +274,7 @@ void ClearMiniScreenLines() {
 void ClearMiniObjectData() {
 }
 
-void draw_mini_screen() {
+void draw_minicomputer_lines() {
     {
         Rects rects;
         for (int32_t count = 0; count < kMiniScreenTrueLineNum; count++) {
@@ -383,7 +383,18 @@ void draw_mini_screen() {
                     c->string, textcolor);
         }
     }
+}
 
+void draw_mini_screen() {
+    switch (globals()->gMiniScreenData.currentScreen) {
+        case kMainMiniScreen:
+        case kBuildMiniScreen:
+        case kSpecialMiniScreen:
+        case kMessageMiniScreen:
+        case kStatusMiniScreen:
+            draw_minicomputer_lines();
+            break;
+    }
     draw_mini_ship_data(
             g.admiral->control(), YELLOW, kMiniSelectTop + instrument_top(),
             mini_data_strings->at(0));
