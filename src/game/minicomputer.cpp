@@ -52,21 +52,6 @@ using std::max;
 
 namespace antares {
 
-class MiniSpaceObject {
-  public:
-    Handle<BaseObject> base;
-    struct { Handle<BaseObject> base; } beam, pulse, special;
-    Handle<SpaceObject> destObject;
-    Handle<Destination> asDestination;
-    int32_t _health;
-    int32_t _energy;
-    int pixResID;
-    uint32_t attributes;
-    Handle<Admiral> owner;
-    int32_t max_health() const { return base->health; }
-    int32_t max_energy() const { return base->energy; }
-};
-
 namespace {
 
 const int32_t kMiniScreenCharWidth = 25;
@@ -251,11 +236,10 @@ inline void mCopyBlankLineString(miniScreenLineType* mline, StringSlice mstring)
     }
 }
 
-inline MiniSpaceObject* mGetMiniObjectPtr(int32_t mwhich) {
-    return globals()->gMiniScreenData.objectData + mwhich;
-}
-
 }  // namespace
+
+int32_t MiniSpaceObject::max_health() const { return base->health; }
+int32_t MiniSpaceObject::max_energy() const { return base->energy; }
 
 void MiniComputerSetStatusStrings( void);
 int32_t MiniComputerGetStatusValue( int32_t);
@@ -269,7 +253,6 @@ void MiniScreenInit() {
     globals()->gMiniScreenData.clickLine = kMiniScreenNoLineSelected;
 
     globals()->gMiniScreenData.lineData.reset(new miniScreenLineType[kMiniScreenTrueLineNum]);
-    globals()->gMiniScreenData.objectData = new MiniSpaceObject[kMiniObjectDataNum];
 
     ClearMiniScreenLines();
     ClearMiniObjectData();
@@ -314,7 +297,7 @@ void ClearMiniObjectData( void)
 {
     MiniSpaceObject *o;
 
-    o = mGetMiniObjectPtr( kMiniSelectObjectNum);
+    o = &globals()->gMiniScreenData.control;
     o->beam.base = BaseObject::none();
     o->pulse.base = BaseObject::none();
     o->special.base = BaseObject::none();
@@ -326,7 +309,7 @@ void ClearMiniObjectData( void)
     o->pixResID = -1;
     o->attributes = 0;
 
-    o = mGetMiniObjectPtr( kMiniTargetObjectNum);
+    o = &globals()->gMiniScreenData.target;
     o->beam.base = BaseObject::none();
     o->pulse.base = BaseObject::none();
     o->special.base = BaseObject::none();
@@ -452,8 +435,8 @@ void draw_mini_screen() {
         }
     }
 
-    draw_mini_ship_data(*mGetMiniObjectPtr(kMiniSelectObjectNum), YELLOW, kMiniSelectTop, kMiniSelectObjectNum + 1);
-    draw_mini_ship_data(*mGetMiniObjectPtr(kMiniTargetObjectNum), SKY_BLUE, kMiniTargetTop, kMiniTargetObjectNum + 1);
+    draw_mini_ship_data(globals()->gMiniScreenData.control, YELLOW, kMiniSelectTop, kMiniSelectObjectNum + 1);
+    draw_mini_ship_data(globals()->gMiniScreenData.target, SKY_BLUE, kMiniTargetTop, kMiniTargetObjectNum + 1);
 }
 
 void MakeMiniScreenFromIndString(int16_t whichString) {
@@ -647,7 +630,7 @@ void MiniComputerHandleNull(ticks unitsToDo) {
 
         // handle control/command/selected object
 
-        myObject = mGetMiniObjectPtr( kMiniSelectObjectNum);
+        myObject = &globals()->gMiniScreenData.control;
         auto control = g.admiral->control();
         if (control.get()) {
             mCopyMiniSpaceObject(newObject, *control);
@@ -665,7 +648,7 @@ void MiniComputerHandleNull(ticks unitsToDo) {
         }
         mCopyMiniSpaceObject(*myObject, newObject);
 
-        myObject = mGetMiniObjectPtr( kMiniTargetObjectNum);
+        myObject = &globals()->gMiniScreenData.target;
         auto target = g.admiral->target();
         if (target.get()) {
             mCopyMiniSpaceObject(newObject, *target);

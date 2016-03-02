@@ -57,12 +57,26 @@ enum ZoomType {
     kSmallestZoom           = 7,
 };
 
-class MiniSpaceObject;
+class MiniSpaceObject {
+  public:
+    Handle<BaseObject> base;
+    struct { Handle<BaseObject> base; } beam, pulse, special;
+    Handle<SpaceObject> destObject;
+    Handle<Destination> asDestination;
+    int32_t _health;
+    int32_t _energy;
+    int pixResID;
+    uint32_t attributes;
+    Handle<Admiral> owner;
+    int32_t max_health() const;
+    int32_t max_energy() const;
+};
 
 struct miniScreenLineType;
 struct miniComputerDataType {
     std::unique_ptr<miniScreenLineType[]> lineData;
-    MiniSpaceObject* objectData;  // TODO(sfiera): no leak.
+    MiniSpaceObject         control;
+    MiniSpaceObject         target;
     int32_t                 selectLine;
     ticks                   pollTime;
     int32_t                 buildTimeBarValue;
