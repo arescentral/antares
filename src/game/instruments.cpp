@@ -936,16 +936,14 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
 }
 
 void draw_build_time_bar() {
-    int32_t value = 0;
     auto build_at = GetAdmiralBuildAtObject(g.admiral);
-    if (build_at.get()) {
-        if (build_at->totalBuildTime > ticks(0)) {
-            int progress = build_at->buildTime.count() * kMiniBuildTimeHeight;
-            progress /= build_at->totalBuildTime.count();
-            value = progress;
-        }
-    } else {
+    if (!build_at.get()) {
         return;
+    }
+
+    int32_t value = 0;
+    if (build_at->totalBuildTime > ticks(0)) {
+        value = build_at->buildTime * kMiniBuildTimeHeight / build_at->totalBuildTime;
     }
 
     Rects rects;
