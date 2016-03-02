@@ -151,7 +151,8 @@ class SpaceObject {
     int32_t                 warpEnergyCollected = 0;
 
     Handle<Admiral>         owner;
-    ticks                   age = ticks(-1);
+    bool                    expires = false;
+    ticks                   expire_after = ticks(-1);
     int32_t                 naturalScale = SCALE_SCALE;
     int32_t                 id = kNoShip;
     ticks                   rechargeTime = ticks(0);
@@ -193,7 +194,7 @@ class SpaceObject {
 
     struct Weapon {
         Handle<BaseObject>      base;
-        ticks                   time = ticks(0);
+        game_ticks              time;
         int32_t                 ammo = 0;
         int32_t                 position = 0;
         int16_t                 charge = 0;

@@ -88,7 +88,7 @@ class ReplayMaster : public Card {
             globals()->gInputSource.reset(new ReplayInputSource(&_replay_data));
             stack()->push(new MainPlay(
                         GetScenarioPtrFromChapter(_replay_data.chapter_id), true, false,
-                        &_game_result, &_seconds));
+                        &_game_result));
             break;
 
           case REPLAY:
@@ -103,7 +103,7 @@ class ReplayMaster : public Card {
                         sfz::write(outcome, "\n\n");
                         Handle<Admiral> player(0);
                         String text = DebriefingScreen::build_score_text(
-                                _seconds, g.level->parTime,
+                                g.time, g.level->parTime,
                                 GetAdmiralLoss(player), g.level->parLosses,
                                 GetAdmiralKill(player), g.level->parKills);
                         sfz::write(outcome, utf8::encode(text));
@@ -129,7 +129,6 @@ class ReplayMaster : public Card {
     ReplayData _replay_data;
     const int32_t _random_seed;
     GameResult _game_result;
-    secs _seconds;
 
     DISALLOW_COPY_AND_ASSIGN(ReplayMaster);
 };

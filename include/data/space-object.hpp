@@ -32,7 +32,7 @@ namespace antares {
 
 const int32_t kMaxSpaceObject           = 250;
 
-const int32_t kTimeToCheckHome          = 900;
+const ticks   kTimeToCheckHome          = secs(15);
 
 const int32_t kEnergyPodAmount          = 500;  // average (calced) of 500 energy units/pod
 
@@ -247,7 +247,7 @@ union objectFrameType {
     struct Weapon {
         uint32_t                usage;              // when is this used?
         int32_t                 energyCost;         // cost to fire
-        int32_t                 fireTime;           // time between shots
+        ticks                   fireTime;           // time between shots
         int32_t                 ammo;               // initial ammo
         int32_t                 range;              // range (= age * max velocity)
         int32_t                 inverseSpeed;       // for AI = 1/max velocity

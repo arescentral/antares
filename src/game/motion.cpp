@@ -470,9 +470,9 @@ void MoveSpaceObjects(const ticks unitsToDo) {
 }
 
 static void age_object(const Handle<SpaceObject>& o) {
-    if (o->age >= ticks(0)) {
-        o->age -= kMajorTick;
-        if (o->age < ticks(0)) {
+    if (o->expires) {
+        o->expire_after -= kMajorTick;
+        if (o->expire_after < ticks(0)) {
             if (!(o->baseType->expireDontDie)) {
                 o->active = kObjectToBeFreed;
             }
@@ -488,8 +488,7 @@ static void activate_object(const Handle<SpaceObject>& o) {
         if (o->periodicTime <= ticks(0)) {
             exec(o->baseType->activate, o, SpaceObject::none(), NULL);
             o->periodicTime =
-                o->baseType->activatePeriod
-                + ticks(o->randomSeed.next(o->baseType->activatePeriodRange.count()));
+                o->baseType->activatePeriod + o->randomSeed.next(o->baseType->activatePeriodRange);
         }
     }
 }

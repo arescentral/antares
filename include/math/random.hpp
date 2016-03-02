@@ -21,12 +21,15 @@
 
 #include <stdint.h>
 
+#include "math/units.hpp"
+
 namespace antares {
 
 struct Random {
     int32_t seed;
 
     int16_t next(int16_t range);
+    ticks next(ticks range) { return ticks(next(range.count())); }
 };
 
 int Randomize(int range);

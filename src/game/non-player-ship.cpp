@@ -119,9 +119,6 @@ void SpaceObject::recharge() {
 static void tick_weapon(
         Handle<SpaceObject> subject, Handle<SpaceObject> target,
         uint32_t key, const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
-    if (weapon.time > ticks(0)) {
-        weapon.time -= kMajorTick;
-    }
     if (subject->keysDown & key) {
         fire_weapon(subject, target, base_weapon, weapon);
     }
@@ -130,7 +127,7 @@ static void tick_weapon(
 void fire_weapon(
         Handle<SpaceObject> subject, Handle<SpaceObject> target,
         const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
-    if ((weapon.time > ticks(0)) || !weapon.base.get()) {
+    if ((weapon.time > g.time) || !weapon.base.get()) {
         return;
     }
 
@@ -168,7 +165,7 @@ void fire_weapon(
         at = &offset;
     }
 
-    weapon.time = ticks(weaponObject->frame.weapon.fireTime);
+    weapon.time = g.time + weaponObject->frame.weapon.fireTime;
     if (weaponObject->frame.weapon.ammo > 0) {
         weapon.ammo--;
     }
@@ -353,7 +350,7 @@ void NonplayerShipThink() {
 
         if ((anObject->attributes & kRemoteOrHuman)
                 && (!(anObject->attributes & kCanThink))
-                && (anObject->age < secs(2))) {
+                && (!anObject->expires || (anObject->expire_after < secs(2)))) {
             PlayerShipBodyExpire(anObject);
         }
 
@@ -483,7 +480,7 @@ uint32_t ThinkObjectNormalPresence(
                     || ((anObject->attributes & kCanEngage)
                         && !(anObject->attributes & kRemoteOrHuman)
                         && (distance < static_cast<uint32_t>(anObject->engageRange))
-                        && (anObject->timeFromOrigin < ticks(kTimeToCheckHome))
+                        && (anObject->timeFromOrigin < kTimeToCheckHome)
                         && (targetObject->attributes & kCanBeEngaged)))) {
             keysDown |= ThinkObjectEngageTarget(anObject, targetObject, distance, &theta);
             ///--->>> END TARGETING <<<---///

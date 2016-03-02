@@ -327,7 +327,7 @@ SpaceObject::SpaceObject(
     }
 
     if (baseType->activatePeriod != ticks(0)) {
-        periodicTime = baseType->activatePeriod + ticks(randomSeed.next(baseType->activatePeriodRange.count()));
+        periodicTime = baseType->activatePeriod + randomSeed.next(baseType->activatePeriodRange);
     }
 
     direction = baseType->initialDirection;
@@ -373,7 +373,10 @@ SpaceObject::SpaceObject(
     }
 
     if (baseType->initialAge >= ticks(0)) {
-        age = baseType->initialAge + ticks(randomSeed.next(baseType->initialAgeRange.count()));
+        expire_after = baseType->initialAge + randomSeed.next(baseType->initialAgeRange);
+        expires = true;
+    } else {
+        expires = false;
     }
 
     if (spriteIDOverride == -1) {
@@ -486,7 +489,17 @@ void SpaceObject::change_base_type(
 
     obj->maxVelocity = base->maxVelocity;
 
-    obj->age = base->initialAge + ticks(obj->randomSeed.next(base->initialAgeRange.count()));
+    if (base->initialAge >= ticks(0)) {
+        obj->expire_after = base->initialAge + obj->randomSeed.next(base->initialAgeRange);
+        obj->expires = true;
+    } else {
+        obj->expires = false;
+
+        // Compatibility: discard a random number. Used to be that a
+        // random age was unconditionally generated, even for objects
+        // that wouldn't expire after altering their base-type.
+        obj->randomSeed.next(1);
+    }
 
     obj->naturalScale = base->naturalScale;
 
@@ -509,7 +522,7 @@ void SpaceObject::change_base_type(
     // check periodic time
     obj->periodicTime = ticks(0);
     if (base->activatePeriod != ticks(0)) {
-        obj->periodicTime = base->activatePeriod + ticks(obj->randomSeed.next(base->activatePeriodRange.count()));
+        obj->periodicTime = base->activatePeriod + obj->randomSeed.next(base->activatePeriodRange);
     }
 
     obj->pulse.base = base->pulse.base;
@@ -520,17 +533,15 @@ void SpaceObject::change_base_type(
 
     for (auto* weapon: {&obj->pulse, &obj->beam, &obj->special}) {
         if (!weapon->base.get()) {
-            weapon->time = ticks(0);
+            weapon->time = game_ticks();
             continue;
         }
 
         if (!relative) {
             weapon->ammo = weapon->base->frame.weapon.ammo;
             weapon->position = 0;
-            if (weapon->time < ticks(0)) {
-                weapon->time = ticks(0);
-            } else if (weapon->time > ticks(weapon->base->frame.weapon.fireTime)) {
-                weapon->time = ticks(weapon->base->frame.weapon.fireTime);
+            if (weapon->time > g.time + weapon->base->frame.weapon.fireTime) {
+                weapon->time = g.time + weapon->base->frame.weapon.fireTime;
             }
         }
         r = weapon->base->frame.weapon.range;

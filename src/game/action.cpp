@@ -64,7 +64,6 @@ struct actionQueueType {
     HandleList<Action>              actionRef;
     ticks                           scheduledTime;
     actionQueueType*                nextActionQueue;
-    int32_t                         nextActionQueueNum;
     Handle<SpaceObject>             subjectObject;
     int32_t                         subjectObjectNum;
     int32_t                         subjectObjectID;
@@ -75,7 +74,6 @@ struct actionQueueType {
 };
 
 static ANTARES_GLOBAL actionQueueType* gFirstActionQueue = NULL;
-static ANTARES_GLOBAL int32_t gFirstActionQueueNumber = -1;
 
 static ANTARES_GLOBAL unique_ptr<actionQueueType[]> gActionQueueData;
 
@@ -84,7 +82,7 @@ ANTARES_GLOBAL set<int32_t> covered_actions;
 #endif  // DATA_COVERAGE
 
 static void queue_action(
-        HandleList<Action> actions, int32_t delayTime,
+        HandleList<Action> actions, ticks delayTime,
         Handle<SpaceObject> subjectObject, Handle<SpaceObject> directObject, Point* offset);
 
 bool action_filter_applies_to(const Action& action, Handle<BaseObject> target) {
@@ -152,7 +150,7 @@ static void create_object(
                     }
                 }
             } else if (action->reflexive) {
-                product->timeFromOrigin = ticks(kTimeToCheckHome);
+                product->timeFromOrigin = kTimeToCheckHome;
                 product->runTimeFlags &= ~kHasArrived;
                 product->destObject = focus; //a->destinationObject;
                 product->destObjectDest = focus->destObject;
@@ -263,6 +261,7 @@ static void alter(
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
     int32_t l;
+    ticks t;
     Fixed f, f2;
     int16_t angle;
     coordPointType newLocation;
@@ -476,20 +475,18 @@ static void alter(
             break;
 
         case kAlterAge:
-            l = alter.minimum + focus->randomSeed.next(alter.range);
+            t = ticks(alter.minimum + focus->randomSeed.next(alter.range));
 
             if (alter.relative) {
-                if (focus->age >= ticks(0)) {
-                    focus->age += ticks(l);
-
-                    if (focus->age < ticks(0)) {
-                        focus->age = ticks(0);
-                    }
+                if (focus->expires) {
+                    focus->expire_after += t;
                 } else {
-                    focus->age += ticks(l);
+                    focus->expire_after += t;
+                    focus->expires = (focus->expire_after >= ticks(0));
                 }
             } else {
-                focus->age = ticks(l);
+                focus->expire_after = t;
+                focus->expires = (focus->expire_after >= ticks(0));
             }
             break;
 
@@ -526,7 +523,7 @@ static void alter(
             if (focus->pulse.base.get()) {
                 auto baseObject = focus->pulse.base;
                 focus->pulse.ammo = baseObject->frame.weapon.ammo;
-                focus->pulse.time = ticks(0);
+                focus->pulse.time = g.time;
                 focus->pulse.position = 0;
                 if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
                     focus->longestWeaponRange = baseObject->frame.weapon.range;
@@ -537,7 +534,7 @@ static void alter(
             } else {
                 focus->pulse.base = BaseObject::none();
                 focus->pulse.ammo = 0;
-                focus->pulse.time = ticks(0);
+                focus->pulse.time = g.time;
             }
             break;
 
@@ -546,7 +543,7 @@ static void alter(
             if (focus->beam.base.get()) {
                 auto baseObject = focus->beam.base;
                 focus->beam.ammo = baseObject->frame.weapon.ammo;
-                focus->beam.time = ticks(0);
+                focus->beam.time = g.time;
                 focus->beam.position = 0;
                 if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
                     focus->longestWeaponRange = baseObject->frame.weapon.range;
@@ -557,7 +554,7 @@ static void alter(
             } else {
                 focus->beam.base = BaseObject::none();
                 focus->beam.ammo = 0;
-                focus->beam.time = ticks(0);
+                focus->beam.time = g.time;
             }
             break;
 
@@ -566,7 +563,7 @@ static void alter(
             if (focus->special.base.get()) {
                 auto baseObject = focus->special.base;
                 focus->special.ammo = baseObject->frame.weapon.ammo;
-                focus->special.time = ticks(0);
+                focus->special.time = g.time;
                 focus->special.position = 0;
                 if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
                     focus->longestWeaponRange = baseObject->frame.weapon.range;
@@ -577,7 +574,7 @@ static void alter(
             } else {
                 focus->special.base = BaseObject::none();
                 focus->special.ammo = 0;
-                focus->special.time = ticks(0);
+                focus->special.time = g.time;
             }
             break;
 
@@ -724,7 +721,7 @@ static void execute_actions(
             object = GetObjectFromInitialNumber(action->initialDirectOverride);
         }
 
-        if ((action->delay > 0) && allowDelay) {
+        if ((action->delay > ticks(0)) && allowDelay) {
             queue_action(
                     {action.number(), (*actions.end()).number()},
                     action->delay, subject, object, offset);
@@ -798,28 +795,16 @@ void exec(
 void reset_action_queue() {
     gActionQueueData.reset(new actionQueueType[kActionQueueLength]);
 
-    gFirstActionQueueNumber = -1;
     gFirstActionQueue = NULL;
 
     actionQueueType* action = gActionQueueData.get();
     for (int32_t i = 0; i < kActionQueueLength; i++) {
-        action->actionRef = {-1, -1};
-        action->nextActionQueueNum = -1;
-        action->nextActionQueue = NULL;
-        action->scheduledTime = ticks(-1);
-        action->subjectObject = SpaceObject::none();
-        action->subjectObjectNum = -1;
-        action->subjectObjectID = -1;
-        action->directObject = SpaceObject::none();
-        action->directObjectNum = -1;
-        action->directObjectID = -1;
-        action->offset.h = action->offset.v = 0;
-        action++;
+        (action++)->actionRef = {-1, -1};
     }
 }
 
 static void queue_action(
-        HandleList<Action> actions, int32_t delayTime,
+        HandleList<Action> actions, ticks delayTime,
         Handle<SpaceObject> subjectObject, Handle<SpaceObject> directObject, Point* offset) {
     int32_t queueNumber = 0;
     actionQueueType* actionQueue = gActionQueueData.get();
@@ -832,7 +817,7 @@ static void queue_action(
         return;
     }
     actionQueue->actionRef = actions;
-    actionQueue->scheduledTime = ticks(delayTime);
+    actionQueue->scheduledTime = delayTime;
 
     if (offset) {
         actionQueue->offset = *offset;
@@ -860,21 +845,17 @@ static void queue_action(
 
     actionQueueType* previousQueue = NULL;
     actionQueueType* nextQueue = gFirstActionQueue;
-    while (nextQueue && (nextQueue->scheduledTime < ticks(delayTime))) {
+    while (nextQueue && (nextQueue->scheduledTime < delayTime)) {
         previousQueue = nextQueue;
         nextQueue = nextQueue->nextActionQueue;
     }
     if (previousQueue) {
         actionQueue->nextActionQueue = previousQueue->nextActionQueue;
-        actionQueue->nextActionQueueNum = previousQueue->nextActionQueueNum;
 
         previousQueue->nextActionQueue = actionQueue;
-        previousQueue->nextActionQueueNum = queueNumber;
     } else {
         actionQueue->nextActionQueue = gFirstActionQueue;
-        actionQueue->nextActionQueueNum = gFirstActionQueueNumber;
         gFirstActionQueue = actionQueue;
-        gFirstActionQueueNumber = queueNumber;
     }
 }
 
@@ -905,23 +886,9 @@ void execute_action_queue() {
                     gFirstActionQueue->subjectObject, gFirstActionQueue->directObject,
                     &gFirstActionQueue->offset, false);
         }
+
         gFirstActionQueue->actionRef = {-1, -1};
-        gFirstActionQueue->scheduledTime = ticks(-1);
-        gFirstActionQueue->subjectObject = SpaceObject::none();
-        gFirstActionQueue->subjectObjectNum = -1;
-        gFirstActionQueue->subjectObjectID = -1;
-        gFirstActionQueue->directObject = SpaceObject::none();
-        gFirstActionQueue->directObjectNum = -1;
-        gFirstActionQueue->directObjectID = -1;
-        gFirstActionQueue->offset = Point{0, 0};
-
-        auto actionQueue = gFirstActionQueue;
-
-        gFirstActionQueueNumber = gFirstActionQueue->nextActionQueueNum;
         gFirstActionQueue = gFirstActionQueue->nextActionQueue;
-
-        actionQueue->nextActionQueueNum = -1;
-        actionQueue->nextActionQueue = NULL;
     }
 }
 

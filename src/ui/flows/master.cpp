@@ -53,7 +53,7 @@ class TitleScreenFade : public PictFade {
     }
 
     virtual usecs display_time() const {
-        return ticks(*_fast ? 60 : 300);
+        return secs(*_fast ? 1 : 5);
     }
 
     virtual bool skip() const {

@@ -68,15 +68,34 @@ const int32_t kCursorBoundsSize = 16;  // should be same in instruments.c
 }  // namespace
 
 const static ticks kKlaxonInterval = ticks(125);
-const static ticks kKeyHoldDuration = ticks(45);
+const static ticks kDestKeyHoldDuration = ticks(45);
+const static ticks kHotKeyHoldDuration = ticks(51);  // Compatibility
 
 int32_t HotKey_GetFromObject(Handle<SpaceObject> object);
 void Update_LabelStrings_ForHotKeyChange( void);
 
 namespace {
 
-static ANTARES_GLOBAL ticks gDestKeyTime = ticks(0);
-static ANTARES_GLOBAL ZoomType gPreviousZoomMode;
+enum DestKeyState {
+    DEST_KEY_UP,       // up
+    DEST_KEY_DOWN,     // down, and possibly usable for self-selection
+    DEST_KEY_BLOCKED,  // down, but used for something else
+};
+
+enum HotKeyState {
+    HOT_KEY_UP,
+    HOT_KEY_SELECT,
+    HOT_KEY_TARGET,
+};
+
+static ANTARES_GLOBAL DestKeyState  gDestKeyState = DEST_KEY_UP;
+static ANTARES_GLOBAL wall_time     gDestKeyTime;
+
+static ANTARES_GLOBAL HotKeyState   gHotKeyState = HOT_KEY_UP;
+static ANTARES_GLOBAL wall_time     gHotKeyTime;
+static ANTARES_GLOBAL int           gHotKeyNum;
+
+static ANTARES_GLOBAL ZoomType      gPreviousZoomMode;
 
 struct HotKeySuffix {
     Handle<SpaceObject> space_object;
@@ -111,7 +130,7 @@ void ResetPlayerShip(Handle<SpaceObject> which) {
     g.target_label = Label::add(0, 0, 0, -20, SpaceObject::none(), true, SKY_BLUE);
     g.send_label = Label::add(200, 200, 0, 30, SpaceObject::none(), false, GREEN);
     globals()->starfield.reset(g.ship);
-    globals()->next_klaxon = game_time();
+    globals()->next_klaxon = game_ticks();
     globals()->keyMask = 0;
     globals()->gZoomMode = kNearestFoeZoom;
     gPreviousZoomMode = kNearestFoeZoom;
@@ -120,10 +139,8 @@ void ResetPlayerShip(Handle<SpaceObject> which) {
         globals()->hotKey[h].object = SpaceObject::none();
         globals()->hotKey[h].objectID = -1;
     }
-    globals()->hotKeyDownTime = ticks(0);
-    globals()->lastHotKey = -1;
-    globals()->destKeyUsedForSelection = false;
-    globals()->hotKey_target = false;
+    gHotKeyState = HOT_KEY_UP;
+    gDestKeyState = DEST_KEY_UP;
 }
 
 PlayerShip::PlayerShip():
@@ -639,7 +656,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
 
     if (theShip->health() < (theShip->baseType->health >> 2L)) {
         if (g.time > globals()->next_klaxon) {
-            if (globals()->next_klaxon == game_time()) {
+            if (globals()->next_klaxon == game_ticks()) {
                 PlayVolumeSound(kKlaxon, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
             } else {
                 PlayVolumeSound(kKlaxon, kMediumVolume, kMediumLongPersistence, kPrioritySound);
@@ -648,7 +665,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
             globals()->next_klaxon = g.time + kKlaxonInterval;
         }
     } else {
-        globals()->next_klaxon = game_time();
+        globals()->next_klaxon = game_ticks();
     }
 
     if (!(theShip->attributes & kIsHumanControlled)) {
@@ -661,18 +678,17 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
     attributes = gTheseKeys & dcalc;
 
     if (gTheseKeys & kDestinationKey) {
-        if (gDestKeyTime >= ticks(0)) {
-            gDestKeyTime += kMajorTick;
+        if (gDestKeyState == DEST_KEY_UP) {
+            gDestKeyState = DEST_KEY_DOWN;
+            gDestKeyTime = now();
         }
     } else {
-        if (gDestKeyTime > kKeyHoldDuration) {
-            if ((theShip->attributes & kCanBeDestination)
-                    && (!globals()->destKeyUsedForSelection)) {
-                target_self();
-            }
+        if ((gDestKeyState == DEST_KEY_DOWN)
+                && (now() >= (gDestKeyTime + kDestKeyHoldDuration))
+                && (theShip->attributes & kCanBeDestination)) {
+            target_self();
         }
-        gDestKeyTime = ticks(0);
-        globals()->destKeyUsedForSelection = false;
+        gDestKeyState = DEST_KEY_UP;
     }
 
 // NEW -- do hot key selection
@@ -684,21 +700,21 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
     }
 
     if (hot_key >= 0) {
-        if (hot_key != globals()->lastHotKey) {
-            globals()->lastHotKey = hot_key;
-            globals()->hotKeyDownTime = ticks(0);
-            globals()->hotKey_target = false;
+        if (gHotKeyState == HOT_KEY_UP) {
+            gHotKeyTime = now();
+            gHotKeyNum = hot_key;
             if (gTheseKeys & kDestinationKey) {
-                globals()->hotKey_target = true;
+                gHotKeyState = HOT_KEY_TARGET;
+            } else {
+                gHotKeyState = HOT_KEY_SELECT;
             }
-        } else {
-            globals()->hotKeyDownTime += kMajorTick;
         }
-    } else if (globals()->lastHotKey >= 0) {
-        hot_key = globals()->lastHotKey;
-        globals()->lastHotKey = -1;
+    } else if (gHotKeyState != HOT_KEY_UP) {
+        hot_key = gHotKeyNum;
+        bool target = gHotKeyState == HOT_KEY_TARGET;
+        gHotKeyState = HOT_KEY_UP;
 
-        if (globals()->hotKeyDownTime > kKeyHoldDuration) {
+        if (now() >= gHotKeyTime + kHotKeyHoldDuration) {
             if (globals()->lastSelectedObject.get()) {
                 auto selectShip = globals()->lastSelectedObject;
 
@@ -712,14 +728,14 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
                 }
             }
         } else {
-            globals()->destKeyUsedForSelection = true;
+            gDestKeyState = DEST_KEY_BLOCKED;
             if (globals()->hotKey[hot_key].object.get()) {
                 auto selectShip = globals()->hotKey[hot_key].object;
                 if ((selectShip->active)
                         && (selectShip->id == globals()->hotKey[hot_key].objectID)) {
                     bool is_target = (gTheseKeys & kDestinationKey)
                         || (selectShip->owner != g.admiral)
-                        || (globals()->hotKey_target);
+                        || target;
                     SetPlayerSelectShip(
                             globals()->hotKey[hot_key].object,
                             is_target,
@@ -728,14 +744,13 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
                     globals()->hotKey[hot_key].object = SpaceObject::none();
                 }
             }
-            globals()->hotKeyDownTime = ticks(0);
         }
     }
 // end new hotkey selection
 
     // for this we check lastKeys against theseKeys & relevent keys now being pressed
     if ((attributes) && (!(gLastKeys & attributes)) && (!cursor.active())) {
-        gDestKeyTime = ticks(-1);
+        gDestKeyState = DEST_KEY_BLOCKED;
         if (gTheseKeys & kSelectFriendKey) {
             if (!(gTheseKeys & kDestinationKey)) {
                 select_friendly(theShip, theShip->direction);
@@ -777,7 +792,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
 
     if ((gTheseKeys & kWarpKey)
             && (gTheseKeys & kDestinationKey)) {
-        gDestKeyTime = ticks(-1);
+        gDestKeyState = DEST_KEY_BLOCKED;
         if (!(gLastKeys & kWarpKey)) {
             engage_autopilot();
         }
@@ -814,7 +829,7 @@ void PlayerShipHandleClick(Point where, int button) {
         return;
     }
 
-    gDestKeyTime = ticks(-1);
+    gDestKeyState = DEST_KEY_BLOCKED;
     if (g.ship.get()) {
         auto theShip = g.ship;
         if ((theShip->active) && (theShip->attributes & kIsHumanControlled)) {
@@ -852,7 +867,7 @@ void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> 
     if (adm == g.admiral) {
         globals()->lastSelectedObject = ship;
         globals()->lastSelectedObjectID = ship->id;
-        globals()->destKeyUsedForSelection = true;
+        gDestKeyState = DEST_KEY_BLOCKED;
     }
     if (target) {
         adm->set_target(ship);

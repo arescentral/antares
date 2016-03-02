@@ -48,11 +48,10 @@ const ticks kMinorTick = ticks(1);
 const ticks kConditionTick = ticks(90);
 
 // Time units
-struct GameStart { typedef usecs duration; };
+struct GameStart { typedef ticks duration; };
 struct Wall { typedef usecs duration; };
 
-typedef std::chrono::time_point<GameStart> game_time;
-typedef std::chrono::time_point<GameStart, ticks> game_ticks;
+typedef std::chrono::time_point<GameStart> game_ticks;
 typedef std::chrono::time_point<Wall> wall_time;
 typedef std::chrono::time_point<Wall, ticks> wall_ticks;
 

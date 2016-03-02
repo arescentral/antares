@@ -37,7 +37,7 @@ class MainPlay : public Card {
   public:
     MainPlay(
             const Scenario* scenario, bool replay, bool show_loading_screen,
-            GameResult* game_result, secs* seconds);
+            GameResult* game_result);
 
     virtual void become_front();
 
@@ -55,7 +55,6 @@ class MainPlay : public Card {
     const bool _show_loading_screen;
     bool _cancelled;
     GameResult* const _game_result;
-    secs* const _seconds;
     ReplayBuilder _replay_builder;
 };
 

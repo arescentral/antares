@@ -250,7 +250,7 @@ struct Action {
     uint32_t                    exclusiveFilter;        // don't execute if it has ANY of these
     uint8_t                     levelKeyTag;
     int16_t                     owner;                  // 0 no matter, 1 same owner, -1 different owner
-    uint32_t                    delay;
+    ticks                       delay;
 //  uint32_t                    reserved1;
     int16_t                     initialSubjectOverride;
     int16_t                     initialDirectOverride;

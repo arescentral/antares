@@ -73,7 +73,7 @@ void read_from(ReadSource in, Scenario& scenario) {
     read(in, scenario.briefPointFirst);
     read(in, scenario.starMapV);
     read(in, scenario.briefPointNum);
-    scenario.parTime = secs(read<int16_t>(in));
+    scenario.parTime = game_ticks(secs(read<int16_t>(in)));
     in.shift(2);
     read(in, scenario.parKills);
     read(in, scenario.levelNameStrNum);
@@ -124,11 +124,14 @@ void read_from(ReadSource in, Scenario::Condition& scenario_condition) {
 
       case kDestructionCondition:
       case kOwnerCondition:
-      case kTimeCondition:
       case kVelocityLessThanEqualToCondition:
       case kNoShipsLeftCondition:
       case kZoomLevelCondition:
         read(sub, scenario_condition.conditionArgument.longValue);
+        break;
+
+      case kTimeCondition:
+        scenario_condition.conditionArgument.timeValue = ticks(read<int32_t>(sub));
         break;
 
       case kProximityCondition:

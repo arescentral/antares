@@ -136,7 +136,7 @@ struct Scenario {
     int16_t                     briefPointFirst;
     int16_t                     starMapV;
     int16_t                     briefPointNum;  // use kScenarioBriefMask
-    secs                        parTime;
+    game_ticks                  parTime;
     int16_t                     parKills;
     int16_t                     levelNameStrNum;
     Fixed                       parKillRatio;
@@ -201,6 +201,7 @@ struct Scenario::Condition {
         Point               location;
         CounterArgument     counter;
         int32_t             longValue;
+        ticks               timeValue;
         uint32_t            unsignedLongValue;
     } conditionArgument;
     int32_t         subjectObject;      // initial object #
