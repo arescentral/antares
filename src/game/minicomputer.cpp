@@ -229,7 +229,6 @@ void MiniComputerMakeStatusString(int32_t which_line, String& string);
 void MiniScreenInit() {
     globals()->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
     globals()->gMiniScreenData.currentScreen = kMainMiniScreen;
-    globals()->gMiniScreenData.buildTimeBarValue = -1;
     globals()->gMiniScreenData.clickLine = kMiniScreenNoLineSelected;
 
     globals()->gMiniScreenData.lineData.reset(new miniScreenLineType[kMiniScreenTrueLineNum]);
@@ -273,7 +272,6 @@ void ClearMiniScreenLines() {
 }
 
 void ClearMiniObjectData() {
-    globals()->gMiniScreenData.buildTimeBarValue = -1;
 }
 
 void draw_mini_screen() {
@@ -577,21 +575,6 @@ void MiniComputerHandleNull(ticks unitsToDo) {
     Handle<Destination> buildAtObject;
 
     UpdateMiniScreenLines();
-
-    // handle control/command/selected object
-
-    auto build_at = GetAdmiralBuildAtObject(g.admiral);
-    if (build_at.get()) {
-        if (build_at->totalBuildTime > ticks(0)) {
-            int progress = build_at->buildTime.count() * kMiniBuildTimeHeight;
-            progress /= build_at->totalBuildTime.count();
-            globals()->gMiniScreenData.buildTimeBarValue = progress;
-        } else {
-            globals()->gMiniScreenData.buildTimeBarValue = 0;
-        }
-    } else {
-        globals()->gMiniScreenData.buildTimeBarValue = -1;
-    }
 }
 
 

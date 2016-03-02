@@ -163,7 +163,7 @@ T clamp(T value, T min, T max) {
 
 static void draw_bar_indicator(int16_t, int32_t, int32_t);
 static void draw_money();
-static void draw_build_time_bar(int32_t value);
+static void draw_build_time_bar();
 
 void InstrumentInit() {
     g.radar_blips.reset(new Point[kRadarBlipNum]);
@@ -532,7 +532,7 @@ void draw_instruments() {
     draw_bar_indicator(kShieldBar, o->health(), o->max_health());
     draw_bar_indicator(kEnergyBar, o->energy(), o->max_energy());
     draw_bar_indicator(kBatteryBar, o->battery(), o->max_battery());
-    draw_build_time_bar(globals()->gMiniScreenData.buildTimeBarValue);
+    draw_build_time_bar();
     draw_money();
     draw_radar();
     draw_mini_screen();
@@ -935,10 +935,19 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
     gBarIndicator[which].thisValue = value;
 }
 
-void draw_build_time_bar(int32_t value) {
-    if (value < 0) {
+void draw_build_time_bar() {
+    int32_t value = 0;
+    auto build_at = GetAdmiralBuildAtObject(g.admiral);
+    if (build_at.get()) {
+        if (build_at->totalBuildTime > ticks(0)) {
+            int progress = build_at->buildTime.count() * kMiniBuildTimeHeight;
+            progress /= build_at->totalBuildTime.count();
+            value = progress;
+        }
+    } else {
         return;
     }
+
     Rects rects;
     value = kMiniBuildTimeHeight - value;
 
