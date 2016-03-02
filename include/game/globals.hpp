@@ -84,7 +84,6 @@ struct miniComputerDataType {
     MiniSpaceObject         control;
     MiniSpaceObject         target;
     int32_t                 selectLine;
-    ticks                   pollTime;
     int32_t                 buildTimeBarValue;
     int32_t                 currentScreen;
     int32_t                 clickLine;

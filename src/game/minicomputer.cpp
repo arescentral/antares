@@ -140,8 +140,6 @@ enum {
     kMaxStatusTypeValue     = kSmallFixedMinusValue,
 };
 
-const ticks kMiniComputerPollTime   = secs(1);
-
 const int32_t kMiniObjectDataNum    = 2;
 const int32_t kMiniSelectObjectNum  = 0;
 const int32_t kMiniSelectTop        = 180;
@@ -257,7 +255,6 @@ void MiniComputerMakeStatusString(int32_t which_line, String& string);
 void MiniScreenInit() {
     globals()->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
     globals()->gMiniScreenData.currentScreen = kMainMiniScreen;
-    globals()->gMiniScreenData.pollTime = ticks(0);
     globals()->gMiniScreenData.buildTimeBarValue = -1;
     globals()->gMiniScreenData.clickLine = kMiniScreenNoLineSelected;
 
@@ -306,7 +303,6 @@ void ClearMiniObjectData() {
     globals()->gMiniScreenData.target = MiniSpaceObject();
 
     globals()->gMiniScreenData.buildTimeBarValue = -1;
-    globals()->gMiniScreenData.pollTime = ticks(0);
 }
 
 void draw_mini_screen() {
@@ -609,42 +605,37 @@ void minicomputer_cancel() {
 void MiniComputerHandleNull(ticks unitsToDo) {
     Handle<Destination> buildAtObject;
 
-    globals()->gMiniScreenData.pollTime += unitsToDo;
-    if ( globals()->gMiniScreenData.pollTime > kMiniComputerPollTime)
-    {
-        globals()->gMiniScreenData.pollTime = ticks(0);
-        UpdateMiniScreenLines();
+    UpdateMiniScreenLines();
 
-        // handle control/command/selected object
+    // handle control/command/selected object
 
-        auto mini_control = &globals()->gMiniScreenData.control;
-        auto control = g.admiral->control();
-        if (control.get()) {
-            *mini_control = MiniSpaceObject(*control);
+    auto mini_control = &globals()->gMiniScreenData.control;
+    auto control = g.admiral->control();
+    if (control.get()) {
+        *mini_control = MiniSpaceObject(*control);
+    } else {
+        *mini_control = MiniSpaceObject();
+    }
+
+    auto mini_target = &globals()->gMiniScreenData.target;
+    auto target = g.admiral->target();
+    if (target.get()) {
+        *mini_target = MiniSpaceObject(*target);
+    } else {
+        *mini_target = MiniSpaceObject();
+    }
+
+    auto build_at = GetAdmiralBuildAtObject(g.admiral);
+    if (build_at.get()) {
+        if (build_at->totalBuildTime > ticks(0)) {
+            int progress = build_at->buildTime.count() * kMiniBuildTimeHeight;
+            progress /= build_at->totalBuildTime.count();
+            globals()->gMiniScreenData.buildTimeBarValue = progress;
         } else {
-            *mini_control = MiniSpaceObject();
+            globals()->gMiniScreenData.buildTimeBarValue = 0;
         }
-
-        auto mini_target = &globals()->gMiniScreenData.target;
-        auto target = g.admiral->target();
-        if (target.get()) {
-            *mini_target = MiniSpaceObject(*target);
-        } else {
-            *mini_target = MiniSpaceObject();
-        }
-
-        auto build_at = GetAdmiralBuildAtObject(g.admiral);
-        if (build_at.get()) {
-            if (build_at->totalBuildTime > ticks(0)) {
-                int progress = build_at->buildTime.count() * kMiniBuildTimeHeight;
-                progress /= build_at->totalBuildTime.count();
-                globals()->gMiniScreenData.buildTimeBarValue = progress;
-            } else {
-                globals()->gMiniScreenData.buildTimeBarValue = 0;
-            }
-        } else {
-            globals()->gMiniScreenData.buildTimeBarValue = -1;
-        }
+    } else {
+        globals()->gMiniScreenData.buildTimeBarValue = -1;
     }
 }
 
