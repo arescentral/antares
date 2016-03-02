@@ -221,6 +221,10 @@ inline void mCopyBlankLineString(miniScreenLineType* mline, StringSlice mstring)
 
 }  // namespace
 
+static void draw_mini_ship_data(
+        const MiniSpaceObject& newObject, uint8_t headerColor,
+        int16_t screen_top, StringSlice label);
+
 // for copying the fields of a space object relevant to the miniscreens:
 MiniSpaceObject::MiniSpaceObject(const SpaceObject& o) {
     beam           = o.beam.base;
@@ -416,8 +420,12 @@ void draw_mini_screen() {
         }
     }
 
-    draw_mini_ship_data(globals()->gMiniScreenData.control, YELLOW, kMiniSelectTop, kMiniSelectObjectNum + 1);
-    draw_mini_ship_data(globals()->gMiniScreenData.target, SKY_BLUE, kMiniTargetTop, kMiniTargetObjectNum + 1);
+    draw_mini_ship_data(
+            globals()->gMiniScreenData.control, YELLOW, kMiniSelectTop + instrument_top(),
+            mini_data_strings->at(0));
+    draw_mini_ship_data(
+            globals()->gMiniScreenData.target, SKY_BLUE, kMiniTargetTop + instrument_top(),
+            mini_data_strings->at(1));
 }
 
 void MakeMiniScreenFromIndString(int16_t whichString) {
@@ -752,22 +760,21 @@ void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) 
     draw_player_ammo_in_rect(ammo_special, ORANGE, clip);
 }
 
-void draw_mini_ship_data(
+static void draw_mini_ship_data(
         const MiniSpaceObject& newObject, uint8_t headerColor,
-        int16_t screenTop, int16_t whichString) {
+        int16_t screen_top, StringSlice label) {
     {
         // "CONTROL" or "TARGET" label.
-        Rect bar = mini_screen_line_bounds(screenTop + instrument_top(), 0, 0, kMiniScreenWidth);
+        Rect bar = mini_screen_line_bounds(screen_top, 0, 0, kMiniScreenWidth);
         draw_shaded_rect(Rects(), bar, headerColor, LIGHT, VERY_LIGHT, MEDIUM);
-        String text(mini_data_strings->at(whichString - 1));
         computer_font->draw(
                 Point(bar.left + kMiniScreenLeftBuffer, bar.top + computer_font->ascent),
-                text, RgbColor::kBlack);
+                label, RgbColor::kBlack);
     }
 
     // Icon
     Rect icon_rect = {
-        {kMiniIconLeft, screenTop + instrument_top() + MiniIconMacLineTop()},
+        {kMiniIconLeft, screen_top + MiniIconMacLineTop()},
         {kMiniIconWidth, kMiniIconHeight},
     };
     if (!newObject.base.get()) {
@@ -778,8 +785,7 @@ void draw_mini_ship_data(
     {
         // Object name.
         if (newObject.base.get()) {
-            Rect lRect = mini_screen_line_bounds(
-                    screenTop + instrument_top(), kMiniNameLineNum, 0, kMiniScreenWidth);
+            Rect lRect = mini_screen_line_bounds(screen_top, kMiniNameLineNum, 0, kMiniScreenWidth);
             computer_font->draw(
                     Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
                     newObject.short_name(), GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT));
@@ -818,7 +824,7 @@ void draw_mini_ship_data(
         if ((newObject.max_health() > 0) && (newObject._health > 0)) {
             Rects rects;
             Rect dRect = {
-                Point(kMiniHealthLeft, screenTop + instrument_top() + MiniIconMacLineTop()),
+                Point(kMiniHealthLeft, screen_top + MiniIconMacLineTop()),
                 Size(kMiniBarWidth, kMiniIconHeight)
             };
 
@@ -844,7 +850,7 @@ void draw_mini_ship_data(
         if ((newObject.max_energy() > 0) && (newObject._energy > 0)) {
             Rects rects;
             Rect dRect = {
-                Point(kMiniEnergyLeft, screenTop + instrument_top() + MiniIconMacLineTop()),
+                Point(kMiniEnergyLeft, screen_top + MiniIconMacLineTop()),
                 Size(kMiniBarWidth, kMiniIconHeight)
             };
 
@@ -872,8 +878,7 @@ void draw_mini_ship_data(
 
         if (newObject.beam.get()) {
             Rect lRect = mini_screen_line_bounds(
-                    screenTop + instrument_top(), kMiniWeapon1LineNum,
-                    kMiniRightColumnLeft, kMiniScreenWidth);
+                    screen_top, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
             computer_font->draw(
                     Point(lRect.left, lRect.top + computer_font->ascent),
                     get_object_short_name(newObject.beam), color);
@@ -881,8 +886,7 @@ void draw_mini_ship_data(
 
         if (newObject.pulse.get()) {
             Rect lRect = mini_screen_line_bounds(
-                    screenTop + instrument_top(), kMiniWeapon2LineNum,
-                    kMiniRightColumnLeft, kMiniScreenWidth);
+                    screen_top, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
             computer_font->draw(
                     Point(lRect.left, lRect.top + computer_font->ascent),
                     get_object_short_name(newObject.pulse), color);
@@ -892,8 +896,7 @@ void draw_mini_ship_data(
         if (!(newObject.attributes & kIsDestination)) {
             if (newObject.special.get()) {
                 Rect lRect = mini_screen_line_bounds(
-                        screenTop + instrument_top(), kMiniWeapon3LineNum,
-                        kMiniRightColumnLeft, kMiniScreenWidth);
+                        screen_top, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
                 computer_font->draw(
                         Point(lRect.left, lRect.top + computer_font->ascent),
                         get_object_short_name(newObject.special), color);
@@ -906,7 +909,7 @@ void draw_mini_ship_data(
         auto dest = newObject.destObject;
         bool friendly = (dest->owner == g.admiral);
         RgbColor color = GetRGBTranslateColorShade(friendly ? GREEN : RED, VERY_LIGHT);
-        Rect lRect = mini_screen_line_bounds(screenTop + instrument_top(), kMiniDestLineNum, 0, kMiniScreenWidth);
+        Rect lRect = mini_screen_line_bounds(screen_top, kMiniDestLineNum, 0, kMiniScreenWidth);
         computer_font->draw(Point(lRect.left, lRect.top + computer_font->ascent), dest->name(), color);
     }
 }
