@@ -571,84 +571,70 @@ void minicomputer_cancel() {
     minicomputer_handle_action(kOutLineButton, false, NULL);
 }
 
+static void update_build_screen_lines() {
+    Rect mRect = Rect(
+            kMiniScreenLeft, kMiniScreenTop + instrument_top(), kMiniScreenRight,
+            kMiniScreenBottom + instrument_top());
+    auto& mini = globals()->gMiniScreenData;
+
+    const auto& admiral = g.admiral;
+    miniScreenLineType* line = &mini.lineData[kBuildScreenWhereNameLine];
+    if (line->value != GetAdmiralBuildAtObject(admiral).number()) {
+        if (mini.selectLine != kMiniScreenNoLineSelected) {
+            line = &mini.lineData[mini.selectLine];
+            line->hiliteLeft = line->hiliteRight = 0;
+            mini.selectLine = kMiniScreenNoLineSelected;
+        }
+        MiniComputerSetBuildStrings();
+    } else if (GetAdmiralBuildAtObject(admiral).get()) {
+        line = mini.lineData.get() + kBuildScreenFirstTypeLine;
+        int32_t lineNum = kBuildScreenFirstTypeLine;
+
+        for (int32_t count = 0; count < kMaxShipCanBuild; count++) {
+            auto buildObject = line->sourceData;
+            if (buildObject.get()) {
+                if (buildObject->price > mFixedToLong(admiral->cash())) {
+                    if (line->selectable != selectDim) {
+                        line->selectable = selectDim;
+                    }
+                } else {
+                    if (line->selectable != selectable) {
+                        if (mini.selectLine == kMiniScreenNoLineSelected) {
+                            mini.selectLine = lineNum;
+                            line->hiliteLeft = mRect.left;
+                            line->hiliteRight = mRect.right;
+                        }
+                        line->selectable = selectable;
+                    }
+                }
+            }
+            line++;
+            lineNum++;
+        }
+    }
+}
+
+static void update_status_screen_lines() {
+    auto& mini = globals()->gMiniScreenData;
+    for (int32_t count = kStatusMiniScreenFirstLine; count < kMiniScreenCharHeight; count++) {
+        miniScreenLineType* line = &mini.lineData[count];
+        int32_t lineNum = MiniComputerGetStatusValue( count);
+        if (line->value != lineNum) {
+            line->value = lineNum;
+            MiniComputerMakeStatusString(count, line->string);
+        }
+    }
+}
+
 // only for updating volitile lines--doesn't draw whole screen!
 void UpdateMiniScreenLines() {
-    miniScreenLineType  *line = NULL;
-    int32_t                lineNum, count;
-    Rect                mRect;
-
-    mRect = Rect(kMiniScreenLeft, kMiniScreenTop + instrument_top(), kMiniScreenRight,
-                        kMiniScreenBottom + instrument_top());
-    switch( globals()->gMiniScreenData.currentScreen)
-    {
-        case kBuildMiniScreen: {
-            const auto& admiral = g.admiral;
-            line = globals()->gMiniScreenData.lineData.get() +
-                kBuildScreenWhereNameLine;
-            if (line->value != GetAdmiralBuildAtObject(admiral).number()) {
-                if ( globals()->gMiniScreenData.selectLine !=
-                        kMiniScreenNoLineSelected)
-                {
-                    line = globals()->gMiniScreenData.lineData.get()
-                        + globals()->gMiniScreenData.selectLine;
-                    line->hiliteLeft = line->hiliteRight = 0;
-                    globals()->gMiniScreenData.selectLine =
-                        kMiniScreenNoLineSelected;
-                }
-                MiniComputerSetBuildStrings();
-            } else if (GetAdmiralBuildAtObject(admiral).get()) {
-                line = globals()->gMiniScreenData.lineData.get() + kBuildScreenFirstTypeLine;
-                lineNum = kBuildScreenFirstTypeLine;
-
-                for ( count = 0; count < kMaxShipCanBuild; count++)
-                {
-                    auto buildObject = line->sourceData;
-                    if (buildObject.get()) {
-                        if ( buildObject->price > mFixedToLong(admiral->cash()))
-                        {
-                            if ( line->selectable != selectDim)
-                            {
-                                line->selectable = selectDim;
-                            }
-                        } else
-                        {
-                            if (line->selectable != selectable)
-                            {
-                                if ( globals()->gMiniScreenData.selectLine ==
-                                    kMiniScreenNoLineSelected)
-                                {
-                                    globals()->gMiniScreenData.selectLine =
-                                        lineNum;
-                                    line->hiliteLeft = mRect.left;
-                                    line->hiliteRight = mRect.right;
-                                }
-                                line->selectable = selectable;
-                            }
-                        }
-                    }
-                    line++;
-                    lineNum++;
-                }
-            }
-
+    switch (globals()->gMiniScreenData.currentScreen) {
+        case kBuildMiniScreen:
+            update_build_screen_lines();
             break;
-        }
 
         case kStatusMiniScreen:
-            for ( count = kStatusMiniScreenFirstLine; count <
-                kMiniScreenCharHeight; count++)
-            {
-                line =
-                    globals()->gMiniScreenData.lineData.get() +
-                        count;
-                lineNum = MiniComputerGetStatusValue( count);
-                if ( line->value != lineNum)
-                {
-                    line->value = lineNum;
-                    MiniComputerMakeStatusString(count, line->string);
-                }
-
-            }
+            update_status_screen_lines();
             break;
     }
 }
