@@ -33,7 +33,7 @@ class DebriefingScreen : public Card {
 
     DebriefingScreen(
             int text_id,
-            secs your_length, secs par_length,
+            game_ticks your_time, game_ticks par_time,
             int your_loss, int par_loss,
             int your_kill, int par_kill);
 
@@ -49,7 +49,7 @@ class DebriefingScreen : public Card {
     virtual void fire_timer();
 
     static sfz::String build_score_text(
-            secs your_length, secs par_length,
+            game_ticks your_length, game_ticks par_length,
             int your_loss, int par_loss,
             int your_kill, int par_kill);
     

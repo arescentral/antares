@@ -40,6 +40,7 @@ using sfz::PrintItem;
 using sfz::String;
 using sfz::dec;
 using sfz::format;
+using std::chrono::duration_cast;
 using std::unique_ptr;
 using std::vector;
 
@@ -98,11 +99,13 @@ int score_high_target(double yours, double par, double value) {
 }
 
 int score(
-        secs your_length, secs par_length,
+        game_ticks your_length, game_ticks par_length,
         int your_loss, int par_loss,
         int your_kill, int par_kill) {
     int score = 0;
-    score += score_low_target(your_length.count(), par_length.count(), 50);
+    score += score_low_target(
+            duration_cast<secs>(your_length.time_since_epoch()).count(),
+            duration_cast<secs>(par_length.time_since_epoch()).count(), 50);
     score += score_low_target(your_loss, par_loss, 30);
     score += score_high_target(your_kill, par_kill, 20);
     return score;
@@ -125,7 +128,7 @@ DebriefingScreen::DebriefingScreen(int text_id) :
 
 DebriefingScreen::DebriefingScreen(
         int text_id,
-        secs your_length, secs par_length,
+        game_ticks your_time, game_ticks par_time,
         int your_loss, int par_loss,
         int your_kill, int par_kill):
         _state(TYPING),
@@ -136,7 +139,7 @@ DebriefingScreen::DebriefingScreen(
     score_area.top = score_area.bottom - kScoreTableHeight;
 
     _score = style_score_text(build_score_text(
-                your_length, par_length, your_loss, par_loss, your_kill, par_kill));
+                your_time, par_time, your_loss, par_loss, your_kill, par_kill));
     _score->set_tab_width(60);
     _score->wrap_to(_message_bounds.width(), 0, 2);
     _score_bounds = Rect(0, 0, _score->auto_width(), _score->height());
@@ -242,7 +245,7 @@ LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
 }
 
 String DebriefingScreen::build_score_text(
-        secs your_length, secs par_length,
+        game_ticks your_time, game_ticks par_time,
         int your_loss, int par_loss,
         int your_kill, int par_kill) {
     Resource rsrc("text", "txt", 6000);
@@ -250,16 +253,16 @@ String DebriefingScreen::build_score_text(
 
     StringList strings(6000);
 
-    const int your_mins = your_length.count() / 60;
-    const int your_secs = your_length.count() % 60;
-    const int par_mins = par_length.count() / 60;
-    const int par_secs = par_length.count() % 60;
-    const int your_score = score(your_length, par_length, your_loss, par_loss, your_kill, par_kill);
+    const int your_mins = duration_cast<secs>(your_time.time_since_epoch()).count() / 60;
+    const int your_secs = duration_cast<secs>(your_time.time_since_epoch()).count() % 60;
+    const int par_mins = duration_cast<secs>(par_time.time_since_epoch()).count() / 60;
+    const int par_secs = duration_cast<secs>(par_time.time_since_epoch()).count() % 60;
+    const int your_score = score(your_time, par_time, your_loss, par_loss, your_kill, par_kill);
     const int par_score = 100;
 
     string_replace(&text, strings.at(0), your_mins);
     string_replace(&text, strings.at(1), dec(your_secs, 2));
-    if (par_length > secs(0)) {
+    if (par_time > game_ticks()) {
         string_replace(&text, strings.at(2), par_mins);
         String secs_string;
         print(secs_string, format(":{0}", dec(par_secs, 2)));

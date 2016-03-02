@@ -73,7 +73,7 @@ void read_from(ReadSource in, Scenario& scenario) {
     read(in, scenario.briefPointFirst);
     read(in, scenario.starMapV);
     read(in, scenario.briefPointNum);
-    scenario.parTime = secs(read<int16_t>(in));
+    scenario.parTime = game_ticks(secs(read<int16_t>(in)));
     in.shift(2);
     read(in, scenario.parKills);
     read(in, scenario.levelNameStrNum);
