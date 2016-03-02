@@ -52,6 +52,36 @@ using std::max;
 
 namespace antares {
 
+class MiniSpaceObject: private SpaceObject {
+  public:
+    using SpaceObject::id;
+    using SpaceObject::beam;
+    using SpaceObject::pulse;
+    using SpaceObject::special;
+    using SpaceObject::destinationLocation;
+    using SpaceObject::destObject;
+    using SpaceObject::asDestination;
+    using SpaceObject::_health;
+    using SpaceObject::health;
+    using SpaceObject::max_health;
+    using SpaceObject::_energy;
+    using SpaceObject::energy;
+    using SpaceObject::max_energy;
+    using SpaceObject::base;
+    using SpaceObject::pixResID;
+    using SpaceObject::attributes;
+    using SpaceObject::baseType;
+    using SpaceObject::location;
+    using SpaceObject::owner;
+    using SpaceObject::nextNearObject;
+    using SpaceObject::nextFarObject;
+    using SpaceObject::distanceGrid;
+    using SpaceObject::collisionGrid;
+    using SpaceObject::remoteFriendStrength;
+    using SpaceObject::remoteFoeStrength;
+    using SpaceObject::escortStrength;
+};
+
 namespace {
 
 const int32_t kMiniScreenCharWidth = 25;
@@ -213,8 +243,9 @@ inline int32_t mGetLineNumFromV(int32_t mV) {
 }
 
 // for copying the fields of a space object relevant to the miniscreens:
+template <typename T, typename U>
 inline void mCopyMiniSpaceObject(
-        SpaceObject& mdestobject, const SpaceObject& msourceobject) {
+        T& mdestobject, const U& msourceobject) {
     (mdestobject).id = (msourceobject).id;
     (mdestobject).beam.base = (msourceobject).beam.base;
     (mdestobject).pulse.base = (msourceobject).pulse.base;
@@ -247,8 +278,8 @@ inline void mCopyBlankLineString(miniScreenLineType* mline, StringSlice mstring)
     }
 }
 
-inline SpaceObject* mGetMiniObjectPtr(int32_t mwhich) {
-    return globals()->gMiniScreenData.objectData.get() + mwhich;
+inline MiniSpaceObject* mGetMiniObjectPtr(int32_t mwhich) {
+    return globals()->gMiniScreenData.objectData + mwhich;
 }
 
 }  // namespace
@@ -265,7 +296,7 @@ void MiniScreenInit() {
     globals()->gMiniScreenData.clickLine = kMiniScreenNoLineSelected;
 
     globals()->gMiniScreenData.lineData.reset(new miniScreenLineType[kMiniScreenTrueLineNum]);
-    globals()->gMiniScreenData.objectData.reset(new SpaceObject[kMiniObjectDataNum]);
+    globals()->gMiniScreenData.objectData = new MiniSpaceObject[kMiniObjectDataNum];
 
     ClearMiniScreenLines();
     ClearMiniObjectData();
@@ -275,7 +306,7 @@ void MiniScreenInit() {
 
 void MiniScreenCleanup() {
     globals()->gMiniScreenData.lineData.reset();
-    globals()->gMiniScreenData.objectData.reset();
+    // globals()->gMiniScreenData.objectData.reset();
 }
 
 #pragma mark -
@@ -308,7 +339,7 @@ void ClearMiniScreenLines() {
 void ClearMiniObjectData( void)
 
 {
-    SpaceObject *o;
+    MiniSpaceObject *o;
 
     o = mGetMiniObjectPtr( kMiniSelectObjectNum);
     o->id = -1;
@@ -639,7 +670,7 @@ void minicomputer_cancel() {
 
 void MiniComputerHandleNull(ticks unitsToDo) {
     Handle<Destination> buildAtObject;
-    SpaceObject     *myObject = NULL, newObject;
+    MiniSpaceObject     *myObject = NULL, newObject;
 
     globals()->gMiniScreenData.pollTime += unitsToDo;
     if ( globals()->gMiniScreenData.pollTime > kMiniComputerPollTime)
@@ -818,7 +849,7 @@ void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) 
 }
 
 void draw_mini_ship_data(
-        const SpaceObject& newObject, uint8_t headerColor,
+        const MiniSpaceObject& newObject, uint8_t headerColor,
         int16_t screenTop, int16_t whichString) {
     Rect lRect = mini_screen_line_bounds(screenTop + instrument_top(), 0, 0, kMiniScreenWidth);
     RgbColor color = GetRGBTranslateColorShade(headerColor, LIGHT);

@@ -57,10 +57,12 @@ enum ZoomType {
     kSmallestZoom           = 7,
 };
 
+class MiniSpaceObject;
+
 struct miniScreenLineType;
 struct miniComputerDataType {
     std::unique_ptr<miniScreenLineType[]> lineData;
-    std::unique_ptr<SpaceObject[]> objectData;
+    MiniSpaceObject* objectData;  // TODO(sfiera): no leak.
     int32_t                 selectLine;
     ticks                   pollTime;
     int32_t                 buildTimeBarValue;
