@@ -222,8 +222,7 @@ inline void mCopyBlankLineString(miniScreenLineType* mline, StringSlice mstring)
 }  // namespace
 
 static void draw_mini_ship_data(
-        const MiniSpaceObject& newObject, uint8_t headerColor,
-        int16_t screen_top, StringSlice label);
+        const MiniSpaceObject& obj, uint8_t header_color, int16_t screen_top, StringSlice label);
 
 // for copying the fields of a space object relevant to the miniscreens:
 MiniSpaceObject::MiniSpaceObject(const SpaceObject& o) {
@@ -761,12 +760,11 @@ void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) 
 }
 
 static void draw_mini_ship_data(
-        const MiniSpaceObject& newObject, uint8_t headerColor,
-        int16_t screen_top, StringSlice label) {
+        const MiniSpaceObject& obj, uint8_t header_color, int16_t screen_top, StringSlice label) {
     {
         // "CONTROL" or "TARGET" label.
         Rect bar = mini_screen_line_bounds(screen_top, 0, 0, kMiniScreenWidth);
-        draw_shaded_rect(Rects(), bar, headerColor, LIGHT, VERY_LIGHT, MEDIUM);
+        draw_shaded_rect(Rects(), bar, header_color, LIGHT, VERY_LIGHT, MEDIUM);
         computer_font->draw(
                 Point(bar.left + kMiniScreenLeftBuffer, bar.top + computer_font->ascent),
                 label, RgbColor::kBlack);
@@ -777,29 +775,29 @@ static void draw_mini_ship_data(
         {kMiniIconLeft, screen_top + MiniIconMacLineTop()},
         {kMiniIconWidth, kMiniIconHeight},
     };
-    if (!newObject.base.get()) {
+    if (!obj.base.get()) {
         draw_vbracket(Rects(), icon_rect, GetRGBTranslateColorShade(PALE_GREEN, MEDIUM));
         return;
     }
 
     {
         // Object name.
-        if (newObject.base.get()) {
+        if (obj.base.get()) {
             Rect lRect = mini_screen_line_bounds(screen_top, kMiniNameLineNum, 0, kMiniScreenWidth);
             computer_font->draw(
                     Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
-                    newObject.short_name(), GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT));
+                    obj.short_name(), GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT));
         }
     }
 
-    if ((newObject.base.get()) && (newObject.pixResID >= 0)) {
+    if ((obj.base.get()) && (obj.pixResID >= 0)) {
         // Icon
-        NatePixTable* pixTable = GetPixTable(newObject.pixResID);
+        NatePixTable* pixTable = GetPixTable(obj.pixResID);
 
         if (pixTable != NULL) {
             int16_t whichShape;
-            if (newObject.attributes & kIsSelfAnimated) {
-                whichShape = more_evil_fixed_to_long(newObject.base->frame.animation.firstShape);
+            if (obj.attributes & kIsSelfAnimated) {
+                whichShape = more_evil_fixed_to_long(obj.base->frame.animation.firstShape);
             } else {
                 whichShape = 0;
             }
@@ -821,15 +819,15 @@ static void draw_mini_ship_data(
     draw_vbracket(Rects(), icon_rect, GetRGBTranslateColorShade(PALE_GREEN, MEDIUM));
 
     {
-        if ((newObject.max_health() > 0) && (newObject._health > 0)) {
+        if ((obj.max_health() > 0) && (obj._health > 0)) {
             Rects rects;
             Rect dRect = {
                 Point(kMiniHealthLeft, screen_top + MiniIconMacLineTop()),
                 Size(kMiniBarWidth, kMiniIconHeight)
             };
 
-            uint32_t tlong = newObject._health * kMiniBarHeight;
-            tlong /= newObject.max_health();
+            uint32_t tlong = obj._health * kMiniBarHeight;
+            tlong /= obj.max_health();
 
             Rect lRect;
             lRect.left = dRect.left + 2;
@@ -847,15 +845,15 @@ static void draw_mini_ship_data(
     }
 
     {
-        if ((newObject.max_energy() > 0) && (newObject._energy > 0)) {
+        if ((obj.max_energy() > 0) && (obj._energy > 0)) {
             Rects rects;
             Rect dRect = {
                 Point(kMiniEnergyLeft, screen_top + MiniIconMacLineTop()),
                 Size(kMiniBarWidth, kMiniIconHeight)
             };
 
-            uint32_t tlong = newObject._energy * kMiniBarHeight;
-            tlong /= newObject.max_energy();
+            uint32_t tlong = obj._energy * kMiniBarHeight;
+            tlong /= obj.max_energy();
 
             Rect lRect;
             lRect.left = dRect.left + 2;
@@ -876,37 +874,37 @@ static void draw_mini_ship_data(
         // Weapons
         RgbColor color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
-        if (newObject.beam.get()) {
+        if (obj.beam.get()) {
             Rect lRect = mini_screen_line_bounds(
                     screen_top, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
             computer_font->draw(
                     Point(lRect.left, lRect.top + computer_font->ascent),
-                    get_object_short_name(newObject.beam), color);
+                    get_object_short_name(obj.beam), color);
         }
 
-        if (newObject.pulse.get()) {
+        if (obj.pulse.get()) {
             Rect lRect = mini_screen_line_bounds(
                     screen_top, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
             computer_font->draw(
                     Point(lRect.left, lRect.top + computer_font->ascent),
-                    get_object_short_name(newObject.pulse), color);
+                    get_object_short_name(obj.pulse), color);
         }
 
         // Don't show special weapons of destination objects.
-        if (!(newObject.attributes & kIsDestination)) {
-            if (newObject.special.get()) {
+        if (!(obj.attributes & kIsDestination)) {
+            if (obj.special.get()) {
                 Rect lRect = mini_screen_line_bounds(
                         screen_top, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
                 computer_font->draw(
                         Point(lRect.left, lRect.top + computer_font->ascent),
-                        get_object_short_name(newObject.special), color);
+                        get_object_short_name(obj.special), color);
             }
         }
     }
 
     // write the name
-    if (newObject.destObject.get()) {
-        auto dest = newObject.destObject;
+    if (obj.destObject.get()) {
+        auto dest = obj.destObject;
         bool friendly = (dest->owner == g.admiral);
         RgbColor color = GetRGBTranslateColorShade(friendly ? GREEN : RED, VERY_LIGHT);
         Rect lRect = mini_screen_line_bounds(screen_top, kMiniDestLineNum, 0, kMiniScreenWidth);
