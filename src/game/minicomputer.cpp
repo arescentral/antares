@@ -213,20 +213,18 @@ inline int32_t mGetLineNumFromV(int32_t mV) {
 }
 
 // for copying the fields of a space object relevant to the miniscreens:
-template <typename T, typename U>
-inline void mCopyMiniSpaceObject(
-        T& mdestobject, const U& msourceobject) {
-    (mdestobject).beam.base = (msourceobject).beam.base;
-    (mdestobject).pulse.base = (msourceobject).pulse.base;
-    (mdestobject).special.base = (msourceobject).special.base;
-    (mdestobject).destObject = (msourceobject).destObject;
-    (mdestobject).asDestination = (msourceobject).asDestination;
-    (mdestobject)._health = (msourceobject)._health;
-    (mdestobject)._energy = (msourceobject)._energy;
-    (mdestobject).base = (msourceobject).base;
-    (mdestobject).pixResID = (msourceobject).pixResID;
-    (mdestobject).attributes = (msourceobject).attributes;
-    (mdestobject).owner = (msourceobject).owner;
+inline void mCopyMiniSpaceObject(MiniSpaceObject& dst, const SpaceObject& src) {
+    dst.beam.base      = src.beam.base;
+    dst.pulse.base     = src.pulse.base;
+    dst.special.base   = src.special.base;
+    dst.destObject     = src.destObject;
+    dst.asDestination  = src.asDestination;
+    dst._health        = src._health;
+    dst._energy        = src._energy;
+    dst.base           = src.base;
+    dst.pixResID       = src.pixResID;
+    dst.attributes     = src.attributes;
+    dst.owner          = src.owner;
 }
 
 inline void mCopyBlankLineString(miniScreenLineType* mline, StringSlice mstring) {
@@ -620,7 +618,6 @@ void minicomputer_cancel() {
 
 void MiniComputerHandleNull(ticks unitsToDo) {
     Handle<Destination> buildAtObject;
-    MiniSpaceObject     *myObject = NULL, newObject;
 
     globals()->gMiniScreenData.pollTime += unitsToDo;
     if ( globals()->gMiniScreenData.pollTime > kMiniComputerPollTime)
@@ -630,41 +627,39 @@ void MiniComputerHandleNull(ticks unitsToDo) {
 
         // handle control/command/selected object
 
-        myObject = &globals()->gMiniScreenData.control;
+        auto mini_control = &globals()->gMiniScreenData.control;
         auto control = g.admiral->control();
         if (control.get()) {
-            mCopyMiniSpaceObject(newObject, *control);
+            mCopyMiniSpaceObject(*mini_control, *control);
         } else {
-            newObject.beam.base = BaseObject::none();
-            newObject.pulse.base = BaseObject::none();
-            newObject.special.base = BaseObject::none();
-            newObject.destObject = SpaceObject::none();
-            newObject.asDestination = Destination::none();
-            newObject._health = 0;
-            newObject._energy = 0;
-            newObject.base = BaseObject::none();
-            newObject.pixResID = -1;
-            newObject.attributes = 0;
+            mini_control->beam.base = BaseObject::none();
+            mini_control->pulse.base = BaseObject::none();
+            mini_control->special.base = BaseObject::none();
+            mini_control->destObject = SpaceObject::none();
+            mini_control->asDestination = Destination::none();
+            mini_control->_health = 0;
+            mini_control->_energy = 0;
+            mini_control->base = BaseObject::none();
+            mini_control->pixResID = -1;
+            mini_control->attributes = 0;
         }
-        mCopyMiniSpaceObject(*myObject, newObject);
 
-        myObject = &globals()->gMiniScreenData.target;
+        auto mini_target = &globals()->gMiniScreenData.target;
         auto target = g.admiral->target();
         if (target.get()) {
-            mCopyMiniSpaceObject(newObject, *target);
+            mCopyMiniSpaceObject(*mini_target, *target);
         } else {
-            newObject.beam.base = BaseObject::none();
-            newObject.pulse.base = BaseObject::none();
-            newObject.special.base = BaseObject::none();
-            newObject.destObject = SpaceObject::none();
-            newObject.asDestination = Destination::none();
-            newObject._health = 0;
-            newObject._energy = 0;
-            newObject.base = BaseObject::none();
-            newObject.pixResID = -1;
-            newObject.attributes = 0;
+            mini_target->beam.base = BaseObject::none();
+            mini_target->pulse.base = BaseObject::none();
+            mini_target->special.base = BaseObject::none();
+            mini_target->destObject = SpaceObject::none();
+            mini_target->asDestination = Destination::none();
+            mini_target->_health = 0;
+            mini_target->_energy = 0;
+            mini_target->base = BaseObject::none();
+            mini_target->pixResID = -1;
+            mini_target->attributes = 0;
         }
-        mCopyMiniSpaceObject(*myObject, newObject);
 
         auto build_at = GetAdmiralBuildAtObject(g.admiral);
         if (build_at.get()) {
