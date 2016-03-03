@@ -41,8 +41,6 @@ struct miniScreenLineType {
     sfz::String     statusTrue;
     sfz::String     statusString;
     sfz::String     postString;
-    int32_t         hiliteLeft;
-    int32_t         hiliteRight;
     int32_t         whichButton;
     lineSelectType  selectable;
     bool         underline;

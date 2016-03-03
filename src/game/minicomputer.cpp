@@ -262,7 +262,6 @@ void ClearMiniScreenLines() {
     miniScreenLineType* c = globals()->gMiniScreenData.lineData.get();
     for (int32_t b = 0; b < kMiniScreenTrueLineNum; b++) {
         c->string.clear();
-        c->hiliteLeft = c->hiliteRight = 0;
         c->whichButton = kNoLineButton;
         c->selectable = cannotSelect;
         c->underline = false;
@@ -294,11 +293,11 @@ void draw_minicomputer_lines() {
                 rects.fill({mini_rect.left, y, mini_rect.right - 1, y + 1}, color);
             }
 
-            if (c->hiliteLeft < c->hiliteRight) {
+            if (count == globals()->gMiniScreenData.selectLine) {
                 Rect hilite_rect;
-                hilite_rect.left = c->hiliteLeft;
+                hilite_rect.left = mini_rect.left;
                 hilite_rect.top = mini_rect.top + line_offset;
-                hilite_rect.right = c->hiliteRight;
+                hilite_rect.right = mini_rect.right;
                 hilite_rect.bottom = hilite_rect.top + computer_font->height;
                 draw_shaded_rect(rects, hilite_rect, kMiniScreenColor, DARK, MEDIUM, DARKER);
             }
@@ -308,9 +307,10 @@ void draw_minicomputer_lines() {
         for (int32_t count = 0; count < kMiniScreenButtonNum; count++) {
             auto c = &globals()->gMiniScreenData.lineData[count + kMiniScreenCharHeight];
             Rect hilite_rect;
-            hilite_rect.left = c->hiliteLeft - 2;
+            hilite_rect.left = but_box_rect.left + kMiniScreenLeftBuffer - 2;
             hilite_rect.top = but_box_rect.top + (count * computer_font->height);
-            hilite_rect.right = c->hiliteRight + 2;
+            hilite_rect.right = but_box_rect.left + kMiniScreenLeftBuffer
+                + computer_font->logicalWidth * 4 + 1;
             hilite_rect.bottom = hilite_rect.top + computer_font->height;
             switch (c->lineKind) {
                 case plainLineKind:
@@ -337,7 +337,7 @@ void draw_minicomputer_lines() {
 
             RgbColor textcolor = GetRGBTranslateColorShade(kMiniScreenColor, VERY_LIGHT);
             if (c->selectable == selectDim) {
-                if (c->hiliteLeft < c->hiliteRight) {
+                if (count == globals()->gMiniScreenData.selectLine) {
                     textcolor = GetRGBTranslateColorShade(kMiniScreenColor, VERY_DARK);
                 } else {
                     textcolor = GetRGBTranslateColorShade(kMiniScreenColor, MEDIUM);
@@ -417,8 +417,6 @@ void MakeMiniScreenFromIndString(int16_t whichString) {
                 line->selectable = selectable;
                 if (globals()->gMiniScreenData.selectLine == kMiniScreenNoLineSelected) {
                     globals()->gMiniScreenData.selectLine = line - line_begin;
-                    line->hiliteLeft = mRect.left;
-                    line->hiliteRight = mRect.right;
                 }
                 break;
 
@@ -426,18 +424,11 @@ void MakeMiniScreenFromIndString(int16_t whichString) {
                 {
                     line->lineKind = buttonOffLineKind;
                     line->whichButton = kInLineButton;
-                    line->hiliteLeft
-                        = mRect.left + kMiniScreenLeftBuffer
-                        + computer_font->logicalWidth * line->string.size();
 
                     sfz::String key_name;
                     GetKeyNumName(Preferences::preferences()->key(kCompAcceptKeyNum), &key_name);
                     pad_to(key_name, kKeyNameLength);
                     line->string.append(key_name);
-
-                    line->hiliteRight
-                        = mRect.left + kMiniScreenLeftBuffer
-                        + computer_font->logicalWidth * line->string.size() - 1;
                 }
                 break;
 
@@ -445,19 +436,11 @@ void MakeMiniScreenFromIndString(int16_t whichString) {
                 {
                     line->lineKind = buttonOffLineKind;
                     line->whichButton = kOutLineButton;
-                    line->hiliteLeft
-                        = mRect.left + kMiniScreenLeftBuffer
-                        + computer_font->logicalWidth * line->string.size();
 
                     sfz::String key_name;
-                    GetKeyNumName(
-                            Preferences::preferences()->key(kCompCancelKeyNum), &key_name);
+                    GetKeyNumName(Preferences::preferences()->key(kCompCancelKeyNum), &key_name);
                     pad_to(key_name, kKeyNameLength);
                     line->string.append(key_name);
-
-                    line->hiliteRight
-                        = mRect.left + kMiniScreenLeftBuffer
-                        + computer_font->logicalWidth * line->string.size() - 1;
                 }
                 break;
 
@@ -516,7 +499,6 @@ static void minicomputer_handle_move(int direction) {
         return;
     }
     miniScreenLineType* line = globals()->gMiniScreenData.lineData.get() + globals()->gMiniScreenData.selectLine;
-    line->hiliteLeft = line->hiliteRight = 0;
     do {
         line += direction;
         globals()->gMiniScreenData.selectLine += direction;
@@ -528,9 +510,6 @@ static void minicomputer_handle_move(int direction) {
             line -= kMiniScreenCharHeight;
         }
     } while (line->selectable == cannotSelect);
-
-    line->hiliteLeft = kMiniScreenLeft;
-    line->hiliteRight = kMiniScreenRight;
 }
 
 void minicomputer_handle_keys(uint32_t new_keys, uint32_t old_keys, bool cancel) {
@@ -569,7 +548,6 @@ static void update_build_screen_lines() {
     if (line->value != GetAdmiralBuildAtObject(admiral).number()) {
         if (mini.selectLine != kMiniScreenNoLineSelected) {
             line = &mini.lineData[mini.selectLine];
-            line->hiliteLeft = line->hiliteRight = 0;
             mini.selectLine = kMiniScreenNoLineSelected;
         }
         MiniComputerSetBuildStrings();
@@ -588,8 +566,6 @@ static void update_build_screen_lines() {
                     if (line->selectable != selectable) {
                         if (mini.selectLine == kMiniScreenNoLineSelected) {
                             mini.selectLine = lineNum;
-                            line->hiliteLeft = mRect.left;
-                            line->hiliteRight = mRect.right;
                         }
                         line->selectable = selectable;
                     }
@@ -1030,8 +1006,6 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
                     if ( globals()->gMiniScreenData.selectLine == kMiniScreenNoLineSelected)
                     {
                         globals()->gMiniScreenData.selectLine = lineNum;
-                        line->hiliteLeft = mRect.left;
-                        line->hiliteRight = mRect.right;
                     }
 
                 } else
@@ -1040,7 +1014,6 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
                     line->selectable = cannotSelect;
                     if ( globals()->gMiniScreenData.selectLine == (count + kBuildScreenFirstTypeLine))
                     {
-                        line->hiliteLeft = line->hiliteRight = 0;
                         globals()->gMiniScreenData.selectLine++;
                     }
                     line->value = -1;
@@ -1063,7 +1036,6 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
             {
                 line->string.clear();
                 line->selectable = cannotSelect;
-                line->hiliteLeft = line->hiliteRight = 0;
                 line++;
             }
         }
@@ -1399,7 +1371,6 @@ void MiniComputerHandleClick( Point where)
             {
                 line = globals()->gMiniScreenData.lineData.get() +
                     globals()->gMiniScreenData.selectLine;
-                line->hiliteLeft = line->hiliteRight = 0;
             }
 
             lineNum = mGetLineNumFromV(where.v);
@@ -1411,8 +1382,6 @@ void MiniComputerHandleClick( Point where)
 
                 line = globals()->gMiniScreenData.lineData.get() +
                     globals()->gMiniScreenData.selectLine;
-                line->hiliteLeft = mRect.left;
-                line->hiliteRight = mRect.right;
             }
         } else globals()->gMiniScreenData.clickLine = kMiniScreenNoLineSelected;
     }
@@ -1510,7 +1479,6 @@ void MiniComputerHandleDoubleClick( Point where)
                     kMiniScreenNoLineSelected)
                 {
                     line = globals()->gMiniScreenData.lineData.get() + globals()->gMiniScreenData.selectLine;
-                    line->hiliteLeft = line->hiliteRight = 0;
                 }
 
                 lineNum = mGetLineNumFromV(where.v);
@@ -1520,8 +1488,6 @@ void MiniComputerHandleDoubleClick( Point where)
                     globals()->gMiniScreenData.selectLine = lineNum;
 
                     line = globals()->gMiniScreenData.lineData.get() + globals()->gMiniScreenData.selectLine;
-                    line->hiliteLeft = mRect.left;
-                    line->hiliteRight = mRect.right;
                 }
             }
         }
