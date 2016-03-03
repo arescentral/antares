@@ -23,28 +23,23 @@
 
 namespace antares {
 
-enum lineKindType {
-    plainLineKind = 0,
-    buttonOffLineKind = 1,
-    buttonOnLineKind = 2
-};
-
-enum lineSelectType {
-    cannotSelect = 0,
-    selectDim = 1,
-    selectable = 2
+enum MiniScreenLineKind {
+    MINI_NONE        = 0,
+    MINI_DIM         = 1,
+    MINI_SELECTABLE  = 2,
+    MINI_BUTTON_ON   = 3,
+    MINI_BUTTON_OFF  = 4,
 };
 
 struct miniScreenLineType {
+    MiniScreenLineKind  kind;
     sfz::String     string;
     sfz::String     statusFalse;
     sfz::String     statusTrue;
     sfz::String     statusString;
     sfz::String     postString;
     int32_t         whichButton;
-    lineSelectType  selectable;
     bool         underline;
-    lineKindType    lineKind;
     int32_t         value;      // for keeping track of changing values
     int32_t         statusType;
     int32_t         whichStatus;
