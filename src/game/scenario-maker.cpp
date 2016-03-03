@@ -286,15 +286,6 @@ int32_t Scenario::chapter_number() const {
     return levelNameStrNum;
 }
 
-ScenarioName Scenario::name() const {
-    ScenarioName name = {levelNameStrNum};
-    return name;
-}
-
-void print_to(PrintTarget out, ScenarioName name) {
-    print(out, plug.chapter_names->at(name.string_id - 1));
-}
-
 int32_t Scenario::prologue_id() const {
     return prologueID;
 }
@@ -498,12 +489,14 @@ void ScenarioMakerInit() {
     }
 
     {
+        StringList chapter_names(kLevelNameID);
         plug.chapters.clear();
         Resource rsrc("scenarios", "snro", kScenarioResID);
         BytesSlice in(rsrc.data());
         while (!in.empty()) {
             Scenario scenario;
             read(in, scenario);
+            scenario.name.assign(chapter_names.at(scenario.levelNameStrNum - 1));
             plug.chapters.push_back(scenario);
         }
     }
@@ -542,8 +535,6 @@ void ScenarioMakerInit() {
     }
 
     InitRaces();
-
-    plug.chapter_names.reset(new StringList(kLevelNameID));
 }
 
 bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
