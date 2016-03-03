@@ -507,7 +507,6 @@ void GamePlay::fire_timer() {
         return;
     }
 
-    globals()->starfield.prepare_to_move();
     EraseSite();
 
     if (_player_paused) {
@@ -524,6 +523,7 @@ void GamePlay::fire_timer() {
         }
 
         // executed arbitrarily, but at least once every major tick
+        globals()->starfield.prepare_to_move();
         globals()->starfield.move(unitsToDo);
         MoveSpaceObjects(unitsToDo);
 
