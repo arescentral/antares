@@ -550,7 +550,7 @@ void GamePlay::fire_timer() {
             }
         }
 
-        MiniComputerHandleNull(unitsToDo);
+        UpdateMiniScreenLines();
 
         Messages::clip();
         Messages::draw_long_message(unitsToDo);

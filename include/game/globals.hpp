@@ -60,10 +60,7 @@ enum ZoomType {
 struct miniScreenLineType;
 struct miniComputerDataType {
     std::unique_ptr<miniScreenLineType[]> lineData;
-    std::unique_ptr<SpaceObject[]> objectData;
     int32_t                 selectLine;
-    ticks                   pollTime;
-    int32_t                 buildTimeBarValue;
     int32_t                 currentScreen;
     int32_t                 clickLine;
 };
