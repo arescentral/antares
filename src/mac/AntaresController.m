@@ -77,6 +77,8 @@ static NSURL* url(const char* utf8_bytes) {
 }
 
 @interface AntaresController (Private)
+- (void)fail:(NSString*)message;
+
 - (NSURL*)authorURL;
 - (void)setAuthorURL:(NSURL*)authorURL;
 - (NSURL*)downloadURL;
@@ -89,8 +91,7 @@ static NSURL* url(const char* utf8_bytes) {
     AntaresExtractDataController* extract = [[[AntaresExtractDataController alloc]
         initWithTarget:self selector:@selector(installDone:) path:filename] autorelease];
     if (!extract) {
-        NSLog(@"Failed to create AntaresExtractDataController");
-        exit(1);
+        [self fail:@"Failed to create AntaresExtractDataController"];
     }
 }
 
@@ -203,18 +204,24 @@ static NSURL* url(const char* utf8_bytes) {
     CFStringRef error_message;
     drivers = antares_controller_create_drivers(&error_message);
     if (!drivers) {
-        NSLog(@"%@", error_message);
-        CFRelease(error_message);
-        exit(1);
+        [self fail:(NSString*)error_message];
     }
 
     NSString* scenario = [[NSUserDefaults standardUserDefaults] stringForKey:kScenario];
     AntaresExtractDataController* extract = [[[AntaresExtractDataController alloc]
         initWithTarget:self selector:@selector(extractDone:) scenario:scenario] autorelease];
     if (!extract) {
-        NSLog(@"Failed to create AntaresExtractDataController");
-        exit(1);
+        [self fail:@"Failed to create AntaresExtractDataController"];
     }
+}
+
+- (void)fail:(NSString*)message {
+    NSAlert* alert = [[NSAlert alloc] init];
+    [alert setMessageText:@"Oops"];
+    [alert setInformativeText:message];
+    [alert addButtonWithTitle:@"Quit"];
+    [alert runModal];
+    exit(1);
 }
 
 - (void)installDone:(id)sender {
@@ -226,9 +233,7 @@ static NSURL* url(const char* utf8_bytes) {
 - (void)extractDone:(id)sender {
     CFStringRef error_message;
     if (!antares_controller_loop(drivers, &error_message)) {
-        NSLog(@"%@", error_message);
-        CFRelease(error_message);
-        exit(1);
+        [self fail:(NSString*)error_message];
     }
     antares_controller_destroy_drivers(drivers);
     [NSApp terminate:self];
