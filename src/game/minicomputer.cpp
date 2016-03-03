@@ -989,6 +989,8 @@ static void show_main_screen(Handle<Admiral> adm, int32_t line) {
 
 static void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral) {
     if (whichLine != kMiniScreenNoLineSelected) {
+        // TODO(sfiera): has to work for remote players, which means
+        // we can't use the local player's mini scren line data. #net
         const miniScreenLineType* line = &globals()->gMiniScreenData.lineData[whichLine];
         if (line->callback) {
             line->callback(whichAdmiral, whichLine);
