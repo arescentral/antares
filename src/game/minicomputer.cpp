@@ -275,68 +275,59 @@ void ClearMiniObjectData() {
 }
 
 void draw_minicomputer_lines() {
+    Rect mini_rect = Rect(kMiniScreenLeft, kMiniScreenTop, kMiniScreenRight, kMiniScreenBottom);
+    mini_rect.offset(0, instrument_top());
+    Rect but_box_rect = Rect(kButBoxLeft, kButBoxTop, kButBoxRight, kButBoxBottom);
+    but_box_rect.offset(0, instrument_top());
+
     {
         Rects rects;
+        rects.fill(mini_rect, GetRGBTranslateColorShade(kMiniScreenColor, DARKEST));
         for (int32_t count = 0; count < kMiniScreenTrueLineNum; count++) {
             auto c = &globals()->gMiniScreenData.lineData[count];
-            Rect mRect = Rect(
-                    kMiniScreenLeft,
-                    kMiniScreenTop + instrument_top(),
-                    kMiniScreenRight,
-                    kMiniScreenBottom + instrument_top());
+            Rect rect = mini_rect;
             uint8_t lineColor = kMiniScreenColor;
-            int32_t lineCorrect = 0;
-            if (count < kMiniScreenCharHeight) {
-                if (count == 0) {
-                    auto color = GetRGBTranslateColorShade(kMiniScreenColor, DARKEST);
-                    rects.fill(mRect, color);
-                }
-            } else {
-                mRect = Rect(
-                        kButBoxLeft,
-                        kButBoxTop + instrument_top(),
-                        kButBoxRight,
-                        kButBoxBottom + instrument_top());
-                lineCorrect = -kMiniScreenCharHeight;
+            int32_t line_offset = count * computer_font->height;
+            if (count >= kMiniScreenCharHeight) {
+                rect = but_box_rect;
+                line_offset -= kMiniScreenCharHeight * computer_font->height;
                 lineColor = kMiniButColor;
                 if (count == kMiniScreenCharHeight) {
-                    auto color = GetRGBTranslateColorShade(kMiniButColor, DARKEST);
-                    rects.fill(mRect, color);
+                    rects.fill(but_box_rect, GetRGBTranslateColorShade(kMiniButColor, DARKEST));
                 }
             }
 
             if (c->underline) {
                 const RgbColor color = GetRGBTranslateColorShade(lineColor, MEDIUM);
-                int32_t y = mRect.top + (count + lineCorrect) * computer_font->height
-                    + computer_font->ascent;
-                rects.fill({mRect.left, y, mRect.right - 1, y + 1}, color);
+                int32_t y = rect.top + line_offset + computer_font->ascent;
+                rects.fill({rect.left, y, rect.right - 1, y + 1}, color);
             }
 
             if (c->hiliteLeft < c->hiliteRight) {
-                Rect cRect;
+                Rect hilite_rect;
                 switch (c->lineKind) {
                   case plainLineKind:
-                    cRect.left = c->hiliteLeft;
-                    cRect.top = mRect.top + ((count + lineCorrect) * computer_font->height);
-                    cRect.right = c->hiliteRight;
-                    cRect.bottom = cRect.top + computer_font->height;
-                    draw_shaded_rect(rects, cRect, lineColor, DARK, MEDIUM, DARKER);
+                    hilite_rect.left = c->hiliteLeft;
+                    hilite_rect.top = rect.top + line_offset;
+                    hilite_rect.right = c->hiliteRight;
+                    hilite_rect.bottom = hilite_rect.top + computer_font->height;
+                    draw_shaded_rect(rects, hilite_rect, lineColor, DARK, MEDIUM, DARKER);
                     break;
 
                   case buttonOffLineKind:
-                    cRect.left = c->hiliteLeft - 2;
-                    cRect.top = mRect.top + ((count + lineCorrect) * computer_font->height);
-                    cRect.right = c->hiliteRight + 2;
-                    cRect.bottom = cRect.top + computer_font->height;
-                    draw_shaded_rect(rects, cRect, lineColor, MEDIUM, LIGHT, DARK);
+                    hilite_rect.left = c->hiliteLeft - 2;
+                    hilite_rect.top = rect.top + line_offset;
+                    hilite_rect.right = c->hiliteRight + 2;
+                    hilite_rect.bottom = hilite_rect.top + computer_font->height;
+                    draw_shaded_rect(rects, hilite_rect, lineColor, MEDIUM, LIGHT, DARK);
                     break;
 
                   case buttonOnLineKind:
-                    cRect.left = c->hiliteLeft - 2;
-                    cRect.top = mRect.top + ((count + lineCorrect) * computer_font->height);
-                    cRect.right = mRect.right;
-                    cRect.bottom = cRect.top + computer_font->height;
-                    draw_shaded_rect(rects, cRect, lineColor, LIGHT, VERY_LIGHT, MEDIUM);
+                    hilite_rect.left = c->hiliteLeft - 2;
+                    hilite_rect.top = rect.top + line_offset;
+                    hilite_rect.right = rect.right;
+                    hilite_rect.bottom = hilite_rect.top + computer_font->height;
+                    draw_shaded_rect(rects, hilite_rect, lineColor, LIGHT, VERY_LIGHT, MEDIUM);
                     break;
                 }
             }
@@ -347,22 +338,15 @@ void draw_minicomputer_lines() {
         Quads quads(computer_font->texture);
         for (int32_t count = 0; count < kMiniScreenTrueLineNum; count++) {
             auto c = &globals()->gMiniScreenData.lineData[count];
-            Rect mRect = Rect(
-                        kMiniScreenLeft,
-                        kMiniScreenTop + instrument_top(),
-                        kMiniScreenRight,
-                        kMiniScreenBottom + instrument_top());
+            Point origin = mini_rect.origin();
             uint8_t lineColor = kMiniScreenColor;
-            int32_t lineCorrect = 0;
+            int32_t line_offset = count * computer_font->height;
             if (count >= kMiniScreenCharHeight) {
-                mRect = Rect(
-                        kButBoxLeft,
-                        kButBoxTop + instrument_top(),
-                        kButBoxRight,
-                        kButBoxBottom + instrument_top());
-                lineCorrect = -kMiniScreenCharHeight;
+                origin = but_box_rect.origin();
+                line_offset -= kMiniScreenCharHeight * computer_font->height;
                 lineColor = kMiniButColor;
             }
+            origin.offset(kMiniScreenLeftBuffer, line_offset + computer_font->ascent);
 
             RgbColor textcolor = GetRGBTranslateColorShade(lineColor, VERY_LIGHT);
             if (c->hiliteLeft < c->hiliteRight) {
@@ -375,12 +359,7 @@ void draw_minicomputer_lines() {
                 textcolor = GetRGBTranslateColorShade(lineColor, MEDIUM);
             }
 
-            computer_font->draw(
-                    quads,
-                    Point(
-                        mRect.left + kMiniScreenLeftBuffer,
-                        mRect.top + (count + lineCorrect) * computer_font->height + computer_font->ascent),
-                    c->string, textcolor);
+            computer_font->draw(quads, origin, c->string, textcolor);
         }
     }
 }
