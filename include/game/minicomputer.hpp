@@ -51,6 +51,7 @@ struct miniScreenLineType {
     Handle<Admiral> statusPlayer;
     int32_t         negativeValue;
     Handle<BaseObject>  sourceData;
+    void                (*callback)(Handle<Admiral> adm, int32_t line);
 };
 
 void MiniScreenInit( void);
@@ -60,7 +61,6 @@ void DisposeMiniScreenStatusStrList( void);
 void ClearMiniScreenLines( void);
 void ClearMiniObjectData( void);
 void draw_mini_screen();
-void MakeMiniScreenFromIndString( int16_t);
 void minicomputer_handle_keys(uint32_t new_keys, uint32_t old_keys, bool cancel);
 void minicomputer_cancel();
 int32_t MiniComputerGetPriceOfCurrentSelection( void);

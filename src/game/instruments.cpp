@@ -496,7 +496,7 @@ static void draw_money() {
 void set_up_instruments() {
     globals()->gZoomMode = kNearestFoeZoom;
 
-    MakeMiniScreenFromIndString(1);
+    MiniComputerDoCancel();  // i.e., go to main screen
     ResetInstruments();
     ClearMiniObjectData();
     UpdateRadar(ticks(100));  // full update

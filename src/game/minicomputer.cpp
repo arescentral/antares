@@ -268,6 +268,7 @@ void ClearMiniScreenLines() {
         c->underline = false;
         c->lineKind = plainLineKind;
         c->sourceData = BaseObject::none();
+        c->callback = nullptr;
         c++;
     }
 }
@@ -935,6 +936,10 @@ static void show_build_screen(Handle<Admiral> adm, int32_t line) {
     }
     MakeMiniScreenFromIndString(kBuildMiniScreen);
     MiniComputerSetBuildStrings();
+    auto&& lines = globals()->gMiniScreenData.lineData;
+    for (int i = 0; i < kMaxShipCanBuild; ++i) {
+        lines[kBuildScreenFirstTypeLine + i].callback = build_ship;
+    }
 }
 
 static void show_special_screen(Handle<Admiral> adm, int32_t line) {
@@ -942,6 +947,13 @@ static void show_special_screen(Handle<Admiral> adm, int32_t line) {
         return;
     }
     MakeMiniScreenFromIndString(kSpecialMiniScreen);
+    auto&& lines = globals()->gMiniScreenData.lineData;
+    lines[kSpecialMiniTransfer].callback = transfer_control;
+    lines[kSpecialMiniFire1].callback = fire1;
+    lines[kSpecialMiniFire2].callback = fire2;
+    lines[kSpecialMiniFireSpecial].callback = fire_special;
+    lines[kSpecialMiniHold].callback = hold_position;
+    lines[kSpecialMiniGoToMe].callback = come_to_me;
 }
 
 static void show_message_screen(Handle<Admiral> adm, int32_t line) {
@@ -949,6 +961,10 @@ static void show_message_screen(Handle<Admiral> adm, int32_t line) {
         return;
     }
     MakeMiniScreenFromIndString(kMessageMiniScreen);
+    auto&& lines = globals()->gMiniScreenData.lineData;
+    lines[kMessageMiniNext].callback = next_message;
+    lines[kMessageMiniLast].callback = last_message;
+    lines[kMessageMiniPrevious].callback = prev_message;
 }
 
 static void show_status_screen(Handle<Admiral> adm, int32_t line) {
@@ -957,6 +973,7 @@ static void show_status_screen(Handle<Admiral> adm, int32_t line) {
     }
     MakeMiniScreenFromIndString(kStatusMiniScreen);
     MiniComputerSetStatusStrings();
+    auto&& lines = globals()->gMiniScreenData.lineData;
 }
 
 static void show_main_screen(Handle<Admiral> adm, int32_t line) {
@@ -964,47 +981,19 @@ static void show_main_screen(Handle<Admiral> adm, int32_t line) {
         return;
     }
     MakeMiniScreenFromIndString(kMainMiniScreen);
+    auto&& lines = globals()->gMiniScreenData.lineData;
+    lines[kMainMiniBuild].callback = show_build_screen;
+    lines[kMainMiniSpecial].callback = show_special_screen;
+    lines[kMainMiniMessage].callback = show_message_screen;
+    lines[kMainMiniStatus].callback = show_status_screen;
 }
 
 static void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral) {
-    if (whichLine == kMiniScreenNoLineSelected) {
-        return;
-    }
-    const miniScreenLineType* line = &globals()->gMiniScreenData.lineData[whichLine];
-    switch (whichPage) {
-        case kMainMiniScreen:
-            switch (whichLine) {
-                case kMainMiniBuild: show_build_screen(whichAdmiral, whichLine); break;
-                case kMainMiniSpecial: show_special_screen(whichAdmiral, whichLine); break;
-                case kMainMiniMessage: show_message_screen(whichAdmiral, whichLine); break;
-                case kMainMiniStatus: show_status_screen(whichAdmiral, whichLine); break;
-            }
-            break;
-
-        case kBuildMiniScreen:
-            build_ship(whichAdmiral, whichLine);
-            break;
-
-        case kSpecialMiniScreen:
-            switch (whichLine) {
-                case kSpecialMiniTransfer: transfer_control(whichAdmiral, whichLine); break;
-                case kSpecialMiniFire1: fire1(whichAdmiral, whichLine); break;
-                case kSpecialMiniFire2: fire2(whichAdmiral, whichLine); break;
-                case kSpecialMiniFireSpecial: fire_special(whichAdmiral, whichLine); break;
-                case kSpecialMiniHold: hold_position(whichAdmiral, whichLine); break;
-                case kSpecialMiniGoToMe: come_to_me(whichAdmiral, whichLine); break;
-            }
-            break;
-
-        case kMessageMiniScreen:
-            if (whichAdmiral == g.admiral) {
-                switch (whichLine) {
-                    case kMessageMiniNext: next_message(whichAdmiral, whichLine); break;
-                    case kMessageMiniLast: last_message(whichAdmiral, whichLine); break;
-                    case kMessageMiniPrevious: prev_message(whichAdmiral, whichLine); break;
-                }
-            }
-            break;
+    if (whichLine != kMiniScreenNoLineSelected) {
+        const miniScreenLineType* line = &globals()->gMiniScreenData.lineData[whichLine];
+        if (line->callback) {
+            line->callback(whichAdmiral, whichLine);
+        }
     }
 }
 
