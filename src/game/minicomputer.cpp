@@ -292,6 +292,7 @@ static void highlight(const Rects& rects, int line) {
 
 static void item_text(const Quads& quads, int line, StringSlice string, bool dim) {
     Rect rect = Rect(kMiniScreenLeft, kMiniScreenTop, kMiniScreenRight, kMiniScreenBottom);
+    rect.offset(0, instrument_top());
     Point origin = rect.origin();
     origin.offset(kMiniScreenLeftBuffer, (line * computer_font->height) + computer_font->ascent);
     RgbColor textcolor = GetRGBTranslateColorShade(kMiniScreenColor, VERY_LIGHT);
