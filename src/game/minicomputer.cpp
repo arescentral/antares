@@ -833,7 +833,7 @@ void MiniComputerDoAccept() {
             g.admiral);
 }
 
-void transfer_control(Handle<Admiral> adm) {
+void transfer_control(Handle<Admiral> adm, int32_t line) {
     auto control = adm->control();
     auto flagship = adm->flagship();
     if (flagship.get()) {
@@ -854,164 +854,162 @@ void transfer_control(Handle<Admiral> adm) {
     }
 }
 
-static void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral) {
-    SpaceObject *anotherObject;
-
-    switch ( whichPage)
-    {
-        case kMainMiniScreen:
-            if (whichAdmiral == g.admiral) {
-                switch ( whichLine)
-                {
-                    case kMainMiniBuild:
-                        MakeMiniScreenFromIndString( kBuildMiniScreen);
-                        MiniComputerSetBuildStrings();
-                        break;
-
-                    case kMainMiniSpecial:
-                        MakeMiniScreenFromIndString( kSpecialMiniScreen);
-                        break;
-
-                    case kMainMiniMessage:
-                        MakeMiniScreenFromIndString( kMessageMiniScreen);
-                        break;
-
-                    case kMainMiniStatus:
-                        MakeMiniScreenFromIndString( kStatusMiniScreen);
-                        MiniComputerSetStatusStrings();
-                        break;
-
-                    default:
-                        break;
-                }
+static void build_ship(Handle<Admiral> adm, int32_t line) {
+    if (globals()->keyMask & kComputerBuildMenu) {
+        return;
+    }
+    if (CountObjectsOfBaseType(BaseObject::none(), Admiral::none()) < (kMaxSpaceObject - kMaxShipBuffer)) {
+        if (adm->build(line - kBuildScreenFirstTypeLine) == false) {
+            if (adm == g.admiral) {
+                mPlayBeepBad();
             }
+        }
+    } else {
+        if (adm == g.admiral) {
+            Messages::set_status("Maximum number of ships built", ORANGE);
+        }
+    }
+}
 
+static void fire(Handle<Admiral> adm, int key) {
+    if (globals()->keyMask & kComputerSpecialMenu) {
+        return;
+    }
+    auto control = adm->control();
+    if (control.get()) {
+        if (control->attributes & kCanAcceptDestination) {
+            control->keysDown |= key | kManualOverrideFlag;
+        }
+    }
+}
+
+static void fire1(Handle<Admiral> adm, int32_t line) { fire(adm, kOneKey); }
+static void fire2(Handle<Admiral> adm, int32_t line) { fire(adm, kTwoKey); }
+static void fire_special(Handle<Admiral> adm, int32_t line) { fire(adm, kEnterKey); }
+
+static void hold_position(Handle<Admiral> adm, int32_t line) {
+    if (globals()->keyMask & kComputerSpecialMenu) {
+        return;
+    }
+    auto control = adm->control();
+    if (control.get()) {
+        SetObjectLocationDestination(control, &control->location);
+    }
+}
+
+static void come_to_me(Handle<Admiral> adm, int32_t line) {
+    if (globals()->keyMask & kComputerSpecialMenu) {
+        return;
+    }
+    auto control = adm->control();
+    if (control.get()) {
+        auto flagship = adm->flagship();
+        SetObjectLocationDestination(control, &flagship->location);
+    }
+}
+
+static void next_message(Handle<Admiral> adm, int32_t line) {
+    if (globals()->keyMask & kComputerMessageMenu) {
+        return;
+    }
+    Messages::advance();
+}
+
+static void last_message(Handle<Admiral> adm, int32_t line) {
+    if (globals()->keyMask & kComputerMessageMenu) {
+        return;
+    }
+    Messages::replay();
+}
+
+static void prev_message(Handle<Admiral> adm, int32_t line) {
+    if (globals()->keyMask & kComputerMessageMenu) {
+        return;
+    }
+    Messages::previous();
+}
+
+static void show_build_screen(Handle<Admiral> adm, int32_t line) {
+    if (adm != g.admiral) {
+        return;
+    }
+    MakeMiniScreenFromIndString(kBuildMiniScreen);
+    MiniComputerSetBuildStrings();
+}
+
+static void show_special_screen(Handle<Admiral> adm, int32_t line) {
+    if (adm != g.admiral) {
+        return;
+    }
+    MakeMiniScreenFromIndString(kSpecialMiniScreen);
+}
+
+static void show_message_screen(Handle<Admiral> adm, int32_t line) {
+    if (adm != g.admiral) {
+        return;
+    }
+    MakeMiniScreenFromIndString(kMessageMiniScreen);
+}
+
+static void show_status_screen(Handle<Admiral> adm, int32_t line) {
+    if (adm != g.admiral) {
+        return;
+    }
+    MakeMiniScreenFromIndString(kStatusMiniScreen);
+    MiniComputerSetStatusStrings();
+}
+
+static void show_main_screen(Handle<Admiral> adm, int32_t line) {
+    if (adm != g.admiral) {
+        return;
+    }
+    MakeMiniScreenFromIndString(kMainMiniScreen);
+}
+
+static void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral) {
+    if (whichLine == kMiniScreenNoLineSelected) {
+        return;
+    }
+    const miniScreenLineType* line = &globals()->gMiniScreenData.lineData[whichLine];
+    switch (whichPage) {
+        case kMainMiniScreen:
+            switch (whichLine) {
+                case kMainMiniBuild: show_build_screen(whichAdmiral, whichLine); break;
+                case kMainMiniSpecial: show_special_screen(whichAdmiral, whichLine); break;
+                case kMainMiniMessage: show_message_screen(whichAdmiral, whichLine); break;
+                case kMainMiniStatus: show_status_screen(whichAdmiral, whichLine); break;
+            }
             break;
 
         case kBuildMiniScreen:
-            if ( globals()->keyMask & kComputerBuildMenu) return;
-            if ( whichLine != kMiniScreenNoLineSelected)
-            {
-                if (CountObjectsOfBaseType(BaseObject::none(), Admiral::none()) < (kMaxSpaceObject - kMaxShipBuffer)) {
-                    if (whichAdmiral->build(whichLine - kBuildScreenFirstTypeLine) == false) {
-                        if (whichAdmiral == g.admiral) {
-                            mPlayBeepBad();
-                        }
-                    }
-                } else
-                {
-                    if (whichAdmiral == g.admiral) {
-                        Messages::set_status("Maximum number of ships built", ORANGE);
-                    }
-                }
-            }
+            build_ship(whichAdmiral, whichLine);
             break;
 
         case kSpecialMiniScreen:
-            if ( globals()->keyMask & kComputerSpecialMenu) return;
-            switch ( whichLine)
-            {
-                case kSpecialMiniTransfer: {
-                    transfer_control(whichAdmiral);
-                    break;
-                }
-
-                case kSpecialMiniFire1: {
-                    auto control = whichAdmiral->control();
-                    if (control.get()) {
-                        if (control->attributes & kCanAcceptDestination) {
-                            control->keysDown |= kOneKey | kManualOverrideFlag;
-                        }
-                    }
-                    break;
-                }
-
-                case kSpecialMiniFire2: {
-                    auto control = whichAdmiral->control();
-                    if (control.get()) {
-                        if (control->attributes & kCanAcceptDestination) {
-                            control->keysDown |= kTwoKey | kManualOverrideFlag;
-                        }
-                    }
-                    break;
-                }
-
-                case kSpecialMiniFireSpecial: {
-                    auto control = whichAdmiral->control();
-                    if (control.get()) {
-                        if (control->attributes & kCanAcceptDestination) {
-                            control->keysDown |= kEnterKey | kManualOverrideFlag;
-                        }
-                    }
-                    break;
-                }
-
-                case kSpecialMiniHold: {
-                    auto control = whichAdmiral->control();
-                    if (control.get()) {
-                        SetObjectLocationDestination(control, &control->location);
-                    }
-                    break;
-                }
-
-                case kSpecialMiniGoToMe: {
-                    auto control = whichAdmiral->control();
-                    if (control.get()) {
-                        auto flagship = whichAdmiral->flagship();
-                        SetObjectLocationDestination(control, &flagship->location);
-                    }
-                    break;
-                }
-
-                default:
-                    break;
+            switch (whichLine) {
+                case kSpecialMiniTransfer: transfer_control(whichAdmiral, whichLine); break;
+                case kSpecialMiniFire1: fire1(whichAdmiral, whichLine); break;
+                case kSpecialMiniFire2: fire2(whichAdmiral, whichLine); break;
+                case kSpecialMiniFireSpecial: fire_special(whichAdmiral, whichLine); break;
+                case kSpecialMiniHold: hold_position(whichAdmiral, whichLine); break;
+                case kSpecialMiniGoToMe: come_to_me(whichAdmiral, whichLine); break;
             }
             break;
 
         case kMessageMiniScreen:
-            if ( globals()->keyMask & kComputerMessageMenu) return;
             if (whichAdmiral == g.admiral) {
-                switch ( whichLine)
-                {
-                    case kMessageMiniNext:
-                        Messages::advance();
-                        break;
-
-                    case kMessageMiniLast:
-                        Messages::replay();
-                        break;
-
-                    case kMessageMiniPrevious:
-                        Messages::previous();
-                        break;
-
-                    default:
-                        break;
+                switch (whichLine) {
+                    case kMessageMiniNext: next_message(whichAdmiral, whichLine); break;
+                    case kMessageMiniLast: last_message(whichAdmiral, whichLine); break;
+                    case kMessageMiniPrevious: prev_message(whichAdmiral, whichLine); break;
                 }
             }
-            break;
-
-        default:
             break;
     }
 }
 
-void MiniComputerDoCancel( void)
-
-{
-    switch ( globals()->gMiniScreenData.currentScreen)
-    {
-        case kBuildMiniScreen:
-        case kSpecialMiniScreen:
-        case kMessageMiniScreen:
-        case kStatusMiniScreen:
-            MakeMiniScreenFromIndString( kMainMiniScreen);
-
-            break;
-
-        default:
-            break;
-    }
+void MiniComputerDoCancel() {
+    show_main_screen(g.admiral, 0);
 }
 
 void MiniComputerSetBuildStrings( void) // sets the ship type strings for the build screen
@@ -1636,29 +1634,12 @@ void MiniComputer_SetScreenAndLineHack( int32_t whichScreen, int32_t whichLine)
 {
     Point   w;
 
-    switch ( whichScreen)
-    {
-        case kBuildMiniScreen:
-            MakeMiniScreenFromIndString( kBuildMiniScreen);
-            MiniComputerSetBuildStrings();
-            break;
-
-        case kSpecialMiniScreen:
-            MakeMiniScreenFromIndString( kSpecialMiniScreen);
-            break;
-
-        case kMessageMiniScreen:
-            MakeMiniScreenFromIndString( kMessageMiniScreen);
-            break;
-
-        case kStatusMiniScreen:
-            MakeMiniScreenFromIndString( kStatusMiniScreen);
-            MiniComputerSetStatusStrings();
-            break;
-
-        default:
-            MakeMiniScreenFromIndString( kMainMiniScreen);
-            break;
+    switch (whichScreen) {
+        case kBuildMiniScreen: show_build_screen(g.admiral, 0); break;
+        case kSpecialMiniScreen: show_special_screen(g.admiral, 0); break;
+        case kMessageMiniScreen: show_message_screen(g.admiral, 0); break;
+        case kStatusMiniScreen: show_status_screen(g.admiral, 0); break;
+        default: show_main_screen(g.admiral, 0); break;
     }
 
     w.v = (whichLine * computer_font->height) + ( kMiniScreenTop + instrument_top());
