@@ -318,7 +318,6 @@ void KeyControlScreen::handle_button(Button& button) {
         {
             size_t key = kKeyIndices[_tab] + button.id - _key_start;
             if ((kKeyIndices[_tab] <= key) && (key < kKeyIndices[_tab + 1])) {
-                // TODO(sfiera): ensure that the button stays highlighted, instead of flashing.
                 _selected_key = key;
                 adjust_interface();
             } else {
