@@ -92,6 +92,7 @@ class StyledText {
     RgbColor _back_color;
     std::vector<StyledChar> _chars;
     std::vector<inlinePictType> _inline_picts;
+    std::vector<Texture> _textures;
     int _tab_width;
     int _width;
     int _height;

@@ -181,14 +181,14 @@ void StyledText::set_interface_text(sfz::StringSlice text) {
                         if (!string_to_int(id_string, id, 10)) {
                             throw Exception(format("invalid numeric literal {0}", id_string));
                         }
-                        // TODO(sfiera): save the picture somewhere so we only have to load it once
-                        // here, and not additionally each time we draw it.
                         inline_pict.id = id;
                         // TODO(sfiera): report an error if the picture is not loadable, instead of
                         // silently ignoring it.
                         try {
-                            inline_pict.bounds = Picture(id).size().as_rect();
+                            Picture pict(id);
+                            inline_pict.bounds = pict.size().as_rect();
                             _inline_picts.push_back(inline_pict);
+                            _textures.push_back(pict.texture());
                             _chars.push_back(StyledChar(
                                         _inline_picts.size() - 1, PICTURE, _fore_color,
                                         _back_color));
@@ -368,9 +368,9 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
         Point corner = bounds.origin();
         if (ch.special == PICTURE) {
             const inlinePictType& inline_pict = _inline_picts[ch.character];
+            const Texture& texture = _textures[_chars[i].character];
             corner.offset(inline_pict.bounds.left, inline_pict.bounds.top + _line_spacing);
-            // TODO(sfiera): load and save this texture in inline_pict.
-            Picture(inline_pict.id).texture().draw(corner.h, corner.v);
+            texture.draw(corner.h, corner.v);
         }
     }
 }
