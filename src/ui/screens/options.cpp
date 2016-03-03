@@ -224,7 +224,7 @@ void KeyControlScreen::key_down(const KeyDownEvent& event) {
           case Keys::ESCAPE:
           case Keys::RETURN:
           case Keys::CAPS_LOCK:
-            // TODO(sfiera): beep angrily.
+            PlayVolumeSound(kWarningTone, kMediumVolume, kMediumPersistence, kLowPrioritySound);
             _selected_key = -1;
             break;
 
