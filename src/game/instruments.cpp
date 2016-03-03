@@ -498,7 +498,6 @@ void set_up_instruments() {
 
     MiniComputerDoCancel();  // i.e., go to main screen
     ResetInstruments();
-    ClearMiniObjectData();
     UpdateRadar(ticks(100));  // full update
 }
 

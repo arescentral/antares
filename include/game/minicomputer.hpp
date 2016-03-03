@@ -54,7 +54,6 @@ void MiniScreenCleanup( void);
 void SetMiniScreenStatusStrList( int16_t);
 void DisposeMiniScreenStatusStrList( void);
 void ClearMiniScreenLines( void);
-void ClearMiniObjectData( void);
 void draw_mini_screen();
 void minicomputer_handle_keys(uint32_t new_keys, uint32_t old_keys, bool cancel);
 void minicomputer_cancel();

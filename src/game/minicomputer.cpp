@@ -236,7 +236,6 @@ void MiniScreenInit() {
     globals()->gMiniScreenData.lineData.reset(new miniScreenLineType[kMiniScreenTrueLineNum]);
 
     ClearMiniScreenLines();
-    ClearMiniObjectData();
 
     mini_data_strings = new StringList(kMiniDataStringID);
 }
@@ -255,7 +254,7 @@ void SetMiniScreenStatusStrList(int16_t strID) {
     }
 }
 
-void DisposeMiniScreenStatusStrList( void) {
+void DisposeMiniScreenStatusStrList() {
     gMissionStatusStrList.reset();
 }
 
@@ -270,9 +269,6 @@ void ClearMiniScreenLines() {
         c->callback = nullptr;
         c++;
     }
-}
-
-void ClearMiniObjectData() {
 }
 
 static void underline(const Rects& rects, int line) {
@@ -1084,24 +1080,24 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 //  If the selection is not legal, or the current Menu is not the Build Menu,
 //  returns 0
 
-int32_t MiniComputerGetPriceOfCurrentSelection( void)
-{
-    miniScreenLineType  *line = NULL;
+int32_t MiniComputerGetPriceOfCurrentSelection() {
 
-    if (( globals()->gMiniScreenData.currentScreen != kBuildMiniScreen) ||
-            ( globals()->gMiniScreenData.selectLine == kMiniScreenNoLineSelected))
-        return (0);
+    if ((globals()->gMiniScreenData.currentScreen != kBuildMiniScreen) ||
+            (globals()->gMiniScreenData.selectLine == kMiniScreenNoLineSelected)) {
+        return 0;
+    }
 
-        line = globals()->gMiniScreenData.lineData.get() +
-            globals()->gMiniScreenData.selectLine;
+    miniScreenLineType* line = &globals()->gMiniScreenData.lineData[globals()->gMiniScreenData.selectLine];
+    if (line->value < 0) {
+        return 0;
+    }
 
-        if ( line->value < 0) return( 0);
+    auto buildObject = Handle<BaseObject>(line->value);
+    if (buildObject->price < 0) {
+        return 0;
+    }
 
-        auto buildObject = Handle<BaseObject>(line->value);
-
-        if ( buildObject->price < 0) return( 0);
-
-        return( mLongToFixed(buildObject->price));
+    return mLongToFixed(buildObject->price);
 }
 
 void MiniComputerSetStatusStrings() {
@@ -1133,11 +1129,10 @@ void MiniComputerSetStatusStrings() {
     //  Samples Left: 7
     //
 
-    miniScreenLineType  *line;
 
     if (gMissionStatusStrList.get() == NULL) {
         for (int count = kStatusMiniScreenFirstLine; count < kMiniScreenCharHeight; count++) {
-            line = globals()->gMiniScreenData.lineData.get() + count;
+            miniScreenLineType* line = globals()->gMiniScreenData.lineData.get() + count;
             line->statusType = kNoStatusData;
             line->value = -1;
             line->string.clear();
@@ -1146,7 +1141,7 @@ void MiniComputerSetStatusStrings() {
     }
 
     for (int count = kStatusMiniScreenFirstLine; count < kMiniScreenCharHeight; count++) {
-        line = globals()->gMiniScreenData.lineData.get() + count;
+        miniScreenLineType* line = globals()->gMiniScreenData.lineData.get() + count;
 
         if (implicit_cast<size_t>(count - kStatusMiniScreenFirstLine) <
                 gMissionStatusStrList->size()) {
@@ -1277,20 +1272,16 @@ void MiniComputerMakeStatusString(int32_t which_line, String& string) {
     }
 }
 
-int32_t MiniComputerGetStatusValue( int32_t whichLine)
-{
-    miniScreenLineType  *line;
+int32_t MiniComputerGetStatusValue( int32_t whichLine) {
+    miniScreenLineType* line = globals()->gMiniScreenData.lineData.get() + whichLine;
 
-    line = globals()->gMiniScreenData.lineData.get() +
-        whichLine;
+    if (line->statusType == kNoStatusData) {
+        return -1;
+    }
 
-    if ( line->statusType == kNoStatusData)
-        return( -1);
-
-    switch ( line->statusType)
-    {
+    switch (line->statusType) {
         case kPlainTextStatus:
-            return( 0);
+            return 0;
             break;
 
         case kTrueFalseCondition:
@@ -1308,29 +1299,28 @@ int32_t MiniComputerGetStatusValue( int32_t whichLine)
 
         case kIntegerMinusValue:
         case kSmallFixedMinusValue:
-            return line->negativeValue
-                - GetAdmiralScore(line->statusPlayer, line->whichStatus);
+            return line->negativeValue - GetAdmiralScore(line->statusPlayer, line->whichStatus);
             break;
 
         default:
-            return( 0);
+            return 0;
             break;
     }
 }
 
-void MiniComputerHandleClick( Point where)
-
-{
+void MiniComputerHandleClick(Point where) {
     Rect        mRect;
     int32_t        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
     miniScreenLineType  *line;
 
     line = globals()->gMiniScreenData.lineData.get();
     scrap = 0;
-    while ( scrap < kMiniScreenTrueLineNum)
-    {
-        if ( line->whichButton == kInLineButton) inLineButtonLine = scrap;
-        else if ( line->whichButton == kOutLineButton) outLineButtonLine = scrap;
+    while (scrap < kMiniScreenTrueLineNum) {
+        if (line->whichButton == kInLineButton) {
+            inLineButtonLine = scrap;
+        } else if (line->whichButton == kOutLineButton) {
+            outLineButtonLine = scrap;
+        }
         scrap++;
         line++;
     }
@@ -1343,55 +1333,40 @@ void MiniComputerHandleClick( Point where)
         lineNum = (( where.v - ( kButBoxTop + instrument_top())) / computer_font->height) + kMiniScreenCharHeight;
         globals()->gMiniScreenData.clickLine = lineNum;
         line = globals()->gMiniScreenData.lineData.get() + lineNum;
-        if ( line->whichButton == kInLineButton)
-        {
-            if ( line->kind != MINI_BUTTON_ON)
-            {
+        if (line->whichButton == kInLineButton) {
+            if (line->kind != MINI_BUTTON_ON) {
                 line->kind = MINI_BUTTON_ON;
                 mPlayBeep3();
             }
-            if ( outLineButtonLine >= 0)
-            {
-                line = globals()->gMiniScreenData.lineData.get() +
-                    outLineButtonLine;
-                if ( line->kind != MINI_BUTTON_OFF)
-                {
+            if (outLineButtonLine >= 0) {
+                line = globals()->gMiniScreenData.lineData.get() + outLineButtonLine;
+                if (line->kind != MINI_BUTTON_OFF) {
                     line->kind = MINI_BUTTON_OFF;
                 }
             }
-        } else if ( line->whichButton == kOutLineButton)
-        {
-            if ( line->kind != MINI_BUTTON_ON)
-            {
+        } else if (line->whichButton == kOutLineButton) {
+            if (line->kind != MINI_BUTTON_ON) {
                 line->kind = MINI_BUTTON_ON;
                 mPlayBeep3();
             }
-            if ( inLineButtonLine >= 0)
-            {
+            if (inLineButtonLine >= 0) {
                 line = globals()->gMiniScreenData.lineData.get() + inLineButtonLine;
-                if ( line->kind != MINI_BUTTON_OFF)
-                {
+                if (line->kind != MINI_BUTTON_OFF) {
                     line->kind = MINI_BUTTON_OFF;
                 }
             }
         }
-    } else
-    {
-
+    } else {
         // make sure both buttons are off
-        if ( inLineButtonLine >= 0)
-        {
+        if (inLineButtonLine >= 0) {
             line = globals()->gMiniScreenData.lineData.get() + inLineButtonLine;
-            if ( line->kind != MINI_BUTTON_OFF)
-            {
+            if (line->kind != MINI_BUTTON_OFF) {
                 line->kind = MINI_BUTTON_OFF;
             }
         }
-        if ( outLineButtonLine >= 0)
-        {
+        if (outLineButtonLine >= 0) {
             line = globals()->gMiniScreenData.lineData.get() + outLineButtonLine;
-            if ( line->kind != MINI_BUTTON_OFF)
-            {
+            if (line->kind != MINI_BUTTON_OFF) {
                 line->kind = MINI_BUTTON_OFF;
             }
         }
@@ -1401,40 +1376,36 @@ void MiniComputerHandleClick( Point where)
 
         // if click is in main menu screen
         if (mRect.contains(where)) {
-            if ( globals()->gMiniScreenData.selectLine !=
-                kMiniScreenNoLineSelected)
-            {
-                line = globals()->gMiniScreenData.lineData.get() +
-                    globals()->gMiniScreenData.selectLine;
+            if (globals()->gMiniScreenData.selectLine != kMiniScreenNoLineSelected) {
+                line = globals()->gMiniScreenData.lineData.get() + globals()->gMiniScreenData.selectLine;
             }
 
             lineNum = mGetLineNumFromV(where.v);
             globals()->gMiniScreenData.clickLine = lineNum;
             line = globals()->gMiniScreenData.lineData.get() + lineNum;
-            if (( line->kind == MINI_SELECTABLE) || (line->kind == MINI_DIM))
-            {
+            if ((line->kind == MINI_SELECTABLE) || (line->kind == MINI_DIM)) {
                 globals()->gMiniScreenData.selectLine = lineNum;
-
-                line = globals()->gMiniScreenData.lineData.get() +
-                    globals()->gMiniScreenData.selectLine;
+                line = globals()->gMiniScreenData.lineData.get() + globals()->gMiniScreenData.selectLine;
             }
-        } else globals()->gMiniScreenData.clickLine = kMiniScreenNoLineSelected;
+        } else {
+            globals()->gMiniScreenData.clickLine = kMiniScreenNoLineSelected;
+        }
     }
 }
 
-void MiniComputerHandleDoubleClick( Point where)
-
-{
+void MiniComputerHandleDoubleClick(Point where) {
     Rect        mRect;
     int32_t        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
     miniScreenLineType  *line;
 
     line = globals()->gMiniScreenData.lineData.get();
     scrap = 0;
-    while ( scrap < kMiniScreenTrueLineNum)
-    {
-        if ( line->whichButton == kInLineButton) inLineButtonLine = scrap;
-        else if ( line->whichButton == kOutLineButton) outLineButtonLine = scrap;
+    while (scrap < kMiniScreenTrueLineNum) {
+        if (line->whichButton == kInLineButton) {
+            inLineButtonLine = scrap;
+        } else if (line->whichButton == kOutLineButton) {
+            outLineButtonLine = scrap;
+        }
         scrap++;
         line++;
     }
@@ -1446,54 +1417,40 @@ void MiniComputerHandleDoubleClick( Point where)
     if (mRect.contains(where)) {
         lineNum = (( where.v - ( kButBoxTop + instrument_top())) / computer_font->height) + kMiniScreenCharHeight;
         line = globals()->gMiniScreenData.lineData.get() + lineNum;
-        if ( line->whichButton == kInLineButton)
-        {
-            if ( line->kind != MINI_BUTTON_ON)
-            {
+        if (line->whichButton == kInLineButton) {
+            if (line->kind != MINI_BUTTON_ON) {
                 line->kind = MINI_BUTTON_ON;
                 mPlayBeep3();
             }
-            if ( outLineButtonLine >= 0)
-            {
+            if (outLineButtonLine >= 0) {
                 line = globals()->gMiniScreenData.lineData.get() + outLineButtonLine;
-                if ( line->kind != MINI_BUTTON_OFF)
-                {
+                if (line->kind != MINI_BUTTON_OFF) {
                     line->kind = MINI_BUTTON_OFF;
                 }
             }
-        } else if ( line->whichButton == kOutLineButton)
-        {
-            if ( line->kind != MINI_BUTTON_ON)
-            {
+        } else if (line->whichButton == kOutLineButton) {
+            if (line->kind != MINI_BUTTON_ON) {
                 line->kind = MINI_BUTTON_ON;
                 mPlayBeep3();
             }
-            if ( inLineButtonLine >= 0)
-            {
+            if (inLineButtonLine >= 0) {
                 line = globals()->gMiniScreenData.lineData.get() + inLineButtonLine;
-                if ( line->kind != MINI_BUTTON_OFF)
-                {
+                if (line->kind != MINI_BUTTON_OFF) {
                     line->kind = MINI_BUTTON_OFF;
                 }
             }
         }
-    } else
-    {
-
+    } else {
         // make sure both buttons are off
-        if ( inLineButtonLine >= 0)
-        {
+        if (inLineButtonLine >= 0) {
             line = globals()->gMiniScreenData.lineData.get() + inLineButtonLine;
-            if ( line->kind != MINI_BUTTON_OFF)
-            {
+            if (line->kind != MINI_BUTTON_OFF) {
                 line->kind = MINI_BUTTON_OFF;
             }
         }
-        if ( outLineButtonLine >= 0)
-        {
+        if (outLineButtonLine >= 0) {
             line = globals()->gMiniScreenData.lineData.get() + outLineButtonLine;
-            if ( line->kind != MINI_BUTTON_OFF)
-            {
+            if (line->kind != MINI_BUTTON_OFF) {
                 line->kind = MINI_BUTTON_OFF;
             }
         }
@@ -1504,22 +1461,17 @@ void MiniComputerHandleDoubleClick( Point where)
         // if click is in main menu screen
         if (mRect.contains(where)) {
             lineNum = mGetLineNumFromV(where.v);
-            if ( lineNum == globals()->gMiniScreenData.selectLine)
-            {
+            if (lineNum == globals()->gMiniScreenData.selectLine) {
                 mPlayBeep3();
                 MiniComputerDoAccept();
-            } else
-            {
-                if ( globals()->gMiniScreenData.selectLine !=
-                    kMiniScreenNoLineSelected)
-                {
+            } else {
+                if (globals()->gMiniScreenData.selectLine != kMiniScreenNoLineSelected) {
                     line = globals()->gMiniScreenData.lineData.get() + globals()->gMiniScreenData.selectLine;
                 }
 
                 lineNum = mGetLineNumFromV(where.v);
                 line = globals()->gMiniScreenData.lineData.get() + lineNum;
-                if (( line->kind == MINI_SELECTABLE) || (line->kind == MINI_DIM))
-                {
+                if ((line->kind == MINI_SELECTABLE) || (line->kind == MINI_DIM)) {
                     globals()->gMiniScreenData.selectLine = lineNum;
 
                     line = globals()->gMiniScreenData.lineData.get() + globals()->gMiniScreenData.selectLine;
@@ -1529,9 +1481,7 @@ void MiniComputerHandleDoubleClick( Point where)
     }
 }
 
-void MiniComputerHandleMouseUp( Point where)
-
-{
+void MiniComputerHandleMouseUp(Point where) {
     Rect        mRect;
     int32_t        lineNum;
     miniScreenLineType  *line;
@@ -1543,17 +1493,13 @@ void MiniComputerHandleMouseUp( Point where)
     if (mRect.contains(where)) {
         lineNum = (( where.v - ( kButBoxTop + instrument_top())) / computer_font->height) + kMiniScreenCharHeight;
         line = globals()->gMiniScreenData.lineData.get() + lineNum;
-        if ( line->whichButton == kInLineButton)
-        {
-            if ( line->kind == MINI_BUTTON_ON)
-            {
+        if (line->whichButton == kInLineButton) {
+            if (line->kind == MINI_BUTTON_ON) {
                 line->kind = MINI_BUTTON_OFF;
                 MiniComputerDoAccept();
             }
-        } else if ( line->whichButton == kOutLineButton)
-        {
-            if ( line->kind == MINI_BUTTON_ON)
-            {
+        } else if (line->whichButton == kOutLineButton) {
+            if (line->kind == MINI_BUTTON_ON) {
                 line->kind = MINI_BUTTON_OFF;
                 MiniComputerDoCancel();
             }
@@ -1561,19 +1507,19 @@ void MiniComputerHandleMouseUp( Point where)
     }
 }
 
-void MiniComputerHandleMouseStillDown( Point where)
-
-{
+void MiniComputerHandleMouseStillDown(Point where) {
     Rect        mRect;
     int32_t        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
     miniScreenLineType  *line;
 
     line = globals()->gMiniScreenData.lineData.get();
     scrap = 0;
-    while ( scrap < kMiniScreenTrueLineNum)
-    {
-        if ( line->whichButton == kInLineButton) inLineButtonLine = scrap;
-        else if ( line->whichButton == kOutLineButton) outLineButtonLine = scrap;
+    while (scrap < kMiniScreenTrueLineNum) {
+        if (line->whichButton == kInLineButton) {
+            inLineButtonLine = scrap;
+        } else if (line->whichButton == kOutLineButton) {
+            outLineButtonLine = scrap;
+        }
         scrap++;
         line++;
     }
@@ -1583,43 +1529,39 @@ void MiniComputerHandleMouseStillDown( Point where)
 
     // if click is in button screen
     if (mRect.contains(where)) {
-        lineNum = (( where.v - ( kButBoxTop + instrument_top())) / computer_font->height) + kMiniScreenCharHeight;
+        lineNum = ((where.v - (kButBoxTop + instrument_top())) / computer_font->height) + kMiniScreenCharHeight;
         line = globals()->gMiniScreenData.lineData.get() + lineNum;
-        if (( line->whichButton == kInLineButton) &&
-            ( lineNum == globals()->gMiniScreenData.clickLine))
-        {
-            if ( line->kind != MINI_BUTTON_ON)
-            {
+        if ((line->whichButton == kInLineButton) &&
+            (lineNum == globals()->gMiniScreenData.clickLine)) {
+            if (line->kind != MINI_BUTTON_ON) {
                 line->kind = MINI_BUTTON_ON;
             }
-        } else if (( line->whichButton == kOutLineButton) &&
-            ( lineNum == globals()->gMiniScreenData.clickLine))
-        {
-            if ( line->kind != MINI_BUTTON_ON)
-            {
+        } else if ((line->whichButton == kOutLineButton) &&
+                   (lineNum == globals()->gMiniScreenData.clickLine)) {
+            if (line->kind != MINI_BUTTON_ON) {
                 line->kind = MINI_BUTTON_ON;
             }
-        } else ( lineNum = -1);
-    } else lineNum = -1;
+        } else {
+            lineNum = -1;
+        }
+    } else {
+        lineNum = -1;
+    }
 
-    if ( lineNum == -1)
-    {
+    if (lineNum == -1) {
         line = globals()->gMiniScreenData.lineData.get() + inLineButtonLine;
-        if ( line->kind == MINI_BUTTON_ON)
-        {
+        if (line->kind == MINI_BUTTON_ON) {
             line->kind = MINI_BUTTON_OFF;
         }
         line = globals()->gMiniScreenData.lineData.get() + outLineButtonLine;
-        if ( line->kind == MINI_BUTTON_ON)
-        {
+        if (line->kind == MINI_BUTTON_ON) {
             line->kind = MINI_BUTTON_OFF;
         }
     }
 }
 
 // for ambrosia tutorial, a horrific hack
-void MiniComputer_SetScreenAndLineHack( int32_t whichScreen, int32_t whichLine)
-{
+void MiniComputer_SetScreenAndLineHack( int32_t whichScreen, int32_t whichLine) {
     Point   w;
 
     switch (whichScreen) {
@@ -1630,9 +1572,9 @@ void MiniComputer_SetScreenAndLineHack( int32_t whichScreen, int32_t whichLine)
         default: show_main_screen(g.admiral, 0); break;
     }
 
-    w.v = (whichLine * computer_font->height) + ( kMiniScreenTop + instrument_top());
+    w.v = (whichLine * computer_font->height) + (kMiniScreenTop + instrument_top());
     w.h = kMiniScreenLeft + 5;
-    MiniComputerHandleClick( w);    // what an atrocious hack! oh well
+    MiniComputerHandleClick(w);    // what an atrocious hack! oh well
 }
 
 }  // namespace antares
