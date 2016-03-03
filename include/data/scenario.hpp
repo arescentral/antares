@@ -121,6 +121,7 @@ struct Scenario {
         int16_t         reserved1;
     };
 
+    sfz::String                 name;
     int16_t                     netRaceFlags;
     int16_t                     playerNum;
     Player                      player[kMaxPlayerNum];
@@ -155,17 +156,12 @@ struct Scenario {
     int32_t angle() const;
     Point star_map_point() const;
     int32_t chapter_number() const;
-    ScenarioName name() const;
 
     int32_t prologue_id() const;
     int32_t epilogue_id() const;
 };
 void read_from(sfz::ReadSource in, Scenario& scenario);
 void read_from(sfz::ReadSource in, Scenario::Player& scenario_player);
-
-// TODO(sfiera): generalize PrintItem references to STR# resources.
-struct ScenarioName { int16_t string_id; };
-void print_to(sfz::PrintTarget out, ScenarioName name);
 
 struct Scenario::InitialObject {
     Handle<BaseObject>  type;

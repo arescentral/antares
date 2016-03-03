@@ -173,7 +173,7 @@ void SelectLevelScreen::overlay() const {
 }
 
 void SelectLevelScreen::draw_level_name() const {
-    const String chapter_name((*_scenario)->name());
+    const String chapter_name((*_scenario)->name);
 
     const InterfaceItem& i = item(NAME);
 

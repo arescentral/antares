@@ -1045,40 +1045,22 @@ void draw_labeled_box(Point origin, const LabeledRect& item) {
 }
 
 void draw_text_rect(Point origin, const TextRect& item) {
-    vector<inlinePictType> inlinePict;
     Rect bounds = item.bounds();
     bounds.offset(origin.h, origin.v);
-    draw_text_in_rect(bounds, item.text, item.style, item.hue, inlinePict);
+    draw_text_in_rect(bounds, item.text, item.style, item.hue);
 }
 
 }  // namespace
 
 void draw_text_in_rect(
-        Rect tRect, const StringSlice& text, interfaceStyleType style,
-        uint8_t textcolor, vector<inlinePictType>& inlinePict) {
+        Rect tRect, const StringSlice& text, interfaceStyleType style, uint8_t textcolor) {
     RgbColor color = GetRGBTranslateColorShade(textcolor, VERY_LIGHT);
     StyledText interface_text(interface_font(style));
     interface_text.set_fore_color(color);
     interface_text.set_interface_text(text);
     interface_text.wrap_to(tRect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer);
-    inlinePict = interface_text.inline_picts();
-    for (int i = 0; i < inlinePict.size(); ++i) {
-        inlinePict[i].bounds.offset(tRect.left, tRect.top);
-    }
     tRect.offset(0, -kInterfaceTextVBuffer);
     interface_text.draw(tRect);
-}
-
-void populate_inline_picts(
-        Rect rect, StringSlice text, interfaceStyleType style,
-        vector<inlinePictType>& inline_pict) {
-    StyledText interface_text(interface_font(style));
-    interface_text.set_interface_text(text);
-    interface_text.wrap_to(rect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer);
-    inline_pict = interface_text.inline_picts();
-    for (int i = 0; i < inline_pict.size(); ++i) {
-        inline_pict[i].bounds.offset(rect.left, rect.top);
-    }
 }
 
 int16_t GetInterfaceTextHeightFromWidth(

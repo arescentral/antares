@@ -35,8 +35,6 @@
     IBOutlet NSButton* _author_button;
     IBOutlet NSTextField* _version_label;
 
-    IBOutlet NSPopUpButton* _resolution_list;
-    IBOutlet NSButton* _window_checkbox;
     IBOutlet NSButton* _skip_checkbox;
 }
 

@@ -772,7 +772,7 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
 
     if (object->attributes & kIsDestination) {
         if (object->attributes & kNeutralDeath) {
-            ClearAllOccupants(object->asDestination, owner, object->baseType->initialAgeRange.count());
+            ClearAllOccupants(object->asDestination, owner, object->baseType->occupy_count);
         }
         StopBuilding(object->asDestination);
         if (message) {
@@ -806,7 +806,7 @@ void SpaceObject::alter_occupation(Handle<Admiral> owner, int32_t howMuch, bool 
             && (object->attributes & kIsDestination)
             && (object->attributes & kNeutralDeath)) {
         if (AlterDestinationObjectOccupation(object->asDestination, owner, howMuch)
-                >= object->baseType->initialAgeRange.count()) {
+                >= object->baseType->occupy_count) {
             object->set_owner(owner, message);
         }
     }
