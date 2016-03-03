@@ -230,8 +230,10 @@ void KeyControlScreen::key_down(const KeyDownEvent& event) {
 
           default:
             _preferences->set_key(_selected_key, event.key() + 1);
-            _selected_key = -1;
-            // TODO(sfiera): select next key.
+            if (++_selected_key == kKeyIndices[_tab + 1]) {
+              _selected_key = -1;
+            }
+            adjust_interface();
             break;
         }
         update_conflicts();
