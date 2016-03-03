@@ -224,9 +224,7 @@ class PixMap::View : public PixMap {
     const Point _offset;
 
     // The size of this view.
-    //
-    // TODO(sfiera): change the type to `const Size`.
-    Size _size;
+    const Size _size;
 
     // ALLOW_COPY_AND_ASSIGN(View);
 };
