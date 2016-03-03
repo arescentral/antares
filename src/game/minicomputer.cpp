@@ -1002,79 +1002,51 @@ void MiniComputerDoCancel() {
     show_main_screen(g.admiral, 0);
 }
 
-void MiniComputerSetBuildStrings( void) // sets the ship type strings for the build screen
-// also sets up the values = base object num
+void MiniComputerSetBuildStrings() {
+    // sets the ship type strings for the build screen
+    // also sets up the values = base object num
+    auto& mini = globals()->gMiniScreenData;
+    if (mini.currentScreen != kBuildMiniScreen) {
+        return;
+    }
 
-{
-    Handle<Destination> buildAtObject;
-    miniScreenLineType  *line = NULL;
-    int32_t                count, lineNum;
-    Rect                mRect;
+    // Clear header, selection, and all build entries.
+    miniScreenLineType* header = &mini.lineData[kBuildScreenWhereNameLine];
+    header->value = -1;
+    mini.selectLine = kMiniScreenNoLineSelected;
+    for (int32_t count = 0; count < kMaxShipCanBuild; count++) {
+        miniScreenLineType* line = &mini.lineData[kBuildScreenFirstTypeLine + count];
+        line->string.clear();
+        line->kind = MINI_NONE;
+        line->value = -1;
+    }
 
-    mRect = Rect(kMiniScreenLeft, kMiniScreenTop + instrument_top(), kMiniScreenRight,
-                kMiniScreenBottom + instrument_top());
+    auto buildAtObject = GetAdmiralBuildAtObject(g.admiral);
+    if (!buildAtObject.get()) {
+        return;
+    }
+    header->value = buildAtObject.number();
+    mCopyBlankLineString(header, buildAtObject->name);
 
-    globals()->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
-    if ( globals()->gMiniScreenData.currentScreen == kBuildMiniScreen)
-    {
-        const auto& admiral = g.admiral;
-        line = globals()->gMiniScreenData.lineData.get() +
-            kBuildScreenWhereNameLine;
-        auto buildAtObject = GetAdmiralBuildAtObject(g.admiral);
-        line->value = buildAtObject.number();
+    for (int32_t count = 0; count < kMaxShipCanBuild; count++) {
+        int32_t lineNum = kBuildScreenFirstTypeLine + count;
+        miniScreenLineType* line = &mini.lineData[lineNum];
+        auto buildObject = mGetBaseObjectFromClassRace(
+                buildAtObject->canBuildType[count], g.admiral->race());
+        line->value = buildObject.number();
+        line->sourceData = buildObject;
+        if (!buildObject.get()) {
+            continue;
+        }
 
-        if (buildAtObject.get()) {
-            mCopyBlankLineString( line, buildAtObject->name);
-
-            line = globals()->gMiniScreenData.lineData.get() + kBuildScreenFirstTypeLine;
-            lineNum = kBuildScreenFirstTypeLine;
-
-            for ( count = 0; count < kMaxShipCanBuild; count++)
-            {
-                auto buildObject = mGetBaseObjectFromClassRace(
-                        buildAtObject->canBuildType[count], admiral->race());
-                line->value = buildObject.number();
-                line->sourceData = buildObject;
-                if (buildObject.get()) {
-                    mCopyBlankLineString(line, get_object_name(buildObject));
-                    if ( buildObject->price > mFixedToLong(admiral->cash()))
-                        line->kind = MINI_DIM;
-                    else line->kind = MINI_SELECTABLE;
-                    if ( globals()->gMiniScreenData.selectLine == kMiniScreenNoLineSelected)
-                    {
-                        globals()->gMiniScreenData.selectLine = lineNum;
-                    }
-
-                } else
-                {
-                    line->string.clear();
-                    line->kind = MINI_NONE;
-                    if ( globals()->gMiniScreenData.selectLine == (count + kBuildScreenFirstTypeLine))
-                    {
-                        globals()->gMiniScreenData.selectLine++;
-                    }
-                    line->value = -1;
-                }
-                lineNum++;
-                line++;
-            }
-            line = globals()->gMiniScreenData.lineData.get() + globals()->gMiniScreenData.selectLine;
-            if ( line->kind == MINI_NONE)
-                globals()->gMiniScreenData.selectLine =
-                kMiniScreenNoLineSelected;
-        } else
-        {
-            globals()->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
-
-            line =
-                globals()->gMiniScreenData.lineData.get() +
-                kBuildScreenFirstTypeLine;
-            for ( count = 0; count < kMaxShipCanBuild; count++)
-            {
-                line->string.clear();
-                line->kind = MINI_NONE;
-                line++;
-            }
+        mCopyBlankLineString(line, get_object_name(buildObject));
+        if (buildObject->price > mFixedToLong(g.admiral->cash())) {
+            line->kind = MINI_DIM;
+        } else {
+            line->kind = MINI_SELECTABLE;
+        }
+        if (mini.selectLine == kMiniScreenNoLineSelected) {
+            mini.selectLine = lineNum;
         }
     }
 }
@@ -1087,7 +1059,6 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 //  returns 0
 
 int32_t MiniComputerGetPriceOfCurrentSelection() {
-
     if ((globals()->gMiniScreenData.currentScreen != kBuildMiniScreen) ||
             (globals()->gMiniScreenData.selectLine == kMiniScreenNoLineSelected)) {
         return 0;
