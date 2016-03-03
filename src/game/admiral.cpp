@@ -174,8 +174,7 @@ Handle<Destination> MakeNewDestination(
         }
 
         if (object->owner.get()) {
-            // TODO(sfiera): put this property somewhere other than initialAgeRange.
-            d->occupied[object->owner.number()] = object->baseType->initialAgeRange.count();
+            d->occupied[object->owner.number()] = object->baseType->occupy_count;
         }
     }
 

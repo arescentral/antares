@@ -290,9 +290,9 @@ class BaseObject {
     int32_t                 energy;                     // starting energy for material objects
 
     ticks                   initialAge;                 // starting minimum age
-    ticks                   initialAgeRange;            // random addition to starting age --
-                                                        // for neutral death objects =
-                                                        // size of occupying force (HACK)
+    ticks                   initialAgeRange;            // random addition to starting age
+
+    int32_t                 occupy_count;               // size of occupying force
 
     int32_t                 naturalScale;               // natural scale relative to %100
 

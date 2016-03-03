@@ -116,7 +116,19 @@ void read_from(ReadSource in, BaseObject& object) {
     read(in, object.energy);
 
     object.initialAge = ticks(read<int32_t>(in));
-    object.initialAgeRange = ticks(read<int32_t>(in));
+
+    int32_t age_range = read<int32_t>(in);
+    if (age_range >= 0) {
+        object.initialAgeRange = ticks(age_range);
+    } else {
+        object.initialAgeRange = ticks(0);
+    }
+
+    if (object.attributes & kNeutralDeath) {
+        object.occupy_count = age_range;
+    } else {
+        object.occupy_count = -1;
+    }
 
     read(in, object.naturalScale);
 
