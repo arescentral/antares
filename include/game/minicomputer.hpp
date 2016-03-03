@@ -67,7 +67,7 @@ int32_t MiniComputerGetPriceOfCurrentSelection( void);
 void UpdateMiniScreenLines( void);
 void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special);
 void MiniComputerDoAccept( void);
-void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral);
+void transfer_control(Handle<Admiral> adm);
 void MiniComputerDoCancel( void);
 void MiniComputerSetBuildStrings( void);
 void MiniComputerHandleClick( Point);

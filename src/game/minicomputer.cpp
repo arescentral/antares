@@ -222,6 +222,7 @@ inline void mCopyBlankLineString(miniScreenLineType* mline, StringSlice mstring)
 
 static void draw_mini_ship_data(
         Handle<SpaceObject> obj, uint8_t header_color, int16_t screen_top, StringSlice label);
+static void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral);
 
 void MiniComputerSetStatusStrings( void);
 int32_t MiniComputerGetStatusValue( int32_t);
@@ -832,7 +833,28 @@ void MiniComputerDoAccept() {
             g.admiral);
 }
 
-void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral) {
+void transfer_control(Handle<Admiral> adm) {
+    auto control = adm->control();
+    auto flagship = adm->flagship();
+    if (flagship.get()) {
+        if (control.get()) {
+            if (!(control->attributes & kCanThink)
+                    || (control->attributes & kStaticDestination)
+                    || (control->owner != flagship->owner)
+                    || !(control->attributes & kCanAcceptDestination)
+                    || !(control->attributes & kCanBeDestination)
+                    || (flagship->active != kObjectInUse)) {
+                if (adm == g.admiral) {
+                    mPlayBeepBad();
+                }
+            } else {
+                ChangePlayerShipNumber(adm, control);
+            }
+        }
+    }
+}
+
+static void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral) {
     SpaceObject *anotherObject;
 
     switch ( whichPage)
@@ -890,24 +912,7 @@ void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> w
             switch ( whichLine)
             {
                 case kSpecialMiniTransfer: {
-                    auto control = whichAdmiral->control();
-                    auto flagship = whichAdmiral->flagship();
-                    if (flagship.get()) {
-                        if (control.get()) {
-                            if (!(control->attributes & kCanThink)
-                                    || (control->attributes & kStaticDestination)
-                                    || (control->owner != flagship->owner)
-                                    || !(control->attributes & kCanAcceptDestination)
-                                    || !(control->attributes & kCanBeDestination)
-                                    || (flagship->active != kObjectInUse)) {
-                                if (whichAdmiral == g.admiral) {
-                                    mPlayBeepBad();
-                                }
-                            } else {
-                                ChangePlayerShipNumber(whichAdmiral, control);
-                            }
-                        }
-                    }
+                    transfer_control(whichAdmiral);
                     break;
                 }
 

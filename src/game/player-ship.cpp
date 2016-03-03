@@ -328,7 +328,7 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
         zoom_shortcut(kSmallestZoom);
         break;
       case kTransferKeyNum:
-        MiniComputerExecute(3, 1, g.admiral);
+        transfer_control(g.admiral);
         break;
       case kMessageNextKeyNum:
         Messages::advance();
@@ -423,7 +423,7 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
             if (_gamepad_state & TARGET_BUMPER) {
                 target_self();
             } else {
-                MiniComputerExecute(3, 1, g.admiral);
+                transfer_control(g.admiral);
             }
             return;
         }
