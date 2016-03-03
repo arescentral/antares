@@ -31,6 +31,12 @@ namespace antares {
 class Font;
 class Picture;
 
+// the inline pictType struct is for keeping track of picts included in my text boxes.
+struct inlinePictType {
+    Rect bounds;
+    int16_t id;
+};
+
 class StyledText {
   public:
     StyledText(const Font* font);

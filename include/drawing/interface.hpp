@@ -30,17 +30,8 @@ namespace antares {
 const int32_t kInterfaceTextVBuffer = 2;
 const int32_t kInterfaceTextHBuffer = 3;
 
-// the inline pictType struct is for keeping track of picts included in my text boxes.
-struct inlinePictType {
-    Rect bounds;
-    int16_t id;
-};
-
 void draw_text_in_rect(
         Rect tRect, const sfz::StringSlice& text, interfaceStyleType style, uint8_t textcolor);
-void populate_inline_picts(
-        Rect rect, sfz::StringSlice text, interfaceStyleType style,
-        std::vector<inlinePictType>& inline_pict);
 
 int16_t GetInterfaceTextHeightFromWidth(
         const sfz::StringSlice& text, interfaceStyleType style, int16_t width);

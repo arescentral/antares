@@ -20,10 +20,12 @@
 
 #include "config/gamepad.hpp"
 #include "data/picture.hpp"
+#include "data/resource.hpp"
 #include "drawing/briefing.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
 #include "drawing/shapes.hpp"
+#include "drawing/text.hpp"
 #include "game/instruments.hpp"
 #include "game/scenario-maker.hpp"
 #include "math/random.hpp"
@@ -34,8 +36,12 @@
 
 using sfz::Exception;
 using sfz::String;
+using sfz::StringSlice;
 using sfz::format;
+using std::make_pair;
+using std::pair;
 using std::vector;
+namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -47,18 +53,150 @@ enum BriefingPoint {
     BRIEFING_POINT_COUNT,
 };
 
-const int kStarMapPictId = 8000;
-const int kMissionStarPointWidth = 16;
-const int kMissionStarPointHeight = 12;
-const int32_t kMissionDataHiliteColor = GOLD;
+}  // namespace
 
-LabeledRect data_item(const InterfaceItem& map_rect) {
+static const int kStarMapPictId = 8000;
+static const int kMissionStarPointWidth = 16;
+static const int kMissionStarPointHeight = 12;
+static const int32_t kMissionDataHiliteColor = GOLD;
+
+static const int32_t kMissionBriefPointOffset  = 2;
+static const int32_t kMissionDataWidth         = 200;
+static const int32_t kMissionDataVBuffer       = 40;
+static const int32_t kMissionDataTopBuffer     = 30;
+static const int32_t kMissionDataBottomBuffer  = 15;
+static const int32_t kMissionDataHBuffer       = 41;
+static const int32_t kMissionLineHJog          = 10;
+
+static LabeledRect data_item(const InterfaceItem& map_rect) {
     Rect bounds(0, 0, 200, 200);
     bounds.center_in(map_rect.bounds());
     return LabeledRect(0, bounds, {4000, 1}, GOLD, kLarge);
 }
 
-}  // namespace
+static const Font* interface_font(interfaceStyleType style) {
+    if ( style == kSmall) {
+        return small_button_font;
+    } else {
+        return button_font;
+    }
+}
+
+static void populate_inline_picts(
+        Rect rect, StringSlice text, interfaceStyleType style,
+        vector<inlinePictType>& inline_pict) {
+    StyledText interface_text(interface_font(style));
+    interface_text.set_interface_text(text);
+    interface_text.wrap_to(rect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer);
+    inline_pict = interface_text.inline_picts();
+    for (int i = 0; i < inline_pict.size(); ++i) {
+        inline_pict[i].bounds.offset(rect.left, rect.top);
+    }
+}
+
+static void update_mission_brief_point(
+        LabeledRect *dataItem, int32_t whichBriefPoint, const Scenario* scenario,
+        coordPointType *corner, int32_t scale, Rect *bounds, vector<inlinePictType>& inlinePict,
+        Rect& highlight_rect, vector<pair<Point, Point>>& lines, String& text) {
+    if (whichBriefPoint < kMissionBriefPointOffset) {
+        // No longer handled here.
+        return;
+    }
+
+    whichBriefPoint -= kMissionBriefPointOffset;
+
+    Rect hiliteBounds;
+    int32_t         headerID, headerNumber, contentID;
+    BriefPoint_Data_Get(whichBriefPoint, scenario, &headerID, &headerNumber, &contentID,
+            &hiliteBounds, corner, scale, 16, 32, bounds);
+    hiliteBounds.offset(bounds->left, bounds->top);
+
+    // TODO(sfiera): catch exception.
+    Resource rsrc("text", "txt", contentID);
+    text.assign(utf8::decode(rsrc.data()));
+    int16_t textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
+    if (hiliteBounds.left == hiliteBounds.right) {
+        dataItem->bounds().left = (bounds->right - bounds->left) / 2 - (kMissionDataWidth / 2) + bounds->left;
+        dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
+        dataItem->bounds().top = (bounds->bottom - bounds->top) / 2 - (textHeight / 2) + bounds->top;
+        dataItem->bounds().bottom = dataItem->bounds().top + textHeight;
+        highlight_rect = Rect();
+    } else {
+        if ((hiliteBounds.left + (hiliteBounds.right - hiliteBounds.left) / 2) >
+                (bounds->left + (bounds->right - bounds->left) / 2)) {
+            dataItem->bounds().right = hiliteBounds.left - kMissionDataHBuffer;
+            dataItem->bounds().left = dataItem->bounds().right - kMissionDataWidth;
+        } else {
+            dataItem->bounds().left = hiliteBounds.right + kMissionDataHBuffer;
+            dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
+        }
+
+        dataItem->bounds().top = hiliteBounds.top + (hiliteBounds.bottom - hiliteBounds.top) / 2 -
+                                textHeight / 2;
+        dataItem->bounds().bottom = dataItem->bounds().top + textHeight;
+        if (dataItem->bounds().top < (bounds->top + kMissionDataTopBuffer)) {
+            dataItem->bounds().top = bounds->top + kMissionDataTopBuffer;
+            dataItem->bounds().bottom = dataItem->bounds().top + textHeight;
+        }
+        if (dataItem->bounds().bottom > (bounds->bottom - kMissionDataBottomBuffer)) {
+            dataItem->bounds().bottom = bounds->bottom - kMissionDataBottomBuffer;
+            dataItem->bounds().top = dataItem->bounds().bottom - textHeight;
+        }
+
+        if (dataItem->bounds().left < (bounds->left + kMissionDataVBuffer)) {
+            dataItem->bounds().left = bounds->left + kMissionDataVBuffer;
+            dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
+        }
+        if (dataItem->bounds().right > (bounds->right - kMissionDataVBuffer)) {
+            dataItem->bounds().right = bounds->right - kMissionDataVBuffer;
+            dataItem->bounds().left = dataItem->bounds().right - kMissionDataWidth;
+        }
+
+        hiliteBounds.right++;
+        hiliteBounds.bottom++;
+        highlight_rect = hiliteBounds;
+        Rect newRect;
+        GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
+        lines.clear();
+        if (dataItem->bounds().right < hiliteBounds.left) {
+            Point p1(hiliteBounds.left, hiliteBounds.top);
+            Point p2(newRect.right + kMissionLineHJog, hiliteBounds.top);
+            Point p3(newRect.right + kMissionLineHJog, newRect.top);
+            Point p4(newRect.right + 2, newRect.top);
+            lines.push_back(make_pair(p1, p2));
+            lines.push_back(make_pair(p2, p3));
+            lines.push_back(make_pair(p3, p4));
+
+            Point p5(hiliteBounds.left, hiliteBounds.bottom - 1);
+            Point p6(newRect.right + kMissionLineHJog, hiliteBounds.bottom - 1);
+            Point p7(newRect.right + kMissionLineHJog, newRect.bottom - 1);
+            Point p8(newRect.right + 2, newRect.bottom - 1);
+            lines.push_back(make_pair(p5, p6));
+            lines.push_back(make_pair(p6, p7));
+            lines.push_back(make_pair(p7, p8));
+        } else {
+            Point p1(hiliteBounds.right, hiliteBounds.top);
+            Point p2(newRect.left - kMissionLineHJog, hiliteBounds.top);
+            Point p3(newRect.left - kMissionLineHJog, newRect.top);
+            Point p4(newRect.left - 3, newRect.top);
+            lines.push_back(make_pair(p1, p2));
+            lines.push_back(make_pair(p2, p3));
+            lines.push_back(make_pair(p3, p4));
+
+            Point p5(hiliteBounds.right, hiliteBounds.bottom - 1);
+            Point p6(newRect.left - kMissionLineHJog, hiliteBounds.bottom - 1);
+            Point p7(newRect.left - kMissionLineHJog, newRect.bottom - 1);
+            Point p8(newRect.left - 3, newRect.bottom - 1);
+            lines.push_back(make_pair(p5, p6));
+            lines.push_back(make_pair(p6, p7));
+            lines.push_back(make_pair(p7, p8));
+        }
+    }
+    dataItem->label.assign(StringList(headerID).at(headerNumber - 1));
+    Rect newRect;
+    GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
+    populate_inline_picts(dataItem->bounds(), text, dataItem->style, inlinePict);
+}
 
 BriefingScreen::BriefingScreen(const Scenario* scenario, bool* cancelled)
         : InterfaceScreen("briefing", {0, 0, 640, 480}, true),
