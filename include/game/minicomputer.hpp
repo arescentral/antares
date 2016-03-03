@@ -32,21 +32,21 @@ enum MiniScreenLineKind {
 };
 
 struct miniScreenLineType {
-    MiniScreenLineKind  kind;
+    MiniScreenLineKind  kind = MINI_NONE;
     sfz::String     string;
     sfz::String     statusFalse;
     sfz::String     statusTrue;
     sfz::String     statusString;
     sfz::String     postString;
-    int32_t         whichButton;
-    bool         underline;
+    int32_t         whichButton = -1;
+    bool         underline = false;
     int32_t         value;      // for keeping track of changing values
     int32_t         statusType;
     int32_t         whichStatus;
     Handle<Admiral> statusPlayer;
     int32_t         negativeValue;
     Handle<BaseObject>  sourceData;
-    void                (*callback)(Handle<Admiral> adm, int32_t line);
+    void                (*callback)(Handle<Admiral> adm, int32_t line) = nullptr;
 };
 
 void MiniScreenInit( void);

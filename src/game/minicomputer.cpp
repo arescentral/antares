@@ -49,6 +49,7 @@ using sfz::bin;
 using sfz::range;
 using sfz::string_to_int;
 using std::max;
+using std::vector;
 
 namespace antares {
 
@@ -75,7 +76,6 @@ const int32_t kButBoxBottom         = 475;
 
 const int32_t kMiniScreenNoLineSelected = -1;
 
-const int16_t kMiniScreenStringID   = 3000;
 const int16_t kMiniDataStringID     = 3001;
 
 const uint8_t kMiniScreenColor      = GREEN;
@@ -420,94 +420,81 @@ void draw_mini_screen() {
             mini_data_strings->at(1));
 }
 
-void MakeMiniScreenFromIndString(int16_t whichString) {
-    Rect mRect(kMiniScreenLeft, kMiniScreenTop, kMiniScreenRight, kMiniScreenBottom);
-    mRect.offset(0, instrument_top());
+static miniScreenLineType text(StringSlice name, bool underlined) {
+    miniScreenLineType line;
+    line.string.assign(name);
+    line.kind = MINI_NONE;
+    line.underline = underlined;
+    return line;
+}
+
+static miniScreenLineType selectable(
+        StringSlice name, void (*callback)(Handle<Admiral> adm, int32_t line)) {
+    miniScreenLineType line;
+    line.kind = MINI_SELECTABLE;
+    line.string.assign(name);
+    line.callback = callback;
+    return line;
+}
+
+static miniScreenLineType accept(StringSlice name) {
+    miniScreenLineType line;
+    GetKeyNumName(Preferences::preferences()->key(kCompAcceptKeyNum), &line.string);
+    pad_to(line.string, kKeyNameLength);
+    line.string.append(" ");
+    line.string.append(name);
+    line.kind = MINI_BUTTON_OFF;
+    line.whichButton = kInLineButton;
+    return line;
+}
+
+static miniScreenLineType cancel(StringSlice name) {
+    miniScreenLineType line;
+    GetKeyNumName(Preferences::preferences()->key(kCompCancelKeyNum), &line.string);
+    pad_to(line.string, kKeyNameLength);
+    line.string.append(" ");
+    line.string.append(name);
+    line.kind = MINI_BUTTON_OFF;
+    line.whichButton = kOutLineButton;
+    return line;
+}
+
+static void make_mini_screen(int16_t screen, vector<miniScreenLineType> lines) {
+    auto& mini = globals()->gMiniScreenData;
+    auto* item = mini.lineData.get();
+    auto* button = mini.lineData.get() + kMiniScreenCharHeight;
+    mini.currentScreen = screen;
+    mini.selectLine = kMiniScreenNoLineSelected;
 
     ClearMiniScreenLines();
-    globals()->gMiniScreenData.currentScreen = whichString;
-    globals()->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
+    for (const auto& src: lines) {
+        miniScreenLineType* dst;
+        switch (src.kind) {
+            case MINI_SELECTABLE:
+            case MINI_DIM:
+                if (mini.selectLine == kMiniScreenNoLineSelected) {
+                    mini.selectLine = item - mini.lineData.get();
+                }
+                // fall through
 
-    StringList string_list(kMiniScreenStringID);
-    StringSlice string = string_list.at(whichString - 1);
+            case MINI_NONE:
+                dst = item++;
+                break;
 
-    miniScreenLineType* const line_begin = globals()->gMiniScreenData.lineData.get();
-    miniScreenLineType* const line_switch = line_begin + kMiniScreenCharHeight;
-    miniScreenLineType* const line_end = line_begin + kMiniScreenTrueLineNum;
-    miniScreenLineType* line = line_begin;
-
-    bool escape = false;
-    for (Rune r: string) {
-        if (escape) {
-            escape = false;
-            switch (r) {
-              case kUnderlineEndLineChar:
-                line->underline = true;
-                // fall through.
-              case kEndLineChar:
-                ++line;
-                if (line == line_end) {
-                    return;
-                } else if (line == line_switch) {
-                    mRect = Rect(kButBoxLeft, kButBoxTop, kButBoxRight, kButBoxBottom);
-                    mRect.offset(0, instrument_top());
+            case MINI_BUTTON_ON:
+            case MINI_BUTTON_OFF:
+                if (src.whichButton == kInLineButton) {
+                    dst = &button[0];
+                } else {
+                    dst = &button[1];
                 }
                 break;
-
-              case kSelectableLineChar:
-                line->kind = MINI_SELECTABLE;
-                if (globals()->gMiniScreenData.selectLine == kMiniScreenNoLineSelected) {
-                    globals()->gMiniScreenData.selectLine = line - line_begin;
-                }
-                break;
-
-              case kIntoButtonChar:
-                {
-                    line->kind = MINI_BUTTON_OFF;
-                    line->whichButton = kInLineButton;
-
-                    sfz::String key_name;
-                    GetKeyNumName(Preferences::preferences()->key(kCompAcceptKeyNum), &key_name);
-                    pad_to(key_name, kKeyNameLength);
-                    line->string.append(key_name);
-                }
-                break;
-
-              case kOutOfButtonChar:
-                {
-                    line->kind = MINI_BUTTON_OFF;
-                    line->whichButton = kOutLineButton;
-
-                    sfz::String key_name;
-                    GetKeyNumName(Preferences::preferences()->key(kCompCancelKeyNum), &key_name);
-                    pad_to(key_name, kKeyNameLength);
-                    line->string.append(key_name);
-                }
-                break;
-
-              case kMiniScreenSpecChar:
-                line->string.append(1, kMiniScreenSpecChar);
-                break;
-            }
-        } else if (r == kMiniScreenSpecChar) {
-            escape = true;
-        } else {
-            line->string.append(1, r);
         }
-
-        while (line->string.size() > kMiniScreenCharWidth) {
-            String excess(line->string.slice(kMiniScreenCharWidth));
-            line->string.resize(kMiniScreenCharWidth);
-
-            ++line;
-            if (line == line_end) {
-                return;
-            } else if (line == line_switch) {
-                mRect = Rect(kButBoxLeft, kButBoxTop, kButBoxRight, kButBoxBottom);
-                mRect.offset(0, instrument_top());
-            }
-            line->string.assign(excess);
-        }
+        dst->kind = src.kind;
+        dst->string.assign(src.string);
+        dst->underline = src.underline;
+        dst->callback = src.callback;
+        dst->whichButton = src.whichButton;
     }
 }
 
@@ -929,58 +916,75 @@ static void show_build_screen(Handle<Admiral> adm, int32_t line) {
     if (adm != g.admiral) {
         return;
     }
-    MakeMiniScreenFromIndString(kBuildMiniScreen);
+    make_mini_screen(kBuildMiniScreen, {
+        text("BUILD SHIPS", false),
+        text("", true),
+        selectable("", build_ship),
+        selectable("", build_ship),
+        selectable("", build_ship),
+        selectable("", build_ship),
+        selectable("", build_ship),
+        selectable("", build_ship),
+        accept("Build"),
+        cancel("Main Menu"),
+    });
     MiniComputerSetBuildStrings();
-    auto&& lines = globals()->gMiniScreenData.lineData;
-    for (int i = 0; i < kMaxShipCanBuild; ++i) {
-        lines[kBuildScreenFirstTypeLine + i].callback = build_ship;
-    }
 }
 
 static void show_special_screen(Handle<Admiral> adm, int32_t line) {
     if (adm != g.admiral) {
         return;
     }
-    MakeMiniScreenFromIndString(kSpecialMiniScreen);
-    auto&& lines = globals()->gMiniScreenData.lineData;
-    lines[kSpecialMiniTransfer].callback = transfer_control;
-    lines[kSpecialMiniFire1].callback = fire1;
-    lines[kSpecialMiniFire2].callback = fire2;
-    lines[kSpecialMiniFireSpecial].callback = fire_special;
-    lines[kSpecialMiniHold].callback = hold_position;
-    lines[kSpecialMiniGoToMe].callback = come_to_me;
+    make_mini_screen(kSpecialMiniScreen, {
+        text("SPECIAL ORDERS", true),
+        selectable("Transfer Control", transfer_control),
+        selectable("Hold Position", hold_position),
+        selectable("Go To My Position", come_to_me),
+        selectable("Fire Weapon 1", fire1),
+        selectable("Fire Weapon 2", fire2),
+        selectable("Fire Special", fire_special),
+        accept("Execute"),
+        cancel("Main Menu"),
+    });
 }
 
 static void show_message_screen(Handle<Admiral> adm, int32_t line) {
     if (adm != g.admiral) {
         return;
     }
-    MakeMiniScreenFromIndString(kMessageMiniScreen);
-    auto&& lines = globals()->gMiniScreenData.lineData;
-    lines[kMessageMiniNext].callback = next_message;
-    lines[kMessageMiniLast].callback = last_message;
-    lines[kMessageMiniPrevious].callback = prev_message;
+    make_mini_screen(kMessageMiniScreen, {
+        text("MESSAGES", true),
+        selectable("Next Page/Clear", next_message),
+        selectable("Previous Page", prev_message),
+        selectable("Last Message", last_message),
+        accept("Execute"),
+        cancel("Main Menu"),
+    });
 }
 
 static void show_status_screen(Handle<Admiral> adm, int32_t line) {
     if (adm != g.admiral) {
         return;
     }
-    MakeMiniScreenFromIndString(kStatusMiniScreen);
+    make_mini_screen(kStatusMiniScreen, {
+        text("MISSION STATUS", true),
+        cancel("Main Menu"),
+    });
     MiniComputerSetStatusStrings();
-    auto&& lines = globals()->gMiniScreenData.lineData;
 }
 
 static void show_main_screen(Handle<Admiral> adm, int32_t line) {
     if (adm != g.admiral) {
         return;
     }
-    MakeMiniScreenFromIndString(kMainMiniScreen);
-    auto&& lines = globals()->gMiniScreenData.lineData;
-    lines[kMainMiniBuild].callback = show_build_screen;
-    lines[kMainMiniSpecial].callback = show_special_screen;
-    lines[kMainMiniMessage].callback = show_message_screen;
-    lines[kMainMiniStatus].callback = show_status_screen;
+    make_mini_screen(kMainMiniScreen, {
+        text("MAIN MENU", true),
+        selectable("<Build>", show_build_screen),
+        selectable("<Special Orders>", show_special_screen),
+        selectable("<Message>", show_message_screen),
+        selectable("<Mission Status>", show_status_screen),
+        accept("Select"),
+    });
 }
 
 static void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral) {
