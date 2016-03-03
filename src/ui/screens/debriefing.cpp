@@ -170,8 +170,7 @@ void DebriefingScreen::draw() const {
     interface_bounds.offset(_pix_bounds.left, _pix_bounds.top);
     draw_interface_item(_data_item, KEYBOARD_MOUSE);
 
-    vector<inlinePictType> inline_pict;
-    draw_text_in_rect(interface_bounds, _message, kLarge, GOLD, inline_pict);
+    draw_text_in_rect(interface_bounds, _message, kLarge, GOLD);
 
     RgbColor bracket_color = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
     Rect bracket_bounds = _score_bounds;

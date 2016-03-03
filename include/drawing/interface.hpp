@@ -37,8 +37,7 @@ struct inlinePictType {
 };
 
 void draw_text_in_rect(
-        Rect tRect, const sfz::StringSlice& text, interfaceStyleType style,
-        uint8_t textcolor, std::vector<inlinePictType>& inlinePict);
+        Rect tRect, const sfz::StringSlice& text, interfaceStyleType style, uint8_t textcolor);
 void populate_inline_picts(
         Rect rect, sfz::StringSlice text, interfaceStyleType style,
         std::vector<inlinePictType>& inline_pict);

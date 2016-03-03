@@ -338,11 +338,10 @@ void KeyControlScreen::overlay() const {
                     _tabs.at(get_tab_num(key_two)), _keys.at(key_two)));
 
         const TextRect& box = dynamic_cast<const TextRect&>(item(CONFLICT_TEXT));
-        vector<inlinePictType> pict;
         Rect bounds = box.bounds();
         Point off = offset();
         bounds.offset(off.h, off.v);
-        draw_text_in_rect(bounds, text, box.style, box.hue, pict);
+        draw_text_in_rect(bounds, text, box.style, box.hue);
     }
 }
 

@@ -327,10 +327,9 @@ void BriefingScreen::draw_brief_point() const {
     bounds.offset(off.h, off.v);
     Rects().fill(bounds, RgbColor::kBlack);
     draw_interface_item(_data_item, KEYBOARD_MOUSE, off);
-    vector<inlinePictType> unused;
     bounds = _data_item.bounds();
     bounds.offset(off.h, off.v);
-    draw_text_in_rect(bounds, _text, _data_item.style, _data_item.hue, unused);
+    draw_text_in_rect(bounds, _text, _data_item.style, _data_item.hue);
 }
 
 void BriefingScreen::show_object_data(int index, const KeyDownEvent& event) {
