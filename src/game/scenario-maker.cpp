@@ -570,11 +570,11 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     for (int i = 0; i < g.level->playerNum; i++) {
         if (g.level->player[i].playerType == kSingleHumanPlayer) {
             auto admiral = Admiral::make(i, kAIsHuman, g.level->player[i]);
-            admiral->pay(mLongToFixed(5000));
+            admiral->pay(Fixed::from_long(5000));
             g.admiral = admiral;
         } else {
             auto admiral = Admiral::make(i, kAIsComputer, g.level->player[i]);
-            admiral->pay(mLongToFixed(5000));
+            admiral->pay(Fixed::from_long(5000));
         }
     }
 

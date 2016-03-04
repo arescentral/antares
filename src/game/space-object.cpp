@@ -278,14 +278,14 @@ void CorrectAllBaseObjectColor( void)
         }
 
 //      if (( aBase->attributes & kCanThink) && ( aBase->warpSpeed <= 0))
-//          aBase->warpSpeed = mLongToFixed( 50);
+//          aBase->warpSpeed = Fixed::from_long( 50);
 
         if ( aBase->attributes & kIsSelfAnimated)
         {
-            aBase->frame.animation.firstShape = mLongToFixed(aBase->frame.animation.firstShape).val();
-            aBase->frame.animation.lastShape = mLongToFixed(aBase->frame.animation.lastShape).val();
-            aBase->frame.animation.frameShape = mLongToFixed(aBase->frame.animation.frameShape).val();
-            aBase->frame.animation.frameShapeRange = mLongToFixed(aBase->frame.animation.frameShapeRange).val();
+            aBase->frame.animation.firstShape = Fixed::from_long(aBase->frame.animation.firstShape).val();
+            aBase->frame.animation.lastShape = Fixed::from_long(aBase->frame.animation.lastShape).val();
+            aBase->frame.animation.frameShape = Fixed::from_long(aBase->frame.animation.frameShape).val();
+            aBase->frame.animation.frameShapeRange = Fixed::from_long(aBase->frame.animation.frameShapeRange).val();
         }
     }
 

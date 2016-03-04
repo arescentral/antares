@@ -169,21 +169,21 @@ void Starfield::move(ticks by_units) {
 
         int32_t h;
         if (star->motionFraction.h >= Fixed::zero()) {
-            h = more_evil_fixed_to_long(star->motionFraction.h + mFloatToFixed(0.5));
+            h = more_evil_fixed_to_long(star->motionFraction.h + Fixed::from_float(0.5));
         } else {
-            h = more_evil_fixed_to_long(star->motionFraction.h - mFloatToFixed(0.5)) + 1;
+            h = more_evil_fixed_to_long(star->motionFraction.h - Fixed::from_float(0.5)) + 1;
         }
         star->location.h += h;
-        star->motionFraction.h -= mLongToFixed(h);
+        star->motionFraction.h -= Fixed::from_long(h);
 
         int32_t v;
         if (star->motionFraction.v >= Fixed::zero()) {
-            v = more_evil_fixed_to_long(star->motionFraction.v + mFloatToFixed(0.5));
+            v = more_evil_fixed_to_long(star->motionFraction.v + Fixed::from_float(0.5));
         } else {
-            v = more_evil_fixed_to_long(star->motionFraction.v - mFloatToFixed(0.5)) + 1;
+            v = more_evil_fixed_to_long(star->motionFraction.v - Fixed::from_float(0.5)) + 1;
         }
         star->location.v += v;
-        star->motionFraction.v -= mLongToFixed(v);
+        star->motionFraction.v -= Fixed::from_long(v);
 
         if ((star->location.h < viewport.left) && (star->oldLocation.h < viewport.left)) {
             star->location.h += play_screen.width() - 1;
@@ -242,21 +242,21 @@ void Starfield::move(ticks by_units) {
 
         int32_t h;
         if (star->motionFraction.h >= Fixed::zero()) {
-            h = more_evil_fixed_to_long(star->motionFraction.h + mFloatToFixed(0.5));
+            h = more_evil_fixed_to_long(star->motionFraction.h + Fixed::from_float(0.5));
         } else {
-            h = more_evil_fixed_to_long(star->motionFraction.h - mFloatToFixed(0.5)) + 1;
+            h = more_evil_fixed_to_long(star->motionFraction.h - Fixed::from_float(0.5)) + 1;
         }
         star->location.h += h;
-        star->motionFraction.h -= mLongToFixed(h);
+        star->motionFraction.h -= Fixed::from_long(h);
 
         int32_t v;
         if (star->motionFraction.v >= Fixed::zero()) {
-            v = more_evil_fixed_to_long(star->motionFraction.v + mFloatToFixed(0.5));
+            v = more_evil_fixed_to_long(star->motionFraction.v + Fixed::from_float(0.5));
         } else {
-            v = more_evil_fixed_to_long(star->motionFraction.v - mFloatToFixed(0.5)) + 1;
+            v = more_evil_fixed_to_long(star->motionFraction.v - Fixed::from_float(0.5)) + 1;
         }
         star->location.v += v;
-        star->motionFraction.v -= mLongToFixed(v);
+        star->motionFraction.v -= Fixed::from_long(v);
     }
 }
 

@@ -56,7 +56,7 @@ TEST_F(FixedTest, Print) {
     // All 2.x values should be printed with 1 digit of precision.
     for (int i = 0; i < 10; ++i) {
         String expected(format("2.{0}", i));
-        EXPECT_EQ(expected, String(mFloatToFixed(2.0 + (i / 10.0))));
+        EXPECT_EQ(expected, String(Fixed::from_float(2.0 + (i / 10.0))));
     }
 
     // All 3.xy values should be printed with 2 digits of precision
@@ -66,34 +66,34 @@ TEST_F(FixedTest, Print) {
             continue;
         }
         String expected(format("3.{0}", dec(i, 2)));
-        EXPECT_EQ(expected, String(mFloatToFixed(3.0 + (i / 100.0))));
+        EXPECT_EQ(expected, String(Fixed::from_float(3.0 + (i / 100.0))));
     }
 }
 
 TEST_F(FixedTest, FloatToFixed) {
-    EXPECT_EQ(-256, mFloatToFixed(-1.0).val());
-    EXPECT_EQ(-128, mFloatToFixed(-0.5).val());
-    EXPECT_EQ(-64, mFloatToFixed(-0.25).val());
-    EXPECT_EQ(0, mFloatToFixed(0.0).val());
-    EXPECT_EQ(64, mFloatToFixed(0.25).val());
-    EXPECT_EQ(128, mFloatToFixed(0.5).val());
-    EXPECT_EQ(256, mFloatToFixed(1.0).val());
+    EXPECT_EQ(-256, Fixed::from_float(-1.0).val());
+    EXPECT_EQ(-128, Fixed::from_float(-0.5).val());
+    EXPECT_EQ(-64, Fixed::from_float(-0.25).val());
+    EXPECT_EQ(0, Fixed::from_float(0.0).val());
+    EXPECT_EQ(64, Fixed::from_float(0.25).val());
+    EXPECT_EQ(128, Fixed::from_float(0.5).val());
+    EXPECT_EQ(256, Fixed::from_float(1.0).val());
 
-    EXPECT_EQ(353, mFloatToFixed(1.378).val());
-    EXPECT_EQ(353, mFloatToFixed(1.38).val());
-    EXPECT_EQ(354, mFloatToFixed(1.382).val());
-    EXPECT_EQ(355, mFloatToFixed(1.386).val());
-    EXPECT_EQ(356, mFloatToFixed(1.390).val());
-    EXPECT_EQ(356, mFloatToFixed(1.39).val());
-    EXPECT_EQ(357, mFloatToFixed(1.394).val());
-    EXPECT_EQ(358, mFloatToFixed(1.398).val());
-    EXPECT_EQ(358, mFloatToFixed(1.4).val());
-    EXPECT_EQ(358, mFloatToFixed(1.40).val());
-    EXPECT_EQ(359, mFloatToFixed(1.402).val());
-    EXPECT_EQ(360, mFloatToFixed(1.406).val());
-    EXPECT_EQ(361, mFloatToFixed(1.41).val());
-    EXPECT_EQ(361, mFloatToFixed(1.410).val());
-    EXPECT_EQ(362, mFloatToFixed(1.414).val());
+    EXPECT_EQ(353, Fixed::from_float(1.378).val());
+    EXPECT_EQ(353, Fixed::from_float(1.38).val());
+    EXPECT_EQ(354, Fixed::from_float(1.382).val());
+    EXPECT_EQ(355, Fixed::from_float(1.386).val());
+    EXPECT_EQ(356, Fixed::from_float(1.390).val());
+    EXPECT_EQ(356, Fixed::from_float(1.39).val());
+    EXPECT_EQ(357, Fixed::from_float(1.394).val());
+    EXPECT_EQ(358, Fixed::from_float(1.398).val());
+    EXPECT_EQ(358, Fixed::from_float(1.4).val());
+    EXPECT_EQ(358, Fixed::from_float(1.40).val());
+    EXPECT_EQ(359, Fixed::from_float(1.402).val());
+    EXPECT_EQ(360, Fixed::from_float(1.406).val());
+    EXPECT_EQ(361, Fixed::from_float(1.41).val());
+    EXPECT_EQ(361, Fixed::from_float(1.410).val());
+    EXPECT_EQ(362, Fixed::from_float(1.414).val());
 }
 
 TEST_F(FixedTest, FixedToFloat) {

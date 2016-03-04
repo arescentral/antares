@@ -1075,7 +1075,7 @@ int32_t MiniComputerGetPriceOfCurrentSelection() {
         return 0;
     }
 
-    return mLongToFixed(buildObject->price).val();
+    return Fixed::from_long(buildObject->price).val();
 }
 
 void MiniComputerSetStatusStrings() {

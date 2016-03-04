@@ -545,7 +545,7 @@ static void update_triangle(SiteData& site, int32_t direction, int32_t distance,
     Fixed fa, fb, fc;
     GetRotPoint(&fa, &fb, direction);
 
-    fc = mLongToFixed(-distance);
+    fc = Fixed::from_long(-distance);
     fa = mMultiplyFixed(fc, fa);
     fb = mMultiplyFixed(fc, fb);
 
@@ -556,7 +556,7 @@ static void update_triangle(SiteData& site, int32_t direction, int32_t distance,
     count = direction;
     mAddAngle(count, 30);
     GetRotPoint(&fa, &fb, count);
-    fc = mLongToFixed(size);
+    fc = Fixed::from_long(size);
     fa = mMultiplyFixed(fc, fa);
     fb = mMultiplyFixed(fc, fb);
 
@@ -566,7 +566,7 @@ static void update_triangle(SiteData& site, int32_t direction, int32_t distance,
     count = direction;
     mAddAngle(count, -30);
     GetRotPoint(&fa, &fb, count);
-    fc = mLongToFixed(size);
+    fc = Fixed::from_long(size);
     fa = mMultiplyFixed(fc, fa);
     fb = mMultiplyFixed(fc, fb);
 

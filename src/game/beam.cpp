@@ -41,7 +41,7 @@ namespace antares {
 namespace {
 
 void DetermineBeamRelativeCoordFromAngle(Handle<SpaceObject> beamObject, int16_t angle) {
-    Fixed range = mLongToFixed(beamObject->frame.beam->range);
+    Fixed range = Fixed::from_long(beamObject->frame.beam->range);
 
     mAddAngle(angle, -90);
     Fixed fcos, fsin;

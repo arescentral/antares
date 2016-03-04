@@ -159,12 +159,12 @@ static void move(Handle<SpaceObject> o) {
 
         int32_t h;
         if (o->turnFraction >= Fixed::zero()) {
-            h = more_evil_fixed_to_long(o->turnFraction + mFloatToFixed(0.5));
+            h = more_evil_fixed_to_long(o->turnFraction + Fixed::from_float(0.5));
         } else {
-            h = more_evil_fixed_to_long(o->turnFraction - mFloatToFixed(0.5)) + 1;
+            h = more_evil_fixed_to_long(o->turnFraction - Fixed::from_float(0.5)) + 1;
         }
         o->direction += h;
-        o->turnFraction -= mLongToFixed(h);
+        o->turnFraction -= Fixed::from_long(h);
 
         while (o->direction >= ROT_POS) {
             o->direction -= ROT_POS;
@@ -242,21 +242,21 @@ static void move(Handle<SpaceObject> o) {
 
     int32_t h;
     if (o->motionFraction.h >= Fixed::zero()) {
-        h = more_evil_fixed_to_long(o->motionFraction.h + mFloatToFixed(0.5));
+        h = more_evil_fixed_to_long(o->motionFraction.h + Fixed::from_float(0.5));
     } else {
-        h = more_evil_fixed_to_long(o->motionFraction.h - mFloatToFixed(0.5)) + 1;
+        h = more_evil_fixed_to_long(o->motionFraction.h - Fixed::from_float(0.5)) + 1;
     }
     o->location.h -= h;
-    o->motionFraction.h -= mLongToFixed(h);
+    o->motionFraction.h -= Fixed::from_long(h);
 
     int32_t v;
     if (o->motionFraction.v >= Fixed::zero()) {
-        v = more_evil_fixed_to_long(o->motionFraction.v + mFloatToFixed(0.5));
+        v = more_evil_fixed_to_long(o->motionFraction.v + Fixed::from_float(0.5));
     } else {
-        v = more_evil_fixed_to_long(o->motionFraction.v - mFloatToFixed(0.5)) + 1;
+        v = more_evil_fixed_to_long(o->motionFraction.v - Fixed::from_float(0.5)) + 1;
     }
     o->location.v -= v;
-    o->motionFraction.v -= mLongToFixed(v);
+    o->motionFraction.v -= Fixed::from_long(v);
 }
 
 static void bounce(Handle<SpaceObject> o) {
@@ -925,21 +925,21 @@ static void push(Handle<SpaceObject> o) {
 
     int32_t h;
     if (o->motionFraction.h >= Fixed::zero()) {
-        h = more_evil_fixed_to_long(o->motionFraction.h + mFloatToFixed(0.5));
+        h = more_evil_fixed_to_long(o->motionFraction.h + Fixed::from_float(0.5));
     } else {
-        h = more_evil_fixed_to_long(o->motionFraction.h - mFloatToFixed(0.5)) + 1;
+        h = more_evil_fixed_to_long(o->motionFraction.h - Fixed::from_float(0.5)) + 1;
     }
     o->location.h -= h;
-    o->motionFraction.h -= mLongToFixed(h);
+    o->motionFraction.h -= Fixed::from_long(h);
 
     int32_t v;
     if (o->motionFraction.v >= Fixed::zero()) {
-        v = more_evil_fixed_to_long(o->motionFraction.v + mFloatToFixed(0.5));
+        v = more_evil_fixed_to_long(o->motionFraction.v + Fixed::from_float(0.5));
     } else {
-        v = more_evil_fixed_to_long(o->motionFraction.v - mFloatToFixed(0.5)) + 1;
+        v = more_evil_fixed_to_long(o->motionFraction.v - Fixed::from_float(0.5)) + 1;
     }
     o->location.v -= v;
-    o->motionFraction.v -= mLongToFixed(v);
+    o->motionFraction.v -= Fixed::from_long(v);
 
     o->absoluteBounds.offset(-h, -v);
 }

@@ -844,7 +844,7 @@ uint32_t ThinkObjectNormalPresence(
                     dcalc = lsqrt(distance);
 
                     calcv = targetObject->velocity.h - anObject->velocity.h;
-                    fdist = mLongToFixed(dcalc);
+                    fdist = Fixed::from_long(dcalc);
                     fdist = mMultiplyFixed(Fixed::from_val(bestWeapon->frame.weapon.inverseSpeed), fdist);
                     calcv = mMultiplyFixed(calcv, fdist);
                     difference = mFixedToLong(calcv);
@@ -970,7 +970,7 @@ uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, Handle<BaseObj
     Fixed           calcv, fdist;
     fixedPointType  newVel;
 
-    anObject->presence.warp_out -= mLongToFixed(kWarpAcceleration).val();
+    anObject->presence.warp_out -= Fixed::from_long(kWarpAcceleration).val();
     if (Fixed::from_val(anObject->presence.warp_out) < anObject->maxVelocity) {
         anObject->refund_warp_energy();
 

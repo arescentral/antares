@@ -696,8 +696,8 @@ void Admiral::think() {
                             anObject->currentTargetValue
                                 = anObject->bestConsideredTargetValue;
                             thisValue = anObject->randomSeed.next(
-                                    mFloatToFixed(0.5))
-                                - mFloatToFixed(0.25);
+                                    Fixed::from_float(0.5))
+                                - Fixed::from_float(0.25);
                             thisValue = mMultiplyFixed(
                                     thisValue, anObject->currentTargetValue);
                             anObject->currentTargetValue += thisValue;
@@ -1029,12 +1029,12 @@ void Admiral::think() {
                 }
                 if ((j < kMaxTypeBaseCanBuild) && (_hopeToBuild != kNoShip)) {
                     auto baseObject = mGetBaseObjectFromClassRace(_hopeToBuild, _race);
-                    if (_cash >= mLongToFixed(baseObject->price)) {
+                    if (_cash >= Fixed::from_long(baseObject->price)) {
                         Admiral::build(j);
                         _hopeToBuild = -1;
                         _saveGoal = Fixed::zero();
                     } else {
-                        _saveGoal = mLongToFixed(baseObject->price);
+                        _saveGoal = Fixed::from_long(baseObject->price);
                     }
                 } // otherwise just wait until we get to it
             }
@@ -1050,7 +1050,7 @@ bool Admiral::build(int32_t buildWhichType) {
             && (dest->buildTime <= ticks(0))) {
         auto buildBaseObject = mGetBaseObjectFromClassRace(dest->canBuildType[buildWhichType], _race);
         if (buildBaseObject.get() && (buildBaseObject->price <= mFixedToLong(_cash))) {
-            _cash -= (mLongToFixed(buildBaseObject->price));
+            _cash -= (Fixed::from_long(buildBaseObject->price));
             if (_cheats & kBuildFastBit) {
                 dest->buildTime = kMinorTick;
                 dest->totalBuildTime = kMinorTick;
