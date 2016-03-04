@@ -234,8 +234,12 @@ void RemoveSprite(Handle<Sprite> sprite) {
     sprite->resID = -1;
 }
 
-int32_t scale_by(int32_t value, int32_t scale) {
+Fixed scale_by(Fixed value, int32_t scale) {
     return (value * scale) / SCALE_SCALE;
+}
+
+Fixed evil_scale_by(Fixed value, int32_t scale) {
+    return (value * scale) >> SHIFT_SCALE;
 }
 
 int32_t evil_scale_by(int32_t value, int32_t scale) {
