@@ -118,12 +118,12 @@ void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
             break;
 
         case kRaisePayRateCheat:
-            whichPlayer->set_earning_power(whichPlayer->earning_power() + Fixed::from_val(0x20));
+            whichPlayer->set_earning_power(whichPlayer->earning_power() + Fixed::from_float(0.125));
             CheatFeedbackPlus(whichCheat, true, whichPlayer, Fixed(whichPlayer->earning_power()));
             break;
 
         case kLowerPayRateCheat:
-            whichPlayer->set_earning_power(whichPlayer->earning_power() - Fixed::from_val(0x20));
+            whichPlayer->set_earning_power(whichPlayer->earning_power() - Fixed::from_float(0.125));
             CheatFeedbackPlus(whichCheat, true, whichPlayer, Fixed(whichPlayer->earning_power()));
             break;
     }
