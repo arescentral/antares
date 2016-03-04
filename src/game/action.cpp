@@ -525,14 +525,15 @@ static void alter_absolute_location(Handle<Action> action, Handle<SpaceObject> f
     }
 }
 
-static void alter_weapon1(Handle<Action> action, Handle<SpaceObject> focus) {
+static void alter_weapon(
+        Handle<Action> action, Handle<SpaceObject> focus, SpaceObject::Weapon& weapon) {
     const auto alter = action->argument.alterWeapon;
-    focus->pulse.base = alter.base;
-    if (focus->pulse.base.get()) {
-        auto baseObject = focus->pulse.base;
-        focus->pulse.ammo = baseObject->frame.weapon.ammo;
-        focus->pulse.time = g.time;
-        focus->pulse.position = 0;
+    weapon.base = alter.base;
+    if (weapon.base.get()) {
+        auto baseObject = weapon.base;
+        weapon.ammo = baseObject->frame.weapon.ammo;
+        weapon.time = g.time;
+        weapon.position = 0;
         if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
             focus->longestWeaponRange = baseObject->frame.weapon.range;
         }
@@ -540,52 +541,22 @@ static void alter_weapon1(Handle<Action> action, Handle<SpaceObject> focus) {
             focus->shortestWeaponRange = baseObject->frame.weapon.range;
         }
     } else {
-        focus->pulse.base = BaseObject::none();
-        focus->pulse.ammo = 0;
-        focus->pulse.time = g.time;
+        weapon.base = BaseObject::none();
+        weapon.ammo = 0;
+        weapon.time = g.time;
     }
+}
+
+static void alter_weapon1(Handle<Action> action, Handle<SpaceObject> focus) {
+    alter_weapon(action, focus, focus->pulse);
 }
 
 static void alter_weapon2(Handle<Action> action, Handle<SpaceObject> focus) {
-    const auto alter = action->argument.alterWeapon;
-    focus->beam.base = alter.base;
-    if (focus->beam.base.get()) {
-        auto baseObject = focus->beam.base;
-        focus->beam.ammo = baseObject->frame.weapon.ammo;
-        focus->beam.time = g.time;
-        focus->beam.position = 0;
-        if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
-            focus->longestWeaponRange = baseObject->frame.weapon.range;
-        }
-        if (baseObject->frame.weapon.range < focus->shortestWeaponRange) {
-            focus->shortestWeaponRange = baseObject->frame.weapon.range;
-        }
-    } else {
-        focus->beam.base = BaseObject::none();
-        focus->beam.ammo = 0;
-        focus->beam.time = g.time;
-    }
+    alter_weapon(action, focus, focus->beam);
 }
 
 static void alter_special(Handle<Action> action, Handle<SpaceObject> focus) {
-    const auto alter = action->argument.alterWeapon;
-    focus->special.base = alter.base;
-    if (focus->special.base.get()) {
-        auto baseObject = focus->special.base;
-        focus->special.ammo = baseObject->frame.weapon.ammo;
-        focus->special.time = g.time;
-        focus->special.position = 0;
-        if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
-            focus->longestWeaponRange = baseObject->frame.weapon.range;
-        }
-        if (baseObject->frame.weapon.range < focus->shortestWeaponRange) {
-            focus->shortestWeaponRange = baseObject->frame.weapon.range;
-        }
-    } else {
-        focus->special.base = BaseObject::none();
-        focus->special.ammo = 0;
-        focus->special.time = g.time;
-    }
+    alter_weapon(action, focus, focus->special);
 }
 
 static void land_at(Handle<Action> action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
