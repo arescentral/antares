@@ -250,7 +250,7 @@ union objectFrameType {
         ticks                   fireTime;           // time between shots
         int32_t                 ammo;               // initial ammo
         int32_t                 range;              // range (= age * max velocity)
-        int32_t                 inverseSpeed;       // for AI = 1/max velocity
+        Fixed                   inverseSpeed;       // for AI = 1/max velocity
         int32_t                 restockCost;        // energy to make new ammo
     };
     Weapon weapon;
