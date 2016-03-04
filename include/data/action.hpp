@@ -133,7 +133,33 @@ union argumentType {
     struct AlterSimple alterEnergy;
     struct AlterSimple alterOccupation;
 
-    struct AlterWeapon { Handle<BaseObject> base; } alterWeapon;
+    struct AlterWeapon {
+        Handle<BaseObject> base;
+    } alterWeapon;
+
+    struct AlterFixedRange { Fixed minimum, range; };
+    AlterFixedRange alterSpin;
+    AlterFixedRange alterOffline;
+
+    struct AlterThrust {
+        bool relative;
+        Fixed minimum, range;
+    } alterThrust;
+
+    struct AlterMaxVelocity {
+        Fixed amount;
+    } alterMaxVelocity;
+
+    struct AlterCash {
+        bool relative;
+        Fixed amount;
+        Handle<Admiral> admiral;
+    } alterAbsoluteCash;
+
+    struct AlterVelocity {
+        bool relative;
+        Fixed amount;
+    } alterVelocity;
 
     // alterObject: change some attribute of an object
     struct AlterObject {
@@ -143,15 +169,9 @@ union argumentType {
         int32_t                 range;
     };
     AlterObject alterHidden;
-    AlterObject alterSpin;
-    AlterObject alterOffline;
-    AlterObject alterVelocity;
-    AlterObject alterMaxVelocity;
-    AlterObject alterThrust;
     AlterObject alterBaseType;
     AlterObject alterOwner;
     AlterObject alterConditionTrueYet;
-    AlterObject alterAbsoluteCash;
     AlterObject alterAge;
     AlterObject alterLocation;
     AlterObject alterAbsoluteLocation;

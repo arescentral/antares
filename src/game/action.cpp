@@ -291,8 +291,7 @@ static void alter_spin(
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterSpin;
     if (focus->attributes & kCanTurn) {
-        Fixed f = (focus->turn_rate() *
-                   Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range)));
+        Fixed f = focus->turn_rate() * (alter.minimum + focus->randomSeed.next(alter.range));
         Fixed f2 = focus->baseType->mass;
         if (f2 == Fixed::zero()) {
             f = kFixedNone;
@@ -307,7 +306,7 @@ static void alter_offline(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterOffline;
-    Fixed f = Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range));
+    Fixed f = alter.minimum + focus->randomSeed.next(alter.range);
     Fixed f2 = focus->baseType->mass;
     if (f2 == Fixed::zero()) {
         f = kFixedNone;
@@ -330,8 +329,8 @@ static void alter_velocity(
             if (alter.relative) {
                 if ((object->baseType->mass > Fixed::zero()) &&
                     (object->maxVelocity > Fixed::zero())) {
-                    if (alter.minimum >= 0) {
-                        // if the minimum >= 0, then PUSH the object like collision
+                    if (alter.amount >= Fixed::zero()) {
+                        // if the amount >= 0, then PUSH the object like collision
                         f = subject->velocity.h - object->velocity.h;
                         f /= object->baseType->mass.val();
                         f <<= 6L;
@@ -346,10 +345,10 @@ static void alter_velocity(
                     } else {
                         // if the minumum < 0, then STOP the object like applying breaks
                         f = object->velocity.h;
-                        f = (f * Fixed::from_val(alter.minimum));
+                        f = f * alter.amount;
                         object->velocity.h += f;
                         f = object->velocity.v;
-                        f = (f * Fixed::from_val(alter.minimum));
+                        f = f * alter.amount;
                         object->velocity.v += f;
 
                         // make sure we're not going faster than our top speed
@@ -358,8 +357,8 @@ static void alter_velocity(
 
                     // get the maxthrust of new vector
                     GetRotPoint(&f, &f2, angle);
-                    f = (object->maxVelocity * f);
-                    f2 = (object->maxVelocity * f2);
+                    f = object->maxVelocity * f;
+                    f2 = object->maxVelocity * f2;
 
                     if (f < Fixed::zero()) {
                         if (object->velocity.h < f) {
@@ -383,8 +382,8 @@ static void alter_velocity(
                 }
             } else {
                 GetRotPoint(&f, &f2, subject->direction);
-                f = (Fixed::from_val(alter.minimum) * f);
-                f2 = (Fixed::from_val(alter.minimum) * f2);
+                f = alter.amount * f;
+                f2 = alter.amount * f2;
                 focus->velocity.h = f;
                 focus->velocity.v = f2;
             }
@@ -394,8 +393,8 @@ static void alter_velocity(
             // excede its max velocity.
             // Minimum value is absolute speed in direction.
             GetRotPoint(&f, &f2, focus->direction);
-            f = (Fixed::from_val(alter.minimum) * f);
-            f2 = (Fixed::from_val(alter.minimum) * f2);
+            f = alter.amount * f;
+            f2 = alter.amount * f2;
             if (alter.relative) {
                 focus->velocity.h += f;
                 focus->velocity.v += f2;
@@ -411,10 +410,10 @@ static void alter_max_velocity(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterMaxVelocity;
-    if (alter.minimum < 0) {
+    if (alter.amount < Fixed::zero()) {
         focus->maxVelocity = focus->baseType->maxVelocity;
     } else {
-        focus->maxVelocity = Fixed::from_val(alter.minimum);
+        focus->maxVelocity = alter.amount;
     }
 }
 
@@ -422,7 +421,7 @@ static void alter_thrust(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterThrust;
-    Fixed f = Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range));
+    Fixed f = alter.minimum + focus->randomSeed.next(alter.range);
     if (alter.relative) {
         focus->thrust += f;
     } else {
@@ -491,10 +490,10 @@ static void alter_absolute_cash(
             admiral = focus->owner;
         }
     } else {
-        admiral = Handle<Admiral>(alter.range);
+        admiral = alter.admiral;
     }
     if (admiral.get()) {
-        admiral->pay_absolute(Fixed::from_val(alter.minimum));
+        admiral->pay_absolute(alter.amount);
     }
 }
 

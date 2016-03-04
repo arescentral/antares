@@ -184,6 +184,34 @@ void read_from(ReadSource in, argumentType::AlterWeapon& argument) {
     argument.base = Handle<BaseObject>(read<int32_t>(in));
 }
 
+void read_from(ReadSource in, argumentType::AlterFixedRange& argument) {
+    in.shift(1);
+    read(in, argument.minimum);
+    read(in, argument.range);
+}
+
+void read_from(ReadSource in, argumentType::AlterThrust& argument) {
+    argument.relative = read<uint8_t>(in);
+    read(in, argument.minimum);
+    read(in, argument.range);
+}
+
+void read_from(ReadSource in, argumentType::AlterMaxVelocity& argument) {
+    in.shift(1);
+    read(in, argument.amount);
+}
+
+void read_from(ReadSource in, argumentType::AlterCash& argument) {
+    read(in, argument.relative);
+    read(in, argument.amount);
+    argument.admiral = Handle<Admiral>(read<uint32_t>(in));
+}
+
+void read_from(ReadSource in, argumentType::AlterVelocity& argument) {
+    read(in, argument.relative);
+    read(in, argument.amount);
+}
+
 void read_from(ReadSource in, argumentType::MakeSparks& argument) {
     read(in, argument.howMany);
     read(in, argument.speed);
