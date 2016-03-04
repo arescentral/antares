@@ -259,21 +259,21 @@ static void nil_target(Handle<Action> action, Handle<SpaceObject> focus) {
 static void alter_damage(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
+    const auto alter = action->argument.alterDamage;
     focus->alter_health(alter.minimum);
 }
 
 static void alter_energy(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
+    const auto alter = action->argument.alterEnergy;
     focus->alter_energy(alter.minimum);
 }
 
 static void alter_hidden(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
+    const auto alter = action->argument.alterHidden;
     // Preserves old behavior; shouldn't really be adding one to alter.range.
     for (auto i: range(alter.minimum, alter.minimum + alter.range + 1)) {
         UnhideInitialObject(i);
@@ -289,7 +289,7 @@ static void alter_cloak(
 static void alter_spin(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
+    const auto alter = action->argument.alterSpin;
     if (focus->attributes & kCanTurn) {
         Fixed f = (focus->turn_rate() *
                    Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range)));
@@ -306,7 +306,7 @@ static void alter_spin(
 static void alter_offline(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
+    const auto alter = action->argument.alterOffline;
     Fixed f = Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range));
     Fixed f2 = focus->baseType->mass;
     if (f2 == Fixed::zero()) {
@@ -320,7 +320,7 @@ static void alter_offline(
 static void alter_velocity(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
+    const auto alter = action->argument.alterVelocity;
     Fixed f, f2;
     int16_t angle;
     if (subject.get()) {
@@ -410,7 +410,7 @@ static void alter_velocity(
 static void alter_max_velocity(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
+    const auto alter = action->argument.alterMaxVelocity;
     if (alter.minimum < 0) {
         focus->maxVelocity = focus->baseType->maxVelocity;
     } else {
@@ -421,7 +421,7 @@ static void alter_max_velocity(
 static void alter_thrust(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
+    const auto alter = action->argument.alterThrust;
     Fixed f = Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range));
     if (alter.relative) {
         focus->thrust += f;
@@ -433,7 +433,7 @@ static void alter_thrust(
 static void alter_base_type(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
+    const auto alter = action->argument.alterBaseType;
     if (action->reflexive || object.get()) {
         focus->change_base_type(Handle<BaseObject>(alter.minimum), -1, alter.relative);
     }
@@ -442,7 +442,7 @@ static void alter_base_type(
 static void alter_owner(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
+    const auto alter = action->argument.alterOwner;
     if (focus.get()) {
         if (alter.relative) {
             // if it's relative AND reflexive, we take the direct
@@ -462,7 +462,7 @@ static void alter_owner(
 static void alter_condition_true_yet(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
+    const auto alter = action->argument.alterConditionTrueYet;
     if (alter.range <= 0) {
         g.level->condition(alter.minimum)->set_true_yet(alter.relative);
     } else {
@@ -475,7 +475,7 @@ static void alter_condition_true_yet(
 static void alter_occupation(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
+    const auto alter = action->argument.alterOccupation;
     if (focus.get()) {
         focus->alter_occupation(subject->owner, alter.minimum, true);
     }
@@ -484,7 +484,7 @@ static void alter_occupation(
 static void alter_absolute_cash(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
+    const auto alter = action->argument.alterAbsoluteCash;
     Handle<Admiral> admiral;
     if (alter.relative) {
         if (focus.get()) {
@@ -501,7 +501,7 @@ static void alter_absolute_cash(
 static void alter_age(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
+    const auto alter = action->argument.alterAge;
     ticks t = ticks(alter.minimum + focus->randomSeed.next(alter.range));
 
     if (alter.relative) {
@@ -520,7 +520,7 @@ static void alter_age(
 static void alter_location(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
+    const auto alter = action->argument.alterLocation;
     coordPointType newLocation;
     if (alter.relative) {
         if (object.get()) {
@@ -542,7 +542,7 @@ static void alter_location(
 static void alter_absolute_location(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
+    const auto alter = action->argument.alterAbsoluteLocation;
     if (alter.relative) {
         focus->location.h += alter.minimum;
         focus->location.v += alter.range;
@@ -554,7 +554,7 @@ static void alter_absolute_location(
 static void alter_weapon1(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
+    const auto alter = action->argument.alterWeapon;
     focus->pulse.base = Handle<BaseObject>(alter.minimum);
     if (focus->pulse.base.get()) {
         auto baseObject = focus->pulse.base;
@@ -577,7 +577,7 @@ static void alter_weapon1(
 static void alter_weapon2(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
+    const auto alter = action->argument.alterWeapon;
     focus->beam.base = Handle<BaseObject>(alter.minimum);
     if (focus->beam.base.get()) {
         auto baseObject = focus->beam.base;
@@ -600,7 +600,7 @@ static void alter_weapon2(
 static void alter_special(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
+    const auto alter = action->argument.alterWeapon;
     focus->special.base = Handle<BaseObject>(alter.minimum);
     if (focus->special.base.get()) {
         auto baseObject = focus->special.base;

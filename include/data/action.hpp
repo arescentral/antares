@@ -135,7 +135,23 @@ union argumentType {
         int32_t                 minimum;
         int32_t                 range;
     };
-    AlterObject alterObject;
+    AlterObject alterDamage;
+    AlterObject alterEnergy;
+    AlterObject alterHidden;
+    AlterObject alterSpin;
+    AlterObject alterOffline;
+    AlterObject alterVelocity;
+    AlterObject alterMaxVelocity;
+    AlterObject alterThrust;
+    AlterObject alterBaseType;
+    AlterObject alterOwner;
+    AlterObject alterConditionTrueYet;
+    AlterObject alterOccupation;
+    AlterObject alterAbsoluteCash;
+    AlterObject alterAge;
+    AlterObject alterLocation;
+    AlterObject alterAbsoluteLocation;
+    AlterObject alterWeapon;
 
     // makeSpark
     struct MakeSparks {

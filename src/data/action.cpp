@@ -68,8 +68,28 @@ void read_from(ReadSource in, Action& action) {
         break;
 
       case kAlter:
-        read(sub, action.argument.alterObject);
-        action.verb |= action.argument.alterObject.alterType;
+        action.verb |= read<uint8_t>(sub);
+        switch (action.verb) {
+            case kAlterDamage:            read(sub, action.argument.alterDamage); break;
+            case kAlterEnergy:            read(sub, action.argument.alterEnergy); break;
+            case kAlterHidden:            read(sub, action.argument.alterHidden); break;
+            case kAlterSpin:              read(sub, action.argument.alterSpin); break;
+            case kAlterOffline:           read(sub, action.argument.alterOffline); break;
+            case kAlterVelocity:          read(sub, action.argument.alterVelocity); break;
+            case kAlterMaxVelocity:       read(sub, action.argument.alterMaxVelocity); break;
+            case kAlterThrust:            read(sub, action.argument.alterThrust); break;
+            case kAlterBaseType:          read(sub, action.argument.alterBaseType); break;
+            case kAlterOwner:             read(sub, action.argument.alterOwner); break;
+            case kAlterConditionTrueYet:  read(sub, action.argument.alterConditionTrueYet); break;
+            case kAlterOccupation:        read(sub, action.argument.alterOccupation); break;
+            case kAlterAbsoluteCash:      read(sub, action.argument.alterAbsoluteCash); break;
+            case kAlterAge:               read(sub, action.argument.alterAge); break;
+            case kAlterLocation:          read(sub, action.argument.alterLocation); break;
+            case kAlterAbsoluteLocation:  read(sub, action.argument.alterAbsoluteLocation); break;
+            case kAlterWeapon1:
+            case kAlterWeapon2:
+            case kAlterSpecial:           read(sub, action.argument.alterWeapon); break;
+        }
         break;
 
       case kMakeSparks:
@@ -149,7 +169,6 @@ void read_from(ReadSource in, argumentType::PlaySound& argument) {
 }
 
 void read_from(ReadSource in, argumentType::AlterObject& argument) {
-    read(in, argument.alterType);
     read(in, argument.relative);
     read(in, argument.minimum);
     read(in, argument.range);
