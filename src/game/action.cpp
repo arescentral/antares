@@ -260,96 +260,46 @@ static void alter_damage(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
-    Fixed f, f2;
-    int16_t angle;
-    coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterDamage:
-            focus->alter_health(alter.minimum);
-            break;
-    }
+    focus->alter_health(alter.minimum);
 }
 
 static void alter_energy(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
-    Fixed f, f2;
-    int16_t angle;
-    coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterEnergy:
-            focus->alter_energy(alter.minimum);
-            break;
-
-    }
+    focus->alter_energy(alter.minimum);
 }
 
 static void alter_hidden(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
-    Fixed f, f2;
-    int16_t angle;
-    coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterHidden:
-            // Preserves old behavior; shouldn't really be adding one to alter.range.
-            for (auto i: range(alter.minimum, alter.minimum + alter.range + 1)) {
-                UnhideInitialObject(i);
-            }
-            break;
-
+    // Preserves old behavior; shouldn't really be adding one to alter.range.
+    for (auto i: range(alter.minimum, alter.minimum + alter.range + 1)) {
+        UnhideInitialObject(i);
     }
 }
 
 static void alter_cloak(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
-    Fixed f, f2;
-    int16_t angle;
-    coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterCloak:
-            focus->set_cloak(true);
-            break;
-
-    }
+    focus->set_cloak(true);
 }
 
 static void alter_spin(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
-    Fixed f, f2;
-    int16_t angle;
-    coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterSpin:
-            if (focus->attributes & kCanTurn) {
-                f = (focus->turn_rate() *
-                     Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range)));
-                f2 = focus->baseType->mass;
-                if (f2 == Fixed::zero()) {
-                    f = kFixedNone;
-                } else {
-                    f /= f2;
-                }
-                focus->turnVelocity = f;
-            }
-            break;
-
+    if (focus->attributes & kCanTurn) {
+        Fixed f = (focus->turn_rate() *
+                   Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range)));
+        Fixed f2 = focus->baseType->mass;
+        if (f2 == Fixed::zero()) {
+            f = kFixedNone;
+        } else {
+            f /= f2;
+        }
+        focus->turnVelocity = f;
     }
 }
 
@@ -357,121 +307,103 @@ static void alter_offline(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
-    Fixed f, f2;
-    int16_t angle;
-    coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterOffline:
-            f = Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range));
-            f2 = focus->baseType->mass;
-            if (f2 == Fixed::zero()) {
-                f = kFixedNone;
-            } else {
-                f /= f2;
-            }
-            focus->offlineTime = mFixedToLong(f);
-            break;
-
+    Fixed f = Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range));
+    Fixed f2 = focus->baseType->mass;
+    if (f2 == Fixed::zero()) {
+        f = kFixedNone;
+    } else {
+        f /= f2;
     }
+    focus->offlineTime = mFixedToLong(f);
 }
 
 static void alter_velocity(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
     Fixed f, f2;
     int16_t angle;
-    coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterVelocity:
-            if (subject.get()) {
-                // active (non-reflexive) altering of velocity means a PUSH, just like
-                //  two objects colliding.  Negative velocity = slow down
-                if (object.get()) {
-                    if (alter.relative) {
-                        if ((object->baseType->mass > Fixed::zero()) &&
-                            (object->maxVelocity > Fixed::zero())) {
-                            if (alter.minimum >= 0) {
-                                // if the minimum >= 0, then PUSH the object like collision
-                                f = subject->velocity.h - object->velocity.h;
-                                f /= object->baseType->mass.val();
-                                f <<= 6L;
-                                object->velocity.h += f;
-                                f = subject->velocity.v - object->velocity.v;
-                                f /= object->baseType->mass.val();
-                                f <<= 6L;
-                                object->velocity.v += f;
+    if (subject.get()) {
+        // active (non-reflexive) altering of velocity means a PUSH, just like
+        //  two objects colliding.  Negative velocity = slow down
+        if (object.get()) {
+            if (alter.relative) {
+                if ((object->baseType->mass > Fixed::zero()) &&
+                    (object->maxVelocity > Fixed::zero())) {
+                    if (alter.minimum >= 0) {
+                        // if the minimum >= 0, then PUSH the object like collision
+                        f = subject->velocity.h - object->velocity.h;
+                        f /= object->baseType->mass.val();
+                        f <<= 6L;
+                        object->velocity.h += f;
+                        f = subject->velocity.v - object->velocity.v;
+                        f /= object->baseType->mass.val();
+                        f <<= 6L;
+                        object->velocity.v += f;
 
-                                // make sure we're not going faster than our top speed
-                                angle = ratio_to_angle(object->velocity.h, object->velocity.v);
-                            } else {
-                                // if the minumum < 0, then STOP the object like applying breaks
-                                f = object->velocity.h;
-                                f = (f * Fixed::from_val(alter.minimum));
-                                object->velocity.h += f;
-                                f = object->velocity.v;
-                                f = (f * Fixed::from_val(alter.minimum));
-                                object->velocity.v += f;
+                        // make sure we're not going faster than our top speed
+                        angle = ratio_to_angle(object->velocity.h, object->velocity.v);
+                    } else {
+                        // if the minumum < 0, then STOP the object like applying breaks
+                        f = object->velocity.h;
+                        f = (f * Fixed::from_val(alter.minimum));
+                        object->velocity.h += f;
+                        f = object->velocity.v;
+                        f = (f * Fixed::from_val(alter.minimum));
+                        object->velocity.v += f;
 
-                                // make sure we're not going faster than our top speed
-                                angle = ratio_to_angle(object->velocity.h, object->velocity.v);
-                            }
+                        // make sure we're not going faster than our top speed
+                        angle = ratio_to_angle(object->velocity.h, object->velocity.v);
+                    }
 
-                            // get the maxthrust of new vector
-                            GetRotPoint(&f, &f2, angle);
-                            f = (object->maxVelocity * f);
-                            f2 = (object->maxVelocity * f2);
+                    // get the maxthrust of new vector
+                    GetRotPoint(&f, &f2, angle);
+                    f = (object->maxVelocity * f);
+                    f2 = (object->maxVelocity * f2);
 
-                            if (f < Fixed::zero()) {
-                                if (object->velocity.h < f) {
-                                    object->velocity.h = f;
-                                }
-                            } else {
-                                if (object->velocity.h > f) {
-                                    object->velocity.h = f;
-                                }
-                            }
-
-                            if (f2 < Fixed::zero()) {
-                                if (object->velocity.v < f2) {
-                                    object->velocity.v = f2;
-                                }
-                            } else {
-                                if (object->velocity.v > f2) {
-                                    object->velocity.v = f2;
-                                }
-                            }
+                    if (f < Fixed::zero()) {
+                        if (object->velocity.h < f) {
+                            object->velocity.h = f;
                         }
                     } else {
-                        GetRotPoint(&f, &f2, subject->direction);
-                        f = (Fixed::from_val(alter.minimum) * f);
-                        f2 = (Fixed::from_val(alter.minimum) * f2);
-                        focus->velocity.h = f;
-                        focus->velocity.v = f2;
+                        if (object->velocity.h > f) {
+                            object->velocity.h = f;
+                        }
                     }
-                } else {
-                    // reflexive alter velocity means a burst of speed in the direction
-                    // the object is facing, where negative speed means backwards. Object can
-                    // excede its max velocity.
-                    // Minimum value is absolute speed in direction.
-                    GetRotPoint(&f, &f2, focus->direction);
-                    f = (Fixed::from_val(alter.minimum) * f);
-                    f2 = (Fixed::from_val(alter.minimum) * f2);
-                    if (alter.relative) {
-                        focus->velocity.h += f;
-                        focus->velocity.v += f2;
+
+                    if (f2 < Fixed::zero()) {
+                        if (object->velocity.v < f2) {
+                            object->velocity.v = f2;
+                        }
                     } else {
-                        focus->velocity.h = f;
-                        focus->velocity.v = f2;
+                        if (object->velocity.v > f2) {
+                            object->velocity.v = f2;
+                        }
                     }
                 }
+            } else {
+                GetRotPoint(&f, &f2, subject->direction);
+                f = (Fixed::from_val(alter.minimum) * f);
+                f2 = (Fixed::from_val(alter.minimum) * f2);
+                focus->velocity.h = f;
+                focus->velocity.v = f2;
             }
-            break;
-
+        } else {
+            // reflexive alter velocity means a burst of speed in the direction
+            // the object is facing, where negative speed means backwards. Object can
+            // excede its max velocity.
+            // Minimum value is absolute speed in direction.
+            GetRotPoint(&f, &f2, focus->direction);
+            f = (Fixed::from_val(alter.minimum) * f);
+            f2 = (Fixed::from_val(alter.minimum) * f2);
+            if (alter.relative) {
+                focus->velocity.h += f;
+                focus->velocity.v += f2;
+            } else {
+                focus->velocity.h = f;
+                focus->velocity.v = f2;
+            }
+        }
     }
 }
 
@@ -479,20 +411,10 @@ static void alter_max_velocity(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
-    Fixed f, f2;
-    int16_t angle;
-    coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterMaxVelocity:
-            if (alter.minimum < 0) {
-                focus->maxVelocity = focus->baseType->maxVelocity;
-            } else {
-                focus->maxVelocity = Fixed::from_val(alter.minimum);
-            }
-            break;
-
+    if (alter.minimum < 0) {
+        focus->maxVelocity = focus->baseType->maxVelocity;
+    } else {
+        focus->maxVelocity = Fixed::from_val(alter.minimum);
     }
 }
 
@@ -500,21 +422,11 @@ static void alter_thrust(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
-    Fixed f, f2;
-    int16_t angle;
-    coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterThrust:
-            f = Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range));
-            if (alter.relative) {
-                focus->thrust += f;
-            } else {
-                focus->thrust = f;
-            }
-            break;
-
+    Fixed f = Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range));
+    if (alter.relative) {
+        focus->thrust += f;
+    } else {
+        focus->thrust = f;
     }
 }
 
@@ -522,18 +434,8 @@ static void alter_base_type(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
-    Fixed f, f2;
-    int16_t angle;
-    coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterBaseType:
-            if (action->reflexive || object.get()) {
-                focus->change_base_type(Handle<BaseObject>(alter.minimum), -1, alter.relative);
-            }
-            break;
-
+    if (action->reflexive || object.get()) {
+        focus->change_base_type(Handle<BaseObject>(alter.minimum), -1, alter.relative);
     }
 }
 
@@ -541,29 +443,19 @@ static void alter_owner(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
-    Fixed f, f2;
-    int16_t angle;
-    coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterOwner:
-            if (focus.get()) {
-                if (alter.relative) {
-                    // if it's relative AND reflexive, we take the direct
-                    // object's owner, since relative & reflexive would
-                    // do nothing.
-                    if (action->reflexive && focus.get() && object.get()) {
-                        focus->set_owner(object->owner, true);
-                    } else {
-                        focus->set_owner(subject->owner, true);
-                    }
-                } else {
-                    focus->set_owner(Handle<Admiral>(alter.minimum), false);
-                }
+    if (focus.get()) {
+        if (alter.relative) {
+            // if it's relative AND reflexive, we take the direct
+            // object's owner, since relative & reflexive would
+            // do nothing.
+            if (action->reflexive && focus.get() && object.get()) {
+                focus->set_owner(object->owner, true);
+            } else {
+                focus->set_owner(subject->owner, true);
             }
-            break;
-
+        } else {
+            focus->set_owner(Handle<Admiral>(alter.minimum), false);
+        }
     }
 }
 
@@ -571,22 +463,12 @@ static void alter_condition_true_yet(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
-    Fixed f, f2;
-    int16_t angle;
-    coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterConditionTrueYet:
-            if (alter.range <= 0) {
-                g.level->condition(alter.minimum)->set_true_yet(alter.relative);
-            } else {
-                for (auto l: range(alter.minimum, alter.minimum + alter.range + 1)) {
-                    g.level->condition(l)->set_true_yet(alter.relative);
-                }
-            }
-            break;
-
+    if (alter.range <= 0) {
+        g.level->condition(alter.minimum)->set_true_yet(alter.relative);
+    } else {
+        for (auto l: range(alter.minimum, alter.minimum + alter.range + 1)) {
+            g.level->condition(l)->set_true_yet(alter.relative);
+        }
     }
 }
 
@@ -594,18 +476,8 @@ static void alter_occupation(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
-    Fixed f, f2;
-    int16_t angle;
-    coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterOccupation:
-            if (focus.get()) {
-                focus->alter_occupation(subject->owner, alter.minimum, true);
-            }
-            break;
-
+    if (focus.get()) {
+        focus->alter_occupation(subject->owner, alter.minimum, true);
     }
 }
 
@@ -613,28 +485,16 @@ static void alter_absolute_cash(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
-    Fixed f, f2;
-    int16_t angle;
-    coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterAbsoluteCash:
-            {
-                Handle<Admiral> admiral;
-                if (alter.relative) {
-                    if (focus.get()) {
-                        admiral = focus->owner;
-                    }
-                } else {
-                    admiral = Handle<Admiral>(alter.range);
-                }
-                if (admiral.get()) {
-                    admiral->pay_absolute(Fixed::from_val(alter.minimum));
-                }
-            }
-            break;
-
+    Handle<Admiral> admiral;
+    if (alter.relative) {
+        if (focus.get()) {
+            admiral = focus->owner;
+        }
+    } else {
+        admiral = Handle<Admiral>(alter.range);
+    }
+    if (admiral.get()) {
+        admiral->pay_absolute(Fixed::from_val(alter.minimum));
     }
 }
 
@@ -642,28 +502,18 @@ static void alter_age(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
-    Fixed f, f2;
-    int16_t angle;
-    coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterAge:
-            t = ticks(alter.minimum + focus->randomSeed.next(alter.range));
+    ticks t = ticks(alter.minimum + focus->randomSeed.next(alter.range));
 
-            if (alter.relative) {
-                if (focus->expires) {
-                    focus->expire_after += t;
-                } else {
-                    focus->expire_after += t;
-                    focus->expires = (focus->expire_after >= ticks(0));
-                }
-            } else {
-                focus->expire_after = t;
-                focus->expires = (focus->expire_after >= ticks(0));
-            }
-            break;
-
+    if (alter.relative) {
+        if (focus->expires) {
+            focus->expire_after += t;
+        } else {
+            focus->expire_after += t;
+            focus->expires = (focus->expire_after >= ticks(0));
+        }
+    } else {
+        focus->expire_after = t;
+        focus->expires = (focus->expire_after >= ticks(0));
     }
 }
 
@@ -671,53 +521,33 @@ static void alter_location(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
-    Fixed f, f2;
-    int16_t angle;
     coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterLocation:
-            if (alter.relative) {
-                if (object.get()) {
-                    newLocation.h = subject->location.h;
-                    newLocation.v = subject->location.v;
-                } else {
-                    newLocation.h = object->location.h;
-                    newLocation.v = object->location.v;
-                }
-            } else {
-                newLocation.h = newLocation.v = 0;
-            }
-            newLocation.h += focus->randomSeed.next(alter.minimum << 1) - alter.minimum;
-            newLocation.v += focus->randomSeed.next(alter.minimum << 1) - alter.minimum;
-            focus->location.h = newLocation.h;
-            focus->location.v = newLocation.v;
-            break;
-
+    if (alter.relative) {
+        if (object.get()) {
+            newLocation.h = subject->location.h;
+            newLocation.v = subject->location.v;
+        } else {
+            newLocation.h = object->location.h;
+            newLocation.v = object->location.v;
+        }
+    } else {
+        newLocation.h = newLocation.v = 0;
     }
+    newLocation.h += focus->randomSeed.next(alter.minimum << 1) - alter.minimum;
+    newLocation.v += focus->randomSeed.next(alter.minimum << 1) - alter.minimum;
+    focus->location.h = newLocation.h;
+    focus->location.v = newLocation.v;
 }
 
 static void alter_absolute_location(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
-    Fixed f, f2;
-    int16_t angle;
-    coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterAbsoluteLocation:
-            if (alter.relative) {
-                focus->location.h += alter.minimum;
-                focus->location.v += alter.range;
-            } else {
-                focus->location = Translate_Coord_To_Scenario_Rotation(
-                    alter.minimum, alter.range);
-            }
-            break;
-
+    if (alter.relative) {
+        focus->location.h += alter.minimum;
+        focus->location.v += alter.range;
+    } else {
+        focus->location = Translate_Coord_To_Scenario_Rotation(alter.minimum, alter.range);
     }
 }
 
@@ -725,32 +555,22 @@ static void alter_weapon1(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
-    Fixed f, f2;
-    int16_t angle;
-    coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterWeapon1:
-            focus->pulse.base = Handle<BaseObject>(alter.minimum);
-            if (focus->pulse.base.get()) {
-                auto baseObject = focus->pulse.base;
-                focus->pulse.ammo = baseObject->frame.weapon.ammo;
-                focus->pulse.time = g.time;
-                focus->pulse.position = 0;
-                if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
-                    focus->longestWeaponRange = baseObject->frame.weapon.range;
-                }
-                if (baseObject->frame.weapon.range < focus->shortestWeaponRange) {
-                    focus->shortestWeaponRange = baseObject->frame.weapon.range;
-                }
-            } else {
-                focus->pulse.base = BaseObject::none();
-                focus->pulse.ammo = 0;
-                focus->pulse.time = g.time;
-            }
-            break;
-
+    focus->pulse.base = Handle<BaseObject>(alter.minimum);
+    if (focus->pulse.base.get()) {
+        auto baseObject = focus->pulse.base;
+        focus->pulse.ammo = baseObject->frame.weapon.ammo;
+        focus->pulse.time = g.time;
+        focus->pulse.position = 0;
+        if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
+            focus->longestWeaponRange = baseObject->frame.weapon.range;
+        }
+        if (baseObject->frame.weapon.range < focus->shortestWeaponRange) {
+            focus->shortestWeaponRange = baseObject->frame.weapon.range;
+        }
+    } else {
+        focus->pulse.base = BaseObject::none();
+        focus->pulse.ammo = 0;
+        focus->pulse.time = g.time;
     }
 }
 
@@ -758,32 +578,22 @@ static void alter_weapon2(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
-    Fixed f, f2;
-    int16_t angle;
-    coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterWeapon2:
-            focus->beam.base = Handle<BaseObject>(alter.minimum);
-            if (focus->beam.base.get()) {
-                auto baseObject = focus->beam.base;
-                focus->beam.ammo = baseObject->frame.weapon.ammo;
-                focus->beam.time = g.time;
-                focus->beam.position = 0;
-                if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
-                    focus->longestWeaponRange = baseObject->frame.weapon.range;
-                }
-                if (baseObject->frame.weapon.range < focus->shortestWeaponRange) {
-                    focus->shortestWeaponRange = baseObject->frame.weapon.range;
-                }
-            } else {
-                focus->beam.base = BaseObject::none();
-                focus->beam.ammo = 0;
-                focus->beam.time = g.time;
-            }
-            break;
-
+    focus->beam.base = Handle<BaseObject>(alter.minimum);
+    if (focus->beam.base.get()) {
+        auto baseObject = focus->beam.base;
+        focus->beam.ammo = baseObject->frame.weapon.ammo;
+        focus->beam.time = g.time;
+        focus->beam.position = 0;
+        if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
+            focus->longestWeaponRange = baseObject->frame.weapon.range;
+        }
+        if (baseObject->frame.weapon.range < focus->shortestWeaponRange) {
+            focus->shortestWeaponRange = baseObject->frame.weapon.range;
+        }
+    } else {
+        focus->beam.base = BaseObject::none();
+        focus->beam.ammo = 0;
+        focus->beam.time = g.time;
     }
 }
 
@@ -791,48 +601,22 @@ static void alter_special(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
-    Fixed f, f2;
-    int16_t angle;
-    coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterSpecial:
-            focus->special.base = Handle<BaseObject>(alter.minimum);
-            if (focus->special.base.get()) {
-                auto baseObject = focus->special.base;
-                focus->special.ammo = baseObject->frame.weapon.ammo;
-                focus->special.time = g.time;
-                focus->special.position = 0;
-                if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
-                    focus->longestWeaponRange = baseObject->frame.weapon.range;
-                }
-                if (baseObject->frame.weapon.range < focus->shortestWeaponRange) {
-                    focus->shortestWeaponRange = baseObject->frame.weapon.range;
-                }
-            } else {
-                focus->special.base = BaseObject::none();
-                focus->special.ammo = 0;
-                focus->special.time = g.time;
-            }
-            break;
-
-    }
-}
-
-static void alter_level_key_tag(
-        Handle<Action> action,
-        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterObject;
-    int32_t l;
-    ticks t;
-    Fixed f, f2;
-    int16_t angle;
-    coordPointType newLocation;
-    switch (action->verb) {
-        case kAlterLevelKeyTag:
-            break;
-
+    focus->special.base = Handle<BaseObject>(alter.minimum);
+    if (focus->special.base.get()) {
+        auto baseObject = focus->special.base;
+        focus->special.ammo = baseObject->frame.weapon.ammo;
+        focus->special.time = g.time;
+        focus->special.position = 0;
+        if (baseObject->frame.weapon.range > focus->longestWeaponRange) {
+            focus->longestWeaponRange = baseObject->frame.weapon.range;
+        }
+        if (baseObject->frame.weapon.range < focus->shortestWeaponRange) {
+            focus->shortestWeaponRange = baseObject->frame.weapon.range;
+        }
+    } else {
+        focus->special.base = BaseObject::none();
+        focus->special.ammo = 0;
+        focus->special.time = g.time;
     }
 }
 
