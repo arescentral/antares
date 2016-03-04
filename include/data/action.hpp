@@ -32,61 +32,61 @@ namespace antares {
 struct SpaceObject;
 
 enum objectVerbIDEnum {
-    kNoAction = 0,
-    kCreateObject = 1,
-    kPlaySound = 2,
-    kAlter = 3,
-    kMakeSparks = 4,
-    kReleaseEnergy = 5,
-    kLandAt = 6,
-    kEnterWarp = 7,
-    kDisplayMessage = 8,
-    kChangeScore = 9,
-    kDeclareWinner = 10,
-    kDie = 11,
-    kSetDestination = 12,
-    kActivateSpecial = 13,
-    kActivatePulse = 14,
-    kActivateBeam = 15,
-    kColorFlash = 16,
-    kCreateObjectSetDest = 17,      // creates an object with the same destination as anObject's (either subject or direct)
-    kNilTarget = 18,
-    kDisableKeys = 19,
-    kEnableKeys = 20,
-    kSetZoom = 21,
-    kComputerSelect = 22,           // selects a line & screen of the minicomputer
-    kAssumeInitialObject = 23       // assumes the identity of an intial object; for tutorial
+    kNoAction               = 0 << 8,
+    kCreateObject           = 1 << 8,
+    kPlaySound              = 2 << 8,
+    kAlter                  = 3 << 8,
+    kMakeSparks             = 4 << 8,
+    kReleaseEnergy          = 5 << 8,
+    kLandAt                 = 6 << 8,
+    kEnterWarp              = 7 << 8,
+    kDisplayMessage         = 8 << 8,
+    kChangeScore            = 9 << 8,
+    kDeclareWinner          = 10 << 8,
+    kDie                    = 11 << 8,
+    kSetDestination         = 12 << 8,
+    kActivateSpecial        = 13 << 8,
+    kActivatePulse          = 14 << 8,
+    kActivateBeam           = 15 << 8,
+    kColorFlash             = 16 << 8,
+    kCreateObjectSetDest    = 17 << 8,  // creates an object with the same destination as anObject's
+                                   // (either subject or direct)
+    kNilTarget              = 18 << 8,
+    kDisableKeys            = 19 << 8,
+    kEnableKeys             = 20 << 8,
+    kSetZoom                = 21 << 8,
+    kComputerSelect         = 22 << 8,  // selects a line & screen of the minicomputer
+    kAssumeInitialObject    = 23 << 8,  // assumes the identity of an intial object; for tutorial
 };
-typedef uint8_t objectVerbIDType;
 
 enum alterVerbIDType {
-    kAlterDamage = 0,
-    kAlterVelocity = 1,
-    kAlterThrust = 2,
-    kAlterMaxThrust = 3,
-    kAlterMaxVelocity = 4,
-    kAlterMaxTurnRate = 5,
-    kAlterLocation = 6,
-    kAlterScale = 7,
-    kAlterWeapon1 = 8,
-    kAlterWeapon2 = 9,
-    kAlterSpecial = 10,
-    kAlterEnergy = 11,
-    kAlterOwner = 12,
-    kAlterHidden = 13,
-    kAlterCloak = 14,
-    kAlterOffline = 15,
-    kAlterSpin = 16,
-    kAlterBaseType = 17,
-    kAlterConditionTrueYet = 18,    // relative = state, min = which condition basically force to recheck
-    kAlterOccupation = 19,          // for special neutral death objects
-    kAlterAbsoluteCash = 20,        // relative: true = cash to object : false = range = admiral who gets cash
-    kAlterAge = 21,
-    kAlterAttributes = 22,
-    kAlterLevelKeyTag = 23,
-    kAlterOrderKeyTag = 24,
-    kAlterEngageKeyTag = 25,
-    kAlterAbsoluteLocation = 26
+    kAlterDamage            = kAlter | 0,
+    kAlterVelocity          = kAlter | 1,
+    kAlterThrust            = kAlter | 2,
+    kAlterMaxThrust         = kAlter | 3,
+    kAlterMaxVelocity       = kAlter | 4,
+    kAlterMaxTurnRate       = kAlter | 5,
+    kAlterLocation          = kAlter | 6,
+    kAlterScale             = kAlter | 7,
+    kAlterWeapon1           = kAlter | 8,
+    kAlterWeapon2           = kAlter | 9,
+    kAlterSpecial           = kAlter | 10,
+    kAlterEnergy            = kAlter | 11,
+    kAlterOwner             = kAlter | 12,
+    kAlterHidden            = kAlter | 13,
+    kAlterCloak             = kAlter | 14,
+    kAlterOffline           = kAlter | 15,
+    kAlterSpin              = kAlter | 16,
+    kAlterBaseType          = kAlter | 17,
+    kAlterConditionTrueYet  = kAlter | 18,  // relative = state, min = which condition basically force to recheck
+    kAlterOccupation        = kAlter | 19,  // for special neutral death objects
+    kAlterAbsoluteCash      = kAlter | 20,  // relative: true = cash to object : false = range = admiral who gets cash
+    kAlterAge               = kAlter | 21,
+    kAlterAttributes        = kAlter | 22,
+    kAlterLevelKeyTag       = kAlter | 23,
+    kAlterOrderKeyTag       = kAlter | 24,
+    kAlterEngageKeyTag      = kAlter | 25,
+    kAlterAbsoluteLocation  = kAlter | 26,
 };
 
 enum dieVerbIDEnum {
@@ -128,14 +128,75 @@ union argumentType {
     };
     PlaySound playSound;
 
-    // alterObject: change some attribute of an object
-    struct AlterObject {
-        uint8_t                 alterType;
-        uint8_t                 relative;
-        int32_t                 minimum;
-        int32_t                 range;
-    };
-    AlterObject alterObject;
+    struct AlterSimple { int32_t amount; };
+    struct AlterSimple alterDamage;
+    struct AlterSimple alterEnergy;
+    struct AlterSimple alterOccupation;
+
+    struct AlterWeapon {
+        Handle<BaseObject> base;
+    } alterWeapon;
+
+    struct AlterFixedRange { Fixed minimum, range; };
+    AlterFixedRange alterSpin;
+    AlterFixedRange alterOffline;
+
+    struct AlterAge {
+        bool relative;
+        ticks minimum, range;
+    } alterAge;
+
+    struct AlterThrust {
+        bool relative;
+        Fixed minimum, range;
+    } alterThrust;
+
+    struct AlterMaxVelocity {
+        Fixed amount;
+    } alterMaxVelocity;
+
+    struct AlterOwner {
+        bool relative;
+        Fixed amount;
+        Handle<Admiral> admiral;
+    } alterOwner;
+
+    struct AlterCash {
+        bool relative;
+        Fixed amount;
+        Handle<Admiral> admiral;
+    } alterAbsoluteCash;
+
+    struct AlterVelocity {
+        bool relative;
+        Fixed amount;
+    } alterVelocity;
+
+    struct AlterBaseType {
+        bool keep_ammo;
+        Handle<BaseObject> base;
+    } alterBaseType;
+
+    struct AlterLocation {
+        bool relative;
+        int32_t by;
+    } alterLocation;
+
+    struct AlterAbsoluteLocation {
+        bool relative;
+        Point at;
+    } alterAbsoluteLocation;
+
+    struct AlterHidden {
+        int32_t first;
+        int32_t count_minus_1;
+    } alterHidden;
+
+    struct AlterConditionTrueYet {
+        bool true_yet;
+        int32_t first;
+        int32_t count_minus_1;
+    } alterConditionTrueYet;
 
     // makeSpark
     struct MakeSparks {
@@ -224,9 +285,11 @@ union argumentType {
     };
     AssumeInitial assumeInitial;
 };
+
 void read_from(sfz::ReadSource in, argumentType::CreateObject& argument);
 void read_from(sfz::ReadSource in, argumentType::PlaySound& argument);
-void read_from(sfz::ReadSource in, argumentType::AlterObject& argument);
+void read_from(sfz::ReadSource in, argumentType::AlterSimple& argument);
+void read_from(sfz::ReadSource in, argumentType::AlterWeapon& argument);
 void read_from(sfz::ReadSource in, argumentType::MakeSparks& argument);
 void read_from(sfz::ReadSource in, argumentType::ReleaseEnergy& argument);
 void read_from(sfz::ReadSource in, argumentType::LandAt& argument);
@@ -244,7 +307,8 @@ void read_from(sfz::ReadSource in, argumentType::AssumeInitial& argument);
 struct Action {
     static Action* get(int number);
 
-    objectVerbIDType            verb;                   // what is this verb?
+    uint16_t                    verb;
+
     uint8_t                     reflexive;              // does it apply to object executing verb?
     uint32_t                    inclusiveFilter;        // if it has ALL these attributes, OK -- for non-reflective verbs
     uint32_t                    exclusiveFilter;        // don't execute if it has ANY of these

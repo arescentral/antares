@@ -31,7 +31,8 @@ namespace antares {
 void read_from(ReadSource in, Action& action) {
     uint8_t section[24];
 
-    read(in, action.verb);
+    action.verb = read<uint8_t>(in) << 8;
+
     read(in, action.reflexive);
     read(in, action.inclusiveFilter);
     read(in, action.exclusiveFilter);
@@ -67,7 +68,28 @@ void read_from(ReadSource in, Action& action) {
         break;
 
       case kAlter:
-        read(sub, action.argument.alterObject);
+        action.verb |= read<uint8_t>(sub);
+        switch (action.verb) {
+            case kAlterDamage:            read(sub, action.argument.alterDamage); break;
+            case kAlterEnergy:            read(sub, action.argument.alterEnergy); break;
+            case kAlterHidden:            read(sub, action.argument.alterHidden); break;
+            case kAlterSpin:              read(sub, action.argument.alterSpin); break;
+            case kAlterOffline:           read(sub, action.argument.alterOffline); break;
+            case kAlterVelocity:          read(sub, action.argument.alterVelocity); break;
+            case kAlterMaxVelocity:       read(sub, action.argument.alterMaxVelocity); break;
+            case kAlterThrust:            read(sub, action.argument.alterThrust); break;
+            case kAlterBaseType:          read(sub, action.argument.alterBaseType); break;
+            case kAlterOwner:             read(sub, action.argument.alterOwner); break;
+            case kAlterConditionTrueYet:  read(sub, action.argument.alterConditionTrueYet); break;
+            case kAlterOccupation:        read(sub, action.argument.alterOccupation); break;
+            case kAlterAbsoluteCash:      read(sub, action.argument.alterAbsoluteCash); break;
+            case kAlterAge:               read(sub, action.argument.alterAge); break;
+            case kAlterLocation:          read(sub, action.argument.alterLocation); break;
+            case kAlterAbsoluteLocation:  read(sub, action.argument.alterAbsoluteLocation); break;
+            case kAlterWeapon1:
+            case kAlterWeapon2:
+            case kAlterSpecial:           read(sub, action.argument.alterWeapon); break;
+        }
         break;
 
       case kMakeSparks:
@@ -146,11 +168,80 @@ void read_from(ReadSource in, argumentType::PlaySound& argument) {
     read(in, argument.idRange);
 }
 
-void read_from(ReadSource in, argumentType::AlterObject& argument) {
-    read(in, argument.alterType);
-    read(in, argument.relative);
+void read_from(ReadSource in, argumentType::AlterHidden& argument) {
+    in.shift(1);
+    read(in, argument.first);
+    read(in, argument.count_minus_1);
+}
+
+void read_from(ReadSource in, argumentType::AlterConditionTrueYet& argument) {
+    argument.true_yet = read<uint8_t>(in);
+    read(in, argument.first);
+    read(in, argument.count_minus_1);
+}
+
+void read_from(ReadSource in, argumentType::AlterSimple& argument) {
+    in.shift(1);
+    read(in, argument.amount);
+}
+
+void read_from(ReadSource in, argumentType::AlterWeapon& argument) {
+    in.shift(1);
+    argument.base = Handle<BaseObject>(read<int32_t>(in));
+}
+
+void read_from(ReadSource in, argumentType::AlterFixedRange& argument) {
+    in.shift(1);
     read(in, argument.minimum);
     read(in, argument.range);
+}
+
+void read_from(ReadSource in, argumentType::AlterAge& argument) {
+    argument.relative = read<uint8_t>(in);
+    argument.minimum = ticks(read<int32_t>(in));
+    argument.range = ticks(read<int32_t>(in));
+}
+
+void read_from(ReadSource in, argumentType::AlterThrust& argument) {
+    argument.relative = read<uint8_t>(in);
+    read(in, argument.minimum);
+    read(in, argument.range);
+}
+
+void read_from(ReadSource in, argumentType::AlterMaxVelocity& argument) {
+    in.shift(1);
+    read(in, argument.amount);
+}
+
+void read_from(ReadSource in, argumentType::AlterOwner& argument) {
+    read(in, argument.relative);
+    argument.admiral = Handle<Admiral>(read<uint32_t>(in));
+}
+
+void read_from(ReadSource in, argumentType::AlterCash& argument) {
+    read(in, argument.relative);
+    read(in, argument.amount);
+    argument.admiral = Handle<Admiral>(read<uint32_t>(in));
+}
+
+void read_from(ReadSource in, argumentType::AlterVelocity& argument) {
+    read(in, argument.relative);
+    read(in, argument.amount);
+}
+
+void read_from(ReadSource in, argumentType::AlterBaseType& argument) {
+    argument.keep_ammo = read<uint8_t>(in);
+    argument.base = Handle<BaseObject>(read<int32_t>(in));
+}
+
+void read_from(ReadSource in, argumentType::AlterLocation& argument) {
+    argument.relative = read<uint8_t>(in);
+    read(in, argument.by);
+}
+
+void read_from(ReadSource in, argumentType::AlterAbsoluteLocation& argument) {
+    argument.relative = read<uint8_t>(in);
+    read(in, argument.at);
 }
 
 void read_from(ReadSource in, argumentType::MakeSparks& argument) {
