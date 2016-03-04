@@ -58,7 +58,6 @@ enum objectVerbIDEnum {
     kComputerSelect         = 22,  // selects a line & screen of the minicomputer
     kAssumeInitialObject    = 23,  // assumes the identity of an intial object; for tutorial
 };
-typedef uint8_t objectVerbIDType;
 
 enum alterVerbIDType {
     kAlterDamage            = 0,
@@ -245,7 +244,12 @@ void read_from(sfz::ReadSource in, argumentType::AssumeInitial& argument);
 struct Action {
     static Action* get(int number);
 
-    objectVerbIDType            verb;                   // what is this verb?
+    uint8_t                     verb_group() const;
+    uint8_t                     verb_subgroup() const;
+    uint8_t                     whole_verb() const;
+
+    uint8_t                     _verb;
+
     uint8_t                     reflexive;              // does it apply to object executing verb?
     uint32_t                    inclusiveFilter;        // if it has ALL these attributes, OK -- for non-reflective verbs
     uint32_t                    exclusiveFilter;        // don't execute if it has ANY of these

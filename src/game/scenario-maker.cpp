@@ -160,7 +160,7 @@ void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors) {
     if (!action.get()) {
         return;
     }
-    switch (action->verb) {
+    switch (action->verb_group()) {
         case kCreateObject:
         case kCreateObjectSetDest:
             AddBaseObjectMedia(action->argument.createObject.whichBaseType, color, all_colors);
@@ -176,7 +176,7 @@ void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors) {
             break;
 
         case kAlter:
-            switch(action->argument.alterObject.alterType) {
+            switch(action->verb_subgroup()) {
                 case kAlterBaseType:
                     AddBaseObjectMedia(
                             Handle<BaseObject>(action->argument.alterObject.minimum),

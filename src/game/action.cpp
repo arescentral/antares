@@ -143,7 +143,7 @@ static void create_object(
             product->attributes &= ~kStaticDestination;
             if (product->owner.get()) {
                 if (action->reflexive) {
-                    if (action->verb != kCreateObjectSetDest) {
+                    if (action->verb_group() != kCreateObjectSetDest) {
                         SetObjectDestination(product, focus);
                     } else if (focus->destObject.get()) {
                         SetObjectDestination(product, focus->destObject);
@@ -265,7 +265,7 @@ static void alter(
     Fixed f, f2;
     int16_t angle;
     coordPointType newLocation;
-    switch (alter.alterType) {
+    switch (action->verb_subgroup()) {
         case kAlterDamage:
             focus->alter_health(alter.minimum);
             break;
@@ -702,7 +702,7 @@ static void execute_actions(
         covered_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
-        if (action->verb == kNoAction) {
+        if (action->verb_group() == kNoAction) {
             break;
         }
         auto subject = original_subject;
@@ -741,7 +741,7 @@ static void execute_actions(
             continue;
         }
 
-        switch (action->verb) {
+        switch (action->verb_group()) {
             case kCreateObject:
             case kCreateObjectSetDest:  create_object(action, focus, subject, offset); break;
             case kPlaySound:            play_sound(action, focus); break;
@@ -766,7 +766,7 @@ static void execute_actions(
             case kAssumeInitialObject:  assume_initial_object(action, focus); break;
         }
 
-        switch (action->verb) {
+        switch (action->verb_group()) {
             case kChangeScore:
             case kDisplayMessage:
                 checkConditions = true;

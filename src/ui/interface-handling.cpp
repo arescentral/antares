@@ -214,8 +214,8 @@ void CreateWeaponDataText(
     isGuided = false;
     if (weaponObject->activate.size() > 0) {
         for (auto action: weaponObject->activate) {
-            if (( action->verb == kCreateObject) || ( action->verb == kCreateObjectSetDest))
-            {
+            if ((action->verb_group() == kCreateObject) ||
+                (action->verb_group() == kCreateObjectSetDest)) {
                 Handle<BaseObject> missileObject = action->argument.createObject.whichBaseType;
                 if ( missileObject->attributes & kIsGuided) isGuided = true;
                 if ( missileObject->damage > mostDamage) mostDamage = missileObject->damage;
