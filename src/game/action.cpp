@@ -291,7 +291,7 @@ static void alter(
                     f = (focus->baseType->frame.rotation.maxTurnRate *
                          Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range)));
                 } else {
-                    f = (Fixed::from_val(2) /*kDefaultTurnRate*/ *
+                    f = (2 /*kDefaultTurnRate*/ *
                          Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range)));
                 }
                 f2 = focus->baseType->mass;
