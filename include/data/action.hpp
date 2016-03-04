@@ -155,6 +155,12 @@ union argumentType {
         Fixed amount;
     } alterMaxVelocity;
 
+    struct AlterOwner {
+        bool relative;
+        Fixed amount;
+        Handle<Admiral> admiral;
+    } alterOwner;
+
     struct AlterCash {
         bool relative;
         Fixed amount;
@@ -189,7 +195,6 @@ union argumentType {
         int32_t                 range;
     };
     AlterObject alterHidden;
-    AlterObject alterOwner;
     AlterObject alterConditionTrueYet;
 
     // makeSpark

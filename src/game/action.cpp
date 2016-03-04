@@ -453,7 +453,7 @@ static void alter_owner(
                 focus->set_owner(subject->owner, true);
             }
         } else {
-            focus->set_owner(Handle<Admiral>(alter.minimum), false);
+            focus->set_owner(alter.admiral, false);
         }
     }
 }

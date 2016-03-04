@@ -207,6 +207,11 @@ void read_from(ReadSource in, argumentType::AlterMaxVelocity& argument) {
     read(in, argument.amount);
 }
 
+void read_from(ReadSource in, argumentType::AlterOwner& argument) {
+    read(in, argument.relative);
+    argument.admiral = Handle<Admiral>(read<uint32_t>(in));
+}
+
 void read_from(ReadSource in, argumentType::AlterCash& argument) {
     read(in, argument.relative);
     read(in, argument.amount);
