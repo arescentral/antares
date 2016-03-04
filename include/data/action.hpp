@@ -187,15 +187,16 @@ union argumentType {
         Point at;
     } alterAbsoluteLocation;
 
-    // alterObject: change some attribute of an object
-    struct AlterObject {
-        uint8_t                 alterType;
-        uint8_t                 relative;
-        int32_t                 minimum;
-        int32_t                 range;
-    };
-    AlterObject alterHidden;
-    AlterObject alterConditionTrueYet;
+    struct AlterHidden {
+        int32_t first;
+        int32_t count_minus_1;
+    } alterHidden;
+
+    struct AlterConditionTrueYet {
+        bool true_yet;
+        int32_t first;
+        int32_t count_minus_1;
+    } alterConditionTrueYet;
 
     // makeSpark
     struct MakeSparks {
@@ -287,7 +288,6 @@ union argumentType {
 
 void read_from(sfz::ReadSource in, argumentType::CreateObject& argument);
 void read_from(sfz::ReadSource in, argumentType::PlaySound& argument);
-void read_from(sfz::ReadSource in, argumentType::AlterObject& argument);
 void read_from(sfz::ReadSource in, argumentType::AlterSimple& argument);
 void read_from(sfz::ReadSource in, argumentType::AlterWeapon& argument);
 void read_from(sfz::ReadSource in, argumentType::MakeSparks& argument);

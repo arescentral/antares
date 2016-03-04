@@ -168,10 +168,16 @@ void read_from(ReadSource in, argumentType::PlaySound& argument) {
     read(in, argument.idRange);
 }
 
-void read_from(ReadSource in, argumentType::AlterObject& argument) {
-    read(in, argument.relative);
-    read(in, argument.minimum);
-    read(in, argument.range);
+void read_from(ReadSource in, argumentType::AlterHidden& argument) {
+    in.shift(1);
+    read(in, argument.first);
+    read(in, argument.count_minus_1);
+}
+
+void read_from(ReadSource in, argumentType::AlterConditionTrueYet& argument) {
+    argument.true_yet = read<uint8_t>(in);
+    read(in, argument.first);
+    read(in, argument.count_minus_1);
 }
 
 void read_from(ReadSource in, argumentType::AlterSimple& argument) {

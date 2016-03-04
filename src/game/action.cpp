@@ -274,8 +274,9 @@ static void alter_hidden(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterHidden;
-    // Preserves old behavior; shouldn't really be adding one to alter.range.
-    for (auto i: range(alter.minimum, alter.minimum + alter.range + 1)) {
+    int32_t begin = alter.first;
+    int32_t end = begin + std::max(0, alter.count_minus_1) + 1;
+    for (auto i: range(begin, end)) {
         UnhideInitialObject(i);
     }
 }
@@ -462,12 +463,10 @@ static void alter_condition_true_yet(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterConditionTrueYet;
-    if (alter.range <= 0) {
-        g.level->condition(alter.minimum)->set_true_yet(alter.relative);
-    } else {
-        for (auto l: range(alter.minimum, alter.minimum + alter.range + 1)) {
-            g.level->condition(l)->set_true_yet(alter.relative);
-        }
+    int32_t begin = alter.first;
+    int32_t end = begin + std::max(0, alter.count_minus_1) + 1;
+    for (auto l: range(begin, end)) {
+        g.level->condition(l)->set_true_yet(alter.true_yet);
     }
 }
 
