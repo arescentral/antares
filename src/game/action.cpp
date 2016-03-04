@@ -308,11 +308,11 @@ static void alter(
             f = Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range));
             f2 = focus->baseType->mass;
             if (f2 == Fixed::zero()) {
-                focus->offlineTime = -1;
+                f = kFixedNone;
             } else {
-                focus->offlineTime = (f / f2).val();
+                f /= f2;
             }
-            focus->offlineTime = mFixedToLong(Fixed::from_val(focus->offlineTime));
+            focus->offlineTime = mFixedToLong(f);
             break;
 
         case kAlterVelocity:
