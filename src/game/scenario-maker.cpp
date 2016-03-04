@@ -198,16 +198,22 @@ void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors) {
     }
 }
 
-void GetInitialCoord(Scenario::InitialObject *initial, coordPointType *coord, int32_t rotation) {
+static coordPointType rotate_coords(int32_t h, int32_t v, int32_t rotation) {
     mAddAngle(rotation, 90);
     Fixed lcos, lsin;
     GetRotPoint(&lcos, &lsin, rotation);
-    coord->h = (kUniversalCenter
-                + (Fixed::from_val(initial->location.h) * -lcos).val()
-                - (Fixed::from_val(initial->location.v) * -lsin).val());
-    coord->v = (kUniversalCenter
-                + (Fixed::from_val(initial->location.h) * -lsin).val()
-                + (Fixed::from_val(initial->location.v) * -lcos).val());
+    coordPointType coord;
+    coord.h = (kUniversalCenter
+               + (Fixed::from_val(h) * -lcos).val()
+               - (Fixed::from_val(v) * -lsin).val());
+    coord.v = (kUniversalCenter
+               + (Fixed::from_val(h) * -lsin).val()
+               + (Fixed::from_val(v) * -lcos).val());
+    return coord;
+}
+
+void GetInitialCoord(Scenario::InitialObject *initial, coordPointType *coord, int32_t rotation) {
+    *coord = rotate_coords(initial->location.h, initial->location.v, rotation);
 }
 
 void set_initial_destination(const Scenario::InitialObject* initial, bool preserve) {
@@ -998,26 +1004,7 @@ const Scenario* GetScenarioPtrFromChapter(int32_t chapter) {
 }
 
 coordPointType Translate_Coord_To_Scenario_Rotation(int32_t h, int32_t v) {
-    Fixed lcos, lsin, lscrap;
-    int32_t angle = gScenarioRotation;
-    coordPointType coord;
-
-    mAddAngle(angle, 90);
-    GetRotPoint(&lcos, &lsin, angle);
-    lcos = -lcos;
-    lsin = -lsin;
-
-    lscrap = Fixed::from_val(h) * lcos;
-    lscrap -= Fixed::from_val(v) * lsin;
-    coord.h = kUniversalCenter;
-    coord.h += lscrap.val();
-
-    lscrap = Fixed::from_val(h) * lsin;
-    lscrap += Fixed::from_val(v) * lcos;
-    coord.v = kUniversalCenter;
-    coord.v += lscrap.val();
-
-    return coord;
+    return rotate_coords(h, v, gScenarioRotation);
 }
 
 }  // namespace antares

@@ -965,7 +965,7 @@ static void correct_physical_space(Handle<SpaceObject> a, Handle<SpaceObject> b)
     const int32_t av = b->location.v - a->location.v;
 
     const Fixed totalMass = a->baseType->mass + b->baseType->mass;
-    int16_t angle = ratio_to_angle(Fixed::from_val(ah), Fixed::from_val(av));
+    int16_t angle = ratio_to_angle(ah, av);
     adjust_velocity(a, angle, totalMass, force);
     mAddAngle(angle, 180);
     adjust_velocity(b, angle, totalMass, force);
