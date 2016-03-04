@@ -28,10 +28,6 @@ using sfz::read;
 
 namespace antares {
 
-uint16_t Action::verb_group() const {
-    return _verb & 0xff00;
-}
-
 uint16_t Action::whole_verb() const {
     return _verb;
 }

@@ -244,7 +244,6 @@ void read_from(sfz::ReadSource in, argumentType::AssumeInitial& argument);
 struct Action {
     static Action* get(int number);
 
-    uint16_t                    verb_group() const;
     uint16_t                    whole_verb() const;
 
     uint16_t                     _verb;

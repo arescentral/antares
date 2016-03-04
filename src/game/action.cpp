@@ -143,7 +143,7 @@ static void create_object(
             product->attributes &= ~kStaticDestination;
             if (product->owner.get()) {
                 if (action->reflexive) {
-                    if (action->verb_group() != kCreateObjectSetDest) {
+                    if (action->whole_verb() != kCreateObjectSetDest) {
                         SetObjectDestination(product, focus);
                     } else if (focus->destObject.get()) {
                         SetObjectDestination(product, focus->destObject);
@@ -702,7 +702,7 @@ static void execute_actions(
         covered_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
-        if (action->verb_group() == kNoAction) {
+        if (action->whole_verb() == kNoAction) {
             break;
         }
         auto subject = original_subject;
@@ -741,14 +741,13 @@ static void execute_actions(
             continue;
         }
 
-        switch (action->verb_group()) {
+        switch (action->whole_verb()) {
             case kCreateObject:
             case kCreateObjectSetDest:  create_object(action, focus, subject, offset); break;
             case kPlaySound:            play_sound(action, focus); break;
             case kMakeSparks:           make_sparks(action, focus); break;
             case kDie:                  die(action, focus, subject); break;
             case kNilTarget:            nil_target(action, focus); break;
-            case kAlter:                alter(action, focus, subject, object); break;
             case kLandAt:               land_at(action, focus, subject); break;
             case kEnterWarp:            enter_warp(action, focus, subject); break;
             case kChangeScore:          change_score(action, focus); break;
@@ -764,9 +763,38 @@ static void execute_actions(
             case kSetZoom:              set_zoom(action, focus); break;
             case kComputerSelect:       computer_select(action, focus); break;
             case kAssumeInitialObject:  assume_initial_object(action, focus); break;
+
+            case kAlterDamage:
+            case kAlterVelocity:
+            case kAlterThrust:
+            case kAlterMaxThrust:
+            case kAlterMaxVelocity:
+            case kAlterMaxTurnRate:
+            case kAlterLocation:
+            case kAlterScale:
+            case kAlterWeapon1:
+            case kAlterWeapon2:
+            case kAlterSpecial:
+            case kAlterEnergy:
+            case kAlterOwner:
+            case kAlterHidden:
+            case kAlterCloak:
+            case kAlterOffline:
+            case kAlterSpin:
+            case kAlterBaseType:
+            case kAlterConditionTrueYet:
+            case kAlterOccupation:
+            case kAlterAbsoluteCash:
+            case kAlterAge:
+            case kAlterAttributes:
+            case kAlterLevelKeyTag:
+            case kAlterOrderKeyTag:
+            case kAlterEngageKeyTag:
+            case kAlterAbsoluteLocation:
+                                        alter(action, focus, subject, object); break;
         }
 
-        switch (action->verb_group()) {
+        switch (action->whole_verb()) {
             case kChangeScore:
             case kDisplayMessage:
                 checkConditions = true;

@@ -160,7 +160,7 @@ void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors) {
     if (!action.get()) {
         return;
     }
-    switch (action->verb_group()) {
+    switch (action->whole_verb()) {
         case kCreateObject:
         case kCreateObjectSetDest:
             AddBaseObjectMedia(action->argument.createObject.whichBaseType, color, all_colors);
@@ -175,24 +175,20 @@ void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors) {
             }
             break;
 
-        case kAlter:
-            switch(action->whole_verb()) {
-                case kAlterBaseType:
-                    AddBaseObjectMedia(
-                            Handle<BaseObject>(action->argument.alterObject.minimum),
-                            color, all_colors);
-                    break;
+        case kAlterBaseType:
+            AddBaseObjectMedia(
+                    Handle<BaseObject>(action->argument.alterObject.minimum),
+                    color, all_colors);
+            break;
 
-                case kAlterOwner:
-                    for (auto baseObject: BaseObject::all()) {
-                        if (action_filter_applies_to(*action, baseObject)) {
-                            baseObject->internalFlags |= all_colors;
-                        }
-                        if (baseObject->internalFlags & kAnyColorLoadedFlag) {
-                            AddBaseObjectMedia(baseObject, color, all_colors);
-                        }
-                    }
-                    break;
+        case kAlterOwner:
+            for (auto baseObject: BaseObject::all()) {
+                if (action_filter_applies_to(*action, baseObject)) {
+                    baseObject->internalFlags |= all_colors;
+                }
+                if (baseObject->internalFlags & kAnyColorLoadedFlag) {
+                    AddBaseObjectMedia(baseObject, color, all_colors);
+                }
             }
             break;
     }
