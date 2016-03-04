@@ -754,14 +754,14 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
 
     object->remoteFoeStrength = object->remoteFriendStrength = object->escortStrength =
         object->localFoeStrength = object->localFriendStrength = Fixed::zero();
-    object->bestConsideredTargetValue = object->currentTargetValue = Fixed::from_val(0xffffffff);
+    object->bestConsideredTargetValue = object->currentTargetValue = kFixedNone;
     object->bestConsideredTargetNumber = SpaceObject::none();
 
     for (auto fixObject: SpaceObject::all()) {
         if ((fixObject->destObject == object)
                 && (fixObject->active != kObjectAvailable)
                 && (fixObject->attributes & kCanThink)) {
-            fixObject->currentTargetValue = Fixed::from_val(0xffffffff);
+            fixObject->currentTargetValue = kFixedNone;
             if (fixObject->owner != owner) {
                 object->remoteFoeStrength += fixObject->baseType->offenseValue;
             } else {

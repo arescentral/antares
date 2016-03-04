@@ -226,7 +226,7 @@ void RecalcAllAdmiralBuildData() {
         for (int j = 0; j < kMaxNumAdmiralCanBuild; j++) {
             a->canBuildType()[j].baseNum = -1;
             a->canBuildType()[j].base = BaseObject::none();
-            a->canBuildType()[j].chanceRange = Fixed::from_val(-1);
+            a->canBuildType()[j].chanceRange = kFixedNone;
         }
         a->totalBuildChance() = Fixed::zero();
         a->hopeToBuild() = -1;
@@ -711,7 +711,7 @@ void Admiral::think() {
                     _thisFreeEscortStrength += anObject->baseType->offenseValue;
                 }
 
-                anObject->bestConsideredTargetValue = Fixed::from_val(0xffffffff);
+                anObject->bestConsideredTargetValue = kFixedNone;
                 // start back with 1st ship
                 _destinationObject = g.root;
                 destObject = g.root;
@@ -981,7 +981,7 @@ void Admiral::think() {
                         k++;
                         // choose something to build
                         thisValue = g.random.next(_totalBuildChance);
-                        friendValue = Fixed::from_val(0xffffffff); // equals the highest qualifying object
+                        friendValue = kFixedNone; // equals the highest qualifying object
                         for (int j = 0; j < kMaxNumAdmiralCanBuild; ++j) {
                             if ((_canBuildType[j].chanceRange <= thisValue)
                                     && (_canBuildType[j].chanceRange > friendValue)) {

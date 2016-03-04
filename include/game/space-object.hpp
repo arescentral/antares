@@ -106,8 +106,8 @@ class SpaceObject {
     Fixed                   remoteFriendStrength = Fixed::zero();
     Fixed                   remoteFoeStrength = Fixed::zero();
 
-    Fixed                   bestConsideredTargetValue = Fixed::from_val(0xffffffff);
-    Fixed                   currentTargetValue = Fixed::from_val(0xffffffff);
+    Fixed                   bestConsideredTargetValue = kFixedNone;
+    Fixed                   currentTargetValue = kFixedNone;
     Handle<SpaceObject>     bestConsideredTargetNumber;
 
     ticks                   timeFromOrigin = ticks(0);     // time it's been since we left

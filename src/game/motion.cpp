@@ -906,7 +906,7 @@ void CollideSpaceObjects() {
 static void adjust_velocity(Handle<SpaceObject> o, int16_t angle, Fixed totalMass, Fixed force) {
     Fixed tfix = (o->baseType->mass * force);
     if (totalMass == Fixed::zero()) {
-        tfix = Fixed::from_val(-1);
+        tfix = kFixedNone;
     } else {
         tfix /= totalMass;
     }

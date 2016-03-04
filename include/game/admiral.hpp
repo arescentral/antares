@@ -87,7 +87,7 @@ struct Destination {
 struct admiralBuildType {
     Handle<BaseObject>  base;
     int32_t             baseNum = -1;
-    Fixed               chanceRange = Fixed::from_val(-1);
+    Fixed               chanceRange = kFixedNone;
 };
 
 class Admiral {

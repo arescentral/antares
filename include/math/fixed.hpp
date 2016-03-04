@@ -74,6 +74,8 @@ inline Fixed operator-(Fixed x) { return Fixed::from_val(-x.val()); }
 
 inline void read_from(sfz::ReadSource in, Fixed& f) { f = Fixed::from_val(sfz::read<int32_t>(in)); }
 
+static const Fixed kFixedNone = Fixed::from_val(-1);
+
 //
 //  MAX VALUE FOR SMALLFIXEDTYPE:
 //

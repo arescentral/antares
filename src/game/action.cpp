@@ -296,7 +296,7 @@ static void alter(
                 }
                 f2 = focus->baseType->mass;
                 if (f2 == Fixed::zero()) {
-                    f = Fixed::from_val(-1);
+                    f = kFixedNone;
                 } else {
                     f /= f2;
                 }
