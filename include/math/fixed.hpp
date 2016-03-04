@@ -56,10 +56,14 @@ inline Fixed operator/(int32_t x, Fixed y) { return Fixed::from_val(x / y.val())
 inline Fixed operator<<(Fixed x, int n) { return Fixed::from_val(x.val() << n); }
 inline Fixed operator>>(Fixed x, int n) { return Fixed::from_val(x.val() >> n); }
 
+// the max safe # we can do is 181 for signed multiply if we don't know other value
+// if -1 <= other value <= 1 then we can do 32767
+inline Fixed operator*(Fixed x, Fixed y) { return (x * y.val()) >> 8; }
 inline Fixed operator/(Fixed x, Fixed y) { return (x << 8) / y.val(); }
 
 inline Fixed& operator+=(Fixed& x, Fixed y) { return x = x + y; }
 inline Fixed& operator-=(Fixed& x, Fixed y) { return x = x - y; }
+inline Fixed& operator*=(Fixed& x, Fixed y) { return x = x * y; }
 inline Fixed& operator*=(Fixed& x, int32_t y) { return x = x * y; }
 inline Fixed& operator/=(Fixed& x, Fixed y) { return x = x / y; }
 inline Fixed& operator/=(Fixed& x, int32_t y) { return x = x / y; }
@@ -101,12 +105,6 @@ inline float mFixedToFloat(Fixed m_f)   { return floorf(m_f.val() * 1e3 / 256.0)
 inline int32_t mFixedToLong(Fixed m_f)  { return evil_fixed_to_long(m_f); }
 
 void print_to(sfz::PrintTarget out, const Fixed& fixed);
-
-// the max safe # we can do is 181 for signed multiply if we don't know other value
-// if -1 <= other value <= 1 then we can do 32767
-inline Fixed mMultiplyFixed(Fixed m_f1, Fixed m_f2) {
-    return (m_f1 * m_f2.val()) >> 8;
-}
 
 struct fixedPointType {
     Fixed               h;

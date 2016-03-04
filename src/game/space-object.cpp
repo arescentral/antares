@@ -341,8 +341,8 @@ SpaceObject::SpaceObject(
         f += randomSeed.next(baseType->initialVelocityRange);
     }
     GetRotPoint(&velocity.h, &velocity.v, direction);
-    velocity.h = mMultiplyFixed(velocity.h, f);
-    velocity.v = mMultiplyFixed(velocity.v, f);
+    velocity.h = (velocity.h * f);
+    velocity.v = (velocity.v * f);
 
     if (relative_velocity) {
         velocity.h += relative_velocity->h;

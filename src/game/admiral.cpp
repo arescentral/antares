@@ -698,8 +698,7 @@ void Admiral::think() {
                             thisValue = anObject->randomSeed.next(
                                     Fixed::from_float(0.5))
                                 - Fixed::from_float(0.25);
-                            thisValue = mMultiplyFixed(
-                                    thisValue, anObject->currentTargetValue);
+                            thisValue = (thisValue * anObject->currentTargetValue);
                             anObject->currentTargetValue += thisValue;
                             SetObjectDestination(anObject, SpaceObject::none());
                         }
@@ -1071,7 +1070,7 @@ void StopBuilding(Handle<Destination> destObject) {
 }
 
 void Admiral::pay(Fixed howMuch) {
-    pay_absolute(mMultiplyFixed(howMuch, _earning_power));
+    pay_absolute(howMuch * _earning_power);
 }
 
 void Admiral::pay_absolute(Fixed howMuch) {

@@ -546,8 +546,8 @@ static void update_triangle(SiteData& site, int32_t direction, int32_t distance,
     GetRotPoint(&fa, &fb, direction);
 
     fc = Fixed::from_long(-distance);
-    fa = mMultiplyFixed(fc, fa);
-    fb = mMultiplyFixed(fc, fb);
+    fa = (fc * fa);
+    fb = (fc * fb);
 
     Point a(mFixedToLong(fa), mFixedToLong(fb));
     a.offset(g.ship->sprite->where.h, g.ship->sprite->where.v);
@@ -557,8 +557,8 @@ static void update_triangle(SiteData& site, int32_t direction, int32_t distance,
     mAddAngle(count, 30);
     GetRotPoint(&fa, &fb, count);
     fc = Fixed::from_long(size);
-    fa = mMultiplyFixed(fc, fa);
-    fb = mMultiplyFixed(fc, fb);
+    fa = (fc * fa);
+    fb = (fc * fb);
 
     Point b(a.h + mFixedToLong(fa), a.v + mFixedToLong(fb));
     site.b = b;
@@ -567,8 +567,8 @@ static void update_triangle(SiteData& site, int32_t direction, int32_t distance,
     mAddAngle(count, -30);
     GetRotPoint(&fa, &fb, count);
     fc = Fixed::from_long(size);
-    fa = mMultiplyFixed(fc, fa);
-    fb = mMultiplyFixed(fc, fb);
+    fa = (fc * fa);
+    fb = (fc * fb);
 
     Point c(a.h + mFixedToLong(fa), a.v + mFixedToLong(fb));
     site.c = c;

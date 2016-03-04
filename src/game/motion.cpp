@@ -182,14 +182,14 @@ static void move(Handle<SpaceObject> o) {
 
             // multiply by max velocity
             if (o->presenceState == kWarpingPresence) {
-                fa = mMultiplyFixed(fa, Fixed::from_val(o->presence.warping));
-                fb = mMultiplyFixed(fb, Fixed::from_val(o->presence.warping));
+                fa = (fa * Fixed::from_val(o->presence.warping));
+                fb = (fb * Fixed::from_val(o->presence.warping));
             } else if (o->presenceState == kWarpOutPresence) {
-                fa = mMultiplyFixed(fa, Fixed::from_val(o->presence.warp_out));
-                fb = mMultiplyFixed(fb, Fixed::from_val(o->presence.warp_out));
+                fa = (fa * Fixed::from_val(o->presence.warp_out));
+                fb = (fb * Fixed::from_val(o->presence.warp_out));
             } else {
-                fa = mMultiplyFixed(o->maxVelocity, fa);
-                fb = mMultiplyFixed(o->maxVelocity, fb);
+                fa = (o->maxVelocity * fa);
+                fb = (o->maxVelocity * fb);
             }
 
             // the difference between our actual vector and our goal vector is our new vector
@@ -209,8 +209,8 @@ static void move(Handle<SpaceObject> o) {
         Fixed fh, fv;
         GetRotPoint(&fh, &fv, angle);
 
-        fh = mMultiplyFixed(useThrust, fh);
-        fv = mMultiplyFixed(useThrust, fv);
+        fh = (useThrust * fh);
+        fv = (useThrust * fv);
 
         // if our new vector excedes our max thrust, it must be limited
         if (fh < Fixed::zero()) {
@@ -904,7 +904,7 @@ void CollideSpaceObjects() {
 }
 
 static void adjust_velocity(Handle<SpaceObject> o, int16_t angle, Fixed totalMass, Fixed force) {
-    Fixed tfix = mMultiplyFixed(o->baseType->mass, force);
+    Fixed tfix = (o->baseType->mass * force);
     if (totalMass == Fixed::zero()) {
         tfix = Fixed::from_val(-1);
     } else {
@@ -913,8 +913,8 @@ static void adjust_velocity(Handle<SpaceObject> o, int16_t angle, Fixed totalMas
     tfix += o->maxVelocity >> 1;
     fixedPointType tvel;
     GetRotPoint(&tvel.h, &tvel.v, angle);
-    tvel.h = mMultiplyFixed(tfix, tvel.h);
-    tvel.v = mMultiplyFixed(tfix, tvel.v);
+    tvel.h = (tfix * tvel.h);
+    tvel.v = (tfix * tvel.v);
     o->velocity.v = tvel.v;
     o->velocity.h = tvel.h;
 }
@@ -959,7 +959,7 @@ static void correct_physical_space(Handle<SpaceObject> a, Handle<SpaceObject> b)
     // calculate the new velocities
     const Fixed dvx = b->velocity.h - a->velocity.h;
     const Fixed dvy = b->velocity.v - a->velocity.v;
-    const Fixed force = Fixed::from_val(lsqrt((mMultiplyFixed(dvx, dvx) + mMultiplyFixed(dvy, dvy)).val()));
+    const Fixed force = Fixed::from_val(lsqrt(((dvx * dvx) + (dvy * dvy)).val()));
     const int32_t ah = b->location.h - a->location.h;
     const int32_t av = b->location.v - a->location.v;
 

@@ -47,9 +47,10 @@ void DetermineBeamRelativeCoordFromAngle(Handle<SpaceObject> beamObject, int16_t
     Fixed fcos, fsin;
     GetRotPoint(&fcos, &fsin, angle);
 
+    // TODO(sfiera): archaeology. Did we always multiply by zero?
     beamObject->frame.beam->toRelativeCoord = Point(
-            mFixedToLong(mMultiplyFixed(Fixed::zero(), -fcos) - mMultiplyFixed(range, -fsin)),
-            mFixedToLong(mMultiplyFixed(Fixed::zero(), -fsin) + mMultiplyFixed(range, -fcos)));
+            mFixedToLong((Fixed::zero() * -fcos) - (range * -fsin)),
+            mFixedToLong((Fixed::zero() * -fsin) + (range * -fcos)));
 }
 
 template <typename T>

@@ -288,13 +288,11 @@ static void alter(
         case kAlterSpin:
             if (focus->attributes & kCanTurn) {
                 if (focus->attributes & kShapeFromDirection) {
-                    f = mMultiplyFixed(
-                            focus->baseType->frame.rotation.maxTurnRate,
-                            Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range)));
+                    f = (focus->baseType->frame.rotation.maxTurnRate *
+                         Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range)));
                 } else {
-                    f = mMultiplyFixed(
-                            Fixed::from_val(2) /*kDefaultTurnRate*/,
-                            Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range)));
+                    f = (Fixed::from_val(2) /*kDefaultTurnRate*/ *
+                         Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range)));
                 }
                 f2 = focus->baseType->mass;
                 if (f2 == Fixed::zero()) {
@@ -341,10 +339,10 @@ static void alter(
                             } else {
                                 // if the minumum < 0, then STOP the object like applying breaks
                                 f = object->velocity.h;
-                                f = mMultiplyFixed(f, Fixed::from_val(alter.minimum));
+                                f = (f * Fixed::from_val(alter.minimum));
                                 object->velocity.h += f;
                                 f = object->velocity.v;
-                                f = mMultiplyFixed(f, Fixed::from_val(alter.minimum));
+                                f = (f * Fixed::from_val(alter.minimum));
                                 object->velocity.v += f;
 
                                 // make sure we're not going faster than our top speed
@@ -353,8 +351,8 @@ static void alter(
 
                             // get the maxthrust of new vector
                             GetRotPoint(&f, &f2, angle);
-                            f = mMultiplyFixed(object->maxVelocity, f);
-                            f2 = mMultiplyFixed(object->maxVelocity, f2);
+                            f = (object->maxVelocity * f);
+                            f2 = (object->maxVelocity * f2);
 
                             if (f < Fixed::zero()) {
                                 if (object->velocity.h < f) {
@@ -378,8 +376,8 @@ static void alter(
                         }
                     } else {
                         GetRotPoint(&f, &f2, subject->direction);
-                        f = mMultiplyFixed(Fixed::from_val(alter.minimum), f);
-                        f2 = mMultiplyFixed(Fixed::from_val(alter.minimum), f2);
+                        f = (Fixed::from_val(alter.minimum) * f);
+                        f2 = (Fixed::from_val(alter.minimum) * f2);
                         focus->velocity.h = f;
                         focus->velocity.v = f2;
                     }
@@ -389,8 +387,8 @@ static void alter(
                     // excede its max velocity.
                     // Minimum value is absolute speed in direction.
                     GetRotPoint(&f, &f2, focus->direction);
-                    f = mMultiplyFixed(Fixed::from_val(alter.minimum), f);
-                    f2 = mMultiplyFixed(Fixed::from_val(alter.minimum), f2);
+                    f = (Fixed::from_val(alter.minimum) * f);
+                    f2 = (Fixed::from_val(alter.minimum) * f2);
                     if (alter.relative) {
                         focus->velocity.h += f;
                         focus->velocity.v += f2;
