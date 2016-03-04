@@ -289,15 +289,11 @@ static const char fractions[][5] = {
     ".999",
 };
 
-PrintableFixed fixed(Fixed value) {
-    return PrintableFixed(value);
-}
-
-void print_to(PrintTarget out, const PrintableFixed& fixed) {
-    if (fixed.value < 0) {
+void print_to(PrintTarget out, const Fixed& fixed) {
+    if (fixed < Fixed::zero()) {
         out.push(1, '-');
     }
-    int64_t value = llabs(fixed.value);
+    int64_t value = llabs(fixed.val());
     const int32_t integral = (value & 0xffffff00) >> 8;
     print(out, integral);
     value &= 0xff;

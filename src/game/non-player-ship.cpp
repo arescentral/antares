@@ -156,12 +156,10 @@ void fire_weapon(
     Point offset;
     Point* at = nullptr;
     if (&weapon != &subject->special) {
-        offset.h = mMultiplyFixed(base_weapon.position[weapon.position].h, fcos);
-        offset.h -= mMultiplyFixed(base_weapon.position[weapon.position].v, fsin);
-        offset.v = mMultiplyFixed(base_weapon.position[weapon.position].h, fsin);
-        offset.v += mMultiplyFixed(base_weapon.position[weapon.position].v, fcos);
-        offset.h = mFixedToLong(offset.h);
-        offset.v = mFixedToLong(offset.v);
+        offset.h = mFixedToLong((base_weapon.position[weapon.position].h * fcos) +
+                                (base_weapon.position[weapon.position].v * -fsin));
+        offset.v = mFixedToLong((base_weapon.position[weapon.position].h * fsin) +
+                                (base_weapon.position[weapon.position].v * fcos));
         at = &offset;
     }
 
@@ -361,7 +359,7 @@ void NonplayerShipThink() {
             } else if (anObject->keysDown & kRightKey) {
                 anObject->turnVelocity = anObject->turn_rate();
             } else {
-                anObject->turnVelocity = 0;
+                anObject->turnVelocity = Fixed::zero();
             }
         }
 
@@ -374,7 +372,7 @@ void NonplayerShipThink() {
         } else if (anObject->keysDown & kDownKey) {
             anObject->thrust = -baseObject->maxThrust;
         } else {
-            anObject->thrust = 0;
+            anObject->thrust = Fixed::zero();
         }
 
         if (anObject->rechargeTime < kRechargeSpeed) {
@@ -400,14 +398,12 @@ void NonplayerShipThink() {
         tick_special(anObject, targetObject);
 
         if ((anObject->keysDown & kWarpKey)
-                && (baseObject->warpSpeed > 0)
+                && (baseObject->warpSpeed > Fixed::zero())
                 && (anObject->energy() > 0)) {
             if (anObject->presenceState == kWarpingPresence) {
-                anObject->thrust = mMultiplyFixed(
-                        baseObject->maxThrust, anObject->presence.warping);
+                anObject->thrust = baseObject->maxThrust * anObject->presence.warping;
             } else if (anObject->presenceState == kWarpOutPresence) {
-                anObject->thrust = mMultiplyFixed(
-                        baseObject->maxThrust, anObject->presence.warp_out);
+                anObject->thrust = baseObject->maxThrust * anObject->presence.warp_out;
             } else if ((anObject->presenceState == kNormalPresence)
                     && (anObject->energy() > (anObject->max_energy() >> kWarpInEnergyFactor))) {
                 anObject->presenceState = kWarpInPresence;
@@ -420,8 +416,7 @@ void NonplayerShipThink() {
             } else if (anObject->presenceState == kWarpingPresence) {
                 anObject->presenceState = kWarpOutPresence;
             } else if (anObject->presenceState == kWarpOutPresence) {
-                anObject->thrust = mMultiplyFixed(
-                        baseObject->maxThrust, anObject->presence.warp_out);
+                anObject->thrust = baseObject->maxThrust * anObject->presence.warp_out;
             }
         }
 
@@ -745,7 +740,7 @@ uint32_t ThinkObjectNormalPresence(
                             keysDown |= kEnterKey;
                         }
                     }
-                    if ((baseObject->warpSpeed > 0)
+                    if ((baseObject->warpSpeed > Fixed::zero())
                             && (anObject->energy() > (anObject->max_energy() >> kWarpInEnergyFactor))
                             && (distance > kWarpInDistance)
                             && (theta <= kDirectionError)) {
@@ -757,7 +752,7 @@ uint32_t ThinkObjectNormalPresence(
                             && (targetObject->attributes & anObject->attributes & kHasDirectionGoal)) {
                         anObject->directionGoal = targetObject->direction;
                         if ((targetObject->keysDown & kWarpKey)
-                                && (baseObject->warpSpeed > 0)) {
+                                && (baseObject->warpSpeed > Fixed::zero())) {
                             theta = mAngleDifference(anObject->direction, targetObject->direction);
                             if (ABS(theta) < kDirectionError) {
                                 keysDown |= kWarpKey;
@@ -844,14 +839,14 @@ uint32_t ThinkObjectNormalPresence(
                     dcalc = lsqrt(distance);
 
                     calcv = targetObject->velocity.h - anObject->velocity.h;
-                    fdist = mLongToFixed(dcalc);
-                    fdist = mMultiplyFixed(bestWeapon->frame.weapon.inverseSpeed, fdist);
-                    calcv = mMultiplyFixed(calcv, fdist);
+                    fdist = Fixed::from_long(dcalc);
+                    fdist *= bestWeapon->frame.weapon.inverseSpeed;
+                    calcv = (calcv * fdist);
                     difference = mFixedToLong(calcv);
                     dest.h -= difference;
 
                     calcv = targetObject->velocity.v - anObject->velocity.v;
-                    calcv = mMultiplyFixed(calcv, fdist);
+                    calcv = (calcv * fdist);
                     difference = mFixedToLong(calcv);
                     dest.v -= difference;
                 }
@@ -907,7 +902,7 @@ uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
             anObject->presenceState = kWarpingPresence;
             anObject->presence.warping = anObject->baseType->warpSpeed;
             anObject->attributes &= ~kOccupiesSpace;
-            newVel.h = newVel.v = 0;
+            newVel.h = newVel.v = Fixed::zero();
             CreateAnySpaceObject(
                     plug.meta.warpInFlareID, &newVel, &anObject->location,
                     anObject->direction, Admiral::none(), 0, -1);
@@ -970,9 +965,8 @@ uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, Handle<BaseObj
     Fixed           calcv, fdist;
     fixedPointType  newVel;
 
-    anObject->presence.warp_out -= mLongToFixed(kWarpAcceleration);
-    if ( anObject->presence.warp_out < anObject->maxVelocity)
-    {
+    anObject->presence.warp_out -= Fixed::from_long(kWarpAcceleration);
+    if (anObject->presence.warp_out < anObject->maxVelocity) {
         anObject->refund_warp_energy();
 
         anObject->presenceState = kNormalPresence;
@@ -985,11 +979,11 @@ uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, Handle<BaseObj
 
         // multiply by max velocity
 
-        fdist = mMultiplyFixed( anObject->maxVelocity, fdist);
-        calcv = mMultiplyFixed( anObject->maxVelocity, calcv);
+        fdist = (anObject->maxVelocity * fdist);
+        calcv = (anObject->maxVelocity * calcv);
         anObject->velocity.h = fdist;
         anObject->velocity.v = calcv;
-        newVel.h = newVel.v = 0;
+        newVel.h = newVel.v = Fixed::zero();
 
 
         CreateAnySpaceObject(plug.meta.warpOutFlareID, &(newVel),

@@ -79,8 +79,8 @@ class SpaceObject {
 
     int32_t                 direction = 0;
     int32_t                 directionGoal = 0;
-    Fixed                   turnVelocity = 0;
-    Fixed                   turnFraction = 0;
+    Fixed                   turnVelocity = Fixed::zero();
+    Fixed                   turnFraction = Fixed::zero();
 
     int32_t                 offlineTime = 0;
 
@@ -100,30 +100,30 @@ class SpaceObject {
     int32_t                 destObjectID = kNoShip;         // ID of our dest object
     int32_t                 destObjectDestID = kNoShip;     // id of our dest's destination
 
-    Fixed                   localFriendStrength = 0;
-    Fixed                   localFoeStrength = 0;
-    Fixed                   escortStrength = 0;
-    Fixed                   remoteFriendStrength = 0;
-    Fixed                   remoteFoeStrength = 0;
+    Fixed                   localFriendStrength = Fixed::zero();
+    Fixed                   localFoeStrength = Fixed::zero();
+    Fixed                   escortStrength = Fixed::zero();
+    Fixed                   remoteFriendStrength = Fixed::zero();
+    Fixed                   remoteFoeStrength = Fixed::zero();
 
-    Fixed                   bestConsideredTargetValue = 0xffffffff;
-    Fixed                   currentTargetValue = 0xffffffff;
+    Fixed                   bestConsideredTargetValue = kFixedNone;
+    Fixed                   currentTargetValue = kFixedNone;
     Handle<SpaceObject>     bestConsideredTargetNumber;
 
     ticks                   timeFromOrigin = ticks(0);     // time it's been since we left
-    fixedPointType          idealLocationCalc = {0, 0};  // calced when we got origin
+    fixedPointType          idealLocationCalc = {Fixed::zero(), Fixed::zero()};  // calced when we got origin
     coordPointType          originLocation = {0, 0};     // coords of our origin
 
-    fixedPointType          motionFraction = {0, 0};
-    fixedPointType          velocity = {0, 0};
-    Fixed                   thrust = 0;
-    Fixed                   maxVelocity = 0;
+    fixedPointType          motionFraction = {Fixed::zero(), Fixed::zero()};
+    fixedPointType          velocity = {Fixed::zero(), Fixed::zero()};
+    Fixed                   thrust = Fixed::zero();
+    Fixed                   maxVelocity = Fixed::zero();
     Rect                absoluteBounds;
     Random                  randomSeed;
 
     struct {
         struct {
-            int32_t             thisShape;
+            Fixed               thisShape;
             Fixed               frameFraction;
             int32_t             frameDirection;
             Fixed               frameSpeed;
@@ -185,8 +185,8 @@ class SpaceObject {
             uint8_t step;
             ticks progress;
         } warp_in;
-        int32_t warping;
-        int32_t warp_out;
+        Fixed warping;
+        Fixed warp_out;
     } presence;
 
     int32_t                 hitState = 0;

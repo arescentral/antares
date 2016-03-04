@@ -220,17 +220,17 @@ union objectFrameType {
 
     // animation: objects whose appearence does not depend on direction
     struct Animation {
-        int32_t                 firstShape;         // first shape in range
-        int32_t                 lastShape;          // last shape (inclusive)
+        Fixed                   firstShape;         // first shape in range
+        Fixed                   lastShape;          // last shape (inclusive)
 
         int32_t                 frameDirection;     // direction (either -1, 0, or 1)
         int32_t                 frameDirectionRange;    // either 0, 1, or 2
 
-        int32_t                 frameSpeed;         // speed at which object animates
-        int32_t                 frameSpeedRange;    // random addition to speed
+        Fixed                   frameSpeed;         // speed at which object animates
+        Fixed                   frameSpeedRange;    // random addition to speed
 
-        int32_t                 frameShape;         // starting shape #
-        int32_t                 frameShapeRange;    // random addition to starting shape #
+        Fixed                   frameShape;         // starting shape #
+        Fixed                   frameShapeRange;    // random addition to starting shape #
     };
     Animation animation;
 
@@ -250,7 +250,7 @@ union objectFrameType {
         ticks                   fireTime;           // time between shots
         int32_t                 ammo;               // initial ammo
         int32_t                 range;              // range (= age * max velocity)
-        int32_t                 inverseSpeed;       // for AI = 1/max velocity
+        Fixed                   inverseSpeed;       // for AI = 1/max velocity
         int32_t                 restockCost;        // energy to make new ammo
     };
     Weapon weapon;

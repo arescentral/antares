@@ -24,7 +24,58 @@
 
 namespace antares {
 
-typedef int32_t Fixed;
+class Fixed {
+    public:
+        Fixed() = default;
+
+        static constexpr Fixed from_long(int32_t x) { return Fixed(x << 8); }
+        static constexpr Fixed from_float(float x) { return Fixed(roundf(x * 256.0)); }
+        static constexpr Fixed from_val(int32_t value) { return Fixed(value); }
+        static constexpr Fixed zero() { return Fixed(0); }
+
+        int32_t val() const { return _value; }
+
+    private:
+        explicit constexpr Fixed(int32_t value): _value(value) { }
+        int32_t _value;
+};
+
+inline bool operator==(Fixed x, Fixed y) { return x.val() == y.val(); }
+inline bool operator!=(Fixed x, Fixed y) { return x.val() != y.val(); }
+inline bool operator< (Fixed x, Fixed y) { return x.val() <  y.val(); }
+inline bool operator<=(Fixed x, Fixed y) { return x.val() <= y.val(); }
+inline bool operator> (Fixed x, Fixed y) { return x.val() >  y.val(); }
+inline bool operator>=(Fixed x, Fixed y) { return x.val() >= y.val(); }
+
+inline Fixed operator+(Fixed x, Fixed y) { return Fixed::from_val(x.val() + y.val()); }
+inline Fixed operator-(Fixed x, Fixed y) { return Fixed::from_val(x.val() - y.val()); }
+inline Fixed operator%(Fixed x, Fixed y) { return Fixed::from_val(x.val() % y.val()); }
+inline Fixed operator*(Fixed x, int32_t y) { return Fixed::from_val(x.val() * y); }
+inline Fixed operator*(int32_t x, Fixed y) { return Fixed::from_val(x * y.val()); }
+inline Fixed operator/(Fixed x, int32_t y) { return Fixed::from_val(x.val() / y); }
+inline Fixed operator<<(Fixed x, int n) { return Fixed::from_val(x.val() << n); }
+inline Fixed operator>>(Fixed x, int n) { return Fixed::from_val(x.val() >> n); }
+
+// the max safe # we can do is 181 for signed multiply if we don't know other value
+// if -1 <= other value <= 1 then we can do 32767
+inline Fixed operator*(Fixed x, Fixed y) { return (x * y.val()) >> 8; }
+inline Fixed operator/(Fixed x, Fixed y) { return (x << 8) / y.val(); }
+inline Fixed operator%(Fixed x, int32_t y) { return x % Fixed::from_long(y); }
+
+inline Fixed& operator+=(Fixed& x, Fixed y) { return x = x + y; }
+inline Fixed& operator-=(Fixed& x, Fixed y) { return x = x - y; }
+inline Fixed& operator*=(Fixed& x, Fixed y) { return x = x * y; }
+inline Fixed& operator*=(Fixed& x, int32_t y) { return x = x * y; }
+inline Fixed& operator/=(Fixed& x, Fixed y) { return x = x / y; }
+inline Fixed& operator/=(Fixed& x, int32_t y) { return x = x / y; }
+inline Fixed& operator<<=(Fixed& x, int n) { return x = x << n; }
+inline Fixed& operator>>=(Fixed& x, int n) { return x = x >> n; }
+
+inline Fixed operator-(Fixed x) { return Fixed::from_val(-x.val()); }
+
+inline void read_from(sfz::ReadSource in, Fixed& f) { f = Fixed::from_val(sfz::read<int32_t>(in)); }
+
+static const Fixed kFixedNone = Fixed::from_val(-1);
 
 //
 //  MAX VALUE FOR SMALLFIXEDTYPE:
@@ -43,36 +94,20 @@ typedef int32_t Fixed;
 // results otherwise.  The more evil variant returns the evil result - 1, returning correct results
 // only when 256 evenly divides `value`.
 inline int32_t evil_fixed_to_long(Fixed value) {
-    if (value < 0) {
-        return (value >> 8) + 1;
+    if (value < Fixed::zero()) {
+        return (value.val() >> 8) + 1;
     } else {
-        return value >> 8;
+        return value.val() >> 8;
     }
 }
 inline int32_t more_evil_fixed_to_long(Fixed value) {
-    return value >> 8;
+    return (value >> 8).val();
 }
 
-inline Fixed mLongToFixed(int32_t m_l)  { return m_l << 8; }
-inline Fixed mFloatToFixed(float m_r)   { return roundf(m_r * 256.0); }
-inline float mFixedToFloat(Fixed m_f)   { return floorf(m_f * 1e3 / 256.0) / 1e3; }
+inline float mFixedToFloat(Fixed m_f)   { return floorf(m_f.val() * 1e3 / 256.0) / 1e3; }
 inline int32_t mFixedToLong(Fixed m_f)  { return evil_fixed_to_long(m_f); }
 
-struct PrintableFixed {
-    Fixed value;
-    explicit PrintableFixed(Fixed v) : value(v) { }
-};
-PrintableFixed fixed(Fixed value);
-void print_to(sfz::PrintTarget out, const PrintableFixed& fixed);
-
-// the max safe # we can do is 181 for signed multiply if we don't know other value
-// if -1 <= other value <= 1 then we can do 32767
-inline Fixed mMultiplyFixed(Fixed m_f1, Fixed m_f2) {
-    return (m_f1 * m_f2) >> 8;
-}
-inline Fixed mDivideFixed(Fixed m_f1, Fixed m_f2) {
-    return (m_f1 << 8) / m_f2;
-}
+void print_to(sfz::PrintTarget out, const Fixed& fixed);
 
 struct fixedPointType {
     Fixed               h;

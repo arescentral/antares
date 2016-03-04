@@ -331,7 +331,7 @@ static void render_briefing_with(
         if (( anObject->active == kObjectInUse) && ( anObject->sprite.get()))
         {
             auto baseObject = anObject->base;
-            if (baseObject->maxVelocity == 0) {
+            if (baseObject->maxVelocity == Fixed::zero()) {
                 const NatePixTable::Frame* frame = NULL;
                 GetRealObjectSpriteData( &(anObject->location),
                     anObject->base, anObject->owner,

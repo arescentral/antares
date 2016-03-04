@@ -22,6 +22,7 @@
 #include "data/handle.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
+#include "math/fixed.hpp"
 
 namespace antares {
 
@@ -100,7 +101,8 @@ extern int32_t gAbsoluteScale;
 // The regular variant calculates the final scale as ``(value * scale) / 4096``.  The evil variant
 // calculates the final scale as ``(value * scale) >> 12``, which results in off-by-one errors when
 // `value` is negative.
-int32_t scale_by(int32_t value, int32_t scale);
+Fixed scale_by(Fixed value, int32_t scale);
+Fixed evil_scale_by(Fixed value, int32_t scale);
 int32_t evil_scale_by(int32_t value, int32_t scale);
 
 void SpriteHandlingInit();

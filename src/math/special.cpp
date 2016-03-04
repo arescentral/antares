@@ -227,7 +227,7 @@ Fixed MyFixRatio(int16_t numer, int16_t denom) {
 
     result = ((result >> 16L) & 0x0000ffff) | ((result << 16L) & 0xffff0000);
     result /= longdenom;
-    return result;
+    return Fixed::from_val(result);
 
 label1:
     result = 0x7fffffff;
@@ -237,26 +237,26 @@ label1:
     result = -result;
 
 label2:
-    return result;
+    return Fixed::from_val(result);
 
 label3:
     result = 0x00000001;
     result = (( result >> 16L) & 0x0000ffff) | (( result << 16L) & 0xffff0000);
-    return result;
+    return Fixed::from_val(result);
 }
 
-int16_t ratio_to_angle(int32_t x, int32_t y) {
-    if (x == 0) {
-        if (y < 0) {
+int16_t ratio_to_angle(Fixed x, Fixed y) {
+    if (x == Fixed::zero()) {
+        if (y < Fixed::zero()) {
             return 180;
         } else {
             return 0;
         }
     }
 
-    Fixed slope = MyFixRatio(x, y);
+    Fixed slope = MyFixRatio(x.val(), y.val());
     int16_t angle = AngleFromSlope(slope);
-    if (x > 0) {
+    if (x > Fixed::zero()) {
         angle += 180;
     }
     if (angle >= 360) {
@@ -271,7 +271,7 @@ void read_from(ReadSource in, fixedPointType& point) {
 }
 
 struct AngleFromSlopeData {
-    Fixed min_slope;
+    int32_t min_slope;
     int32_t angle;
 };
 
@@ -463,7 +463,7 @@ static AngleFromSlopeData angle_from_slope_data[angle_from_slope_data_count] = {
 
 int32_t AngleFromSlope(Fixed slope) {
     for (int i = 1; i < angle_from_slope_data_count; ++i) {
-        if (angle_from_slope_data[i].min_slope > slope) {
+        if (angle_from_slope_data[i].min_slope > slope.val()) {
             return angle_from_slope_data[i - 1].angle;
         }
     }

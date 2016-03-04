@@ -41,15 +41,16 @@ namespace antares {
 namespace {
 
 void DetermineBeamRelativeCoordFromAngle(Handle<SpaceObject> beamObject, int16_t angle) {
-    Fixed range = mLongToFixed(beamObject->frame.beam->range);
+    Fixed range = Fixed::from_long(beamObject->frame.beam->range);
 
     mAddAngle(angle, -90);
     Fixed fcos, fsin;
     GetRotPoint(&fcos, &fsin, angle);
 
+    // TODO(sfiera): archaeology. Did we always multiply by zero?
     beamObject->frame.beam->toRelativeCoord = Point(
-            mFixedToLong(mMultiplyFixed(0, -fcos) - mMultiplyFixed(range, -fsin)),
-            mFixedToLong(mMultiplyFixed(0, -fsin) + mMultiplyFixed(range, -fcos)));
+            mFixedToLong((Fixed::zero() * -fcos) - (range * -fsin)),
+            mFixedToLong((Fixed::zero() * -fsin) + (range * -fcos)));
 }
 
 template <typename T>

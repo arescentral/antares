@@ -93,7 +93,7 @@ const int32_t kGrossMoneyVBuffer    = 4;
 const int32_t kGrossMoneyBarWidth   = 10;
 const int32_t kGrossMoneyBarHeight  = 5;
 const int32_t kGrossMoneyBarNum     = 7;
-const int32_t kGrossMoneyBarValue   = 5120000;
+const int32_t kGrossMoneyBarValue   = 20000;
 const uint8_t kGrossMoneyColor      = YELLOW;
 
 const int32_t kFineMoneyLeft        = 25;
@@ -103,13 +103,14 @@ const int32_t kFineMoneyVBuffer     = 1;
 const int32_t kFineMoneyBarWidth    = 2;
 const int32_t kFineMoneyBarHeight   = 4;
 const int32_t kFineMoneyBarNum      = 100;
-const int32_t kFineMoneyBarMod      = 5120000;
-const int32_t kFineMoneyBarValue    = 51200;
+const int32_t kFineMoneyBarMod      = kGrossMoneyBarValue;
+const int32_t kFineMoneyBarValue    = 200;
 const int32_t kFineMoneyColor       = PALE_GREEN;
 const int32_t kFineMoneyNeedColor   = ORANGE;
 const uint8_t kFineMoneyUseColor    = SKY_BLUE;
 
-const int32_t kMaxMoneyValue        = kGrossMoneyBarValue * 7;
+const Fixed   kMaxMoneyValue        = Fixed::from_long(kGrossMoneyBarValue * kGrossMoneyBarNum)
+                                    - Fixed::from_val(1);
 
 Rect mini_build_time_rect() {
     Rect result(play_screen().right + 10, 8, play_screen().right + 22, 37);
@@ -411,10 +412,9 @@ void draw_radar() {
 // SHOW ME THE MONEY
 static void draw_money() {
     auto& admiral = g.admiral;
-    const int cash = clamp(admiral->cash(), 0, kMaxMoneyValue - 1);
-    gBarIndicator[kFineMoneyBar].thisValue
-        = (cash % kFineMoneyBarMod) / kFineMoneyBarValue;
-    const int price = MiniComputerGetPriceOfCurrentSelection() / kFineMoneyBarValue;
+    const Fixed cash = clamp(admiral->cash(), Fixed::zero(), kMaxMoneyValue);
+    gBarIndicator[kFineMoneyBar].thisValue = mFixedToLong((cash % kFineMoneyBarMod) / kFineMoneyBarValue);
+    const int price = mFixedToLong(MiniComputerGetPriceOfCurrentSelection() / kFineMoneyBarValue);
 
     Rect box(0, 0, kFineMoneyBarWidth, kFineMoneyBarHeight - 1);
     box.offset(kFineMoneyLeft + kFineMoneyHBuffer + play_screen().right,
@@ -475,7 +475,7 @@ static void draw_money() {
     gBarIndicator[kFineMoneyBar].thisValue = second_threshold;
 
     barIndicatorType* gross = gBarIndicator + kGrossMoneyBar;
-    gross->thisValue = (admiral->cash() / kGrossMoneyBarValue);
+    gross->thisValue = mFixedToLong(admiral->cash() / kGrossMoneyBarValue);
 
     box = Rect(0, 0, kGrossMoneyBarWidth, kGrossMoneyBarHeight - 1);
     box.offset(play_screen().right + kGrossMoneyLeft + kGrossMoneyHBuffer,
@@ -545,9 +545,9 @@ static void update_triangle(SiteData& site, int32_t direction, int32_t distance,
     Fixed fa, fb, fc;
     GetRotPoint(&fa, &fb, direction);
 
-    fc = mLongToFixed(-distance);
-    fa = mMultiplyFixed(fc, fa);
-    fb = mMultiplyFixed(fc, fb);
+    fc = Fixed::from_long(-distance);
+    fa = (fc * fa);
+    fb = (fc * fb);
 
     Point a(mFixedToLong(fa), mFixedToLong(fb));
     a.offset(g.ship->sprite->where.h, g.ship->sprite->where.v);
@@ -556,9 +556,9 @@ static void update_triangle(SiteData& site, int32_t direction, int32_t distance,
     count = direction;
     mAddAngle(count, 30);
     GetRotPoint(&fa, &fb, count);
-    fc = mLongToFixed(size);
-    fa = mMultiplyFixed(fc, fa);
-    fb = mMultiplyFixed(fc, fb);
+    fc = Fixed::from_long(size);
+    fa = (fc * fa);
+    fb = (fc * fb);
 
     Point b(a.h + mFixedToLong(fa), a.v + mFixedToLong(fb));
     site.b = b;
@@ -566,9 +566,9 @@ static void update_triangle(SiteData& site, int32_t direction, int32_t distance,
     count = direction;
     mAddAngle(count, -30);
     GetRotPoint(&fa, &fb, count);
-    fc = mLongToFixed(size);
-    fa = mMultiplyFixed(fc, fa);
-    fb = mMultiplyFixed(fc, fb);
+    fc = Fixed::from_long(size);
+    fa = (fc * fa);
+    fb = (fc * fb);
 
     Point c(a.h + mFixedToLong(fa), a.v + mFixedToLong(fb));
     site.c = c;

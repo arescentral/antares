@@ -19,6 +19,7 @@
 #ifndef ANTARES_MATH_MACROS_HPP_
 #define ANTARES_MATH_MACROS_HPP_
 
+#include "math/fixed.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
@@ -26,6 +27,15 @@ namespace antares {
 template <typename T>
 inline T ABS(T x) {
     if (x >= 0) {
+        return x;
+    } else {
+        return -x;
+    }
+}
+
+template <>
+inline Fixed ABS(Fixed x) {
+    if (x >= Fixed::zero()) {
         return x;
     } else {
         return -x;

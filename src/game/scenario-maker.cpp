@@ -198,23 +198,22 @@ void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors) {
     }
 }
 
-void GetInitialCoord(Scenario::InitialObject *initial, coordPointType *coord, int32_t rotation) {
-    int32_t lcos, lsin, lscrap;
-
+static coordPointType rotate_coords(int32_t h, int32_t v, int32_t rotation) {
     mAddAngle(rotation, 90);
+    Fixed lcos, lsin;
     GetRotPoint(&lcos, &lsin, rotation);
-    lcos = -lcos;
-    lsin = -lsin;
+    coordPointType coord;
+    coord.h = (kUniversalCenter
+               + (Fixed::from_val(h) * -lcos).val()
+               - (Fixed::from_val(v) * -lsin).val());
+    coord.v = (kUniversalCenter
+               + (Fixed::from_val(h) * -lsin).val()
+               + (Fixed::from_val(v) * -lcos).val());
+    return coord;
+}
 
-    lscrap = mMultiplyFixed(initial->location.h, lcos);
-    lscrap -= mMultiplyFixed(initial->location.v, lsin);
-    coord->h = kUniversalCenter;
-    coord->h += lscrap;
-
-    lscrap = mMultiplyFixed(initial->location.h, lsin);
-    lscrap += mMultiplyFixed(initial->location.v, lcos);
-    coord->v = kUniversalCenter;
-    coord->v += lscrap;
+void GetInitialCoord(Scenario::InitialObject *initial, coordPointType *coord, int32_t rotation) {
+    *coord = rotate_coords(initial->location.h, initial->location.v, rotation);
 }
 
 void set_initial_destination(const Scenario::InitialObject* initial, bool preserve) {
@@ -430,8 +429,8 @@ bool Scenario::Condition::is_true() const {
         case kVelocityLessThanEqualToCondition: {
             auto sObject = GetObjectFromInitialNumber(subjectObject);
             return sObject.get()
-                && ((ABS(sObject->velocity.h)) < conditionArgument.longValue)
-                && ((ABS(sObject->velocity.v)) < conditionArgument.longValue);
+                && (ABS(sObject->velocity.h) < conditionArgument.fixedValue)
+                && (ABS(sObject->velocity.v) < conditionArgument.fixedValue);
         }
 
         case kNoShipsLeftCondition:
@@ -570,11 +569,11 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     for (int i = 0; i < g.level->playerNum; i++) {
         if (g.level->player[i].playerType == kSingleHumanPlayer) {
             auto admiral = Admiral::make(i, kAIsHuman, g.level->player[i]);
-            admiral->pay(mLongToFixed(5000));
+            admiral->pay(Fixed::from_long(5000));
             g.admiral = admiral;
         } else {
             auto admiral = Admiral::make(i, kAIsComputer, g.level->player[i]);
-            admiral->pay(mLongToFixed(5000));
+            admiral->pay(Fixed::from_long(5000));
         }
     }
 
@@ -708,7 +707,7 @@ static void create_initial(int i, uint32_t all_colors) {
 
     auto type = initial->type;
     // TODO(sfiera): remap object in networked games.
-    fixedPointType v = {0, 0};
+    fixedPointType v = {Fixed::zero(), Fixed::zero()};
     auto anObject = initial->realObject = CreateAnySpaceObject(
             type, &v, &coord, gScenarioRotation, owner, specialAttributes,
             initial->spriteIDOverride);
@@ -839,7 +838,7 @@ void UnhideInitialObject(int32_t whichInitial) {
 
     auto type = initial->type;
     // TODO(sfiera): remap objects in networked games.
-    fixedPointType v = {0, 0};
+    fixedPointType v = {Fixed::zero(), Fixed::zero()};
     auto anObject = initial->realObject = CreateAnySpaceObject(
             type, &v, &coord, 0, owner, specialAttributes, initial->spriteIDOverride);
 
@@ -1005,25 +1004,7 @@ const Scenario* GetScenarioPtrFromChapter(int32_t chapter) {
 }
 
 coordPointType Translate_Coord_To_Scenario_Rotation(int32_t h, int32_t v) {
-    int32_t lcos, lsin, lscrap, angle = gScenarioRotation;
-    coordPointType coord;
-
-    mAddAngle(angle, 90);
-    GetRotPoint(&lcos, &lsin, angle);
-    lcos = -lcos;
-    lsin = -lsin;
-
-    lscrap = mMultiplyFixed(h, lcos);
-    lscrap -= mMultiplyFixed(v, lsin);
-    coord.h = kUniversalCenter;
-    coord.h += lscrap;
-
-    lscrap = mMultiplyFixed(h, lsin);
-    lscrap += mMultiplyFixed(v, lcos);
-    coord.v = kUniversalCenter;
-    coord.v += lscrap;
-
-    return coord;
+    return rotate_coords(h, v, gScenarioRotation);
 }
 
 }  // namespace antares

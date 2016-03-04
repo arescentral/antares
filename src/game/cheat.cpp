@@ -94,9 +94,9 @@ void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
             break;
 
         case kPayMoneyCheat:
-            whichPlayer->pay_absolute(mLongToFixed(5000));
-            whichPlayer->pay_absolute(mLongToFixed(5000));
-            whichPlayer->pay_absolute(mLongToFixed(5000));
+            whichPlayer->pay_absolute(Fixed::from_long(5000));
+            whichPlayer->pay_absolute(Fixed::from_long(5000));
+            whichPlayer->pay_absolute(Fixed::from_long(5000));
             CheatFeedback( whichCheat, true, whichPlayer);
             break;
 
@@ -118,13 +118,13 @@ void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
             break;
 
         case kRaisePayRateCheat:
-            whichPlayer->set_earning_power(whichPlayer->earning_power() + 0x20);
-            CheatFeedbackPlus(whichCheat, true, whichPlayer, fixed(whichPlayer->earning_power()));
+            whichPlayer->set_earning_power(whichPlayer->earning_power() + Fixed::from_float(0.125));
+            CheatFeedbackPlus(whichCheat, true, whichPlayer, Fixed(whichPlayer->earning_power()));
             break;
 
         case kLowerPayRateCheat:
-            whichPlayer->set_earning_power(whichPlayer->earning_power() - 0x20);
-            CheatFeedbackPlus(whichCheat, true, whichPlayer, fixed(whichPlayer->earning_power()));
+            whichPlayer->set_earning_power(whichPlayer->earning_power() - Fixed::from_float(0.125));
+            CheatFeedbackPlus(whichCheat, true, whichPlayer, Fixed(whichPlayer->earning_power()));
             break;
     }
 }

@@ -65,7 +65,7 @@ const uint8_t kNeutralColor         = SKY_BLUE;
 static const int16_t kSpaceObjectNameResID          = 5000;
 static const int16_t kSpaceObjectShortNameResID     = 5001;
 
-const int32_t kDefaultTurnRate      = 0x00000200;
+const Fixed kDefaultTurnRate        = Fixed::from_long(2.000);
 
 #ifdef DATA_COVERAGE
 ANTARES_GLOBAL set<int32_t> covered_objects;
@@ -276,17 +276,6 @@ void CorrectAllBaseObjectColor( void)
                 aBase->frame.beam.color = 0;
             }
         }
-
-//      if (( aBase->attributes & kCanThink) && ( aBase->warpSpeed <= 0))
-//          aBase->warpSpeed = mLongToFixed( 50);
-
-        if ( aBase->attributes & kIsSelfAnimated)
-        {
-            aBase->frame.animation.firstShape = mLongToFixed(aBase->frame.animation.firstShape);
-            aBase->frame.animation.lastShape = mLongToFixed(aBase->frame.animation.lastShape);
-            aBase->frame.animation.frameShape = mLongToFixed(aBase->frame.animation.frameShape);
-            aBase->frame.animation.frameShapeRange = mLongToFixed(aBase->frame.animation.frameShapeRange);
-        }
     }
 
 }
@@ -337,12 +326,12 @@ SpaceObject::SpaceObject(
     }
 
     Fixed f = baseType->initialVelocity;
-    if (baseType->initialVelocityRange > 0) {
+    if (baseType->initialVelocityRange > Fixed::zero()) {
         f += randomSeed.next(baseType->initialVelocityRange);
     }
     GetRotPoint(&velocity.h, &velocity.v, direction);
-    velocity.h = mMultiplyFixed(velocity.h, f);
-    velocity.v = mMultiplyFixed(velocity.v, f);
+    velocity.h = (velocity.h * f);
+    velocity.v = (velocity.v * f);
 
     if (relative_velocity) {
         velocity.h += relative_velocity->h;
@@ -355,7 +344,7 @@ SpaceObject::SpaceObject(
 
     if (attributes & kIsSelfAnimated) {
         frame.animation.thisShape = baseType->frame.animation.frameShape;
-        if (baseType->frame.animation.frameShapeRange > 0) {
+        if (baseType->frame.animation.frameShapeRange > Fixed::zero()) {
             frame.animation.thisShape +=
                 randomSeed.next(baseType->frame.animation.frameShapeRange);
         }
@@ -368,7 +357,7 @@ SpaceObject::SpaceObject(
             frame.animation.frameDirection += randomSeed.next(
                 baseType->frame.animation.frameDirectionRange);
         }
-        frame.animation.frameFraction = 0;
+        frame.animation.frameFraction = Fixed::zero();
         frame.animation.frameSpeed = baseType->frame.animation.frameSpeed;
     }
 
@@ -466,13 +455,13 @@ void SpaceObject::change_base_type(
     obj->tinySize = base->tinySize;
     obj->shieldColor = base->shieldColor;
     obj->layer = base->pixLayer;
-    obj->directionGoal = obj->turnFraction = obj->turnVelocity = 0;
+    obj->directionGoal = 0;
+    obj->turnFraction = obj->turnVelocity = Fixed::zero();
 
     if (obj->attributes & kIsSelfAnimated) {
         obj->frame.animation.thisShape = base->frame.animation.frameShape;
-        if (base->frame.animation.frameShapeRange > 0) {
-            r = obj->randomSeed.next(base->frame.animation.frameShapeRange);
-            obj->frame.animation.thisShape += r;
+        if (base->frame.animation.frameShapeRange > Fixed::zero()) {
+            obj->frame.animation.thisShape += obj->randomSeed.next(base->frame.animation.frameShapeRange);
         }
         obj->frame.animation.frameDirection = base->frame.animation.frameDirection;
         if (base->frame.animation.frameDirectionRange == -1) {
@@ -483,7 +472,7 @@ void SpaceObject::change_base_type(
             obj->frame.animation.frameDirection += obj->randomSeed.next(
                 base->frame.animation.frameDirectionRange);
         }
-        obj->frame.animation.frameFraction = 0;
+        obj->frame.animation.frameFraction = Fixed::zero();
         obj->frame.animation.frameSpeed = base->frame.animation.frameSpeed;
     }
 
@@ -656,7 +645,7 @@ void SpaceObject::alter_battery(int32_t amount) {
     _battery += amount;
     if (_battery > max_battery()) {
         if (owner.get()) {
-            owner->pay(_battery - max_battery());
+            owner->pay(Fixed::from_val(_battery - max_battery()));
         }
         _battery = max_battery();
     }
@@ -752,15 +741,15 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
     }
 
     object->remoteFoeStrength = object->remoteFriendStrength = object->escortStrength =
-        object->localFoeStrength = object->localFriendStrength = 0;
-    object->bestConsideredTargetValue = object->currentTargetValue = 0xffffffff;
+        object->localFoeStrength = object->localFriendStrength = Fixed::zero();
+    object->bestConsideredTargetValue = object->currentTargetValue = kFixedNone;
     object->bestConsideredTargetNumber = SpaceObject::none();
 
     for (auto fixObject: SpaceObject::all()) {
         if ((fixObject->destObject == object)
                 && (fixObject->active != kObjectAvailable)
                 && (fixObject->attributes & kCanThink)) {
-            fixObject->currentTargetValue = 0xffffffff;
+            fixObject->currentTargetValue = kFixedNone;
             if (fixObject->owner != owner) {
                 object->remoteFoeStrength += fixObject->baseType->offenseValue;
             } else {

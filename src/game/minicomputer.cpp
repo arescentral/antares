@@ -1059,23 +1059,23 @@ void MiniComputerSetBuildStrings() {
 //  If the selection is not legal, or the current Menu is not the Build Menu,
 //  returns 0
 
-int32_t MiniComputerGetPriceOfCurrentSelection() {
+Fixed MiniComputerGetPriceOfCurrentSelection() {
     if ((globals()->gMiniScreenData.currentScreen != kBuildMiniScreen) ||
             (globals()->gMiniScreenData.selectLine == kMiniScreenNoLineSelected)) {
-        return 0;
+        return Fixed::zero();
     }
 
     miniScreenLineType* line = &globals()->gMiniScreenData.lineData[globals()->gMiniScreenData.selectLine];
     if (line->value < 0) {
-        return 0;
+        return Fixed::zero();
     }
 
     auto buildObject = Handle<BaseObject>(line->value);
     if (buildObject->price < 0) {
-        return 0;
+        return Fixed::zero();
     }
 
-    return mLongToFixed(buildObject->price);
+    return Fixed::from_long(buildObject->price);
 }
 
 void MiniComputerSetStatusStrings() {
@@ -1242,7 +1242,7 @@ void MiniComputerMakeStatusString(int32_t which_line, String& string) {
 
         case kSmallFixedValue:
         case kSmallFixedMinusValue:
-            print(string, fixed(line.value));
+            print(string, Fixed::from_val(line.value));
             break;
     }
     if (line.statusType != kPlainTextStatus) {
