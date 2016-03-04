@@ -122,28 +122,28 @@ void Starfield::move(ticks by_units) {
 
     const fixedPointType slowVelocity = {
         Fixed::from_val(scale_by(
-                (mMultiplyFixed(g.ship->velocity.h, kSlowStarFraction) * Fixed::from_val(by_units.count())).val(),
+                (mMultiplyFixed(g.ship->velocity.h, kSlowStarFraction) * by_units.count()).val(),
                 gAbsoluteScale)),
         Fixed::from_val(scale_by(
-                (mMultiplyFixed(g.ship->velocity.v, kSlowStarFraction) * Fixed::from_val(by_units.count())).val(),
+                (mMultiplyFixed(g.ship->velocity.v, kSlowStarFraction) * by_units.count()).val(),
                 gAbsoluteScale)),
     };
 
     const fixedPointType mediumVelocity = {
         Fixed::from_val(scale_by(
-                (mMultiplyFixed(g.ship->velocity.h, kMediumStarFraction) * Fixed::from_val(by_units.count())).val(),
+                (mMultiplyFixed(g.ship->velocity.h, kMediumStarFraction) * by_units.count()).val(),
                 gAbsoluteScale)),
         Fixed::from_val(scale_by(
-                (mMultiplyFixed(g.ship->velocity.v, kMediumStarFraction) * Fixed::from_val(by_units.count())).val(),
+                (mMultiplyFixed(g.ship->velocity.v, kMediumStarFraction) * by_units.count()).val(),
                 gAbsoluteScale)),
     };
 
     const fixedPointType fastVelocity = {
         Fixed::from_val(scale_by(
-                (mMultiplyFixed(g.ship->velocity.h, kFastStarFraction) * Fixed::from_val(by_units.count())).val(),
+                (mMultiplyFixed(g.ship->velocity.h, kFastStarFraction) * by_units.count()).val(),
                 gAbsoluteScale)),
         Fixed::from_val(scale_by(
-                (mMultiplyFixed(g.ship->velocity.v, kFastStarFraction) * Fixed::from_val(by_units.count())).val(),
+                (mMultiplyFixed(g.ship->velocity.v, kFastStarFraction) * by_units.count()).val(),
                 gAbsoluteScale)),
     };
 
@@ -237,8 +237,8 @@ void Starfield::move(ticks by_units) {
         }
         star->age -= star->speed * by_units.count();
 
-        star->motionFraction.h += star->velocity.h * Fixed::from_val(by_units.count()) + slowVelocity.h;
-        star->motionFraction.v += star->velocity.v * Fixed::from_val(by_units.count()) + slowVelocity.v;
+        star->motionFraction.h += star->velocity.h * by_units.count() + slowVelocity.h;
+        star->motionFraction.v += star->velocity.v * by_units.count() + slowVelocity.v;
 
         int32_t h;
         if (star->motionFraction.h >= Fixed::zero()) {

@@ -475,7 +475,7 @@ static void draw_money() {
     gBarIndicator[kFineMoneyBar].thisValue = second_threshold;
 
     barIndicatorType* gross = gBarIndicator + kGrossMoneyBar;
-    gross->thisValue = (admiral->cash() / Fixed::from_val(kGrossMoneyBarValue)).val();
+    gross->thisValue = (admiral->cash() / kGrossMoneyBarValue).val();
 
     box = Rect(0, 0, kGrossMoneyBarWidth, kGrossMoneyBarHeight - 1);
     box.offset(play_screen().right + kGrossMoneyLeft + kGrossMoneyHBuffer,

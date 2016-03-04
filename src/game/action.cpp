@@ -328,11 +328,11 @@ static void alter(
                             if (alter.minimum >= 0) {
                                 // if the minimum >= 0, then PUSH the object like collision
                                 f = subject->velocity.h - object->velocity.h;
-                                f /= object->baseType->mass;
+                                f /= object->baseType->mass.val();
                                 f <<= 6L;
                                 object->velocity.h += f;
                                 f = subject->velocity.v - object->velocity.v;
-                                f /= object->baseType->mass;
+                                f /= object->baseType->mass.val();
                                 f <<= 6L;
                                 object->velocity.v += f;
 
