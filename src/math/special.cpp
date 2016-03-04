@@ -245,7 +245,7 @@ label3:
     return result;
 }
 
-int16_t ratio_to_angle(int32_t x, int32_t y) {
+int16_t ratio_to_angle(Fixed x, Fixed y) {
     if (x == 0) {
         if (y < 0) {
             return 180;
@@ -254,7 +254,7 @@ int16_t ratio_to_angle(int32_t x, int32_t y) {
         }
     }
 
-    Fixed slope = MyFixRatio(x, y);
+    Fixed slope = MyFixRatio(x.val(), y.val());
     int16_t angle = AngleFromSlope(slope);
     if (x > 0) {
         angle += 180;

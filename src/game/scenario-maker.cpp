@@ -206,13 +206,13 @@ void GetInitialCoord(Scenario::InitialObject *initial, coordPointType *coord, in
     lcos = -lcos;
     lsin = -lsin;
 
-    lscrap = mMultiplyFixed(initial->location.h, lcos);
-    lscrap -= mMultiplyFixed(initial->location.v, lsin);
+    lscrap = mMultiplyFixed(initial->location.h, lcos).val();
+    lscrap -= mMultiplyFixed(initial->location.v, lsin).val();
     coord->h = kUniversalCenter;
     coord->h += lscrap;
 
-    lscrap = mMultiplyFixed(initial->location.h, lsin);
-    lscrap += mMultiplyFixed(initial->location.v, lcos);
+    lscrap = mMultiplyFixed(initial->location.h, lsin).val();
+    lscrap += mMultiplyFixed(initial->location.v, lcos).val();
     coord->v = kUniversalCenter;
     coord->v += lscrap;
 }
@@ -1013,13 +1013,13 @@ coordPointType Translate_Coord_To_Scenario_Rotation(int32_t h, int32_t v) {
     lcos = -lcos;
     lsin = -lsin;
 
-    lscrap = mMultiplyFixed(h, lcos);
-    lscrap -= mMultiplyFixed(v, lsin);
+    lscrap = mMultiplyFixed(h, lcos).val();
+    lscrap -= mMultiplyFixed(v, lsin).val();
     coord.h = kUniversalCenter;
     coord.h += lscrap;
 
-    lscrap = mMultiplyFixed(h, lsin);
-    lscrap += mMultiplyFixed(v, lcos);
+    lscrap = mMultiplyFixed(h, lsin).val();
+    lscrap += mMultiplyFixed(v, lcos).val();
     coord.v = kUniversalCenter;
     coord.v += lscrap;
 

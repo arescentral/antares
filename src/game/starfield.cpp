@@ -79,15 +79,15 @@ void Starfield::reset(Handle<SpaceObject> which_object) {
 
 void Starfield::make_sparks(
         int32_t sparkNum, int32_t sparkSpeed, Fixed maxVelocity, uint8_t color, Point* location) {
-    maxVelocity = evil_scale_by(maxVelocity, gAbsoluteScale);
+    maxVelocity = evil_scale_by(maxVelocity.val(), gAbsoluteScale);
     if (sparkNum <= 0) {
         return;
     }
 
     for (scrollStarType* spark: range(_stars + kSparkStarOffset, _stars + kAllStarNum)) {
         if (spark->speed == kNoStar) {
-            spark->velocity.h = Randomize(maxVelocity << 2L) - maxVelocity;
-            spark->velocity.v = Randomize(maxVelocity << 2L) - maxVelocity;
+            spark->velocity.h = Randomize(maxVelocity.val() << 2L) - maxVelocity;
+            spark->velocity.v = Randomize(maxVelocity.val() << 2L) - maxVelocity;
             spark->oldLocation.h = spark->location.h = location->h;
             spark->oldLocation.v = spark->location.v = location->v;
             spark->motionFraction.h = spark->motionFraction.v = 0;
@@ -122,28 +122,28 @@ void Starfield::move(ticks by_units) {
 
     const fixedPointType slowVelocity = {
         scale_by(
-                mMultiplyFixed(g.ship->velocity.h, kSlowStarFraction) * by_units.count(),
+                (mMultiplyFixed(g.ship->velocity.h, kSlowStarFraction) * by_units.count()).val(),
                 gAbsoluteScale),
         scale_by(
-                mMultiplyFixed(g.ship->velocity.v, kSlowStarFraction) * by_units.count(),
+                (mMultiplyFixed(g.ship->velocity.v, kSlowStarFraction) * by_units.count()).val(),
                 gAbsoluteScale),
     };
 
     const fixedPointType mediumVelocity = {
         scale_by(
-                mMultiplyFixed(g.ship->velocity.h, kMediumStarFraction) * by_units.count(),
+                (mMultiplyFixed(g.ship->velocity.h, kMediumStarFraction) * by_units.count()).val(),
                 gAbsoluteScale),
         scale_by(
-                mMultiplyFixed(g.ship->velocity.v, kMediumStarFraction) * by_units.count(),
+                (mMultiplyFixed(g.ship->velocity.v, kMediumStarFraction) * by_units.count()).val(),
                 gAbsoluteScale),
     };
 
     const fixedPointType fastVelocity = {
         scale_by(
-                mMultiplyFixed(g.ship->velocity.h, kFastStarFraction) * by_units.count(),
+                (mMultiplyFixed(g.ship->velocity.h, kFastStarFraction) * by_units.count()).val(),
                 gAbsoluteScale),
         scale_by(
-                mMultiplyFixed(g.ship->velocity.v, kFastStarFraction) * by_units.count(),
+                (mMultiplyFixed(g.ship->velocity.v, kFastStarFraction) * by_units.count()).val(),
                 gAbsoluteScale),
     };
 

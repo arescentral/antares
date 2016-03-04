@@ -312,7 +312,7 @@ static void alter(
             if (f2 == 0) {
                 focus->offlineTime = -1;
             } else {
-                focus->offlineTime = mDivideFixed(f, f2);
+                focus->offlineTime = mDivideFixed(f, f2).val();
             }
             focus->offlineTime = mFixedToLong(focus->offlineTime);
             break;

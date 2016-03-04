@@ -28,11 +28,26 @@ class Fixed {
     public:
         Fixed() = default;
         Fixed(int32_t value): _value(value) { }
-        operator int32_t() const { return _value; }
+
+        int32_t val() const { return _value; }
 
     private:
         int32_t _value;
 };
+
+inline bool operator==(Fixed x, Fixed y) { return x.val() == y.val(); }
+inline bool operator!=(Fixed x, Fixed y) { return x.val() != y.val(); }
+inline bool operator< (Fixed x, Fixed y) { return x.val() <  y.val(); }
+inline bool operator<=(Fixed x, Fixed y) { return x.val() <= y.val(); }
+inline bool operator> (Fixed x, Fixed y) { return x.val() >  y.val(); }
+inline bool operator>=(Fixed x, Fixed y) { return x.val() >= y.val(); }
+
+inline Fixed operator+(Fixed x, Fixed y) { return x.val() + y.val(); }
+inline Fixed operator-(Fixed x, Fixed y) { return x.val() - y.val(); }
+inline Fixed operator*(Fixed x, Fixed y) { return x.val() * y.val(); }
+inline Fixed operator/(Fixed x, Fixed y) { return x.val() / y.val(); }
+inline Fixed operator<<(Fixed x, int n) { return x.val() << n; }
+inline Fixed operator>>(Fixed x, int n) { return x.val() >> n; }
 
 inline Fixed& operator+=(Fixed& x, Fixed y) { return x = x + y; }
 inline Fixed& operator-=(Fixed& x, Fixed y) { return x = x - y; }
@@ -40,6 +55,8 @@ inline Fixed& operator*=(Fixed& x, Fixed y) { return x = x * y; }
 inline Fixed& operator/=(Fixed& x, Fixed y) { return x = x / y; }
 inline Fixed& operator<<=(Fixed& x, int n) { return x = x << n; }
 inline Fixed& operator>>=(Fixed& x, int n) { return x = x >> n; }
+
+inline Fixed operator-(Fixed x) { return -x.val(); }
 
 inline void read_from(sfz::ReadSource in, Fixed& f) { f = sfz::read<int32_t>(in); }
 
@@ -61,18 +78,18 @@ inline void read_from(sfz::ReadSource in, Fixed& f) { f = sfz::read<int32_t>(in)
 // only when 256 evenly divides `value`.
 inline int32_t evil_fixed_to_long(Fixed value) {
     if (value < 0) {
-        return (value >> 8) + 1;
+        return (value.val() >> 8) + 1;
     } else {
-        return value >> 8;
+        return value.val() >> 8;
     }
 }
 inline int32_t more_evil_fixed_to_long(Fixed value) {
-    return value >> 8;
+    return (value >> 8).val();
 }
 
 inline Fixed mLongToFixed(int32_t m_l)  { return m_l << 8; }
 inline Fixed mFloatToFixed(float m_r)   { return roundf(m_r * 256.0); }
-inline float mFixedToFloat(Fixed m_f)   { return floorf(m_f * 1e3 / 256.0) / 1e3; }
+inline float mFixedToFloat(Fixed m_f)   { return floorf(m_f.val() * 1e3 / 256.0) / 1e3; }
 inline int32_t mFixedToLong(Fixed m_f)  { return evil_fixed_to_long(m_f); }
 
 void print_to(sfz::PrintTarget out, const Fixed& fixed);

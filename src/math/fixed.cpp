@@ -293,7 +293,7 @@ void print_to(PrintTarget out, const Fixed& fixed) {
     if (fixed < 0) {
         out.push(1, '-');
     }
-    int64_t value = llabs(fixed);
+    int64_t value = llabs(fixed.val());
     const int32_t integral = (value & 0xffffff00) >> 8;
     print(out, integral);
     value &= 0xff;

@@ -282,10 +282,10 @@ void CorrectAllBaseObjectColor( void)
 
         if ( aBase->attributes & kIsSelfAnimated)
         {
-            aBase->frame.animation.firstShape = mLongToFixed(aBase->frame.animation.firstShape);
-            aBase->frame.animation.lastShape = mLongToFixed(aBase->frame.animation.lastShape);
-            aBase->frame.animation.frameShape = mLongToFixed(aBase->frame.animation.frameShape);
-            aBase->frame.animation.frameShapeRange = mLongToFixed(aBase->frame.animation.frameShapeRange);
+            aBase->frame.animation.firstShape = mLongToFixed(aBase->frame.animation.firstShape).val();
+            aBase->frame.animation.lastShape = mLongToFixed(aBase->frame.animation.lastShape).val();
+            aBase->frame.animation.frameShape = mLongToFixed(aBase->frame.animation.frameShape).val();
+            aBase->frame.animation.frameShapeRange = mLongToFixed(aBase->frame.animation.frameShapeRange).val();
         }
     }
 
@@ -466,7 +466,8 @@ void SpaceObject::change_base_type(
     obj->tinySize = base->tinySize;
     obj->shieldColor = base->shieldColor;
     obj->layer = base->pixLayer;
-    obj->directionGoal = obj->turnFraction = obj->turnVelocity = 0;
+    obj->directionGoal = 0;
+    obj->turnFraction = obj->turnVelocity = 0;
 
     if (obj->attributes & kIsSelfAnimated) {
         obj->frame.animation.thisShape = base->frame.animation.frameShape;

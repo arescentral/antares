@@ -293,7 +293,7 @@ static void animate(Handle<SpaceObject> o) {
     }
 
     auto& space_anim = o->frame.animation;
-    space_anim.thisShape += space_anim.frameDirection * space_anim.frameSpeed;
+    space_anim.thisShape += space_anim.frameDirection * space_anim.frameSpeed.val();
     if (o->attributes & kAnimationCycle) {
         int shape_num = (base_anim.lastShape - base_anim.firstShape) + 1;
         while (space_anim.thisShape > base_anim.lastShape) {
@@ -959,7 +959,7 @@ static void correct_physical_space(Handle<SpaceObject> a, Handle<SpaceObject> b)
     // calculate the new velocities
     const Fixed dvx = b->velocity.h - a->velocity.h;
     const Fixed dvy = b->velocity.v - a->velocity.v;
-    const Fixed force = lsqrt(mMultiplyFixed(dvx, dvx) + mMultiplyFixed(dvy, dvy));
+    const Fixed force = lsqrt((mMultiplyFixed(dvx, dvx) + mMultiplyFixed(dvy, dvy)).val());
     const int32_t ah = b->location.h - a->location.h;
     const int32_t av = b->location.v - a->location.v;
 
@@ -969,8 +969,8 @@ static void correct_physical_space(Handle<SpaceObject> a, Handle<SpaceObject> b)
     mAddAngle(angle, 180);
     adjust_velocity(b, angle, totalMass, force);
 
-    if (!(a->velocity.h || a->velocity.v ||
-                b->velocity.h || b->velocity.v)) {
+    if (!(a->velocity.h.val() || a->velocity.v.val() ||
+                b->velocity.h.val() || b->velocity.v.val())) {
         return;
     }
 

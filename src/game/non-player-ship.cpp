@@ -156,10 +156,10 @@ void fire_weapon(
     Point offset;
     Point* at = nullptr;
     if (&weapon != &subject->special) {
-        offset.h = mMultiplyFixed(base_weapon.position[weapon.position].h, fcos);
-        offset.h -= mMultiplyFixed(base_weapon.position[weapon.position].v, fsin);
-        offset.v = mMultiplyFixed(base_weapon.position[weapon.position].h, fsin);
-        offset.v += mMultiplyFixed(base_weapon.position[weapon.position].v, fcos);
+        offset.h = mMultiplyFixed(base_weapon.position[weapon.position].h, fcos).val();
+        offset.h -= mMultiplyFixed(base_weapon.position[weapon.position].v, fsin).val();
+        offset.v = mMultiplyFixed(base_weapon.position[weapon.position].h, fsin).val();
+        offset.v += mMultiplyFixed(base_weapon.position[weapon.position].v, fcos).val();
         offset.h = mFixedToLong(offset.h);
         offset.v = mFixedToLong(offset.v);
         at = &offset;
@@ -905,7 +905,7 @@ uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
     if (presence.progress > ticks(100)) {
         if (anObject->collect_warp_energy(anObject->max_energy() >> kWarpInEnergyFactor)) {
             anObject->presenceState = kWarpingPresence;
-            anObject->presence.warping = anObject->baseType->warpSpeed;
+            anObject->presence.warping = anObject->baseType->warpSpeed.val();
             anObject->attributes &= ~kOccupiesSpace;
             newVel.h = newVel.v = 0;
             CreateAnySpaceObject(
@@ -970,7 +970,7 @@ uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, Handle<BaseObj
     Fixed           calcv, fdist;
     fixedPointType  newVel;
 
-    anObject->presence.warp_out -= mLongToFixed(kWarpAcceleration);
+    anObject->presence.warp_out -= mLongToFixed(kWarpAcceleration).val();
     if ( anObject->presence.warp_out < anObject->maxVelocity)
     {
         anObject->refund_warp_energy();

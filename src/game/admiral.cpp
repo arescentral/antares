@@ -782,7 +782,7 @@ void Admiral::think() {
                 if (destObject->attributes & kIsDestination) {
                     if (destObject->escortStrength < destObject->baseType->friendDefecit) {
                         thisValue = kAbsolutelyEssential;
-                    } else if (foeValue) {
+                    } else if (foeValue.val()) {
                         if (foeValue >= friendValue) {
                             thisValue = kMostImportantTarget;
                         } else if (foeValue > (friendValue >> 1)) {
@@ -855,7 +855,7 @@ void Admiral::think() {
                             thisValue = 0;
                         }
                     } else {
-                        if (friendValue) {
+                        if (friendValue.val()) {
                             if (friendValue < foeValue) {
                                 thisValue = kSomewhatImportantTarget;
                             } else {
@@ -1015,7 +1015,7 @@ void Admiral::think() {
                                         thisValue = 1;
                                     }
                                 }
-                                if (!thisValue) {
+                                if (!thisValue.val()) {
                                     _hopeToBuild = -1;
                                 }
                             }
