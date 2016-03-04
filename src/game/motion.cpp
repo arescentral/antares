@@ -908,7 +908,7 @@ static void adjust_velocity(Handle<SpaceObject> o, int16_t angle, Fixed totalMas
     if (totalMass == Fixed::zero()) {
         tfix = Fixed::from_val(-1);
     } else {
-        tfix = mDivideFixed(tfix, totalMass);
+        tfix /= totalMass;
     }
     tfix += o->maxVelocity >> 1;
     fixedPointType tvel;

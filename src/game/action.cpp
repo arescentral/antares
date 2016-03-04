@@ -300,7 +300,7 @@ static void alter(
                 if (f2 == Fixed::zero()) {
                     f = Fixed::from_val(-1);
                 } else {
-                    f = mDivideFixed(f, f2);
+                    f /= f2;
                 }
                 focus->turnVelocity = f;
             }
@@ -312,7 +312,7 @@ static void alter(
             if (f2 == Fixed::zero()) {
                 focus->offlineTime = -1;
             } else {
-                focus->offlineTime = mDivideFixed(f, f2).val();
+                focus->offlineTime = (f / f2).val();
             }
             focus->offlineTime = mFixedToLong(Fixed::from_val(focus->offlineTime));
             break;

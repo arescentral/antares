@@ -56,9 +56,12 @@ inline Fixed operator/(int32_t x, Fixed y) { return Fixed::from_val(x / y.val())
 inline Fixed operator<<(Fixed x, int n) { return Fixed::from_val(x.val() << n); }
 inline Fixed operator>>(Fixed x, int n) { return Fixed::from_val(x.val() >> n); }
 
+inline Fixed operator/(Fixed x, Fixed y) { return (x << 8) / y.val(); }
+
 inline Fixed& operator+=(Fixed& x, Fixed y) { return x = x + y; }
 inline Fixed& operator-=(Fixed& x, Fixed y) { return x = x - y; }
 inline Fixed& operator*=(Fixed& x, int32_t y) { return x = x * y; }
+inline Fixed& operator/=(Fixed& x, Fixed y) { return x = x / y; }
 inline Fixed& operator/=(Fixed& x, int32_t y) { return x = x / y; }
 inline Fixed& operator<<=(Fixed& x, int n) { return x = x << n; }
 inline Fixed& operator>>=(Fixed& x, int n) { return x = x >> n; }
@@ -103,9 +106,6 @@ void print_to(sfz::PrintTarget out, const Fixed& fixed);
 // if -1 <= other value <= 1 then we can do 32767
 inline Fixed mMultiplyFixed(Fixed m_f1, Fixed m_f2) {
     return (m_f1 * m_f2.val()) >> 8;
-}
-inline Fixed mDivideFixed(Fixed m_f1, Fixed m_f2) {
-    return (m_f1 << 8) / m_f2.val();
 }
 
 struct fixedPointType {
