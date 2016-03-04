@@ -31,32 +31,32 @@ namespace {
 typedef testing::Test FixedTest;
 
 TEST_F(FixedTest, Print) {
-    EXPECT_EQ("0.0", String(fixed(0)));
+    EXPECT_EQ("0.0", String(Fixed(0)));
 
-    EXPECT_EQ("1.0", String(fixed(256)));
-    EXPECT_EQ("-1.0", String(fixed(-256)));
-    EXPECT_EQ("1.125", String(fixed(288)));
-    EXPECT_EQ("-1.125", String(fixed(-288)));
+    EXPECT_EQ("1.0", String(Fixed(256)));
+    EXPECT_EQ("-1.0", String(Fixed(-256)));
+    EXPECT_EQ("1.125", String(Fixed(288)));
+    EXPECT_EQ("-1.125", String(Fixed(-288)));
 
-    EXPECT_EQ("8388607.996", String(fixed(std::numeric_limits<int32_t>::max())));
-    EXPECT_EQ("-8388607.996", String(fixed(-std::numeric_limits<int32_t>::max())));
-    EXPECT_EQ("-8388608.0", String(fixed(std::numeric_limits<int32_t>::min())));
+    EXPECT_EQ("8388607.996", String(Fixed(std::numeric_limits<int32_t>::max())));
+    EXPECT_EQ("-8388607.996", String(Fixed(-std::numeric_limits<int32_t>::max())));
+    EXPECT_EQ("-8388608.0", String(Fixed(std::numeric_limits<int32_t>::min())));
 
-    EXPECT_EQ("1.38", String(fixed(353)));
-    EXPECT_EQ("1.383", String(fixed(354)));
-    EXPECT_EQ("1.387", String(fixed(355)));
-    EXPECT_EQ("1.39", String(fixed(356)));
-    EXPECT_EQ("1.395", String(fixed(357)));
-    EXPECT_EQ("1.4", String(fixed(358)));
-    EXPECT_EQ("1.402", String(fixed(359)));
-    EXPECT_EQ("1.406", String(fixed(360)));
-    EXPECT_EQ("1.41", String(fixed(361)));
-    EXPECT_EQ("1.414", String(fixed(362)));
+    EXPECT_EQ("1.38", String(Fixed(353)));
+    EXPECT_EQ("1.383", String(Fixed(354)));
+    EXPECT_EQ("1.387", String(Fixed(355)));
+    EXPECT_EQ("1.39", String(Fixed(356)));
+    EXPECT_EQ("1.395", String(Fixed(357)));
+    EXPECT_EQ("1.4", String(Fixed(358)));
+    EXPECT_EQ("1.402", String(Fixed(359)));
+    EXPECT_EQ("1.406", String(Fixed(360)));
+    EXPECT_EQ("1.41", String(Fixed(361)));
+    EXPECT_EQ("1.414", String(Fixed(362)));
 
     // All 2.x values should be printed with 1 digit of precision.
     for (int i = 0; i < 10; ++i) {
         String expected(format("2.{0}", i));
-        EXPECT_EQ(expected, String(fixed(mFloatToFixed(2.0 + (i / 10.0)))));
+        EXPECT_EQ(expected, String(Fixed(mFloatToFixed(2.0 + (i / 10.0)))));
     }
 
     // All 3.xy values should be printed with 2 digits of precision
@@ -66,7 +66,7 @@ TEST_F(FixedTest, Print) {
             continue;
         }
         String expected(format("3.{0}", dec(i, 2)));
-        EXPECT_EQ(expected, String(fixed(mFloatToFixed(3.0 + (i / 100.0)))));
+        EXPECT_EQ(expected, String(Fixed(mFloatToFixed(3.0 + (i / 100.0)))));
     }
 }
 

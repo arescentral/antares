@@ -68,7 +68,6 @@ inline Fixed mFloatToFixed(float m_r)   { return roundf(m_r * 256.0); }
 inline float mFixedToFloat(Fixed m_f)   { return floorf(m_f * 1e3 / 256.0) / 1e3; }
 inline int32_t mFixedToLong(Fixed m_f)  { return evil_fixed_to_long(m_f); }
 
-inline Fixed fixed(Fixed value) { return value; }
 void print_to(sfz::PrintTarget out, const Fixed& fixed);
 
 // the max safe # we can do is 181 for signed multiply if we don't know other value

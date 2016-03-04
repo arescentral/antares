@@ -168,7 +168,7 @@ void CreateObjectDataText(String* text, Handle<BaseObject> object) {
     }
 
     // ship mass
-    find_replace(data, 0, keys.at(kMassStringNum), fixed(object->mass));
+    find_replace(data, 0, keys.at(kMassStringNum), Fixed(object->mass));
 
     // ship shields
     find_replace(data, 0, keys.at(kShieldStringNum), object->health);
@@ -178,14 +178,14 @@ void CreateObjectDataText(String* text, Handle<BaseObject> object) {
     find_replace(data, 0, keys.at(kHasLightStringNum), warp_speed);
 
     // max velocity
-    find_replace(data, 0, keys.at(kMaxSpeedStringNum), fixed(object->maxVelocity));
+    find_replace(data, 0, keys.at(kMaxSpeedStringNum), Fixed(object->maxVelocity));
 
     // thrust
-    find_replace(data, 0, keys.at(kThrustStringNum), fixed(object->maxThrust));
+    find_replace(data, 0, keys.at(kThrustStringNum), Fixed(object->maxThrust));
 
     // par turn
     find_replace(data, 0, keys.at(kTurnStringNum),
-            fixed(object->frame.rotation.turnAcceleration));
+            Fixed(object->frame.rotation.turnAcceleration));
 
     // now, check for weapons!
     CreateWeaponDataText(&data, object->pulse.base, values.at(kShipDataPulseStringNum));

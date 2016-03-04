@@ -1242,7 +1242,7 @@ void MiniComputerMakeStatusString(int32_t which_line, String& string) {
 
         case kSmallFixedValue:
         case kSmallFixedMinusValue:
-            print(string, fixed(line.value));
+            print(string, Fixed(line.value));
             break;
     }
     if (line.statusType != kPlainTextStatus) {
