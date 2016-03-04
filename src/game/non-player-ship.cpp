@@ -156,12 +156,10 @@ void fire_weapon(
     Point offset;
     Point* at = nullptr;
     if (&weapon != &subject->special) {
-        offset.h = (base_weapon.position[weapon.position].h * fcos).val();
-        offset.h -= (base_weapon.position[weapon.position].v * fsin).val();
-        offset.v = (base_weapon.position[weapon.position].h * fsin).val();
-        offset.v += (base_weapon.position[weapon.position].v * fcos).val();
-        offset.h = mFixedToLong(Fixed::from_val(offset.h));
-        offset.v = mFixedToLong(Fixed::from_val(offset.v));
+        offset.h = mFixedToLong((base_weapon.position[weapon.position].h * fcos) +
+                                (base_weapon.position[weapon.position].v * -fsin));
+        offset.v = mFixedToLong((base_weapon.position[weapon.position].h * fsin) +
+                                (base_weapon.position[weapon.position].v * fcos));
         at = &offset;
     }
 
