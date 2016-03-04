@@ -426,20 +426,22 @@ static void alter_owner(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterOwner;
-    if (focus.get()) {
-        if (alter.relative) {
-            // if it's relative AND reflexive, we take the direct
-            // object's owner, since relative & reflexive would
-            // do nothing.
-            if (action->reflexive && focus.get() && object.get()) {
-                focus->set_owner(object->owner, true);
-            } else {
-                focus->set_owner(subject->owner, true);
-            }
-        } else {
-            focus->set_owner(alter.admiral, false);
-        }
+    if (!focus.get()) {
+        return;
     }
+    if (alter.relative) {
+        // if it's relative AND reflexive, we take the direct
+        // object's owner, since relative & reflexive would
+        // do nothing.
+        if (action->reflexive && object.get()) {
+            focus->set_owner(object->owner, true);
+        } else {
+            focus->set_owner(subject->owner, true);
+        }
+    } else {
+        focus->set_owner(alter.admiral, false);
+    }
+
 }
 
 static void alter_condition_true_yet(Handle<Action> action) {
