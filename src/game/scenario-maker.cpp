@@ -199,22 +199,22 @@ void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors) {
 }
 
 void GetInitialCoord(Scenario::InitialObject *initial, coordPointType *coord, int32_t rotation) {
-    int32_t lcos, lsin, lscrap;
+    Fixed lcos, lsin, lscrap;
 
     mAddAngle(rotation, 90);
     GetRotPoint(&lcos, &lsin, rotation);
     lcos = -lcos;
     lsin = -lsin;
 
-    lscrap = (Fixed::from_val(initial->location.h) * Fixed::from_val(lcos)).val();
-    lscrap -= (Fixed::from_val(initial->location.v) * Fixed::from_val(lsin)).val();
+    lscrap = Fixed::from_val(initial->location.h) * lcos;
+    lscrap -= Fixed::from_val(initial->location.v) * lsin;
     coord->h = kUniversalCenter;
-    coord->h += lscrap;
+    coord->h += lscrap.val();
 
-    lscrap = (Fixed::from_val(initial->location.h) * Fixed::from_val(lsin)).val();
-    lscrap += (Fixed::from_val(initial->location.v) * Fixed::from_val(lcos)).val();
+    lscrap = Fixed::from_val(initial->location.h) * lsin;
+    lscrap += Fixed::from_val(initial->location.v) * lcos;
     coord->v = kUniversalCenter;
-    coord->v += lscrap;
+    coord->v += lscrap.val();
 }
 
 void set_initial_destination(const Scenario::InitialObject* initial, bool preserve) {
@@ -1005,7 +1005,8 @@ const Scenario* GetScenarioPtrFromChapter(int32_t chapter) {
 }
 
 coordPointType Translate_Coord_To_Scenario_Rotation(int32_t h, int32_t v) {
-    int32_t lcos, lsin, lscrap, angle = gScenarioRotation;
+    Fixed lcos, lsin, lscrap;
+    int32_t angle = gScenarioRotation;
     coordPointType coord;
 
     mAddAngle(angle, 90);
@@ -1013,15 +1014,15 @@ coordPointType Translate_Coord_To_Scenario_Rotation(int32_t h, int32_t v) {
     lcos = -lcos;
     lsin = -lsin;
 
-    lscrap = (Fixed::from_val(h) * Fixed::from_val(lcos)).val();
-    lscrap -= (Fixed::from_val(v) * Fixed::from_val(lsin)).val();
+    lscrap = Fixed::from_val(h) * lcos;
+    lscrap -= Fixed::from_val(v) * lsin;
     coord.h = kUniversalCenter;
-    coord.h += lscrap;
+    coord.h += lscrap.val();
 
-    lscrap = (Fixed::from_val(h) * Fixed::from_val(lsin)).val();
-    lscrap += (Fixed::from_val(v) * Fixed::from_val(lcos)).val();
+    lscrap = Fixed::from_val(h) * lsin;
+    lscrap += Fixed::from_val(v) * lcos;
     coord.v = kUniversalCenter;
-    coord.v += lscrap;
+    coord.v += lscrap.val();
 
     return coord;
 }

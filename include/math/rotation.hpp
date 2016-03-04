@@ -65,7 +65,6 @@ inline void mAddAngle(T& theta, int32_t other) {
 }
 
 void RotationInit();
-void GetRotPoint(int32_t *x, int32_t *y, int32_t rotpos);
 void GetRotPoint(Fixed *x, Fixed *y, int32_t rotpos);
 int32_t GetAngleFromVector(int32_t x, int32_t y);
 

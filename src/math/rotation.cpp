@@ -42,15 +42,6 @@ void RotationInit() {
     }
 }
 
-void GetRotPoint(int32_t *x, int32_t *y, int32_t rotpos) {
-    int32_t* i;
-
-    i = gRotTable + rotpos * 2L;
-    *x = *i;
-    i++;
-    *y = *i;
-}
-
 void GetRotPoint(Fixed *x, Fixed *y, int32_t rotpos) {
     int32_t* i;
 
