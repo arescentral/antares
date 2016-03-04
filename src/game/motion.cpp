@@ -970,8 +970,10 @@ static void correct_physical_space(Handle<SpaceObject> a, Handle<SpaceObject> b)
     mAddAngle(angle, 180);
     adjust_velocity(b, angle, totalMass, force);
 
-    if (!(a->velocity.h.val() || a->velocity.v.val() ||
-                b->velocity.h.val() || b->velocity.v.val())) {
+    if ((a->velocity.h == Fixed::zero()) &&
+        (a->velocity.v == Fixed::zero()) &&
+        (b->velocity.h == Fixed::zero()) &&
+        (b->velocity.v == Fixed::zero())) {
         return;
     }
 
