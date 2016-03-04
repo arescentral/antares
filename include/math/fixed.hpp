@@ -29,12 +29,19 @@ class Fixed {
         Fixed() = default;
         Fixed(int32_t value): _value(value) { }
         operator int32_t() const { return _value; }
-        operator int32_t&() { return _value; }
+
     private:
         int32_t _value;
 };
 
-inline void read_from(sfz::ReadSource in, Fixed& f) { sfz::read<int32_t>(in, f); }
+inline Fixed& operator+=(Fixed& x, Fixed y) { return x = x + y; }
+inline Fixed& operator-=(Fixed& x, Fixed y) { return x = x - y; }
+inline Fixed& operator*=(Fixed& x, Fixed y) { return x = x * y; }
+inline Fixed& operator/=(Fixed& x, Fixed y) { return x = x / y; }
+inline Fixed& operator<<=(Fixed& x, int n) { return x = x << n; }
+inline Fixed& operator>>=(Fixed& x, int n) { return x = x >> n; }
+
+inline void read_from(sfz::ReadSource in, Fixed& f) { f = sfz::read<int32_t>(in); }
 
 //
 //  MAX VALUE FOR SMALLFIXEDTYPE:
