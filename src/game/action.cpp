@@ -501,7 +501,7 @@ static void alter_age(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterAge;
-    ticks t = ticks(alter.minimum + focus->randomSeed.next(alter.range));
+    ticks t = alter.minimum + focus->randomSeed.next(alter.range);
 
     if (alter.relative) {
         if (focus->expires) {

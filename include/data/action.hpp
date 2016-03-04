@@ -141,6 +141,11 @@ union argumentType {
     AlterFixedRange alterSpin;
     AlterFixedRange alterOffline;
 
+    struct AlterAge {
+        bool relative;
+        ticks minimum, range;
+    } alterAge;
+
     struct AlterThrust {
         bool relative;
         Fixed minimum, range;
@@ -176,7 +181,6 @@ union argumentType {
     AlterObject alterHidden;
     AlterObject alterOwner;
     AlterObject alterConditionTrueYet;
-    AlterObject alterAge;
     AlterObject alterLocation;
     AlterObject alterAbsoluteLocation;
 

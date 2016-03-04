@@ -190,6 +190,12 @@ void read_from(ReadSource in, argumentType::AlterFixedRange& argument) {
     read(in, argument.range);
 }
 
+void read_from(ReadSource in, argumentType::AlterAge& argument) {
+    argument.relative = read<uint8_t>(in);
+    argument.minimum = ticks(read<int32_t>(in));
+    argument.range = ticks(read<int32_t>(in));
+}
+
 void read_from(ReadSource in, argumentType::AlterThrust& argument) {
     argument.relative = read<uint8_t>(in);
     read(in, argument.minimum);
