@@ -60,33 +60,33 @@ enum objectVerbIDEnum {
 };
 
 enum alterVerbIDType {
-    kAlterDamage            = 0,
-    kAlterVelocity          = 1,
-    kAlterThrust            = 2,
-    kAlterMaxThrust         = 3,
-    kAlterMaxVelocity       = 4,
-    kAlterMaxTurnRate       = 5,
-    kAlterLocation          = 6,
-    kAlterScale             = 7,
-    kAlterWeapon1           = 8,
-    kAlterWeapon2           = 9,
-    kAlterSpecial           = 10,
-    kAlterEnergy            = 11,
-    kAlterOwner             = 12,
-    kAlterHidden            = 13,
-    kAlterCloak             = 14,
-    kAlterOffline           = 15,
-    kAlterSpin              = 16,
-    kAlterBaseType          = 17,
-    kAlterConditionTrueYet  = 18,  // relative = state, min = which condition basically force to recheck
-    kAlterOccupation        = 19,  // for special neutral death objects
-    kAlterAbsoluteCash      = 20,  // relative: true = cash to object : false = range = admiral who gets cash
-    kAlterAge               = 21,
-    kAlterAttributes        = 22,
-    kAlterLevelKeyTag       = 23,
-    kAlterOrderKeyTag       = 24,
-    kAlterEngageKeyTag      = 25,
-    kAlterAbsoluteLocation  = 26,
+    kAlterDamage            = (kAlter << 8) | 0,
+    kAlterVelocity          = (kAlter << 8) | 1,
+    kAlterThrust            = (kAlter << 8) | 2,
+    kAlterMaxThrust         = (kAlter << 8) | 3,
+    kAlterMaxVelocity       = (kAlter << 8) | 4,
+    kAlterMaxTurnRate       = (kAlter << 8) | 5,
+    kAlterLocation          = (kAlter << 8) | 6,
+    kAlterScale             = (kAlter << 8) | 7,
+    kAlterWeapon1           = (kAlter << 8) | 8,
+    kAlterWeapon2           = (kAlter << 8) | 9,
+    kAlterSpecial           = (kAlter << 8) | 10,
+    kAlterEnergy            = (kAlter << 8) | 11,
+    kAlterOwner             = (kAlter << 8) | 12,
+    kAlterHidden            = (kAlter << 8) | 13,
+    kAlterCloak             = (kAlter << 8) | 14,
+    kAlterOffline           = (kAlter << 8) | 15,
+    kAlterSpin              = (kAlter << 8) | 16,
+    kAlterBaseType          = (kAlter << 8) | 17,
+    kAlterConditionTrueYet  = (kAlter << 8) | 18,  // relative = state, min = which condition basically force to recheck
+    kAlterOccupation        = (kAlter << 8) | 19,  // for special neutral death objects
+    kAlterAbsoluteCash      = (kAlter << 8) | 20,  // relative: true = cash to object : false = range = admiral who gets cash
+    kAlterAge               = (kAlter << 8) | 21,
+    kAlterAttributes        = (kAlter << 8) | 22,
+    kAlterLevelKeyTag       = (kAlter << 8) | 23,
+    kAlterOrderKeyTag       = (kAlter << 8) | 24,
+    kAlterEngageKeyTag      = (kAlter << 8) | 25,
+    kAlterAbsoluteLocation  = (kAlter << 8) | 26,
 };
 
 enum dieVerbIDEnum {
@@ -245,8 +245,7 @@ struct Action {
     static Action* get(int number);
 
     uint8_t                     verb_group() const;
-    uint8_t                     verb_subgroup() const;
-    uint8_t                     whole_verb() const;
+    uint16_t                    whole_verb() const;
 
     uint8_t                     _verb;
 

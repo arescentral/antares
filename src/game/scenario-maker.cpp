@@ -176,7 +176,7 @@ void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors) {
             break;
 
         case kAlter:
-            switch(action->verb_subgroup()) {
+            switch(action->whole_verb()) {
                 case kAlterBaseType:
                     AddBaseObjectMedia(
                             Handle<BaseObject>(action->argument.alterObject.minimum),

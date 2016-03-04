@@ -32,15 +32,11 @@ uint8_t Action::verb_group() const {
     return _verb;
 }
 
-uint8_t Action::verb_subgroup() const {
+uint16_t Action::whole_verb() const {
     if (_verb == kAlter) {
-        return argument.alterObject.alterType;
+        return (kAlter << 8) | argument.alterObject.alterType;
     }
-    return 0;
-}
-
-uint8_t Action::whole_verb() const {
-    return (_verb << 8) | verb_subgroup();
+    return _verb << 8;
 }
 
 void read_from(ReadSource in, Action& action) {

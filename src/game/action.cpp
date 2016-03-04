@@ -265,7 +265,7 @@ static void alter(
     Fixed f, f2;
     int16_t angle;
     coordPointType newLocation;
-    switch (action->verb_subgroup()) {
+    switch (action->whole_verb()) {
         case kAlterDamage:
             focus->alter_health(alter.minimum);
             break;
