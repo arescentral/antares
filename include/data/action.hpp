@@ -244,9 +244,7 @@ void read_from(sfz::ReadSource in, argumentType::AssumeInitial& argument);
 struct Action {
     static Action* get(int number);
 
-    uint16_t                    whole_verb() const;
-
-    uint16_t                     _verb;
+    uint16_t                    verb;
 
     uint8_t                     reflexive;              // does it apply to object executing verb?
     uint32_t                    inclusiveFilter;        // if it has ALL these attributes, OK -- for non-reflective verbs
