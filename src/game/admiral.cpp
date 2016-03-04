@@ -46,13 +46,13 @@ const int32_t kDestNoObject             = -1;
 const int32_t kDestinationNameLen        = 17;
 const int32_t kAdmiralNameLen            = 31;
 
-const Fixed kUnimportantTarget          = Fixed::from_val(0x00000000);
-const Fixed kMostImportantTarget        = Fixed::from_val(0x00000200);
-const Fixed kLeastImportantTarget       = Fixed::from_val(0x00000100);
-const Fixed kVeryImportantTarget        = Fixed::from_val(0x00000160);
-const Fixed kImportantTarget            = Fixed::from_val(0x00000140);
-const Fixed kSomewhatImportantTarget    = Fixed::from_val(0x00000120);
-const Fixed kAbsolutelyEssential        = Fixed::from_val(0x00008000);
+const Fixed kUnimportantTarget          = Fixed::from_float(0.000);
+const Fixed kMostImportantTarget        = Fixed::from_float(2.000);
+const Fixed kLeastImportantTarget       = Fixed::from_float(1.000);
+const Fixed kVeryImportantTarget        = Fixed::from_float(1.375);
+const Fixed kImportantTarget            = Fixed::from_float(1.250);
+const Fixed kSomewhatImportantTarget    = Fixed::from_float(1.125);
+const Fixed kAbsolutelyEssential        = Fixed::from_float(128.0);
 
 }  // namespace
 

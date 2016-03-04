@@ -37,9 +37,9 @@ const int kMinimumStarSpeed = 1;
 const int kMaximumStarSpeed = 3;
 const int kStarSpeedSpread = (kMaximumStarSpeed - kMinimumStarSpeed + 1);
 
-const Fixed kSlowStarFraction   = Fixed::from_val(0x00000080);   // 0.500
-const Fixed kMediumStarFraction = Fixed::from_val(0x000000c0);   // 0.750
-const Fixed kFastStarFraction   = Fixed::from_val(0x00000100);   // 1.000
+const Fixed kSlowStarFraction   = Fixed::from_float(0.500);
+const Fixed kMediumStarFraction = Fixed::from_float(0.750);
+const Fixed kFastStarFraction   = Fixed::from_float(1.000);
 
 const uint8_t kStarColor = GRAY;
 
