@@ -32,61 +32,62 @@ namespace antares {
 struct SpaceObject;
 
 enum objectVerbIDEnum {
-    kNoAction = 0,
-    kCreateObject = 1,
-    kPlaySound = 2,
-    kAlter = 3,
-    kMakeSparks = 4,
-    kReleaseEnergy = 5,
-    kLandAt = 6,
-    kEnterWarp = 7,
-    kDisplayMessage = 8,
-    kChangeScore = 9,
-    kDeclareWinner = 10,
-    kDie = 11,
-    kSetDestination = 12,
-    kActivateSpecial = 13,
-    kActivatePulse = 14,
-    kActivateBeam = 15,
-    kColorFlash = 16,
-    kCreateObjectSetDest = 17,      // creates an object with the same destination as anObject's (either subject or direct)
-    kNilTarget = 18,
-    kDisableKeys = 19,
-    kEnableKeys = 20,
-    kSetZoom = 21,
-    kComputerSelect = 22,           // selects a line & screen of the minicomputer
-    kAssumeInitialObject = 23       // assumes the identity of an intial object; for tutorial
+    kNoAction               = 0,
+    kCreateObject           = 1,
+    kPlaySound              = 2,
+    kAlter                  = 3,
+    kMakeSparks             = 4,
+    kReleaseEnergy          = 5,
+    kLandAt                 = 6,
+    kEnterWarp              = 7,
+    kDisplayMessage         = 8,
+    kChangeScore            = 9,
+    kDeclareWinner          = 10,
+    kDie                    = 11,
+    kSetDestination         = 12,
+    kActivateSpecial        = 13,
+    kActivatePulse          = 14,
+    kActivateBeam           = 15,
+    kColorFlash             = 16,
+    kCreateObjectSetDest    = 17,  // creates an object with the same destination as anObject's
+                                   // (either subject or direct)
+    kNilTarget              = 18,
+    kDisableKeys            = 19,
+    kEnableKeys             = 20,
+    kSetZoom                = 21,
+    kComputerSelect         = 22,  // selects a line & screen of the minicomputer
+    kAssumeInitialObject    = 23,  // assumes the identity of an intial object; for tutorial
 };
 typedef uint8_t objectVerbIDType;
 
 enum alterVerbIDType {
-    kAlterDamage = 0,
-    kAlterVelocity = 1,
-    kAlterThrust = 2,
-    kAlterMaxThrust = 3,
-    kAlterMaxVelocity = 4,
-    kAlterMaxTurnRate = 5,
-    kAlterLocation = 6,
-    kAlterScale = 7,
-    kAlterWeapon1 = 8,
-    kAlterWeapon2 = 9,
-    kAlterSpecial = 10,
-    kAlterEnergy = 11,
-    kAlterOwner = 12,
-    kAlterHidden = 13,
-    kAlterCloak = 14,
-    kAlterOffline = 15,
-    kAlterSpin = 16,
-    kAlterBaseType = 17,
-    kAlterConditionTrueYet = 18,    // relative = state, min = which condition basically force to recheck
-    kAlterOccupation = 19,          // for special neutral death objects
-    kAlterAbsoluteCash = 20,        // relative: true = cash to object : false = range = admiral who gets cash
-    kAlterAge = 21,
-    kAlterAttributes = 22,
-    kAlterLevelKeyTag = 23,
-    kAlterOrderKeyTag = 24,
-    kAlterEngageKeyTag = 25,
-    kAlterAbsoluteLocation = 26
+    kAlterDamage            = 0,
+    kAlterVelocity          = 1,
+    kAlterThrust            = 2,
+    kAlterMaxThrust         = 3,
+    kAlterMaxVelocity       = 4,
+    kAlterMaxTurnRate       = 5,
+    kAlterLocation          = 6,
+    kAlterScale             = 7,
+    kAlterWeapon1           = 8,
+    kAlterWeapon2           = 9,
+    kAlterSpecial           = 10,
+    kAlterEnergy            = 11,
+    kAlterOwner             = 12,
+    kAlterHidden            = 13,
+    kAlterCloak             = 14,
+    kAlterOffline           = 15,
+    kAlterSpin              = 16,
+    kAlterBaseType          = 17,
+    kAlterConditionTrueYet  = 18,  // relative = state, min = which condition basically force to recheck
+    kAlterOccupation        = 19,  // for special neutral death objects
+    kAlterAbsoluteCash      = 20,  // relative: true = cash to object : false = range = admiral who gets cash
+    kAlterAge               = 21,
+    kAlterAttributes        = 22,
+    kAlterLevelKeyTag       = 23,
+    kAlterOrderKeyTag       = 24,
+    kAlterEngageKeyTag      = 25,
+    kAlterAbsoluteLocation  = 26,
 };
 
 enum dieVerbIDEnum {
