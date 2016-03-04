@@ -369,7 +369,7 @@ SpaceObject::SpaceObject(
                 baseType->frame.animation.frameDirectionRange);
         }
         frame.animation.frameFraction = Fixed::zero();
-        frame.animation.frameSpeed = Fixed::from_val(baseType->frame.animation.frameSpeed);
+        frame.animation.frameSpeed = baseType->frame.animation.frameSpeed;
     }
 
     if (baseType->initialAge >= ticks(0)) {
@@ -485,7 +485,7 @@ void SpaceObject::change_base_type(
                 base->frame.animation.frameDirectionRange);
         }
         obj->frame.animation.frameFraction = Fixed::zero();
-        obj->frame.animation.frameSpeed = Fixed::from_val(base->frame.animation.frameSpeed);
+        obj->frame.animation.frameSpeed = base->frame.animation.frameSpeed;
     }
 
     obj->maxVelocity = base->maxVelocity;

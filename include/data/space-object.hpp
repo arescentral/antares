@@ -226,8 +226,8 @@ union objectFrameType {
         int32_t                 frameDirection;     // direction (either -1, 0, or 1)
         int32_t                 frameDirectionRange;    // either 0, 1, or 2
 
-        int32_t                 frameSpeed;         // speed at which object animates
-        int32_t                 frameSpeedRange;    // random addition to speed
+        Fixed                   frameSpeed;         // speed at which object animates
+        Fixed                   frameSpeedRange;    // random addition to speed
 
         int32_t                 frameShape;         // starting shape #
         int32_t                 frameShapeRange;    // random addition to starting shape #
