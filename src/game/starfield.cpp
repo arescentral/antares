@@ -86,8 +86,8 @@ void Starfield::make_sparks(
 
     for (scrollStarType* spark: range(_stars + kSparkStarOffset, _stars + kAllStarNum)) {
         if (spark->speed == kNoStar) {
-            spark->velocity.h = Fixed::from_val(Randomize(maxVelocity.val() << 2L)) - maxVelocity;
-            spark->velocity.v = Fixed::from_val(Randomize(maxVelocity.val() << 2L)) - maxVelocity;
+            spark->velocity.h = Randomize(maxVelocity << 2) - maxVelocity;
+            spark->velocity.v = Randomize(maxVelocity << 2) - maxVelocity;
             spark->oldLocation.h = spark->location.h = location->h;
             spark->oldLocation.v = spark->location.v = location->v;
             spark->motionFraction.h = spark->motionFraction.v = Fixed::zero();
