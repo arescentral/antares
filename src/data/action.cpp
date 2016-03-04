@@ -29,20 +29,18 @@ using sfz::read;
 namespace antares {
 
 uint8_t Action::verb_group() const {
-    return _verb;
+    return _verb >> 8;
 }
 
 uint16_t Action::whole_verb() const {
-    if (_verb == kAlter) {
-        return (kAlter << 8) | argument.alterObject.alterType;
-    }
-    return _verb << 8;
+    return _verb;
 }
 
 void read_from(ReadSource in, Action& action) {
     uint8_t section[24];
 
-    read(in, action._verb);
+    action._verb = read<uint8_t>(in) << 8;
+
     read(in, action.reflexive);
     read(in, action.inclusiveFilter);
     read(in, action.exclusiveFilter);
@@ -59,7 +57,7 @@ void read_from(ReadSource in, Action& action) {
     read(in, section, 24);
 
     BytesSlice sub(BytesSlice(section, 24));
-    switch (action._verb) {
+    switch (action.verb_group()) {
       case kNoAction:
       case kSetDestination:
       case kActivateSpecial:
@@ -79,6 +77,7 @@ void read_from(ReadSource in, Action& action) {
 
       case kAlter:
         read(sub, action.argument.alterObject);
+        action._verb |= action.argument.alterObject.alterType;
         break;
 
       case kMakeSparks:

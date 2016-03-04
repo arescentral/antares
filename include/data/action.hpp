@@ -247,7 +247,7 @@ struct Action {
     uint8_t                     verb_group() const;
     uint16_t                    whole_verb() const;
 
-    uint8_t                     _verb;
+    uint16_t                     _verb;
 
     uint8_t                     reflexive;              // does it apply to object executing verb?
     uint32_t                    inclusiveFilter;        // if it has ALL these attributes, OK -- for non-reflective verbs
