@@ -32,61 +32,61 @@ namespace antares {
 struct SpaceObject;
 
 enum objectVerbIDEnum {
-    kNoAction               = 0,
-    kCreateObject           = 1,
-    kPlaySound              = 2,
-    kAlter                  = 3,
-    kMakeSparks             = 4,
-    kReleaseEnergy          = 5,
-    kLandAt                 = 6,
-    kEnterWarp              = 7,
-    kDisplayMessage         = 8,
-    kChangeScore            = 9,
-    kDeclareWinner          = 10,
-    kDie                    = 11,
-    kSetDestination         = 12,
-    kActivateSpecial        = 13,
-    kActivatePulse          = 14,
-    kActivateBeam           = 15,
-    kColorFlash             = 16,
-    kCreateObjectSetDest    = 17,  // creates an object with the same destination as anObject's
+    kNoAction               = 0 << 8,
+    kCreateObject           = 1 << 8,
+    kPlaySound              = 2 << 8,
+    kAlter                  = 3 << 8,
+    kMakeSparks             = 4 << 8,
+    kReleaseEnergy          = 5 << 8,
+    kLandAt                 = 6 << 8,
+    kEnterWarp              = 7 << 8,
+    kDisplayMessage         = 8 << 8,
+    kChangeScore            = 9 << 8,
+    kDeclareWinner          = 10 << 8,
+    kDie                    = 11 << 8,
+    kSetDestination         = 12 << 8,
+    kActivateSpecial        = 13 << 8,
+    kActivatePulse          = 14 << 8,
+    kActivateBeam           = 15 << 8,
+    kColorFlash             = 16 << 8,
+    kCreateObjectSetDest    = 17 << 8,  // creates an object with the same destination as anObject's
                                    // (either subject or direct)
-    kNilTarget              = 18,
-    kDisableKeys            = 19,
-    kEnableKeys             = 20,
-    kSetZoom                = 21,
-    kComputerSelect         = 22,  // selects a line & screen of the minicomputer
-    kAssumeInitialObject    = 23,  // assumes the identity of an intial object; for tutorial
+    kNilTarget              = 18 << 8,
+    kDisableKeys            = 19 << 8,
+    kEnableKeys             = 20 << 8,
+    kSetZoom                = 21 << 8,
+    kComputerSelect         = 22 << 8,  // selects a line & screen of the minicomputer
+    kAssumeInitialObject    = 23 << 8,  // assumes the identity of an intial object; for tutorial
 };
 
 enum alterVerbIDType {
-    kAlterDamage            = (kAlter << 8) | 0,
-    kAlterVelocity          = (kAlter << 8) | 1,
-    kAlterThrust            = (kAlter << 8) | 2,
-    kAlterMaxThrust         = (kAlter << 8) | 3,
-    kAlterMaxVelocity       = (kAlter << 8) | 4,
-    kAlterMaxTurnRate       = (kAlter << 8) | 5,
-    kAlterLocation          = (kAlter << 8) | 6,
-    kAlterScale             = (kAlter << 8) | 7,
-    kAlterWeapon1           = (kAlter << 8) | 8,
-    kAlterWeapon2           = (kAlter << 8) | 9,
-    kAlterSpecial           = (kAlter << 8) | 10,
-    kAlterEnergy            = (kAlter << 8) | 11,
-    kAlterOwner             = (kAlter << 8) | 12,
-    kAlterHidden            = (kAlter << 8) | 13,
-    kAlterCloak             = (kAlter << 8) | 14,
-    kAlterOffline           = (kAlter << 8) | 15,
-    kAlterSpin              = (kAlter << 8) | 16,
-    kAlterBaseType          = (kAlter << 8) | 17,
-    kAlterConditionTrueYet  = (kAlter << 8) | 18,  // relative = state, min = which condition basically force to recheck
-    kAlterOccupation        = (kAlter << 8) | 19,  // for special neutral death objects
-    kAlterAbsoluteCash      = (kAlter << 8) | 20,  // relative: true = cash to object : false = range = admiral who gets cash
-    kAlterAge               = (kAlter << 8) | 21,
-    kAlterAttributes        = (kAlter << 8) | 22,
-    kAlterLevelKeyTag       = (kAlter << 8) | 23,
-    kAlterOrderKeyTag       = (kAlter << 8) | 24,
-    kAlterEngageKeyTag      = (kAlter << 8) | 25,
-    kAlterAbsoluteLocation  = (kAlter << 8) | 26,
+    kAlterDamage            = kAlter | 0,
+    kAlterVelocity          = kAlter | 1,
+    kAlterThrust            = kAlter | 2,
+    kAlterMaxThrust         = kAlter | 3,
+    kAlterMaxVelocity       = kAlter | 4,
+    kAlterMaxTurnRate       = kAlter | 5,
+    kAlterLocation          = kAlter | 6,
+    kAlterScale             = kAlter | 7,
+    kAlterWeapon1           = kAlter | 8,
+    kAlterWeapon2           = kAlter | 9,
+    kAlterSpecial           = kAlter | 10,
+    kAlterEnergy            = kAlter | 11,
+    kAlterOwner             = kAlter | 12,
+    kAlterHidden            = kAlter | 13,
+    kAlterCloak             = kAlter | 14,
+    kAlterOffline           = kAlter | 15,
+    kAlterSpin              = kAlter | 16,
+    kAlterBaseType          = kAlter | 17,
+    kAlterConditionTrueYet  = kAlter | 18,  // relative = state, min = which condition basically force to recheck
+    kAlterOccupation        = kAlter | 19,  // for special neutral death objects
+    kAlterAbsoluteCash      = kAlter | 20,  // relative: true = cash to object : false = range = admiral who gets cash
+    kAlterAge               = kAlter | 21,
+    kAlterAttributes        = kAlter | 22,
+    kAlterLevelKeyTag       = kAlter | 23,
+    kAlterOrderKeyTag       = kAlter | 24,
+    kAlterEngageKeyTag      = kAlter | 25,
+    kAlterAbsoluteLocation  = kAlter | 26,
 };
 
 enum dieVerbIDEnum {
@@ -244,7 +244,7 @@ void read_from(sfz::ReadSource in, argumentType::AssumeInitial& argument);
 struct Action {
     static Action* get(int number);
 
-    uint8_t                     verb_group() const;
+    uint16_t                    verb_group() const;
     uint16_t                    whole_verb() const;
 
     uint16_t                     _verb;

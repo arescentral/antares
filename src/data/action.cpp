@@ -28,8 +28,8 @@ using sfz::read;
 
 namespace antares {
 
-uint8_t Action::verb_group() const {
-    return _verb >> 8;
+uint16_t Action::verb_group() const {
+    return _verb & 0xff00;
 }
 
 uint16_t Action::whole_verb() const {
@@ -57,7 +57,7 @@ void read_from(ReadSource in, Action& action) {
     read(in, section, 24);
 
     BytesSlice sub(BytesSlice(section, 24));
-    switch (action.verb_group()) {
+    switch (action._verb) {
       case kNoAction:
       case kSetDestination:
       case kActivateSpecial:
