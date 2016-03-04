@@ -287,13 +287,8 @@ static void alter(
 
         case kAlterSpin:
             if (focus->attributes & kCanTurn) {
-                if (focus->attributes & kShapeFromDirection) {
-                    f = (focus->baseType->frame.rotation.maxTurnRate *
-                         Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range)));
-                } else {
-                    f = (2 /*kDefaultTurnRate*/ *
-                         Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range)));
-                }
+                f = (focus->turn_rate() *
+                     Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range)));
                 f2 = focus->baseType->mass;
                 if (f2 == Fixed::zero()) {
                     f = kFixedNone;

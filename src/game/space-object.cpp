@@ -65,7 +65,7 @@ const uint8_t kNeutralColor         = SKY_BLUE;
 static const int16_t kSpaceObjectNameResID          = 5000;
 static const int16_t kSpaceObjectShortNameResID     = 5001;
 
-const int32_t kDefaultTurnRate      = 0x00000200;
+const Fixed kDefaultTurnRate        = Fixed::from_long(2.000);
 
 #ifdef DATA_COVERAGE
 ANTARES_GLOBAL set<int32_t> covered_objects;
@@ -954,7 +954,7 @@ Fixed SpaceObject::turn_rate() const {
     if (attributes & kShapeFromDirection) {
         return baseType->frame.rotation.maxTurnRate;
     }
-    return Fixed::from_val(kDefaultTurnRate);
+    return kDefaultTurnRate;
 }
 
 StringSlice get_object_name(Handle<BaseObject> id) {
