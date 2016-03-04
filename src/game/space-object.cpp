@@ -209,7 +209,7 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
         int16_t whichShape = 0;
         int16_t angle;
         if (obj->attributes & kIsSelfAnimated) {
-            whichShape = more_evil_fixed_to_long(Fixed::from_val(obj->frame.animation.thisShape));
+            whichShape = more_evil_fixed_to_long(obj->frame.animation.thisShape);
         } else if (obj->attributes & kShapeFromDirection) {
             angle = obj->direction;
             mAddAngle(angle, obj->baseType->frame.rotation.rotRes >> 1);
@@ -275,17 +275,6 @@ void CorrectAllBaseObjectColor( void)
             {
                 aBase->frame.beam.color = 0;
             }
-        }
-
-//      if (( aBase->attributes & kCanThink) && ( aBase->warpSpeed <= 0))
-//          aBase->warpSpeed = Fixed::from_long( 50);
-
-        if ( aBase->attributes & kIsSelfAnimated)
-        {
-            aBase->frame.animation.firstShape = Fixed::from_long(aBase->frame.animation.firstShape).val();
-            aBase->frame.animation.lastShape = Fixed::from_long(aBase->frame.animation.lastShape).val();
-            aBase->frame.animation.frameShape = Fixed::from_long(aBase->frame.animation.frameShape).val();
-            aBase->frame.animation.frameShapeRange = Fixed::from_long(aBase->frame.animation.frameShapeRange).val();
         }
     }
 
@@ -355,7 +344,7 @@ SpaceObject::SpaceObject(
 
     if (attributes & kIsSelfAnimated) {
         frame.animation.thisShape = baseType->frame.animation.frameShape;
-        if (baseType->frame.animation.frameShapeRange > 0) {
+        if (baseType->frame.animation.frameShapeRange > Fixed::zero()) {
             frame.animation.thisShape +=
                 randomSeed.next(baseType->frame.animation.frameShapeRange);
         }
@@ -471,9 +460,8 @@ void SpaceObject::change_base_type(
 
     if (obj->attributes & kIsSelfAnimated) {
         obj->frame.animation.thisShape = base->frame.animation.frameShape;
-        if (base->frame.animation.frameShapeRange > 0) {
-            r = obj->randomSeed.next(base->frame.animation.frameShapeRange);
-            obj->frame.animation.thisShape += r;
+        if (base->frame.animation.frameShapeRange > Fixed::zero()) {
+            obj->frame.animation.thisShape += obj->randomSeed.next(base->frame.animation.frameShapeRange);
         }
         obj->frame.animation.frameDirection = base->frame.animation.frameDirection;
         if (base->frame.animation.frameDirectionRange == -1) {
@@ -579,7 +567,7 @@ void SpaceObject::change_base_type(
         obj->sprite->scale = base->naturalScale;
 
         if (obj->attributes & kIsSelfAnimated) {
-            obj->sprite->whichShape = more_evil_fixed_to_long(Fixed::from_val(obj->frame.animation.thisShape));
+            obj->sprite->whichShape = more_evil_fixed_to_long(obj->frame.animation.thisShape);
         } else if (obj->attributes & kShapeFromDirection) {
             angle = obj->direction;
             mAddAngle(angle, base->frame.rotation.rotRes >> 1);

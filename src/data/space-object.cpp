@@ -205,14 +205,14 @@ void read_from(ReadSource in, objectFrameType::Rotation& rotation) {
 }
 
 void read_from(ReadSource in, objectFrameType::Animation& animation) {
-    read(in, animation.firstShape);
-    read(in, animation.lastShape);
+    animation.firstShape = Fixed::from_long(read<int32_t>(in));
+    animation.lastShape = Fixed::from_long(read<int32_t>(in));
     read(in, animation.frameDirection);
     read(in, animation.frameDirectionRange);
     read(in, animation.frameSpeed);
     read(in, animation.frameSpeedRange);
-    read(in, animation.frameShape);
-    read(in, animation.frameShapeRange);
+    animation.frameShape = Fixed::from_long(read<int32_t>(in));
+    animation.frameShapeRange = Fixed::from_long(read<int32_t>(in));
 }
 
 void read_from(ReadSource in, objectFrameType::Beam& beam) {

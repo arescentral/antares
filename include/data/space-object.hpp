@@ -220,8 +220,8 @@ union objectFrameType {
 
     // animation: objects whose appearence does not depend on direction
     struct Animation {
-        int32_t                 firstShape;         // first shape in range
-        int32_t                 lastShape;          // last shape (inclusive)
+        Fixed                   firstShape;         // first shape in range
+        Fixed                   lastShape;          // last shape (inclusive)
 
         int32_t                 frameDirection;     // direction (either -1, 0, or 1)
         int32_t                 frameDirectionRange;    // either 0, 1, or 2
@@ -229,8 +229,8 @@ union objectFrameType {
         Fixed                   frameSpeed;         // speed at which object animates
         Fixed                   frameSpeedRange;    // random addition to speed
 
-        int32_t                 frameShape;         // starting shape #
-        int32_t                 frameShapeRange;    // random addition to starting shape #
+        Fixed                   frameShape;         // starting shape #
+        Fixed                   frameShapeRange;    // random addition to starting shape #
     };
     Animation animation;
 

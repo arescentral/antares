@@ -123,7 +123,7 @@ class SpaceObject {
 
     struct {
         struct {
-            int32_t             thisShape;
+            Fixed               thisShape;
             Fixed               frameFraction;
             int32_t             frameDirection;
             Fixed               frameSpeed;

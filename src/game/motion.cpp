@@ -293,9 +293,10 @@ static void animate(Handle<SpaceObject> o) {
     }
 
     auto& space_anim = o->frame.animation;
-    space_anim.thisShape += space_anim.frameDirection * space_anim.frameSpeed.val();
+    space_anim.thisShape += space_anim.frameDirection * space_anim.frameSpeed;
     if (o->attributes & kAnimationCycle) {
-        int shape_num = (base_anim.lastShape - base_anim.firstShape) + 1;
+        // TODO(sfiera): does Fixed::from_val(1) make sense here? Not Fixed::from_long(1)?
+        Fixed shape_num = (base_anim.lastShape - base_anim.firstShape) + Fixed::from_val(1);
         while (space_anim.thisShape > base_anim.lastShape) {
             space_anim.thisShape -= shape_num;
         }
@@ -459,7 +460,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
         auto baseObject = o->base;
         if (o->attributes & kIsSelfAnimated) {
             if (baseObject->frame.animation.frameSpeed != Fixed::zero()) {
-                sprite.whichShape = more_evil_fixed_to_long(Fixed::from_val(o->frame.animation.thisShape));
+                sprite.whichShape = more_evil_fixed_to_long(o->frame.animation.thisShape);
             }
         } else if (o->attributes & kShapeFromDirection) {
             int16_t angle = o->direction;
