@@ -171,6 +171,16 @@ union argumentType {
         Handle<BaseObject> base;
     } alterBaseType;
 
+    struct AlterLocation {
+        bool relative;
+        int32_t by;
+    } alterLocation;
+
+    struct AlterAbsoluteLocation {
+        bool relative;
+        Point at;
+    } alterAbsoluteLocation;
+
     // alterObject: change some attribute of an object
     struct AlterObject {
         uint8_t                 alterType;
@@ -181,8 +191,6 @@ union argumentType {
     AlterObject alterHidden;
     AlterObject alterOwner;
     AlterObject alterConditionTrueYet;
-    AlterObject alterLocation;
-    AlterObject alterAbsoluteLocation;
 
     // makeSpark
     struct MakeSparks {

@@ -223,6 +223,16 @@ void read_from(ReadSource in, argumentType::AlterBaseType& argument) {
     argument.base = Handle<BaseObject>(read<int32_t>(in));
 }
 
+void read_from(ReadSource in, argumentType::AlterLocation& argument) {
+    argument.relative = read<uint8_t>(in);
+    read(in, argument.by);
+}
+
+void read_from(ReadSource in, argumentType::AlterAbsoluteLocation& argument) {
+    argument.relative = read<uint8_t>(in);
+    read(in, argument.at);
+}
+
 void read_from(ReadSource in, argumentType::MakeSparks& argument) {
     read(in, argument.howMany);
     read(in, argument.speed);

@@ -532,8 +532,8 @@ static void alter_location(
     } else {
         newLocation.h = newLocation.v = 0;
     }
-    newLocation.h += focus->randomSeed.next(alter.minimum << 1) - alter.minimum;
-    newLocation.v += focus->randomSeed.next(alter.minimum << 1) - alter.minimum;
+    newLocation.h += focus->randomSeed.next(alter.by << 1) - alter.by;
+    newLocation.v += focus->randomSeed.next(alter.by << 1) - alter.by;
     focus->location.h = newLocation.h;
     focus->location.v = newLocation.v;
 }
@@ -543,10 +543,10 @@ static void alter_absolute_location(
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterAbsoluteLocation;
     if (alter.relative) {
-        focus->location.h += alter.minimum;
-        focus->location.v += alter.range;
+        focus->location.h += alter.at.h;
+        focus->location.v += alter.at.v;
     } else {
-        focus->location = Translate_Coord_To_Scenario_Rotation(alter.minimum, alter.range);
+        focus->location = Translate_Coord_To_Scenario_Rotation(alter.at.h, alter.at.v);
     }
 }
 
