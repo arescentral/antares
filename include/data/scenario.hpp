@@ -197,6 +197,7 @@ struct Scenario::Condition {
         Point               location;
         CounterArgument     counter;
         int32_t             longValue;
+        Fixed               fixedValue;
         ticks               timeValue;
         uint32_t            unsignedLongValue;
     } conditionArgument;

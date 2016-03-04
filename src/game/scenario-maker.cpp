@@ -429,8 +429,8 @@ bool Scenario::Condition::is_true() const {
         case kVelocityLessThanEqualToCondition: {
             auto sObject = GetObjectFromInitialNumber(subjectObject);
             return sObject.get()
-                && ((ABS(sObject->velocity.h)) < Fixed::from_val(conditionArgument.longValue))
-                && ((ABS(sObject->velocity.v)) < Fixed::from_val(conditionArgument.longValue));
+                && (ABS(sObject->velocity.h) < conditionArgument.fixedValue)
+                && (ABS(sObject->velocity.v) < conditionArgument.fixedValue);
         }
 
         case kNoShipsLeftCondition:
