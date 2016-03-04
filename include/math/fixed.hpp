@@ -49,10 +49,10 @@ inline bool operator>=(Fixed x, Fixed y) { return x.val() >= y.val(); }
 
 inline Fixed operator+(Fixed x, Fixed y) { return Fixed::from_val(x.val() + y.val()); }
 inline Fixed operator-(Fixed x, Fixed y) { return Fixed::from_val(x.val() - y.val()); }
+inline Fixed operator%(Fixed x, Fixed y) { return Fixed::from_val(x.val() % y.val()); }
 inline Fixed operator*(Fixed x, int32_t y) { return Fixed::from_val(x.val() * y); }
 inline Fixed operator*(int32_t x, Fixed y) { return Fixed::from_val(x * y.val()); }
 inline Fixed operator/(Fixed x, int32_t y) { return Fixed::from_val(x.val() / y); }
-inline Fixed operator/(int32_t x, Fixed y) { return Fixed::from_val(x / y.val()); }
 inline Fixed operator<<(Fixed x, int n) { return Fixed::from_val(x.val() << n); }
 inline Fixed operator>>(Fixed x, int n) { return Fixed::from_val(x.val() >> n); }
 
@@ -60,6 +60,7 @@ inline Fixed operator>>(Fixed x, int n) { return Fixed::from_val(x.val() >> n); 
 // if -1 <= other value <= 1 then we can do 32767
 inline Fixed operator*(Fixed x, Fixed y) { return (x * y.val()) >> 8; }
 inline Fixed operator/(Fixed x, Fixed y) { return (x << 8) / y.val(); }
+inline Fixed operator%(Fixed x, int32_t y) { return x % Fixed::from_long(y); }
 
 inline Fixed& operator+=(Fixed& x, Fixed y) { return x = x + y; }
 inline Fixed& operator-=(Fixed& x, Fixed y) { return x = x - y; }
