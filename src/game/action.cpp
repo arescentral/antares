@@ -256,7 +256,7 @@ static void nil_target(Handle<Action> action, Handle<SpaceObject> focus) {
     focus->lastTarget = SpaceObject::none();
 }
 
-static void alter(
+static void alter_damage(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterObject;
@@ -269,11 +269,36 @@ static void alter(
         case kAlterDamage:
             focus->alter_health(alter.minimum);
             break;
+    }
+}
 
+static void alter_energy(
+        Handle<Action> action,
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
+    const auto alter = action->argument.alterObject;
+    int32_t l;
+    ticks t;
+    Fixed f, f2;
+    int16_t angle;
+    coordPointType newLocation;
+    switch (action->verb) {
         case kAlterEnergy:
             focus->alter_energy(alter.minimum);
             break;
 
+    }
+}
+
+static void alter_hidden(
+        Handle<Action> action,
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
+    const auto alter = action->argument.alterObject;
+    int32_t l;
+    ticks t;
+    Fixed f, f2;
+    int16_t angle;
+    coordPointType newLocation;
+    switch (action->verb) {
         case kAlterHidden:
             // Preserves old behavior; shouldn't really be adding one to alter.range.
             for (auto i: range(alter.minimum, alter.minimum + alter.range + 1)) {
@@ -281,10 +306,36 @@ static void alter(
             }
             break;
 
+    }
+}
+
+static void alter_cloak(
+        Handle<Action> action,
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
+    const auto alter = action->argument.alterObject;
+    int32_t l;
+    ticks t;
+    Fixed f, f2;
+    int16_t angle;
+    coordPointType newLocation;
+    switch (action->verb) {
         case kAlterCloak:
             focus->set_cloak(true);
             break;
 
+    }
+}
+
+static void alter_spin(
+        Handle<Action> action,
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
+    const auto alter = action->argument.alterObject;
+    int32_t l;
+    ticks t;
+    Fixed f, f2;
+    int16_t angle;
+    coordPointType newLocation;
+    switch (action->verb) {
         case kAlterSpin:
             if (focus->attributes & kCanTurn) {
                 f = (focus->turn_rate() *
@@ -299,6 +350,19 @@ static void alter(
             }
             break;
 
+    }
+}
+
+static void alter_offline(
+        Handle<Action> action,
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
+    const auto alter = action->argument.alterObject;
+    int32_t l;
+    ticks t;
+    Fixed f, f2;
+    int16_t angle;
+    coordPointType newLocation;
+    switch (action->verb) {
         case kAlterOffline:
             f = Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range));
             f2 = focus->baseType->mass;
@@ -310,6 +374,19 @@ static void alter(
             focus->offlineTime = mFixedToLong(f);
             break;
 
+    }
+}
+
+static void alter_velocity(
+        Handle<Action> action,
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
+    const auto alter = action->argument.alterObject;
+    int32_t l;
+    ticks t;
+    Fixed f, f2;
+    int16_t angle;
+    coordPointType newLocation;
+    switch (action->verb) {
         case kAlterVelocity:
             if (subject.get()) {
                 // active (non-reflexive) altering of velocity means a PUSH, just like
@@ -395,6 +472,19 @@ static void alter(
             }
             break;
 
+    }
+}
+
+static void alter_max_velocity(
+        Handle<Action> action,
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
+    const auto alter = action->argument.alterObject;
+    int32_t l;
+    ticks t;
+    Fixed f, f2;
+    int16_t angle;
+    coordPointType newLocation;
+    switch (action->verb) {
         case kAlterMaxVelocity:
             if (alter.minimum < 0) {
                 focus->maxVelocity = focus->baseType->maxVelocity;
@@ -403,6 +493,19 @@ static void alter(
             }
             break;
 
+    }
+}
+
+static void alter_thrust(
+        Handle<Action> action,
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
+    const auto alter = action->argument.alterObject;
+    int32_t l;
+    ticks t;
+    Fixed f, f2;
+    int16_t angle;
+    coordPointType newLocation;
+    switch (action->verb) {
         case kAlterThrust:
             f = Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range));
             if (alter.relative) {
@@ -412,12 +515,38 @@ static void alter(
             }
             break;
 
+    }
+}
+
+static void alter_base_type(
+        Handle<Action> action,
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
+    const auto alter = action->argument.alterObject;
+    int32_t l;
+    ticks t;
+    Fixed f, f2;
+    int16_t angle;
+    coordPointType newLocation;
+    switch (action->verb) {
         case kAlterBaseType:
             if (action->reflexive || object.get()) {
                 focus->change_base_type(Handle<BaseObject>(alter.minimum), -1, alter.relative);
             }
             break;
 
+    }
+}
+
+static void alter_owner(
+        Handle<Action> action,
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
+    const auto alter = action->argument.alterObject;
+    int32_t l;
+    ticks t;
+    Fixed f, f2;
+    int16_t angle;
+    coordPointType newLocation;
+    switch (action->verb) {
         case kAlterOwner:
             if (focus.get()) {
                 if (alter.relative) {
@@ -435,6 +564,19 @@ static void alter(
             }
             break;
 
+    }
+}
+
+static void alter_condition_true_yet(
+        Handle<Action> action,
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
+    const auto alter = action->argument.alterObject;
+    int32_t l;
+    ticks t;
+    Fixed f, f2;
+    int16_t angle;
+    coordPointType newLocation;
+    switch (action->verb) {
         case kAlterConditionTrueYet:
             if (alter.range <= 0) {
                 g.level->condition(alter.minimum)->set_true_yet(alter.relative);
@@ -445,12 +587,38 @@ static void alter(
             }
             break;
 
+    }
+}
+
+static void alter_occupation(
+        Handle<Action> action,
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
+    const auto alter = action->argument.alterObject;
+    int32_t l;
+    ticks t;
+    Fixed f, f2;
+    int16_t angle;
+    coordPointType newLocation;
+    switch (action->verb) {
         case kAlterOccupation:
             if (focus.get()) {
                 focus->alter_occupation(subject->owner, alter.minimum, true);
             }
             break;
 
+    }
+}
+
+static void alter_absolute_cash(
+        Handle<Action> action,
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
+    const auto alter = action->argument.alterObject;
+    int32_t l;
+    ticks t;
+    Fixed f, f2;
+    int16_t angle;
+    coordPointType newLocation;
+    switch (action->verb) {
         case kAlterAbsoluteCash:
             {
                 Handle<Admiral> admiral;
@@ -467,6 +635,19 @@ static void alter(
             }
             break;
 
+    }
+}
+
+static void alter_age(
+        Handle<Action> action,
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
+    const auto alter = action->argument.alterObject;
+    int32_t l;
+    ticks t;
+    Fixed f, f2;
+    int16_t angle;
+    coordPointType newLocation;
+    switch (action->verb) {
         case kAlterAge:
             t = ticks(alter.minimum + focus->randomSeed.next(alter.range));
 
@@ -483,6 +664,19 @@ static void alter(
             }
             break;
 
+    }
+}
+
+static void alter_location(
+        Handle<Action> action,
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
+    const auto alter = action->argument.alterObject;
+    int32_t l;
+    ticks t;
+    Fixed f, f2;
+    int16_t angle;
+    coordPointType newLocation;
+    switch (action->verb) {
         case kAlterLocation:
             if (alter.relative) {
                 if (object.get()) {
@@ -501,6 +695,19 @@ static void alter(
             focus->location.v = newLocation.v;
             break;
 
+    }
+}
+
+static void alter_absolute_location(
+        Handle<Action> action,
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
+    const auto alter = action->argument.alterObject;
+    int32_t l;
+    ticks t;
+    Fixed f, f2;
+    int16_t angle;
+    coordPointType newLocation;
+    switch (action->verb) {
         case kAlterAbsoluteLocation:
             if (alter.relative) {
                 focus->location.h += alter.minimum;
@@ -511,6 +718,19 @@ static void alter(
             }
             break;
 
+    }
+}
+
+static void alter_weapon1(
+        Handle<Action> action,
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
+    const auto alter = action->argument.alterObject;
+    int32_t l;
+    ticks t;
+    Fixed f, f2;
+    int16_t angle;
+    coordPointType newLocation;
+    switch (action->verb) {
         case kAlterWeapon1:
             focus->pulse.base = Handle<BaseObject>(alter.minimum);
             if (focus->pulse.base.get()) {
@@ -531,6 +751,19 @@ static void alter(
             }
             break;
 
+    }
+}
+
+static void alter_weapon2(
+        Handle<Action> action,
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
+    const auto alter = action->argument.alterObject;
+    int32_t l;
+    ticks t;
+    Fixed f, f2;
+    int16_t angle;
+    coordPointType newLocation;
+    switch (action->verb) {
         case kAlterWeapon2:
             focus->beam.base = Handle<BaseObject>(alter.minimum);
             if (focus->beam.base.get()) {
@@ -551,6 +784,19 @@ static void alter(
             }
             break;
 
+    }
+}
+
+static void alter_special(
+        Handle<Action> action,
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
+    const auto alter = action->argument.alterObject;
+    int32_t l;
+    ticks t;
+    Fixed f, f2;
+    int16_t angle;
+    coordPointType newLocation;
+    switch (action->verb) {
         case kAlterSpecial:
             focus->special.base = Handle<BaseObject>(alter.minimum);
             if (focus->special.base.get()) {
@@ -571,11 +817,22 @@ static void alter(
             }
             break;
 
+    }
+}
+
+static void alter_level_key_tag(
+        Handle<Action> action,
+        Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
+    const auto alter = action->argument.alterObject;
+    int32_t l;
+    ticks t;
+    Fixed f, f2;
+    int16_t angle;
+    coordPointType newLocation;
+    switch (action->verb) {
         case kAlterLevelKeyTag:
             break;
 
-        default:
-            break;
     }
 }
 
@@ -743,55 +1000,56 @@ static void execute_actions(
 
         switch (action->verb) {
             case kCreateObject:
-            case kCreateObjectSetDest:  create_object(action, focus, subject, offset); break;
-            case kPlaySound:            play_sound(action, focus); break;
-            case kMakeSparks:           make_sparks(action, focus); break;
-            case kDie:                  die(action, focus, subject); break;
-            case kNilTarget:            nil_target(action, focus); break;
-            case kLandAt:               land_at(action, focus, subject); break;
-            case kEnterWarp:            enter_warp(action, focus, subject); break;
-            case kChangeScore:          change_score(action, focus); break;
-            case kDeclareWinner:        declare_winner(action, focus); break;
-            case kDisplayMessage:       display_message(action, focus); break;
-            case kSetDestination:       set_destination(action, focus, subject); break;
-            case kActivateSpecial:      activate_special(action, focus, subject); break;
-            case kActivatePulse:        activate_pulse(action, focus, subject); break;
-            case kActivateBeam:         activate_beam(action, focus, subject); break;
-            case kColorFlash:           color_flash(action, focus); break;
-            case kEnableKeys:           enable_keys(action, focus); break;
-            case kDisableKeys:          disable_keys(action, focus); break;
-            case kSetZoom:              set_zoom(action, focus); break;
-            case kComputerSelect:       computer_select(action, focus); break;
-            case kAssumeInitialObject:  assume_initial_object(action, focus); break;
+            case kCreateObjectSetDest:    create_object(action, focus, subject, offset); break;
 
-            case kAlterDamage:
-            case kAlterVelocity:
-            case kAlterThrust:
+            case kPlaySound:              play_sound(action, focus); break;
+            case kMakeSparks:             make_sparks(action, focus); break;
+            case kDie:                    die(action, focus, subject); break;
+            case kNilTarget:              nil_target(action, focus); break;
+            case kLandAt:                 land_at(action, focus, subject); break;
+            case kEnterWarp:              enter_warp(action, focus, subject); break;
+            case kChangeScore:            change_score(action, focus); break;
+            case kDeclareWinner:          declare_winner(action, focus); break;
+            case kDisplayMessage:         display_message(action, focus); break;
+            case kSetDestination:         set_destination(action, focus, subject); break;
+            case kActivateSpecial:        activate_special(action, focus, subject); break;
+            case kActivatePulse:          activate_pulse(action, focus, subject); break;
+            case kActivateBeam:           activate_beam(action, focus, subject); break;
+            case kColorFlash:             color_flash(action, focus); break;
+            case kEnableKeys:             enable_keys(action, focus); break;
+            case kDisableKeys:            disable_keys(action, focus); break;
+            case kSetZoom:                set_zoom(action, focus); break;
+            case kComputerSelect:         computer_select(action, focus); break;
+            case kAssumeInitialObject:    assume_initial_object(action, focus); break;
+
+            case kAlterDamage:            alter_damage(action, focus, subject, object); break;
+            case kAlterVelocity:          alter_velocity(action, focus, subject, object); break;
+            case kAlterThrust:            alter_thrust(action, focus, subject, object); break;
+            case kAlterMaxVelocity:       alter_max_velocity(action, focus, subject, object); break;
+            case kAlterLocation:          alter_location(action, focus, subject, object); break;
+            case kAlterWeapon1:           alter_weapon1(action, focus, subject, object); break;
+            case kAlterWeapon2:           alter_weapon2(action, focus, subject, object); break;
+            case kAlterSpecial:           alter_special(action, focus, subject, object); break;
+            case kAlterEnergy:            alter_energy(action, focus, subject, object); break;
+            case kAlterOwner:             alter_owner(action, focus, subject, object); break;
+            case kAlterHidden:            alter_hidden(action, focus, subject, object); break;
+            case kAlterCloak:             alter_cloak(action, focus, subject, object); break;
+            case kAlterOffline:           alter_offline(action, focus, subject, object); break;
+            case kAlterSpin:              alter_spin(action, focus, subject, object); break;
+            case kAlterBaseType:          alter_base_type(action, focus, subject, object); break;
+            case kAlterConditionTrueYet:  alter_condition_true_yet(action, focus, subject, object); break;
+            case kAlterOccupation:        alter_occupation(action, focus, subject, object); break;
+            case kAlterAbsoluteCash:      alter_absolute_cash(action, focus, subject, object); break;
+            case kAlterAge:               alter_age(action, focus, subject, object); break;
+            case kAlterAbsoluteLocation:  alter_absolute_location(action, focus, subject, object); break;
+
             case kAlterMaxThrust:
-            case kAlterMaxVelocity:
             case kAlterMaxTurnRate:
-            case kAlterLocation:
             case kAlterScale:
-            case kAlterWeapon1:
-            case kAlterWeapon2:
-            case kAlterSpecial:
-            case kAlterEnergy:
-            case kAlterOwner:
-            case kAlterHidden:
-            case kAlterCloak:
-            case kAlterOffline:
-            case kAlterSpin:
-            case kAlterBaseType:
-            case kAlterConditionTrueYet:
-            case kAlterOccupation:
-            case kAlterAbsoluteCash:
-            case kAlterAge:
             case kAlterAttributes:
             case kAlterLevelKeyTag:
             case kAlterOrderKeyTag:
-            case kAlterEngageKeyTag:
-            case kAlterAbsoluteLocation:
-                                        alter(action, focus, subject, object); break;
+            case kAlterEngageKeyTag:      /* not implemented */ break;
         }
 
         switch (action->verb) {
