@@ -260,14 +260,14 @@ static void alter_damage(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterDamage;
-    focus->alter_health(alter.minimum);
+    focus->alter_health(alter.amount);
 }
 
 static void alter_energy(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterEnergy;
-    focus->alter_energy(alter.minimum);
+    focus->alter_energy(alter.amount);
 }
 
 static void alter_hidden(
@@ -477,7 +477,7 @@ static void alter_occupation(
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterOccupation;
     if (focus.get()) {
-        focus->alter_occupation(subject->owner, alter.minimum, true);
+        focus->alter_occupation(subject->owner, alter.amount, true);
     }
 }
 
@@ -555,7 +555,7 @@ static void alter_weapon1(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterWeapon;
-    focus->pulse.base = Handle<BaseObject>(alter.minimum);
+    focus->pulse.base = alter.base;
     if (focus->pulse.base.get()) {
         auto baseObject = focus->pulse.base;
         focus->pulse.ammo = baseObject->frame.weapon.ammo;
@@ -578,7 +578,7 @@ static void alter_weapon2(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterWeapon;
-    focus->beam.base = Handle<BaseObject>(alter.minimum);
+    focus->beam.base = alter.base;
     if (focus->beam.base.get()) {
         auto baseObject = focus->beam.base;
         focus->beam.ammo = baseObject->frame.weapon.ammo;
@@ -601,7 +601,7 @@ static void alter_special(
         Handle<Action> action,
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterWeapon;
-    focus->special.base = Handle<BaseObject>(alter.minimum);
+    focus->special.base = alter.base;
     if (focus->special.base.get()) {
         auto baseObject = focus->special.base;
         focus->special.ammo = baseObject->frame.weapon.ammo;

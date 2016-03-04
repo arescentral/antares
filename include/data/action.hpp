@@ -128,6 +128,13 @@ union argumentType {
     };
     PlaySound playSound;
 
+    struct AlterSimple { int32_t amount; };
+    struct AlterSimple alterDamage;
+    struct AlterSimple alterEnergy;
+    struct AlterSimple alterOccupation;
+
+    struct AlterWeapon { Handle<BaseObject> base; } alterWeapon;
+
     // alterObject: change some attribute of an object
     struct AlterObject {
         uint8_t                 alterType;
@@ -135,8 +142,6 @@ union argumentType {
         int32_t                 minimum;
         int32_t                 range;
     };
-    AlterObject alterDamage;
-    AlterObject alterEnergy;
     AlterObject alterHidden;
     AlterObject alterSpin;
     AlterObject alterOffline;
@@ -146,12 +151,10 @@ union argumentType {
     AlterObject alterBaseType;
     AlterObject alterOwner;
     AlterObject alterConditionTrueYet;
-    AlterObject alterOccupation;
     AlterObject alterAbsoluteCash;
     AlterObject alterAge;
     AlterObject alterLocation;
     AlterObject alterAbsoluteLocation;
-    AlterObject alterWeapon;
 
     // makeSpark
     struct MakeSparks {
@@ -240,9 +243,12 @@ union argumentType {
     };
     AssumeInitial assumeInitial;
 };
+
 void read_from(sfz::ReadSource in, argumentType::CreateObject& argument);
 void read_from(sfz::ReadSource in, argumentType::PlaySound& argument);
 void read_from(sfz::ReadSource in, argumentType::AlterObject& argument);
+void read_from(sfz::ReadSource in, argumentType::AlterSimple& argument);
+void read_from(sfz::ReadSource in, argumentType::AlterWeapon& argument);
 void read_from(sfz::ReadSource in, argumentType::MakeSparks& argument);
 void read_from(sfz::ReadSource in, argumentType::ReleaseEnergy& argument);
 void read_from(sfz::ReadSource in, argumentType::LandAt& argument);

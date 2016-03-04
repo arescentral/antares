@@ -174,6 +174,16 @@ void read_from(ReadSource in, argumentType::AlterObject& argument) {
     read(in, argument.range);
 }
 
+void read_from(ReadSource in, argumentType::AlterSimple& argument) {
+    in.shift(1);
+    read(in, argument.amount);
+}
+
+void read_from(ReadSource in, argumentType::AlterWeapon& argument) {
+    in.shift(1);
+    argument.base = Handle<BaseObject>(read<int32_t>(in));
+}
+
 void read_from(ReadSource in, argumentType::MakeSparks& argument) {
     read(in, argument.howMany);
     read(in, argument.speed);
