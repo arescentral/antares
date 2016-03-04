@@ -161,6 +161,11 @@ union argumentType {
         Fixed amount;
     } alterVelocity;
 
+    struct AlterBaseType {
+        bool keep_ammo;
+        Handle<BaseObject> base;
+    } alterBaseType;
+
     // alterObject: change some attribute of an object
     struct AlterObject {
         uint8_t                 alterType;
@@ -169,7 +174,6 @@ union argumentType {
         int32_t                 range;
     };
     AlterObject alterHidden;
-    AlterObject alterBaseType;
     AlterObject alterOwner;
     AlterObject alterConditionTrueYet;
     AlterObject alterAge;

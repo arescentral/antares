@@ -176,9 +176,7 @@ void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors) {
             break;
 
         case kAlterBaseType:
-            AddBaseObjectMedia(
-                    Handle<BaseObject>(action->argument.alterBaseType.minimum),
-                    color, all_colors);
+            AddBaseObjectMedia(action->argument.alterBaseType.base, color, all_colors);
             break;
 
         case kAlterOwner:

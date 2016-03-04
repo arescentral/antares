@@ -434,7 +434,7 @@ static void alter_base_type(
         Handle<SpaceObject> focus, Handle<SpaceObject> subject, Handle<SpaceObject> object) {
     const auto alter = action->argument.alterBaseType;
     if (action->reflexive || object.get()) {
-        focus->change_base_type(Handle<BaseObject>(alter.minimum), -1, alter.relative);
+        focus->change_base_type(alter.base, -1, alter.keep_ammo);
     }
 }
 

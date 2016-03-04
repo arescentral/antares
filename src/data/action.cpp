@@ -212,6 +212,11 @@ void read_from(ReadSource in, argumentType::AlterVelocity& argument) {
     read(in, argument.amount);
 }
 
+void read_from(ReadSource in, argumentType::AlterBaseType& argument) {
+    argument.keep_ammo = read<uint8_t>(in);
+    argument.base = Handle<BaseObject>(read<int32_t>(in));
+}
+
 void read_from(ReadSource in, argumentType::MakeSparks& argument) {
     read(in, argument.howMany);
     read(in, argument.speed);
