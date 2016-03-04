@@ -185,8 +185,8 @@ class SpaceObject {
             uint8_t step;
             ticks progress;
         } warp_in;
-        int32_t warping;
-        int32_t warp_out;
+        Fixed warping;
+        Fixed warp_out;
     } presence;
 
     int32_t                 hitState = 0;

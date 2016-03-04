@@ -182,11 +182,11 @@ static void move(Handle<SpaceObject> o) {
 
             // multiply by max velocity
             if (o->presenceState == kWarpingPresence) {
-                fa = (fa * Fixed::from_val(o->presence.warping));
-                fb = (fb * Fixed::from_val(o->presence.warping));
+                fa = (fa * o->presence.warping);
+                fb = (fb * o->presence.warping);
             } else if (o->presenceState == kWarpOutPresence) {
-                fa = (fa * Fixed::from_val(o->presence.warp_out));
-                fb = (fb * Fixed::from_val(o->presence.warp_out));
+                fa = (fa * o->presence.warp_out);
+                fb = (fb * o->presence.warp_out);
             } else {
                 fa = (o->maxVelocity * fa);
                 fb = (o->maxVelocity * fb);

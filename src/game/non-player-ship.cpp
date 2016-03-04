@@ -403,11 +403,9 @@ void NonplayerShipThink() {
                 && (baseObject->warpSpeed > Fixed::zero())
                 && (anObject->energy() > 0)) {
             if (anObject->presenceState == kWarpingPresence) {
-                anObject->thrust = (
-                        baseObject->maxThrust * Fixed::from_val(anObject->presence.warping));
+                anObject->thrust = baseObject->maxThrust * anObject->presence.warping;
             } else if (anObject->presenceState == kWarpOutPresence) {
-                anObject->thrust = (
-                        baseObject->maxThrust * Fixed::from_val(anObject->presence.warp_out));
+                anObject->thrust = baseObject->maxThrust * anObject->presence.warp_out;
             } else if ((anObject->presenceState == kNormalPresence)
                     && (anObject->energy() > (anObject->max_energy() >> kWarpInEnergyFactor))) {
                 anObject->presenceState = kWarpInPresence;
@@ -420,8 +418,7 @@ void NonplayerShipThink() {
             } else if (anObject->presenceState == kWarpingPresence) {
                 anObject->presenceState = kWarpOutPresence;
             } else if (anObject->presenceState == kWarpOutPresence) {
-                anObject->thrust = (
-                        baseObject->maxThrust * Fixed::from_val(anObject->presence.warp_out));
+                anObject->thrust = baseObject->maxThrust * anObject->presence.warp_out;
             }
         }
 
@@ -905,7 +902,7 @@ uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
     if (presence.progress > ticks(100)) {
         if (anObject->collect_warp_energy(anObject->max_energy() >> kWarpInEnergyFactor)) {
             anObject->presenceState = kWarpingPresence;
-            anObject->presence.warping = anObject->baseType->warpSpeed.val();
+            anObject->presence.warping = anObject->baseType->warpSpeed;
             anObject->attributes &= ~kOccupiesSpace;
             newVel.h = newVel.v = Fixed::zero();
             CreateAnySpaceObject(
@@ -970,8 +967,8 @@ uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, Handle<BaseObj
     Fixed           calcv, fdist;
     fixedPointType  newVel;
 
-    anObject->presence.warp_out -= Fixed::from_long(kWarpAcceleration).val();
-    if (Fixed::from_val(anObject->presence.warp_out) < anObject->maxVelocity) {
+    anObject->presence.warp_out -= Fixed::from_long(kWarpAcceleration);
+    if (anObject->presence.warp_out < anObject->maxVelocity) {
         anObject->refund_warp_energy();
 
         anObject->presenceState = kNormalPresence;
