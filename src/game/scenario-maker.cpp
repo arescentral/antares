@@ -199,22 +199,15 @@ void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors) {
 }
 
 void GetInitialCoord(Scenario::InitialObject *initial, coordPointType *coord, int32_t rotation) {
-    Fixed lcos, lsin, lscrap;
-
     mAddAngle(rotation, 90);
+    Fixed lcos, lsin;
     GetRotPoint(&lcos, &lsin, rotation);
-    lcos = -lcos;
-    lsin = -lsin;
-
-    lscrap = Fixed::from_val(initial->location.h) * lcos;
-    lscrap -= Fixed::from_val(initial->location.v) * lsin;
-    coord->h = kUniversalCenter;
-    coord->h += lscrap.val();
-
-    lscrap = Fixed::from_val(initial->location.h) * lsin;
-    lscrap += Fixed::from_val(initial->location.v) * lcos;
-    coord->v = kUniversalCenter;
-    coord->v += lscrap.val();
+    coord->h = (kUniversalCenter
+                + (Fixed::from_val(initial->location.h) * -lcos).val()
+                - (Fixed::from_val(initial->location.v) * -lsin).val());
+    coord->v = (kUniversalCenter
+                + (Fixed::from_val(initial->location.h) * -lsin).val()
+                + (Fixed::from_val(initial->location.v) * -lcos).val());
 }
 
 void set_initial_destination(const Scenario::InitialObject* initial, bool preserve) {
