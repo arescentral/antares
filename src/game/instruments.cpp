@@ -109,7 +109,7 @@ const int32_t kFineMoneyColor       = PALE_GREEN;
 const int32_t kFineMoneyNeedColor   = ORANGE;
 const uint8_t kFineMoneyUseColor    = SKY_BLUE;
 
-const int32_t kMaxMoneyValue        = kGrossMoneyBarValue * 7;
+const Fixed   kMaxMoneyValue        = Fixed::from_val(kGrossMoneyBarValue * 7 - 1);
 
 Rect mini_build_time_rect() {
     Rect result(play_screen().right + 10, 8, play_screen().right + 22, 37);
@@ -411,10 +411,9 @@ void draw_radar() {
 // SHOW ME THE MONEY
 static void draw_money() {
     auto& admiral = g.admiral;
-    const int cash = clamp(admiral->cash(), Fixed::zero(), Fixed::from_val(kMaxMoneyValue - 1)).val();
-    gBarIndicator[kFineMoneyBar].thisValue
-        = (cash % kFineMoneyBarMod) / kFineMoneyBarValue;
-    const int price = MiniComputerGetPriceOfCurrentSelection() / kFineMoneyBarValue;
+    const int cash = clamp(admiral->cash(), Fixed::zero(), kMaxMoneyValue).val();
+    gBarIndicator[kFineMoneyBar].thisValue = (cash % kFineMoneyBarMod) / kFineMoneyBarValue;
+    const int price = MiniComputerGetPriceOfCurrentSelection().val() / kFineMoneyBarValue;
 
     Rect box(0, 0, kFineMoneyBarWidth, kFineMoneyBarHeight - 1);
     box.offset(kFineMoneyLeft + kFineMoneyHBuffer + play_screen().right,
