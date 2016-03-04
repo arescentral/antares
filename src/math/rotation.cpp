@@ -51,6 +51,12 @@ void GetRotPoint(int32_t *x, int32_t *y, int32_t rotpos) {
     *y = *i;
 }
 
+void GetRotPoint(Fixed *x, Fixed *y, int32_t rotpos) {
+    int32_t& xi = *x;
+    int32_t& yi = *y;
+    GetRotPoint(&xi, &yi, rotpos);
+}
+
 int32_t GetAngleFromVector(int32_t x, int32_t y) {
     int32_t* h;
     int32_t* v;

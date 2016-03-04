@@ -38,9 +38,9 @@ TEST_F(FixedTest, Print) {
     EXPECT_EQ("1.125", String(fixed(288)));
     EXPECT_EQ("-1.125", String(fixed(-288)));
 
-    EXPECT_EQ("8388607.996", String(fixed(std::numeric_limits<Fixed>::max())));
-    EXPECT_EQ("-8388607.996", String(fixed(-std::numeric_limits<Fixed>::max())));
-    EXPECT_EQ("-8388608.0", String(fixed(std::numeric_limits<Fixed>::min())));
+    EXPECT_EQ("8388607.996", String(fixed(std::numeric_limits<int32_t>::max())));
+    EXPECT_EQ("-8388607.996", String(fixed(-std::numeric_limits<int32_t>::max())));
+    EXPECT_EQ("-8388608.0", String(fixed(std::numeric_limits<int32_t>::min())));
 
     EXPECT_EQ("1.38", String(fixed(353)));
     EXPECT_EQ("1.383", String(fixed(354)));

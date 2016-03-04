@@ -24,7 +24,17 @@
 
 namespace antares {
 
-typedef int32_t Fixed;
+class Fixed {
+    public:
+        Fixed() = default;
+        Fixed(int32_t value): _value(value) { }
+        operator int32_t() const { return _value; }
+        operator int32_t&() { return _value; }
+    private:
+        int32_t _value;
+};
+
+inline void read_from(sfz::ReadSource in, Fixed& f) { sfz::read<int32_t>(in, f); }
 
 //
 //  MAX VALUE FOR SMALLFIXEDTYPE:
@@ -58,12 +68,8 @@ inline Fixed mFloatToFixed(float m_r)   { return roundf(m_r * 256.0); }
 inline float mFixedToFloat(Fixed m_f)   { return floorf(m_f * 1e3 / 256.0) / 1e3; }
 inline int32_t mFixedToLong(Fixed m_f)  { return evil_fixed_to_long(m_f); }
 
-struct PrintableFixed {
-    Fixed value;
-    explicit PrintableFixed(Fixed v) : value(v) { }
-};
-PrintableFixed fixed(Fixed value);
-void print_to(sfz::PrintTarget out, const PrintableFixed& fixed);
+inline Fixed fixed(Fixed value) { return value; }
+void print_to(sfz::PrintTarget out, const Fixed& fixed);
 
 // the max safe # we can do is 181 for signed multiply if we don't know other value
 // if -1 <= other value <= 1 then we can do 32767

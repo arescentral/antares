@@ -174,7 +174,8 @@ void CreateObjectDataText(String* text, Handle<BaseObject> object) {
     find_replace(data, 0, keys.at(kShieldStringNum), object->health);
 
     // light speed
-    find_replace(data, 0, keys.at(kHasLightStringNum), object->warpSpeed);
+    int32_t warp_speed = object->warpSpeed;  // TODO(sfiera): fixed to long.
+    find_replace(data, 0, keys.at(kHasLightStringNum), warp_speed);
 
     // max velocity
     find_replace(data, 0, keys.at(kMaxSpeedStringNum), fixed(object->maxVelocity));
