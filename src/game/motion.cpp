@@ -959,7 +959,7 @@ static void correct_physical_space(Handle<SpaceObject> a, Handle<SpaceObject> b)
     // calculate the new velocities
     const Fixed dvx = b->velocity.h - a->velocity.h;
     const Fixed dvy = b->velocity.v - a->velocity.v;
-    const Fixed force = Fixed::from_val(lsqrt(((dvx * dvx) + (dvy * dvy)).val()));
+    const Fixed force = lsqrt((dvx * dvx) + (dvy * dvy));
     const int32_t ah = b->location.h - a->location.h;
     const int32_t av = b->location.v - a->location.v;
 

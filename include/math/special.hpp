@@ -25,6 +25,7 @@
 namespace antares {
 
 uint32_t lsqrt(uint32_t n);
+inline Fixed lsqrt(Fixed n) { return Fixed::from_val(lsqrt(n.val())); }
 uint64_t wsqrt(uint64_t n);
 
 Fixed MyFixRatio(int16_t, int16_t);
