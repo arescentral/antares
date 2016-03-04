@@ -31,7 +31,7 @@ struct Random {
 
     int16_t next(int16_t range);
     ticks next(ticks range) { return ticks(next(range.count())); }
-    Fixed next(Fixed range) { return Fixed(next(range.val())); }
+    Fixed next(Fixed range) { return Fixed::from_val(next(range.val())); }
 };
 
 int Randomize(int range);

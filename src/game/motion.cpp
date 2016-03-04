@@ -150,7 +150,7 @@ void MotionCleanup() {
 }
 
 static void move(Handle<SpaceObject> o) {
-    if ((o->maxVelocity == 0) && !(o->attributes & kCanTurn)) {
+    if ((o->maxVelocity == Fixed::zero()) && !(o->attributes & kCanTurn)) {
         return;
     }
 
@@ -158,7 +158,7 @@ static void move(Handle<SpaceObject> o) {
         o->turnFraction += o->turnVelocity;
 
         int32_t h;
-        if (o->turnFraction >= 0) {
+        if (o->turnFraction >= Fixed::zero()) {
             h = more_evil_fixed_to_long(o->turnFraction + mFloatToFixed(0.5));
         } else {
             h = more_evil_fixed_to_long(o->turnFraction - mFloatToFixed(0.5)) + 1;
@@ -174,19 +174,19 @@ static void move(Handle<SpaceObject> o) {
         }
     }
 
-    if (o->thrust != 0) {
+    if (o->thrust != Fixed::zero()) {
         Fixed fa, fb, useThrust;
-        if (o->thrust > 0) {
+        if (o->thrust > Fixed::zero()) {
             // get the goal dh & dv
             GetRotPoint(&fa, &fb, o->direction);
 
             // multiply by max velocity
             if (o->presenceState == kWarpingPresence) {
-                fa = mMultiplyFixed(fa, o->presence.warping);
-                fb = mMultiplyFixed(fb, o->presence.warping);
+                fa = mMultiplyFixed(fa, Fixed::from_val(o->presence.warping));
+                fb = mMultiplyFixed(fb, Fixed::from_val(o->presence.warping));
             } else if (o->presenceState == kWarpOutPresence) {
-                fa = mMultiplyFixed(fa, o->presence.warp_out);
-                fb = mMultiplyFixed(fb, o->presence.warp_out);
+                fa = mMultiplyFixed(fa, Fixed::from_val(o->presence.warp_out));
+                fb = mMultiplyFixed(fb, Fixed::from_val(o->presence.warp_out));
             } else {
                 fa = mMultiplyFixed(o->maxVelocity, fa);
                 fb = mMultiplyFixed(o->maxVelocity, fb);
@@ -213,7 +213,7 @@ static void move(Handle<SpaceObject> o) {
         fv = mMultiplyFixed(useThrust, fv);
 
         // if our new vector excedes our max thrust, it must be limited
-        if (fh < 0) {
+        if (fh < Fixed::zero()) {
             if (fa < fh) {
                 fa = fh;
             }
@@ -223,7 +223,7 @@ static void move(Handle<SpaceObject> o) {
             }
         }
 
-        if (fv < 0) {
+        if (fv < Fixed::zero()) {
             if (fb < fv) {
                 fb = fv;
             }
@@ -241,7 +241,7 @@ static void move(Handle<SpaceObject> o) {
     o->motionFraction.v += o->velocity.v;
 
     int32_t h;
-    if (o->motionFraction.h >= 0) {
+    if (o->motionFraction.h >= Fixed::zero()) {
         h = more_evil_fixed_to_long(o->motionFraction.h + mFloatToFixed(0.5));
     } else {
         h = more_evil_fixed_to_long(o->motionFraction.h - mFloatToFixed(0.5)) + 1;
@@ -250,7 +250,7 @@ static void move(Handle<SpaceObject> o) {
     o->motionFraction.h -= mLongToFixed(h);
 
     int32_t v;
-    if (o->motionFraction.v >= 0) {
+    if (o->motionFraction.v >= Fixed::zero()) {
         v = more_evil_fixed_to_long(o->motionFraction.v + mFloatToFixed(0.5));
     } else {
         v = more_evil_fixed_to_long(o->motionFraction.v - mFloatToFixed(0.5)) + 1;
@@ -459,7 +459,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
         auto baseObject = o->base;
         if (o->attributes & kIsSelfAnimated) {
             if (baseObject->frame.animation.frameSpeed != 0) {
-                sprite.whichShape = more_evil_fixed_to_long(o->frame.animation.thisShape);
+                sprite.whichShape = more_evil_fixed_to_long(Fixed::from_val(o->frame.animation.thisShape));
             }
         } else if (o->attributes & kShapeFromDirection) {
             int16_t angle = o->direction;
@@ -550,7 +550,7 @@ static void calc_misc() {
 
         if (o->attributes & kConsiderDistanceAttributes) {
             o->localFriendStrength = o->baseType->offenseValue;
-            o->localFoeStrength = 0;
+            o->localFoeStrength = Fixed::zero();
             o->closestObject = SpaceObject::none();
             o->closestDistance = kMaximumRelevantDistanceSquared;
             o->absoluteBounds.right = o->absoluteBounds.left = 0;
@@ -905,8 +905,8 @@ void CollideSpaceObjects() {
 
 static void adjust_velocity(Handle<SpaceObject> o, int16_t angle, Fixed totalMass, Fixed force) {
     Fixed tfix = mMultiplyFixed(o->baseType->mass, force);
-    if (totalMass == 0) {
-        tfix = -1;
+    if (totalMass == Fixed::zero()) {
+        tfix = Fixed::from_val(-1);
     } else {
         tfix = mDivideFixed(tfix, totalMass);
     }
@@ -924,7 +924,7 @@ static void push(Handle<SpaceObject> o) {
     o->motionFraction.v += o->velocity.v;
 
     int32_t h;
-    if (o->motionFraction.h >= 0) {
+    if (o->motionFraction.h >= Fixed::zero()) {
         h = more_evil_fixed_to_long(o->motionFraction.h + mFloatToFixed(0.5));
     } else {
         h = more_evil_fixed_to_long(o->motionFraction.h - mFloatToFixed(0.5)) + 1;
@@ -933,7 +933,7 @@ static void push(Handle<SpaceObject> o) {
     o->motionFraction.h -= mLongToFixed(h);
 
     int32_t v;
-    if (o->motionFraction.v >= 0) {
+    if (o->motionFraction.v >= Fixed::zero()) {
         v = more_evil_fixed_to_long(o->motionFraction.v + mFloatToFixed(0.5));
     } else {
         v = more_evil_fixed_to_long(o->motionFraction.v - mFloatToFixed(0.5)) + 1;
@@ -959,12 +959,12 @@ static void correct_physical_space(Handle<SpaceObject> a, Handle<SpaceObject> b)
     // calculate the new velocities
     const Fixed dvx = b->velocity.h - a->velocity.h;
     const Fixed dvy = b->velocity.v - a->velocity.v;
-    const Fixed force = lsqrt((mMultiplyFixed(dvx, dvx) + mMultiplyFixed(dvy, dvy)).val());
+    const Fixed force = Fixed::from_val(lsqrt((mMultiplyFixed(dvx, dvx) + mMultiplyFixed(dvy, dvy)).val()));
     const int32_t ah = b->location.h - a->location.h;
     const int32_t av = b->location.v - a->location.v;
 
     const Fixed totalMass = a->baseType->mass + b->baseType->mass;
-    int16_t angle = ratio_to_angle(ah, av);
+    int16_t angle = ratio_to_angle(Fixed::from_val(ah), Fixed::from_val(av));
     adjust_velocity(a, angle, totalMass, force);
     mAddAngle(angle, 180);
     adjust_velocity(b, angle, totalMass, force);

@@ -209,7 +209,7 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
         int16_t whichShape = 0;
         int16_t angle;
         if (obj->attributes & kIsSelfAnimated) {
-            whichShape = more_evil_fixed_to_long(obj->frame.animation.thisShape);
+            whichShape = more_evil_fixed_to_long(Fixed::from_val(obj->frame.animation.thisShape));
         } else if (obj->attributes & kShapeFromDirection) {
             angle = obj->direction;
             mAddAngle(angle, obj->baseType->frame.rotation.rotRes >> 1);
@@ -337,7 +337,7 @@ SpaceObject::SpaceObject(
     }
 
     Fixed f = baseType->initialVelocity;
-    if (baseType->initialVelocityRange > 0) {
+    if (baseType->initialVelocityRange > Fixed::zero()) {
         f += randomSeed.next(baseType->initialVelocityRange);
     }
     GetRotPoint(&velocity.h, &velocity.v, direction);
@@ -368,8 +368,8 @@ SpaceObject::SpaceObject(
             frame.animation.frameDirection += randomSeed.next(
                 baseType->frame.animation.frameDirectionRange);
         }
-        frame.animation.frameFraction = 0;
-        frame.animation.frameSpeed = baseType->frame.animation.frameSpeed;
+        frame.animation.frameFraction = Fixed::zero();
+        frame.animation.frameSpeed = Fixed::from_val(baseType->frame.animation.frameSpeed);
     }
 
     if (baseType->initialAge >= ticks(0)) {
@@ -467,7 +467,7 @@ void SpaceObject::change_base_type(
     obj->shieldColor = base->shieldColor;
     obj->layer = base->pixLayer;
     obj->directionGoal = 0;
-    obj->turnFraction = obj->turnVelocity = 0;
+    obj->turnFraction = obj->turnVelocity = Fixed::zero();
 
     if (obj->attributes & kIsSelfAnimated) {
         obj->frame.animation.thisShape = base->frame.animation.frameShape;
@@ -484,8 +484,8 @@ void SpaceObject::change_base_type(
             obj->frame.animation.frameDirection += obj->randomSeed.next(
                 base->frame.animation.frameDirectionRange);
         }
-        obj->frame.animation.frameFraction = 0;
-        obj->frame.animation.frameSpeed = base->frame.animation.frameSpeed;
+        obj->frame.animation.frameFraction = Fixed::zero();
+        obj->frame.animation.frameSpeed = Fixed::from_val(base->frame.animation.frameSpeed);
     }
 
     obj->maxVelocity = base->maxVelocity;
@@ -579,7 +579,7 @@ void SpaceObject::change_base_type(
         obj->sprite->scale = base->naturalScale;
 
         if (obj->attributes & kIsSelfAnimated) {
-            obj->sprite->whichShape = more_evil_fixed_to_long(obj->frame.animation.thisShape);
+            obj->sprite->whichShape = more_evil_fixed_to_long(Fixed::from_val(obj->frame.animation.thisShape));
         } else if (obj->attributes & kShapeFromDirection) {
             angle = obj->direction;
             mAddAngle(angle, base->frame.rotation.rotRes >> 1);
@@ -657,7 +657,7 @@ void SpaceObject::alter_battery(int32_t amount) {
     _battery += amount;
     if (_battery > max_battery()) {
         if (owner.get()) {
-            owner->pay(_battery - max_battery());
+            owner->pay(Fixed::from_val(_battery - max_battery()));
         }
         _battery = max_battery();
     }
@@ -753,15 +753,15 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
     }
 
     object->remoteFoeStrength = object->remoteFriendStrength = object->escortStrength =
-        object->localFoeStrength = object->localFriendStrength = 0;
-    object->bestConsideredTargetValue = object->currentTargetValue = 0xffffffff;
+        object->localFoeStrength = object->localFriendStrength = Fixed::zero();
+    object->bestConsideredTargetValue = object->currentTargetValue = Fixed::from_val(0xffffffff);
     object->bestConsideredTargetNumber = SpaceObject::none();
 
     for (auto fixObject: SpaceObject::all()) {
         if ((fixObject->destObject == object)
                 && (fixObject->active != kObjectAvailable)
                 && (fixObject->attributes & kCanThink)) {
-            fixObject->currentTargetValue = 0xffffffff;
+            fixObject->currentTargetValue = Fixed::from_val(0xffffffff);
             if (fixObject->owner != owner) {
                 object->remoteFoeStrength += fixObject->baseType->offenseValue;
             } else {
@@ -966,7 +966,7 @@ Fixed SpaceObject::turn_rate() const {
     if (attributes & kShapeFromDirection) {
         return baseType->frame.rotation.maxTurnRate;
     }
-    return kDefaultTurnRate;
+    return Fixed::from_val(kDefaultTurnRate);
 }
 
 StringSlice get_object_name(Handle<BaseObject> id) {

@@ -37,9 +37,9 @@ const int kMinimumStarSpeed = 1;
 const int kMaximumStarSpeed = 3;
 const int kStarSpeedSpread = (kMaximumStarSpeed - kMinimumStarSpeed + 1);
 
-const Fixed kSlowStarFraction   = 0x00000080;   // 0.500
-const Fixed kMediumStarFraction = 0x000000c0;   // 0.750
-const Fixed kFastStarFraction   = 0x00000100;   // 1.000
+const Fixed kSlowStarFraction   = Fixed::from_val(0x00000080);   // 0.500
+const Fixed kMediumStarFraction = Fixed::from_val(0x000000c0);   // 0.750
+const Fixed kFastStarFraction   = Fixed::from_val(0x00000100);   // 1.000
 
 const uint8_t kStarColor = GRAY;
 
@@ -67,7 +67,7 @@ void Starfield::reset(Handle<SpaceObject> which_object) {
     for (scrollStarType* star: range(_stars, _stars + kScrollStarNum)) {
         star->location.h = Randomize(play_screen().width()) + viewport().left;
         star->location.v = Randomize(play_screen().height()) + viewport().top;
-        star->motionFraction.h = star->motionFraction.v = 0;
+        star->motionFraction.h = star->motionFraction.v = Fixed::zero();
 
         star->speed = RandomStarSpeed();
         star->age = 0;
@@ -79,18 +79,18 @@ void Starfield::reset(Handle<SpaceObject> which_object) {
 
 void Starfield::make_sparks(
         int32_t sparkNum, int32_t sparkSpeed, Fixed maxVelocity, uint8_t color, Point* location) {
-    maxVelocity = evil_scale_by(maxVelocity.val(), gAbsoluteScale);
+    maxVelocity = Fixed::from_val(evil_scale_by(maxVelocity.val(), gAbsoluteScale));
     if (sparkNum <= 0) {
         return;
     }
 
     for (scrollStarType* spark: range(_stars + kSparkStarOffset, _stars + kAllStarNum)) {
         if (spark->speed == kNoStar) {
-            spark->velocity.h = Randomize(maxVelocity.val() << 2L) - maxVelocity;
-            spark->velocity.v = Randomize(maxVelocity.val() << 2L) - maxVelocity;
+            spark->velocity.h = Fixed::from_val(Randomize(maxVelocity.val() << 2L)) - maxVelocity;
+            spark->velocity.v = Fixed::from_val(Randomize(maxVelocity.val() << 2L)) - maxVelocity;
             spark->oldLocation.h = spark->location.h = location->h;
             spark->oldLocation.v = spark->location.v = location->v;
-            spark->motionFraction.h = spark->motionFraction.v = 0;
+            spark->motionFraction.h = spark->motionFraction.v = Fixed::zero();
             spark->age = kMaxSparkAge;
             spark->speed = sparkSpeed;
             spark->color = color;
@@ -121,30 +121,30 @@ void Starfield::move(ticks by_units) {
     const Rect play_screen = antares::play_screen();
 
     const fixedPointType slowVelocity = {
-        scale_by(
-                (mMultiplyFixed(g.ship->velocity.h, kSlowStarFraction) * by_units.count()).val(),
-                gAbsoluteScale),
-        scale_by(
-                (mMultiplyFixed(g.ship->velocity.v, kSlowStarFraction) * by_units.count()).val(),
-                gAbsoluteScale),
+        Fixed::from_val(scale_by(
+                (mMultiplyFixed(g.ship->velocity.h, kSlowStarFraction) * Fixed::from_val(by_units.count())).val(),
+                gAbsoluteScale)),
+        Fixed::from_val(scale_by(
+                (mMultiplyFixed(g.ship->velocity.v, kSlowStarFraction) * Fixed::from_val(by_units.count())).val(),
+                gAbsoluteScale)),
     };
 
     const fixedPointType mediumVelocity = {
-        scale_by(
-                (mMultiplyFixed(g.ship->velocity.h, kMediumStarFraction) * by_units.count()).val(),
-                gAbsoluteScale),
-        scale_by(
-                (mMultiplyFixed(g.ship->velocity.v, kMediumStarFraction) * by_units.count()).val(),
-                gAbsoluteScale),
+        Fixed::from_val(scale_by(
+                (mMultiplyFixed(g.ship->velocity.h, kMediumStarFraction) * Fixed::from_val(by_units.count())).val(),
+                gAbsoluteScale)),
+        Fixed::from_val(scale_by(
+                (mMultiplyFixed(g.ship->velocity.v, kMediumStarFraction) * Fixed::from_val(by_units.count())).val(),
+                gAbsoluteScale)),
     };
 
     const fixedPointType fastVelocity = {
-        scale_by(
-                (mMultiplyFixed(g.ship->velocity.h, kFastStarFraction) * by_units.count()).val(),
-                gAbsoluteScale),
-        scale_by(
-                (mMultiplyFixed(g.ship->velocity.v, kFastStarFraction) * by_units.count()).val(),
-                gAbsoluteScale),
+        Fixed::from_val(scale_by(
+                (mMultiplyFixed(g.ship->velocity.h, kFastStarFraction) * Fixed::from_val(by_units.count())).val(),
+                gAbsoluteScale)),
+        Fixed::from_val(scale_by(
+                (mMultiplyFixed(g.ship->velocity.v, kFastStarFraction) * Fixed::from_val(by_units.count())).val(),
+                gAbsoluteScale)),
     };
 
     for (scrollStarType* star: range(_stars, _stars + kScrollStarNum)) {
@@ -168,7 +168,7 @@ void Starfield::move(ticks by_units) {
         star->motionFraction.v += velocity->v;
 
         int32_t h;
-        if (star->motionFraction.h >= 0) {
+        if (star->motionFraction.h >= Fixed::zero()) {
             h = more_evil_fixed_to_long(star->motionFraction.h + mFloatToFixed(0.5));
         } else {
             h = more_evil_fixed_to_long(star->motionFraction.h - mFloatToFixed(0.5)) + 1;
@@ -177,7 +177,7 @@ void Starfield::move(ticks by_units) {
         star->motionFraction.h -= mLongToFixed(h);
 
         int32_t v;
-        if (star->motionFraction.v >= 0) {
+        if (star->motionFraction.v >= Fixed::zero()) {
             v = more_evil_fixed_to_long(star->motionFraction.v + mFloatToFixed(0.5));
         } else {
             v = more_evil_fixed_to_long(star->motionFraction.v - mFloatToFixed(0.5)) + 1;
@@ -188,26 +188,26 @@ void Starfield::move(ticks by_units) {
         if ((star->location.h < viewport.left) && (star->oldLocation.h < viewport.left)) {
             star->location.h += play_screen.width() - 1;
             star->location.v = Randomize(play_screen.height()) + viewport.top;
-            star->motionFraction.h = star->motionFraction.v = 0;
+            star->motionFraction.h = star->motionFraction.v = Fixed::zero();
             star->speed = RandomStarSpeed();
             star->age = 0;
         } else if ((star->location.h >= viewport.right) && (star->oldLocation.h >= viewport.right)) {
             star->location.h -= play_screen.width();
             star->location.v = Randomize(play_screen.height()) + viewport.top;
-            star->motionFraction.h = star->motionFraction.v = 0;
+            star->motionFraction.h = star->motionFraction.v = Fixed::zero();
             star->speed = RandomStarSpeed();
             star->age = 0;
         } else if ((star->location.v < viewport.top) && (star->oldLocation.v < viewport.top)) {
             star->location.h = Randomize(play_screen.width()) + viewport.left;
             star->location.v += play_screen.height() - 1;
-            star->motionFraction.h = star->motionFraction.v = 0;
+            star->motionFraction.h = star->motionFraction.v = Fixed::zero();
             star->speed = RandomStarSpeed();
             star->age = 0;
         } else if ((star->location.v >= play_screen.bottom)
                 && (star->oldLocation.v >= play_screen.bottom)) {
             star->location.h = Randomize(play_screen.width()) + viewport.left;
             star->location.v -= play_screen.height();
-            star->motionFraction.h = star->motionFraction.v = 0;
+            star->motionFraction.h = star->motionFraction.v = Fixed::zero();
             star->speed = RandomStarSpeed();
             star->age = 0;
         }
@@ -237,11 +237,11 @@ void Starfield::move(ticks by_units) {
         }
         star->age -= star->speed * by_units.count();
 
-        star->motionFraction.h += star->velocity.h * by_units.count() + slowVelocity.h;
-        star->motionFraction.v += star->velocity.v * by_units.count() + slowVelocity.v;
+        star->motionFraction.h += star->velocity.h * Fixed::from_val(by_units.count()) + slowVelocity.h;
+        star->motionFraction.v += star->velocity.v * Fixed::from_val(by_units.count()) + slowVelocity.v;
 
         int32_t h;
-        if (star->motionFraction.h >= 0) {
+        if (star->motionFraction.h >= Fixed::zero()) {
             h = more_evil_fixed_to_long(star->motionFraction.h + mFloatToFixed(0.5));
         } else {
             h = more_evil_fixed_to_long(star->motionFraction.h - mFloatToFixed(0.5)) + 1;
@@ -250,7 +250,7 @@ void Starfield::move(ticks by_units) {
         star->motionFraction.h -= mLongToFixed(h);
 
         int32_t v;
-        if (star->motionFraction.v >= 0) {
+        if (star->motionFraction.v >= Fixed::zero()) {
             v = more_evil_fixed_to_long(star->motionFraction.v + mFloatToFixed(0.5));
         } else {
             v = more_evil_fixed_to_long(star->motionFraction.v - mFloatToFixed(0.5)) + 1;

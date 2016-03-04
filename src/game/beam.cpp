@@ -48,8 +48,8 @@ void DetermineBeamRelativeCoordFromAngle(Handle<SpaceObject> beamObject, int16_t
     GetRotPoint(&fcos, &fsin, angle);
 
     beamObject->frame.beam->toRelativeCoord = Point(
-            mFixedToLong(mMultiplyFixed(0, -fcos) - mMultiplyFixed(range, -fsin)),
-            mFixedToLong(mMultiplyFixed(0, -fsin) + mMultiplyFixed(range, -fcos)));
+            mFixedToLong(mMultiplyFixed(Fixed::zero(), -fcos) - mMultiplyFixed(range, -fsin)),
+            mFixedToLong(mMultiplyFixed(Fixed::zero(), -fsin) + mMultiplyFixed(range, -fcos)));
 }
 
 template <typename T>

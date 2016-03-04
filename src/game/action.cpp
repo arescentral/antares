@@ -110,7 +110,7 @@ static void create_object(
         count += focus->randomSeed.next(create.howManyRange);
     }
     for (int i = 0; i < count; ++i) {
-        fixedPointType vel = {0, 0};
+        fixedPointType vel = {Fixed::zero(), Fixed::zero()};
         if (create.velocityRelative) {
             vel = focus->velocity;
         }
@@ -290,15 +290,15 @@ static void alter(
                 if (focus->attributes & kShapeFromDirection) {
                     f = mMultiplyFixed(
                             focus->baseType->frame.rotation.maxTurnRate,
-                            alter.minimum + focus->randomSeed.next(alter.range));
+                            Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range)));
                 } else {
                     f = mMultiplyFixed(
-                            2 /*kDefaultTurnRate*/,
-                            alter.minimum + focus->randomSeed.next(alter.range));
+                            Fixed::from_val(2) /*kDefaultTurnRate*/,
+                            Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range)));
                 }
                 f2 = focus->baseType->mass;
-                if (f2 == 0) {
-                    f = -1;
+                if (f2 == Fixed::zero()) {
+                    f = Fixed::from_val(-1);
                 } else {
                     f = mDivideFixed(f, f2);
                 }
@@ -307,14 +307,14 @@ static void alter(
             break;
 
         case kAlterOffline:
-            f = alter.minimum + focus->randomSeed.next(alter.range);
+            f = Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range));
             f2 = focus->baseType->mass;
-            if (f2 == 0) {
+            if (f2 == Fixed::zero()) {
                 focus->offlineTime = -1;
             } else {
                 focus->offlineTime = mDivideFixed(f, f2).val();
             }
-            focus->offlineTime = mFixedToLong(focus->offlineTime);
+            focus->offlineTime = mFixedToLong(Fixed::from_val(focus->offlineTime));
             break;
 
         case kAlterVelocity:
@@ -323,8 +323,8 @@ static void alter(
                 //  two objects colliding.  Negative velocity = slow down
                 if (object.get()) {
                     if (alter.relative) {
-                        if ((object->baseType->mass > 0) &&
-                            (object->maxVelocity > 0)) {
+                        if ((object->baseType->mass > Fixed::zero()) &&
+                            (object->maxVelocity > Fixed::zero())) {
                             if (alter.minimum >= 0) {
                                 // if the minimum >= 0, then PUSH the object like collision
                                 f = subject->velocity.h - object->velocity.h;
@@ -341,10 +341,10 @@ static void alter(
                             } else {
                                 // if the minumum < 0, then STOP the object like applying breaks
                                 f = object->velocity.h;
-                                f = mMultiplyFixed(f, alter.minimum);
+                                f = mMultiplyFixed(f, Fixed::from_val(alter.minimum));
                                 object->velocity.h += f;
                                 f = object->velocity.v;
-                                f = mMultiplyFixed(f, alter.minimum);
+                                f = mMultiplyFixed(f, Fixed::from_val(alter.minimum));
                                 object->velocity.v += f;
 
                                 // make sure we're not going faster than our top speed
@@ -356,7 +356,7 @@ static void alter(
                             f = mMultiplyFixed(object->maxVelocity, f);
                             f2 = mMultiplyFixed(object->maxVelocity, f2);
 
-                            if (f < 0) {
+                            if (f < Fixed::zero()) {
                                 if (object->velocity.h < f) {
                                     object->velocity.h = f;
                                 }
@@ -366,7 +366,7 @@ static void alter(
                                 }
                             }
 
-                            if (f2 < 0) {
+                            if (f2 < Fixed::zero()) {
                                 if (object->velocity.v < f2) {
                                     object->velocity.v = f2;
                                 }
@@ -378,8 +378,8 @@ static void alter(
                         }
                     } else {
                         GetRotPoint(&f, &f2, subject->direction);
-                        f = mMultiplyFixed(alter.minimum, f);
-                        f2 = mMultiplyFixed(alter.minimum, f2);
+                        f = mMultiplyFixed(Fixed::from_val(alter.minimum), f);
+                        f2 = mMultiplyFixed(Fixed::from_val(alter.minimum), f2);
                         focus->velocity.h = f;
                         focus->velocity.v = f2;
                     }
@@ -389,8 +389,8 @@ static void alter(
                     // excede its max velocity.
                     // Minimum value is absolute speed in direction.
                     GetRotPoint(&f, &f2, focus->direction);
-                    f = mMultiplyFixed(alter.minimum, f);
-                    f2 = mMultiplyFixed(alter.minimum, f2);
+                    f = mMultiplyFixed(Fixed::from_val(alter.minimum), f);
+                    f2 = mMultiplyFixed(Fixed::from_val(alter.minimum), f2);
                     if (alter.relative) {
                         focus->velocity.h += f;
                         focus->velocity.v += f2;
@@ -406,12 +406,12 @@ static void alter(
             if (alter.minimum < 0) {
                 focus->maxVelocity = focus->baseType->maxVelocity;
             } else {
-                focus->maxVelocity = alter.minimum;
+                focus->maxVelocity = Fixed::from_val(alter.minimum);
             }
             break;
 
         case kAlterThrust:
-            f = alter.minimum + focus->randomSeed.next(alter.range);
+            f = Fixed::from_val(alter.minimum + focus->randomSeed.next(alter.range));
             if (alter.relative) {
                 focus->thrust += f;
             } else {
@@ -469,7 +469,7 @@ static void alter(
                     admiral = Handle<Admiral>(alter.range);
                 }
                 if (admiral.get()) {
-                    admiral->pay_absolute(alter.minimum);
+                    admiral->pay_absolute(Fixed::from_val(alter.minimum));
                 }
             }
             break;
@@ -601,7 +601,7 @@ static void enter_warp(Handle<Action> action, Handle<SpaceObject> focus, Handle<
     subject->presence.warp_in.progress = ticks(0);
     subject->presence.warp_in.step = 0;
     subject->attributes &= ~kOccupiesSpace;
-    fixedPointType newVel = {0, 0};
+    fixedPointType newVel = {Fixed::zero(), Fixed::zero()};
     CreateAnySpaceObject(
             plug.meta.warpInFlareID, &newVel,
             &subject->location, subject->direction, Admiral::none(), 0, -1);

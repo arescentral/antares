@@ -55,9 +55,9 @@ void GetRotPoint(Fixed *x, Fixed *y, int32_t rotpos) {
     int32_t* i;
 
     i = gRotTable + rotpos * 2L;
-    *x = *i;
+    *x = Fixed::from_val(*i);
     i++;
-    *y = *i;
+    *y = Fixed::from_val(*i);
 }
 
 int32_t GetAngleFromVector(int32_t x, int32_t y) {

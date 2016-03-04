@@ -206,13 +206,13 @@ void GetInitialCoord(Scenario::InitialObject *initial, coordPointType *coord, in
     lcos = -lcos;
     lsin = -lsin;
 
-    lscrap = mMultiplyFixed(initial->location.h, lcos).val();
-    lscrap -= mMultiplyFixed(initial->location.v, lsin).val();
+    lscrap = mMultiplyFixed(Fixed::from_val(initial->location.h), Fixed::from_val(lcos)).val();
+    lscrap -= mMultiplyFixed(Fixed::from_val(initial->location.v), Fixed::from_val(lsin)).val();
     coord->h = kUniversalCenter;
     coord->h += lscrap;
 
-    lscrap = mMultiplyFixed(initial->location.h, lsin).val();
-    lscrap += mMultiplyFixed(initial->location.v, lcos).val();
+    lscrap = mMultiplyFixed(Fixed::from_val(initial->location.h), Fixed::from_val(lsin)).val();
+    lscrap += mMultiplyFixed(Fixed::from_val(initial->location.v), Fixed::from_val(lcos)).val();
     coord->v = kUniversalCenter;
     coord->v += lscrap;
 }
@@ -430,8 +430,8 @@ bool Scenario::Condition::is_true() const {
         case kVelocityLessThanEqualToCondition: {
             auto sObject = GetObjectFromInitialNumber(subjectObject);
             return sObject.get()
-                && ((ABS(sObject->velocity.h)) < conditionArgument.longValue)
-                && ((ABS(sObject->velocity.v)) < conditionArgument.longValue);
+                && ((ABS(sObject->velocity.h)) < Fixed::from_val(conditionArgument.longValue))
+                && ((ABS(sObject->velocity.v)) < Fixed::from_val(conditionArgument.longValue));
         }
 
         case kNoShipsLeftCondition:
@@ -708,7 +708,7 @@ static void create_initial(int i, uint32_t all_colors) {
 
     auto type = initial->type;
     // TODO(sfiera): remap object in networked games.
-    fixedPointType v = {0, 0};
+    fixedPointType v = {Fixed::zero(), Fixed::zero()};
     auto anObject = initial->realObject = CreateAnySpaceObject(
             type, &v, &coord, gScenarioRotation, owner, specialAttributes,
             initial->spriteIDOverride);
@@ -839,7 +839,7 @@ void UnhideInitialObject(int32_t whichInitial) {
 
     auto type = initial->type;
     // TODO(sfiera): remap objects in networked games.
-    fixedPointType v = {0, 0};
+    fixedPointType v = {Fixed::zero(), Fixed::zero()};
     auto anObject = initial->realObject = CreateAnySpaceObject(
             type, &v, &coord, 0, owner, specialAttributes, initial->spriteIDOverride);
 
@@ -1013,13 +1013,13 @@ coordPointType Translate_Coord_To_Scenario_Rotation(int32_t h, int32_t v) {
     lcos = -lcos;
     lsin = -lsin;
 
-    lscrap = mMultiplyFixed(h, lcos).val();
-    lscrap -= mMultiplyFixed(v, lsin).val();
+    lscrap = mMultiplyFixed(Fixed::from_val(h), Fixed::from_val(lcos)).val();
+    lscrap -= mMultiplyFixed(Fixed::from_val(v), Fixed::from_val(lsin)).val();
     coord.h = kUniversalCenter;
     coord.h += lscrap;
 
-    lscrap = mMultiplyFixed(h, lsin).val();
-    lscrap += mMultiplyFixed(v, lcos).val();
+    lscrap = mMultiplyFixed(Fixed::from_val(h), Fixed::from_val(lsin)).val();
+    lscrap += mMultiplyFixed(Fixed::from_val(v), Fixed::from_val(lcos)).val();
     coord.v = kUniversalCenter;
     coord.v += lscrap;
 

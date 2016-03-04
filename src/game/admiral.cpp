@@ -46,13 +46,13 @@ const int32_t kDestNoObject             = -1;
 const int32_t kDestinationNameLen        = 17;
 const int32_t kAdmiralNameLen            = 31;
 
-const Fixed kUnimportantTarget          = 0x00000000;
-const Fixed kMostImportantTarget        = 0x00000200;
-const Fixed kLeastImportantTarget       = 0x00000100;
-const Fixed kVeryImportantTarget        = 0x00000160;
-const Fixed kImportantTarget            = 0x00000140;
-const Fixed kSomewhatImportantTarget    = 0x00000120;
-const Fixed kAbsolutelyEssential        = 0x00008000;
+const Fixed kUnimportantTarget          = Fixed::from_val(0x00000000);
+const Fixed kMostImportantTarget        = Fixed::from_val(0x00000200);
+const Fixed kLeastImportantTarget       = Fixed::from_val(0x00000100);
+const Fixed kVeryImportantTarget        = Fixed::from_val(0x00000160);
+const Fixed kImportantTarget            = Fixed::from_val(0x00000140);
+const Fixed kSomewhatImportantTarget    = Fixed::from_val(0x00000120);
+const Fixed kAbsolutelyEssential        = Fixed::from_val(0x00008000);
 
 }  // namespace
 
@@ -73,7 +73,7 @@ void ResetAllDestObjectData() {
     for (auto d: Destination::all()) {
         d->whichObject = SpaceObject::none();
         d->name.clear();
-        d->earn = 0;
+        d->earn = Fixed::zero();
         d->totalBuildTime = d->buildTime = ticks(0);
         d->buildObjectBaseNum = BaseObject::none();
         for (int j = 0; j < kMaxTypeBaseCanBuild; ++j) {
@@ -208,7 +208,7 @@ void RemoveDestination(Handle<Destination> d) {
 
     d->whichObject = SpaceObject::none();
     d->name.clear();
-    d->earn = 0;
+    d->earn = Fixed::zero();
     d->totalBuildTime = d->buildTime = ticks(0);
     d->buildObjectBaseNum = BaseObject::none();
     for (int i = 0; i < kMaxTypeBaseCanBuild; i++) {
@@ -226,9 +226,9 @@ void RecalcAllAdmiralBuildData() {
         for (int j = 0; j < kMaxNumAdmiralCanBuild; j++) {
             a->canBuildType()[j].baseNum = -1;
             a->canBuildType()[j].base = BaseObject::none();
-            a->canBuildType()[j].chanceRange = -1;
+            a->canBuildType()[j].chanceRange = Fixed::from_val(-1);
         }
-        a->totalBuildChance() = 0;
+        a->totalBuildChance() = Fixed::zero();
         a->hopeToBuild() = -1;
     }
 
@@ -388,7 +388,7 @@ void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType *where) 
         o->destObjectID = -1;
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
         o->timeFromOrigin = ticks(0);
-        o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
+        o->idealLocationCalc.h = o->idealLocationCalc.v = Fixed::zero();
         o->originLocation = o->location;
         return;
     }
@@ -416,7 +416,7 @@ void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType *where) 
         o->destObjectDest = SpaceObject::none();
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
         o->timeFromOrigin = ticks(0);
-        o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
+        o->idealLocationCalc.h = o->idealLocationCalc.v = Fixed::zero();
         o->originLocation = o->location;
     } else {
         // the object is OK, the admiral is OK, then go about setting its destination
@@ -434,7 +434,7 @@ void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType *where) 
         o->destinationLocation = o->originLocation = *where;
         o->destObject = SpaceObject::none();
         o->timeFromOrigin = ticks(0);
-        o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
+        o->idealLocationCalc.h = o->idealLocationCalc.v = Fixed::zero();
     }
 }
 
@@ -448,7 +448,7 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
         o->destObjectID = -1;
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
         o->timeFromOrigin = ticks(0);
-        o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
+        o->idealLocationCalc.h = o->idealLocationCalc.v = Fixed::zero();
         o->originLocation = o->location;
         return;
     }
@@ -481,7 +481,7 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
         o->destObjectDest = SpaceObject::none();
         o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
         o->timeFromOrigin = ticks(0);
-        o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
+        o->idealLocationCalc.h = o->idealLocationCalc.v = Fixed::zero();
         o->originLocation = o->location;
     } else {
         // the object is OK, the admiral is OK, then go about setting its destination
@@ -541,7 +541,7 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
                 o->destObjectDest = SpaceObject::none();
                 o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
                 o->timeFromOrigin = ticks(0);
-                o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
+                o->idealLocationCalc.h = o->idealLocationCalc.v = Fixed::zero();
                 o->originLocation = o->location;
             }
         } else {
@@ -549,7 +549,7 @@ void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObj
             o->destObjectDest = SpaceObject::none();
             o->destinationLocation.h = o->destinationLocation.v = kNoDestinationCoord;
             o->timeFromOrigin = ticks(0);
-            o->idealLocationCalc.h = o->idealLocationCalc.v = 0;
+            o->idealLocationCalc.h = o->idealLocationCalc.v = Fixed::zero();
             o->originLocation = o->location;
         }
     }
@@ -576,7 +576,7 @@ void RemoveObjectFromDestination(Handle<SpaceObject> o) {
 // assumes you can afford it & base has time
 static void AdmiralBuildAtObject(
         Handle<Admiral> admiral, Handle<BaseObject> base, Handle<Destination> buildAtDest) {
-    fixedPointType  v = {0, 0};
+    fixedPointType  v = {Fixed::zero(), Fixed::zero()};
     if (base.get()) {
         auto coord = buildAtDest->whichObject->location;
 
@@ -635,7 +635,7 @@ void Admiral::think() {
             _blitzkrieg = 0 - (g.random.next(1200) + 1200);
             for (auto anObject: SpaceObject::all()) {
                 if (anObject->owner.get() == this) {
-                    anObject->currentTargetValue = 0x00000000;
+                    anObject->currentTargetValue = Fixed::zero();
                 }
             }
         }
@@ -646,7 +646,7 @@ void Admiral::think() {
             _blitzkrieg = g.random.next(1200) + 1200;
             for (auto anObject: SpaceObject::all()) {
                 if (anObject->owner.get() == this) {
-                    anObject->currentTargetValue = 0x00000000;
+                    anObject->currentTargetValue = Fixed::zero();
                 }
             }
         }
@@ -712,7 +712,7 @@ void Admiral::think() {
                     _thisFreeEscortStrength += anObject->baseType->offenseValue;
                 }
 
-                anObject->bestConsideredTargetValue = 0xffffffff;
+                anObject->bestConsideredTargetValue = Fixed::from_val(0xffffffff);
                 // start back with 1st ship
                 _destinationObject = g.root;
                 destObject = g.root;
@@ -731,7 +731,7 @@ void Admiral::think() {
                         anObject = g.root;
                         _considerShipID = anObject->id;
                         _lastFreeEscortStrength = _thisFreeEscortStrength;
-                        _thisFreeEscortStrength = 0;
+                        _thisFreeEscortStrength = Fixed::zero();
                     } else {
                         anObject = anObject->nextObject;
                         _considerShipID = anObject->id;
@@ -794,7 +794,7 @@ void Admiral::think() {
                         if ((_blitzkrieg > 0) && (anObject->duty == eGuardDuty)) {
                             thisValue = kUnimportantTarget;
                         } else {
-                            if (foeValue > 0) {
+                            if (foeValue > Fixed::zero()) {
                                 thisValue = kSomewhatImportantTarget;
                             } else {
                                 thisValue = kUnimportantTarget;
@@ -805,7 +805,7 @@ void Admiral::think() {
                         thisValue <<= 3;
                     }
                     if (anObject->baseType->orderFlags & kHardTargetIsNotBase) {
-                        thisValue = 0;
+                        thisValue = Fixed::zero();
                     }
                 } else {
                     if (destObject->baseType->destinationClass
@@ -827,14 +827,14 @@ void Admiral::think() {
                         thisValue <<= 3;
                     }
                     if (anObject->baseType->orderFlags & kHardTargetIsBase) {
-                        thisValue = 0;
+                        thisValue = Fixed::zero();
                     }
                 }
                 if (anObject->baseType->orderFlags & kTargetIsFriend) {
                     thisValue <<= 3;
                 }
                 if (anObject->baseType->orderFlags & kHardTargetIsFoe) {
-                    thisValue = 0;
+                    thisValue = Fixed::zero();
                 }
             } else if (destObject->owner.get()) {
                 if ((anObject->duty == eGuardDuty) || (anObject->duty == eNoDuty)) {
@@ -852,7 +852,7 @@ void Admiral::think() {
                         }
 
                         if (anObject->baseType->orderFlags & kHardTargetIsNotBase) {
-                            thisValue = 0;
+                            thisValue = Fixed::zero();
                         }
                     } else {
                         if (friendValue.val()) {
@@ -869,7 +869,7 @@ void Admiral::think() {
                         }
 
                         if (anObject->baseType->orderFlags & kHardTargetIsBase) {
-                            thisValue = 0;
+                            thisValue = Fixed::zero();
                         }
                     }
                 }
@@ -877,7 +877,7 @@ void Admiral::think() {
                     thisValue <<= 3;
                 }
                 if (anObject->baseType->orderFlags & kHardTargetIsFriend) {
-                    thisValue = 0;
+                    thisValue = Fixed::zero();
                 }
             } else {
                 if (destObject->attributes & kIsDestination) {
@@ -889,21 +889,21 @@ void Admiral::think() {
                         thisValue <<= 3;
                     }
                     if (anObject->baseType->orderFlags & kHardTargetIsNotBase) {
-                        thisValue = 0;
+                        thisValue = Fixed::zero();
                     }
                 } else {
                     if (anObject->baseType->orderFlags & kTargetIsNotBase) {
                         thisValue <<= 3;
                     }
                     if (anObject->baseType->orderFlags & kHardTargetIsBase) {
-                        thisValue = 0;
+                        thisValue = Fixed::zero();
                     }
                 }
                 if (anObject->baseType->orderFlags & kTargetIsFoe) {
                     thisValue <<= 3;
                 }
                 if (anObject->baseType->orderFlags & kHardTargetIsFriend) {
-                    thisValue = 0;
+                    thisValue = Fixed::zero();
                 }
             }
 
@@ -920,14 +920,14 @@ void Admiral::think() {
                     thisValue <<= 3;
                 }
                 if (anObject->baseType->orderFlags & kHardTargetIsRemote) {
-                    thisValue = 0;
+                    thisValue = Fixed::zero();
                 }
             } else {
                 if (anObject->baseType->orderFlags & kTargetIsRemote) {
                     thisValue <<= 3;
                 }
                 if (anObject->baseType->orderFlags & kHardTargetIsLocal) {
-                    thisValue = 0;
+                    thisValue = Fixed::zero();
                 }
             }
 
@@ -936,10 +936,10 @@ void Admiral::think() {
                     && (anObject->baseType->orderKeyTag == destObject->baseType->levelKeyTag)) {
                 thisValue <<= 3;
             } else if (anObject->baseType->orderFlags & kHardMatchingFoe) {
-                thisValue = 0;
+                thisValue = Fixed::zero();
             }
 
-            if (thisValue > 0) {
+            if (thisValue > Fixed::zero()) {
                 thisValue += anObject->randomSeed.next(thisValue >> 1) - (thisValue >> 2);
             }
             if (thisValue > anObject->bestConsideredTargetValue) {
@@ -951,7 +951,7 @@ void Admiral::think() {
 
     // if we've saved enough for our dreams
     if (_cash > _saveGoal) {
-        _saveGoal = 0;
+        _saveGoal = Fixed::zero();
 
         // consider what ship to build
         if (!_buildAtObject.get()) {
@@ -982,7 +982,7 @@ void Admiral::think() {
                         k++;
                         // choose something to build
                         thisValue = g.random.next(_totalBuildChance);
-                        friendValue = 0xffffffff; // equals the highest qualifying object
+                        friendValue = Fixed::from_val(0xffffffff); // equals the highest qualifying object
                         for (int j = 0; j < kMaxNumAdmiralCanBuild; ++j) {
                             if ((_canBuildType[j].chanceRange <= thisValue)
                                     && (_canBuildType[j].chanceRange > friendValue)) {
@@ -1006,13 +1006,13 @@ void Admiral::think() {
                             }
 
                             if (baseObject->buildFlags & kMatchingFoeExists) {
-                                thisValue = 0;
+                                thisValue = Fixed::zero();
                                 for (auto anObject: SpaceObject::all()) {
                                     if ((anObject->active)
                                             && (anObject->owner.get() != this)
                                             && (anObject->baseType->levelKeyTag
                                                 == baseObject->orderKeyTag)) {
-                                        thisValue = 1;
+                                        thisValue = Fixed::from_val(1);
                                     }
                                 }
                                 if (!thisValue.val()) {
@@ -1032,7 +1032,7 @@ void Admiral::think() {
                     if (_cash >= mLongToFixed(baseObject->price)) {
                         Admiral::build(j);
                         _hopeToBuild = -1;
-                        _saveGoal = 0;
+                        _saveGoal = Fixed::zero();
                     } else {
                         _saveGoal = mLongToFixed(baseObject->price);
                     }
@@ -1076,8 +1076,8 @@ void Admiral::pay(Fixed howMuch) {
 
 void Admiral::pay_absolute(Fixed howMuch) {
     _cash += howMuch;
-    if (_cash < 0) {
-        _cash = 0;
+    if (_cash < Fixed::zero()) {
+        _cash = Fixed::zero();
     }
 }
 

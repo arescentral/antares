@@ -245,7 +245,7 @@ void GetRealObjectSpriteData(
     }
 
     if ( baseObject->attributes & kIsSelfAnimated)
-        whichShape = more_evil_fixed_to_long(baseObject->frame.animation.firstShape);
+        whichShape = more_evil_fixed_to_long(Fixed::from_val(baseObject->frame.animation.firstShape));
     else
         whichShape = 0;
 
@@ -331,7 +331,7 @@ static void render_briefing_with(
         if (( anObject->active == kObjectInUse) && ( anObject->sprite.get()))
         {
             auto baseObject = anObject->base;
-            if (baseObject->maxVelocity == 0) {
+            if (baseObject->maxVelocity == Fixed::zero()) {
                 const NatePixTable::Frame* frame = NULL;
                 GetRealObjectSpriteData( &(anObject->location),
                     anObject->base, anObject->owner,

@@ -87,7 +87,7 @@ struct Destination {
 struct admiralBuildType {
     Handle<BaseObject>  base;
     int32_t             baseNum = -1;
-    Fixed               chanceRange = -1;
+    Fixed               chanceRange = Fixed::from_val(-1);
 };
 
 class Admiral {
@@ -157,18 +157,18 @@ class Admiral {
     int32_t             _considerDestination = kNoShip;
     Handle<Destination> _buildAtObject; // # of destination object to build at
     int32_t             _race = -1;
-    Fixed               _cash = 0;
-    Fixed               _saveGoal = 0;
-    Fixed               _earning_power = 0;
+    Fixed               _cash = Fixed::zero();
+    Fixed               _saveGoal = Fixed::zero();
+    Fixed               _earning_power = Fixed::zero();
     int32_t             _kills = 0;
     int32_t             _losses = 0;
     int32_t             _shipsLeft = 0;
     int32_t             _score[kAdmiralScoreNum] = {};
     int32_t             _blitzkrieg = 1200;
-    Fixed               _lastFreeEscortStrength = 0;
-    Fixed               _thisFreeEscortStrength = 0;
+    Fixed               _lastFreeEscortStrength = Fixed::zero();
+    Fixed               _thisFreeEscortStrength = Fixed::zero();
     admiralBuildType    _canBuildType[kMaxNumAdmiralCanBuild];
-    Fixed               _totalBuildChance = 0;
+    Fixed               _totalBuildChance = Fixed::zero();
     int32_t             _hopeToBuild = -1;
     uint8_t             _color = 0;
     bool                _active = false;

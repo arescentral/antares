@@ -290,7 +290,7 @@ static const char fractions[][5] = {
 };
 
 void print_to(PrintTarget out, const Fixed& fixed) {
-    if (fixed < 0) {
+    if (fixed < Fixed::zero()) {
         out.push(1, '-');
     }
     int64_t value = llabs(fixed.val());
