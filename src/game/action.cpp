@@ -28,6 +28,7 @@
 #include "drawing/sprite-handling.hpp"
 #include "game/admiral.hpp"
 #include "game/vector.hpp"
+#include "game/condition.hpp"
 #include "game/globals.hpp"
 #include "game/labels.hpp"
 #include "game/messages.hpp"

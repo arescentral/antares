@@ -25,6 +25,7 @@
 #include "drawing/interface.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "drawing/text.hpp"
+#include "game/condition.hpp"
 #include "game/globals.hpp"
 #include "game/instruments.hpp"
 #include "game/labels.hpp"

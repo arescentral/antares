@@ -37,6 +37,7 @@
 #include "game/action.hpp"
 #include "game/admiral.hpp"
 #include "game/vector.hpp"
+#include "game/condition.hpp"
 #include "game/cursor.hpp"
 #include "game/globals.hpp"
 #include "game/input-source.hpp"
