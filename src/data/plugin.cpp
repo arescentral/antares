@@ -26,6 +26,7 @@ using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::StringSlice;
 using sfz::format;
+using sfz::range;
 using std::vector;
 
 namespace antares {
@@ -73,6 +74,12 @@ void PluginInit() {
     StringList level_names(kLevelNameID);
     for (auto& level: plug.levels) {
         level.name.assign(level_names.at(level.levelNameStrNum - 1));
+    }
+    for (int i: range(plug.levels.size())) {
+        while (i != plug.levels[i].levelNameStrNum - 1) {
+            using std::swap;
+            swap(plug.levels[i], plug.levels[plug.levels[i].levelNameStrNum - 1]);
+        }
     }
 
     StringList object_names(kSpaceObjectNameResID);

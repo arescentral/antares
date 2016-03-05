@@ -920,12 +920,7 @@ void GetLevelFullScaleAndCorner(
 }
 
 const Level* GetLevelPtrFromChapter(int32_t chapter) {
-    for (const Level& level: plug.levels) {
-        if (level.chapter_number() == chapter) {
-            return &level;
-        }
-    }
-    return NULL;
+    return &plug.levels[chapter - 1];
 }
 
 coordPointType Translate_Coord_To_Level_Rotation(int32_t h, int32_t v) {
