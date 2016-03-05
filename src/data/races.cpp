@@ -33,29 +33,6 @@ using std::unique_ptr;
 
 namespace antares {
 
-static const int16_t kRaceResID = 500;
-
-void InitRaces() {
-    if (!plug.races.empty()) {
-        return;
-    }
-
-    Resource rsrc("races", "race", kRaceResID);
-    BytesSlice in(rsrc.data());
-    size_t count = rsrc.data().size() / Race::byte_size;
-    plug.races.resize(count);
-    for (size_t i = 0; i < count; ++i) {
-        read(in, plug.races[i]);
-    }
-    if (!in.empty()) {
-        throw Exception("didn't consume all of race data");
-    }
-}
-
-void CleanupRaces() {
-    plug.races.clear();
-}
-
 int16_t GetRaceIDFromNum(size_t raceNum) {
     if (raceNum < plug.races.size()) {
         return plug.races[raceNum].id;

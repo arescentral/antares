@@ -62,9 +62,6 @@ const uint8_t kFriendlyColor        = GREEN;
 const uint8_t kHostileColor         = RED;
 const uint8_t kNeutralColor         = SKY_BLUE;
 
-static const int16_t kSpaceObjectNameResID          = 5000;
-static const int16_t kSpaceObjectShortNameResID     = 5001;
-
 const Fixed kDefaultTurnRate        = Fixed::from_long(2.000);
 
 #ifdef DATA_COVERAGE
@@ -72,39 +69,10 @@ ANTARES_GLOBAL set<int32_t> covered_objects;
 #endif  // DATA_COVERAGE
 
 void SpaceObjectHandlingInit() {
-    {
-        Resource rsrc("object-actions", "obac", kObjectActionResID);
-        BytesSlice in(rsrc.data());
-        size_t count = rsrc.data().size() / Action::byte_size;
-        plug.actions.resize(count);
-        for (size_t i = 0; i < count; ++i) {
-            read(in, plug.actions[i]);
-        }
-        if (!in.empty()) {
-            throw Exception("didn't consume all of object action data");
-        }
-    }
-
     g.objects.reset(new SpaceObject[kMaxSpaceObject]);
-    {
-        Resource rsrc("objects", "bsob", kBaseObjectResID);
-        BytesSlice in(rsrc.data());
-        size_t count = rsrc.data().size() / BaseObject::byte_size;
-        plug.objects.resize(count);
-        for (size_t i = 0; i < count; ++i) {
-            read(in, plug.objects[i]);
-        }
-        if (!in.empty()) {
-            throw Exception("didn't consume all of base object data");
-        }
-    }
-
-    CorrectAllBaseObjectColor();
     ResetAllSpaceObjects();
     reset_action_queue();
 
-    plug.object_names.reset(new StringList(kSpaceObjectNameResID));
-    plug.object_short_names.reset(new StringList(kSpaceObjectShortNameResID));
 }
 
 void ResetAllSpaceObjects() {
@@ -255,29 +223,6 @@ void RemoveAllSpaceObjects() {
         obj->nextNearObject = obj->nextFarObject = SpaceObject::none();
         obj->attributes = 0;
     }
-}
-
-void CorrectAllBaseObjectColor( void)
-
-{
-    int16_t         i;
-
-    for (auto aBase: BaseObject::all()) {
-        if (( aBase->shieldColor != 0xFF) && ( aBase->shieldColor != 0))
-        {
-            aBase->shieldColor = GetTranslateColorShade(aBase->shieldColor, 15);
-        }
-        if ( aBase->attributes & kIsBeam)
-        {
-            if ( aBase->frame.beam.color > 16)
-                aBase->frame.beam.color = GetTranslateIndex( aBase->frame.beam.color);
-            else
-            {
-                aBase->frame.beam.color = 0;
-            }
-        }
-    }
-
 }
 
 SpaceObject::SpaceObject(

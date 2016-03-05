@@ -24,7 +24,7 @@
 #include "data/space-object.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
-#include "game/space-object.hpp"
+#include "game/level.hpp"
 #include "ui/interface-handling.hpp"
 #include "video/text-driver.hpp"
 
@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
     NullPrefsDriver prefs;
     TextVideoDriver video({640, 480}, {});
     init_globals();
-    SpaceObjectHandlingInit();
+    PluginInit();
 
     ObjectDataBuilder builder(output_dir);
     for (auto object: BaseObject::all()) {

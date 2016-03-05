@@ -24,9 +24,6 @@
 
 namespace antares {
 
-const int16_t kBaseObjectResID      = 500;
-const int16_t kObjectActionResID    = 500;
-
 enum dutyType {
     eNoDuty =           0,
     eEscortDuty =       1,
@@ -218,7 +215,6 @@ class SpaceObject {
 void SpaceObjectHandlingInit( void);
 void ResetAllSpaceObjects( void);
 void RemoveAllSpaceObjects( void);
-void CorrectAllBaseObjectColor( void);
 
 Handle<SpaceObject> CreateAnySpaceObject(
         Handle<BaseObject> whichBase, fixedPointType *velocity, coordPointType *location,

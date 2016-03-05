@@ -64,17 +64,22 @@ namespace antares {
 
 namespace {
 
-const int16_t kLevelResID            = 500;
-const int16_t kLevelInitialResID     = 500;
-const int16_t kLevelConditionResID   = 500;
-const int16_t kLevelBriefResID       = 500;
+static const int16_t kLevelNameID                = 4600;
+static const int16_t kSpaceObjectNameResID       = 5000;
+static const int16_t kSpaceObjectShortNameResID  = 5001;
+
+static const int16_t kLevelResID                 = 500;
+static const int16_t kLevelInitialResID          = 500;
+static const int16_t kLevelConditionResID        = 500;
+static const int16_t kLevelBriefResID            = 500;
+static const int16_t kBaseObjectResID            = 500;
+static const int16_t kObjectActionResID          = 500;
+static const int16_t kRaceResID                  = 500;
 
 const uint32_t kNeutralColorNeededFlag   = 0x00010000u;
 const uint32_t kAnyColorNeededFlag       = 0xffff0000u;
 const uint32_t kNeutralColorLoadedFlag   = 0x00000001u;
 const uint32_t kAnyColorLoadedFlag       = 0x0000ffffu;
-
-const int16_t kLevelNameID = 4600;
 
 ANTARES_GLOBAL int32_t gLevelRotation = 0;
 
@@ -471,6 +476,22 @@ bool Level::Condition::is_true() const {
     return false;
 }
 
+// TODO(sfiera): move this into data/space-object.cpp's read_from().
+void CorrectAllBaseObjectColor() {
+    for (auto aBase: BaseObject::all()) {
+        if ((aBase->shieldColor != 0xFF) && (aBase->shieldColor != 0)) {
+            aBase->shieldColor = GetTranslateColorShade(aBase->shieldColor, 15);
+        }
+        if (aBase->attributes & kIsBeam) {
+            if (aBase->frame.beam.color > 16) {
+                aBase->frame.beam.color = GetTranslateIndex(aBase->frame.beam.color);
+            } else {
+                aBase->frame.beam.color = 0;
+            }
+        }
+    }
+}
+
 void PluginInit() {
     {
         Resource rsrc("scenario-info", "nlAG", 128);
@@ -527,7 +548,48 @@ void PluginInit() {
         }
     }
 
-    InitRaces();
+    {
+        Resource rsrc("objects", "bsob", kBaseObjectResID);
+        BytesSlice in(rsrc.data());
+        size_t count = rsrc.data().size() / BaseObject::byte_size;
+        plug.objects.resize(count);
+        for (size_t i = 0; i < count; ++i) {
+            read(in, plug.objects[i]);
+        }
+        if (!in.empty()) {
+            throw Exception("didn't consume all of base object data");
+        }
+    }
+
+    CorrectAllBaseObjectColor();
+    plug.object_names.reset(new StringList(kSpaceObjectNameResID));
+    plug.object_short_names.reset(new StringList(kSpaceObjectShortNameResID));
+
+    {
+        Resource rsrc("object-actions", "obac", kObjectActionResID);
+        BytesSlice in(rsrc.data());
+        size_t count = rsrc.data().size() / Action::byte_size;
+        plug.actions.resize(count);
+        for (size_t i = 0; i < count; ++i) {
+            read(in, plug.actions[i]);
+        }
+        if (!in.empty()) {
+            throw Exception("didn't consume all of object action data");
+        }
+    }
+
+    {
+        Resource rsrc("races", "race", kRaceResID);
+        BytesSlice in(rsrc.data());
+        size_t count = rsrc.data().size() / Race::byte_size;
+        plug.races.resize(count);
+        for (size_t i = 0; i < count; ++i) {
+            read(in, plug.races[i]);
+        }
+        if (!in.empty()) {
+            throw Exception("didn't consume all of race data");
+        }
+    }
 }
 
 bool start_construct_level(const Level* level, int32_t* max) {
