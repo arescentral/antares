@@ -123,18 +123,12 @@ extern GlobalState g;
 
 struct ScenarioGlobals {
     scenarioInfoType                      meta;
-
     std::vector<Level>                    chapters;
     std::vector<Level::InitialObject>     initials;
     std::vector<Level::Condition>         conditions;
     std::vector<Level::BriefPoint>        briefings;
-
     std::vector<BaseObject>               objects;
-    std::unique_ptr<StringList>           object_names;
-    std::unique_ptr<StringList>           object_short_names;
-
     std::vector<Action>                   actions;
-
     std::vector<Race>                     races;
 };
 

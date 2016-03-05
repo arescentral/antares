@@ -266,6 +266,9 @@ class BaseObject {
     static Handle<BaseObject> none() { return Handle<BaseObject>(-1); }
     static HandleList<BaseObject> all() { return HandleList<BaseObject>(0, plug.objects.size()); }
 
+    sfz::String             name;
+    sfz::String             short_name;
+
     uint32_t                attributes;                 // initial attributes (see flags)
     int32_t                 baseClass;
     int32_t                 baseRace;

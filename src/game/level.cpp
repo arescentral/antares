@@ -548,6 +548,8 @@ void PluginInit() {
         }
     }
 
+    StringList object_names(kSpaceObjectNameResID);
+    StringList object_short_names(kSpaceObjectShortNameResID);
     {
         Resource rsrc("objects", "bsob", kBaseObjectResID);
         BytesSlice in(rsrc.data());
@@ -555,15 +557,14 @@ void PluginInit() {
         plug.objects.resize(count);
         for (size_t i = 0; i < count; ++i) {
             read(in, plug.objects[i]);
+            plug.objects[i].name.assign(object_names.at(i));
+            plug.objects[i].short_name.assign(object_short_names.at(i));
         }
         if (!in.empty()) {
             throw Exception("didn't consume all of base object data");
         }
     }
-
     CorrectAllBaseObjectColor();
-    plug.object_names.reset(new StringList(kSpaceObjectNameResID));
-    plug.object_short_names.reset(new StringList(kSpaceObjectShortNameResID));
 
     {
         Resource rsrc("object-actions", "obac", kObjectActionResID);

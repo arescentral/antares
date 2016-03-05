@@ -903,11 +903,11 @@ Fixed SpaceObject::turn_rate() const {
 }
 
 StringSlice get_object_name(Handle<BaseObject> id) {
-    return plug.object_names->at(id.number());
+    return id->name;  // TODO(sfiera): use directly.
 }
 
 StringSlice get_object_short_name(Handle<BaseObject> id) {
-    return plug.object_short_names->at(id.number());
+    return id->short_name;  // TODO(sfiera): use directly.
 }
 
 int32_t SpaceObject::number() const {
