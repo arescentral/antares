@@ -153,10 +153,10 @@ class GamePlay : public Card {
 };
 
 MainPlay::MainPlay(
-        const Scenario* scenario, bool replay, bool show_loading_screen,
+        const Level* level, bool replay, bool show_loading_screen,
         GameResult* game_result):
     _state(NEW),
-    _scenario(scenario),
+    _level(level),
     _replay(replay),
     _show_loading_screen(show_loading_screen),
     _cancelled(false),
@@ -173,7 +173,7 @@ void MainPlay::become_front() {
             _replay_builder.init(
                     Preferences::preferences()->scenario_identifier(),
                     String(u32_to_version(plug.meta.version)),
-                    _scenario->chapter_number(),
+                    _level->chapter_number(),
                     g.random.seed);
 
             if (Preferences::preferences()->play_idle_music()) {
@@ -183,18 +183,18 @@ void MainPlay::become_front() {
             }
 
             if (_show_loading_screen) {
-                stack()->push(new LoadingScreen(_scenario, &_cancelled));
+                stack()->push(new LoadingScreen(_level, &_cancelled));
                 break;
             } else {
                 int32_t max;
                 int32_t current = 0;
-                if (!start_construct_scenario(_scenario, &max)) {
+                if (!start_construct_scenario(_level, &max)) {
                     *_game_result = QUIT_GAME;
                     stack()->pop(this);
                     return;
                 }
                 while (current < max) {
-                    construct_scenario(_scenario, &current);
+                    construct_scenario(_level, &current);
                 }
             }
         }
@@ -209,7 +209,7 @@ void MainPlay::become_front() {
             }
             if (!_replay) {
                 _state = BRIEFING;
-                stack()->push(new BriefingScreen(_scenario, &_cancelled));
+                stack()->push(new BriefingScreen(_level, &_cancelled));
                 break;
             }
         }

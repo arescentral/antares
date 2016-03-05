@@ -206,11 +206,11 @@ static coordPointType rotate_coords(int32_t h, int32_t v, int32_t rotation) {
     return coord;
 }
 
-void GetInitialCoord(Scenario::InitialObject *initial, coordPointType *coord, int32_t rotation) {
+void GetInitialCoord(Level::InitialObject *initial, coordPointType *coord, int32_t rotation) {
     *coord = rotate_coords(initial->location.h, initial->location.v, rotation);
 }
 
-void set_initial_destination(const Scenario::InitialObject* initial, bool preserve) {
+void set_initial_destination(const Level::InitialObject* initial, bool preserve) {
     if (!initial->realObject.get()                      // hasn't been created yet
             || (initial->initialDestination < 0)        // doesn't have a target
             || (!initial->owner.get())) {               // doesn't have an owner
@@ -243,56 +243,56 @@ void set_initial_destination(const Scenario::InitialObject* initial, bool preser
 
 }  // namespace
 
-Scenario* mGetScenario(int32_t num) {
+Level* mGetScenario(int32_t num) {
     return &plug.chapters[num];
 }
 
-Scenario::InitialObject* Scenario::initial(size_t at) const {
+Level::InitialObject* Level::initial(size_t at) const {
     return &plug.initials[initialFirst + at];
 }
 
-Scenario::Condition* Scenario::condition(size_t at) const {
+Level::Condition* Level::condition(size_t at) const {
     return &plug.conditions[conditionFirst + at];
 }
 
-Scenario::BriefPoint* Scenario::brief_point(size_t at) const {
+Level::BriefPoint* Level::brief_point(size_t at) const {
     return &plug.briefings[briefPointFirst + at];
 }
 
-size_t Scenario::brief_point_size() const {
-    return briefPointNum & kScenarioBriefMask;
+size_t Level::brief_point_size() const {
+    return briefPointNum & kLevelBriefMask;
 }
 
-int32_t Scenario::angle() const {
-    if (briefPointNum & kScenarioAngleMask) {
-        return (((briefPointNum & kScenarioAngleMask) >> kScenarioAngleShift) - 1) * 2;
+int32_t Level::angle() const {
+    if (briefPointNum & kLevelAngleMask) {
+        return (((briefPointNum & kLevelAngleMask) >> kLevelAngleShift) - 1) * 2;
     } else {
         return -1;
     }
 }
 
-Point Scenario::star_map_point() const {
+Point Level::star_map_point() const {
     return Point(starMapH, starMapV);
 }
 
-int32_t Scenario::chapter_number() const {
+int32_t Level::chapter_number() const {
     return levelNameStrNum;
 }
 
-int32_t Scenario::prologue_id() const {
+int32_t Level::prologue_id() const {
     return prologueID;
 }
 
-int32_t Scenario::epilogue_id() const {
+int32_t Level::epilogue_id() const {
     return epilogueID;
 }
 
-bool Scenario::Condition::active() const {
+bool Level::Condition::active() const {
     return !(flags & kTrueOnlyOnce)
         || !(flags & kHasBeenTrue);
 }
 
-void Scenario::Condition::set_true_yet(bool state) {
+void Level::Condition::set_true_yet(bool state) {
     if (state) {
         flags |= kHasBeenTrue;
     } else {
@@ -300,11 +300,11 @@ void Scenario::Condition::set_true_yet(bool state) {
     }
 }
 
-bool Scenario::Condition::true_yet() const {
+bool Level::Condition::true_yet() const {
     return flags & kHasBeenTrue;
 }
 
-bool Scenario::Condition::is_true() const {
+bool Level::Condition::is_true() const {
     int32_t i, difference;
     Handle<Admiral> a;
     uint32_t distance, dcalc;
@@ -487,10 +487,10 @@ void ScenarioMakerInit() {
         Resource rsrc("scenarios", "snro", kScenarioResID);
         BytesSlice in(rsrc.data());
         while (!in.empty()) {
-            Scenario scenario;
-            read(in, scenario);
-            scenario.name.assign(chapter_names.at(scenario.levelNameStrNum - 1));
-            plug.chapters.push_back(scenario);
+            Level level;
+            read(in, level);
+            level.name.assign(chapter_names.at(level.levelNameStrNum - 1));
+            plug.chapters.push_back(level);
         }
     }
 
@@ -499,7 +499,7 @@ void ScenarioMakerInit() {
         Resource rsrc("scenario-initial-objects", "snit", kScenarioInitialResID);
         BytesSlice in(rsrc.data());
         while (!in.empty()) {
-            Scenario::InitialObject initial;
+            Level::InitialObject initial;
             read(in, initial);
             plug.initials.push_back(initial);
         }
@@ -510,7 +510,7 @@ void ScenarioMakerInit() {
         Resource rsrc("scenario-conditions", "sncd", kScenarioConditionResID);
         BytesSlice in(rsrc.data());
         while (!in.empty()) {
-            Scenario::Condition condition;
+            Level::Condition condition;
             read(in, condition);
             plug.conditions.push_back(condition);
         }
@@ -521,7 +521,7 @@ void ScenarioMakerInit() {
         Resource rsrc("scenario-briefing-points", "snbf", kScenarioBriefResID);
         BytesSlice in(rsrc.data());
         while (!in.empty()) {
-            Scenario::BriefPoint brief_point;
+            Level::BriefPoint brief_point;
             read(in, brief_point);
             plug.briefings.push_back(brief_point);
         }
@@ -530,7 +530,7 @@ void ScenarioMakerInit() {
     InitRaces();
 }
 
-bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
+bool start_construct_scenario(const Level* level, int32_t* max) {
     ResetAllSpaceObjects();
     reset_action_queue();
     Beams::reset();
@@ -543,7 +543,7 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     gAbsoluteScale = kTimesTwoScale;
     g.sync = 0;
 
-    g.level = scenario;
+    g.level = level;
 
     {
         int32_t angle = g.level->angle();
@@ -621,7 +621,7 @@ static void load_blessed_objects(uint32_t all_colors) {
 }
 
 static void load_initial(int i, uint32_t all_colors) {
-    Scenario::InitialObject* initial = g.level->initial(i);
+    Level::InitialObject* initial = g.level->initial(i);
     Handle<Admiral> owner = initial->owner;
     auto baseObject = initial->type;
     // TODO(sfiera): remap objects in networked games.
@@ -668,7 +668,7 @@ static void load_initial(int i, uint32_t all_colors) {
 }
 
 static void load_condition(int i, uint32_t all_colors) {
-    Scenario::Condition* condition = g.level->condition(i);
+    Level::Condition* condition = g.level->condition(i);
     for (auto action: condition->action) {
         AddActionMedia(action, GRAY, all_colors);
     }
@@ -676,7 +676,7 @@ static void load_condition(int i, uint32_t all_colors) {
 }
 
 static void create_initial(int i, uint32_t all_colors) {
-    Scenario::InitialObject* initial = g.level->initial(i);
+    Level::InitialObject* initial = g.level->initial(i);
 
     if (initial->attributes & kInitiallyHidden) {
         initial->realObject = SpaceObject::none();
@@ -750,7 +750,7 @@ static void run_game_1s() {
     } while ((g.time.time_since_epoch() % secs(1)) != ticks(0));
 }
 
-void construct_scenario(const Scenario* scenario, int32_t* current) {
+void construct_scenario(const Level* level, int32_t* current) {
     int32_t step = *current;
     uint32_t all_colors = kNeutralColorNeededFlag;
     for (auto adm: Admiral::all()) {
@@ -869,7 +869,7 @@ void UnhideInitialObject(int32_t whichInitial) {
 
 Handle<SpaceObject> GetObjectFromInitialNumber(int32_t initialNumber) {
     if (initialNumber >= 0) {
-        Scenario::InitialObject* initial = g.level->initial(initialNumber);
+        Level::InitialObject* initial = g.level->initial(initialNumber);
         if (initial->realObject.get()) {
             auto object = initial->realObject;
             if ((object->id != initial->realObjectID) || (object->active != kObjectInUse)) {
@@ -913,24 +913,24 @@ void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textI
 //  at which to show the entire scenario.
 
 void GetScenarioFullScaleAndCorner(
-        const Scenario* scenario, int32_t rotation, coordPointType *corner, int32_t *scale,
+        const Level* level, int32_t rotation, coordPointType *corner, int32_t *scale,
         Rect *bounds) {
     int32_t         biggest, count, otherCount, mustFit;
     Point           coord, otherCoord, tempCoord;
-    Scenario::InitialObject     *initial;
+    Level::InitialObject     *initial;
 
     mustFit = bounds->bottom - bounds->top;
     if ((bounds->right - bounds->left) < mustFit) mustFit = bounds->right - bounds->left;
 
     biggest = 0;
-    for (int32_t count = 0; count < scenario->initialNum; count++)
+    for (int32_t count = 0; count < level->initialNum; count++)
     {
-        initial = scenario->initial(count);
+        initial = level->initial(count);
         if (!(initial->attributes & kInitiallyHidden)) {
             GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&coord), gScenarioRotation);
 
-            for (int32_t otherCount = 0; otherCount < scenario->initialNum; otherCount++) {
-                initial = scenario->initial(otherCount);
+            for (int32_t otherCount = 0; otherCount < level->initialNum; otherCount++) {
+                initial = level->initial(otherCount);
                 GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&otherCoord), gScenarioRotation);
 
                 if (ABS(otherCoord.h - coord.h) > biggest) {
@@ -952,8 +952,8 @@ void GetScenarioFullScaleAndCorner(
     otherCoord.v = kUniversalCenter;
     coord.h = kUniversalCenter;
     coord.v = kUniversalCenter;
-    initial = scenario->initial(0);
-    for (int32_t count = 0; count < scenario->initialNum; count++)
+    initial = level->initial(0);
+    for (int32_t count = 0; count < level->initialNum; count++)
     {
         if (!(initial->attributes & kInitiallyHidden)) {
             GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&tempCoord), gScenarioRotation);
@@ -988,10 +988,10 @@ void GetScenarioFullScaleAndCorner(
 
 }
 
-const Scenario* GetScenarioPtrFromChapter(int32_t chapter) {
-    for (const Scenario& scenario: plug.chapters) {
-        if (scenario.chapter_number() == chapter) {
-            return &scenario;
+const Level* GetScenarioPtrFromChapter(int32_t chapter) {
+    for (const Level& level: plug.chapters) {
+        if (level.chapter_number() == chapter) {
+            return &level;
         }
     }
     return NULL;

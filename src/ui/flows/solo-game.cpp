@@ -55,7 +55,7 @@ void SoloGame::become_front() {
     switch (_state) {
       case NEW:
         _state = SELECT_LEVEL;
-        stack()->push(new SelectLevelScreen(&_cancelled, &_scenario));
+        stack()->push(new SelectLevelScreen(&_cancelled, &_level));
         break;
 
       case SELECT_LEVEL:
@@ -69,8 +69,8 @@ void SoloGame::become_front() {
 
       case START_LEVEL:
         _state = PROLOGUE;
-        if (_scenario->prologue_id() > 0) {
-            stack()->push(new ScrollTextScreen(_scenario->prologue_id(), 450, kSlowScrollInterval, 4002));
+        if (_level->prologue_id() > 0) {
+            stack()->push(new ScrollTextScreen(_level->prologue_id(), 450, kSlowScrollInterval, 4002));
             break;
         }
         // else fall through
@@ -80,7 +80,7 @@ void SoloGame::become_front() {
         _state = PLAYING;
         _game_result = NO_GAME;
         globals()->gInputSource.reset();
-        stack()->push(new MainPlay(_scenario, false, true, &_game_result));
+        stack()->push(new MainPlay(_level, false, true, &_game_result));
         break;
 
       case PLAYING:
@@ -102,7 +102,7 @@ void SoloGame::handle_game_result() {
       case WIN_GAME:
         {
             _state = EPILOGUE;
-            const int epilogue = _scenario->epilogue_id();
+            const int epilogue = _level->epilogue_id();
             if (epilogue > 0) {
                 // normal scrolltext song
                 int scroll_song = 4002;
@@ -138,21 +138,21 @@ void SoloGame::epilogue_done() {
     }
 
     if (g.next_level < 0) {
-        _scenario = NULL;
+        _level = NULL;
     } else {
-        _scenario = GetScenarioPtrFromChapter(g.next_level);
+        _level = GetScenarioPtrFromChapter(g.next_level);
     }
 
-    if (_scenario != NULL) {
-        const int32_t chapter = _scenario->chapter_number();
+    if (_level != NULL) {
+        const int32_t chapter = _level->chapter_number();
         if (chapter >= 0) {
             Ledger::ledger()->unlock_chapter(chapter);
         } else {
-            _scenario = NULL;
+            _level = NULL;
         }
     }
 
-    if (_scenario != NULL) {
+    if (_level != NULL) {
         _state = START_LEVEL;
     } else {
         _state = QUIT;

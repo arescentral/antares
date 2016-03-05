@@ -108,7 +108,7 @@ Admiral* Admiral::get(int i) {
     return nullptr;
 }
 
-Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Scenario::Player& player) {
+Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Level::Player& player) {
     Handle<Admiral> a(index);
     if (a->_active) {
         return none();

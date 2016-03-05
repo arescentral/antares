@@ -29,11 +29,11 @@
 
 namespace antares {
 
-struct Scenario;
+struct Level;
 
 class LoadingScreen : public InterfaceScreen {
   public:
-    LoadingScreen(const Scenario* scenario, bool* cancelled);
+    LoadingScreen(const Level* level, bool* cancelled);
     ~LoadingScreen();
 
     virtual void become_front();
@@ -54,7 +54,7 @@ class LoadingScreen : public InterfaceScreen {
     };
     State _state;
 
-    const Scenario* const _scenario;
+    const Level* const _level;
     bool* const _cancelled;
 
     std::unique_ptr<StyledText> _name_text;

@@ -29,11 +29,11 @@
 
 namespace antares {
 
-struct Scenario;
+struct Level;
 
 class BriefingScreen : public InterfaceScreen {
   public:
-    BriefingScreen(const Scenario* scenario, bool* cancelled);
+    BriefingScreen(const Level* level, bool* cancelled);
     ~BriefingScreen();
 
     virtual void become_front();
@@ -68,7 +68,7 @@ class BriefingScreen : public InterfaceScreen {
     void show_object_data(int index, const GamepadButtonDownEvent& event);
     void show_object_data(int index, ObjectDataScreen::Trigger trigger, int which);
 
-    const Scenario* const _scenario;
+    const Level* const _level;
     bool* const _cancelled;
     int _briefing_point;
     const int _briefing_point_count;

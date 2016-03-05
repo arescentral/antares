@@ -24,7 +24,7 @@
 
 #include "config/keys.hpp"
 #include "data/handle.hpp"
-#include "data/scenario.hpp"
+#include "data/level.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "game/starfield.hpp"
@@ -84,7 +84,7 @@ struct GlobalState {
     game_ticks  time;    // Current game time.
     Random      random;  // Global random number generator.
 
-    const Scenario* level;
+    const Level* level;
 
     std::unique_ptr<Admiral[]>  admirals;  // All admirals (whether active or not).
     Handle<Admiral>             admiral;   // Local player.
@@ -124,10 +124,10 @@ extern GlobalState g;
 struct ScenarioGlobals {
     scenarioInfoType                      meta;
 
-    std::vector<Scenario>                 chapters;
-    std::vector<Scenario::InitialObject>  initials;
-    std::vector<Scenario::Condition>      conditions;
-    std::vector<Scenario::BriefPoint>     briefings;
+    std::vector<Level>                    chapters;
+    std::vector<Level::InitialObject>     initials;
+    std::vector<Level::Condition>         conditions;
+    std::vector<Level::BriefPoint>        briefings;
 
     std::vector<BaseObject>               objects;
     std::unique_ptr<StringList>           object_names;

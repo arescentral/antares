@@ -663,7 +663,7 @@ static void computer_select(Handle<Action> action, Handle<SpaceObject> focus) {
 
 static void assume_initial_object(Handle<Action> action, Handle<SpaceObject> focus) {
     Handle<Admiral> player1(0);
-    Scenario::InitialObject* initialObject = g.level->initial(
+    Level::InitialObject* initialObject = g.level->initial(
             action->argument.assumeInitial.whichInitialObject + GetAdmiralScore(player1, 0));
     if (initialObject) {
         initialObject->realObjectID = focus->id;

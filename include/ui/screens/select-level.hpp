@@ -26,11 +26,11 @@
 
 namespace antares {
 
-struct Scenario;
+struct Level;
 
 class SelectLevelScreen : public InterfaceScreen {
   public:
-    SelectLevelScreen(bool* cancelled, const Scenario** scenario);
+    SelectLevelScreen(bool* cancelled, const Level** level);
     ~SelectLevelScreen();
 
     virtual void become_front();
@@ -64,7 +64,7 @@ class SelectLevelScreen : public InterfaceScreen {
 
     bool* _cancelled;
     size_t _index;
-    const Scenario** _scenario;
+    const Level** _level;
     std::vector<int> _chapters;
     int _unlock_digits;
     size_t _unlock_chapter;

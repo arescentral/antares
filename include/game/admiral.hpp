@@ -22,7 +22,7 @@
 #include <sfz/sfz.hpp>
 
 #include "data/handle.hpp"
-#include "data/scenario.hpp"
+#include "data/level.hpp"
 #include "data/space-object.hpp"
 #include "math/fixed.hpp"
 
@@ -95,7 +95,7 @@ class Admiral {
     static void         init();
     static void         reset();
     static Admiral*     get(int i);
-    static Handle<Admiral>  make(int index, uint32_t attributes, const Scenario::Player& player);
+    static Handle<Admiral>  make(int index, uint32_t attributes, const Level::Player& player);
     static Handle<Admiral>  none() { return Handle<Admiral>(-1); }
     static HandleList<Admiral> all() { return HandleList<Admiral>(0, kMaxPlayerNum); }
 

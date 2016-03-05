@@ -24,7 +24,7 @@
 
 namespace antares {
 
-struct Scenario;
+struct Level;
 class PixMap;
 
 struct BriefingSpriteBounds {
@@ -36,7 +36,7 @@ void draw_briefing_objects(
         Point origin, int32_t maxSize, Rect bounds, coordPointType corner, int32_t scale);
 
 void BriefPoint_Data_Get(
-        int32_t whichPoint, const Scenario* scenario, int32_t *headerID, int32_t *headerNumber,
+        int32_t whichPoint, const Level* level, int32_t *headerID, int32_t *headerNumber,
         int32_t *contentID, Rect *hiliteBounds, coordPointType *corner, int32_t scale,
         int32_t minSectorSize, int32_t maxSize, Rect *bounds);
 

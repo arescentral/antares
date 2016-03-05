@@ -19,7 +19,7 @@
 #ifndef ANTARES_GAME_SCENARIO_MAKER_HPP_
 #define ANTARES_GAME_SCENARIO_MAKER_HPP_
 
-#include "data/scenario.hpp"
+#include "data/level.hpp"
 #include "data/space-object.hpp"
 #include "game/globals.hpp"
 #include "game/space-object.hpp"
@@ -38,19 +38,19 @@ enum {
     kArriveActionType = 6
 };
 
-Scenario* mGetScenario(int32_t num);
+Level* mGetScenario(int32_t num);
 
 void ScenarioMakerInit();
-bool start_construct_scenario(const Scenario* scenario, int32_t* max);
-void construct_scenario(const Scenario* scenario, int32_t* current);
+bool start_construct_scenario(const Level* level, int32_t* max);
+void construct_scenario(const Level* level, int32_t* current);
 void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textID);
 void CheckScenarioConditions();
 void UnhideInitialObject(int32_t whichInitial);
 Handle<SpaceObject> GetObjectFromInitialNumber(int32_t initialNumber);
 void GetScenarioFullScaleAndCorner(
-        const Scenario* scenario, int32_t rotation, coordPointType *corner, int32_t *scale,
+        const Level* level, int32_t rotation, coordPointType *corner, int32_t *scale,
         Rect *bounds);
-const Scenario* GetScenarioPtrFromChapter(int32_t chapter);
+const Level* GetScenarioPtrFromChapter(int32_t chapter);
 coordPointType Translate_Coord_To_Scenario_Rotation(int32_t h, int32_t v);
 
 }  // namespace antares

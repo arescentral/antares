@@ -44,14 +44,14 @@ using std::unique_ptr;
 
 namespace antares {
 
-SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Scenario** scenario)
+SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Level** level)
         : InterfaceScreen("select-level", {0, 0, 640, 480}, true),
           _state(SELECTING),
           _cancelled(cancelled),
-          _scenario(scenario) {
+          _level(level) {
     Ledger::ledger()->unlocked_chapters(&_chapters);
     _index = _chapters.size() - 1;
-    *_scenario = GetScenarioPtrFromChapter(_chapters[_index]);
+    *_level = GetScenarioPtrFromChapter(_chapters[_index]);
 }
 
 SelectLevelScreen::~SelectLevelScreen() { }
@@ -150,7 +150,7 @@ void SelectLevelScreen::handle_button(Button& button) {
       case PREVIOUS:
         if (_index > 0) {
             --_index;
-            *_scenario = GetScenarioPtrFromChapter(_chapters[_index]);
+            *_level = GetScenarioPtrFromChapter(_chapters[_index]);
         }
         adjust_interface();
         break;
@@ -158,7 +158,7 @@ void SelectLevelScreen::handle_button(Button& button) {
       case NEXT:
         if (_index < _chapters.size() - 1) {
             ++_index;
-            *_scenario = GetScenarioPtrFromChapter(_chapters[_index]);
+            *_level = GetScenarioPtrFromChapter(_chapters[_index]);
         }
         adjust_interface();
         break;
@@ -173,7 +173,7 @@ void SelectLevelScreen::overlay() const {
 }
 
 void SelectLevelScreen::draw_level_name() const {
-    const String chapter_name((*_scenario)->name);
+    const String chapter_name((*_level)->name);
 
     const InterfaceItem& i = item(NAME);
 

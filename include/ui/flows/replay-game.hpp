@@ -29,7 +29,7 @@
 
 namespace antares {
 
-struct Scenario;
+struct Level;
 
 class ReplayGame : public Card {
   public:
@@ -49,7 +49,7 @@ class ReplayGame : public Card {
     Resource _resource;
     ReplayData _data;
     Random _random_seed;
-    const Scenario* _scenario;
+    const Level* _level;
     GameResult _game_result;
 };
 

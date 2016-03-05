@@ -21,7 +21,7 @@
 #include <sfz/sfz.hpp>
 
 #include "data/resource.hpp"
-#include "data/scenario.hpp"
+#include "data/level.hpp"
 #include "game/globals.hpp"
 #include "lang/defines.hpp"
 

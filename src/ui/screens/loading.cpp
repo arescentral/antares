@@ -34,10 +34,10 @@ static const int16_t kLevelNameID = 4600;
 static const uint8_t kLoadingScreenColor = PALE_GREEN;
 static const ticks kTypingDelay = kMinorTick;
 
-LoadingScreen::LoadingScreen(const Scenario* scenario, bool* cancelled):
+LoadingScreen::LoadingScreen(const Level* level, bool* cancelled):
         InterfaceScreen("loading", {0, 0, 640, 480}, true),
         _state(TYPING),
-        _scenario(scenario),
+        _level(level),
         _cancelled(cancelled),
         _next_update(now() + kTypingDelay),
         _chars_typed(0),
@@ -46,7 +46,7 @@ LoadingScreen::LoadingScreen(const Scenario* scenario, bool* cancelled):
     StringList strings(kLevelNameID);
     _name_text.reset(new StyledText(title_font));
     _name_text->set_fore_color(GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT));
-    _name_text->set_retro_text(strings.at(_scenario->levelNameStrNum - 1));
+    _name_text->set_retro_text(strings.at(_level->levelNameStrNum - 1));
     _name_text->set_tab_width(220);
     _name_text->wrap_to(640, 0, 2);
 }
@@ -76,7 +76,7 @@ void LoadingScreen::fire_timer() {
         while (_next_update < now()) {
             if (_chars_typed >= _name_text->size()) {
                 _state = LOADING;
-                if (!start_construct_scenario(_scenario, &_max)) {
+                if (!start_construct_scenario(_level, &_max)) {
                     *_cancelled = true;
                     stack()->pop(this);
                 }
@@ -94,7 +94,7 @@ void LoadingScreen::fire_timer() {
         _next_update = now() + kTypingDelay;
         while (now() < _next_update) {
             if (_current < _max) {
-                construct_scenario(_scenario, &_current);
+                construct_scenario(_level, &_current);
             } else {
                 _state = DONE;
                 return;

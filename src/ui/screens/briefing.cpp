@@ -95,7 +95,7 @@ static void populate_inline_picts(
 }
 
 static void update_mission_brief_point(
-        LabeledRect *dataItem, int32_t whichBriefPoint, const Scenario* scenario,
+        LabeledRect *dataItem, int32_t whichBriefPoint, const Level* level,
         coordPointType *corner, int32_t scale, Rect *bounds, vector<inlinePictType>& inlinePict,
         Rect& highlight_rect, vector<pair<Point, Point>>& lines, String& text) {
     if (whichBriefPoint < kMissionBriefPointOffset) {
@@ -107,7 +107,7 @@ static void update_mission_brief_point(
 
     Rect hiliteBounds;
     int32_t         headerID, headerNumber, contentID;
-    BriefPoint_Data_Get(whichBriefPoint, scenario, &headerID, &headerNumber, &contentID,
+    BriefPoint_Data_Get(whichBriefPoint, level, &headerID, &headerNumber, &contentID,
             &hiliteBounds, corner, scale, 16, 32, bounds);
     hiliteBounds.offset(bounds->left, bounds->top);
 
@@ -198,12 +198,12 @@ static void update_mission_brief_point(
     populate_inline_picts(dataItem->bounds(), text, dataItem->style, inlinePict);
 }
 
-BriefingScreen::BriefingScreen(const Scenario* scenario, bool* cancelled)
+BriefingScreen::BriefingScreen(const Level* level, bool* cancelled)
         : InterfaceScreen("briefing", {0, 0, 640, 480}, true),
-          _scenario(scenario),
+          _level(level),
           _cancelled(cancelled),
           _briefing_point(0),
-          _briefing_point_count(_scenario->brief_point_size() + 2),
+          _briefing_point_count(_level->brief_point_size() + 2),
           _data_item(data_item(item(MAP_RECT))) {
     build_star_map();
     for (int i = 0; i < 500; ++i) {
@@ -361,7 +361,7 @@ void BriefingScreen::build_star_map() {
     _bounds = pix_bounds;
     _bounds.center_in(item(MAP_RECT).bounds());
 
-    _star_rect = Rect(_scenario->star_map_point(), Size(0, 0));
+    _star_rect = Rect(_level->star_map_point(), Size(0, 0));
     _star_rect.inset(-kMissionStarPointWidth, -kMissionStarPointHeight);
 
     // Move `_star_rect` so that it is inside of `pix_bounds`.
@@ -383,12 +383,12 @@ void BriefingScreen::build_brief_point() {
         coordPointType corner;
         int32_t scale;
         Rect map_rect = item(MAP_RECT).bounds();
-        GetScenarioFullScaleAndCorner(_scenario, 0, &corner, &scale, &map_rect);
+        GetScenarioFullScaleAndCorner(_level, 0, &corner, &scale, &map_rect);
 
         vector<inlinePictType> inline_pict;
 
         update_mission_brief_point(
-                &_data_item, _briefing_point, _scenario, &corner, scale, &map_rect, inline_pict,
+                &_data_item, _briefing_point, _level, &corner, scale, &map_rect, inline_pict,
                 _highlight_rect, _highlight_lines, _text);
         swap(inline_pict, _inline_pict);
     }
@@ -410,7 +410,7 @@ void BriefingScreen::draw_system_map() const {
     coordPointType corner;
     int32_t scale;
     Rect pix_bounds = _bounds.size().as_rect();
-    GetScenarioFullScaleAndCorner(_scenario, 0, &corner, &scale, &pix_bounds);
+    GetScenarioFullScaleAndCorner(_level, 0, &corner, &scale, &pix_bounds);
     Rect bounds = _bounds;
     bounds.offset(off.h, off.v);
     draw_arbitrary_sector_lines(corner, scale, 16, bounds);

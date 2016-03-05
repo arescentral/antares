@@ -28,8 +28,6 @@
 
 namespace antares {
 
-struct Scenario;
-
 enum PlayAgainResult {
     PLAY_AGAIN_QUIT,
     PLAY_AGAIN_RESTART,
