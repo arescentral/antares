@@ -165,8 +165,8 @@ static void create_object(
 
         //  ugly though it is, we have to fill in the rest of
         //  a new beam's fields after it's created.
-        if (product->attributes & kIsBeam) {
-            if (product->frame.beam->beamKind != eKineticBeamKind) {
+        if (product->attributes & kIsVector) {
+            if (product->frame.beam->vectorKind != eKineticBoltKind) {
                 // special beams need special post-creation acts
                 Beams::set_attributes(product, focus);
             }

@@ -88,7 +88,7 @@ void Beams::reset() {
 }
 
 Handle<Beam> Beams::add(
-        coordPointType* location, uint8_t color, beamKindType kind, int32_t accuracy,
+        coordPointType* location, uint8_t color, vectorKindType kind, int32_t accuracy,
         int32_t beam_range) {
     for (auto beam: Beam::all()) {
         if (!beam->active) {
@@ -104,7 +104,7 @@ Handle<Beam> Beams::add(
             beam->thisLocation = Rect(0, 0, 0, 0);
             beam->thisLocation.offset(h + viewport().left, v + viewport().top);
 
-            beam->beamKind = kind;
+            beam->vectorKind = kind;
             beam->accuracy = accuracy;
             beam->range = beam_range;
             beam->fromObjectID = -1;
@@ -138,15 +138,15 @@ void Beams::set_attributes(Handle<SpaceObject> beamObject, Handle<SpaceObject> s
             if ((((h * h) + (v * v)) > (beam.range * beam.range))
                     || (h > kMaximumRelevantDistance)
                     || (v > kMaximumRelevantDistance)) {
-                if (beam.beamKind == eStaticObjectToObjectKind) {
-                    beam.beamKind = eStaticObjectToRelativeCoordKind;
-                } else if (beam.beamKind == eBoltObjectToObjectKind) {
-                    beam.beamKind = eBoltObjectToRelativeCoordKind;
+                if (beam.vectorKind == eStaticObjectToObjectKind) {
+                    beam.vectorKind = eStaticObjectToRelativeCoordKind;
+                } else if (beam.vectorKind == eBoltObjectToObjectKind) {
+                    beam.vectorKind = eBoltObjectToRelativeCoordKind;
                 }
                 DetermineBeamRelativeCoordFromAngle(beamObject, sourceObject->targetAngle);
             } else {
-                if ((beam.beamKind == eStaticObjectToRelativeCoordKind)
-                        || (beam.beamKind == eBoltObjectToRelativeCoordKind)) {
+                if ((beam.vectorKind == eStaticObjectToRelativeCoordKind)
+                        || (beam.vectorKind == eBoltObjectToRelativeCoordKind)) {
                     beam.toRelativeCoord.h = target->location.h - sourceObject->location.h
                         - beam.accuracy
                         + beamObject->randomSeed.next(beam.accuracy << 1);
@@ -159,18 +159,18 @@ void Beams::set_attributes(Handle<SpaceObject> beamObject, Handle<SpaceObject> s
                 }
             }
         } else { // target not valid
-            if (beam.beamKind == eStaticObjectToObjectKind) {
-                beam.beamKind = eStaticObjectToRelativeCoordKind;
-            } else if (beam.beamKind == eBoltObjectToObjectKind) {
-                beam.beamKind = eBoltObjectToRelativeCoordKind;
+            if (beam.vectorKind == eStaticObjectToObjectKind) {
+                beam.vectorKind = eStaticObjectToRelativeCoordKind;
+            } else if (beam.vectorKind == eBoltObjectToObjectKind) {
+                beam.vectorKind = eBoltObjectToRelativeCoordKind;
             }
             DetermineBeamRelativeCoordFromAngle(beamObject, sourceObject->direction);
         }
     } else { // target not valid
-        if (beam.beamKind == eStaticObjectToObjectKind) {
-            beam.beamKind = eStaticObjectToRelativeCoordKind;
-        } else if (beam.beamKind == eBoltObjectToObjectKind) {
-            beam.beamKind = eBoltObjectToRelativeCoordKind;
+        if (beam.vectorKind == eStaticObjectToObjectKind) {
+            beam.vectorKind = eStaticObjectToRelativeCoordKind;
+        } else if (beam.vectorKind == eBoltObjectToObjectKind) {
+            beam.vectorKind = eBoltObjectToRelativeCoordKind;
         }
         DetermineBeamRelativeCoordFromAngle(beamObject, sourceObject->direction);
     }
@@ -191,7 +191,7 @@ void Beams::update() {
 
             if (!beam->killMe) {
                 if (beam->color) {
-                    if (beam->beamKind != eKineticBeamKind) {
+                    if (beam->vectorKind != eKineticBoltKind) {
                         beam->boltState++;
                         if (beam->boltState > 24) beam->boltState = -24;
                         uint8_t currentColor = GetRetroIndex(beam->color);
@@ -202,8 +202,8 @@ void Beams::update() {
                             currentColor += beam->boltState >> 1;
                         beam->color = GetTranslateIndex(currentColor);
                     }
-                    if ((beam->beamKind == eBoltObjectToObjectKind)
-                            || (beam->beamKind == eBoltObjectToRelativeCoordKind)) {
+                    if ((beam->vectorKind == eBoltObjectToObjectKind)
+                            || (beam->vectorKind == eBoltObjectToRelativeCoordKind)) {
                         beam->thisBoltPoint[0].h = beam->thisLocation.left;
                         beam->thisBoltPoint[0].v = beam->thisLocation.top;
                         beam->thisBoltPoint[kBoltPointNum - 1].h = beam->thisLocation.right;
@@ -235,8 +235,8 @@ void Beams::draw() {
         if (beam->active) {
             if (!beam->killMe) {
                 if (beam->color) {
-                    if ((beam->beamKind == eBoltObjectToObjectKind)
-                            || (beam->beamKind == eBoltObjectToRelativeCoordKind)) {
+                    if ((beam->vectorKind == eBoltObjectToObjectKind)
+                            || (beam->vectorKind == eBoltObjectToRelativeCoordKind)) {
                         for (int j: range(1, kBoltPointNum)) {
                             lines.draw(
                                     beam->thisBoltPoint[j-1], beam->thisBoltPoint[j],
@@ -261,8 +261,8 @@ void Beams::show_all() {
                 beam->active = false;
             }
             if (beam->color) {
-                if ((beam->beamKind == eBoltObjectToObjectKind)
-                        || (beam->beamKind == eBoltObjectToRelativeCoordKind)) {
+                if ((beam->vectorKind == eBoltObjectToObjectKind)
+                        || (beam->vectorKind == eBoltObjectToRelativeCoordKind)) {
                     for (int j: range(kBoltPointNum)) {
                         beam->lastBoltPoint[j] = beam->thisBoltPoint[j];
                     }

@@ -26,6 +26,7 @@
 #include "drawing/sprite-handling.hpp"
 #include "game/action.hpp"
 #include "game/admiral.hpp"
+#include "game/beam.hpp"
 #include "game/globals.hpp"
 #include "game/non-player-ship.hpp"
 #include "game/player-ship.hpp"
@@ -317,8 +318,8 @@ static void move_beam(Handle<SpaceObject> o) {
     auto& beam = *o->frame.beam;
 
     beam.objectLocation = o->location;
-    if ((beam.beamKind == eStaticObjectToObjectKind) ||
-            (beam.beamKind == eBoltObjectToObjectKind)) {
+    if ((beam.vectorKind == eStaticObjectToObjectKind) ||
+            (beam.vectorKind == eBoltObjectToObjectKind)) {
         if (beam.toObject.get()) {
             auto target = beam.toObject;
             if (target->active && (target->id == beam.toObjectID)) {
@@ -336,8 +337,8 @@ static void move_beam(Handle<SpaceObject> o) {
                 o->active = kObjectToBeFreed;
             }
         }
-    } else if ((beam.beamKind == eStaticObjectToRelativeCoordKind) ||
-            (beam.beamKind == eBoltObjectToRelativeCoordKind)) {
+    } else if ((beam.vectorKind == eStaticObjectToRelativeCoordKind) ||
+            (beam.vectorKind == eBoltObjectToRelativeCoordKind)) {
         if (beam.fromObject.get()) {
             auto target = beam.fromObject;
             if (target->active && (target->id == beam.fromObjectID)) {
@@ -415,7 +416,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
             bounce(o);
             if (o->attributes & kIsSelfAnimated) {
                 animate(o);
-            } else if (o->attributes & kIsBeam) {
+            } else if (o->attributes & kIsVector) {
                 move_beam(o);
             }
         }
@@ -434,7 +435,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
     for (Handle<SpaceObject> o = g.root; o.get(); o = o->nextObject) {
         if (o->active != kObjectInUse) {
             continue;
-        } else if ((o->attributes & kIsBeam) || !o->sprite.get()) {
+        } else if ((o->attributes & kIsVector) || !o->sprite.get()) {
             continue;
         }
         auto& sprite = *o->sprite;
@@ -746,16 +747,16 @@ static void calc_impacts() {
                         continue;
                     }
 
-                    if (a->attributes & b->attributes & kIsBeam) {
+                    if (a->attributes & b->attributes & kIsVector) {
                         // no reason beams can't intersect, but the
                         // code we have now won't handle it.
                         continue;
-                    } else if (a->attributes & kIsBeam) {
+                    } else if (a->attributes & kIsVector) {
                         if (beam_intersects(a, b)) {
                             HitObject(b, a);
                         }
                         continue;
-                    } else if (b->attributes & kIsBeam) {
+                    } else if (b->attributes & kIsVector) {
                         if (beam_intersects(b, a)) {
                             HitObject(a, b);
                         }
@@ -888,7 +889,7 @@ static void calc_visibility() {
 static void update_last_beam_locations() {
     for (auto o: SpaceObject::all()) {
         if (o->active == kObjectInUse) {
-            if (o->attributes & kIsBeam) {
+            if (o->attributes & kIsVector) {
                 o->frame.beam->lastGlobalLocation = o->location;
             }
         }

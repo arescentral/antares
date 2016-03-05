@@ -198,8 +198,8 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
         }
     }
 
-    if (obj->attributes & kIsBeam) {
-        const auto& beam = obj->baseType->frame.beam;
+    if (obj->attributes & kIsVector) {
+        const auto& beam = obj->baseType->frame.vector;
         obj->frame.beam = Beams::add(
                 &(obj->location), beam.color, beam.kind, beam.accuracy, beam.range);
     }
@@ -818,7 +818,7 @@ void SpaceObject::destroy() {
 }
 
 void SpaceObject::free() {
-    if (attributes & kIsBeam) {
+    if (attributes & kIsVector) {
         if (frame.beam.get()) {
             frame.beam->killMe = true;
         }

@@ -193,12 +193,12 @@ void read_from(ReadSource in, BaseObject& object) {
         read(sub, object.frame.rotation);
     } else if (object.attributes & kIsSelfAnimated) {
         read(sub, object.frame.animation);
-    } else if (object.attributes & kIsBeam) {
-        read(sub, object.frame.beam);
-        if (object.frame.beam.color > 16) {
-            object.frame.beam.color = GetTranslateIndex(object.frame.beam.color);
+    } else if (object.attributes & kIsVector) {
+        read(sub, object.frame.vector);
+        if (object.frame.vector.color > 16) {
+            object.frame.vector.color = GetTranslateIndex(object.frame.vector.color);
         } else {
-            object.frame.beam.color = 0;
+            object.frame.vector.color = 0;
         }
     } else {
         read(sub, object.frame.weapon);
@@ -223,11 +223,11 @@ void read_from(ReadSource in, objectFrameType::Animation& animation) {
     animation.frameShapeRange = Fixed::from_long(read<int32_t>(in));
 }
 
-void read_from(ReadSource in, objectFrameType::Beam& beam) {
-    read(in, beam.color);
-    read(in, beam.kind);
-    read(in, beam.accuracy);
-    read(in, beam.range);
+void read_from(ReadSource in, objectFrameType::Vector& vector) {
+    read(in, vector.color);
+    read(in, vector.kind);
+    read(in, vector.accuracy);
+    read(in, vector.range);
 }
 
 void read_from(ReadSource in, objectFrameType::Weapon& weapon) {

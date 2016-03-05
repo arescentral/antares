@@ -21,21 +21,13 @@
 
 #include <stdint.h>
 
+#include "data/base-object.hpp"
 #include "data/handle.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
 
 struct SpaceObject;
-
-typedef uint8_t beamKindType;
-enum beamKindEnum {
-    eKineticBeamKind =                  0,  // has velocity, moves
-    eStaticObjectToObjectKind =         1,  // static line connects 2 objects
-    eStaticObjectToRelativeCoordKind =  2,  // static line goes from object to coord
-    eBoltObjectToObjectKind =           3,  // lightning bolt, connects 2 objects
-    eBoltObjectToRelativeCoordKind =    4   // lightning bolt, from object to coord
-};
 
 static const int kBoltPointNum = 10;
 
@@ -46,7 +38,7 @@ struct Beam {
 
     Beam();
 
-    beamKindType        beamKind;
+    vectorKindType      vectorKind;
     Rect                thisLocation;
     coordPointType      lastGlobalLocation;
     coordPointType      objectLocation;
@@ -75,7 +67,7 @@ class Beams {
     static void init();
     static void reset();
     static Handle<Beam> add(
-            coordPointType* location, uint8_t color, beamKindType kind, int32_t accuracy,
+            coordPointType* location, uint8_t color, vectorKindType kind, int32_t accuracy,
             int32_t beam_range);
     static void set_attributes(Handle<SpaceObject> beamObject, Handle<SpaceObject> sourceObject);
     static void update();

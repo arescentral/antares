@@ -27,6 +27,7 @@
 #include "drawing/pix-map.hpp"
 #include "drawing/text.hpp"
 #include "game/admiral.hpp"
+#include "game/beam.hpp"
 #include "game/cheat.hpp"
 #include "game/cursor.hpp"
 #include "game/globals.hpp"

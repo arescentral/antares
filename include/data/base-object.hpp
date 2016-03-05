@@ -23,7 +23,6 @@
 #include "data/plugin.hpp"
 #include "drawing/color.hpp"
 #include "drawing/sprite-handling.hpp"
-#include "game/beam.hpp"
 #include "game/globals.hpp"
 #include "math/fixed.hpp"
 #include "math/random.hpp"
@@ -69,7 +68,7 @@ enum {
     kHasDirectionGoal       = 0x00000004,  // we must turn it towards its goal
     kIsRemote               = 0x00000008,  // is controlled by remote computer
     kIsHumanControlled      = 0x00000010,  // human is controlling it
-    kIsBeam                 = 0x00000020,  // a vector shot, no sprite
+    kIsVector               = 0x00000020,  // a vector shot, no sprite
     kDoesBounce             = 0x00000040,  // when it hits the edge, it bounces FORMER: can't move, so don't try
     kIsSelfAnimated         = 0x00000080,  // cycles through animation frames
     kShapeFromDirection     = 0x00000100,  // its appearence is based on its direction
@@ -209,6 +208,15 @@ enum kPresenceStateType {
     kWarpOutPresence = 5
 };
 
+typedef uint8_t vectorKindType;
+enum vectorKindEnum {
+    eKineticBoltKind =                  0,  // has velocity, moves
+    eStaticObjectToObjectKind =         1,  // static line connects 2 objects
+    eStaticObjectToRelativeCoordKind =  2,  // static line goes from object to coord
+    eBoltObjectToObjectKind =           3,  // lightning bolt, connects 2 objects
+    eBoltObjectToRelativeCoordKind =    4   // lightning bolt, from object to coord
+};
+
 union objectFrameType {
     // rotation: for objects whose shapes depend on their direction
     struct Rotation {
@@ -235,14 +243,14 @@ union objectFrameType {
     };
     Animation animation;
 
-    // beam: have no associated sprite
-    struct Beam {
-        uint8_t                 color;              // color of beam
-        beamKindType            kind;
-        int32_t                 accuracy;           // for non-normal beams, how accurate
+    // vector: have no associated sprite
+    struct Vector {
+        uint8_t                 color;              // color of line
+        vectorKindType          kind;
+        int32_t                 accuracy;           // for non-normal vector objects, how accurate
         int32_t                 range;
     };
-    Beam beam;
+    Vector vector;
 
     // weapon: weapon objects have no physical form, and can only be activated
     struct Weapon {
@@ -258,7 +266,7 @@ union objectFrameType {
 };
 void read_from(sfz::ReadSource in, objectFrameType::Rotation& rotation);
 void read_from(sfz::ReadSource in, objectFrameType::Animation& animation);
-void read_from(sfz::ReadSource in, objectFrameType::Beam& beam);
+void read_from(sfz::ReadSource in, objectFrameType::Vector& vector);
 void read_from(sfz::ReadSource in, objectFrameType::Weapon& weapon);
 
 class BaseObject {
