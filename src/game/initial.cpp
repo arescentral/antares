@@ -52,7 +52,7 @@ void create_initial(Level::InitialObject* initial, uint32_t all_colors) {
     // TODO(sfiera): remap object in networked games.
     fixedPointType v = {Fixed::zero(), Fixed::zero()};
     auto anObject = initial->realObject = CreateAnySpaceObject(
-            type, &v, &coord, gLevelRotation, owner, specialAttributes,
+            type, &v, &coord, g.angle, owner, specialAttributes,
             initial->spriteIDOverride);
 
     if (anObject->attributes & kIsDestination) {

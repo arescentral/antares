@@ -65,8 +65,6 @@ using std::vector;
 
 namespace antares {
 
-ANTARES_GLOBAL int32_t gLevelRotation = 0;
-
 namespace {
 
 const uint32_t kNeutralColorNeededFlag   = 0x00010000u;
@@ -248,9 +246,9 @@ bool start_construct_level(const Level* level, int32_t* max) {
     {
         int32_t angle = g.level->angle();
         if (angle < 0) {
-            gLevelRotation = g.random.next(ROT_POS);
+            g.angle = g.random.next(ROT_POS);
         } else {
-            gLevelRotation = angle;
+            g.angle = angle;
         }
     }
 
@@ -470,11 +468,11 @@ void GetLevelFullScaleAndCorner(
     {
         initial = level->initial(count);
         if (!(initial->attributes & kInitiallyHidden)) {
-            GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&coord), gLevelRotation);
+            GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&coord), g.angle);
 
             for (int32_t otherCount = 0; otherCount < level->initialNum; otherCount++) {
                 initial = level->initial(otherCount);
-                GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&otherCoord), gLevelRotation);
+                GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&otherCoord), g.angle);
 
                 if (ABS(otherCoord.h - coord.h) > biggest) {
                     biggest = ABS(otherCoord.h - coord.h);
@@ -499,7 +497,7 @@ void GetLevelFullScaleAndCorner(
     for (int32_t count = 0; count < level->initialNum; count++)
     {
         if (!(initial->attributes & kInitiallyHidden)) {
-            GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&tempCoord), gLevelRotation);
+            GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&tempCoord), g.angle);
 
             if (tempCoord.h < coord.h) {
                 coord.h = tempCoord.h;
@@ -532,7 +530,7 @@ void GetLevelFullScaleAndCorner(
 }
 
 coordPointType Translate_Coord_To_Level_Rotation(int32_t h, int32_t v) {
-    return rotate_coords(h, v, gLevelRotation);
+    return rotate_coords(h, v, g.angle);
 }
 
 }  // namespace antares

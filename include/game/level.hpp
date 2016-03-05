@@ -27,8 +27,6 @@
 
 namespace antares {
 
-extern int32_t gLevelRotation;
-
 const int16_t kLevelNoShipTextID = 10000;
 
 bool start_construct_level(const Level* level, int32_t* max);
