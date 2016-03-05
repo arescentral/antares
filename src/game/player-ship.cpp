@@ -23,7 +23,7 @@
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"

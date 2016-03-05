@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_DATA_SPACE_OBJECT_HPP_
-#define ANTARES_DATA_SPACE_OBJECT_HPP_
+#ifndef ANTARES_DATA_BASE_OBJECT_HPP_
+#define ANTARES_DATA_BASE_OBJECT_HPP_
 
 #include "data/action.hpp"
 #include "data/plugin.hpp"
@@ -360,4 +360,4 @@ void read_from(sfz::ReadSource in, BaseObject& object);
 
 }  // namespace antares
 
-#endif // ANTARES_DATA_SPACE_OBJECT_HPP_
+#endif // ANTARES_DATA_BASE_OBJECT_HPP_

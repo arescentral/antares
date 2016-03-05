@@ -99,6 +99,7 @@
     , "type": "static_library"
     , "sources":
       [ "include/data/action.hpp"
+      , "include/data/base-object.hpp"
       , "include/data/extractor.hpp"
       , "include/data/handle.hpp"
       , "include/data/interface.hpp"
@@ -110,9 +111,9 @@
       , "include/data/replay.hpp"
       , "include/data/resource.hpp"
       , "include/data/scenario-list.hpp"
-      , "include/data/space-object.hpp"
       , "include/data/string-list.hpp"
       , "src/data/action.cpp"
+      , "src/data/base-object.cpp"
       , "src/data/extractor.cpp"
       , "src/data/interface.cpp"
       , "src/data/level.cpp"
@@ -123,7 +124,6 @@
       , "src/data/replay.cpp"
       , "src/data/resource.cpp"
       , "src/data/scenario-list.cpp"
-      , "src/data/space-object.cpp"
       , "src/data/string-list.cpp"
       ]
     , "dependencies":

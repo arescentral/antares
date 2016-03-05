@@ -18,7 +18,7 @@
 
 // Space Object Handling >> MUST BE INITED _AFTER_ SCENARIOMAKER << (uses Ares Scenarios file)
 
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
 
 #include <sfz/sfz.hpp>
 

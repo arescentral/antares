@@ -19,7 +19,7 @@
 #ifndef ANTARES_GAME_MINICOMPUTER_HPP_
 #define ANTARES_GAME_MINICOMPUTER_HPP_
 
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
 
 namespace antares {
 

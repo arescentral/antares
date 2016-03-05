@@ -21,7 +21,7 @@
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
 #include "game/globals.hpp"
 #include "game/motion.hpp"
 #include "game/space-object.hpp"

@@ -20,7 +20,7 @@
 
 #include "data/resource.hpp"
 #include "lang/defines.hpp"
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
 
 using sfz::BytesSlice;
 using sfz::Exception;

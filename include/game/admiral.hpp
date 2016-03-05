@@ -23,7 +23,7 @@
 
 #include "data/handle.hpp"
 #include "data/level.hpp"
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
 #include "math/fixed.hpp"
 
 namespace antares {

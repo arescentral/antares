@@ -20,7 +20,7 @@
 
 #include <sfz/sfz.hpp>
 
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "drawing/sprite-handling.hpp"

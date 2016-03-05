@@ -20,7 +20,7 @@
 
 #include <sfz/sfz.hpp>
 
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
 #include "drawing/color.hpp"
 #include "game/globals.hpp"
 #include "game/motion.hpp"

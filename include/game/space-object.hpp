@@ -19,7 +19,7 @@
 #ifndef ANTARES_GAME_SPACE_OBJECT_HPP_
 #define ANTARES_GAME_SPACE_OBJECT_HPP_
 
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
 #include "math/units.hpp"
 
 namespace antares {
