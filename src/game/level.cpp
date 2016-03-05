@@ -78,7 +78,8 @@ ANTARES_GLOBAL set<int32_t> possible_actions;
 #endif  // DATA_COVERAGE
 
 void AddBaseObjectActionMedia(
-        Handle<BaseObject> base, int32_t whichType, uint8_t color, uint32_t all_colors);
+        Handle<BaseObject> base, HandleList<Action> (BaseObject::*whichType),
+        uint8_t color, uint32_t all_colors);
 void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors);
 
 void SetAllBaseObjectsUnchecked() {
@@ -109,12 +110,12 @@ void AddBaseObjectMedia(Handle<BaseObject> base, uint8_t color, uint32_t all_col
             AddPixTable(id);
         }
 
-        AddBaseObjectActionMedia(base, kDestroyActionType, i, all_colors);
-        AddBaseObjectActionMedia(base, kExpireActionType, i, all_colors);
-        AddBaseObjectActionMedia(base, kCreateActionType, i, all_colors);
-        AddBaseObjectActionMedia(base, kCollideActionType, i, all_colors);
-        AddBaseObjectActionMedia(base, kActivateActionType, i, all_colors);
-        AddBaseObjectActionMedia(base, kArriveActionType, i, all_colors);
+        AddBaseObjectActionMedia(base, &BaseObject::destroy, i, all_colors);
+        AddBaseObjectActionMedia(base, &BaseObject::expire, i, all_colors);
+        AddBaseObjectActionMedia(base, &BaseObject::create, i, all_colors);
+        AddBaseObjectActionMedia(base, &BaseObject::collide, i, all_colors);
+        AddBaseObjectActionMedia(base, &BaseObject::activate, i, all_colors);
+        AddBaseObjectActionMedia(base, &BaseObject::arrive, i, all_colors);
 
         for (Handle<BaseObject> weapon: {base->pulse.base, base->beam.base, base->special.base}) {
             if (weapon.get()) {
@@ -124,21 +125,10 @@ void AddBaseObjectMedia(Handle<BaseObject> base, uint8_t color, uint32_t all_col
     }
 }
 
-HandleList<Action> action_list(Handle<BaseObject> base, int32_t type) {
-    switch (type) {
-        case kDestroyActionType: return base->destroy;
-        case kExpireActionType: return base->expire;
-        case kCreateActionType: return base->create;
-        case kCollideActionType: return base->collide;
-        case kActivateActionType: return base->activate;
-        case kArriveActionType: return base->arrive;
-        default: return {-1, -1};
-    }
-}
-
 void AddBaseObjectActionMedia(
-        Handle<BaseObject> base, int32_t whichType, uint8_t color, uint32_t all_colors) {
-    for (auto action: action_list(base, whichType)) {
+        Handle<BaseObject> base, HandleList<Action> (BaseObject::*whichType),
+        uint8_t color, uint32_t all_colors) {
+    for (auto action: (*base.*whichType)) {
         if (action.get()) {
             AddActionMedia(action, color, all_colors);
         }

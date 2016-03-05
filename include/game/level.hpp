@@ -29,15 +29,6 @@ namespace antares {
 
 const int16_t kLevelNoShipTextID = 10000;
 
-enum {
-    kDestroyActionType = 1,
-    kExpireActionType = 2,
-    kCreateActionType = 3,
-    kCollideActionType = 4,
-    kActivateActionType = 5,
-    kArriveActionType = 6
-};
-
 bool start_construct_level(const Level* level, int32_t* max);
 void construct_level(const Level* level, int32_t* current);
 void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textID);
