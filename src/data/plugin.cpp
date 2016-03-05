@@ -62,7 +62,7 @@ void PluginInit() {
         }
     }
 
-    read_all("level",       "scenarios",                 "snro",  plug.chapters);
+    read_all("level",       "scenarios",                 "snro",  plug.levels);
     read_all("initials",    "scenario-initial-objects",  "snit",  plug.initials);
     read_all("conditions",  "scenario-conditions",       "sncd",  plug.conditions);
     read_all("briefings",   "scenario-briefing-points",  "snbf",  plug.briefings);
@@ -71,7 +71,7 @@ void PluginInit() {
     read_all("races",       "races",                     "race",  plug.races);
 
     StringList level_names(kLevelNameID);
-    for (auto& level: plug.chapters) {
+    for (auto& level: plug.levels) {
         level.name.assign(level_names.at(level.levelNameStrNum - 1));
     }
 

@@ -238,7 +238,7 @@ void set_initial_destination(const Level::InitialObject* initial, bool preserve)
 }  // namespace
 
 Level* mGetLevel(int32_t num) {
-    return &plug.chapters[num];
+    return &plug.levels[num];
 }
 
 Level::InitialObject* Level::initial(size_t at) const {
@@ -924,7 +924,7 @@ void GetLevelFullScaleAndCorner(
 }
 
 const Level* GetLevelPtrFromChapter(int32_t chapter) {
-    for (const Level& level: plug.chapters) {
+    for (const Level& level: plug.levels) {
         if (level.chapter_number() == chapter) {
             return &level;
         }

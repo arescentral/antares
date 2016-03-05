@@ -28,7 +28,7 @@ namespace antares {
 
 struct ScenarioGlobals {
     scenarioInfoType                   meta;
-    std::vector<Level>                 chapters;
+    std::vector<Level>                 levels;
     std::vector<Level::InitialObject>  initials;
     std::vector<Level::Condition>      conditions;
     std::vector<Level::BriefPoint>     briefings;
