@@ -199,9 +199,9 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
     }
 
     if (obj->attributes & kIsVector) {
-        const auto& beam = obj->baseType->frame.vector;
-        obj->frame.beam = Beams::add(
-                &(obj->location), beam.color, beam.kind, beam.accuracy, beam.range);
+        const auto& vector = obj->baseType->frame.vector;
+        obj->frame.vector = Vectors::add(
+                &(obj->location), vector.color, vector.kind, vector.accuracy, vector.range);
     }
 
     obj->nextObject = g.root;
@@ -819,8 +819,8 @@ void SpaceObject::destroy() {
 
 void SpaceObject::free() {
     if (attributes & kIsVector) {
-        if (frame.beam.get()) {
-            frame.beam->killMe = true;
+        if (frame.vector.get()) {
+            frame.vector->killMe = true;
         }
     } else {
         if (sprite.get()) {

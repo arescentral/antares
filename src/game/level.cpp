@@ -468,7 +468,7 @@ bool Level::Condition::is_true() const {
 bool start_construct_level(const Level* level, int32_t* max) {
     ResetAllSpaceObjects();
     reset_action_queue();
-    Beams::reset();
+    Vectors::reset();
     ResetAllSprites();
     Label::reset();
     ResetInstruments();
@@ -681,7 +681,7 @@ static void run_game_1s() {
             CheckLevelConditions();
         }
         CullSprites();
-        Beams::cull();
+        Vectors::cull();
     } while ((g.time.time_since_epoch() % secs(1)) != ticks(0));
 }
 

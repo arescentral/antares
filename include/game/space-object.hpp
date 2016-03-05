@@ -125,7 +125,7 @@ class SpaceObject {
             int32_t             frameDirection;
             Fixed               frameSpeed;
         } animation;
-        Handle<Beam>            beam;
+        Handle<Vector>      vector;
     } frame;
 
     int32_t                 _health = 0;

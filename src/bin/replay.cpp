@@ -152,7 +152,7 @@ void ReplayMaster::init() {
     MusicInit();
     InitMotion();
     Admiral::init();
-    Beams::init();
+    Vectors::init();
 }
 
 void usage(StringSlice program_name) {
