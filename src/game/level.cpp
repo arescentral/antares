@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 
 #include <vector>
 #include <set>
@@ -64,10 +64,10 @@ namespace antares {
 
 namespace {
 
-const int16_t kScenarioResID            = 500;
-const int16_t kScenarioInitialResID     = 500;
-const int16_t kScenarioConditionResID   = 500;
-const int16_t kScenarioBriefResID       = 500;
+const int16_t kLevelResID            = 500;
+const int16_t kLevelInitialResID     = 500;
+const int16_t kLevelConditionResID   = 500;
+const int16_t kLevelBriefResID       = 500;
 
 const uint32_t kNeutralColorNeededFlag   = 0x00010000u;
 const uint32_t kAnyColorNeededFlag       = 0xffff0000u;
@@ -76,7 +76,7 @@ const uint32_t kAnyColorLoadedFlag       = 0x0000ffffu;
 
 const int16_t kLevelNameID = 4600;
 
-ANTARES_GLOBAL int32_t gScenarioRotation = 0;
+ANTARES_GLOBAL int32_t gLevelRotation = 0;
 
 #ifdef DATA_COVERAGE
 ANTARES_GLOBAL set<int32_t> possible_objects;
@@ -243,7 +243,7 @@ void set_initial_destination(const Level::InitialObject* initial, bool preserve)
 
 }  // namespace
 
-Level* mGetScenario(int32_t num) {
+Level* mGetLevel(int32_t num) {
     return &plug.chapters[num];
 }
 
@@ -471,7 +471,7 @@ bool Level::Condition::is_true() const {
     return false;
 }
 
-void ScenarioMakerInit() {
+void PluginInit() {
     {
         Resource rsrc("scenario-info", "nlAG", 128);
         BytesSlice in(rsrc.data());
@@ -484,7 +484,7 @@ void ScenarioMakerInit() {
     {
         StringList chapter_names(kLevelNameID);
         plug.chapters.clear();
-        Resource rsrc("scenarios", "snro", kScenarioResID);
+        Resource rsrc("scenarios", "snro", kLevelResID);
         BytesSlice in(rsrc.data());
         while (!in.empty()) {
             Level level;
@@ -496,7 +496,7 @@ void ScenarioMakerInit() {
 
     {
         plug.initials.clear();
-        Resource rsrc("scenario-initial-objects", "snit", kScenarioInitialResID);
+        Resource rsrc("scenario-initial-objects", "snit", kLevelInitialResID);
         BytesSlice in(rsrc.data());
         while (!in.empty()) {
             Level::InitialObject initial;
@@ -507,7 +507,7 @@ void ScenarioMakerInit() {
 
     {
         plug.conditions.clear();
-        Resource rsrc("scenario-conditions", "sncd", kScenarioConditionResID);
+        Resource rsrc("scenario-conditions", "sncd", kLevelConditionResID);
         BytesSlice in(rsrc.data());
         while (!in.empty()) {
             Level::Condition condition;
@@ -518,7 +518,7 @@ void ScenarioMakerInit() {
 
     {
         plug.briefings.clear();
-        Resource rsrc("scenario-briefing-points", "snbf", kScenarioBriefResID);
+        Resource rsrc("scenario-briefing-points", "snbf", kLevelBriefResID);
         BytesSlice in(rsrc.data());
         while (!in.empty()) {
             Level::BriefPoint brief_point;
@@ -530,7 +530,7 @@ void ScenarioMakerInit() {
     InitRaces();
 }
 
-bool start_construct_scenario(const Level* level, int32_t* max) {
+bool start_construct_level(const Level* level, int32_t* max) {
     ResetAllSpaceObjects();
     reset_action_queue();
     Beams::reset();
@@ -548,9 +548,9 @@ bool start_construct_scenario(const Level* level, int32_t* max) {
     {
         int32_t angle = g.level->angle();
         if (angle < 0) {
-            gScenarioRotation = g.random.next(ROT_POS);
+            gLevelRotation = g.random.next(ROT_POS);
         } else {
-            gScenarioRotation = angle;
+            gLevelRotation = angle;
         }
     }
 
@@ -684,7 +684,7 @@ static void create_initial(int i, uint32_t all_colors) {
     }
 
     coordPointType coord;
-    GetInitialCoord(initial, &coord, gScenarioRotation);
+    GetInitialCoord(initial, &coord, gLevelRotation);
 
     Handle<Admiral> owner = Admiral::none();
     if (initial->owner.get()) {
@@ -703,7 +703,7 @@ static void create_initial(int i, uint32_t all_colors) {
     // TODO(sfiera): remap object in networked games.
     fixedPointType v = {Fixed::zero(), Fixed::zero()};
     auto anObject = initial->realObject = CreateAnySpaceObject(
-            type, &v, &coord, gScenarioRotation, owner, specialAttributes,
+            type, &v, &coord, gLevelRotation, owner, specialAttributes,
             initial->spriteIDOverride);
 
     if (anObject->attributes & kIsDestination) {
@@ -743,14 +743,14 @@ static void run_game_1s() {
         execute_action_queue();
         CollideSpaceObjects();
         if (((g.time - start_time) % kConditionTick) == ticks(0)) {
-            CheckScenarioConditions();
+            CheckLevelConditions();
         }
         CullSprites();
         Beams::cull();
     } while ((g.time.time_since_epoch() % secs(1)) != ticks(0));
 }
 
-void construct_scenario(const Level* level, int32_t* current) {
+void construct_level(const Level* level, int32_t* current) {
     int32_t step = *current;
     uint32_t all_colors = kNeutralColorNeededFlag;
     for (auto adm: Admiral::all()) {
@@ -789,7 +789,7 @@ void construct_scenario(const Level* level, int32_t* current) {
     return;
 }
 
-void CheckScenarioConditions() {
+void CheckLevelConditions() {
     for (int32_t i = 0; i < g.level->conditionNum; i++) {
         auto c = g.level->condition(i);
         if (c->active() && c->is_true()) {
@@ -809,7 +809,7 @@ void UnhideInitialObject(int32_t whichInitial) {
     }
 
     coordPointType coord;
-    GetInitialCoord(initial, &coord, gScenarioRotation);
+    GetInitialCoord(initial, &coord, gLevelRotation);
 
     Handle<Admiral> owner = Admiral::none();
     if (initial->owner.get()) {
@@ -908,11 +908,11 @@ void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textI
     }
 }
 
-// GetScenarioFullScaleAndCorner:
+// GetLevelFullScaleAndCorner:
 //  This is really just for the mission briefing.  It calculates the best scale
 //  at which to show the entire scenario.
 
-void GetScenarioFullScaleAndCorner(
+void GetLevelFullScaleAndCorner(
         const Level* level, int32_t rotation, coordPointType *corner, int32_t *scale,
         Rect *bounds) {
     int32_t         biggest, count, otherCount, mustFit;
@@ -927,11 +927,11 @@ void GetScenarioFullScaleAndCorner(
     {
         initial = level->initial(count);
         if (!(initial->attributes & kInitiallyHidden)) {
-            GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&coord), gScenarioRotation);
+            GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&coord), gLevelRotation);
 
             for (int32_t otherCount = 0; otherCount < level->initialNum; otherCount++) {
                 initial = level->initial(otherCount);
-                GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&otherCoord), gScenarioRotation);
+                GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&otherCoord), gLevelRotation);
 
                 if (ABS(otherCoord.h - coord.h) > biggest) {
                     biggest = ABS(otherCoord.h - coord.h);
@@ -956,7 +956,7 @@ void GetScenarioFullScaleAndCorner(
     for (int32_t count = 0; count < level->initialNum; count++)
     {
         if (!(initial->attributes & kInitiallyHidden)) {
-            GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&tempCoord), gScenarioRotation);
+            GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&tempCoord), gLevelRotation);
 
             if (tempCoord.h < coord.h) {
                 coord.h = tempCoord.h;
@@ -988,7 +988,7 @@ void GetScenarioFullScaleAndCorner(
 
 }
 
-const Level* GetScenarioPtrFromChapter(int32_t chapter) {
+const Level* GetLevelPtrFromChapter(int32_t chapter) {
     for (const Level& level: plug.chapters) {
         if (level.chapter_number() == chapter) {
             return &level;
@@ -997,8 +997,8 @@ const Level* GetScenarioPtrFromChapter(int32_t chapter) {
     return NULL;
 }
 
-coordPointType Translate_Coord_To_Scenario_Rotation(int32_t h, int32_t v) {
-    return rotate_coords(h, v, gScenarioRotation);
+coordPointType Translate_Coord_To_Level_Rotation(int32_t h, int32_t v) {
+    return rotate_coords(h, v, gLevelRotation);
 }
 
 }  // namespace antares

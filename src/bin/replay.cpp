@@ -36,7 +36,7 @@
 #include "game/main.hpp"
 #include "game/messages.hpp"
 #include "game/motion.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "math/random.hpp"
 #include "math/rotation.hpp"
 #include "sound/driver.hpp"
@@ -87,7 +87,7 @@ class ReplayMaster : public Card {
             g.random.seed = _random_seed;
             globals()->gInputSource.reset(new ReplayInputSource(&_replay_data));
             stack()->push(new MainPlay(
-                        GetScenarioPtrFromChapter(_replay_data.chapter_id), true, false,
+                        GetLevelPtrFromChapter(_replay_data.chapter_id), true, false,
                         &_game_result));
             break;
 
@@ -145,8 +145,8 @@ void ReplayMaster::init() {
     InstrumentInit();
     SpriteHandlingInit();
     AresCheatInit();
-    ScenarioMakerInit();
-    SpaceObjectHandlingInit();  // MUST be after ScenarioMakerInit()
+    PluginInit();
+    SpaceObjectHandlingInit();  // MUST be after PluginInit()
     InitSoundFX();
     MusicInit();
     InitMotion();

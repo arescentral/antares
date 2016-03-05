@@ -35,7 +35,7 @@
 #include "game/motion.hpp"
 #include "game/non-player-ship.hpp"
 #include "game/player-ship.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
 #include "lang/defines.hpp"
@@ -521,7 +521,7 @@ static void alter_absolute_location(Handle<Action> action, Handle<SpaceObject> f
         focus->location.h += alter.at.h;
         focus->location.v += alter.at.v;
     } else {
-        focus->location = Translate_Coord_To_Scenario_Rotation(alter.at.h, alter.at.v);
+        focus->location = Translate_Coord_To_Level_Rotation(alter.at.h, alter.at.v);
     }
 }
 
@@ -784,7 +784,7 @@ static void execute_actions(
     }
 
     if (checkConditions) {
-        CheckScenarioConditions();
+        CheckLevelConditions();
     }
 }
 

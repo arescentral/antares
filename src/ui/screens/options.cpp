@@ -30,7 +30,7 @@
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/main.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "game/time.hpp"
 #include "sound/driver.hpp"
 #include "sound/music.hpp"

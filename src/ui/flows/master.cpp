@@ -27,7 +27,7 @@
 #include "game/labels.hpp"
 #include "game/messages.hpp"
 #include "game/motion.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "game/space-object.hpp"
 #include "math/rotation.hpp"
 #include "sound/driver.hpp"
@@ -131,7 +131,7 @@ void Master::init() {
     InstrumentInit();
     SpriteHandlingInit();
     AresCheatInit();
-    ScenarioMakerInit();
+    PluginInit();
     SpaceObjectHandlingInit();  // MUST be after ScenarioMakerInit()
     InitSoundFX();
     MusicInit();

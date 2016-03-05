@@ -46,7 +46,7 @@
 #include "game/motion.hpp"
 #include "game/non-player-ship.hpp"
 #include "game/player-ship.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "game/starfield.hpp"
 #include "game/time.hpp"
 #include "lang/defines.hpp"
@@ -188,13 +188,13 @@ void MainPlay::become_front() {
             } else {
                 int32_t max;
                 int32_t current = 0;
-                if (!start_construct_scenario(_level, &max)) {
+                if (!start_construct_level(_level, &max)) {
                     *_game_result = QUIT_GAME;
                     stack()->pop(this);
                     return;
                 }
                 while (current < max) {
-                    construct_scenario(_level, &current);
+                    construct_level(_level, &current);
                 }
             }
         }
@@ -402,7 +402,7 @@ void GamePlay::become_front() {
         }
         HintLine::reset();
 
-        CheckScenarioConditions();
+        CheckLevelConditions();
         break;
 
       case PAUSED:
@@ -546,7 +546,7 @@ void GamePlay::fire_timer() {
 
             CollideSpaceObjects();
             if ((g.time.time_since_epoch() % kConditionTick) == ticks(0)) {
-                CheckScenarioConditions();
+                CheckLevelConditions();
             }
         }
 

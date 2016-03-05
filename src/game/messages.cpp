@@ -28,7 +28,7 @@
 #include "game/globals.hpp"
 #include "game/instruments.hpp"
 #include "game/labels.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "lang/defines.hpp"
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
@@ -341,7 +341,7 @@ void Messages::draw_long_message(ticks time_pass) {
         //
         // if ( !(globals()->gOptions & kOptionNetworkOn))
         // {
-            CheckScenarioConditions();
+            CheckLevelConditions();
         // }
 
         if ((tmessage->lastResID >= 0) && (tmessage->lastLabelMessage)) {

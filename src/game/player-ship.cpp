@@ -37,7 +37,7 @@
 #include "game/messages.hpp"
 #include "game/minicomputer.hpp"
 #include "game/non-player-ship.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
 #include "game/time.hpp"
@@ -1010,7 +1010,7 @@ void PlayerShipBodyExpire(Handle<SpaceObject> theShip) {
             g.game_over_at = g.time + secs(3);
         }
         if (theShip->owner == g.admiral) {
-            g.victory_text = kScenarioNoShipTextID + g.level->levelNameStrNum;
+            g.victory_text = kLevelNoShipTextID + g.level->levelNameStrNum;
         } else {
             g.victory_text = 10050 + g.level->levelNameStrNum;
         }

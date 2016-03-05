@@ -26,7 +26,7 @@
 #include "game/globals.hpp"
 #include "game/input-source.hpp"
 #include "game/main.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "sound/music.hpp"
 #include "ui/card.hpp"
 #include "ui/screens/debriefing.hpp"
@@ -140,7 +140,7 @@ void SoloGame::epilogue_done() {
     if (g.next_level < 0) {
         _level = NULL;
     } else {
-        _level = GetScenarioPtrFromChapter(g.next_level);
+        _level = GetLevelPtrFromChapter(g.next_level);
     }
 
     if (_level != NULL) {

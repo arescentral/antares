@@ -41,7 +41,7 @@
 #include "game/instruments.hpp"
 #include "game/main.hpp"
 #include "game/messages.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
 #include "math/fixed.hpp"

@@ -24,7 +24,7 @@
 #include "data/string-list.hpp"
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "game/time.hpp"
 #include "video/driver.hpp"
 
@@ -76,7 +76,7 @@ void LoadingScreen::fire_timer() {
         while (_next_update < now()) {
             if (_chars_typed >= _name_text->size()) {
                 _state = LOADING;
-                if (!start_construct_scenario(_level, &_max)) {
+                if (!start_construct_level(_level, &_max)) {
                     *_cancelled = true;
                     stack()->pop(this);
                 }
@@ -94,7 +94,7 @@ void LoadingScreen::fire_timer() {
         _next_update = now() + kTypingDelay;
         while (now() < _next_update) {
             if (_current < _max) {
-                construct_scenario(_level, &_current);
+                construct_level(_level, &_current);
             } else {
                 _state = DONE;
                 return;

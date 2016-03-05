@@ -28,7 +28,7 @@
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/main.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "sound/driver.hpp"
 #include "ui/card.hpp"
 #include "ui/interface-handling.hpp"
@@ -51,7 +51,7 @@ SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Level** level)
           _level(level) {
     Ledger::ledger()->unlocked_chapters(&_chapters);
     _index = _chapters.size() - 1;
-    *_level = GetScenarioPtrFromChapter(_chapters[_index]);
+    *_level = GetLevelPtrFromChapter(_chapters[_index]);
 }
 
 SelectLevelScreen::~SelectLevelScreen() { }
@@ -150,7 +150,7 @@ void SelectLevelScreen::handle_button(Button& button) {
       case PREVIOUS:
         if (_index > 0) {
             --_index;
-            *_level = GetScenarioPtrFromChapter(_chapters[_index]);
+            *_level = GetLevelPtrFromChapter(_chapters[_index]);
         }
         adjust_interface();
         break;
@@ -158,7 +158,7 @@ void SelectLevelScreen::handle_button(Button& button) {
       case NEXT:
         if (_index < _chapters.size() - 1) {
             ++_index;
-            *_level = GetScenarioPtrFromChapter(_chapters[_index]);
+            *_level = GetLevelPtrFromChapter(_chapters[_index]);
         }
         adjust_interface();
         break;

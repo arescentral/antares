@@ -27,7 +27,7 @@
 #include "drawing/shapes.hpp"
 #include "drawing/text.hpp"
 #include "game/instruments.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "math/random.hpp"
 #include "ui/card.hpp"
 #include "ui/interface-handling.hpp"
@@ -383,7 +383,7 @@ void BriefingScreen::build_brief_point() {
         coordPointType corner;
         int32_t scale;
         Rect map_rect = item(MAP_RECT).bounds();
-        GetScenarioFullScaleAndCorner(_level, 0, &corner, &scale, &map_rect);
+        GetLevelFullScaleAndCorner(_level, 0, &corner, &scale, &map_rect);
 
         vector<inlinePictType> inline_pict;
 
@@ -410,7 +410,7 @@ void BriefingScreen::draw_system_map() const {
     coordPointType corner;
     int32_t scale;
     Rect pix_bounds = _bounds.size().as_rect();
-    GetScenarioFullScaleAndCorner(_level, 0, &corner, &scale, &pix_bounds);
+    GetLevelFullScaleAndCorner(_level, 0, &corner, &scale, &pix_bounds);
     Rect bounds = _bounds;
     bounds.offset(off.h, off.v);
     draw_arbitrary_sector_lines(corner, scale, 16, bounds);

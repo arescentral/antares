@@ -22,7 +22,7 @@
 
 #include "game/globals.hpp"
 #include "game/input-source.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "math/random.hpp"
 #include "ui/card.hpp"
 #include "video/transitions.hpp"
@@ -37,7 +37,7 @@ ReplayGame::ReplayGame(int16_t replay_id):
         _resource("replays", "NLRP", replay_id),
         _data(_resource.data()),
         _random_seed{_data.global_seed},
-        _level(GetScenarioPtrFromChapter(_data.chapter_id)),
+        _level(GetLevelPtrFromChapter(_data.chapter_id)),
         _game_result(NO_GAME) { }
 
 ReplayGame::~ReplayGame() { }

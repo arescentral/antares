@@ -36,7 +36,7 @@
 #include "game/minicomputer.hpp"
 #include "game/motion.hpp"
 #include "game/player-ship.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "game/starfield.hpp"
 #include "math/macros.hpp"
 #include "math/random.hpp"
