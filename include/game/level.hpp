@@ -38,8 +38,6 @@ enum {
     kArriveActionType = 6
 };
 
-Level* mGetLevel(int32_t num);
-
 bool start_construct_level(const Level* level, int32_t* max);
 void construct_level(const Level* level, int32_t* current);
 void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textID);

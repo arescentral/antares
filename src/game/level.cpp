@@ -237,10 +237,6 @@ void set_initial_destination(const Level::InitialObject* initial, bool preserve)
 
 }  // namespace
 
-Level* mGetLevel(int32_t num) {
-    return &plug.levels[num];
-}
-
 Level::InitialObject* Level::initial(size_t at) const {
     return &plug.initials[initialFirst + at];
 }
