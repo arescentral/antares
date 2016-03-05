@@ -88,7 +88,7 @@ void Vectors::reset() {
 }
 
 Handle<Vector> Vectors::add(
-        coordPointType* location, uint8_t color, vectorKindType kind, int32_t accuracy,
+        coordPointType* location, uint8_t color, uint8_t kind, int32_t accuracy,
         int32_t vector_range) {
     for (auto vector: Vector::all()) {
         if (!vector->active) {
@@ -138,15 +138,15 @@ void Vectors::set_attributes(Handle<SpaceObject> vectorObject, Handle<SpaceObjec
             if ((((h * h) + (v * v)) > (vector.range * vector.range))
                     || (h > kMaximumRelevantDistance)
                     || (v > kMaximumRelevantDistance)) {
-                if (vector.vectorKind == eStaticObjectToObjectKind) {
-                    vector.vectorKind = eStaticObjectToRelativeCoordKind;
-                } else if (vector.vectorKind == eBoltObjectToObjectKind) {
-                    vector.vectorKind = eBoltObjectToRelativeCoordKind;
+                if (vector.vectorKind == Vector::BEAM_TO_OBJECT) {
+                    vector.vectorKind = Vector::BEAM_TO_COORD;
+                } else if (vector.vectorKind == Vector::BEAM_TO_OBJECT_LIGHTNING) {
+                    vector.vectorKind = Vector::BEAM_TO_COORD_LIGHTNING;
                 }
                 DetermineVectorRelativeCoordFromAngle(vectorObject, sourceObject->targetAngle);
             } else {
-                if ((vector.vectorKind == eStaticObjectToRelativeCoordKind)
-                        || (vector.vectorKind == eBoltObjectToRelativeCoordKind)) {
+                if ((vector.vectorKind == Vector::BEAM_TO_COORD)
+                        || (vector.vectorKind == Vector::BEAM_TO_COORD_LIGHTNING)) {
                     vector.toRelativeCoord.h = target->location.h - sourceObject->location.h
                         - vector.accuracy
                         + vectorObject->randomSeed.next(vector.accuracy << 1);
@@ -159,18 +159,18 @@ void Vectors::set_attributes(Handle<SpaceObject> vectorObject, Handle<SpaceObjec
                 }
             }
         } else { // target not valid
-            if (vector.vectorKind == eStaticObjectToObjectKind) {
-                vector.vectorKind = eStaticObjectToRelativeCoordKind;
-            } else if (vector.vectorKind == eBoltObjectToObjectKind) {
-                vector.vectorKind = eBoltObjectToRelativeCoordKind;
+            if (vector.vectorKind == Vector::BEAM_TO_OBJECT) {
+                vector.vectorKind = Vector::BEAM_TO_COORD;
+            } else if (vector.vectorKind == Vector::BEAM_TO_OBJECT_LIGHTNING) {
+                vector.vectorKind = Vector::BEAM_TO_COORD_LIGHTNING;
             }
             DetermineVectorRelativeCoordFromAngle(vectorObject, sourceObject->direction);
         }
     } else { // target not valid
-        if (vector.vectorKind == eStaticObjectToObjectKind) {
-            vector.vectorKind = eStaticObjectToRelativeCoordKind;
-        } else if (vector.vectorKind == eBoltObjectToObjectKind) {
-            vector.vectorKind = eBoltObjectToRelativeCoordKind;
+        if (vector.vectorKind == Vector::BEAM_TO_OBJECT) {
+            vector.vectorKind = Vector::BEAM_TO_COORD;
+        } else if (vector.vectorKind == Vector::BEAM_TO_OBJECT_LIGHTNING) {
+            vector.vectorKind = Vector::BEAM_TO_COORD_LIGHTNING;
         }
         DetermineVectorRelativeCoordFromAngle(vectorObject, sourceObject->direction);
     }
@@ -191,7 +191,7 @@ void Vectors::update() {
 
             if (!vector->killMe) {
                 if (vector->color) {
-                    if (vector->vectorKind != eKineticBoltKind) {
+                    if (vector->vectorKind != Vector::BOLT) {
                         vector->boltState++;
                         if (vector->boltState > 24) vector->boltState = -24;
                         uint8_t currentColor = GetRetroIndex(vector->color);
@@ -202,8 +202,8 @@ void Vectors::update() {
                             currentColor += vector->boltState >> 1;
                         vector->color = GetTranslateIndex(currentColor);
                     }
-                    if ((vector->vectorKind == eBoltObjectToObjectKind)
-                            || (vector->vectorKind == eBoltObjectToRelativeCoordKind)) {
+                    if ((vector->vectorKind == Vector::BEAM_TO_OBJECT_LIGHTNING)
+                            || (vector->vectorKind == Vector::BEAM_TO_COORD_LIGHTNING)) {
                         vector->thisBoltPoint[0].h = vector->thisLocation.left;
                         vector->thisBoltPoint[0].v = vector->thisLocation.top;
                         vector->thisBoltPoint[kBoltPointNum - 1].h = vector->thisLocation.right;
@@ -235,8 +235,8 @@ void Vectors::draw() {
         if (vector->active) {
             if (!vector->killMe) {
                 if (vector->color) {
-                    if ((vector->vectorKind == eBoltObjectToObjectKind)
-                            || (vector->vectorKind == eBoltObjectToRelativeCoordKind)) {
+                    if ((vector->vectorKind == Vector::BEAM_TO_OBJECT_LIGHTNING)
+                            || (vector->vectorKind == Vector::BEAM_TO_COORD_LIGHTNING)) {
                         for (int j: range(1, kBoltPointNum)) {
                             lines.draw(
                                     vector->thisBoltPoint[j-1], vector->thisBoltPoint[j],
@@ -261,8 +261,8 @@ void Vectors::show_all() {
                 vector->active = false;
             }
             if (vector->color) {
-                if ((vector->vectorKind == eBoltObjectToObjectKind)
-                        || (vector->vectorKind == eBoltObjectToRelativeCoordKind)) {
+                if ((vector->vectorKind == Vector::BEAM_TO_OBJECT_LIGHTNING)
+                        || (vector->vectorKind == Vector::BEAM_TO_COORD_LIGHTNING)) {
                     for (int j: range(kBoltPointNum)) {
                         vector->lastBoltPoint[j] = vector->thisBoltPoint[j];
                     }

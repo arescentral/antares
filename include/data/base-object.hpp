@@ -208,15 +208,6 @@ enum kPresenceStateType {
     kWarpOutPresence = 5
 };
 
-typedef uint8_t vectorKindType;
-enum vectorKindEnum {
-    eKineticBoltKind =                  0,  // has velocity, moves
-    eStaticObjectToObjectKind =         1,  // static line connects 2 objects
-    eStaticObjectToRelativeCoordKind =  2,  // static line goes from object to coord
-    eBoltObjectToObjectKind =           3,  // lightning bolt, connects 2 objects
-    eBoltObjectToRelativeCoordKind =    4   // lightning bolt, from object to coord
-};
-
 union objectFrameType {
     // rotation: for objects whose shapes depend on their direction
     struct Rotation {
@@ -246,7 +237,7 @@ union objectFrameType {
     // vector: have no associated sprite
     struct Vector {
         uint8_t                 color;              // color of line
-        vectorKindType          kind;
+        uint8_t                 kind;
         int32_t                 accuracy;           // for non-normal vector objects, how accurate
         int32_t                 range;
     };

@@ -32,13 +32,21 @@ struct SpaceObject;
 static const int kBoltPointNum = 10;
 
 struct Vector {
+    enum Kind {
+        BOLT                      = 0,  // has velocity, moves
+        BEAM_TO_OBJECT            = 1,  // static line connects 2 objects
+        BEAM_TO_COORD             = 2,  // static line goes from object to coord
+        BEAM_TO_OBJECT_LIGHTNING  = 3,  // lightning bolt, connects 2 objects
+        BEAM_TO_COORD_LIGHTNING   = 4,  // lightning bolt, from object to coord
+    };
+
     static Vector* get(int number);
     static Handle<Vector> none() { return Handle<Vector>(-1); }
     static HandleList<Vector> all() { return HandleList<Vector>(0, size); }
 
     Vector();
 
-    vectorKindType      vectorKind;
+    uint8_t             vectorKind;
     Rect                thisLocation;
     coordPointType      lastGlobalLocation;
     coordPointType      objectLocation;
@@ -67,7 +75,7 @@ class Vectors {
     static void init();
     static void reset();
     static Handle<Vector> add(
-            coordPointType* location, uint8_t color, vectorKindType kind, int32_t accuracy,
+            coordPointType* location, uint8_t color, uint8_t kind, int32_t accuracy,
             int32_t vector_range);
     static void set_attributes(Handle<SpaceObject> vectorObject, Handle<SpaceObject> sourceObject);
     static void update();
