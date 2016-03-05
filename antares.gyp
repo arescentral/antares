@@ -180,7 +180,6 @@
     , "sources":
       [ "include/game/action.hpp"
       , "include/game/admiral.hpp"
-      , "include/game/beam.hpp"
       , "include/game/cheat.hpp"
       , "include/game/cursor.hpp"
       , "include/game/globals.hpp"
@@ -197,9 +196,9 @@
       , "include/game/space-object.hpp"
       , "include/game/starfield.hpp"
       , "include/game/time.hpp"
+      , "include/game/vector.hpp"
       , "src/game/action.cpp"
       , "src/game/admiral.cpp"
-      , "src/game/beam.cpp"
       , "src/game/cheat.cpp"
       , "src/game/cursor.cpp"
       , "src/game/globals.cpp"
@@ -215,6 +214,7 @@
       , "src/game/player-ship.cpp"
       , "src/game/space-object.cpp"
       , "src/game/starfield.cpp"
+      , "src/game/vector.cpp"
       ]
     , "dependencies": ["<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz"]
     , "export_dependent_settings": ["<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz"]

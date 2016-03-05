@@ -31,7 +31,7 @@
 #include "drawing/pix-table.hpp"
 #include "game/action.hpp"
 #include "game/admiral.hpp"
-#include "game/beam.hpp"
+#include "game/vector.hpp"
 #include "game/globals.hpp"
 #include "game/instruments.hpp"
 #include "game/labels.hpp"

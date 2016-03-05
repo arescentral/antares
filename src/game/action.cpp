@@ -27,7 +27,7 @@
 #include "drawing/color.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "game/admiral.hpp"
-#include "game/beam.hpp"
+#include "game/vector.hpp"
 #include "game/globals.hpp"
 #include "game/labels.hpp"
 #include "game/messages.hpp"

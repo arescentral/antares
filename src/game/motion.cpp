@@ -26,7 +26,7 @@
 #include "drawing/sprite-handling.hpp"
 #include "game/action.hpp"
 #include "game/admiral.hpp"
-#include "game/beam.hpp"
+#include "game/vector.hpp"
 #include "game/globals.hpp"
 #include "game/non-player-ship.hpp"
 #include "game/player-ship.hpp"

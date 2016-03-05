@@ -30,7 +30,7 @@
 #include "lang/defines.hpp"
 #include "game/action.hpp"
 #include "game/admiral.hpp"
-#include "game/beam.hpp"
+#include "game/vector.hpp"
 #include "game/globals.hpp"
 #include "game/labels.hpp"
 #include "game/messages.hpp"
