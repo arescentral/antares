@@ -24,6 +24,9 @@
 
 using sfz::BytesSlice;
 using sfz::Exception;
+using sfz::StringSlice;
+using sfz::format;
+using std::vector;
 
 namespace antares {
 
@@ -31,15 +34,23 @@ static const int16_t kLevelNameID                = 4600;
 static const int16_t kSpaceObjectNameResID       = 5000;
 static const int16_t kSpaceObjectShortNameResID  = 5001;
 
-static const int16_t kLevelResID                 = 500;
-static const int16_t kLevelInitialResID          = 500;
-static const int16_t kLevelConditionResID        = 500;
-static const int16_t kLevelBriefResID            = 500;
-static const int16_t kBaseObjectResID            = 500;
-static const int16_t kObjectActionResID          = 500;
-static const int16_t kRaceResID                  = 500;
+static const int16_t kPackedResID                = 500;
 
 ANTARES_GLOBAL ScenarioGlobals plug;
+
+template <typename T>
+static void read_all(StringSlice name, StringSlice type, StringSlice extension, vector<T>& v) {
+    Resource rsrc(type, extension, kPackedResID);
+    BytesSlice in(rsrc.data());
+    size_t count = rsrc.data().size() / T::byte_size;
+    v.resize(count);
+    for (size_t i = 0; i < count; ++i) {
+        read(in, v[i]);
+    }
+    if (!in.empty()) {
+        throw Exception(format("didn't consume all of {0} data", name));
+    }
+}
 
 void PluginInit() {
     {
@@ -51,93 +62,24 @@ void PluginInit() {
         }
     }
 
-    {
-        StringList chapter_names(kLevelNameID);
-        plug.chapters.clear();
-        Resource rsrc("scenarios", "snro", kLevelResID);
-        BytesSlice in(rsrc.data());
-        while (!in.empty()) {
-            Level level;
-            read(in, level);
-            level.name.assign(chapter_names.at(level.levelNameStrNum - 1));
-            plug.chapters.push_back(level);
-        }
+    read_all("level",       "scenarios",                 "snro",  plug.chapters);
+    read_all("initials",    "scenario-initial-objects",  "snit",  plug.initials);
+    read_all("conditions",  "scenario-conditions",       "sncd",  plug.conditions);
+    read_all("briefings",   "scenario-briefing-points",  "snbf",  plug.briefings);
+    read_all("objects",     "objects",                   "bsob",  plug.objects);
+    read_all("actions",     "object-actions",            "obac",  plug.actions);
+    read_all("races",       "races",                     "race",  plug.races);
+
+    StringList level_names(kLevelNameID);
+    for (auto& level: plug.chapters) {
+        level.name.assign(level_names.at(level.levelNameStrNum - 1));
     }
 
-    {
-        plug.initials.clear();
-        Resource rsrc("scenario-initial-objects", "snit", kLevelInitialResID);
-        BytesSlice in(rsrc.data());
-        while (!in.empty()) {
-            Level::InitialObject initial;
-            read(in, initial);
-            plug.initials.push_back(initial);
-        }
-    }
-
-    {
-        plug.conditions.clear();
-        Resource rsrc("scenario-conditions", "sncd", kLevelConditionResID);
-        BytesSlice in(rsrc.data());
-        while (!in.empty()) {
-            Level::Condition condition;
-            read(in, condition);
-            plug.conditions.push_back(condition);
-        }
-    }
-
-    {
-        plug.briefings.clear();
-        Resource rsrc("scenario-briefing-points", "snbf", kLevelBriefResID);
-        BytesSlice in(rsrc.data());
-        while (!in.empty()) {
-            Level::BriefPoint brief_point;
-            read(in, brief_point);
-            plug.briefings.push_back(brief_point);
-        }
-    }
-
-    {
-        StringList object_names(kSpaceObjectNameResID);
-        StringList object_short_names(kSpaceObjectShortNameResID);
-        Resource rsrc("objects", "bsob", kBaseObjectResID);
-        BytesSlice in(rsrc.data());
-        size_t count = rsrc.data().size() / BaseObject::byte_size;
-        plug.objects.resize(count);
-        for (size_t i = 0; i < count; ++i) {
-            read(in, plug.objects[i]);
-            plug.objects[i].name.assign(object_names.at(i));
-            plug.objects[i].short_name.assign(object_short_names.at(i));
-        }
-        if (!in.empty()) {
-            throw Exception("didn't consume all of base object data");
-        }
-    }
-
-    {
-        Resource rsrc("object-actions", "obac", kObjectActionResID);
-        BytesSlice in(rsrc.data());
-        size_t count = rsrc.data().size() / Action::byte_size;
-        plug.actions.resize(count);
-        for (size_t i = 0; i < count; ++i) {
-            read(in, plug.actions[i]);
-        }
-        if (!in.empty()) {
-            throw Exception("didn't consume all of object action data");
-        }
-    }
-
-    {
-        Resource rsrc("races", "race", kRaceResID);
-        BytesSlice in(rsrc.data());
-        size_t count = rsrc.data().size() / Race::byte_size;
-        plug.races.resize(count);
-        for (size_t i = 0; i < count; ++i) {
-            read(in, plug.races[i]);
-        }
-        if (!in.empty()) {
-            throw Exception("didn't consume all of race data");
-        }
+    StringList object_names(kSpaceObjectNameResID);
+    StringList object_short_names(kSpaceObjectShortNameResID);
+    for (size_t i = 0; i < plug.objects.size(); ++i) {
+        plug.objects[i].name.assign(object_names.at(i));
+        plug.objects[i].short_name.assign(object_short_names.at(i));
     }
 }
 
