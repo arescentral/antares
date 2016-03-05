@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2012 The Antares Authors
+// Copyright (C) 2016 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,29 +16,18 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_GAME_LEVEL_HPP_
-#define ANTARES_GAME_LEVEL_HPP_
+#ifndef ANTARES_GAME_INITIAL_HPP_
+#define ANTARES_GAME_INITIAL_HPP_
 
 #include "data/level.hpp"
-#include "data/base-object.hpp"
-#include "game/globals.hpp"
-#include "game/space-object.hpp"
-#include "lang/casts.hpp"
 
 namespace antares {
 
-extern int32_t gLevelRotation;
-
-const int16_t kLevelNoShipTextID = 10000;
-
-bool start_construct_level(const Level* level, int32_t* max);
-void construct_level(const Level* level, int32_t* current);
-void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textID);
-void GetLevelFullScaleAndCorner(
-        const Level* level, int32_t rotation, coordPointType *corner, int32_t *scale,
-        Rect *bounds);
-coordPointType Translate_Coord_To_Level_Rotation(int32_t h, int32_t v);
+void create_initial(Level::InitialObject* initial, uint32_t all_colors);
+void set_initial_destination(const Level::InitialObject* initial, bool preserve);
+void UnhideInitialObject(int32_t whichInitial);
+Handle<SpaceObject> GetObjectFromInitialNumber(int32_t initialNumber);
 
 }  // namespace antares
 
-#endif // ANTARES_GAME_LEVEL_HPP_
+#endif // ANTARES_GAME_INITIAL_HPP_

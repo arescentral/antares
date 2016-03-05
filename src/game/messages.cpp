@@ -27,6 +27,7 @@
 #include "drawing/text.hpp"
 #include "game/condition.hpp"
 #include "game/globals.hpp"
+#include "game/initial.hpp"
 #include "game/instruments.hpp"
 #include "game/labels.hpp"
 #include "game/level.hpp"

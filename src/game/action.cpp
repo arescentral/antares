@@ -30,6 +30,7 @@
 #include "game/vector.hpp"
 #include "game/condition.hpp"
 #include "game/globals.hpp"
+#include "game/initial.hpp"
 #include "game/labels.hpp"
 #include "game/messages.hpp"
 #include "game/minicomputer.hpp"

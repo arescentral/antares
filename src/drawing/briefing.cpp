@@ -24,6 +24,7 @@
 #include "drawing/sprite-handling.hpp"
 #include "game/admiral.hpp"
 #include "game/globals.hpp"
+#include "game/initial.hpp"
 #include "game/level.hpp"
 #include "game/space-object.hpp"
 #include "lang/defines.hpp"

@@ -20,6 +20,7 @@
 
 #include "game/action.hpp"
 #include "game/admiral.hpp"
+#include "game/initial.hpp"
 #include "game/level.hpp"
 #include "game/messages.hpp"
 #include "game/player-ship.hpp"

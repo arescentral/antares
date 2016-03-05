@@ -35,6 +35,7 @@
 #include "game/vector.hpp"
 #include "game/globals.hpp"
 #include "game/instruments.hpp"
+#include "game/initial.hpp"
 #include "game/labels.hpp"
 #include "game/messages.hpp"
 #include "game/minicomputer.hpp"
@@ -64,14 +65,14 @@ using std::vector;
 
 namespace antares {
 
+ANTARES_GLOBAL int32_t gLevelRotation = 0;
+
 namespace {
 
 const uint32_t kNeutralColorNeededFlag   = 0x00010000u;
 const uint32_t kAnyColorNeededFlag       = 0xffff0000u;
 const uint32_t kNeutralColorLoadedFlag   = 0x00000001u;
 const uint32_t kAnyColorLoadedFlag       = 0x0000ffffu;
-
-ANTARES_GLOBAL int32_t gLevelRotation = 0;
 
 #ifdef DATA_COVERAGE
 ANTARES_GLOBAL set<int32_t> possible_objects;
@@ -195,42 +196,7 @@ void GetInitialCoord(Level::InitialObject *initial, coordPointType *coord, int32
     *coord = rotate_coords(initial->location.h, initial->location.v, rotation);
 }
 
-void set_initial_destination(const Level::InitialObject* initial, bool preserve) {
-    if (!initial->realObject.get()                      // hasn't been created yet
-            || (initial->initialDestination < 0)        // doesn't have a target
-            || (!initial->owner.get())) {               // doesn't have an owner
-        return;
-    }
-
-    // get the correct admiral #
-    Handle<Admiral> owner = initial->owner;
-
-    auto target = g.level->initial(initial->initialDestination);
-    if (target->realObject.get()) {
-        auto saveDest = owner->target(); // save the original dest
-
-        // set the admiral's dest object to the mapped initial dest object
-        owner->set_target(target->realObject);
-
-        // now give the mapped initial object the admiral's destination
-
-        auto object = initial->realObject;
-        uint32_t specialAttributes = object->attributes; // preserve the attributes
-        object->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
-        SetObjectDestination(object, SpaceObject::none());
-        object->attributes = specialAttributes;
-
-        if (preserve) {
-            owner->set_target(saveDest);
-        }
-    }
-}
-
 }  // namespace
-
-Level::InitialObject* Level::initial(size_t at) const {
-    return &plug.initials[initialFirst + at];
-}
 
 Level::BriefPoint* Level::brief_point(size_t at) const {
     return &plug.briefings[briefPointFirst + at];
@@ -409,64 +375,6 @@ static void load_condition(int i, uint32_t all_colors) {
     condition->set_true_yet(condition->flags & kInitiallyTrue);
 }
 
-static void create_initial(int i, uint32_t all_colors) {
-    Level::InitialObject* initial = g.level->initial(i);
-
-    if (initial->attributes & kInitiallyHidden) {
-        initial->realObject = SpaceObject::none();
-        return;
-    }
-
-    coordPointType coord;
-    GetInitialCoord(initial, &coord, gLevelRotation);
-
-    Handle<Admiral> owner = Admiral::none();
-    if (initial->owner.get()) {
-        owner = initial->owner;
-    }
-
-    int32_t specialAttributes = initial->attributes & (~kInitialAttributesMask);
-    if (initial->attributes & kIsPlayerShip) {
-        specialAttributes &= ~kIsPlayerShip;
-        if ((owner == g.admiral) && !owner->flagship().get()) {
-            specialAttributes |= kIsHumanControlled | kIsPlayerShip;
-        }
-    }
-
-    auto type = initial->type;
-    // TODO(sfiera): remap object in networked games.
-    fixedPointType v = {Fixed::zero(), Fixed::zero()};
-    auto anObject = initial->realObject = CreateAnySpaceObject(
-            type, &v, &coord, gLevelRotation, owner, specialAttributes,
-            initial->spriteIDOverride);
-
-    if (anObject->attributes & kIsDestination) {
-        anObject->asDestination = MakeNewDestination(
-                anObject, initial->canBuild, initial->earning, initial->nameResID,
-                initial->nameStrNum);
-    }
-    initial->realObjectID = anObject->id;
-
-    if ((initial->attributes & kIsPlayerShip)
-            && owner.get() && !owner->flagship().get()) {
-        owner->set_flagship(anObject);
-        if (owner == g.admiral) {
-            ResetPlayerShip(anObject);
-        }
-    }
-
-    if (anObject->attributes & kIsDestination) {
-        if (owner.get()) {
-            if (initial->canBuild[0] >= 0) {
-                if (!GetAdmiralBuildAtObject(owner).get()) {
-                    owner->set_control(anObject);
-                    owner->set_target(anObject);
-                }
-            }
-        }
-    }
-}
-
 static void run_game_1s() {
     game_ticks start_time = game_ticks(-g.level->startTime);
     do {
@@ -504,10 +412,10 @@ void construct_level(const Level* level, int32_t* current) {
         for (int i = 0; i < g.level->conditionNum; i++) {
             load_condition(i, all_colors);
         }
-        create_initial(step, all_colors);
+        create_initial(g.level->initial(step), all_colors);
     } else if (step < (2 * g.level->initialNum)) {
         step -= g.level->initialNum;
-        create_initial(step, all_colors);
+        create_initial(g.level->initial(step), all_colors);
     } else if (step < (3 * g.level->initialNum)) {
         // double back and set up any defined initial destinations
         step -= (2 * g.level->initialNum);
@@ -521,92 +429,6 @@ void construct_level(const Level* level, int32_t* current) {
     }
     ++*current;
     return;
-}
-
-void UnhideInitialObject(int32_t whichInitial) {
-    auto initial = g.level->initial(whichInitial);
-    if (GetObjectFromInitialNumber(whichInitial).get()) {
-        return;  // Already visible.
-    }
-
-    coordPointType coord;
-    GetInitialCoord(initial, &coord, gLevelRotation);
-
-    Handle<Admiral> owner = Admiral::none();
-    if (initial->owner.get()) {
-        owner = initial->owner;
-    }
-
-    uint32_t specialAttributes = initial->attributes & ~kInitialAttributesMask;
-    if (initial->attributes & kIsPlayerShip) {
-        if (owner.get() && !owner->flagship().get()) {
-            if (owner == g.admiral) {
-                specialAttributes |= kIsHumanControlled;
-            } else {
-                specialAttributes &= ~kIsPlayerShip;
-            }
-        } else { // we already have a flagship; this should not override
-            specialAttributes &= ~kIsPlayerShip;
-        }
-    }
-
-
-    auto type = initial->type;
-    // TODO(sfiera): remap objects in networked games.
-    fixedPointType v = {Fixed::zero(), Fixed::zero()};
-    auto anObject = initial->realObject = CreateAnySpaceObject(
-            type, &v, &coord, 0, owner, specialAttributes, initial->spriteIDOverride);
-
-    if (anObject->attributes & kIsDestination) {
-        anObject->asDestination = MakeNewDestination(
-                anObject, initial->canBuild, initial->earning, initial->nameResID,
-                initial->nameStrNum);
-
-        if (owner.get()) {
-            if (initial->canBuild[0] >= 0) {
-                if (!owner->control().get()) {
-                    owner->set_control(anObject);
-                }
-                if (!GetAdmiralBuildAtObject(owner).get()) {
-                    SetAdmiralBuildAtObject(owner, anObject);
-                }
-                if (!owner->target().get()) {
-                    owner->set_target(anObject);
-                }
-            }
-        }
-    }
-
-    initial->realObjectID = anObject->id;
-    if ((initial->attributes & kIsPlayerShip) && owner.get() && !owner->flagship().get()) {
-        owner->set_flagship(anObject);
-        if (owner == g.admiral) {
-            ResetPlayerShip(anObject);
-        }
-    }
-
-    set_initial_destination(initial, true);
-}
-
-Handle<SpaceObject> GetObjectFromInitialNumber(int32_t initialNumber) {
-    if (initialNumber >= 0) {
-        Level::InitialObject* initial = g.level->initial(initialNumber);
-        if (initial->realObject.get()) {
-            auto object = initial->realObject;
-            if ((object->id != initial->realObjectID) || (object->active != kObjectInUse)) {
-                return SpaceObject::none();
-            }
-            return object;
-        }
-        return SpaceObject::none();
-    } else if (initialNumber == -2) {
-        auto object = g.ship;
-        if (!object->active || !(object->attributes & kCanThink)) {
-            return SpaceObject::none();
-        }
-        return object;
-    }
-    return SpaceObject::none();
 }
 
 void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textID) {
