@@ -136,6 +136,9 @@ void read_from(ReadSource in, BaseObject& object) {
     read(in, object.pixResID);
     read(in, object.tinySize);
     read(in, object.shieldColor);
+    if ((object.shieldColor != 0xFF) && (object.shieldColor != 0)) {
+        object.shieldColor = GetTranslateColorShade(object.shieldColor, 15);
+    }
     in.shift(1);
 
     read(in, object.initialDirection);
@@ -192,6 +195,11 @@ void read_from(ReadSource in, BaseObject& object) {
         read(sub, object.frame.animation);
     } else if (object.attributes & kIsBeam) {
         read(sub, object.frame.beam);
+        if (object.frame.beam.color > 16) {
+            object.frame.beam.color = GetTranslateIndex(object.frame.beam.color);
+        } else {
+            object.frame.beam.color = 0;
+        }
     } else {
         read(sub, object.frame.weapon);
     }

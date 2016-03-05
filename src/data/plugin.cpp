@@ -41,22 +41,6 @@ static const int16_t kRaceResID                  = 500;
 
 ANTARES_GLOBAL ScenarioGlobals plug;
 
-// TODO(sfiera): move this into data/space-object.cpp's read_from().
-static void CorrectAllBaseObjectColor() {
-    for (auto aBase: BaseObject::all()) {
-        if ((aBase->shieldColor != 0xFF) && (aBase->shieldColor != 0)) {
-            aBase->shieldColor = GetTranslateColorShade(aBase->shieldColor, 15);
-        }
-        if (aBase->attributes & kIsBeam) {
-            if (aBase->frame.beam.color > 16) {
-                aBase->frame.beam.color = GetTranslateIndex(aBase->frame.beam.color);
-            } else {
-                aBase->frame.beam.color = 0;
-            }
-        }
-    }
-}
-
 void PluginInit() {
     {
         Resource rsrc("scenario-info", "nlAG", 128);
@@ -113,9 +97,9 @@ void PluginInit() {
         }
     }
 
-    StringList object_names(kSpaceObjectNameResID);
-    StringList object_short_names(kSpaceObjectShortNameResID);
     {
+        StringList object_names(kSpaceObjectNameResID);
+        StringList object_short_names(kSpaceObjectShortNameResID);
         Resource rsrc("objects", "bsob", kBaseObjectResID);
         BytesSlice in(rsrc.data());
         size_t count = rsrc.data().size() / BaseObject::byte_size;
@@ -129,7 +113,6 @@ void PluginInit() {
             throw Exception("didn't consume all of base object data");
         }
     }
-    CorrectAllBaseObjectColor();
 
     {
         Resource rsrc("object-actions", "obac", kObjectActionResID);
