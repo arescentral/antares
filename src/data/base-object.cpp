@@ -90,8 +90,10 @@ void read_from(ReadSource in, BaseObject& object) {
     uint8_t section[32];
 
     read(in, object.attributes);
-    if ((object.attributes & kIsSelfAnimated) && (object.attributes & kShapeFromDirection)) {
-        object.attributes ^= kShapeFromDirection;
+    if (object.attributes & kIsSelfAnimated) {
+        object.attributes &= ~(kShapeFromDirection | kIsVector);
+    } else if (object.attributes & kShapeFromDirection) {
+        object.attributes &= ~kIsVector;
     }
 
     read(in, object.baseClass);
