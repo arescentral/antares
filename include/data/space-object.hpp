@@ -20,6 +20,7 @@
 #define ANTARES_DATA_SPACE_OBJECT_HPP_
 
 #include "data/action.hpp"
+#include "data/plugin.hpp"
 #include "drawing/color.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "game/beam.hpp"

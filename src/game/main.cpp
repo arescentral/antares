@@ -26,6 +26,7 @@
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
+#include "data/plugin.hpp"
 #include "data/replay.hpp"
 #include "data/string-list.hpp"
 #include "data/scenario-list.hpp"

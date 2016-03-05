@@ -21,6 +21,7 @@
 #include <set>
 #include <sfz/sfz.hpp>
 
+#include "data/plugin.hpp"
 #include "data/resource.hpp"
 #include "data/space-object.hpp"
 #include "data/string-list.hpp"

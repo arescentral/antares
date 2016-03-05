@@ -121,19 +121,6 @@ struct GlobalState {
 
 extern GlobalState g;
 
-struct ScenarioGlobals {
-    scenarioInfoType                      meta;
-    std::vector<Level>                    chapters;
-    std::vector<Level::InitialObject>     initials;
-    std::vector<Level::Condition>         conditions;
-    std::vector<Level::BriefPoint>        briefings;
-    std::vector<BaseObject>               objects;
-    std::vector<Action>                   actions;
-    std::vector<Race>                     races;
-};
-
-extern ScenarioGlobals plug;
-
 struct aresGlobalType {
     aresGlobalType();
     ~aresGlobalType();

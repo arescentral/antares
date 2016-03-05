@@ -23,6 +23,7 @@
 #include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
+#include "data/plugin.hpp"
 #include "data/races.hpp"
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
@@ -63,18 +64,6 @@ using std::vector;
 namespace antares {
 
 namespace {
-
-static const int16_t kLevelNameID                = 4600;
-static const int16_t kSpaceObjectNameResID       = 5000;
-static const int16_t kSpaceObjectShortNameResID  = 5001;
-
-static const int16_t kLevelResID                 = 500;
-static const int16_t kLevelInitialResID          = 500;
-static const int16_t kLevelConditionResID        = 500;
-static const int16_t kLevelBriefResID            = 500;
-static const int16_t kBaseObjectResID            = 500;
-static const int16_t kObjectActionResID          = 500;
-static const int16_t kRaceResID                  = 500;
 
 const uint32_t kNeutralColorNeededFlag   = 0x00010000u;
 const uint32_t kAnyColorNeededFlag       = 0xffff0000u;
@@ -474,123 +463,6 @@ bool Level::Condition::is_true() const {
         }
     }
     return false;
-}
-
-// TODO(sfiera): move this into data/space-object.cpp's read_from().
-void CorrectAllBaseObjectColor() {
-    for (auto aBase: BaseObject::all()) {
-        if ((aBase->shieldColor != 0xFF) && (aBase->shieldColor != 0)) {
-            aBase->shieldColor = GetTranslateColorShade(aBase->shieldColor, 15);
-        }
-        if (aBase->attributes & kIsBeam) {
-            if (aBase->frame.beam.color > 16) {
-                aBase->frame.beam.color = GetTranslateIndex(aBase->frame.beam.color);
-            } else {
-                aBase->frame.beam.color = 0;
-            }
-        }
-    }
-}
-
-void PluginInit() {
-    {
-        Resource rsrc("scenario-info", "nlAG", 128);
-        BytesSlice in(rsrc.data());
-        read(in, plug.meta);
-        if (!in.empty()) {
-            throw Exception("didn't consume all of scenario file info data");
-        }
-    }
-
-    {
-        StringList chapter_names(kLevelNameID);
-        plug.chapters.clear();
-        Resource rsrc("scenarios", "snro", kLevelResID);
-        BytesSlice in(rsrc.data());
-        while (!in.empty()) {
-            Level level;
-            read(in, level);
-            level.name.assign(chapter_names.at(level.levelNameStrNum - 1));
-            plug.chapters.push_back(level);
-        }
-    }
-
-    {
-        plug.initials.clear();
-        Resource rsrc("scenario-initial-objects", "snit", kLevelInitialResID);
-        BytesSlice in(rsrc.data());
-        while (!in.empty()) {
-            Level::InitialObject initial;
-            read(in, initial);
-            plug.initials.push_back(initial);
-        }
-    }
-
-    {
-        plug.conditions.clear();
-        Resource rsrc("scenario-conditions", "sncd", kLevelConditionResID);
-        BytesSlice in(rsrc.data());
-        while (!in.empty()) {
-            Level::Condition condition;
-            read(in, condition);
-            plug.conditions.push_back(condition);
-        }
-    }
-
-    {
-        plug.briefings.clear();
-        Resource rsrc("scenario-briefing-points", "snbf", kLevelBriefResID);
-        BytesSlice in(rsrc.data());
-        while (!in.empty()) {
-            Level::BriefPoint brief_point;
-            read(in, brief_point);
-            plug.briefings.push_back(brief_point);
-        }
-    }
-
-    StringList object_names(kSpaceObjectNameResID);
-    StringList object_short_names(kSpaceObjectShortNameResID);
-    {
-        Resource rsrc("objects", "bsob", kBaseObjectResID);
-        BytesSlice in(rsrc.data());
-        size_t count = rsrc.data().size() / BaseObject::byte_size;
-        plug.objects.resize(count);
-        for (size_t i = 0; i < count; ++i) {
-            read(in, plug.objects[i]);
-            plug.objects[i].name.assign(object_names.at(i));
-            plug.objects[i].short_name.assign(object_short_names.at(i));
-        }
-        if (!in.empty()) {
-            throw Exception("didn't consume all of base object data");
-        }
-    }
-    CorrectAllBaseObjectColor();
-
-    {
-        Resource rsrc("object-actions", "obac", kObjectActionResID);
-        BytesSlice in(rsrc.data());
-        size_t count = rsrc.data().size() / Action::byte_size;
-        plug.actions.resize(count);
-        for (size_t i = 0; i < count; ++i) {
-            read(in, plug.actions[i]);
-        }
-        if (!in.empty()) {
-            throw Exception("didn't consume all of object action data");
-        }
-    }
-
-    {
-        Resource rsrc("races", "race", kRaceResID);
-        BytesSlice in(rsrc.data());
-        size_t count = rsrc.data().size() / Race::byte_size;
-        plug.races.resize(count);
-        for (size_t i = 0; i < count; ++i) {
-            read(in, plug.races[i]);
-        }
-        if (!in.empty()) {
-            throw Exception("didn't consume all of race data");
-        }
-    }
 }
 
 bool start_construct_level(const Level* level, int32_t* max) {

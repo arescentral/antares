@@ -19,6 +19,7 @@
 #include "game/non-player-ship.hpp"
 
 #include "config/keys.hpp"
+#include "data/plugin.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "game/action.hpp"

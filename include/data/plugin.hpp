@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2012 The Antares Authors
+// Copyright (C) 2016 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,38 +16,31 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "data/races.hpp"
+#ifndef ANTARES_DATA_PLUGIN_HPP_
+#define ANTARES_DATA_PLUGIN_HPP_
 
-#include <sfz/sfz.hpp>
+#include <memory>
+#include <vector>
 
-#include "data/plugin.hpp"
-#include "data/resource.hpp"
 #include "data/level.hpp"
-#include "game/globals.hpp"
-#include "lang/defines.hpp"
-
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::ReadSource;
-using sfz::read;
-using std::unique_ptr;
 
 namespace antares {
 
-int16_t GetRaceIDFromNum(size_t raceNum) {
-    if (raceNum < plug.races.size()) {
-        return plug.races[raceNum].id;
-    } else {
-        return -1;
-    }
-}
+struct ScenarioGlobals {
+    scenarioInfoType                   meta;
+    std::vector<Level>                 chapters;
+    std::vector<Level::InitialObject>  initials;
+    std::vector<Level::Condition>      conditions;
+    std::vector<Level::BriefPoint>     briefings;
+    std::vector<BaseObject>            objects;
+    std::vector<Action>                actions;
+    std::vector<Race>                  races;
+};
 
-void read_from(ReadSource in, Race& race) {
-    read(in, race.id);
-    read(in, race.apparentColor);
-    in.shift(1);
-    read(in, race.illegalColors);
-    read(in, race.advantage);
-}
+extern ScenarioGlobals plug;
+
+void PluginInit();
 
 }  // namespace antares
+
+#endif // ANTARES_DATA_PLUGIN_HPP_
