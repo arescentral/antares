@@ -47,7 +47,6 @@ Handle<SpaceObject> GetObjectFromInitialNumber(int32_t initialNumber);
 void GetLevelFullScaleAndCorner(
         const Level* level, int32_t rotation, coordPointType *corner, int32_t *scale,
         Rect *bounds);
-const Level* GetLevelPtrFromChapter(int32_t chapter);
 coordPointType Translate_Coord_To_Level_Rotation(int32_t h, int32_t v);
 
 }  // namespace antares

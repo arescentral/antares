@@ -919,10 +919,6 @@ void GetLevelFullScaleAndCorner(
 
 }
 
-const Level* GetLevelPtrFromChapter(int32_t chapter) {
-    return &plug.levels[chapter - 1];
-}
-
 coordPointType Translate_Coord_To_Level_Rotation(int32_t h, int32_t v) {
     return rotate_coords(h, v, gLevelRotation);
 }

@@ -37,7 +37,7 @@ ReplayGame::ReplayGame(int16_t replay_id):
         _resource("replays", "NLRP", replay_id),
         _data(_resource.data()),
         _random_seed{_data.global_seed},
-        _level(GetLevelPtrFromChapter(_data.chapter_id)),
+        _level(&plug.levels[_data.chapter_id - 1]),
         _game_result(NO_GAME) { }
 
 ReplayGame::~ReplayGame() { }

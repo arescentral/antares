@@ -88,8 +88,7 @@ class ReplayMaster : public Card {
             g.random.seed = _random_seed;
             globals()->gInputSource.reset(new ReplayInputSource(&_replay_data));
             stack()->push(new MainPlay(
-                        GetLevelPtrFromChapter(_replay_data.chapter_id), true, false,
-                        &_game_result));
+                        &plug.levels[_replay_data.chapter_id - 1], true, false, &_game_result));
             break;
 
           case REPLAY:

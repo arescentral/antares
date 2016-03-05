@@ -140,7 +140,7 @@ void SoloGame::epilogue_done() {
     if (g.next_level < 0) {
         _level = NULL;
     } else {
-        _level = GetLevelPtrFromChapter(g.next_level);
+        _level = &plug.levels[g.next_level - 1];
     }
 
     if (_level != NULL) {
