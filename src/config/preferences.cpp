@@ -24,6 +24,7 @@
 #include "config/keys.hpp"
 #include "data/resource.hpp"
 #include "game/globals.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 
 using sfz::BytesSlice;
@@ -42,8 +43,6 @@ template <typename T>
 static T clamp(T value, T lower, T upper) {
     return min(upper, max(lower, value));
 }
-
-static ANTARES_GLOBAL PrefsDriver* prefs_driver = NULL;
 
 Preferences::Preferences() {
     keys[kUpKeyNum]              = 1 + Keys::N8;
@@ -118,18 +117,18 @@ Preferences Preferences::copy() const {
 }
 
 PrefsDriver::PrefsDriver() {
-    if (antares::prefs_driver) {
+    if (sys.prefs) {
         throw Exception("PrefsDriver is a singleton");
     }
-    antares::prefs_driver = this;
+    sys.prefs = this;
 }
 
 PrefsDriver::~PrefsDriver() {
-    antares::prefs_driver = NULL;
+    sys.prefs = NULL;
 }
 
 PrefsDriver* PrefsDriver::driver() {
-    return prefs_driver;
+    return sys.prefs;
 }
 
 void PrefsDriver::set_key(size_t index, uint32_t key) {

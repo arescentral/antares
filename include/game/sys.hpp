@@ -26,6 +26,7 @@ namespace antares {
 
 class SoundDriver;
 class Font;
+class PrefsDriver;
 class VideoDriver;
 
 struct SystemGlobals {
@@ -45,8 +46,9 @@ struct SystemGlobals {
     enum { ROT_TABLE_SIZE = 720 };
     int32_t rot_table[ROT_TABLE_SIZE];
 
-    SoundDriver* audio;
-    VideoDriver* video;
+    SoundDriver* audio = nullptr;
+    VideoDriver* video = nullptr;
+    PrefsDriver* prefs = nullptr;
 };
 
 extern SystemGlobals sys;
