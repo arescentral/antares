@@ -25,39 +25,16 @@
 
 namespace antares {
 
-class Preferences {
-  public:
+struct Preferences {
     Preferences();
-    Preferences(const Preferences& other);
-    Preferences(Preferences&& other) = default;
-    Preferences& operator=(const Preferences& other);
-    Preferences& operator=(Preferences&& other) = default;
-    ~Preferences();
+    Preferences copy() const;
 
-    void reset();
-    void copy(const Preferences& preferences);
-
-    uint32_t key(size_t index) const;
-    bool play_idle_music() const;
-    bool play_music_in_game() const;
-    bool speech_on() const;
-    int volume() const;
-    sfz::StringSlice scenario_identifier() const;
-
-    void set_key(size_t index, uint32_t key);
-    void set_play_idle_music(bool on);
-    void set_play_music_in_game(bool on);
-    void set_speech_on(bool on);
-    void set_volume(int volume);
-    void set_scenario_identifier(sfz::StringSlice id);
-
-  private:
-    int16_t             _key_map[44];
-    bool                _play_idle_music;
-    bool                _play_music_in_game;
-    bool                _speech_on;
-    int16_t             _volume;
-    sfz::String         _scenario_identifier;
+    int16_t      keys[44];
+    bool         play_idle_music;
+    bool         play_music_in_game;
+    bool         speech_on;
+    int16_t      volume;
+    sfz::String  scenario_identifier;
 };
 
 class PrefsDriver {
@@ -68,12 +45,12 @@ class PrefsDriver {
     virtual Preferences get() const = 0;
     virtual void set(const Preferences& prefs) = 0;
 
-    uint32_t key(size_t index) const { return get().key(index); }
-    bool play_idle_music() const { return get().play_idle_music(); }
-    bool play_music_in_game() const { return get().play_music_in_game(); }
-    bool speech_on() const { return get().speech_on(); }
-    int volume() const { return get().volume(); }
-    sfz::String scenario_identifier() const { return sfz::String(get().scenario_identifier()); }
+    uint32_t key(size_t index) const { return get().keys[index]; }
+    bool play_idle_music() const { return get().play_idle_music; }
+    bool play_music_in_game() const { return get().play_music_in_game; }
+    bool speech_on() const { return get().speech_on; }
+    int volume() const { return get().volume; }
+    sfz::String scenario_identifier() const { return sfz::String(get().scenario_identifier); }
 
     void set_key(size_t index, uint32_t key);
     void set_play_idle_music(bool on);

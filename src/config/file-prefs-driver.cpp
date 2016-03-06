@@ -109,15 +109,27 @@ bool get(Json json, int& v) {
     return false;
 }
 
-template <typename ValueType, typename ValueKey, typename PrefsMethod, typename... Args>
+template <typename ValueType, typename ValueKey, typename PrefsMethod>
 static void set_from(
     const Json& json, const char* section_key, ValueKey value_key,
-    Preferences& prefs, PrefsMethod pmeth, Args&& ...args) {
+    Preferences& prefs, PrefsMethod pmeth) {
     auto section = json.get(section_key);
     auto value = section.get(value_key);
     ValueType typed;
     if (get(value, typed)) {
-        (prefs.*pmeth)(args..., typed);
+        (prefs.*pmeth) = typed;
+    }
+}
+
+template <typename ValueType, typename ValueKey, typename PrefsMethod>
+static void set_from(
+    const Json& json, const char* section_key, ValueKey value_key,
+    Preferences& prefs, PrefsMethod pmeth, int index) {
+    auto section = json.get(section_key);
+    auto value = section.get(value_key);
+    ValueType typed;
+    if (get(value, typed)) {
+        (prefs.*pmeth)[index] = typed;
     }
 }
 
@@ -132,13 +144,13 @@ Preferences FilePrefsDriver::get() const {
             return p;
         }
 
-        set_from<int>(json, "sound", "volume", p, &Preferences::set_volume);
-        set_from<bool>(json, "sound", "speech", p, &Preferences::set_speech_on);
-        set_from<bool>(json, "sound", "idle music", p, &Preferences::set_play_idle_music);
-        set_from<bool>(json, "sound", "game music", p, &Preferences::set_play_music_in_game);
+        set_from<int>(json, "sound", "volume", p, &Preferences::volume);
+        set_from<bool>(json, "sound", "speech", p, &Preferences::speech_on);
+        set_from<bool>(json, "sound", "idle music", p, &Preferences::play_idle_music);
+        set_from<bool>(json, "sound", "game music", p, &Preferences::play_music_in_game);
 
         for (auto i: range<size_t>(KEY_COUNT)) {
-            set_from<int>(json, "keys", kKeyNames[i], p, &Preferences::set_key, i);
+            set_from<int>(json, "keys", kKeyNames[i], p, &Preferences::keys, i);
         }
     } catch (Exception& e) {
         // pass
@@ -148,14 +160,14 @@ Preferences FilePrefsDriver::get() const {
 
 void FilePrefsDriver::set(const Preferences& p) {
     StringMap<Json> sound;
-    sound["volume"]      = Json::number(p.volume());
-    sound["speech"]      = Json::boolean(p.speech_on());
-    sound["idle music"]  = Json::boolean(p.play_idle_music());
-    sound["game music"]  = Json::boolean(p.play_music_in_game());
+    sound["volume"]      = Json::number(p.volume);
+    sound["speech"]      = Json::boolean(p.speech_on);
+    sound["idle music"]  = Json::boolean(p.play_idle_music);
+    sound["game music"]  = Json::boolean(p.play_music_in_game);
 
     StringMap<Json> keys;
     for (auto i: range<size_t>(KEY_COUNT)) {
-        keys[kKeyNames[i]] = Json::number(p.key(i));
+        keys[kKeyNames[i]] = Json::number(p.keys[i]);
     }
 
     StringMap<Json> all;

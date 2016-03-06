@@ -203,7 +203,7 @@ void main(int argc, char** argv) {
     }
 
     Preferences preferences;
-    preferences.set_play_music_in_game(true);
+    preferences.play_music_in_game = true;
     NullPrefsDriver prefs(preferences);
 
     EventScheduler scheduler;
