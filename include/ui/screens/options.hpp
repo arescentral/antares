@@ -43,12 +43,12 @@ class OptionsScreen : public Card {
 
   private:
     State _state;
-    Preferences* _preferences;
+    Preferences _revert;
 };
 
 class SoundControlScreen : public InterfaceScreen {
   public:
-    SoundControlScreen(OptionsScreen::State* state, Preferences* preferences);
+    SoundControlScreen(OptionsScreen::State* state);
     ~SoundControlScreen();
 
     virtual void overlay() const;
@@ -80,14 +80,13 @@ class SoundControlScreen : public InterfaceScreen {
     OptionsScreen::State button_state(int button);
 
     OptionsScreen::State* const _state;
-    Preferences* const _preferences;
 
     DISALLOW_COPY_AND_ASSIGN(SoundControlScreen);
 };
 
 class KeyControlScreen : public InterfaceScreen {
   public:
-    KeyControlScreen(OptionsScreen::State* state, Preferences* preferences);
+    KeyControlScreen(OptionsScreen::State* state);
     ~KeyControlScreen();
 
     virtual void key_down(const KeyDownEvent& event);
@@ -133,7 +132,6 @@ class KeyControlScreen : public InterfaceScreen {
     void flash_on(size_t key);
 
     OptionsScreen::State* const _state;
-    Preferences* const _preferences;
 
     Tab _tab;
     const size_t _key_start;

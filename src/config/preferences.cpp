@@ -30,6 +30,7 @@ using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::ReadSource;
 using sfz::StringSlice;
+using sfz::range;
 using sfz::read;
 using std::max;
 using std::min;
@@ -202,6 +203,48 @@ PrefsDriver::~PrefsDriver() {
 
 PrefsDriver* PrefsDriver::driver() {
     return prefs_driver;
+}
+
+void PrefsDriver::set_key(size_t index, uint32_t key) {
+    Preferences::preferences()->set_key(index, key);
+    save(*Preferences::preferences());
+}
+
+void PrefsDriver::set_play_idle_music(bool on) {
+    Preferences::preferences()->set_play_idle_music(on);
+    save(*Preferences::preferences());
+}
+
+void PrefsDriver::set_play_music_in_game(bool on) {
+    Preferences::preferences()->set_play_music_in_game(on);
+    save(*Preferences::preferences());
+}
+
+void PrefsDriver::set_speech_on(bool on) {
+    Preferences::preferences()->set_speech_on(on);
+    save(*Preferences::preferences());
+}
+
+void PrefsDriver::set_volume(int volume) {
+    Preferences::preferences()->set_volume(volume);
+    save(*Preferences::preferences());
+}
+
+void PrefsDriver::set_scenario_identifier(sfz::StringSlice id) {
+    Preferences::preferences()->set_scenario_identifier(id);
+    save(*Preferences::preferences());
+}
+
+void PrefsDriver::set(const Preferences& prefs) {
+    for (size_t i: range<size_t>(0, kKeyExtendedControlNum)) {
+        Preferences::preferences()->set_key(i, prefs.key(i));
+    }
+    Preferences::preferences()->set_play_idle_music(prefs.play_idle_music());
+    Preferences::preferences()->set_play_music_in_game(prefs.play_music_in_game());
+    Preferences::preferences()->set_speech_on(prefs.speech_on());
+    Preferences::preferences()->set_volume(prefs.volume());
+    Preferences::preferences()->set_scenario_identifier(prefs.scenario_identifier());
+    save(*Preferences::preferences());
 }
 
 NullPrefsDriver::NullPrefsDriver() { }

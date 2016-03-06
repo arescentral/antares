@@ -27,8 +27,6 @@ namespace antares {
 
 class Preferences {
   public:
-    static Preferences* preferences();
-
     Preferences();
     Preferences(const Preferences& other);
     Preferences(Preferences&& other) = default;
@@ -54,6 +52,10 @@ class Preferences {
     void set_scenario_identifier(sfz::StringSlice id);
 
   private:
+    friend class PrefsDriver;
+
+    static Preferences* preferences();
+
     static std::unique_ptr<Preferences> _preferences;
 
     int16_t             _key_map[44];
@@ -78,13 +80,15 @@ class PrefsDriver {
     bool speech_on() const { return Preferences::preferences()->speech_on(); }
     int volume() const { return Preferences::preferences()->volume(); }
     sfz::StringSlice scenario_identifier() const { return Preferences::preferences()->scenario_identifier(); }
+    const Preferences& get() const { return *Preferences::preferences(); }
 
-    void set_key(size_t index, uint32_t key) { Preferences::preferences()->set_key(index, key); }
-    void set_play_idle_music(bool on) { Preferences::preferences()->set_play_idle_music(on); }
-    void set_play_music_in_game(bool on) { Preferences::preferences()->set_play_music_in_game(on); }
-    void set_speech_on(bool on) { Preferences::preferences()->set_speech_on(on); }
-    void set_volume(int volume) { Preferences::preferences()->set_volume(volume); }
-    void set_scenario_identifier(sfz::StringSlice id) { Preferences::preferences()->set_scenario_identifier(id); }
+    void set_key(size_t index, uint32_t key);
+    void set_play_idle_music(bool on);
+    void set_play_music_in_game(bool on);
+    void set_speech_on(bool on);
+    void set_volume(int volume);
+    void set_scenario_identifier(sfz::StringSlice id);
+    void set(const Preferences& prefs);
 
     static PrefsDriver* driver();
 };
