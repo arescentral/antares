@@ -32,19 +32,6 @@ const int16_t kSpriteTableColorShift = 11;
 const int16_t kSpriteTableColorIDMask = 0x7800;  // bits 11-14
 // this makes the max legal sprite id 2047
 
-const int32_t SCALE_SCALE   = 4096;
-const int32_t MIN_SCALE     = 256;
-const int32_t MAX_SCALE     = 32768;
-const int32_t MAX_SCALE_PIX = 32;  // the maximum size a single scaled pixel can be
-                                   // (should be 32)
-
-const int32_t kOneEighthScale   = SCALE_SCALE / 8;
-const int32_t kOneQuarterScale  = SCALE_SCALE / 4;
-const int32_t kOneHalfScale     = SCALE_SCALE / 2;
-const int32_t kTimesTwoScale    = SCALE_SCALE * 2;
-
-const int32_t SHIFT_SCALE       = 12;
-
 enum {
     kNoSpriteLayer      = 0,
     kFirstSpriteLayer   = 1,

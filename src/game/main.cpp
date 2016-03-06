@@ -26,6 +26,7 @@
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
+#include "data/plugin.hpp"
 #include "data/replay.hpp"
 #include "data/string-list.hpp"
 #include "data/scenario-list.hpp"
@@ -35,7 +36,8 @@
 #include "drawing/text.hpp"
 #include "game/action.hpp"
 #include "game/admiral.hpp"
-#include "game/beam.hpp"
+#include "game/vector.hpp"
+#include "game/condition.hpp"
 #include "game/cursor.hpp"
 #include "game/globals.hpp"
 #include "game/input-source.hpp"
@@ -46,7 +48,7 @@
 #include "game/motion.hpp"
 #include "game/non-player-ship.hpp"
 #include "game/player-ship.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "game/starfield.hpp"
 #include "game/time.hpp"
 #include "lang/defines.hpp"
@@ -153,10 +155,10 @@ class GamePlay : public Card {
 };
 
 MainPlay::MainPlay(
-        const Scenario* scenario, bool replay, bool show_loading_screen,
+        const Level* level, bool replay, bool show_loading_screen,
         GameResult* game_result):
     _state(NEW),
-    _scenario(scenario),
+    _level(level),
     _replay(replay),
     _show_loading_screen(show_loading_screen),
     _cancelled(false),
@@ -173,7 +175,7 @@ void MainPlay::become_front() {
             _replay_builder.init(
                     Preferences::preferences()->scenario_identifier(),
                     String(u32_to_version(plug.meta.version)),
-                    _scenario->chapter_number(),
+                    _level->chapter_number(),
                     g.random.seed);
 
             if (Preferences::preferences()->play_idle_music()) {
@@ -183,18 +185,18 @@ void MainPlay::become_front() {
             }
 
             if (_show_loading_screen) {
-                stack()->push(new LoadingScreen(_scenario, &_cancelled));
+                stack()->push(new LoadingScreen(_level, &_cancelled));
                 break;
             } else {
                 int32_t max;
                 int32_t current = 0;
-                if (!start_construct_scenario(_scenario, &max)) {
+                if (!start_construct_level(_level, &max)) {
                     *_game_result = QUIT_GAME;
                     stack()->pop(this);
                     return;
                 }
                 while (current < max) {
-                    construct_scenario(_scenario, &current);
+                    construct_level(_level, &current);
                 }
             }
         }
@@ -209,7 +211,7 @@ void MainPlay::become_front() {
             }
             if (!_replay) {
                 _state = BRIEFING;
-                stack()->push(new BriefingScreen(_scenario, &_cancelled));
+                stack()->push(new BriefingScreen(_level, &_cancelled));
                 break;
             }
         }
@@ -402,7 +404,7 @@ void GamePlay::become_front() {
         }
         HintLine::reset();
 
-        CheckScenarioConditions();
+        CheckLevelConditions();
         break;
 
       case PAUSED:
@@ -464,7 +466,7 @@ void GamePlay::resign_front() {
 void GamePlay::draw() const {
     globals()->starfield.draw();
     draw_sector_lines();
-    Beams::draw();
+    Vectors::draw();
     draw_sprites();
     Label::draw();
 
@@ -546,7 +548,7 @@ void GamePlay::fire_timer() {
 
             CollideSpaceObjects();
             if ((g.time.time_since_epoch() % kConditionTick) == ticks(0)) {
-                CheckScenarioConditions();
+                CheckLevelConditions();
             }
         }
 
@@ -556,14 +558,14 @@ void GamePlay::fire_timer() {
         Messages::draw_long_message(unitsToDo);
 
         update_sector_lines();
-        Beams::update();
+        Vectors::update();
         Label::update_positions(unitsToDo);
         Label::update_contents(unitsToDo);
         update_site(_replay);
 
         CullSprites();
         Label::show_all();
-        Beams::show_all();
+        Vectors::show_all();
         globals()->starfield.show();
 
         Messages::draw_message_screen(unitsToDo);

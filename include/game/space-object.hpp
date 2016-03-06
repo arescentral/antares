@@ -19,13 +19,11 @@
 #ifndef ANTARES_GAME_SPACE_OBJECT_HPP_
 #define ANTARES_GAME_SPACE_OBJECT_HPP_
 
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
+#include "game/globals.hpp"
 #include "math/units.hpp"
 
 namespace antares {
-
-const int16_t kBaseObjectResID      = 500;
-const int16_t kObjectActionResID    = 500;
 
 enum dutyType {
     eNoDuty =           0,
@@ -128,7 +126,7 @@ class SpaceObject {
             int32_t             frameDirection;
             Fixed               frameSpeed;
         } animation;
-        Handle<Beam>            beam;
+        Handle<Vector>      vector;
     } frame;
 
     int32_t                 _health = 0;
@@ -218,7 +216,6 @@ class SpaceObject {
 void SpaceObjectHandlingInit( void);
 void ResetAllSpaceObjects( void);
 void RemoveAllSpaceObjects( void);
-void CorrectAllBaseObjectColor( void);
 
 Handle<SpaceObject> CreateAnySpaceObject(
         Handle<BaseObject> whichBase, fixedPointType *velocity, coordPointType *location,

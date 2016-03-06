@@ -21,21 +21,24 @@
 #include <set>
 #include <sfz/sfz.hpp>
 
+#include "data/base-object.hpp"
+#include "data/plugin.hpp"
 #include "data/resource.hpp"
-#include "data/space-object.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "game/admiral.hpp"
-#include "game/beam.hpp"
+#include "game/vector.hpp"
+#include "game/condition.hpp"
 #include "game/globals.hpp"
+#include "game/initial.hpp"
 #include "game/labels.hpp"
 #include "game/messages.hpp"
 #include "game/minicomputer.hpp"
 #include "game/motion.hpp"
 #include "game/non-player-ship.hpp"
 #include "game/player-ship.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
 #include "lang/defines.hpp"
@@ -165,10 +168,10 @@ static void create_object(
 
         //  ugly though it is, we have to fill in the rest of
         //  a new beam's fields after it's created.
-        if (product->attributes & kIsBeam) {
-            if (product->frame.beam->beamKind != eKineticBeamKind) {
+        if (product->attributes & kIsVector) {
+            if (product->frame.vector->vectorKind != Vector::BOLT) {
                 // special beams need special post-creation acts
-                Beams::set_attributes(product, focus);
+                Vectors::set_attributes(product, focus);
             }
         }
     }
@@ -521,7 +524,7 @@ static void alter_absolute_location(Handle<Action> action, Handle<SpaceObject> f
         focus->location.h += alter.at.h;
         focus->location.v += alter.at.v;
     } else {
-        focus->location = Translate_Coord_To_Scenario_Rotation(alter.at.h, alter.at.v);
+        focus->location = Translate_Coord_To_Level_Rotation(alter.at.h, alter.at.v);
     }
 }
 
@@ -663,7 +666,7 @@ static void computer_select(Handle<Action> action, Handle<SpaceObject> focus) {
 
 static void assume_initial_object(Handle<Action> action, Handle<SpaceObject> focus) {
     Handle<Admiral> player1(0);
-    Scenario::InitialObject* initialObject = g.level->initial(
+    Level::InitialObject* initialObject = g.level->initial(
             action->argument.assumeInitial.whichInitialObject + GetAdmiralScore(player1, 0));
     if (initialObject) {
         initialObject->realObjectID = focus->id;
@@ -784,7 +787,7 @@ static void execute_actions(
     }
 
     if (checkConditions) {
-        CheckScenarioConditions();
+        CheckLevelConditions();
     }
 }
 

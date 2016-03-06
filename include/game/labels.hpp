@@ -21,7 +21,7 @@
 
 #include <sfz/sfz.hpp>
 
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
 
 namespace antares {
 

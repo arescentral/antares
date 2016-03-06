@@ -22,11 +22,14 @@
 
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
+#include "data/plugin.hpp"
 #include "data/replay.hpp"
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/text.hpp"
 #include "game/admiral.hpp"
+#include "game/vector.hpp"
 #include "game/cheat.hpp"
 #include "game/cursor.hpp"
 #include "game/globals.hpp"
@@ -36,7 +39,8 @@
 #include "game/main.hpp"
 #include "game/messages.hpp"
 #include "game/motion.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
+#include "game/space-object.hpp"
 #include "math/random.hpp"
 #include "math/rotation.hpp"
 #include "sound/driver.hpp"
@@ -87,8 +91,7 @@ class ReplayMaster : public Card {
             g.random.seed = _random_seed;
             globals()->gInputSource.reset(new ReplayInputSource(&_replay_data));
             stack()->push(new MainPlay(
-                        GetScenarioPtrFromChapter(_replay_data.chapter_id), true, false,
-                        &_game_result));
+                        &plug.levels[_replay_data.chapter_id - 1], true, false, &_game_result));
             break;
 
           case REPLAY:
@@ -145,13 +148,13 @@ void ReplayMaster::init() {
     InstrumentInit();
     SpriteHandlingInit();
     AresCheatInit();
-    ScenarioMakerInit();
-    SpaceObjectHandlingInit();  // MUST be after ScenarioMakerInit()
+    PluginInit();
+    SpaceObjectHandlingInit();  // MUST be after PluginInit()
     InitSoundFX();
     MusicInit();
     InitMotion();
     Admiral::init();
-    Beams::init();
+    Vectors::init();
 }
 
 void usage(StringSlice program_name) {

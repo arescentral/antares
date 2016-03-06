@@ -18,14 +18,16 @@
 
 #include "drawing/briefing.hpp"
 
-#include "data/scenario.hpp"
+#include "data/level.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "game/admiral.hpp"
 #include "game/globals.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/initial.hpp"
+#include "game/level.hpp"
 #include "game/space-object.hpp"
+#include "lang/casts.hpp"
 #include "lang/defines.hpp"
 #include "video/driver.hpp"
 
@@ -43,7 +45,7 @@ Point BriefingSprite_GetBestLocation(
         int32_t gridHeight, Rect *bounds);
 
 void GetInitialObjectSpriteData(
-        const Scenario* scenario, int32_t whichObject, int32_t maxSize, Rect *bounds,
+        const Level* level, int32_t whichObject, int32_t maxSize, Rect *bounds,
         coordPointType *corner, int32_t scale, int32_t *thisScale, Point *where, Rect *spriteRect);
 
 void GetRealObjectSpriteData(
@@ -196,7 +198,7 @@ void Briefing_Grid_Set(bool *grid, int32_t x, int32_t y, int32_t gridWidth, int3
 }
 
 void GetInitialObjectSpriteData(
-        const Scenario* scenario, int32_t whichObject, int32_t maxSize, Rect *bounds,
+        const Level* level, int32_t whichObject, int32_t maxSize, Rect *bounds,
         coordPointType *corner, int32_t scale, int32_t *thisScale, Point *where, Rect *spriteRect) {
     spriteRect->right = spriteRect->left = -1;
 
@@ -434,13 +436,13 @@ void draw_briefing_objects(
 }
 
 void BriefPoint_Data_Get(
-        int32_t whichPoint, const Scenario* scenario, int32_t *headerID, int32_t *headerNumber,
+        int32_t whichPoint, const Level* level, int32_t *headerID, int32_t *headerNumber,
         int32_t *contentID, Rect *hiliteBounds, coordPointType *corner, int32_t scale,
         int32_t minSectorSize, int32_t maxSize, Rect *bounds) {
     Point           where;
     Rect        spriteRect;
     int32_t            thisScale;
-    Scenario::BriefPoint* brief = scenario->brief_point(whichPoint);
+    Level::BriefPoint* brief = level->brief_point(whichPoint);
 
 #pragma unused( minSectorSize)
     hiliteBounds->right = hiliteBounds->left = 0;
@@ -448,7 +450,7 @@ void BriefPoint_Data_Get(
         hiliteBounds->left = hiliteBounds->right = -1;
     } else if (brief->briefPointKind == kBriefObjectKind) {
         GetInitialObjectSpriteData(
-                scenario, brief->briefPointData.objectBriefType.objectNum, maxSize, bounds,
+                level, brief->briefPointData.objectBriefType.objectNum, maxSize, bounds,
                 corner, scale, &thisScale, &where, &spriteRect);
         hiliteBounds->left = spriteRect.left - 2;
         hiliteBounds->right = spriteRect.right + 2;

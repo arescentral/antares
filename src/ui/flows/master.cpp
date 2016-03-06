@@ -18,8 +18,10 @@
 
 #include "ui/flows/master.hpp"
 
+#include "data/plugin.hpp"
 #include "drawing/text.hpp"
 #include "game/admiral.hpp"
+#include "game/vector.hpp"
 #include "game/cheat.hpp"
 #include "game/cursor.hpp"
 #include "game/globals.hpp"
@@ -27,7 +29,7 @@
 #include "game/labels.hpp"
 #include "game/messages.hpp"
 #include "game/motion.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "game/space-object.hpp"
 #include "math/rotation.hpp"
 #include "sound/driver.hpp"
@@ -131,13 +133,13 @@ void Master::init() {
     InstrumentInit();
     SpriteHandlingInit();
     AresCheatInit();
-    ScenarioMakerInit();
+    PluginInit();
     SpaceObjectHandlingInit();  // MUST be after ScenarioMakerInit()
     InitSoundFX();
     MusicInit();
     InitMotion();
     Admiral::init();
-    Beams::init();
+    Vectors::init();
 
     if (Preferences::preferences()->play_idle_music()) {
         LoadSong( kTitleSongID);

@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2012 The Antares Authors
+// Copyright (C) 2016 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,30 +16,18 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_DRAWING_BRIEFING_HPP_
-#define ANTARES_DRAWING_BRIEFING_HPP_
+#ifndef ANTARES_GAME_INITIAL_HPP_
+#define ANTARES_GAME_INITIAL_HPP_
 
-#include "data/handle.hpp"
-#include "math/geometry.hpp"
+#include "data/level.hpp"
 
 namespace antares {
 
-struct Level;
-class PixMap;
-
-struct BriefingSpriteBounds {
-    Rect                bounds;
-    Handle<SpaceObject> object;
-};
-
-void draw_briefing_objects(
-        Point origin, int32_t maxSize, Rect bounds, coordPointType corner, int32_t scale);
-
-void BriefPoint_Data_Get(
-        int32_t whichPoint, const Level* level, int32_t *headerID, int32_t *headerNumber,
-        int32_t *contentID, Rect *hiliteBounds, coordPointType *corner, int32_t scale,
-        int32_t minSectorSize, int32_t maxSize, Rect *bounds);
+void create_initial(Level::InitialObject* initial, uint32_t all_colors);
+void set_initial_destination(const Level::InitialObject* initial, bool preserve);
+void UnhideInitialObject(int32_t whichInitial);
+Handle<SpaceObject> GetObjectFromInitialNumber(int32_t initialNumber);
 
 }  // namespace antares
 
-#endif // ANTARES_DRAWING_BRIEFING_HPP_
+#endif // ANTARES_GAME_INITIAL_HPP_

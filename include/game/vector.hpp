@@ -16,11 +16,12 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_GAME_BEAM_HPP_
-#define ANTARES_GAME_BEAM_HPP_
+#ifndef ANTARES_GAME_VECTOR_HPP_
+#define ANTARES_GAME_VECTOR_HPP_
 
 #include <stdint.h>
 
+#include "data/base-object.hpp"
 #include "data/handle.hpp"
 #include "math/geometry.hpp"
 
@@ -28,25 +29,24 @@ namespace antares {
 
 struct SpaceObject;
 
-typedef uint8_t beamKindType;
-enum beamKindEnum {
-    eKineticBeamKind =                  0,  // has velocity, moves
-    eStaticObjectToObjectKind =         1,  // static line connects 2 objects
-    eStaticObjectToRelativeCoordKind =  2,  // static line goes from object to coord
-    eBoltObjectToObjectKind =           3,  // lightning bolt, connects 2 objects
-    eBoltObjectToRelativeCoordKind =    4   // lightning bolt, from object to coord
-};
-
 static const int kBoltPointNum = 10;
 
-struct Beam {
-    static Beam* get(int number);
-    static Handle<Beam> none() { return Handle<Beam>(-1); }
-    static HandleList<Beam> all() { return HandleList<Beam>(0, size); }
+struct Vector {
+    enum Kind {
+        BOLT                      = 0,  // has velocity, moves
+        BEAM_TO_OBJECT            = 1,  // static line connects 2 objects
+        BEAM_TO_COORD             = 2,  // static line goes from object to coord
+        BEAM_TO_OBJECT_LIGHTNING  = 3,  // lightning bolt, connects 2 objects
+        BEAM_TO_COORD_LIGHTNING   = 4,  // lightning bolt, from object to coord
+    };
 
-    Beam();
+    static Vector* get(int number);
+    static Handle<Vector> none() { return Handle<Vector>(-1); }
+    static HandleList<Vector> all() { return HandleList<Vector>(0, size); }
 
-    beamKindType        beamKind;
+    Vector();
+
+    uint8_t             vectorKind;
     Rect                thisLocation;
     coordPointType      lastGlobalLocation;
     coordPointType      objectLocation;
@@ -66,18 +66,18 @@ struct Beam {
     Point               lastBoltPoint[kBoltPointNum];
 
   private:
-    friend class Beams;
+    friend class Vectors;
     const static size_t size = 256;
 };
 
-class Beams {
+class Vectors {
   public:
     static void init();
     static void reset();
-    static Handle<Beam> add(
-            coordPointType* location, uint8_t color, beamKindType kind, int32_t accuracy,
-            int32_t beam_range);
-    static void set_attributes(Handle<SpaceObject> beamObject, Handle<SpaceObject> sourceObject);
+    static Handle<Vector> add(
+            coordPointType* location, uint8_t color, uint8_t kind, int32_t accuracy,
+            int32_t vector_range);
+    static void set_attributes(Handle<SpaceObject> vectorObject, Handle<SpaceObject> sourceObject);
     static void update();
     static void draw();
     static void show_all();
@@ -86,4 +86,4 @@ class Beams {
 
 }  // namespace antares
 
-#endif // ANTARES_GAME_BEAM_HPP_
+#endif // ANTARES_GAME_VECTOR_HPP_

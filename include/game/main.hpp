@@ -25,6 +25,8 @@
 
 namespace antares {
 
+class Level;
+
 enum GameResult {
     NO_GAME = -1,
     LOSE_GAME = 0,
@@ -36,7 +38,7 @@ enum GameResult {
 class MainPlay : public Card {
   public:
     MainPlay(
-            const Scenario* scenario, bool replay, bool show_loading_screen,
+            const Level* level, bool replay, bool show_loading_screen,
             GameResult* game_result);
 
     virtual void become_front();
@@ -50,7 +52,7 @@ class MainPlay : public Card {
     };
     State _state;
 
-    const Scenario* _scenario;
+    const Level* _level;
     const bool _replay;
     const bool _show_loading_screen;
     bool _cancelled;

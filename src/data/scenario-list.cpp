@@ -21,7 +21,7 @@
 #include <glob.h>
 #include <sfz/sfz.hpp>
 #include "config/dirs.hpp"
-#include "data/scenario.hpp"
+#include "data/level.hpp"
 
 using sfz::BytesSlice;
 using sfz::CString;

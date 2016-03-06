@@ -18,7 +18,7 @@
 
 #include "game/admiral.hpp"
 
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
 #include "data/string-list.hpp"
 #include "game/cheat.hpp"
 #include "game/globals.hpp"
@@ -108,7 +108,7 @@ Admiral* Admiral::get(int i) {
     return nullptr;
 }
 
-Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Scenario::Player& player) {
+Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Level::Player& player) {
     Handle<Admiral> a(index);
     if (a->_active) {
         return none();

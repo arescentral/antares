@@ -20,12 +20,13 @@
 
 #include <sfz/sfz.hpp>
 
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "game/action.hpp"
 #include "game/admiral.hpp"
+#include "game/vector.hpp"
 #include "game/globals.hpp"
 #include "game/non-player-ship.hpp"
 #include "game/player-ship.hpp"
@@ -310,42 +311,42 @@ static void animate(Handle<SpaceObject> o) {
     }
 }
 
-static void move_beam(Handle<SpaceObject> o) {
-    if (!o->frame.beam.get()) {
-        throw Exception("Unexpected error: a beam appears to be missing.");
+static void move_vector(Handle<SpaceObject> o) {
+    if (!o->frame.vector.get()) {
+        throw Exception("Unexpected error: a vector appears to be missing.");
     }
-    auto& beam = *o->frame.beam;
+    auto& vector = *o->frame.vector;
 
-    beam.objectLocation = o->location;
-    if ((beam.beamKind == eStaticObjectToObjectKind) ||
-            (beam.beamKind == eBoltObjectToObjectKind)) {
-        if (beam.toObject.get()) {
-            auto target = beam.toObject;
-            if (target->active && (target->id == beam.toObjectID)) {
-                o->location = beam.objectLocation = target->location;
+    vector.objectLocation = o->location;
+    if ((vector.vectorKind == Vector::BEAM_TO_OBJECT) ||
+            (vector.vectorKind == Vector::BEAM_TO_OBJECT_LIGHTNING)) {
+        if (vector.toObject.get()) {
+            auto target = vector.toObject;
+            if (target->active && (target->id == vector.toObjectID)) {
+                o->location = vector.objectLocation = target->location;
             } else {
                 o->active = kObjectToBeFreed;
             }
         }
 
-        if (beam.fromObject.get()) {
-            auto target = beam.fromObject;
-            if (target->active && (target->id == beam.fromObjectID)) {
-                beam.lastGlobalLocation = beam.lastApparentLocation = target->location;
+        if (vector.fromObject.get()) {
+            auto target = vector.fromObject;
+            if (target->active && (target->id == vector.fromObjectID)) {
+                vector.lastGlobalLocation = vector.lastApparentLocation = target->location;
             } else {
                 o->active = kObjectToBeFreed;
             }
         }
-    } else if ((beam.beamKind == eStaticObjectToRelativeCoordKind) ||
-            (beam.beamKind == eBoltObjectToRelativeCoordKind)) {
-        if (beam.fromObject.get()) {
-            auto target = beam.fromObject;
-            if (target->active && (target->id == beam.fromObjectID)) {
-                beam.lastGlobalLocation = beam.lastApparentLocation = target->location;
-                o->location.h = beam.objectLocation.h =
-                    target->location.h + beam.toRelativeCoord.h;
-                o->location.v = beam.objectLocation.v =
-                    target->location.v + beam.toRelativeCoord.v;
+    } else if ((vector.vectorKind == Vector::BEAM_TO_COORD) ||
+            (vector.vectorKind == Vector::BEAM_TO_COORD_LIGHTNING)) {
+        if (vector.fromObject.get()) {
+            auto target = vector.fromObject;
+            if (target->active && (target->id == vector.fromObjectID)) {
+                vector.lastGlobalLocation = vector.lastApparentLocation = target->location;
+                o->location.h = vector.objectLocation.h =
+                    target->location.h + vector.toRelativeCoord.h;
+                o->location.v = vector.objectLocation.v =
+                    target->location.v + vector.toRelativeCoord.v;
             } else {
                 o->active = kObjectToBeFreed;
             }
@@ -415,8 +416,8 @@ void MoveSpaceObjects(const ticks unitsToDo) {
             bounce(o);
             if (o->attributes & kIsSelfAnimated) {
                 animate(o);
-            } else if (o->attributes & kIsBeam) {
-                move_beam(o);
+            } else if (o->attributes & kIsVector) {
+                move_vector(o);
             }
         }
     }
@@ -434,7 +435,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
     for (Handle<SpaceObject> o = g.root; o.get(); o = o->nextObject) {
         if (o->active != kObjectInUse) {
             continue;
-        } else if ((o->attributes & kIsBeam) || !o->sprite.get()) {
+        } else if ((o->attributes & kIsVector) || !o->sprite.get()) {
             continue;
         }
         auto& sprite = *o->sprite;
@@ -607,13 +608,13 @@ static int mClipCode(int x, int y, const Rect& bounds) {
         | (y >= bounds.bottom);
 }
 
-static bool beam_intersects(const Handle<SpaceObject>& beam, const Handle<SpaceObject>& target) {
-    if (beam->active == kObjectToBeFreed) {
+static bool vector_intersects(const Handle<SpaceObject>& vector, const Handle<SpaceObject>& target) {
+    if (vector->active == kObjectToBeFreed) {
         return false;
     }
 
-    Point start(beam->location.h, beam->location.v);
-    Point end(beam->frame.beam->lastGlobalLocation.h, beam->frame.beam->lastGlobalLocation.v);
+    Point start(vector->location.h, vector->location.v);
+    Point end(vector->frame.vector->lastGlobalLocation.h, vector->frame.vector->lastGlobalLocation.v);
 
     //
     // Determine if the line segment defined by `{start, end}` passes
@@ -746,17 +747,17 @@ static void calc_impacts() {
                         continue;
                     }
 
-                    if (a->attributes & b->attributes & kIsBeam) {
-                        // no reason beams can't intersect, but the
+                    if (a->attributes & b->attributes & kIsVector) {
+                        // no reason vectors can't intersect, but the
                         // code we have now won't handle it.
                         continue;
-                    } else if (a->attributes & kIsBeam) {
-                        if (beam_intersects(a, b)) {
+                    } else if (a->attributes & kIsVector) {
+                        if (vector_intersects(a, b)) {
                             HitObject(b, a);
                         }
                         continue;
-                    } else if (b->attributes & kIsBeam) {
-                        if (beam_intersects(b, a)) {
+                    } else if (b->attributes & kIsVector) {
+                        if (vector_intersects(b, a)) {
                             HitObject(a, b);
                         }
                         continue;
@@ -885,11 +886,11 @@ static void calc_visibility() {
     }
 }
 
-static void update_last_beam_locations() {
+static void update_last_vector_locations() {
     for (auto o: SpaceObject::all()) {
         if (o->active == kObjectInUse) {
-            if (o->attributes & kIsBeam) {
-                o->frame.beam->lastGlobalLocation = o->location;
+            if (o->attributes & kIsVector) {
+                o->frame.vector->lastGlobalLocation = o->location;
             }
         }
     }
@@ -901,7 +902,7 @@ void CollideSpaceObjects() {
     calc_impacts();
     calc_locality();
     calc_visibility();
-    update_last_beam_locations();
+    update_last_vector_locations();
 }
 
 static void adjust_velocity(Handle<SpaceObject> o, int16_t angle, Fixed totalMass, Fixed force) {

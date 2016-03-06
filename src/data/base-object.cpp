@@ -18,7 +18,7 @@
 
 // Space Object Handling >> MUST BE INITED _AFTER_ SCENARIOMAKER << (uses Ares Scenarios file)
 
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
 
 #include <sfz/sfz.hpp>
 
@@ -90,8 +90,10 @@ void read_from(ReadSource in, BaseObject& object) {
     uint8_t section[32];
 
     read(in, object.attributes);
-    if ((object.attributes & kIsSelfAnimated) && (object.attributes & kShapeFromDirection)) {
-        object.attributes ^= kShapeFromDirection;
+    if (object.attributes & kIsSelfAnimated) {
+        object.attributes &= ~(kShapeFromDirection | kIsVector);
+    } else if (object.attributes & kShapeFromDirection) {
+        object.attributes &= ~kIsVector;
     }
 
     read(in, object.baseClass);
@@ -136,6 +138,9 @@ void read_from(ReadSource in, BaseObject& object) {
     read(in, object.pixResID);
     read(in, object.tinySize);
     read(in, object.shieldColor);
+    if ((object.shieldColor != 0xFF) && (object.shieldColor != 0)) {
+        object.shieldColor = GetTranslateColorShade(object.shieldColor, 15);
+    }
     in.shift(1);
 
     read(in, object.initialDirection);
@@ -190,8 +195,13 @@ void read_from(ReadSource in, BaseObject& object) {
         read(sub, object.frame.rotation);
     } else if (object.attributes & kIsSelfAnimated) {
         read(sub, object.frame.animation);
-    } else if (object.attributes & kIsBeam) {
-        read(sub, object.frame.beam);
+    } else if (object.attributes & kIsVector) {
+        read(sub, object.frame.vector);
+        if (object.frame.vector.color > 16) {
+            object.frame.vector.color = GetTranslateIndex(object.frame.vector.color);
+        } else {
+            object.frame.vector.color = 0;
+        }
     } else {
         read(sub, object.frame.weapon);
     }
@@ -215,11 +225,11 @@ void read_from(ReadSource in, objectFrameType::Animation& animation) {
     animation.frameShapeRange = Fixed::from_long(read<int32_t>(in));
 }
 
-void read_from(ReadSource in, objectFrameType::Beam& beam) {
-    read(in, beam.color);
-    read(in, beam.kind);
-    read(in, beam.accuracy);
-    read(in, beam.range);
+void read_from(ReadSource in, objectFrameType::Vector& vector) {
+    read(in, vector.color);
+    read(in, vector.kind);
+    read(in, vector.accuracy);
+    read(in, vector.range);
 }
 
 void read_from(ReadSource in, objectFrameType::Weapon& weapon) {

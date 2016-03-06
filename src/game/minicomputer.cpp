@@ -33,7 +33,7 @@
 #include "game/instruments.hpp"
 #include "game/messages.hpp"
 #include "game/player-ship.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
 #include "lang/defines.hpp"

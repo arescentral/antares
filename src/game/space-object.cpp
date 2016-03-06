@@ -21,22 +21,23 @@
 #include <set>
 #include <sfz/sfz.hpp>
 
+#include "data/plugin.hpp"
 #include "data/resource.hpp"
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "lang/defines.hpp"
 #include "game/action.hpp"
 #include "game/admiral.hpp"
-#include "game/beam.hpp"
+#include "game/vector.hpp"
 #include "game/globals.hpp"
 #include "game/labels.hpp"
 #include "game/messages.hpp"
 #include "game/minicomputer.hpp"
 #include "game/motion.hpp"
 #include "game/player-ship.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "game/starfield.hpp"
 #include "math/macros.hpp"
 #include "math/random.hpp"
@@ -62,9 +63,6 @@ const uint8_t kFriendlyColor        = GREEN;
 const uint8_t kHostileColor         = RED;
 const uint8_t kNeutralColor         = SKY_BLUE;
 
-static const int16_t kSpaceObjectNameResID          = 5000;
-static const int16_t kSpaceObjectShortNameResID     = 5001;
-
 const Fixed kDefaultTurnRate        = Fixed::from_long(2.000);
 
 #ifdef DATA_COVERAGE
@@ -72,39 +70,10 @@ ANTARES_GLOBAL set<int32_t> covered_objects;
 #endif  // DATA_COVERAGE
 
 void SpaceObjectHandlingInit() {
-    {
-        Resource rsrc("object-actions", "obac", kObjectActionResID);
-        BytesSlice in(rsrc.data());
-        size_t count = rsrc.data().size() / Action::byte_size;
-        plug.actions.resize(count);
-        for (size_t i = 0; i < count; ++i) {
-            read(in, plug.actions[i]);
-        }
-        if (!in.empty()) {
-            throw Exception("didn't consume all of object action data");
-        }
-    }
-
     g.objects.reset(new SpaceObject[kMaxSpaceObject]);
-    {
-        Resource rsrc("objects", "bsob", kBaseObjectResID);
-        BytesSlice in(rsrc.data());
-        size_t count = rsrc.data().size() / BaseObject::byte_size;
-        plug.objects.resize(count);
-        for (size_t i = 0; i < count; ++i) {
-            read(in, plug.objects[i]);
-        }
-        if (!in.empty()) {
-            throw Exception("didn't consume all of base object data");
-        }
-    }
-
-    CorrectAllBaseObjectColor();
     ResetAllSpaceObjects();
     reset_action_queue();
 
-    plug.object_names.reset(new StringList(kSpaceObjectNameResID));
-    plug.object_short_names.reset(new StringList(kSpaceObjectShortNameResID));
 }
 
 void ResetAllSpaceObjects() {
@@ -120,6 +89,10 @@ BaseObject* BaseObject::get(int number) {
         return &plug.objects[number];
     }
     return nullptr;
+}
+
+HandleList<BaseObject> BaseObject::all() {
+    return HandleList<BaseObject>(0, plug.objects.size());
 }
 
 Action* Action::get(int32_t number) {
@@ -229,10 +202,10 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
         }
     }
 
-    if (obj->attributes & kIsBeam) {
-        const auto& beam = obj->baseType->frame.beam;
-        obj->frame.beam = Beams::add(
-                &(obj->location), beam.color, beam.kind, beam.accuracy, beam.range);
+    if (obj->attributes & kIsVector) {
+        const auto& vector = obj->baseType->frame.vector;
+        obj->frame.vector = Vectors::add(
+                &(obj->location), vector.color, vector.kind, vector.accuracy, vector.range);
     }
 
     obj->nextObject = g.root;
@@ -255,29 +228,6 @@ void RemoveAllSpaceObjects() {
         obj->nextNearObject = obj->nextFarObject = SpaceObject::none();
         obj->attributes = 0;
     }
-}
-
-void CorrectAllBaseObjectColor( void)
-
-{
-    int16_t         i;
-
-    for (auto aBase: BaseObject::all()) {
-        if (( aBase->shieldColor != 0xFF) && ( aBase->shieldColor != 0))
-        {
-            aBase->shieldColor = GetTranslateColorShade(aBase->shieldColor, 15);
-        }
-        if ( aBase->attributes & kIsBeam)
-        {
-            if ( aBase->frame.beam.color > 16)
-                aBase->frame.beam.color = GetTranslateIndex( aBase->frame.beam.color);
-            else
-            {
-                aBase->frame.beam.color = 0;
-            }
-        }
-    }
-
 }
 
 SpaceObject::SpaceObject(
@@ -872,9 +822,9 @@ void SpaceObject::destroy() {
 }
 
 void SpaceObject::free() {
-    if (attributes & kIsBeam) {
-        if (frame.beam.get()) {
-            frame.beam->killMe = true;
+    if (attributes & kIsVector) {
+        if (frame.vector.get()) {
+            frame.vector->killMe = true;
         }
     } else {
         if (sprite.get()) {
@@ -958,11 +908,11 @@ Fixed SpaceObject::turn_rate() const {
 }
 
 StringSlice get_object_name(Handle<BaseObject> id) {
-    return plug.object_names->at(id.number());
+    return id->name;  // TODO(sfiera): use directly.
 }
 
 StringSlice get_object_short_name(Handle<BaseObject> id) {
-    return plug.object_short_names->at(id.number());
+    return id->short_name;  // TODO(sfiera): use directly.
 }
 
 int32_t SpaceObject::number() const {

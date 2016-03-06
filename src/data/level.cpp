@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "data/scenario.hpp"
+#include "data/level.hpp"
 
 #include <sfz/sfz.hpp>
 
@@ -28,8 +28,8 @@ namespace macroman = sfz::macroman;
 
 namespace antares {
 
-static const int16_t kScenario_StartTimeMask   = 0x7fff;
-static const int16_t kScenario_IsTraining_Bit  = 0x8000;
+static const int16_t kLevel_StartTimeMask   = 0x7fff;
+static const int16_t kLevel_IsTraining_Bit  = 0x8000;
 
 namespace {
 
@@ -57,104 +57,104 @@ void read_from(ReadSource in, scenarioInfoType& scenario_info) {
     read(in, scenario_info.checkSum);
 }
 
-void read_from(ReadSource in, Scenario& scenario) {
-    read(in, scenario.netRaceFlags);
-    read(in, scenario.playerNum);
-    read(in, scenario.player, kMaxPlayerNum);
-    read(in, scenario.scoreStringResID);
-    read(in, scenario.initialFirst);
-    read(in, scenario.prologueID);
-    read(in, scenario.initialNum);
-    read(in, scenario.songID);
-    read(in, scenario.conditionFirst);
-    read(in, scenario.epilogueID);
-    read(in, scenario.conditionNum);
-    read(in, scenario.starMapH);
-    read(in, scenario.briefPointFirst);
-    read(in, scenario.starMapV);
-    read(in, scenario.briefPointNum);
-    scenario.parTime = game_ticks(secs(read<int16_t>(in)));
+void read_from(ReadSource in, Level& level) {
+    read(in, level.netRaceFlags);
+    read(in, level.playerNum);
+    read(in, level.player, kMaxPlayerNum);
+    read(in, level.scoreStringResID);
+    read(in, level.initialFirst);
+    read(in, level.prologueID);
+    read(in, level.initialNum);
+    read(in, level.songID);
+    read(in, level.conditionFirst);
+    read(in, level.epilogueID);
+    read(in, level.conditionNum);
+    read(in, level.starMapH);
+    read(in, level.briefPointFirst);
+    read(in, level.starMapV);
+    read(in, level.briefPointNum);
+    level.parTime = game_ticks(secs(read<int16_t>(in)));
     in.shift(2);
-    read(in, scenario.parKills);
-    read(in, scenario.levelNameStrNum);
-    read(in, scenario.parKillRatio);
-    read(in, scenario.parLosses);
+    read(in, level.parKills);
+    read(in, level.levelNameStrNum);
+    read(in, level.parKillRatio);
+    read(in, level.parLosses);
     int16_t start_time = read<int16_t>(in);
-    scenario.startTime = secs(start_time & kScenario_StartTimeMask);
-    scenario.is_training = start_time & kScenario_IsTraining_Bit;
+    level.startTime = secs(start_time & kLevel_StartTimeMask);
+    level.is_training = start_time & kLevel_IsTraining_Bit;
 }
 
-void read_from(ReadSource in, Scenario::Player& scenario_player) {
-    read(in, scenario_player.playerType);
-    read(in, scenario_player.playerRace);
-    read(in, scenario_player.nameResID);
-    read(in, scenario_player.nameStrNum);
+void read_from(ReadSource in, Level::Player& level_player) {
+    read(in, level_player.playerType);
+    read(in, level_player.playerRace);
+    read(in, level_player.nameResID);
+    read(in, level_player.nameStrNum);
     in.shift(4);
-    read(in, scenario_player.earningPower);
-    read(in, scenario_player.netRaceFlags);
+    read(in, level_player.earningPower);
+    read(in, level_player.netRaceFlags);
     in.shift(2);
 }
 
-static void read_action(sfz::ReadSource in, Scenario::Condition& condition) {
+static void read_action(sfz::ReadSource in, Level::Condition& condition) {
     auto start = read<int32_t>(in);
     auto count = read<int32_t>(in);
     auto end = (start >= 0) ? (start + count) : start;
     condition.action = {start, end};
 }
 
-void read_from(ReadSource in, Scenario::Condition& scenario_condition) {
+void read_from(ReadSource in, Level::Condition& level_condition) {
     uint8_t section[12];
 
-    read(in, scenario_condition.condition);
+    read(in, level_condition.condition);
     in.shift(1);
     read(in, section, 12);
-    read(in, scenario_condition.subjectObject);
-    read(in, scenario_condition.directObject);
-    read_action(in, scenario_condition);
-    read(in, scenario_condition.flags);
-    read(in, scenario_condition.direction);
+    read(in, level_condition.subjectObject);
+    read(in, level_condition.directObject);
+    read_action(in, level_condition);
+    read(in, level_condition.flags);
+    read(in, level_condition.direction);
 
     BytesSlice sub(section, 12);
-    switch (scenario_condition.condition) {
+    switch (level_condition.condition) {
       case kCounterCondition:
       case kCounterGreaterCondition:
       case kCounterNotCondition:
-        read(sub, scenario_condition.conditionArgument.counter);
+        read(sub, level_condition.conditionArgument.counter);
         break;
 
       case kDestructionCondition:
       case kOwnerCondition:
       case kNoShipsLeftCondition:
       case kZoomLevelCondition:
-        read(sub, scenario_condition.conditionArgument.longValue);
+        read(sub, level_condition.conditionArgument.longValue);
         break;
 
       case kVelocityLessThanEqualToCondition:
-        read(sub, scenario_condition.conditionArgument.fixedValue);
+        read(sub, level_condition.conditionArgument.fixedValue);
 
       case kTimeCondition:
-        scenario_condition.conditionArgument.timeValue = ticks(read<int32_t>(sub));
+        level_condition.conditionArgument.timeValue = ticks(read<int32_t>(sub));
         break;
 
       case kProximityCondition:
       case kDistanceGreaterCondition:
-        read(sub, scenario_condition.conditionArgument.unsignedLongValue);
+        read(sub, level_condition.conditionArgument.unsignedLongValue);
         break;
 
       case kCurrentMessageCondition:
       case kCurrentComputerCondition:
-        read(sub, scenario_condition.conditionArgument.location);
+        read(sub, level_condition.conditionArgument.location);
         break;
     }
 }
 
-void read_from(ReadSource in, Scenario::Condition::CounterArgument& counter_argument) {
+void read_from(ReadSource in, Level::Condition::CounterArgument& counter_argument) {
     counter_argument.whichPlayer = Handle<Admiral>(read<int32_t>(in));
     read(in, counter_argument.whichCounter);
     read(in, counter_argument.amount);
 }
 
-void read_from(ReadSource in, Scenario::BriefPoint& brief_point) {
+void read_from(ReadSource in, Level::BriefPoint& brief_point) {
     uint8_t section[8];
 
     read(in, brief_point.briefPointKind);
@@ -181,32 +181,32 @@ void read_from(ReadSource in, Scenario::BriefPoint& brief_point) {
     }
 }
 
-void read_from(ReadSource in, Scenario::BriefPoint::ObjectBrief& object_brief) {
+void read_from(ReadSource in, Level::BriefPoint::ObjectBrief& object_brief) {
     read(in, object_brief.objectNum);
     read(in, object_brief.objectVisible);
 }
 
-void read_from(ReadSource in, Scenario::BriefPoint::AbsoluteBrief& absolute_brief) {
+void read_from(ReadSource in, Level::BriefPoint::AbsoluteBrief& absolute_brief) {
     read(in, absolute_brief.location);
 }
 
-void read_from(ReadSource in, Scenario::InitialObject& scenario_initial) {
-    scenario_initial.type = Handle<BaseObject>(read<int32_t>(in));
-    scenario_initial.owner = Handle<Admiral>(read<int32_t>(in));
+void read_from(ReadSource in, Level::InitialObject& level_initial) {
+    level_initial.type = Handle<BaseObject>(read<int32_t>(in));
+    level_initial.owner = Handle<Admiral>(read<int32_t>(in));
     in.shift(4);
-    scenario_initial.realObject = Handle<SpaceObject>(-1);
-    read(in, scenario_initial.realObjectID);
-    read(in, scenario_initial.location);
-    read(in, scenario_initial.earning);
-    read(in, scenario_initial.distanceRange);
-    read(in, scenario_initial.rotationMinimum);
-    read(in, scenario_initial.rotationRange);
-    read(in, scenario_initial.spriteIDOverride);
-    read(in, scenario_initial.canBuild, kMaxTypeBaseCanBuild);
-    read(in, scenario_initial.initialDestination);
-    read(in, scenario_initial.nameResID);
-    read(in, scenario_initial.nameStrNum);
-    read(in, scenario_initial.attributes);
+    level_initial.realObject = Handle<SpaceObject>(-1);
+    read(in, level_initial.realObjectID);
+    read(in, level_initial.location);
+    read(in, level_initial.earning);
+    read(in, level_initial.distanceRange);
+    read(in, level_initial.rotationMinimum);
+    read(in, level_initial.rotationRange);
+    read(in, level_initial.spriteIDOverride);
+    read(in, level_initial.canBuild, kMaxTypeBaseCanBuild);
+    read(in, level_initial.initialDestination);
+    read(in, level_initial.nameResID);
+    read(in, level_initial.nameStrNum);
+    read(in, level_initial.attributes);
 }
 
 }  // namespace antares

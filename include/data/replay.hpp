@@ -23,8 +23,7 @@
 #include <vector>
 #include <sfz/sfz.hpp>
 
-#include "data/resource.hpp"
-#include "ui/card.hpp"
+#include "ui/event.hpp"
 
 namespace antares {
 

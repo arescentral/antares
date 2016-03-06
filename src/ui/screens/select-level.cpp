@@ -23,12 +23,13 @@
 #include "config/keys.hpp"
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
+#include "data/plugin.hpp"
 #include "drawing/color.hpp"
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/main.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "sound/driver.hpp"
 #include "ui/card.hpp"
 #include "ui/interface-handling.hpp"
@@ -44,14 +45,14 @@ using std::unique_ptr;
 
 namespace antares {
 
-SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Scenario** scenario)
+SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Level** level)
         : InterfaceScreen("select-level", {0, 0, 640, 480}, true),
           _state(SELECTING),
           _cancelled(cancelled),
-          _scenario(scenario) {
+          _level(level) {
     Ledger::ledger()->unlocked_chapters(&_chapters);
     _index = _chapters.size() - 1;
-    *_scenario = GetScenarioPtrFromChapter(_chapters[_index]);
+    *_level = &plug.levels[_chapters[_index] - 1];
 }
 
 SelectLevelScreen::~SelectLevelScreen() { }
@@ -90,7 +91,7 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
           case Keys::N_TIMES:
             _state = UNLOCKING;
             _unlock_chapter = 0;
-            _unlock_digits = ndigits(plug.chapters.size());
+            _unlock_digits = ndigits(plug.levels.size());
             PlayVolumeSound(kCloakOn, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
             return;
         }
@@ -104,7 +105,7 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
             _unlock_chapter = (_unlock_chapter * 10) + digit;
             if (--_unlock_digits == 0) {
                 _state = SELECTING;
-                if (_unlock_chapter > plug.chapters.size()) {
+                if (_unlock_chapter > plug.levels.size()) {
                     return;
                 }
                 PlayVolumeSound(kCloakOff, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
@@ -150,7 +151,7 @@ void SelectLevelScreen::handle_button(Button& button) {
       case PREVIOUS:
         if (_index > 0) {
             --_index;
-            *_scenario = GetScenarioPtrFromChapter(_chapters[_index]);
+            *_level = &plug.levels[_chapters[_index] - 1];
         }
         adjust_interface();
         break;
@@ -158,7 +159,7 @@ void SelectLevelScreen::handle_button(Button& button) {
       case NEXT:
         if (_index < _chapters.size() - 1) {
             ++_index;
-            *_scenario = GetScenarioPtrFromChapter(_chapters[_index]);
+            *_level = &plug.levels[_chapters[_index] - 1];
         }
         adjust_interface();
         break;
@@ -173,7 +174,7 @@ void SelectLevelScreen::overlay() const {
 }
 
 void SelectLevelScreen::draw_level_name() const {
-    const String chapter_name((*_scenario)->name);
+    const String chapter_name((*_level)->name);
 
     const InterfaceItem& i = item(NAME);
 

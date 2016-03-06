@@ -22,7 +22,7 @@
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/main.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "game/time.hpp"
 #include "math/random.hpp"
 #include "sound/music.hpp"

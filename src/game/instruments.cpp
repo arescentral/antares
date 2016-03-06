@@ -21,7 +21,7 @@
 #include <algorithm>
 
 #include "data/picture.hpp"
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
 #include "drawing/color.hpp"
 #include "drawing/shapes.hpp"
 #include "game/admiral.hpp"

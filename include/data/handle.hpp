@@ -28,6 +28,8 @@ struct BaseObject;
 struct Destination;
 class Label;
 struct SpaceObject;
+class Sprite;
+class Vector;
 
 template <typename T>
 class Handle {

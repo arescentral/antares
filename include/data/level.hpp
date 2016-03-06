@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_DATA_SCENARIO_HPP_
-#define ANTARES_DATA_SCENARIO_HPP_
+#ifndef ANTARES_DATA_LEVEL_HPP_
+#define ANTARES_DATA_LEVEL_HPP_
 
 #include <sfz/sfz.hpp>
 
@@ -29,7 +29,7 @@
 
 namespace antares {
 
-struct ScenarioName;
+struct LevelName;
 class BaseObject;
 
 const size_t kMaxPlayerNum                 = 4;
@@ -43,11 +43,11 @@ enum {
     kComputerPlayer = 2,
 };
 
-const int16_t kScenarioBriefMask = 0x00ff;
-const int16_t kScenarioAngleMask = 0xff00;
-const int32_t kScenarioAngleShift = 8;
+const int16_t kLevelBriefMask = 0x00ff;
+const int16_t kLevelAngleMask = 0xff00;
+const int32_t kLevelAngleShift = 8;
 
-const int32_t kScenarioNoOwner = -1;
+const int32_t kLevelNoOwner = -1;
 
 // condition flags
 const int32_t kTrueOnlyOnce     = 0x00000001;
@@ -106,7 +106,7 @@ enum briefingPointKindEnum {
     kBriefFreestandingKind = 3
 };
 
-struct Scenario {
+struct Level {
     struct InitialObject;
     struct Condition;
     struct BriefPoint;
@@ -136,7 +136,7 @@ struct Scenario {
     int16_t                     starMapH;
     int16_t                     briefPointFirst;
     int16_t                     starMapV;
-    int16_t                     briefPointNum;  // use kScenarioBriefMask
+    int16_t                     briefPointNum;  // use kLevelBriefMask
     game_ticks                  parTime;
     int16_t                     parKills;
     int16_t                     levelNameStrNum;
@@ -160,10 +160,10 @@ struct Scenario {
     int32_t prologue_id() const;
     int32_t epilogue_id() const;
 };
-void read_from(sfz::ReadSource in, Scenario& scenario);
-void read_from(sfz::ReadSource in, Scenario::Player& scenario_player);
+void read_from(sfz::ReadSource in, Level& level);
+void read_from(sfz::ReadSource in, Level::Player& level_player);
 
-struct Scenario::InitialObject {
+struct Level::InitialObject {
     Handle<BaseObject>  type;
     Handle<Admiral> owner;
     Handle<SpaceObject> realObject;
@@ -182,9 +182,9 @@ struct Scenario::InitialObject {
 
     static const size_t byte_size = 108;
 };
-void read_from(sfz::ReadSource in, Scenario::InitialObject& scenario_initial);
+void read_from(sfz::ReadSource in, Level::InitialObject& level_initial);
 
-struct Scenario::Condition {
+struct Level::Condition {
     struct CounterArgument {
         Handle<Admiral> whichPlayer;
         int32_t         whichCounter;
@@ -214,19 +214,19 @@ struct Scenario::Condition {
     bool true_yet() const;
     void set_true_yet(bool state);
 };
-void read_from(sfz::ReadSource in, Scenario::Condition& scenario_condition);
-void read_from(sfz::ReadSource in, Scenario::Condition::CounterArgument& counter_argument);
+void read_from(sfz::ReadSource in, Level::Condition& level_condition);
+void read_from(sfz::ReadSource in, Level::Condition::CounterArgument& counter_argument);
 
 //
 // We need to know:
 // type of tour point: object, absolute, or free-standing
-// either scenario object # & visible --or-- location ((int32_t & bool) or longPoint)
+// either level object # & visible --or-- location ((int32_t & bool) or longPoint)
 // range (longPoint)
 // title ID, # (int16_t, int16_t)
 // content ID, # (int16_t, int16_t)
 //
 
-struct Scenario::BriefPoint {
+struct Level::BriefPoint {
     struct ObjectBrief {
         int32_t         objectNum;
         uint8_t         objectVisible;  // bool
@@ -248,9 +248,9 @@ struct Scenario::BriefPoint {
 
     static const size_t byte_size = 24;
 };
-void read_from(sfz::ReadSource in, Scenario::BriefPoint::ObjectBrief& object_brief);
-void read_from(sfz::ReadSource in, Scenario::BriefPoint::AbsoluteBrief& absolute_brief);
-void read_from(sfz::ReadSource in, Scenario::BriefPoint& brief_point);
+void read_from(sfz::ReadSource in, Level::BriefPoint::ObjectBrief& object_brief);
+void read_from(sfz::ReadSource in, Level::BriefPoint::AbsoluteBrief& absolute_brief);
+void read_from(sfz::ReadSource in, Level::BriefPoint& brief_point);
 
 struct Race {
     int32_t id;
@@ -264,4 +264,4 @@ void read_from(sfz::ReadSource in, Race& race);
 
 }  // namespace antares
 
-#endif // ANTARES_DATA_SCENARIO_HPP_
+#endif // ANTARES_DATA_LEVEL_HPP_

@@ -54,7 +54,7 @@ class SoloGame : public Card {
     void epilogue_done();
 
     bool _cancelled;
-    const Scenario* _scenario;
+    const Level* _level;
     GameResult _game_result;
     PlayAgainScreen::Item _play_again;
 };

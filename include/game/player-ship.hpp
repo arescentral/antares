@@ -19,7 +19,9 @@
 #ifndef ANTARES_GAME_PLAYER_SHIP_HPP_
 #define ANTARES_GAME_PLAYER_SHIP_HPP_
 
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
+#include "config/keys.hpp"
+#include "ui/event.hpp"
 
 namespace antares {
 

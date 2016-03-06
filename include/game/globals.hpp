@@ -24,7 +24,7 @@
 
 #include "config/keys.hpp"
 #include "data/handle.hpp"
-#include "data/scenario.hpp"
+#include "data/level.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "game/starfield.hpp"
@@ -35,11 +35,7 @@
 
 namespace antares {
 
-const size_t kKeyControlNum                = 19;
-const size_t kKeyExtendedControlNum     = 44;
 const size_t kBarIndicatorNum              = 5;
-const size_t kKeyMapBufferNum              = 256;
-const size_t kHotKeyNum                    = 10;
 
 const int32_t kLeftPanelWidth       = 128;
 const int32_t kRightPanelWidth      = 32;
@@ -71,7 +67,7 @@ struct hotKeyType {
 };
 
 struct Admiral;
-struct Beam;
+struct Vector;
 struct Destination;
 struct proximityUnitType;
 struct scrollStarType;
@@ -84,7 +80,8 @@ struct GlobalState {
     game_ticks  time;    // Current game time.
     Random      random;  // Global random number generator.
 
-    const Scenario* level;
+    const Level*  level;
+    int32_t       angle;
 
     std::unique_ptr<Admiral[]>  admirals;  // All admirals (whether active or not).
     Handle<Admiral>             admiral;   // Local player.
@@ -95,7 +92,7 @@ struct GlobalState {
     Handle<SpaceObject>             closest;   // Nearest object or hostile, depending on zoom.
     Handle<SpaceObject>             farthest;  // Farthest object (sufficient for zoom-to-all).
 
-    std::unique_ptr<Beam[]>         beams;         // Auxiliary info for kIsBeam objects.
+    std::unique_ptr<Vector[]>       vectors;       // Auxiliary info for kIsVector objects.
     std::unique_ptr<Destination[]>  destinations;  // Auxiliary info for kIsDestination objects.
     std::unique_ptr<Sprite[]>       sprites;       // Auxiliary info for objects with sprites.
 
@@ -120,25 +117,6 @@ struct GlobalState {
 };
 
 extern GlobalState g;
-
-struct ScenarioGlobals {
-    scenarioInfoType                      meta;
-
-    std::vector<Scenario>                 chapters;
-    std::vector<Scenario::InitialObject>  initials;
-    std::vector<Scenario::Condition>      conditions;
-    std::vector<Scenario::BriefPoint>     briefings;
-
-    std::vector<BaseObject>               objects;
-    std::unique_ptr<StringList>           object_names;
-    std::unique_ptr<StringList>           object_short_names;
-
-    std::vector<Action>                   actions;
-
-    std::vector<Race>                     races;
-};
-
-extern ScenarioGlobals plug;
 
 struct aresGlobalType {
     aresGlobalType();

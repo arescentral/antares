@@ -23,6 +23,7 @@
 #include "drawing/color.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "game/admiral.hpp"
+#include "game/vector.hpp"
 #include "game/input-source.hpp"
 #include "game/labels.hpp"
 #include "game/minicomputer.hpp"
@@ -37,7 +38,6 @@ namespace antares {
 static ANTARES_GLOBAL aresGlobalType* gAresGlobal;
 
 ANTARES_GLOBAL GlobalState g;
-ANTARES_GLOBAL ScenarioGlobals plug;
 
 aresGlobalType* globals() {
     return gAresGlobal;
