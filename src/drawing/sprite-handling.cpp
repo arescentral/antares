@@ -25,6 +25,7 @@
 #include "drawing/shapes.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 #include "math/random.hpp"
 #include "math/rotation.hpp"
@@ -68,15 +69,15 @@ static void draw_tiny_square(const Rect& rect, const RgbColor& color) {
 }
 
 static void draw_tiny_triangle(const Rect& rect, const RgbColor& color) {
-    VideoDriver::driver()->draw_triangle(rect, color);
+    sys.video->draw_triangle(rect, color);
 }
 
 static void draw_tiny_diamond(const Rect& rect, const RgbColor& color) {
-    VideoDriver::driver()->draw_diamond(rect, color);
+    sys.video->draw_diamond(rect, color);
 }
 
 static void draw_tiny_plus(const Rect& rect, const RgbColor& color) {
-    VideoDriver::driver()->draw_plus(rect, color);
+    sys.video->draw_plus(rect, color);
 }
 
 draw_tiny_t draw_tiny_function(uint8_t id) {

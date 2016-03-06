@@ -22,6 +22,7 @@
 
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
+#include "game/sys.hpp"
 #include "video/driver.hpp"
 
 using sfz::BytesSlice;
@@ -288,7 +289,7 @@ const PixMap& NatePixTable::Frame::pix_map() const { return _pix_map; }
 const Texture& NatePixTable::Frame::texture() const { return _texture; }
 
 void NatePixTable::Frame::build(int16_t id, int frame) {
-    _texture = VideoDriver::driver()->texture(
+    _texture = sys.video->texture(
             format("/sprites/{0}.SMIV/{1}", id, frame), _pix_map);
 }
 

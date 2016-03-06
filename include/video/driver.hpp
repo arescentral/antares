@@ -65,8 +65,6 @@ class VideoDriver {
     virtual void draw_diamond(const Rect& rect, const RgbColor& color) = 0;
     virtual void draw_plus(const Rect& rect, const RgbColor& color) = 0;
 
-    static VideoDriver* driver();
-
   private:
     friend class Points;
     friend class Lines;

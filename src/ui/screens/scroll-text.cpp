@@ -23,6 +23,7 @@
 #include "drawing/pix-map.hpp"
 #include "game/globals.hpp"
 #include "game/time.hpp"
+#include "game/sys.hpp"
 #include "sound/music.hpp"
 #include "ui/card.hpp"
 #include "video/driver.hpp"
@@ -105,7 +106,7 @@ void ScrollTextScreen::fire_timer() {
 }
 
 void ScrollTextScreen::draw() const {
-    Rect world = VideoDriver::driver()->screen_size().as_rect();
+    Rect world = sys.video->screen_size().as_rect();
     Rect clip = Rect(0, 0, world.width(), kScrollTextHeight);
     clip.center_in(world);
 

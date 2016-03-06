@@ -38,46 +38,42 @@ VideoDriver::~VideoDriver() {
     sys.video = NULL;
 }
 
-VideoDriver* VideoDriver::driver() {
-    return sys.video;
-}
-
 Texture::Impl::~Impl() { }
 
 Points::Points() {
-    VideoDriver::driver()->begin_points();
+    sys.video->begin_points();
 }
 
 Points::~Points() {
-    VideoDriver::driver()->end_points();
+    sys.video->end_points();
 }
 
 void Points::draw(const Point& at, const RgbColor& color) const {
-    VideoDriver::driver()->batch_point(at, color);
+    sys.video->batch_point(at, color);
 }
 
 Lines::Lines() {
-    VideoDriver::driver()->begin_lines();
+    sys.video->begin_lines();
 }
 
 Lines::~Lines() {
-    VideoDriver::driver()->end_lines();
+    sys.video->end_lines();
 }
 
 void Lines::draw(const Point& from, const Point& to, const RgbColor& color) const {
-    VideoDriver::driver()->batch_line(from, to, color);
+    sys.video->batch_line(from, to, color);
 }
 
 Rects::Rects() {
-    VideoDriver::driver()->begin_rects();
+    sys.video->begin_rects();
 }
 
 Rects::~Rects() {
-    VideoDriver::driver()->end_rects();
+    sys.video->end_rects();
 }
 
 void Rects::fill(const Rect& rect, const RgbColor& color) const {
-    VideoDriver::driver()->batch_rect(rect, color);
+    sys.video->batch_rect(rect, color);
 }
 
 Quads::Quads(const Texture& sprite):

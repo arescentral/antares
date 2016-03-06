@@ -19,12 +19,13 @@
 #ifndef ANTARES_GAME_TIME_HPP_
 #define ANTARES_GAME_TIME_HPP_
 
+#include "game/sys.hpp"
 #include "video/driver.hpp"
 
 namespace antares {
 
 inline wall_time now() {
-    return VideoDriver::driver()->now();
+    return sys.video->now();
 }
 
 }  // namespace antares

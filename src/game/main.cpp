@@ -89,16 +89,16 @@ extern set<int32_t> covered_actions;
 #endif  // DATA_COVERAGE
 
 Rect world() {
-    return Rect({0, 0}, VideoDriver::driver()->screen_size());
+    return Rect({0, 0}, sys.video->screen_size());
 }
 
 Rect play_screen() {
-    const Size size = VideoDriver::driver()->screen_size();
+    const Size size = sys.video->screen_size();
     return Rect(kLeftPanelWidth, 0, size.width - kRightPanelWidth, size.height);
 }
 
 Rect viewport() {
-    const Size size = VideoDriver::driver()->screen_size();
+    const Size size = sys.video->screen_size();
     return Rect(kLeftPanelWidth, 0, size.width - kRightPanelWidth, size.height - g.bottom_border);
 }
 
@@ -699,7 +699,7 @@ void GamePlay::mouse_down(const MouseDownEvent& event) {
             break;
         case 1:
             if (event.count() == 1) {
-                PlayerShipHandleClick(VideoDriver::driver()->get_mouse(), 1);
+                PlayerShipHandleClick(sys.video->get_mouse(), 1);
             }
             break;
     }

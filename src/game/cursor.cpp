@@ -24,6 +24,7 @@
 #include "drawing/pix-table.hpp"
 #include "game/globals.hpp"
 #include "game/time.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 #include "video/driver.hpp"
 
@@ -39,7 +40,7 @@ static const usecs kTimeout = secs(1);
 Cursor::Cursor(): _sprite(500, GRAY) { }
 
 void Cursor::draw() const {
-    draw_at(VideoDriver::driver()->get_mouse());
+    draw_at(sys.video->get_mouse());
 }
 
 void Cursor::draw_at(Point where) const {
@@ -58,7 +59,7 @@ bool GameCursor::active() const {
 }
 
 Point GameCursor::clamped_location() {
-    return clamp(VideoDriver::driver()->get_mouse());
+    return clamp(sys.video->get_mouse());
 }
 
 Point GameCursor::clamp(Point p) {
@@ -127,7 +128,7 @@ void GameCursor::draw() const {
         return;
     }
 
-    Point where = VideoDriver::driver()->get_mouse();
+    Point where = sys.video->get_mouse();
 
     where = clamp(where);
     if (active()) {

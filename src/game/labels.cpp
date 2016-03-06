@@ -143,7 +143,7 @@ void Label::draw() {
         }
         const RgbColor light = GetRGBTranslateColorShade(label->color, VERY_LIGHT);
         const RgbColor dark = GetRGBTranslateColorShade(label->color, VERY_DARK);
-        VideoDriver::driver()->dither_rect(label->thisRect, dark);
+        sys.video->dither_rect(label->thisRect, dark);
         at.offset(kLabelInnerSpace, kLabelInnerSpace + sys.fonts.tactical->ascent);
 
         if (label->lineNum > 1) {

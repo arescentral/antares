@@ -25,6 +25,7 @@
 #include "game/globals.hpp"
 #include "game/motion.hpp"
 #include "game/space-object.hpp"
+#include "game/time.hpp"
 #include "lang/defines.hpp"
 #include "math/macros.hpp"
 #include "math/special.hpp"
@@ -114,8 +115,7 @@ static bool oldest_available_channel(int& channel) {
     usecs oldestSoundTime(0);
     bool result = false;
     for (int i = 0; i < kMaxChannelNum; ++i) {
-        auto past_reservation =
-            VideoDriver::driver()->now() - gChannel[i].reserved_until;
+        auto past_reservation = now() - gChannel[i].reserved_until;
         if (past_reservation > oldestSoundTime) {
             oldestSoundTime = past_reservation;
             channel = i;
@@ -154,7 +154,7 @@ void PlayVolumeSound(
         }
 
         gChannel[whichChannel].whichSound = whichSoundID;
-        gChannel[whichChannel].reserved_until = VideoDriver::driver()->now() + persistence;
+        gChannel[whichChannel].reserved_until = now() + persistence;
         gChannel[whichChannel].soundPriority = priority;
         gChannel[whichChannel].soundVolume = amplitude;
 
