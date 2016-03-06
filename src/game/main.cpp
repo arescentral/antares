@@ -699,7 +699,7 @@ void GamePlay::mouse_down(const MouseDownEvent& event) {
             break;
         case 1:
             if (event.count() == 1) {
-                PlayerShipHandleClick(sys.video->get_mouse(), 1);
+                PlayerShipHandleClick(event.where(), 1);
             }
             break;
     }
