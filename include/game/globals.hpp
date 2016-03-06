@@ -35,11 +35,7 @@
 
 namespace antares {
 
-const size_t kKeyControlNum                = 19;
-const size_t kKeyExtendedControlNum     = 44;
 const size_t kBarIndicatorNum              = 5;
-const size_t kKeyMapBufferNum              = 256;
-const size_t kHotKeyNum                    = 10;
 
 const int32_t kLeftPanelWidth       = 128;
 const int32_t kRightPanelWidth      = 32;

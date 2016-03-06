@@ -38,6 +38,7 @@
 #include "game/messages.hpp"
 #include "game/motion.hpp"
 #include "game/level.hpp"
+#include "game/space-object.hpp"
 #include "math/random.hpp"
 #include "math/rotation.hpp"
 #include "sound/driver.hpp"

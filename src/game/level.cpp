@@ -18,22 +18,15 @@
 
 #include "game/level.hpp"
 
-#include <vector>
 #include <set>
 #include <sfz/sfz.hpp>
 
-#include "config/keys.hpp"
 #include "data/plugin.hpp"
-#include "data/races.hpp"
-#include "data/resource.hpp"
-#include "data/string-list.hpp"
-#include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "game/action.hpp"
 #include "game/admiral.hpp"
 #include "game/condition.hpp"
 #include "game/vector.hpp"
-#include "game/globals.hpp"
 #include "game/instruments.hpp"
 #include "game/initial.hpp"
 #include "game/labels.hpp"
@@ -42,15 +35,12 @@
 #include "game/motion.hpp"
 #include "game/non-player-ship.hpp"
 #include "game/player-ship.hpp"
-#include "game/space-object.hpp"
 #include "game/starfield.hpp"
-#include "lang/casts.hpp"
 #include "lang/defines.hpp"
 #include "math/macros.hpp"
 #include "math/random.hpp"
 #include "math/rotation.hpp"
 #include "math/units.hpp"
-#include "ui/interface-handling.hpp"
 
 using sfz::Bytes;
 using sfz::BytesSlice;
@@ -61,7 +51,6 @@ using sfz::StringSlice;
 using sfz::range;
 using sfz::read;
 using std::set;
-using std::vector;
 
 namespace antares {
 

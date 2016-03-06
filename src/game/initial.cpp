@@ -23,6 +23,7 @@
 #include "game/globals.hpp"
 #include "game/level.hpp"
 #include "game/player-ship.hpp"
+#include "game/space-object.hpp"
 
 namespace antares {
 

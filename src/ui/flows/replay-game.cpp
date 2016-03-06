@@ -20,6 +20,7 @@
 
 #include <algorithm>
 
+#include "data/plugin.hpp"
 #include "game/globals.hpp"
 #include "game/input-source.hpp"
 #include "game/level.hpp"

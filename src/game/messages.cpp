@@ -31,6 +31,7 @@
 #include "game/instruments.hpp"
 #include "game/labels.hpp"
 #include "game/level.hpp"
+#include "game/space-object.hpp"
 #include "lang/defines.hpp"
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"

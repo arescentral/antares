@@ -27,6 +27,7 @@
 #include "game/initial.hpp"
 #include "game/level.hpp"
 #include "game/space-object.hpp"
+#include "lang/casts.hpp"
 #include "lang/defines.hpp"
 #include "video/driver.hpp"
 

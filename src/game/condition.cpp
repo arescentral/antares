@@ -24,6 +24,7 @@
 #include "game/level.hpp"
 #include "game/messages.hpp"
 #include "game/player-ship.hpp"
+#include "game/space-object.hpp"
 #include "math/macros.hpp"
 
 namespace antares {

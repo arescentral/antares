@@ -33,6 +33,7 @@
 #include "game/level.hpp"
 #include "game/time.hpp"
 #include "sound/driver.hpp"
+#include "sound/fx.hpp"
 #include "sound/music.hpp"
 #include "ui/card.hpp"
 #include "ui/interface-handling.hpp"

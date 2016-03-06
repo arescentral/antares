@@ -20,10 +20,6 @@
 #define ANTARES_GAME_LEVEL_HPP_
 
 #include "data/level.hpp"
-#include "data/base-object.hpp"
-#include "game/globals.hpp"
-#include "game/space-object.hpp"
-#include "lang/casts.hpp"
 
 namespace antares {
 

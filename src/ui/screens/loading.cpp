@@ -24,8 +24,10 @@
 #include "data/string-list.hpp"
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
+#include "game/globals.hpp"
 #include "game/level.hpp"
 #include "game/time.hpp"
+#include "sound/fx.hpp"
 #include "video/driver.hpp"
 
 namespace antares {
