@@ -114,10 +114,10 @@ void SoundControlScreen::handle_button(Button& button) {
         case IDLE_MUSIC:
             sys.prefs->set_play_idle_music(!dynamic_cast<CheckboxButton&>(button).on);
             if (sys.prefs->play_idle_music()) {
-                LoadSong(kTitleSongID);
-                PlaySong();
+                sys.music.LoadSong(kTitleSongID);
+                sys.music.PlaySong();
             } else {
-                StopAndUnloadSong();
+                sys.music.StopAndUnloadSong();
             }
             adjust_interface();
             break;

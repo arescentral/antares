@@ -133,16 +133,14 @@ void Master::init() {
     SpriteHandlingInit();
     PluginInit();
     SpaceObjectHandlingInit();  // MUST be after ScenarioMakerInit()
-    InitSoundFX();
-    MusicInit();
     InitMotion();
     Admiral::init();
     Vectors::init();
 
     if (sys.prefs->play_idle_music()) {
-        LoadSong( kTitleSongID);
-        SetSongVolume( kMaxMusicVolume);
-        PlaySong();
+        sys.music.LoadSong( kTitleSongID);
+        sys.music.SetSongVolume( kMaxMusicVolume);
+        sys.music.PlaySong();
     }
 }
 

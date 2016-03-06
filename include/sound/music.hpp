@@ -19,21 +19,37 @@
 #ifndef ANTARES_SOUND_MUSIC_HPP_
 #define ANTARES_SOUND_MUSIC_HPP_
 
+#include <memory>
+
+using std::unique_ptr;
+
 namespace antares {
+
+class Sound;
+class SoundChannel;
 
 const int kTitleSongID = 4001;  // Doomtroopers, Unite!
 
 const double kMusicVolume = 0.84375;  // In-game music volume.
 const double kMaxMusicVolume = 1.0;   // Idle music volume.
 
-void MusicInit();
-void MusicCleanup();
-void PlaySong();
-void ToggleSong();
-bool SongIsPlaying();
-void StopAndUnloadSong();
-void LoadSong(int id);
-void SetSongVolume(double volume);
+class Music {
+    public:
+        void init();
+        void PlaySong();
+        void ToggleSong();
+        bool SongIsPlaying();
+        void StopAndUnloadSong();
+        void LoadSong(int id);
+        void SetSongVolume(double volume);
+
+    private:
+        void StopSong();
+
+        bool playing = false;
+        unique_ptr<Sound> song;
+        unique_ptr<SoundChannel> channel;
+};
 
 }  // namespace antares
 

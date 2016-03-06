@@ -180,9 +180,9 @@ void MainPlay::become_front() {
                     g.random.seed);
 
             if (sys.prefs->play_idle_music()) {
-                LoadSong(3000);
-                SetSongVolume( kMaxMusicVolume);
-                PlaySong();
+                sys.music.LoadSong(3000);
+                sys.music.SetSongVolume( kMaxMusicVolume);
+                sys.music.PlaySong();
             }
 
             if (_show_loading_screen) {
@@ -221,7 +221,7 @@ void MainPlay::become_front() {
       case BRIEFING:
         {
             if (sys.prefs->play_idle_music()) {
-                StopAndUnloadSong();
+                sys.music.StopAndUnloadSong();
             }
 
             if (_cancelled) {
@@ -235,9 +235,9 @@ void MainPlay::become_front() {
             set_up_instruments();
 
             if (sys.prefs->play_music_in_game()) {
-                LoadSong(g.level->songID);
-                SetSongVolume(kMusicVolume);
-                PlaySong();
+                sys.music.LoadSong(g.level->songID);
+                sys.music.SetSongVolume(kMusicVolume);
+                sys.music.PlaySong();
             }
 
             if (!_replay) {
@@ -251,7 +251,7 @@ void MainPlay::become_front() {
         globals()->transitions.reset();
         quiet_all();
         if (sys.prefs->play_music_in_game()) {
-            StopAndUnloadSong();
+            sys.music.StopAndUnloadSong();
         }
         _replay_builder.finish();
 #ifdef DATA_COVERAGE
@@ -654,7 +654,7 @@ void GamePlay::key_down(const KeyDownEvent& event) {
             sys.audio->set_global_volume(sys.prefs->volume());
         } else if (event.key() == sys.prefs->key(kActionMusicKeyNum) - 1) {
             if (sys.prefs->play_music_in_game()) {
-                ToggleSong();
+                sys.music.ToggleSong();
             }
         } else if (event.key() == sys.prefs->key(kFastMotionKeyNum) - 1) {
             _fast_motion = true;

@@ -53,12 +53,12 @@ ScrollTextScreen::ScrollTextScreen(int text_id, int width, ticks interval, int s
 void ScrollTextScreen::become_front() {
     // If a song was requested, play it.
     if (_play_song && sys.prefs->play_idle_music()) {
-        if (SongIsPlaying()) {
-            StopAndUnloadSong();
+        if (sys.music.SongIsPlaying()) {
+            sys.music.StopAndUnloadSong();
         }
-        LoadSong(_song_id);
-        SetSongVolume(kMaxMusicVolume);
-        PlaySong();
+        sys.music.LoadSong(_song_id);
+        sys.music.SetSongVolume(kMaxMusicVolume);
+        sys.music.PlaySong();
     }
 
     _start = now();
@@ -68,8 +68,8 @@ void ScrollTextScreen::become_front() {
 
 void ScrollTextScreen::resign_front() {
     // If a song was requested, stop it.
-    if (_play_song && SongIsPlaying()) {
-        StopAndUnloadSong();
+    if (_play_song && sys.music.SongIsPlaying()) {
+        sys.music.StopAndUnloadSong();
     }
 }
 

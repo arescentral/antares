@@ -148,8 +148,6 @@ void ReplayMaster::init() {
     SpriteHandlingInit();
     PluginInit();
     SpaceObjectHandlingInit();  // MUST be after PluginInit()
-    InitSoundFX();
-    MusicInit();
     InitMotion();
     Admiral::init();
     Vectors::init();

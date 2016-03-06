@@ -28,35 +28,24 @@ using std::unique_ptr;
 
 namespace antares {
 
-static ANTARES_GLOBAL bool playing = false;
-static ANTARES_GLOBAL unique_ptr<Sound> song;
-static ANTARES_GLOBAL unique_ptr<SoundChannel> channel;
-
-void MusicInit() {
+void Music::init() {
     playing = false;
     song.reset();
     channel = sys.audio->open_channel();
 }
 
-void MusicCleanup() {
-    channel->quiet();
-    channel.reset();
-    song.reset();
-    playing = false;
-}
-
-void PlaySong() {
+void Music::PlaySong() {
     channel->activate();
     song->loop();
     playing = true;
 }
 
-void StopSong() {
+void Music::StopSong() {
     channel->quiet();
     playing = false;
 }
 
-void ToggleSong() {
+void Music::ToggleSong() {
     if (playing) {
         StopSong();
     } else {
@@ -64,21 +53,21 @@ void ToggleSong() {
     }
 }
 
-bool SongIsPlaying() {
+bool Music::SongIsPlaying() {
     return playing;
 }
 
-void StopAndUnloadSong() {
+void Music::StopAndUnloadSong() {
     StopSong();
     song.reset();
 }
 
-void LoadSong(int id) {
+void Music::LoadSong(int id) {
     StopSong();
     song = sys.audio->open_sound(format("/music/{0}", id));
 }
 
-void SetSongVolume(double volume) {
+void Music::SetSongVolume(double volume) {
     channel->amp(255 * volume);
 }
 

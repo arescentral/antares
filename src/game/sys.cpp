@@ -24,6 +24,8 @@
 #include "data/string-list.hpp"
 #include "drawing/text.hpp"
 #include "lang/defines.hpp"
+#include "sound/driver.hpp"
+#include "sound/fx.hpp"
 
 using sfz::BytesSlice;
 using sfz::Exception;
@@ -60,6 +62,11 @@ void sys_init() {
     sys.cheat.codes  = to_vector(StringList(kCheatStringListID));
     sys.cheat.on     = to_vector(StringList(kCheatFeedbackOnID));
     sys.cheat.off    = to_vector(StringList(kCheatFeedbackOffID));
+
+    if (sys.audio) {
+        InitSoundFX();
+        sys.music.init();
+    }
 }
 
 }  // namespace antares

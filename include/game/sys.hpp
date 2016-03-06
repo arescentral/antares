@@ -22,6 +22,8 @@
 #include <sfz/sfz.hpp>
 #include <vector>
 
+#include "sound/music.hpp"
+
 namespace antares {
 
 class SoundDriver;
@@ -55,6 +57,8 @@ struct SystemGlobals {
         std::vector<sfz::String> on;
         std::vector<sfz::String> off;
     } cheat;
+
+    Music music;
 };
 
 extern SystemGlobals sys;
