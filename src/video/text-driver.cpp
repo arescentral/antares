@@ -27,9 +27,9 @@
 
 #include "config/preferences.hpp"
 #include "drawing/pix-map.hpp"
-#include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/time.hpp"
+#include "game/sys.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
 #include "ui/event.hpp"
@@ -265,7 +265,7 @@ class DummyCard: public Card {
   public:
     void become_front() {
         if (!_inited) {
-            InitDirectText();
+            sys_init();
             _inited = true;
         }
     }

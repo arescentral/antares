@@ -50,6 +50,7 @@
 #include "game/player-ship.hpp"
 #include "game/level.hpp"
 #include "game/starfield.hpp"
+#include "game/sys.hpp"
 #include "game/time.hpp"
 #include "lang/defines.hpp"
 #include "math/units.hpp"
@@ -88,22 +89,24 @@ extern set<int32_t> covered_actions;
 #endif  // DATA_COVERAGE
 
 Rect world() {
-    return Rect({0, 0}, VideoDriver::driver()->screen_size());
+    return Rect({0, 0}, sys.video->screen_size());
 }
 
 Rect play_screen() {
-    const Size size = VideoDriver::driver()->screen_size();
+    const Size size = sys.video->screen_size();
     return Rect(kLeftPanelWidth, 0, size.width - kRightPanelWidth, size.height);
 }
 
 Rect viewport() {
-    const Size size = VideoDriver::driver()->screen_size();
+    const Size size = sys.video->screen_size();
     return Rect(kLeftPanelWidth, 0, size.width - kRightPanelWidth, size.height - g.bottom_border);
 }
 
 class GamePlay : public Card {
   public:
-    GamePlay(bool replay, ReplayBuilder& replay_builder, GameResult* game_result);
+    GamePlay(
+            bool replay, ReplayBuilder& replay_builder, InputSource* input,
+            GameResult* game_result);
 
     virtual void become_front();
     virtual void resign_front();
@@ -152,17 +155,20 @@ class GamePlay : public Card {
     // paused games, it tracks now() without regard for the in-game
     // clock.
     wall_time _real_time;
+
+    InputSource* _input_source;
 };
 
 MainPlay::MainPlay(
-        const Level* level, bool replay, bool show_loading_screen,
+        const Level* level, bool replay, InputSource* input, bool show_loading_screen,
         GameResult* game_result):
     _state(NEW),
     _level(level),
     _replay(replay),
     _show_loading_screen(show_loading_screen),
     _cancelled(false),
-    _game_result(game_result) { }
+    _game_result(game_result),
+    _input_source(input) { }
 
 void MainPlay::become_front() {
     switch (_state) {
@@ -173,16 +179,12 @@ void MainPlay::become_front() {
             g.game_over = false;
 
             _replay_builder.init(
-                    Preferences::preferences()->scenario_identifier(),
+                    sys.prefs->scenario_identifier(),
                     String(u32_to_version(plug.meta.version)),
                     _level->chapter_number(),
                     g.random.seed);
 
-            if (Preferences::preferences()->play_idle_music()) {
-                LoadSong(3000);
-                SetSongVolume( kMaxMusicVolume);
-                PlaySong();
-            }
+            sys.music.play(Music::IDLE, 3000);
 
             if (_show_loading_screen) {
                 stack()->push(new LoadingScreen(_level, &_cancelled));
@@ -219,9 +221,7 @@ void MainPlay::become_front() {
 
       case BRIEFING:
         {
-            if (Preferences::preferences()->play_idle_music()) {
-                StopAndUnloadSong();
-            }
+            sys.music.stop();
 
             if (_cancelled) {
                 *_game_result = QUIT_GAME;
@@ -233,25 +233,19 @@ void MainPlay::become_front() {
 
             set_up_instruments();
 
-            if (Preferences::preferences()->play_music_in_game()) {
-                LoadSong(g.level->songID);
-                SetSongVolume(kMusicVolume);
-                PlaySong();
-            }
+            sys.music.play(Music::IN_GAME, g.level->songID);
 
             if (!_replay) {
                 _replay_builder.start();
             }
-            stack()->push(new GamePlay(_replay, _replay_builder, _game_result));
+            stack()->push(new GamePlay(_replay, _replay_builder, _input_source, _game_result));
         }
         break;
 
       case PLAYING:
         globals()->transitions.reset();
-        quiet_all();
-        if (Preferences::preferences()->play_music_in_game()) {
-            StopAndUnloadSong();
-        }
+        sys.sound.stop();
+        sys.music.stop();
         _replay_builder.finish();
 #ifdef DATA_COVERAGE
         {
@@ -287,7 +281,8 @@ int new_replay_file() {
     return open(path, O_WRONLY | O_CREAT | O_EXCL, 0644);
 }
 
-GamePlay::GamePlay(bool replay, ReplayBuilder& replay_builder, GameResult* game_result):
+GamePlay::GamePlay(
+        bool replay, ReplayBuilder& replay_builder, InputSource* input, GameResult* game_result):
         _state(PLAYING),
         _replay(replay),
         _game_result(game_result),
@@ -298,7 +293,8 @@ GamePlay::GamePlay(bool replay, ReplayBuilder& replay_builder, GameResult* game_
         _entering_message(false),
         _player_paused(false),
         _replay_builder(replay_builder),
-        _real_time(now()) { }
+        _real_time(now()),
+        _input_source(input) { }
 
 static const usecs kSwitchAfter = usecs(1000000 / 3);  // TODO(sfiera): ticks(20)
 static const usecs kSleepAfter = secs(60);
@@ -308,10 +304,10 @@ class PauseScreen : public Card {
     PauseScreen() {
         const StringList list(3100);
         _pause_string.assign(list.at(10));
-        int32_t width = title_font->string_width(_pause_string);
-        Rect bounds(0, 0, width, title_font->height);
+        int32_t width = sys.fonts.title->string_width(_pause_string);
+        Rect bounds(0, 0, width, sys.fonts.title->height);
         bounds.center_in(play_screen());
-        _text_origin = Point(bounds.left, bounds.top + title_font->ascent);
+        _text_origin = Point(bounds.left, bounds.top + sys.fonts.title->ascent);
 
         bounds.inset(-4, -4);
         _bracket_bounds = bounds;
@@ -319,7 +315,7 @@ class PauseScreen : public Card {
 
     virtual void become_front() {
         // TODO(sfiera): cancel any active transition.
-        PlayVolumeSound(kComputerBeep4, kMaxSoundVolume, kShortPersistence, kMustPlaySound);
+        sys.sound.pause();
         _visible = true;
         _next_switch = now() + kSwitchAfter;
         _sleep_at = now() + kSleepAfter;
@@ -360,10 +356,10 @@ class PauseScreen : public Card {
                 draw_vbracket(rects, _bracket_bounds, light_green);
             }
 
-            title_font->draw(_text_origin, _pause_string, light_green);
+            sys.fonts.title->draw(_text_origin, _pause_string, light_green);
         }
         if (asleep()) {
-            Rects().fill(world(), RgbColor(63, 0, 0, 0));
+            Rects().fill(world(), rgba(0, 0, 0, 63));
         }
     }
 
@@ -539,7 +535,7 @@ void GamePlay::fire_timer() {
             AdmiralThink();
             execute_action_queue();
 
-            if (globals()->gInputSource && !globals()->gInputSource->next(_player_ship)) {
+            if (_input_source && !_input_source->next(_player_ship)) {
                 g.game_over = true;
                 g.game_over_at = g.time;
             }
@@ -620,7 +616,7 @@ void GamePlay::fire_timer() {
 }
 
 void GamePlay::key_down(const KeyDownEvent& event) {
-    if (globals()->gInputSource) {
+    if (_input_source) {
         *_game_result = QUIT_GAME;
         g.game_over = true;
         g.game_over_at = g.time;
@@ -641,21 +637,21 @@ void GamePlay::key_down(const KeyDownEvent& event) {
         break;
 
       default:
-        if (event.key() == Preferences::preferences()->key(kHelpKeyNum) - 1) {
+        if (event.key() == sys.prefs->key(kHelpKeyNum) - 1) {
             _state = HELP;
             _player_paused = true;
             stack()->push(new HelpScreen);
-        } else if (event.key() == Preferences::preferences()->key(kVolumeDownKeyNum) - 1) {
-            Preferences::preferences()->set_volume(Preferences::preferences()->volume() - 1);
-            SoundDriver::driver()->set_global_volume(Preferences::preferences()->volume());
-        } else if (event.key() == Preferences::preferences()->key(kVolumeUpKeyNum) - 1) {
-            Preferences::preferences()->set_volume(Preferences::preferences()->volume() + 1);
-            SoundDriver::driver()->set_global_volume(Preferences::preferences()->volume());
-        } else if (event.key() == Preferences::preferences()->key(kActionMusicKeyNum) - 1) {
-            if (Preferences::preferences()->play_music_in_game()) {
-                ToggleSong();
+        } else if (event.key() == sys.prefs->key(kVolumeDownKeyNum) - 1) {
+            sys.prefs->set_volume(sys.prefs->volume() - 1);
+            sys.audio->set_global_volume(sys.prefs->volume());
+        } else if (event.key() == sys.prefs->key(kVolumeUpKeyNum) - 1) {
+            sys.prefs->set_volume(sys.prefs->volume() + 1);
+            sys.audio->set_global_volume(sys.prefs->volume());
+        } else if (event.key() == sys.prefs->key(kActionMusicKeyNum) - 1) {
+            if (sys.prefs->play_music_in_game()) {
+                sys.music.toggle();
             }
-        } else if (event.key() == Preferences::preferences()->key(kFastMotionKeyNum) - 1) {
+        } else if (event.key() == sys.prefs->key(kFastMotionKeyNum) - 1) {
             _fast_motion = true;
         }
         break;
@@ -666,11 +662,11 @@ void GamePlay::key_down(const KeyDownEvent& event) {
 }
 
 void GamePlay::key_up(const KeyUpEvent& event) {
-    if (globals()->gInputSource) {
+    if (_input_source) {
         return;
     }
 
-    if (event.key() == Preferences::preferences()->key(kFastMotionKeyNum) - 1) {
+    if (event.key() == sys.prefs->key(kFastMotionKeyNum) - 1) {
         _fast_motion = false;
     }
 
@@ -698,7 +694,7 @@ void GamePlay::mouse_down(const MouseDownEvent& event) {
             break;
         case 1:
             if (event.count() == 1) {
-                PlayerShipHandleClick(VideoDriver::driver()->get_mouse(), 1);
+                PlayerShipHandleClick(event.where(), 1);
             }
             break;
     }
@@ -718,7 +714,7 @@ void GamePlay::mouse_move(const MouseMoveEvent& event) {
 }
 
 void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
-    if (globals()->gInputSource) {
+    if (_input_source) {
         *_game_result = QUIT_GAME;
         g.game_over = true;
         g.game_over_at = g.time;
@@ -737,7 +733,7 @@ void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
 }
 
 void GamePlay::gamepad_button_up(const GamepadButtonUpEvent& event) {
-    if (globals()->gInputSource) {
+    if (_input_source) {
         return;
     }
 

@@ -25,6 +25,7 @@
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
+#include "game/sys.hpp"
 
 using sfz::BytesSlice;
 using sfz::Exception;
@@ -154,7 +155,7 @@ BuildPix::BuildPix(int text_id, int width):
                 }
             }
         } else {
-            unique_ptr<StyledText> styled(new StyledText(title_font));
+            unique_ptr<StyledText> styled(new StyledText(sys.fonts.title));
             auto red = GetRGBTranslateColorShade(RED, VERY_LIGHT);
             styled->set_fore_color(red);
             styled->set_retro_text(line);

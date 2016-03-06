@@ -197,6 +197,7 @@
       , "include/game/player-ship.hpp"
       , "include/game/space-object.hpp"
       , "include/game/starfield.hpp"
+      , "include/game/sys.hpp"
       , "include/game/time.hpp"
       , "include/game/vector.hpp"
       , "src/game/action.cpp"
@@ -218,6 +219,7 @@
       , "src/game/player-ship.cpp"
       , "src/game/space-object.cpp"
       , "src/game/starfield.cpp"
+      , "src/game/sys.cpp"
       , "src/game/vector.cpp"
       ]
     , "dependencies": ["<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz"]

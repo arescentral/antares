@@ -378,7 +378,7 @@ static void update_static(Handle<SpaceObject> o, ticks unitsToDo) {
                 }
             }
             sprite.style = spriteColor;
-            sprite.styleColor = RgbColor::kClear;
+            sprite.styleColor = RgbColor::clear();
             sprite.styleData = o->cloakState;
             if (o->owner == g.admiral) {
                 sprite.styleData -= sprite.styleData >> 2;
@@ -391,7 +391,7 @@ static void update_static(Handle<SpaceObject> o, ticks unitsToDo) {
                 sprite.style = spriteNormal;
             } else {
                 sprite.style = spriteColor;
-                sprite.styleColor = RgbColor::kClear;
+                sprite.styleColor = RgbColor::clear();
                 sprite.styleData = -o->cloakState;
                 if (o->owner == g.admiral) {
                     sprite.styleData -= sprite.styleData >> 2;
@@ -537,7 +537,7 @@ static void calc_misc() {
                 uint64_t dist = (vdiff * vdiff) + (hdiff * hdiff);
                 o->distanceFromPlayer = dist;
                 if ((dist < closestDist) && (o != g.ship)) {
-                    if (!((globals()->gZoomMode == kNearestFoeZoom) &&
+                    if (!((g.zoom == kNearestFoeZoom) &&
                           (o->owner == g.ship->owner))) {
                         closestDist = dist;
                         g.closest = o;

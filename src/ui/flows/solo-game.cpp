@@ -28,6 +28,7 @@
 #include "game/input-source.hpp"
 #include "game/main.hpp"
 #include "game/level.hpp"
+#include "game/sys.hpp"
 #include "sound/music.hpp"
 #include "ui/card.hpp"
 #include "ui/screens/debriefing.hpp"
@@ -80,8 +81,7 @@ void SoloGame::become_front() {
       case RESTART_LEVEL:
         _state = PLAYING;
         _game_result = NO_GAME;
-        globals()->gInputSource.reset();
-        stack()->push(new MainPlay(_level, false, true, &_game_result));
+        stack()->push(new MainPlay(_level, false, nullptr, true, &_game_result));
         break;
 
       case PLAYING:
@@ -134,10 +134,6 @@ void SoloGame::handle_game_result() {
 }
 
 void SoloGame::epilogue_done() {
-    if (Preferences::preferences()->play_idle_music()) {
-        StopAndUnloadSong();
-    }
-
     if (g.next_level < 0) {
         _level = NULL;
     } else {

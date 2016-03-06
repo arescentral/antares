@@ -27,6 +27,7 @@
 #include "game/initial.hpp"
 #include "game/level.hpp"
 #include "game/space-object.hpp"
+#include "game/sys.hpp"
 #include "lang/casts.hpp"
 #include "lang/defines.hpp"
 #include "video/driver.hpp"
@@ -229,16 +230,16 @@ void GetRealObjectSpriteData(
         tlong = baseObject->pixResID;
         if ( baseObject->attributes & kCanThink)
         {
-            pixTable = GetPixTable( tlong +
+            pixTable = sys.pix.get( tlong +
                 (implicit_cast<int16_t>(GetAdmiralColor( owner)) << kSpriteTableColorShift));
         } else
         {
-            pixTable = GetPixTable( tlong);
+            pixTable = sys.pix.get( tlong);
         }
     } else
     {
         tlong = spriteOverride;
-        pixTable = GetPixTable( tlong);
+        pixTable = sys.pix.get( tlong);
     }
 
 

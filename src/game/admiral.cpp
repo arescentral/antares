@@ -23,6 +23,7 @@
 #include "game/cheat.hpp"
 #include "game/globals.hpp"
 #include "game/space-object.hpp"
+#include "game/sys.hpp"
 #include "lang/casts.hpp"
 #include "math/macros.hpp"
 #include "math/random.hpp"
@@ -38,23 +39,19 @@ using std::unique_ptr;
 
 namespace antares {
 
-namespace {
+static const int32_t kNoFreeAdmiral            = -1;
+static const int32_t kDestNoObject             = -1;
 
-const int32_t kNoFreeAdmiral            = -1;
-const int32_t kDestNoObject             = -1;
+static const int32_t kDestinationNameLen        = 17;
+static const int32_t kAdmiralNameLen            = 31;
 
-const int32_t kDestinationNameLen        = 17;
-const int32_t kAdmiralNameLen            = 31;
-
-const Fixed kUnimportantTarget          = Fixed::from_float(0.000);
-const Fixed kMostImportantTarget        = Fixed::from_float(2.000);
-const Fixed kLeastImportantTarget       = Fixed::from_float(1.000);
-const Fixed kVeryImportantTarget        = Fixed::from_float(1.375);
-const Fixed kImportantTarget            = Fixed::from_float(1.250);
-const Fixed kSomewhatImportantTarget    = Fixed::from_float(1.125);
-const Fixed kAbsolutelyEssential        = Fixed::from_float(128.0);
-
-}  // namespace
+static const Fixed kUnimportantTarget          = Fixed::from_float(0.000);
+static const Fixed kMostImportantTarget        = Fixed::from_float(2.000);
+static const Fixed kLeastImportantTarget       = Fixed::from_float(1.000);
+static const Fixed kVeryImportantTarget        = Fixed::from_float(1.375);
+static const Fixed kImportantTarget            = Fixed::from_float(1.250);
+static const Fixed kSomewhatImportantTarget    = Fixed::from_float(1.125);
+static const Fixed kAbsolutelyEssential        = Fixed::from_float(128.0);
 
 void Admiral::init() {
     g.admirals.reset(new Admiral[kMaxPlayerNum]);
@@ -584,8 +581,7 @@ static void AdmiralBuildAtObject(
         if (newObject.get()) {
             SetObjectDestination(newObject, SpaceObject::none());
             if (admiral == g.admiral) {
-                PlayVolumeSound(kComputerBeep2, kMediumVolume, kMediumPersistence,
-                        kLowPrioritySound);
+                sys.sound.build();
             }
         }
     }

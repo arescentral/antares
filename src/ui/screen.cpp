@@ -26,6 +26,7 @@
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
 #include "game/time.hpp"
+#include "game/sys.hpp"
 #include "sound/fx.hpp"
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
@@ -109,10 +110,10 @@ void InterfaceScreen::draw() const {
     }
     copy_area.offset(off.h, off.v);
 
-    Rects().fill(copy_area, RgbColor::kBlack);
+    Rects().fill(copy_area, RgbColor::black());
 
     for (const auto& item: _items) {
-        draw_interface_item(*item, VideoDriver::driver()->input_mode(), off);
+        draw_interface_item(*item, sys.video->input_mode(), off);
     }
     overlay();
     if (stack()->top() == this) {
@@ -136,8 +137,7 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
             become_normal();
             _state = MOUSE_DOWN;
             button->status = kIH_Hilite;
-            PlayVolumeSound(
-                    kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
+            sys.sound.select();
             _hit_button = button;
             return;
         }
@@ -176,7 +176,7 @@ void InterfaceScreen::key_down(const KeyDownEvent& event) {
             become_normal();
             _state = KEY_DOWN;
             button->status = kIH_Hilite;
-            PlayVolumeSound(kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
+            sys.sound.select();
             _hit_button = button;
             _pressed = key_code;
             return;
@@ -203,7 +203,7 @@ void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
             become_normal();
             _state = GAMEPAD_DOWN;
             button->status = kIH_Hilite;
-            PlayVolumeSound(kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
+            sys.sound.select();
             _hit_button = button;
             _pressed = event.button;
             return;
@@ -244,7 +244,7 @@ void InterfaceScreen::extend(const Json& json) {
 
 Point InterfaceScreen::offset() const {
     Rect bounds = {0, 0, 640, 480};
-    bounds.center_in(VideoDriver::driver()->screen_size().as_rect());
+    bounds.center_in(sys.video->screen_size().as_rect());
     return bounds.origin();
 }
 

@@ -23,6 +23,7 @@
 #include "drawing/pix-map.hpp"
 #include "game/globals.hpp"
 #include "game/time.hpp"
+#include "game/sys.hpp"
 #include "sound/music.hpp"
 #include "ui/card.hpp"
 #include "video/driver.hpp"
@@ -51,13 +52,8 @@ ScrollTextScreen::ScrollTextScreen(int text_id, int width, ticks interval, int s
 
 void ScrollTextScreen::become_front() {
     // If a song was requested, play it.
-    if (_play_song && Preferences::preferences()->play_idle_music()) {
-        if (SongIsPlaying()) {
-            StopAndUnloadSong();
-        }
-        LoadSong(_song_id);
-        SetSongVolume(kMaxMusicVolume);
-        PlaySong();
+    if (_play_song) {
+        sys.music.play(Music::IDLE, _song_id);
     }
 
     _start = now();
@@ -67,8 +63,8 @@ void ScrollTextScreen::become_front() {
 
 void ScrollTextScreen::resign_front() {
     // If a song was requested, stop it.
-    if (_play_song && SongIsPlaying()) {
-        StopAndUnloadSong();
+    if (_play_song) {
+        sys.music.stop();
     }
 }
 
@@ -105,7 +101,7 @@ void ScrollTextScreen::fire_timer() {
 }
 
 void ScrollTextScreen::draw() const {
-    Rect world = VideoDriver::driver()->screen_size().as_rect();
+    Rect world = sys.video->screen_size().as_rect();
     Rect clip = Rect(0, 0, world.width(), kScrollTextHeight);
     clip.center_in(world);
 
@@ -115,8 +111,8 @@ void ScrollTextScreen::draw() const {
     position.offset(0, -_position);
     _build_pix.draw(position.origin());
     Rects rects;
-    rects.fill(Rect(world.left, world.top, world.right, clip.top), RgbColor::kBlack);
-    rects.fill(Rect(world.left, clip.bottom, world.right, world.bottom), RgbColor::kBlack);
+    rects.fill(Rect(world.left, world.top, world.right, clip.top), RgbColor::black());
+    rects.fill(Rect(world.left, clip.bottom, world.right, world.bottom), RgbColor::black());
 }
 
 }  // namespace antares

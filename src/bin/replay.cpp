@@ -27,7 +27,6 @@
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
-#include "drawing/text.hpp"
 #include "game/admiral.hpp"
 #include "game/vector.hpp"
 #include "game/cheat.hpp"
@@ -41,6 +40,7 @@
 #include "game/motion.hpp"
 #include "game/level.hpp"
 #include "game/space-object.hpp"
+#include "game/sys.hpp"
 #include "math/random.hpp"
 #include "math/rotation.hpp"
 #include "sound/driver.hpp"
@@ -79,7 +79,8 @@ class ReplayMaster : public Card {
             _output_path(output_path),
             _replay_data(data),
             _random_seed(_replay_data.global_seed),
-            _game_result(NO_GAME) { }
+            _game_result(NO_GAME),
+            _input_source(&_replay_data) { }
 
     virtual void become_front() {
         switch (_state) {
@@ -89,9 +90,9 @@ class ReplayMaster : public Card {
             Randomize(4);  // For the decision to replay intro.
             _game_result = NO_GAME;
             g.random.seed = _random_seed;
-            globals()->gInputSource.reset(new ReplayInputSource(&_replay_data));
             stack()->push(new MainPlay(
-                        &plug.levels[_replay_data.chapter_id - 1], true, false, &_game_result));
+                        &plug.levels[_replay_data.chapter_id - 1], true, &_input_source, false,
+                        &_game_result));
             break;
 
           case REPLAY:
@@ -132,6 +133,7 @@ class ReplayMaster : public Card {
     ReplayData _replay_data;
     const int32_t _random_seed;
     GameResult _game_result;
+    ReplayInputSource _input_source;
 
     DISALLOW_COPY_AND_ASSIGN(ReplayMaster);
 };
@@ -139,19 +141,15 @@ class ReplayMaster : public Card {
 void ReplayMaster::init() {
     init_globals();
 
-    SoundDriver::driver()->set_global_volume(8);  // Max volume.
+    sys.audio->set_global_volume(8);  // Max volume.
 
-    RotationInit();
-    InitDirectText();
+    sys_init();
     Label::init();
     Messages::init();
     InstrumentInit();
     SpriteHandlingInit();
-    AresCheatInit();
     PluginInit();
     SpaceObjectHandlingInit();  // MUST be after PluginInit()
-    InitSoundFX();
-    MusicInit();
     InitMotion();
     Admiral::init();
     Vectors::init();
@@ -204,7 +202,7 @@ void main(int argc, char** argv) {
     }
 
     Preferences preferences;
-    preferences.set_play_music_in_game(true);
+    preferences.play_music_in_game = true;
     NullPrefsDriver prefs(preferences);
 
     EventScheduler scheduler;

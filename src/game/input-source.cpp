@@ -56,11 +56,11 @@ bool ReplayInputSource::advance(EventReceiver& receiver) {
         const ReplayData::Action& action = _data->actions[_data_index];
         if (_at == action.at) {
             for (uint8_t key: action.keys_down) {
-                int code = Preferences::preferences()->key(key) - 1;
+                int code = sys.prefs->key(key) - 1;
                 receiver.key_down(KeyDownEvent(now(), code));
             }
             for (uint8_t key: action.keys_up) {
-                int code = Preferences::preferences()->key(key) - 1;
+                int code = sys.prefs->key(key) - 1;
                 receiver.key_up(KeyUpEvent(now(), code));
             }
         }

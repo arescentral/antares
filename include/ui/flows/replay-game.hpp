@@ -23,6 +23,7 @@
 
 #include "data/replay.hpp"
 #include "data/resource.hpp"
+#include "game/input-source.hpp"
 #include "game/main.hpp"
 #include "math/random.hpp"
 #include "ui/card.hpp"
@@ -51,6 +52,7 @@ class ReplayGame : public Card {
     Random _random_seed;
     const Level* _level;
     GameResult _game_result;
+    ReplayInputSource _input_source;
 };
 
 }  // namespace antares

@@ -53,11 +53,6 @@ T clamp(T value, T min, T max) {
     }
 }
 
-template <typename T>
-void clear(T& t) {
-    t = T();
-}
-
 }  // namespace
 
 namespace cf {
@@ -83,18 +78,14 @@ void set_preference(const StringSlice& key, const T& value) {
 }  // namespace
 }  // namespace cf
 
-CoreFoundationPrefsDriver::CoreFoundationPrefsDriver() { }
-
-void CoreFoundationPrefsDriver::load(Preferences* preferences) {
-    clear(*preferences);
-
+CoreFoundationPrefsDriver::CoreFoundationPrefsDriver() {
     cf::Array key_settings;
     if (cf::get_preference(kKeySettingsPreference, key_settings)) {
         for (int i: range(min<int>(KEY_COUNT, key_settings.size()))) {
             cf::Number number = cf::cast<cf::Number>(cf::Type(CFRetain(key_settings.get(i))));
             int key;
             if (cf::unwrap(number, key)) {
-                preferences->set_key(i, key);
+                _current.keys[i] = key;
             }
         }
     }
@@ -103,13 +94,13 @@ void CoreFoundationPrefsDriver::load(Preferences* preferences) {
         cf::Boolean cfbool;
         bool val;
         if (cf::get_preference(kIdleMusicPreference, cfbool) && cf::unwrap(cfbool, val)) {
-            preferences->set_play_idle_music(val);
+            _current.play_idle_music = val;
         }
         if (cf::get_preference(kGameMusicPreference, cfbool) && cf::unwrap(cfbool, val)) {
-            preferences->set_play_music_in_game(val);
+            _current.play_music_in_game = val;
         }
         if (cf::get_preference(kSpeechOnPreference, cfbool) && cf::unwrap(cfbool, val)) {
-            preferences->set_speech_on(val);
+            _current.speech_on = val;
         }
     }
 
@@ -117,29 +108,31 @@ void CoreFoundationPrefsDriver::load(Preferences* preferences) {
         cf::Number cfnum;
         double val;
         if (cf::get_preference(kVolumePreference, cfnum) && cf::unwrap(cfnum, val)) {
-            preferences->set_volume(clamp<int>(8 * val, 0, 8));
+            _current.volume = clamp<int>(8 * val, 0, 8);
         }
     }
 
     cf::String cfstr;
     String id;
     if (cf::get_preference(kScenarioPreference, cfstr) && cf::unwrap(cfstr, id)) {
-        preferences->set_scenario_identifier(id);
+        _current.scenario_identifier.assign(id);
     }
 }
 
-void CoreFoundationPrefsDriver::save(const Preferences& preferences) {
+void CoreFoundationPrefsDriver::set(const Preferences& preferences) {
+    _current = preferences.copy();
+
     cf::MutableArray key_settings(CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks));
     for (int i: range<int>(KEY_COUNT)) {
-        int key = preferences.key(i);
+        int key = preferences.keys[i];
         key_settings.append(cf::wrap(key).c_obj());
     }
     cf::set_preference(kKeySettingsPreference, key_settings);
-    cf::set_preference(kIdleMusicPreference, cf::wrap(preferences.play_idle_music()));
-    cf::set_preference(kGameMusicPreference, cf::wrap(preferences.play_music_in_game()));
-    cf::set_preference(kSpeechOnPreference, cf::wrap(preferences.speech_on()));
-    cf::set_preference(kVolumePreference, cf::wrap(0.125 * preferences.volume()));
-    cf::set_preference(kScenarioPreference, cf::wrap(preferences.scenario_identifier()));
+    cf::set_preference(kIdleMusicPreference, cf::wrap(preferences.play_idle_music));
+    cf::set_preference(kGameMusicPreference, cf::wrap(preferences.play_music_in_game));
+    cf::set_preference(kSpeechOnPreference, cf::wrap(preferences.speech_on));
+    cf::set_preference(kVolumePreference, cf::wrap(0.125 * preferences.volume));
+    cf::set_preference(kScenarioPreference, cf::wrap(preferences.scenario_identifier));
     CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication);
 }
 

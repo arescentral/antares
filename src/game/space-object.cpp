@@ -39,6 +39,7 @@
 #include "game/player-ship.hpp"
 #include "game/level.hpp"
 #include "game/starfield.hpp"
+#include "game/sys.hpp"
 #include "math/macros.hpp"
 #include "math/random.hpp"
 #include "math/rotation.hpp"
@@ -131,7 +132,7 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
 
     NatePixTable* spriteTable = nullptr;
     if (sourceObject->pixResID != kNoSpriteTable) {
-        spriteTable = GetPixTable(sourceObject->pixResID);
+        spriteTable = sys.pix.get(sourceObject->pixResID);
         if (!spriteTable) {
             throw Exception("Received an unexpected request to load a sprite");
         }
@@ -170,7 +171,7 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
 
         RgbColor tinyColor;
         if (obj->tinySize == 0) {
-            tinyColor = RgbColor::kClear;
+            tinyColor = RgbColor::clear();
         } else if (obj->owner == g.admiral) {
             tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
         } else if (obj->owner.get()) {
@@ -504,11 +505,11 @@ void SpaceObject::change_base_type(
 
     // HANDLE THE NEW SPRITE DATA:
     if (obj->pixResID != kNoSpriteTable) {
-        spriteTable = GetPixTable(obj->pixResID);
+        spriteTable = sys.pix.get(obj->pixResID);
 
         if (spriteTable == NULL) {
             throw Exception("Couldn't load a requested sprite");
-            spriteTable = AddPixTable(obj->pixResID);
+            spriteTable = sys.pix.add(obj->pixResID);
         }
 
         obj->sprite->table = spriteTable;
@@ -682,7 +683,7 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
                     object->baseType->pixResID | (GetAdmiralColor(owner)
                             << kSpriteTableColorShift);
 
-                pixTable = GetPixTable(object->pixResID);
+                pixTable = sys.pix.get(object->pixResID);
                 if (pixTable != NULL) {
                     object->sprite->table = pixTable;
                 }
@@ -755,11 +756,11 @@ void SpaceObject::set_cloak(bool cloak) {
     auto object = Handle<SpaceObject>(number());
     if (cloak && (object->cloakState == 0)) {
         object->cloakState = 1;
-        mPlayDistanceSound(kMaxSoundVolume, object, kCloakOn, kMediumPersistence, kPrioritySound);
+        sys.sound.cloak_on_at(object);
     } else if ((!cloak || (object->attributes & kRemoteOrHuman))
             && (object->cloakState >= 250)) {
         object->cloakState = kCloakOffStateMax;
-        mPlayDistanceSound(kMaxSoundVolume, object, kCloakOff, kMediumPersistence, kPrioritySound);
+        sys.sound.cloak_off_at(object);
     }
 }
 

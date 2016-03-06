@@ -27,6 +27,7 @@
 #include "game/globals.hpp"
 #include "game/level.hpp"
 #include "game/time.hpp"
+#include "game/sys.hpp"
 #include "sound/fx.hpp"
 #include "video/driver.hpp"
 
@@ -46,7 +47,7 @@ LoadingScreen::LoadingScreen(const Level* level, bool* cancelled):
         _current(0),
         _max(1) {
     StringList strings(kLevelNameID);
-    _name_text.reset(new StyledText(title_font));
+    _name_text.reset(new StyledText(sys.fonts.title));
     _name_text->set_fore_color(GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT));
     _name_text->set_retro_text(strings.at(_level->levelNameStrNum - 1));
     _name_text->set_tab_width(220);
@@ -85,7 +86,7 @@ void LoadingScreen::fire_timer() {
                 return;
             }
             if ((_chars_typed % 3) == 0) {
-                PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
+                sys.sound.teletype();
             }
             _next_update += kTypingDelay;
             ++_chars_typed;

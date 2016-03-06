@@ -219,13 +219,13 @@ void PictFade::draw() const {
 
 void PictFade::wax() {
     _state = WAXING;
-    stack()->push(new ColorFade(ColorFade::FROM_COLOR, RgbColor::kBlack, this->fade_time(), true,
+    stack()->push(new ColorFade(ColorFade::FROM_COLOR, RgbColor::black(), this->fade_time(), true,
                 _skipped));
 }
 
 void PictFade::wane() {
     _state = WANING;
-    stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::kBlack, this->fade_time(), true,
+    stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), this->fade_time(), true,
                 _skipped));
 }
 

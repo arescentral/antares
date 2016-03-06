@@ -32,6 +32,7 @@
 #include "game/labels.hpp"
 #include "game/level.hpp"
 #include "game/space-object.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
@@ -47,45 +48,45 @@ namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-namespace {
+static const int32_t kMessageScreenLeft        = 200;
+static const int32_t kMessageScreenTop         = 454;
+static const int32_t kMessageScreenRight       = 420;
+static const int32_t kMessageScreenBottom      = 475;
 
-const int32_t kMessageScreenLeft        = 200;
-const int32_t kMessageScreenTop         = 454;
-const int32_t kMessageScreenRight       = 420;
-const int32_t kMessageScreenBottom      = 475;
+static const uint8_t kMessageColor             = RED;
+static const ticks   kMessageMoveTime          = ticks(30);
+static const ticks   kMessageDisplayTime       = (kMessageMoveTime * 2 + secs(2));
+static const ticks   kLowerTime                = (kMessageDisplayTime - kMessageMoveTime);
+static const ticks   kRaiseTime                = kMessageMoveTime;
 
-const uint8_t kMessageColor             = RED;
-const ticks   kMessageMoveTime          = ticks(30);
-const ticks   kMessageDisplayTime       = (kMessageMoveTime * 2 + secs(2));
-const ticks   kLowerTime                = (kMessageDisplayTime - kMessageMoveTime);
-const ticks   kRaiseTime                = kMessageMoveTime;
+static const int32_t kDestinationLength        = 127;
 
-const int32_t kDestinationLength        = 127;
+static const int32_t kStatusLabelLeft          = 200;
+static const int32_t kStatusLabelTop           = 50;
+static const ticks   kStatusLabelAge           = secs(2);
 
-const int32_t kStatusLabelLeft          = 200;
-const int32_t kStatusLabelTop           = 50;
-const ticks   kStatusLabelAge           = secs(2);
+static const int32_t kMaxRetroSize             = 10;
+static const int32_t kLongMessageVPad          = 5;
+static const int32_t kLongMessageVPadDouble    = 10;
 
-const int32_t kMaxRetroSize             = 10;
-const int32_t kLongMessageVPad          = 5;
-const int32_t kLongMessageVPadDouble    = 10;
-
-const int32_t kMessageCharTopBuffer     = 0;
-const int32_t kMessageCharBottomBuffer  = 0;
+static const int32_t kMessageCharTopBuffer     = 0;
+static const int32_t kMessageCharBottomBuffer  = 0;
 
 // These should be Rune constants, but we operate over bytes for now.
-const uint8_t kReturnChar               = '\n';
-const uint8_t kCodeChar                 = '\\';
-const uint8_t kCodeTabChar              = 't';
-const uint8_t kCodeInvertChar           = 'i';
-const uint8_t kCodeColorChar            = 'c';
-const uint8_t kCodeRevertChar           = 'r';
-const uint8_t kCodeForeColorChar        = 'f';
-const uint8_t kCodeBackColorChar        = 'b';
+static const uint8_t kReturnChar               = '\n';
+static const uint8_t kCodeChar                 = '\\';
+static const uint8_t kCodeTabChar              = 't';
+static const uint8_t kCodeInvertChar           = 'i';
+static const uint8_t kCodeColorChar            = 'c';
+static const uint8_t kCodeRevertChar           = 'r';
+static const uint8_t kCodeForeColorChar        = 'f';
+static const uint8_t kCodeBackColorChar        = 'b';
 
-const int16_t kStringMessageID          = 1;
+static const int16_t kStringMessageID          = 1;
 
-const int32_t kHBuffer                  = 4;
+static const int32_t kHBuffer                  = 4;
+
+namespace {
 
 template <typename T>
 void clear(T& t) {
@@ -282,18 +283,18 @@ void Messages::clip( void)
                 const RgbColor& light_blue = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
                 const RgbColor& dark_blue = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
                 tmessage->text.assign(*textData);
-                tmessage->retro_text.reset(new StyledText(tactical_font));
+                tmessage->retro_text.reset(new StyledText(sys.fonts.tactical));
                 tmessage->retro_text->set_fore_color(light_blue);
                 tmessage->retro_text->set_back_color(dark_blue);
                 tmessage->retro_text->set_retro_text(*textData);
                 tmessage->retro_text->set_tab_width(60);
                 tmessage->retro_text->wrap_to(
-                        viewport().width() - kHBuffer - tactical_font->logicalWidth + 1, 0, 0);
+                        viewport().width() - kHBuffer - sys.fonts.tactical->logicalWidth + 1, 0, 0);
                 tmessage->textHeight = tmessage->retro_text->height();
                 tmessage->textHeight += kLongMessageVPadDouble;
                 tmessage->retro_origin = Point(
                         viewport().left + kHBuffer,
-                        viewport().bottom + tactical_font->ascent + kLongMessageVPad);
+                        viewport().bottom + sys.fonts.tactical->ascent + kLongMessageVPad);
                 tmessage->at_char = 0;
 
                 if (tmessage->labelMessage == false) {
@@ -377,7 +378,7 @@ void Messages::draw_long_message(ticks time_pass) {
         // Play teletype sound at least once every 3 ticks.
         tmessage->charDelayCount += time_pass;
         if (tmessage->charDelayCount > ticks(0)) {
-            PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
+            sys.sound.teletype();
             while (tmessage->charDelayCount > ticks(0)) {
                 tmessage->charDelayCount -= kMajorTick;
             }

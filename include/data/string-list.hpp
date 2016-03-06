@@ -33,10 +33,17 @@ class StringList {
     const sfz::String& at(size_t index) const;
 
   private:
+    friend std::vector<sfz::String> to_vector(StringList&& strl);
     std::vector<sfz::String> _strings;
 
     DISALLOW_COPY_AND_ASSIGN(StringList);
 };
+
+inline std::vector<sfz::String> to_vector(StringList&& strl) {
+    std::vector<sfz::String> result;
+    std::swap(result, strl._strings);
+    return result;
+}
 
 }  // namespace antares
 

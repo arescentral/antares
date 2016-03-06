@@ -224,7 +224,7 @@ class OpenGlTextureImpl : public Texture::Impl {
         size.width += 2;
         size.height += 2;
         ArrayPixMap copy(size);
-        copy.fill(RgbColor::kClear);
+        copy.fill(RgbColor::clear());
         copy.view(Rect(1, 1, size.width - 1, size.height - 1)).copy(image);
         glTexImage2D(
                 GL_TEXTURE_RECTANGLE, 0, GL_RGBA, size.width, size.height,
@@ -237,7 +237,7 @@ class OpenGlTextureImpl : public Texture::Impl {
 
     virtual void draw(const Rect& draw_rect) const {
         _uniforms.color_mode.set(DRAW_SPRITE_MODE);
-        draw_internal(draw_rect, RgbColor::kWhite);
+        draw_internal(draw_rect, RgbColor::white());
     }
 
     virtual void draw_cropped(const Rect& dest, const Rect& source, const RgbColor& tint) const {
@@ -558,8 +558,8 @@ void OpenGlVideoDriver::draw_triangle(const Rect& rect, const RgbColor& color) {
     to.offset(rect.left, rect.top);
     if (_triangles.find(size) == _triangles.end()) {
         ArrayPixMap pix(size, size);
-        pix.fill(RgbColor::kClear);
-        draw_triangle_up(&pix, RgbColor::kWhite);
+        pix.fill(RgbColor::clear());
+        draw_triangle_up(&pix, RgbColor::white());
         _triangles[size] = texture("", pix);
     }
     _triangles[size].draw_shaded(to, color);
@@ -571,8 +571,8 @@ void OpenGlVideoDriver::draw_diamond(const Rect& rect, const RgbColor& color) {
     to.offset(rect.left, rect.top);
     if (_diamonds.find(size) == _diamonds.end()) {
         ArrayPixMap pix(size, size);
-        pix.fill(RgbColor::kClear);
-        draw_compat_diamond(&pix, RgbColor::kWhite);
+        pix.fill(RgbColor::clear());
+        draw_compat_diamond(&pix, RgbColor::white());
         _diamonds[size] = texture("", pix);
     }
     _diamonds[size].draw_shaded(to, color);
@@ -584,8 +584,8 @@ void OpenGlVideoDriver::draw_plus(const Rect& rect, const RgbColor& color) {
     to.offset(rect.left, rect.top);
     if (_pluses.find(size) == _pluses.end()) {
         ArrayPixMap pix(size, size);
-        pix.fill(RgbColor::kClear);
-        draw_compat_plus(&pix, RgbColor::kWhite);
+        pix.fill(RgbColor::clear());
+        draw_compat_plus(&pix, RgbColor::white());
         _pluses[size] = texture("", pix);
     }
     _pluses[size].draw_shaded(to, color);

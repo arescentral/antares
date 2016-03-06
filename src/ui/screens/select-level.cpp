@@ -30,6 +30,7 @@
 #include "game/globals.hpp"
 #include "game/main.hpp"
 #include "game/level.hpp"
+#include "game/sys.hpp"
 #include "sound/driver.hpp"
 #include "ui/card.hpp"
 #include "ui/interface-handling.hpp"
@@ -92,7 +93,7 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
             _state = UNLOCKING;
             _unlock_chapter = 0;
             _unlock_digits = ndigits(plug.levels.size());
-            PlayVolumeSound(kCloakOn, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
+            sys.sound.cloak_on();
             return;
         }
       case UNLOCKING:
@@ -108,7 +109,7 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
                 if (_unlock_chapter > plug.levels.size()) {
                     return;
                 }
-                PlayVolumeSound(kCloakOff, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
+                sys.sound.cloak_off();
                 Ledger::ledger()->unlock_chapter(_unlock_chapter);
                 Ledger::ledger()->unlocked_chapters(&_chapters);
                 adjust_interface();
@@ -140,7 +141,7 @@ void SelectLevelScreen::handle_button(Button& button) {
       case OK:
         _state = FADING_OUT;
         *_cancelled = false;
-        stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::kBlack, secs(1), false, NULL));
+        stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
         break;
 
       case CANCEL:
@@ -179,7 +180,7 @@ void SelectLevelScreen::draw_level_name() const {
     const InterfaceItem& i = item(NAME);
 
     RgbColor color = GetRGBTranslateColorShade(AQUA, VERY_LIGHT);
-    StyledText retro(title_font);
+    StyledText retro(sys.fonts.title);
     retro.set_fore_color(color);
     retro.set_retro_text(chapter_name);
     retro.wrap_to(440, 0, 2);

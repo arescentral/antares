@@ -26,8 +26,8 @@
 
 #include "config/preferences.hpp"
 #include "drawing/pix-map.hpp"
-#include "drawing/text.hpp"
 #include "game/time.hpp"
+#include "game/sys.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
 #include "ui/event.hpp"
@@ -85,7 +85,7 @@ class SnapshotBuffer {
                 uint8_t green = *(p++);
                 uint8_t red = *(p++);
                 ++p;
-                pix.set(x, size.height - y - 1, RgbColor(red, green, blue));
+                pix.set(x, size.height - y - 1, rgb(red, green, blue));
             }
         }
     }
@@ -204,7 +204,7 @@ class DummyCard: public Card {
   public:
     void become_front() {
         if (!_inited) {
-            InitDirectText();
+            sys_init();
             _inited = true;
         }
     }

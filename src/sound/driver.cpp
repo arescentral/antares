@@ -21,6 +21,8 @@
 #include <fcntl.h>
 #include <sfz/sfz.hpp>
 
+#include "game/time.hpp"
+#include "game/sys.hpp"
 #include "lang/casts.hpp"
 #include "lang/defines.hpp"
 #include "video/driver.hpp"
@@ -42,21 +44,15 @@ namespace antares {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // SoundDriver
 
-static ANTARES_GLOBAL SoundDriver* sound_driver = NULL;
-
 SoundDriver::SoundDriver() {
-    if (antares::sound_driver) {
+    if (sys.audio) {
         throw Exception("SoundDriver is a singleton");
     }
-    antares::sound_driver = this;
+    sys.audio = this;
 }
 
 SoundDriver::~SoundDriver() {
-    antares::sound_driver = NULL;
-}
-
-SoundDriver* SoundDriver::driver() {
-    return sound_driver;
+    sys.audio = NULL;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -120,29 +116,25 @@ class LogSoundDriver::LogChannel : public SoundChannel {
     }
 
     void play(StringSlice sound_path) {
-        auto t = std::chrono::time_point_cast<ticks>(
-                VideoDriver::driver()->now()).time_since_epoch().count();
+        auto t = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
         String line(format("play\t{0}\t{1}\t{2}\n", _id, t, sound_path));
         write(_driver._sound_log, Bytes(utf8::encode(line)));
     }
 
     void loop(StringSlice sound_path) {
-        auto t = std::chrono::time_point_cast<ticks>(
-                VideoDriver::driver()->now()).time_since_epoch().count();
+        auto t = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
         String line(format("loop\t{0}\t{1}\t{2}\n", _id, t, sound_path));
         write(_driver._sound_log, Bytes(utf8::encode(line)));
     }
 
     virtual void amp(uint8_t volume) {
-        auto t = std::chrono::time_point_cast<ticks>(
-                VideoDriver::driver()->now()).time_since_epoch().count();
+        auto t = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
         String line(format("amp\t{0}\t{1}\t{2}\n", _id, t, volume));
         write(_driver._sound_log, Bytes(utf8::encode(line)));
     }
 
     virtual void quiet() {
-        auto t = std::chrono::time_point_cast<ticks>(
-                VideoDriver::driver()->now()).time_since_epoch().count();
+        auto t = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
         String line(format("quiet\t{0}\t{1}\n", _id, t));
         write(_driver._sound_log, Bytes(utf8::encode(line)));
     }

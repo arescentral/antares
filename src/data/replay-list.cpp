@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
+#include "game/sys.hpp"
 
 using sfz::CString;
 using sfz::MappedFile;
@@ -48,7 +49,7 @@ struct ScopedGlob {
 
 ReplayList::ReplayList() {
     ScopedGlob g;
-    const StringSlice scenario = Preferences::preferences()->scenario_identifier();
+    const StringSlice scenario = sys.prefs->scenario_identifier();
     String str(format("{0}/{1}/replays/*.NLRP", dirs().scenarios, scenario));
     CString c_str(str);
     glob(c_str.data(), 0, NULL, &g.data);

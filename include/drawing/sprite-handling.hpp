@@ -92,15 +92,19 @@ Fixed scale_by(Fixed value, int32_t scale);
 Fixed evil_scale_by(Fixed value, int32_t scale);
 int32_t evil_scale_by(int32_t value, int32_t scale);
 
+class Pix {
+    public:
+        void reset();
+        NatePixTable* add(int16_t id);
+        NatePixTable* get(int16_t id);
+
+    private:
+        std::map<int16_t, NatePixTable> pix;
+};
+
 void SpriteHandlingInit();
 void ResetAllSprites();
 Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t scale);
-void ResetAllPixTables();
-void SetAllPixTablesNoKeep();
-void KeepPixTable(int16_t resource_id);
-void RemoveAllUnusedPixTables();
-NatePixTable* AddPixTable(int16_t resource_id);
-NatePixTable* GetPixTable(int16_t resource_id);
 Handle<Sprite> AddSprite(
         Point where, NatePixTable* table, int16_t resID, int16_t whichShape, int32_t scale, int32_t size,
         int16_t layer, const RgbColor& color);

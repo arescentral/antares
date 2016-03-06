@@ -55,11 +55,7 @@ void MainScreen::become_front() {
     switch (_state) {
       case NORMAL:
         InterfaceScreen::become_front();
-        if (Preferences::preferences()->play_idle_music() && !SongIsPlaying()) {
-            LoadSong(kTitleSongID);
-            SetSongVolume(kMaxMusicVolume);
-            PlaySong();
-        }
+        sys.music.play(Music::IDLE, kTitleSongID);
         _next_timer = (now() + kMainDemoTimeOutTime);
         break;
       case QUITTING:
@@ -131,7 +127,7 @@ void MainScreen::handle_button(antares::Button& button) {
         // 1-second fade-out.
         _state = QUITTING;
         stack()->push(new ColorFade(
-                    ColorFade::TO_COLOR, RgbColor::kBlack, secs(1), false, NULL));
+                    ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
         break;
 
       case DEMO:

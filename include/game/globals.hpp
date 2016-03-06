@@ -89,8 +89,6 @@ struct GlobalState {
     std::unique_ptr<SpaceObject[]>  objects;   // All space objects (whether active or not).
     Handle<SpaceObject>             ship;      // Local player's flagship.
     Handle<SpaceObject>             root;      // Head of LL of active objs, in creation time order.
-    Handle<SpaceObject>             closest;   // Nearest object or hostile, depending on zoom.
-    Handle<SpaceObject>             farthest;  // Farthest object (sufficient for zoom-to-all).
 
     std::unique_ptr<Vector[]>       vectors;       // Auxiliary info for kIsVector objects.
     std::unique_ptr<Destination[]>  destinations;  // Auxiliary info for kIsDestination objects.
@@ -114,6 +112,14 @@ struct GlobalState {
     Handle<Label>             send_label;     // Message local player is currently entering.
 
     int32_t                   bottom_border;  // When a message is being displayed.
+
+    uint32_t  key_mask;  // Determines input to reject.
+
+    miniComputerDataType  mini;
+
+    ZoomType             zoom;
+    Handle<SpaceObject>  closest;   // Nearest object or hostile, depending on zoom.
+    Handle<SpaceObject>  farthest;  // Farthest object (sufficient for zoom-to-all).
 };
 
 extern GlobalState g;
@@ -122,13 +128,6 @@ struct aresGlobalType {
     aresGlobalType();
     ~aresGlobalType();
 
-    std::unique_ptr<InputSource> gInputSource;
-
-    ZoomType        gZoomMode;
-
-    miniComputerDataType    gMiniScreenData;
-
-    uint32_t        keyMask;
     hotKeyType      hotKey[kHotKeyNum];
 
     Handle<SpaceObject>     lastSelectedObject;

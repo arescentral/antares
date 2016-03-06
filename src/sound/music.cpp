@@ -19,6 +19,7 @@
 #include "sound/music.hpp"
 
 #include "config/preferences.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 #include "sound/driver.hpp"
 
@@ -27,58 +28,67 @@ using std::unique_ptr;
 
 namespace antares {
 
-static ANTARES_GLOBAL bool playing = false;
-static ANTARES_GLOBAL unique_ptr<Sound> song;
-static ANTARES_GLOBAL unique_ptr<SoundChannel> channel;
-
-void MusicInit() {
-    playing = false;
-    song.reset();
-    channel = SoundDriver::driver()->open_channel();
+void Music::init() {
+    _playing = false;
+    _song_type = IDLE;
+    _song_id = kTitleSongID;
+    _song.reset();
+    _channel = sys.audio->open_channel();
 }
 
-void MusicCleanup() {
-    channel->quiet();
-    channel.reset();
-    song.reset();
-    playing = false;
-}
+void Music::play(Type type, int16_t id) {
+    bool play = false;
+    double volume = 1.0;
+    if (type == IDLE) {
+        play = sys.prefs->play_idle_music();
+    } else if (type == IN_GAME) {
+        play = sys.prefs->play_music_in_game();
+        volume = 0.84375;
+    }
 
-void PlaySong() {
-    channel->activate();
-    song->loop();
-    playing = true;
-}
+    if (_playing && play && (_song_id == id)) {
+        return;
+    }
+    stop();
+    _song_type = type;
+    _song_id = id;
 
-void StopSong() {
-    channel->quiet();
-    playing = false;
-}
-
-void ToggleSong() {
-    if (playing) {
-        StopSong();
-    } else {
-        PlaySong();
+    if (play) {
+        _song = sys.audio->open_sound(format("/music/{0}", id));
+        _channel->activate();
+        _channel->amp(255 * volume);
+        _song->loop();
+        _playing = true;
     }
 }
 
-bool SongIsPlaying() {
-    return playing;
+void Music::stop() {
+    _channel->quiet();
+    _playing = false;
 }
 
-void StopAndUnloadSong() {
-    StopSong();
-    song.reset();
+void Music::toggle() {
+    if (_playing) {
+        stop();
+    } else {
+        play(_song_type, _song_id);
+    }
 }
 
-void LoadSong(int id) {
-    StopSong();
-    song = SoundDriver::driver()->open_sound(format("/music/{0}", id));
-}
-
-void SetSongVolume(double volume) {
-    channel->amp(255 * volume);
+void Music::sync() {
+    if (_song_type == IDLE) {
+        if (sys.prefs->play_idle_music()) {
+            play(_song_type, _song_id);
+        } else {
+            stop();
+        }
+    } else if (_song_type == IN_GAME) {
+        if (sys.prefs->play_music_in_game()) {
+            play(_song_type, _song_id);
+        } else {
+            stop();
+        }
+    }
 }
 
 }  // namespace antares

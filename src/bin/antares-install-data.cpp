@@ -36,6 +36,10 @@ namespace utf8 = sfz::utf8;
 
 namespace antares {
 
+String application_path() {
+    return String(".");
+}
+
 class PrintStatusObserver : public DataExtractor::Observer {
   public:
     virtual void status(const sfz::StringSlice& status) {

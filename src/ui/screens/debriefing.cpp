@@ -30,6 +30,7 @@
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/time.hpp"
+#include "game/sys.hpp"
 #include "sound/fx.hpp"
 #include "ui/card.hpp"
 #include "video/driver.hpp"
@@ -112,7 +113,7 @@ int score(
 }
 
 unique_ptr<StyledText> style_score_text(String text) {
-    unique_ptr<StyledText> result(new StyledText(button_font));
+    unique_ptr<StyledText> result(new StyledText(sys.fonts.button));
     result->set_fore_color(GetRGBTranslateColorShade(GOLD, VERY_LIGHT));
     result->set_back_color(GetRGBTranslateColorShade(GOLD, DARKEST));
     result->set_retro_text(text);
@@ -162,7 +163,7 @@ void DebriefingScreen::resign_front() {
 
 void DebriefingScreen::draw() const {
     next()->draw();
-    Rects().fill(_pix_bounds, RgbColor::kBlack);
+    Rects().fill(_pix_bounds, RgbColor::black());
     if (_score) {
         _score->draw_range(_score_bounds, 0, _typed_chars);
     }
@@ -211,7 +212,7 @@ void DebriefingScreen::fire_timer() {
     if (_state != TYPING) {
         throw Exception(format("DebriefingScreen::fire_timer() called but _state is {0}", _state));
     }
-    PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
+    sys.sound.teletype();
     wall_time now = antares::now();
     while (_next_update <= now) {
         if (_typed_chars < _score->size()) {

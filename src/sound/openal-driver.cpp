@@ -223,7 +223,7 @@ void OpenAlSoundDriver::read_sound(BytesSlice data, OpenAlSound& sound) {
 }
 
 unique_ptr<Sound> OpenAlSoundDriver::open_sound(PrintItem path) {
-    static struct {
+    static const struct {
         const char ext[6];
         void (*fn)(BytesSlice, OpenAlSound&);
     } fmts[] = {

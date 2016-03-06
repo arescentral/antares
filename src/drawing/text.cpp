@@ -25,6 +25,7 @@
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "game/globals.hpp"
+#include "lang/defines.hpp"
 #include "video/driver.hpp"
 
 using sfz::Bytes;
@@ -63,9 +64,9 @@ void recolor(PixMap& glyph_table) {
     for (size_t y = 0; y < glyph_table.size().height; ++y) {
         for (size_t x = 0; x < glyph_table.size().width; ++x) {
             if (glyph_table.get(x, y).red < 255) {
-                glyph_table.set(x, y, RgbColor::kWhite);
+                glyph_table.set(x, y, RgbColor::white());
             } else {
-                glyph_table.set(x, y, RgbColor::kClear);
+                glyph_table.set(x, y, RgbColor::clear());
             }
         }
     }
@@ -193,12 +194,6 @@ struct FontVisitor : public JsonDefaultVisitor {
 
 }  // namespace
 
-const Font* tactical_font;
-const Font* computer_font;
-const Font* button_font;
-const Font* title_font;
-const Font* small_button_font;
-
 Font::Font(StringSlice name) {
     String path(format("fonts/{0}.json", name));
     Resource rsrc(path);
@@ -233,14 +228,6 @@ void Font::draw(const Quads& quads, Point cursor, sfz::StringSlice string, RgbCo
         quads.draw(Rect(cursor, glyph.size()), scaled, color);
         cursor.offset(glyph.width(), 0);
     }
-}
-
-void InitDirectText() {
-    tactical_font = new Font("tactical");
-    computer_font = new Font("computer");
-    button_font = new Font("button");
-    title_font = new Font("title");
-    small_button_font = new Font("button-small");
 }
 
 uint8_t Font::char_width(Rune mchar) const {

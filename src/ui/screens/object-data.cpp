@@ -22,6 +22,7 @@
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/time.hpp"
+#include "game/sys.hpp"
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
@@ -66,7 +67,7 @@ ObjectDataScreen::ObjectDataScreen(
         _state(TYPING) {
     String text;
     CreateObjectDataText(&text, object);
-    _text.reset(new StyledText(button_font));
+    _text.reset(new StyledText(sys.fonts.button));
     _text->set_fore_color(GetRGBTranslateColorShade(GREEN, VERY_LIGHT));
     _text->set_back_color(GetRGBTranslateColorShade(GREEN, DARKEST));
     _text->set_retro_text(text);
@@ -94,7 +95,7 @@ bool ObjectDataScreen::next_timer(wall_time& time) {
 void ObjectDataScreen::fire_timer() {
     wall_time now = antares::now();
     if (_next_sound <= now) {
-        PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
+        sys.sound.teletype();
         _next_sound += 3 * kTypingDelay;
         while (_next_sound <= now) {
             _next_sound += kTypingDelay;
@@ -137,7 +138,7 @@ void ObjectDataScreen::draw() const {
     const RgbColor light_green = GetRGBTranslateColorShade(GREEN, VERY_LIGHT);
     Rects().fill(outside, light_green);
     outside.inset(1, 1);
-    Rects().fill(outside, RgbColor::kBlack);
+    Rects().fill(outside, RgbColor::black());
     _text->draw_range(_bounds, 0, _typed_chars);
     if (_typed_chars < _text->size()) {
         _text->draw_cursor(_bounds, _typed_chars);

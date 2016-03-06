@@ -19,7 +19,6 @@
 #include "ui/flows/master.hpp"
 
 #include "data/plugin.hpp"
-#include "drawing/text.hpp"
 #include "game/admiral.hpp"
 #include "game/vector.hpp"
 #include "game/cheat.hpp"
@@ -31,6 +30,7 @@
 #include "game/motion.hpp"
 #include "game/level.hpp"
 #include "game/space-object.hpp"
+#include "game/sys.hpp"
 #include "math/rotation.hpp"
 #include "sound/driver.hpp"
 #include "sound/music.hpp"
@@ -120,32 +120,24 @@ void Master::init() {
 
     init_globals();
 
-    SoundDriver::driver()->set_global_volume(Preferences::preferences()->volume());
+    sys.audio->set_global_volume(sys.prefs->volume());
 
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
 
-    RotationInit();
     g.random.seed = _seed;
 
-    InitDirectText();
+    sys_init();
     Label::init();
     Messages::init();
     InstrumentInit();
     SpriteHandlingInit();
-    AresCheatInit();
     PluginInit();
     SpaceObjectHandlingInit();  // MUST be after ScenarioMakerInit()
-    InitSoundFX();
-    MusicInit();
     InitMotion();
     Admiral::init();
     Vectors::init();
 
-    if (Preferences::preferences()->play_idle_music()) {
-        LoadSong( kTitleSongID);
-        SetSongVolume( kMaxMusicVolume);
-        PlaySong();
-    }
+    sys.music.play(Music::IDLE, kTitleSongID);
 }
 
 }  // namespace antares

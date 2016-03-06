@@ -40,6 +40,7 @@
 #include "game/level.hpp"
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
+#include "game/sys.hpp"
 #include "game/time.hpp"
 #include "lang/defines.hpp"
 #include "math/fixed.hpp"
@@ -107,7 +108,7 @@ void print_to(PrintTarget out, const HotKeySuffix& suffix) {
         return;
     }
 
-    int keyNum = Preferences::preferences()->key(h + kFirstHotKeyNum);
+    int keyNum = sys.prefs->key(h + kFirstHotKeyNum);
     if (keyNum < 0) {
         return;
     }
@@ -131,8 +132,8 @@ void ResetPlayerShip(Handle<SpaceObject> which) {
     g.send_label = Label::add(200, 200, 0, 30, SpaceObject::none(), false, GREEN);
     globals()->starfield.reset(g.ship);
     globals()->next_klaxon = game_ticks();
-    globals()->keyMask = 0;
-    globals()->gZoomMode = kNearestFoeZoom;
+    g.key_mask = 0;
+    g.zoom = kNearestFoeZoom;
     gPreviousZoomMode = kNearestFoeZoom;
 
     for (int h = 0; h < kHotKeyNum; h++) {
@@ -163,7 +164,7 @@ void PlayerShip::update_keys(const KeyMap& keys) {
 
 static int key_num(uint32_t key) {
     for (int i = 0; i < kKeyExtendedControlNum; ++i) {
-        if (key == (Preferences::preferences()->key(i) - 1)) {
+        if (key == (sys.prefs->key(i) - 1)) {
             return i;
         }
     }
@@ -171,22 +172,22 @@ static int key_num(uint32_t key) {
 }
 
 static void zoom_to(ZoomType zoom) {
-    if (globals()->gZoomMode != zoom) {
-        globals()->gZoomMode = zoom;
-        PlayVolumeSound(kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+    if (g.zoom != zoom) {
+        g.zoom = zoom;
+        sys.sound.click();
         StringList strings(kMessageStringID);
-        StringSlice string = strings.at(globals()->gZoomMode + kZoomStringOffset - 1);
+        StringSlice string = strings.at(g.zoom + kZoomStringOffset - 1);
         Messages::set_status(string, kStatusLabelColor);
     }
 }
 
 static void zoom_shortcut(ZoomType zoom) {
-    if (globals()->keyMask & kShortcutZoomMask) {
+    if (g.key_mask & kShortcutZoomMask) {
         return;
     }
     ZoomType previous = gPreviousZoomMode;
-    gPreviousZoomMode = globals()->gZoomMode;
-    if (globals()->gZoomMode == zoom) {
+    gPreviousZoomMode = g.zoom;
+    if (g.zoom == zoom) {
         zoom_to(previous);
     } else {
         zoom_to(zoom);
@@ -194,20 +195,20 @@ static void zoom_shortcut(ZoomType zoom) {
 }
 
 static void zoom_in() {
-    if (globals()->keyMask & kZoomInKey) {
+    if (g.key_mask & kZoomInKey) {
         return;
     }
-    if (globals()->gZoomMode > kTimesTwoZoom) {
-        zoom_to(static_cast<ZoomType>(globals()->gZoomMode - 1));
+    if (g.zoom > kTimesTwoZoom) {
+        zoom_to(static_cast<ZoomType>(g.zoom - 1));
     }
 }
 
 static void zoom_out() {
-    if (globals()->keyMask & kZoomOutKey) {
+    if (g.key_mask & kZoomOutKey) {
         return;
     }
-    if (globals()->gZoomMode < kSmallestZoom) {
-        zoom_to(static_cast<ZoomType>(globals()->gZoomMode + 1));
+    if (g.zoom < kSmallestZoom) {
+        zoom_to(static_cast<ZoomType>(g.zoom + 1));
     }
 }
 
@@ -335,8 +336,8 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
         break;
       default:
         if (key < kKeyControlNum) {
-            if (!(gTheseKeys & (0x01 << key) & ~globals()->keyMask)) {
-                gTheseKeys ^= (0x01 << key) & ~globals()->keyMask;
+            if (!(gTheseKeys & (0x01 << key) & ~g.key_mask)) {
+                gTheseKeys ^= (0x01 << key) & ~g.key_mask;
             }
         }
         break;
@@ -354,8 +355,8 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
     switch (key) {
       default:
         if (key < kKeyControlNum) {
-            if (gTheseKeys & (0x01 << key) & ~globals()->keyMask) {
-                gTheseKeys ^= (0x01 << key) & ~globals()->keyMask;
+            if (gTheseKeys & (0x01 << key) & ~g.key_mask) {
+                gTheseKeys ^= (0x01 << key) & ~g.key_mask;
             }
         }
         break;
@@ -625,7 +626,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
                         }
                     }
                 }
-                width = tactical_font->string_width(*message);
+                width = sys.fonts.tactical->string_width(*message);
                 strlen = viewport.left + ((viewport.width() / 2) - (width / 2));
                 if ((strlen + width) > (viewport.right))
                 {
@@ -636,7 +637,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
                     ((play_screen.height() / 2) + kSendMessageVOffset));
             }
         } else {
-            if ((mReturnKey(*bufMap)) && (!(globals()->keyMask & kReturnKeyMask))) {
+            if ((mReturnKey(*bufMap)) && (!(g.key_mask & kReturnKeyMask))) {
                 *enterMessage = true;
             }
         }
@@ -657,9 +658,9 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
     if (theShip->health() < (theShip->baseType->health >> 2L)) {
         if (g.time > globals()->next_klaxon) {
             if (globals()->next_klaxon == game_ticks()) {
-                PlayVolumeSound(kKlaxon, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
+                sys.sound.loud_klaxon();
             } else {
-                PlayVolumeSound(kKlaxon, kMediumVolume, kMediumLongPersistence, kPrioritySound);
+                sys.sound.klaxon();
             }
             Messages::set_status("WARNING: Shields Low", kStatusWarnColor);
             globals()->next_klaxon = g.time + kKlaxonInterval;
@@ -722,9 +723,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
                     globals()->hotKey[hot_key].object = globals()->lastSelectedObject;
                     globals()->hotKey[hot_key].objectID = globals()->lastSelectedObjectID;
                     Update_LabelStrings_ForHotKeyChange();
-                    PlayVolumeSound(
-                            kComputerBeep1, kMediumLoudVolume, kMediumPersistence,
-                            kLowPrioritySound);
+                    sys.sound.select();
                 }
             }
         } else {
@@ -825,7 +824,7 @@ int32_t PlayerShip::goal_direction() const {
 void PlayerShipHandleClick(Point where, int button) {
     Rect            bounds;
 
-    if (globals()->keyMask & kMouseMask) {
+    if (g.key_mask & kMouseMask) {
         return;
     }
 
@@ -882,7 +881,7 @@ void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> 
     }
 
     if (adm == g.admiral) {
-        PlayVolumeSound(kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
+        sys.sound.select();
         label->set_object(ship);
         if (ship == g.ship) {
             label->set_age(Label::kVisibleTime);
@@ -975,7 +974,7 @@ void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral) {
     if (control.get()) {
         SetObjectDestination(control, SpaceObject::none());
         if ( whichAdmiral == g.admiral)
-            PlayVolumeSound(  kMorseBeepSound, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+            sys.sound.order();
     }
 }
 
@@ -1064,8 +1063,7 @@ void Update_LabelStrings_ForHotKeyChange( void)
         if (control == g.ship) {
             g.control_label->set_age(Label::kVisibleTime);
         }
-        PlayVolumeSound(
-                kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
+        sys.sound.select();
         if (control->attributes & kIsDestination) {
             String string(GetDestBalanceName(control->asDestination));
             print(string, hot_key_suffix(control));

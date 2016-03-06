@@ -25,6 +25,7 @@
 #include "drawing/shapes.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 #include "math/random.hpp"
 #include "math/rotation.hpp"
@@ -40,46 +41,32 @@ using std::unique_ptr;
 
 namespace antares {
 
-namespace {
+static const uint32_t kSolidSquareBlip     = 0x00000000;
+static const uint32_t kTriangleUpBlip      = 0x00000010;
+static const uint32_t kDiamondBlip         = 0x00000020;
+static const uint32_t kPlusBlip            = 0x00000030;
+static const uint32_t kFramedSquareBlip    = 0x00000040;
 
-const size_t kMinVolatilePixTable = 1;  // sound 0 is always there; 1+ is volatile
-
-const uint32_t kSolidSquareBlip     = 0x00000000;
-const uint32_t kTriangleUpBlip      = 0x00000010;
-const uint32_t kDiamondBlip         = 0x00000020;
-const uint32_t kPlusBlip            = 0x00000030;
-const uint32_t kFramedSquareBlip    = 0x00000040;
-
-const uint32_t kBlipSizeMask        = 0x0000000f;
-const uint32_t kBlipTypeMask        = 0x000000f0;
-
-template <typename T>
-void zero(T* t) {
-    *t = T();
-}
-
-template <typename T>
-Range<T*> slice(T* array, size_t start, size_t end) {
-    return Range<T*>(array + start, array + end);
-}
+static const uint32_t kBlipSizeMask        = 0x0000000f;
+static const uint32_t kBlipTypeMask        = 0x000000f0;
 
 static void draw_tiny_square(const Rect& rect, const RgbColor& color) {
     Rects().fill(rect, color);
 }
 
 static void draw_tiny_triangle(const Rect& rect, const RgbColor& color) {
-    VideoDriver::driver()->draw_triangle(rect, color);
+    sys.video->draw_triangle(rect, color);
 }
 
 static void draw_tiny_diamond(const Rect& rect, const RgbColor& color) {
-    VideoDriver::driver()->draw_diamond(rect, color);
+    sys.video->draw_diamond(rect, color);
 }
 
 static void draw_tiny_plus(const Rect& rect, const RgbColor& color) {
-    VideoDriver::driver()->draw_plus(rect, color);
+    sys.video->draw_plus(rect, color);
 }
 
-draw_tiny_t draw_tiny_function(uint8_t id) {
+static draw_tiny_t draw_tiny_function(uint8_t id) {
     uint8_t size = id & kBlipSizeMask;
     uint8_t type = id & kBlipTypeMask;
     if (size <= 0) {
@@ -95,20 +82,10 @@ draw_tiny_t draw_tiny_function(uint8_t id) {
     }
 }
 
-}  // namespace
-
-struct pixTableType {
-    std::unique_ptr<NatePixTable>   resource;
-    int                             resID;
-    bool                            keepMe;
-};
-static ANTARES_GLOBAL pixTableType gPixTable[kMaxPixTableEntry];
 
 int32_t ANTARES_GLOBAL gAbsoluteScale = MIN_SCALE;
 
 void SpriteHandlingInit() {
-    ResetAllPixTables();
-
     g.sprites.reset(new Sprite[Sprite::size]);
     ResetAllSprites();
 
@@ -128,7 +105,7 @@ Sprite::Sprite()
         : table(NULL),
           resID(-1),
           style(spriteNormal),
-          styleColor(RgbColor::kWhite),
+          styleColor(RgbColor::white()),
           styleData(0),
           whichLayer(kNoSpriteLayer),
           killMe(false),
@@ -136,70 +113,32 @@ Sprite::Sprite()
 
 void ResetAllSprites() {
     for (auto sprite: Sprite::all()) {
-        zero(sprite.get());
+        *sprite = Sprite();
     }
 }
 
-void ResetAllPixTables() {
-    for (pixTableType* entry: range(gPixTable, gPixTable + kMaxPixTableEntry)) {
-        entry->resource.reset();
-        entry->keepMe = false;
-        entry->resID = -1;
-    }
+void Pix::reset() {
+    pix.clear();
 }
 
-void SetAllPixTablesNoKeep() {
-    for (pixTableType* entry:
-            range(gPixTable + kMinVolatilePixTable, gPixTable + kMaxPixTableEntry)) {
-        entry->keepMe = false;
-    }
-}
-
-void KeepPixTable(int16_t resID) {
-    for (pixTableType* entry: range(gPixTable, gPixTable + kMaxPixTableEntry)) {
-        if (entry->resID == resID) {
-            entry->keepMe = true;
-            return;
-        }
-    }
-}
-
-void RemoveAllUnusedPixTables() {
-    for (pixTableType* entry:
-            range(gPixTable + kMinVolatilePixTable, gPixTable + kMaxPixTableEntry)) {
-        if (!entry->keepMe) {
-            entry->resource.reset();
-            entry->resID = -1;
-        }
-    }
-}
-
-NatePixTable* AddPixTable(int16_t resource_id) {
-    NatePixTable* result = GetPixTable(resource_id);
-    if (result != NULL) {
+NatePixTable* Pix::add(int16_t resource_id) {
+    NatePixTable* result = get(resource_id);
+    if (result) {
         return result;
     }
 
     int16_t real_resource_id = resource_id & ~kSpriteTableColorIDMask;
     int16_t color = (resource_id & kSpriteTableColorIDMask) >> kSpriteTableColorShift;
-    for (pixTableType* entry: range(gPixTable, gPixTable + kMaxPixTableEntry)) {
-        if (entry->resource.get() == NULL) {
-            entry->resID = resource_id;
-            entry->resource.reset(new NatePixTable(real_resource_id, color));
-            return entry->resource.get();
-        }
-    }
-
-    throw Exception("Can't manage any more sprite tables");
+    auto it = pix.emplace(resource_id, NatePixTable(real_resource_id, color)).first;
+    return &it->second;
 }
 
-NatePixTable* GetPixTable(int16_t resource_id) {
-    for (pixTableType* entry: range(gPixTable, gPixTable + kMaxPixTableEntry)) {
-        if (entry->resID == resource_id) {
-            return entry->resource.get();
-        }
+NatePixTable* Pix::get(int16_t resource_id) {
+    auto it = pix.find(resource_id);
+    if (it != pix.end()) {
+        return &it->second;
     }
-    return NULL;
+    return nullptr;
 }
 
 Handle<Sprite> AddSprite(
@@ -218,7 +157,7 @@ Handle<Sprite> AddSprite(
             sprite->draw_tiny = draw_tiny_function(size);
             sprite->killMe = false;
             sprite->style = spriteNormal;
-            sprite->styleColor = RgbColor::kWhite;
+            sprite->styleColor = RgbColor::white();
             sprite->styleData = 0;
 
             return sprite;

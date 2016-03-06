@@ -276,7 +276,7 @@ struct AngleFromSlopeData {
 };
 
 static const int angle_from_slope_data_count = 182;
-static AngleFromSlopeData angle_from_slope_data[angle_from_slope_data_count] = {
+static const AngleFromSlopeData angle_from_slope_data[angle_from_slope_data_count] = {
     {std::numeric_limits<int32_t>::min(), 90},
     {-3755044, 89},
     {-1877195, 88},

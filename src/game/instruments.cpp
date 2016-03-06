@@ -31,6 +31,7 @@
 #include "game/motion.hpp"
 #include "game/player-ship.hpp"
 #include "game/space-object.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 #include "math/macros.hpp"
 #include "math/random.hpp"
@@ -64,8 +65,6 @@ const int32_t kRadarColorSteps  = 14;
 
 const size_t kScaleListNum      = 64;
 const int32_t kScaleListShift   = 6;
-const int16_t kInstLeftPictID   = 501;
-const int16_t kInstRightPictID  = 512;
 const int32_t kSiteDistance     = 200;
 const int32_t kSiteSize         = 16;
 
@@ -133,8 +132,6 @@ struct barIndicatorType {
 };
 
 static ANTARES_GLOBAL coordPointType          gLastGlobalCorner;
-static ANTARES_GLOBAL Texture left_instrument_texture;
-static ANTARES_GLOBAL Texture right_instrument_texture;
 static ANTARES_GLOBAL unique_ptr<int32_t[]> gScaleList;
 static ANTARES_GLOBAL int32_t gWhichScaleNum;
 static ANTARES_GLOBAL int32_t gLastScale;
@@ -170,10 +167,6 @@ void InstrumentInit() {
     g.radar_blips.reset(new Point[kRadarBlipNum]);
     gScaleList.reset(new int32_t[kScaleListNum]);
     ResetInstruments();
-
-    // Initialize left and right instrument picts.
-    left_instrument_texture = Picture(kInstLeftPictID).texture();
-    right_instrument_texture = Picture(kInstRightPictID).texture();
 
     site.light = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);
     site.dark = GetRGBTranslateColorShade(PALE_GREEN, DARKER + kSlightlyDarkerColor);
@@ -297,7 +290,7 @@ void UpdateRadar(ticks unitsDone) {
     }
 
     uint32_t bestScale = MIN_SCALE;
-    switch (globals()->gZoomMode) {
+    switch (g.zoom) {
       case kNearestFoeZoom:
       case kNearestAnythingZoom:
         {
@@ -494,7 +487,7 @@ static void draw_money() {
 }
 
 void set_up_instruments() {
-    globals()->gZoomMode = kNearestFoeZoom;
+    g.zoom = kNearestFoeZoom;
 
     MiniComputerDoCancel();  // i.e., go to main screen
     ResetInstruments();
@@ -508,8 +501,8 @@ void draw_instruments() {
     left_rect.inset(0, (world().height() - 768) / 2);
     right_rect.inset(0, (world().height() - 768) / 2);
 
-    left_instrument_texture.draw(left_rect.left, left_rect.top);
-    right_instrument_texture.draw(right_rect.left, right_rect.top);
+    sys.left_instrument_texture.draw(left_rect.left, left_rect.top);
+    sys.right_instrument_texture.draw(right_rect.left, right_rect.top);
 
     if (g.ship.get()) {
         auto player = g.ship;
@@ -628,7 +621,7 @@ void update_sector_lines() {
     }
 
     if ((gLastScale < kBlipThreshhold) != (gAbsoluteScale < kBlipThreshhold)) {
-        PlayVolumeSound(kComputerBeep4, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+        sys.sound.zoom();
     }
 
     gLastScale = gAbsoluteScale;

@@ -183,12 +183,12 @@ bool Level::Condition::is_true() const {
                 == (conditionArgument.location.h + conditionArgument.location.v - 1);
 
         case kCurrentComputerCondition:
-            return (globals()->gMiniScreenData.currentScreen == conditionArgument.location.h)
+            return (g.mini.currentScreen == conditionArgument.location.h)
                 && ((conditionArgument.location.v < 0)
-                        || (globals()->gMiniScreenData.selectLine == conditionArgument.location.v));
+                        || (g.mini.selectLine == conditionArgument.location.v));
 
         case kZoomLevelCondition:
-            return globals()->gZoomMode == conditionArgument.longValue;
+            return g.zoom == conditionArgument.longValue;
 
         case kAutopilotCondition:
             return IsPlayerShipOnAutoPilot();

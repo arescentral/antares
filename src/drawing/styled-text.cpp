@@ -52,8 +52,8 @@ int hex_digit(uint32_t c) {
 }  // namespace
 
 StyledText::StyledText(const Font* font):
-        _fore_color(RgbColor::kWhite),
-        _back_color(RgbColor::kBlack),
+        _fore_color(RgbColor::white()),
+        _back_color(RgbColor::black()),
         _tab_width(0),
         _font(font) { }
 
@@ -319,7 +319,7 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
               case NONE:
               case WORD_BREAK:
                 corner.offset(ch.h, ch.v);
-                if (ch.back_color != RgbColor::kBlack) {
+                if (ch.back_color != RgbColor::black()) {
                     Rect char_rect(0, 0, _font->char_width(ch.character), line_height);
                     char_rect.offset(corner.h, corner.v);
                     rects.fill(char_rect, ch.back_color);
@@ -328,7 +328,7 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
 
               case TAB:
                 corner.offset(ch.h, ch.v);
-                if (ch.back_color != RgbColor::kBlack) {
+                if (ch.back_color != RgbColor::black()) {
                     Rect tab_rect(0, 0, tab_width() - (ch.h % tab_width()), line_height);
                     tab_rect.offset(corner.h, corner.v);
                     rects.fill(tab_rect, ch.back_color);
@@ -337,7 +337,7 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
 
               case LINE_BREAK:
                 corner.offset(ch.h, ch.v);
-                if (ch.back_color != RgbColor::kBlack) {
+                if (ch.back_color != RgbColor::black()) {
                     Rect line_rect(0, 0, bounds.width() - ch.h, line_height);
                     line_rect.offset(corner.h, corner.v);
                     rects.fill(line_rect, ch.back_color);

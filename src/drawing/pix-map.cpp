@@ -86,7 +86,7 @@ void PixMap::composite(const PixMap& pix) {
             double green = (over.green * oa) + ((under.green * ua) * (1.0 - oa));
             double blue  = (over.blue  * oa) + ((under.blue  * ua) * (1.0 - oa));
             double alpha = oa + (ua * (1.0 - oa));
-            set(x, y, RgbColor(alpha * 255, red / alpha, green / alpha, blue / alpha));
+            set(x, y, rgba(red / alpha, green / alpha, blue / alpha, alpha * 255));
         }
     }
 }

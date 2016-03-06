@@ -180,8 +180,6 @@ struct Keys {
         // Miscellaneous.
         POWER       = 0x66,
     };
-
-    static void init();
 };
 
 enum {
@@ -295,9 +293,7 @@ enum {
     kMiscKeyMask            = (~(kMotionKeyMask | kWeaponKeyMask | kSpecialKeyMask)),
 };
 
-inline bool mCheckKeyMap(const KeyMap& mKeyMap, int mki) {
-    return mKeyMap.get(Preferences::preferences()->key(mki) - 1);
-}
+bool mCheckKeyMap(const KeyMap& mKeyMap, int mki);
 
 inline bool mHelpKey(const KeyMap& km)             { return mCheckKeyMap(km, kHelpKeyNum); }
 inline bool mVolumeDownKey(const KeyMap& km)       { return mCheckKeyMap(km, kVolumeDownKeyNum); }
