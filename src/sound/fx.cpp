@@ -38,10 +38,23 @@ using sfz::format;
 
 namespace antares {
 
-const int32_t kMaxChannelNum    = 3;
+static const int32_t kMaxChannelNum    = 3;
 
 // sound 0-14 always used -- loaded at start; 15+ may be swapped around
-const int kMinVolatileSound = 15;
+static const int kMinVolatileSound = 15;
+
+static const int16_t kMorseBeepSound   = 506;  // ship receives order
+static const int16_t kComputerBeep1    = 507;  // ship selected
+static const int16_t kComputerBeep2    = 508;  // ship built
+static const int16_t kComputerBeep3    = 509;  // button push
+static const int16_t kComputerBeep4    = 510;  // change range
+static const int16_t kWarningTone      = 511;  // naughty beep
+static const int16_t kLandingWoosh     = 513;
+static const int16_t kCloakOff         = 522;
+static const int16_t kCloakOn          = 523;
+static const int16_t kKlaxon           = 525;
+static const int16_t kWarp             = 526;
+static const int16_t kTeletype         = 535;
 
 static const int16_t kFixedSounds[kMinVolatileSound] = {
     kComputerBeep4,
@@ -54,10 +67,10 @@ static const int16_t kFixedSounds[kMinVolatileSound] = {
     kCloakOn,
     kCloakOff,
     kKlaxon,
-    kWarp[0],
-    kWarp[1],
-    kWarp[2],
-    kWarp[3],
+    kWarp + 0,
+    kWarp + 1,
+    kWarp + 2,
+    kWarp + 3,
     kTeletype,
 };
 
@@ -326,6 +339,66 @@ void SoundFX::play_at(int16_t msoundid, int32_t mvolume, usecs msoundpersistence
             }
         }
     }
+}
+
+void SoundFX::select() {
+    play(kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
+}
+
+void SoundFX::build() {
+    play(kComputerBeep2, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+}
+
+void SoundFX::click() {
+    play(kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+}
+
+void SoundFX::zoom() {
+    play(kComputerBeep4, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+}
+
+void SoundFX::pause() {
+    play(kComputerBeep4, kMaxSoundVolume, kShortPersistence, kMustPlaySound);
+}
+
+void SoundFX::klaxon() {
+    play(kKlaxon, kMediumVolume, kMediumLongPersistence, kPrioritySound);
+}
+
+void SoundFX::loud_klaxon() {
+    play(kKlaxon, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
+}
+
+void SoundFX::order() {
+    play(kMorseBeepSound, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+}
+
+void SoundFX::warning() {
+    play(kWarningTone, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+}
+
+void SoundFX::teletype() {
+    play(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
+}
+
+void SoundFX::cloak_on() {
+    play(kCloakOn, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
+}
+
+void SoundFX::cloak_off() {
+    play(kCloakOff, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
+}
+
+void SoundFX::warp(int n, Handle<SpaceObject> object) {
+    play_at(kWarp + n, kMaxSoundVolume, kMediumPersistence, kPrioritySound, object);
+}
+
+void SoundFX::cloak_on_at(Handle<SpaceObject> object) {
+    play_at(kCloakOn, kMaxSoundVolume, kMediumPersistence, kPrioritySound, object);
+}
+
+void SoundFX::cloak_off_at(Handle<SpaceObject> object) {
+    play_at(kCloakOff, kMaxSoundVolume, kMediumPersistence, kPrioritySound, object);
 }
 
 }  // namespace antares

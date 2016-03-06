@@ -39,19 +39,6 @@ const ticks kMediumPersistence        = ticks(20);
 const ticks kMediumLongPersistence    = ticks(40);
 const ticks kLongPersistence          = ticks(60);
 
-const int16_t kMorseBeepSound   = 506;  // ship receives order
-const int16_t kComputerBeep1    = 507;  // ship selected
-const int16_t kComputerBeep2    = 508;  // ship built
-const int16_t kComputerBeep3    = 509;  // button push
-const int16_t kComputerBeep4    = 510;  // change range
-const int16_t kWarningTone      = 511;  // naughty beep
-const int16_t kLandingWoosh     = 513;
-const int16_t kCloakOff         = 522;
-const int16_t kCloakOn          = 523;
-const int16_t kKlaxon           = 525;
-const int16_t kWarp[4]          = {526, 527, 528, 529};
-const int16_t kTeletype         = 535;
-
 class Sound;
 class SoundChannel;
 struct SpaceObject;
@@ -88,6 +75,25 @@ class SoundFX {
         void play(int16_t id, uint8_t volume, usecs persistence, soundPriorityType priority);
         void play_at(int16_t id, int32_t volume, usecs persistence, soundPriorityType priority,
                      Handle<SpaceObject> object);
+
+        void select();
+        void build();
+        void click();
+        void zoom();
+        void pause();
+
+        void klaxon();
+        void loud_klaxon();
+        void order();
+
+        void warning();
+        void teletype();
+        void cloak_on();
+        void cloak_off();
+
+        void warp(int n, Handle<SpaceObject> object);
+        void cloak_on_at(Handle<SpaceObject> object);
+        void cloak_off_at(Handle<SpaceObject> object);
 
     private:
         bool same_sound_channel(

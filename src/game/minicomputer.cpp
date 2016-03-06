@@ -175,14 +175,6 @@ const int32_t kMiniAmmoLeftTwo      = 64;
 const int32_t kMiniAmmoLeftSpecial  = 100;
 const int32_t kMiniAmmoTextHBuffer  = 2;
 
-inline void mPlayBeep3() {
-    sys.sound.play(kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
-}
-
-inline void mPlayBeepBad() {
-    sys.sound.play(kWarningTone, kMediumVolume, kMediumPersistence, kLowPrioritySound);
-}
-
 const int32_t kMaxShipBuffer = 40;
 
 void pad_to(String& s, size_t width) {
@@ -511,7 +503,7 @@ static void minicomputer_handle_action(int32_t button, bool key_down, void (*act
         if (key_down) {
             if (line.kind != MINI_BUTTON_ON) {
                 line.kind = MINI_BUTTON_ON;
-                mPlayBeep3();
+                sys.sound.click();
             }
         } else {
             if (line.kind != MINI_BUTTON_OFF) {
@@ -830,7 +822,7 @@ void transfer_control(Handle<Admiral> adm, int32_t line) {
                     || !(control->attributes & kCanBeDestination)
                     || (flagship->active != kObjectInUse)) {
                 if (adm == g.admiral) {
-                    mPlayBeepBad();
+                    sys.sound.warning();
                 }
             } else {
                 ChangePlayerShipNumber(adm, control);
@@ -846,7 +838,7 @@ static void build_ship(Handle<Admiral> adm, int32_t line) {
     if (CountObjectsOfBaseType(BaseObject::none(), Admiral::none()) < (kMaxSpaceObject - kMaxShipBuffer)) {
         if (adm->build(line - kBuildScreenFirstTypeLine) == false) {
             if (adm == g.admiral) {
-                mPlayBeepBad();
+                sys.sound.warning();
             }
         }
     } else {
@@ -1315,7 +1307,7 @@ void MiniComputerHandleClick(Point where) {
         if (line->whichButton == kInLineButton) {
             if (line->kind != MINI_BUTTON_ON) {
                 line->kind = MINI_BUTTON_ON;
-                mPlayBeep3();
+                sys.sound.click();
             }
             if (outLineButtonLine >= 0) {
                 line = globals()->gMiniScreenData.lineData.get() + outLineButtonLine;
@@ -1326,7 +1318,7 @@ void MiniComputerHandleClick(Point where) {
         } else if (line->whichButton == kOutLineButton) {
             if (line->kind != MINI_BUTTON_ON) {
                 line->kind = MINI_BUTTON_ON;
-                mPlayBeep3();
+                sys.sound.click();
             }
             if (inLineButtonLine >= 0) {
                 line = globals()->gMiniScreenData.lineData.get() + inLineButtonLine;
@@ -1399,7 +1391,7 @@ void MiniComputerHandleDoubleClick(Point where) {
         if (line->whichButton == kInLineButton) {
             if (line->kind != MINI_BUTTON_ON) {
                 line->kind = MINI_BUTTON_ON;
-                mPlayBeep3();
+                sys.sound.click();
             }
             if (outLineButtonLine >= 0) {
                 line = globals()->gMiniScreenData.lineData.get() + outLineButtonLine;
@@ -1410,7 +1402,7 @@ void MiniComputerHandleDoubleClick(Point where) {
         } else if (line->whichButton == kOutLineButton) {
             if (line->kind != MINI_BUTTON_ON) {
                 line->kind = MINI_BUTTON_ON;
-                mPlayBeep3();
+                sys.sound.click();
             }
             if (inLineButtonLine >= 0) {
                 line = globals()->gMiniScreenData.lineData.get() + inLineButtonLine;
@@ -1441,7 +1433,7 @@ void MiniComputerHandleDoubleClick(Point where) {
         if (mRect.contains(where)) {
             lineNum = mGetLineNumFromV(where.v);
             if (lineNum == globals()->gMiniScreenData.selectLine) {
-                mPlayBeep3();
+                sys.sound.click();
                 MiniComputerDoAccept();
             } else {
                 if (globals()->gMiniScreenData.selectLine != kMiniScreenNoLineSelected) {

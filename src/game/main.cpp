@@ -308,7 +308,7 @@ class PauseScreen : public Card {
 
     virtual void become_front() {
         // TODO(sfiera): cancel any active transition.
-        sys.sound.play(kComputerBeep4, kMaxSoundVolume, kShortPersistence, kMustPlaySound);
+        sys.sound.pause();
         _visible = true;
         _next_switch = now() + kSwitchAfter;
         _sleep_at = now() + kSleepAfter;

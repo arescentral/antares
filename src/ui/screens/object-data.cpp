@@ -95,7 +95,7 @@ bool ObjectDataScreen::next_timer(wall_time& time) {
 void ObjectDataScreen::fire_timer() {
     wall_time now = antares::now();
     if (_next_sound <= now) {
-        sys.sound.play(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
+        sys.sound.teletype();
         _next_sound += 3 * kTypingDelay;
         while (_next_sound <= now) {
             _next_sound += kTypingDelay;

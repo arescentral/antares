@@ -652,7 +652,7 @@ static void disable_keys(Handle<Action> action, Handle<SpaceObject> focus) {
 static void set_zoom(Handle<Action> action, Handle<SpaceObject> focus) {
     if (action->argument.zoom.zoomLevel != globals()->gZoomMode) {
         globals()->gZoomMode = static_cast<ZoomType>(action->argument.zoom.zoomLevel);
-        sys.sound.play(kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+        sys.sound.click();
         StringList strings(kMessageStringID);
         StringSlice string = strings.at(globals()->gZoomMode + kZoomStringOffset - 1);
         Messages::set_status(string, kStatusLabelColor);

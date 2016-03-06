@@ -629,7 +629,7 @@ void update_sector_lines() {
     }
 
     if ((gLastScale < kBlipThreshhold) != (gAbsoluteScale < kBlipThreshhold)) {
-        sys.sound.play(kComputerBeep4, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+        sys.sound.zoom();
     }
 
     gLastScale = gAbsoluteScale;

@@ -756,11 +756,11 @@ void SpaceObject::set_cloak(bool cloak) {
     auto object = Handle<SpaceObject>(number());
     if (cloak && (object->cloakState == 0)) {
         object->cloakState = 1;
-        sys.sound.play_at(kCloakOn, kMaxSoundVolume, kMediumPersistence, kPrioritySound, object);
+        sys.sound.cloak_on_at(object);
     } else if ((!cloak || (object->attributes & kRemoteOrHuman))
             && (object->cloakState >= 250)) {
         object->cloakState = kCloakOffStateMax;
-        sys.sound.play_at(kCloakOff, kMaxSoundVolume, kMediumPersistence, kPrioritySound, object);
+        sys.sound.cloak_off_at(object);
     }
 }
 

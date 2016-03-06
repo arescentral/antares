@@ -378,7 +378,7 @@ void Messages::draw_long_message(ticks time_pass) {
         // Play teletype sound at least once every 3 ticks.
         tmessage->charDelayCount += time_pass;
         if (tmessage->charDelayCount > ticks(0)) {
-            sys.sound.play(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
+            sys.sound.teletype();
             while (tmessage->charDelayCount > ticks(0)) {
                 tmessage->charDelayCount -= kMajorTick;
             }

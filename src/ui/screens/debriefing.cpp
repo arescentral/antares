@@ -212,7 +212,7 @@ void DebriefingScreen::fire_timer() {
     if (_state != TYPING) {
         throw Exception(format("DebriefingScreen::fire_timer() called but _state is {0}", _state));
     }
-    sys.sound.play(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
+    sys.sound.teletype();
     wall_time now = antares::now();
     while (_next_update <= now) {
         if (_typed_chars < _score->size()) {

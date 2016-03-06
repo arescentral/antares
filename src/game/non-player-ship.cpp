@@ -893,8 +893,7 @@ uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
     presence.progress += kMajorTick;
     for (int i = 0; i < 4; ++i) {
         if ((presence.step == i) && (presence.progress > ticks(25 * i))) {
-            sys.sound.play_at(
-                    kWarp[i], kMaxSoundVolume, kMediumPersistence, kPrioritySound, anObject);
+            sys.sound.warp(i, anObject);
             ++presence.step;
             break;
         }

@@ -585,8 +585,7 @@ static void AdmiralBuildAtObject(
         if (newObject.get()) {
             SetObjectDestination(newObject, SpaceObject::none());
             if (admiral == g.admiral) {
-                sys.sound.play(kComputerBeep2, kMediumVolume, kMediumPersistence,
-                               kLowPrioritySound);
+                sys.sound.build();
             }
         }
     }
