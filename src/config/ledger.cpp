@@ -155,7 +155,7 @@ class DirectoryLedger::Visitor : public JsonVisitor {
 };
 
 void DirectoryLedger::load() {
-    const StringSlice scenario_id = Preferences::preferences()->scenario_identifier();
+    const StringSlice scenario_id = PrefsDriver::driver()->scenario_identifier();
     String path(format("{0}/{1}/ledger.json", dirs().registry, scenario_id));
 
     _chapters.clear();
@@ -178,7 +178,7 @@ void DirectoryLedger::load() {
 }
 
 void DirectoryLedger::save() {
-    const StringSlice scenario_id = Preferences::preferences()->scenario_identifier();
+    const StringSlice scenario_id = PrefsDriver::driver()->scenario_identifier();
     const String path(format("{0}/{1}/ledger.json", dirs().registry, scenario_id));
 
     vector<Json> unlocked_levels;

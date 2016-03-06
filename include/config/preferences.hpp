@@ -72,6 +72,20 @@ class PrefsDriver {
     virtual void load(Preferences* preferences) = 0;
     virtual void save(const Preferences& preferences) = 0;
 
+    uint32_t key(size_t index) const { return Preferences::preferences()->key(index); }
+    bool play_idle_music() const { return Preferences::preferences()->play_idle_music(); }
+    bool play_music_in_game() const { return Preferences::preferences()->play_music_in_game(); }
+    bool speech_on() const { return Preferences::preferences()->speech_on(); }
+    int volume() const { return Preferences::preferences()->volume(); }
+    sfz::StringSlice scenario_identifier() const { return Preferences::preferences()->scenario_identifier(); }
+
+    void set_key(size_t index, uint32_t key) { Preferences::preferences()->set_key(index, key); }
+    void set_play_idle_music(bool on) { Preferences::preferences()->set_play_idle_music(on); }
+    void set_play_music_in_game(bool on) { Preferences::preferences()->set_play_music_in_game(on); }
+    void set_speech_on(bool on) { Preferences::preferences()->set_speech_on(on); }
+    void set_volume(int volume) { Preferences::preferences()->set_volume(volume); }
+    void set_scenario_identifier(sfz::StringSlice id) { Preferences::preferences()->set_scenario_identifier(id); }
+
     static PrefsDriver* driver();
 };
 

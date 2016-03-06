@@ -54,7 +54,7 @@ static unique_ptr<MappedFile> load_first(sfz::StringSlice resource_path,
 
 static unique_ptr<MappedFile> load(sfz::StringSlice resource_path) {
     return load_first(resource_path, {
-        format("{0}/{1}", dirs().scenarios, Preferences::preferences()->scenario_identifier()),
+        format("{0}/{1}", dirs().scenarios, PrefsDriver::driver()->scenario_identifier()),
         format("{0}/{1}", dirs().scenarios, kFactoryScenarioIdentifier),
         application_path(),
     });

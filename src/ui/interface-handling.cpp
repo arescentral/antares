@@ -136,7 +136,7 @@ bool BothCommandAndQ() {
     bool q = false;
 
     for (int i = 0; i < kKeyExtendedControlNum; i++) {
-        uint32_t key = Preferences::preferences()->key(i);
+        uint32_t key = PrefsDriver::driver()->key(i);
         q |= (key == Keys::Q);
         command |= (key == Keys::L_COMMAND);
     }
@@ -271,7 +271,7 @@ void Replace_KeyCode_Strings_With_Actual_Key_Names(String* text, int16_t resID, 
 
     for (int i = 0; i < kKeyExtendedControlNum; ++i) {
         const StringSlice& search = keys.at(i);
-        String replace(values.at(Preferences::preferences()->key(i) - 1));
+        String replace(values.at(PrefsDriver::driver()->key(i) - 1));
         // First, pad to the desired width.
         if (replace.size() < padTo) {
             replace.resize(padTo, ' ');

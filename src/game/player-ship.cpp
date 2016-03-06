@@ -108,7 +108,7 @@ void print_to(PrintTarget out, const HotKeySuffix& suffix) {
         return;
     }
 
-    int keyNum = Preferences::preferences()->key(h + kFirstHotKeyNum);
+    int keyNum = PrefsDriver::driver()->key(h + kFirstHotKeyNum);
     if (keyNum < 0) {
         return;
     }
@@ -164,7 +164,7 @@ void PlayerShip::update_keys(const KeyMap& keys) {
 
 static int key_num(uint32_t key) {
     for (int i = 0; i < kKeyExtendedControlNum; ++i) {
-        if (key == (Preferences::preferences()->key(i) - 1)) {
+        if (key == (PrefsDriver::driver()->key(i) - 1)) {
             return i;
         }
     }

@@ -60,7 +60,7 @@ void main(int argc, const char* argv[]) {
 
     FilePrefsDriver prefs;
 
-    const auto& scenario = Preferences::preferences()->scenario_identifier();
+    const auto& scenario = PrefsDriver::driver()->scenario_identifier();
     bool have_scenario = false;
     ScenarioList l;
     for (auto i: range(l.size())) {

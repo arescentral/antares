@@ -134,7 +134,7 @@ void SoloGame::handle_game_result() {
 }
 
 void SoloGame::epilogue_done() {
-    if (Preferences::preferences()->play_idle_music()) {
+    if (PrefsDriver::driver()->play_idle_music()) {
         StopAndUnloadSong();
     }
 

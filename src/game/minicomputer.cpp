@@ -441,7 +441,7 @@ static miniScreenLineType selectable(
 
 static miniScreenLineType accept(StringSlice name) {
     miniScreenLineType line;
-    GetKeyNumName(Preferences::preferences()->key(kCompAcceptKeyNum), &line.string);
+    GetKeyNumName(PrefsDriver::driver()->key(kCompAcceptKeyNum), &line.string);
     pad_to(line.string, kKeyNameLength);
     line.string.append(" ");
     line.string.append(name);
@@ -452,7 +452,7 @@ static miniScreenLineType accept(StringSlice name) {
 
 static miniScreenLineType cancel(StringSlice name) {
     miniScreenLineType line;
-    GetKeyNumName(Preferences::preferences()->key(kCompCancelKeyNum), &line.string);
+    GetKeyNumName(PrefsDriver::driver()->key(kCompCancelKeyNum), &line.string);
     pad_to(line.string, kKeyNameLength);
     line.string.append(" ");
     line.string.append(name);

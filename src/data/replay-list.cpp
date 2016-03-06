@@ -48,7 +48,7 @@ struct ScopedGlob {
 
 ReplayList::ReplayList() {
     ScopedGlob g;
-    const StringSlice scenario = Preferences::preferences()->scenario_identifier();
+    const StringSlice scenario = PrefsDriver::driver()->scenario_identifier();
     String str(format("{0}/{1}/replays/*.NLRP", dirs().scenarios, scenario));
     CString c_str(str);
     glob(c_str.data(), 0, NULL, &g.data);

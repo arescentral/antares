@@ -294,7 +294,7 @@ enum {
 };
 
 inline bool mCheckKeyMap(const KeyMap& mKeyMap, int mki) {
-    return mKeyMap.get(Preferences::preferences()->key(mki) - 1);
+    return mKeyMap.get(PrefsDriver::driver()->key(mki) - 1);
 }
 
 inline bool mHelpKey(const KeyMap& km)             { return mCheckKeyMap(km, kHelpKeyNum); }
