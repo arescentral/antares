@@ -32,7 +32,7 @@ using sfz::write;
 
 namespace antares {
 
-static const RgbColor colors[256] = {
+static const RgbColor kColors[256] = {
     RgbColor(255, 255, 255),
     RgbColor(32, 0, 0),
     RgbColor(224, 224, 224),
@@ -310,7 +310,7 @@ const RgbColor RgbColor::kBlack(0xFF, 0x00, 0x00, 0x00);
 const RgbColor RgbColor::kWhite(0xFF, 0xFF, 0xFF, 0xFF);
 const RgbColor RgbColor::kClear(0x00, 0x00, 0x00, 0x00);
 
-static const uint8_t diffuse[][3] = {
+static const uint8_t kDiffuse[][3] = {
     {255,    255,    255},
     {255,    128,      0},
     {255,    255,      0},
@@ -329,7 +329,7 @@ static const uint8_t diffuse[][3] = {
     {255,      0,      0},
 };
 
-static const uint8_t ambient[][3] = {
+static const uint8_t kAmbient[][3] = {
     { 0,  0,  0},
     { 0,  0,  0},
     { 0,  0,  0},
@@ -350,14 +350,14 @@ static const uint8_t ambient[][3] = {
 
 RgbColor RgbColor::tint(uint8_t color, uint8_t value) {
     return {
-        implicit_cast<uint8_t>((diffuse[color][0] * value / 255) + ambient[color][0]),
-        implicit_cast<uint8_t>((diffuse[color][1] * value / 255) + ambient[color][1]),
-        implicit_cast<uint8_t>((diffuse[color][2] * value / 255) + ambient[color][2]),
+        implicit_cast<uint8_t>((kDiffuse[color][0] * value / 255) + kAmbient[color][0]),
+        implicit_cast<uint8_t>((kDiffuse[color][1] * value / 255) + kAmbient[color][1]),
+        implicit_cast<uint8_t>((kDiffuse[color][2] * value / 255) + kAmbient[color][2]),
     };
 }
 
 const RgbColor& RgbColor::at(uint8_t index) {
-    return colors[index];
+    return kColors[index];
 }
 
 void read_from(ReadSource in, RgbColor& color) {
