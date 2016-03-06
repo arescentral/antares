@@ -25,6 +25,7 @@
 namespace antares {
 
 class Font;
+class VideoDriver;
 
 struct SystemGlobals {
     struct {
@@ -42,6 +43,8 @@ struct SystemGlobals {
 
     enum { ROT_TABLE_SIZE = 720 };
     int32_t rot_table[ROT_TABLE_SIZE];
+
+    VideoDriver* video;
 };
 
 extern SystemGlobals sys;

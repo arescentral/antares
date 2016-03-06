@@ -20,27 +20,26 @@
 
 #include <sfz/sfz.hpp>
 
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 
 using sfz::Exception;
 
 namespace antares {
 
-static ANTARES_GLOBAL VideoDriver* video_driver = NULL;
-
 VideoDriver::VideoDriver() {
-    if (video_driver) {
+    if (sys.video) {
         throw Exception("VideoDriver is a singleton");
     }
-    antares::video_driver = this;
+    sys.video = this;
 }
 
 VideoDriver::~VideoDriver() {
-    antares::video_driver = NULL;
+    sys.video = NULL;
 }
 
 VideoDriver* VideoDriver::driver() {
-    return antares::video_driver;
+    return sys.video;
 }
 
 Texture::Impl::~Impl() { }
