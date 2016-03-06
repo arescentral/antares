@@ -29,7 +29,7 @@ using sfz::range;
 namespace antares {
 
 // From scripts/generate-fixed-table.py.
-static const char fractions[][5] = {
+static const char kFractions[][5] = {
     ".0",
     ".004",
     ".008",
@@ -297,7 +297,7 @@ void print_to(PrintTarget out, const Fixed& fixed) {
     const int32_t integral = (value & 0xffffff00) >> 8;
     print(out, integral);
     value &= 0xff;
-    out.push(fractions[value]);
+    out.push(kFractions[value]);
 }
 
 }  // namespace antares
