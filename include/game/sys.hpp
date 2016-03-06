@@ -19,6 +19,9 @@
 #ifndef ANTARES_GAME_SYS_HPP_
 #define ANTARES_GAME_SYS_HPP_
 
+#include <sfz/sfz.hpp>
+#include <vector>
+
 namespace antares {
 
 class Font;
@@ -31,6 +34,11 @@ struct SystemGlobals {
         const Font* title;
         const Font* small_button;
     } fonts;
+
+    std::vector<sfz::String> key_names;
+    std::vector<sfz::String> key_long_names;
+    std::vector<sfz::String> gamepad_names;
+    std::vector<sfz::String> gamepad_long_names;
 };
 
 extern SystemGlobals sys;
