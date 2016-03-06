@@ -32,7 +32,7 @@ using sfz::write;
 
 namespace antares {
 
-static ANTARES_GLOBAL RgbColor colors[256] = {
+static const RgbColor colors[256] = {
     RgbColor(255, 255, 255),
     RgbColor(32, 0, 0),
     RgbColor(224, 224, 224),
@@ -310,7 +310,7 @@ const RgbColor RgbColor::kBlack(0xFF, 0x00, 0x00, 0x00);
 const RgbColor RgbColor::kWhite(0xFF, 0xFF, 0xFF, 0xFF);
 const RgbColor RgbColor::kClear(0x00, 0x00, 0x00, 0x00);
 
-static uint8_t diffuse[][3] = {
+static const uint8_t diffuse[][3] = {
     {255,    255,    255},
     {255,    128,      0},
     {255,    255,      0},
@@ -329,7 +329,7 @@ static uint8_t diffuse[][3] = {
     {255,      0,      0},
 };
 
-static uint8_t ambient[][3] = {
+static const uint8_t ambient[][3] = {
     { 0,  0,  0},
     { 0,  0,  0},
     { 0,  0,  0},
