@@ -31,8 +31,6 @@ class SoundDriver;
 class Font;
 class PrefsDriver;
 class VideoDriver;
-class smartSoundHandle;
-class smartSoundChannel;
 
 struct SystemGlobals {
     struct {

@@ -39,10 +39,6 @@ const ticks kMediumPersistence        = ticks(20);
 const ticks kMediumLongPersistence    = ticks(40);
 const ticks kLongPersistence          = ticks(60);
 
-class Sound;
-class SoundChannel;
-struct SpaceObject;
-
 enum soundPriorityType {
     kNoSound = 0,
     kVeryLowPrioritySound = 1,
@@ -52,21 +48,11 @@ enum soundPriorityType {
     kMustPlaySound = 5
 };
 
-struct smartSoundChannel {
-    int32_t             whichSound;
-    wall_time           reserved_until;
-    int16_t             soundVolume;
-    soundPriorityType   soundPriority;
-    std::unique_ptr<SoundChannel> channelPtr;
-};
-
-struct smartSoundHandle {
-    int16_t                 id;
-    std::unique_ptr<Sound>  soundHandle;
-};
-
 class SoundFX {
     public:
+        SoundFX();
+        ~SoundFX();
+
         void init();
         void load(int16_t id);
         void reset();
@@ -96,6 +82,9 @@ class SoundFX {
         void cloak_off_at(Handle<SpaceObject> object);
 
     private:
+        class smartSoundHandle;
+        class smartSoundChannel;
+
         bool same_sound_channel(
                 int& channel, int16_t id, uint8_t amplitude, soundPriorityType priority);
         bool quieter_channel(int& channel, uint8_t amplitude);

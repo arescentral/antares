@@ -74,6 +74,19 @@ static const int16_t kFixedSounds[kMinVolatileSound] = {
     kTeletype,
 };
 
+struct SoundFX::smartSoundChannel {
+    int32_t             whichSound;
+    wall_time           reserved_until;
+    int16_t             soundVolume;
+    soundPriorityType   soundPriority;
+    std::unique_ptr<SoundChannel> channelPtr;
+};
+
+struct SoundFX::smartSoundHandle {
+    int16_t                 id;
+    std::unique_ptr<Sound>  soundHandle;
+};
+
 // see if there's a channel with the same sound at same or lower volume
 bool SoundFX::same_sound_channel(
         int& channel, int16_t id, uint8_t amplitude, soundPriorityType priority) {
@@ -179,6 +192,9 @@ static void PlayLocalizedSound(
 
     sys.sound.play(whichSoundID, amplitude, persistence, priority);
 }
+
+SoundFX::SoundFX() { }
+SoundFX::~SoundFX() { }
 
 void SoundFX::init() {
     channels.resize(kMaxChannelNum);
