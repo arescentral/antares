@@ -32,6 +32,8 @@ class NatePixTable {
     class Frame;
 
     NatePixTable(int id, uint8_t color);
+    NatePixTable(const NatePixTable&) = delete;
+    NatePixTable(NatePixTable&&) = default;
     ~NatePixTable();
 
     const Frame& at(size_t index) const;
@@ -40,8 +42,6 @@ class NatePixTable {
   private:
     size_t _size;
     std::vector<Frame> _frames;
-
-    DISALLOW_COPY_AND_ASSIGN(NatePixTable);
 };
 
 class NatePixTable::Frame {

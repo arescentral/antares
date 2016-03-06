@@ -94,17 +94,12 @@ int32_t evil_scale_by(int32_t value, int32_t scale);
 
 class Pix {
     public:
-        void init();
         void reset();
         NatePixTable* add(int16_t id);
         NatePixTable* get(int16_t id);
 
     private:
-        struct pixTableType {
-            std::unique_ptr<NatePixTable>  resource;
-            int                            resID = -1;
-        };
-        pixTableType gPixTable[kMaxPixTableEntry];
+        std::map<int16_t, NatePixTable> pix;
 };
 
 void SpriteHandlingInit();

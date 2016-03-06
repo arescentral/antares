@@ -117,42 +117,28 @@ void ResetAllSprites() {
     }
 }
 
-void Pix::init() {
-    reset();
-}
-
 void Pix::reset() {
-    for (pixTableType* entry: range(gPixTable, gPixTable + kMaxPixTableEntry)) {
-        *entry = pixTableType();
-    }
+    pix.clear();
 }
 
 NatePixTable* Pix::add(int16_t resource_id) {
     NatePixTable* result = get(resource_id);
-    if (result != NULL) {
+    if (result) {
         return result;
     }
 
     int16_t real_resource_id = resource_id & ~kSpriteTableColorIDMask;
     int16_t color = (resource_id & kSpriteTableColorIDMask) >> kSpriteTableColorShift;
-    for (pixTableType* entry: range(gPixTable, gPixTable + kMaxPixTableEntry)) {
-        if (entry->resource.get() == NULL) {
-            entry->resID = resource_id;
-            entry->resource.reset(new NatePixTable(real_resource_id, color));
-            return entry->resource.get();
-        }
-    }
-
-    throw Exception("Can't manage any more sprite tables");
+    auto it = pix.emplace(resource_id, NatePixTable(real_resource_id, color)).first;
+    return &it->second;
 }
 
 NatePixTable* Pix::get(int16_t resource_id) {
-    for (pixTableType* entry: range(gPixTable, gPixTable + kMaxPixTableEntry)) {
-        if (entry->resID == resource_id) {
-            return entry->resource.get();
-        }
+    auto it = pix.find(resource_id);
+    if (it != pix.end()) {
+        return &it->second;
     }
-    return NULL;
+    return nullptr;
 }
 
 Handle<Sprite> AddSprite(
