@@ -29,25 +29,6 @@ namespace antares {
 
 const int32_t kMaxVolumePreference = 8;
 
-const uint8_t kMediumLowVolume  = 64;
-const uint8_t kMediumVolume     = 128;
-const uint8_t kMediumLoudVolume = 192;
-const uint8_t kMaxSoundVolume   = 255;
-
-const ticks kShortPersistence         = ticks(10);
-const ticks kMediumPersistence        = ticks(20);
-const ticks kMediumLongPersistence    = ticks(40);
-const ticks kLongPersistence          = ticks(60);
-
-enum soundPriorityType {
-    kNoSound = 0,
-    kVeryLowPrioritySound = 1,
-    kLowPrioritySound = 2,
-    kPrioritySound = 3,
-    kHighPrioritySound = 4,
-    kMustPlaySound = 5
-};
-
 class SoundFX {
     public:
         SoundFX();
@@ -58,8 +39,8 @@ class SoundFX {
         void reset();
         void stop();
 
-        void play(int16_t id, uint8_t volume, usecs persistence, soundPriorityType priority);
-        void play_at(int16_t id, int32_t volume, usecs persistence, soundPriorityType priority,
+        void play(int16_t id, uint8_t volume, usecs persistence, uint8_t priority);
+        void play_at(int16_t id, int32_t volume, usecs persistence, uint8_t priority,
                      Handle<SpaceObject> object);
 
         void select();
@@ -86,14 +67,13 @@ class SoundFX {
         class smartSoundChannel;
 
         bool same_sound_channel(
-                int& channel, int16_t id, uint8_t amplitude, soundPriorityType priority);
+                int& channel, int16_t id, uint8_t amplitude, uint8_t priority);
         bool quieter_channel(int& channel, uint8_t amplitude);
-        bool lower_priority_channel(int& channel, soundPriorityType priority);
+        bool lower_priority_channel(int& channel, uint8_t priority);
         bool oldest_available_channel(int& channel);
         bool best_channel(
                 int& channel,
-                int16_t sound_id, uint8_t amplitude, usecs persistence,
-                soundPriorityType priority);
+                int16_t sound_id, uint8_t amplitude, usecs persistence, uint8_t priority);
 
         std::vector<smartSoundHandle>   sounds;
         std::vector<smartSoundChannel>  channels;

@@ -43,18 +43,20 @@ static const int32_t kMaxChannelNum    = 3;
 // sound 0-14 always used -- loaded at start; 15+ may be swapped around
 static const int kMinVolatileSound = 15;
 
-static const int16_t kMorseBeepSound   = 506;  // ship receives order
-static const int16_t kComputerBeep1    = 507;  // ship selected
-static const int16_t kComputerBeep2    = 508;  // ship built
-static const int16_t kComputerBeep3    = 509;  // button push
-static const int16_t kComputerBeep4    = 510;  // change range
-static const int16_t kWarningTone      = 511;  // naughty beep
-static const int16_t kLandingWoosh     = 513;
-static const int16_t kCloakOff         = 522;
-static const int16_t kCloakOn          = 523;
-static const int16_t kKlaxon           = 525;
-static const int16_t kWarp             = 526;
-static const int16_t kTeletype         = 535;
+enum {
+    kMorseBeepSound   = 506,  // ship receives order
+    kComputerBeep1    = 507,  // ship selected
+    kComputerBeep2    = 508,  // ship built
+    kComputerBeep3    = 509,  // button push
+    kComputerBeep4    = 510,  // change range
+    kWarningTone      = 511,  // naughty beep
+    kLandingWoosh     = 513,
+    kCloakOff         = 522,
+    kCloakOn          = 523,
+    kKlaxon           = 525,
+    kWarp             = 526,
+    kTeletype         = 535,
+};
 
 static const int16_t kFixedSounds[kMinVolatileSound] = {
     kComputerBeep4,
@@ -74,12 +76,33 @@ static const int16_t kFixedSounds[kMinVolatileSound] = {
     kTeletype,
 };
 
+enum {
+    kMediumLowVolume  = 64,
+    kMediumVolume     = 128,
+    kMediumLoudVolume = 192,
+    kMaxSoundVolume   = 255,
+};
+
+static const ticks kShortPersistence       = ticks(10);
+static const ticks kMediumPersistence      = ticks(20);
+static const ticks kMediumLongPersistence  = ticks(40);
+static const ticks kLongPersistence        = ticks(60);
+
+enum {
+    kNoSound = 0,
+    kVeryLowPrioritySound = 1,
+    kLowPrioritySound = 2,
+    kPrioritySound = 3,
+    kHighPrioritySound = 4,
+    kMustPlaySound = 5
+};
+
 struct SoundFX::smartSoundChannel {
-    int32_t             whichSound;
-    wall_time           reserved_until;
-    int16_t             soundVolume;
-    soundPriorityType   soundPriority;
-    std::unique_ptr<SoundChannel> channelPtr;
+    int32_t                        whichSound;
+    wall_time                      reserved_until;
+    int16_t                        soundVolume;
+    uint8_t                        soundPriority;
+    std::unique_ptr<SoundChannel>  channelPtr;
 };
 
 struct SoundFX::smartSoundHandle {
@@ -88,8 +111,7 @@ struct SoundFX::smartSoundHandle {
 };
 
 // see if there's a channel with the same sound at same or lower volume
-bool SoundFX::same_sound_channel(
-        int& channel, int16_t id, uint8_t amplitude, soundPriorityType priority) {
+bool SoundFX::same_sound_channel(int& channel, int16_t id, uint8_t amplitude, uint8_t priority) {
     if (priority > kVeryLowPrioritySound) {
         for (int i = 0; i < kMaxChannelNum; ++i) {
             if ((channels[i].whichSound == id) &&
@@ -114,7 +136,7 @@ bool SoundFX::quieter_channel(int& channel, uint8_t amplitude) {
 }
 
 // see if there's a channel at lower priority
-bool SoundFX::lower_priority_channel(int& channel, soundPriorityType priority) {
+bool SoundFX::lower_priority_channel(int& channel, uint8_t priority) {
     for (int i = 0; i < kMaxChannelNum; ++i) {
         if (channels[i].soundPriority < priority) {
             channel = i;
@@ -140,17 +162,14 @@ bool SoundFX::oldest_available_channel(int& channel) {
 }
 
 bool SoundFX::best_channel(
-        int& channel,
-        int16_t sound_id, uint8_t amplitude, usecs persistence,
-        soundPriorityType priority) {
+        int& channel, int16_t sound_id, uint8_t amplitude, usecs persistence, uint8_t priority) {
     return same_sound_channel(channel, sound_id, amplitude, priority)
         || quieter_channel(channel, amplitude)
         || lower_priority_channel(channel, priority)
         || oldest_available_channel(channel);
 }
 
-void SoundFX::play(
-        int16_t whichSoundID, uint8_t amplitude, usecs persistence, soundPriorityType priority) {
+void SoundFX::play(int16_t whichSoundID, uint8_t amplitude, usecs persistence, uint8_t priority) {
     int32_t whichChannel = -1;
     // TODO(sfiera): don't play sound at all if the game is muted.
     if (amplitude > 0) {
@@ -180,9 +199,8 @@ void SoundFX::play(
 }
 
 static void PlayLocalizedSound(
-        uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy,
-        Fixed hvel, Fixed vvel, int16_t whichSoundID, int16_t amplitude,
-        usecs persistence, soundPriorityType priority) {
+        uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy, Fixed hvel, Fixed vvel,
+        int16_t whichSoundID, int16_t amplitude, usecs persistence, uint8_t priority) {
     static_cast<void>(sx);
     static_cast<void>(sy);
     static_cast<void>(dx);
@@ -263,7 +281,7 @@ void SoundFX::stop() {
 //
 
 void SoundFX::play_at(int16_t msoundid, int32_t mvolume, usecs msoundpersistence,
-                      soundPriorityType msoundpriority, Handle<SpaceObject> mobjectptr) {
+                      uint8_t msoundpriority, Handle<SpaceObject> mobjectptr) {
     if (mobjectptr->distanceFromPlayer < kMaximumRelevantDistanceSquared) {
         int32_t mdistance = mobjectptr->distanceFromPlayer;
         uint32_t mul1;

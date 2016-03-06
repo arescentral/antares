@@ -181,14 +181,13 @@ static void create_object(
 static void play_sound(Handle<Action> action, Handle<SpaceObject> focus) {
     const auto& sound = action->argument.playSound;
     auto id = sound.idMinimum;
-    auto priority = static_cast<soundPriorityType>(sound.priority);
     if (sound.idRange > 0) {
         id += focus->randomSeed.next(sound.idRange + 1);
     }
     if (sound.absolute) {
-        sys.sound.play(id, sound.volumeMinimum, sound.persistence, priority);
+        sys.sound.play(id, sound.volumeMinimum, sound.persistence, sound.priority);
     } else {
-        sys.sound.play_at(id, sound.volumeMinimum, sound.persistence, priority, focus);
+        sys.sound.play_at(id, sound.volumeMinimum, sound.persistence, sound.priority, focus);
     }
 }
 
