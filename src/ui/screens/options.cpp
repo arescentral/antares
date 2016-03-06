@@ -51,7 +51,7 @@ namespace antares {
 
 OptionsScreen::OptionsScreen():
         _state(SOUND_CONTROL),
-        _revert(PrefsDriver::driver()->get()) { }
+        _revert(sys.prefs->get()) { }
 
 void OptionsScreen::become_front() {
     switch (_state) {
@@ -68,7 +68,7 @@ void OptionsScreen::become_front() {
             break;
 
         case CANCEL:
-            PrefsDriver::driver()->set(_revert);
+            sys.prefs->set(_revert);
             stack()->pop(this);
             break;
     }
@@ -81,9 +81,9 @@ SoundControlScreen::SoundControlScreen(OptionsScreen::State* state)
 SoundControlScreen::~SoundControlScreen() { }
 
 void SoundControlScreen::adjust_interface() {
-    dynamic_cast<CheckboxButton&>(mutable_item(IDLE_MUSIC)).on = PrefsDriver::driver()->play_idle_music();
-    dynamic_cast<CheckboxButton&>(mutable_item(GAME_MUSIC)).on = PrefsDriver::driver()->play_music_in_game();
-    dynamic_cast<CheckboxButton&>(mutable_item(SPEECH_ON)).on = PrefsDriver::driver()->speech_on();
+    dynamic_cast<CheckboxButton&>(mutable_item(IDLE_MUSIC)).on = sys.prefs->play_idle_music();
+    dynamic_cast<CheckboxButton&>(mutable_item(GAME_MUSIC)).on = sys.prefs->play_music_in_game();
+    dynamic_cast<CheckboxButton&>(mutable_item(SPEECH_ON)).on = sys.prefs->speech_on();
 
     if (false) {  // TODO(sfiera): if speech available.
         dynamic_cast<Button&>(mutable_item(SPEECH_ON)).status = kActive;
@@ -91,13 +91,13 @@ void SoundControlScreen::adjust_interface() {
         dynamic_cast<Button&>(mutable_item(SPEECH_ON)).status = kDimmed;
     }
 
-    if (PrefsDriver::driver()->volume() > 0) {
+    if (sys.prefs->volume() > 0) {
         dynamic_cast<Button&>(mutable_item(VOLUME_DOWN)).status = kActive;
     } else {
         dynamic_cast<Button&>(mutable_item(VOLUME_DOWN)).status = kDimmed;
     }
 
-    if (PrefsDriver::driver()->volume() < kMaxVolumePreference) {
+    if (sys.prefs->volume() < kMaxVolumePreference) {
         dynamic_cast<Button&>(mutable_item(VOLUME_UP)).status = kActive;
     } else {
         dynamic_cast<Button&>(mutable_item(VOLUME_UP)).status = kDimmed;
@@ -107,13 +107,13 @@ void SoundControlScreen::adjust_interface() {
 void SoundControlScreen::handle_button(Button& button) {
     switch (button.id) {
         case GAME_MUSIC:
-            PrefsDriver::driver()->set_play_music_in_game(!dynamic_cast<CheckboxButton&>(button).on);
+            sys.prefs->set_play_music_in_game(!dynamic_cast<CheckboxButton&>(button).on);
             adjust_interface();
             break;
 
         case IDLE_MUSIC:
-            PrefsDriver::driver()->set_play_idle_music(!dynamic_cast<CheckboxButton&>(button).on);
-            if (PrefsDriver::driver()->play_idle_music()) {
+            sys.prefs->set_play_idle_music(!dynamic_cast<CheckboxButton&>(button).on);
+            if (sys.prefs->play_idle_music()) {
                 LoadSong(kTitleSongID);
                 PlaySong();
             } else {
@@ -123,19 +123,19 @@ void SoundControlScreen::handle_button(Button& button) {
             break;
 
         case SPEECH_ON:
-            PrefsDriver::driver()->set_speech_on(!dynamic_cast<CheckboxButton&>(button).on);
+            sys.prefs->set_speech_on(!dynamic_cast<CheckboxButton&>(button).on);
             adjust_interface();
             break;
 
         case VOLUME_DOWN:
-            PrefsDriver::driver()->set_volume(PrefsDriver::driver()->volume() - 1);
-            sys.audio->set_global_volume(PrefsDriver::driver()->volume());
+            sys.prefs->set_volume(sys.prefs->volume() - 1);
+            sys.audio->set_global_volume(sys.prefs->volume());
             adjust_interface();
             break;
 
         case VOLUME_UP:
-            PrefsDriver::driver()->set_volume(PrefsDriver::driver()->volume() + 1);
-            sys.audio->set_global_volume(PrefsDriver::driver()->volume());
+            sys.prefs->set_volume(sys.prefs->volume() + 1);
+            sys.audio->set_global_volume(sys.prefs->volume());
             adjust_interface();
             break;
 
@@ -152,7 +152,7 @@ void SoundControlScreen::handle_button(Button& button) {
 }
 
 void SoundControlScreen::overlay() const {
-    const int volume = PrefsDriver::driver()->volume();
+    const int volume = sys.prefs->volume();
     Rect bounds = item(VOLUME_BOX).bounds();
     Point off = offset();
     bounds.offset(off.h, off.v);
@@ -226,7 +226,7 @@ void KeyControlScreen::key_down(const KeyDownEvent& event) {
                 break;
 
             default:
-                PrefsDriver::driver()->set_key(_selected_key, event.key() + 1);
+                sys.prefs->set_key(_selected_key, event.key() + 1);
                 if (++_selected_key == kKeyIndices[_tab + 1]) {
                     _selected_key = -1;
                 }
@@ -266,7 +266,7 @@ void KeyControlScreen::adjust_interface() {
 
     for (size_t i = _key_start; i < size(); ++i) {
         size_t key = kKeyIndices[_tab] + i - _key_start;
-        int key_num = PrefsDriver::driver()->key(key);
+        int key_num = sys.prefs->key(key);
         dynamic_cast<Button&>(mutable_item(i)).key = key_num;
         if (key == _selected_key) {
             dynamic_cast<Button&>(mutable_item(i)).status = kIH_Hilite;
@@ -399,7 +399,7 @@ void KeyControlScreen::update_conflicts() {
     vector<pair<size_t, size_t>> new_conflicts;
     for (size_t i = 0; i < kKeyExtendedControlNum; ++i) {
         for (size_t j = i + 1; j < kKeyExtendedControlNum; ++j) {
-            if (PrefsDriver::driver()->key(i) == PrefsDriver::driver()->key(j)) {
+            if (sys.prefs->key(i) == sys.prefs->key(j)) {
                 new_conflicts.push_back(make_pair(i, j));
             }
         }

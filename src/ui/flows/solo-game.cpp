@@ -28,6 +28,7 @@
 #include "game/input-source.hpp"
 #include "game/main.hpp"
 #include "game/level.hpp"
+#include "game/sys.hpp"
 #include "sound/music.hpp"
 #include "ui/card.hpp"
 #include "ui/screens/debriefing.hpp"
@@ -134,7 +135,7 @@ void SoloGame::handle_game_result() {
 }
 
 void SoloGame::epilogue_done() {
-    if (PrefsDriver::driver()->play_idle_music()) {
+    if (sys.prefs->play_idle_music()) {
         StopAndUnloadSong();
     }
 

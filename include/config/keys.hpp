@@ -293,9 +293,7 @@ enum {
     kMiscKeyMask            = (~(kMotionKeyMask | kWeaponKeyMask | kSpecialKeyMask)),
 };
 
-inline bool mCheckKeyMap(const KeyMap& mKeyMap, int mki) {
-    return mKeyMap.get(PrefsDriver::driver()->key(mki) - 1);
-}
+bool mCheckKeyMap(const KeyMap& mKeyMap, int mki);
 
 inline bool mHelpKey(const KeyMap& km)             { return mCheckKeyMap(km, kHelpKeyNum); }
 inline bool mVolumeDownKey(const KeyMap& km)       { return mCheckKeyMap(km, kVolumeDownKeyNum); }

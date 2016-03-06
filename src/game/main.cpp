@@ -174,12 +174,12 @@ void MainPlay::become_front() {
             g.game_over = false;
 
             _replay_builder.init(
-                    PrefsDriver::driver()->scenario_identifier(),
+                    sys.prefs->scenario_identifier(),
                     String(u32_to_version(plug.meta.version)),
                     _level->chapter_number(),
                     g.random.seed);
 
-            if (PrefsDriver::driver()->play_idle_music()) {
+            if (sys.prefs->play_idle_music()) {
                 LoadSong(3000);
                 SetSongVolume( kMaxMusicVolume);
                 PlaySong();
@@ -220,7 +220,7 @@ void MainPlay::become_front() {
 
       case BRIEFING:
         {
-            if (PrefsDriver::driver()->play_idle_music()) {
+            if (sys.prefs->play_idle_music()) {
                 StopAndUnloadSong();
             }
 
@@ -234,7 +234,7 @@ void MainPlay::become_front() {
 
             set_up_instruments();
 
-            if (PrefsDriver::driver()->play_music_in_game()) {
+            if (sys.prefs->play_music_in_game()) {
                 LoadSong(g.level->songID);
                 SetSongVolume(kMusicVolume);
                 PlaySong();
@@ -250,7 +250,7 @@ void MainPlay::become_front() {
       case PLAYING:
         globals()->transitions.reset();
         quiet_all();
-        if (PrefsDriver::driver()->play_music_in_game()) {
+        if (sys.prefs->play_music_in_game()) {
             StopAndUnloadSong();
         }
         _replay_builder.finish();
@@ -642,21 +642,21 @@ void GamePlay::key_down(const KeyDownEvent& event) {
         break;
 
       default:
-        if (event.key() == PrefsDriver::driver()->key(kHelpKeyNum) - 1) {
+        if (event.key() == sys.prefs->key(kHelpKeyNum) - 1) {
             _state = HELP;
             _player_paused = true;
             stack()->push(new HelpScreen);
-        } else if (event.key() == PrefsDriver::driver()->key(kVolumeDownKeyNum) - 1) {
-            PrefsDriver::driver()->set_volume(PrefsDriver::driver()->volume() - 1);
-            sys.audio->set_global_volume(PrefsDriver::driver()->volume());
-        } else if (event.key() == PrefsDriver::driver()->key(kVolumeUpKeyNum) - 1) {
-            PrefsDriver::driver()->set_volume(PrefsDriver::driver()->volume() + 1);
-            sys.audio->set_global_volume(PrefsDriver::driver()->volume());
-        } else if (event.key() == PrefsDriver::driver()->key(kActionMusicKeyNum) - 1) {
-            if (PrefsDriver::driver()->play_music_in_game()) {
+        } else if (event.key() == sys.prefs->key(kVolumeDownKeyNum) - 1) {
+            sys.prefs->set_volume(sys.prefs->volume() - 1);
+            sys.audio->set_global_volume(sys.prefs->volume());
+        } else if (event.key() == sys.prefs->key(kVolumeUpKeyNum) - 1) {
+            sys.prefs->set_volume(sys.prefs->volume() + 1);
+            sys.audio->set_global_volume(sys.prefs->volume());
+        } else if (event.key() == sys.prefs->key(kActionMusicKeyNum) - 1) {
+            if (sys.prefs->play_music_in_game()) {
                 ToggleSong();
             }
-        } else if (event.key() == PrefsDriver::driver()->key(kFastMotionKeyNum) - 1) {
+        } else if (event.key() == sys.prefs->key(kFastMotionKeyNum) - 1) {
             _fast_motion = true;
         }
         break;
@@ -671,7 +671,7 @@ void GamePlay::key_up(const KeyUpEvent& event) {
         return;
     }
 
-    if (event.key() == PrefsDriver::driver()->key(kFastMotionKeyNum) - 1) {
+    if (event.key() == sys.prefs->key(kFastMotionKeyNum) - 1) {
         _fast_motion = false;
     }
 

@@ -127,10 +127,6 @@ PrefsDriver::~PrefsDriver() {
     sys.prefs = NULL;
 }
 
-PrefsDriver* PrefsDriver::driver() {
-    return sys.prefs;
-}
-
 void PrefsDriver::set_key(size_t index, uint32_t key) {
     Preferences p(get());
     p.keys[index] = key;

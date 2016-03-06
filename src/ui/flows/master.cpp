@@ -120,7 +120,7 @@ void Master::init() {
 
     init_globals();
 
-    sys.audio->set_global_volume(PrefsDriver::driver()->volume());
+    sys.audio->set_global_volume(sys.prefs->volume());
 
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
 
@@ -140,7 +140,7 @@ void Master::init() {
     Admiral::init();
     Vectors::init();
 
-    if (PrefsDriver::driver()->play_idle_music()) {
+    if (sys.prefs->play_idle_music()) {
         LoadSong( kTitleSongID);
         SetSongVolume( kMaxMusicVolume);
         PlaySong();

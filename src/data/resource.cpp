@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
+#include "game/sys.hpp"
 
 using sfz::BytesSlice;
 using sfz::Exception;
@@ -54,7 +55,7 @@ static unique_ptr<MappedFile> load_first(sfz::StringSlice resource_path,
 
 static unique_ptr<MappedFile> load(sfz::StringSlice resource_path) {
     return load_first(resource_path, {
-        format("{0}/{1}", dirs().scenarios, PrefsDriver::driver()->scenario_identifier()),
+        format("{0}/{1}", dirs().scenarios, sys.prefs->scenario_identifier()),
         format("{0}/{1}", dirs().scenarios, kFactoryScenarioIdentifier),
         application_path(),
     });

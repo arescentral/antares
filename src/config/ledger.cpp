@@ -24,6 +24,7 @@
 #include <sfz/sfz.hpp>
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 
 using sfz::Bytes;
@@ -155,7 +156,7 @@ class DirectoryLedger::Visitor : public JsonVisitor {
 };
 
 void DirectoryLedger::load() {
-    const String scenario_id = PrefsDriver::driver()->scenario_identifier();
+    const String scenario_id = sys.prefs->scenario_identifier();
     String path(format("{0}/{1}/ledger.json", dirs().registry, scenario_id));
 
     _chapters.clear();
@@ -178,7 +179,7 @@ void DirectoryLedger::load() {
 }
 
 void DirectoryLedger::save() {
-    const String scenario_id = PrefsDriver::driver()->scenario_identifier();
+    const String scenario_id = sys.prefs->scenario_identifier();
     const String path(format("{0}/{1}/ledger.json", dirs().registry, scenario_id));
 
     vector<Json> unlocked_levels;

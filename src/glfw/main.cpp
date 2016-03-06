@@ -25,6 +25,7 @@
 #include "config/preferences.hpp"
 #include "config/ledger.hpp"
 #include "data/scenario-list.hpp"
+#include "game/sys.hpp"
 #include "glfw/video-driver.hpp"
 #include "sound/openal-driver.hpp"
 #include "ui/flows/master.hpp"
@@ -60,7 +61,7 @@ void main(int argc, const char* argv[]) {
 
     FilePrefsDriver prefs;
 
-    const auto& scenario = PrefsDriver::driver()->scenario_identifier();
+    const auto& scenario = sys.prefs->scenario_identifier();
     bool have_scenario = false;
     ScenarioList l;
     for (auto i: range(l.size())) {

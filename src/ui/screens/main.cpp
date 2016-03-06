@@ -55,7 +55,7 @@ void MainScreen::become_front() {
     switch (_state) {
       case NORMAL:
         InterfaceScreen::become_front();
-        if (PrefsDriver::driver()->play_idle_music() && !SongIsPlaying()) {
+        if (sys.prefs->play_idle_music() && !SongIsPlaying()) {
             LoadSong(kTitleSongID);
             SetSongVolume(kMaxMusicVolume);
             PlaySong();

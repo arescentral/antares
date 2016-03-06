@@ -57,7 +57,7 @@ HelpScreen::HelpScreen():
 HelpScreen::~HelpScreen() { }
 
 void HelpScreen::key_down(const KeyDownEvent& event) {
-    if (event.key() == PrefsDriver::driver()->key(kHelpKeyNum) - 1) {
+    if (event.key() == sys.prefs->key(kHelpKeyNum) - 1) {
         stack()->pop(this);
     } else {
         InterfaceScreen::key_down(event);

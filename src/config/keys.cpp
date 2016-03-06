@@ -134,6 +134,10 @@ int key_digit(uint32_t k) {
     }
 }
 
+bool mCheckKeyMap(const KeyMap& mKeyMap, int mki) {
+    return mKeyMap.get(sys.prefs->key(mki) - 1);
+}
+
 int32_t GetAsciiFromKeyMap(const KeyMap& sourceKeyMap, const KeyMap& previousKeyMap) {
     // TODO(sfiera): write a new implementation of this method.
     static_cast<void>(sourceKeyMap);
