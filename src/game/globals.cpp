@@ -53,8 +53,6 @@ void init_globals() {
 }
 
 aresGlobalType::aresGlobalType() {
-    gZoomMode = kTimesTwoZoom;
-    keyMask = 0;
 }
 
 aresGlobalType::~aresGlobalType() {

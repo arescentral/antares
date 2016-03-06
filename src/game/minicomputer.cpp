@@ -832,7 +832,7 @@ void transfer_control(Handle<Admiral> adm, int32_t line) {
 }
 
 static void build_ship(Handle<Admiral> adm, int32_t line) {
-    if (globals()->keyMask & kComputerBuildMenu) {
+    if (g.key_mask & kComputerBuildMenu) {
         return;
     }
     if (CountObjectsOfBaseType(BaseObject::none(), Admiral::none()) < (kMaxSpaceObject - kMaxShipBuffer)) {
@@ -849,7 +849,7 @@ static void build_ship(Handle<Admiral> adm, int32_t line) {
 }
 
 static void fire(Handle<Admiral> adm, int key) {
-    if (globals()->keyMask & kComputerSpecialMenu) {
+    if (g.key_mask & kComputerSpecialMenu) {
         return;
     }
     auto control = adm->control();
@@ -865,7 +865,7 @@ static void fire2(Handle<Admiral> adm, int32_t line) { fire(adm, kTwoKey); }
 static void fire_special(Handle<Admiral> adm, int32_t line) { fire(adm, kEnterKey); }
 
 static void hold_position(Handle<Admiral> adm, int32_t line) {
-    if (globals()->keyMask & kComputerSpecialMenu) {
+    if (g.key_mask & kComputerSpecialMenu) {
         return;
     }
     auto control = adm->control();
@@ -875,7 +875,7 @@ static void hold_position(Handle<Admiral> adm, int32_t line) {
 }
 
 static void come_to_me(Handle<Admiral> adm, int32_t line) {
-    if (globals()->keyMask & kComputerSpecialMenu) {
+    if (g.key_mask & kComputerSpecialMenu) {
         return;
     }
     auto control = adm->control();
@@ -886,21 +886,21 @@ static void come_to_me(Handle<Admiral> adm, int32_t line) {
 }
 
 static void next_message(Handle<Admiral> adm, int32_t line) {
-    if (globals()->keyMask & kComputerMessageMenu) {
+    if (g.key_mask & kComputerMessageMenu) {
         return;
     }
     Messages::advance();
 }
 
 static void last_message(Handle<Admiral> adm, int32_t line) {
-    if (globals()->keyMask & kComputerMessageMenu) {
+    if (g.key_mask & kComputerMessageMenu) {
         return;
     }
     Messages::replay();
 }
 
 static void prev_message(Handle<Admiral> adm, int32_t line) {
-    if (globals()->keyMask & kComputerMessageMenu) {
+    if (g.key_mask & kComputerMessageMenu) {
         return;
     }
     Messages::previous();

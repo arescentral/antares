@@ -641,11 +641,11 @@ static void color_flash(Handle<Action> action, Handle<SpaceObject> focus) {
 }
 
 static void enable_keys(Handle<Action> action, Handle<SpaceObject> focus) {
-    globals()->keyMask = globals()->keyMask & ~action->argument.keys.keyMask;
+    g.key_mask = g.key_mask & ~action->argument.keys.keyMask;
 }
 
 static void disable_keys(Handle<Action> action, Handle<SpaceObject> focus) {
-    globals()->keyMask = globals()->keyMask | action->argument.keys.keyMask;
+    g.key_mask = g.key_mask | action->argument.keys.keyMask;
 }
 
 static void set_zoom(Handle<Action> action, Handle<SpaceObject> focus) {

@@ -132,7 +132,7 @@ void ResetPlayerShip(Handle<SpaceObject> which) {
     g.send_label = Label::add(200, 200, 0, 30, SpaceObject::none(), false, GREEN);
     globals()->starfield.reset(g.ship);
     globals()->next_klaxon = game_ticks();
-    globals()->keyMask = 0;
+    g.key_mask = 0;
     globals()->gZoomMode = kNearestFoeZoom;
     gPreviousZoomMode = kNearestFoeZoom;
 
@@ -182,7 +182,7 @@ static void zoom_to(ZoomType zoom) {
 }
 
 static void zoom_shortcut(ZoomType zoom) {
-    if (globals()->keyMask & kShortcutZoomMask) {
+    if (g.key_mask & kShortcutZoomMask) {
         return;
     }
     ZoomType previous = gPreviousZoomMode;
@@ -195,7 +195,7 @@ static void zoom_shortcut(ZoomType zoom) {
 }
 
 static void zoom_in() {
-    if (globals()->keyMask & kZoomInKey) {
+    if (g.key_mask & kZoomInKey) {
         return;
     }
     if (globals()->gZoomMode > kTimesTwoZoom) {
@@ -204,7 +204,7 @@ static void zoom_in() {
 }
 
 static void zoom_out() {
-    if (globals()->keyMask & kZoomOutKey) {
+    if (g.key_mask & kZoomOutKey) {
         return;
     }
     if (globals()->gZoomMode < kSmallestZoom) {
@@ -336,8 +336,8 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
         break;
       default:
         if (key < kKeyControlNum) {
-            if (!(gTheseKeys & (0x01 << key) & ~globals()->keyMask)) {
-                gTheseKeys ^= (0x01 << key) & ~globals()->keyMask;
+            if (!(gTheseKeys & (0x01 << key) & ~g.key_mask)) {
+                gTheseKeys ^= (0x01 << key) & ~g.key_mask;
             }
         }
         break;
@@ -355,8 +355,8 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
     switch (key) {
       default:
         if (key < kKeyControlNum) {
-            if (gTheseKeys & (0x01 << key) & ~globals()->keyMask) {
-                gTheseKeys ^= (0x01 << key) & ~globals()->keyMask;
+            if (gTheseKeys & (0x01 << key) & ~g.key_mask) {
+                gTheseKeys ^= (0x01 << key) & ~g.key_mask;
             }
         }
         break;
@@ -637,7 +637,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
                     ((play_screen.height() / 2) + kSendMessageVOffset));
             }
         } else {
-            if ((mReturnKey(*bufMap)) && (!(globals()->keyMask & kReturnKeyMask))) {
+            if ((mReturnKey(*bufMap)) && (!(g.key_mask & kReturnKeyMask))) {
                 *enterMessage = true;
             }
         }
@@ -824,7 +824,7 @@ int32_t PlayerShip::goal_direction() const {
 void PlayerShipHandleClick(Point where, int button) {
     Rect            bounds;
 
-    if (globals()->keyMask & kMouseMask) {
+    if (g.key_mask & kMouseMask) {
         return;
     }
 

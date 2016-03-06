@@ -114,6 +114,8 @@ struct GlobalState {
     Handle<Label>             send_label;     // Message local player is currently entering.
 
     int32_t                   bottom_border;  // When a message is being displayed.
+
+    uint32_t  key_mask;  // Determines input to reject.
 };
 
 extern GlobalState g;
@@ -128,7 +130,6 @@ struct aresGlobalType {
 
     miniComputerDataType    gMiniScreenData;
 
-    uint32_t        keyMask;
     hotKeyType      hotKey[kHotKeyNum];
 
     Handle<SpaceObject>     lastSelectedObject;
