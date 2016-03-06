@@ -116,6 +116,8 @@ struct GlobalState {
     int32_t                   bottom_border;  // When a message is being displayed.
 
     uint32_t  key_mask;  // Determines input to reject.
+
+    miniComputerDataType  mini;
 };
 
 extern GlobalState g;
@@ -127,8 +129,6 @@ struct aresGlobalType {
     std::unique_ptr<InputSource> gInputSource;
 
     ZoomType        gZoomMode;
-
-    miniComputerDataType    gMiniScreenData;
 
     hotKeyType      hotKey[kHotKeyNum];
 
