@@ -25,6 +25,7 @@
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "game/globals.hpp"
+#include "lang/defines.hpp"
 #include "video/driver.hpp"
 
 using sfz::Bytes;
@@ -193,11 +194,11 @@ struct FontVisitor : public JsonDefaultVisitor {
 
 }  // namespace
 
-const Font* tactical_font;
-const Font* computer_font;
-const Font* button_font;
-const Font* title_font;
-const Font* small_button_font;
+ANTARES_GLOBAL const Font* tactical_font;
+ANTARES_GLOBAL const Font* computer_font;
+ANTARES_GLOBAL const Font* button_font;
+ANTARES_GLOBAL const Font* title_font;
+ANTARES_GLOBAL const Font* small_button_font;
 
 Font::Font(StringSlice name) {
     String path(format("fonts/{0}.json", name));
