@@ -124,7 +124,6 @@ void Master::init() {
 
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
 
-    RotationInit();
     g.random.seed = _seed;
 
     sys_init();

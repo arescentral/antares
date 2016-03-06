@@ -39,6 +39,9 @@ struct SystemGlobals {
     std::vector<sfz::String> key_long_names;
     std::vector<sfz::String> gamepad_names;
     std::vector<sfz::String> gamepad_long_names;
+
+    enum { ROT_TABLE_SIZE = 720 };
+    int32_t rot_table[ROT_TABLE_SIZE];
 };
 
 extern SystemGlobals sys;

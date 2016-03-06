@@ -20,9 +20,13 @@
 
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
+#include "data/resource.hpp"
 #include "data/string-list.hpp"
 #include "drawing/text.hpp"
 #include "lang/defines.hpp"
+
+using sfz::BytesSlice;
+using sfz::Exception;
 
 namespace antares {
 
@@ -39,6 +43,15 @@ void sys_init() {
     sys.key_long_names = to_vector(StringList(KEY_LONG_NAMES));
     sys.gamepad_names = to_vector(StringList(Gamepad::NAMES));
     sys.gamepad_long_names = to_vector(StringList(Gamepad::LONG_NAMES));
+
+    {
+        Resource rsrc("rotation-table");
+        BytesSlice in(rsrc.data());
+        read(in, sys.rot_table, SystemGlobals::ROT_TABLE_SIZE);
+        if (!in.empty()) {
+            throw Exception("didn't consume all of rotation data");
+        }
+    }
 }
 
 }  // namespace antares

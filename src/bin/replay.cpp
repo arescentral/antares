@@ -141,7 +141,6 @@ void ReplayMaster::init() {
 
     SoundDriver::driver()->set_global_volume(8);  // Max volume.
 
-    RotationInit();
     sys_init();
     Label::init();
     Messages::init();
