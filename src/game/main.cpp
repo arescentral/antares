@@ -648,10 +648,10 @@ void GamePlay::key_down(const KeyDownEvent& event) {
             stack()->push(new HelpScreen);
         } else if (event.key() == Preferences::preferences()->key(kVolumeDownKeyNum) - 1) {
             Preferences::preferences()->set_volume(Preferences::preferences()->volume() - 1);
-            SoundDriver::driver()->set_global_volume(Preferences::preferences()->volume());
+            sys.audio->set_global_volume(Preferences::preferences()->volume());
         } else if (event.key() == Preferences::preferences()->key(kVolumeUpKeyNum) - 1) {
             Preferences::preferences()->set_volume(Preferences::preferences()->volume() + 1);
-            SoundDriver::driver()->set_global_volume(Preferences::preferences()->volume());
+            sys.audio->set_global_volume(Preferences::preferences()->volume());
         } else if (event.key() == Preferences::preferences()->key(kActionMusicKeyNum) - 1) {
             if (Preferences::preferences()->play_music_in_game()) {
                 ToggleSong();

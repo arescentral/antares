@@ -19,6 +19,7 @@
 #include "sound/music.hpp"
 
 #include "config/preferences.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 #include "sound/driver.hpp"
 
@@ -34,7 +35,7 @@ static ANTARES_GLOBAL unique_ptr<SoundChannel> channel;
 void MusicInit() {
     playing = false;
     song.reset();
-    channel = SoundDriver::driver()->open_channel();
+    channel = sys.audio->open_channel();
 }
 
 void MusicCleanup() {
@@ -74,7 +75,7 @@ void StopAndUnloadSong() {
 
 void LoadSong(int id) {
     StopSong();
-    song = SoundDriver::driver()->open_sound(format("/music/{0}", id));
+    song = sys.audio->open_sound(format("/music/{0}", id));
 }
 
 void SetSongVolume(double volume) {

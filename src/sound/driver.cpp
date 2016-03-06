@@ -55,10 +55,6 @@ SoundDriver::~SoundDriver() {
     sys.audio = NULL;
 }
 
-SoundDriver* SoundDriver::driver() {
-    return sys.audio;
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // NullSoundDriver
 

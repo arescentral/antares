@@ -139,7 +139,7 @@ class ReplayMaster : public Card {
 void ReplayMaster::init() {
     init_globals();
 
-    SoundDriver::driver()->set_global_volume(8);  // Max volume.
+    sys.audio->set_global_volume(8);  // Max volume.
 
     sys_init();
     Label::init();

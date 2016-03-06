@@ -70,7 +70,7 @@ void OptionsScreen::become_front() {
 
         case CANCEL:
             PrefsDriver::driver()->load(_preferences);
-            SoundDriver::driver()->set_global_volume(_preferences->volume());
+            sys.audio->set_global_volume(_preferences->volume());
             stack()->pop(this);
             break;
     }
@@ -132,13 +132,13 @@ void SoundControlScreen::handle_button(Button& button) {
 
         case VOLUME_DOWN:
             _preferences->set_volume(_preferences->volume() - 1);
-            SoundDriver::driver()->set_global_volume(_preferences->volume());
+            sys.audio->set_global_volume(_preferences->volume());
             adjust_interface();
             break;
 
         case VOLUME_UP:
             _preferences->set_volume(_preferences->volume() + 1);
-            SoundDriver::driver()->set_global_volume(_preferences->volume());
+            sys.audio->set_global_volume(_preferences->volume());
             adjust_interface();
             break;
 

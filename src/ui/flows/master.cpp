@@ -120,7 +120,7 @@ void Master::init() {
 
     init_globals();
 
-    SoundDriver::driver()->set_global_volume(Preferences::preferences()->volume());
+    sys.audio->set_global_volume(Preferences::preferences()->volume());
 
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
 

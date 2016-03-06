@@ -52,7 +52,7 @@ void InitSoundFX() {
         gChannel[i].soundPriority = kNoSound;
         gChannel[i].soundVolume = 0;
         gChannel[i].whichSound = -1;
-        gChannel[i].channelPtr = SoundDriver::driver()->open_channel();
+        gChannel[i].channelPtr = sys.audio->open_channel();
     }
 
     ResetAllSounds();
@@ -233,7 +233,7 @@ int AddSound(int soundID) {
             throw Exception("Can't manage any more sounds");
         }
 
-        gSound[whichSound].soundHandle = SoundDriver::driver()->open_sound(
+        gSound[whichSound].soundHandle = sys.audio->open_sound(
                 format("/sounds/{0}", soundID));
         gSound[whichSound].id = soundID;
     }
