@@ -63,6 +63,9 @@ struct SystemGlobals {
     SoundFX sound;
     Music music;
     Pix pix;
+
+    Texture left_instrument_texture;
+    Texture right_instrument_texture;
 };
 
 extern SystemGlobals sys;

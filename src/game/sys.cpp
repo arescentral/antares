@@ -20,6 +20,7 @@
 
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
+#include "data/picture.hpp"
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
 #include "drawing/text.hpp"
@@ -35,6 +36,9 @@ namespace antares {
 static const int16_t kCheatStringListID   = 750;
 static const int16_t kCheatFeedbackOnID   = 751;
 static const int16_t kCheatFeedbackOffID  = 752;
+
+const int16_t kInstLeftPictID   = 501;
+const int16_t kInstRightPictID  = 512;
 
 ANTARES_GLOBAL SystemGlobals sys;
 
@@ -67,6 +71,9 @@ void sys_init() {
         sys.sound.init();
         sys.music.init();
     }
+
+    sys.left_instrument_texture = Picture(kInstLeftPictID).texture();
+    sys.right_instrument_texture = Picture(kInstRightPictID).texture();
 }
 
 }  // namespace antares
