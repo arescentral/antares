@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 #include <vector>
 
+#include "drawing/sprite-handling.hpp"
 #include "sound/music.hpp"
 #include "sound/fx.hpp"
 
@@ -61,6 +62,7 @@ struct SystemGlobals {
 
     SoundFX sound;
     Music music;
+    Pix pix;
 };
 
 extern SystemGlobals sys;

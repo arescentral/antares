@@ -683,7 +683,7 @@ static void draw_mini_ship_data(
 
     if ((obj->base.get()) && (obj->pixResID >= 0)) {
         // Icon
-        NatePixTable* pixTable = GetPixTable(obj->pixResID);
+        NatePixTable* pixTable = sys.pix.get(obj->pixResID);
 
         if (pixTable != NULL) {
             int16_t whichShape;

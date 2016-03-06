@@ -82,17 +82,10 @@ static draw_tiny_t draw_tiny_function(uint8_t id) {
     }
 }
 
-struct pixTableType {
-    std::unique_ptr<NatePixTable>   resource;
-    int                             resID;
-};
-static ANTARES_GLOBAL pixTableType gPixTable[kMaxPixTableEntry];
 
 int32_t ANTARES_GLOBAL gAbsoluteScale = MIN_SCALE;
 
 void SpriteHandlingInit() {
-    ResetAllPixTables();
-
     g.sprites.reset(new Sprite[Sprite::size]);
     ResetAllSprites();
 
@@ -124,15 +117,18 @@ void ResetAllSprites() {
     }
 }
 
-void ResetAllPixTables() {
+void Pix::init() {
+    reset();
+}
+
+void Pix::reset() {
     for (pixTableType* entry: range(gPixTable, gPixTable + kMaxPixTableEntry)) {
-        entry->resource.reset();
-        entry->resID = -1;
+        *entry = pixTableType();
     }
 }
 
-NatePixTable* AddPixTable(int16_t resource_id) {
-    NatePixTable* result = GetPixTable(resource_id);
+NatePixTable* Pix::add(int16_t resource_id) {
+    NatePixTable* result = get(resource_id);
     if (result != NULL) {
         return result;
     }
@@ -150,7 +146,7 @@ NatePixTable* AddPixTable(int16_t resource_id) {
     throw Exception("Can't manage any more sprite tables");
 }
 
-NatePixTable* GetPixTable(int16_t resource_id) {
+NatePixTable* Pix::get(int16_t resource_id) {
     for (pixTableType* entry: range(gPixTable, gPixTable + kMaxPixTableEntry)) {
         if (entry->resID == resource_id) {
             return entry->resource.get();

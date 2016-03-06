@@ -67,6 +67,7 @@ void sys_init() {
         sys.sound.init();
         sys.music.init();
     }
+    sys.pix.init();
 }
 
 }  // namespace antares

@@ -132,7 +132,7 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
 
     NatePixTable* spriteTable = nullptr;
     if (sourceObject->pixResID != kNoSpriteTable) {
-        spriteTable = GetPixTable(sourceObject->pixResID);
+        spriteTable = sys.pix.get(sourceObject->pixResID);
         if (!spriteTable) {
             throw Exception("Received an unexpected request to load a sprite");
         }
@@ -505,11 +505,11 @@ void SpaceObject::change_base_type(
 
     // HANDLE THE NEW SPRITE DATA:
     if (obj->pixResID != kNoSpriteTable) {
-        spriteTable = GetPixTable(obj->pixResID);
+        spriteTable = sys.pix.get(obj->pixResID);
 
         if (spriteTable == NULL) {
             throw Exception("Couldn't load a requested sprite");
-            spriteTable = AddPixTable(obj->pixResID);
+            spriteTable = sys.pix.add(obj->pixResID);
         }
 
         obj->sprite->table = spriteTable;
@@ -683,7 +683,7 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
                     object->baseType->pixResID | (GetAdmiralColor(owner)
                             << kSpriteTableColorShift);
 
-                pixTable = GetPixTable(object->pixResID);
+                pixTable = sys.pix.get(object->pixResID);
                 if (pixTable != NULL) {
                     object->sprite->table = pixTable;
                 }

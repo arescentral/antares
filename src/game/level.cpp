@@ -98,7 +98,7 @@ void AddBaseObjectMedia(Handle<BaseObject> base, uint8_t color, uint32_t all_col
 
         if (base->pixResID != kNoSpriteTable) {
             int16_t id = base->pixResID + (i << kSpriteTableColorShift);
-            AddPixTable(id);
+            sys.pix.add(id);
         }
 
         AddBaseObjectActionMedia(base, &BaseObject::destroy, i, all_colors);
@@ -268,7 +268,7 @@ bool start_construct_level(const Level* level, int32_t* max) {
     SetAllBaseObjectsUnchecked();
     // uncheck all sounds
 
-    ResetAllPixTables();
+    sys.pix.reset();
     sys.sound.reset();
 
     *max = g.level->initialNum * 3L
@@ -328,11 +328,11 @@ static void load_initial(int i, uint32_t all_colors) {
     // make sure we're not overriding the sprite
     if (initial->spriteIDOverride >= 0) {
         if (baseObject->attributes & kCanThink) {
-            AddPixTable(
+            sys.pix.add(
                     initial->spriteIDOverride +
                     (GetAdmiralColor(owner) << kSpriteTableColorShift));
         } else {
-            AddPixTable(initial->spriteIDOverride);
+            sys.pix.add(initial->spriteIDOverride);
         }
     }
 
