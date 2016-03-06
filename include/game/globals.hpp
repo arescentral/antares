@@ -128,8 +128,6 @@ struct aresGlobalType {
     aresGlobalType();
     ~aresGlobalType();
 
-    std::unique_ptr<InputSource> gInputSource;
-
     hotKeyType      hotKey[kHotKeyNum];
 
     Handle<SpaceObject>     lastSelectedObject;

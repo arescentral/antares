@@ -25,6 +25,7 @@
 
 namespace antares {
 
+class InputSource;
 class Level;
 
 enum GameResult {
@@ -38,7 +39,7 @@ enum GameResult {
 class MainPlay : public Card {
   public:
     MainPlay(
-            const Level* level, bool replay, bool show_loading_screen,
+            const Level* level, bool replay, InputSource* input, bool show_loading_screen,
             GameResult* game_result);
 
     virtual void become_front();
@@ -58,6 +59,7 @@ class MainPlay : public Card {
     bool _cancelled;
     GameResult* const _game_result;
     ReplayBuilder _replay_builder;
+    InputSource* _input_source;
 };
 
 }  // namespace antares

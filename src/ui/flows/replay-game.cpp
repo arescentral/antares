@@ -22,7 +22,6 @@
 
 #include "data/plugin.hpp"
 #include "game/globals.hpp"
-#include "game/input-source.hpp"
 #include "game/level.hpp"
 #include "math/random.hpp"
 #include "ui/card.hpp"
@@ -39,7 +38,8 @@ ReplayGame::ReplayGame(int16_t replay_id):
         _data(_resource.data()),
         _random_seed{_data.global_seed},
         _level(&plug.levels[_data.chapter_id - 1]),
-        _game_result(NO_GAME) { }
+        _game_result(NO_GAME),
+        _input_source(&_data) { }
 
 ReplayGame::~ReplayGame() { }
 
@@ -53,16 +53,14 @@ void ReplayGame::become_front() {
       case FADING_OUT:
         {
             _state = PLAYING;
-            globals()->gInputSource.reset(new ReplayInputSource(&_data));
             swap(_random_seed, g.random);
             _game_result = NO_GAME;
-            stack()->push(new MainPlay(_level, true, true, &_game_result));
+            stack()->push(new MainPlay(_level, true, &_input_source, true, &_game_result));
         }
         break;
 
       case PLAYING:
         swap(_random_seed, g.random);
-        globals()->gInputSource.reset();
         stack()->pop(this);
         break;
     }
