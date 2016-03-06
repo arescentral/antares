@@ -55,11 +55,7 @@ void MainScreen::become_front() {
     switch (_state) {
       case NORMAL:
         InterfaceScreen::become_front();
-        if (sys.prefs->play_idle_music() && !sys.music.SongIsPlaying()) {
-            sys.music.LoadSong(kTitleSongID);
-            sys.music.SetSongVolume(kMaxMusicVolume);
-            sys.music.PlaySong();
-        }
+        sys.music.play(Music::IDLE, kTitleSongID);
         _next_timer = (now() + kMainDemoTimeOutTime);
         break;
       case QUITTING:

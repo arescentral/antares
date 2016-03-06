@@ -30,25 +30,27 @@ class SoundChannel;
 
 const int kTitleSongID = 4001;  // Doomtroopers, Unite!
 
-const double kMusicVolume = 0.84375;  // In-game music volume.
-const double kMaxMusicVolume = 1.0;   // Idle music volume.
-
 class Music {
     public:
+        enum Type {
+            IN_GAME,
+            IDLE,
+        };
+
         void init();
-        void PlaySong();
-        void ToggleSong();
-        bool SongIsPlaying();
-        void StopAndUnloadSong();
-        void LoadSong(int id);
-        void SetSongVolume(double volume);
+        void play(Type type, int16_t id);
+        void stop();
+        void toggle();
+        void sync();
 
     private:
         void StopSong();
 
-        bool playing = false;
-        unique_ptr<Sound> song;
-        unique_ptr<SoundChannel> channel;
+        bool _playing = false;
+        Type _song_type;
+        int16_t _song_id;
+        unique_ptr<Sound> _song;
+        unique_ptr<SoundChannel> _channel;
 };
 
 }  // namespace antares

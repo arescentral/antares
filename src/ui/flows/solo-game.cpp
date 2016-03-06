@@ -135,10 +135,6 @@ void SoloGame::handle_game_result() {
 }
 
 void SoloGame::epilogue_done() {
-    if (sys.prefs->play_idle_music()) {
-        sys.music.StopAndUnloadSong();
-    }
-
     if (g.next_level < 0) {
         _level = NULL;
     } else {

@@ -179,11 +179,7 @@ void MainPlay::become_front() {
                     _level->chapter_number(),
                     g.random.seed);
 
-            if (sys.prefs->play_idle_music()) {
-                sys.music.LoadSong(3000);
-                sys.music.SetSongVolume( kMaxMusicVolume);
-                sys.music.PlaySong();
-            }
+            sys.music.play(Music::IDLE, 3000);
 
             if (_show_loading_screen) {
                 stack()->push(new LoadingScreen(_level, &_cancelled));
@@ -220,9 +216,7 @@ void MainPlay::become_front() {
 
       case BRIEFING:
         {
-            if (sys.prefs->play_idle_music()) {
-                sys.music.StopAndUnloadSong();
-            }
+            sys.music.stop();
 
             if (_cancelled) {
                 *_game_result = QUIT_GAME;
@@ -234,11 +228,7 @@ void MainPlay::become_front() {
 
             set_up_instruments();
 
-            if (sys.prefs->play_music_in_game()) {
-                sys.music.LoadSong(g.level->songID);
-                sys.music.SetSongVolume(kMusicVolume);
-                sys.music.PlaySong();
-            }
+            sys.music.play(Music::IN_GAME, g.level->songID);
 
             if (!_replay) {
                 _replay_builder.start();
@@ -250,9 +240,7 @@ void MainPlay::become_front() {
       case PLAYING:
         globals()->transitions.reset();
         quiet_all();
-        if (sys.prefs->play_music_in_game()) {
-            sys.music.StopAndUnloadSong();
-        }
+        sys.music.stop();
         _replay_builder.finish();
 #ifdef DATA_COVERAGE
         {
@@ -654,7 +642,7 @@ void GamePlay::key_down(const KeyDownEvent& event) {
             sys.audio->set_global_volume(sys.prefs->volume());
         } else if (event.key() == sys.prefs->key(kActionMusicKeyNum) - 1) {
             if (sys.prefs->play_music_in_game()) {
-                sys.music.ToggleSong();
+                sys.music.toggle();
             }
         } else if (event.key() == sys.prefs->key(kFastMotionKeyNum) - 1) {
             _fast_motion = true;

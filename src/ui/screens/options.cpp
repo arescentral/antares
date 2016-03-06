@@ -69,6 +69,7 @@ void OptionsScreen::become_front() {
 
         case CANCEL:
             sys.prefs->set(_revert);
+            sys.music.sync();  // TODO(sfiera): do this in driver.
             stack()->pop(this);
             break;
     }
@@ -113,12 +114,7 @@ void SoundControlScreen::handle_button(Button& button) {
 
         case IDLE_MUSIC:
             sys.prefs->set_play_idle_music(!dynamic_cast<CheckboxButton&>(button).on);
-            if (sys.prefs->play_idle_music()) {
-                sys.music.LoadSong(kTitleSongID);
-                sys.music.PlaySong();
-            } else {
-                sys.music.StopAndUnloadSong();
-            }
+            sys.music.sync();  // TODO(sfiera): do this in driver.
             adjust_interface();
             break;
 

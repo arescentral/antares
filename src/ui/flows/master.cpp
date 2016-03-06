@@ -137,11 +137,7 @@ void Master::init() {
     Admiral::init();
     Vectors::init();
 
-    if (sys.prefs->play_idle_music()) {
-        sys.music.LoadSong( kTitleSongID);
-        sys.music.SetSongVolume( kMaxMusicVolume);
-        sys.music.PlaySong();
-    }
+    sys.music.play(Music::IDLE, kTitleSongID);
 }
 
 }  // namespace antares
