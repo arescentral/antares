@@ -41,28 +41,14 @@ using std::unique_ptr;
 
 namespace antares {
 
-namespace {
+static const uint32_t kSolidSquareBlip     = 0x00000000;
+static const uint32_t kTriangleUpBlip      = 0x00000010;
+static const uint32_t kDiamondBlip         = 0x00000020;
+static const uint32_t kPlusBlip            = 0x00000030;
+static const uint32_t kFramedSquareBlip    = 0x00000040;
 
-const size_t kMinVolatilePixTable = 1;  // sound 0 is always there; 1+ is volatile
-
-const uint32_t kSolidSquareBlip     = 0x00000000;
-const uint32_t kTriangleUpBlip      = 0x00000010;
-const uint32_t kDiamondBlip         = 0x00000020;
-const uint32_t kPlusBlip            = 0x00000030;
-const uint32_t kFramedSquareBlip    = 0x00000040;
-
-const uint32_t kBlipSizeMask        = 0x0000000f;
-const uint32_t kBlipTypeMask        = 0x000000f0;
-
-template <typename T>
-void zero(T* t) {
-    *t = T();
-}
-
-template <typename T>
-Range<T*> slice(T* array, size_t start, size_t end) {
-    return Range<T*>(array + start, array + end);
-}
+static const uint32_t kBlipSizeMask        = 0x0000000f;
+static const uint32_t kBlipTypeMask        = 0x000000f0;
 
 static void draw_tiny_square(const Rect& rect, const RgbColor& color) {
     Rects().fill(rect, color);
@@ -80,7 +66,7 @@ static void draw_tiny_plus(const Rect& rect, const RgbColor& color) {
     sys.video->draw_plus(rect, color);
 }
 
-draw_tiny_t draw_tiny_function(uint8_t id) {
+static draw_tiny_t draw_tiny_function(uint8_t id) {
     uint8_t size = id & kBlipSizeMask;
     uint8_t type = id & kBlipTypeMask;
     if (size <= 0) {
@@ -96,12 +82,9 @@ draw_tiny_t draw_tiny_function(uint8_t id) {
     }
 }
 
-}  // namespace
-
 struct pixTableType {
     std::unique_ptr<NatePixTable>   resource;
     int                             resID;
-    bool                            keepMe;
 };
 static ANTARES_GLOBAL pixTableType gPixTable[kMaxPixTableEntry];
 
@@ -137,41 +120,14 @@ Sprite::Sprite()
 
 void ResetAllSprites() {
     for (auto sprite: Sprite::all()) {
-        zero(sprite.get());
+        *sprite = Sprite();
     }
 }
 
 void ResetAllPixTables() {
     for (pixTableType* entry: range(gPixTable, gPixTable + kMaxPixTableEntry)) {
         entry->resource.reset();
-        entry->keepMe = false;
         entry->resID = -1;
-    }
-}
-
-void SetAllPixTablesNoKeep() {
-    for (pixTableType* entry:
-            range(gPixTable + kMinVolatilePixTable, gPixTable + kMaxPixTableEntry)) {
-        entry->keepMe = false;
-    }
-}
-
-void KeepPixTable(int16_t resID) {
-    for (pixTableType* entry: range(gPixTable, gPixTable + kMaxPixTableEntry)) {
-        if (entry->resID == resID) {
-            entry->keepMe = true;
-            return;
-        }
-    }
-}
-
-void RemoveAllUnusedPixTables() {
-    for (pixTableType* entry:
-            range(gPixTable + kMinVolatilePixTable, gPixTable + kMaxPixTableEntry)) {
-        if (!entry->keepMe) {
-            entry->resource.reset();
-            entry->resID = -1;
-        }
     }
 }
 

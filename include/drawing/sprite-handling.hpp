@@ -96,9 +96,6 @@ void SpriteHandlingInit();
 void ResetAllSprites();
 Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t scale);
 void ResetAllPixTables();
-void SetAllPixTablesNoKeep();
-void KeepPixTable(int16_t resource_id);
-void RemoveAllUnusedPixTables();
 NatePixTable* AddPixTable(int16_t resource_id);
 NatePixTable* GetPixTable(int16_t resource_id);
 Handle<Sprite> AddSprite(

@@ -267,9 +267,8 @@ bool start_construct_level(const Level* level, int32_t* max) {
     // uncheck all base objects
     SetAllBaseObjectsUnchecked();
     // uncheck all sounds
-    SetAllPixTablesNoKeep();
 
-    RemoveAllUnusedPixTables();
+    ResetAllPixTables();
     sys.sound.reset();
 
     *max = g.level->initialNum * 3L
