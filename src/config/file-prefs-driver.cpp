@@ -121,30 +121,32 @@ static void set_from(
     }
 }
 
-void FilePrefsDriver::load(Preferences* p) {
+Preferences FilePrefsDriver::get() const {
+    Preferences p;
     try {
         String path(format("{0}/config.json", dirs().root));
         MappedFile file(path);
         Json json;
         String data(utf8::decode(file.data()));
         if (!string_to_json(data, json)) {
-            return;
+            return p;
         }
 
-        set_from<int>(json, "sound", "volume", *p, &Preferences::set_volume);
-        set_from<bool>(json, "sound", "speech", *p, &Preferences::set_speech_on);
-        set_from<bool>(json, "sound", "idle music", *p, &Preferences::set_play_idle_music);
-        set_from<bool>(json, "sound", "game music", *p, &Preferences::set_play_music_in_game);
+        set_from<int>(json, "sound", "volume", p, &Preferences::set_volume);
+        set_from<bool>(json, "sound", "speech", p, &Preferences::set_speech_on);
+        set_from<bool>(json, "sound", "idle music", p, &Preferences::set_play_idle_music);
+        set_from<bool>(json, "sound", "game music", p, &Preferences::set_play_music_in_game);
 
         for (auto i: range<size_t>(KEY_COUNT)) {
-            set_from<int>(json, "keys", kKeyNames[i], *p, &Preferences::set_key, i);
+            set_from<int>(json, "keys", kKeyNames[i], p, &Preferences::set_key, i);
         }
     } catch (Exception& e) {
         // pass
     }
+    return p;
 }
 
-void FilePrefsDriver::save(const Preferences& p) {
+void FilePrefsDriver::set(const Preferences& p) {
     StringMap<Json> sound;
     sound["volume"]      = Json::number(p.volume());
     sound["speech"]      = Json::boolean(p.speech_on());

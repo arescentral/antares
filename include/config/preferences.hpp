@@ -52,12 +52,6 @@ class Preferences {
     void set_scenario_identifier(sfz::StringSlice id);
 
   private:
-    friend class PrefsDriver;
-
-    static Preferences* preferences();
-
-    static std::unique_ptr<Preferences> _preferences;
-
     int16_t             _key_map[44];
     bool                _play_idle_music;
     bool                _play_music_in_game;
@@ -71,16 +65,15 @@ class PrefsDriver {
     PrefsDriver();
     virtual ~PrefsDriver();
 
-    virtual void load(Preferences* preferences) = 0;
-    virtual void save(const Preferences& preferences) = 0;
+    virtual Preferences get() const = 0;
+    virtual void set(const Preferences& prefs) = 0;
 
-    uint32_t key(size_t index) const { return Preferences::preferences()->key(index); }
-    bool play_idle_music() const { return Preferences::preferences()->play_idle_music(); }
-    bool play_music_in_game() const { return Preferences::preferences()->play_music_in_game(); }
-    bool speech_on() const { return Preferences::preferences()->speech_on(); }
-    int volume() const { return Preferences::preferences()->volume(); }
-    sfz::StringSlice scenario_identifier() const { return Preferences::preferences()->scenario_identifier(); }
-    const Preferences& get() const { return *Preferences::preferences(); }
+    uint32_t key(size_t index) const { return get().key(index); }
+    bool play_idle_music() const { return get().play_idle_music(); }
+    bool play_music_in_game() const { return get().play_music_in_game(); }
+    bool speech_on() const { return get().speech_on(); }
+    int volume() const { return get().volume(); }
+    sfz::String scenario_identifier() const { return sfz::String(get().scenario_identifier()); }
 
     void set_key(size_t index, uint32_t key);
     void set_play_idle_music(bool on);
@@ -88,7 +81,6 @@ class PrefsDriver {
     void set_speech_on(bool on);
     void set_volume(int volume);
     void set_scenario_identifier(sfz::StringSlice id);
-    void set(const Preferences& prefs);
 
     static PrefsDriver* driver();
 };
@@ -98,8 +90,8 @@ class NullPrefsDriver : public PrefsDriver {
     NullPrefsDriver();
     NullPrefsDriver(Preferences defaults);
 
-    virtual void load(Preferences* preferences);
-    virtual void save(const Preferences& preferences);
+    virtual Preferences get() const;
+    virtual void set(const Preferences& prefs);
 
   private:
     Preferences _saved;

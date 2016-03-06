@@ -27,8 +27,8 @@ class FilePrefsDriver : public PrefsDriver {
   public:
     FilePrefsDriver();
 
-    virtual void load(Preferences* preferences);
-    virtual void save(const Preferences& preferences);
+    virtual Preferences get() const;
+    virtual void set(const Preferences& preferences);
 };
 
 }  // namespace antares

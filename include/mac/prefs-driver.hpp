@@ -29,8 +29,8 @@ class CoreFoundationPrefsDriver : public PrefsDriver {
   public:
     CoreFoundationPrefsDriver();
 
-    virtual void load(Preferences* preferences);
-    virtual void save(const Preferences& preferences);
+    virtual Preferences get() const;
+    virtual void set(const Preferences& prefs);
 
   private:
     DISALLOW_COPY_AND_ASSIGN(CoreFoundationPrefsDriver);
