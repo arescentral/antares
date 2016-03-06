@@ -194,12 +194,6 @@ struct FontVisitor : public JsonDefaultVisitor {
 
 }  // namespace
 
-ANTARES_GLOBAL const Font* tactical_font;
-ANTARES_GLOBAL const Font* computer_font;
-ANTARES_GLOBAL const Font* button_font;
-ANTARES_GLOBAL const Font* title_font;
-ANTARES_GLOBAL const Font* small_button_font;
-
 Font::Font(StringSlice name) {
     String path(format("fonts/{0}.json", name));
     Resource rsrc(path);
@@ -234,14 +228,6 @@ void Font::draw(const Quads& quads, Point cursor, sfz::StringSlice string, RgbCo
         quads.draw(Rect(cursor, glyph.size()), scaled, color);
         cursor.offset(glyph.width(), 0);
     }
-}
-
-void InitDirectText() {
-    tactical_font = new Font("tactical");
-    computer_font = new Font("computer");
-    button_font = new Font("button");
-    title_font = new Font("title");
-    small_button_font = new Font("button-small");
 }
 
 uint8_t Font::char_width(Rune mchar) const {

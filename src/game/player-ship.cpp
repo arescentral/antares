@@ -40,6 +40,7 @@
 #include "game/level.hpp"
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
+#include "game/sys.hpp"
 #include "game/time.hpp"
 #include "lang/defines.hpp"
 #include "math/fixed.hpp"
@@ -625,7 +626,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
                         }
                     }
                 }
-                width = tactical_font->string_width(*message);
+                width = sys.fonts.tactical->string_width(*message);
                 strlen = viewport.left + ((viewport.width() / 2) - (width / 2));
                 if ((strlen + width) > (viewport.right))
                 {

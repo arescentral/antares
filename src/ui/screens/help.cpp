@@ -25,6 +25,7 @@
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
+#include "game/sys.hpp"
 #include "ui/card.hpp"
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
@@ -40,7 +41,7 @@ namespace antares {
 
 HelpScreen::HelpScreen():
         InterfaceScreen("help", {128, 0, 608, 480}, false),
-        _text(computer_font) {
+        _text(sys.fonts.computer) {
     Resource rsrc("text", "txt", 6002);
     String text(utf8::decode(rsrc.data()));
     Replace_KeyCode_Strings_With_Actual_Key_Names(&text, 1000, 4);

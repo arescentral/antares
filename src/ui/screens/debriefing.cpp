@@ -30,6 +30,7 @@
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/time.hpp"
+#include "game/sys.hpp"
 #include "sound/fx.hpp"
 #include "ui/card.hpp"
 #include "video/driver.hpp"
@@ -112,7 +113,7 @@ int score(
 }
 
 unique_ptr<StyledText> style_score_text(String text) {
-    unique_ptr<StyledText> result(new StyledText(button_font));
+    unique_ptr<StyledText> result(new StyledText(sys.fonts.button));
     result->set_fore_color(GetRGBTranslateColorShade(GOLD, VERY_LIGHT));
     result->set_back_color(GetRGBTranslateColorShade(GOLD, DARKEST));
     result->set_retro_text(text);

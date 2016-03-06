@@ -31,6 +31,7 @@
 #include "drawing/text.hpp"
 #include "game/instruments.hpp"
 #include "game/level.hpp"
+#include "game/sys.hpp"
 #include "math/random.hpp"
 #include "ui/card.hpp"
 #include "ui/interface-handling.hpp"
@@ -79,9 +80,9 @@ static LabeledRect data_item(const InterfaceItem& map_rect) {
 
 static const Font* interface_font(interfaceStyleType style) {
     if ( style == kSmall) {
-        return small_button_font;
+        return sys.fonts.small_button;
     } else {
-        return button_font;
+        return sys.fonts.button;
     }
 }
 

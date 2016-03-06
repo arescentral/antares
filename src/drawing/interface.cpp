@@ -26,6 +26,7 @@
 #include "drawing/color.hpp"
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
+#include "game/sys.hpp"
 #include "video/driver.hpp"
 
 using sfz::BytesSlice;
@@ -62,9 +63,9 @@ const int32_t kMaxKeyNameLength         = 4;  // how many chars can be in name o
 
 const Font* interface_font(interfaceStyleType style) {
     if ( style == kSmall) {
-        return small_button_font;
+        return sys.fonts.small_button;
     } else {
-        return button_font;
+        return sys.fonts.button;
     }
 }
 

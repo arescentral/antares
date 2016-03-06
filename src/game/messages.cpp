@@ -32,6 +32,7 @@
 #include "game/labels.hpp"
 #include "game/level.hpp"
 #include "game/space-object.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
@@ -282,18 +283,18 @@ void Messages::clip( void)
                 const RgbColor& light_blue = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
                 const RgbColor& dark_blue = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
                 tmessage->text.assign(*textData);
-                tmessage->retro_text.reset(new StyledText(tactical_font));
+                tmessage->retro_text.reset(new StyledText(sys.fonts.tactical));
                 tmessage->retro_text->set_fore_color(light_blue);
                 tmessage->retro_text->set_back_color(dark_blue);
                 tmessage->retro_text->set_retro_text(*textData);
                 tmessage->retro_text->set_tab_width(60);
                 tmessage->retro_text->wrap_to(
-                        viewport().width() - kHBuffer - tactical_font->logicalWidth + 1, 0, 0);
+                        viewport().width() - kHBuffer - sys.fonts.tactical->logicalWidth + 1, 0, 0);
                 tmessage->textHeight = tmessage->retro_text->height();
                 tmessage->textHeight += kLongMessageVPadDouble;
                 tmessage->retro_origin = Point(
                         viewport().left + kHBuffer,
-                        viewport().bottom + tactical_font->ascent + kLongMessageVPad);
+                        viewport().bottom + sys.fonts.tactical->ascent + kLongMessageVPad);
                 tmessage->at_char = 0;
 
                 if (tmessage->labelMessage == false) {

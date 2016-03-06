@@ -19,7 +19,6 @@
 #include "ui/flows/master.hpp"
 
 #include "data/plugin.hpp"
-#include "drawing/text.hpp"
 #include "game/admiral.hpp"
 #include "game/vector.hpp"
 #include "game/cheat.hpp"
@@ -31,6 +30,7 @@
 #include "game/motion.hpp"
 #include "game/level.hpp"
 #include "game/space-object.hpp"
+#include "game/sys.hpp"
 #include "math/rotation.hpp"
 #include "sound/driver.hpp"
 #include "sound/music.hpp"
@@ -127,7 +127,7 @@ void Master::init() {
     RotationInit();
     g.random.seed = _seed;
 
-    InitDirectText();
+    sys_init();
     Label::init();
     Messages::init();
     InstrumentInit();

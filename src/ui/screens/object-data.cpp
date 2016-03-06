@@ -22,6 +22,7 @@
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/time.hpp"
+#include "game/sys.hpp"
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
@@ -66,7 +67,7 @@ ObjectDataScreen::ObjectDataScreen(
         _state(TYPING) {
     String text;
     CreateObjectDataText(&text, object);
-    _text.reset(new StyledText(button_font));
+    _text.reset(new StyledText(sys.fonts.button));
     _text->set_fore_color(GetRGBTranslateColorShade(GREEN, VERY_LIGHT));
     _text->set_back_color(GetRGBTranslateColorShade(GREEN, DARKEST));
     _text->set_retro_text(text);

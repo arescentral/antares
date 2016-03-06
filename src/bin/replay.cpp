@@ -27,7 +27,6 @@
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
-#include "drawing/text.hpp"
 #include "game/admiral.hpp"
 #include "game/vector.hpp"
 #include "game/cheat.hpp"
@@ -41,6 +40,7 @@
 #include "game/motion.hpp"
 #include "game/level.hpp"
 #include "game/space-object.hpp"
+#include "game/sys.hpp"
 #include "math/random.hpp"
 #include "math/rotation.hpp"
 #include "sound/driver.hpp"
@@ -142,7 +142,7 @@ void ReplayMaster::init() {
     SoundDriver::driver()->set_global_volume(8);  // Max volume.
 
     RotationInit();
-    InitDirectText();
+    sys_init();
     Label::init();
     Messages::init();
     InstrumentInit();

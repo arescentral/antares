@@ -30,6 +30,7 @@
 #include "game/globals.hpp"
 #include "game/main.hpp"
 #include "game/level.hpp"
+#include "game/sys.hpp"
 #include "sound/driver.hpp"
 #include "ui/card.hpp"
 #include "ui/interface-handling.hpp"
@@ -179,7 +180,7 @@ void SelectLevelScreen::draw_level_name() const {
     const InterfaceItem& i = item(NAME);
 
     RgbColor color = GetRGBTranslateColorShade(AQUA, VERY_LIGHT);
-    StyledText retro(title_font);
+    StyledText retro(sys.fonts.title);
     retro.set_fore_color(color);
     retro.set_retro_text(chapter_name);
     retro.wrap_to(440, 0, 2);
