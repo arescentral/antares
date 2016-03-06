@@ -290,7 +290,7 @@ void UpdateRadar(ticks unitsDone) {
     }
 
     uint32_t bestScale = MIN_SCALE;
-    switch (globals()->gZoomMode) {
+    switch (g.zoom) {
       case kNearestFoeZoom:
       case kNearestAnythingZoom:
         {
@@ -487,7 +487,7 @@ static void draw_money() {
 }
 
 void set_up_instruments() {
-    globals()->gZoomMode = kNearestFoeZoom;
+    g.zoom = kNearestFoeZoom;
 
     MiniComputerDoCancel();  // i.e., go to main screen
     ResetInstruments();

@@ -133,7 +133,7 @@ void ResetPlayerShip(Handle<SpaceObject> which) {
     globals()->starfield.reset(g.ship);
     globals()->next_klaxon = game_ticks();
     g.key_mask = 0;
-    globals()->gZoomMode = kNearestFoeZoom;
+    g.zoom = kNearestFoeZoom;
     gPreviousZoomMode = kNearestFoeZoom;
 
     for (int h = 0; h < kHotKeyNum; h++) {
@@ -172,11 +172,11 @@ static int key_num(uint32_t key) {
 }
 
 static void zoom_to(ZoomType zoom) {
-    if (globals()->gZoomMode != zoom) {
-        globals()->gZoomMode = zoom;
+    if (g.zoom != zoom) {
+        g.zoom = zoom;
         sys.sound.click();
         StringList strings(kMessageStringID);
-        StringSlice string = strings.at(globals()->gZoomMode + kZoomStringOffset - 1);
+        StringSlice string = strings.at(g.zoom + kZoomStringOffset - 1);
         Messages::set_status(string, kStatusLabelColor);
     }
 }
@@ -186,8 +186,8 @@ static void zoom_shortcut(ZoomType zoom) {
         return;
     }
     ZoomType previous = gPreviousZoomMode;
-    gPreviousZoomMode = globals()->gZoomMode;
-    if (globals()->gZoomMode == zoom) {
+    gPreviousZoomMode = g.zoom;
+    if (g.zoom == zoom) {
         zoom_to(previous);
     } else {
         zoom_to(zoom);
@@ -198,8 +198,8 @@ static void zoom_in() {
     if (g.key_mask & kZoomInKey) {
         return;
     }
-    if (globals()->gZoomMode > kTimesTwoZoom) {
-        zoom_to(static_cast<ZoomType>(globals()->gZoomMode - 1));
+    if (g.zoom > kTimesTwoZoom) {
+        zoom_to(static_cast<ZoomType>(g.zoom - 1));
     }
 }
 
@@ -207,8 +207,8 @@ static void zoom_out() {
     if (g.key_mask & kZoomOutKey) {
         return;
     }
-    if (globals()->gZoomMode < kSmallestZoom) {
-        zoom_to(static_cast<ZoomType>(globals()->gZoomMode + 1));
+    if (g.zoom < kSmallestZoom) {
+        zoom_to(static_cast<ZoomType>(g.zoom + 1));
     }
 }
 

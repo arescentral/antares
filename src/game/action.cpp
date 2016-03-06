@@ -649,11 +649,11 @@ static void disable_keys(Handle<Action> action, Handle<SpaceObject> focus) {
 }
 
 static void set_zoom(Handle<Action> action, Handle<SpaceObject> focus) {
-    if (action->argument.zoom.zoomLevel != globals()->gZoomMode) {
-        globals()->gZoomMode = static_cast<ZoomType>(action->argument.zoom.zoomLevel);
+    if (action->argument.zoom.zoomLevel != g.zoom) {
+        g.zoom = static_cast<ZoomType>(action->argument.zoom.zoomLevel);
         sys.sound.click();
         StringList strings(kMessageStringID);
-        StringSlice string = strings.at(globals()->gZoomMode + kZoomStringOffset - 1);
+        StringSlice string = strings.at(g.zoom + kZoomStringOffset - 1);
         Messages::set_status(string, kStatusLabelColor);
     }
 }

@@ -188,7 +188,7 @@ bool Level::Condition::is_true() const {
                         || (g.mini.selectLine == conditionArgument.location.v));
 
         case kZoomLevelCondition:
-            return globals()->gZoomMode == conditionArgument.longValue;
+            return g.zoom == conditionArgument.longValue;
 
         case kAutopilotCondition:
             return IsPlayerShipOnAutoPilot();
