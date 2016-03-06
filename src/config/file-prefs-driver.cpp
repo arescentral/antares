@@ -90,10 +90,7 @@ static const char* kKeyNames[KEY_COUNT] = {
     "hotkey 10",
 };
 
-FilePrefsDriver::FilePrefsDriver() {
-}
-
-bool get(Json json, bool& v) {
+static bool get(Json json, bool& v) {
     if (json.is_boolean()) {
         v = json.boolean();
         return true;
@@ -101,7 +98,7 @@ bool get(Json json, bool& v) {
     return false;
 }
 
-bool get(Json json, int& v) {
+static bool get(Json json, int& v) {
     if (json.is_number()) {
         v = json.number();
         return true;
@@ -133,32 +130,33 @@ static void set_from(
     }
 }
 
-Preferences FilePrefsDriver::get() const {
-    Preferences p;
+FilePrefsDriver::FilePrefsDriver() {
+    Preferences _current;
     try {
         String path(format("{0}/config.json", dirs().root));
         MappedFile file(path);
         Json json;
         String data(utf8::decode(file.data()));
         if (!string_to_json(data, json)) {
-            return p;
+            return;
         }
 
-        set_from<int>(json, "sound", "volume", p, &Preferences::volume);
-        set_from<bool>(json, "sound", "speech", p, &Preferences::speech_on);
-        set_from<bool>(json, "sound", "idle music", p, &Preferences::play_idle_music);
-        set_from<bool>(json, "sound", "game music", p, &Preferences::play_music_in_game);
+        set_from<int>(json, "sound", "volume", _current, &Preferences::volume);
+        set_from<bool>(json, "sound", "speech", _current, &Preferences::speech_on);
+        set_from<bool>(json, "sound", "idle music", _current, &Preferences::play_idle_music);
+        set_from<bool>(json, "sound", "game music", _current, &Preferences::play_music_in_game);
 
         for (auto i: range<size_t>(KEY_COUNT)) {
-            set_from<int>(json, "keys", kKeyNames[i], p, &Preferences::keys, i);
+            set_from<int>(json, "keys", kKeyNames[i], _current, &Preferences::keys, i);
         }
     } catch (Exception& e) {
         // pass
     }
-    return p;
 }
 
 void FilePrefsDriver::set(const Preferences& p) {
+    _current = p.copy();
+
     StringMap<Json> sound;
     sound["volume"]      = Json::number(p.volume);
     sound["speech"]      = Json::boolean(p.speech_on);

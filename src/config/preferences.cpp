@@ -168,7 +168,7 @@ NullPrefsDriver::NullPrefsDriver() { }
 NullPrefsDriver::NullPrefsDriver(Preferences defaults):
         _saved(defaults) { }
 
-Preferences NullPrefsDriver::get() const {
+const Preferences& NullPrefsDriver::get() const {
     return _saved;
 }
 

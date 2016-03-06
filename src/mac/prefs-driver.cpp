@@ -78,18 +78,14 @@ void set_preference(const StringSlice& key, const T& value) {
 }  // namespace
 }  // namespace cf
 
-CoreFoundationPrefsDriver::CoreFoundationPrefsDriver() { }
-
-Preferences CoreFoundationPrefsDriver::get() const {
-    Preferences prefs;
-
+CoreFoundationPrefsDriver::CoreFoundationPrefsDriver() {
     cf::Array key_settings;
     if (cf::get_preference(kKeySettingsPreference, key_settings)) {
         for (int i: range(min<int>(KEY_COUNT, key_settings.size()))) {
             cf::Number number = cf::cast<cf::Number>(cf::Type(CFRetain(key_settings.get(i))));
             int key;
             if (cf::unwrap(number, key)) {
-                prefs.keys[i] = key;
+                _current.keys[i] = key;
             }
         }
     }
@@ -98,13 +94,13 @@ Preferences CoreFoundationPrefsDriver::get() const {
         cf::Boolean cfbool;
         bool val;
         if (cf::get_preference(kIdleMusicPreference, cfbool) && cf::unwrap(cfbool, val)) {
-            prefs.play_idle_music = val;
+            _current.play_idle_music = val;
         }
         if (cf::get_preference(kGameMusicPreference, cfbool) && cf::unwrap(cfbool, val)) {
-            prefs.play_music_in_game = val;
+            _current.play_music_in_game = val;
         }
         if (cf::get_preference(kSpeechOnPreference, cfbool) && cf::unwrap(cfbool, val)) {
-            prefs.speech_on = val;
+            _current.speech_on = val;
         }
     }
 
@@ -112,20 +108,20 @@ Preferences CoreFoundationPrefsDriver::get() const {
         cf::Number cfnum;
         double val;
         if (cf::get_preference(kVolumePreference, cfnum) && cf::unwrap(cfnum, val)) {
-            prefs.volume = clamp<int>(8 * val, 0, 8);
+            _current.volume = clamp<int>(8 * val, 0, 8);
         }
     }
 
     cf::String cfstr;
     String id;
     if (cf::get_preference(kScenarioPreference, cfstr) && cf::unwrap(cfstr, id)) {
-        prefs.scenario_identifier.assign(id);
+        _current.scenario_identifier.assign(id);
     }
-
-    return prefs;
 }
 
 void CoreFoundationPrefsDriver::set(const Preferences& preferences) {
+    _current = preferences.copy();
+
     cf::MutableArray key_settings(CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks));
     for (int i: range<int>(KEY_COUNT)) {
         int key = preferences.keys[i];

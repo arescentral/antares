@@ -42,7 +42,7 @@ class PrefsDriver {
     PrefsDriver();
     virtual ~PrefsDriver();
 
-    virtual Preferences get() const = 0;
+    virtual const Preferences& get() const = 0;
     virtual void set(const Preferences& prefs) = 0;
 
     uint32_t key(size_t index) const { return get().keys[index]; }
@@ -50,7 +50,7 @@ class PrefsDriver {
     bool play_music_in_game() const { return get().play_music_in_game; }
     bool speech_on() const { return get().speech_on; }
     int volume() const { return get().volume; }
-    sfz::String scenario_identifier() const { return sfz::String(get().scenario_identifier); }
+    sfz::StringSlice scenario_identifier() const { return get().scenario_identifier; }
 
     void set_key(size_t index, uint32_t key);
     void set_play_idle_music(bool on);
@@ -67,7 +67,7 @@ class NullPrefsDriver : public PrefsDriver {
     NullPrefsDriver();
     NullPrefsDriver(Preferences defaults);
 
-    virtual Preferences get() const;
+    virtual const Preferences& get() const;
     virtual void set(const Preferences& prefs);
 
   private:
