@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 
 #include "game/time.hpp"
+#include "game/sys.hpp"
 #include "lang/casts.hpp"
 #include "lang/defines.hpp"
 #include "video/driver.hpp"
@@ -43,21 +44,19 @@ namespace antares {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // SoundDriver
 
-static ANTARES_GLOBAL SoundDriver* sound_driver = NULL;
-
 SoundDriver::SoundDriver() {
-    if (antares::sound_driver) {
+    if (sys.audio) {
         throw Exception("SoundDriver is a singleton");
     }
-    antares::sound_driver = this;
+    sys.audio = this;
 }
 
 SoundDriver::~SoundDriver() {
-    antares::sound_driver = NULL;
+    sys.audio = NULL;
 }
 
 SoundDriver* SoundDriver::driver() {
-    return sound_driver;
+    return sys.audio;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
