@@ -137,8 +137,7 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
             become_normal();
             _state = MOUSE_DOWN;
             button->status = kIH_Hilite;
-            PlayVolumeSound(
-                    kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
+            sys.sound.play(kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
             _hit_button = button;
             return;
         }
@@ -177,7 +176,7 @@ void InterfaceScreen::key_down(const KeyDownEvent& event) {
             become_normal();
             _state = KEY_DOWN;
             button->status = kIH_Hilite;
-            PlayVolumeSound(kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
+            sys.sound.play(kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
             _hit_button = button;
             _pressed = key_code;
             return;
@@ -204,7 +203,7 @@ void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
             become_normal();
             _state = GAMEPAD_DOWN;
             button->status = kIH_Hilite;
-            PlayVolumeSound(kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
+            sys.sound.play(kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
             _hit_button = button;
             _pressed = event.button;
             return;

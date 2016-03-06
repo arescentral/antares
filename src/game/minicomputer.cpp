@@ -176,11 +176,11 @@ const int32_t kMiniAmmoLeftSpecial  = 100;
 const int32_t kMiniAmmoTextHBuffer  = 2;
 
 inline void mPlayBeep3() {
-    PlayVolumeSound(kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+    sys.sound.play(kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
 }
 
 inline void mPlayBeepBad() {
-    PlayVolumeSound(kWarningTone, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+    sys.sound.play(kWarningTone, kMediumVolume, kMediumPersistence, kLowPrioritySound);
 }
 
 const int32_t kMaxShipBuffer = 40;

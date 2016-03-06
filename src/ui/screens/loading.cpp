@@ -86,7 +86,7 @@ void LoadingScreen::fire_timer() {
                 return;
             }
             if ((_chars_typed % 3) == 0) {
-                PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
+                sys.sound.play(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
             }
             _next_update += kTypingDelay;
             ++_chars_typed;

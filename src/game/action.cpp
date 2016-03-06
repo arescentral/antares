@@ -41,6 +41,7 @@
 #include "game/level.hpp"
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 #include "math/macros.hpp"
 #include "math/random.hpp"
@@ -185,9 +186,9 @@ static void play_sound(Handle<Action> action, Handle<SpaceObject> focus) {
         id += focus->randomSeed.next(sound.idRange + 1);
     }
     if (sound.absolute) {
-        PlayVolumeSound(id, sound.volumeMinimum, sound.persistence, priority);
+        sys.sound.play(id, sound.volumeMinimum, sound.persistence, priority);
     } else {
-        mPlayDistanceSound(sound.volumeMinimum, focus, id, sound.persistence, priority);
+        sys.sound.play_at(id, sound.volumeMinimum, sound.persistence, priority, focus);
     }
 }
 
@@ -651,7 +652,7 @@ static void disable_keys(Handle<Action> action, Handle<SpaceObject> focus) {
 static void set_zoom(Handle<Action> action, Handle<SpaceObject> focus) {
     if (action->argument.zoom.zoomLevel != globals()->gZoomMode) {
         globals()->gZoomMode = static_cast<ZoomType>(action->argument.zoom.zoomLevel);
-        PlayVolumeSound(kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+        sys.sound.play(kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
         StringList strings(kMessageStringID);
         StringSlice string = strings.at(globals()->gZoomMode + kZoomStringOffset - 1);
         Messages::set_status(string, kStatusLabelColor);

@@ -239,7 +239,7 @@ void MainPlay::become_front() {
 
       case PLAYING:
         globals()->transitions.reset();
-        quiet_all();
+        sys.sound.stop();
         sys.music.stop();
         _replay_builder.finish();
 #ifdef DATA_COVERAGE
@@ -308,7 +308,7 @@ class PauseScreen : public Card {
 
     virtual void become_front() {
         // TODO(sfiera): cancel any active transition.
-        PlayVolumeSound(kComputerBeep4, kMaxSoundVolume, kShortPersistence, kMustPlaySound);
+        sys.sound.play(kComputerBeep4, kMaxSoundVolume, kShortPersistence, kMustPlaySound);
         _visible = true;
         _next_switch = now() + kSwitchAfter;
         _sleep_at = now() + kSleepAfter;

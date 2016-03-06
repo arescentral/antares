@@ -93,7 +93,7 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
             _state = UNLOCKING;
             _unlock_chapter = 0;
             _unlock_digits = ndigits(plug.levels.size());
-            PlayVolumeSound(kCloakOn, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
+            sys.sound.play(kCloakOn, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
             return;
         }
       case UNLOCKING:
@@ -109,7 +109,7 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
                 if (_unlock_chapter > plug.levels.size()) {
                     return;
                 }
-                PlayVolumeSound(kCloakOff, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
+                sys.sound.play(kCloakOff, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
                 Ledger::ledger()->unlock_chapter(_unlock_chapter);
                 Ledger::ledger()->unlocked_chapters(&_chapters);
                 adjust_interface();

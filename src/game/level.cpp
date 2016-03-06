@@ -36,6 +36,7 @@
 #include "game/non-player-ship.hpp"
 #include "game/player-ship.hpp"
 #include "game/starfield.hpp"
+#include "game/sys.hpp"
 #include "game/vector.hpp"
 #include "lang/defines.hpp"
 #include "math/macros.hpp"
@@ -145,7 +146,7 @@ void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors) {
             l2 = action->argument.playSound.idMinimum +
                     action->argument.playSound.idRange;
             for (int32_t count = l1; count <= l2; count++) {
-                AddSound(count); // moves mem
+                sys.sound.load(count);
             }
             break;
 
@@ -266,11 +267,10 @@ bool start_construct_level(const Level* level, int32_t* max) {
     // uncheck all base objects
     SetAllBaseObjectsUnchecked();
     // uncheck all sounds
-    SetAllSoundsNoKeep();
     SetAllPixTablesNoKeep();
 
-    RemoveAllUnusedSounds();
     RemoveAllUnusedPixTables();
+    sys.sound.reset();
 
     *max = g.level->initialNum * 3L
          + 1

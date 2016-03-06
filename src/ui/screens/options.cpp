@@ -217,7 +217,7 @@ void KeyControlScreen::key_down(const KeyDownEvent& event) {
             case Keys::ESCAPE:
             case Keys::RETURN:
             case Keys::CAPS_LOCK:
-                PlayVolumeSound(kWarningTone, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+                sys.sound.play(kWarningTone, kMediumVolume, kMediumPersistence, kLowPrioritySound);
                 _selected_key = -1;
                 break;
 

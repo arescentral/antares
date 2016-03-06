@@ -27,9 +27,6 @@
 
 namespace antares {
 
-const int32_t kSoundNum         = 48;
-const int32_t kMaxChannelNum    = 3;
-
 const int32_t kMaxVolumePreference = 8;
 
 const uint8_t kMediumLowVolume  = 64;
@@ -37,7 +34,7 @@ const uint8_t kMediumVolume     = 128;
 const uint8_t kMediumLoudVolume = 192;
 const uint8_t kMaxSoundVolume   = 255;
 
-const ticks kShortPersistence         = ticks(10);      // in ticks
+const ticks kShortPersistence         = ticks(10);
 const ticks kMediumPersistence        = ticks(20);
 const ticks kMediumLongPersistence    = ticks(40);
 const ticks kLongPersistence          = ticks(60);
@@ -77,27 +74,35 @@ struct smartSoundChannel {
 };
 
 struct smartSoundHandle {
-    std::unique_ptr<Sound>   soundHandle;
-    int16_t             id;
-    bool             keepMe;
+    int16_t                 id;
+    std::unique_ptr<Sound>  soundHandle;
 };
 
-void SetAllSoundsNoKeep();
-void KeepSound(int sound_id);
-int AddSound(int sound_id);
-void RemoveAllUnusedSounds();
-void ResetAllSounds();
-void PlayVolumeSound(
-        int16_t whichSoundID, uint8_t amplitude, usecs persistence, soundPriorityType priority);
-void PlayLocalizedSound(
-        uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy,
-        Fixed hvel, Fixed vvel, int16_t whichSoundID, int16_t amplitude,
-        usecs persistence, soundPriorityType priority);
-void quiet_all();
+class SoundFX {
+    public:
+        void init();
+        void load(int16_t id);
+        void reset();
+        void stop();
 
-void mPlayDistanceSound(
-        int32_t mvolume, Handle<SpaceObject> mobjectptr, int32_t msoundid,
-        usecs msoundpersistence, soundPriorityType msoundpriority);
+        void play(int16_t id, uint8_t volume, usecs persistence, soundPriorityType priority);
+        void play_at(int16_t id, int32_t volume, usecs persistence, soundPriorityType priority,
+                     Handle<SpaceObject> object);
+
+    private:
+        bool same_sound_channel(
+                int& channel, int16_t id, uint8_t amplitude, soundPriorityType priority);
+        bool quieter_channel(int& channel, uint8_t amplitude);
+        bool lower_priority_channel(int& channel, soundPriorityType priority);
+        bool oldest_available_channel(int& channel);
+        bool best_channel(
+                int& channel,
+                int16_t sound_id, uint8_t amplitude, usecs persistence,
+                soundPriorityType priority);
+
+        std::vector<smartSoundHandle>   sounds;
+        std::vector<smartSoundChannel>  channels;
+};
 
 }  // namespace antares
 

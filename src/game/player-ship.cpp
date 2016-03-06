@@ -174,7 +174,7 @@ static int key_num(uint32_t key) {
 static void zoom_to(ZoomType zoom) {
     if (globals()->gZoomMode != zoom) {
         globals()->gZoomMode = zoom;
-        PlayVolumeSound(kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+        sys.sound.play(kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
         StringList strings(kMessageStringID);
         StringSlice string = strings.at(globals()->gZoomMode + kZoomStringOffset - 1);
         Messages::set_status(string, kStatusLabelColor);
@@ -658,9 +658,9 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
     if (theShip->health() < (theShip->baseType->health >> 2L)) {
         if (g.time > globals()->next_klaxon) {
             if (globals()->next_klaxon == game_ticks()) {
-                PlayVolumeSound(kKlaxon, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
+                sys.sound.play(kKlaxon, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
             } else {
-                PlayVolumeSound(kKlaxon, kMediumVolume, kMediumLongPersistence, kPrioritySound);
+                sys.sound.play(kKlaxon, kMediumVolume, kMediumLongPersistence, kPrioritySound);
             }
             Messages::set_status("WARNING: Shields Low", kStatusWarnColor);
             globals()->next_klaxon = g.time + kKlaxonInterval;
@@ -723,7 +723,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
                     globals()->hotKey[hot_key].object = globals()->lastSelectedObject;
                     globals()->hotKey[hot_key].objectID = globals()->lastSelectedObjectID;
                     Update_LabelStrings_ForHotKeyChange();
-                    PlayVolumeSound(
+                    sys.sound.play(
                             kComputerBeep1, kMediumLoudVolume, kMediumPersistence,
                             kLowPrioritySound);
                 }
@@ -883,7 +883,7 @@ void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> 
     }
 
     if (adm == g.admiral) {
-        PlayVolumeSound(kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
+        sys.sound.play(kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
         label->set_object(ship);
         if (ship == g.ship) {
             label->set_age(Label::kVisibleTime);
@@ -976,7 +976,7 @@ void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral) {
     if (control.get()) {
         SetObjectDestination(control, SpaceObject::none());
         if ( whichAdmiral == g.admiral)
-            PlayVolumeSound(  kMorseBeepSound, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+            sys.sound.play(  kMorseBeepSound, kMediumVolume, kMediumPersistence, kLowPrioritySound);
     }
 }
 
@@ -1065,7 +1065,7 @@ void Update_LabelStrings_ForHotKeyChange( void)
         if (control == g.ship) {
             g.control_label->set_age(Label::kVisibleTime);
         }
-        PlayVolumeSound(
+        sys.sound.play(
                 kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
         if (control->attributes & kIsDestination) {
             String string(GetDestBalanceName(control->asDestination));

@@ -187,7 +187,7 @@ void Label::update_contents(ticks units_done) {
             if (static_cast<size_t>(label->retroCount) > label->text.size()) {
                 label->retroCount = -1;
             } else {
-                PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
+                sys.sound.play(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
             }
         }
     }

@@ -38,18 +38,36 @@ using sfz::format;
 
 namespace antares {
 
+const int32_t kMaxChannelNum    = 3;
+
 // sound 0-14 always used -- loaded at start; 15+ may be swapped around
 const int kMinVolatileSound = 15;
 
-const double kHackRangeMultiplier = 0.0025;
+static const int16_t kFixedSounds[kMinVolatileSound] = {
+    kComputerBeep4,
+    kComputerBeep1,
+    kComputerBeep2,
+    kComputerBeep3,
+    kMorseBeepSound,
+    kWarningTone,
+    kLandingWoosh,
+    kCloakOn,
+    kCloakOff,
+    kKlaxon,
+    kWarp[0],
+    kWarp[1],
+    kWarp[2],
+    kWarp[3],
+    kTeletype,
+};
 
 // see if there's a channel with the same sound at same or lower volume
-static bool same_sound_channel(
+bool SoundFX::same_sound_channel(
         int& channel, int16_t id, uint8_t amplitude, soundPriorityType priority) {
     if (priority > kVeryLowPrioritySound) {
         for (int i = 0; i < kMaxChannelNum; ++i) {
-            if ((sys.channels[i].whichSound == id) &&
-                (sys.channels[i].soundVolume <= amplitude)) {
+            if ((channels[i].whichSound == id) &&
+                (channels[i].soundVolume <= amplitude)) {
                 channel = i;
                 return true;
             }
@@ -59,9 +77,9 @@ static bool same_sound_channel(
 }
 
 // see if there's a channel at lower volume
-static bool quieter_channel(int& channel, uint8_t amplitude) {
+bool SoundFX::quieter_channel(int& channel, uint8_t amplitude) {
     for (int i = 0; i < kMaxChannelNum; ++i) {
-        if (sys.channels[i].soundVolume < amplitude) {
+        if (channels[i].soundVolume < amplitude) {
             channel = i;
             return true;
         }
@@ -70,9 +88,9 @@ static bool quieter_channel(int& channel, uint8_t amplitude) {
 }
 
 // see if there's a channel at lower priority
-static bool lower_priority_channel(int& channel, soundPriorityType priority) {
+bool SoundFX::lower_priority_channel(int& channel, soundPriorityType priority) {
     for (int i = 0; i < kMaxChannelNum; ++i) {
-        if (sys.channels[i].soundPriority < priority) {
+        if (channels[i].soundPriority < priority) {
             channel = i;
             return true;
         }
@@ -81,11 +99,11 @@ static bool lower_priority_channel(int& channel, soundPriorityType priority) {
 }
 
 // take the oldest sound if past minimum persistence
-static bool oldest_available_channel(int& channel) {
+bool SoundFX::oldest_available_channel(int& channel) {
     usecs oldestSoundTime(0);
     bool result = false;
     for (int i = 0; i < kMaxChannelNum; ++i) {
-        auto past_reservation = now() - sys.channels[i].reserved_until;
+        auto past_reservation = now() - channels[i].reserved_until;
         if (past_reservation > oldestSoundTime) {
             oldestSoundTime = past_reservation;
             channel = i;
@@ -95,7 +113,7 @@ static bool oldest_available_channel(int& channel) {
     return result;
 }
 
-static bool best_channel(
+bool SoundFX::best_channel(
         int& channel,
         int16_t sound_id, uint8_t amplitude, usecs persistence,
         soundPriorityType priority) {
@@ -105,9 +123,8 @@ static bool best_channel(
         || oldest_available_channel(channel);
 }
 
-void PlayVolumeSound(
-        int16_t whichSoundID, uint8_t amplitude, usecs persistence,
-        soundPriorityType priority) {
+void SoundFX::play(
+        int16_t whichSoundID, uint8_t amplitude, usecs persistence, soundPriorityType priority) {
     int32_t whichChannel = -1;
     // TODO(sfiera): don't play sound at all if the game is muted.
     if (amplitude > 0) {
@@ -116,27 +133,27 @@ void PlayVolumeSound(
         }
 
         int whichSound = 0;
-        while ((sys.sounds[whichSound].id != whichSoundID) && (whichSound < kSoundNum)) {
+        while ((sounds[whichSound].id != whichSoundID) && (whichSound < sounds.size())) {
             whichSound++;
         }
-        if (whichSound == kSoundNum) {
+        if (whichSound == sounds.size()) {
             return;
         }
 
-        sys.channels[whichChannel].whichSound = whichSoundID;
-        sys.channels[whichChannel].reserved_until = now() + persistence;
-        sys.channels[whichChannel].soundPriority = priority;
-        sys.channels[whichChannel].soundVolume = amplitude;
+        channels[whichChannel].whichSound = whichSoundID;
+        channels[whichChannel].reserved_until = now() + persistence;
+        channels[whichChannel].soundPriority = priority;
+        channels[whichChannel].soundVolume = amplitude;
 
-        sys.channels[whichChannel].channelPtr->quiet();
+        channels[whichChannel].channelPtr->quiet();
 
-        sys.channels[whichChannel].channelPtr->amp(amplitude);
-        sys.channels[whichChannel].channelPtr->activate();
-        sys.sounds[whichSound].soundHandle->play();
+        channels[whichChannel].channelPtr->amp(amplitude);
+        channels[whichChannel].channelPtr->activate();
+        sounds[whichSound].soundHandle->play();
     }
 }
 
-void PlayLocalizedSound(
+static void PlayLocalizedSound(
         uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy,
         Fixed hvel, Fixed vvel, int16_t whichSoundID, int16_t amplitude,
         usecs persistence, soundPriorityType priority) {
@@ -147,73 +164,49 @@ void PlayLocalizedSound(
     static_cast<void>(hvel);
     static_cast<void>(vvel);
 
-    PlayVolumeSound(whichSoundID, amplitude, persistence, priority);
+    sys.sound.play(whichSoundID, amplitude, persistence, priority);
 }
 
-void SetAllSoundsNoKeep() {
-    for (int count = kMinVolatileSound; count < kSoundNum; count++) {
-        sys.sounds[count].keepMe = false;
-    }
-}
-
-void RemoveAllUnusedSounds() {
-    for (int count = kMinVolatileSound; count < kSoundNum; count++) {
-        if ((!sys.sounds[count].keepMe) &&
-                (sys.sounds[count].soundHandle.get() != NULL)) {
-            sys.sounds[count].soundHandle.reset();
-            sys.sounds[count].id = -1;
-        }
-    }
-}
-
-void ResetAllSounds() {
-    sys.sounds.resize(kSoundNum);
-    for (int count = 0; count < kSoundNum; count++) {
-        sys.sounds[count].keepMe = false;
-        sys.sounds[count].id = -1;
-    }
-}
-
-void KeepSound(int soundID) {
-    int16_t whichSound;
-
-    whichSound = 0;
-    while ((sys.sounds[whichSound].id != soundID) && (whichSound < kSoundNum)) {
-        whichSound++;
-    }
-
-    if (whichSound < kSoundNum) {
-        sys.sounds[whichSound].keepMe = true;
-    }
-}
-
-int AddSound(int soundID) {
-    int whichSound = 0;
-    while ((sys.sounds[whichSound].id != soundID) && (whichSound < kSoundNum)) {
-        whichSound++;
-    }
-
-    if (whichSound == kSoundNum) {
-        whichSound = 0;
-        while ((sys.sounds[whichSound].soundHandle.get() != NULL) &&
-                (whichSound < kSoundNum)) {
-            whichSound++;
-        }
-
-        if (whichSound == kSoundNum) {
-            throw Exception("Can't manage any more sounds");
-        }
-
-        sys.sounds[whichSound].soundHandle = sys.audio->open_sound(
-                format("/sounds/{0}", soundID));
-        sys.sounds[whichSound].id = soundID;
-    }
-    return whichSound;
-}
-
-void quiet_all() {
+void SoundFX::init() {
+    channels.resize(kMaxChannelNum);
     for (int i = 0; i < kMaxChannelNum; i++) {
-        sys.channels[i].channelPtr->quiet();
+        channels[i].reserved_until = wall_time();
+        channels[i].soundPriority = kNoSound;
+        channels[i].soundVolume = 0;
+        channels[i].whichSound = -1;
+        channels[i].channelPtr = sys.audio->open_channel();
+    }
+
+    reset();
+}
+
+void SoundFX::reset() {
+    sounds.resize(kMinVolatileSound);
+    for (int i = 0; i < kMinVolatileSound; ++i) {
+        if (!sounds[i].soundHandle.get()) {
+            auto id = kFixedSounds[i];
+            sounds[i].id = id;
+            sounds[i].soundHandle = sys.audio->open_sound(format("/sounds/{0}", id));
+        }
+    }
+}
+
+void SoundFX::load(int16_t id) {
+    int whichSound = 0;
+    while ((sounds[whichSound].id != id) && (whichSound < sounds.size())) {
+        whichSound++;
+    }
+
+    if (whichSound == sounds.size()) {
+        sounds.emplace_back();
+        sounds.back().id = id;
+        sounds.back().soundHandle = sys.audio->open_sound(format("/sounds/{0}", id));
+    }
+}
+
+void SoundFX::stop() {
+    for (int i = 0; i < kMaxChannelNum; i++) {
+        channels[i].channelPtr->quiet();
     }
 }
 
@@ -240,9 +233,8 @@ void quiet_all() {
 // END;
 //
 
-void mPlayDistanceSound(
-        int32_t mvolume, Handle<SpaceObject> mobjectptr, int32_t msoundid,
-        usecs msoundpersistence, soundPriorityType msoundpriority) {
+void SoundFX::play_at(int16_t msoundid, int32_t mvolume, usecs msoundpersistence,
+                      soundPriorityType msoundpriority, Handle<SpaceObject> mobjectptr) {
     if (mobjectptr->distanceFromPlayer < kMaximumRelevantDistanceSquared) {
         int32_t mdistance = mobjectptr->distanceFromPlayer;
         uint32_t mul1;

@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "sound/music.hpp"
+#include "sound/fx.hpp"
 
 namespace antares {
 
@@ -60,8 +61,7 @@ struct SystemGlobals {
         std::vector<sfz::String> off;
     } cheat;
 
-    std::vector<smartSoundHandle>   sounds;
-    std::vector<smartSoundChannel>  channels;
+    SoundFX sound;
     Music music;
 };
 

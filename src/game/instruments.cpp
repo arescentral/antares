@@ -31,6 +31,7 @@
 #include "game/motion.hpp"
 #include "game/player-ship.hpp"
 #include "game/space-object.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 #include "math/macros.hpp"
 #include "math/random.hpp"
@@ -628,7 +629,7 @@ void update_sector_lines() {
     }
 
     if ((gLastScale < kBlipThreshhold) != (gAbsoluteScale < kBlipThreshhold)) {
-        PlayVolumeSound(kComputerBeep4, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+        sys.sound.play(kComputerBeep4, kMediumVolume, kMediumPersistence, kLowPrioritySound);
     }
 
     gLastScale = gAbsoluteScale;

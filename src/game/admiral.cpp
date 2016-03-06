@@ -23,6 +23,7 @@
 #include "game/cheat.hpp"
 #include "game/globals.hpp"
 #include "game/space-object.hpp"
+#include "game/sys.hpp"
 #include "lang/casts.hpp"
 #include "math/macros.hpp"
 #include "math/random.hpp"
@@ -584,8 +585,8 @@ static void AdmiralBuildAtObject(
         if (newObject.get()) {
             SetObjectDestination(newObject, SpaceObject::none());
             if (admiral == g.admiral) {
-                PlayVolumeSound(kComputerBeep2, kMediumVolume, kMediumPersistence,
-                        kLowPrioritySound);
+                sys.sound.play(kComputerBeep2, kMediumVolume, kMediumPersistence,
+                               kLowPrioritySound);
             }
         }
     }

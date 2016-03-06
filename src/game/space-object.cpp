@@ -39,6 +39,7 @@
 #include "game/player-ship.hpp"
 #include "game/level.hpp"
 #include "game/starfield.hpp"
+#include "game/sys.hpp"
 #include "math/macros.hpp"
 #include "math/random.hpp"
 #include "math/rotation.hpp"
@@ -755,11 +756,11 @@ void SpaceObject::set_cloak(bool cloak) {
     auto object = Handle<SpaceObject>(number());
     if (cloak && (object->cloakState == 0)) {
         object->cloakState = 1;
-        mPlayDistanceSound(kMaxSoundVolume, object, kCloakOn, kMediumPersistence, kPrioritySound);
+        sys.sound.play_at(kCloakOn, kMaxSoundVolume, kMediumPersistence, kPrioritySound, object);
     } else if ((!cloak || (object->attributes & kRemoteOrHuman))
             && (object->cloakState >= 250)) {
         object->cloakState = kCloakOffStateMax;
-        mPlayDistanceSound(kMaxSoundVolume, object, kCloakOff, kMediumPersistence, kPrioritySound);
+        sys.sound.play_at(kCloakOff, kMaxSoundVolume, kMediumPersistence, kPrioritySound, object);
     }
 }
 
