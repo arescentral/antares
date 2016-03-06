@@ -120,7 +120,7 @@ void HintLine::reset() {
     show_hint_line = false;
     hint_line_start.h = hint_line_start.v = -1;
     hint_line_end.h = hint_line_end.v = -1;
-    hint_line_color = hint_line_color_dark = RgbColor::kBlack;
+    hint_line_color = hint_line_color_dark = RgbColor::black();
 }
 
 void GameCursor::draw() const {

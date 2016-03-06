@@ -352,7 +352,7 @@ class PauseScreen : public Card {
             sys.fonts.title->draw(_text_origin, _pause_string, light_green);
         }
         if (asleep()) {
-            Rects().fill(world(), RgbColor(63, 0, 0, 0));
+            Rects().fill(world(), rgba(0, 0, 0, 63));
         }
     }
 

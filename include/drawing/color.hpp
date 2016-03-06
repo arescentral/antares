@@ -72,17 +72,17 @@ enum {
 };
 
 class RgbColor {
-  public:
-    static const RgbColor kBlack;
-    static const RgbColor kWhite;
-    static const RgbColor kClear;
-
-    constexpr RgbColor():
-        RgbColor(0xFF, 0x00, 0x00, 0x00) { }
-    constexpr RgbColor(uint8_t red, uint8_t green, uint8_t blue):
-        RgbColor(0xFF, red, green, blue) { }
-    constexpr RgbColor(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue):
+    friend constexpr RgbColor rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+    constexpr RgbColor(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha):
         alpha(alpha), red(red), green(green), blue(blue) { }
+
+  public:
+    static constexpr RgbColor black() { return RgbColor(0x00, 0x00, 0x00, 0xff); }
+    static constexpr RgbColor white() { return RgbColor(0xff, 0xff, 0xff, 0xff); }
+    static constexpr RgbColor clear() { return RgbColor(0x00, 0x00, 0x00, 0x00); }
+
+    constexpr RgbColor(): RgbColor(0x00, 0x00, 0x00, 0xff) { }
+
     static RgbColor tint(uint8_t color, uint8_t value);
 
     static const RgbColor& at(uint8_t index);
@@ -92,6 +92,14 @@ class RgbColor {
     uint8_t green;
     uint8_t blue;
 };
+
+inline constexpr RgbColor rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+    return RgbColor(r, g, b, a);
+}
+
+inline constexpr RgbColor rgb(uint8_t r, uint8_t g, uint8_t b) {
+    return rgba(r, g, b, 0xff);
+}
 
 void read_from(sfz::ReadSource in, RgbColor& color);
 void write_to(sfz::WriteTarget out, const RgbColor& color);

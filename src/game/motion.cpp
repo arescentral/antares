@@ -378,7 +378,7 @@ static void update_static(Handle<SpaceObject> o, ticks unitsToDo) {
                 }
             }
             sprite.style = spriteColor;
-            sprite.styleColor = RgbColor::kClear;
+            sprite.styleColor = RgbColor::clear();
             sprite.styleData = o->cloakState;
             if (o->owner == g.admiral) {
                 sprite.styleData -= sprite.styleData >> 2;
@@ -391,7 +391,7 @@ static void update_static(Handle<SpaceObject> o, ticks unitsToDo) {
                 sprite.style = spriteNormal;
             } else {
                 sprite.style = spriteColor;
-                sprite.styleColor = RgbColor::kClear;
+                sprite.styleColor = RgbColor::clear();
                 sprite.styleData = -o->cloakState;
                 if (o->owner == g.admiral) {
                     sprite.styleData -= sprite.styleData >> 2;

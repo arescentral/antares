@@ -114,7 +114,7 @@ class Texture {
     void draw(int32_t x, int32_t y) const { _impl->draw(rect(x, y)); }
 
     void draw_cropped(const Rect& dest, const Rect& source) const {
-        _impl->draw_cropped(dest, source, RgbColor::kWhite);
+        _impl->draw_cropped(dest, source, RgbColor::white());
     }
 
     void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const {

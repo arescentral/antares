@@ -64,9 +64,9 @@ void recolor(PixMap& glyph_table) {
     for (size_t y = 0; y < glyph_table.size().height; ++y) {
         for (size_t x = 0; x < glyph_table.size().width; ++x) {
             if (glyph_table.get(x, y).red < 255) {
-                glyph_table.set(x, y, RgbColor::kWhite);
+                glyph_table.set(x, y, RgbColor::white());
             } else {
-                glyph_table.set(x, y, RgbColor::kClear);
+                glyph_table.set(x, y, RgbColor::clear());
             }
         }
     }

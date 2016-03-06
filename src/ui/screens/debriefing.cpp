@@ -163,7 +163,7 @@ void DebriefingScreen::resign_front() {
 
 void DebriefingScreen::draw() const {
     next()->draw();
-    Rects().fill(_pix_bounds, RgbColor::kBlack);
+    Rects().fill(_pix_bounds, RgbColor::black());
     if (_score) {
         _score->draw_range(_score_bounds, 0, _typed_chars);
     }

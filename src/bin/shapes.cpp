@@ -60,7 +60,7 @@ const char* name(Shape shape) {
 }
 
 void draw(Shape shape, PixMap& pix) {
-    RgbColor color = RgbColor(255, 0, 0);
+    RgbColor color = rgb(255, 0, 0);
     switch (shape) {
         case SQUARE:
             pix.fill(color);
@@ -84,7 +84,7 @@ class ShapeBuilder {
 
     void save(Shape shape, int size) {
         ArrayPixMap pix(size, size);
-        pix.fill(RgbColor::kClear);
+        pix.fill(RgbColor::clear());
         draw(shape, pix);
         if (_output_dir.has()) {
             const String path(format("{0}/{1}/{2}.png", *_output_dir, name(shape), dec(size, 2)));

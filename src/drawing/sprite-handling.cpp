@@ -105,7 +105,7 @@ Sprite::Sprite()
         : table(NULL),
           resID(-1),
           style(spriteNormal),
-          styleColor(RgbColor::kWhite),
+          styleColor(RgbColor::white()),
           styleData(0),
           whichLayer(kNoSpriteLayer),
           killMe(false),
@@ -157,7 +157,7 @@ Handle<Sprite> AddSprite(
             sprite->draw_tiny = draw_tiny_function(size);
             sprite->killMe = false;
             sprite->style = spriteNormal;
-            sprite->styleColor = RgbColor::kWhite;
+            sprite->styleColor = RgbColor::white();
             sprite->styleData = 0;
 
             return sprite;

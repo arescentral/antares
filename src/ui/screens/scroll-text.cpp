@@ -111,8 +111,8 @@ void ScrollTextScreen::draw() const {
     position.offset(0, -_position);
     _build_pix.draw(position.origin());
     Rects rects;
-    rects.fill(Rect(world.left, world.top, world.right, clip.top), RgbColor::kBlack);
-    rects.fill(Rect(world.left, clip.bottom, world.right, world.bottom), RgbColor::kBlack);
+    rects.fill(Rect(world.left, world.top, world.right, clip.top), RgbColor::black());
+    rects.fill(Rect(world.left, clip.bottom, world.right, world.bottom), RgbColor::black());
 }
 
 }  // namespace antares

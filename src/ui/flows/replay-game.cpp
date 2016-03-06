@@ -47,7 +47,7 @@ void ReplayGame::become_front() {
     switch (_state) {
       case NEW:
         _state = FADING_OUT;
-        stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::kBlack, secs(1), false, NULL));
+        stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
         break;
 
       case FADING_OUT:

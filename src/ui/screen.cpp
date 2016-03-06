@@ -110,7 +110,7 @@ void InterfaceScreen::draw() const {
     }
     copy_area.offset(off.h, off.v);
 
-    Rects().fill(copy_area, RgbColor::kBlack);
+    Rects().fill(copy_area, RgbColor::black());
 
     for (const auto& item: _items) {
         draw_interface_item(*item, sys.video->input_mode(), off);

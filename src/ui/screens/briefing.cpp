@@ -467,7 +467,7 @@ void BriefingScreen::draw_brief_point() const {
     Rect bounds;
     GetAnyInterfaceItemGraphicBounds(_data_item, &bounds);
     bounds.offset(off.h, off.v);
-    Rects().fill(bounds, RgbColor::kBlack);
+    Rects().fill(bounds, RgbColor::black());
     draw_interface_item(_data_item, KEYBOARD_MOUSE, off);
     bounds = _data_item.bounds();
     bounds.offset(off.h, off.v);

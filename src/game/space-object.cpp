@@ -171,7 +171,7 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject *sourceObject) {
 
         RgbColor tinyColor;
         if (obj->tinySize == 0) {
-            tinyColor = RgbColor::kClear;
+            tinyColor = RgbColor::clear();
         } else if (obj->owner == g.admiral) {
             tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
         } else if (obj->owner.get()) {

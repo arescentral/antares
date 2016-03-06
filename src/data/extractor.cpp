@@ -161,7 +161,7 @@ void convert_frame(StringSlice dir, int16_t id, BytesSlice data, PixMap::View pi
     auto width = pix.size().width;
     auto height = pix.size().height;
 
-    pix.fill(RgbColor::kClear);
+    pix.fill(RgbColor::clear());
     for (auto y: range(height)) {
         for (auto x: range(width)) {
             uint8_t byte = read<uint8_t>(data);
@@ -198,9 +198,9 @@ void convert_overlay(StringSlice dir, int16_t id, BytesSlice data, PixMap::View 
             if (byte & color_mask) {
                 byte = (byte & 0x0f) | 0x10;
                 uint8_t value = RgbColor::at(byte).red;
-                pix.set(x, y, RgbColor(value, 0, 0));
+                pix.set(x, y, rgb(value, 0, 0));
             } else {
-                pix.set(x, y, RgbColor::kClear);
+                pix.set(x, y, RgbColor::clear());
             }
         }
     }
@@ -307,8 +307,8 @@ bool convert_smiv(StringSlice dir, bool factory, int16_t id, BytesSlice data, Wr
 
     ArrayPixMap image(max_bounds.width() * cols, max_bounds.height() * rows);
     ArrayPixMap overlay(max_bounds.width() * cols, max_bounds.height() * rows);
-    image.fill(RgbColor::kClear);
-    overlay.fill(RgbColor::kClear);
+    image.fill(RgbColor::clear());
+    overlay.fill(RgbColor::clear());
     for (auto i: range(size)) {
         int col = i % cols;
         int row = i / cols;

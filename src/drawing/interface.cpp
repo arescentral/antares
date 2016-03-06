@@ -115,7 +115,7 @@ inline void mDrawPuffUpRect(const Rects& rects, Rect r, uint8_t mcolor, int msha
 }
 
 inline void mDrawPuffDownRect(const Rects& rects, Rect r, uint8_t mcolor, int mshade) {
-    rects.fill(r, RgbColor::kBlack);
+    rects.fill(r, RgbColor::black());
     const RgbColor darker = GetRGBTranslateColorShade(mcolor, mshade + kDarkerColor);
     rects.fill(Rect(r.left - 1, r.top - 1, r.left, r.bottom + 1), darker);
     rects.fill(Rect(r.left - 1, r.top - 1, r.right, r.top), darker);
@@ -552,8 +552,8 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
         }
         left = Rect(left.left, left.bottom, left.right, left.bottom + 3);
         right = Rect(right.left, right.bottom, right.right, right.bottom + 3);
-        rects.fill(left, RgbColor::kBlack);
-        rects.fill(right, RgbColor::kBlack);
+        rects.fill(left, RgbColor::black());
+        rects.fill(right, RgbColor::black());
         shade = MEDIUM;
         color = GetRGBTranslateColorShade(item.hue, shade);
         rects.fill(Rect(left.left - 3, left.bottom, right.right + 3, left.bottom + 3), color);
@@ -600,7 +600,7 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
         uRect.bottom++;
         uRect.left = uRect.right + 1;
         uRect.right = vRect.left - 1;
-        rects.fill(uRect, RgbColor::kBlack);
+        rects.fill(uRect, RgbColor::black());
     }
 
     if (item.key == 0) {
@@ -761,7 +761,7 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap
 
         wRect.left += 2;
         wRect.right += 2;
-        FrameOval(pix, wRect, RgbColor::kBlack);
+        FrameOval(pix, wRect, RgbColor::black());
         wRect.left -= 2;
         wRect.right -= 2;
         mDrawPuffUpOval(wRect, item.hue, shade, pix);
@@ -771,7 +771,7 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap
         wRect.inset(1, 1);
 
         if (!item.on) {
-            PaintOval(pix, wRect, RgbColor::kBlack);
+            PaintOval(pix, wRect, RgbColor::black());
         } else {
             const RgbColor color = GetRGBTranslateColorShade(item.hue, VERY_LIGHT);
             PaintOval(pix, wRect, color);
@@ -785,7 +785,7 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap
         mDrawPuffUpRect( vRect, item.hue, shade, pix);
         wRect.left += 2;
         wRect.right += 2;
-        FrameOval(pix, wRect, RgbColor::kBlack);
+        FrameOval(pix, wRect, RgbColor::black());
         wRect.left -= 2;
         wRect.right -= 2;
         mDrawPuffUpOval(wRect, item.hue, shade, pix);
@@ -794,7 +794,7 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap
         mDrawPuffDownOval(wRect, item.hue, shade, pix);
         wRect.inset(1, 1);
         if (!item.on) {
-            PaintOval(pix, wRect, RgbColor::kBlack);
+            PaintOval(pix, wRect, RgbColor::black());
         } else if (item.status == kActive) {
             const RgbColor color = GetRGBTranslateColorShade(item.hue, LIGHT);
             PaintOval(pix, wRect, color);
@@ -884,7 +884,7 @@ void draw_checkbox(Point origin, const CheckboxButton& item) {
         mDrawPuffDownRect(Rects(), wRect, item.hue, shade);
         wRect.inset(1, 1);
         if ( !item.on) {
-            color = RgbColor::kBlack;
+            color = RgbColor::black();
         } else {
             color = GetRGBTranslateColorShade(item.hue, VERY_LIGHT);
         }
@@ -900,7 +900,7 @@ void draw_checkbox(Point origin, const CheckboxButton& item) {
         mDrawPuffDownRect(Rects(), wRect, item.hue, shade);
         wRect.inset(1, 1);
         if (!item.on) {
-            color = RgbColor::kBlack;
+            color = RgbColor::black();
         } else if (item.status == kActive) {
             color = GetRGBTranslateColorShade(item.hue, LIGHT);
         } else {

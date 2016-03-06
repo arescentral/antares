@@ -326,7 +326,7 @@ static void button_on_text(const Quads& quads, int line, StringSlice string) {
     rect.offset(0, instrument_top());
     Point origin = rect.origin();
     origin.offset(kMiniScreenLeftBuffer, (line * sys.fonts.computer->height) + sys.fonts.computer->ascent);
-    RgbColor textcolor = RgbColor::kBlack;
+    RgbColor textcolor = RgbColor::black();
     sys.fonts.computer->draw(quads, origin, string, textcolor);
 }
 
@@ -658,7 +658,7 @@ static void draw_mini_ship_data(
         draw_shaded_rect(Rects(), bar, header_color, LIGHT, VERY_LIGHT, MEDIUM);
         sys.fonts.computer->draw(
                 Point(bar.left + kMiniScreenLeftBuffer, bar.top + sys.fonts.computer->ascent),
-                label, RgbColor::kBlack);
+                label, RgbColor::black());
     }
 
     // Icon
