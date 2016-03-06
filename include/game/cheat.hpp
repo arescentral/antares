@@ -60,8 +60,6 @@ enum {
     kCheatBit32         = 0x80000000,
 };
 
-void AresCheatInit();
-void CleanupAresCheat();
 int16_t GetCheatNumFromString(const sfz::StringSlice& string);
 void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer);
 

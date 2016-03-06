@@ -49,6 +49,12 @@ struct SystemGlobals {
     SoundDriver* audio = nullptr;
     VideoDriver* video = nullptr;
     PrefsDriver* prefs = nullptr;
+
+    struct {
+        std::vector<sfz::String> codes;
+        std::vector<sfz::String> on;
+        std::vector<sfz::String> off;
+    } cheat;
 };
 
 extern SystemGlobals sys;

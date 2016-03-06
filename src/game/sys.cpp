@@ -30,6 +30,10 @@ using sfz::Exception;
 
 namespace antares {
 
+static const int16_t kCheatStringListID   = 750;
+static const int16_t kCheatFeedbackOnID   = 751;
+static const int16_t kCheatFeedbackOffID  = 752;
+
 ANTARES_GLOBAL SystemGlobals sys;
 
 void sys_init() {
@@ -52,6 +56,10 @@ void sys_init() {
             throw Exception("didn't consume all of rotation data");
         }
     }
+
+    sys.cheat.codes  = to_vector(StringList(kCheatStringListID));
+    sys.cheat.on     = to_vector(StringList(kCheatFeedbackOnID));
+    sys.cheat.off    = to_vector(StringList(kCheatFeedbackOffID));
 }
 
 }  // namespace antares

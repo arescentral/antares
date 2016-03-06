@@ -146,7 +146,6 @@ void ReplayMaster::init() {
     Messages::init();
     InstrumentInit();
     SpriteHandlingInit();
-    AresCheatInit();
     PluginInit();
     SpaceObjectHandlingInit();  // MUST be after PluginInit()
     InitSoundFX();

@@ -131,7 +131,6 @@ void Master::init() {
     Messages::init();
     InstrumentInit();
     SpriteHandlingInit();
-    AresCheatInit();
     PluginInit();
     SpaceObjectHandlingInit();  // MUST be after ScenarioMakerInit()
     InitSoundFX();

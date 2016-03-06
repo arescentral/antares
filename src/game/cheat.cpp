@@ -26,6 +26,7 @@
 #include "game/messages.hpp"
 #include "game/player-ship.hpp"
 #include "game/space-object.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 #include "math/fixed.hpp"
 
@@ -38,10 +39,6 @@ using std::unique_ptr;
 
 namespace antares {
 
-const int16_t kCheatStringListID    = 750;
-const int16_t kCheatFeedbackOnID    = 751;
-const int16_t kCheatFeedbackOffID   = 752;
-
 const int32_t kCheatCodeValue       = 5;
 
 const int16_t kActivateCheatCheat   = 1;
@@ -53,25 +50,19 @@ const int16_t kBuildFastCheat       = 6;
 const int16_t kRaisePayRateCheat    = 7;  // determines your payscale
 const int16_t kLowerPayRateCheat    = 8;
 
-static ANTARES_GLOBAL unique_ptr<StringList> gAresCheatStrings;
-
 void CheatFeedback(int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer);
 void CheatFeedbackPlus(int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer, PrintItem extra);
-
-void AresCheatInit() {
-    gAresCheatStrings.reset(new StringList(kCheatStringListID));
-}
-
-void CleanupAresCheat() {
-    gAresCheatStrings.reset();
-}
 
 int16_t GetCheatNumFromString(const StringSlice& s) {
     String code_string;
     for (Rune r: s) {
         code_string.append(1, r + kCheatCodeValue);
     }
-    return gAresCheatStrings.get()->index_of(code_string) + 1;
+    auto it = std::find(sys.cheat.codes.begin(), sys.cheat.codes.end(), code_string);
+    if (it == sys.cheat.codes.end()) {
+        return -1;
+    }
+    return it - sys.cheat.codes.begin() + 1;
 }
 
 void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
@@ -133,9 +124,9 @@ void CheatFeedback(int16_t whichCheat, bool activate, Handle<Admiral> whichPlaye
     String admiral_name(GetAdmiralName(whichPlayer));
     String feedback;
     if (activate) {
-        feedback.assign(StringList(kCheatFeedbackOnID).at(whichCheat - 1));
+        feedback.assign(sys.cheat.on.at(whichCheat - 1));
     } else {
-        feedback.assign(StringList(kCheatFeedbackOffID).at(whichCheat - 1));
+        feedback.assign(sys.cheat.off.at(whichCheat - 1));
     }
     Messages::add(format("{0}{1}", admiral_name, feedback));
 }
@@ -145,9 +136,9 @@ void CheatFeedbackPlus(
     String admiral_name(GetAdmiralName(whichPlayer));
     String feedback;
     if (activate) {
-        feedback.assign(StringList(kCheatFeedbackOnID).at(whichCheat - 1));
+        feedback.assign(sys.cheat.on.at(whichCheat - 1));
     } else {
-        feedback.assign(StringList(kCheatFeedbackOffID).at(whichCheat - 1));
+        feedback.assign(sys.cheat.off.at(whichCheat - 1));
     }
     Messages::add(format("{0}{1}{2}", admiral_name, feedback, extra));
 }
