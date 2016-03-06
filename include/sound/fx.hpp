@@ -82,7 +82,6 @@ struct smartSoundHandle {
     bool             keepMe;
 };
 
-void InitSoundFX();
 void SetAllSoundsNoKeep();
 void KeepSound(int sound_id);
 int AddSound(int sound_id);
@@ -95,7 +94,6 @@ void PlayLocalizedSound(
         Fixed hvel, Fixed vvel, int16_t whichSoundID, int16_t amplitude,
         usecs persistence, soundPriorityType priority);
 void quiet_all();
-void SoundFXCleanup();
 
 void mPlayDistanceSound(
         int32_t mvolume, Handle<SpaceObject> mobjectptr, int32_t msoundid,

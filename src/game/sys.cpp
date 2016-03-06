@@ -64,7 +64,32 @@ void sys_init() {
     sys.cheat.off    = to_vector(StringList(kCheatFeedbackOffID));
 
     if (sys.audio) {
-        InitSoundFX();
+        sys.channels.resize(kMaxChannelNum);
+        for (int i = 0; i < kMaxChannelNum; i++) {
+            sys.channels[i].reserved_until = wall_time();
+            sys.channels[i].soundPriority = kNoSound;
+            sys.channels[i].soundVolume = 0;
+            sys.channels[i].whichSound = -1;
+            sys.channels[i].channelPtr = sys.audio->open_channel();
+        }
+
+        ResetAllSounds();
+        AddSound(kComputerBeep4);
+        AddSound(kComputerBeep1);
+        AddSound(kComputerBeep2);
+        AddSound(kComputerBeep3);
+        AddSound(kMorseBeepSound);
+        AddSound(kWarningTone);
+        AddSound(kLandingWoosh);
+        AddSound(kCloakOn);
+        AddSound(kCloakOff);
+        AddSound(kKlaxon);
+        AddSound(kWarp[0]);
+        AddSound(kWarp[1]);
+        AddSound(kWarp[2]);
+        AddSound(kWarp[3]);
+        AddSound(kTeletype);
+
         sys.music.init();
     }
 }

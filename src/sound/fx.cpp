@@ -43,43 +43,13 @@ const int kMinVolatileSound = 15;
 
 const double kHackRangeMultiplier = 0.0025;
 
-ANTARES_GLOBAL smartSoundHandle    gSound[kSoundNum];
-ANTARES_GLOBAL smartSoundChannel   gChannel[kMaxChannelNum];
-
-void InitSoundFX() {
-    for (int i = 0; i < kMaxChannelNum; i++) {
-        gChannel[i].reserved_until = wall_time();
-        gChannel[i].soundPriority = kNoSound;
-        gChannel[i].soundVolume = 0;
-        gChannel[i].whichSound = -1;
-        gChannel[i].channelPtr = sys.audio->open_channel();
-    }
-
-    ResetAllSounds();
-    AddSound(kComputerBeep4);
-    AddSound(kComputerBeep1);
-    AddSound(kComputerBeep2);
-    AddSound(kComputerBeep3);
-    AddSound(kMorseBeepSound);
-    AddSound(kWarningTone);
-    AddSound(kLandingWoosh);
-    AddSound(kCloakOn);
-    AddSound(kCloakOff);
-    AddSound(kKlaxon);
-    AddSound(kWarp[0]);
-    AddSound(kWarp[1]);
-    AddSound(kWarp[2]);
-    AddSound(kWarp[3]);
-    AddSound(kTeletype);
-}
-
 // see if there's a channel with the same sound at same or lower volume
 static bool same_sound_channel(
         int& channel, int16_t id, uint8_t amplitude, soundPriorityType priority) {
     if (priority > kVeryLowPrioritySound) {
         for (int i = 0; i < kMaxChannelNum; ++i) {
-            if ((gChannel[i].whichSound == id) &&
-                (gChannel[i].soundVolume <= amplitude)) {
+            if ((sys.channels[i].whichSound == id) &&
+                (sys.channels[i].soundVolume <= amplitude)) {
                 channel = i;
                 return true;
             }
@@ -91,7 +61,7 @@ static bool same_sound_channel(
 // see if there's a channel at lower volume
 static bool quieter_channel(int& channel, uint8_t amplitude) {
     for (int i = 0; i < kMaxChannelNum; ++i) {
-        if (gChannel[i].soundVolume < amplitude) {
+        if (sys.channels[i].soundVolume < amplitude) {
             channel = i;
             return true;
         }
@@ -102,7 +72,7 @@ static bool quieter_channel(int& channel, uint8_t amplitude) {
 // see if there's a channel at lower priority
 static bool lower_priority_channel(int& channel, soundPriorityType priority) {
     for (int i = 0; i < kMaxChannelNum; ++i) {
-        if (gChannel[i].soundPriority < priority) {
+        if (sys.channels[i].soundPriority < priority) {
             channel = i;
             return true;
         }
@@ -115,7 +85,7 @@ static bool oldest_available_channel(int& channel) {
     usecs oldestSoundTime(0);
     bool result = false;
     for (int i = 0; i < kMaxChannelNum; ++i) {
-        auto past_reservation = now() - gChannel[i].reserved_until;
+        auto past_reservation = now() - sys.channels[i].reserved_until;
         if (past_reservation > oldestSoundTime) {
             oldestSoundTime = past_reservation;
             channel = i;
@@ -146,23 +116,23 @@ void PlayVolumeSound(
         }
 
         int whichSound = 0;
-        while ((gSound[whichSound].id != whichSoundID) && (whichSound < kSoundNum)) {
+        while ((sys.sounds[whichSound].id != whichSoundID) && (whichSound < kSoundNum)) {
             whichSound++;
         }
         if (whichSound == kSoundNum) {
             return;
         }
 
-        gChannel[whichChannel].whichSound = whichSoundID;
-        gChannel[whichChannel].reserved_until = now() + persistence;
-        gChannel[whichChannel].soundPriority = priority;
-        gChannel[whichChannel].soundVolume = amplitude;
+        sys.channels[whichChannel].whichSound = whichSoundID;
+        sys.channels[whichChannel].reserved_until = now() + persistence;
+        sys.channels[whichChannel].soundPriority = priority;
+        sys.channels[whichChannel].soundVolume = amplitude;
 
-        gChannel[whichChannel].channelPtr->quiet();
+        sys.channels[whichChannel].channelPtr->quiet();
 
-        gChannel[whichChannel].channelPtr->amp(amplitude);
-        gChannel[whichChannel].channelPtr->activate();
-        gSound[whichSound].soundHandle->play();
+        sys.channels[whichChannel].channelPtr->amp(amplitude);
+        sys.channels[whichChannel].channelPtr->activate();
+        sys.sounds[whichSound].soundHandle->play();
     }
 }
 
@@ -182,24 +152,25 @@ void PlayLocalizedSound(
 
 void SetAllSoundsNoKeep() {
     for (int count = kMinVolatileSound; count < kSoundNum; count++) {
-        gSound[count].keepMe = false;
+        sys.sounds[count].keepMe = false;
     }
 }
 
 void RemoveAllUnusedSounds() {
     for (int count = kMinVolatileSound; count < kSoundNum; count++) {
-        if ((!gSound[count].keepMe) &&
-                (gSound[count].soundHandle.get() != NULL)) {
-            gSound[count].soundHandle.reset();
-            gSound[count].id = -1;
+        if ((!sys.sounds[count].keepMe) &&
+                (sys.sounds[count].soundHandle.get() != NULL)) {
+            sys.sounds[count].soundHandle.reset();
+            sys.sounds[count].id = -1;
         }
     }
 }
 
 void ResetAllSounds() {
+    sys.sounds.resize(kSoundNum);
     for (int count = 0; count < kSoundNum; count++) {
-        gSound[count].keepMe = false;
-        gSound[count].id = -1;
+        sys.sounds[count].keepMe = false;
+        sys.sounds[count].id = -1;
     }
 }
 
@@ -207,24 +178,24 @@ void KeepSound(int soundID) {
     int16_t whichSound;
 
     whichSound = 0;
-    while ((gSound[whichSound].id != soundID) && (whichSound < kSoundNum)) {
+    while ((sys.sounds[whichSound].id != soundID) && (whichSound < kSoundNum)) {
         whichSound++;
     }
 
     if (whichSound < kSoundNum) {
-        gSound[whichSound].keepMe = true;
+        sys.sounds[whichSound].keepMe = true;
     }
 }
 
 int AddSound(int soundID) {
     int whichSound = 0;
-    while ((gSound[whichSound].id != soundID) && (whichSound < kSoundNum)) {
+    while ((sys.sounds[whichSound].id != soundID) && (whichSound < kSoundNum)) {
         whichSound++;
     }
 
     if (whichSound == kSoundNum) {
         whichSound = 0;
-        while ((gSound[whichSound].soundHandle.get() != NULL) &&
+        while ((sys.sounds[whichSound].soundHandle.get() != NULL) &&
                 (whichSound < kSoundNum)) {
             whichSound++;
         }
@@ -233,26 +204,16 @@ int AddSound(int soundID) {
             throw Exception("Can't manage any more sounds");
         }
 
-        gSound[whichSound].soundHandle = sys.audio->open_sound(
+        sys.sounds[whichSound].soundHandle = sys.audio->open_sound(
                 format("/sounds/{0}", soundID));
-        gSound[whichSound].id = soundID;
+        sys.sounds[whichSound].id = soundID;
     }
     return whichSound;
 }
 
-void SoundFXCleanup() {
-    for (int i = 0; i < kMaxChannelNum; i++) {
-        gChannel[i].channelPtr.reset();
-    }
-
-    for (int i = 0; i < kSoundNum; i++) {
-        gSound[i].soundHandle.reset();
-    }
-}
-
 void quiet_all() {
     for (int i = 0; i < kMaxChannelNum; i++) {
-        gChannel[i].channelPtr->quiet();
+        sys.channels[i].channelPtr->quiet();
     }
 }
 
