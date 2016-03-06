@@ -21,6 +21,7 @@
 
 #include "data/base-object.hpp"
 #include "config/keys.hpp"
+#include "game/cursor.hpp"
 #include "ui/event.hpp"
 
 namespace antares {
@@ -36,17 +37,24 @@ class PlayerShip : public EventReceiver {
     virtual void key_down(const KeyDownEvent& event);
     virtual void key_up(const KeyUpEvent& event);
 
+    virtual void mouse_down(const MouseDownEvent& event);
+    virtual void mouse_up(const MouseUpEvent& event);
+    virtual void mouse_move(const MouseMoveEvent& event);
+
     virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
     virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
     virtual void gamepad_stick(const GamepadStickEvent& event);
 
-    void update(const GameCursor& cursor, bool enter_message);
+    void update(bool enter_message);
 
     bool show_select() const;
     bool show_target() const;
     int32_t control_direction() const;
     bool show_right_stick() const;
     int32_t goal_direction() const;
+
+    GameCursor& cursor() { return _cursor; }
+    const GameCursor& cursor() const { return _cursor; }
 
   private:
     bool active() const;
@@ -68,6 +76,7 @@ class PlayerShip : public EventReceiver {
     GamepadState _gamepad_state;
     bool _control_active;
     int32_t _control_direction;
+    GameCursor _cursor;
 };
 
 void ResetPlayerShip(Handle<SpaceObject> which);

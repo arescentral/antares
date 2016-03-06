@@ -137,7 +137,6 @@ class GamePlay : public Card {
     };
     State _state;
 
-    GameCursor _cursor;
     const bool _replay;
     GameResult* const _game_result;
     wall_time _next_timer;
@@ -394,9 +393,9 @@ void GamePlay::become_front() {
     switch (_state) {
       case PLAYING:
         if (_replay) {
-            _cursor.show = false;
+            _player_ship.cursor().show = false;
         } else {
-            _cursor.show = true;
+            _player_ship.cursor().show = true;
         }
         HintLine::reset();
 
@@ -470,7 +469,7 @@ void GamePlay::draw() const {
     draw_site(_player_ship);
     draw_instruments();
     if (stack()->top() == this) {
-        _cursor.draw();
+        _player_ship.cursor().draw();
     }
     HintLine::draw();
     globals()->transitions.draw();
@@ -540,7 +539,7 @@ void GamePlay::fire_timer() {
                 g.game_over_at = g.time;
             }
             _replay_builder.next();
-            _player_ship.update(_cursor, _entering_message);
+            _player_ship.update(_entering_message);
 
             CollideSpaceObjects();
             if ((g.time.time_since_epoch() % kConditionTick) == ticks(0)) {
@@ -671,40 +670,14 @@ void GamePlay::key_up(const KeyUpEvent& event) {
 }
 
 void GamePlay::mouse_down(const MouseDownEvent& event) {
-    _cursor.mouse_down(event);
-
-    switch (event.button()) {
-        case 0:
-            if (event.count() == 2) {
-                InstrumentsHandleDoubleClick(_cursor);
-            } else if (event.count() == 1) {
-                InstrumentsHandleClick(_cursor);
-            }
-            break;
-        case 1:
-            if (event.count() == 1) {
-                PlayerShipHandleClick(event.where(), 1);
-            }
-            break;
-    }
-
     _input_source->mouse_down(event);
 }
 
 void GamePlay::mouse_up(const MouseUpEvent& event) {
-    _cursor.mouse_up(event);
-
-    if (event.button() == 0) {
-        InstrumentsHandleMouseStillDown(_cursor);
-        InstrumentsHandleMouseUp(_cursor);
-    }
-
     _input_source->mouse_up(event);
 }
 
 void GamePlay::mouse_move(const MouseMoveEvent& event) {
-    _cursor.mouse_move(event);
-
     _input_source->mouse_move(event);
 }
 

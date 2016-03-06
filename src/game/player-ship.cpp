@@ -363,6 +363,38 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
     }
 }
 
+void PlayerShip::mouse_down(const MouseDownEvent& event) {
+    _cursor.mouse_down(event);
+
+    switch (event.button()) {
+        case 0:
+            if (event.count() == 2) {
+                InstrumentsHandleDoubleClick(_cursor);
+            } else if (event.count() == 1) {
+                InstrumentsHandleClick(_cursor);
+            }
+            break;
+        case 1:
+            if (event.count() == 1) {
+                PlayerShipHandleClick(event.where(), 1);
+            }
+            break;
+    }
+}
+
+void PlayerShip::mouse_up(const MouseUpEvent& event) {
+    _cursor.mouse_up(event);
+
+    if (event.button() == 0) {
+        InstrumentsHandleMouseStillDown(_cursor);
+        InstrumentsHandleMouseUp(_cursor);
+    }
+}
+
+void PlayerShip::mouse_move(const MouseMoveEvent& event) {
+    _cursor.mouse_move(event);
+}
+
 void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
     switch (event.button) {
       case Gamepad::LB:
@@ -562,7 +594,7 @@ bool PlayerShip::active() const {
         && (player->attributes & kIsHumanControlled);
 }
 
-void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
+void PlayerShip::update(bool enter_message) {
     uint32_t        attributes;
 
     if (!g.ship.get()) {
@@ -748,7 +780,7 @@ void PlayerShip::update(const GameCursor& cursor, bool enter_message) {
 // end new hotkey selection
 
     // for this we check lastKeys against theseKeys & relevent keys now being pressed
-    if ((attributes) && (!(gLastKeys & attributes)) && (!cursor.active())) {
+    if ((attributes) && (!(gLastKeys & attributes)) && (!_cursor.active())) {
         gDestKeyState = DEST_KEY_BLOCKED;
         if (gTheseKeys & kSelectFriendKey) {
             if (!(gTheseKeys & kDestinationKey)) {
