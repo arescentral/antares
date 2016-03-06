@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 
 #include "game/main.hpp"
+#include "game/input-source.hpp"
 #include "ui/card.hpp"
 #include "ui/screens/play-again.hpp"
 
@@ -57,6 +58,7 @@ class SoloGame : public Card {
     const Level* _level;
     GameResult _game_result;
     PlayAgainScreen::Item _play_again;
+    RealInputSource _input_source;
 };
 
 }  // namespace antares

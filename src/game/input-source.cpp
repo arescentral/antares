@@ -32,7 +32,48 @@ namespace antares {
 
 InputSource::~InputSource() { }
 
+bool RealInputSource::next(EventReceiver& receiver) {
+    for (const auto& event: _queue) {
+        event->send(&receiver);
+    }
+    _queue.clear();
+    return true;
+}
+
+void RealInputSource::key_down(const KeyDownEvent& event) {
+    _queue.emplace_back(new KeyDownEvent(event.at(), event.key()));
+}
+
+void RealInputSource::key_up(const KeyUpEvent& event) {
+    _queue.emplace_back(new KeyUpEvent(event.at(), event.key()));
+}
+
+void RealInputSource::gamepad_button_down(const GamepadButtonDownEvent& event) {
+    _queue.emplace_back(new GamepadButtonDownEvent(event.at(), event.button));
+}
+
+void RealInputSource::gamepad_button_up(const GamepadButtonUpEvent& event) {
+    _queue.emplace_back(new GamepadButtonUpEvent(event.at(), event.button));
+}
+
+void RealInputSource::gamepad_stick(const GamepadStickEvent& event) {
+    _queue.emplace_back(new GamepadStickEvent(event.at(), event.stick, event.x, event.y));
+}
+
+void RealInputSource::mouse_down(const MouseDownEvent& event) {
+    _queue.emplace_back(new MouseDownEvent(event.at(), event.button(), event.count(), event.where()));
+}
+
+void RealInputSource::mouse_up(const MouseUpEvent& event) {
+    _queue.emplace_back(new MouseUpEvent(event.at(), event.button(), event.where()));
+}
+
+void RealInputSource::mouse_move(const MouseMoveEvent& event) {
+    _queue.emplace_back(new MouseMoveEvent(event.at(), event.where()));
+}
+
 ReplayInputSource::ReplayInputSource(ReplayData* data):
+        _exit(false),
         _data(data),
         _data_index(0),
         _at(0) {
@@ -41,7 +82,7 @@ ReplayInputSource::ReplayInputSource(ReplayData* data):
 }
 
 bool ReplayInputSource::next(EventReceiver& receiver) {
-    if (!advance(receiver)) {
+    if (_exit || !advance(receiver)) {
         return false;
     }
     return true;
@@ -68,6 +109,18 @@ bool ReplayInputSource::advance(EventReceiver& receiver) {
     }
     ++_at;
     return true;
+}
+
+void ReplayInputSource::key_down(const KeyDownEvent& event) {
+    _exit = true;
+}
+
+void ReplayInputSource::gamepad_button_down(const GamepadButtonDownEvent& event) {
+    _exit = true;
+}
+
+void ReplayInputSource::mouse_down(const MouseDownEvent& event) {
+    _exit = true;
 }
 
 }  // namespace antares

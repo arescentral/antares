@@ -29,28 +29,50 @@ namespace antares {
 
 struct ReplayData;
 
-class InputSource {
-  public:
-    virtual ~InputSource();
+class InputSource: public EventReceiver {
+    public:
+        virtual ~InputSource();
 
-    virtual bool next(EventReceiver& key_map) = 0;
+        virtual bool next(EventReceiver& key_map) = 0;
+};
+
+class RealInputSource: public InputSource {
+    public:
+        virtual bool next(EventReceiver& receiver);
+
+        virtual void key_down(const KeyDownEvent& event);
+        virtual void key_up(const KeyUpEvent& event);
+        virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
+        virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
+        virtual void gamepad_stick(const GamepadStickEvent& event);
+        virtual void mouse_down(const MouseDownEvent& event);
+        virtual void mouse_up(const MouseUpEvent& event);
+        virtual void mouse_move(const MouseMoveEvent& event);
+
+    private:
+        std::vector<std::unique_ptr<Event>> _queue;
 };
 
 class ReplayInputSource : public InputSource {
-  public:
-    explicit ReplayInputSource(ReplayData* data);
+    public:
+        explicit ReplayInputSource(ReplayData* data);
 
-    virtual bool next(EventReceiver& receiver);
+        virtual bool next(EventReceiver& receiver);
 
-  private:
-    bool advance(EventReceiver& receiver);
+        virtual void key_down(const KeyDownEvent& event);
+        virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
+        virtual void mouse_down(const MouseDownEvent& event);
 
-    const ReplayData* _data;
-    size_t _data_index;
-    uint64_t _at;
-    KeyMap _key_map;
+    private:
+        bool advance(EventReceiver& receiver);
 
-    DISALLOW_COPY_AND_ASSIGN(ReplayInputSource);
+        bool _exit;
+        const ReplayData* _data;
+        size_t _data_index;
+        uint64_t _at;
+        KeyMap _key_map;
+
+        DISALLOW_COPY_AND_ASSIGN(ReplayInputSource);
 };
 
 }  // namespace antares

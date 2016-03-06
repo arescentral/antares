@@ -535,7 +535,7 @@ void GamePlay::fire_timer() {
             AdmiralThink();
             execute_action_queue();
 
-            if (_input_source && !_input_source->next(_player_ship)) {
+            if (!_input_source->next(_player_ship)) {
                 g.game_over = true;
                 g.game_over_at = g.time;
             }
@@ -616,13 +616,6 @@ void GamePlay::fire_timer() {
 }
 
 void GamePlay::key_down(const KeyDownEvent& event) {
-    if (_input_source) {
-        *_game_result = QUIT_GAME;
-        g.game_over = true;
-        g.game_over_at = g.time;
-        return;
-    }
-
     switch (event.key()) {
       case Keys::CAPS_LOCK:
         _state = PAUSED;
@@ -631,6 +624,7 @@ void GamePlay::key_down(const KeyDownEvent& event) {
         return;
 
       case Keys::ESCAPE:
+        // TODO(sfiera): not in a replay.
         _state = PLAY_AGAIN;
         _player_paused = true;
         stack()->push(new PlayAgainScreen(true, g.level->is_training, &_play_again));
@@ -638,51 +632,46 @@ void GamePlay::key_down(const KeyDownEvent& event) {
 
       default:
         if (event.key() == sys.prefs->key(kHelpKeyNum) - 1) {
+            // TODO(sfiera): not in a replay.
             _state = HELP;
             _player_paused = true;
             stack()->push(new HelpScreen);
         } else if (event.key() == sys.prefs->key(kVolumeDownKeyNum) - 1) {
             sys.prefs->set_volume(sys.prefs->volume() - 1);
             sys.audio->set_global_volume(sys.prefs->volume());
+            return;
         } else if (event.key() == sys.prefs->key(kVolumeUpKeyNum) - 1) {
             sys.prefs->set_volume(sys.prefs->volume() + 1);
             sys.audio->set_global_volume(sys.prefs->volume());
+            return;
         } else if (event.key() == sys.prefs->key(kActionMusicKeyNum) - 1) {
             if (sys.prefs->play_music_in_game()) {
                 sys.music.toggle();
             }
+            return;
         } else if (event.key() == sys.prefs->key(kFastMotionKeyNum) - 1) {
             _fast_motion = true;
+            return;
         }
         break;
     }
 
-    _player_ship.key_down(event);
+    _input_source->key_down(event);
     _replay_builder.key_down(event);
 }
 
 void GamePlay::key_up(const KeyUpEvent& event) {
-    if (_input_source) {
+    if (event.key() == sys.prefs->key(kFastMotionKeyNum) - 1) {
+        _fast_motion = false;
         return;
     }
 
-    if (event.key() == sys.prefs->key(kFastMotionKeyNum) - 1) {
-        _fast_motion = false;
-    }
-
-    _player_ship.key_up(event);
+    _input_source->key_up(event);
     _replay_builder.key_up(event);
 }
 
 void GamePlay::mouse_down(const MouseDownEvent& event) {
     _cursor.mouse_down(event);
-
-    if (_replay) {
-        *_game_result = QUIT_GAME;
-        g.game_over = true;
-        g.game_over_at = g.time;
-        return;
-    }
 
     switch (event.button()) {
         case 0:
@@ -698,6 +687,8 @@ void GamePlay::mouse_down(const MouseDownEvent& event) {
             }
             break;
     }
+
+    _input_source->mouse_down(event);
 }
 
 void GamePlay::mouse_up(const MouseUpEvent& event) {
@@ -707,41 +698,35 @@ void GamePlay::mouse_up(const MouseUpEvent& event) {
         InstrumentsHandleMouseStillDown(_cursor);
         InstrumentsHandleMouseUp(_cursor);
     }
+
+    _input_source->mouse_up(event);
 }
 
 void GamePlay::mouse_move(const MouseMoveEvent& event) {
     _cursor.mouse_move(event);
+
+    _input_source->mouse_move(event);
 }
 
 void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
-    if (_input_source) {
-        *_game_result = QUIT_GAME;
-        g.game_over = true;
-        g.game_over_at = g.time;
-        return;
-    }
-
     switch (event.button) {
       case Gamepad::START:
+        // TODO(sfiera): not in a replay.
         _state  = PLAY_AGAIN;
         _player_paused = true;
         stack()->push(new PlayAgainScreen(true, g.level->is_training, &_play_again));
         break;
     }
 
-    _player_ship.gamepad_button_down(event);
+    _input_source->gamepad_button_down(event);
 }
 
 void GamePlay::gamepad_button_up(const GamepadButtonUpEvent& event) {
-    if (_input_source) {
-        return;
-    }
-
-    _player_ship.gamepad_button_up(event);
+    _input_source->gamepad_button_up(event);
 }
 
 void GamePlay::gamepad_stick(const GamepadStickEvent& event) {
-    _player_ship.gamepad_stick(event);
+    _input_source->gamepad_stick(event);
 }
 
 }  // namespace antares
