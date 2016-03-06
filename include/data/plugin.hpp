@@ -19,7 +19,6 @@
 #ifndef ANTARES_DATA_PLUGIN_HPP_
 #define ANTARES_DATA_PLUGIN_HPP_
 
-#include <memory>
 #include <vector>
 
 #include "data/level.hpp"

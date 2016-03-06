@@ -22,6 +22,7 @@
 
 #include "data/base-object.hpp"
 #include "drawing/color.hpp"
+#include "drawing/sprite-handling.hpp"
 #include "game/globals.hpp"
 #include "game/motion.hpp"
 #include "game/space-object.hpp"

@@ -22,7 +22,9 @@
 
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
+#include "data/plugin.hpp"
 #include "data/replay.hpp"
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/text.hpp"

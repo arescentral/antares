@@ -18,6 +18,7 @@
 
 #include "ui/flows/master.hpp"
 
+#include "data/plugin.hpp"
 #include "drawing/text.hpp"
 #include "game/admiral.hpp"
 #include "game/vector.hpp"

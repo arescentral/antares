@@ -22,6 +22,7 @@
 #include "data/plugin.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
+#include "drawing/sprite-handling.hpp"
 #include "game/action.hpp"
 #include "game/admiral.hpp"
 #include "game/globals.hpp"

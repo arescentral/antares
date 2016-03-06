@@ -20,6 +20,7 @@
 
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
+#include "data/plugin.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
 #include "game/admiral.hpp"

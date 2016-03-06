@@ -18,9 +18,10 @@
 
 #include "data/plugin.hpp"
 
-#include "data/resource.hpp"
-#include "lang/defines.hpp"
 #include "data/base-object.hpp"
+#include "data/resource.hpp"
+#include "data/string-list.hpp"
+#include "lang/defines.hpp"
 
 using sfz::BytesSlice;
 using sfz::Exception;

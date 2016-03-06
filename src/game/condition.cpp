@@ -18,8 +18,10 @@
 
 #include "game/condition.hpp"
 
+#include "data/plugin.hpp"
 #include "game/action.hpp"
 #include "game/admiral.hpp"
+#include "game/globals.hpp"
 #include "game/initial.hpp"
 #include "game/level.hpp"
 #include "game/messages.hpp"

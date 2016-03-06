@@ -20,13 +20,9 @@
 #define ANTARES_DATA_BASE_OBJECT_HPP_
 
 #include "data/action.hpp"
-#include "data/plugin.hpp"
 #include "drawing/color.hpp"
-#include "drawing/sprite-handling.hpp"
-#include "game/globals.hpp"
 #include "math/fixed.hpp"
 #include "math/random.hpp"
-#include "sound/fx.hpp"
 
 namespace antares {
 
@@ -264,7 +260,7 @@ class BaseObject {
   public:
     static BaseObject* get(int number);
     static Handle<BaseObject> none() { return Handle<BaseObject>(-1); }
-    static HandleList<BaseObject> all() { return HandleList<BaseObject>(0, plug.objects.size()); }
+    static HandleList<BaseObject> all();
 
     sfz::String             name;
     sfz::String             short_name;

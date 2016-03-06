@@ -20,6 +20,7 @@
 #define ANTARES_GAME_SPACE_OBJECT_HPP_
 
 #include "data/base-object.hpp"
+#include "game/globals.hpp"
 #include "math/units.hpp"
 
 namespace antares {

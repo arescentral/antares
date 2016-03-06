@@ -22,9 +22,11 @@
 
 #include "config/preferences.hpp"
 #include "data/base-object.hpp"
+#include "data/plugin.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
 #include "game/level.hpp"
+#include "game/globals.hpp"
 #include "ui/interface-handling.hpp"
 #include "video/text-driver.hpp"
 
