@@ -23,91 +23,95 @@
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
 #include "data/replay.hpp"
+#include "game/globals.hpp"
 #include "game/time.hpp"
 
 using sfz::BytesSlice;
+using sfz::range;
 using sfz::read;
 
 namespace antares {
 
 InputSource::~InputSource() { }
 
-bool RealInputSource::next(EventReceiver& receiver) {
-    for (const auto& event: _queue) {
-        event->send(&receiver);
+void RealInputSource::start() {
+    _events.clear();
+}
+
+bool RealInputSource::get(game_ticks at, EventReceiver& receiver) {
+    auto events = _events.equal_range(at);
+    for (auto it: range(events.first, events.second)) {
+        it->second->send(&receiver);
     }
-    _queue.clear();
     return true;
 }
 
 void RealInputSource::key_down(const KeyDownEvent& event) {
-    _queue.emplace_back(new KeyDownEvent(event.at(), event.key()));
+    _events.emplace(at(), std::unique_ptr<Event>(new KeyDownEvent(event.at(), event.key())));
 }
 
 void RealInputSource::key_up(const KeyUpEvent& event) {
-    _queue.emplace_back(new KeyUpEvent(event.at(), event.key()));
+    _events.emplace(at(), std::unique_ptr<Event>(new KeyUpEvent(event.at(), event.key())));
 }
 
 void RealInputSource::gamepad_button_down(const GamepadButtonDownEvent& event) {
-    _queue.emplace_back(new GamepadButtonDownEvent(event.at(), event.button));
+    _events.emplace(at(), std::unique_ptr<Event>(new GamepadButtonDownEvent(event.at(), event.button)));
 }
 
 void RealInputSource::gamepad_button_up(const GamepadButtonUpEvent& event) {
-    _queue.emplace_back(new GamepadButtonUpEvent(event.at(), event.button));
+    _events.emplace(at(), std::unique_ptr<Event>(new GamepadButtonUpEvent(event.at(), event.button)));
 }
 
 void RealInputSource::gamepad_stick(const GamepadStickEvent& event) {
-    _queue.emplace_back(new GamepadStickEvent(event.at(), event.stick, event.x, event.y));
+    _events.emplace(at(), std::unique_ptr<Event>(new GamepadStickEvent(event.at(), event.stick, event.x, event.y)));
 }
 
 void RealInputSource::mouse_down(const MouseDownEvent& event) {
-    _queue.emplace_back(new MouseDownEvent(event.at(), event.button(), event.count(), event.where()));
+    _events.emplace(at(), std::unique_ptr<Event>(new MouseDownEvent(event.at(), event.button(), event.count(), event.where())));
 }
 
 void RealInputSource::mouse_up(const MouseUpEvent& event) {
-    _queue.emplace_back(new MouseUpEvent(event.at(), event.button(), event.where()));
+    _events.emplace(at(), std::unique_ptr<Event>(new MouseUpEvent(event.at(), event.button(), event.where())));
 }
 
 void RealInputSource::mouse_move(const MouseMoveEvent& event) {
-    _queue.emplace_back(new MouseMoveEvent(event.at(), event.where()));
+    _events.emplace(at(), std::unique_ptr<Event>(new MouseMoveEvent(event.at(), event.where())));
+}
+
+game_ticks RealInputSource::at() {
+    game_ticks result = g.time + ticks(1);
+    while ((result.time_since_epoch() % kMajorTick).count()) {
+        result += ticks(1);
+    }
+    return result;
 }
 
 ReplayInputSource::ReplayInputSource(ReplayData* data):
         _exit(false),
-        _data(data),
-        _data_index(0),
-        _at(0) {
-    EventReceiver receiver;
-    advance(receiver);
-}
-
-bool ReplayInputSource::next(EventReceiver& receiver) {
-    if (_exit || !advance(receiver)) {
-        return false;
-    }
-    return true;
-}
-
-bool ReplayInputSource::advance(EventReceiver& receiver) {
-    if (_at >= _data->duration) {
-        return false;
-    }
-    while ((_data_index < _data->actions.size())
-            && (_at >= _data->actions[_data_index].at)) {
-        const ReplayData::Action& action = _data->actions[_data_index];
-        if (_at == action.at) {
-            for (uint8_t key: action.keys_down) {
-                int code = sys.prefs->key(key) - 1;
-                receiver.key_down(KeyDownEvent(now(), code));
-            }
-            for (uint8_t key: action.keys_up) {
-                int code = sys.prefs->key(key) - 1;
-                receiver.key_up(KeyUpEvent(now(), code));
-            }
+        _duration(game_ticks(ticks(data->duration * 3))) {
+    for (auto action: data->actions) {
+        game_ticks at = game_ticks(ticks(action.at * 3));
+        for (auto key: action.keys_down) {
+            int code = sys.prefs->key(key) - 1;
+            _events.emplace(at, unique_ptr<Event>(new KeyDownEvent(wall_time(), code)));
         }
-        ++_data_index;
+        for (auto key: action.keys_up) {
+            int code = sys.prefs->key(key) - 1;
+            _events.emplace(at, unique_ptr<Event>(new KeyUpEvent(wall_time(), code)));
+        }
     }
-    ++_at;
+}
+
+void ReplayInputSource::start() { }
+
+bool ReplayInputSource::get(game_ticks at, EventReceiver& receiver) {
+    if (_exit || (at >= _duration)) {
+        return false;
+    }
+    auto events = _events.equal_range(at);
+    for (auto it: range(events.first, events.second)) {
+        it->second->send(&receiver);
+    }
     return true;
 }
 

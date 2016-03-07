@@ -104,9 +104,7 @@ Rect viewport() {
 
 class GamePlay : public Card {
   public:
-    GamePlay(
-            bool replay, ReplayBuilder& replay_builder, InputSource* input,
-            GameResult* game_result);
+    GamePlay(bool replay, InputSource* input, GameResult* game_result);
 
     virtual void become_front();
     virtual void resign_front();
@@ -147,7 +145,6 @@ class GamePlay : public Card {
     bool _player_paused;
     PlayAgainScreen::Item _play_again;
     PlayerShip _player_ship;
-    ReplayBuilder& _replay_builder;
 
     // The wall_time that g.time corresponds to. Under normal operation,
     // this increases in lockstep with g.time, but during fast motion or
@@ -177,11 +174,11 @@ void MainPlay::become_front() {
             RemoveAllSpaceObjects();
             g.game_over = false;
 
-            _replay_builder.init(
-                    sys.prefs->scenario_identifier(),
-                    String(u32_to_version(plug.meta.version)),
-                    _level->chapter_number(),
-                    g.random.seed);
+            // _replay_builder.init(
+            //         sys.prefs->scenario_identifier(),
+            //         String(u32_to_version(plug.meta.version)),
+            //         _level->chapter_number(),
+            //         g.random.seed);
 
             sys.music.play(Music::IDLE, 3000);
 
@@ -234,10 +231,7 @@ void MainPlay::become_front() {
 
             sys.music.play(Music::IN_GAME, g.level->songID);
 
-            if (!_replay) {
-                _replay_builder.start();
-            }
-            stack()->push(new GamePlay(_replay, _replay_builder, _input_source, _game_result));
+            stack()->push(new GamePlay(_replay, _input_source, _game_result));
         }
         break;
 
@@ -245,7 +239,6 @@ void MainPlay::become_front() {
         globals()->transitions.reset();
         sys.sound.stop();
         sys.music.stop();
-        _replay_builder.finish();
 #ifdef DATA_COVERAGE
         {
             sfz::print(sfz::io::err, sfz::format("{{ \"level\": {0},\n", g.level->chapter_number()));
@@ -280,8 +273,7 @@ int new_replay_file() {
     return open(path, O_WRONLY | O_CREAT | O_EXCL, 0644);
 }
 
-GamePlay::GamePlay(
-        bool replay, ReplayBuilder& replay_builder, InputSource* input, GameResult* game_result):
+GamePlay::GamePlay(bool replay, InputSource* input, GameResult* game_result):
         _state(PLAYING),
         _replay(replay),
         _game_result(game_result),
@@ -291,7 +283,6 @@ GamePlay::GamePlay(
         _fast_motion(false),
         _entering_message(false),
         _player_paused(false),
-        _replay_builder(replay_builder),
         _real_time(now()),
         _input_source(input) { }
 
@@ -392,6 +383,7 @@ class PauseScreen : public Card {
 void GamePlay::become_front() {
     switch (_state) {
       case PLAYING:
+        _input_source->start();
         if (_replay) {
             _player_ship.cursor().show = false;
         } else {
@@ -534,11 +526,10 @@ void GamePlay::fire_timer() {
             AdmiralThink();
             execute_action_queue();
 
-            if (!_input_source->next(_player_ship)) {
+            if (!_input_source->get(g.time, _player_ship)) {
                 g.game_over = true;
                 g.game_over_at = g.time;
             }
-            _replay_builder.next();
             _player_ship.update(_entering_message);
 
             CollideSpaceObjects();
@@ -656,7 +647,6 @@ void GamePlay::key_down(const KeyDownEvent& event) {
     }
 
     _input_source->key_down(event);
-    _replay_builder.key_down(event);
 }
 
 void GamePlay::key_up(const KeyUpEvent& event) {
@@ -666,7 +656,6 @@ void GamePlay::key_up(const KeyUpEvent& event) {
     }
 
     _input_source->key_up(event);
-    _replay_builder.key_up(event);
 }
 
 void GamePlay::mouse_down(const MouseDownEvent& event) {

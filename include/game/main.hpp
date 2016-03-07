@@ -58,7 +58,6 @@ class MainPlay : public Card {
     const bool _show_loading_screen;
     bool _cancelled;
     GameResult* const _game_result;
-    ReplayBuilder _replay_builder;
     InputSource* _input_source;
 };
 
