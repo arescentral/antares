@@ -614,18 +614,25 @@ void GamePlay::key_down(const KeyDownEvent& event) {
         return;
 
       case Keys::ESCAPE:
-        // TODO(sfiera): not in a replay.
-        _state = PLAY_AGAIN;
-        _player_paused = true;
-        stack()->push(new PlayAgainScreen(true, g.level->is_training, &_play_again));
-        break;
+        if (_replay) {
+            break;
+        } else {
+            _state = PLAY_AGAIN;
+            _player_paused = true;
+            stack()->push(new PlayAgainScreen(true, g.level->is_training, &_play_again));
+            return;
+        }
 
       default:
         if (event.key() == sys.prefs->key(kHelpKeyNum) - 1) {
-            // TODO(sfiera): not in a replay.
-            _state = HELP;
-            _player_paused = true;
-            stack()->push(new HelpScreen);
+            if (_replay) {
+                break;
+            } else {
+                _state = HELP;
+                _player_paused = true;
+                stack()->push(new HelpScreen);
+                return;
+            }
         } else if (event.key() == sys.prefs->key(kVolumeDownKeyNum) - 1) {
             sys.prefs->set_volume(sys.prefs->volume() - 1);
             sys.audio->set_global_volume(sys.prefs->volume());
@@ -643,7 +650,6 @@ void GamePlay::key_down(const KeyDownEvent& event) {
             _fast_motion = true;
             return;
         }
-        break;
     }
 
     _input_source->key_down(event);
@@ -673,11 +679,14 @@ void GamePlay::mouse_move(const MouseMoveEvent& event) {
 void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
     switch (event.button) {
       case Gamepad::START:
-        // TODO(sfiera): not in a replay.
-        _state  = PLAY_AGAIN;
-        _player_paused = true;
-        stack()->push(new PlayAgainScreen(true, g.level->is_training, &_play_again));
-        break;
+        if (_replay) {
+            break;
+        } else {
+            _state  = PLAY_AGAIN;
+            _player_paused = true;
+            stack()->push(new PlayAgainScreen(true, g.level->is_training, &_play_again));
+            return;
+        }
     }
 
     _input_source->gamepad_button_down(event);
