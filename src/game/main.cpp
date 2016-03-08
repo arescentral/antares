@@ -156,7 +156,7 @@ class GamePlay : public Card {
 };
 
 MainPlay::MainPlay(
-        const Level* level, bool replay, InputSource* input, bool show_loading_screen,
+        Handle<Level> level, bool replay, InputSource* input, bool show_loading_screen,
         GameResult* game_result):
     _state(NEW),
     _level(level),
@@ -209,7 +209,7 @@ void MainPlay::become_front() {
             }
             if (!_replay) {
                 _state = BRIEFING;
-                stack()->push(new BriefingScreen(_level, &_cancelled));
+                stack()->push(new BriefingScreen(_level.get(), &_cancelled));
                 break;
             }
         }

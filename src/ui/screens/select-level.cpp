@@ -46,14 +46,14 @@ using std::unique_ptr;
 
 namespace antares {
 
-SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Level** level)
+SelectLevelScreen::SelectLevelScreen(bool* cancelled, Handle<Level>* level)
         : InterfaceScreen("select-level", {0, 0, 640, 480}, true),
           _state(SELECTING),
           _cancelled(cancelled),
           _level(level) {
     Ledger::ledger()->unlocked_chapters(&_chapters);
     _index = _chapters.size() - 1;
-    *_level = &plug.levels[_chapters[_index] - 1];
+    *_level = Handle<Level>(_chapters[_index] - 1);
 }
 
 SelectLevelScreen::~SelectLevelScreen() { }
@@ -152,7 +152,7 @@ void SelectLevelScreen::handle_button(Button& button) {
       case PREVIOUS:
         if (_index > 0) {
             --_index;
-            *_level = &plug.levels[_chapters[_index] - 1];
+            *_level = Handle<Level>(_chapters[_index] - 1);
         }
         adjust_interface();
         break;
@@ -160,7 +160,7 @@ void SelectLevelScreen::handle_button(Button& button) {
       case NEXT:
         if (_index < _chapters.size() - 1) {
             ++_index;
-            *_level = &plug.levels[_chapters[_index] - 1];
+            *_level = Handle<Level>(_chapters[_index] - 1);
         }
         adjust_interface();
         break;

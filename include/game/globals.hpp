@@ -80,8 +80,8 @@ struct GlobalState {
     game_ticks  time;    // Current game time.
     Random      random;  // Global random number generator.
 
-    const Level*  level;
-    int32_t       angle;
+    Handle<Level>  level;
+    int32_t        angle;
 
     std::unique_ptr<Admiral[]>  admirals;  // All admirals (whether active or not).
     Handle<Admiral>             admiral;   // Local player.

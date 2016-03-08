@@ -25,8 +25,8 @@ namespace antares {
 
 const int16_t kLevelNoShipTextID = 10000;
 
-bool start_construct_level(const Level* level, int32_t* max);
-void construct_level(const Level* level, int32_t* current);
+bool start_construct_level(Handle<Level> level, int32_t* max);
+void construct_level(Handle<Level> level, int32_t* current);
 void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textID);
 void GetLevelFullScaleAndCorner(
         const Level* level, int32_t rotation, coordPointType *corner, int32_t *scale,

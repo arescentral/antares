@@ -39,7 +39,7 @@ enum GameResult {
 class MainPlay : public Card {
   public:
     MainPlay(
-            const Level* level, bool replay, InputSource* input, bool show_loading_screen,
+            Handle<Level> level, bool replay, InputSource* input, bool show_loading_screen,
             GameResult* game_result);
 
     virtual void become_front();
@@ -53,7 +53,7 @@ class MainPlay : public Card {
     };
     State _state;
 
-    const Level* _level;
+    Handle<Level> _level;
     const bool _replay;
     const bool _show_loading_screen;
     bool _cancelled;

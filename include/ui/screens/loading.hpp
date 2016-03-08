@@ -23,6 +23,7 @@
 #include <vector>
 #include <sfz/sfz.hpp>
 
+#include "data/handle.hpp"
 #include "drawing/styled-text.hpp"
 #include "math/units.hpp"
 #include "ui/screen.hpp"
@@ -33,7 +34,7 @@ struct Level;
 
 class LoadingScreen : public InterfaceScreen {
   public:
-    LoadingScreen(const Level* level, bool* cancelled);
+    LoadingScreen(Handle<Level> level, bool* cancelled);
     ~LoadingScreen();
 
     virtual void become_front();
@@ -54,7 +55,7 @@ class LoadingScreen : public InterfaceScreen {
     };
     State _state;
 
-    const Level* const _level;
+    Handle<Level> const _level;
     bool* const _cancelled;
 
     std::unique_ptr<StyledText> _name_text;
