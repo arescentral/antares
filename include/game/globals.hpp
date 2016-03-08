@@ -122,7 +122,9 @@ struct GlobalState {
     Handle<SpaceObject>  farthest;  // Farthest object (sufficient for zoom-to-all).
 };
 
-extern GlobalState g;
+extern GlobalState&  g;  // head
+extern GlobalState   head;
+extern GlobalState   tail;
 
 struct aresGlobalType {
     aresGlobalType();

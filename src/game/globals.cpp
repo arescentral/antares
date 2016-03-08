@@ -37,7 +37,9 @@ namespace antares {
 
 static ANTARES_GLOBAL aresGlobalType* gAresGlobal;
 
-ANTARES_GLOBAL GlobalState g;
+ANTARES_GLOBAL GlobalState&  g = head;
+ANTARES_GLOBAL GlobalState   head;
+ANTARES_GLOBAL GlobalState   tail;
 
 aresGlobalType* globals() {
     return gAresGlobal;
