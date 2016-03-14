@@ -164,7 +164,8 @@ def check_ninja():
     GNU Ninja doesn't have a --version flag, so this check should fail
     if the user accidentally installed ninja instead of ninja-build.
     """
-    return cfg.check_bin("ninja --version".split())
+    return (cfg.check_bin("ninja --version".split()) or
+            cfg.check_bin("ninja-build --version".split()))
 
 def check_pkg_config():
     """Run pkg-config --version."""
