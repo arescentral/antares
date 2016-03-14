@@ -71,7 +71,7 @@ def check_mac():
         msg("%d.%d" % ver, color="green")
 
     missing = collections.OrderedDict()
-    if not check_clang():
+    if not (check_clang() and check_libcxx()):
         missing["xcode"] = (
                 "* Xcode can be installed via the App Store:\n"
                 "    https://itunes.apple.com/en/app/xcode/id497799835\n"
@@ -106,6 +106,7 @@ def check_linux():
     missing = collections.OrderedDict()
     if not check_clang():
         missing["clang"] = "clang"
+    if not check_libcxx():
         missing["libc++"] = "libc++-dev"
     if not check_gyp():
         missing["gyp"] = "gyp"
@@ -141,10 +142,17 @@ def check_linux():
 
 
 def check_clang():
+    """Compile a basic C++11 binary."""
+    return cfg.check_bin(
+            "clang -x c++ -std=c++11 - -o /dev/null".split(),
+            input="int main() { return 1; }")
+
+def check_libcxx():
     """Compile a basic C++11, libc++ binary."""
     return cfg.check_bin(
             "clang -x c++ -std=c++11 -stdlib=libc++ - -o /dev/null".split(),
-            input="int main() { return 1; }")
+            what="libc++",
+            input="#include <chrono>\n\nint main() { return std::chrono::seconds(1).count(); }")
 
 def check_gyp():
     """Run gyp --help (it doesn't have --version)."""
@@ -156,7 +164,8 @@ def check_ninja():
     GNU Ninja doesn't have a --version flag, so this check should fail
     if the user accidentally installed ninja instead of ninja-build.
     """
-    return cfg.check_bin("ninja --version".split())
+    return (cfg.check_bin("ninja --version".split()) or
+            cfg.check_bin("ninja-build --version".split()))
 
 def check_pkg_config():
     """Run pkg-config --version."""

@@ -42,8 +42,10 @@ def step(message):
         print(padding + tint("ok", "green"))
 
 
-def check_bin(cmdline, input=None):
-    with step("checking for %s" % cmdline[0]) as msg:
+def check_bin(cmdline, what=None, input=None):
+    if what is None:
+        what = cmdline[0]
+    with step("checking for %s" % what) as msg:
         stdin = None
         if input is not None:
             stdin = subprocess.PIPE
