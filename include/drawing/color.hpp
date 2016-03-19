@@ -20,6 +20,7 @@
 #define ANTARES_DRAWING_COLOR_HPP_
 
 #include <stdint.h>
+#include <string.h>
 #include <vector>
 #include <sfz/sfz.hpp>
 
