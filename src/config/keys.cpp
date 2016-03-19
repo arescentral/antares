@@ -18,6 +18,8 @@
 
 #include "config/keys.hpp"
 
+#include <string.h>
+
 #include "game/sys.hpp"
 
 namespace antares {
