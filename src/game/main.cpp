@@ -526,7 +526,7 @@ void GamePlay::fire_timer() {
             AdmiralThink();
             execute_action_queue();
 
-            if (!_input_source->get(g.time, _player_ship)) {
+            if (!_input_source->get(g.admiral, g.time, _player_ship)) {
                 g.game_over = true;
                 g.game_over_at = g.time;
             }

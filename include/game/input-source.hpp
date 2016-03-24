@@ -23,6 +23,7 @@
 #include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
+#include "data/handle.hpp"
 #include "ui/event.hpp"
 
 namespace antares {
@@ -34,13 +35,13 @@ class InputSource: public EventReceiver {
         virtual ~InputSource();
 
         virtual void start() = 0;
-        virtual bool get(game_ticks at, EventReceiver& key_map) = 0;
+        virtual bool get(Handle<Admiral> admiral, game_ticks at, EventReceiver& key_map) = 0;
 };
 
 class RealInputSource: public InputSource {
     public:
         virtual void start();
-        virtual bool get(game_ticks at, EventReceiver& receiver);
+        virtual bool get(Handle<Admiral> admiral, game_ticks at, EventReceiver& key_map);
 
         virtual void key_down(const KeyDownEvent& event);
         virtual void key_up(const KeyUpEvent& event);
@@ -54,7 +55,7 @@ class RealInputSource: public InputSource {
     private:
         static game_ticks at();
 
-        std::multimap<game_ticks, std::unique_ptr<Event>> _events;
+        std::multimap<std::pair<int, game_ticks>, std::unique_ptr<Event>> _events;
 };
 
 class ReplayInputSource : public InputSource {
@@ -62,7 +63,7 @@ class ReplayInputSource : public InputSource {
         explicit ReplayInputSource(ReplayData* data);
 
         virtual void start();
-        virtual bool get(game_ticks at, EventReceiver& receiver);
+        virtual bool get(Handle<Admiral> admiral, game_ticks at, EventReceiver& key_map);
 
         virtual void key_down(const KeyDownEvent& event);
         virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
@@ -72,7 +73,7 @@ class ReplayInputSource : public InputSource {
         bool advance(EventReceiver& receiver);
 
         game_ticks _duration;
-        std::multimap<game_ticks, std::unique_ptr<Event>> _events;
+        std::multimap<std::pair<int, game_ticks>, std::unique_ptr<Event>> _events;
         bool _exit;
 
         DISALLOW_COPY_AND_ASSIGN(ReplayInputSource);
