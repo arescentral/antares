@@ -22,6 +22,7 @@
 #include <vector>
 #include <sfz/sfz.hpp>
 
+#include "data/handle.hpp"
 #include "ui/screen.hpp"
 
 namespace antares {
@@ -30,7 +31,7 @@ struct Level;
 
 class SelectLevelScreen : public InterfaceScreen {
   public:
-    SelectLevelScreen(bool* cancelled, const Level** level);
+    SelectLevelScreen(bool* cancelled, Handle<Level>* level);
     ~SelectLevelScreen();
 
     virtual void become_front();
@@ -64,7 +65,7 @@ class SelectLevelScreen : public InterfaceScreen {
 
     bool* _cancelled;
     size_t _index;
-    const Level** _level;
+    Handle<Level>* _level;
     std::vector<int> _chapters;
     int _unlock_digits;
     size_t _unlock_chapter;

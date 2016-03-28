@@ -37,7 +37,7 @@ static const int16_t kLevelNameID = 4600;
 static const uint8_t kLoadingScreenColor = PALE_GREEN;
 static const ticks kTypingDelay = kMinorTick;
 
-LoadingScreen::LoadingScreen(const Level* level, bool* cancelled):
+LoadingScreen::LoadingScreen(Handle<Level> level, bool* cancelled):
         InterfaceScreen("loading", {0, 0, 640, 480}, true),
         _state(TYPING),
         _level(level),

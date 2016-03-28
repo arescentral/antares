@@ -147,6 +147,9 @@ struct Level {
 
     static const size_t byte_size = 124;
 
+    static Level* get(int n);
+    static Handle<Level> none() { return Handle<Level>(-1); }
+
     InitialObject* initial(size_t at) const;
     Condition* condition(size_t at) const;
 

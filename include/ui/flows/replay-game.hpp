@@ -50,7 +50,7 @@ class ReplayGame : public Card {
     Resource _resource;
     ReplayData _data;
     Random _random_seed;
-    const Level* _level;
+    Handle<Level> _level;
     GameResult _game_result;
     ReplayInputSource _input_source;
 };

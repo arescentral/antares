@@ -23,34 +23,60 @@
 #include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
+#include "data/handle.hpp"
 #include "ui/event.hpp"
 
 namespace antares {
 
 struct ReplayData;
 
-class InputSource {
-  public:
-    virtual ~InputSource();
+class InputSource: public EventReceiver {
+    public:
+        virtual ~InputSource();
 
-    virtual bool next(EventReceiver& key_map) = 0;
+        virtual void start() = 0;
+        virtual bool get(Handle<Admiral> admiral, game_ticks at, EventReceiver& key_map) = 0;
+};
+
+class RealInputSource: public InputSource {
+    public:
+        virtual void start();
+        virtual bool get(Handle<Admiral> admiral, game_ticks at, EventReceiver& key_map);
+
+        virtual void key_down(const KeyDownEvent& event);
+        virtual void key_up(const KeyUpEvent& event);
+        virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
+        virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
+        virtual void gamepad_stick(const GamepadStickEvent& event);
+        virtual void mouse_down(const MouseDownEvent& event);
+        virtual void mouse_up(const MouseUpEvent& event);
+        virtual void mouse_move(const MouseMoveEvent& event);
+
+    private:
+        static game_ticks at();
+
+        std::multimap<std::pair<int, game_ticks>, std::unique_ptr<Event>> _events;
 };
 
 class ReplayInputSource : public InputSource {
-  public:
-    explicit ReplayInputSource(ReplayData* data);
+    public:
+        explicit ReplayInputSource(ReplayData* data);
 
-    virtual bool next(EventReceiver& receiver);
+        virtual void start();
+        virtual bool get(Handle<Admiral> admiral, game_ticks at, EventReceiver& key_map);
 
-  private:
-    bool advance(EventReceiver& receiver);
+        virtual void key_down(const KeyDownEvent& event);
+        virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
+        virtual void mouse_down(const MouseDownEvent& event);
 
-    const ReplayData* _data;
-    size_t _data_index;
-    uint64_t _at;
-    KeyMap _key_map;
+    private:
+        bool advance(EventReceiver& receiver);
 
-    DISALLOW_COPY_AND_ASSIGN(ReplayInputSource);
+        game_ticks _duration;
+        std::multimap<std::pair<int, game_ticks>, std::unique_ptr<Event>> _events;
+        bool _exit;
+
+        DISALLOW_COPY_AND_ASSIGN(ReplayInputSource);
 };
 
 }  // namespace antares

@@ -219,7 +219,7 @@ int32_t Level::epilogue_id() const {
     return epilogueID;
 }
 
-bool start_construct_level(const Level* level, int32_t* max) {
+bool start_construct_level(Handle<Level> level, int32_t* max) {
     ResetAllSpaceObjects();
     reset_action_queue();
     Vectors::reset();
@@ -379,7 +379,7 @@ static void run_game_1s() {
     } while ((g.time.time_since_epoch() % secs(1)) != ticks(0));
 }
 
-void construct_level(const Level* level, int32_t* current) {
+void construct_level(Handle<Level> level, int32_t* current) {
     int32_t step = *current;
     uint32_t all_colors = kNeutralColorNeededFlag;
     for (auto adm: Admiral::all()) {

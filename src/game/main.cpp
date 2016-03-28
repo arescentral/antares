@@ -104,9 +104,7 @@ Rect viewport() {
 
 class GamePlay : public Card {
   public:
-    GamePlay(
-            bool replay, ReplayBuilder& replay_builder, InputSource* input,
-            GameResult* game_result);
+    GamePlay(bool replay, InputSource* input, GameResult* game_result);
 
     virtual void become_front();
     virtual void resign_front();
@@ -137,7 +135,6 @@ class GamePlay : public Card {
     };
     State _state;
 
-    GameCursor _cursor;
     const bool _replay;
     GameResult* const _game_result;
     wall_time _next_timer;
@@ -148,7 +145,6 @@ class GamePlay : public Card {
     bool _player_paused;
     PlayAgainScreen::Item _play_again;
     PlayerShip _player_ship;
-    ReplayBuilder& _replay_builder;
 
     // The wall_time that g.time corresponds to. Under normal operation,
     // this increases in lockstep with g.time, but during fast motion or
@@ -160,7 +156,7 @@ class GamePlay : public Card {
 };
 
 MainPlay::MainPlay(
-        const Level* level, bool replay, InputSource* input, bool show_loading_screen,
+        Handle<Level> level, bool replay, InputSource* input, bool show_loading_screen,
         GameResult* game_result):
     _state(NEW),
     _level(level),
@@ -178,11 +174,11 @@ void MainPlay::become_front() {
             RemoveAllSpaceObjects();
             g.game_over = false;
 
-            _replay_builder.init(
-                    sys.prefs->scenario_identifier(),
-                    String(u32_to_version(plug.meta.version)),
-                    _level->chapter_number(),
-                    g.random.seed);
+            // _replay_builder.init(
+            //         sys.prefs->scenario_identifier(),
+            //         String(u32_to_version(plug.meta.version)),
+            //         _level->chapter_number(),
+            //         g.random.seed);
 
             sys.music.play(Music::IDLE, 3000);
 
@@ -213,7 +209,7 @@ void MainPlay::become_front() {
             }
             if (!_replay) {
                 _state = BRIEFING;
-                stack()->push(new BriefingScreen(_level, &_cancelled));
+                stack()->push(new BriefingScreen(_level.get(), &_cancelled));
                 break;
             }
         }
@@ -235,10 +231,7 @@ void MainPlay::become_front() {
 
             sys.music.play(Music::IN_GAME, g.level->songID);
 
-            if (!_replay) {
-                _replay_builder.start();
-            }
-            stack()->push(new GamePlay(_replay, _replay_builder, _input_source, _game_result));
+            stack()->push(new GamePlay(_replay, _input_source, _game_result));
         }
         break;
 
@@ -246,7 +239,6 @@ void MainPlay::become_front() {
         globals()->transitions.reset();
         sys.sound.stop();
         sys.music.stop();
-        _replay_builder.finish();
 #ifdef DATA_COVERAGE
         {
             sfz::print(sfz::io::err, sfz::format("{{ \"level\": {0},\n", g.level->chapter_number()));
@@ -281,8 +273,7 @@ int new_replay_file() {
     return open(path, O_WRONLY | O_CREAT | O_EXCL, 0644);
 }
 
-GamePlay::GamePlay(
-        bool replay, ReplayBuilder& replay_builder, InputSource* input, GameResult* game_result):
+GamePlay::GamePlay(bool replay, InputSource* input, GameResult* game_result):
         _state(PLAYING),
         _replay(replay),
         _game_result(game_result),
@@ -292,7 +283,6 @@ GamePlay::GamePlay(
         _fast_motion(false),
         _entering_message(false),
         _player_paused(false),
-        _replay_builder(replay_builder),
         _real_time(now()),
         _input_source(input) { }
 
@@ -393,10 +383,11 @@ class PauseScreen : public Card {
 void GamePlay::become_front() {
     switch (_state) {
       case PLAYING:
+        _input_source->start();
         if (_replay) {
-            _cursor.show = false;
+            _player_ship.cursor().show = false;
         } else {
-            _cursor.show = true;
+            _player_ship.cursor().show = true;
         }
         HintLine::reset();
 
@@ -470,7 +461,7 @@ void GamePlay::draw() const {
     draw_site(_player_ship);
     draw_instruments();
     if (stack()->top() == this) {
-        _cursor.draw();
+        _player_ship.cursor().draw();
     }
     HintLine::draw();
     globals()->transitions.draw();
@@ -535,12 +526,11 @@ void GamePlay::fire_timer() {
             AdmiralThink();
             execute_action_queue();
 
-            if (_input_source && !_input_source->next(_player_ship)) {
+            if (!_input_source->get(g.admiral, g.time, _player_ship)) {
                 g.game_over = true;
                 g.game_over_at = g.time;
             }
-            _replay_builder.next();
-            _player_ship.update(_cursor, _entering_message);
+            _player_ship.update(_entering_message);
 
             CollideSpaceObjects();
             if ((g.time.time_since_epoch() % kConditionTick) == ticks(0)) {
@@ -616,13 +606,6 @@ void GamePlay::fire_timer() {
 }
 
 void GamePlay::key_down(const KeyDownEvent& event) {
-    if (_input_source) {
-        *_game_result = QUIT_GAME;
-        g.game_over = true;
-        g.game_over_at = g.time;
-        return;
-    }
-
     switch (event.key()) {
       case Keys::CAPS_LOCK:
         _state = PAUSED;
@@ -631,117 +614,90 @@ void GamePlay::key_down(const KeyDownEvent& event) {
         return;
 
       case Keys::ESCAPE:
-        _state = PLAY_AGAIN;
-        _player_paused = true;
-        stack()->push(new PlayAgainScreen(true, g.level->is_training, &_play_again));
-        break;
+        if (_replay) {
+            break;
+        } else {
+            _state = PLAY_AGAIN;
+            _player_paused = true;
+            stack()->push(new PlayAgainScreen(true, g.level->is_training, &_play_again));
+            return;
+        }
 
       default:
         if (event.key() == sys.prefs->key(kHelpKeyNum) - 1) {
-            _state = HELP;
-            _player_paused = true;
-            stack()->push(new HelpScreen);
+            if (_replay) {
+                break;
+            } else {
+                _state = HELP;
+                _player_paused = true;
+                stack()->push(new HelpScreen);
+                return;
+            }
         } else if (event.key() == sys.prefs->key(kVolumeDownKeyNum) - 1) {
             sys.prefs->set_volume(sys.prefs->volume() - 1);
             sys.audio->set_global_volume(sys.prefs->volume());
+            return;
         } else if (event.key() == sys.prefs->key(kVolumeUpKeyNum) - 1) {
             sys.prefs->set_volume(sys.prefs->volume() + 1);
             sys.audio->set_global_volume(sys.prefs->volume());
+            return;
         } else if (event.key() == sys.prefs->key(kActionMusicKeyNum) - 1) {
             if (sys.prefs->play_music_in_game()) {
                 sys.music.toggle();
             }
+            return;
         } else if (event.key() == sys.prefs->key(kFastMotionKeyNum) - 1) {
             _fast_motion = true;
+            return;
         }
-        break;
     }
 
-    _player_ship.key_down(event);
-    _replay_builder.key_down(event);
+    _input_source->key_down(event);
 }
 
 void GamePlay::key_up(const KeyUpEvent& event) {
-    if (_input_source) {
+    if (event.key() == sys.prefs->key(kFastMotionKeyNum) - 1) {
+        _fast_motion = false;
         return;
     }
 
-    if (event.key() == sys.prefs->key(kFastMotionKeyNum) - 1) {
-        _fast_motion = false;
-    }
-
-    _player_ship.key_up(event);
-    _replay_builder.key_up(event);
+    _input_source->key_up(event);
 }
 
 void GamePlay::mouse_down(const MouseDownEvent& event) {
-    _cursor.mouse_down(event);
-
-    if (_replay) {
-        *_game_result = QUIT_GAME;
-        g.game_over = true;
-        g.game_over_at = g.time;
-        return;
-    }
-
-    switch (event.button()) {
-        case 0:
-            if (event.count() == 2) {
-                InstrumentsHandleDoubleClick(_cursor);
-            } else if (event.count() == 1) {
-                InstrumentsHandleClick(_cursor);
-            }
-            break;
-        case 1:
-            if (event.count() == 1) {
-                PlayerShipHandleClick(event.where(), 1);
-            }
-            break;
-    }
+    _input_source->mouse_down(event);
 }
 
 void GamePlay::mouse_up(const MouseUpEvent& event) {
-    _cursor.mouse_up(event);
-
-    if (event.button() == 0) {
-        InstrumentsHandleMouseStillDown(_cursor);
-        InstrumentsHandleMouseUp(_cursor);
-    }
+    _input_source->mouse_up(event);
 }
 
 void GamePlay::mouse_move(const MouseMoveEvent& event) {
-    _cursor.mouse_move(event);
+    _input_source->mouse_move(event);
 }
 
 void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
-    if (_input_source) {
-        *_game_result = QUIT_GAME;
-        g.game_over = true;
-        g.game_over_at = g.time;
-        return;
-    }
-
     switch (event.button) {
       case Gamepad::START:
-        _state  = PLAY_AGAIN;
-        _player_paused = true;
-        stack()->push(new PlayAgainScreen(true, g.level->is_training, &_play_again));
-        break;
+        if (_replay) {
+            break;
+        } else {
+            _state  = PLAY_AGAIN;
+            _player_paused = true;
+            stack()->push(new PlayAgainScreen(true, g.level->is_training, &_play_again));
+            return;
+        }
     }
 
-    _player_ship.gamepad_button_down(event);
+    _input_source->gamepad_button_down(event);
 }
 
 void GamePlay::gamepad_button_up(const GamepadButtonUpEvent& event) {
-    if (_input_source) {
-        return;
-    }
-
-    _player_ship.gamepad_button_up(event);
+    _input_source->gamepad_button_up(event);
 }
 
 void GamePlay::gamepad_stick(const GamepadStickEvent& event) {
-    _player_ship.gamepad_stick(event);
+    _input_source->gamepad_stick(event);
 }
 
 }  // namespace antares

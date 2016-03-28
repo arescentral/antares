@@ -20,6 +20,8 @@
 
 #include <sfz/sfz.hpp>
 
+#include "data/plugin.hpp"
+
 using sfz::BytesSlice;
 using sfz::ReadSource;
 using sfz::String;
@@ -41,6 +43,10 @@ void read_pstr(ReadSource in, String& out) {
 }
 
 }  // namespace
+
+Level* Level::get(int n) {
+    return &plug.levels[n];
+}
 
 void read_from(ReadSource in, scenarioInfoType& scenario_info) {
     scenario_info.warpInFlareID = Handle<BaseObject>(read<int32_t>(in));
