@@ -435,7 +435,11 @@ void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType *where) 
     }
 }
 
-void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObject) {
+void SetObjectDestination(Handle<SpaceObject> o) {
+    OverrideObjectDestination(o, SpaceObject::none());
+}
+
+void OverrideObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObject) {
     auto dObject = overrideObject;
 
     // if the object does not have an alliance, then something is wrong here--forget it
@@ -579,7 +583,7 @@ static void AdmiralBuildAtObject(
 
         auto newObject = CreateAnySpaceObject(base, &v, &coord, 0, admiral, 0, -1);
         if (newObject.get()) {
-            SetObjectDestination(newObject, SpaceObject::none());
+            SetObjectDestination(newObject);
             if (admiral == g.admiral) {
                 sys.sound.build();
             }
@@ -696,7 +700,7 @@ void Admiral::think() {
                                 - Fixed::from_float(0.25);
                             thisValue = (thisValue * anObject->currentTargetValue);
                             anObject->currentTargetValue += thisValue;
-                            SetObjectDestination(anObject, SpaceObject::none());
+                            SetObjectDestination(anObject);
                         }
                     }
                     _has_destination = false;

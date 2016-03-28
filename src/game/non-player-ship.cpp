@@ -332,7 +332,7 @@ void NonplayerShipThink() {
 
         // Take care of any "keys" being pressed
         if (anObject->keysDown & kAdoptTargetKey) {
-            SetObjectDestination(anObject, SpaceObject::none());
+            SetObjectDestination(anObject);
         }
         if (anObject->keysDown & kAutoPilotKey) {
             TogglePlayerAutoPilot(anObject);

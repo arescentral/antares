@@ -905,7 +905,7 @@ void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> 
         label = g.target_label;
 
         if (!(flagship->attributes & kOnAutoPilot)) {
-            SetObjectDestination(flagship, SpaceObject::none());
+            SetObjectDestination(flagship);
         }
     } else {
         adm->set_control(ship);
@@ -982,7 +982,7 @@ void TogglePlayerAutoPilot(Handle<SpaceObject> theShip) {
             Messages::set_status(string, kStatusLabelColor);
         }
     } else {
-        SetObjectDestination(theShip, SpaceObject::none());
+        SetObjectDestination(theShip);
         theShip->attributes |= kOnAutoPilot;
         if ((theShip->owner == g.admiral) &&
             ( theShip->attributes & kIsHumanControlled))
@@ -1004,7 +1004,7 @@ void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral) {
     auto control = whichAdmiral->control();
 
     if (control.get()) {
-        SetObjectDestination(control, SpaceObject::none());
+        SetObjectDestination(control);
         if ( whichAdmiral == g.admiral)
             sys.sound.order();
     }
