@@ -529,7 +529,7 @@ static void minicomputer_handle_move(int direction) {
     } while (line->kind == MINI_NONE);
 }
 
-void minicomputer_handle_keys(uint32_t key_presses, uint32_t key_releases, bool cancel) {
+void minicomputer_handle_keys(uint32_t key_presses, uint32_t key_releases) {
     if ((key_presses | key_releases) & kCompAcceptKey) {
         minicomputer_handle_action(
                 kInLineButton, key_presses & kCompAcceptKey, MiniComputerDoAccept);

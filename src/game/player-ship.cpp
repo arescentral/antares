@@ -492,16 +492,16 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
         }
         break;
       case Gamepad::UP:
-        minicomputer_handle_keys(kCompUpKey, 0, false);
+        minicomputer_handle_keys(kCompUpKey, 0);
         break;
       case Gamepad::DOWN:
-        minicomputer_handle_keys(kCompDownKey, 0, false);
+        minicomputer_handle_keys(kCompDownKey, 0);
         break;
       case Gamepad::RIGHT:
-        minicomputer_handle_keys(kCompAcceptKey, 0, false);
+        minicomputer_handle_keys(kCompAcceptKey, 0);
         break;
       case Gamepad::LEFT:
-        minicomputer_handle_keys(kCompCancelKey, 0, false);
+        minicomputer_handle_keys(kCompCancelKey, 0);
         break;
     }
 }
@@ -560,10 +560,10 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
         }
         break;
       case Gamepad::RIGHT:
-        minicomputer_handle_keys(0, kCompAcceptKey, false);
+        minicomputer_handle_keys(0, kCompAcceptKey);
         break;
       case Gamepad::LEFT:
-        minicomputer_handle_keys(0, kCompCancelKey, false);
+        minicomputer_handle_keys(0, kCompCancelKey);
         break;
     }
 }
@@ -705,7 +705,7 @@ void PlayerShip::update(bool enter_message) {
         return;
     }
 
-    minicomputer_handle_keys(_key_presses, _key_releases, false);
+    minicomputer_handle_keys(_key_presses, _key_releases);
 
     if (gTheseKeys & kDestinationKey) {
         if (gDestKeyState == DEST_KEY_UP) {
