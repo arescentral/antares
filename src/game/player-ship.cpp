@@ -862,18 +862,17 @@ void PlayerShipHandleClick(Point where, int button) {
 
     gDestKeyState = DEST_KEY_BLOCKED;
     if (g.ship.get()) {
-        auto theShip = g.ship;
-        if ((theShip->active) && (theShip->attributes & kIsHumanControlled)) {
+        if ((g.ship->active) && (g.ship->attributes & kIsHumanControlled)) {
             bounds.left = where.h - kCursorBoundsSize;
             bounds.top = where.v - kCursorBoundsSize;
             bounds.right = where.h + kCursorBoundsSize;
             bounds.bottom = where.v + kCursorBoundsSize;
 
-            if ((theShip->keysDown & kDestinationKey) || (button == 1)) {
+            if ((g.ship->keysDown & kDestinationKey) || (button == 1)) {
                 auto target = g.admiral->target();
 
                 auto selectShipNum = GetSpritePointSelectObject(
-                        &bounds, theShip, kCanBeDestination | kIsDestination,
+                        &bounds, g.ship, kCanBeDestination | kIsDestination,
                         target, FRIENDLY_OR_HOSTILE);
                 if (selectShipNum.get()) {
                     SetPlayerSelectShip(selectShipNum, true, g.admiral);
@@ -881,7 +880,7 @@ void PlayerShipHandleClick(Point where, int button) {
             } else {
                 auto control = g.admiral->control();
                 auto selectShipNum = GetSpritePointSelectObject(
-                        &bounds, theShip, kCanBeDestination | kCanAcceptBuild,
+                        &bounds, g.ship, kCanBeDestination | kCanAcceptBuild,
                         control, FRIENDLY);
                 if (selectShipNum.get()) {
                     SetPlayerSelectShip(selectShipNum, false, g.admiral);
@@ -970,22 +969,22 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
     adm->set_flagship(newShip);
 }
 
-void TogglePlayerAutoPilot(Handle<SpaceObject> theShip) {
-    if ( theShip->attributes & kOnAutoPilot)
+void TogglePlayerAutoPilot(Handle<SpaceObject> flagship) {
+    if ( flagship->attributes & kOnAutoPilot)
     {
-        theShip->attributes &= ~kOnAutoPilot;
-        if ((theShip->owner == g.admiral) &&
-            ( theShip->attributes & kIsHumanControlled))
+        flagship->attributes &= ~kOnAutoPilot;
+        if ((flagship->owner == g.admiral) &&
+            ( flagship->attributes & kIsHumanControlled))
         {
             StringList strings(kMessageStringID);
             StringSlice string = strings.at(kAutoPilotOffString - 1);
             Messages::set_status(string, kStatusLabelColor);
         }
     } else {
-        SetObjectDestination(theShip);
-        theShip->attributes |= kOnAutoPilot;
-        if ((theShip->owner == g.admiral) &&
-            ( theShip->attributes & kIsHumanControlled))
+        SetObjectDestination(flagship);
+        flagship->attributes |= kOnAutoPilot;
+        if ((flagship->owner == g.admiral) &&
+            ( flagship->attributes & kIsHumanControlled))
         {
             StringList strings(kMessageStringID);
             StringSlice string = strings.at(kAutoPilotOnString - 1);
@@ -1010,14 +1009,14 @@ void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral) {
     }
 }
 
-void PlayerShipBodyExpire(Handle<SpaceObject> theShip) {
-    auto selectShip = theShip->owner->control();
+void PlayerShipBodyExpire(Handle<SpaceObject> flagship) {
+    auto selectShip = flagship->owner->control();
 
     if (selectShip.get()) {
         if (( selectShip->active != kObjectInUse) ||
             ( !(selectShip->attributes & kCanThink)) ||
             ( selectShip->attributes & kStaticDestination)
-            || ( selectShip->owner != theShip->owner) ||
+            || ( selectShip->owner != flagship->owner) ||
             (!(selectShip->attributes & kCanAcceptDestination))
             )
             selectShip = SpaceObject::none();
@@ -1029,24 +1028,24 @@ void PlayerShipBodyExpire(Handle<SpaceObject> theShip) {
                     || (selectShip->attributes & kStaticDestination)
                     || (!((selectShip->attributes & kCanThink) &&
                             (selectShip->attributes & kCanAcceptDestination)))
-                    || (selectShip->owner != theShip->owner))) {
+                    || (selectShip->owner != flagship->owner))) {
             selectShip = selectShip->nextObject;
         }
     }
     if (selectShip.get()) {
-        ChangePlayerShipNumber(theShip->owner, selectShip);
+        ChangePlayerShipNumber(flagship->owner, selectShip);
     } else {
         if (!g.game_over) {
             g.game_over = true;
             g.game_over_at = g.time + secs(3);
         }
-        if (theShip->owner == g.admiral) {
+        if (flagship->owner == g.admiral) {
             g.victory_text = kLevelNoShipTextID + g.level->levelNameStrNum;
         } else {
             g.victory_text = 10050 + g.level->levelNameStrNum;
         }
-        if (theShip->owner.get()) {
-            theShip->owner->set_flagship(SpaceObject::none());
+        if (flagship->owner.get()) {
+            flagship->owner->set_flagship(SpaceObject::none());
         }
     }
 }
