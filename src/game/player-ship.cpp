@@ -147,7 +147,8 @@ void ResetPlayerShip(Handle<SpaceObject> which) {
 PlayerShip::PlayerShip():
     gTheseKeys(0),
     _gamepad_keys(0),
-    gLastKeys(0),
+    _key_presses(0),
+    _key_releases(0),
     _gamepad_state(NO_BUMPER),
     _control_active(false),
     _control_direction(0) { }
@@ -336,9 +337,8 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
         break;
       default:
         if (key < kKeyControlNum) {
-            if (!(gTheseKeys & (0x01 << key) & ~g.key_mask)) {
-                gTheseKeys ^= (0x01 << key) & ~g.key_mask;
-            }
+            _key_presses |= ((1 << key) & ~g.key_mask);
+            _key_releases &= ~((1 << key) & ~g.key_mask);
         }
         break;
     }
@@ -355,9 +355,8 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
     switch (key) {
       default:
         if (key < kKeyControlNum) {
-            if (gTheseKeys & (0x01 << key) & ~g.key_mask) {
-                gTheseKeys ^= (0x01 << key) & ~g.key_mask;
-            }
+            _key_releases |= ((1 << key) & ~g.key_mask);
+            _key_presses &= ~((1 << key) & ~g.key_mask);
         }
         break;
     }
@@ -600,10 +599,11 @@ void PlayerShip::update(bool enter_message) {
     }
 
     if (enter_message) {
-        gTheseKeys = 0;
+        _key_presses = 0;
+        _key_releases = gTheseKeys;
     }
-    uint32_t key_presses = gTheseKeys & ~gLastKeys;
-    uint32_t key_releases = gLastKeys & ~gTheseKeys;
+    gTheseKeys |= _key_presses;
+    gTheseKeys &= ~_key_releases;
 
     /*
     while ((globals()->gKeyMapBufferBottom != globals()->gKeyMapBufferTop)) {
@@ -705,7 +705,7 @@ void PlayerShip::update(bool enter_message) {
         return;
     }
 
-    minicomputer_handle_keys(key_presses, key_releases, false);
+    minicomputer_handle_keys(_key_presses, _key_releases, false);
 
     if (gTheseKeys & kDestinationKey) {
         if (gDestKeyState == DEST_KEY_UP) {
@@ -777,16 +777,16 @@ void PlayerShip::update(bool enter_message) {
 // end new hotkey selection
 
     // for this we check lastKeys against theseKeys & relevent keys now being pressed
-    uint32_t select_keys = key_presses & (kSelectFriendKey | kSelectFoeKey | kSelectBaseKey);
+    uint32_t select_keys = _key_presses & (kSelectFriendKey | kSelectFoeKey | kSelectBaseKey);
     if (select_keys && !_cursor.active()) {
         gDestKeyState = DEST_KEY_BLOCKED;
-        if (key_presses & kSelectFriendKey) {
+        if (_key_presses & kSelectFriendKey) {
             if (!(gTheseKeys & kDestinationKey)) {
                 select_friendly(theShip, theShip->direction);
             } else {
                 target_friendly(theShip, theShip->direction);
             }
-        } else if (key_presses & kSelectFoeKey) {
+        } else if (_key_presses & kSelectFoeKey) {
             target_hostile(theShip, theShip->direction);
         } else {
             if (!(gTheseKeys & kDestinationKey)) {
@@ -815,20 +815,21 @@ void PlayerShip::update(bool enter_message) {
         }
     }
 
-    if (key_presses & kOrderKey) {
+    if (_key_presses & kOrderKey) {
         theShip->keysDown |= kGiveCommandKey;
     }
 
     if ((gTheseKeys & kWarpKey)
             && (gTheseKeys & kDestinationKey)) {
         gDestKeyState = DEST_KEY_BLOCKED;
-        if (key_presses & kWarpKey) {
+        if (_key_presses & kWarpKey) {
             engage_autopilot();
         }
         theShip->keysDown &= ~kWarpKey;
     }
 
-    gLastKeys = gTheseKeys;
+    _key_presses = 0;
+    _key_releases = 0;
 }
 
 bool PlayerShip::show_select() const {

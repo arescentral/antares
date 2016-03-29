@@ -61,7 +61,8 @@ class PlayerShip : public EventReceiver {
 
     uint32_t gTheseKeys;
     uint32_t _gamepad_keys;
-    uint32_t gLastKeys;
+    uint32_t _key_presses;
+    uint32_t _key_releases;
     KeyMap _keys;
 
     enum GamepadState {
