@@ -595,8 +595,6 @@ bool PlayerShip::active() const {
 }
 
 void PlayerShip::update(bool enter_message) {
-    uint32_t        attributes;
-
     if (!g.ship.get()) {
         return;
     }
@@ -604,6 +602,8 @@ void PlayerShip::update(bool enter_message) {
     if (enter_message) {
         gTheseKeys = 0;
     }
+    uint32_t key_presses = gTheseKeys & ~gLastKeys;
+    uint32_t key_releases = gLastKeys & ~gTheseKeys;
 
     /*
     while ((globals()->gKeyMapBufferBottom != globals()->gKeyMapBufferTop)) {
@@ -705,10 +705,7 @@ void PlayerShip::update(bool enter_message) {
         return;
     }
 
-    minicomputer_handle_keys(gTheseKeys, gLastKeys, false);
-
-    uint32_t dcalc = kSelectFriendKey | kSelectFoeKey | kSelectBaseKey;
-    attributes = gTheseKeys & dcalc;
+    minicomputer_handle_keys(key_presses, key_releases, false);
 
     if (gTheseKeys & kDestinationKey) {
         if (gDestKeyState == DEST_KEY_UP) {
@@ -780,15 +777,16 @@ void PlayerShip::update(bool enter_message) {
 // end new hotkey selection
 
     // for this we check lastKeys against theseKeys & relevent keys now being pressed
-    if ((attributes) && (!(gLastKeys & attributes)) && (!_cursor.active())) {
+    uint32_t select_keys = key_presses & (kSelectFriendKey | kSelectFoeKey | kSelectBaseKey);
+    if (select_keys && !_cursor.active()) {
         gDestKeyState = DEST_KEY_BLOCKED;
-        if (gTheseKeys & kSelectFriendKey) {
+        if (key_presses & kSelectFriendKey) {
             if (!(gTheseKeys & kDestinationKey)) {
                 select_friendly(theShip, theShip->direction);
             } else {
                 target_friendly(theShip, theShip->direction);
             }
-        } else if (gTheseKeys & kSelectFoeKey) {
+        } else if (key_presses & kSelectFoeKey) {
             target_hostile(theShip, theShip->direction);
         } else {
             if (!(gTheseKeys & kDestinationKey)) {
@@ -817,14 +815,14 @@ void PlayerShip::update(bool enter_message) {
         }
     }
 
-    if ((gTheseKeys & kOrderKey) && (!(gLastKeys & kOrderKey))) {
+    if (key_presses & kOrderKey) {
         theShip->keysDown |= kGiveCommandKey;
     }
 
     if ((gTheseKeys & kWarpKey)
             && (gTheseKeys & kDestinationKey)) {
         gDestKeyState = DEST_KEY_BLOCKED;
-        if (!(gLastKeys & kWarpKey)) {
+        if (key_presses & kWarpKey) {
             engage_autopilot();
         }
         theShip->keysDown &= ~kWarpKey;

@@ -529,22 +529,22 @@ static void minicomputer_handle_move(int direction) {
     } while (line->kind == MINI_NONE);
 }
 
-void minicomputer_handle_keys(uint32_t new_keys, uint32_t old_keys, bool cancel) {
-    if ((new_keys ^ old_keys) & kCompAcceptKey) {
+void minicomputer_handle_keys(uint32_t key_presses, uint32_t key_releases, bool cancel) {
+    if ((key_presses | key_releases) & kCompAcceptKey) {
         minicomputer_handle_action(
-                kInLineButton, new_keys & kCompAcceptKey, MiniComputerDoAccept);
+                kInLineButton, key_presses & kCompAcceptKey, MiniComputerDoAccept);
     }
 
-    if ((new_keys ^ old_keys) & kCompCancelKey) {
+    if ((key_presses | key_releases) & kCompCancelKey) {
         minicomputer_handle_action(
-                kOutLineButton, new_keys & kCompCancelKey, MiniComputerDoCancel);
+                kOutLineButton, key_presses & kCompCancelKey, MiniComputerDoCancel);
     }
 
-    if ((new_keys & ~old_keys) & kCompUpKey) {
+    if (key_presses & kCompUpKey) {
         minicomputer_handle_move(-1);
     }
 
-    if ((new_keys & ~old_keys) & kCompDownKey) {
+    if (key_presses & kCompDownKey) {
         minicomputer_handle_move(+1);
     }
 }
