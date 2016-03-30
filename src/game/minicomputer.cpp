@@ -806,21 +806,18 @@ void MiniComputerDoAccept() {
 void transfer_control(Handle<Admiral> adm, int32_t line) {
     auto control = adm->control();
     auto flagship = adm->flagship();
-    if (flagship.get()) {
-        if (control.get()) {
-            if (!(control->attributes & kCanThink)
-                    || (control->attributes & kStaticDestination)
-                    || (control->owner != flagship->owner)
-                    || !(control->attributes & kCanAcceptDestination)
-                    || !(control->attributes & kCanBeDestination)
-                    || (flagship->active != kObjectInUse)) {
-                if (adm == g.admiral) {
-                    sys.sound.warning();
-                }
-            } else {
-                ChangePlayerShipNumber(adm, control);
-            }
+    if (flagship.get() && control.get()) {
+        if ((control->attributes & kCanThink)
+            && !(control->attributes & kStaticDestination)
+            && (control->owner == flagship->owner)
+            && (control->attributes & kCanAcceptDestination)
+            && (control->attributes & kCanBeDestination)
+            && (flagship->active == kObjectInUse)) {
+            ChangePlayerShipNumber(adm, control);
+        } else if (adm == g.admiral) {
+            sys.sound.warning();
         }
+
     }
 }
 
