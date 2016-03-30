@@ -677,10 +677,6 @@ void PlayerShip::update(bool enter_message) {
     }
     */
 
-    // TERRIBLE HACK:
-    //  this implements the often requested feature of having a shortcut for
-    //  transfering control.
-
     auto theShip = g.ship;
 
     if (!theShip->active) {
