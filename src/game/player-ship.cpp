@@ -840,17 +840,7 @@ int32_t PlayerShip::control_direction() const {
     return _control_direction;
 }
 
-bool PlayerShip::show_right_stick() const {
-    return false;
-}
-
-int32_t PlayerShip::goal_direction() const {
-    return 0;
-}
-
 void PlayerShipHandleClick(Point where, int button) {
-    Rect            bounds;
-
     if (g.key_mask & kMouseMask) {
         return;
     }
@@ -858,14 +848,15 @@ void PlayerShipHandleClick(Point where, int button) {
     gDestKeyState = DEST_KEY_BLOCKED;
     if (g.ship.get()) {
         if ((g.ship->active) && (g.ship->attributes & kIsHumanControlled)) {
-            bounds.left = where.h - kCursorBoundsSize;
-            bounds.top = where.v - kCursorBoundsSize;
-            bounds.right = where.h + kCursorBoundsSize;
-            bounds.bottom = where.v + kCursorBoundsSize;
+            Rect bounds = {
+                where.h - kCursorBoundsSize,
+                where.v - kCursorBoundsSize,
+                where.h + kCursorBoundsSize,
+                where.v + kCursorBoundsSize,
+            };
 
             if ((g.ship->keysDown & kDestinationKey) || (button == 1)) {
                 auto target = g.admiral->target();
-
                 auto selectShipNum = GetSpritePointSelectObject(
                         &bounds, g.ship, kCanBeDestination | kIsDestination,
                         target, FRIENDLY_OR_HOSTILE);
@@ -934,9 +925,8 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
     }
 
     if (adm == g.admiral) {
-        flagship->attributes &= (~kIsHumanControlled) & (~kIsPlayerShip);
-        if (newShip != g.ship)
-        {
+        flagship->attributes &= ~(kIsHumanControlled | kIsPlayerShip);
+        if (newShip != g.ship) {
             g.ship = newShip;
             globals()->starfield.reset(newShip);
         }
@@ -965,12 +955,10 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
 }
 
 void TogglePlayerAutoPilot(Handle<SpaceObject> flagship) {
-    if ( flagship->attributes & kOnAutoPilot)
-    {
+    if (flagship->attributes & kOnAutoPilot) {
         flagship->attributes &= ~kOnAutoPilot;
         if ((flagship->owner == g.admiral) &&
-            ( flagship->attributes & kIsHumanControlled))
-        {
+            (flagship->attributes & kIsHumanControlled)) {
             StringList strings(kMessageStringID);
             StringSlice string = strings.at(kAutoPilotOffString - 1);
             Messages::set_status(string, kStatusLabelColor);
@@ -979,8 +967,7 @@ void TogglePlayerAutoPilot(Handle<SpaceObject> flagship) {
         SetObjectDestination(flagship);
         flagship->attributes |= kOnAutoPilot;
         if ((flagship->owner == g.admiral) &&
-            ( flagship->attributes & kIsHumanControlled))
-        {
+            (flagship->attributes & kIsHumanControlled)) {
             StringList strings(kMessageStringID);
             StringSlice string = strings.at(kAutoPilotOnString - 1);
             Messages::set_status(string, kStatusLabelColor);
@@ -989,9 +976,8 @@ void TogglePlayerAutoPilot(Handle<SpaceObject> flagship) {
 }
 
 bool IsPlayerShipOnAutoPilot() {
-    auto player = g.ship;
-    return player.get()
-        && (player->attributes & kOnAutoPilot);
+    return g.ship.get()
+        && (g.ship->attributes & kOnAutoPilot);
 }
 
 void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral) {
@@ -999,8 +985,9 @@ void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral) {
 
     if (control.get()) {
         SetObjectDestination(control);
-        if ( whichAdmiral == g.admiral)
+        if (whichAdmiral == g.admiral) {
             sys.sound.order();
+        }
     }
 }
 
@@ -1046,20 +1033,15 @@ void PlayerShipBodyExpire(Handle<SpaceObject> flagship) {
 }
 
 int32_t HotKey_GetFromObject(Handle<SpaceObject> object) {
-    int32_t i = 0;
-
-    if (!object.get()) return -1;
-    if ( !object->active) return -1;
-    while ( i < kHotKeyNum)
-    {
-        if ( globals()->hotKey[i].object == object)
-        {
-            if ( globals()->hotKey[i].objectID == object->id)
-            {
+    if (!object.get() && !object->active) {
+        return -1;
+    }
+    for (int32_t i = 0; i < kHotKeyNum; ++i) {
+        if (globals()->hotKey[i].object == object) {
+            if (globals()->hotKey[i].objectID == object->id) {
                 return i;
             }
         }
-        i++;
     }
     return -1;
 }

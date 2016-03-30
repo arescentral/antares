@@ -50,8 +50,6 @@ class PlayerShip : public EventReceiver {
     bool show_select() const;
     bool show_target() const;
     int32_t control_direction() const;
-    bool show_right_stick() const;
-    int32_t goal_direction() const;
 
     GameCursor& cursor() { return _cursor; }
     const GameCursor& cursor() const { return _cursor; }
