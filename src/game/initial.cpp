@@ -105,7 +105,7 @@ void set_initial_destination(const Level::InitialObject* initial, bool preserve)
         auto object = initial->realObject;
         uint32_t specialAttributes = object->attributes; // preserve the attributes
         object->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
-        SetObjectDestination(object, SpaceObject::none());
+        SetObjectDestination(object);
         object->attributes = specialAttributes;
 
         if (preserve) {

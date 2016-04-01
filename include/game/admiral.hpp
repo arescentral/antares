@@ -199,7 +199,8 @@ sfz::StringSlice GetDestBalanceName(Handle<Destination> whichDestObject);
 sfz::StringSlice GetAdmiralName(Handle<Admiral> whichAdmiral);
 
 void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType* where);
-void SetObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObject);
+void SetObjectDestination(Handle<SpaceObject> o);
+void OverrideObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overrideObject);
 void RemoveObjectFromDestination(Handle<SpaceObject> o);
 
 void AdmiralThink();

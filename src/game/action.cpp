@@ -148,9 +148,9 @@ static void create_object(
             if (product->owner.get()) {
                 if (action->reflexive) {
                     if (action->verb != kCreateObjectSetDest) {
-                        SetObjectDestination(product, focus);
+                        OverrideObjectDestination(product, focus);
                     } else if (focus->destObject.get()) {
-                        SetObjectDestination(product, focus->destObject);
+                        OverrideObjectDestination(product, focus->destObject);
                     }
                 }
             } else if (action->reflexive) {
@@ -612,7 +612,7 @@ static void set_destination(
         Handle<Action> action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
     uint32_t save_attributes = subject->attributes;
     subject->attributes &= ~kStaticDestination;
-    SetObjectDestination(subject, focus);
+    OverrideObjectDestination(subject, focus);
     subject->attributes = save_attributes;
 }
 
