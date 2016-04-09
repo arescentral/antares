@@ -52,9 +52,6 @@ namespace utf8 = sfz::utf8;
 namespace antares {
 namespace {
 
-const int32_t kScreenWidth = 640;
-const int32_t kScreenHeight = 480;
-
 void main_screen(EventScheduler& scheduler);
 void options(EventScheduler& scheduler);
 void mission_briefing(EventScheduler& scheduler, Ledger& ledger);

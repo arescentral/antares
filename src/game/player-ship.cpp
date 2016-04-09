@@ -63,7 +63,7 @@ namespace antares {
 
 namespace {
 
-const int32_t kSendMessageVOffset = 20;
+// const int32_t kSendMessageVOffset = 20;
 const int32_t kCursorBoundsSize = 16;  // should be same in instruments.c
 
 }  // namespace

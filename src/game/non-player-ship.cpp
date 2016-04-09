@@ -55,9 +55,6 @@ const uint32_t kMotionMargin        = 5000;    // margin of change in distance b
 const uint32_t kLandingDistance     = 1000;
 const uint32_t kWarpInDistance      = 16777216;
 
-const int8_t kCloserThanClosest     = 0x01;
-const int8_t kFartherThanFarther    = 0x02;
-
 const ticks kRechargeSpeed          = ticks(12);
 const int32_t kHealthRatio          = 5;
 const int32_t kWeaponRatio          = 2;
@@ -881,7 +878,6 @@ uint32_t ThinkObjectNormalPresence(
 
 uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject) {
     uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask;
-    int32_t         longscrap;
     fixedPointType  newVel;
 
     if (( !(anObject->attributes & kRemoteOrHuman)) ||

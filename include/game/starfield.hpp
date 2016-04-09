@@ -26,7 +26,7 @@
 
 namespace antares {
 
-struct SpaceObject;
+class SpaceObject;
 
 const int32_t kMaxSparkAge = 1023;
 const int32_t kSparkAgeToShadeShift = 6;

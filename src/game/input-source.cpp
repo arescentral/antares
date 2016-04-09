@@ -88,8 +88,8 @@ game_ticks RealInputSource::at() {
 }
 
 ReplayInputSource::ReplayInputSource(ReplayData* data):
-        _exit(false),
-        _duration(game_ticks(ticks(data->duration * 3))) {
+        _duration(game_ticks(ticks(data->duration * 3))),
+        _exit(false) {
     for (auto action: data->actions) {
         game_ticks at = game_ticks(ticks(action.at * 3));
         for (auto key: action.keys_down) {

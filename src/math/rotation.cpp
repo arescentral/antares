@@ -31,8 +31,6 @@ using sfz::read;
 
 namespace antares {
 
-const int kRotTableSize = 720;
-
 void GetRotPoint(Fixed *x, Fixed *y, int32_t rotpos) {
     int32_t* i;
 

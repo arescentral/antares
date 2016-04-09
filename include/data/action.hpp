@@ -29,7 +29,7 @@
 
 namespace antares {
 
-struct SpaceObject;
+class SpaceObject;
 
 enum objectVerbIDEnum {
     kNoAction               = 0 << 8,

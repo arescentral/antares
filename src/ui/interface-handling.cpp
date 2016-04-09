@@ -73,9 +73,6 @@ namespace antares {
 
 namespace {
 
-const int32_t kTargetScreenWidth = 640;
-const int32_t kTargetScreenHeight = 480;
-
 const int16_t kShipDataTextID       = 6001;
 const int16_t kShipDataKeyStringID  = 6001;
 const int16_t kShipDataNameID       = 6002;
@@ -106,8 +103,6 @@ enum {
     kShipDataBeamStringNum      = 6,
     kShipDataSpecialStringNum   = 7,
 };
-
-const int32_t kShipDataWidth = 240;
 
 const int16_t kHelpScreenKeyStringID = 6003;
 

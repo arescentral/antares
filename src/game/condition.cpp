@@ -53,7 +53,7 @@ bool Level::Condition::true_yet() const {
 }
 
 bool Level::Condition::is_true() const {
-    int32_t i, difference;
+    int32_t difference;
     Handle<Admiral> a;
     uint32_t distance, dcalc;
 

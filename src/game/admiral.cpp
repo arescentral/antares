@@ -39,9 +39,6 @@ using std::unique_ptr;
 
 namespace antares {
 
-static const int32_t kNoFreeAdmiral            = -1;
-static const int32_t kDestNoObject             = -1;
-
 static const int32_t kDestinationNameLen        = 17;
 static const int32_t kAdmiralNameLen            = 31;
 

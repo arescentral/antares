@@ -50,8 +50,6 @@ namespace antares {
 
 namespace {
 
-static const int kDirectFontNum = 6;
-
 enum {
     kTacticalFontResID      = 5000,
     kComputerFontResID      = 5001,

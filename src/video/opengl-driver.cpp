@@ -157,8 +157,6 @@ static T _gl_check(T t, const char* fn, const char* file, int line) {
     _GL(glShaderSource, shader, count, string, length)
 #define glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels) \
     _GL(glTexImage2D, target, level, internalformat, width, height, border, format, type, pixels)
-//#define glTextureRangeAPPLE(target, length, pointer) \
-    _GL(glTextureRangeAPPLE, target, length, pointer)
 #define glUniform1f(location, v0)               _GL(glUniform1f, location, v0)
 #define glUniform1i(location, v0)               _GL(glUniform1i, location, v0)
 #define glUniform2f(location, v0, v1)           _GL(glUniform2f, location, v0, v1)
@@ -547,9 +545,9 @@ void OpenGlVideoDriver::batch_line(
 }
 
 void OpenGlVideoDriver::draw_line(const Point& from, const Point& to, const RgbColor& color) {
-    begin_lines();
-    draw_line(from, to, color);
-    end_lines();
+    // begin_lines();
+    // draw_line(from, to, color);
+    // end_lines();
 }
 
 void OpenGlVideoDriver::draw_triangle(const Rect& rect, const RgbColor& color) {

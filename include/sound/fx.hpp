@@ -63,8 +63,8 @@ class SoundFX {
         void cloak_off_at(Handle<SpaceObject> object);
 
     private:
-        class smartSoundHandle;
-        class smartSoundChannel;
+        struct smartSoundHandle;
+        struct smartSoundChannel;
 
         bool same_sound_channel(
                 int& channel, int16_t id, uint8_t amplitude, uint8_t priority);

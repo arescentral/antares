@@ -27,7 +27,7 @@
 
 namespace antares {
 
-struct SpaceObject;
+class SpaceObject;
 
 static const int kBoltPointNum = 10;
 

@@ -188,8 +188,8 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
 
 OffscreenVideoDriver::OffscreenVideoDriver(Size screen_size, const Optional<String>& output_dir):
         _screen_size(screen_size),
-        _capture_rect(screen_size.as_rect()),
-        _output_dir(output_dir) { }
+        _output_dir(output_dir),
+        _capture_rect(screen_size.as_rect()) { }
 
 void OffscreenVideoDriver::loop(Card* initial, EventScheduler& scheduler) {
     _scheduler = &scheduler;

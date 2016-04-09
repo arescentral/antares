@@ -66,8 +66,6 @@ int16_t GetCheatNumFromString(const StringSlice& s) {
 }
 
 void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
-    int32_t                    i;
-
     if ( whichCheat == kNameObjectCheat)
     {
         whichPlayer->cheats() |= kNameObjectBit;
