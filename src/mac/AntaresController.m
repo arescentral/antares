@@ -38,30 +38,6 @@
 
 #define kFactoryScenario @"com.biggerplanet.ares"
 
-// A comparator for display mode dictionaries.  Orders the objects as
-// the pair (screen height, screen width).  The case where this ordering
-// differs from (screen width, screen height) is unlikely enough that
-// it's not worth doing anything fancier.
-static NSInteger compare_resolutions(id x, id y, void* unused) {
-    (void)unused;
-    int x_width = CGDisplayModeGetWidth((CGDisplayModeRef)x);
-    int x_height = CGDisplayModeGetHeight((CGDisplayModeRef)x);
-    int y_width = CGDisplayModeGetWidth((CGDisplayModeRef)y);
-    int y_height = CGDisplayModeGetHeight((CGDisplayModeRef)y);
-
-    if (x_height < y_height) {
-        return NSOrderedAscending;
-    } else if (x_height > y_height) {
-        return NSOrderedDescending;
-    } else if (x_width < y_width) {
-        return NSOrderedAscending;
-    } else if (x_width > y_width) {
-        return NSOrderedDescending;
-    } else {
-        return NSOrderedSame;
-    }
-}
-
 static NSInteger compare_scenarios(id x, id y, void* unused) {
     (void)unused;
 

@@ -68,8 +68,6 @@ const int32_t kScaleListShift   = 6;
 const int32_t kSiteDistance     = 200;
 const int32_t kSiteSize         = 16;
 
-const int32_t kCursorBoundsSize = 16;
-
 const int32_t kBarIndicatorHeight   = 98;
 const int32_t kBarIndicatorWidth    = 9;
 const int32_t kBarIndicatorLeft     = 6;
@@ -82,7 +80,6 @@ enum {
     kGrossMoneyBar  = 4,
 };
 
-const size_t kMaxSectorLine         = 32;
 const int32_t kMinGraphicSectorSize = 90;
 
 const int32_t kGrossMoneyLeft       = 11;
@@ -118,8 +115,6 @@ Rect mini_build_time_rect() {
 }
 
 const int32_t kMinimumAutoScale     = 2;
-
-const int32_t kMouseSleepTime       = 58;
 
 const int32_t kSectorLineBrightness = DARKER;
 

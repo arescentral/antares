@@ -109,7 +109,6 @@ void GLFWVideoDriver::key(int key, int scancode, int action, int mods) {
     }
     String name;
     GetKeyNumName(key + 1, &name);
-    const char* actions[3] = {"release", "press", "repeat"};
     if (action == GLFW_PRESS) {
         KeyDownEvent(now(), key).send(_loop->top());
     } else if (action == GLFW_RELEASE) {

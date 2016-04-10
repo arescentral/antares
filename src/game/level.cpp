@@ -59,7 +59,6 @@ namespace antares {
 namespace {
 
 const uint32_t kNeutralColorNeededFlag   = 0x00010000u;
-const uint32_t kAnyColorNeededFlag       = 0xffff0000u;
 const uint32_t kNeutralColorLoadedFlag   = 0x00000001u;
 const uint32_t kAnyColorLoadedFlag       = 0x0000ffffu;
 
@@ -127,7 +126,7 @@ void AddBaseObjectActionMedia(
 }
 
 void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors) {
-    int32_t             count = 0, l1, l2;
+    int32_t             l1, l2;
 #ifdef DATA_COVERAGE
         possible_actions.insert(action.number());
 #endif  // DATA_COVERAGE
@@ -445,7 +444,7 @@ void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textI
 void GetLevelFullScaleAndCorner(
         const Level* level, int32_t rotation, coordPointType *corner, int32_t *scale,
         Rect *bounds) {
-    int32_t         biggest, count, otherCount, mustFit;
+    int32_t         biggest, mustFit;
     Point           coord, otherCoord, tempCoord;
     Level::InitialObject     *initial;
 

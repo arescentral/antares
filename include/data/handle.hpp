@@ -23,13 +23,13 @@
 
 namespace antares {
 
-struct Admiral;
-struct BaseObject;
+class Admiral;
+class BaseObject;
 struct Destination;
 class Label;
-struct SpaceObject;
+class SpaceObject;
 class Sprite;
-class Vector;
+struct Vector;
 
 template <typename T>
 class Handle {

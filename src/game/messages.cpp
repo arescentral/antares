@@ -50,8 +50,6 @@ namespace antares {
 
 static const int32_t kMessageScreenLeft        = 200;
 static const int32_t kMessageScreenTop         = 454;
-static const int32_t kMessageScreenRight       = 420;
-static const int32_t kMessageScreenBottom      = 475;
 
 static const uint8_t kMessageColor             = RED;
 static const ticks   kMessageMoveTime          = ticks(30);
@@ -59,28 +57,12 @@ static const ticks   kMessageDisplayTime       = (kMessageMoveTime * 2 + secs(2)
 static const ticks   kLowerTime                = (kMessageDisplayTime - kMessageMoveTime);
 static const ticks   kRaiseTime                = kMessageMoveTime;
 
-static const int32_t kDestinationLength        = 127;
-
 static const int32_t kStatusLabelLeft          = 200;
 static const int32_t kStatusLabelTop           = 50;
 static const ticks   kStatusLabelAge           = secs(2);
 
-static const int32_t kMaxRetroSize             = 10;
 static const int32_t kLongMessageVPad          = 5;
 static const int32_t kLongMessageVPadDouble    = 10;
-
-static const int32_t kMessageCharTopBuffer     = 0;
-static const int32_t kMessageCharBottomBuffer  = 0;
-
-// These should be Rune constants, but we operate over bytes for now.
-static const uint8_t kReturnChar               = '\n';
-static const uint8_t kCodeChar                 = '\\';
-static const uint8_t kCodeTabChar              = 't';
-static const uint8_t kCodeInvertChar           = 'i';
-static const uint8_t kCodeColorChar            = 'c';
-static const uint8_t kCodeRevertChar           = 'r';
-static const uint8_t kCodeForeColorChar        = 'f';
-static const uint8_t kCodeBackColorChar        = 'b';
 
 static const int16_t kStringMessageID          = 1;
 

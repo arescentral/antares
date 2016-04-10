@@ -29,6 +29,7 @@ static bool mouse_visible = true;
 - (NSTimeInterval)timeIntervalSinceSystemStart {
     clock_serv_t system_clock;
     kern_return_t status = host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &system_clock);
+    (void)status;  // TODO(sfiera): abort? don't know how to proceed.
     mach_timespec_t now;
     clock_get_time(system_clock, &now);
     NSTimeInterval now_secs = now.tv_sec + (now.tv_nsec / 1e9);

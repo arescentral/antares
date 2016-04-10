@@ -77,17 +77,8 @@ const int32_t kButBoxBottom         = 475;
 
 const int32_t kMiniScreenNoLineSelected = -1;
 
-const int16_t kMiniDataStringID     = 3001;
-
 const uint8_t kMiniScreenColor      = GREEN;
 const uint8_t kMiniButColor         = AQUA;
-
-const Rune kMiniScreenSpecChar      = '\\';
-const Rune kEndLineChar             = 'x';
-const Rune kUnderlineEndLineChar    = 'u';
-const Rune kIntoButtonChar          = 'I';
-const Rune kOutOfButtonChar         = 'O';
-const Rune kSelectableLineChar      = 'S';
 
 const int32_t kNoLineButton         = -1;
 const int32_t kInLineButton         = kCompAcceptKeyNum;
@@ -141,8 +132,6 @@ enum {
     kMaxStatusTypeValue     = kSmallFixedMinusValue,
 };
 
-const int32_t kMiniObjectDataNum    = 2;
-const int32_t kMiniSelectObjectNum  = 0;
 const int32_t kMiniSelectTop        = 180;
 
 const int32_t kMiniIconHeight       = 22;
@@ -163,7 +152,6 @@ const int32_t kMiniNameLineNum      = 1;
 
 const int32_t kMiniDestLineNum      = 4;
 
-const int32_t kMiniTargetObjectNum  = 1;
 const int32_t kMiniTargetTop        = 252;
 
 const int32_t kMiniAmmoTop          = 161;
@@ -555,10 +543,6 @@ void minicomputer_cancel() {
 }
 
 static void update_build_screen_lines() {
-    Rect mRect = Rect(
-            kMiniScreenLeft, kMiniScreenTop + instrument_top(), kMiniScreenRight,
-            kMiniScreenBottom + instrument_top());
-
     const auto& admiral = g.admiral;
     miniScreenLineType* line = &g.mini.lineData[kBuildScreenWhereNameLine];
     if (line->value != GetAdmiralBuildAtObject(admiral).number()) {

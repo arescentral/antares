@@ -41,12 +41,6 @@ using sfz::format;
 
 namespace antares {
 
-namespace {
-
-const int32_t kHackLevelMax = 26;
-
-}  // namespace
-
 SoloGame::SoloGame()
         : _state(NEW),
           _game_result(NO_GAME) { }

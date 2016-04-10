@@ -47,9 +47,6 @@ String application_path() {
 void main(int argc, const char* argv[]) {
     args::Parser parser(argv[0], "Runs Antares");
 
-    int width = 640;
-    int height = 480;
-
     parser.add_argument("--help", help(parser, 0))
         .help("display this help screen");
 

@@ -51,14 +51,9 @@ const int32_t kProximityWidthMultiply       = 4;    // for speed = * kCollisionS
 
 const int32_t kCollisionUnitBitShift        = 7;    // >> 7 = / 128
 const int32_t kCollisionSuperUnitBitShift   = 11;   // >> 11 = / 2048
-const int32_t kCollisionSuperExtraShift     = kCollisionSuperUnitBitShift - kCollisionUnitBitShift;
 
 const int32_t kDistanceUnitBitShift         = 11;   // >> 14L = / 2048
 const int32_t kDistanceSuperUnitBitShift    = 15;   // >> 18L = / 262144
-const int32_t kDistanceSuperExtraShift      = kDistanceSuperUnitBitShift - kDistanceUnitBitShift;
-const int32_t kDistanceUnitExtraShift       = 0;    // speed from kCollisionSuperUnitBitShift to kDistanceUnitBitShift
-
-const int32_t kNoDir = -1;
 
 const int32_t kConsiderDistanceAttributes = (
         kCanCollide | kCanBeHit | kIsDestination | kCanThink | kConsiderDistance | kCanBeEvaded |

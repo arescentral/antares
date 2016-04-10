@@ -66,12 +66,12 @@ struct hotKeyType {
     int32_t                 objectID;
 };
 
-struct Admiral;
+class Admiral;
 struct Vector;
 struct Destination;
 struct proximityUnitType;
 struct scrollStarType;
-struct Sprite;
+class Sprite;
 class InputSource;
 class StringList;
 

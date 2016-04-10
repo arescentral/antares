@@ -84,7 +84,6 @@ static int ndigits(size_t n) {
 }
 
 void SelectLevelScreen::key_down(const KeyDownEvent& event) {
-    int digit;
     switch (_state) {
       case SELECTING:
         switch (event.key()) {
