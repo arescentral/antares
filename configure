@@ -124,6 +124,7 @@ def check_linux():
             ("xinerama", "libxinerama-dev"),
             ("xrandr", "libxrandr-dev"),
             ("xxf86vm", "libxxf86vm-dev"),
+            ("zlib", "zlib1g-dev"),
         ]
         for lib, dpkg in libs:
             if not cfg.check_pkg(lib):
