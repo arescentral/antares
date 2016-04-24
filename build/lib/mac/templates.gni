@@ -1,0 +1,78 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+template("app") {
+  output_name = invoker.output_name
+  id = target_name
+
+  create_bundle(id) {
+    deps = invoker.resources
+    deps += [
+      ":${id}_bundle_executable",
+      ":${id}_bundle_info_plist",
+    ]
+
+    bundle_root_dir = "$root_build_dir/$output_name.app/Contents"
+    bundle_resources_dir = bundle_root_dir + "/Resources"
+    bundle_executable_dir = bundle_root_dir + "/MacOS"
+    bundle_plugins_dir = bundle_root_dir + "/Plugins"
+  }
+
+  bundle_data("${id}_bundle_executable") {
+    public_deps = [
+      ":${id}_executable",
+    ]
+    sources = [
+      "$target_gen_dir/${id}_executable",
+    ]
+    outputs = [
+      "{{bundle_executable_dir}}/$output_name",
+    ]
+  }
+
+  bundle_data("${id}_bundle_info_plist") {
+    public_deps = [
+      ":${id}_info_plist",
+    ]
+    sources = [
+      "$target_gen_dir/${id}-Info.plist",
+    ]
+    outputs = [
+      "{{bundle_root_dir}}/Info.plist",
+    ]
+  }
+
+  executable("${id}_executable") {
+    sources = invoker.sources
+    deps = invoker.deps
+    libs = invoker.libs
+    configs += invoker.configs
+    output_name =
+        rebase_path("$target_gen_dir/${id}_executable", root_build_dir)
+  }
+
+  action("${id}_info_plist") {
+    script = "//build/lib/scripts/copy_info_plist.py"
+    sources = [
+      invoker.info_plist,
+    ]
+    outputs = [
+      "$target_gen_dir/${id}-Info.plist",
+    ]
+    args = rebase_path(sources, root_build_dir) +
+           rebase_path(outputs, root_build_dir)
+    if (defined(invoker.info_plist_defines)) {
+      args += invoker.info_plist_defines
+    }
+  }
+}
+
+template("app_resources") {
+  bundle_data(target_name) {
+    sources = invoker.sources
+    outputs = [
+      "{{bundle_resources_dir}}/{{source_file_part}}",
+    ]
+  }
+}

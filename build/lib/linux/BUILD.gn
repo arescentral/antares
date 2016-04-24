@@ -1,0 +1,21 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("../gcc.gni")
+
+gcc_toolchain("linux") {
+  cc = "clang"
+  cxx = "clang++"
+  ld = cxx
+  ar = "ar"
+}
+
+gcc_toolchain("cross_mac") {
+  cc = "x86_64-apple-darwin15-clang"
+  cxx = "x86_64-apple-darwin15-clang++"
+  objc = cc
+  objcxx = cxx
+  ld = cxx
+  ar = "x86_64-apple-darwin15-ar"
+}

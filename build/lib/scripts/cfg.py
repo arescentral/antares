@@ -1,13 +1,17 @@
-#!/usr/bin/env
-
+#!/usr/bin/env python
+#
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
 from __future__ import division, print_function, unicode_literals
 import contextlib
 import os
+import platform
 import subprocess
 import sys
 
-def platform():
+def host_os():
     if sys.platform == "darwin":
         return "mac"
     for platform in ["linux", "win"]:
@@ -16,16 +20,23 @@ def platform():
     return "unknown"
 
 
+def host_cpu():
+    cpu = platform.uname()[4]
+    if cpu == "x86_64":
+        return "x64"
+    return cpu
+
+
 def tint(text, color):
     if not (color and os.isatty(1)):
         return text
     color = {
-        "red": 31,
-        "green": 32,
-        "yellow": 33,
-        "blue": 34,
+        "red": 1,
+        "green": 2,
+        "yellow": 3,
+        "blue": 4,
     }[color]
-    return "\033[1;%dm%s\033[0m" % (color, text)
+    return "\033[1;38;5;%dm%s\033[0m" % (color, text)
 
 
 @contextlib.contextmanager
@@ -49,6 +60,8 @@ def check_bin(cmdline, what=None, input=None):
         stdin = None
         if input is not None:
             stdin = subprocess.PIPE
+            if not isinstance(input, bytes):
+                input = input.encode("utf-8")
         try:
             p = subprocess.Popen(cmdline, stdin=stdin, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             p.communicate(input)
@@ -81,9 +94,27 @@ def makedirs(path):
             raise
 
 
-def linkf(dst, src):
-    try:
-        os.unlink(src)
-    except OSError as e:
-        pass
-    os.symlink(dst, src)
+def gn(**kwds):
+    target_os = kwds["target_os"]
+    mode = kwds["mode"]
+    out = os.path.join("out", target_os, mode)
+
+    gn_args = " ".join('%s = "%s"' % kv for kv in kwds.items())
+    cmd = ["build/lib/scripts/gn", "gen", "-q", out, "--args=%s" % gn_args]
+    with step("generating build.ninja") as msg:
+        try:
+            os.makedirs("out")
+        except OSError as e:
+            if e.errno != 17:
+                raise
+
+        try:
+            os.unlink("out/cur")
+        except OSError as e:
+            pass
+        os.symlink(os.path.join(target_os, mode), "out/cur")
+
+        retcode = subprocess.call(cmd)
+        if retcode != 0:
+            msg("failed", color="red")
+            sys.exit(retcode)
