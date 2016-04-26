@@ -73,9 +73,7 @@ template("gcc_toolchain") {
       outfile = "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"
       description = "LINK $outfile"
 
-      rspfile = "$outfile.rsp"
-      command = "$ld {{ldflags}} -o $outfile -Wl,-filelist,$rspfile {{solibs}} {{libs}}"
-      rspfile_content = "{{inputs_newline}}"
+      command = "$ld {{ldflags}} -o $outfile {{inputs}} {{solibs}} {{libs}} -pthread"
       outputs = [
         outfile,
       ]

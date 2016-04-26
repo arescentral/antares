@@ -5,8 +5,8 @@
 import("../gcc.gni")
 
 gcc_toolchain("linux") {
-  cc = "clang"
-  cxx = "clang++"
+  cc = "clang-3.7"
+  cxx = "clang++-3.7"
   ld = cxx
   ar = "ar"
 }
