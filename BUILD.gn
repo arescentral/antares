@@ -33,7 +33,7 @@ config("antares_private") {
   ]
 }
 
-group("libantares") {
+static_library("libantares") {
   public_deps = [
     ":libantares-config",
     ":libantares-data",
@@ -51,7 +51,7 @@ group("libantares") {
   }
 }
 
-static_library("libantares-config") {
+source_set("libantares-config") {
   sources = [
     "include/config/dirs.hpp",
     "include/config/file-prefs-driver.hpp",
@@ -83,7 +83,7 @@ static_library("libantares-config") {
   configs += [ ":antares_private" ]
 }
 
-static_library("libantares-data") {
+source_set("libantares-data") {
   sources = [
     "include/data/action.hpp",
     "include/data/base-object.hpp",
@@ -122,7 +122,7 @@ static_library("libantares-data") {
   configs += [ ":antares_private" ]
 }
 
-static_library("libantares-drawing") {
+source_set("libantares-drawing") {
   sources = [
     "include/drawing/briefing.hpp",
     "include/drawing/build-pix.hpp",
@@ -153,7 +153,7 @@ static_library("libantares-drawing") {
   configs += [ ":antares_private" ]
 }
 
-static_library("libantares-game") {
+source_set("libantares-game") {
   sources = [
     "include/game/action.hpp",
     "include/game/admiral.hpp",
@@ -205,7 +205,7 @@ static_library("libantares-game") {
   configs += [ ":antares_private" ]
 }
 
-static_library("libantares-math") {
+source_set("libantares-math") {
   sources = [
     "include/math/fixed.hpp",
     "include/math/geometry.hpp",
@@ -226,7 +226,7 @@ static_library("libantares-math") {
   configs += [ ":antares_private" ]
 }
 
-static_library("libantares-sound") {
+source_set("libantares-sound") {
   sources = [
     "include/sound/driver.hpp",
     "include/sound/fx.hpp",
@@ -253,7 +253,7 @@ static_library("libantares-sound") {
   configs += [ ":antares_private" ]
 }
 
-static_library("libantares-ui") {
+source_set("libantares-ui") {
   sources = [
     "include/ui/card.hpp",
     "include/ui/event-scheduler.hpp",
@@ -298,7 +298,7 @@ static_library("libantares-ui") {
   configs += [ ":antares_private" ]
 }
 
-static_library("libantares-video") {
+source_set("libantares-video") {
   sources = [
     "$target_gen_dir/include/video/glsl/fragment.hpp",
     "$target_gen_dir/include/video/glsl/vertex.hpp",
@@ -408,7 +408,7 @@ executable("tint") {
   configs += [ ":antares_private" ]
 }
 
-static_library("libantares-test") {
+source_set("libantares-test") {
   testonly = true
   sources = [
     "include/video/offscreen-driver.hpp",
@@ -513,7 +513,7 @@ if (target_os == "mac") {
   import("//build/lib/mac/templates.gni")
   antares_version = "0.8.0"
 
-  static_library("libantares-mac") {
+  source_set("libantares-mac") {
     sources = [
       "include/mac/audio-file.hpp",
       "include/mac/core-foundation.hpp",
@@ -602,7 +602,7 @@ if (target_os == "mac") {
     ]
   }
 } else if (target_os == "linux") {
-  static_library("libantares-linux") {
+  source_set("libantares-linux") {
     sources = [
       "src/linux/http.cpp",
     ]
