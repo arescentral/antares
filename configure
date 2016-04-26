@@ -142,9 +142,9 @@ def check_linux_native(args):
             msg(" ".join(distro) + " (untested)", color="yellow")
 
     missing = collections.OrderedDict()
-    if not check_clang():
-        missing["clang"] = "clang"
-    if not check_libcxx():
+    if not check_clang("clang++-3.7"):
+        missing["clang"] = "clang-3.7"
+    if not check_libcxx("clang++-3.7"):
         missing["libc++"] = "libc++-dev"
     if not check_ninja():
         missing["ninja"] = "ninja-build"
@@ -183,7 +183,8 @@ def check_mac_on_linux(args):
         missing["ninja"] = (
                 "* On Ubuntu, ninja can be installed with:\n"
                 "    $ sudo apt-get install ninja-build")
-    if not (check_clang("x86_64-apple-darwin15-") and check_libcxx("x86_64-apple-darwin15-")):
+    if not (check_clang("x86_64-apple-darwin15-clang++") and
+            check_libcxx("x86_64-apple-darwin15-clang++")):
         missing["osxcross"] = (
                 "* OSXCross can be found here:\n"
                 "    https://github.com/tpoechtrager/osxcross\n"
@@ -196,18 +197,20 @@ def check_mac_on_linux(args):
         sys.exit(1)
 
 
-def check_clang(prefix=""):
+def check_clang(executable=""):
     """Compile a basic C++11 binary."""
+    executable = executable or "clang++"
     return cfg.check_bin(
-            ("%sclang -x c++ -std=c++11 - -o /dev/null" % prefix).split(),
+            ("%s -x c++ -std=c++11 - -o /dev/null" % executable).split(),
             what="clang",
             input="int main() { return 1; }")
 
 
-def check_libcxx(prefix=""):
+def check_libcxx(executable=""):
     """Compile a basic C++11, libc++ binary."""
+    executable = executable or "clang++"
     return cfg.check_bin(
-            ("%sclang -x c++ -std=c++11 -stdlib=libc++ - -o /dev/null" % prefix).split(),
+            ("%s -x c++ -std=c++11 -stdlib=libc++ - -o /dev/null" % executable).split(),
             what="libc++",
             input="#include <chrono>\n\nint main() { return std::chrono::seconds(1).count(); }")
 
