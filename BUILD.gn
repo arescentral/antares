@@ -354,11 +354,12 @@ embed("embed_glsl_vertex") {
 }
 
 executable("hash-data") {
+  testonly = true
   sources = [
     "src/bin/hash-data.cpp",
   ]
   deps = [
-    ":libantares",
+    ":libantares-test",
   ]
   configs += [ ":antares_private" ]
 }
