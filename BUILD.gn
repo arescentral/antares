@@ -33,7 +33,7 @@ config("antares_private") {
   ]
 }
 
-static_library("libantares") {
+source_set("libantares") {
   public_deps = [
     ":libantares-config",
     ":libantares-data",
