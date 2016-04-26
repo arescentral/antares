@@ -73,7 +73,8 @@ template("gcc_toolchain") {
       outfile = "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"
       description = "LINK $outfile"
 
-      command = "$ld {{ldflags}} -o $outfile {{inputs}} {{solibs}} {{libs}} -pthread"
+      command =
+          "$ld {{ldflags}} -o $outfile {{inputs}} {{solibs}} {{libs}} -lpthread"
       outputs = [
         outfile,
       ]
