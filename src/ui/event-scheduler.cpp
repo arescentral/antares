@@ -18,6 +18,7 @@
 
 #include "ui/event-scheduler.hpp"
 
+#include <algorithm>
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"

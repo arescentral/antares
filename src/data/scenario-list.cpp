@@ -20,6 +20,7 @@
 
 #include <glob.h>
 #include <sfz/sfz.hpp>
+#include <string.h>
 #include "config/dirs.hpp"
 #include "data/level.hpp"
 
