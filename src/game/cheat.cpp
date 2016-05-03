@@ -18,6 +18,7 @@
 
 #include "game/cheat.hpp"
 
+#include <algorithm>
 #include <sfz/sfz.hpp>
 
 #include "data/string-list.hpp"
