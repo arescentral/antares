@@ -5,6 +5,12 @@
 config("c++11") {
   cflags_cc = [
     "-std=c++11",
+  ]
+  ldflags = cflags_cc
+}
+
+config("libc++") {
+  cflags_cc = [
     "-stdlib=libc++",
   ]
   ldflags = cflags_cc

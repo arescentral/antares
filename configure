@@ -142,10 +142,8 @@ def check_linux_native(args):
             msg(" ".join(distro) + " (untested)", color="yellow")
 
     missing = collections.OrderedDict()
-    if not check_clang("clang++-3.7"):
-        missing["clang"] = "clang-3.7"
-    if not check_libcxx("clang++-3.7"):
-        missing["libc++"] = "libc++-dev"
+    if not check_clang("clang++"):
+        missing["clang"] = "clang"
     if not check_ninja():
         missing["ninja"] = "ninja-build"
 
