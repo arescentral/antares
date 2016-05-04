@@ -19,6 +19,7 @@
 #include "sound/sndfile.hpp"
 
 #include <sndfile.h>
+#include <string.h>
 
 using sfz::Bytes;
 using sfz::BytesSlice;
