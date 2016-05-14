@@ -106,8 +106,6 @@ def check_linux():
     missing = collections.OrderedDict()
     if not check_clang():
         missing["clang"] = "clang"
-    if not check_libcxx():
-        missing["libc++"] = "libc++-dev"
     if not check_gyp():
         missing["gyp"] = "gyp"
     if not check_ninja():
@@ -146,7 +144,7 @@ def check_clang():
     """Compile a basic C++11 binary."""
     return cfg.check_bin(
             "clang -x c++ -std=c++11 - -o /dev/null".split(),
-            input="int main() { return 1; }")
+            input="#include <vector>\n\nint main() { return 1; }")
 
 def check_libcxx():
     """Compile a basic C++11, libc++ binary."""
