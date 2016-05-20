@@ -16,9 +16,9 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include <sfz/sfz.hpp>
-#include <getopt.h>
 #include <fcntl.h>
+#include <getopt.h>
+#include <sfz/sfz.hpp>
 
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
@@ -28,19 +28,19 @@
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
 #include "game/admiral.hpp"
-#include "game/vector.hpp"
 #include "game/cheat.hpp"
 #include "game/cursor.hpp"
 #include "game/globals.hpp"
 #include "game/input-source.hpp"
 #include "game/instruments.hpp"
 #include "game/labels.hpp"
+#include "game/level.hpp"
 #include "game/main.hpp"
 #include "game/messages.hpp"
 #include "game/motion.hpp"
-#include "game/level.hpp"
 #include "game/space-object.hpp"
 #include "game/sys.hpp"
+#include "game/vector.hpp"
 #include "math/random.hpp"
 #include "math/rotation.hpp"
 #include "sound/driver.hpp"
@@ -66,7 +66,7 @@ using sfz::open;
 using std::unique_ptr;
 
 namespace args = sfz::args;
-namespace io = sfz::io;
+namespace io   = sfz::io;
 namespace path = sfz::path;
 namespace utf8 = sfz::utf8;
 
@@ -74,49 +74,49 @@ namespace antares {
 
 class ReplayMaster : public Card {
   public:
-    ReplayMaster(BytesSlice data, Optional<String> output_path):
-            _state(NEW),
-            _output_path(output_path),
-            _replay_data(data),
-            _random_seed(_replay_data.global_seed),
-            _game_result(NO_GAME),
-            _input_source(&_replay_data) { }
+    ReplayMaster(BytesSlice data, Optional<String> output_path)
+            : _state(NEW),
+              _output_path(output_path),
+              _replay_data(data),
+              _random_seed(_replay_data.global_seed),
+              _game_result(NO_GAME),
+              _input_source(&_replay_data) {}
 
     virtual void become_front() {
         switch (_state) {
-          case NEW:
-            _state = REPLAY;
-            init();
-            Randomize(4);  // For the decision to replay intro.
-            _game_result = NO_GAME;
-            g.random.seed = _random_seed;
-            stack()->push(new MainPlay(
-                            Handle<Level>(_replay_data.chapter_id - 1), true, &_input_source,
-                            false, &_game_result));
-            break;
+            case NEW:
+                _state = REPLAY;
+                init();
+                Randomize(4);  // For the decision to replay intro.
+                _game_result  = NO_GAME;
+                g.random.seed = _random_seed;
+                stack()->push(
+                        new MainPlay(
+                                Handle<Level>(_replay_data.chapter_id - 1), true, &_input_source,
+                                false, &_game_result));
+                break;
 
-          case REPLAY:
-            if (_output_path.has()) {
-                String path(format("{0}/debriefing.txt", *_output_path));
-                makedirs(path::dirname(path), 0755);
-                ScopedFd outcome(open(path, O_WRONLY | O_CREAT, 0644));
-                if ((g.victory_text >= 0)) {
-                    Resource rsrc("text", "txt", g.victory_text);
-                    sfz::write(outcome, rsrc.data());
-                    if (_game_result == WIN_GAME) {
-                        sfz::write(outcome, "\n\n");
-                        Handle<Admiral> player(0);
-                        String text = DebriefingScreen::build_score_text(
-                                g.time, g.level->parTime,
-                                GetAdmiralLoss(player), g.level->parLosses,
-                                GetAdmiralKill(player), g.level->parKills);
-                        sfz::write(outcome, utf8::encode(text));
+            case REPLAY:
+                if (_output_path.has()) {
+                    String path(format("{0}/debriefing.txt", *_output_path));
+                    makedirs(path::dirname(path), 0755);
+                    ScopedFd outcome(open(path, O_WRONLY | O_CREAT, 0644));
+                    if ((g.victory_text >= 0)) {
+                        Resource rsrc("text", "txt", g.victory_text);
+                        sfz::write(outcome, rsrc.data());
+                        if (_game_result == WIN_GAME) {
+                            sfz::write(outcome, "\n\n");
+                            Handle<Admiral> player(0);
+                            String          text = DebriefingScreen::build_score_text(
+                                    g.time, g.level->parTime, GetAdmiralLoss(player),
+                                    g.level->parLosses, GetAdmiralKill(player), g.level->parKills);
+                            sfz::write(outcome, utf8::encode(text));
+                        }
+                        sfz::write(outcome, "\n");
                     }
-                    sfz::write(outcome, "\n");
                 }
-            }
-            stack()->pop(this);
-            break;
+                stack()->pop(this);
+                break;
         }
     }
 
@@ -129,10 +129,10 @@ class ReplayMaster : public Card {
     };
     State _state;
 
-    Optional<String> _output_path;
-    ReplayData _replay_data;
-    const int32_t _random_seed;
-    GameResult _game_result;
+    Optional<String>  _output_path;
+    ReplayData        _replay_data;
+    const int32_t     _random_seed;
+    GameResult        _game_result;
     ReplayInputSource _input_source;
 
     DISALLOW_COPY_AND_ASSIGN(ReplayMaster);
@@ -164,32 +164,25 @@ void main(int argc, char** argv) {
     args::Parser parser(argv[0], "Plays a replay into a set of images and a log of sounds");
 
     String replay_path(utf8::decode(argv[0]));
-    parser.add_argument("replay", store(replay_path))
-        .help("an Antares replay script")
-        .required();
+    parser.add_argument("replay", store(replay_path)).help("an Antares replay script").required();
 
     Optional<String> output_dir;
     parser.add_argument("-o", "--output", store(output_dir))
-        .help("place output in this directory");
+            .help("place output in this directory");
 
-    int interval = 60;
-    int width = 640;
-    int height = 480;
-    bool text = false;
-    bool smoke = false;
+    int  interval = 60;
+    int  width    = 640;
+    int  height   = 480;
+    bool text     = false;
+    bool smoke    = false;
     parser.add_argument("-i", "--interval", store(interval))
-        .help("take one screenshot per this many ticks (default: 60)");
-    parser.add_argument("-w", "--width", store(width))
-        .help("screen width (default: 640)");
-    parser.add_argument("-h", "--height", store(height))
-        .help("screen height (default: 480)");
-    parser.add_argument("-t", "--text", store_const(text, true))
-        .help("produce text output");
-    parser.add_argument("-s", "--smoke", store_const(smoke, true))
-        .help("run as smoke text");
+            .help("take one screenshot per this many ticks (default: 60)");
+    parser.add_argument("-w", "--width", store(width)).help("screen width (default: 640)");
+    parser.add_argument("-h", "--height", store(height)).help("screen height (default: 480)");
+    parser.add_argument("-t", "--text", store_const(text, true)).help("produce text output");
+    parser.add_argument("-s", "--smoke", store_const(smoke, true)).help("run as smoke text");
 
-    parser.add_argument("--help", help(parser, 0))
-        .help("display this help screen");
+    parser.add_argument("--help", help(parser, 0)).help("display this help screen");
 
     String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {

@@ -32,7 +32,7 @@ template <typename Derived, typename Base>
 Derived down_cast(const Base& base) {
     if (false) {
         Derived* d = NULL;
-        Base* b = d;
+        Base*    b = d;
         static_cast<void>(b);
     }
     return reinterpret_cast<Derived>(base);

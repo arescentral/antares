@@ -24,21 +24,21 @@ in vec2 screen_position;
 
 out vec4 frag_color;
 
-uniform int            scale;
-uniform int            color_mode;
-uniform sampler2DRect  sprite;
-uniform sampler2D      static_image;
-uniform float          static_fraction;
-uniform vec2           unit;
-uniform vec4           outline_color;
-uniform int            seed;
+uniform int scale;
+uniform int color_mode;
+uniform sampler2DRect sprite;
+uniform sampler2D static_image;
+uniform float     static_fraction;
+uniform vec2 unit;
+uniform vec4 outline_color;
+uniform int  seed;
 
-const int FILL_MODE            = 0;
-const int DITHER_MODE          = 1;
-const int DRAW_SPRITE_MODE     = 2;
-const int TINT_SPRITE_MODE     = 3;
-const int STATIC_SPRITE_MODE   = 4;
-const int OUTLINE_SPRITE_MODE  = 5;
+const int FILL_MODE           = 0;
+const int DITHER_MODE         = 1;
+const int DRAW_SPRITE_MODE    = 2;
+const int TINT_SPRITE_MODE    = 3;
+const int STATIC_SPRITE_MODE  = 4;
+const int OUTLINE_SPRITE_MODE = 5;
 
 void main() {
     vec4 sprite_color = texture(sprite, uv);
@@ -52,25 +52,24 @@ void main() {
     } else if (color_mode == TINT_SPRITE_MODE) {
         frag_color = color * sprite_color;
     } else if (color_mode == STATIC_SPRITE_MODE) {
-        float f = scale / 256.0;
-        vec2 uv2 = (screen_position + vec2(seed * f, seed)) * vec2(f, f);
-        vec4 static_color = texture(static_image, uv2).rrrg;
+        float f            = scale / 256.0;
+        vec2  uv2          = (screen_position + vec2(seed * f, seed)) * vec2(f, f);
+        vec4  static_color = texture(static_image, uv2).rrrg;
         if (static_color.w <= static_fraction) {
             vec4 sprite_alpha = vec4(1, 1, 1, sprite_color.w);
-            frag_color = color * sprite_alpha;
+            frag_color        = color * sprite_alpha;
         } else {
             frag_color = sprite_color;
         }
     } else if (color_mode == OUTLINE_SPRITE_MODE) {
-        float neighborhood =
-                texture(sprite, uv + vec2(-unit.s, -unit.t)).w +
-                texture(sprite, uv + vec2(-unit.s,       0)).w +
-                texture(sprite, uv + vec2(-unit.s,  unit.t)).w +
-                texture(sprite, uv + vec2(      0, -unit.t)).w +
-                texture(sprite, uv + vec2(      0,  unit.t)).w +
-                texture(sprite, uv + vec2( unit.s, -unit.t)).w +
-                texture(sprite, uv + vec2( unit.s,       0)).w +
-                texture(sprite, uv + vec2( unit.s,  unit.t)).w;
+        float neighborhood = texture(sprite, uv + vec2(-unit.s, -unit.t)).w +
+                             texture(sprite, uv + vec2(-unit.s, 0)).w +
+                             texture(sprite, uv + vec2(-unit.s, unit.t)).w +
+                             texture(sprite, uv + vec2(0, -unit.t)).w +
+                             texture(sprite, uv + vec2(0, unit.t)).w +
+                             texture(sprite, uv + vec2(unit.s, -unit.t)).w +
+                             texture(sprite, uv + vec2(unit.s, 0)).w +
+                             texture(sprite, uv + vec2(unit.s, unit.t)).w;
         if (sprite_color.w > (neighborhood / 8)) {
             frag_color = outline_color;
         } else if (sprite_color.w > 0) {

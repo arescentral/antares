@@ -26,8 +26,8 @@
 #include "game/admiral.hpp"
 #include "game/globals.hpp"
 #include "game/input-source.hpp"
-#include "game/main.hpp"
 #include "game/level.hpp"
+#include "game/main.hpp"
 #include "game/sys.hpp"
 #include "sound/music.hpp"
 #include "ui/card.hpp"
@@ -41,62 +41,61 @@ using sfz::format;
 
 namespace antares {
 
-SoloGame::SoloGame()
-        : _state(NEW),
-          _game_result(NO_GAME) { }
+SoloGame::SoloGame() : _state(NEW), _game_result(NO_GAME) {}
 
-SoloGame::~SoloGame() { }
+SoloGame::~SoloGame() {}
 
 void SoloGame::become_front() {
     switch (_state) {
-      case NEW:
-        _state = SELECT_LEVEL;
-        stack()->push(new SelectLevelScreen(&_cancelled, &_level));
-        break;
-
-      case SELECT_LEVEL:
-        _state = START_LEVEL;
-        if (_cancelled) {
-            _state = QUIT;
-            stack()->pop(this);
+        case NEW:
+            _state = SELECT_LEVEL;
+            stack()->push(new SelectLevelScreen(&_cancelled, &_level));
             break;
-        }
+
+        case SELECT_LEVEL:
+            _state = START_LEVEL;
+            if (_cancelled) {
+                _state = QUIT;
+                stack()->pop(this);
+                break;
+            }
         // else fall through.
 
-      case START_LEVEL:
-        _state = PROLOGUE;
-        if (_level->prologue_id() > 0) {
-            stack()->push(new ScrollTextScreen(_level->prologue_id(), 450, kSlowScrollInterval, 4002));
-            break;
-        }
+        case START_LEVEL:
+            _state = PROLOGUE;
+            if (_level->prologue_id() > 0) {
+                stack()->push(
+                        new ScrollTextScreen(
+                                _level->prologue_id(), 450, kSlowScrollInterval, 4002));
+                break;
+            }
         // else fall through
 
-      case PROLOGUE:
-      case RESTART_LEVEL:
-        _state = PLAYING;
-        _game_result = NO_GAME;
-        stack()->push(new MainPlay(_level, false, &_input_source, true, &_game_result));
-        break;
+        case PROLOGUE:
+        case RESTART_LEVEL:
+            _state       = PLAYING;
+            _game_result = NO_GAME;
+            stack()->push(new MainPlay(_level, false, &_input_source, true, &_game_result));
+            break;
 
-      case PLAYING:
-        handle_game_result();
-        break;
+        case PLAYING:
+            handle_game_result();
+            break;
 
-      case EPILOGUE:
-        epilogue_done();
-        break;
+        case EPILOGUE:
+            epilogue_done();
+            break;
 
-      case QUIT:
-        stack()->pop(this);
-        break;
+        case QUIT:
+            stack()->pop(this);
+            break;
     }
 }
 
 void SoloGame::handle_game_result() {
     switch (_game_result) {
-      case WIN_GAME:
-        {
-            _state = EPILOGUE;
+        case WIN_GAME: {
+            _state             = EPILOGUE;
             const int epilogue = _level->epilogue_id();
             if (epilogue > 0) {
                 // normal scrolltext song
@@ -105,25 +104,25 @@ void SoloGame::handle_game_result() {
                     // we win but no next level? Play triumph song
                     scroll_song = 4003;
                 }
-                stack()->push(new ScrollTextScreen(epilogue, 450, kSlowScrollInterval, scroll_song));
+                stack()->push(
+                        new ScrollTextScreen(epilogue, 450, kSlowScrollInterval, scroll_song));
             } else {
                 become_front();
             }
-        }
-        break;
+        } break;
 
-      case RESTART_GAME:
-        _state = RESTART_LEVEL;
-        become_front();
-        break;
+        case RESTART_GAME:
+            _state = RESTART_LEVEL;
+            become_front();
+            break;
 
-      case QUIT_GAME:
-        _state = QUIT;
-        become_front();
-        break;
+        case QUIT_GAME:
+            _state = QUIT;
+            become_front();
+            break;
 
-      default:
-        throw Exception(format("_play_again was invalid after PLAY_AGAIN ({0})", _play_again));
+        default:
+            throw Exception(format("_play_again was invalid after PLAY_AGAIN ({0})", _play_again));
     }
 }
 

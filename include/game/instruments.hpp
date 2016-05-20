@@ -29,7 +29,7 @@ class PlayerShip;
 
 const int32_t kMiniBuildTimeHeight = 25;
 
-void InstrumentInit();
+void    InstrumentInit();
 int32_t instrument_top();
 void UpdateRadar(ticks units);
 void InstrumentCleanup();
@@ -47,9 +47,9 @@ void InstrumentsHandleMouseUp(const GameCursor& cursor);
 void InstrumentsHandleMouseStillDown(const GameCursor& cursor);
 void draw_arbitrary_sector_lines(
         const coordPointType& corner, int32_t scale, int32_t minSectorSize, const Rect& bounds);
-void GetArbitrarySingleSectorBounds(coordPointType*, coordPointType*, int32_t, int32_t, Rect*,
-        Rect*);
+void GetArbitrarySingleSectorBounds(
+        coordPointType*, coordPointType*, int32_t, int32_t, Rect*, Rect*);
 
 }  // namespace antares
 
-#endif // ANTARES_GAME_INSTRUMENTS_HPP_
+#endif  // ANTARES_GAME_INSTRUMENTS_HPP_

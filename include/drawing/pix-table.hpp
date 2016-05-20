@@ -19,8 +19,8 @@
 #ifndef ANTARES_DRAWING_PIX_TABLE_HPP_
 #define ANTARES_DRAWING_PIX_TABLE_HPP_
 
-#include <vector>
 #include <sfz/sfz.hpp>
+#include <vector>
 
 #include "drawing/pix-map.hpp"
 #include "video/driver.hpp"
@@ -33,29 +33,29 @@ class NatePixTable {
 
     NatePixTable(int id, uint8_t color);
     NatePixTable(const NatePixTable&) = delete;
-    NatePixTable(NatePixTable&&) = default;
+    NatePixTable(NatePixTable&&)      = default;
     ~NatePixTable();
 
     const Frame& at(size_t index) const;
     size_t size() const;
 
   private:
-    size_t _size;
+    size_t             _size;
     std::vector<Frame> _frames;
 };
 
 class NatePixTable::Frame {
   public:
     Frame(Rect bounds, const PixMap& image, int16_t id, int frame);
-    Frame(Rect bounds, const PixMap& image, int16_t id, int frame,
-          const PixMap& overlay, uint8_t color);
+    Frame(Rect bounds, const PixMap& image, int16_t id, int frame, const PixMap& overlay,
+          uint8_t color);
     Frame(Frame&&) = default;
     ~Frame();
-    
-    uint16_t width() const;
-    uint16_t height() const;
-    Point center() const;
-    const PixMap& pix_map() const;
+
+    uint16_t       width() const;
+    uint16_t       height() const;
+    Point          center() const;
+    const PixMap&  pix_map() const;
     const Texture& texture() const;
 
   private:
@@ -63,13 +63,13 @@ class NatePixTable::Frame {
     void load_overlay(const PixMap& pix, uint8_t color);
     void build(int16_t id, int frame);
 
-    Rect _bounds;
+    Rect        _bounds;
     ArrayPixMap _pix_map;
-    Texture _texture;
+    Texture     _texture;
 
     DISALLOW_COPY_AND_ASSIGN(Frame);
 };
 
 }  // namespace antares
 
-#endif // ANTARES_DRAWING_PIX_TABLE_HPP_
+#endif  // ANTARES_DRAWING_PIX_TABLE_HPP_

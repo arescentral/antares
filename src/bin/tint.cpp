@@ -37,7 +37,7 @@ using sfz::path::dirname;
 using sfz::write;
 using std::unique_ptr;
 
-namespace io = sfz::io;
+namespace io   = sfz::io;
 namespace utf8 = sfz::utf8;
 namespace args = sfz::args;
 
@@ -46,20 +46,28 @@ namespace {
 
 const char* name(int16_t id) {
     switch (id) {
-        case 501: return "ishiman/cruiser";
-        case 510: return "ishiman/fighter";
-        case 515: return "ishiman/transport";
-        case 532: return "obish/escort";
-        case 550: return "gaitori/cruiser";
-        case 551: return "gaitori/fighter";
-        case 563: return "gaitori/transport";
-        case 567: return "obish/transport";
+        case 501:
+            return "ishiman/cruiser";
+        case 510:
+            return "ishiman/fighter";
+        case 515:
+            return "ishiman/transport";
+        case 532:
+            return "obish/escort";
+        case 550:
+            return "gaitori/cruiser";
+        case 551:
+            return "gaitori/fighter";
+        case 563:
+            return "gaitori/transport";
+        case 567:
+            return "obish/transport";
     }
     abort();
 }
 
 void draw(int16_t id, uint8_t color, ArrayPixMap& pix) {
-    NatePixTable table(id, color);
+    NatePixTable               table(id, color);
     const NatePixTable::Frame& frame = table.at(9);
     pix.resize(Size(frame.width(), frame.height()));
     pix.copy(frame.pix_map());
@@ -67,8 +75,7 @@ void draw(int16_t id, uint8_t color, ArrayPixMap& pix) {
 
 class ShapeBuilder {
   public:
-    ShapeBuilder(const Optional<String>& output_dir)
-            : _output_dir(output_dir) { }
+    ShapeBuilder(const Optional<String>& output_dir) : _output_dir(output_dir) {}
 
     void save(int16_t id, uint8_t color) {
         ArrayPixMap pix(0, 0);
@@ -92,9 +99,8 @@ int main(int argc, char* const* argv) {
 
     Optional<String> output_dir;
     parser.add_argument("-o", "--output", store(output_dir))
-        .help("place output in this directory");
-    parser.add_argument("-h", "--help", help(parser, 0))
-        .help("display this help screen");
+            .help("place output in this directory");
+    parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
 
     String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
@@ -104,9 +110,9 @@ int main(int argc, char* const* argv) {
 
     NullPrefsDriver prefs;
     TextVideoDriver video({640, 480}, output_dir);
-    ShapeBuilder builder(output_dir);
-    int16_t ids[] = {501, 510, 515, 532, 550, 551, 563, 567};
-    for (int16_t id: ids) {
+    ShapeBuilder    builder(output_dir);
+    int16_t         ids[] = {501, 510, 515, 532, 550, 551, 563, 567};
+    for (int16_t id : ids) {
         for (int tint = 0; tint < 16; ++tint) {
             builder.save(id, tint);
         }

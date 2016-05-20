@@ -47,11 +47,11 @@ class ReplayGame : public Card {
     };
     State _state;
 
-    Resource _resource;
-    ReplayData _data;
-    Random _random_seed;
-    Handle<Level> _level;
-    GameResult _game_result;
+    Resource          _resource;
+    ReplayData        _data;
+    Random            _random_seed;
+    Handle<Level>     _level;
+    GameResult        _game_result;
     ReplayInputSource _input_source;
 };
 

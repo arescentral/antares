@@ -26,8 +26,8 @@
 
 #include "config/preferences.hpp"
 #include "drawing/pix-map.hpp"
-#include "game/time.hpp"
 #include "game/sys.hpp"
+#include "game/time.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
 #include "ui/event.hpp"
@@ -39,8 +39,8 @@
 #else
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
-#include <GL/glu.h>
 #include <GL/glext.h>
+#include <GL/glu.h>
 #include "linux/offscreen.hpp"
 #endif
 
@@ -70,20 +70,20 @@ namespace {
 
 class SnapshotBuffer {
   public:
-    SnapshotBuffer() { }
+    SnapshotBuffer() {}
 
     void copy(Rect bounds, ArrayPixMap& pix) {
         _data.resize(bounds.area() * 4);
         Size size = bounds.size();
         glReadPixels(
-                bounds.left, bounds.top, size.width, size.height,
-                GL_BGRA, GL_UNSIGNED_BYTE, _data.data());
+                bounds.left, bounds.top, size.width, size.height, GL_BGRA, GL_UNSIGNED_BYTE,
+                _data.data());
         uint8_t* p = _data.data();
-        for (int32_t y: range(size.height)) {
-            for (int32_t x: range(size.width)) {
-                uint8_t blue = *(p++);
+        for (int32_t y : range(size.height)) {
+            for (int32_t x : range(size.width)) {
+                uint8_t blue  = *(p++);
                 uint8_t green = *(p++);
-                uint8_t red = *(p++);
+                uint8_t red   = *(p++);
                 ++p;
                 pix.set(x, size.height - y - 1, rgb(red, green, blue));
             }
@@ -109,9 +109,7 @@ struct Framebuffer {
         gl_check();
     }
 
-    ~Framebuffer() {
-        glDeleteFramebuffers(1, &id);
-    }
+    ~Framebuffer() { glDeleteFramebuffers(1, &id); }
 };
 
 struct Renderbuffer {
@@ -122,29 +120,26 @@ struct Renderbuffer {
         gl_check();
     }
 
-    ~Renderbuffer() {
-        glDeleteRenderbuffers(1, &id);
-    }
+    ~Renderbuffer() { glDeleteRenderbuffers(1, &id); }
 };
 
 }  // namespace
 
 class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
   public:
-    MainLoop(OffscreenVideoDriver& driver, const Optional<String>& output_dir, Card* initial):
-            _driver(driver),
-            _offscreen(driver._screen_size),
-            _setup(*this),
-            _output_dir(output_dir),
-            _loop(driver, initial) {
-    }
+    MainLoop(OffscreenVideoDriver& driver, const Optional<String>& output_dir, Card* initial)
+            : _driver(driver),
+              _offscreen(driver._screen_size),
+              _setup(*this),
+              _output_dir(output_dir),
+              _loop(driver, initial) {}
 
-    bool takes_snapshots() {
-        return _output_dir.has();
-    }
+    bool takes_snapshots() { return _output_dir.has(); }
 
     void snapshot(wall_ticks ticks) {
-        snapshot_to(_driver._capture_rect, format("screens/{0}.png", dec(ticks.time_since_epoch().count(), 6)));
+        snapshot_to(
+                _driver._capture_rect,
+                format("screens/{0}.png", dec(ticks.time_since_epoch().count(), 6)));
     }
 
     void snapshot_to(Rect bounds, PrintItem relpath) {
@@ -160,36 +155,36 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
         write(file, pix);
     }
 
-    void draw() { _loop.draw(); }
-    bool done() const { return _loop.done(); }
+    void  draw() { _loop.draw(); }
+    bool  done() const { return _loop.done(); }
     Card* top() const { return _loop.top(); }
 
   private:
     const OffscreenVideoDriver& _driver;
-    Offscreen _offscreen;
-    Framebuffer _fb;
-    Renderbuffer _rb;
-    SnapshotBuffer _buffer;
+    Offscreen                   _offscreen;
+    Framebuffer                 _fb;
+    Renderbuffer                _rb;
+    SnapshotBuffer              _buffer;
     struct Setup {
         Setup(OffscreenVideoDriver::MainLoop& loop) {
             glBindFramebuffer(GL_FRAMEBUFFER, loop._fb.id);
             glBindRenderbuffer(GL_RENDERBUFFER, loop._rb.id);
             glRenderbufferStorage(
-                    GL_RENDERBUFFER, GL_RGBA,
-                    loop._driver._screen_size.width, loop._driver._screen_size.height);
+                    GL_RENDERBUFFER, GL_RGBA, loop._driver._screen_size.width,
+                    loop._driver._screen_size.height);
             glFramebufferRenderbuffer(
                     GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, loop._rb.id);
         }
     };
-    Setup _setup;
-    Optional<String> _output_dir;
+    Setup                       _setup;
+    Optional<String>            _output_dir;
     OpenGlVideoDriver::MainLoop _loop;
 };
 
-OffscreenVideoDriver::OffscreenVideoDriver(Size screen_size, const Optional<String>& output_dir):
-        _screen_size(screen_size),
-        _output_dir(output_dir),
-        _capture_rect(screen_size.as_rect()) { }
+OffscreenVideoDriver::OffscreenVideoDriver(Size screen_size, const Optional<String>& output_dir)
+        : _screen_size(screen_size),
+          _output_dir(output_dir),
+          _capture_rect(screen_size.as_rect()) {}
 
 void OffscreenVideoDriver::loop(Card* initial, EventScheduler& scheduler) {
     _scheduler = &scheduler;
@@ -200,7 +195,7 @@ void OffscreenVideoDriver::loop(Card* initial, EventScheduler& scheduler) {
 
 namespace {
 
-class DummyCard: public Card {
+class DummyCard : public Card {
   public:
     void become_front() {
         if (!_inited) {
@@ -217,7 +212,7 @@ class DummyCard: public Card {
 
 void OffscreenVideoDriver::capture(vector<pair<unique_ptr<Card>, String>>& pix) {
     MainLoop loop(*this, _output_dir, new DummyCard);
-    for (auto& p: pix) {
+    for (auto& p : pix) {
         loop.top()->stack()->push(p.first.release());
         loop.draw();
         loop.snapshot_to(_capture_rect, p.second);

@@ -69,7 +69,7 @@ Ledger* Ledger::ledger() {
     return ::antares::ledger;
 }
 
-NullLedger::NullLedger(): _chapters{1} { }
+NullLedger::NullLedger() : _chapters{1} {}
 
 void NullLedger::unlock_chapter(int chapter) {
     _chapters.insert(chapter);
@@ -100,9 +100,7 @@ class DirectoryLedger::Visitor : public JsonVisitor {
         UNLOCKED_CHAPTER,
     };
 
-    Visitor(DirectoryLedger& ledger, State& state):
-            _ledger(ledger),
-            _state(state) {
+    Visitor(DirectoryLedger& ledger, State& state) : _ledger(ledger), _state(state) {
         _state = NEW;
     }
 
@@ -121,7 +119,7 @@ class DirectoryLedger::Visitor : public JsonVisitor {
     virtual void visit_array(const std::vector<Json>& value) const {
         if (_state == UNLOCKED_CHAPTERS) {
             _state = UNLOCKED_CHAPTER;
-            for (const Json& chapter: value) {
+            for (const Json& chapter : value) {
                 chapter.accept(*this);
             }
             _state = UNLOCKED_CHAPTERS;
@@ -142,22 +140,18 @@ class DirectoryLedger::Visitor : public JsonVisitor {
         throw Exception("invalid ledger content");
     }
 
-    virtual void visit_bool(bool value) const {
-        throw Exception("invalid ledger content");
-    }
+    virtual void visit_bool(bool value) const { throw Exception("invalid ledger content"); }
 
-    virtual void visit_null() const {
-        throw Exception("invalid ledger content");
-    }
+    virtual void visit_null() const { throw Exception("invalid ledger content"); }
 
   private:
     DirectoryLedger& _ledger;
-    State& _state;
+    State&           _state;
 };
 
 void DirectoryLedger::load() {
     const StringSlice scenario_id = sys.prefs->scenario_identifier();
-    String path(format("{0}/{1}/ledger.json", dirs().registry, scenario_id));
+    String            path(format("{0}/{1}/ledger.json", dirs().registry, scenario_id));
 
     _chapters.clear();
     unique_ptr<MappedFile> file;
@@ -169,7 +163,7 @@ void DirectoryLedger::load() {
     }
 
     String data(utf8::decode(file->data()));
-    Json json;
+    Json   json;
     if (!string_to_json(data, json)) {
         throw Exception("bad ledger");
     }
@@ -180,7 +174,7 @@ void DirectoryLedger::load() {
 
 void DirectoryLedger::save() {
     const StringSlice scenario_id = sys.prefs->scenario_identifier();
-    const String path(format("{0}/{1}/ledger.json", dirs().registry, scenario_id));
+    const String      path(format("{0}/{1}/ledger.json", dirs().registry, scenario_id));
 
     vector<Json> unlocked_levels;
     for (std::set<int>::const_iterator it = _chapters.begin(); it != _chapters.end(); ++it) {
@@ -188,12 +182,12 @@ void DirectoryLedger::save() {
     }
     StringMap<Json> data;
     data["unlocked-levels"] = Json::array(unlocked_levels);
-    Json json = Json::object(data);
+    Json   json             = Json::object(data);
     String contents(pretty_print(json));
 
     makedirs(path::dirname(path), 0755);
     ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-    Bytes bytes(utf8::encode(contents));
+    Bytes    bytes(utf8::encode(contents));
     write(fd, bytes);
 }
 

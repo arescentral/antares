@@ -36,49 +36,48 @@ static T* check_nonnull(T* value, const char* name) {
 }
 
 GLXFBConfig* fb_configs(Display* display) {
-    int count;
+    int          count;
     GLXFBConfig* configs = check_nonnull(
             glXChooseFBConfig(display, DefaultScreen(display), kAttrs, &count),
             "glXChooseFBConfig()");
     return configs;
 }
 
-const int kContextAttrs[] = {
-    GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
-    GLX_CONTEXT_MINOR_VERSION_ARB, 2,
-    GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
-    None
-};
+const int kContextAttrs[] = {GLX_CONTEXT_MAJOR_VERSION_ARB,
+                             3,
+                             GLX_CONTEXT_MINOR_VERSION_ARB,
+                             2,
+                             GLX_CONTEXT_PROFILE_MASK_ARB,
+                             GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
+                             None};
 
 GLXContext new_context(Display* display, GLXFBConfig config) {
-    typedef GLXContext (*glXCreateContextAttribsARBProc)(Display*, GLXFBConfig, GLXContext, Bool, const int*);
-    glXCreateContextAttribsARBProc glXCreateContextAttribsARB
-        = (glXCreateContextAttribsARBProc)glXGetProcAddressARB((const GLubyte*)"glXCreateContextAttribsARB");
+    typedef GLXContext (*glXCreateContextAttribsARBProc)(
+            Display*, GLXFBConfig, GLXContext, Bool, const int*);
+    glXCreateContextAttribsARBProc glXCreateContextAttribsARB =
+            (glXCreateContextAttribsARBProc)glXGetProcAddressARB(
+                    (const GLubyte*)"glXCreateContextAttribsARB");
     return check_nonnull(
             glXCreateContextAttribsARB(display, config, nullptr, true, kContextAttrs),
             "glXCreateContextAttribsARB()");
 }
 
 GLXPbuffer new_pbuffer(Display* display, GLXFBConfig config, Size size) {
-    int attrs[] = {
-        GLX_PBUFFER_WIDTH, size.width,
-        GLX_PBUFFER_HEIGHT, size.height,
-        None
-    };
+    int attrs[] = {GLX_PBUFFER_WIDTH, size.width, GLX_PBUFFER_HEIGHT, size.height, None};
     return glXCreatePbuffer(display, config, attrs);
 }
 
-Offscreen::Offscreen(Size size):
-        _display(check_nonnull(XOpenDisplay(nullptr), "XOpenDisplay()"), XCloseDisplay),
-        _fb_configs(fb_configs(_display.get()), XFree),
-        _context(new_context(_display.get(), _fb_configs[0]), {_display.get()}) {
+Offscreen::Offscreen(Size size)
+        : _display(check_nonnull(XOpenDisplay(nullptr), "XOpenDisplay()"), XCloseDisplay),
+          _fb_configs(fb_configs(_display.get()), XFree),
+          _context(new_context(_display.get(), _fb_configs[0]), {_display.get()}) {
     typedef Bool (*glXMakeContextCurrentARBProc)(Display*, GLXDrawable, GLXDrawable, GLXContext);
-    glXMakeContextCurrentARBProc glXMakeContextCurrentARB
-        = (glXMakeContextCurrentARBProc)glXGetProcAddressARB((const GLubyte*)"glXMakeContextCurrent");
+    glXMakeContextCurrentARBProc glXMakeContextCurrentARB =
+            (glXMakeContextCurrentARBProc)glXGetProcAddressARB(
+                    (const GLubyte*)"glXMakeContextCurrent");
     glXMakeContextCurrentARB(_display.get(), 0, 0, _context.get());
 }
 
-Offscreen::~Offscreen() {
-}
+Offscreen::~Offscreen() {}
 
 }  // namespace antares

@@ -38,4 +38,4 @@ void reset_action_queue();
 void execute_action_queue();
 }  // namespace antares
 
-#endif // ANTARES_GAME_ACTION_HPP_
+#endif  // ANTARES_GAME_ACTION_HPP_

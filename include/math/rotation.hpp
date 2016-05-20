@@ -26,9 +26,9 @@
 namespace antares {
 
 enum {
-    ROT_0 = 0,
-    ROT_45 = 45,
-    ROT_90 = 90,
+    ROT_0   = 0,
+    ROT_45  = 45,
+    ROT_90  = 90,
     ROT_180 = 180,
     ROT_POS = 360,
 };
@@ -64,9 +64,9 @@ inline void mAddAngle(T& theta, int32_t other) {
     }
 }
 
-void GetRotPoint(Fixed *x, Fixed *y, int32_t rotpos);
+void GetRotPoint(Fixed* x, Fixed* y, int32_t rotpos);
 int32_t GetAngleFromVector(int32_t x, int32_t y);
 
 }  // namespace antares
 
-#endif // ANTARES_MATH_ROTATION_HPP_
+#endif  // ANTARES_MATH_ROTATION_HPP_

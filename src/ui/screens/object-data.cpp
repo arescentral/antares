@@ -21,8 +21,8 @@
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
-#include "game/time.hpp"
 #include "game/sys.hpp"
+#include "game/time.hpp"
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
@@ -36,7 +36,7 @@ namespace antares {
 namespace {
 
 const int32_t kShipDataWidth = 240;
-const usecs kTypingDelay = kMinorTick;
+const usecs   kTypingDelay   = kMinorTick;
 
 Rect object_data_bounds(Point origin, Size size) {
     Rect bounds(Point(0, 0), size);
@@ -61,10 +61,8 @@ Rect object_data_bounds(Point origin, Size size) {
 }  // namespace
 
 ObjectDataScreen::ObjectDataScreen(
-        Point origin, Handle<BaseObject> object, Trigger trigger, int which):
-        _trigger(trigger),
-        _which(which),
-        _state(TYPING) {
+        Point origin, Handle<BaseObject> object, Trigger trigger, int which)
+        : _trigger(trigger), _which(which), _state(TYPING) {
     String text;
     CreateObjectDataText(&text, object);
     _text.reset(new StyledText(sys.fonts.button));
@@ -75,13 +73,13 @@ ObjectDataScreen::ObjectDataScreen(
     _bounds = object_data_bounds(origin, Size(_text->auto_width(), _text->height()));
 }
 
-ObjectDataScreen::~ObjectDataScreen() { }
+ObjectDataScreen::~ObjectDataScreen() {}
 
 void ObjectDataScreen::become_front() {
-    _state = TYPING;
+    _state       = TYPING;
     _typed_chars = 0;
     _next_update = now() + kTypingDelay;
-    _next_sound = _next_update;
+    _next_sound  = _next_update;
 }
 
 bool ObjectDataScreen::next_timer(wall_time& time) {
@@ -107,7 +105,7 @@ void ObjectDataScreen::fire_timer() {
             ++_typed_chars;
         } else {
             _next_update = wall_time();
-            _state = DONE;
+            _state       = DONE;
             break;
         }
     }

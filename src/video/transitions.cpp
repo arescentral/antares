@@ -36,23 +36,22 @@ namespace antares {
 namespace {
 
 const int32_t kStartAnimation = -255;
-const int32_t kEndAnimation = 255;
+const int32_t kEndAnimation   = 255;
 
 }  // namespace
 
-Transitions::Transitions():
-        _active(false) { }
-Transitions::~Transitions() { }
+Transitions::Transitions() : _active(false) {}
+Transitions::~Transitions() {}
 
 void Transitions::reset() {
     _active = false;
 }
 
 void Transitions::start_boolean(int32_t in_speed, int32_t out_speed, uint8_t goal_color) {
-    _step = kStartAnimation;
-    _in_speed = in_speed;
-    _out_speed = out_speed;
-    _color = GetRGBTranslateColor(GetRetroIndex(goal_color));
+    _step        = kStartAnimation;
+    _in_speed    = in_speed;
+    _out_speed   = out_speed;
+    _color       = GetRGBTranslateColor(GetRetroIndex(goal_color));
     _color.alpha = 127;
     if (!_active) {
         _active = true;
@@ -78,16 +77,15 @@ void Transitions::draw() const {
 }
 
 ColorFade::ColorFade(
-        Direction direction, const RgbColor& color, usecs duration,
-        bool allow_skip, bool* skipped)
+        Direction direction, const RgbColor& color, usecs duration, bool allow_skip, bool* skipped)
         : _direction(direction),
           _color(color),
           _allow_skip(allow_skip),
           _skipped(skipped),
-          _duration(duration) { }
+          _duration(duration) {}
 
 void ColorFade::become_front() {
-    _start = now();
+    _start      = now();
     _next_event = _start + kMinorTick;
 }
 
@@ -133,8 +131,8 @@ void ColorFade::fire_timer() {
 
 void ColorFade::draw() const {
     next()->draw();
-    wall_time now = antares::now();
-    double fraction = static_cast<double>((now - _start).count()) / _duration.count();
+    wall_time now      = antares::now();
+    double    fraction = static_cast<double>((now - _start).count()) / _duration.count();
     if (fraction > 1.0) {
         fraction = 1.0;
     }
@@ -147,34 +145,32 @@ void ColorFade::draw() const {
     Rects().fill(world(), fill_color);
 }
 
-PictFade::PictFade(int pict_id, bool* skipped):
-        _state(NEW),
-        _skipped(skipped),
-        _texture(Picture(pict_id).texture()) { }
+PictFade::PictFade(int pict_id, bool* skipped)
+        : _state(NEW), _skipped(skipped), _texture(Picture(pict_id).texture()) {}
 
-PictFade::~PictFade() { }
+PictFade::~PictFade() {}
 
 void PictFade::become_front() {
     switch (_state) {
-      case NEW:
-        wax();
-        break;
-
-      case WAXING:
-        if (!this->skip()) {
-            _state = FULL;
-            _wane_start = now() + this->display_time();
+        case NEW:
+            wax();
             break;
-        }
+
+        case WAXING:
+            if (!this->skip()) {
+                _state      = FULL;
+                _wane_start = now() + this->display_time();
+                break;
+            }
         // fall through.
 
-      case WANING:
-        _state = NEW;
-        stack()->pop(this);
-        break;
+        case WANING:
+            _state = NEW;
+            stack()->pop(this);
+            break;
 
-      default:
-        break;
+        default:
+            break;
     }
 }
 
@@ -219,14 +215,16 @@ void PictFade::draw() const {
 
 void PictFade::wax() {
     _state = WAXING;
-    stack()->push(new ColorFade(ColorFade::FROM_COLOR, RgbColor::black(), this->fade_time(), true,
-                _skipped));
+    stack()->push(
+            new ColorFade(
+                    ColorFade::FROM_COLOR, RgbColor::black(), this->fade_time(), true, _skipped));
 }
 
 void PictFade::wane() {
     _state = WANING;
-    stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), this->fade_time(), true,
-                _skipped));
+    stack()->push(
+            new ColorFade(
+                    ColorFade::TO_COLOR, RgbColor::black(), this->fade_time(), true, _skipped));
 }
 
 usecs PictFade::fade_time() const {

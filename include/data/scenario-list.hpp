@@ -19,8 +19,8 @@
 #ifndef ANTARES_DATA_SCENARIO_LIST_HPP_
 #define ANTARES_DATA_SCENARIO_LIST_HPP_
 
-#include <vector>
 #include <sfz/sfz.hpp>
+#include <vector>
 
 namespace antares {
 
@@ -38,12 +38,12 @@ class ScenarioList {
         sfz::String download_url;
         sfz::String author;
         sfz::String author_url;
-        Version version;
-        bool installed;
+        Version     version;
+        bool        installed;
     };
 
     ScenarioList();
-    size_t size() const;
+    size_t       size() const;
     const Entry& at(size_t index) const;
 
   private:
@@ -54,4 +54,4 @@ class ScenarioList {
 
 }  // namespace antares
 
-#endif // ANTARES_DATA_SCENARIO_LIST_HPP_
+#endif  // ANTARES_DATA_SCENARIO_LIST_HPP_

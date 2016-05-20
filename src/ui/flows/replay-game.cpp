@@ -32,37 +32,36 @@ namespace antares {
 using sfz::read;
 using std::swap;
 
-ReplayGame::ReplayGame(int16_t replay_id):
-        _state(NEW),
-        _resource("replays", "NLRP", replay_id),
-        _data(_resource.data()),
-        _random_seed{_data.global_seed},
-        _level(_data.chapter_id - 1),
-        _game_result(NO_GAME),
-        _input_source(&_data) { }
+ReplayGame::ReplayGame(int16_t replay_id)
+        : _state(NEW),
+          _resource("replays", "NLRP", replay_id),
+          _data(_resource.data()),
+          _random_seed{_data.global_seed},
+          _level(_data.chapter_id - 1),
+          _game_result(NO_GAME),
+          _input_source(&_data) {}
 
-ReplayGame::~ReplayGame() { }
+ReplayGame::~ReplayGame() {}
 
 void ReplayGame::become_front() {
     switch (_state) {
-      case NEW:
-        _state = FADING_OUT;
-        stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
-        break;
+        case NEW:
+            _state = FADING_OUT;
+            stack()->push(
+                    new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
+            break;
 
-      case FADING_OUT:
-        {
+        case FADING_OUT: {
             _state = PLAYING;
             swap(_random_seed, g.random);
             _game_result = NO_GAME;
             stack()->push(new MainPlay(_level, true, &_input_source, true, &_game_result));
-        }
-        break;
+        } break;
 
-      case PLAYING:
-        swap(_random_seed, g.random);
-        stack()->pop(this);
-        break;
+        case PLAYING:
+            swap(_random_seed, g.random);
+            stack()->pop(this);
+            break;
     }
 }
 

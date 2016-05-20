@@ -31,7 +31,7 @@ class Offscreen {
 
   private:
     cgl::PixelFormat _pix;
-    cgl::Context _context;
+    cgl::Context     _context;
 };
 
 }  // namespace antares

@@ -38,7 +38,7 @@ VideoDriver::~VideoDriver() {
     sys.video = NULL;
 }
 
-Texture::Impl::~Impl() { }
+Texture::Impl::~Impl() {}
 
 Points::Points() {
     sys.video->begin_points();
@@ -76,8 +76,7 @@ void Rects::fill(const Rect& rect, const RgbColor& color) const {
     sys.video->batch_rect(rect, color);
 }
 
-Quads::Quads(const Texture& sprite):
-        _sprite(sprite) {
+Quads::Quads(const Texture& sprite) : _sprite(sprite) {
     _sprite._impl->begin_quads();
 }
 

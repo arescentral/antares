@@ -30,8 +30,8 @@ namespace macroman = sfz::macroman;
 
 namespace antares {
 
-static const int16_t kLevel_StartTimeMask   = 0x7fff;
-static const int16_t kLevel_IsTraining_Bit  = 0x8000;
+static const int16_t kLevel_StartTimeMask  = 0x7fff;
+static const int16_t kLevel_IsTraining_Bit = 0x8000;
 
 namespace {
 
@@ -49,10 +49,10 @@ Level* Level::get(int n) {
 }
 
 void read_from(ReadSource in, scenarioInfoType& scenario_info) {
-    scenario_info.warpInFlareID = Handle<BaseObject>(read<int32_t>(in));
+    scenario_info.warpInFlareID  = Handle<BaseObject>(read<int32_t>(in));
     scenario_info.warpOutFlareID = Handle<BaseObject>(read<int32_t>(in));
-    scenario_info.playerBodyID = Handle<BaseObject>(read<int32_t>(in));
-    scenario_info.energyBlobID = Handle<BaseObject>(read<int32_t>(in));
+    scenario_info.playerBodyID   = Handle<BaseObject>(read<int32_t>(in));
+    scenario_info.energyBlobID   = Handle<BaseObject>(read<int32_t>(in));
     read_pstr(in, scenario_info.downloadURLString);
     read_pstr(in, scenario_info.titleString);
     read_pstr(in, scenario_info.authorNameString);
@@ -86,8 +86,8 @@ void read_from(ReadSource in, Level& level) {
     read(in, level.parKillRatio);
     read(in, level.parLosses);
     int16_t start_time = read<int16_t>(in);
-    level.startTime = secs(start_time & kLevel_StartTimeMask);
-    level.is_training = start_time & kLevel_IsTraining_Bit;
+    level.startTime    = secs(start_time & kLevel_StartTimeMask);
+    level.is_training  = start_time & kLevel_IsTraining_Bit;
 }
 
 void read_from(ReadSource in, Level::Player& level_player) {
@@ -102,9 +102,9 @@ void read_from(ReadSource in, Level::Player& level_player) {
 }
 
 static void read_action(sfz::ReadSource in, Level::Condition& condition) {
-    auto start = read<int32_t>(in);
-    auto count = read<int32_t>(in);
-    auto end = (start >= 0) ? (start + count) : start;
+    auto start       = read<int32_t>(in);
+    auto count       = read<int32_t>(in);
+    auto end         = (start >= 0) ? (start + count) : start;
     condition.action = {start, end};
 }
 
@@ -122,35 +122,35 @@ void read_from(ReadSource in, Level::Condition& level_condition) {
 
     BytesSlice sub(section, 12);
     switch (level_condition.condition) {
-      case kCounterCondition:
-      case kCounterGreaterCondition:
-      case kCounterNotCondition:
-        read(sub, level_condition.conditionArgument.counter);
-        break;
+        case kCounterCondition:
+        case kCounterGreaterCondition:
+        case kCounterNotCondition:
+            read(sub, level_condition.conditionArgument.counter);
+            break;
 
-      case kDestructionCondition:
-      case kOwnerCondition:
-      case kNoShipsLeftCondition:
-      case kZoomLevelCondition:
-        read(sub, level_condition.conditionArgument.longValue);
-        break;
+        case kDestructionCondition:
+        case kOwnerCondition:
+        case kNoShipsLeftCondition:
+        case kZoomLevelCondition:
+            read(sub, level_condition.conditionArgument.longValue);
+            break;
 
-      case kVelocityLessThanEqualToCondition:
-        read(sub, level_condition.conditionArgument.fixedValue);
+        case kVelocityLessThanEqualToCondition:
+            read(sub, level_condition.conditionArgument.fixedValue);
 
-      case kTimeCondition:
-        level_condition.conditionArgument.timeValue = ticks(read<int32_t>(sub));
-        break;
+        case kTimeCondition:
+            level_condition.conditionArgument.timeValue = ticks(read<int32_t>(sub));
+            break;
 
-      case kProximityCondition:
-      case kDistanceGreaterCondition:
-        read(sub, level_condition.conditionArgument.unsignedLongValue);
-        break;
+        case kProximityCondition:
+        case kDistanceGreaterCondition:
+            read(sub, level_condition.conditionArgument.unsignedLongValue);
+            break;
 
-      case kCurrentMessageCondition:
-      case kCurrentComputerCondition:
-        read(sub, level_condition.conditionArgument.location);
-        break;
+        case kCurrentMessageCondition:
+        case kCurrentComputerCondition:
+            read(sub, level_condition.conditionArgument.location);
+            break;
     }
 }
 
@@ -173,17 +173,17 @@ void read_from(ReadSource in, Level::BriefPoint& brief_point) {
 
     BytesSlice sub(section, 8);
     switch (brief_point.briefPointKind) {
-      case kNoPointKind:
-      case kBriefFreestandingKind:
-        break;
+        case kNoPointKind:
+        case kBriefFreestandingKind:
+            break;
 
-      case kBriefObjectKind:
-        read(sub, brief_point.briefPointData.objectBriefType);
-        break;
+        case kBriefObjectKind:
+            read(sub, brief_point.briefPointData.objectBriefType);
+            break;
 
-      case kBriefAbsoluteKind:
-        read(sub, brief_point.briefPointData.absoluteBriefType);
-        break;
+        case kBriefAbsoluteKind:
+            read(sub, brief_point.briefPointData.absoluteBriefType);
+            break;
     }
 }
 
@@ -197,7 +197,7 @@ void read_from(ReadSource in, Level::BriefPoint::AbsoluteBrief& absolute_brief) 
 }
 
 void read_from(ReadSource in, Level::InitialObject& level_initial) {
-    level_initial.type = Handle<BaseObject>(read<int32_t>(in));
+    level_initial.type  = Handle<BaseObject>(read<int32_t>(in));
     level_initial.owner = Handle<Admiral>(read<int32_t>(in));
     in.shift(4);
     level_initial.realObject = Handle<SpaceObject>(-1);

@@ -22,8 +22,8 @@
 #include "drawing/build-pix.hpp"
 #include "drawing/pix-map.hpp"
 #include "game/globals.hpp"
-#include "game/time.hpp"
 #include "game/sys.hpp"
+#include "game/time.hpp"
 #include "sound/music.hpp"
 #include "ui/card.hpp"
 #include "video/driver.hpp"
@@ -38,17 +38,17 @@ const int kScrollTextHeight = 200;
 
 }  // namespace
 
-ScrollTextScreen::ScrollTextScreen(int text_id, int width, ticks interval):
-        _build_pix(BuildPix(text_id, width)),
-        _interval(interval),
-        _play_song(false),
-        _song_id(0) { }
+ScrollTextScreen::ScrollTextScreen(int text_id, int width, ticks interval)
+        : _build_pix(BuildPix(text_id, width)),
+          _interval(interval),
+          _play_song(false),
+          _song_id(0) {}
 
-ScrollTextScreen::ScrollTextScreen(int text_id, int width, ticks interval, int song_id):
-        _build_pix(BuildPix(text_id, width)),
-        _interval(interval),
-        _play_song(true),
-        _song_id(song_id) { }
+ScrollTextScreen::ScrollTextScreen(int text_id, int width, ticks interval, int song_id)
+        : _build_pix(BuildPix(text_id, width)),
+          _interval(interval),
+          _play_song(true),
+          _song_id(song_id) {}
 
 void ScrollTextScreen::become_front() {
     // If a song was requested, play it.
@@ -56,9 +56,9 @@ void ScrollTextScreen::become_front() {
         sys.music.play(Music::IDLE, _song_id);
     }
 
-    _start = now();
+    _start      = now();
     _next_shift = _start;
-    _position = -kScrollTextHeight;
+    _position   = -kScrollTextHeight;
 }
 
 void ScrollTextScreen::resign_front() {
@@ -102,7 +102,7 @@ void ScrollTextScreen::fire_timer() {
 
 void ScrollTextScreen::draw() const {
     Rect world = sys.video->screen_size().as_rect();
-    Rect clip = Rect(0, 0, world.width(), kScrollTextHeight);
+    Rect clip  = Rect(0, 0, world.width(), kScrollTextHeight);
     clip.center_in(world);
 
     Rect position = _build_pix.size().as_rect();

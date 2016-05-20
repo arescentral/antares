@@ -19,11 +19,11 @@
 #ifndef ANTARES_UI_SCREENS_BRIEFING_HPP_
 #define ANTARES_UI_SCREENS_BRIEFING_HPP_
 
-#include <vector>
 #include <sfz/sfz.hpp>
+#include <vector>
 
-#include "math/geometry.hpp"
 #include "drawing/interface.hpp"
+#include "math/geometry.hpp"
 #include "ui/screen.hpp"
 #include "ui/screens/object-data.hpp"
 
@@ -50,9 +50,9 @@ class BriefingScreen : public InterfaceScreen {
   private:
     enum Item {
         // Buttons:
-        DONE = 0,
+        DONE     = 0,
         PREVIOUS = 1,
-        NEXT = 2,
+        NEXT     = 2,
 
         // Map area:
         MAP_RECT = 7,
@@ -68,24 +68,24 @@ class BriefingScreen : public InterfaceScreen {
     void show_object_data(int index, const GamepadButtonDownEvent& event);
     void show_object_data(int index, ObjectDataScreen::Trigger trigger, int which);
 
-    const Level* const _level;
-    bool* const _cancelled;
-    int _briefing_point;
-    const int _briefing_point_count;
+    const Level* const  _level;
+    bool* const         _cancelled;
+    int                 _briefing_point;
+    const int           _briefing_point_count;
     mutable LabeledRect _data_item;
 
     Rect _bounds;
 
     Texture _star_map;
-    Rect _star_rect;
+    Rect    _star_rect;
 
     struct Star {
-        Point location;
+        Point   location;
         uint8_t shade;
     };
-    std::vector<Star> _system_stars;
+    std::vector<Star>           _system_stars;
     std::vector<inlinePictType> _inline_pict;
-    Rect _highlight_rect;
+    Rect                        _highlight_rect;
     std::vector<std::pair<Point, Point>> _highlight_lines;
     sfz::String _text;
 

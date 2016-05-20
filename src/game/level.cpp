@@ -27,8 +27,8 @@
 #include "game/admiral.hpp"
 #include "game/condition.hpp"
 #include "game/globals.hpp"
-#include "game/instruments.hpp"
 #include "game/initial.hpp"
+#include "game/instruments.hpp"
 #include "game/labels.hpp"
 #include "game/messages.hpp"
 #include "game/minicomputer.hpp"
@@ -58,9 +58,9 @@ namespace antares {
 
 namespace {
 
-const uint32_t kNeutralColorNeededFlag   = 0x00010000u;
-const uint32_t kNeutralColorLoadedFlag   = 0x00000001u;
-const uint32_t kAnyColorLoadedFlag       = 0x0000ffffu;
+const uint32_t kNeutralColorNeededFlag = 0x00010000u;
+const uint32_t kNeutralColorLoadedFlag = 0x00000001u;
+const uint32_t kAnyColorLoadedFlag     = 0x0000ffffu;
 
 #ifdef DATA_COVERAGE
 ANTARES_GLOBAL set<int32_t> possible_objects;
@@ -68,12 +68,12 @@ ANTARES_GLOBAL set<int32_t> possible_actions;
 #endif  // DATA_COVERAGE
 
 void AddBaseObjectActionMedia(
-        Handle<BaseObject> base, HandleList<Action> (BaseObject::*whichType),
-        uint8_t color, uint32_t all_colors);
+        Handle<BaseObject> base, HandleList<Action>(BaseObject::*whichType), uint8_t color,
+        uint32_t all_colors);
 void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors);
 
 void SetAllBaseObjectsUnchecked() {
-    for (auto aBase: BaseObject::all()) {
+    for (auto aBase : BaseObject::all()) {
         aBase->internalFlags = 0;
     }
 }
@@ -107,7 +107,7 @@ void AddBaseObjectMedia(Handle<BaseObject> base, uint8_t color, uint32_t all_col
         AddBaseObjectActionMedia(base, &BaseObject::activate, i, all_colors);
         AddBaseObjectActionMedia(base, &BaseObject::arrive, i, all_colors);
 
-        for (Handle<BaseObject> weapon: {base->pulse.base, base->beam.base, base->special.base}) {
+        for (Handle<BaseObject> weapon : {base->pulse.base, base->beam.base, base->special.base}) {
             if (weapon.get()) {
                 AddBaseObjectMedia(weapon, i, all_colors);
             }
@@ -116,9 +116,9 @@ void AddBaseObjectMedia(Handle<BaseObject> base, uint8_t color, uint32_t all_col
 }
 
 void AddBaseObjectActionMedia(
-        Handle<BaseObject> base, HandleList<Action> (BaseObject::*whichType),
-        uint8_t color, uint32_t all_colors) {
-    for (auto action: (*base.*whichType)) {
+        Handle<BaseObject> base, HandleList<Action>(BaseObject::*whichType), uint8_t color,
+        uint32_t all_colors) {
+    for (auto action : (*base.*whichType)) {
         if (action.get()) {
             AddActionMedia(action, color, all_colors);
         }
@@ -126,9 +126,9 @@ void AddBaseObjectActionMedia(
 }
 
 void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors) {
-    int32_t             l1, l2;
+    int32_t l1, l2;
 #ifdef DATA_COVERAGE
-        possible_actions.insert(action.number());
+    possible_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
     if (!action.get()) {
@@ -142,8 +142,7 @@ void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors) {
 
         case kPlaySound:
             l1 = action->argument.playSound.idMinimum;
-            l2 = action->argument.playSound.idMinimum +
-                    action->argument.playSound.idRange;
+            l2 = action->argument.playSound.idMinimum + action->argument.playSound.idRange;
             for (int32_t count = l1; count <= l2; count++) {
                 sys.sound.load(count);
             }
@@ -154,7 +153,7 @@ void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors) {
             break;
 
         case kAlterOwner:
-            for (auto baseObject: BaseObject::all()) {
+            for (auto baseObject : BaseObject::all()) {
                 if (action_filter_applies_to(*action, baseObject)) {
                     baseObject->internalFlags |= all_colors;
                 }
@@ -171,16 +170,16 @@ static coordPointType rotate_coords(int32_t h, int32_t v, int32_t rotation) {
     Fixed lcos, lsin;
     GetRotPoint(&lcos, &lsin, rotation);
     coordPointType coord;
-    coord.h = (kUniversalCenter
-               + (Fixed::from_val(h) * -lcos).val()
-               - (Fixed::from_val(v) * -lsin).val());
-    coord.v = (kUniversalCenter
-               + (Fixed::from_val(h) * -lsin).val()
-               + (Fixed::from_val(v) * -lcos).val());
+    coord.h =
+            (kUniversalCenter + (Fixed::from_val(h) * -lcos).val() -
+             (Fixed::from_val(v) * -lsin).val());
+    coord.v =
+            (kUniversalCenter + (Fixed::from_val(h) * -lsin).val() +
+             (Fixed::from_val(v) * -lcos).val());
     return coord;
 }
 
-void GetInitialCoord(Level::InitialObject *initial, coordPointType *coord, int32_t rotation) {
+void GetInitialCoord(Level::InitialObject* initial, coordPointType* coord, int32_t rotation) {
     *coord = rotate_coords(initial->location.h, initial->location.v, rotation);
 }
 
@@ -229,7 +228,7 @@ bool start_construct_level(Handle<Level> level, int32_t* max) {
     ResetAllDestObjectData();
     ResetMotionGlobals();
     gAbsoluteScale = kTimesTwoScale;
-    g.sync = 0;
+    g.sync         = 0;
 
     g.level = level;
 
@@ -242,8 +241,8 @@ bool start_construct_level(Handle<Level> level, int32_t* max) {
         }
     }
 
-    g.victor = Admiral::none();
-    g.next_level = -1;
+    g.victor       = Admiral::none();
+    g.next_level   = -1;
     g.victory_text = -1;
 
     SetMiniScreenStatusStrList(g.level->scoreStringResID);
@@ -270,9 +269,8 @@ bool start_construct_level(Handle<Level> level, int32_t* max) {
     sys.pix.reset();
     sys.sound.reset();
 
-    *max = g.level->initialNum * 3L
-         + 1
-         + g.level->startTime.count(); // for each run through the initial num
+    *max = g.level->initialNum * 3L + 1 +
+           g.level->startTime.count();  // for each run through the initial num
 
     return true;
 }
@@ -296,20 +294,20 @@ static void load_blessed_objects(uint32_t all_colors) {
     // objects by default.
     plug.meta.playerBodyID->internalFlags |= all_colors;
     for (int i = 0; i < g.level->playerNum; i++) {
-        const auto& meta = plug.meta;
+        const auto&        meta      = plug.meta;
         Handle<BaseObject> blessed[] = {
-            meta.energyBlobID, meta.warpInFlareID, meta.warpOutFlareID, meta.playerBodyID,
+                meta.energyBlobID, meta.warpInFlareID, meta.warpOutFlareID, meta.playerBodyID,
         };
-        for (auto id: blessed) {
+        for (auto id : blessed) {
             AddBaseObjectMedia(id, GRAY, all_colors);
         }
     }
 }
 
 static void load_initial(int i, uint32_t all_colors) {
-    Level::InitialObject* initial = g.level->initial(i);
-    Handle<Admiral> owner = initial->owner;
-    auto baseObject = initial->type;
+    Level::InitialObject* initial    = g.level->initial(i);
+    Handle<Admiral>       owner      = initial->owner;
+    auto                  baseObject = initial->type;
     // TODO(sfiera): remap objects in networked games.
 
     // Load the media for this object
@@ -340,10 +338,10 @@ static void load_initial(int i, uint32_t all_colors) {
         initial = g.level->initial(i);
         if (initial->canBuild[j] != kNoClass) {
             // check for each player
-            for (auto a: Admiral::all()) {
+            for (auto a : Admiral::all()) {
                 if (a->active()) {
-                    auto baseObject = mGetBaseObjectFromClassRace(
-                            initial->canBuild[j], GetAdmiralRace(a));
+                    auto baseObject =
+                            mGetBaseObjectFromClassRace(initial->canBuild[j], GetAdmiralRace(a));
                     if (baseObject.get()) {
                         AddBaseObjectMedia(baseObject, GetAdmiralColor(a), all_colors);
                     }
@@ -355,7 +353,7 @@ static void load_initial(int i, uint32_t all_colors) {
 
 static void load_condition(int i, uint32_t all_colors) {
     Level::Condition* condition = g.level->condition(i);
-    for (auto action: condition->action) {
+    for (auto action : condition->action) {
         AddActionMedia(action, GRAY, all_colors);
     }
     condition->set_true_yet(condition->flags & kInitiallyTrue);
@@ -379,9 +377,9 @@ static void run_game_1s() {
 }
 
 void construct_level(Handle<Level> level, int32_t* current) {
-    int32_t step = *current;
+    int32_t  step       = *current;
     uint32_t all_colors = kNeutralColorNeededFlag;
-    for (auto adm: Admiral::all()) {
+    for (auto adm : Admiral::all()) {
         if (adm->active()) {
             all_colors |= kNeutralColorNeededFlag << GetAdmiralColor(adm);
         }
@@ -420,17 +418,17 @@ void construct_level(Handle<Level> level, int32_t* current) {
 void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textID) {
     if (!whichPlayer.get()) {
         // if there's no winner, we want to exit immediately
-        g.next_level = nextLevel;
+        g.next_level   = nextLevel;
         g.victory_text = textID;
-        g.game_over = true;
+        g.game_over    = true;
         g.game_over_at = g.time;
     } else {
         if (!g.victor.get()) {
-            g.victor = whichPlayer;
+            g.victor       = whichPlayer;
             g.victory_text = textID;
-            g.next_level = nextLevel;
+            g.next_level   = nextLevel;
             if (!g.game_over) {
-                g.game_over = true;
+                g.game_over    = true;
                 g.game_over_at = g.time + secs(3);
             }
         }
@@ -442,25 +440,25 @@ void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textI
 //  at which to show the entire scenario.
 
 void GetLevelFullScaleAndCorner(
-        const Level* level, int32_t rotation, coordPointType *corner, int32_t *scale,
-        Rect *bounds) {
-    int32_t         biggest, mustFit;
-    Point           coord, otherCoord, tempCoord;
-    Level::InitialObject     *initial;
+        const Level* level, int32_t rotation, coordPointType* corner, int32_t* scale,
+        Rect* bounds) {
+    int32_t               biggest, mustFit;
+    Point                 coord, otherCoord, tempCoord;
+    Level::InitialObject* initial;
 
     mustFit = bounds->bottom - bounds->top;
-    if ((bounds->right - bounds->left) < mustFit) mustFit = bounds->right - bounds->left;
+    if ((bounds->right - bounds->left) < mustFit)
+        mustFit = bounds->right - bounds->left;
 
     biggest = 0;
-    for (int32_t count = 0; count < level->initialNum; count++)
-    {
+    for (int32_t count = 0; count < level->initialNum; count++) {
         initial = level->initial(count);
         if (!(initial->attributes & kInitiallyHidden)) {
-            GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&coord), g.angle);
+            GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&coord), g.angle);
 
             for (int32_t otherCount = 0; otherCount < level->initialNum; otherCount++) {
                 initial = level->initial(otherCount);
-                GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&otherCoord), g.angle);
+                GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&otherCoord), g.angle);
 
                 if (ABS(otherCoord.h - coord.h) > biggest) {
                     biggest = ABS(otherCoord.h - coord.h);
@@ -479,13 +477,12 @@ void GetLevelFullScaleAndCorner(
 
     otherCoord.h = kUniversalCenter;
     otherCoord.v = kUniversalCenter;
-    coord.h = kUniversalCenter;
-    coord.v = kUniversalCenter;
-    initial = level->initial(0);
-    for (int32_t count = 0; count < level->initialNum; count++)
-    {
+    coord.h      = kUniversalCenter;
+    coord.v      = kUniversalCenter;
+    initial      = level->initial(0);
+    for (int32_t count = 0; count < level->initialNum; count++) {
         if (!(initial->attributes & kInitiallyHidden)) {
-            GetInitialCoord(initial, reinterpret_cast<coordPointType *>(&tempCoord), g.angle);
+            GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&tempCoord), g.angle);
 
             if (tempCoord.h < coord.h) {
                 coord.h = tempCoord.h;
@@ -509,12 +506,11 @@ void GetLevelFullScaleAndCorner(
     biggest /= *scale;
     biggest /= 2;
     corner->h = (coord.h + (otherCoord.h - coord.h) / 2) - biggest;
-    biggest = (bounds->bottom - bounds->top);
+    biggest   = (bounds->bottom - bounds->top);
     biggest *= SCALE_SCALE;
     biggest /= *scale;
     biggest /= 2;
     corner->v = (coord.v + (otherCoord.v - coord.v) / 2) - biggest;
-
 }
 
 coordPointType Translate_Coord_To_Level_Rotation(int32_t h, int32_t v) {

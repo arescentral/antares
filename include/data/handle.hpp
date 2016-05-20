@@ -34,40 +34,51 @@ struct Vector;
 template <typename T>
 class Handle {
   public:
-    Handle(): _number(-1) { }
-    explicit Handle(int number): _number(number) { }
-    int number() const { return _number; }
-    T* get() const { return T::get(_number); }
+    Handle() : _number(-1) {}
+    explicit Handle(int number) : _number(number) {}
+    int                 number() const { return _number; }
+    T*                  get() const { return T::get(_number); }
     T& operator*() const { return *get(); }
     T* operator->() const { return get(); }
+
   private:
     int _number;
 };
 template <typename T>
-inline bool operator==(Handle<T> x, Handle<T> y) { return x.number() == y.number(); }
+inline bool operator==(Handle<T> x, Handle<T> y) {
+    return x.number() == y.number();
+}
 template <typename T>
-inline bool operator!=(Handle<T> x, Handle<T> y) { return !(x == y); }
+inline bool operator!=(Handle<T> x, Handle<T> y) {
+    return !(x == y);
+}
 
 template <typename T>
 class HandleList {
   public:
-    HandleList(): HandleList(-1, -1) { }
-    HandleList(int begin, int end): _begin(begin), _end(end) { }
+    HandleList() : HandleList(-1, -1) {}
+    HandleList(int begin, int end) : _begin(begin), _end(end) {}
     size_t size() const { return _end - _begin; }
     class iterator {
         friend class HandleList;
+
       public:
         Handle<T> operator*() const { return Handle<T>(_number); }
-        iterator& operator++() { ++_number; return *this; }
+        iterator& operator++() {
+            ++_number;
+            return *this;
+        }
         iterator operator++(int) { return iterator(_number++); }
         bool operator==(iterator other) const { return _number == other._number; }
         bool operator!=(iterator other) const { return _number != other._number; }
+
       private:
-        explicit iterator(int number): _number(number) { }
-        int _number;
+        explicit iterator(int number) : _number(number) {}
+        int                   _number;
     };
     iterator begin() const { return iterator(_begin); }
     iterator end() const { return iterator(_end); }
+
   private:
     int _begin;
     int _end;
@@ -75,4 +86,4 @@ class HandleList {
 
 }  // namespace antares
 
-#endif // ANTARES_DATA_HANDLE_HPP_
+#endif  // ANTARES_DATA_HANDLE_HPP_

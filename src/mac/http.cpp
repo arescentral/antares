@@ -32,11 +32,11 @@ namespace antares {
 namespace http {
 
 void get(const StringSlice& url, WriteTarget out) {
-    cf::Url cfurl(url);
+    cf::Url  cfurl(url);
     cf::Data cfdata;
-    SInt32 error;
+    SInt32   error;
     if (CFURLCreateDataAndPropertiesFromResource(
-            NULL, cfurl.c_obj(), &cfdata.c_obj(), NULL, NULL, &error)) {
+                NULL, cfurl.c_obj(), &cfdata.c_obj(), NULL, NULL, &error)) {
         write(out, cfdata.data());
     } else {
         throw Exception(format("Couldn't load requested url {0}", url));

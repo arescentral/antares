@@ -56,4 +56,4 @@ class Font {
 
 }  // namespace antares
 
-#endif // ANTARES_DRAWING_TEXT_HPP_
+#endif  // ANTARES_DRAWING_TEXT_HPP_

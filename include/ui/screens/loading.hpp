@@ -20,8 +20,8 @@
 #ifndef ANTARES_UI_SCREENS_LOADING_HPP_
 #define ANTARES_UI_SCREENS_LOADING_HPP_
 
-#include <vector>
 #include <sfz/sfz.hpp>
+#include <vector>
 
 #include "data/handle.hpp"
 #include "drawing/styled-text.hpp"
@@ -56,11 +56,11 @@ class LoadingScreen : public InterfaceScreen {
     State _state;
 
     Handle<Level> const _level;
-    bool* const _cancelled;
+    bool* const         _cancelled;
 
     std::unique_ptr<StyledText> _name_text;
-    wall_time _next_update;
-    int32_t _chars_typed;
+    wall_time                   _next_update;
+    int32_t                     _chars_typed;
 
     int32_t _current;
     int32_t _max;

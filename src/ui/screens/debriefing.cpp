@@ -18,8 +18,8 @@
 
 #include "ui/screens/debriefing.hpp"
 
-#include <vector>
 #include <sfz/sfz.hpp>
+#include <vector>
 
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
@@ -29,8 +29,8 @@
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
-#include "game/time.hpp"
 #include "game/sys.hpp"
+#include "game/time.hpp"
 #include "sound/fx.hpp"
 #include "ui/card.hpp"
 #include "video/driver.hpp"
@@ -51,9 +51,9 @@ namespace antares {
 
 namespace {
 
-const usecs kTypingDelay = kMajorTick;
-const int kScoreTableHeight = 120;
-const int kTextWidth = 300;
+const usecs kTypingDelay      = kMajorTick;
+const int   kScoreTableHeight = 120;
+const int   kTextWidth        = 300;
 
 void string_replace(String* s, const String& in, const PrintItem& out) {
     size_t index = s->find(in);
@@ -100,9 +100,8 @@ int score_high_target(double yours, double par, double value) {
 }
 
 int score(
-        game_ticks your_length, game_ticks par_length,
-        int your_loss, int par_loss,
-        int your_kill, int par_kill) {
+        game_ticks your_length, game_ticks par_length, int your_loss, int par_loss, int your_kill,
+        int par_kill) {
     int score = 0;
     score += score_low_target(
             duration_cast<secs>(your_length.time_since_epoch()).count(),
@@ -122,25 +121,18 @@ unique_ptr<StyledText> style_score_text(String text) {
 
 }  // namespace
 
-DebriefingScreen::DebriefingScreen(int text_id) :
-        _state(DONE),
-        _typed_chars(0),
-        _data_item(initialize(text_id, false)) { }
+DebriefingScreen::DebriefingScreen(int text_id)
+        : _state(DONE), _typed_chars(0), _data_item(initialize(text_id, false)) {}
 
 DebriefingScreen::DebriefingScreen(
-        int text_id,
-        game_ticks your_time, game_ticks par_time,
-        int your_loss, int par_loss,
-        int your_kill, int par_kill):
-        _state(TYPING),
-        _typed_chars(0),
-        _data_item(initialize(text_id, true)) {
-
+        int text_id, game_ticks your_time, game_ticks par_time, int your_loss, int par_loss,
+        int your_kill, int par_kill)
+        : _state(TYPING), _typed_chars(0), _data_item(initialize(text_id, true)) {
     Rect score_area = _message_bounds;
-    score_area.top = score_area.bottom - kScoreTableHeight;
+    score_area.top  = score_area.bottom - kScoreTableHeight;
 
-    _score = style_score_text(build_score_text(
-                your_time, par_time, your_loss, par_loss, your_kill, par_kill));
+    _score = style_score_text(
+            build_score_text(your_time, par_time, your_loss, par_loss, your_kill, par_kill));
     _score->set_tab_width(60);
     _score->wrap_to(_message_bounds.width(), 0, 2);
     _score_bounds = Rect(0, 0, _score->auto_width(), _score->height());
@@ -158,8 +150,7 @@ void DebriefingScreen::become_front() {
     }
 }
 
-void DebriefingScreen::resign_front() {
-}
+void DebriefingScreen::resign_front() {}
 
 void DebriefingScreen::draw() const {
     next()->draw();
@@ -173,8 +164,8 @@ void DebriefingScreen::draw() const {
 
     draw_text_in_rect(interface_bounds, _message, kLarge, GOLD);
 
-    RgbColor bracket_color = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
-    Rect bracket_bounds = _score_bounds;
+    RgbColor bracket_color  = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
+    Rect     bracket_bounds = _score_bounds;
     bracket_bounds.inset(-2, -2);
     draw_vbracket(Rects(), bracket_bounds, bracket_color);
 }
@@ -220,7 +211,7 @@ void DebriefingScreen::fire_timer() {
             ++_typed_chars;
         } else {
             _next_update = wall_time();
-            _state = DONE;
+            _state       = DONE;
             break;
         }
     }
@@ -230,7 +221,7 @@ LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
     Resource rsrc("text", "txt", text_id);
     _message.assign(utf8::decode(rsrc.data()));
 
-    int text_height = GetInterfaceTextHeightFromWidth(_message, kLarge, kTextWidth);
+    int  text_height = GetInterfaceTextHeightFromWidth(_message, kLarge, kTextWidth);
     Rect text_bounds(0, 0, kTextWidth, text_height);
     if (do_score) {
         text_bounds.bottom += kScoreTableHeight;
@@ -238,27 +229,26 @@ LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
     text_bounds.center_in(viewport());
 
     LabeledRect data_item = interface_item(text_bounds);
-    _pix_bounds = pix_bounds(data_item);
-    _message_bounds = text_bounds;
+    _pix_bounds           = pix_bounds(data_item);
+    _message_bounds       = text_bounds;
     _message_bounds.offset(-_pix_bounds.left, -_pix_bounds.top);
     return data_item;
 }
 
 String DebriefingScreen::build_score_text(
-        game_ticks your_time, game_ticks par_time,
-        int your_loss, int par_loss,
-        int your_kill, int par_kill) {
+        game_ticks your_time, game_ticks par_time, int your_loss, int par_loss, int your_kill,
+        int par_kill) {
     Resource rsrc("text", "txt", 6000);
-    String text(utf8::decode(rsrc.data()));
+    String   text(utf8::decode(rsrc.data()));
 
     StringList strings(6000);
 
-    const int your_mins = duration_cast<secs>(your_time.time_since_epoch()).count() / 60;
-    const int your_secs = duration_cast<secs>(your_time.time_since_epoch()).count() % 60;
-    const int par_mins = duration_cast<secs>(par_time.time_since_epoch()).count() / 60;
-    const int par_secs = duration_cast<secs>(par_time.time_since_epoch()).count() % 60;
+    const int your_mins  = duration_cast<secs>(your_time.time_since_epoch()).count() / 60;
+    const int your_secs  = duration_cast<secs>(your_time.time_since_epoch()).count() % 60;
+    const int par_mins   = duration_cast<secs>(par_time.time_since_epoch()).count() / 60;
+    const int par_secs   = duration_cast<secs>(par_time.time_since_epoch()).count() % 60;
     const int your_score = score(your_time, par_time, your_loss, par_loss, your_kill, par_kill);
-    const int par_score = 100;
+    const int par_score  = 100;
 
     string_replace(&text, strings.at(0), your_mins);
     string_replace(&text, strings.at(1), dec(your_secs, 2));
@@ -283,12 +273,12 @@ String DebriefingScreen::build_score_text(
 
 void print_to(sfz::PrintTarget out, DebriefingScreen::State state) {
     switch (state) {
-      case DebriefingScreen::TYPING:
-        print(out, "TYPING");
-        return;
-      case DebriefingScreen::DONE:
-        print(out, "DONE");
-        return;
+        case DebriefingScreen::TYPING:
+            print(out, "TYPING");
+            return;
+        case DebriefingScreen::DONE:
+            print(out, "DONE");
+            return;
     }
     print(out, static_cast<int64_t>(state));
 }

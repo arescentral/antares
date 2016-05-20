@@ -38,14 +38,13 @@ void fire_weapon(
 void NonplayerShipThink();
 void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject);
 Handle<SpaceObject> GetManualSelectObject(
-        Handle<SpaceObject> sourceObject, int32_t direction,
-        uint32_t inclusiveAttributes, uint32_t exclusiveAttributes,
-        const uint64_t* fartherThan, Handle<SpaceObject> currentShip, Allegiance allegiance);
+        Handle<SpaceObject> sourceObject, int32_t direction, uint32_t inclusiveAttributes,
+        uint32_t exclusiveAttributes, const uint64_t* fartherThan, Handle<SpaceObject> currentShip,
+        Allegiance allegiance);
 Handle<SpaceObject> GetSpritePointSelectObject(
-        Rect *bounds, Handle<SpaceObject> sourceObject,
-        uint32_t anyOneAttribute,
+        Rect* bounds, Handle<SpaceObject> sourceObject, uint32_t anyOneAttribute,
         Handle<SpaceObject> currentShip, Allegiance allegiance);
 
 }  // namespace antares
 
-#endif // ANTARES_GAME_NON_PLAYER_SHIP_HPP_
+#endif  // ANTARES_GAME_NON_PLAYER_SHIP_HPP_

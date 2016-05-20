@@ -25,7 +25,7 @@
 extern "C" {
 #endif
 
-typedef struct AntaresScenarioList AntaresScenarioList;
+typedef struct AntaresScenarioList      AntaresScenarioList;
 typedef struct AntaresScenarioListEntry AntaresScenarioListEntry;
 
 AntaresScenarioList* antares_scenario_list_create();

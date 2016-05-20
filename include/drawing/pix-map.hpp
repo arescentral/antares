@@ -166,9 +166,9 @@ class ArrayPixMap : public PixMap {
     void resize(Size new_size);
 
     // Implementations of the core PixMap methods.
-    virtual const Size& size() const;
+    virtual const Size&     size() const;
     virtual const RgbColor* bytes() const;
-    virtual int row_bytes() const;
+    virtual int             row_bytes() const;
 
     virtual RgbColor* mutable_bytes();
 
@@ -191,7 +191,9 @@ class ArrayPixMap : public PixMap {
 // Deserializes an ArrayPixMap from a WriteTarget.
 void read_from(sfz::ReadSource out, ArrayPixMap& image);
 
-inline void swap(ArrayPixMap& x, ArrayPixMap& y) { x.swap(y); }
+inline void swap(ArrayPixMap& x, ArrayPixMap& y) {
+    x.swap(y);
+}
 
 // A clipped view of another PixMap.
 //
@@ -208,9 +210,9 @@ class PixMap::View : public PixMap {
     View(PixMap* pix, const Rect& bounds);
 
     // Implementations of the core PixMap methods.
-    virtual const Size& size() const;
+    virtual const Size&     size() const;
     virtual const RgbColor* bytes() const;
-    virtual int row_bytes() const;
+    virtual int             row_bytes() const;
 
     virtual RgbColor* mutable_bytes();
 

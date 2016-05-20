@@ -19,8 +19,8 @@
 #ifndef ANTARES_DRAWING_BUILD_PIX_HPP_
 #define ANTARES_DRAWING_BUILD_PIX_HPP_
 
-#include <vector>
 #include <sfz/sfz.hpp>
+#include <vector>
 #include "drawing/styled-text.hpp"
 #include "math/geometry.hpp"
 #include "video/driver.hpp"
@@ -41,11 +41,11 @@ class BuildPix {
             BACKGROUND,
             TEXT,
         } type;
-        Texture texture;
+        Texture                     texture;
         std::unique_ptr<StyledText> text;
     };
     std::vector<Line> _lines;
-    Size _size;
+    Size              _size;
 };
 
 }  // namespace antares

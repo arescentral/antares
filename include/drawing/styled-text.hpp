@@ -19,8 +19,8 @@
 #ifndef ANTARES_DRAWING_STYLED_TEXT_HPP_
 #define ANTARES_DRAWING_STYLED_TEXT_HPP_
 
-#include <vector>
 #include <sfz/sfz.hpp>
+#include <vector>
 
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
@@ -33,7 +33,7 @@ class Picture;
 
 // the inline pictType struct is for keeping track of picts included in my text boxes.
 struct inlinePictType {
-    Rect bounds;
+    Rect    bounds;
     int16_t id;
 };
 
@@ -49,11 +49,11 @@ class StyledText {
     void set_interface_text(sfz::StringSlice text);
     void wrap_to(int width, int side_margin, int line_spacing);
 
-    int size() const;
-    int tab_width() const;
-    int width() const;
-    int height() const;
-    int auto_width() const;
+    int                                size() const;
+    int                                tab_width() const;
+    int                                width() const;
+    int                                height() const;
+    int                                auto_width() const;
     const std::vector<inlinePictType>& inline_picts() const;
 
     void draw(const Rect& bounds) const;
@@ -77,29 +77,29 @@ class StyledText {
                 uint32_t character, SpecialChar special, const RgbColor& fore_color,
                 const RgbColor& back_color);
 
-        sfz::Rune character;
+        sfz::Rune   character;
         SpecialChar special;
-        RgbColor fore_color;
-        RgbColor back_color;
-        int h;
-        int v;
+        RgbColor    fore_color;
+        RgbColor    back_color;
+        int         h;
+        int         v;
     };
 
     void color_cursor(const Rect& bounds, int index, const RgbColor& color) const;
     int move_word_down(int index, int v);
 
-    RgbColor _fore_color;
-    RgbColor _back_color;
-    std::vector<StyledChar> _chars;
+    RgbColor                    _fore_color;
+    RgbColor                    _back_color;
+    std::vector<StyledChar>     _chars;
     std::vector<inlinePictType> _inline_picts;
-    std::vector<Texture> _textures;
-    int _tab_width;
-    int _width;
-    int _height;
-    int _auto_width;
-    int _side_margin;
-    int _line_spacing;
-    const Font* const _font;
+    std::vector<Texture>        _textures;
+    int                         _tab_width;
+    int                         _width;
+    int                         _height;
+    int                         _auto_width;
+    int                         _side_margin;
+    int                         _line_spacing;
+    const Font* const           _font;
 
     DISALLOW_COPY_AND_ASSIGN(StyledText);
 };

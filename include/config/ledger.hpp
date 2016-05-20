@@ -20,8 +20,8 @@
 #define ANTARES_CONFIG_LEDGER_HPP_
 
 #include <set>
-#include <vector>
 #include <sfz/sfz.hpp>
+#include <vector>
 
 namespace antares {
 
@@ -32,7 +32,7 @@ class Ledger {
 
     static Ledger* ledger();
 
-    virtual void unlock_chapter(int chapter) = 0;
+    virtual void unlock_chapter(int chapter)                   = 0;
     virtual void unlocked_chapters(std::vector<int>* chapters) = 0;
 };
 

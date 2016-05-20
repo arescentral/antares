@@ -30,7 +30,7 @@ using sfz::write;
 
 namespace antares {
 
-PixMap::~PixMap() { }
+PixMap::~PixMap() {}
 
 const RgbColor* PixMap::row(int y) const {
     return bytes() + y * row_bytes();
@@ -74,39 +74,37 @@ void PixMap::composite(const PixMap& pix) {
     }
     for (int y = 0; y < size().height; ++y) {
         for (int x = 0; x < size().width; ++x) {
-            const RgbColor& over = pix.get(x, y);
-            const double oa = over.alpha / 255.0;
+            const RgbColor& over  = pix.get(x, y);
+            const double    oa    = over.alpha / 255.0;
             const RgbColor& under = get(x, y);
-            const double ua = under.alpha / 255.0;
+            const double    ua    = under.alpha / 255.0;
 
             // TODO(sfiera): if we're going to do anything like this in the long run, we should
             // require that alpha be pre-multiplied with the color components.  We should probably
             // also use integral arithmetic.
-            double red   = (over.red   * oa) + ((under.red   * ua) * (1.0 - oa));
+            double red   = (over.red * oa) + ((under.red * ua) * (1.0 - oa));
             double green = (over.green * oa) + ((under.green * ua) * (1.0 - oa));
-            double blue  = (over.blue  * oa) + ((under.blue  * ua) * (1.0 - oa));
+            double blue  = (over.blue * oa) + ((under.blue * ua) * (1.0 - oa));
             double alpha = oa + (ua * (1.0 - oa));
             set(x, y, rgba(red / alpha, green / alpha, blue / alpha, alpha * 255));
         }
     }
 }
 
-ArrayPixMap::ArrayPixMap(int32_t width, int32_t height):
-        _size(width, height),
-        _bytes(new RgbColor[width * height]) { }
+ArrayPixMap::ArrayPixMap(int32_t width, int32_t height)
+        : _size(width, height), _bytes(new RgbColor[width * height]) {}
 
-ArrayPixMap::ArrayPixMap(Size size):
-        _size(size),
-        _bytes(new RgbColor[_size.width * _size.height]) { }
+ArrayPixMap::ArrayPixMap(Size size)
+        : _size(size), _bytes(new RgbColor[_size.width * _size.height]) {}
 
-ArrayPixMap::~ArrayPixMap() { }
+ArrayPixMap::~ArrayPixMap() {}
 
 void ArrayPixMap::resize(Size new_size) {
     using sfz::swap;
     using std::min;
     ArrayPixMap new_pix_map(new_size.width, new_size.height);
-    Size min_size(min(size().width, new_size.width), min(size().height, new_size.height));
-    Rect transfer = min_size.as_rect();
+    Size        min_size(min(size().width, new_size.width), min(size().height, new_size.height));
+    Rect        transfer = min_size.as_rect();
     new_pix_map.view(transfer).copy(view(transfer));
     _size = new_size;
     swap(_bytes, new_pix_map._bytes);
@@ -136,14 +134,12 @@ void ArrayPixMap::swap(ArrayPixMap& other) {
 }
 
 PixMap::View::View(PixMap* pix, const Rect& bounds)
-        : _parent(pix),
-          _offset(bounds.origin()),
-          _size(bounds.size()) {
+        : _parent(pix), _offset(bounds.origin()), _size(bounds.size()) {
     Rect pix_bounds(Point(0, 0), pix->size());
     if (!pix_bounds.encloses(bounds)) {
-        throw Exception(format(
-                    "tried to take view {0} outside of parent PixMap with bounds {1}",
-                    bounds, pix_bounds));
+        throw Exception(
+                format("tried to take view {0} outside of parent PixMap with bounds {1}", bounds,
+                       pix_bounds));
     }
 }
 

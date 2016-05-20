@@ -36,4 +36,4 @@ class FilePrefsDriver : public PrefsDriver {
 
 }  // namespace antares
 
-#endif // ANTARES_CONFIG_FILE_PREFS_DRIVER_HPP_
+#endif  // ANTARES_CONFIG_FILE_PREFS_DRIVER_HPP_

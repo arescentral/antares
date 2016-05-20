@@ -18,18 +18,18 @@
 
 #include "video/text-driver.hpp"
 
-#include <algorithm>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <strings.h>
+#include <algorithm>
 #include <algorithm>
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
 #include "drawing/pix-map.hpp"
 #include "game/globals.hpp"
-#include "game/time.hpp"
 #include "game/sys.hpp"
+#include "game/time.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
 #include "ui/event.hpp"
@@ -77,10 +77,8 @@ void print_to(PrintTarget target, HexColor color) {
 
 class TextVideoDriver::TextureImpl : public Texture::Impl {
   public:
-    TextureImpl(PrintItem name, TextVideoDriver& driver, Size size):
-            _name(name),
-            _driver(driver),
-            _size(size) { }
+    TextureImpl(PrintItem name, TextVideoDriver& driver, Size size)
+            : _name(name), _driver(driver), _size(size) {}
 
     virtual StringSlice name() const { return _name; }
 
@@ -89,8 +87,7 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
             return;
         }
         PrintItem args[] = {
-            draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
-            _name,
+                draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom, _name,
         };
         _driver.log("draw", args);
     }
@@ -101,14 +98,14 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
         }
         if (source.size() == dest.size()) {
             PrintItem args[] = {
-                dest.left, dest.top, dest.right, dest.bottom,
-                source.left, source.top, hex(tint), _name,
+                    dest.left,   dest.top,   dest.right, dest.bottom,
+                    source.left, source.top, hex(tint),  _name,
             };
             _driver.log("crop", args);
         } else {
             PrintItem args[] = {
-                dest.left, dest.top, dest.right, dest.bottom,
-                source.left, source.top, source.right, source.bottom, hex(tint), _name,
+                    dest.left,  dest.top,     dest.right,    dest.bottom, source.left,
+                    source.top, source.right, source.bottom, hex(tint),   _name,
             };
             _driver.log("crop", args);
         }
@@ -119,8 +116,7 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
             return;
         }
         PrintItem args[] = {
-            draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
-            hex(tint), _name,
+                draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom, hex(tint), _name,
         };
         _driver.log("tint", args);
     }
@@ -130,8 +126,8 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
             return;
         }
         PrintItem args[] = {
-            draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
-            hex(color), frac, _name,
+                draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
+                hex(color),     frac,          _name,
         };
         _driver.log("static", args);
     }
@@ -143,8 +139,8 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
             return;
         }
         PrintItem args[] = {
-            draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
-            hex(outline_color), hex(fill_color), _name,
+                draw_rect.left,     draw_rect.top,   draw_rect.right, draw_rect.bottom,
+                hex(outline_color), hex(fill_color), _name,
         };
         _driver.log("outline", args);
     }
@@ -152,21 +148,17 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
     virtual const Size& size() const { return _size; }
 
   private:
-    String _name;
+    String           _name;
     TextVideoDriver& _driver;
-    Size _size;
+    Size             _size;
 };
 
 class TextVideoDriver::MainLoop : public EventScheduler::MainLoop {
   public:
-    MainLoop(TextVideoDriver& driver, const Optional<String>& output_dir, Card* initial):
-            _driver(driver),
-            _output_dir(output_dir),
-            _stack(initial) { }
+    MainLoop(TextVideoDriver& driver, const Optional<String>& output_dir, Card* initial)
+            : _driver(driver), _output_dir(output_dir), _stack(initial) {}
 
-    bool takes_snapshots() {
-        return _output_dir.has();
-    }
+    bool takes_snapshots() { return _output_dir.has(); }
 
     void snapshot(wall_ticks ticks) {
         snapshot_to(format("screens/{0}.txt", dec(ticks.time_since_epoch().count(), 6)));
@@ -184,18 +176,17 @@ class TextVideoDriver::MainLoop : public EventScheduler::MainLoop {
         _driver._last_args.clear();
         _stack.top()->draw();
     }
-    bool done() const { return _stack.empty(); }
+    bool  done() const { return _stack.empty(); }
     Card* top() const { return _stack.top(); }
 
   private:
     TextVideoDriver& _driver;
     Optional<String> _output_dir;
-    CardStack _stack;
+    CardStack        _stack;
 };
 
-TextVideoDriver::TextVideoDriver(Size screen_size, const Optional<String>& output_dir):
-        _size(screen_size),
-        _output_dir(output_dir) { }
+TextVideoDriver::TextVideoDriver(Size screen_size, const Optional<String>& output_dir)
+        : _size(screen_size), _output_dir(output_dir) {}
 
 int TextVideoDriver::scale() const {
     return 1;
@@ -261,7 +252,7 @@ void TextVideoDriver::loop(Card* initial, EventScheduler& scheduler) {
 
 namespace {
 
-class DummyCard: public Card {
+class DummyCard : public Card {
   public:
     void become_front() {
         if (!_inited) {
@@ -278,7 +269,7 @@ class DummyCard: public Card {
 
 void TextVideoDriver::capture(vector<pair<unique_ptr<Card>, String>>& pix) {
     MainLoop loop(*this, _output_dir, new DummyCard);
-    for (auto& p: pix) {
+    for (auto& p : pix) {
         loop.top()->stack()->push(p.first.release());
         loop.draw();
         loop.snapshot_to(p.second);

@@ -23,13 +23,13 @@
 #include "drawing/color.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "game/admiral.hpp"
-#include "game/vector.hpp"
 #include "game/input-source.hpp"
 #include "game/labels.hpp"
 #include "game/minicomputer.hpp"
 #include "game/motion.hpp"
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
+#include "game/vector.hpp"
 #include "lang/defines.hpp"
 #include "sound/driver.hpp"
 
@@ -37,9 +37,9 @@ namespace antares {
 
 static ANTARES_GLOBAL aresGlobalType* gAresGlobal;
 
-ANTARES_GLOBAL GlobalState&  g = head;
-ANTARES_GLOBAL GlobalState   head;
-ANTARES_GLOBAL GlobalState   tail;
+ANTARES_GLOBAL GlobalState& g = head;
+ANTARES_GLOBAL GlobalState head;
+ANTARES_GLOBAL GlobalState tail;
 
 aresGlobalType* globals() {
     return gAresGlobal;
@@ -48,16 +48,14 @@ aresGlobalType* globals() {
 void init_globals() {
     gAresGlobal = new aresGlobalType;
 
-    g.time = game_ticks();
-    g.ship = Handle<SpaceObject>(0);
-    g.closest = Handle<SpaceObject>(0);
+    g.time     = game_ticks();
+    g.ship     = Handle<SpaceObject>(0);
+    g.closest  = Handle<SpaceObject>(0);
     g.farthest = Handle<SpaceObject>(0);
 }
 
-aresGlobalType::aresGlobalType() {
-}
+aresGlobalType::aresGlobalType() {}
 
-aresGlobalType::~aresGlobalType() {
-}
+aresGlobalType::~aresGlobalType() {}
 
 }  // namespace antares

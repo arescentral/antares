@@ -26,11 +26,11 @@
 namespace antares {
 
 enum dutyType {
-    eNoDuty =           0,
-    eEscortDuty =       1,
-    eGuardDuty =        2,
-    eAssaultDuty =      3,
-    eHostileBaseDuty =  4
+    eNoDuty          = 0,
+    eEscortDuty      = 1,
+    eGuardDuty       = 2,
+    eAssaultDuty     = 3,
+    eHostileBaseDuty = 4
 };
 
 class SpaceObject {
@@ -42,15 +42,15 @@ class SpaceObject {
         return nullptr;
     }
 
-    static Handle<SpaceObject> none() { return Handle<SpaceObject>(-1); }
+    static Handle<SpaceObject>     none() { return Handle<SpaceObject>(-1); }
     static HandleList<SpaceObject> all() { return HandleList<SpaceObject>(0, kMaxSpaceObject); }
 
     SpaceObject() = default;
     SpaceObject(
             Handle<BaseObject> type, Random seed, int32_t object_id,
-            const coordPointType& initial_location,
-            int32_t relative_direction, fixedPointType *relative_velocity,
-            Handle<Admiral> new_owner, int16_t spriteIDOverride);
+            const coordPointType& initial_location, int32_t relative_direction,
+            fixedPointType* relative_velocity, Handle<Admiral> new_owner,
+            int16_t spriteIDOverride);
 
     void change_base_type(Handle<BaseObject> base, int32_t spriteIDOverride, bool relative);
     void set_owner(Handle<Admiral> owner, bool message);
@@ -65,115 +65,116 @@ class SpaceObject {
     bool engages(const SpaceObject& b) const;
     Fixed turn_rate() const;
 
-    uint32_t                attributes = 0;
-    BaseObject*             baseType = nullptr;
-    Handle<BaseObject>      base;
-    int32_t                 number() const;
+    uint32_t           attributes = 0;
+    BaseObject*        baseType   = nullptr;
+    Handle<BaseObject> base;
+    int32_t            number() const;
 
-    uint32_t                keysDown = 0;
+    uint32_t keysDown = 0;
 
-    int32_t                 tinySize = 0;
-    RgbColor                tinyColor;
+    int32_t  tinySize = 0;
+    RgbColor tinyColor;
 
-    int32_t                 direction = 0;
-    int32_t                 directionGoal = 0;
-    Fixed                   turnVelocity = Fixed::zero();
-    Fixed                   turnFraction = Fixed::zero();
+    int32_t direction     = 0;
+    int32_t directionGoal = 0;
+    Fixed   turnVelocity  = Fixed::zero();
+    Fixed   turnFraction  = Fixed::zero();
 
-    int32_t                 offlineTime = 0;
+    int32_t offlineTime = 0;
 
-    coordPointType          location = {0, 0};
-    Point                   collisionGrid;
-    Handle<SpaceObject>     nextNearObject;
-    Point                   distanceGrid;
-    Handle<SpaceObject>     nextFarObject;
-    Handle<SpaceObject>     previousObject;
-    Handle<SpaceObject>     nextObject;
+    coordPointType      location = {0, 0};
+    Point               collisionGrid;
+    Handle<SpaceObject> nextNearObject;
+    Point               distanceGrid;
+    Handle<SpaceObject> nextFarObject;
+    Handle<SpaceObject> previousObject;
+    Handle<SpaceObject> nextObject;
 
-    int32_t                 runTimeFlags = 0;               // distance from origin to destination
-    coordPointType          destinationLocation = {0, 0};   // coords of our destination ( or kNoDestination)
-    Handle<SpaceObject>     destObject;                     // target of this object.
-    Handle<SpaceObject>     destObjectDest;                 // # of our destination's destination in case it dies
-    Handle<Destination>     asDestination;                  // If this object kIsDestination.
-    int32_t                 destObjectID = kNoShip;         // ID of our dest object
-    int32_t                 destObjectDestID = kNoShip;     // id of our dest's destination
+    int32_t        runTimeFlags        = 0;       // distance from origin to destination
+    coordPointType destinationLocation = {0, 0};  // coords of our destination ( or kNoDestination)
+    Handle<SpaceObject> destObject;               // target of this object.
+    Handle<SpaceObject> destObjectDest;  // # of our destination's destination in case it dies
+    Handle<Destination> asDestination;   // If this object kIsDestination.
+    int32_t             destObjectID     = kNoShip;  // ID of our dest object
+    int32_t             destObjectDestID = kNoShip;  // id of our dest's destination
 
-    Fixed                   localFriendStrength = Fixed::zero();
-    Fixed                   localFoeStrength = Fixed::zero();
-    Fixed                   escortStrength = Fixed::zero();
-    Fixed                   remoteFriendStrength = Fixed::zero();
-    Fixed                   remoteFoeStrength = Fixed::zero();
+    Fixed localFriendStrength  = Fixed::zero();
+    Fixed localFoeStrength     = Fixed::zero();
+    Fixed escortStrength       = Fixed::zero();
+    Fixed remoteFriendStrength = Fixed::zero();
+    Fixed remoteFoeStrength    = Fixed::zero();
 
-    Fixed                   bestConsideredTargetValue = kFixedNone;
-    Fixed                   currentTargetValue = kFixedNone;
-    Handle<SpaceObject>     bestConsideredTargetNumber;
+    Fixed               bestConsideredTargetValue = kFixedNone;
+    Fixed               currentTargetValue        = kFixedNone;
+    Handle<SpaceObject> bestConsideredTargetNumber;
 
-    ticks                   timeFromOrigin = ticks(0);     // time it's been since we left
-    fixedPointType          idealLocationCalc = {Fixed::zero(), Fixed::zero()};  // calced when we got origin
-    coordPointType          originLocation = {0, 0};     // coords of our origin
+    ticks          timeFromOrigin    = ticks(0);  // time it's been since we left
+    fixedPointType idealLocationCalc = {Fixed::zero(),
+                                        Fixed::zero()};  // calced when we got origin
+    coordPointType originLocation = {0, 0};              // coords of our origin
 
-    fixedPointType          motionFraction = {Fixed::zero(), Fixed::zero()};
-    fixedPointType          velocity = {Fixed::zero(), Fixed::zero()};
-    Fixed                   thrust = Fixed::zero();
-    Fixed                   maxVelocity = Fixed::zero();
-    Rect                absoluteBounds;
-    Random                  randomSeed;
+    fixedPointType motionFraction = {Fixed::zero(), Fixed::zero()};
+    fixedPointType velocity       = {Fixed::zero(), Fixed::zero()};
+    Fixed          thrust         = Fixed::zero();
+    Fixed          maxVelocity    = Fixed::zero();
+    Rect           absoluteBounds;
+    Random         randomSeed;
 
     struct {
         struct {
-            Fixed               thisShape;
-            Fixed               frameFraction;
-            int32_t             frameDirection;
-            Fixed               frameSpeed;
+            Fixed   thisShape;
+            Fixed   frameFraction;
+            int32_t frameDirection;
+            Fixed   frameSpeed;
         } animation;
-        Handle<Vector>      vector;
+        Handle<Vector> vector;
     } frame;
 
-    int32_t                 _health = 0;
-    int32_t                 _energy = 0;
-    int32_t                 _battery = 0;
+    int32_t _health  = 0;
+    int32_t _energy  = 0;
+    int32_t _battery = 0;
 
-    int32_t                 health() const { return _health; }
-    void                    alter_health(int32_t amount);
-    int32_t                 max_health() const { return baseType->health; }
+    int32_t health() const { return _health; }
+    void alter_health(int32_t amount);
+    int32_t max_health() const { return baseType->health; }
 
-    int32_t                 energy() const { return _energy; }
-    void                    alter_energy(int32_t amount);
-    int32_t                 max_energy() const { return baseType->energy; }
+    int32_t energy() const { return _energy; }
+    void alter_energy(int32_t amount);
+    int32_t max_energy() const { return baseType->energy; }
 
-    int32_t                 battery() const { return _battery; }
-    void                    alter_battery(int32_t amount);
-    int32_t                 max_battery() const { return 5 * max_energy(); }
+    int32_t battery() const { return _battery; }
+    void alter_battery(int32_t amount);
+    int32_t max_battery() const { return 5 * max_energy(); }
 
-    void                    recharge();
-    bool                    collect_warp_energy(int32_t amount);
-    void                    refund_warp_energy();
-    int32_t                 warpEnergyCollected = 0;
+    void recharge();
+    bool collect_warp_energy(int32_t amount);
+    void    refund_warp_energy();
+    int32_t warpEnergyCollected = 0;
 
-    Handle<Admiral>         owner;
-    bool                    expires = false;
-    ticks                   expire_after = ticks(-1);
-    int32_t                 naturalScale = SCALE_SCALE;
-    int32_t                 id = kNoShip;
-    ticks                   rechargeTime = ticks(0);
-    int16_t                 active = kObjectAvailable;
+    Handle<Admiral> owner;
+    bool            expires      = false;
+    ticks           expire_after = ticks(-1);
+    int32_t         naturalScale = SCALE_SCALE;
+    int32_t         id           = kNoShip;
+    ticks           rechargeTime = ticks(0);
+    int16_t         active       = kObjectAvailable;
 
-    int16_t                 layer = 0;
-    Handle<Sprite>          sprite;
+    int16_t        layer = 0;
+    Handle<Sprite> sprite;
 
-    uint64_t                distanceFromPlayer = 0;
-    uint32_t                closestDistance = kMaximumRelevantDistanceSquared;
-    Handle<SpaceObject>     closestObject;
-    Handle<SpaceObject>     targetObject;
-    int32_t                 targetObjectID = kNoShip;
-    int32_t                 targetAngle = 0;
-    Handle<SpaceObject>     lastTarget;
-    int32_t                 lastTargetDistance = 0;
-    int32_t                 longestWeaponRange = 0;
-    int32_t                 shortestWeaponRange = 0;
-    int32_t                 engageRange = kEngageRange;  // longestWeaponRange or kEngageRange
+    uint64_t            distanceFromPlayer = 0;
+    uint32_t            closestDistance    = kMaximumRelevantDistanceSquared;
+    Handle<SpaceObject> closestObject;
+    Handle<SpaceObject> targetObject;
+    int32_t             targetObjectID = kNoShip;
+    int32_t             targetAngle    = 0;
+    Handle<SpaceObject> lastTarget;
+    int32_t             lastTargetDistance  = 0;
+    int32_t             longestWeaponRange  = 0;
+    int32_t             shortestWeaponRange = 0;
+    int32_t             engageRange         = kEngageRange;  // longestWeaponRange or kEngageRange
 
-    kPresenceStateType      presenceState = kNormalPresence;
+    kPresenceStateType presenceState = kNormalPresence;
     union {
         struct {
             int16_t speed;
@@ -181,44 +182,44 @@ class SpaceObject {
         } landing;
         struct {
             uint8_t step;
-            ticks progress;
+            ticks   progress;
         } warp_in;
         Fixed warping;
         Fixed warp_out;
     } presence;
 
-    int32_t                 hitState = 0;
-    int32_t                 cloakState = 0;
-    dutyType                duty = eNoDuty;
-    int                     pixResID = -1;
+    int32_t  hitState   = 0;
+    int32_t  cloakState = 0;
+    dutyType duty       = eNoDuty;
+    int      pixResID   = -1;
 
     struct Weapon {
-        Handle<BaseObject>      base;
-        game_ticks              time;
-        int32_t                 ammo = 0;
-        int32_t                 position = 0;
-        int16_t                 charge = 0;
+        Handle<BaseObject> base;
+        game_ticks         time;
+        int32_t            ammo     = 0;
+        int32_t            position = 0;
+        int16_t            charge   = 0;
     };
-    Weapon                  pulse;
-    Weapon                  beam;
-    Weapon                  special;
+    Weapon pulse;
+    Weapon beam;
+    Weapon special;
 
-    ticks                   periodicTime = ticks(0);
+    ticks periodicTime = ticks(0);
 
-    uint32_t                myPlayerFlag = 0x80000000;
-    uint32_t                seenByPlayerFlags = 0xffffffff;
-    uint32_t                hostileTowardsFlags = 0;
+    uint32_t myPlayerFlag        = 0x80000000;
+    uint32_t seenByPlayerFlags   = 0xffffffff;
+    uint32_t hostileTowardsFlags = 0;
 
-    uint8_t                 shieldColor = 0;
-    uint8_t                 originalColor = 0;
+    uint8_t shieldColor   = 0;
+    uint8_t originalColor = 0;
 };
 
-void SpaceObjectHandlingInit( void);
-void ResetAllSpaceObjects( void);
-void RemoveAllSpaceObjects( void);
+void SpaceObjectHandlingInit(void);
+void ResetAllSpaceObjects(void);
+void RemoveAllSpaceObjects(void);
 
 Handle<SpaceObject> CreateAnySpaceObject(
-        Handle<BaseObject> whichBase, fixedPointType *velocity, coordPointType *location,
+        Handle<BaseObject> whichBase, fixedPointType* velocity, coordPointType* location,
         int32_t direction, Handle<Admiral> owner, uint32_t specialAttributes,
         int16_t spriteIDOverride);
 int32_t CountObjectsOfBaseType(Handle<BaseObject> whichType, Handle<Admiral> owner);
@@ -230,4 +231,4 @@ sfz::StringSlice get_object_short_name(Handle<BaseObject> id);
 
 }  // namespace antares
 
-#endif // ANTARES_GAME_SPACE_OBJECT_HPP_
+#endif  // ANTARES_GAME_SPACE_OBJECT_HPP_

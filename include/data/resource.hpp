@@ -38,4 +38,4 @@ class Resource {
 
 }  // namespace antares
 
-#endif // ANTARES_DATA_RESOURCE_HPP_
+#endif  // ANTARES_DATA_RESOURCE_HPP_
