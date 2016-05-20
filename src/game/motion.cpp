@@ -592,7 +592,6 @@ static void calc_misc() {
 static bool inclusive_intersect(Rect x, Rect y) {
     ++x.right;
     ++x.bottom;
-    ;
     ++y.right;
     ++y.bottom;
     return x.intersects(y);

@@ -208,7 +208,6 @@ static void make_sparks(Handle<Action> action, Handle<SpaceObject> focus) {
 
         l = (focus->location.v - gGlobalCorner.v) * gAbsoluteScale;
         l >>= SHIFT_SCALE; /*+ CLIP_TOP*/
-        ;
         if ((l > -kSpriteMaxSize) && (l < kSpriteMaxSize)) {
             location.v = l + viewport().top;
         } else {
@@ -236,7 +235,6 @@ static void die(Handle<Action> action, Handle<SpaceObject> focus, Handle<SpaceOb
                 destroy = true;
             } else {
                 return;
-                ;
             }
             break;
     }
