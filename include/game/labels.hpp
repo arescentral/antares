@@ -27,16 +27,16 @@ namespace antares {
 
 class Label {
   public:
-    static const int32_t kNone = -1;
+    static const int32_t kNone        = -1;
     static const int32_t kMaxLabelNum = 16;
-    static const ticks kVisibleTime;
+    static const ticks   kVisibleTime;
 
     static Label* get(int number);
-    static Handle<Label> none() { return Handle<Label>(-1); }
+    static Handle<Label>     none() { return Handle<Label>(-1); }
     static HandleList<Label> all() { return {0, kMaxLabelNum}; }
 
-    static void init();
-    static void reset();
+    static void          init();
+    static void          reset();
     static Handle<Label> add(
             int16_t h, int16_t v, int16_t hoff, int16_t voff, Handle<SpaceObject> object,
             bool objectLink, uint8_t color);
@@ -60,7 +60,7 @@ class Label {
 
   private:
     static Handle<Label> next_free_label();
-    void recalc_size();
+    void                 recalc_size();
 
     Point               where;
     Point               offset;
@@ -70,19 +70,19 @@ class Label {
     ticks               age = ticks(0);
     sfz::String         text;
     uint8_t             color;
-    bool                active = false;
-    bool                killMe = false;
+    bool                active  = false;
+    bool                killMe  = false;
     bool                visible = false;
     Handle<SpaceObject> object;
-    bool                objectLink = true;     // true if label requires an object to be seen
-    int32_t             lineNum = 1;
+    bool                objectLink = true;  // true if label requires an object to be seen
+    int32_t             lineNum    = 1;
     int32_t             lineHeight;
-    bool                keepOnScreenAnyway = false; // if not attached to object, keep on screen if it's off
-    bool                attachedHintLine = false;
-    Point               attachedToWhere;
-    int32_t             retroCount = -1;
+    bool    keepOnScreenAnyway = false;  // if not attached to object, keep on screen if it's off
+    bool    attachedHintLine   = false;
+    Point   attachedToWhere;
+    int32_t retroCount = -1;
 };
 
 }  // namespace antares
 
-#endif // ANTARES_GAME_LABELS_HPP_
+#endif  // ANTARES_GAME_LABELS_HPP_

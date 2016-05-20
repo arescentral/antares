@@ -44,4 +44,4 @@ inline Fixed ABS(Fixed x) {
 
 }  // namespace antares
 
-#endif // ANTARES_MATH_MACROS_HPP_
+#endif  // ANTARES_MATH_MACROS_HPP_

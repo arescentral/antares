@@ -59,18 +59,18 @@ enum BriefingPoint {
 
 }  // namespace
 
-static const int kStarMapPictId = 8000;
-static const int kMissionStarPointWidth = 16;
-static const int kMissionStarPointHeight = 12;
+static const int     kStarMapPictId          = 8000;
+static const int     kMissionStarPointWidth  = 16;
+static const int     kMissionStarPointHeight = 12;
 static const int32_t kMissionDataHiliteColor = GOLD;
 
-static const int32_t kMissionBriefPointOffset  = 2;
-static const int32_t kMissionDataWidth         = 200;
-static const int32_t kMissionDataVBuffer       = 40;
-static const int32_t kMissionDataTopBuffer     = 30;
-static const int32_t kMissionDataBottomBuffer  = 15;
-static const int32_t kMissionDataHBuffer       = 41;
-static const int32_t kMissionLineHJog          = 10;
+static const int32_t kMissionBriefPointOffset = 2;
+static const int32_t kMissionDataWidth        = 200;
+static const int32_t kMissionDataVBuffer      = 40;
+static const int32_t kMissionDataTopBuffer    = 30;
+static const int32_t kMissionDataBottomBuffer = 15;
+static const int32_t kMissionDataHBuffer      = 41;
+static const int32_t kMissionLineHJog         = 10;
 
 static LabeledRect data_item(const InterfaceItem& map_rect) {
     Rect bounds(0, 0, 200, 200);
@@ -79,7 +79,7 @@ static LabeledRect data_item(const InterfaceItem& map_rect) {
 }
 
 static const Font* interface_font(interfaceStyleType style) {
-    if ( style == kSmall) {
+    if (style == kSmall) {
         return sys.fonts.small_button;
     } else {
         return sys.fonts.button;
@@ -99,9 +99,9 @@ static void populate_inline_picts(
 }
 
 static void update_mission_brief_point(
-        LabeledRect *dataItem, int32_t whichBriefPoint, const Level* level,
-        coordPointType *corner, int32_t scale, Rect *bounds, vector<inlinePictType>& inlinePict,
-        Rect& highlight_rect, vector<pair<Point, Point>>& lines, String& text) {
+        LabeledRect* dataItem, int32_t whichBriefPoint, const Level* level, coordPointType* corner,
+        int32_t scale, Rect* bounds, vector<inlinePictType>& inlinePict, Rect& highlight_rect,
+        vector<pair<Point, Point>>& lines, String& text) {
     if (whichBriefPoint < kMissionBriefPointOffset) {
         // No longer handled here.
         return;
@@ -109,10 +109,11 @@ static void update_mission_brief_point(
 
     whichBriefPoint -= kMissionBriefPointOffset;
 
-    Rect hiliteBounds;
-    int32_t         headerID, headerNumber, contentID;
-    BriefPoint_Data_Get(whichBriefPoint, level, &headerID, &headerNumber, &contentID,
-            &hiliteBounds, corner, scale, 16, 32, bounds);
+    Rect    hiliteBounds;
+    int32_t headerID, headerNumber, contentID;
+    BriefPoint_Data_Get(
+            whichBriefPoint, level, &headerID, &headerNumber, &contentID, &hiliteBounds, corner,
+            scale, 16, 32, bounds);
     hiliteBounds.offset(bounds->left, bounds->top);
 
     // TODO(sfiera): catch exception.
@@ -120,40 +121,42 @@ static void update_mission_brief_point(
     text.assign(utf8::decode(rsrc.data()));
     int16_t textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
     if (hiliteBounds.left == hiliteBounds.right) {
-        dataItem->bounds().left = (bounds->right - bounds->left) / 2 - (kMissionDataWidth / 2) + bounds->left;
+        dataItem->bounds().left =
+                (bounds->right - bounds->left) / 2 - (kMissionDataWidth / 2) + bounds->left;
         dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
-        dataItem->bounds().top = (bounds->bottom - bounds->top) / 2 - (textHeight / 2) + bounds->top;
+        dataItem->bounds().top =
+                (bounds->bottom - bounds->top) / 2 - (textHeight / 2) + bounds->top;
         dataItem->bounds().bottom = dataItem->bounds().top + textHeight;
-        highlight_rect = Rect();
+        highlight_rect            = Rect();
     } else {
         if ((hiliteBounds.left + (hiliteBounds.right - hiliteBounds.left) / 2) >
-                (bounds->left + (bounds->right - bounds->left) / 2)) {
+            (bounds->left + (bounds->right - bounds->left) / 2)) {
             dataItem->bounds().right = hiliteBounds.left - kMissionDataHBuffer;
-            dataItem->bounds().left = dataItem->bounds().right - kMissionDataWidth;
+            dataItem->bounds().left  = dataItem->bounds().right - kMissionDataWidth;
         } else {
-            dataItem->bounds().left = hiliteBounds.right + kMissionDataHBuffer;
+            dataItem->bounds().left  = hiliteBounds.right + kMissionDataHBuffer;
             dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
         }
 
-        dataItem->bounds().top = hiliteBounds.top + (hiliteBounds.bottom - hiliteBounds.top) / 2 -
-                                textHeight / 2;
+        dataItem->bounds().top =
+                hiliteBounds.top + (hiliteBounds.bottom - hiliteBounds.top) / 2 - textHeight / 2;
         dataItem->bounds().bottom = dataItem->bounds().top + textHeight;
         if (dataItem->bounds().top < (bounds->top + kMissionDataTopBuffer)) {
-            dataItem->bounds().top = bounds->top + kMissionDataTopBuffer;
+            dataItem->bounds().top    = bounds->top + kMissionDataTopBuffer;
             dataItem->bounds().bottom = dataItem->bounds().top + textHeight;
         }
         if (dataItem->bounds().bottom > (bounds->bottom - kMissionDataBottomBuffer)) {
             dataItem->bounds().bottom = bounds->bottom - kMissionDataBottomBuffer;
-            dataItem->bounds().top = dataItem->bounds().bottom - textHeight;
+            dataItem->bounds().top    = dataItem->bounds().bottom - textHeight;
         }
 
         if (dataItem->bounds().left < (bounds->left + kMissionDataVBuffer)) {
-            dataItem->bounds().left = bounds->left + kMissionDataVBuffer;
+            dataItem->bounds().left  = bounds->left + kMissionDataVBuffer;
             dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
         }
         if (dataItem->bounds().right > (bounds->right - kMissionDataVBuffer)) {
             dataItem->bounds().right = bounds->right - kMissionDataVBuffer;
-            dataItem->bounds().left = dataItem->bounds().right - kMissionDataWidth;
+            dataItem->bounds().left  = dataItem->bounds().right - kMissionDataWidth;
         }
 
         hiliteBounds.right++;
@@ -212,14 +215,14 @@ BriefingScreen::BriefingScreen(const Level* level, bool* cancelled)
     build_star_map();
     for (int i = 0; i < 500; ++i) {
         Star star;
-        star.shade = Randomize(kVisibleShadeNum);
+        star.shade      = Randomize(kVisibleShadeNum);
         star.location.h = _bounds.left + Randomize(_bounds.width());
         star.location.v = _bounds.top + Randomize(_bounds.height());
         _system_stars.push_back(star);
     }
 }
 
-BriefingScreen::~BriefingScreen() { }
+BriefingScreen::~BriefingScreen() {}
 
 void BriefingScreen::become_front() {
     if (_briefing_point_count <= 2) {
@@ -231,14 +234,13 @@ void BriefingScreen::become_front() {
 
 void BriefingScreen::overlay() const {
     switch (_briefing_point) {
-      case STAR_MAP:
-        {
-            Point off = offset();
-            Rect star_rect = _star_rect;
+        case STAR_MAP: {
+            Point off       = offset();
+            Rect  star_rect = _star_rect;
             star_rect.offset(off.h, off.v);
-            const Point star = star_rect.center();
-            RgbColor gold = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
-            Rect bounds = _bounds;
+            const Point star   = star_rect.center();
+            RgbColor    gold   = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
+            Rect        bounds = _bounds;
             bounds.offset(off.h, off.v);
             _star_map.draw_cropped(bounds, Rect(Point(0, 2), bounds.size()));
             Rects rects;
@@ -247,30 +249,30 @@ void BriefingScreen::overlay() const {
             rects.fill({star.h, star_rect.bottom, star.h + 1, bounds.bottom + 1}, gold);
             rects.fill({bounds.left, star.v, star_rect.left + 1, star.v + 1}, gold);
             rects.fill({star_rect.right - 1, star.v, bounds.right + 1, star.v + 1}, gold);
-        }
-        break;
+        } break;
 
-      case BLANK_SYSTEM_MAP:
-        draw_system_map();
-        break;
+        case BLANK_SYSTEM_MAP:
+            draw_system_map();
+            break;
 
-      default:
-        draw_brief_point();
-        break;
+        default:
+            draw_brief_point();
+            break;
     }
 }
 
 void BriefingScreen::mouse_down(const MouseDownEvent& event) {
-    Point off = offset();
+    Point off   = offset();
     Point where = event.where();
     where.offset(-off.h, -off.v);
     for (size_t i = 0; i < _inline_pict.size(); ++i) {
         if (_inline_pict[i].bounds.contains(where)) {
             const int pict_id = _inline_pict[i].id;
-            for (auto obj: BaseObject::all()) {
+            for (auto obj : BaseObject::all()) {
                 if (obj->pictPortraitResID == pict_id) {
-                    stack()->push(new ObjectDataScreen(
-                                event.where(), obj, ObjectDataScreen::MOUSE, event.button()));
+                    stack()->push(
+                            new ObjectDataScreen(
+                                    event.where(), obj, ObjectDataScreen::MOUSE, event.button()));
                     return;
                 }
             }
@@ -285,20 +287,28 @@ void BriefingScreen::key_down(const KeyDownEvent& event) {
             *_cancelled = true;
             stack()->pop(this);
         }
-        return;
-        case Keys::K1: return show_object_data(0, event);
-        case Keys::K2: return show_object_data(1, event);
-        case Keys::K3: return show_object_data(2, event);
-        case Keys::K4: return show_object_data(3, event);
-        case Keys::K5: return show_object_data(4, event);
-        case Keys::K6: return show_object_data(5, event);
-        case Keys::K7: return show_object_data(6, event);
-        case Keys::K8: return show_object_data(7, event);
-        case Keys::K9: return show_object_data(8, event);
-        case Keys::K0: return show_object_data(9, event);
-        default: {
-            return InterfaceScreen::key_down(event);
-        }
+            return;
+        case Keys::K1:
+            return show_object_data(0, event);
+        case Keys::K2:
+            return show_object_data(1, event);
+        case Keys::K3:
+            return show_object_data(2, event);
+        case Keys::K4:
+            return show_object_data(3, event);
+        case Keys::K5:
+            return show_object_data(4, event);
+        case Keys::K6:
+            return show_object_data(5, event);
+        case Keys::K7:
+            return show_object_data(6, event);
+        case Keys::K8:
+            return show_object_data(7, event);
+        case Keys::K9:
+            return show_object_data(8, event);
+        case Keys::K0:
+            return show_object_data(9, event);
+        default: { return InterfaceScreen::key_down(event); }
     }
 }
 
@@ -308,12 +318,12 @@ void BriefingScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
             *_cancelled = true;
             stack()->pop(this);
         }
-        return;
-        case Gamepad::UP: return show_object_data(0, event);
-        case Gamepad::DOWN: return show_object_data(1, event);
-        default: {
-            return InterfaceScreen::gamepad_button_down(event);
-        }
+            return;
+        case Gamepad::UP:
+            return show_object_data(0, event);
+        case Gamepad::DOWN:
+            return show_object_data(1, event);
+        default: { return InterfaceScreen::gamepad_button_down(event); }
     }
 }
 
@@ -332,33 +342,33 @@ void BriefingScreen::adjust_interface() {
 
 void BriefingScreen::handle_button(Button& button) {
     switch (button.id) {
-      case DONE:
-        stack()->pop(this);
-        break;
+        case DONE:
+            stack()->pop(this);
+            break;
 
-      case PREVIOUS:
-        if (_briefing_point > 0) {
-            --_briefing_point;
-        }
-        adjust_interface();
-        build_brief_point();
-        break;
+        case PREVIOUS:
+            if (_briefing_point > 0) {
+                --_briefing_point;
+            }
+            adjust_interface();
+            build_brief_point();
+            break;
 
-      case NEXT:
-        if (_briefing_point < _briefing_point_count - 1) {
-            ++_briefing_point;
-        }
-        adjust_interface();
-        build_brief_point();
-        break;
+        case NEXT:
+            if (_briefing_point < _briefing_point_count - 1) {
+                ++_briefing_point;
+            }
+            adjust_interface();
+            build_brief_point();
+            break;
 
-      default:
-        throw Exception(format("Got unknown button {0}.", button.id));
+        default:
+            throw Exception(format("Got unknown button {0}.", button.id));
     }
 }
 
 void BriefingScreen::build_star_map() {
-    _star_map = Picture(kStarMapPictId).texture();
+    _star_map       = Picture(kStarMapPictId).texture();
     Rect pix_bounds = _star_map.size().as_rect();
     pix_bounds.offset(0, 2);
     pix_bounds.bottom -= 3;
@@ -385,8 +395,8 @@ void BriefingScreen::build_star_map() {
 void BriefingScreen::build_brief_point() {
     if (_briefing_point >= BRIEFING_POINT_COUNT) {
         coordPointType corner;
-        int32_t scale;
-        Rect map_rect = item(MAP_RECT).bounds();
+        int32_t        scale;
+        Rect           map_rect = item(MAP_RECT).bounds();
         GetLevelFullScaleAndCorner(_level, 0, &corner, &scale, &map_rect);
 
         vector<inlinePictType> inline_pict;
@@ -403,17 +413,17 @@ void BriefingScreen::draw_system_map() const {
     {
         Points points;
         for (int i = 0; i < _system_stars.size(); ++i) {
-            const Star& star = _system_stars[i];
-            RgbColor star_color = GetRGBTranslateColorShade(GRAY, star.shade + DARKEST);
-            Point location = star.location;
+            const Star& star       = _system_stars[i];
+            RgbColor    star_color = GetRGBTranslateColorShade(GRAY, star.shade + DARKEST);
+            Point       location   = star.location;
             location.offset(off.h, off.v);
             points.draw(location, star_color);
         }
     }
 
     coordPointType corner;
-    int32_t scale;
-    Rect pix_bounds = _bounds.size().as_rect();
+    int32_t        scale;
+    Rect           pix_bounds = _bounds.size().as_rect();
     GetLevelFullScaleAndCorner(_level, 0, &corner, &scale, &pix_bounds);
     Rect bounds = _bounds;
     bounds.offset(off.h, off.v);
@@ -428,23 +438,23 @@ void BriefingScreen::draw_brief_point() const {
     if (!_highlight_rect.empty()) {
         Rect highlight_rect = _highlight_rect;
         highlight_rect.offset(off.h, off.v);
-        Rects rects;
+        Rects          rects;
         const RgbColor very_light = GetRGBTranslateColorShade(kMissionDataHiliteColor, VERY_LIGHT);
         rects.fill(
-                {highlight_rect.left, highlight_rect.top,
-                highlight_rect.right, highlight_rect.top + 1},
+                {highlight_rect.left, highlight_rect.top, highlight_rect.right,
+                 highlight_rect.top + 1},
                 very_light);
         rects.fill(
-                {highlight_rect.right - 1, highlight_rect.top,
-                highlight_rect.right, highlight_rect.bottom},
+                {highlight_rect.right - 1, highlight_rect.top, highlight_rect.right,
+                 highlight_rect.bottom},
                 very_light);
         rects.fill(
-                {highlight_rect.left, highlight_rect.bottom - 1,
-                highlight_rect.right, highlight_rect.bottom},
+                {highlight_rect.left, highlight_rect.bottom - 1, highlight_rect.right,
+                 highlight_rect.bottom},
                 very_light);
         rects.fill(
-                {highlight_rect.left, highlight_rect.top,
-                highlight_rect.left + 1, highlight_rect.bottom},
+                {highlight_rect.left, highlight_rect.top, highlight_rect.left + 1,
+                 highlight_rect.bottom},
                 very_light);
 
         const RgbColor medium = GetRGBTranslateColorShade(kMissionDataHiliteColor, MEDIUM);
@@ -484,9 +494,9 @@ void BriefingScreen::show_object_data(int index, const GamepadButtonDownEvent& e
 
 void BriefingScreen::show_object_data(int index, ObjectDataScreen::Trigger trigger, int which) {
     if (index < _inline_pict.size()) {
-        const int pict_id = _inline_pict[index].id;
-        const Point origin = _inline_pict[index].bounds.center();
-        for (auto obj: BaseObject::all()) {
+        const int   pict_id = _inline_pict[index].id;
+        const Point origin  = _inline_pict[index].bounds.center();
+        for (auto obj : BaseObject::all()) {
             if (obj->pictPortraitResID == pict_id) {
                 stack()->push(new ObjectDataScreen(origin, obj, trigger, which));
                 return;

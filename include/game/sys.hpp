@@ -23,8 +23,8 @@
 #include <vector>
 
 #include "drawing/sprite-handling.hpp"
-#include "sound/music.hpp"
 #include "sound/fx.hpp"
+#include "sound/music.hpp"
 
 namespace antares {
 
@@ -61,8 +61,8 @@ struct SystemGlobals {
     } cheat;
 
     SoundFX sound;
-    Music music;
-    Pix pix;
+    Music   music;
+    Pix     pix;
 
     Texture left_instrument_texture;
     Texture right_instrument_texture;
@@ -74,4 +74,4 @@ void sys_init();
 
 }  // namespace antares
 
-#endif // ANTARES_GAME_SYS_HPP_
+#endif  // ANTARES_GAME_SYS_HPP_

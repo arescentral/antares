@@ -27,7 +27,7 @@ using sfz::range;
 namespace antares {
 
 int16_t Gamepad::num(StringSlice name) {
-    for (auto i: range<int>(BEGIN, END)) {
+    for (auto i : range<int>(BEGIN, END)) {
         if (sys.gamepad_names.at(i) == name) {
             return i;
         }

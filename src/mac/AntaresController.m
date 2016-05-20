@@ -18,8 +18,8 @@
 
 #include "mac/AntaresController.h"
 
-#include <stdlib.h>
 #include <ApplicationServices/ApplicationServices.h>
+#include <stdlib.h>
 #include "mac/AntaresExtractDataController.h"
 #include "mac/c/AntaresController.h"
 #include "mac/c/scenario-list.h"
@@ -64,8 +64,10 @@ static NSURL* url(const char* utf8_bytes) {
 @implementation AntaresController
 - (void)application:(NSApplication*)app openFile:(NSString*)filename {
     [_window orderOut:self];
-    AntaresExtractDataController* extract = [[[AntaresExtractDataController alloc]
-        initWithTarget:self selector:@selector(installDone:) path:filename] autorelease];
+    AntaresExtractDataController* extract =
+            [[[AntaresExtractDataController alloc] initWithTarget:self
+                                                         selector:@selector(installDone:)
+                                                             path:filename] autorelease];
     if (!extract) {
         [self fail:@"Failed to create AntaresExtractDataController"];
     }
@@ -73,10 +75,8 @@ static NSURL* url(const char* utf8_bytes) {
 
 - (void)applicationDidFinishLaunching:(NSNotification*)aNotification {
     bool skip =
-        [[NSUserDefaults standardUserDefaults] boolForKey:kSkipSettings]
-        && !([NSEvent modifierFlags]
-                & NSDeviceIndependentModifierFlagsMask
-                & NSAlternateKeyMask);
+            [[NSUserDefaults standardUserDefaults] boolForKey:kSkipSettings] &&
+            !([NSEvent modifierFlags] & NSDeviceIndependentModifierFlagsMask & NSAlternateKeyMask);
     if (skip) {
         [self settingsDone:self];
     } else {
@@ -87,9 +87,9 @@ static NSURL* url(const char* utf8_bytes) {
 
 - (void)setScenarioFrom:(NSMenuItem*)sender {
     NSString* identifier = [[sender representedObject] objectForKey:kIdentifier];
-    NSString* title = [[sender representedObject] objectForKey:kTitle];
-    NSString* author = [[sender representedObject] objectForKey:kAuthor];
-    NSString* version = [[sender representedObject] objectForKey:kVersion];
+    NSString* title      = [[sender representedObject] objectForKey:kTitle];
+    NSString* author     = [[sender representedObject] objectForKey:kAuthor];
+    NSString* version    = [[sender representedObject] objectForKey:kVersion];
 
     [_scenario_button setTitle:title];
     [self setDownloadURL:[[sender representedObject] objectForKey:kDownloadURL]];
@@ -102,25 +102,26 @@ static NSURL* url(const char* utf8_bytes) {
 
 - (void)updateScenarioList {
     NSString* user_scenario = [[NSUserDefaults standardUserDefaults] stringForKey:kScenario];
-    int factory_scenario = -1;
-    int best_scenario = -1;
+    int factory_scenario    = -1;
+    int best_scenario       = -1;
 
     NSMutableArray* scenarios = [NSMutableArray array];
     AntaresScenarioList* list = antares_scenario_list_create();
-    size_t i;
+    size_t               i;
     for (i = 0; i < antares_scenario_list_size(list); ++i) {
-        AntaresScenarioListEntry* entry = antares_scenario_list_at(list, i);
-        NSString* title = str(antares_scenario_list_entry_title(entry));
-        NSString* identifier = str(antares_scenario_list_entry_identifier(entry));
-        NSDictionary* scenario_info = [NSDictionary dictionaryWithObjectsAndKeys:
-            identifier, kIdentifier,
-            title, kTitle,
-            url(antares_scenario_list_entry_download_url(entry)), kDownloadURL,
-            str(antares_scenario_list_entry_author(entry)), kAuthor,
-            url(antares_scenario_list_entry_author_url(entry)), kAuthorURL,
-            str(antares_scenario_list_entry_version(entry)), kVersion,
-            NULL
-        ];
+        AntaresScenarioListEntry* entry      = antares_scenario_list_at(list, i);
+        NSString*                 title      = str(antares_scenario_list_entry_title(entry));
+        NSString*                 identifier = str(antares_scenario_list_entry_identifier(entry));
+        NSDictionary*             scenario_info = [NSDictionary
+                dictionaryWithObjectsAndKeys:identifier, kIdentifier, title, kTitle,
+                                             url(antares_scenario_list_entry_download_url(entry)),
+                                             kDownloadURL,
+                                             str(antares_scenario_list_entry_author(entry)),
+                                             kAuthor,
+                                             url(antares_scenario_list_entry_author_url(entry)),
+                                             kAuthorURL,
+                                             str(antares_scenario_list_entry_version(entry)),
+                                             kVersion, NULL];
         [scenarios addObject:scenario_info];
     }
     antares_scenario_list_destroy(list);
@@ -128,12 +129,13 @@ static NSURL* url(const char* utf8_bytes) {
 
     [_scenario_list removeAllItems];
     for (i = 0; i < [scenarios count]; ++i) {
-        NSDictionary* scenario = [scenarios objectAtIndex:i];
-        NSString* title = [scenario objectForKey:kTitle];
-        NSString* identifier = [scenario objectForKey:kIdentifier];
+        NSDictionary* scenario   = [scenarios objectAtIndex:i];
+        NSString*     title      = [scenario objectForKey:kTitle];
+        NSString*     identifier = [scenario objectForKey:kIdentifier];
 
-        NSMenuItem* menu_item = [[[NSMenuItem alloc] initWithTitle:title action:nil
-            keyEquivalent:@""] autorelease];
+        NSMenuItem* menu_item =
+                [[[NSMenuItem alloc] initWithTitle:title action:nil keyEquivalent:@""]
+                        autorelease];
         [menu_item setRepresentedObject:scenario];
         [menu_item setTarget:self];
         [menu_item setAction:@selector(setScenarioFrom:)];
@@ -184,8 +186,10 @@ static NSURL* url(const char* utf8_bytes) {
     }
 
     NSString* scenario = [[NSUserDefaults standardUserDefaults] stringForKey:kScenario];
-    AntaresExtractDataController* extract = [[[AntaresExtractDataController alloc]
-        initWithTarget:self selector:@selector(extractDone:) scenario:scenario] autorelease];
+    AntaresExtractDataController* extract =
+            [[[AntaresExtractDataController alloc] initWithTarget:self
+                                                         selector:@selector(extractDone:)
+                                                         scenario:scenario] autorelease];
     if (!extract) {
         [self fail:@"Failed to create AntaresExtractDataController"];
     }
@@ -222,13 +226,13 @@ static NSURL* url(const char* utf8_bytes) {
 }
 
 - (NSURL*)authorURL {
-    @synchronized (self) {
+    @synchronized(self) {
         return [[_author_url retain] autorelease];
     }
 }
 
 - (void)setAuthorURL:(NSURL*)authorURL {
-    @synchronized (self) {
+    @synchronized(self) {
         [authorURL retain];
         [_author_url release];
         _author_url = authorURL;
@@ -236,13 +240,13 @@ static NSURL* url(const char* utf8_bytes) {
 }
 
 - (NSURL*)downloadURL {
-    @synchronized (self) {
+    @synchronized(self) {
         return [[_download_url retain] autorelease];
     }
 }
 
 - (void)setDownloadURL:(NSURL*)downloadURL {
-    @synchronized (self) {
+    @synchronized(self) {
         [downloadURL retain];
         [_download_url release];
         _download_url = downloadURL;

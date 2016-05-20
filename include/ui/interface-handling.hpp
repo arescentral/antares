@@ -19,8 +19,8 @@
 #ifndef ANTARES_UI_INTERFACE_HANDLING_HPP_
 #define ANTARES_UI_INTERFACE_HANDLING_HPP_
 
-#include <vector>
 #include <sfz/sfz.hpp>
+#include <vector>
 
 #include "data/handle.hpp"
 #include "data/interface.hpp"
@@ -35,10 +35,10 @@ enum PlayAgainResult {
     PLAY_AGAIN_SKIP,
 };
 
-bool BothCommandAndQ( void);
+bool BothCommandAndQ(void);
 void CreateObjectDataText(sfz::String* text, Handle<BaseObject> object);
 void Replace_KeyCode_Strings_With_Actual_Key_Names(sfz::String* text, int16_t resID, size_t padTo);
 
 }  // namespace antares
 
-#endif // ANTARES_UI_INTERFACE_HANDLING_HPP_
+#endif  // ANTARES_UI_INTERFACE_HANDLING_HPP_

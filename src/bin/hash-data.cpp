@@ -26,7 +26,7 @@ using sfz::args::store;
 using sfz::print;
 
 namespace args = sfz::args;
-namespace io = sfz::io;
+namespace io   = sfz::io;
 namespace utf8 = sfz::utf8;
 
 namespace antares {
@@ -36,10 +36,9 @@ void main(int argc, char* const* argv) {
 
     String directory;
     parser.add_argument("directory", store(directory))
-        .help("the directory to take the digest of")
-        .required();
-    parser.add_argument("-h", "--help", help(parser, 0))
-        .help("display this help screen");
+            .help("the directory to take the digest of")
+            .required();
+    parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
 
     String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {

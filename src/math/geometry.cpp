@@ -27,13 +27,9 @@ using sfz::read;
 
 namespace antares {
 
-Point::Point()
-        : h(0),
-          v(0) { }
+Point::Point() : h(0), v(0) {}
 
-Point::Point(int x, int y)
-        : h(x),
-          v(y) { }
+Point::Point(int x, int y) : h(x), v(y) {}
 
 void Point::offset(int32_t x, int32_t y) {
     h += x;
@@ -60,44 +56,29 @@ void read_from(ReadSource in, Point& p) {
     read(in, p.v);
 }
 
-Size::Size():
-        width(0),
-        height(0) { }
+Size::Size() : width(0), height(0) {}
 
-Size::Size(int32_t width, int32_t height):
-        width(width),
-        height(height) { }
+Size::Size(int32_t width, int32_t height) : width(width), height(height) {}
 
 Rect Size::as_rect() const {
     return Rect(0, 0, width, height);
 }
 
 bool operator==(Size x, Size y) {
-    return (x.width == y.width)
-        && (x.height == y.height);
+    return (x.width == y.width) && (x.height == y.height);
 }
 
 bool operator!=(Size x, Size y) {
     return !(x == y);
 }
 
-Rect::Rect()
-        : left(0),
-          top(0),
-          right(0),
-          bottom(0) { }
+Rect::Rect() : left(0), top(0), right(0), bottom(0) {}
 
 Rect::Rect(int32_t left, int32_t top, int32_t right, int32_t bottom)
-        : left(left),
-          top(top),
-          right(right),
-          bottom(bottom) { }
+        : left(left), top(top), right(right), bottom(bottom) {}
 
-Rect::Rect(Point origin, Size size):
-        left(origin.h),
-        top(origin.v),
-        right(left + size.width),
-        bottom(top + size.height) { }
+Rect::Rect(Point origin, Size size)
+        : left(origin.h), top(origin.v), right(left + size.width), bottom(top + size.height) {}
 
 bool Rect::empty() const {
     return (width() <= 0) || (height() <= 0);
@@ -128,18 +109,15 @@ int32_t Rect::area() const {
 }
 
 bool Rect::contains(const Point& p) const {
-    return left <= p.h && p.h < right
-        && top <= p.v && p.v < bottom;
+    return left <= p.h && p.h < right && top <= p.v && p.v < bottom;
 }
 
 bool Rect::encloses(const Rect& r) const {
-    return left <= r.left && r.right <= right
-        && top <= r.top && r.bottom <= bottom;
+    return left <= r.left && r.right <= right && top <= r.top && r.bottom <= bottom;
 }
 
 bool Rect::intersects(const Rect& r) const {
-    return left < r.right && r.left < right
-        && top < r.bottom && r.top < bottom;
+    return left < r.right && r.left < right && top < r.bottom && r.top < bottom;
 }
 
 void Rect::offset(int32_t x, int32_t y) {
@@ -163,16 +141,16 @@ void Rect::center_in(const Rect& r) {
 }
 
 void Rect::clip_to(const Rect& r) {
-    left = std::max(left, r.left);
-    top = std::max(top, r.top);
-    right = std::min(right, r.right);
+    left   = std::max(left, r.left);
+    top    = std::max(top, r.top);
+    right  = std::min(right, r.right);
     bottom = std::min(bottom, r.bottom);
 }
 
 void Rect::enlarge_to(const Rect& r) {
-    left = std::min(left, r.left);
-    top = std::min(top, r.top);
-    right = std::max(right, r.right);
+    left   = std::min(left, r.left);
+    top    = std::min(top, r.top);
+    right  = std::max(right, r.right);
     bottom = std::max(bottom, r.bottom);
 }
 

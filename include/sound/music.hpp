@@ -31,28 +31,28 @@ class SoundChannel;
 const int kTitleSongID = 4001;  // Doomtroopers, Unite!
 
 class Music {
-    public:
-        enum Type {
-            IN_GAME,
-            IDLE,
-        };
+  public:
+    enum Type {
+        IN_GAME,
+        IDLE,
+    };
 
-        void init();
-        void play(Type type, int16_t id);
-        void stop();
-        void toggle();
-        void sync();
+    void init();
+    void play(Type type, int16_t id);
+    void stop();
+    void toggle();
+    void sync();
 
-    private:
-        void StopSong();
+  private:
+    void StopSong();
 
-        bool _playing = false;
-        Type _song_type;
-        int16_t _song_id;
-        unique_ptr<Sound> _song;
-        unique_ptr<SoundChannel> _channel;
+    bool                     _playing = false;
+    Type                     _song_type;
+    int16_t                  _song_id;
+    unique_ptr<Sound>        _song;
+    unique_ptr<SoundChannel> _channel;
 };
 
 }  // namespace antares
 
-#endif // ANTARES_SOUND_MUSIC_HPP_
+#endif  // ANTARES_SOUND_MUSIC_HPP_

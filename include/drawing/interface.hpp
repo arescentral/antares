@@ -19,8 +19,8 @@
 #ifndef ANTARES_DRAWING_INTERFACE_HPP_
 #define ANTARES_DRAWING_INTERFACE_HPP_
 
-#include <vector>
 #include <sfz/sfz.hpp>
+#include <vector>
 
 #include "data/interface.hpp"
 #include "ui/event.hpp"
@@ -42,4 +42,4 @@ void GetAnyInterfaceItemGraphicBounds(const InterfaceItem& item, Rect* rect);
 
 }  // namespace antares
 
-#endif // ANTARES_DRAWING_INTERFACE_HPP_
+#endif  // ANTARES_DRAWING_INTERFACE_HPP_

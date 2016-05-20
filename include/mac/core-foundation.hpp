@@ -19,9 +19,9 @@
 #ifndef ANTARES_MAC_CORE_FOUNDATION_HPP_
 #define ANTARES_MAC_CORE_FOUNDATION_HPP_
 
+#include <CoreFoundation/CoreFoundation.h>
 #include <algorithm>
 #include <initializer_list>
-#include <CoreFoundation/CoreFoundation.h>
 #include <sfz/sfz.hpp>
 
 namespace antares {
@@ -32,12 +32,15 @@ class UnownedObject {
   public:
     typedef T type;
 
-    UnownedObject(): _c_obj(NULL) { }
-    UnownedObject(type c_obj): _c_obj(c_obj) { }
-    UnownedObject(UnownedObject&& other): _c_obj(other.release()) { }
-    UnownedObject& operator=(UnownedObject&& other) { reset(other.release()); return *this; }
+    UnownedObject() : _c_obj(NULL) {}
+    UnownedObject(type c_obj) : _c_obj(c_obj) {}
+    UnownedObject(UnownedObject&& other) : _c_obj(other.release()) {}
+    UnownedObject& operator=(UnownedObject&& other) {
+        reset(other.release());
+        return *this;
+    }
 
-    type c_obj() const { return _c_obj; }
+    type  c_obj() const { return _c_obj; }
     type& c_obj() { return _c_obj; }
 
     type release() {
@@ -47,9 +50,7 @@ class UnownedObject {
         return result;
     }
 
-    void reset(type c_obj = NULL) {
-        _c_obj = c_obj;
-    }
+    void reset(type c_obj = NULL) { _c_obj = c_obj; }
 
   private:
     type _c_obj;
@@ -62,10 +63,13 @@ class Object : public UnownedObject<T> {
   public:
     typedef T type;
 
-    Object() { }
-    Object(type c_obj): UnownedObject<T>(c_obj) { }
-    Object(Object&& other): UnownedObject<T>(other.release()) { }
-    Object& operator=(Object&& other) { reset(other.release()); return *this; }
+    Object() {}
+    Object(type c_obj) : UnownedObject<T>(c_obj) {}
+    Object(Object&& other) : UnownedObject<T>(other.release()) {}
+    Object& operator=(Object&& other) {
+        reset(other.release());
+        return *this;
+    }
     ~Object() { reset(); }
 
     void reset(type c_obj = NULL) {
@@ -88,7 +92,7 @@ class Type : public Object<CFTypeRef> {
   public:
     Type();
     Type(type value);
-    Type(Type&&) = default;
+    Type(Type&&)  = default;
     Type& operator=(Type&&) = default;
 };
 
@@ -141,9 +145,9 @@ class Array : public Object<CFArrayRef> {
     static CFTypeID type_id();
     Array();
     Array(type c_obj);
-    Array(Array&&) = default;
-    Array& operator=(Array&&) = default;
-    size_t size() const;
+    Array(Array&&)      = default;
+    Array&      operator=(Array&&) = default;
+    size_t      size() const;
     const void* get(size_t index) const;
 };
 
@@ -154,7 +158,7 @@ class MutableArray : public Object<CFMutableArrayRef> {
     MutableArray(type c_obj);
     MutableArray(MutableArray&&) = default;
     MutableArray& operator=(MutableArray&&) = default;
-    size_t size() const;
+    size_t        size() const;
     const void* get(size_t index) const;
     void append(const void* key);
 };
@@ -183,7 +187,7 @@ class Data : public Object<CFDataRef> {
     static CFTypeID type_id();
     Data();
     Data(type c_obj);
-    Data(Data&&) = default;
+    Data(Data&&)  = default;
     Data& operator=(Data&&) = default;
 
     sfz::BytesSlice data() const;
@@ -204,7 +208,7 @@ class Url : public Object<CFURLRef> {
     Url();
     Url(type c_obj);
     Url(const sfz::StringSlice& string);
-    Url(Url&&) = default;
+    Url(Url&&)   = default;
     Url& operator=(Url&&) = default;
 };
 

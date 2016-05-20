@@ -24,10 +24,10 @@
 
 namespace antares {
 
-void InitRaces();
-void CleanupRaces();
+void    InitRaces();
+void    CleanupRaces();
 int16_t GetRaceIDFromNum(size_t raceNum);
 
 }  // namespace antares
 
-#endif // ANTARES_DATA_RACES_HPP_
+#endif  // ANTARES_DATA_RACES_HPP_

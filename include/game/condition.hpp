@@ -27,4 +27,4 @@ void CheckLevelConditions();
 
 }  // namespace antares
 
-#endif // ANTARES_GAME_CONDITION_HPP_
+#endif  // ANTARES_GAME_CONDITION_HPP_

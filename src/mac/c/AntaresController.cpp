@@ -53,9 +53,9 @@ namespace utf8 = sfz::utf8;
 
 struct AntaresDrivers {
     CoreFoundationPrefsDriver prefs;
-    CocoaVideoDriver video;
-    OpenAlSoundDriver sound;
-    DirectoryLedger ledger;
+    CocoaVideoDriver          video;
+    OpenAlSoundDriver         sound;
+    DirectoryLedger           ledger;
 };
 
 namespace antares {

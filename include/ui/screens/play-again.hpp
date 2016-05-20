@@ -29,9 +29,9 @@ class PlayAgainScreen : public InterfaceScreen {
   public:
     enum Item {
         RESTART = 0,
-        QUIT = 1,
-        RESUME = 4,
-        SKIP = 5,
+        QUIT    = 1,
+        RESUME  = 4,
+        SKIP    = 5,
 
         BOX = 3,
     };

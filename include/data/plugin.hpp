@@ -26,14 +26,14 @@
 namespace antares {
 
 struct ScenarioGlobals {
-    scenarioInfoType                   meta;
-    std::vector<Level>                 levels;
-    std::vector<Level::InitialObject>  initials;
-    std::vector<Level::Condition>      conditions;
-    std::vector<Level::BriefPoint>     briefings;
-    std::vector<BaseObject>            objects;
-    std::vector<Action>                actions;
-    std::vector<Race>                  races;
+    scenarioInfoType                  meta;
+    std::vector<Level>                levels;
+    std::vector<Level::InitialObject> initials;
+    std::vector<Level::Condition>     conditions;
+    std::vector<Level::BriefPoint>    briefings;
+    std::vector<BaseObject>           objects;
+    std::vector<Action>               actions;
+    std::vector<Race>                 races;
 };
 
 extern ScenarioGlobals plug;
@@ -42,4 +42,4 @@ void PluginInit();
 
 }  // namespace antares
 
-#endif // ANTARES_DATA_PLUGIN_HPP_
+#endif  // ANTARES_DATA_PLUGIN_HPP_

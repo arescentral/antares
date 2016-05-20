@@ -18,12 +18,12 @@
 
 #include "mac/prefs-driver.hpp"
 
-#include <algorithm>
 #include <CoreFoundation/CoreFoundation.h>
+#include <algorithm>
 
-#include "mac/core-foundation.hpp"
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
+#include "mac/core-foundation.hpp"
 
 using sfz::String;
 using sfz::StringSlice;
@@ -35,12 +35,12 @@ namespace antares {
 
 namespace {
 
-static const char kKeySettingsPreference[]     = "KeySettings";
-static const char kIdleMusicPreference[]       = "PlayIdleMusic";
-static const char kGameMusicPreference[]       = "PlayGameMusic";
-static const char kSpeechOnPreference[]        = "SpeechOn";
-static const char kVolumePreference[]          = "Volume";
-static const char kScenarioPreference[]        = "Scenario";
+static const char kKeySettingsPreference[] = "KeySettings";
+static const char kIdleMusicPreference[]   = "PlayIdleMusic";
+static const char kGameMusicPreference[]   = "PlayGameMusic";
+static const char kSpeechOnPreference[]    = "SpeechOn";
+static const char kVolumePreference[]      = "Volume";
+static const char kScenarioPreference[]    = "Scenario";
 
 template <typename T>
 T clamp(T value, T min, T max) {
@@ -60,8 +60,8 @@ namespace {
 
 template <typename T>
 bool get_preference(const StringSlice& key, T& value) {
-    PropertyList plist(CFPreferencesCopyAppValue(
-                cf::wrap(key).c_obj(), kCFPreferencesCurrentApplication));
+    PropertyList plist(
+            CFPreferencesCopyAppValue(cf::wrap(key).c_obj(), kCFPreferencesCurrentApplication));
     if (plist.c_obj()) {
         value = cast<T>(std::move(plist));
         return true;
@@ -81,9 +81,9 @@ void set_preference(const StringSlice& key, const T& value) {
 CoreFoundationPrefsDriver::CoreFoundationPrefsDriver() {
     cf::Array key_settings;
     if (cf::get_preference(kKeySettingsPreference, key_settings)) {
-        for (int i: range(min<int>(KEY_COUNT, key_settings.size()))) {
+        for (int i : range(min<int>(KEY_COUNT, key_settings.size()))) {
             cf::Number number = cf::cast<cf::Number>(cf::Type(CFRetain(key_settings.get(i))));
-            int key;
+            int        key;
             if (cf::unwrap(number, key)) {
                 _current.keys[i] = key;
             }
@@ -92,7 +92,7 @@ CoreFoundationPrefsDriver::CoreFoundationPrefsDriver() {
 
     {
         cf::Boolean cfbool;
-        bool val;
+        bool        val;
         if (cf::get_preference(kIdleMusicPreference, cfbool) && cf::unwrap(cfbool, val)) {
             _current.play_idle_music = val;
         }
@@ -106,14 +106,14 @@ CoreFoundationPrefsDriver::CoreFoundationPrefsDriver() {
 
     {
         cf::Number cfnum;
-        double val;
+        double     val;
         if (cf::get_preference(kVolumePreference, cfnum) && cf::unwrap(cfnum, val)) {
             _current.volume = clamp<int>(8 * val, 0, 8);
         }
     }
 
     cf::String cfstr;
-    String id;
+    String     id;
     if (cf::get_preference(kScenarioPreference, cfstr) && cf::unwrap(cfstr, id)) {
         _current.scenario_identifier.assign(id);
     }
@@ -123,7 +123,7 @@ void CoreFoundationPrefsDriver::set(const Preferences& preferences) {
     _current = preferences.copy();
 
     cf::MutableArray key_settings(CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks));
-    for (int i: range<int>(KEY_COUNT)) {
+    for (int i : range<int>(KEY_COUNT)) {
         int key = preferences.keys[i];
         key_settings.append(cf::wrap(key).c_obj());
     }

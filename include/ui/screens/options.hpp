@@ -42,7 +42,7 @@ class OptionsScreen : public Card {
     virtual void become_front();
 
   private:
-    State _state;
+    State       _state;
     Preferences _revert;
 };
 
@@ -62,15 +62,15 @@ class SoundControlScreen : public InterfaceScreen {
         // Checkboxes
         GAME_MUSIC = 0,
         IDLE_MUSIC = 1,
-        SPEECH_ON = 4,
+        SPEECH_ON  = 4,
 
         // Volume Control
-        VOLUME_UP = 2,
+        VOLUME_UP   = 2,
         VOLUME_DOWN = 3,
 
         // Buttons
-        CANCEL = 5,
-        DONE = 6,
+        CANCEL      = 5,
+        DONE        = 6,
         KEY_CONTROL = 7,
 
         // Other
@@ -103,18 +103,18 @@ class KeyControlScreen : public InterfaceScreen {
 
   private:
     enum Item {
-        CANCEL = 0,
-        DONE = 1,
+        CANCEL        = 0,
+        DONE          = 1,
         SOUND_CONTROL = 2,
 
-        SHIP_TAB = 3,
-        COMMAND_TAB = 4,
+        SHIP_TAB     = 3,
+        COMMAND_TAB  = 4,
         SHORTCUT_TAB = 5,
-        UTILITY_TAB = 6,
-        HOT_KEY_TAB = 7,
+        UTILITY_TAB  = 6,
+        HOT_KEY_TAB  = 7,
 
         CONFLICT_TEXT = 10,
-        TAB_BOX = 8,
+        TAB_BOX       = 8,
     };
 
     enum Tab {
@@ -133,13 +133,13 @@ class KeyControlScreen : public InterfaceScreen {
 
     OptionsScreen::State* const _state;
 
-    Tab _tab;
+    Tab          _tab;
     const size_t _key_start;
-    int32_t _selected_key;
+    int32_t      _selected_key;
     std::vector<std::pair<size_t, size_t>> _conflicts;
 
     wall_time _next_flash;
-    bool _flashed_on;
+    bool      _flashed_on;
 
     StringList _tabs;
     StringList _keys;

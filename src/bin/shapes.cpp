@@ -35,7 +35,7 @@ using sfz::path::dirname;
 using sfz::write;
 using std::unique_ptr;
 
-namespace io = sfz::io;
+namespace io   = sfz::io;
 namespace utf8 = sfz::utf8;
 namespace args = sfz::args;
 
@@ -51,10 +51,14 @@ enum Shape {
 
 const char* name(Shape shape) {
     switch (shape) {
-        case SQUARE: return "square";
-        case PLUS: return "plus";
-        case TRIANGLE: return "triangle";
-        case DIAMOND: return "diamond";
+        case SQUARE:
+            return "square";
+        case PLUS:
+            return "plus";
+        case TRIANGLE:
+            return "triangle";
+        case DIAMOND:
+            return "diamond";
     }
     abort();
 }
@@ -79,8 +83,7 @@ void draw(Shape shape, PixMap& pix) {
 
 class ShapeBuilder {
   public:
-    ShapeBuilder(const Optional<String>& output_dir)
-            : _output_dir(output_dir) { }
+    ShapeBuilder(const Optional<String>& output_dir) : _output_dir(output_dir) {}
 
     void save(Shape shape, int size) {
         ArrayPixMap pix(size, size);
@@ -105,9 +108,8 @@ int main(int argc, char* const* argv) {
 
     Optional<String> output_dir;
     parser.add_argument("-o", "--output", store(output_dir))
-        .help("place output in this directory");
-    parser.add_argument("-h", "--help", help(parser, 0))
-        .help("display this help screen");
+            .help("place output in this directory");
+    parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
 
     String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
@@ -116,7 +118,7 @@ int main(int argc, char* const* argv) {
     }
 
     ShapeBuilder builder(output_dir);
-    Shape shapes[] = {SQUARE, PLUS, TRIANGLE, DIAMOND};
+    Shape        shapes[] = {SQUARE, PLUS, TRIANGLE, DIAMOND};
     for (size_t i = 0; i < 4; ++i) {
         for (int size = 1; size < 16; ++size) {
             builder.save(shapes[i], size);

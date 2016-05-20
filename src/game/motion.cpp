@@ -26,11 +26,11 @@
 #include "drawing/sprite-handling.hpp"
 #include "game/action.hpp"
 #include "game/admiral.hpp"
-#include "game/vector.hpp"
 #include "game/globals.hpp"
 #include "game/non-player-ship.hpp"
 #include "game/player-ship.hpp"
 #include "game/space-object.hpp"
+#include "game/vector.hpp"
 #include "lang/defines.hpp"
 #include "math/macros.hpp"
 #include "math/random.hpp"
@@ -44,23 +44,25 @@ using std::unique_ptr;
 
 namespace antares {
 
-const int32_t kProximitySuperSize           = 16;   // number of cUnits in cSuperUnits
-const int32_t kProximityGridDataLength      = kProximitySuperSize * kProximitySuperSize;
-const int32_t kProximityUnitAndModulo       = kProximitySuperSize - 1;  // & a int32_t with this and get modulo kCollisionSuperSize
-const int32_t kProximityWidthMultiply       = 4;    // for speed = * kCollisionSuperSize
+const int32_t kProximitySuperSize      = 16;  // number of cUnits in cSuperUnits
+const int32_t kProximityGridDataLength = kProximitySuperSize * kProximitySuperSize;
+const int32_t kProximityUnitAndModulo =
+        kProximitySuperSize - 1;  // & a int32_t with this and get modulo kCollisionSuperSize
+const int32_t kProximityWidthMultiply = 4;  // for speed = * kCollisionSuperSize
 
-const int32_t kCollisionUnitBitShift        = 7;    // >> 7 = / 128
-const int32_t kCollisionSuperUnitBitShift   = 11;   // >> 11 = / 2048
+const int32_t kCollisionUnitBitShift      = 7;   // >> 7 = / 128
+const int32_t kCollisionSuperUnitBitShift = 11;  // >> 11 = / 2048
 
-const int32_t kDistanceUnitBitShift         = 11;   // >> 14L = / 2048
-const int32_t kDistanceSuperUnitBitShift    = 15;   // >> 18L = / 262144
+const int32_t kDistanceUnitBitShift      = 11;  // >> 14L = / 2048
+const int32_t kDistanceSuperUnitBitShift = 15;  // >> 18L = / 262144
 
-const int32_t kConsiderDistanceAttributes = (
-        kCanCollide | kCanBeHit | kIsDestination | kCanThink | kConsiderDistance | kCanBeEvaded |
-        kIsHumanControlled | kIsRemote);
+const int32_t kConsiderDistanceAttributes =
+        (kCanCollide | kCanBeHit | kIsDestination | kCanThink | kConsiderDistance | kCanBeEvaded |
+         kIsHumanControlled | kIsRemote);
 
-const uint32_t kThinkiverseTopLeft       = (kUniversalCenter - (2 * 65534)); // universe for thinking or owned objects
-const uint32_t kThinkiverseBottomRight   = (kUniversalCenter + (2 * 65534));
+const uint32_t kThinkiverseTopLeft =
+        (kUniversalCenter - (2 * 65534));  // universe for thinking or owned objects
+const uint32_t kThinkiverseBottomRight = (kUniversalCenter + (2 * 65534));
 
 // kAdjacentUnits encodes the following set of locations relative to the
 // center:
@@ -81,15 +83,14 @@ const uint32_t kThinkiverseBottomRight   = (kUniversalCenter + (2 * 65534));
 // same grid in a way I have yet to comprehend.
 const static Point kAdjacentUnits[] = {{0, 0}, {1, 0}, {-1, 1}, {0, 1}, {1, 1}};
 
-ANTARES_GLOBAL coordPointType          gGlobalCorner;
+ANTARES_GLOBAL coordPointType gGlobalCorner;
 static ANTARES_GLOBAL unique_ptr<proximityUnitType[]> gProximityGrid;
 
 static void correct_physical_space(Handle<SpaceObject> a, Handle<SpaceObject> b);
 
 Size center_scale() {
     return {
-        (play_screen().width() / 2) * SCALE_SCALE,
-        (play_screen().height() / 2) * SCALE_SCALE,
+            (play_screen().width() / 2) * SCALE_SCALE, (play_screen().height() / 2) * SCALE_SCALE,
     };
 }
 
@@ -123,7 +124,7 @@ void InitMotion() {
                     uy -= kProximitySuperSize;
                     sy++;
                 }
-                p->unitsToCheck[i].adjacentUnit = (uy << kProximityWidthMultiply) + ux;
+                p->unitsToCheck[i].adjacentUnit  = (uy << kProximityWidthMultiply) + ux;
                 p->unitsToCheck[i].superOffset.h = sx;
                 p->unitsToCheck[i].superOffset.v = sy;
             }
@@ -133,8 +134,8 @@ void InitMotion() {
 
 void ResetMotionGlobals() {
     gGlobalCorner.h = gGlobalCorner.v = 0;
-    g.closest = Handle<SpaceObject>(0);
-    g.farthest = Handle<SpaceObject>(0);
+    g.closest                         = Handle<SpaceObject>(0);
+    g.farthest                        = Handle<SpaceObject>(0);
 
     for (int i = 0; i < kProximityGridDataLength; i++) {
         gProximityGrid[i].nearObject = gProximityGrid[i].farObject = SpaceObject::none();
@@ -189,12 +190,12 @@ static void move(Handle<SpaceObject> o) {
             }
 
             // the difference between our actual vector and our goal vector is our new vector
-            fa = fa - o->velocity.h;
-            fb = fb - o->velocity.v;
+            fa        = fa - o->velocity.h;
+            fb        = fb - o->velocity.v;
             useThrust = o->thrust;
         } else {
-            fa = -o->velocity.h;
-            fb = -o->velocity.v;
+            fa        = -o->velocity.h;
+            fb        = -o->velocity.v;
             useThrust = -o->thrust;
         }
 
@@ -258,8 +259,7 @@ static void move(Handle<SpaceObject> o) {
 static void bounce(Handle<SpaceObject> o) {
     // check to see if it's out of bounds
     if (!(o->attributes & kDoesBounce)) {
-        if ((o->location.h < kThinkiverseTopLeft) ||
-            (o->location.v < kThinkiverseTopLeft) ||
+        if ((o->location.h < kThinkiverseTopLeft) || (o->location.v < kThinkiverseTopLeft) ||
             (o->location.h > kThinkiverseBottomRight) ||
             (o->location.v > kThinkiverseBottomRight)) {
             o->active = kObjectToBeFreed;
@@ -299,9 +299,10 @@ static void animate(Handle<SpaceObject> o) {
         while (space_anim.thisShape < base_anim.firstShape) {
             space_anim.thisShape += shape_num;
         }
-    } else if ((space_anim.thisShape > base_anim.lastShape) ||
+    } else if (
+            (space_anim.thisShape > base_anim.lastShape) ||
             (space_anim.thisShape < base_anim.firstShape)) {
-        o->active = kObjectToBeFreed;
+        o->active            = kObjectToBeFreed;
         space_anim.thisShape = base_anim.lastShape;
     }
 }
@@ -314,7 +315,7 @@ static void move_vector(Handle<SpaceObject> o) {
 
     vector.objectLocation = o->location;
     if ((vector.vectorKind == Vector::BEAM_TO_OBJECT) ||
-            (vector.vectorKind == Vector::BEAM_TO_OBJECT_LIGHTNING)) {
+        (vector.vectorKind == Vector::BEAM_TO_OBJECT_LIGHTNING)) {
         if (vector.toObject.get()) {
             auto target = vector.toObject;
             if (target->active && (target->id == vector.toObjectID)) {
@@ -332,16 +333,17 @@ static void move_vector(Handle<SpaceObject> o) {
                 o->active = kObjectToBeFreed;
             }
         }
-    } else if ((vector.vectorKind == Vector::BEAM_TO_COORD) ||
+    } else if (
+            (vector.vectorKind == Vector::BEAM_TO_COORD) ||
             (vector.vectorKind == Vector::BEAM_TO_COORD_LIGHTNING)) {
         if (vector.fromObject.get()) {
             auto target = vector.fromObject;
             if (target->active && (target->id == vector.fromObjectID)) {
                 vector.lastGlobalLocation = vector.lastApparentLocation = target->location;
-                o->location.h = vector.objectLocation.h =
-                    target->location.h + vector.toRelativeCoord.h;
+                o->location.h                                           = vector.objectLocation.h =
+                        target->location.h + vector.toRelativeCoord.h;
                 o->location.v = vector.objectLocation.v =
-                    target->location.v + vector.toRelativeCoord.v;
+                        target->location.v + vector.toRelativeCoord.v;
             } else {
                 o->active = kObjectToBeFreed;
             }
@@ -354,14 +356,14 @@ static void update_static(Handle<SpaceObject> o, ticks unitsToDo) {
     if (o->hitState != 0) {
         o->hitState -= unitsToDo.count() << 2L;
         if (o->hitState <= 0) {
-            o->hitState = 0;
-            sprite.style = spriteNormal;
+            o->hitState      = 0;
+            sprite.style     = spriteNormal;
             sprite.styleData = 0;
         } else {
             // we know it has sprite
-            sprite.style = spriteColor;
+            sprite.style      = spriteColor;
             sprite.styleColor = GetRGBTranslateColor(o->shieldColor);
-            sprite.styleData = o->hitState;
+            sprite.styleData  = o->hitState;
         }
     } else {
         if (o->cloakState > 0) {
@@ -372,9 +374,9 @@ static void update_static(Handle<SpaceObject> o, ticks unitsToDo) {
                     o->cloakState = kCloakOnStateMax;
                 }
             }
-            sprite.style = spriteColor;
+            sprite.style      = spriteColor;
             sprite.styleColor = RgbColor::clear();
-            sprite.styleData = o->cloakState;
+            sprite.styleData  = o->cloakState;
             if (o->owner == g.admiral) {
                 sprite.styleData -= sprite.styleData >> 2;
             }
@@ -383,11 +385,11 @@ static void update_static(Handle<SpaceObject> o, ticks unitsToDo) {
             if (o->cloakState >= 0) {
                 o->runTimeFlags &= ~kIsCloaked;
                 o->cloakState = 0;
-                sprite.style = spriteNormal;
+                sprite.style  = spriteNormal;
             } else {
-                sprite.style = spriteColor;
+                sprite.style      = spriteColor;
                 sprite.styleColor = RgbColor::clear();
-                sprite.styleData = -o->cloakState;
+                sprite.styleData  = -o->cloakState;
                 if (o->owner == g.admiral) {
                     sprite.styleData -= sprite.styleData >> 2;
                 }
@@ -422,10 +424,10 @@ void MoveSpaceObjects(const ticks unitsToDo) {
         gGlobalCorner.v = g.ship->location.v - (center_scale().height / gAbsoluteScale);
     }
 
-// !!!!!!!!
-// nothing below can effect any object actions (expire actions get executed)
-// (but they can effect objects thinking)
-// !!!!!!!!
+    // !!!!!!!!
+    // nothing below can effect any object actions (expire actions get executed)
+    // (but they can effect objects thinking)
+    // !!!!!!!!
     const Rect viewport = antares::viewport();
     for (Handle<SpaceObject> o = g.root; o.get(); o = o->nextObject) {
         if (o->active != kObjectInUse) {
@@ -484,8 +486,8 @@ static void activate_object(const Handle<SpaceObject>& o) {
         o->periodicTime--;
         if (o->periodicTime <= ticks(0)) {
             exec(o->baseType->activate, o, SpaceObject::none(), NULL);
-            o->periodicTime =
-                o->baseType->activatePeriod + o->randomSeed.next(o->baseType->activatePeriodRange);
+            o->periodicTime = o->baseType->activatePeriod +
+                              o->randomSeed.next(o->baseType->activatePeriodRange);
         }
     }
 }
@@ -493,7 +495,7 @@ static void activate_object(const Handle<SpaceObject>& o) {
 static void calc_misc() {
     // set up player info so we can find closest ship (for scaling)
     uint64_t farthestDist = 0;
-    uint64_t closestDist = 0x7fffffffffffffffull;
+    uint64_t closestDist  = 0x7fffffffffffffffull;
     g.closest = g.farthest = Handle<SpaceObject>(0);
 
     // reset the collision grid
@@ -527,29 +529,28 @@ static void calc_misc() {
         // Mark closest and farthest object relative to player, for zooming.
         if (g.ship.get() && g.ship->active) {
             if (o->attributes & kAppearOnRadar) {
-                uint64_t hdiff = ABS<int>(g.ship->location.h - o->location.h);
-                uint64_t vdiff = ABS<int>(g.ship->location.v - o->location.v);
-                uint64_t dist = (vdiff * vdiff) + (hdiff * hdiff);
+                uint64_t hdiff        = ABS<int>(g.ship->location.h - o->location.h);
+                uint64_t vdiff        = ABS<int>(g.ship->location.v - o->location.v);
+                uint64_t dist         = (vdiff * vdiff) + (hdiff * hdiff);
                 o->distanceFromPlayer = dist;
                 if ((dist < closestDist) && (o != g.ship)) {
-                    if (!((g.zoom == kNearestFoeZoom) &&
-                          (o->owner == g.ship->owner))) {
+                    if (!((g.zoom == kNearestFoeZoom) && (o->owner == g.ship->owner))) {
                         closestDist = dist;
-                        g.closest = o;
+                        g.closest   = o;
                     }
                 }
                 if (dist > farthestDist) {
                     farthestDist = dist;
-                    g.farthest = o;
+                    g.farthest   = o;
                 }
             }
         }
 
         if (o->attributes & kConsiderDistanceAttributes) {
-            o->localFriendStrength = o->baseType->offenseValue;
-            o->localFoeStrength = Fixed::zero();
-            o->closestObject = SpaceObject::none();
-            o->closestDistance = kMaximumRelevantDistanceSquared;
+            o->localFriendStrength  = o->baseType->offenseValue;
+            o->localFoeStrength     = Fixed::zero();
+            o->closestObject        = SpaceObject::none();
+            o->closestDistance      = kMaximumRelevantDistanceSquared;
             o->absoluteBounds.right = o->absoluteBounds.left = 0;
 
             const auto& loc = o->location;
@@ -558,10 +559,10 @@ static void calc_misc() {
                 int32_t x2 = loc.h >> kCollisionSuperUnitBitShift;
                 int32_t y1 = (loc.v >> kCollisionUnitBitShift) & kProximityUnitAndModulo;
                 int32_t y2 = loc.v >> kCollisionSuperUnitBitShift;
-                auto& proximityObject = gProximityGrid[(y1 << kProximityWidthMultiply) + x1];
-                o->nextNearObject = proximityObject.nearObject;
+                auto&   proximityObject    = gProximityGrid[(y1 << kProximityWidthMultiply) + x1];
+                o->nextNearObject          = proximityObject.nearObject;
                 proximityObject.nearObject = o;
-                o->collisionGrid = {x2, y2};
+                o->collisionGrid           = {x2, y2};
             }
 
             {
@@ -569,10 +570,10 @@ static void calc_misc() {
                 int32_t x4 = loc.h >> kDistanceSuperUnitBitShift;
                 int32_t y3 = (loc.v >> kDistanceUnitBitShift) & kProximityUnitAndModulo;
                 int32_t y4 = loc.v >> kDistanceSuperUnitBitShift;
-                auto& proximityObject = gProximityGrid[(y3 << kProximityWidthMultiply) + x3];
-                o->nextFarObject = proximityObject.farObject;
+                auto&   proximityObject   = gProximityGrid[(y3 << kProximityWidthMultiply) + x3];
+                o->nextFarObject          = proximityObject.farObject;
                 proximityObject.farObject = o;
-                o->distanceGrid = {x4, y4};
+                o->distanceGrid           = {x4, y4};
             }
 
             if (!(o->attributes & kIsDestination)) {
@@ -590,26 +591,28 @@ static void calc_misc() {
 // Collision uses inclusive rect bounds for historical reasons.
 static bool inclusive_intersect(Rect x, Rect y) {
     ++x.right;
-    ++x.bottom;;
+    ++x.bottom;
+    ;
     ++y.right;
     ++y.bottom;
     return x.intersects(y);
 }
 
 static int mClipCode(int x, int y, const Rect& bounds) {
-    return ((x < bounds.left) << 3)
-        | ((x >= bounds.right) << 2)
-        | ((y < bounds.top) << 1)
-        | (y >= bounds.bottom);
+    return ((x < bounds.left) << 3) | ((x >= bounds.right) << 2) | ((y < bounds.top) << 1) |
+           (y >= bounds.bottom);
 }
 
-static bool vector_intersects(const Handle<SpaceObject>& vector, const Handle<SpaceObject>& target) {
+static bool vector_intersects(
+        const Handle<SpaceObject>& vector, const Handle<SpaceObject>& target) {
     if (vector->active == kObjectToBeFreed) {
         return false;
     }
 
     Point start(vector->location.h, vector->location.v);
-    Point end(vector->frame.vector->lastGlobalLocation.h, vector->frame.vector->lastGlobalLocation.v);
+    Point end(
+            vector->frame.vector->lastGlobalLocation.h,
+            vector->frame.vector->lastGlobalLocation.v);
 
     //
     // Determine if the line segment defined by `{start, end}` passes
@@ -701,13 +704,11 @@ static void calc_bounds() {
     for (auto o = g.root; o.get(); o = o->nextObject) {
         if ((o->absoluteBounds.left >= o->absoluteBounds.right) && o->sprite.get()) {
             const NatePixTable::Frame& frame = o->sprite->table->at(o->sprite->whichShape);
-            o->absoluteBounds = Rect(
-                    Point(
-                        o->location.h - ((frame.center().h * o->naturalScale) >> SHIFT_SCALE),
-                        o->location.v - ((frame.center().v * o->naturalScale) >> SHIFT_SCALE)),
-                    Size(
-                        (frame.width() * o->naturalScale) >> SHIFT_SCALE,
-                        (frame.height() * o->naturalScale) >> SHIFT_SCALE));
+            o->absoluteBounds                = Rect(
+                    Point(o->location.h - ((frame.center().h * o->naturalScale) >> SHIFT_SCALE),
+                          o->location.v - ((frame.center().v * o->naturalScale) >> SHIFT_SCALE)),
+                    Size((frame.width() * o->naturalScale) >> SHIFT_SCALE,
+                         (frame.height() * o->naturalScale) >> SHIFT_SCALE));
         }
     }
 }
@@ -718,11 +719,11 @@ static void calc_impacts() {
         const auto& cell = gProximityGrid[i];
         for (auto a = cell.nearObject; a.get(); a = a->nextNearObject) {
             for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
-                Handle<SpaceObject> b = a->nextNearObject;
-                Point super = a->collisionGrid;
+                Handle<SpaceObject> b     = a->nextNearObject;
+                Point               super = a->collisionGrid;
                 if (k > 0) {
                     const auto& adj = cell.unitsToCheck[k];
-                    b = gProximityGrid[adj.adjacentUnit].nearObject;
+                    b               = gProximityGrid[adj.adjacentUnit].nearObject;
                     super.offset(adj.superOffset.h, adj.superOffset.v);
                 }
 
@@ -732,9 +733,9 @@ static void calc_impacts() {
 
                 for (; b.get(); b = b->nextNearObject) {
                     // this'll be true even ONLY if BOTH objects are not non-physical dest object
-                    if (!((b->attributes | a->attributes) & kCanCollide)
-                            || !((b->attributes | a->attributes) & kCanBeHit)
-                            || (b->collisionGrid != super)) {
+                    if (!((b->attributes | a->attributes) & kCanCollide) ||
+                        !((b->attributes | a->attributes) & kCanBeHit) ||
+                        (b->collisionGrid != super)) {
                         continue;
                     }
 
@@ -780,11 +781,11 @@ static void calc_locality() {
         const auto& cell = gProximityGrid[i];
         for (auto a = cell.farObject; a.get(); a = a->nextFarObject) {
             for (int32_t k = 0; k < kUnitsToCheckNumber; k++) {
-                Handle<SpaceObject> b = a->nextFarObject;
-                Point super = a->distanceGrid;
+                Handle<SpaceObject> b     = a->nextFarObject;
+                Point               super = a->distanceGrid;
                 if (k > 0) {
                     const auto& adj = cell.unitsToCheck[k];
-                    b = gProximityGrid[adj.adjacentUnit].farObject;
+                    b               = gProximityGrid[adj.adjacentUnit].farObject;
                     super.offset(adj.superOffset.h, adj.superOffset.v);
                 }
                 if ((super.h < 0) || (super.v < 0)) {
@@ -795,18 +796,16 @@ static void calc_locality() {
                     if (b->distanceGrid != super) {
                         continue;
                     }
-                    if ((b->owner != a->owner)
-                            && ((b->attributes & kCanThink)
-                                || (b->attributes & kRemoteOrHuman)
-                                || (b->attributes & kHated))
-                            && ((a->attributes & kCanThink)
-                                || (a->attributes & kRemoteOrHuman)
-                                || (a->attributes & kHated))) {
+                    if ((b->owner != a->owner) &&
+                        ((b->attributes & kCanThink) || (b->attributes & kRemoteOrHuman) ||
+                         (b->attributes & kHated)) &&
+                        ((a->attributes & kCanThink) || (a->attributes & kRemoteOrHuman) ||
+                         (a->attributes & kHated))) {
                         uint32_t x_dist = ABS<int>(b->location.h - a->location.h);
                         uint32_t y_dist = ABS<int>(b->location.v - a->location.v);
                         uint32_t dist;
-                        if ((x_dist > kMaximumRelevantDistance)
-                                || (y_dist > kMaximumRelevantDistance)) {
+                        if ((x_dist > kMaximumRelevantDistance) ||
+                            (y_dist > kMaximumRelevantDistance)) {
                             dist = kMaximumRelevantDistanceSquared;
                         } else {
                             dist = (y_dist * y_dist) + (x_dist * x_dist);
@@ -826,16 +825,18 @@ static void calc_locality() {
                         }
 
                         if (a->engages(*b)) {
-                            if ((dist < a->closestDistance) && (b->attributes & kPotentialTarget)) {
+                            if ((dist < a->closestDistance) &&
+                                (b->attributes & kPotentialTarget)) {
                                 a->closestDistance = dist;
-                                a->closestObject = b;
+                                a->closestObject   = b;
                             }
                         }
 
                         if (b->engages(*a)) {
-                            if ((dist < b->closestDistance) && (a->attributes & kPotentialTarget)) {
+                            if ((dist < b->closestDistance) &&
+                                (a->attributes & kPotentialTarget)) {
                                 b->closestDistance = dist;
-                                b->closestObject = a;
+                                b->closestObject   = a;
                             }
                         }
 
@@ -860,20 +861,19 @@ static void calc_visibility() {
     // here, it doesn't matter in what order we step through the table
     const uint32_t seen_by_me = 1ul << g.admiral.number();
 
-    for (auto o: SpaceObject::all()) {
+    for (auto o : SpaceObject::all()) {
         if (o->active == kObjectToBeFreed) {
             o->free();
         } else if (o->active) {
-            if ((o->attributes & kConsiderDistanceAttributes)
-                    && (!(o->attributes & kIsDestination))) {
+            if ((o->attributes & kConsiderDistanceAttributes) &&
+                (!(o->attributes & kIsDestination))) {
                 if (o->runTimeFlags & kIsCloaked) {
                     o->seenByPlayerFlags = 0;
                 } else if (!(o->runTimeFlags & kIsHidden)) {
                     o->seenByPlayerFlags = 0xffffffff;
                 }
                 o->seenByPlayerFlags |= o->myPlayerFlag;
-                if (!(o->seenByPlayerFlags & seen_by_me)
-                        && o->sprite.get()) {
+                if (!(o->seenByPlayerFlags & seen_by_me) && o->sprite.get()) {
                     o->sprite->tinySize = 0;
                 }
             }
@@ -882,7 +882,7 @@ static void calc_visibility() {
 }
 
 static void update_last_vector_locations() {
-    for (auto o: SpaceObject::all()) {
+    for (auto o : SpaceObject::all()) {
         if (o->active == kObjectInUse) {
             if (o->attributes & kIsVector) {
                 o->frame.vector->lastGlobalLocation = o->location;
@@ -910,8 +910,8 @@ static void adjust_velocity(Handle<SpaceObject> o, int16_t angle, Fixed totalMas
     tfix += o->maxVelocity >> 1;
     fixedPointType tvel;
     GetRotPoint(&tvel.h, &tvel.v, angle);
-    tvel.h = (tfix * tvel.h);
-    tvel.v = (tfix * tvel.v);
+    tvel.h        = (tfix * tvel.h);
+    tvel.v        = (tfix * tvel.v);
     o->velocity.v = tvel.v;
     o->velocity.h = tvel.h;
 }
@@ -954,29 +954,28 @@ static void correct_physical_space(Handle<SpaceObject> a, Handle<SpaceObject> b)
     }
 
     // calculate the new velocities
-    const Fixed dvx = b->velocity.h - a->velocity.h;
-    const Fixed dvy = b->velocity.v - a->velocity.v;
-    const Fixed force = lsqrt((dvx * dvx) + (dvy * dvy));
-    const int32_t ah = b->location.h - a->location.h;
-    const int32_t av = b->location.v - a->location.v;
+    const Fixed   dvx   = b->velocity.h - a->velocity.h;
+    const Fixed   dvy   = b->velocity.v - a->velocity.v;
+    const Fixed   force = lsqrt((dvx * dvx) + (dvy * dvy));
+    const int32_t ah    = b->location.h - a->location.h;
+    const int32_t av    = b->location.v - a->location.v;
 
     const Fixed totalMass = a->baseType->mass + b->baseType->mass;
-    int16_t angle = ratio_to_angle(ah, av);
+    int16_t     angle     = ratio_to_angle(ah, av);
     adjust_velocity(a, angle, totalMass, force);
     mAddAngle(angle, 180);
     adjust_velocity(b, angle, totalMass, force);
 
-    if ((a->velocity.h == Fixed::zero()) &&
-        (a->velocity.v == Fixed::zero()) &&
-        (b->velocity.h == Fixed::zero()) &&
-        (b->velocity.v == Fixed::zero())) {
+    if ((a->velocity.h == Fixed::zero()) && (a->velocity.v == Fixed::zero()) &&
+        (b->velocity.h == Fixed::zero()) && (b->velocity.v == Fixed::zero())) {
         return;
     }
 
-    while (!((a->absoluteBounds.right   <   b->absoluteBounds.left) ||
-             (a->absoluteBounds.left    >   b->absoluteBounds.right) ||
-             (a->absoluteBounds.bottom  <   b->absoluteBounds.top) ||
-             (a->absoluteBounds.top     >   b->absoluteBounds.bottom))) {
+    while (
+            !((a->absoluteBounds.right < b->absoluteBounds.left) ||
+              (a->absoluteBounds.left > b->absoluteBounds.right) ||
+              (a->absoluteBounds.bottom < b->absoluteBounds.top) ||
+              (a->absoluteBounds.top > b->absoluteBounds.bottom))) {
         push(a);
         push(b);
     }

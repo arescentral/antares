@@ -43,34 +43,33 @@ namespace antares {
 
 namespace {
 
-const int32_t kInterfaceLargeHBorder    = 13;
-const int32_t kInterfaceSmallHBorder    = 3;
-const int32_t kInterfaceVEdgeHeight     = 1;
-const int32_t kInterfaceVCornerHeight   = 2;
-const int32_t kInterfaceVLipHeight      = 1;
-const int32_t kInterfaceHTop            = 2;
-const int32_t kLabelBottomHeight        = 6;
-const int32_t kInterfaceContentBuffer   = 2;
+const int32_t kInterfaceLargeHBorder  = 13;
+const int32_t kInterfaceSmallHBorder  = 3;
+const int32_t kInterfaceVEdgeHeight   = 1;
+const int32_t kInterfaceVCornerHeight = 2;
+const int32_t kInterfaceVLipHeight    = 1;
+const int32_t kInterfaceHTop          = 2;
+const int32_t kLabelBottomHeight      = 6;
+const int32_t kInterfaceContentBuffer = 2;
 
-const int32_t kIndicatorVOffset         = 4;
-const int32_t kRadioIndicatorHOffset    = 4;
-const int32_t kCheckIndicatorHOffset    = 4;
+const int32_t kIndicatorVOffset      = 4;
+const int32_t kRadioIndicatorHOffset = 4;
+const int32_t kCheckIndicatorHOffset = 4;
 
-const int32_t kMaxKeyNameLength         = 4;  // how many chars can be in name of key for plainButton
+const int32_t kMaxKeyNameLength = 4;  // how many chars can be in name of key for plainButton
 
 // DrawInterfaceString:
 //  Relies on roman alphabet for upper/lower casing.  NOT WORLD-READY!
 
 const Font* interface_font(interfaceStyleType style) {
-    if ( style == kSmall) {
+    if (style == kSmall) {
         return sys.fonts.small_button;
     } else {
         return sys.fonts.button;
     }
 }
 
-void DrawInterfaceString(
-        Point p, StringSlice s, interfaceStyleType style, const RgbColor& color) {
+void DrawInterfaceString(Point p, StringSlice s, interfaceStyleType style, const RgbColor& color) {
     interface_font(style)->draw(p, s, color);
 }
 
@@ -93,15 +92,11 @@ int16_t GetInterfaceFontHeight(interfaceStyleType style) {
     return interface_font(style)->height;
 }
 
-int16_t GetInterfaceFontAscent( interfaceStyleType style) {
+int16_t GetInterfaceFontAscent(interfaceStyleType style) {
     return interface_font(style)->ascent;
 }
 
-enum inlineKindType {
-    kNoKind = 0,
-    kVPictKind = 1,
-    kVClearPictKind = 2
-};
+enum inlineKindType { kNoKind = 0, kVPictKind = 1, kVClearPictKind = 2 };
 
 inline void mDrawPuffUpRect(const Rects& rects, Rect r, uint8_t mcolor, int mshade) {
     const RgbColor color = GetRGBTranslateColorShade(mcolor, mshade);
@@ -124,7 +119,8 @@ inline void mDrawPuffDownRect(const Rects& rects, Rect r, uint8_t mcolor, int ms
     rects.fill(Rect(r.left, r.bottom, r.right + 1, r.bottom + 1), lighter);
 }
 
-inline void mDrawPuffUpTopBorder(const Rects& rects, Rect r, uint8_t hue, int shade, int h_border) {
+inline void mDrawPuffUpTopBorder(
+        const Rects& rects, Rect r, uint8_t hue, int shade, int h_border) {
     // For historical reasons, this function assumes r has closed intervals.
     ++r.right;
     ++r.bottom;
@@ -148,14 +144,15 @@ inline void mDrawPuffUpTopBorder(const Rects& rects, Rect r, uint8_t hue, int sh
     rects.fill(Rect(outer.left, outer.top, outer.right, outer.top + 1), lighter);
 }
 
-inline void mDrawPuffUpBottomBorder(const Rects& rects, Rect r, uint8_t hue, int shade, int h_border) {
+inline void mDrawPuffUpBottomBorder(
+        const Rects& rects, Rect r, uint8_t hue, int shade, int h_border) {
     // For historical reasons, this function assumes r has closed intervals.
     ++r.right;
     ++r.bottom;
 
     Rect outer(
-            r.left - h_border, r.bottom + kInterfaceVLipHeight,
-            r.right + h_border, r.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
+            r.left - h_border, r.bottom + kInterfaceVLipHeight, r.right + h_border,
+            r.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
 
     const RgbColor color = GetRGBTranslateColorShade(hue, shade);
     rects.fill(Rect(outer.left, r.bottom, r.left, outer.bottom), color);
@@ -173,55 +170,65 @@ inline void mDrawPuffUpBottomBorder(const Rects& rects, Rect r, uint8_t hue, int
     rects.fill(Rect(outer.right - 1, r.bottom - 1, outer.right, outer.bottom), darker);
 }
 
-inline void mDrawPuffUpTBorder(const Rects& rects, Rect r, uint8_t mcolor, int mshade, int msheight, int h_border) {
+inline void mDrawPuffUpTBorder(
+        const Rects& rects, Rect r, uint8_t mcolor, int mshade, int msheight, int h_border) {
     ++r.right;
     ++r.bottom;
 
     const RgbColor color = GetRGBTranslateColorShade(mcolor, mshade);
-    rects.fill(Rect(
-                r.left - h_border, r.top + msheight, r.left + 1,
-                r.top + msheight + kLabelBottomHeight + 1), color);
-    rects.fill(Rect(
-                r.right - 1, r.top + msheight, r.right + h_border,
-                r.top + msheight + kLabelBottomHeight + 1), color);
-    rects.fill(Rect(
-                r.left, r.top + msheight + kInterfaceVLipHeight, r.right,
-                r.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight + 1), color);
+    rects.fill(
+            Rect(r.left - h_border, r.top + msheight, r.left + 1,
+                 r.top + msheight + kLabelBottomHeight + 1),
+            color);
+    rects.fill(
+            Rect(r.right - 1, r.top + msheight, r.right + h_border,
+                 r.top + msheight + kLabelBottomHeight + 1),
+            color);
+    rects.fill(
+            Rect(r.left, r.top + msheight + kInterfaceVLipHeight, r.right,
+                 r.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight + 1),
+            color);
 
     const RgbColor lighter = GetRGBTranslateColorShade(mcolor, mshade + kLighterColor);
-    rects.fill(Rect(
-                r.left - h_border, r.top + msheight, r.left - h_border + 1,
-                r.top + msheight + kLabelBottomHeight + 1), lighter);
-    rects.fill(Rect(
-                r.left - h_border, r.top + msheight, r.left + 1, r.top + msheight + 1), lighter);
-    rects.fill(Rect(
-                r.left, r.top + msheight + kInterfaceVLipHeight, r.right,
-                r.top + msheight + kInterfaceVLipHeight + 1), lighter);
-    rects.fill(Rect(
-                r.right - 1, r.top + msheight, r.right + h_border - 1,
-                r.top + msheight + 1), lighter);
+    rects.fill(
+            Rect(r.left - h_border, r.top + msheight, r.left - h_border + 1,
+                 r.top + msheight + kLabelBottomHeight + 1),
+            lighter);
+    rects.fill(
+            Rect(r.left - h_border, r.top + msheight, r.left + 1, r.top + msheight + 1), lighter);
+    rects.fill(
+            Rect(r.left, r.top + msheight + kInterfaceVLipHeight, r.right,
+                 r.top + msheight + kInterfaceVLipHeight + 1),
+            lighter);
+    rects.fill(
+            Rect(r.right - 1, r.top + msheight, r.right + h_border - 1, r.top + msheight + 1),
+            lighter);
 
     const RgbColor darker = GetRGBTranslateColorShade(mcolor, mshade + kDarkerColor);
-    rects.fill(Rect(
-                r.left - h_border + 1, r.top + msheight + kLabelBottomHeight, r.left + 1,
-                r.top + msheight + kLabelBottomHeight + 1), darker);
-    rects.fill(Rect(
-                r.left, r.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight, r.right,
-                r.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight + 1), darker);
-    rects.fill(Rect(
-                r.right - 1, r.top + msheight + kLabelBottomHeight, r.right + h_border,
-                r.top + msheight + kLabelBottomHeight + 1), darker);
-    rects.fill(Rect(
-                r.right + h_border - 1, r.top + msheight, r.right + h_border,
-                r.top + msheight + kLabelBottomHeight + 1), darker);
+    rects.fill(
+            Rect(r.left - h_border + 1, r.top + msheight + kLabelBottomHeight, r.left + 1,
+                 r.top + msheight + kLabelBottomHeight + 1),
+            darker);
+    rects.fill(
+            Rect(r.left, r.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight, r.right,
+                 r.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight + 1),
+            darker);
+    rects.fill(
+            Rect(r.right - 1, r.top + msheight + kLabelBottomHeight, r.right + h_border,
+                 r.top + msheight + kLabelBottomHeight + 1),
+            darker);
+    rects.fill(
+            Rect(r.right + h_border - 1, r.top + msheight, r.right + h_border,
+                 r.top + msheight + kLabelBottomHeight + 1),
+            darker);
 }
 
 template <typename T>
 void draw_plain_rect(Point origin, const T& item) {
-    Rects rects;
-    Rect            tRect, uRect;
-    int16_t         vcenter, thisHBorder = kInterfaceSmallHBorder;
-    uint8_t         color = item.hue;
+    Rects              rects;
+    Rect               tRect, uRect;
+    int16_t            vcenter, thisHBorder = kInterfaceSmallHBorder;
+    uint8_t            color = item.hue;
     interfaceStyleType style = item.style;
 
     if (style == kLarge) {
@@ -242,57 +249,54 @@ void draw_plain_rect(Point origin, const T& item) {
 
     // main part left border
 
-    vcenter = ( tRect.bottom - tRect.top) / 2;
+    vcenter = (tRect.bottom - tRect.top) / 2;
 
-    uRect = Rect(tRect.left - thisHBorder,
-        tRect.top + kInterfaceHTop,
-        tRect.left + 1,
-        tRect.top + vcenter - kInterfaceVLipHeight + 1);
+    uRect =
+            Rect(tRect.left - thisHBorder, tRect.top + kInterfaceHTop, tRect.left + 1,
+                 tRect.top + vcenter - kInterfaceVLipHeight + 1);
     mDrawPuffUpRect(rects, uRect, color, DARKER);
 
-    uRect = Rect(tRect.left - thisHBorder,
-        tRect.bottom - vcenter + kInterfaceVLipHeight,
-        tRect.left + 1,
-        tRect.bottom - kInterfaceHTop + 1);
+    uRect =
+            Rect(tRect.left - thisHBorder, tRect.bottom - vcenter + kInterfaceVLipHeight,
+                 tRect.left + 1, tRect.bottom - kInterfaceHTop + 1);
     mDrawPuffUpRect(rects, uRect, color, VERY_DARK);
 
     // right border
 
-    uRect = Rect(tRect.right,
-        tRect.top + kInterfaceHTop,
-        tRect.right + thisHBorder + 1,
-        tRect.top + vcenter - kInterfaceVLipHeight + 1);
+    uRect =
+            Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
+                 tRect.top + vcenter - kInterfaceVLipHeight + 1);
     mDrawPuffUpRect(rects, uRect, color, DARKER);
 
-    uRect = Rect(tRect.right,
-        tRect.bottom - vcenter + kInterfaceVLipHeight,
-        tRect.right + thisHBorder + 1,
-        tRect.bottom - kInterfaceHTop + 1);
+    uRect =
+            Rect(tRect.right, tRect.bottom - vcenter + kInterfaceVLipHeight,
+                 tRect.right + thisHBorder + 1, tRect.bottom - kInterfaceHTop + 1);
     mDrawPuffUpRect(rects, uRect, color, VERY_DARK);
 }
 
 void draw_tab_box(Point origin, const TabBox& item) {
-    Rects rects;
-    Rect                uRect;
-    int16_t             vcenter, h_border = kInterfaceSmallHBorder;
-    uint8_t             shade;
-    uint8_t             color = item.hue;
-    interfaceStyleType  style = item.style;
-    int16_t             top_right_border_size = item.top_right_border_size;
+    Rects              rects;
+    Rect               uRect;
+    int16_t            vcenter, h_border = kInterfaceSmallHBorder;
+    uint8_t            shade;
+    uint8_t            color                 = item.hue;
+    interfaceStyleType style                 = item.style;
+    int16_t            top_right_border_size = item.top_right_border_size;
 
     Rect r = item.bounds();
     r.offset(origin.h, origin.v);
-    if ( style == kLarge) h_border = kInterfaceLargeHBorder;
+    if (style == kLarge)
+        h_border = kInterfaceLargeHBorder;
     r.left -= kInterfaceContentBuffer;
     r.top -= kInterfaceContentBuffer;
     r.right += kInterfaceContentBuffer;
     r.bottom += kInterfaceContentBuffer;
     Rect outer(
-            r.left - h_border, r.top - 3 - kInterfaceVCornerHeight,
-            r.right + h_border, r.top - kInterfaceVLipHeight);
+            r.left - h_border, r.top - 3 - kInterfaceVCornerHeight, r.right + h_border,
+            r.top - kInterfaceVLipHeight);
 
     // top border
-    shade = MEDIUM;
+    shade              = MEDIUM;
     const RgbColor rgb = GetRGBTranslateColorShade(color, shade);
     rects.fill(Rect(outer.left, outer.top, r.left, r.top), rgb);
     rects.fill(Rect(r.right, outer.top, outer.right, r.top), rgb);
@@ -323,38 +327,34 @@ void draw_tab_box(Point origin, const TabBox& item) {
 
     vcenter = (r.bottom - r.top) / 2;
 
-    uRect = Rect(outer.left,
-        r.top + kInterfaceHTop,
-        r.left + 1,
-        r.top + vcenter - kInterfaceVLipHeight + 1);
+    uRect =
+            Rect(outer.left, r.top + kInterfaceHTop, r.left + 1,
+                 r.top + vcenter - kInterfaceVLipHeight + 1);
     mDrawPuffUpRect(rects, uRect, color, DARKER);
 
-    uRect = Rect(outer.left,
-        r.bottom - vcenter + kInterfaceVLipHeight,
-        r.left + 1,
-        r.bottom - kInterfaceHTop + 1);
+    uRect =
+            Rect(outer.left, r.bottom - vcenter + kInterfaceVLipHeight, r.left + 1,
+                 r.bottom - kInterfaceHTop + 1);
     mDrawPuffUpRect(rects, uRect, color, VERY_DARK);
 
     // right border
 
-    uRect = Rect(r.right,
-        r.top + kInterfaceHTop,
-        outer.right + 1,
-        r.top + vcenter - kInterfaceVLipHeight + 1);
+    uRect =
+            Rect(r.right, r.top + kInterfaceHTop, outer.right + 1,
+                 r.top + vcenter - kInterfaceVLipHeight + 1);
     mDrawPuffUpRect(rects, uRect, color, DARKER);
 
-    uRect = Rect(r.right,
-        r.bottom - vcenter + kInterfaceVLipHeight,
-        outer.right + 1,
-        r.bottom - kInterfaceHTop + 1);
+    uRect =
+            Rect(r.right, r.bottom - vcenter + kInterfaceVLipHeight, outer.right + 1,
+                 r.bottom - kInterfaceHTop + 1);
     mDrawPuffUpRect(rects, uRect, color, VERY_DARK);
 }
 
 void draw_button(Point origin, InputMode mode, const PlainButton& item) {
-    Rect            tRect, uRect, vRect;
-    int16_t         swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
-    uint8_t         shade;
-    RgbColor        color;
+    Rect     tRect, uRect, vRect;
+    int16_t  swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
+    uint8_t  shade;
+    RgbColor color;
 
     {
         Rects rects;
@@ -388,10 +388,12 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
 
         // side border top
 
-        uRect = Rect(tRect.left - thisHBorder, tRect.top + kInterfaceHTop, tRect.left + 1,
-                tRect.bottom - kInterfaceHTop + 1);
-        vRect = Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
-                tRect.bottom - kInterfaceHTop + 1);
+        uRect =
+                Rect(tRect.left - thisHBorder, tRect.top + kInterfaceHTop, tRect.left + 1,
+                     tRect.bottom - kInterfaceHTop + 1);
+        vRect =
+                Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
+                     tRect.bottom - kInterfaceHTop + 1);
         if (item.status == kIH_Hilite) {
             shade = LIGHT;
             mDrawPuffUpRect(rects, uRect, item.hue, shade);
@@ -407,7 +409,7 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
         }
     }
 
-    bool draw_shortcut = false;
+    bool   draw_shortcut = false;
     String shortcut_text;
     if ((mode == KEYBOARD_MOUSE) && item.key) {
         draw_shortcut = true;
@@ -418,17 +420,18 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
     }
 
     if (!draw_shortcut) {
-        uRect = Rect(tRect.left +  kInterfaceContentBuffer,
-            tRect.top + kInterfaceContentBuffer,
-            tRect.left +  kInterfaceContentBuffer,
-            tRect.bottom - kInterfaceContentBuffer);
+        uRect =
+                Rect(tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
+                     tRect.left + kInterfaceContentBuffer, tRect.bottom - kInterfaceContentBuffer);
 
         if (item.status == kIH_Hilite)
             shade = LIGHT;
-        else shade = DARK;//DARKEST + kSlightlyLighterColor;
-        uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
-                        tRect.right - kInterfaceContentBuffer + 1,
-                        tRect.bottom - kInterfaceContentBuffer + 1);
+        else
+            shade = DARK;  // DARKEST + kSlightlyLighterColor;
+        uRect =
+                Rect(tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
+                     tRect.right - kInterfaceContentBuffer + 1,
+                     tRect.bottom - kInterfaceContentBuffer + 1);
 
         color = GetRGBTranslateColorShade(item.hue, shade);
         Rects().fill(uRect, color);
@@ -440,8 +443,8 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
         } else {
             color = GetRGBTranslateColorShade(item.hue, LIGHTER);
         }
-        swidth = GetInterfaceStringWidth(item.label, item.style);
-        swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
+        swidth  = GetInterfaceStringWidth(item.label, item.style);
+        swidth  = tRect.left + (tRect.right - tRect.left) / 2 - swidth / 2;
         sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
         DrawInterfaceString(Point(swidth, sheight), item.label, item.style, color);
     } else {
@@ -450,27 +453,29 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
             Rects rects;
             if (item.status == kDimmed)
                 shade = VERY_DARK;
-            else shade = LIGHT;
-            swidth = GetInterfaceFontWidth(item.style) * kMaxKeyNameLength;
+            else
+                shade = LIGHT;
+            swidth    = GetInterfaceFontWidth(item.style) * kMaxKeyNameLength;
 
-            uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
+            uRect = Rect(
+                    tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                     tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 1,
                     tRect.bottom - kInterfaceContentBuffer + 1);
             mDrawPuffUpRect(rects, uRect, item.hue, shade);
 
             if (item.status == kIH_Hilite)
                 shade = LIGHT;
-            else shade = DARK;//DARKEST;
-            vRect = Rect(
+            else
+                shade = DARK;  // DARKEST;
+            vRect     = Rect(
                     tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 2,
-                    tRect.top + kInterfaceContentBuffer,
-                    tRect.right - kInterfaceContentBuffer + 1,
+                    tRect.top + kInterfaceContentBuffer, tRect.right - kInterfaceContentBuffer + 1,
                     tRect.bottom - kInterfaceContentBuffer + 1);
             color = GetRGBTranslateColorShade(item.hue, shade);
             rects.fill(vRect, color);
 
             swidth = GetInterfaceStringWidth(shortcut_text, item.style);
-            swidth = uRect.left + ( uRect.right - uRect.left) / 2 - swidth / 2;
+            swidth = uRect.left + (uRect.right - uRect.left) / 2 - swidth / 2;
             if (item.status == kDimmed) {
                 color = GetRGBTranslateColorShade(item.hue, VERY_DARK);
             } else {
@@ -479,8 +484,8 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
         }
 
         DrawInterfaceString(
-                Point(swidth, uRect.top + GetInterfaceFontAscent(item.style)),
-                shortcut_text, item.style, color);
+                Point(swidth, uRect.top + GetInterfaceFontAscent(item.style)), shortcut_text,
+                item.style, color);
 
         // draw the button title
         {
@@ -493,19 +498,19 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
             }
 
             StringSlice s = item.label;
-            swidth = GetInterfaceStringWidth(s, item.style);
-            swidth = uRect.right + ( tRect.right - uRect.right) / 2 - swidth / 2;
-            sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
+            swidth        = GetInterfaceStringWidth(s, item.style);
+            swidth        = uRect.right + (tRect.right - uRect.right) / 2 - swidth / 2;
+            sheight       = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
             DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
         }
     }
 }
 
 void draw_tab_box_button(Point origin, const TabBoxButton& item) {
-    Rect            tRect;
-    int16_t         swidth, sheight, h_border = kInterfaceSmallHBorder;
-    uint8_t         shade;
-    RgbColor        color;
+    Rect     tRect;
+    int16_t  swidth, sheight, h_border = kInterfaceSmallHBorder;
+    uint8_t  shade;
+    RgbColor color;
 
     if (item.style == kLarge) {
         h_border = kInterfaceLargeHBorder;
@@ -545,12 +550,12 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
         } else {
             if (item.status == kDimmed) {
                 shade = VERY_DARK;
-            }
-            else shade = DARK;
+            } else
+                shade = DARK;
             mDrawPuffUpRect(rects, left, item.hue, shade);
             mDrawPuffUpRect(rects, right, item.hue, shade);
         }
-        left = Rect(left.left, left.bottom, left.right, left.bottom + 3);
+        left  = Rect(left.left, left.bottom, left.right, left.bottom + 3);
         right = Rect(right.left, right.bottom, right.right, right.bottom + 3);
         rects.fill(left, RgbColor::black());
         rects.fill(right, RgbColor::black());
@@ -582,7 +587,8 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
         rects.fill(Rect(left.left, left.top, left.left + 1, left.bottom - 5), lighter);
         rects.fill(Rect(left.left - 3, left.bottom - 5, left.left + 1, left.bottom - 4), lighter);
         rects.fill(Rect(right.left, right.top, right.right - 1, right.top + 1), lighter);
-        rects.fill(Rect(right.right, right.bottom - 5, right.right + 3, right.bottom - 4), lighter);
+        rects.fill(
+                Rect(right.right, right.bottom - 5, right.right + 3, right.bottom - 4), lighter);
         rects.fill(Rect(right.left, right.top, right.left + 1, right.bottom - 1), lighter);
 
         const RgbColor darker = GetRGBTranslateColorShade(item.hue, shade + kDarkerColor);
@@ -591,34 +597,34 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
         rects.fill(Rect(right.right - 1, right.top, right.right, right.bottom - 4), darker);
         rects.fill(Rect(right.left, right.bottom - 1, right.right + 3, right.bottom), darker);
 
-        Rect uRect(left.left - 3, left.bottom - 4, left.right - 1, left.bottom - 1);
+        Rect           uRect(left.left - 3, left.bottom - 4, left.right - 1, left.bottom - 1);
         const RgbColor color = GetRGBTranslateColorShade(item.hue, shade);
         rects.fill(uRect, color);
         Rect vRect(right.left + 1, right.bottom - 4, right.right + 3, right.bottom - 1);
         rects.fill(vRect, color);
         uRect.top--;
         uRect.bottom++;
-        uRect.left = uRect.right + 1;
+        uRect.left  = uRect.right + 1;
         uRect.right = vRect.left - 1;
         rects.fill(uRect, RgbColor::black());
     }
 
     if (item.key == 0) {
-        Rect uRect(tRect.left +  kInterfaceContentBuffer,
-            tRect.top + kInterfaceContentBuffer,
-            tRect.left +  kInterfaceContentBuffer,
-            tRect.bottom - kInterfaceContentBuffer);
+        Rect uRect(
+                tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
+                tRect.left + kInterfaceContentBuffer, tRect.bottom - kInterfaceContentBuffer);
 
         if (item.on) {
             shade = MEDIUM;
         } else if (item.status == kIH_Hilite) {
             shade = LIGHT;
         } else {
-            shade = DARKER;//DARKEST + kSlightlyLighterColor;
+            shade = DARKER;  // DARKEST + kSlightlyLighterColor;
         }
-        uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
-                        tRect.right - kInterfaceContentBuffer + 1,
-                        tRect.bottom - kInterfaceContentBuffer + 1);
+        uRect =
+                Rect(tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
+                     tRect.right - kInterfaceContentBuffer + 1,
+                     tRect.bottom - kInterfaceContentBuffer + 1);
         color = GetRGBTranslateColorShade(item.hue, shade);
         Rects().fill(uRect, color);
 
@@ -635,9 +641,9 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
         }
 
         StringSlice s = item.label;
-        swidth = GetInterfaceStringWidth(s, item.style);
-        swidth = tRect.left + (tRect.right - tRect.left) / 2 - swidth / 2;
-        sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
+        swidth        = GetInterfaceStringWidth(s, item.style);
+        swidth        = tRect.left + (tRect.right - tRect.left) / 2 - swidth / 2;
+        sheight       = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
         DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
     } else {
         // draw the key code
@@ -646,14 +652,14 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
         } else if (item.status == kIH_Hilite) {
             shade = VERY_LIGHT;
         } else {
-            shade = DARK;//DARKEST + kSlightlyLighterColor;
+            shade = DARK;  // DARKEST + kSlightlyLighterColor;
         }
         String s;
         GetKeyNumName(item.key, &s);
         swidth = GetInterfaceFontWidth(item.style) * kMaxKeyNameLength;
 
         Rect uRect(
-                tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
+                tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                 tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 1,
                 tRect.bottom - kInterfaceContentBuffer + 1);
         mDrawPuffUpRect(Rects(), uRect, item.hue, shade);
@@ -663,12 +669,11 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
         } else if (item.status == kIH_Hilite) {
             shade = VERY_LIGHT;
         } else {
-            shade = DARKER;//DARKEST + kSlightlyLighterColor;
+            shade = DARKER;  // DARKEST + kSlightlyLighterColor;
         }
         Rect vRect(
                 tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 2,
-                tRect.top + kInterfaceContentBuffer,
-                tRect.right - kInterfaceContentBuffer + 1,
+                tRect.top + kInterfaceContentBuffer, tRect.right - kInterfaceContentBuffer + 1,
                 tRect.bottom - kInterfaceContentBuffer + 1);
         color = GetRGBTranslateColorShade(item.hue, shade);
         Rects().fill(vRect, color);
@@ -700,9 +705,9 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
 
         {
             StringSlice s = item.label;
-            swidth = GetInterfaceStringWidth(s, item.style);
-            swidth = uRect.right + (tRect.right - uRect.right) / 2 - swidth / 2;
-            sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
+            swidth        = GetInterfaceStringWidth(s, item.style);
+            swidth        = uRect.right + (tRect.right - uRect.right) / 2 - swidth / 2;
+            sheight       = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
             DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
         }
     }
@@ -747,100 +752,113 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap
     uRect = Rect(tRect.left - thisHBorder - kCheckIndicatorHOffset - 2,
             tRect.top + kInterfaceHTop,
             tRect.left + 1,
-            *//*tRect.top + vcenter - kInterfaceVLipHeight + 1*//*
+            */ /*tRect.top + vcenter - kInterfaceVLipHeight + 1*/ /*
             tRect.bottom - kInterfaceHTop + 1);
     vRect = Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
-            *//*tRect.top + vcenter - kInterfaceVLipHeight + 1*//*
-            tRect.bottom - kInterfaceHTop + 1);
+            */ /*tRect.top + vcenter - kInterfaceVLipHeight + 1*/ /*
+                                                        tRect.bottom - kInterfaceHTop + 1);
 
-    if ( item.status == kIH_Hilite)
-    {
-        shade = LIGHT;
-        mDrawPuffUpRect( uRect, item.hue, shade, pix);
-        mDrawPuffUpRect( vRect, item.hue, shade, pix);
+                                                if ( item.status == kIH_Hilite)
+                                                {
+                                                    shade = LIGHT;
+                                                    mDrawPuffUpRect( uRect, item.hue, shade, pix);
+                                                    mDrawPuffUpRect( vRect, item.hue, shade, pix);
 
-        wRect.left += 2;
-        wRect.right += 2;
-        FrameOval(pix, wRect, RgbColor::black());
-        wRect.left -= 2;
-        wRect.right -= 2;
-        mDrawPuffUpOval(wRect, item.hue, shade, pix);
+                                                    wRect.left += 2;
+                                                    wRect.right += 2;
+                                                    FrameOval(pix, wRect, RgbColor::black());
+                                                    wRect.left -= 2;
+                                                    wRect.right -= 2;
+                                                    mDrawPuffUpOval(wRect, item.hue, shade, pix);
 
-        wRect.inset(3, 3);
-        mDrawPuffDownOval(wRect, item.hue, shade, pix);
-        wRect.inset(1, 1);
+                                                    wRect.inset(3, 3);
+                                                    mDrawPuffDownOval(wRect, item.hue, shade, pix);
+                                                    wRect.inset(1, 1);
 
-        if (!item.on) {
-            PaintOval(pix, wRect, RgbColor::black());
-        } else {
-            const RgbColor color = GetRGBTranslateColorShade(item.hue, VERY_LIGHT);
-            PaintOval(pix, wRect, color);
-        }
-    } else
-    {
-        if ( item.status == kDimmed)
-            shade = VERY_DARK;
-        else shade = MEDIUM + kSlightlyLighterColor;
-        mDrawPuffUpRect( uRect, item.hue, shade, pix);
-        mDrawPuffUpRect( vRect, item.hue, shade, pix);
-        wRect.left += 2;
-        wRect.right += 2;
-        FrameOval(pix, wRect, RgbColor::black());
-        wRect.left -= 2;
-        wRect.right -= 2;
-        mDrawPuffUpOval(wRect, item.hue, shade, pix);
+                                                    if (!item.on) {
+                                                        PaintOval(pix, wRect, RgbColor::black());
+                                                    } else {
+                                                        const RgbColor color =
+                                            GetRGBTranslateColorShade(item.hue, VERY_LIGHT);
+                                                        PaintOval(pix, wRect, color);
+                                                    }
+                                                } else
+                                                {
+                                                    if ( item.status == kDimmed)
+                                                        shade = VERY_DARK;
+                                                    else shade = MEDIUM + kSlightlyLighterColor;
+                                                    mDrawPuffUpRect( uRect, item.hue, shade, pix);
+                                                    mDrawPuffUpRect( vRect, item.hue, shade, pix);
+                                                    wRect.left += 2;
+                                                    wRect.right += 2;
+                                                    FrameOval(pix, wRect, RgbColor::black());
+                                                    wRect.left -= 2;
+                                                    wRect.right -= 2;
+                                                    mDrawPuffUpOval(wRect, item.hue, shade, pix);
 
-        wRect.inset(3, 3);
-        mDrawPuffDownOval(wRect, item.hue, shade, pix);
-        wRect.inset(1, 1);
-        if (!item.on) {
-            PaintOval(pix, wRect, RgbColor::black());
-        } else if (item.status == kActive) {
-            const RgbColor color = GetRGBTranslateColorShade(item.hue, LIGHT);
-            PaintOval(pix, wRect, color);
-        } else {
-            const RgbColor color = GetRGBTranslateColorShade(item.hue, MEDIUM);
-            PaintOval(pix, wRect, color);
-        }
-    }
+                                                    wRect.inset(3, 3);
+                                                    mDrawPuffDownOval(wRect, item.hue, shade, pix);
+                                                    wRect.inset(1, 1);
+                                                    if (!item.on) {
+                                                        PaintOval(pix, wRect, RgbColor::black());
+                                                    } else if (item.status == kActive) {
+                                                        const RgbColor color =
+                                            GetRGBTranslateColorShade(item.hue, LIGHT);
+                                                        PaintOval(pix, wRect, color);
+                                                    } else {
+                                                        const RgbColor color =
+                                            GetRGBTranslateColorShade(item.hue, MEDIUM);
+                                                        PaintOval(pix, wRect, color);
+                                                    }
+                                                }
 
-    uRect = Rect(tRect.left +  kInterfaceContentBuffer,
-        tRect.top + kInterfaceContentBuffer,
-        tRect.left +  kInterfaceContentBuffer,
-        tRect.bottom - kInterfaceContentBuffer);
+                                                uRect = Rect(tRect.left +  kInterfaceContentBuffer,
+                                                    tRect.top + kInterfaceContentBuffer,
+                                                    tRect.left +  kInterfaceContentBuffer,
+                                                    tRect.bottom - kInterfaceContentBuffer);
 
-    if ( item.status == kIH_Hilite)
-        shade = LIGHT;
-    else shade = DARKEST + kSlightlyLighterColor;
-    uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
-                    tRect.right - kInterfaceContentBuffer + 1,
-                    tRect.bottom - kInterfaceContentBuffer + 1);
-    color = GetRGBTranslateColorShade(item.hue, shade);
-    pix->view(uRect).fill(color);
+                                                if ( item.status == kIH_Hilite)
+                                                    shade = LIGHT;
+                                                else shade = DARKEST + kSlightlyLighterColor;
+                                                uRect = Rect(tRect.left +  kInterfaceContentBuffer,
+                                            tRect.top + kInterfaceContentBuffer,
+                                                                tRect.right -
+                                            kInterfaceContentBuffer + 1,
+                                                                tRect.bottom -
+                                            kInterfaceContentBuffer + 1);
+                                                color = GetRGBTranslateColorShade(item.hue, shade);
+                                                pix->view(uRect).fill(color);
 
-    if (item.status == kIH_Hilite) {
-        color = GetRGBTranslateColorShade(item.hue, DARKEST);
-    } else if (item.status == kDimmed) {
-        color = GetRGBTranslateColorShade(item.hue, DARK);
-    } else {
-        color = GetRGBTranslateColorShade(item.hue, LIGHT);
-    }
-    StringSlice s = item.label;
-    swidth = GetInterfaceStringWidth( s, item.style);
-    swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
-    sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
-    DrawInterfaceString(Point(swidth, sheight), s, item.style, pix, color);
-}
-*/
+                                                if (item.status == kIH_Hilite) {
+                                                    color = GetRGBTranslateColorShade(item.hue,
+                                            DARKEST);
+                                                } else if (item.status == kDimmed) {
+                                                    color = GetRGBTranslateColorShade(item.hue,
+                                            DARK);
+                                                } else {
+                                                    color = GetRGBTranslateColorShade(item.hue,
+                                            LIGHT);
+                                                }
+                                                StringSlice s = item.label;
+                                                swidth = GetInterfaceStringWidth( s, item.style);
+                                                swidth = tRect.left + ( tRect.right - tRect.left) /
+                                            2 - swidth / 2;
+                                                sheight = GetInterfaceFontAscent(item.style) +
+                                            kInterfaceTextVBuffer + tRect.top;
+                                                DrawInterfaceString(Point(swidth, sheight), s,
+                                            item.style, pix, color);
+                                            }
+                                            */
 
 void draw_checkbox(Point origin, const CheckboxButton& item) {
-    Rect            tRect, uRect, vRect, wRect;
-    int16_t         swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
-    uint8_t         shade;
-    RgbColor        color;
+    Rect     tRect, uRect, vRect, wRect;
+    int16_t  swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
+    uint8_t  shade;
+    RgbColor color;
 
-    if ( item.style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    tRect = item.bounds();
+    if (item.style == kLarge)
+        thisHBorder = kInterfaceLargeHBorder;
+    tRect           = item.bounds();
     tRect.offset(origin.h, origin.v);
 
     tRect.left -= kInterfaceContentBuffer;
@@ -850,9 +868,10 @@ void draw_checkbox(Point origin, const CheckboxButton& item) {
 
     // top border
 
-    if ( item.status == kDimmed)
+    if (item.status == kDimmed)
         shade = VERY_DARK;
-    else shade = MEDIUM;
+    else
+        shade = MEDIUM;
 
     mDrawPuffUpTopBorder(Rects(), tRect, item.hue, shade, thisHBorder);
     // bottom border
@@ -862,18 +881,20 @@ void draw_checkbox(Point origin, const CheckboxButton& item) {
     // side border top
 
     swidth = (tRect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight + kIndicatorVOffset);
-    sheight = (tRect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight - kIndicatorVOffset) -
+    sheight =
+            (tRect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight - kIndicatorVOffset) -
             swidth;
 
-    wRect = Rect(tRect.left - thisHBorder - kCheckIndicatorHOffset - sheight, swidth,
-            tRect.left - thisHBorder - kCheckIndicatorHOffset + 1, swidth + sheight + 1);
+    wRect =
+            Rect(tRect.left - thisHBorder - kCheckIndicatorHOffset - sheight, swidth,
+                 tRect.left - thisHBorder - kCheckIndicatorHOffset + 1, swidth + sheight + 1);
 
-    uRect = Rect(tRect.left - thisHBorder - kCheckIndicatorHOffset + 2,
-            tRect.top + kInterfaceHTop,
-            tRect.left + 1,
-            tRect.bottom - kInterfaceHTop + 1);
-    vRect = Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
-            tRect.bottom - kInterfaceHTop + 1);
+    uRect =
+            Rect(tRect.left - thisHBorder - kCheckIndicatorHOffset + 2, tRect.top + kInterfaceHTop,
+                 tRect.left + 1, tRect.bottom - kInterfaceHTop + 1);
+    vRect =
+            Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
+                 tRect.bottom - kInterfaceHTop + 1);
 
     if (item.status == kIH_Hilite) {
         shade = LIGHT;
@@ -883,16 +904,17 @@ void draw_checkbox(Point origin, const CheckboxButton& item) {
         wRect.inset(3, 3);
         mDrawPuffDownRect(Rects(), wRect, item.hue, shade);
         wRect.inset(1, 1);
-        if ( !item.on) {
+        if (!item.on) {
             color = RgbColor::black();
         } else {
             color = GetRGBTranslateColorShade(item.hue, VERY_LIGHT);
         }
         Rects().fill(wRect, color);
     } else {
-        if ( item.status == kDimmed)
+        if (item.status == kDimmed)
             shade = VERY_DARK;
-        else shade = MEDIUM + kSlightlyLighterColor;
+        else
+            shade = MEDIUM + kSlightlyLighterColor;
         mDrawPuffUpRect(Rects(), uRect, item.hue, shade);
         mDrawPuffUpRect(Rects(), vRect, item.hue, shade);
         mDrawPuffUpRect(Rects(), wRect, item.hue, shade);
@@ -909,40 +931,40 @@ void draw_checkbox(Point origin, const CheckboxButton& item) {
         Rects().fill(wRect, color);
     }
 
-    uRect = Rect(tRect.left +  kInterfaceContentBuffer,
-        tRect.top + kInterfaceContentBuffer,
-        tRect.left +  kInterfaceContentBuffer,
-        tRect.bottom - kInterfaceContentBuffer);
+    uRect =
+            Rect(tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
+                 tRect.left + kInterfaceContentBuffer, tRect.bottom - kInterfaceContentBuffer);
 
-    if ( item.status == kIH_Hilite)
+    if (item.status == kIH_Hilite)
         shade = LIGHT;
-    else shade = DARKEST + kSlightlyLighterColor;
-    uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
-                    tRect.right - kInterfaceContentBuffer + 1,
-                    tRect.bottom - kInterfaceContentBuffer + 1);
+    else
+        shade = DARKEST + kSlightlyLighterColor;
+    uRect     = Rect(
+            tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
+            tRect.right - kInterfaceContentBuffer + 1, tRect.bottom - kInterfaceContentBuffer + 1);
     color = GetRGBTranslateColorShade(item.hue, shade);
     Rects().fill(uRect, color);
 
     if (item.status == kIH_Hilite) {
         color = GetRGBTranslateColorShade(item.hue, DARKEST);
-    } else if ( item.status == kDimmed) {
+    } else if (item.status == kDimmed) {
         color = GetRGBTranslateColorShade(item.hue, DARK);
     } else {
         color = GetRGBTranslateColorShade(item.hue, LIGHT);
     }
 
     StringSlice s = item.label;
-    swidth = GetInterfaceStringWidth( s, item.style);
-    swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
-    sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
+    swidth        = GetInterfaceStringWidth(s, item.style);
+    swidth        = tRect.left + (tRect.right - tRect.left) / 2 - swidth / 2;
+    sheight       = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
     DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
 }
 
 void draw_labeled_box(Point origin, const LabeledRect& item) {
-    Rect            tRect, uRect;
-    int16_t         vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
-    uint8_t         shade;
-    RgbColor        color;
+    Rect     tRect, uRect;
+    int16_t  vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
+    uint8_t  shade;
+    RgbColor color;
 
     if (item.style == kLarge) {
         thisHBorder = kInterfaceLargeHBorder;
@@ -951,7 +973,7 @@ void draw_labeled_box(Point origin, const LabeledRect& item) {
     tRect.offset(origin.h, origin.v);
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer + GetInterfaceFontHeight(item.style) +
-            kInterfaceTextVBuffer * 2 + kLabelBottomHeight;
+                 kInterfaceTextVBuffer * 2 + kLabelBottomHeight;
     tRect.right += kInterfaceContentBuffer;
     tRect.bottom += kInterfaceContentBuffer;
 
@@ -965,47 +987,44 @@ void draw_labeled_box(Point origin, const LabeledRect& item) {
     // draw the string
 
     StringSlice s = item.label;
-    swidth = GetInterfaceStringWidth( s, item.style) + kInterfaceTextHBuffer * 2;
-    swidth = ( tRect.right - tRect.left) - swidth;
-    sheight = GetInterfaceFontHeight( item.style) + kInterfaceTextVBuffer * 2;
+    swidth        = GetInterfaceStringWidth(s, item.style) + kInterfaceTextHBuffer * 2;
+    swidth        = (tRect.right - tRect.left) - swidth;
+    sheight       = GetInterfaceFontHeight(item.style) + kInterfaceTextVBuffer * 2;
 
-    uRect = Rect(tRect.left + kInterfaceTextHBuffer - 1,
-        tRect.top + kInterfaceHTop,
-        tRect.right - swidth - kInterfaceTextHBuffer + 1,
-        tRect.top + sheight - kInterfaceHTop);
+    uRect =
+            Rect(tRect.left + kInterfaceTextHBuffer - 1, tRect.top + kInterfaceHTop,
+                 tRect.right - swidth - kInterfaceTextHBuffer + 1,
+                 tRect.top + sheight - kInterfaceHTop);
     color = GetRGBTranslateColorShade(item.hue, VERY_DARK);
     Rects().fill(uRect, color);
 
     color = GetRGBTranslateColorShade(item.hue, LIGHT);
 
     DrawInterfaceString(
-            Point(
-                tRect.left + kInterfaceTextHBuffer,
-                tRect.top + GetInterfaceFontAscent( item.style) + kInterfaceTextVBuffer),
+            Point(tRect.left + kInterfaceTextHBuffer,
+                  tRect.top + GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer),
             s, item.style, color);
 
     // string left border
 
-    shade = MEDIUM;
+    shade   = MEDIUM;
     vcenter = sheight / 2;
 
-    uRect = Rect(tRect.left - thisHBorder,
-            tRect.top + kInterfaceHTop,
-            tRect.left + 1, tRect.top + sheight - kInterfaceHTop + 1);
+    uRect =
+            Rect(tRect.left - thisHBorder, tRect.top + kInterfaceHTop, tRect.left + 1,
+                 tRect.top + sheight - kInterfaceHTop + 1);
     mDrawPuffUpRect(Rects(), uRect, item.hue, shade);
 
     // string right border
 
     shade = MEDIUM;
-    uRect = Rect(tRect.right - swidth,
-        tRect.top + kInterfaceHTop,
-        tRect.right - 2,
-        tRect.top + sheight - kInterfaceHTop + 1);
+    uRect =
+            Rect(tRect.right - swidth, tRect.top + kInterfaceHTop, tRect.right - 2,
+                 tRect.top + sheight - kInterfaceHTop + 1);
     mDrawPuffUpRect(Rects(), uRect, item.hue, shade);
-    uRect = Rect(tRect.right,
-        tRect.top + kInterfaceHTop,
-        tRect.right + thisHBorder + 1,
-        tRect.top + sheight - kInterfaceHTop + 1);
+    uRect =
+            Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
+                 tRect.top + sheight - kInterfaceHTop + 1);
     mDrawPuffUpRect(Rects(), uRect, item.hue, shade);
 
     // string bottom border
@@ -1016,32 +1035,28 @@ void draw_labeled_box(Point origin, const LabeledRect& item) {
 
     tRect.top += sheight + kLabelBottomHeight;
 
-    vcenter = ( tRect.bottom - tRect.top) / 2;
+    vcenter = (tRect.bottom - tRect.top) / 2;
 
-    uRect = Rect(tRect.left - thisHBorder,
-        tRect.top + kInterfaceHTop,
-        tRect.left + 1,
-        tRect.top + vcenter - kInterfaceVLipHeight + 1);
+    uRect =
+            Rect(tRect.left - thisHBorder, tRect.top + kInterfaceHTop, tRect.left + 1,
+                 tRect.top + vcenter - kInterfaceVLipHeight + 1);
     mDrawPuffUpRect(Rects(), uRect, item.hue, DARKER);
 
-    uRect = Rect(tRect.left - thisHBorder,
-        tRect.bottom - vcenter + kInterfaceVLipHeight,
-        tRect.left + 1,
-        tRect.bottom - kInterfaceHTop + 1);
+    uRect =
+            Rect(tRect.left - thisHBorder, tRect.bottom - vcenter + kInterfaceVLipHeight,
+                 tRect.left + 1, tRect.bottom - kInterfaceHTop + 1);
     mDrawPuffUpRect(Rects(), uRect, item.hue, VERY_DARK);
 
     // right border
 
-    uRect = Rect(tRect.right,
-        tRect.top + kInterfaceHTop,
-        tRect.right + thisHBorder + 1,
-        tRect.top + vcenter - kInterfaceVLipHeight + 1);
+    uRect =
+            Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
+                 tRect.top + vcenter - kInterfaceVLipHeight + 1);
     mDrawPuffUpRect(Rects(), uRect, item.hue, DARKER);
 
-    uRect = Rect(tRect.right,
-        tRect.bottom - vcenter + kInterfaceVLipHeight,
-        tRect.right + thisHBorder + 1,
-        tRect.bottom - kInterfaceHTop + 1);
+    uRect =
+            Rect(tRect.right, tRect.bottom - vcenter + kInterfaceVLipHeight,
+                 tRect.right + thisHBorder + 1, tRect.bottom - kInterfaceHTop + 1);
     mDrawPuffUpRect(Rects(), uRect, item.hue, VERY_DARK);
 }
 
@@ -1055,7 +1070,7 @@ void draw_text_rect(Point origin, const TextRect& item) {
 
 void draw_text_in_rect(
         Rect tRect, const StringSlice& text, interfaceStyleType style, uint8_t textcolor) {
-    RgbColor color = GetRGBTranslateColorShade(textcolor, VERY_LIGHT);
+    RgbColor   color = GetRGBTranslateColorShade(textcolor, VERY_LIGHT);
     StyledText interface_text(interface_font(style));
     interface_text.set_fore_color(color);
     interface_text.set_interface_text(text);
@@ -1084,18 +1099,16 @@ void draw_picture_rect(Point origin, const PictureRect& item) {
 namespace {
 
 struct DrawInterfaceItemVisitor : InterfaceItem::Visitor {
-    Point p;
+    Point     p;
     InputMode mode;
-    DrawInterfaceItemVisitor(Point p, InputMode mode):
-            p(p),
-            mode(mode) { }
+    DrawInterfaceItemVisitor(Point p, InputMode mode) : p(p), mode(mode) {}
 
     virtual void visit_plain_rect(const PlainRect& i) const { draw_plain_rect(p, i); }
     virtual void visit_labeled_rect(const LabeledRect& i) const { draw_labeled_box(p, i); }
     virtual void visit_text_rect(const TextRect& i) const { draw_text_rect(p, i); }
     virtual void visit_picture_rect(const PictureRect& i) const { draw_picture_rect(p, i); }
     virtual void visit_plain_button(const PlainButton& i) const { draw_button(p, mode, i); }
-    virtual void visit_radio_button(const RadioButton& i) const { }
+    virtual void visit_radio_button(const RadioButton& i) const {}
     virtual void visit_checkbox_button(const CheckboxButton& i) const { draw_checkbox(p, i); }
     virtual void visit_tab_box(const TabBox& i) const { draw_tab_box(p, i); }
     virtual void visit_tab_box_button(const TabBoxButton& i) const { draw_tab_box_button(p, i); }
@@ -1103,7 +1116,7 @@ struct DrawInterfaceItemVisitor : InterfaceItem::Visitor {
 
 struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
     Rect* bounds;
-    GetBoundsInterfaceItemVisitor(Rect* bounds): bounds(bounds) { }
+    GetBoundsInterfaceItemVisitor(Rect* bounds) : bounds(bounds) {}
 
     void initialize_bounds(const InterfaceItem& item) const {
         *bounds = item.bounds();
@@ -1131,7 +1144,7 @@ struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
         bounds->left -= h_border(item);
         bounds->right += h_border(item);
         bounds->top -= GetInterfaceFontHeight(item.style) + kInterfaceTextVBuffer * 2 +
-            kLabelBottomHeight + kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
+                       kLabelBottomHeight + kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
         bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     }
 
@@ -1162,8 +1175,8 @@ struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
     virtual void visit_radio_button(const RadioButton& item) const {
         initialize_bounds(item);
         bounds->left -= bounds->bottom - bounds->top + 2 * kInterfaceVEdgeHeight +
-            2 * kInterfaceVCornerHeight - 2 * kIndicatorVOffset + h_border(item) +
-            kRadioIndicatorHOffset;
+                        2 * kInterfaceVCornerHeight - 2 * kIndicatorVOffset + h_border(item) +
+                        kRadioIndicatorHOffset;
         bounds->right += h_border(item);
         bounds->top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
         bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
@@ -1172,8 +1185,8 @@ struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
     virtual void visit_checkbox_button(const CheckboxButton& item) const {
         initialize_bounds(item);
         bounds->left -= bounds->bottom - bounds->top + 2 * kInterfaceVEdgeHeight +
-            2 * kInterfaceVCornerHeight - 2 * kIndicatorVOffset + h_border(item) +
-            kCheckIndicatorHOffset;
+                        2 * kInterfaceVCornerHeight - 2 * kIndicatorVOffset + h_border(item) +
+                        kCheckIndicatorHOffset;
         bounds->right += h_border(item);
         bounds->top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
         bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
@@ -1206,7 +1219,7 @@ struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
             */
 };
 
-} // namespace
+}  // namespace
 
 void draw_interface_item(const InterfaceItem& item, InputMode mode) {
     item.accept(DrawInterfaceItemVisitor({0, 0}, mode));
@@ -1216,7 +1229,7 @@ void draw_interface_item(const InterfaceItem& item, InputMode mode, Point origin
     item.accept(DrawInterfaceItemVisitor(origin, mode));
 }
 
-void GetAnyInterfaceItemGraphicBounds(const InterfaceItem& item, Rect *bounds) {
+void GetAnyInterfaceItemGraphicBounds(const InterfaceItem& item, Rect* bounds) {
     item.accept(GetBoundsInterfaceItemVisitor(bounds));
 }
 

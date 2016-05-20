@@ -21,10 +21,10 @@
 
 #define GLX_GLXEXT_PROTOTYPES
 
-#include <memory>
 #include <GL/glx.h>
 #include <GL/glxext.h>
 #include <X11/Xlib.h>
+#include <memory>
 
 #include "math/geometry.hpp"
 
@@ -38,13 +38,11 @@ class Offscreen {
   private:
     struct ContextDestroyer {
         Display* display;
-        void operator()(GLXContext context) {
-            glXDestroyContext(display, context);
-        }
+        void operator()(GLXContext context) { glXDestroyContext(display, context); }
     };
 
-    std::unique_ptr<Display, decltype(&XCloseDisplay)> _display;
-    std::unique_ptr<GLXFBConfig[], decltype(&XFree)> _fb_configs;
+    std::unique_ptr<Display, decltype(&XCloseDisplay)>                       _display;
+    std::unique_ptr<GLXFBConfig[], decltype(&XFree)>                         _fb_configs;
     std::unique_ptr<std::remove_pointer<GLXContext>::type, ContextDestroyer> _context;
 };
 

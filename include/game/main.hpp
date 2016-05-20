@@ -29,11 +29,11 @@ class InputSource;
 struct Level;
 
 enum GameResult {
-    NO_GAME = -1,
-    LOSE_GAME = 0,
-    WIN_GAME = 1,
+    NO_GAME      = -1,
+    LOSE_GAME    = 0,
+    WIN_GAME     = 1,
     RESTART_GAME = 2,
-    QUIT_GAME = 3,
+    QUIT_GAME    = 3,
 };
 
 class MainPlay : public Card {
@@ -53,14 +53,14 @@ class MainPlay : public Card {
     };
     State _state;
 
-    Handle<Level> _level;
-    const bool _replay;
-    const bool _show_loading_screen;
-    bool _cancelled;
+    Handle<Level>     _level;
+    const bool        _replay;
+    const bool        _show_loading_screen;
+    bool              _cancelled;
     GameResult* const _game_result;
-    InputSource* _input_source;
+    InputSource*      _input_source;
 };
 
 }  // namespace antares
 
-#endif // ANTARES_GAME_MAIN_HPP_
+#endif  // ANTARES_GAME_MAIN_HPP_

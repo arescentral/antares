@@ -19,8 +19,8 @@
 #ifndef ANTARES_MATH_UNITS_HPP_
 #define ANTARES_MATH_UNITS_HPP_
 
-#include <chrono>
 #include <stdint.h>
+#include <chrono>
 
 namespace antares {
 
@@ -41,28 +41,33 @@ namespace antares {
 // microseconds.
 typedef std::chrono::microseconds usecs;
 typedef std::chrono::duration<usecs::rep, std::ratio<1000020, 1000000>> secs;
-typedef std::chrono::duration<usecs::rep, std::ratio<16667, 1000000>> ticks;
+typedef std::chrono::duration<usecs::rep, std::ratio<16667, 1000000>>   ticks;
 
-const ticks kMajorTick = ticks(3);
-const ticks kMinorTick = ticks(1);
+const ticks kMajorTick     = ticks(3);
+const ticks kMinorTick     = ticks(1);
 const ticks kConditionTick = ticks(90);
 
 // Time units
-struct GameStart { typedef ticks duration; };
-struct Wall { typedef usecs duration; };
+struct GameStart {
+    typedef ticks duration;
+};
+struct Wall {
+    typedef usecs duration;
+};
 
 typedef std::chrono::time_point<GameStart> game_ticks;
-typedef std::chrono::time_point<Wall> wall_time;
+typedef std::chrono::time_point<Wall>      wall_time;
 typedef std::chrono::time_point<Wall, ticks> wall_ticks;
 
 // Spatial units
 
-const int32_t kUniversalCenter = 1073741823;
+const int32_t kUniversalCenter         = 1073741823;
 const int32_t kMaximumRelevantDistance = 46340;
-const int32_t kMaximumRelevantDistanceSquared = kMaximumRelevantDistance * kMaximumRelevantDistance;
-const int32_t kMaximumAngleDistance = 32767;      // maximum distance we can calc angle for
+const int32_t kMaximumRelevantDistanceSquared =
+        kMaximumRelevantDistance * kMaximumRelevantDistance;
+const int32_t kMaximumAngleDistance = 32767;  // maximum distance we can calc angle for
 
-const int32_t kSubSectorSize = 512;
+const int32_t kSubSectorSize  = 512;
 const int32_t kSubSectorShift = 9;
 
 const int32_t SCALE_SCALE   = 4096;
@@ -71,13 +76,13 @@ const int32_t MAX_SCALE     = 32768;
 const int32_t MAX_SCALE_PIX = 32;  // the maximum size a single scaled pixel can be
                                    // (should be 32)
 
-const int32_t kOneEighthScale   = SCALE_SCALE / 8;
-const int32_t kOneQuarterScale  = SCALE_SCALE / 4;
-const int32_t kOneHalfScale     = SCALE_SCALE / 2;
-const int32_t kTimesTwoScale    = SCALE_SCALE * 2;
+const int32_t kOneEighthScale  = SCALE_SCALE / 8;
+const int32_t kOneQuarterScale = SCALE_SCALE / 4;
+const int32_t kOneHalfScale    = SCALE_SCALE / 2;
+const int32_t kTimesTwoScale   = SCALE_SCALE * 2;
 
-const int32_t SHIFT_SCALE       = 12;
+const int32_t SHIFT_SCALE = 12;
 
 }  // namespace antares
 
-#endif // ANTARES_MATH_UNITS_HPP_
+#endif  // ANTARES_MATH_UNITS_HPP_

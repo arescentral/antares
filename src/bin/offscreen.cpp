@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include <sys/time.h>
 #include <getopt.h>
+#include <sys/time.h>
 #include <queue>
 #include <sfz/sfz.hpp>
 
@@ -46,7 +46,7 @@ using sfz::string_to_int;
 using std::unique_ptr;
 
 namespace args = sfz::args;
-namespace io = sfz::io;
+namespace io   = sfz::io;
 namespace utf8 = sfz::utf8;
 
 namespace antares {
@@ -62,18 +62,16 @@ void main(int argc, char* const* argv) {
 
     String script;
     parser.add_argument("script", store(script))
-        .metavar("main-screen|options|mission-briefing|pause")
-        .required()
-        .help("the script to execute");
+            .metavar("main-screen|options|mission-briefing|pause")
+            .required()
+            .help("the script to execute");
 
     Optional<String> output_dir;
-    bool text = false;
+    bool             text = false;
     parser.add_argument("-o", "--output", store(output_dir))
-        .help("place output in this directory");
-    parser.add_argument("-t", "--text", store_const(text, true))
-        .help("produce text output");
-    parser.add_argument("-h", "--help", help(parser, 0))
-        .help("display this help screen");
+            .help("place output in this directory");
+    parser.add_argument("-t", "--text", store_const(text, true)).help("produce text output");
+    parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
 
     String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
@@ -86,8 +84,8 @@ void main(int argc, char* const* argv) {
     }
 
     NullPrefsDriver prefs;
-    EventScheduler scheduler;
-    NullLedger ledger;
+    EventScheduler  scheduler;
+    NullLedger      ledger;
     if (script == "main-screen") {
         main_screen(scheduler);
     } else if (script == "options") {

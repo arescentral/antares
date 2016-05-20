@@ -21,26 +21,19 @@
 
 #include <sfz/sfz.hpp>
 
-#include "math/geometry.hpp"
 #include "data/picture.hpp"
+#include "math/geometry.hpp"
 #include "video/driver.hpp"
 
 namespace antares {
 
-enum interfaceItemStatusType {
-    kDimmed = 1,
-    kActive = 2,
-    kIH_Hilite = 3
-};
+enum interfaceItemStatusType { kDimmed = 1, kActive = 2, kIH_Hilite = 3 };
 
-enum interfaceStyleType {
-    kLarge = 1,
-    kSmall = 2
-};
+enum interfaceStyleType { kLarge = 1, kSmall = 2 };
 
 struct interfaceLabelType {
-    int16_t             stringID;
-    int16_t             stringNumber;
+    int16_t stringID;
+    int16_t stringNumber;
 };
 
 class InterfaceItem {
@@ -51,9 +44,9 @@ class InterfaceItem {
     InterfaceItem& operator=(InterfaceItem&&) = default;
     virtual ~InterfaceItem() {}
 
-    const int id;
-    const Rect& bounds() const { return _bounds; }
-    Rect& bounds() { return _bounds; }
+    const int    id;
+    const Rect&  bounds() const { return _bounds; }
+    Rect&        bounds() { return _bounds; }
     virtual void accept(const Visitor& visitor) const = 0;
 
   protected:
@@ -63,7 +56,7 @@ class InterfaceItem {
     friend std::vector<std::unique_ptr<InterfaceItem>> interface_items(
             int id0, const sfz::Json& json);
 
-    Rect                        _bounds;
+    Rect _bounds;
 };
 
 std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, const sfz::Json& json);
@@ -72,14 +65,14 @@ struct PlainRect : public InterfaceItem {
     PlainRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style);
     virtual void accept(const Visitor& visitor) const;
 
-    uint8_t                     hue;
-    interfaceStyleType          style;
+    uint8_t            hue;
+    interfaceStyleType style;
 };
 
 struct LabeledItem : public InterfaceItem {
     LabeledItem(int id, Rect bounds, interfaceLabelType label);
 
-    sfz::String                 label;
+    sfz::String label;
 };
 
 struct LabeledRect : public LabeledItem {
@@ -87,8 +80,8 @@ struct LabeledRect : public LabeledItem {
             int id, Rect bounds, interfaceLabelType label, uint8_t hue, interfaceStyleType style);
     virtual void accept(const Visitor& visitor) const;
 
-    uint8_t                     hue;
-    interfaceStyleType          style;
+    uint8_t            hue;
+    interfaceStyleType style;
 };
 
 struct TextRect : public InterfaceItem {
@@ -96,32 +89,31 @@ struct TextRect : public InterfaceItem {
     TextRect(int id, Rect bounds, sfz::StringSlice name, uint8_t hue, interfaceStyleType style);
     virtual void accept(const Visitor& visitor) const;
 
-    sfz::String                 text;
-    uint8_t                     hue;
-    interfaceStyleType          style;
+    sfz::String        text;
+    uint8_t            hue;
+    interfaceStyleType style;
 };
 
 struct PictureRect : public InterfaceItem {
     PictureRect(int id, Rect bounds, sfz::StringSlice name);
     virtual void accept(const Visitor& visitor) const;
 
-    Picture                     picture;
-    Texture                     texture;
-    bool                        visible_bounds;
-    uint8_t                     hue;
-    interfaceStyleType          style;
+    Picture            picture;
+    Texture            texture;
+    bool               visible_bounds;
+    uint8_t            hue;
+    interfaceStyleType style;
 };
 
 struct Button : public LabeledItem {
-    Button(
-            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
-            uint8_t hue, interfaceStyleType style);
+    Button(int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
+           uint8_t hue, interfaceStyleType style);
 
-    int16_t                     key;
-    int16_t                     gamepad;
-    uint8_t                     hue;
-    interfaceStyleType          style;
-    interfaceItemStatusType     status;
+    int16_t                 key;
+    int16_t                 gamepad;
+    uint8_t                 hue;
+    interfaceStyleType      style;
+    interfaceItemStatusType status;
 };
 
 struct PlainButton : public Button {
@@ -137,7 +129,7 @@ struct CheckboxButton : public Button {
             uint8_t hue, interfaceStyleType style);
     virtual void accept(const Visitor& visitor) const;
 
-    bool                        on;
+    bool on;
 };
 
 struct RadioButton : public Button {
@@ -146,7 +138,7 @@ struct RadioButton : public Button {
             uint8_t hue, interfaceStyleType style);
     virtual void accept(const Visitor& visitor) const;
 
-    bool                        on;
+    bool on;
 };
 
 struct TabBoxButton : public Button {
@@ -155,35 +147,34 @@ struct TabBoxButton : public Button {
             uint8_t hue, interfaceStyleType style, const sfz::Json& tab_content);
     virtual void accept(const Visitor& visitor) const;
 
-    bool                        on;
-    sfz::Json                   tab_content;
+    bool      on;
+    sfz::Json tab_content;
 };
 
 struct TabBox : public InterfaceItem {
-    TabBox(
-            int id, Rect bounds, uint8_t hue, interfaceStyleType style,
-            int16_t top_right_border_size);
+    TabBox(int id, Rect bounds, uint8_t hue, interfaceStyleType style,
+           int16_t top_right_border_size);
     virtual void accept(const Visitor& visitor) const;
 
-    uint8_t                     hue;
-    interfaceStyleType          style;
-    int16_t                     top_right_border_size;
+    uint8_t            hue;
+    interfaceStyleType style;
+    int16_t            top_right_border_size;
 };
 
 class InterfaceItem::Visitor {
   public:
     ~Visitor();
-    virtual void visit_plain_rect(const PlainRect&) const = 0;
-    virtual void visit_labeled_rect(const LabeledRect&) const = 0;
-    virtual void visit_text_rect(const TextRect&) const = 0;
-    virtual void visit_picture_rect(const PictureRect&) const = 0;
-    virtual void visit_plain_button(const PlainButton&) const = 0;
-    virtual void visit_radio_button(const RadioButton&) const = 0;
+    virtual void visit_plain_rect(const PlainRect&) const           = 0;
+    virtual void visit_labeled_rect(const LabeledRect&) const       = 0;
+    virtual void visit_text_rect(const TextRect&) const             = 0;
+    virtual void visit_picture_rect(const PictureRect&) const       = 0;
+    virtual void visit_plain_button(const PlainButton&) const       = 0;
+    virtual void visit_radio_button(const RadioButton&) const       = 0;
     virtual void visit_checkbox_button(const CheckboxButton&) const = 0;
-    virtual void visit_tab_box(const TabBox&) const = 0;
-    virtual void visit_tab_box_button(const TabBoxButton&) const = 0;
+    virtual void visit_tab_box(const TabBox&) const                 = 0;
+    virtual void visit_tab_box_button(const TabBoxButton&) const    = 0;
 };
 
 }  // namespace antares
 
-#endif // ANTARES_DATA_INTERFACE_HPP_
+#endif  // ANTARES_DATA_INTERFACE_HPP_

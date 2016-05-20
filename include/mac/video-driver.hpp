@@ -20,8 +20,8 @@
 #define ANTARES_MAC_VIDEO_DRIVER_HPP_
 
 #include <queue>
-#include <stack>
 #include <sfz/sfz.hpp>
+#include <stack>
 
 #include "config/keys.hpp"
 #include "drawing/color.hpp"
@@ -40,7 +40,7 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     virtual Size viewport_size() const;
     virtual Size screen_size() const;
 
-    virtual Point get_mouse();
+    virtual Point     get_mouse();
     virtual InputMode input_mode() const;
 
     virtual wall_time now() const;
@@ -54,17 +54,18 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
 
     class EventTranslator {
       public:
-        EventTranslator(): _c_obj(antares_event_translator_create()) { }
+        EventTranslator() : _c_obj(antares_event_translator_create()) {}
         ~EventTranslator() { antares_event_translator_destroy(_c_obj); }
         AntaresEventTranslator* c_obj() const { return _c_obj; }
+
       private:
         AntaresEventTranslator* _c_obj;
         DISALLOW_COPY_AND_ASSIGN(EventTranslator);
     };
     EventTranslator _translator;
 
-    InputMode _input_mode = KEYBOARD_MOUSE;
-    AntaresWindow* _window = nullptr;
+    InputMode      _input_mode = KEYBOARD_MOUSE;
+    AntaresWindow* _window     = nullptr;
 
     DISALLOW_COPY_AND_ASSIGN(CocoaVideoDriver);
 };

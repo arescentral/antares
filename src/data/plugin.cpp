@@ -32,19 +32,19 @@ using std::vector;
 
 namespace antares {
 
-static const int16_t kLevelNameID                = 4600;
-static const int16_t kSpaceObjectNameResID       = 5000;
-static const int16_t kSpaceObjectShortNameResID  = 5001;
+static const int16_t kLevelNameID               = 4600;
+static const int16_t kSpaceObjectNameResID      = 5000;
+static const int16_t kSpaceObjectShortNameResID = 5001;
 
-static const int16_t kPackedResID                = 500;
+static const int16_t kPackedResID = 500;
 
 ANTARES_GLOBAL ScenarioGlobals plug;
 
 template <typename T>
 static void read_all(StringSlice name, StringSlice type, StringSlice extension, vector<T>& v) {
-    Resource rsrc(type, extension, kPackedResID);
+    Resource   rsrc(type, extension, kPackedResID);
     BytesSlice in(rsrc.data());
-    size_t count = rsrc.data().size() / T::byte_size;
+    size_t     count = rsrc.data().size() / T::byte_size;
     v.resize(count);
     for (size_t i = 0; i < count; ++i) {
         read(in, v[i]);
@@ -56,7 +56,7 @@ static void read_all(StringSlice name, StringSlice type, StringSlice extension, 
 
 void PluginInit() {
     {
-        Resource rsrc("scenario-info", "nlAG", 128);
+        Resource   rsrc("scenario-info", "nlAG", 128);
         BytesSlice in(rsrc.data());
         read(in, plug.meta);
         if (!in.empty()) {
@@ -64,19 +64,19 @@ void PluginInit() {
         }
     }
 
-    read_all("level",       "scenarios",                 "snro",  plug.levels);
-    read_all("initials",    "scenario-initial-objects",  "snit",  plug.initials);
-    read_all("conditions",  "scenario-conditions",       "sncd",  plug.conditions);
-    read_all("briefings",   "scenario-briefing-points",  "snbf",  plug.briefings);
-    read_all("objects",     "objects",                   "bsob",  plug.objects);
-    read_all("actions",     "object-actions",            "obac",  plug.actions);
-    read_all("races",       "races",                     "race",  plug.races);
+    read_all("level", "scenarios", "snro", plug.levels);
+    read_all("initials", "scenario-initial-objects", "snit", plug.initials);
+    read_all("conditions", "scenario-conditions", "sncd", plug.conditions);
+    read_all("briefings", "scenario-briefing-points", "snbf", plug.briefings);
+    read_all("objects", "objects", "bsob", plug.objects);
+    read_all("actions", "object-actions", "obac", plug.actions);
+    read_all("races", "races", "race", plug.races);
 
     StringList level_names(kLevelNameID);
-    for (auto& level: plug.levels) {
+    for (auto& level : plug.levels) {
         level.name.assign(level_names.at(level.levelNameStrNum - 1));
     }
-    for (int i: range(plug.levels.size())) {
+    for (int i : range(plug.levels.size())) {
         while (i != plug.levels[i].levelNameStrNum - 1) {
             using std::swap;
             swap(plug.levels[i], plug.levels[plug.levels[i].levelNameStrNum - 1]);

@@ -19,8 +19,8 @@
 #ifndef ANTARES_GAME_PLAYER_SHIP_HPP_
 #define ANTARES_GAME_PLAYER_SHIP_HPP_
 
-#include "data/base-object.hpp"
 #include "config/keys.hpp"
+#include "data/base-object.hpp"
 #include "game/cursor.hpp"
 #include "ui/event.hpp"
 
@@ -47,11 +47,11 @@ class PlayerShip : public EventReceiver {
 
     void update(bool enter_message);
 
-    bool show_select() const;
-    bool show_target() const;
+    bool    show_select() const;
+    bool    show_target() const;
     int32_t control_direction() const;
 
-    GameCursor& cursor() { return _cursor; }
+    GameCursor&       cursor() { return _cursor; }
     const GameCursor& cursor() const { return _cursor; }
 
   private:
@@ -61,21 +61,21 @@ class PlayerShip : public EventReceiver {
     uint32_t _gamepad_keys;
     uint32_t _key_presses;
     uint32_t _key_releases;
-    KeyMap _keys;
+    KeyMap   _keys;
 
     enum GamepadState {
-        NO_BUMPER               = 0,
-        SELECT_BUMPER           = 1,
-        TARGET_BUMPER           = 2,
-        EITHER_BUMPER           = SELECT_BUMPER | TARGET_BUMPER,
-        OVERRIDE                = 4,
-        SELECT_BUMPER_OVERRIDE  = SELECT_BUMPER | OVERRIDE,
-        TARGET_BUMPER_OVERRIDE  = TARGET_BUMPER | OVERRIDE,
+        NO_BUMPER              = 0,
+        SELECT_BUMPER          = 1,
+        TARGET_BUMPER          = 2,
+        EITHER_BUMPER          = SELECT_BUMPER | TARGET_BUMPER,
+        OVERRIDE               = 4,
+        SELECT_BUMPER_OVERRIDE = SELECT_BUMPER | OVERRIDE,
+        TARGET_BUMPER_OVERRIDE = TARGET_BUMPER | OVERRIDE,
     };
     GamepadState _gamepad_state;
-    bool _control_active;
-    int32_t _control_direction;
-    GameCursor _cursor;
+    bool         _control_active;
+    int32_t      _control_direction;
+    GameCursor   _cursor;
 };
 
 void ResetPlayerShip(Handle<SpaceObject> which);
@@ -84,11 +84,11 @@ void SetPlayerSelectShip(
         Handle<SpaceObject> whichShip, bool target, Handle<Admiral> admiralNumber);
 void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, Handle<SpaceObject> newShip);
 void TogglePlayerAutoPilot(Handle<SpaceObject> theShip);
-bool IsPlayerShipOnAutoPilot( void);
+bool IsPlayerShipOnAutoPilot(void);
 void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral);
 void PlayerShipBodyExpire(Handle<SpaceObject> theShip);
-void HandleTextMessageKeys(const KeyMap&, const KeyMap&, bool *);
+void HandleTextMessageKeys(const KeyMap&, const KeyMap&, bool*);
 
 }  // namespace antares
 
-#endif // ANTARES_GAME_PLAYER_SHIP_HPP_
+#endif  // ANTARES_GAME_PLAYER_SHIP_HPP_

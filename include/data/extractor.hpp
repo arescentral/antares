@@ -44,9 +44,9 @@ class DataExtractor {
     void extract_factory_scenario(Observer* observer) const;
     void extract_plugin_scenario(Observer* observer) const;
 
-    void download(Observer* observer, const sfz::StringSlice& base,
-            const sfz::StringSlice& name, const sfz::StringSlice& version,
-            const sfz::Sha1::Digest& digest) const;
+    void download(
+            Observer* observer, const sfz::StringSlice& base, const sfz::StringSlice& name,
+            const sfz::StringSlice& version, const sfz::Sha1::Digest& digest) const;
     void write_version(sfz::StringSlice scenario_identifier) const;
     void extract_original(Observer* observer, const sfz::StringSlice& zip) const;
     void extract_supplemental(Observer* observer, const sfz::StringSlice& zip) const;
@@ -54,7 +54,7 @@ class DataExtractor {
 
     const sfz::String _downloads_dir;
     const sfz::String _output_dir;
-    sfz::String _scenario;
+    sfz::String       _scenario;
 };
 
 }  // namespace antares

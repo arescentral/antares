@@ -25,8 +25,8 @@
 #include "data/plugin.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
-#include "game/level.hpp"
 #include "game/globals.hpp"
+#include "game/level.hpp"
 #include "ui/interface-handling.hpp"
 #include "video/text-driver.hpp"
 
@@ -41,7 +41,7 @@ using sfz::write;
 using std::unique_ptr;
 
 namespace args = sfz::args;
-namespace io = sfz::io;
+namespace io   = sfz::io;
 namespace utf8 = sfz::utf8;
 
 namespace antares {
@@ -49,14 +49,13 @@ namespace {
 
 class ObjectDataBuilder {
   public:
-    ObjectDataBuilder(const Optional<String>& output_dir)
-            : _output_dir(output_dir) { }
+    ObjectDataBuilder(const Optional<String>& output_dir) : _output_dir(output_dir) {}
 
     void save(Handle<BaseObject> object, int pict_id) {
         String data;
         CreateObjectDataText(&data, object);
         if (_output_dir.has()) {
-            String path(format("{0}/{1}.txt", *_output_dir, dec(pict_id, 5)));
+            String   path(format("{0}/{1}.txt", *_output_dir, dec(pict_id, 5)));
             ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
             write(fd, utf8::encode(data));
         }
@@ -68,15 +67,13 @@ class ObjectDataBuilder {
     DISALLOW_COPY_AND_ASSIGN(ObjectDataBuilder);
 };
 
-
 int main(int argc, char** argv) {
     args::Parser parser(argv[0], "Builds all of the scrolling text images in the game");
 
     Optional<String> output_dir;
     parser.add_argument("-o", "--output", store(output_dir))
-        .help("place output in this directory");
-    parser.add_argument("-h", "--help", help(parser, 0))
-        .help("display this help screen");
+            .help("place output in this directory");
+    parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
 
     String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
@@ -94,7 +91,7 @@ int main(int argc, char** argv) {
     PluginInit();
 
     ObjectDataBuilder builder(output_dir);
-    for (auto object: BaseObject::all()) {
+    for (auto object : BaseObject::all()) {
         const int pict_id = object->pictPortraitResID;
         if (pict_id <= 0) {
             continue;

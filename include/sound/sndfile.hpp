@@ -45,4 +45,4 @@ class Sndfile {
 
 }  // namespace antares
 
-#endif // ANTARES_SOUND_SNDFILE_HPP_
+#endif  // ANTARES_SOUND_SNDFILE_HPP_

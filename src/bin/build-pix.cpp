@@ -42,7 +42,7 @@ using std::pair;
 using std::unique_ptr;
 using std::vector;
 
-namespace io = sfz::io;
+namespace io   = sfz::io;
 namespace utf8 = sfz::utf8;
 namespace args = sfz::args;
 
@@ -51,10 +51,8 @@ namespace {
 
 class DrawPix : public Card {
   public:
-    DrawPix(OffscreenVideoDriver* driver, int16_t id, int32_t width):
-            _driver(driver),
-            _id(id),
-            _width(width) { }
+    DrawPix(OffscreenVideoDriver* driver, int16_t id, int32_t width)
+            : _driver(driver), _id(id), _width(width) {}
 
     virtual void draw() const {
         BuildPix pix(_id, _width);
@@ -66,21 +64,19 @@ class DrawPix : public Card {
 
   private:
     OffscreenVideoDriver* _driver;
-    const int16_t _id;
-    const int32_t _width;
+    const int16_t         _id;
+    const int32_t         _width;
 };
 
 int main(int argc, char* const* argv) {
     args::Parser parser(argv[0], "Builds all of the scrolling text images in the game");
 
     Optional<String> output_dir;
-    bool text = false;
+    bool             text = false;
     parser.add_argument("-o", "--output", store(output_dir))
-        .help("place output in this directory");
-    parser.add_argument("-h", "--help", help(parser, 0))
-        .help("display this help screen");
-    parser.add_argument("-t", "--text", store_const(text, true))
-        .help("produce text output");
+            .help("place output in this directory");
+    parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
+    parser.add_argument("-t", "--text", store_const(text, true)).help("produce text output");
 
     String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
@@ -95,25 +91,25 @@ int main(int argc, char* const* argv) {
     NullPrefsDriver prefs;
 
     vector<pair<int, int>> specs = {
-        {3020, 450},  // Gaitori prologue
-        {3025, 450},  // Tutorial prologue
-        {3080, 450},  // Cantharan prologue
-        {3081, 450},  // Cantharan epilogue
-        {3120, 450},  // Salrilian prologue
-        {3211, 450},  // Game epilogue
-        {4063, 450},  // Bazidanese prologue
-        {4509, 450},  // Elejeetian prologue
-        {4606, 450},  // Audemedon prologue
-        {5600, 450},  // Story introduction
-        {6500, 540},  // Credits text
-        {6501, 450},  // Please register
-        {10199, 450},  // Unused Gaitori prologue
+            {3020, 450},   // Gaitori prologue
+            {3025, 450},   // Tutorial prologue
+            {3080, 450},   // Cantharan prologue
+            {3081, 450},   // Cantharan epilogue
+            {3120, 450},   // Salrilian prologue
+            {3211, 450},   // Game epilogue
+            {4063, 450},   // Bazidanese prologue
+            {4509, 450},   // Elejeetian prologue
+            {4606, 450},   // Audemedon prologue
+            {5600, 450},   // Story introduction
+            {6500, 540},   // Credits text
+            {6501, 450},   // Please register
+            {10199, 450},  // Unused Gaitori prologue
     };
 
     vector<pair<unique_ptr<Card>, String>> pix;
     if (text) {
         TextVideoDriver video({540, 2000}, output_dir);
-        for (auto spec: specs) {
+        for (auto spec : specs) {
             pix.emplace_back(
                     unique_ptr<Card>(new DrawPix(nullptr, spec.first, spec.second)),
                     String(format("{0}.txt", dec(spec.first, 5))));
@@ -121,7 +117,7 @@ int main(int argc, char* const* argv) {
         video.capture(pix);
     } else {
         OffscreenVideoDriver video({540, 2000}, output_dir);
-        for (auto spec: specs) {
+        for (auto spec : specs) {
             pix.emplace_back(
                     unique_ptr<Card>(new DrawPix(&video, spec.first, spec.second)),
                     String(format("{0}.png", dec(spec.first, 5))));

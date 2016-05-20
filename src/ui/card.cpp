@@ -18,8 +18,8 @@
 
 #include "ui/card.hpp"
 
-#include <algorithm>
 #include <stdlib.h>
+#include <algorithm>
 #include <sfz/sfz.hpp>
 
 #include "video/driver.hpp"
@@ -30,14 +30,13 @@ using std::unique_ptr;
 
 namespace antares {
 
-Card::Card()
-        : _stack(NULL) { }
+Card::Card() : _stack(NULL) {}
 
-Card::~Card() { }
+Card::~Card() {}
 
-void Card::become_front() { }
+void Card::become_front() {}
 
-void Card::resign_front() { }
+void Card::resign_front() {}
 
 void Card::draw() const {
     next()->draw();
@@ -48,7 +47,7 @@ bool Card::next_timer(wall_time& time) {
     return false;
 }
 
-void Card::fire_timer() { }
+void Card::fire_timer() {}
 
 CardStack* Card::stack() const {
     return _stack;

@@ -32,9 +32,7 @@ class DebriefingScreen : public Card {
     DebriefingScreen(int text_id);
 
     DebriefingScreen(
-            int text_id,
-            game_ticks your_time, game_ticks par_time,
-            int your_loss, int par_loss,
+            int text_id, game_ticks your_time, game_ticks par_time, int your_loss, int par_loss,
             int your_kill, int par_kill);
 
     virtual void become_front();
@@ -49,10 +47,9 @@ class DebriefingScreen : public Card {
     virtual void fire_timer();
 
     static sfz::String build_score_text(
-            game_ticks your_length, game_ticks par_length,
-            int your_loss, int par_loss,
+            game_ticks your_length, game_ticks par_length, int your_loss, int par_loss,
             int your_kill, int par_kill);
-    
+
   private:
     LabeledRect initialize(int text_id, bool do_score);
 
@@ -63,14 +60,14 @@ class DebriefingScreen : public Card {
     friend void print_to(sfz::PrintTarget out, State state);
     State _state;
 
-    sfz::String _message;
+    sfz::String                 _message;
     std::unique_ptr<StyledText> _score;
-    Rect _pix_bounds;
-    Rect _message_bounds;
-    Rect _score_bounds;
+    Rect                        _pix_bounds;
+    Rect                        _message_bounds;
+    Rect                        _score_bounds;
 
     wall_time _next_update;
-    int _typed_chars;
+    int       _typed_chars;
 
     LabeledRect _data_item;
 

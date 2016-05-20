@@ -28,8 +28,8 @@
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
-#include "game/main.hpp"
 #include "game/level.hpp"
+#include "game/main.hpp"
 #include "game/sys.hpp"
 #include "sound/driver.hpp"
 #include "ui/card.hpp"
@@ -52,22 +52,22 @@ SelectLevelScreen::SelectLevelScreen(bool* cancelled, Handle<Level>* level)
           _cancelled(cancelled),
           _level(level) {
     Ledger::ledger()->unlocked_chapters(&_chapters);
-    _index = _chapters.size() - 1;
+    _index  = _chapters.size() - 1;
     *_level = Handle<Level>(_chapters[_index] - 1);
 }
 
-SelectLevelScreen::~SelectLevelScreen() { }
+SelectLevelScreen::~SelectLevelScreen() {}
 
 void SelectLevelScreen::become_front() {
     switch (_state) {
-      case SELECTING:
-      case UNLOCKING:
-        InterfaceScreen::become_front();
-        break;
+        case SELECTING:
+        case UNLOCKING:
+            InterfaceScreen::become_front();
+            break;
 
-      case FADING_OUT:
-        stack()->pop(this);
-        break;
+        case FADING_OUT:
+            stack()->pop(this);
+            break;
     }
 }
 
@@ -85,18 +85,17 @@ static int ndigits(size_t n) {
 
 void SelectLevelScreen::key_down(const KeyDownEvent& event) {
     switch (_state) {
-      case SELECTING:
-        switch (event.key()) {
-          case Keys::K8:
-          case Keys::N_TIMES:
-            _state = UNLOCKING;
-            _unlock_chapter = 0;
-            _unlock_digits = ndigits(plug.levels.size());
-            sys.sound.cloak_on();
-            return;
-        }
-      case UNLOCKING:
-        {
+        case SELECTING:
+            switch (event.key()) {
+                case Keys::K8:
+                case Keys::N_TIMES:
+                    _state          = UNLOCKING;
+                    _unlock_chapter = 0;
+                    _unlock_digits  = ndigits(plug.levels.size());
+                    sys.sound.cloak_on();
+                    return;
+            }
+        case UNLOCKING: {
             int digit = key_digit(event.key());
             if (digit < 0) {
                 _state = SELECTING;
@@ -114,10 +113,9 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
                 adjust_interface();
             }
             return;
-        }
-        break;
-      case FADING_OUT:
-        return;
+        } break;
+        case FADING_OUT:
+            return;
     }
     InterfaceScreen::key_down(event);
 }
@@ -137,35 +135,36 @@ void SelectLevelScreen::adjust_interface() {
 
 void SelectLevelScreen::handle_button(Button& button) {
     switch (button.id) {
-      case OK:
-        _state = FADING_OUT;
-        *_cancelled = false;
-        stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
-        break;
+        case OK:
+            _state      = FADING_OUT;
+            *_cancelled = false;
+            stack()->push(
+                    new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
+            break;
 
-      case CANCEL:
-        *_cancelled = true;
-        stack()->pop(this);
-        break;
+        case CANCEL:
+            *_cancelled = true;
+            stack()->pop(this);
+            break;
 
-      case PREVIOUS:
-        if (_index > 0) {
-            --_index;
-            *_level = Handle<Level>(_chapters[_index] - 1);
-        }
-        adjust_interface();
-        break;
+        case PREVIOUS:
+            if (_index > 0) {
+                --_index;
+                *_level = Handle<Level>(_chapters[_index] - 1);
+            }
+            adjust_interface();
+            break;
 
-      case NEXT:
-        if (_index < _chapters.size() - 1) {
-            ++_index;
-            *_level = Handle<Level>(_chapters[_index] - 1);
-        }
-        adjust_interface();
-        break;
+        case NEXT:
+            if (_index < _chapters.size() - 1) {
+                ++_index;
+                *_level = Handle<Level>(_chapters[_index] - 1);
+            }
+            adjust_interface();
+            break;
 
-      default:
-        throw Exception(format("Got unknown button {0}.", button.id));
+        default:
+            throw Exception(format("Got unknown button {0}.", button.id));
     }
 }
 
@@ -178,14 +177,14 @@ void SelectLevelScreen::draw_level_name() const {
 
     const InterfaceItem& i = item(NAME);
 
-    RgbColor color = GetRGBTranslateColorShade(AQUA, VERY_LIGHT);
+    RgbColor   color = GetRGBTranslateColorShade(AQUA, VERY_LIGHT);
     StyledText retro(sys.fonts.title);
     retro.set_fore_color(color);
     retro.set_retro_text(chapter_name);
     retro.wrap_to(440, 0, 2);
 
-    Rect bounds = i.bounds();
-    Point off = offset();
+    Rect  bounds = i.bounds();
+    Point off    = offset();
     bounds.offset(off.h, off.v);
     retro.draw(bounds);
 }

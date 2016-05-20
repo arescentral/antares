@@ -52,9 +52,7 @@ class ExtAudioFile {
         }
     }
 
-    ~ExtAudioFile() {
-        ExtAudioFileDispose(_id);
-    }
+    ~ExtAudioFile() { ExtAudioFileDispose(_id); }
 
     void convert(Bytes& data, ALenum& format, ALsizei& frequency);
 
@@ -68,8 +66,7 @@ class ExtAudioFile {
 
 }  // namespace
 
-AudioFile::AudioFile(const BytesSlice& data)
-        : _data(data) {
+AudioFile::AudioFile(const BytesSlice& data) : _data(data) {
     OSStatus err = AudioFileOpenWithCallbacks(
             this, read_proc, NULL, get_size_proc, NULL, kAudioFileAIFFType, &_id);
     check_os_err(err, "AudioFileOpenWithCallbacks");
@@ -89,9 +86,9 @@ void ExtAudioFile::convert(Bytes& data, ALenum& format, ALsizei& frequency) {
 
     // Read in the original file format.
     AudioStreamBasicDescription in_format;
-    UInt32 in_format_size = sizeof(AudioStreamBasicDescription);
-    err = ExtAudioFileGetProperty(_id, kExtAudioFileProperty_FileDataFormat, &in_format_size,
-            &in_format);
+    UInt32                      in_format_size = sizeof(AudioStreamBasicDescription);
+    err                                        = ExtAudioFileGetProperty(
+            _id, kExtAudioFileProperty_FileDataFormat, &in_format_size, &in_format);
     check_os_err(err, "ExtAudioFileGetProperty");
 
     frequency = in_format.mSampleRate;
@@ -106,39 +103,39 @@ void ExtAudioFile::convert(Bytes& data, ALenum& format, ALsizei& frequency) {
     // Convert to 16-bit native-endian linear PCM.  Preserve the frequency and channel count
     // of the original format.
     AudioStreamBasicDescription out_format = in_format;
-    out_format.mFormatID            = kAudioFormatLinearPCM;
-    out_format.mBytesPerPacket      = 2 * out_format.mChannelsPerFrame;
-    out_format.mFramesPerPacket     = 1;
-    out_format.mBytesPerFrame       = 2 * out_format.mChannelsPerFrame;
-    out_format.mBitsPerChannel      = 16;
-    out_format.mFormatFlags         = kAudioFormatFlagsNativeEndian
-                                    | kAudioFormatFlagIsPacked
-                                    | kAudioFormatFlagIsSignedInteger;
-    err = ExtAudioFileSetProperty(_id, kExtAudioFileProperty_ClientDataFormat,
-            sizeof(AudioStreamBasicDescription), &out_format);
+    out_format.mFormatID                   = kAudioFormatLinearPCM;
+    out_format.mBytesPerPacket             = 2 * out_format.mChannelsPerFrame;
+    out_format.mFramesPerPacket            = 1;
+    out_format.mBytesPerFrame              = 2 * out_format.mChannelsPerFrame;
+    out_format.mBitsPerChannel             = 16;
+    out_format.mFormatFlags = kAudioFormatFlagsNativeEndian | kAudioFormatFlagIsPacked |
+                              kAudioFormatFlagIsSignedInteger;
+    err = ExtAudioFileSetProperty(
+            _id, kExtAudioFileProperty_ClientDataFormat, sizeof(AudioStreamBasicDescription),
+            &out_format);
     check_os_err(err, "ExtAudioFileSetProperty");
 
     // Get the number of frames.
     SInt64 frame_count;
     UInt32 frame_count_size = sizeof(int64_t);
-    err = ExtAudioFileGetProperty(_id, kExtAudioFileProperty_FileLengthFrames, &frame_count_size,
-            &frame_count);
+    err                     = ExtAudioFileGetProperty(
+            _id, kExtAudioFileProperty_FileLengthFrames, &frame_count_size, &frame_count);
     check_os_err(err, "ExtAudioFileGetProperty");
 
     // Read the converted frames into memory.
     UInt32 frame_count_32 = frame_count;
     data.resize(frame_count * out_format.mBytesPerFrame);
     AudioBufferList data_buffer;
-    data_buffer.mNumberBuffers = 1;
-    data_buffer.mBuffers[0].mDataByteSize = data.size();
+    data_buffer.mNumberBuffers              = 1;
+    data_buffer.mBuffers[0].mDataByteSize   = data.size();
     data_buffer.mBuffers[0].mNumberChannels = out_format.mChannelsPerFrame;
-    data_buffer.mBuffers[0].mData = data.data();
-    err = ExtAudioFileRead(_id, &frame_count_32, &data_buffer);
+    data_buffer.mBuffers[0].mData           = data.data();
+    err                                     = ExtAudioFileRead(_id, &frame_count_32, &data_buffer);
     check_os_err(err, "ExtAudioFileRead");
 }
 
-OSStatus AudioFile::read_proc(void* this_, SInt64 in_pos, UInt32 req_count, void* buffer,
-        UInt32* actual_count) {
+OSStatus AudioFile::read_proc(
+        void* this_, SInt64 in_pos, UInt32 req_count, void* buffer, UInt32* actual_count) {
     return reinterpret_cast<AudioFile*>(this_)->read(in_pos, req_count, buffer, actual_count);
 }
 
@@ -146,8 +143,8 @@ SInt64 AudioFile::get_size_proc(void* this_) {
     return reinterpret_cast<AudioFile*>(this_)->get_size();
 }
 
-OSStatus AudioFile::read(SInt64 in_pos, UInt32 req_count, void* buffer,
-        UInt32* actual_count) const {
+OSStatus AudioFile::read(
+        SInt64 in_pos, UInt32 req_count, void* buffer, UInt32* actual_count) const {
     if (in_pos > _data.size()) {
         return kAudioFileInvalidPacketOffsetError;
     }
