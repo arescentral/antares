@@ -39,4 +39,4 @@ love:
 time:
 	@echo "I've always got time for you."
 
-.PHONY: all clean dist distclean run sign test
+.PHONY: all test smoke-test clean dist distclean run sign friends love time
