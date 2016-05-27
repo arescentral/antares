@@ -2,39 +2,50 @@
 
 import os
 import sys
+import tarfile
 import zipfile
 
 
 def main():
-    assert not sys.argv[1:]
+    progname, archive_format = sys.argv
 
     with open("./antares.gyp") as f:
         data = eval(f.read(), {"__builtins__": None}, {})
 
     version = data["target_defaults"]["variables"]["ANTARES_VERSION"]
-    ziproot = "Antares-%s" % version
-    path = "./Antares-Source-%s.zip" % version
+    archive_root = "Antares-%s" % version
 
-    " test **/.* **/*.zip **/*.pyc **/build ext/*/ext"
-    " ext/gmock-waf/waf ext/libpng-waf/waf ext/libsfz/waf ext/libzipxx/waf ext/rezin/waf"
-
-    with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
-        for root, dirs, files in os.walk("."):
-            root = root[2:]
-            files[:] = [f for f in files if should_write(root, f)]
-            dirs[:] = [d for d in dirs if should_recurse(root, d)]
-
-            for f in files:
-                real_path = os.path.join(root, f)
-                zip_path = os.path.join(ziproot, root, f)
-                z.write(real_path, zip_path)
+    if archive_format == "zip":
+        path = "./Antares-Source-%s.%s" % (version, archive_format)
+        with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
+            for real_path, archive_path in walk(archive_root):
+                    z.write(real_path, archive_path)
+    elif archive_format in ["gz", "bz2"]:
+        path = "./Antares-Source-%s.t%s" % (version, archive_format)
+        with tarfile.open(path, "w:%s" % archive_format) as t:
+            for real_path, archive_path in walk(archive_root):
+                    t.add(real_path, arcname=archive_path)
+    else:
+        raise RuntimeError(archive_format)
 
 
-def should_write(root, base):
+def walk(archive_root):
+    for root, dirs, files in os.walk("."):
+        root = root[2:]
+        files[:] = [f for f in files if should_write(f)]
+        dirs[:] = [d for d in dirs if should_recurse(root, d)]
+
+        for f in files:
+            real_path = os.path.join(root, f)
+            archive_path = os.path.join(archive_root, root, f)
+            yield real_path, archive_path
+
+
+def should_write(base):
     _, ext = os.path.splitext(base)
     if base.startswith("."):
         return False
-    elif ext in [".pyc", ".zip"]:
+    elif ext in [".pyc", ".zip", ".tgz", ".tbz2"]:
         return False
     return True
 

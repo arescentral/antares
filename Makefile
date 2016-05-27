@@ -15,7 +15,9 @@ clean:
 	@$(NINJA) -t clean
 
 dist:
-	scripts/dist.py
+	scripts/dist.py zip
+	scripts/dist.py gz
+	scripts/dist.py bz2
 
 distclean:
 	rm -Rf out/
