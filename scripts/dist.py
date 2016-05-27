@@ -15,13 +15,10 @@ def main():
     ziproot = "Antares-%s" % version
     path = "./Antares-Source-%s.zip" % version
 
-    " test **/.* **/*.zip **/*.pyc **/build ext/*/ext"
-    " ext/gmock-waf/waf ext/libpng-waf/waf ext/libsfz/waf ext/libzipxx/waf ext/rezin/waf"
-
     with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
         for root, dirs, files in os.walk("."):
             root = root[2:]
-            files[:] = [f for f in files if should_write(root, f)]
+            files[:] = [f for f in files if should_write(f)]
             dirs[:] = [d for d in dirs if should_recurse(root, d)]
 
             for f in files:
@@ -30,7 +27,7 @@ def main():
                 z.write(real_path, zip_path)
 
 
-def should_write(root, base):
+def should_write(base):
     _, ext = os.path.splitext(base)
     if base.startswith("."):
         return False
