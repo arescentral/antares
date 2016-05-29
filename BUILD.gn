@@ -1,3 +1,9 @@
+declare_args() {
+  # Installation prefix (default: /usr/local)
+  # Used only on linux. Data files are expected under $prefix/share/antares/app.
+  prefix = "/usr/local"
+}
+
 import("//build/lib/embed.gni")
 
 group("default") {
@@ -31,6 +37,7 @@ config("antares_private") {
     "-Wno-sign-compare",
     "-Wno-deprecated-declarations",
   ]
+  defines = [ "ANTARES_PREFIX=\"" + prefix + "\"" ]
 }
 
 source_set("libantares") {

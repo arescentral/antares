@@ -32,6 +32,8 @@ def main():
     parser.add_argument("-o", "--target-os", metavar="OS",
                         type=str,
                         help="target os (default: host os)")
+    parser.add_argument("--prefix", type=str, default="/usr/local",
+                        help="installation prefix (default: /usr/local)")
     args = parser.parse_args()
 
     check_submodules()
@@ -46,7 +48,8 @@ def main():
     with cfg.step("configure mode") as msg:
         msg(args.mode, color="green")
     cfg.gn(mode=args.mode,
-           target_os=args.target_os)
+           target_os=args.target_os,
+           prefix=args.prefix)
 
     print("make(1) it so!")
 

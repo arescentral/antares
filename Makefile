@@ -1,12 +1,10 @@
+include out/cur/args.gn
 NINJA=scripts/ninja.sh -C out/cur
 MAC_BIN=out/cur/Antares.app/Contents/MacOS/Antares
 LINUX_BIN=out/cur/antares
 
-# temporary: only used for install; install only used on linux.
-OS=linux
-PREFIX=/usr/local
-BINDIR=$(PREFIX)/bin
-DATADIR=$(PREFIX)/share/antares/app
+BINDIR=$(prefix)/bin
+DATADIR=$(prefix)/share/antares/app
 
 all:
 	@$(NINJA)
@@ -39,7 +37,8 @@ sign:
 		out/cur/Antares.app
 
 install: all
-ifeq ($(OS), linux)
+ifeq ($(target_os), "linux")
+	install -m 755 -d $(BINDIR)
 	install -m 755 out/cur/antares $(DESTROOT)$(BINDIR)/antares
 	install -m 755 out/cur/antares-install-data $(DESTROOT)$(BINDIR)/antares-install-data
 	install -m 755 -d $(DATADIR)
@@ -54,7 +53,7 @@ ifeq ($(OS), linux)
 	cp -r data/strings $(DATADIR)
 	cp -r data/text $(DATADIR)
 else
-	@echo "nothing to install on $(OS)"
+	@echo "nothing to install on '$(target_os)'."
 endif
 
 friends:
