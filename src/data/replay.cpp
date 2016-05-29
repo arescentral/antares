@@ -49,8 +49,7 @@ namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-ReplayData::ReplayData() {
-}
+ReplayData::ReplayData() {}
 
 ReplayData::ReplayData(sfz::BytesSlice in) {
     read(in, *this);
@@ -75,25 +74,25 @@ void ReplayData::key_up(uint64_t at, uint32_t key) {
 }
 
 enum {
-    VARINT = 0,
-    FIXED64 = 1,
+    VARINT           = 0,
+    FIXED64          = 1,
     LENGTH_DELIMITED = 2,
-    FIXED32 = 5,
+    FIXED32          = 5,
 };
 
 enum {
-    SCENARIO             = (0x01 << 3) | LENGTH_DELIMITED,
-    CHAPTER              = (0x02 << 3) | VARINT,
-    GLOBAL_SEED          = (0x03 << 3) | VARINT,
-    DURATION             = (0x04 << 3) | VARINT,
-    ACTION               = (0x05 << 3) | LENGTH_DELIMITED,
+    SCENARIO    = (0x01 << 3) | LENGTH_DELIMITED,
+    CHAPTER     = (0x02 << 3) | VARINT,
+    GLOBAL_SEED = (0x03 << 3) | VARINT,
+    DURATION    = (0x04 << 3) | VARINT,
+    ACTION      = (0x05 << 3) | LENGTH_DELIMITED,
 
-    SCENARIO_IDENTIFIER  = (0x01 << 3) | LENGTH_DELIMITED,
-    SCENARIO_VERSION     = (0x02 << 3) | LENGTH_DELIMITED,
+    SCENARIO_IDENTIFIER = (0x01 << 3) | LENGTH_DELIMITED,
+    SCENARIO_VERSION    = (0x02 << 3) | LENGTH_DELIMITED,
 
-    ACTION_AT            = (0x01 << 3) | VARINT,
-    ACTION_KEY_DOWN      = (0x02 << 3) | VARINT,
-    ACTION_KEY_UP        = (0x03 << 3) | VARINT,
+    ACTION_AT       = (0x01 << 3) | VARINT,
+    ACTION_KEY_DOWN = (0x02 << 3) | VARINT,
+    ACTION_KEY_UP   = (0x03 << 3) | VARINT,
 };
 
 static void write_varint(WriteTarget out, uint64_t value) {
@@ -119,14 +118,14 @@ static void tag_varint(WriteTarget out, uint64_t tag, uint64_t value) {
 // of the built-in integer types.  is_size_t lets us define methods for
 // both without getting a linker error for having a duplicate symbol.
 // It doesn't matter which version we use if they're the same.
-template <typename T, bool is_size_t=std::is_same<T, size_t>::value>
+template <typename T, bool is_size_t = std::is_same<T, size_t>::value>
 static T read_varint(ReadSource in);
 
 template <>
 uint64_t read_varint<uint64_t, false>(ReadSource in) {
     uint64_t byte;
     uint64_t value = 0;
-    int shift = 0;
+    int      shift = 0;
     do {
         byte = read<uint8_t>(in);
         value |= (byte & 0x7f) << shift;
@@ -138,7 +137,7 @@ uint64_t read_varint<uint64_t, false>(ReadSource in) {
 template <>
 int64_t read_varint<int64_t, false>(ReadSource in) {
     uint64_t u64 = read_varint<uint64_t, false>(in);
-    int64_t s64 = u64 & 0x7fffffffffffffffULL;
+    int64_t  s64 = u64 & 0x7fffffffffffffffULL;
     if (u64 & 0x8000000000000000ULL) {
         s64 += -0x8000000000000000ULL;
     }
@@ -185,7 +184,7 @@ template <typename T>
 static T read_message(ReadSource in) {
     Bytes bytes(read_varint<size_t>(in), '\0');
     in.shift(bytes.data(), bytes.size());
-    T message;
+    T          message;
     BytesSlice slice = bytes;
     read(slice, message);
     return message;
@@ -194,21 +193,21 @@ static T read_message(ReadSource in) {
 void read_from(ReadSource in, ReplayData& replay) {
     while (!in.empty()) {
         switch (read_varint<uint64_t>(in)) {
-          case SCENARIO:
-            replay.scenario = read_message<ReplayData::Scenario>(in);
-            break;
-          case CHAPTER:
-            replay.chapter_id = read_varint<int32_t>(in);
-            break;
-          case GLOBAL_SEED:
-            replay.global_seed = read_varint<int32_t>(in);
-            break;
-          case DURATION:
-            replay.duration = read_varint<uint64_t>(in);
-            break;
-          case ACTION:
-            replay.actions.push_back(read_message<ReplayData::Action>(in));
-            break;
+            case SCENARIO:
+                replay.scenario = read_message<ReplayData::Scenario>(in);
+                break;
+            case CHAPTER:
+                replay.chapter_id = read_varint<int32_t>(in);
+                break;
+            case GLOBAL_SEED:
+                replay.global_seed = read_varint<int32_t>(in);
+                break;
+            case DURATION:
+                replay.duration = read_varint<uint64_t>(in);
+                break;
+            case ACTION:
+                replay.actions.push_back(read_message<ReplayData::Action>(in));
+                break;
         }
     }
 }
@@ -216,12 +215,12 @@ void read_from(ReadSource in, ReplayData& replay) {
 void read_from(ReadSource in, ReplayData::Scenario& scenario) {
     while (!in.empty()) {
         switch (read_varint<uint64_t>(in)) {
-          case SCENARIO_IDENTIFIER:
-            scenario.identifier = read_string(in);
-            break;
-          case SCENARIO_VERSION:
-            scenario.version = read_string(in);
-            break;
+            case SCENARIO_IDENTIFIER:
+                scenario.identifier = read_string(in);
+                break;
+            case SCENARIO_VERSION:
+                scenario.version = read_string(in);
+                break;
         }
     }
 }
@@ -229,15 +228,15 @@ void read_from(ReadSource in, ReplayData::Scenario& scenario) {
 void read_from(ReadSource in, ReplayData::Action& action) {
     while (!in.empty()) {
         switch (read_varint<uint64_t>(in)) {
-          case ACTION_AT:
-            action.at = read_varint<uint64_t>(in);
-            break;
-          case ACTION_KEY_DOWN:
-            action.keys_down.push_back(read_varint<uint8_t>(in));
-            break;
-          case ACTION_KEY_UP:
-            action.keys_up.push_back(read_varint<uint8_t>(in));
-            break;
+            case ACTION_AT:
+                action.at = read_varint<uint64_t>(in);
+                break;
+            case ACTION_KEY_DOWN:
+                action.keys_down.push_back(read_varint<uint8_t>(in));
+                break;
+            case ACTION_KEY_UP:
+                action.keys_up.push_back(read_varint<uint8_t>(in));
+                break;
         }
     }
 }
@@ -247,7 +246,7 @@ void write_to(WriteTarget out, const ReplayData& replay) {
     tag_varint(out, CHAPTER, replay.chapter_id);
     tag_varint(out, GLOBAL_SEED, replay.global_seed);
     tag_varint(out, DURATION, replay.duration);
-    for (const ReplayData::Action& action: replay.actions) {
+    for (const ReplayData::Action& action : replay.actions) {
         tag_message(out, ACTION, action);
     }
 }
@@ -259,15 +258,15 @@ void write_to(WriteTarget out, const ReplayData::Scenario& scenario) {
 
 void write_to(WriteTarget out, const ReplayData::Action& action) {
     tag_varint(out, ACTION_AT, action.at);
-    for (uint8_t key: action.keys_down) {
+    for (uint8_t key : action.keys_down) {
         tag_varint(out, ACTION_KEY_DOWN, key);
     }
-    for (uint8_t key: action.keys_up) {
+    for (uint8_t key : action.keys_up) {
         tag_varint(out, ACTION_KEY_UP, key);
     }
 }
 
-ReplayBuilder::ReplayBuilder() { }
+ReplayBuilder::ReplayBuilder() {}
 
 namespace {
 
@@ -284,8 +283,8 @@ struct ScopedGlob {
 static void cull_replays(size_t count) {
     if (path::isdir(dirs().replays)) {
         ScopedGlob g;
-        String str(format("{0}/*.nlrp", dirs().replays));
-        CString c_str(str);
+        String     str(format("{0}/*.nlrp", dirs().replays));
+        CString    c_str(str);
         glob(c_str.data(), 0, NULL, &g.data);
 
         map<int64_t, const char*> files;
@@ -307,27 +306,25 @@ static void cull_replays(size_t count) {
 }
 
 void ReplayBuilder::init(
-        StringSlice scenario_identifier, StringSlice scenario_version,
-        int32_t chapter_id, int32_t global_seed) {
+        StringSlice scenario_identifier, StringSlice scenario_version, int32_t chapter_id,
+        int32_t global_seed) {
     _scenario.identifier.assign(scenario_identifier);
     _scenario.version.assign(scenario_version);
-    _chapter_id = chapter_id;
+    _chapter_id  = chapter_id;
     _global_seed = global_seed;
 }
 
 void ReplayBuilder::start() {
     _at = 1;
     cull_replays(10);
-    time_t t;
+    time_t    t;
     struct tm tm;
-    char buffer[1024];
-    if ((time(&t) < 0)
-            || !localtime_r(&t, &tm)
-            || (strftime(buffer, 1024, "%c", &tm) <= 0)) {
+    char      buffer[1024];
+    if ((time(&t) < 0) || !localtime_r(&t, &tm) || (strftime(buffer, 1024, "%c", &tm) <= 0)) {
         return;
     }
     sfz::String path(format("{0}/Replay {1}.nlrp", dirs().replays, utf8::decode(buffer)));
-    int fd = open(path, O_WRONLY | O_CREAT | O_EXCL, 0644);
+    int         fd = open(path, O_WRONLY | O_CREAT | O_EXCL, 0644);
     if (fd >= 0) {
         _file.reset(new ScopedFd(fd));
         tag_message(*_file, SCENARIO, _scenario);
@@ -340,10 +337,10 @@ void ReplayBuilder::key_down(const KeyDownEvent& event) {
     if (!_file) {
         return;
     }
-    for (auto i: range<int>(KEY_COUNT)) {
+    for (auto i : range<int>(KEY_COUNT)) {
         if (event.key() == sys.prefs->key(i) - 1) {
             ReplayData::Action action = {};
-            action.at = _at;
+            action.at                 = _at;
             action.keys_down.push_back(i);
             tag_message(*_file, ACTION, action);
         }
@@ -354,10 +351,10 @@ void ReplayBuilder::key_up(const KeyUpEvent& event) {
     if (!_file) {
         return;
     }
-    for (auto i: range<int>(KEY_COUNT)) {
+    for (auto i : range<int>(KEY_COUNT)) {
         if (event.key() == sys.prefs->key(i) - 1) {
             ReplayData::Action action = {};
-            action.at = _at;
+            action.at                 = _at;
             action.keys_up.push_back(i);
             tag_message(*_file, ACTION, action);
             break;

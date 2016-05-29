@@ -23,8 +23,8 @@
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "game/globals.hpp"
-#include "game/time.hpp"
 #include "game/sys.hpp"
+#include "game/time.hpp"
 #include "lang/defines.hpp"
 #include "video/driver.hpp"
 
@@ -34,10 +34,10 @@ using std::unique_ptr;
 
 namespace antares {
 
-static const int kCursorBoundsSize = 16;
-static const usecs kTimeout = secs(1);
+static const int   kCursorBoundsSize = 16;
+static const usecs kTimeout          = secs(1);
 
-Cursor::Cursor(): _sprite(500, GRAY) { }
+Cursor::Cursor() : _sprite(500, GRAY) {}
 
 void Cursor::draw() const {
     draw_at(sys.video->get_mouse());
@@ -50,9 +50,7 @@ void Cursor::draw_at(Point where) const {
     }
 }
 
-GameCursor::GameCursor():
-        show(true),
-        _show_crosshairs_until(now() + kTimeout) { }
+GameCursor::GameCursor() : show(true), _show_crosshairs_until(now() + kTimeout) {}
 
 bool GameCursor::active() const {
     return show && (_show_crosshairs_until > now());
@@ -105,10 +103,10 @@ ANTARES_GLOBAL RgbColor HintLine::hint_line_color_dark;
 
 void HintLine::show(Point fromWhere, Point toWhere, uint8_t color, uint8_t brightness) {
     hint_line_start = fromWhere;
-    hint_line_end = toWhere;
-    show_hint_line = true;
+    hint_line_end   = toWhere;
+    show_hint_line  = true;
 
-    hint_line_color = GetRGBTranslateColorShade(color, brightness);
+    hint_line_color      = GetRGBTranslateColorShade(color, brightness);
     hint_line_color_dark = GetRGBTranslateColorShade(color, VERY_DARK);
 }
 
@@ -117,7 +115,7 @@ void HintLine::hide() {
 }
 
 void HintLine::reset() {
-    show_hint_line = false;
+    show_hint_line    = false;
     hint_line_start.h = hint_line_start.v = -1;
     hint_line_end.h = hint_line_end.v = -1;
     hint_line_color = hint_line_color_dark = RgbColor::black();
@@ -132,17 +130,17 @@ void GameCursor::draw() const {
 
     where = clamp(where);
     if (active()) {
-        const Rect clip_rect = viewport();
-        const RgbColor color = GetRGBTranslateColorShade(SKY_BLUE, MEDIUM);
+        const Rect     clip_rect = viewport();
+        const RgbColor color     = GetRGBTranslateColorShade(SKY_BLUE, MEDIUM);
 
-        Point top_a = Point(where.h, clip_rect.top);
-        Point top_b = Point(where.h, (where.v - kCursorBoundsSize));
+        Point top_a    = Point(where.h, clip_rect.top);
+        Point top_b    = Point(where.h, (where.v - kCursorBoundsSize));
         Point bottom_a = Point(where.h, (where.v + kCursorBoundsSize));
         Point bottom_b = Point(where.h, clip_rect.bottom - 1);
-        Point left_a = Point(clip_rect.left, where.v);
-        Point left_b = Point((where.h - kCursorBoundsSize), where.v);
-        Point right_a = Point(std::max(viewport().left, where.h + kCursorBoundsSize), where.v);
-        Point right_b = Point(clip_rect.right - 1, where.v);
+        Point left_a   = Point(clip_rect.left, where.v);
+        Point left_b   = Point((where.h - kCursorBoundsSize), where.v);
+        Point right_a  = Point(std::max(viewport().left, where.h + kCursorBoundsSize), where.v);
+        Point right_b  = Point(clip_rect.right - 1, where.v);
 
         Rects rects;
         if (top_a.h >= viewport().left) {
@@ -164,7 +162,7 @@ void HintLine::draw() {
     if (show_hint_line) {
         Lines lines;
         Point start = hint_line_start;
-        Point end = hint_line_end;
+        Point end   = hint_line_end;
 
         start.offset(0, 2);
         end.offset(0, 2);

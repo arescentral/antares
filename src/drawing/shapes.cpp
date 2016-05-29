@@ -30,9 +30,9 @@ using std::min;
 namespace antares {
 
 // must be square
-void draw_triangle_up(PixMap *destPix, const RgbColor& color) {
+void draw_triangle_up(PixMap* destPix, const RgbColor& color) {
     int32_t size = destPix->size().width;
-    Rect r(0, 0, size, 2);
+    Rect    r(0, 0, size, 2);
     for (int32_t i = 0; i < size; i += 2) {
         r.bottom = min(r.bottom, size);
         destPix->view(r).fill(color);
@@ -55,7 +55,7 @@ static void draw_plus(PixMap::View pix, RgbColor color) {
 // Compatibility shim.  The original implementation of this function
 // didn't properly fill the rect, so this function trims the rect
 // correspondingly and forwards to draw_plus().
-void draw_compat_plus(PixMap *destPix, const RgbColor& color) {
+void draw_compat_plus(PixMap* destPix, const RgbColor& color) {
     Rect bounds = destPix->size().as_rect();
     if (bounds.right != 1) {
         ++bounds.left;
@@ -81,7 +81,7 @@ static void draw_diamond(PixMap::View pix, RgbColor color) {
 // Compatibility shim.  The original implementation of this function
 // didn't properly fill the rect, so this function trims the rect
 // correspondingly and forwards to draw_diamond().
-void draw_compat_diamond(PixMap *destPix, const RgbColor& color) {
+void draw_compat_diamond(PixMap* destPix, const RgbColor& color) {
     Rect bounds = destPix->size().as_rect();
     if (bounds.right != 1) {
         ++bounds.left;
@@ -110,8 +110,8 @@ void draw_vbracket(const Rects& rects, const Rect& rect, const RgbColor& color) 
 }
 
 void draw_shaded_rect(
-        const Rects& rects, Rect rect,
-        const RgbColor& fill_color, const RgbColor& light_color, const RgbColor& dark_color) {
+        const Rects& rects, Rect rect, const RgbColor& fill_color, const RgbColor& light_color,
+        const RgbColor& dark_color) {
     rects.fill({rect.left, rect.top, rect.left + 1, rect.bottom}, light_color);
     rects.fill({rect.left, rect.top, rect.right, rect.top + 1}, light_color);
 
@@ -125,11 +125,10 @@ void draw_shaded_rect(
 }
 
 void draw_shaded_rect(
-        const Rects& rects, Rect rect,
-        uint8_t hue, uint8_t fill_color, uint8_t light_color, uint8_t dark_color) {
+        const Rects& rects, Rect rect, uint8_t hue, uint8_t fill_color, uint8_t light_color,
+        uint8_t dark_color) {
     draw_shaded_rect(
-            rects, rect,
-            GetRGBTranslateColorShade(hue, fill_color),
+            rects, rect, GetRGBTranslateColorShade(hue, fill_color),
             GetRGBTranslateColorShade(hue, light_color),
             GetRGBTranslateColorShade(hue, dark_color));
 }

@@ -20,8 +20,8 @@
 #define ANTARES_GLFW_VIDEO_DRIVER_HPP_
 
 #include <queue>
-#include <stack>
 #include <sfz/sfz.hpp>
+#include <stack>
 
 #include "config/keys.hpp"
 #include "drawing/color.hpp"
@@ -42,7 +42,7 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
     virtual Size viewport_size() const { return _viewport_size; }
     virtual Size screen_size() const { return _screen_size; }
 
-    virtual Point get_mouse();
+    virtual Point     get_mouse();
     virtual InputMode input_mode() const;
 
     virtual wall_time now() const;
@@ -59,12 +59,12 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
     static void mouse_move_callback(GLFWwindow* w, double x, double y);
     static void window_size_callback(GLFWwindow* w, int width, int height);
 
-    Size _screen_size;
-    Size _viewport_size;
+    Size        _screen_size;
+    Size        _viewport_size;
     GLFWwindow* _window;
-    MainLoop* _loop;
-    wall_time _last_click_usecs;
-    int _last_click_count;
+    MainLoop*   _loop;
+    wall_time   _last_click_usecs;
+    int         _last_click_count;
 
     DISALLOW_COPY_AND_ASSIGN(GLFWVideoDriver);
 };

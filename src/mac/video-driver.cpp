@@ -18,20 +18,20 @@
 
 #include "mac/video-driver.hpp"
 
-#include <stdlib.h>
-#include <strings.h>
-#include <algorithm>
 #include <ApplicationServices/ApplicationServices.h>
 #include <IOKit/hid/IOHIDLib.h>
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
-#include <sfz/sfz.hpp>
+#include <stdlib.h>
+#include <strings.h>
 #include <sys/time.h>
+#include <algorithm>
+#include <sfz/sfz.hpp>
 
 #include "game/time.hpp"
 #include "mac/c/CocoaVideoDriver.h"
-#include "mac/core-opengl.hpp"
 #include "mac/core-foundation.hpp"
+#include "mac/core-opengl.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
 #include "ui/event.hpp"
@@ -46,8 +46,8 @@ namespace {
 
 class AntaresWindow {
   public:
-    AntaresWindow(const cgl::PixelFormat& pixel_format, const cgl::Context& context):
-        _c_obj(antares_window_create(pixel_format.c_obj(), context.c_obj())) { }
+    AntaresWindow(const cgl::PixelFormat& pixel_format, const cgl::Context& context)
+            : _c_obj(antares_window_create(pixel_format.c_obj(), context.c_obj())) {}
 
     ~AntaresWindow() { antares_window_destroy(_c_obj); }
 
@@ -59,7 +59,7 @@ class AntaresWindow {
 
 class InputModeTracker : public EventReceiver {
   public:
-    InputModeTracker(InputMode* mode): _mode(mode) { }
+    InputModeTracker(InputMode* mode) : _mode(mode) {}
 
     virtual void key_down(const KeyDownEvent&) { *_mode = KEYBOARD_MOUSE; }
     virtual void mouse_down(const MouseDownEvent&) { *_mode = KEYBOARD_MOUSE; }
@@ -75,19 +75,17 @@ class InputModeTracker : public EventReceiver {
 
 }  // namespace
 
-CocoaVideoDriver::CocoaVideoDriver() { }
+CocoaVideoDriver::CocoaVideoDriver() {}
 
 Size CocoaVideoDriver::viewport_size() const {
     return {
-        antares_window_viewport_width(_window),
-        antares_window_viewport_height(_window),
+            antares_window_viewport_width(_window), antares_window_viewport_height(_window),
     };
 }
 
 Size CocoaVideoDriver::screen_size() const {
     return {
-        antares_window_screen_width(_window),
-        antares_window_screen_height(_window),
+            antares_window_screen_width(_window), antares_window_screen_height(_window),
     };
 }
 
@@ -106,10 +104,10 @@ wall_time CocoaVideoDriver::now() const {
 }
 
 struct CocoaVideoDriver::EventBridge {
-    InputMode& input_mode;
-    MainLoop& main_loop;
-    cgl::Context& context;
-    EventTranslator& translator;
+    InputMode&         input_mode;
+    MainLoop&          main_loop;
+    cgl::Context&      context;
+    EventTranslator&   translator;
     std::queue<Event*> event_queue;
 
     double gamepad[6];
@@ -140,22 +138,22 @@ struct CocoaVideoDriver::EventBridge {
     }
 
     static void hid_event(void* userdata, IOReturn result, void* sender, IOHIDValueRef value) {
-        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        IOHIDElementRef element = IOHIDValueGetElement(value);
-        uint32_t usage_page = IOHIDElementGetUsagePage(element);
+        EventBridge*    self       = reinterpret_cast<EventBridge*>(userdata);
+        IOHIDElementRef element    = IOHIDValueGetElement(value);
+        uint32_t        usage_page = IOHIDElementGetUsagePage(element);
         switch (usage_page) {
-          case kHIDPage_KeyboardOrKeypad:
-            self->key_event(result, element, value);
-            break;
-          case kHIDPage_GenericDesktop:
-            self->analog_event(result, element, value);
-            break;
-          case kHIDPage_Button:
-            self->button_event(result, element, value);
-            break;
-          default:
-            sfz::print(sfz::io::err, sfz::format("{0}\n", usage_page));
-            break;
+            case kHIDPage_KeyboardOrKeypad:
+                self->key_event(result, element, value);
+                break;
+            case kHIDPage_GenericDesktop:
+                self->analog_event(result, element, value);
+                break;
+            case kHIDPage_Button:
+                self->button_event(result, element, value);
+                break;
+            default:
+                sfz::print(sfz::io::err, sfz::format("{0}\n", usage_page));
+                break;
         }
     }
 
@@ -163,7 +161,7 @@ struct CocoaVideoDriver::EventBridge {
         if (!antares_is_active()) {
             return;
         }
-        bool down = IOHIDValueGetIntegerValue(value);
+        bool     down      = IOHIDValueGetIntegerValue(value);
         uint16_t scan_code = IOHIDElementGetUsage(element);
         if ((scan_code < 4) || (231 < scan_code)) {
             return;
@@ -182,7 +180,7 @@ struct CocoaVideoDriver::EventBridge {
         if (!antares_is_active()) {
             return;
         }
-        bool down = IOHIDValueGetIntegerValue(value);
+        bool     down  = IOHIDValueGetIntegerValue(value);
         uint16_t usage = IOHIDElementGetUsage(element);
         if (down) {
             enqueue(new GamepadButtonDownEvent(_now(), usage));
@@ -192,16 +190,15 @@ struct CocoaVideoDriver::EventBridge {
     }
 
     void analog_event(IOReturn result, IOHIDElementRef element, IOHIDValueRef value) {
-        int int_value = IOHIDValueGetIntegerValue(value);
-        uint16_t usage = IOHIDElementGetUsage(element);
+        int      int_value = IOHIDValueGetIntegerValue(value);
+        uint16_t usage     = IOHIDElementGetUsage(element);
         switch (usage) {
-          case kHIDUsage_GD_X:
-          case kHIDUsage_GD_Y:
-          case kHIDUsage_GD_Rx:
-          case kHIDUsage_GD_Ry:
-            {
-                int min = IOHIDElementGetLogicalMin(element);
-                int max = IOHIDElementGetLogicalMax(element);
+            case kHIDUsage_GD_X:
+            case kHIDUsage_GD_Y:
+            case kHIDUsage_GD_Rx:
+            case kHIDUsage_GD_Ry: {
+                int    min          = IOHIDElementGetLogicalMin(element);
+                int    max          = IOHIDElementGetLogicalMax(element);
                 double double_value = int_value;
                 if (int_value < 0) {
                     double_value = -(double_value / min);
@@ -210,17 +207,16 @@ struct CocoaVideoDriver::EventBridge {
                 }
 
                 usage -= kHIDUsage_GD_X;
-                gamepad[usage] = double_value;
+                gamepad[usage]                 = double_value;
                 static const int x_component[] = {0, 0, -1, 3, 3, -1};
-                double x = gamepad[x_component[usage]];
-                double y = gamepad[x_component[usage] + 1];
+                double           x             = gamepad[x_component[usage]];
+                double           y             = gamepad[x_component[usage] + 1];
                 enqueue(new GamepadStickEvent(_now(), kHIDUsage_GD_X + x_component[usage], x, y));
-            }
-            break;
-          case kHIDUsage_GD_Z:
-          case kHIDUsage_GD_Rz:
-            button_event(result, element, value);
-            break;
+            } break;
+            case kHIDUsage_GD_Z:
+            case kHIDUsage_GD_Rz:
+                button_event(result, element, value);
+                break;
         }
     }
 
@@ -246,18 +242,16 @@ struct CocoaVideoDriver::EventBridge {
 
 void CocoaVideoDriver::loop(Card* initial) {
     CGLPixelFormatAttribute attrs[] = {
-        kCGLPFAOpenGLProfile, (CGLPixelFormatAttribute)kCGLOGLPVersion_3_2_Core,
-        kCGLPFADisplayMask, static_cast<CGLPixelFormatAttribute>(
-                CGDisplayIDToOpenGLDisplayMask(kCGDirectMainDisplay)),
-        kCGLPFAColorSize, static_cast<CGLPixelFormatAttribute>(24),
-        kCGLPFADoubleBuffer,
-        kCGLPFAAccelerated,
-        static_cast<CGLPixelFormatAttribute>(0),
+            kCGLPFAOpenGLProfile, (CGLPixelFormatAttribute)kCGLOGLPVersion_3_2_Core,
+            kCGLPFADisplayMask, static_cast<CGLPixelFormatAttribute>(
+                                        CGDisplayIDToOpenGLDisplayMask(kCGDirectMainDisplay)),
+            kCGLPFAColorSize, static_cast<CGLPixelFormatAttribute>(24), kCGLPFADoubleBuffer,
+            kCGLPFAAccelerated, static_cast<CGLPixelFormatAttribute>(0),
     };
 
     cgl::PixelFormat pixel_format(attrs);
-    cgl::Context context(pixel_format.c_obj(), NULL);
-    AntaresWindow window(pixel_format, context);
+    cgl::Context     context(pixel_format.c_obj(), NULL);
+    AntaresWindow    window(pixel_format, context);
     _window = window.c_obj();
     antares_event_translator_set_window(_translator.c_obj(), window.c_obj());
     GLint swap_interval = 1;
@@ -280,16 +274,16 @@ void CocoaVideoDriver::loop(Card* initial) {
     antares_event_translator_set_caps_unlock_callback(
             _translator.c_obj(), EventBridge::caps_unlock, &bridge);
 
-    cf::MutableDictionary keyboard(CFDictionaryCreateMutable(
-                NULL, 0,
-                &kCFCopyStringDictionaryKeyCallBacks,
-                &kCFTypeDictionaryValueCallBacks));
+    cf::MutableDictionary keyboard(
+            CFDictionaryCreateMutable(
+                    NULL, 0, &kCFCopyStringDictionaryKeyCallBacks,
+                    &kCFTypeDictionaryValueCallBacks));
     keyboard.set(CFSTR(kIOHIDDeviceUsagePageKey), cf::wrap(kHIDPage_GenericDesktop).c_obj());
     keyboard.set(CFSTR(kIOHIDDeviceUsageKey), cf::wrap(kHIDUsage_GD_Keyboard).c_obj());
-    cf::MutableDictionary gamepad(CFDictionaryCreateMutable(
-                NULL, 0,
-                &kCFCopyStringDictionaryKeyCallBacks,
-                &kCFTypeDictionaryValueCallBacks));
+    cf::MutableDictionary gamepad(
+            CFDictionaryCreateMutable(
+                    NULL, 0, &kCFCopyStringDictionaryKeyCallBacks,
+                    &kCFTypeDictionaryValueCallBacks));
     gamepad.set(CFSTR(kIOHIDDeviceUsagePageKey), cf::wrap(kHIDPage_GenericDesktop).c_obj());
     gamepad.set(CFSTR(kIOHIDDeviceUsageKey), cf::wrap(kHIDUsage_GD_GamePad).c_obj());
     cf::MutableArray criteria(CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks));
@@ -308,7 +302,8 @@ void CocoaVideoDriver::loop(Card* initial) {
     while (!main_loop.done()) {
         wall_time at;
         if (main_loop.top()->next_timer(at)) {
-            if (antares_event_translator_next(_translator.c_obj(), at.time_since_epoch().count())) {
+            if (antares_event_translator_next(
+                        _translator.c_obj(), at.time_since_epoch().count())) {
                 bridge.send_all();
             } else {
                 main_loop.top()->fire_timer();

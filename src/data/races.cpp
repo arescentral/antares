@@ -20,9 +20,9 @@
 
 #include <sfz/sfz.hpp>
 
+#include "data/level.hpp"
 #include "data/plugin.hpp"
 #include "data/resource.hpp"
-#include "data/level.hpp"
 #include "game/globals.hpp"
 #include "lang/defines.hpp"
 

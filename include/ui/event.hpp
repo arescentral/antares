@@ -67,8 +67,9 @@ class Event {
 // documentation/mac/pdf/MacintoshToolboxEssentials.pdf
 class KeyEvent : public Event {
   public:
-    KeyEvent(wall_time at, uint32_t key): Event(at), _key(key) { }
+    KeyEvent(wall_time at, uint32_t key) : Event(at), _key(key) {}
     uint32_t key() const { return _key; }
+
   private:
     uint32_t _key;
 };
@@ -79,7 +80,7 @@ class KeyEvent : public Event {
 //  * key(): the key that was pressed, as described in KeyEvent.
 class KeyDownEvent : public KeyEvent {
   public:
-    KeyDownEvent(wall_time at, uint32_t key): KeyEvent(at, key) { }
+    KeyDownEvent(wall_time at, uint32_t key) : KeyEvent(at, key) {}
     virtual void send(EventReceiver* receiver) const;
 };
 
@@ -89,34 +90,34 @@ class KeyDownEvent : public KeyEvent {
 //  * key(): the key that was released, as described in KeyEvent.
 class KeyUpEvent : public KeyEvent {
   public:
-    KeyUpEvent(wall_time at, uint32_t key): KeyEvent(at, key) { }
+    KeyUpEvent(wall_time at, uint32_t key) : KeyEvent(at, key) {}
     virtual void send(EventReceiver* receiver) const;
 };
 
 class GamepadButtonEvent : public Event {
   public:
-    GamepadButtonEvent(wall_time at, uint32_t button): Event(at), button(button) { }
+    GamepadButtonEvent(wall_time at, uint32_t button) : Event(at), button(button) {}
     const uint32_t button;
 };
 
 class GamepadButtonDownEvent : public GamepadButtonEvent {
   public:
-    GamepadButtonDownEvent(wall_time at, uint32_t button): GamepadButtonEvent(at, button) { }
+    GamepadButtonDownEvent(wall_time at, uint32_t button) : GamepadButtonEvent(at, button) {}
     virtual void send(EventReceiver* receiver) const;
 };
 
 class GamepadButtonUpEvent : public GamepadButtonEvent {
   public:
-    GamepadButtonUpEvent(wall_time at, uint32_t button): GamepadButtonEvent(at, button) { }
+    GamepadButtonUpEvent(wall_time at, uint32_t button) : GamepadButtonEvent(at, button) {}
     virtual void send(EventReceiver* receiver) const;
 };
 
 class GamepadStickEvent : public Event {
   public:
-    GamepadStickEvent(wall_time at, int stick, double x, double y):
-            Event(at), stick(stick), x(x), y(y) { }
+    GamepadStickEvent(wall_time at, int stick, double x, double y)
+            : Event(at), stick(stick), x(x), y(y) {}
     virtual void send(EventReceiver* receiver) const;
-    const int stick;
+    const int    stick;
     const double x;
     const double y;
 };
@@ -127,8 +128,9 @@ class GamepadStickEvent : public Event {
 // corner of the screen.
 class MouseEvent : public Event {
   public:
-    MouseEvent(wall_time at, const Point& where): Event(at), _where(where) { }
+    MouseEvent(wall_time at, const Point& where) : Event(at), _where(where) {}
     const Point& where() const { return _where; }
+
   private:
     Point _where;
 };
@@ -141,10 +143,10 @@ class MouseEvent : public Event {
 // implement it in terms of separate events instead.
 class MouseButtonEvent : public MouseEvent {
   public:
-    MouseButtonEvent(wall_time at, int button, const Point& where):
-            MouseEvent(at, where),
-            _button(button) { }
+    MouseButtonEvent(wall_time at, int button, const Point& where)
+            : MouseEvent(at, where), _button(button) {}
     int button() const { return _button; }
+
   private:
     int _button;
 };
@@ -157,11 +159,11 @@ class MouseButtonEvent : public MouseEvent {
 //  * count(): the number of clicks, e.g. 2 for a double-click.
 class MouseDownEvent : public MouseButtonEvent {
   public:
-    MouseDownEvent(wall_time at, int button, int count, const Point& where):
-            MouseButtonEvent(at, button, where),
-            _count(count) { }
+    MouseDownEvent(wall_time at, int button, int count, const Point& where)
+            : MouseButtonEvent(at, button, where), _count(count) {}
     virtual void send(EventReceiver* receiver) const;
     int count() const { return _count; }
+
   private:
     int _count;
 };
@@ -173,8 +175,8 @@ class MouseDownEvent : public MouseButtonEvent {
 //  * where(): the location of the mouse release, as described in MouseEvent.
 class MouseUpEvent : public MouseButtonEvent {
   public:
-    MouseUpEvent(wall_time at, int button, const Point& where):
-            MouseButtonEvent(at, button, where) { }
+    MouseUpEvent(wall_time at, int button, const Point& where)
+            : MouseButtonEvent(at, button, where) {}
     virtual void send(EventReceiver* receiver) const;
 };
 
@@ -184,7 +186,7 @@ class MouseUpEvent : public MouseButtonEvent {
 //  * where(): the new location of the mouse pointer.
 class MouseMoveEvent : public MouseEvent {
   public:
-    MouseMoveEvent(wall_time at, const Point& where): MouseEvent(at, where) { }
+    MouseMoveEvent(wall_time at, const Point& where) : MouseEvent(at, where) {}
     virtual void send(EventReceiver* receiver) const;
 };
 
@@ -204,4 +206,4 @@ class EventReceiver {
 
 }  // namespace antares
 
-#endif // ANTARES_UI_EVENT_HPP_
+#endif  // ANTARES_UI_EVENT_HPP_

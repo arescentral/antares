@@ -30,4 +30,4 @@ Handle<SpaceObject> GetObjectFromInitialNumber(int32_t initialNumber);
 
 }  // namespace antares
 
-#endif // ANTARES_GAME_INITIAL_HPP_
+#endif  // ANTARES_GAME_INITIAL_HPP_

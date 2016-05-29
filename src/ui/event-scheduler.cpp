@@ -39,7 +39,7 @@ namespace {
 
 class MouseReader : public EventReceiver {
   public:
-    MouseReader(Point* mouse): _mouse(mouse) { }
+    MouseReader(Point* mouse) : _mouse(mouse) {}
 
     virtual void mouse_down(const MouseDownEvent& event) { *_mouse = event.where(); }
     virtual void mouse_up(const MouseUpEvent& event) { *_mouse = event.where(); }
@@ -53,8 +53,7 @@ class MouseReader : public EventReceiver {
 
 }  // namespace
 
-EventScheduler::EventScheduler():
-        _mouse(-1, -1) { }
+EventScheduler::EventScheduler() : _mouse(-1, -1) {}
 
 void EventScheduler::schedule_snapshot(int64_t at) {
     _snapshot_times.push_back(wall_ticks(ticks(at)));
@@ -71,17 +70,17 @@ void EventScheduler::schedule_key(int32_t key, int64_t down, int64_t up) {
     schedule_event(unique_ptr<Event>(new KeyUpEvent(wall_time(ticks(up)), key)));
 }
 
-void EventScheduler::schedule_mouse(
-        int button, const Point& where, int64_t down, int64_t up) {
-    schedule_event(unique_ptr<Event>(new MouseDownEvent(wall_time(ticks(down)), button, 1, where)));
+void EventScheduler::schedule_mouse(int button, const Point& where, int64_t down, int64_t up) {
+    schedule_event(
+            unique_ptr<Event>(new MouseDownEvent(wall_time(ticks(down)), button, 1, where)));
     schedule_event(unique_ptr<Event>(new MouseUpEvent(wall_time(ticks(up)), button, where)));
 }
 
 void EventScheduler::loop(EventScheduler::MainLoop& loop) {
     while (!loop.done()) {
-        wall_time at_usecs;
-        const bool has_timer = loop.top()->next_timer(at_usecs);
-        const wall_ticks at_ticks = std::chrono::time_point_cast<ticks>(at_usecs);
+        wall_time        at_usecs;
+        const bool       has_timer = loop.top()->next_timer(at_usecs);
+        const wall_ticks at_ticks  = std::chrono::time_point_cast<ticks>(at_usecs);
         if (!_event_heap.empty() && (!has_timer || (_event_heap.front()->at() <= at_usecs))) {
             unique_ptr<Event> event;
             swap(event, _event_heap.front());

@@ -30,55 +30,55 @@ namespace antares {
 const int32_t kMaxVolumePreference = 8;
 
 class SoundFX {
-    public:
-        SoundFX();
-        ~SoundFX();
+  public:
+    SoundFX();
+    ~SoundFX();
 
-        void init();
-        void load(int16_t id);
-        void reset();
-        void stop();
+    void init();
+    void load(int16_t id);
+    void reset();
+    void stop();
 
-        void play(int16_t id, uint8_t volume, usecs persistence, uint8_t priority);
-        void play_at(int16_t id, int32_t volume, usecs persistence, uint8_t priority,
-                     Handle<SpaceObject> object);
+    void play(int16_t id, uint8_t volume, usecs persistence, uint8_t priority);
+    void play_at(
+            int16_t id, int32_t volume, usecs persistence, uint8_t priority,
+            Handle<SpaceObject> object);
 
-        void select();
-        void build();
-        void click();
-        void zoom();
-        void pause();
+    void select();
+    void build();
+    void click();
+    void zoom();
+    void pause();
 
-        void klaxon();
-        void loud_klaxon();
-        void order();
+    void klaxon();
+    void loud_klaxon();
+    void order();
 
-        void warning();
-        void teletype();
-        void cloak_on();
-        void cloak_off();
+    void warning();
+    void teletype();
+    void cloak_on();
+    void cloak_off();
 
-        void warp(int n, Handle<SpaceObject> object);
-        void cloak_on_at(Handle<SpaceObject> object);
-        void cloak_off_at(Handle<SpaceObject> object);
+    void warp(int n, Handle<SpaceObject> object);
+    void cloak_on_at(Handle<SpaceObject> object);
+    void cloak_off_at(Handle<SpaceObject> object);
 
-    private:
-        struct smartSoundHandle;
-        struct smartSoundChannel;
+  private:
+    struct smartSoundHandle;
+    struct smartSoundChannel;
 
-        bool same_sound_channel(
-                int& channel, int16_t id, uint8_t amplitude, uint8_t priority);
-        bool quieter_channel(int& channel, uint8_t amplitude);
-        bool lower_priority_channel(int& channel, uint8_t priority);
-        bool oldest_available_channel(int& channel);
-        bool best_channel(
-                int& channel,
-                int16_t sound_id, uint8_t amplitude, usecs persistence, uint8_t priority);
+    bool same_sound_channel(int& channel, int16_t id, uint8_t amplitude, uint8_t priority);
+    bool quieter_channel(int& channel, uint8_t amplitude);
+    bool lower_priority_channel(int& channel, uint8_t priority);
+    bool oldest_available_channel(int& channel);
+    bool best_channel(
+            int& channel, int16_t sound_id, uint8_t amplitude, usecs persistence,
+            uint8_t priority);
 
-        std::vector<smartSoundHandle>   sounds;
-        std::vector<smartSoundChannel>  channels;
+    std::vector<smartSoundHandle>  sounds;
+    std::vector<smartSoundChannel> channels;
 };
 
 }  // namespace antares
 
-#endif // ANTARES_SOUND_FX_HPP_
+#endif  // ANTARES_SOUND_FX_HPP_

@@ -31,10 +31,10 @@ class TextVideoDriver : public VideoDriver {
   public:
     TextVideoDriver(Size screen_size, const sfz::Optional<sfz::String>& output_dir);
 
-    virtual Point get_mouse() { return _scheduler->get_mouse(); }
+    virtual Point     get_mouse() { return _scheduler->get_mouse(); }
     virtual InputMode input_mode() const { return KEYBOARD_MOUSE; }
-    virtual int scale() const;
-    virtual Size screen_size() const { return _size; }
+    virtual int       scale() const;
+    virtual Size      screen_size() const { return _size; }
 
     virtual wall_time now() const { return _scheduler->now(); }
 
@@ -62,7 +62,7 @@ class TextVideoDriver : public VideoDriver {
     template <int size>
     void log(sfz::StringSlice command, sfz::PrintItem (&args)[size]);
 
-    const Size _size;
+    const Size                       _size;
     const sfz::Optional<sfz::String> _output_dir;
 
     sfz::String _log;

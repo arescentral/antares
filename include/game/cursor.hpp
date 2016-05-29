@@ -48,10 +48,10 @@ class GameCursor : public Cursor, public EventReceiver {
     GameCursor();
     GameCursor(const GameCursor&) = delete;
 
-    bool                    show;
+    bool show;
 
-    bool active() const;
-    void draw() const;
+    bool         active() const;
+    void         draw() const;
     static Point clamped_location();
 
     virtual void mouse_down(const MouseDownEvent& event);
@@ -73,13 +73,13 @@ class HintLine {
     static void draw();
 
   private:
-    static bool show_hint_line;
-    static Point hint_line_start;
-    static Point hint_line_end;
+    static bool     show_hint_line;
+    static Point    hint_line_start;
+    static Point    hint_line_end;
     static RgbColor hint_line_color;
     static RgbColor hint_line_color_dark;
 };
 
 }  // namespace antares
 
-#endif // ANTARES_GAME_CURSOR_HPP_
+#endif  // ANTARES_GAME_CURSOR_HPP_

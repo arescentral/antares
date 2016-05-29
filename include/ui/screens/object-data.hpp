@@ -50,15 +50,15 @@ class ObjectDataScreen : public Card {
 
   private:
     const Trigger _trigger;
-    const int _which;
+    const int     _which;
 
     enum State { TYPING, DONE };
-    State _state;
+    State     _state;
     wall_time _next_update;
     wall_time _next_sound;
-    int _typed_chars;
+    int       _typed_chars;
 
-    Rect _bounds;
+    Rect                        _bounds;
     std::unique_ptr<StyledText> _text;
 
     DISALLOW_COPY_AND_ASSIGN(ObjectDataScreen);

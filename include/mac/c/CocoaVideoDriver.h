@@ -19,10 +19,10 @@
 #ifndef ANTARES_MAC_C_COCOA_VIDEO_DRIVER_H_
 #define ANTARES_MAC_C_COCOA_VIDEO_DRIVER_H_
 
-#include <stdint.h>
-#include <stdbool.h>
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,7 +43,7 @@ int32_t antares_window_viewport_width(const AntaresWindow* window);
 int32_t antares_window_viewport_height(const AntaresWindow* window);
 
 typedef struct AntaresEventTranslator AntaresEventTranslator;
-AntaresEventTranslator* antares_event_translator_create();
+AntaresEventTranslator*               antares_event_translator_create();
 void antares_event_translator_destroy(AntaresEventTranslator* translator);
 
 void antares_event_translator_set_window(
@@ -52,19 +52,18 @@ void antares_get_mouse_location(AntaresEventTranslator* translator, int32_t* x, 
 
 void antares_event_translator_set_mouse_down_callback(
         AntaresEventTranslator* translator,
-        void (*callback)(int button, int32_t x, int32_t y, int count, void* userdata), void* userdata);
+        void (*callback)(int button, int32_t x, int32_t y, int count, void* userdata),
+        void* userdata);
 void antares_event_translator_set_mouse_up_callback(
         AntaresEventTranslator* translator,
         void (*callback)(int button, int32_t x, int32_t y, void* userdata), void* userdata);
 void antares_event_translator_set_mouse_move_callback(
-        AntaresEventTranslator* translator,
-        void (*callback)(int32_t x, int32_t y, void* userdata), void* userdata);
+        AntaresEventTranslator* translator, void (*callback)(int32_t x, int32_t y, void* userdata),
+        void* userdata);
 void antares_event_translator_set_caps_lock_callback(
-        AntaresEventTranslator* translator,
-        void (*callback)(void* userdata), void* userdata);
+        AntaresEventTranslator* translator, void (*callback)(void* userdata), void* userdata);
 void antares_event_translator_set_caps_unlock_callback(
-        AntaresEventTranslator* translator,
-        void (*callback)(void* userdata), void* userdata);
+        AntaresEventTranslator* translator, void (*callback)(void* userdata), void* userdata);
 
 bool antares_event_translator_next(AntaresEventTranslator* translator, int64_t until);
 void antares_event_translator_cancel(AntaresEventTranslator* translator);

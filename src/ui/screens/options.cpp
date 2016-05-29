@@ -29,8 +29,8 @@
 #include "drawing/color.hpp"
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
-#include "game/main.hpp"
 #include "game/level.hpp"
+#include "game/main.hpp"
 #include "game/time.hpp"
 #include "sound/driver.hpp"
 #include "sound/fx.hpp"
@@ -49,9 +49,7 @@ using std::vector;
 
 namespace antares {
 
-OptionsScreen::OptionsScreen():
-        _state(SOUND_CONTROL),
-        _revert(sys.prefs->get()) { }
+OptionsScreen::OptionsScreen() : _state(SOUND_CONTROL), _revert(sys.prefs->get()) {}
 
 void OptionsScreen::become_front() {
     switch (_state) {
@@ -76,15 +74,14 @@ void OptionsScreen::become_front() {
 }
 
 SoundControlScreen::SoundControlScreen(OptionsScreen::State* state)
-        : InterfaceScreen("options/sound", {0, 0, 640, 480}, true),
-          _state(state) { }
+        : InterfaceScreen("options/sound", {0, 0, 640, 480}, true), _state(state) {}
 
-SoundControlScreen::~SoundControlScreen() { }
+SoundControlScreen::~SoundControlScreen() {}
 
 void SoundControlScreen::adjust_interface() {
     dynamic_cast<CheckboxButton&>(mutable_item(IDLE_MUSIC)).on = sys.prefs->play_idle_music();
     dynamic_cast<CheckboxButton&>(mutable_item(GAME_MUSIC)).on = sys.prefs->play_music_in_game();
-    dynamic_cast<CheckboxButton&>(mutable_item(SPEECH_ON)).on = sys.prefs->speech_on();
+    dynamic_cast<CheckboxButton&>(mutable_item(SPEECH_ON)).on  = sys.prefs->speech_on();
 
     if (false) {  // TODO(sfiera): if speech available.
         dynamic_cast<Button&>(mutable_item(SPEECH_ON)).status = kActive;
@@ -149,17 +146,18 @@ void SoundControlScreen::handle_button(Button& button) {
 
 void SoundControlScreen::overlay() const {
     const int volume = sys.prefs->volume();
-    Rect bounds = item(VOLUME_BOX).bounds();
-    Point off = offset();
+    Rect      bounds = item(VOLUME_BOX).bounds();
+    Point     off    = offset();
     bounds.offset(off.h, off.v);
 
-    const int notch_width = bounds.width() / kMaxVolumePreference;
+    const int notch_width  = bounds.width() / kMaxVolumePreference;
     const int notch_height = bounds.height() - 4;
-    Rect notch_bounds(0, 0, notch_width * kMaxVolumePreference, notch_height);
+    Rect      notch_bounds(0, 0, notch_width * kMaxVolumePreference, notch_height);
     notch_bounds.center_in(bounds);
 
-    Rect notch(notch_bounds.left, notch_bounds.top,
-            notch_bounds.left + notch_width, notch_bounds.bottom);
+    Rect notch(
+            notch_bounds.left, notch_bounds.top, notch_bounds.left + notch_width,
+            notch_bounds.bottom);
     notch.inset(3, 6);
 
     Rects rects;
@@ -187,7 +185,7 @@ static const usecs kFlashTime = ticks(12);
 
 // Indices of the keys controlled by each tab.  The "Ship" tab specifies keys 0..7, the "Command"
 // tab specifies keys 8..18, and so on.
-static const size_t kKeyIndices[] = { 0, 8, 19, 28, 34, 44 };
+static const size_t kKeyIndices[] = {0, 8, 19, 28, 34, 44};
 
 static size_t get_tab_num(size_t key) {
     for (size_t i = 1; i < 5; ++i) {
@@ -209,7 +207,7 @@ KeyControlScreen::KeyControlScreen(OptionsScreen::State* state)
     set_tab(SHIP);
 }
 
-KeyControlScreen::~KeyControlScreen() { }
+KeyControlScreen::~KeyControlScreen() {}
 
 void KeyControlScreen::key_down(const KeyDownEvent& event) {
     if (_selected_key >= 0) {
@@ -261,8 +259,8 @@ void KeyControlScreen::adjust_interface() {
     }
 
     for (size_t i = _key_start; i < size(); ++i) {
-        size_t key = kKeyIndices[_tab] + i - _key_start;
-        int key_num = sys.prefs->key(key);
+        size_t key                                 = kKeyIndices[_tab] + i - _key_start;
+        int    key_num                             = sys.prefs->key(key);
         dynamic_cast<Button&>(mutable_item(i)).key = key_num;
         if (key == _selected_key) {
             dynamic_cast<Button&>(mutable_item(i)).status = kIH_Hilite;
@@ -274,17 +272,17 @@ void KeyControlScreen::adjust_interface() {
 
     if (_flashed_on) {
         for (vector<pair<size_t, size_t>>::const_iterator it = _conflicts.begin();
-                it != _conflicts.end(); ++it) {
+             it != _conflicts.end(); ++it) {
             flash_on(it->first);
             flash_on(it->second);
         }
     }
 
     if (_conflicts.empty()) {
-        dynamic_cast<Button&>(mutable_item(DONE)).status = kActive;
+        dynamic_cast<Button&>(mutable_item(DONE)).status          = kActive;
         dynamic_cast<Button&>(mutable_item(SOUND_CONTROL)).status = kActive;
     } else {
-        dynamic_cast<Button&>(mutable_item(DONE)).status = kDimmed;
+        dynamic_cast<Button&>(mutable_item(DONE)).status          = kDimmed;
         dynamic_cast<Button&>(mutable_item(SOUND_CONTROL)).status = kDimmed;
     }
 }
@@ -326,13 +324,13 @@ void KeyControlScreen::overlay() const {
         const size_t key_two = _conflicts[0].second;
 
         // TODO(sfiera): permit localization.
-        String text(format("{0}: {1} conflicts with {2}: {3}",
-                    _tabs.at(get_tab_num(key_one)), _keys.at(key_one),
-                    _tabs.at(get_tab_num(key_two)), _keys.at(key_two)));
+        String text(
+                format("{0}: {1} conflicts with {2}: {3}", _tabs.at(get_tab_num(key_one)),
+                       _keys.at(key_one), _tabs.at(get_tab_num(key_two)), _keys.at(key_two)));
 
-        const TextRect& box = dynamic_cast<const TextRect&>(item(CONFLICT_TEXT));
-        Rect bounds = box.bounds();
-        Point off = offset();
+        const TextRect& box    = dynamic_cast<const TextRect&>(item(CONFLICT_TEXT));
+        Rect            bounds = box.bounds();
+        Point           off    = offset();
         bounds.offset(off.h, off.v);
         draw_text_in_rect(bounds, text, box.style, box.hue);
     }
@@ -370,11 +368,7 @@ KeyControlScreen::Tab KeyControlScreen::button_tab(int button) {
 
 void KeyControlScreen::set_tab(Tab tab) {
     static const int buttons[] = {
-        SHIP_TAB,
-        COMMAND_TAB,
-        SHORTCUT_TAB,
-        UTILITY_TAB,
-        HOT_KEY_TAB,
+            SHIP_TAB, COMMAND_TAB, SHORTCUT_TAB, UTILITY_TAB, HOT_KEY_TAB,
     };
 
     truncate(_key_start);
@@ -387,7 +381,7 @@ void KeyControlScreen::set_tab(Tab tab) {
             item.on = false;
         }
     }
-    _tab = tab;
+    _tab          = tab;
     _selected_key = -1;
 }
 
@@ -415,10 +409,10 @@ void KeyControlScreen::update_conflicts() {
 void KeyControlScreen::flash_on(size_t key) {
     if (kKeyIndices[_tab] <= key && key < kKeyIndices[_tab + 1]) {
         Button& item = dynamic_cast<Button&>(mutable_item(key - kKeyIndices[_tab] + _key_start));
-        item.hue = GOLD;
+        item.hue     = GOLD;
     } else {
         Button& item = dynamic_cast<Button&>(mutable_item(SHIP_TAB + get_tab_num(key)));
-        item.hue = GOLD;
+        item.hue     = GOLD;
     }
 }
 

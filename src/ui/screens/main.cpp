@@ -21,8 +21,8 @@
 #include "config/preferences.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
-#include "game/main.hpp"
 #include "game/level.hpp"
+#include "game/main.hpp"
 #include "game/time.hpp"
 #include "math/random.hpp"
 #include "sound/music.hpp"
@@ -40,27 +40,25 @@ namespace antares {
 
 namespace {
 
-const secs kMainDemoTimeOutTime = secs(30);
-const int kTitleTextScrollWidth = 450;
+const secs kMainDemoTimeOutTime  = secs(30);
+const int  kTitleTextScrollWidth = 450;
 
 }  // namespace
 
-MainScreen::MainScreen():
-        InterfaceScreen("main", {0, 0, 640, 480}, true),
-        _state(NORMAL) { }
+MainScreen::MainScreen() : InterfaceScreen("main", {0, 0, 640, 480}, true), _state(NORMAL) {}
 
-MainScreen::~MainScreen() { }
+MainScreen::~MainScreen() {}
 
 void MainScreen::become_front() {
     switch (_state) {
-      case NORMAL:
-        InterfaceScreen::become_front();
-        sys.music.play(Music::IDLE, kTitleSongID);
-        _next_timer = (now() + kMainDemoTimeOutTime);
-        break;
-      case QUITTING:
-        stack()->pop(this);
-        break;
+        case NORMAL:
+            InterfaceScreen::become_front();
+            sys.music.play(Music::IDLE, kTitleSongID);
+            _next_timer = (now() + kMainDemoTimeOutTime);
+            break;
+        case QUITTING:
+            stack()->pop(this);
+            break;
     }
 }
 
@@ -123,36 +121,36 @@ void MainScreen::adjust_interface() {
 
 void MainScreen::handle_button(antares::Button& button) {
     switch (button.id) {
-      case QUIT:
-        // 1-second fade-out.
-        _state = QUITTING;
-        stack()->push(new ColorFade(
-                    ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
-        break;
+        case QUIT:
+            // 1-second fade-out.
+            _state = QUITTING;
+            stack()->push(
+                    new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
+            break;
 
-      case DEMO:
-        stack()->push(new ReplayGame(_replays.at(rand() % _replays.size())));
-        break;
+        case DEMO:
+            stack()->push(new ReplayGame(_replays.at(rand() % _replays.size())));
+            break;
 
-      case REPLAY_INTRO:
-        stack()->push(new ScrollTextScreen(5600, kTitleTextScrollWidth, kSlowScrollInterval));
-        break;
+        case REPLAY_INTRO:
+            stack()->push(new ScrollTextScreen(5600, kTitleTextScrollWidth, kSlowScrollInterval));
+            break;
 
-      case START_NEW_GAME:
-        stack()->push(new SoloGame);
-        break;
+        case START_NEW_GAME:
+            stack()->push(new SoloGame);
+            break;
 
-      case START_NETWORK_GAME:
-        throw Exception("Networked games not yet implemented.");
-        break;
+        case START_NETWORK_GAME:
+            throw Exception("Networked games not yet implemented.");
+            break;
 
-      case ABOUT_ARES:
-        stack()->push(new ScrollTextScreen(6500, 540, kFastScrollInterval));
-        break;
+        case ABOUT_ARES:
+            stack()->push(new ScrollTextScreen(6500, 540, kFastScrollInterval));
+            break;
 
-      case OPTIONS:
-        stack()->push(new OptionsScreen);
-        break;
+        case OPTIONS:
+            stack()->push(new OptionsScreen);
+            break;
     }
 }
 

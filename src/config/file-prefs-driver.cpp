@@ -40,54 +40,20 @@ namespace utf8 = sfz::utf8;
 namespace antares {
 
 static const char* kKeyNames[KEY_COUNT] = {
-    "ship accel",
-    "ship decel",
-    "ship ccw",
-    "ship cw",
-    "fire 1",
-    "fire 2",
-    "fire s",
-    "warp",
+        "ship accel",      "ship decel",     "ship ccw",    "ship cw",      "fire 1",
+        "fire 2",          "fire s",         "warp",
 
-    "select friendly",
-    "select hostile",
-    "select base",
-    "target",
-    "order",
-    "zoom in",
-    "zoom out",
+        "select friendly", "select hostile", "select base", "target",       "order",
+        "zoom in",         "zoom out",
 
-    "comp up",
-    "comp down",
-    "comp accept",
-    "comp cancel",
+        "comp up",         "comp down",      "comp accept", "comp cancel",
 
-    "transfer",
-    "zoom 1:1",
-    "zoom 1:2",
-    "zoom 1:4",
-    "zoom 1:16",
-    "zoom hostile",
-    "zoom object",
-    "zoom all",
-    "next message",
-    "help",
-    "volume down",
-    "volume up",
-    "game music",
-    "net settings",
-    "fast motion",
+        "transfer",        "zoom 1:1",       "zoom 1:2",    "zoom 1:4",     "zoom 1:16",
+        "zoom hostile",    "zoom object",    "zoom all",    "next message", "help",
+        "volume down",     "volume up",      "game music",  "net settings", "fast motion",
 
-    "hotkey 1",
-    "hotkey 2",
-    "hotkey 3",
-    "hotkey 4",
-    "hotkey 5",
-    "hotkey 6",
-    "hotkey 7",
-    "hotkey 8",
-    "hotkey 9",
-    "hotkey 10",
+        "hotkey 1",        "hotkey 2",       "hotkey 3",    "hotkey 4",     "hotkey 5",
+        "hotkey 6",        "hotkey 7",       "hotkey 8",    "hotkey 9",     "hotkey 10",
 };
 
 static bool get(Json json, bool& v) {
@@ -108,10 +74,10 @@ static bool get(Json json, int& v) {
 
 template <typename ValueType, typename ValueKey, typename PrefsMethod>
 static void set_from(
-    const Json& json, const char* section_key, ValueKey value_key,
-    Preferences& prefs, PrefsMethod pmeth) {
-    auto section = json.get(section_key);
-    auto value = section.get(value_key);
+        const Json& json, const char* section_key, ValueKey value_key, Preferences& prefs,
+        PrefsMethod pmeth) {
+    auto      section = json.get(section_key);
+    auto      value   = section.get(value_key);
     ValueType typed;
     if (get(value, typed)) {
         (prefs.*pmeth) = typed;
@@ -120,10 +86,10 @@ static void set_from(
 
 template <typename ValueType, typename ValueKey, typename PrefsMethod>
 static void set_from(
-    const Json& json, const char* section_key, ValueKey value_key,
-    Preferences& prefs, PrefsMethod pmeth, int index) {
-    auto section = json.get(section_key);
-    auto value = section.get(value_key);
+        const Json& json, const char* section_key, ValueKey value_key, Preferences& prefs,
+        PrefsMethod pmeth, int index) {
+    auto      section = json.get(section_key);
+    auto      value   = section.get(value_key);
     ValueType typed;
     if (get(value, typed)) {
         (prefs.*pmeth)[index] = typed;
@@ -133,10 +99,10 @@ static void set_from(
 FilePrefsDriver::FilePrefsDriver() {
     Preferences _current;
     try {
-        String path(format("{0}/config.json", dirs().root));
+        String     path(format("{0}/config.json", dirs().root));
         MappedFile file(path);
-        Json json;
-        String data(utf8::decode(file.data()));
+        Json       json;
+        String     data(utf8::decode(file.data()));
         if (!string_to_json(data, json)) {
             return;
         }
@@ -146,7 +112,7 @@ FilePrefsDriver::FilePrefsDriver() {
         set_from<bool>(json, "sound", "idle music", _current, &Preferences::play_idle_music);
         set_from<bool>(json, "sound", "game music", _current, &Preferences::play_music_in_game);
 
-        for (auto i: range<size_t>(KEY_COUNT)) {
+        for (auto i : range<size_t>(KEY_COUNT)) {
             set_from<int>(json, "keys", kKeyNames[i], _current, &Preferences::keys, i);
         }
     } catch (Exception& e) {
@@ -158,23 +124,23 @@ void FilePrefsDriver::set(const Preferences& p) {
     _current = p.copy();
 
     StringMap<Json> sound;
-    sound["volume"]      = Json::number(p.volume);
-    sound["speech"]      = Json::boolean(p.speech_on);
-    sound["idle music"]  = Json::boolean(p.play_idle_music);
-    sound["game music"]  = Json::boolean(p.play_music_in_game);
+    sound["volume"]     = Json::number(p.volume);
+    sound["speech"]     = Json::boolean(p.speech_on);
+    sound["idle music"] = Json::boolean(p.play_idle_music);
+    sound["game music"] = Json::boolean(p.play_music_in_game);
 
     StringMap<Json> keys;
-    for (auto i: range<size_t>(KEY_COUNT)) {
+    for (auto i : range<size_t>(KEY_COUNT)) {
         keys[kKeyNames[i]] = Json::number(p.keys[i]);
     }
 
     StringMap<Json> all;
-    all["sound"]  = Json::object(sound);
-    all["keys"]   = Json::object(keys);
+    all["sound"] = Json::object(sound);
+    all["keys"]  = Json::object(keys);
 
-    String path(format("{0}/config.json", dirs().root));
+    String   path(format("{0}/config.json", dirs().root));
     ScopedFd fd(open(path, O_CREAT | O_TRUNC | O_WRONLY, 0644));
-    String pretty(pretty_print(Json::object(all)));
+    String   pretty(pretty_print(Json::object(all)));
     write(fd, utf8::encode(pretty));
 }
 

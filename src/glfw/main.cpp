@@ -18,12 +18,12 @@
 
 #include <GLFW/glfw3.h>
 
-#include <sfz/sfz.hpp>
 #include <time.h>
+#include <sfz/sfz.hpp>
 
 #include "config/file-prefs-driver.hpp"
-#include "config/preferences.hpp"
 #include "config/ledger.hpp"
+#include "config/preferences.hpp"
 #include "data/scenario-list.hpp"
 #include "game/sys.hpp"
 #include "glfw/video-driver.hpp"
@@ -36,7 +36,7 @@ using sfz::args::store_const;
 using sfz::range;
 
 namespace args = sfz::args;
-namespace io = sfz::io;
+namespace io   = sfz::io;
 
 namespace antares {
 
@@ -47,8 +47,7 @@ String application_path() {
 void main(int argc, const char* argv[]) {
     args::Parser parser(argv[0], "Runs Antares");
 
-    parser.add_argument("--help", help(parser, 0))
-        .help("display this help screen");
+    parser.add_argument("--help", help(parser, 0)).help("display this help screen");
 
     String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
@@ -58,10 +57,10 @@ void main(int argc, const char* argv[]) {
 
     FilePrefsDriver prefs;
 
-    const auto& scenario = sys.prefs->scenario_identifier();
-    bool have_scenario = false;
+    const auto&  scenario      = sys.prefs->scenario_identifier();
+    bool         have_scenario = false;
     ScenarioList l;
-    for (auto i: range(l.size())) {
+    for (auto i : range(l.size())) {
         const auto& entry = l.at(i);
         if (entry.identifier == scenario) {
             if (entry.installed) {
@@ -79,9 +78,9 @@ void main(int argc, const char* argv[]) {
         exit(1);
     }
 
-    DirectoryLedger ledger;
+    DirectoryLedger   ledger;
     OpenAlSoundDriver sound;
-    GLFWVideoDriver video;
+    GLFWVideoDriver   video;
     video.loop(new Master(time(NULL)));
 }
 

@@ -29,20 +29,20 @@ using std::unique_ptr;
 namespace antares {
 
 void Music::init() {
-    _playing = false;
+    _playing   = false;
     _song_type = IDLE;
-    _song_id = kTitleSongID;
+    _song_id   = kTitleSongID;
     _song.reset();
     _channel = sys.audio->open_channel();
 }
 
 void Music::play(Type type, int16_t id) {
-    bool play = false;
+    bool   play   = false;
     double volume = 1.0;
     if (type == IDLE) {
         play = sys.prefs->play_idle_music();
     } else if (type == IN_GAME) {
-        play = sys.prefs->play_music_in_game();
+        play   = sys.prefs->play_music_in_game();
         volume = 0.84375;
     }
 
@@ -51,7 +51,7 @@ void Music::play(Type type, int16_t id) {
     }
     stop();
     _song_type = type;
-    _song_id = id;
+    _song_id   = id;
 
     if (play) {
         _song = sys.audio->open_sound(format("/music/{0}", id));

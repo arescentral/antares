@@ -29,14 +29,11 @@ out vec2 screen_position;
 uniform vec2 screen;
 
 void main() {
-    mat4 transform = mat4(
-            2.0 / screen.x,  0,              0, 0,
-            0,              -2.0 / screen.y, 0, 0,
-            0,               0,              0, 0,
-           -1.0,             1.0,            0, 1);
+    mat4 transform =
+            mat4(2.0 / screen.x, 0, 0, 0, 0, -2.0 / screen.y, 0, 0, 0, 0, 0, 0, -1.0, 1.0, 0, 1);
 
-    gl_Position = transform * vec4(vertex, 0, 1);
-    uv = tex_coord;
+    gl_Position     = transform * vec4(vertex, 0, 1);
+    uv              = tex_coord;
     screen_position = vertex;
-    color = in_color;
+    color           = in_color;
 }

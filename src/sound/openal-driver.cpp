@@ -40,13 +40,20 @@ namespace {
 
 const char* al_error_to_string(int error) {
     switch (error) {
-      case AL_NO_ERROR:             return "AL_NO_ERROR";
-      case AL_INVALID_NAME:         return "AL_INVALID_NAME";
-      case AL_INVALID_ENUM:         return "AL_INVALID_ENUM";
-      case AL_INVALID_VALUE:        return "AL_INVALID_VALUE";
-      case AL_INVALID_OPERATION:    return "AL_INVALID_OPERATION";
-      case AL_OUT_OF_MEMORY:        return "AL_OUT_OF_MEMORY";
-      default:                      return "unknown OpenAL error";
+        case AL_NO_ERROR:
+            return "AL_NO_ERROR";
+        case AL_INVALID_NAME:
+            return "AL_INVALID_NAME";
+        case AL_INVALID_ENUM:
+            return "AL_INVALID_ENUM";
+        case AL_INVALID_VALUE:
+            return "AL_INVALID_VALUE";
+        case AL_INVALID_OPERATION:
+            return "AL_INVALID_OPERATION";
+        case AL_OUT_OF_MEMORY:
+            return "AL_OUT_OF_MEMORY";
+        default:
+            return "unknown OpenAL error";
     }
 }
 
@@ -62,10 +69,10 @@ class ModPlugFile {
     ModPlugFile(BytesSlice data) {
         ModPlug_Settings settings;
         ModPlug_GetSettings(&settings);
-        settings.mFlags = MODPLUG_ENABLE_OVERSAMPLING;
-        settings.mChannels = 2;
-        settings.mBits = 16;
-        settings.mFrequency = 44100;
+        settings.mFlags          = MODPLUG_ENABLE_OVERSAMPLING;
+        settings.mChannels       = 2;
+        settings.mBits           = 16;
+        settings.mFrequency      = 44100;
         settings.mResamplingMode = MODPLUG_RESAMPLE_LINEAR;
         ModPlug_SetSettings(&settings);
         file = ModPlug_Load(data.data(), data.size());
@@ -80,7 +87,7 @@ class ModPlugFile {
     }
 
     void convert(Bytes& data, ALenum& format, ALsizei& frequency) const {
-        format = AL_FORMAT_STEREO16;
+        format    = AL_FORMAT_STEREO16;
         frequency = 44100;
         uint8_t buffer[1024];
         ssize_t read;
@@ -98,9 +105,7 @@ class ModPlugFile {
 
 class OpenAlSoundDriver::OpenAlSound : public Sound {
   public:
-    OpenAlSound(const OpenAlSoundDriver& driver):
-            _driver(driver),
-            _buffer(generate_buffer()) { }
+    OpenAlSound(const OpenAlSoundDriver& driver) : _driver(driver), _buffer(generate_buffer()) {}
 
     ~OpenAlSound() {
         alDeleteBuffers(1, &_buffer);
@@ -112,8 +117,8 @@ class OpenAlSoundDriver::OpenAlSound : public Sound {
 
     template <typename T>
     void buffer(const T& file) {
-        Bytes data;
-        ALenum format;
+        Bytes   data;
+        ALenum  format;
         ALsizei frequency;
         file.convert(data, format, frequency);
         alBufferData(_buffer, format, data.data(), data.size(), frequency);
@@ -131,15 +136,14 @@ class OpenAlSoundDriver::OpenAlSound : public Sound {
     }
 
     const OpenAlSoundDriver& _driver;
-    ALuint _buffer;
+    ALuint                   _buffer;
 
     DISALLOW_COPY_AND_ASSIGN(OpenAlSound);
 };
 
 class OpenAlSoundDriver::OpenAlChannel : public SoundChannel {
   public:
-    OpenAlChannel(OpenAlSoundDriver& driver):
-            _driver(driver) {
+    OpenAlChannel(OpenAlSoundDriver& driver) : _driver(driver) {
         alGenSources(1, &_source);
         check_al_error("alGenSources");
         alSourcef(_source, AL_PITCH, 1.0f);
@@ -152,9 +156,7 @@ class OpenAlSoundDriver::OpenAlChannel : public SoundChannel {
         alGetError();  // discard.
     }
 
-    virtual void activate() {
-        _driver._active_channel = this;
-    }
+    virtual void activate() { _driver._active_channel = this; }
 
     void play(const OpenAlSound& sound) {
         alSourcei(_source, AL_LOOPING, AL_FALSE);
@@ -186,7 +188,7 @@ class OpenAlSoundDriver::OpenAlChannel : public SoundChannel {
 
   private:
     OpenAlSoundDriver& _driver;
-    ALuint _source;
+    ALuint             _source;
 
     DISALLOW_COPY_AND_ASSIGN(OpenAlChannel);
 };
@@ -199,10 +201,9 @@ void OpenAlSoundDriver::OpenAlSound::loop() {
     _driver._active_channel->loop(*this);
 }
 
-OpenAlSoundDriver::OpenAlSoundDriver():
-        _active_channel(NULL) {
+OpenAlSoundDriver::OpenAlSoundDriver() : _active_channel(NULL) {
     // TODO(sfiera): error-checking.
-    _device = alcOpenDevice(NULL);
+    _device  = alcOpenDevice(NULL);
     _context = alcCreateContext(_device, NULL);
     alcMakeContextCurrent(_context);
 }
@@ -227,14 +228,14 @@ unique_ptr<Sound> OpenAlSoundDriver::open_sound(PrintItem path) {
         const char ext[6];
         void (*fn)(BytesSlice, OpenAlSound&);
     } fmts[] = {
-        {".aiff",   read_sound<Sndfile>},
-        {".s3m",    read_sound<ModPlugFile>},
-        {".xm",     read_sound<ModPlugFile>},
+            {".aiff", read_sound<Sndfile>},
+            {".s3m", read_sound<ModPlugFile>},
+            {".xm", read_sound<ModPlugFile>},
     };
 
-    String path_string(path);
+    String                  path_string(path);
     unique_ptr<OpenAlSound> sound(new OpenAlSound(*this));
-    for (const auto& fmt: fmts) {
+    for (const auto& fmt : fmts) {
         try {
             Resource rsrc(format("{0}{1}", path_string, fmt.ext));
             fmt.fn(rsrc.data(), *sound);

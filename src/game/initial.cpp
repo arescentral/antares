@@ -33,8 +33,8 @@ void create_initial(Level::InitialObject* initial, uint32_t all_colors) {
         return;
     }
 
-    coordPointType coord = Translate_Coord_To_Level_Rotation(
-            initial->location.h, initial->location.v);
+    coordPointType coord =
+            Translate_Coord_To_Level_Rotation(initial->location.h, initial->location.v);
 
     Handle<Admiral> owner = Admiral::none();
     if (initial->owner.get()) {
@@ -51,10 +51,9 @@ void create_initial(Level::InitialObject* initial, uint32_t all_colors) {
 
     auto type = initial->type;
     // TODO(sfiera): remap object in networked games.
-    fixedPointType v = {Fixed::zero(), Fixed::zero()};
-    auto anObject = initial->realObject = CreateAnySpaceObject(
-            type, &v, &coord, g.angle, owner, specialAttributes,
-            initial->spriteIDOverride);
+    fixedPointType v        = {Fixed::zero(), Fixed::zero()};
+    auto           anObject = initial->realObject = CreateAnySpaceObject(
+            type, &v, &coord, g.angle, owner, specialAttributes, initial->spriteIDOverride);
 
     if (anObject->attributes & kIsDestination) {
         anObject->asDestination = MakeNewDestination(
@@ -63,8 +62,7 @@ void create_initial(Level::InitialObject* initial, uint32_t all_colors) {
     }
     initial->realObjectID = anObject->id;
 
-    if ((initial->attributes & kIsPlayerShip)
-            && owner.get() && !owner->flagship().get()) {
+    if ((initial->attributes & kIsPlayerShip) && owner.get() && !owner->flagship().get()) {
         owner->set_flagship(anObject);
         if (owner == g.admiral) {
             ResetPlayerShip(anObject);
@@ -84,9 +82,9 @@ void create_initial(Level::InitialObject* initial, uint32_t all_colors) {
 }
 
 void set_initial_destination(const Level::InitialObject* initial, bool preserve) {
-    if (!initial->realObject.get()                      // hasn't been created yet
-            || (initial->initialDestination < 0)        // doesn't have a target
-            || (!initial->owner.get())) {               // doesn't have an owner
+    if (!initial->realObject.get()            // hasn't been created yet
+        || (initial->initialDestination < 0)  // doesn't have a target
+        || (!initial->owner.get())) {         // doesn't have an owner
         return;
     }
 
@@ -95,16 +93,17 @@ void set_initial_destination(const Level::InitialObject* initial, bool preserve)
 
     auto target = g.level->initial(initial->initialDestination);
     if (target->realObject.get()) {
-        auto saveDest = owner->target(); // save the original dest
+        auto saveDest = owner->target();  // save the original dest
 
         // set the admiral's dest object to the mapped initial dest object
         owner->set_target(target->realObject);
 
         // now give the mapped initial object the admiral's destination
 
-        auto object = initial->realObject;
-        uint32_t specialAttributes = object->attributes; // preserve the attributes
-        object->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
+        auto     object            = initial->realObject;
+        uint32_t specialAttributes = object->attributes;  // preserve the attributes
+        object->attributes &=
+                ~kStaticDestination;  // we've got to force this off so we can set dest
         SetObjectDestination(object);
         object->attributes = specialAttributes;
 
@@ -124,8 +123,8 @@ void UnhideInitialObject(int32_t whichInitial) {
         return;  // Already visible.
     }
 
-    coordPointType coord = Translate_Coord_To_Level_Rotation(
-            initial->location.h, initial->location.v);
+    coordPointType coord =
+            Translate_Coord_To_Level_Rotation(initial->location.h, initial->location.v);
 
     Handle<Admiral> owner = Admiral::none();
     if (initial->owner.get()) {
@@ -140,16 +139,15 @@ void UnhideInitialObject(int32_t whichInitial) {
             } else {
                 specialAttributes &= ~kIsPlayerShip;
             }
-        } else { // we already have a flagship; this should not override
+        } else {  // we already have a flagship; this should not override
             specialAttributes &= ~kIsPlayerShip;
         }
     }
 
-
     auto type = initial->type;
     // TODO(sfiera): remap objects in networked games.
-    fixedPointType v = {Fixed::zero(), Fixed::zero()};
-    auto anObject = initial->realObject = CreateAnySpaceObject(
+    fixedPointType v        = {Fixed::zero(), Fixed::zero()};
+    auto           anObject = initial->realObject = CreateAnySpaceObject(
             type, &v, &coord, 0, owner, specialAttributes, initial->spriteIDOverride);
 
     if (anObject->attributes & kIsDestination) {

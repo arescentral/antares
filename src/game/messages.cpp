@@ -48,25 +48,25 @@ namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-static const int32_t kMessageScreenLeft        = 200;
-static const int32_t kMessageScreenTop         = 454;
+static const int32_t kMessageScreenLeft = 200;
+static const int32_t kMessageScreenTop  = 454;
 
-static const uint8_t kMessageColor             = RED;
-static const ticks   kMessageMoveTime          = ticks(30);
-static const ticks   kMessageDisplayTime       = (kMessageMoveTime * 2 + secs(2));
-static const ticks   kLowerTime                = (kMessageDisplayTime - kMessageMoveTime);
-static const ticks   kRaiseTime                = kMessageMoveTime;
+static const uint8_t kMessageColor       = RED;
+static const ticks   kMessageMoveTime    = ticks(30);
+static const ticks   kMessageDisplayTime = (kMessageMoveTime * 2 + secs(2));
+static const ticks   kLowerTime          = (kMessageDisplayTime - kMessageMoveTime);
+static const ticks   kRaiseTime          = kMessageMoveTime;
 
-static const int32_t kStatusLabelLeft          = 200;
-static const int32_t kStatusLabelTop           = 50;
-static const ticks   kStatusLabelAge           = secs(2);
+static const int32_t kStatusLabelLeft = 200;
+static const int32_t kStatusLabelTop  = 50;
+static const ticks   kStatusLabelAge  = secs(2);
 
-static const int32_t kLongMessageVPad          = 5;
-static const int32_t kLongMessageVPadDouble    = 10;
+static const int32_t kLongMessageVPad       = 5;
+static const int32_t kLongMessageVPadDouble = 10;
 
-static const int16_t kStringMessageID          = 1;
+static const int16_t kStringMessageID = 1;
 
-static const int32_t kHBuffer                  = 4;
+static const int32_t kHBuffer = 4;
 
 namespace {
 
@@ -78,42 +78,42 @@ void clear(T& t) {
 }
 
 enum longMessageStageType {
-    kNoStage = 0,
+    kNoStage    = 0,
     kStartStage = 1,
-    kClipStage = 2,
-    kShowStage = 3,
-    kEndStage = 4
+    kClipStage  = 2,
+    kShowStage  = 3,
+    kEndStage   = 4
 };
 
 }  // namespace
 
 struct Messages::longMessageType {
-    longMessageStageType    stage;
-    ticks                   charDelayCount;
-    Rect                    pictBounds;
-    int32_t                 pictDelayCount;
-    int32_t                 pictCurrentLeft;
-    int32_t                 pictCurrentTop;
-    int32_t                 time;
-    int32_t                 textHeight;
-    int16_t                 startResID;
-    int16_t                 endResID;
-    int16_t                 currentResID;
-    int16_t                 lastResID;
-    int16_t                 previousStartResID;
-    int16_t                 previousEndResID;
-    int16_t                 pictID;
-    uint8_t                 backColor;
-    sfz::String             stringMessage;
-    sfz::String             lastStringMessage;
-    bool                 newStringMessage;
-    sfz::String             text;
+    longMessageStageType        stage;
+    ticks                       charDelayCount;
+    Rect                        pictBounds;
+    int32_t                     pictDelayCount;
+    int32_t                     pictCurrentLeft;
+    int32_t                     pictCurrentTop;
+    int32_t                     time;
+    int32_t                     textHeight;
+    int16_t                     startResID;
+    int16_t                     endResID;
+    int16_t                     currentResID;
+    int16_t                     lastResID;
+    int16_t                     previousStartResID;
+    int16_t                     previousEndResID;
+    int16_t                     pictID;
+    uint8_t                     backColor;
+    sfz::String                 stringMessage;
+    sfz::String                 lastStringMessage;
+    bool                        newStringMessage;
+    sfz::String                 text;
     std::unique_ptr<StyledText> retro_text;
-    Point                   retro_origin;
-    int32_t                 at_char;
-    bool                 labelMessage;
-    bool                 lastLabelMessage;
-    Handle<Label>           labelMessageID;
+    Point                       retro_origin;
+    int32_t                     at_char;
+    bool                        labelMessage;
+    bool                        lastLabelMessage;
+    Handle<Label>               labelMessageID;
 };
 
 ANTARES_GLOBAL std::queue<sfz::String> Messages::message_data;
@@ -123,69 +123,72 @@ ANTARES_GLOBAL ticks Messages::time_count;
 void MessageLabel_Set_Special(Handle<Label> id, const StringSlice& text);
 
 void Messages::init() {
-    longMessageType *tmessage = NULL;
+    longMessageType* tmessage = NULL;
 
     antares::clear(message_data);
     long_message_data = new longMessageType;
 
     g.message_label = Label::add(
-            kMessageScreenLeft, kMessageScreenTop, 0, 0, SpaceObject::none(), false, kMessageColor);
+            kMessageScreenLeft, kMessageScreenTop, 0, 0, SpaceObject::none(), false,
+            kMessageColor);
 
     if (!g.message_label.get()) {
         throw Exception("Couldn't add a screen label.");
     }
     g.status_label = Label::add(
-            kStatusLabelLeft, kStatusLabelTop, 0, 0, SpaceObject::none(), false, kStatusLabelColor);
+            kStatusLabelLeft, kStatusLabelTop, 0, 0, SpaceObject::none(), false,
+            kStatusLabelColor);
     if (!g.status_label.get()) {
         throw Exception("Couldn't add a screen label.");
     }
 
-    tmessage = long_message_data;
-    tmessage->startResID =  tmessage->endResID = tmessage->lastResID = tmessage->currentResID =
-        -1;
-    tmessage->time = 0;
-    tmessage->stage = kNoStage;
+    tmessage             = long_message_data;
+    tmessage->startResID = tmessage->endResID = tmessage->lastResID = tmessage->currentResID = -1;
+    tmessage->time                                                                           = 0;
+    tmessage->stage      = kNoStage;
     tmessage->textHeight = 0;
     tmessage->retro_text.reset();
-    tmessage->charDelayCount = ticks(0);
-    tmessage->pictBounds.left = tmessage->pictBounds.right= 0;
-    tmessage->pictCurrentLeft = 0;
-    tmessage->pictCurrentTop = 0;
-    tmessage->pictID = -1;
+    tmessage->charDelayCount  = ticks(0);
+    tmessage->pictBounds.left = tmessage->pictBounds.right = 0;
+    tmessage->pictCurrentLeft                              = 0;
+    tmessage->pictCurrentTop                               = 0;
+    tmessage->pictID                                       = -1;
     tmessage->stringMessage.clear();
     tmessage->lastStringMessage.clear();
     tmessage->newStringMessage = false;
-    tmessage->labelMessage = false;
+    tmessage->labelMessage     = false;
     tmessage->lastLabelMessage = false;
-    tmessage->labelMessageID = Label::none();
+    tmessage->labelMessageID   = Label::none();
 }
 
 void Messages::clear() {
-    longMessageType *tmessage;
+    longMessageType* tmessage;
 
     time_count = ticks(0);
     std::queue<sfz::String> empty;
     swap(message_data, empty);
     g.message_label = Label::add(
-            kMessageScreenLeft, kMessageScreenTop, 0, 0, SpaceObject::none(), false, kMessageColor);
+            kMessageScreenLeft, kMessageScreenTop, 0, 0, SpaceObject::none(), false,
+            kMessageColor);
     g.status_label = Label::add(
-            kStatusLabelLeft, kStatusLabelTop, 0, 0, SpaceObject::none(), false, kStatusLabelColor);
+            kStatusLabelLeft, kStatusLabelTop, 0, 0, SpaceObject::none(), false,
+            kStatusLabelColor);
 
-    tmessage = long_message_data;
-    tmessage->startResID = -1;
-    tmessage->endResID = -1;
-    tmessage->currentResID = -1;
-    tmessage->lastResID = -1;
-    tmessage->textHeight = 0;
+    tmessage                     = long_message_data;
+    tmessage->startResID         = -1;
+    tmessage->endResID           = -1;
+    tmessage->currentResID       = -1;
+    tmessage->lastResID          = -1;
+    tmessage->textHeight         = 0;
     tmessage->previousStartResID = tmessage->previousEndResID = -1;
-    tmessage = long_message_data;
+    tmessage                                                  = long_message_data;
     tmessage->stringMessage.clear();
     tmessage->lastStringMessage.clear();
     tmessage->newStringMessage = false;
-    tmessage->labelMessage = false;
+    tmessage->labelMessage     = false;
     tmessage->lastLabelMessage = false;
     tmessage->retro_text.reset();
-    g.bottom_border = 0;
+    g.bottom_border          = 0;
     tmessage->labelMessageID = Label::add(0, 0, 0, 0, SpaceObject::none(), false, SKY_BLUE);
     tmessage->labelMessageID->set_keep_on_screen_anyway(true);
 }
@@ -195,75 +198,66 @@ void Messages::add(const sfz::PrintItem& message) {
 }
 
 void Messages::start(int16_t startResID, int16_t endResID) {
-    longMessageType *tmessage;
+    longMessageType* tmessage;
 
     tmessage = long_message_data;
 
-    if ( tmessage->currentResID != -1)
-    {
-        tmessage->startResID = startResID;
-        tmessage->endResID = endResID;
+    if (tmessage->currentResID != -1) {
+        tmessage->startResID   = startResID;
+        tmessage->endResID     = endResID;
         tmessage->currentResID = startResID - 1;
         advance();
-    } else
-    {
+    } else {
         tmessage->previousStartResID = tmessage->startResID;
-        tmessage->previousEndResID = tmessage->endResID;
-        tmessage->startResID = startResID;
-        tmessage->endResID = endResID;
-        tmessage->currentResID = startResID;
-        tmessage->time = 0;
-        tmessage->stage = kStartStage;
-        tmessage->textHeight = 0;
+        tmessage->previousEndResID   = tmessage->endResID;
+        tmessage->startResID         = startResID;
+        tmessage->endResID           = endResID;
+        tmessage->currentResID       = startResID;
+        tmessage->time               = 0;
+        tmessage->stage              = kStartStage;
+        tmessage->textHeight         = 0;
         tmessage->retro_text.reset();
-        tmessage->charDelayCount = ticks(0);
-        tmessage->pictBounds.left = tmessage->pictBounds.right= 0;
+        tmessage->charDelayCount  = ticks(0);
+        tmessage->pictBounds.left = tmessage->pictBounds.right = 0;
         // tmessage->pictDelayCount;
         tmessage->pictCurrentLeft = 0;
-        tmessage->pictCurrentTop = 0;
-        tmessage->pictID = -1;
+        tmessage->pictCurrentTop  = 0;
+        tmessage->pictID          = -1;
     }
 }
 
-void Messages::clip( void)
+void Messages::clip(void)
 
 {
-    longMessageType *tmessage;
+    longMessageType*   tmessage;
     unique_ptr<String> textData;
 
     tmessage = long_message_data;
-    if (( tmessage->currentResID != tmessage->lastResID) || ( tmessage->newStringMessage))
-    {
-
-        if ( tmessage->lastResID >= 0)
-        {
+    if ((tmessage->currentResID != tmessage->lastResID) || (tmessage->newStringMessage)) {
+        if (tmessage->lastResID >= 0) {
             g.bottom_border = 0;
         }
 
         // draw in offscreen world
-        if (( tmessage->currentResID >= 0) && ( tmessage->stage == kClipStage))
-        {
-            if ( tmessage->currentResID == kStringMessageID)
-            {
+        if ((tmessage->currentResID >= 0) && (tmessage->stage == kClipStage)) {
+            if (tmessage->currentResID == kStringMessageID) {
                 textData.reset(new String);
                 if (textData.get() != NULL) {
                     print(*textData, tmessage->stringMessage);
                 }
                 tmessage->labelMessage = false;
-            } else
-            {
+            } else {
                 Resource rsrc("text", "txt", tmessage->currentResID);
                 textData.reset(new String(utf8::decode(rsrc.data())));
                 Replace_KeyCode_Strings_With_Actual_Key_Names(textData.get(), KEY_LONG_NAMES, 0);
                 if (textData->at(0) == '#') {
                     tmessage->labelMessage = true;
-                }
-                else tmessage->labelMessage = false;
-
+                } else
+                    tmessage->labelMessage = false;
             }
             if (textData.get() != NULL) {
                 const RgbColor& light_blue = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
-                const RgbColor& dark_blue = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
+                const RgbColor& dark_blue  = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
                 tmessage->text.assign(*textData);
                 tmessage->retro_text.reset(new StyledText(sys.fonts.tactical));
                 tmessage->retro_text->set_fore_color(light_blue);
@@ -271,12 +265,13 @@ void Messages::clip( void)
                 tmessage->retro_text->set_retro_text(*textData);
                 tmessage->retro_text->set_tab_width(60);
                 tmessage->retro_text->wrap_to(
-                        viewport().width() - kHBuffer - sys.fonts.tactical->logicalWidth + 1, 0, 0);
+                        viewport().width() - kHBuffer - sys.fonts.tactical->logicalWidth + 1, 0,
+                        0);
                 tmessage->textHeight = tmessage->retro_text->height();
                 tmessage->textHeight += kLongMessageVPadDouble;
-                tmessage->retro_origin = Point(
-                        viewport().left + kHBuffer,
-                        viewport().bottom + sys.fonts.tactical->ascent + kLongMessageVPad);
+                tmessage->retro_origin =
+                        Point(viewport().left + kHBuffer,
+                              viewport().bottom + sys.fonts.tactical->ascent + kLongMessageVPad);
                 tmessage->at_char = 0;
 
                 if (tmessage->labelMessage == false) {
@@ -293,7 +288,8 @@ void Messages::clip( void)
                 tmessage->retroTextSpec.lineCount = 0;
                 tmessage->retroTextSpec.linePosition = 0;
                 tmessage->retroTextSpec.xpos = viewport.left + kHBuffer;
-                tmessage->retroTextSpec.ypos = viewport.bottom + mDirectFontAscent() + kLongMessageVPad + tmessage->retroTextSpec.topBuffer;
+                tmessage->retroTextSpec.ypos = viewport.bottom + mDirectFontAscent() +
+                kLongMessageVPad + tmessage->retroTextSpec.topBuffer;
                 tmessage->retroTextSpec.tabSize = 60;
                 tmessage->retroTextSpec.color = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
                 tmessage->retroTextSpec.backColor = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
@@ -311,14 +307,13 @@ void Messages::clip( void)
 }
 
 void Messages::draw_long_message(ticks time_pass) {
-    Rect            tRect, uRect;
-    Rect            lRect, cRect;
-    longMessageType *tmessage;
-    RgbColor        color;
+    Rect             tRect, uRect;
+    Rect             lRect, cRect;
+    longMessageType* tmessage;
+    RgbColor         color;
 
     tmessage = long_message_data;
-    if ((tmessage->currentResID != tmessage->lastResID)
-            || (tmessage->newStringMessage)) {
+    if ((tmessage->currentResID != tmessage->lastResID) || (tmessage->newStringMessage)) {
         // TODO(sfiera): figure out what this meant.
         //
         // we check scenario conditions here for ambrosia tutorial
@@ -327,7 +322,7 @@ void Messages::draw_long_message(ticks time_pass) {
         //
         // if ( !(globals()->gOptions & kOptionNetworkOn))
         // {
-            CheckLevelConditions();
+        CheckLevelConditions();
         // }
 
         if ((tmessage->lastResID >= 0) && (tmessage->lastLabelMessage)) {
@@ -335,7 +330,7 @@ void Messages::draw_long_message(ticks time_pass) {
         }
 
         // draw in offscreen world
-        if ((tmessage->currentResID >= 0) && ( tmessage->stage == kShowStage)) {
+        if ((tmessage->currentResID >= 0) && (tmessage->stage == kShowStage)) {
             if (tmessage->retro_text.get() != NULL) {
                 if (tmessage->labelMessage) {
                     tmessage->labelMessageID->set_age(ticks(0));
@@ -347,15 +342,14 @@ void Messages::draw_long_message(ticks time_pass) {
             }
         }
         if ((tmessage->stage == kShowStage) || (tmessage->currentResID < 0)) {
-            tmessage->lastResID = tmessage->currentResID;
+            tmessage->lastResID        = tmessage->currentResID;
             tmessage->lastLabelMessage = tmessage->labelMessage;
             tmessage->newStringMessage = false;
         }
-    } else if ((tmessage->currentResID >= 0)
-            && (tmessage->retro_text.get() != NULL)
-            && (tmessage->at_char < tmessage->retro_text->size())
-            && (tmessage->stage == kShowStage)
-            && !tmessage->labelMessage) {
+    } else if (
+            (tmessage->currentResID >= 0) && (tmessage->retro_text.get() != NULL) &&
+            (tmessage->at_char < tmessage->retro_text->size()) &&
+            (tmessage->stage == kShowStage) && !tmessage->labelMessage) {
         time_pass = std::min(time_pass, ticks(tmessage->retro_text->size() - tmessage->at_char));
         // Play teletype sound at least once every 3 ticks.
         tmessage->charDelayCount += time_pass;
@@ -370,45 +364,39 @@ void Messages::draw_long_message(ticks time_pass) {
 }
 
 void Messages::end() {
-    longMessageType *tmessage;
+    longMessageType* tmessage;
 
-    tmessage = long_message_data;
+    tmessage                     = long_message_data;
     tmessage->previousStartResID = tmessage->startResID;
-    tmessage->previousEndResID = tmessage->endResID;
-    tmessage->startResID = -1;
-    tmessage->endResID = -1;
-    tmessage->currentResID = -1;
-    tmessage->stage = kStartStage;
+    tmessage->previousEndResID   = tmessage->endResID;
+    tmessage->startResID         = -1;
+    tmessage->endResID           = -1;
+    tmessage->currentResID       = -1;
+    tmessage->stage              = kStartStage;
     tmessage->retro_text.reset();
     tmessage->lastStringMessage.assign(tmessage->stringMessage);
 }
 
 void Messages::advance() {
-    longMessageType *tmessage;
+    longMessageType* tmessage;
 
     tmessage = long_message_data;
-    if ( tmessage->currentResID != -1)
-    {
-        if ( tmessage->currentResID < tmessage->endResID)
-        {
+    if (tmessage->currentResID != -1) {
+        if (tmessage->currentResID < tmessage->endResID) {
             tmessage->currentResID++;
             tmessage->stage = kStartStage;
-        }
-        else
-        {
+        } else {
             end();
         }
     }
 }
 
 void Messages::previous() {
-    longMessageType *tmessage;
+    longMessageType* tmessage;
 
     tmessage = long_message_data;
-    if ( tmessage->currentResID != -1)
-    {
-        if ( tmessage->currentResID > tmessage->startResID)
-        {
+    if (tmessage->currentResID != -1) {
+        if (tmessage->currentResID > tmessage->startResID) {
             tmessage->currentResID--;
             tmessage->stage = kStartStage;
         }
@@ -416,13 +404,12 @@ void Messages::previous() {
 }
 
 void Messages::replay() {
-    longMessageType *tmessage;
+    longMessageType* tmessage;
 
     tmessage = long_message_data;
-    if (( tmessage->previousStartResID >= 0) && ( tmessage->currentResID < 0))
-    {
+    if ((tmessage->previousStartResID >= 0) && (tmessage->currentResID < 0)) {
         tmessage->stringMessage.assign(tmessage->lastStringMessage);
-        start( tmessage->previousStartResID, tmessage->previousEndResID);
+        start(tmessage->previousStartResID, tmessage->previousEndResID);
     }
 }
 
@@ -444,10 +431,12 @@ void Messages::draw_message_screen(ticks by_units) {
         const String& message = message_data.front();
 
         if (time_count < kRaiseTime) {
-            g.message_label->set_position(kMessageScreenLeft, viewport().bottom - time_count.count());
+            g.message_label->set_position(
+                    kMessageScreenLeft, viewport().bottom - time_count.count());
         } else if (time_count > kLowerTime) {
             g.message_label->set_position(
-                    kMessageScreenLeft, viewport().bottom - (kMessageDisplayTime - time_count).count());
+                    kMessageScreenLeft,
+                    viewport().bottom - (kMessageDisplayTime - time_count).count());
         }
 
         g.message_label->set_string(message);
@@ -481,10 +470,10 @@ int16_t Messages::current() {
 //  nnn... are digits specifying value (distance from top, or initial object #)
 //
 void MessageLabel_Set_Special(Handle<Label> label, const StringSlice& text) {
-    char whichType;
+    char    whichType;
     int32_t value = 0;
-    Point attachPoint;
-    bool hintLine = false;
+    Point   attachPoint;
+    bool    hintLine = false;
 
     StringSlice::const_iterator it = text.begin();
 
@@ -523,8 +512,8 @@ void MessageLabel_Set_Special(Handle<Label> label, const StringSlice& text) {
         }
         attachPoint.v += instrument_top();
         if (attachPoint.h >= (kSmallScreenWidth - kRightPanelWidth)) {
-            attachPoint.h = (attachPoint.h - (kSmallScreenWidth - kRightPanelWidth)) +
-                play_screen().right;
+            attachPoint.h =
+                    (attachPoint.h - (kSmallScreenWidth - kRightPanelWidth)) + play_screen().right;
         }
         ++it;
     }
@@ -539,27 +528,24 @@ void MessageLabel_Set_Special(Handle<Label> label, const StringSlice& text) {
     label->set_keep_on_screen_anyway(true);
 
     switch (whichType) {
-      case 'R':
-        label->set_offset(0, 0);
-        label->set_position(
-                play_screen().right - (label->get_width()+10),
-                instrument_top() + value);
-        break;
+        case 'R':
+            label->set_offset(0, 0);
+            label->set_position(
+                    play_screen().right - (label->get_width() + 10), instrument_top() + value);
+            break;
 
-      case 'L':
-        label->set_offset(0, 0);
-        label->set_position(138, instrument_top() + value);
-        break;
+        case 'L':
+            label->set_offset(0, 0);
+            label->set_position(138, instrument_top() + value);
+            break;
 
-      case 'O':
-        {
+        case 'O': {
             auto o = GetObjectFromInitialNumber(value);
-            label->set_offset(-(label->get_width()/2), 64);
+            label->set_offset(-(label->get_width() / 2), 64);
             label->set_object(o);
 
             hintLine = true;
-        }
-        break;
+        } break;
     }
     attachPoint.v -= 2;
     label->set_attached_hint_line(hintLine, attachPoint);
@@ -570,9 +556,10 @@ void Messages::draw_message() {
         return;
     }
 
-    const RgbColor& dark_blue = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
+    const RgbColor& dark_blue  = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
     const RgbColor& light_blue = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
-    Rect message_bounds(play_screen().left, viewport().bottom, play_screen().right, play_screen().bottom);
+    Rect            message_bounds(
+            play_screen().left, viewport().bottom, play_screen().right, play_screen().bottom);
     {
         Rects rects;
         rects.fill(message_bounds, light_blue);
@@ -585,8 +572,8 @@ void Messages::draw_message() {
     bounds.top += kLongMessageVPad;
     long_message_data->retro_text->draw_range(bounds, 0, long_message_data->at_char);
     // The final char is a newline; don't display a cursor rect for it.
-    if ((0 < long_message_data->at_char)
-            && (long_message_data->at_char < (long_message_data->retro_text->size() - 1))) {
+    if ((0 < long_message_data->at_char) &&
+        (long_message_data->at_char < (long_message_data->retro_text->size() - 1))) {
         long_message_data->retro_text->draw_cursor(bounds, long_message_data->at_char);
     }
 }

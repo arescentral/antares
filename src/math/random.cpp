@@ -44,7 +44,7 @@ int Randomize(int range) {
 }
 
 int16_t Random::next(int16_t range) {
-    seed = 1664525 * seed + 1013904223;
+    seed      = 1664525 * seed + 1013904223;
     int32_t l = seed & 0x00007fff;
     return (l * range) >> 15;
 }

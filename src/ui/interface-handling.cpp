@@ -23,8 +23,8 @@
 
 #include "ui/interface-handling.hpp"
 
-#include <vector>
 #include <sfz/sfz.hpp>
+#include <vector>
 
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
@@ -39,9 +39,9 @@
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/instruments.hpp"
+#include "game/level.hpp"
 #include "game/main.hpp"
 #include "game/messages.hpp"
-#include "game/level.hpp"
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
 #include "game/sys.hpp"
@@ -73,35 +73,35 @@ namespace antares {
 
 namespace {
 
-const int16_t kShipDataTextID       = 6001;
-const int16_t kShipDataKeyStringID  = 6001;
-const int16_t kShipDataNameID       = 6002;
-const int16_t kWeaponDataTextID     = 6003;
+const int16_t kShipDataTextID      = 6001;
+const int16_t kShipDataKeyStringID = 6001;
+const int16_t kShipDataNameID      = 6002;
+const int16_t kWeaponDataTextID    = 6003;
 
 enum {
-    kShipOrObjectStringNum      = 0,
-    kShipTypeStringNum          = 1,
-    kMassStringNum              = 2,
-    kShieldStringNum            = 3,
-    kHasLightStringNum          = 4,
-    kMaxSpeedStringNum          = 5,
-    kThrustStringNum            = 6,
-    kTurnStringNum              = 7,
-    kWeaponNumberStringNum      = 8,
-    kWeaponNameStringNum        = 9,
-    kWeaponGuidedStringNum      = 10,
-    kWeaponRangeStringNum       = 11,
-    kWeaponDamageStringNum      = 12,
-    kWeaponAutoTargetStringNum  = 13,
+    kShipOrObjectStringNum     = 0,
+    kShipTypeStringNum         = 1,
+    kMassStringNum             = 2,
+    kShieldStringNum           = 3,
+    kHasLightStringNum         = 4,
+    kMaxSpeedStringNum         = 5,
+    kThrustStringNum           = 6,
+    kTurnStringNum             = 7,
+    kWeaponNumberStringNum     = 8,
+    kWeaponNameStringNum       = 9,
+    kWeaponGuidedStringNum     = 10,
+    kWeaponRangeStringNum      = 11,
+    kWeaponDamageStringNum     = 12,
+    kWeaponAutoTargetStringNum = 13,
 };
 
 enum {
-    kShipDataDashStringNum      = 2,
-    kShipDataYesStringNum       = 3,
-    kShipDataNoStringNum        = 4,
-    kShipDataPulseStringNum     = 5,
-    kShipDataBeamStringNum      = 6,
-    kShipDataSpecialStringNum   = 7,
+    kShipDataDashStringNum    = 2,
+    kShipDataYesStringNum     = 3,
+    kShipDataNoStringNum      = 4,
+    kShipDataPulseStringNum   = 5,
+    kShipDataBeamStringNum    = 6,
+    kShipDataSpecialStringNum = 7,
 };
 
 const int16_t kHelpScreenKeyStringID = 6003;
@@ -129,7 +129,7 @@ void CreateWeaponDataText(
 
 bool BothCommandAndQ() {
     bool command = false;
-    bool q = false;
+    bool q       = false;
 
     for (int i = 0; i < kKeyExtendedControlNum; i++) {
         uint32_t key = sys.prefs->key(i);
@@ -142,7 +142,7 @@ bool BothCommandAndQ() {
 
 void CreateObjectDataText(String* text, Handle<BaseObject> object) {
     Resource rsrc("text", "txt", kShipDataTextID);
-    String data(utf8::decode(rsrc.data()));
+    String   data(utf8::decode(rsrc.data()));
 
     StringList keys(kShipDataKeyStringID);
     StringList values(kShipDataNameID);
@@ -179,8 +179,7 @@ void CreateObjectDataText(String* text, Handle<BaseObject> object) {
     find_replace(data, 0, keys.at(kThrustStringNum), Fixed(object->maxThrust));
 
     // par turn
-    find_replace(data, 0, keys.at(kTurnStringNum),
-            Fixed(object->frame.rotation.turnAcceleration));
+    find_replace(data, 0, keys.at(kTurnStringNum), Fixed(object->frame.rotation.turnAcceleration));
 
     // now, check for weapons!
     CreateWeaponDataText(&data, object->pulse.base, values.at(kShipDataPulseStringNum));
@@ -192,8 +191,8 @@ void CreateObjectDataText(String* text, Handle<BaseObject> object) {
 
 void CreateWeaponDataText(
         String* text, Handle<BaseObject> weaponObject, const StringSlice& weaponName) {
-    int32_t             mostDamage;
-    bool             isGuided = false;
+    int32_t mostDamage;
+    bool    isGuided = false;
 
     if (!weaponObject.get()) {
         return;
@@ -201,20 +200,21 @@ void CreateWeaponDataText(
 
     // TODO(sfiera): catch exception.
     Resource rsrc("text", "txt", kWeaponDataTextID);
-    String data(utf8::decode(rsrc.data()));
+    String   data(utf8::decode(rsrc.data()));
     // damage; this is tricky--we have to guess by walking through activate actions,
     //  and for all the createObject actions, see which creates the most damaging
     //  object.  We calc this first so we can use isGuided
 
     mostDamage = 0;
-    isGuided = false;
+    isGuided   = false;
     if (weaponObject->activate.size() > 0) {
-        for (auto action: weaponObject->activate) {
-            if ((action->verb == kCreateObject) ||
-                (action->verb == kCreateObjectSetDest)) {
+        for (auto action : weaponObject->activate) {
+            if ((action->verb == kCreateObject) || (action->verb == kCreateObjectSetDest)) {
                 Handle<BaseObject> missileObject = action->argument.createObject.whichBaseType;
-                if ( missileObject->attributes & kIsGuided) isGuided = true;
-                if ( missileObject->damage > mostDamage) mostDamage = missileObject->damage;
+                if (missileObject->attributes & kIsGuided)
+                    isGuided = true;
+                if (missileObject->damage > mostDamage)
+                    mostDamage = missileObject->damage;
             }
         }
     }
@@ -231,8 +231,8 @@ void CreateWeaponDataText(
         find_replace(data, 0, keys.at(kWeaponNameStringNum), name);
     }
 
-    const StringSlice& yes = values.at(kShipDataYesStringNum);
-    const StringSlice& no = values.at(kShipDataNoStringNum);
+    const StringSlice& yes  = values.at(kShipDataYesStringNum);
+    const StringSlice& no   = values.at(kShipDataNoStringNum);
     const StringSlice& dash = values.at(kShipDataDashStringNum);
 
     // is guided
@@ -250,8 +250,7 @@ void CreateWeaponDataText(
     }
 
     // range
-    find_replace(data, 0, keys.at(kWeaponRangeStringNum),
-            lsqrt(weaponObject->frame.weapon.range));
+    find_replace(data, 0, keys.at(kWeaponRangeStringNum), lsqrt(weaponObject->frame.weapon.range));
 
     if (mostDamage > 0) {
         find_replace(data, 0, keys.at(kWeaponDamageStringNum), mostDamage);
@@ -267,7 +266,7 @@ void Replace_KeyCode_Strings_With_Actual_Key_Names(String* text, int16_t resID, 
 
     for (int i = 0; i < kKeyExtendedControlNum; ++i) {
         const StringSlice& search = keys.at(i);
-        String replace(values.at(sys.prefs->key(i) - 1));
+        String             replace(values.at(sys.prefs->key(i) - 1));
         // First, pad to the desired width.
         if (replace.size() < padTo) {
             replace.resize(padTo, ' ');

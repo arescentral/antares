@@ -41,7 +41,7 @@ void png_write_data(png_struct* png, png_byte* data, png_size_t length) {
     write(*out, data, length);
 }
 
-void png_flush_data(png_struct*) { }
+void png_flush_data(png_struct*) {}
 
 }  // namespace
 
@@ -74,8 +74,8 @@ void read_from(ReadSource in, ArrayPixMap& pix) {
 
     png_uint_32 width;
     png_uint_32 height;
-    int bit_depth;
-    int color_type;
+    int         bit_depth;
+    int         color_type;
     png_get_IHDR(png, info, &width, &height, &bit_depth, &color_type, NULL, NULL, NULL);
     pix.resize(Size(width, height));
 
@@ -129,8 +129,7 @@ void write_to(WriteTarget out, const PixMap& pix) {
     }
 
     png_set_write_fn(png, &out, png_write_data, png_flush_data);
-    png_set_IHDR(
-            png, info, pix.size().width, pix.size().height, 8, PNG_COLOR_TYPE_RGBA, 0, 0, 0);
+    png_set_IHDR(png, info, pix.size().width, pix.size().height, 8, PNG_COLOR_TYPE_RGBA, 0, 0, 0);
     png_set_swap_alpha(png);
 
     png_write_info(png, info);

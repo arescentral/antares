@@ -18,6 +18,7 @@
 
 #include "config/dirs.hpp"
 
+#include <sys/param.h>
 #include <unistd.h>
 #include <sfz/sfz.hpp>
 #include <sys/param.h>

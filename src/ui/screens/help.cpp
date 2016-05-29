@@ -39,11 +39,10 @@ namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-HelpScreen::HelpScreen():
-        InterfaceScreen("help", {128, 0, 608, 480}, false),
-        _text(sys.fonts.computer) {
+HelpScreen::HelpScreen()
+        : InterfaceScreen("help", {128, 0, 608, 480}, false), _text(sys.fonts.computer) {
     Resource rsrc("text", "txt", 6002);
-    String text(utf8::decode(rsrc.data()));
+    String   text(utf8::decode(rsrc.data()));
     Replace_KeyCode_Strings_With_Actual_Key_Names(&text, 1000, 4);
 
     RgbColor fore = GetRGBTranslateColorShade(RED, VERY_LIGHT);
@@ -54,7 +53,7 @@ HelpScreen::HelpScreen():
     _text.wrap_to(item(BOX).bounds().width(), 0, 0);
 }
 
-HelpScreen::~HelpScreen() { }
+HelpScreen::~HelpScreen() {}
 
 void HelpScreen::key_down(const KeyDownEvent& event) {
     if (event.key() == sys.prefs->key(kHelpKeyNum) - 1) {
@@ -66,18 +65,18 @@ void HelpScreen::key_down(const KeyDownEvent& event) {
 
 void HelpScreen::handle_button(Button& button) {
     switch (button.id) {
-      case DONE:
-        stack()->pop(this);
-        break;
+        case DONE:
+            stack()->pop(this);
+            break;
 
-      default:
-        throw Exception(format("Got unknown button {0}.", button.id));
+        default:
+            throw Exception(format("Got unknown button {0}.", button.id));
     }
 }
 
 void HelpScreen::overlay() const {
-    Rect bounds = item(BOX).bounds();
-    Point off = offset();
+    Rect  bounds = item(BOX).bounds();
+    Point off    = offset();
     bounds.offset(off.h, off.v);
     _text.draw(bounds);
 }

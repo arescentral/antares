@@ -19,9 +19,9 @@
 #include "glfw/video-driver.hpp"
 
 #include <GLFW/glfw3.h>
-#include <sfz/sfz.hpp>
 #include <sys/time.h>
 #include <unistd.h>
+#include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
 
@@ -37,44 +37,122 @@ namespace antares {
 static const ticks kDoubleClickInterval = ticks(30);
 
 static int kGLFWKeyToUSB[GLFW_KEY_LAST + 1] = {
-    [GLFW_KEY_SPACE] = Keys::SPACE,
-    [GLFW_KEY_APOSTROPHE] = Keys::QUOTE,
-    [GLFW_KEY_COMMA] = Keys::COMMA, Keys::MINUS, Keys::PERIOD, Keys::SLASH,
-    [GLFW_KEY_0] = Keys::K0, Keys::K1, Keys::K2, Keys::K3, Keys::K4, Keys::K5, Keys::K6,
-        Keys::K7, Keys::K8, Keys::K9,
-    [GLFW_KEY_SEMICOLON] = Keys::SEMICOLON,
-    [GLFW_KEY_EQUAL] = Keys::EQUALS,
-    [GLFW_KEY_A] = Keys::A, Keys::B, Keys::C, Keys::D, Keys::E, Keys::F, Keys::G, Keys::H,
-        Keys::I, Keys::J, Keys::K, Keys::L, Keys::M, Keys::N, Keys::O, Keys::P, Keys::Q,
-        Keys::R, Keys::S, Keys::T, Keys::U, Keys::V, Keys::W, Keys::X, Keys::Y, Keys::Z,
-    [GLFW_KEY_LEFT_BRACKET] = Keys::L_BRACKET, Keys::BACKSLASH, Keys::R_BRACKET,
-    [GLFW_KEY_GRAVE_ACCENT] = Keys::BACKTICK,
-    [GLFW_KEY_WORLD_1] = 0, 0,
-    [GLFW_KEY_ESCAPE] = Keys::ESCAPE, Keys::RETURN, Keys::TAB, Keys::BACKSPACE,
-        0 /* Keys::INSERT */, Keys::DELETE,
-    [GLFW_KEY_RIGHT] = Keys::RIGHT_ARROW, Keys::LEFT_ARROW, Keys::DOWN_ARROW,
-        Keys::UP_ARROW, Keys::PAGE_UP, Keys::PAGE_DOWN, Keys::HOME, Keys::END,
-    [GLFW_KEY_CAPS_LOCK] = Keys::CAPS_LOCK, 0 /* SCROLL_LOCK */, 0 /* NUM_LOCK */,
-    [GLFW_KEY_PRINT_SCREEN] = 0 /* PRINT_SCREEN */, 0 /* PAUSE */,
-    [GLFW_KEY_F1] = Keys::F1, Keys::F2, Keys::F3, Keys::F4, Keys::F5, Keys::F6, Keys::F7,
-        Keys::F8, Keys::F9, Keys::F10, Keys::F11, Keys::F12, Keys::F13, Keys::F14,
-        Keys::F15,
-    [GLFW_KEY_KP_1] = Keys::N1, Keys::N2, Keys::N3, Keys::N4, Keys::N5, Keys::N6, Keys::N7,
-        Keys::N8, Keys::N9,
-    [GLFW_KEY_KP_DECIMAL] = Keys::N_PERIOD, Keys::N_DIVIDE, Keys::N_TIMES, Keys::N_MINUS,
-        Keys::N_PLUS, Keys::N_ENTER, Keys::N_EQUALS,
-    [GLFW_KEY_LEFT_SHIFT] = Keys::L_SHIFT, Keys::L_CONTROL, Keys::L_OPTION, Keys::L_COMMAND,
-    [GLFW_KEY_RIGHT_SHIFT] = Keys::R_SHIFT, Keys::R_CONTROL, Keys::R_OPTION, Keys::R_COMMAND,
-    [GLFW_KEY_MENU] = 0 /* MENU */,
+                [GLFW_KEY_SPACE]      = Keys::SPACE,
+                [GLFW_KEY_APOSTROPHE] = Keys::QUOTE,
+                [GLFW_KEY_COMMA]      = Keys::COMMA,
+                Keys::MINUS,
+                Keys::PERIOD,
+                Keys::SLASH,
+                [GLFW_KEY_0] = Keys::K0,
+                Keys::K1,
+                Keys::K2,
+                Keys::K3,
+                Keys::K4,
+                Keys::K5,
+                Keys::K6,
+                Keys::K7,
+                Keys::K8,
+                Keys::K9,
+                [GLFW_KEY_SEMICOLON] = Keys::SEMICOLON,
+                [GLFW_KEY_EQUAL]     = Keys::EQUALS,
+                [GLFW_KEY_A]         = Keys::A,
+                Keys::B,
+                Keys::C,
+                Keys::D,
+                Keys::E,
+                Keys::F,
+                Keys::G,
+                Keys::H,
+                Keys::I,
+                Keys::J,
+                Keys::K,
+                Keys::L,
+                Keys::M,
+                Keys::N,
+                Keys::O,
+                Keys::P,
+                Keys::Q,
+                Keys::R,
+                Keys::S,
+                Keys::T,
+                Keys::U,
+                Keys::V,
+                Keys::W,
+                Keys::X,
+                Keys::Y,
+                Keys::Z,
+                [GLFW_KEY_LEFT_BRACKET] = Keys::L_BRACKET,
+                Keys::BACKSLASH,
+                Keys::R_BRACKET,
+                [GLFW_KEY_GRAVE_ACCENT] = Keys::BACKTICK,
+                [GLFW_KEY_WORLD_1]      = 0,
+                0,
+                [GLFW_KEY_ESCAPE] = Keys::ESCAPE,
+                Keys::RETURN,
+                Keys::TAB,
+                Keys::BACKSPACE,
+                0 /* Keys::INSERT */,
+                Keys::DELETE,
+                [GLFW_KEY_RIGHT] = Keys::RIGHT_ARROW,
+                Keys::LEFT_ARROW,
+                Keys::DOWN_ARROW,
+                Keys::UP_ARROW,
+                Keys::PAGE_UP,
+                Keys::PAGE_DOWN,
+                Keys::HOME,
+                Keys::END,
+                [GLFW_KEY_CAPS_LOCK] = Keys::CAPS_LOCK,
+                0 /* SCROLL_LOCK */,
+                0 /* NUM_LOCK */,
+                [GLFW_KEY_PRINT_SCREEN] = 0 /* PRINT_SCREEN */,
+                0 /* PAUSE */,
+                [GLFW_KEY_F1] = Keys::F1,
+                Keys::F2,
+                Keys::F3,
+                Keys::F4,
+                Keys::F5,
+                Keys::F6,
+                Keys::F7,
+                Keys::F8,
+                Keys::F9,
+                Keys::F10,
+                Keys::F11,
+                Keys::F12,
+                Keys::F13,
+                Keys::F14,
+                Keys::F15,
+                [GLFW_KEY_KP_1] = Keys::N1,
+                Keys::N2,
+                Keys::N3,
+                Keys::N4,
+                Keys::N5,
+                Keys::N6,
+                Keys::N7,
+                Keys::N8,
+                Keys::N9,
+                [GLFW_KEY_KP_DECIMAL] = Keys::N_PERIOD,
+                Keys::N_DIVIDE,
+                Keys::N_TIMES,
+                Keys::N_MINUS,
+                Keys::N_PLUS,
+                Keys::N_ENTER,
+                Keys::N_EQUALS,
+                [GLFW_KEY_LEFT_SHIFT] = Keys::L_SHIFT,
+                Keys::L_CONTROL,
+                Keys::L_OPTION,
+                Keys::L_COMMAND,
+                [GLFW_KEY_RIGHT_SHIFT] = Keys::R_SHIFT,
+                Keys::R_CONTROL,
+                Keys::R_OPTION,
+                Keys::R_COMMAND,
+                [GLFW_KEY_MENU] = 0 /* MENU */,
 };
 
 static void throw_error(int code, const char* message) {
     throw Exception(format("{0}: {1}", code, utf8::decode(message)));
 }
 
-GLFWVideoDriver::GLFWVideoDriver():
-        _screen_size(640, 480),
-        _last_click_count(0) {
+GLFWVideoDriver::GLFWVideoDriver() : _screen_size(640, 480), _last_click_count(0) {
     if (!glfwInit()) {
         throw Exception("glfwInit()");
     }
@@ -178,9 +256,9 @@ void GLFWVideoDriver::loop(Card* initial) {
     glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
     glfwSetWindowUserPointer(_window, this);
-    glfwSetKeyCallback(_window, key_callback);   
-    glfwSetMouseButtonCallback(_window, mouse_button_callback);   
-    glfwSetCursorPosCallback(_window, mouse_move_callback);   
+    glfwSetKeyCallback(_window, key_callback);
+    glfwSetMouseButtonCallback(_window, mouse_button_callback);
+    glfwSetCursorPosCallback(_window, mouse_move_callback);
     glfwSetWindowSizeCallback(_window, window_size_callback);
 
     /* Make the _window's context current */

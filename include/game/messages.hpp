@@ -29,20 +29,20 @@
 
 namespace antares {
 
-const int16_t kMessageStringID      = 3100;
-const int16_t kZoomStringOffset     = 1;
-const int16_t kAutoPilotOnString    = 9;
-const int16_t kAutoPilotOffString   = 10;
+const int16_t kMessageStringID    = 3100;
+const int16_t kZoomStringOffset   = 1;
+const int16_t kAutoPilotOnString  = 9;
+const int16_t kAutoPilotOffString = 10;
 
-const uint8_t kStatusLabelColor     = AQUA;
-const uint8_t kStatusWarnColor      = PINK;
+const uint8_t kStatusLabelColor = AQUA;
+const uint8_t kStatusWarnColor  = PINK;
 
 class Messages {
   public:
     static void init();
     static void clear();
     static void add(const sfz::PrintItem& message);
-    static void start( int16_t, int16_t);
+    static void start(int16_t, int16_t);
     static void clip();
     static void end();
     static void advance();
@@ -59,10 +59,10 @@ class Messages {
     struct longMessageType;
 
     static std::queue<sfz::String> message_data;
-    static longMessageType* long_message_data;
-    static ticks time_count;
+    static longMessageType*        long_message_data;
+    static ticks                   time_count;
 };
 
 }  // namespace antares
 
-#endif // ANTARES_GAME_MESSAGES_HPP_
+#endif  // ANTARES_GAME_MESSAGES_HPP_

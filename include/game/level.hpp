@@ -29,10 +29,10 @@ bool start_construct_level(Handle<Level> level, int32_t* max);
 void construct_level(Handle<Level> level, int32_t* current);
 void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textID);
 void GetLevelFullScaleAndCorner(
-        const Level* level, int32_t rotation, coordPointType *corner, int32_t *scale,
-        Rect *bounds);
+        const Level* level, int32_t rotation, coordPointType* corner, int32_t* scale,
+        Rect* bounds);
 coordPointType Translate_Coord_To_Level_Rotation(int32_t h, int32_t v);
 
 }  // namespace antares
 
-#endif // ANTARES_GAME_LEVEL_HPP_
+#endif  // ANTARES_GAME_LEVEL_HPP_

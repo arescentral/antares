@@ -26,36 +26,36 @@ namespace antares {
 
 struct Gamepad {
     enum Button {
-        A           = 0x01,
-        B           = 0x02,
-        X           = 0x03,
-        Y           = 0x04,
-        LB          = 0x05,
-        RB          = 0x06,
-        LSB         = 0x07,
-        RSB         = 0x08,
-        START       = 0x09,
-        BACK        = 0x0a,
-        VENDOR      = 0x0b,
-        UP          = 0x0c,
-        DOWN        = 0x0d,
-        LEFT        = 0x0e,
-        RIGHT       = 0x0f,
+        A      = 0x01,
+        B      = 0x02,
+        X      = 0x03,
+        Y      = 0x04,
+        LB     = 0x05,
+        RB     = 0x06,
+        LSB    = 0x07,
+        RSB    = 0x08,
+        START  = 0x09,
+        BACK   = 0x0a,
+        VENDOR = 0x0b,
+        UP     = 0x0c,
+        DOWN   = 0x0d,
+        LEFT   = 0x0e,
+        RIGHT  = 0x0f,
 
-        LT          = 0x32,
-        RT          = 0x35,
+        LT = 0x32,
+        RT = 0x35,
     };
 
     enum Stick {
-        LS          = 0x30,
-        RS          = 0x33,
+        LS = 0x30,
+        RS = 0x33,
     };
 
     enum {
-        BEGIN       = A,
-        END         = RT + 1,
-        NAMES       = 1001,
-        LONG_NAMES  = 1003,
+        BEGIN      = A,
+        END        = RT + 1,
+        NAMES      = 1001,
+        LONG_NAMES = 1003,
     };
 
     static int16_t num(sfz::StringSlice name);
@@ -64,4 +64,4 @@ struct Gamepad {
 
 }  // namespace antares
 
-#endif // ANTARES_CONFIG_GAMEPAD_HPP_
+#endif  // ANTARES_CONFIG_GAMEPAD_HPP_

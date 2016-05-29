@@ -32,77 +32,77 @@ namespace antares {
 struct LevelName;
 class BaseObject;
 
-const size_t kMaxPlayerNum                 = 4;
+const size_t kMaxPlayerNum = 4;
 
 const int32_t kMaxTypeBaseCanBuild = 12;
-const int32_t kMaxShipCanBuild = 6;
+const int32_t kMaxShipCanBuild     = 6;
 
 enum {
-    kSingleHumanPlayer = 0,
+    kSingleHumanPlayer  = 0,
     kNetworkHumanPlayer = 1,
-    kComputerPlayer = 2,
+    kComputerPlayer     = 2,
 };
 
-const int16_t kLevelBriefMask = 0x00ff;
-const int16_t kLevelAngleMask = 0xff00;
+const int16_t kLevelBriefMask  = 0x00ff;
+const int16_t kLevelAngleMask  = 0xff00;
 const int32_t kLevelAngleShift = 8;
 
 const int32_t kLevelNoOwner = -1;
 
 // condition flags
-const int32_t kTrueOnlyOnce     = 0x00000001;
-const int32_t kInitiallyTrue    = 0x00000002;
-const int32_t kHasBeenTrue      = 0x00000004;
+const int32_t kTrueOnlyOnce  = 0x00000001;
+const int32_t kInitiallyTrue = 0x00000002;
+const int32_t kHasBeenTrue   = 0x00000004;
 
 struct scenarioInfoType {
-    Handle<BaseObject>  warpInFlareID;
-    Handle<BaseObject>  warpOutFlareID;
-    Handle<BaseObject>  playerBodyID;
-    Handle<BaseObject>  energyBlobID;
-    sfz::String     downloadURLString;
-    sfz::String     titleString;
-    sfz::String     authorNameString;
-    sfz::String     authorURLString;
-    uint32_t        version;
-    uint32_t        requiresAresVersion;
-    uint32_t        flags;
-    uint32_t        checkSum;
+    Handle<BaseObject> warpInFlareID;
+    Handle<BaseObject> warpOutFlareID;
+    Handle<BaseObject> playerBodyID;
+    Handle<BaseObject> energyBlobID;
+    sfz::String        downloadURLString;
+    sfz::String        titleString;
+    sfz::String        authorNameString;
+    sfz::String        authorURLString;
+    uint32_t           version;
+    uint32_t           requiresAresVersion;
+    uint32_t           flags;
+    uint32_t           checkSum;
 };
 void read_from(sfz::ReadSource in, scenarioInfoType& scenario_info);
 
 enum conditionType {
-    kNoCondition = 0,
-    kLocationCondition = 1,
-    kCounterCondition = 2,
-    kProximityCondition = 3,
-    kOwnerCondition = 4,
-    kDestructionCondition = 5,
-    kAgeCondition = 6,
-    kTimeCondition = 7,
-    kRandomCondition = 8,
-    kHalfHealthCondition = 9,
-    kIsAuxiliaryObject = 10,
-    kIsTargetObject = 11,
-    kCounterGreaterCondition = 12,
-    kCounterNotCondition = 13,
-    kDistanceGreaterCondition = 14,
+    kNoCondition                      = 0,
+    kLocationCondition                = 1,
+    kCounterCondition                 = 2,
+    kProximityCondition               = 3,
+    kOwnerCondition                   = 4,
+    kDestructionCondition             = 5,
+    kAgeCondition                     = 6,
+    kTimeCondition                    = 7,
+    kRandomCondition                  = 8,
+    kHalfHealthCondition              = 9,
+    kIsAuxiliaryObject                = 10,
+    kIsTargetObject                   = 11,
+    kCounterGreaterCondition          = 12,
+    kCounterNotCondition              = 13,
+    kDistanceGreaterCondition         = 14,
     kVelocityLessThanEqualToCondition = 15,
-    kNoShipsLeftCondition = 16,
-    kCurrentMessageCondition = 17, // use location.h for res id, .v for page
-    kCurrentComputerCondition = 18, // use location.h for screen #, .v for line #
-    kZoomLevelCondition = 19,
-    kAutopilotCondition = 20,
-    kNotAutopilotCondition = 21,
-    kObjectIsBeingBuilt = 22,       // for tutorial; is base building something?
-    kDirectIsSubjectTarget = 23,
-    kSubjectIsPlayerCondition = 24
+    kNoShipsLeftCondition             = 16,
+    kCurrentMessageCondition          = 17,  // use location.h for res id, .v for page
+    kCurrentComputerCondition         = 18,  // use location.h for screen #, .v for line #
+    kZoomLevelCondition               = 19,
+    kAutopilotCondition               = 20,
+    kNotAutopilotCondition            = 21,
+    kObjectIsBeingBuilt               = 22,  // for tutorial; is base building something?
+    kDirectIsSubjectTarget            = 23,
+    kSubjectIsPlayerCondition         = 24
 };
 
 typedef uint8_t briefingPointKindType;
 enum briefingPointKindEnum {
-    kNoPointKind = 0,
-    kBriefObjectKind = 1,
-    kBriefAbsoluteKind = 2,
+    kNoPointKind           = 0,
+    kBriefObjectKind       = 1,
+    kBriefAbsoluteKind     = 2,
     kBriefFreestandingKind = 3
 };
 
@@ -112,38 +112,38 @@ struct Level {
     struct BriefPoint;
 
     struct Player {
-        int16_t         playerType;
-        int16_t         playerRace;
-        int16_t         nameResID;
-        int16_t         nameStrNum;
-        Fixed           earningPower;
-        int16_t         netRaceFlags;
-        int16_t         reserved1;
+        int16_t playerType;
+        int16_t playerRace;
+        int16_t nameResID;
+        int16_t nameStrNum;
+        Fixed   earningPower;
+        int16_t netRaceFlags;
+        int16_t reserved1;
     };
 
-    sfz::String                 name;
-    int16_t                     netRaceFlags;
-    int16_t                     playerNum;
-    Player                      player[kMaxPlayerNum];
-    int16_t                     scoreStringResID;
-    int16_t                     initialFirst;
-    int16_t                     prologueID;
-    int16_t                     initialNum;
-    int16_t                     songID;
-    int16_t                     conditionFirst;
-    int16_t                     epilogueID;
-    int16_t                     conditionNum;
-    int16_t                     starMapH;
-    int16_t                     briefPointFirst;
-    int16_t                     starMapV;
-    int16_t                     briefPointNum;  // use kLevelBriefMask
-    game_ticks                  parTime;
-    int16_t                     parKills;
-    int16_t                     levelNameStrNum;
-    Fixed                       parKillRatio;
-    int16_t                     parLosses;
-    secs                        startTime;
-    bool                        is_training;
+    sfz::String name;
+    int16_t     netRaceFlags;
+    int16_t     playerNum;
+    Player      player[kMaxPlayerNum];
+    int16_t     scoreStringResID;
+    int16_t     initialFirst;
+    int16_t     prologueID;
+    int16_t     initialNum;
+    int16_t     songID;
+    int16_t     conditionFirst;
+    int16_t     epilogueID;
+    int16_t     conditionNum;
+    int16_t     starMapH;
+    int16_t     briefPointFirst;
+    int16_t     starMapV;
+    int16_t     briefPointNum;  // use kLevelBriefMask
+    game_ticks  parTime;
+    int16_t     parKills;
+    int16_t     levelNameStrNum;
+    Fixed       parKillRatio;
+    int16_t     parLosses;
+    secs        startTime;
+    bool        is_training;
 
     static const size_t byte_size = 124;
 
@@ -157,7 +157,7 @@ struct Level {
     size_t brief_point_size() const;
 
     int32_t angle() const;
-    Point star_map_point() const;
+    Point   star_map_point() const;
     int32_t chapter_number() const;
 
     int32_t prologue_id() const;
@@ -168,20 +168,20 @@ void read_from(sfz::ReadSource in, Level::Player& level_player);
 
 struct Level::InitialObject {
     Handle<BaseObject>  type;
-    Handle<Admiral> owner;
+    Handle<Admiral>     owner;
     Handle<SpaceObject> realObject;
-    int32_t         realObjectID;
-    Point           location;
-    Fixed           earning;
-    int32_t         distanceRange;
-    int32_t         rotationMinimum;
-    int32_t         rotationRange;
-    int32_t         spriteIDOverride;               // <- ADDED 9/30
-    int32_t         canBuild[kMaxTypeBaseCanBuild];
-    int32_t         initialDestination;             // <- ADDED 9/27
-    int32_t         nameResID;
-    int32_t         nameStrNum;
-    uint32_t        attributes;
+    int32_t             realObjectID;
+    Point               location;
+    Fixed               earning;
+    int32_t             distanceRange;
+    int32_t             rotationMinimum;
+    int32_t             rotationRange;
+    int32_t             spriteIDOverride;  // <- ADDED 9/30
+    int32_t             canBuild[kMaxTypeBaseCanBuild];
+    int32_t             initialDestination;  // <- ADDED 9/27
+    int32_t             nameResID;
+    int32_t             nameStrNum;
+    uint32_t            attributes;
 
     static const size_t byte_size = 108;
 };
@@ -194,21 +194,21 @@ struct Level::Condition {
         int32_t         amount;
     };
 
-    uint8_t         condition;
+    uint8_t condition;
     struct {
         // Really a union
-        Point               location;
-        CounterArgument     counter;
-        int32_t             longValue;
-        Fixed               fixedValue;
-        ticks               timeValue;
-        uint32_t            unsignedLongValue;
+        Point           location;
+        CounterArgument counter;
+        int32_t         longValue;
+        Fixed           fixedValue;
+        ticks           timeValue;
+        uint32_t        unsignedLongValue;
     } conditionArgument;
-    int32_t         subjectObject;      // initial object #
-    int32_t         directObject;       // initial object #
-    HandleList<Action>  action;
-    uint32_t        flags;
-    int32_t         direction;
+    int32_t            subjectObject;  // initial object #
+    int32_t            directObject;   // initial object #
+    HandleList<Action> action;
+    uint32_t           flags;
+    int32_t            direction;
 
     static const size_t byte_size = 38;
 
@@ -231,23 +231,23 @@ void read_from(sfz::ReadSource in, Level::Condition::CounterArgument& counter_ar
 
 struct Level::BriefPoint {
     struct ObjectBrief {
-        int32_t         objectNum;
-        uint8_t         objectVisible;  // bool
+        int32_t objectNum;
+        uint8_t objectVisible;  // bool
     };
     struct AbsoluteBrief {
         Point location;
     };
 
-    briefingPointKindType   briefPointKind;
+    briefingPointKindType briefPointKind;
     struct {
         // Really a union
-        ObjectBrief objectBriefType;
+        ObjectBrief   objectBriefType;
         AbsoluteBrief absoluteBriefType;
     } briefPointData;
-    Point                   range;
-    int16_t                 titleResID;
-    int16_t                 titleNum;
-    int16_t                 contentResID;
+    Point   range;
+    int16_t titleResID;
+    int16_t titleNum;
+    int16_t contentResID;
 
     static const size_t byte_size = 24;
 };
@@ -256,10 +256,10 @@ void read_from(sfz::ReadSource in, Level::BriefPoint::AbsoluteBrief& absolute_br
 void read_from(sfz::ReadSource in, Level::BriefPoint& brief_point);
 
 struct Race {
-    int32_t id;
-    uint8_t apparentColor;
+    int32_t  id;
+    uint8_t  apparentColor;
     uint32_t illegalColors;
-    int32_t advantage;
+    int32_t  advantage;
 
     static const size_t byte_size = 14;
 };
@@ -267,4 +267,4 @@ void read_from(sfz::ReadSource in, Race& race);
 
 }  // namespace antares
 
-#endif // ANTARES_DATA_LEVEL_HPP_
+#endif  // ANTARES_DATA_LEVEL_HPP_

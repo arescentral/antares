@@ -49,14 +49,14 @@ class ScrollTextScreen : public Card {
     virtual void draw() const;
 
   private:
-    BuildPix _build_pix;
+    BuildPix    _build_pix;
     const ticks _interval;
-    const bool _play_song;
-    const int _song_id;
+    const bool  _play_song;
+    const int   _song_id;
 
     wall_time _start;
     wall_time _next_shift;
-    int32_t _position;
+    int32_t   _position;
 
     DISALLOW_COPY_AND_ASSIGN(ScrollTextScreen);
 };

@@ -36,4 +36,4 @@ const Directories& dirs();
 
 }  // namespace antares
 
-#endif // ANTARES_CONFIG_DIRS_HPP_
+#endif  // ANTARES_CONFIG_DIRS_HPP_

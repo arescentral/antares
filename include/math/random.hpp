@@ -35,8 +35,10 @@ struct Random {
 };
 
 int Randomize(int range);
-inline Fixed Randomize(Fixed range) { return Fixed::from_val(Randomize(range.val())); }
+inline Fixed Randomize(Fixed range) {
+    return Fixed::from_val(Randomize(range.val()));
+}
 
 }  // namespace antares
 
-#endif // ANTARES_MATH_RANDOM_HPP_
+#endif  // ANTARES_MATH_RANDOM_HPP_
