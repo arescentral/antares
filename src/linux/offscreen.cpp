@@ -75,7 +75,8 @@ Offscreen::Offscreen(Size size)
     glXMakeContextCurrentARBProc glXMakeContextCurrentARB =
             (glXMakeContextCurrentARBProc)glXGetProcAddressARB(
                     (const GLubyte*)"glXMakeContextCurrent");
-    glXMakeContextCurrentARB(_display.get(), 0, 0, _context.get());
+    GLXPbuffer pbuffer = new_pbuffer(_display.get(), _fb_configs[0], size);
+    glXMakeContextCurrentARB(_display.get(), pbuffer, pbuffer, _context.get());
 }
 
 Offscreen::~Offscreen() {}
