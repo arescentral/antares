@@ -93,6 +93,13 @@ def call(args):
 
 
 def main():
+    if sys.platform.startswith("linux"):
+        if "DISPLAY" not in os.environ:
+            # TODO(sfiera): determine when Xvfb is unnecessary and skip this.
+            print("no DISPLAY; using Xvfb")
+            os.execvp("xvfb-run",
+                      ["xvfb-run", "-s", "-screen 0 640x480x24"] + sys.argv)
+
     test_types = "unit data offscreen replay".split()
     parser = argparse.ArgumentParser()
     parser.add_argument("--smoke", action="store_true")
