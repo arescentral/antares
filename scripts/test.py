@@ -184,15 +184,15 @@ def handle_queue(queue, tests):
             del in_progress[name]
             duration, output = params
             if cmd == PASSED:
-                color = 32
+                color = 2
             else:
                 failed += 1
-                color = 31
+                color = 1
                 sys.stderr.write("%s failed:\n" % name)
                 sys.stderr.write("====================\n")
                 sys.stderr.write(output)
                 sys.stderr.write("====================\n")
-            rstr = "\033[1;%dm%s\033[0m" % (color, cmd)
+            rstr = "\033[1;38;5;%dm%s\033[0m" % (color, cmd)
             print_name = name
             if len(print_name) > 36:
                 print_name = name[:33] + "..."
