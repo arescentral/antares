@@ -93,6 +93,13 @@ def call(args):
 
 
 def main():
+    if sys.platform.startswith("linux"):
+        if "DISPLAY" not in os.environ:
+            # TODO(sfiera): determine when Xvfb is unnecessary and skip this.
+            print("no DISPLAY; using Xvfb")
+            os.execvp("xvfb-run",
+                      ["xvfb-run", "-s", "-screen 0 640x480x24"] + sys.argv)
+
     test_types = "unit data offscreen replay".split()
     parser = argparse.ArgumentParser()
     parser.add_argument("--smoke", action="store_true")
@@ -172,8 +179,6 @@ def handle_queue(queue, tests):
         msg = queue.get()
         for _ in in_progress:
             sys.stderr.write("\033[1A\033[2K")
-        for _ in completed:
-            sys.stderr.write("\033[1A\033[2K")
         name, cmd, params = msg[0], msg[1], msg[2:]
         if cmd in START:
             print_name = name
@@ -184,22 +189,20 @@ def handle_queue(queue, tests):
             del in_progress[name]
             duration, output = params
             if cmd == PASSED:
-                color = 32
+                color = 2
             else:
                 failed += 1
-                color = 31
+                color = 1
                 sys.stderr.write("%s failed:\n" % name)
                 sys.stderr.write("====================\n")
                 sys.stderr.write(output)
                 sys.stderr.write("====================\n")
-            rstr = "\033[1;%dm%s\033[0m" % (color, cmd)
+            rstr = "\033[1;38;5;%dm%s\033[0m" % (color, cmd)
             print_name = name
             if len(print_name) > 36:
                 print_name = name[:33] + "..."
-            completed.append("  %-40s %s in %0.2fs\n" % (print_name, rstr, duration))
+            sys.stderr.write("  %-40s %s in %0.2fs\n" % (print_name, rstr, duration))
             pending -= 1
-        for line in completed:
-            sys.stderr.write(line)
         for line in in_progress.values():
             sys.stderr.write(line)
     return failed
