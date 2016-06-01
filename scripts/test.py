@@ -179,8 +179,6 @@ def handle_queue(queue, tests):
         msg = queue.get()
         for _ in in_progress:
             sys.stderr.write("\033[1A\033[2K")
-        for _ in completed:
-            sys.stderr.write("\033[1A\033[2K")
         name, cmd, params = msg[0], msg[1], msg[2:]
         if cmd in START:
             print_name = name
@@ -203,10 +201,8 @@ def handle_queue(queue, tests):
             print_name = name
             if len(print_name) > 36:
                 print_name = name[:33] + "..."
-            completed.append("  %-40s %s in %0.2fs\n" % (print_name, rstr, duration))
+            sys.stderr.write("  %-40s %s in %0.2fs\n" % (print_name, rstr, duration))
             pending -= 1
-        for line in completed:
-            sys.stderr.write(line)
         for line in in_progress.values():
             sys.stderr.write(line)
     return failed
