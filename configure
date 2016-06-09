@@ -56,6 +56,7 @@ def main():
 
 def check_submodules():
     REQUIRED_SUBMODULES = [
+        "build/lib",
         "ext/glfw",
         "ext/gmock-gyp",
         "ext/libmodplug-gyp",
@@ -75,7 +76,7 @@ def check_submodules():
     if missing:
         print("Some submodules are missing. Run:")
         print("  $ git submodule init")
-        print("  $ git submodule update ext data")
+        print("  $ git submodule update build ext data")
         sys.exit(1)
 
 
