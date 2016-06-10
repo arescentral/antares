@@ -2,6 +2,9 @@ declare_args() {
   # Installation prefix (default: /usr/local)
   # Used only on linux. Data files are expected under $prefix/share/antares/app.
   prefix = "/usr/local"
+
+  # Antares version. Can be overridden for nightlies and release builds.
+  antares_version = "0.8.0-HEAD"
 }
 
 import("//build/lib/embed.gni")
@@ -37,7 +40,10 @@ config("antares_private") {
     "-Wno-sign-compare",
     "-Wno-deprecated-declarations",
   ]
-  defines = [ "ANTARES_PREFIX=\"" + prefix + "\"" ]
+  defines = [
+    "ANTARES_PREFIX=\"" + prefix + "\"",
+    "ANTARES_VERSION=\"" + antares_version + "\"",
+  ]
 }
 
 source_set("libantares") {
@@ -518,7 +524,6 @@ executable("antares-install-data") {
 
 if (target_os == "mac") {
   import("//build/lib/mac/templates.gni")
-  antares_version = "0.8.0"
 
   source_set("libantares-mac") {
     sources = [
