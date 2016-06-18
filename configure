@@ -56,20 +56,20 @@ def main():
 
 def check_submodules():
     REQUIRED_SUBMODULES = [
-        "build/lib",
-        "ext/glfw",
-        "ext/gmock-gyp",
-        "ext/libmodplug-gyp",
-        "ext/libpng-gyp",
-        "ext/libsfz",
-        "ext/libsndfile-gyp",
-        "ext/libzipxx",
-        "ext/rezin",
-        "data",
+        "build/lib/BUILD.gn",
+        "ext/glfw/BUILD.gn",
+        "ext/gmock-gyp/BUILD.gn",
+        "ext/libmodplug-gyp/BUILD.gn",
+        "ext/libpng-gyp/BUILD.gn",
+        "ext/libsfz/BUILD.gn",
+        "ext/libsndfile-gyp/BUILD.gn",
+        "ext/libzipxx/BUILD.gn",
+        "ext/rezin/BUILD.gn",
+        "data/README.md",
     ]
     missing = False
     for module in REQUIRED_SUBMODULES:
-        if not os.path.exists(os.path.join(module, ".git")):
+        if not os.path.exists(os.path.join(module)):
             missing = True
             break
 
