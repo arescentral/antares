@@ -13,8 +13,8 @@ if [[ $# != 2 ]]; then
     usage
 fi
 
-# Check that there is a line 'VERSION = "..."' in the gyp file.
-grep >/dev/null '"ANTARES_VERSION": ".*"' antares.gyp
+# Check that there is a line 'VERSION = "..."' in the gn file.
+grep >/dev/null '^  antares_version = ".*"$' BUILD.gn
 ACTION=$1
 VERSION=$2
 
@@ -32,8 +32,8 @@ else
     usage
 fi
 
-update-gyp() {
-    sed -i '' 's/"ANTARES_VERSION": ".*"/"ANTARES_VERSION": "'$1'"/' antares.gyp
+update-gn() {
+    sed -i '' 's/  antares_version = ".*"/  antares_version = "'$1'"/' BUILD.gn
 }
 
 update-readme() {
@@ -43,13 +43,13 @@ update-readme() {
 if [[ $ACTION == start ]]; then
     set -o verbose
     git checkout -b release/$VERSION
-    update-gyp ${VERSION}rc1
-    git commit antares.gyp README.rst -m "Create release branch for $VERSION."
+    update-gn ${VERSION}rc1
+    git commit BUILD.gn README.rst -m "Create release branch for $VERSION."
 else
     set -o verbose
-    update-gyp $VERSION
+    update-gn $VERSION
     update-readme $VERSION
-    git commit antares.gyp README.rst -m "Release Antares $VERSION."
+    git commit BUILD.gn README.rst -m "Release Antares $VERSION."
 
     git checkout stable
     git merge --no-ff release/$VERSION
