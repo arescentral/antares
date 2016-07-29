@@ -35,13 +35,17 @@ using sfz::args::store;
 using sfz::args::store_const;
 using sfz::range;
 
+#ifndef ANTARES_PREFIX
+#define ANTARES_PREFIX "/usr/local"
+#endif  // ANTARES_PREFIX
+
 namespace args = sfz::args;
 namespace io   = sfz::io;
 
 namespace antares {
 
 String application_path() {
-    return String("./data");
+    return String(ANTARES_PREFIX "/share/antares/app");
 }
 
 void main(int argc, const char* argv[]) {

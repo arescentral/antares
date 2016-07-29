@@ -43,6 +43,8 @@ struct ne_userdata {
 static int accept(void* userdata, ne_request* req, const ne_status* st) {
     ne_userdata* u   = reinterpret_cast<ne_userdata*>(userdata);
     auto         len = ne_get_response_header(req, "Content-Length");
+    (void)u;
+    (void)len;
     return true;
 }
 

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import division, print_function, unicode_literals
+
 import os
 import sys
 import tarfile
@@ -9,10 +11,17 @@ import zipfile
 def main():
     progname, archive_format = sys.argv
 
-    with open("./antares.gyp") as f:
-        data = eval(f.read(), {"__builtins__": None}, {})
+    with open("./BUILD.gn") as f:
+        version = None
+        for line in f.readlines():
+            line = line.strip()
+            if line.startswith("antares_version = "):
+                version = line.split("=", 1)[1].strip().strip('"')
+                break
+    if not version:
+        print("couldn't determine antares version")
+        sys.exit(1)
 
-    version = data["target_defaults"]["variables"]["ANTARES_VERSION"]
     archive_root = "Antares-%s" % version
 
     if archive_format == "zip":
@@ -44,6 +53,8 @@ def walk(archive_root):
 def should_write(base):
     _, ext = os.path.splitext(base)
     if base.startswith("."):
+        return False
+    elif base == "gn":
         return False
     elif ext in [".pyc", ".zip", ".tgz", ".tbz2"]:
         return False

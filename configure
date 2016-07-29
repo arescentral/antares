@@ -9,58 +9,104 @@ import os
 import platform
 import subprocess
 import sys
-from scripts import cfg
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "build", "lib", "scripts"))
+try:
+    import cfg
+except ImportError:
+    pass
+
+str = type("")  # For Python2
+
 
 def main():
     os.chdir(os.path.dirname(sys.argv[0]))
     progname = sys.argv[0]
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-m", "--mode", type=unicode, choices="dbg dev opt".split(), default="opt")
-    parser.add_argument("--coverage", action="store_true", default=False)
-    args, remainder = parser.parse_known_args()
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument("-m", "--mode", metavar="MODE",
+                        type=str, choices="dbg dev opt".split(), default="opt",
+                        help="set build configuration:\n"
+                        "  - opt: compile for fast binaries (default)\n"
+                        "  - dev: compile for fast builds\n"
+                        "  - dbg: add debugging symbols")
+    parser.add_argument("-o", "--target-os", metavar="OS",
+                        type=str,
+                        help="target os (default: host os)")
+    parser.add_argument("--prefix", type=str, default="/usr/local",
+                        help="installation prefix (default: /usr/local)")
+    args = parser.parse_args()
 
-    check_platform()
-    check_arch()
-    check_deps()
+    check_submodules()
+    if not check_gn():
+        print("\nYou don't seem to have gn(1). Run:")
+        print("  $ build/lib/scripts/download-gn.py")
+        sys.exit(1)
 
-    submodules()
-    cfg.makedirs("out")
-    cfg.linkf(args.mode, "out/cur")
-    gyp(args, remainder)
+    check_host()
+    check_target(args)
+
+    with cfg.step("configure mode") as msg:
+        msg(args.mode, color="green")
+    cfg.gn(mode=args.mode,
+           target_os=args.target_os,
+           prefix=args.prefix)
+
     print("make(1) it so!")
 
 
-def check_platform():
-    with cfg.step("checking platform") as msg:
-        if cfg.platform() in ["mac", "linux"]:
-            msg(cfg.platform(), color="green")
+def check_submodules():
+    REQUIRED_SUBMODULES = [
+        "build/lib/BUILD.gn",
+        "ext/glfw/BUILD.gn",
+        "ext/gmock-gyp/BUILD.gn",
+        "ext/libmodplug-gyp/BUILD.gn",
+        "ext/libpng-gyp/BUILD.gn",
+        "ext/libsfz/BUILD.gn",
+        "ext/libsndfile-gyp/BUILD.gn",
+        "ext/libzipxx/BUILD.gn",
+        "ext/rezin/BUILD.gn",
+        "data/README.md",
+    ]
+    missing = False
+    for module in REQUIRED_SUBMODULES:
+        if not os.path.exists(os.path.join(module)):
+            missing = True
+            break
+
+    if missing:
+        print("Some submodules are missing. Run:")
+        print("  $ git submodule init")
+        print("  $ git submodule update build ext data")
+        sys.exit(1)
+
+
+def check_host():
+    with cfg.step("checking host os") as msg:
+        if cfg.host_os() in ["mac", "linux"]:
+            msg(cfg.host_os(), color="green")
         else:
-            msg(cfg.platform(), color="red")
+            msg(cfg.host_os(), color="red")
             print("\nSorry! Antares requires Mac OS X or Linux")
             sys.exit(1)
 
 
-def check_arch():
-    with cfg.step("checking architecture") as msg:
-        arch = platform.uname()[5]
-        if not arch:
-            msg("unknown", color="red")
+def check_target(args):
+    with cfg.step("checking target os") as msg:
+        if args.target_os is None:
+            args.target_os = cfg.host_os()
+        checker = {
+            ("mac", "mac"): check_mac,
+            ("linux", "linux"): check_linux_native,
+            ("linux", "mac"): check_mac_on_linux,
+        }.get((cfg.host_os(), args.target_os))
+        if checker is None:
+            msg(args.target_os, color="red")
             sys.exit(1)
-        elif arch in ["x86_64", "i386"]:
-            msg(arch, color="green")
-        else:
-            msg(arch + " (untested)", color="yellow")
+        msg(args.target_os, color="green")
+    checker(args)
 
 
-def check_deps():
-    checker = {
-        "mac": check_mac,
-        "linux": check_linux,
-    }[cfg.platform()]
-    checker()
-
-
-def check_mac():
+def check_mac(args):
     with cfg.step("checking Mac OS X version") as msg:
         ver = platform.mac_ver()[0]
         ver = tuple(int(x) for x in ver.split(".")[:2])
@@ -76,10 +122,6 @@ def check_mac():
                 "* Xcode can be installed via the App Store:\n"
                 "    https://itunes.apple.com/en/app/xcode/id497799835\n"
                 "  After installing, open it and accept the license agreement\n")
-    if not check_gyp():
-        missing["gyp"] = (
-                "* gyp can be installed with Homebrew:\n"
-                "    $ brew install --HEAD scripts/gyp.rb\n")
     if not check_ninja():
         missing["ninja"] = (
                 "* ninja can be installed with Homebrew:\n"
@@ -95,7 +137,7 @@ def check_mac():
         sys.exit(1)
 
 
-def check_linux():
+def check_linux_native(args):
     with cfg.step("checking Linux distro") as msg:
         distro = platform.linux_distribution()
         if distro[0] == "Ubuntu":
@@ -104,10 +146,8 @@ def check_linux():
             msg(" ".join(distro) + " (untested)", color="yellow")
 
     missing = collections.OrderedDict()
-    if not check_clang():
+    if not check_clang("clang++"):
         missing["clang"] = "clang"
-    if not check_gyp():
-        missing["gyp"] = "gyp"
     if not check_ninja():
         missing["ninja"] = "ninja-build"
 
@@ -140,22 +180,48 @@ def check_linux():
         sys.exit(1)
 
 
-def check_clang():
-    """Compile a basic C++11 binary."""
-    return cfg.check_bin(
-            "clang -x c++ -std=c++11 - -o /dev/null".split(),
-            input="#include <vector>\n\nint main() { return 1; }")
+def check_mac_on_linux(args):
+    missing = collections.OrderedDict()
+    if not check_ninja():
+        missing["ninja"] = (
+                "* On Ubuntu, ninja can be installed with:\n"
+                "    $ sudo apt-get install ninja-build")
+    if not (check_clang("x86_64-apple-darwin15-clang++") and
+            check_libcxx("x86_64-apple-darwin15-clang++")):
+        missing["osxcross"] = (
+                "* OSXCross can be found here:\n"
+                "    https://github.com/tpoechtrager/osxcross\n"
+                "  Download and build it, and ensure target/bin is in your $PATH\n")
 
-def check_libcxx():
-    """Compile a basic C++11, libc++ binary."""
+    if missing:
+        print("\nmissing dependencies: %s\n" % " ".join(missing.keys()))
+        for step in missing.values():
+            sys.stdout.write(step)
+        sys.exit(1)
+
+
+def check_clang(executable=""):
+    """Compile a basic C++11 binary."""
+    executable = executable or "clang++"
     return cfg.check_bin(
-            "clang -x c++ -std=c++11 -stdlib=libc++ - -o /dev/null".split(),
+            ("%s -x c++ -std=c++11 - -o /dev/null" % executable).split(),
+            what="clang",
+            input="int main() { return 1; }")
+
+
+def check_libcxx(executable=""):
+    """Compile a basic C++11, libc++ binary."""
+    executable = executable or "clang++"
+    return cfg.check_bin(
+            ("%s -x c++ -std=c++11 -stdlib=libc++ - -o /dev/null" % executable).split(),
             what="libc++",
             input="#include <chrono>\n\nint main() { return std::chrono::seconds(1).count(); }")
 
-def check_gyp():
-    """Run gyp --help (it doesn't have --version)."""
-    return cfg.check_bin("gyp --help".split())
+
+def check_gn():
+    """Run gn --version."""
+    return cfg.check_bin("build/lib/scripts/gn --version".split(), what="gn")
+
 
 def check_ninja():
     """Run ninja --version.
@@ -165,6 +231,7 @@ def check_ninja():
     """
     return (cfg.check_bin("ninja --version".split()) or
             cfg.check_bin("ninja-build --version".split()))
+
 
 def check_pkg_config():
     """Run pkg-config --version."""
@@ -177,25 +244,6 @@ def submodules():
             return
     subprocess.check_call("git submodule init".split())
     subprocess.check_call("git submodule update ext data".split())
-
-
-def gyp(args, remainder):
-    with cfg.step("configure mode") as msg:
-        msg(args.mode, color="green")
-    with cfg.step("generating build.ninja") as msg:
-        cmd = [
-            "gyp",
-            "--include=defaults.gypi",
-            "--format=ninja",
-            "--depth=.",
-        ]
-        cmd += ["-D", "COVERAGE=%s" % ("1" if args.coverage else "")]
-        cmd += remainder
-
-        retcode = subprocess.call(cmd)
-        if retcode != 0:
-            msg("failed", color="red")
-            sys.exit(retcode)
 
 
 if __name__ == "__main__":
