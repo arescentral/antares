@@ -64,9 +64,6 @@ struct scenarioInfoType {
     sfz::String        authorNameString;
     sfz::String        authorURLString;
     uint32_t           version;
-    uint32_t           requiresAresVersion;
-    uint32_t           flags;
-    uint32_t           checkSum;
 };
 void read_from(sfz::ReadSource in, scenarioInfoType& scenario_info);
 

@@ -58,9 +58,7 @@ void read_from(ReadSource in, scenarioInfoType& scenario_info) {
     read_pstr(in, scenario_info.authorNameString);
     read_pstr(in, scenario_info.authorURLString);
     read(in, scenario_info.version);
-    read(in, scenario_info.requiresAresVersion);
-    read(in, scenario_info.flags);
-    read(in, scenario_info.checkSum);
+    in.shift(12);
 }
 
 void read_from(ReadSource in, Level& level) {
