@@ -102,37 +102,26 @@ bool AnyKeyButThisOne(const KeyMap& key_map, int key_num) {
 int key_digit(uint32_t k) {
     switch (k) {
         case Keys::K0:
-        case Keys::N0:
-            return 0;
+        case Keys::N0: return 0;
         case Keys::K1:
-        case Keys::N1:
-            return 1;
+        case Keys::N1: return 1;
         case Keys::K2:
-        case Keys::N2:
-            return 2;
+        case Keys::N2: return 2;
         case Keys::K3:
-        case Keys::N3:
-            return 3;
+        case Keys::N3: return 3;
         case Keys::K4:
-        case Keys::N4:
-            return 4;
+        case Keys::N4: return 4;
         case Keys::K5:
-        case Keys::N5:
-            return 5;
+        case Keys::N5: return 5;
         case Keys::K6:
-        case Keys::N6:
-            return 6;
+        case Keys::N6: return 6;
         case Keys::K7:
-        case Keys::N7:
-            return 7;
+        case Keys::N7: return 7;
         case Keys::K8:
-        case Keys::N8:
-            return 8;
+        case Keys::N8: return 8;
         case Keys::K9:
-        case Keys::N9:
-            return 9;
-        default:
-            return -1;
+        case Keys::N9: return 9;
+        default: return -1;
     }
 }
 

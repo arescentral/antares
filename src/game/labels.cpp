@@ -421,8 +421,7 @@ static void Auto_Animate_Line(Point* source, Point* dest) {
             dest->v = dest->v + ((source->v - dest->v) >> 2);
             break;
 
-        case 3:
-            break;
+        case 3: break;
     }
 }
 

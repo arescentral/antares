@@ -152,9 +152,7 @@ PictFade::~PictFade() {}
 
 void PictFade::become_front() {
     switch (_state) {
-        case NEW:
-            wax();
-            break;
+        case NEW: wax(); break;
 
         case WAXING:
             if (!this->skip()) {
@@ -169,8 +167,7 @@ void PictFade::become_front() {
             stack()->pop(this);
             break;
 
-        default:
-            break;
+        default: break;
     }
 }
 

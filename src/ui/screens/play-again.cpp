@@ -58,13 +58,9 @@ PlayAgainScreen::~PlayAgainScreen() {}
 
 void PlayAgainScreen::become_front() {
     switch (_state) {
-        case ASKING:
-            InterfaceScreen::become_front();
-            break;
+        case ASKING: InterfaceScreen::become_front(); break;
 
-        case FADING_OUT:
-            stack()->pop(this);
-            break;
+        case FADING_OUT: stack()->pop(this); break;
     }
 }
 
@@ -89,28 +85,17 @@ void PlayAgainScreen::handle_button(Button& button) {
             stack()->pop(this);
             break;
 
-        default:
-            throw Exception(format("Got unknown button {0}.", button.id));
+        default: throw Exception(format("Got unknown button {0}.", button.id));
     }
 }
 
 void print_to(sfz::PrintTarget out, PlayAgainScreen::Item item) {
     switch (item) {
-        case PlayAgainScreen::RESTART:
-            print(out, "RESTART");
-            return;
-        case PlayAgainScreen::QUIT:
-            print(out, "QUIT");
-            return;
-        case PlayAgainScreen::RESUME:
-            print(out, "RESUME");
-            return;
-        case PlayAgainScreen::SKIP:
-            print(out, "SKIP");
-            return;
-        case PlayAgainScreen::BOX:
-            print(out, "BOX");
-            return;
+        case PlayAgainScreen::RESTART: print(out, "RESTART"); return;
+        case PlayAgainScreen::QUIT: print(out, "QUIT"); return;
+        case PlayAgainScreen::RESUME: print(out, "RESUME"); return;
+        case PlayAgainScreen::SKIP: print(out, "SKIP"); return;
+        case PlayAgainScreen::BOX: print(out, "BOX"); return;
     }
     print(out, static_cast<int64_t>(item));
 }

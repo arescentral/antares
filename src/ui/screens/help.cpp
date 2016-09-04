@@ -65,12 +65,9 @@ void HelpScreen::key_down(const KeyDownEvent& event) {
 
 void HelpScreen::handle_button(Button& button) {
     switch (button.id) {
-        case DONE:
-            stack()->pop(this);
-            break;
+        case DONE: stack()->pop(this); break;
 
-        default:
-            throw Exception(format("Got unknown button {0}.", button.id));
+        default: throw Exception(format("Got unknown button {0}.", button.id));
     }
 }
 

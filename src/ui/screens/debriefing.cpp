@@ -273,12 +273,8 @@ String DebriefingScreen::build_score_text(
 
 void print_to(sfz::PrintTarget out, DebriefingScreen::State state) {
     switch (state) {
-        case DebriefingScreen::TYPING:
-            print(out, "TYPING");
-            return;
-        case DebriefingScreen::DONE:
-            print(out, "DONE");
-            return;
+        case DebriefingScreen::TYPING: print(out, "TYPING"); return;
+        case DebriefingScreen::DONE: print(out, "DONE"); return;
     }
     print(out, static_cast<int64_t>(state));
 }

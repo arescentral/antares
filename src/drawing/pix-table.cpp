@@ -162,8 +162,7 @@ struct PixTableVisitor : public JsonDefaultVisitor {
                 }
                 break;
 
-            default:
-                return visit_default("object");
+            default: return visit_default("object");
         }
     }
 
@@ -180,8 +179,7 @@ struct PixTableVisitor : public JsonDefaultVisitor {
                 state.state = DONE;
                 break;
 
-            default:
-                return visit_default("array");
+            default: return visit_default("array");
         }
     }
 
@@ -193,43 +191,23 @@ struct PixTableVisitor : public JsonDefaultVisitor {
 
     virtual void visit_string(const StringSlice& value) const {
         switch (state.state) {
-            case IMAGE:
-                return load_image(state.image, value);
-            case OVERLAY:
-                return load_image(state.overlay, value);
-            default:
-                return visit_default("string");
+            case IMAGE: return load_image(state.image, value);
+            case OVERLAY: return load_image(state.overlay, value);
+            default: return visit_default("string");
         }
     }
 
     virtual void visit_number(double value) const {
         switch (state.state) {
-            case ROWS:
-                state.rows = value;
-                break;
-            case COLS:
-                state.cols = value;
-                break;
-            case CENTER_X:
-                state.center.h = value;
-                break;
-            case CENTER_Y:
-                state.center.v = value;
-                break;
-            case FRAME_LEFT:
-                state.frame.left = value;
-                break;
-            case FRAME_TOP:
-                state.frame.top = value;
-                break;
-            case FRAME_RIGHT:
-                state.frame.right = value;
-                break;
-            case FRAME_BOTTOM:
-                state.frame.bottom = value;
-                break;
-            default:
-                return visit_default("number");
+            case ROWS: state.rows                 = value; break;
+            case COLS: state.cols                 = value; break;
+            case CENTER_X: state.center.h         = value; break;
+            case CENTER_Y: state.center.v         = value; break;
+            case FRAME_LEFT: state.frame.left     = value; break;
+            case FRAME_TOP: state.frame.top       = value; break;
+            case FRAME_RIGHT: state.frame.right   = value; break;
+            case FRAME_BOTTOM: state.frame.bottom = value; break;
+            default: return visit_default("number");
         }
     }
 

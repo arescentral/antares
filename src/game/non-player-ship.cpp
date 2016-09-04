@@ -256,21 +256,15 @@ void NonplayerShipThink() {
                 keysDown = ThinkObjectNormalPresence(anObject, baseObject);
                 break;
 
-            case kWarpingPresence:
-                keysDown = ThinkObjectWarpingPresence(anObject);
-                break;
+            case kWarpingPresence: keysDown = ThinkObjectWarpingPresence(anObject); break;
 
-            case kWarpInPresence:
-                keysDown = ThinkObjectWarpInPresence(anObject);
-                break;
+            case kWarpInPresence: keysDown = ThinkObjectWarpInPresence(anObject); break;
 
             case kWarpOutPresence:
                 keysDown = ThinkObjectWarpOutPresence(anObject, baseObject);
                 break;
 
-            case kLandingPresence:
-                keysDown = ThinkObjectLandingPresence(anObject);
-                break;
+            case kLandingPresence: keysDown = ThinkObjectLandingPresence(anObject); break;
         }
 
         if (!(anObject->attributes & kRemoteOrHuman) || (anObject->attributes & kOnAutoPilot)) {
@@ -1550,12 +1544,9 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
 static bool allegiance_is(
         Allegiance allegiance, Handle<Admiral> admiral, Handle<SpaceObject> object) {
     switch (allegiance) {
-        case FRIENDLY_OR_HOSTILE:
-            return true;
-        case FRIENDLY:
-            return object->owner == admiral;
-        case HOSTILE:
-            return object->owner != admiral;
+        case FRIENDLY_OR_HOSTILE: return true;
+        case FRIENDLY: return object->owner == admiral;
+        case HOSTILE: return object->owner != admiral;
     }
 }
 

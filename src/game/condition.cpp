@@ -177,14 +177,11 @@ bool Level::Condition::is_true() const {
                    ((conditionArgument.location.v < 0) ||
                     (g.mini.selectLine == conditionArgument.location.v));
 
-        case kZoomLevelCondition:
-            return g.zoom == conditionArgument.longValue;
+        case kZoomLevelCondition: return g.zoom == conditionArgument.longValue;
 
-        case kAutopilotCondition:
-            return IsPlayerShipOnAutoPilot();
+        case kAutopilotCondition: return IsPlayerShipOnAutoPilot();
 
-        case kNotAutopilotCondition:
-            return !IsPlayerShipOnAutoPilot();
+        case kNotAutopilotCondition: return !IsPlayerShipOnAutoPilot();
 
         case kObjectIsBeingBuilt: {
             auto buildAtObject = GetAdmiralBuildAtObject(g.admiral);

@@ -46,22 +46,14 @@ namespace {
 
 const char* name(int16_t id) {
     switch (id) {
-        case 501:
-            return "ishiman/cruiser";
-        case 510:
-            return "ishiman/fighter";
-        case 515:
-            return "ishiman/transport";
-        case 532:
-            return "obish/escort";
-        case 550:
-            return "gaitori/cruiser";
-        case 551:
-            return "gaitori/fighter";
-        case 563:
-            return "gaitori/transport";
-        case 567:
-            return "obish/transport";
+        case 501: return "ishiman/cruiser";
+        case 510: return "ishiman/fighter";
+        case 515: return "ishiman/transport";
+        case 532: return "obish/escort";
+        case 550: return "gaitori/cruiser";
+        case 551: return "gaitori/fighter";
+        case 563: return "gaitori/transport";
+        case 567: return "obish/transport";
     }
     abort();
 }

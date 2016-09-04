@@ -152,21 +152,13 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject* sourceObject) {
     if (spriteTable) {
         uint8_t tinyShade;
         switch (obj->layer) {
-            case kFirstSpriteLayer:
-                tinyShade = MEDIUM;
-                break;
+            case kFirstSpriteLayer: tinyShade = MEDIUM; break;
 
-            case kMiddleSpriteLayer:
-                tinyShade = LIGHT;
-                break;
+            case kMiddleSpriteLayer: tinyShade = LIGHT; break;
 
-            case kLastSpriteLayer:
-                tinyShade = VERY_LIGHT;
-                break;
+            case kLastSpriteLayer: tinyShade = VERY_LIGHT; break;
 
-            default:
-                tinyShade = DARK;
-                break;
+            default: tinyShade = DARK; break;
         }
 
         RgbColor tinyColor;
@@ -657,18 +649,10 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
     if (object->sprite.get()) {
         uint8_t tinyShade;
         switch (object->sprite->whichLayer) {
-            case kFirstSpriteLayer:
-                tinyShade = MEDIUM;
-                break;
-            case kMiddleSpriteLayer:
-                tinyShade = LIGHT;
-                break;
-            case kLastSpriteLayer:
-                tinyShade = VERY_LIGHT;
-                break;
-            default:
-                tinyShade = DARK;
-                break;
+            case kFirstSpriteLayer: tinyShade  = MEDIUM; break;
+            case kMiddleSpriteLayer: tinyShade = LIGHT; break;
+            case kLastSpriteLayer: tinyShade   = VERY_LIGHT; break;
+            default: tinyShade                 = DARK; break;
         }
 
         RgbColor tinyColor;

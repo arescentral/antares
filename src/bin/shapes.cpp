@@ -51,14 +51,10 @@ enum Shape {
 
 const char* name(Shape shape) {
     switch (shape) {
-        case SQUARE:
-            return "square";
-        case PLUS:
-            return "plus";
-        case TRIANGLE:
-            return "triangle";
-        case DIAMOND:
-            return "diamond";
+        case SQUARE: return "square";
+        case PLUS: return "plus";
+        case TRIANGLE: return "triangle";
+        case DIAMOND: return "diamond";
     }
     abort();
 }
@@ -66,18 +62,10 @@ const char* name(Shape shape) {
 void draw(Shape shape, PixMap& pix) {
     RgbColor color = rgb(255, 0, 0);
     switch (shape) {
-        case SQUARE:
-            pix.fill(color);
-            break;
-        case PLUS:
-            draw_compat_plus(&pix, color);
-            break;
-        case TRIANGLE:
-            draw_triangle_up(&pix, color);
-            break;
-        case DIAMOND:
-            draw_compat_diamond(&pix, color);
-            break;
+        case SQUARE: pix.fill(color); break;
+        case PLUS: draw_compat_plus(&pix, color); break;
+        case TRIANGLE: draw_triangle_up(&pix, color); break;
+        case DIAMOND: draw_compat_diamond(&pix, color); break;
     }
 }
 

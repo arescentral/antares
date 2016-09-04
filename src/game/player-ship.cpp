@@ -301,39 +301,17 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
 
     int key = key_num(event.key());
     switch (key) {
-        case kZoomOutKeyNum:
-            zoom_out();
-            break;
-        case kZoomInKeyNum:
-            zoom_in();
-            break;
-        case kScale121KeyNum:
-            zoom_shortcut(kActualSizeZoom);
-            break;
-        case kScale122KeyNum:
-            zoom_shortcut(kHalfSizeZoom);
-            break;
-        case kScale124KeyNum:
-            zoom_shortcut(kQuarterSizeZoom);
-            break;
-        case kScale1216KeyNum:
-            zoom_shortcut(kEighthSizeZoom);
-            break;
-        case kScaleHostileKeyNum:
-            zoom_shortcut(kNearestFoeZoom);
-            break;
-        case kScaleObjectKeyNum:
-            zoom_shortcut(kNearestAnythingZoom);
-            break;
-        case kScaleAllKeyNum:
-            zoom_shortcut(kSmallestZoom);
-            break;
-        case kTransferKeyNum:
-            transfer_control(g.admiral, 0);
-            break;
-        case kMessageNextKeyNum:
-            Messages::advance();
-            break;
+        case kZoomOutKeyNum: zoom_out(); break;
+        case kZoomInKeyNum: zoom_in(); break;
+        case kScale121KeyNum: zoom_shortcut(kActualSizeZoom); break;
+        case kScale122KeyNum: zoom_shortcut(kHalfSizeZoom); break;
+        case kScale124KeyNum: zoom_shortcut(kQuarterSizeZoom); break;
+        case kScale1216KeyNum: zoom_shortcut(kEighthSizeZoom); break;
+        case kScaleHostileKeyNum: zoom_shortcut(kNearestFoeZoom); break;
+        case kScaleObjectKeyNum: zoom_shortcut(kNearestAnythingZoom); break;
+        case kScaleAllKeyNum: zoom_shortcut(kSmallestZoom); break;
+        case kTransferKeyNum: transfer_control(g.admiral, 0); break;
+        case kMessageNextKeyNum: Messages::advance(); break;
         default:
             if (key < kKeyControlNum) {
                 _key_presses |= ((1 << key) & ~g.key_mask);
@@ -461,24 +439,12 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
     }
 
     switch (event.button) {
-        case Gamepad::A:
-            _gamepad_keys |= kUpKey;
-            break;
-        case Gamepad::B:
-            _gamepad_keys |= kDownKey;
-            break;
-        case Gamepad::X:
-            zoom_out();
-            break;
-        case Gamepad::Y:
-            zoom_in();
-            break;
-        case Gamepad::BACK:
-            Messages::advance();
-            break;
-        case Gamepad::LT:
-            _gamepad_keys |= kEnterKey;
-            break;
+        case Gamepad::A: _gamepad_keys |= kUpKey; break;
+        case Gamepad::B: _gamepad_keys |= kDownKey; break;
+        case Gamepad::X: zoom_out(); break;
+        case Gamepad::Y: zoom_in(); break;
+        case Gamepad::BACK: Messages::advance(); break;
+        case Gamepad::LT: _gamepad_keys |= kEnterKey; break;
         case Gamepad::RT:
             _gamepad_keys |= kOneKey;
             _gamepad_keys |= kTwoKey;
@@ -490,18 +456,10 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
                 _gamepad_keys |= kWarpKey;
             }
             break;
-        case Gamepad::UP:
-            minicomputer_handle_keys(kCompUpKey, 0);
-            break;
-        case Gamepad::DOWN:
-            minicomputer_handle_keys(kCompDownKey, 0);
-            break;
-        case Gamepad::RIGHT:
-            minicomputer_handle_keys(kCompAcceptKey, 0);
-            break;
-        case Gamepad::LEFT:
-            minicomputer_handle_keys(kCompCancelKey, 0);
-            break;
+        case Gamepad::UP: minicomputer_handle_keys(kCompUpKey, 0); break;
+        case Gamepad::DOWN: minicomputer_handle_keys(kCompDownKey, 0); break;
+        case Gamepad::RIGHT: minicomputer_handle_keys(kCompAcceptKey, 0); break;
+        case Gamepad::LEFT: minicomputer_handle_keys(kCompCancelKey, 0); break;
     }
 }
 
@@ -533,22 +491,15 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
             case Gamepad::B:
             case Gamepad::X:
             case Gamepad::Y:
-            case Gamepad::LSB:
-                return;
+            case Gamepad::LSB: return;
         }
     }
 
     auto player = g.ship;
     switch (event.button) {
-        case Gamepad::A:
-            _gamepad_keys &= ~kUpKey;
-            break;
-        case Gamepad::B:
-            _gamepad_keys &= ~kDownKey;
-            break;
-        case Gamepad::LT:
-            _gamepad_keys &= ~kEnterKey;
-            break;
+        case Gamepad::A: _gamepad_keys &= ~kUpKey; break;
+        case Gamepad::B: _gamepad_keys &= ~kDownKey; break;
+        case Gamepad::LT: _gamepad_keys &= ~kEnterKey; break;
         case Gamepad::RT:
             _gamepad_keys &= ~kOneKey;
             _gamepad_keys &= ~kTwoKey;
@@ -558,12 +509,8 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
                 _gamepad_keys &= !kWarpKey;
             }
             break;
-        case Gamepad::RIGHT:
-            minicomputer_handle_keys(0, kCompAcceptKey);
-            break;
-        case Gamepad::LEFT:
-            minicomputer_handle_keys(0, kCompCancelKey);
-            break;
+        case Gamepad::RIGHT: minicomputer_handle_keys(0, kCompAcceptKey); break;
+        case Gamepad::LEFT: minicomputer_handle_keys(0, kCompCancelKey); break;
     }
 }
 

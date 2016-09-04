@@ -84,12 +84,9 @@ enum {
 
 int32_t nlrp_chapter(int16_t id) {
     switch (id) {
-        case THE_STARS_HAVE_EARS:
-            return 4;
-        case WHILE_THE_IRON_IS_HOT:
-            return 6;
-        case SPACE_RACE_THE_MUSICAL:
-            return 26;
+        case THE_STARS_HAVE_EARS: return 4;
+        case WHILE_THE_IRON_IS_HOT: return 6;
+        case SPACE_RACE_THE_MUSICAL: return 26;
     };
     throw Exception(format("invalid replay ID {0}", id));
 }

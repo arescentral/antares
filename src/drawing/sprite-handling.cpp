@@ -73,17 +73,12 @@ static draw_tiny_t draw_tiny_function(uint8_t id) {
         return NULL;
     }
     switch (type) {
-        case kTriangleUpBlip:
-            return draw_tiny_triangle;
+        case kTriangleUpBlip: return draw_tiny_triangle;
         case kFramedSquareBlip:
-        case kSolidSquareBlip:
-            return draw_tiny_square;
-        case kPlusBlip:
-            return draw_tiny_plus;
-        case kDiamondBlip:
-            return draw_tiny_diamond;
-        default:
-            return NULL;
+        case kSolidSquareBlip: return draw_tiny_square;
+        case kPlusBlip: return draw_tiny_plus;
+        case kDiamondBlip: return draw_tiny_diamond;
+        default: return NULL;
     }
 }
 
@@ -217,9 +212,7 @@ void draw_sprites() {
                     draw_rect.offset(aSprite->where.h - scaled_h, aSprite->where.v - scaled_v);
 
                     switch (aSprite->style) {
-                        case spriteNormal:
-                            frame.texture().draw(draw_rect);
-                            break;
+                        case spriteNormal: frame.texture().draw(draw_rect); break;
 
                         case spriteColor:
                             Randomize(63);
