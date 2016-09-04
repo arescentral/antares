@@ -270,9 +270,8 @@ void BriefingScreen::mouse_down(const MouseDownEvent& event) {
             const int pict_id = _inline_pict[i].id;
             for (auto obj : BaseObject::all()) {
                 if (obj->pictPortraitResID == pict_id) {
-                    stack()->push(
-                            new ObjectDataScreen(
-                                    event.where(), obj, ObjectDataScreen::MOUSE, event.button()));
+                    stack()->push(new ObjectDataScreen(
+                            event.where(), obj, ObjectDataScreen::MOUSE, event.button()));
                     return;
                 }
             }

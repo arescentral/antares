@@ -274,16 +274,12 @@ void CocoaVideoDriver::loop(Card* initial) {
     antares_event_translator_set_caps_unlock_callback(
             _translator.c_obj(), EventBridge::caps_unlock, &bridge);
 
-    cf::MutableDictionary keyboard(
-            CFDictionaryCreateMutable(
-                    NULL, 0, &kCFCopyStringDictionaryKeyCallBacks,
-                    &kCFTypeDictionaryValueCallBacks));
+    cf::MutableDictionary keyboard(CFDictionaryCreateMutable(
+            NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
     keyboard.set(CFSTR(kIOHIDDeviceUsagePageKey), cf::wrap(kHIDPage_GenericDesktop).c_obj());
     keyboard.set(CFSTR(kIOHIDDeviceUsageKey), cf::wrap(kHIDUsage_GD_Keyboard).c_obj());
-    cf::MutableDictionary gamepad(
-            CFDictionaryCreateMutable(
-                    NULL, 0, &kCFCopyStringDictionaryKeyCallBacks,
-                    &kCFTypeDictionaryValueCallBacks));
+    cf::MutableDictionary gamepad(CFDictionaryCreateMutable(
+            NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
     gamepad.set(CFSTR(kIOHIDDeviceUsagePageKey), cf::wrap(kHIDPage_GenericDesktop).c_obj());
     gamepad.set(CFSTR(kIOHIDDeviceUsageKey), cf::wrap(kHIDUsage_GD_GamePad).c_obj());
     cf::MutableArray criteria(CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks));

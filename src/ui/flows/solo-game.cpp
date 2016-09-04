@@ -64,9 +64,8 @@ void SoloGame::become_front() {
         case START_LEVEL:
             _state = PROLOGUE;
             if (_level->prologue_id() > 0) {
-                stack()->push(
-                        new ScrollTextScreen(
-                                _level->prologue_id(), 450, kSlowScrollInterval, 4002));
+                stack()->push(new ScrollTextScreen(
+                        _level->prologue_id(), 450, kSlowScrollInterval, 4002));
                 break;
             }
         // else fall through

@@ -135,20 +135,18 @@ BuildPix::BuildPix(int text_id, int width) : _size({width, 0}) {
                         }
                     }
                     Picture pict(id);
-                    _lines.push_back(
-                            Line{
-                                    Line::BACKGROUND, Picture(id).texture(), nullptr,
-                            });
+                    _lines.push_back(Line{
+                            Line::BACKGROUND, Picture(id).texture(), nullptr,
+                    });
                 } else {
                     int32_t id;
                     if (!string_to_int(line.slice(2), id)) {
                         throw Exception(format("malformed header line {0}", quote(line)));
                     }
                     Picture pict(id);
-                    _lines.push_back(
-                            Line{
-                                    Line::PICTURE, Picture(id).texture(), nullptr,
-                            });
+                    _lines.push_back(Line{
+                            Line::PICTURE, Picture(id).texture(), nullptr,
+                    });
                 }
             }
         } else {

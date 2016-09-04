@@ -90,10 +90,9 @@ class ReplayMaster : public Card {
                 Randomize(4);  // For the decision to replay intro.
                 _game_result  = NO_GAME;
                 g.random.seed = _random_seed;
-                stack()->push(
-                        new MainPlay(
-                                Handle<Level>(_replay_data.chapter_id - 1), true, &_input_source,
-                                false, &_game_result));
+                stack()->push(new MainPlay(
+                        Handle<Level>(_replay_data.chapter_id - 1), true, &_input_source, false,
+                        &_game_result));
                 break;
 
             case REPLAY:

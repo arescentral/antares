@@ -259,12 +259,10 @@ class OpenGlTextureImpl : public Texture::Impl {
             const Rect& draw_rect, const RgbColor& outline_color,
             const RgbColor& fill_color) const {
         _uniforms.color_mode.set(OUTLINE_SPRITE_MODE);
-        _uniforms.unit.set(
-                {float(_size.width) / draw_rect.width(),
-                 float(_size.height) / draw_rect.height()});
-        _uniforms.outline_color.set(
-                {outline_color.red / 255.0f, outline_color.green / 255.0f,
-                 outline_color.blue / 255.0f, outline_color.alpha / 255.0f});
+        _uniforms.unit.set({float(_size.width) / draw_rect.width(),
+                            float(_size.height) / draw_rect.height()});
+        _uniforms.outline_color.set({outline_color.red / 255.0f, outline_color.green / 255.0f,
+                                     outline_color.blue / 255.0f, outline_color.alpha / 255.0f});
         draw_internal(draw_rect, fill_color);
     }
 

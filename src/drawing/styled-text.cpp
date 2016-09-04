@@ -187,10 +187,8 @@ void StyledText::set_interface_text(sfz::StringSlice text) {
                             inline_pict.bounds = pict.size().as_rect();
                             _inline_picts.push_back(inline_pict);
                             _textures.push_back(pict.texture());
-                            _chars.push_back(
-                                    StyledChar(
-                                            _inline_picts.size() - 1, PICTURE, _fore_color,
-                                            _back_color));
+                            _chars.push_back(StyledChar(
+                                    _inline_picts.size() - 1, PICTURE, _fore_color, _back_color));
                         } catch (sfz::Exception& e) {
                         }
                         found_code = true;

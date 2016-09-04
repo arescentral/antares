@@ -607,10 +607,9 @@ void DataExtractor::extract_original(Observer* observer, const StringSlice& file
             const ResourceType& type = rsrc.at(conversion.resource);
             for (const ResourceEntry& entry : type) {
                 Bytes  data;
-                String output(
-                        format("{0}/com.biggerplanet.ares/{1}/{2}.{3}", _output_dir,
-                               conversion.output_directory, entry.id(),
-                               conversion.output_extension));
+                String output(format(
+                        "{0}/com.biggerplanet.ares/{1}/{2}.{3}", _output_dir,
+                        conversion.output_directory, entry.id(), conversion.output_extension));
                 if (conversion.convert(
                             path::dirname(output), true, entry.id(), entry.data(), data)) {
                     makedirs(path::dirname(output), 0755);

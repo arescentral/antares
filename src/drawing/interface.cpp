@@ -756,99 +756,204 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap
             tRect.bottom - kInterfaceHTop + 1);
     vRect = Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
             */ /*tRect.top + vcenter - kInterfaceVLipHeight + 1*/ /*
-                                                        tRect.bottom - kInterfaceHTop + 1);
+                                                                                                                                            tRect.bottom - kInterfaceHTop + 1);
 
-                                                if ( item.status == kIH_Hilite)
-                                                {
-                                                    shade = LIGHT;
-                                                    mDrawPuffUpRect( uRect, item.hue, shade, pix);
-                                                    mDrawPuffUpRect( vRect, item.hue, shade, pix);
+                                                                                                                                    if (
+                                                                                                                                item.status
+                                                                                                                                ==
+                                                                                                                                kIH_Hilite)
+                                                                                                                                    {
+                                                                                                                                        shade
+                                                                                                                                = LIGHT;
+                                                                                                                                        mDrawPuffUpRect(
+                                                                                                                                uRect,
+                                                                                                                                item.hue,
+                                                                                                                                shade, pix);
+                                                                                                                                        mDrawPuffUpRect(
+                                                                                                                                vRect,
+                                                                                                                                item.hue,
+                                                                                                                                shade, pix);
 
-                                                    wRect.left += 2;
-                                                    wRect.right += 2;
-                                                    FrameOval(pix, wRect, RgbColor::black());
-                                                    wRect.left -= 2;
-                                                    wRect.right -= 2;
-                                                    mDrawPuffUpOval(wRect, item.hue, shade, pix);
+                                                                                                                                        wRect.left
+                                                                                                                                += 2;
+                                                                                                                                        wRect.right
+                                                                                                                                += 2;
+                                                                                                                                        FrameOval(pix,
+                                                                                                                                wRect,
+                                                                                                                                RgbColor::black());
+                                                                                                                                        wRect.left
+                                                                                                                                -= 2;
+                                                                                                                                        wRect.right
+                                                                                                                                -= 2;
+                                                                                                                                        mDrawPuffUpOval(wRect,
+                                                                                                                                item.hue,
+                                                                                                                                shade, pix);
 
-                                                    wRect.inset(3, 3);
-                                                    mDrawPuffDownOval(wRect, item.hue, shade, pix);
-                                                    wRect.inset(1, 1);
+                                                                                                                                        wRect.inset(3,
+                                                                                                                                3);
+                                                                                                                                        mDrawPuffDownOval(wRect,
+                                                                                                                                item.hue,
+                                                                                                                                shade, pix);
+                                                                                                                                        wRect.inset(1,
+                                                                                                                                1);
 
-                                                    if (!item.on) {
-                                                        PaintOval(pix, wRect, RgbColor::black());
-                                                    } else {
-                                                        const RgbColor color =
-                                            GetRGBTranslateColorShade(item.hue, VERY_LIGHT);
-                                                        PaintOval(pix, wRect, color);
-                                                    }
-                                                } else
-                                                {
-                                                    if ( item.status == kDimmed)
-                                                        shade = VERY_DARK;
-                                                    else shade = MEDIUM + kSlightlyLighterColor;
-                                                    mDrawPuffUpRect( uRect, item.hue, shade, pix);
-                                                    mDrawPuffUpRect( vRect, item.hue, shade, pix);
-                                                    wRect.left += 2;
-                                                    wRect.right += 2;
-                                                    FrameOval(pix, wRect, RgbColor::black());
-                                                    wRect.left -= 2;
-                                                    wRect.right -= 2;
-                                                    mDrawPuffUpOval(wRect, item.hue, shade, pix);
+                                                                                                                                        if
+                                                                                                                                (!item.on) {
+                                                                                                                                            PaintOval(pix, wRect, RgbColor::black());
+                                                                                                                                        }
+                                                                                                                                else {
+                                                                                                                                            const RgbColor color =
+                                                                                                                                GetRGBTranslateColorShade(item.hue,
+                                                                                                                                VERY_LIGHT);
+                                                                                                                                            PaintOval(pix, wRect, color);
+                                                                                                                                        }
+                                                                                                                                    } else
+                                                                                                                                    {
+                                                                                                                                        if (
+                                                                                                                                item.status
+                                                                                                                                == kDimmed)
+                                                                                                                                            shade = VERY_DARK;
+                                                                                                                                        else
+                                                                                                                                shade =
+                                                                                                                                MEDIUM +
+                                                                                                                                kSlightlyLighterColor;
+                                                                                                                                        mDrawPuffUpRect(
+                                                                                                                                uRect,
+                                                                                                                                item.hue,
+                                                                                                                                shade, pix);
+                                                                                                                                        mDrawPuffUpRect(
+                                                                                                                                vRect,
+                                                                                                                                item.hue,
+                                                                                                                                shade, pix);
+                                                                                                                                        wRect.left
+                                                                                                                                += 2;
+                                                                                                                                        wRect.right
+                                                                                                                                += 2;
+                                                                                                                                        FrameOval(pix,
+                                                                                                                                wRect,
+                                                                                                                                RgbColor::black());
+                                                                                                                                        wRect.left
+                                                                                                                                -= 2;
+                                                                                                                                        wRect.right
+                                                                                                                                -= 2;
+                                                                                                                                        mDrawPuffUpOval(wRect,
+                                                                                                                                item.hue,
+                                                                                                                                shade, pix);
 
-                                                    wRect.inset(3, 3);
-                                                    mDrawPuffDownOval(wRect, item.hue, shade, pix);
-                                                    wRect.inset(1, 1);
-                                                    if (!item.on) {
-                                                        PaintOval(pix, wRect, RgbColor::black());
-                                                    } else if (item.status == kActive) {
-                                                        const RgbColor color =
-                                            GetRGBTranslateColorShade(item.hue, LIGHT);
-                                                        PaintOval(pix, wRect, color);
-                                                    } else {
-                                                        const RgbColor color =
-                                            GetRGBTranslateColorShade(item.hue, MEDIUM);
-                                                        PaintOval(pix, wRect, color);
-                                                    }
-                                                }
+                                                                                                                                        wRect.inset(3,
+                                                                                                                                3);
+                                                                                                                                        mDrawPuffDownOval(wRect,
+                                                                                                                                item.hue,
+                                                                                                                                shade, pix);
+                                                                                                                                        wRect.inset(1,
+                                                                                                                                1);
+                                                                                                                                        if
+                                                                                                                                (!item.on) {
+                                                                                                                                            PaintOval(pix, wRect, RgbColor::black());
+                                                                                                                                        }
+                                                                                                                                else if
+                                                                                                                                (item.status
+                                                                                                                                == kActive) {
+                                                                                                                                            const RgbColor color =
+                                                                                                                                GetRGBTranslateColorShade(item.hue,
+                                                                                                                                LIGHT);
+                                                                                                                                            PaintOval(pix, wRect, color);
+                                                                                                                                        }
+                                                                                                                                else {
+                                                                                                                                            const RgbColor color =
+                                                                                                                                GetRGBTranslateColorShade(item.hue,
+                                                                                                                                MEDIUM);
+                                                                                                                                            PaintOval(pix, wRect, color);
+                                                                                                                                        }
+                                                                                                                                    }
 
-                                                uRect = Rect(tRect.left +  kInterfaceContentBuffer,
-                                                    tRect.top + kInterfaceContentBuffer,
-                                                    tRect.left +  kInterfaceContentBuffer,
-                                                    tRect.bottom - kInterfaceContentBuffer);
+                                                                                                                                    uRect =
+                                                                                                                                Rect(tRect.left
+                                                                                                                                +
+                                                                                                                                kInterfaceContentBuffer,
+                                                                                                                                        tRect.top
+                                                                                                                                +
+                                                                                                                                kInterfaceContentBuffer,
+                                                                                                                                        tRect.left
+                                                                                                                                +
+                                                                                                                                kInterfaceContentBuffer,
+                                                                                                                                        tRect.bottom
+                                                                                                                                -
+                                                                                                                                kInterfaceContentBuffer);
 
-                                                if ( item.status == kIH_Hilite)
-                                                    shade = LIGHT;
-                                                else shade = DARKEST + kSlightlyLighterColor;
-                                                uRect = Rect(tRect.left +  kInterfaceContentBuffer,
-                                            tRect.top + kInterfaceContentBuffer,
-                                                                tRect.right -
-                                            kInterfaceContentBuffer + 1,
-                                                                tRect.bottom -
-                                            kInterfaceContentBuffer + 1);
-                                                color = GetRGBTranslateColorShade(item.hue, shade);
-                                                pix->view(uRect).fill(color);
+                                                                                                                                    if (
+                                                                                                                                item.status
+                                                                                                                                ==
+                                                                                                                                kIH_Hilite)
+                                                                                                                                        shade
+                                                                                                                                = LIGHT;
+                                                                                                                                    else
+                                                                                                                                shade =
+                                                                                                                                DARKEST +
+                                                                                                                                kSlightlyLighterColor;
+                                                                                                                                    uRect =
+                                                                                                                                Rect(tRect.left
+                                                                                                                                +
+                                                                                                                                kInterfaceContentBuffer,
+                                                                                                                                tRect.top +
+                                                                                                                                kInterfaceContentBuffer,
+                                                                                                                                                    tRect.right -
+                                                                                                                                kInterfaceContentBuffer
+                                                                                                                                + 1,
+                                                                                                                                                    tRect.bottom -
+                                                                                                                                kInterfaceContentBuffer
+                                                                                                                                + 1);
+                                                                                                                                    color =
+                                                                                                                                GetRGBTranslateColorShade(item.hue,
+                                                                                                                                shade);
+                                                                                                                                    pix->view(uRect).fill(color);
 
-                                                if (item.status == kIH_Hilite) {
-                                                    color = GetRGBTranslateColorShade(item.hue,
-                                            DARKEST);
-                                                } else if (item.status == kDimmed) {
-                                                    color = GetRGBTranslateColorShade(item.hue,
-                                            DARK);
-                                                } else {
-                                                    color = GetRGBTranslateColorShade(item.hue,
-                                            LIGHT);
-                                                }
-                                                StringSlice s = item.label;
-                                                swidth = GetInterfaceStringWidth( s, item.style);
-                                                swidth = tRect.left + ( tRect.right - tRect.left) /
-                                            2 - swidth / 2;
-                                                sheight = GetInterfaceFontAscent(item.style) +
-                                            kInterfaceTextVBuffer + tRect.top;
-                                                DrawInterfaceString(Point(swidth, sheight), s,
-                                            item.style, pix, color);
-                                            }
-                                            */
+                                                                                                                                    if
+                                                                                                                                (item.status
+                                                                                                                                ==
+                                                                                                                                kIH_Hilite) {
+                                                                                                                                        color
+                                                                                                                                =
+                                                                                                                                GetRGBTranslateColorShade(item.hue,
+                                                                                                                                DARKEST);
+                                                                                                                                    } else if
+                                                                                                                                (item.status
+                                                                                                                                == kDimmed) {
+                                                                                                                                        color
+                                                                                                                                =
+                                                                                                                                GetRGBTranslateColorShade(item.hue,
+                                                                                                                                DARK);
+                                                                                                                                    } else {
+                                                                                                                                        color
+                                                                                                                                =
+                                                                                                                                GetRGBTranslateColorShade(item.hue,
+                                                                                                                                LIGHT);
+                                                                                                                                    }
+                                                                                                                                    StringSlice
+                                                                                                                                s =
+                                                                                                                                item.label;
+                                                                                                                                    swidth =
+                                                                                                                                GetInterfaceStringWidth(
+                                                                                                                                s,
+                                                                                                                                item.style);
+                                                                                                                                    swidth =
+                                                                                                                                tRect.left +
+                                                                                                                                ( tRect.right
+                                                                                                                                - tRect.left)
+                                                                                                                                /
+                                                                                                                                2 - swidth /
+                                                                                                                                2;
+                                                                                                                                    sheight =
+                                                                                                                                GetInterfaceFontAscent(item.style)
+                                                                                                                                +
+                                                                                                                                kInterfaceTextVBuffer
+                                                                                                                                + tRect.top;
+                                                                                                                                    DrawInterfaceString(Point(swidth,
+                                                                                                                                sheight), s,
+                                                                                                                                item.style,
+                                                                                                                                pix, color);
+                                                                                                                                }
+                                                                                                                                */
 
 void draw_checkbox(Point origin, const CheckboxButton& item) {
     Rect     tRect, uRect, vRect, wRect;
