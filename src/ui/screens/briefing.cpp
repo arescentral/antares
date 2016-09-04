@@ -251,13 +251,9 @@ void BriefingScreen::overlay() const {
             rects.fill({star_rect.right - 1, star.v, bounds.right + 1, star.v + 1}, gold);
         } break;
 
-        case BLANK_SYSTEM_MAP:
-            draw_system_map();
-            break;
+        case BLANK_SYSTEM_MAP: draw_system_map(); break;
 
-        default:
-            draw_brief_point();
-            break;
+        default: draw_brief_point(); break;
     }
 }
 
@@ -270,9 +266,8 @@ void BriefingScreen::mouse_down(const MouseDownEvent& event) {
             const int pict_id = _inline_pict[i].id;
             for (auto obj : BaseObject::all()) {
                 if (obj->pictPortraitResID == pict_id) {
-                    stack()->push(
-                            new ObjectDataScreen(
-                                    event.where(), obj, ObjectDataScreen::MOUSE, event.button()));
+                    stack()->push(new ObjectDataScreen(
+                            event.where(), obj, ObjectDataScreen::MOUSE, event.button()));
                     return;
                 }
             }
@@ -288,26 +283,16 @@ void BriefingScreen::key_down(const KeyDownEvent& event) {
             stack()->pop(this);
         }
             return;
-        case Keys::K1:
-            return show_object_data(0, event);
-        case Keys::K2:
-            return show_object_data(1, event);
-        case Keys::K3:
-            return show_object_data(2, event);
-        case Keys::K4:
-            return show_object_data(3, event);
-        case Keys::K5:
-            return show_object_data(4, event);
-        case Keys::K6:
-            return show_object_data(5, event);
-        case Keys::K7:
-            return show_object_data(6, event);
-        case Keys::K8:
-            return show_object_data(7, event);
-        case Keys::K9:
-            return show_object_data(8, event);
-        case Keys::K0:
-            return show_object_data(9, event);
+        case Keys::K1: return show_object_data(0, event);
+        case Keys::K2: return show_object_data(1, event);
+        case Keys::K3: return show_object_data(2, event);
+        case Keys::K4: return show_object_data(3, event);
+        case Keys::K5: return show_object_data(4, event);
+        case Keys::K6: return show_object_data(5, event);
+        case Keys::K7: return show_object_data(6, event);
+        case Keys::K8: return show_object_data(7, event);
+        case Keys::K9: return show_object_data(8, event);
+        case Keys::K0: return show_object_data(9, event);
         default: { return InterfaceScreen::key_down(event); }
     }
 }
@@ -319,10 +304,8 @@ void BriefingScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
             stack()->pop(this);
         }
             return;
-        case Gamepad::UP:
-            return show_object_data(0, event);
-        case Gamepad::DOWN:
-            return show_object_data(1, event);
+        case Gamepad::UP: return show_object_data(0, event);
+        case Gamepad::DOWN: return show_object_data(1, event);
         default: { return InterfaceScreen::gamepad_button_down(event); }
     }
 }
@@ -342,9 +325,7 @@ void BriefingScreen::adjust_interface() {
 
 void BriefingScreen::handle_button(Button& button) {
     switch (button.id) {
-        case DONE:
-            stack()->pop(this);
-            break;
+        case DONE: stack()->pop(this); break;
 
         case PREVIOUS:
             if (_briefing_point > 0) {
@@ -362,8 +343,7 @@ void BriefingScreen::handle_button(Button& button) {
             build_brief_point();
             break;
 
-        default:
-            throw Exception(format("Got unknown button {0}.", button.id));
+        default: throw Exception(format("Got unknown button {0}.", button.id));
     }
 }
 

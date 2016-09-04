@@ -353,24 +353,14 @@ static void draw_minicomputer_lines() {
 
         rects.fill(but_box_rect, GetRGBTranslateColorShade(kMiniButColor, DARKEST));
         switch (g.mini.lineData[kMiniScreenCharHeight].kind) {
-            case MINI_BUTTON_OFF:
-                button_off(rects, 0);
-                break;
-            case MINI_BUTTON_ON:
-                button_on(rects, 0);
-                break;
-            default:
-                break;
+            case MINI_BUTTON_OFF: button_off(rects, 0); break;
+            case MINI_BUTTON_ON: button_on(rects, 0); break;
+            default: break;
         }
         switch (g.mini.lineData[kMiniScreenCharHeight + 1].kind) {
-            case MINI_BUTTON_OFF:
-                button_off(rects, 1);
-                break;
-            case MINI_BUTTON_ON:
-                button_on(rects, 1);
-                break;
-            default:
-                break;
+            case MINI_BUTTON_OFF: button_off(rects, 1); break;
+            case MINI_BUTTON_ON: button_on(rects, 1); break;
+            default: break;
         }
     }
 
@@ -398,8 +388,7 @@ static void draw_minicomputer_lines() {
                     button_off_text(
                             quads, count, g.mini.lineData[count + kMiniScreenCharHeight].string);
                     break;
-                default:
-                    break;
+                default: break;
             }
         }
     }
@@ -411,9 +400,7 @@ void draw_mini_screen() {
         case kBuildMiniScreen:
         case kSpecialMiniScreen:
         case kMessageMiniScreen:
-        case kStatusMiniScreen:
-            draw_minicomputer_lines();
-            break;
+        case kStatusMiniScreen: draw_minicomputer_lines(); break;
     }
     draw_mini_ship_data(
             g.admiral->control(), YELLOW, kMiniSelectTop + instrument_top(), "CONTROL");
@@ -477,9 +464,7 @@ static void make_mini_screen(int16_t screen, vector<miniScreenLineType> lines) {
                 }
             // fall through
 
-            case MINI_NONE:
-                dst = item++;
-                break;
+            case MINI_NONE: dst = item++; break;
 
             case MINI_BUTTON_ON:
             case MINI_BUTTON_OFF:
@@ -614,13 +599,9 @@ static void update_status_screen_lines() {
 // only for updating volitile lines--doesn't draw whole screen!
 void UpdateMiniScreenLines() {
     switch (g.mini.currentScreen) {
-        case kBuildMiniScreen:
-            update_build_screen_lines();
-            break;
+        case kBuildMiniScreen: update_build_screen_lines(); break;
 
-        case kStatusMiniScreen:
-            update_status_screen_lines();
-            break;
+        case kStatusMiniScreen: update_status_screen_lines(); break;
     }
 }
 
@@ -1215,14 +1196,10 @@ void MiniComputerMakeStatusString(int32_t which_line, String& string) {
             break;
 
         case kIntegerValue:
-        case kIntegerMinusValue:
-            print(string, line.value);
-            break;
+        case kIntegerMinusValue: print(string, line.value); break;
 
         case kSmallFixedValue:
-        case kSmallFixedMinusValue:
-            print(string, Fixed::from_val(line.value));
-            break;
+        case kSmallFixedMinusValue: print(string, Fixed::from_val(line.value)); break;
     }
     if (line.statusType != kPlainTextStatus) {
         print(string, line.postString);
@@ -1237,9 +1214,7 @@ int32_t MiniComputerGetStatusValue(int32_t whichLine) {
     }
 
     switch (line->statusType) {
-        case kPlainTextStatus:
-            return 0;
-            break;
+        case kPlainTextStatus: return 0; break;
 
         case kTrueFalseCondition:
             if (g.level->condition(line->whichStatus)->true_yet()) {
@@ -1259,9 +1234,7 @@ int32_t MiniComputerGetStatusValue(int32_t whichLine) {
             return line->negativeValue - GetAdmiralScore(line->statusPlayer, line->whichStatus);
             break;
 
-        default:
-            return 0;
-            break;
+        default: return 0; break;
     }
 }
 
@@ -1530,21 +1503,11 @@ void MiniComputer_SetScreenAndLineHack(int32_t whichScreen, int32_t whichLine) {
     Point w;
 
     switch (whichScreen) {
-        case kBuildMiniScreen:
-            show_build_screen(g.admiral, 0);
-            break;
-        case kSpecialMiniScreen:
-            show_special_screen(g.admiral, 0);
-            break;
-        case kMessageMiniScreen:
-            show_message_screen(g.admiral, 0);
-            break;
-        case kStatusMiniScreen:
-            show_status_screen(g.admiral, 0);
-            break;
-        default:
-            show_main_screen(g.admiral, 0);
-            break;
+        case kBuildMiniScreen: show_build_screen(g.admiral, 0); break;
+        case kSpecialMiniScreen: show_special_screen(g.admiral, 0); break;
+        case kMessageMiniScreen: show_message_screen(g.admiral, 0); break;
+        case kStatusMiniScreen: show_status_screen(g.admiral, 0); break;
+        default: show_main_screen(g.admiral, 0); break;
     }
 
     w.v = (whichLine * sys.fonts.computer->height) + (kMiniScreenTop + instrument_top());

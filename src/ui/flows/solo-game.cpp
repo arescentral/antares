@@ -64,9 +64,8 @@ void SoloGame::become_front() {
         case START_LEVEL:
             _state = PROLOGUE;
             if (_level->prologue_id() > 0) {
-                stack()->push(
-                        new ScrollTextScreen(
-                                _level->prologue_id(), 450, kSlowScrollInterval, 4002));
+                stack()->push(new ScrollTextScreen(
+                        _level->prologue_id(), 450, kSlowScrollInterval, 4002));
                 break;
             }
         // else fall through
@@ -78,17 +77,11 @@ void SoloGame::become_front() {
             stack()->push(new MainPlay(_level, false, &_input_source, true, &_game_result));
             break;
 
-        case PLAYING:
-            handle_game_result();
-            break;
+        case PLAYING: handle_game_result(); break;
 
-        case EPILOGUE:
-            epilogue_done();
-            break;
+        case EPILOGUE: epilogue_done(); break;
 
-        case QUIT:
-            stack()->pop(this);
-            break;
+        case QUIT: stack()->pop(this); break;
     }
 }
 

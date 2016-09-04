@@ -229,9 +229,8 @@ String wrap(const char* value) {
 
 String wrap(sfz::StringSlice value) {
     Bytes bytes(utf8::encode(value));
-    return String(
-            CFStringCreateWithBytes(
-                    NULL, bytes.data(), bytes.size(), kCFStringEncodingUTF8, false));
+    return String(CFStringCreateWithBytes(
+            NULL, bytes.data(), bytes.size(), kCFStringEncodingUTF8, false));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -291,9 +290,8 @@ bool unwrap(const String& cfvalue, sfz::String& value) {
     if (!cfvalue.c_obj()) {
         return false;
     }
-    Data encoded(
-            CFStringCreateExternalRepresentation(
-                    NULL, cfvalue.c_obj(), kCFStringEncodingUTF8, '?'));
+    Data encoded(CFStringCreateExternalRepresentation(
+            NULL, cfvalue.c_obj(), kCFStringEncodingUTF8, '?'));
     print(value, utf8::decode(encoded.data()));
     return true;
 }

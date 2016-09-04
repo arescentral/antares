@@ -53,17 +53,11 @@ OptionsScreen::OptionsScreen() : _state(SOUND_CONTROL), _revert(sys.prefs->get()
 
 void OptionsScreen::become_front() {
     switch (_state) {
-        case SOUND_CONTROL:
-            stack()->push(new SoundControlScreen(&_state));
-            break;
+        case SOUND_CONTROL: stack()->push(new SoundControlScreen(&_state)); break;
 
-        case KEY_CONTROL:
-            stack()->push(new KeyControlScreen(&_state));
-            break;
+        case KEY_CONTROL: stack()->push(new KeyControlScreen(&_state)); break;
 
-        case ACCEPT:
-            stack()->pop(this);
-            break;
+        case ACCEPT: stack()->pop(this); break;
 
         case CANCEL:
             sys.prefs->set(_revert);
@@ -139,8 +133,7 @@ void SoundControlScreen::handle_button(Button& button) {
             stack()->pop(this);
             break;
 
-        default:
-            throw Exception(format("Got unknown button {0}.", button.id));
+        default: throw Exception(format("Got unknown button {0}.", button.id));
     }
 }
 
@@ -170,14 +163,10 @@ void SoundControlScreen::overlay() const {
 
 OptionsScreen::State SoundControlScreen::button_state(int button) {
     switch (button) {
-        case DONE:
-            return OptionsScreen::ACCEPT;
-        case CANCEL:
-            return OptionsScreen::CANCEL;
-        case KEY_CONTROL:
-            return OptionsScreen::KEY_CONTROL;
-        default:
-            throw Exception(format("unknown sound control button {0}", button));
+        case DONE: return OptionsScreen::ACCEPT;
+        case CANCEL: return OptionsScreen::CANCEL;
+        case KEY_CONTROL: return OptionsScreen::KEY_CONTROL;
+        default: throw Exception(format("unknown sound control button {0}", button));
     }
 }
 
@@ -338,31 +327,21 @@ void KeyControlScreen::overlay() const {
 
 OptionsScreen::State KeyControlScreen::button_state(int button) {
     switch (button) {
-        case DONE:
-            return OptionsScreen::ACCEPT;
-        case CANCEL:
-            return OptionsScreen::CANCEL;
-        case SOUND_CONTROL:
-            return OptionsScreen::SOUND_CONTROL;
-        default:
-            throw Exception(format("unknown key control button {0}", button));
+        case DONE: return OptionsScreen::ACCEPT;
+        case CANCEL: return OptionsScreen::CANCEL;
+        case SOUND_CONTROL: return OptionsScreen::SOUND_CONTROL;
+        default: throw Exception(format("unknown key control button {0}", button));
     }
 }
 
 KeyControlScreen::Tab KeyControlScreen::button_tab(int button) {
     switch (button) {
-        case SHIP_TAB:
-            return SHIP;
-        case COMMAND_TAB:
-            return COMMAND;
-        case SHORTCUT_TAB:
-            return SHORTCUT;
-        case UTILITY_TAB:
-            return UTILITY;
-        case HOT_KEY_TAB:
-            return HOT_KEY;
-        default:
-            throw Exception(format("unknown key control tab {0}", button));
+        case SHIP_TAB: return SHIP;
+        case COMMAND_TAB: return COMMAND;
+        case SHORTCUT_TAB: return SHORTCUT;
+        case UTILITY_TAB: return UTILITY;
+        case HOT_KEY_TAB: return HOT_KEY;
+        default: throw Exception(format("unknown key control tab {0}", button));
     }
 }
 

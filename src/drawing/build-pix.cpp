@@ -135,20 +135,18 @@ BuildPix::BuildPix(int text_id, int width) : _size({width, 0}) {
                         }
                     }
                     Picture pict(id);
-                    _lines.push_back(
-                            Line{
-                                    Line::BACKGROUND, Picture(id).texture(), nullptr,
-                            });
+                    _lines.push_back(Line{
+                            Line::BACKGROUND, Picture(id).texture(), nullptr,
+                    });
                 } else {
                     int32_t id;
                     if (!string_to_int(line.slice(2), id)) {
                         throw Exception(format("malformed header line {0}", quote(line)));
                     }
                     Picture pict(id);
-                    _lines.push_back(
-                            Line{
-                                    Line::PICTURE, Picture(id).texture(), nullptr,
-                            });
+                    _lines.push_back(Line{
+                            Line::PICTURE, Picture(id).texture(), nullptr,
+                    });
                 }
             }
         } else {
@@ -163,14 +161,9 @@ BuildPix::BuildPix(int text_id, int width) : _size({width, 0}) {
 
     for (const auto& line : _lines) {
         switch (line.type) {
-            case Line::PICTURE:
-                _size.height += line.texture.size().height;
-                break;
-            case Line::TEXT:
-                _size.height += line.text->height();
-                break;
-            case Line::BACKGROUND:
-                break;
+            case Line::PICTURE: _size.height += line.texture.size().height; break;
+            case Line::TEXT: _size.height += line.text->height(); break;
+            case Line::BACKGROUND: break;
         }
     }
 }
@@ -179,15 +172,9 @@ void BuildPix::draw(Point origin) const {
     PixDraw draw(origin, _size.width);
     for (const auto& line : _lines) {
         switch (line.type) {
-            case Line::PICTURE:
-                draw.add_picture(line.texture);
-                break;
-            case Line::TEXT:
-                draw.add_text(*line.text);
-                break;
-            case Line::BACKGROUND:
-                draw.set_background(line.texture);
-                break;
+            case Line::PICTURE: draw.add_picture(line.texture); break;
+            case Line::TEXT: draw.add_text(*line.text); break;
+            case Line::BACKGROUND: draw.set_background(line.texture); break;
         }
     }
 }

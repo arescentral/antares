@@ -88,9 +88,7 @@ void StyledText::set_retro_text(sfz::StringSlice text) {
                 _chars.push_back(StyledChar(' ', NONE, fore_color, back_color));
                 break;
 
-            case ' ':
-                _chars.push_back(StyledChar(' ', WORD_BREAK, fore_color, back_color));
-                break;
+            case ' ': _chars.push_back(StyledChar(' ', WORD_BREAK, fore_color, back_color)); break;
 
             case '\\':
                 if (i + 1 >= text.size()) {
@@ -142,9 +140,7 @@ void StyledText::set_retro_text(sfz::StringSlice text) {
                 }
                 break;
 
-            default:
-                _chars.push_back(StyledChar(text.at(i), NONE, fore_color, back_color));
-                break;
+            default: _chars.push_back(StyledChar(text.at(i), NONE, fore_color, back_color)); break;
         }
     }
     _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
@@ -187,10 +183,8 @@ void StyledText::set_interface_text(sfz::StringSlice text) {
                             inline_pict.bounds = pict.size().as_rect();
                             _inline_picts.push_back(inline_pict);
                             _textures.push_back(pict.texture());
-                            _chars.push_back(
-                                    StyledChar(
-                                            _inline_picts.size() - 1, PICTURE, _fore_color,
-                                            _back_color));
+                            _chars.push_back(StyledChar(
+                                    _inline_picts.size() - 1, PICTURE, _fore_color, _back_color));
                         } catch (sfz::Exception& e) {
                         }
                         found_code = true;
@@ -247,9 +241,7 @@ void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
                 v += _font->height + _line_spacing;
                 break;
 
-            case WORD_BREAK:
-                h += _font->char_width(_chars[i].character);
-                break;
+            case WORD_BREAK: h += _font->char_width(_chars[i].character); break;
 
             case PICTURE: {
                 inlinePictType* pict = &_inline_picts[_chars[i].character];
@@ -264,8 +256,7 @@ void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
                 }
             } break;
 
-            case DELAY:
-                break;
+            case DELAY: break;
         }
     }
     _height = v;
@@ -341,8 +332,7 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
                     }
                     break;
 
-                default:
-                    break;
+                default: break;
             }
         }
     }
@@ -395,8 +385,7 @@ int StyledText::move_word_down(int index, int v) {
     for (int i = index; i >= 0; --i) {
         switch (_chars[i].special) {
             case LINE_BREAK:
-            case PICTURE:
-                return _side_margin;
+            case PICTURE: return _side_margin;
 
             case WORD_BREAK:
             case TAB:
@@ -414,8 +403,7 @@ int StyledText::move_word_down(int index, int v) {
                 return h;
             }
 
-            case NONE:
-                break;
+            case NONE: break;
         }
     }
     return _side_margin;

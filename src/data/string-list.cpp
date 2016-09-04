@@ -61,18 +61,14 @@ struct StringListVisitor : public JsonDefaultVisitor {
                 }
                 _state = DONE;
                 break;
-            default:
-                return JsonDefaultVisitor::visit_array(value);
+            default: return JsonDefaultVisitor::visit_array(value);
         }
     }
 
     virtual void visit_string(const StringSlice& value) const {
         switch (_state) {
-            case ARRAY:
-                _vec.emplace_back(value);
-                break;
-            default:
-                return JsonDefaultVisitor::visit_string(value);
+            case ARRAY: _vec.emplace_back(value); break;
+            default: return JsonDefaultVisitor::visit_string(value);
         }
     }
 

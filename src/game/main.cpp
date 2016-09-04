@@ -388,9 +388,7 @@ void GamePlay::become_front() {
             break;
 
         case PAUSED:
-        case HELP:
-            _state = PLAYING;
-            break;
+        case HELP: _state = PLAYING; break;
 
         case PLAY_AGAIN:
             switch (_play_again) {
@@ -410,9 +408,7 @@ void GamePlay::become_front() {
                     stack()->pop(this);
                     break;
 
-                case PlayAgainScreen::RESUME:
-                    _state = PLAYING;
-                    break;
+                case PlayAgainScreen::RESUME: _state = PLAYING; break;
 
                 case PlayAgainScreen::SKIP:
                     *_game_result  = WIN_GAME;
@@ -423,8 +419,7 @@ void GamePlay::become_front() {
                     stack()->pop(this);
                     break;
 
-                default:
-                    throw Exception(format("invalid play again result {0}", _play_again));
+                default: throw Exception(format("invalid play again result {0}", _play_again));
             }
             break;
 
@@ -566,9 +561,7 @@ void GamePlay::fire_timer() {
 
     switch (*_game_result) {
         case QUIT_GAME:
-        case RESTART_GAME:
-            stack()->pop(this);
-            break;
+        case RESTART_GAME: stack()->pop(this); break;
 
         case WIN_GAME:
             if (_replay || (g.victory_text < 0)) {
@@ -576,10 +569,9 @@ void GamePlay::fire_timer() {
             } else {
                 _state        = DEBRIEFING;
                 const auto& a = g.admiral;
-                stack()->push(
-                        new DebriefingScreen(
-                                g.victory_text, g.time, g.level->parTime, GetAdmiralLoss(a),
-                                g.level->parLosses, GetAdmiralKill(a), g.level->parKills));
+                stack()->push(new DebriefingScreen(
+                        g.victory_text, g.time, g.level->parTime, GetAdmiralLoss(a),
+                        g.level->parLosses, GetAdmiralKill(a), g.level->parKills));
             }
             break;
 

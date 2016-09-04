@@ -122,16 +122,12 @@ void read_from(ReadSource in, Level::Condition& level_condition) {
     switch (level_condition.condition) {
         case kCounterCondition:
         case kCounterGreaterCondition:
-        case kCounterNotCondition:
-            read(sub, level_condition.conditionArgument.counter);
-            break;
+        case kCounterNotCondition: read(sub, level_condition.conditionArgument.counter); break;
 
         case kDestructionCondition:
         case kOwnerCondition:
         case kNoShipsLeftCondition:
-        case kZoomLevelCondition:
-            read(sub, level_condition.conditionArgument.longValue);
-            break;
+        case kZoomLevelCondition: read(sub, level_condition.conditionArgument.longValue); break;
 
         case kVelocityLessThanEqualToCondition:
             read(sub, level_condition.conditionArgument.fixedValue);
@@ -172,16 +168,11 @@ void read_from(ReadSource in, Level::BriefPoint& brief_point) {
     BytesSlice sub(section, 8);
     switch (brief_point.briefPointKind) {
         case kNoPointKind:
-        case kBriefFreestandingKind:
-            break;
+        case kBriefFreestandingKind: break;
 
-        case kBriefObjectKind:
-            read(sub, brief_point.briefPointData.objectBriefType);
-            break;
+        case kBriefObjectKind: read(sub, brief_point.briefPointData.objectBriefType); break;
 
-        case kBriefAbsoluteKind:
-            read(sub, brief_point.briefPointData.absoluteBriefType);
-            break;
+        case kBriefAbsoluteKind: read(sub, brief_point.briefPointData.absoluteBriefType); break;
     }
 }
 

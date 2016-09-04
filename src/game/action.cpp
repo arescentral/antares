@@ -724,128 +724,48 @@ static void execute_actions(
 
         switch (action->verb) {
             case kCreateObject:
-            case kCreateObjectSetDest:
-                create_object(action, focus, subject, offset);
-                break;
+            case kCreateObjectSetDest: create_object(action, focus, subject, offset); break;
 
-            case kPlaySound:
-                play_sound(action, focus);
-                break;
-            case kMakeSparks:
-                make_sparks(action, focus);
-                break;
-            case kDie:
-                die(action, focus, subject);
-                break;
-            case kNilTarget:
-                nil_target(action, focus);
-                break;
-            case kLandAt:
-                land_at(action, focus, subject);
-                break;
-            case kEnterWarp:
-                enter_warp(action, focus, subject);
-                break;
-            case kChangeScore:
-                change_score(action, focus);
-                break;
-            case kDeclareWinner:
-                declare_winner(action, focus);
-                break;
-            case kDisplayMessage:
-                display_message(action, focus);
-                break;
-            case kSetDestination:
-                set_destination(action, focus, subject);
-                break;
-            case kActivateSpecial:
-                activate_special(action, focus, subject);
-                break;
-            case kActivatePulse:
-                activate_pulse(action, focus, subject);
-                break;
-            case kActivateBeam:
-                activate_beam(action, focus, subject);
-                break;
-            case kColorFlash:
-                color_flash(action, focus);
-                break;
-            case kEnableKeys:
-                enable_keys(action, focus);
-                break;
-            case kDisableKeys:
-                disable_keys(action, focus);
-                break;
-            case kSetZoom:
-                set_zoom(action, focus);
-                break;
-            case kComputerSelect:
-                computer_select(action, focus);
-                break;
-            case kAssumeInitialObject:
-                assume_initial_object(action, focus);
-                break;
+            case kPlaySound: play_sound(action, focus); break;
+            case kMakeSparks: make_sparks(action, focus); break;
+            case kDie: die(action, focus, subject); break;
+            case kNilTarget: nil_target(action, focus); break;
+            case kLandAt: land_at(action, focus, subject); break;
+            case kEnterWarp: enter_warp(action, focus, subject); break;
+            case kChangeScore: change_score(action, focus); break;
+            case kDeclareWinner: declare_winner(action, focus); break;
+            case kDisplayMessage: display_message(action, focus); break;
+            case kSetDestination: set_destination(action, focus, subject); break;
+            case kActivateSpecial: activate_special(action, focus, subject); break;
+            case kActivatePulse: activate_pulse(action, focus, subject); break;
+            case kActivateBeam: activate_beam(action, focus, subject); break;
+            case kColorFlash: color_flash(action, focus); break;
+            case kEnableKeys: enable_keys(action, focus); break;
+            case kDisableKeys: disable_keys(action, focus); break;
+            case kSetZoom: set_zoom(action, focus); break;
+            case kComputerSelect: computer_select(action, focus); break;
+            case kAssumeInitialObject: assume_initial_object(action, focus); break;
 
-            case kAlterDamage:
-                alter_damage(action, focus);
-                break;
-            case kAlterVelocity:
-                alter_velocity(action, focus, subject, object);
-                break;
-            case kAlterThrust:
-                alter_thrust(action, focus);
-                break;
-            case kAlterMaxVelocity:
-                alter_max_velocity(action, focus);
-                break;
-            case kAlterLocation:
-                alter_location(action, focus, subject, object);
-                break;
-            case kAlterWeapon1:
-                alter_weapon1(action, focus);
-                break;
-            case kAlterWeapon2:
-                alter_weapon2(action, focus);
-                break;
-            case kAlterSpecial:
-                alter_special(action, focus);
-                break;
-            case kAlterEnergy:
-                alter_energy(action, focus);
-                break;
-            case kAlterOwner:
-                alter_owner(action, focus, subject, object);
-                break;
-            case kAlterHidden:
-                alter_hidden(action);
-                break;
-            case kAlterCloak:
-                alter_cloak(action, focus);
-                break;
-            case kAlterOffline:
-                alter_offline(action, focus);
-                break;
-            case kAlterSpin:
-                alter_spin(action, focus);
-                break;
-            case kAlterBaseType:
-                alter_base_type(action, focus, object);
-                break;
-            case kAlterConditionTrueYet:
-                alter_condition_true_yet(action);
-                break;
-            case kAlterOccupation:
-                alter_occupation(action, focus, subject);
-                break;
-            case kAlterAbsoluteCash:
-                alter_absolute_cash(action, focus);
-                break;
-            case kAlterAge:
-                alter_age(action, focus);
-                break;
-            case kAlterAbsoluteLocation:
-                alter_absolute_location(action, focus);
-                break;
+            case kAlterDamage: alter_damage(action, focus); break;
+            case kAlterVelocity: alter_velocity(action, focus, subject, object); break;
+            case kAlterThrust: alter_thrust(action, focus); break;
+            case kAlterMaxVelocity: alter_max_velocity(action, focus); break;
+            case kAlterLocation: alter_location(action, focus, subject, object); break;
+            case kAlterWeapon1: alter_weapon1(action, focus); break;
+            case kAlterWeapon2: alter_weapon2(action, focus); break;
+            case kAlterSpecial: alter_special(action, focus); break;
+            case kAlterEnergy: alter_energy(action, focus); break;
+            case kAlterOwner: alter_owner(action, focus, subject, object); break;
+            case kAlterHidden: alter_hidden(action); break;
+            case kAlterCloak: alter_cloak(action, focus); break;
+            case kAlterOffline: alter_offline(action, focus); break;
+            case kAlterSpin: alter_spin(action, focus); break;
+            case kAlterBaseType: alter_base_type(action, focus, object); break;
+            case kAlterConditionTrueYet: alter_condition_true_yet(action); break;
+            case kAlterOccupation: alter_occupation(action, focus, subject); break;
+            case kAlterAbsoluteCash: alter_absolute_cash(action, focus); break;
+            case kAlterAge: alter_age(action, focus); break;
+            case kAlterAbsoluteLocation: alter_absolute_location(action, focus); break;
 
             case kAlterMaxThrust:
             case kAlterMaxTurnRate:
@@ -853,15 +773,12 @@ static void execute_actions(
             case kAlterAttributes:
             case kAlterLevelKeyTag:
             case kAlterOrderKeyTag:
-            case kAlterEngageKeyTag: /* not implemented */
-                break;
+            case kAlterEngageKeyTag: /* not implemented */ break;
         }
 
         switch (action->verb) {
             case kChangeScore:
-            case kDisplayMessage:
-                checkConditions = true;
-                break;
+            case kDisplayMessage: checkConditions = true; break;
         }
     }
 

@@ -229,19 +229,15 @@ static void hide_unhide(AntaresWindow* window, NSPoint location) {
 static int button_for(NSEvent* event) {
     switch ([event type]) {
         case NSLeftMouseDown:
-        case NSLeftMouseUp:
-            return 0;
+        case NSLeftMouseUp: return 0;
 
         case NSRightMouseDown:
-        case NSRightMouseUp:
-            return 1;
+        case NSRightMouseUp: return 1;
 
         case NSOtherMouseDown:
-        case NSOtherMouseUp:
-            return 2;
+        case NSOtherMouseUp: return 2;
 
-        default:
-            return -1;
+        default: return -1;
     }
 }
 
@@ -296,12 +292,9 @@ bool antares_event_translator_next(AntaresEventTranslator* translator, int64_t u
         // Send non-key events.
         switch ([event type]) {
             case NSKeyDown:
-            case NSKeyUp:
-                break;
+            case NSKeyUp: break;
 
-            default:
-                [NSApp sendEvent:event];
-                break;
+            default: [NSApp sendEvent:event]; break;
         };
 
         // Handle events.
@@ -325,9 +318,7 @@ bool antares_event_translator_next(AntaresEventTranslator* translator, int64_t u
                 waiting = false;
                 break;
 
-            case NSApplicationDefined:
-                waiting = false;
-                break;
+            case NSApplicationDefined: waiting = false; break;
 
             case NSFlagsChanged:
                 if ([event modifierFlags] & NSAlphaShiftKeyMask) {
@@ -337,8 +328,7 @@ bool antares_event_translator_next(AntaresEventTranslator* translator, int64_t u
                 }
                 break;
 
-            default:
-                break;
+            default: break;
         }
     }
     [pool drain];

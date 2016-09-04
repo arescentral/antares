@@ -193,21 +193,11 @@ static T read_message(ReadSource in) {
 void read_from(ReadSource in, ReplayData& replay) {
     while (!in.empty()) {
         switch (read_varint<uint64_t>(in)) {
-            case SCENARIO:
-                replay.scenario = read_message<ReplayData::Scenario>(in);
-                break;
-            case CHAPTER:
-                replay.chapter_id = read_varint<int32_t>(in);
-                break;
-            case GLOBAL_SEED:
-                replay.global_seed = read_varint<int32_t>(in);
-                break;
-            case DURATION:
-                replay.duration = read_varint<uint64_t>(in);
-                break;
-            case ACTION:
-                replay.actions.push_back(read_message<ReplayData::Action>(in));
-                break;
+            case SCENARIO: replay.scenario       = read_message<ReplayData::Scenario>(in); break;
+            case CHAPTER: replay.chapter_id      = read_varint<int32_t>(in); break;
+            case GLOBAL_SEED: replay.global_seed = read_varint<int32_t>(in); break;
+            case DURATION: replay.duration       = read_varint<uint64_t>(in); break;
+            case ACTION: replay.actions.push_back(read_message<ReplayData::Action>(in)); break;
         }
     }
 }
@@ -215,12 +205,8 @@ void read_from(ReadSource in, ReplayData& replay) {
 void read_from(ReadSource in, ReplayData::Scenario& scenario) {
     while (!in.empty()) {
         switch (read_varint<uint64_t>(in)) {
-            case SCENARIO_IDENTIFIER:
-                scenario.identifier = read_string(in);
-                break;
-            case SCENARIO_VERSION:
-                scenario.version = read_string(in);
-                break;
+            case SCENARIO_IDENTIFIER: scenario.identifier = read_string(in); break;
+            case SCENARIO_VERSION: scenario.version       = read_string(in); break;
         }
     }
 }
@@ -228,15 +214,9 @@ void read_from(ReadSource in, ReplayData::Scenario& scenario) {
 void read_from(ReadSource in, ReplayData::Action& action) {
     while (!in.empty()) {
         switch (read_varint<uint64_t>(in)) {
-            case ACTION_AT:
-                action.at = read_varint<uint64_t>(in);
-                break;
-            case ACTION_KEY_DOWN:
-                action.keys_down.push_back(read_varint<uint8_t>(in));
-                break;
-            case ACTION_KEY_UP:
-                action.keys_up.push_back(read_varint<uint8_t>(in));
-                break;
+            case ACTION_AT: action.at = read_varint<uint64_t>(in); break;
+            case ACTION_KEY_DOWN: action.keys_down.push_back(read_varint<uint8_t>(in)); break;
+            case ACTION_KEY_UP: action.keys_up.push_back(read_varint<uint8_t>(in)); break;
         }
     }
 }

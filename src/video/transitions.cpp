@@ -152,9 +152,7 @@ PictFade::~PictFade() {}
 
 void PictFade::become_front() {
     switch (_state) {
-        case NEW:
-            wax();
-            break;
+        case NEW: wax(); break;
 
         case WAXING:
             if (!this->skip()) {
@@ -169,8 +167,7 @@ void PictFade::become_front() {
             stack()->pop(this);
             break;
 
-        default:
-            break;
+        default: break;
     }
 }
 
@@ -215,16 +212,14 @@ void PictFade::draw() const {
 
 void PictFade::wax() {
     _state = WAXING;
-    stack()->push(
-            new ColorFade(
-                    ColorFade::FROM_COLOR, RgbColor::black(), this->fade_time(), true, _skipped));
+    stack()->push(new ColorFade(
+            ColorFade::FROM_COLOR, RgbColor::black(), this->fade_time(), true, _skipped));
 }
 
 void PictFade::wane() {
     _state = WANING;
-    stack()->push(
-            new ColorFade(
-                    ColorFade::TO_COLOR, RgbColor::black(), this->fade_time(), true, _skipped));
+    stack()->push(new ColorFade(
+            ColorFade::TO_COLOR, RgbColor::black(), this->fade_time(), true, _skipped));
 }
 
 usecs PictFade::fade_time() const {

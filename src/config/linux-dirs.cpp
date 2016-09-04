@@ -21,7 +21,6 @@
 #include <sys/param.h>
 #include <unistd.h>
 #include <sfz/sfz.hpp>
-#include <sys/param.h>
 
 using sfz::String;
 using sfz::format;

@@ -142,18 +142,10 @@ struct CocoaVideoDriver::EventBridge {
         IOHIDElementRef element    = IOHIDValueGetElement(value);
         uint32_t        usage_page = IOHIDElementGetUsagePage(element);
         switch (usage_page) {
-            case kHIDPage_KeyboardOrKeypad:
-                self->key_event(result, element, value);
-                break;
-            case kHIDPage_GenericDesktop:
-                self->analog_event(result, element, value);
-                break;
-            case kHIDPage_Button:
-                self->button_event(result, element, value);
-                break;
-            default:
-                sfz::print(sfz::io::err, sfz::format("{0}\n", usage_page));
-                break;
+            case kHIDPage_KeyboardOrKeypad: self->key_event(result, element, value); break;
+            case kHIDPage_GenericDesktop: self->analog_event(result, element, value); break;
+            case kHIDPage_Button: self->button_event(result, element, value); break;
+            default: sfz::print(sfz::io::err, sfz::format("{0}\n", usage_page)); break;
         }
     }
 
@@ -214,9 +206,7 @@ struct CocoaVideoDriver::EventBridge {
                 enqueue(new GamepadStickEvent(_now(), kHIDUsage_GD_X + x_component[usage], x, y));
             } break;
             case kHIDUsage_GD_Z:
-            case kHIDUsage_GD_Rz:
-                button_event(result, element, value);
-                break;
+            case kHIDUsage_GD_Rz: button_event(result, element, value); break;
         }
     }
 
@@ -274,16 +264,12 @@ void CocoaVideoDriver::loop(Card* initial) {
     antares_event_translator_set_caps_unlock_callback(
             _translator.c_obj(), EventBridge::caps_unlock, &bridge);
 
-    cf::MutableDictionary keyboard(
-            CFDictionaryCreateMutable(
-                    NULL, 0, &kCFCopyStringDictionaryKeyCallBacks,
-                    &kCFTypeDictionaryValueCallBacks));
+    cf::MutableDictionary keyboard(CFDictionaryCreateMutable(
+            NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
     keyboard.set(CFSTR(kIOHIDDeviceUsagePageKey), cf::wrap(kHIDPage_GenericDesktop).c_obj());
     keyboard.set(CFSTR(kIOHIDDeviceUsageKey), cf::wrap(kHIDUsage_GD_Keyboard).c_obj());
-    cf::MutableDictionary gamepad(
-            CFDictionaryCreateMutable(
-                    NULL, 0, &kCFCopyStringDictionaryKeyCallBacks,
-                    &kCFTypeDictionaryValueCallBacks));
+    cf::MutableDictionary gamepad(CFDictionaryCreateMutable(
+            NULL, 0, &kCFCopyStringDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
     gamepad.set(CFSTR(kIOHIDDeviceUsagePageKey), cf::wrap(kHIDPage_GenericDesktop).c_obj());
     gamepad.set(CFSTR(kIOHIDDeviceUsageKey), cf::wrap(kHIDUsage_GD_GamePad).c_obj());
     cf::MutableArray criteria(CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks));

@@ -158,8 +158,7 @@ struct FontVisitor : public JsonDefaultVisitor {
                 }
                 break;
 
-            default:
-                return visit_default("object");
+            default: return visit_default("object");
         }
     }
 
@@ -172,36 +171,20 @@ struct FontVisitor : public JsonDefaultVisitor {
                 scale   = glyph_table.scale();
                 break;
             }
-            default:
-                return visit_default("string");
+            default: return visit_default("string");
         }
     }
 
     virtual void visit_number(double value) const {
         switch (state.state) {
-            case LOGICAL_WIDTH:
-                logical_width = value;
-                break;
-            case HEIGHT:
-                height = value;
-                break;
-            case ASCENT:
-                ascent = value;
-                break;
-            case GLYPH_LEFT:
-                state.glyph_rect.left = value;
-                break;
-            case GLYPH_TOP:
-                state.glyph_rect.top = value;
-                break;
-            case GLYPH_RIGHT:
-                state.glyph_rect.right = value;
-                break;
-            case GLYPH_BOTTOM:
-                state.glyph_rect.bottom = value;
-                break;
-            default:
-                return visit_default("number");
+            case LOGICAL_WIDTH: logical_width          = value; break;
+            case HEIGHT: height                        = value; break;
+            case ASCENT: ascent                        = value; break;
+            case GLYPH_LEFT: state.glyph_rect.left     = value; break;
+            case GLYPH_TOP: state.glyph_rect.top       = value; break;
+            case GLYPH_RIGHT: state.glyph_rect.right   = value; break;
+            case GLYPH_BOTTOM: state.glyph_rect.bottom = value; break;
+            default: return visit_default("number");
         }
     }
 

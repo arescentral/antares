@@ -300,25 +300,15 @@ void UpdateRadar(ticks unitsDone) {
             bestScale     = clamp<uint32_t>(bestScale, kMinimumAutoScale, SCALE_SCALE);
         } break;
 
-        case kActualSizeZoom:
-            bestScale = SCALE_SCALE;
-            break;
+        case kActualSizeZoom: bestScale = SCALE_SCALE; break;
 
-        case kEighthSizeZoom:
-            bestScale = kOneEighthScale;
-            break;
+        case kEighthSizeZoom: bestScale = kOneEighthScale; break;
 
-        case kQuarterSizeZoom:
-            bestScale = kOneQuarterScale;
-            break;
+        case kQuarterSizeZoom: bestScale = kOneQuarterScale; break;
 
-        case kHalfSizeZoom:
-            bestScale = kOneHalfScale;
-            break;
+        case kHalfSizeZoom: bestScale = kOneHalfScale; break;
 
-        case kTimesTwoZoom:
-            bestScale = kTimesTwoScale;
-            break;
+        case kTimesTwoZoom: bestScale = kTimesTwoScale; break;
 
         case kSmallestZoom: {
             auto     anObject = g.farthest;

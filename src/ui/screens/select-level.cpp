@@ -61,13 +61,9 @@ SelectLevelScreen::~SelectLevelScreen() {}
 void SelectLevelScreen::become_front() {
     switch (_state) {
         case SELECTING:
-        case UNLOCKING:
-            InterfaceScreen::become_front();
-            break;
+        case UNLOCKING: InterfaceScreen::become_front(); break;
 
-        case FADING_OUT:
-            stack()->pop(this);
-            break;
+        case FADING_OUT: stack()->pop(this); break;
     }
 }
 
@@ -114,8 +110,7 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
             }
             return;
         } break;
-        case FADING_OUT:
-            return;
+        case FADING_OUT: return;
     }
     InterfaceScreen::key_down(event);
 }
@@ -163,8 +158,7 @@ void SelectLevelScreen::handle_button(Button& button) {
             adjust_interface();
             break;
 
-        default:
-            throw Exception(format("Got unknown button {0}.", button.id));
+        default: throw Exception(format("Got unknown button {0}.", button.id));
     }
 }
 

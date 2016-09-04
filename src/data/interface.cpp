@@ -147,10 +147,8 @@ vector<unique_ptr<InterfaceItem>> interface_items(int id0, const Json& json) {
                 Json tab                 = tabs.at(i);
                 button_bounds.right      = button_bounds.left + tab.get("width").number();
                 interfaceLabelType label = antares::label(tab.get("label"));
-                items.emplace_back(
-                        new TabBoxButton(
-                                id++, button_bounds, key, gamepad, label, hue, style,
-                                tab.get("content")));
+                items.emplace_back(new TabBoxButton(
+                        id++, button_bounds, key, gamepad, label, hue, style, tab.get("content")));
                 button_bounds.left = button_bounds.right + 37;
             }
             int16_t top_right_border_size = bounds.right - button_bounds.right - 17;
