@@ -173,7 +173,7 @@ void SelectLevelScreen::draw_level_name() const {
     RgbColor   color = GetRGBTranslateColorShade(AQUA, VERY_LIGHT);
     StyledText retro(sys.fonts.title);
     retro.set_fore_color(color);
-    retro.set_retro_text(pn2sfz(chapter_name));
+    retro.set_retro_text(chapter_name);
     retro.wrap_to(440, 0, 2);
 
     Rect  bounds = i.bounds();

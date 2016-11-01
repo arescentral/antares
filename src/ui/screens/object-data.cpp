@@ -18,6 +18,7 @@
 
 #include "ui/screens/object-data.hpp"
 
+#include "data/pn.hpp"
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
@@ -68,7 +69,7 @@ ObjectDataScreen::ObjectDataScreen(
     _text.reset(new StyledText(sys.fonts.button));
     _text->set_fore_color(GetRGBTranslateColorShade(GREEN, VERY_LIGHT));
     _text->set_back_color(GetRGBTranslateColorShade(GREEN, DARKEST));
-    _text->set_retro_text(text);
+    _text->set_retro_text(sfz2pn(text));
     _text->wrap_to(kShipDataWidth, 0, 0);
     _bounds = object_data_bounds(origin, Size(_text->auto_width(), _text->height()));
 }

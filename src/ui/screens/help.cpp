@@ -18,6 +18,7 @@
 
 #include "ui/screens/help.hpp"
 
+#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
@@ -49,7 +50,7 @@ HelpScreen::HelpScreen()
     RgbColor back = GetRGBTranslateColorShade(RED, VERY_DARK);
     _text.set_fore_color(fore);
     _text.set_back_color(back);
-    _text.set_retro_text(text);
+    _text.set_retro_text(sfz2pn(text));
     _text.wrap_to(item(BOX).bounds().width(), 0, 0);
 }
 

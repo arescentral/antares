@@ -117,7 +117,7 @@ unique_ptr<StyledText> style_score_text(String text) {
     unique_ptr<StyledText> result(new StyledText(sys.fonts.button));
     result->set_fore_color(GetRGBTranslateColorShade(GOLD, VERY_LIGHT));
     result->set_back_color(GetRGBTranslateColorShade(GOLD, DARKEST));
-    result->set_retro_text(text);
+    result->set_retro_text(sfz2pn(text));
     return result;
 }
 
@@ -164,7 +164,7 @@ void DebriefingScreen::draw() const {
     interface_bounds.offset(_pix_bounds.left, _pix_bounds.top);
     draw_interface_item(_data_item, KEYBOARD_MOUSE);
 
-    draw_text_in_rect(interface_bounds, _message, kLarge, GOLD);
+    draw_text_in_rect(interface_bounds, sfz2pn(_message), kLarge, GOLD);
 
     RgbColor bracket_color  = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
     Rect     bracket_bounds = _score_bounds;
@@ -223,7 +223,7 @@ LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
     Resource rsrc("text", "txt", text_id);
     _message.assign(utf8::decode(rsrc.data()));
 
-    int  text_height = GetInterfaceTextHeightFromWidth(_message, kLarge, kTextWidth);
+    int  text_height = GetInterfaceTextHeightFromWidth(sfz2pn(_message), kLarge, kTextWidth);
     Rect text_bounds(0, 0, kTextWidth, text_height);
     if (do_score) {
         text_bounds.bottom += kScoreTableHeight;

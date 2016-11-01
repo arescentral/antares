@@ -19,6 +19,7 @@
 #ifndef ANTARES_DRAWING_STYLED_TEXT_HPP_
 #define ANTARES_DRAWING_STYLED_TEXT_HPP_
 
+#include <pn/string>
 #include <sfz/sfz.hpp>
 #include <vector>
 
@@ -45,8 +46,8 @@ class StyledText {
     void set_fore_color(RgbColor fore_color);
     void set_back_color(RgbColor back_color);
     void set_tab_width(int tab_width);
-    void set_retro_text(sfz::StringSlice text);
-    void set_interface_text(sfz::StringSlice text);
+    void set_retro_text(pn::string_view text);
+    void set_interface_text(pn::string_view text);
     void wrap_to(int width, int side_margin, int line_spacing);
 
     int                                size() const;

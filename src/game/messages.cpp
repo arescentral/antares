@@ -259,7 +259,7 @@ void Messages::clip(void)
                 tmessage->retro_text.reset(new StyledText(sys.fonts.tactical));
                 tmessage->retro_text->set_fore_color(light_blue);
                 tmessage->retro_text->set_back_color(dark_blue);
-                tmessage->retro_text->set_retro_text(*textData);
+                tmessage->retro_text->set_retro_text(sfz2pn(*textData));
                 tmessage->retro_text->set_tab_width(60);
                 tmessage->retro_text->wrap_to(
                         viewport().width() - kHBuffer - sys.fonts.tactical->logicalWidth + 1, 0,

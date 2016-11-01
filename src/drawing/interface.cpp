@@ -18,8 +18,6 @@
 
 #include "drawing/interface.hpp"
 
-#include <sfz/sfz.hpp>
-
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "data/interface.hpp"
@@ -33,7 +31,6 @@
 using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::String;
-using sfz::StringSlice;
 using sfz::format;
 using std::unique_ptr;
 using std::vector;
@@ -70,12 +67,13 @@ const Font* interface_font(interfaceStyleType style) {
     }
 }
 
-void DrawInterfaceString(Point p, StringSlice s, interfaceStyleType style, const RgbColor& color) {
-    interface_font(style)->draw(p, sfz2pn(s), color);
+void DrawInterfaceString(
+        Point p, pn::string_view s, interfaceStyleType style, const RgbColor& color) {
+    interface_font(style)->draw(p, s, color);
 }
 
-int16_t GetInterfaceStringWidth(const StringSlice& s, interfaceStyleType style) {
-    return interface_font(style)->string_width(sfz2pn(s));
+int16_t GetInterfaceStringWidth(pn::string_view s, interfaceStyleType style) {
+    return interface_font(style)->string_width(s);
 }
 
 // GetInterfaceFontWidth:       -- NOT WORLD-READY! --
@@ -440,10 +438,10 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
         } else {
             color = GetRGBTranslateColorShade(item.hue, LIGHTER);
         }
-        swidth  = GetInterfaceStringWidth(pn2sfz(item.label), item.style);
+        swidth  = GetInterfaceStringWidth(item.label, item.style);
         swidth  = tRect.left + (tRect.right - tRect.left) / 2 - swidth / 2;
         sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
-        DrawInterfaceString(Point(swidth, sheight), pn2sfz(item.label), item.style, color);
+        DrawInterfaceString(Point(swidth, sheight), item.label, item.style, color);
     } else {
         // draw the key code
         {
@@ -471,7 +469,7 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
             color = GetRGBTranslateColorShade(item.hue, shade);
             rects.fill(vRect, color);
 
-            swidth = GetInterfaceStringWidth(shortcut_text, item.style);
+            swidth = GetInterfaceStringWidth(sfz2pn(shortcut_text), item.style);
             swidth = uRect.left + (uRect.right - uRect.left) / 2 - swidth / 2;
             if (item.status == kDimmed) {
                 color = GetRGBTranslateColorShade(item.hue, VERY_DARK);
@@ -481,8 +479,8 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
         }
 
         DrawInterfaceString(
-                Point(swidth, uRect.top + GetInterfaceFontAscent(item.style)), shortcut_text,
-                item.style, color);
+                Point(swidth, uRect.top + GetInterfaceFontAscent(item.style)),
+                sfz2pn(shortcut_text), item.style, color);
 
         // draw the button title
         {
@@ -495,10 +493,10 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
             }
 
             pn::string_view s = item.label;
-            swidth            = GetInterfaceStringWidth(pn2sfz(s), item.style);
+            swidth            = GetInterfaceStringWidth(s, item.style);
             swidth            = uRect.right + (tRect.right - uRect.right) / 2 - swidth / 2;
             sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
-            DrawInterfaceString(Point(swidth, sheight), pn2sfz(s), item.style, color);
+            DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
         }
     }
 }
@@ -638,10 +636,10 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
         }
 
         pn::string_view s = item.label;
-        swidth            = GetInterfaceStringWidth(pn2sfz(s), item.style);
+        swidth            = GetInterfaceStringWidth(s, item.style);
         swidth            = tRect.left + (tRect.right - tRect.left) / 2 - swidth / 2;
         sheight           = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
-        DrawInterfaceString(Point(swidth, sheight), pn2sfz(s), item.style, color);
+        DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
     } else {
         // draw the key code
         if (item.on) {
@@ -675,7 +673,7 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
         color = GetRGBTranslateColorShade(item.hue, shade);
         Rects().fill(vRect, color);
 
-        swidth = GetInterfaceStringWidth(s, item.style);
+        swidth = GetInterfaceStringWidth(sfz2pn(s), item.style);
         swidth = uRect.left + (uRect.right - uRect.left) / 2 - swidth / 2;
         if (item.status == kDimmed) {
             color = GetRGBTranslateColorShade(item.hue, VERY_DARK);
@@ -684,8 +682,8 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
         }
 
         DrawInterfaceString(
-                Point(swidth, uRect.top + GetInterfaceFontAscent(item.style)), s, item.style,
-                color);
+                Point(swidth, uRect.top + GetInterfaceFontAscent(item.style)), sfz2pn(s),
+                item.style, color);
 
         // draw the button title
         if (!item.on) {
@@ -702,10 +700,10 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
 
         {
             pn::string_view s = item.label;
-            swidth            = GetInterfaceStringWidth(pn2sfz(s), item.style);
+            swidth            = GetInterfaceStringWidth(s, item.style);
             swidth            = uRect.right + (tRect.right - uRect.right) / 2 - swidth / 2;
             sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
-            DrawInterfaceString(Point(swidth, sheight), pn2sfz(s), item.style, color);
+            DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
         }
     }
 }
@@ -1057,10 +1055,10 @@ void draw_checkbox(Point origin, const CheckboxButton& item) {
     }
 
     pn::string_view s = item.label;
-    swidth            = GetInterfaceStringWidth(pn2sfz(s), item.style);
+    swidth            = GetInterfaceStringWidth(s, item.style);
     swidth            = tRect.left + (tRect.right - tRect.left) / 2 - swidth / 2;
     sheight           = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
-    DrawInterfaceString(Point(swidth, sheight), pn2sfz(s), item.style, color);
+    DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
 }
 
 void draw_labeled_box(Point origin, const LabeledRect& item) {
@@ -1090,7 +1088,7 @@ void draw_labeled_box(Point origin, const LabeledRect& item) {
     // draw the string
 
     pn::string_view s = item.label;
-    swidth            = GetInterfaceStringWidth(pn2sfz(s), item.style) + kInterfaceTextHBuffer * 2;
+    swidth            = GetInterfaceStringWidth(s, item.style) + kInterfaceTextHBuffer * 2;
     swidth            = (tRect.right - tRect.left) - swidth;
     sheight           = GetInterfaceFontHeight(item.style) + kInterfaceTextVBuffer * 2;
 
@@ -1106,7 +1104,7 @@ void draw_labeled_box(Point origin, const LabeledRect& item) {
     DrawInterfaceString(
             Point(tRect.left + kInterfaceTextHBuffer,
                   tRect.top + GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer),
-            pn2sfz(s), item.style, color);
+            s, item.style, color);
 
     // string left border
 
@@ -1166,13 +1164,13 @@ void draw_labeled_box(Point origin, const LabeledRect& item) {
 void draw_text_rect(Point origin, const TextRect& item) {
     Rect bounds = item.bounds();
     bounds.offset(origin.h, origin.v);
-    draw_text_in_rect(bounds, pn2sfz(item.text), item.style, item.hue);
+    draw_text_in_rect(bounds, item.text, item.style, item.hue);
 }
 
 }  // namespace
 
 void draw_text_in_rect(
-        Rect tRect, const StringSlice& text, interfaceStyleType style, uint8_t textcolor) {
+        Rect tRect, pn::string_view text, interfaceStyleType style, uint8_t textcolor) {
     RgbColor   color = GetRGBTranslateColorShade(textcolor, VERY_LIGHT);
     StyledText interface_text(interface_font(style));
     interface_text.set_fore_color(color);
@@ -1183,7 +1181,7 @@ void draw_text_in_rect(
 }
 
 int16_t GetInterfaceTextHeightFromWidth(
-        const StringSlice& text, interfaceStyleType style, int16_t boundsWidth) {
+        pn::string_view text, interfaceStyleType style, int16_t boundsWidth) {
     StyledText interface_text(interface_font(style));
     interface_text.set_interface_text(text);
     interface_text.wrap_to(boundsWidth, kInterfaceTextHBuffer, kInterfaceTextVBuffer);

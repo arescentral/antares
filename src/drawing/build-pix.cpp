@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "data/picture.hpp"
+#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
@@ -153,7 +154,7 @@ BuildPix::BuildPix(int text_id, int width) : _size({width, 0}) {
             unique_ptr<StyledText> styled(new StyledText(sys.fonts.title));
             auto                   red = GetRGBTranslateColorShade(RED, VERY_LIGHT);
             styled->set_fore_color(red);
-            styled->set_retro_text(line);
+            styled->set_retro_text(sfz2pn(line));
             styled->wrap_to(_size.width - 11, 0, 2);
             _lines.push_back(Line{Line::TEXT, nullptr, std::move(styled)});
         }

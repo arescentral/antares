@@ -31,7 +31,6 @@
 using sfz::Bytes;
 using sfz::Exception;
 using sfz::String;
-using sfz::StringSlice;
 using sfz::format;
 using std::unique_ptr;
 
@@ -66,14 +65,15 @@ void StyledText::set_back_color(RgbColor back_color) { _back_color = back_color;
 
 void StyledText::set_tab_width(int tab_width) { _tab_width = tab_width; }
 
-void StyledText::set_retro_text(sfz::StringSlice text) {
+void StyledText::set_retro_text(pn::string_view text) {
+    sfz::String    sfz_text            = pn2sfz(text);
     const RgbColor original_fore_color = _fore_color;
     const RgbColor original_back_color = _back_color;
     RgbColor       fore_color          = _fore_color;
     RgbColor       back_color          = _back_color;
 
-    for (size_t i = 0; i < text.size(); ++i) {
-        switch (text.at(i)) {
+    for (size_t i = 0; i < sfz_text.size(); ++i) {
+        switch (sfz_text.at(i)) {
             case '\n':
                 _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
                 break;
@@ -86,11 +86,11 @@ void StyledText::set_retro_text(sfz::StringSlice text) {
             case ' ': _chars.push_back(StyledChar(' ', WORD_BREAK, fore_color, back_color)); break;
 
             case '\\':
-                if (i + 1 >= text.size()) {
+                if (i + 1 >= sfz_text.size()) {
                     throw Exception(format("not enough input for special code."));
                 }
                 ++i;
-                switch (text.at(i)) {
+                switch (sfz_text.at(i)) {
                     case 'i':
                         std::swap(fore_color, back_color);
                         _chars.push_back(StyledChar('\\', DELAY, fore_color, back_color));
@@ -98,20 +98,20 @@ void StyledText::set_retro_text(sfz::StringSlice text) {
                         break;
 
                     case 'f':
-                        if (i + 2 >= text.size()) {
+                        if (i + 2 >= sfz_text.size()) {
                             throw Exception(format("not enough input for foreground code."));
                         }
                         fore_color = GetRGBTranslateColorShade(
-                                hex_digit(text.at(i + 1)), hex_digit(text.at(i + 2)));
+                                hex_digit(sfz_text.at(i + 1)), hex_digit(sfz_text.at(i + 2)));
                         i += 2;
                         break;
 
                     case 'b':
-                        if (i + 2 >= text.size()) {
+                        if (i + 2 >= sfz_text.size()) {
                             throw Exception(format("not enough input for foreground code."));
                         }
                         back_color = GetRGBTranslateColorShade(
-                                hex_digit(text.at(i + 1)), hex_digit(text.at(i + 2)));
+                                hex_digit(sfz_text.at(i + 1)), hex_digit(sfz_text.at(i + 2)));
                         i += 2;
                         break;
 
@@ -131,11 +131,14 @@ void StyledText::set_retro_text(sfz::StringSlice text) {
                         break;
 
                     default:
-                        throw Exception(format("found bad special character {0}.", text.at(i)));
+                        throw Exception(
+                                format("found bad special character {0}.", sfz_text.at(i)));
                 }
                 break;
 
-            default: _chars.push_back(StyledChar(text.at(i), NONE, fore_color, back_color)); break;
+            default:
+                _chars.push_back(StyledChar(sfz_text.at(i), NONE, fore_color, back_color));
+                break;
         }
     }
     _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
@@ -143,9 +146,10 @@ void StyledText::set_retro_text(sfz::StringSlice text) {
     wrap_to(std::numeric_limits<int>::max(), 0, 0);
 }
 
-void StyledText::set_interface_text(sfz::StringSlice text) {
-    for (size_t i = 0; i < text.size(); ++i) {
-        switch (text.at(i)) {
+void StyledText::set_interface_text(pn::string_view text) {
+    sfz::String sfz_text = pn2sfz(text);
+    for (size_t i = 0; i < sfz_text.size(); ++i) {
+        switch (sfz_text.at(i)) {
             case '\n':
                 _chars.push_back(StyledChar('\n', LINE_BREAK, _fore_color, _back_color));
                 break;
@@ -156,15 +160,15 @@ void StyledText::set_interface_text(sfz::StringSlice text) {
 
             case '^': {
                 bool found_code = false;
-                if (i + 1 >= text.size()) {
+                if (i + 1 >= sfz_text.size()) {
                     throw Exception(format("not enough input for inline code."));
                 }
-                if ((text.at(i + 1) != 'P') && (text.at(i + 1) != 'p')) {
-                    throw Exception(format("found bad inline pict code {0}", text.at(i)));
+                if ((sfz_text.at(i + 1) != 'P') && (sfz_text.at(i + 1) != 'p')) {
+                    throw Exception(format("found bad inline pict code {0}", sfz_text.at(i)));
                 }
                 String id_string;
-                for (size_t j = i + 2; j < text.size(); ++j) {
-                    if (text.at(j) == '^') {
+                for (size_t j = i + 2; j < sfz_text.size(); ++j) {
+                    if (sfz_text.at(j) == '^') {
                         inlinePictType inline_pict;
                         int32_t        id;
                         if (!string_to_int(id_string, id, 10)) {
@@ -186,7 +190,7 @@ void StyledText::set_interface_text(sfz::StringSlice text) {
                         i          = j;
                         break;
                     }
-                    id_string.push(1, text.at(j));
+                    id_string.push(1, sfz_text.at(j));
                 }
                 if (!found_code) {
                     throw Exception(format("malformed inline code"));
@@ -194,7 +198,7 @@ void StyledText::set_interface_text(sfz::StringSlice text) {
             } break;
 
             default:
-                _chars.push_back(StyledChar(text.at(i), NONE, _fore_color, _back_color));
+                _chars.push_back(StyledChar(sfz_text.at(i), NONE, _fore_color, _back_color));
                 break;
         }
     }

@@ -321,7 +321,7 @@ void KeyControlScreen::overlay() const {
         Rect            bounds = box.bounds();
         Point           off    = offset();
         bounds.offset(off.h, off.v);
-        draw_text_in_rect(bounds, text, box.style, box.hue);
+        draw_text_in_rect(bounds, sfz2pn(text), box.style, box.hue);
     }
 }
 

@@ -19,7 +19,7 @@
 #ifndef ANTARES_DRAWING_INTERFACE_HPP_
 #define ANTARES_DRAWING_INTERFACE_HPP_
 
-#include <sfz/sfz.hpp>
+#include <pn/string>
 #include <vector>
 
 #include "data/interface.hpp"
@@ -31,10 +31,10 @@ const int32_t kInterfaceTextVBuffer = 2;
 const int32_t kInterfaceTextHBuffer = 3;
 
 void draw_text_in_rect(
-        Rect tRect, const sfz::StringSlice& text, interfaceStyleType style, uint8_t textcolor);
+        Rect tRect, pn::string_view text, interfaceStyleType style, uint8_t textcolor);
 
 int16_t GetInterfaceTextHeightFromWidth(
-        const sfz::StringSlice& text, interfaceStyleType style, int16_t width);
+        pn::string_view text, interfaceStyleType style, int16_t width);
 void draw_interface_item(const InterfaceItem& item, InputMode mode);
 void draw_interface_item(const InterfaceItem& item, InputMode mode, Point origin);
 

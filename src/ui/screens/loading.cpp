@@ -50,7 +50,7 @@ LoadingScreen::LoadingScreen(Handle<Level> level, bool* cancelled)
     StringList strings(kLevelNameID);
     _name_text.reset(new StyledText(sys.fonts.title));
     _name_text->set_fore_color(GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT));
-    _name_text->set_retro_text(pn2sfz(strings.at(_level->levelNameStrNum - 1)));
+    _name_text->set_retro_text(strings.at(_level->levelNameStrNum - 1));
     _name_text->set_tab_width(220);
     _name_text->wrap_to(640, 0, 2);
 }

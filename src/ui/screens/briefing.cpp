@@ -91,7 +91,7 @@ static void populate_inline_picts(
         Rect rect, StringSlice text, interfaceStyleType style,
         vector<inlinePictType>& inline_pict) {
     StyledText interface_text(interface_font(style));
-    interface_text.set_interface_text(text);
+    interface_text.set_interface_text(sfz2pn(text));
     interface_text.wrap_to(rect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer);
     inline_pict = interface_text.inline_picts();
     for (int i = 0; i < inline_pict.size(); ++i) {
@@ -120,7 +120,8 @@ static void update_mission_brief_point(
     // TODO(sfiera): catch exception.
     Resource rsrc("text", "txt", contentID);
     text.assign(utf8::decode(rsrc.data()));
-    int16_t textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
+    int16_t textHeight =
+            GetInterfaceTextHeightFromWidth(sfz2pn(text), dataItem->style, kMissionDataWidth);
     if (hiliteBounds.left == hiliteBounds.right) {
         dataItem->bounds().left =
                 (bounds->right - bounds->left) / 2 - (kMissionDataWidth / 2) + bounds->left;
@@ -462,7 +463,7 @@ void BriefingScreen::draw_brief_point() const {
     draw_interface_item(_data_item, KEYBOARD_MOUSE, off);
     bounds = _data_item.bounds();
     bounds.offset(off.h, off.v);
-    draw_text_in_rect(bounds, _text, _data_item.style, _data_item.hue);
+    draw_text_in_rect(bounds, sfz2pn(_text), _data_item.style, _data_item.hue);
 }
 
 void BriefingScreen::show_object_data(int index, const KeyDownEvent& event) {
