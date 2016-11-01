@@ -36,8 +36,8 @@ enum PlayAgainResult {
 };
 
 bool BothCommandAndQ(void);
-void CreateObjectDataText(sfz::String* text, Handle<BaseObject> object);
-void Replace_KeyCode_Strings_With_Actual_Key_Names(sfz::String* text, int16_t resID, size_t padTo);
+void CreateObjectDataText(pn::string& text, Handle<BaseObject> object);
+void Replace_KeyCode_Strings_With_Actual_Key_Names(pn::string& text, int16_t resID, size_t padTo);
 
 }  // namespace antares
 

@@ -142,7 +142,7 @@ bool BothCommandAndQ() {
     return command && q;
 }
 
-void CreateObjectDataText(String* text, Handle<BaseObject> object) {
+void CreateObjectDataText(pn::string& text, Handle<BaseObject> object) {
     Resource rsrc("text", "txt", kShipDataTextID);
     String   data(utf8::decode(rsrc.data()));
 
@@ -188,7 +188,7 @@ void CreateObjectDataText(String* text, Handle<BaseObject> object) {
     CreateWeaponDataText(&data, object->beam.base, values.at(kShipDataBeamStringNum));
     CreateWeaponDataText(&data, object->special.base, values.at(kShipDataSpecialStringNum));
 
-    print(*text, data);
+    text = sfz2pn(data);
 }
 
 void CreateWeaponDataText(
@@ -262,9 +262,10 @@ void CreateWeaponDataText(
     print(*text, data);
 }
 
-void Replace_KeyCode_Strings_With_Actual_Key_Names(String* text, int16_t resID, size_t padTo) {
+void Replace_KeyCode_Strings_With_Actual_Key_Names(pn::string& text, int16_t resID, size_t padTo) {
     StringList keys(kHelpScreenKeyStringID);
     StringList values(resID);
+    String     sfz_text = pn2sfz(text);
 
     for (int i = 0; i < kKeyExtendedControlNum; ++i) {
         pn::string_view search  = keys.at(i);
@@ -283,10 +284,11 @@ void Replace_KeyCode_Strings_With_Actual_Key_Names(String* text, int16_t resID, 
         }
 
         // Replace search string with value string in resulting text.
-        while (find_replace(*text, 0, search, replace) != String::npos) {
+        while (find_replace(sfz_text, 0, search, replace) != String::npos) {
             pos += 1;
         };
     }
+    text = sfz2pn(sfz_text);
 }
 
 }  // namespace antares

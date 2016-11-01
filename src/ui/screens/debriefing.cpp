@@ -113,11 +113,11 @@ int score(
     return score;
 }
 
-unique_ptr<StyledText> style_score_text(String text) {
+unique_ptr<StyledText> style_score_text(pn::string text) {
     unique_ptr<StyledText> result(new StyledText(sys.fonts.button));
     result->set_fore_color(GetRGBTranslateColorShade(GOLD, VERY_LIGHT));
     result->set_back_color(GetRGBTranslateColorShade(GOLD, DARKEST));
-    result->set_retro_text(sfz2pn(text));
+    result->set_retro_text(text);
     return result;
 }
 
@@ -237,7 +237,7 @@ LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
     return data_item;
 }
 
-String DebriefingScreen::build_score_text(
+pn::string DebriefingScreen::build_score_text(
         game_ticks your_time, game_ticks par_time, int your_loss, int par_loss, int your_kill,
         int par_kill) {
     Resource rsrc("text", "txt", 6000);
@@ -270,7 +270,7 @@ String DebriefingScreen::build_score_text(
     string_replace(&text, strings.at(7), par_kill);
     string_replace(&text, strings.at(8), your_score);
     string_replace(&text, strings.at(9), par_score);
-    return text;
+    return sfz2pn(text);
 }
 
 void print_to(sfz::PrintTarget out, DebriefingScreen::State state) {

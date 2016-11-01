@@ -64,12 +64,12 @@ Rect object_data_bounds(Point origin, Size size) {
 ObjectDataScreen::ObjectDataScreen(
         Point origin, Handle<BaseObject> object, Trigger trigger, int which)
         : _trigger(trigger), _which(which), _state(TYPING) {
-    String text;
-    CreateObjectDataText(&text, object);
+    pn::string text;
+    CreateObjectDataText(text, object);
     _text.reset(new StyledText(sys.fonts.button));
     _text->set_fore_color(GetRGBTranslateColorShade(GREEN, VERY_LIGHT));
     _text->set_back_color(GetRGBTranslateColorShade(GREEN, DARKEST));
-    _text->set_retro_text(sfz2pn(text));
+    _text->set_retro_text(text);
     _text->wrap_to(kShipDataWidth, 0, 0);
     _bounds = object_data_bounds(origin, Size(_text->auto_width(), _text->height()));
 }

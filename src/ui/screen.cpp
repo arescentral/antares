@@ -35,10 +35,6 @@
 #include "video/driver.hpp"
 
 using sfz::Exception;
-using sfz::PrintItem;
-using sfz::String;
-using sfz::StringMap;
-using sfz::StringSlice;
 using sfz::format;
 using sfz::range;
 using sfz::read;
@@ -49,7 +45,7 @@ namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-InterfaceScreen::InterfaceScreen(PrintItem name, const Rect& bounds, bool full_screen)
+InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds, bool full_screen)
         : InterfaceScreen(pn::value_cref{load_pn(name)}, bounds, full_screen) {}
 
 InterfaceScreen::InterfaceScreen(pn::value_cref x, const Rect& bounds, bool full_screen)
@@ -62,8 +58,8 @@ InterfaceScreen::InterfaceScreen(pn::value_cref x, const Rect& bounds, bool full
 
 InterfaceScreen::~InterfaceScreen() {}
 
-pn::value InterfaceScreen::load_pn(sfz::PrintItem id) {
-    Resource   rsrc(sfz2pn(sfz::format("interfaces/{0}.pn", id)));
+pn::value InterfaceScreen::load_pn(pn::string_view id) {
+    Resource   rsrc(sfz2pn(sfz::format("interfaces/{0}.pn", pn2sfz(id))));
     pn::string in = sfz2pn(utf8::decode(rsrc.data()));
     pn::value  x;
     if (!pn::parse(in.open(), x, nullptr)) {

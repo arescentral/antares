@@ -23,6 +23,7 @@
 #include "config/preferences.hpp"
 #include "data/base-object.hpp"
 #include "data/plugin.hpp"
+#include "data/pn.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
@@ -52,12 +53,12 @@ class ObjectDataBuilder {
     ObjectDataBuilder(const Optional<String>& output_dir) : _output_dir(output_dir) {}
 
     void save(Handle<BaseObject> object, int pict_id) {
-        String data;
-        CreateObjectDataText(&data, object);
+        pn::string data;
+        CreateObjectDataText(data, object);
         if (_output_dir.has()) {
             String   path(format("{0}/{1}.txt", *_output_dir, dec(pict_id, 5)));
             ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-            write(fd, utf8::encode(data));
+            write(fd, utf8::encode(pn2sfz(data)));
         }
     }
 

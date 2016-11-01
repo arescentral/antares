@@ -23,6 +23,7 @@
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "data/plugin.hpp"
+#include "data/pn.hpp"
 #include "data/replay.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
@@ -106,10 +107,10 @@ class ReplayMaster : public Card {
                         if (_game_result == WIN_GAME) {
                             sfz::write(outcome, "\n\n");
                             Handle<Admiral> player(0);
-                            String          text = DebriefingScreen::build_score_text(
+                            pn::string      text = DebriefingScreen::build_score_text(
                                     g.time, g.level->parTime, GetAdmiralLoss(player),
                                     g.level->parLosses, GetAdmiralKill(player), g.level->parKills);
-                            sfz::write(outcome, utf8::encode(text));
+                            sfz::write(outcome, utf8::encode(pn2sfz(text)));
                         }
                         sfz::write(outcome, "\n");
                     }

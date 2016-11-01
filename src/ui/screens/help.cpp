@@ -42,15 +42,15 @@ namespace antares {
 
 HelpScreen::HelpScreen()
         : InterfaceScreen("help", {128, 0, 608, 480}, false), _text(sys.fonts.computer) {
-    Resource rsrc("text", "txt", 6002);
-    String   text(utf8::decode(rsrc.data()));
-    Replace_KeyCode_Strings_With_Actual_Key_Names(&text, 1000, 4);
+    Resource   rsrc("text", "txt", 6002);
+    pn::string text = sfz2pn(utf8::decode(rsrc.data()));
+    Replace_KeyCode_Strings_With_Actual_Key_Names(text, 1000, 4);
 
     RgbColor fore = GetRGBTranslateColorShade(RED, VERY_LIGHT);
     RgbColor back = GetRGBTranslateColorShade(RED, VERY_DARK);
     _text.set_fore_color(fore);
     _text.set_back_color(back);
-    _text.set_retro_text(sfz2pn(text));
+    _text.set_retro_text(text);
     _text.wrap_to(item(BOX).bounds().width(), 0, 0);
 }
 

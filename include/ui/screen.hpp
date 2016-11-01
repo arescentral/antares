@@ -32,7 +32,7 @@ namespace antares {
 
 class InterfaceScreen : public Card {
   public:
-    InterfaceScreen(sfz::PrintItem name, const Rect& bounds, bool full_screen);
+    InterfaceScreen(pn::string_view name, const Rect& bounds, bool full_screen);
     InterfaceScreen(pn::value_cref x, const Rect& bounds, bool full_screen);
     ~InterfaceScreen();
 
@@ -71,7 +71,7 @@ class InterfaceScreen : public Card {
     };
     State _state;
 
-    pn::value load_pn(sfz::PrintItem id);
+    pn::value load_pn(pn::string_view id);
     void      become_normal();
 
     const Rect                                  _bounds;

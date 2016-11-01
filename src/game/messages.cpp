@@ -244,9 +244,10 @@ void Messages::clip(void)
                 }
                 tmessage->labelMessage = false;
             } else {
-                Resource rsrc("text", "txt", tmessage->currentResID);
-                textData.reset(new String(utf8::decode(rsrc.data())));
-                Replace_KeyCode_Strings_With_Actual_Key_Names(textData.get(), KEY_LONG_NAMES, 0);
+                Resource   rsrc("text", "txt", tmessage->currentResID);
+                pn::string text = sfz2pn(utf8::decode(rsrc.data()));
+                Replace_KeyCode_Strings_With_Actual_Key_Names(text, KEY_LONG_NAMES, 0);
+                textData.reset(new String(pn2sfz(text)));
                 if (textData->at(0) == '#') {
                     tmessage->labelMessage = true;
                 } else
