@@ -78,11 +78,8 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
         if (!world().intersects(draw_rect)) {
             return;
         }
-        pn::string args[] = {
-                sfz2pn(draw_rect.left),   sfz2pn(draw_rect.top), sfz2pn(draw_rect.right),
-                sfz2pn(draw_rect.bottom), _name.copy(),
-        };
-        _driver.log("draw", args);
+        _driver.log(
+                "draw", draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom, _name);
     }
 
     virtual void draw_cropped(const Rect& dest, const Rect& source, const RgbColor& tint) const {
@@ -90,20 +87,13 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
             return;
         }
         if (source.size() == dest.size()) {
-            pn::string args[] = {
-                    sfz2pn(dest.left),   sfz2pn(dest.top),    sfz2pn(dest.right),
-                    sfz2pn(dest.bottom), sfz2pn(source.left), sfz2pn(source.top),
-                    hex(tint),           _name.copy(),
-            };
-            _driver.log("crop", args);
+            _driver.log(
+                    "crop", dest.left, dest.top, dest.right, dest.bottom, source.left, source.top,
+                    hex(tint), _name);
         } else {
-            pn::string args[] = {
-                    sfz2pn(dest.left),    sfz2pn(dest.top),      sfz2pn(dest.right),
-                    sfz2pn(dest.bottom),  sfz2pn(source.left),   sfz2pn(source.top),
-                    sfz2pn(source.right), sfz2pn(source.bottom), hex(tint),
-                    _name.copy(),
-            };
-            _driver.log("crop", args);
+            _driver.log(
+                    "crop", dest.left, dest.top, dest.right, dest.bottom, source.left, source.top,
+                    source.right, source.bottom, hex(tint), _name);
         }
     }
 
@@ -111,31 +101,18 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
         if (!world().intersects(draw_rect)) {
             return;
         }
-        pn::string args[] = {
-                sfz2pn(draw_rect.left),
-                sfz2pn(draw_rect.top),
-                sfz2pn(draw_rect.right),
-                sfz2pn(draw_rect.bottom),
-                hex(tint),
-                _name.copy(),
-        };
-        _driver.log("tint", args);
+        _driver.log(
+                "tint", draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
+                hex(tint), _name);
     }
 
     virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const {
         if (!world().intersects(draw_rect)) {
             return;
         }
-        pn::string args[] = {
-                sfz2pn(draw_rect.left),
-                sfz2pn(draw_rect.top),
-                sfz2pn(draw_rect.right),
-                sfz2pn(draw_rect.bottom),
-                hex(color),
-                sfz2pn(frac),
-                _name.copy(),
-        };
-        _driver.log("static", args);
+        _driver.log(
+                "static", draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
+                hex(color), frac, _name);
     }
 
     virtual void draw_outlined(
@@ -144,16 +121,9 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
         if (!world().intersects(draw_rect)) {
             return;
         }
-        pn::string args[] = {
-                sfz2pn(draw_rect.left),
-                sfz2pn(draw_rect.top),
-                sfz2pn(draw_rect.right),
-                sfz2pn(draw_rect.bottom),
-                hex(outline_color),
-                hex(fill_color),
-                _name.copy(),
-        };
-        _driver.log("outline", args);
+        _driver.log(
+                "outline", draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
+                hex(outline_color), hex(fill_color), _name.copy());
     }
 
     virtual const Size& size() const { return _size; }
@@ -217,52 +187,40 @@ void TextVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
     if (!world().intersects(rect)) {
         return;
     }
-    pn::string args[] = {sfz2pn(rect.left), sfz2pn(rect.top), sfz2pn(rect.right),
-                         sfz2pn(rect.bottom), hex(color)};
-    log("rect", args);
+    log("rect", rect.left, rect.top, rect.right, rect.bottom, hex(color));
 }
 
 void TextVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
-    pn::string args[] = {sfz2pn(rect.left), sfz2pn(rect.top), sfz2pn(rect.right),
-                         sfz2pn(rect.bottom), hex(color)};
-    log("dither", args);
+    log("dither", rect.left, rect.top, rect.right, rect.bottom, hex(color));
 }
 
 void TextVideoDriver::draw_point(const Point& at, const RgbColor& color) {
-    pn::string args[] = {sfz2pn(at.h), sfz2pn(at.v), hex(color)};
-    log("point", args);
+    log("point", at.h, at.v, hex(color));
 }
 
 void TextVideoDriver::draw_line(const Point& from, const Point& to, const RgbColor& color) {
-    pn::string args[] = {sfz2pn(from.h), sfz2pn(from.v), sfz2pn(to.h), sfz2pn(to.v), hex(color)};
-    log("line", args);
+    log("line", from.h, from.v, to.h, to.v, hex(color));
 }
 
 void TextVideoDriver::draw_triangle(const Rect& rect, const RgbColor& color) {
     if (!world().intersects(rect)) {
         return;
     }
-    pn::string args[] = {sfz2pn(rect.left), sfz2pn(rect.top), sfz2pn(rect.right),
-                         sfz2pn(rect.bottom), hex(color)};
-    log("triangle", args);
+    log("triangle", rect.left, rect.top, rect.right, rect.bottom, hex(color));
 }
 
 void TextVideoDriver::draw_diamond(const Rect& rect, const RgbColor& color) {
     if (!world().intersects(rect)) {
         return;
     }
-    pn::string args[] = {sfz2pn(rect.left), sfz2pn(rect.top), sfz2pn(rect.right),
-                         sfz2pn(rect.bottom), hex(color)};
-    log("diamond", args);
+    log("diamond", rect.left, rect.top, rect.right, rect.bottom, hex(color));
 }
 
 void TextVideoDriver::draw_plus(const Rect& rect, const RgbColor& color) {
     if (!world().intersects(rect)) {
         return;
     }
-    pn::string args[] = {sfz2pn(rect.left), sfz2pn(rect.top), sfz2pn(rect.right),
-                         sfz2pn(rect.bottom), hex(color)};
-    log("plus", args);
+    log("plus", rect.left, rect.top, rect.right, rect.bottom, hex(color));
 }
 
 void TextVideoDriver::loop(Card* initial, EventScheduler& scheduler) {
@@ -313,9 +271,13 @@ pn::string_view TextVideoDriver::last_arg(size_t index) const {
     return _log.substr(_last_args[index].first, _last_args[index].second);
 }
 
-template <int size>
-void TextVideoDriver::log(pn::string_view command, pn::string (&args)[size]) {
+static pn::string log_string(int i) { return sfz2pn(sfz::String(i)); }
+static pn::string log_string(pn::string_view s) { return s.copy(); }
+
+template <typename... Args>
+void TextVideoDriver::log(pn::string_view command, const Args&... args) {
     vector<pair<size_t, size_t>> this_args;
+    pn::string                   str_args[]  = {log_string(args)...};
     bool                         new_command = _last_args.empty() || (command != last_arg(0));
 
     if (new_command) {
@@ -323,9 +285,9 @@ void TextVideoDriver::log(pn::string_view command, pn::string (&args)[size]) {
     } else {
         dup_arg(0, this_args);
     }
-    for (size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i < sizeof...(args); ++i) {
         _log += "\t";
-        pn::string_view s(args[i]);
+        pn::string_view s(str_args[i]);
         if (new_command || (s != last_arg(i + 1))) {
             add_arg(s, this_args);
         } else {

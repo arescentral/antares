@@ -60,8 +60,8 @@ class TextVideoDriver : public VideoDriver {
     void            dup_arg(size_t index, std::vector<std::pair<size_t, size_t>>& args);
     pn::string_view last_arg(size_t index) const;
 
-    template <int size>
-    void log(pn::string_view command, pn::string (&args)[size]);
+    template <typename... Args>
+    void log(pn::string_view command, const Args&... args);
 
     const Size                _size;
     sfz::Optional<pn::string> _output_dir;
