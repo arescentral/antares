@@ -99,31 +99,20 @@ static ANTARES_GLOBAL int       gHotKeyNum;
 
 static ANTARES_GLOBAL ZoomType gPreviousZoomMode;
 
-struct HotKeySuffix {
-    Handle<SpaceObject> space_object;
-};
-
-void print_to(PrintTarget out, const HotKeySuffix& suffix) {
-    int h = HotKey_GetFromObject(suffix.space_object);
+pn::string hot_key_suffix(Handle<SpaceObject> space_object) {
+    int h = HotKey_GetFromObject(space_object);
     if (h < 0) {
-        return;
+        return "";
     }
 
     int keyNum = sys.prefs->key(h + kFirstHotKeyNum);
     if (keyNum < 0) {
-        return;
+        return "";
     }
 
     StringList strings(KEY_LONG_NAMES);
     String     key_name = pn2sfz(strings.at(keyNum - 1));
-    print(out, format(" < {0} >", key_name));
-};
-
-inline pn::string sfz2pn(const HotKeySuffix& h) { return antares::sfz2pn(sfz::String(h)); }
-
-HotKeySuffix hot_key_suffix(Handle<SpaceObject> space_object) {
-    HotKeySuffix result = {space_object};
-    return result;
+    return sfz2pn(format(" < {0} >", key_name));
 };
 
 }  // namespace
@@ -841,7 +830,7 @@ void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> 
         } else {
             string = get_object_name(ship->base).copy();
         }
-        string += sfz2pn(hot_key_suffix(ship));
+        string += hot_key_suffix(ship);
         label->set_string(string);
     }
 }
@@ -979,11 +968,11 @@ void Update_LabelStrings_ForHotKeyChange(void) {
         }
         if (target->attributes & kIsDestination) {
             pn::string string = GetDestBalanceName(target->asDestination).copy();
-            string += sfz2pn(hot_key_suffix(target));
+            string += hot_key_suffix(target);
             g.target_label->set_string(string);
         } else {
             pn::string string = get_object_name(target->base).copy();
-            string += sfz2pn(hot_key_suffix(target));
+            string += hot_key_suffix(target);
             g.target_label->set_string(string);
         }
     }
@@ -997,11 +986,11 @@ void Update_LabelStrings_ForHotKeyChange(void) {
         sys.sound.select();
         if (control->attributes & kIsDestination) {
             pn::string string = GetDestBalanceName(control->asDestination).copy();
-            string += sfz2pn(hot_key_suffix(control));
+            string += hot_key_suffix(control);
             g.control_label->set_string(string);
         } else {
             pn::string string = get_object_name(control->base).copy();
-            string += sfz2pn(hot_key_suffix(control));
+            string += hot_key_suffix(control);
             g.control_label->set_string(string);
         }
     }

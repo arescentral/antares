@@ -30,9 +30,8 @@ namespace antares {
 struct Version {
     std::vector<int> components;
 };
-void              print_to(sfz::PrintTarget out, const Version& v);
-inline pn::string sfz2pn(const Version& v) { return sfz2pn(sfz::String(v)); }
-Version           u32_to_version(uint32_t in);
+pn::string stringify(const Version& v);
+Version    u32_to_version(uint32_t in);
 
 class ScenarioList {
   public:

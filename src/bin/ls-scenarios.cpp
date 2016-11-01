@@ -44,7 +44,7 @@ void main(int argc, char* const* argv) {
         print(io::out, format("    download url: {0}\n", pn2sfz(list.at(i).download_url)));
         print(io::out, format("    author: {0}\n", pn2sfz(list.at(i).author)));
         print(io::out, format("    author url: {0}\n", pn2sfz(list.at(i).author_url)));
-        print(io::out, format("    version: {0}\n", list.at(i).version));
+        print(io::out, format("    version: {0}\n", pn2sfz(stringify(list.at(i).version))));
     }
 }
 

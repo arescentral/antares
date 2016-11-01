@@ -56,22 +56,16 @@ namespace antares {
 
 namespace {
 
-struct HexColor {
-    RgbColor color;
-};
-HexColor hex(RgbColor color) {
-    HexColor result = {color};
-    return result;
-}
-inline pn::string sfz2pn(const HexColor& h) { return antares::sfz2pn(sfz::String(h)); }
-void              print_to(PrintTarget target, HexColor color) {
+pn::string hex(RgbColor color) {
     using sfz::hex;
-    print(target, hex(color.color.red, 2));
-    print(target, hex(color.color.green, 2));
-    print(target, hex(color.color.blue, 2));
-    if (color.color.alpha != 255) {
-        print(target, hex(color.color.alpha, 2));
+    sfz::String target;
+    print(target, hex(color.red, 2));
+    print(target, hex(color.green, 2));
+    print(target, hex(color.blue, 2));
+    if (color.alpha != 255) {
+        print(target, hex(color.alpha, 2));
     }
+    return sfz2pn(target);
 }
 
 }  // namespace
@@ -102,14 +96,14 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
             pn::string args[] = {
                     sfz2pn(dest.left),   sfz2pn(dest.top),    sfz2pn(dest.right),
                     sfz2pn(dest.bottom), sfz2pn(source.left), sfz2pn(source.top),
-                    sfz2pn(hex(tint)),   _name.copy(),
+                    hex(tint),           _name.copy(),
             };
             _driver.log("crop", args);
         } else {
             pn::string args[] = {
                     sfz2pn(dest.left),    sfz2pn(dest.top),      sfz2pn(dest.right),
                     sfz2pn(dest.bottom),  sfz2pn(source.left),   sfz2pn(source.top),
-                    sfz2pn(source.right), sfz2pn(source.bottom), sfz2pn(hex(tint)),
+                    sfz2pn(source.right), sfz2pn(source.bottom), hex(tint),
                     _name.copy(),
             };
             _driver.log("crop", args);
@@ -121,8 +115,12 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
             return;
         }
         pn::string args[] = {
-                sfz2pn(draw_rect.left),   sfz2pn(draw_rect.top), sfz2pn(draw_rect.right),
-                sfz2pn(draw_rect.bottom), sfz2pn(hex(tint)),     _name.copy(),
+                sfz2pn(draw_rect.left),
+                sfz2pn(draw_rect.top),
+                sfz2pn(draw_rect.right),
+                sfz2pn(draw_rect.bottom),
+                hex(tint),
+                _name.copy(),
         };
         _driver.log("tint", args);
     }
@@ -136,7 +134,7 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
                 sfz2pn(draw_rect.top),
                 sfz2pn(draw_rect.right),
                 sfz2pn(draw_rect.bottom),
-                sfz2pn(hex(color)),
+                hex(color),
                 sfz2pn(frac),
                 _name.copy(),
         };
@@ -154,8 +152,8 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
                 sfz2pn(draw_rect.top),
                 sfz2pn(draw_rect.right),
                 sfz2pn(draw_rect.bottom),
-                sfz2pn(hex(outline_color)),
-                sfz2pn(hex(fill_color)),
+                hex(outline_color),
+                hex(fill_color),
                 _name.copy(),
         };
         _driver.log("outline", args);
@@ -223,24 +221,23 @@ void TextVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
         return;
     }
     pn::string args[] = {sfz2pn(rect.left), sfz2pn(rect.top), sfz2pn(rect.right),
-                         sfz2pn(rect.bottom), sfz2pn(hex(color))};
+                         sfz2pn(rect.bottom), hex(color)};
     log("rect", args);
 }
 
 void TextVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
     pn::string args[] = {sfz2pn(rect.left), sfz2pn(rect.top), sfz2pn(rect.right),
-                         sfz2pn(rect.bottom), sfz2pn(hex(color))};
+                         sfz2pn(rect.bottom), hex(color)};
     log("dither", args);
 }
 
 void TextVideoDriver::draw_point(const Point& at, const RgbColor& color) {
-    pn::string args[] = {sfz2pn(at.h), sfz2pn(at.v), sfz2pn(hex(color))};
+    pn::string args[] = {sfz2pn(at.h), sfz2pn(at.v), hex(color)};
     log("point", args);
 }
 
 void TextVideoDriver::draw_line(const Point& from, const Point& to, const RgbColor& color) {
-    pn::string args[] = {sfz2pn(from.h), sfz2pn(from.v), sfz2pn(to.h), sfz2pn(to.v),
-                         sfz2pn(hex(color))};
+    pn::string args[] = {sfz2pn(from.h), sfz2pn(from.v), sfz2pn(to.h), sfz2pn(to.v), hex(color)};
     log("line", args);
 }
 
@@ -249,7 +246,7 @@ void TextVideoDriver::draw_triangle(const Rect& rect, const RgbColor& color) {
         return;
     }
     pn::string args[] = {sfz2pn(rect.left), sfz2pn(rect.top), sfz2pn(rect.right),
-                         sfz2pn(rect.bottom), sfz2pn(hex(color))};
+                         sfz2pn(rect.bottom), hex(color)};
     log("triangle", args);
 }
 
@@ -258,7 +255,7 @@ void TextVideoDriver::draw_diamond(const Rect& rect, const RgbColor& color) {
         return;
     }
     pn::string args[] = {sfz2pn(rect.left), sfz2pn(rect.top), sfz2pn(rect.right),
-                         sfz2pn(rect.bottom), sfz2pn(hex(color))};
+                         sfz2pn(rect.bottom), hex(color)};
     log("diamond", args);
 }
 
@@ -267,7 +264,7 @@ void TextVideoDriver::draw_plus(const Rect& rect, const RgbColor& color) {
         return;
     }
     pn::string args[] = {sfz2pn(rect.left), sfz2pn(rect.top), sfz2pn(rect.right),
-                         sfz2pn(rect.bottom), sfz2pn(hex(color))};
+                         sfz2pn(rect.bottom), hex(color)};
     log("plus", args);
 }
 
