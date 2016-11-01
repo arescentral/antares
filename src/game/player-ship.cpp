@@ -119,6 +119,8 @@ void print_to(PrintTarget out, const HotKeySuffix& suffix) {
     print(out, format(" < {0} >", key_name));
 };
 
+inline pn::string sfz2pn(const HotKeySuffix& h) { return antares::sfz2pn(sfz::String(h)); }
+
 HotKeySuffix hot_key_suffix(Handle<SpaceObject> space_object) {
     HotKeySuffix result = {space_object};
     return result;

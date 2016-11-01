@@ -29,10 +29,18 @@ inline sfz::String pn2sfz(pn::string_view s) {
             sfz::utf8::decode(sfz::Bytes(reinterpret_cast<const uint8_t*>(s.data()), s.size())));
 }
 
-inline pn::string sfz2pn(sfz::PrintItem s) {
-    sfz::Bytes bytes(sfz::utf8::encode(sfz::String(s)));
+inline pn::string sfz2pn(sfz::StringSlice s) {
+    sfz::Bytes bytes(sfz::utf8::encode(s));
     return pn::string(reinterpret_cast<char*>(bytes.data()), bytes.size());
 }
+
+template <typename T>
+inline pn::string sfz2pn(sfz::EncodedString<T> s) {
+    return sfz2pn(sfz::String(s));
+}
+inline pn::string sfz2pn(sfz::Format<16> f) { return sfz2pn(sfz::String(f)); }
+inline pn::string sfz2pn(int i) { return sfz2pn(sfz::String(i)); }
+inline pn::string sfz2pn(double d) { return sfz2pn(sfz::String(d)); }
 
 }  // namespace antares
 

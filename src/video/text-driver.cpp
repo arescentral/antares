@@ -63,7 +63,8 @@ HexColor hex(RgbColor color) {
     HexColor result = {color};
     return result;
 }
-void print_to(PrintTarget target, HexColor color) {
+inline pn::string sfz2pn(const HexColor& h) { return antares::sfz2pn(sfz::String(h)); }
+void              print_to(PrintTarget target, HexColor color) {
     using sfz::hex;
     print(target, hex(color.color.red, 2));
     print(target, hex(color.color.green, 2));
