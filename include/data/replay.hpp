@@ -30,8 +30,8 @@ namespace antares {
 
 struct ReplayData {
     struct Scenario {
-        sfz::String identifier;
-        sfz::String version;
+        pn::string identifier;
+        pn::string version;
     };
 
     struct Action {

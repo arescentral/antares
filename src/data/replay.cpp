@@ -157,16 +157,16 @@ uint8_t read_varint<uint8_t, false>(ReadSource in) {
     return read_varint<int64_t, false>(in);
 }
 
-static void tag_string(WriteTarget out, uint64_t tag, const String& s) {
+static void tag_string(WriteTarget out, uint64_t tag, pn::string_view s) {
     write_varint(out, tag);
     write_varint(out, s.size());
-    write(out, utf8::encode(s));
+    write(out, utf8::encode(pn2sfz(s)));
 }
 
-static String read_string(ReadSource in) {
+static pn::string read_string(ReadSource in) {
     Bytes bytes(read_varint<size_t>(in), '\0');
     in.shift(bytes.data(), bytes.size());
-    return String(utf8::decode(bytes));
+    return sfz2pn(String(utf8::decode(bytes)));
 }
 
 template <typename T>
@@ -286,8 +286,8 @@ static void cull_replays(size_t count) {
 void ReplayBuilder::init(
         pn::string_view scenario_identifier, pn::string_view scenario_version, int32_t chapter_id,
         int32_t global_seed) {
-    _scenario.identifier = pn2sfz(scenario_identifier);
-    _scenario.version    = pn2sfz(scenario_version);
+    _scenario.identifier = scenario_identifier.copy();
+    _scenario.version    = scenario_version.copy();
     _chapter_id          = chapter_id;
     _global_seed         = global_seed;
 }

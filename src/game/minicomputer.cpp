@@ -165,13 +165,14 @@ const int32_t kMiniAmmoTextHBuffer = 2;
 
 const int32_t kMaxShipBuffer = 40;
 
-void pad_to(String& s, size_t width) {
-    if (s.size() < width) {
+void pad_to(pn::string& s, size_t width) {
+    sfz::String ss = pn2sfz(s);
+    if (ss.size() < width) {
         String result;
-        result.append((width - s.size()) / 2, ' ');
-        result.append(s);
-        result.append((1 + width - s.size()) / 2, ' ');
-        swap(result, s);
+        result.append((width - ss.size()) / 2, ' ');
+        result.append(ss);
+        result.append((1 + width - ss.size()) / 2, ' ');
+        s = sfz2pn(result);
     }
 }
 
@@ -191,10 +192,11 @@ inline int32_t mGetLineNumFromV(int32_t mV) {
 }
 
 inline void mCopyBlankLineString(miniScreenLineType* mline, pn::string_view mstring) {
-    mline->string.assign(pn2sfz(mstring));
-    if (mline->string.size() > kMiniScreenCharWidth) {
-        mline->string.resize(kMiniScreenCharWidth);
+    String s = pn2sfz(mstring);
+    if (s.size() > kMiniScreenCharWidth) {
+        s.resize(kMiniScreenCharWidth);
     }
+    mline->string = sfz2pn(s);
 }
 
 }  // namespace
@@ -206,7 +208,7 @@ static void MiniComputerExecute(
 
 void    MiniComputerSetStatusStrings(void);
 int32_t MiniComputerGetStatusValue(int32_t);
-void    MiniComputerMakeStatusString(int32_t which_line, String& string);
+void    MiniComputerMakeStatusString(int32_t which_line, pn::string& string);
 
 void MiniScreenInit() {
     g.mini.selectLine    = kMiniScreenNoLineSelected;
@@ -362,13 +364,13 @@ static void draw_minicomputer_lines() {
     }
 
     {
-        Quads       quads(sys.fonts.computer->texture);
-        bool        dim[kMiniScreenCharHeight];
-        StringSlice strings[kMiniScreenCharHeight];
+        Quads  quads(sys.fonts.computer->texture);
+        bool   dim[kMiniScreenCharHeight];
+        String strings[kMiniScreenCharHeight];
         for (int32_t count = 0; count < kMiniScreenCharHeight; count++) {
             auto c         = &g.mini.lineData[count];
             dim[count]     = (c->kind == MINI_DIM);
-            strings[count] = c->string;
+            strings[count] = pn2sfz(c->string);
         }
 
         for (int32_t count = 0; count < kMiniScreenCharHeight; count++) {
@@ -379,13 +381,11 @@ static void draw_minicomputer_lines() {
             switch (g.mini.lineData[count + kMiniScreenCharHeight].kind) {
                 case MINI_BUTTON_ON:
                     button_on_text(
-                            quads, count,
-                            sfz2pn(g.mini.lineData[count + kMiniScreenCharHeight].string));
+                            quads, count, g.mini.lineData[count + kMiniScreenCharHeight].string);
                     break;
                 case MINI_BUTTON_OFF:
                     button_off_text(
-                            quads, count,
-                            sfz2pn(g.mini.lineData[count + kMiniScreenCharHeight].string));
+                            quads, count, g.mini.lineData[count + kMiniScreenCharHeight].string);
                     break;
                 default: break;
             }
@@ -409,7 +409,7 @@ void draw_mini_screen() {
 
 static miniScreenLineType text(pn::string_view name, bool underlined) {
     miniScreenLineType line;
-    line.string    = pn2sfz(name);
+    line.string    = name.copy();
     line.kind      = MINI_NONE;
     line.underline = underlined;
     return line;
@@ -419,7 +419,7 @@ static miniScreenLineType selectable(
         pn::string_view name, void (*callback)(Handle<Admiral> adm, int32_t line)) {
     miniScreenLineType line;
     line.kind     = MINI_SELECTABLE;
-    line.string   = pn2sfz(name);
+    line.string   = name.copy();
     line.callback = callback;
     return line;
 }
@@ -428,10 +428,10 @@ static miniScreenLineType accept(pn::string_view name) {
     miniScreenLineType line;
     pn::string         line_string;
     GetKeyNumName(sys.prefs->key(kCompAcceptKeyNum), line_string);
-    line.string = pn2sfz(line_string);
+    line.string = line_string.copy();
     pad_to(line.string, kKeyNameLength);
-    line.string.append(" ");
-    line.string.append(pn2sfz(name));
+    line.string += " ";
+    line.string += name;
     line.kind        = MINI_BUTTON_OFF;
     line.whichButton = kInLineButton;
     return line;
@@ -441,16 +441,17 @@ static miniScreenLineType cancel(pn::string_view name) {
     miniScreenLineType line;
     pn::string         line_string;
     GetKeyNumName(sys.prefs->key(kCompCancelKeyNum), line_string);
-    line.string = pn2sfz(line_string);
+    line.string = line_string.copy();
     pad_to(line.string, kKeyNameLength);
-    line.string.append(" ");
-    line.string.append(pn2sfz(name));
+    line.string += " ";
+    line.string += name;
     line.kind        = MINI_BUTTON_OFF;
     line.whichButton = kOutLineButton;
     return line;
 }
 
-static void make_mini_screen(int16_t screen, vector<miniScreenLineType> lines) {
+template <int size>
+static void make_mini_screen(int16_t screen, const miniScreenLineType (&lines)[size]) {
     auto* item           = g.mini.lineData.get();
     auto* button         = g.mini.lineData.get() + kMiniScreenCharHeight;
     g.mini.currentScreen = screen;
@@ -478,8 +479,8 @@ static void make_mini_screen(int16_t screen, vector<miniScreenLineType> lines) {
                 }
                 break;
         }
-        dst->kind = src.kind;
-        dst->string.assign(src.string);
+        dst->kind        = src.kind;
+        dst->string      = src.string.copy();
         dst->underline   = src.underline;
         dst->callback    = src.callback;
         dst->whichButton = src.whichButton;
@@ -1092,7 +1093,7 @@ void MiniComputerSetStatusStrings() {
                 // - = abbreviated string, just plain text
                 line->statusType = kPlainTextStatus;
                 line->value      = 0;
-                line->string.assign(sourceString.slice(1));
+                line->string     = sfz2pn(sourceString.slice(1));
             } else {
                 //////////////////////////////////////////////
                 // get status type
@@ -1140,26 +1141,26 @@ void MiniComputerSetStatusStrings() {
                 // get falseString
                 StringSlice status_false_string;
                 if (partition(status_false_string, "\\", sourceString)) {
-                    line->statusFalse.assign(status_false_string);
+                    line->statusFalse = sfz2pn(status_false_string);
                 }
 
                 //////////////////////////////////////////////
                 // get trueString
                 StringSlice status_true_string;
                 if (partition(status_true_string, "\\", sourceString)) {
-                    line->statusTrue.assign(status_true_string);
+                    line->statusTrue = sfz2pn(status_true_string);
                 }
 
                 //////////////////////////////////////////////
                 // get statusString
                 StringSlice status_string;
                 if (partition(status_string, "\\", sourceString)) {
-                    line->statusString.assign(status_string);
+                    line->statusString = sfz2pn(status_string);
                 }
 
                 //////////////////////////////////////////////
                 // get postString
-                line->postString.assign(sourceString);
+                line->postString = sfz2pn(sourceString);
 
                 line->value = MiniComputerGetStatusValue(count);
                 MiniComputerMakeStatusString(count, line->string);
@@ -1172,7 +1173,7 @@ void MiniComputerSetStatusStrings() {
     }
 }
 
-void MiniComputerMakeStatusString(int32_t which_line, String& string) {
+void MiniComputerMakeStatusString(int32_t which_line, pn::string& string) {
     string.clear();
 
     const miniScreenLineType& line = g.mini.lineData[which_line];
@@ -1180,24 +1181,24 @@ void MiniComputerMakeStatusString(int32_t which_line, String& string) {
         return;
     }
 
-    print(string, line.statusString);
+    string += line.statusString;
     switch (line.statusType) {
         case kTrueFalseCondition:
             if (line.value == 1) {
-                print(string, line.statusTrue);
+                string += line.statusTrue;
             } else {
-                print(string, line.statusFalse);
+                string += line.statusFalse;
             }
             break;
 
         case kIntegerValue:
-        case kIntegerMinusValue: print(string, line.value); break;
+        case kIntegerMinusValue: string += sfz2pn(line.value); break;
 
         case kSmallFixedValue:
-        case kSmallFixedMinusValue: print(string, Fixed::from_val(line.value)); break;
+        case kSmallFixedMinusValue: string += stringify(Fixed::from_val(line.value)); break;
     }
     if (line.statusType != kPlainTextStatus) {
-        print(string, line.postString);
+        string += line.postString;
     }
 }
 

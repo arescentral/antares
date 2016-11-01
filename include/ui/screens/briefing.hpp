@@ -87,7 +87,7 @@ class BriefingScreen : public InterfaceScreen {
     std::vector<inlinePictType>          _inline_pict;
     Rect                                 _highlight_rect;
     std::vector<std::pair<Point, Point>> _highlight_lines;
-    sfz::String                          _text;
+    pn::string                           _text;
 
     DISALLOW_COPY_AND_ASSIGN(BriefingScreen);
 };

@@ -60,7 +60,7 @@ class DebriefingScreen : public Card {
     friend void print_to(sfz::PrintTarget out, State state);
     State       _state;
 
-    sfz::String                 _message;
+    pn::string                  _message;
     std::unique_ptr<StyledText> _score;
     Rect                        _pix_bounds;
     Rect                        _message_bounds;

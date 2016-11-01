@@ -101,7 +101,7 @@ static void populate_inline_picts(
 static void update_mission_brief_point(
         LabeledRect* dataItem, int32_t whichBriefPoint, const Level* level, coordPointType* corner,
         int32_t scale, Rect* bounds, vector<inlinePictType>& inlinePict, Rect& highlight_rect,
-        vector<pair<Point, Point>>& lines, String& text) {
+        vector<pair<Point, Point>>& lines, pn::string& text) {
     if (whichBriefPoint < kMissionBriefPointOffset) {
         // No longer handled here.
         return;
@@ -118,9 +118,8 @@ static void update_mission_brief_point(
 
     // TODO(sfiera): catch exception.
     Resource rsrc("text", "txt", contentID);
-    text.assign(utf8::decode(rsrc.data()));
-    int16_t textHeight =
-            GetInterfaceTextHeightFromWidth(sfz2pn(text), dataItem->style, kMissionDataWidth);
+    text               = sfz2pn(utf8::decode(rsrc.data()));
+    int16_t textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
     if (hiliteBounds.left == hiliteBounds.right) {
         dataItem->bounds().left =
                 (bounds->right - bounds->left) / 2 - (kMissionDataWidth / 2) + bounds->left;
@@ -203,7 +202,7 @@ static void update_mission_brief_point(
     dataItem->label = StringList(headerID).at(headerNumber - 1).copy();
     Rect newRect;
     GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
-    populate_inline_picts(dataItem->bounds(), sfz2pn(text), dataItem->style, inlinePict);
+    populate_inline_picts(dataItem->bounds(), text, dataItem->style, inlinePict);
 }
 
 BriefingScreen::BriefingScreen(const Level* level, bool* cancelled)
@@ -462,7 +461,7 @@ void BriefingScreen::draw_brief_point() const {
     draw_interface_item(_data_item, KEYBOARD_MOUSE, off);
     bounds = _data_item.bounds();
     bounds.offset(off.h, off.v);
-    draw_text_in_rect(bounds, sfz2pn(_text), _data_item.style, _data_item.hue);
+    draw_text_in_rect(bounds, _text, _data_item.style, _data_item.hue);
 }
 
 void BriefingScreen::show_object_data(int index, const KeyDownEvent& event) {

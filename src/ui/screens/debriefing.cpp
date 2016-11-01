@@ -161,7 +161,7 @@ void DebriefingScreen::draw() const {
     interface_bounds.offset(_pix_bounds.left, _pix_bounds.top);
     draw_interface_item(_data_item, KEYBOARD_MOUSE);
 
-    draw_text_in_rect(interface_bounds, sfz2pn(_message), kLarge, GOLD);
+    draw_text_in_rect(interface_bounds, _message, kLarge, GOLD);
 
     RgbColor bracket_color  = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
     Rect     bracket_bounds = _score_bounds;
@@ -218,9 +218,9 @@ void DebriefingScreen::fire_timer() {
 
 LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
     Resource rsrc("text", "txt", text_id);
-    _message.assign(utf8::decode(rsrc.data()));
+    _message = sfz2pn(utf8::decode(rsrc.data()));
 
-    int  text_height = GetInterfaceTextHeightFromWidth(sfz2pn(_message), kLarge, kTextWidth);
+    int  text_height = GetInterfaceTextHeightFromWidth(_message, kLarge, kTextWidth);
     Rect text_bounds(0, 0, kTextWidth, text_height);
     if (do_score) {
         text_bounds.bottom += kScoreTableHeight;

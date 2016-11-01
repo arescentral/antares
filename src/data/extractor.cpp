@@ -97,9 +97,9 @@ int32_t nlrp_chapter(int16_t id) {
 
 bool convert_nlrp(pn::string_view, bool, int16_t id, BytesSlice data, WriteTarget out) {
     ReplayData replay;
-    replay.scenario.identifier.assign(kFactoryScenarioIdentifier);
-    replay.scenario.version.assign("1.1.1");
-    replay.chapter_id = nlrp_chapter(id);
+    replay.scenario.identifier = kFactoryScenarioIdentifier;
+    replay.scenario.version    = "1.1.1";
+    replay.chapter_id          = nlrp_chapter(id);
     read(data, replay.global_seed);
 
     uint32_t keys = 0;

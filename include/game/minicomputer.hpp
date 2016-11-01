@@ -33,11 +33,11 @@ enum MiniScreenLineKind {
 
 struct miniScreenLineType {
     MiniScreenLineKind kind = MINI_NONE;
-    sfz::String        string;
-    sfz::String        statusFalse;
-    sfz::String        statusTrue;
-    sfz::String        statusString;
-    sfz::String        postString;
+    pn::string         string;
+    pn::string         statusFalse;
+    pn::string         statusTrue;
+    pn::string         statusString;
+    pn::string         postString;
     int32_t            whichButton = -1;
     bool               underline   = false;
     int32_t            value;  // for keeping track of changing values
