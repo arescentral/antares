@@ -26,7 +26,6 @@
 using sfz::Exception;
 using sfz::Optional;
 using sfz::String;
-using sfz::StringSlice;
 using sfz::print;
 using sfz::args::help;
 using sfz::args::store;
@@ -82,7 +81,7 @@ void ExtractDataMain(int argc, char* const* argv) {
             print(io::err, format("Extracting to {0}...\n", dest));
             PrintStatusObserver observer;
             extractor.extract(&observer);
-            print(io::err, StringSlice("done.\n"));
+            print(io::err, "done.\n");
         }
     } catch (Exception& e) {
         print(io::err, format("{0}: {1}\n", utf8::decode(argv[0]), e.message()));

@@ -40,7 +40,6 @@ using sfz::Rune;
 using sfz::ScopedFd;
 using sfz::String;
 using sfz::StringMap;
-using sfz::StringSlice;
 using sfz::format;
 using sfz::makedirs;
 using sfz::print;

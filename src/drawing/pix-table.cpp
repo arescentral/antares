@@ -32,9 +32,7 @@
 using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::ReadSource;
-using sfz::String;
 using sfz::StringMap;
-using sfz::StringSlice;
 using sfz::format;
 using sfz::range;
 using sfz::read;
