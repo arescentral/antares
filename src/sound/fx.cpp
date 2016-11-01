@@ -22,6 +22,7 @@
 
 #include "config/preferences.hpp"
 #include "data/base-object.hpp"
+#include "data/pn.hpp"
 #include "game/globals.hpp"
 #include "game/motion.hpp"
 #include "game/space-object.hpp"
@@ -219,7 +220,7 @@ void SoundFX::reset() {
         if (!sounds[i].soundHandle.get()) {
             auto id               = kFixedSounds[i];
             sounds[i].id          = id;
-            sounds[i].soundHandle = sys.audio->open_sound(format("/sounds/{0}", id));
+            sounds[i].soundHandle = sys.audio->open_sound(sfz2pn(format("/sounds/{0}", id)));
         }
     }
 }
@@ -233,7 +234,7 @@ void SoundFX::load(int16_t id) {
     if (whichSound == sounds.size()) {
         sounds.emplace_back();
         sounds.back().id          = id;
-        sounds.back().soundHandle = sys.audio->open_sound(format("/sounds/{0}", id));
+        sounds.back().soundHandle = sys.audio->open_sound(sfz2pn(format("/sounds/{0}", id)));
     }
 }
 

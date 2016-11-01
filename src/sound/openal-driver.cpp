@@ -213,7 +213,7 @@ void OpenAlSoundDriver::read_sound(BytesSlice data, OpenAlSound& sound) {
     sound.buffer(file);
 }
 
-unique_ptr<Sound> OpenAlSoundDriver::open_sound(PrintItem path) {
+unique_ptr<Sound> OpenAlSoundDriver::open_sound(pn::string_view path) {
     static const struct {
         const char ext[6];
         void (*fn)(BytesSlice, OpenAlSound&);
@@ -223,18 +223,17 @@ unique_ptr<Sound> OpenAlSoundDriver::open_sound(PrintItem path) {
             {".xm", read_sound<ModPlugFile>},
     };
 
-    String                  path_string(path);
     unique_ptr<OpenAlSound> sound(new OpenAlSound(*this));
     for (const auto& fmt : fmts) {
         try {
-            Resource rsrc(sfz2pn(format("{0}{1}", path_string, fmt.ext)));
+            Resource rsrc(sfz2pn(format("{0}{1}", pn2sfz(path), fmt.ext)));
             fmt.fn(rsrc.data(), *sound);
             return std::move(sound);
         } catch (Exception& e) {
             continue;
         }
     }
-    throw Exception(format("couldn't load sound {0}", quote(path_string)));
+    throw Exception(format("couldn't load sound {0}", quote(pn2sfz(path))));
 }
 
 void OpenAlSoundDriver::set_global_volume(uint8_t volume) { alListenerf(AL_GAIN, volume / 8.0); }

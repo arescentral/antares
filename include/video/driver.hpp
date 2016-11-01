@@ -20,6 +20,7 @@
 #define ANTARES_VIDEO_DRIVER_HPP_
 
 #include <stdint.h>
+#include <pn/string>
 #include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
@@ -57,7 +58,7 @@ class VideoDriver {
 
     virtual wall_time now() const = 0;
 
-    virtual Texture texture(sfz::PrintItem name, const PixMap& content)                  = 0;
+    virtual Texture texture(pn::string_view name, const PixMap& content)                 = 0;
     virtual void    dither_rect(const Rect& rect, const RgbColor& color)                 = 0;
     virtual void    draw_point(const Point& at, const RgbColor& color)                   = 0;
     virtual void    draw_line(const Point& from, const Point& to, const RgbColor& color) = 0;
@@ -89,11 +90,11 @@ class Texture {
   public:
     struct Impl {
         virtual ~Impl();
-        virtual sfz::StringSlice name() const                      = 0;
-        virtual void             draw(const Rect& draw_rect) const = 0;
-        virtual void             draw_cropped(
-                            const Rect& dest, const Rect& source, const RgbColor& tint) const = 0;
-        virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const           = 0;
+        virtual pn::string_view name() const                      = 0;
+        virtual void            draw(const Rect& draw_rect) const = 0;
+        virtual void            draw_cropped(
+                           const Rect& dest, const Rect& source, const RgbColor& tint) const = 0;
+        virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const          = 0;
         virtual void draw_static(
                 const Rect& draw_rect, const RgbColor& color, uint8_t frac) const = 0;
         virtual void draw_outlined(

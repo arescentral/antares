@@ -197,9 +197,9 @@ void gl_log(GLint object) {
 class OpenGlTextureImpl : public Texture::Impl {
   public:
     OpenGlTextureImpl(
-            PrintItem name, const PixMap& image, const OpenGlVideoDriver::Uniforms& uniforms,
+            pn::string_view name, const PixMap& image, const OpenGlVideoDriver::Uniforms& uniforms,
             GLuint vbuf[3])
-            : _name(name), _size(image.size()), _uniforms(uniforms), _vbuf(vbuf) {
+            : _name(name.copy()), _size(image.size()), _uniforms(uniforms), _vbuf(vbuf) {
         glBindTexture(GL_TEXTURE_RECTANGLE, _texture.id);
         glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -225,7 +225,7 @@ class OpenGlTextureImpl : public Texture::Impl {
                 copy.bytes());
     }
 
-    virtual StringSlice name() const { return _name; }
+    virtual pn::string_view name() const { return _name; }
 
     virtual void draw(const Rect& draw_rect) const {
         _uniforms.color_mode.set(DRAW_SPRITE_MODE);
@@ -365,7 +365,7 @@ class OpenGlTextureImpl : public Texture::Impl {
         DISALLOW_COPY_AND_ASSIGN(Texture);
     };
 
-    const String                       _name;
+    const pn::string                   _name;
     Texture                            _texture;
     Size                               _size;
     const OpenGlVideoDriver::Uniforms& _uniforms;
@@ -380,7 +380,7 @@ OpenGlVideoDriver::OpenGlVideoDriver() : _static_seed{0} {}
 
 int OpenGlVideoDriver::scale() const { return viewport_size().width / screen_size().width; }
 
-Texture OpenGlVideoDriver::texture(PrintItem name, const PixMap& content) {
+Texture OpenGlVideoDriver::texture(pn::string_view name, const PixMap& content) {
     return unique_ptr<Texture::Impl>(new OpenGlTextureImpl(name, content, _uniforms, _vbuf));
 }
 

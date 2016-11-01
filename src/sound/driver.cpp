@@ -21,6 +21,7 @@
 #include <fcntl.h>
 #include <sfz/sfz.hpp>
 
+#include "data/pn.hpp"
 #include "game/sys.hpp"
 #include "game/time.hpp"
 #include "lang/casts.hpp"
@@ -32,7 +33,6 @@ using sfz::Exception;
 using sfz::PrintItem;
 using sfz::ScopedFd;
 using sfz::String;
-using sfz::StringSlice;
 using sfz::format;
 using sfz::write;
 using std::unique_ptr;
@@ -89,7 +89,7 @@ unique_ptr<SoundChannel> NullSoundDriver::open_channel() {
     return unique_ptr<SoundChannel>(new NullChannel);
 }
 
-unique_ptr<Sound> NullSoundDriver::open_sound(PrintItem path) {
+unique_ptr<Sound> NullSoundDriver::open_sound(pn::string_view path) {
     static_cast<void>(path);
     return unique_ptr<Sound>(new NullSound);
 }
@@ -105,15 +105,15 @@ class LogSoundDriver::LogChannel : public SoundChannel {
 
     virtual void activate() { _driver._active_channel = this; }
 
-    void play(StringSlice sound_path) {
+    void play(pn::string_view sound_path) {
         auto   t = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
-        String line(format("play\t{0}\t{1}\t{2}\n", _id, t, sound_path));
+        String line(format("play\t{0}\t{1}\t{2}\n", _id, t, pn2sfz(sound_path)));
         write(_driver._sound_log, Bytes(utf8::encode(line)));
     }
 
-    void loop(StringSlice sound_path) {
+    void loop(pn::string_view sound_path) {
         auto   t = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
-        String line(format("loop\t{0}\t{1}\t{2}\n", _id, t, sound_path));
+        String line(format("loop\t{0}\t{1}\t{2}\n", _id, t, pn2sfz(sound_path)));
         write(_driver._sound_log, Bytes(utf8::encode(line)));
     }
 
@@ -138,7 +138,8 @@ class LogSoundDriver::LogChannel : public SoundChannel {
 
 class LogSoundDriver::LogSound : public Sound {
   public:
-    LogSound(const LogSoundDriver& driver, StringSlice path) : _driver(driver), _path(path) {}
+    LogSound(const LogSoundDriver& driver, pn::string_view path)
+            : _driver(driver), _path(path.copy()) {}
 
     virtual void play() { _driver._active_channel->play(_path); }
 
@@ -146,13 +147,13 @@ class LogSoundDriver::LogSound : public Sound {
 
   private:
     const LogSoundDriver& _driver;
-    const String          _path;
+    const pn::string      _path;
 
     DISALLOW_COPY_AND_ASSIGN(LogSound);
 };
 
-LogSoundDriver::LogSoundDriver(const StringSlice& path)
-        : _sound_log(open(path, O_CREAT | O_WRONLY | O_TRUNC, 0644)),
+LogSoundDriver::LogSoundDriver(pn::string_view path)
+        : _sound_log(open(pn2sfz(path), O_CREAT | O_WRONLY | O_TRUNC, 0644)),
           _last_id(-1),
           _active_channel(NULL) {}
 
@@ -160,9 +161,8 @@ unique_ptr<SoundChannel> LogSoundDriver::open_channel() {
     return unique_ptr<SoundChannel>(new LogChannel(*this));
 }
 
-unique_ptr<Sound> LogSoundDriver::open_sound(PrintItem path) {
-    String path_string(path);
-    return unique_ptr<Sound>(new LogSound(*this, path_string));
+unique_ptr<Sound> LogSoundDriver::open_sound(pn::string_view path) {
+    return unique_ptr<Sound>(new LogSound(*this, path));
 }
 
 void LogSoundDriver::set_global_volume(uint8_t volume) { static_cast<void>(volume); }

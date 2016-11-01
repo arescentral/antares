@@ -58,7 +58,7 @@ Picture::Picture(pn::string_view resource, bool hidpi)
 }
 
 Texture Picture::texture() const {
-    return sys.video->texture(format("/{0}", pn2sfz(_path)), *this);
+    return sys.video->texture(sfz2pn(format("/{0}", pn2sfz(_path))), *this);
 }
 
 }  // namespace antares

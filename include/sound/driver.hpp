@@ -19,6 +19,7 @@
 #ifndef ANTARES_SOUND_DRIVER_HPP_
 #define ANTARES_SOUND_DRIVER_HPP_
 
+#include <pn/string>
 #include <sfz/sfz.hpp>
 
 namespace antares {
@@ -54,7 +55,7 @@ class SoundDriver {
     virtual ~SoundDriver();
 
     virtual std::unique_ptr<SoundChannel> open_channel()                    = 0;
-    virtual std::unique_ptr<Sound>        open_sound(sfz::PrintItem path)   = 0;
+    virtual std::unique_ptr<Sound>        open_sound(pn::string_view path)  = 0;
     virtual void                          set_global_volume(uint8_t volume) = 0;
 
     static SoundDriver* driver();
@@ -68,7 +69,7 @@ class NullSoundDriver : public SoundDriver {
     NullSoundDriver() {}
 
     virtual std::unique_ptr<SoundChannel> open_channel();
-    virtual std::unique_ptr<Sound>        open_sound(sfz::PrintItem path);
+    virtual std::unique_ptr<Sound>        open_sound(pn::string_view path);
     virtual void                          set_global_volume(uint8_t volume);
 
   private:
@@ -77,10 +78,10 @@ class NullSoundDriver : public SoundDriver {
 
 class LogSoundDriver : public SoundDriver {
   public:
-    LogSoundDriver(const sfz::StringSlice& path);
+    LogSoundDriver(pn::string_view path);
 
     virtual std::unique_ptr<SoundChannel> open_channel();
-    virtual std::unique_ptr<Sound>        open_sound(sfz::PrintItem path);
+    virtual std::unique_ptr<Sound>        open_sound(pn::string_view path);
     virtual void                          set_global_volume(uint8_t volume);
 
   private:

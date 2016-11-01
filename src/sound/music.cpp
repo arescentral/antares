@@ -19,6 +19,7 @@
 #include "sound/music.hpp"
 
 #include "config/preferences.hpp"
+#include "data/pn.hpp"
 #include "game/sys.hpp"
 #include "lang/defines.hpp"
 #include "sound/driver.hpp"
@@ -54,7 +55,7 @@ void Music::play(Type type, int16_t id) {
     _song_id   = id;
 
     if (play) {
-        _song = sys.audio->open_sound(format("/music/{0}", id));
+        _song = sys.audio->open_sound(sfz2pn(format("/music/{0}", id)));
         _channel->activate();
         _channel->amp(255 * volume);
         _song->loop();

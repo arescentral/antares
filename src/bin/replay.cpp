@@ -75,13 +75,16 @@ namespace antares {
 
 class ReplayMaster : public Card {
   public:
-    ReplayMaster(BytesSlice data, Optional<String> output_path)
+    ReplayMaster(BytesSlice data, const Optional<pn::string>& output_path)
             : _state(NEW),
-              _output_path(output_path),
               _replay_data(data),
               _random_seed(_replay_data.global_seed),
               _game_result(NO_GAME),
-              _input_source(&_replay_data) {}
+              _input_source(&_replay_data) {
+        if (output_path.has()) {
+            _output_path.set(output_path->copy());
+        }
+    }
 
     virtual void become_front() {
         switch (_state) {
@@ -98,7 +101,7 @@ class ReplayMaster : public Card {
 
             case REPLAY:
                 if (_output_path.has()) {
-                    String path(format("{0}/debriefing.txt", *_output_path));
+                    String path(format("{0}/debriefing.txt", pn2sfz(*_output_path)));
                     makedirs(path::dirname(path), 0755);
                     ScopedFd outcome(open(path, O_WRONLY | O_CREAT, 0644));
                     if ((g.victory_text >= 0)) {
@@ -129,11 +132,11 @@ class ReplayMaster : public Card {
     };
     State _state;
 
-    Optional<String>  _output_path;
-    ReplayData        _replay_data;
-    const int32_t     _random_seed;
-    GameResult        _game_result;
-    ReplayInputSource _input_source;
+    Optional<pn::string> _output_path;
+    ReplayData           _replay_data;
+    const int32_t        _random_seed;
+    GameResult           _game_result;
+    ReplayInputSource    _input_source;
 
     DISALLOW_COPY_AND_ASSIGN(ReplayMaster);
 };
@@ -166,8 +169,8 @@ void main(int argc, char** argv) {
     String replay_path(utf8::decode(argv[0]));
     parser.add_argument("replay", store(replay_path)).help("an Antares replay script").required();
 
-    Optional<String> output_dir;
-    parser.add_argument("-o", "--output", store(output_dir))
+    Optional<String> sfz_output_dir;
+    parser.add_argument("-o", "--output", store(sfz_output_dir))
             .help("place output in this directory");
 
     int  interval = 60;
@@ -190,8 +193,10 @@ void main(int argc, char** argv) {
         exit(1);
     }
 
-    if (output_dir.has()) {
-        makedirs(*output_dir, 0755);
+    Optional<pn::string> output_dir;
+    if (sfz_output_dir.has()) {
+        output_dir.set(sfz2pn(*sfz_output_dir));
+        makedirs(pn2sfz(*output_dir), 0755);
     }
 
     Preferences preferences;
@@ -207,8 +212,8 @@ void main(int argc, char** argv) {
 
     unique_ptr<SoundDriver> sound;
     if (!smoke && output_dir.has()) {
-        String out(format("{0}/sound.log", *output_dir));
-        sound.reset(new LogSoundDriver(out));
+        String out(format("{0}/sound.log", pn2sfz(*output_dir)));
+        sound.reset(new LogSoundDriver(sfz2pn(out)));
     } else {
         sound.reset(new NullSoundDriver);
     }
@@ -216,7 +221,7 @@ void main(int argc, char** argv) {
 
     MappedFile replay_file(replay_path);
     if (smoke) {
-        TextVideoDriver video({width, height}, Optional<String>());
+        TextVideoDriver video({width, height}, Optional<pn::string>());
         video.loop(new ReplayMaster(replay_file.data(), output_dir), scheduler);
     } else if (text) {
         TextVideoDriver video({width, height}, output_dir);

@@ -23,6 +23,7 @@
 
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
+#include "data/pn.hpp"
 #include "sound/driver.hpp"
 #include "ui/card.hpp"
 #include "ui/flows/master.hpp"
@@ -66,9 +67,9 @@ void main(int argc, char* const* argv) {
             .required()
             .help("the script to execute");
 
-    Optional<String> output_dir;
+    Optional<String> sfz_output_dir;
     bool             text = false;
-    parser.add_argument("-o", "--output", store(output_dir))
+    parser.add_argument("-o", "--output", store(sfz_output_dir))
             .help("place output in this directory");
     parser.add_argument("-t", "--text", store_const(text, true)).help("produce text output");
     parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
@@ -79,8 +80,10 @@ void main(int argc, char* const* argv) {
         exit(1);
     }
 
-    if (output_dir.has()) {
-        makedirs(*output_dir, 0755);
+    Optional<pn::string> output_dir;
+    if (sfz_output_dir.has()) {
+        output_dir.set(sfz2pn(*sfz_output_dir));
+        makedirs(pn2sfz(*output_dir), 0755);
     }
 
     NullPrefsDriver prefs;
@@ -101,8 +104,8 @@ void main(int argc, char* const* argv) {
 
     unique_ptr<SoundDriver> sound;
     if (output_dir.has()) {
-        String out(format("{0}/sound.log", *output_dir));
-        sound.reset(new LogSoundDriver(out));
+        String out(format("{0}/sound.log", pn2sfz(*output_dir)));
+        sound.reset(new LogSoundDriver(sfz2pn(out)));
     } else {
         sound.reset(new NullSoundDriver);
     }

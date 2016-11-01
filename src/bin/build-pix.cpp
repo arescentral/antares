@@ -21,6 +21,7 @@
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
+#include "data/pn.hpp"
 #include "drawing/build-pix.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
@@ -71,9 +72,9 @@ class DrawPix : public Card {
 int main(int argc, char* const* argv) {
     args::Parser parser(argv[0], "Builds all of the scrolling text images in the game");
 
-    Optional<String> output_dir;
+    Optional<String> sfz_output_dir;
     bool             text = false;
-    parser.add_argument("-o", "--output", store(output_dir))
+    parser.add_argument("-o", "--output", store(sfz_output_dir))
             .help("place output in this directory");
     parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
     parser.add_argument("-t", "--text", store_const(text, true)).help("produce text output");
@@ -84,8 +85,10 @@ int main(int argc, char* const* argv) {
         exit(1);
     }
 
-    if (output_dir.has()) {
-        makedirs(*output_dir, 0755);
+    Optional<pn::string> output_dir;
+    if (sfz_output_dir.has()) {
+        output_dir.set(sfz2pn(*sfz_output_dir));
+        makedirs(pn2sfz(*output_dir), 0755);
     }
 
     NullPrefsDriver prefs;
@@ -106,13 +109,13 @@ int main(int argc, char* const* argv) {
             {10199, 450},  // Unused Gaitori prologue
     };
 
-    vector<pair<unique_ptr<Card>, String>> pix;
+    vector<pair<unique_ptr<Card>, pn::string>> pix;
     if (text) {
         TextVideoDriver video({540, 2000}, output_dir);
         for (auto spec : specs) {
             pix.emplace_back(
                     unique_ptr<Card>(new DrawPix(nullptr, spec.first, spec.second)),
-                    String(format("{0}.txt", dec(spec.first, 5))));
+                    sfz2pn(format("{0}.txt", dec(spec.first, 5))));
         }
         video.capture(pix);
     } else {
@@ -120,7 +123,7 @@ int main(int argc, char* const* argv) {
         for (auto spec : specs) {
             pix.emplace_back(
                     unique_ptr<Card>(new DrawPix(&video, spec.first, spec.second)),
-                    String(format("{0}.png", dec(spec.first, 5))));
+                    sfz2pn(format("{0}.png", dec(spec.first, 5))));
         }
         video.capture(pix);
     }

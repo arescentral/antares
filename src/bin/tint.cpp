@@ -20,6 +20,7 @@
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
+#include "data/pn.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/pix-table.hpp"
@@ -67,13 +68,18 @@ void draw(int16_t id, uint8_t color, ArrayPixMap& pix) {
 
 class ShapeBuilder {
   public:
-    ShapeBuilder(const Optional<String>& output_dir) : _output_dir(output_dir) {}
+    ShapeBuilder(const Optional<pn::string>& output_dir) {
+        if (output_dir.has()) {
+            _output_dir.set(output_dir->copy());
+        }
+    }
 
     void save(int16_t id, uint8_t color) {
         ArrayPixMap pix(0, 0);
         draw(id, color, pix);
         if (_output_dir.has()) {
-            const String path(format("{0}/{1}/{2}.png", *_output_dir, name(id), hex(color)));
+            const String path(
+                    format("{0}/{1}/{2}.png", pn2sfz(*_output_dir), name(id), hex(color)));
             makedirs(dirname(path), 0755);
             ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
             write(fd, pix);
@@ -81,7 +87,7 @@ class ShapeBuilder {
     }
 
   private:
-    const Optional<String> _output_dir;
+    Optional<pn::string> _output_dir;
 
     DISALLOW_COPY_AND_ASSIGN(ShapeBuilder);
 };
@@ -89,8 +95,8 @@ class ShapeBuilder {
 int main(int argc, char* const* argv) {
     args::Parser parser(argv[0], "Draws shapes used in the long-range view");
 
-    Optional<String> output_dir;
-    parser.add_argument("-o", "--output", store(output_dir))
+    Optional<String> sfz_output_dir;
+    parser.add_argument("-o", "--output", store(sfz_output_dir))
             .help("place output in this directory");
     parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
 
@@ -98,6 +104,11 @@ int main(int argc, char* const* argv) {
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
         print(io::err, format("{0}: {1}\n", parser.name(), error));
         exit(1);
+    }
+
+    Optional<pn::string> output_dir;
+    if (sfz_output_dir.has()) {
+        output_dir.set(sfz2pn(*sfz_output_dir));
     }
 
     NullPrefsDriver prefs;

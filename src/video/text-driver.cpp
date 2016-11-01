@@ -25,6 +25,7 @@
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
+#include "data/pn.hpp"
 #include "drawing/pix-map.hpp"
 #include "game/globals.hpp"
 #include "game/sys.hpp"
@@ -76,17 +77,20 @@ void print_to(PrintTarget target, HexColor color) {
 
 class TextVideoDriver::TextureImpl : public Texture::Impl {
   public:
-    TextureImpl(PrintItem name, TextVideoDriver& driver, Size size)
-            : _name(name), _driver(driver), _size(size) {}
+    TextureImpl(pn::string_view name, TextVideoDriver& driver, Size size)
+            : _name(name.copy()), _driver(driver), _size(size) {}
 
-    virtual StringSlice name() const { return _name; }
+    virtual pn::string_view name() const { return _name; }
 
     virtual void draw(const Rect& draw_rect) const {
         if (!world().intersects(draw_rect)) {
             return;
         }
-        _driver.log(
-                "draw", {draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom, _name});
+        pn::string args[] = {
+                sfz2pn(draw_rect.left),   sfz2pn(draw_rect.top), sfz2pn(draw_rect.right),
+                sfz2pn(draw_rect.bottom), _name.copy(),
+        };
+        _driver.log("draw", args);
     }
 
     virtual void draw_cropped(const Rect& dest, const Rect& source, const RgbColor& tint) const {
@@ -94,13 +98,20 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
             return;
         }
         if (source.size() == dest.size()) {
-            _driver.log(
-                    "crop", {dest.left, dest.top, dest.right, dest.bottom, source.left, source.top,
-                             hex(tint), _name});
+            pn::string args[] = {
+                    sfz2pn(dest.left),   sfz2pn(dest.top),    sfz2pn(dest.right),
+                    sfz2pn(dest.bottom), sfz2pn(source.left), sfz2pn(source.top),
+                    sfz2pn(hex(tint)),   _name.copy(),
+            };
+            _driver.log("crop", args);
         } else {
-            _driver.log(
-                    "crop", {dest.left, dest.top, dest.right, dest.bottom, source.left, source.top,
-                             source.right, source.bottom, hex(tint), _name});
+            pn::string args[] = {
+                    sfz2pn(dest.left),    sfz2pn(dest.top),      sfz2pn(dest.right),
+                    sfz2pn(dest.bottom),  sfz2pn(source.left),   sfz2pn(source.top),
+                    sfz2pn(source.right), sfz2pn(source.bottom), sfz2pn(hex(tint)),
+                    _name.copy(),
+            };
+            _driver.log("crop", args);
         }
     }
 
@@ -108,18 +119,27 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
         if (!world().intersects(draw_rect)) {
             return;
         }
-        _driver.log(
-                "tint", {draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
-                         hex(tint), _name});
+        pn::string args[] = {
+                sfz2pn(draw_rect.left),   sfz2pn(draw_rect.top), sfz2pn(draw_rect.right),
+                sfz2pn(draw_rect.bottom), sfz2pn(hex(tint)),     _name.copy(),
+        };
+        _driver.log("tint", args);
     }
 
     virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const {
         if (!world().intersects(draw_rect)) {
             return;
         }
-        _driver.log(
-                "static", {draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
-                           hex(color), frac, _name});
+        pn::string args[] = {
+                sfz2pn(draw_rect.left),
+                sfz2pn(draw_rect.top),
+                sfz2pn(draw_rect.right),
+                sfz2pn(draw_rect.bottom),
+                sfz2pn(hex(color)),
+                sfz2pn(frac),
+                _name.copy(),
+        };
+        _driver.log("static", args);
     }
 
     virtual void draw_outlined(
@@ -128,35 +148,46 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
         if (!world().intersects(draw_rect)) {
             return;
         }
-        _driver.log(
-                "outline", {draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
-                            hex(outline_color), hex(fill_color), _name});
+        pn::string args[] = {
+                sfz2pn(draw_rect.left),
+                sfz2pn(draw_rect.top),
+                sfz2pn(draw_rect.right),
+                sfz2pn(draw_rect.bottom),
+                sfz2pn(hex(outline_color)),
+                sfz2pn(hex(fill_color)),
+                _name.copy(),
+        };
+        _driver.log("outline", args);
     }
 
     virtual const Size& size() const { return _size; }
 
   private:
-    String           _name;
+    pn::string       _name;
     TextVideoDriver& _driver;
     Size             _size;
 };
 
 class TextVideoDriver::MainLoop : public EventScheduler::MainLoop {
   public:
-    MainLoop(TextVideoDriver& driver, const Optional<String>& output_dir, Card* initial)
-            : _driver(driver), _output_dir(output_dir), _stack(initial) {}
+    MainLoop(TextVideoDriver& driver, const Optional<pn::string>& output_dir, Card* initial)
+            : _driver(driver), _stack(initial) {
+        if (output_dir.has()) {
+            _output_dir.set(output_dir->copy());
+        }
+    }
 
     bool takes_snapshots() { return _output_dir.has(); }
 
     void snapshot(wall_ticks ticks) {
-        snapshot_to(format("screens/{0}.txt", dec(ticks.time_since_epoch().count(), 6)));
+        snapshot_to(sfz2pn(format("screens/{0}.txt", dec(ticks.time_since_epoch().count(), 6))));
     }
 
-    void snapshot_to(PrintItem relpath) {
-        String path(format("{0}/{1}", *_output_dir, relpath));
+    void snapshot_to(pn::string_view relpath) {
+        String path(format("{0}/{1}", pn2sfz(*_output_dir), pn2sfz(relpath)));
         makedirs(path::dirname(path), 0755);
         sfz::ScopedFd file(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-        write(file, sfz::Bytes(utf8::encode(_driver._log)));
+        write(file, sfz::Bytes(utf8::encode(pn2sfz(_driver._log))));
     }
 
     void draw() {
@@ -168,17 +199,21 @@ class TextVideoDriver::MainLoop : public EventScheduler::MainLoop {
     Card* top() const { return _stack.top(); }
 
   private:
-    TextVideoDriver& _driver;
-    Optional<String> _output_dir;
-    CardStack        _stack;
+    TextVideoDriver&     _driver;
+    Optional<pn::string> _output_dir;
+    CardStack            _stack;
 };
 
-TextVideoDriver::TextVideoDriver(Size screen_size, const Optional<String>& output_dir)
-        : _size(screen_size), _output_dir(output_dir) {}
+TextVideoDriver::TextVideoDriver(Size screen_size, const Optional<pn::string>& output_dir)
+        : _size(screen_size) {
+    if (output_dir.has()) {
+        _output_dir.set(output_dir->copy());
+    }
+}
 
 int TextVideoDriver::scale() const { return 1; }
 
-Texture TextVideoDriver::texture(sfz::PrintItem name, const PixMap& content) {
+Texture TextVideoDriver::texture(pn::string_view name, const PixMap& content) {
     return std::unique_ptr<Texture::Impl>(new TextureImpl(name, *this, content.size()));
 }
 
@@ -186,40 +221,53 @@ void TextVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
     if (!world().intersects(rect)) {
         return;
     }
-    log("rect", {rect.left, rect.top, rect.right, rect.bottom, hex(color)});
+    pn::string args[] = {sfz2pn(rect.left), sfz2pn(rect.top), sfz2pn(rect.right),
+                         sfz2pn(rect.bottom), sfz2pn(hex(color))};
+    log("rect", args);
 }
 
 void TextVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
-    log("dither", {rect.left, rect.top, rect.right, rect.bottom, hex(color)});
+    pn::string args[] = {sfz2pn(rect.left), sfz2pn(rect.top), sfz2pn(rect.right),
+                         sfz2pn(rect.bottom), sfz2pn(hex(color))};
+    log("dither", args);
 }
 
 void TextVideoDriver::draw_point(const Point& at, const RgbColor& color) {
-    log("point", {at.h, at.v, hex(color)});
+    pn::string args[] = {sfz2pn(at.h), sfz2pn(at.v), sfz2pn(hex(color))};
+    log("point", args);
 }
 
 void TextVideoDriver::draw_line(const Point& from, const Point& to, const RgbColor& color) {
-    log("line", {from.h, from.v, to.h, to.v, hex(color)});
+    pn::string args[] = {sfz2pn(from.h), sfz2pn(from.v), sfz2pn(to.h), sfz2pn(to.v),
+                         sfz2pn(hex(color))};
+    log("line", args);
 }
 
 void TextVideoDriver::draw_triangle(const Rect& rect, const RgbColor& color) {
     if (!world().intersects(rect)) {
         return;
     }
-    log("triangle", {rect.left, rect.top, rect.right, rect.bottom, hex(color)});
+    pn::string args[] = {sfz2pn(rect.left), sfz2pn(rect.top), sfz2pn(rect.right),
+                         sfz2pn(rect.bottom), sfz2pn(hex(color))};
+    log("triangle", args);
 }
 
 void TextVideoDriver::draw_diamond(const Rect& rect, const RgbColor& color) {
     if (!world().intersects(rect)) {
         return;
     }
-    log("diamond", {rect.left, rect.top, rect.right, rect.bottom, hex(color)});
+    pn::string args[] = {sfz2pn(rect.left), sfz2pn(rect.top), sfz2pn(rect.right),
+                         sfz2pn(rect.bottom), sfz2pn(hex(color))};
+    log("diamond", args);
 }
 
 void TextVideoDriver::draw_plus(const Rect& rect, const RgbColor& color) {
     if (!world().intersects(rect)) {
         return;
     }
-    log("plus", {rect.left, rect.top, rect.right, rect.bottom, hex(color)});
+    pn::string args[] = {sfz2pn(rect.left), sfz2pn(rect.top), sfz2pn(rect.right),
+                         sfz2pn(rect.bottom), sfz2pn(hex(color))};
+    log("plus", args);
 }
 
 void TextVideoDriver::loop(Card* initial, EventScheduler& scheduler) {
@@ -246,7 +294,7 @@ class DummyCard : public Card {
 
 }  // namespace
 
-void TextVideoDriver::capture(vector<pair<unique_ptr<Card>, String>>& pix) {
+void TextVideoDriver::capture(vector<pair<unique_ptr<Card>, pn::string>>& pix) {
     MainLoop loop(*this, _output_dir, new DummyCard);
     for (auto& p : pix) {
         loop.top()->stack()->push(p.first.release());
@@ -256,9 +304,9 @@ void TextVideoDriver::capture(vector<pair<unique_ptr<Card>, String>>& pix) {
     }
 }
 
-void TextVideoDriver::add_arg(StringSlice arg, std::vector<std::pair<size_t, size_t>>& args) {
+void TextVideoDriver::add_arg(pn::string_view arg, std::vector<std::pair<size_t, size_t>>& args) {
     size_t start = _log.size();
-    _log.push(arg);
+    _log += arg;
     args.push_back(make_pair(start, _log.size() - start));
 }
 
@@ -266,11 +314,12 @@ void TextVideoDriver::dup_arg(size_t index, std::vector<std::pair<size_t, size_t
     args.push_back(_last_args[index]);
 }
 
-sfz::StringSlice TextVideoDriver::last_arg(size_t index) const {
-    return _log.slice(_last_args[index].first, _last_args[index].second);
+pn::string_view TextVideoDriver::last_arg(size_t index) const {
+    return _log.substr(_last_args[index].first, _last_args[index].second);
 }
 
-void TextVideoDriver::log(StringSlice command, const std::vector<PrintItem>& args) {
+template <int size>
+void TextVideoDriver::log(pn::string_view command, pn::string (&args)[size]) {
     vector<pair<size_t, size_t>> this_args;
     bool                         new_command = _last_args.empty() || (command != last_arg(0));
 
@@ -279,16 +328,16 @@ void TextVideoDriver::log(StringSlice command, const std::vector<PrintItem>& arg
     } else {
         dup_arg(0, this_args);
     }
-    for (size_t i = 0; i < args.size(); ++i) {
-        _log.push("\t");
-        String s(args[i]);
+    for (size_t i = 0; i < size; ++i) {
+        _log += "\t";
+        pn::string_view s(args[i]);
         if (new_command || (s != last_arg(i + 1))) {
             add_arg(s, this_args);
         } else {
             dup_arg(i + 1, this_args);
         }
     }
-    _log.push("\n");
+    _log += "\n";
 
     using std::swap;
     swap(this_args, _last_args);
