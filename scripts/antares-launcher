@@ -8,6 +8,19 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
+
+PREFIX = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+if os.path.exists(os.path.join(PREFIX, "share", "antares", "app")):
+    BIN_PREFIX = os.path.join(PREFIX, "bin")
+    DATADIR = os.path.join(PREFIX, "share", "antares", "app")
+else:
+    BIN_PREFIX = os.path.join(PREFIX, "out", "cur")
+    DATADIR = os.path.join(PREFIX, "resources")
+
+ANTARES_BIN = os.path.join(BIN_PREFIX, "antares")
+ANTARES_ICON = os.path.join(DATADIR, "Antares.png")
+
+
 def main():
     win = LauncherWindow()
     win.show_all()
@@ -40,7 +53,7 @@ class LauncherWindow(Gtk.Dialog):
         notebook = Gtk.Notebook()
         notebook.append_page(plugin, Gtk.Label("Scenario"))
 
-        icon = Gtk.Image.new_from_file("resources/Antares.png")
+        icon = Gtk.Image.new_from_file(ANTARES_ICON)
 
         sections = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         sections.pack_start(icon, False, False, 0)
@@ -49,7 +62,7 @@ class LauncherWindow(Gtk.Dialog):
 
     def handle(self, widget, value):
         if value == Gtk.ResponseType.OK:
-            args = ["out/cur/antares"]
+            args = [ANTARES_BIN]
             os.execvp(args[0], args)
         else:
             Gtk.main_quit()

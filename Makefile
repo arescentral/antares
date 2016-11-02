@@ -40,8 +40,10 @@ ifeq ($(target_os), "linux")
 	install -m 755 -d $(DESTROOT)$(BINDIR)
 	install -m 755 out/cur/antares $(DESTROOT)$(BINDIR)/antares
 	install -m 755 out/cur/antares-install-data $(DESTROOT)$(BINDIR)/antares-install-data
+	install -m 755 scripts/antares-launcher $(DESTROOT)$(BINDIR)/antares-launcher
 	install -m 755 out/cur/antares-ls-scenarios $(DESTROOT)$(BINDIR)/antares-ls-scenarios
 	install -m 755 -d $(DESTROOT)$(DATADIR)
+	install -m 644 resources/Antares.png $(DESTROOT)$(DATADIR)
 	install -m 644 data/COPYING $(DESTROOT)$(DATADIR)
 	install -m 644 data/AUTHORS $(DESTROOT)$(DATADIR)
 	install -m 644 data/README.md $(DESTROOT)$(DATADIR)
