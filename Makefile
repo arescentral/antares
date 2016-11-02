@@ -37,21 +37,21 @@ sign:
 
 install: all
 ifeq ($(target_os), "linux")
-	install -m 755 -d $(BINDIR)
+	install -m 755 -d $(DESTROOT)$(BINDIR)
 	install -m 755 out/cur/antares $(DESTROOT)$(BINDIR)/antares
 	install -m 755 out/cur/antares-install-data $(DESTROOT)$(BINDIR)/antares-install-data
 	install -m 755 out/cur/antares-ls-scenarios $(DESTROOT)$(BINDIR)/antares-ls-scenarios
-	install -m 755 -d $(DATADIR)
-	install -m 644 data/COPYING $(DATADIR)
-	install -m 644 data/AUTHORS $(DATADIR)
-	install -m 644 data/README.md $(DATADIR)
-	cp -r data/fonts $(DATADIR)
-	cp -r data/interfaces $(DATADIR)
-	cp -r data/music $(DATADIR)
-	cp -r data/pictures $(DATADIR)
-	cp -r data/rotation-table $(DATADIR)
-	cp -r data/strings $(DATADIR)
-	cp -r data/text $(DATADIR)
+	install -m 755 -d $(DESTROOT)$(DATADIR)
+	install -m 644 data/COPYING $(DESTROOT)$(DATADIR)
+	install -m 644 data/AUTHORS $(DESTROOT)$(DATADIR)
+	install -m 644 data/README.md $(DESTROOT)$(DATADIR)
+	cp -r data/fonts $(DESTROOT)$(DATADIR)
+	cp -r data/interfaces $(DESTROOT)$(DATADIR)
+	cp -r data/music $(DESTROOT)$(DATADIR)
+	cp -r data/pictures $(DESTROOT)$(DATADIR)
+	cp -r data/rotation-table $(DESTROOT)$(DATADIR)
+	cp -r data/strings $(DESTROOT)$(DATADIR)
+	cp -r data/text $(DESTROOT)$(DATADIR)
 else
 	@echo "nothing to install on '$(target_os)'."
 endif
