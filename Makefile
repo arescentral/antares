@@ -40,6 +40,7 @@ ifeq ($(target_os), "linux")
 	install -m 755 -d $(BINDIR)
 	install -m 755 out/cur/antares $(DESTROOT)$(BINDIR)/antares
 	install -m 755 out/cur/antares-install-data $(DESTROOT)$(BINDIR)/antares-install-data
+	install -m 755 out/cur/antares-ls-scenarios $(DESTROOT)$(BINDIR)/antares-ls-scenarios
 	install -m 755 -d $(DATADIR)
 	install -m 644 data/COPYING $(DATADIR)
 	install -m 644 data/AUTHORS $(DATADIR)

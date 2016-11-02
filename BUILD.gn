@@ -14,10 +14,10 @@ group("default") {
   deps = [
     ":antares",
     ":antares-install-data",
+    ":antares-ls-scenarios",
     ":build-pix",
     ":fixed-test",
     ":hash-data",
-    ":ls-scenarios",
     ":object-data",
     ":offscreen",
     ":replay",
@@ -377,7 +377,7 @@ executable("hash-data") {
   configs += [ ":antares_private" ]
 }
 
-executable("ls-scenarios") {
+executable("antares-ls-scenarios") {
   testonly = true
   sources = [
     "src/bin/ls-scenarios.cpp",
@@ -514,7 +514,7 @@ executable(antares_glfw) {
 
 executable("antares-install-data") {
   sources = [
-    "src/bin/antares-install-data.cpp",
+    "src/bin/install-data.cpp",
   ]
   deps = [
     ":libantares",
