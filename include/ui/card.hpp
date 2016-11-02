@@ -19,6 +19,7 @@
 #ifndef ANTARES_UI_CARD_HPP_
 #define ANTARES_UI_CARD_HPP_
 
+#include "math/units.hpp"
 #include "ui/event.hpp"
 
 namespace antares {
@@ -92,7 +93,7 @@ class Card : public EventReceiver {
     // @param [out] time    If true is returned, the referent is set to the time point at which to
     //                      fire the timer.  If false is returned, is unchanged.
     // @returns             If `fire_timer()` should be called, true; otherwise, false.
-    virtual bool next_timer(int64_t& time);
+    virtual bool next_timer(wall_time& time);
 
     // Called when a Card's timer should be fired.
     //

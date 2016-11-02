@@ -23,13 +23,14 @@
 
 #include "data/replay.hpp"
 #include "data/resource.hpp"
+#include "game/input-source.hpp"
 #include "game/main.hpp"
 #include "math/random.hpp"
 #include "ui/card.hpp"
 
 namespace antares {
 
-struct Scenario;
+struct Level;
 
 class ReplayGame : public Card {
   public:
@@ -46,12 +47,12 @@ class ReplayGame : public Card {
     };
     State _state;
 
-    Resource _resource;
-    ReplayData _data;
-    Random _random_seed;
-    const Scenario* _scenario;
-    GameResult _game_result;
-    int32_t _seconds;
+    Resource          _resource;
+    ReplayData        _data;
+    Random            _random_seed;
+    Handle<Level>     _level;
+    GameResult        _game_result;
+    ReplayInputSource _input_source;
 };
 
 }  // namespace antares

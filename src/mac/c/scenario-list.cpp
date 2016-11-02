@@ -29,36 +29,36 @@ using std::vector;
 namespace utf8 = sfz::utf8;
 
 struct AntaresScenarioListEntry {
-    AntaresScenarioListEntry(const antares::ScenarioList::Entry& entry):
-            identifier(entry.identifier),
-            title(entry.title),
-            download_url(entry.download_url),
-            author(entry.author),
-            author_url(entry.author_url),
-            version_string(entry.version),
-            version(version_string) { }
+    AntaresScenarioListEntry(const antares::ScenarioList::Entry& entry)
+            : identifier(entry.identifier),
+              title(entry.title),
+              download_url(entry.download_url),
+              author(entry.author),
+              author_url(entry.author_url),
+              version_string(entry.version),
+              version(version_string) {}
 
     // TODO(sfiera): give CString a move constructor so we don't need to define this.
-    AntaresScenarioListEntry(AntaresScenarioListEntry&& other):
-        identifier(String(utf8::decode(other.identifier.data()))),
-        title(String(utf8::decode(other.title.data()))),
-        download_url(String(utf8::decode(other.download_url.data()))),
-        author(String(utf8::decode(other.author.data()))),
-        author_url(String(utf8::decode(other.author_url.data()))),
-        version_string(other.version_string),
-        version(String(utf8::decode(other.version.data()))) { }
+    AntaresScenarioListEntry(AntaresScenarioListEntry&& other)
+            : identifier(String(utf8::decode(other.identifier.data()))),
+              title(String(utf8::decode(other.title.data()))),
+              download_url(String(utf8::decode(other.download_url.data()))),
+              author(String(utf8::decode(other.author.data()))),
+              author_url(String(utf8::decode(other.author_url.data()))),
+              version_string(other.version_string),
+              version(String(utf8::decode(other.version.data()))) {}
 
     CString identifier;
     CString title;
     CString download_url;
     CString author;
     CString author_url;
-    String version_string;
+    String  version_string;
     CString version;
 };
 
 struct AntaresScenarioList {
-    antares::ScenarioList cxx_obj;
+    antares::ScenarioList            cxx_obj;
     vector<AntaresScenarioListEntry> entries;
 
     AntaresScenarioList() {

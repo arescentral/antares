@@ -23,12 +23,14 @@
 #include "config/keys.hpp"
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
+#include "data/plugin.hpp"
 #include "drawing/color.hpp"
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
+#include "game/level.hpp"
 #include "game/main.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/sys.hpp"
 #include "sound/driver.hpp"
 #include "ui/card.hpp"
 #include "ui/interface-handling.hpp"
@@ -44,28 +46,24 @@ using std::unique_ptr;
 
 namespace antares {
 
-SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Scenario** scenario)
-        : InterfaceScreen("select-level", world, true),
+SelectLevelScreen::SelectLevelScreen(bool* cancelled, Handle<Level>* level)
+        : InterfaceScreen("select-level", {0, 0, 640, 480}, true),
           _state(SELECTING),
           _cancelled(cancelled),
-          _scenario(scenario) {
+          _level(level) {
     Ledger::ledger()->unlocked_chapters(&_chapters);
-    _index = _chapters.size() - 1;
-    *_scenario = GetScenarioPtrFromChapter(_chapters[_index]);
+    _index  = _chapters.size() - 1;
+    *_level = Handle<Level>(_chapters[_index] - 1);
 }
 
-SelectLevelScreen::~SelectLevelScreen() { }
+SelectLevelScreen::~SelectLevelScreen() {}
 
 void SelectLevelScreen::become_front() {
     switch (_state) {
-      case SELECTING:
-      case UNLOCKING:
-        InterfaceScreen::become_front();
-        break;
+        case SELECTING:
+        case UNLOCKING: InterfaceScreen::become_front(); break;
 
-      case FADING_OUT:
-        stack()->pop(this);
-        break;
+        case FADING_OUT: stack()->pop(this); break;
     }
 }
 
@@ -82,20 +80,18 @@ static int ndigits(size_t n) {
 }
 
 void SelectLevelScreen::key_down(const KeyDownEvent& event) {
-    int digit;
     switch (_state) {
-      case SELECTING:
-        switch (event.key()) {
-          case Keys::K8:
-          case Keys::N_TIMES:
-            _state = UNLOCKING;
-            _unlock_chapter = 0;
-            _unlock_digits = ndigits(globals()->scenarioNum);
-            PlayVolumeSound(kCloakOn, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
-            return;
-        }
-      case UNLOCKING:
-        {
+        case SELECTING:
+            switch (event.key()) {
+                case Keys::K8:
+                case Keys::N_TIMES:
+                    _state          = UNLOCKING;
+                    _unlock_chapter = 0;
+                    _unlock_digits  = ndigits(plug.levels.size());
+                    sys.sound.cloak_on();
+                    return;
+            }
+        case UNLOCKING: {
             int digit = key_digit(event.key());
             if (digit < 0) {
                 _state = SELECTING;
@@ -104,19 +100,17 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
             _unlock_chapter = (_unlock_chapter * 10) + digit;
             if (--_unlock_digits == 0) {
                 _state = SELECTING;
-                if (_unlock_chapter > globals()->scenarioNum) {
+                if (_unlock_chapter > plug.levels.size()) {
                     return;
                 }
-                PlayVolumeSound(kCloakOff, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
+                sys.sound.cloak_off();
                 Ledger::ledger()->unlock_chapter(_unlock_chapter);
                 Ledger::ledger()->unlocked_chapters(&_chapters);
                 adjust_interface();
             }
             return;
-        }
-        break;
-      case FADING_OUT:
-        return;
+        } break;
+        case FADING_OUT: return;
     }
     InterfaceScreen::key_down(event);
 }
@@ -136,35 +130,35 @@ void SelectLevelScreen::adjust_interface() {
 
 void SelectLevelScreen::handle_button(Button& button) {
     switch (button.id) {
-      case OK:
-        _state = FADING_OUT;
-        *_cancelled = false;
-        stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::kBlack, 1e6, false, NULL));
-        break;
+        case OK:
+            _state      = FADING_OUT;
+            *_cancelled = false;
+            stack()->push(
+                    new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
+            break;
 
-      case CANCEL:
-        *_cancelled = true;
-        stack()->pop(this);
-        break;
+        case CANCEL:
+            *_cancelled = true;
+            stack()->pop(this);
+            break;
 
-      case PREVIOUS:
-        if (_index > 0) {
-            --_index;
-            *_scenario = GetScenarioPtrFromChapter(_chapters[_index]);
-        }
-        adjust_interface();
-        break;
+        case PREVIOUS:
+            if (_index > 0) {
+                --_index;
+                *_level = Handle<Level>(_chapters[_index] - 1);
+            }
+            adjust_interface();
+            break;
 
-      case NEXT:
-        if (_index < _chapters.size() - 1) {
-            ++_index;
-            *_scenario = GetScenarioPtrFromChapter(_chapters[_index]);
-        }
-        adjust_interface();
-        break;
+        case NEXT:
+            if (_index < _chapters.size() - 1) {
+                ++_index;
+                *_level = Handle<Level>(_chapters[_index] - 1);
+            }
+            adjust_interface();
+            break;
 
-      default:
-        throw Exception(format("Got unknown button {0}.", button.id));
+        default: throw Exception(format("Got unknown button {0}.", button.id));
     }
 }
 
@@ -173,17 +167,20 @@ void SelectLevelScreen::overlay() const {
 }
 
 void SelectLevelScreen::draw_level_name() const {
-    const String chapter_name((*_scenario)->name());
+    const String chapter_name((*_level)->name);
 
     const InterfaceItem& i = item(NAME);
 
-    RgbColor color = GetRGBTranslateColorShade(AQUA, VERY_LIGHT);
-    StyledText retro(title_font);
+    RgbColor   color = GetRGBTranslateColorShade(AQUA, VERY_LIGHT);
+    StyledText retro(sys.fonts.title);
     retro.set_fore_color(color);
     retro.set_retro_text(chapter_name);
     retro.wrap_to(440, 0, 2);
 
-    retro.draw(i.bounds());
+    Rect  bounds = i.bounds();
+    Point off    = offset();
+    bounds.offset(off.h, off.v);
+    retro.draw(bounds);
 }
 
 }  // namespace antares

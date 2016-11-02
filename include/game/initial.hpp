@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2012 The Antares Authors
+// Copyright (C) 2016 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,35 +16,18 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_MAC_WINDOWED_HPP_
-#define ANTARES_MAC_WINDOWED_HPP_
+#ifndef ANTARES_GAME_INITIAL_HPP_
+#define ANTARES_GAME_INITIAL_HPP_
 
-#include <sfz/sfz.hpp>
-
-#include "mac/c/CocoaVideoDriver.h"
-#include "math/geometry.hpp"
+#include "data/level.hpp"
 
 namespace antares {
-namespace cgl {
-class Context;
-class PixelFormat;
-}  // namespace cgl
 
-class CocoaWindowed {
-  public:
-    CocoaWindowed(
-        const cgl::PixelFormat& pixel_format, const cgl::Context& context, Size screen_size,
-        bool fullscreen, bool retina);
-    ~CocoaWindowed();
-
-    AntaresWindow* window() const { return _window; }
-    Size viewport_size() const;
-
-  private:
-    AntaresWindow* _window;
-    DISALLOW_COPY_AND_ASSIGN(CocoaWindowed);
-};
+void create_initial(Level::InitialObject* initial, uint32_t all_colors);
+void set_initial_destination(const Level::InitialObject* initial, bool preserve);
+void UnhideInitialObject(int32_t whichInitial);
+Handle<SpaceObject> GetObjectFromInitialNumber(int32_t initialNumber);
 
 }  // namespace antares
 
-#endif  // ANTARES_MAC_WINDOWED_HPP_
+#endif  // ANTARES_GAME_INITIAL_HPP_

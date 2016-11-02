@@ -28,3 +28,6 @@
 [submodule "ext/glfw"]
 	path = ext/glfw
 	url = https://github.com/sfiera/glfw-gyp
+[submodule "build/lib"]
+	path = build/lib
+	url = https://github.com/sfiera/gn-tools

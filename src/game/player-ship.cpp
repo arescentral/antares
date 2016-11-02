@@ -23,7 +23,7 @@
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
@@ -34,12 +34,13 @@
 #include "game/input-source.hpp"
 #include "game/instruments.hpp"
 #include "game/labels.hpp"
+#include "game/level.hpp"
 #include "game/messages.hpp"
 #include "game/minicomputer.hpp"
 #include "game/non-player-ship.hpp"
-#include "game/scenario-maker.hpp"
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
+#include "game/sys.hpp"
 #include "game/time.hpp"
 #include "lang/defines.hpp"
 #include "math/fixed.hpp"
@@ -62,18 +63,39 @@ namespace antares {
 
 namespace {
 
-const int32_t kSendMessageVOffset = 20;
+// const int32_t kSendMessageVOffset = 20;
 const int32_t kCursorBoundsSize = 16;  // should be same in instruments.c
 
 }  // namespace
 
+const static ticks kKlaxonInterval      = ticks(125);
+const static ticks kDestKeyHoldDuration = ticks(45);
+const static ticks kHotKeyHoldDuration  = ticks(51);  // Compatibility
+
 int32_t HotKey_GetFromObject(Handle<SpaceObject> object);
-void Update_LabelStrings_ForHotKeyChange( void);
+void Update_LabelStrings_ForHotKeyChange(void);
 
 namespace {
 
-static ANTARES_GLOBAL int32_t gDestKeyTime = 0;
-static ANTARES_GLOBAL int32_t gAlarmCount = -1;
+enum DestKeyState {
+    DEST_KEY_UP,       // up
+    DEST_KEY_DOWN,     // down, and possibly usable for self-selection
+    DEST_KEY_BLOCKED,  // down, but used for something else
+};
+
+enum HotKeyState {
+    HOT_KEY_UP,
+    HOT_KEY_SELECT,
+    HOT_KEY_TARGET,
+};
+
+static ANTARES_GLOBAL DestKeyState gDestKeyState = DEST_KEY_UP;
+static ANTARES_GLOBAL wall_time gDestKeyTime;
+
+static ANTARES_GLOBAL HotKeyState gHotKeyState = HOT_KEY_UP;
+static ANTARES_GLOBAL wall_time gHotKeyTime;
+static ANTARES_GLOBAL int       gHotKeyNum;
+
 static ANTARES_GLOBAL ZoomType gPreviousZoomMode;
 
 struct HotKeySuffix {
@@ -86,12 +108,12 @@ void print_to(PrintTarget out, const HotKeySuffix& suffix) {
         return;
     }
 
-    int keyNum = Preferences::preferences()->key(h + kFirstHotKeyNum);
+    int keyNum = sys.prefs->key(h + kFirstHotKeyNum);
     if (keyNum < 0) {
         return;
     }
 
-    StringList strings(KEY_LONG_NAMES);
+    StringList  strings(KEY_LONG_NAMES);
     StringSlice key_name = strings.at(keyNum - 1);
     print(out, format(" < {0} >", key_name));
 };
@@ -104,48 +126,46 @@ HotKeySuffix hot_key_suffix(Handle<SpaceObject> space_object) {
 }  // namespace
 
 void ResetPlayerShip(Handle<SpaceObject> which) {
-    g.ship = which;
+    g.ship          = which;
     g.control_label = Label::add(0, 0, 0, 10, SpaceObject::none(), true, YELLOW);
-    g.target_label = Label::add(0, 0, 0, -20, SpaceObject::none(), true, SKY_BLUE);
-    g.send_label = Label::add(200, 200, 0, 30, SpaceObject::none(), false, GREEN);
+    g.target_label  = Label::add(0, 0, 0, -20, SpaceObject::none(), true, SKY_BLUE);
+    g.send_label    = Label::add(200, 200, 0, 30, SpaceObject::none(), false, GREEN);
     globals()->starfield.reset(g.ship);
-    gAlarmCount = -1;
-    globals()->gAutoPilotOff = true;
-    globals()->keyMask = 0;
-    globals()->gZoomMode = kNearestFoeZoom;
-    gPreviousZoomMode = kNearestFoeZoom;
+    globals()->next_klaxon = game_ticks();
+    g.key_mask             = 0;
+    g.zoom                 = kNearestFoeZoom;
+    gPreviousZoomMode      = kNearestFoeZoom;
 
     for (int h = 0; h < kHotKeyNum; h++) {
-        globals()->hotKey[h].object = SpaceObject::none();
+        globals()->hotKey[h].object   = SpaceObject::none();
         globals()->hotKey[h].objectID = -1;
     }
-    globals()->hotKeyDownTime = 0;
-    globals()->lastHotKey = -1;
-    globals()->destKeyUsedForSelection = false;
-    globals()->hotKey_target = false;
+    gHotKeyState  = HOT_KEY_UP;
+    gDestKeyState = DEST_KEY_UP;
 }
 
-PlayerShip::PlayerShip():
-    gTheseKeys(0),
-    _gamepad_keys(0),
-    gLastKeys(0),
-    _gamepad_state(NO_BUMPER),
-    _control_active(false),
-    _control_direction(0) { }
+PlayerShip::PlayerShip()
+        : gTheseKeys(0),
+          _gamepad_keys(0),
+          _key_presses(0),
+          _key_releases(0),
+          _gamepad_state(NO_BUMPER),
+          _control_active(false),
+          _control_direction(0) {}
 
 void PlayerShip::update_keys(const KeyMap& keys) {
     for (int i = 0; i < 256; ++i) {
-        if (keys.get(i) && ! _keys.get(i)) {
-            key_down(KeyDownEvent(now_usecs(), i));
-        } else if (_keys.get(i) && ! keys.get(i)) {
-            key_up(KeyUpEvent(now_usecs(), i));
+        if (keys.get(i) && !_keys.get(i)) {
+            key_down(KeyDownEvent(now(), i));
+        } else if (_keys.get(i) && !keys.get(i)) {
+            key_up(KeyUpEvent(now(), i));
         }
     }
 }
 
 static int key_num(uint32_t key) {
     for (int i = 0; i < kKeyExtendedControlNum; ++i) {
-        if (key == (Preferences::preferences()->key(i) - 1)) {
+        if (key == (sys.prefs->key(i) - 1)) {
             return i;
         }
     }
@@ -153,22 +173,22 @@ static int key_num(uint32_t key) {
 }
 
 static void zoom_to(ZoomType zoom) {
-    if (globals()->gZoomMode != zoom) {
-        globals()->gZoomMode = zoom;
-        PlayVolumeSound(kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
-        StringList strings(kMessageStringID);
-        StringSlice string = strings.at(globals()->gZoomMode + kZoomStringOffset - 1);
+    if (g.zoom != zoom) {
+        g.zoom = zoom;
+        sys.sound.click();
+        StringList  strings(kMessageStringID);
+        StringSlice string = strings.at(g.zoom + kZoomStringOffset - 1);
         Messages::set_status(string, kStatusLabelColor);
     }
 }
 
 static void zoom_shortcut(ZoomType zoom) {
-    if (globals()->keyMask & kShortcutZoomMask) {
+    if (g.key_mask & kShortcutZoomMask) {
         return;
     }
     ZoomType previous = gPreviousZoomMode;
-    gPreviousZoomMode = globals()->gZoomMode;
-    if (globals()->gZoomMode == zoom) {
+    gPreviousZoomMode = g.zoom;
+    if (g.zoom == zoom) {
         zoom_to(previous);
     } else {
         zoom_to(zoom);
@@ -176,20 +196,20 @@ static void zoom_shortcut(ZoomType zoom) {
 }
 
 static void zoom_in() {
-    if (globals()->keyMask & kZoomInKey) {
+    if (g.key_mask & kZoomInKey) {
         return;
     }
-    if (globals()->gZoomMode > kTimesTwoZoom) {
-        zoom_to(static_cast<ZoomType>(globals()->gZoomMode - 1));
+    if (g.zoom > kTimesTwoZoom) {
+        zoom_to(static_cast<ZoomType>(g.zoom - 1));
     }
 }
 
 static void zoom_out() {
-    if (globals()->keyMask & kZoomOutKey) {
+    if (g.key_mask & kZoomOutKey) {
         return;
     }
-    if (globals()->gZoomMode < kSmallestZoom) {
-        zoom_to(static_cast<ZoomType>(globals()->gZoomMode + 1));
+    if (g.zoom < kSmallestZoom) {
+        zoom_to(static_cast<ZoomType>(g.zoom + 1));
     }
 }
 
@@ -207,16 +227,17 @@ static void pick_object(
     uint64_t huge_distance;
     if (select_ship.get()) {
         uint32_t difference = ABS<int>(origin_ship->location.h - select_ship->location.h);
-        uint32_t dcalc = difference;
-        difference =  ABS<int>(origin_ship->location.v - select_ship->location.v);
-        uint32_t distance = difference;
+        uint32_t dcalc      = difference;
+        difference          = ABS<int>(origin_ship->location.v - select_ship->location.v);
+        uint32_t distance   = difference;
 
-        if ((dcalc > kMaximumRelevantDistance)
-                || (distance > kMaximumRelevantDistance)) {
+        if ((dcalc > kMaximumRelevantDistance) || (distance > kMaximumRelevantDistance)) {
             huge_distance = dcalc;  // must be positive
             MyWideMul(huge_distance, huge_distance, &huge_distance);
             select_ship->distanceFromPlayer = distance;
-            MyWideMul(select_ship->distanceFromPlayer, select_ship->distanceFromPlayer, &select_ship->distanceFromPlayer);
+            MyWideMul(
+                    select_ship->distanceFromPlayer, select_ship->distanceFromPlayer,
+                    &select_ship->distanceFromPlayer);
             select_ship->distanceFromPlayer += huge_distance;
         } else {
             select_ship->distanceFromPlayer = distance * distance + dcalc * dcalc;
@@ -241,32 +262,30 @@ static void pick_object(
 
 static void select_friendly(Handle<SpaceObject> origin_ship, int32_t direction) {
     pick_object(
-            origin_ship, direction, false, kCanBeDestination, kIsDestination,
-            g.admiral->control(), FRIENDLY);
+            origin_ship, direction, false, kCanBeDestination, kIsDestination, g.admiral->control(),
+            FRIENDLY);
 }
 
 static void target_friendly(Handle<SpaceObject> origin_ship, int32_t direction) {
     pick_object(
-            origin_ship, direction, true, kCanBeDestination, kIsDestination,
-            g.admiral->target(), FRIENDLY);
+            origin_ship, direction, true, kCanBeDestination, kIsDestination, g.admiral->target(),
+            FRIENDLY);
 }
 
 static void target_hostile(Handle<SpaceObject> origin_ship, int32_t direction) {
     pick_object(
-            origin_ship, direction, true, kCanBeDestination, kIsDestination,
-            g.admiral->target(), HOSTILE);
+            origin_ship, direction, true, kCanBeDestination, kIsDestination, g.admiral->target(),
+            HOSTILE);
 }
 
 static void select_base(Handle<SpaceObject> origin_ship, int32_t direction) {
-    pick_object(
-            origin_ship, direction, false, kCanAcceptBuild, 0,
-            g.admiral->control(), FRIENDLY);
+    pick_object(origin_ship, direction, false, kCanAcceptBuild, 0, g.admiral->control(), FRIENDLY);
 }
 
 static void target_base(Handle<SpaceObject> origin_ship, int32_t direction) {
     pick_object(
-            origin_ship, direction, true, kIsDestination, 0,
-            g.admiral->target(), FRIENDLY_OR_HOSTILE);
+            origin_ship, direction, true, kIsDestination, 0, g.admiral->target(),
+            FRIENDLY_OR_HOSTILE);
 }
 
 static void target_self() {
@@ -282,46 +301,23 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
 
     int key = key_num(event.key());
     switch (key) {
-      case kZoomOutKeyNum:
-        zoom_out();
-        break;
-      case kZoomInKeyNum:
-        zoom_in();
-        break;
-      case kScale121KeyNum:
-        zoom_shortcut(kActualSizeZoom);
-        break;
-      case kScale122KeyNum:
-        zoom_shortcut(kHalfSizeZoom);
-        break;
-      case kScale124KeyNum:
-        zoom_shortcut(kQuarterSizeZoom);
-        break;
-      case kScale1216KeyNum:
-        zoom_shortcut(kEighthSizeZoom);
-        break;
-      case kScaleHostileKeyNum:
-        zoom_shortcut(kNearestFoeZoom);
-        break;
-      case kScaleObjectKeyNum:
-        zoom_shortcut(kNearestAnythingZoom);
-        break;
-      case kScaleAllKeyNum:
-        zoom_shortcut(kSmallestZoom);
-        break;
-      case kTransferKeyNum:
-        MiniComputerExecute(3, 1, g.admiral);
-        break;
-      case kMessageNextKeyNum:
-        Messages::advance();
-        break;
-      default:
-        if (key < kKeyControlNum) {
-            if (!(gTheseKeys & (0x01 << key) & ~globals()->keyMask)) {
-                gTheseKeys ^= (0x01 << key) & ~globals()->keyMask;
+        case kZoomOutKeyNum: zoom_out(); break;
+        case kZoomInKeyNum: zoom_in(); break;
+        case kScale121KeyNum: zoom_shortcut(kActualSizeZoom); break;
+        case kScale122KeyNum: zoom_shortcut(kHalfSizeZoom); break;
+        case kScale124KeyNum: zoom_shortcut(kQuarterSizeZoom); break;
+        case kScale1216KeyNum: zoom_shortcut(kEighthSizeZoom); break;
+        case kScaleHostileKeyNum: zoom_shortcut(kNearestFoeZoom); break;
+        case kScaleObjectKeyNum: zoom_shortcut(kNearestAnythingZoom); break;
+        case kScaleAllKeyNum: zoom_shortcut(kSmallestZoom); break;
+        case kTransferKeyNum: transfer_control(g.admiral, 0); break;
+        case kMessageNextKeyNum: Messages::advance(); break;
+        default:
+            if (key < kKeyControlNum) {
+                _key_presses |= ((1 << key) & ~g.key_mask);
+                _key_releases &= ~((1 << key) & ~g.key_mask);
             }
-        }
-        break;
+            break;
     }
 }
 
@@ -334,32 +330,63 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
 
     int key = key_num(event.key());
     switch (key) {
-      default:
-        if (key < kKeyControlNum) {
-            if (gTheseKeys & (0x01 << key) & ~globals()->keyMask) {
-                gTheseKeys ^= (0x01 << key) & ~globals()->keyMask;
+        default:
+            if (key < kKeyControlNum) {
+                _key_releases |= ((1 << key) & ~g.key_mask);
+                _key_presses &= ~((1 << key) & ~g.key_mask);
             }
-        }
-        break;
+            break;
     }
+}
+
+void PlayerShip::mouse_down(const MouseDownEvent& event) {
+    _cursor.mouse_down(event);
+
+    switch (event.button()) {
+        case 0:
+            if (event.count() == 2) {
+                InstrumentsHandleDoubleClick(_cursor);
+            } else if (event.count() == 1) {
+                InstrumentsHandleClick(_cursor);
+            }
+            break;
+        case 1:
+            if (event.count() == 1) {
+                PlayerShipHandleClick(event.where(), 1);
+            }
+            break;
+    }
+}
+
+void PlayerShip::mouse_up(const MouseUpEvent& event) {
+    _cursor.mouse_up(event);
+
+    if (event.button() == 0) {
+        InstrumentsHandleMouseStillDown(_cursor);
+        InstrumentsHandleMouseUp(_cursor);
+    }
+}
+
+void PlayerShip::mouse_move(const MouseMoveEvent& event) {
+    _cursor.mouse_move(event);
 }
 
 void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
     switch (event.button) {
-      case Gamepad::LB:
-        if (_gamepad_state & SELECT_BUMPER) {
-            _gamepad_state = TARGET_BUMPER_OVERRIDE;
-        } else if (!(_gamepad_state & TARGET_BUMPER)) {
-            _gamepad_state = TARGET_BUMPER;
-        }
-        return;
-      case Gamepad::RB:
-        if (_gamepad_state & TARGET_BUMPER) {
-            _gamepad_state = SELECT_BUMPER_OVERRIDE;
-        } else if (!(_gamepad_state & SELECT_BUMPER)) {
-            _gamepad_state = SELECT_BUMPER;
-        }
-        return;
+        case Gamepad::LB:
+            if (_gamepad_state & SELECT_BUMPER) {
+                _gamepad_state = TARGET_BUMPER_OVERRIDE;
+            } else if (!(_gamepad_state & TARGET_BUMPER)) {
+                _gamepad_state = TARGET_BUMPER;
+            }
+            return;
+        case Gamepad::RB:
+            if (_gamepad_state & TARGET_BUMPER) {
+                _gamepad_state = SELECT_BUMPER_OVERRIDE;
+            } else if (!(_gamepad_state & SELECT_BUMPER)) {
+                _gamepad_state = SELECT_BUMPER;
+            }
+            return;
     }
 
     if (!active()) {
@@ -369,109 +396,89 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
     auto player = g.ship;
     if (_gamepad_state) {
         switch (event.button) {
-          case Gamepad::A:
-            if (_control_active) {
-                if (_gamepad_state & SELECT_BUMPER) {
-                    select_friendly(player, _control_direction);
-                } else {
-                    target_friendly(player, _control_direction);
+            case Gamepad::A:
+                if (_control_active) {
+                    if (_gamepad_state & SELECT_BUMPER) {
+                        select_friendly(player, _control_direction);
+                    } else {
+                        target_friendly(player, _control_direction);
+                    }
                 }
-            }
-            return;
-          case Gamepad::B:
-            if (_control_active) {
+                return;
+            case Gamepad::B:
+                if (_control_active) {
+                    if (_gamepad_state & TARGET_BUMPER) {
+                        target_hostile(player, _control_direction);
+                    }
+                }
+                return;
+            case Gamepad::X:
+                if (_control_active) {
+                    if (_gamepad_state & SELECT_BUMPER) {
+                        select_base(player, _control_direction);
+                    } else {
+                        target_base(player, _control_direction);
+                    }
+                }
+                return;
+            case Gamepad::Y:
+                if (_gamepad_state & SELECT_BUMPER) {
+                    player->keysDown |= kGiveCommandKey;
+                } else {
+                    engage_autopilot();
+                }
+                return;
+            case Gamepad::LSB:
                 if (_gamepad_state & TARGET_BUMPER) {
-                    target_hostile(player, _control_direction);
-                }
-            }
-            return;
-          case Gamepad::X:
-            if (_control_active) {
-                if (_gamepad_state & SELECT_BUMPER) {
-                    select_base(player, _control_direction);
+                    target_self();
                 } else {
-                    target_base(player, _control_direction);
+                    transfer_control(g.admiral, 0);
                 }
-            }
-            return;
-          case Gamepad::Y:
-            if (_gamepad_state & SELECT_BUMPER) {
-                player->keysDown |= kGiveCommandKey;
-            } else {
-                engage_autopilot();
-            }
-            return;
-          case Gamepad::LSB:
-            if (_gamepad_state & TARGET_BUMPER) {
-                target_self();
-            } else {
-                MiniComputerExecute(3, 1, g.admiral);
-            }
-            return;
+                return;
         }
     }
 
     switch (event.button) {
-      case Gamepad::A:
-        _gamepad_keys |= kUpKey;
-        break;
-      case Gamepad::B:
-        _gamepad_keys |= kDownKey;
-        break;
-      case Gamepad::X:
-        zoom_out();
-        break;
-      case Gamepad::Y:
-        zoom_in();
-        break;
-      case Gamepad::BACK:
-        Messages::advance();
-        break;
-      case Gamepad::LT:
-        _gamepad_keys |= kEnterKey;
-        break;
-      case Gamepad::RT:
-        _gamepad_keys |= kOneKey;
-        _gamepad_keys |= kTwoKey;
-        break;
-      case Gamepad::LSB:
-        if (player->presenceState == kWarpingPresence) {
-            _gamepad_keys &= !kWarpKey;
-        } else {
-            _gamepad_keys |= kWarpKey;
-        }
-        break;
-      case Gamepad::UP:
-        minicomputer_handle_keys(kCompUpKey, 0, false);
-        break;
-      case Gamepad::DOWN:
-        minicomputer_handle_keys(kCompDownKey, 0, false);
-        break;
-      case Gamepad::RIGHT:
-        minicomputer_handle_keys(kCompAcceptKey, 0, false);
-        break;
-      case Gamepad::LEFT:
-        minicomputer_handle_keys(kCompCancelKey, 0, false);
-        break;
+        case Gamepad::A: _gamepad_keys |= kUpKey; break;
+        case Gamepad::B: _gamepad_keys |= kDownKey; break;
+        case Gamepad::X: zoom_out(); break;
+        case Gamepad::Y: zoom_in(); break;
+        case Gamepad::BACK: Messages::advance(); break;
+        case Gamepad::LT: _gamepad_keys |= kEnterKey; break;
+        case Gamepad::RT:
+            _gamepad_keys |= kOneKey;
+            _gamepad_keys |= kTwoKey;
+            break;
+        case Gamepad::LSB:
+            if (player->presenceState == kWarpingPresence) {
+                _gamepad_keys &= !kWarpKey;
+            } else {
+                _gamepad_keys |= kWarpKey;
+            }
+            break;
+        case Gamepad::UP: minicomputer_handle_keys(kCompUpKey, 0); break;
+        case Gamepad::DOWN: minicomputer_handle_keys(kCompDownKey, 0); break;
+        case Gamepad::RIGHT: minicomputer_handle_keys(kCompAcceptKey, 0); break;
+        case Gamepad::LEFT: minicomputer_handle_keys(kCompCancelKey, 0); break;
     }
 }
 
 void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
     switch (event.button) {
-      case Gamepad::LB:
-        if (_gamepad_state & OVERRIDE) {
-            _gamepad_state = SELECT_BUMPER;
-        } else {
-            _gamepad_state = NO_BUMPER;
-        }
-        return;
-      case Gamepad::RB:
-        if (_gamepad_state & OVERRIDE) {
-            _gamepad_state = TARGET_BUMPER;
-        } else {
-            _gamepad_state = NO_BUMPER;
-        }
-        return;
+        case Gamepad::LB:
+            if (_gamepad_state & OVERRIDE) {
+                _gamepad_state = SELECT_BUMPER;
+            } else {
+                _gamepad_state = NO_BUMPER;
+            }
+            return;
+        case Gamepad::RB:
+            if (_gamepad_state & OVERRIDE) {
+                _gamepad_state = TARGET_BUMPER;
+            } else {
+                _gamepad_state = NO_BUMPER;
+            }
+            return;
     }
 
     if (!active()) {
@@ -480,79 +487,67 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
 
     if (_gamepad_state) {
         switch (event.button) {
-          case Gamepad::A:
-          case Gamepad::B:
-          case Gamepad::X:
-          case Gamepad::Y:
-          case Gamepad::LSB:
-            return;
+            case Gamepad::A:
+            case Gamepad::B:
+            case Gamepad::X:
+            case Gamepad::Y:
+            case Gamepad::LSB: return;
         }
     }
 
     auto player = g.ship;
     switch (event.button) {
-      case Gamepad::A:
-        _gamepad_keys &= ~kUpKey;
-        break;
-      case Gamepad::B:
-        _gamepad_keys &= ~kDownKey;
-        break;
-      case Gamepad::LT:
-        _gamepad_keys &= ~kEnterKey;
-        break;
-      case Gamepad::RT:
-        _gamepad_keys &= ~kOneKey;
-        _gamepad_keys &= ~kTwoKey;
-        break;
-      case Gamepad::LSB:
-        if (player->presenceState != kWarpingPresence) {
-            _gamepad_keys &= !kWarpKey;
-        }
-        break;
-      case Gamepad::RIGHT:
-        minicomputer_handle_keys(0, kCompAcceptKey, false);
-        break;
-      case Gamepad::LEFT:
-        minicomputer_handle_keys(0, kCompCancelKey, false);
-        break;
+        case Gamepad::A: _gamepad_keys &= ~kUpKey; break;
+        case Gamepad::B: _gamepad_keys &= ~kDownKey; break;
+        case Gamepad::LT: _gamepad_keys &= ~kEnterKey; break;
+        case Gamepad::RT:
+            _gamepad_keys &= ~kOneKey;
+            _gamepad_keys &= ~kTwoKey;
+            break;
+        case Gamepad::LSB:
+            if (player->presenceState != kWarpingPresence) {
+                _gamepad_keys &= !kWarpKey;
+            }
+            break;
+        case Gamepad::RIGHT: minicomputer_handle_keys(0, kCompAcceptKey); break;
+        case Gamepad::LEFT: minicomputer_handle_keys(0, kCompCancelKey); break;
     }
 }
 
 void PlayerShip::gamepad_stick(const GamepadStickEvent& event) {
     bool active;
-    int direction = 0;
+    int  direction = 0;
     if ((event.x * event.x + event.y * event.y) < 0.90) {
         active = false;
     } else {
-        active = true;
+        active    = true;
         direction = GetAngleFromVector(event.x * 32768, event.y * 32768);
         mAddAngle(direction, ROT_180);
     }
     switch (event.stick) {
-      case Gamepad::LS:
-        _control_active = active;
-        _control_direction = direction;
-        break;
+        case Gamepad::LS:
+            _control_active    = active;
+            _control_direction = direction;
+            break;
     }
 }
 
 bool PlayerShip::active() const {
     auto player = g.ship;
-    return player.get()
-        && player->active
-        && (player->attributes & kIsHumanControlled);
+    return player.get() && player->active && (player->attributes & kIsHumanControlled);
 }
 
-void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_message) {
-    uint32_t        attributes;
-
+void PlayerShip::update(bool enter_message) {
     if (!g.ship.get()) {
         return;
     }
 
     if (enter_message) {
-        gTheseKeys = 0;
+        _key_presses  = 0;
+        _key_releases = gTheseKeys;
     }
+    gTheseKeys |= _key_presses;
+    gTheseKeys &= ~_key_releases;
 
     /*
     while ((globals()->gKeyMapBufferBottom != globals()->gKeyMapBufferTop)) {
@@ -607,7 +602,7 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
                         }
                     }
                 }
-                width = tactical_font->string_width(*message);
+                width = sys.fonts.tactical->string_width(*message);
                 strlen = viewport.left + ((viewport.width() / 2) - (width / 2));
                 if ((strlen + width) > (viewport.right))
                 {
@@ -618,17 +613,13 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
                     ((play_screen.height() / 2) + kSendMessageVOffset));
             }
         } else {
-            if ((mReturnKey(*bufMap)) && (!(globals()->keyMask & kReturnKeyMask))) {
+            if ((mReturnKey(*bufMap)) && (!(g.key_mask & kReturnKeyMask))) {
                 *enterMessage = true;
             }
         }
         globals()->gLastMessageKeyMap.copy(*bufMap);
     }
     */
-
-    // TERRIBLE HACK:
-    //  this implements the often requested feature of having a shortcut for
-    //  transfering control.
 
     auto theShip = g.ship;
 
@@ -637,47 +628,39 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
     }
 
     if (theShip->health() < (theShip->baseType->health >> 2L)) {
-         if (gAlarmCount < 0) {
-            PlayVolumeSound(kKlaxon, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
-            gAlarmCount = 0;
-            Messages::set_status("WARNING: Shields Low", kStatusWarnColor);
-         } else {
-            gAlarmCount += timePass;
-            if (gAlarmCount > 125) {
-                PlayVolumeSound(kKlaxon, kMediumVolume, kMediumLongPersistence, kPrioritySound);
-                gAlarmCount = 0;
-                Messages::set_status("WARNING: Shields Low", kStatusWarnColor);
+        if (g.time > globals()->next_klaxon) {
+            if (globals()->next_klaxon == game_ticks()) {
+                sys.sound.loud_klaxon();
+            } else {
+                sys.sound.klaxon();
             }
+            Messages::set_status("WARNING: Shields Low", kStatusWarnColor);
+            globals()->next_klaxon = g.time + kKlaxonInterval;
         }
     } else {
-        gAlarmCount = -1;
+        globals()->next_klaxon = game_ticks();
     }
 
     if (!(theShip->attributes & kIsHumanControlled)) {
         return;
     }
 
-    minicomputer_handle_keys(gTheseKeys, gLastKeys, false);
-
-    uint32_t dcalc = kSelectFriendKey | kSelectFoeKey | kSelectBaseKey;
-    attributes = gTheseKeys & dcalc;
+    minicomputer_handle_keys(_key_presses, _key_releases);
 
     if (gTheseKeys & kDestinationKey) {
-        if (gDestKeyTime >= 0) {
-            gDestKeyTime += timePass;
+        if (gDestKeyState == DEST_KEY_UP) {
+            gDestKeyState = DEST_KEY_DOWN;
+            gDestKeyTime  = now();
         }
     } else {
-        if (gDestKeyTime > 45) {
-            if ((theShip->attributes & kCanBeDestination)
-                    && (!globals()->destKeyUsedForSelection)) {
-                target_self();
-            }
+        if ((gDestKeyState == DEST_KEY_DOWN) && (now() >= (gDestKeyTime + kDestKeyHoldDuration)) &&
+            (theShip->attributes & kCanBeDestination)) {
+            target_self();
         }
-        gDestKeyTime = 0;
-        globals()->destKeyUsedForSelection = false;
+        gDestKeyState = DEST_KEY_UP;
     }
 
-// NEW -- do hot key selection
+    // NEW -- do hot key selection
     int hot_key = -1;
     for (int i = 0; i < kHotKeyNum; i++) {
         if (mCheckKeyMap(_keys, kFirstHotKeyNum + i)) {
@@ -686,65 +669,59 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
     }
 
     if (hot_key >= 0) {
-        if (hot_key != globals()->lastHotKey) {
-            globals()->lastHotKey = hot_key;
-            globals()->hotKeyDownTime = 0;
-            globals()->hotKey_target = false;
+        if (gHotKeyState == HOT_KEY_UP) {
+            gHotKeyTime = now();
+            gHotKeyNum  = hot_key;
             if (gTheseKeys & kDestinationKey) {
-                globals()->hotKey_target = true;
+                gHotKeyState = HOT_KEY_TARGET;
+            } else {
+                gHotKeyState = HOT_KEY_SELECT;
             }
-        } else {
-            globals()->hotKeyDownTime += timePass;
         }
-    } else if (globals()->lastHotKey >= 0) {
-        hot_key = globals()->lastHotKey;
-        globals()->lastHotKey = -1;
+    } else if (gHotKeyState != HOT_KEY_UP) {
+        hot_key      = gHotKeyNum;
+        bool target  = gHotKeyState == HOT_KEY_TARGET;
+        gHotKeyState = HOT_KEY_UP;
 
-        if (globals()->hotKeyDownTime > 45) {
+        if (now() >= gHotKeyTime + kHotKeyHoldDuration) {
             if (globals()->lastSelectedObject.get()) {
                 auto selectShip = globals()->lastSelectedObject;
 
                 if (selectShip->active) {
-                    globals()->hotKey[hot_key].object = globals()->lastSelectedObject;
+                    globals()->hotKey[hot_key].object   = globals()->lastSelectedObject;
                     globals()->hotKey[hot_key].objectID = globals()->lastSelectedObjectID;
                     Update_LabelStrings_ForHotKeyChange();
-                    PlayVolumeSound(
-                            kComputerBeep1, kMediumLoudVolume, kMediumPersistence,
-                            kLowPrioritySound);
+                    sys.sound.select();
                 }
             }
         } else {
-            globals()->destKeyUsedForSelection = true;
+            gDestKeyState = DEST_KEY_BLOCKED;
             if (globals()->hotKey[hot_key].object.get()) {
                 auto selectShip = globals()->hotKey[hot_key].object;
-                if ((selectShip->active)
-                        && (selectShip->id == globals()->hotKey[hot_key].objectID)) {
-                    bool is_target = (gTheseKeys & kDestinationKey)
-                        || (selectShip->owner != g.admiral)
-                        || (globals()->hotKey_target);
-                    SetPlayerSelectShip(
-                            globals()->hotKey[hot_key].object,
-                            is_target,
-                            g.admiral);
+                if ((selectShip->active) &&
+                    (selectShip->id == globals()->hotKey[hot_key].objectID)) {
+                    bool is_target = (gTheseKeys & kDestinationKey) ||
+                                     (selectShip->owner != g.admiral) || target;
+                    SetPlayerSelectShip(globals()->hotKey[hot_key].object, is_target, g.admiral);
                 } else {
                     globals()->hotKey[hot_key].object = SpaceObject::none();
                 }
             }
-            globals()->hotKeyDownTime = 0;
         }
     }
-// end new hotkey selection
+    // end new hotkey selection
 
     // for this we check lastKeys against theseKeys & relevent keys now being pressed
-    if ((attributes) && (!(gLastKeys & attributes)) && (!cursor.active())) {
-        gDestKeyTime = -1;
-        if (gTheseKeys & kSelectFriendKey) {
+    uint32_t select_keys = _key_presses & (kSelectFriendKey | kSelectFoeKey | kSelectBaseKey);
+    if (select_keys && !_cursor.active()) {
+        gDestKeyState = DEST_KEY_BLOCKED;
+        if (_key_presses & kSelectFriendKey) {
             if (!(gTheseKeys & kDestinationKey)) {
                 select_friendly(theShip, theShip->direction);
             } else {
                 target_friendly(theShip, theShip->direction);
             }
-        } else if (gTheseKeys & kSelectFoeKey) {
+        } else if (_key_presses & kSelectFoeKey) {
             target_hostile(theShip, theShip->direction);
         } else {
             if (!(gTheseKeys & kDestinationKey)) {
@@ -756,19 +733,11 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
     }
 
     if (theShip->attributes & kOnAutoPilot) {
-        if ((globals()->gAutoPilotOff) && // no off request pending
-                ((gTheseKeys | _gamepad_keys) & (kUpKey | kDownKey | kLeftKey | kRightKey))) {
+        if ((gTheseKeys | _gamepad_keys) & (kUpKey | kDownKey | kLeftKey | kRightKey)) {
             theShip->keysDown = gTheseKeys | kAutoPilotKey;
-            globals()->gAutoPilotOff = false;
-        } else {
-            theShip->keysDown
-                = (theShip->keysDown & (~kMiscKeyMask))
-                | (gTheseKeys & (kMiscKeyMask));
         }
     } else {
         theShip->keysDown = gTheseKeys | _gamepad_keys;
-        globals()->gAutoPilotOff = true;
-
         if ((_gamepad_state == NO_BUMPER) && _control_active) {
             int difference = mAngleDifference(_control_direction, theShip->direction);
             if (abs(difference) < 15) {
@@ -781,20 +750,20 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
         }
     }
 
-    if ((gTheseKeys & kOrderKey) && (!(gLastKeys & kOrderKey))) {
+    if (_key_presses & kOrderKey) {
         theShip->keysDown |= kGiveCommandKey;
     }
 
-    if ((gTheseKeys & kWarpKey)
-            && (gTheseKeys & kDestinationKey)) {
-        gDestKeyTime = -1;
-        if (!(gLastKeys & kWarpKey)) {
+    if ((gTheseKeys & kWarpKey) && (gTheseKeys & kDestinationKey)) {
+        gDestKeyState = DEST_KEY_BLOCKED;
+        if (_key_presses & kWarpKey) {
             engage_autopilot();
         }
         theShip->keysDown &= ~kWarpKey;
     }
 
-    gLastKeys = gTheseKeys;
+    _key_presses  = 0;
+    _key_releases = 0;
 }
 
 bool PlayerShip::show_select() const {
@@ -809,44 +778,31 @@ int32_t PlayerShip::control_direction() const {
     return _control_direction;
 }
 
-bool PlayerShip::show_right_stick() const {
-    return false;
-}
-
-int32_t PlayerShip::goal_direction() const {
-    return 0;
-}
-
 void PlayerShipHandleClick(Point where, int button) {
-    Rect            bounds;
-
-    if (globals()->keyMask & kMouseMask) {
+    if (g.key_mask & kMouseMask) {
         return;
     }
 
-    gDestKeyTime = -1;
+    gDestKeyState = DEST_KEY_BLOCKED;
     if (g.ship.get()) {
-        auto theShip = g.ship;
-        if ((theShip->active) && (theShip->attributes & kIsHumanControlled)) {
-            bounds.left = where.h - kCursorBoundsSize;
-            bounds.top = where.v - kCursorBoundsSize;
-            bounds.right = where.h + kCursorBoundsSize;
-            bounds.bottom = where.v + kCursorBoundsSize;
+        if ((g.ship->active) && (g.ship->attributes & kIsHumanControlled)) {
+            Rect bounds = {
+                    where.h - kCursorBoundsSize, where.v - kCursorBoundsSize,
+                    where.h + kCursorBoundsSize, where.v + kCursorBoundsSize,
+            };
 
-            if ((theShip->keysDown & kDestinationKey) || (button == 1)) {
-                auto target = g.admiral->target();
-
+            if ((g.ship->keysDown & kDestinationKey) || (button == 1)) {
+                auto target        = g.admiral->target();
                 auto selectShipNum = GetSpritePointSelectObject(
-                        &bounds, theShip, kCanBeDestination | kIsDestination,
-                        target, FRIENDLY_OR_HOSTILE);
+                        &bounds, g.ship, kCanBeDestination | kIsDestination, target,
+                        FRIENDLY_OR_HOSTILE);
                 if (selectShipNum.get()) {
                     SetPlayerSelectShip(selectShipNum, true, g.admiral);
                 }
             } else {
-                auto control = g.admiral->control();
+                auto control       = g.admiral->control();
                 auto selectShipNum = GetSpritePointSelectObject(
-                        &bounds, theShip, kCanBeDestination | kCanAcceptBuild,
-                        control, FRIENDLY);
+                        &bounds, g.ship, kCanBeDestination | kCanAcceptBuild, control, FRIENDLY);
                 if (selectShipNum.get()) {
                     SetPlayerSelectShip(selectShipNum, false, g.admiral);
                 }
@@ -857,19 +813,19 @@ void PlayerShipHandleClick(Point where, int button) {
 
 void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> adm) {
     Handle<SpaceObject> flagship = adm->flagship();
-    Handle<Label> label;
+    Handle<Label>       label;
 
     if (adm == g.admiral) {
-        globals()->lastSelectedObject = ship;
+        globals()->lastSelectedObject   = ship;
         globals()->lastSelectedObjectID = ship->id;
-        globals()->destKeyUsedForSelection = true;
+        gDestKeyState                   = DEST_KEY_BLOCKED;
     }
     if (target) {
         adm->set_target(ship);
         label = g.target_label;
 
         if (!(flagship->attributes & kOnAutoPilot)) {
-            SetObjectDestination(flagship, SpaceObject::none());
+            SetObjectDestination(flagship);
         }
     } else {
         adm->set_control(ship);
@@ -877,7 +833,7 @@ void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> 
     }
 
     if (adm == g.admiral) {
-        PlayVolumeSound(kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
+        sys.sound.select();
         label->set_object(ship);
         if (ship == g.ship) {
             label->set_age(Label::kVisibleTime);
@@ -904,27 +860,26 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
     }
 
     if (adm == g.admiral) {
-        flagship->attributes &= (~kIsHumanControlled) & (~kIsPlayerShip);
-        if (newShip != g.ship)
-        {
+        flagship->attributes &= ~(kIsHumanControlled | kIsPlayerShip);
+        if (newShip != g.ship) {
             g.ship = newShip;
             globals()->starfield.reset(newShip);
         }
 
         flagship = g.ship;
         if (!flagship.get()) {
-            throw Exception(format(
-                        "adm: {0}, newShip: {1}, gPlayerShip: {2}",
-                        adm.number(), newShip.number(), g.ship.number()));
+            throw Exception(
+                    format("adm: {0}, newShip: {1}, gPlayerShip: {2}", adm.number(),
+                           newShip.number(), g.ship.number()));
         }
 
         flagship->attributes |= kIsHumanControlled | kIsPlayerShip;
 
         if (newShip == g.admiral->control()) {
-             g.control_label->set_age(Label::kVisibleTime);
+            g.control_label->set_age(Label::kVisibleTime);
         }
         if (newShip == g.admiral->target()) {
-             g.target_label->set_age(Label::kVisibleTime);
+            g.target_label->set_age(Label::kVisibleTime);
         }
     } else {
         flagship->attributes &= ~(kIsRemote | kIsPlayerShip);
@@ -934,24 +889,19 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
     adm->set_flagship(newShip);
 }
 
-void TogglePlayerAutoPilot(Handle<SpaceObject> theShip) {
-    if ( theShip->attributes & kOnAutoPilot)
-    {
-        theShip->attributes &= ~kOnAutoPilot;
-        if ((theShip->owner == g.admiral) &&
-            ( theShip->attributes & kIsHumanControlled))
-        {
-            StringList strings(kMessageStringID);
+void TogglePlayerAutoPilot(Handle<SpaceObject> flagship) {
+    if (flagship->attributes & kOnAutoPilot) {
+        flagship->attributes &= ~kOnAutoPilot;
+        if ((flagship->owner == g.admiral) && (flagship->attributes & kIsHumanControlled)) {
+            StringList  strings(kMessageStringID);
             StringSlice string = strings.at(kAutoPilotOffString - 1);
             Messages::set_status(string, kStatusLabelColor);
         }
     } else {
-        SetObjectDestination(theShip, SpaceObject::none());
-        theShip->attributes |= kOnAutoPilot;
-        if ((theShip->owner == g.admiral) &&
-            ( theShip->attributes & kIsHumanControlled))
-        {
-            StringList strings(kMessageStringID);
+        SetObjectDestination(flagship);
+        flagship->attributes |= kOnAutoPilot;
+        if ((flagship->owner == g.admiral) && (flagship->attributes & kIsHumanControlled)) {
+            StringList  strings(kMessageStringID);
             StringSlice string = strings.at(kAutoPilotOnString - 1);
             Messages::set_status(string, kStatusLabelColor);
         }
@@ -959,83 +909,73 @@ void TogglePlayerAutoPilot(Handle<SpaceObject> theShip) {
 }
 
 bool IsPlayerShipOnAutoPilot() {
-    auto player = g.ship;
-    return player.get()
-        && (player->attributes & kOnAutoPilot);
+    return g.ship.get() && (g.ship->attributes & kOnAutoPilot);
 }
 
 void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral) {
     auto control = whichAdmiral->control();
 
     if (control.get()) {
-        SetObjectDestination(control, SpaceObject::none());
-        if ( whichAdmiral == g.admiral)
-            PlayVolumeSound(  kMorseBeepSound, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+        SetObjectDestination(control);
+        if (whichAdmiral == g.admiral) {
+            sys.sound.order();
+        }
     }
 }
 
-void PlayerShipBodyExpire(Handle<SpaceObject> theShip) {
-    auto selectShip = theShip->owner->control();
+void PlayerShipBodyExpire(Handle<SpaceObject> flagship) {
+    auto selectShip = flagship->owner->control();
 
     if (selectShip.get()) {
-        if (( selectShip->active != kObjectInUse) ||
-            ( !(selectShip->attributes & kCanThink)) ||
-            ( selectShip->attributes & kStaticDestination)
-            || ( selectShip->owner != theShip->owner) ||
-            (!(selectShip->attributes & kCanAcceptDestination))
-            )
+        if ((selectShip->active != kObjectInUse) || (!(selectShip->attributes & kCanThink)) ||
+            (selectShip->attributes & kStaticDestination) ||
+            (selectShip->owner != flagship->owner) ||
+            (!(selectShip->attributes & kCanAcceptDestination)))
             selectShip = SpaceObject::none();
     }
     if (!selectShip.get()) {
         selectShip = g.root;
-        while (selectShip.get()
-                && ((selectShip->active != kObjectInUse)
-                    || (selectShip->attributes & kStaticDestination)
-                    || (!((selectShip->attributes & kCanThink) &&
-                            (selectShip->attributes & kCanAcceptDestination)))
-                    || (selectShip->owner != theShip->owner))) {
+        while (selectShip.get() && ((selectShip->active != kObjectInUse) ||
+                                    (selectShip->attributes & kStaticDestination) ||
+                                    (!((selectShip->attributes & kCanThink) &&
+                                       (selectShip->attributes & kCanAcceptDestination))) ||
+                                    (selectShip->owner != flagship->owner))) {
             selectShip = selectShip->nextObject;
         }
     }
     if (selectShip.get()) {
-        ChangePlayerShipNumber(theShip->owner, selectShip);
+        ChangePlayerShipNumber(flagship->owner, selectShip);
     } else {
         if (!g.game_over) {
-            g.game_over = true;
-            g.game_over_at = add_ticks(g.time, 180);
+            g.game_over    = true;
+            g.game_over_at = g.time + secs(3);
         }
-        if (theShip->owner == g.admiral) {
-            g.victory_text = kScenarioNoShipTextID + gThisScenario->levelNameStrNum;
+        if (flagship->owner == g.admiral) {
+            g.victory_text = kLevelNoShipTextID + g.level->levelNameStrNum;
         } else {
-            g.victory_text = 10050 + gThisScenario->levelNameStrNum;
+            g.victory_text = 10050 + g.level->levelNameStrNum;
         }
-        if (theShip->owner.get()) {
-            theShip->owner->set_flagship(SpaceObject::none());
+        if (flagship->owner.get()) {
+            flagship->owner->set_flagship(SpaceObject::none());
         }
     }
 }
 
 int32_t HotKey_GetFromObject(Handle<SpaceObject> object) {
-    int32_t i = 0;
-
-    if (!object.get()) return -1;
-    if ( !object->active) return -1;
-    while ( i < kHotKeyNum)
-    {
-        if ( globals()->hotKey[i].object == object)
-        {
-            if ( globals()->hotKey[i].objectID == object->id)
-            {
+    if (!object.get() && !object->active) {
+        return -1;
+    }
+    for (int32_t i = 0; i < kHotKeyNum; ++i) {
+        if (globals()->hotKey[i].object == object) {
+            if (globals()->hotKey[i].objectID == object->id) {
                 return i;
             }
         }
-        i++;
     }
     return -1;
 }
 
-void Update_LabelStrings_ForHotKeyChange( void)
-{
+void Update_LabelStrings_ForHotKeyChange(void) {
     auto target = g.admiral->target();
     if (target.get()) {
         g.target_label->set_object(target);
@@ -1059,8 +999,7 @@ void Update_LabelStrings_ForHotKeyChange( void)
         if (control == g.ship) {
             g.control_label->set_age(Label::kVisibleTime);
         }
-        PlayVolumeSound(
-                kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
+        sys.sound.select();
         if (control->attributes & kIsDestination) {
             String string(GetDestBalanceName(control->asDestination));
             print(string, hot_key_suffix(control));

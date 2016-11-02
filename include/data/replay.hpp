@@ -20,11 +20,10 @@
 #define ANTARES_DATA_REPLAY_HPP_
 
 #include <stdint.h>
-#include <vector>
 #include <sfz/sfz.hpp>
+#include <vector>
 
-#include "data/resource.hpp"
-#include "ui/card.hpp"
+#include "ui/event.hpp"
 
 namespace antares {
 
@@ -35,15 +34,15 @@ struct ReplayData {
     };
 
     struct Action {
-        uint64_t at;
+        uint64_t             at;
         std::vector<uint8_t> keys_down;
         std::vector<uint8_t> keys_up;
     };
 
-    Scenario scenario;
-    int32_t chapter_id;
-    int32_t global_seed;
-    uint64_t duration;
+    Scenario            scenario;
+    int32_t             chapter_id;
+    int32_t             global_seed;
+    uint64_t            duration;
     std::vector<Action> actions;
 
     ReplayData();
@@ -66,7 +65,7 @@ class ReplayBuilder : public EventReceiver {
     void init(
             sfz::StringSlice scenario_identifier, sfz::StringSlice scenario_version,
             int32_t chapter_id, int32_t global_seed);
-    void start();
+    void         start();
     virtual void key_down(const KeyDownEvent& key);
     virtual void key_up(const KeyUpEvent& key);
     void next();
@@ -74,10 +73,10 @@ class ReplayBuilder : public EventReceiver {
 
   private:
     std::unique_ptr<sfz::ScopedFd> _file;
-    ReplayData::Scenario _scenario;
-    int32_t _chapter_id;
-    int32_t _global_seed;
-    uint64_t _at;
+    ReplayData::Scenario           _scenario;
+    int32_t                        _chapter_id;
+    int32_t                        _global_seed;
+    uint64_t                       _at;
 };
 
 }  // namespace antares

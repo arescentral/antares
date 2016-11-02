@@ -35,7 +35,7 @@ using sfz::path::dirname;
 using sfz::write;
 using std::unique_ptr;
 
-namespace io = sfz::io;
+namespace io   = sfz::io;
 namespace utf8 = sfz::utf8;
 namespace args = sfz::args;
 
@@ -60,31 +60,22 @@ const char* name(Shape shape) {
 }
 
 void draw(Shape shape, PixMap& pix) {
-    RgbColor color = RgbColor(255, 0, 0);
+    RgbColor color = rgb(255, 0, 0);
     switch (shape) {
-        case SQUARE:
-            pix.fill(color);
-            break;
-        case PLUS:
-            draw_compat_plus(&pix, color);
-            break;
-        case TRIANGLE:
-            draw_triangle_up(&pix, color);
-            break;
-        case DIAMOND:
-            draw_compat_diamond(&pix, color);
-            break;
+        case SQUARE: pix.fill(color); break;
+        case PLUS: draw_compat_plus(&pix, color); break;
+        case TRIANGLE: draw_triangle_up(&pix, color); break;
+        case DIAMOND: draw_compat_diamond(&pix, color); break;
     }
 }
 
 class ShapeBuilder {
   public:
-    ShapeBuilder(const Optional<String>& output_dir)
-            : _output_dir(output_dir) { }
+    ShapeBuilder(const Optional<String>& output_dir) : _output_dir(output_dir) {}
 
     void save(Shape shape, int size) {
         ArrayPixMap pix(size, size);
-        pix.fill(RgbColor::kClear);
+        pix.fill(RgbColor::clear());
         draw(shape, pix);
         if (_output_dir.has()) {
             const String path(format("{0}/{1}/{2}.png", *_output_dir, name(shape), dec(size, 2)));
@@ -105,9 +96,8 @@ int main(int argc, char* const* argv) {
 
     Optional<String> output_dir;
     parser.add_argument("-o", "--output", store(output_dir))
-        .help("place output in this directory");
-    parser.add_argument("-h", "--help", help(parser, 0))
-        .help("display this help screen");
+            .help("place output in this directory");
+    parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
 
     String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
@@ -116,7 +106,7 @@ int main(int argc, char* const* argv) {
     }
 
     ShapeBuilder builder(output_dir);
-    Shape shapes[] = {SQUARE, PLUS, TRIANGLE, DIAMOND};
+    Shape        shapes[] = {SQUARE, PLUS, TRIANGLE, DIAMOND};
     for (size_t i = 0; i < 4; ++i) {
         for (int size = 1; size < 16; ++size) {
             builder.save(shapes[i], size);

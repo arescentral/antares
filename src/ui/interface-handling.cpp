@@ -23,8 +23,8 @@
 
 #include "ui/interface-handling.hpp"
 
-#include <vector>
 #include <sfz/sfz.hpp>
+#include <vector>
 
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
@@ -39,11 +39,12 @@
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/instruments.hpp"
+#include "game/level.hpp"
 #include "game/main.hpp"
 #include "game/messages.hpp"
-#include "game/scenario-maker.hpp"
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
+#include "game/sys.hpp"
 #include "math/fixed.hpp"
 #include "math/special.hpp"
 #include "sound/fx.hpp"
@@ -72,49 +73,36 @@ namespace antares {
 
 namespace {
 
-const int32_t kTargetScreenWidth = 640;
-const int32_t kTargetScreenHeight = 480;
-
-const int32_t kMissionDataWidth         = 200;
-const int32_t kMissionDataVBuffer       = 40;
-const int32_t kMissionDataTopBuffer     = 30;
-const int32_t kMissionDataBottomBuffer  = 15;
-const int32_t kMissionDataHBuffer       = 41;
-const int32_t kMissionLineHJog          = 10;
-const int32_t kMissionBriefPointOffset  = 2;
-
-const int16_t kShipDataTextID       = 6001;
-const int16_t kShipDataKeyStringID  = 6001;
-const int16_t kShipDataNameID       = 6002;
-const int16_t kWeaponDataTextID     = 6003;
+const int16_t kShipDataTextID      = 6001;
+const int16_t kShipDataKeyStringID = 6001;
+const int16_t kShipDataNameID      = 6002;
+const int16_t kWeaponDataTextID    = 6003;
 
 enum {
-    kShipOrObjectStringNum      = 0,
-    kShipTypeStringNum          = 1,
-    kMassStringNum              = 2,
-    kShieldStringNum            = 3,
-    kHasLightStringNum          = 4,
-    kMaxSpeedStringNum          = 5,
-    kThrustStringNum            = 6,
-    kTurnStringNum              = 7,
-    kWeaponNumberStringNum      = 8,
-    kWeaponNameStringNum        = 9,
-    kWeaponGuidedStringNum      = 10,
-    kWeaponRangeStringNum       = 11,
-    kWeaponDamageStringNum      = 12,
-    kWeaponAutoTargetStringNum  = 13,
+    kShipOrObjectStringNum     = 0,
+    kShipTypeStringNum         = 1,
+    kMassStringNum             = 2,
+    kShieldStringNum           = 3,
+    kHasLightStringNum         = 4,
+    kMaxSpeedStringNum         = 5,
+    kThrustStringNum           = 6,
+    kTurnStringNum             = 7,
+    kWeaponNumberStringNum     = 8,
+    kWeaponNameStringNum       = 9,
+    kWeaponGuidedStringNum     = 10,
+    kWeaponRangeStringNum      = 11,
+    kWeaponDamageStringNum     = 12,
+    kWeaponAutoTargetStringNum = 13,
 };
 
 enum {
-    kShipDataDashStringNum      = 2,
-    kShipDataYesStringNum       = 3,
-    kShipDataNoStringNum        = 4,
-    kShipDataPulseStringNum     = 5,
-    kShipDataBeamStringNum      = 6,
-    kShipDataSpecialStringNum   = 7,
+    kShipDataDashStringNum    = 2,
+    kShipDataYesStringNum     = 3,
+    kShipDataNoStringNum      = 4,
+    kShipDataPulseStringNum   = 5,
+    kShipDataBeamStringNum    = 6,
+    kShipDataSpecialStringNum = 7,
 };
-
-const int32_t kShipDataWidth = 240;
 
 const int16_t kHelpScreenKeyStringID = 6003;
 
@@ -141,10 +129,10 @@ void CreateWeaponDataText(
 
 bool BothCommandAndQ() {
     bool command = false;
-    bool q = false;
+    bool q       = false;
 
     for (int i = 0; i < kKeyExtendedControlNum; i++) {
-        uint32_t key = Preferences::preferences()->key(i);
+        uint32_t key = sys.prefs->key(i);
         q |= (key == Keys::Q);
         command |= (key == Keys::L_COMMAND);
     }
@@ -152,113 +140,9 @@ bool BothCommandAndQ() {
     return command && q;
 }
 
-void update_mission_brief_point(
-        LabeledRect *dataItem, int32_t whichBriefPoint, const Scenario* scenario,
-        coordPointType *corner, int32_t scale, Rect *bounds, vector<inlinePictType>& inlinePict,
-        Rect& highlight_rect, vector<pair<Point, Point>>& lines, String& text) {
-    if (whichBriefPoint < kMissionBriefPointOffset) {
-        // No longer handled here.
-        return;
-    }
-
-    whichBriefPoint -= kMissionBriefPointOffset;
-
-    Rect hiliteBounds;
-    int32_t         headerID, headerNumber, contentID;
-    BriefPoint_Data_Get(whichBriefPoint, scenario, &headerID, &headerNumber, &contentID,
-            &hiliteBounds, corner, scale, 16, 32, bounds);
-    hiliteBounds.offset(bounds->left, bounds->top);
-
-    // TODO(sfiera): catch exception.
-    Resource rsrc("text", "txt", contentID);
-    text.assign(utf8::decode(rsrc.data()));
-    int16_t textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
-    if (hiliteBounds.left == hiliteBounds.right) {
-        dataItem->bounds().left = (bounds->right - bounds->left) / 2 - (kMissionDataWidth / 2) + bounds->left;
-        dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
-        dataItem->bounds().top = (bounds->bottom - bounds->top) / 2 - (textHeight / 2) + bounds->top;
-        dataItem->bounds().bottom = dataItem->bounds().top + textHeight;
-        highlight_rect = Rect();
-    } else {
-        if ((hiliteBounds.left + (hiliteBounds.right - hiliteBounds.left) / 2) >
-                (bounds->left + (bounds->right - bounds->left) / 2)) {
-            dataItem->bounds().right = hiliteBounds.left - kMissionDataHBuffer;
-            dataItem->bounds().left = dataItem->bounds().right - kMissionDataWidth;
-        } else {
-            dataItem->bounds().left = hiliteBounds.right + kMissionDataHBuffer;
-            dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
-        }
-
-        dataItem->bounds().top = hiliteBounds.top + (hiliteBounds.bottom - hiliteBounds.top) / 2 -
-                                textHeight / 2;
-        dataItem->bounds().bottom = dataItem->bounds().top + textHeight;
-        if (dataItem->bounds().top < (bounds->top + kMissionDataTopBuffer)) {
-            dataItem->bounds().top = bounds->top + kMissionDataTopBuffer;
-            dataItem->bounds().bottom = dataItem->bounds().top + textHeight;
-        }
-        if (dataItem->bounds().bottom > (bounds->bottom - kMissionDataBottomBuffer)) {
-            dataItem->bounds().bottom = bounds->bottom - kMissionDataBottomBuffer;
-            dataItem->bounds().top = dataItem->bounds().bottom - textHeight;
-        }
-
-        if (dataItem->bounds().left < (bounds->left + kMissionDataVBuffer)) {
-            dataItem->bounds().left = bounds->left + kMissionDataVBuffer;
-            dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
-        }
-        if (dataItem->bounds().right > (bounds->right - kMissionDataVBuffer)) {
-            dataItem->bounds().right = bounds->right - kMissionDataVBuffer;
-            dataItem->bounds().left = dataItem->bounds().right - kMissionDataWidth;
-        }
-
-        hiliteBounds.right++;
-        hiliteBounds.bottom++;
-        highlight_rect = hiliteBounds;
-        Rect newRect;
-        GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
-        lines.clear();
-        if (dataItem->bounds().right < hiliteBounds.left) {
-            Point p1(hiliteBounds.left, hiliteBounds.top);
-            Point p2(newRect.right + kMissionLineHJog, hiliteBounds.top);
-            Point p3(newRect.right + kMissionLineHJog, newRect.top);
-            Point p4(newRect.right + 2, newRect.top);
-            lines.push_back(make_pair(p1, p2));
-            lines.push_back(make_pair(p2, p3));
-            lines.push_back(make_pair(p3, p4));
-
-            Point p5(hiliteBounds.left, hiliteBounds.bottom - 1);
-            Point p6(newRect.right + kMissionLineHJog, hiliteBounds.bottom - 1);
-            Point p7(newRect.right + kMissionLineHJog, newRect.bottom - 1);
-            Point p8(newRect.right + 2, newRect.bottom - 1);
-            lines.push_back(make_pair(p5, p6));
-            lines.push_back(make_pair(p6, p7));
-            lines.push_back(make_pair(p7, p8));
-        } else {
-            Point p1(hiliteBounds.right, hiliteBounds.top);
-            Point p2(newRect.left - kMissionLineHJog, hiliteBounds.top);
-            Point p3(newRect.left - kMissionLineHJog, newRect.top);
-            Point p4(newRect.left - 3, newRect.top);
-            lines.push_back(make_pair(p1, p2));
-            lines.push_back(make_pair(p2, p3));
-            lines.push_back(make_pair(p3, p4));
-
-            Point p5(hiliteBounds.right, hiliteBounds.bottom - 1);
-            Point p6(newRect.left - kMissionLineHJog, hiliteBounds.bottom - 1);
-            Point p7(newRect.left - kMissionLineHJog, newRect.bottom - 1);
-            Point p8(newRect.left - 3, newRect.bottom - 1);
-            lines.push_back(make_pair(p5, p6));
-            lines.push_back(make_pair(p6, p7));
-            lines.push_back(make_pair(p7, p8));
-        }
-    }
-    dataItem->label.assign(StringList(headerID).at(headerNumber - 1));
-    Rect newRect;
-    GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
-    populate_inline_picts(dataItem->bounds(), text, dataItem->style, inlinePict);
-}
-
 void CreateObjectDataText(String* text, Handle<BaseObject> object) {
     Resource rsrc("text", "txt", kShipDataTextID);
-    String data(utf8::decode(rsrc.data()));
+    String   data(utf8::decode(rsrc.data()));
 
     StringList keys(kShipDataKeyStringID);
     StringList values(kShipDataNameID);
@@ -280,23 +164,22 @@ void CreateObjectDataText(String* text, Handle<BaseObject> object) {
     }
 
     // ship mass
-    find_replace(data, 0, keys.at(kMassStringNum), fixed(object->mass));
+    find_replace(data, 0, keys.at(kMassStringNum), Fixed(object->mass));
 
     // ship shields
     find_replace(data, 0, keys.at(kShieldStringNum), object->health);
 
     // light speed
-    find_replace(data, 0, keys.at(kHasLightStringNum), object->warpSpeed);
+    find_replace(data, 0, keys.at(kHasLightStringNum), object->warpSpeed.val());
 
     // max velocity
-    find_replace(data, 0, keys.at(kMaxSpeedStringNum), fixed(object->maxVelocity));
+    find_replace(data, 0, keys.at(kMaxSpeedStringNum), Fixed(object->maxVelocity));
 
     // thrust
-    find_replace(data, 0, keys.at(kThrustStringNum), fixed(object->maxThrust));
+    find_replace(data, 0, keys.at(kThrustStringNum), Fixed(object->maxThrust));
 
     // par turn
-    find_replace(data, 0, keys.at(kTurnStringNum),
-            fixed(object->frame.rotation.turnAcceleration));
+    find_replace(data, 0, keys.at(kTurnStringNum), Fixed(object->frame.rotation.turnAcceleration));
 
     // now, check for weapons!
     CreateWeaponDataText(&data, object->pulse.base, values.at(kShipDataPulseStringNum));
@@ -308,8 +191,8 @@ void CreateObjectDataText(String* text, Handle<BaseObject> object) {
 
 void CreateWeaponDataText(
         String* text, Handle<BaseObject> weaponObject, const StringSlice& weaponName) {
-    int32_t             mostDamage;
-    bool             isGuided = false;
+    int32_t mostDamage;
+    bool    isGuided = false;
 
     if (!weaponObject.get()) {
         return;
@@ -317,20 +200,21 @@ void CreateWeaponDataText(
 
     // TODO(sfiera): catch exception.
     Resource rsrc("text", "txt", kWeaponDataTextID);
-    String data(utf8::decode(rsrc.data()));
+    String   data(utf8::decode(rsrc.data()));
     // damage; this is tricky--we have to guess by walking through activate actions,
     //  and for all the createObject actions, see which creates the most damaging
     //  object.  We calc this first so we can use isGuided
 
     mostDamage = 0;
-    isGuided = false;
+    isGuided   = false;
     if (weaponObject->activate.size() > 0) {
-        for (auto action: weaponObject->activate) {
-            if (( action->verb == kCreateObject) || ( action->verb == kCreateObjectSetDest))
-            {
+        for (auto action : weaponObject->activate) {
+            if ((action->verb == kCreateObject) || (action->verb == kCreateObjectSetDest)) {
                 Handle<BaseObject> missileObject = action->argument.createObject.whichBaseType;
-                if ( missileObject->attributes & kIsGuided) isGuided = true;
-                if ( missileObject->damage > mostDamage) mostDamage = missileObject->damage;
+                if (missileObject->attributes & kIsGuided)
+                    isGuided = true;
+                if (missileObject->damage > mostDamage)
+                    mostDamage = missileObject->damage;
             }
         }
     }
@@ -347,8 +231,8 @@ void CreateWeaponDataText(
         find_replace(data, 0, keys.at(kWeaponNameStringNum), name);
     }
 
-    const StringSlice& yes = values.at(kShipDataYesStringNum);
-    const StringSlice& no = values.at(kShipDataNoStringNum);
+    const StringSlice& yes  = values.at(kShipDataYesStringNum);
+    const StringSlice& no   = values.at(kShipDataNoStringNum);
     const StringSlice& dash = values.at(kShipDataDashStringNum);
 
     // is guided
@@ -366,8 +250,7 @@ void CreateWeaponDataText(
     }
 
     // range
-    find_replace(data, 0, keys.at(kWeaponRangeStringNum),
-            lsqrt(weaponObject->frame.weapon.range));
+    find_replace(data, 0, keys.at(kWeaponRangeStringNum), lsqrt(weaponObject->frame.weapon.range));
 
     if (mostDamage > 0) {
         find_replace(data, 0, keys.at(kWeaponDamageStringNum), mostDamage);
@@ -383,7 +266,7 @@ void Replace_KeyCode_Strings_With_Actual_Key_Names(String* text, int16_t resID, 
 
     for (int i = 0; i < kKeyExtendedControlNum; ++i) {
         const StringSlice& search = keys.at(i);
-        String replace(values.at(Preferences::preferences()->key(i) - 1));
+        String             replace(values.at(sys.prefs->key(i) - 1));
         // First, pad to the desired width.
         if (replace.size() < padTo) {
             replace.resize(padTo, ' ');

@@ -16,33 +16,23 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "mac/windowed.hpp"
+#ifndef ANTARES_GAME_LEVEL_HPP_
+#define ANTARES_GAME_LEVEL_HPP_
 
-#include <ApplicationServices/ApplicationServices.h>
-#include <OpenGL/OpenGL.h>
-#include <OpenGL/gl.h>
-#include <sfz/sfz.hpp>
-
-#include "mac/c/CocoaVideoDriver.h"
-#include "mac/core-opengl.hpp"
-
-using sfz::Exception;
+#include "data/level.hpp"
 
 namespace antares {
 
-CocoaWindowed::CocoaWindowed(
-        const cgl::PixelFormat& pixel_format, const cgl::Context& context, Size screen_size,
-        bool fullscreen, bool retina):
-        _window(antares_window_create(
-                    pixel_format.c_obj(), context.c_obj(),
-                    screen_size.width, screen_size.height, fullscreen, retina)) { }
+const int16_t kLevelNoShipTextID = 10000;
 
-CocoaWindowed::~CocoaWindowed() {
-    antares_window_destroy(_window);
-}
-
-Size CocoaWindowed::viewport_size() const {
-    return {antares_window_viewport_width(_window), antares_window_viewport_height(_window)};
-}
+bool start_construct_level(Handle<Level> level, int32_t* max);
+void construct_level(Handle<Level> level, int32_t* current);
+void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textID);
+void GetLevelFullScaleAndCorner(
+        const Level* level, int32_t rotation, coordPointType* corner, int32_t* scale,
+        Rect* bounds);
+coordPointType Translate_Coord_To_Level_Rotation(int32_t h, int32_t v);
 
 }  // namespace antares
+
+#endif  // ANTARES_GAME_LEVEL_HPP_

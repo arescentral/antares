@@ -18,13 +18,14 @@
 
 #include <GLFW/glfw3.h>
 
-#include <sfz/sfz.hpp>
 #include <time.h>
+#include <sfz/sfz.hpp>
 
 #include "config/file-prefs-driver.hpp"
-#include "config/preferences.hpp"
 #include "config/ledger.hpp"
+#include "config/preferences.hpp"
 #include "data/scenario-list.hpp"
+#include "game/sys.hpp"
 #include "glfw/video-driver.hpp"
 #include "sound/openal-driver.hpp"
 #include "ui/flows/master.hpp"
@@ -34,30 +35,25 @@ using sfz::args::store;
 using sfz::args::store_const;
 using sfz::range;
 
+#ifndef ANTARES_PREFIX
+#define ANTARES_PREFIX "/usr/local"
+#endif  // ANTARES_PREFIX
+
 namespace args = sfz::args;
-namespace io = sfz::io;
+namespace io   = sfz::io;
 
 namespace antares {
 
 String application_path() {
-    return String("./data");
+    return String(ANTARES_PREFIX "/share/antares/app");
 }
 
 void main(int argc, const char* argv[]) {
     args::Parser parser(argv[0], "Runs Antares");
 
-    int width = 640;
-    int height = 480;
-    bool fullscreen = false;
-    parser.add_argument("-w", "--width", store(width))
-        .help("screen width (default: 640)");
-    parser.add_argument("-h", "--height", store(height))
-        .help("screen height (default: 480)");
-    parser.add_argument("-f", "--fullscreen", store_const(fullscreen, true))
-        .help("play in full screen mode (default: windowed)");
-
-    parser.add_argument("--help", help(parser, 0))
-        .help("display this help screen");
+    sfz::String scenario("com.biggerplanet.ares");
+    parser.add_argument("scenario", store(scenario)).help("select scenario");
+    parser.add_argument("--help", help(parser, 0)).help("display this help screen");
 
     String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
@@ -66,13 +62,11 @@ void main(int argc, const char* argv[]) {
     }
 
     FilePrefsDriver prefs;
-    Preferences::preferences()->set_screen_size({width, height});
-    Preferences::preferences()->set_fullscreen(fullscreen);
 
-    const auto& scenario = Preferences::preferences()->scenario_identifier();
-    bool have_scenario = false;
+    sys.prefs->set_scenario_identifier(scenario);
+    bool         have_scenario = false;
     ScenarioList l;
-    for (auto i: range(l.size())) {
+    for (auto i : range(l.size())) {
         const auto& entry = l.at(i);
         if (entry.identifier == scenario) {
             if (entry.installed) {
@@ -90,9 +84,9 @@ void main(int argc, const char* argv[]) {
         exit(1);
     }
 
-    DirectoryLedger ledger;
+    DirectoryLedger   ledger;
     OpenAlSoundDriver sound;
-    GLFWVideoDriver video;
+    GLFWVideoDriver   video;
     video.loop(new Master(time(NULL)));
 }
 

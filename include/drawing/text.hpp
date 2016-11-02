@@ -54,14 +54,6 @@ class Font {
     DISALLOW_COPY_AND_ASSIGN(Font);
 };
 
-extern const Font* tactical_font;
-extern const Font* computer_font;
-extern const Font* button_font;
-extern const Font* title_font;
-extern const Font* small_button_font;
-
-void InitDirectText();
-
 }  // namespace antares
 
-#endif // ANTARES_DRAWING_TEXT_HPP_
+#endif  // ANTARES_DRAWING_TEXT_HPP_

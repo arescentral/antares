@@ -19,8 +19,8 @@
 #ifndef ANTARES_DRAWING_INTERFACE_HPP_
 #define ANTARES_DRAWING_INTERFACE_HPP_
 
-#include <vector>
 #include <sfz/sfz.hpp>
+#include <vector>
 
 #include "data/interface.hpp"
 #include "ui/event.hpp"
@@ -30,18 +30,8 @@ namespace antares {
 const int32_t kInterfaceTextVBuffer = 2;
 const int32_t kInterfaceTextHBuffer = 3;
 
-// the inline pictType struct is for keeping track of picts included in my text boxes.
-struct inlinePictType {
-    Rect bounds;
-    int16_t id;
-};
-
 void draw_text_in_rect(
-        Rect tRect, const sfz::StringSlice& text, interfaceStyleType style,
-        uint8_t textcolor, std::vector<inlinePictType>& inlinePict);
-void populate_inline_picts(
-        Rect rect, sfz::StringSlice text, interfaceStyleType style,
-        std::vector<inlinePictType>& inline_pict);
+        Rect tRect, const sfz::StringSlice& text, interfaceStyleType style, uint8_t textcolor);
 
 int16_t GetInterfaceTextHeightFromWidth(
         const sfz::StringSlice& text, interfaceStyleType style, int16_t width);
@@ -52,4 +42,4 @@ void GetAnyInterfaceItemGraphicBounds(const InterfaceItem& item, Rect* rect);
 
 }  // namespace antares
 
-#endif // ANTARES_DRAWING_INTERFACE_HPP_
+#endif  // ANTARES_DRAWING_INTERFACE_HPP_

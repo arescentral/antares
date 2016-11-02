@@ -1,0 +1,621 @@
+declare_args() {
+  # Installation prefix (default: /usr/local)
+  # Used only on linux. Data files are expected under $prefix/share/antares/app.
+  prefix = "/usr/local"
+
+  # Antares version. Can be overridden for nightlies and release builds.
+  antares_version = "0.8.1"
+}
+
+import("//build/lib/embed.gni")
+
+group("default") {
+  testonly = true
+  deps = [
+    ":antares-glfw",
+    ":antares-install-data",
+    ":antares-ls-scenarios",
+    ":build-pix",
+    ":fixed-test",
+    ":hash-data",
+    ":object-data",
+    ":offscreen",
+    ":replay",
+    ":shapes",
+    ":tint",
+  ]
+  if (target_os == "mac") {
+    deps += [ ":antares" ]
+  }
+}
+
+config("antares_private") {
+  include_dirs = [
+    "include",
+    "$target_gen_dir/include",
+  ]
+  cflags = [
+    "-Wall",
+    "-Werror",
+    "-Wno-sign-compare",
+    "-Wno-deprecated-declarations",
+  ]
+  defines = [
+    "ANTARES_PREFIX=\"" + prefix + "\"",
+    "ANTARES_VERSION=\"" + antares_version + "\"",
+  ]
+}
+
+source_set("libantares") {
+  public_deps = [
+    ":libantares-config",
+    ":libantares-data",
+    ":libantares-drawing",
+    ":libantares-game",
+    ":libantares-math",
+    ":libantares-sound",
+    ":libantares-ui",
+    ":libantares-video",
+  ]
+  if (target_os == "mac") {
+    public_deps += [ ":libantares-mac" ]
+  } else if (target_os == "linux") {
+    public_deps += [ ":libantares-linux" ]
+  }
+}
+
+source_set("libantares-config") {
+  sources = [
+    "include/config/dirs.hpp",
+    "include/config/file-prefs-driver.hpp",
+    "include/config/gamepad.hpp",
+    "include/config/keys.hpp",
+    "include/config/ledger.hpp",
+    "include/config/preferences.hpp",
+
+    # These don't really belong here, but there aren't any
+    # associated sources, and ninja doesn't like when you have a
+    # library with just includes in the sources list.
+    "include/lang/casts.hpp",
+    "include/lang/defines.hpp",
+    "include/net/http.hpp",
+    "src/config/file-prefs-driver.cpp",
+    "src/config/gamepad.cpp",
+    "src/config/keys.cpp",
+    "src/config/ledger.cpp",
+    "src/config/preferences.cpp",
+  ]
+  public_deps = [
+    "//ext/libsfz",
+  ]
+  if (target_os == "mac") {
+    sources += [ "src/config/mac-dirs.cpp" ]
+  } else if (target_os == "linux") {
+    sources += [ "src/config/linux-dirs.cpp" ]
+  }
+  configs += [ ":antares_private" ]
+}
+
+source_set("libantares-data") {
+  sources = [
+    "include/data/action.hpp",
+    "include/data/base-object.hpp",
+    "include/data/extractor.hpp",
+    "include/data/handle.hpp",
+    "include/data/interface.hpp",
+    "include/data/level.hpp",
+    "include/data/picture.hpp",
+    "include/data/plugin.hpp",
+    "include/data/races.hpp",
+    "include/data/replay-list.hpp",
+    "include/data/replay.hpp",
+    "include/data/resource.hpp",
+    "include/data/scenario-list.hpp",
+    "include/data/string-list.hpp",
+    "src/data/action.cpp",
+    "src/data/base-object.cpp",
+    "src/data/extractor.cpp",
+    "src/data/interface.cpp",
+    "src/data/level.cpp",
+    "src/data/picture.cpp",
+    "src/data/plugin.cpp",
+    "src/data/races.cpp",
+    "src/data/replay-list.cpp",
+    "src/data/replay.cpp",
+    "src/data/resource.cpp",
+    "src/data/scenario-list.cpp",
+    "src/data/string-list.cpp",
+  ]
+  public_deps = [
+    "//ext/libpng-gyp:libpng",
+    "//ext/libsfz",
+    "//ext/libzipxx",
+    "//ext/rezin:librezin",
+  ]
+  configs += [ ":antares_private" ]
+}
+
+source_set("libantares-drawing") {
+  sources = [
+    "include/drawing/briefing.hpp",
+    "include/drawing/build-pix.hpp",
+    "include/drawing/color.hpp",
+    "include/drawing/interface.hpp",
+    "include/drawing/pix-map.hpp",
+    "include/drawing/pix-table.hpp",
+    "include/drawing/shapes.hpp",
+    "include/drawing/sprite-handling.hpp",
+    "include/drawing/styled-text.hpp",
+    "include/drawing/text.hpp",
+    "src/drawing/briefing.cpp",
+    "src/drawing/build-pix.cpp",
+    "src/drawing/color.cpp",
+    "src/drawing/interface.cpp",
+    "src/drawing/libpng-pix-map.cpp",
+    "src/drawing/pix-map.cpp",
+    "src/drawing/pix-table.cpp",
+    "src/drawing/shapes.cpp",
+    "src/drawing/sprite-handling.cpp",
+    "src/drawing/styled-text.cpp",
+    "src/drawing/text.cpp",
+  ]
+  deps = [
+    "//ext/libpng-gyp:libpng",
+    "//ext/libsfz",
+  ]
+  configs += [ ":antares_private" ]
+}
+
+source_set("libantares-game") {
+  sources = [
+    "include/game/action.hpp",
+    "include/game/admiral.hpp",
+    "include/game/cheat.hpp",
+    "include/game/condition.hpp",
+    "include/game/cursor.hpp",
+    "include/game/globals.hpp",
+    "include/game/initial.hpp",
+    "include/game/input-source.hpp",
+    "include/game/instruments.hpp",
+    "include/game/labels.hpp",
+    "include/game/level.hpp",
+    "include/game/main.hpp",
+    "include/game/messages.hpp",
+    "include/game/minicomputer.hpp",
+    "include/game/motion.hpp",
+    "include/game/non-player-ship.hpp",
+    "include/game/player-ship.hpp",
+    "include/game/space-object.hpp",
+    "include/game/starfield.hpp",
+    "include/game/sys.hpp",
+    "include/game/time.hpp",
+    "include/game/vector.hpp",
+    "src/game/action.cpp",
+    "src/game/admiral.cpp",
+    "src/game/cheat.cpp",
+    "src/game/condition.cpp",
+    "src/game/cursor.cpp",
+    "src/game/globals.cpp",
+    "src/game/initial.cpp",
+    "src/game/input-source.cpp",
+    "src/game/instruments.cpp",
+    "src/game/labels.cpp",
+    "src/game/level.cpp",
+    "src/game/main.cpp",
+    "src/game/messages.cpp",
+    "src/game/minicomputer.cpp",
+    "src/game/motion.cpp",
+    "src/game/non-player-ship.cpp",
+    "src/game/player-ship.cpp",
+    "src/game/space-object.cpp",
+    "src/game/starfield.cpp",
+    "src/game/sys.cpp",
+    "src/game/vector.cpp",
+  ]
+  public_deps = [
+    "//ext/libsfz",
+  ]
+  configs += [ ":antares_private" ]
+}
+
+source_set("libantares-math") {
+  sources = [
+    "include/math/fixed.hpp",
+    "include/math/geometry.hpp",
+    "include/math/macros.hpp",
+    "include/math/random.hpp",
+    "include/math/rotation.hpp",
+    "include/math/special.hpp",
+    "include/math/units.hpp",
+    "src/math/fixed.cpp",
+    "src/math/geometry.cpp",
+    "src/math/random.cpp",
+    "src/math/rotation.cpp",
+    "src/math/special.cpp",
+  ]
+  public_deps = [
+    "//ext/libsfz",
+  ]
+  configs += [ ":antares_private" ]
+}
+
+source_set("libantares-sound") {
+  sources = [
+    "include/sound/driver.hpp",
+    "include/sound/fx.hpp",
+    "include/sound/music.hpp",
+    "include/sound/openal-driver.hpp",
+    "include/sound/sndfile.hpp",
+    "src/sound/driver.cpp",
+    "src/sound/fx.cpp",
+    "src/sound/music.cpp",
+    "src/sound/openal-driver.cpp",
+    "src/sound/sndfile.cpp",
+  ]
+  public_deps = [
+    "//ext/libmodplug-gyp:libmodplug",
+    "//ext/libsfz",
+    "//ext/libsndfile-gyp:libsndfile",
+  ]
+  libs = []
+  if (target_os == "mac") {
+    libs += [ "OpenAL.framework" ]
+  } else if (target_os == "linux") {
+    libs += [ "-lopenal" ]
+  }
+  configs += [ ":antares_private" ]
+}
+
+source_set("libantares-ui") {
+  sources = [
+    "include/ui/card.hpp",
+    "include/ui/event-scheduler.hpp",
+    "include/ui/event.hpp",
+    "include/ui/flows/master.hpp",
+    "include/ui/flows/replay-game.hpp",
+    "include/ui/flows/solo-game.hpp",
+    "include/ui/interface-handling.hpp",
+    "include/ui/screen.hpp",
+    "include/ui/screens/briefing.hpp",
+    "include/ui/screens/debriefing.hpp",
+    "include/ui/screens/help.hpp",
+    "include/ui/screens/loading.hpp",
+    "include/ui/screens/main.hpp",
+    "include/ui/screens/object-data.hpp",
+    "include/ui/screens/options.hpp",
+    "include/ui/screens/play-again.hpp",
+    "include/ui/screens/scroll-text.hpp",
+    "include/ui/screens/select-level.hpp",
+    "src/ui/card.cpp",
+    "src/ui/event-scheduler.cpp",
+    "src/ui/event.cpp",
+    "src/ui/flows/master.cpp",
+    "src/ui/flows/replay-game.cpp",
+    "src/ui/flows/solo-game.cpp",
+    "src/ui/interface-handling.cpp",
+    "src/ui/screen.cpp",
+    "src/ui/screens/briefing.cpp",
+    "src/ui/screens/debriefing.cpp",
+    "src/ui/screens/help.cpp",
+    "src/ui/screens/loading.cpp",
+    "src/ui/screens/main.cpp",
+    "src/ui/screens/object-data.cpp",
+    "src/ui/screens/options.cpp",
+    "src/ui/screens/play-again.cpp",
+    "src/ui/screens/scroll-text.cpp",
+    "src/ui/screens/select-level.cpp",
+  ]
+  public_deps = [
+    "//ext/libsfz",
+  ]
+  configs += [ ":antares_private" ]
+}
+
+source_set("libantares-video") {
+  sources = [
+    "$target_gen_dir/include/video/glsl/fragment.hpp",
+    "$target_gen_dir/include/video/glsl/vertex.hpp",
+    "$target_gen_dir/src/video/glsl/fragment.cpp",
+    "$target_gen_dir/src/video/glsl/vertex.cpp",
+    "include/video/driver.hpp",
+    "include/video/opengl-driver.hpp",
+    "include/video/transitions.hpp",
+    "src/video/driver.cpp",
+    "src/video/opengl-driver.cpp",
+    "src/video/transitions.cpp",
+  ]
+  deps = [
+    ":embed_glsl_fragment",
+    ":embed_glsl_vertex",
+  ]
+  public_deps = [
+    "//ext/libpng-gyp:libpng",
+    "//ext/libsfz",
+  ]
+  libs = []
+  if (target_os == "mac") {
+    libs += [ "OpenGL.framework" ]
+  } else if (target_os == "linux") {
+    libs += [
+      "-lGL",
+      "-lX11",
+    ]
+  }
+  configs += [ ":antares_private" ]
+}
+
+embed("embed_glsl_fragment") {
+  symbol = "antares::glsl::fragment"
+  sources = [
+    "src/video/glsl/fragment.frag",
+  ]
+  outputs = [
+    "include/video/glsl/fragment.hpp",
+    "src/video/glsl/fragment.cpp",
+  ]
+}
+
+embed("embed_glsl_vertex") {
+  symbol = "antares::glsl::vertex"
+  sources = [
+    "src/video/glsl/vertex.vert",
+  ]
+  outputs = [
+    "include/video/glsl/vertex.hpp",
+    "src/video/glsl/vertex.cpp",
+  ]
+}
+
+executable("hash-data") {
+  testonly = true
+  sources = [
+    "src/bin/hash-data.cpp",
+  ]
+  deps = [
+    ":libantares-test",
+  ]
+  configs += [ ":antares_private" ]
+}
+
+executable("antares-ls-scenarios") {
+  testonly = true
+  sources = [
+    "src/bin/ls-scenarios.cpp",
+  ]
+  deps = [
+    ":libantares-test",
+  ]
+  configs += [ ":antares_private" ]
+}
+
+executable("object-data") {
+  testonly = true
+  sources = [
+    "src/bin/object-data.cpp",
+  ]
+  deps = [
+    ":libantares-test",
+  ]
+  configs += [ ":antares_private" ]
+}
+
+executable("shapes") {
+  testonly = true
+  sources = [
+    "src/bin/shapes.cpp",
+  ]
+  deps = [
+    ":libantares-test",
+  ]
+  configs += [ ":antares_private" ]
+}
+
+executable("tint") {
+  testonly = true
+  sources = [
+    "src/bin/tint.cpp",
+  ]
+  deps = [
+    ":libantares-test",
+  ]
+  configs += [ ":antares_private" ]
+}
+
+source_set("libantares-test") {
+  testonly = true
+  sources = [
+    "include/video/offscreen-driver.hpp",
+    "include/video/text-driver.hpp",
+    "src/test/resource.cpp",
+    "src/video/offscreen-driver.cpp",
+    "src/video/text-driver.cpp",
+  ]
+  defines = [ "ANTARES_DATA=./data" ]
+  public_deps = [
+    ":libantares",
+  ]
+  if (target_os == "mac") {
+    sources += [
+      "src/mac/offscreen.cpp",
+      "src/mac/offscreen.hpp",
+    ]
+  } else if (target_os == "linux") {
+    sources += [
+      "src/linux/offscreen.cpp",
+      "src/linux/offscreen.hpp",
+    ]
+  }
+  configs += [ ":antares_private" ]
+}
+
+executable("fixed-test") {
+  testonly = true
+  sources = [
+    "src/math/fixed.test.cpp",
+  ]
+  deps = [
+    ":libantares-test",
+    "//ext/gmock-gyp:gmock_main",
+  ]
+  configs += [ ":antares_private" ]
+}
+
+executable("offscreen") {
+  testonly = true
+  sources = [
+    "src/bin/offscreen.cpp",
+  ]
+  deps = [
+    ":libantares-test",
+  ]
+  configs += [ ":antares_private" ]
+}
+
+executable("replay") {
+  testonly = true
+  sources = [
+    "src/bin/replay.cpp",
+  ]
+  deps = [
+    ":libantares-test",
+  ]
+  configs += [ ":antares_private" ]
+}
+
+executable("build-pix") {
+  testonly = true
+  sources = [
+    "src/bin/build-pix.cpp",
+  ]
+  deps = [
+    ":libantares-test",
+  ]
+  configs += [ ":antares_private" ]
+}
+
+executable("antares-glfw") {
+  sources = [
+    "include/glfw/video-driver.hpp",
+    "src/glfw/main.cpp",
+    "src/glfw/video-driver.cpp",
+  ]
+  deps = [
+    ":libantares",
+    "//ext/glfw:libglfw",
+  ]
+  configs += [ ":antares_private" ]
+}
+
+executable("antares-install-data") {
+  sources = [
+    "src/bin/install-data.cpp",
+  ]
+  deps = [
+    ":libantares",
+  ]
+  configs += [ ":antares_private" ]
+}
+
+if (target_os == "mac") {
+  import("//build/lib/mac/templates.gni")
+
+  source_set("libantares-mac") {
+    sources = [
+      "include/mac/audio-file.hpp",
+      "include/mac/core-foundation.hpp",
+      "include/mac/core-opengl.hpp",
+      "src/mac/audio-file.cpp",
+      "src/mac/core-foundation.cpp",
+      "src/mac/core-opengl.cpp",
+      "src/mac/http.cpp",
+    ]
+    public_deps = [
+      "//ext/libpng-gyp:libpng",
+      "//ext/libsfz",
+    ]
+    libs = [
+      "AudioToolbox.framework",
+      "CoreFoundation.framework",
+      "IOKit.framework",
+      "OpenGL.framework",
+    ]
+    configs += [ ":antares_private" ]
+  }
+
+  # xcode_settings:
+  # CODE_SIGN_IDENTITY=Developer ID Application
+  # CODE_SIGN_ENTITLEMENTS=resources/entitlements.plist
+  app("antares") {
+    output_name = "Antares"
+    info_plist = "resources/Antares-Info.plist"
+    info_plist_defines = [
+      "ANTARES_VERSION=$antares_version",
+      "SYSTEM_VERSION=10.7",
+    ]
+    sources = [
+      "include/mac/AntaresController.h",
+      "include/mac/AntaresExtractDataController.h",
+      "include/mac/c/AntaresController.hpp",
+      "include/mac/c/CocoaVideoDriver.hpp",
+      "include/mac/c/DataExtractor.h",
+      "include/mac/c/scenario-list.h",
+      "include/mac/prefs-driver.hpp",
+      "include/mac/video-driver.hpp",
+      "src/mac/AntaresController.m",
+      "src/mac/AntaresExtractDataController.m",
+      "src/mac/c/AntaresController.cpp",
+      "src/mac/c/CocoaVideoDriver.m",
+      "src/mac/c/DataExtractor.cpp",
+      "src/mac/c/scenario-list.cpp",
+      "src/mac/main.m",
+      "src/mac/prefs-driver.cpp",
+      "src/mac/resource.cpp",
+      "src/mac/video-driver.cpp",
+    ]
+    deps = [
+      ":libantares",
+    ]
+    libs = [
+      "Carbon.framework",
+      "Cocoa.framework",
+    ]
+
+    resources = [
+      ":antares_app_resource_data",
+      ":antares_app_embedded_scenario_data",
+    ]
+    configs = [ ":antares_private" ]
+  }
+
+  app_resources("antares_app_embedded_scenario_data") {
+    sources = [
+      "data/fonts",
+      "data/interfaces",
+      "data/music",
+      "data/pictures",
+      "data/rotation-table",
+      "data/strings",
+      "data/text",
+    ]
+  }
+
+  app_resources("antares_app_resource_data") {
+    sources = [
+      "resources/Antares.icns",
+      "resources/ExtractData.nib",
+      "resources/MainMenu.nib",
+      "resources/container-migration.plist",
+    ]
+  }
+} else if (target_os == "linux") {
+  source_set("libantares-linux") {
+    sources = [
+      "src/linux/http.cpp",
+    ]
+    public_deps = [
+      "//ext/libsfz",
+    ]
+    libs = [ "-lneon" ]
+    configs += [ ":antares_private" ]
+  }
+}

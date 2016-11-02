@@ -32,8 +32,8 @@ namespace utf8 = sfz::utf8;
 struct AntaresDataExtractor {
     antares::DataExtractor cxx_obj;
 
-    AntaresDataExtractor(const StringSlice& downloads_dir, const StringSlice& output_dir):
-            cxx_obj(downloads_dir, output_dir) { }
+    AntaresDataExtractor(const StringSlice& downloads_dir, const StringSlice& output_dir)
+            : cxx_obj(downloads_dir, output_dir) {}
 };
 
 namespace antares {
@@ -69,9 +69,8 @@ namespace {
 
 class UserDataObserver : public DataExtractor::Observer {
   public:
-    UserDataObserver(void (*callback)(const char*, void*), void* userdata):
-            _callback(callback),
-            _userdata(userdata) { }
+    UserDataObserver(void (*callback)(const char*, void*), void* userdata)
+            : _callback(callback), _userdata(userdata) {}
 
     virtual void status(const StringSlice& status) {
         CString c_str(status);

@@ -18,8 +18,8 @@
 
 #include "ui/screens/debriefing.hpp"
 
-#include <vector>
 #include <sfz/sfz.hpp>
+#include <vector>
 
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
@@ -29,6 +29,7 @@
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
+#include "game/sys.hpp"
 #include "game/time.hpp"
 #include "sound/fx.hpp"
 #include "ui/card.hpp"
@@ -40,6 +41,7 @@ using sfz::PrintItem;
 using sfz::String;
 using sfz::dec;
 using sfz::format;
+using std::chrono::duration_cast;
 using std::unique_ptr;
 using std::vector;
 
@@ -49,9 +51,9 @@ namespace antares {
 
 namespace {
 
-const int64_t kTypingDelay = 1e6 / 20;
-const int kScoreTableHeight = 120;
-const int kTextWidth = 300;
+const usecs kTypingDelay      = kMajorTick;
+const int   kScoreTableHeight = 120;
+const int   kTextWidth        = 300;
 
 void string_replace(String* s, const String& in, const PrintItem& out) {
     size_t index = s->find(in);
@@ -98,17 +100,19 @@ int score_high_target(double yours, double par, double value) {
 }
 
 int score(
-        int your_length, int par_length, int your_loss, int par_loss, int your_kill,
+        game_ticks your_length, game_ticks par_length, int your_loss, int par_loss, int your_kill,
         int par_kill) {
     int score = 0;
-    score += score_low_target(your_length, par_length, 50);
+    score += score_low_target(
+            duration_cast<secs>(your_length.time_since_epoch()).count(),
+            duration_cast<secs>(par_length.time_since_epoch()).count(), 50);
     score += score_low_target(your_loss, par_loss, 30);
     score += score_high_target(your_kill, par_kill, 20);
     return score;
 }
 
 unique_ptr<StyledText> style_score_text(String text) {
-    unique_ptr<StyledText> result(new StyledText(button_font));
+    unique_ptr<StyledText> result(new StyledText(sys.fonts.button));
     result->set_fore_color(GetRGBTranslateColorShade(GOLD, VERY_LIGHT));
     result->set_back_color(GetRGBTranslateColorShade(GOLD, DARKEST));
     result->set_retro_text(text);
@@ -117,25 +121,18 @@ unique_ptr<StyledText> style_score_text(String text) {
 
 }  // namespace
 
-DebriefingScreen::DebriefingScreen(int text_id) :
-        _state(DONE),
-        _next_update(0),
-        _typed_chars(0),
-        _data_item(initialize(text_id, false)) { }
+DebriefingScreen::DebriefingScreen(int text_id)
+        : _state(DONE), _typed_chars(0), _data_item(initialize(text_id, false)) {}
 
 DebriefingScreen::DebriefingScreen(
-        int text_id, int your_length, int par_length, int your_loss, int par_loss,
-        int your_kill, int par_kill):
-        _state(TYPING),
-        _next_update(0),
-        _typed_chars(0),
-        _data_item(initialize(text_id, true)) {
-
+        int text_id, game_ticks your_time, game_ticks par_time, int your_loss, int par_loss,
+        int your_kill, int par_kill)
+        : _state(TYPING), _typed_chars(0), _data_item(initialize(text_id, true)) {
     Rect score_area = _message_bounds;
-    score_area.top = score_area.bottom - kScoreTableHeight;
+    score_area.top  = score_area.bottom - kScoreTableHeight;
 
-    _score = style_score_text(build_score_text(
-                your_length, par_length, your_loss, par_loss, your_kill, par_kill));
+    _score = style_score_text(
+            build_score_text(your_time, par_time, your_loss, par_loss, your_kill, par_kill));
     _score->set_tab_width(60);
     _score->wrap_to(_message_bounds.width(), 0, 2);
     _score_bounds = Rect(0, 0, _score->auto_width(), _score->height());
@@ -147,18 +144,17 @@ DebriefingScreen::DebriefingScreen(
 void DebriefingScreen::become_front() {
     _typed_chars = 0;
     if (_state == TYPING) {
-        _next_update = now_usecs() + kTypingDelay;
+        _next_update = now() + kTypingDelay;
     } else {
-        _next_update = 0;
+        _next_update = wall_time();
     }
 }
 
-void DebriefingScreen::resign_front() {
-}
+void DebriefingScreen::resign_front() {}
 
 void DebriefingScreen::draw() const {
     next()->draw();
-    Rects().fill(_pix_bounds, RgbColor::kBlack);
+    Rects().fill(_pix_bounds, RgbColor::black());
     if (_score) {
         _score->draw_range(_score_bounds, 0, _typed_chars);
     }
@@ -166,11 +162,10 @@ void DebriefingScreen::draw() const {
     interface_bounds.offset(_pix_bounds.left, _pix_bounds.top);
     draw_interface_item(_data_item, KEYBOARD_MOUSE);
 
-    vector<inlinePictType> inline_pict;
-    draw_text_in_rect(interface_bounds, _message, kLarge, GOLD, inline_pict);
+    draw_text_in_rect(interface_bounds, _message, kLarge, GOLD);
 
-    RgbColor bracket_color = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
-    Rect bracket_bounds = _score_bounds;
+    RgbColor bracket_color  = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
+    Rect     bracket_bounds = _score_bounds;
     bracket_bounds.inset(-2, -2);
     draw_vbracket(Rects(), bracket_bounds, bracket_color);
 }
@@ -196,7 +191,7 @@ void DebriefingScreen::gamepad_button_down(const GamepadButtonDownEvent& event) 
     }
 }
 
-bool DebriefingScreen::next_timer(int64_t& time) {
+bool DebriefingScreen::next_timer(wall_time& time) {
     if (_state == TYPING) {
         time = _next_update;
         return true;
@@ -208,15 +203,15 @@ void DebriefingScreen::fire_timer() {
     if (_state != TYPING) {
         throw Exception(format("DebriefingScreen::fire_timer() called but _state is {0}", _state));
     }
-    PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
-    int64_t now = now_usecs();
+    sys.sound.teletype();
+    wall_time now = antares::now();
     while (_next_update <= now) {
         if (_typed_chars < _score->size()) {
             _next_update += kTypingDelay;
             ++_typed_chars;
         } else {
-            _next_update = 0;
-            _state = DONE;
+            _next_update = wall_time();
+            _state       = DONE;
             break;
         }
     }
@@ -226,38 +221,38 @@ LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
     Resource rsrc("text", "txt", text_id);
     _message.assign(utf8::decode(rsrc.data()));
 
-    int text_height = GetInterfaceTextHeightFromWidth(_message, kLarge, kTextWidth);
+    int  text_height = GetInterfaceTextHeightFromWidth(_message, kLarge, kTextWidth);
     Rect text_bounds(0, 0, kTextWidth, text_height);
     if (do_score) {
         text_bounds.bottom += kScoreTableHeight;
     }
-    text_bounds.center_in(viewport);
+    text_bounds.center_in(viewport());
 
     LabeledRect data_item = interface_item(text_bounds);
-    _pix_bounds = pix_bounds(data_item);
-    _message_bounds = text_bounds;
+    _pix_bounds           = pix_bounds(data_item);
+    _message_bounds       = text_bounds;
     _message_bounds.offset(-_pix_bounds.left, -_pix_bounds.top);
     return data_item;
 }
 
 String DebriefingScreen::build_score_text(
-        int your_length, int par_length, int your_loss, int par_loss, int your_kill,
+        game_ticks your_time, game_ticks par_time, int your_loss, int par_loss, int your_kill,
         int par_kill) {
     Resource rsrc("text", "txt", 6000);
-    String text(utf8::decode(rsrc.data()));
+    String   text(utf8::decode(rsrc.data()));
 
     StringList strings(6000);
 
-    const int your_mins = your_length / 60;
-    const int your_secs = your_length % 60;
-    const int par_mins = par_length / 60;
-    const int par_secs = par_length % 60;
-    const int your_score = score(your_length, par_length, your_loss, par_loss, your_kill, par_kill);
-    const int par_score = 100;
+    const int your_mins  = duration_cast<secs>(your_time.time_since_epoch()).count() / 60;
+    const int your_secs  = duration_cast<secs>(your_time.time_since_epoch()).count() % 60;
+    const int par_mins   = duration_cast<secs>(par_time.time_since_epoch()).count() / 60;
+    const int par_secs   = duration_cast<secs>(par_time.time_since_epoch()).count() % 60;
+    const int your_score = score(your_time, par_time, your_loss, par_loss, your_kill, par_kill);
+    const int par_score  = 100;
 
     string_replace(&text, strings.at(0), your_mins);
     string_replace(&text, strings.at(1), dec(your_secs, 2));
-    if (par_length > 0) {
+    if (par_time > game_ticks()) {
         string_replace(&text, strings.at(2), par_mins);
         String secs_string;
         print(secs_string, format(":{0}", dec(par_secs, 2)));
@@ -278,12 +273,8 @@ String DebriefingScreen::build_score_text(
 
 void print_to(sfz::PrintTarget out, DebriefingScreen::State state) {
     switch (state) {
-      case DebriefingScreen::TYPING:
-        print(out, "TYPING");
-        return;
-      case DebriefingScreen::DONE:
-        print(out, "DONE");
-        return;
+        case DebriefingScreen::TYPING: print(out, "TYPING"); return;
+        case DebriefingScreen::DONE: print(out, "DONE"); return;
     }
     print(out, static_cast<int64_t>(state));
 }

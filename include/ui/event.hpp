@@ -23,6 +23,7 @@
 #include <sfz/sfz.hpp>
 
 #include "math/geometry.hpp"
+#include "math/units.hpp"
 
 namespace antares {
 
@@ -36,16 +37,16 @@ enum InputMode {
 // Superclass for all events.
 class Event {
   public:
-    Event(int64_t at);
+    Event(wall_time at);
     virtual ~Event();
 
-    int64_t at() const;
+    wall_time at() const;
 
     // Calls receiver->m(*this), for the appropriate EventReceiver method 'm'.
     virtual void send(EventReceiver* receiver) const = 0;
 
   private:
-    const int64_t _at;
+    const wall_time _at;
 
     DISALLOW_COPY_AND_ASSIGN(Event);
 };
@@ -66,8 +67,9 @@ class Event {
 // documentation/mac/pdf/MacintoshToolboxEssentials.pdf
 class KeyEvent : public Event {
   public:
-    KeyEvent(int64_t at, uint32_t key): Event(at), _key(key) { }
+    KeyEvent(wall_time at, uint32_t key) : Event(at), _key(key) {}
     uint32_t key() const { return _key; }
+
   private:
     uint32_t _key;
 };
@@ -78,7 +80,7 @@ class KeyEvent : public Event {
 //  * key(): the key that was pressed, as described in KeyEvent.
 class KeyDownEvent : public KeyEvent {
   public:
-    KeyDownEvent(int64_t at, uint32_t key): KeyEvent(at, key) { }
+    KeyDownEvent(wall_time at, uint32_t key) : KeyEvent(at, key) {}
     virtual void send(EventReceiver* receiver) const;
 };
 
@@ -88,34 +90,34 @@ class KeyDownEvent : public KeyEvent {
 //  * key(): the key that was released, as described in KeyEvent.
 class KeyUpEvent : public KeyEvent {
   public:
-    KeyUpEvent(int64_t at, uint32_t key): KeyEvent(at, key) { }
+    KeyUpEvent(wall_time at, uint32_t key) : KeyEvent(at, key) {}
     virtual void send(EventReceiver* receiver) const;
 };
 
 class GamepadButtonEvent : public Event {
   public:
-    GamepadButtonEvent(int64_t at, uint32_t button): Event(at), button(button) { }
+    GamepadButtonEvent(wall_time at, uint32_t button) : Event(at), button(button) {}
     const uint32_t button;
 };
 
 class GamepadButtonDownEvent : public GamepadButtonEvent {
   public:
-    GamepadButtonDownEvent(int64_t at, uint32_t button): GamepadButtonEvent(at, button) { }
+    GamepadButtonDownEvent(wall_time at, uint32_t button) : GamepadButtonEvent(at, button) {}
     virtual void send(EventReceiver* receiver) const;
 };
 
 class GamepadButtonUpEvent : public GamepadButtonEvent {
   public:
-    GamepadButtonUpEvent(int64_t at, uint32_t button): GamepadButtonEvent(at, button) { }
+    GamepadButtonUpEvent(wall_time at, uint32_t button) : GamepadButtonEvent(at, button) {}
     virtual void send(EventReceiver* receiver) const;
 };
 
 class GamepadStickEvent : public Event {
   public:
-    GamepadStickEvent(int64_t at, int stick, double x, double y):
-            Event(at), stick(stick), x(x), y(y) { }
+    GamepadStickEvent(wall_time at, int stick, double x, double y)
+            : Event(at), stick(stick), x(x), y(y) {}
     virtual void send(EventReceiver* receiver) const;
-    const int stick;
+    const int    stick;
     const double x;
     const double y;
 };
@@ -126,8 +128,9 @@ class GamepadStickEvent : public Event {
 // corner of the screen.
 class MouseEvent : public Event {
   public:
-    MouseEvent(int64_t at, const Point& where): Event(at), _where(where) { }
+    MouseEvent(wall_time at, const Point& where) : Event(at), _where(where) {}
     const Point& where() const { return _where; }
+
   private:
     Point _where;
 };
@@ -140,24 +143,29 @@ class MouseEvent : public Event {
 // implement it in terms of separate events instead.
 class MouseButtonEvent : public MouseEvent {
   public:
-    MouseButtonEvent(int64_t at, int button, const Point& where):
-            MouseEvent(at, where),
-            _button(button) { }
+    MouseButtonEvent(wall_time at, int button, const Point& where)
+            : MouseEvent(at, where), _button(button) {}
     int button() const { return _button; }
+
   private:
     int _button;
 };
 
 // Generated when a mouse button is pressed.
 //
-// This event has two fields:
+// This event has three fields:
 //  * button(): the mouse button that was pressed, as described in MouseButtonEvent.
 //  * where(): the location of the mouse press, as described in MouseEvent.
+//  * count(): the number of clicks, e.g. 2 for a double-click.
 class MouseDownEvent : public MouseButtonEvent {
   public:
-    MouseDownEvent(int64_t at, int button, const Point& where):
-            MouseButtonEvent(at, button, where) { }
+    MouseDownEvent(wall_time at, int button, int count, const Point& where)
+            : MouseButtonEvent(at, button, where), _count(count) {}
     virtual void send(EventReceiver* receiver) const;
+    int count() const { return _count; }
+
+  private:
+    int _count;
 };
 
 // Generated when a mouse button is released.
@@ -167,8 +175,8 @@ class MouseDownEvent : public MouseButtonEvent {
 //  * where(): the location of the mouse release, as described in MouseEvent.
 class MouseUpEvent : public MouseButtonEvent {
   public:
-    MouseUpEvent(int64_t at, int button, const Point& where):
-            MouseButtonEvent(at, button, where) { }
+    MouseUpEvent(wall_time at, int button, const Point& where)
+            : MouseButtonEvent(at, button, where) {}
     virtual void send(EventReceiver* receiver) const;
 };
 
@@ -178,7 +186,7 @@ class MouseUpEvent : public MouseButtonEvent {
 //  * where(): the new location of the mouse pointer.
 class MouseMoveEvent : public MouseEvent {
   public:
-    MouseMoveEvent(int64_t at, const Point& where): MouseEvent(at, where) { }
+    MouseMoveEvent(wall_time at, const Point& where) : MouseEvent(at, where) {}
     virtual void send(EventReceiver* receiver) const;
 };
 
@@ -198,4 +206,4 @@ class EventReceiver {
 
 }  // namespace antares
 
-#endif // ANTARES_UI_EVENT_HPP_
+#endif  // ANTARES_UI_EVENT_HPP_

@@ -46,9 +46,9 @@ class Master : public Card {
         MAIN_SCREEN,
     };
 
-    State _state;
+    State         _state;
     const int32_t _seed;
-    bool _skipped;
+    bool          _skipped;
 };
 
 }  // namespace antares

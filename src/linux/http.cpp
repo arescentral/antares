@@ -21,8 +21,8 @@
 #include <neon/ne_basic.h>
 #include <neon/ne_session.h>
 #include <neon/ne_uri.h>
-#include <sfz/sfz.hpp>
 #include <unistd.h>
+#include <sfz/sfz.hpp>
 
 using sfz::BytesSlice;
 using sfz::CString;
@@ -37,12 +37,14 @@ namespace http {
 
 struct ne_userdata {
     WriteTarget out;
-    size_t total;
+    size_t      total;
 };
 
 static int accept(void* userdata, ne_request* req, const ne_status* st) {
-    ne_userdata* u = reinterpret_cast<ne_userdata*>(userdata);
-    auto len = ne_get_response_header(req, "Content-Length");
+    ne_userdata* u   = reinterpret_cast<ne_userdata*>(userdata);
+    auto         len = ne_get_response_header(req, "Content-Length");
+    (void)u;
+    (void)len;
     return true;
 }
 
@@ -60,14 +62,14 @@ void get(const StringSlice& url, WriteTarget out) {
     }
 
     CString cstr(url);
-    ne_uri uri = {};
+    ne_uri  uri = {};
     if (ne_uri_parse(cstr.data(), &uri)) {
         throw Exception("ne_uri_parse()");
     }
     if (uri.port == 0) {
         uri.port = ne_uri_defaultport(uri.scheme);
     }
-    unique_ptr<ne_uri, decltype(&ne_uri_free)> uri_free(&uri, ne_uri_free);
+    unique_ptr<ne_uri, decltype(&ne_uri_free)>            uri_free(&uri, ne_uri_free);
     unique_ptr<ne_session, decltype(&ne_session_destroy)> sess(
             ne_session_create(uri.scheme, uri.host, uri.port), ne_session_destroy);
 

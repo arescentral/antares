@@ -22,6 +22,7 @@
 #include "drawing/build-pix.hpp"
 #include "drawing/pix-map.hpp"
 #include "game/globals.hpp"
+#include "game/sys.hpp"
 #include "game/time.hpp"
 #include "sound/music.hpp"
 #include "ui/card.hpp"
@@ -37,44 +38,33 @@ const int kScrollTextHeight = 200;
 
 }  // namespace
 
-ScrollTextScreen::ScrollTextScreen(int text_id, int width, double speed):
-        _build_pix(BuildPix(text_id, width)),
-        _speed(speed),
-        _play_song(false),
-        _song_id(0) { }
+ScrollTextScreen::ScrollTextScreen(int text_id, int width, ticks interval)
+        : _build_pix(BuildPix(text_id, width)),
+          _interval(interval),
+          _play_song(false),
+          _song_id(0) {}
 
-ScrollTextScreen::ScrollTextScreen(int text_id, int width, double speed, int song_id):
-        _build_pix(BuildPix(text_id, width)),
-        _speed(speed),
-        _play_song(true),
-        _song_id(song_id) { }
+ScrollTextScreen::ScrollTextScreen(int text_id, int width, ticks interval, int song_id)
+        : _build_pix(BuildPix(text_id, width)),
+          _interval(interval),
+          _play_song(true),
+          _song_id(song_id) {}
 
 void ScrollTextScreen::become_front() {
     // If a song was requested, play it.
-    if (_play_song && Preferences::preferences()->play_idle_music()) {
-        if (SongIsPlaying()) {
-            StopAndUnloadSong();
-        }
-        LoadSong(_song_id);
-        SetSongVolume(kMaxMusicVolume);
-        PlaySong();
+    if (_play_song) {
+        sys.music.play(Music::IDLE, _song_id);
     }
 
-    _start = now_usecs();
+    _start      = now();
     _next_shift = _start;
-
-    _clip = Rect(0, 0, world.width(), kScrollTextHeight);
-    _clip.center_in(world);
-
-    _position = _build_pix.size().as_rect();
-    _position.center_in(_clip);
-    _position.offset(0, _clip.bottom - _position.top);
+    _position   = -kScrollTextHeight;
 }
 
 void ScrollTextScreen::resign_front() {
     // If a song was requested, stop it.
-    if (_play_song && SongIsPlaying()) {
-        StopAndUnloadSong();
+    if (_play_song) {
+        sys.music.stop();
     }
 }
 
@@ -93,28 +83,36 @@ void ScrollTextScreen::gamepad_button_down(const GamepadButtonDownEvent& event) 
     stack()->pop(this);
 }
 
-bool ScrollTextScreen::next_timer(int64_t& time) {
+bool ScrollTextScreen::next_timer(wall_time& time) {
     time = _next_shift;
     return true;
 }
 
 void ScrollTextScreen::fire_timer() {
-    int64_t now = now_usecs();
+    wall_time now = antares::now();
     while (_next_shift < now) {
-        _next_shift += (1e6 / _speed);
-        _position.offset(0, -1);
+        _next_shift += _interval;
+        ++_position;
     }
 
-    if (!_position.intersects(_clip)) {
+    if (_position >= _build_pix.size().height) {
         stack()->pop(this);
     }
 }
 
 void ScrollTextScreen::draw() const {
-    _build_pix.draw(_position.origin());
+    Rect world = sys.video->screen_size().as_rect();
+    Rect clip  = Rect(0, 0, world.width(), kScrollTextHeight);
+    clip.center_in(world);
+
+    Rect position = _build_pix.size().as_rect();
+    position.center_in(clip);
+    position.offset(0, clip.top - position.top);
+    position.offset(0, -_position);
+    _build_pix.draw(position.origin());
     Rects rects;
-    rects.fill(Rect(world.left, world.top, world.right, _clip.top), RgbColor::kBlack);
-    rects.fill(Rect(world.left, _clip.bottom, world.right, world.bottom), RgbColor::kBlack);
+    rects.fill(Rect(world.left, world.top, world.right, clip.top), RgbColor::black());
+    rects.fill(Rect(world.left, clip.bottom, world.right, world.bottom), RgbColor::black());
 }
 
 }  // namespace antares

@@ -23,14 +23,18 @@
 
 #include "drawing/build-pix.hpp"
 #include "math/geometry.hpp"
+#include "math/units.hpp"
 #include "ui/card.hpp"
 
 namespace antares {
 
+const ticks kSlowScrollInterval = ticks(4);
+const ticks kFastScrollInterval = ticks(2);
+
 class ScrollTextScreen : public Card {
   public:
-    ScrollTextScreen(int text_id, int width, double speed);
-    ScrollTextScreen(int text_id, int width, double speed, int song_id);
+    ScrollTextScreen(int text_id, int width, ticks interval);
+    ScrollTextScreen(int text_id, int width, ticks interval, int song_id);
 
     virtual void become_front();
     virtual void resign_front();
@@ -39,21 +43,20 @@ class ScrollTextScreen : public Card {
     virtual void key_down(const KeyDownEvent& event);
     virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
 
-    virtual bool next_timer(int64_t& time);
+    virtual bool next_timer(wall_time& time);
     virtual void fire_timer();
 
     virtual void draw() const;
 
   private:
-    BuildPix _build_pix;
-    const double _speed;
-    const bool _play_song;
-    const int _song_id;
+    BuildPix    _build_pix;
+    const ticks _interval;
+    const bool  _play_song;
+    const int   _song_id;
 
-    int64_t _start;
-    int64_t _next_shift;
-    Rect _clip;
-    Rect _position;
+    wall_time _start;
+    wall_time _next_shift;
+    int32_t   _position;
 
     DISALLOW_COPY_AND_ASSIGN(ScrollTextScreen);
 };

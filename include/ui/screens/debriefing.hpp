@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 
 #include "drawing/styled-text.hpp"
+#include "math/units.hpp"
 #include "ui/card.hpp"
 
 namespace antares {
@@ -31,7 +32,7 @@ class DebriefingScreen : public Card {
     DebriefingScreen(int text_id);
 
     DebriefingScreen(
-            int text_id, int your_length, int par_length, int your_loss, int par_loss,
+            int text_id, game_ticks your_time, game_ticks par_time, int your_loss, int par_loss,
             int your_kill, int par_kill);
 
     virtual void become_front();
@@ -42,13 +43,13 @@ class DebriefingScreen : public Card {
     virtual void key_down(const KeyDownEvent& event);
     virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
 
-    virtual bool next_timer(int64_t& time);
+    virtual bool next_timer(wall_time& time);
     virtual void fire_timer();
 
     static sfz::String build_score_text(
-            int your_length, int par_length, int your_loss, int par_loss, int your_kill,
-            int par_kill);
-    
+            game_ticks your_length, game_ticks par_length, int your_loss, int par_loss,
+            int your_kill, int par_kill);
+
   private:
     LabeledRect initialize(int text_id, bool do_score);
 
@@ -59,14 +60,14 @@ class DebriefingScreen : public Card {
     friend void print_to(sfz::PrintTarget out, State state);
     State _state;
 
-    sfz::String _message;
+    sfz::String                 _message;
     std::unique_ptr<StyledText> _score;
-    Rect _pix_bounds;
-    Rect _message_bounds;
-    Rect _score_bounds;
+    Rect                        _pix_bounds;
+    Rect                        _message_bounds;
+    Rect                        _score_bounds;
 
-    int64_t _next_update;
-    int _typed_chars;
+    wall_time _next_update;
+    int       _typed_chars;
 
     LabeledRect _data_item;
 

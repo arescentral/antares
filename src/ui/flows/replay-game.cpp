@@ -20,9 +20,9 @@
 
 #include <algorithm>
 
+#include "data/plugin.hpp"
 #include "game/globals.hpp"
-#include "game/input-source.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/level.hpp"
 #include "math/random.hpp"
 #include "ui/card.hpp"
 #include "video/transitions.hpp"
@@ -32,39 +32,36 @@ namespace antares {
 using sfz::read;
 using std::swap;
 
-ReplayGame::ReplayGame(int16_t replay_id):
-        _state(NEW),
-        _resource("replays", "NLRP", replay_id),
-        _data(_resource.data()),
-        _random_seed{_data.global_seed},
-        _scenario(GetScenarioPtrFromChapter(_data.chapter_id)),
-        _game_result(NO_GAME) { }
+ReplayGame::ReplayGame(int16_t replay_id)
+        : _state(NEW),
+          _resource("replays", "NLRP", replay_id),
+          _data(_resource.data()),
+          _random_seed{_data.global_seed},
+          _level(_data.chapter_id - 1),
+          _game_result(NO_GAME),
+          _input_source(&_data) {}
 
-ReplayGame::~ReplayGame() { }
+ReplayGame::~ReplayGame() {}
 
 void ReplayGame::become_front() {
     switch (_state) {
-      case NEW:
-        _state = FADING_OUT;
-        stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::kBlack, 1e6, false, NULL));
-        break;
+        case NEW:
+            _state = FADING_OUT;
+            stack()->push(
+                    new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
+            break;
 
-      case FADING_OUT:
-        {
+        case FADING_OUT: {
             _state = PLAYING;
-            globals()->gInputSource.reset(new ReplayInputSource(&_data));
             swap(_random_seed, g.random);
             _game_result = NO_GAME;
-            _seconds = 0;
-            stack()->push(new MainPlay(_scenario, true, true, &_game_result, &_seconds));
-        }
-        break;
+            stack()->push(new MainPlay(_level, true, &_input_source, true, &_game_result));
+        } break;
 
-      case PLAYING:
-        swap(_random_seed, g.random);
-        globals()->gInputSource.reset();
-        stack()->pop(this);
-        break;
+        case PLAYING:
+            swap(_random_seed, g.random);
+            stack()->pop(this);
+            break;
     }
 }
 

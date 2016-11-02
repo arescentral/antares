@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
+#include "game/sys.hpp"
 
 using sfz::BytesSlice;
 using sfz::Exception;
@@ -41,9 +42,9 @@ static const char kFactoryScenarioIdentifier[] = "com.biggerplanet.ares";
 
 const sfz::String application_path();
 
-static unique_ptr<MappedFile> load_first(sfz::StringSlice resource_path,
-                                         const std::initializer_list<PrintItem>& dirs) {
-    for (const auto& dir: dirs) {
+static unique_ptr<MappedFile> load_first(
+        sfz::StringSlice resource_path, const std::initializer_list<PrintItem>& dirs) {
+    for (const auto& dir : dirs) {
         String path(sfz::format("{0}/{1}", dir, resource_path));
         if (path::isfile(path)) {
             return unique_ptr<MappedFile>(new MappedFile(path));
@@ -53,20 +54,21 @@ static unique_ptr<MappedFile> load_first(sfz::StringSlice resource_path,
 }
 
 static unique_ptr<MappedFile> load(sfz::StringSlice resource_path) {
-    return load_first(resource_path, {
-        format("{0}/{1}", dirs().scenarios, Preferences::preferences()->scenario_identifier()),
-        format("{0}/{1}", dirs().scenarios, kFactoryScenarioIdentifier),
-        application_path(),
-    });
+    return load_first(
+            resource_path,
+            {
+                    format("{0}/{1}", dirs().scenarios, sys.prefs->scenario_identifier()),
+                    format("{0}/{1}", dirs().scenarios, kFactoryScenarioIdentifier),
+                    application_path(),
+            });
 }
 
-Resource::Resource(const StringSlice& type, const StringSlice& extension, int id):
-        Resource(format("{0}/{1}.{2}", type, id, extension)) { }
+Resource::Resource(const StringSlice& type, const StringSlice& extension, int id)
+        : Resource(format("{0}/{1}.{2}", type, id, extension)) {}
 
-Resource::Resource(const sfz::PrintItem& resource_path):
-        _file(load(String(resource_path))) { }
+Resource::Resource(const sfz::PrintItem& resource_path) : _file(load(String(resource_path))) {}
 
-Resource::~Resource() { }
+Resource::~Resource() {}
 
 BytesSlice Resource::data() const {
     return _file->data();

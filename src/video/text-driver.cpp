@@ -18,16 +18,17 @@
 
 #include "video/text-driver.hpp"
 
-#include <algorithm>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <strings.h>
+#include <algorithm>
 #include <algorithm>
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
 #include "drawing/pix-map.hpp"
 #include "game/globals.hpp"
+#include "game/sys.hpp"
 #include "game/time.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
@@ -36,7 +37,6 @@
 using sfz::Optional;
 using sfz::PrintItem;
 using sfz::PrintTarget;
-using sfz::ScopedFd;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::dec;
@@ -47,7 +47,9 @@ using std::make_pair;
 using std::max;
 using std::min;
 using std::pair;
+using std::unique_ptr;
 using std::vector;
+namespace path = sfz::path;
 namespace utf8 = sfz::utf8;
 
 namespace antares {
@@ -75,61 +77,57 @@ void print_to(PrintTarget target, HexColor color) {
 
 class TextVideoDriver::TextureImpl : public Texture::Impl {
   public:
-    TextureImpl(PrintItem name, TextVideoDriver& driver, Size size):
-            _name(name),
-            _driver(driver),
-            _size(size) { }
+    TextureImpl(PrintItem name, TextVideoDriver& driver, Size size)
+            : _name(name), _driver(driver), _size(size) {}
 
     virtual StringSlice name() const { return _name; }
 
     virtual void draw(const Rect& draw_rect) const {
-        if (!world.intersects(draw_rect)) {
+        if (!world().intersects(draw_rect)) {
             return;
         }
         PrintItem args[] = {
-            draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
-            _name,
+                draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom, _name,
         };
         _driver.log("draw", args);
     }
 
     virtual void draw_cropped(const Rect& dest, const Rect& source, const RgbColor& tint) const {
-        if (!world.intersects(dest)) {
+        if (!world().intersects(dest)) {
             return;
         }
         if (source.size() == dest.size()) {
             PrintItem args[] = {
-                dest.left, dest.top, dest.right, dest.bottom,
-                source.left, source.top, hex(tint), _name,
+                    dest.left,   dest.top,   dest.right, dest.bottom,
+                    source.left, source.top, hex(tint),  _name,
             };
             _driver.log("crop", args);
         } else {
             PrintItem args[] = {
-                dest.left, dest.top, dest.right, dest.bottom,
-                source.left, source.top, source.right, source.bottom, hex(tint), _name,
+                    dest.left,  dest.top,     dest.right,    dest.bottom, source.left,
+                    source.top, source.right, source.bottom, hex(tint),   _name,
             };
             _driver.log("crop", args);
         }
     }
 
     virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const {
-        if (!world.intersects(draw_rect)) {
+        if (!world().intersects(draw_rect)) {
             return;
         }
         PrintItem args[] = {
-            draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
-            hex(tint), _name,
+                draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom, hex(tint), _name,
         };
         _driver.log("tint", args);
     }
 
     virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const {
-        if (!world.intersects(draw_rect)) {
+        if (!world().intersects(draw_rect)) {
             return;
         }
         PrintItem args[] = {
-            draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
-            hex(color), frac, _name,
+                draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
+                hex(color),     frac,          _name,
         };
         _driver.log("static", args);
     }
@@ -137,12 +135,12 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
     virtual void draw_outlined(
             const Rect& draw_rect, const RgbColor& outline_color,
             const RgbColor& fill_color) const {
-        if (!world.intersects(draw_rect)) {
+        if (!world().intersects(draw_rect)) {
             return;
         }
         PrintItem args[] = {
-            draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
-            hex(outline_color), hex(fill_color), _name,
+                draw_rect.left,     draw_rect.top,   draw_rect.right, draw_rect.bottom,
+                hex(outline_color), hex(fill_color), _name,
         };
         _driver.log("outline", args);
     }
@@ -150,28 +148,27 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
     virtual const Size& size() const { return _size; }
 
   private:
-    String _name;
+    String           _name;
     TextVideoDriver& _driver;
-    Size _size;
+    Size             _size;
 };
 
 class TextVideoDriver::MainLoop : public EventScheduler::MainLoop {
   public:
-    MainLoop(TextVideoDriver& driver, const Optional<String>& output_dir, Card* initial):
-            _driver(driver),
-            _output_dir(output_dir),
-            _stack(initial) { }
+    MainLoop(TextVideoDriver& driver, const Optional<String>& output_dir, Card* initial)
+            : _driver(driver), _output_dir(output_dir), _stack(initial) {}
 
-    bool takes_snapshots() {
-        return _output_dir.has();
+    bool takes_snapshots() { return _output_dir.has(); }
+
+    void snapshot(wall_ticks ticks) {
+        snapshot_to(format("screens/{0}.txt", dec(ticks.time_since_epoch().count(), 6)));
     }
 
-    void snapshot(int64_t ticks) {
-        String dir(format("{0}/screens", *_output_dir));
-        makedirs(dir, 0755);
-        String path(format("{0}/{1}.txt", dir, dec(ticks, 6)));
-        ScopedFd file(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-        write(file, utf8::encode(_driver._log));
+    void snapshot_to(PrintItem relpath) {
+        String path(format("{0}/{1}", *_output_dir, relpath));
+        makedirs(path::dirname(path), 0755);
+        sfz::ScopedFd file(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
+        write(file, sfz::Bytes(utf8::encode(_driver._log)));
     }
 
     void draw() {
@@ -179,20 +176,17 @@ class TextVideoDriver::MainLoop : public EventScheduler::MainLoop {
         _driver._last_args.clear();
         _stack.top()->draw();
     }
-    bool done() const { return _stack.empty(); }
+    bool  done() const { return _stack.empty(); }
     Card* top() const { return _stack.top(); }
 
   private:
     TextVideoDriver& _driver;
     Optional<String> _output_dir;
-    CardStack _stack;
+    CardStack        _stack;
 };
 
-TextVideoDriver::TextVideoDriver(
-        Size screen_size, EventScheduler& scheduler, const Optional<String>& output_dir):
-        _size(screen_size),
-        _scheduler(scheduler),
-        _output_dir(output_dir) { }
+TextVideoDriver::TextVideoDriver(Size screen_size, const Optional<String>& output_dir)
+        : _size(screen_size), _output_dir(output_dir) {}
 
 int TextVideoDriver::scale() const {
     return 1;
@@ -203,7 +197,7 @@ Texture TextVideoDriver::texture(sfz::PrintItem name, const PixMap& content) {
 }
 
 void TextVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
-    if (!world.intersects(rect)) {
+    if (!world().intersects(rect)) {
         return;
     }
     PrintItem args[] = {rect.left, rect.top, rect.right, rect.bottom, hex(color)};
@@ -226,7 +220,7 @@ void TextVideoDriver::draw_line(const Point& from, const Point& to, const RgbCol
 }
 
 void TextVideoDriver::draw_triangle(const Rect& rect, const RgbColor& color) {
-    if (!world.intersects(rect)) {
+    if (!world().intersects(rect)) {
         return;
     }
     PrintItem args[] = {rect.left, rect.top, rect.right, rect.bottom, hex(color)};
@@ -234,7 +228,7 @@ void TextVideoDriver::draw_triangle(const Rect& rect, const RgbColor& color) {
 }
 
 void TextVideoDriver::draw_diamond(const Rect& rect, const RgbColor& color) {
-    if (!world.intersects(rect)) {
+    if (!world().intersects(rect)) {
         return;
     }
     PrintItem args[] = {rect.left, rect.top, rect.right, rect.bottom, hex(color)};
@@ -242,16 +236,45 @@ void TextVideoDriver::draw_diamond(const Rect& rect, const RgbColor& color) {
 }
 
 void TextVideoDriver::draw_plus(const Rect& rect, const RgbColor& color) {
-    if (!world.intersects(rect)) {
+    if (!world().intersects(rect)) {
         return;
     }
     PrintItem args[] = {rect.left, rect.top, rect.right, rect.bottom, hex(color)};
     log("plus", args);
 }
 
-void TextVideoDriver::loop(Card* initial) {
+void TextVideoDriver::loop(Card* initial, EventScheduler& scheduler) {
+    _scheduler = &scheduler;
     MainLoop loop(*this, _output_dir, initial);
-    _scheduler.loop(loop);
+    _scheduler->loop(loop);
+    _scheduler = nullptr;
+}
+
+namespace {
+
+class DummyCard : public Card {
+  public:
+    void become_front() {
+        if (!_inited) {
+            sys_init();
+            _inited = true;
+        }
+    }
+
+  private:
+    bool _inited = false;
+};
+
+}  // namespace
+
+void TextVideoDriver::capture(vector<pair<unique_ptr<Card>, String>>& pix) {
+    MainLoop loop(*this, _output_dir, new DummyCard);
+    for (auto& p : pix) {
+        loop.top()->stack()->push(p.first.release());
+        loop.draw();
+        loop.snapshot_to(p.second);
+        loop.top()->stack()->pop(loop.top());
+    }
 }
 
 void TextVideoDriver::add_arg(StringSlice arg, std::vector<std::pair<size_t, size_t>>& args) {

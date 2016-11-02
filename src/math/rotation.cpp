@@ -21,6 +21,7 @@
 #include <sfz/sfz.hpp>
 
 #include "data/resource.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 #include "math/macros.hpp"
 
@@ -30,81 +31,70 @@ using sfz::read;
 
 namespace antares {
 
-const int kRotTableSize = 720;
-static ANTARES_GLOBAL int32_t gRotTable[kRotTableSize];
-
-void RotationInit() {
-    Resource rsrc("rotation-table");
-    BytesSlice in(rsrc.data());
-    read(in, gRotTable, kRotTableSize);
-    if (!in.empty()) {
-        throw Exception("didn't consume all of rotation data");
-    }
-}
-
-void GetRotPoint(int32_t *x, int32_t *y, int32_t rotpos) {
+void GetRotPoint(Fixed* x, Fixed* y, int32_t rotpos) {
     int32_t* i;
 
-    i = gRotTable + rotpos * 2L;
-    *x = *i;
+    i  = sys.rot_table + rotpos * 2L;
+    *x = Fixed::from_val(*i);
     i++;
-    *y = *i;
+    *y = Fixed::from_val(*i);
 }
 
 int32_t GetAngleFromVector(int32_t x, int32_t y) {
     int32_t* h;
     int32_t* v;
-    int32_t a, b, test = 0, best = 0, whichBest = -1, whichAngle;
+    int32_t  a, b, test = 0, best = 0, whichBest = -1, whichAngle;
 
     a = x;
     b = y;
 
-    if ( a < 0) a = -a;
-    if ( b < 0) b = -b;
-    if ( b < a)
-    {
-        h = gRotTable + ROT_45 * 2;
+    if (a < 0)
+        a = -a;
+    if (b < 0)
+        b = -b;
+    if (b < a) {
+        h          = sys.rot_table + ROT_45 * 2;
         whichAngle = ROT_45;
-        v = h + 1;
-        do
-        {
-            test = (*v * a) + (*h * b); // we're adding b/c in my table 45-90 degrees, h < 0
-            if ( test < 0) test = -test;
-            if (( whichBest < 0)  || ( test < best))
-            {
-                best = test;
+        v          = h + 1;
+        do {
+            test = (*v * a) + (*h * b);  // we're adding b/c in my table 45-90 degrees, h < 0
+            if (test < 0)
+                test = -test;
+            if ((whichBest < 0) || (test < best)) {
+                best      = test;
                 whichBest = whichAngle;
             }
             h += 2;
             v += 2;
             whichAngle++;
-        } while ( ( test == best) && ( whichAngle <= ROT_90));
-    } else
-    {
-        h = gRotTable + ROT_0 * 2;
+        } while ((test == best) && (whichAngle <= ROT_90));
+    } else {
+        h          = sys.rot_table + ROT_0 * 2;
         whichAngle = ROT_0;
-        v = h + 1;
-        do
-        {
+        v          = h + 1;
+        do {
             test = (*v * a) + (*h * b);
-            if ( test < 0) test = -test;
-            if (( whichBest < 0)  || ( test < best))
-            {
-                best = test;
+            if (test < 0)
+                test = -test;
+            if ((whichBest < 0) || (test < best)) {
+                best      = test;
                 whichBest = whichAngle;
             }
             h += 2;
             v += 2;
             whichAngle++;
-        } while (( test == best) &&  ( whichAngle <= ROT_45));
+        } while ((test == best) && (whichAngle <= ROT_45));
     }
-    if ( x > 0)
-    {
-        if ( y < 0) whichBest = whichBest + ROT_180;
-        else whichBest = ROT_POS - whichBest;
-    } else if ( y < 0) whichBest = ROT_180 - whichBest;
-    if ( whichBest == ROT_POS) whichBest = ROT_0;
-    return ( whichBest);
+    if (x > 0) {
+        if (y < 0)
+            whichBest = whichBest + ROT_180;
+        else
+            whichBest = ROT_POS - whichBest;
+    } else if (y < 0)
+        whichBest = ROT_180 - whichBest;
+    if (whichBest == ROT_POS)
+        whichBest = ROT_0;
+    return (whichBest);
 }
 
 }  // namespace antares

@@ -29,6 +29,7 @@
 #include "game/motion.hpp"
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
+#include "game/vector.hpp"
 #include "lang/defines.hpp"
 #include "sound/driver.hpp"
 
@@ -36,7 +37,9 @@ namespace antares {
 
 static ANTARES_GLOBAL aresGlobalType* gAresGlobal;
 
-ANTARES_GLOBAL GlobalState g;
+ANTARES_GLOBAL GlobalState& g = head;
+ANTARES_GLOBAL GlobalState head;
+ANTARES_GLOBAL GlobalState tail;
 
 aresGlobalType* globals() {
     return gAresGlobal;
@@ -45,27 +48,14 @@ aresGlobalType* globals() {
 void init_globals() {
     gAresGlobal = new aresGlobalType;
 
-    g.time = 0;
-    g.ship = Handle<SpaceObject>(0);
-    g.closest = Handle<SpaceObject>(0);
+    g.time     = game_ticks();
+    g.ship     = Handle<SpaceObject>(0);
+    g.closest  = Handle<SpaceObject>(0);
     g.farthest = Handle<SpaceObject>(0);
-
-    Keys::init();
-    Gamepad::init();
 }
 
-aresGlobalType::aresGlobalType() {
-    gCenterScaleH = 0;
-    gCenterScaleV = 0;
-    gZoomMode = kTimesTwoZoom;
-    gInstrumentTop = 0;
-    gAutoPilotOff = true;
-    keyMask = 0;
+aresGlobalType::aresGlobalType() {}
 
-    hotKeyDownTime = -1;
-}
-
-aresGlobalType::~aresGlobalType() {
-}
+aresGlobalType::~aresGlobalType() {}
 
 }  // namespace antares

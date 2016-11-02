@@ -19,7 +19,10 @@
 #ifndef ANTARES_GAME_PLAYER_SHIP_HPP_
 #define ANTARES_GAME_PLAYER_SHIP_HPP_
 
-#include "data/space-object.hpp"
+#include "config/keys.hpp"
+#include "data/base-object.hpp"
+#include "game/cursor.hpp"
+#include "ui/event.hpp"
 
 namespace antares {
 
@@ -34,38 +37,45 @@ class PlayerShip : public EventReceiver {
     virtual void key_down(const KeyDownEvent& event);
     virtual void key_up(const KeyUpEvent& event);
 
+    virtual void mouse_down(const MouseDownEvent& event);
+    virtual void mouse_up(const MouseUpEvent& event);
+    virtual void mouse_move(const MouseMoveEvent& event);
+
     virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
     virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
     virtual void gamepad_stick(const GamepadStickEvent& event);
 
-    void update(int64_t timePass, const GameCursor& cursor, bool enter_message);
+    void update(bool enter_message);
 
-    bool show_select() const;
-    bool show_target() const;
+    bool    show_select() const;
+    bool    show_target() const;
     int32_t control_direction() const;
-    bool show_right_stick() const;
-    int32_t goal_direction() const;
+
+    GameCursor&       cursor() { return _cursor; }
+    const GameCursor& cursor() const { return _cursor; }
 
   private:
     bool active() const;
 
     uint32_t gTheseKeys;
     uint32_t _gamepad_keys;
-    uint32_t gLastKeys;
-    KeyMap _keys;
+    uint32_t _key_presses;
+    uint32_t _key_releases;
+    KeyMap   _keys;
 
     enum GamepadState {
-        NO_BUMPER               = 0,
-        SELECT_BUMPER           = 1,
-        TARGET_BUMPER           = 2,
-        EITHER_BUMPER           = SELECT_BUMPER | TARGET_BUMPER,
-        OVERRIDE                = 4,
-        SELECT_BUMPER_OVERRIDE  = SELECT_BUMPER | OVERRIDE,
-        TARGET_BUMPER_OVERRIDE  = TARGET_BUMPER | OVERRIDE,
+        NO_BUMPER              = 0,
+        SELECT_BUMPER          = 1,
+        TARGET_BUMPER          = 2,
+        EITHER_BUMPER          = SELECT_BUMPER | TARGET_BUMPER,
+        OVERRIDE               = 4,
+        SELECT_BUMPER_OVERRIDE = SELECT_BUMPER | OVERRIDE,
+        TARGET_BUMPER_OVERRIDE = TARGET_BUMPER | OVERRIDE,
     };
     GamepadState _gamepad_state;
-    bool _control_active;
-    int32_t _control_direction;
+    bool         _control_active;
+    int32_t      _control_direction;
+    GameCursor   _cursor;
 };
 
 void ResetPlayerShip(Handle<SpaceObject> which);
@@ -74,11 +84,11 @@ void SetPlayerSelectShip(
         Handle<SpaceObject> whichShip, bool target, Handle<Admiral> admiralNumber);
 void ChangePlayerShipNumber(Handle<Admiral> whichAdmiral, Handle<SpaceObject> newShip);
 void TogglePlayerAutoPilot(Handle<SpaceObject> theShip);
-bool IsPlayerShipOnAutoPilot( void);
+bool IsPlayerShipOnAutoPilot(void);
 void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral);
 void PlayerShipBodyExpire(Handle<SpaceObject> theShip);
-void HandleTextMessageKeys(const KeyMap&, const KeyMap&, bool *);
+void HandleTextMessageKeys(const KeyMap&, const KeyMap&, bool*);
 
 }  // namespace antares
 
-#endif // ANTARES_GAME_PLAYER_SHIP_HPP_
+#endif  // ANTARES_GAME_PLAYER_SHIP_HPP_

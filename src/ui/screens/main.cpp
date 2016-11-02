@@ -21,8 +21,8 @@
 #include "config/preferences.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
+#include "game/level.hpp"
 #include "game/main.hpp"
-#include "game/scenario-maker.hpp"
 #include "game/time.hpp"
 #include "math/random.hpp"
 #include "sound/music.hpp"
@@ -40,35 +40,27 @@ namespace antares {
 
 namespace {
 
-const int64_t kMainDemoTimeOutTime = 30e6;
-const int kTitleTextScrollWidth = 450;
+const secs kMainDemoTimeOutTime  = secs(30);
+const int  kTitleTextScrollWidth = 450;
 
 }  // namespace
 
-MainScreen::MainScreen():
-        InterfaceScreen("main", world, true),
-        _state(NORMAL) { }
+MainScreen::MainScreen() : InterfaceScreen("main", {0, 0, 640, 480}, true), _state(NORMAL) {}
 
-MainScreen::~MainScreen() { }
+MainScreen::~MainScreen() {}
 
 void MainScreen::become_front() {
     switch (_state) {
-      case NORMAL:
-        InterfaceScreen::become_front();
-        if (Preferences::preferences()->play_idle_music() && !SongIsPlaying()) {
-            LoadSong(kTitleSongID);
-            SetSongVolume(kMaxMusicVolume);
-            PlaySong();
-        }
-        _next_timer = now_usecs() + kMainDemoTimeOutTime;
-        break;
-      case QUITTING:
-        stack()->pop(this);
-        break;
+        case NORMAL:
+            InterfaceScreen::become_front();
+            sys.music.play(Music::IDLE, kTitleSongID);
+            _next_timer = (now() + kMainDemoTimeOutTime);
+            break;
+        case QUITTING: stack()->pop(this); break;
     }
 }
 
-bool MainScreen::next_timer(int64_t& time) {
+bool MainScreen::next_timer(wall_time& time) {
     time = _next_timer;
     return true;
 }
@@ -77,7 +69,7 @@ void MainScreen::fire_timer() {
     Randomize(1);
     size_t demo = rand() % (_replays.size() + 1);
     if (demo == _replays.size()) {
-        stack()->push(new ScrollTextScreen(5600, kTitleTextScrollWidth, 15.0));
+        stack()->push(new ScrollTextScreen(5600, kTitleTextScrollWidth, kSlowScrollInterval));
     } else {
         stack()->push(new ReplayGame(_replays.at(demo)));
     }
@@ -85,32 +77,32 @@ void MainScreen::fire_timer() {
 
 void MainScreen::mouse_down(const MouseDownEvent& event) {
     InterfaceScreen::mouse_down(event);
-    _next_timer = now_usecs() + kMainDemoTimeOutTime;
+    _next_timer = (now() + kMainDemoTimeOutTime);
 }
 
 void MainScreen::mouse_up(const MouseUpEvent& event) {
     InterfaceScreen::mouse_up(event);
-    _next_timer = now_usecs() + kMainDemoTimeOutTime;
+    _next_timer = (now() + kMainDemoTimeOutTime);
 }
 
 void MainScreen::key_down(const KeyDownEvent& event) {
     InterfaceScreen::key_down(event);
-    _next_timer = now_usecs() + kMainDemoTimeOutTime;
+    _next_timer = (now() + kMainDemoTimeOutTime);
 }
 
 void MainScreen::key_up(const KeyUpEvent& event) {
     InterfaceScreen::key_up(event);
-    _next_timer = now_usecs() + kMainDemoTimeOutTime;
+    _next_timer = (now() + kMainDemoTimeOutTime);
 }
 
 void MainScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
     InterfaceScreen::gamepad_button_down(event);
-    _next_timer = now_usecs() + kMainDemoTimeOutTime;
+    _next_timer = (now() + kMainDemoTimeOutTime);
 }
 
 void MainScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
     InterfaceScreen::gamepad_button_up(event);
-    _next_timer = now_usecs() + kMainDemoTimeOutTime;
+    _next_timer = (now() + kMainDemoTimeOutTime);
 }
 
 void MainScreen::adjust_interface() {
@@ -127,35 +119,28 @@ void MainScreen::adjust_interface() {
 
 void MainScreen::handle_button(antares::Button& button) {
     switch (button.id) {
-      case QUIT:
-        // 1-second fade-out.
-        _state = QUITTING;
-        stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::kBlack, 1e6, false, NULL));
-        break;
+        case QUIT:
+            // 1-second fade-out.
+            _state = QUITTING;
+            stack()->push(
+                    new ColorFade(ColorFade::TO_COLOR, RgbColor::black(), secs(1), false, NULL));
+            break;
 
-      case DEMO:
-        stack()->push(new ReplayGame(_replays.at(rand() % _replays.size())));
-        break;
+        case DEMO: stack()->push(new ReplayGame(_replays.at(rand() % _replays.size()))); break;
 
-      case REPLAY_INTRO:
-        stack()->push(new ScrollTextScreen(5600, kTitleTextScrollWidth, 15.0));
-        break;
+        case REPLAY_INTRO:
+            stack()->push(new ScrollTextScreen(5600, kTitleTextScrollWidth, kSlowScrollInterval));
+            break;
 
-      case START_NEW_GAME:
-        stack()->push(new SoloGame);
-        break;
+        case START_NEW_GAME: stack()->push(new SoloGame); break;
 
-      case START_NETWORK_GAME:
-        throw Exception("Networked games not yet implemented.");
-        break;
+        case START_NETWORK_GAME: throw Exception("Networked games not yet implemented."); break;
 
-      case ABOUT_ARES:
-        stack()->push(new ScrollTextScreen(6500, 540, 30.0));
-        break;
+        case ABOUT_ARES:
+            stack()->push(new ScrollTextScreen(6500, 540, kFastScrollInterval));
+            break;
 
-      case OPTIONS:
-        stack()->push(new OptionsScreen);
-        break;
+        case OPTIONS: stack()->push(new OptionsScreen); break;
     }
 }
 

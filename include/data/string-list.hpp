@@ -19,8 +19,8 @@
 #ifndef ANTARES_DATA_STRING_LIST_HPP_
 #define ANTARES_DATA_STRING_LIST_HPP_
 
-#include <vector>
 #include <sfz/sfz.hpp>
+#include <vector>
 
 namespace antares {
 
@@ -29,15 +29,22 @@ class StringList {
     StringList(int id);
 
     ssize_t index_of(const sfz::StringSlice& result) const;
-    size_t size() const;
+    size_t             size() const;
     const sfz::String& at(size_t index) const;
 
   private:
+    friend std::vector<sfz::String> to_vector(StringList&& strl);
     std::vector<sfz::String> _strings;
 
     DISALLOW_COPY_AND_ASSIGN(StringList);
 };
 
+inline std::vector<sfz::String> to_vector(StringList&& strl) {
+    std::vector<sfz::String> result;
+    std::swap(result, strl._strings);
+    return result;
+}
+
 }  // namespace antares
 
-#endif // ANTARES_DATA_STRING_LIST_HPP_
+#endif  // ANTARES_DATA_STRING_LIST_HPP_

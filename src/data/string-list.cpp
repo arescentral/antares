@@ -48,33 +48,27 @@ struct StringListVisitor : public JsonDefaultVisitor {
         DONE,
     };
 
-    StringListVisitor(State& state, vector<String>& vec):
-            _state(state),
-            _vec(vec) {
+    StringListVisitor(State& state, vector<String>& vec) : _state(state), _vec(vec) {
         _state = NEW;
     }
-    
+
     virtual void visit_array(const std::vector<Json>& value) const {
         switch (_state) {
-          case NEW:
-            _state = ARRAY;
-            for (size_t i = 0; i < value.size(); ++i) {
-                value[i].accept(*this);
-            }
-            _state = DONE;
-            break;
-          default:
-            return JsonDefaultVisitor::visit_array(value);
+            case NEW:
+                _state = ARRAY;
+                for (size_t i = 0; i < value.size(); ++i) {
+                    value[i].accept(*this);
+                }
+                _state = DONE;
+                break;
+            default: return JsonDefaultVisitor::visit_array(value);
         }
     }
 
     virtual void visit_string(const StringSlice& value) const {
         switch (_state) {
-          case ARRAY:
-            _vec.emplace_back(value);
-            break;
-          default:
-            return JsonDefaultVisitor::visit_string(value);
+            case ARRAY: _vec.emplace_back(value); break;
+            default: return JsonDefaultVisitor::visit_string(value);
         }
     }
 
@@ -82,7 +76,7 @@ struct StringListVisitor : public JsonDefaultVisitor {
         throw Exception(format("got unexpected JSON {0}", type));
     }
 
-    State& _state;
+    State&          _state;
     vector<String>& _vec;
 };
 
@@ -90,8 +84,8 @@ struct StringListVisitor : public JsonDefaultVisitor {
 
 StringList::StringList(int id) {
     Resource rsrc("strings", "json", id);
-    String in(utf8::decode(rsrc.data()));
-    Json strings;
+    String   in(utf8::decode(rsrc.data()));
+    Json     strings;
     if (!string_to_json(in, strings)) {
         throw Exception(sfz::format("Couldn't parse strings/{0}.json", id));
     }

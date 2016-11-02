@@ -26,45 +26,43 @@
 namespace antares {
 
 enum {
-    kCheatActiveBit     = 0x00000001,
-    kAutoPlayBit        = 0x00000002,
-    kNameObjectBit      = 0x00000004,
-    kObserverBit        = 0x00000008,
-    kBuildFastBit       = 0x00000010,
-    kRaisePayRateBit    = 0x00000020,
-    kLowerPayRateBit    = 0x00000040,
-    kCheatBit8          = 0x00000080,
-    kCheatBit9          = 0x00000100,
-    kCheatBit10         = 0x00000200,
-    kCheatBit11         = 0x00000400,
-    kCheatBit12         = 0x00000800,
-    kCheatBit13         = 0x00001000,
-    kCheatBit14         = 0x00002000,
-    kCheatBit15         = 0x00004000,
-    kCheatBit16         = 0x00008000,
-    kCheatBit17         = 0x00010000,
-    kCheatBit18         = 0x00020000,
-    kCheatBit19         = 0x00040000,
-    kCheatBit20         = 0x00080000,
-    kCheatBit21         = 0x00100000,
-    kCheatBit22         = 0x00200000,
-    kCheatBit23         = 0x00400000,
-    kCheatBit24         = 0x00800000,
-    kCheatBit25         = 0x01000000,
-    kCheatBit26         = 0x02000000,
-    kCheatBit27         = 0x04000000,
-    kCheatBit28         = 0x08000000,
-    kCheatBit29         = 0x10000000,
-    kCheatBit30         = 0x20000000,
-    kCheatBit31         = 0x40000000,
-    kCheatBit32         = 0x80000000,
+    kCheatActiveBit  = 0x00000001,
+    kAutoPlayBit     = 0x00000002,
+    kNameObjectBit   = 0x00000004,
+    kObserverBit     = 0x00000008,
+    kBuildFastBit    = 0x00000010,
+    kRaisePayRateBit = 0x00000020,
+    kLowerPayRateBit = 0x00000040,
+    kCheatBit8       = 0x00000080,
+    kCheatBit9       = 0x00000100,
+    kCheatBit10      = 0x00000200,
+    kCheatBit11      = 0x00000400,
+    kCheatBit12      = 0x00000800,
+    kCheatBit13      = 0x00001000,
+    kCheatBit14      = 0x00002000,
+    kCheatBit15      = 0x00004000,
+    kCheatBit16      = 0x00008000,
+    kCheatBit17      = 0x00010000,
+    kCheatBit18      = 0x00020000,
+    kCheatBit19      = 0x00040000,
+    kCheatBit20      = 0x00080000,
+    kCheatBit21      = 0x00100000,
+    kCheatBit22      = 0x00200000,
+    kCheatBit23      = 0x00400000,
+    kCheatBit24      = 0x00800000,
+    kCheatBit25      = 0x01000000,
+    kCheatBit26      = 0x02000000,
+    kCheatBit27      = 0x04000000,
+    kCheatBit28      = 0x08000000,
+    kCheatBit29      = 0x10000000,
+    kCheatBit30      = 0x20000000,
+    kCheatBit31      = 0x40000000,
+    kCheatBit32      = 0x80000000,
 };
 
-void AresCheatInit();
-void CleanupAresCheat();
 int16_t GetCheatNumFromString(const sfz::StringSlice& string);
 void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer);
 
 }  // namespace antares
 
-#endif // ANTARES_GAME_CHEAT_HPP_
+#endif  // ANTARES_GAME_CHEAT_HPP_

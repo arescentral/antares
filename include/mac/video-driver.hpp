@@ -20,14 +20,13 @@
 #define ANTARES_MAC_VIDEO_DRIVER_HPP_
 
 #include <queue>
-#include <stack>
 #include <sfz/sfz.hpp>
+#include <stack>
 
 #include "config/keys.hpp"
 #include "drawing/color.hpp"
 #include "mac/c/CocoaVideoDriver.h"
 #include "math/geometry.hpp"
-#include "ui/event-tracker.hpp"
 #include "video/opengl-driver.hpp"
 
 namespace antares {
@@ -36,43 +35,37 @@ class Event;
 
 class CocoaVideoDriver : public OpenGlVideoDriver {
   public:
-    CocoaVideoDriver(bool fullscreen, Size screen_size);
+    CocoaVideoDriver();
 
-    virtual Size viewport_size() const { return _viewport_size; }
-    virtual Size screen_size() const { return _screen_size; }
+    virtual Size viewport_size() const;
+    virtual Size screen_size() const;
 
-    virtual bool button(int which);
-    virtual Point get_mouse();
-    virtual void get_keys(KeyMap* k);
+    virtual Point     get_mouse();
     virtual InputMode input_mode() const;
 
-    virtual int ticks() const;
-    virtual int usecs() const;
-    virtual int64_t double_click_interval_usecs() const;
+    virtual wall_time now() const;
 
     void loop(Card* initial);
 
   private:
-    const Size _screen_size;
-    Size _viewport_size;
-    const bool _fullscreen;
-    int64_t _start_time;
+    static wall_time _now();
 
     struct EventBridge;
 
     class EventTranslator {
       public:
-        EventTranslator(int32_t screen_width, int32_t screen_height):
-                _c_obj(antares_event_translator_create(screen_width, screen_height)) { }
+        EventTranslator() : _c_obj(antares_event_translator_create()) {}
         ~EventTranslator() { antares_event_translator_destroy(_c_obj); }
         AntaresEventTranslator* c_obj() const { return _c_obj; }
+
       private:
         AntaresEventTranslator* _c_obj;
         DISALLOW_COPY_AND_ASSIGN(EventTranslator);
     };
     EventTranslator _translator;
 
-    EventTracker _event_tracker;
+    InputMode      _input_mode = KEYBOARD_MOUSE;
+    AntaresWindow* _window     = nullptr;
 
     DISALLOW_COPY_AND_ASSIGN(CocoaVideoDriver);
 };

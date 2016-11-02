@@ -19,6 +19,7 @@
 #ifndef ANTARES_MATH_MACROS_HPP_
 #define ANTARES_MATH_MACROS_HPP_
 
+#include "math/fixed.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
@@ -32,13 +33,15 @@ inline T ABS(T x) {
     }
 }
 
-inline int mClipCode(int x, int y, const Rect& bounds) {
-    return ((x < bounds.left) << 3)
-        | ((x > (bounds.right - 1)) << 2)
-        | ((y < bounds.top) << 1)
-        | (y > ( bounds.bottom - 1));
+template <>
+inline Fixed ABS(Fixed x) {
+    if (x >= Fixed::zero()) {
+        return x;
+    } else {
+        return -x;
+    }
 }
 
 }  // namespace antares
 
-#endif // ANTARES_MATH_MACROS_HPP_
+#endif  // ANTARES_MATH_MACROS_HPP_

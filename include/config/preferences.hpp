@@ -25,51 +25,16 @@
 
 namespace antares {
 
-class Preferences {
-  public:
-    static Preferences* preferences();
-
+struct Preferences {
     Preferences();
-    Preferences(const Preferences& other);
-    Preferences(Preferences&& other) = default;
-    Preferences& operator=(const Preferences& other);
-    Preferences& operator=(Preferences&& other) = default;
-    ~Preferences();
+    Preferences copy() const;
 
-    void reset();
-    void copy(const Preferences& preferences);
-
-    uint32_t key(size_t index) const;
-    bool play_idle_music() const;
-    bool play_music_in_game() const;
-    bool speech_on() const;
-    int volume() const;
-    bool fullscreen() const;
-    Size screen_size() const;
-    sfz::StringSlice scenario_identifier() const;
-
-    void set_key(size_t index, uint32_t key);
-    void set_play_idle_music(bool on);
-    void set_play_music_in_game(bool on);
-    void set_speech_on(bool on);
-    void set_volume(int volume);
-    void set_fullscreen(bool fullscreen);
-    void set_screen_size(Size size);
-    void set_screen_width(int32_t width);
-    void set_screen_height(int32_t height);
-    void set_scenario_identifier(sfz::StringSlice id);
-
-  private:
-    static std::unique_ptr<Preferences> _preferences;
-
-    int16_t             _key_map[44];
-    bool                _play_idle_music;
-    bool                _play_music_in_game;
-    bool                _speech_on;
-    int16_t             _volume;
-    bool                _fullscreen;
-    Size                _screen_size;
-    sfz::String         _scenario_identifier;
+    int16_t     keys[44];
+    bool        play_idle_music;
+    bool        play_music_in_game;
+    bool        speech_on;
+    int16_t     volume;
+    sfz::String scenario_identifier;
 };
 
 class PrefsDriver {
@@ -77,8 +42,22 @@ class PrefsDriver {
     PrefsDriver();
     virtual ~PrefsDriver();
 
-    virtual void load(Preferences* preferences) = 0;
-    virtual void save(const Preferences& preferences) = 0;
+    virtual const Preferences& get() const     = 0;
+    virtual void set(const Preferences& prefs) = 0;
+
+    uint32_t key(size_t index) const { return get().keys[index]; }
+    bool                play_idle_music() const { return get().play_idle_music; }
+    bool                play_music_in_game() const { return get().play_music_in_game; }
+    bool                speech_on() const { return get().speech_on; }
+    int                 volume() const { return get().volume; }
+    sfz::StringSlice    scenario_identifier() const { return get().scenario_identifier; }
+
+    void set_key(size_t index, uint32_t key);
+    void set_play_idle_music(bool on);
+    void set_play_music_in_game(bool on);
+    void set_speech_on(bool on);
+    void set_volume(int volume);
+    void set_scenario_identifier(sfz::StringSlice id);
 
     static PrefsDriver* driver();
 };
@@ -88,8 +67,8 @@ class NullPrefsDriver : public PrefsDriver {
     NullPrefsDriver();
     NullPrefsDriver(Preferences defaults);
 
-    virtual void load(Preferences* preferences);
-    virtual void save(const Preferences& preferences);
+    virtual const Preferences& get() const;
+    virtual void set(const Preferences& prefs);
 
   private:
     Preferences _saved;
@@ -97,4 +76,4 @@ class NullPrefsDriver : public PrefsDriver {
 
 }  // namespace antares
 
-#endif // ANTARES_CONFIG_PREFERENCES_HPP_
+#endif  // ANTARES_CONFIG_PREFERENCES_HPP_

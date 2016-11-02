@@ -20,13 +20,15 @@
 
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
+#include "data/plugin.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
 #include "game/admiral.hpp"
 #include "game/globals.hpp"
 #include "game/input-source.hpp"
+#include "game/level.hpp"
 #include "game/main.hpp"
-#include "game/scenario-maker.hpp"
+#include "game/sys.hpp"
 #include "sound/music.hpp"
 #include "ui/card.hpp"
 #include "ui/screens/debriefing.hpp"
@@ -39,71 +41,55 @@ using sfz::format;
 
 namespace antares {
 
-namespace {
+SoloGame::SoloGame() : _state(NEW), _game_result(NO_GAME) {}
 
-const int32_t kHackLevelMax = 26;
-
-}  // namespace
-
-SoloGame::SoloGame()
-        : _state(NEW),
-          _game_result(NO_GAME) { }
-
-SoloGame::~SoloGame() { }
+SoloGame::~SoloGame() {}
 
 void SoloGame::become_front() {
     switch (_state) {
-      case NEW:
-        _state = SELECT_LEVEL;
-        stack()->push(new SelectLevelScreen(&_cancelled, &_scenario));
-        break;
-
-      case SELECT_LEVEL:
-        _state = START_LEVEL;
-        if (_cancelled) {
-            _state = QUIT;
-            stack()->pop(this);
+        case NEW:
+            _state = SELECT_LEVEL;
+            stack()->push(new SelectLevelScreen(&_cancelled, &_level));
             break;
-        }
+
+        case SELECT_LEVEL:
+            _state = START_LEVEL;
+            if (_cancelled) {
+                _state = QUIT;
+                stack()->pop(this);
+                break;
+            }
         // else fall through.
 
-      case START_LEVEL:
-        _state = PROLOGUE;
-        if (_scenario->prologue_id() > 0) {
-            stack()->push(new ScrollTextScreen(_scenario->prologue_id(), 450, 15.0, 4002));
-            break;
-        }
+        case START_LEVEL:
+            _state = PROLOGUE;
+            if (_level->prologue_id() > 0) {
+                stack()->push(new ScrollTextScreen(
+                        _level->prologue_id(), 450, kSlowScrollInterval, 4002));
+                break;
+            }
         // else fall through
 
-      case PROLOGUE:
-      case RESTART_LEVEL:
-        _state = PLAYING;
-        _game_result = NO_GAME;
-        _seconds = 0;
-        globals()->gInputSource.reset();
-        stack()->push(new MainPlay(_scenario, false, true, &_game_result, &_seconds));
-        break;
+        case PROLOGUE:
+        case RESTART_LEVEL:
+            _state       = PLAYING;
+            _game_result = NO_GAME;
+            stack()->push(new MainPlay(_level, false, &_input_source, true, &_game_result));
+            break;
 
-      case PLAYING:
-        handle_game_result();
-        break;
+        case PLAYING: handle_game_result(); break;
 
-      case EPILOGUE:
-        epilogue_done();
-        break;
+        case EPILOGUE: epilogue_done(); break;
 
-      case QUIT:
-        stack()->pop(this);
-        break;
+        case QUIT: stack()->pop(this); break;
     }
 }
 
 void SoloGame::handle_game_result() {
     switch (_game_result) {
-      case WIN_GAME:
-        {
-            _state = EPILOGUE;
-            const int epilogue = _scenario->epilogue_id();
+        case WIN_GAME: {
+            _state             = EPILOGUE;
+            const int epilogue = _level->epilogue_id();
             if (epilogue > 0) {
                 // normal scrolltext song
                 int scroll_song = 4002;
@@ -111,49 +97,45 @@ void SoloGame::handle_game_result() {
                     // we win but no next level? Play triumph song
                     scroll_song = 4003;
                 }
-                stack()->push(new ScrollTextScreen(epilogue, 450, 15.0, scroll_song));
+                stack()->push(
+                        new ScrollTextScreen(epilogue, 450, kSlowScrollInterval, scroll_song));
             } else {
                 become_front();
             }
-        }
-        break;
+        } break;
 
-      case RESTART_GAME:
-        _state = RESTART_LEVEL;
-        become_front();
-        break;
+        case RESTART_GAME:
+            _state = RESTART_LEVEL;
+            become_front();
+            break;
 
-      case QUIT_GAME:
-        _state = QUIT;
-        become_front();
-        break;
+        case QUIT_GAME:
+            _state = QUIT;
+            become_front();
+            break;
 
-      default:
-        throw Exception(format("_play_again was invalid after PLAY_AGAIN ({0})", _play_again));
+        default:
+            throw Exception(format("_play_again was invalid after PLAY_AGAIN ({0})", _play_again));
     }
 }
 
 void SoloGame::epilogue_done() {
-    if (Preferences::preferences()->play_idle_music()) {
-        StopAndUnloadSong();
-    }
-
     if (g.next_level < 0) {
-        _scenario = NULL;
+        _level = Level::none();
     } else {
-        _scenario = GetScenarioPtrFromChapter(g.next_level);
+        _level = Handle<Level>(g.next_level - 1);
     }
 
-    if (_scenario != NULL) {
-        const int32_t chapter = _scenario->chapter_number();
+    if (_level.get()) {
+        const int32_t chapter = _level->chapter_number();
         if (chapter >= 0) {
             Ledger::ledger()->unlock_chapter(chapter);
         } else {
-            _scenario = NULL;
+            _level = Level::none();
         }
     }
 
-    if (_scenario != NULL) {
+    if (_level.get()) {
         _state = START_LEVEL;
     } else {
         _state = QUIT;

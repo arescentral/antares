@@ -27,10 +27,13 @@ class FilePrefsDriver : public PrefsDriver {
   public:
     FilePrefsDriver();
 
-    virtual void load(Preferences* preferences);
-    virtual void save(const Preferences& preferences);
+    virtual const Preferences& get() const { return _current; }
+    virtual void set(const Preferences& preferences);
+
+  private:
+    Preferences _current;
 };
 
 }  // namespace antares
 
-#endif // ANTARES_CONFIG_FILE_PREFS_DRIVER_HPP_
+#endif  // ANTARES_CONFIG_FILE_PREFS_DRIVER_HPP_

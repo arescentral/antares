@@ -19,8 +19,8 @@
 #ifndef ANTARES_UI_SCREEN_HPP_
 #define ANTARES_UI_SCREEN_HPP_
 
-#include <vector>
 #include <sfz/sfz.hpp>
+#include <vector>
 
 #include "data/interface.hpp"
 #include "drawing/interface.hpp"
@@ -57,10 +57,10 @@ class InterfaceScreen : public Card {
     void truncate(size_t size);
     void extend(const sfz::Json& json);
 
-    size_t size() const;
+    Point                offset() const;
+    size_t               size() const;
     const InterfaceItem& item(int index) const;
     InterfaceItem& mutable_item(int index);
-    void offset(int offset_x, int offset_y);
 
   private:
     enum State {
@@ -74,12 +74,12 @@ class InterfaceScreen : public Card {
     sfz::Json load_json(sfz::PrintItem id);
     void become_normal();
 
-    const Rect _bounds;
-    const bool _full_screen;
+    const Rect                                  _bounds;
+    const bool                                  _full_screen;
     std::vector<std::unique_ptr<InterfaceItem>> _items;
-    Button* _hit_button;
-    uint32_t _pressed;
-    Cursor _cursor;
+    Button*                                     _hit_button;
+    uint32_t                                    _pressed;
+    Cursor                                      _cursor;
 
     DISALLOW_COPY_AND_ASSIGN(InterfaceScreen);
 };

@@ -33,7 +33,7 @@ class MainScreen : public InterfaceScreen {
 
     virtual void become_front();
 
-    virtual bool next_timer(int64_t& time);
+    virtual bool next_timer(wall_time& time);
     virtual void fire_timer();
 
     virtual void mouse_down(const MouseDownEvent& event);
@@ -49,21 +49,21 @@ class MainScreen : public InterfaceScreen {
 
   private:
     enum Button {
-        START_NEW_GAME = 0,
+        START_NEW_GAME     = 0,
         START_NETWORK_GAME = 1,
-        OPTIONS = 2,
-        QUIT = 3,
-        ABOUT_ARES = 4,
-        DEMO = 5,
-        REPLAY_INTRO = 6,
+        OPTIONS            = 2,
+        QUIT               = 3,
+        ABOUT_ARES         = 4,
+        DEMO               = 5,
+        REPLAY_INTRO       = 6,
     };
     enum State {
-        NORMAL = 0,
+        NORMAL   = 0,
         QUITTING = 1,
     };
-    State _state;
+    State      _state;
     ReplayList _replays;
-    int64_t _next_timer;
+    wall_time  _next_timer;
 
     DISALLOW_COPY_AND_ASSIGN(MainScreen);
 };

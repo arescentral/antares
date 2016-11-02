@@ -20,8 +20,9 @@
 
 #include <sfz/sfz.hpp>
 
+#include "data/level.hpp"
+#include "data/plugin.hpp"
 #include "data/resource.hpp"
-#include "data/scenario.hpp"
 #include "game/globals.hpp"
 #include "lang/defines.hpp"
 
@@ -33,35 +34,9 @@ using std::unique_ptr;
 
 namespace antares {
 
-static const int16_t kRaceResID = 500;
-
-static ANTARES_GLOBAL unique_ptr<Race[]> gRaceData;
-
-void InitRaces() {
-    if (gRaceData.get() == NULL) {
-        Resource rsrc("races", "race", kRaceResID);
-        BytesSlice in(rsrc.data());
-        size_t count = rsrc.data().size() / Race::byte_size;
-        if (count != kRaceNum) {
-            throw Exception("got unexpected number of races");
-        }
-        gRaceData.reset(new Race[count]);
-        for (size_t i = 0; i < count; ++i) {
-            read(in, gRaceData[i]);
-        }
-        if (!in.empty()) {
-            throw Exception("didn't consume all of race data");
-        }
-    }
-}
-
-void CleanupRaces() {
-    gRaceData.reset();
-}
-
 int16_t GetRaceIDFromNum(size_t raceNum) {
-    if (raceNum < kRaceNum) {
-        return gRaceData[raceNum].id;
+    if (raceNum < plug.races.size()) {
+        return plug.races[raceNum].id;
     } else {
         return -1;
     }

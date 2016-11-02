@@ -25,9 +25,16 @@
 namespace antares {
 
 uint32_t lsqrt(uint32_t n);
+inline Fixed lsqrt(Fixed n) {
+    return Fixed::from_val(lsqrt(n.val()));
+}
 uint64_t wsqrt(uint64_t n);
 
-Fixed MyFixRatio(int16_t, int16_t);
+Fixed   MyFixRatio(int16_t, int16_t);
+int16_t ratio_to_angle(Fixed x, Fixed y);
+inline int16_t ratio_to_angle(int32_t x, int32_t y) {
+    return ratio_to_angle(Fixed::from_val(x), Fixed::from_val(y));
+}
 void MyMulDoubleLong(int32_t, int32_t, int64_t*);
 
 template <typename T>
@@ -44,4 +51,4 @@ int32_t AngleFromSlope(Fixed slope);
 
 }  // namespace antares
 
-#endif // ANTARES_MATH_SPECIAL_HPP_
+#endif  // ANTARES_MATH_SPECIAL_HPP_

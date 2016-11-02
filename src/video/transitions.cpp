@@ -36,35 +36,34 @@ namespace antares {
 namespace {
 
 const int32_t kStartAnimation = -255;
-const int32_t kEndAnimation = 255;
+const int32_t kEndAnimation   = 255;
 
 }  // namespace
 
-Transitions::Transitions():
-        _active(false) { }
-Transitions::~Transitions() { }
+Transitions::Transitions() : _active(false) {}
+Transitions::~Transitions() {}
 
 void Transitions::reset() {
     _active = false;
 }
 
 void Transitions::start_boolean(int32_t in_speed, int32_t out_speed, uint8_t goal_color) {
-    _step = kStartAnimation;
-    _in_speed = in_speed;
-    _out_speed = out_speed;
-    _color = GetRGBTranslateColor(GetRetroIndex(goal_color));
+    _step        = kStartAnimation;
+    _in_speed    = in_speed;
+    _out_speed   = out_speed;
+    _color       = GetRGBTranslateColor(GetRetroIndex(goal_color));
     _color.alpha = 127;
     if (!_active) {
         _active = true;
     }
 }
 
-void Transitions::update_boolean(int32_t time_passed) {
+void Transitions::update_boolean(ticks time_passed) {
     if (_active) {
         if (_step < 0) {
-            _step += _in_speed * time_passed;
-        } else if ((_step + _out_speed * time_passed) < kEndAnimation) {
-            _step += _out_speed * time_passed;
+            _step += _in_speed * time_passed.count();
+        } else if ((_step + _out_speed * time_passed.count()) < kEndAnimation) {
+            _step += _out_speed * time_passed.count();
         } else {
             _active = false;
         }
@@ -73,23 +72,21 @@ void Transitions::update_boolean(int32_t time_passed) {
 
 void Transitions::draw() const {
     if (_active) {
-        Rects().fill(world, _color);
+        Rects().fill(world(), _color);
     }
 }
 
 ColorFade::ColorFade(
-        Direction direction, const RgbColor& color, int64_t duration, bool allow_skip,
-        bool* skipped)
+        Direction direction, const RgbColor& color, usecs duration, bool allow_skip, bool* skipped)
         : _direction(direction),
           _color(color),
           _allow_skip(allow_skip),
           _skipped(skipped),
-          _next_event(0.0),
-          _duration(duration) { }
+          _duration(duration) {}
 
 void ColorFade::become_front() {
-    _start = now_usecs();
-    _next_event = add_ticks(_start, 1);
+    _start      = now();
+    _next_event = _start + kMinorTick;
 }
 
 void ColorFade::mouse_down(const MouseDownEvent& event) {
@@ -116,17 +113,17 @@ void ColorFade::gamepad_button_down(const GamepadButtonDownEvent& event) {
     }
 }
 
-bool ColorFade::next_timer(int64_t& time) {
+bool ColorFade::next_timer(wall_time& time) {
     time = _next_event;
     return true;
 }
 
 void ColorFade::fire_timer() {
-    int64_t now = now_usecs();
+    wall_time now = antares::now();
     while (_next_event < now) {
-        _next_event = add_ticks(_next_event, 1);
+        _next_event = _next_event + kMinorTick;
     }
-    double fraction = static_cast<double>(now - _start) / _duration;
+    double fraction = static_cast<double>((now - _start).count()) / _duration.count();
     if (fraction >= 1.0) {
         stack()->pop(this);
     }
@@ -134,8 +131,8 @@ void ColorFade::fire_timer() {
 
 void ColorFade::draw() const {
     next()->draw();
-    int64_t now = now_usecs();
-    double fraction = static_cast<double>(now - _start) / _duration;
+    wall_time now      = antares::now();
+    double    fraction = static_cast<double>((now - _start).count()) / _duration.count();
     if (fraction > 1.0) {
         fraction = 1.0;
     }
@@ -145,37 +142,32 @@ void ColorFade::draw() const {
     } else {
         fill_color.alpha = 0xff * (1.0 - fraction);
     }
-    Rects().fill(world, fill_color);
+    Rects().fill(world(), fill_color);
 }
 
-PictFade::PictFade(int pict_id, bool* skipped):
-        _state(NEW),
-        _skipped(skipped),
-        _texture(Picture(pict_id).texture()) { }
+PictFade::PictFade(int pict_id, bool* skipped)
+        : _state(NEW), _skipped(skipped), _texture(Picture(pict_id).texture()) {}
 
-PictFade::~PictFade() { }
+PictFade::~PictFade() {}
 
 void PictFade::become_front() {
     switch (_state) {
-      case NEW:
-        wax();
-        break;
+        case NEW: wax(); break;
 
-      case WAXING:
-        if (!this->skip()) {
-            _state = FULL;
-            _wane_start = now_usecs() + this->display_time();
-            break;
-        }
+        case WAXING:
+            if (!this->skip()) {
+                _state      = FULL;
+                _wane_start = now() + this->display_time();
+                break;
+            }
         // fall through.
 
-      case WANING:
-        _state = NEW;
-        stack()->pop(this);
-        break;
+        case WANING:
+            _state = NEW;
+            stack()->pop(this);
+            break;
 
-      default:
-        break;
+        default: break;
     }
 }
 
@@ -199,7 +191,7 @@ void PictFade::key_down(const KeyDownEvent& event) {
     }
 }
 
-bool PictFade::next_timer(int64_t& time) {
+bool PictFade::next_timer(wall_time& time) {
     if (_state == FULL) {
         time = _wane_start;
         return true;
@@ -214,28 +206,28 @@ void PictFade::fire_timer() {
 
 void PictFade::draw() const {
     Rect bounds = _texture.size().as_rect();
-    bounds.center_in(world);
+    bounds.center_in(world());
     _texture.draw(bounds.left, bounds.top);
 }
 
 void PictFade::wax() {
     _state = WAXING;
-    stack()->push(new ColorFade(ColorFade::FROM_COLOR, RgbColor::kBlack, this->fade_time(), true,
-                _skipped));
+    stack()->push(new ColorFade(
+            ColorFade::FROM_COLOR, RgbColor::black(), this->fade_time(), true, _skipped));
 }
 
 void PictFade::wane() {
     _state = WANING;
-    stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::kBlack, this->fade_time(), true,
-                _skipped));
+    stack()->push(new ColorFade(
+            ColorFade::TO_COLOR, RgbColor::black(), this->fade_time(), true, _skipped));
 }
 
-int64_t PictFade::fade_time() const {
-    return 5e6 / 3;
+usecs PictFade::fade_time() const {
+    return ticks(100);
 }
 
-int64_t PictFade::display_time() const {
-    return 4e6 / 3;
+usecs PictFade::display_time() const {
+    return ticks(80);
 }
 
 bool PictFade::skip() const {

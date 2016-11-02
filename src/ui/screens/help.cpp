@@ -25,6 +25,7 @@
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
+#include "game/sys.hpp"
 #include "ui/card.hpp"
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
@@ -38,17 +39,10 @@ namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-HelpScreen::HelpScreen():
-        InterfaceScreen("help", play_screen, false),
-        _text(computer_font) {
-    // TODO(sfiera): top and bottom buffer of 1, not just top buffer of 2.
-    offset((world.width() / 2) - (viewport.width() / 2), 2);
-
-    _bounds = item(BOX).bounds();
-    _bounds.offset(viewport.left, 0);
-
+HelpScreen::HelpScreen()
+        : InterfaceScreen("help", {128, 0, 608, 480}, false), _text(sys.fonts.computer) {
     Resource rsrc("text", "txt", 6002);
-    String text(utf8::decode(rsrc.data()));
+    String   text(utf8::decode(rsrc.data()));
     Replace_KeyCode_Strings_With_Actual_Key_Names(&text, 1000, 4);
 
     RgbColor fore = GetRGBTranslateColorShade(RED, VERY_LIGHT);
@@ -56,13 +50,13 @@ HelpScreen::HelpScreen():
     _text.set_fore_color(fore);
     _text.set_back_color(back);
     _text.set_retro_text(text);
-    _text.wrap_to(_bounds.width(), 0, 0);
+    _text.wrap_to(item(BOX).bounds().width(), 0, 0);
 }
 
-HelpScreen::~HelpScreen() { }
+HelpScreen::~HelpScreen() {}
 
 void HelpScreen::key_down(const KeyDownEvent& event) {
-    if (event.key() == Preferences::preferences()->key(kHelpKeyNum) - 1) {
+    if (event.key() == sys.prefs->key(kHelpKeyNum) - 1) {
         stack()->pop(this);
     } else {
         InterfaceScreen::key_down(event);
@@ -71,17 +65,17 @@ void HelpScreen::key_down(const KeyDownEvent& event) {
 
 void HelpScreen::handle_button(Button& button) {
     switch (button.id) {
-      case DONE:
-        stack()->pop(this);
-        break;
+        case DONE: stack()->pop(this); break;
 
-      default:
-        throw Exception(format("Got unknown button {0}.", button.id));
+        default: throw Exception(format("Got unknown button {0}.", button.id));
     }
 }
 
 void HelpScreen::overlay() const {
-    _text.draw(_bounds);
+    Rect  bounds = item(BOX).bounds();
+    Point off    = offset();
+    bounds.offset(off.h, off.v);
+    _text.draw(bounds);
 }
 
 }  // namespace antares

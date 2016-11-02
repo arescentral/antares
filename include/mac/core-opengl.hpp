@@ -37,11 +37,11 @@ class PixelFormat {
     ~PixelFormat();
 
     CGLPixelFormatObj c_obj() const;
-    GLint npix() const;
+    GLint             npix() const;
 
   private:
     CGLPixelFormatObj _pixel_format;
-    GLint _npix;
+    GLint             _npix;
 
     DISALLOW_COPY_AND_ASSIGN(PixelFormat);
 };

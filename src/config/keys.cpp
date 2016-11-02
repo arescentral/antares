@@ -18,24 +18,13 @@
 
 #include "config/keys.hpp"
 
-#include <strings.h>
+#include <string.h>
 
-#include "data/string-list.hpp"
-#include "game/globals.hpp"
-#include "lang/defines.hpp"
-#include "video/driver.hpp"
+#include "game/sys.hpp"
 
 namespace antares {
 
-static ANTARES_GLOBAL std::unique_ptr<StringList> key_names;
-static ANTARES_GLOBAL std::unique_ptr<StringList> key_long_names;
-
-void Keys::init() {
-    key_names.reset(new StringList(KEY_NAMES));
-    key_long_names.reset(new StringList(KEY_LONG_NAMES));
-}
-
-KeyMap::KeyMap(): _data{} {}
+KeyMap::KeyMap() : _data{} {}
 
 bool KeyMap::get(size_t index) const {
     return _data[index >> 3] & (1 << (index & 0x7));
@@ -48,7 +37,7 @@ void KeyMap::set(size_t index, bool value) {
 }
 
 bool KeyMap::any() const {
-    static const Data zero = { };
+    static const Data zero = {};
     return memcmp(_data, zero, kDataSize) == 0;
 }
 
@@ -86,21 +75,15 @@ int GetKeyNumFromKeyMap(const KeyMap& key_map) {
     return 0;
 }
 
-bool CommandKey() {
-    KeyMap key_map;
-    VideoDriver::driver()->get_keys(&key_map);
-    return key_map.get(Keys::L_COMMAND);
-}
-
 void GetKeyNumName(int key_num, sfz::String* out) {
-    out->assign(key_names->at(key_num - 1));
+    out->assign(sys.key_names.at(key_num - 1));
 }
 
 bool GetKeyNameNum(sfz::StringSlice name, int& out) {
     bool result = false;
-    for (int i = 0; i < key_names->size(); ++i) {
-        if (key_names->at(i) == name) {
-            out = i + 1;
+    for (int i = 0; i < sys.key_names.size(); ++i) {
+        if (sys.key_names.at(i) == name) {
+            out    = i + 1;
             result = true;
         }
     }
@@ -108,16 +91,6 @@ bool GetKeyNameNum(sfz::StringSlice name, int& out) {
 }
 
 // returns true if any keys OTHER THAN POWER ON AND CAPS LOCK are down
-
-bool AnyRealKeyDown() {
-    KeyMap key_map;
-    VideoDriver::driver()->get_keys(&key_map);
-
-    key_map.set(Keys::POWER, false);
-    key_map.set(Keys::CAPS_LOCK, false);
-
-    return key_map.any();
-}
 
 bool AnyKeyButThisOne(const KeyMap& key_map, int key_num) {
     KeyMap others;
@@ -128,39 +101,32 @@ bool AnyKeyButThisOne(const KeyMap& key_map, int key_num) {
 
 int key_digit(uint32_t k) {
     switch (k) {
-      case Keys::K0:
-      case Keys::N0:
-        return 0;
-      case Keys::K1:
-      case Keys::N1:
-        return 1;
-      case Keys::K2:
-      case Keys::N2:
-        return 2;
-      case Keys::K3:
-      case Keys::N3:
-        return 3;
-      case Keys::K4:
-      case Keys::N4:
-        return 4;
-      case Keys::K5:
-      case Keys::N5:
-        return 5;
-      case Keys::K6:
-      case Keys::N6:
-        return 6;
-      case Keys::K7:
-      case Keys::N7:
-        return 7;
-      case Keys::K8:
-      case Keys::N8:
-        return 8;
-      case Keys::K9:
-      case Keys::N9:
-        return 9;
-      default:
-        return -1;
+        case Keys::K0:
+        case Keys::N0: return 0;
+        case Keys::K1:
+        case Keys::N1: return 1;
+        case Keys::K2:
+        case Keys::N2: return 2;
+        case Keys::K3:
+        case Keys::N3: return 3;
+        case Keys::K4:
+        case Keys::N4: return 4;
+        case Keys::K5:
+        case Keys::N5: return 5;
+        case Keys::K6:
+        case Keys::N6: return 6;
+        case Keys::K7:
+        case Keys::N7: return 7;
+        case Keys::K8:
+        case Keys::N8: return 8;
+        case Keys::K9:
+        case Keys::N9: return 9;
+        default: return -1;
     }
+}
+
+bool mCheckKeyMap(const KeyMap& mKeyMap, int mki) {
+    return mKeyMap.get(sys.prefs->key(mki) - 1);
 }
 
 int32_t GetAsciiFromKeyMap(const KeyMap& sourceKeyMap, const KeyMap& previousKeyMap) {

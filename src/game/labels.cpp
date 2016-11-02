@@ -28,6 +28,7 @@
 #include "game/cursor.hpp"
 #include "game/globals.hpp"
 #include "game/space-object.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 #include "video/driver.hpp"
 
@@ -44,16 +45,18 @@ namespace antares {
 
 namespace {
 
-const int32_t kLabelBuffer = 4;
-const int32_t kLabelInnerSpace = 3;
+const int32_t kLabelBuffer          = 4;
+const int32_t kLabelInnerSpace      = 3;
 const int32_t kLabelTotalInnerSpace = kLabelInnerSpace << 1;
 
 }  // namespace
 
+const ticks Label::kVisibleTime = secs(1);
+
 // local function prototypes
 static int32_t String_Count_Lines(const StringSlice& s);
 static StringSlice String_Get_Nth_Line(const StringSlice& source, int32_t nth);
-static void Auto_Animate_Line( Point *source, Point *dest);
+static void Auto_Animate_Line(Point* source, Point* dest);
 
 Label* Label::get(int number) {
     if ((0 <= number) && (number < kMaxLabelNum)) {
@@ -67,13 +70,13 @@ void Label::init() {
 }
 
 void Label::reset() {
-    for (auto label: all()) {
+    for (auto label : all()) {
         *label = Label();
     }
 }
 
 Handle<Label> Label::next_free_label() {
-    for (auto label: all()) {
+    for (auto label : all()) {
         if (!label->active) {
             return label;
         }
@@ -89,15 +92,15 @@ Handle<Label> Label::add(
         return Label::none();  // no free label
     }
 
-    label->active = true;
-    label->killMe = false;
-    label->where = Point(h, v);
-    label->offset = Point(hoff, voff);
-    label->color = color;
-    label->object = object;
-    label->objectLink = objectLink;
+    label->active             = true;
+    label->killMe             = false;
+    label->where              = Point(h, v);
+    label->offset             = Point(hoff, voff);
+    label->color              = color;
+    label->object             = object;
+    label->objectLink         = objectLink;
     label->keepOnScreenAnyway = false;
-    label->attachedHintLine = false;
+    label->attachedHintLine   = false;
     if (objectLink) {
         label->visible = bool(label->object.get());
     } else {
@@ -119,19 +122,15 @@ void Label::remove() {
 }
 
 void Label::draw() {
-    for (auto label: all()) {
+    for (auto label : all()) {
         // We anchor the image at the corner of the rect instead of label->where.  In some cases,
         // label->where is changed between update_all_label_contents() and draw time, but the rect
         // remains unchanged.  Since that function used to do this drawing, the rect's corner is
         // the original location we drew at.
         Point at(label->thisRect.left, label->thisRect.top);
 
-        if (!label->active
-                || label->killMe
-                || (label->text.empty())
-                || !label->visible
-                || (label->thisRect.width() <= 0)
-                || (label->thisRect.height() <= 0)) {
+        if (!label->active || label->killMe || (label->text.empty()) || !label->visible ||
+            (label->thisRect.width() <= 0) || (label->thisRect.height() <= 0)) {
             continue;
         }
         StringSlice text = label->text;
@@ -139,30 +138,30 @@ void Label::draw() {
             text = text.slice(0, label->retroCount);
         }
         const RgbColor light = GetRGBTranslateColorShade(label->color, VERY_LIGHT);
-        const RgbColor dark = GetRGBTranslateColorShade(label->color, VERY_DARK);
-        VideoDriver::driver()->dither_rect(label->thisRect, dark);
-        at.offset(kLabelInnerSpace, kLabelInnerSpace + tactical_font->ascent);
+        const RgbColor dark  = GetRGBTranslateColorShade(label->color, VERY_DARK);
+        sys.video->dither_rect(label->thisRect, dark);
+        at.offset(kLabelInnerSpace, kLabelInnerSpace + sys.fonts.tactical->ascent);
 
         if (label->lineNum > 1) {
             for (int j = 1; j <= label->lineNum; j++) {
                 StringSlice line = String_Get_Nth_Line(text, j);
 
-                tactical_font->draw(Point(at.h + 1, at.v + 1), line, RgbColor::kBlack);
-                tactical_font->draw(Point(at.h - 1, at.v - 1), line, RgbColor::kBlack);
-                tactical_font->draw(at, line, light);
+                sys.fonts.tactical->draw(Point(at.h + 1, at.v + 1), line, RgbColor::black());
+                sys.fonts.tactical->draw(Point(at.h - 1, at.v - 1), line, RgbColor::black());
+                sys.fonts.tactical->draw(at, line, light);
 
                 at.offset(0, label->lineHeight);
             }
         } else {
-            tactical_font->draw(Point(at.h + 1, at.v + 1), text, RgbColor::kBlack);
-            tactical_font->draw(at, text, light);
+            sys.fonts.tactical->draw(Point(at.h + 1, at.v + 1), text, RgbColor::black());
+            sys.fonts.tactical->draw(at, text, light);
         }
     }
 }
 
-void Label::update_contents(int32_t units_done) {
-    Rect clip = viewport;
-    for (auto label: all()) {
+void Label::update_contents(ticks units_done) {
+    Rect clip = viewport();
+    for (auto label : all()) {
         if (!label->active || label->killMe || (label->text.empty()) || !label->visible) {
             label->thisRect.left = label->thisRect.right = 0;
             continue;
@@ -180,18 +179,18 @@ void Label::update_contents(int32_t units_done) {
             // printing was tied to the frame rate before: 3 per frame.  Here, we've switched to 1
             // per tick, so this would be equivalent to the old code at 20 FPS.  The question is,
             // does it feel equivalent?  It only comes up in the tutorial.
-            label->retroCount += units_done;
+            label->retroCount += units_done.count();
             if (static_cast<size_t>(label->retroCount) > label->text.size()) {
                 label->retroCount = -1;
             } else {
-                PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
+                sys.sound.teletype();
             }
         }
     }
 }
 
 void Label::show_all() {
-    for (auto label: all()) {
+    for (auto label : all()) {
         if (label->active && label->visible) {
             if (label->killMe) {
                 label->active = false;
@@ -205,12 +204,12 @@ void Label::set_position(int16_t h, int16_t v) {
     where.offset(h, v);
 }
 
-void Label::update_positions(int32_t units_done) {
+void Label::update_positions(ticks units_done) {
     const Rect label_limits(
-            viewport.left + kLabelBuffer, viewport.top + kLabelBuffer,
-            viewport.right - kLabelBuffer, viewport.bottom - kLabelBuffer);
+            viewport().left + kLabelBuffer, viewport().top + kLabelBuffer,
+            viewport().right - kLabelBuffer, viewport().bottom - kLabelBuffer);
 
-    for (auto label: all()) {
+    for (auto label : all()) {
         bool isOffScreen = false;
         if ((label->active) && (!label->killMe)) {
             if (label->object.get() && label->object->sprite.get()) {
@@ -218,39 +217,38 @@ void Label::update_positions(int32_t units_done) {
                     label->where.h = label->object->sprite->where.h + label->offset.h;
 
                     if (label->where.h < label_limits.left) {
-                        isOffScreen = true;
+                        isOffScreen    = true;
                         label->where.h = label_limits.left;
                     }
 
                     if (label->where.h > (label_limits.right - label->width)) {
-                        isOffScreen = true;
+                        isOffScreen    = true;
                         label->where.h = label_limits.right - label->width;
                     }
 
                     label->where.v = label->object->sprite->where.v + label->offset.v;
 
                     if (label->where.v < label_limits.top) {
-                        isOffScreen = true;
+                        isOffScreen    = true;
                         label->where.v = label_limits.top;
                     }
 
                     if (label->where.v > (label_limits.bottom - label->height)) {
-                        isOffScreen = true;
+                        isOffScreen    = true;
                         label->where.v = label_limits.bottom - label->height;
                     }
 
-                    if (!(label->object->seenByPlayerFlags &
-                                (1 << g.admiral.number()))) {
+                    if (!(label->object->seenByPlayerFlags & (1 << g.admiral.number()))) {
                         isOffScreen = true;
                     }
 
                     if (!label->keepOnScreenAnyway) {
                         if (isOffScreen) {
-                            if (label->age == 0) {
+                            if (label->age == ticks(0)) {
                                 label->age = -kVisibleTime;
                             }
-                        } else if (label->age < 0) {
-                            label->age = 0;
+                        } else if (label->age < ticks(0)) {
+                            label->age     = ticks(0);
                             label->visible = true;
                         }
                     }
@@ -292,21 +290,21 @@ void Label::update_positions(int32_t units_done) {
                     HintLine::show(source, dest, label->color, VERY_LIGHT);
                 }
             }
-            if (label->age > 0) {
+            if (label->age > ticks(0)) {
                 label->age -= units_done;
-                if (label->age <= 0) {
+                if (label->age <= ticks(0)) {
                     label->visible = false;
-                    label->age = 0;
-                    label->object = SpaceObject::none();
+                    label->age     = ticks(0);
+                    label->object  = SpaceObject::none();
                     label->text.clear();
                     if (label->attachedHintLine) {
                         HintLine::hide();
                     }
                 }
-            } else if (label->age < 0) {
+            } else if (label->age < ticks(0)) {
                 label->age += units_done;
-                if (label->age >= 0) {
-                    label->age = 0;
+                if (label->age >= ticks(0)) {
+                    label->age     = ticks(0);
                     label->visible = false;
                 }
             }
@@ -316,13 +314,13 @@ void Label::update_positions(int32_t units_done) {
 
 void Label::set_object(Handle<SpaceObject> object) {
     this->object = object;
-    visible = bool(object.get());
-    age = 0;
+    visible      = bool(object.get());
+    age          = ticks(0);
 }
 
-void Label::set_age(int32_t age) {
+void Label::set_age(ticks age) {
     this->age = age;
-    visible = true;
+    visible   = true;
 }
 
 void Label::set_string(const StringSlice& string) {
@@ -341,7 +339,7 @@ void Label::set_color(uint8_t color) {
 
 void Label::set_keep_on_screen_anyway(bool keepOnScreenAnyway) {
     this->keepOnScreenAnyway = keepOnScreenAnyway;
-    retroCount = 0;
+    retroCount               = 0;
 }
 
 void Label::set_attached_hint_line(bool attachedHintLine, Point toWhere) {
@@ -349,8 +347,8 @@ void Label::set_attached_hint_line(bool attachedHintLine, Point toWhere) {
         HintLine::hide();
     }
     this->attachedHintLine = attachedHintLine;
-    attachedToWhere = toWhere;
-    retroCount = 0;
+    attachedToWhere        = toWhere;
+    retroCount             = 0;
 }
 
 void Label::set_offset(int32_t hoff, int32_t voff) {
@@ -364,22 +362,21 @@ void Label::recalc_size() {
 
     if (lineNum > 1) {
         this->lineNum = lineNum;
-        int maxWidth = 0;
+        int maxWidth  = 0;
         for (int i = 1; i <= lineNum; i++) {
-            StringSlice text = String_Get_Nth_Line(this->text, i);
-            int32_t width = tactical_font->string_width(text);
+            StringSlice text  = String_Get_Nth_Line(this->text, i);
+            int32_t     width = sys.fonts.tactical->string_width(text);
             if (width > maxWidth) {
                 maxWidth = width;
             }
         }
-        width = maxWidth + kLabelTotalInnerSpace;
-        height = (tactical_font->height * lineNum) + kLabelTotalInnerSpace;
-        lineHeight = tactical_font->height;
+        width      = maxWidth + kLabelTotalInnerSpace;
+        height     = (sys.fonts.tactical->height * lineNum) + kLabelTotalInnerSpace;
+        lineHeight = sys.fonts.tactical->height;
     } else {
-        lineNum = 1;
-        width = tactical_font->string_width(text) + kLabelTotalInnerSpace;
-        height = tactical_font->height + kLabelTotalInnerSpace;
-        lineHeight = tactical_font->height;
+        width      = sys.fonts.tactical->string_width(text) + kLabelTotalInnerSpace;
+        height     = sys.fonts.tactical->height + kLabelTotalInnerSpace;
+        lineHeight = sys.fonts.tactical->height;
     }
 }
 
@@ -407,8 +404,8 @@ static StringSlice String_Get_Nth_Line(const StringSlice& source, int32_t nth) {
     }
 }
 
-static void Auto_Animate_Line( Point *source, Point *dest) {
-    switch ((usecs_to_ticks(g.time) >> 3) & 0x03) {
+static void Auto_Animate_Line(Point* source, Point* dest) {
+    switch ((std::chrono::time_point_cast<ticks>(g.time).time_since_epoch().count() >> 3) & 0x03) {
         case 0:
             dest->h = source->h + ((dest->h - source->h) >> 2);
             dest->v = source->v + ((dest->v - source->v) >> 2);
@@ -424,8 +421,7 @@ static void Auto_Animate_Line( Point *source, Point *dest) {
             dest->v = dest->v + ((source->v - dest->v) >> 2);
             break;
 
-        case 3:
-            break;
+        case 3: break;
     }
 }
 

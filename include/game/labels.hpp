@@ -21,35 +21,35 @@
 
 #include <sfz/sfz.hpp>
 
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
 
 namespace antares {
 
 class Label {
   public:
-    static const int32_t kNone = -1;
+    static const int32_t kNone        = -1;
     static const int32_t kMaxLabelNum = 16;
-    static const int32_t kVisibleTime = 60;
+    static const ticks   kVisibleTime;
 
     static Label* get(int number);
-    static Handle<Label> none() { return Handle<Label>(-1); }
+    static Handle<Label>     none() { return Handle<Label>(-1); }
     static HandleList<Label> all() { return {0, kMaxLabelNum}; }
 
-    static void init();
-    static void reset();
+    static void          init();
+    static void          reset();
     static Handle<Label> add(
             int16_t h, int16_t v, int16_t hoff, int16_t voff, Handle<SpaceObject> object,
             bool objectLink, uint8_t color);
     static void draw();
-    static void update_contents(int32_t units_done);
-    static void update_positions(int32_t units_done);
+    static void update_contents(ticks units_done);
+    static void update_positions(ticks units_done);
     static void show_all();
 
     void remove();
 
     void set_position(int16_t h, int16_t v);
     void set_object(Handle<SpaceObject> object);
-    void set_age(int32_t age);
+    void set_age(ticks age);
     void set_string(const sfz::StringSlice& string);
     void clear_string();
     void set_color(uint8_t color);
@@ -60,29 +60,29 @@ class Label {
 
   private:
     static Handle<Label> next_free_label();
-    void recalc_size();
+    void                 recalc_size();
 
     Point               where;
     Point               offset;
     Rect                thisRect = Rect(0, 0, -1, -1);
     int32_t             width;
     int32_t             height;
-    int32_t             age = 0;
+    ticks               age = ticks(0);
     sfz::String         text;
     uint8_t             color;
-    bool                active = false;
-    bool                killMe = false;
+    bool                active  = false;
+    bool                killMe  = false;
     bool                visible = false;
     Handle<SpaceObject> object;
-    bool                objectLink = true;     // true if label requires an object to be seen
-    int32_t             lineNum = 1;
+    bool                objectLink = true;  // true if label requires an object to be seen
+    int32_t             lineNum    = 1;
     int32_t             lineHeight;
-    bool                keepOnScreenAnyway = false; // if not attached to object, keep on screen if it's off
-    bool                attachedHintLine = false;
-    Point               attachedToWhere;
-    int32_t             retroCount = -1;
+    bool    keepOnScreenAnyway = false;  // if not attached to object, keep on screen if it's off
+    bool    attachedHintLine   = false;
+    Point   attachedToWhere;
+    int32_t retroCount = -1;
 };
 
 }  // namespace antares
 
-#endif // ANTARES_GAME_LABELS_HPP_
+#endif  // ANTARES_GAME_LABELS_HPP_

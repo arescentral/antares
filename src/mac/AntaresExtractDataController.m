@@ -24,9 +24,10 @@ static NSString* kAntaresDidInstallScenarioFromPath = @"AntaresDidInstallScenari
 
 static void set_label(const char* status, void* userdata) {
     AntaresExtractDataController* controller = userdata;
-    NSString* label = [[NSString alloc] initWithUTF8String:status];
+    NSString* label                          = [[NSString alloc] initWithUTF8String:status];
     [controller performSelectorOnMainThread:@selector(setAndReleaseLabel:)
-        withObject:label waitUntilDone:NO];
+                                 withObject:label
+                              waitUntilDone:NO];
 }
 
 @implementation AntaresExtractDataController
@@ -39,9 +40,9 @@ static void set_label(const char* status, void* userdata) {
     if (!(self = [super init])) {
         return NULL;
     }
-    _target = [target retain];
+    _target   = [target retain];
     _selector = selector;
-    _path = [path retain];
+    _path     = [path retain];
     _scenario = nil;
     if (![[NSBundle mainBundle] loadNibNamed:@"ExtractData" owner:self topLevelObjects:nil]) {
         [self release];
@@ -54,9 +55,9 @@ static void set_label(const char* status, void* userdata) {
     if (!(self = [super init])) {
         return NULL;
     }
-    _target = [target retain];
+    _target   = [target retain];
     _selector = selector;
-    _path = nil;
+    _path     = nil;
     _scenario = [scenario retain];
     if (![[NSBundle mainBundle] loadNibNamed:@"ExtractData" owner:self topLevelObjects:nil]) {
         [self release];
@@ -87,7 +88,11 @@ static void set_label(const char* status, void* userdata) {
 
 - (void)done {
     [_window close];
-    [[NSDistributedNotificationCenter defaultCenter] postNotificationName:kAntaresDidInstallScenarioFromPath object:[_path stringByStandardizingPath] userInfo:nil deliverImmediately:YES];
+    [[NSDistributedNotificationCenter defaultCenter]
+            postNotificationName:kAntaresDidInstallScenarioFromPath
+                          object:[_path stringByStandardizingPath]
+                        userInfo:nil
+              deliverImmediately:YES];
     [_target performSelector:_selector withObject:self];
 }
 
@@ -96,12 +101,12 @@ static void set_label(const char* status, void* userdata) {
 
     NSString* antares = [[NSSearchPathForDirectoriesInDomains(
             NSApplicationSupportDirectory, NSUserDomainMask, YES) objectAtIndex:0]
-        stringByAppendingPathComponent:@"Antares"];
+            stringByAppendingPathComponent:@"Antares"];
     NSString* downloads = [antares stringByAppendingPathComponent:@"Downloads"];
     NSString* scenarios = [antares stringByAppendingPathComponent:@"Scenarios"];
 
-    AntaresDataExtractor* extractor = antares_data_extractor_create(
-            [downloads UTF8String], [scenarios UTF8String]);
+    AntaresDataExtractor* extractor =
+            antares_data_extractor_create([downloads UTF8String], [scenarios UTF8String]);
     if (_path) {
         antares_data_extractor_set_plugin_file(extractor, [_path UTF8String]);
     } else {

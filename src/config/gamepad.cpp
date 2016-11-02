@@ -18,9 +18,7 @@
 
 #include "config/gamepad.hpp"
 
-#include "data/string-list.hpp"
-#include "game/globals.hpp"
-#include "lang/defines.hpp"
+#include "game/sys.hpp"
 
 using sfz::String;
 using sfz::StringSlice;
@@ -28,17 +26,9 @@ using sfz::range;
 
 namespace antares {
 
-static ANTARES_GLOBAL std::unique_ptr<StringList> gamepad_names;
-static ANTARES_GLOBAL std::unique_ptr<StringList> gamepad_long_names;
-
-void Gamepad::init() {
-    gamepad_names.reset(new StringList(Gamepad::NAMES));
-    gamepad_long_names.reset(new StringList(Gamepad::LONG_NAMES));
-}
-
 int16_t Gamepad::num(StringSlice name) {
-    for (auto i: range<int>(BEGIN, END)) {
-        if (gamepad_names->at(i) == name) {
+    for (auto i : range<int>(BEGIN, END)) {
+        if (sys.gamepad_names.at(i) == name) {
             return i;
         }
     }
@@ -46,8 +36,8 @@ int16_t Gamepad::num(StringSlice name) {
 }
 
 bool Gamepad::name(int16_t button, String& out) {
-    if ((0 <= button) && (button < gamepad_names->size())) {
-        out.assign(gamepad_names->at(button));
+    if ((0 <= button) && (button < sys.gamepad_names.size())) {
+        out.assign(sys.gamepad_names.at(button));
         return true;
     }
     return false;

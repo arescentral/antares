@@ -19,18 +19,19 @@
 #ifndef ANTARES_UI_SCREENS_SELECT_LEVEL_HPP_
 #define ANTARES_UI_SCREENS_SELECT_LEVEL_HPP_
 
-#include <vector>
 #include <sfz/sfz.hpp>
+#include <vector>
 
+#include "data/handle.hpp"
 #include "ui/screen.hpp"
 
 namespace antares {
 
-struct Scenario;
+struct Level;
 
 class SelectLevelScreen : public InterfaceScreen {
   public:
-    SelectLevelScreen(bool* cancelled, const Scenario** scenario);
+    SelectLevelScreen(bool* cancelled, Handle<Level>* level);
     ~SelectLevelScreen();
 
     virtual void become_front();
@@ -44,10 +45,10 @@ class SelectLevelScreen : public InterfaceScreen {
   private:
     enum Item {
         // Buttons:
-        OK = 0,
-        CANCEL = 1,
+        OK       = 0,
+        CANCEL   = 1,
         PREVIOUS = 2,
-        NEXT = 3,
+        NEXT     = 3,
 
         // Text box:
         NAME = 4,
@@ -62,12 +63,12 @@ class SelectLevelScreen : public InterfaceScreen {
 
     void draw_level_name() const;
 
-    bool* _cancelled;
-    size_t _index;
-    const Scenario** _scenario;
+    bool*            _cancelled;
+    size_t           _index;
+    Handle<Level>*   _level;
     std::vector<int> _chapters;
-    int _unlock_digits;
-    size_t _unlock_chapter;
+    int              _unlock_digits;
+    size_t           _unlock_chapter;
 
     DISALLOW_COPY_AND_ASSIGN(SelectLevelScreen);
 };

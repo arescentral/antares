@@ -39,8 +39,13 @@ def diff_test(queue, name, cmd, expected):
                 run(queue, name, ["diff", "-ru", "-x.*", expected, d]))
 
 
-def data_test(opts, queue, name, args=[]):
-    return diff_test(queue, name, ["out/cur/%s" % name] + args, "test/%s" % name)
+def data_test(opts, queue, name, args=[], smoke_args=[]):
+    if opts.smoke:
+        args += smoke_args
+        expected = "test/smoke/%s" % name
+    else:
+        expected = "test/%s" % name
+    return diff_test(queue, name, ["out/cur/%s" % name] + args, expected)
 
 
 def offscreen_test(opts, queue, name, args=[]):
@@ -68,14 +73,14 @@ def call(args):
     opts = args[1]
     queue = args[2]
     name = args[3]
-    args = list(*args[4:])
+    args = list(args[4:])
 
     sys.stdout = cStringIO.StringIO()
 
     queue.put((name, START,))
     try:
         start = time.time()
-        result = fn(opts, queue, name, args)
+        result = fn(opts, queue, name, *args)
         end = time.time()
         if result:
             queue.put((name, PASSED, end - start, sys.stdout.getvalue()))
@@ -88,6 +93,13 @@ def call(args):
 
 
 def main():
+    if sys.platform.startswith("linux"):
+        if "DISPLAY" not in os.environ:
+            # TODO(sfiera): determine when Xvfb is unnecessary and skip this.
+            print("no DISPLAY; using Xvfb")
+            os.execvp("xvfb-run",
+                      ["xvfb-run", "-s", "-screen 0 640x480x24"] + sys.argv)
+
     test_types = "unit data offscreen replay".split()
     parser = argparse.ArgumentParser()
     parser.add_argument("--smoke", action="store_true")
@@ -100,7 +112,7 @@ def main():
     tests = [
         (unit_test, opts, queue, "fixed-test"),
 
-        (data_test, opts, queue, "build-pix"),
+        (data_test, opts, queue, "build-pix", [], ["--text"]),
         (data_test, opts, queue, "object-data"),
         (data_test, opts, queue, "shapes"),
         (data_test, opts, queue, "tint"),
@@ -167,8 +179,6 @@ def handle_queue(queue, tests):
         msg = queue.get()
         for _ in in_progress:
             sys.stderr.write("\033[1A\033[2K")
-        for _ in completed:
-            sys.stderr.write("\033[1A\033[2K")
         name, cmd, params = msg[0], msg[1], msg[2:]
         if cmd in START:
             print_name = name
@@ -179,22 +189,20 @@ def handle_queue(queue, tests):
             del in_progress[name]
             duration, output = params
             if cmd == PASSED:
-                color = 32
+                color = 2
             else:
                 failed += 1
-                color = 31
+                color = 1
                 sys.stderr.write("%s failed:\n" % name)
                 sys.stderr.write("====================\n")
                 sys.stderr.write(output)
                 sys.stderr.write("====================\n")
-            rstr = "\033[1;%dm%s\033[0m" % (color, cmd)
+            rstr = "\033[1;38;5;%dm%s\033[0m" % (color, cmd)
             print_name = name
             if len(print_name) > 36:
                 print_name = name[:33] + "..."
-            completed.append("  %-40s %s in %0.2fs\n" % (print_name, rstr, duration))
+            sys.stderr.write("  %-40s %s in %0.2fs\n" % (print_name, rstr, duration))
             pending -= 1
-        for line in completed:
-            sys.stderr.write(line)
         for line in in_progress.values():
             sys.stderr.write(line)
     return failed

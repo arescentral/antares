@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include <sys/time.h>
 #include <getopt.h>
+#include <sys/time.h>
 #include <queue>
 #include <sfz/sfz.hpp>
 
@@ -46,14 +46,11 @@ using sfz::string_to_int;
 using std::unique_ptr;
 
 namespace args = sfz::args;
-namespace io = sfz::io;
+namespace io   = sfz::io;
 namespace utf8 = sfz::utf8;
 
 namespace antares {
 namespace {
-
-const int32_t kScreenWidth = 640;
-const int32_t kScreenHeight = 480;
 
 void main_screen(EventScheduler& scheduler);
 void options(EventScheduler& scheduler);
@@ -65,18 +62,16 @@ void main(int argc, char* const* argv) {
 
     String script;
     parser.add_argument("script", store(script))
-        .metavar("main-screen|options|mission-briefing|pause")
-        .required()
-        .help("the script to execute");
+            .metavar("main-screen|options|mission-briefing|pause")
+            .required()
+            .help("the script to execute");
 
     Optional<String> output_dir;
-    bool text = false;
+    bool             text = false;
     parser.add_argument("-o", "--output", store(output_dir))
-        .help("place output in this directory");
-    parser.add_argument("-t", "--text", store_const(text, true))
-        .help("produce text output");
-    parser.add_argument("-h", "--help", help(parser, 0))
-        .help("display this help screen");
+            .help("place output in this directory");
+    parser.add_argument("-t", "--text", store_const(text, true)).help("produce text output");
+    parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
 
     String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
@@ -89,8 +84,8 @@ void main(int argc, char* const* argv) {
     }
 
     NullPrefsDriver prefs;
-    EventScheduler scheduler;
-    NullLedger ledger;
+    EventScheduler  scheduler;
+    NullLedger      ledger;
     if (script == "main-screen") {
         main_screen(scheduler);
     } else if (script == "options") {
@@ -113,10 +108,10 @@ void main(int argc, char* const* argv) {
     }
 
     if (text) {
-        TextVideoDriver video(Preferences::preferences()->screen_size(), scheduler, output_dir);
-        video.loop(new Master(14586));
+        TextVideoDriver video({640, 480}, output_dir);
+        video.loop(new Master(14586), scheduler);
     } else {
-        OffscreenVideoDriver video(Preferences::preferences()->screen_size(), output_dir);
+        OffscreenVideoDriver video({640, 480}, output_dir);
         video.loop(new Master(14586), scheduler);
     }
 }
@@ -205,7 +200,7 @@ void mission_briefing(EventScheduler& scheduler, Ledger& ledger) {
 }
 
 void pause(EventScheduler& scheduler) {
-    scheduler.schedule_event(unique_ptr<Event>(new MouseMoveEvent(0, Point(320, 240))));
+    scheduler.schedule_event(unique_ptr<Event>(new MouseMoveEvent(wall_time(), Point(320, 240))));
 
     // Skip the intro.  Start the first tutorial and skip the prologue.
     scheduler.schedule_key(Keys::Q, 1756, 1757);

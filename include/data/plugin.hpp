@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2012 The Antares Authors
+// Copyright (C) 2016 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,15 +16,30 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "game/time.hpp"
+#ifndef ANTARES_DATA_PLUGIN_HPP_
+#define ANTARES_DATA_PLUGIN_HPP_
 
-#include "math/units.hpp"
-#include "video/driver.hpp"
+#include <vector>
+
+#include "data/level.hpp"
 
 namespace antares {
 
-int64_t now_usecs() {
-    return VideoDriver::driver()->usecs();
-}
+struct ScenarioGlobals {
+    scenarioInfoType                  meta;
+    std::vector<Level>                levels;
+    std::vector<Level::InitialObject> initials;
+    std::vector<Level::Condition>     conditions;
+    std::vector<Level::BriefPoint>    briefings;
+    std::vector<BaseObject>           objects;
+    std::vector<Action>               actions;
+    std::vector<Race>                 races;
+};
+
+extern ScenarioGlobals plug;
+
+void PluginInit();
 
 }  // namespace antares
+
+#endif  // ANTARES_DATA_PLUGIN_HPP_

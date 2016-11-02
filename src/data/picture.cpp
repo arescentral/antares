@@ -19,6 +19,7 @@
 #include "data/picture.hpp"
 
 #include "data/resource.hpp"
+#include "game/sys.hpp"
 #include "video/driver.hpp"
 
 using sfz::BytesSlice;
@@ -29,12 +30,10 @@ using sfz::format;
 
 namespace antares {
 
-Picture::Picture(int32_t id, bool hidpi):
-        Picture(String(format("pictures/{0}", id))) { }
+Picture::Picture(int32_t id, bool hidpi) : Picture(String(format("pictures/{0}", id))) {}
 
-Picture::Picture(StringSlice resource, bool hidpi):
-        ArrayPixMap(0, 0),
-        _scale(hidpi ? VideoDriver::driver()->scale() : 1) {
+Picture::Picture(StringSlice resource, bool hidpi)
+        : ArrayPixMap(0, 0), _scale(hidpi ? sys.video->scale() : 1) {
     while (true) {
         try {
             _path.assign(resource);
@@ -43,7 +42,7 @@ Picture::Picture(StringSlice resource, bool hidpi):
             } else {
                 _path.append(".png");
             }
-            Resource rsrc(_path);
+            Resource   rsrc(_path);
             BytesSlice in(rsrc.data());
             read(in, *this);
             break;
@@ -58,7 +57,7 @@ Picture::Picture(StringSlice resource, bool hidpi):
 }
 
 Texture Picture::texture() const {
-    return VideoDriver::driver()->texture(format("/{0}", _path), *this);
+    return sys.video->texture(format("/{0}", _path), *this);
 }
 
 }  // namespace antares

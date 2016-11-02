@@ -22,54 +22,39 @@
 #include "data/handle.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
+#include "math/fixed.hpp"
 
 namespace antares {
 
 const int32_t kNoSpriteTable = -1;
 
-const int16_t kSpriteTableColorShift = 11;
+const int16_t kSpriteTableColorShift  = 11;
 const int16_t kSpriteTableColorIDMask = 0x7800;  // bits 11-14
 // this makes the max legal sprite id 2047
 
-const int32_t SCALE_SCALE   = 4096;
-const int32_t MIN_SCALE     = 256;
-const int32_t MAX_SCALE     = 32768;
-const int32_t MAX_SCALE_PIX = 32;  // the maximum size a single scaled pixel can be
-                                   // (should be 32)
-
-const int32_t kOneEighthScale   = SCALE_SCALE / 8;
-const int32_t kOneQuarterScale  = SCALE_SCALE / 4;
-const int32_t kOneHalfScale     = SCALE_SCALE / 2;
-const int32_t kTimesTwoScale    = SCALE_SCALE * 2;
-
-const int32_t SHIFT_SCALE       = 12;
-
 enum {
-    kNoSpriteLayer      = 0,
-    kFirstSpriteLayer   = 1,
-    kMiddleSpriteLayer  = 2,
-    kLastSpriteLayer    = 3,
+    kNoSpriteLayer     = 0,
+    kFirstSpriteLayer  = 1,
+    kMiddleSpriteLayer = 2,
+    kLastSpriteLayer   = 3,
 };
 
-const int32_t kSpriteMaxSize = 2048;
+const int32_t kSpriteMaxSize  = 2048;
 const int32_t kBlipThreshhold = kOneQuarterScale;
 
 const size_t MAX_PIX_SIZE = 480;
 
-const size_t kMaxPixTableEntry = 60;
-const int32_t kNoSprite = -1;
+const size_t  kMaxPixTableEntry = 60;
+const int32_t kNoSprite         = -1;
 
-enum spriteStyleType {
-    spriteNormal = 0,
-    spriteColor = 2
-};
+enum spriteStyleType { spriteNormal = 0, spriteColor = 2 };
 
 typedef void (*draw_tiny_t)(const Rect& rect, const RgbColor& color);
 
 class Sprite {
   public:
     static Sprite* get(int number);
-    static Handle<Sprite> none() { return Handle<Sprite>(-1); }
+    static Handle<Sprite>     none() { return Handle<Sprite>(-1); }
     static HandleList<Sprite> all() { return HandleList<Sprite>(0, size); }
 
     Sprite();
@@ -89,7 +74,7 @@ class Sprite {
     draw_tiny_t     draw_tiny;
 
   private:
-    friend void SpriteHandlingInit();
+    friend void         SpriteHandlingInit();
     static const size_t size = 500;
 };
 
@@ -100,25 +85,30 @@ extern int32_t gAbsoluteScale;
 // The regular variant calculates the final scale as ``(value * scale) / 4096``.  The evil variant
 // calculates the final scale as ``(value * scale) >> 12``, which results in off-by-one errors when
 // `value` is negative.
-int32_t scale_by(int32_t value, int32_t scale);
+Fixed scale_by(Fixed value, int32_t scale);
+Fixed evil_scale_by(Fixed value, int32_t scale);
 int32_t evil_scale_by(int32_t value, int32_t scale);
+
+class Pix {
+  public:
+    void          reset();
+    NatePixTable* add(int16_t id);
+    NatePixTable* get(int16_t id);
+
+  private:
+    std::map<int16_t, NatePixTable> pix;
+};
 
 void SpriteHandlingInit();
 void ResetAllSprites();
 Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t scale);
-void ResetAllPixTables();
-void SetAllPixTablesNoKeep();
-void KeepPixTable(int16_t resource_id);
-void RemoveAllUnusedPixTables();
-NatePixTable* AddPixTable(int16_t resource_id);
-NatePixTable* GetPixTable(int16_t resource_id);
 Handle<Sprite> AddSprite(
-        Point where, NatePixTable* table, int16_t resID, int16_t whichShape, int32_t scale, int32_t size,
-        int16_t layer, const RgbColor& color);
+        Point where, NatePixTable* table, int16_t resID, int16_t whichShape, int32_t scale,
+        int32_t size, int16_t layer, const RgbColor& color);
 void RemoveSprite(Handle<Sprite> sprite);
 void draw_sprites();
 void CullSprites();
 
 }  // namespace antares
 
-#endif // ANTARES_DRAWING_SPRITE_HANDLING_HPP_
+#endif  // ANTARES_DRAWING_SPRITE_HANDLING_HPP_

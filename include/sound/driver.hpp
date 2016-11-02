@@ -25,8 +25,8 @@ namespace antares {
 
 class Sound {
   public:
-    Sound() { }
-    virtual ~Sound() { }
+    Sound() {}
+    virtual ~Sound() {}
 
     virtual void play() = 0;
     virtual void loop() = 0;
@@ -37,12 +37,12 @@ class Sound {
 
 class SoundChannel {
   public:
-    SoundChannel() { }
-    virtual ~SoundChannel() { }
+    SoundChannel() {}
+    virtual ~SoundChannel() {}
 
-    virtual void activate() = 0;
+    virtual void activate()          = 0;
     virtual void amp(uint8_t volume) = 0;
-    virtual void quiet() = 0;
+    virtual void quiet()             = 0;
 
   private:
     DISALLOW_COPY_AND_ASSIGN(SoundChannel);
@@ -53,9 +53,9 @@ class SoundDriver {
     SoundDriver();
     virtual ~SoundDriver();
 
-    virtual std::unique_ptr<SoundChannel> open_channel() = 0;
+    virtual std::unique_ptr<SoundChannel> open_channel()           = 0;
     virtual std::unique_ptr<Sound> open_sound(sfz::PrintItem path) = 0;
-    virtual void set_global_volume(uint8_t volume) = 0;
+    virtual void set_global_volume(uint8_t volume)                 = 0;
 
     static SoundDriver* driver();
 
@@ -65,7 +65,7 @@ class SoundDriver {
 
 class NullSoundDriver : public SoundDriver {
   public:
-    NullSoundDriver() { }
+    NullSoundDriver() {}
 
     virtual std::unique_ptr<SoundChannel> open_channel();
     virtual std::unique_ptr<Sound> open_sound(sfz::PrintItem path);
@@ -88,8 +88,8 @@ class LogSoundDriver : public SoundDriver {
     class LogChannel;
 
     sfz::ScopedFd _sound_log;
-    int _last_id;
-    LogChannel* _active_channel;
+    int           _last_id;
+    LogChannel*   _active_channel;
 };
 
 }  // namespace antares

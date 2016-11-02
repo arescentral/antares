@@ -20,34 +20,69 @@
 #define ANTARES_MATH_UNITS_HPP_
 
 #include <stdint.h>
+#include <chrono>
 
 namespace antares {
 
+// The three units of time in Antares are the microsecond, the second,
+// and the tick.
+//
+// There are 60 ticks in a second. Also, every third tick is a major
+// tick, so there are 20 major ticks in a second. Major ticks are when
+// most things happen: ships collide, decisions are made, and actions
+// are executed. During the two minor ticks between major ticks, ships
+// and stars move, but don't collide. Minor ticks may be skipped if
+// drawing is slow, but will make the game look smoother if they aren't.
+//
+// Antares actually uses a unit for seconds that is slightly longer than
+// a second. There are exactly 16667 microseconds in a tick, and 60
+// ticks in a second, which gives us 1000020 microseconds in a second.
+// This makes it possible to implicitly convert seconds to ticks to
+// microseconds.
+typedef std::chrono::microseconds usecs;
+typedef std::chrono::duration<usecs::rep, std::ratio<1000020, 1000000>> secs;
+typedef std::chrono::duration<usecs::rep, std::ratio<16667, 1000000>>   ticks;
+
+const ticks kMajorTick     = ticks(3);
+const ticks kMinorTick     = ticks(1);
+const ticks kConditionTick = ticks(90);
+
 // Time units
+struct GameStart {
+    typedef ticks duration;
+};
+struct Wall {
+    typedef usecs duration;
+};
 
-// in microseconds--essentially one tick (1/60th of second)
-const uint64_t kTimeUnit = 16667;
-
-inline int64_t ticks_to_usecs(int64_t ticks) { return ticks * kTimeUnit; }
-inline int64_t usecs_to_ticks(int64_t usecs) { return usecs / kTimeUnit; }
-inline int64_t add_ticks(int64_t usecs, int ticks) { return usecs + (ticks * kTimeUnit); }
-
-// max number of time units to move by at once
-const int32_t kMaxTimePerCycle = 3;
-
-// every time this many cycles pass, we have to process player & computer decisions
-const uint32_t kDecideEveryCycles = 3;
+typedef std::chrono::time_point<GameStart> game_ticks;
+typedef std::chrono::time_point<Wall>      wall_time;
+typedef std::chrono::time_point<Wall, ticks> wall_ticks;
 
 // Spatial units
 
-const int32_t kUniversalCenter = 1073741823;
+const int32_t kUniversalCenter         = 1073741823;
 const int32_t kMaximumRelevantDistance = 46340;
-const int32_t kMaximumRelevantDistanceSquared = kMaximumRelevantDistance * kMaximumRelevantDistance;
-const int32_t kMaximumAngleDistance = 32767;      // maximum distance we can calc angle for
+const int32_t kMaximumRelevantDistanceSquared =
+        kMaximumRelevantDistance * kMaximumRelevantDistance;
+const int32_t kMaximumAngleDistance = 32767;  // maximum distance we can calc angle for
 
-const int32_t kSubSectorSize = 512;
+const int32_t kSubSectorSize  = 512;
 const int32_t kSubSectorShift = 9;
+
+const int32_t SCALE_SCALE   = 4096;
+const int32_t MIN_SCALE     = 256;
+const int32_t MAX_SCALE     = 32768;
+const int32_t MAX_SCALE_PIX = 32;  // the maximum size a single scaled pixel can be
+                                   // (should be 32)
+
+const int32_t kOneEighthScale  = SCALE_SCALE / 8;
+const int32_t kOneQuarterScale = SCALE_SCALE / 4;
+const int32_t kOneHalfScale    = SCALE_SCALE / 2;
+const int32_t kTimesTwoScale   = SCALE_SCALE * 2;
+
+const int32_t SHIFT_SCALE = 12;
 
 }  // namespace antares
 
-#endif // ANTARES_MATH_UNITS_HPP_
+#endif  // ANTARES_MATH_UNITS_HPP_

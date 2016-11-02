@@ -18,13 +18,14 @@
 
 #include "drawing/build-pix.hpp"
 
-#include <vector>
 #include <sfz/sfz.hpp>
+#include <vector>
 
 #include "data/picture.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
+#include "game/sys.hpp"
 
 using sfz::BytesSlice;
 using sfz::Exception;
@@ -43,17 +44,17 @@ namespace {
 
 class PixDraw {
   public:
-    PixDraw(Point origin, int32_t width)
-            : _bounds(origin, {width, 0}) { }
+    PixDraw(Point origin, int32_t width) : _bounds(origin, {width, 0}) {}
 
     void set_background(const Texture& texture) {
-        _background = &texture;
+        _background       = &texture;
         _background_start = _bounds.height();
     }
 
     void add_picture(const Texture& texture) {
         Rect surround(
-            _bounds.left, _bounds.bottom, _bounds.right, _bounds.bottom + texture.size().height);
+                _bounds.left, _bounds.bottom, _bounds.right,
+                _bounds.bottom + texture.size().height);
         extend(texture.size().height);
         Rect dest = texture.size().as_rect();
         dest.center_in(surround);
@@ -94,29 +95,28 @@ class PixDraw {
     Rect _bounds;
 
     const Texture* _background;
-    int _background_start;
+    int            _background_start;
 };
 
 }  // namespace
 
-BuildPix::BuildPix(int text_id, int width):
-        _size({width, 0}) {
+BuildPix::BuildPix(int text_id, int width) : _size({width, 0}) {
     Resource rsrc("text", "txt", text_id);
 
-    BytesSlice data = rsrc.data();
-    String text(utf8::decode(data));
-    bool in_section_header = (text.size() >= 2) && (text.slice(0, 2) == "#+");
-    size_t start = 0;
-    const size_t end = text.size();
+    BytesSlice     data = rsrc.data();
+    String         text(utf8::decode(data));
+    bool           in_section_header = (text.size() >= 2) && (text.slice(0, 2) == "#+");
+    size_t         start             = 0;
+    const size_t   end               = text.size();
     vector<String> raw_lines;
     for (size_t i = start; i != end; ++i) {
         if (((end - i) >= 3) && (text.slice(i, 3) == "\n#+")) {
             raw_lines.emplace_back(text.slice(start, i - start));
-            start = i + 1;
+            start             = i + 1;
             in_section_header = true;
         } else if (in_section_header && (text.at(i) == '\n')) {
             raw_lines.emplace_back(text.slice(start, i - start));
-            start = i + 1;
+            start             = i + 1;
             in_section_header = false;
         }
     }
@@ -124,7 +124,7 @@ BuildPix::BuildPix(int text_id, int width):
         raw_lines.emplace_back(text.slice(start));
     }
 
-    for (const auto& line: raw_lines) {
+    for (const auto& line : raw_lines) {
         if (line.size() >= 2 && line.slice(0, 2) == "#+") {
             if (line.size() > 2) {
                 if (line.at(2) == 'B') {
@@ -136,9 +136,7 @@ BuildPix::BuildPix(int text_id, int width):
                     }
                     Picture pict(id);
                     _lines.push_back(Line{
-                        Line::BACKGROUND,
-                        VideoDriver::driver()->texture("-", pict),
-                        nullptr,
+                            Line::BACKGROUND, Picture(id).texture(), nullptr,
                     });
                 } else {
                     int32_t id;
@@ -147,15 +145,13 @@ BuildPix::BuildPix(int text_id, int width):
                     }
                     Picture pict(id);
                     _lines.push_back(Line{
-                        Line::PICTURE,
-                        VideoDriver::driver()->texture("-", pict),
-                        nullptr,
+                            Line::PICTURE, Picture(id).texture(), nullptr,
                     });
                 }
             }
         } else {
-            unique_ptr<StyledText> styled(new StyledText(title_font));
-            auto red = GetRGBTranslateColorShade(RED, VERY_LIGHT);
+            unique_ptr<StyledText> styled(new StyledText(sys.fonts.title));
+            auto                   red = GetRGBTranslateColorShade(RED, VERY_LIGHT);
             styled->set_fore_color(red);
             styled->set_retro_text(line);
             styled->wrap_to(_size.width - 11, 0, 2);
@@ -163,7 +159,7 @@ BuildPix::BuildPix(int text_id, int width):
         }
     }
 
-    for (const auto& line: _lines) {
+    for (const auto& line : _lines) {
         switch (line.type) {
             case Line::PICTURE: _size.height += line.texture.size().height; break;
             case Line::TEXT: _size.height += line.text->height(); break;
@@ -174,7 +170,7 @@ BuildPix::BuildPix(int text_id, int width):
 
 void BuildPix::draw(Point origin) const {
     PixDraw draw(origin, _size.width);
-    for (const auto& line: _lines) {
+    for (const auto& line : _lines) {
         switch (line.type) {
             case Line::PICTURE: draw.add_picture(line.texture); break;
             case Line::TEXT: draw.add_text(*line.text); break;

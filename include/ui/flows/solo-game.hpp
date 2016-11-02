@@ -21,6 +21,7 @@
 
 #include <sfz/sfz.hpp>
 
+#include "game/input-source.hpp"
 #include "game/main.hpp"
 #include "ui/card.hpp"
 #include "ui/screens/play-again.hpp"
@@ -53,11 +54,11 @@ class SoloGame : public Card {
     void debriefing_done();
     void epilogue_done();
 
-    bool _cancelled;
-    const Scenario* _scenario;
-    GameResult _game_result;
-    int32_t _seconds;
+    bool                  _cancelled;
+    Handle<Level>         _level;
+    GameResult            _game_result;
     PlayAgainScreen::Item _play_again;
+    RealInputSource       _input_source;
 };
 
 }  // namespace antares

@@ -33,12 +33,12 @@ void draw_compat_plus(PixMap* destPix, const RgbColor& color);
 void draw_compat_diamond(PixMap* destPix, const RgbColor& color);
 void draw_vbracket(const Rects& rects, const Rect& rect, const RgbColor& color);
 void draw_shaded_rect(
-        const Rects& rects, Rect rect,
-        const RgbColor& fill_color, const RgbColor& light_color, const RgbColor& dark_color);
+        const Rects& rects, Rect rect, const RgbColor& fill_color, const RgbColor& light_color,
+        const RgbColor& dark_color);
 void draw_shaded_rect(
-        const Rects& rects, Rect rect,
-        uint8_t hue, uint8_t fill_color, uint8_t light_color, uint8_t dark_color);
+        const Rects& rects, Rect rect, uint8_t hue, uint8_t fill_color, uint8_t light_color,
+        uint8_t dark_color);
 
 }  // namespace antares
 
-#endif // ANTARES_DRAWING_SHAPES_HPP_
+#endif  // ANTARES_DRAWING_SHAPES_HPP_

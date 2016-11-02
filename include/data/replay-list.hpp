@@ -19,15 +19,15 @@
 #ifndef ANTARES_DATA_REPLAY_LIST_HPP_
 #define ANTARES_DATA_REPLAY_LIST_HPP_
 
-#include <vector>
 #include <sfz/sfz.hpp>
+#include <vector>
 
 namespace antares {
 
 class ReplayList {
   public:
     ReplayList();
-    size_t size() const;
+    size_t  size() const;
     int16_t at(size_t index) const;
 
   private:
@@ -38,4 +38,4 @@ class ReplayList {
 
 }  // namespace antares
 
-#endif // ANTARES_DATA_REPLAY_LIST_HPP_
+#endif  // ANTARES_DATA_REPLAY_LIST_HPP_

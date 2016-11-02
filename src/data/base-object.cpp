@@ -18,7 +18,7 @@
 
 // Space Object Handling >> MUST BE INITED _AFTER_ SCENARIOMAKER << (uses Ares Scenarios file)
 
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
 
 #include <sfz/sfz.hpp>
 
@@ -28,61 +28,62 @@ using sfz::read;
 
 namespace antares {
 
-static const uint32_t kPeriodicActionTimeMask  = 0xff000000;
-static const uint32_t kPeriodicActionRangeMask = 0x00ff0000;
-static const uint32_t kPeriodicActionNotMask   = 0x0000ffff;
-static const int32_t kPeriodicActionTimeShift  = 24;
-static const int32_t kPeriodicActionRangeShift = 16;
+static const uint32_t kPeriodicActionTimeMask   = 0xff000000;
+static const uint32_t kPeriodicActionRangeMask  = 0x00ff0000;
+static const uint32_t kPeriodicActionNotMask    = 0x0000ffff;
+static const int32_t  kPeriodicActionTimeShift  = 24;
+static const int32_t  kPeriodicActionRangeShift = 16;
 
-static const uint32_t kDestroyActionNotMask        = 0x7fffffff;
-static const uint32_t kDestroyActionDontDieFlag    = 0x80000000;
+static const uint32_t kDestroyActionNotMask     = 0x7fffffff;
+static const uint32_t kDestroyActionDontDieFlag = 0x80000000;
 
 static void read_destroy(ReadSource in, BaseObject& object) {
-    auto start = read<int32_t>(in);
-    auto count = read<int32_t>(in);
+    auto start            = read<int32_t>(in);
+    auto count            = read<int32_t>(in);
     object.destroyDontDie = count & kDestroyActionDontDieFlag;
     count &= kDestroyActionNotMask;
-    auto end = (start >= 0) ? (start + count) : start;
+    auto end       = (start >= 0) ? (start + count) : start;
     object.destroy = {start, end};
 }
 
 static void read_expire(ReadSource in, BaseObject& object) {
-    auto start = read<int32_t>(in);
-    auto count = read<int32_t>(in);
+    auto start           = read<int32_t>(in);
+    auto count           = read<int32_t>(in);
     object.expireDontDie = count & kDestroyActionDontDieFlag;
     count &= kDestroyActionNotMask;
-    auto end = (start >= 0) ? (start + count) : start;
+    auto end      = (start >= 0) ? (start + count) : start;
     object.expire = {start, end};
 }
 
 static void read_create(ReadSource in, BaseObject& object) {
-    auto start = read<int32_t>(in);
-    auto count = read<int32_t>(in);
-    auto end = (start >= 0) ? (start + count) : start;
+    auto start    = read<int32_t>(in);
+    auto count    = read<int32_t>(in);
+    auto end      = (start >= 0) ? (start + count) : start;
     object.create = {start, end};
 }
 
 static void read_collide(ReadSource in, BaseObject& object) {
-    auto start = read<int32_t>(in);
-    auto count = read<int32_t>(in);
-    auto end = (start >= 0) ? (start + count) : start;
+    auto start     = read<int32_t>(in);
+    auto count     = read<int32_t>(in);
+    auto end       = (start >= 0) ? (start + count) : start;
     object.collide = {start, end};
 }
 
 static void read_activate(ReadSource in, BaseObject& object) {
-    auto start = read<int32_t>(in);
-    auto count = read<int32_t>(in);
-    object.activatePeriod = (count & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift;
-    object.activatePeriodRange = (count & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift;
+    auto start            = read<int32_t>(in);
+    auto count            = read<int32_t>(in);
+    object.activatePeriod = ticks((count & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift);
+    object.activatePeriodRange =
+            ticks((count & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift);
     count &= kPeriodicActionNotMask;
-    auto end = (start >= 0) ? (start + count) : start;
+    auto end        = (start >= 0) ? (start + count) : start;
     object.activate = {start, end};
 }
 
 static void read_arrive(ReadSource in, BaseObject& object) {
-    auto start = read<int32_t>(in);
-    auto count = read<int32_t>(in);
-    auto end = (start >= 0) ? (start + count) : start;
+    auto start    = read<int32_t>(in);
+    auto count    = read<int32_t>(in);
+    auto end      = (start >= 0) ? (start + count) : start;
     object.arrive = {start, end};
 }
 
@@ -90,8 +91,10 @@ void read_from(ReadSource in, BaseObject& object) {
     uint8_t section[32];
 
     read(in, object.attributes);
-    if ((object.attributes & kIsSelfAnimated) && (object.attributes & kShapeFromDirection)) {
-        object.attributes ^= kShapeFromDirection;
+    if (object.attributes & kIsSelfAnimated) {
+        object.attributes &= ~(kShapeFromDirection | kIsVector);
+    } else if (object.attributes & kShapeFromDirection) {
+        object.attributes &= ~kIsVector;
     }
 
     read(in, object.baseClass);
@@ -115,8 +118,20 @@ void read_from(ReadSource in, BaseObject& object) {
     read(in, object.damage);
     read(in, object.energy);
 
-    read(in, object.initialAge);
-    read(in, object.initialAgeRange);
+    object.initialAge = ticks(read<int32_t>(in));
+
+    int32_t age_range = read<int32_t>(in);
+    if (age_range >= 0) {
+        object.initialAgeRange = ticks(age_range);
+    } else {
+        object.initialAgeRange = ticks(0);
+    }
+
+    if (object.attributes & kNeutralDeath) {
+        object.occupy_count = age_range;
+    } else {
+        object.occupy_count = -1;
+    }
 
     read(in, object.naturalScale);
 
@@ -124,13 +139,16 @@ void read_from(ReadSource in, BaseObject& object) {
     read(in, object.pixResID);
     read(in, object.tinySize);
     read(in, object.shieldColor);
+    if ((object.shieldColor != 0xFF) && (object.shieldColor != 0)) {
+        object.shieldColor = GetTranslateColorShade(object.shieldColor, 15);
+    }
     in.shift(1);
 
     read(in, object.initialDirection);
     read(in, object.initialDirectionRange);
 
-    object.pulse.base = Handle<BaseObject>(read<int32_t>(in));
-    object.beam.base = Handle<BaseObject>(read<int32_t>(in));
+    object.pulse.base   = Handle<BaseObject>(read<int32_t>(in));
+    object.beam.base    = Handle<BaseObject>(read<int32_t>(in));
     object.special.base = Handle<BaseObject>(read<int32_t>(in));
 
     read(in, object.pulse.positionNum);
@@ -159,12 +177,12 @@ void read_from(ReadSource in, BaseObject& object) {
     read(in, object.buildFlags);
     read(in, object.orderFlags);
 
-    object.levelKeyTag = (object.buildFlags & kLevelKeyTag) >> kLevelKeyTagShift;
+    object.levelKeyTag  = (object.buildFlags & kLevelKeyTag) >> kLevelKeyTagShift;
     object.engageKeyTag = (object.buildFlags & kEngageKeyTag) >> kEngageKeyTagShift;
-    object.orderKeyTag = (object.orderFlags & kOrderKeyTag) >> kOrderKeyTagShift;
+    object.orderKeyTag  = (object.orderFlags & kOrderKeyTag) >> kOrderKeyTagShift;
 
     read(in, object.buildRatio);
-    read(in, object.buildTime);
+    object.buildTime = 3 * ticks(read<uint32_t>(in) / 10);
     read(in, object.skillNum);
     read(in, object.skillDen);
     read(in, object.skillNumAdj);
@@ -178,8 +196,13 @@ void read_from(ReadSource in, BaseObject& object) {
         read(sub, object.frame.rotation);
     } else if (object.attributes & kIsSelfAnimated) {
         read(sub, object.frame.animation);
-    } else if (object.attributes & kIsBeam) {
-        read(sub, object.frame.beam);
+    } else if (object.attributes & kIsVector) {
+        read(sub, object.frame.vector);
+        if (object.frame.vector.color > 16) {
+            object.frame.vector.color = GetTranslateIndex(object.frame.vector.color);
+        } else {
+            object.frame.vector.color = 0;
+        }
     } else {
         read(sub, object.frame.weapon);
     }
@@ -193,27 +216,27 @@ void read_from(ReadSource in, objectFrameType::Rotation& rotation) {
 }
 
 void read_from(ReadSource in, objectFrameType::Animation& animation) {
-    read(in, animation.firstShape);
-    read(in, animation.lastShape);
+    animation.firstShape = Fixed::from_long(read<int32_t>(in));
+    animation.lastShape  = Fixed::from_long(read<int32_t>(in));
     read(in, animation.frameDirection);
     read(in, animation.frameDirectionRange);
     read(in, animation.frameSpeed);
     read(in, animation.frameSpeedRange);
-    read(in, animation.frameShape);
-    read(in, animation.frameShapeRange);
+    animation.frameShape      = Fixed::from_long(read<int32_t>(in));
+    animation.frameShapeRange = Fixed::from_long(read<int32_t>(in));
 }
 
-void read_from(ReadSource in, objectFrameType::Beam& beam) {
-    read(in, beam.color);
-    read(in, beam.kind);
-    read(in, beam.accuracy);
-    read(in, beam.range);
+void read_from(ReadSource in, objectFrameType::Vector& vector) {
+    read(in, vector.color);
+    read(in, vector.kind);
+    read(in, vector.accuracy);
+    read(in, vector.range);
 }
 
 void read_from(ReadSource in, objectFrameType::Weapon& weapon) {
     read(in, weapon.usage);
     read(in, weapon.energyCost);
-    read(in, weapon.fireTime);
+    weapon.fireTime = ticks(read<int32_t>(in));
     read(in, weapon.ammo);
     read(in, weapon.range);
     read(in, weapon.inverseSpeed);

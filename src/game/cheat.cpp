@@ -18,6 +18,7 @@
 
 #include "game/cheat.hpp"
 
+#include <algorithm>
 #include <sfz/sfz.hpp>
 
 #include "data/string-list.hpp"
@@ -26,6 +27,7 @@
 #include "game/messages.hpp"
 #include "game/player-ship.hpp"
 #include "game/space-object.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 #include "math/fixed.hpp"
 
@@ -38,66 +40,53 @@ using std::unique_ptr;
 
 namespace antares {
 
-const int16_t kCheatStringListID    = 750;
-const int16_t kCheatFeedbackOnID    = 751;
-const int16_t kCheatFeedbackOffID   = 752;
+const int32_t kCheatCodeValue = 5;
 
-const int32_t kCheatCodeValue       = 5;
-
-const int16_t kActivateCheatCheat   = 1;
-const int16_t kAutoPlayCheat        = 2;
-const int16_t kPayMoneyCheat        = 3;
-const int16_t kNameObjectCheat      = 4;
-const int16_t kObserverCheat        = 5;  // makes your ship appear to not be engageable
-const int16_t kBuildFastCheat       = 6;
-const int16_t kRaisePayRateCheat    = 7;  // determines your payscale
-const int16_t kLowerPayRateCheat    = 8;
-
-static ANTARES_GLOBAL unique_ptr<StringList> gAresCheatStrings;
+const int16_t kActivateCheatCheat = 1;
+const int16_t kAutoPlayCheat      = 2;
+const int16_t kPayMoneyCheat      = 3;
+const int16_t kNameObjectCheat    = 4;
+const int16_t kObserverCheat      = 5;  // makes your ship appear to not be engageable
+const int16_t kBuildFastCheat     = 6;
+const int16_t kRaisePayRateCheat  = 7;  // determines your payscale
+const int16_t kLowerPayRateCheat  = 8;
 
 void CheatFeedback(int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer);
-void CheatFeedbackPlus(int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer, PrintItem extra);
-
-void AresCheatInit() {
-    gAresCheatStrings.reset(new StringList(kCheatStringListID));
-}
-
-void CleanupAresCheat() {
-    gAresCheatStrings.reset();
-}
+void CheatFeedbackPlus(
+        int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer, PrintItem extra);
 
 int16_t GetCheatNumFromString(const StringSlice& s) {
     String code_string;
-    for (Rune r: s) {
+    for (Rune r : s) {
         code_string.append(1, r + kCheatCodeValue);
     }
-    return gAresCheatStrings.get()->index_of(code_string) + 1;
+    auto it = std::find(sys.cheat.codes.begin(), sys.cheat.codes.end(), code_string);
+    if (it == sys.cheat.codes.end()) {
+        return -1;
+    }
+    return it - sys.cheat.codes.begin() + 1;
 }
 
 void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
-    int32_t                    i;
-
-    if ( whichCheat == kNameObjectCheat)
-    {
+    if (whichCheat == kNameObjectCheat) {
         whichPlayer->cheats() |= kNameObjectBit;
-        CheatFeedback( whichCheat, true, whichPlayer);
+        CheatFeedback(whichCheat, true, whichPlayer);
         return;
     }
 
-    switch( whichCheat)
-    {
+    switch (whichCheat) {
         case kActivateCheatCheat:
-            for (auto adm: Admiral::all()) {
+            for (auto adm : Admiral::all()) {
                 adm->cheats() = 0;
             }
-            CheatFeedback( whichCheat, false, whichPlayer);
+            CheatFeedback(whichCheat, false, whichPlayer);
             break;
 
         case kPayMoneyCheat:
-            whichPlayer->pay_absolute(mLongToFixed(5000));
-            whichPlayer->pay_absolute(mLongToFixed(5000));
-            whichPlayer->pay_absolute(mLongToFixed(5000));
-            CheatFeedback( whichCheat, true, whichPlayer);
+            whichPlayer->pay_absolute(Fixed::from_long(5000));
+            whichPlayer->pay_absolute(Fixed::from_long(5000));
+            whichPlayer->pay_absolute(Fixed::from_long(5000));
+            CheatFeedback(whichCheat, true, whichPlayer);
             break;
 
         case kAutoPlayCheat:
@@ -113,18 +102,20 @@ void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
         case kObserverCheat:
             if (whichPlayer->flagship().get()) {
                 whichPlayer->flagship()->attributes &= ~(kCanBeEngaged | kHated);
-                CheatFeedback( whichCheat, true, whichPlayer);
+                CheatFeedback(whichCheat, true, whichPlayer);
             }
             break;
 
         case kRaisePayRateCheat:
-            whichPlayer->set_earning_power(whichPlayer->earning_power() + 0x20);
-            CheatFeedbackPlus(whichCheat, true, whichPlayer, fixed(whichPlayer->earning_power()));
+            whichPlayer->set_earning_power(
+                    whichPlayer->earning_power() + Fixed::from_float(0.125));
+            CheatFeedbackPlus(whichCheat, true, whichPlayer, Fixed(whichPlayer->earning_power()));
             break;
 
         case kLowerPayRateCheat:
-            whichPlayer->set_earning_power(whichPlayer->earning_power() - 0x20);
-            CheatFeedbackPlus(whichCheat, true, whichPlayer, fixed(whichPlayer->earning_power()));
+            whichPlayer->set_earning_power(
+                    whichPlayer->earning_power() - Fixed::from_float(0.125));
+            CheatFeedbackPlus(whichCheat, true, whichPlayer, Fixed(whichPlayer->earning_power()));
             break;
     }
 }
@@ -133,9 +124,9 @@ void CheatFeedback(int16_t whichCheat, bool activate, Handle<Admiral> whichPlaye
     String admiral_name(GetAdmiralName(whichPlayer));
     String feedback;
     if (activate) {
-        feedback.assign(StringList(kCheatFeedbackOnID).at(whichCheat - 1));
+        feedback.assign(sys.cheat.on.at(whichCheat - 1));
     } else {
-        feedback.assign(StringList(kCheatFeedbackOffID).at(whichCheat - 1));
+        feedback.assign(sys.cheat.off.at(whichCheat - 1));
     }
     Messages::add(format("{0}{1}", admiral_name, feedback));
 }
@@ -145,9 +136,9 @@ void CheatFeedbackPlus(
     String admiral_name(GetAdmiralName(whichPlayer));
     String feedback;
     if (activate) {
-        feedback.assign(StringList(kCheatFeedbackOnID).at(whichCheat - 1));
+        feedback.assign(sys.cheat.on.at(whichCheat - 1));
     } else {
-        feedback.assign(StringList(kCheatFeedbackOffID).at(whichCheat - 1));
+        feedback.assign(sys.cheat.off.at(whichCheat - 1));
     }
     Messages::add(format("{0}{1}{2}", admiral_name, feedback, extra));
 }

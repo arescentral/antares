@@ -19,21 +19,22 @@
 #ifndef ANTARES_GAME_MOTION_HPP_
 #define ANTARES_GAME_MOTION_HPP_
 
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
+#include "math/units.hpp"
 
 namespace antares {
 
 const int32_t kUnitsToCheckNumber = 5;
 
 struct adjacentUnitType {
-    int32_t                 adjacentUnit;           // the normal adjacent unit
-    Point                   superOffset;            // the offset of the super unit (for wrap-around)
+    uint8_t adjacentUnit;  // the normal adjacent unit
+    Point   superOffset;   // the offset of the super unit (for wrap-around)
 };
 
 struct proximityUnitType {
-    Handle<SpaceObject>     nearObject;                         // for collision checking
-    Handle<SpaceObject>     farObject;                          // for distance checking
-    adjacentUnitType        unitsToCheck[kUnitsToCheckNumber];  // adjacent units to check
+    Handle<SpaceObject> nearObject;                         // for collision checking
+    Handle<SpaceObject> farObject;                          // for distance checking
+    adjacentUnitType    unitsToCheck[kUnitsToCheckNumber];  // adjacent units to check
 };
 
 extern coordPointType gGlobalCorner;
@@ -41,11 +42,12 @@ extern coordPointType gGlobalCorner;
 void InitMotion();
 void ResetMotionGlobals();
 
+Size center_scale();
+
 void MotionCleanup();
-void MoveSpaceObjects(const int32_t unitsToDo);
+void MoveSpaceObjects(ticks unitsToDo);
 void CollideSpaceObjects();
-void CorrectPhysicalSpace(Handle<SpaceObject> aObject, Handle<SpaceObject> bObject);
 
 }  // namespace antares
 
-#endif // ANTARES_GAME_MOTION_HPP_
+#endif  // ANTARES_GAME_MOTION_HPP_

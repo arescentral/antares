@@ -35,50 +35,53 @@ namespace cf {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Type
 
-Type::Type() { }
+Type::Type() {}
 
-Type::Type(type c_obj):
-    Object<CFTypeRef>(c_obj) { }
+Type::Type(type c_obj) : Object<CFTypeRef>(c_obj) {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Boolean
 
-CFTypeID Boolean::type_id() { return CFBooleanGetTypeID(); }
+CFTypeID Boolean::type_id() {
+    return CFBooleanGetTypeID();
+}
 
-Boolean::Boolean() { }
+Boolean::Boolean() {}
 
-Boolean::Boolean(type c_obj):
-    UnownedObject<CFBooleanRef>(c_obj) { }
+Boolean::Boolean(type c_obj) : UnownedObject<CFBooleanRef>(c_obj) {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Number
 
-CFTypeID Number::type_id() { return CFNumberGetTypeID(); }
+CFTypeID Number::type_id() {
+    return CFNumberGetTypeID();
+}
 
-Number::Number() { }
+Number::Number() {}
 
-Number::Number(type c_obj):
-    Object<CFNumberRef>(c_obj) { }
+Number::Number(type c_obj) : Object<CFNumberRef>(c_obj) {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // String
 
-CFTypeID String::type_id() { return CFStringGetTypeID(); }
+CFTypeID String::type_id() {
+    return CFStringGetTypeID();
+}
 
-String::String() { }
+String::String() {}
 
-String::String(type c_obj):
-    Object<CFStringRef>(c_obj) { }
+String::String(type c_obj) : Object<CFStringRef>(c_obj) {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Array
 
-CFTypeID Array::type_id() { return CFArrayGetTypeID(); }
+CFTypeID Array::type_id() {
+    return CFArrayGetTypeID();
+}
 
-Array::Array() { }
+Array::Array() {}
 
-Array::Array(type c_obj):
-    Object<CFArrayRef>(c_obj) { }
+Array::Array(type c_obj) : Object<CFArrayRef>(c_obj) {}
 
 size_t Array::size() const {
     return CFArrayGetCount(c_obj());
@@ -91,12 +94,13 @@ const void* Array::get(size_t index) const {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // MutableArray
 
-CFTypeID MutableArray::type_id() { return CFArrayGetTypeID(); }
+CFTypeID MutableArray::type_id() {
+    return CFArrayGetTypeID();
+}
 
-MutableArray::MutableArray() { }
+MutableArray::MutableArray() {}
 
-MutableArray::MutableArray(type c_obj):
-    Object<CFMutableArrayRef>(c_obj) { }
+MutableArray::MutableArray(type c_obj) : Object<CFMutableArrayRef>(c_obj) {}
 
 size_t MutableArray::size() const {
     return CFArrayGetCount(c_obj());
@@ -113,22 +117,24 @@ void MutableArray::append(const void* key) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Dictionary
 
-CFTypeID Dictionary::type_id() { return CFDictionaryGetTypeID(); }
+CFTypeID Dictionary::type_id() {
+    return CFDictionaryGetTypeID();
+}
 
-Dictionary::Dictionary() { }
+Dictionary::Dictionary() {}
 
-Dictionary::Dictionary(type c_obj):
-    Object<CFDictionaryRef>(c_obj) { }
+Dictionary::Dictionary(type c_obj) : Object<CFDictionaryRef>(c_obj) {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // MutableDictionary
 
-CFTypeID MutableDictionary::type_id() { return CFDictionaryGetTypeID(); }
+CFTypeID MutableDictionary::type_id() {
+    return CFDictionaryGetTypeID();
+}
 
-MutableDictionary::MutableDictionary() { }
+MutableDictionary::MutableDictionary() {}
 
-MutableDictionary::MutableDictionary(type c_obj):
-    Object<CFMutableDictionaryRef>(c_obj) { }
+MutableDictionary::MutableDictionary(type c_obj) : Object<CFMutableDictionaryRef>(c_obj) {}
 
 void MutableDictionary::set(const void* key, const void* value) {
     CFDictionarySetValue(c_obj(), key, value);
@@ -137,12 +143,13 @@ void MutableDictionary::set(const void* key, const void* value) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Data
 
-CFTypeID Data::type_id() { return CFDataGetTypeID(); }
+CFTypeID Data::type_id() {
+    return CFDataGetTypeID();
+}
 
-Data::Data() { }
+Data::Data() {}
 
-Data::Data(type c_obj):
-    Object<CFDataRef>(c_obj) { }
+Data::Data(type c_obj) : Object<CFDataRef>(c_obj) {}
 
 sfz::BytesSlice Data::data() const {
     return sfz::BytesSlice(CFDataGetBytePtr(c_obj()), CFDataGetLength(c_obj()));
@@ -155,10 +162,9 @@ void write_to(sfz::WriteTarget out, const Data& data) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // PropertyList
 
-PropertyList::PropertyList() { }
+PropertyList::PropertyList() {}
 
-PropertyList::PropertyList(type c_obj):
-    Object<CFPropertyListRef>(c_obj) { }
+PropertyList::PropertyList(type c_obj) : Object<CFPropertyListRef>(c_obj) {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Url
@@ -172,15 +178,15 @@ CFURLRef create_url(const StringSlice& string) {
 
 }  // namespace
 
-CFTypeID Url::type_id() { return CFURLGetTypeID(); }
+CFTypeID Url::type_id() {
+    return CFURLGetTypeID();
+}
 
-Url::Url() { }
+Url::Url() {}
 
-Url::Url(type c_obj):
-    Object<CFURLRef>(c_obj) { }
+Url::Url(type c_obj) : Object<CFURLRef>(c_obj) {}
 
-Url::Url(const sfz::StringSlice& string):
-    Object<CFURLRef>(create_url(string)) { }
+Url::Url(const sfz::StringSlice& string) : Object<CFURLRef>(create_url(string)) {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // wrap()
@@ -224,7 +230,7 @@ String wrap(const char* value) {
 String wrap(sfz::StringSlice value) {
     Bytes bytes(utf8::encode(value));
     return String(CFStringCreateWithBytes(
-                NULL, bytes.data(), bytes.size(), kCFStringEncodingUTF8, false));
+            NULL, bytes.data(), bytes.size(), kCFStringEncodingUTF8, false));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -285,7 +291,7 @@ bool unwrap(const String& cfvalue, sfz::String& value) {
         return false;
     }
     Data encoded(CFStringCreateExternalRepresentation(
-                NULL, cfvalue.c_obj(), kCFStringEncodingUTF8, '?'));
+            NULL, cfvalue.c_obj(), kCFStringEncodingUTF8, '?'));
     print(value, utf8::decode(encoded.data()));
     return true;
 }

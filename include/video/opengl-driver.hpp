@@ -34,13 +34,17 @@ class Event;
 
 typedef int sampler2D;
 typedef int sampler2DRect;
-struct vec2 { float x, y; };
-struct vec4 { float x, y, z, w; };
+struct vec2 {
+    float x, y;
+};
+struct vec4 {
+    float x, y, z, w;
+};
 
 template <typename T>
 struct Uniform {
     const char* name;
-    int location;
+    int         location;
 
     void load(int program);
     void set(T value) const;
@@ -61,38 +65,37 @@ class OpenGlVideoDriver : public VideoDriver {
     virtual void draw_plus(const Rect& rect, const RgbColor& color);
 
     struct Uniforms {
-        Uniform<vec2>           screen           = {"screen"};
-        Uniform<int>            scale            = {"scale"};
-        Uniform<int>            color_mode       = {"color_mode"};
-        Uniform<sampler2DRect>  sprite           = {"sprite"};
-        Uniform<sampler2D>      static_image     = {"static_image"};
-        Uniform<float>          static_fraction  = {"static_fraction"};
-        Uniform<vec2>           unit             = {"unit"};
-        Uniform<vec4>           outline_color    = {"outline_color"};
-        Uniform<int>            seed             = {"seed"};
+        Uniform<vec2>          screen          = {"screen"};
+        Uniform<int>           scale           = {"scale"};
+        Uniform<int>           color_mode      = {"color_mode"};
+        Uniform<sampler2DRect> sprite          = {"sprite"};
+        Uniform<sampler2D>     static_image    = {"static_image"};
+        Uniform<float>         static_fraction = {"static_fraction"};
+        Uniform<vec2>          unit            = {"unit"};
+        Uniform<vec4>          outline_color   = {"outline_color"};
+        Uniform<int>           seed            = {"seed"};
     };
 
   protected:
     class MainLoop {
       public:
         MainLoop(OpenGlVideoDriver& driver, Card* initial);
-        void draw();
-        bool done() const;
+        void  draw();
+        bool  done() const;
         Card* top() const;
 
       private:
         struct Setup {
             Setup(OpenGlVideoDriver& driver);
         };
-        const Setup _setup;
+        const Setup        _setup;
         OpenGlVideoDriver& _driver;
-        CardStack _stack;
+        CardStack          _stack;
 
         DISALLOW_COPY_AND_ASSIGN(MainLoop);
     };
 
     virtual Size viewport_size() const = 0;
-    virtual Size screen_size() const = 0;
 
   private:
     virtual void begin_points();
@@ -114,6 +117,8 @@ class OpenGlVideoDriver : public VideoDriver {
     std::map<size_t, Texture> _triangles;
     std::map<size_t, Texture> _diamonds;
     std::map<size_t, Texture> _pluses;
+
+    uint32_t _vbuf[3];
 
     DISALLOW_COPY_AND_ASSIGN(OpenGlVideoDriver);
 };

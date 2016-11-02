@@ -24,6 +24,7 @@
 
 #include "drawing/color.hpp"
 #include "math/geometry.hpp"
+#include "math/units.hpp"
 #include "ui/event.hpp"
 
 namespace antares {
@@ -49,43 +50,38 @@ class VideoDriver {
   public:
     VideoDriver();
     virtual ~VideoDriver();
-    virtual bool button(int which) = 0;
-    virtual Point get_mouse() = 0;
-    virtual void get_keys(KeyMap* k) = 0;
-    virtual InputMode input_mode() const = 0;
-    virtual int scale() const = 0;
+    virtual Point     get_mouse()         = 0;
+    virtual InputMode input_mode() const  = 0;
+    virtual int       scale() const       = 0;
+    virtual Size      screen_size() const = 0;
 
-    virtual int ticks() const = 0;
-    virtual int usecs() const = 0;
-    virtual int64_t double_click_interval_usecs() const = 0;
+    virtual wall_time now() const = 0;
 
     virtual Texture texture(sfz::PrintItem name, const PixMap& content) = 0;
-    virtual void dither_rect(const Rect& rect, const RgbColor& color) = 0;
-    virtual void draw_point(const Point& at, const RgbColor& color) = 0;
+    virtual void dither_rect(const Rect& rect, const RgbColor& color)   = 0;
+    virtual void draw_point(const Point& at, const RgbColor& color)     = 0;
     virtual void draw_line(const Point& from, const Point& to, const RgbColor& color) = 0;
     virtual void draw_triangle(const Rect& rect, const RgbColor& color) = 0;
-    virtual void draw_diamond(const Rect& rect, const RgbColor& color) = 0;
-    virtual void draw_plus(const Rect& rect, const RgbColor& color) = 0;
-
-    static VideoDriver* driver();
+    virtual void draw_diamond(const Rect& rect, const RgbColor& color)  = 0;
+    virtual void draw_plus(const Rect& rect, const RgbColor& color)     = 0;
 
   private:
     friend class Points;
     friend class Lines;
     friend class Rects;
 
-    virtual void begin_points() { }
-    virtual void end_points() { }
+    virtual void begin_points() {}
+    virtual void end_points() {}
     virtual void batch_point(const Point& at, const RgbColor& color) { draw_point(at, color); }
 
-    virtual void begin_lines() { }
-    virtual void end_lines() { }
+    virtual void begin_lines() {}
+    virtual void end_lines() {}
     virtual void batch_line(const Point& from, const Point& to, const RgbColor& color) {
         draw_line(from, to, color);
     }
 
-    virtual void begin_rects() { }
-    virtual void end_rects() { }
+    virtual void begin_rects() {}
+    virtual void end_rects() {}
     virtual void batch_rect(const Rect& rect, const RgbColor& color) = 0;
 };
 
@@ -93,32 +89,33 @@ class Texture {
   public:
     struct Impl {
         virtual ~Impl();
-        virtual sfz::StringSlice name() const = 0;
+        virtual sfz::StringSlice name() const          = 0;
         virtual void draw(const Rect& draw_rect) const = 0;
         virtual void draw_cropped(
                 const Rect& dest, const Rect& source, const RgbColor& tint) const = 0;
         virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const = 0;
-        virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const = 0;
+        virtual void draw_static(
+                const Rect& draw_rect, const RgbColor& color, uint8_t frac) const = 0;
         virtual void draw_outlined(
                 const Rect& draw_rect, const RgbColor& outline_color,
                 const RgbColor& fill_color) const = 0;
-        virtual const Size& size() const = 0;
+        virtual const Size& size() const          = 0;
 
-        virtual void begin_quads() const { }
-        virtual void end_quads() const { }
+        virtual void begin_quads() const {}
+        virtual void end_quads() const {}
         virtual void draw_quad(const Rect& dest, const Rect& source, const RgbColor& tint) const {
             draw_cropped(dest, source, tint);
         }
     };
 
-    Texture(std::nullptr_t n=nullptr) { }
-    Texture(std::unique_ptr<Impl> impl): _impl(std::move(impl)) { }
+    Texture(std::nullptr_t n = nullptr) {}
+    Texture(std::unique_ptr<Impl> impl) : _impl(std::move(impl)) {}
 
     void draw(const Rect& draw_rect) const { _impl->draw(draw_rect); }
     void draw(int32_t x, int32_t y) const { _impl->draw(rect(x, y)); }
 
     void draw_cropped(const Rect& dest, const Rect& source) const {
-        _impl->draw_cropped(dest, source, RgbColor::kWhite);
+        _impl->draw_cropped(dest, source, RgbColor::white());
     }
 
     void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const {
@@ -186,6 +183,7 @@ class Quads {
     Quads(const Texture& sprite);
     ~Quads();
     void draw(const Rect& dest, const Rect& source, const RgbColor& tint) const;
+
   private:
     const Texture& _sprite;
 };

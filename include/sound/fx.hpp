@@ -23,83 +23,62 @@
 
 #include "data/handle.hpp"
 #include "math/fixed.hpp"
+#include "math/units.hpp"
 
 namespace antares {
 
-const int32_t kSoundNum         = 48;
-const int32_t kMaxChannelNum    = 3;
-
 const int32_t kMaxVolumePreference = 8;
 
-const uint8_t kMediumLowVolume  = 64;
-const uint8_t kMediumVolume     = 128;
-const uint8_t kMediumLoudVolume = 192;
-const uint8_t kMaxSoundVolume   = 255;
+class SoundFX {
+  public:
+    SoundFX();
+    ~SoundFX();
 
-const int16_t kShortPersistence         = 10;      // in ticks
-const int16_t kMediumPersistence        = 20;
-const int16_t kMediumLongPersistence    = 40;
-const int16_t kLongPersistence          = 60;
+    void init();
+    void load(int16_t id);
+    void reset();
+    void stop();
 
-const int16_t kMorseBeepSound   = 506;  // ship receives order
-const int16_t kComputerBeep1    = 507;  // ship selected
-const int16_t kComputerBeep2    = 508;  // ship built
-const int16_t kComputerBeep3    = 509;  // button push
-const int16_t kComputerBeep4    = 510;  // change range
-const int16_t kWarningTone      = 511;  // naughty beep
-const int16_t kLandingWoosh     = 513;
-const int16_t kCloakOff         = 522;
-const int16_t kCloakOn          = 523;
-const int16_t kKlaxon           = 525;
-const int16_t kWarp[4]          = {526, 527, 528, 529};
-const int16_t kTeletype         = 535;
+    void play(int16_t id, uint8_t volume, usecs persistence, uint8_t priority);
+    void play_at(
+            int16_t id, int32_t volume, usecs persistence, uint8_t priority,
+            Handle<SpaceObject> object);
 
-class Sound;
-class SoundChannel;
-struct SpaceObject;
+    void select();
+    void build();
+    void click();
+    void zoom();
+    void pause();
 
-enum soundPriorityType {
-    kNoSound = 0,
-    kVeryLowPrioritySound = 1,
-    kLowPrioritySound = 2,
-    kPrioritySound = 3,
-    kHighPrioritySound = 4,
-    kMustPlaySound = 5
+    void klaxon();
+    void loud_klaxon();
+    void order();
+
+    void warning();
+    void teletype();
+    void cloak_on();
+    void cloak_off();
+
+    void warp(int n, Handle<SpaceObject> object);
+    void cloak_on_at(Handle<SpaceObject> object);
+    void cloak_off_at(Handle<SpaceObject> object);
+
+  private:
+    struct smartSoundHandle;
+    struct smartSoundChannel;
+
+    bool same_sound_channel(int& channel, int16_t id, uint8_t amplitude, uint8_t priority);
+    bool quieter_channel(int& channel, uint8_t amplitude);
+    bool lower_priority_channel(int& channel, uint8_t priority);
+    bool oldest_available_channel(int& channel);
+    bool best_channel(
+            int& channel, int16_t sound_id, uint8_t amplitude, usecs persistence,
+            uint8_t priority);
+
+    std::vector<smartSoundHandle>  sounds;
+    std::vector<smartSoundChannel> channels;
 };
-
-struct smartSoundChannel {
-    int32_t             whichSound;
-    int64_t             reserved_until;
-    int16_t             soundVolume;
-    soundPriorityType   soundPriority;
-    std::unique_ptr<SoundChannel> channelPtr;
-};
-
-struct smartSoundHandle {
-    std::unique_ptr<Sound>   soundHandle;
-    int16_t             id;
-    bool             keepMe;
-};
-
-void InitSoundFX();
-void SetAllSoundsNoKeep();
-void KeepSound(int sound_id);
-int AddSound(int sound_id);
-void RemoveAllUnusedSounds();
-void ResetAllSounds();
-void PlayVolumeSound(
-        int16_t whichSoundID, uint8_t amplitude, int16_t persistence, soundPriorityType priority);
-void PlayLocalizedSound(
-        uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy,
-        Fixed hvel, Fixed vvel, int16_t whichSoundID, int16_t amplitude,
-        int16_t persistence, soundPriorityType priority);
-void quiet_all();
-void SoundFXCleanup();
-
-void mPlayDistanceSound(
-        int32_t mvolume, Handle<SpaceObject> mobjectptr, int32_t msoundid,
-        int32_t msoundpersistence, soundPriorityType msoundpriority);
 
 }  // namespace antares
 
-#endif // ANTARES_SOUND_FX_HPP_
+#endif  // ANTARES_SOUND_FX_HPP_

@@ -21,20 +21,16 @@
 namespace antares {
 
 static const CGLPixelFormatAttribute kAttrs[] = {
-    kCGLPFAOpenGLProfile, (CGLPixelFormatAttribute)kCGLOGLPVersion_3_2_Core,
-    kCGLPFAColorSize, static_cast<CGLPixelFormatAttribute>(24),
-    kCGLPFAAccelerated,
-    static_cast<CGLPixelFormatAttribute>(0),
+        kCGLPFAOpenGLProfile, (CGLPixelFormatAttribute)kCGLOGLPVersion_3_2_Core,
+        kCGLPFAColorSize,     static_cast<CGLPixelFormatAttribute>(24),
+        kCGLPFAAccelerated,   static_cast<CGLPixelFormatAttribute>(0),
 };
 
-Offscreen::Offscreen(Size size):
-        _pix(kAttrs),
-        _context(_pix.c_obj(), nullptr) {
+Offscreen::Offscreen(Size size) : _pix(kAttrs), _context(_pix.c_obj(), nullptr) {
     static_cast<void>(size);
     cgl::check(CGLSetCurrentContext(_context.c_obj()));
 }
 
-Offscreen::~Offscreen() {
-}
+Offscreen::~Offscreen() {}
 
 }  // namespace antares

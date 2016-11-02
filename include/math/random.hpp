@@ -21,16 +21,24 @@
 
 #include <stdint.h>
 
+#include "math/fixed.hpp"
+#include "math/units.hpp"
+
 namespace antares {
 
 struct Random {
     int32_t seed;
 
     int16_t next(int16_t range);
+    ticks next(ticks range) { return ticks(next(range.count())); }
+    Fixed next(Fixed range) { return Fixed::from_val(next(range.val())); }
 };
 
 int Randomize(int range);
+inline Fixed Randomize(Fixed range) {
+    return Fixed::from_val(Randomize(range.val()));
+}
 
 }  // namespace antares
 
-#endif // ANTARES_MATH_RANDOM_HPP_
+#endif  // ANTARES_MATH_RANDOM_HPP_

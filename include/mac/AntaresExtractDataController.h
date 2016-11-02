@@ -22,19 +22,19 @@
 #include <Cocoa/Cocoa.h>
 
 @interface AntaresExtractDataController : NSObject {
-    id _target;
-    SEL _selector;
+    id        _target;
+    SEL       _selector;
     NSString* _path;
     NSString* _scenario;
 
-    NSWindow* _window;
+    NSWindow*            _window;
     NSProgressIndicator* _progress_bar;
-    NSTextField* _status_field;
+    NSTextField*         _status_field;
 }
 
-@property (strong) IBOutlet NSWindow* _window;
-@property (strong) IBOutlet NSProgressIndicator* _progress_bar;
-@property (strong) IBOutlet NSTextField* _status_field;
+@property(strong) IBOutlet NSWindow* _window;
+@property(strong) IBOutlet NSProgressIndicator* _progress_bar;
+@property(strong) IBOutlet NSTextField* _status_field;
 
 - (id)initWithTarget:(id)target selector:(SEL)selector path:(NSString*)path;
 - (id)initWithTarget:(id)target selector:(SEL)selector scenario:(NSString*)scenario;

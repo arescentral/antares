@@ -35,14 +35,11 @@
     IBOutlet NSButton* _author_button;
     IBOutlet NSTextField* _version_label;
 
-    IBOutlet NSPopUpButton* _resolution_list;
-    IBOutlet NSButton* _window_checkbox;
     IBOutlet NSButton* _skip_checkbox;
 }
 
 - (IBAction)openScenarioURL:(id)sender;
 - (IBAction)openAuthorURL:(id)sender;
-- (IBAction)setWindowedFrom:(id)sender;
 - (IBAction)setSkipSettingsFrom:(id)sender;
 
 - (IBAction)settingsDone:(id)sender;

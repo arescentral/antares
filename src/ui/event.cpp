@@ -22,12 +22,11 @@
 
 namespace antares {
 
-Event::Event(int64_t at):
-        _at(at) { }
+Event::Event(wall_time at) : _at(at) {}
 
-Event::~Event() { }
+Event::~Event() {}
 
-int64_t Event::at() const {
+wall_time Event::at() const {
     return _at;
 }
 
@@ -63,15 +62,15 @@ void MouseMoveEvent::send(EventReceiver* receiver) const {
     receiver->mouse_move(*this);
 }
 
-EventReceiver::~EventReceiver() { }
+EventReceiver::~EventReceiver() {}
 
-void EventReceiver::key_down(const KeyDownEvent& event) { }
-void EventReceiver::key_up(const KeyUpEvent& event) { }
-void EventReceiver::gamepad_button_down(const GamepadButtonDownEvent& event) { }
-void EventReceiver::gamepad_button_up(const GamepadButtonUpEvent& event) { }
-void EventReceiver::gamepad_stick(const GamepadStickEvent& event) { }
-void EventReceiver::mouse_down(const MouseDownEvent& event) { }
-void EventReceiver::mouse_up(const MouseUpEvent& event) { }
-void EventReceiver::mouse_move(const MouseMoveEvent& event) { }
+void EventReceiver::key_down(const KeyDownEvent& event) {}
+void EventReceiver::key_up(const KeyUpEvent& event) {}
+void EventReceiver::gamepad_button_down(const GamepadButtonDownEvent& event) {}
+void EventReceiver::gamepad_button_up(const GamepadButtonUpEvent& event) {}
+void EventReceiver::gamepad_stick(const GamepadStickEvent& event) {}
+void EventReceiver::mouse_down(const MouseDownEvent& event) {}
+void EventReceiver::mouse_up(const MouseUpEvent& event) {}
+void EventReceiver::mouse_move(const MouseMoveEvent& event) {}
 
 }  // namespace antares

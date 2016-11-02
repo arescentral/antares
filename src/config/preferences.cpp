@@ -24,12 +24,14 @@
 #include "config/keys.hpp"
 #include "data/resource.hpp"
 #include "game/globals.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 
 using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::ReadSource;
 using sfz::StringSlice;
+using sfz::range;
 using sfz::read;
 using std::max;
 using std::min;
@@ -42,208 +44,135 @@ static T clamp(T value, T lower, T upper) {
     return min(upper, max(lower, value));
 }
 
-static ANTARES_GLOBAL Preferences* preferences = NULL;
-
-static ANTARES_GLOBAL PrefsDriver* prefs_driver = NULL;
-
-Preferences* Preferences::preferences() {
-    if (antares::preferences == NULL) {
-        antares::preferences = new Preferences;
-        PrefsDriver::driver()->load(antares::preferences);
-    }
-    return antares::preferences;
-}
-
 Preferences::Preferences() {
-    set_key(kUpKeyNum,              1 + Keys::N8);
-    set_key(kDownKeyNum,            1 + Keys::N5);
-    set_key(kLeftKeyNum,            1 + Keys::N4);
-    set_key(kRightKeyNum,           1 + Keys::N6);
-    set_key(kOneKeyNum,             1 + Keys::L_OPTION);
-    set_key(kTwoKeyNum,             1 + Keys::L_COMMAND);
-    set_key(kEnterKeyNum,           1 + Keys::SPACE);
-    set_key(kWarpKeyNum,            1 + Keys::TAB);
+    keys[kUpKeyNum]    = 1 + Keys::N8;
+    keys[kDownKeyNum]  = 1 + Keys::N5;
+    keys[kLeftKeyNum]  = 1 + Keys::N4;
+    keys[kRightKeyNum] = 1 + Keys::N6;
+    keys[kOneKeyNum]   = 1 + Keys::L_OPTION;
+    keys[kTwoKeyNum]   = 1 + Keys::L_COMMAND;
+    keys[kEnterKeyNum] = 1 + Keys::SPACE;
+    keys[kWarpKeyNum]  = 1 + Keys::TAB;
 
-    set_key(kSelectFriendKeyNum,    1 + Keys::N_CLEAR);
-    set_key(kSelectFoeKeyNum,       1 + Keys::N_EQUALS);
-    set_key(kSelectBaseKeyNum,      1 + Keys::N_DIVIDE);
-    set_key(kDestinationKeyNum,     1 + Keys::L_SHIFT);
-    set_key(kOrderKeyNum,           1 + Keys::L_CONTROL);
+    keys[kSelectFriendKeyNum] = 1 + Keys::N_CLEAR;
+    keys[kSelectFoeKeyNum]    = 1 + Keys::N_EQUALS;
+    keys[kSelectBaseKeyNum]   = 1 + Keys::N_DIVIDE;
+    keys[kDestinationKeyNum]  = 1 + Keys::L_SHIFT;
+    keys[kOrderKeyNum]        = 1 + Keys::L_CONTROL;
 
-    set_key(kZoomInKeyNum,          1 + Keys::N_PLUS);
-    set_key(kZoomOutKeyNum,         1 + Keys::N_MINUS);
+    keys[kZoomInKeyNum]  = 1 + Keys::N_PLUS;
+    keys[kZoomOutKeyNum] = 1 + Keys::N_MINUS;
 
-    set_key(kCompUpKeyNum,          1 + Keys::UP_ARROW);
-    set_key(kCompDownKeyNum,        1 + Keys::DOWN_ARROW);
-    set_key(kCompAcceptKeyNum,      1 + Keys::RIGHT_ARROW);
-    set_key(kCompCancelKeyNum,      1 + Keys::LEFT_ARROW);
+    keys[kCompUpKeyNum]     = 1 + Keys::UP_ARROW;
+    keys[kCompDownKeyNum]   = 1 + Keys::DOWN_ARROW;
+    keys[kCompAcceptKeyNum] = 1 + Keys::RIGHT_ARROW;
+    keys[kCompCancelKeyNum] = 1 + Keys::LEFT_ARROW;
 
-    set_key(kTransferKeyNum,        1 + Keys::F8);
-    set_key(kScale121KeyNum,        1 + Keys::F9);
-    set_key(kScale122KeyNum,        1 + Keys::F10);
-    set_key(kScale124KeyNum,        1 + Keys::F11);
-    set_key(kScale1216KeyNum,       1 + Keys::F12);
-    set_key(kScaleHostileKeyNum,    1 + Keys::HELP);
-    set_key(kScaleObjectKeyNum,     1 + Keys::HOME);
-    set_key(kScaleAllKeyNum,        1 + Keys::PAGE_UP);
+    keys[kTransferKeyNum]     = 1 + Keys::F8;
+    keys[kScale121KeyNum]     = 1 + Keys::F9;
+    keys[kScale122KeyNum]     = 1 + Keys::F10;
+    keys[kScale124KeyNum]     = 1 + Keys::F11;
+    keys[kScale1216KeyNum]    = 1 + Keys::F12;
+    keys[kScaleHostileKeyNum] = 1 + Keys::HELP;
+    keys[kScaleObjectKeyNum]  = 1 + Keys::HOME;
+    keys[kScaleAllKeyNum]     = 1 + Keys::PAGE_UP;
 
-    set_key(kMessageNextKeyNum,     1 + Keys::BACKSPACE);
-    set_key(kHelpKeyNum,            1 + Keys::F1);
-    set_key(kVolumeDownKeyNum,      1 + Keys::F2);
-    set_key(kVolumeUpKeyNum,        1 + Keys::F3);
-    set_key(kActionMusicKeyNum,     1 + Keys::F4);
-    set_key(kNetSettingsKeyNum,     1 + Keys::F5);
-    set_key(kFastMotionKeyNum,      1 + Keys::F6);
+    keys[kMessageNextKeyNum] = 1 + Keys::BACKSPACE;
+    keys[kHelpKeyNum]        = 1 + Keys::F1;
+    keys[kVolumeDownKeyNum]  = 1 + Keys::F2;
+    keys[kVolumeUpKeyNum]    = 1 + Keys::F3;
+    keys[kActionMusicKeyNum] = 1 + Keys::F4;
+    keys[kNetSettingsKeyNum] = 1 + Keys::F5;
+    keys[kFastMotionKeyNum]  = 1 + Keys::F6;
 
-    set_key(kFirstHotKeyNum + 0,    1 + Keys::K1);
-    set_key(kFirstHotKeyNum + 1,    1 + Keys::K2);
-    set_key(kFirstHotKeyNum + 2,    1 + Keys::K3);
-    set_key(kFirstHotKeyNum + 3,    1 + Keys::K4);
-    set_key(kFirstHotKeyNum + 4,    1 + Keys::K5);
-    set_key(kFirstHotKeyNum + 5,    1 + Keys::K6);
-    set_key(kFirstHotKeyNum + 6,    1 + Keys::K7);
-    set_key(kFirstHotKeyNum + 7,    1 + Keys::K8);
-    set_key(kFirstHotKeyNum + 8,    1 + Keys::K9);
-    set_key(kFirstHotKeyNum + 9,    1 + Keys::K0);
+    keys[kFirstHotKeyNum + 0] = 1 + Keys::K1;
+    keys[kFirstHotKeyNum + 1] = 1 + Keys::K2;
+    keys[kFirstHotKeyNum + 2] = 1 + Keys::K3;
+    keys[kFirstHotKeyNum + 3] = 1 + Keys::K4;
+    keys[kFirstHotKeyNum + 4] = 1 + Keys::K5;
+    keys[kFirstHotKeyNum + 5] = 1 + Keys::K6;
+    keys[kFirstHotKeyNum + 6] = 1 + Keys::K7;
+    keys[kFirstHotKeyNum + 7] = 1 + Keys::K8;
+    keys[kFirstHotKeyNum + 8] = 1 + Keys::K9;
+    keys[kFirstHotKeyNum + 9] = 1 + Keys::K0;
 
-    set_play_idle_music(true);
-    set_play_music_in_game(false);
-    set_speech_on(false);
+    play_idle_music    = true;
+    play_music_in_game = false;
+    speech_on          = false;
 
-    set_volume(7);
+    volume = 7;
 
-    set_fullscreen(true);
-    set_screen_size(Size(640, 480));
-
-    _scenario_identifier.assign("com.biggerplanet.ares");
+    scenario_identifier.assign("com.biggerplanet.ares");
 }
 
-Preferences::Preferences(const Preferences& other) {
-    copy(other);
-}
-
-Preferences& Preferences::operator=(const Preferences& other) {
-    copy(other);
-    return *this;
-}
-
-Preferences::~Preferences() { }
-
-void Preferences::reset() {
-    *this = Preferences();
-}
-
-void Preferences::copy(const Preferences& preferences) {
-    for (size_t i = 0; i < KEY_COUNT; ++i) {
-        set_key(i, preferences.key(i));
-    }
-    set_play_idle_music(preferences.play_idle_music());
-    set_play_music_in_game(preferences.play_music_in_game());
-    set_speech_on(preferences.speech_on());
-    set_volume(preferences.volume());
-    set_fullscreen(preferences.fullscreen());
-    set_screen_size(preferences.screen_size());
-    set_scenario_identifier(preferences.scenario_identifier());
-}
-
-uint32_t Preferences::key(size_t index) const {
-    return _key_map[index];
-}
-
-bool Preferences::play_idle_music() const {
-    return _play_idle_music;
-}
-
-bool Preferences::play_music_in_game() const {
-    return _play_music_in_game;
-}
-
-bool Preferences::speech_on() const {
-    return _speech_on;
-}
-
-int Preferences::volume() const {
-    return _volume;
-}
-
-bool Preferences::fullscreen() const {
-    return _fullscreen;
-}
-
-Size Preferences::screen_size() const {
-    return _screen_size;
-}
-
-StringSlice Preferences::scenario_identifier() const {
-    return _scenario_identifier;
-}
-
-void Preferences::set_key(size_t index, uint32_t key) {
-    _key_map[index] = key;
-}
-
-void Preferences::set_play_idle_music(bool on) {
-    _play_idle_music = on;
-}
-
-void Preferences::set_play_music_in_game(bool on) {
-    _play_music_in_game = on;
-}
-
-void Preferences::set_speech_on(bool on) {
-    _speech_on = on;
-}
-
-void Preferences::set_volume(int volume) {
-    _volume = clamp(volume, 0, 8);
-}
-
-void Preferences::set_fullscreen(bool fullscreen) {
-    _fullscreen = fullscreen;
-}
-
-void Preferences::set_screen_size(Size size) {
-    _screen_size = size;
-}
-
-void Preferences::set_screen_width(int32_t width) {
-    _screen_size.width = width;
-}
-
-void Preferences::set_screen_height(int32_t height) {
-    _screen_size.height = height;
-}
-
-void Preferences::set_scenario_identifier(StringSlice id) {
-    _scenario_identifier.assign(id);
+Preferences Preferences::copy() const {
+    Preferences copy;
+    memcpy(copy.keys, keys, sizeof(keys));
+    copy.play_idle_music    = play_idle_music;
+    copy.play_music_in_game = play_music_in_game;
+    copy.speech_on          = speech_on;
+    copy.volume             = volume;
+    copy.scenario_identifier.assign(scenario_identifier);
+    return copy;
 }
 
 PrefsDriver::PrefsDriver() {
-    if (antares::prefs_driver) {
+    if (sys.prefs) {
         throw Exception("PrefsDriver is a singleton");
     }
-    antares::prefs_driver = this;
+    sys.prefs = this;
 }
 
 PrefsDriver::~PrefsDriver() {
-    antares::prefs_driver = NULL;
+    sys.prefs = NULL;
 }
 
-PrefsDriver* PrefsDriver::driver() {
-    return prefs_driver;
+void PrefsDriver::set_key(size_t index, uint32_t key) {
+    Preferences p(get());
+    p.keys[index] = key;
+    set(p);
 }
 
-NullPrefsDriver::NullPrefsDriver() { }
-
-NullPrefsDriver::NullPrefsDriver(Preferences defaults):
-        _saved(defaults) { }
-
-void NullPrefsDriver::load(Preferences* preferences) {
-    *preferences = _saved;
+void PrefsDriver::set_play_idle_music(bool on) {
+    Preferences p(get());
+    p.play_idle_music = on;
+    set(p);
 }
 
-void NullPrefsDriver::save(const Preferences& preferences) {
-    _saved = preferences;
+void PrefsDriver::set_play_music_in_game(bool on) {
+    Preferences p(get());
+    p.play_music_in_game = on;
+    set(p);
+}
+
+void PrefsDriver::set_speech_on(bool on) {
+    Preferences p(get());
+    p.speech_on = on;
+    set(p);
+}
+
+void PrefsDriver::set_volume(int volume) {
+    Preferences p(get());
+    p.volume = volume;
+    set(p);
+}
+
+void PrefsDriver::set_scenario_identifier(sfz::StringSlice id) {
+    Preferences p(get());
+    p.scenario_identifier.assign(id);
+    set(p);
+}
+
+NullPrefsDriver::NullPrefsDriver() {}
+
+NullPrefsDriver::NullPrefsDriver(Preferences defaults) : _saved(defaults) {}
+
+const Preferences& NullPrefsDriver::get() const {
+    return _saved;
+}
+
+void NullPrefsDriver::set(const Preferences& prefs) {
+    _saved = prefs.copy();
 }
 
 }  // namespace antares

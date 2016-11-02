@@ -19,9 +19,10 @@
 #include "data/scenario-list.hpp"
 
 #include <glob.h>
+#include <string.h>
 #include <sfz/sfz.hpp>
 #include "config/dirs.hpp"
-#include "data/scenario.hpp"
+#include "data/level.hpp"
 
 using sfz::BytesSlice;
 using sfz::CString;
@@ -68,27 +69,27 @@ ScenarioList::ScenarioList() {
     factory_scenario.download_url.assign("http://www.arescentral.com");
     factory_scenario.author.assign("Bigger Planet");
     factory_scenario.author_url.assign("http://www.biggerplanet.com");
-    factory_scenario.version = u32_to_version(0x01010100);
+    factory_scenario.version   = u32_to_version(0x01010100);
     factory_scenario.installed = false;
 
-    ScopedGlob g;
+    ScopedGlob        g;
     const StringSlice info("scenario-info/128.nlAG");
-    String str(format("{0}/*/{1}", dirs().scenarios, info));
-    CString c_str(str);
+    String            str(format("{0}/*/{1}", dirs().scenarios, info));
+    CString           c_str(str);
     glob(c_str.data(), 0, NULL, &g.data);
 
     size_t prefix_len = dirs().scenarios.size() + 1;
     size_t suffix_len = info.size() + 1;
     for (int i = 0; i < g.data.gl_pathc; ++i) {
         const String path(utf8::decode(g.data.gl_pathv[i]));
-        StringSlice identifier = path.slice(prefix_len, path.size() - prefix_len - suffix_len);
-        if (identifier == factory_scenario.identifier) {
-            factory_scenario.installed = true;
+        StringSlice  identifier = path.slice(prefix_len, path.size() - prefix_len - suffix_len);
+        if (identifier == _scenarios[0].identifier) {
+            _scenarios[0].installed = true;
             continue;
         }
 
-        MappedFile file(path);
-        BytesSlice data(file.data());
+        MappedFile       file(path);
+        BytesSlice       data(file.data());
         scenarioInfoType info;
         read(data, info);
         _scenarios.emplace_back();
@@ -98,7 +99,7 @@ ScenarioList::ScenarioList() {
         entry.download_url.assign(info.downloadURLString);
         entry.author.assign(info.authorNameString);
         entry.author_url.assign(info.authorURLString);
-        entry.version = u32_to_version(info.version);
+        entry.version   = u32_to_version(info.version);
         entry.installed = true;
     }
 }
@@ -113,7 +114,7 @@ const ScenarioList::Entry& ScenarioList::at(size_t index) const {
 
 void print_to(sfz::PrintTarget out, const Version& v) {
     for (vector<int>::const_iterator begin = v.components.begin(), end = v.components.end();
-            begin != end; ++begin) {
+         begin != end; ++begin) {
         if (begin != v.components.begin()) {
             print(out, ".");
         }

@@ -20,13 +20,12 @@
 #define ANTARES_GLFW_VIDEO_DRIVER_HPP_
 
 #include <queue>
-#include <stack>
 #include <sfz/sfz.hpp>
+#include <stack>
 
 #include "config/keys.hpp"
 #include "drawing/color.hpp"
 #include "math/geometry.hpp"
-#include "ui/event-tracker.hpp"
 #include "video/opengl-driver.hpp"
 
 struct GLFWwindow;
@@ -43,14 +42,10 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
     virtual Size viewport_size() const { return _viewport_size; }
     virtual Size screen_size() const { return _screen_size; }
 
-    virtual bool button(int which);
-    virtual Point get_mouse();
-    virtual void get_keys(KeyMap* k);
+    virtual Point     get_mouse();
     virtual InputMode input_mode() const;
 
-    virtual int ticks() const;
-    virtual int usecs() const;
-    virtual int64_t double_click_interval_usecs() const;
+    virtual wall_time now() const;
 
     void loop(Card* initial);
 
@@ -58,14 +53,18 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
     void key(int key, int scancode, int action, int mods);
     void mouse_button(int button, int action, int mods);
     void mouse_move(double x, double y);
+    void window_size(int width, int height);
     static void key_callback(GLFWwindow* w, int key, int scancode, int action, int mods);
     static void mouse_button_callback(GLFWwindow* w, int button, int action, int mods);
     static void mouse_move_callback(GLFWwindow* w, double x, double y);
+    static void window_size_callback(GLFWwindow* w, int width, int height);
 
-    const Size _screen_size;
-    Size _viewport_size;
+    Size        _screen_size;
+    Size        _viewport_size;
     GLFWwindow* _window;
-    MainLoop* _loop;
+    MainLoop*   _loop;
+    wall_time   _last_click_usecs;
+    int         _last_click_count;
 
     DISALLOW_COPY_AND_ASSIGN(GLFWVideoDriver);
 };

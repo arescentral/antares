@@ -19,11 +19,14 @@
 #ifndef ANTARES_GAME_TIME_HPP_
 #define ANTARES_GAME_TIME_HPP_
 
-#include <stdint.h>
+#include "game/sys.hpp"
+#include "video/driver.hpp"
 
 namespace antares {
 
-int64_t now_usecs();
+inline wall_time now() {
+    return sys.video->now();
+}
 
 }  // namespace antares
 

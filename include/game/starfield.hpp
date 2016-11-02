@@ -22,36 +22,37 @@
 #include "data/handle.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
+#include "math/units.hpp"
 
 namespace antares {
 
-struct SpaceObject;
+class SpaceObject;
 
-const int32_t kMaxSparkAge = 1023;
+const int32_t kMaxSparkAge          = 1023;
 const int32_t kSparkAgeToShadeShift = 6;
 
 enum StarSpeed {
-    kNoStar = -1,
-    kSlowStarSpeed = 1,
+    kNoStar          = -1,
+    kSlowStarSpeed   = 1,
     kMediumStarSpeed = 2,
-    kFastStarSpeed = 3,
+    kFastStarSpeed   = 3,
 };
 
 struct scrollStarType {
-    Point           oldLocation;
-    Point           location;
-    fixedPointType  motionFraction;
-    fixedPointType  velocity;
-    int32_t         age;
-    int32_t         speed;
-    uint8_t         color;
+    Point          oldLocation;
+    Point          location;
+    fixedPointType motionFraction;
+    fixedPointType velocity;
+    int32_t        age;
+    int32_t        speed;
+    uint8_t        color;
 };
 
 class Starfield {
   public:
-    static const int32_t kScrollStarNum = 125;
-    static const int32_t kSparkStarNum = 125;
-    static const int32_t kAllStarNum = kScrollStarNum + kSparkStarNum;
+    static const int32_t kScrollStarNum   = 125;
+    static const int32_t kSparkStarNum    = 125;
+    static const int32_t kAllStarNum      = kScrollStarNum + kSparkStarNum;
     static const int32_t kSparkStarOffset = kScrollStarNum;
 
     Starfield();
@@ -60,18 +61,18 @@ class Starfield {
             int32_t sparkNum, int32_t sparkSpeed, Fixed maxVelocity, uint8_t color,
             Point* location);
     void prepare_to_move();
-    void move(int32_t by_units);
+    void move(ticks by_units);
     void draw() const;
     void show();
 
   private:
     scrollStarType _stars[kScrollStarNum + kSparkStarNum];
-    int32_t _last_clip_bottom;
-    bool _warp_stars;
+    int32_t        _last_clip_bottom;
+    bool           _warp_stars;
 
     DISALLOW_COPY_AND_ASSIGN(Starfield);
 };
 
 }  // namespace antares
 
-#endif // ANTARES_GAME_STARFIELD_HPP_
+#endif  // ANTARES_GAME_STARFIELD_HPP_

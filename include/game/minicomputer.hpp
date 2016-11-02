@@ -19,69 +19,57 @@
 #ifndef ANTARES_GAME_MINICOMPUTER_HPP_
 #define ANTARES_GAME_MINICOMPUTER_HPP_
 
-#include "data/space-object.hpp"
+#include "data/base-object.hpp"
 
 namespace antares {
 
-enum lineKindType {
-    plainLineKind = 0,
-    buttonOffLineKind = 1,
-    buttonOnLineKind = 2
-};
-
-enum lineSelectType {
-    cannotSelect = 0,
-    selectDim = 1,
-    selectable = 2
+enum MiniScreenLineKind {
+    MINI_NONE       = 0,
+    MINI_DIM        = 1,
+    MINI_SELECTABLE = 2,
+    MINI_BUTTON_ON  = 3,
+    MINI_BUTTON_OFF = 4,
 };
 
 struct miniScreenLineType {
-    sfz::String     string;
-    sfz::String     statusFalse;
-    sfz::String     statusTrue;
-    sfz::String     statusString;
-    sfz::String     postString;
-    int32_t         hiliteLeft;
-    int32_t         hiliteRight;
-    int32_t         whichButton;
-    lineSelectType  selectable;
-    bool         underline;
-    lineKindType    lineKind;
-    int32_t         value;      // for keeping track of changing values
-    int32_t         statusType;
-    int32_t         whichStatus;
-    Handle<Admiral> statusPlayer;
-    int32_t         negativeValue;
-    Handle<BaseObject>  sourceData;
+    MiniScreenLineKind kind = MINI_NONE;
+    sfz::String        string;
+    sfz::String        statusFalse;
+    sfz::String        statusTrue;
+    sfz::String        statusString;
+    sfz::String        postString;
+    int32_t            whichButton = -1;
+    bool               underline   = false;
+    int32_t            value;  // for keeping track of changing values
+    int32_t            statusType;
+    int32_t            whichStatus;
+    Handle<Admiral>    statusPlayer;
+    int32_t            negativeValue;
+    Handle<BaseObject> sourceData;
+    void (*callback)(Handle<Admiral> adm, int32_t line) = nullptr;
 };
 
-void MiniScreenInit( void);
-void MiniScreenCleanup( void);
-void SetMiniScreenStatusStrList( int16_t);
-void DisposeMiniScreenStatusStrList( void);
-void ClearMiniScreenLines( void);
-void ClearMiniObjectData( void);
+void MiniScreenInit(void);
+void MiniScreenCleanup(void);
+void SetMiniScreenStatusStrList(int16_t);
+void DisposeMiniScreenStatusStrList(void);
+void ClearMiniScreenLines(void);
 void draw_mini_screen();
-void MakeMiniScreenFromIndString( int16_t);
-void minicomputer_handle_keys(uint32_t new_keys, uint32_t old_keys, bool cancel);
-void minicomputer_cancel();
-void MiniComputerHandleNull(int32_t);
-int32_t MiniComputerGetPriceOfCurrentSelection( void);
-void UpdateMiniScreenLines( void);
+void minicomputer_handle_keys(uint32_t key_presses, uint32_t key_releases);
+void  minicomputer_cancel();
+Fixed MiniComputerGetPriceOfCurrentSelection(void);
+void  UpdateMiniScreenLines(void);
 void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special);
-void draw_mini_ship_data(
-        const SpaceObject& newObject, uint8_t headerColor,
-        int16_t screenTop, int16_t whichString);
-void MiniComputerDoAccept( void);
-void MiniComputerExecute(int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral);
-void MiniComputerDoCancel( void);
-void MiniComputerSetBuildStrings( void);
-void MiniComputerHandleClick( Point);
-void MiniComputerHandleDoubleClick( Point);
-void MiniComputerHandleMouseUp( Point);
-void MiniComputerHandleMouseStillDown( Point);
+void MiniComputerDoAccept(void);
+void transfer_control(Handle<Admiral> adm, int line);
+void MiniComputerDoCancel(void);
+void MiniComputerSetBuildStrings(void);
+void MiniComputerHandleClick(Point);
+void MiniComputerHandleDoubleClick(Point);
+void MiniComputerHandleMouseUp(Point);
+void MiniComputerHandleMouseStillDown(Point);
 void MiniComputer_SetScreenAndLineHack(int32_t whichScreen, int32_t whichLine);
 
 }  // namespace antares
 
-#endif // ANTARES_GAME_MINICOMPUTER_HPP_
+#endif  // ANTARES_GAME_MINICOMPUTER_HPP_

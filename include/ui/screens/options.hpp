@@ -24,6 +24,7 @@
 
 #include "config/preferences.hpp"
 #include "data/string-list.hpp"
+#include "math/units.hpp"
 #include "ui/screen.hpp"
 
 namespace antares {
@@ -41,13 +42,13 @@ class OptionsScreen : public Card {
     virtual void become_front();
 
   private:
-    State _state;
-    Preferences* _preferences;
+    State       _state;
+    Preferences _revert;
 };
 
 class SoundControlScreen : public InterfaceScreen {
   public:
-    SoundControlScreen(OptionsScreen::State* state, Preferences* preferences);
+    SoundControlScreen(OptionsScreen::State* state);
     ~SoundControlScreen();
 
     virtual void overlay() const;
@@ -61,15 +62,15 @@ class SoundControlScreen : public InterfaceScreen {
         // Checkboxes
         GAME_MUSIC = 0,
         IDLE_MUSIC = 1,
-        SPEECH_ON = 4,
+        SPEECH_ON  = 4,
 
         // Volume Control
-        VOLUME_UP = 2,
+        VOLUME_UP   = 2,
         VOLUME_DOWN = 3,
 
         // Buttons
-        CANCEL = 5,
-        DONE = 6,
+        CANCEL      = 5,
+        DONE        = 6,
         KEY_CONTROL = 7,
 
         // Other
@@ -79,20 +80,19 @@ class SoundControlScreen : public InterfaceScreen {
     OptionsScreen::State button_state(int button);
 
     OptionsScreen::State* const _state;
-    Preferences* const _preferences;
 
     DISALLOW_COPY_AND_ASSIGN(SoundControlScreen);
 };
 
 class KeyControlScreen : public InterfaceScreen {
   public:
-    KeyControlScreen(OptionsScreen::State* state, Preferences* preferences);
+    KeyControlScreen(OptionsScreen::State* state);
     ~KeyControlScreen();
 
     virtual void key_down(const KeyDownEvent& event);
     virtual void key_up(const KeyUpEvent& event);
 
-    virtual bool next_timer(int64_t& time);
+    virtual bool next_timer(wall_time& time);
     virtual void fire_timer();
 
     virtual void overlay() const;
@@ -103,18 +103,18 @@ class KeyControlScreen : public InterfaceScreen {
 
   private:
     enum Item {
-        CANCEL = 0,
-        DONE = 1,
+        CANCEL        = 0,
+        DONE          = 1,
         SOUND_CONTROL = 2,
 
-        SHIP_TAB = 3,
-        COMMAND_TAB = 4,
+        SHIP_TAB     = 3,
+        COMMAND_TAB  = 4,
         SHORTCUT_TAB = 5,
-        UTILITY_TAB = 6,
-        HOT_KEY_TAB = 7,
+        UTILITY_TAB  = 6,
+        HOT_KEY_TAB  = 7,
 
         CONFLICT_TEXT = 10,
-        TAB_BOX = 8,
+        TAB_BOX       = 8,
     };
 
     enum Tab {
@@ -132,15 +132,14 @@ class KeyControlScreen : public InterfaceScreen {
     void flash_on(size_t key);
 
     OptionsScreen::State* const _state;
-    Preferences* const _preferences;
 
-    Tab _tab;
+    Tab          _tab;
     const size_t _key_start;
-    int32_t _selected_key;
+    int32_t      _selected_key;
     std::vector<std::pair<size_t, size_t>> _conflicts;
 
-    int64_t _next_flash;
-    bool _flashed_on;
+    wall_time _next_flash;
+    bool      _flashed_on;
 
     StringList _tabs;
     StringList _keys;
