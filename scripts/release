@@ -54,11 +54,13 @@ else
     git checkout stable
     git merge --no-ff release/$VERSION
     git tag v$VERSION
-    MODE=opt ./configure
+    ./configure --mode=opt
     make
     make sign
-    (cd out/opt && zip -r ../../Antares-$VERSION.zip Antares.app)
-    scripts/dist.py
+    (cd out/cur && zip -r ../../Antares-$VERSION.zip Antares.app)
+    scripts/dist.py zip
+    scripts/dist.py gz
+    scripts/dist.py bz2
 
     git checkout master
     git merge --no-ff release/$VERSION
