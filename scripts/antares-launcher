@@ -17,7 +17,7 @@ else:
     BIN_PREFIX = os.path.join(PREFIX, "out", "cur")
     DATADIR = os.path.join(PREFIX, "resources")
 
-ANTARES_BIN = os.path.join(BIN_PREFIX, "antares")
+ANTARES_BIN = os.path.join(BIN_PREFIX, "antares-glfw")
 ANTARES_ICON = os.path.join(DATADIR, "Antares.png")
 
 

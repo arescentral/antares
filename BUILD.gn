@@ -12,7 +12,7 @@ import("//build/lib/embed.gni")
 group("default") {
   testonly = true
   deps = [
-    ":antares",
+    ":antares-glfw",
     ":antares-install-data",
     ":antares-ls-scenarios",
     ":build-pix",
@@ -25,7 +25,7 @@ group("default") {
     ":tint",
   ]
   if (target_os == "mac") {
-    deps += [ ":antares_glfw" ]
+    deps += [ ":antares" ]
   }
 }
 
@@ -493,13 +493,7 @@ executable("build-pix") {
   configs += [ ":antares_private" ]
 }
 
-if (target_os == "mac") {
-  antares_glfw = "antares_glfw"
-} else {
-  antares_glfw = "antares"
-}
-
-executable(antares_glfw) {
+executable("antares-glfw") {
   sources = [
     "include/glfw/video-driver.hpp",
     "src/glfw/main.cpp",
