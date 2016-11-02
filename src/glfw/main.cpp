@@ -51,6 +51,8 @@ String application_path() {
 void main(int argc, const char* argv[]) {
     args::Parser parser(argv[0], "Runs Antares");
 
+    sfz::String scenario("com.biggerplanet.ares");
+    parser.add_argument("scenario", store(scenario)).help("select scenario");
     parser.add_argument("--help", help(parser, 0)).help("display this help screen");
 
     String error;
@@ -61,7 +63,7 @@ void main(int argc, const char* argv[]) {
 
     FilePrefsDriver prefs;
 
-    const auto&  scenario      = sys.prefs->scenario_identifier();
+    sys.prefs->set_scenario_identifier(scenario);
     bool         have_scenario = false;
     ScenarioList l;
     for (auto i : range(l.size())) {
