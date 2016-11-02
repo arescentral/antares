@@ -1,7 +1,6 @@
 include out/cur/args.gn
 NINJA=scripts/ninja.sh -C out/cur
 MAC_BIN=out/cur/Antares.app/Contents/MacOS/Antares
-LINUX_BIN=out/cur/antares
 
 BINDIR=$(prefix)/bin
 DATADIR=$(prefix)/share/antares/app
@@ -28,7 +27,7 @@ distclean:
 
 run: all
 	@[ -f $(MAC_BIN) ] && $(MAC_BIN) || true
-	@[ ! -f $(MAC_BIN) ] && $(LINUX_BIN) || true
+	@[ ! -f $(MAC_BIN) ] && scripts/antares-launcher || true
 
 sign:
 	codesign --force \
