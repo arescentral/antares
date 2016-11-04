@@ -20,14 +20,15 @@
 #define ANTARES_DATA_RESOURCE_HPP_
 
 #include <stdint.h>
+#include <pn/string>
 #include <sfz/sfz.hpp>
 
 namespace antares {
 
 class Resource {
   public:
-    Resource(const sfz::StringSlice& type, const sfz::StringSlice& extension, int id);
-    Resource(const sfz::PrintItem& resource_path);
+    Resource(pn::string_view type, pn::string_view extension, int id);
+    Resource(pn::string_view resource_path);
     ~Resource();
 
     sfz::BytesSlice data() const;

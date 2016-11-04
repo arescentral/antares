@@ -118,27 +118,27 @@ vector<unique_ptr<InterfaceItem>> interface_items(int id0, pn::array_cref l) {
         interfaceLabelType label =
                 sub.has("label") ? antares::label(sub.get("label")) : interfaceLabelType{};
 
-        if (kind == pn::string{"rect"}) {
+        if (kind == "rect") {
             if (sub.has("label")) {
                 items.emplace_back(new LabeledRect(id++, bounds, label, hue, style));
             } else {
                 items.emplace_back(new PlainRect(id++, bounds, hue, style));
             }
-        } else if (kind == pn::string{"button"}) {
+        } else if (kind == "button") {
             items.emplace_back(new PlainButton(id++, bounds, key, gamepad, label, hue, style));
-        } else if (kind == pn::string{"checkbox"}) {
+        } else if (kind == "checkbox") {
             items.emplace_back(new CheckboxButton(id++, bounds, key, gamepad, label, hue, style));
-        } else if (kind == pn::string{"radio"}) {
+        } else if (kind == "radio") {
             items.emplace_back(new RadioButton(id++, bounds, key, gamepad, label, hue, style));
-        } else if (kind == pn::string{"picture"}) {
+        } else if (kind == "picture") {
             items.emplace_back(new PictureRect(id++, bounds, resource));
-        } else if (kind == pn::string{"text"}) {
+        } else if (kind == "text") {
             if (sub.has("resource")) {
                 items.emplace_back(new TextRect(id++, bounds, resource, hue, style));
             } else {
                 items.emplace_back(new TextRect(id++, bounds, hue, style));
             }
-        } else if (kind == pn::string{"tab-box"}) {
+        } else if (kind == "tab-box") {
             Rect button_bounds = {
                     bounds.left + 22, bounds.top - 20, 0, bounds.top - 10,
             };
@@ -181,7 +181,7 @@ TextRect::TextRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style)
 TextRect::TextRect(
         int id, Rect bounds, pn::string_view resource, uint8_t hue, interfaceStyleType style)
         : InterfaceItem(id, bounds),
-          text(sfz2pn(utf8::decode(Resource(pn2sfz(resource)).data()))),
+          text(sfz2pn(utf8::decode(Resource(resource).data()))),
           hue(hue),
           style(style) {}
 
@@ -189,7 +189,7 @@ void TextRect::accept(const Visitor& visitor) const { visitor.visit_text_rect(*t
 
 PictureRect::PictureRect(int id, Rect bounds, pn::string_view resource)
         : InterfaceItem(id, bounds),
-          picture(pn2sfz(resource)),
+          picture(resource),
           texture(picture.texture()),
           visible_bounds(false),
           hue(GRAY),

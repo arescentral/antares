@@ -43,7 +43,7 @@ ANTARES_GLOBAL ScenarioGlobals plug;
 
 template <typename T>
 static void read_all(StringSlice name, StringSlice type, StringSlice extension, vector<T>& v) {
-    Resource   rsrc(type, extension, kPackedResID);
+    Resource   rsrc(sfz2pn(type), sfz2pn(extension), kPackedResID);
     BytesSlice in(rsrc.data());
     size_t     count = rsrc.data().size() / T::byte_size;
     v.resize(count);
@@ -75,7 +75,7 @@ void PluginInit() {
 
     StringList level_names(kLevelNameID);
     for (auto& level : plug.levels) {
-        level.name = pn2sfz(level_names.at(level.levelNameStrNum - 1));
+        level.name = level_names.at(level.levelNameStrNum - 1).copy();
     }
     for (int i : range(plug.levels.size())) {
         while (i != plug.levels[i].levelNameStrNum - 1) {

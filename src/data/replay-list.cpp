@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
+#include "data/pn.hpp"
 #include "game/sys.hpp"
 
 using sfz::CString;
@@ -48,10 +49,10 @@ struct ScopedGlob {
 }  // namespace
 
 ReplayList::ReplayList() {
-    ScopedGlob        g;
-    const StringSlice scenario = sys.prefs->scenario_identifier();
-    String            str(format("{0}/replays/*.NLRP", scenario_dir(scenario)));
-    CString           c_str(str);
+    ScopedGlob            g;
+    const pn::string_view scenario = sys.prefs->scenario_identifier();
+    String  str(format("{0}/{1}/replays/*.NLRP", dirs().scenarios, pn2sfz(scenario)));
+    CString c_str(str);
     glob(c_str.data(), 0, NULL, &g.data);
 
     for (int i = 0; i < g.data.gl_pathc; ++i) {

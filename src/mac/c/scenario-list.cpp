@@ -20,6 +20,7 @@
 
 #include <sfz/sfz.hpp>
 
+#include "data/pn.hpp"
 #include "data/scenario-list.hpp"
 
 using sfz::CString;
@@ -30,31 +31,19 @@ namespace utf8 = sfz::utf8;
 
 struct AntaresScenarioListEntry {
     AntaresScenarioListEntry(const antares::ScenarioList::Entry& entry)
-            : identifier(entry.identifier),
-              title(entry.title),
-              download_url(entry.download_url),
-              author(entry.author),
-              author_url(entry.author_url),
-              version_string(entry.version),
-              version(version_string) {}
+            : identifier(entry.identifier.copy()),
+              title(entry.title.copy()),
+              download_url(entry.download_url.copy()),
+              author(entry.author.copy()),
+              author_url(entry.author_url.copy()),
+              version(sfz2pn(entry.version)) {}
 
-    // TODO(sfiera): give CString a move constructor so we don't need to define this.
-    AntaresScenarioListEntry(AntaresScenarioListEntry&& other)
-            : identifier(String(utf8::decode(other.identifier.data()))),
-              title(String(utf8::decode(other.title.data()))),
-              download_url(String(utf8::decode(other.download_url.data()))),
-              author(String(utf8::decode(other.author.data()))),
-              author_url(String(utf8::decode(other.author_url.data()))),
-              version_string(other.version_string),
-              version(String(utf8::decode(other.version.data()))) {}
-
-    CString identifier;
-    CString title;
-    CString download_url;
-    CString author;
-    CString author_url;
-    String  version_string;
-    CString version;
+    pn::string identifier;
+    pn::string title;
+    pn::string download_url;
+    pn::string author;
+    pn::string author_url;
+    pn::string version;
 };
 
 struct AntaresScenarioList {

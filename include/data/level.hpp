@@ -19,6 +19,7 @@
 #ifndef ANTARES_DATA_LEVEL_HPP_
 #define ANTARES_DATA_LEVEL_HPP_
 
+#include <pn/string>
 #include <sfz/sfz.hpp>
 
 #include "data/action.hpp"
@@ -59,10 +60,10 @@ struct scenarioInfoType {
     Handle<BaseObject> warpOutFlareID;
     Handle<BaseObject> playerBodyID;
     Handle<BaseObject> energyBlobID;
-    sfz::String        downloadURLString;
-    sfz::String        titleString;
-    sfz::String        authorNameString;
-    sfz::String        authorURLString;
+    pn::string         downloadURLString;
+    pn::string         titleString;
+    pn::string         authorNameString;
+    pn::string         authorURLString;
     uint32_t           version;
 };
 void read_from(sfz::ReadSource in, scenarioInfoType& scenario_info);
@@ -118,29 +119,29 @@ struct Level {
         int16_t reserved1;
     };
 
-    sfz::String name;
-    int16_t     netRaceFlags;
-    int16_t     playerNum;
-    Player      player[kMaxPlayerNum];
-    int16_t     scoreStringResID;
-    int16_t     initialFirst;
-    int16_t     prologueID;
-    int16_t     initialNum;
-    int16_t     songID;
-    int16_t     conditionFirst;
-    int16_t     epilogueID;
-    int16_t     conditionNum;
-    int16_t     starMapH;
-    int16_t     briefPointFirst;
-    int16_t     starMapV;
-    int16_t     briefPointNum;  // use kLevelBriefMask
-    game_ticks  parTime;
-    int16_t     parKills;
-    int16_t     levelNameStrNum;
-    Fixed       parKillRatio;
-    int16_t     parLosses;
-    secs        startTime;
-    bool        is_training;
+    pn::string name;
+    int16_t    netRaceFlags;
+    int16_t    playerNum;
+    Player     player[kMaxPlayerNum];
+    int16_t    scoreStringResID;
+    int16_t    initialFirst;
+    int16_t    prologueID;
+    int16_t    initialNum;
+    int16_t    songID;
+    int16_t    conditionFirst;
+    int16_t    epilogueID;
+    int16_t    conditionNum;
+    int16_t    starMapH;
+    int16_t    briefPointFirst;
+    int16_t    starMapV;
+    int16_t    briefPointNum;  // use kLevelBriefMask
+    game_ticks parTime;
+    int16_t    parKills;
+    int16_t    levelNameStrNum;
+    Fixed      parKillRatio;
+    int16_t    parLosses;
+    secs       startTime;
+    bool       is_training;
 
     static const size_t byte_size = 124;
 

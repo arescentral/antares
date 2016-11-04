@@ -21,6 +21,8 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <sfz/sfz.hpp>
 
+#include "data/pn.hpp"
+
 using sfz::Bytes;
 using sfz::BytesSlice;
 using sfz::CString;
@@ -193,6 +195,8 @@ String wrap(sfz::StringSlice value) {
             NULL, bytes.data(), bytes.size(), kCFStringEncodingUTF8, false));
 }
 
+String wrap(pn::string_view value) { return wrap(pn2sfz(value)); }
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // unwrap()
 
@@ -254,6 +258,15 @@ bool unwrap(const String& cfvalue, sfz::String& value) {
             NULL, cfvalue.c_obj(), kCFStringEncodingUTF8, '?'));
     print(value, utf8::decode(encoded.data()));
     return true;
+}
+
+bool unwrap(const String& cfvalue, pn::string& value) {
+    sfz::String sfz_value;
+    if (unwrap(cfvalue, sfz_value)) {
+        value = sfz2pn(sfz_value);
+        return true;
+    }
+    return false;
 }
 
 }  // namespace cf

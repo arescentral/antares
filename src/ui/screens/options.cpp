@@ -50,7 +50,7 @@ using std::vector;
 
 namespace antares {
 
-OptionsScreen::OptionsScreen() : _state(SOUND_CONTROL), _revert(sys.prefs->get()) {}
+OptionsScreen::OptionsScreen() : _state(SOUND_CONTROL), _revert(sys.prefs->get().copy()) {}
 
 void OptionsScreen::become_front() {
     switch (_state) {

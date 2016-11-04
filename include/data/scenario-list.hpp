@@ -19,6 +19,7 @@
 #ifndef ANTARES_DATA_SCENARIO_LIST_HPP_
 #define ANTARES_DATA_SCENARIO_LIST_HPP_
 
+#include <pn/string>
 #include <sfz/sfz.hpp>
 #include <vector>
 
@@ -33,13 +34,13 @@ Version u32_to_version(uint32_t in);
 class ScenarioList {
   public:
     struct Entry {
-        sfz::String identifier;
-        sfz::String title;
-        sfz::String download_url;
-        sfz::String author;
-        sfz::String author_url;
-        Version     version;
-        bool        installed;
+        pn::string identifier;
+        pn::string title;
+        pn::string download_url;
+        pn::string author;
+        pn::string author_url;
+        Version    version;
+        bool       installed;
     };
 
     ScenarioList();

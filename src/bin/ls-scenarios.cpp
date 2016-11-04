@@ -18,6 +18,7 @@
 
 #include <sfz/sfz.hpp>
 
+#include "data/pn.hpp"
 #include "data/scenario-list.hpp"
 
 using sfz::format;
@@ -38,11 +39,11 @@ void main(int argc, char* const* argv) {
         if (!list.at(i).installed) {
             continue;
         }
-        print(io::out, format("{0}:\n", list.at(i).identifier));
-        print(io::out, format("    title: {0}\n", list.at(i).title));
-        print(io::out, format("    download url: {0}\n", list.at(i).download_url));
-        print(io::out, format("    author: {0}\n", list.at(i).author));
-        print(io::out, format("    author url: {0}\n", list.at(i).author_url));
+        print(io::out, format("{0}:\n", pn2sfz(list.at(i).identifier)));
+        print(io::out, format("    title: {0}\n", pn2sfz(list.at(i).title)));
+        print(io::out, format("    download url: {0}\n", pn2sfz(list.at(i).download_url)));
+        print(io::out, format("    author: {0}\n", pn2sfz(list.at(i).author)));
+        print(io::out, format("    author url: {0}\n", pn2sfz(list.at(i).author_url)));
         print(io::out, format("    version: {0}\n", list.at(i).version));
     }
 }

@@ -25,6 +25,7 @@
 #include "config/file-prefs-driver.hpp"
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
+#include "data/pn.hpp"
 #include "data/scenario-list.hpp"
 #include "game/sys.hpp"
 #include "glfw/video-driver.hpp"
@@ -45,11 +46,11 @@ namespace antares {
 void main(int argc, const char* argv[]) {
     args::Parser parser(argv[0], "Runs Antares");
 
-    sfz::String app_data(default_application_path());
-    sfz::String scenario(kFactoryScenarioIdentifier);
-    parser.add_argument("scenario", store(scenario)).help("select scenario");
+    sfz::String sfz_app_data(default_application_path());
+    sfz::String sfz_scenario(kFactoryScenarioIdentifier);
+    parser.add_argument("scenario", store(sfz_scenario)).help("select scenario");
     parser.add_argument("--help", help(parser, 0)).help("display this help screen");
-    parser.add_argument("--app-data", store(app_data))
+    parser.add_argument("--app-data", store(sfz_app_data))
             .help(format(
                     "set path to application data (default: {0})", default_application_path()));
 
@@ -60,7 +61,7 @@ void main(int argc, const char* argv[]) {
     }
 
     if (!sfz::path::isdir(application_path())) {
-        if (app_data.empty()) {
+        if (sfz_app_data.empty()) {
             print(io::err, format("{0}: application data not installed\n\n", parser.name()));
             print(io::err, format("Please install it, or specify a path with --app-data\n\n"));
         } else {
@@ -69,11 +70,12 @@ void main(int argc, const char* argv[]) {
         }
         exit(1);
     } else {
-        set_application_path(app_data);
+        set_application_path(sfz_app_data);
     }
 
     FilePrefsDriver prefs;
 
+    pn::string scenario = sfz2pn(sfz_scenario);
     sys.prefs->set_scenario_identifier(scenario);
     bool         have_scenario = false;
     ScenarioList l;
@@ -91,7 +93,8 @@ void main(int argc, const char* argv[]) {
         }
     }
     if (!have_scenario) {
-        print(io::err, format("{0}: {1}: scenario not installed\n", parser.name(), scenario));
+        print(io::err,
+              format("{0}: {1}: scenario not installed\n", parser.name(), pn2sfz(scenario)));
         exit(1);
     }
 

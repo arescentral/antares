@@ -24,6 +24,7 @@
 #include <sfz/sfz.hpp>
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
+#include "data/pn.hpp"
 #include "game/sys.hpp"
 #include "lang/defines.hpp"
 
@@ -142,8 +143,8 @@ class DirectoryLedger::Visitor : public JsonVisitor {
 };
 
 void DirectoryLedger::load() {
-    const StringSlice scenario_id = sys.prefs->scenario_identifier();
-    String            path(format("{0}/{1}/ledger.json", dirs().registry, scenario_id));
+    const pn::string_view scenario_id = sys.prefs->scenario_identifier();
+    String path(format("{0}/{1}/ledger.json", dirs().registry, pn2sfz(scenario_id)));
 
     _chapters.clear();
     unique_ptr<MappedFile> file;
@@ -165,8 +166,8 @@ void DirectoryLedger::load() {
 }
 
 void DirectoryLedger::save() {
-    const StringSlice scenario_id = sys.prefs->scenario_identifier();
-    const String      path(format("{0}/{1}/ledger.json", dirs().registry, scenario_id));
+    const pn::string_view scenario_id = sys.prefs->scenario_identifier();
+    const String path(format("{0}/{1}/ledger.json", dirs().registry, pn2sfz(scenario_id)));
 
     vector<Json> unlocked_levels;
     for (std::set<int>::const_iterator it = _chapters.begin(); it != _chapters.end(); ++it) {

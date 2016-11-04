@@ -20,6 +20,7 @@
 
 #include <sfz/sfz.hpp>
 
+#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "game/sys.hpp"
@@ -185,7 +186,7 @@ struct PixTableVisitor : public JsonDefaultVisitor {
     }
 
     void load_image(ArrayPixMap& image, StringSlice path) const {
-        Resource   rsrc(path);
+        Resource   rsrc(sfz2pn(path));
         BytesSlice data = rsrc.data();
         read(data, image);
     }

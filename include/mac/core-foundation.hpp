@@ -22,6 +22,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <algorithm>
 #include <initializer_list>
+#include <pn/string>
 #include <sfz/sfz.hpp>
 
 namespace antares {
@@ -138,7 +139,9 @@ class String : public Object<CFStringRef> {
 };
 String wrap(const char* value);
 String wrap(sfz::StringSlice value);
+String wrap(pn::string_view value);
 bool   unwrap(const String& cfvalue, sfz::String& value);
+bool   unwrap(const String& cfvalue, pn::string& value);
 
 class Array : public Object<CFArrayRef> {
   public:

@@ -21,10 +21,10 @@
 #include <sfz/sfz.hpp>
 
 #include "data/plugin.hpp"
+#include "data/pn.hpp"
 
 using sfz::BytesSlice;
 using sfz::ReadSource;
-using sfz::String;
 using sfz::read;
 namespace macroman = sfz::macroman;
 
@@ -35,11 +35,11 @@ static const int16_t kLevel_IsTraining_Bit = 0x8000;
 
 namespace {
 
-void read_pstr(ReadSource in, String& out) {
+void read_pstr(ReadSource in, pn::string& out) {
     uint8_t bytes[256];
     read(in, bytes, 256);
     BytesSlice encoded(bytes + 1, bytes[0]);
-    out.assign(macroman::decode(encoded));
+    out = sfz2pn(macroman::decode(encoded));
 }
 
 }  // namespace

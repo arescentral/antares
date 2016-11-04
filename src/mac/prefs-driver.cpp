@@ -113,9 +113,9 @@ CoreFoundationPrefsDriver::CoreFoundationPrefsDriver() {
     }
 
     cf::String cfstr;
-    String     id;
+    pn::string id;
     if (cf::get_preference(kScenarioPreference, cfstr) && cf::unwrap(cfstr, id)) {
-        _current.scenario_identifier.assign(id);
+        _current.scenario_identifier = id.copy();
     }
 }
 

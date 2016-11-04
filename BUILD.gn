@@ -564,6 +564,7 @@ if (target_os == "mac") {
     public_deps = [
       "//ext/libpng",
       "//ext/libsfz",
+      "//ext/procyon:procyon-cpp",
     ]
     libs = [
       "AudioToolbox.framework",

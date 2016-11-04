@@ -65,14 +65,14 @@ void recolor(PixMap& glyph_table) {
 }  // namespace
 
 Font::Font(pn::string_view name) {
-    String     path(format("fonts/{0}.pn", pn2sfz(name)));
+    pn::string path = sfz2pn(format("fonts/{0}.pn", pn2sfz(name)));
     Resource   rsrc(path);
     pn::string rsrc_string = sfz2pn(utf8::decode(rsrc.data()));
     pn::value  x;
     pn_error_t err;
     if (!pn::parse(rsrc_string.open(), x, &err)) {
-        throw Exception(
-                format("{0}:{1}:{2}: {3}", path, err.lineno, err.column, pn_strerror(err.code)));
+        throw Exception(format(
+                "{0}:{1}:{2}: {3}", pn2sfz(path), err.lineno, err.column, pn_strerror(err.code)));
     }
 
     pn::map_cref    m     = x.as_map();
@@ -82,7 +82,7 @@ Font::Font(pn::string_view name) {
     ascent                = m.get("ascent").as_int();
     pn::map_cref glyphs   = m.get("glyphs").as_map();
 
-    Picture glyph_table(pn2sfz(image), true);
+    Picture glyph_table(image, true);
     recolor(glyph_table);
     texture = glyph_table.texture();
     _scale  = glyph_table.scale();

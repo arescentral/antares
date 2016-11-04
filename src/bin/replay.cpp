@@ -195,7 +195,7 @@ void main(int argc, char** argv) {
 
     Preferences preferences;
     preferences.play_music_in_game = true;
-    NullPrefsDriver prefs(preferences);
+    NullPrefsDriver prefs(preferences.copy());
 
     EventScheduler scheduler;
     scheduler.schedule_event(unique_ptr<Event>(new MouseMoveEvent(wall_time(), Point(320, 240))));

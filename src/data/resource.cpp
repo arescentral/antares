@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
+#include "data/pn.hpp"
 #include "game/sys.hpp"
 
 using sfz::BytesSlice;
@@ -52,15 +53,15 @@ static unique_ptr<MappedFile> load_first(
 static unique_ptr<MappedFile> load(sfz::StringSlice resource_path) {
     return load_first(
             resource_path, {
-                                   scenario_dir(sys.prefs->scenario_identifier()),
+                                   scenario_dir(pn2sfz(sys.prefs->scenario_identifier())),
                                    scenario_dir(kFactoryScenarioIdentifier), application_path(),
                            });
 }
 
-Resource::Resource(const StringSlice& type, const StringSlice& extension, int id)
-        : Resource(format("{0}/{1}.{2}", type, id, extension)) {}
+Resource::Resource(pn::string_view type, pn::string_view extension, int id)
+        : Resource(sfz2pn(format("{0}/{1}.{2}", pn2sfz(type), id, pn2sfz(extension)))) {}
 
-Resource::Resource(const sfz::PrintItem& resource_path) : _file(load(String(resource_path))) {}
+Resource::Resource(pn::string_view resource_path) : _file(load(pn2sfz(resource_path))) {}
 
 Resource::~Resource() {}
 

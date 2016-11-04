@@ -24,6 +24,7 @@
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "data/plugin.hpp"
+#include "data/pn.hpp"
 #include "drawing/color.hpp"
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
@@ -165,14 +166,14 @@ void SelectLevelScreen::handle_button(Button& button) {
 void SelectLevelScreen::overlay() const { draw_level_name(); }
 
 void SelectLevelScreen::draw_level_name() const {
-    const String chapter_name((*_level)->name);
+    const pn::string_view chapter_name = (*_level)->name;
 
     const InterfaceItem& i = item(NAME);
 
     RgbColor   color = GetRGBTranslateColorShade(AQUA, VERY_LIGHT);
     StyledText retro(sys.fonts.title);
     retro.set_fore_color(color);
-    retro.set_retro_text(chapter_name);
+    retro.set_retro_text(pn2sfz(chapter_name));
     retro.wrap_to(440, 0, 2);
 
     Rect  bounds = i.bounds();

@@ -23,6 +23,7 @@
 #include <sfz/sfz.hpp>
 #include "config/dirs.hpp"
 #include "data/level.hpp"
+#include "data/pn.hpp"
 
 using sfz::BytesSlice;
 using sfz::CString;
@@ -63,8 +64,8 @@ Version u32_to_version(uint32_t in) {
 
 ScenarioList::ScenarioList() {
     _scenarios.emplace_back();
-    Entry& factory_scenario = _scenarios.back();
-    factory_scenario.identifier.assign(kFactoryScenarioIdentifier);
+    Entry& factory_scenario     = _scenarios.back();
+    factory_scenario.identifier = kFactoryScenarioIdentifier;
 
     const String factory_path(
             format("{0}/scenario-info/128.nlAG", scenario_dir(kFactoryScenarioIdentifier)));
@@ -73,19 +74,19 @@ ScenarioList::ScenarioList() {
         BytesSlice       data(file.data());
         scenarioInfoType info;
         read(data, info);
-        factory_scenario.title.assign(info.titleString);
-        factory_scenario.download_url.assign(info.downloadURLString);
-        factory_scenario.author.assign(info.authorNameString);
-        factory_scenario.author_url.assign(info.authorURLString);
-        factory_scenario.version   = u32_to_version(info.version);
-        factory_scenario.installed = true;
+        factory_scenario.title        = info.titleString.copy();
+        factory_scenario.download_url = info.downloadURLString.copy();
+        factory_scenario.author       = info.authorNameString.copy();
+        factory_scenario.author_url   = info.authorURLString.copy();
+        factory_scenario.version      = u32_to_version(info.version);
+        factory_scenario.installed    = true;
     } else {
-        factory_scenario.title.assign("Ares");
-        factory_scenario.download_url.assign("http://www.arescentral.com");
-        factory_scenario.author.assign("Bigger Planet");
-        factory_scenario.author_url.assign("http://www.biggerplanet.com");
-        factory_scenario.version   = u32_to_version(0x01010100);
-        factory_scenario.installed = false;
+        factory_scenario.title        = "Ares";
+        factory_scenario.download_url = "http://www.arescentral.com";
+        factory_scenario.author       = "Bigger Planet";
+        factory_scenario.author_url   = "http://www.biggerplanet.com";
+        factory_scenario.version      = u32_to_version(0x01010100);
+        factory_scenario.installed    = false;
     }
 
     ScopedGlob        g;
@@ -98,7 +99,8 @@ ScenarioList::ScenarioList() {
     size_t suffix_len = info.size() + 1;
     for (int i = 0; i < g.data.gl_pathc; ++i) {
         const String path(utf8::decode(g.data.gl_pathv[i]));
-        StringSlice  identifier = path.slice(prefix_len, path.size() - prefix_len - suffix_len);
+        pn::string   identifier =
+                sfz2pn(path.slice(prefix_len, path.size() - prefix_len - suffix_len));
         if (identifier == _scenarios[0].identifier) {
             continue;
         }
@@ -108,14 +110,14 @@ ScenarioList::ScenarioList() {
         scenarioInfoType info;
         read(data, info);
         _scenarios.emplace_back();
-        Entry& entry = _scenarios.back();
-        entry.identifier.assign(identifier);
-        entry.title.assign(info.titleString);
-        entry.download_url.assign(info.downloadURLString);
-        entry.author.assign(info.authorNameString);
-        entry.author_url.assign(info.authorURLString);
-        entry.version   = u32_to_version(info.version);
-        entry.installed = true;
+        Entry& entry       = _scenarios.back();
+        entry.identifier   = identifier.copy();
+        entry.title        = info.titleString.copy();
+        entry.download_url = info.downloadURLString.copy();
+        entry.author       = info.authorNameString.copy();
+        entry.author_url   = info.authorURLString.copy();
+        entry.version      = u32_to_version(info.version);
+        entry.installed    = true;
     }
 }
 
