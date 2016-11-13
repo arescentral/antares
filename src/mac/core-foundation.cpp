@@ -130,8 +130,6 @@ sfz::BytesSlice Data::data() const {
     return sfz::BytesSlice(CFDataGetBytePtr(c_obj()), CFDataGetLength(c_obj()));
 }
 
-void write_to(sfz::WriteTarget out, const Data& data) { write(out, data.data()); }
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // PropertyList
 

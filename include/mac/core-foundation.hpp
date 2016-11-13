@@ -192,7 +192,6 @@ class Data : public Object<CFDataRef> {
 
     sfz::BytesSlice data() const;
 };
-void write_to(sfz::WriteTarget out, const Data& data);
 
 class PropertyList : public Object<CFPropertyListRef> {
   public:
