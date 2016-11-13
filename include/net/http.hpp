@@ -25,7 +25,7 @@
 namespace antares {
 namespace http {
 
-void get(pn::string_view url, sfz::WriteTarget out);
+void get(pn::string_view url, pn::file_view out);
 
 }  // namespace http
 }  // namespace antares

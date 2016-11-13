@@ -27,7 +27,6 @@
 #include <sys/time.h>
 #include <algorithm>
 #include <pn/file>
-#include <sfz/sfz.hpp>
 
 #include "game/time.hpp"
 #include "mac/c/CocoaVideoDriver.h"

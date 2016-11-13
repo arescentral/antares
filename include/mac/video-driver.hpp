@@ -20,7 +20,6 @@
 #define ANTARES_MAC_VIDEO_DRIVER_HPP_
 
 #include <queue>
-#include <sfz/sfz.hpp>
 #include <stack>
 
 #include "config/keys.hpp"

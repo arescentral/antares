@@ -568,10 +568,10 @@ void DataExtractor::download(
     // Download the file from `url`.  Check its digest when it has been downloaded; if it is not
     // the right file, then throw an exception without writing it to disk.  Otherwise, write it to
     // disk.
-    sfz::Bytes download;
-    http::get(url, download);
+    pn::data download;
+    http::get(url, download.open("w"));
     Sha1 sha;
-    write(sha, download);
+    write(sha, sfz::BytesSlice{download.data(), static_cast<size_t>(download.size())});
     if (sha.digest() != expected_digest) {
         throw std::runtime_error(
                 pn::format(
@@ -583,7 +583,7 @@ void DataExtractor::download(
     // If we got the file, write it out at `full_path`.
     makedirs(path::dirname(pn2sfz(full_path)), 0755);
     pn::file file = pn::open(full_path, "w");
-    file.write(pn::data_view{download.data(), static_cast<int>(download.size())});
+    file.write(download);
 }
 
 void DataExtractor::write_version(pn::string_view scenario_identifier) const {

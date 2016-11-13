@@ -20,12 +20,10 @@
 
 #include <AudioToolbox/AudioToolbox.h>
 #include <pn/file>
-#include <sfz/sfz.hpp>
 
 #include "data/pn.hpp"
 #include "data/resource.hpp"
 
-using sfz::quote;
 using std::unique_ptr;
 
 namespace antares {

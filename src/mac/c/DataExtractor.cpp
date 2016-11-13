@@ -18,14 +18,9 @@
 
 #include "mac/c/DataExtractor.h"
 
-#include <sfz/sfz.hpp>
-
 #include "data/extractor.hpp"
 
-using sfz::CString;
 using std::unique_ptr;
-
-namespace utf8 = sfz::utf8;
 
 struct AntaresDataExtractor {
     antares::DataExtractor cxx_obj;

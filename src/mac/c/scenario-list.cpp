@@ -18,15 +18,10 @@
 
 #include "mac/c/scenario-list.h"
 
-#include <sfz/sfz.hpp>
-
 #include "data/pn.hpp"
 #include "data/scenario-list.hpp"
 
-using sfz::CString;
 using std::vector;
-
-namespace utf8 = sfz::utf8;
 
 struct AntaresScenarioListEntry {
     AntaresScenarioListEntry(const antares::ScenarioList::Entry& entry)

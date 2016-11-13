@@ -19,7 +19,6 @@
 #include "mac/c/AntaresController.h"
 
 #include <stdlib.h>
-#include <sfz/sfz.hpp>
 
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
@@ -45,8 +44,6 @@ using antares::Preferences;
 using antares::PrefsDriver;
 using antares::SoundDriver;
 using antares::VideoDriver;
-
-namespace utf8 = sfz::utf8;
 
 struct AntaresDrivers {
     CoreFoundationPrefsDriver prefs;

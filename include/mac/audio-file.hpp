@@ -23,13 +23,14 @@
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
 #include <pn/data>
-#include <sfz/sfz.hpp>
 
 namespace antares {
 
 class AudioFile {
   public:
     AudioFile(pn::data_view data);
+    AudioFile(const AudioFile&) = delete;
+    AudioFile& operator=(const AudioFile&) = delete;
 
     ~AudioFile();
 
@@ -46,8 +47,6 @@ class AudioFile {
 
     AudioFileID   _id;
     pn::data_view _data;
-
-    DISALLOW_COPY_AND_ASSIGN(AudioFile);
 };
 
 }  // namespace antares

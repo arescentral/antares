@@ -20,9 +20,6 @@
 
 #include <OpenGL/OpenGL.h>
 #include <pn/file>
-#include <sfz/sfz.hpp>
-
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 namespace cgl {

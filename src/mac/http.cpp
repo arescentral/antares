@@ -20,21 +20,21 @@
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <pn/file>
-#include <sfz/sfz.hpp>
 
 #include "data/pn.hpp"
 #include "mac/core-foundation.hpp"
+#include "net/http.hpp"
 
 namespace antares {
 namespace http {
 
-void get(pn::string_view url, sfz::WriteTarget out) {
+void get(pn::string_view url, pn::file_view out) {
     cf::Url  cfurl(url);
     cf::Data cfdata;
     SInt32   error;
     if (CFURLCreateDataAndPropertiesFromResource(
                 NULL, cfurl.c_obj(), &cfdata.c_obj(), NULL, NULL, &error)) {
-        write(out, cfdata.data());
+        out.write(cfdata.data());
     } else {
         throw std::runtime_error(pn::format("Couldn't load requested url {0}", url).c_str());
     }

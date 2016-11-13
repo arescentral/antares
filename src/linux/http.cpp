@@ -34,8 +34,8 @@ namespace antares {
 namespace http {
 
 struct ne_userdata {
-    WriteTarget out;
-    size_t      total;
+    pn::file_view out;
+    size_t        total;
 };
 
 static int accept(void* userdata, ne_request* req, const ne_status* st) {
@@ -49,11 +49,11 @@ static int accept(void* userdata, ne_request* req, const ne_status* st) {
 static int reader(void* userdata, const char* buf, size_t len) {
     ne_userdata* u = reinterpret_cast<ne_userdata*>(userdata);
     u->total += len;
-    write(u->out, buf, len);
+    u->out.write(pn::data_view{reinterpret_cast<const uint8_t*>(buf), static_cast<int>(len)});
     return 0;
 }
 
-void get(pn::string_view url, WriteTarget out) {
+void get(pn::string_view url, pn::file_view out) {
     static int inited = ne_sock_init();
     if (inited != 0) {
         throw std::runtime_error("ne_sock_init()");

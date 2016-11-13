@@ -19,14 +19,11 @@
 #include "mac/core-foundation.hpp"
 
 #include <CoreFoundation/CoreFoundation.h>
-#include <sfz/sfz.hpp>
+#include <pn/data>
 
 #include "data/pn.hpp"
 
-using sfz::CString;
 using std::unique_ptr;
-
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 namespace cf {
@@ -126,8 +123,8 @@ Data::Data() {}
 
 Data::Data(type c_obj) : Object<CFDataRef>(c_obj) {}
 
-sfz::BytesSlice Data::data() const {
-    return sfz::BytesSlice(CFDataGetBytePtr(c_obj()), CFDataGetLength(c_obj()));
+pn::data_view Data::data() const {
+    return pn::data_view(CFDataGetBytePtr(c_obj()), CFDataGetLength(c_obj()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -246,12 +243,10 @@ bool unwrap(const String& cfvalue, pn::string& value) {
     if (!cfvalue.c_obj()) {
         return false;
     }
-    sfz::String sfz_value;
-    Data        encoded(CFStringCreateExternalRepresentation(
+    Data encoded(CFStringCreateExternalRepresentation(
             NULL, cfvalue.c_obj(), kCFStringEncodingUTF8, '?'));
     value = pn::string(
             reinterpret_cast<const char*>(encoded.data().data()), encoded.data().size());
-    value = sfz2pn(sfz_value);
     return true;
 }
 

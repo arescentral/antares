@@ -23,7 +23,6 @@
 #include <algorithm>
 #include <initializer_list>
 #include <pn/string>
-#include <sfz/sfz.hpp>
 
 namespace antares {
 namespace cf {
@@ -35,8 +34,10 @@ class UnownedObject {
 
     UnownedObject() : _c_obj(NULL) {}
     UnownedObject(type c_obj) : _c_obj(c_obj) {}
+    UnownedObject(const UnownedObject&) = delete;
     UnownedObject(UnownedObject&& other) : _c_obj(other.release()) {}
-    UnownedObject& operator=(UnownedObject&& other) {
+    UnownedObject& operator=(const UnownedObject&) = delete;
+    UnownedObject& operator                        =(UnownedObject&& other) {
         reset(other.release());
         return *this;
     }
@@ -55,8 +56,6 @@ class UnownedObject {
 
   private:
     type _c_obj;
-
-    DISALLOW_COPY_AND_ASSIGN(UnownedObject);
 };
 
 template <typename T>
@@ -190,7 +189,7 @@ class Data : public Object<CFDataRef> {
     Data(Data&&)  = default;
     Data& operator=(Data&&) = default;
 
-    sfz::BytesSlice data() const;
+    pn::data_view data() const;
 };
 
 class PropertyList : public Object<CFPropertyListRef> {

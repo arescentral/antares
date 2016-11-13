@@ -20,6 +20,7 @@
 
 #include <CoreFoundation/CoreFoundation.h>
 #include <algorithm>
+#include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
