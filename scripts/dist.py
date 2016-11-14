@@ -52,7 +52,9 @@ def walk(archive_root):
 
 def should_write(base):
     _, ext = os.path.splitext(base)
-    if base.startswith("."):
+    if base == ".gn":
+        return True
+    elif base.startswith("."):
         return False
     elif base == "gn":
         return False
