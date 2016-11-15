@@ -61,6 +61,11 @@ void main(int argc, const char* argv[]) {
         exit(1);
     }
 
+    if (!sfz::path::isdir(application_path())) {
+        print(io::err, format("{0}: application data not installed\n\n", parser.name()));
+        exit(1);
+    }
+
     FilePrefsDriver prefs;
 
     sys.prefs->set_scenario_identifier(scenario);
