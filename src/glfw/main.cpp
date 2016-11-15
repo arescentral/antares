@@ -34,18 +34,25 @@ using sfz::String;
 using sfz::args::store;
 using sfz::args::store_const;
 using sfz::range;
+using sfz::format;
 
 #ifndef ANTARES_PREFIX
 #define ANTARES_PREFIX "/usr/local"
 #endif  // ANTARES_PREFIX
+#define ANTARES_APP_DATA ANTARES_PREFIX "/share/antares/app"
 
 namespace args = sfz::args;
 namespace io   = sfz::io;
 
 namespace antares {
 
+static String app_data;
+
 String application_path() {
-    return String(ANTARES_PREFIX "/share/antares/app");
+    if (app_data.empty()) {
+        return sfz::String(ANTARES_APP_DATA);
+    }
+    return sfz::String(app_data);
 }
 
 void main(int argc, const char* argv[]) {
@@ -54,10 +61,23 @@ void main(int argc, const char* argv[]) {
     sfz::String scenario("com.biggerplanet.ares");
     parser.add_argument("scenario", store(scenario)).help("select scenario");
     parser.add_argument("--help", help(parser, 0)).help("display this help screen");
+    parser.add_argument("--app-data", store(app_data))
+            .help("set path to application data (default: " ANTARES_APP_DATA ")");
 
     String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
         print(io::err, format("{0}: {1}\n", parser.name(), error));
+        exit(1);
+    }
+
+    if (!sfz::path::isdir(application_path())) {
+        if (app_data.empty()) {
+            print(io::err, format("{0}: application data not installed\n\n", parser.name()));
+            print(io::err, format("Please install it, or specify a path with --app-data\n\n"));
+        } else {
+            print(io::err, format("{0}: application data not found at {1}\n\n", parser.name(),
+                                  application_path()));
+        }
         exit(1);
     }
 
