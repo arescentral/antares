@@ -97,7 +97,6 @@ static void set_from(
 }
 
 FilePrefsDriver::FilePrefsDriver() {
-    Preferences _current;
     try {
         String     path(format("{0}/config.json", dirs().root));
         MappedFile file(path);
