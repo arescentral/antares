@@ -26,7 +26,6 @@
 #include "mac/core-foundation.hpp"
 
 using sfz::String;
-using sfz::StringSlice;
 using sfz::range;
 using std::min;
 using std::swap;

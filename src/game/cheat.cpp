@@ -36,7 +36,6 @@ using sfz::BytesSlice;
 using sfz::PrintItem;
 using sfz::Rune;
 using sfz::String;
-using sfz::StringSlice;
 using std::unique_ptr;
 
 namespace antares {

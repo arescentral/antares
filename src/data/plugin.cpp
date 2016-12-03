@@ -26,7 +26,6 @@
 
 using sfz::BytesSlice;
 using sfz::Exception;
-using sfz::StringSlice;
 using sfz::format;
 using sfz::range;
 using std::vector;
@@ -42,8 +41,9 @@ static const int16_t kPackedResID = 500;
 ANTARES_GLOBAL ScenarioGlobals plug;
 
 template <typename T>
-static void read_all(StringSlice name, StringSlice type, StringSlice extension, vector<T>& v) {
-    Resource   rsrc(sfz2pn(type), sfz2pn(extension), kPackedResID);
+static void read_all(
+        pn::string_view name, pn::string_view type, pn::string_view extension, vector<T>& v) {
+    Resource   rsrc(type, extension, kPackedResID);
     BytesSlice in(rsrc.data());
     size_t     count = rsrc.data().size() / T::byte_size;
     v.resize(count);
@@ -51,7 +51,7 @@ static void read_all(StringSlice name, StringSlice type, StringSlice extension, 
         read(in, v[i]);
     }
     if (!in.empty()) {
-        throw Exception(format("didn't consume all of {0} data", name));
+        throw Exception(format("didn't consume all of {0} data", pn2sfz(name)));
     }
 }
 

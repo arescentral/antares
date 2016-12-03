@@ -21,23 +21,22 @@
 #include <AudioToolbox/AudioToolbox.h>
 #include <sfz/sfz.hpp>
 
+#include "data/pn.hpp"
 #include "data/resource.hpp"
 
 using sfz::Bytes;
 using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::PrintItem;
-using sfz::String;
-using sfz::StringSlice;
 using sfz::format;
 using sfz::quote;
 using std::unique_ptr;
 
 namespace antares {
 
-static void check_os_err(OSStatus err, const StringSlice& method) {
+static void check_os_err(OSStatus err, pn::string_view method) {
     if (err != noErr) {
-        throw Exception(format("{0}: {1}", method, err));
+        throw Exception(format("{0}: {1}", pn2sfz(method), err));
     }
 }
 

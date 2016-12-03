@@ -71,7 +71,6 @@
 using sfz::Exception;
 using sfz::ScopedFd;
 using sfz::String;
-using sfz::StringSlice;
 using sfz::format;
 using sfz::makedirs;
 using sfz::open;

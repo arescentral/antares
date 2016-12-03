@@ -190,8 +190,8 @@ inline int32_t mGetLineNumFromV(int32_t mV) {
     return (((mV) - (kMiniScreenTop + instrument_top())) / sys.fonts.computer->height);
 }
 
-inline void mCopyBlankLineString(miniScreenLineType* mline, StringSlice mstring) {
-    mline->string.assign(mstring);
+inline void mCopyBlankLineString(miniScreenLineType* mline, pn::string_view mstring) {
+    mline->string.assign(pn2sfz(mstring));
     if (mline->string.size() > kMiniScreenCharWidth) {
         mline->string.resize(kMiniScreenCharWidth);
     }
@@ -200,7 +200,7 @@ inline void mCopyBlankLineString(miniScreenLineType* mline, StringSlice mstring)
 }  // namespace
 
 static void draw_mini_ship_data(
-        Handle<SpaceObject> obj, uint8_t header_color, int16_t screen_top, StringSlice label);
+        Handle<SpaceObject> obj, uint8_t header_color, int16_t screen_top, pn::string_view label);
 static void MiniComputerExecute(
         int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral);
 
@@ -266,7 +266,7 @@ static void highlight(const Rects& rects, int line) {
     draw_shaded_rect(rects, hilite_rect, kMiniScreenColor, DARK, MEDIUM, DARKER);
 }
 
-static void item_text(const Quads& quads, int line, StringSlice string, bool dim) {
+static void item_text(const Quads& quads, int line, pn::string_view string, bool dim) {
     Rect rect = Rect(kMiniScreenLeft, kMiniScreenTop, kMiniScreenRight, kMiniScreenBottom);
     rect.offset(0, instrument_top());
     Point origin = rect.origin();
@@ -281,7 +281,7 @@ static void item_text(const Quads& quads, int line, StringSlice string, bool dim
             textcolor = GetRGBTranslateColorShade(kMiniScreenColor, MEDIUM);
         }
     }
-    sys.fonts.computer->draw(quads, origin, sfz2pn(string), textcolor);
+    sys.fonts.computer->draw(quads, origin, string, textcolor);
 }
 
 static void button_on(const Rects& rects, int line) {
@@ -307,7 +307,7 @@ static void button_off(const Rects& rects, int line) {
     draw_shaded_rect(rects, hilite_rect, kMiniButColor, MEDIUM, LIGHT, DARK);
 }
 
-static void button_on_text(const Quads& quads, int line, StringSlice string) {
+static void button_on_text(const Quads& quads, int line, pn::string_view string) {
     Rect rect = Rect(kButBoxLeft, kButBoxTop, kButBoxRight, kButBoxBottom);
     rect.offset(0, instrument_top());
     Point origin = rect.origin();
@@ -315,10 +315,10 @@ static void button_on_text(const Quads& quads, int line, StringSlice string) {
             kMiniScreenLeftBuffer,
             (line * sys.fonts.computer->height) + sys.fonts.computer->ascent);
     RgbColor textcolor = RgbColor::black();
-    sys.fonts.computer->draw(quads, origin, sfz2pn(string), textcolor);
+    sys.fonts.computer->draw(quads, origin, string, textcolor);
 }
 
-static void button_off_text(const Quads& quads, int line, StringSlice string) {
+static void button_off_text(const Quads& quads, int line, pn::string_view string) {
     Rect rect = Rect(kButBoxLeft, kButBoxTop, kButBoxRight, kButBoxBottom);
     rect.offset(0, instrument_top());
     Point origin = rect.origin();
@@ -326,7 +326,7 @@ static void button_off_text(const Quads& quads, int line, StringSlice string) {
             kMiniScreenLeftBuffer,
             (line * sys.fonts.computer->height) + sys.fonts.computer->ascent);
     RgbColor textcolor = GetRGBTranslateColorShade(kMiniButColor, VERY_LIGHT);
-    sys.fonts.computer->draw(quads, origin, sfz2pn(string), textcolor);
+    sys.fonts.computer->draw(quads, origin, string, textcolor);
 }
 
 static void draw_minicomputer_lines() {
@@ -372,18 +372,20 @@ static void draw_minicomputer_lines() {
         }
 
         for (int32_t count = 0; count < kMiniScreenCharHeight; count++) {
-            item_text(quads, count, strings[count], dim[count]);
+            item_text(quads, count, sfz2pn(strings[count]), dim[count]);
         }
 
         for (int32_t count = 0; count < kMiniScreenButtonNum; count++) {
             switch (g.mini.lineData[count + kMiniScreenCharHeight].kind) {
                 case MINI_BUTTON_ON:
                     button_on_text(
-                            quads, count, g.mini.lineData[count + kMiniScreenCharHeight].string);
+                            quads, count,
+                            sfz2pn(g.mini.lineData[count + kMiniScreenCharHeight].string));
                     break;
                 case MINI_BUTTON_OFF:
                     button_off_text(
-                            quads, count, g.mini.lineData[count + kMiniScreenCharHeight].string);
+                            quads, count,
+                            sfz2pn(g.mini.lineData[count + kMiniScreenCharHeight].string));
                     break;
                 default: break;
             }
@@ -405,44 +407,44 @@ void draw_mini_screen() {
             g.admiral->target(), SKY_BLUE, kMiniTargetTop + instrument_top(), "TARGET");
 }
 
-static miniScreenLineType text(StringSlice name, bool underlined) {
+static miniScreenLineType text(pn::string_view name, bool underlined) {
     miniScreenLineType line;
-    line.string.assign(name);
+    line.string    = pn2sfz(name);
     line.kind      = MINI_NONE;
     line.underline = underlined;
     return line;
 }
 
 static miniScreenLineType selectable(
-        StringSlice name, void (*callback)(Handle<Admiral> adm, int32_t line)) {
+        pn::string_view name, void (*callback)(Handle<Admiral> adm, int32_t line)) {
     miniScreenLineType line;
-    line.kind = MINI_SELECTABLE;
-    line.string.assign(name);
+    line.kind     = MINI_SELECTABLE;
+    line.string   = pn2sfz(name);
     line.callback = callback;
     return line;
 }
 
-static miniScreenLineType accept(StringSlice name) {
+static miniScreenLineType accept(pn::string_view name) {
     miniScreenLineType line;
     pn::string         line_string;
     GetKeyNumName(sys.prefs->key(kCompAcceptKeyNum), line_string);
     line.string = pn2sfz(line_string);
     pad_to(line.string, kKeyNameLength);
     line.string.append(" ");
-    line.string.append(name);
+    line.string.append(pn2sfz(name));
     line.kind        = MINI_BUTTON_OFF;
     line.whichButton = kInLineButton;
     return line;
 }
 
-static miniScreenLineType cancel(StringSlice name) {
+static miniScreenLineType cancel(pn::string_view name) {
     miniScreenLineType line;
     pn::string         line_string;
     GetKeyNumName(sys.prefs->key(kCompCancelKeyNum), line_string);
     line.string = pn2sfz(line_string);
     pad_to(line.string, kKeyNameLength);
     line.string.append(" ");
-    line.string.append(name);
+    line.string.append(pn2sfz(name));
     line.kind        = MINI_BUTTON_OFF;
     line.whichButton = kOutLineButton;
     return line;
@@ -631,14 +633,14 @@ void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) 
 }
 
 static void draw_mini_ship_data(
-        Handle<SpaceObject> obj, uint8_t header_color, int16_t screen_top, StringSlice label) {
+        Handle<SpaceObject> obj, uint8_t header_color, int16_t screen_top, pn::string_view label) {
     {
         // "CONTROL" or "TARGET" label.
         Rect bar = mini_screen_line_bounds(screen_top, 0, 0, kMiniScreenWidth);
         draw_shaded_rect(Rects(), bar, header_color, LIGHT, VERY_LIGHT, MEDIUM);
         sys.fonts.computer->draw(
                 Point(bar.left + kMiniScreenLeftBuffer, bar.top + sys.fonts.computer->ascent),
-                sfz2pn(label), RgbColor::black());
+                label, RgbColor::black());
     }
 
     // Icon
@@ -981,7 +983,7 @@ void MiniComputerSetBuildStrings() {
         return;
     }
     header->value = buildAtObject.number();
-    mCopyBlankLineString(header, pn2sfz(buildAtObject->name));
+    mCopyBlankLineString(header, buildAtObject->name);
 
     for (int32_t count = 0; count < kMaxShipCanBuild; count++) {
         int32_t             lineNum = kBuildScreenFirstTypeLine + count;
@@ -994,7 +996,7 @@ void MiniComputerSetBuildStrings() {
             continue;
         }
 
-        mCopyBlankLineString(line, pn2sfz(get_object_name(buildObject)));
+        mCopyBlankLineString(line, get_object_name(buildObject));
         if (buildObject->price > mFixedToLong(g.admiral->cash())) {
             line->kind = MINI_DIM;
         } else {

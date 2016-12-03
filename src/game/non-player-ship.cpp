@@ -43,7 +43,6 @@
 #include "video/transitions.hpp"
 
 using sfz::Exception;
-using sfz::StringSlice;
 
 namespace antares {
 

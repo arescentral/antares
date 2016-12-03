@@ -55,7 +55,6 @@ using sfz::Exception;
 using sfz::BytesSlice;
 using sfz::PrintTarget;
 using sfz::String;
-using sfz::StringSlice;
 using sfz::format;
 
 namespace macroman = sfz::macroman;
@@ -110,9 +109,9 @@ pn::string hot_key_suffix(Handle<SpaceObject> space_object) {
         return "";
     }
 
-    StringList strings(KEY_LONG_NAMES);
-    String     key_name = pn2sfz(strings.at(keyNum - 1));
-    return sfz2pn(format(" < {0} >", key_name));
+    StringList      strings(KEY_LONG_NAMES);
+    pn::string_view key_name = strings.at(keyNum - 1);
+    return sfz2pn(format(" < {0} >", pn2sfz(key_name)));
 };
 
 }  // namespace

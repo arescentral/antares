@@ -58,7 +58,6 @@ using sfz::MappedFile;
 using sfz::Optional;
 using sfz::ScopedFd;
 using sfz::String;
-using sfz::StringSlice;
 using sfz::args::store;
 using sfz::args::store_const;
 using sfz::format;
@@ -158,8 +157,8 @@ void ReplayMaster::init() {
     Vectors::init();
 }
 
-void usage(StringSlice program_name) {
-    print(io::err, format("usage: {0} replay_path output_dir\n", program_name));
+void usage(pn::string_view program_name) {
+    print(io::err, format("usage: {0} replay_path output_dir\n", pn2sfz(program_name)));
     exit(1);
 }
 

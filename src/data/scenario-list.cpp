@@ -29,7 +29,6 @@ using sfz::BytesSlice;
 using sfz::CString;
 using sfz::MappedFile;
 using sfz::String;
-using sfz::StringSlice;
 using sfz::format;
 using sfz::read;
 using std::vector;
@@ -89,10 +88,10 @@ ScenarioList::ScenarioList() {
         factory_scenario.installed    = false;
     }
 
-    ScopedGlob        g;
-    const StringSlice info("scenario-info/128.nlAG");
-    String            str(format("{0}/*/{1}", pn2sfz(dirs().scenarios), info));
-    CString           c_str(str);
+    ScopedGlob            g;
+    const pn::string_view info("scenario-info/128.nlAG");
+    String                str(format("{0}/*/{1}", pn2sfz(dirs().scenarios), pn2sfz(info)));
+    CString               c_str(str);
     glob(c_str.data(), 0, NULL, &g.data);
 
     size_t prefix_len = pn2sfz(dirs().scenarios).size() + 1;

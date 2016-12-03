@@ -31,7 +31,6 @@
 using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::ReadSource;
-using sfz::StringSlice;
 using sfz::range;
 using sfz::read;
 using std::max;

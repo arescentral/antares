@@ -51,7 +51,6 @@ using sfz::Optional;
 using sfz::PrintItem;
 using sfz::ScopedFd;
 using sfz::String;
-using sfz::StringSlice;
 using sfz::WriteTarget;
 using sfz::dec;
 using sfz::format;

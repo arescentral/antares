@@ -36,7 +36,6 @@ using sfz::Exception;
 using sfz::Optional;
 using sfz::Rune;
 using sfz::String;
-using sfz::StringSlice;
 using sfz::args::help;
 using sfz::args::store;
 using sfz::args::store_const;

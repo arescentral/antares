@@ -29,8 +29,6 @@ using sfz::Bytes;
 using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::PrintItem;
-using sfz::String;
-using sfz::StringSlice;
 using sfz::format;
 using sfz::quote;
 using std::unique_ptr;
@@ -51,10 +49,10 @@ const char* al_error_to_string(int error) {
     }
 }
 
-void check_al_error(const StringSlice& method) {
+void check_al_error(pn::string_view method) {
     int error = alGetError();
     if (error != AL_NO_ERROR) {
-        throw Exception(format("{0}: {1}", method, al_error_to_string(error)));
+        throw Exception(format("{0}: {1}", pn2sfz(method), al_error_to_string(error)));
     }
 }
 

@@ -46,8 +46,6 @@
 
 using sfz::Exception;
 using sfz::PrintItem;
-using sfz::String;
-using sfz::StringSlice;
 using sfz::format;
 using sfz::hex;
 using sfz::print;

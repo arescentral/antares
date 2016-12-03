@@ -19,7 +19,6 @@
 #include <sfz/sfz.hpp>
 
 using sfz::String;
-using sfz::StringSlice;
 using sfz::format;
 using sfz::args::help;
 using sfz::args::store;

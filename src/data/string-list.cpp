@@ -29,8 +29,6 @@
 using sfz::Bytes;
 using sfz::BytesSlice;
 using sfz::Exception;
-using sfz::String;
-using sfz::StringSlice;
 using sfz::format;
 using sfz::quote;
 using sfz::read;
@@ -42,9 +40,8 @@ namespace antares {
 
 StringList::StringList(int id) {
     Resource  rsrc("strings", "pn", id);
-    String    in(utf8::decode(rsrc.data()));
     pn::value strings;
-    if (!pn::parse(sfz2pn(in).open(), strings, nullptr)) {
+    if (!pn::parse(sfz2pn(utf8::decode(rsrc.data())).open(), strings, nullptr)) {
         throw Exception(sfz::format("Couldn't parse strings/{0}.pn", id));
     }
     pn::array_cref l = strings.as_array();

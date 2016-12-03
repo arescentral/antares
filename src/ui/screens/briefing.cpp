@@ -41,7 +41,6 @@
 
 using sfz::Exception;
 using sfz::String;
-using sfz::StringSlice;
 using sfz::format;
 using std::make_pair;
 using std::pair;
@@ -88,10 +87,10 @@ static const Font* interface_font(interfaceStyleType style) {
 }
 
 static void populate_inline_picts(
-        Rect rect, StringSlice text, interfaceStyleType style,
+        Rect rect, pn::string_view text, interfaceStyleType style,
         vector<inlinePictType>& inline_pict) {
     StyledText interface_text(interface_font(style));
-    interface_text.set_interface_text(sfz2pn(text));
+    interface_text.set_interface_text(text);
     interface_text.wrap_to(rect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer);
     inline_pict = interface_text.inline_picts();
     for (int i = 0; i < inline_pict.size(); ++i) {
@@ -204,7 +203,7 @@ static void update_mission_brief_point(
     dataItem->label = StringList(headerID).at(headerNumber - 1).copy();
     Rect newRect;
     GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
-    populate_inline_picts(dataItem->bounds(), text, dataItem->style, inlinePict);
+    populate_inline_picts(dataItem->bounds(), sfz2pn(text), dataItem->style, inlinePict);
 }
 
 BriefingScreen::BriefingScreen(const Level* level, bool* cancelled)

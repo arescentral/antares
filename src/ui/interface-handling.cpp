@@ -59,7 +59,6 @@ using sfz::Exception;
 using sfz::PrintItem;
 using sfz::ReadSource;
 using sfz::String;
-using sfz::StringSlice;
 using sfz::read;
 using std::make_pair;
 using std::max;

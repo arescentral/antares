@@ -32,7 +32,6 @@
 using sfz::Optional;
 using sfz::ScopedFd;
 using sfz::String;
-using sfz::StringSlice;
 using sfz::args::help;
 using sfz::args::store;
 using sfz::args::store_const;

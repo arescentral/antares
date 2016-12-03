@@ -47,9 +47,6 @@
 using sfz::Bytes;
 using sfz::BytesSlice;
 using sfz::Exception;
-using sfz::PrintTarget;
-using sfz::String;
-using sfz::StringSlice;
 using sfz::range;
 using sfz::read;
 using std::set;

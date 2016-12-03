@@ -31,7 +31,6 @@
 using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::String;
-using sfz::StringSlice;
 using sfz::format;
 using sfz::string_to_int;
 using std::unique_ptr;

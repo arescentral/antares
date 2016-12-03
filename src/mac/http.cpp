@@ -25,7 +25,6 @@
 #include "mac/core-foundation.hpp"
 
 using sfz::Exception;
-using sfz::StringSlice;
 using sfz::WriteTarget;
 using sfz::format;
 

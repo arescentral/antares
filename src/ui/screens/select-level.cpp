@@ -40,8 +40,6 @@
 
 using sfz::BytesSlice;
 using sfz::Exception;
-using sfz::String;
-using sfz::StringSlice;
 using sfz::format;
 using std::unique_ptr;
 

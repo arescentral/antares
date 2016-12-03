@@ -38,7 +38,6 @@ using sfz::Optional;
 using sfz::PrintItem;
 using sfz::PrintTarget;
 using sfz::String;
-using sfz::StringSlice;
 using sfz::dec;
 using sfz::format;
 using sfz::print;

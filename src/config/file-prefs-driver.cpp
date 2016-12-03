@@ -31,7 +31,6 @@ using sfz::MappedFile;
 using sfz::ScopedFd;
 using sfz::String;
 using sfz::StringMap;
-using sfz::StringSlice;
 using sfz::format;
 using sfz::makedirs;
 using sfz::path::dirname;

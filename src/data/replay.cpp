@@ -37,7 +37,6 @@ using sfz::Exception;
 using sfz::ReadSource;
 using sfz::ScopedFd;
 using sfz::String;
-using sfz::StringSlice;
 using sfz::WriteTarget;
 using sfz::format;
 using sfz::range;

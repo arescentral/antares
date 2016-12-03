@@ -33,7 +33,6 @@
 
 using sfz::Exception;
 using sfz::Range;
-using sfz::StringSlice;
 using sfz::format;
 using sfz::range;
 using std::map;

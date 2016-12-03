@@ -23,8 +23,6 @@
 #include "data/extractor.hpp"
 
 using sfz::CString;
-using sfz::String;
-using sfz::StringSlice;
 using std::unique_ptr;
 
 namespace utf8 = sfz::utf8;

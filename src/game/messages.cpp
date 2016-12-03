@@ -40,7 +40,6 @@
 
 using sfz::Exception;
 using sfz::String;
-using sfz::StringSlice;
 using std::unique_ptr;
 
 namespace utf8 = sfz::utf8;
@@ -119,7 +118,7 @@ ANTARES_GLOBAL std::queue<pn::string> Messages::message_data;
 ANTARES_GLOBAL Messages::longMessageType* Messages::long_message_data;
 ANTARES_GLOBAL ticks Messages::time_count;
 
-void MessageLabel_Set_Special(Handle<Label> id, const StringSlice& text);
+void MessageLabel_Set_Special(Handle<Label> id, pn::string_view text);
 
 void Messages::init() {
     longMessageType* tmessage = NULL;
@@ -334,7 +333,7 @@ void Messages::draw_long_message(ticks time_pass) {
                     tmessage->labelMessageID->set_age(ticks(0));
 
                     if (tmessage->retro_text.get() != NULL) {
-                        MessageLabel_Set_Special(tmessage->labelMessageID, tmessage->text);
+                        MessageLabel_Set_Special(tmessage->labelMessageID, sfz2pn(tmessage->text));
                     }
                 }
             }
@@ -465,16 +464,16 @@ int16_t Messages::current() { return long_message_data->currentResID; }
 //  t = one of three characters: 'L' for left, 'R' for right, and 'O' for object
 //  nnn... are digits specifying value (distance from top, or initial object #)
 //
-void MessageLabel_Set_Special(Handle<Label> label, const StringSlice& text) {
-    char    whichType;
-    int32_t value = 0;
-    Point   attachPoint;
-    bool    hintLine = false;
+void MessageLabel_Set_Special(Handle<Label> label, pn::string_view text) {
+    pn::rune whichType;
+    int32_t  value = 0;
+    Point    attachPoint;
+    bool     hintLine = false;
 
-    StringSlice::const_iterator it = text.begin();
+    pn::string_view::iterator it = text.begin();
 
     // if not legal, bail
-    if (*it != '#') {
+    if (*it != pn::rune{'#'}) {
         return;
     }
 
@@ -482,28 +481,28 @@ void MessageLabel_Set_Special(Handle<Label> label, const StringSlice& text) {
 
     whichType = *it;
     ++it;
-    while ((it != text.end()) && (*it != '#')) {
+    while ((it != text.end()) && (*it != pn::rune{'#'})) {
         value *= 10;
-        value += *it - '0';
+        value += (*it).value() - '0';
         ++it;
     }
 
     ++it;
-    if (*it == '#') {  // also a hint line attached
+    if (*it == pn::rune{'#'}) {  // also a hint line attached
         hintLine = true;
         ++it;
         // h coord
-        while ((it != text.end()) && (*it != ',')) {
+        while ((it != text.end()) && (*it != pn::rune{','})) {
             attachPoint.h *= 10;
-            attachPoint.h += *it - '0';
+            attachPoint.h += (*it).value() - '0';
             ++it;
         }
 
         ++it;
 
-        while ((it != text.end()) && (*it != '#')) {
+        while ((it != text.end()) && (*it != pn::rune{'#'})) {
             attachPoint.v *= 10;
-            attachPoint.v += *it - '0';
+            attachPoint.v += (*it).value() - '0';
             ++it;
         }
         attachPoint.v += instrument_top();
@@ -516,14 +515,14 @@ void MessageLabel_Set_Special(Handle<Label> label, const StringSlice& text) {
 
     String message;
     while (it != text.end()) {
-        message.push(1, *it);
+        message.push(1, (*it).value());
         ++it;
     }
 
     label->set_string(sfz2pn(message));
     label->set_keep_on_screen_anyway(true);
 
-    switch (whichType) {
+    switch (whichType.value()) {
         case 'R':
             label->set_offset(0, 0);
             label->set_position(

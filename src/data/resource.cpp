@@ -30,7 +30,6 @@ using sfz::Exception;
 using sfz::MappedFile;
 using sfz::PrintItem;
 using sfz::String;
-using sfz::StringSlice;
 using sfz::format;
 using std::unique_ptr;
 
@@ -40,17 +39,17 @@ namespace utf8 = sfz::utf8;
 namespace antares {
 
 static unique_ptr<MappedFile> load_first(
-        sfz::StringSlice resource_path, const std::initializer_list<PrintItem>& dirs) {
+        pn::string_view resource_path, const std::initializer_list<PrintItem>& dirs) {
     for (const auto& dir : dirs) {
-        String path(sfz::format("{0}/{1}", dir, resource_path));
+        String path(sfz::format("{0}/{1}", dir, pn2sfz(resource_path)));
         if (path::isfile(path)) {
             return unique_ptr<MappedFile>(new MappedFile(path));
         }
     }
-    throw Exception(format("couldn't find resource {0}", quote(resource_path)));
+    throw Exception(format("couldn't find resource {0}", quote(pn2sfz(resource_path))));
 }
 
-static unique_ptr<MappedFile> load(sfz::StringSlice resource_path) {
+static unique_ptr<MappedFile> load(pn::string_view resource_path) {
     return load_first(
             resource_path,
             {
@@ -62,7 +61,7 @@ static unique_ptr<MappedFile> load(sfz::StringSlice resource_path) {
 Resource::Resource(pn::string_view type, pn::string_view extension, int id)
         : Resource(sfz2pn(format("{0}/{1}.{2}", pn2sfz(type), id, pn2sfz(extension)))) {}
 
-Resource::Resource(pn::string_view resource_path) : _file(load(pn2sfz(resource_path))) {}
+Resource::Resource(pn::string_view resource_path) : _file(load(resource_path)) {}
 
 Resource::~Resource() {}
 
