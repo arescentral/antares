@@ -98,10 +98,10 @@ struct Messages::longMessageType {
     int16_t                     previousEndResID;
     int16_t                     pictID;
     uint8_t                     backColor;
-    sfz::String                 stringMessage;
-    sfz::String                 lastStringMessage;
+    pn::string                  stringMessage;
+    pn::string                  lastStringMessage;
     bool                        newStringMessage;
-    sfz::String                 text;
+    pn::string                  text;
     std::unique_ptr<StyledText> retro_text;
     Point                       retro_origin;
     int32_t                     at_char;
@@ -221,8 +221,8 @@ void Messages::start(int16_t startResID, int16_t endResID) {
 void Messages::clip(void)
 
 {
-    longMessageType*        tmessage;
-    unique_ptr<sfz::String> textData;
+    longMessageType*       tmessage;
+    unique_ptr<pn::string> textData;
 
     tmessage = long_message_data;
     if ((tmessage->currentResID != tmessage->lastResID) || (tmessage->newStringMessage)) {
@@ -233,17 +233,17 @@ void Messages::clip(void)
         // draw in offscreen world
         if ((tmessage->currentResID >= 0) && (tmessage->stage == kClipStage)) {
             if (tmessage->currentResID == kStringMessageID) {
-                textData.reset(new sfz::String);
+                textData.reset(new pn::string);
                 if (textData.get() != NULL) {
-                    textData->append(tmessage->stringMessage);
+                    *textData += tmessage->stringMessage;
                 }
                 tmessage->labelMessage = false;
             } else {
                 Resource   rsrc("text", "txt", tmessage->currentResID);
                 pn::string text = rsrc.string().copy();
                 Replace_KeyCode_Strings_With_Actual_Key_Names(text, KEY_LONG_NAMES, 0);
-                textData.reset(new sfz::String(pn2sfz(text)));
-                if (textData->at(0) == '#') {
+                textData.reset(new pn::string(text.copy()));
+                if (*textData->begin() == pn::rune{'#'}) {
                     tmessage->labelMessage = true;
                 } else
                     tmessage->labelMessage = false;
@@ -251,11 +251,11 @@ void Messages::clip(void)
             if (textData.get() != NULL) {
                 const RgbColor& light_blue = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
                 const RgbColor& dark_blue  = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
-                tmessage->text.assign(*textData);
+                tmessage->text             = textData->copy();
                 tmessage->retro_text.reset(new StyledText(sys.fonts.tactical));
                 tmessage->retro_text->set_fore_color(light_blue);
                 tmessage->retro_text->set_back_color(dark_blue);
-                tmessage->retro_text->set_retro_text(sfz2pn(*textData));
+                tmessage->retro_text->set_retro_text(*textData);
                 tmessage->retro_text->set_tab_width(60);
                 tmessage->retro_text->wrap_to(
                         viewport().width() - kHBuffer - sys.fonts.tactical->logicalWidth + 1, 0,
@@ -329,7 +329,7 @@ void Messages::draw_long_message(ticks time_pass) {
                     tmessage->labelMessageID->set_age(ticks(0));
 
                     if (tmessage->retro_text.get() != NULL) {
-                        MessageLabel_Set_Special(tmessage->labelMessageID, sfz2pn(tmessage->text));
+                        MessageLabel_Set_Special(tmessage->labelMessageID, tmessage->text);
                     }
                 }
             }
@@ -367,7 +367,7 @@ void Messages::end() {
     tmessage->currentResID       = -1;
     tmessage->stage              = kStartStage;
     tmessage->retro_text.reset();
-    tmessage->lastStringMessage.assign(tmessage->stringMessage);
+    tmessage->lastStringMessage = tmessage->stringMessage.copy();
 }
 
 void Messages::advance() {
@@ -401,7 +401,7 @@ void Messages::replay() {
 
     tmessage = long_message_data;
     if ((tmessage->previousStartResID >= 0) && (tmessage->currentResID < 0)) {
-        tmessage->stringMessage.assign(tmessage->lastStringMessage);
+        tmessage->stringMessage = tmessage->lastStringMessage.copy();
         start(tmessage->previousStartResID, tmessage->previousEndResID);
     }
 }
@@ -509,13 +509,13 @@ void MessageLabel_Set_Special(Handle<Label> label, pn::string_view text) {
         ++it;
     }
 
-    sfz::String message;
+    pn::string message;
     while (it != text.end()) {
-        message.push(1, (*it).value());
+        message += *it;
         ++it;
     }
 
-    label->set_string(sfz2pn(message));
+    label->set_string(message);
     label->set_keep_on_screen_anyway(true);
 
     switch (whichType.value()) {
