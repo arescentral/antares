@@ -50,12 +50,11 @@ const usecs kTypingDelay      = kMajorTick;
 const int   kScoreTableHeight = 120;
 const int   kTextWidth        = 300;
 
-void string_replace(sfz::String* s, pn::string_view in, pn::string_view out) {
-    sfz::String sfz_in = pn2sfz(in);
-    size_t      index  = s->find(sfz_in);
+void string_replace(pn::string_ref s, pn::string_view in, pn::string_view out) {
+    size_t index = s.find(in);
     while (index != sfz::String::npos) {
-        s->replace(index, in.size(), pn2sfz(out));
-        index = s->find(sfz_in, index + 1);
+        s.replace(index, in.size(), out);
+        index = s.find(in, index + 1);
     }
 }
 
@@ -235,8 +234,8 @@ LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
 pn::string DebriefingScreen::build_score_text(
         game_ticks your_time, game_ticks par_time, int your_loss, int par_loss, int your_kill,
         int par_kill) {
-    Resource    rsrc("text", "txt", 6000);
-    sfz::String text = pn2sfz(rsrc.string());
+    Resource   rsrc("text", "txt", 6000);
+    pn::string text = rsrc.string().copy();
 
     StringList strings(6000);
 
@@ -247,26 +246,26 @@ pn::string DebriefingScreen::build_score_text(
     const int your_score = score(your_time, par_time, your_loss, par_loss, your_kill, par_kill);
     const int par_score  = 100;
 
-    string_replace(&text, strings.at(0), pn::dump(your_mins, pn::dump_short));
-    string_replace(&text, strings.at(1), sfz2pn(sfz::String(dec(your_secs, 2))));
+    string_replace(text, strings.at(0), pn::dump(your_mins, pn::dump_short));
+    string_replace(text, strings.at(1), sfz2pn(sfz::String(dec(your_secs, 2))));
     if (par_time > game_ticks()) {
-        string_replace(&text, strings.at(2), pn::dump(par_mins, pn::dump_short));
+        string_replace(text, strings.at(2), pn::dump(par_mins, pn::dump_short));
         sfz::String secs_string;
         secs_string.append(":");
         secs_string.append(dec(par_secs, 2));
-        string_replace(&text, strings.at(3), sfz2pn(secs_string));
+        string_replace(text, strings.at(3), sfz2pn(secs_string));
     } else {
         StringList data_strings(6002);
-        string_replace(&text, strings.at(2), data_strings.at(8));  // = "N/A"
-        string_replace(&text, strings.at(3), "");
+        string_replace(text, strings.at(2), data_strings.at(8));  // = "N/A"
+        string_replace(text, strings.at(3), "");
     }
-    string_replace(&text, strings.at(4), pn::dump(your_loss, pn::dump_short));
-    string_replace(&text, strings.at(5), pn::dump(par_loss, pn::dump_short));
-    string_replace(&text, strings.at(6), pn::dump(your_kill, pn::dump_short));
-    string_replace(&text, strings.at(7), pn::dump(par_kill, pn::dump_short));
-    string_replace(&text, strings.at(8), pn::dump(your_score, pn::dump_short));
-    string_replace(&text, strings.at(9), pn::dump(par_score, pn::dump_short));
-    return sfz2pn(text);
+    string_replace(text, strings.at(4), pn::dump(your_loss, pn::dump_short));
+    string_replace(text, strings.at(5), pn::dump(par_loss, pn::dump_short));
+    string_replace(text, strings.at(6), pn::dump(your_kill, pn::dump_short));
+    string_replace(text, strings.at(7), pn::dump(par_kill, pn::dump_short));
+    string_replace(text, strings.at(8), pn::dump(your_score, pn::dump_short));
+    string_replace(text, strings.at(9), pn::dump(par_score, pn::dump_short));
+    return text;
 }
 
 const char* stringify(DebriefingScreen::State state) {
