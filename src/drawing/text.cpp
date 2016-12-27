@@ -85,7 +85,7 @@ Font::Font(pn::string_view name) {
         pn::string_view glyph    = kv.key();
         pn::map_cref    rect_map = kv.value().as_map();
 
-        _glyphs[(*glyph.begin()).value()] =
+        _glyphs[*glyph.begin()] =
                 Rect(rect_map.get("left").as_int(), rect_map.get("top").as_int(),
                      rect_map.get("right").as_int(), rect_map.get("bottom").as_int());
     }
@@ -93,7 +93,7 @@ Font::Font(pn::string_view name) {
 
 Font::~Font() {}
 
-Rect Font::glyph_rect(uint32_t rune) const {
+Rect Font::glyph_rect(pn::rune rune) const {
     auto it = _glyphs.find(rune);
     if (it == _glyphs.end()) {
         return Rect();
@@ -108,7 +108,7 @@ void Font::draw(Point cursor, pn::string_view string, RgbColor color) const {
 void Font::draw(const Quads& quads, Point cursor, pn::string_view string, RgbColor color) const {
     cursor.offset(0, -ascent);
     for (pn::rune rune : string) {
-        auto glyph = glyph_rect(rune.value());
+        auto glyph = glyph_rect(rune);
         Rect scaled(
                 glyph.left * _scale, glyph.top * _scale, glyph.right * _scale,
                 glyph.bottom * _scale);
@@ -117,12 +117,12 @@ void Font::draw(const Quads& quads, Point cursor, pn::string_view string, RgbCol
     }
 }
 
-uint8_t Font::char_width(uint32_t mchar) const { return glyph_rect(mchar).width(); }
+uint8_t Font::char_width(pn::rune mchar) const { return glyph_rect(mchar).width(); }
 
 int32_t Font::string_width(pn::string_view s) const {
     int32_t sum = 0;
     for (pn::rune rune : s) {
-        sum += char_width(rune.value());
+        sum += char_width(rune);
     }
     return sum;
 }

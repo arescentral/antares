@@ -33,7 +33,6 @@
 #include "lang/defines.hpp"
 #include "video/driver.hpp"
 
-using sfz::Rune;
 using std::max;
 using std::min;
 using std::unique_ptr;

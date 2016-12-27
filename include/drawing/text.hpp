@@ -36,7 +36,7 @@ class Font {
     Font& operator=(const Font&) = delete;
     ~Font();
 
-    uint8_t char_width(uint32_t rune) const;
+    uint8_t char_width(pn::rune rune) const;
     int32_t string_width(pn::string_view s) const;
 
     void draw(Point cursor, pn::string_view string, RgbColor color) const;
@@ -48,10 +48,10 @@ class Font {
     int32_t ascent;
 
   private:
-    Rect glyph_rect(uint32_t rune) const;
+    Rect glyph_rect(pn::rune rune) const;
 
     int                      _scale;
-    std::map<uint32_t, Rect> _glyphs;
+    std::map<pn::rune, Rect> _glyphs;
 };
 
 }  // namespace antares

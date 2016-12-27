@@ -257,7 +257,7 @@ void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
             case WORD_BREAK: h += _font->char_width(_chars[i].character); break;
 
             case PICTURE: {
-                inlinePictType* pict = &_inline_picts[_chars[i].character];
+                inlinePictType* pict = &_inline_picts[_chars[i].character.value()];
                 if (h != _side_margin) {
                     v += _font->height + _line_spacing;
                 }
@@ -345,7 +345,7 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
             if (ch.special == NONE) {
                 _font->draw(
                         quads, Point(bounds.left + ch.h, bounds.top + ch.v + char_adjust),
-                        sfz2pn(sfz::String(1, ch.character)), ch.fore_color);
+                        ch.character, ch.fore_color);
             }
         }
     }
@@ -354,8 +354,8 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
         const StyledChar& ch     = _chars[i];
         Point             corner = bounds.origin();
         if (ch.special == PICTURE) {
-            const inlinePictType& inline_pict = _inline_picts[ch.character];
-            const Texture&        texture     = _textures[_chars[i].character];
+            const inlinePictType& inline_pict = _inline_picts[ch.character.value()];
+            const Texture&        texture     = _textures[_chars[i].character.value()];
             corner.offset(inline_pict.bounds.left, inline_pict.bounds.top + _line_spacing);
             texture.draw(corner.h, corner.v);
         }

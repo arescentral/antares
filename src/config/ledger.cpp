@@ -34,7 +34,6 @@
 #include "lang/defines.hpp"
 
 using sfz::MappedFile;
-using sfz::Rune;
 using sfz::StringMap;
 using sfz::makedirs;
 using sfz::range;

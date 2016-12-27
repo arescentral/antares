@@ -80,7 +80,7 @@ class StyledText {
                 uint32_t character, SpecialChar special, const RgbColor& fore_color,
                 const RgbColor& back_color);
 
-        sfz::Rune   character;
+        pn::rune    character;
         SpecialChar special;
         RgbColor    fore_color;
         RgbColor    back_color;
