@@ -124,10 +124,11 @@ BuildPix::BuildPix(int text_id, int width) : _size({width, 0}) {
                     int64_t id = 2005;
                     if (line.size() > 3) {
                         if (!pn::strtoll(sfz2pn(line.slice(3)), &id, nullptr)) {
-                            throw std::runtime_error(pn::format(
-                                                             "malformed header line {0}",
-                                                             sfz2pn(sfz::String(quote(line))))
-                                                             .c_str());
+                            throw std::runtime_error(
+                                    pn::format(
+                                            "malformed header line {0}",
+                                            pn::dump(sfz2pn(line), pn::dump_short))
+                                            .c_str());
                         }
                     }
                     Picture pict(id);
@@ -139,7 +140,7 @@ BuildPix::BuildPix(int text_id, int width) : _size({width, 0}) {
                     if (!pn::strtoll(sfz2pn(line.slice(2)), &id, nullptr)) {
                         throw std::runtime_error(pn::format(
                                                          "malformed header line {0}",
-                                                         sfz2pn(sfz::String(quote(line))))
+                                                         pn::dump(sfz2pn(line), pn::dump_short))
                                                          .c_str());
                     }
                     Picture pict(id);

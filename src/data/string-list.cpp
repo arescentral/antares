@@ -26,7 +26,6 @@
 #include "data/pn.hpp"
 #include "data/resource.hpp"
 
-using sfz::quote;
 using sfz::read;
 using std::vector;
 

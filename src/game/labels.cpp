@@ -34,7 +34,6 @@
 #include "video/driver.hpp"
 
 using sfz::Rune;
-using sfz::quote;
 using std::max;
 using std::min;
 using std::unique_ptr;

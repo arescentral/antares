@@ -26,7 +26,6 @@
 #include "data/resource.hpp"
 #include "sound/sndfile.hpp"
 
-using sfz::quote;
 using std::unique_ptr;
 
 namespace antares {
@@ -226,8 +225,7 @@ unique_ptr<Sound> OpenAlSoundDriver::open_sound(pn::string_view path) {
         }
     }
     throw std::runtime_error(
-            pn::format("couldn't load sound {0}", sfz2pn(sfz::String(quote(pn2sfz(path)))))
-                    .c_str());
+            pn::format("couldn't load sound {0}", pn::dump(path, pn::dump_short)).c_str());
 }
 
 void OpenAlSoundDriver::set_global_volume(uint8_t volume) { alListenerf(AL_GAIN, volume / 8.0); }

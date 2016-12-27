@@ -42,10 +42,9 @@ static unique_ptr<MappedFile> load_first(
             return unique_ptr<MappedFile>(new MappedFile(pn2sfz(path)));
         }
     }
-    throw std::runtime_error(pn::format(
-                                     "couldn't find resource {0}",
-                                     sfz2pn(sfz::String(quote(pn2sfz(resource_path)))))
-                                     .c_str());
+    throw std::runtime_error(
+            pn::format("couldn't find resource {0}", pn::dump(resource_path, pn::dump_short))
+                    .c_str());
 }
 
 static unique_ptr<MappedFile> load(pn::string_view resource_path) {

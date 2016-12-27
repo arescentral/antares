@@ -38,7 +38,6 @@ using sfz::args::help;
 using sfz::args::store;
 using sfz::args::store_const;
 using sfz::makedirs;
-using sfz::quote;
 using std::unique_ptr;
 
 namespace args = sfz::args;
@@ -91,7 +90,7 @@ void main(int argc, char* const* argv) {
     } else if (script == "pause") {
         pause(scheduler);
     } else {
-        pn::format(stderr, "no such script {0}\n", sfz2pn(sfz::String(quote(script))));
+        pn::format(stderr, "no such script {0}\n", pn::dump(sfz2pn(script), pn::dump_short));
         exit(1);
     }
 

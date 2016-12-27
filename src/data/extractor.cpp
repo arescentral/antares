@@ -430,35 +430,32 @@ void check_version(ZipArchive& archive, pn::string_view expected) {
     pn::string    actual{reinterpret_cast<const char*>(version_file.data().data()),
                       static_cast<int>(version_file.data().size())};
     if (actual != expected) {
-        throw std::runtime_error(pn::format(
-                                         "unsupported plugin version {0}",
-                                         sfz2pn(sfz::String(quote(pn2sfz(actual)))))
-                                         .c_str());
+        throw std::runtime_error(
+                pn::format("unsupported plugin version {0}", pn::dump(actual, pn::dump_short))
+                        .c_str());
     }
 }
 
 void read_identifier(ZipArchive& archive, pn::string& out) {
     ZipFileReader identifier_file(archive, kPluginIdentifierFile);
-    sfz::String   actual =
-            pn2sfz(pn::string{reinterpret_cast<const char*>(identifier_file.data().data()),
-                              static_cast<int>(identifier_file.data().size())});
-    if (actual.at(actual.size() - 1) != '\n') {
+    pn::string    actual{reinterpret_cast<const char*>(identifier_file.data().data()),
+                      static_cast<int>(identifier_file.data().size())};
+    if (actual.data()[actual.size() - 1] != '\n') {
         throw std::runtime_error(pn::format(
                                          "missing newline in plugin identifier {0}",
-                                         sfz2pn(sfz::String(quote(actual))))
+                                         pn::dump(actual, pn::dump_short))
                                          .c_str());
     }
-    out = sfz2pn(actual.slice(0, actual.size() - 1));
+    out = actual.substr(0, actual.size() - 1).copy();
 }
 
 void check_identifier(ZipArchive& archive, pn::string_view expected) {
     pn::string actual;
     read_identifier(archive, actual);
     if (expected != actual) {
-        throw std::runtime_error(pn::format(
-                                         "mismatch in plugin identifier {0}",
-                                         sfz2pn(sfz::String(quote(pn2sfz(actual)))))
-                                         .c_str());
+        throw std::runtime_error(
+                pn::format("mismatch in plugin identifier {0}", pn::dump(actual, pn::dump_short))
+                        .c_str());
     }
 }
 
@@ -668,13 +665,14 @@ void DataExtractor::extract_plugin(Observer* observer) const {
             !pn::partition(id_slice, " ", path) || !pn::strtoll(id_slice, &id, nullptr) ||
             (path.find(pn::rune{'/'}) != StringSlice::npos)) {
             throw std::runtime_error(
-                    pn::format("bad plugin file {0}", sfz2pn(sfz::String(quote(file.path()))))
+                    pn::format(
+                            "bad plugin file {0}", pn::dump(sfz2pn(file.path()), pn::dump_short))
                             .c_str());
         }
 
-        sfz::String resource_type(pn2sfz(resource_type_slice));
-        if (resource_type.size() < 4) {
-            resource_type.resize(4, ' ');
+        pn::string resource_type(resource_type_slice.copy());
+        while (std::distance(resource_type.begin(), resource_type.end()) != 4) {
+            resource_type += pn::rune{' '};
         }
 
         for (const ResourceFile::ExtractedResource& conversion : kPluginFiles) {
@@ -695,7 +693,7 @@ void DataExtractor::extract_plugin(Observer* observer) const {
         }
 
         throw std::runtime_error(
-                pn::format("unknown resource type {0}", sfz2pn(sfz::String(quote(resource_type))))
+                pn::format("unknown resource type {0}", pn::dump(resource_type, pn::dump_short))
                         .c_str());
 
     next:;  // labeled continue.
