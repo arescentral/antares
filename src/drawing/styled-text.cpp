@@ -64,19 +64,18 @@ void StyledText::set_back_color(RgbColor back_color) { _back_color = back_color;
 void StyledText::set_tab_width(int tab_width) { _tab_width = tab_width; }
 
 void StyledText::set_retro_text(pn::string_view text) {
-    sfz::String    sfz_text            = pn2sfz(text);
     const RgbColor original_fore_color = _fore_color;
     const RgbColor original_back_color = _back_color;
     RgbColor       fore_color          = _fore_color;
     RgbColor       back_color          = _back_color;
-    pn::rune       r1, r2;
+    pn::rune       r1;
 
     enum { START, SLASH, FG1, FG2, BG1, BG2 } state = START;
 
-    for (size_t i = 0; i < sfz_text.size(); ++i) {
+    for (pn::rune r : text) {
         switch (state) {
             case START:
-                switch (sfz_text.at(i)) {
+                switch (r.value()) {
                     case '\n':
                         _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
                         break;
@@ -93,13 +92,13 @@ void StyledText::set_retro_text(pn::string_view text) {
                     case '\\': state = SLASH; break;
 
                     default:
-                        _chars.push_back(StyledChar(sfz_text.at(i), NONE, fore_color, back_color));
+                        _chars.push_back(StyledChar(r.value(), NONE, fore_color, back_color));
                         break;
                 }
                 break;
 
             case SLASH:
-                switch (sfz_text.at(i)) {
+                switch (r.value()) {
                     case 'i':
                         std::swap(fore_color, back_color);
                         _chars.push_back(StyledChar('\\', DELAY, fore_color, back_color));
@@ -130,22 +129,19 @@ void StyledText::set_retro_text(pn::string_view text) {
 
                     default:
                         throw std::runtime_error(
-                                pn::format("found bad special character {0}.", sfz_text.at(i))
-                                        .c_str());
+                                pn::format("found bad special character {0}.", r.value()).c_str());
                 }
                 break;
 
-            case FG1: r1 = pn::rune{sfz_text.at(i)}, state = FG2; break;
+            case FG1: r1 = r, state = FG2; break;
             case FG2:
-                r2         = pn::rune{sfz_text.at(i)};
-                fore_color = GetRGBTranslateColorShade(hex_digit(r1), hex_digit(r2));
+                fore_color = GetRGBTranslateColorShade(hex_digit(r1), hex_digit(r));
                 state      = START;
                 break;
 
-            case BG1: r1 = pn::rune{sfz_text.at(i)}, state = BG2; break;
+            case BG1: r1 = r, state = BG2; break;
             case BG2:
-                r2         = pn::rune{sfz_text.at(i)};
-                back_color = GetRGBTranslateColorShade(hex_digit(r1), hex_digit(r2));
+                back_color = GetRGBTranslateColorShade(hex_digit(r1), hex_digit(r));
                 state      = START;
                 break;
         }
