@@ -35,7 +35,8 @@ namespace antares {
 
 namespace {
 
-int hex_digit(uint32_t c) {
+int hex_digit(pn::rune r) {
+    int32_t c = r.value();
     if ('0' <= c && c <= '9') {
         return c - '0';
     } else if ('A' <= c && c <= 'Z') {
@@ -68,51 +69,42 @@ void StyledText::set_retro_text(pn::string_view text) {
     const RgbColor original_back_color = _back_color;
     RgbColor       fore_color          = _fore_color;
     RgbColor       back_color          = _back_color;
+    pn::rune       r1, r2;
+
+    enum { START, SLASH, FG1, FG2, BG1, BG2 } state = START;
 
     for (size_t i = 0; i < sfz_text.size(); ++i) {
-        switch (sfz_text.at(i)) {
-            case '\n':
-                _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
-                break;
+        switch (state) {
+            case START:
+                switch (sfz_text.at(i)) {
+                    case '\n':
+                        _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
+                        break;
 
-            case '_':
-                // TODO(sfiera): replace use of "_" with e.g. "\_".
-                _chars.push_back(StyledChar(' ', NONE, fore_color, back_color));
-                break;
+                    case '_':
+                        // TODO(sfiera): replace use of "_" with e.g. "\_".
+                        _chars.push_back(StyledChar(' ', NONE, fore_color, back_color));
+                        break;
 
-            case ' ': _chars.push_back(StyledChar(' ', WORD_BREAK, fore_color, back_color)); break;
+                    case ' ':
+                        _chars.push_back(StyledChar(' ', WORD_BREAK, fore_color, back_color));
+                        break;
 
-            case '\\':
-                if (i + 1 >= sfz_text.size()) {
-                    throw std::runtime_error(
-                            pn::format("not enough input for special code.").c_str());
+                    case '\\': state = SLASH; break;
+
+                    default:
+                        _chars.push_back(StyledChar(sfz_text.at(i), NONE, fore_color, back_color));
+                        break;
                 }
-                ++i;
+                break;
+
+            case SLASH:
                 switch (sfz_text.at(i)) {
                     case 'i':
                         std::swap(fore_color, back_color);
                         _chars.push_back(StyledChar('\\', DELAY, fore_color, back_color));
                         _chars.push_back(StyledChar('i', DELAY, fore_color, back_color));
-                        break;
-
-                    case 'f':
-                        if (i + 2 >= sfz_text.size()) {
-                            throw std::runtime_error(
-                                    pn::format("not enough input for foreground code.").c_str());
-                        }
-                        fore_color = GetRGBTranslateColorShade(
-                                hex_digit(sfz_text.at(i + 1)), hex_digit(sfz_text.at(i + 2)));
-                        i += 2;
-                        break;
-
-                    case 'b':
-                        if (i + 2 >= sfz_text.size()) {
-                            throw std::runtime_error(
-                                    pn::format("not enough input for foreground code.").c_str());
-                        }
-                        back_color = GetRGBTranslateColorShade(
-                                hex_digit(sfz_text.at(i + 1)), hex_digit(sfz_text.at(i + 2)));
-                        i += 2;
+                        state = START;
                         break;
 
                     case 'r':
@@ -120,15 +112,21 @@ void StyledText::set_retro_text(pn::string_view text) {
                         back_color = original_back_color;
                         _chars.push_back(StyledChar('\\', DELAY, fore_color, back_color));
                         _chars.push_back(StyledChar('r', DELAY, fore_color, back_color));
+                        state = START;
                         break;
 
                     case 't':
                         _chars.push_back(StyledChar('\\', TAB, fore_color, back_color));
+                        state = START;
                         break;
 
                     case '\\':
                         _chars.push_back(StyledChar('\\', NONE, fore_color, back_color));
+                        state = START;
                         break;
+
+                    case 'f': state = FG1; break;
+                    case 'b': state = BG1; break;
 
                     default:
                         throw std::runtime_error(
@@ -137,11 +135,26 @@ void StyledText::set_retro_text(pn::string_view text) {
                 }
                 break;
 
-            default:
-                _chars.push_back(StyledChar(sfz_text.at(i), NONE, fore_color, back_color));
+            case FG1: r1 = pn::rune{sfz_text.at(i)}, state = FG2; break;
+            case FG2:
+                r2         = pn::rune{sfz_text.at(i)};
+                fore_color = GetRGBTranslateColorShade(hex_digit(r1), hex_digit(r2));
+                state      = START;
+                break;
+
+            case BG1: r1 = pn::rune{sfz_text.at(i)}, state = BG2; break;
+            case BG2:
+                r2         = pn::rune{sfz_text.at(i)};
+                back_color = GetRGBTranslateColorShade(hex_digit(r1), hex_digit(r2));
+                state      = START;
                 break;
         }
     }
+
+    if (state != START) {
+        throw std::runtime_error(pn::format("not enough input for special code.").c_str());
+    }
+
     _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
 
     wrap_to(std::numeric_limits<int>::max(), 0, 0);
