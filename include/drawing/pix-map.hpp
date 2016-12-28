@@ -20,7 +20,6 @@
 #define ANTARES_DRAWING_PIX_MAP_HPP_
 
 #include <pn/file>
-#include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
 #include "math/geometry.hpp"
@@ -192,8 +191,8 @@ class ArrayPixMap : public PixMap {
     std::unique_ptr<RgbColor[]> _bytes;
 };
 
-// Deserializes an ArrayPixMap from a WriteTarget.
-void read_from(sfz::ReadSource out, ArrayPixMap& image);
+// Deserializes an ArrayPixMap from its serialized PNG form.
+ArrayPixMap read_png(pn::file_view in);
 
 inline void swap(ArrayPixMap& x, ArrayPixMap& y) { x.swap(y); }
 

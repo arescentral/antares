@@ -28,28 +28,10 @@ using sfz::write;
 
 namespace antares {
 
-namespace {
-
-void png_read_data(png_struct* png, png_byte* data, png_size_t length) {
-    ReadSource* in = reinterpret_cast<ReadSource*>(png_get_io_ptr(png));
-    read(*in, data, length);
-}
-
-void png_write_data(png_struct* png, png_byte* data, png_size_t length) {
-    FILE* out = reinterpret_cast<FILE*>(png_get_io_ptr(png));
-    fwrite(data, 1, length, out);
-}
-
-void png_flush_data(png_struct* png) {
-    FILE* out = reinterpret_cast<FILE*>(png_get_io_ptr(png));
-    fflush(out);
-}
-
-}  // namespace
-
-void read_from(ReadSource in, ArrayPixMap& pix) {
-    png_byte sig[8];
-    sfz::read(in, sig, 8);
+ArrayPixMap read_png(pn::file_view in) {
+    ArrayPixMap pix{0, 0};
+    png_byte    sig[8];
+    fread(sig, 1, 8, in.c_obj());
     if (png_sig_cmp(sig, 0, 8) != 0) {
         throw std::runtime_error("invalid png signature");
     }
@@ -71,7 +53,7 @@ void read_from(ReadSource in, ArrayPixMap& pix) {
     }
 
     png_set_sig_bytes(png, 8);
-    png_set_read_fn(png, &in, png_read_data);
+    png_init_io(png, in.c_obj());
     png_read_info(png, info);
 
     png_uint_32 width;
@@ -111,6 +93,7 @@ void read_from(ReadSource in, ArrayPixMap& pix) {
     }
 
     png_destroy_read_struct(&png, &info, NULL);
+    return pix;
 }
 
 void PixMap::encode(pn::file_view out) {
@@ -130,7 +113,7 @@ void PixMap::encode(pn::file_view out) {
         throw std::runtime_error("reading png failed");
     }
 
-    png_set_write_fn(png, out.c_obj(), png_write_data, png_flush_data);
+    png_init_io(png, out.c_obj());
     png_set_IHDR(png, info, size().width, size().height, 8, PNG_COLOR_TYPE_RGBA, 0, 0, 0);
     png_set_swap_alpha(png);
 

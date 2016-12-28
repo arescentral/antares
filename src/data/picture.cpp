@@ -39,9 +39,8 @@ Picture::Picture(pn::string_view resource, bool hidpi)
             } else {
                 _path += ".png";
             }
-            Resource        rsrc(_path);
-            sfz::BytesSlice in{rsrc.data().data(), static_cast<size_t>(rsrc.data().size())};
-            read(in, *this);
+            Resource     rsrc(_path);
+            ArrayPixMap::operator=(read_png(rsrc.data().open()));
             break;
         } catch (std::exception& e) {
             if (_scale > 1) {

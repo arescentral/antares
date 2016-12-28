@@ -38,10 +38,9 @@ using std::vector;
 
 namespace antares {
 
-static void load_image(ArrayPixMap& image, pn::string_view path) {
-    Resource        rsrc(path);
-    sfz::BytesSlice data{rsrc.data().data(), static_cast<size_t>(rsrc.data().size())};
-    read(data, image);
+static ArrayPixMap load_image(pn::string_view path) {
+    Resource rsrc(path);
+    return read_png(rsrc.data().open());
 }
 
 NatePixTable::NatePixTable(int id, uint8_t color) {
@@ -64,8 +63,8 @@ NatePixTable::NatePixTable(int id, uint8_t color) {
     state.center       = Point(point.get("x").as_int(), point.get("y").as_int());
     state.rows         = m.get("rows").as_int();
     state.cols         = m.get("cols").as_int();
-    load_image(state.image, m.get("image").as_string());
-    load_image(state.overlay, m.get("overlay").as_string());
+    state.image        = load_image(m.get("image").as_string());
+    state.overlay      = load_image(m.get("overlay").as_string());
 
     if (state.image.size() != state.overlay.size()) {
         throw std::runtime_error("size mismatch between image and overlay");
