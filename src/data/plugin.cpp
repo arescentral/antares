@@ -86,7 +86,7 @@ void PluginInit() {
 
     read_all("level", "scenarios", "snro", plug.levels);
     read_all("initials", "scenario-initial-objects", "snit", plug.initials);
-    read_all("conditions", "scenario-conditions", "sncd", plug.conditions);
+    read_all_pn("conditions", "scenario-conditions", "sncd", plug.conditions);
     read_all_pn("briefings", "scenario-briefing-points", "snbf", plug.briefings);
     read_all("objects", "objects", "bsob", plug.objects);
     read_all_pn("actions", "object-actions", "obac", plug.actions);

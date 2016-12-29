@@ -105,59 +105,71 @@ void read_from(ReadSource in, Level::Player& level_player) {
     in.shift(2);
 }
 
-static void read_action(sfz::ReadSource in, Level::Condition& condition) {
-    auto start       = read<int32_t>(in);
-    auto count       = read<int32_t>(in);
-    auto end         = (start >= 0) ? (start + count) : start;
-    condition.action = {start, end};
+static bool read_action(pn::file_view in, Level::Condition* condition) {
+    int32_t start, count;
+    if (!in.read(&start, &count)) {
+        return false;
+    }
+    auto end          = (start >= 0) ? (start + count) : start;
+    condition->action = {start, end};
+    return true;
 }
 
-void read_from(ReadSource in, Level::Condition& level_condition) {
+bool read_from(pn::file_view in, Level::Condition* level_condition) {
     uint8_t section[12];
 
-    read(in, level_condition.condition);
-    in.shift(1);
-    read(in, section, 12);
-    read(in, level_condition.subjectObject);
-    read(in, level_condition.directObject);
-    read_action(in, level_condition);
-    read(in, level_condition.flags);
-    read(in, level_condition.direction);
+    uint8_t unused;
+    if (!(in.read(&level_condition->condition, &unused) &&
+          (fread(section, 1, 12, in.c_obj()) == 12) &&
+          in.read(&level_condition->subjectObject, &level_condition->directObject) &&
+          read_action(in, level_condition) &&
+          in.read(&level_condition->flags, &level_condition->direction))) {
+        return false;
+    }
 
-    sfz::BytesSlice sub(section, 12);
-    switch (level_condition.condition) {
+    pn::file sub = pn::data_view{section, 12}.open();
+    switch (level_condition->condition) {
         case kCounterCondition:
         case kCounterGreaterCondition:
-        case kCounterNotCondition: read(sub, level_condition.conditionArgument.counter); break;
+        case kCounterNotCondition:
+            return read_from(sub, &level_condition->conditionArgument.counter);
 
         case kDestructionCondition:
         case kOwnerCondition:
         case kNoShipsLeftCondition:
-        case kZoomLevelCondition: read(sub, level_condition.conditionArgument.longValue); break;
+        case kZoomLevelCondition: return sub.read(&level_condition->conditionArgument.longValue);
 
         case kVelocityLessThanEqualToCondition:
-            read(sub, level_condition.conditionArgument.fixedValue);
+            return read_from(sub, &level_condition->conditionArgument.fixedValue);
 
-        case kTimeCondition:
-            level_condition.conditionArgument.timeValue = ticks(read<int32_t>(sub));
-            break;
+        case kTimeCondition: {
+            int32_t time;
+            if (!sub.read(&time)) {
+                return false;
+            }
+            level_condition->conditionArgument.timeValue = ticks(time);
+            return true;
+        }
 
         case kProximityCondition:
         case kDistanceGreaterCondition:
-            read(sub, level_condition.conditionArgument.unsignedLongValue);
-            break;
+            return sub.read(&level_condition->conditionArgument.unsignedLongValue);
 
         case kCurrentMessageCondition:
         case kCurrentComputerCondition:
-            read(sub, level_condition.conditionArgument.location);
-            break;
+            return read_from(sub, &level_condition->conditionArgument.location);
+
+        default: return true;
     }
 }
 
-void read_from(ReadSource in, Level::Condition::CounterArgument& counter_argument) {
-    counter_argument.whichPlayer = Handle<Admiral>(read<int32_t>(in));
-    read(in, counter_argument.whichCounter);
-    read(in, counter_argument.amount);
+bool read_from(pn::file_view in, Level::Condition::CounterArgument* counter_argument) {
+    int32_t admiral;
+    if (!in.read(&admiral, &counter_argument->whichCounter, &counter_argument->amount)) {
+        return false;
+    }
+    counter_argument->whichPlayer = Handle<Admiral>(admiral);
+    return true;
 }
 
 bool read_from(pn::file_view in, Level::BriefPoint* brief_point) {

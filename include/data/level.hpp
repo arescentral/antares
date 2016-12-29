@@ -215,8 +215,8 @@ struct Level::Condition {
     bool true_yet() const;
     void set_true_yet(bool state);
 };
-void read_from(sfz::ReadSource in, Level::Condition& level_condition);
-void read_from(sfz::ReadSource in, Level::Condition::CounterArgument& counter_argument);
+bool read_from(pn::file_view in, Level::Condition* level_condition);
+bool read_from(pn::file_view in, Level::Condition::CounterArgument* counter_argument);
 
 //
 // We need to know:
