@@ -88,7 +88,7 @@ void PluginInit() {
     read_all("briefings", "scenario-briefing-points", "snbf", plug.briefings);
     read_all("objects", "objects", "bsob", plug.objects);
     read_all_pn("actions", "object-actions", "obac", plug.actions);
-    read_all("races", "races", "race", plug.races);
+    read_all_pn("races", "races", "race", plug.races);
 
     StringList level_names(kLevelNameID);
     for (auto& level : plug.levels) {

@@ -261,7 +261,7 @@ struct Race {
 
     static const size_t byte_size = 14;
 };
-void read_from(sfz::ReadSource in, Race& race);
+bool read_from(pn::file_view in, Race* race);
 
 }  // namespace antares
 

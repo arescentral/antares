@@ -40,12 +40,10 @@ int16_t GetRaceIDFromNum(size_t raceNum) {
     }
 }
 
-void read_from(ReadSource in, Race& race) {
-    read(in, race.id);
-    read(in, race.apparentColor);
-    in.shift(1);
-    read(in, race.illegalColors);
-    read(in, race.advantage);
+bool read_from(pn::file_view in, Race* race) {
+    uint8_t unused;
+    return in.read(
+            &race->id, &race->apparentColor, &unused, &race->illegalColors, &race->advantage);
 }
 
 }  // namespace antares
