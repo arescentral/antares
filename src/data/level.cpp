@@ -160,35 +160,35 @@ void read_from(ReadSource in, Level::Condition::CounterArgument& counter_argumen
     read(in, counter_argument.amount);
 }
 
-void read_from(ReadSource in, Level::BriefPoint& brief_point) {
+bool read_from(pn::file_view in, Level::BriefPoint* brief_point) {
+    uint8_t unused;
     uint8_t section[8];
+    if (!(in.read(&brief_point->briefPointKind, &unused) &&
+          (fread(section, 1, 8, in.c_obj()) == 8) && read_from(in, &brief_point->range) &&
+          in.read(&brief_point->titleResID, &brief_point->titleNum, &brief_point->contentResID))) {
+        return false;
+    }
 
-    read(in, brief_point.briefPointKind);
-    in.shift(1);
-    read(in, section, 8);
-    read(in, brief_point.range);
-    read(in, brief_point.titleResID);
-    read(in, brief_point.titleNum);
-    read(in, brief_point.contentResID);
-
-    sfz::BytesSlice sub(section, 8);
-    switch (brief_point.briefPointKind) {
+    pn::file sub = pn::data_view{section, 8}.open();
+    switch (brief_point->briefPointKind) {
         case kNoPointKind:
-        case kBriefFreestandingKind: break;
+        case kBriefFreestandingKind: return true;
 
-        case kBriefObjectKind: read(sub, brief_point.briefPointData.objectBriefType); break;
+        case kBriefObjectKind: return read_from(sub, &brief_point->briefPointData.objectBriefType);
 
-        case kBriefAbsoluteKind: read(sub, brief_point.briefPointData.absoluteBriefType); break;
+        case kBriefAbsoluteKind:
+            return read_from(sub, &brief_point->briefPointData.absoluteBriefType);
+
+        default: return false;
     }
 }
 
-void read_from(ReadSource in, Level::BriefPoint::ObjectBrief& object_brief) {
-    read(in, object_brief.objectNum);
-    read(in, object_brief.objectVisible);
+bool read_from(pn::file_view in, Level::BriefPoint::ObjectBrief* object_brief) {
+    return in.read(&object_brief->objectNum, &object_brief->objectVisible);
 }
 
-void read_from(ReadSource in, Level::BriefPoint::AbsoluteBrief& absolute_brief) {
-    read(in, absolute_brief.location);
+bool read_from(pn::file_view in, Level::BriefPoint::AbsoluteBrief* absolute_brief) {
+    return read_from(in, &absolute_brief->location);
 }
 
 void read_from(ReadSource in, Level::InitialObject& level_initial) {

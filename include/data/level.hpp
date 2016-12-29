@@ -249,9 +249,9 @@ struct Level::BriefPoint {
 
     static const size_t byte_size = 24;
 };
-void read_from(sfz::ReadSource in, Level::BriefPoint::ObjectBrief& object_brief);
-void read_from(sfz::ReadSource in, Level::BriefPoint::AbsoluteBrief& absolute_brief);
-void read_from(sfz::ReadSource in, Level::BriefPoint& brief_point);
+bool read_from(pn::file_view in, Level::BriefPoint::ObjectBrief* object_brief);
+bool read_from(pn::file_view in, Level::BriefPoint::AbsoluteBrief* absolute_brief);
+bool read_from(pn::file_view in, Level::BriefPoint* brief_point);
 
 struct Race {
     int32_t  id;
