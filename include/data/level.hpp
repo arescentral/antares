@@ -183,7 +183,7 @@ struct Level::InitialObject {
 
     static const size_t byte_size = 108;
 };
-void read_from(sfz::ReadSource in, Level::InitialObject& level_initial);
+bool read_from(pn::file_view in, Level::InitialObject* level_initial);
 
 struct Level::Condition {
     struct CounterArgument {

@@ -203,23 +203,30 @@ bool read_from(pn::file_view in, Level::BriefPoint::AbsoluteBrief* absolute_brie
     return read_from(in, &absolute_brief->location);
 }
 
-void read_from(ReadSource in, Level::InitialObject& level_initial) {
-    level_initial.type  = Handle<BaseObject>(read<int32_t>(in));
-    level_initial.owner = Handle<Admiral>(read<int32_t>(in));
-    in.shift(4);
-    level_initial.realObject = Handle<SpaceObject>(-1);
-    read(in, level_initial.realObjectID);
-    read(in, level_initial.location);
-    read(in, level_initial.earning);
-    read(in, level_initial.distanceRange);
-    read(in, level_initial.rotationMinimum);
-    read(in, level_initial.rotationRange);
-    read(in, level_initial.spriteIDOverride);
-    read(in, level_initial.canBuild, kMaxTypeBaseCanBuild);
-    read(in, level_initial.initialDestination);
-    read(in, level_initial.nameResID);
-    read(in, level_initial.nameStrNum);
-    read(in, level_initial.attributes);
+bool read_from(pn::file_view in, Level::InitialObject* level_initial) {
+    int32_t type, owner;
+    uint8_t unused[4];
+    if (!(in.read(&type, &owner) && (fread(unused, 1, 4, in.c_obj()) == 4) &&
+          in.read(&level_initial->realObjectID) && read_from(in, &level_initial->location) &&
+          read_from(in, &level_initial->earning) &&
+          in.read(&level_initial->distanceRange, &level_initial->rotationMinimum,
+                  &level_initial->rotationRange, &level_initial->spriteIDOverride))) {
+        return false;
+    }
+    for (size_t i = 0; i < kMaxTypeBaseCanBuild; ++i) {
+        if (!in.read(&level_initial->canBuild[i])) {
+            return false;
+        }
+    }
+    if (!in.read(
+                &level_initial->initialDestination, &level_initial->nameResID,
+                &level_initial->nameStrNum, &level_initial->attributes)) {
+        return false;
+    }
+    level_initial->realObject = Handle<SpaceObject>(-1);
+    level_initial->type       = Handle<BaseObject>(type);
+    level_initial->owner      = Handle<Admiral>(owner);
+    return true;
 }
 
 }  // namespace antares
