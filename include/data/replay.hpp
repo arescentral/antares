@@ -56,9 +56,9 @@ struct ReplayData {
     void key_down(uint64_t at, uint32_t key);
     void key_up(uint64_t at, uint32_t key);
 };
-void read_from(sfz::ReadSource in, ReplayData& replay);
-void read_from(sfz::ReadSource in, ReplayData::Scenario& scenario);
-void read_from(sfz::ReadSource in, ReplayData::Action& action);
+bool read_from(pn::file_view in, ReplayData* replay);
+bool read_from(pn::file_view in, ReplayData::Scenario* scenario);
+bool read_from(pn::file_view in, ReplayData::Action* action);
 
 class ReplayBuilder : public EventReceiver {
   public:
