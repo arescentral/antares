@@ -49,8 +49,6 @@
 #include "math/units.hpp"
 #include "video/transitions.hpp"
 
-using sfz::ReadSource;
-using sfz::read;
 using std::max;
 using std::min;
 using std::set;

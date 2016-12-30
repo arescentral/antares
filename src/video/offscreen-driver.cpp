@@ -47,7 +47,6 @@
 #endif
 
 using sfz::Optional;
-using sfz::WriteTarget;
 using sfz::dec;
 using sfz::range;
 using std::greater;

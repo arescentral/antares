@@ -25,11 +25,6 @@
 #include "lang/casts.hpp"
 #include "lang/defines.hpp"
 
-using sfz::ReadSource;
-using sfz::WriteTarget;
-using sfz::read;
-using sfz::write;
-
 namespace antares {
 
 static const RgbColor kColors[256] = {

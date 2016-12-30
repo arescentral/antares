@@ -29,10 +29,8 @@
 #include "game/sys.hpp"
 #include "video/driver.hpp"
 
-using sfz::ReadSource;
 using sfz::StringMap;
 using sfz::range;
-using sfz::read;
 using std::unique_ptr;
 using std::vector;
 

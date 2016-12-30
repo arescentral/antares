@@ -28,9 +28,7 @@
 #include "game/sys.hpp"
 #include "lang/defines.hpp"
 
-using sfz::ReadSource;
 using sfz::range;
-using sfz::read;
 using std::max;
 using std::min;
 using std::unique_ptr;

@@ -20,9 +20,6 @@
 
 #include <sfz/sfz.hpp>
 
-using sfz::ReadSource;
-using sfz::read;
-
 namespace antares {
 
 //      FOR THE SQUARE ROOT CODE:

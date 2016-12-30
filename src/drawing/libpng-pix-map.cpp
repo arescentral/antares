@@ -21,11 +21,6 @@
 #include <png.h>
 #include <sfz/sfz.hpp>
 
-using sfz::ReadSource;
-using sfz::WriteTarget;
-using sfz::read;
-using sfz::write;
-
 namespace antares {
 
 ArrayPixMap read_png(pn::file_view in) {

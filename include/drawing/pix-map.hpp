@@ -33,8 +33,8 @@ class RgbColor;
 // Defines an interface for objects which store pixel data, as well as some utility methods for
 // manipulating the pixels.
 //
-// PixMap objects can be written to WriteTarget objects, but not read back in, as that would
-// potentially require resizing the PixMap, which is not a required part of the interface.
+// PixMap objects can be written to file objects, but not read back in, as that would potentially
+// require resizing the PixMap, which is not a required part of the interface.
 class PixMap {
   public:
     virtual ~PixMap();

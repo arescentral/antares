@@ -55,8 +55,6 @@
 #include "video/driver.hpp"
 #include "video/transitions.hpp"
 
-using sfz::ReadSource;
-using sfz::read;
 using std::make_pair;
 using std::max;
 using std::min;

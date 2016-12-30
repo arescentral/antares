@@ -25,9 +25,6 @@
 #include "data/pn.hpp"
 #include "lang/casts.hpp"
 
-using sfz::WriteTarget;
-using sfz::write;
-
 namespace antares {
 
 PixMap::~PixMap() {}

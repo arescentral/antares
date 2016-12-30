@@ -51,9 +51,7 @@
 #include "math/units.hpp"
 #include "video/transitions.hpp"
 
-using sfz::ReadSource;
 using sfz::range;
-using sfz::read;
 using std::set;
 using std::unique_ptr;
 
