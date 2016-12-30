@@ -190,56 +190,56 @@ void read_from(ReadSource in, BaseObject& object) {
     in.shift(6);
     read(in, object.internalFlags);
 
-    sfz::BytesSlice sub(sfz::BytesSlice(section, 32));
+    pn::file sub = pn::data_view{section, 32}.open();
     if (object.attributes & kShapeFromDirection) {
-        read(sub, object.frame.rotation);
+        read_from(sub, &object.frame.rotation);
     } else if (object.attributes & kIsSelfAnimated) {
-        read(sub, object.frame.animation);
+        read_from(sub, &object.frame.animation);
     } else if (object.attributes & kIsVector) {
-        read(sub, object.frame.vector);
+        read_from(sub, &object.frame.vector);
         if (object.frame.vector.color > 16) {
             object.frame.vector.color = object.frame.vector.color;
         } else {
             object.frame.vector.color = 0;
         }
     } else {
-        read(sub, object.frame.weapon);
+        read_from(sub, &object.frame.weapon);
     }
 }
 
-void read_from(ReadSource in, objectFrameType::Rotation& rotation) {
-    read(in, rotation.shapeOffset);
-    read(in, rotation.rotRes);
-    read(in, rotation.maxTurnRate);
-    read(in, rotation.turnAcceleration);
+bool read_from(pn::file_view in, objectFrameType::Rotation* rotation) {
+    return in.read(&rotation->shapeOffset, &rotation->rotRes) &&
+           read_from(in, &rotation->maxTurnRate) && read_from(in, &rotation->turnAcceleration);
 }
 
-void read_from(ReadSource in, objectFrameType::Animation& animation) {
-    animation.firstShape = Fixed::from_long(read<int32_t>(in));
-    animation.lastShape  = Fixed::from_long(read<int32_t>(in));
-    read(in, animation.frameDirection);
-    read(in, animation.frameDirectionRange);
-    read(in, animation.frameSpeed);
-    read(in, animation.frameSpeedRange);
-    animation.frameShape      = Fixed::from_long(read<int32_t>(in));
-    animation.frameShapeRange = Fixed::from_long(read<int32_t>(in));
+bool read_from(pn::file_view in, objectFrameType::Animation* animation) {
+    int32_t first_shape, last_shape, frame_shape, frame_shape_range;
+    if (!(in.read(&first_shape, &last_shape, &animation->frameDirection,
+                  &animation->frameDirectionRange) &&
+          read_from(in, &animation->frameSpeed) && read_from(in, &animation->frameSpeedRange) &&
+          in.read(&frame_shape, &frame_shape_range))) {
+        return false;
+    }
+    animation->firstShape      = Fixed::from_long(first_shape);
+    animation->lastShape       = Fixed::from_long(last_shape);
+    animation->frameShape      = Fixed::from_long(frame_shape);
+    animation->frameShapeRange = Fixed::from_long(frame_shape_range);
+    return true;
 }
 
-void read_from(ReadSource in, objectFrameType::Vector& vector) {
-    read(in, vector.color);
-    read(in, vector.kind);
-    read(in, vector.accuracy);
-    read(in, vector.range);
+bool read_from(pn::file_view in, objectFrameType::Vector* vector) {
+    return in.read(&vector->color, &vector->kind, &vector->accuracy, &vector->range);
 }
 
-void read_from(ReadSource in, objectFrameType::Weapon& weapon) {
-    read(in, weapon.usage);
-    read(in, weapon.energyCost);
-    weapon.fireTime = ticks(read<int32_t>(in));
-    read(in, weapon.ammo);
-    read(in, weapon.range);
-    read(in, weapon.inverseSpeed);
-    read(in, weapon.restockCost);
+bool read_from(pn::file_view in, objectFrameType::Weapon* weapon) {
+    int32_t fire_time;
+    if (!(in.read(&weapon->usage, &weapon->energyCost, &fire_time, &weapon->ammo,
+                  &weapon->range) &&
+          read_from(in, &weapon->inverseSpeed) && in.read(&weapon->restockCost))) {
+        return false;
+    }
+    weapon->fireTime = ticks(fire_time);
+    return true;
 }
 
 }  // namespace antares
