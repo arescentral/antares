@@ -22,9 +22,6 @@
 #include <pn/file>
 #include <sfz/sfz.hpp>
 
-using sfz::ReadSource;
-using sfz::read;
-
 namespace antares {
 
 Point::Point() : h(0), v(0) {}
@@ -48,11 +45,6 @@ bool operator==(const Point& lhs, const Point& rhs) {
 }
 
 bool operator!=(const Point& lhs, const Point& rhs) { return !(lhs == rhs); }
-
-void read_from(ReadSource in, Point& p) {
-    read(in, p.h);
-    read(in, p.v);
-}
 
 bool read_from(pn::file_view in, Point* p) { return in.read(&p->h, &p->v); }
 
@@ -132,13 +124,6 @@ void Rect::enlarge_to(const Rect& r) {
     top    = std::min(top, r.top);
     right  = std::max(right, r.right);
     bottom = std::max(bottom, r.bottom);
-}
-
-void read_from(ReadSource in, Rect& r) {
-    read(in, r.left);
-    read(in, r.top);
-    read(in, r.right);
-    read(in, r.bottom);
 }
 
 bool read_from(pn::file_view in, Rect* r) {

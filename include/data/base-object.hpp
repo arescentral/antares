@@ -357,7 +357,7 @@ class BaseObject {
 
     static const int byte_size = 318;
 };
-void read_from(sfz::ReadSource in, BaseObject& object);
+bool read_from(pn::file_view in, BaseObject* object);
 
 }  // namespace antares
 

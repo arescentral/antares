@@ -267,9 +267,8 @@ int16_t ratio_to_angle(Fixed x, Fixed y) {
     return angle;
 }
 
-void read_from(ReadSource in, fixedPointType& point) {
-    read(in, point.h);
-    read(in, point.v);
+bool read_from(pn::file_view in, fixedPointType* point) {
+    return read_from(in, &point->h) && read_from(in, &point->v);
 }
 
 struct AngleFromSlopeData {

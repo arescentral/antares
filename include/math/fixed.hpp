@@ -75,10 +75,6 @@ inline Fixed& operator>>=(Fixed& x, int n) { return x = x >> n; }
 
 inline Fixed operator-(Fixed x) { return Fixed::from_val(-x.val()); }
 
-inline void read_from(sfz::ReadSource in, Fixed& f) {
-    f = Fixed::from_val(sfz::read<int32_t>(in));
-}
-
 inline bool read_from(pn::file_view in, Fixed* f) {
     int32_t i32;
     if (!in.read(&i32)) {
@@ -124,7 +120,7 @@ struct fixedPointType {
     Fixed h;
     Fixed v;
 };
-void read_from(sfz::ReadSource in, fixedPointType& point);
+bool read_from(pn::file_view in, fixedPointType* point);
 
 }  // namespace antares
 

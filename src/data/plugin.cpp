@@ -42,21 +42,6 @@ ANTARES_GLOBAL ScenarioGlobals plug;
 template <typename T>
 static void read_all(
         pn::string_view name, pn::string_view type, pn::string_view extension, vector<T>& v) {
-    Resource        rsrc(type, extension, kPackedResID);
-    sfz::BytesSlice in{rsrc.data().data(), static_cast<size_t>(rsrc.data().size())};
-    size_t          count = rsrc.data().size() / T::byte_size;
-    v.resize(count);
-    for (size_t i = 0; i < count; ++i) {
-        read(in, v[i]);
-    }
-    if (!in.empty()) {
-        throw std::runtime_error(pn::format("didn't consume all of {0} data", name).c_str());
-    }
-}
-
-template <typename T>
-static void read_all_pn(
-        pn::string_view name, pn::string_view type, pn::string_view extension, vector<T>& v) {
     Resource rsrc(type, extension, kPackedResID);
     size_t   count = rsrc.data().size() / T::byte_size;
     v.resize(count);
@@ -84,13 +69,13 @@ void PluginInit() {
         }
     }
 
-    read_all_pn("level", "scenarios", "snro", plug.levels);
-    read_all_pn("initials", "scenario-initial-objects", "snit", plug.initials);
-    read_all_pn("conditions", "scenario-conditions", "sncd", plug.conditions);
-    read_all_pn("briefings", "scenario-briefing-points", "snbf", plug.briefings);
+    read_all("level", "scenarios", "snro", plug.levels);
+    read_all("initials", "scenario-initial-objects", "snit", plug.initials);
+    read_all("conditions", "scenario-conditions", "sncd", plug.conditions);
+    read_all("briefings", "scenario-briefing-points", "snbf", plug.briefings);
     read_all("objects", "objects", "bsob", plug.objects);
-    read_all_pn("actions", "object-actions", "obac", plug.actions);
-    read_all_pn("races", "races", "race", plug.races);
+    read_all("actions", "object-actions", "obac", plug.actions);
+    read_all("races", "races", "race", plug.races);
 
     StringList level_names(kLevelNameID);
     for (auto& level : plug.levels) {
