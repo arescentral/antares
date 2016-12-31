@@ -61,11 +61,11 @@ ScenarioList::ScenarioList() {
     Entry& factory_scenario     = _scenarios.back();
     factory_scenario.identifier = kFactoryScenarioIdentifier;
 
-    const sfz::String factory_path(format(
-            "{0}/scenario-info/128.nlAG", pn2sfz(scenario_dir(kFactoryScenarioIdentifier))));
-    if (sfz::path::isfile(factory_path)) {
+    const pn::string factory_path =
+            pn::format("{0}/scenario-info/128.nlAG", scenario_dir(kFactoryScenarioIdentifier));
+    if (sfz::path::isfile(pn2sfz(factory_path))) {
         scenarioInfoType info;
-        read_from(pn::open(sfz2pn(factory_path), "r"), &info);
+        read_from(pn::open(factory_path, "r"), &info);
         factory_scenario.title        = info.titleString.copy();
         factory_scenario.download_url = info.downloadURLString.copy();
         factory_scenario.author       = info.authorNameString.copy();

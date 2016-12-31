@@ -87,18 +87,26 @@ int32_t nlrp_chapter(int16_t id) {
 }
 
 bool convert_nlrp(pn::string_view, bool, int16_t id, pn::data_view data, pn::file_view out) {
-    sfz::BytesSlice in{data.data(), static_cast<size_t>(data.size())};
-    ReplayData      replay;
+    pn::file   in = data.open();
+    ReplayData replay;
     replay.scenario.identifier = kFactoryScenarioIdentifier;
     replay.scenario.version    = "1.1.1";
     replay.chapter_id          = nlrp_chapter(id);
-    read(in, replay.global_seed);
+    if (!in.read(&replay.global_seed)) {
+        return false;
+    }
 
     uint32_t keys = 0;
     uint32_t at   = 0;
-    while (!in.empty()) {
-        const uint32_t ticks     = read<uint32_t>(in) + 1;
-        const uint32_t new_keys  = read<uint32_t>(in);
+    while (true) {
+        uint32_t ticks_minus_one, new_keys;
+        if (!in.read(&ticks_minus_one, &new_keys)) {
+            if (in.error()) {
+                return false;
+            }
+            break;
+        }
+        const uint32_t ticks     = ticks_minus_one + 1;
         const uint32_t keys_down = new_keys & ~keys;
         const uint32_t keys_up   = keys & ~new_keys;
 
