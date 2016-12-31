@@ -51,7 +51,6 @@ using sfz::StringSlice;
 using sfz::dec;
 using sfz::makedirs;
 using sfz::range;
-using sfz::read;
 using sfz::tree_digest;
 using sfz::write;
 using std::set;
@@ -168,14 +167,14 @@ bool convert_snd(pn::string_view, bool, int16_t, pn::data_view data, pn::file_vi
 }
 
 void convert_frame(pn::string_view dir, int16_t id, pn::data_view data, PixMap::View pix) {
-    sfz::BytesSlice in{data.data(), static_cast<size_t>(data.size())};
-    auto            width  = pix.size().width;
-    auto            height = pix.size().height;
+    auto width  = pix.size().width;
+    auto height = pix.size().height;
 
     pix.fill(RgbColor::clear());
+    size_t i = 0;
     for (auto y : range(height)) {
         for (auto x : range(width)) {
-            uint8_t byte = read<uint8_t>(in);
+            uint8_t byte = data[i++];
             if (byte) {
                 pix.set(x, y, RgbColor::at(byte));
             }
@@ -270,24 +269,29 @@ void alphatize(ArrayPixMap& image) {
 
 bool convert_smiv(
         pn::string_view dir, bool factory, int16_t id, pn::data_view data, pn::file_view out) {
-    sfz::BytesSlice header{data.data(), static_cast<size_t>(data.size())};
-    header.shift(4);
-    uint32_t         size = read<uint32_t>(header);
+    pn::file header = data.slice(4).open();
+    uint32_t size;
+    if (!header.read(&size)) {
+        return false;
+    }
     vector<uint32_t> offsets;
     vector<Rect>     bounds;
 
     pn::array frames;
     for (auto i : range(size)) {
         static_cast<void>(i);
-        uint32_t        offset     = read<uint32_t>(header);
-        pn::data_view   frame_data = data.slice(offset);
-        sfz::BytesSlice bytes{frame_data.data(), static_cast<size_t>(frame_data.size())};
-        auto            width    = read<uint16_t>(bytes);
-        auto            height   = read<uint16_t>(bytes);
-        auto            x_offset = -read<int16_t>(bytes);
-        auto            y_offset = -read<int16_t>(bytes);
+        uint32_t offset;
+        if (!header.read(&offset)) {
+            return false;
+        }
+        pn::file frame_data = data.slice(offset).open();
+        uint16_t width, height;
+        int16_t  x_offset, y_offset;
+        if (!frame_data.read(&width, &height, &x_offset, &y_offset)) {
+            return false;
+        }
         offsets.push_back(offset);
-        bounds.emplace_back(Point(x_offset, y_offset), Size(width, height));
+        bounds.emplace_back(Point(-x_offset, -y_offset), Size(width, height));
 
         frames.push_back(pn_rect(bounds.back()));
     }
