@@ -66,8 +66,8 @@ namespace antares {
 
 namespace {
 
-bool verbatim(pn::string_view, bool, int16_t, sfz::BytesSlice data, pn::file_view out) {
-    out.write(pn::data_view{data.data(), static_cast<int>(data.size())});
+bool verbatim(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
+    out.write(pn::data_view{data.data(), data.size()});
     return true;
 }
 
@@ -86,18 +86,19 @@ int32_t nlrp_chapter(int16_t id) {
     throw std::runtime_error(pn::format("invalid replay ID {0}", id).c_str());
 }
 
-bool convert_nlrp(pn::string_view, bool, int16_t id, sfz::BytesSlice data, pn::file_view out) {
-    ReplayData replay;
+bool convert_nlrp(pn::string_view, bool, int16_t id, pn::data_view data, pn::file_view out) {
+    sfz::BytesSlice in{data.data(), static_cast<size_t>(data.size())};
+    ReplayData      replay;
     replay.scenario.identifier = kFactoryScenarioIdentifier;
     replay.scenario.version    = "1.1.1";
     replay.chapter_id          = nlrp_chapter(id);
-    read(data, replay.global_seed);
+    read(in, replay.global_seed);
 
     uint32_t keys = 0;
     uint32_t at   = 0;
-    while (!data.empty()) {
-        const uint32_t ticks     = read<uint32_t>(data) + 1;
-        const uint32_t new_keys  = read<uint32_t>(data);
+    while (!in.empty()) {
+        const uint32_t ticks     = read<uint32_t>(in) + 1;
+        const uint32_t new_keys  = read<uint32_t>(in);
         const uint32_t keys_down = new_keys & ~keys;
         const uint32_t keys_up   = keys & ~new_keys;
 
@@ -119,8 +120,8 @@ bool convert_nlrp(pn::string_view, bool, int16_t id, sfz::BytesSlice data, pn::f
     return true;
 }
 
-bool convert_pict(pn::string_view, bool, int16_t, sfz::BytesSlice data, pn::file_view out) {
-    rezin::Picture pict(data);
+bool convert_pict(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
+    rezin::Picture pict({data.data(), static_cast<size_t>(data.size())});
     if ((pict.version() == 2) && (pict.is_raster())) {
         sfz::Bytes bytes(png(pict));
         out.write(pn::data_view{bytes.data(), static_cast<int>(bytes.size())});
@@ -137,35 +138,36 @@ static pn::array pn_str(const StringList& str_list) {
     return a;
 }
 
-bool convert_str(pn::string_view, bool, int16_t, sfz::BytesSlice data, pn::file_view out) {
+bool convert_str(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
     Options    options;
-    StringList list(data, options);
+    StringList list(sfz::BytesSlice{data.data(), static_cast<size_t>(data.size())}, options);
     pn::dump(out, pn::value{pn_str(list)});
     return true;
 }
 
-bool convert_text(pn::string_view, bool, int16_t, sfz::BytesSlice data, pn::file_view out) {
-    Options    options;
-    pn::string string = sfz2pn(sfz::String(options.decode(data)));
-    out.write(string);
+bool convert_text(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
+    Options options;
+    out.write(
+            sfz2pn(sfz::String(options.decode({data.data(), static_cast<size_t>(data.size())}))));
     return true;
 }
 
-bool convert_snd(pn::string_view, bool, int16_t, sfz::BytesSlice data, pn::file_view out) {
-    Sound      snd(data);
+bool convert_snd(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
+    Sound      snd({data.data(), static_cast<size_t>(data.size())});
     sfz::Bytes bytes(aiff(snd));
     out.write(pn::data_view{bytes.data(), static_cast<int>(bytes.size())});
     return true;
 }
 
-void convert_frame(pn::string_view dir, int16_t id, sfz::BytesSlice data, PixMap::View pix) {
-    auto width  = pix.size().width;
-    auto height = pix.size().height;
+void convert_frame(pn::string_view dir, int16_t id, pn::data_view data, PixMap::View pix) {
+    sfz::BytesSlice in{data.data(), static_cast<size_t>(data.size())};
+    auto            width  = pix.size().width;
+    auto            height = pix.size().height;
 
     pix.fill(RgbColor::clear());
     for (auto y : range(height)) {
         for (auto x : range(width)) {
-            uint8_t byte = read<uint8_t>(data);
+            uint8_t byte = read<uint8_t>(in);
             if (byte) {
                 pix.set(x, y, RgbColor::at(byte));
             }
@@ -173,7 +175,7 @@ void convert_frame(pn::string_view dir, int16_t id, sfz::BytesSlice data, PixMap
     }
 }
 
-void convert_overlay(pn::string_view dir, int16_t id, sfz::BytesSlice data, PixMap::View pix) {
+void convert_overlay(pn::string_view dir, int16_t id, pn::data_view data, PixMap::View pix) {
     auto width  = pix.size().width;
     auto height = pix.size().height;
 
@@ -192,10 +194,11 @@ void convert_overlay(pn::string_view dir, int16_t id, sfz::BytesSlice data, PixM
     // 'white' band of the color table, then colorize all opaque
     // (non-0x00) pixels.  Otherwise, only colors pixels which are
     // opaque and outside of the white band (0x01..0x0F).
+    int           i          = 0;
     const uint8_t color_mask = (white_count > (pixel_count / 3)) ? 0xFF : 0xF0;
     for (auto y : range(height)) {
         for (auto x : range(width)) {
-            uint8_t byte = read<uint8_t>(data);
+            uint8_t byte = data[i++];
             if (byte & color_mask) {
                 byte          = (byte & 0x0f) | 0x10;
                 uint8_t value = RgbColor::at(byte).red;
@@ -258,8 +261,8 @@ void alphatize(ArrayPixMap& image) {
 }
 
 bool convert_smiv(
-        pn::string_view dir, bool factory, int16_t id, sfz::BytesSlice data, pn::file_view out) {
-    sfz::BytesSlice header = data;
+        pn::string_view dir, bool factory, int16_t id, pn::data_view data, pn::file_view out) {
+    sfz::BytesSlice header{data.data(), static_cast<size_t>(data.size())};
     header.shift(4);
     uint32_t         size = read<uint32_t>(header);
     vector<uint32_t> offsets;
@@ -269,11 +272,12 @@ bool convert_smiv(
     for (auto i : range(size)) {
         static_cast<void>(i);
         uint32_t        offset     = read<uint32_t>(header);
-        sfz::BytesSlice frame_data = data.slice(offset);
-        auto            width      = read<uint16_t>(frame_data);
-        auto            height     = read<uint16_t>(frame_data);
-        auto            x_offset   = -read<int16_t>(frame_data);
-        auto            y_offset   = -read<int16_t>(frame_data);
+        pn::data_view   frame_data = data.slice(offset);
+        sfz::BytesSlice bytes{frame_data.data(), static_cast<size_t>(frame_data.size())};
+        auto            width    = read<uint16_t>(bytes);
+        auto            height   = read<uint16_t>(bytes);
+        auto            x_offset = -read<int16_t>(bytes);
+        auto            y_offset = -read<int16_t>(bytes);
         offsets.push_back(offset);
         bounds.emplace_back(Point(x_offset, y_offset), Size(width, height));
 
@@ -310,8 +314,8 @@ bool convert_smiv(
         int col = i % cols;
         int row = i / cols;
 
-        pn::map         frame;
-        sfz::BytesSlice frame_data = data.slice(offsets[i]);
+        pn::map       frame;
+        pn::data_view frame_data = data.slice(offsets[i]);
         frame_data.shift(8);
         Rect r = bounds[i];
         r.offset(max_bounds.width() * col, max_bounds.height() * row);
@@ -359,7 +363,7 @@ struct ResourceFile {
         const char* output_directory;
         const char* output_extension;
         bool (*convert)(
-                pn::string_view dir, bool factory, int16_t id, sfz::BytesSlice data,
+                pn::string_view dir, bool factory, int16_t id, pn::data_view data,
                 pn::file_view out);
     } resources[16];
 };
@@ -529,11 +533,12 @@ void DataExtractor::extract_plugin_scenario(Observer* observer) const {
 }
 
 bool DataExtractor::scenario_current(pn::string_view scenario) const {
-    pn::string      path = pn::format("{0}/{1}/version", _output_dir, scenario);
-    sfz::BytesSlice version(kVersion);
+    pn::string    path = pn::format("{0}/{1}/version", _output_dir, scenario);
+    pn::data_view version{reinterpret_cast<const uint8_t*>(kVersion),
+                          static_cast<int>(strlen(kVersion))};
     try {
         MappedFile file(pn2sfz(path));
-        return file.data() == version;
+        return pn::data_view{file.data().data(), static_cast<int>(file.data().size())} == version;
     } catch (std::exception& e) {
         return false;
     }
@@ -588,9 +593,8 @@ void DataExtractor::download(
 void DataExtractor::write_version(pn::string_view scenario_identifier) const {
     pn::string path = pn::format("{0}/{1}/version", _output_dir, scenario_identifier);
     makedirs(path::dirname(pn2sfz(path)), 0755);
-    pn::file        file = pn::open(path, "w");
-    sfz::BytesSlice version(kVersion);
-    file.write(pn::data_view{version.data(), static_cast<int>(version.size())});
+    pn::file file = pn::open(path, "w");
+    file.write(kVersion);
 }
 
 void DataExtractor::extract_original(Observer* observer, pn::string_view file) const {
@@ -620,7 +624,8 @@ void DataExtractor::extract_original(Observer* observer, pn::string_view file) c
                         "{0}/{1}/{2}/{3}.{4}", _output_dir, kFactoryScenarioIdentifier,
                         conversion.output_directory, entry.id(), conversion.output_extension);
                 if (conversion.convert(
-                            sfz2pn(path::dirname(pn2sfz(output))), true, entry.id(), entry.data(),
+                            sfz2pn(path::dirname(pn2sfz(output))), true, entry.id(),
+                            {entry.data().data(), static_cast<int>(entry.data().size())},
                             data.open("w"))) {
                     makedirs(path::dirname(pn2sfz(output)), 0755);
                     pn::file file = pn::open(output, "w");
@@ -682,7 +687,8 @@ void DataExtractor::extract_plugin(Observer* observer) const {
                         "{0}/{1}/{2}/{3}.{4}", _output_dir, _scenario, conversion.output_directory,
                         id, conversion.output_extension);
                 if (conversion.convert(
-                            sfz2pn(path::dirname(pn2sfz(output))), false, id, file.data(),
+                            sfz2pn(path::dirname(pn2sfz(output))), false, id,
+                            {file.data().data(), static_cast<int>(file.data().size())},
                             data.open("w"))) {
                     makedirs(path::dirname(pn2sfz(output)), 0755);
                     pn::file file = pn::open(output, "w");

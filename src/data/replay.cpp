@@ -43,7 +43,10 @@ namespace antares {
 
 ReplayData::ReplayData() {}
 
-ReplayData::ReplayData(sfz::BytesSlice in) { read(in, *this); }
+ReplayData::ReplayData(pn::data_view in) {
+    sfz::BytesSlice bytes{in.data(), static_cast<size_t>(in.size())};
+    read(bytes, *this);
+}
 
 void ReplayData::key_down(uint64_t at, uint32_t key) {
     if (actions.empty() || (actions.back().at != at)) {

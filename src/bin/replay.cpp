@@ -69,7 +69,7 @@ namespace antares {
 
 class ReplayMaster : public Card {
   public:
-    ReplayMaster(sfz::BytesSlice data, const Optional<pn::string>& output_path)
+    ReplayMaster(pn::data_view data, const Optional<pn::string>& output_path)
             : _state(NEW),
               _replay_data(data),
               _random_seed(_replay_data.global_seed),
@@ -212,16 +212,17 @@ void main(int argc, char** argv) {
     }
     NullLedger ledger;
 
-    MappedFile replay_file(replay_path);
+    MappedFile    replay_file(replay_path);
+    pn::data_view in{replay_file.data().data(), static_cast<int>(replay_file.data().size())};
     if (smoke) {
         TextVideoDriver video({width, height}, Optional<pn::string>());
-        video.loop(new ReplayMaster(replay_file.data(), output_dir), scheduler);
+        video.loop(new ReplayMaster(in, output_dir), scheduler);
     } else if (text) {
         TextVideoDriver video({width, height}, output_dir);
-        video.loop(new ReplayMaster(replay_file.data(), output_dir), scheduler);
+        video.loop(new ReplayMaster(in, output_dir), scheduler);
     } else {
         OffscreenVideoDriver video({width, height}, output_dir);
-        video.loop(new ReplayMaster(replay_file.data(), output_dir), scheduler);
+        video.loop(new ReplayMaster(in, output_dir), scheduler);
     }
 }
 
