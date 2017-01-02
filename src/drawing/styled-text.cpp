@@ -157,66 +157,62 @@ void StyledText::set_retro_text(pn::string_view text) {
 }
 
 void StyledText::set_interface_text(pn::string_view text) {
-    sfz::String sfz_text = pn2sfz(text);
-    for (size_t i = 0; i < sfz_text.size(); ++i) {
-        switch (sfz_text.at(i)) {
-            case '\n':
-                _chars.push_back(StyledChar('\n', LINE_BREAK, _fore_color, _back_color));
+    const auto f = _fore_color;
+    const auto b = _back_color;
+    pn::string id_string;
+    int64_t    id;
+    enum { START, CODE, ID } state = START;
+
+    for (auto r : text) {
+        switch (state) {
+            case START:
+                switch (r.value()) {
+                    case '\n': _chars.push_back(StyledChar('\n', LINE_BREAK, f, b)); break;
+                    case ' ': _chars.push_back(StyledChar(' ', WORD_BREAK, f, b)); break;
+                    default: _chars.push_back(StyledChar(r.value(), NONE, f, b)); break;
+                    case '^': state = CODE; break;
+                }
                 break;
 
-            case ' ':
-                _chars.push_back(StyledChar(' ', WORD_BREAK, _fore_color, _back_color));
+            case CODE:
+                if ((r != pn::rune{'P'}) && (r != pn::rune{'p'})) {
+                    throw std::runtime_error(
+                            pn::format(
+                                    "found bad inline pict code {0}", pn::dump(r, pn::dump_short))
+                                    .c_str());
+                }
+                state = ID;
                 break;
 
-            case '^': {
-                bool found_code = false;
-                if (i + 1 >= sfz_text.size()) {
-                    throw std::runtime_error(
-                            pn::format("not enough input for inline code.").c_str());
+            case ID:
+                if (r != pn::rune{'^'}) {
+                    id_string += r;
+                    continue;
                 }
-                if ((sfz_text.at(i + 1) != 'P') && (sfz_text.at(i + 1) != 'p')) {
-                    throw std::runtime_error(
-                            pn::format("found bad inline pict code {0}", sfz_text.at(i)).c_str());
+                if (!pn::strtoll(id_string, &id, nullptr)) {
+                    throw std::runtime_error(pn::format(
+                                                     "invalid numeric literal {0}",
+                                                     pn::dump(id_string, pn::dump_short))
+                                                     .c_str());
                 }
-                sfz::String id_string;
-                for (size_t j = i + 2; j < sfz_text.size(); ++j) {
-                    if (sfz_text.at(j) == '^') {
-                        inlinePictType inline_pict;
-                        int64_t        id;
-                        if (!pn::strtoll(sfz2pn(id_string), &id, nullptr)) {
-                            throw std::runtime_error(
-                                    pn::format("invalid numeric literal {0}", sfz2pn(id_string))
-                                            .c_str());
-                        }
-                        inline_pict.id = id;
-                        // TODO(sfiera): report an error if the picture is not loadable, instead of
-                        // silently ignoring it.
-                        try {
-                            Picture pict(id);
-                            inline_pict.bounds = pict.size().as_rect();
-                            _inline_picts.push_back(inline_pict);
-                            _textures.push_back(pict.texture());
-                            _chars.push_back(StyledChar(
-                                    _inline_picts.size() - 1, PICTURE, _fore_color, _back_color));
-                        } catch (std::exception& e) {
-                        }
-                        found_code = true;
-                        i          = j;
-                        break;
-                    }
-                    id_string.push(1, sfz_text.at(j));
+                inlinePictType inline_pict;
+                inline_pict.id = id;
+                // TODO(sfiera): report an error if the picture is not loadable,
+                // instead of silently ignoring it.
+                try {
+                    Picture pict(id);
+                    inline_pict.bounds = pict.size().as_rect();
+                    _inline_picts.push_back(inline_pict);
+                    _textures.push_back(pict.texture());
+                    _chars.push_back(StyledChar(_inline_picts.size() - 1, PICTURE, f, b));
+                } catch (std::exception& e) {
                 }
-                if (!found_code) {
-                    throw std::runtime_error(pn::format("malformed inline code").c_str());
-                }
-            } break;
-
-            default:
-                _chars.push_back(StyledChar(sfz_text.at(i), NONE, _fore_color, _back_color));
+                id_string.clear();
+                state = START;
                 break;
         }
     }
-    _chars.push_back(StyledChar('\n', LINE_BREAK, _fore_color, _back_color));
+    _chars.push_back(StyledChar('\n', LINE_BREAK, f, b));
 
     wrap_to(std::numeric_limits<int>::max(), 0, 0);
 }
