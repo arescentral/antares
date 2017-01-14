@@ -58,7 +58,7 @@ def check_submodules():
     REQUIRED_SUBMODULES = [
         "build/lib/BUILD.gn",
         "ext/glfw/BUILD.gn",
-        "ext/gmock-gyp/BUILD.gn",
+        "ext/gmock/BUILD.gn",
         "ext/libmodplug-gyp/BUILD.gn",
         "ext/libpng-gyp/BUILD.gn",
         "ext/libsfz/BUILD.gn",

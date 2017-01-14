@@ -455,7 +455,7 @@ executable("fixed-test") {
   ]
   deps = [
     ":libantares-test",
-    "//ext/gmock-gyp:gmock_main",
+    "//ext/gmock:gmock_main",
   ]
   configs += [ ":antares_private" ]
 }
