@@ -127,7 +127,7 @@ source_set("libantares-data") {
     "src/data/string-list.cpp",
   ]
   public_deps = [
-    "//ext/libpng-gyp:libpng",
+    "//ext/libpng",
     "//ext/libsfz",
     "//ext/libzipxx",
     "//ext/rezin:librezin",
@@ -160,7 +160,7 @@ source_set("libantares-drawing") {
     "src/drawing/text.cpp",
   ]
   deps = [
-    "//ext/libpng-gyp:libpng",
+    "//ext/libpng",
     "//ext/libsfz",
   ]
   configs += [ ":antares_private" ]
@@ -329,7 +329,7 @@ source_set("libantares-video") {
     ":embed_glsl_vertex",
   ]
   public_deps = [
-    "//ext/libpng-gyp:libpng",
+    "//ext/libpng",
     "//ext/libsfz",
   ]
   libs = []
@@ -530,7 +530,7 @@ if (target_os == "mac") {
       "src/mac/http.cpp",
     ]
     public_deps = [
-      "//ext/libpng-gyp:libpng",
+      "//ext/libpng",
       "//ext/libsfz",
     ]
     libs = [

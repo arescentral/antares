@@ -14,7 +14,7 @@
 	path = ext/gmock
 	url = https://github.com/sfiera/gmock-gyp.git
 [submodule "ext/libpng-gyp"]
-	path = ext/libpng-gyp
+	path = ext/libpng
 	url = https://github.com/sfiera/libpng-gyp.git
 [submodule "data"]
 	path = data
