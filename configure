@@ -47,9 +47,13 @@ def main():
 
     with cfg.step("configure mode") as msg:
         msg(args.mode, color="green")
-    cfg.gn(mode=args.mode,
-           target_os=args.target_os,
-           prefix=args.prefix)
+    gn_args = {}
+    gn_args["mode"] = args.mode
+    gn_args["target_os"] = args.target_os
+    gn_args["prefix"] = args.prefix
+    if args.target_os == "mac":
+        gn_args["macosx_version_min"] = "10.7"
+    cfg.gn(**gn_args)
 
     print("make(1) it so!")
 
