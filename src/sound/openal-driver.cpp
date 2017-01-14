@@ -18,7 +18,7 @@
 
 #include "sound/openal-driver.hpp"
 
-#include <modplug.h>
+#include <libmodplug/modplug.h>
 #include <sfz/sfz.hpp>
 
 #include "data/resource.hpp"
