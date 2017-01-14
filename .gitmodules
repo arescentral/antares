@@ -11,19 +11,19 @@
 	path = ext/rezin
 	url = https://github.com/sfiera/rezin.git
 [submodule "ext/gmock-gyp"]
-	path = ext/gmock-gyp
+	path = ext/gmock
 	url = https://github.com/sfiera/gmock-gyp.git
 [submodule "ext/libpng-gyp"]
-	path = ext/libpng-gyp
+	path = ext/libpng
 	url = https://github.com/sfiera/libpng-gyp.git
 [submodule "data"]
 	path = data
 	url = https://github.com/arescentral/antares-data.git
 [submodule "ext/libmodplug-gyp"]
-	path = ext/libmodplug-gyp
+	path = ext/libmodplug
 	url = https://github.com/sfiera/libmodplug-gyp.git
 [submodule "ext/libsndfile-gyp"]
-	path = ext/libsndfile-gyp
+	path = ext/libsndfile
 	url = https://github.com/sfiera/libsndfile-gyp.git
 [submodule "ext/glfw"]
 	path = ext/glfw

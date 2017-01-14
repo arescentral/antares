@@ -127,7 +127,7 @@ source_set("libantares-data") {
     "src/data/string-list.cpp",
   ]
   public_deps = [
-    "//ext/libpng-gyp:libpng",
+    "//ext/libpng",
     "//ext/libsfz",
     "//ext/libzipxx",
     "//ext/rezin:librezin",
@@ -160,7 +160,7 @@ source_set("libantares-drawing") {
     "src/drawing/text.cpp",
   ]
   deps = [
-    "//ext/libpng-gyp:libpng",
+    "//ext/libpng",
     "//ext/libsfz",
   ]
   configs += [ ":antares_private" ]
@@ -253,9 +253,9 @@ source_set("libantares-sound") {
     "src/sound/sndfile.cpp",
   ]
   public_deps = [
-    "//ext/libmodplug-gyp:libmodplug",
+    "//ext/libmodplug",
     "//ext/libsfz",
-    "//ext/libsndfile-gyp:libsndfile",
+    "//ext/libsndfile",
   ]
   libs = []
   if (target_os == "mac") {
@@ -329,7 +329,7 @@ source_set("libantares-video") {
     ":embed_glsl_vertex",
   ]
   public_deps = [
-    "//ext/libpng-gyp:libpng",
+    "//ext/libpng",
     "//ext/libsfz",
   ]
   libs = []
@@ -455,7 +455,7 @@ executable("fixed-test") {
   ]
   deps = [
     ":libantares-test",
-    "//ext/gmock-gyp:gmock_main",
+    "//ext/gmock:gmock_main",
   ]
   configs += [ ":antares_private" ]
 }
@@ -530,7 +530,7 @@ if (target_os == "mac") {
       "src/mac/http.cpp",
     ]
     public_deps = [
-      "//ext/libpng-gyp:libpng",
+      "//ext/libpng",
       "//ext/libsfz",
     ]
     libs = [
