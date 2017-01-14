@@ -8,6 +8,7 @@ declare_args() {
 }
 
 import("//build/lib/embed.gni")
+import("//build/lib/mac/version.gni")
 
 group("default") {
   testonly = true
@@ -550,7 +551,7 @@ if (target_os == "mac") {
     info_plist = "resources/Antares-Info.plist"
     info_plist_defines = [
       "ANTARES_VERSION=$antares_version",
-      "SYSTEM_VERSION=10.7",
+      "SYSTEM_VERSION=$macosx_version_min",
     ]
     sources = [
       "include/mac/AntaresController.h",
