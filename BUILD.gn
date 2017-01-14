@@ -253,9 +253,9 @@ source_set("libantares-sound") {
     "src/sound/sndfile.cpp",
   ]
   public_deps = [
-    "//ext/libmodplug-gyp:libmodplug",
+    "//ext/libmodplug",
     "//ext/libsfz",
-    "//ext/libsndfile-gyp:libsndfile",
+    "//ext/libsndfile",
   ]
   libs = []
   if (target_os == "mac") {

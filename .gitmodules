@@ -20,10 +20,10 @@
 	path = data
 	url = https://github.com/arescentral/antares-data.git
 [submodule "ext/libmodplug-gyp"]
-	path = ext/libmodplug-gyp
+	path = ext/libmodplug
 	url = https://github.com/sfiera/libmodplug-gyp.git
 [submodule "ext/libsndfile-gyp"]
-	path = ext/libsndfile-gyp
+	path = ext/libsndfile
 	url = https://github.com/sfiera/libsndfile-gyp.git
 [submodule "ext/glfw"]
 	path = ext/glfw
