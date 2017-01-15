@@ -12,9 +12,9 @@ from gi.repository import Gtk
 
 
 PREFIX = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-if os.path.exists(os.path.join(PREFIX, "share", "antares", "app")):
-    BIN_PREFIX = os.path.join(PREFIX, "bin")
-    DATADIR = os.path.join(PREFIX, "share", "antares", "app")
+if os.path.exists(os.path.join(PREFIX, "share", "games", "antares", "app")):
+    BIN_PREFIX = os.path.join(PREFIX, "games")
+    DATADIR = os.path.join(PREFIX, "share", "games", "antares", "app")
 else:
     BIN_PREFIX = os.path.join(PREFIX, "out", "cur")
     DATADIR = os.path.join(PREFIX, "resources")

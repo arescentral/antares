@@ -2,8 +2,8 @@
 NINJA=scripts/ninja.sh -C out/cur
 MAC_BIN=out/cur/Antares.app/Contents/MacOS/Antares
 
-BINDIR=$(prefix)/bin
-DATADIR=$(prefix)/share/antares/app
+BINDIR=$(prefix)/games
+DATADIR=$(prefix)/share/games/antares/app
 
 all:
 	@$(NINJA)
