@@ -37,23 +37,23 @@ sign:
 
 install: all
 ifeq ($(target_os), "linux")
-	install -m 755 -d $(DESTROOT)$(BINDIR)
-	install -m 755 scripts/antares-launcher $(DESTROOT)$(BINDIR)/antares
-	install -m 755 out/cur/antares-glfw $(DESTROOT)$(BINDIR)/antares-glfw
-	install -m 755 out/cur/antares-install-data $(DESTROOT)$(BINDIR)/antares-install-data
-	install -m 755 out/cur/antares-ls-scenarios $(DESTROOT)$(BINDIR)/antares-ls-scenarios
-	install -m 755 -d $(DESTROOT)$(DATADIR)
-	install -m 644 resources/Antares.png $(DESTROOT)$(DATADIR)
-	install -m 644 data/COPYING $(DESTROOT)$(DATADIR)
-	install -m 644 data/AUTHORS $(DESTROOT)$(DATADIR)
-	install -m 644 data/README.md $(DESTROOT)$(DATADIR)
-	cp -r data/fonts $(DESTROOT)$(DATADIR)
-	cp -r data/interfaces $(DESTROOT)$(DATADIR)
-	cp -r data/music $(DESTROOT)$(DATADIR)
-	cp -r data/pictures $(DESTROOT)$(DATADIR)
-	cp -r data/rotation-table $(DESTROOT)$(DATADIR)
-	cp -r data/strings $(DESTROOT)$(DATADIR)
-	cp -r data/text $(DESTROOT)$(DATADIR)
+	install -m 755 -d $(DESTDIR)$(BINDIR)
+	install -m 755 scripts/antares-launcher $(DESTDIR)$(BINDIR)/antares
+	install -m 755 out/cur/antares-glfw $(DESTDIR)$(BINDIR)/antares-glfw
+	install -m 755 out/cur/antares-install-data $(DESTDIR)$(BINDIR)/antares-install-data
+	install -m 755 out/cur/antares-ls-scenarios $(DESTDIR)$(BINDIR)/antares-ls-scenarios
+	install -m 755 -d $(DESTDIR)$(DATADIR)
+	install -m 644 resources/Antares.png $(DESTDIR)$(DATADIR)
+	install -m 644 data/COPYING $(DESTDIR)$(DATADIR)
+	install -m 644 data/AUTHORS $(DESTDIR)$(DATADIR)
+	install -m 644 data/README.md $(DESTDIR)$(DATADIR)
+	cp -r data/fonts $(DESTDIR)$(DATADIR)
+	cp -r data/interfaces $(DESTDIR)$(DATADIR)
+	cp -r data/music $(DESTDIR)$(DATADIR)
+	cp -r data/pictures $(DESTDIR)$(DATADIR)
+	cp -r data/rotation-table $(DESTDIR)$(DATADIR)
+	cp -r data/strings $(DESTDIR)$(DATADIR)
+	cp -r data/text $(DESTDIR)$(DATADIR)
 else
 	@echo "nothing to install on '$(target_os)'."
 endif
