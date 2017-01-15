@@ -3,6 +3,8 @@ NINJA=scripts/ninja.sh -C out/cur
 MAC_BIN=out/cur/Antares.app/Contents/MacOS/Antares
 
 BINDIR=$(prefix)/games
+APPDIR=$(prefix)/share/applications
+ICONDIR=$(prefix)/share/icons
 DATADIR=$(prefix)/share/games/antares/app
 
 all:
@@ -43,6 +45,10 @@ ifeq ($(target_os), "linux")
 	install -m 755 out/cur/antares-glfw $(DESTDIR)$(BINDIR)/antares-glfw
 	install -m 755 out/cur/antares-install-data $(DESTDIR)$(BINDIR)/antares-install-data
 	install -m 755 out/cur/antares-ls-scenarios $(DESTDIR)$(BINDIR)/antares-ls-scenarios
+	install -m 755 -d $(DESTDIR)$(ICONDIR)/hicolor/128x128/apps
+	install -m 644 resources/Antares.png $(DESTDIR)$(ICONDIR)/hicolor/128x128/apps/antares.png
+	install -m 755 -d $(DESTDIR)$(APPDIR)
+	install -m 644 resources/antares.desktop $(DESTDIR)$(APPDIR)
 	install -m 755 -d $(DESTDIR)$(DATADIR)
 	install -m 644 resources/Antares.png $(DESTDIR)$(DATADIR)
 	install -m 644 data/COPYING $(DESTDIR)$(DATADIR)

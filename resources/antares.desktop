@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=Antares
+GenericName=Space game
+Comment=A tactical space-combat game
+Keywords=game;strategy;space;
+Categories=Game;Strategy;
+Exec=/usr/games/antares
+Icon=antares
+Terminal=false
