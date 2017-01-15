@@ -24,6 +24,7 @@ dist:
 
 distclean:
 	rm -Rf out/
+	rm -f build/lib/scripts/*.pyc build/lib/scripts/gn
 
 run: all
 	@[ -f $(MAC_BIN) ] && $(MAC_BIN) || true
