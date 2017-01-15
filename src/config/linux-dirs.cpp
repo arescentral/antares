@@ -39,7 +39,7 @@ Directories linux_dirs() {
         char tmp[PATH_MAX] = "/tmp/antares-XXXXXX";
         directories.root.assign(utf8::decode(mkdtemp(tmp)));
     }
-    directories.root.append("/.local/share/antares");
+    directories.root.append("/.local/share/games/antares");
 
     directories.downloads.assign(format("{0}/downloads", directories.root));
     directories.registry.assign(format("{0}/registry", directories.root));

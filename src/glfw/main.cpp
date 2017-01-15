@@ -45,7 +45,7 @@ namespace antares {
 static String app_data;
 
 String default_application_path() {
-    return String(format("{0}/share/antares/app", sfz::String(kAntaresPrefix)));
+    return String(format("{0}/share/games/antares/app", sfz::String(kAntaresPrefix)));
 }
 
 String application_path() {
