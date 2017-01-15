@@ -41,14 +41,11 @@ config("antares_private") {
     "-Wno-sign-compare",
     "-Wno-deprecated-declarations",
   ]
-  defines = [
-    "ANTARES_PREFIX=\"" + prefix + "\"",
-    "ANTARES_VERSION=\"" + antares_version + "\"",
-  ]
 }
 
 source_set("libantares") {
   public_deps = [
+    ":libantares-build",
     ":libantares-config",
     ":libantares-data",
     ":libantares-drawing",
@@ -63,6 +60,18 @@ source_set("libantares") {
   } else if (target_os == "linux") {
     public_deps += [ ":libantares-linux" ]
   }
+}
+
+source_set("libantares-build") {
+  sources = [
+    "include/build/defs.hpp",
+    "src/build/defs.cpp",
+  ]
+  configs += [ ":antares_private" ]
+  defines = [
+    "ANTARES_PREFIX=\"" + prefix + "\"",
+    "ANTARES_VERSION=\"" + antares_version + "\"",
+  ]
 }
 
 source_set("libantares-config") {
