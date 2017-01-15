@@ -1,4 +1,4 @@
-include out/cur/args.gn
+-include out/cur/args.gn
 NINJA=scripts/ninja.sh -C out/cur
 MAC_BIN=out/cur/Antares.app/Contents/MacOS/Antares
 
