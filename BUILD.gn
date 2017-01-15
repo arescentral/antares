@@ -611,9 +611,9 @@ if (target_os == "mac") {
 
   app_resources("antares_app_resource_data") {
     sources = [
-      "resources/Antares.icns",
       "resources/ExtractData.nib",
       "resources/MainMenu.nib",
+      "resources/antares.icns",
       "resources/container-migration.plist",
     ]
   }
