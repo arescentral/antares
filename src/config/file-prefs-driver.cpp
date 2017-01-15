@@ -32,6 +32,8 @@ using sfz::String;
 using sfz::StringMap;
 using sfz::StringSlice;
 using sfz::format;
+using sfz::makedirs;
+using sfz::path::dirname;
 using sfz::range;
 using std::vector;
 
@@ -137,7 +139,8 @@ void FilePrefsDriver::set(const Preferences& p) {
     all["sound"] = Json::object(sound);
     all["keys"]  = Json::object(keys);
 
-    String   path(format("{0}/config.json", dirs().root));
+    String path(format("{0}/config.json", dirs().root));
+    makedirs(dirname(path), 0640);
     ScopedFd fd(open(path, O_CREAT | O_TRUNC | O_WRONLY, 0644));
     String   pretty(pretty_print(Json::object(all)));
     write(fd, utf8::encode(pretty));
