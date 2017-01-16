@@ -15,13 +15,15 @@ PREFIX = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 if os.path.exists(os.path.join(PREFIX, "share", "games", "antares", "app")):
     BIN_PREFIX = os.path.join(PREFIX, "games")
     DATADIR = os.path.join(PREFIX, "share", "games", "antares", "app")
+    ANTARES_ICON = os.path.join(PREFIX, "share", "icons", "hicolor", "128x128", "apps",
+                                "antares.png")
 else:
     BIN_PREFIX = os.path.join(PREFIX, "out", "cur")
     DATADIR = os.path.join(PREFIX, "resources")
+    ANTARES_ICON = os.path.join(PREFIX, "resources", "antares.iconset", "icon_128x128.png")
 
 ANTARES_BIN = os.path.join(BIN_PREFIX, "antares-glfw")
 LS_SCENARIOS_BIN = os.path.join(BIN_PREFIX, "antares-ls-scenarios")
-ANTARES_ICON = os.path.join(DATADIR, "Antares.png")
 
 
 def main():

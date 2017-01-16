@@ -45,12 +45,17 @@ ifeq ($(target_os), "linux")
 	install -m 755 out/cur/antares-glfw $(DESTDIR)$(BINDIR)/antares-glfw
 	install -m 755 out/cur/antares-install-data $(DESTDIR)$(BINDIR)/antares-install-data
 	install -m 755 out/cur/antares-ls-scenarios $(DESTDIR)$(BINDIR)/antares-ls-scenarios
+	install -m 755 -d $(DESTDIR)$(ICONDIR)/hicolor/16x16/apps
+	install -m 644 resources/antares.iconset/icon_16x16.png $(DESTDIR)$(ICONDIR)/hicolor/16x16/apps/antares.png
+	install -m 755 -d $(DESTDIR)$(ICONDIR)/hicolor/32x32/apps
+	install -m 644 resources/antares.iconset/icon_32x32.png $(DESTDIR)$(ICONDIR)/hicolor/32x32/apps/antares.png
 	install -m 755 -d $(DESTDIR)$(ICONDIR)/hicolor/128x128/apps
-	install -m 644 resources/Antares.png $(DESTDIR)$(ICONDIR)/hicolor/128x128/apps/antares.png
+	install -m 644 resources/antares.iconset/icon_128x128.png $(DESTDIR)$(ICONDIR)/hicolor/128x128/apps/antares.png
+	install -m 755 -d $(DESTDIR)$(ICONDIR)/hicolor/512x512/apps
+	install -m 644 resources/antares.iconset/icon_512x512.png $(DESTDIR)$(ICONDIR)/hicolor/512x512/apps/antares.png
 	install -m 755 -d $(DESTDIR)$(APPDIR)
 	install -m 644 resources/antares.desktop $(DESTDIR)$(APPDIR)
 	install -m 755 -d $(DESTDIR)$(DATADIR)
-	install -m 644 resources/Antares.png $(DESTDIR)$(DATADIR)
 	install -m 644 data/COPYING $(DESTDIR)$(DATADIR)
 	install -m 644 data/AUTHORS $(DESTDIR)$(DATADIR)
 	install -m 644 data/README.md $(DESTDIR)$(DATADIR)
