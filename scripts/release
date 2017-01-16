@@ -43,7 +43,7 @@ update-readme() {
 if [[ $ACTION == start ]]; then
     set -o verbose
     git checkout -b release/$VERSION
-    update-gn ${VERSION}rc1
+    update-gn ${VERSION}~rc1
     git commit BUILD.gn README.rst -m "Create release branch for $VERSION."
 else
     set -o verbose
