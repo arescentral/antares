@@ -33,11 +33,13 @@ else
 fi
 
 update-gn() {
-    sed -i '' 's/  antares_version = ".*"/  antares_version = "'$1'"/' BUILD.gn
+    sed 's/  antares_version = ".*"/  antares_version = "'$1'"/' BUILD.gn >.BUILD.gn.tmp
+    mv .BUILD.gn.tmp BUILD.gn
 }
 
 update-readme() {
-    sed -i '' 's/\(Antares[- ]\)\([0-9.]*\)[0-9]/\1'$1'/g' README.rst
+    sed 's/\(Antares[- ]\)\([0-9.]*\)[0-9]/\1'$1'/g' README.rst >.README.rst.tmp
+    mv .README.rst.tmp README.rst
 }
 
 if [[ $ACTION == start ]]; then
