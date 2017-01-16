@@ -22,15 +22,15 @@ def main():
         print("couldn't determine antares version")
         sys.exit(1)
 
-    archive_root = "Antares-%s" % version
+    archive_root = "antares-%s" % version
 
     if archive_format == "zip":
-        path = "./Antares-Source-%s.%s" % (version, archive_format)
+        path = "./antares-%s.%s" % (version, archive_format)
         with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
             for real_path, archive_path in walk(archive_root):
                     z.write(real_path, archive_path)
     elif archive_format in ["gz", "bz2"]:
-        path = "./Antares-Source-%s.t%s" % (version, archive_format)
+        path = "./antares-%s.t%s" % (version, archive_format)
         with tarfile.open(path, "w:%s" % archive_format) as t:
             for real_path, archive_path in walk(archive_root):
                     t.add(real_path, arcname=archive_path)
