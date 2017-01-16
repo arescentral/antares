@@ -57,7 +57,7 @@ else
     ./configure --mode=opt
     make
     make sign
-    (cd out/cur && zip -r ../../Antares-$VERSION.zip Antares.app)
+    (cd out/cur && zip -r ../../antares-mac-$VERSION.zip Antares.app)
     scripts/dist.py zip
     scripts/dist.py gz
     scripts/dist.py bz2
