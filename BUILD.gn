@@ -384,12 +384,12 @@ executable("hash-data") {
 }
 
 executable("antares-ls-scenarios") {
-  testonly = true
   sources = [
     "src/bin/ls-scenarios.cpp",
   ]
   deps = [
-    ":libantares-test",
+    ":libantares",
+    ":libantares-real",
   ]
   configs += [ ":antares_private" ]
 }

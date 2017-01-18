@@ -36,8 +36,4 @@ void set_application_path(sfz::StringSlice path) {
     app_data.assign(path);
 }
 
-sfz::String scenario_dir(sfz::StringSlice identifier) {
-    return sfz::String(sfz::format("{0}/{1}", dirs().scenarios, identifier));
-}
-
 }  // namespace antares

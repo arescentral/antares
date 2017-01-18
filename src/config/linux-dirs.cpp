@@ -32,7 +32,7 @@ namespace utf8 = sfz::utf8;
 namespace antares {
 
 String default_application_path() {
-    return String(format("{0}/share/games/antares/app", sfz::String(kAntaresPrefix)));
+    return String(format("{0}/share/games/antares/app", kAntaresPrefix));
 }
 
 Directories linux_dirs() {
@@ -57,6 +57,14 @@ Directories linux_dirs() {
 const Directories& dirs() {
     static const Directories dirs = linux_dirs();
     return dirs;
+}
+
+sfz::String scenario_dir(sfz::StringSlice identifier) {
+    if (identifier == kFactoryScenarioIdentifier) {
+        return sfz::String(
+                sfz::format("{0}/share/games/antares/scenarios/{1}", kAntaresPrefix, identifier));
+    }
+    return sfz::String(sfz::format("{0}/{1}", dirs().scenarios, identifier));
 }
 
 }  // namespace antares

@@ -66,4 +66,8 @@ const Directories& dirs() {
     return dirs;
 }
 
+sfz::String scenario_dir(sfz::StringSlice identifier) {
+    return sfz::String(sfz::format("{0}/{1}", dirs().scenarios, identifier));
+}
+
 }  // namespace antares
