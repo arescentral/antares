@@ -22,7 +22,19 @@
 
 namespace antares {
 
-const char kFactoryScenarioIdentifier[] = "com.biggerplanet.ares";
+static sfz::String app_data;
+const char         kFactoryScenarioIdentifier[] = "com.biggerplanet.ares";
+
+sfz::String application_path() {
+    if (app_data.empty()) {
+        return default_application_path();
+    }
+    return sfz::String(app_data);
+}
+
+void set_application_path(sfz::StringSlice path) {
+    app_data.assign(path);
+}
 
 sfz::String scenario_dir(sfz::StringSlice identifier) {
     return sfz::String(sfz::format("{0}/{1}", dirs().scenarios, identifier));

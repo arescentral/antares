@@ -21,7 +21,6 @@
 #include <time.h>
 #include <sfz/sfz.hpp>
 
-#include "build/defs.hpp"
 #include "config/dirs.hpp"
 #include "config/file-prefs-driver.hpp"
 #include "config/ledger.hpp"
@@ -43,22 +42,10 @@ namespace io   = sfz::io;
 
 namespace antares {
 
-static String app_data;
-
-String default_application_path() {
-    return String(format("{0}/share/games/antares/app", sfz::String(kAntaresPrefix)));
-}
-
-String application_path() {
-    if (app_data.empty()) {
-        return default_application_path();
-    }
-    return sfz::String(app_data);
-}
-
 void main(int argc, const char* argv[]) {
     args::Parser parser(argv[0], "Runs Antares");
 
+    sfz::String app_data(default_application_path());
     sfz::String scenario(kFactoryScenarioIdentifier);
     parser.add_argument("scenario", store(scenario)).help("select scenario");
     parser.add_argument("--help", help(parser, 0)).help("display this help screen");
@@ -81,6 +68,8 @@ void main(int argc, const char* argv[]) {
                                   application_path()));
         }
         exit(1);
+    } else {
+        set_application_path(app_data);
     }
 
     FilePrefsDriver prefs;

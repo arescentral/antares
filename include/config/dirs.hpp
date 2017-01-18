@@ -36,6 +36,10 @@ struct Directories {
 
 const Directories& dirs();
 
+sfz::String default_application_path();
+sfz::String application_path();
+void set_application_path(sfz::StringSlice path);
+
 sfz::String scenario_dir(sfz::StringSlice identifier);
 
 }  // namespace antares

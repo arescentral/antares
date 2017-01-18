@@ -22,12 +22,18 @@
 #include <unistd.h>
 #include <sfz/sfz.hpp>
 
+#include "build/defs.hpp"
+
 using sfz::String;
 using sfz::format;
 
 namespace utf8 = sfz::utf8;
 
 namespace antares {
+
+String default_application_path() {
+    return String(format("{0}/share/games/antares/app", sfz::String(kAntaresPrefix)));
+}
 
 Directories linux_dirs() {
     Directories directories;

@@ -38,8 +38,6 @@ namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-const sfz::String application_path();
-
 static unique_ptr<MappedFile> load_first(
         sfz::StringSlice resource_path, const std::initializer_list<PrintItem>& dirs) {
     for (const auto& dir : dirs) {

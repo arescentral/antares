@@ -99,11 +99,6 @@ source_set("libantares-config") {
   public_deps = [
     "//ext/libsfz",
   ]
-  if (target_os == "mac") {
-    sources += [ "src/config/mac-dirs.cpp" ]
-  } else if (target_os == "linux") {
-    sources += [ "src/config/linux-dirs.cpp" ]
-  }
   configs += [ ":antares_private" ]
 }
 
@@ -432,18 +427,29 @@ executable("tint") {
   configs += [ ":antares_private" ]
 }
 
+source_set("libantares-real") {
+  sources = [
+    "src/config/$target_os-dirs.cpp",
+  ]
+  public_deps = [
+    ":libantares-config",
+  ]
+  configs += [ ":antares_private" ]
+}
+
 source_set("libantares-test") {
   testonly = true
   sources = [
     "include/video/offscreen-driver.hpp",
     "include/video/text-driver.hpp",
-    "src/test/resource.cpp",
+    "src/config/test-dirs.cpp",
     "src/video/offscreen-driver.cpp",
     "src/video/text-driver.cpp",
   ]
   defines = [ "ANTARES_DATA=./data" ]
   public_deps = [
     ":libantares",
+    ":libantares-build",
   ]
   if (target_os == "mac") {
     sources += [
@@ -512,6 +518,7 @@ executable("antares-glfw") {
   ]
   deps = [
     ":libantares",
+    ":libantares-real",
     "//ext/glfw:libglfw",
   ]
   configs += [ ":antares_private" ]
@@ -523,6 +530,7 @@ executable("antares-install-data") {
   ]
   deps = [
     ":libantares",
+    ":libantares-real",
   ]
   configs += [ ":antares_private" ]
 }
@@ -580,11 +588,11 @@ if (target_os == "mac") {
       "src/mac/c/scenario-list.cpp",
       "src/mac/main.m",
       "src/mac/prefs-driver.cpp",
-      "src/mac/resource.cpp",
       "src/mac/video-driver.cpp",
     ]
     deps = [
       ":libantares",
+      ":libantares-real",
     ]
     libs = [
       "Carbon.framework",
