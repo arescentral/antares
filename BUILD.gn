@@ -89,6 +89,7 @@ source_set("libantares-config") {
     "include/lang/casts.hpp",
     "include/lang/defines.hpp",
     "include/net/http.hpp",
+    "src/config/dirs.cpp",
     "src/config/file-prefs-driver.cpp",
     "src/config/gamepad.cpp",
     "src/config/keys.cpp",

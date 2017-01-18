@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 
 #include "build/defs.hpp"
+#include "config/dirs.hpp"
 #include "config/file-prefs-driver.hpp"
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
@@ -58,7 +59,7 @@ String application_path() {
 void main(int argc, const char* argv[]) {
     args::Parser parser(argv[0], "Runs Antares");
 
-    sfz::String scenario("com.biggerplanet.ares");
+    sfz::String scenario(kFactoryScenarioIdentifier);
     parser.add_argument("scenario", store(scenario)).help("select scenario");
     parser.add_argument("--help", help(parser, 0)).help("display this help screen");
     parser.add_argument("--app-data", store(app_data))

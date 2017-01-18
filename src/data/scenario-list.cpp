@@ -64,7 +64,7 @@ Version u32_to_version(uint32_t in) {
 ScenarioList::ScenarioList() {
     _scenarios.emplace_back();
     Entry& factory_scenario = _scenarios.back();
-    factory_scenario.identifier.assign("com.biggerplanet.ares");
+    factory_scenario.identifier.assign(kFactoryScenarioIdentifier);
     factory_scenario.title.assign("Ares");
     factory_scenario.download_url.assign("http://www.arescentral.com");
     factory_scenario.author.assign("Bigger Planet");

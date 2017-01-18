@@ -38,8 +38,6 @@ namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-static const char kFactoryScenarioIdentifier[] = "com.biggerplanet.ares";
-
 const sfz::String application_path();
 
 static unique_ptr<MappedFile> load_first(
@@ -55,12 +53,10 @@ static unique_ptr<MappedFile> load_first(
 
 static unique_ptr<MappedFile> load(sfz::StringSlice resource_path) {
     return load_first(
-            resource_path,
-            {
-                    format("{0}/{1}", dirs().scenarios, sys.prefs->scenario_identifier()),
-                    format("{0}/{1}", dirs().scenarios, kFactoryScenarioIdentifier),
-                    application_path(),
-            });
+            resource_path, {
+                                   scenario_dir(sys.prefs->scenario_identifier()),
+                                   scenario_dir(kFactoryScenarioIdentifier), application_path(),
+                           });
 }
 
 Resource::Resource(const StringSlice& type, const StringSlice& extension, int id)

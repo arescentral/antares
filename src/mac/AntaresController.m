@@ -36,7 +36,7 @@
 #define kAuthorURL @"AuthorURL"
 #define kVersion @"Version"
 
-#define kFactoryScenario @"com.biggerplanet.ares"
+#define kFactoryScenarioIdentifier @"com.biggerplanet.ares"
 
 static NSInteger compare_scenarios(id x, id y, void* unused) {
     (void)unused;
@@ -144,7 +144,7 @@ static NSURL* url(const char* utf8_bytes) {
         if ([identifier isEqualToString:user_scenario]) {
             best_scenario = i;
         }
-        if ([identifier isEqualToString:kFactoryScenario]) {
+        if ([identifier isEqualToString:kFactoryScenarioIdentifier]) {
             factory_scenario = i;
         }
     }

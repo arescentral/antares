@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2013 The Antares Authors
+// Copyright (C) 2017 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,28 +16,16 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_CONFIG_DIRS_HPP_
-#define ANTARES_CONFIG_DIRS_HPP_
+#include "config/dirs.hpp"
 
 #include <sfz/sfz.hpp>
 
 namespace antares {
 
-extern const char kFactoryScenarioIdentifier[];
+const char kFactoryScenarioIdentifier[] = "com.biggerplanet.ares";
 
-struct Directories {
-    sfz::String root;
-
-    sfz::String downloads;
-    sfz::String registry;
-    sfz::String replays;
-    sfz::String scenarios;
-};
-
-const Directories& dirs();
-
-sfz::String scenario_dir(sfz::StringSlice identifier);
+sfz::String scenario_dir(sfz::StringSlice identifier) {
+    return sfz::String(sfz::format("{0}/{1}", dirs().scenarios, identifier));
+}
 
 }  // namespace antares
-
-#endif  // ANTARES_CONFIG_DIRS_HPP_
