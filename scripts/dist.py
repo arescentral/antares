@@ -69,6 +69,8 @@ def should_recurse(root, base):
         return False
     elif path in ["out", "test"]:
         return False
+    elif path in ["data/scenarios", "data/downloads"]:
+        return False
     elif root.startswith("ext/") and (base == "ext"):
         return False
     return True

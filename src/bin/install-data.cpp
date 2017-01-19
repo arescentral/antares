@@ -29,16 +29,13 @@ using sfz::StringSlice;
 using sfz::print;
 using sfz::args::help;
 using sfz::args::store;
+using sfz::args::store_const;
 
 namespace args = sfz::args;
 namespace io   = sfz::io;
 namespace utf8 = sfz::utf8;
 
 namespace antares {
-
-String application_path() {
-    return String(".");
-}
 
 class PrintStatusObserver : public DataExtractor::Observer {
   public:
@@ -52,12 +49,15 @@ void ExtractDataMain(int argc, char* const* argv) {
 
     String           source(dirs().downloads);
     String           dest(dirs().scenarios);
+    bool             check = false;
     Optional<String> plugin;
     parser.add_argument("plugin", store(plugin))
             .help("a plugin to install (default: install factory scenario)");
     parser.add_argument("-s", "--source", store(source))
             .help("directory in which to store or expect zip files");
     parser.add_argument("-d", "--dest", store(dest)).help("place output in this directory");
+    parser.add_argument("-c", "--check", store_const(check, true))
+            .help("don't install, just check if up-to-date");
     parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
 
     try {
@@ -74,6 +74,9 @@ void ExtractDataMain(int argc, char* const* argv) {
 
         if (extractor.current()) {
             print(io::err, format("{0} is up-to-date!\n", dest));
+        } else if (check) {
+            print(io::err, format("{0} is not up-to-date.\n", dest));
+            exit(1);
         } else {
             print(io::err, format("Extracting to {0}...\n", dest));
             PrintStatusObserver observer;

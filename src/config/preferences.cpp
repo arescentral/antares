@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <sfz/sfz.hpp>
 
+#include "config/dirs.hpp"
 #include "config/keys.hpp"
 #include "data/resource.hpp"
 #include "game/globals.hpp"
@@ -102,7 +103,7 @@ Preferences::Preferences() {
 
     volume = 7;
 
-    scenario_identifier.assign("com.biggerplanet.ares");
+    scenario_identifier.assign(kFactoryScenarioIdentifier);
 }
 
 Preferences Preferences::copy() const {

@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2013 The Antares Authors
+// Copyright (C) 2013 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,11 +16,11 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "data/resource.hpp"
+#include "config/dirs.hpp"
 
+#include <sys/param.h>
+#include <unistd.h>
 #include <sfz/sfz.hpp>
-
-using sfz::String;
 
 namespace antares {
 
@@ -28,8 +28,29 @@ namespace antares {
 #define STRINGIFY(x) STRINGIFY_(x)
 #define ANTARES_DATA_STRING STRINGIFY(ANTARES_DATA)
 
-String application_path() {
-    return String(ANTARES_DATA_STRING);
+sfz::String default_application_path() {
+    return sfz::String(ANTARES_DATA_STRING);
+}
+
+Directories test_dirs() {
+    Directories directories;
+    directories.root.assign(application_path());
+    directories.downloads.assign(format("{0}/downloads", directories.root));
+    directories.registry.assign(format("{0}/registry", directories.root));
+    directories.replays.assign(format("{0}/replays", directories.root));
+    directories.scenarios.assign(format("{0}/scenarios", directories.root));
+    sfz::print(sfz::io::err, directories.scenarios);
+    sfz::print(sfz::io::err, "\n");
+    return directories;
+};
+
+const Directories& dirs() {
+    static const Directories dirs = test_dirs();
+    return dirs;
+}
+
+sfz::String scenario_dir(sfz::StringSlice identifier) {
+    return sfz::String(sfz::format("{0}/{1}", dirs().scenarios, identifier));
 }
 
 }  // namespace antares
