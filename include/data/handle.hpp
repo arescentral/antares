@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2015 The Antares Authors
+// Copyright (C) 2015-2017 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
