@@ -1,4 +1,7 @@
 #!/bin/zsh
+# Copyright (C) 2017 The Antares Authors
+# This file is part of Antares, a tactical space combat game.
+# Antares is free software, distributed under the LGPL+. See COPYING.
 
 set -o nounset
 set -o errexit
