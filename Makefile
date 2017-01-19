@@ -1,3 +1,7 @@
+# Copyright (C) 2017 The Antares Authors
+# This file is part of Antares, a tactical space combat game.
+# Antares is free software, distributed under the LGPL+. See COPYING.
+
 -include out/cur/args.gn
 NINJA=scripts/ninja.sh -C out/cur
 MAC_BIN=out/cur/Antares.app/Contents/MacOS/Antares
