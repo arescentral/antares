@@ -161,9 +161,14 @@ def check_linux_native(args):
     if check_pkg_config():
         libs = [
             ("gl", "libgl1-mesa-dev"),
+            ("glfw3", "libglfw3-dev"),
             ("glu", "libglu1-mesa-dev"),
+            ("libmodplug", "libmodplug-dev"),
+            ("libzip", "libzip-dev"),
+            ("libpng16", "libpng16-dev"),
             ("neon", "libneon27-dev"),
             ("openal", "libopenal-dev"),
+            ("sndfile", "libsndfile1-dev"),
             ("x11", "libx11-dev"),
             ("xcursor", "libxcursor-dev"),
             ("xinerama", "libxinerama-dev"),
