@@ -29,7 +29,6 @@
 
 namespace antares {
 
-using sfz::read;
 using std::swap;
 
 ReplayGame::ReplayGame(int16_t replay_id)

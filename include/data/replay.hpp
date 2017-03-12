@@ -22,7 +22,6 @@
 #include <stdint.h>
 #include <pn/file>
 #include <pn/string>
-#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "ui/event.hpp"

@@ -18,8 +18,6 @@
 
 #include "data/races.hpp"
 
-#include <sfz/sfz.hpp>
-
 #include "data/level.hpp"
 #include "data/plugin.hpp"
 #include "data/resource.hpp"

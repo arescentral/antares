@@ -20,7 +20,6 @@
 #define ANTARES_DRAWING_STYLED_TEXT_HPP_
 
 #include <pn/string>
-#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "drawing/color.hpp"

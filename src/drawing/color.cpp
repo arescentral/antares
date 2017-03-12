@@ -20,7 +20,6 @@
 
 #include <stdint.h>
 #include <pn/file>
-#include <sfz/sfz.hpp>
 
 #include "lang/casts.hpp"
 #include "lang/defines.hpp"

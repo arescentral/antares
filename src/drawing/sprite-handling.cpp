@@ -19,6 +19,7 @@
 #include "drawing/sprite-handling.hpp"
 
 #include <numeric>
+#include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
@@ -31,7 +32,6 @@
 #include "math/rotation.hpp"
 #include "video/driver.hpp"
 
-using sfz::Range;
 using sfz::range;
 using std::map;
 using std::unique_ptr;

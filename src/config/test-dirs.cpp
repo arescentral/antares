@@ -21,7 +21,6 @@
 #include <sys/param.h>
 #include <unistd.h>
 #include <pn/file>
-#include <sfz/sfz.hpp>
 
 namespace antares {
 

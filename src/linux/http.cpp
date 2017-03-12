@@ -22,11 +22,10 @@
 #include <neon/ne_session.h>
 #include <neon/ne_uri.h>
 #include <unistd.h>
+#include <memory>
 #include <pn/file>
 #include <pn/string>
-#include <sfz/sfz.hpp>
 
-using sfz::WriteTarget;
 using std::unique_ptr;
 
 namespace antares {

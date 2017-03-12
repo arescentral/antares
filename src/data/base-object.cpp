@@ -20,8 +20,6 @@
 
 #include "data/base-object.hpp"
 
-#include <sfz/sfz.hpp>
-
 namespace antares {
 
 static const uint32_t kPeriodicActionTimeMask   = 0xff000000;

@@ -21,6 +21,8 @@
 
 #include <stdint.h>
 
+#include <vector>
+
 #include "data/handle.hpp"
 #include "math/fixed.hpp"
 #include "math/units.hpp"

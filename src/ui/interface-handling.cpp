@@ -24,7 +24,6 @@
 #include "ui/interface-handling.hpp"
 
 #include <pn/file>
-#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "config/keys.hpp"

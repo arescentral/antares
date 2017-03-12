@@ -20,6 +20,7 @@
 #define ANTARES_VIDEO_DRIVER_HPP_
 
 #include <stdint.h>
+#include <memory>
 #include <pn/string>
 
 #include "drawing/color.hpp"
@@ -60,13 +61,13 @@ class VideoDriver {
 
     virtual wall_time now() const = 0;
 
-    virtual Texture texture(pn::string_view name, const PixMap& content)                 = 0;
-    virtual void    dither_rect(const Rect& rect, const RgbColor& color)                 = 0;
-    virtual void    draw_point(const Point& at, const RgbColor& color)                   = 0;
-    virtual void    draw_line(const Point& from, const Point& to, const RgbColor& color) = 0;
-    virtual void    draw_triangle(const Rect& rect, const RgbColor& color)               = 0;
-    virtual void    draw_diamond(const Rect& rect, const RgbColor& color)                = 0;
-    virtual void    draw_plus(const Rect& rect, const RgbColor& color)                   = 0;
+    virtual Texture texture(pn::string_view name, const PixMap& content) = 0;
+    virtual void dither_rect(const Rect& rect, const RgbColor& color)    = 0;
+    virtual void draw_point(const Point& at, const RgbColor& color)      = 0;
+    virtual void draw_line(const Point& from, const Point& to, const RgbColor& color) = 0;
+    virtual void draw_triangle(const Rect& rect, const RgbColor& color) = 0;
+    virtual void draw_diamond(const Rect& rect, const RgbColor& color)  = 0;
+    virtual void draw_plus(const Rect& rect, const RgbColor& color)     = 0;
 
   private:
     friend class Points;
@@ -96,11 +97,11 @@ class Texture {
         Impl& operator=(const Impl&) = delete;
         virtual ~Impl();
 
-        virtual pn::string_view name() const                      = 0;
-        virtual void            draw(const Rect& draw_rect) const = 0;
-        virtual void            draw_cropped(
-                           const Rect& dest, const Rect& source, const RgbColor& tint) const = 0;
-        virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const          = 0;
+        virtual pn::string_view name() const           = 0;
+        virtual void draw(const Rect& draw_rect) const = 0;
+        virtual void draw_cropped(
+                const Rect& dest, const Rect& source, const RgbColor& tint) const = 0;
+        virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const = 0;
         virtual void draw_static(
                 const Rect& draw_rect, const RgbColor& color, uint8_t frac) const = 0;
         virtual void draw_outlined(

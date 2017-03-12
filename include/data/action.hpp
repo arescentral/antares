@@ -20,7 +20,6 @@
 #define ANTARES_DATA_ACTION_HPP_
 
 #include <stdint.h>
-#include <sfz/sfz.hpp>
 
 #include "data/handle.hpp"
 #include "math/fixed.hpp"

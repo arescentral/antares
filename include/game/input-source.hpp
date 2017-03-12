@@ -20,6 +20,8 @@
 #define ANTARES_GAME_INPUT_SOURCE_HPP_
 
 #include <stdint.h>
+#include <map>
+#include <memory>
 
 #include "config/keys.hpp"
 #include "data/handle.hpp"
@@ -36,7 +38,7 @@ class InputSource : public EventReceiver {
     InputSource& operator=(const InputSource&) = delete;
     virtual ~InputSource();
 
-    virtual void start()                                                             = 0;
+    virtual void start() = 0;
     virtual bool get(Handle<Admiral> admiral, game_ticks at, EventReceiver& key_map) = 0;
 };
 
@@ -74,9 +76,9 @@ class ReplayInputSource : public InputSource {
   private:
     bool advance(EventReceiver& receiver);
 
-    game_ticks                                                        _duration;
+    game_ticks _duration;
     std::multimap<std::pair<int, game_ticks>, std::unique_ptr<Event>> _events;
-    bool                                                              _exit;
+    bool _exit;
 };
 
 }  // namespace antares

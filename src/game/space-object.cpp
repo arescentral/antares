@@ -20,7 +20,6 @@
 
 #include <pn/file>
 #include <set>
-#include <sfz/sfz.hpp>
 
 #include "data/base-object.hpp"
 #include "data/plugin.hpp"

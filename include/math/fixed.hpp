@@ -22,7 +22,6 @@
 #include <math.h>
 #include <pn/file>
 #include <pn/string>
-#include <sfz/sfz.hpp>
 
 namespace antares {
 

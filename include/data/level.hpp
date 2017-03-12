@@ -20,7 +20,6 @@
 #define ANTARES_DATA_LEVEL_HPP_
 
 #include <pn/string>
-#include <sfz/sfz.hpp>
 
 #include "data/action.hpp"
 #include "data/handle.hpp"

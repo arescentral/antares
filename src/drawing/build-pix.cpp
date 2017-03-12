@@ -19,7 +19,6 @@
 #include "drawing/build-pix.hpp"
 
 #include <pn/file>
-#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "data/picture.hpp"

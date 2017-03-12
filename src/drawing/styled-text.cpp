@@ -21,7 +21,6 @@
 #include <algorithm>
 #include <limits>
 #include <pn/file>
-#include <sfz/sfz.hpp>
 
 #include "data/picture.hpp"
 #include "data/pn.hpp"

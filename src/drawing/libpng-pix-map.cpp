@@ -19,7 +19,6 @@
 #include "drawing/pix-map.hpp"
 
 #include <png.h>
-#include <sfz/sfz.hpp>
 
 namespace antares {
 

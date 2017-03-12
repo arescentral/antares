@@ -20,6 +20,7 @@
 #define ANTARES_VIDEO_OPEN_GL_DRIVER_HPP_
 
 #include <stdint.h>
+#include <map>
 
 #include "drawing/color.hpp"
 #include "math/geometry.hpp"

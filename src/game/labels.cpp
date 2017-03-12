@@ -19,7 +19,6 @@
 #include "game/labels.hpp"
 
 #include <algorithm>
-#include <sfz/sfz.hpp>
 
 #include "data/pn.hpp"
 #include "drawing/color.hpp"

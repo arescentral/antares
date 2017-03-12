@@ -19,6 +19,7 @@
 #ifndef ANTARES_DRAWING_PIX_MAP_HPP_
 #define ANTARES_DRAWING_PIX_MAP_HPP_
 
+#include <memory>
 #include <pn/file>
 
 #include "drawing/color.hpp"
