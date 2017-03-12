@@ -70,7 +70,6 @@
 #include "video/driver.hpp"
 
 using sfz::makedirs;
-using sfz::open;
 using std::max;
 using std::min;
 using std::set;

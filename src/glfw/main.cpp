@@ -36,7 +36,6 @@
 using sfz::args::store;
 using sfz::args::store_const;
 using sfz::range;
-using sfz::format;
 
 namespace args = sfz::args;
 

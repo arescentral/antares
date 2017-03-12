@@ -35,7 +35,6 @@ using sfz::args::help;
 using sfz::args::store;
 using sfz::args::store_const;
 using sfz::dec;
-using sfz::write;
 using std::pair;
 using std::unique_ptr;
 using std::vector;

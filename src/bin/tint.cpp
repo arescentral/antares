@@ -32,7 +32,6 @@ using sfz::args::help;
 using sfz::args::store;
 using sfz::hex;
 using sfz::path::dirname;
-using sfz::write;
 using std::unique_ptr;
 
 namespace args = sfz::args;

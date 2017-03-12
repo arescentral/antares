@@ -43,7 +43,7 @@ void main(int argc, char* const* argv) {
         exit(1);
     }
 
-    pn::format(stdout, "{0}\n", sfz2pn(sfz::String(tree_digest(directory))));
+    pn::format(stdout, "{0}\n", sfz2pn(sfz::String(sfz::tree_digest(directory))));
 }
 
 }  // namespace antares

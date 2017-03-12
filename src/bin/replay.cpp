@@ -58,8 +58,6 @@ using sfz::MappedFile;
 using sfz::Optional;
 using sfz::args::store;
 using sfz::args::store_const;
-using sfz::mkdir;
-using sfz::open;
 using std::unique_ptr;
 
 namespace args = sfz::args;

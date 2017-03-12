@@ -36,7 +36,6 @@ using sfz::Optional;
 using sfz::args::help;
 using sfz::args::store;
 using sfz::dec;
-using sfz::write;
 using std::unique_ptr;
 
 namespace args = sfz::args;

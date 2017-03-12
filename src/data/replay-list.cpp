@@ -28,7 +28,6 @@
 #include "game/sys.hpp"
 
 using sfz::MappedFile;
-using sfz::read;
 using std::vector;
 
 namespace path = sfz::path;

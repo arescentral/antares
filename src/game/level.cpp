@@ -45,7 +45,6 @@
 #include "math/units.hpp"
 
 using sfz::range;
-using sfz::read;
 using std::set;
 
 namespace antares {

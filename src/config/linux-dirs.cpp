@@ -22,7 +22,6 @@
 #include <unistd.h>
 #include <pn/file>
 #include "build/defs.hpp"
-#include "data/pn.hpp"
 
 namespace antares {
 

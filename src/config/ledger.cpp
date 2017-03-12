@@ -37,7 +37,6 @@ using sfz::MappedFile;
 using sfz::StringMap;
 using sfz::makedirs;
 using sfz::range;
-using sfz::write;
 using std::unique_ptr;
 using std::vector;
 

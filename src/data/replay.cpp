@@ -32,7 +32,6 @@
 #include "game/sys.hpp"
 
 using sfz::range;
-using sfz::write;
 using std::map;
 
 namespace path = sfz::path;

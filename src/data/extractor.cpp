@@ -50,8 +50,6 @@ using sfz::StringMap;
 using sfz::dec;
 using sfz::makedirs;
 using sfz::range;
-using sfz::tree_digest;
-using sfz::write;
 using std::set;
 using std::unique_ptr;
 using std::vector;
@@ -567,7 +565,7 @@ void DataExtractor::download(
         if (path::isfile(pn2sfz(full_path))) {
             MappedFile file(pn2sfz(full_path));
             Sha1       sha;
-            write(sha, file.data());
+            sfz::write(sha, file.data());
             if (sha.digest() == expected_digest) {
                 return;
             }
@@ -586,7 +584,7 @@ void DataExtractor::download(
     pn::data download;
     http::get(url, download.open("w"));
     Sha1 sha;
-    write(sha, sfz::BytesSlice{download.data(), static_cast<size_t>(download.size())});
+    sfz::write(sha, sfz::BytesSlice{download.data(), static_cast<size_t>(download.size())});
     if (sha.digest() != expected_digest) {
         throw std::runtime_error(
                 pn::format(

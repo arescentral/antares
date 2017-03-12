@@ -27,7 +27,6 @@
 #include "game/time.hpp"
 
 using sfz::range;
-using sfz::read;
 using std::make_pair;
 
 namespace antares {

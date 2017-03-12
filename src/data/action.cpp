@@ -22,8 +22,6 @@
 
 #include "data/base-object.hpp"
 
-using sfz::read;
-
 namespace antares {
 
 namespace {
