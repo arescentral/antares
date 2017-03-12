@@ -74,10 +74,12 @@ static void read_all_pn(
 
 void PluginInit() {
     {
-        Resource        rsrc("scenario-info", "nlAG", 128);
-        sfz::BytesSlice in{rsrc.data().data(), static_cast<size_t>(rsrc.data().size())};
-        read(in, plug.meta);
-        if (!in.empty()) {
+        Resource rsrc("scenario-info", "nlAG", 128);
+        pn::file in = rsrc.data().open();
+        if (!read_from(in, &plug.meta)) {
+            throw std::runtime_error("error while reading scenario file info data");
+        }
+        if (fgetc(in.c_obj()) != EOF) {
             throw std::runtime_error("didn't consume all of scenario file info data");
         }
     }

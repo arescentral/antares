@@ -34,28 +34,37 @@ static const int16_t kLevel_IsTraining_Bit = 0x8000;
 
 namespace {
 
-void read_pstr(ReadSource in, pn::string& out) {
+bool read_pstr(pn::file_view in, pn::string* out) {
     uint8_t bytes[256];
-    read(in, bytes, 256);
-    sfz::BytesSlice encoded(bytes + 1, bytes[0]);
-    out = sfz2pn(macroman::decode(encoded));
+    if (fread(bytes, 1, 256, in.c_obj()) < 256) {
+        return false;
+    }
+    pn::data_view encoded{bytes + 1, bytes[0]};
+    *out = sfz2pn(macroman::decode({encoded.data(), static_cast<size_t>(encoded.size())}));
+    return true;
 }
 
 }  // namespace
 
 Level* Level::get(int n) { return &plug.levels[n]; }
 
-void read_from(ReadSource in, scenarioInfoType& scenario_info) {
-    scenario_info.warpInFlareID  = Handle<BaseObject>(read<int32_t>(in));
-    scenario_info.warpOutFlareID = Handle<BaseObject>(read<int32_t>(in));
-    scenario_info.playerBodyID   = Handle<BaseObject>(read<int32_t>(in));
-    scenario_info.energyBlobID   = Handle<BaseObject>(read<int32_t>(in));
-    read_pstr(in, scenario_info.downloadURLString);
-    read_pstr(in, scenario_info.titleString);
-    read_pstr(in, scenario_info.authorNameString);
-    read_pstr(in, scenario_info.authorURLString);
-    read(in, scenario_info.version);
-    in.shift(12);
+bool read_from(pn::file_view in, scenarioInfoType* scenario_info) {
+    int32_t warp_in, warp_out, body, energy;
+    uint8_t unused[12];
+    if (!(in.read(&warp_in, &warp_out, &body, &energy) &&
+          read_pstr(in, &scenario_info->downloadURLString) &&
+          read_pstr(in, &scenario_info->titleString) &&
+          read_pstr(in, &scenario_info->authorNameString) &&
+          read_pstr(in, &scenario_info->authorURLString) && in.read(&scenario_info->version) &&
+          (fread(unused, 1, 12, in.c_obj()) == 12))) {
+        return false;
+    }
+
+    scenario_info->warpInFlareID  = Handle<BaseObject>(warp_in);
+    scenario_info->warpOutFlareID = Handle<BaseObject>(warp_out);
+    scenario_info->playerBodyID   = Handle<BaseObject>(body);
+    scenario_info->energyBlobID   = Handle<BaseObject>(energy);
+    return true;
 }
 
 void read_from(ReadSource in, Level& level) {

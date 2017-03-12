@@ -66,7 +66,7 @@ struct scenarioInfoType {
     pn::string         authorURLString;
     uint32_t           version;
 };
-void read_from(sfz::ReadSource in, scenarioInfoType& scenario_info);
+bool read_from(pn::file_view in, scenarioInfoType* scenario_info);
 
 enum conditionType {
     kNoCondition                      = 0,
