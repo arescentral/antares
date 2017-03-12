@@ -28,7 +28,6 @@
 using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::MappedFile;
-using sfz::PrintItem;
 using sfz::String;
 using sfz::format;
 using std::unique_ptr;
@@ -39,9 +38,9 @@ namespace utf8 = sfz::utf8;
 namespace antares {
 
 static unique_ptr<MappedFile> load_first(
-        pn::string_view resource_path, const std::initializer_list<PrintItem>& dirs) {
+        pn::string_view resource_path, const std::vector<pn::string_view>& dirs) {
     for (const auto& dir : dirs) {
-        String path(sfz::format("{0}/{1}", dir, pn2sfz(resource_path)));
+        String path(sfz::format("{0}/{1}", pn2sfz(dir), pn2sfz(resource_path)));
         if (path::isfile(path)) {
             return unique_ptr<MappedFile>(new MappedFile(path));
         }
@@ -50,12 +49,10 @@ static unique_ptr<MappedFile> load_first(
 }
 
 static unique_ptr<MappedFile> load(pn::string_view resource_path) {
-    return load_first(
-            resource_path,
-            {
-                    pn2sfz(scenario_dir(sys.prefs->scenario_identifier())),
-                    pn2sfz(scenario_dir(kFactoryScenarioIdentifier)), pn2sfz(application_path()),
-            });
+    pn::string scenario = scenario_dir(sys.prefs->scenario_identifier());
+    pn::string factory  = scenario_dir(kFactoryScenarioIdentifier);
+    pn::string app      = application_path().copy();
+    return load_first(resource_path, {scenario, factory, app});
 }
 
 Resource::Resource(pn::string_view type, pn::string_view extension, int id)

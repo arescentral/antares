@@ -20,6 +20,7 @@
 #define ANTARES_MATH_FIXED_HPP_
 
 #include <math.h>
+#include <pn/string>
 #include <sfz/sfz.hpp>
 
 namespace antares {
@@ -106,6 +107,8 @@ inline int32_t more_evil_fixed_to_long(Fixed value) { return (value >> 8).val();
 
 inline float   mFixedToFloat(Fixed m_f) { return floorf(m_f.val() * 1e3 / 256.0) / 1e3; }
 inline int32_t mFixedToLong(Fixed m_f) { return evil_fixed_to_long(m_f); }
+
+pn::string stringify(Fixed fixed);
 
 void print_to(sfz::PrintTarget out, const Fixed& fixed);
 

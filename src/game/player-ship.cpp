@@ -53,7 +53,6 @@
 
 using sfz::Exception;
 using sfz::BytesSlice;
-using sfz::PrintTarget;
 using sfz::String;
 using sfz::format;
 

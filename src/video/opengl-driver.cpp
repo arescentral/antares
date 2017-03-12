@@ -45,7 +45,6 @@
 #endif
 
 using sfz::Exception;
-using sfz::PrintItem;
 using sfz::format;
 using sfz::hex;
 using sfz::print;

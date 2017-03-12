@@ -36,7 +36,6 @@
 using sfz::Bytes;
 using sfz::Exception;
 using sfz::MappedFile;
-using sfz::PrintItem;
 using sfz::Rune;
 using sfz::ScopedFd;
 using sfz::String;

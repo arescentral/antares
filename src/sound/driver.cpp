@@ -30,7 +30,6 @@
 
 using sfz::Bytes;
 using sfz::Exception;
-using sfz::PrintItem;
 using sfz::ScopedFd;
 using sfz::String;
 using sfz::format;

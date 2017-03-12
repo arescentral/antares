@@ -33,7 +33,6 @@
 #include "math/fixed.hpp"
 
 using sfz::BytesSlice;
-using sfz::PrintItem;
 using sfz::Rune;
 using sfz::String;
 using std::unique_ptr;
@@ -53,7 +52,7 @@ const int16_t kLowerPayRateCheat  = 8;
 
 void CheatFeedback(int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer);
 void CheatFeedbackPlus(
-        int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer, PrintItem extra);
+        int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer, pn::string_view extra);
 
 int16_t GetCheatNumFromString(pn::string_view s) {
     String code_string;
@@ -109,13 +108,15 @@ void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
         case kRaisePayRateCheat:
             whichPlayer->set_earning_power(
                     whichPlayer->earning_power() + Fixed::from_float(0.125));
-            CheatFeedbackPlus(whichCheat, true, whichPlayer, Fixed(whichPlayer->earning_power()));
+            CheatFeedbackPlus(
+                    whichCheat, true, whichPlayer, stringify(Fixed(whichPlayer->earning_power())));
             break;
 
         case kLowerPayRateCheat:
             whichPlayer->set_earning_power(
                     whichPlayer->earning_power() - Fixed::from_float(0.125));
-            CheatFeedbackPlus(whichCheat, true, whichPlayer, Fixed(whichPlayer->earning_power()));
+            CheatFeedbackPlus(
+                    whichCheat, true, whichPlayer, stringify(Fixed(whichPlayer->earning_power())));
             break;
     }
 }
@@ -132,7 +133,7 @@ void CheatFeedback(int16_t whichCheat, bool activate, Handle<Admiral> whichPlaye
 }
 
 void CheatFeedbackPlus(
-        int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer, PrintItem extra) {
+        int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer, pn::string_view extra) {
     pn::string_view admiral_name = GetAdmiralName(whichPlayer);
     pn::string_view feedback;
     if (activate) {
@@ -140,7 +141,8 @@ void CheatFeedbackPlus(
     } else {
         feedback = sys.cheat.off.at(whichCheat - 1);
     }
-    Messages::add(sfz2pn(format("{0}{1}{2}", pn2sfz(admiral_name), pn2sfz(feedback), extra)));
+    Messages::add(
+            sfz2pn(format("{0}{1}{2}", pn2sfz(admiral_name), pn2sfz(feedback), pn2sfz(extra))));
 }
 
 }  // namespace antares

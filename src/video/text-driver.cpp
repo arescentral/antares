@@ -35,8 +35,6 @@
 #include "ui/event.hpp"
 
 using sfz::Optional;
-using sfz::PrintItem;
-using sfz::PrintTarget;
 using sfz::String;
 using sfz::dec;
 using sfz::format;

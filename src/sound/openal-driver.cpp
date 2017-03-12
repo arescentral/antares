@@ -28,7 +28,6 @@
 using sfz::Bytes;
 using sfz::BytesSlice;
 using sfz::Exception;
-using sfz::PrintItem;
 using sfz::format;
 using sfz::quote;
 using std::unique_ptr;

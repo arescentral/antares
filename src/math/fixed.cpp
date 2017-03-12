@@ -21,7 +21,8 @@
 #include <cmath>
 #include <sfz/sfz.hpp>
 
-using sfz::PrintTarget;
+#include "data/pn.hpp"
+
 using sfz::String;
 using sfz::dec;
 using sfz::range;
@@ -56,7 +57,9 @@ static const char kFractions[][5] = {
         ".99",  ".992", ".996", ".999",
 };
 
-void print_to(PrintTarget out, const Fixed& fixed) {
+pn::string stringify(Fixed fixed) { return sfz2pn(sfz::String(fixed)); }
+
+void print_to(sfz::PrintTarget out, const Fixed& fixed) {
     if (fixed < Fixed::zero()) {
         out.push(1, '-');
     }

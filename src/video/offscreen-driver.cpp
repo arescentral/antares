@@ -48,7 +48,6 @@
 using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::Optional;
-using sfz::PrintItem;
 using sfz::ScopedFd;
 using sfz::String;
 using sfz::WriteTarget;

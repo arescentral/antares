@@ -56,7 +56,6 @@
 
 using sfz::BytesSlice;
 using sfz::Exception;
-using sfz::PrintItem;
 using sfz::ReadSource;
 using sfz::String;
 using sfz::read;
@@ -106,13 +105,11 @@ enum {
 
 const int16_t kHelpScreenKeyStringID = 6003;
 
-int find_replace(String& data, int pos, pn::string_view search, const PrintItem& replace) {
+int find_replace(String& data, int pos, pn::string_view search, pn::string_view replace) {
     String sfz_search = pn2sfz(search);
     size_t at         = data.find(sfz_search, pos);
     if (at != String::npos) {
-        String replace_string;
-        replace.print_to(replace_string);
-        data.replace(at, sfz_search.size(), replace_string);
+        data.replace(at, sfz_search.size(), pn2sfz(replace));
     }
     return at;
 }
@@ -152,35 +149,37 @@ void CreateObjectDataText(pn::string& text, Handle<BaseObject> object) {
     // an object or a ship?
     if (object->attributes & kCanThink) {
         pn::string_view name = values.at(0);
-        find_replace(data, 0, keys.at(kShipOrObjectStringNum), pn2sfz(name));
+        find_replace(data, 0, keys.at(kShipOrObjectStringNum), name);
     } else {
         pn::string_view name = values.at(1);
-        find_replace(data, 0, keys.at(kShipOrObjectStringNum), pn2sfz(name));
+        find_replace(data, 0, keys.at(kShipOrObjectStringNum), name);
     }
 
     // ship name
     {
         pn::string_view name = get_object_name(object);
-        find_replace(data, 0, keys.at(kShipTypeStringNum), pn2sfz(name));
+        find_replace(data, 0, keys.at(kShipTypeStringNum), name);
     }
 
     // ship mass
-    find_replace(data, 0, keys.at(kMassStringNum), Fixed(object->mass));
+    find_replace(data, 0, keys.at(kMassStringNum), stringify(Fixed(object->mass)));
 
     // ship shields
-    find_replace(data, 0, keys.at(kShieldStringNum), object->health);
+    find_replace(data, 0, keys.at(kShieldStringNum), sfz2pn(object->health));
 
     // light speed
-    find_replace(data, 0, keys.at(kHasLightStringNum), object->warpSpeed.val());
+    find_replace(data, 0, keys.at(kHasLightStringNum), sfz2pn(object->warpSpeed.val()));
 
     // max velocity
-    find_replace(data, 0, keys.at(kMaxSpeedStringNum), Fixed(object->maxVelocity));
+    find_replace(data, 0, keys.at(kMaxSpeedStringNum), stringify(Fixed(object->maxVelocity)));
 
     // thrust
-    find_replace(data, 0, keys.at(kThrustStringNum), Fixed(object->maxThrust));
+    find_replace(data, 0, keys.at(kThrustStringNum), stringify(Fixed(object->maxThrust)));
 
     // par turn
-    find_replace(data, 0, keys.at(kTurnStringNum), Fixed(object->frame.rotation.turnAcceleration));
+    find_replace(
+            data, 0, keys.at(kTurnStringNum),
+            stringify(Fixed(object->frame.rotation.turnAcceleration)));
 
     // now, check for weapons!
     CreateWeaponDataText(&data, object->pulse.base, values.at(kShipDataPulseStringNum));
@@ -224,12 +223,12 @@ void CreateWeaponDataText(
     StringList values(kShipDataNameID);
 
     // weapon name #
-    find_replace(data, 0, keys.at(kWeaponNumberStringNum), pn2sfz(weaponName));
+    find_replace(data, 0, keys.at(kWeaponNumberStringNum), weaponName);
 
     // weapon name
     {
         pn::string_view name = get_object_name(weaponObject);
-        find_replace(data, 0, keys.at(kWeaponNameStringNum), pn2sfz(name));
+        find_replace(data, 0, keys.at(kWeaponNameStringNum), name);
     }
 
     pn::string_view yes  = values.at(kShipDataYesStringNum);
@@ -238,25 +237,27 @@ void CreateWeaponDataText(
 
     // is guided
     if (isGuided) {
-        find_replace(data, 0, keys.at(kWeaponGuidedStringNum), pn2sfz(yes));
+        find_replace(data, 0, keys.at(kWeaponGuidedStringNum), yes);
     } else {
-        find_replace(data, 0, keys.at(kWeaponGuidedStringNum), pn2sfz(no));
+        find_replace(data, 0, keys.at(kWeaponGuidedStringNum), no);
     }
 
     // is autotarget
     if (weaponObject->attributes & kAutoTarget) {
-        find_replace(data, 0, keys.at(kWeaponAutoTargetStringNum), pn2sfz(yes));
+        find_replace(data, 0, keys.at(kWeaponAutoTargetStringNum), yes);
     } else {
-        find_replace(data, 0, keys.at(kWeaponAutoTargetStringNum), pn2sfz(no));
+        find_replace(data, 0, keys.at(kWeaponAutoTargetStringNum), no);
     }
 
     // range
-    find_replace(data, 0, keys.at(kWeaponRangeStringNum), lsqrt(weaponObject->frame.weapon.range));
+    find_replace(
+            data, 0, keys.at(kWeaponRangeStringNum),
+            sfz2pn(lsqrt(weaponObject->frame.weapon.range)));
 
     if (mostDamage > 0) {
-        find_replace(data, 0, keys.at(kWeaponDamageStringNum), mostDamage);
+        find_replace(data, 0, keys.at(kWeaponDamageStringNum), sfz2pn(mostDamage));
     } else {
-        find_replace(data, 0, keys.at(kWeaponDamageStringNum), pn2sfz(dash));
+        find_replace(data, 0, keys.at(kWeaponDamageStringNum), dash);
     }
     print(*text, data);
 }
@@ -283,7 +284,7 @@ void Replace_KeyCode_Strings_With_Actual_Key_Names(pn::string& text, int16_t res
         }
 
         // Replace search string with value string in resulting text.
-        while (find_replace(sfz_text, 0, search, replace) != String::npos) {
+        while (find_replace(sfz_text, 0, search, sfz2pn(replace)) != String::npos) {
             pos += 1;
         };
     }

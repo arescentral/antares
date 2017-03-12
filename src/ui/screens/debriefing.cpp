@@ -38,7 +38,6 @@
 
 using sfz::Bytes;
 using sfz::Exception;
-using sfz::PrintItem;
 using sfz::String;
 using sfz::dec;
 using sfz::format;
@@ -56,13 +55,11 @@ const usecs kTypingDelay      = kMajorTick;
 const int   kScoreTableHeight = 120;
 const int   kTextWidth        = 300;
 
-void string_replace(String* s, pn::string_view in, const PrintItem& out) {
+void string_replace(String* s, pn::string_view in, pn::string_view out) {
     sfz::String sfz_in = pn2sfz(in);
     size_t      index  = s->find(sfz_in);
     while (index != String::npos) {
-        String out_string;
-        out.print_to(out_string);
-        s->replace(index, in.size(), out_string);
+        s->replace(index, in.size(), pn2sfz(out));
         index = s->find(sfz_in, index + 1);
     }
 }
@@ -252,24 +249,24 @@ pn::string DebriefingScreen::build_score_text(
     const int your_score = score(your_time, par_time, your_loss, par_loss, your_kill, par_kill);
     const int par_score  = 100;
 
-    string_replace(&text, strings.at(0), your_mins);
-    string_replace(&text, strings.at(1), dec(your_secs, 2));
+    string_replace(&text, strings.at(0), sfz2pn(your_mins));
+    string_replace(&text, strings.at(1), sfz2pn(sfz::String(dec(your_secs, 2))));
     if (par_time > game_ticks()) {
-        string_replace(&text, strings.at(2), par_mins);
+        string_replace(&text, strings.at(2), sfz2pn(par_mins));
         String secs_string;
         print(secs_string, format(":{0}", dec(par_secs, 2)));
-        string_replace(&text, strings.at(3), secs_string);
+        string_replace(&text, strings.at(3), sfz2pn(secs_string));
     } else {
         StringList data_strings(6002);
-        string_replace(&text, strings.at(2), pn2sfz(data_strings.at(8)));  // = "N/A"
+        string_replace(&text, strings.at(2), data_strings.at(8));  // = "N/A"
         string_replace(&text, strings.at(3), "");
     }
-    string_replace(&text, strings.at(4), your_loss);
-    string_replace(&text, strings.at(5), par_loss);
-    string_replace(&text, strings.at(6), your_kill);
-    string_replace(&text, strings.at(7), par_kill);
-    string_replace(&text, strings.at(8), your_score);
-    string_replace(&text, strings.at(9), par_score);
+    string_replace(&text, strings.at(4), sfz2pn(your_loss));
+    string_replace(&text, strings.at(5), sfz2pn(par_loss));
+    string_replace(&text, strings.at(6), sfz2pn(your_kill));
+    string_replace(&text, strings.at(7), sfz2pn(par_kill));
+    string_replace(&text, strings.at(8), sfz2pn(your_score));
+    string_replace(&text, strings.at(9), sfz2pn(par_score));
     return sfz2pn(text);
 }
 
