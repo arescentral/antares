@@ -110,10 +110,12 @@ Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Level::Playe
     a->_earning_power = player.earningPower;
     a->_race          = player.playerRace;
     if ((player.nameResID >= 0)) {
-        a->_name = StringList(player.nameResID).at(player.nameStrNum - 1).copy();
-        if (pn2sfz(a->_name).size() > kAdmiralNameLen) {
-            a->_name = sfz2pn(pn2sfz(a->_name).slice(0, kAdmiralNameLen));
+        StringList      strings(player.nameResID);
+        pn::string_view name = strings.at(player.nameStrNum - 1);
+        if (pn::rune::count(name) > kAdmiralNameLen) {
+            name = pn::rune::slice(name, 0, kAdmiralNameLen);
         }
+        a->_name = name.copy();
     }
 
     // for now set strategy balance to 0 -- we may want to calc this if player added on the fly?
@@ -153,10 +155,12 @@ Handle<Destination> MakeNewDestination(
     }
 
     if ((nameResID >= 0)) {
-        d->name = StringList(nameResID).at(nameStrNum - 1).copy();
-        if (pn2sfz(d->name).size() > kDestinationNameLen) {
-            d->name = sfz2pn(pn2sfz(d->name).slice(0, kDestinationNameLen));
+        StringList      strings(nameResID);
+        pn::string_view name = strings.at(nameStrNum - 1);
+        if (pn::rune::count(name) > kDestinationNameLen) {
+            name = pn::rune::slice(name, 0, kDestinationNameLen);
         }
+        d->name = name.copy();
     }
 
     if (object->attributes & kNeutralDeath) {

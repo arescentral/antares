@@ -163,14 +163,21 @@ const int32_t kMiniAmmoTextHBuffer = 2;
 const int32_t kMaxShipBuffer = 40;
 
 void pad_to(pn::string& s, size_t width) {
-    sfz::String ss = pn2sfz(s);
-    if (ss.size() < width) {
-        sfz::String result;
-        result.append((width - ss.size()) / 2, ' ');
-        result.append(ss);
-        result.append((1 + width - ss.size()) / 2, ' ');
-        s = sfz2pn(result);
+    size_t length = pn::rune::count(s);
+    if (length >= width) {
+        return;
     }
+    size_t     left_pad  = (width - length) / 2;
+    size_t     right_pad = (width - length) - left_pad;
+    pn::string t;
+    for (size_t i = 0; i < left_pad; ++i) {
+        t += pn::rune{' '};
+    }
+    t += s;
+    for (size_t i = 0; i < right_pad; ++i) {
+        t += pn::rune{' '};
+    }
+    s = std::move(t);
 }
 
 const int32_t MiniIconMacLineTop() { return sys.fonts.computer->height * 2; }
@@ -189,11 +196,10 @@ inline int32_t mGetLineNumFromV(int32_t mV) {
 }
 
 inline void mCopyBlankLineString(miniScreenLineType* mline, pn::string_view mstring) {
-    sfz::String s = pn2sfz(mstring);
-    if (s.size() > kMiniScreenCharWidth) {
-        s.resize(kMiniScreenCharWidth);
+    if (pn::rune::count(mstring) > kMiniScreenCharWidth) {
+        mstring = pn::rune::slice(mstring, 0, kMiniScreenCharWidth);
     }
-    mline->string = sfz2pn(s);
+    mline->string = mstring.copy();
 }
 
 }  // namespace

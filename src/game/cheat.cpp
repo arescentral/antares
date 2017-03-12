@@ -55,7 +55,7 @@ void CheatFeedbackPlus(
 int16_t GetCheatNumFromString(pn::string_view s) {
     pn::string code_string;
     for (pn::rune r : s) {
-        code_string += sfz2pn(sfz::String(1, r.value() + kCheatCodeValue));
+        code_string += pn::rune{r.value() + kCheatCodeValue};
     }
     auto it = std::find(sys.cheat.codes.begin(), sys.cheat.codes.end(), code_string);
     if (it == sys.cheat.codes.end()) {
