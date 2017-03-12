@@ -49,14 +49,10 @@ Directories mac_dirs() {
     }
     directories.root += "/Library/Application Support/Antares";
 
-    directories.downloads = directories.root.copy();
-    directories.downloads += "/Downloads";
-    directories.registry = directories.root.copy();
-    directories.registry += "/Registry";
-    directories.replays = directories.root.copy();
-    directories.replays += "/Replays";
-    directories.scenarios = directories.root.copy();
-    directories.scenarios += "/Scenarios";
+    directories.downloads = pn::format("{0}/Downloads", directories.root);
+    directories.registry  = pn::format("{0}/Registry", directories.root);
+    directories.replays   = pn::format("{0}/Replays", directories.root);
+    directories.scenarios = pn::format("{0}/Scenarios", directories.root);
     return directories;
 };
 
