@@ -116,9 +116,7 @@ void ResetAllSprites() {
     }
 }
 
-void Pix::reset() {
-    pix.clear();
-}
+void Pix::reset() { pix.clear(); }
 
 NatePixTable* Pix::add(int16_t resource_id) {
     NatePixTable* result = get(resource_id);
@@ -172,17 +170,11 @@ void RemoveSprite(Handle<Sprite> sprite) {
     sprite->resID  = -1;
 }
 
-Fixed scale_by(Fixed value, int32_t scale) {
-    return (value * scale) / SCALE_SCALE;
-}
+Fixed scale_by(Fixed value, int32_t scale) { return (value * scale) / SCALE_SCALE; }
 
-Fixed evil_scale_by(Fixed value, int32_t scale) {
-    return (value * scale) >> SHIFT_SCALE;
-}
+Fixed evil_scale_by(Fixed value, int32_t scale) { return (value * scale) >> SHIFT_SCALE; }
 
-int32_t evil_scale_by(int32_t value, int32_t scale) {
-    return (value * scale) >> SHIFT_SCALE;
-}
+int32_t evil_scale_by(int32_t value, int32_t scale) { return (value * scale) >> SHIFT_SCALE; }
 
 Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t scale) {
     Rect draw_rect =

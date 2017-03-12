@@ -159,9 +159,7 @@ GLFWVideoDriver::GLFWVideoDriver() : _screen_size(640, 480), _last_click_count(0
     glfwSetErrorCallback(throw_error);
 }
 
-GLFWVideoDriver::~GLFWVideoDriver() {
-    glfwTerminate();
-}
+GLFWVideoDriver::~GLFWVideoDriver() { glfwTerminate(); }
 
 Point GLFWVideoDriver::get_mouse() {
     double x, y;
@@ -169,13 +167,9 @@ Point GLFWVideoDriver::get_mouse() {
     return {int(x), int(y)};
 }
 
-InputMode GLFWVideoDriver::input_mode() const {
-    return KEYBOARD_MOUSE;
-}
+InputMode GLFWVideoDriver::input_mode() const { return KEYBOARD_MOUSE; }
 
-wall_time GLFWVideoDriver::now() const {
-    return wall_time(usecs(int64_t(glfwGetTime() * 1e6)));
-}
+wall_time GLFWVideoDriver::now() const { return wall_time(usecs(int64_t(glfwGetTime() * 1e6))); }
 
 void GLFWVideoDriver::key(int key, int scancode, int action, int mods) {
     if (key < 0) {

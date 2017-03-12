@@ -64,9 +64,7 @@ extern "C" AntaresDrivers* antares_controller_create_drivers(CFStringRef* error_
     return new AntaresDrivers();
 }
 
-extern "C" void antares_controller_destroy_drivers(AntaresDrivers* drivers) {
-    delete drivers;
-}
+extern "C" void antares_controller_destroy_drivers(AntaresDrivers* drivers) { delete drivers; }
 
 extern "C" bool antares_controller_loop(AntaresDrivers* drivers, CFStringRef* error_message) {
     try {

@@ -133,9 +133,7 @@ RgbColor RgbColor::tint(uint8_t color, uint8_t value) {
             implicit_cast<uint8_t>((kDiffuse[color][2] * value / 255) + kAmbient[color][2]));
 }
 
-const RgbColor& RgbColor::at(uint8_t index) {
-    return kColors[index];
-}
+const RgbColor& RgbColor::at(uint8_t index) { return kColors[index]; }
 
 void read_from(ReadSource in, RgbColor& color) {
     in.shift(2);
@@ -166,13 +164,9 @@ void print_to(sfz::PrintTarget out, const RgbColor& color) {
     }
 }
 
-uint8_t GetRetroIndex(uint8_t which) {
-    return which;
-}
+uint8_t GetRetroIndex(uint8_t which) { return which; }
 
-uint8_t GetTranslateIndex(uint8_t which) {
-    return which;
-}
+uint8_t GetTranslateIndex(uint8_t which) { return which; }
 
 uint8_t GetTranslateColorShade(uint8_t color, uint8_t shade) {
     return (17 - shade) + (color * 16);
@@ -188,9 +182,7 @@ RgbColor GetRGBTranslateColorShade(uint8_t color, uint8_t shade) {
     return result;
 }
 
-void GetRGBTranslateColor(RgbColor* c, uint8_t color) {
-    *c = RgbColor::at(color);
-}
+void GetRGBTranslateColor(RgbColor* c, uint8_t color) { *c = RgbColor::at(color); }
 
 RgbColor GetRGBTranslateColor(uint8_t color) {
     RgbColor result;

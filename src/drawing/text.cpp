@@ -233,9 +233,7 @@ void Font::draw(const Quads& quads, Point cursor, sfz::StringSlice string, RgbCo
     }
 }
 
-uint8_t Font::char_width(Rune mchar) const {
-    return glyph_rect(mchar).width();
-}
+uint8_t Font::char_width(Rune mchar) const { return glyph_rect(mchar).width(); }
 
 int32_t Font::string_width(sfz::StringSlice s) const {
     int32_t sum = 0;

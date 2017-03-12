@@ -35,9 +35,7 @@ namespace antares {
 
 InputSource::~InputSource() {}
 
-void RealInputSource::start() {
-    _events.clear();
-}
+void RealInputSource::start() { _events.clear(); }
 
 bool RealInputSource::get(Handle<Admiral> admiral, game_ticks at, EventReceiver& receiver) {
     auto events = _events.equal_range(make_pair(admiral.number(), at));
@@ -135,16 +133,10 @@ bool ReplayInputSource::get(Handle<Admiral> admiral, game_ticks at, EventReceive
     return true;
 }
 
-void ReplayInputSource::key_down(const KeyDownEvent& event) {
-    _exit = true;
-}
+void ReplayInputSource::key_down(const KeyDownEvent& event) { _exit = true; }
 
-void ReplayInputSource::gamepad_button_down(const GamepadButtonDownEvent& event) {
-    _exit = true;
-}
+void ReplayInputSource::gamepad_button_down(const GamepadButtonDownEvent& event) { _exit = true; }
 
-void ReplayInputSource::mouse_down(const MouseDownEvent& event) {
-    _exit = true;
-}
+void ReplayInputSource::mouse_down(const MouseDownEvent& event) { _exit = true; }
 
 }  // namespace antares

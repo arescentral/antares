@@ -17,3 +17,4 @@ AlignConsecutiveDeclarations:                    true
 AlignOperands:                                   true
 SortIncludes:                                    true
 AllowShortCaseLabelsOnASingleLine:               true
+AllowShortFunctionsOnASingleLine:                true

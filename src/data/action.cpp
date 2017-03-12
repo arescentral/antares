@@ -228,13 +228,9 @@ void read_from(ReadSource in, argumentType::ReleaseEnergy& argument) {
     read(in, argument.percent);
 }
 
-void read_from(ReadSource in, argumentType::LandAt& argument) {
-    read(in, argument.landingSpeed);
-}
+void read_from(ReadSource in, argumentType::LandAt& argument) { read(in, argument.landingSpeed); }
 
-void read_from(ReadSource in, argumentType::EnterWarp& argument) {
-    read(in, argument.warpSpeed);
-}
+void read_from(ReadSource in, argumentType::EnterWarp& argument) { read(in, argument.warpSpeed); }
 
 void read_from(ReadSource in, argumentType::DisplayMessage& argument) {
     read(in, argument.resID);
@@ -253,9 +249,7 @@ void read_from(ReadSource in, argumentType::DeclareWinner& argument) {
     read(in, argument.textID);
 }
 
-void read_from(ReadSource in, argumentType::KillObject& argument) {
-    read(in, argument.dieType);
-}
+void read_from(ReadSource in, argumentType::KillObject& argument) { read(in, argument.dieType); }
 
 void read_from(ReadSource in, argumentType::ColorFlash& argument) {
     read(in, argument.length);
@@ -263,13 +257,9 @@ void read_from(ReadSource in, argumentType::ColorFlash& argument) {
     read(in, argument.shade);
 }
 
-void read_from(ReadSource in, argumentType::Keys& argument) {
-    read(in, argument.keyMask);
-}
+void read_from(ReadSource in, argumentType::Keys& argument) { read(in, argument.keyMask); }
 
-void read_from(ReadSource in, argumentType::Zoom& argument) {
-    read(in, argument.zoomLevel);
-}
+void read_from(ReadSource in, argumentType::Zoom& argument) { read(in, argument.zoomLevel); }
 
 void read_from(ReadSource in, argumentType::ComputerSelect& argument) {
     read(in, argument.screenNumber);

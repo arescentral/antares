@@ -38,9 +38,7 @@ void Card::become_front() {}
 
 void Card::resign_front() {}
 
-void Card::draw() const {
-    next()->draw();
-}
+void Card::draw() const { next()->draw(); }
 
 bool Card::next_timer(wall_time& time) {
     static_cast<void>(time);
@@ -49,21 +47,13 @@ bool Card::next_timer(wall_time& time) {
 
 void Card::fire_timer() {}
 
-CardStack* Card::stack() const {
-    return _stack;
-}
+CardStack* Card::stack() const { return _stack; }
 
-Card* Card::next() const {
-    return _next.get();
-}
+Card* Card::next() const { return _next.get(); }
 
-CardStack::CardStack(Card* top) {
-    push(top);
-}
+CardStack::CardStack(Card* top) { push(top); }
 
-bool CardStack::empty() const {
-    return _top == nullptr;
-}
+bool CardStack::empty() const { return _top == nullptr; }
 
 void CardStack::push(Card* card) {
     if (!empty()) {
@@ -89,8 +79,6 @@ void CardStack::pop(Card* card) {
     }
 }
 
-Card* CardStack::top() const {
-    return _top.get();
-}
+Card* CardStack::top() const { return _top.get(); }
 
 }  // namespace antares

@@ -65,12 +65,8 @@ ReplayList::ReplayList() {
     }
 }
 
-size_t ReplayList::size() const {
-    return _replays.size();
-}
+size_t ReplayList::size() const { return _replays.size(); }
 
-int16_t ReplayList::at(size_t index) const {
-    return _replays.at(index);
-}
+int16_t ReplayList::at(size_t index) const { return _replays.at(index); }
 
 }  // namespace antares

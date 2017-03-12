@@ -28,9 +28,7 @@ namespace antares {
 #define STRINGIFY(x) STRINGIFY_(x)
 #define ANTARES_DATA_STRING STRINGIFY(ANTARES_DATA)
 
-sfz::String default_application_path() {
-    return sfz::String(ANTARES_DATA_STRING);
-}
+sfz::String default_application_path() { return sfz::String(ANTARES_DATA_STRING); }
 
 Directories test_dirs() {
     Directories directories;

@@ -95,13 +95,9 @@ Point CocoaVideoDriver::get_mouse() {
     return p;
 }
 
-InputMode CocoaVideoDriver::input_mode() const {
-    return _input_mode;
-}
+InputMode CocoaVideoDriver::input_mode() const { return _input_mode; }
 
-wall_time CocoaVideoDriver::now() const {
-    return _now();
-}
+wall_time CocoaVideoDriver::now() const { return _now(); }
 
 struct CocoaVideoDriver::EventBridge {
     InputMode&         input_mode;

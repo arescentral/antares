@@ -221,9 +221,7 @@ void KeyControlScreen::key_down(const KeyDownEvent& event) {
     }
 }
 
-void KeyControlScreen::key_up(const KeyUpEvent& event) {
-    static_cast<void>(event);
-}
+void KeyControlScreen::key_up(const KeyUpEvent& event) { static_cast<void>(event); }
 
 bool KeyControlScreen::next_timer(wall_time& time) {
     if (_next_flash > wall_time()) {

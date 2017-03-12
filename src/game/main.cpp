@@ -88,9 +88,7 @@ extern set<int32_t> covered_objects;
 extern set<int32_t> covered_actions;
 #endif  // DATA_COVERAGE
 
-Rect world() {
-    return Rect({0, 0}, sys.video->screen_size());
-}
+Rect world() { return Rect({0, 0}, sys.video->screen_size()); }
 
 Rect play_screen() {
     const Size size = sys.video->screen_size();
@@ -434,9 +432,7 @@ void GamePlay::become_front() {
     }
 }
 
-void GamePlay::resign_front() {
-    minicomputer_cancel();
-}
+void GamePlay::resign_front() { minicomputer_cancel(); }
 
 void GamePlay::draw() const {
     globals()->starfield.draw();
@@ -649,17 +645,11 @@ void GamePlay::key_up(const KeyUpEvent& event) {
     _input_source->key_up(event);
 }
 
-void GamePlay::mouse_down(const MouseDownEvent& event) {
-    _input_source->mouse_down(event);
-}
+void GamePlay::mouse_down(const MouseDownEvent& event) { _input_source->mouse_down(event); }
 
-void GamePlay::mouse_up(const MouseUpEvent& event) {
-    _input_source->mouse_up(event);
-}
+void GamePlay::mouse_up(const MouseUpEvent& event) { _input_source->mouse_up(event); }
 
-void GamePlay::mouse_move(const MouseMoveEvent& event) {
-    _input_source->mouse_move(event);
-}
+void GamePlay::mouse_move(const MouseMoveEvent& event) { _input_source->mouse_move(event); }
 
 void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
     switch (event.button) {

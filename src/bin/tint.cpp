@@ -116,6 +116,4 @@ int main(int argc, char* const* argv) {
 }  // namespace
 }  // namespace antares
 
-int main(int argc, char** argv) {
-    return antares::main(argc, argv);
-}
+int main(int argc, char** argv) { return antares::main(argc, argv); }

@@ -113,9 +113,7 @@ void set_initial_destination(const Level::InitialObject* initial, bool preserve)
     }
 }
 
-Level::InitialObject* Level::initial(size_t at) const {
-    return &plug.initials[initialFirst + at];
-}
+Level::InitialObject* Level::initial(size_t at) const { return &plug.initials[initialFirst + at]; }
 
 void UnhideInitialObject(int32_t whichInitial) {
     auto initial = g.level->initial(whichInitial);

@@ -189,9 +189,7 @@ Level::BriefPoint* Level::brief_point(size_t at) const {
     return &plug.briefings[briefPointFirst + at];
 }
 
-size_t Level::brief_point_size() const {
-    return briefPointNum & kLevelBriefMask;
-}
+size_t Level::brief_point_size() const { return briefPointNum & kLevelBriefMask; }
 
 int32_t Level::angle() const {
     if (briefPointNum & kLevelAngleMask) {
@@ -201,21 +199,13 @@ int32_t Level::angle() const {
     }
 }
 
-Point Level::star_map_point() const {
-    return Point(starMapH, starMapV);
-}
+Point Level::star_map_point() const { return Point(starMapH, starMapV); }
 
-int32_t Level::chapter_number() const {
-    return levelNameStrNum;
-}
+int32_t Level::chapter_number() const { return levelNameStrNum; }
 
-int32_t Level::prologue_id() const {
-    return prologueID;
-}
+int32_t Level::prologue_id() const { return prologueID; }
 
-int32_t Level::epilogue_id() const {
-    return epilogueID;
-}
+int32_t Level::epilogue_id() const { return epilogueID; }
 
 bool start_construct_level(Handle<Level> level, int32_t* max) {
     ResetAllSpaceObjects();

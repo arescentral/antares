@@ -65,9 +65,7 @@ Label* Label::get(int number) {
     return nullptr;
 }
 
-void Label::init() {
-    g.labels.reset(new Label[kMaxLabelNum]);
-}
+void Label::init() { g.labels.reset(new Label[kMaxLabelNum]); }
 
 void Label::reset() {
     for (auto label : all()) {
@@ -333,9 +331,7 @@ void Label::clear_string() {
     width = height = 0;
 }
 
-void Label::set_color(uint8_t color) {
-    this->color = color;
-}
+void Label::set_color(uint8_t color) { this->color = color; }
 
 void Label::set_keep_on_screen_anyway(bool keepOnScreenAnyway) {
     this->keepOnScreenAnyway = keepOnScreenAnyway;

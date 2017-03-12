@@ -64,8 +64,6 @@ Resource::Resource(const sfz::PrintItem& resource_path) : _file(load(String(reso
 
 Resource::~Resource() {}
 
-BytesSlice Resource::data() const {
-    return _file->data();
-}
+BytesSlice Resource::data() const { return _file->data(); }
 
 }  // namespace antares

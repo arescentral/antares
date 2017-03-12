@@ -102,12 +102,8 @@ ssize_t StringList::index_of(const StringSlice& result) const {
     return -1;
 }
 
-size_t StringList::size() const {
-    return _strings.size();
-}
+size_t StringList::size() const { return _strings.size(); }
 
-const String& StringList::at(size_t index) const {
-    return _strings.at(index);
-}
+const String& StringList::at(size_t index) const { return _strings.at(index); }
 
 }  // namespace antares

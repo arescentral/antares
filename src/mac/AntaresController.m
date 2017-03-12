@@ -44,13 +44,9 @@ static NSInteger compare_scenarios(id x, id y, void* unused) {
     return [[x objectForKey:kTitle] caseInsensitiveCompare:[y objectForKey:kTitle]];
 }
 
-static NSString* str(const char* utf8_bytes) {
-    return [NSString stringWithUTF8String:utf8_bytes];
-}
+static NSString* str(const char* utf8_bytes) { return [NSString stringWithUTF8String:utf8_bytes]; }
 
-static NSURL* url(const char* utf8_bytes) {
-    return [NSURL URLWithString:str(utf8_bytes)];
-}
+static NSURL* url(const char* utf8_bytes) { return [NSURL URLWithString:str(utf8_bytes)]; }
 
 @interface AntaresController (Private)
 - (void)fail:(NSString*)message;

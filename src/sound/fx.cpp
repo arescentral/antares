@@ -374,17 +374,11 @@ void SoundFX::zoom() {
     play(kComputerBeep4, kMediumVolume, kMediumPersistence, kLowPrioritySound);
 }
 
-void SoundFX::pause() {
-    play(kComputerBeep4, kMaxSoundVolume, kShortPersistence, kMustPlaySound);
-}
+void SoundFX::pause() { play(kComputerBeep4, kMaxSoundVolume, kShortPersistence, kMustPlaySound); }
 
-void SoundFX::klaxon() {
-    play(kKlaxon, kMediumVolume, kMediumLongPersistence, kPrioritySound);
-}
+void SoundFX::klaxon() { play(kKlaxon, kMediumVolume, kMediumLongPersistence, kPrioritySound); }
 
-void SoundFX::loud_klaxon() {
-    play(kKlaxon, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
-}
+void SoundFX::loud_klaxon() { play(kKlaxon, kMaxSoundVolume, kLongPersistence, kMustPlaySound); }
 
 void SoundFX::order() {
     play(kMorseBeepSound, kMediumVolume, kMediumPersistence, kLowPrioritySound);
@@ -398,9 +392,7 @@ void SoundFX::teletype() {
     play(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
 }
 
-void SoundFX::cloak_on() {
-    play(kCloakOn, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
-}
+void SoundFX::cloak_on() { play(kCloakOn, kMediumLoudVolume, kShortPersistence, kMustPlaySound); }
 
 void SoundFX::cloak_off() {
     play(kCloakOff, kMediumLoudVolume, kShortPersistence, kMustPlaySound);

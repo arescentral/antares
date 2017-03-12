@@ -72,9 +72,7 @@ AudioFile::AudioFile(const BytesSlice& data) : _data(data) {
     check_os_err(err, "AudioFileOpenWithCallbacks");
 }
 
-AudioFile::~AudioFile() {
-    AudioFileClose(_id);
-}
+AudioFile::~AudioFile() { AudioFileClose(_id); }
 
 void AudioFile::convert(Bytes& data, ALenum& format, ALsizei& frequency) const {
     ExtAudioFile ext(*this);
@@ -153,8 +151,6 @@ OSStatus AudioFile::read(
     return noErr;
 }
 
-SInt64 AudioFile::get_size() const {
-    return _data.size();
-}
+SInt64 AudioFile::get_size() const { return _data.size(); }
 
 }  // namespace antares

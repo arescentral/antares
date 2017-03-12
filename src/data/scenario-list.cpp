@@ -119,13 +119,9 @@ ScenarioList::ScenarioList() {
     }
 }
 
-size_t ScenarioList::size() const {
-    return _scenarios.size();
-}
+size_t ScenarioList::size() const { return _scenarios.size(); }
 
-const ScenarioList::Entry& ScenarioList::at(size_t index) const {
-    return _scenarios.at(index);
-}
+const ScenarioList::Entry& ScenarioList::at(size_t index) const { return _scenarios.at(index); }
 
 void print_to(sfz::PrintTarget out, const Version& v) {
     for (vector<int>::const_iterator begin = v.components.begin(), end = v.components.end();

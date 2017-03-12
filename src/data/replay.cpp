@@ -51,9 +51,7 @@ namespace antares {
 
 ReplayData::ReplayData() {}
 
-ReplayData::ReplayData(sfz::BytesSlice in) {
-    read(in, *this);
-}
+ReplayData::ReplayData(sfz::BytesSlice in) { read(in, *this); }
 
 void ReplayData::key_down(uint64_t at, uint32_t key) {
     if (actions.empty() || (actions.back().at != at)) {
@@ -342,9 +340,7 @@ void ReplayBuilder::key_up(const KeyUpEvent& event) {
     }
 }
 
-void ReplayBuilder::next() {
-    ++_at;
-}
+void ReplayBuilder::next() { ++_at; }
 
 void ReplayBuilder::finish() {
     if (!_file) {

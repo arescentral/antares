@@ -59,17 +59,11 @@ StyledText::StyledText(const Font* font)
 
 StyledText::~StyledText() {}
 
-void StyledText::set_fore_color(RgbColor fore_color) {
-    _fore_color = fore_color;
-}
+void StyledText::set_fore_color(RgbColor fore_color) { _fore_color = fore_color; }
 
-void StyledText::set_back_color(RgbColor back_color) {
-    _back_color = back_color;
-}
+void StyledText::set_back_color(RgbColor back_color) { _back_color = back_color; }
 
-void StyledText::set_tab_width(int tab_width) {
-    _tab_width = tab_width;
-}
+void StyledText::set_tab_width(int tab_width) { _tab_width = tab_width; }
 
 void StyledText::set_retro_text(sfz::StringSlice text) {
     const RgbColor original_fore_color = _fore_color;
@@ -262,9 +256,7 @@ void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
     _height = v;
 }
 
-int StyledText::size() const {
-    return _chars.size();
-}
+int StyledText::size() const { return _chars.size(); }
 
 int StyledText::tab_width() const {
     if (_tab_width > 0) {
@@ -274,25 +266,15 @@ int StyledText::tab_width() const {
     }
 }
 
-int StyledText::width() const {
-    return _width;
-}
+int StyledText::width() const { return _width; }
 
-int StyledText::height() const {
-    return _height;
-}
+int StyledText::height() const { return _height; }
 
-int StyledText::auto_width() const {
-    return _auto_width;
-}
+int StyledText::auto_width() const { return _auto_width; }
 
-const std::vector<inlinePictType>& StyledText::inline_picts() const {
-    return _inline_picts;
-}
+const std::vector<inlinePictType>& StyledText::inline_picts() const { return _inline_picts; }
 
-void StyledText::draw(const Rect& bounds) const {
-    draw_range(bounds, 0, _chars.size());
-}
+void StyledText::draw(const Rect& bounds) const { draw_range(bounds, 0, _chars.size()); }
 
 void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
     const int line_height = _font->height + _line_spacing;

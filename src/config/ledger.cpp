@@ -61,27 +61,19 @@ Ledger::Ledger() {
     antares::ledger = this;
 }
 
-Ledger::~Ledger() {
-    antares::ledger = NULL;
-}
+Ledger::~Ledger() { antares::ledger = NULL; }
 
-Ledger* Ledger::ledger() {
-    return ::antares::ledger;
-}
+Ledger* Ledger::ledger() { return ::antares::ledger; }
 
 NullLedger::NullLedger() : _chapters{1} {}
 
-void NullLedger::unlock_chapter(int chapter) {
-    _chapters.insert(chapter);
-}
+void NullLedger::unlock_chapter(int chapter) { _chapters.insert(chapter); }
 
 void NullLedger::unlocked_chapters(std::vector<int>* chapters) {
     *chapters = std::vector<int>(_chapters.begin(), _chapters.end());
 }
 
-DirectoryLedger::DirectoryLedger() {
-    load();
-}
+DirectoryLedger::DirectoryLedger() { load(); }
 
 void DirectoryLedger::unlock_chapter(int chapter) {
     _chapters.insert(chapter);

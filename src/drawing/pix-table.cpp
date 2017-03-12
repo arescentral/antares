@@ -231,13 +231,9 @@ NatePixTable::NatePixTable(int id, uint8_t color) {
 
 NatePixTable::~NatePixTable() {}
 
-const NatePixTable::Frame& NatePixTable::at(size_t index) const {
-    return _frames[index];
-}
+const NatePixTable::Frame& NatePixTable::at(size_t index) const { return _frames[index]; }
 
-size_t NatePixTable::size() const {
-    return _size;
-}
+size_t NatePixTable::size() const { return _size; }
 
 NatePixTable::Frame::Frame(
         Rect bounds, const PixMap& image, int16_t id, int frame, const PixMap& overlay,
@@ -256,9 +252,7 @@ NatePixTable::Frame::Frame(Rect bounds, const PixMap& image, int16_t id, int fra
 
 NatePixTable::Frame::~Frame() {}
 
-void NatePixTable::Frame::load_image(const PixMap& pix) {
-    _pix_map.copy(pix);
-}
+void NatePixTable::Frame::load_image(const PixMap& pix) { _pix_map.copy(pix); }
 
 void NatePixTable::Frame::load_overlay(const PixMap& pix, uint8_t color) {
     for (auto x : range(width())) {
@@ -278,21 +272,11 @@ void NatePixTable::Frame::load_overlay(const PixMap& pix, uint8_t color) {
     }
 }
 
-uint16_t NatePixTable::Frame::width() const {
-    return _bounds.width();
-}
-uint16_t NatePixTable::Frame::height() const {
-    return _bounds.height();
-}
-Point NatePixTable::Frame::center() const {
-    return _bounds.origin();
-}
-const PixMap& NatePixTable::Frame::pix_map() const {
-    return _pix_map;
-}
-const Texture& NatePixTable::Frame::texture() const {
-    return _texture;
-}
+uint16_t       NatePixTable::Frame::width() const { return _bounds.width(); }
+uint16_t       NatePixTable::Frame::height() const { return _bounds.height(); }
+Point          NatePixTable::Frame::center() const { return _bounds.origin(); }
+const PixMap&  NatePixTable::Frame::pix_map() const { return _pix_map; }
+const Texture& NatePixTable::Frame::texture() const { return _texture; }
 
 void NatePixTable::Frame::build(int16_t id, int frame) {
     _texture = sys.video->texture(format("/sprites/{0}.SMIV/{1}", id, frame), _pix_map);

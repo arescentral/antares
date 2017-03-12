@@ -191,9 +191,7 @@ class ArrayPixMap : public PixMap {
 // Deserializes an ArrayPixMap from a WriteTarget.
 void read_from(sfz::ReadSource out, ArrayPixMap& image);
 
-inline void swap(ArrayPixMap& x, ArrayPixMap& y) {
-    x.swap(y);
-}
+inline void swap(ArrayPixMap& x, ArrayPixMap& y) { x.swap(y); }
 
 // A clipped view of another PixMap.
 //

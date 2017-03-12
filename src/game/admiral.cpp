@@ -1045,9 +1045,7 @@ void StopBuilding(Handle<Destination> destObject) {
     destObject->buildObjectBaseNum                     = BaseObject::none();
 }
 
-void Admiral::pay(Fixed howMuch) {
-    pay_absolute(howMuch * _earning_power);
-}
+void Admiral::pay(Fixed howMuch) { pay_absolute(howMuch * _earning_power); }
 
 void Admiral::pay_absolute(Fixed howMuch) {
     _cash += howMuch;

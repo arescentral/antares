@@ -51,9 +51,7 @@ SoundDriver::SoundDriver() {
     sys.audio = this;
 }
 
-SoundDriver::~SoundDriver() {
-    sys.audio = NULL;
-}
+SoundDriver::~SoundDriver() { sys.audio = NULL; }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // NullSoundDriver
@@ -96,9 +94,7 @@ unique_ptr<Sound> NullSoundDriver::open_sound(PrintItem path) {
     return unique_ptr<Sound>(new NullSound);
 }
 
-void NullSoundDriver::set_global_volume(uint8_t volume) {
-    static_cast<void>(volume);
-}
+void NullSoundDriver::set_global_volume(uint8_t volume) { static_cast<void>(volume); }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // LogSoundDriver
@@ -169,8 +165,6 @@ unique_ptr<Sound> LogSoundDriver::open_sound(PrintItem path) {
     return unique_ptr<Sound>(new LogSound(*this, path_string));
 }
 
-void LogSoundDriver::set_global_volume(uint8_t volume) {
-    static_cast<void>(volume);
-}
+void LogSoundDriver::set_global_volume(uint8_t volume) { static_cast<void>(volume); }
 
 }  // namespace antares

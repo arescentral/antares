@@ -41,9 +41,7 @@ ANTARES_GLOBAL GlobalState& g = head;
 ANTARES_GLOBAL GlobalState head;
 ANTARES_GLOBAL GlobalState tail;
 
-aresGlobalType* globals() {
-    return gAresGlobal;
-}
+aresGlobalType* globals() { return gAresGlobal; }
 
 void init_globals() {
     gAresGlobal = new aresGlobalType;

@@ -24,9 +24,7 @@
 
 namespace antares {
 
-inline wall_time now() {
-    return sys.video->now();
-}
+inline wall_time now() { return sys.video->now(); }
 
 }  // namespace antares
 

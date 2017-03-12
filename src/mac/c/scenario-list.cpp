@@ -70,13 +70,9 @@ struct AntaresScenarioList {
 
 namespace antares {
 
-extern "C" AntaresScenarioList* antares_scenario_list_create() {
-    return new AntaresScenarioList;
-}
+extern "C" AntaresScenarioList* antares_scenario_list_create() { return new AntaresScenarioList; }
 
-extern "C" void antares_scenario_list_destroy(AntaresScenarioList* list) {
-    delete list;
-}
+extern "C" void antares_scenario_list_destroy(AntaresScenarioList* list) { delete list; }
 
 extern "C" size_t antares_scenario_list_size(AntaresScenarioList* list) {
     return list->entries.size();

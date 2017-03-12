@@ -193,9 +193,7 @@ void Messages::clear() {
     tmessage->labelMessageID->set_keep_on_screen_anyway(true);
 }
 
-void Messages::add(const sfz::PrintItem& message) {
-    message_data.emplace(message);
-}
+void Messages::add(const sfz::PrintItem& message) { message_data.emplace(message); }
 
 void Messages::start(int16_t startResID, int16_t endResID) {
     longMessageType* tmessage;
@@ -452,9 +450,7 @@ void Messages::set_status(const StringSlice& status, uint8_t color) {
     g.status_label->set_age(kStatusLabelAge);
 }
 
-int16_t Messages::current() {
-    return long_message_data->currentResID;
-}
+int16_t Messages::current() { return long_message_data->currentResID; }
 
 //
 // MessageLabel_Set_Special

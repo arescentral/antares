@@ -62,9 +62,7 @@ void clear(T& t) {
     swap(t, u);
 }
 
-int32_t scale(int32_t value, int32_t scale) {
-    return (value * scale) >> SHIFT_SCALE;
-}
+int32_t scale(int32_t value, int32_t scale) { return (value * scale) >> SHIFT_SCALE; }
 
 }  // namespace
 
@@ -77,9 +75,7 @@ Vector* Vector::get(int number) {
 
 Vector::Vector() : killMe(false), active(false) {}
 
-void Vectors::init() {
-    g.vectors.reset(new Vector[Vector::size]);
-}
+void Vectors::init() { g.vectors.reset(new Vector[Vector::size]); }
 
 void Vectors::reset() {
     for (auto vector : Vector::all()) {

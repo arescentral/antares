@@ -188,9 +188,7 @@ class TextVideoDriver::MainLoop : public EventScheduler::MainLoop {
 TextVideoDriver::TextVideoDriver(Size screen_size, const Optional<String>& output_dir)
         : _size(screen_size), _output_dir(output_dir) {}
 
-int TextVideoDriver::scale() const {
-    return 1;
-}
+int TextVideoDriver::scale() const { return 1; }
 
 Texture TextVideoDriver::texture(sfz::PrintItem name, const PixMap& content) {
     return std::unique_ptr<Texture::Impl>(new TextureImpl(name, *this, content.size()));

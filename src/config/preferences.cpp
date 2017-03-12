@@ -124,9 +124,7 @@ PrefsDriver::PrefsDriver() {
     sys.prefs = this;
 }
 
-PrefsDriver::~PrefsDriver() {
-    sys.prefs = NULL;
-}
+PrefsDriver::~PrefsDriver() { sys.prefs = NULL; }
 
 void PrefsDriver::set_key(size_t index, uint32_t key) {
     Preferences p(get());
@@ -168,12 +166,8 @@ NullPrefsDriver::NullPrefsDriver() {}
 
 NullPrefsDriver::NullPrefsDriver(Preferences defaults) : _saved(defaults) {}
 
-const Preferences& NullPrefsDriver::get() const {
-    return _saved;
-}
+const Preferences& NullPrefsDriver::get() const { return _saved; }
 
-void NullPrefsDriver::set(const Preferences& prefs) {
-    _saved = prefs.copy();
-}
+void NullPrefsDriver::set(const Preferences& prefs) { _saved = prefs.copy(); }
 
 }  // namespace antares

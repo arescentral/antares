@@ -35,9 +35,7 @@ struct Random {
 };
 
 int Randomize(int range);
-inline Fixed Randomize(Fixed range) {
-    return Fixed::from_val(Randomize(range.val()));
-}
+inline Fixed Randomize(Fixed range) { return Fixed::from_val(Randomize(range.val())); }
 
 }  // namespace antares
 

@@ -174,9 +174,7 @@ void pad_to(String& s, size_t width) {
     }
 }
 
-const int32_t MiniIconMacLineTop() {
-    return sys.fonts.computer->height * 2;
-}
+const int32_t MiniIconMacLineTop() { return sys.fonts.computer->height * 2; }
 
 Rect mini_screen_line_bounds(int32_t mtop, int32_t mlinenum, int32_t mleft, int32_t mright) {
     Rect mbounds;
@@ -233,9 +231,7 @@ void SetMiniScreenStatusStrList(int16_t strID) {
     }
 }
 
-void DisposeMiniScreenStatusStrList() {
-    gMissionStatusStrList.reset();
-}
+void DisposeMiniScreenStatusStrList() { gMissionStatusStrList.reset(); }
 
 void ClearMiniScreenLines() {
     miniScreenLineType* c = g.mini.lineData.get();
@@ -828,15 +824,9 @@ static void fire(Handle<Admiral> adm, int key) {
     }
 }
 
-static void fire1(Handle<Admiral> adm, int32_t line) {
-    fire(adm, kOneKey);
-}
-static void fire2(Handle<Admiral> adm, int32_t line) {
-    fire(adm, kTwoKey);
-}
-static void fire_special(Handle<Admiral> adm, int32_t line) {
-    fire(adm, kEnterKey);
-}
+static void fire1(Handle<Admiral> adm, int32_t line) { fire(adm, kOneKey); }
+static void fire2(Handle<Admiral> adm, int32_t line) { fire(adm, kTwoKey); }
+static void fire_special(Handle<Admiral> adm, int32_t line) { fire(adm, kEnterKey); }
 
 static void hold_position(Handle<Admiral> adm, int32_t line) {
     if (g.key_mask & kComputerSpecialMenu) {
@@ -961,9 +951,7 @@ static void MiniComputerExecute(
     }
 }
 
-void MiniComputerDoCancel() {
-    show_main_screen(g.admiral, 0);
-}
+void MiniComputerDoCancel() { show_main_screen(g.admiral, 0); }
 
 void MiniComputerSetBuildStrings() {
     // sets the ship type strings for the build screen

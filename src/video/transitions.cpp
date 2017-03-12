@@ -43,9 +43,7 @@ const int32_t kEndAnimation   = 255;
 Transitions::Transitions() : _active(false) {}
 Transitions::~Transitions() {}
 
-void Transitions::reset() {
-    _active = false;
-}
+void Transitions::reset() { _active = false; }
 
 void Transitions::start_boolean(int32_t in_speed, int32_t out_speed, uint8_t goal_color) {
     _step        = kStartAnimation;
@@ -222,16 +220,10 @@ void PictFade::wane() {
             ColorFade::TO_COLOR, RgbColor::black(), this->fade_time(), true, _skipped));
 }
 
-usecs PictFade::fade_time() const {
-    return ticks(100);
-}
+usecs PictFade::fade_time() const { return ticks(100); }
 
-usecs PictFade::display_time() const {
-    return ticks(80);
-}
+usecs PictFade::display_time() const { return ticks(80); }
 
-bool PictFade::skip() const {
-    return *_skipped;
-}
+bool PictFade::skip() const { return *_skipped; }
 
 }  // namespace antares

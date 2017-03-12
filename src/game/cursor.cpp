@@ -39,9 +39,7 @@ static const usecs kTimeout          = secs(1);
 
 Cursor::Cursor() : _sprite(500, GRAY) {}
 
-void Cursor::draw() const {
-    draw_at(sys.video->get_mouse());
-}
+void Cursor::draw() const { draw_at(sys.video->get_mouse()); }
 
 void Cursor::draw_at(Point where) const {
     if (world().contains(where)) {
@@ -52,13 +50,9 @@ void Cursor::draw_at(Point where) const {
 
 GameCursor::GameCursor() : show(true), _show_crosshairs_until(now() + kTimeout) {}
 
-bool GameCursor::active() const {
-    return show && (_show_crosshairs_until > now());
-}
+bool GameCursor::active() const { return show && (_show_crosshairs_until > now()); }
 
-Point GameCursor::clamped_location() {
-    return clamp(sys.video->get_mouse());
-}
+Point GameCursor::clamped_location() { return clamp(sys.video->get_mouse()); }
 
 Point GameCursor::clamp(Point p) {
     // Do the cursor, too, unless this is a replay.
@@ -91,9 +85,7 @@ void GameCursor::mouse_move(const MouseMoveEvent& event) {
     }
 }
 
-void GameCursor::wake() {
-    _show_crosshairs_until = now() + kTimeout;
-}
+void GameCursor::wake() { _show_crosshairs_until = now() + kTimeout; }
 
 ANTARES_GLOBAL bool HintLine::show_hint_line = false;
 ANTARES_GLOBAL Point HintLine::hint_line_start;
@@ -110,9 +102,7 @@ void HintLine::show(Point fromWhere, Point toWhere, uint8_t color, uint8_t brigh
     hint_line_color_dark = GetRGBTranslateColorShade(color, VERY_DARK);
 }
 
-void HintLine::hide() {
-    show_hint_line = false;
-}
+void HintLine::hide() { show_hint_line = false; }
 
 void HintLine::reset() {
     show_hint_line    = false;

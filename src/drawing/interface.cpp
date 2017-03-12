@@ -88,13 +88,9 @@ int16_t GetInterfaceFontWidth(interfaceStyleType style) {
     return interface_font(style)->logicalWidth;
 }
 
-int16_t GetInterfaceFontHeight(interfaceStyleType style) {
-    return interface_font(style)->height;
-}
+int16_t GetInterfaceFontHeight(interfaceStyleType style) { return interface_font(style)->height; }
 
-int16_t GetInterfaceFontAscent(interfaceStyleType style) {
-    return interface_font(style)->ascent;
-}
+int16_t GetInterfaceFontAscent(interfaceStyleType style) { return interface_font(style)->ascent; }
 
 enum inlineKindType { kNoKind = 0, kVPictKind = 1, kVClearPictKind = 2 };
 
@@ -755,9 +751,10 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap
             */ /*tRect.top + vcenter - kInterfaceVLipHeight + 1*/ /*
             tRect.bottom - kInterfaceHTop + 1);
     vRect = Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
-            */ /*tRect.top + vcenter - kInterfaceVLipHeight + 1*/ /*
+            */
+/*tRect.top + vcenter - kInterfaceVLipHeight + 1*/                /*
                                                                                                                                                                                       tRect.bottom - kInterfaceHTop + 1);
-
+               
                                                                                                                                                                               if (
                                                                                                                                                                           item.status
                                                                                                                                                                           ==
@@ -773,7 +770,7 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap
                                                                                                                                                                           vRect,
                                                                                                                                                                           item.hue,
                                                                                                                                                                           shade, pix);
-
+               
                                                                                                                                                                                   wRect.left
                                                                                                                                                                           += 2;
                                                                                                                                                                                   wRect.right
@@ -788,7 +785,7 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap
                                                                                                                                                                                   mDrawPuffUpOval(wRect,
                                                                                                                                                                           item.hue,
                                                                                                                                                                           shade, pix);
-
+               
                                                                                                                                                                                   wRect.inset(3,
                                                                                                                                                                           3);
                                                                                                                                                                                   mDrawPuffDownOval(wRect,
@@ -796,7 +793,7 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap
                                                                                                                                                                           shade, pix);
                                                                                                                                                                                   wRect.inset(1,
                                                                                                                                                                           1);
-
+               
                                                                                                                                                                                   if
                                                                                                                                                                           (!item.on) {
                                                                                                                                                                                       PaintOval(pix, wRect, RgbColor::black());
@@ -839,7 +836,7 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap
                                                                                                                                                                                   mDrawPuffUpOval(wRect,
                                                                                                                                                                           item.hue,
                                                                                                                                                                           shade, pix);
-
+               
                                                                                                                                                                                   wRect.inset(3,
                                                                                                                                                                           3);
                                                                                                                                                                                   mDrawPuffDownOval(wRect,
@@ -866,7 +863,7 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap
                                                                                                                                                                                       PaintOval(pix, wRect, color);
                                                                                                                                                                                   }
                                                                                                                                                                               }
-
+               
                                                                                                                                                                               uRect =
                                                                                                                                                                           Rect(tRect.left
                                                                                                                                                                           +
@@ -880,7 +877,7 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap
                                                                                                                                                                                   tRect.bottom
                                                                                                                                                                           -
                                                                                                                                                                           kInterfaceContentBuffer);
-
+               
                                                                                                                                                                               if (
                                                                                                                                                                           item.status
                                                                                                                                                                           ==
@@ -907,7 +904,7 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap
                                                                                                                                                                           GetRGBTranslateColorShade(item.hue,
                                                                                                                                                                           shade);
                                                                                                                                                                               pix->view(uRect).fill(color);
-
+               
                                                                                                                                                                               if
                                                                                                                                                                           (item.status
                                                                                                                                                                           ==

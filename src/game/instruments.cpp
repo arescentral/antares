@@ -169,9 +169,7 @@ void InstrumentInit() {
     MiniScreenInit();
 }
 
-int32_t instrument_top() {
-    return (world().height() / 2) - (kPanelHeight / 2);
-}
+int32_t instrument_top() { return (world().height() / 2) - (kPanelHeight / 2); }
 
 void InstrumentCleanup() {
     g.radar_blips.reset();

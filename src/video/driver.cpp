@@ -34,55 +34,37 @@ VideoDriver::VideoDriver() {
     sys.video = this;
 }
 
-VideoDriver::~VideoDriver() {
-    sys.video = NULL;
-}
+VideoDriver::~VideoDriver() { sys.video = NULL; }
 
 Texture::Impl::~Impl() {}
 
-Points::Points() {
-    sys.video->begin_points();
-}
+Points::Points() { sys.video->begin_points(); }
 
-Points::~Points() {
-    sys.video->end_points();
-}
+Points::~Points() { sys.video->end_points(); }
 
 void Points::draw(const Point& at, const RgbColor& color) const {
     sys.video->batch_point(at, color);
 }
 
-Lines::Lines() {
-    sys.video->begin_lines();
-}
+Lines::Lines() { sys.video->begin_lines(); }
 
-Lines::~Lines() {
-    sys.video->end_lines();
-}
+Lines::~Lines() { sys.video->end_lines(); }
 
 void Lines::draw(const Point& from, const Point& to, const RgbColor& color) const {
     sys.video->batch_line(from, to, color);
 }
 
-Rects::Rects() {
-    sys.video->begin_rects();
-}
+Rects::Rects() { sys.video->begin_rects(); }
 
-Rects::~Rects() {
-    sys.video->end_rects();
-}
+Rects::~Rects() { sys.video->end_rects(); }
 
 void Rects::fill(const Rect& rect, const RgbColor& color) const {
     sys.video->batch_rect(rect, color);
 }
 
-Quads::Quads(const Texture& sprite) : _sprite(sprite) {
-    _sprite._impl->begin_quads();
-}
+Quads::Quads(const Texture& sprite) : _sprite(sprite) { _sprite._impl->begin_quads(); }
 
-Quads::~Quads() {
-    _sprite._impl->end_quads();
-}
+Quads::~Quads() { _sprite._impl->end_quads(); }
 
 void Quads::draw(const Rect& dest, const Rect& source, const RgbColor& tint) const {
     _sprite._impl->draw_quad(dest, source, tint);

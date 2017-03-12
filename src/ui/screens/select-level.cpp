@@ -162,9 +162,7 @@ void SelectLevelScreen::handle_button(Button& button) {
     }
 }
 
-void SelectLevelScreen::overlay() const {
-    draw_level_name();
-}
+void SelectLevelScreen::overlay() const { draw_level_name(); }
 
 void SelectLevelScreen::draw_level_name() const {
     const String chapter_name((*_level)->name);

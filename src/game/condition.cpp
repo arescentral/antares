@@ -47,9 +47,7 @@ void Level::Condition::set_true_yet(bool state) {
     }
 }
 
-bool Level::Condition::true_yet() const {
-    return flags & kHasBeenTrue;
-}
+bool Level::Condition::true_yet() const { return flags & kHasBeenTrue; }
 
 bool Level::Condition::is_true() const {
     int32_t         difference;

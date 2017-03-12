@@ -41,29 +41,19 @@ PixelFormat::PixelFormat(const CGLPixelFormatAttribute* attrs) {
     }
 }
 
-PixelFormat::~PixelFormat() {
-    CGLReleasePixelFormat(_pixel_format);
-}
+PixelFormat::~PixelFormat() { CGLReleasePixelFormat(_pixel_format); }
 
-CGLPixelFormatObj PixelFormat::c_obj() const {
-    return _pixel_format;
-}
+CGLPixelFormatObj PixelFormat::c_obj() const { return _pixel_format; }
 
-GLint PixelFormat::npix() const {
-    return _npix;
-}
+GLint PixelFormat::npix() const { return _npix; }
 
 Context::Context(CGLPixelFormatObj pix, CGLContextObj share) {
     check(CGLCreateContext(pix, NULL, &_context));
 }
 
-Context::~Context() {
-    CGLReleaseContext(_context);
-}
+Context::~Context() { CGLReleaseContext(_context); }
 
-CGLContextObj Context::c_obj() const {
-    return _context;
-}
+CGLContextObj Context::c_obj() const { return _context; }
 
 }  // namespace cgl
 }  // namespace antares

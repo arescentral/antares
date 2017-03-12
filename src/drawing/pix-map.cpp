@@ -32,21 +32,13 @@ namespace antares {
 
 PixMap::~PixMap() {}
 
-const RgbColor* PixMap::row(int y) const {
-    return bytes() + y * row_bytes();
-}
+const RgbColor* PixMap::row(int y) const { return bytes() + y * row_bytes(); }
 
-RgbColor* PixMap::mutable_row(int y) {
-    return mutable_bytes() + y * row_bytes();
-}
+RgbColor* PixMap::mutable_row(int y) { return mutable_bytes() + y * row_bytes(); }
 
-const RgbColor& PixMap::get(int x, int y) const {
-    return row(y)[x];
-}
+const RgbColor& PixMap::get(int x, int y) const { return row(y)[x]; }
 
-void PixMap::set(int x, int y, const RgbColor& color) {
-    mutable_row(y)[x] = color;
-}
+void PixMap::set(int x, int y, const RgbColor& color) { mutable_row(y)[x] = color; }
 
 void PixMap::fill(const RgbColor& color) {
     if (size().height > 0) {
@@ -110,21 +102,13 @@ void ArrayPixMap::resize(Size new_size) {
     swap(_bytes, new_pix_map._bytes);
 }
 
-const Size& ArrayPixMap::size() const {
-    return _size;
-}
+const Size& ArrayPixMap::size() const { return _size; }
 
-int ArrayPixMap::row_bytes() const {
-    return _size.width;
-}
+int ArrayPixMap::row_bytes() const { return _size.width; }
 
-const RgbColor* ArrayPixMap::bytes() const {
-    return _bytes.get();
-}
+const RgbColor* ArrayPixMap::bytes() const { return _bytes.get(); }
 
-RgbColor* ArrayPixMap::mutable_bytes() {
-    return _bytes.get();
-}
+RgbColor* ArrayPixMap::mutable_bytes() { return _bytes.get(); }
 
 void ArrayPixMap::swap(ArrayPixMap& other) {
     using sfz::swap;
@@ -143,13 +127,9 @@ PixMap::View::View(PixMap* pix, const Rect& bounds)
     }
 }
 
-const Size& PixMap::View::size() const {
-    return _size;
-}
+const Size& PixMap::View::size() const { return _size; }
 
-int PixMap::View::row_bytes() const {
-    return _parent->row_bytes();
-}
+int PixMap::View::row_bytes() const { return _parent->row_bytes(); }
 
 const RgbColor* PixMap::View::bytes() const {
     return _parent->bytes() + _offset.v * row_bytes() + _offset.h;
@@ -159,8 +139,6 @@ RgbColor* PixMap::View::mutable_bytes() {
     return _parent->mutable_bytes() + _offset.v * row_bytes() + _offset.h;
 }
 
-PixMap::View PixMap::view(const Rect& bounds) {
-    return View(this, bounds);
-}
+PixMap::View PixMap::view(const Rect& bounds) { return View(this, bounds); }
 
 }  // namespace antares

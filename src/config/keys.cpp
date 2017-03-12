@@ -26,9 +26,7 @@ namespace antares {
 
 KeyMap::KeyMap() : _data{} {}
 
-bool KeyMap::get(size_t index) const {
-    return _data[index >> 3] & (1 << (index & 0x7));
-}
+bool KeyMap::get(size_t index) const { return _data[index >> 3] & (1 << (index & 0x7)); }
 
 void KeyMap::set(size_t index, bool value) {
     if (get(index) != value) {
@@ -45,21 +43,13 @@ bool KeyMap::equals(const KeyMap& other) const {
     return memcmp(_data, other._data, kDataSize) == 0;
 }
 
-void KeyMap::copy(const KeyMap& other) {
-    memcpy(_data, other._data, kDataSize);
-}
+void KeyMap::copy(const KeyMap& other) { memcpy(_data, other._data, kDataSize); }
 
-void KeyMap::clear() {
-    bzero(_data, kDataSize);
-}
+void KeyMap::clear() { bzero(_data, kDataSize); }
 
-bool operator==(const KeyMap& a, const KeyMap& b) {
-    return a.equals(b);
-}
+bool operator==(const KeyMap& a, const KeyMap& b) { return a.equals(b); }
 
-bool operator!=(const KeyMap& a, const KeyMap& b) {
-    return !a.equals(b);
-}
+bool operator!=(const KeyMap& a, const KeyMap& b) { return !a.equals(b); }
 
 void GetKeyMapFromKeyNum(int key_num, KeyMap* key_map) {
     key_map->clear();
@@ -75,9 +65,7 @@ int GetKeyNumFromKeyMap(const KeyMap& key_map) {
     return 0;
 }
 
-void GetKeyNumName(int key_num, sfz::String* out) {
-    out->assign(sys.key_names.at(key_num - 1));
-}
+void GetKeyNumName(int key_num, sfz::String* out) { out->assign(sys.key_names.at(key_num - 1)); }
 
 bool GetKeyNameNum(sfz::StringSlice name, int& out) {
     bool result = false;
@@ -125,9 +113,7 @@ int key_digit(uint32_t k) {
     }
 }
 
-bool mCheckKeyMap(const KeyMap& mKeyMap, int mki) {
-    return mKeyMap.get(sys.prefs->key(mki) - 1);
-}
+bool mCheckKeyMap(const KeyMap& mKeyMap, int mki) { return mKeyMap.get(sys.prefs->key(mki) - 1); }
 
 int32_t GetAsciiFromKeyMap(const KeyMap& sourceKeyMap, const KeyMap& previousKeyMap) {
     // TODO(sfiera): write a new implementation of this method.

@@ -288,9 +288,7 @@ static void target_base(Handle<SpaceObject> origin_ship, int32_t direction) {
             FRIENDLY_OR_HOSTILE);
 }
 
-static void target_self() {
-    SetPlayerSelectShip(g.ship, true, g.admiral);
-}
+static void target_self() { SetPlayerSelectShip(g.ship, true, g.admiral); }
 
 void PlayerShip::key_down(const KeyDownEvent& event) {
     _keys.set(event.key(), true);
@@ -367,9 +365,7 @@ void PlayerShip::mouse_up(const MouseUpEvent& event) {
     }
 }
 
-void PlayerShip::mouse_move(const MouseMoveEvent& event) {
-    _cursor.mouse_move(event);
-}
+void PlayerShip::mouse_move(const MouseMoveEvent& event) { _cursor.mouse_move(event); }
 
 void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
     switch (event.button) {
@@ -774,9 +770,7 @@ bool PlayerShip::show_target() const {
     return _control_active && (_gamepad_state & TARGET_BUMPER);
 }
 
-int32_t PlayerShip::control_direction() const {
-    return _control_direction;
-}
+int32_t PlayerShip::control_direction() const { return _control_direction; }
 
 void PlayerShipHandleClick(Point where, int button) {
     if (g.key_mask & kMouseMask) {
@@ -908,9 +902,7 @@ void TogglePlayerAutoPilot(Handle<SpaceObject> flagship) {
     }
 }
 
-bool IsPlayerShipOnAutoPilot() {
-    return g.ship.get() && (g.ship->attributes & kOnAutoPilot);
-}
+bool IsPlayerShipOnAutoPilot() { return g.ship.get() && (g.ship->attributes & kOnAutoPilot); }
 
 void PlayerShipGiveCommand(Handle<Admiral> whichAdmiral) {
     auto control = whichAdmiral->control();

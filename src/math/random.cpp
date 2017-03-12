@@ -26,9 +26,7 @@ namespace antares {
 
 static ANTARES_GLOBAL Random global_seed = {static_cast<int32_t>(0x84744901)};
 
-static int32_t Random() {
-    return global_seed.next(0x8000);
-}
+static int32_t Random() { return global_seed.next(0x8000); }
 
 int Randomize(int range) {
     int32_t rawResult;

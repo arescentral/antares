@@ -163,9 +163,7 @@ InterfaceItem::InterfaceItem(int id, Rect bounds) : id(id), _bounds(bounds) {}
 PlainRect::PlainRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style)
         : InterfaceItem(id, bounds), hue(hue), style(style) {}
 
-void PlainRect::accept(const Visitor& visitor) const {
-    visitor.visit_plain_rect(*this);
-}
+void PlainRect::accept(const Visitor& visitor) const { visitor.visit_plain_rect(*this); }
 
 LabeledItem::LabeledItem(int id, Rect bounds, interfaceLabelType label)
         : InterfaceItem(id, bounds),
@@ -175,9 +173,7 @@ LabeledRect::LabeledRect(
         int id, Rect bounds, interfaceLabelType label, uint8_t hue, interfaceStyleType style)
         : LabeledItem(id, bounds, label), hue(hue), style(style) {}
 
-void LabeledRect::accept(const Visitor& visitor) const {
-    visitor.visit_labeled_rect(*this);
-}
+void LabeledRect::accept(const Visitor& visitor) const { visitor.visit_labeled_rect(*this); }
 
 TextRect::TextRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style)
         : InterfaceItem(id, bounds), hue(hue), style(style) {}
@@ -189,9 +185,7 @@ TextRect::TextRect(
           hue(hue),
           style(style) {}
 
-void TextRect::accept(const Visitor& visitor) const {
-    visitor.visit_text_rect(*this);
-}
+void TextRect::accept(const Visitor& visitor) const { visitor.visit_text_rect(*this); }
 
 PictureRect::PictureRect(int id, Rect bounds, StringSlice resource)
         : InterfaceItem(id, bounds),
@@ -201,9 +195,7 @@ PictureRect::PictureRect(int id, Rect bounds, StringSlice resource)
           hue(GRAY),
           style(kSmall) {}
 
-void PictureRect::accept(const Visitor& visitor) const {
-    visitor.visit_picture_rect(*this);
-}
+void PictureRect::accept(const Visitor& visitor) const { visitor.visit_picture_rect(*this); }
 
 Button::Button(
         int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, uint8_t hue,
@@ -220,27 +212,21 @@ PlainButton::PlainButton(
         interfaceStyleType style)
         : Button(id, bounds, key, gamepad, label, hue, style) {}
 
-void PlainButton::accept(const Visitor& visitor) const {
-    visitor.visit_plain_button(*this);
-}
+void PlainButton::accept(const Visitor& visitor) const { visitor.visit_plain_button(*this); }
 
 CheckboxButton::CheckboxButton(
         int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, uint8_t hue,
         interfaceStyleType style)
         : Button(id, bounds, key, gamepad, label, hue, style), on(false) {}
 
-void CheckboxButton::accept(const Visitor& visitor) const {
-    visitor.visit_checkbox_button(*this);
-}
+void CheckboxButton::accept(const Visitor& visitor) const { visitor.visit_checkbox_button(*this); }
 
 RadioButton::RadioButton(
         int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, uint8_t hue,
         interfaceStyleType style)
         : Button(id, bounds, key, gamepad, label, hue, style), on(false) {}
 
-void RadioButton::accept(const Visitor& visitor) const {
-    visitor.visit_radio_button(*this);
-}
+void RadioButton::accept(const Visitor& visitor) const { visitor.visit_radio_button(*this); }
 
 TabBoxButton::TabBoxButton(
         int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, uint8_t hue,
@@ -249,9 +235,7 @@ TabBoxButton::TabBoxButton(
           on(false),
           tab_content(tab_content) {}
 
-void TabBoxButton::accept(const Visitor& visitor) const {
-    visitor.visit_tab_box_button(*this);
-}
+void TabBoxButton::accept(const Visitor& visitor) const { visitor.visit_tab_box_button(*this); }
 
 TabBox::TabBox(
         int id, Rect bounds, uint8_t hue, interfaceStyleType style, int16_t top_right_border_size)
@@ -260,9 +244,7 @@ TabBox::TabBox(
           style(style),
           top_right_border_size(top_right_border_size) {}
 
-void TabBox::accept(const Visitor& visitor) const {
-    visitor.visit_tab_box(*this);
-}
+void TabBox::accept(const Visitor& visitor) const { visitor.visit_tab_box(*this); }
 
 InterfaceItem::Visitor::~Visitor() {}
 

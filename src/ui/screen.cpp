@@ -76,9 +76,7 @@ void InterfaceScreen::become_front() {
     // half-second fade from black.
 }
 
-void InterfaceScreen::resign_front() {
-    become_normal();
-}
+void InterfaceScreen::resign_front() { become_normal(); }
 
 void InterfaceScreen::become_normal() {
     _state      = NORMAL;
@@ -245,16 +243,10 @@ Point InterfaceScreen::offset() const {
     return bounds.origin();
 }
 
-size_t InterfaceScreen::size() const {
-    return _items.size();
-}
+size_t InterfaceScreen::size() const { return _items.size(); }
 
-const InterfaceItem& InterfaceScreen::item(int i) const {
-    return *_items[i];
-}
+const InterfaceItem& InterfaceScreen::item(int i) const { return *_items[i]; }
 
-InterfaceItem& InterfaceScreen::mutable_item(int i) {
-    return *_items[i];
-}
+InterfaceItem& InterfaceScreen::mutable_item(int i) { return *_items[i]; }
 
 }  // namespace antares

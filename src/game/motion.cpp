@@ -142,9 +142,7 @@ void ResetMotionGlobals() {
     }
 }
 
-void MotionCleanup() {
-    gProximityGrid.reset();
-}
+void MotionCleanup() { gProximityGrid.reset(); }
 
 static void move(Handle<SpaceObject> o) {
     if ((o->maxVelocity == Fixed::zero()) && !(o->attributes & kCanTurn)) {

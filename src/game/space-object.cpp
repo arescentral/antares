@@ -91,9 +91,7 @@ BaseObject* BaseObject::get(int number) {
     return nullptr;
 }
 
-HandleList<BaseObject> BaseObject::all() {
-    return HandleList<BaseObject>(0, plug.objects.size());
-}
+HandleList<BaseObject> BaseObject::all() { return HandleList<BaseObject>(0, plug.objects.size()); }
 
 Action* Action::get(int32_t number) {
     if ((0 <= number) && (number < plug.actions.size())) {
@@ -902,8 +900,6 @@ StringSlice get_object_short_name(Handle<BaseObject> id) {
     return id->short_name;  // TODO(sfiera): use directly.
 }
 
-int32_t SpaceObject::number() const {
-    return this - g.objects.get();
-}
+int32_t SpaceObject::number() const { return this - g.objects.get(); }
 
 }  // namespace antares

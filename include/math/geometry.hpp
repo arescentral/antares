@@ -192,12 +192,8 @@ struct coordPointType {
     uint32_t v;
 };
 
-inline bool operator==(coordPointType x, coordPointType y) {
-    return (x.h == y.h) && (x.v == y.v);
-}
-inline bool operator!=(coordPointType x, coordPointType y) {
-    return !(x == y);
-}
+inline bool operator==(coordPointType x, coordPointType y) { return (x.h == y.h) && (x.v == y.v); }
+inline bool operator!=(coordPointType x, coordPointType y) { return !(x == y); }
 
 }  // namespace antares
 

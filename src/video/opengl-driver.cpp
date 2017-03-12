@@ -378,17 +378,13 @@ class OpenGlTextureImpl : public Texture::Impl {
 
 OpenGlVideoDriver::OpenGlVideoDriver() : _static_seed{0} {}
 
-int OpenGlVideoDriver::scale() const {
-    return viewport_size().width / screen_size().width;
-}
+int OpenGlVideoDriver::scale() const { return viewport_size().width / screen_size().width; }
 
 Texture OpenGlVideoDriver::texture(PrintItem name, const PixMap& content) {
     return unique_ptr<Texture::Impl>(new OpenGlTextureImpl(name, content, _uniforms, _vbuf));
 }
 
-void OpenGlVideoDriver::begin_rects() {
-    _uniforms.color_mode.set(FILL_MODE);
-}
+void OpenGlVideoDriver::begin_rects() { _uniforms.color_mode.set(FILL_MODE); }
 
 void OpenGlVideoDriver::batch_rect(const Rect& rect, const RgbColor& color) {
     glEnableVertexAttribArray(0);
@@ -424,9 +420,7 @@ void OpenGlVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
     batch_rect(rect, color);
 }
 
-void OpenGlVideoDriver::begin_points() {
-    _uniforms.color_mode.set(FILL_MODE);
-}
+void OpenGlVideoDriver::begin_points() { _uniforms.color_mode.set(FILL_MODE); }
 
 void OpenGlVideoDriver::end_points() {}
 
@@ -458,9 +452,7 @@ void OpenGlVideoDriver::draw_point(const Point& at, const RgbColor& color) {
     end_points();
 }
 
-void OpenGlVideoDriver::begin_lines() {
-    _uniforms.color_mode.set(FILL_MODE);
-}
+void OpenGlVideoDriver::begin_lines() { _uniforms.color_mode.set(FILL_MODE); }
 
 void OpenGlVideoDriver::end_lines() {}
 
@@ -667,12 +659,8 @@ void OpenGlVideoDriver::MainLoop::draw() {
     glFinish();
 }
 
-bool OpenGlVideoDriver::MainLoop::done() const {
-    return _stack.empty();
-}
+bool OpenGlVideoDriver::MainLoop::done() const { return _stack.empty(); }
 
-Card* OpenGlVideoDriver::MainLoop::top() const {
-    return _stack.top();
-}
+Card* OpenGlVideoDriver::MainLoop::top() const { return _stack.top(); }
 
 }  // namespace antares

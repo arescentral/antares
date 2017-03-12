@@ -458,9 +458,7 @@ DataExtractor::DataExtractor(const StringSlice& downloads_dir, const StringSlice
           _output_dir(output_dir),
           _scenario(kFactoryScenarioIdentifier) {}
 
-void DataExtractor::set_scenario(sfz::StringSlice scenario) {
-    _scenario.assign(scenario);
-}
+void DataExtractor::set_scenario(sfz::StringSlice scenario) { _scenario.assign(scenario); }
 
 void DataExtractor::set_plugin_file(StringSlice path) {
     String found_scenario;

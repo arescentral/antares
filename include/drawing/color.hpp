@@ -98,9 +98,7 @@ inline constexpr RgbColor rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
     return RgbColor(r, g, b, a);
 }
 
-inline constexpr RgbColor rgb(uint8_t r, uint8_t g, uint8_t b) {
-    return rgba(r, g, b, 0xff);
-}
+inline constexpr RgbColor rgb(uint8_t r, uint8_t g, uint8_t b) { return rgba(r, g, b, 0xff); }
 
 void read_from(sfz::ReadSource in, RgbColor& color);
 void write_to(sfz::WriteTarget out, const RgbColor& color);

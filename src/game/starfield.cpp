@@ -46,9 +46,7 @@ const uint8_t kStarColor = GRAY;
 
 namespace {
 
-inline int32_t RandomStarSpeed() {
-    return Randomize(kStarSpeedSpread) + kMinimumStarSpeed;
-}
+inline int32_t RandomStarSpeed() { return Randomize(kStarSpeedSpread) + kMinimumStarSpeed; }
 
 }  // namespace
 

@@ -44,9 +44,7 @@ void read_pstr(ReadSource in, String& out) {
 
 }  // namespace
 
-Level* Level::get(int n) {
-    return &plug.levels[n];
-}
+Level* Level::get(int n) { return &plug.levels[n]; }
 
 void read_from(ReadSource in, scenarioInfoType& scenario_info) {
     scenario_info.warpInFlareID  = Handle<BaseObject>(read<int32_t>(in));

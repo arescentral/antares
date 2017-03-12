@@ -37,17 +37,11 @@ static bool mouse_visible = true;
 }
 @end
 
-bool antares_is_active() {
-    return [NSApp isActive];
-}
+bool antares_is_active() { return [NSApp isActive]; }
 
-void antares_menu_bar_hide() {
-    [NSMenu setMenuBarVisible:NO];
-}
+void antares_menu_bar_hide() { [NSMenu setMenuBarVisible:NO]; }
 
-void antares_menu_bar_show() {
-    [NSMenu setMenuBarVisible:YES];
-}
+void antares_menu_bar_show() { [NSMenu setMenuBarVisible:YES]; }
 
 void antares_mouse_hide() {
     if (mouse_visible) {
@@ -158,9 +152,7 @@ AntaresEventTranslator* antares_event_translator_create() {
     return translator;
 }
 
-void antares_event_translator_destroy(AntaresEventTranslator* translator) {
-    free(translator);
-}
+void antares_event_translator_destroy(AntaresEventTranslator* translator) { free(translator); }
 
 void antares_event_translator_set_window(
         AntaresEventTranslator* translator, AntaresWindow* window) {

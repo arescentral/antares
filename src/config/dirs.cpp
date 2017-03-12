@@ -32,8 +32,6 @@ sfz::String application_path() {
     return sfz::String(app_data);
 }
 
-void set_application_path(sfz::StringSlice path) {
-    app_data.assign(path);
-}
+void set_application_path(sfz::StringSlice path) { app_data.assign(path); }
 
 }  // namespace antares

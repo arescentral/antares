@@ -186,13 +186,9 @@ class OpenAlSoundDriver::OpenAlChannel : public SoundChannel {
     DISALLOW_COPY_AND_ASSIGN(OpenAlChannel);
 };
 
-void OpenAlSoundDriver::OpenAlSound::play() {
-    _driver._active_channel->play(*this);
-}
+void OpenAlSoundDriver::OpenAlSound::play() { _driver._active_channel->play(*this); }
 
-void OpenAlSoundDriver::OpenAlSound::loop() {
-    _driver._active_channel->loop(*this);
-}
+void OpenAlSoundDriver::OpenAlSound::loop() { _driver._active_channel->loop(*this); }
 
 OpenAlSoundDriver::OpenAlSoundDriver() : _active_channel(NULL) {
     // TODO(sfiera): error-checking.
@@ -240,8 +236,6 @@ unique_ptr<Sound> OpenAlSoundDriver::open_sound(PrintItem path) {
     throw Exception(format("couldn't load sound {0}", quote(path_string)));
 }
 
-void OpenAlSoundDriver::set_global_volume(uint8_t volume) {
-    alListenerf(AL_GAIN, volume / 8.0);
-}
+void OpenAlSoundDriver::set_global_volume(uint8_t volume) { alListenerf(AL_GAIN, volume / 8.0); }
 
 }  // namespace antares
