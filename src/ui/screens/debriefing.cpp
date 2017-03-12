@@ -52,7 +52,7 @@ const int   kTextWidth        = 300;
 
 void string_replace(pn::string_ref s, pn::string_view in, pn::string_view out) {
     size_t index = s.find(in);
-    while (index != sfz::String::npos) {
+    while (index != s.npos) {
         s.replace(index, in.size(), out);
         index = s.find(in, index + 1);
     }

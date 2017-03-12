@@ -44,7 +44,6 @@
 #include "sound/fx.hpp"
 #include "video/driver.hpp"
 
-using sfz::StringSlice;
 using sfz::bin;
 using sfz::range;
 using std::max;

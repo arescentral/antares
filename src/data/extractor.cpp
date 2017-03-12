@@ -47,7 +47,6 @@ using rezin::aiff;
 using sfz::MappedFile;
 using sfz::Sha1;
 using sfz::StringMap;
-using sfz::StringSlice;
 using sfz::dec;
 using sfz::makedirs;
 using sfz::range;
@@ -680,7 +679,7 @@ void DataExtractor::extract_plugin(Observer* observer) const {
         if (!pn::partition(data, "/", path) || (data != "data") ||
             !pn::partition(resource_type_slice, "/", path) ||
             !pn::partition(id_slice, " ", path) || !pn::strtoll(id_slice, &id, nullptr) ||
-            (path.find(pn::rune{'/'}) != StringSlice::npos)) {
+            (path.find(pn::rune{'/'}) != path.npos)) {
             throw std::runtime_error(
                     pn::format(
                             "bad plugin file {0}", pn::dump(sfz2pn(file.path()), pn::dump_short))

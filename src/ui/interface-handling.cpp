@@ -99,9 +99,10 @@ enum {
 
 const int16_t kHelpScreenKeyStringID = 6003;
 
-int find_replace(pn::string_ref data, int pos, pn::string_view search, pn::string_view replace) {
+pn::string_view::size_type find_replace(
+        pn::string_ref data, int pos, pn::string_view search, pn::string_view replace) {
     size_t at = data.find(search, pos);
-    if (at != sfz::String::npos) {
+    if (at != data.npos) {
         data.replace(at, search.size(), replace);
     }
     return at;
@@ -274,12 +275,12 @@ void Replace_KeyCode_Strings_With_Actual_Key_Names(pn::string& text, int16_t res
         // StyledText.set_retro_text(), which interprets backslashes
         // specially.  Don't do this until after padding, though.
         size_t pos = 0;
-        while ((pos = find_replace(replace, pos, pn::string{"\\"}, "\\\\")) != sfz::String::npos) {
+        while ((pos = find_replace(replace, pos, pn::string{"\\"}, "\\\\")) != replace.npos) {
             pos += 2;  // Don't find the just-inserted backslashes again.
         }
 
         // Replace search string with value string in resulting text.
-        while (find_replace(text, 0, search, replace) != sfz::String::npos) {
+        while (find_replace(text, 0, search, replace) != text.npos) {
             pos += 1;
         };
     }
