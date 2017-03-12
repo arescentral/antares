@@ -28,7 +28,6 @@
 #include "game/sys.hpp"
 #include "video/driver.hpp"
 
-using sfz::BytesSlice;
 using std::unique_ptr;
 using std::vector;
 

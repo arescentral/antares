@@ -49,7 +49,6 @@
 #include "math/units.hpp"
 #include "video/transitions.hpp"
 
-using sfz::BytesSlice;
 using sfz::ReadSource;
 using sfz::read;
 using std::max;

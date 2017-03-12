@@ -55,7 +55,6 @@
 #include "video/driver.hpp"
 #include "video/transitions.hpp"
 
-using sfz::BytesSlice;
 using sfz::ReadSource;
 using sfz::read;
 using std::make_pair;

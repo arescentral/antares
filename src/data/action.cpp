@@ -22,7 +22,6 @@
 
 #include "data/base-object.hpp"
 
-using sfz::BytesSlice;
 using sfz::ReadSource;
 using sfz::read;
 
@@ -48,7 +47,7 @@ void read_from(ReadSource in, Action& action) {
     in.shift(4);
     read(in, section, 24);
 
-    BytesSlice sub(BytesSlice(section, 24));
+    sfz::BytesSlice sub(sfz::BytesSlice(section, 24));
     switch (action.verb) {
         case kNoAction:
         case kSetDestination:

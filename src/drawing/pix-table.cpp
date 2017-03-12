@@ -29,7 +29,6 @@
 #include "game/sys.hpp"
 #include "video/driver.hpp"
 
-using sfz::BytesSlice;
 using sfz::ReadSource;
 using sfz::StringMap;
 using sfz::range;
@@ -42,8 +41,8 @@ namespace utf8 = sfz::utf8;
 namespace antares {
 
 static void load_image(ArrayPixMap& image, pn::string_view path) {
-    Resource   rsrc(path);
-    BytesSlice data = rsrc.data();
+    Resource        rsrc(path);
+    sfz::BytesSlice data = rsrc.data();
     read(data, image);
 }
 

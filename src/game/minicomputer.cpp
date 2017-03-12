@@ -44,7 +44,6 @@
 #include "sound/fx.hpp"
 #include "video/driver.hpp"
 
-using sfz::Bytes;
 using sfz::Rune;
 using sfz::StringSlice;
 using sfz::bin;

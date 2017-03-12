@@ -28,8 +28,6 @@
 #include "sound/driver.hpp"
 #include "sound/fx.hpp"
 
-using sfz::BytesSlice;
-
 namespace antares {
 
 static const int16_t kCheatStringListID  = 750;
@@ -54,8 +52,8 @@ void sys_init() {
     sys.gamepad_long_names = to_vector(StringList(Gamepad::LONG_NAMES));
 
     {
-        Resource   rsrc("rotation-table");
-        BytesSlice in(rsrc.data());
+        Resource        rsrc("rotation-table");
+        sfz::BytesSlice in(rsrc.data());
         read(in, sys.rot_table, SystemGlobals::ROT_TABLE_SIZE);
         if (!in.empty()) {
             throw std::runtime_error("didn't consume all of rotation data");

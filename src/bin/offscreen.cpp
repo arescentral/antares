@@ -32,7 +32,6 @@
 #include "video/offscreen-driver.hpp"
 #include "video/text-driver.hpp"
 
-using sfz::Bytes;
 using sfz::Optional;
 using sfz::Rune;
 using sfz::args::help;

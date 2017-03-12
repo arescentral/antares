@@ -31,8 +31,6 @@
 #include "data/pn.hpp"
 #include "game/sys.hpp"
 
-using sfz::Bytes;
-using sfz::BytesSlice;
 using sfz::CString;
 using sfz::ReadSource;
 using sfz::ScopedFd;
@@ -162,14 +160,14 @@ static void tag_string(WriteTarget out, uint64_t tag, pn::string_view s) {
 }
 
 static pn::string read_string(ReadSource in) {
-    Bytes bytes(read_varint<size_t>(in), '\0');
+    sfz::Bytes bytes(read_varint<size_t>(in), '\0');
     in.shift(bytes.data(), bytes.size());
     return sfz2pn(sfz::String(utf8::decode(bytes)));
 }
 
 template <typename T>
 static void tag_message(WriteTarget out, uint64_t tag, const T& message) {
-    Bytes bytes;
+    sfz::Bytes bytes;
     write(bytes, message);
     write_varint(out, tag);
     write_varint(out, bytes.size());
@@ -178,10 +176,10 @@ static void tag_message(WriteTarget out, uint64_t tag, const T& message) {
 
 template <typename T>
 static T read_message(ReadSource in) {
-    Bytes bytes(read_varint<size_t>(in), '\0');
+    sfz::Bytes bytes(read_varint<size_t>(in), '\0');
     in.shift(bytes.data(), bytes.size());
-    T          message;
-    BytesSlice slice = bytes;
+    T               message;
+    sfz::BytesSlice slice = bytes;
     read(slice, message);
     return message;
 }

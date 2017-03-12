@@ -23,8 +23,6 @@
 
 #include "data/pn.hpp"
 
-using sfz::Bytes;
-using sfz::BytesSlice;
 using sfz::CString;
 using std::unique_ptr;
 

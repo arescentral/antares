@@ -26,8 +26,6 @@
 #include "data/pn.hpp"
 #include "data/resource.hpp"
 
-using sfz::Bytes;
-using sfz::BytesSlice;
 using sfz::quote;
 using sfz::read;
 using std::vector;

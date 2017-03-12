@@ -33,7 +33,6 @@
 #include "lang/defines.hpp"
 #include "math/fixed.hpp"
 
-using sfz::BytesSlice;
 using sfz::Rune;
 using std::unique_ptr;
 

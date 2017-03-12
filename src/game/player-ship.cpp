@@ -52,8 +52,6 @@
 #include "math/units.hpp"
 #include "sound/fx.hpp"
 
-using sfz::BytesSlice;
-
 namespace macroman = sfz::macroman;
 
 namespace antares {
@@ -580,7 +578,7 @@ void PlayerShip::update(bool enter_message) {
                         uint8_t ch = GetAsciiFromKeyMap(*bufMap, globals()->gLastMessageKeyMap);
                         if (ch) {
                             message->resize(message->size() - 1);
-                            String s(macroman::decode(BytesSlice(&ch, 1)));
+                            String s(macroman::decode(sfz::BytesSlice(&ch, 1)));
                             message->append(s);
                             message->append(1, '>');
                         }

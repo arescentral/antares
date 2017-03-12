@@ -39,7 +39,6 @@
 #include "video/driver.hpp"
 #include "video/transitions.hpp"
 
-using sfz::BytesSlice;
 using std::unique_ptr;
 
 namespace antares {

@@ -22,7 +22,6 @@
 
 #include <sfz/sfz.hpp>
 
-using sfz::BytesSlice;
 using sfz::ReadSource;
 using sfz::read;
 
@@ -191,7 +190,7 @@ void read_from(ReadSource in, BaseObject& object) {
     in.shift(6);
     read(in, object.internalFlags);
 
-    BytesSlice sub(BytesSlice(section, 32));
+    sfz::BytesSlice sub(sfz::BytesSlice(section, 32));
     if (object.attributes & kShapeFromDirection) {
         read(sub, object.frame.rotation);
     } else if (object.attributes & kIsSelfAnimated) {

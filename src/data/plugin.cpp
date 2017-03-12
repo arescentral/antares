@@ -26,7 +26,6 @@
 #include "data/string-list.hpp"
 #include "lang/defines.hpp"
 
-using sfz::BytesSlice;
 using sfz::range;
 using std::vector;
 
@@ -43,9 +42,9 @@ ANTARES_GLOBAL ScenarioGlobals plug;
 template <typename T>
 static void read_all(
         pn::string_view name, pn::string_view type, pn::string_view extension, vector<T>& v) {
-    Resource   rsrc(type, extension, kPackedResID);
-    BytesSlice in(rsrc.data());
-    size_t     count = rsrc.data().size() / T::byte_size;
+    Resource        rsrc(type, extension, kPackedResID);
+    sfz::BytesSlice in(rsrc.data());
+    size_t          count = rsrc.data().size() / T::byte_size;
     v.resize(count);
     for (size_t i = 0; i < count; ++i) {
         read(in, v[i]);
@@ -57,8 +56,8 @@ static void read_all(
 
 void PluginInit() {
     {
-        Resource   rsrc("scenario-info", "nlAG", 128);
-        BytesSlice in(rsrc.data());
+        Resource        rsrc("scenario-info", "nlAG", 128);
+        sfz::BytesSlice in(rsrc.data());
         read(in, plug.meta);
         if (!in.empty()) {
             throw std::runtime_error("didn't consume all of scenario file info data");

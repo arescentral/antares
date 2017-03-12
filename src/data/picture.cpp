@@ -25,8 +25,6 @@
 #include "game/sys.hpp"
 #include "video/driver.hpp"
 
-using sfz::BytesSlice;
-
 namespace antares {
 
 Picture::Picture(int32_t id, bool hidpi) : Picture(pn::format("pictures/{0}", id)) {}
@@ -41,8 +39,8 @@ Picture::Picture(pn::string_view resource, bool hidpi)
             } else {
                 _path += ".png";
             }
-            Resource   rsrc(_path);
-            BytesSlice in(rsrc.data());
+            Resource        rsrc(_path);
+            sfz::BytesSlice in(rsrc.data());
             read(in, *this);
             break;
         } catch (std::exception& e) {

@@ -37,7 +37,6 @@
 #include "ui/card.hpp"
 #include "video/driver.hpp"
 
-using sfz::Bytes;
 using sfz::dec;
 using std::chrono::duration_cast;
 using std::unique_ptr;

@@ -51,7 +51,6 @@
 #include "math/units.hpp"
 #include "video/transitions.hpp"
 
-using sfz::BytesSlice;
 using sfz::ReadSource;
 using sfz::range;
 using sfz::read;

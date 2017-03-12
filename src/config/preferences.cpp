@@ -28,7 +28,6 @@
 #include "game/sys.hpp"
 #include "lang/defines.hpp"
 
-using sfz::BytesSlice;
 using sfz::ReadSource;
 using sfz::range;
 using sfz::read;

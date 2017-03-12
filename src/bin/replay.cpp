@@ -54,7 +54,6 @@
 #include "video/offscreen-driver.hpp"
 #include "video/text-driver.hpp"
 
-using sfz::BytesSlice;
 using sfz::MappedFile;
 using sfz::Optional;
 using sfz::ScopedFd;
@@ -72,7 +71,7 @@ namespace antares {
 
 class ReplayMaster : public Card {
   public:
-    ReplayMaster(BytesSlice data, const Optional<pn::string>& output_path)
+    ReplayMaster(sfz::BytesSlice data, const Optional<pn::string>& output_path)
             : _state(NEW),
               _replay_data(data),
               _random_seed(_replay_data.global_seed),

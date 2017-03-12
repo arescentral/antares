@@ -26,7 +26,6 @@
 #include "game/globals.hpp"
 #include "lang/defines.hpp"
 
-using sfz::BytesSlice;
 using sfz::ReadSource;
 using sfz::read;
 using std::unique_ptr;

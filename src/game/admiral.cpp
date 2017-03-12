@@ -31,7 +31,6 @@
 #include "math/units.hpp"
 #include "sound/fx.hpp"
 
-using sfz::Bytes;
 using std::min;
 using std::unique_ptr;
 

@@ -44,8 +44,6 @@ using rezin::ResourceType;
 using rezin::Sound;
 using rezin::StringList;
 using rezin::aiff;
-using sfz::Bytes;
-using sfz::BytesSlice;
 using sfz::MappedFile;
 using sfz::ScopedFd;
 using sfz::Sha1;
@@ -71,7 +69,7 @@ namespace antares {
 
 namespace {
 
-bool verbatim(pn::string_view, bool, int16_t, BytesSlice data, WriteTarget out) {
+bool verbatim(pn::string_view, bool, int16_t, sfz::BytesSlice data, WriteTarget out) {
     write(out, data);
     return true;
 }
@@ -91,7 +89,7 @@ int32_t nlrp_chapter(int16_t id) {
     throw std::runtime_error(pn::format("invalid replay ID {0}", id).c_str());
 }
 
-bool convert_nlrp(pn::string_view, bool, int16_t id, BytesSlice data, WriteTarget out) {
+bool convert_nlrp(pn::string_view, bool, int16_t id, sfz::BytesSlice data, WriteTarget out) {
     ReplayData replay;
     replay.scenario.identifier = kFactoryScenarioIdentifier;
     replay.scenario.version    = "1.1.1";
@@ -124,7 +122,7 @@ bool convert_nlrp(pn::string_view, bool, int16_t id, BytesSlice data, WriteTarge
     return true;
 }
 
-bool convert_pict(pn::string_view, bool, int16_t, BytesSlice data, WriteTarget out) {
+bool convert_pict(pn::string_view, bool, int16_t, sfz::BytesSlice data, WriteTarget out) {
     rezin::Picture pict(data);
     if ((pict.version() == 2) && (pict.is_raster())) {
         write(out, png(pict));
@@ -141,7 +139,7 @@ static pn::array pn_str(const StringList& str_list) {
     return a;
 }
 
-bool convert_str(pn::string_view, bool, int16_t, BytesSlice data, WriteTarget out) {
+bool convert_str(pn::string_view, bool, int16_t, sfz::BytesSlice data, WriteTarget out) {
     Options    options;
     StringList list(data, options);
     pn::string string = pn::dump(pn::value{pn_str(list)});
@@ -149,20 +147,20 @@ bool convert_str(pn::string_view, bool, int16_t, BytesSlice data, WriteTarget ou
     return true;
 }
 
-bool convert_text(pn::string_view, bool, int16_t, BytesSlice data, WriteTarget out) {
+bool convert_text(pn::string_view, bool, int16_t, sfz::BytesSlice data, WriteTarget out) {
     Options    options;
     pn::string string = sfz2pn(sfz::String(options.decode(data)));
     write(out, string.data(), string.size());
     return true;
 }
 
-bool convert_snd(pn::string_view, bool, int16_t, BytesSlice data, WriteTarget out) {
+bool convert_snd(pn::string_view, bool, int16_t, sfz::BytesSlice data, WriteTarget out) {
     Sound snd(data);
     write(out, aiff(snd));
     return true;
 }
 
-void convert_frame(pn::string_view dir, int16_t id, BytesSlice data, PixMap::View pix) {
+void convert_frame(pn::string_view dir, int16_t id, sfz::BytesSlice data, PixMap::View pix) {
     auto width  = pix.size().width;
     auto height = pix.size().height;
 
@@ -177,7 +175,7 @@ void convert_frame(pn::string_view dir, int16_t id, BytesSlice data, PixMap::Vie
     }
 }
 
-void convert_overlay(pn::string_view dir, int16_t id, BytesSlice data, PixMap::View pix) {
+void convert_overlay(pn::string_view dir, int16_t id, sfz::BytesSlice data, PixMap::View pix) {
     auto width  = pix.size().width;
     auto height = pix.size().height;
 
@@ -262,8 +260,8 @@ void alphatize(ArrayPixMap& image) {
 }
 
 bool convert_smiv(
-        pn::string_view dir, bool factory, int16_t id, BytesSlice data, WriteTarget out) {
-    BytesSlice header = data;
+        pn::string_view dir, bool factory, int16_t id, sfz::BytesSlice data, WriteTarget out) {
+    sfz::BytesSlice header = data;
     header.shift(4);
     uint32_t         size = read<uint32_t>(header);
     vector<uint32_t> offsets;
@@ -272,12 +270,12 @@ bool convert_smiv(
     pn::array frames;
     for (auto i : range(size)) {
         static_cast<void>(i);
-        uint32_t   offset     = read<uint32_t>(header);
-        BytesSlice frame_data = data.slice(offset);
-        auto       width      = read<uint16_t>(frame_data);
-        auto       height     = read<uint16_t>(frame_data);
-        auto       x_offset   = -read<int16_t>(frame_data);
-        auto       y_offset   = -read<int16_t>(frame_data);
+        uint32_t        offset     = read<uint32_t>(header);
+        sfz::BytesSlice frame_data = data.slice(offset);
+        auto            width      = read<uint16_t>(frame_data);
+        auto            height     = read<uint16_t>(frame_data);
+        auto            x_offset   = -read<int16_t>(frame_data);
+        auto            y_offset   = -read<int16_t>(frame_data);
         offsets.push_back(offset);
         bounds.emplace_back(Point(x_offset, y_offset), Size(width, height));
 
@@ -314,8 +312,8 @@ bool convert_smiv(
         int col = i % cols;
         int row = i / cols;
 
-        pn::map    frame;
-        BytesSlice frame_data = data.slice(offsets[i]);
+        pn::map         frame;
+        sfz::BytesSlice frame_data = data.slice(offsets[i]);
         frame_data.shift(8);
         Rect r = bounds[i];
         r.offset(max_bounds.width() * col, max_bounds.height() * row);
@@ -339,13 +337,13 @@ bool convert_smiv(
     {
         pn::string output = pn::format("{0}/{1}/image.png", dir, id);
         ScopedFd   fd(open(pn2sfz(output), O_WRONLY | O_CREAT | O_TRUNC, 0644));
-        write(fd, Bytes(image));
+        write(fd, sfz::Bytes(image));
     }
 
     {
         pn::string output = pn::format("{0}/{1}/overlay.png", dir, id);
         ScopedFd   fd(open(pn2sfz(output), O_WRONLY | O_CREAT | O_TRUNC, 0644));
-        write(fd, Bytes(overlay));
+        write(fd, sfz::Bytes(overlay));
     }
 
     pn::string string(
@@ -366,7 +364,8 @@ struct ResourceFile {
         const char* output_directory;
         const char* output_extension;
         bool (*convert)(
-                pn::string_view dir, bool factory, int16_t id, BytesSlice data, WriteTarget out);
+                pn::string_view dir, bool factory, int16_t id, sfz::BytesSlice data,
+                WriteTarget out);
     } resources[16];
 };
 
@@ -535,8 +534,8 @@ void DataExtractor::extract_plugin_scenario(Observer* observer) const {
 }
 
 bool DataExtractor::scenario_current(pn::string_view scenario) const {
-    pn::string path = pn::format("{0}/{1}/version", _output_dir, scenario);
-    BytesSlice version(kVersion);
+    pn::string      path = pn::format("{0}/{1}/version", _output_dir, scenario);
+    sfz::BytesSlice version(kVersion);
     try {
         MappedFile file(pn2sfz(path));
         return file.data() == version;
@@ -573,7 +572,7 @@ void DataExtractor::download(
     // Download the file from `url`.  Check its digest when it has been downloaded; if it is not
     // the right file, then throw an exception without writing it to disk.  Otherwise, write it to
     // disk.
-    Bytes download;
+    sfz::Bytes download;
     http::get(url, download);
     Sha1 sha;
     write(sha, download);
@@ -594,8 +593,8 @@ void DataExtractor::download(
 void DataExtractor::write_version(pn::string_view scenario_identifier) const {
     pn::string path = pn::format("{0}/{1}/version", _output_dir, scenario_identifier);
     makedirs(path::dirname(pn2sfz(path)), 0755);
-    ScopedFd   fd(open(pn2sfz(path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
-    BytesSlice version(kVersion);
+    ScopedFd        fd(open(pn2sfz(path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
+    sfz::BytesSlice version(kVersion);
     write(fd, version);
 }
 
@@ -621,7 +620,7 @@ void DataExtractor::extract_original(Observer* observer, pn::string_view file) c
 
             const ResourceType& type = rsrc.at(conversion.resource);
             for (const ResourceEntry& entry : type) {
-                Bytes      data;
+                sfz::Bytes data;
                 pn::string output = pn::format(
                         "{0}/{1}/{2}/{3}.{4}", _output_dir, kFactoryScenarioIdentifier,
                         conversion.output_directory, entry.id(), conversion.output_extension);
@@ -680,7 +679,7 @@ void DataExtractor::extract_plugin(Observer* observer) const {
 
         for (const ResourceFile::ExtractedResource& conversion : kPluginFiles) {
             if (conversion.resource == resource_type) {
-                Bytes      data;
+                sfz::Bytes data;
                 pn::string output = pn::format(
                         "{0}/{1}/{2}/{3}.{4}", _output_dir, _scenario, conversion.output_directory,
                         id, conversion.output_extension);

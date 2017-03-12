@@ -29,7 +29,6 @@
 #include "drawing/text.hpp"
 #include "video/driver.hpp"
 
-using sfz::Bytes;
 using std::unique_ptr;
 
 namespace antares {

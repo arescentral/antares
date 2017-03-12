@@ -23,7 +23,6 @@
 #include "data/plugin.hpp"
 #include "data/pn.hpp"
 
-using sfz::BytesSlice;
 using sfz::ReadSource;
 using sfz::read;
 namespace macroman = sfz::macroman;
@@ -38,7 +37,7 @@ namespace {
 void read_pstr(ReadSource in, pn::string& out) {
     uint8_t bytes[256];
     read(in, bytes, 256);
-    BytesSlice encoded(bytes + 1, bytes[0]);
+    sfz::BytesSlice encoded(bytes + 1, bytes[0]);
     out = sfz2pn(macroman::decode(encoded));
 }
 
@@ -116,7 +115,7 @@ void read_from(ReadSource in, Level::Condition& level_condition) {
     read(in, level_condition.flags);
     read(in, level_condition.direction);
 
-    BytesSlice sub(section, 12);
+    sfz::BytesSlice sub(section, 12);
     switch (level_condition.condition) {
         case kCounterCondition:
         case kCounterGreaterCondition:
@@ -163,7 +162,7 @@ void read_from(ReadSource in, Level::BriefPoint& brief_point) {
     read(in, brief_point.titleNum);
     read(in, brief_point.contentResID);
 
-    BytesSlice sub(section, 8);
+    sfz::BytesSlice sub(section, 8);
     switch (brief_point.briefPointKind) {
         case kNoPointKind:
         case kBriefFreestandingKind: break;

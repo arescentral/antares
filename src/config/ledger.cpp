@@ -33,7 +33,6 @@
 #include "game/sys.hpp"
 #include "lang/defines.hpp"
 
-using sfz::Bytes;
 using sfz::MappedFile;
 using sfz::Rune;
 using sfz::ScopedFd;

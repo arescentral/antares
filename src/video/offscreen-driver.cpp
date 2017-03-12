@@ -46,7 +46,6 @@
 #include "linux/offscreen.hpp"
 #endif
 
-using sfz::BytesSlice;
 using sfz::Optional;
 using sfz::ScopedFd;
 using sfz::WriteTarget;

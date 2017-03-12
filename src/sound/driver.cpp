@@ -29,7 +29,6 @@
 #include "lang/defines.hpp"
 #include "video/driver.hpp"
 
-using sfz::Bytes;
 using sfz::ScopedFd;
 using sfz::write;
 using std::unique_ptr;

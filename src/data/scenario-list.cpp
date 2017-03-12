@@ -26,7 +26,6 @@
 #include "data/level.hpp"
 #include "data/pn.hpp"
 
-using sfz::BytesSlice;
 using sfz::CString;
 using sfz::MappedFile;
 using sfz::read;
@@ -69,9 +68,9 @@ ScenarioList::ScenarioList() {
             "{0}/scenario-info/128.nlAG", pn2sfz(scenario_dir(kFactoryScenarioIdentifier))));
     if (sfz::path::isfile(factory_path)) {
         MappedFile       file(factory_path);
-        BytesSlice       data(file.data());
+        sfz::BytesSlice  data(file.data());
         scenarioInfoType info;
-        read(data, info);
+        read_from(data, info);
         factory_scenario.title        = info.titleString.copy();
         factory_scenario.download_url = info.downloadURLString.copy();
         factory_scenario.author       = info.authorNameString.copy();
@@ -103,7 +102,7 @@ ScenarioList::ScenarioList() {
         }
 
         MappedFile       file(pn2sfz(path));
-        BytesSlice       data(file.data());
+        sfz::BytesSlice  data(file.data());
         scenarioInfoType info;
         read(data, info);
         _scenarios.emplace_back();

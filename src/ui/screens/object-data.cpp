@@ -27,8 +27,6 @@
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
-using sfz::Bytes;
-
 namespace antares {
 
 namespace {

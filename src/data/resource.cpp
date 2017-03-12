@@ -27,7 +27,6 @@
 #include "data/pn.hpp"
 #include "game/sys.hpp"
 
-using sfz::BytesSlice;
 using sfz::MappedFile;
 using std::unique_ptr;
 
@@ -64,6 +63,6 @@ Resource::Resource(pn::string_view resource_path) : _file(load(resource_path)) {
 
 Resource::~Resource() {}
 
-BytesSlice Resource::data() const { return _file->data(); }
+sfz::BytesSlice Resource::data() const { return _file->data(); }
 
 }  // namespace antares

@@ -44,8 +44,6 @@
 #include "math/rotation.hpp"
 #include "math/units.hpp"
 
-using sfz::Bytes;
-using sfz::BytesSlice;
 using sfz::range;
 using sfz::read;
 using std::set;
