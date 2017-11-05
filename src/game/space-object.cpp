@@ -253,7 +253,7 @@ SpaceObject::SpaceObject(
 
     // We used to irrelevantly set 'id' here.  Now, we just cycle
     // through values to maintain replay-compatibility of randomSeed.
-    while (randomSeed.next(32768) == -1) {
+    while (randomSeed.next(-32768) == -1) {
         continue;
     }
 
