@@ -39,8 +39,6 @@ Directories test_dirs() {
     directories.registry.assign(format("{0}/registry", directories.root));
     directories.replays.assign(format("{0}/replays", directories.root));
     directories.scenarios.assign(format("{0}/scenarios", directories.root));
-    sfz::print(sfz::io::err, directories.scenarios);
-    sfz::print(sfz::io::err, "\n");
     return directories;
 };
 
