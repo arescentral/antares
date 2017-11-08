@@ -22,7 +22,7 @@
     <key>CFBundleExecutable</key>
     <string>Antares</string>
     <key>CFBundleIconFile</key>
-    <string>Antares.icns</string>
+    <string>antares.icns</string>
     <key>CFBundleIdentifier</key>
     <string>org.arescentral.antares</string>
     <key>CFBundleInfoDictionaryVersion</key>

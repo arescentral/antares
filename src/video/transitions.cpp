@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2012 The Antares Authors
+// Copyright (C) 2008-2017 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -51,7 +51,7 @@ void Transitions::start_boolean(int32_t in_speed, int32_t out_speed, uint8_t goa
     _step        = kStartAnimation;
     _in_speed    = in_speed;
     _out_speed   = out_speed;
-    _color       = GetRGBTranslateColor(GetRetroIndex(goal_color));
+    _color       = GetRGBTranslateColor(goal_color);
     _color.alpha = 127;
     if (!_active) {
         _active = true;

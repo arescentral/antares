@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2012 The Antares Authors
+// Copyright (C) 2008-2017 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -36,7 +36,7 @@
 #define kAuthorURL @"AuthorURL"
 #define kVersion @"Version"
 
-#define kFactoryScenario @"com.biggerplanet.ares"
+#define kFactoryScenarioIdentifier @"com.biggerplanet.ares"
 
 static NSInteger compare_scenarios(id x, id y, void* unused) {
     (void)unused;
@@ -144,7 +144,7 @@ static NSURL* url(const char* utf8_bytes) {
         if ([identifier isEqualToString:user_scenario]) {
             best_scenario = i;
         }
-        if ([identifier isEqualToString:kFactoryScenario]) {
+        if ([identifier isEqualToString:kFactoryScenarioIdentifier]) {
             factory_scenario = i;
         }
     }

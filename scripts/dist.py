@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# Copyright (C) 2017 The Antares Authors
+# This file is part of Antares, a tactical space combat game.
+# Antares is free software, distributed under the LGPL+. See COPYING.
 
 from __future__ import division, print_function, unicode_literals
 
@@ -22,15 +25,15 @@ def main():
         print("couldn't determine antares version")
         sys.exit(1)
 
-    archive_root = "Antares-%s" % version
+    archive_root = "antares-%s" % version
 
     if archive_format == "zip":
-        path = "./Antares-Source-%s.%s" % (version, archive_format)
+        path = "./antares-%s.%s" % (version, archive_format)
         with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
             for real_path, archive_path in walk(archive_root):
                     z.write(real_path, archive_path)
     elif archive_format in ["gz", "bz2"]:
-        path = "./Antares-Source-%s.t%s" % (version, archive_format)
+        path = "./antares-%s.t%s" % (version, archive_format)
         with tarfile.open(path, "w:%s" % archive_format) as t:
             for real_path, archive_path in walk(archive_root):
                     t.add(real_path, arcname=archive_path)
@@ -52,7 +55,9 @@ def walk(archive_root):
 
 def should_write(base):
     _, ext = os.path.splitext(base)
-    if base.startswith("."):
+    if base == ".gn":
+        return True
+    elif base.startswith("."):
         return False
     elif base == "gn":
         return False
@@ -66,6 +71,8 @@ def should_recurse(root, base):
     if base.startswith("."):
         return False
     elif path in ["out", "test"]:
+        return False
+    elif path in ["data/scenarios", "data/downloads"]:
         return False
     elif root.startswith("ext/") and (base == "ext"):
         return False

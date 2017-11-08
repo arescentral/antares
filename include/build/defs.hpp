@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2013 The Antares Authors
+// Copyright (C) 2008-2017 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,20 +16,14 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "data/resource.hpp"
-
-#include <sfz/sfz.hpp>
-
-using sfz::String;
+#ifndef ANTARES_LANG_DEFINES_HPP_
+#define ANTARES_LANG_DEFINES_HPP_
 
 namespace antares {
 
-#define STRINGIFY_(x) #x
-#define STRINGIFY(x) STRINGIFY_(x)
-#define ANTARES_DATA_STRING STRINGIFY(ANTARES_DATA)
-
-String application_path() {
-    return String(ANTARES_DATA_STRING);
-}
+extern const char kAntaresPrefix[];
+extern const char kAntaresVersion[];
 
 }  // namespace antares
+
+#endif  // ANTARES_LANG_DEFINES_HPP_

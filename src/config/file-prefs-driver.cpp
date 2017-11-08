@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2015 The Antares Authors
+// Copyright (C) 2015-2017 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -32,6 +32,8 @@ using sfz::String;
 using sfz::StringMap;
 using sfz::StringSlice;
 using sfz::format;
+using sfz::makedirs;
+using sfz::path::dirname;
 using sfz::range;
 using std::vector;
 
@@ -97,7 +99,6 @@ static void set_from(
 }
 
 FilePrefsDriver::FilePrefsDriver() {
-    Preferences _current;
     try {
         String     path(format("{0}/config.json", dirs().root));
         MappedFile file(path);
@@ -138,7 +139,8 @@ void FilePrefsDriver::set(const Preferences& p) {
     all["sound"] = Json::object(sound);
     all["keys"]  = Json::object(keys);
 
-    String   path(format("{0}/config.json", dirs().root));
+    String path(format("{0}/config.json", dirs().root));
+    makedirs(dirname(path), 0755);
     ScopedFd fd(open(path, O_CREAT | O_TRUNC | O_WRONLY, 0644));
     String   pretty(pretty_print(Json::object(all)));
     write(fd, utf8::encode(pretty));

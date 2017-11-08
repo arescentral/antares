@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2012 The Antares Authors
+// Copyright (C) 2008-2017 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -50,7 +50,7 @@ struct ScopedGlob {
 ReplayList::ReplayList() {
     ScopedGlob        g;
     const StringSlice scenario = sys.prefs->scenario_identifier();
-    String            str(format("{0}/{1}/replays/*.NLRP", dirs().scenarios, scenario));
+    String            str(format("{0}/replays/*.NLRP", scenario_dir(scenario)));
     CString           c_str(str);
     glob(c_str.data(), 0, NULL, &g.data);
 

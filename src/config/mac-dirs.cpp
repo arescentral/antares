@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2013 The Antares Authors
+// Copyright (C) 2013-2017 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -21,12 +21,26 @@
 #include <unistd.h>
 #include <sfz/sfz.hpp>
 
+#include "mac/core-foundation.hpp"
+
+using sfz::Exception;
 using sfz::String;
 using sfz::format;
 
 namespace utf8 = sfz::utf8;
 
 namespace antares {
+
+String default_application_path() {
+    cf::Url    url(CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle()));
+    cf::String url_string(CFStringCreateCopy(NULL, CFURLGetString(url.c_obj())));
+    char       path_buffer[PATH_MAX];
+    if (!CFURLGetFileSystemRepresentation(
+                url.c_obj(), true, reinterpret_cast<UInt8*>(path_buffer), PATH_MAX)) {
+        throw Exception("couldn't get application_path()");
+    }
+    return String(utf8::decode(path_buffer));
+}
 
 Directories mac_dirs() {
     Directories directories;
@@ -50,6 +64,10 @@ Directories mac_dirs() {
 const Directories& dirs() {
     static const Directories dirs = mac_dirs();
     return dirs;
+}
+
+sfz::String scenario_dir(sfz::StringSlice identifier) {
+    return sfz::String(sfz::format("{0}/{1}", dirs().scenarios, identifier));
 }
 
 }  // namespace antares

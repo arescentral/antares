@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2013 The Antares Authors
+// Copyright (C) 2013-2017 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -23,6 +23,8 @@
 
 namespace antares {
 
+extern const char kFactoryScenarioIdentifier[];
+
 struct Directories {
     sfz::String root;
 
@@ -33,6 +35,12 @@ struct Directories {
 };
 
 const Directories& dirs();
+
+sfz::String default_application_path();
+sfz::String application_path();
+void set_application_path(sfz::StringSlice path);
+
+sfz::String scenario_dir(sfz::StringSlice identifier);
 
 }  // namespace antares
 

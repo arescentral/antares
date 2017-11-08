@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2012 The Antares Authors
+// Copyright (C) 2008-2017 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -26,6 +26,7 @@
 #include <sfz/sfz.hpp>
 #include <zipxx/zipxx.hpp>
 
+#include "config/dirs.hpp"
 #include "data/replay.hpp"
 #include "drawing/pix-map.hpp"
 #include "math/geometry.hpp"
@@ -93,7 +94,7 @@ int32_t nlrp_chapter(int16_t id) {
 
 bool convert_nlrp(StringSlice, bool, int16_t id, BytesSlice data, WriteTarget out) {
     ReplayData replay;
-    replay.scenario.identifier.assign("com.biggerplanet.ares");
+    replay.scenario.identifier.assign(kFactoryScenarioIdentifier);
     replay.scenario.version.assign("1.1.1");
     replay.chapter_id = nlrp_chapter(id);
     read(data, replay.global_seed);
@@ -416,9 +417,8 @@ static const ResourceFile::ExtractedResource kPluginFiles[] = {
         {"snro", "scenarios", "snro", verbatim},
 };
 
-static const char kFactoryScenario[] = "com.biggerplanet.ares";
-static const char kDownloadBase[]    = "http://downloads.arescentral.org";
-static const char kVersion[]         = "14\n";
+static const char kDownloadBase[] = "http://downloads.arescentral.org";
+static const char kVersion[]      = "14\n";
 
 static const char kPluginVersionFile[]    = "data/version";
 static const char kPluginVersion[]        = "1\n";
@@ -454,7 +454,9 @@ void check_identifier(ZipArchive& archive, StringSlice expected) {
 DataExtractor::Observer::~Observer() {}
 
 DataExtractor::DataExtractor(const StringSlice& downloads_dir, const StringSlice& output_dir)
-        : _downloads_dir(downloads_dir), _output_dir(output_dir), _scenario(kFactoryScenario) {}
+        : _downloads_dir(downloads_dir),
+          _output_dir(output_dir),
+          _scenario(kFactoryScenarioIdentifier) {}
 
 void DataExtractor::set_scenario(sfz::StringSlice scenario) {
     _scenario.assign(scenario);
@@ -488,7 +490,7 @@ void DataExtractor::set_plugin_file(StringSlice path) {
 }
 
 bool DataExtractor::current() const {
-    return scenario_current(_scenario) && scenario_current(kFactoryScenario);
+    return scenario_current(_scenario) && scenario_current(kFactoryScenarioIdentifier);
 }
 
 void DataExtractor::extract(Observer* observer) const {
@@ -497,20 +499,20 @@ void DataExtractor::extract(Observer* observer) const {
 }
 
 void DataExtractor::extract_factory_scenario(Observer* observer) const {
-    if (!scenario_current(kFactoryScenario)) {
+    if (!scenario_current(kFactoryScenarioIdentifier)) {
         download(
                 observer, kDownloadBase, "Ares", "1.2.0",
                 (Sha1::Digest){{0x246c393c, 0xa598af68, 0xa58cfdd1, 0x8e1601c1, 0xf4f30931}});
 
-        String scenario_dir(format("{0}/{1}", _output_dir, kFactoryScenario));
+        String scenario_dir(format("{0}/{1}", _output_dir, kFactoryScenarioIdentifier));
         rmtree(scenario_dir);
         extract_original(observer, "Ares-1.2.0.zip");
-        write_version(kFactoryScenario);
+        write_version(kFactoryScenarioIdentifier);
     }
 }
 
 void DataExtractor::extract_plugin_scenario(Observer* observer) const {
-    if ((_scenario != kFactoryScenario) && !scenario_current(_scenario)) {
+    if ((_scenario != kFactoryScenarioIdentifier) && !scenario_current(_scenario)) {
         String scenario_dir(format("{0}/{1}", _output_dir, _scenario));
         rmtree(scenario_dir);
         extract_plugin(observer);
@@ -604,9 +606,10 @@ void DataExtractor::extract_original(Observer* observer, const StringSlice& file
             const ResourceType& type = rsrc.at(conversion.resource);
             for (const ResourceEntry& entry : type) {
                 Bytes  data;
-                String output(format(
-                        "{0}/com.biggerplanet.ares/{1}/{2}.{3}", _output_dir,
-                        conversion.output_directory, entry.id(), conversion.output_extension));
+                String output(
+                        format("{0}/{1}/{2}/{3}.{4}", _output_dir, kFactoryScenarioIdentifier,
+                               conversion.output_directory, entry.id(),
+                               conversion.output_extension));
                 if (conversion.convert(
                             path::dirname(output), true, entry.id(), entry.data(), data)) {
                     makedirs(path::dirname(output), 0755);

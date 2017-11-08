@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2012 The Antares Authors
+// Copyright (C) 2008-2017 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -38,10 +38,6 @@ namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-static const char kFactoryScenarioIdentifier[] = "com.biggerplanet.ares";
-
-const sfz::String application_path();
-
 static unique_ptr<MappedFile> load_first(
         sfz::StringSlice resource_path, const std::initializer_list<PrintItem>& dirs) {
     for (const auto& dir : dirs) {
@@ -55,12 +51,10 @@ static unique_ptr<MappedFile> load_first(
 
 static unique_ptr<MappedFile> load(sfz::StringSlice resource_path) {
     return load_first(
-            resource_path,
-            {
-                    format("{0}/{1}", dirs().scenarios, sys.prefs->scenario_identifier()),
-                    format("{0}/{1}", dirs().scenarios, kFactoryScenarioIdentifier),
-                    application_path(),
-            });
+            resource_path, {
+                                   scenario_dir(sys.prefs->scenario_identifier()),
+                                   scenario_dir(kFactoryScenarioIdentifier), application_path(),
+                           });
 }
 
 Resource::Resource(const StringSlice& type, const StringSlice& extension, int id)

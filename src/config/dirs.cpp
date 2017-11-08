@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2013 The Antares Authors
+// Copyright (C) 2017 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,29 +16,24 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "data/resource.hpp"
+#include "config/dirs.hpp"
 
-#include <CoreFoundation/CoreFoundation.h>
 #include <sfz/sfz.hpp>
-
-#include "mac/core-foundation.hpp"
-
-using sfz::Exception;
-using sfz::String;
-
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-const String application_path() {
-    cf::Url    url(CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle()));
-    cf::String url_string(CFStringCreateCopy(NULL, CFURLGetString(url.c_obj())));
-    char       path_buffer[PATH_MAX];
-    if (!CFURLGetFileSystemRepresentation(
-                url.c_obj(), true, reinterpret_cast<UInt8*>(path_buffer), PATH_MAX)) {
-        throw Exception("couldn't get application_path()");
+static sfz::String app_data;
+const char         kFactoryScenarioIdentifier[] = "com.biggerplanet.ares";
+
+sfz::String application_path() {
+    if (app_data.empty()) {
+        return default_application_path();
     }
-    return String(utf8::decode(path_buffer));
+    return sfz::String(app_data);
+}
+
+void set_application_path(sfz::StringSlice path) {
+    app_data.assign(path);
 }
 
 }  // namespace antares

@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2012 The Antares Authors
+// Copyright (C) 2008-2017 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -253,7 +253,7 @@ SpaceObject::SpaceObject(
 
     // We used to irrelevantly set 'id' here.  Now, we just cycle
     // through values to maintain replay-compatibility of randomSeed.
-    while (randomSeed.next(32768) == -1) {
+    while (randomSeed.next(-32768) == -1) {
         continue;
     }
 

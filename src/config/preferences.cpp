@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2012 The Antares Authors
+// Copyright (C) 2008-2017 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <sfz/sfz.hpp>
 
+#include "config/dirs.hpp"
 #include "config/keys.hpp"
 #include "data/resource.hpp"
 #include "game/globals.hpp"
@@ -102,7 +103,7 @@ Preferences::Preferences() {
 
     volume = 7;
 
-    scenario_identifier.assign("com.biggerplanet.ares");
+    scenario_identifier.assign(kFactoryScenarioIdentifier);
 }
 
 Preferences Preferences::copy() const {

@@ -1,4 +1,7 @@
 #!/bin/zsh
+# Copyright (C) 2017 The Antares Authors
+# This file is part of Antares, a tactical space combat game.
+# Antares is free software, distributed under the LGPL+. See COPYING.
 
 set -o errexit
 
@@ -33,17 +36,19 @@ else
 fi
 
 update-gn() {
-    sed -i '' 's/  antares_version = ".*"/  antares_version = "'$1'"/' BUILD.gn
+    sed 's/  antares_version = ".*"/  antares_version = "'$1'"/' BUILD.gn >.BUILD.gn.tmp
+    mv .BUILD.gn.tmp BUILD.gn
 }
 
 update-readme() {
-    sed -i '' 's/\(Antares[- ]\)\([0-9.]*\)[0-9]/\1'$1'/g' README.rst
+    sed 's/\(Antares[- ]\)\([0-9.]*\)[0-9]/\1'$1'/g' README.rst >.README.rst.tmp
+    mv .README.rst.tmp README.rst
 }
 
 if [[ $ACTION == start ]]; then
     set -o verbose
     git checkout -b release/$VERSION
-    update-gn ${VERSION}rc1
+    update-gn ${VERSION}~rc1
     git commit BUILD.gn README.rst -m "Create release branch for $VERSION."
 else
     set -o verbose
@@ -57,7 +62,7 @@ else
     ./configure --mode=opt
     make
     make sign
-    (cd out/cur && zip -r ../../Antares-$VERSION.zip Antares.app)
+    (cd out/cur && zip -r ../../antares-mac-$VERSION.zip Antares.app)
     scripts/dist.py zip
     scripts/dist.py gz
     scripts/dist.py bz2

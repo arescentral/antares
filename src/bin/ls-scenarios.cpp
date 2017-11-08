@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2012 The Antares Authors
+// Copyright (C) 2008-2017 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -35,6 +35,9 @@ void main(int argc, char* const* argv) {
 
     ScenarioList list;
     for (size_t i = 0; i < list.size(); ++i) {
+        if (!list.at(i).installed) {
+            continue;
+        }
         print(io::out, format("{0}:\n", list.at(i).identifier));
         print(io::out, format("    title: {0}\n", list.at(i).title));
         print(io::out, format("    download url: {0}\n", list.at(i).download_url));
