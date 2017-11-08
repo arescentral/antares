@@ -8,7 +8,7 @@ declare_args() {
   prefix = "/usr/local"
 
   # Antares version. Can be overridden for nightlies and release builds.
-  antares_version = "0.8.2~rc1"
+  antares_version = "0.8.2"
 }
 
 import("//build/lib/embed.gni")
