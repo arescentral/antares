@@ -194,13 +194,13 @@ void Vectors::update() {
                         vector->boltState++;
                         if (vector->boltState > 24)
                             vector->boltState = -24;
-                        uint8_t currentColor  = GetRetroIndex(vector->color);
+                        uint8_t currentColor = vector->color;
                         currentColor &= 0xf0;
                         if (vector->boltState < 0)
                             currentColor += (-vector->boltState) >> 1;
                         else
                             currentColor += vector->boltState >> 1;
-                        vector->color = GetTranslateIndex(currentColor);
+                        vector->color = currentColor;
                     }
                     if ((vector->vectorKind == Vector::BEAM_TO_OBJECT_LIGHTNING) ||
                         (vector->vectorKind == Vector::BEAM_TO_COORD_LIGHTNING)) {

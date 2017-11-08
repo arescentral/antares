@@ -137,26 +137,6 @@ const RgbColor& RgbColor::at(uint8_t index) {
     return kColors[index];
 }
 
-void read_from(ReadSource in, RgbColor& color) {
-    in.shift(2);
-    read(in, color.red);
-    in.shift(3);
-    read(in, color.green);
-    in.shift(3);
-    read(in, color.blue);
-    in.shift(1);
-}
-
-void write_to(WriteTarget out, const RgbColor& color) {
-    out.push(2, '\0');
-    write(out, color.red);
-    out.push(3, '\0');
-    write(out, color.green);
-    out.push(3, '\0');
-    write(out, color.blue);
-    out.push(1, '\0');
-}
-
 void print_to(sfz::PrintTarget out, const RgbColor& color) {
     if (color.alpha == 0xff) {
         print(out, format("rgb({0}, {1}, {2})", color.red, color.green, color.blue));
@@ -164,14 +144,6 @@ void print_to(sfz::PrintTarget out, const RgbColor& color) {
         print(out,
               format("rgba({0}, {1}, {2}, {3})", color.red, color.green, color.blue, color.alpha));
     }
-}
-
-uint8_t GetRetroIndex(uint8_t which) {
-    return which;
-}
-
-uint8_t GetTranslateIndex(uint8_t which) {
-    return which;
 }
 
 uint8_t GetTranslateColorShade(uint8_t color, uint8_t shade) {

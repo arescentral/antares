@@ -102,8 +102,6 @@ inline constexpr RgbColor rgb(uint8_t r, uint8_t g, uint8_t b) {
     return rgba(r, g, b, 0xff);
 }
 
-void read_from(sfz::ReadSource in, RgbColor& color);
-void write_to(sfz::WriteTarget out, const RgbColor& color);
 void print_to(sfz::PrintTarget out, const RgbColor& color);
 
 inline bool operator==(const RgbColor& lhs, const RgbColor& rhs) {
@@ -114,8 +112,6 @@ inline bool operator!=(const RgbColor& lhs, const RgbColor& rhs) {
     return memcmp(&lhs, &rhs, sizeof(RgbColor)) != 0;
 }
 
-uint8_t GetRetroIndex(uint8_t which);
-uint8_t GetTranslateIndex(uint8_t which);
 uint8_t GetTranslateColorShade(uint8_t color, uint8_t shade);
 
 RgbColor GetRGBTranslateColorShade(uint8_t color, uint8_t shade);
