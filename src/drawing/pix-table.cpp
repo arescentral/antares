@@ -148,14 +148,15 @@ struct PixTableVisitor : public JsonDefaultVisitor {
                             Size(cell_width, cell_height));
                     Rect sprite(state.frame);
                     sprite.offset(state.center.h, state.center.v);
-                    auto image = state.image.view(cell).view(sprite);
                     Rect bounds(state.frame);
                     bounds.offset(2 * -bounds.left, 2 * -bounds.top);
                     if (color) {
-                        auto overlay = state.overlay.view(cell).view(sprite);
-                        frames.emplace_back(bounds, image, id, frame, overlay, color);
+                        frames.emplace_back(
+                                bounds, state.image.view(cell).view(sprite), id, frame,
+                                state.overlay.view(cell).view(sprite), color);
                     } else {
-                        frames.emplace_back(bounds, image, id, frame);
+                        frames.emplace_back(
+                                bounds, state.image.view(cell).view(sprite), id, frame);
                     }
                 } else {
                     throw Exception("bad frame rect");
@@ -199,13 +200,13 @@ struct PixTableVisitor : public JsonDefaultVisitor {
 
     virtual void visit_number(double value) const {
         switch (state.state) {
-            case ROWS: state.rows                 = value; break;
-            case COLS: state.cols                 = value; break;
-            case CENTER_X: state.center.h         = value; break;
-            case CENTER_Y: state.center.v         = value; break;
-            case FRAME_LEFT: state.frame.left     = value; break;
-            case FRAME_TOP: state.frame.top       = value; break;
-            case FRAME_RIGHT: state.frame.right   = value; break;
+            case ROWS: state.rows = value; break;
+            case COLS: state.cols = value; break;
+            case CENTER_X: state.center.h = value; break;
+            case CENTER_Y: state.center.v = value; break;
+            case FRAME_LEFT: state.frame.left = value; break;
+            case FRAME_TOP: state.frame.top = value; break;
+            case FRAME_RIGHT: state.frame.right = value; break;
             case FRAME_BOTTOM: state.frame.bottom = value; break;
             default: return visit_default("number");
         }

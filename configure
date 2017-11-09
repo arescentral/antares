@@ -40,11 +40,6 @@ def main():
     args = parser.parse_args()
 
     check_submodules()
-    if not check_gn():
-        print("\nYou don't seem to have gn(1). Run:")
-        print("  $ build/lib/scripts/download-gn.py")
-        sys.exit(1)
-
     check_host()
     check_target(args)
 
@@ -82,8 +77,7 @@ def check_submodules():
 
     if missing:
         print("Some submodules are missing. Run:")
-        print("  $ git submodule init")
-        print("  $ git submodule update build ext data")
+        print("  $ git submodule update --init build ext data")
         sys.exit(1)
 
 
@@ -104,7 +98,6 @@ def check_target(args):
         checker = {
             ("mac", "mac"): check_mac,
             ("linux", "linux"): check_linux_native,
-            ("linux", "mac"): check_mac_on_linux,
         }.get((cfg.host_os(), args.target_os))
         if checker is None:
             msg(args.target_os, color="red")
@@ -126,21 +119,22 @@ def check_mac(args):
     missing = collections.OrderedDict()
     if not (check_clang() and check_libcxx()):
         missing["xcode"] = (
-                "* Xcode can be installed via the App Store:\n"
+                "* To install Xcode, open the App Store:\n"
                 "    https://itunes.apple.com/en/app/xcode/id497799835\n"
                 "  After installing, open it and accept the license agreement\n")
+    if not check_gn():
+        missing["gn"] = (
+                "* To download gn, run:\n"
+                "    $ build/lib/scripts/download-gn.py\n")
     if not check_ninja():
         missing["ninja"] = (
-                "* ninja can be installed with Homebrew:\n"
-                "    $ brew install ninja\n")
+                "* To download ninja, run:\n"
+                "    $ build/lib/scripts/download-ninja.py\n")
 
     if missing:
         print("\nmissing dependencies: %s\n" % " ".join(missing.keys()))
         for step in missing.values():
             sys.stdout.write(step)
-        if any("Homebrew" in v for v in missing.values()):
-            print("* Homebrew can be installed like so:")
-            print('    $ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"')
         sys.exit(1)
 
 
@@ -152,18 +146,21 @@ def check_linux_native(args):
         else:
             msg(" ".join(distro) + " (untested)", color="yellow")
 
-    missing = collections.OrderedDict()
+    missing_pkgs = collections.OrderedDict()
     if not check_clang("clang++"):
-        missing["clang"] = "clang"
-    if not check_ninja():
-        missing["ninja"] = "ninja-build"
+        missing_pkgs["clang"] = "clang"
 
     if check_pkg_config():
         libs = [
             ("gl", "libgl1-mesa-dev"),
+            ("glfw3", "libglfw3-dev"),
             ("glu", "libglu1-mesa-dev"),
+            ("libmodplug", "libmodplug-dev"),
+            ("libzip", "libzip-dev"),
+            ("libpng16", "libpng16-dev"),
             ("neon", "libneon27-dev"),
             ("openal", "libopenal-dev"),
+            ("sndfile", "libsndfile1-dev"),
             ("x11", "libx11-dev"),
             ("xcursor", "libxcursor-dev"),
             ("xinerama", "libxinerama-dev"),
@@ -173,35 +170,29 @@ def check_linux_native(args):
         ]
         for lib, dpkg in libs:
             if not cfg.check_pkg(lib):
-                missing[lib] = dpkg
+                missing_pkgs[lib] = dpkg
     else:
-        missing["pkg-config"] = "pkg-config"
+        missing_pkgs["pkg-config"] = "pkg-config"
 
-    if missing:
-        print("\nmissing dependencies: %s" % " ".join(missing.keys()))
-        if len(missing) == 1:
-            print("\nOn Ubuntu, you can install it with:\n")
-        else:
-            print("\nOn Ubuntu, you can install them with:\n")
-        print("    $ sudo apt-get install %s" % (" ".join(missing.values())))
-        sys.exit(1)
-
-
-def check_mac_on_linux(args):
     missing = collections.OrderedDict()
+    if not check_gn():
+        missing["gn"] = (
+                "* To download gn, run:\n"
+                "    $ build/lib/scripts/download-gn.py\n")
     if not check_ninja():
         missing["ninja"] = (
-                "* On Ubuntu, ninja can be installed with:\n"
-                "    $ sudo apt-get install ninja-build")
-    if not (check_clang("x86_64-apple-darwin15-clang++") and
-            check_libcxx("x86_64-apple-darwin15-clang++")):
-        missing["osxcross"] = (
-                "* OSXCross can be found here:\n"
-                "    https://github.com/tpoechtrager/osxcross\n"
-                "  Download and build it, and ensure target/bin is in your $PATH\n")
+                "* To download ninja, run:\n"
+                "    $ build/lib/scripts/download-ninja.py\n")
+    if missing_pkgs:
+        if len(missing_pkgs) == 1:
+            apt_get_install = "On Ubuntu, you can install %s with:\n" % next(iter(missing_pkgs))
+        else:
+            apt_get_install = "On Ubuntu, you can install the missing packages with:\n"
+        apt_get_install += "    $ sudo apt-get install %s\n" % (" ".join(missing_pkgs.values()))
+        missing[" ".join(missing_pkgs.keys())] = apt_get_install
 
     if missing:
-        print("\nmissing dependencies: %s\n" % " ".join(missing.keys()))
+        print("\nmissing dependencies: %s" % " ".join(missing_pkgs.keys()))
         for step in missing.values():
             sys.stdout.write(step)
         sys.exit(1)
@@ -231,13 +222,8 @@ def check_gn():
 
 
 def check_ninja():
-    """Run ninja --version.
-
-    GNU Ninja doesn't have a --version flag, so this check should fail
-    if the user accidentally installed ninja instead of ninja-build.
-    """
-    return (cfg.check_bin("ninja --version".split()) or
-            cfg.check_bin("ninja-build --version".split()))
+    """Run ninja --version."""
+    return cfg.check_bin("build/lib/scripts/ninja --version".split(), what="ninja")
 
 
 def check_pkg_config():

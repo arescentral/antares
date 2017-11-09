@@ -20,6 +20,7 @@
 #define ANTARES_VIDEO_TEXT_DRIVER_HPP_
 
 #include <sfz/sfz.hpp>
+#include <vector>
 
 #include "config/keys.hpp"
 #include "ui/event-scheduler.hpp"
@@ -39,12 +40,12 @@ class TextVideoDriver : public VideoDriver {
     virtual wall_time now() const { return _scheduler->now(); }
 
     virtual Texture texture(sfz::PrintItem name, const PixMap& content);
-    virtual void dither_rect(const Rect& rect, const RgbColor& color);
-    virtual void draw_point(const Point& at, const RgbColor& color);
-    virtual void draw_line(const Point& from, const Point& to, const RgbColor& color);
-    virtual void draw_triangle(const Rect& rect, const RgbColor& color);
-    virtual void draw_diamond(const Rect& rect, const RgbColor& color);
-    virtual void draw_plus(const Rect& rect, const RgbColor& color);
+    virtual void    dither_rect(const Rect& rect, const RgbColor& color);
+    virtual void    draw_point(const Point& at, const RgbColor& color);
+    virtual void    draw_line(const Point& from, const Point& to, const RgbColor& color);
+    virtual void    draw_triangle(const Rect& rect, const RgbColor& color);
+    virtual void    draw_diamond(const Rect& rect, const RgbColor& color);
+    virtual void    draw_plus(const Rect& rect, const RgbColor& color);
 
     void loop(Card* initial, EventScheduler& scheduler);
     void capture(std::vector<std::pair<std::unique_ptr<Card>, sfz::String>>& pix);
@@ -55,17 +56,16 @@ class TextVideoDriver : public VideoDriver {
 
     virtual void batch_rect(const Rect& rect, const RgbColor& color);
 
-    void add_arg(sfz::StringSlice arg, std::vector<std::pair<size_t, size_t>>& args);
-    void dup_arg(size_t index, std::vector<std::pair<size_t, size_t>>& args);
+    void             add_arg(sfz::StringSlice arg, std::vector<std::pair<size_t, size_t>>& args);
+    void             dup_arg(size_t index, std::vector<std::pair<size_t, size_t>>& args);
     sfz::StringSlice last_arg(size_t index) const;
 
-    template <int size>
-    void log(sfz::StringSlice command, sfz::PrintItem (&args)[size]);
+    void log(sfz::StringSlice command, const std::vector<sfz::PrintItem>& args);
 
     const Size                       _size;
     const sfz::Optional<sfz::String> _output_dir;
 
-    sfz::String _log;
+    sfz::String                            _log;
     std::vector<std::pair<size_t, size_t>> _last_args;
 
     EventScheduler* _scheduler = nullptr;

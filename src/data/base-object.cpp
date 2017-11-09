@@ -199,7 +199,7 @@ void read_from(ReadSource in, BaseObject& object) {
     } else if (object.attributes & kIsVector) {
         read(sub, object.frame.vector);
         if (object.frame.vector.color > 16) {
-            object.frame.vector.color = GetTranslateIndex(object.frame.vector.color);
+            object.frame.vector.color = object.frame.vector.color;
         } else {
             object.frame.vector.color = 0;
         }
