@@ -38,8 +38,6 @@
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
-using sfz::Bytes;
-using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::String;
 using sfz::StringSlice;
@@ -117,7 +115,7 @@ struct Messages::longMessageType {
     Handle<Label>               labelMessageID;
 };
 
-ANTARES_GLOBAL std::queue<sfz::String> Messages::message_data;
+ANTARES_GLOBAL std::queue<pn::string> Messages::message_data;
 ANTARES_GLOBAL Messages::longMessageType* Messages::long_message_data;
 ANTARES_GLOBAL ticks Messages::time_count;
 
@@ -166,7 +164,7 @@ void Messages::clear() {
     longMessageType* tmessage;
 
     time_count = ticks(0);
-    std::queue<sfz::String> empty;
+    std::queue<pn::string> empty;
     swap(message_data, empty);
     g.message_label = Label::add(
             kMessageScreenLeft, kMessageScreenTop, 0, 0, SpaceObject::none(), false,
@@ -194,7 +192,7 @@ void Messages::clear() {
     tmessage->labelMessageID->set_keep_on_screen_anyway(true);
 }
 
-void Messages::add(const sfz::PrintItem& message) { message_data.emplace(message); }
+void Messages::add(pn::string_view message) { message_data.emplace(message.copy()); }
 
 void Messages::start(int16_t startResID, int16_t endResID) {
     longMessageType* tmessage;
@@ -427,7 +425,7 @@ void Messages::draw_message_screen(ticks by_units) {
     }
 
     if (!message_data.empty()) {
-        const String& message = message_data.front();
+        pn::string_view message = message_data.front();
 
         if (time_count < kRaiseTime) {
             g.message_label->set_position(
@@ -438,16 +436,16 @@ void Messages::draw_message_screen(ticks by_units) {
                     viewport().bottom - (kMessageDisplayTime - time_count).count());
         }
 
-        g.message_label->set_string(sfz2pn(message));
+        g.message_label->set_string(message);
     } else {
         g.message_label->clear_string();
         time_count = ticks(0);
     }
 }
 
-void Messages::set_status(const StringSlice& status, uint8_t color) {
+void Messages::set_status(pn::string_view status, uint8_t color) {
     g.status_label->set_color(color);
-    g.status_label->set_string(sfz2pn(status));
+    g.status_label->set_string(status);
     g.status_label->set_age(kStatusLabelAge);
 }
 

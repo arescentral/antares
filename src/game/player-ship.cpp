@@ -177,8 +177,8 @@ static void zoom_to(ZoomType zoom) {
     if (g.zoom != zoom) {
         g.zoom = zoom;
         sys.sound.click();
-        StringList strings(kMessageStringID);
-        String     string = pn2sfz(strings.at(g.zoom + kZoomStringOffset - 1));
+        StringList      strings(kMessageStringID);
+        pn::string_view string = strings.at(g.zoom + kZoomStringOffset - 1);
         Messages::set_status(string, kStatusLabelColor);
     }
 }
@@ -888,16 +888,16 @@ void TogglePlayerAutoPilot(Handle<SpaceObject> flagship) {
     if (flagship->attributes & kOnAutoPilot) {
         flagship->attributes &= ~kOnAutoPilot;
         if ((flagship->owner == g.admiral) && (flagship->attributes & kIsHumanControlled)) {
-            StringList strings(kMessageStringID);
-            String     string = pn2sfz(strings.at(kAutoPilotOffString - 1));
+            StringList      strings(kMessageStringID);
+            pn::string_view string = strings.at(kAutoPilotOffString - 1);
             Messages::set_status(string, kStatusLabelColor);
         }
     } else {
         SetObjectDestination(flagship);
         flagship->attributes |= kOnAutoPilot;
         if ((flagship->owner == g.admiral) && (flagship->attributes & kIsHumanControlled)) {
-            StringList strings(kMessageStringID);
-            String     string = pn2sfz(strings.at(kAutoPilotOnString - 1));
+            StringList      strings(kMessageStringID);
+            pn::string_view string = strings.at(kAutoPilotOnString - 1);
             Messages::set_status(string, kStatusLabelColor);
         }
     }

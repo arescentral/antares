@@ -1529,7 +1529,8 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
         (anObject->attributes & kCanAcceptDestination)) {
         pn::string_view object_name = get_object_name(anObject->base);
         int             count       = CountObjectsOfBaseType(anObject->base, anObject->owner) - 1;
-        Messages::add(format(" {0} destroyed.  {1} remaining. ", pn2sfz(object_name), count));
+        Messages::add(
+                sfz2pn(format(" {0} destroyed.  {1} remaining. ", pn2sfz(object_name), count)));
     }
 
     if (sObject->active == kObjectInUse) {

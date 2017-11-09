@@ -652,8 +652,8 @@ static void set_zoom(Handle<Action> action, Handle<SpaceObject> focus) {
     if (action->argument.zoom.zoomLevel != g.zoom) {
         g.zoom = static_cast<ZoomType>(action->argument.zoom.zoomLevel);
         sys.sound.click();
-        StringList strings(kMessageStringID);
-        String     string = pn2sfz(strings.at(g.zoom + kZoomStringOffset - 1));
+        StringList      strings(kMessageStringID);
+        pn::string_view string = strings.at(g.zoom + kZoomStringOffset - 1);
         Messages::set_status(string, kStatusLabelColor);
     }
 }
