@@ -19,6 +19,8 @@
 #ifndef ANTARES_DATA_BASE_OBJECT_HPP_
 #define ANTARES_DATA_BASE_OBJECT_HPP_
 
+#include <pn/string>
+
 #include "data/action.hpp"
 #include "drawing/color.hpp"
 #include "math/fixed.hpp"
@@ -265,8 +267,8 @@ class BaseObject {
     static Handle<BaseObject>     none() { return Handle<BaseObject>(-1); }
     static HandleList<BaseObject> all();
 
-    sfz::String name;
-    sfz::String short_name;
+    pn::string name;
+    pn::string short_name;
 
     uint32_t attributes;  // initial attributes (see flags)
     int32_t  baseClass;

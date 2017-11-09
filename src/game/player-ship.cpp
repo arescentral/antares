@@ -833,14 +833,14 @@ void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> 
         if (ship == g.ship) {
             label->set_age(Label::kVisibleTime);
         }
-        String string;
+        pn::string string;
         if (ship->attributes & kIsDestination) {
-            string.assign(GetDestBalanceName(ship->asDestination));
+            string = GetDestBalanceName(ship->asDestination).copy();
         } else {
-            string.assign(get_object_name(ship->base));
+            string = get_object_name(ship->base).copy();
         }
-        print(string, hot_key_suffix(ship));
-        label->set_string(string);
+        string += sfz2pn(hot_key_suffix(ship));
+        label->set_string(pn2sfz(string));
     }
 }
 
@@ -976,13 +976,13 @@ void Update_LabelStrings_ForHotKeyChange(void) {
             g.target_label->set_age(Label::kVisibleTime);
         }
         if (target->attributes & kIsDestination) {
-            String string(GetDestBalanceName(target->asDestination));
-            print(string, hot_key_suffix(target));
-            g.target_label->set_string(string);
+            pn::string string = GetDestBalanceName(target->asDestination).copy();
+            string += sfz2pn(hot_key_suffix(target));
+            g.target_label->set_string(pn2sfz(string));
         } else {
-            String string(get_object_name(target->base));
-            print(string, hot_key_suffix(target));
-            g.target_label->set_string(string);
+            pn::string string = get_object_name(target->base).copy();
+            string += sfz2pn(hot_key_suffix(target));
+            g.target_label->set_string(pn2sfz(string));
         }
     }
 
@@ -994,13 +994,13 @@ void Update_LabelStrings_ForHotKeyChange(void) {
         }
         sys.sound.select();
         if (control->attributes & kIsDestination) {
-            String string(GetDestBalanceName(control->asDestination));
-            print(string, hot_key_suffix(control));
-            g.control_label->set_string(string);
+            pn::string string = GetDestBalanceName(control->asDestination).copy();
+            string += sfz2pn(hot_key_suffix(control));
+            g.control_label->set_string(pn2sfz(string));
         } else {
-            String string(get_object_name(control->base));
-            print(string, hot_key_suffix(control));
-            g.control_label->set_string(string);
+            pn::string string = get_object_name(control->base).copy();
+            string += sfz2pn(hot_key_suffix(control));
+            g.control_label->set_string(pn2sfz(string));
         }
     }
 }

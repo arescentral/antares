@@ -79,7 +79,7 @@ struct Destination {
     ticks               buildTime;
     ticks               totalBuildTime;
     Handle<BaseObject>  buildObjectBaseNum;
-    sfz::String         name;
+    pn::string          name;
 
     bool can_build() const;  // Can build anything.
 };
@@ -144,7 +144,7 @@ class Admiral {
     int32_t&          hopeToBuild() { return _hopeToBuild; }
     uint8_t&          color() { return _color; }
     bool&             active() { return _active; }
-    sfz::StringSlice  name() { return _name; }
+    pn::string_view   name() { return _name; }
     uint32_t&         cheats() { return _cheats; }
 
   private:
@@ -175,7 +175,7 @@ class Admiral {
     uint8_t             _color            = 0;
     bool                _active           = false;
     uint32_t            _cheats           = 0;
-    sfz::String         _name;
+    pn::string          _name;
 
   private:
     Admiral() = default;
@@ -196,9 +196,9 @@ bool                BaseHasSomethingToBuild(Handle<SpaceObject> obj);
 Handle<Destination> GetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral);
 void                SetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral, Handle<SpaceObject> obj);
 
-void             SetAdmiralBuildAtName(Handle<Admiral> whichAdmiral, sfz::StringSlice name);
-sfz::StringSlice GetDestBalanceName(Handle<Destination> whichDestObject);
-sfz::StringSlice GetAdmiralName(Handle<Admiral> whichAdmiral);
+void            SetAdmiralBuildAtName(Handle<Admiral> whichAdmiral, sfz::StringSlice name);
+pn::string_view GetDestBalanceName(Handle<Destination> whichDestObject);
+pn::string_view GetAdmiralName(Handle<Admiral> whichAdmiral);
 
 void SetObjectLocationDestination(Handle<SpaceObject> o, coordPointType* where);
 void SetObjectDestination(Handle<SpaceObject> o);

@@ -122,26 +122,26 @@ void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer) {
 }
 
 void CheatFeedback(int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer) {
-    String admiral_name(GetAdmiralName(whichPlayer));
-    String feedback;
+    pn::string_view admiral_name = GetAdmiralName(whichPlayer);
+    pn::string_view feedback;
     if (activate) {
-        feedback = pn2sfz(sys.cheat.on.at(whichCheat - 1));
+        feedback = sys.cheat.on.at(whichCheat - 1);
     } else {
-        feedback = pn2sfz(sys.cheat.off.at(whichCheat - 1));
+        feedback = sys.cheat.off.at(whichCheat - 1);
     }
-    Messages::add(format("{0}{1}", admiral_name, feedback));
+    Messages::add(format("{0}{1}", pn2sfz(admiral_name), pn2sfz(feedback)));
 }
 
 void CheatFeedbackPlus(
         int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer, PrintItem extra) {
-    String admiral_name(GetAdmiralName(whichPlayer));
-    String feedback;
+    pn::string_view admiral_name = GetAdmiralName(whichPlayer);
+    pn::string_view feedback;
     if (activate) {
-        feedback = pn2sfz(sys.cheat.on.at(whichCheat - 1));
+        feedback = sys.cheat.on.at(whichCheat - 1);
     } else {
-        feedback = pn2sfz(sys.cheat.off.at(whichCheat - 1));
+        feedback = sys.cheat.off.at(whichCheat - 1);
     }
-    Messages::add(format("{0}{1}{2}", admiral_name, feedback, extra));
+    Messages::add(format("{0}{1}{2}", pn2sfz(admiral_name), pn2sfz(feedback), extra));
 }
 
 }  // namespace antares

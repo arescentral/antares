@@ -114,9 +114,9 @@ Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Level::Playe
     a->_earning_power = player.earningPower;
     a->_race          = player.playerRace;
     if ((player.nameResID >= 0)) {
-        a->_name = pn2sfz(StringList(player.nameResID).at(player.nameStrNum - 1));
-        if (a->_name.size() > kAdmiralNameLen) {
-            a->_name.resize(kAdmiralNameLen);
+        a->_name = StringList(player.nameResID).at(player.nameStrNum - 1).copy();
+        if (pn2sfz(a->_name).size() > kAdmiralNameLen) {
+            a->_name = sfz2pn(pn2sfz(a->_name).slice(0, kAdmiralNameLen));
         }
     }
 
@@ -157,9 +157,9 @@ Handle<Destination> MakeNewDestination(
     }
 
     if ((nameResID >= 0)) {
-        d->name = pn2sfz(StringList(nameResID).at(nameStrNum - 1));
-        if (d->name.size() > kDestinationNameLen) {
-            d->name.resize(kDestinationNameLen);
+        d->name = StringList(nameResID).at(nameStrNum - 1).copy();
+        if (pn2sfz(d->name).size() > kDestinationNameLen) {
+            d->name = sfz2pn(pn2sfz(d->name).slice(0, kDestinationNameLen));
         }
     }
 
@@ -357,19 +357,19 @@ void SetAdmiralBuildAtObject(Handle<Admiral> a, Handle<SpaceObject> obj) {
 }
 
 void SetAdmiralBuildAtName(Handle<Admiral> a, StringSlice name) {
-    auto destObject = a->buildAtObject();
-    destObject->name.assign(name.slice(0, min<size_t>(name.size(), kDestinationNameLen)));
+    auto destObject  = a->buildAtObject();
+    destObject->name = sfz2pn(name.slice(0, min<size_t>(name.size(), kDestinationNameLen)));
 }
 
-StringSlice GetDestBalanceName(Handle<Destination> whichDestObject) {
+pn::string_view GetDestBalanceName(Handle<Destination> whichDestObject) {
     return whichDestObject->name;
 }
 
-StringSlice GetAdmiralName(Handle<Admiral> a) {
+pn::string_view GetAdmiralName(Handle<Admiral> a) {
     if (a.get()) {
         return a->name();
     } else {
-        return NULL;
+        return pn::string_view{};
     }
 }
 

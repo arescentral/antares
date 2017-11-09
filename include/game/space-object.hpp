@@ -60,10 +60,10 @@ class SpaceObject {
     void free();
     void create_floating_player_body();
 
-    sfz::StringSlice name() const;
-    sfz::StringSlice short_name() const;
-    bool             engages(const SpaceObject& b) const;
-    Fixed            turn_rate() const;
+    pn::string_view name() const;
+    pn::string_view short_name() const;
+    bool            engages(const SpaceObject& b) const;
+    Fixed           turn_rate() const;
 
     uint32_t           attributes = 0;
     BaseObject*        baseType   = nullptr;
@@ -226,8 +226,8 @@ int32_t CountObjectsOfBaseType(Handle<BaseObject> whichType, Handle<Admiral> own
 
 Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, int race);
 
-sfz::StringSlice get_object_name(Handle<BaseObject> id);
-sfz::StringSlice get_object_short_name(Handle<BaseObject> id);
+pn::string_view get_object_name(Handle<BaseObject> id);
+pn::string_view get_object_short_name(Handle<BaseObject> id);
 
 }  // namespace antares
 

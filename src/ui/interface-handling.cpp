@@ -161,8 +161,8 @@ void CreateObjectDataText(String* text, Handle<BaseObject> object) {
 
     // ship name
     {
-        const StringSlice& name = get_object_name(object);
-        find_replace(data, 0, keys.at(kShipTypeStringNum), name);
+        pn::string_view name = get_object_name(object);
+        find_replace(data, 0, keys.at(kShipTypeStringNum), pn2sfz(name));
     }
 
     // ship mass
@@ -229,8 +229,8 @@ void CreateWeaponDataText(
 
     // weapon name
     {
-        const StringSlice& name = get_object_name(weaponObject);
-        find_replace(data, 0, keys.at(kWeaponNameStringNum), name);
+        pn::string_view name = get_object_name(weaponObject);
+        find_replace(data, 0, keys.at(kWeaponNameStringNum), pn2sfz(name));
     }
 
     pn::string_view yes  = values.at(kShipDataYesStringNum);

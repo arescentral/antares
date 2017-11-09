@@ -23,6 +23,7 @@
 
 #include "data/base-object.hpp"
 #include "data/plugin.hpp"
+#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
@@ -704,25 +705,29 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
         }
         StopBuilding(object->asDestination);
         if (message) {
-            String destination_name(GetDestBalanceName(object->asDestination));
+            pn::string_view destination_name = GetDestBalanceName(object->asDestination);
             if (owner.get()) {
-                String new_owner_name(GetAdmiralName(object->owner));
-                Messages::add(format("{0} captured by {1}.", destination_name, new_owner_name));
+                pn::string_view new_owner_name(GetAdmiralName(object->owner));
+                Messages::add(format(
+                        "{0} captured by {1}.", pn2sfz(destination_name), pn2sfz(new_owner_name)));
             } else if (old_owner.get()) {  // must be since can't both be -1
-                String old_owner_name(GetAdmiralName(old_owner));
-                Messages::add(format("{0} lost by {1}.", destination_name, old_owner_name));
+                pn::string_view old_owner_name(GetAdmiralName(old_owner));
+                Messages::add(format(
+                        "{0} lost by {1}.", pn2sfz(destination_name), pn2sfz(old_owner_name)));
             }
         }
         RecalcAllAdmiralBuildData();
     } else {
         if (message) {
-            StringSlice object_name = get_object_name(object->base);
+            pn::string_view object_name = get_object_name(object->base);
             if (owner.get()) {
-                String new_owner_name(GetAdmiralName(object->owner));
-                Messages::add(format("{0} captured by {1}.", object_name, new_owner_name));
+                pn::string_view new_owner_name = GetAdmiralName(object->owner);
+                Messages::add(format(
+                        "{0} captured by {1}.", pn2sfz(object_name), pn2sfz(new_owner_name)));
             } else if (old_owner.get()) {  // must be since can't both be -1
-                String old_owner_name(GetAdmiralName(old_owner));
-                Messages::add(format("{0} lost by {1}.", object_name, old_owner_name));
+                pn::string_view old_owner_name = GetAdmiralName(old_owner);
+                Messages::add(
+                        format("{0} lost by {1}.", pn2sfz(object_name), pn2sfz(old_owner_name)));
             }
         }
     }
@@ -861,7 +866,7 @@ void SpaceObject::create_floating_player_body() {
     }
 }
 
-sfz::StringSlice SpaceObject::name() const {
+pn::string_view SpaceObject::name() const {
     if (attributes & kIsDestination) {
         return GetDestBalanceName(asDestination);
     } else {
@@ -869,7 +874,7 @@ sfz::StringSlice SpaceObject::name() const {
     }
 }
 
-sfz::StringSlice SpaceObject::short_name() const {
+pn::string_view SpaceObject::short_name() const {
     if (attributes & kIsDestination) {
         return GetDestBalanceName(asDestination);
     } else {
@@ -892,11 +897,11 @@ Fixed SpaceObject::turn_rate() const {
     return kDefaultTurnRate;
 }
 
-StringSlice get_object_name(Handle<BaseObject> id) {
+pn::string_view get_object_name(Handle<BaseObject> id) {
     return id->name;  // TODO(sfiera): use directly.
 }
 
-StringSlice get_object_short_name(Handle<BaseObject> id) {
+pn::string_view get_object_short_name(Handle<BaseObject> id) {
     return id->short_name;  // TODO(sfiera): use directly.
 }
 

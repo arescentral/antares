@@ -87,8 +87,8 @@ void PluginInit() {
     StringList object_names(kSpaceObjectNameResID);
     StringList object_short_names(kSpaceObjectShortNameResID);
     for (size_t i = 0; i < plug.objects.size(); ++i) {
-        plug.objects[i].name       = pn2sfz(object_names.at(i));
-        plug.objects[i].short_name = pn2sfz(object_short_names.at(i));
+        plug.objects[i].name       = object_names.at(i).copy();
+        plug.objects[i].short_name = object_short_names.at(i).copy();
     }
 }
 

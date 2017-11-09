@@ -20,6 +20,7 @@
 
 #include "config/keys.hpp"
 #include "data/plugin.hpp"
+#include "data/pn.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/sprite-handling.hpp"
@@ -1526,9 +1527,9 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
 
     if (anObject->health() < 0 && (anObject->owner == g.admiral) &&
         (anObject->attributes & kCanAcceptDestination)) {
-        const StringSlice& object_name = get_object_name(anObject->base);
-        int                count = CountObjectsOfBaseType(anObject->base, anObject->owner) - 1;
-        Messages::add(format(" {0} destroyed.  {1} remaining. ", object_name, count));
+        pn::string_view object_name = get_object_name(anObject->base);
+        int             count       = CountObjectsOfBaseType(anObject->base, anObject->owner) - 1;
+        Messages::add(format(" {0} destroyed.  {1} remaining. ", pn2sfz(object_name), count));
     }
 
     if (sObject->active == kObjectInUse) {

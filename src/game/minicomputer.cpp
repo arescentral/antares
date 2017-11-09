@@ -654,7 +654,7 @@ static void draw_mini_ship_data(
             sys.fonts.computer->draw(
                     Point(lRect.left + kMiniScreenLeftBuffer,
                           lRect.top + sys.fonts.computer->ascent),
-                    obj->short_name(), GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT));
+                    pn2sfz(obj->short_name()), GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT));
         }
     }
 
@@ -743,7 +743,7 @@ static void draw_mini_ship_data(
                     screen_top, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
             sys.fonts.computer->draw(
                     Point(lRect.left, lRect.top + sys.fonts.computer->ascent),
-                    get_object_short_name(obj->beam.base), color);
+                    pn2sfz(get_object_short_name(obj->beam.base)), color);
         }
 
         if (obj->pulse.base.get()) {
@@ -751,7 +751,7 @@ static void draw_mini_ship_data(
                     screen_top, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
             sys.fonts.computer->draw(
                     Point(lRect.left, lRect.top + sys.fonts.computer->ascent),
-                    get_object_short_name(obj->pulse.base), color);
+                    pn2sfz(get_object_short_name(obj->pulse.base)), color);
         }
 
         // Don't show special weapons of destination objects.
@@ -761,7 +761,7 @@ static void draw_mini_ship_data(
                         screen_top, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
                 sys.fonts.computer->draw(
                         Point(lRect.left, lRect.top + sys.fonts.computer->ascent),
-                        get_object_short_name(obj->special.base), color);
+                        pn2sfz(get_object_short_name(obj->special.base)), color);
             }
         }
     }
@@ -773,7 +773,8 @@ static void draw_mini_ship_data(
         RgbColor color    = GetRGBTranslateColorShade(friendly ? GREEN : RED, VERY_LIGHT);
         Rect lRect = mini_screen_line_bounds(screen_top, kMiniDestLineNum, 0, kMiniScreenWidth);
         sys.fonts.computer->draw(
-                Point(lRect.left, lRect.top + sys.fonts.computer->ascent), dest->name(), color);
+                Point(lRect.left, lRect.top + sys.fonts.computer->ascent), pn2sfz(dest->name()),
+                color);
     }
 }
 
@@ -977,7 +978,7 @@ void MiniComputerSetBuildStrings() {
         return;
     }
     header->value = buildAtObject.number();
-    mCopyBlankLineString(header, buildAtObject->name);
+    mCopyBlankLineString(header, pn2sfz(buildAtObject->name));
 
     for (int32_t count = 0; count < kMaxShipCanBuild; count++) {
         int32_t             lineNum = kBuildScreenFirstTypeLine + count;
@@ -990,7 +991,7 @@ void MiniComputerSetBuildStrings() {
             continue;
         }
 
-        mCopyBlankLineString(line, get_object_name(buildObject));
+        mCopyBlankLineString(line, pn2sfz(get_object_name(buildObject)));
         if (buildObject->price > mFixedToLong(g.admiral->cash())) {
             line->kind = MINI_DIM;
         } else {
