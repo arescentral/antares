@@ -68,7 +68,7 @@ const int32_t kMaxNumAdmiralCanBuild = kMaxDestObject * kMaxTypeBaseCanBuild;
 const int32_t kAdmiralScoreNum       = 3;
 
 struct Destination {
-    static Destination* get(int i);
+    static Destination*            get(int i);
     static Handle<Destination>     none() { return Handle<Destination>(-1); }
     static HandleList<Destination> all() { return HandleList<Destination>(0, kMaxDestObject); }
 
@@ -92,10 +92,10 @@ struct admiralBuildType {
 
 class Admiral {
   public:
-    static void     init();
-    static void     reset();
-    static Admiral* get(int i);
-    static Handle<Admiral> make(int index, uint32_t attributes, const Level::Player& player);
+    static void                init();
+    static void                reset();
+    static Admiral*            get(int i);
+    static Handle<Admiral>     make(int index, uint32_t attributes, const Level::Player& player);
     static Handle<Admiral>     none() { return Handle<Admiral>(-1); }
     static HandleList<Admiral> all() { return HandleList<Admiral>(0, kMaxPlayerNum); }
 
@@ -107,8 +107,8 @@ class Admiral {
 
     Handle<SpaceObject> control() const;
     Handle<SpaceObject> target() const;
-    void set_control(Handle<SpaceObject> object);
-    void set_target(Handle<SpaceObject> object);
+    void                set_control(Handle<SpaceObject> object);
+    void                set_target(Handle<SpaceObject> object);
 
     uint32_t&           attributes() { return _attributes; }
     bool                has_destination() { return _has_destination; }
@@ -116,7 +116,7 @@ class Admiral {
     int32_t             destinationObjectID() { return _destinationObjectID; }
 
     Handle<SpaceObject> flagship() { return _flagship; }
-    void set_flagship(Handle<SpaceObject> object) { _flagship = object; }
+    void                set_flagship(Handle<SpaceObject> object) { _flagship = object; }
 
     Handle<SpaceObject>  considerShip() { return _considerShip; }
     int32_t              considerShipID() { return _considerShipID; }
@@ -130,7 +130,7 @@ class Admiral {
     Fixed&   saveGoal() { return _saveGoal; }
 
     Fixed earning_power() { return _earning_power; }
-    void set_earning_power(Fixed value) { _earning_power = value; }
+    void  set_earning_power(Fixed value) { _earning_power = value; }
 
     int32_t&          kills() { return _kills; }
     int32_t&          losses() { return _losses; }
@@ -192,11 +192,11 @@ void RecalcAllAdmiralBuildData();
 uint8_t GetAdmiralColor(Handle<Admiral> whichAdmiral);
 int32_t GetAdmiralRace(Handle<Admiral> whichAdmiral);
 
-bool BaseHasSomethingToBuild(Handle<SpaceObject> obj);
+bool                BaseHasSomethingToBuild(Handle<SpaceObject> obj);
 Handle<Destination> GetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral);
-void SetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral, Handle<SpaceObject> obj);
+void                SetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral, Handle<SpaceObject> obj);
 
-void SetAdmiralBuildAtName(Handle<Admiral> whichAdmiral, sfz::StringSlice name);
+void             SetAdmiralBuildAtName(Handle<Admiral> whichAdmiral, sfz::StringSlice name);
 sfz::StringSlice GetDestBalanceName(Handle<Destination> whichDestObject);
 sfz::StringSlice GetAdmiralName(Handle<Admiral> whichAdmiral);
 
@@ -208,7 +208,7 @@ void RemoveObjectFromDestination(Handle<SpaceObject> o);
 void AdmiralThink();
 void StopBuilding(Handle<Destination> whichDestObject);
 
-void AlterAdmiralScore(Handle<Admiral> whichAdmiral, int32_t whichScore, int32_t amount);
+void    AlterAdmiralScore(Handle<Admiral> whichAdmiral, int32_t whichScore, int32_t amount);
 int32_t GetAdmiralScore(Handle<Admiral> whichAdmiral, int32_t whichScore);
 int32_t GetAdmiralShipsLeft(Handle<Admiral> whichAdmiral);
 int32_t AlterDestinationObjectOccupation(

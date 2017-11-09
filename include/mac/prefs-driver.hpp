@@ -30,7 +30,7 @@ class CoreFoundationPrefsDriver : public PrefsDriver {
     CoreFoundationPrefsDriver();
 
     virtual const Preferences& get() const { return _current; }
-    virtual void set(const Preferences& prefs);
+    virtual void               set(const Preferences& prefs);
 
   private:
     Preferences _current;

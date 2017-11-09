@@ -27,7 +27,7 @@ namespace antares {
 struct Version {
     std::vector<int> components;
 };
-void print_to(sfz::PrintTarget out, const Version& v);
+void    print_to(sfz::PrintTarget out, const Version& v);
 Version u32_to_version(uint32_t in);
 
 class ScenarioList {

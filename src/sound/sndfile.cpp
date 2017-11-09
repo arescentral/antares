@@ -115,7 +115,7 @@ void Sndfile::convert(Bytes& data, ALenum& format, ALsizei& frequency) const {
     VirtualFile userdata = {
             .data = _data, .pointer = 0,
     };
-    SF_INFO info = {};
+    SF_INFO                                       info = {};
     std::unique_ptr<SNDFILE, decltype(&sf_close)> file(
             sf_open_virtual(&io, SFM_READ, &info, &userdata), sf_close);
 

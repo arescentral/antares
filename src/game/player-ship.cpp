@@ -73,7 +73,7 @@ const static ticks kDestKeyHoldDuration = ticks(45);
 const static ticks kHotKeyHoldDuration  = ticks(51);  // Compatibility
 
 int32_t HotKey_GetFromObject(Handle<SpaceObject> object);
-void Update_LabelStrings_ForHotKeyChange(void);
+void    Update_LabelStrings_ForHotKeyChange(void);
 
 namespace {
 

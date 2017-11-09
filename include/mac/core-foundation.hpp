@@ -105,7 +105,7 @@ class Boolean : public UnownedObject<CFBooleanRef> {
     Boolean& operator=(Boolean&&) = default;
 };
 Boolean wrap(bool value);
-bool unwrap(const Boolean& cfvalue, bool& value);
+bool    unwrap(const Boolean& cfvalue, bool& value);
 
 class Number : public Object<CFNumberRef> {
   public:
@@ -121,12 +121,12 @@ Number wrap(long value);
 Number wrap(long long value);
 Number wrap(float value);
 Number wrap(double value);
-bool unwrap(const Number& cfvalue, short& value);
-bool unwrap(const Number& cfvalue, int& value);
-bool unwrap(const Number& cfvalue, long& value);
-bool unwrap(const Number& cfvalue, long long& value);
-bool unwrap(const Number& cfvalue, float& value);
-bool unwrap(const Number& cfvalue, double& value);
+bool   unwrap(const Number& cfvalue, short& value);
+bool   unwrap(const Number& cfvalue, int& value);
+bool   unwrap(const Number& cfvalue, long& value);
+bool   unwrap(const Number& cfvalue, long long& value);
+bool   unwrap(const Number& cfvalue, float& value);
+bool   unwrap(const Number& cfvalue, double& value);
 
 class String : public Object<CFStringRef> {
   public:
@@ -138,7 +138,7 @@ class String : public Object<CFStringRef> {
 };
 String wrap(const char* value);
 String wrap(sfz::StringSlice value);
-bool unwrap(const String& cfvalue, sfz::String& value);
+bool   unwrap(const String& cfvalue, sfz::String& value);
 
 class Array : public Object<CFArrayRef> {
   public:
@@ -159,8 +159,8 @@ class MutableArray : public Object<CFMutableArrayRef> {
     MutableArray(MutableArray&&) = default;
     MutableArray& operator=(MutableArray&&) = default;
     size_t        size() const;
-    const void* get(size_t index) const;
-    void append(const void* key);
+    const void*   get(size_t index) const;
+    void          append(const void* key);
 };
 
 class Dictionary : public Object<CFDictionaryRef> {
@@ -179,7 +179,7 @@ class MutableDictionary : public Object<CFMutableDictionaryRef> {
     MutableDictionary(type c_obj);
     MutableDictionary(MutableDictionary&&) = default;
     MutableDictionary& operator=(MutableDictionary&&) = default;
-    void set(const void* key, const void* value);
+    void               set(const void* key, const void* value);
 };
 
 class Data : public Object<CFDataRef> {

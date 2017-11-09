@@ -37,7 +37,7 @@ class NatePixTable {
     ~NatePixTable();
 
     const Frame& at(size_t index) const;
-    size_t size() const;
+    size_t       size() const;
 
   private:
     size_t             _size;

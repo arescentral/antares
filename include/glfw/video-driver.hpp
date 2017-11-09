@@ -50,10 +50,10 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
     void loop(Card* initial);
 
   private:
-    void key(int key, int scancode, int action, int mods);
-    void mouse_button(int button, int action, int mods);
-    void mouse_move(double x, double y);
-    void window_size(int width, int height);
+    void        key(int key, int scancode, int action, int mods);
+    void        mouse_button(int button, int action, int mods);
+    void        mouse_move(double x, double y);
+    void        window_size(int width, int height);
     static void key_callback(GLFWwindow* w, int key, int scancode, int action, int mods);
     static void mouse_button_callback(GLFWwindow* w, int button, int action, int mods);
     static void mouse_move_callback(GLFWwindow* w, double x, double y);

@@ -62,8 +62,8 @@ class SpaceObject {
 
     sfz::StringSlice name() const;
     sfz::StringSlice short_name() const;
-    bool engages(const SpaceObject& b) const;
-    Fixed turn_rate() const;
+    bool             engages(const SpaceObject& b) const;
+    Fixed            turn_rate() const;
 
     uint32_t           attributes = 0;
     BaseObject*        baseType   = nullptr;
@@ -111,7 +111,7 @@ class SpaceObject {
     ticks          timeFromOrigin    = ticks(0);  // time it's been since we left
     fixedPointType idealLocationCalc = {Fixed::zero(),
                                         Fixed::zero()};  // calced when we got origin
-    coordPointType originLocation = {0, 0};              // coords of our origin
+    coordPointType originLocation    = {0, 0};           // coords of our origin
 
     fixedPointType motionFraction = {Fixed::zero(), Fixed::zero()};
     fixedPointType velocity       = {Fixed::zero(), Fixed::zero()};
@@ -135,19 +135,19 @@ class SpaceObject {
     int32_t _battery = 0;
 
     int32_t health() const { return _health; }
-    void alter_health(int32_t amount);
+    void    alter_health(int32_t amount);
     int32_t max_health() const { return baseType->health; }
 
     int32_t energy() const { return _energy; }
-    void alter_energy(int32_t amount);
+    void    alter_energy(int32_t amount);
     int32_t max_energy() const { return baseType->energy; }
 
     int32_t battery() const { return _battery; }
-    void alter_battery(int32_t amount);
+    void    alter_battery(int32_t amount);
     int32_t max_battery() const { return 5 * max_energy(); }
 
-    void recharge();
-    bool collect_warp_energy(int32_t amount);
+    void    recharge();
+    bool    collect_warp_energy(int32_t amount);
     void    refund_warp_energy();
     int32_t warpEnergyCollected = 0;
 

@@ -23,9 +23,9 @@
 
 namespace antares {
 
-void create_initial(Level::InitialObject* initial, uint32_t all_colors);
-void set_initial_destination(const Level::InitialObject* initial, bool preserve);
-void UnhideInitialObject(int32_t whichInitial);
+void                create_initial(Level::InitialObject* initial, uint32_t all_colors);
+void                set_initial_destination(const Level::InitialObject* initial, bool preserve);
+void                UnhideInitialObject(int32_t whichInitial);
 Handle<SpaceObject> GetObjectFromInitialNumber(int32_t initialNumber);
 
 }  // namespace antares

@@ -28,9 +28,9 @@ extern "C" {
 typedef struct AntaresScenarioList      AntaresScenarioList;
 typedef struct AntaresScenarioListEntry AntaresScenarioListEntry;
 
-AntaresScenarioList* antares_scenario_list_create();
-void antares_scenario_list_destroy(AntaresScenarioList* list);
-size_t antares_scenario_list_size(AntaresScenarioList* list);
+AntaresScenarioList*      antares_scenario_list_create();
+void                      antares_scenario_list_destroy(AntaresScenarioList* list);
+size_t                    antares_scenario_list_size(AntaresScenarioList* list);
 AntaresScenarioListEntry* antares_scenario_list_at(AntaresScenarioList* list, size_t index);
 
 const char* antares_scenario_list_entry_identifier(AntaresScenarioListEntry* entry);

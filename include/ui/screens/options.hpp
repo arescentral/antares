@@ -126,16 +126,16 @@ class KeyControlScreen : public InterfaceScreen {
     };
 
     OptionsScreen::State button_state(int button);
-    Tab button_tab(int button);
-    void set_tab(Tab tab);
-    void update_conflicts();
-    void flash_on(size_t key);
+    Tab                  button_tab(int button);
+    void                 set_tab(Tab tab);
+    void                 update_conflicts();
+    void                 flash_on(size_t key);
 
     OptionsScreen::State* const _state;
 
-    Tab          _tab;
-    const size_t _key_start;
-    int32_t      _selected_key;
+    Tab                                    _tab;
+    const size_t                           _key_start;
+    int32_t                                _selected_key;
     std::vector<std::pair<size_t, size_t>> _conflicts;
 
     wall_time _next_flash;

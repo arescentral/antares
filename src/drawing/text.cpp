@@ -91,12 +91,12 @@ struct FontVisitor : public JsonDefaultVisitor {
         Rect      glyph_rect;
         State() : state(NEW) {}
     };
-    State&   state;
-    Texture& texture;
-    int&     scale;
-    int32_t& logical_width;
-    int32_t& height;
-    int32_t& ascent;
+    State&           state;
+    Texture&         texture;
+    int&             scale;
+    int32_t&         logical_width;
+    int32_t&         height;
+    int32_t&         ascent;
     map<Rune, Rect>& glyphs;
 
     FontVisitor(
@@ -177,12 +177,12 @@ struct FontVisitor : public JsonDefaultVisitor {
 
     virtual void visit_number(double value) const {
         switch (state.state) {
-            case LOGICAL_WIDTH: logical_width          = value; break;
-            case HEIGHT: height                        = value; break;
-            case ASCENT: ascent                        = value; break;
-            case GLYPH_LEFT: state.glyph_rect.left     = value; break;
-            case GLYPH_TOP: state.glyph_rect.top       = value; break;
-            case GLYPH_RIGHT: state.glyph_rect.right   = value; break;
+            case LOGICAL_WIDTH: logical_width = value; break;
+            case HEIGHT: height = value; break;
+            case ASCENT: ascent = value; break;
+            case GLYPH_LEFT: state.glyph_rect.left = value; break;
+            case GLYPH_TOP: state.glyph_rect.top = value; break;
+            case GLYPH_RIGHT: state.glyph_rect.right = value; break;
             case GLYPH_BOTTOM: state.glyph_rect.bottom = value; break;
             default: return visit_default("number");
         }

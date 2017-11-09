@@ -54,9 +54,9 @@ const int32_t kLabelTotalInnerSpace = kLabelInnerSpace << 1;
 const ticks Label::kVisibleTime = secs(1);
 
 // local function prototypes
-static int32_t String_Count_Lines(const StringSlice& s);
+static int32_t     String_Count_Lines(const StringSlice& s);
 static StringSlice String_Get_Nth_Line(const StringSlice& source, int32_t nth);
-static void Auto_Animate_Line(Point* source, Point* dest);
+static void        Auto_Animate_Line(Point* source, Point* dest);
 
 Label* Label::get(int number) {
     if ((0 <= number) && (number < kMaxLabelNum)) {

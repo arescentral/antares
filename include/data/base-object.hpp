@@ -261,7 +261,7 @@ void read_from(sfz::ReadSource in, objectFrameType::Weapon& weapon);
 
 class BaseObject {
   public:
-    static BaseObject* get(int number);
+    static BaseObject*            get(int number);
     static Handle<BaseObject>     none() { return Handle<BaseObject>(-1); }
     static HandleList<BaseObject> all();
 

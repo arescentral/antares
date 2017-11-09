@@ -53,7 +53,7 @@ typedef void (*draw_tiny_t)(const Rect& rect, const RgbColor& color);
 
 class Sprite {
   public:
-    static Sprite* get(int number);
+    static Sprite*            get(int number);
     static Handle<Sprite>     none() { return Handle<Sprite>(-1); }
     static HandleList<Sprite> all() { return HandleList<Sprite>(0, size); }
 
@@ -85,8 +85,8 @@ extern int32_t gAbsoluteScale;
 // The regular variant calculates the final scale as ``(value * scale) / 4096``.  The evil variant
 // calculates the final scale as ``(value * scale) >> 12``, which results in off-by-one errors when
 // `value` is negative.
-Fixed scale_by(Fixed value, int32_t scale);
-Fixed evil_scale_by(Fixed value, int32_t scale);
+Fixed   scale_by(Fixed value, int32_t scale);
+Fixed   evil_scale_by(Fixed value, int32_t scale);
 int32_t evil_scale_by(int32_t value, int32_t scale);
 
 class Pix {
@@ -99,9 +99,9 @@ class Pix {
     std::map<int16_t, NatePixTable> pix;
 };
 
-void SpriteHandlingInit();
-void ResetAllSprites();
-Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t scale);
+void           SpriteHandlingInit();
+void           ResetAllSprites();
+Rect           scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t scale);
 Handle<Sprite> AddSprite(
         Point where, NatePixTable* table, int16_t resID, int16_t whichShape, int32_t scale,
         int32_t size, int16_t layer, const RgbColor& color);

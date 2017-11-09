@@ -58,7 +58,7 @@ class DebriefingScreen : public Card {
         DONE,
     };
     friend void print_to(sfz::PrintTarget out, State state);
-    State _state;
+    State       _state;
 
     sfz::String                 _message;
     std::unique_ptr<StyledText> _score;

@@ -451,7 +451,7 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
                 shade = VERY_DARK;
             else
                 shade = LIGHT;
-            swidth    = GetInterfaceFontWidth(item.style) * kMaxKeyNameLength;
+            swidth = GetInterfaceFontWidth(item.style) * kMaxKeyNameLength;
 
             uRect = Rect(
                     tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
@@ -463,7 +463,7 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
                 shade = LIGHT;
             else
                 shade = DARK;  // DARKEST;
-            vRect     = Rect(
+            vRect = Rect(
                     tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 2,
                     tRect.top + kInterfaceContentBuffer, tRect.right - kInterfaceContentBuffer + 1,
                     tRect.bottom - kInterfaceContentBuffer + 1);
@@ -960,7 +960,7 @@ void draw_checkbox(Point origin, const CheckboxButton& item) {
 
     if (item.style == kLarge)
         thisHBorder = kInterfaceLargeHBorder;
-    tRect           = item.bounds();
+    tRect = item.bounds();
     tRect.offset(origin.h, origin.v);
 
     tRect.left -= kInterfaceContentBuffer;
@@ -1041,7 +1041,7 @@ void draw_checkbox(Point origin, const CheckboxButton& item) {
         shade = LIGHT;
     else
         shade = DARKEST + kSlightlyLighterColor;
-    uRect     = Rect(
+    uRect = Rect(
             tRect.left + kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
             tRect.right - kInterfaceContentBuffer + 1, tRect.bottom - kInterfaceContentBuffer + 1);
     color = GetRGBTranslateColorShade(item.hue, shade);

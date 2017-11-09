@@ -422,8 +422,8 @@ static void render_briefing_with(
 struct DriverRenderer {
     Point origin;
     void  outline(
-            const NatePixTable::Frame& frame, Point where, int32_t scale, Rect* sprite_rect,
-            Rect clip_rect, RgbColor outline_color, RgbColor fill_color) const {
+             const NatePixTable::Frame& frame, Point where, int32_t scale, Rect* sprite_rect,
+             Rect clip_rect, RgbColor outline_color, RgbColor fill_color) const {
         *sprite_rect   = scale_sprite_rect(frame, where, scale);
         Rect draw_rect = *sprite_rect;
         draw_rect.offset(origin.h, origin.v);

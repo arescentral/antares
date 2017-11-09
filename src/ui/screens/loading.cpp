@@ -61,7 +61,7 @@ void LoadingScreen::become_front() {}
 bool LoadingScreen::next_timer(wall_time& time) {
     switch (_state) {
         case TYPING:
-        case DONE: time    = _next_update; return true;
+        case DONE: time = _next_update; return true;
         case LOADING: time = wall_time(); return true;
     }
     return false;

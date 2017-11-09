@@ -31,7 +31,7 @@ class Label {
     static const int32_t kMaxLabelNum = 16;
     static const ticks   kVisibleTime;
 
-    static Label* get(int number);
+    static Label*            get(int number);
     static Handle<Label>     none() { return Handle<Label>(-1); }
     static HandleList<Label> all() { return {0, kMaxLabelNum}; }
 
@@ -47,16 +47,16 @@ class Label {
 
     void remove();
 
-    void set_position(int16_t h, int16_t v);
-    void set_object(Handle<SpaceObject> object);
-    void set_age(ticks age);
-    void set_string(const sfz::StringSlice& string);
-    void clear_string();
-    void set_color(uint8_t color);
-    void set_offset(int32_t hoff, int32_t voff);
+    void    set_position(int16_t h, int16_t v);
+    void    set_object(Handle<SpaceObject> object);
+    void    set_age(ticks age);
+    void    set_string(const sfz::StringSlice& string);
+    void    clear_string();
+    void    set_color(uint8_t color);
+    void    set_offset(int32_t hoff, int32_t voff);
     int32_t get_width() { return width; }
-    void set_keep_on_screen_anyway(bool keepOnScreenAnyWay);
-    void set_attached_hint_line(bool attachedHintLine, Point toWhere);
+    void    set_keep_on_screen_anyway(bool keepOnScreenAnyWay);
+    void    set_attached_hint_line(bool attachedHintLine, Point toWhere);
 
   private:
     static Handle<Label> next_free_label();

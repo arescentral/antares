@@ -31,13 +31,13 @@ class Fixed {
     static constexpr Fixed from_long(int32_t x) { return Fixed(x << 8); }
     static constexpr Fixed from_float(float x) { return Fixed(roundf(x * 256.0)); }
     static constexpr Fixed from_val(int32_t value) { return Fixed(value); }
-    static constexpr Fixed                  zero() { return Fixed(0); }
+    static constexpr Fixed zero() { return Fixed(0); }
 
     int32_t val() const { return _value; }
 
   private:
     explicit constexpr Fixed(int32_t value) : _value(value) {}
-    int32_t                          _value;
+    int32_t _value;
 };
 
 inline bool operator==(Fixed x, Fixed y) { return x.val() == y.val(); }
@@ -104,7 +104,7 @@ inline int32_t evil_fixed_to_long(Fixed value) {
 }
 inline int32_t more_evil_fixed_to_long(Fixed value) { return (value >> 8).val(); }
 
-inline float mFixedToFloat(Fixed m_f) { return floorf(m_f.val() * 1e3 / 256.0) / 1e3; }
+inline float   mFixedToFloat(Fixed m_f) { return floorf(m_f.val() * 1e3 / 256.0) / 1e3; }
 inline int32_t mFixedToLong(Fixed m_f) { return evil_fixed_to_long(m_f); }
 
 void print_to(sfz::PrintTarget out, const Fixed& fixed);

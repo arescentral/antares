@@ -72,8 +72,8 @@ uint32_t ThinkObjectWarpingPresence(Handle<SpaceObject> anObject);
 uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject);
 uint32_t ThinkObjectWarpOutPresence(Handle<SpaceObject> anObject, Handle<BaseObject> baseObject);
 uint32_t ThinkObjectLandingPresence(Handle<SpaceObject> anObject);
-void ThinkObjectGetCoordVector(
-        Handle<SpaceObject> anObject, coordPointType* dest, uint32_t* distance, int16_t* angle);
+void     ThinkObjectGetCoordVector(
+            Handle<SpaceObject> anObject, coordPointType* dest, uint32_t* distance, int16_t* angle);
 void ThinkObjectGetCoordDistance(
         Handle<SpaceObject> anObject, coordPointType* dest, uint32_t* distance);
 void ThinkObjectResolveDestination(

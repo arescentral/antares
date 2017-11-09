@@ -59,7 +59,7 @@ struct Gamepad {
     };
 
     static int16_t num(sfz::StringSlice name);
-    static bool name(int16_t button, sfz::String& out);
+    static bool    name(int16_t button, sfz::String& out);
 };
 
 }  // namespace antares

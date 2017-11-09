@@ -389,7 +389,7 @@ void SpaceObject::change_base_type(
     }
 #endif  // DATA_COVERAGE
 
-    obj->attributes = base->attributes | (obj->attributes & (kIsHumanControlled | kIsRemote |
+    obj->attributes    = base->attributes | (obj->attributes & (kIsHumanControlled | kIsRemote |
                                                              kIsPlayerShip | kStaticDestination));
     obj->baseType      = base.get();
     obj->base          = base;
@@ -647,10 +647,10 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
     if (object->sprite.get()) {
         uint8_t tinyShade;
         switch (object->sprite->whichLayer) {
-            case kFirstSpriteLayer: tinyShade  = MEDIUM; break;
+            case kFirstSpriteLayer: tinyShade = MEDIUM; break;
             case kMiddleSpriteLayer: tinyShade = LIGHT; break;
-            case kLastSpriteLayer: tinyShade   = VERY_LIGHT; break;
-            default: tinyShade                 = DARK; break;
+            case kLastSpriteLayer: tinyShade = VERY_LIGHT; break;
+            default: tinyShade = DARK; break;
         }
 
         RgbColor tinyColor;

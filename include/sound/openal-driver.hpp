@@ -39,8 +39,8 @@ class OpenAlSoundDriver : public SoundDriver {
     ~OpenAlSoundDriver();
 
     virtual std::unique_ptr<SoundChannel> open_channel();
-    virtual std::unique_ptr<Sound> open_sound(sfz::PrintItem path);
-    virtual void set_global_volume(uint8_t volume);
+    virtual std::unique_ptr<Sound>        open_sound(sfz::PrintItem path);
+    virtual void                          set_global_volume(uint8_t volume);
 
   private:
     class OpenAlChannel;

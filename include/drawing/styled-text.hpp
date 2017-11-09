@@ -86,7 +86,7 @@ class StyledText {
     };
 
     void color_cursor(const Rect& bounds, int index, const RgbColor& color) const;
-    int move_word_down(int index, int v);
+    int  move_word_down(int index, int v);
 
     RgbColor                    _fore_color;
     RgbColor                    _back_color;

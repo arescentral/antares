@@ -33,7 +33,7 @@ class PlayerShip : public EventReceiver {
   public:
     PlayerShip();
 
-    void update_keys(const KeyMap& keys);
+    void         update_keys(const KeyMap& keys);
     virtual void key_down(const KeyDownEvent& event);
     virtual void key_up(const KeyUpEvent& event);
 

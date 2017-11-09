@@ -68,8 +68,8 @@ class ReplayBuilder : public EventReceiver {
     void         start();
     virtual void key_down(const KeyDownEvent& key);
     virtual void key_up(const KeyUpEvent& key);
-    void next();
-    void finish();
+    void         next();
+    void         finish();
 
   private:
     std::unique_ptr<sfz::ScopedFd> _file;

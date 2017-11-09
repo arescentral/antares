@@ -40,7 +40,7 @@ struct Vector {
         BEAM_TO_COORD_LIGHTNING  = 4,  // lightning bolt, from object to coord
     };
 
-    static Vector* get(int number);
+    static Vector*            get(int number);
     static Handle<Vector>     none() { return Handle<Vector>(-1); }
     static HandleList<Vector> all() { return HandleList<Vector>(0, size); }
 

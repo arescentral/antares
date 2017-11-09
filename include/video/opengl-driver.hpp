@@ -57,12 +57,12 @@ class OpenGlVideoDriver : public VideoDriver {
     virtual int scale() const;
 
     virtual Texture texture(sfz::PrintItem name, const PixMap& content);
-    virtual void dither_rect(const Rect& rect, const RgbColor& color);
-    virtual void draw_point(const Point& at, const RgbColor& color);
-    virtual void draw_line(const Point& from, const Point& to, const RgbColor& color);
-    virtual void draw_triangle(const Rect& rect, const RgbColor& color);
-    virtual void draw_diamond(const Rect& rect, const RgbColor& color);
-    virtual void draw_plus(const Rect& rect, const RgbColor& color);
+    virtual void    dither_rect(const Rect& rect, const RgbColor& color);
+    virtual void    draw_point(const Point& at, const RgbColor& color);
+    virtual void    draw_line(const Point& from, const Point& to, const RgbColor& color);
+    virtual void    draw_triangle(const Rect& rect, const RgbColor& color);
+    virtual void    draw_diamond(const Rect& rect, const RgbColor& color);
+    virtual void    draw_plus(const Rect& rect, const RgbColor& color);
 
     struct Uniforms {
         Uniform<vec2>          screen          = {"screen"};

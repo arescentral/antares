@@ -228,11 +228,16 @@ struct CocoaVideoDriver::EventBridge {
 
 void CocoaVideoDriver::loop(Card* initial) {
     CGLPixelFormatAttribute attrs[] = {
-            kCGLPFAOpenGLProfile, (CGLPixelFormatAttribute)kCGLOGLPVersion_3_2_Core,
-            kCGLPFADisplayMask, static_cast<CGLPixelFormatAttribute>(
-                                        CGDisplayIDToOpenGLDisplayMask(kCGDirectMainDisplay)),
-            kCGLPFAColorSize, static_cast<CGLPixelFormatAttribute>(24), kCGLPFADoubleBuffer,
-            kCGLPFAAccelerated, static_cast<CGLPixelFormatAttribute>(0),
+            kCGLPFAOpenGLProfile,
+            (CGLPixelFormatAttribute)kCGLOGLPVersion_3_2_Core,
+            kCGLPFADisplayMask,
+            static_cast<CGLPixelFormatAttribute>(
+                    CGDisplayIDToOpenGLDisplayMask(kCGDirectMainDisplay)),
+            kCGLPFAColorSize,
+            static_cast<CGLPixelFormatAttribute>(24),
+            kCGLPFADoubleBuffer,
+            kCGLPFAAccelerated,
+            static_cast<CGLPixelFormatAttribute>(0),
     };
 
     cgl::PixelFormat pixel_format(attrs);

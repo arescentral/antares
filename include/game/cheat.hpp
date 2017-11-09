@@ -61,7 +61,7 @@ enum {
 };
 
 int16_t GetCheatNumFromString(const sfz::StringSlice& string);
-void ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer);
+void    ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer);
 
 }  // namespace antares
 

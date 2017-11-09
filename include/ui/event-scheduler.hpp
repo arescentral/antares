@@ -33,11 +33,11 @@ class EventScheduler {
   public:
     struct MainLoop {
         virtual ~MainLoop() {}
-        virtual bool takes_snapshots()          = 0;
-        virtual void snapshot(wall_ticks ticks) = 0;
-        virtual void  draw()                    = 0;
-        virtual bool  done() const              = 0;
-        virtual Card* top() const               = 0;
+        virtual bool  takes_snapshots()          = 0;
+        virtual void  snapshot(wall_ticks ticks) = 0;
+        virtual void  draw()                     = 0;
+        virtual bool  done() const               = 0;
+        virtual Card* top() const                = 0;
     };
 
     EventScheduler();

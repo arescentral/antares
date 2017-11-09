@@ -60,7 +60,7 @@ class InterfaceScreen : public Card {
     Point                offset() const;
     size_t               size() const;
     const InterfaceItem& item(int index) const;
-    InterfaceItem& mutable_item(int index);
+    InterfaceItem&       mutable_item(int index);
 
   private:
     enum State {
@@ -72,7 +72,7 @@ class InterfaceScreen : public Card {
     State _state;
 
     sfz::Json load_json(sfz::PrintItem id);
-    void become_normal();
+    void      become_normal();
 
     const Rect                                  _bounds;
     const bool                                  _full_screen;

@@ -135,9 +135,9 @@ void Starfield::move(ticks by_units) {
     for (scrollStarType* star : range(_stars, _stars + kScrollStarNum)) {
         const fixedPointType* velocity;
         switch (star->speed) {
-            case kSlowStarSpeed: velocity   = &slowVelocity; break;
+            case kSlowStarSpeed: velocity = &slowVelocity; break;
             case kMediumStarSpeed: velocity = &mediumVelocity; break;
-            case kFastStarSpeed: velocity   = &fastVelocity; break;
+            case kFastStarSpeed: velocity = &fastVelocity; break;
             default:
             case kNoStar: continue;
         }
@@ -194,9 +194,9 @@ void Starfield::move(ticks by_units) {
 
         if (_warp_stars && (star->age == 0)) {
             switch (star->speed) {
-                case kSlowStarSpeed: velocity   = &slowVelocity; break;
+                case kSlowStarSpeed: velocity = &slowVelocity; break;
                 case kMediumStarSpeed: velocity = &mediumVelocity; break;
-                case kFastStarSpeed: velocity   = &fastVelocity; break;
+                case kFastStarSpeed: velocity = &fastVelocity; break;
                 case kNoStar: throw Exception("invalid value of star->speed.");
             }
             star->location.h -= mFixedToLong(velocity->h);

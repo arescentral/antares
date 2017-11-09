@@ -30,7 +30,7 @@ AntaresDataExtractor* antares_data_extractor_create(
 void antares_data_extractor_destroy(AntaresDataExtractor* extractor);
 void antares_data_extractor_set_scenario(AntaresDataExtractor* extractor, const char* scenario);
 void antares_data_extractor_set_plugin_file(AntaresDataExtractor* extractor, const char* path);
-int antares_data_extractor_current(AntaresDataExtractor* extractor);
+int  antares_data_extractor_current(AntaresDataExtractor* extractor);
 void antares_data_extractor_extract(
         AntaresDataExtractor* extractor, void (*callback)(const char*, void*), void* userdata);
 

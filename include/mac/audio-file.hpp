@@ -40,8 +40,8 @@ class AudioFile {
     static OSStatus read_proc(
             void* this_, SInt64 in_pos, UInt32 req_count, void* buffer, UInt32* actual_count);
     static SInt64 get_size_proc(void* this_);
-    OSStatus read(SInt64 in_pos, UInt32 req_count, void* buffer, UInt32* actual_count) const;
-    SInt64 get_size() const;
+    OSStatus      read(SInt64 in_pos, UInt32 req_count, void* buffer, UInt32* actual_count) const;
+    SInt64        get_size() const;
 
     AudioFileID     _id;
     sfz::BytesSlice _data;

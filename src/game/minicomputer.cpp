@@ -205,7 +205,7 @@ static void MiniComputerExecute(
 
 void    MiniComputerSetStatusStrings(void);
 int32_t MiniComputerGetStatusValue(int32_t);
-void MiniComputerMakeStatusString(int32_t which_line, String& string);
+void    MiniComputerMakeStatusString(int32_t which_line, String& string);
 
 void MiniScreenInit() {
     g.mini.selectLine    = kMiniScreenNoLineSelected;

@@ -83,11 +83,11 @@ class BriefingScreen : public InterfaceScreen {
         Point   location;
         uint8_t shade;
     };
-    std::vector<Star>           _system_stars;
-    std::vector<inlinePictType> _inline_pict;
-    Rect                        _highlight_rect;
+    std::vector<Star>                    _system_stars;
+    std::vector<inlinePictType>          _inline_pict;
+    Rect                                 _highlight_rect;
     std::vector<std::pair<Point, Point>> _highlight_lines;
-    sfz::String _text;
+    sfz::String                          _text;
 
     DISALLOW_COPY_AND_ASSIGN(BriefingScreen);
 };

@@ -292,10 +292,10 @@ void UpdateRadar(ticks unitsDone) {
             bestScale = wsqrt(hugeDistance);
             if (bestScale == 0)
                 bestScale = 1;
-            bestScale     = center_scale().height / bestScale;
+            bestScale = center_scale().height / bestScale;
             if (bestScale < SCALE_SCALE)
                 bestScale = (bestScale >> 2L) + (bestScale >> 1L);
-            bestScale     = clamp<uint32_t>(bestScale, kMinimumAutoScale, SCALE_SCALE);
+            bestScale = clamp<uint32_t>(bestScale, kMinimumAutoScale, SCALE_SCALE);
         } break;
 
         case kActualSizeZoom: bestScale = SCALE_SCALE; break;
@@ -314,10 +314,10 @@ void UpdateRadar(ticks unitsDone) {
             bestScale         = wsqrt(tempWide);
             if (bestScale == 0)
                 bestScale = 1;
-            bestScale     = center_scale().height / bestScale;
+            bestScale = center_scale().height / bestScale;
             if (bestScale < SCALE_SCALE)
                 bestScale = (bestScale >> 2L) + (bestScale >> 1L);
-            bestScale     = clamp<uint32_t>(bestScale, kMinimumAutoScale, SCALE_SCALE);
+            bestScale = clamp<uint32_t>(bestScale, kMinimumAutoScale, SCALE_SCALE);
         } break;
     }
 

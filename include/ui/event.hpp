@@ -162,7 +162,7 @@ class MouseDownEvent : public MouseButtonEvent {
     MouseDownEvent(wall_time at, int button, int count, const Point& where)
             : MouseButtonEvent(at, button, where), _count(count) {}
     virtual void send(EventReceiver* receiver) const;
-    int count() const { return _count; }
+    int          count() const { return _count; }
 
   private:
     int _count;

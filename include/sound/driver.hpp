@@ -53,9 +53,9 @@ class SoundDriver {
     SoundDriver();
     virtual ~SoundDriver();
 
-    virtual std::unique_ptr<SoundChannel> open_channel()           = 0;
-    virtual std::unique_ptr<Sound> open_sound(sfz::PrintItem path) = 0;
-    virtual void set_global_volume(uint8_t volume)                 = 0;
+    virtual std::unique_ptr<SoundChannel> open_channel()                    = 0;
+    virtual std::unique_ptr<Sound>        open_sound(sfz::PrintItem path)   = 0;
+    virtual void                          set_global_volume(uint8_t volume) = 0;
 
     static SoundDriver* driver();
 
@@ -68,8 +68,8 @@ class NullSoundDriver : public SoundDriver {
     NullSoundDriver() {}
 
     virtual std::unique_ptr<SoundChannel> open_channel();
-    virtual std::unique_ptr<Sound> open_sound(sfz::PrintItem path);
-    virtual void set_global_volume(uint8_t volume);
+    virtual std::unique_ptr<Sound>        open_sound(sfz::PrintItem path);
+    virtual void                          set_global_volume(uint8_t volume);
 
   private:
     DISALLOW_COPY_AND_ASSIGN(NullSoundDriver);
@@ -80,8 +80,8 @@ class LogSoundDriver : public SoundDriver {
     LogSoundDriver(const sfz::StringSlice& path);
 
     virtual std::unique_ptr<SoundChannel> open_channel();
-    virtual std::unique_ptr<Sound> open_sound(sfz::PrintItem path);
-    virtual void set_global_volume(uint8_t volume);
+    virtual std::unique_ptr<Sound>        open_sound(sfz::PrintItem path);
+    virtual void                          set_global_volume(uint8_t volume);
 
   private:
     class LogSound;

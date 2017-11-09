@@ -60,7 +60,7 @@ class GameCursor : public Cursor, public EventReceiver {
 
   private:
     static Point clamp(Point p);
-    void wake();
+    void         wake();
 
     wall_time _show_crosshairs_until;
 };
