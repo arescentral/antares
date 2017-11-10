@@ -35,7 +35,6 @@
 #include "sound/driver.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
 using sfz::format;
 
 namespace antares {

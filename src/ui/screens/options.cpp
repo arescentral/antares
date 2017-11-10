@@ -41,7 +41,6 @@
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
 using sfz::format;
 using std::make_pair;
 using std::pair;
@@ -134,7 +133,8 @@ void SoundControlScreen::handle_button(Button& button) {
             stack()->pop(this);
             break;
 
-        default: throw Exception(format("Got unknown button {0}.", button.id));
+        default:
+            throw std::runtime_error(pn::format("Got unknown button {0}.", button.id).c_str());
     }
 }
 
@@ -167,7 +167,9 @@ OptionsScreen::State SoundControlScreen::button_state(int button) {
         case DONE: return OptionsScreen::ACCEPT;
         case CANCEL: return OptionsScreen::CANCEL;
         case KEY_CONTROL: return OptionsScreen::KEY_CONTROL;
-        default: throw Exception(format("unknown sound control button {0}", button));
+        default:
+            throw std::runtime_error(
+                    pn::format("unknown sound control button {0}", button).c_str());
     }
 }
 
@@ -299,7 +301,7 @@ void KeyControlScreen::handle_button(Button& button) {
                 _selected_key = key;
                 adjust_interface();
             } else {
-                throw Exception(format("Got unknown button {0}.", button.id));
+                throw std::runtime_error(pn::format("Got unknown button {0}.", button.id).c_str());
             }
             break;
         }
@@ -329,7 +331,8 @@ OptionsScreen::State KeyControlScreen::button_state(int button) {
         case DONE: return OptionsScreen::ACCEPT;
         case CANCEL: return OptionsScreen::CANCEL;
         case SOUND_CONTROL: return OptionsScreen::SOUND_CONTROL;
-        default: throw Exception(format("unknown key control button {0}", button));
+        default:
+            throw std::runtime_error(pn::format("unknown key control button {0}", button).c_str());
     }
 }
 
@@ -340,7 +343,8 @@ KeyControlScreen::Tab KeyControlScreen::button_tab(int button) {
         case SHORTCUT_TAB: return SHORTCUT;
         case UTILITY_TAB: return UTILITY;
         case HOT_KEY_TAB: return HOT_KEY;
-        default: throw Exception(format("unknown key control tab {0}", button));
+        default:
+            throw std::runtime_error(pn::format("unknown key control tab {0}", button).c_str());
     }
 }
 

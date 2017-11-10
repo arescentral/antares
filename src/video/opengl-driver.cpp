@@ -44,7 +44,6 @@
 #include <GL/glu.h>
 #endif
 
-using sfz::Exception;
 using sfz::format;
 using sfz::hex;
 using sfz::print;
@@ -561,7 +560,7 @@ static GLuint make_shader(GLenum shader_type, const GLchar* source) {
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
     if (compiled == GL_FALSE) {
         gl_log(shader);
-        throw Exception("compilation failed");
+        throw std::runtime_error("compilation failed");
     }
     return shader;
 }
@@ -590,7 +589,7 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     glGetProgramiv(program, GL_LINK_STATUS, &linked);
     if (linked == GL_FALSE) {
         gl_log(program);
-        throw Exception("linking failed");
+        throw std::runtime_error("linking failed");
     }
 
     GLuint array;

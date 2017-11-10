@@ -33,7 +33,6 @@
 #include "video/text-driver.hpp"
 
 using sfz::Bytes;
-using sfz::Exception;
 using sfz::Optional;
 using sfz::Rune;
 using sfz::args::help;

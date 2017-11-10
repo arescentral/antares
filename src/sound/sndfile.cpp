@@ -20,10 +20,10 @@
 
 #include <sndfile.h>
 #include <string.h>
+#include <pn/file>
 
 using sfz::Bytes;
 using sfz::BytesSlice;
-using sfz::Exception;
 
 namespace antares {
 
@@ -120,7 +120,7 @@ void Sndfile::convert(Bytes& data, ALenum& format, ALsizei& frequency) const {
             sf_open_virtual(&io, SFM_READ, &info, &userdata), sf_close);
 
     if (!file.get()) {
-        throw Exception(sf_strerror(NULL));
+        throw std::runtime_error(sf_strerror(NULL));
     }
 
     frequency = info.samplerate;
@@ -129,7 +129,7 @@ void Sndfile::convert(Bytes& data, ALenum& format, ALsizei& frequency) const {
     } else if (info.channels == 2) {
         format = AL_FORMAT_STEREO16;
     } else {
-        throw Exception(sfz::format("audio file has {0} channels", info.channels));
+        throw std::runtime_error(pn::format("audio file has {0} channels", info.channels).c_str());
     }
 
     int16_t shorts[1024];

@@ -28,7 +28,6 @@
 
 using sfz::Bytes;
 using sfz::BytesSlice;
-using sfz::Exception;
 using sfz::format;
 using sfz::quote;
 using std::unique_ptr;
@@ -52,7 +51,8 @@ const char* al_error_to_string(int error) {
 void check_al_error(pn::string_view method) {
     int error = alGetError();
     if (error != AL_NO_ERROR) {
-        throw Exception(format("{0}: {1}", pn2sfz(method), al_error_to_string(error)));
+        throw std::runtime_error(
+                pn::format("{0}: {1}", method, al_error_to_string(error)).c_str());
     }
 }
 
@@ -227,11 +227,13 @@ unique_ptr<Sound> OpenAlSoundDriver::open_sound(pn::string_view path) {
             Resource rsrc(pn::format("{0}{1}", path, fmt.ext));
             fmt.fn(rsrc.data(), *sound);
             return std::move(sound);
-        } catch (Exception& e) {
+        } catch (std::exception& e) {
             continue;
         }
     }
-    throw Exception(format("couldn't load sound {0}", quote(pn2sfz(path))));
+    throw std::runtime_error(
+            pn::format("couldn't load sound {0}", sfz2pn(sfz::String(quote(pn2sfz(path)))))
+                    .c_str());
 }
 
 void OpenAlSoundDriver::set_global_volume(uint8_t volume) { alListenerf(AL_GAIN, volume / 8.0); }

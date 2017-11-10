@@ -19,6 +19,7 @@
 #include "net/http.hpp"
 
 #include <CoreFoundation/CoreFoundation.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "data/pn.hpp"
@@ -35,7 +36,7 @@ void get(pn::string_view url, sfz::WriteTarget out) {
                 NULL, cfurl.c_obj(), &cfdata.c_obj(), NULL, NULL, &error)) {
         write(out, cfdata.data());
     } else {
-        throw sfz::Exception(sfz::format("Couldn't load requested url {0}", pn2sfz(url)));
+        throw std::runtime_error(pn::format("Couldn't load requested url {0}", url).c_str());
     }
 }
 

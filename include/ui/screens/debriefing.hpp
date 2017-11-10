@@ -57,8 +57,8 @@ class DebriefingScreen : public Card {
         TYPING,
         DONE,
     };
-    friend void print_to(sfz::PrintTarget out, State state);
-    State       _state;
+    friend const char* stringify(State state);
+    State              _state;
 
     pn::string                  _message;
     std::unique_ptr<StyledText> _score;
@@ -74,7 +74,7 @@ class DebriefingScreen : public Card {
     DISALLOW_COPY_AND_ASSIGN(DebriefingScreen);
 };
 
-void print_to(sfz::PrintTarget out, DebriefingScreen::State state);
+const char* stringify(DebriefingScreen::State state);
 
 }  // namespace antares
 

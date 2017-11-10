@@ -52,7 +52,6 @@
 #include "math/units.hpp"
 #include "sound/fx.hpp"
 
-using sfz::Exception;
 using sfz::BytesSlice;
 using sfz::format;
 
@@ -840,7 +839,8 @@ void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> 
 void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
     auto flagship = adm->flagship();
     if (!flagship.get()) {
-        throw Exception(format("adm: {0}, newShip: {1}", adm.number(), newShip.number()));
+        throw std::runtime_error(
+                pn::format("adm: {0}, newShip: {1}", adm.number(), newShip.number()).c_str());
     }
 
     if (adm == g.admiral) {
@@ -852,9 +852,10 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
 
         flagship = g.ship;
         if (!flagship.get()) {
-            throw Exception(
-                    format("adm: {0}, newShip: {1}, gPlayerShip: {2}", adm.number(),
-                           newShip.number(), g.ship.number()));
+            throw std::runtime_error(pn::format(
+                                             "adm: {0}, newShip: {1}, gPlayerShip: {2}",
+                                             adm.number(), newShip.number(), g.ship.number())
+                                             .c_str());
         }
 
         flagship->attributes |= kIsHumanControlled | kIsPlayerShip;

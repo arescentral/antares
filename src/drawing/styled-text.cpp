@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "data/picture.hpp"
@@ -29,8 +30,6 @@
 #include "video/driver.hpp"
 
 using sfz::Bytes;
-using sfz::Exception;
-using sfz::format;
 using std::unique_ptr;
 
 namespace antares {
@@ -45,7 +44,7 @@ int hex_digit(uint32_t c) {
     } else if ('a' <= c && c <= 'z') {
         return c - 'a' + 10;
     }
-    throw Exception(format("{0} is not a valid hex digit", c));
+    throw std::runtime_error(pn::format("{0} is not a valid hex digit", c).c_str());
 }
 
 }  // namespace
@@ -86,7 +85,8 @@ void StyledText::set_retro_text(pn::string_view text) {
 
             case '\\':
                 if (i + 1 >= sfz_text.size()) {
-                    throw Exception(format("not enough input for special code."));
+                    throw std::runtime_error(
+                            pn::format("not enough input for special code.").c_str());
                 }
                 ++i;
                 switch (sfz_text.at(i)) {
@@ -98,7 +98,8 @@ void StyledText::set_retro_text(pn::string_view text) {
 
                     case 'f':
                         if (i + 2 >= sfz_text.size()) {
-                            throw Exception(format("not enough input for foreground code."));
+                            throw std::runtime_error(
+                                    pn::format("not enough input for foreground code.").c_str());
                         }
                         fore_color = GetRGBTranslateColorShade(
                                 hex_digit(sfz_text.at(i + 1)), hex_digit(sfz_text.at(i + 2)));
@@ -107,7 +108,8 @@ void StyledText::set_retro_text(pn::string_view text) {
 
                     case 'b':
                         if (i + 2 >= sfz_text.size()) {
-                            throw Exception(format("not enough input for foreground code."));
+                            throw std::runtime_error(
+                                    pn::format("not enough input for foreground code.").c_str());
                         }
                         back_color = GetRGBTranslateColorShade(
                                 hex_digit(sfz_text.at(i + 1)), hex_digit(sfz_text.at(i + 2)));
@@ -130,8 +132,9 @@ void StyledText::set_retro_text(pn::string_view text) {
                         break;
 
                     default:
-                        throw Exception(
-                                format("found bad special character {0}.", sfz_text.at(i)));
+                        throw std::runtime_error(
+                                pn::format("found bad special character {0}.", sfz_text.at(i))
+                                        .c_str());
                 }
                 break;
 
@@ -160,10 +163,12 @@ void StyledText::set_interface_text(pn::string_view text) {
             case '^': {
                 bool found_code = false;
                 if (i + 1 >= sfz_text.size()) {
-                    throw Exception(format("not enough input for inline code."));
+                    throw std::runtime_error(
+                            pn::format("not enough input for inline code.").c_str());
                 }
                 if ((sfz_text.at(i + 1) != 'P') && (sfz_text.at(i + 1) != 'p')) {
-                    throw Exception(format("found bad inline pict code {0}", sfz_text.at(i)));
+                    throw std::runtime_error(
+                            pn::format("found bad inline pict code {0}", sfz_text.at(i)).c_str());
                 }
                 sfz::String id_string;
                 for (size_t j = i + 2; j < sfz_text.size(); ++j) {
@@ -171,7 +176,9 @@ void StyledText::set_interface_text(pn::string_view text) {
                         inlinePictType inline_pict;
                         int32_t        id;
                         if (!string_to_int(id_string, id, 10)) {
-                            throw Exception(format("invalid numeric literal {0}", id_string));
+                            throw std::runtime_error(
+                                    pn::format("invalid numeric literal {0}", sfz2pn(id_string))
+                                            .c_str());
                         }
                         inline_pict.id = id;
                         // TODO(sfiera): report an error if the picture is not loadable, instead of
@@ -183,7 +190,7 @@ void StyledText::set_interface_text(pn::string_view text) {
                             _textures.push_back(pict.texture());
                             _chars.push_back(StyledChar(
                                     _inline_picts.size() - 1, PICTURE, _fore_color, _back_color));
-                        } catch (sfz::Exception& e) {
+                        } catch (std::exception& e) {
                         }
                         found_code = true;
                         i          = j;
@@ -192,7 +199,7 @@ void StyledText::set_interface_text(pn::string_view text) {
                     id_string.push(1, sfz_text.at(j));
                 }
                 if (!found_code) {
-                    throw Exception(format("malformed inline code"));
+                    throw std::runtime_error(pn::format("malformed inline code").c_str());
                 }
             } break;
 

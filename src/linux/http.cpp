@@ -22,12 +22,12 @@
 #include <neon/ne_session.h>
 #include <neon/ne_uri.h>
 #include <unistd.h>
+#include <pn/file>
 #include <pn/string>
 #include <sfz/sfz.hpp>
 
 using sfz::BytesSlice;
 using sfz::CString;
-using sfz::Exception;
 using sfz::WriteTarget;
 using sfz::format;
 using std::unique_ptr;
@@ -58,12 +58,12 @@ static int reader(void* userdata, const char* buf, size_t len) {
 void get(pn::string_view url, WriteTarget out) {
     static int inited = ne_sock_init();
     if (inited != 0) {
-        throw Exception("ne_sock_init()");
+        throw std::runtime_error("ne_sock_init()");
     }
 
     ne_uri uri = {};
     if (ne_uri_parse(url.copy().c_str(), &uri)) {
-        throw Exception("ne_uri_parse()");
+        throw std::runtime_error("ne_uri_parse()");
     }
     if (uri.port == 0) {
         uri.port = ne_uri_defaultport(uri.scheme);
@@ -80,11 +80,11 @@ void get(pn::string_view url, WriteTarget out) {
 
     auto err = ne_request_dispatch(req.get());
     if (err != NE_OK) {
-        throw Exception("ne_request_dispatch()");
+        throw std::runtime_error("ne_request_dispatch()");
     }
     auto* st = ne_get_status(req.get());
     if (st->code != 200) {
-        throw Exception(st->code);
+        throw std::runtime_error(pn::format("HTTP error {0}", st->code).c_str());
     }
 }
 

@@ -38,7 +38,6 @@
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
 using std::unique_ptr;
 
 namespace utf8 = sfz::utf8;
@@ -130,13 +129,13 @@ void Messages::init() {
             kMessageColor);
 
     if (!g.message_label.get()) {
-        throw Exception("Couldn't add a screen label.");
+        throw std::runtime_error("Couldn't add a screen label.");
     }
     g.status_label = Label::add(
             kStatusLabelLeft, kStatusLabelTop, 0, 0, SpaceObject::none(), false,
             kStatusLabelColor);
     if (!g.status_label.get()) {
-        throw Exception("Couldn't add a screen label.");
+        throw std::runtime_error("Couldn't add a screen label.");
     }
 
     tmessage             = long_message_data;

@@ -21,7 +21,6 @@
 #include <png.h>
 #include <sfz/sfz.hpp>
 
-using sfz::Exception;
 using sfz::ReadSource;
 using sfz::WriteTarget;
 using sfz::read;
@@ -49,23 +48,23 @@ void read_from(ReadSource in, ArrayPixMap& pix) {
     png_byte sig[8];
     sfz::read(in, sig, 8);
     if (png_sig_cmp(sig, 0, 8) != 0) {
-        throw Exception("invalid png signature");
+        throw std::runtime_error("invalid png signature");
     }
 
     png_struct* png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if (!png) {
-        throw Exception("couldn't create png_struct");
+        throw std::runtime_error("couldn't create png_struct");
     }
 
     png_info* info = png_create_info_struct(png);
     if (!info) {
         png_destroy_read_struct(&png, NULL, NULL);
-        throw Exception("couldn't create png_info");
+        throw std::runtime_error("couldn't create png_info");
     }
 
     if (setjmp(png_jmpbuf(png))) {
         png_destroy_read_struct(&png, &info, NULL);
-        throw Exception("reading png failed");
+        throw std::runtime_error("reading png failed");
     }
 
     png_set_sig_bytes(png, 8);
@@ -114,18 +113,18 @@ void read_from(ReadSource in, ArrayPixMap& pix) {
 void write_to(WriteTarget out, const PixMap& pix) {
     png_struct* png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if (!png) {
-        throw Exception("couldn't create png_struct");
+        throw std::runtime_error("couldn't create png_struct");
     }
 
     png_info* info = png_create_info_struct(png);
     if (!info) {
         png_destroy_write_struct(&png, NULL);
-        throw Exception("couldn't create png_info");
+        throw std::runtime_error("couldn't create png_info");
     }
 
     if (setjmp(png_jmpbuf(png))) {
         png_destroy_write_struct(&png, &info);
-        throw Exception("reading png failed");
+        throw std::runtime_error("reading png failed");
     }
 
     png_set_write_fn(png, &out, png_write_data, png_flush_data);

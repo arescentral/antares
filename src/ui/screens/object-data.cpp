@@ -28,7 +28,6 @@
 #include "video/driver.hpp"
 
 using sfz::Bytes;
-using sfz::Exception;
 using sfz::format;
 
 namespace antares {

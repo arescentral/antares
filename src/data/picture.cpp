@@ -26,7 +26,6 @@
 #include "video/driver.hpp"
 
 using sfz::BytesSlice;
-using sfz::Exception;
 using sfz::format;
 
 namespace antares {
@@ -47,7 +46,7 @@ Picture::Picture(pn::string_view resource, bool hidpi)
             BytesSlice in(rsrc.data());
             read(in, *this);
             break;
-        } catch (Exception& e) {
+        } catch (std::exception& e) {
             if (_scale > 1) {
                 _scale >>= 1;
             } else {

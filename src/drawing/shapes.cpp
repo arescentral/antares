@@ -24,7 +24,6 @@
 #include "drawing/pix-map.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
 using std::min;
 
 namespace antares {

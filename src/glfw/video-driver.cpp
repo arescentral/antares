@@ -21,11 +21,11 @@
 #include <GLFW/glfw3.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
 
-using sfz::Exception;
 using sfz::format;
 using sfz::range;
 
@@ -148,12 +148,12 @@ static int kGLFWKeyToUSB[GLFW_KEY_LAST + 1] = {
 };
 
 static void throw_error(int code, const char* message) {
-    throw Exception(format("{0}: {1}", code, utf8::decode(message)));
+    throw std::runtime_error(pn::format("{0}: {1}", code, message).c_str());
 }
 
 GLFWVideoDriver::GLFWVideoDriver() : _screen_size(640, 480), _last_click_count(0) {
     if (!glfwInit()) {
-        throw Exception("glfwInit()");
+        throw std::runtime_error("glfwInit()");
     }
     glfwSetErrorCallback(throw_error);
 }
@@ -241,7 +241,7 @@ void GLFWVideoDriver::loop(Card* initial) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     _window = glfwCreateWindow(_screen_size.width, _screen_size.height, "", NULL, NULL);
     if (!_window) {
-        throw Exception("glfwCreateWindow");
+        throw std::runtime_error("glfwCreateWindow");
     }
     glfwGetFramebufferSize(_window, &_viewport_size.width, &_viewport_size.height);
     glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);

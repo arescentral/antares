@@ -34,7 +34,6 @@
 using sfz::Bytes;
 using sfz::BytesSlice;
 using sfz::CString;
-using sfz::Exception;
 using sfz::ReadSource;
 using sfz::ScopedFd;
 using sfz::WriteTarget;

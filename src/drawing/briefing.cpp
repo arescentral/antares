@@ -32,7 +32,6 @@
 #include "lang/defines.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
 using std::vector;
 
 namespace antares {
@@ -255,7 +254,7 @@ void GetRealObjectSpriteData(
     }
 
     if (pixTable == NULL) {
-        throw Exception("Couldn't load a requested sprite");
+        throw std::runtime_error("Couldn't load a requested sprite");
     }
 
     if (baseObject->attributes & kIsSelfAnimated)

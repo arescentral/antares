@@ -34,7 +34,6 @@
 #include "lang/defines.hpp"
 
 using sfz::Bytes;
-using sfz::Exception;
 using sfz::MappedFile;
 using sfz::Rune;
 using sfz::ScopedFd;
@@ -57,7 +56,7 @@ static ANTARES_GLOBAL Ledger* ledger;
 
 Ledger::Ledger() {
     if (antares::ledger) {
-        throw Exception("Ledger is a singleton");
+        throw std::runtime_error("Ledger is a singleton");
     }
     antares::ledger = this;
 }
@@ -93,7 +92,7 @@ void DirectoryLedger::load() {
     unique_ptr<MappedFile> file;
     try {
         file.reset(new MappedFile(pn2sfz(path)));
-    } catch (Exception& e) {
+    } catch (std::exception& e) {
         _chapters.insert(1);
         return;
     }
@@ -101,7 +100,7 @@ void DirectoryLedger::load() {
     pn::string data = sfz2pn(utf8::decode(file->data()));
     pn::value  x;
     if (!pn::parse(data.open(), x, nullptr)) {
-        throw Exception("bad ledger");
+        throw std::runtime_error("bad ledger");
     }
 
     for (pn::value_cref level : x.as_map().get("unlocked-levels").as_array()) {

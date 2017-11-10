@@ -29,7 +29,6 @@
 #include "sound/fx.hpp"
 
 using sfz::BytesSlice;
-using sfz::Exception;
 
 namespace antares {
 
@@ -59,7 +58,7 @@ void sys_init() {
         BytesSlice in(rsrc.data());
         read(in, sys.rot_table, SystemGlobals::ROT_TABLE_SIZE);
         if (!in.empty()) {
-            throw Exception("didn't consume all of rotation data");
+            throw std::runtime_error("didn't consume all of rotation data");
         }
     }
 

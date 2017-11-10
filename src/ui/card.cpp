@@ -20,11 +20,11 @@
 
 #include <stdlib.h>
 #include <algorithm>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "video/driver.hpp"
 
-using sfz::Exception;
 using sfz::format;
 using std::unique_ptr;
 
@@ -68,7 +68,9 @@ void CardStack::push(Card* card) {
 
 void CardStack::pop(Card* card) {
     if (card != _top.get()) {
-        throw Exception(format("tried to pop card {0} when not frontmost", card));
+        throw std::runtime_error(
+                pn::format("tried to pop card {0} when not frontmost", static_cast<void*>(card))
+                        .c_str());
     }
     unique_ptr<Card> old;
     card->resign_front();

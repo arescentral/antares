@@ -29,7 +29,6 @@
 #include "video/driver.hpp"
 
 using sfz::BytesSlice;
-using sfz::Exception;
 using sfz::format;
 using std::unique_ptr;
 using std::vector;

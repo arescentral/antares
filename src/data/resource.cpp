@@ -28,7 +28,6 @@
 #include "game/sys.hpp"
 
 using sfz::BytesSlice;
-using sfz::Exception;
 using sfz::MappedFile;
 using sfz::format;
 using std::unique_ptr;
@@ -46,7 +45,10 @@ static unique_ptr<MappedFile> load_first(
             return unique_ptr<MappedFile>(new MappedFile(pn2sfz(path)));
         }
     }
-    throw Exception(format("couldn't find resource {0}", quote(pn2sfz(resource_path))));
+    throw std::runtime_error(pn::format(
+                                     "couldn't find resource {0}",
+                                     sfz2pn(sfz::String(quote(pn2sfz(resource_path)))))
+                                     .c_str());
 }
 
 static unique_ptr<MappedFile> load(pn::string_view resource_path) {

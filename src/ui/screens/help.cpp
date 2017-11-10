@@ -18,6 +18,8 @@
 
 #include "ui/screens/help.hpp"
 
+#include <pn/file>
+
 #include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
@@ -32,7 +34,6 @@
 #include "video/driver.hpp"
 
 using sfz::Bytes;
-using sfz::Exception;
 using sfz::format;
 
 namespace utf8 = sfz::utf8;
@@ -67,7 +68,8 @@ void HelpScreen::handle_button(Button& button) {
     switch (button.id) {
         case DONE: stack()->pop(this); break;
 
-        default: throw Exception(format("Got unknown button {0}.", button.id));
+        default:
+            throw std::runtime_error(pn::format("Got unknown button {0}.", button.id).c_str());
     }
 }
 

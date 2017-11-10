@@ -28,7 +28,6 @@
 
 using sfz::Bytes;
 using sfz::BytesSlice;
-using sfz::Exception;
 using sfz::format;
 using sfz::quote;
 using sfz::read;
@@ -42,7 +41,7 @@ StringList::StringList(int id) {
     Resource  rsrc("strings", "pn", id);
     pn::value strings;
     if (!pn::parse(sfz2pn(utf8::decode(rsrc.data())).open(), strings, nullptr)) {
-        throw Exception(sfz::format("Couldn't parse strings/{0}.pn", id));
+        throw std::runtime_error(pn::format("Couldn't parse strings/{0}.pn", id).c_str());
     }
     pn::array_cref l = strings.as_array();
     for (pn::value_cref x : l) {

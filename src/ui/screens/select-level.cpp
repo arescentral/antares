@@ -18,6 +18,7 @@
 
 #include "ui/screens/select-level.hpp"
 
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
@@ -39,7 +40,6 @@
 #include "video/transitions.hpp"
 
 using sfz::BytesSlice;
-using sfz::Exception;
 using sfz::format;
 using std::unique_ptr;
 
@@ -157,7 +157,8 @@ void SelectLevelScreen::handle_button(Button& button) {
             adjust_interface();
             break;
 
-        default: throw Exception(format("Got unknown button {0}.", button.id));
+        default:
+            throw std::runtime_error(pn::format("Got unknown button {0}.", button.id).c_str());
     }
 }
 

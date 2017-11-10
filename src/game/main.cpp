@@ -21,6 +21,7 @@
 #include <fcntl.h>
 #include <math.h>
 #include <algorithm>
+#include <pn/file>
 #include <set>
 
 #include "config/gamepad.hpp"
@@ -68,7 +69,6 @@
 #include "ui/screens/play-again.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
 using sfz::ScopedFd;
 using sfz::format;
 using sfz::makedirs;
@@ -410,7 +410,10 @@ void GamePlay::become_front() {
                     stack()->pop(this);
                     break;
 
-                default: throw Exception(format("invalid play again result {0}", _play_again));
+                default:
+                    throw std::runtime_error(
+                            pn::format("invalid play again result {0}", stringify(_play_again))
+                                    .c_str());
             }
             break;
 

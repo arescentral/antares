@@ -44,8 +44,6 @@
 #include "sound/fx.hpp"
 #include "video/transitions.hpp"
 
-using sfz::Exception;
-
 namespace antares {
 
 const int32_t kDirectionError = 5;   // how picky in degrees we are about angle

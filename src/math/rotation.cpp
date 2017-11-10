@@ -26,7 +26,6 @@
 #include "math/macros.hpp"
 
 using sfz::BytesSlice;
-using sfz::Exception;
 using sfz::read;
 
 namespace antares {

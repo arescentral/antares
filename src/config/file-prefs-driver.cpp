@@ -27,7 +27,6 @@
 #include "config/keys.hpp"
 #include "data/pn.hpp"
 
-using sfz::Exception;
 using sfz::MappedFile;
 using sfz::ScopedFd;
 using sfz::StringMap;
@@ -119,7 +118,7 @@ FilePrefsDriver::FilePrefsDriver() {
         for (auto i : range<size_t>(KEY_COUNT)) {
             set_from<int>(m, "keys", kKeyNames[i], _current, &Preferences::keys, i);
         }
-    } catch (Exception& e) {
+    } catch (std::exception& e) {
         // pass
     }
 }

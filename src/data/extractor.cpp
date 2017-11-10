@@ -46,7 +46,6 @@ using rezin::StringList;
 using rezin::aiff;
 using sfz::Bytes;
 using sfz::BytesSlice;
-using sfz::Exception;
 using sfz::MappedFile;
 using sfz::ScopedFd;
 using sfz::Sha1;
@@ -56,7 +55,6 @@ using sfz::WriteTarget;
 using sfz::dec;
 using sfz::format;
 using sfz::makedirs;
-using sfz::quote;
 using sfz::range;
 using sfz::read;
 using sfz::tree_digest;
@@ -91,7 +89,7 @@ int32_t nlrp_chapter(int16_t id) {
         case WHILE_THE_IRON_IS_HOT: return 6;
         case SPACE_RACE_THE_MUSICAL: return 26;
     };
-    throw Exception(format("invalid replay ID {0}", id));
+    throw std::runtime_error(pn::format("invalid replay ID {0}", id).c_str());
 }
 
 bool convert_nlrp(pn::string_view, bool, int16_t id, BytesSlice data, WriteTarget out) {
@@ -438,7 +436,10 @@ void check_version(ZipArchive& archive, pn::string_view expected) {
     ZipFileReader version_file(archive, kPluginVersionFile);
     pn::string    actual = sfz2pn(utf8::decode(version_file.data()));
     if (actual != expected) {
-        throw Exception(format("unsupported plugin version {0}", quote(pn2sfz(actual))));
+        throw std::runtime_error(pn::format(
+                                         "unsupported plugin version {0}",
+                                         sfz2pn(sfz::String(quote(pn2sfz(actual)))))
+                                         .c_str());
     }
 }
 
@@ -446,7 +447,10 @@ void read_identifier(ZipArchive& archive, pn::string& out) {
     ZipFileReader identifier_file(archive, kPluginIdentifierFile);
     sfz::String   actual(utf8::decode(identifier_file.data()));
     if (actual.at(actual.size() - 1) != '\n') {
-        throw Exception(format("missing newline in plugin identifier {0}", quote(actual)));
+        throw std::runtime_error(pn::format(
+                                         "missing newline in plugin identifier {0}",
+                                         sfz2pn(sfz::String(quote(actual))))
+                                         .c_str());
     }
     out = sfz2pn(actual.slice(0, actual.size() - 1));
 }
@@ -455,7 +459,10 @@ void check_identifier(ZipArchive& archive, pn::string_view expected) {
     pn::string actual;
     read_identifier(archive, actual);
     if (expected != actual) {
-        throw Exception(format("mismatch in plugin identifier {0}", quote(pn2sfz(actual))));
+        throw std::runtime_error(pn::format(
+                                         "mismatch in plugin identifier {0}",
+                                         sfz2pn(sfz::String(quote(pn2sfz(actual)))))
+                                         .c_str());
     }
 }
 
@@ -534,7 +541,7 @@ bool DataExtractor::scenario_current(pn::string_view scenario) const {
     try {
         MappedFile file(pn2sfz(path));
         return file.data() == version;
-    } catch (Exception& e) {
+    } catch (std::exception& e) {
         return false;
     }
 }
@@ -572,9 +579,11 @@ void DataExtractor::download(
     Sha1 sha;
     write(sha, download);
     if (sha.digest() != expected_digest) {
-        throw Exception(
-                format("Downloaded {0}, size={1} but it didn't have the right digest.",
-                       pn2sfz(pn::dump(pn::string_view{url}, pn::dump_short)), download.size()));
+        throw std::runtime_error(
+                pn::format(
+                        "Downloaded {0}, size={1} but it didn't have the right digest.",
+                        pn::dump(url, pn::dump_short), download.size())
+                        .c_str());
     }
 
     // If we got the file, write it out at `full_path`.
@@ -660,7 +669,9 @@ void DataExtractor::extract_plugin(Observer* observer) const {
         if (!partition(data, "/", path) || (data != "data") ||
             !partition(resource_type_slice, "/", path) || !partition(id_slice, " ", path) ||
             !string_to_int(id_slice, id) || (path.find('/') != StringSlice::npos)) {
-            throw Exception(format("bad plugin file {0}", quote(file.path())));
+            throw std::runtime_error(
+                    pn::format("bad plugin file {0}", sfz2pn(sfz::String(quote(file.path()))))
+                            .c_str());
         }
 
         sfz::String resource_type(resource_type_slice);
@@ -684,7 +695,9 @@ void DataExtractor::extract_plugin(Observer* observer) const {
             }
         }
 
-        throw Exception(format("unknown resource type {0}", quote(resource_type)));
+        throw std::runtime_error(
+                pn::format("unknown resource type {0}", sfz2pn(sfz::String(quote(resource_type))))
+                        .c_str());
 
     next:;  // labeled continue.
     }

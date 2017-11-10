@@ -18,6 +18,8 @@
 
 #include "ui/screens/briefing.hpp"
 
+#include <pn/file>
+
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "data/base-object.hpp"
@@ -39,7 +41,6 @@
 #include "ui/screens/object-data.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
 using sfz::format;
 using std::make_pair;
 using std::pair;
@@ -342,7 +343,8 @@ void BriefingScreen::handle_button(Button& button) {
             build_brief_point();
             break;
 
-        default: throw Exception(format("Got unknown button {0}.", button.id));
+        default:
+            throw std::runtime_error(pn::format("Got unknown button {0}.", button.id).c_str());
     }
 }
 

@@ -38,7 +38,6 @@
 #include "video/driver.hpp"
 
 using sfz::Bytes;
-using sfz::Exception;
 using sfz::dec;
 using sfz::format;
 using std::chrono::duration_cast;
@@ -200,7 +199,10 @@ bool DebriefingScreen::next_timer(wall_time& time) {
 
 void DebriefingScreen::fire_timer() {
     if (_state != TYPING) {
-        throw Exception(format("DebriefingScreen::fire_timer() called but _state is {0}", _state));
+        throw std::runtime_error(pn::format(
+                                         "DebriefingScreen::fire_timer() called but _state is {0}",
+                                         stringify(_state))
+                                         .c_str());
     }
     sys.sound.teletype();
     wall_time now = antares::now();
@@ -270,12 +272,12 @@ pn::string DebriefingScreen::build_score_text(
     return sfz2pn(text);
 }
 
-void print_to(sfz::PrintTarget out, DebriefingScreen::State state) {
+const char* stringify(DebriefingScreen::State state) {
     switch (state) {
-        case DebriefingScreen::TYPING: print(out, "TYPING"); return;
-        case DebriefingScreen::DONE: print(out, "DONE"); return;
+        case DebriefingScreen::TYPING: return "TYPING";
+        case DebriefingScreen::DONE: return "DONE";
     }
-    print(out, static_cast<int64_t>(state));
+    return "?";
 }
 
 }  // namespace antares

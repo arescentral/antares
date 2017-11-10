@@ -52,7 +52,6 @@
 #include "video/transitions.hpp"
 
 using sfz::BytesSlice;
-using sfz::Exception;
 using sfz::ReadSource;
 using sfz::range;
 using sfz::read;

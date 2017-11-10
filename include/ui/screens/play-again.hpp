@@ -57,7 +57,7 @@ class PlayAgainScreen : public InterfaceScreen {
     DISALLOW_COPY_AND_ASSIGN(PlayAgainScreen);
 };
 
-void print_to(sfz::PrintTarget out, PlayAgainScreen::Item item);
+const char* stringify(PlayAgainScreen::Item item);
 
 }  // namespace antares
 

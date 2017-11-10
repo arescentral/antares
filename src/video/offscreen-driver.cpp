@@ -47,7 +47,6 @@
 #endif
 
 using sfz::BytesSlice;
-using sfz::Exception;
 using sfz::Optional;
 using sfz::ScopedFd;
 using sfz::WriteTarget;
@@ -95,7 +94,7 @@ class SnapshotBuffer {
 void gl_check() {
     GLenum error = glGetError();
     if (error != GL_NO_ERROR) {
-        throw Exception(error);
+        throw std::runtime_error(pn::format("gl: {0}", error).c_str());
     }
 }
 

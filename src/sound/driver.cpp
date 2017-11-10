@@ -30,7 +30,6 @@
 #include "video/driver.hpp"
 
 using sfz::Bytes;
-using sfz::Exception;
 using sfz::ScopedFd;
 using sfz::format;
 using sfz::write;
@@ -45,7 +44,7 @@ namespace antares {
 
 SoundDriver::SoundDriver() {
     if (sys.audio) {
-        throw Exception("SoundDriver is a singleton");
+        throw std::runtime_error("SoundDriver is a singleton");
     }
     sys.audio = this;
 }

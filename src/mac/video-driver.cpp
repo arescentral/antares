@@ -36,7 +36,6 @@
 #include "ui/card.hpp"
 #include "ui/event.hpp"
 
-using sfz::Exception;
 using std::min;
 using std::unique_ptr;
 
@@ -282,7 +281,7 @@ void CocoaVideoDriver::loop(Card* initial) {
     IOHIDManagerScheduleWithRunLoop(hid_manager, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
     IOReturn r = IOHIDManagerOpen(hid_manager, kIOHIDOptionsTypeNone);
     if (r != 0) {
-        throw Exception("IOHIDManagerOpen");
+        throw std::runtime_error("IOHIDManagerOpen");
     }
     IOHIDManagerRegisterInputValueCallback(hid_manager, EventBridge::hid_event, &bridge);
 

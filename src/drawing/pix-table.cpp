@@ -30,7 +30,6 @@
 #include "video/driver.hpp"
 
 using sfz::BytesSlice;
-using sfz::Exception;
 using sfz::ReadSource;
 using sfz::StringMap;
 using sfz::format;
@@ -54,7 +53,7 @@ NatePixTable::NatePixTable(int id, uint8_t color) {
     pn::string data = sfz2pn(utf8::decode(rsrc.data()));
     pn::value  x;
     if (!pn::parse(data.open(), x, nullptr)) {
-        throw Exception("invalid sprite");
+        throw std::runtime_error("invalid sprite");
     }
     pn::map_cref m = x.as_map();
 
@@ -74,18 +73,18 @@ NatePixTable::NatePixTable(int id, uint8_t color) {
     load_image(state.overlay, m.get("overlay").as_string());
 
     if (state.image.size() != state.overlay.size()) {
-        throw Exception("size mismatch between image and overlay");
+        throw std::runtime_error("size mismatch between image and overlay");
     }
     if (state.image.size().width % state.cols) {
-        throw Exception("sprite column count does not evenly split image");
+        throw std::runtime_error("sprite column count does not evenly split image");
     }
     if (state.image.size().height % state.rows) {
-        throw Exception("sprite row count does not evenly split image");
+        throw std::runtime_error("sprite row count does not evenly split image");
     }
 
     pn::array_cref frames = m.get("frames").as_array();
     if (frames.size() != (state.rows * state.cols)) {
-        throw Exception("frame count not equal to rows * cols");
+        throw std::runtime_error("frame count not equal to rows * cols");
     }
     for (pn::value_cref frame_value : frames) {
         pn::map_cref f = frame_value.as_map();

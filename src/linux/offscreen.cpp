@@ -18,9 +18,9 @@
 
 #include "linux/offscreen.hpp"
 
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
-using sfz::Exception;
 using sfz::format;
 
 namespace antares {
@@ -32,7 +32,7 @@ static T* check_nonnull(T* value, const char* name) {
     if (value) {
         return value;
     }
-    throw Exception(format("{0} was null", name));
+    throw std::runtime_error(pn::format("{0} was null", name).c_str());
 }
 
 GLXFBConfig* fb_configs(Display* display) {

@@ -32,7 +32,6 @@
 #include "lang/defines.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
 using sfz::format;
 
 namespace utf8 = sfz::utf8;
@@ -70,8 +69,9 @@ Font::Font(pn::string_view name) {
     pn::value  x;
     pn_error_t err;
     if (!pn::parse(rsrc_string.open(), x, &err)) {
-        throw Exception(format(
-                "{0}:{1}:{2}: {3}", pn2sfz(path), err.lineno, err.column, pn_strerror(err.code)));
+        throw std::runtime_error(
+                pn::format("{0}:{1}:{2}: {3}", path, err.lineno, err.column, pn_strerror(err.code))
+                        .c_str());
     }
 
     pn::map_cref    m     = x.as_map();

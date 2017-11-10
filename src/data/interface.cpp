@@ -18,6 +18,7 @@
 
 #include "data/interface.hpp"
 
+#include <pn/file>
 #include <pn/map>
 
 #include <sfz/sfz.hpp>
@@ -30,7 +31,6 @@
 #include "lang/casts.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
 using sfz::StringMap;
 using sfz::format;
 using sfz::range;
@@ -102,8 +102,8 @@ vector<unique_ptr<InterfaceItem>> interface_items(int id0, pn::array_cref l) {
                 if (kind.empty()) {
                     kind = key;
                 } else {
-                    throw Exception(
-                            format("interface item has both {0} and {1}", pn2sfz(kind), key));
+                    throw std::runtime_error(
+                            pn::format("interface item has both {0} and {1}", kind, key).c_str());
                 }
             }
         }

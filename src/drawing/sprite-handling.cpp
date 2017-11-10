@@ -31,7 +31,6 @@
 #include "math/rotation.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
 using sfz::Range;
 using sfz::format;
 using sfz::range;

@@ -18,6 +18,7 @@
 
 #include "drawing/build-pix.hpp"
 
+#include <pn/file>
 #include <sfz/sfz.hpp>
 #include <vector>
 
@@ -29,7 +30,6 @@
 #include "game/sys.hpp"
 
 using sfz::BytesSlice;
-using sfz::Exception;
 using sfz::format;
 using sfz::string_to_int;
 using std::unique_ptr;
@@ -130,7 +130,10 @@ BuildPix::BuildPix(int text_id, int width) : _size({width, 0}) {
                     int32_t id = 2005;
                     if (line.size() > 3) {
                         if (!string_to_int(line.slice(3), id)) {
-                            throw Exception(format("malformed header line {0}", quote(line)));
+                            throw std::runtime_error(pn::format(
+                                                             "malformed header line {0}",
+                                                             sfz2pn(sfz::String(quote(line))))
+                                                             .c_str());
                         }
                     }
                     Picture pict(id);
@@ -140,7 +143,10 @@ BuildPix::BuildPix(int text_id, int width) : _size({width, 0}) {
                 } else {
                     int32_t id;
                     if (!string_to_int(line.slice(2), id)) {
-                        throw Exception(format("malformed header line {0}", quote(line)));
+                        throw std::runtime_error(pn::format(
+                                                         "malformed header line {0}",
+                                                         sfz2pn(sfz::String(quote(line))))
+                                                         .c_str());
                     }
                     Picture pict(id);
                     _lines.push_back(Line{

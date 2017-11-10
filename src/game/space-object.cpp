@@ -50,7 +50,6 @@
 #include "video/transitions.hpp"
 
 using sfz::BytesSlice;
-using sfz::Exception;
 using sfz::ReadSource;
 using sfz::read;
 using std::max;
@@ -131,7 +130,7 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject* sourceObject) {
     if (sourceObject->pixResID != kNoSpriteTable) {
         spriteTable = sys.pix.get(sourceObject->pixResID);
         if (!spriteTable) {
-            throw Exception("Received an unexpected request to load a sprite");
+            throw std::runtime_error("Received an unexpected request to load a sprite");
         }
     }
 
@@ -500,7 +499,7 @@ void SpaceObject::change_base_type(
         spriteTable = sys.pix.get(obj->pixResID);
 
         if (spriteTable == NULL) {
-            throw Exception("Couldn't load a requested sprite");
+            throw std::runtime_error("Couldn't load a requested sprite");
             spriteTable = sys.pix.add(obj->pixResID);
         }
 

@@ -29,7 +29,6 @@
 #include "math/random.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
 using sfz::range;
 
 namespace antares {
@@ -197,7 +196,7 @@ void Starfield::move(ticks by_units) {
                 case kSlowStarSpeed: velocity = &slowVelocity; break;
                 case kMediumStarSpeed: velocity = &mediumVelocity; break;
                 case kFastStarSpeed: velocity = &fastVelocity; break;
-                case kNoStar: throw Exception("invalid value of star->speed.");
+                case kNoStar: throw std::runtime_error("invalid value of star->speed.");
             }
             star->location.h -= mFixedToLong(velocity->h);
             star->location.v -= mFixedToLong(velocity->v);

@@ -34,7 +34,7 @@ pn::string default_application_path() {
     char       path_buffer[PATH_MAX];
     if (!CFURLGetFileSystemRepresentation(
                 url.c_obj(), true, reinterpret_cast<UInt8*>(path_buffer), PATH_MAX)) {
-        throw sfz::Exception("couldn't get application_path()");
+        throw std::runtime_error("couldn't get application_path()");
     }
     return sfz2pn(utf8::decode(path_buffer));
 }

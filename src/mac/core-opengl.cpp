@@ -19,9 +19,9 @@
 #include "mac/core-opengl.hpp"
 
 #include <OpenGL/OpenGL.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
-using sfz::Exception;
 using sfz::format;
 namespace utf8 = sfz::utf8;
 
@@ -30,14 +30,14 @@ namespace cgl {
 
 void check(CGLError error) {
     if (error != kCGLNoError) {
-        throw Exception(format("CGL Error: {0}", utf8::decode(CGLErrorString(error))));
+        throw std::runtime_error(pn::format("CGL Error: {0}", CGLErrorString(error)).c_str());
     }
 }
 
 PixelFormat::PixelFormat(const CGLPixelFormatAttribute* attrs) {
     check(CGLChoosePixelFormat(attrs, &_pixel_format, &_npix));
     if (_pixel_format == NULL) {
-        throw Exception("Couldn't create CGLPixelFormatObj.");
+        throw std::runtime_error("Couldn't create CGLPixelFormatObj.");
     }
 }
 

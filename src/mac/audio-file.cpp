@@ -19,6 +19,7 @@
 #include "mac/audio-file.hpp"
 
 #include <AudioToolbox/AudioToolbox.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "data/pn.hpp"
@@ -26,7 +27,6 @@
 
 using sfz::Bytes;
 using sfz::BytesSlice;
-using sfz::Exception;
 using sfz::format;
 using sfz::quote;
 using std::unique_ptr;
@@ -35,7 +35,7 @@ namespace antares {
 
 static void check_os_err(OSStatus err, pn::string_view method) {
     if (err != noErr) {
-        throw Exception(format("{0}: {1}", pn2sfz(method), err));
+        throw std::runtime_error(pn::format("{0}: {1}", method, err).c_str());
     }
 }
 
@@ -46,7 +46,7 @@ class ExtAudioFile {
     ExtAudioFile(const AudioFile& audio_file) {
         OSStatus err = ExtAudioFileWrapAudioFileID(audio_file.id(), false, &_id);
         if (err != noErr) {
-            throw Exception("ExtAudioFileWrapAudioFileID() failed.");
+            throw std::runtime_error("ExtAudioFileWrapAudioFileID() failed.");
         }
     }
 
@@ -93,7 +93,7 @@ void ExtAudioFile::convert(Bytes& data, ALenum& format, ALsizei& frequency) {
     } else if (in_format.mChannelsPerFrame == 2) {
         format = AL_FORMAT_STEREO16;
     } else {
-        throw Exception("audio file has more than two channels");
+        throw std::runtime_error("audio file has more than two channels");
     }
 
     // Convert to 16-bit native-endian linear PCM.  Preserve the frequency and channel count

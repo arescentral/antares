@@ -28,7 +28,6 @@
 #include "lang/defines.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
 using sfz::format;
 using std::unique_ptr;
 

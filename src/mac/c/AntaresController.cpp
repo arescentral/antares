@@ -33,7 +33,6 @@
 #include "ui/flows/master.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
 using antares::CardStack;
 using antares::CocoaVideoDriver;
 using antares::CoreFoundationPrefsDriver;
@@ -67,8 +66,8 @@ extern "C" void antares_controller_destroy_drivers(AntaresDrivers* drivers) { de
 extern "C" bool antares_controller_loop(AntaresDrivers* drivers, CFStringRef* error_message) {
     try {
         drivers->video.loop(new Master(time(NULL)));
-    } catch (Exception& e) {
-        *error_message = cf::wrap(sfz2pn(e.message())).release();
+    } catch (std::exception& e) {
+        *error_message = cf::wrap(pn::string_view{e.what()}).release();
         return false;
     }
     return true;

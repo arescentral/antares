@@ -29,7 +29,6 @@
 #include "lang/defines.hpp"
 
 using sfz::BytesSlice;
-using sfz::Exception;
 using sfz::ReadSource;
 using sfz::range;
 using sfz::read;
@@ -118,7 +117,7 @@ Preferences Preferences::copy() const {
 
 PrefsDriver::PrefsDriver() {
     if (sys.prefs) {
-        throw Exception("PrefsDriver is a singleton");
+        throw std::runtime_error("PrefsDriver is a singleton");
     }
     sys.prefs = this;
 }

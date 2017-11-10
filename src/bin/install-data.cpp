@@ -23,7 +23,6 @@
 #include "data/pn.hpp"
 #include "net/http.hpp"
 
-using sfz::Exception;
 using sfz::Optional;
 using sfz::print;
 using sfz::args::help;
@@ -82,8 +81,8 @@ void ExtractDataMain(int argc, char* const* argv) {
             extractor.extract(&observer);
             print(io::err, "done.\n");
         }
-    } catch (Exception& e) {
-        print(io::err, format("{0}: {1}\n", utf8::decode(argv[0]), e.message()));
+    } catch (std::exception& e) {
+        print(io::err, format("{0}: {1}\n", utf8::decode(argv[0]), utf8::decode(e.what())));
         exit(1);
     }
 }

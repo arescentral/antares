@@ -18,6 +18,8 @@
 
 #include "data/plugin.hpp"
 
+#include <pn/file>
+
 #include "data/base-object.hpp"
 #include "data/pn.hpp"
 #include "data/resource.hpp"
@@ -25,7 +27,6 @@
 #include "lang/defines.hpp"
 
 using sfz::BytesSlice;
-using sfz::Exception;
 using sfz::format;
 using sfz::range;
 using std::vector;
@@ -51,7 +52,7 @@ static void read_all(
         read(in, v[i]);
     }
     if (!in.empty()) {
-        throw Exception(format("didn't consume all of {0} data", pn2sfz(name)));
+        throw std::runtime_error(pn::format("didn't consume all of {0} data", name).c_str());
     }
 }
 
@@ -61,7 +62,7 @@ void PluginInit() {
         BytesSlice in(rsrc.data());
         read(in, plug.meta);
         if (!in.empty()) {
-            throw Exception("didn't consume all of scenario file info data");
+            throw std::runtime_error("didn't consume all of scenario file info data");
         }
     }
 

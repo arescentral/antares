@@ -19,11 +19,12 @@
 #include "drawing/pix-map.hpp"
 
 #include <algorithm>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
+#include "data/pn.hpp"
 #include "lang/casts.hpp"
 
-using sfz::Exception;
 using sfz::WriteTarget;
 using sfz::format;
 using sfz::write;
@@ -53,7 +54,7 @@ void PixMap::fill(const RgbColor& color) {
 
 void PixMap::copy(const PixMap& pix) {
     if (size() != pix.size()) {
-        throw Exception("Mismatch in PixMap sizes");
+        throw std::runtime_error("Mismatch in PixMap sizes");
     }
     for (int i = 0; i < size().height; ++i) {
         memcpy(mutable_row(i), pix.row(i), size().width * sizeof(RgbColor));
@@ -62,7 +63,7 @@ void PixMap::copy(const PixMap& pix) {
 
 void PixMap::composite(const PixMap& pix) {
     if (size() != pix.size()) {
-        throw Exception("Mismatch in PixMap sizes");
+        throw std::runtime_error("Mismatch in PixMap sizes");
     }
     for (int y = 0; y < size().height; ++y) {
         for (int x = 0; x < size().width; ++x) {
@@ -121,9 +122,11 @@ PixMap::View::View(PixMap* pix, const Rect& bounds)
         : _parent(pix), _offset(bounds.origin()), _size(bounds.size()) {
     Rect pix_bounds(Point(0, 0), pix->size());
     if (!pix_bounds.encloses(bounds)) {
-        throw Exception(
-                format("tried to take view {0} outside of parent PixMap with bounds {1}", bounds,
-                       pix_bounds));
+        throw std::runtime_error(
+                pn::format(
+                        "tried to take view {0} outside of parent PixMap with bounds {1}",
+                        sfz2pn(sfz::String(bounds)), sfz2pn(sfz::String(pix_bounds)))
+                        .c_str());
     }
 }
 

@@ -108,8 +108,8 @@ class PixMap {
     // The sizes of the two PixMap objects must be identical.  As with `fill()`, there are no
     // `Rect` parameters given by this method; use views instead.
     //
-    // @param [in] pix      the PixMap to copy from.
-    // @throws Exception if `this->size()` and `pix.size()` are not equal.
+    // @param [in] pix            the PixMap to copy from.
+    // @throws std::runtime_error if `this->size()` and `pix.size()` are not equal.
     virtual void copy(const PixMap& pix);
 
     // Draws another PixMap over this one.
@@ -117,8 +117,8 @@ class PixMap {
     // This is like `copy()`, except that in places that `pix` is not opaque, the resultant pixel
     // will be created by combining the two colors, rather than simply copying.
     //
-    // @param [in] pix      the PixMap to copy from.
-    // @throws Exception if `this->size()` and `pix.size()` are not equal.
+    // @param [in] pix            the PixMap to copy from.
+    // @throws std::runtime_error if `this->size()` and `pix.size()` are not equal.
     virtual void composite(const PixMap& pix);
 
     // See class documentation below.

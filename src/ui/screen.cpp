@@ -34,7 +34,6 @@
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
 using sfz::format;
 using sfz::range;
 using sfz::read;
@@ -63,7 +62,7 @@ pn::value InterfaceScreen::load_pn(pn::string_view id) {
     pn::string in = sfz2pn(utf8::decode(rsrc.data()));
     pn::value  x;
     if (!pn::parse(in.open(), x, nullptr)) {
-        throw Exception("invalid interface file");
+        throw std::runtime_error("invalid interface file");
     }
     return x;
 }
@@ -220,7 +219,7 @@ void InterfaceScreen::adjust_interface() {}
 
 void InterfaceScreen::truncate(size_t size) {
     if (size > _items.size()) {
-        throw Exception("");
+        throw std::runtime_error("");
     }
     _items.resize(size);
 }

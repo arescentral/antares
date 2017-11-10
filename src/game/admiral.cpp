@@ -32,7 +32,6 @@
 #include "sound/fx.hpp"
 
 using sfz::Bytes;
-using sfz::Exception;
 using std::min;
 using std::unique_ptr;
 
@@ -246,7 +245,7 @@ void RecalcAllAdmiralBuildData() {
                                 j++;
                             }
                             if (j == kMaxNumAdmiralCanBuild) {
-                                throw Exception("Too Many Types to Build!");
+                                throw std::runtime_error("Too Many Types to Build!");
                             }
                             a->canBuildType()[j].baseNum     = d->canBuildType[k];
                             a->canBuildType()[j].base        = baseObject;
@@ -342,7 +341,7 @@ Handle<Destination> GetAdmiralBuildAtObject(Handle<Admiral> a) {
 
 void SetAdmiralBuildAtObject(Handle<Admiral> a, Handle<SpaceObject> obj) {
     if (!a.get()) {
-        throw Exception("Can't set consider ship for -1 admiral.");
+        throw std::runtime_error("Can't set consider ship for -1 admiral.");
     }
     if (obj.get()) {
         if (obj->attributes & kCanAcceptBuild) {
