@@ -23,7 +23,6 @@
 #include <pn/map>
 #include <pn/string>
 #include <pn/value>
-#include <sfz/sfz.hpp>
 
 #include "data/picture.hpp"
 #include "data/pn.hpp"
@@ -33,18 +32,9 @@
 #include "lang/defines.hpp"
 #include "video/driver.hpp"
 
-using sfz::Bytes;
-using sfz::BytesSlice;
 using sfz::Exception;
-using sfz::Rune;
 using sfz::String;
-using sfz::StringMap;
-using sfz::StringSlice;
 using sfz::format;
-using sfz::hex;
-using sfz::read;
-using std::map;
-using std::unique_ptr;
 
 namespace utf8 = sfz::utf8;
 
@@ -74,8 +64,8 @@ void recolor(PixMap& glyph_table) {
 
 }  // namespace
 
-Font::Font(StringSlice name) {
-    String     path(format("fonts/{0}.pn", name));
+Font::Font(pn::string_view name) {
+    String     path(format("fonts/{0}.pn", pn2sfz(name)));
     Resource   rsrc(path);
     pn::string rsrc_string = sfz2pn(utf8::decode(rsrc.data()));
     pn::value  x;
@@ -101,7 +91,7 @@ Font::Font(StringSlice name) {
         pn::string_view glyph    = kv.key();
         pn::map_cref    rect_map = kv.value().as_map();
 
-        _glyphs[pn2sfz(glyph).at(0)] =
+        _glyphs[(*glyph.begin()).value()] =
                 Rect(rect_map.get("left").as_int(), rect_map.get("top").as_int(),
                      rect_map.get("right").as_int(), rect_map.get("bottom").as_int());
     }
@@ -109,22 +99,22 @@ Font::Font(StringSlice name) {
 
 Font::~Font() {}
 
-Rect Font::glyph_rect(Rune r) const {
-    auto it = _glyphs.find(r);
+Rect Font::glyph_rect(uint32_t rune) const {
+    auto it = _glyphs.find(rune);
     if (it == _glyphs.end()) {
         return Rect();
     }
     return it->second;
 }
 
-void Font::draw(Point cursor, sfz::StringSlice string, RgbColor color) const {
+void Font::draw(Point cursor, pn::string_view string, RgbColor color) const {
     draw(Quads(texture), cursor, string, color);
 }
 
-void Font::draw(const Quads& quads, Point cursor, sfz::StringSlice string, RgbColor color) const {
+void Font::draw(const Quads& quads, Point cursor, pn::string_view string, RgbColor color) const {
     cursor.offset(0, -ascent);
-    for (size_t i = 0; i < string.size(); ++i) {
-        auto glyph = glyph_rect(string.at(i));
+    for (pn::rune rune : string) {
+        auto glyph = glyph_rect(rune.value());
         Rect scaled(
                 glyph.left * _scale, glyph.top * _scale, glyph.right * _scale,
                 glyph.bottom * _scale);
@@ -133,12 +123,12 @@ void Font::draw(const Quads& quads, Point cursor, sfz::StringSlice string, RgbCo
     }
 }
 
-uint8_t Font::char_width(Rune mchar) const { return glyph_rect(mchar).width(); }
+uint8_t Font::char_width(uint32_t mchar) const { return glyph_rect(mchar).width(); }
 
-int32_t Font::string_width(sfz::StringSlice s) const {
+int32_t Font::string_width(pn::string_view s) const {
     int32_t sum = 0;
-    for (int i = 0; i < s.size(); ++i) {
-        sum += char_width(s.at(i));
+    for (pn::rune rune : s) {
+        sum += char_width(rune.value());
     }
     return sum;
 }

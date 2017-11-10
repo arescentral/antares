@@ -23,6 +23,7 @@
 #include <sfz/sfz.hpp>
 
 #include "data/picture.hpp"
+#include "data/pn.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
 #include "video/driver.hpp"
@@ -326,7 +327,7 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
             if (ch.special == NONE) {
                 _font->draw(
                         quads, Point(bounds.left + ch.h, bounds.top + ch.v + char_adjust),
-                        String(1, ch.character), ch.fore_color);
+                        sfz2pn(String(1, ch.character)), ch.fore_color);
             }
         }
     }

@@ -71,11 +71,11 @@ const Font* interface_font(interfaceStyleType style) {
 }
 
 void DrawInterfaceString(Point p, StringSlice s, interfaceStyleType style, const RgbColor& color) {
-    interface_font(style)->draw(p, s, color);
+    interface_font(style)->draw(p, sfz2pn(s), color);
 }
 
 int16_t GetInterfaceStringWidth(const StringSlice& s, interfaceStyleType style) {
-    return interface_font(style)->string_width(s);
+    return interface_font(style)->string_width(sfz2pn(s));
 }
 
 // GetInterfaceFontWidth:       -- NOT WORLD-READY! --

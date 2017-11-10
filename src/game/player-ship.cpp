@@ -840,7 +840,7 @@ void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> 
             string = get_object_name(ship->base).copy();
         }
         string += sfz2pn(hot_key_suffix(ship));
-        label->set_string(pn2sfz(string));
+        label->set_string(string);
     }
 }
 
@@ -978,11 +978,11 @@ void Update_LabelStrings_ForHotKeyChange(void) {
         if (target->attributes & kIsDestination) {
             pn::string string = GetDestBalanceName(target->asDestination).copy();
             string += sfz2pn(hot_key_suffix(target));
-            g.target_label->set_string(pn2sfz(string));
+            g.target_label->set_string(string);
         } else {
             pn::string string = get_object_name(target->base).copy();
             string += sfz2pn(hot_key_suffix(target));
-            g.target_label->set_string(pn2sfz(string));
+            g.target_label->set_string(string);
         }
     }
 
@@ -996,11 +996,11 @@ void Update_LabelStrings_ForHotKeyChange(void) {
         if (control->attributes & kIsDestination) {
             pn::string string = GetDestBalanceName(control->asDestination).copy();
             string += sfz2pn(hot_key_suffix(control));
-            g.control_label->set_string(pn2sfz(string));
+            g.control_label->set_string(string);
         } else {
             pn::string string = get_object_name(control->base).copy();
             string += sfz2pn(hot_key_suffix(control));
-            g.control_label->set_string(pn2sfz(string));
+            g.control_label->set_string(string);
         }
     }
 }

@@ -281,7 +281,7 @@ static void item_text(const Quads& quads, int line, StringSlice string, bool dim
             textcolor = GetRGBTranslateColorShade(kMiniScreenColor, MEDIUM);
         }
     }
-    sys.fonts.computer->draw(quads, origin, string, textcolor);
+    sys.fonts.computer->draw(quads, origin, sfz2pn(string), textcolor);
 }
 
 static void button_on(const Rects& rects, int line) {
@@ -315,7 +315,7 @@ static void button_on_text(const Quads& quads, int line, StringSlice string) {
             kMiniScreenLeftBuffer,
             (line * sys.fonts.computer->height) + sys.fonts.computer->ascent);
     RgbColor textcolor = RgbColor::black();
-    sys.fonts.computer->draw(quads, origin, string, textcolor);
+    sys.fonts.computer->draw(quads, origin, sfz2pn(string), textcolor);
 }
 
 static void button_off_text(const Quads& quads, int line, StringSlice string) {
@@ -326,7 +326,7 @@ static void button_off_text(const Quads& quads, int line, StringSlice string) {
             kMiniScreenLeftBuffer,
             (line * sys.fonts.computer->height) + sys.fonts.computer->ascent);
     RgbColor textcolor = GetRGBTranslateColorShade(kMiniButColor, VERY_LIGHT);
-    sys.fonts.computer->draw(quads, origin, string, textcolor);
+    sys.fonts.computer->draw(quads, origin, sfz2pn(string), textcolor);
 }
 
 static void draw_minicomputer_lines() {
@@ -634,7 +634,7 @@ static void draw_mini_ship_data(
         draw_shaded_rect(Rects(), bar, header_color, LIGHT, VERY_LIGHT, MEDIUM);
         sys.fonts.computer->draw(
                 Point(bar.left + kMiniScreenLeftBuffer, bar.top + sys.fonts.computer->ascent),
-                label, RgbColor::black());
+                sfz2pn(label), RgbColor::black());
     }
 
     // Icon
@@ -654,7 +654,7 @@ static void draw_mini_ship_data(
             sys.fonts.computer->draw(
                     Point(lRect.left + kMiniScreenLeftBuffer,
                           lRect.top + sys.fonts.computer->ascent),
-                    pn2sfz(obj->short_name()), GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT));
+                    obj->short_name(), GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT));
         }
     }
 
@@ -743,7 +743,7 @@ static void draw_mini_ship_data(
                     screen_top, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
             sys.fonts.computer->draw(
                     Point(lRect.left, lRect.top + sys.fonts.computer->ascent),
-                    pn2sfz(get_object_short_name(obj->beam.base)), color);
+                    get_object_short_name(obj->beam.base), color);
         }
 
         if (obj->pulse.base.get()) {
@@ -751,7 +751,7 @@ static void draw_mini_ship_data(
                     screen_top, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
             sys.fonts.computer->draw(
                     Point(lRect.left, lRect.top + sys.fonts.computer->ascent),
-                    pn2sfz(get_object_short_name(obj->pulse.base)), color);
+                    get_object_short_name(obj->pulse.base), color);
         }
 
         // Don't show special weapons of destination objects.
@@ -761,7 +761,7 @@ static void draw_mini_ship_data(
                         screen_top, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
                 sys.fonts.computer->draw(
                         Point(lRect.left, lRect.top + sys.fonts.computer->ascent),
-                        pn2sfz(get_object_short_name(obj->special.base)), color);
+                        get_object_short_name(obj->special.base), color);
             }
         }
     }
@@ -773,8 +773,7 @@ static void draw_mini_ship_data(
         RgbColor color    = GetRGBTranslateColorShade(friendly ? GREEN : RED, VERY_LIGHT);
         Rect lRect = mini_screen_line_bounds(screen_top, kMiniDestLineNum, 0, kMiniScreenWidth);
         sys.fonts.computer->draw(
-                Point(lRect.left, lRect.top + sys.fonts.computer->ascent), pn2sfz(dest->name()),
-                color);
+                Point(lRect.left, lRect.top + sys.fonts.computer->ascent), dest->name(), color);
     }
 }
 

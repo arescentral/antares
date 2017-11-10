@@ -290,7 +290,7 @@ class PauseScreen : public Card {
   public:
     PauseScreen() {
         const StringList list(3100);
-        _pause_string = pn2sfz(list.at(10));
+        _pause_string = list.at(10).copy();
         int32_t width = sys.fonts.title->string_width(_pause_string);
         Rect    bounds(0, 0, width, sys.fonts.title->height);
         bounds.center_in(play_screen());
@@ -362,12 +362,12 @@ class PauseScreen : public Card {
 
     void wake() { _sleep_at = now() + kSleepAfter; }
 
-    bool      _visible;
-    wall_time _next_switch;
-    wall_time _sleep_at;
-    String    _pause_string;
-    Point     _text_origin;
-    Rect      _bracket_bounds;
+    bool       _visible;
+    wall_time  _next_switch;
+    wall_time  _sleep_at;
+    pn::string _pause_string;
+    Point      _text_origin;
+    Rect       _bracket_bounds;
 
     DISALLOW_COPY_AND_ASSIGN(PauseScreen);
 };

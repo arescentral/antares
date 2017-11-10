@@ -19,7 +19,7 @@
 #ifndef ANTARES_DRAWING_TEXT_HPP_
 #define ANTARES_DRAWING_TEXT_HPP_
 
-#include <sfz/sfz.hpp>
+#include <pn/string>
 
 #include "drawing/sprite-handling.hpp"
 #include "lang/casts.hpp"
@@ -31,14 +31,14 @@ class Quads;
 
 class Font {
   public:
-    Font(sfz::StringSlice name);
+    Font(pn::string_view name);
     ~Font();
 
-    uint8_t char_width(sfz::Rune mchar) const;
-    int32_t string_width(sfz::StringSlice s) const;
+    uint8_t char_width(uint32_t rune) const;
+    int32_t string_width(pn::string_view s) const;
 
-    void draw(Point cursor, sfz::StringSlice string, RgbColor color) const;
-    void draw(const Quads& quads, Point cursor, sfz::StringSlice string, RgbColor color) const;
+    void draw(Point cursor, pn::string_view string, RgbColor color) const;
+    void draw(const Quads& quads, Point cursor, pn::string_view string, RgbColor color) const;
 
     Texture texture;
     int32_t logicalWidth;
@@ -46,10 +46,10 @@ class Font {
     int32_t ascent;
 
   private:
-    Rect glyph_rect(sfz::Rune r) const;
+    Rect glyph_rect(uint32_t rune) const;
 
-    int                       _scale;
-    std::map<sfz::Rune, Rect> _glyphs;
+    int                      _scale;
+    std::map<uint32_t, Rect> _glyphs;
 
     DISALLOW_COPY_AND_ASSIGN(Font);
 };

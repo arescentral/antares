@@ -19,6 +19,7 @@
 #include "game/messages.hpp"
 
 #include "config/keys.hpp"
+#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
@@ -437,7 +438,7 @@ void Messages::draw_message_screen(ticks by_units) {
                     viewport().bottom - (kMessageDisplayTime - time_count).count());
         }
 
-        g.message_label->set_string(message);
+        g.message_label->set_string(sfz2pn(message));
     } else {
         g.message_label->clear_string();
         time_count = ticks(0);
@@ -446,7 +447,7 @@ void Messages::draw_message_screen(ticks by_units) {
 
 void Messages::set_status(const StringSlice& status, uint8_t color) {
     g.status_label->set_color(color);
-    g.status_label->set_string(status);
+    g.status_label->set_string(sfz2pn(status));
     g.status_label->set_age(kStatusLabelAge);
 }
 
@@ -520,7 +521,7 @@ void MessageLabel_Set_Special(Handle<Label> label, const StringSlice& text) {
         ++it;
     }
 
-    label->set_string(message);
+    label->set_string(sfz2pn(message));
     label->set_keep_on_screen_anyway(true);
 
     switch (whichType) {
