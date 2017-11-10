@@ -19,7 +19,8 @@
 #ifndef ANTARES_DATA_INTERFACE_HPP_
 #define ANTARES_DATA_INTERFACE_HPP_
 
-#include <sfz/sfz.hpp>
+#include <pn/array>
+#include <pn/string>
 
 #include "data/picture.hpp"
 #include "math/geometry.hpp"
@@ -53,13 +54,12 @@ class InterfaceItem {
     InterfaceItem(int id, Rect bounds);
 
   private:
-    friend std::vector<std::unique_ptr<InterfaceItem>> interface_items(
-            int id0, const sfz::Json& json);
+    friend std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, pn::array_cref l);
 
     Rect _bounds;
 };
 
-std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, const sfz::Json& json);
+std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, pn::array_cref l);
 
 struct PlainRect : public InterfaceItem {
     PlainRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style);
@@ -72,7 +72,7 @@ struct PlainRect : public InterfaceItem {
 struct LabeledItem : public InterfaceItem {
     LabeledItem(int id, Rect bounds, interfaceLabelType label);
 
-    sfz::String label;
+    pn::string label;
 };
 
 struct LabeledRect : public LabeledItem {
@@ -86,16 +86,16 @@ struct LabeledRect : public LabeledItem {
 
 struct TextRect : public InterfaceItem {
     TextRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style);
-    TextRect(int id, Rect bounds, sfz::StringSlice name, uint8_t hue, interfaceStyleType style);
+    TextRect(int id, Rect bounds, pn::string_view name, uint8_t hue, interfaceStyleType style);
     virtual void accept(const Visitor& visitor) const;
 
-    sfz::String        text;
+    pn::string         text;
     uint8_t            hue;
     interfaceStyleType style;
 };
 
 struct PictureRect : public InterfaceItem {
-    PictureRect(int id, Rect bounds, sfz::StringSlice name);
+    PictureRect(int id, Rect bounds, pn::string_view name);
     virtual void accept(const Visitor& visitor) const;
 
     Picture            picture;
@@ -144,11 +144,11 @@ struct RadioButton : public Button {
 struct TabBoxButton : public Button {
     TabBoxButton(
             int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
-            uint8_t hue, interfaceStyleType style, const sfz::Json& tab_content);
+            uint8_t hue, interfaceStyleType style, pn::value_cref tab_content);
     virtual void accept(const Visitor& visitor) const;
 
     bool      on;
-    sfz::Json tab_content;
+    pn::value tab_content;
 };
 
 struct TabBox : public InterfaceItem {

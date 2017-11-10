@@ -33,7 +33,7 @@ namespace antares {
 class InterfaceScreen : public Card {
   public:
     InterfaceScreen(sfz::PrintItem name, const Rect& bounds, bool full_screen);
-    InterfaceScreen(sfz::Json json, const Rect& bounds, bool full_screen);
+    InterfaceScreen(pn::value_cref x, const Rect& bounds, bool full_screen);
     ~InterfaceScreen();
 
     virtual void become_front();
@@ -55,7 +55,7 @@ class InterfaceScreen : public Card {
     virtual void handle_button(Button& button) = 0;
 
     void truncate(size_t size);
-    void extend(const sfz::Json& json);
+    void extend(pn::value_cref x);
 
     Point                offset() const;
     size_t               size() const;
@@ -71,7 +71,7 @@ class InterfaceScreen : public Card {
     };
     State _state;
 
-    sfz::Json load_json(sfz::PrintItem id);
+    pn::value load_pn(sfz::PrintItem id);
     void      become_normal();
 
     const Rect                                  _bounds;

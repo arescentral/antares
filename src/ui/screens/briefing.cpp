@@ -22,6 +22,7 @@
 #include "config/keys.hpp"
 #include "data/base-object.hpp"
 #include "data/picture.hpp"
+#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
 #include "drawing/briefing.hpp"
@@ -199,7 +200,7 @@ static void update_mission_brief_point(
             lines.push_back(make_pair(p7, p8));
         }
     }
-    dataItem->label.assign(StringList(headerID).at(headerNumber - 1));
+    dataItem->label = sfz2pn(StringList(headerID).at(headerNumber - 1));
     Rect newRect;
     GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
     populate_inline_picts(dataItem->bounds(), text, dataItem->style, inlinePict);

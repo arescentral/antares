@@ -18,10 +18,13 @@
 
 #include "ui/screen.hpp"
 
+#include <pn/array>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
+#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
@@ -32,7 +35,6 @@
 #include "video/driver.hpp"
 
 using sfz::Exception;
-using sfz::Json;
 using sfz::PrintItem;
 using sfz::String;
 using sfz::StringMap;
@@ -40,7 +42,6 @@ using sfz::StringSlice;
 using sfz::format;
 using sfz::range;
 using sfz::read;
-using sfz::string_to_json;
 using std::unique_ptr;
 using std::vector;
 
@@ -49,11 +50,11 @@ namespace utf8 = sfz::utf8;
 namespace antares {
 
 InterfaceScreen::InterfaceScreen(PrintItem name, const Rect& bounds, bool full_screen)
-        : InterfaceScreen(load_json(name), bounds, full_screen) {}
+        : InterfaceScreen(pn::value_cref{load_pn(name)}, bounds, full_screen) {}
 
-InterfaceScreen::InterfaceScreen(sfz::Json json, const Rect& bounds, bool full_screen)
+InterfaceScreen::InterfaceScreen(pn::value_cref x, const Rect& bounds, bool full_screen)
         : _state(NORMAL), _bounds(bounds), _full_screen(full_screen), _hit_button(nullptr) {
-    _items = interface_items(0, json);
+    _items = interface_items(0, x.as_array());
     for (auto& item : _items) {
         item->bounds().offset(bounds.left, bounds.top);
     }
@@ -61,14 +62,14 @@ InterfaceScreen::InterfaceScreen(sfz::Json json, const Rect& bounds, bool full_s
 
 InterfaceScreen::~InterfaceScreen() {}
 
-Json InterfaceScreen::load_json(sfz::PrintItem id) {
-    Resource rsrc(sfz::format("interfaces/{0}.json", id));
-    String   in(utf8::decode(rsrc.data()));
-    Json     json;
-    if (!string_to_json(in, json)) {
-        throw Exception("invalid interface JSON");
+pn::value InterfaceScreen::load_pn(sfz::PrintItem id) {
+    Resource   rsrc(sfz::format("interfaces/{0}.pn", id));
+    pn::string in = sfz2pn(utf8::decode(rsrc.data()));
+    pn::value  x;
+    if (!pn::parse(in.open(), x, nullptr)) {
+        throw Exception("invalid interface file");
     }
-    return json;
+    return x;
 }
 
 void InterfaceScreen::become_front() {
@@ -228,10 +229,10 @@ void InterfaceScreen::truncate(size_t size) {
     _items.resize(size);
 }
 
-void InterfaceScreen::extend(const Json& json) {
+void InterfaceScreen::extend(pn::value_cref x) {
     const int offset_x = (_bounds.width() / 2) - 320;
     const int offset_y = (_bounds.height() / 2) - 240;
-    for (auto&& item : interface_items(_items.size(), json)) {
+    for (auto&& item : interface_items(_items.size(), x.as_array())) {
         _items.emplace_back(std::move(item));
         _items.back()->bounds().offset(offset_x, offset_y);
     }

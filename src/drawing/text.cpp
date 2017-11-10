@@ -19,9 +19,14 @@
 #include "drawing/text.hpp"
 
 #include <algorithm>
+#include <pn/file>
+#include <pn/map>
+#include <pn/string>
+#include <pn/value>
 #include <sfz/sfz.hpp>
 
 #include "data/picture.hpp"
+#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "game/globals.hpp"
@@ -31,8 +36,6 @@
 using sfz::Bytes;
 using sfz::BytesSlice;
 using sfz::Exception;
-using sfz::Json;
-using sfz::JsonDefaultVisitor;
 using sfz::Rune;
 using sfz::String;
 using sfz::StringMap;
@@ -40,7 +43,6 @@ using sfz::StringSlice;
 using sfz::format;
 using sfz::hex;
 using sfz::read;
-using sfz::string_to_json;
 using std::map;
 using std::unique_ptr;
 
@@ -70,141 +72,39 @@ void recolor(PixMap& glyph_table) {
     }
 }
 
-struct FontVisitor : public JsonDefaultVisitor {
-    enum StateEnum {
-        NEW,
-        IMAGE,
-        LOGICAL_WIDTH,
-        HEIGHT,
-        ASCENT,
-        GLYPHS,
-        GLYPH,
-        GLYPH_LEFT,
-        GLYPH_TOP,
-        GLYPH_RIGHT,
-        GLYPH_BOTTOM,
-        DONE,
-    };
-    struct State {
-        StateEnum state;
-        Rune      glyph;
-        Rect      glyph_rect;
-        State() : state(NEW) {}
-    };
-    State&           state;
-    Texture&         texture;
-    int&             scale;
-    int32_t&         logical_width;
-    int32_t&         height;
-    int32_t&         ascent;
-    map<Rune, Rect>& glyphs;
-
-    FontVisitor(
-            State& state, Texture& texture, int& scale, int32_t& logical_width, int32_t& height,
-            int32_t& ascent, map<Rune, Rect>& glyphs)
-            : state(state),
-              texture(texture),
-              scale(scale),
-              logical_width(logical_width),
-              height(height),
-              ascent(ascent),
-              glyphs(glyphs) {}
-
-    bool descend(StateEnum state, const StringMap<Json>& value, StringSlice key) const {
-        auto it = value.find(key);
-        if (it == value.end()) {
-            return false;
-        }
-        StateEnum saved_state = this->state.state;
-        this->state.state     = state;
-        it->second.accept(*this);
-        this->state.state = saved_state;
-        return true;
-    }
-
-    virtual void visit_object(const StringMap<Json>& value) const {
-        switch (state.state) {
-            case NEW:
-                if (!descend(IMAGE, value, "image")) {
-                    throw Exception("missing image in sprite json");
-                }
-                if (!descend(LOGICAL_WIDTH, value, "logical-width")) {
-                    throw Exception("missing logical-width in sprite json");
-                }
-                if (!descend(HEIGHT, value, "height")) {
-                    throw Exception("missing height in sprite json");
-                }
-                if (!descend(ASCENT, value, "ascent")) {
-                    throw Exception("missing ascent in sprite json");
-                }
-                descend(GLYPHS, value, "glyphs");
-                break;
-
-            case GLYPHS:
-                this->state.state = GLYPH;
-                for (auto kv : value) {
-                    state.glyph = kv.first.at(0);
-                    kv.second.accept(*this);
-                }
-                break;
-
-            case GLYPH:
-                if (descend(GLYPH_LEFT, value, "left") && descend(GLYPH_TOP, value, "top") &&
-                    descend(GLYPH_RIGHT, value, "right") &&
-                    descend(GLYPH_BOTTOM, value, "bottom")) {
-                    glyphs[state.glyph] = state.glyph_rect;
-                } else {
-                    throw Exception("bad glyph rect");
-                }
-                break;
-
-            default: return visit_default("object");
-        }
-    }
-
-    virtual void visit_string(const StringSlice& value) const {
-        switch (state.state) {
-            case IMAGE: {
-                Picture glyph_table(value, true);
-                recolor(glyph_table);
-                texture = glyph_table.texture();
-                scale   = glyph_table.scale();
-                break;
-            }
-            default: return visit_default("string");
-        }
-    }
-
-    virtual void visit_number(double value) const {
-        switch (state.state) {
-            case LOGICAL_WIDTH: logical_width = value; break;
-            case HEIGHT: height = value; break;
-            case ASCENT: ascent = value; break;
-            case GLYPH_LEFT: state.glyph_rect.left = value; break;
-            case GLYPH_TOP: state.glyph_rect.top = value; break;
-            case GLYPH_RIGHT: state.glyph_rect.right = value; break;
-            case GLYPH_BOTTOM: state.glyph_rect.bottom = value; break;
-            default: return visit_default("number");
-        }
-    }
-
-    virtual void visit_default(const char* type) const {
-        throw Exception(format("unexpected {0} in sprite json", type));
-    }
-};
-
 }  // namespace
 
 Font::Font(StringSlice name) {
-    String   path(format("fonts/{0}.json", name));
-    Resource rsrc(path);
-    String   rsrc_string(utf8::decode(rsrc.data()));
-    Json     json;
-    if (!string_to_json(rsrc_string, json)) {
-        throw Exception("invalid JSON");
+    String     path(format("fonts/{0}.pn", name));
+    Resource   rsrc(path);
+    pn::string rsrc_string = sfz2pn(utf8::decode(rsrc.data()));
+    pn::value  x;
+    pn_error_t err;
+    if (!pn::parse(rsrc_string.open(), x, &err)) {
+        throw Exception(
+                format("{0}:{1}:{2}: {3}", path, err.lineno, err.column, pn_strerror(err.code)));
     }
-    FontVisitor::State state;
-    json.accept(FontVisitor(state, texture, _scale, logicalWidth, height, ascent, _glyphs));
+
+    pn::map_cref    m     = x.as_map();
+    pn::string_view image = m.get("image").as_string();
+    logicalWidth          = m.get("logical-width").as_int();
+    height                = m.get("height").as_int();
+    ascent                = m.get("ascent").as_int();
+    pn::map_cref glyphs   = m.get("glyphs").as_map();
+
+    Picture glyph_table(pn2sfz(image), true);
+    recolor(glyph_table);
+    texture = glyph_table.texture();
+    _scale  = glyph_table.scale();
+
+    for (pn::key_value_cref kv : glyphs) {
+        pn::string_view glyph    = kv.key();
+        pn::map_cref    rect_map = kv.value().as_map();
+
+        _glyphs[pn2sfz(glyph).at(0)] =
+                Rect(rect_map.get("left").as_int(), rect_map.get("top").as_int(),
+                     rect_map.get("right").as_int(), rect_map.get("bottom").as_int());
+    }
 }
 
 Font::~Font() {}
