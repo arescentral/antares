@@ -27,7 +27,6 @@
 #include "data/pn.hpp"
 #include "game/sys.hpp"
 
-using sfz::CString;
 using sfz::MappedFile;
 using sfz::read;
 using std::vector;
@@ -56,8 +55,8 @@ ReplayList::ReplayList() {
         const pn::string path      = g.data.gl_pathv[i];
         pn::string       basename  = sfz2pn(path::basename(pn2sfz(path)));
         pn::string_view  id_string = basename.substr(0, basename.size() - 5);
-        int16_t          id;
-        if (string_to_int(pn2sfz(id_string), id)) {
+        int64_t          id;
+        if (pn::strtoll(id_string, &id, nullptr)) {
             _replays.push_back(id);
         }
     }

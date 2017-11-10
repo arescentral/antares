@@ -26,7 +26,6 @@
 #include "data/level.hpp"
 #include "data/pn.hpp"
 
-using sfz::CString;
 using sfz::MappedFile;
 using sfz::read;
 using std::vector;

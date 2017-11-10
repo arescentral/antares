@@ -173,8 +173,8 @@ void StyledText::set_interface_text(pn::string_view text) {
                 for (size_t j = i + 2; j < sfz_text.size(); ++j) {
                     if (sfz_text.at(j) == '^') {
                         inlinePictType inline_pict;
-                        int32_t        id;
-                        if (!string_to_int(id_string, id, 10)) {
+                        int64_t        id;
+                        if (!pn::strtoll(sfz2pn(id_string), &id, nullptr)) {
                             throw std::runtime_error(
                                     pn::format("invalid numeric literal {0}", sfz2pn(id_string))
                                             .c_str());

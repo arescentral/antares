@@ -39,7 +39,6 @@ using sfz::args::store;
 using sfz::args::store_const;
 using sfz::makedirs;
 using sfz::quote;
-using sfz::string_to_int;
 using std::unique_ptr;
 
 namespace args = sfz::args;

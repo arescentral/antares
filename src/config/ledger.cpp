@@ -38,7 +38,6 @@ using sfz::Rune;
 using sfz::StringMap;
 using sfz::makedirs;
 using sfz::range;
-using sfz::string_to_int;
 using sfz::write;
 using std::unique_ptr;
 using std::vector;

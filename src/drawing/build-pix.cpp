@@ -29,7 +29,6 @@
 #include "drawing/text.hpp"
 #include "game/sys.hpp"
 
-using sfz::string_to_int;
 using std::unique_ptr;
 using std::vector;
 
@@ -122,9 +121,9 @@ BuildPix::BuildPix(int text_id, int width) : _size({width, 0}) {
         if (line.size() >= 2 && line.slice(0, 2) == "#+") {
             if (line.size() > 2) {
                 if (line.at(2) == 'B') {
-                    int32_t id = 2005;
+                    int64_t id = 2005;
                     if (line.size() > 3) {
-                        if (!string_to_int(line.slice(3), id)) {
+                        if (!pn::strtoll(sfz2pn(line.slice(3)), &id, nullptr)) {
                             throw std::runtime_error(pn::format(
                                                              "malformed header line {0}",
                                                              sfz2pn(sfz::String(quote(line))))
@@ -136,8 +135,8 @@ BuildPix::BuildPix(int text_id, int width) : _size({width, 0}) {
                             Line::BACKGROUND, Picture(id).texture(), nullptr,
                     });
                 } else {
-                    int32_t id;
-                    if (!string_to_int(line.slice(2), id)) {
+                    int64_t id;
+                    if (!pn::strtoll(sfz2pn(line.slice(2)), &id, nullptr)) {
                         throw std::runtime_error(pn::format(
                                                          "malformed header line {0}",
                                                          sfz2pn(sfz::String(quote(line))))

@@ -26,7 +26,6 @@
 #include <pn/string>
 #include <sfz/sfz.hpp>
 
-using sfz::CString;
 using sfz::WriteTarget;
 using std::unique_ptr;
 

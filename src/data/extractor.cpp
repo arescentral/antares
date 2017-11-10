@@ -648,8 +648,9 @@ void DataExtractor::extract_plugin(Observer* observer) const {
     check_identifier(archive, _scenario);
 
     for (size_t i : range(archive.size())) {
-        ZipFileReader file(archive, i);
-        StringSlice   path = file.path();
+        ZipFileReader   file(archive, i);
+        pn::string      path_data = sfz2pn(file.path());
+        pn::string_view path      = path_data;
 
         // Skip directories and special files.
         if ((path.rfind("/") == (path.size() - 1)) || (path == kPluginIdentifierFile) ||
@@ -658,19 +659,20 @@ void DataExtractor::extract_plugin(Observer* observer) const {
         }
 
         // Parse path into "data/$TYPE/$ID etc.".
-        StringSlice data;
-        StringSlice resource_type_slice;
-        StringSlice id_slice;
-        int16_t     id;
-        if (!partition(data, "/", path) || (data != "data") ||
-            !partition(resource_type_slice, "/", path) || !partition(id_slice, " ", path) ||
-            !string_to_int(id_slice, id) || (path.find('/') != StringSlice::npos)) {
+        pn::string_view data;
+        pn::string_view resource_type_slice;
+        pn::string_view id_slice;
+        int64_t         id;
+        if (!pn::partition(data, "/", path) || (data != "data") ||
+            !pn::partition(resource_type_slice, "/", path) ||
+            !pn::partition(id_slice, " ", path) || !pn::strtoll(id_slice, &id, nullptr) ||
+            (path.find(pn::rune{'/'}) != StringSlice::npos)) {
             throw std::runtime_error(
                     pn::format("bad plugin file {0}", sfz2pn(sfz::String(quote(file.path()))))
                             .c_str());
         }
 
-        sfz::String resource_type(resource_type_slice);
+        sfz::String resource_type(pn2sfz(resource_type_slice));
         if (resource_type.size() < 4) {
             resource_type.resize(4, ' ');
         }

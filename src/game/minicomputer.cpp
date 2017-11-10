@@ -48,7 +48,6 @@ using sfz::Rune;
 using sfz::StringSlice;
 using sfz::bin;
 using sfz::range;
-using sfz::string_to_int;
 using std::max;
 using std::vector;
 
@@ -1080,26 +1079,26 @@ void MiniComputerSetStatusStrings() {
             gMissionStatusStrList->size()) {
             // we have some data for this line to interpret
 
-            sfz::String s = pn2sfz(gMissionStatusStrList->at(count - kStatusMiniScreenFirstLine));
-            StringSlice sourceString = s;
+            pn::string_view sourceString =
+                    gMissionStatusStrList->at(count - kStatusMiniScreenFirstLine);
 
-            if (sourceString.at(0) == '_') {
+            if (sourceString.data()[0] == '_') {
                 line->underline = true;
-                sourceString    = sourceString.slice(1);
+                sourceString    = sourceString.substr(1);
             }
 
-            if (sourceString.at(0) == '-') {
+            if (sourceString.data()[0] == '-') {
                 // - = abbreviated string, just plain text
                 line->statusType = kPlainTextStatus;
                 line->value      = 0;
-                line->string     = sfz2pn(sourceString.slice(1));
+                line->string     = sourceString.substr(1).copy();
             } else {
                 //////////////////////////////////////////////
                 // get status type
-                StringSlice status_type_string;
-                if (partition(status_type_string, "\\", sourceString)) {
-                    int32_t value;
-                    if (string_to_int<int32_t>(status_type_string, value)) {
+                pn::string_view status_type_string;
+                if (pn::partition(status_type_string, "\\", sourceString)) {
+                    int64_t value;
+                    if (pn::strtoll(status_type_string, &value, nullptr)) {
                         if ((0 <= value) && (value <= kMaxStatusTypeValue)) {
                             line->statusType = value;
                         }
@@ -1108,58 +1107,58 @@ void MiniComputerSetStatusStrings() {
 
                 //////////////////////////////////////////////
                 // get score/condition number
-                StringSlice score_condition_string;
-                if (partition(score_condition_string, "\\", sourceString)) {
-                    int32_t value;
-                    if (string_to_int<int32_t>(score_condition_string, value)) {
+                pn::string_view score_condition_string;
+                if (pn::partition(score_condition_string, "\\", sourceString)) {
+                    int64_t value;
+                    if (pn::strtoll(score_condition_string, &value, nullptr)) {
                         line->whichStatus = value;
                     }
                 }
 
                 //////////////////////////////////////////////
                 // get player number
-                StringSlice player_number_string;
-                if (partition(player_number_string, "\\", sourceString)) {
-                    int32_t value;
-                    if (string_to_int<int32_t>(player_number_string, value)) {
+                pn::string_view player_number_string;
+                if (pn::partition(player_number_string, "\\", sourceString)) {
+                    int64_t value;
+                    if (pn::strtoll(player_number_string, &value, nullptr)) {
                         line->statusPlayer = Handle<Admiral>(value);
                     }
                 }
 
                 //////////////////////////////////////////////
                 // get negative value
-                StringSlice negative_value_string;
-                if (partition(negative_value_string, "\\", sourceString)) {
-                    int32_t value;
-                    if (string_to_int<int32_t>(negative_value_string, value)) {
+                pn::string_view negative_value_string;
+                if (pn::partition(negative_value_string, "\\", sourceString)) {
+                    int64_t value;
+                    if (pn::strtoll(negative_value_string, &value, nullptr)) {
                         line->negativeValue = value;
                     }
                 }
 
                 //////////////////////////////////////////////
                 // get falseString
-                StringSlice status_false_string;
-                if (partition(status_false_string, "\\", sourceString)) {
-                    line->statusFalse = sfz2pn(status_false_string);
+                pn::string_view status_false_string;
+                if (pn::partition(status_false_string, "\\", sourceString)) {
+                    line->statusFalse = status_false_string.copy();
                 }
 
                 //////////////////////////////////////////////
                 // get trueString
-                StringSlice status_true_string;
-                if (partition(status_true_string, "\\", sourceString)) {
-                    line->statusTrue = sfz2pn(status_true_string);
+                pn::string_view status_true_string;
+                if (pn::partition(status_true_string, "\\", sourceString)) {
+                    line->statusTrue = status_true_string.copy();
                 }
 
                 //////////////////////////////////////////////
                 // get statusString
-                StringSlice status_string;
-                if (partition(status_string, "\\", sourceString)) {
-                    line->statusString = sfz2pn(status_string);
+                pn::string_view status_string;
+                if (pn::partition(status_string, "\\", sourceString)) {
+                    line->statusString = status_string.copy();
                 }
 
                 //////////////////////////////////////////////
                 // get postString
-                line->postString = sfz2pn(sourceString);
+                line->postString = sourceString.copy();
 
                 line->value = MiniComputerGetStatusValue(count);
                 MiniComputerMakeStatusString(count, line->string);

@@ -31,7 +31,6 @@
 #include "data/pn.hpp"
 #include "game/sys.hpp"
 
-using sfz::CString;
 using sfz::ReadSource;
 using sfz::range;
 using sfz::read;
