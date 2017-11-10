@@ -291,24 +291,6 @@ union argumentType {
     AssumeInitial assumeInitial;
 };
 
-void read_from(sfz::ReadSource in, argumentType::CreateObject& argument);
-void read_from(sfz::ReadSource in, argumentType::PlaySound& argument);
-void read_from(sfz::ReadSource in, argumentType::AlterSimple& argument);
-void read_from(sfz::ReadSource in, argumentType::AlterWeapon& argument);
-void read_from(sfz::ReadSource in, argumentType::MakeSparks& argument);
-void read_from(sfz::ReadSource in, argumentType::ReleaseEnergy& argument);
-void read_from(sfz::ReadSource in, argumentType::LandAt& argument);
-void read_from(sfz::ReadSource in, argumentType::EnterWarp& argument);
-void read_from(sfz::ReadSource in, argumentType::DisplayMessage& argument);
-void read_from(sfz::ReadSource in, argumentType::ChangeScore& argument);
-void read_from(sfz::ReadSource in, argumentType::DeclareWinner& argument);
-void read_from(sfz::ReadSource in, argumentType::KillObject& argument);
-void read_from(sfz::ReadSource in, argumentType::ColorFlash& argument);
-void read_from(sfz::ReadSource in, argumentType::Keys& argument);
-void read_from(sfz::ReadSource in, argumentType::Zoom& argument);
-void read_from(sfz::ReadSource in, argumentType::ComputerSelect& argument);
-void read_from(sfz::ReadSource in, argumentType::AssumeInitial& argument);
-
 struct Action {
     static Action* get(int number);
 
@@ -328,7 +310,7 @@ struct Action {
 
     static const size_t byte_size = 48;
 };
-void read_from(sfz::ReadSource in, Action& action);
+bool read_from(pn::file_view in, Action* action);
 
 }  // namespace antares
 

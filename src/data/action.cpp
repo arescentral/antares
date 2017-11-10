@@ -22,251 +22,299 @@
 
 #include "data/base-object.hpp"
 
-using sfz::ReadSource;
 using sfz::read;
 
 namespace antares {
 
-void read_from(ReadSource in, Action& action) {
+namespace {
+
+bool read_from(pn::file_view in, argumentType::CreateObject* argument) {
+    int32_t base_type;
+    if (!in.read(
+                &base_type, &argument->howManyMinimum, &argument->howManyRange,
+                &argument->velocityRelative, &argument->directionRelative,
+                &argument->randomDistance)) {
+        return false;
+    }
+    argument->whichBaseType = Handle<BaseObject>(base_type);
+    return true;
+}
+
+bool read_from(pn::file_view in, argumentType::PlaySound* argument) {
+    uint8_t unused1, unused2;
+    int32_t persistence;
+    if (!in.read(
+                &argument->priority, &unused1, &persistence, &argument->absolute, &unused2,
+                &argument->volumeMinimum, &argument->volumeRange, &argument->idMinimum,
+                &argument->idRange)) {
+        return false;
+    }
+    argument->persistence = ticks(persistence);
+    return true;
+}
+
+bool read_from(pn::file_view in, argumentType::AlterSimple* argument) {
+    uint8_t unused;
+    return in.read(&unused, &argument->amount);
+}
+
+bool read_from(pn::file_view in, argumentType::AlterWeapon* argument) {
+    uint8_t unused;
+    int32_t base;
+    if (!in.read(&unused, &base)) {
+        return false;
+    }
+    argument->base = Handle<BaseObject>(base);
+    return true;
+}
+
+bool read_from(pn::file_view in, argumentType::AlterAbsoluteLocation* argument) {
+    return in.read(&argument->relative) && read_from(in, &argument->at);
+}
+
+bool read_from(pn::file_view in, argumentType::AlterHidden* argument) {
+    uint8_t unused;
+    return in.read(&unused, &argument->first, &argument->count_minus_1);
+}
+
+bool read_from(pn::file_view in, argumentType::AlterFixedRange* argument) {
+    uint8_t unused;
+    return in.read(&unused) && read_from(in, &argument->minimum) &&
+           read_from(in, &argument->range);
+}
+
+bool read_from(pn::file_view in, argumentType::AlterVelocity* argument) {
+    return in.read(&argument->relative) && read_from(in, &argument->amount);
+}
+
+bool read_from(pn::file_view in, argumentType::AlterMaxVelocity* argument) {
+    uint8_t unused;
+    return in.read(&unused) && read_from(in, &argument->amount);
+}
+
+bool read_from(pn::file_view in, argumentType::AlterThrust* argument) {
+    return in.read(&argument->relative) && read_from(in, &argument->minimum) &&
+           read_from(in, &argument->range);
+}
+
+bool read_from(pn::file_view in, argumentType::AlterBaseType* argument) {
+    int32_t base;
+    if (!in.read(&argument->keep_ammo, &base)) {
+        return false;
+    }
+    argument->base = Handle<BaseObject>(base);
+    return true;
+}
+
+bool read_from(pn::file_view in, argumentType::AlterOwner* argument) {
+    uint32_t admiral;
+    if (!in.read(&argument->relative, &admiral)) {
+        return false;
+    }
+    argument->admiral = Handle<Admiral>(admiral);
+    return true;
+}
+
+bool read_from(pn::file_view in, argumentType::AlterConditionTrueYet* argument) {
+    return in.read(&argument->true_yet, &argument->first, &argument->count_minus_1);
+}
+
+bool read_from(pn::file_view in, argumentType::AlterCash* argument) {
+    uint32_t admiral;
+    if (!(in.read(&argument->relative) && read_from(in, &argument->amount) && in.read(&admiral))) {
+        return false;
+    }
+    argument->admiral = Handle<Admiral>(admiral);
+    return true;
+}
+
+bool read_from(pn::file_view in, argumentType::AlterAge* argument) {
+    int32_t minimum, range;
+    if (!in.read(&argument->relative, &minimum, &range)) {
+        return false;
+    }
+    argument->minimum = ticks(minimum);
+    argument->range   = ticks(range);
+    return true;
+}
+
+bool read_from(pn::file_view in, argumentType::AlterLocation* argument) {
+    return in.read(&argument->relative, &argument->by);
+}
+
+bool read_from(pn::file_view in, argumentType::MakeSparks* argument) {
+    return in.read(&argument->howMany, &argument->speed) &&
+           read_from(in, &argument->velocityRange) && in.read(&argument->color);
+}
+
+bool read_from(pn::file_view in, argumentType::ReleaseEnergy* argument) {
+    return read_from(in, &argument->percent);
+}
+
+bool read_from(pn::file_view in, argumentType::LandAt* argument) {
+    return in.read(&argument->landingSpeed);
+}
+
+bool read_from(pn::file_view in, argumentType::EnterWarp* argument) {
+    return read_from(in, &argument->warpSpeed);
+}
+
+bool read_from(pn::file_view in, argumentType::DisplayMessage* argument) {
+    return in.read(&argument->resID, &argument->pageNum);
+}
+
+bool read_from(pn::file_view in, argumentType::ChangeScore* argument) {
+    int32_t admiral;
+    if (!in.read(&admiral, &argument->whichScore, &argument->amount)) {
+        return false;
+    }
+    argument->whichPlayer = Handle<Admiral>(admiral);
+    return true;
+}
+
+bool read_from(pn::file_view in, argumentType::DeclareWinner* argument) {
+    int32_t admiral;
+    if (!in.read(&admiral, &argument->nextLevel, &argument->textID)) {
+        return false;
+    }
+    argument->whichPlayer = Handle<Admiral>(admiral);
+    return true;
+}
+
+bool read_from(pn::file_view in, argumentType::KillObject* argument) {
+    return in.read(&argument->dieType);
+}
+
+bool read_from(pn::file_view in, argumentType::ColorFlash* argument) {
+    return in.read(&argument->length, &argument->color, &argument->shade);
+}
+
+bool read_from(pn::file_view in, argumentType::Keys* argument) {
+    return in.read(&argument->keyMask);
+}
+
+bool read_from(pn::file_view in, argumentType::Zoom* argument) {
+    return in.read(&argument->zoomLevel);
+}
+
+bool read_from(pn::file_view in, argumentType::ComputerSelect* argument) {
+    return in.read(&argument->screenNumber, &argument->lineNumber);
+}
+
+bool read_from(pn::file_view in, argumentType::AssumeInitial* argument) {
+    return in.read(&argument->whichInitialObject);
+}
+
+}  // namespace
+
+bool read_from(pn::file_view in, Action* action) {
     uint8_t section[24];
 
-    action.verb = read<uint8_t>(in) << 8;
-
-    read(in, action.reflexive);
-    read(in, action.inclusiveFilter);
-    read(in, action.exclusiveFilter);
-    if (action.exclusiveFilter == 0xffffffff) {
-        action.levelKeyTag = (action.inclusiveFilter & kLevelKeyTag) >> kLevelKeyTagShift;
-    } else {
-        action.levelKeyTag = 0;
+    uint8_t verb;
+    if (!in.read(&verb)) {
+        return false;
     }
-    read(in, action.owner);
-    action.delay = ticks(read<uint32_t>(in));
-    read(in, action.initialSubjectOverride);
-    read(in, action.initialDirectOverride);
-    in.shift(4);
-    read(in, section, 24);
+    action->verb = verb << 8;
 
-    sfz::BytesSlice sub(sfz::BytesSlice(section, 24));
-    switch (action.verb) {
+    if (!in.read(&action->reflexive, &action->inclusiveFilter, &action->exclusiveFilter)) {
+        return false;
+    }
+    if (action->exclusiveFilter == 0xffffffff) {
+        action->levelKeyTag = (action->inclusiveFilter & kLevelKeyTag) >> kLevelKeyTagShift;
+    } else {
+        action->levelKeyTag = 0;
+    }
+    uint32_t delay;
+    if (!in.read(
+                &action->owner, &delay, &action->initialSubjectOverride,
+                &action->initialDirectOverride)) {
+        return false;
+    }
+    action->delay = ticks(delay);
+    char ignore[4];
+    if (fread(ignore, 1, 4, in.c_obj()) < 4) {
+        return false;
+    }
+    if (fread(section, 1, 24, in.c_obj()) < 24) {
+        return false;
+    }
+
+    pn::file sub = pn::data_view{section, 24}.open();
+    switch (action->verb) {
         case kNoAction:
         case kSetDestination:
         case kActivateSpecial:
         case kActivatePulse:
         case kActivateBeam:
-        case kNilTarget: break;
+        case kNilTarget: return true;
 
         case kCreateObject:
-        case kCreateObjectSetDest: read(sub, action.argument.createObject); break;
+        case kCreateObjectSetDest: return read_from(sub, &action->argument.createObject);
 
-        case kPlaySound: read(sub, action.argument.playSound); break;
+        case kPlaySound: return read_from(sub, &action->argument.playSound);
 
-        case kAlter:
-            action.verb |= read<uint8_t>(sub);
-            switch (action.verb) {
-                case kAlterDamage: read(sub, action.argument.alterDamage); break;
-                case kAlterEnergy: read(sub, action.argument.alterEnergy); break;
-                case kAlterHidden: read(sub, action.argument.alterHidden); break;
-                case kAlterSpin: read(sub, action.argument.alterSpin); break;
-                case kAlterOffline: read(sub, action.argument.alterOffline); break;
-                case kAlterVelocity: read(sub, action.argument.alterVelocity); break;
-                case kAlterMaxVelocity: read(sub, action.argument.alterMaxVelocity); break;
-                case kAlterThrust: read(sub, action.argument.alterThrust); break;
-                case kAlterBaseType: read(sub, action.argument.alterBaseType); break;
-                case kAlterOwner: read(sub, action.argument.alterOwner); break;
+        case kAlter: {
+            uint8_t alter;
+            if (!sub.read(&alter)) {
+                return false;
+            }
+            action->verb |= alter;
+            switch (action->verb) {
+                case kAlterDamage: return read_from(sub, &action->argument.alterDamage);
+                case kAlterEnergy: return read_from(sub, &action->argument.alterEnergy);
+                case kAlterHidden: return read_from(sub, &action->argument.alterHidden);
+                case kAlterSpin: return read_from(sub, &action->argument.alterSpin);
+                case kAlterOffline: return read_from(sub, &action->argument.alterOffline);
+                case kAlterVelocity: return read_from(sub, &action->argument.alterVelocity);
+                case kAlterMaxVelocity: return read_from(sub, &action->argument.alterMaxVelocity);
+                case kAlterThrust: return read_from(sub, &action->argument.alterThrust);
+                case kAlterBaseType: return read_from(sub, &action->argument.alterBaseType);
+                case kAlterOwner: return read_from(sub, &action->argument.alterOwner);
                 case kAlterConditionTrueYet:
-                    read(sub, action.argument.alterConditionTrueYet);
-                    break;
-                case kAlterOccupation: read(sub, action.argument.alterOccupation); break;
-                case kAlterAbsoluteCash: read(sub, action.argument.alterAbsoluteCash); break;
-                case kAlterAge: read(sub, action.argument.alterAge); break;
-                case kAlterLocation: read(sub, action.argument.alterLocation); break;
+                    return read_from(sub, &action->argument.alterConditionTrueYet);
+                case kAlterOccupation: return read_from(sub, &action->argument.alterOccupation);
+                case kAlterAbsoluteCash:
+                    return read_from(sub, &action->argument.alterAbsoluteCash);
+                case kAlterAge: return read_from(sub, &action->argument.alterAge);
+                case kAlterLocation: return read_from(sub, &action->argument.alterLocation);
                 case kAlterAbsoluteLocation:
-                    read(sub, action.argument.alterAbsoluteLocation);
-                    break;
+                    return read_from(sub, &action->argument.alterAbsoluteLocation);
                 case kAlterWeapon1:
                 case kAlterWeapon2:
-                case kAlterSpecial: read(sub, action.argument.alterWeapon); break;
+                case kAlterSpecial: return read_from(sub, &action->argument.alterWeapon);
+                default: return true;
             }
-            break;
+        }
 
-        case kMakeSparks: read(sub, action.argument.makeSparks); break;
+        case kMakeSparks: return read_from(sub, &action->argument.makeSparks);
 
-        case kReleaseEnergy: read(sub, action.argument.releaseEnergy); break;
+        case kReleaseEnergy: return read_from(sub, &action->argument.releaseEnergy);
 
-        case kLandAt: read(sub, action.argument.landAt); break;
+        case kLandAt: return read_from(sub, &action->argument.landAt);
 
-        case kEnterWarp: read(sub, action.argument.enterWarp); break;
+        case kEnterWarp: return read_from(sub, &action->argument.enterWarp);
 
-        case kDisplayMessage: read(sub, action.argument.displayMessage); break;
+        case kDisplayMessage: return read_from(sub, &action->argument.displayMessage);
 
-        case kChangeScore: read(sub, action.argument.changeScore); break;
+        case kChangeScore: return read_from(sub, &action->argument.changeScore);
 
-        case kDeclareWinner: read(sub, action.argument.declareWinner); break;
+        case kDeclareWinner: return read_from(sub, &action->argument.declareWinner);
 
-        case kDie: read(sub, action.argument.killObject); break;
+        case kDie: return read_from(sub, &action->argument.killObject);
 
-        case kColorFlash: read(sub, action.argument.colorFlash); break;
+        case kColorFlash: return read_from(sub, &action->argument.colorFlash);
 
         case kDisableKeys:
-        case kEnableKeys: read(sub, action.argument.keys); break;
+        case kEnableKeys: return read_from(sub, &action->argument.keys);
 
-        case kSetZoom: read(sub, action.argument.zoom); break;
+        case kSetZoom: return read_from(sub, &action->argument.zoom);
 
-        case kComputerSelect: read(sub, action.argument.computerSelect); break;
+        case kComputerSelect: return read_from(sub, &action->argument.computerSelect);
 
-        case kAssumeInitialObject: read(sub, action.argument.assumeInitial); break;
+        case kAssumeInitialObject: return read_from(sub, &action->argument.assumeInitial);
+
+        default: return true;
     }
-}
-
-void read_from(ReadSource in, argumentType::CreateObject& argument) {
-    argument.whichBaseType = Handle<BaseObject>(read<int32_t>(in));
-    read(in, argument.howManyMinimum);
-    read(in, argument.howManyRange);
-    read(in, argument.velocityRelative);
-    read(in, argument.directionRelative);
-    read(in, argument.randomDistance);
-}
-
-void read_from(ReadSource in, argumentType::PlaySound& argument) {
-    read(in, argument.priority);
-    in.shift(1);
-    argument.persistence = ticks(read<int32_t>(in));
-    read(in, argument.absolute);
-    in.shift(1);
-    read(in, argument.volumeMinimum);
-    read(in, argument.volumeRange);
-    read(in, argument.idMinimum);
-    read(in, argument.idRange);
-}
-
-void read_from(ReadSource in, argumentType::AlterHidden& argument) {
-    in.shift(1);
-    read(in, argument.first);
-    read(in, argument.count_minus_1);
-}
-
-void read_from(ReadSource in, argumentType::AlterConditionTrueYet& argument) {
-    argument.true_yet = read<uint8_t>(in);
-    read(in, argument.first);
-    read(in, argument.count_minus_1);
-}
-
-void read_from(ReadSource in, argumentType::AlterSimple& argument) {
-    in.shift(1);
-    read(in, argument.amount);
-}
-
-void read_from(ReadSource in, argumentType::AlterWeapon& argument) {
-    in.shift(1);
-    argument.base = Handle<BaseObject>(read<int32_t>(in));
-}
-
-void read_from(ReadSource in, argumentType::AlterFixedRange& argument) {
-    in.shift(1);
-    read(in, argument.minimum);
-    read(in, argument.range);
-}
-
-void read_from(ReadSource in, argumentType::AlterAge& argument) {
-    argument.relative = read<uint8_t>(in);
-    argument.minimum  = ticks(read<int32_t>(in));
-    argument.range    = ticks(read<int32_t>(in));
-}
-
-void read_from(ReadSource in, argumentType::AlterThrust& argument) {
-    argument.relative = read<uint8_t>(in);
-    read(in, argument.minimum);
-    read(in, argument.range);
-}
-
-void read_from(ReadSource in, argumentType::AlterMaxVelocity& argument) {
-    in.shift(1);
-    read(in, argument.amount);
-}
-
-void read_from(ReadSource in, argumentType::AlterOwner& argument) {
-    read(in, argument.relative);
-    argument.admiral = Handle<Admiral>(read<uint32_t>(in));
-}
-
-void read_from(ReadSource in, argumentType::AlterCash& argument) {
-    read(in, argument.relative);
-    read(in, argument.amount);
-    argument.admiral = Handle<Admiral>(read<uint32_t>(in));
-}
-
-void read_from(ReadSource in, argumentType::AlterVelocity& argument) {
-    read(in, argument.relative);
-    read(in, argument.amount);
-}
-
-void read_from(ReadSource in, argumentType::AlterBaseType& argument) {
-    argument.keep_ammo = read<uint8_t>(in);
-    argument.base      = Handle<BaseObject>(read<int32_t>(in));
-}
-
-void read_from(ReadSource in, argumentType::AlterLocation& argument) {
-    argument.relative = read<uint8_t>(in);
-    read(in, argument.by);
-}
-
-void read_from(ReadSource in, argumentType::AlterAbsoluteLocation& argument) {
-    argument.relative = read<uint8_t>(in);
-    read(in, argument.at);
-}
-
-void read_from(ReadSource in, argumentType::MakeSparks& argument) {
-    read(in, argument.howMany);
-    read(in, argument.speed);
-    read(in, argument.velocityRange);
-    read(in, argument.color);
-}
-
-void read_from(ReadSource in, argumentType::ReleaseEnergy& argument) {
-    read(in, argument.percent);
-}
-
-void read_from(ReadSource in, argumentType::LandAt& argument) { read(in, argument.landingSpeed); }
-
-void read_from(ReadSource in, argumentType::EnterWarp& argument) { read(in, argument.warpSpeed); }
-
-void read_from(ReadSource in, argumentType::DisplayMessage& argument) {
-    read(in, argument.resID);
-    read(in, argument.pageNum);
-}
-
-void read_from(ReadSource in, argumentType::ChangeScore& argument) {
-    argument.whichPlayer = Handle<Admiral>(read<int32_t>(in));
-    read(in, argument.whichScore);
-    read(in, argument.amount);
-}
-
-void read_from(ReadSource in, argumentType::DeclareWinner& argument) {
-    argument.whichPlayer = Handle<Admiral>(read<int32_t>(in));
-    read(in, argument.nextLevel);
-    read(in, argument.textID);
-}
-
-void read_from(ReadSource in, argumentType::KillObject& argument) { read(in, argument.dieType); }
-
-void read_from(ReadSource in, argumentType::ColorFlash& argument) {
-    read(in, argument.length);
-    read(in, argument.color);
-    read(in, argument.shade);
-}
-
-void read_from(ReadSource in, argumentType::Keys& argument) { read(in, argument.keyMask); }
-
-void read_from(ReadSource in, argumentType::Zoom& argument) { read(in, argument.zoomLevel); }
-
-void read_from(ReadSource in, argumentType::ComputerSelect& argument) {
-    read(in, argument.screenNumber);
-    read(in, argument.lineNumber);
-}
-
-void read_from(ReadSource in, argumentType::AssumeInitial& argument) {
-    read(in, argument.whichInitialObject);
 }
 
 }  // namespace antares

@@ -54,6 +54,24 @@ static void read_all(
     }
 }
 
+template <typename T>
+static void read_all_pn(
+        pn::string_view name, pn::string_view type, pn::string_view extension, vector<T>& v) {
+    Resource rsrc(type, extension, kPackedResID);
+    size_t   count = rsrc.data().size() / T::byte_size;
+    v.resize(count);
+    pn::file in = rsrc.data().open();
+    for (size_t i = 0; i < count; ++i) {
+        if (!read_from(in, &v[i])) {
+            throw std::runtime_error(pn::format("error while reading {0} data", name).c_str());
+        }
+    }
+
+    if (fgetc(in.c_obj()) != EOF) {
+        throw std::runtime_error(pn::format("incorrectly-sized {0} data", name).c_str());
+    }
+}
+
 void PluginInit() {
     {
         Resource        rsrc("scenario-info", "nlAG", 128);
@@ -69,7 +87,7 @@ void PluginInit() {
     read_all("conditions", "scenario-conditions", "sncd", plug.conditions);
     read_all("briefings", "scenario-briefing-points", "snbf", plug.briefings);
     read_all("objects", "objects", "bsob", plug.objects);
-    read_all("actions", "object-actions", "obac", plug.actions);
+    read_all_pn("actions", "object-actions", "obac", plug.actions);
     read_all("races", "races", "race", plug.races);
 
     StringList level_names(kLevelNameID);

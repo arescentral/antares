@@ -20,6 +20,7 @@
 #define ANTARES_MATH_FIXED_HPP_
 
 #include <math.h>
+#include <pn/file>
 #include <pn/string>
 #include <sfz/sfz.hpp>
 
@@ -76,6 +77,15 @@ inline Fixed operator-(Fixed x) { return Fixed::from_val(-x.val()); }
 
 inline void read_from(sfz::ReadSource in, Fixed& f) {
     f = Fixed::from_val(sfz::read<int32_t>(in));
+}
+
+inline bool read_from(pn::file_view in, Fixed* f) {
+    int32_t i32;
+    if (!in.read(&i32)) {
+        return false;
+    }
+    *f = Fixed::from_val(i32);
+    return true;
 }
 
 static const Fixed kFixedNone = Fixed::from_val(-1);

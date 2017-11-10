@@ -20,6 +20,7 @@
 #define ANTARES_MATH_GEOMETRY_HPP_
 
 #include <stdint.h>
+#include <pn/file>
 #include <pn/string>
 #include <sfz/sfz.hpp>
 
@@ -55,6 +56,7 @@ bool operator==(const Point& lhs, const Point& rhs);
 bool operator!=(const Point& lhs, const Point& rhs);
 
 void read_from(sfz::ReadSource in, Point& p);
+bool read_from(pn::file_view in, Point* p);
 
 // A size (width, height) in two-dimensional space.
 struct Size {
@@ -186,6 +188,7 @@ struct Rect {
 };
 
 void       read_from(sfz::ReadSource in, Rect& r);
+bool       read_from(pn::file_view in, Rect* r);
 pn::string stringify(Rect r);
 
 struct coordPointType {

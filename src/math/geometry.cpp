@@ -54,6 +54,8 @@ void read_from(ReadSource in, Point& p) {
     read(in, p.v);
 }
 
+bool read_from(pn::file_view in, Point* p) { return in.read(&p->h, &p->v); }
+
 Size::Size() : width(0), height(0) {}
 
 Size::Size(int32_t width, int32_t height) : width(width), height(height) {}
@@ -137,6 +139,10 @@ void read_from(ReadSource in, Rect& r) {
     read(in, r.top);
     read(in, r.right);
     read(in, r.bottom);
+}
+
+bool read_from(pn::file_view in, Rect* r) {
+    return in.read(&r->left, &r->top, &r->right, &r->bottom);
 }
 
 pn::string stringify(Rect r) {
