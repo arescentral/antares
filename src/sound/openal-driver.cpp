@@ -55,7 +55,7 @@ void check_al_error(pn::string_view method) {
 
 class ModPlugFile {
   public:
-    ModPlugFile(sfz::BytesSlice data) {
+    ModPlugFile(pn::data_view data) {
         ModPlug_Settings settings;
         ModPlug_GetSettings(&settings);
         settings.mFlags          = MODPLUG_ENABLE_OVERSAMPLING;
@@ -75,14 +75,14 @@ class ModPlugFile {
         }
     }
 
-    void convert(sfz::Bytes& data, ALenum& format, ALsizei& frequency) const {
+    void convert(pn::data_ref data, ALenum& format, ALsizei& frequency) const {
         format    = AL_FORMAT_STEREO16;
         frequency = 44100;
         uint8_t buffer[1024];
         ssize_t read;
         do {
             read = ModPlug_Read(file, buffer, 1024);
-            data.push(sfz::BytesSlice(buffer, read));
+            data += pn::data_view(buffer, read);
         } while (read > 0);
     }
 
@@ -106,9 +106,9 @@ class OpenAlSoundDriver::OpenAlSound : public Sound {
 
     template <typename T>
     void buffer(const T& file) {
-        sfz::Bytes data;
-        ALenum     format;
-        ALsizei    frequency;
+        pn::data data;
+        ALenum   format;
+        ALsizei  frequency;
         file.convert(data, format, frequency);
         alBufferData(_buffer, format, data.data(), data.size(), frequency);
         check_al_error("alBufferData");
@@ -203,7 +203,7 @@ unique_ptr<SoundChannel> OpenAlSoundDriver::open_channel() {
 }
 
 template <typename T>
-void OpenAlSoundDriver::read_sound(sfz::BytesSlice data, OpenAlSound& sound) {
+void OpenAlSoundDriver::read_sound(pn::data_view data, OpenAlSound& sound) {
     T file(data);
     sound.buffer(file);
 }
@@ -211,7 +211,7 @@ void OpenAlSoundDriver::read_sound(sfz::BytesSlice data, OpenAlSound& sound) {
 unique_ptr<Sound> OpenAlSoundDriver::open_sound(pn::string_view path) {
     static const struct {
         const char ext[6];
-        void (*fn)(sfz::BytesSlice, OpenAlSound&);
+        void (*fn)(pn::data_view, OpenAlSound&);
     } fmts[] = {
             {".aiff", read_sound<Sndfile>},
             {".s3m", read_sound<ModPlugFile>},
@@ -222,7 +222,8 @@ unique_ptr<Sound> OpenAlSoundDriver::open_sound(pn::string_view path) {
     for (const auto& fmt : fmts) {
         try {
             Resource rsrc(pn::format("{0}{1}", path, fmt.ext));
-            fmt.fn(rsrc.data(), *sound);
+            fmt.fn(pn::data_view{rsrc.data().data(), static_cast<int>(rsrc.data().size())},
+                   *sound);
             return std::move(sound);
         } catch (std::exception& e) {
             continue;

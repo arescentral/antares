@@ -24,13 +24,13 @@
 
 namespace antares {
 
-Sndfile::Sndfile(const sfz::BytesSlice& data) : _data(data) {}
+Sndfile::Sndfile(pn::data_view data) : _data(data) {}
 
 namespace {
 
 struct VirtualFile {
-    sfz::BytesSlice data;
-    size_t          pointer;
+    pn::data_view data;
+    size_t        pointer;
 
     sf_count_t get_filelen() { return data.size(); }
 
@@ -101,7 +101,7 @@ sf_count_t sf_vio_tell(void* user_data) {
     return reinterpret_cast<VirtualFile*>(user_data)->tell();
 }
 
-void Sndfile::convert(sfz::Bytes& data, ALenum& format, ALsizei& frequency) const {
+void Sndfile::convert(pn::data_ref data, ALenum& format, ALsizei& frequency) const {
     SF_VIRTUAL_IO io = {
             .get_filelen = sf_vio_get_filelen,
             .seek        = sf_vio_seek,
@@ -131,8 +131,8 @@ void Sndfile::convert(sfz::Bytes& data, ALenum& format, ALsizei& frequency) cons
 
     int16_t shorts[1024];
     while (auto count = sf_read_short(file.get(), shorts, 1024)) {
-        sfz::BytesSlice bytes(reinterpret_cast<uint8_t*>(shorts), sizeof(int16_t) * count);
-        data.push(bytes);
+        data += pn::data_view{reinterpret_cast<uint8_t*>(shorts),
+                              static_cast<int>(sizeof(int16_t) * count)};
     }
 }
 

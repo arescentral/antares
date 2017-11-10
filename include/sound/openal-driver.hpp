@@ -47,7 +47,7 @@ class OpenAlSoundDriver : public SoundDriver {
     class OpenAlSound;
 
     template <typename T>
-    static void read_sound(sfz::BytesSlice data, OpenAlSound& sound);
+    static void read_sound(pn::data_view data, OpenAlSound& sound);
 
     ALCcontext*    _context;
     ALCdevice*     _device;

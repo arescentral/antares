@@ -49,7 +49,7 @@ class ExtAudioFile {
 
     ~ExtAudioFile() { ExtAudioFileDispose(_id); }
 
-    void convert(sfz::Bytes& data, ALenum& format, ALsizei& frequency);
+    void convert(pn::data_ref data, ALenum& format, ALsizei& frequency);
 
     ExtAudioFileRef id() const { return _id; }
 
@@ -61,7 +61,7 @@ class ExtAudioFile {
 
 }  // namespace
 
-AudioFile::AudioFile(const sfz::BytesSlice& data) : _data(data) {
+AudioFile::AudioFile(pn::data_view data) : _data(data) {
     OSStatus err = AudioFileOpenWithCallbacks(
             this, read_proc, NULL, get_size_proc, NULL, kAudioFileAIFFType, &_id);
     check_os_err(err, "AudioFileOpenWithCallbacks");
@@ -69,12 +69,12 @@ AudioFile::AudioFile(const sfz::BytesSlice& data) : _data(data) {
 
 AudioFile::~AudioFile() { AudioFileClose(_id); }
 
-void AudioFile::convert(sfz::Bytes& data, ALenum& format, ALsizei& frequency) const {
+void AudioFile::convert(pn::data_ref data, ALenum& format, ALsizei& frequency) const {
     ExtAudioFile ext(*this);
     ext.convert(data, format, frequency);
 }
 
-void ExtAudioFile::convert(sfz::Bytes& data, ALenum& format, ALsizei& frequency) {
+void ExtAudioFile::convert(pn::data_ref data, ALenum& format, ALsizei& frequency) {
     OSStatus err;
 
     // Read in the original file format.
