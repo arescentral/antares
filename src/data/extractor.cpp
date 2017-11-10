@@ -47,7 +47,6 @@ using rezin::aiff;
 using sfz::Bytes;
 using sfz::BytesSlice;
 using sfz::Exception;
-using sfz::Json;
 using sfz::MappedFile;
 using sfz::ScopedFd;
 using sfz::Sha1;
@@ -216,20 +215,20 @@ void convert_overlay(pn::string_view dir, int16_t id, BytesSlice data, PixMap::V
     }
 }
 
-static Json json(const Rect& r) {
-    StringMap<Json> json;
-    json["left"]   = Json::number(r.left);
-    json["top"]    = Json::number(r.top);
-    json["right"]  = Json::number(r.right);
-    json["bottom"] = Json::number(r.bottom);
-    return Json::object(json);
+static pn::map pn_rect(const Rect& r) {
+    pn::map x;
+    x["left"]   = r.left;
+    x["top"]    = r.top;
+    x["right"]  = r.right;
+    x["bottom"] = r.bottom;
+    return x;
 }
 
-static Json json(const Point& p) {
-    StringMap<Json> json;
-    json["x"] = Json::number(p.h);
-    json["y"] = Json::number(p.v);
-    return Json::object(json);
+static pn::map pn_point(const Point& p) {
+    pn::map x;
+    x["x"] = p.h;
+    x["y"] = p.v;
+    return x;
 }
 
 void alphatize(ArrayPixMap& image) {
@@ -274,8 +273,7 @@ bool convert_smiv(
     vector<uint32_t> offsets;
     vector<Rect>     bounds;
 
-    StringMap<Json> object;
-    vector<Json>    frames;
+    pn::array frames;
     for (auto i : range(size)) {
         static_cast<void>(i);
         uint32_t   offset     = read<uint32_t>(header);
@@ -287,9 +285,8 @@ bool convert_smiv(
         offsets.push_back(offset);
         bounds.emplace_back(Point(x_offset, y_offset), Size(width, height));
 
-        frames.push_back(json(bounds.back()));
+        frames.push_back(pn_rect(bounds.back()));
     }
-    object["frames"] = Json::array(frames);
 
     Rect max_bounds = bounds[0];
     for (const auto& rect : bounds) {
@@ -298,7 +295,6 @@ bool convert_smiv(
         max_bounds.right  = std::max(max_bounds.right, rect.right);
         max_bounds.bottom = std::max(max_bounds.bottom, rect.bottom);
     }
-    object["center"] = json(Point(-max_bounds.left, -max_bounds.top));
 
     // Do our best to find a square layout of all the frames.  In the
     // event of a prime number of frames, we'll end up with one row and
@@ -313,8 +309,6 @@ bool convert_smiv(
             --rows;
         }
     }
-    object["rows"] = Json::number(rows);
-    object["cols"] = Json::number(cols);
 
     ArrayPixMap image(max_bounds.width() * cols, max_bounds.height() * rows);
     ArrayPixMap overlay(max_bounds.width() * cols, max_bounds.height() * rows);
@@ -324,8 +318,8 @@ bool convert_smiv(
         int col = i % cols;
         int row = i / cols;
 
-        StringMap<Json> frame;
-        BytesSlice      frame_data = data.slice(offsets[i]);
+        pn::map    frame;
+        BytesSlice frame_data = data.slice(offsets[i]);
         frame_data.shift(8);
         Rect r = bounds[i];
         r.offset(max_bounds.width() * col, max_bounds.height() * row);
@@ -350,17 +344,21 @@ bool convert_smiv(
         String   output(format("{0}/{1}/image.png", pn2sfz(dir), id));
         ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
         write(fd, Bytes(image));
-        object["image"] = Json::string(format("sprites/{0}/image.png", id));
     }
 
     {
         String   output(format("{0}/{1}/overlay.png", pn2sfz(dir), id));
         ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
         write(fd, Bytes(overlay));
-        object["overlay"] = Json::string(format("sprites/{0}/overlay.png", id));
     }
 
-    String string(pretty_print(Json::object(object)));
+    String string(
+            pn2sfz(pn::dump(pn::map{{"image", sfz2pn(format("sprites/{0}/image.png", id))},
+                                    {"overlay", sfz2pn(format("sprites/{0}/overlay.png", id))},
+                                    {"rows", rows},
+                                    {"cols", cols},
+                                    {"center", pn_point(Point(-max_bounds.left, -max_bounds.top))},
+                                    {"frames", std::move(frames)}})));
     write(out, utf8::encode(string));
     return true;
 }
@@ -402,7 +400,7 @@ static const ResourceFile kResourceFiles[] = {
         {
                 "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Sprites",
                 {
-                        {"SMIV", "sprites", "json", convert_smiv},
+                        {"SMIV", "sprites", "pn", convert_smiv},
                 },
         },
         {
@@ -416,7 +414,7 @@ static const ResourceFile kResourceFiles[] = {
 static const ResourceFile::ExtractedResource kPluginFiles[] = {
         {"PICT", "pictures", "png", convert_pict},
         {"NLRP", "replays", "NLRP", convert_nlrp},
-        {"SMIV", "sprites", "json", convert_smiv},
+        {"SMIV", "sprites", "pn", convert_smiv},
         {"STR#", "strings", "pn", convert_str},
         {"TEXT", "text", "txt", convert_text},
         {"bsob", "objects", "bsob", verbatim},
@@ -431,7 +429,7 @@ static const ResourceFile::ExtractedResource kPluginFiles[] = {
 };
 
 static const char kDownloadBase[] = "http://downloads.arescentral.org";
-static const char kVersion[]      = "15\n";
+static const char kVersion[]      = "16\n";
 
 static const char kPluginVersionFile[]    = "data/version";
 static const char kPluginVersion[]        = "1\n";
