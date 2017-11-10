@@ -30,7 +30,6 @@
 
 using sfz::BytesSlice;
 using sfz::Exception;
-using sfz::String;
 using sfz::format;
 using std::unique_ptr;
 using std::vector;

@@ -26,7 +26,6 @@
 #include "config/preferences.hpp"
 
 using sfz::Exception;
-using sfz::String;
 using sfz::format;
 using sfz::range;
 

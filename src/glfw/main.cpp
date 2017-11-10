@@ -32,7 +32,6 @@
 #include "sound/openal-driver.hpp"
 #include "ui/flows/master.hpp"
 
-using sfz::String;
 using sfz::args::store;
 using sfz::args::store_const;
 using sfz::range;
@@ -53,7 +52,7 @@ void main(int argc, const char* argv[]) {
     parser.add_argument("--app-data", store(sfz_app_data))
             .help(format("set path to application data (default: {0})", sfz_app_data));
 
-    String error;
+    sfz::String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
         print(io::err, format("{0}: {1}\n", parser.name(), error));
         exit(1);

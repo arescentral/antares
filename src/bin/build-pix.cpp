@@ -31,7 +31,6 @@
 
 using sfz::Optional;
 using sfz::ScopedFd;
-using sfz::String;
 using sfz::args::help;
 using sfz::args::store;
 using sfz::args::store_const;
@@ -71,14 +70,14 @@ class DrawPix : public Card {
 int main(int argc, char* const* argv) {
     args::Parser parser(argv[0], "Builds all of the scrolling text images in the game");
 
-    Optional<String> sfz_output_dir;
-    bool             text = false;
+    Optional<sfz::String> sfz_output_dir;
+    bool                  text = false;
     parser.add_argument("-o", "--output", store(sfz_output_dir))
             .help("place output in this directory");
     parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
     parser.add_argument("-t", "--text", store_const(text, true)).help("produce text output");
 
-    String error;
+    sfz::String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
         print(io::err, format("{0}: {1}\n", parser.name(), error));
         exit(1);

@@ -39,7 +39,6 @@
 #include "video/driver.hpp"
 
 using sfz::Exception;
-using sfz::String;
 using std::unique_ptr;
 
 namespace utf8 = sfz::utf8;
@@ -225,8 +224,8 @@ void Messages::start(int16_t startResID, int16_t endResID) {
 void Messages::clip(void)
 
 {
-    longMessageType*   tmessage;
-    unique_ptr<String> textData;
+    longMessageType*        tmessage;
+    unique_ptr<sfz::String> textData;
 
     tmessage = long_message_data;
     if ((tmessage->currentResID != tmessage->lastResID) || (tmessage->newStringMessage)) {
@@ -237,7 +236,7 @@ void Messages::clip(void)
         // draw in offscreen world
         if ((tmessage->currentResID >= 0) && (tmessage->stage == kClipStage)) {
             if (tmessage->currentResID == kStringMessageID) {
-                textData.reset(new String);
+                textData.reset(new sfz::String);
                 if (textData.get() != NULL) {
                     print(*textData, tmessage->stringMessage);
                 }
@@ -246,7 +245,7 @@ void Messages::clip(void)
                 Resource   rsrc("text", "txt", tmessage->currentResID);
                 pn::string text = sfz2pn(utf8::decode(rsrc.data()));
                 Replace_KeyCode_Strings_With_Actual_Key_Names(text, KEY_LONG_NAMES, 0);
-                textData.reset(new String(pn2sfz(text)));
+                textData.reset(new sfz::String(pn2sfz(text)));
                 if (textData->at(0) == '#') {
                     tmessage->labelMessage = true;
                 } else
@@ -513,7 +512,7 @@ void MessageLabel_Set_Special(Handle<Label> label, pn::string_view text) {
         ++it;
     }
 
-    String message;
+    sfz::String message;
     while (it != text.end()) {
         message.push(1, (*it).value());
         ++it;

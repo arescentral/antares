@@ -22,19 +22,15 @@
 #include <unistd.h>
 #include <pn/file>
 #include <sfz/sfz.hpp>
-
 #include "build/defs.hpp"
 #include "data/pn.hpp"
-
-using sfz::String;
-using sfz::format;
 
 namespace utf8 = sfz::utf8;
 
 namespace antares {
 
 pn::string default_application_path() {
-    return sfz2pn(format("{0}/share/games/antares/app", kAntaresPrefix));
+    return pn::format("{0}/share/games/antares/app", kAntaresPrefix);
 }
 
 Directories linux_dirs() {

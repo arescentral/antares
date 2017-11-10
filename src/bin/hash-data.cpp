@@ -18,7 +18,6 @@
 
 #include <sfz/sfz.hpp>
 
-using sfz::String;
 using sfz::format;
 using sfz::args::help;
 using sfz::args::store;
@@ -33,13 +32,13 @@ namespace antares {
 void main(int argc, char* const* argv) {
     args::Parser parser(argv[0], "Prints the tree digest of a directory");
 
-    String directory;
+    sfz::String directory;
     parser.add_argument("directory", store(directory))
             .help("the directory to take the digest of")
             .required();
     parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
 
-    String error;
+    sfz::String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
         print(io::err, format("{0}: {1}\n", parser.name(), error));
         exit(1);

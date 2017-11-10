@@ -20,6 +20,7 @@
 
 #include <glob.h>
 #include <string.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 #include "config/dirs.hpp"
 #include "data/level.hpp"
@@ -28,7 +29,6 @@
 using sfz::BytesSlice;
 using sfz::CString;
 using sfz::MappedFile;
-using sfz::String;
 using sfz::format;
 using sfz::read;
 using std::vector;
@@ -66,7 +66,7 @@ ScenarioList::ScenarioList() {
     Entry& factory_scenario     = _scenarios.back();
     factory_scenario.identifier = kFactoryScenarioIdentifier;
 
-    const String factory_path(format(
+    const sfz::String factory_path(format(
             "{0}/scenario-info/128.nlAG", pn2sfz(scenario_dir(kFactoryScenarioIdentifier))));
     if (sfz::path::isfile(factory_path)) {
         MappedFile       file(factory_path);
@@ -90,21 +90,20 @@ ScenarioList::ScenarioList() {
 
     ScopedGlob            g;
     const pn::string_view info("scenario-info/128.nlAG");
-    String                str(format("{0}/*/{1}", pn2sfz(dirs().scenarios), pn2sfz(info)));
-    CString               c_str(str);
-    glob(c_str.data(), 0, NULL, &g.data);
+    pn::string str = sfz2pn(format("{0}/*/{1}", pn2sfz(dirs().scenarios), pn2sfz(info)));
+    glob(str.c_str(), 0, NULL, &g.data);
 
-    size_t prefix_len = pn2sfz(dirs().scenarios).size() + 1;
+    size_t prefix_len = dirs().scenarios.size() + 1;
     size_t suffix_len = info.size() + 1;
     for (int i = 0; i < g.data.gl_pathc; ++i) {
-        const String path(utf8::decode(g.data.gl_pathv[i]));
-        pn::string   identifier =
-                sfz2pn(path.slice(prefix_len, path.size() - prefix_len - suffix_len));
+        const pn::string path = sfz2pn(utf8::decode(g.data.gl_pathv[i]));
+        pn::string_view  identifier =
+                path.substr(prefix_len, path.size() - prefix_len - suffix_len);
         if (identifier == _scenarios[0].identifier) {
             continue;
         }
 
-        MappedFile       file(path);
+        MappedFile       file(pn2sfz(path));
         BytesSlice       data(file.data());
         scenarioInfoType info;
         read(data, info);
@@ -125,15 +124,15 @@ size_t ScenarioList::size() const { return _scenarios.size(); }
 const ScenarioList::Entry& ScenarioList::at(size_t index) const { return _scenarios.at(index); }
 
 pn::string stringify(const Version& v) {
-    sfz::String out;
+    pn::string out;
     for (vector<int>::const_iterator begin = v.components.begin(), end = v.components.end();
          begin != end; ++begin) {
         if (begin != v.components.begin()) {
-            print(out, ".");
+            out += ".";
         }
-        print(out, *begin);
+        out += pn::dump(*begin, pn::dump_short);
     }
-    return sfz2pn(out);
+    return out;
 }
 
 }  // namespace antares

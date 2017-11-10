@@ -53,7 +53,6 @@
 
 using sfz::Exception;
 using sfz::BytesSlice;
-using sfz::String;
 using sfz::format;
 
 namespace macroman = sfz::macroman;

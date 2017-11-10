@@ -30,7 +30,6 @@
 
 using sfz::Bytes;
 using sfz::Exception;
-using sfz::String;
 using sfz::format;
 using std::unique_ptr;
 
@@ -166,7 +165,7 @@ void StyledText::set_interface_text(pn::string_view text) {
                 if ((sfz_text.at(i + 1) != 'P') && (sfz_text.at(i + 1) != 'p')) {
                     throw Exception(format("found bad inline pict code {0}", sfz_text.at(i)));
                 }
-                String id_string;
+                sfz::String id_string;
                 for (size_t j = i + 2; j < sfz_text.size(); ++j) {
                     if (sfz_text.at(j) == '^') {
                         inlinePictType inline_pict;
@@ -331,7 +330,7 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
             if (ch.special == NONE) {
                 _font->draw(
                         quads, Point(bounds.left + ch.h, bounds.top + ch.v + char_adjust),
-                        sfz2pn(String(1, ch.character)), ch.fore_color);
+                        sfz2pn(sfz::String(1, ch.character)), ch.fore_color);
             }
         }
     }

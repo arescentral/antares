@@ -34,7 +34,6 @@
 
 using sfz::BytesSlice;
 using sfz::Rune;
-using sfz::String;
 using std::unique_ptr;
 
 namespace antares {
@@ -55,11 +54,11 @@ void CheatFeedbackPlus(
         int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer, pn::string_view extra);
 
 int16_t GetCheatNumFromString(pn::string_view s) {
-    String code_string;
+    pn::string code_string;
     for (pn::rune r : s) {
-        code_string.append(1, r.value() + kCheatCodeValue);
+        code_string += sfz2pn(sfz::String(1, r.value() + kCheatCodeValue));
     }
-    auto it = std::find(sys.cheat.codes.begin(), sys.cheat.codes.end(), sfz2pn(code_string));
+    auto it = std::find(sys.cheat.codes.begin(), sys.cheat.codes.end(), code_string);
     if (it == sys.cheat.codes.end()) {
         return -1;
     }

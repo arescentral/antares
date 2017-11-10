@@ -38,7 +38,6 @@ using sfz::Exception;
 using sfz::MappedFile;
 using sfz::Rune;
 using sfz::ScopedFd;
-using sfz::String;
 using sfz::StringMap;
 using sfz::format;
 using sfz::makedirs;
@@ -88,12 +87,13 @@ void DirectoryLedger::unlocked_chapters(std::vector<int>* chapters) {
 
 void DirectoryLedger::load() {
     const pn::string_view scenario_id = sys.prefs->scenario_identifier();
-    String path(format("{0}/{1}/ledger.pn", pn2sfz(dirs().registry), pn2sfz(scenario_id)));
+    pn::string            path =
+            sfz2pn(format("{0}/{1}/ledger.pn", pn2sfz(dirs().registry), pn2sfz(scenario_id)));
 
     _chapters.clear();
     unique_ptr<MappedFile> file;
     try {
-        file.reset(new MappedFile(path));
+        file.reset(new MappedFile(pn2sfz(path)));
     } catch (Exception& e) {
         _chapters.insert(1);
         return;
@@ -114,18 +114,18 @@ void DirectoryLedger::load() {
 
 void DirectoryLedger::save() {
     const pn::string_view scenario_id = sys.prefs->scenario_identifier();
-    const String path(format("{0}/{1}/ledger.pn", pn2sfz(dirs().registry), pn2sfz(scenario_id)));
+    const pn::string      path =
+            sfz2pn(format("{0}/{1}/ledger.pn", pn2sfz(dirs().registry), pn2sfz(scenario_id)));
 
     pn::array unlocked_levels;
     for (std::set<int>::const_iterator it = _chapters.begin(); it != _chapters.end(); ++it) {
         unlocked_levels.push_back(*it);
     }
-    String contents(pn2sfz(pn::dump(pn::map{{"unlocked-levels", std::move(unlocked_levels)}})));
+    pn::string contents = pn::dump(pn::map{{"unlocked-levels", std::move(unlocked_levels)}});
 
-    makedirs(path::dirname(path), 0755);
-    ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-    Bytes    bytes(utf8::encode(contents));
-    write(fd, bytes);
+    makedirs(path::dirname(pn2sfz(path)), 0755);
+    ScopedFd fd(open(pn2sfz(path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
+    write(fd, contents.data(), contents.size());
 }
 
 }  // namespace antares

@@ -39,7 +39,6 @@
 
 using sfz::Bytes;
 using sfz::Exception;
-using sfz::String;
 using sfz::dec;
 using sfz::format;
 using std::chrono::duration_cast;
@@ -56,10 +55,10 @@ const usecs kTypingDelay      = kMajorTick;
 const int   kScoreTableHeight = 120;
 const int   kTextWidth        = 300;
 
-void string_replace(String* s, pn::string_view in, pn::string_view out) {
+void string_replace(sfz::String* s, pn::string_view in, pn::string_view out) {
     sfz::String sfz_in = pn2sfz(in);
     size_t      index  = s->find(sfz_in);
-    while (index != String::npos) {
+    while (index != sfz::String::npos) {
         s->replace(index, in.size(), pn2sfz(out));
         index = s->find(sfz_in, index + 1);
     }
@@ -238,8 +237,8 @@ LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
 pn::string DebriefingScreen::build_score_text(
         game_ticks your_time, game_ticks par_time, int your_loss, int par_loss, int your_kill,
         int par_kill) {
-    Resource rsrc("text", "txt", 6000);
-    String   text(utf8::decode(rsrc.data()));
+    Resource    rsrc("text", "txt", 6000);
+    sfz::String text(utf8::decode(rsrc.data()));
 
     StringList strings(6000);
 
@@ -254,7 +253,7 @@ pn::string DebriefingScreen::build_score_text(
     string_replace(&text, strings.at(1), sfz2pn(sfz::String(dec(your_secs, 2))));
     if (par_time > game_ticks()) {
         string_replace(&text, strings.at(2), pn::dump(par_mins, pn::dump_short));
-        String secs_string;
+        sfz::String secs_string;
         print(secs_string, format(":{0}", dec(par_secs, 2)));
         string_replace(&text, strings.at(3), sfz2pn(secs_string));
     } else {

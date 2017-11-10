@@ -41,7 +41,6 @@
 #include "video/driver.hpp"
 
 using sfz::Exception;
-using sfz::String;
 using sfz::format;
 using std::make_pair;
 using std::pair;
@@ -312,7 +311,7 @@ void KeyControlScreen::overlay() const {
         const size_t key_two = _conflicts[0].second;
 
         // TODO(sfiera): permit localization.
-        String text(
+        pn::string text = sfz2pn(
                 format("{0}: {1} conflicts with {2}: {3}", pn2sfz(_tabs.at(get_tab_num(key_one))),
                        pn2sfz(_keys.at(key_one)), pn2sfz(_tabs.at(get_tab_num(key_two))),
                        pn2sfz(_keys.at(key_two))));
@@ -321,7 +320,7 @@ void KeyControlScreen::overlay() const {
         Rect            bounds = box.bounds();
         Point           off    = offset();
         bounds.offset(off.h, off.v);
-        draw_text_in_rect(bounds, sfz2pn(text), box.style, box.hue);
+        draw_text_in_rect(bounds, text, box.style, box.hue);
     }
 }
 

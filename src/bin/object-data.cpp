@@ -33,7 +33,6 @@
 
 using sfz::Optional;
 using sfz::ScopedFd;
-using sfz::String;
 using sfz::args::help;
 using sfz::args::store;
 using sfz::dec;
@@ -50,20 +49,20 @@ namespace {
 
 class ObjectDataBuilder {
   public:
-    ObjectDataBuilder(const Optional<String>& output_dir) : _output_dir(output_dir) {}
+    ObjectDataBuilder(const Optional<sfz::String>& output_dir) : _output_dir(output_dir) {}
 
     void save(Handle<BaseObject> object, int pict_id) {
         pn::string data;
         CreateObjectDataText(data, object);
         if (_output_dir.has()) {
-            String   path(format("{0}/{1}.txt", *_output_dir, dec(pict_id, 5)));
-            ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
+            pn::string path = sfz2pn(format("{0}/{1}.txt", *_output_dir, dec(pict_id, 5)));
+            ScopedFd   fd(open(pn2sfz(path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
             write(fd, utf8::encode(pn2sfz(data)));
         }
     }
 
   private:
-    const Optional<String> _output_dir;
+    const Optional<sfz::String> _output_dir;
 
     DISALLOW_COPY_AND_ASSIGN(ObjectDataBuilder);
 };
@@ -71,12 +70,12 @@ class ObjectDataBuilder {
 int main(int argc, char** argv) {
     args::Parser parser(argv[0], "Builds all of the scrolling text images in the game");
 
-    Optional<String> output_dir;
+    Optional<sfz::String> output_dir;
     parser.add_argument("-o", "--output", store(output_dir))
             .help("place output in this directory");
     parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
 
-    String error;
+    sfz::String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
         print(io::err, format("{0}: {1}\n", parser.name(), error));
         exit(1);

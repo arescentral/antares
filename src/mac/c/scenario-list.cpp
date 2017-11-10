@@ -24,7 +24,6 @@
 #include "data/scenario-list.hpp"
 
 using sfz::CString;
-using sfz::String;
 using std::vector;
 
 namespace utf8 = sfz::utf8;

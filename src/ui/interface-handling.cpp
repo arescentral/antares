@@ -58,7 +58,6 @@
 using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::ReadSource;
-using sfz::String;
 using sfz::read;
 using std::make_pair;
 using std::max;
@@ -106,10 +105,10 @@ enum {
 
 const int16_t kHelpScreenKeyStringID = 6003;
 
-int find_replace(String& data, int pos, pn::string_view search, pn::string_view replace) {
-    String sfz_search = pn2sfz(search);
-    size_t at         = data.find(sfz_search, pos);
-    if (at != String::npos) {
+int find_replace(sfz::String& data, int pos, pn::string_view search, pn::string_view replace) {
+    sfz::String sfz_search = pn2sfz(search);
+    size_t      at         = data.find(sfz_search, pos);
+    if (at != sfz::String::npos) {
         data.replace(at, sfz_search.size(), pn2sfz(replace));
     }
     return at;
@@ -118,7 +117,7 @@ int find_replace(String& data, int pos, pn::string_view search, pn::string_view 
 }  // namespace
 
 void CreateWeaponDataText(
-        String* text, Handle<BaseObject> weaponObject, pn::string_view weaponName);
+        sfz::String* text, Handle<BaseObject> weaponObject, pn::string_view weaponName);
 
 //
 // BothCommandAndQ:
@@ -140,8 +139,8 @@ bool BothCommandAndQ() {
 }
 
 void CreateObjectDataText(pn::string& text, Handle<BaseObject> object) {
-    Resource rsrc("text", "txt", kShipDataTextID);
-    String   data(utf8::decode(rsrc.data()));
+    Resource    rsrc("text", "txt", kShipDataTextID);
+    sfz::String data(utf8::decode(rsrc.data()));
 
     StringList keys(kShipDataKeyStringID);
     StringList values(kShipDataNameID);
@@ -193,7 +192,7 @@ void CreateObjectDataText(pn::string& text, Handle<BaseObject> object) {
 }
 
 void CreateWeaponDataText(
-        String* text, Handle<BaseObject> weaponObject, pn::string_view weaponName) {
+        sfz::String* text, Handle<BaseObject> weaponObject, pn::string_view weaponName) {
     int32_t mostDamage;
     bool    isGuided = false;
 
@@ -202,8 +201,8 @@ void CreateWeaponDataText(
     }
 
     // TODO(sfiera): catch exception.
-    Resource rsrc("text", "txt", kWeaponDataTextID);
-    String   data(utf8::decode(rsrc.data()));
+    Resource    rsrc("text", "txt", kWeaponDataTextID);
+    sfz::String data(utf8::decode(rsrc.data()));
     // damage; this is tricky--we have to guess by walking through activate actions,
     //  and for all the createObject actions, see which creates the most damaging
     //  object.  We calc this first so we can use isGuided
@@ -267,13 +266,13 @@ void CreateWeaponDataText(
 }
 
 void Replace_KeyCode_Strings_With_Actual_Key_Names(pn::string& text, int16_t resID, size_t padTo) {
-    StringList keys(kHelpScreenKeyStringID);
-    StringList values(resID);
-    String     sfz_text = pn2sfz(text);
+    StringList  keys(kHelpScreenKeyStringID);
+    StringList  values(resID);
+    sfz::String sfz_text = pn2sfz(text);
 
     for (int i = 0; i < kKeyExtendedControlNum; ++i) {
         pn::string_view search  = keys.at(i);
-        String          replace = pn2sfz(values.at(sys.prefs->key(i) - 1));
+        sfz::String     replace = pn2sfz(values.at(sys.prefs->key(i) - 1));
         // First, pad to the desired width.
         if (replace.size() < padTo) {
             replace.resize(padTo, ' ');
@@ -283,12 +282,12 @@ void Replace_KeyCode_Strings_With_Actual_Key_Names(pn::string& text, int16_t res
         // StyledText.set_retro_text(), which interprets backslashes
         // specially.  Don't do this until after padding, though.
         size_t pos = 0;
-        while ((pos = find_replace(replace, pos, pn::string{"\\"}, "\\\\")) != String::npos) {
+        while ((pos = find_replace(replace, pos, pn::string{"\\"}, "\\\\")) != sfz::String::npos) {
             pos += 2;  // Don't find the just-inserted backslashes again.
         }
 
         // Replace search string with value string in resulting text.
-        while (find_replace(sfz_text, 0, search, sfz2pn(replace)) != String::npos) {
+        while (find_replace(sfz_text, 0, search, sfz2pn(replace)) != sfz::String::npos) {
             pos += 1;
         };
     }

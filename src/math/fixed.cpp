@@ -23,7 +23,6 @@
 
 #include "data/pn.hpp"
 
-using sfz::String;
 using sfz::dec;
 using sfz::range;
 

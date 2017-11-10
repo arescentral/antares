@@ -24,10 +24,6 @@
 #include "data/pn.hpp"
 #include "mac/core-foundation.hpp"
 
-using sfz::Exception;
-using sfz::String;
-using sfz::format;
-
 namespace utf8 = sfz::utf8;
 
 namespace antares {
@@ -38,7 +34,7 @@ pn::string default_application_path() {
     char       path_buffer[PATH_MAX];
     if (!CFURLGetFileSystemRepresentation(
                 url.c_obj(), true, reinterpret_cast<UInt8*>(path_buffer), PATH_MAX)) {
-        throw Exception("couldn't get application_path()");
+        throw sfz::Exception("couldn't get application_path()");
     }
     return sfz2pn(utf8::decode(path_buffer));
 }

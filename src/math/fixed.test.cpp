@@ -21,7 +21,6 @@
 #include <gmock/gmock.h>
 #include <sfz/sfz.hpp>
 
-using sfz::String;
 using sfz::dec;
 using sfz::format;
 
@@ -31,32 +30,33 @@ namespace {
 typedef testing::Test FixedTest;
 
 TEST_F(FixedTest, Print) {
-    EXPECT_EQ("0.0", String(Fixed::from_val(0)));
+    EXPECT_EQ("0.0", stringify(Fixed::from_val(0)));
 
-    EXPECT_EQ("1.0", String(Fixed::from_val(256)));
-    EXPECT_EQ("-1.0", String(Fixed::from_val(-256)));
-    EXPECT_EQ("1.125", String(Fixed::from_val(288)));
-    EXPECT_EQ("-1.125", String(Fixed::from_val(-288)));
+    EXPECT_EQ("1.0", stringify(Fixed::from_val(256)));
+    EXPECT_EQ("-1.0", stringify(Fixed::from_val(-256)));
+    EXPECT_EQ("1.125", stringify(Fixed::from_val(288)));
+    EXPECT_EQ("-1.125", stringify(Fixed::from_val(-288)));
 
-    EXPECT_EQ("8388607.996", String(Fixed::from_val(std::numeric_limits<int32_t>::max())));
-    EXPECT_EQ("-8388607.996", String(Fixed::from_val(-std::numeric_limits<int32_t>::max())));
-    EXPECT_EQ("-8388608.0", String(Fixed::from_val(std::numeric_limits<int32_t>::min())));
+    EXPECT_EQ("8388607.996", stringify(Fixed::from_val(std::numeric_limits<int32_t>::max())));
+    EXPECT_EQ("-8388607.996", stringify(Fixed::from_val(-std::numeric_limits<int32_t>::max())));
+    EXPECT_EQ("-8388608.0", stringify(Fixed::from_val(std::numeric_limits<int32_t>::min())));
 
-    EXPECT_EQ("1.38", String(Fixed::from_val(353)));
-    EXPECT_EQ("1.383", String(Fixed::from_val(354)));
-    EXPECT_EQ("1.387", String(Fixed::from_val(355)));
-    EXPECT_EQ("1.39", String(Fixed::from_val(356)));
-    EXPECT_EQ("1.395", String(Fixed::from_val(357)));
-    EXPECT_EQ("1.4", String(Fixed::from_val(358)));
-    EXPECT_EQ("1.402", String(Fixed::from_val(359)));
-    EXPECT_EQ("1.406", String(Fixed::from_val(360)));
-    EXPECT_EQ("1.41", String(Fixed::from_val(361)));
-    EXPECT_EQ("1.414", String(Fixed::from_val(362)));
+    EXPECT_EQ("1.38", stringify(Fixed::from_val(353)));
+    EXPECT_EQ("1.383", stringify(Fixed::from_val(354)));
+    EXPECT_EQ("1.387", stringify(Fixed::from_val(355)));
+    EXPECT_EQ("1.39", stringify(Fixed::from_val(356)));
+    EXPECT_EQ("1.395", stringify(Fixed::from_val(357)));
+    EXPECT_EQ("1.4", stringify(Fixed::from_val(358)));
+    EXPECT_EQ("1.402", stringify(Fixed::from_val(359)));
+    EXPECT_EQ("1.406", stringify(Fixed::from_val(360)));
+    EXPECT_EQ("1.41", stringify(Fixed::from_val(361)));
+    EXPECT_EQ("1.414", stringify(Fixed::from_val(362)));
 
     // All 2.x values should be printed with 1 digit of precision.
     for (int i = 0; i < 10; ++i) {
-        String expected(format("2.{0}", i));
-        EXPECT_EQ(expected, String(Fixed::from_float(2.0 + (i / 10.0))));
+        char expected[4];
+        sprintf(expected, "2.%d", i);
+        EXPECT_EQ(pn::string_view{expected}, stringify(Fixed::from_float(2.0 + (i / 10.0))));
     }
 
     // All 3.xy values should be printed with 2 digits of precision
@@ -65,8 +65,9 @@ TEST_F(FixedTest, Print) {
         if ((i % 10) == 0) {
             continue;
         }
-        String expected(format("3.{0}", dec(i, 2)));
-        EXPECT_EQ(expected, String(Fixed::from_float(3.0 + (i / 100.0))));
+        char expected[5];
+        sprintf(expected, "3.%02d", i);
+        EXPECT_EQ(pn::string_view{expected}, stringify(Fixed::from_float(3.0 + (i / 100.0))));
     }
 }
 

@@ -35,7 +35,6 @@ using sfz::Bytes;
 using sfz::Exception;
 using sfz::Optional;
 using sfz::Rune;
-using sfz::String;
 using sfz::args::help;
 using sfz::args::store;
 using sfz::args::store_const;
@@ -60,20 +59,20 @@ void pause(EventScheduler& scheduler);
 void main(int argc, char* const* argv) {
     args::Parser parser(argv[0], "Simulates a game off-screen");
 
-    String script;
+    sfz::String script;
     parser.add_argument("script", store(script))
             .metavar("main-screen|options|mission-briefing|pause")
             .required()
             .help("the script to execute");
 
-    Optional<String> sfz_output_dir;
-    bool             text = false;
+    Optional<sfz::String> sfz_output_dir;
+    bool                  text = false;
     parser.add_argument("-o", "--output", store(sfz_output_dir))
             .help("place output in this directory");
     parser.add_argument("-t", "--text", store_const(text, true)).help("produce text output");
     parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
 
-    String error;
+    sfz::String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
         print(io::err, format("{0}: {1}\n", parser.name(), error));
         exit(1);
@@ -103,8 +102,8 @@ void main(int argc, char* const* argv) {
 
     unique_ptr<SoundDriver> sound;
     if (output_dir.has()) {
-        String out(format("{0}/sound.log", pn2sfz(*output_dir)));
-        sound.reset(new LogSoundDriver(sfz2pn(out)));
+        pn::string out = sfz2pn(format("{0}/sound.log", pn2sfz(*output_dir)));
+        sound.reset(new LogSoundDriver(out));
     } else {
         sound.reset(new NullSoundDriver);
     }

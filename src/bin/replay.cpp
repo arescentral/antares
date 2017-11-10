@@ -57,7 +57,6 @@ using sfz::BytesSlice;
 using sfz::MappedFile;
 using sfz::Optional;
 using sfz::ScopedFd;
-using sfz::String;
 using sfz::args::store;
 using sfz::args::store_const;
 using sfz::format;
@@ -100,9 +99,9 @@ class ReplayMaster : public Card {
 
             case REPLAY:
                 if (_output_path.has()) {
-                    String path(format("{0}/debriefing.txt", pn2sfz(*_output_path)));
-                    makedirs(path::dirname(path), 0755);
-                    ScopedFd outcome(open(path, O_WRONLY | O_CREAT, 0644));
+                    pn::string path = sfz2pn(format("{0}/debriefing.txt", pn2sfz(*_output_path)));
+                    makedirs(path::dirname(pn2sfz(path)), 0755);
+                    ScopedFd outcome(open(pn2sfz(path), O_WRONLY | O_CREAT, 0644));
                     if ((g.victory_text >= 0)) {
                         Resource rsrc("text", "txt", g.victory_text);
                         sfz::write(outcome, rsrc.data());
@@ -165,10 +164,10 @@ void usage(pn::string_view program_name) {
 void main(int argc, char** argv) {
     args::Parser parser(argv[0], "Plays a replay into a set of images and a log of sounds");
 
-    String replay_path(utf8::decode(argv[0]));
+    sfz::String replay_path;
     parser.add_argument("replay", store(replay_path)).help("an Antares replay script").required();
 
-    Optional<String> sfz_output_dir;
+    Optional<sfz::String> sfz_output_dir;
     parser.add_argument("-o", "--output", store(sfz_output_dir))
             .help("place output in this directory");
 
@@ -186,7 +185,7 @@ void main(int argc, char** argv) {
 
     parser.add_argument("--help", help(parser, 0)).help("display this help screen");
 
-    String error;
+    sfz::String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
         print(io::err, format("{0}: {1}\n", parser.name(), error));
         exit(1);
@@ -211,8 +210,8 @@ void main(int argc, char** argv) {
 
     unique_ptr<SoundDriver> sound;
     if (!smoke && output_dir.has()) {
-        String out(format("{0}/sound.log", pn2sfz(*output_dir)));
-        sound.reset(new LogSoundDriver(sfz2pn(out)));
+        pn::string out = sfz2pn(format("{0}/sound.log", pn2sfz(*output_dir)));
+        sound.reset(new LogSoundDriver(out));
     } else {
         sound.reset(new NullSoundDriver);
     }

@@ -36,7 +36,6 @@ using sfz::CString;
 using sfz::Exception;
 using sfz::ReadSource;
 using sfz::ScopedFd;
-using sfz::String;
 using sfz::WriteTarget;
 using sfz::format;
 using sfz::range;
@@ -166,7 +165,7 @@ static void tag_string(WriteTarget out, uint64_t tag, pn::string_view s) {
 static pn::string read_string(ReadSource in) {
     Bytes bytes(read_varint<size_t>(in), '\0');
     in.shift(bytes.data(), bytes.size());
-    return sfz2pn(String(utf8::decode(bytes)));
+    return sfz2pn(sfz::String(utf8::decode(bytes)));
 }
 
 template <typename T>
@@ -261,9 +260,8 @@ struct ScopedGlob {
 static void cull_replays(size_t count) {
     if (path::isdir(pn2sfz(dirs().replays))) {
         ScopedGlob g;
-        String     str(format("{0}/*.nlrp", pn2sfz(dirs().replays)));
-        CString    c_str(str);
-        glob(c_str.data(), 0, NULL, &g.data);
+        pn::string str = sfz2pn(format("{0}/*.nlrp", pn2sfz(dirs().replays)));
+        glob(str.c_str(), 0, NULL, &g.data);
 
         map<int64_t, const char*> files;
         for (int i = 0; i < g.data.gl_pathc; ++i) {
@@ -301,8 +299,9 @@ void ReplayBuilder::start() {
     if ((time(&t) < 0) || !localtime_r(&t, &tm) || (strftime(buffer, 1024, "%c", &tm) <= 0)) {
         return;
     }
-    sfz::String path(format("{0}/Replay {1}.nlrp", pn2sfz(dirs().replays), utf8::decode(buffer)));
-    int         fd = open(path, O_WRONLY | O_CREAT | O_EXCL, 0644);
+    pn::string path =
+            sfz2pn(format("{0}/Replay {1}.nlrp", pn2sfz(dirs().replays), utf8::decode(buffer)));
+    int fd = open(pn2sfz(path), O_WRONLY | O_CREAT | O_EXCL, 0644);
     if (fd >= 0) {
         _file.reset(new ScopedFd(fd));
         tag_message(*_file, SCENARIO, _scenario);

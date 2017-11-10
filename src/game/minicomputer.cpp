@@ -46,7 +46,6 @@
 
 using sfz::Bytes;
 using sfz::Rune;
-using sfz::String;
 using sfz::StringSlice;
 using sfz::bin;
 using sfz::range;
@@ -169,7 +168,7 @@ const int32_t kMaxShipBuffer = 40;
 void pad_to(pn::string& s, size_t width) {
     sfz::String ss = pn2sfz(s);
     if (ss.size() < width) {
-        String result;
+        sfz::String result;
         result.append((width - ss.size()) / 2, ' ');
         result.append(ss);
         result.append((1 + width - ss.size()) / 2, ' ');
@@ -193,7 +192,7 @@ inline int32_t mGetLineNumFromV(int32_t mV) {
 }
 
 inline void mCopyBlankLineString(miniScreenLineType* mline, pn::string_view mstring) {
-    String s = pn2sfz(mstring);
+    sfz::String s = pn2sfz(mstring);
     if (s.size() > kMiniScreenCharWidth) {
         s.resize(kMiniScreenCharWidth);
     }
@@ -365,17 +364,17 @@ static void draw_minicomputer_lines() {
     }
 
     {
-        Quads  quads(sys.fonts.computer->texture);
-        bool   dim[kMiniScreenCharHeight];
-        String strings[kMiniScreenCharHeight];
+        Quads           quads(sys.fonts.computer->texture);
+        bool            dim[kMiniScreenCharHeight];
+        pn::string_view strings[kMiniScreenCharHeight];
         for (int32_t count = 0; count < kMiniScreenCharHeight; count++) {
             auto c         = &g.mini.lineData[count];
             dim[count]     = (c->kind == MINI_DIM);
-            strings[count] = pn2sfz(c->string);
+            strings[count] = c->string;
         }
 
         for (int32_t count = 0; count < kMiniScreenCharHeight; count++) {
-            item_text(quads, count, sfz2pn(strings[count]), dim[count]);
+            item_text(quads, count, strings[count], dim[count]);
         }
 
         for (int32_t count = 0; count < kMiniScreenButtonNum; count++) {
@@ -1082,7 +1081,7 @@ void MiniComputerSetStatusStrings() {
             gMissionStatusStrList->size()) {
             // we have some data for this line to interpret
 
-            String      s = pn2sfz(gMissionStatusStrList->at(count - kStatusMiniScreenFirstLine));
+            sfz::String s = pn2sfz(gMissionStatusStrList->at(count - kStatusMiniScreenFirstLine));
             StringSlice sourceString = s;
 
             if (sourceString.at(0) == '_') {

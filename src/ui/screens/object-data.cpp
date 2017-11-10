@@ -29,7 +29,6 @@
 
 using sfz::Bytes;
 using sfz::Exception;
-using sfz::String;
 using sfz::format;
 
 namespace antares {

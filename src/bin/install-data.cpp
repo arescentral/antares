@@ -25,7 +25,6 @@
 
 using sfz::Exception;
 using sfz::Optional;
-using sfz::String;
 using sfz::print;
 using sfz::args::help;
 using sfz::args::store;
@@ -47,10 +46,10 @@ class PrintStatusObserver : public DataExtractor::Observer {
 void ExtractDataMain(int argc, char* const* argv) {
     args::Parser parser(argv[0], "Downloads and extracts game data");
 
-    String           source = pn2sfz(dirs().downloads);
-    String           dest   = pn2sfz(dirs().scenarios);
-    bool             check  = false;
-    Optional<String> plugin;
+    sfz::String           source = pn2sfz(dirs().downloads);
+    sfz::String           dest   = pn2sfz(dirs().scenarios);
+    bool                  check  = false;
+    Optional<sfz::String> plugin;
     parser.add_argument("plugin", store(plugin))
             .help("a plugin to install (default: install factory scenario)");
     parser.add_argument("-s", "--source", store(source))
@@ -61,7 +60,7 @@ void ExtractDataMain(int argc, char* const* argv) {
     parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
 
     try {
-        String error;
+        sfz::String error;
         if (!parser.parse_args(argc - 1, argv + 1, error)) {
             print(io::err, format("{0}: {1}\n", parser.name(), error));
             exit(1);

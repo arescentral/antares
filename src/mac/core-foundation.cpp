@@ -253,7 +253,8 @@ bool unwrap(const String& cfvalue, pn::string& value) {
     sfz::String sfz_value;
     Data        encoded(CFStringCreateExternalRepresentation(
             NULL, cfvalue.c_obj(), kCFStringEncodingUTF8, '?'));
-    print(sfz_value, utf8::decode(encoded.data()));
+    value = pn::string(
+            reinterpret_cast<const char*>(encoded.data().data()), encoded.data().size());
     value = sfz2pn(sfz_value);
     return true;
 }

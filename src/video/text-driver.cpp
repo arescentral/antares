@@ -36,7 +36,6 @@
 #include "ui/event.hpp"
 
 using sfz::Optional;
-using sfz::String;
 using sfz::dec;
 using sfz::format;
 using sfz::print;
@@ -55,15 +54,13 @@ namespace antares {
 namespace {
 
 pn::string hex(RgbColor color) {
-    using sfz::hex;
-    sfz::String target;
-    print(target, hex(color.red, 2));
-    print(target, hex(color.green, 2));
-    print(target, hex(color.blue, 2));
+    char s[9];
     if (color.alpha != 255) {
-        print(target, hex(color.alpha, 2));
+        sprintf(s, "%02x%02x%02x%02x", color.red, color.green, color.blue, color.alpha);
+    } else {
+        sprintf(s, "%02x%02x%02x", color.red, color.green, color.blue);
     }
-    return sfz2pn(target);
+    return s;
 }
 
 }  // namespace
@@ -151,9 +148,9 @@ class TextVideoDriver::MainLoop : public EventScheduler::MainLoop {
     }
 
     void snapshot_to(pn::string_view relpath) {
-        String path(format("{0}/{1}", pn2sfz(*_output_dir), pn2sfz(relpath)));
-        makedirs(path::dirname(path), 0755);
-        sfz::ScopedFd file(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
+        pn::string path = sfz2pn(format("{0}/{1}", pn2sfz(*_output_dir), pn2sfz(relpath)));
+        makedirs(path::dirname(pn2sfz(path)), 0755);
+        sfz::ScopedFd file(open(pn2sfz(path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
         write(file, sfz::Bytes(utf8::encode(pn2sfz(_driver._log))));
     }
 

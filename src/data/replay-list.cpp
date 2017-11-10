@@ -27,7 +27,6 @@
 
 using sfz::CString;
 using sfz::MappedFile;
-using sfz::String;
 using sfz::format;
 using sfz::read;
 using std::vector;
@@ -50,9 +49,9 @@ struct ScopedGlob {
 ReplayList::ReplayList() {
     ScopedGlob            g;
     const pn::string_view scenario = sys.prefs->scenario_identifier();
-    String  str(format("{0}/{1}/replays/*.NLRP", pn2sfz(dirs().scenarios), pn2sfz(scenario)));
-    CString c_str(str);
-    glob(c_str.data(), 0, NULL, &g.data);
+    pn::string            str =
+            sfz2pn(format("{0}/{1}/replays/*.NLRP", pn2sfz(dirs().scenarios), pn2sfz(scenario)));
+    glob(str.c_str(), 0, NULL, &g.data);
 
     for (int i = 0; i < g.data.gl_pathc; ++i) {
         const pn::string path      = sfz2pn(utf8::decode(g.data.gl_pathv[i]));

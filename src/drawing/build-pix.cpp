@@ -30,7 +30,6 @@
 
 using sfz::BytesSlice;
 using sfz::Exception;
-using sfz::String;
 using sfz::format;
 using sfz::string_to_int;
 using std::unique_ptr;
@@ -103,12 +102,12 @@ class PixDraw {
 BuildPix::BuildPix(int text_id, int width) : _size({width, 0}) {
     Resource rsrc("text", "txt", text_id);
 
-    BytesSlice     data = rsrc.data();
-    String         text(utf8::decode(data));
-    bool           in_section_header = (text.size() >= 2) && (text.slice(0, 2) == "#+");
-    size_t         start             = 0;
-    const size_t   end               = text.size();
-    vector<String> raw_lines;
+    BytesSlice          data = rsrc.data();
+    sfz::String         text(utf8::decode(data));
+    bool                in_section_header = (text.size() >= 2) && (text.slice(0, 2) == "#+");
+    size_t              start             = 0;
+    const size_t        end               = text.size();
+    vector<sfz::String> raw_lines;
     for (size_t i = start; i != end; ++i) {
         if (((end - i) >= 3) && (text.slice(i, 3) == "\n#+")) {
             raw_lines.emplace_back(text.slice(start, i - start));

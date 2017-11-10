@@ -49,7 +49,6 @@ using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::Optional;
 using sfz::ScopedFd;
-using sfz::String;
 using sfz::WriteTarget;
 using sfz::dec;
 using sfz::format;
@@ -151,9 +150,9 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
         bounds.offset(0, _driver._screen_size.height - bounds.height() - bounds.top);
         ArrayPixMap pix(bounds.size());
         _buffer.copy(bounds, pix);
-        String path(format("{0}/{1}", pn2sfz(*_output_dir), pn2sfz(relpath)));
-        makedirs(path::dirname(path), 0755);
-        ScopedFd file(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
+        pn::string path = sfz2pn(format("{0}/{1}", pn2sfz(*_output_dir), pn2sfz(relpath)));
+        makedirs(path::dirname(pn2sfz(path)), 0755);
+        ScopedFd file(open(pn2sfz(path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
         write(file, pix);
     }
 

@@ -25,7 +25,6 @@
 #include "config/preferences.hpp"
 #include "mac/core-foundation.hpp"
 
-using sfz::String;
 using sfz::range;
 using std::min;
 using std::swap;

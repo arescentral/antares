@@ -70,7 +70,6 @@
 
 using sfz::Exception;
 using sfz::ScopedFd;
-using sfz::String;
 using sfz::format;
 using sfz::makedirs;
 using sfz::open;
@@ -261,12 +260,6 @@ void MainPlay::become_front() {
             stack()->pop(this);
             break;
     }
-}
-
-int new_replay_file() {
-    String path;
-    makedirs(path::basename(path), 0755);
-    return open(path, O_WRONLY | O_CREAT | O_EXCL, 0644);
 }
 
 GamePlay::GamePlay(bool replay, InputSource* input, GameResult* game_result)

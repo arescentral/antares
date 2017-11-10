@@ -28,7 +28,6 @@
 
 using sfz::Optional;
 using sfz::ScopedFd;
-using sfz::String;
 using sfz::args::help;
 using sfz::args::store;
 using sfz::format;
@@ -77,10 +76,10 @@ class ShapeBuilder {
         ArrayPixMap pix(0, 0);
         draw(id, color, pix);
         if (_output_dir.has()) {
-            const String path(
-                    format("{0}/{1}/{2}.png", pn2sfz(*_output_dir), name(id), hex(color)));
-            makedirs(dirname(path), 0755);
-            ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
+            const pn::string path =
+                    sfz2pn(format("{0}/{1}/{2}.png", pn2sfz(*_output_dir), name(id), hex(color)));
+            makedirs(dirname(pn2sfz(path)), 0755);
+            ScopedFd fd(open(pn2sfz(path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
             write(fd, pix);
         }
     }
@@ -94,12 +93,12 @@ class ShapeBuilder {
 int main(int argc, char* const* argv) {
     args::Parser parser(argv[0], "Draws shapes used in the long-range view");
 
-    Optional<String> sfz_output_dir;
+    Optional<sfz::String> sfz_output_dir;
     parser.add_argument("-o", "--output", store(sfz_output_dir))
             .help("place output in this directory");
     parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
 
-    String error;
+    sfz::String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
         print(io::err, format("{0}: {1}\n", parser.name(), error));
         exit(1);

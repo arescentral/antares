@@ -28,7 +28,6 @@
 using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::MappedFile;
-using sfz::String;
 using sfz::format;
 using std::unique_ptr;
 
@@ -40,9 +39,9 @@ namespace antares {
 static unique_ptr<MappedFile> load_first(
         pn::string_view resource_path, const std::vector<pn::string_view>& dirs) {
     for (const auto& dir : dirs) {
-        String path(sfz::format("{0}/{1}", pn2sfz(dir), pn2sfz(resource_path)));
-        if (path::isfile(path)) {
-            return unique_ptr<MappedFile>(new MappedFile(path));
+        pn::string path = sfz2pn(sfz::format("{0}/{1}", pn2sfz(dir), pn2sfz(resource_path)));
+        if (path::isfile(pn2sfz(path))) {
+            return unique_ptr<MappedFile>(new MappedFile(pn2sfz(path)));
         }
     }
     throw Exception(format("couldn't find resource {0}", quote(pn2sfz(resource_path))));

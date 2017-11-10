@@ -40,7 +40,6 @@
 #include "video/driver.hpp"
 
 using sfz::Exception;
-using sfz::String;
 using sfz::format;
 using std::make_pair;
 using std::pair;

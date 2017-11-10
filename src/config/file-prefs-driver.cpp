@@ -30,7 +30,6 @@
 using sfz::Exception;
 using sfz::MappedFile;
 using sfz::ScopedFd;
-using sfz::String;
 using sfz::StringMap;
 using sfz::format;
 using sfz::makedirs;
@@ -103,11 +102,11 @@ FilePrefsDriver::FilePrefsDriver() {
     sfz::Json();  // TODO(sfiera): remove me. Just here as a workaround for a weird linker bug.
 
     try {
-        String     path(format("{0}/config.pn", pn2sfz(dirs().root)));
-        MappedFile file(path);
+        pn::string path = sfz2pn(format("{0}/config.pn", pn2sfz(dirs().root)));
+        MappedFile file(pn2sfz(path));
         pn::value  x;
-        String     data(utf8::decode(file.data()));
-        if (!pn::parse(sfz2pn(data).open(), x, nullptr)) {
+        pn::string data = sfz2pn(utf8::decode(file.data()));
+        if (!pn::parse(data.open(), x, nullptr)) {
             return;
         }
         pn::map_cref m = x.as_map();
@@ -133,17 +132,16 @@ void FilePrefsDriver::set(const Preferences& p) {
         keys[kKeyNames[i]] = p.keys[i];
     }
 
-    String path(format("{0}/config.pn", pn2sfz(dirs().root)));
-    makedirs(dirname(path), 0755);
-    ScopedFd fd(open(path, O_CREAT | O_TRUNC | O_WRONLY, 0644));
-    String   pretty =
-            pn2sfz(pn::dump(
-                    pn::map{{"sound", pn::map{{"volume", p.volume},
-                                              {"speech", p.speech_on},
-                                              {"idle music", p.play_idle_music},
-                                              {"game music", p.play_music_in_game}}},
-                            {"keys", std::move(keys)}}));
-    write(fd, utf8::encode(pretty));
+    pn::string path = sfz2pn(format("{0}/config.pn", pn2sfz(dirs().root)));
+    makedirs(dirname(pn2sfz(path)), 0755);
+    ScopedFd   fd(open(pn2sfz(path), O_CREAT | O_TRUNC | O_WRONLY, 0644));
+    pn::string pretty = pn::dump(
+            pn::map{{"sound", pn::map{{"volume", p.volume},
+                                      {"speech", p.speech_on},
+                                      {"idle music", p.play_idle_music},
+                                      {"game music", p.play_music_in_game}}},
+                    {"keys", std::move(keys)}});
+    write(fd, pretty.data(), pretty.size());
 }
 
 }  // namespace antares

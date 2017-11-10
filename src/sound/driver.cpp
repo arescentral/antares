@@ -31,7 +31,6 @@
 using sfz::Bytes;
 using sfz::Exception;
 using sfz::ScopedFd;
-using sfz::String;
 using sfz::format;
 using sfz::write;
 using std::unique_ptr;
@@ -105,27 +104,27 @@ class LogSoundDriver::LogChannel : public SoundChannel {
     virtual void activate() { _driver._active_channel = this; }
 
     void play(pn::string_view sound_path) {
-        auto   t = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
-        String line(format("play\t{0}\t{1}\t{2}\n", _id, t, pn2sfz(sound_path)));
-        write(_driver._sound_log, Bytes(utf8::encode(line)));
+        auto       t    = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
+        pn::string line = sfz2pn(format("play\t{0}\t{1}\t{2}\n", _id, t, pn2sfz(sound_path)));
+        write(_driver._sound_log, line.data(), line.size());
     }
 
     void loop(pn::string_view sound_path) {
-        auto   t = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
-        String line(format("loop\t{0}\t{1}\t{2}\n", _id, t, pn2sfz(sound_path)));
-        write(_driver._sound_log, Bytes(utf8::encode(line)));
+        auto       t    = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
+        pn::string line = sfz2pn(format("loop\t{0}\t{1}\t{2}\n", _id, t, pn2sfz(sound_path)));
+        write(_driver._sound_log, line.data(), line.size());
     }
 
     virtual void amp(uint8_t volume) {
-        auto   t = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
-        String line(format("amp\t{0}\t{1}\t{2}\n", _id, t, volume));
-        write(_driver._sound_log, Bytes(utf8::encode(line)));
+        auto       t    = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
+        pn::string line = sfz2pn(format("amp\t{0}\t{1}\t{2}\n", _id, t, volume));
+        write(_driver._sound_log, line.data(), line.size());
     }
 
     virtual void quiet() {
-        auto   t = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
-        String line(format("quiet\t{0}\t{1}\n", _id, t));
-        write(_driver._sound_log, Bytes(utf8::encode(line)));
+        auto       t    = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
+        pn::string line = sfz2pn(format("quiet\t{0}\t{1}\n", _id, t));
+        write(_driver._sound_log, line.data(), line.size());
     }
 
   private:
