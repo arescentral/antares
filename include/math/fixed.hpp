@@ -110,8 +110,6 @@ inline int32_t mFixedToLong(Fixed m_f) { return evil_fixed_to_long(m_f); }
 
 pn::string stringify(Fixed fixed);
 
-void print_to(sfz::PrintTarget out, const Fixed& fixed);
-
 struct fixedPointType {
     Fixed h;
     Fixed v;

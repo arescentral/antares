@@ -19,6 +19,7 @@
 #include "math/fixed.hpp"
 
 #include <cmath>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "data/pn.hpp"
@@ -56,17 +57,17 @@ static const char kFractions[][5] = {
         ".99",  ".992", ".996", ".999",
 };
 
-pn::string stringify(Fixed fixed) { return sfz2pn(sfz::String(fixed)); }
-
-void print_to(sfz::PrintTarget out, const Fixed& fixed) {
+pn::string stringify(Fixed fixed) {
+    pn::string s;
     if (fixed < Fixed::zero()) {
-        out.push(1, '-');
+        s += "-";
     }
     int64_t       value    = llabs(fixed.val());
     const int32_t integral = (value & 0xffffff00) >> 8;
-    print(out, integral);
+    format(s.open("a"), "{0}", integral);
     value &= 0xff;
-    out.push(kFractions[value]);
+    s += kFractions[value];
+    return s;
 }
 
 }  // namespace antares
