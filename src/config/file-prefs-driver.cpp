@@ -102,7 +102,7 @@ FilePrefsDriver::FilePrefsDriver() {
     sfz::Json();  // TODO(sfiera): remove me. Just here as a workaround for a weird linker bug.
 
     try {
-        pn::string path = sfz2pn(format("{0}/config.pn", pn2sfz(dirs().root)));
+        pn::string path = pn::format("{0}/config.pn", dirs().root);
         MappedFile file(pn2sfz(path));
         pn::value  x;
         pn::string data = sfz2pn(utf8::decode(file.data()));
@@ -132,7 +132,7 @@ void FilePrefsDriver::set(const Preferences& p) {
         keys[kKeyNames[i]] = p.keys[i];
     }
 
-    pn::string path = sfz2pn(format("{0}/config.pn", pn2sfz(dirs().root)));
+    pn::string path = pn::format("{0}/config.pn", dirs().root);
     makedirs(dirname(pn2sfz(path)), 0755);
     ScopedFd   fd(open(pn2sfz(path), O_CREAT | O_TRUNC | O_WRONLY, 0644));
     pn::string pretty = pn::dump(

@@ -87,8 +87,7 @@ void DirectoryLedger::unlocked_chapters(std::vector<int>* chapters) {
 
 void DirectoryLedger::load() {
     const pn::string_view scenario_id = sys.prefs->scenario_identifier();
-    pn::string            path =
-            sfz2pn(format("{0}/{1}/ledger.pn", pn2sfz(dirs().registry), pn2sfz(scenario_id)));
+    pn::string            path = pn::format("{0}/{1}/ledger.pn", dirs().registry, scenario_id);
 
     _chapters.clear();
     unique_ptr<MappedFile> file;
@@ -114,8 +113,7 @@ void DirectoryLedger::load() {
 
 void DirectoryLedger::save() {
     const pn::string_view scenario_id = sys.prefs->scenario_identifier();
-    const pn::string      path =
-            sfz2pn(format("{0}/{1}/ledger.pn", pn2sfz(dirs().registry), pn2sfz(scenario_id)));
+    const pn::string      path = pn::format("{0}/{1}/ledger.pn", dirs().registry, scenario_id);
 
     pn::array unlocked_levels;
     for (std::set<int>::const_iterator it = _chapters.begin(); it != _chapters.end(); ++it) {

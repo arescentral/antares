@@ -18,6 +18,7 @@
 
 #include <fcntl.h>
 #include <getopt.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
@@ -55,8 +56,9 @@ class ObjectDataBuilder {
         pn::string data;
         CreateObjectDataText(data, object);
         if (_output_dir.has()) {
-            pn::string path = sfz2pn(format("{0}/{1}.txt", *_output_dir, dec(pict_id, 5)));
-            ScopedFd   fd(open(pn2sfz(path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
+            pn::string path = pn::format(
+                    "{0}/{1}.txt", sfz2pn(*_output_dir), sfz2pn(sfz::String(dec(pict_id, 5))));
+            ScopedFd fd(open(pn2sfz(path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
             write(fd, utf8::encode(pn2sfz(data)));
         }
     }

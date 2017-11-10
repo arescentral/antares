@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <algorithm>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
@@ -51,7 +52,6 @@ using sfz::Optional;
 using sfz::ScopedFd;
 using sfz::WriteTarget;
 using sfz::dec;
-using sfz::format;
 using sfz::range;
 using std::greater;
 using std::max;
@@ -140,7 +140,9 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
     void snapshot(wall_ticks ticks) {
         snapshot_to(
                 _driver._capture_rect,
-                sfz2pn(format("screens/{0}.png", dec(ticks.time_since_epoch().count(), 6))));
+                pn::format(
+                        "screens/{0}.png",
+                        sfz2pn(sfz::String(dec(ticks.time_since_epoch().count(), 6)))));
     }
 
     void snapshot_to(Rect bounds, pn::string_view relpath) {
@@ -150,7 +152,7 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
         bounds.offset(0, _driver._screen_size.height - bounds.height() - bounds.top);
         ArrayPixMap pix(bounds.size());
         _buffer.copy(bounds, pix);
-        pn::string path = sfz2pn(format("{0}/{1}", pn2sfz(*_output_dir), pn2sfz(relpath)));
+        pn::string path = pn::format("{0}/{1}", *_output_dir, relpath);
         makedirs(path::dirname(pn2sfz(path)), 0755);
         ScopedFd file(open(pn2sfz(path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
         write(file, pix);

@@ -18,6 +18,7 @@
 
 #include <fcntl.h>
 #include <getopt.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/ledger.hpp"
@@ -99,7 +100,7 @@ class ReplayMaster : public Card {
 
             case REPLAY:
                 if (_output_path.has()) {
-                    pn::string path = sfz2pn(format("{0}/debriefing.txt", pn2sfz(*_output_path)));
+                    pn::string path = pn::format("{0}/debriefing.txt", *_output_path);
                     makedirs(path::dirname(pn2sfz(path)), 0755);
                     ScopedFd outcome(open(pn2sfz(path), O_WRONLY | O_CREAT, 0644));
                     if ((g.victory_text >= 0)) {
@@ -210,7 +211,7 @@ void main(int argc, char** argv) {
 
     unique_ptr<SoundDriver> sound;
     if (!smoke && output_dir.has()) {
-        pn::string out = sfz2pn(format("{0}/sound.log", pn2sfz(*output_dir)));
+        pn::string out = pn::format("{0}/sound.log", *output_dir);
         sound.reset(new LogSoundDriver(out));
     } else {
         sound.reset(new NullSoundDriver);

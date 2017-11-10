@@ -37,7 +37,6 @@
 
 using sfz::Optional;
 using sfz::dec;
-using sfz::format;
 using sfz::print;
 using sfz::write;
 using std::make_pair;
@@ -144,11 +143,12 @@ class TextVideoDriver::MainLoop : public EventScheduler::MainLoop {
     bool takes_snapshots() { return _output_dir.has(); }
 
     void snapshot(wall_ticks ticks) {
-        snapshot_to(sfz2pn(format("screens/{0}.txt", dec(ticks.time_since_epoch().count(), 6))));
+        snapshot_to(pn::format(
+                "screens/{0}.txt", sfz2pn(sfz::String(dec(ticks.time_since_epoch().count(), 6)))));
     }
 
     void snapshot_to(pn::string_view relpath) {
-        pn::string path = sfz2pn(format("{0}/{1}", pn2sfz(*_output_dir), pn2sfz(relpath)));
+        pn::string path = pn::format("{0}/{1}", *_output_dir, relpath);
         makedirs(path::dirname(pn2sfz(path)), 0755);
         sfz::ScopedFd file(open(pn2sfz(path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
         write(file, sfz::Bytes(utf8::encode(pn2sfz(_driver._log))));

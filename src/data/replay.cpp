@@ -22,6 +22,7 @@
 #include <glob.h>
 #include <time.h>
 #include <unistd.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/dirs.hpp"
@@ -260,7 +261,7 @@ struct ScopedGlob {
 static void cull_replays(size_t count) {
     if (path::isdir(pn2sfz(dirs().replays))) {
         ScopedGlob g;
-        pn::string str = sfz2pn(format("{0}/*.nlrp", pn2sfz(dirs().replays)));
+        pn::string str = pn::format("{0}/*.nlrp", dirs().replays);
         glob(str.c_str(), 0, NULL, &g.data);
 
         map<int64_t, const char*> files;
@@ -299,9 +300,8 @@ void ReplayBuilder::start() {
     if ((time(&t) < 0) || !localtime_r(&t, &tm) || (strftime(buffer, 1024, "%c", &tm) <= 0)) {
         return;
     }
-    pn::string path =
-            sfz2pn(format("{0}/Replay {1}.nlrp", pn2sfz(dirs().replays), utf8::decode(buffer)));
-    int fd = open(pn2sfz(path), O_WRONLY | O_CREAT | O_EXCL, 0644);
+    pn::string path = pn::format("{0}/Replay {1}.nlrp", dirs().replays, buffer);
+    int        fd   = open(pn2sfz(path), O_WRONLY | O_CREAT | O_EXCL, 0644);
     if (fd >= 0) {
         _file.reset(new ScopedFd(fd));
         tag_message(*_file, SCENARIO, _scenario);

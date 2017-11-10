@@ -18,6 +18,7 @@
 
 #include <getopt.h>
 #include <sys/time.h>
+#include <pn/file>
 #include <queue>
 #include <sfz/sfz.hpp>
 
@@ -102,7 +103,7 @@ void main(int argc, char* const* argv) {
 
     unique_ptr<SoundDriver> sound;
     if (output_dir.has()) {
-        pn::string out = sfz2pn(format("{0}/sound.log", pn2sfz(*output_dir)));
+        pn::string out = pn::format("{0}/sound.log", *output_dir);
         sound.reset(new LogSoundDriver(out));
     } else {
         sound.reset(new NullSoundDriver);

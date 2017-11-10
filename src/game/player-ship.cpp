@@ -18,6 +18,7 @@
 
 #include "game/player-ship.hpp"
 
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/gamepad.hpp"
@@ -109,7 +110,7 @@ pn::string hot_key_suffix(Handle<SpaceObject> space_object) {
 
     StringList      strings(KEY_LONG_NAMES);
     pn::string_view key_name = strings.at(keyNum - 1);
-    return sfz2pn(format(" < {0} >", pn2sfz(key_name)));
+    return pn::format(" < {0} >", key_name);
 };
 
 }  // namespace

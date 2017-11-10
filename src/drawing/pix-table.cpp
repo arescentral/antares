@@ -162,7 +162,7 @@ const PixMap&  NatePixTable::Frame::pix_map() const { return _pix_map; }
 const Texture& NatePixTable::Frame::texture() const { return _texture; }
 
 void NatePixTable::Frame::build(int16_t id, int frame) {
-    _texture = sys.video->texture(sfz2pn(format("/sprites/{0}.SMIV/{1}", id, frame)), _pix_map);
+    _texture = sys.video->texture(pn::format("/sprites/{0}.SMIV/{1}", id, frame), _pix_map);
 }
 
 }  // namespace antares

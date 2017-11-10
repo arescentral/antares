@@ -19,6 +19,7 @@
 #include "sound/openal-driver.hpp"
 
 #include <libmodplug/modplug.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "data/pn.hpp"
@@ -223,7 +224,7 @@ unique_ptr<Sound> OpenAlSoundDriver::open_sound(pn::string_view path) {
     unique_ptr<OpenAlSound> sound(new OpenAlSound(*this));
     for (const auto& fmt : fmts) {
         try {
-            Resource rsrc(sfz2pn(format("{0}{1}", pn2sfz(path), fmt.ext)));
+            Resource rsrc(pn::format("{0}{1}", path, fmt.ext));
             fmt.fn(rsrc.data(), *sound);
             return std::move(sound);
         } catch (Exception& e) {

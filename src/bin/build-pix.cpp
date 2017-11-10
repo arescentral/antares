@@ -18,6 +18,7 @@
 
 #include <fcntl.h>
 #include <getopt.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
@@ -113,7 +114,7 @@ int main(int argc, char* const* argv) {
         for (auto spec : specs) {
             pix.emplace_back(
                     unique_ptr<Card>(new DrawPix(nullptr, spec.first, spec.second)),
-                    sfz2pn(format("{0}.txt", dec(spec.first, 5))));
+                    pn::format("{0}.txt", sfz2pn(sfz::String(dec(spec.first, 5)))));
         }
         video.capture(pix);
     } else {
@@ -121,7 +122,7 @@ int main(int argc, char* const* argv) {
         for (auto spec : specs) {
             pix.emplace_back(
                     unique_ptr<Card>(new DrawPix(&video, spec.first, spec.second)),
-                    sfz2pn(format("{0}.png", dec(spec.first, 5))));
+                    pn::format("{0}.png", sfz2pn(sfz::String(dec(spec.first, 5)))));
         }
         video.capture(pix);
     }

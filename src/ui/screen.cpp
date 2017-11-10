@@ -59,7 +59,7 @@ InterfaceScreen::InterfaceScreen(pn::value_cref x, const Rect& bounds, bool full
 InterfaceScreen::~InterfaceScreen() {}
 
 pn::value InterfaceScreen::load_pn(pn::string_view id) {
-    Resource   rsrc(sfz2pn(sfz::format("interfaces/{0}.pn", pn2sfz(id))));
+    Resource   rsrc(pn::format("interfaces/{0}.pn", id));
     pn::string in = sfz2pn(utf8::decode(rsrc.data()));
     pn::value  x;
     if (!pn::parse(in.open(), x, nullptr)) {

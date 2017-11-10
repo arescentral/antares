@@ -19,6 +19,7 @@
 #include "ui/screens/options.hpp"
 
 #include <algorithm>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
@@ -311,10 +312,9 @@ void KeyControlScreen::overlay() const {
         const size_t key_two = _conflicts[0].second;
 
         // TODO(sfiera): permit localization.
-        pn::string text = sfz2pn(
-                format("{0}: {1} conflicts with {2}: {3}", pn2sfz(_tabs.at(get_tab_num(key_one))),
-                       pn2sfz(_keys.at(key_one)), pn2sfz(_tabs.at(get_tab_num(key_two))),
-                       pn2sfz(_keys.at(key_two))));
+        pn::string text = pn::format(
+                "{0}: {1} conflicts with {2}: {3}", _tabs.at(get_tab_num(key_one)),
+                _keys.at(key_one), _tabs.at(get_tab_num(key_two)), _keys.at(key_two));
 
         const TextRect& box    = dynamic_cast<const TextRect&>(item(CONFLICT_TEXT));
         Rect            bounds = box.bounds();

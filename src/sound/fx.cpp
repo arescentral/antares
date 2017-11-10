@@ -18,6 +18,7 @@
 
 #include "sound/fx.hpp"
 
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
@@ -220,7 +221,7 @@ void SoundFX::reset() {
         if (!sounds[i].soundHandle.get()) {
             auto id               = kFixedSounds[i];
             sounds[i].id          = id;
-            sounds[i].soundHandle = sys.audio->open_sound(sfz2pn(format("/sounds/{0}", id)));
+            sounds[i].soundHandle = sys.audio->open_sound(pn::format("/sounds/{0}", id));
         }
     }
 }
@@ -234,7 +235,7 @@ void SoundFX::load(int16_t id) {
     if (whichSound == sounds.size()) {
         sounds.emplace_back();
         sounds.back().id          = id;
-        sounds.back().soundHandle = sys.audio->open_sound(sfz2pn(format("/sounds/{0}", id)));
+        sounds.back().soundHandle = sys.audio->open_sound(pn::format("/sounds/{0}", id));
     }
 }
 

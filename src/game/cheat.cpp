@@ -19,6 +19,7 @@
 #include "game/cheat.hpp"
 
 #include <algorithm>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "data/pn.hpp"
@@ -128,7 +129,7 @@ void CheatFeedback(int16_t whichCheat, bool activate, Handle<Admiral> whichPlaye
     } else {
         feedback = sys.cheat.off.at(whichCheat - 1);
     }
-    Messages::add(sfz2pn(format("{0}{1}", pn2sfz(admiral_name), pn2sfz(feedback))));
+    Messages::add(pn::format("{0}{1}", admiral_name, feedback));
 }
 
 void CheatFeedbackPlus(
@@ -140,8 +141,7 @@ void CheatFeedbackPlus(
     } else {
         feedback = sys.cheat.off.at(whichCheat - 1);
     }
-    Messages::add(
-            sfz2pn(format("{0}{1}{2}", pn2sfz(admiral_name), pn2sfz(feedback), pn2sfz(extra))));
+    Messages::add(pn::format("{0}{1}{2}", admiral_name, feedback, extra));
 }
 
 }  // namespace antares

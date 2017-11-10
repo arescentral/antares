@@ -64,7 +64,7 @@ void recolor(PixMap& glyph_table) {
 }  // namespace
 
 Font::Font(pn::string_view name) {
-    pn::string path = sfz2pn(format("fonts/{0}.pn", pn2sfz(name)));
+    pn::string path = pn::format("fonts/{0}.pn", name);
     Resource   rsrc(path);
     pn::string rsrc_string = sfz2pn(utf8::decode(rsrc.data()));
     pn::value  x;

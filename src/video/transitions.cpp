@@ -29,8 +29,6 @@
 #include "ui/card.hpp"
 #include "video/driver.hpp"
 
-using sfz::format;
-
 namespace antares {
 
 namespace {

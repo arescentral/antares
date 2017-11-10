@@ -18,6 +18,7 @@
 
 #include "game/space-object.hpp"
 
+#include <pn/file>
 #include <set>
 #include <sfz/sfz.hpp>
 
@@ -706,13 +707,11 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
             pn::string_view destination_name = GetDestBalanceName(object->asDestination);
             if (owner.get()) {
                 pn::string_view new_owner_name(GetAdmiralName(object->owner));
-                Messages::add(sfz2pn(
-                        format("{0} captured by {1}.", pn2sfz(destination_name),
-                               pn2sfz(new_owner_name))));
+                Messages::add(
+                        pn::format("{0} captured by {1}.", destination_name, new_owner_name));
             } else if (old_owner.get()) {  // must be since can't both be -1
                 pn::string_view old_owner_name(GetAdmiralName(old_owner));
-                Messages::add(sfz2pn(format(
-                        "{0} lost by {1}.", pn2sfz(destination_name), pn2sfz(old_owner_name))));
+                Messages::add(pn::format("{0} lost by {1}.", destination_name, old_owner_name));
             }
         }
         RecalcAllAdmiralBuildData();
@@ -721,12 +720,10 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
             pn::string_view object_name = get_object_name(object->base);
             if (owner.get()) {
                 pn::string_view new_owner_name = GetAdmiralName(object->owner);
-                Messages::add(sfz2pn(format(
-                        "{0} captured by {1}.", pn2sfz(object_name), pn2sfz(new_owner_name))));
+                Messages::add(pn::format("{0} captured by {1}.", object_name, new_owner_name));
             } else if (old_owner.get()) {  // must be since can't both be -1
                 pn::string_view old_owner_name = GetAdmiralName(old_owner);
-                Messages::add(sfz2pn(
-                        format("{0} lost by {1}.", pn2sfz(object_name), pn2sfz(old_owner_name))));
+                Messages::add(pn::format("{0} lost by {1}.", object_name, old_owner_name));
             }
         }
     }

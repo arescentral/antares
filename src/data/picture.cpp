@@ -18,6 +18,8 @@
 
 #include "data/picture.hpp"
 
+#include <pn/file>
+
 #include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "game/sys.hpp"
@@ -29,7 +31,7 @@ using sfz::format;
 
 namespace antares {
 
-Picture::Picture(int32_t id, bool hidpi) : Picture(sfz2pn(format("pictures/{0}", id))) {}
+Picture::Picture(int32_t id, bool hidpi) : Picture(pn::format("pictures/{0}", id)) {}
 
 Picture::Picture(pn::string_view resource, bool hidpi)
         : ArrayPixMap(0, 0), _scale(hidpi ? sys.video->scale() : 1) {
@@ -37,7 +39,7 @@ Picture::Picture(pn::string_view resource, bool hidpi)
         try {
             _path = resource.copy();
             if (_scale > 1) {
-                _path += sfz2pn(format("@{0}x.png", _scale));
+                _path += pn::format("@{0}x.png", _scale);
             } else {
                 _path += ".png";
             }
@@ -55,8 +57,6 @@ Picture::Picture(pn::string_view resource, bool hidpi)
     }
 }
 
-Texture Picture::texture() const {
-    return sys.video->texture(sfz2pn(format("/{0}", pn2sfz(_path))), *this);
-}
+Texture Picture::texture() const { return sys.video->texture(pn::format("/{0}", _path), *this); }
 
 }  // namespace antares

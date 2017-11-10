@@ -19,7 +19,9 @@
 #include "data/resource.hpp"
 
 #include <stdio.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
+
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
 #include "data/pn.hpp"
@@ -39,7 +41,7 @@ namespace antares {
 static unique_ptr<MappedFile> load_first(
         pn::string_view resource_path, const std::vector<pn::string_view>& dirs) {
     for (const auto& dir : dirs) {
-        pn::string path = sfz2pn(sfz::format("{0}/{1}", pn2sfz(dir), pn2sfz(resource_path)));
+        pn::string path = pn::format("{0}/{1}", dir, resource_path);
         if (path::isfile(pn2sfz(path))) {
             return unique_ptr<MappedFile>(new MappedFile(pn2sfz(path)));
         }
@@ -55,7 +57,7 @@ static unique_ptr<MappedFile> load(pn::string_view resource_path) {
 }
 
 Resource::Resource(pn::string_view type, pn::string_view extension, int id)
-        : Resource(sfz2pn(format("{0}/{1}.{2}", pn2sfz(type), id, pn2sfz(extension)))) {}
+        : Resource(pn::format("{0}/{1}.{2}", type, id, extension)) {}
 
 Resource::Resource(pn::string_view resource_path) : _file(load(resource_path)) {}
 

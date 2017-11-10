@@ -90,7 +90,7 @@ ScenarioList::ScenarioList() {
 
     ScopedGlob            g;
     const pn::string_view info("scenario-info/128.nlAG");
-    pn::string str = sfz2pn(format("{0}/*/{1}", pn2sfz(dirs().scenarios), pn2sfz(info)));
+    pn::string            str = pn::format("{0}/*/{1}", dirs().scenarios, info);
     glob(str.c_str(), 0, NULL, &g.data);
 
     size_t prefix_len = dirs().scenarios.size() + 1;

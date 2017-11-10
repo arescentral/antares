@@ -17,6 +17,7 @@
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include <fcntl.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
@@ -76,8 +77,8 @@ class ShapeBuilder {
         ArrayPixMap pix(0, 0);
         draw(id, color, pix);
         if (_output_dir.has()) {
-            const pn::string path =
-                    sfz2pn(format("{0}/{1}/{2}.png", pn2sfz(*_output_dir), name(id), hex(color)));
+            const pn::string path = pn::format(
+                    "{0}/{1}/{2}.png", *_output_dir, name(id), sfz2pn(sfz::String(hex(color))));
             makedirs(dirname(pn2sfz(path)), 0755);
             ScopedFd fd(open(pn2sfz(path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
             write(fd, pix);

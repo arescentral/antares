@@ -336,24 +336,24 @@ bool convert_smiv(
         alphatize(image);
     }
 
-    pn::string sprite_dir = sfz2pn(format("{0}/{1}", pn2sfz(dir), id));
+    pn::string sprite_dir = pn::format("{0}/{1}", dir, id);
     makedirs(pn2sfz(sprite_dir), 0755);
 
     {
-        pn::string output = sfz2pn(format("{0}/{1}/image.png", pn2sfz(dir), id));
+        pn::string output = pn::format("{0}/{1}/image.png", dir, id);
         ScopedFd   fd(open(pn2sfz(output), O_WRONLY | O_CREAT | O_TRUNC, 0644));
         write(fd, Bytes(image));
     }
 
     {
-        pn::string output = sfz2pn(format("{0}/{1}/overlay.png", pn2sfz(dir), id));
+        pn::string output = pn::format("{0}/{1}/overlay.png", dir, id);
         ScopedFd   fd(open(pn2sfz(output), O_WRONLY | O_CREAT | O_TRUNC, 0644));
         write(fd, Bytes(overlay));
     }
 
     pn::string string(
-            pn::dump(pn::map{{"image", sfz2pn(format("sprites/{0}/image.png", id))},
-                             {"overlay", sfz2pn(format("sprites/{0}/overlay.png", id))},
+            pn::dump(pn::map{{"image", pn::format("sprites/{0}/image.png", id)},
+                             {"overlay", pn::format("sprites/{0}/overlay.png", id)},
                              {"rows", rows},
                              {"cols", cols},
                              {"center", pn_point(Point(-max_bounds.left, -max_bounds.top))},
@@ -482,16 +482,14 @@ void DataExtractor::set_plugin_file(pn::string_view path) {
 
     // Copy it to $DOWNLOADS/$IDENTIFIER.antaresplugin.  This is where
     // extract_scenario() will expect it later.
-    pn::string out_path = sfz2pn(
-            format("{0}/{1}.antaresplugin", pn2sfz(_downloads_dir), pn2sfz(found_scenario)));
+    pn::string out_path = pn::format("{0}/{1}.antaresplugin", _downloads_dir, found_scenario);
     if (path != out_path) {
         makedirs(path::dirname(pn2sfz(out_path)), 0755);
         MappedFile file(pn2sfz(path));
         ScopedFd   fd(open(pn2sfz(out_path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
         write(fd, file.data());
     }
-    pn::string scenario_dir =
-            sfz2pn(format("{0}/{1}", pn2sfz(_output_dir), pn2sfz(found_scenario)));
+    pn::string scenario_dir = pn::format("{0}/{1}", _output_dir, found_scenario);
     if (path::exists(pn2sfz(scenario_dir))) {
         rmtree(pn2sfz(scenario_dir));
     }
@@ -514,8 +512,7 @@ void DataExtractor::extract_factory_scenario(Observer* observer) const {
                 observer, kDownloadBase, "Ares", "1.2.0",
                 (Sha1::Digest){{0x246c393c, 0xa598af68, 0xa58cfdd1, 0x8e1601c1, 0xf4f30931}});
 
-        pn::string scenario_dir =
-                sfz2pn(format("{0}/{1}", pn2sfz(_output_dir), kFactoryScenarioIdentifier));
+        pn::string scenario_dir = pn::format("{0}/{1}", _output_dir, kFactoryScenarioIdentifier);
         rmtree(pn2sfz(scenario_dir));
         extract_original(observer, "Ares-1.2.0.zip");
         write_version(kFactoryScenarioIdentifier);
@@ -524,8 +521,7 @@ void DataExtractor::extract_factory_scenario(Observer* observer) const {
 
 void DataExtractor::extract_plugin_scenario(Observer* observer) const {
     if ((_scenario != kFactoryScenarioIdentifier) && !scenario_current(_scenario)) {
-        pn::string scenario_dir =
-                sfz2pn(format("{0}/{1}", pn2sfz(_output_dir), pn2sfz(_scenario)));
+        pn::string scenario_dir = pn::format("{0}/{1}", _output_dir, _scenario);
         rmtree(pn2sfz(scenario_dir));
         extract_plugin(observer);
         write_version(_scenario);
@@ -533,7 +529,7 @@ void DataExtractor::extract_plugin_scenario(Observer* observer) const {
 }
 
 bool DataExtractor::scenario_current(pn::string_view scenario) const {
-    pn::string path = sfz2pn(format("{0}/{1}/version", pn2sfz(_output_dir), pn2sfz(scenario)));
+    pn::string path = pn::format("{0}/{1}/version", _output_dir, scenario);
     BytesSlice version(kVersion);
     try {
         MappedFile file(pn2sfz(path));
@@ -546,8 +542,7 @@ bool DataExtractor::scenario_current(pn::string_view scenario) const {
 void DataExtractor::download(
         Observer* observer, pn::string_view base, pn::string_view name, pn::string_view version,
         const Sha1::Digest& expected_digest) const {
-    pn::string full_path = sfz2pn(
-            format("{0}/{1}-{2}.zip", pn2sfz(_downloads_dir), pn2sfz(name), pn2sfz(version)));
+    pn::string full_path = pn::format("{0}/{1}-{2}.zip", _downloads_dir, name, version);
 
     // Don't download `file` if it has already been downloaded.  If there is a regular file at
     // `full_path` and it has the expected digest, then return without doing anything.  Otherwise,
@@ -564,11 +559,9 @@ void DataExtractor::download(
         rmtree(pn2sfz(full_path));
     }
 
-    pn::string url =
-            sfz2pn(format("{0}/{1}/{1}-{2}.zip", pn2sfz(base), pn2sfz(name), pn2sfz(version)));
+    pn::string url = pn::format("{0}/{1}/{1}-{2}.zip", base, name, version);
 
-    pn::string status =
-            sfz2pn(format("Downloading {0}-{1}.zip...", pn2sfz(name), pn2sfz(version)));
+    pn::string status = pn::format("Downloading {0}-{1}.zip...", name, version);
     observer->status(status);
 
     // Download the file from `url`.  Check its digest when it has been downloaded; if it is not
@@ -591,8 +584,7 @@ void DataExtractor::download(
 }
 
 void DataExtractor::write_version(pn::string_view scenario_identifier) const {
-    pn::string path =
-            sfz2pn(format("{0}/{1}/version", pn2sfz(_output_dir), pn2sfz(scenario_identifier)));
+    pn::string path = pn::format("{0}/{1}/version", _output_dir, scenario_identifier);
     makedirs(path::dirname(pn2sfz(path)), 0755);
     ScopedFd   fd(open(pn2sfz(path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
     BytesSlice version(kVersion);
@@ -600,9 +592,9 @@ void DataExtractor::write_version(pn::string_view scenario_identifier) const {
 }
 
 void DataExtractor::extract_original(Observer* observer, pn::string_view file) const {
-    pn::string status = sfz2pn(format("Extracting {0}...", pn2sfz(file)));
+    pn::string status = pn::format("Extracting {0}...", file);
     observer->status(status);
-    pn::string full_path = sfz2pn(format("{0}/{1}", pn2sfz(_downloads_dir), pn2sfz(file)));
+    pn::string full_path = pn::format("{0}/{1}", _downloads_dir, file);
     ZipArchive archive(pn2sfz(full_path), 0);
 
     rezin::Options options;
@@ -622,9 +614,9 @@ void DataExtractor::extract_original(Observer* observer, pn::string_view file) c
             const ResourceType& type = rsrc.at(conversion.resource);
             for (const ResourceEntry& entry : type) {
                 Bytes      data;
-                pn::string output = sfz2pn(format(
-                        "{0}/{1}/{2}/{3}.{4}", pn2sfz(_output_dir), kFactoryScenarioIdentifier,
-                        conversion.output_directory, entry.id(), conversion.output_extension));
+                pn::string output = pn::format(
+                        "{0}/{1}/{2}/{3}.{4}", _output_dir, kFactoryScenarioIdentifier,
+                        conversion.output_directory, entry.id(), conversion.output_extension);
                 if (conversion.convert(
                             sfz2pn(path::dirname(pn2sfz(output))), true, entry.id(), entry.data(),
                             data)) {
@@ -638,10 +630,10 @@ void DataExtractor::extract_original(Observer* observer, pn::string_view file) c
 }
 
 void DataExtractor::extract_plugin(Observer* observer) const {
-    pn::string file   = sfz2pn(format("{0}.antaresplugin", pn2sfz(_scenario)));
-    pn::string status = sfz2pn(format("Extracting {0}...", pn2sfz(file)));
+    pn::string file   = pn::format("{0}.antaresplugin", _scenario);
+    pn::string status = pn::format("Extracting {0}...", file);
     observer->status(status);
-    pn::string full_path = sfz2pn(format("{0}/{1}", pn2sfz(_downloads_dir), pn2sfz(file)));
+    pn::string full_path = pn::format("{0}/{1}", _downloads_dir, file);
     ZipArchive archive(pn2sfz(full_path), 0);
 
     rezin::Options options;
@@ -679,9 +671,9 @@ void DataExtractor::extract_plugin(Observer* observer) const {
         for (const ResourceFile::ExtractedResource& conversion : kPluginFiles) {
             if (conversion.resource == resource_type) {
                 Bytes      data;
-                pn::string output = sfz2pn(
-                        format("{0}/{1}/{2}/{3}.{4}", pn2sfz(_output_dir), pn2sfz(_scenario),
-                               conversion.output_directory, id, conversion.output_extension));
+                pn::string output = pn::format(
+                        "{0}/{1}/{2}/{3}.{4}", _output_dir, _scenario, conversion.output_directory,
+                        id, conversion.output_extension);
                 if (conversion.convert(
                             sfz2pn(path::dirname(pn2sfz(output))), false, id, file.data(), data)) {
                     makedirs(path::dirname(pn2sfz(output)), 0755);
