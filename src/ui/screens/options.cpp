@@ -25,6 +25,7 @@
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "data/interface.hpp"
+#include "data/pn.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/styled-text.hpp"
@@ -312,8 +313,9 @@ void KeyControlScreen::overlay() const {
 
         // TODO(sfiera): permit localization.
         String text(
-                format("{0}: {1} conflicts with {2}: {3}", _tabs.at(get_tab_num(key_one)),
-                       _keys.at(key_one), _tabs.at(get_tab_num(key_two)), _keys.at(key_two)));
+                format("{0}: {1} conflicts with {2}: {3}", pn2sfz(_tabs.at(get_tab_num(key_one))),
+                       pn2sfz(_keys.at(key_one)), pn2sfz(_tabs.at(get_tab_num(key_two))),
+                       pn2sfz(_keys.at(key_two))));
 
         const TextRect& box    = dynamic_cast<const TextRect&>(item(CONFLICT_TEXT));
         Rect            bounds = box.bounds();

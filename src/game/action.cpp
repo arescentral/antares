@@ -23,6 +23,7 @@
 
 #include "data/base-object.hpp"
 #include "data/plugin.hpp"
+#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
@@ -651,8 +652,8 @@ static void set_zoom(Handle<Action> action, Handle<SpaceObject> focus) {
     if (action->argument.zoom.zoomLevel != g.zoom) {
         g.zoom = static_cast<ZoomType>(action->argument.zoom.zoomLevel);
         sys.sound.click();
-        StringList  strings(kMessageStringID);
-        StringSlice string = strings.at(g.zoom + kZoomStringOffset - 1);
+        StringList strings(kMessageStringID);
+        String     string = pn2sfz(strings.at(g.zoom + kZoomStringOffset - 1));
         Messages::set_status(string, kStatusLabelColor);
     }
 }

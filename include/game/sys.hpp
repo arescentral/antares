@@ -19,6 +19,7 @@
 #ifndef ANTARES_GAME_SYS_HPP_
 #define ANTARES_GAME_SYS_HPP_
 
+#include <pn/string>
 #include <sfz/sfz.hpp>
 #include <vector>
 
@@ -42,10 +43,10 @@ struct SystemGlobals {
         const Font* small_button;
     } fonts;
 
-    std::vector<sfz::String> key_names;
-    std::vector<sfz::String> key_long_names;
-    std::vector<sfz::String> gamepad_names;
-    std::vector<sfz::String> gamepad_long_names;
+    std::vector<pn::string> key_names;
+    std::vector<pn::string> key_long_names;
+    std::vector<pn::string> gamepad_names;
+    std::vector<pn::string> gamepad_long_names;
 
     enum { ROT_TABLE_SIZE = 720 };
     int32_t rot_table[ROT_TABLE_SIZE];
@@ -55,9 +56,9 @@ struct SystemGlobals {
     PrefsDriver* prefs = nullptr;
 
     struct {
-        std::vector<sfz::String> codes;
-        std::vector<sfz::String> on;
-        std::vector<sfz::String> off;
+        std::vector<pn::string> codes;
+        std::vector<pn::string> on;
+        std::vector<pn::string> off;
     } cheat;
 
     SoundFX sound;

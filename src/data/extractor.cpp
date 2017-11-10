@@ -21,12 +21,16 @@
 #include <fcntl.h>
 #include <math.h>
 #include <stdint.h>
+#include <pn/array>
+#include <pn/file>
+#include <pn/string>
 #include <rezin/rezin.hpp>
 #include <set>
 #include <sfz/sfz.hpp>
 #include <zipxx/zipxx.hpp>
 
 #include "config/dirs.hpp"
+#include "data/pn.hpp"
 #include "data/replay.hpp"
 #include "drawing/pix-map.hpp"
 #include "math/geometry.hpp"
@@ -134,10 +138,18 @@ bool convert_pict(StringSlice, bool, int16_t, BytesSlice data, WriteTarget out) 
     return false;
 }
 
+static pn::array pn_str(const StringList& str_list) {
+    pn::array a;
+    for (const std::shared_ptr<const String>& s : str_list.strings) {
+        a.push_back(sfz2pn(*s));
+    }
+    return a;
+}
+
 bool convert_str(StringSlice, bool, int16_t, BytesSlice data, WriteTarget out) {
     Options    options;
     StringList list(data, options);
-    String     string(pretty_print(json(list)));
+    String     string(pn2sfz(pn::dump(pn::value{pn_str(list)})));
     write(out, utf8::encode(string));
     return true;
 }
@@ -368,7 +380,7 @@ static const ResourceFile kResourceFiles[] = {
                 "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Scenarios",
                 {
                         {"PICT", "pictures", "png", convert_pict},
-                        {"STR#", "strings", "json", convert_str},
+                        {"STR#", "strings", "pn", convert_str},
                         {"TEXT", "text", "txt", convert_text},
                         {"bsob", "objects", "bsob", verbatim},
                         {"nlAG", "scenario-info", "nlAG", verbatim},
@@ -404,7 +416,7 @@ static const ResourceFile::ExtractedResource kPluginFiles[] = {
         {"PICT", "pictures", "png", convert_pict},
         {"NLRP", "replays", "NLRP", convert_nlrp},
         {"SMIV", "sprites", "json", convert_smiv},
-        {"STR#", "strings", "json", convert_str},
+        {"STR#", "strings", "pn", convert_str},
         {"TEXT", "text", "txt", convert_text},
         {"bsob", "objects", "bsob", verbatim},
         {"nlAG", "scenario-info", "nlAG", verbatim},
@@ -418,7 +430,7 @@ static const ResourceFile::ExtractedResource kPluginFiles[] = {
 };
 
 static const char kDownloadBase[] = "http://downloads.arescentral.org";
-static const char kVersion[]      = "14\n";
+static const char kVersion[]      = "15\n";
 
 static const char kPluginVersionFile[]    = "data/version";
 static const char kPluginVersion[]        = "1\n";

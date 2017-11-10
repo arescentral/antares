@@ -21,6 +21,7 @@
 #include <sfz/sfz.hpp>
 #include <vector>
 
+#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
@@ -55,13 +56,14 @@ const usecs kTypingDelay      = kMajorTick;
 const int   kScoreTableHeight = 120;
 const int   kTextWidth        = 300;
 
-void string_replace(String* s, const String& in, const PrintItem& out) {
-    size_t index = s->find(in);
+void string_replace(String* s, pn::string_view in, const PrintItem& out) {
+    sfz::String sfz_in = pn2sfz(in);
+    size_t      index  = s->find(sfz_in);
     while (index != String::npos) {
         String out_string;
         out.print_to(out_string);
         s->replace(index, in.size(), out_string);
-        index = s->find(in, index + 1);
+        index = s->find(sfz_in, index + 1);
     }
 }
 
@@ -259,7 +261,7 @@ String DebriefingScreen::build_score_text(
         string_replace(&text, strings.at(3), secs_string);
     } else {
         StringList data_strings(6002);
-        string_replace(&text, strings.at(2), data_strings.at(8));  // = "N/A"
+        string_replace(&text, strings.at(2), pn2sfz(data_strings.at(8)));  // = "N/A"
         string_replace(&text, strings.at(3), "");
     }
     string_replace(&text, strings.at(4), your_loss);

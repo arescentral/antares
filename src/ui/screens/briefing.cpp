@@ -200,7 +200,7 @@ static void update_mission_brief_point(
             lines.push_back(make_pair(p7, p8));
         }
     }
-    dataItem->label = sfz2pn(StringList(headerID).at(headerNumber - 1));
+    dataItem->label = StringList(headerID).at(headerNumber - 1).copy();
     Rect newRect;
     GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
     populate_inline_picts(dataItem->bounds(), text, dataItem->style, inlinePict);

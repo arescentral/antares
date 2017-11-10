@@ -20,6 +20,7 @@
 #define ANTARES_CONFIG_GAMEPAD_HPP_
 
 #include <stdint.h>
+#include <pn/string>
 #include <sfz/sfz.hpp>
 
 namespace antares {
@@ -58,7 +59,7 @@ struct Gamepad {
         LONG_NAMES = 1003,
     };
 
-    static int16_t num(sfz::StringSlice name);
+    static int16_t num(pn::string_view name);
     static bool    name(int16_t button, sfz::String& out);
 };
 

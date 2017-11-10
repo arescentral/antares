@@ -19,6 +19,7 @@
 #include "game/admiral.hpp"
 
 #include "data/base-object.hpp"
+#include "data/pn.hpp"
 #include "data/string-list.hpp"
 #include "game/cheat.hpp"
 #include "game/globals.hpp"
@@ -113,7 +114,7 @@ Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Level::Playe
     a->_earning_power = player.earningPower;
     a->_race          = player.playerRace;
     if ((player.nameResID >= 0)) {
-        a->_name.assign(StringList(player.nameResID).at(player.nameStrNum - 1));
+        a->_name = pn2sfz(StringList(player.nameResID).at(player.nameStrNum - 1));
         if (a->_name.size() > kAdmiralNameLen) {
             a->_name.resize(kAdmiralNameLen);
         }
@@ -156,7 +157,7 @@ Handle<Destination> MakeNewDestination(
     }
 
     if ((nameResID >= 0)) {
-        d->name.assign(StringList(nameResID).at(nameStrNum - 1));
+        d->name = pn2sfz(StringList(nameResID).at(nameStrNum - 1));
         if (d->name.size() > kDestinationNameLen) {
             d->name.resize(kDestinationNameLen);
         }

@@ -30,6 +30,7 @@
 #include "config/preferences.hpp"
 #include "data/interface.hpp"
 #include "data/picture.hpp"
+#include "data/pn.hpp"
 #include "data/races.hpp"
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
@@ -106,12 +107,13 @@ enum {
 
 const int16_t kHelpScreenKeyStringID = 6003;
 
-int find_replace(String& data, int pos, const StringSlice& search, const PrintItem& replace) {
-    size_t at = data.find(search, pos);
+int find_replace(String& data, int pos, pn::string_view search, const PrintItem& replace) {
+    String sfz_search = pn2sfz(search);
+    size_t at         = data.find(sfz_search, pos);
     if (at != String::npos) {
         String replace_string;
         replace.print_to(replace_string);
-        data.replace(at, search.size(), replace_string);
+        data.replace(at, sfz_search.size(), replace_string);
     }
     return at;
 }
@@ -119,7 +121,7 @@ int find_replace(String& data, int pos, const StringSlice& search, const PrintIt
 }  // namespace
 
 void CreateWeaponDataText(
-        String* text, Handle<BaseObject> weaponObject, const StringSlice& weaponName);
+        String* text, Handle<BaseObject> weaponObject, pn::string_view weaponName);
 
 //
 // BothCommandAndQ:
@@ -150,11 +152,11 @@ void CreateObjectDataText(String* text, Handle<BaseObject> object) {
     // *** Replace place-holders in text with real data, using the fabulous find_replace routine
     // an object or a ship?
     if (object->attributes & kCanThink) {
-        const StringSlice& name = values.at(0);
-        find_replace(data, 0, keys.at(kShipOrObjectStringNum), name);
+        pn::string_view name = values.at(0);
+        find_replace(data, 0, keys.at(kShipOrObjectStringNum), pn2sfz(name));
     } else {
-        const StringSlice& name = values.at(1);
-        find_replace(data, 0, keys.at(kShipOrObjectStringNum), name);
+        pn::string_view name = values.at(1);
+        find_replace(data, 0, keys.at(kShipOrObjectStringNum), pn2sfz(name));
     }
 
     // ship name
@@ -190,7 +192,7 @@ void CreateObjectDataText(String* text, Handle<BaseObject> object) {
 }
 
 void CreateWeaponDataText(
-        String* text, Handle<BaseObject> weaponObject, const StringSlice& weaponName) {
+        String* text, Handle<BaseObject> weaponObject, pn::string_view weaponName) {
     int32_t mostDamage;
     bool    isGuided = false;
 
@@ -223,7 +225,7 @@ void CreateWeaponDataText(
     StringList values(kShipDataNameID);
 
     // weapon name #
-    find_replace(data, 0, keys.at(kWeaponNumberStringNum), weaponName);
+    find_replace(data, 0, keys.at(kWeaponNumberStringNum), pn2sfz(weaponName));
 
     // weapon name
     {
@@ -231,22 +233,22 @@ void CreateWeaponDataText(
         find_replace(data, 0, keys.at(kWeaponNameStringNum), name);
     }
 
-    const StringSlice& yes  = values.at(kShipDataYesStringNum);
-    const StringSlice& no   = values.at(kShipDataNoStringNum);
-    const StringSlice& dash = values.at(kShipDataDashStringNum);
+    pn::string_view yes  = values.at(kShipDataYesStringNum);
+    pn::string_view no   = values.at(kShipDataNoStringNum);
+    pn::string_view dash = values.at(kShipDataDashStringNum);
 
     // is guided
     if (isGuided) {
-        find_replace(data, 0, keys.at(kWeaponGuidedStringNum), yes);
+        find_replace(data, 0, keys.at(kWeaponGuidedStringNum), pn2sfz(yes));
     } else {
-        find_replace(data, 0, keys.at(kWeaponGuidedStringNum), no);
+        find_replace(data, 0, keys.at(kWeaponGuidedStringNum), pn2sfz(no));
     }
 
     // is autotarget
     if (weaponObject->attributes & kAutoTarget) {
-        find_replace(data, 0, keys.at(kWeaponAutoTargetStringNum), yes);
+        find_replace(data, 0, keys.at(kWeaponAutoTargetStringNum), pn2sfz(yes));
     } else {
-        find_replace(data, 0, keys.at(kWeaponAutoTargetStringNum), no);
+        find_replace(data, 0, keys.at(kWeaponAutoTargetStringNum), pn2sfz(no));
     }
 
     // range
@@ -255,7 +257,7 @@ void CreateWeaponDataText(
     if (mostDamage > 0) {
         find_replace(data, 0, keys.at(kWeaponDamageStringNum), mostDamage);
     } else {
-        find_replace(data, 0, keys.at(kWeaponDamageStringNum), dash);
+        find_replace(data, 0, keys.at(kWeaponDamageStringNum), pn2sfz(dash));
     }
     print(*text, data);
 }
@@ -265,8 +267,8 @@ void Replace_KeyCode_Strings_With_Actual_Key_Names(String* text, int16_t resID, 
     StringList values(resID);
 
     for (int i = 0; i < kKeyExtendedControlNum; ++i) {
-        const StringSlice& search = keys.at(i);
-        String             replace(values.at(sys.prefs->key(i) - 1));
+        pn::string_view search  = keys.at(i);
+        String          replace = pn2sfz(values.at(sys.prefs->key(i) - 1));
         // First, pad to the desired width.
         if (replace.size() < padTo) {
             replace.resize(padTo, ' ');
@@ -276,7 +278,7 @@ void Replace_KeyCode_Strings_With_Actual_Key_Names(String* text, int16_t resID, 
         // StyledText.set_retro_text(), which interprets backslashes
         // specially.  Don't do this until after padding, though.
         size_t pos = 0;
-        while ((pos = find_replace(replace, pos, "\\", "\\\\")) != String::npos) {
+        while ((pos = find_replace(replace, pos, pn::string{"\\"}, "\\\\")) != String::npos) {
             pos += 2;  // Don't find the just-inserted backslashes again.
         }
 

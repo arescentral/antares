@@ -18,82 +18,43 @@
 
 #include "data/string-list.hpp"
 
+#include <pn/array>
+#include <pn/file>
+#include <pn/value>
 #include <sfz/sfz.hpp>
 
+#include "data/pn.hpp"
 #include "data/resource.hpp"
 
 using sfz::Bytes;
 using sfz::BytesSlice;
 using sfz::Exception;
-using sfz::Json;
-using sfz::JsonDefaultVisitor;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
 using sfz::quote;
 using sfz::read;
-using sfz::string_to_json;
 using std::vector;
 
 namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-namespace {
-
-struct StringListVisitor : public JsonDefaultVisitor {
-    enum State {
-        NEW,
-        ARRAY,
-        DONE,
-    };
-
-    StringListVisitor(State& state, vector<String>& vec) : _state(state), _vec(vec) {
-        _state = NEW;
-    }
-
-    virtual void visit_array(const std::vector<Json>& value) const {
-        switch (_state) {
-            case NEW:
-                _state = ARRAY;
-                for (size_t i = 0; i < value.size(); ++i) {
-                    value[i].accept(*this);
-                }
-                _state = DONE;
-                break;
-            default: return JsonDefaultVisitor::visit_array(value);
-        }
-    }
-
-    virtual void visit_string(const StringSlice& value) const {
-        switch (_state) {
-            case ARRAY: _vec.emplace_back(value); break;
-            default: return JsonDefaultVisitor::visit_string(value);
-        }
-    }
-
-    virtual void visit_default(const char* type) const {
-        throw Exception(format("got unexpected JSON {0}", type));
-    }
-
-    State&          _state;
-    vector<String>& _vec;
-};
-
-}  // namespace
-
 StringList::StringList(int id) {
-    Resource rsrc("strings", "json", id);
-    String   in(utf8::decode(rsrc.data()));
-    Json     strings;
-    if (!string_to_json(in, strings)) {
-        throw Exception(sfz::format("Couldn't parse strings/{0}.json", id));
+    Resource  rsrc("strings", "pn", id);
+    String    in(utf8::decode(rsrc.data()));
+    pn::value strings;
+    if (!pn::parse(sfz2pn(in).open(), strings, nullptr)) {
+        throw Exception(sfz::format("Couldn't parse strings/{0}.pn", id));
     }
-    StringListVisitor::State state;
-    strings.accept(StringListVisitor(state, _strings));
+    pn::array_cref l = strings.as_array();
+    for (pn::value_cref x : l) {
+        pn::string_view s = x.as_string();
+        _strings.push_back(s.copy());
+    }
 }
 
-ssize_t StringList::index_of(const StringSlice& result) const {
+ssize_t StringList::index_of(pn::string_view result) const {
     for (size_t i = 0; i < size(); ++i) {
         if (at(i) == result) {
             return i;
@@ -104,6 +65,6 @@ ssize_t StringList::index_of(const StringSlice& result) const {
 
 size_t StringList::size() const { return _strings.size(); }
 
-const String& StringList::at(size_t index) const { return _strings.at(index); }
+pn::string_view StringList::at(size_t index) const { return _strings.at(index); }
 
 }  // namespace antares

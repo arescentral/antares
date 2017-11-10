@@ -101,6 +101,7 @@ source_set("libantares-config") {
     "src/config/preferences.cpp",
   ]
   public_deps = [
+    ":libantares-data",
     "//ext/libsfz",
   ]
   configs += [ ":antares_private" ]
@@ -227,6 +228,7 @@ source_set("libantares-game") {
   public_deps = [
     ":libantares-drawing",
     "//ext/libsfz",
+    "//ext/procyon:procyon-cpp",
   ]
   configs += [ ":antares_private" ]
 }
@@ -247,6 +249,7 @@ source_set("libantares-math") {
     "src/math/special.cpp",
   ]
   public_deps = [
+    ":libantares-game",
     "//ext/libsfz",
   ]
   configs += [ ":antares_private" ]
@@ -266,6 +269,7 @@ source_set("libantares-sound") {
     "src/sound/sndfile.cpp",
   ]
   public_deps = [
+    ":libantares-game",
     "//ext/libmodplug",
     "//ext/libsfz",
     "//ext/libsndfile",

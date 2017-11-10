@@ -19,6 +19,7 @@
 #include "data/plugin.hpp"
 
 #include "data/base-object.hpp"
+#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
 #include "lang/defines.hpp"
@@ -74,7 +75,7 @@ void PluginInit() {
 
     StringList level_names(kLevelNameID);
     for (auto& level : plug.levels) {
-        level.name.assign(level_names.at(level.levelNameStrNum - 1));
+        level.name = pn2sfz(level_names.at(level.levelNameStrNum - 1));
     }
     for (int i : range(plug.levels.size())) {
         while (i != plug.levels[i].levelNameStrNum - 1) {
@@ -86,8 +87,8 @@ void PluginInit() {
     StringList object_names(kSpaceObjectNameResID);
     StringList object_short_names(kSpaceObjectShortNameResID);
     for (size_t i = 0; i < plug.objects.size(); ++i) {
-        plug.objects[i].name.assign(object_names.at(i));
-        plug.objects[i].short_name.assign(object_short_names.at(i));
+        plug.objects[i].name       = pn2sfz(object_names.at(i));
+        plug.objects[i].short_name = pn2sfz(object_short_names.at(i));
     }
 }
 

@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <sfz/sfz.hpp>
 
+#include "data/pn.hpp"
 #include "data/string-list.hpp"
 #include "game/admiral.hpp"
 #include "game/globals.hpp"
@@ -60,7 +61,7 @@ int16_t GetCheatNumFromString(const StringSlice& s) {
     for (Rune r : s) {
         code_string.append(1, r + kCheatCodeValue);
     }
-    auto it = std::find(sys.cheat.codes.begin(), sys.cheat.codes.end(), code_string);
+    auto it = std::find(sys.cheat.codes.begin(), sys.cheat.codes.end(), sfz2pn(code_string));
     if (it == sys.cheat.codes.end()) {
         return -1;
     }
@@ -124,9 +125,9 @@ void CheatFeedback(int16_t whichCheat, bool activate, Handle<Admiral> whichPlaye
     String admiral_name(GetAdmiralName(whichPlayer));
     String feedback;
     if (activate) {
-        feedback.assign(sys.cheat.on.at(whichCheat - 1));
+        feedback = pn2sfz(sys.cheat.on.at(whichCheat - 1));
     } else {
-        feedback.assign(sys.cheat.off.at(whichCheat - 1));
+        feedback = pn2sfz(sys.cheat.off.at(whichCheat - 1));
     }
     Messages::add(format("{0}{1}", admiral_name, feedback));
 }
@@ -136,9 +137,9 @@ void CheatFeedbackPlus(
     String admiral_name(GetAdmiralName(whichPlayer));
     String feedback;
     if (activate) {
-        feedback.assign(sys.cheat.on.at(whichCheat - 1));
+        feedback = pn2sfz(sys.cheat.on.at(whichCheat - 1));
     } else {
-        feedback.assign(sys.cheat.off.at(whichCheat - 1));
+        feedback = pn2sfz(sys.cheat.off.at(whichCheat - 1));
     }
     Messages::add(format("{0}{1}{2}", admiral_name, feedback, extra));
 }

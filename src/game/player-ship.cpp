@@ -24,6 +24,7 @@
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
 #include "data/base-object.hpp"
+#include "data/pn.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
@@ -113,8 +114,8 @@ void print_to(PrintTarget out, const HotKeySuffix& suffix) {
         return;
     }
 
-    StringList  strings(KEY_LONG_NAMES);
-    StringSlice key_name = strings.at(keyNum - 1);
+    StringList strings(KEY_LONG_NAMES);
+    String     key_name = pn2sfz(strings.at(keyNum - 1));
     print(out, format(" < {0} >", key_name));
 };
 
@@ -176,8 +177,8 @@ static void zoom_to(ZoomType zoom) {
     if (g.zoom != zoom) {
         g.zoom = zoom;
         sys.sound.click();
-        StringList  strings(kMessageStringID);
-        StringSlice string = strings.at(g.zoom + kZoomStringOffset - 1);
+        StringList strings(kMessageStringID);
+        String     string = pn2sfz(strings.at(g.zoom + kZoomStringOffset - 1));
         Messages::set_status(string, kStatusLabelColor);
     }
 }
@@ -887,16 +888,16 @@ void TogglePlayerAutoPilot(Handle<SpaceObject> flagship) {
     if (flagship->attributes & kOnAutoPilot) {
         flagship->attributes &= ~kOnAutoPilot;
         if ((flagship->owner == g.admiral) && (flagship->attributes & kIsHumanControlled)) {
-            StringList  strings(kMessageStringID);
-            StringSlice string = strings.at(kAutoPilotOffString - 1);
+            StringList strings(kMessageStringID);
+            String     string = pn2sfz(strings.at(kAutoPilotOffString - 1));
             Messages::set_status(string, kStatusLabelColor);
         }
     } else {
         SetObjectDestination(flagship);
         flagship->attributes |= kOnAutoPilot;
         if ((flagship->owner == g.admiral) && (flagship->attributes & kIsHumanControlled)) {
-            StringList  strings(kMessageStringID);
-            StringSlice string = strings.at(kAutoPilotOnString - 1);
+            StringList strings(kMessageStringID);
+            String     string = pn2sfz(strings.at(kAutoPilotOnString - 1));
             Messages::set_status(string, kStatusLabelColor);
         }
     }

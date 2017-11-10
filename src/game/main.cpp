@@ -27,6 +27,7 @@
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
 #include "data/plugin.hpp"
+#include "data/pn.hpp"
 #include "data/replay.hpp"
 #include "data/scenario-list.hpp"
 #include "data/string-list.hpp"
@@ -289,7 +290,7 @@ class PauseScreen : public Card {
   public:
     PauseScreen() {
         const StringList list(3100);
-        _pause_string.assign(list.at(10));
+        _pause_string = pn2sfz(list.at(10));
         int32_t width = sys.fonts.title->string_width(_pause_string);
         Rect    bounds(0, 0, width, sys.fonts.title->height);
         bounds.center_in(play_screen());

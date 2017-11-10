@@ -84,7 +84,7 @@ static interfaceStyleType style(pn::value_cref x) {
 
 static int16_t key(pn::value_cref x) {
     int k;
-    if (!GetKeyNameNum(pn2sfz(x.as_string()), k)) {
+    if (!GetKeyNameNum(x.as_string(), k)) {
         k = 0;
     }
     return k;
@@ -114,8 +114,7 @@ vector<unique_ptr<InterfaceItem>> interface_items(int id0, pn::array_cref l) {
         uint8_t            hue      = antares::hue(sub.get("hue"));
         interfaceStyleType style    = antares::style(sub.get("style"));
         int16_t            key      = sub.has("key") ? antares::key(sub.get("key")) : 0;
-        int16_t            gamepad =
-                sub.has("gamepad") ? Gamepad::num(pn2sfz(sub.get("gamepad").as_string())) : 0;
+        int16_t gamepad = sub.has("gamepad") ? Gamepad::num(sub.get("gamepad").as_string()) : 0;
         interfaceLabelType label =
                 sub.has("label") ? antares::label(sub.get("label")) : interfaceLabelType{};
 
@@ -168,7 +167,7 @@ void PlainRect::accept(const Visitor& visitor) const { visitor.visit_plain_rect(
 
 LabeledItem::LabeledItem(int id, Rect bounds, interfaceLabelType label)
         : InterfaceItem(id, bounds),
-          label(sfz2pn(StringList(label.stringID).at(label.stringNumber - 1))) {}
+          label(StringList(label.stringID).at(label.stringNumber - 1).copy()) {}
 
 LabeledRect::LabeledRect(
         int id, Rect bounds, interfaceLabelType label, uint8_t hue, interfaceStyleType style)

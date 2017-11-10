@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
+#include "data/pn.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
@@ -1073,8 +1074,8 @@ void MiniComputerSetStatusStrings() {
             gMissionStatusStrList->size()) {
             // we have some data for this line to interpret
 
-            StringSlice sourceString =
-                    gMissionStatusStrList->at(count - kStatusMiniScreenFirstLine);
+            String      s = pn2sfz(gMissionStatusStrList->at(count - kStatusMiniScreenFirstLine));
+            StringSlice sourceString = s;
 
             if (sourceString.at(0) == '_') {
                 line->underline = true;
