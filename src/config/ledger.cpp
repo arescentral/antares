@@ -35,7 +35,6 @@
 
 using sfz::MappedFile;
 using sfz::Rune;
-using sfz::ScopedFd;
 using sfz::StringMap;
 using sfz::makedirs;
 using sfz::range;
@@ -115,11 +114,10 @@ void DirectoryLedger::save() {
     for (std::set<int>::const_iterator it = _chapters.begin(); it != _chapters.end(); ++it) {
         unlocked_levels.push_back(*it);
     }
-    pn::string contents = pn::dump(pn::map{{"unlocked-levels", std::move(unlocked_levels)}});
 
     makedirs(path::dirname(pn2sfz(path)), 0755);
-    ScopedFd fd(open(pn2sfz(path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
-    write(fd, contents.data(), contents.size());
+    pn::file file = pn::open(path, "w");
+    pn::dump(file, pn::map{{"unlocked-levels", std::move(unlocked_levels)}});
 }
 
 }  // namespace antares

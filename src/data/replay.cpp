@@ -33,8 +33,6 @@
 
 using sfz::CString;
 using sfz::ReadSource;
-using sfz::ScopedFd;
-using sfz::WriteTarget;
 using sfz::range;
 using sfz::read;
 using sfz::write;
@@ -89,9 +87,10 @@ enum {
     ACTION_KEY_UP   = (0x03 << 3) | VARINT,
 };
 
-static void write_varint(WriteTarget out, uint64_t value) {
+static void write_varint(pn::file_view out, uint64_t value) {
     if (value == 0) {
-        out.push(1, '\0');
+        constexpr uint8_t zero = '\0';
+        out.write(pn::data_view{&zero, 1});
     }
     while (value != 0) {
         uint8_t byte = value & 0x7f;
@@ -99,11 +98,11 @@ static void write_varint(WriteTarget out, uint64_t value) {
         if (value) {
             byte |= 0x80;
         }
-        out.push(1, byte);
+        out.write(pn::data_view{&byte, 1});
     }
 }
 
-static void tag_varint(WriteTarget out, uint64_t tag, uint64_t value) {
+static void tag_varint(pn::file_view out, uint64_t tag, uint64_t value) {
     write_varint(out, tag);
     write_varint(out, value);
 }
@@ -153,10 +152,10 @@ uint8_t read_varint<uint8_t, false>(ReadSource in) {
     return read_varint<int64_t, false>(in);
 }
 
-static void tag_string(WriteTarget out, uint64_t tag, pn::string_view s) {
+static void tag_string(pn::file_view out, uint64_t tag, pn::string_view s) {
     write_varint(out, tag);
     write_varint(out, s.size());
-    write(out, utf8::encode(pn2sfz(s)));
+    out.write(s);
 }
 
 static pn::string read_string(ReadSource in) {
@@ -166,12 +165,12 @@ static pn::string read_string(ReadSource in) {
 }
 
 template <typename T>
-static void tag_message(WriteTarget out, uint64_t tag, const T& message) {
-    sfz::Bytes bytes;
-    write(bytes, message);
+static void tag_message(pn::file_view out, uint64_t tag, const T& message) {
+    pn::data bytes;
+    message.write_to(bytes.open("a"));
     write_varint(out, tag);
     write_varint(out, bytes.size());
-    write(out, bytes);
+    out.write(bytes);
 }
 
 template <typename T>
@@ -215,27 +214,27 @@ void read_from(ReadSource in, ReplayData::Action& action) {
     }
 }
 
-void write_to(WriteTarget out, const ReplayData& replay) {
-    tag_message(out, SCENARIO, replay.scenario);
-    tag_varint(out, CHAPTER, replay.chapter_id);
-    tag_varint(out, GLOBAL_SEED, replay.global_seed);
-    tag_varint(out, DURATION, replay.duration);
-    for (const ReplayData::Action& action : replay.actions) {
+void ReplayData::write_to(pn::file_view out) const {
+    tag_message(out, SCENARIO, scenario);
+    tag_varint(out, CHAPTER, chapter_id);
+    tag_varint(out, GLOBAL_SEED, global_seed);
+    tag_varint(out, DURATION, duration);
+    for (const ReplayData::Action& action : actions) {
         tag_message(out, ACTION, action);
     }
 }
 
-void write_to(WriteTarget out, const ReplayData::Scenario& scenario) {
-    tag_string(out, SCENARIO_IDENTIFIER, scenario.identifier);
-    tag_string(out, SCENARIO_VERSION, scenario.version);
+void ReplayData::Scenario::write_to(pn::file_view out) const {
+    tag_string(out, SCENARIO_IDENTIFIER, identifier);
+    tag_string(out, SCENARIO_VERSION, version);
 }
 
-void write_to(WriteTarget out, const ReplayData::Action& action) {
-    tag_varint(out, ACTION_AT, action.at);
-    for (uint8_t key : action.keys_down) {
+void ReplayData::Action::write_to(pn::file_view out) const {
+    tag_varint(out, ACTION_AT, at);
+    for (uint8_t key : keys_down) {
         tag_varint(out, ACTION_KEY_DOWN, key);
     }
-    for (uint8_t key : action.keys_up) {
+    for (uint8_t key : keys_up) {
         tag_varint(out, ACTION_KEY_UP, key);
     }
 }
@@ -297,17 +296,17 @@ void ReplayBuilder::start() {
         return;
     }
     pn::string path = pn::format("{0}/Replay {1}.nlrp", dirs().replays, buffer);
-    int        fd   = open(pn2sfz(path), O_WRONLY | O_CREAT | O_EXCL, 0644);
-    if (fd >= 0) {
-        _file.reset(new ScopedFd(fd));
-        tag_message(*_file, SCENARIO, _scenario);
-        tag_varint(*_file, CHAPTER, _chapter_id);
-        tag_varint(*_file, GLOBAL_SEED, _global_seed);
+    pn::file   f    = pn::open(path, "w");
+    if (f.c_obj()) {
+        _file = std::move(f);
+        tag_message(_file, SCENARIO, _scenario);
+        tag_varint(_file, CHAPTER, _chapter_id);
+        tag_varint(_file, GLOBAL_SEED, _global_seed);
     }
 }
 
 void ReplayBuilder::key_down(const KeyDownEvent& event) {
-    if (!_file) {
+    if (!_file.c_obj()) {
         return;
     }
     for (auto i : range<int>(KEY_COUNT)) {
@@ -315,13 +314,13 @@ void ReplayBuilder::key_down(const KeyDownEvent& event) {
             ReplayData::Action action = {};
             action.at                 = _at;
             action.keys_down.push_back(i);
-            tag_message(*_file, ACTION, action);
+            tag_message(_file, ACTION, action);
         }
     }
 }
 
 void ReplayBuilder::key_up(const KeyUpEvent& event) {
-    if (!_file) {
+    if (_file.c_obj()) {
         return;
     }
     for (auto i : range<int>(KEY_COUNT)) {
@@ -329,7 +328,7 @@ void ReplayBuilder::key_up(const KeyUpEvent& event) {
             ReplayData::Action action = {};
             action.at                 = _at;
             action.keys_up.push_back(i);
-            tag_message(*_file, ACTION, action);
+            tag_message(_file, ACTION, action);
             break;
         }
     }
@@ -338,10 +337,10 @@ void ReplayBuilder::key_up(const KeyUpEvent& event) {
 void ReplayBuilder::next() { ++_at; }
 
 void ReplayBuilder::finish() {
-    if (!_file) {
+    if (!_file.c_obj()) {
         return;
     }
-    tag_varint(*_file, DURATION, _at);
+    tag_varint(_file, DURATION, _at);
 }
 
 }  // namespace antares

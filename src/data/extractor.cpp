@@ -45,11 +45,9 @@ using rezin::Sound;
 using rezin::StringList;
 using rezin::aiff;
 using sfz::MappedFile;
-using sfz::ScopedFd;
 using sfz::Sha1;
 using sfz::StringMap;
 using sfz::StringSlice;
-using sfz::WriteTarget;
 using sfz::dec;
 using sfz::makedirs;
 using sfz::range;
@@ -69,8 +67,8 @@ namespace antares {
 
 namespace {
 
-bool verbatim(pn::string_view, bool, int16_t, sfz::BytesSlice data, WriteTarget out) {
-    write(out, data);
+bool verbatim(pn::string_view, bool, int16_t, sfz::BytesSlice data, pn::file_view out) {
+    out.write(pn::data_view{data.data(), static_cast<int>(data.size())});
     return true;
 }
 
@@ -89,7 +87,7 @@ int32_t nlrp_chapter(int16_t id) {
     throw std::runtime_error(pn::format("invalid replay ID {0}", id).c_str());
 }
 
-bool convert_nlrp(pn::string_view, bool, int16_t id, sfz::BytesSlice data, WriteTarget out) {
+bool convert_nlrp(pn::string_view, bool, int16_t id, sfz::BytesSlice data, pn::file_view out) {
     ReplayData replay;
     replay.scenario.identifier = kFactoryScenarioIdentifier;
     replay.scenario.version    = "1.1.1";
@@ -118,14 +116,15 @@ bool convert_nlrp(pn::string_view, bool, int16_t id, sfz::BytesSlice data, Write
     }
     replay.duration = at;
 
-    write(out, replay);
+    replay.write_to(out);
     return true;
 }
 
-bool convert_pict(pn::string_view, bool, int16_t, sfz::BytesSlice data, WriteTarget out) {
+bool convert_pict(pn::string_view, bool, int16_t, sfz::BytesSlice data, pn::file_view out) {
     rezin::Picture pict(data);
     if ((pict.version() == 2) && (pict.is_raster())) {
-        write(out, png(pict));
+        sfz::Bytes bytes(png(pict));
+        out.write(pn::data_view{bytes.data(), static_cast<int>(bytes.size())});
         return true;
     }
     return false;
@@ -139,24 +138,24 @@ static pn::array pn_str(const StringList& str_list) {
     return a;
 }
 
-bool convert_str(pn::string_view, bool, int16_t, sfz::BytesSlice data, WriteTarget out) {
+bool convert_str(pn::string_view, bool, int16_t, sfz::BytesSlice data, pn::file_view out) {
     Options    options;
     StringList list(data, options);
-    pn::string string = pn::dump(pn::value{pn_str(list)});
-    write(out, string.data(), string.size());
+    pn::dump(out, pn::value{pn_str(list)});
     return true;
 }
 
-bool convert_text(pn::string_view, bool, int16_t, sfz::BytesSlice data, WriteTarget out) {
+bool convert_text(pn::string_view, bool, int16_t, sfz::BytesSlice data, pn::file_view out) {
     Options    options;
     pn::string string = sfz2pn(sfz::String(options.decode(data)));
-    write(out, string.data(), string.size());
+    out.write(string);
     return true;
 }
 
-bool convert_snd(pn::string_view, bool, int16_t, sfz::BytesSlice data, WriteTarget out) {
-    Sound snd(data);
-    write(out, aiff(snd));
+bool convert_snd(pn::string_view, bool, int16_t, sfz::BytesSlice data, pn::file_view out) {
+    Sound      snd(data);
+    sfz::Bytes bytes(aiff(snd));
+    out.write(pn::data_view{bytes.data(), static_cast<int>(bytes.size())});
     return true;
 }
 
@@ -260,7 +259,7 @@ void alphatize(ArrayPixMap& image) {
 }
 
 bool convert_smiv(
-        pn::string_view dir, bool factory, int16_t id, sfz::BytesSlice data, WriteTarget out) {
+        pn::string_view dir, bool factory, int16_t id, sfz::BytesSlice data, pn::file_view out) {
     sfz::BytesSlice header = data;
     header.shift(4);
     uint32_t         size = read<uint32_t>(header);
@@ -335,25 +334,22 @@ bool convert_smiv(
     makedirs(pn2sfz(sprite_dir), 0755);
 
     {
-        pn::string output = pn::format("{0}/{1}/image.png", dir, id);
-        ScopedFd   fd(open(pn2sfz(output), O_WRONLY | O_CREAT | O_TRUNC, 0644));
-        write(fd, sfz::Bytes(image));
+        pn::file file = pn::open(pn::format("{0}/{1}/image.png", dir, id), "w");
+        image.encode(file);
     }
 
     {
-        pn::string output = pn::format("{0}/{1}/overlay.png", dir, id);
-        ScopedFd   fd(open(pn2sfz(output), O_WRONLY | O_CREAT | O_TRUNC, 0644));
-        write(fd, sfz::Bytes(overlay));
+        pn::file file = pn::open(pn::format("{0}/{1}/overlay.png", dir, id), "w");
+        overlay.encode(file);
     }
 
-    pn::string string(
-            pn::dump(pn::map{{"image", pn::format("sprites/{0}/image.png", id)},
-                             {"overlay", pn::format("sprites/{0}/overlay.png", id)},
-                             {"rows", rows},
-                             {"cols", cols},
-                             {"center", pn_point(Point(-max_bounds.left, -max_bounds.top))},
-                             {"frames", std::move(frames)}}));
-    write(out, string.data(), string.size());
+    pn::dump(
+            out, pn::map{{"image", pn::format("sprites/{0}/image.png", id)},
+                         {"overlay", pn::format("sprites/{0}/overlay.png", id)},
+                         {"rows", rows},
+                         {"cols", cols},
+                         {"center", pn_point(Point(-max_bounds.left, -max_bounds.top))},
+                         {"frames", std::move(frames)}});
     return true;
 }
 
@@ -365,7 +361,7 @@ struct ResourceFile {
         const char* output_extension;
         bool (*convert)(
                 pn::string_view dir, bool factory, int16_t id, sfz::BytesSlice data,
-                WriteTarget out);
+                pn::file_view out);
     } resources[16];
 };
 
@@ -491,8 +487,8 @@ void DataExtractor::set_plugin_file(pn::string_view path) {
     if (path != out_path) {
         makedirs(path::dirname(pn2sfz(out_path)), 0755);
         MappedFile file(pn2sfz(path));
-        ScopedFd   fd(open(pn2sfz(out_path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
-        write(fd, file.data());
+        pn::file   f = pn::open(out_path, "w");
+        f.write(pn::data_view{file.data().data(), static_cast<int>(file.data().size())});
     }
     pn::string scenario_dir = pn::format("{0}/{1}", _output_dir, found_scenario);
     if (path::exists(pn2sfz(scenario_dir))) {
@@ -586,16 +582,16 @@ void DataExtractor::download(
 
     // If we got the file, write it out at `full_path`.
     makedirs(path::dirname(pn2sfz(full_path)), 0755);
-    ScopedFd fd(open(pn2sfz(full_path), O_WRONLY | O_CREAT | O_EXCL, 0644));
-    write(fd, download.data(), download.size());
+    pn::file file = pn::open(full_path, "w");
+    file.write(pn::data_view{download.data(), static_cast<int>(download.size())});
 }
 
 void DataExtractor::write_version(pn::string_view scenario_identifier) const {
     pn::string path = pn::format("{0}/{1}/version", _output_dir, scenario_identifier);
     makedirs(path::dirname(pn2sfz(path)), 0755);
-    ScopedFd        fd(open(pn2sfz(path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
+    pn::file        file = pn::open(path, "w");
     sfz::BytesSlice version(kVersion);
-    write(fd, version);
+    file.write(pn::data_view{version.data(), static_cast<int>(version.size())});
 }
 
 void DataExtractor::extract_original(Observer* observer, pn::string_view file) const {
@@ -620,16 +616,16 @@ void DataExtractor::extract_original(Observer* observer, pn::string_view file) c
 
             const ResourceType& type = rsrc.at(conversion.resource);
             for (const ResourceEntry& entry : type) {
-                sfz::Bytes data;
+                pn::data   data;
                 pn::string output = pn::format(
                         "{0}/{1}/{2}/{3}.{4}", _output_dir, kFactoryScenarioIdentifier,
                         conversion.output_directory, entry.id(), conversion.output_extension);
                 if (conversion.convert(
                             sfz2pn(path::dirname(pn2sfz(output))), true, entry.id(), entry.data(),
-                            data)) {
+                            data.open("w"))) {
                     makedirs(path::dirname(pn2sfz(output)), 0755);
-                    ScopedFd fd(open(pn2sfz(output), O_WRONLY | O_CREAT | O_TRUNC, 0644));
-                    write(fd, data.data(), data.size());
+                    pn::file file = pn::open(output, "w");
+                    file.write(data);
                 }
             }
         }
@@ -679,15 +675,16 @@ void DataExtractor::extract_plugin(Observer* observer) const {
 
         for (const ResourceFile::ExtractedResource& conversion : kPluginFiles) {
             if (conversion.resource == resource_type) {
-                sfz::Bytes data;
+                pn::data   data;
                 pn::string output = pn::format(
                         "{0}/{1}/{2}/{3}.{4}", _output_dir, _scenario, conversion.output_directory,
                         id, conversion.output_extension);
                 if (conversion.convert(
-                            sfz2pn(path::dirname(pn2sfz(output))), false, id, file.data(), data)) {
+                            sfz2pn(path::dirname(pn2sfz(output))), false, id, file.data(),
+                            data.open("w"))) {
                     makedirs(path::dirname(pn2sfz(output)), 0755);
-                    ScopedFd fd(open(pn2sfz(output), O_WRONLY | O_CREAT | O_TRUNC, 0644));
-                    write(fd, data.data(), data.size());
+                    pn::file file = pn::open(output, "w");
+                    file.write(data);
                 }
                 goto next;
             }

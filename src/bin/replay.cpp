@@ -56,7 +56,6 @@
 
 using sfz::MappedFile;
 using sfz::Optional;
-using sfz::ScopedFd;
 using sfz::args::store;
 using sfz::args::store_const;
 using sfz::mkdir;
@@ -99,19 +98,20 @@ class ReplayMaster : public Card {
                 if (_output_path.has()) {
                     pn::string path = pn::format("{0}/debriefing.txt", *_output_path);
                     makedirs(path::dirname(pn2sfz(path)), 0755);
-                    ScopedFd outcome(open(pn2sfz(path), O_WRONLY | O_CREAT, 0644));
+                    pn::file outcome = pn::open(path, "w");
                     if ((g.victory_text >= 0)) {
                         Resource rsrc("text", "txt", g.victory_text);
-                        sfz::write(outcome, rsrc.data());
+                        outcome.write(pn::data_view{rsrc.data().data(),
+                                                    static_cast<int>(rsrc.data().size())});
                         if (_game_result == WIN_GAME) {
-                            sfz::write(outcome, "\n\n");
+                            outcome.write("\n\n");
                             Handle<Admiral> player(0);
                             pn::string      text = DebriefingScreen::build_score_text(
                                     g.time, g.level->parTime, GetAdmiralLoss(player),
                                     g.level->parLosses, GetAdmiralKill(player), g.level->parKills);
-                            sfz::write(outcome, utf8::encode(pn2sfz(text)));
+                            outcome.write(text);
                         }
-                        sfz::write(outcome, "\n");
+                        outcome.write("\n");
                     }
                 }
                 stack()->pop(this);

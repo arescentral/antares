@@ -19,6 +19,7 @@
 #ifndef ANTARES_SOUND_DRIVER_HPP_
 #define ANTARES_SOUND_DRIVER_HPP_
 
+#include <pn/file>
 #include <pn/string>
 #include <sfz/sfz.hpp>
 
@@ -88,9 +89,9 @@ class LogSoundDriver : public SoundDriver {
     class LogSound;
     class LogChannel;
 
-    sfz::ScopedFd _sound_log;
-    int           _last_id;
-    LogChannel*   _active_channel;
+    pn::file    _sound_log;
+    int         _last_id;
+    LogChannel* _active_channel;
 };
 
 }  // namespace antares

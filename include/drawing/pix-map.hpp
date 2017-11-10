@@ -19,6 +19,7 @@
 #ifndef ANTARES_DRAWING_PIX_MAP_HPP_
 #define ANTARES_DRAWING_PIX_MAP_HPP_
 
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
@@ -133,10 +134,12 @@ class PixMap {
     // @param [in] bounds   the region to make a view of.  Must be enclosed by
     // `Rect(Point(0, 0), this->size())`.
     View view(const Rect& bounds);
-};
 
-// Serializes a PixMap to a WriteTarget.
-void write_to(sfz::WriteTarget out, const PixMap& image);
+    // Encodes this object to a file in PNG format.
+    //
+    // @param [in] out      the file to write to
+    void encode(pn::file_view out);
+};
 
 // PixMap subclass which provides its own storage.
 //

@@ -69,7 +69,6 @@
 #include "ui/screens/play-again.hpp"
 #include "video/driver.hpp"
 
-using sfz::ScopedFd;
 using sfz::makedirs;
 using sfz::open;
 using std::max;

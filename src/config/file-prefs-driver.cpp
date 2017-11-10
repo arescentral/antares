@@ -28,7 +28,6 @@
 #include "data/pn.hpp"
 
 using sfz::MappedFile;
-using sfz::ScopedFd;
 using sfz::StringMap;
 using sfz::makedirs;
 using sfz::path::dirname;
@@ -134,14 +133,13 @@ void FilePrefsDriver::set(const Preferences& p) {
 
     pn::string path = pn::format("{0}/config.pn", dirs().root);
     makedirs(dirname(pn2sfz(path)), 0755);
-    ScopedFd   fd(open(pn2sfz(path), O_CREAT | O_TRUNC | O_WRONLY, 0644));
-    pn::string pretty = pn::dump(
-            pn::map{{"sound", pn::map{{"volume", p.volume},
-                                      {"speech", p.speech_on},
-                                      {"idle music", p.play_idle_music},
-                                      {"game music", p.play_music_in_game}}},
-                    {"keys", std::move(keys)}});
-    write(fd, pretty.data(), pretty.size());
+    pn::file file = pn::open(path, "w");
+    pn::dump(
+            file, pn::map{{"sound", pn::map{{"volume", p.volume},
+                                            {"speech", p.speech_on},
+                                            {"idle music", p.play_idle_music},
+                                            {"game music", p.play_music_in_game}}},
+                          {"keys", std::move(keys)}});
 }
 
 }  // namespace antares

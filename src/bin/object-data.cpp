@@ -33,7 +33,6 @@
 #include "video/text-driver.hpp"
 
 using sfz::Optional;
-using sfz::ScopedFd;
 using sfz::args::help;
 using sfz::args::store;
 using sfz::dec;
@@ -56,8 +55,8 @@ class ObjectDataBuilder {
         if (_output_dir.has()) {
             pn::string path = pn::format(
                     "{0}/{1}.txt", sfz2pn(*_output_dir), sfz2pn(sfz::String(dec(pict_id, 5))));
-            ScopedFd fd(open(pn2sfz(path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
-            write(fd, utf8::encode(pn2sfz(data)));
+            pn::file file = pn::open(path, "w");
+            file.write(data);
         }
     }
 

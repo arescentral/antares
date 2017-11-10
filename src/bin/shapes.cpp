@@ -26,7 +26,6 @@
 #include "drawing/shapes.hpp"
 
 using sfz::Optional;
-using sfz::ScopedFd;
 using sfz::args::help;
 using sfz::args::store;
 using sfz::dec;
@@ -80,8 +79,8 @@ class ShapeBuilder {
                     "{0}/{1}/{2}.png", sfz2pn(*_output_dir), name(shape),
                     sfz2pn(sfz::String(dec(size, 2))));
             makedirs(dirname(pn2sfz(path)), 0755);
-            ScopedFd fd(open(pn2sfz(path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
-            write(fd, pix);
+            pn::file file = pn::open(path, "w");
+            pix.encode(file);
         }
     }
 

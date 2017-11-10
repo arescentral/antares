@@ -20,6 +20,7 @@
 #define ANTARES_DATA_REPLAY_HPP_
 
 #include <stdint.h>
+#include <pn/file>
 #include <pn/string>
 #include <sfz/sfz.hpp>
 #include <vector>
@@ -32,12 +33,14 @@ struct ReplayData {
     struct Scenario {
         pn::string identifier;
         pn::string version;
+        void       write_to(pn::file_view out) const;
     };
 
     struct Action {
         uint64_t             at;
         std::vector<uint8_t> keys_down;
         std::vector<uint8_t> keys_up;
+        void                 write_to(pn::file_view out) const;
     };
 
     Scenario            scenario;
@@ -49,15 +52,13 @@ struct ReplayData {
     ReplayData();
     ReplayData(sfz::BytesSlice in);
 
+    void write_to(pn::file_view out) const;
     void key_down(uint64_t at, uint32_t key);
     void key_up(uint64_t at, uint32_t key);
 };
 void read_from(sfz::ReadSource in, ReplayData& replay);
 void read_from(sfz::ReadSource in, ReplayData::Scenario& scenario);
 void read_from(sfz::ReadSource in, ReplayData::Action& action);
-void write_to(sfz::WriteTarget out, const ReplayData& replay);
-void write_to(sfz::WriteTarget out, const ReplayData::Scenario& scenario);
-void write_to(sfz::WriteTarget out, const ReplayData::Action& action);
 
 class ReplayBuilder : public EventReceiver {
   public:
@@ -73,11 +74,11 @@ class ReplayBuilder : public EventReceiver {
     void         finish();
 
   private:
-    std::unique_ptr<sfz::ScopedFd> _file;
-    ReplayData::Scenario           _scenario;
-    int32_t                        _chapter_id;
-    int32_t                        _global_seed;
-    uint64_t                       _at;
+    pn::file             _file;
+    ReplayData::Scenario _scenario;
+    int32_t              _chapter_id;
+    int32_t              _global_seed;
+    uint64_t             _at;
 };
 
 }  // namespace antares

@@ -36,11 +36,14 @@ void png_read_data(png_struct* png, png_byte* data, png_size_t length) {
 }
 
 void png_write_data(png_struct* png, png_byte* data, png_size_t length) {
-    WriteTarget* out = reinterpret_cast<WriteTarget*>(png_get_io_ptr(png));
-    write(*out, data, length);
+    FILE* out = reinterpret_cast<FILE*>(png_get_io_ptr(png));
+    fwrite(data, 1, length, out);
 }
 
-void png_flush_data(png_struct*) {}
+void png_flush_data(png_struct* png) {
+    FILE* out = reinterpret_cast<FILE*>(png_get_io_ptr(png));
+    fflush(out);
+}
 
 }  // namespace
 
@@ -110,7 +113,7 @@ void read_from(ReadSource in, ArrayPixMap& pix) {
     png_destroy_read_struct(&png, &info, NULL);
 }
 
-void write_to(WriteTarget out, const PixMap& pix) {
+void PixMap::encode(pn::file_view out) {
     png_struct* png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if (!png) {
         throw std::runtime_error("couldn't create png_struct");
@@ -127,13 +130,13 @@ void write_to(WriteTarget out, const PixMap& pix) {
         throw std::runtime_error("reading png failed");
     }
 
-    png_set_write_fn(png, &out, png_write_data, png_flush_data);
-    png_set_IHDR(png, info, pix.size().width, pix.size().height, 8, PNG_COLOR_TYPE_RGBA, 0, 0, 0);
+    png_set_write_fn(png, out.c_obj(), png_write_data, png_flush_data);
+    png_set_IHDR(png, info, size().width, size().height, 8, PNG_COLOR_TYPE_RGBA, 0, 0, 0);
     png_set_swap_alpha(png);
 
     png_write_info(png, info);
-    for (int i = 0; i < pix.size().height; ++i) {
-        png_write_row(png, const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(pix.row(i))));
+    for (int i = 0; i < size().height; ++i) {
+        png_write_row(png, const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(row(i))));
     }
 
     png_write_end(png, NULL);

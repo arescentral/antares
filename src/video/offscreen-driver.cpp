@@ -47,7 +47,6 @@
 #endif
 
 using sfz::Optional;
-using sfz::ScopedFd;
 using sfz::WriteTarget;
 using sfz::dec;
 using sfz::range;
@@ -152,8 +151,8 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
         _buffer.copy(bounds, pix);
         pn::string path = pn::format("{0}/{1}", *_output_dir, relpath);
         makedirs(path::dirname(pn2sfz(path)), 0755);
-        ScopedFd file(open(pn2sfz(path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
-        write(file, pix);
+        pn::file file = pn::open(path, "w");
+        pix.encode(file);
     }
 
     void  draw() { _loop.draw(); }

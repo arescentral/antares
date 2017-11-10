@@ -31,7 +31,6 @@
 #include "video/text-driver.hpp"
 
 using sfz::Optional;
-using sfz::ScopedFd;
 using sfz::args::help;
 using sfz::args::store;
 using sfz::args::store_const;

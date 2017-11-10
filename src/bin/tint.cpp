@@ -28,7 +28,6 @@
 #include "video/text-driver.hpp"
 
 using sfz::Optional;
-using sfz::ScopedFd;
 using sfz::args::help;
 using sfz::args::store;
 using sfz::hex;
@@ -78,8 +77,8 @@ class ShapeBuilder {
             const pn::string path = pn::format(
                     "{0}/{1}/{2}.png", *_output_dir, name(id), sfz2pn(sfz::String(hex(color))));
             makedirs(dirname(pn2sfz(path)), 0755);
-            ScopedFd fd(open(pn2sfz(path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
-            write(fd, pix);
+            pn::file file = pn::open(path, "w");
+            pix.encode(file);
         }
     }
 
