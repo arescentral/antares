@@ -19,6 +19,7 @@
 #include "game/minicomputer.hpp"
 
 #include <algorithm>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
@@ -1192,7 +1193,7 @@ void MiniComputerMakeStatusString(int32_t which_line, pn::string& string) {
             break;
 
         case kIntegerValue:
-        case kIntegerMinusValue: string += sfz2pn(line.value); break;
+        case kIntegerMinusValue: string += pn::dump(line.value, pn::dump_short); break;
 
         case kSmallFixedValue:
         case kSmallFixedMinusValue: string += stringify(Fixed::from_val(line.value)); break;

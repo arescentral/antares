@@ -39,10 +39,6 @@ inline pn::string sfz2pn(sfz::EncodedString<T> s) {
     return sfz2pn(sfz::String(s));
 }
 inline pn::string sfz2pn(sfz::Format<16> f) { return sfz2pn(sfz::String(f)); }
-inline pn::string sfz2pn(int i) { return sfz2pn(sfz::String(i)); }
-inline pn::string sfz2pn(uint32_t i) { return sfz2pn(sfz::String(i)); }
-inline pn::string sfz2pn(int64_t i) { return sfz2pn(sfz::String(i)); }
-inline pn::string sfz2pn(double d) { return sfz2pn(sfz::String(d)); }
 
 }  // namespace antares
 

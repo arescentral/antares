@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <algorithm>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
@@ -271,7 +272,7 @@ pn::string_view TextVideoDriver::last_arg(size_t index) const {
     return _log.substr(_last_args[index].first, _last_args[index].second);
 }
 
-static pn::string log_string(int i) { return sfz2pn(sfz::String(i)); }
+static pn::string log_string(int i) { return pn::dump(i, pn::dump_short); }
 static pn::string log_string(pn::string_view s) { return s.copy(); }
 
 template <typename... Args>

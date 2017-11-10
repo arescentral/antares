@@ -23,6 +23,7 @@
 
 #include "ui/interface-handling.hpp"
 
+#include <pn/file>
 #include <sfz/sfz.hpp>
 #include <vector>
 
@@ -165,10 +166,12 @@ void CreateObjectDataText(pn::string& text, Handle<BaseObject> object) {
     find_replace(data, 0, keys.at(kMassStringNum), stringify(Fixed(object->mass)));
 
     // ship shields
-    find_replace(data, 0, keys.at(kShieldStringNum), sfz2pn(object->health));
+    find_replace(data, 0, keys.at(kShieldStringNum), pn::dump(object->health, pn::dump_short));
 
     // light speed
-    find_replace(data, 0, keys.at(kHasLightStringNum), sfz2pn(object->warpSpeed.val()));
+    find_replace(
+            data, 0, keys.at(kHasLightStringNum),
+            pn::dump(object->warpSpeed.val(), pn::dump_short));
 
     // max velocity
     find_replace(data, 0, keys.at(kMaxSpeedStringNum), stringify(Fixed(object->maxVelocity)));
@@ -252,10 +255,11 @@ void CreateWeaponDataText(
     // range
     find_replace(
             data, 0, keys.at(kWeaponRangeStringNum),
-            sfz2pn(lsqrt(weaponObject->frame.weapon.range)));
+            pn::dump((int64_t)lsqrt(weaponObject->frame.weapon.range), pn::dump_short));
 
     if (mostDamage > 0) {
-        find_replace(data, 0, keys.at(kWeaponDamageStringNum), sfz2pn(mostDamage));
+        find_replace(
+                data, 0, keys.at(kWeaponDamageStringNum), pn::dump(mostDamage, pn::dump_short));
     } else {
         find_replace(data, 0, keys.at(kWeaponDamageStringNum), dash);
     }

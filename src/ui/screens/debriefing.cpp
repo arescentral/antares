@@ -18,6 +18,7 @@
 
 #include "ui/screens/debriefing.hpp"
 
+#include <pn/file>
 #include <sfz/sfz.hpp>
 #include <vector>
 
@@ -249,10 +250,10 @@ pn::string DebriefingScreen::build_score_text(
     const int your_score = score(your_time, par_time, your_loss, par_loss, your_kill, par_kill);
     const int par_score  = 100;
 
-    string_replace(&text, strings.at(0), sfz2pn(your_mins));
+    string_replace(&text, strings.at(0), pn::dump(your_mins, pn::dump_short));
     string_replace(&text, strings.at(1), sfz2pn(sfz::String(dec(your_secs, 2))));
     if (par_time > game_ticks()) {
-        string_replace(&text, strings.at(2), sfz2pn(par_mins));
+        string_replace(&text, strings.at(2), pn::dump(par_mins, pn::dump_short));
         String secs_string;
         print(secs_string, format(":{0}", dec(par_secs, 2)));
         string_replace(&text, strings.at(3), sfz2pn(secs_string));
@@ -261,12 +262,12 @@ pn::string DebriefingScreen::build_score_text(
         string_replace(&text, strings.at(2), data_strings.at(8));  // = "N/A"
         string_replace(&text, strings.at(3), "");
     }
-    string_replace(&text, strings.at(4), sfz2pn(your_loss));
-    string_replace(&text, strings.at(5), sfz2pn(par_loss));
-    string_replace(&text, strings.at(6), sfz2pn(your_kill));
-    string_replace(&text, strings.at(7), sfz2pn(par_kill));
-    string_replace(&text, strings.at(8), sfz2pn(your_score));
-    string_replace(&text, strings.at(9), sfz2pn(par_score));
+    string_replace(&text, strings.at(4), pn::dump(your_loss, pn::dump_short));
+    string_replace(&text, strings.at(5), pn::dump(par_loss, pn::dump_short));
+    string_replace(&text, strings.at(6), pn::dump(your_kill, pn::dump_short));
+    string_replace(&text, strings.at(7), pn::dump(par_kill, pn::dump_short));
+    string_replace(&text, strings.at(8), pn::dump(your_score, pn::dump_short));
+    string_replace(&text, strings.at(9), pn::dump(par_score, pn::dump_short));
     return sfz2pn(text);
 }
 
