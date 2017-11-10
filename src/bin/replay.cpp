@@ -60,13 +60,11 @@ using sfz::Optional;
 using sfz::ScopedFd;
 using sfz::args::store;
 using sfz::args::store_const;
-using sfz::format;
 using sfz::mkdir;
 using sfz::open;
 using std::unique_ptr;
 
 namespace args = sfz::args;
-namespace io   = sfz::io;
 namespace path = sfz::path;
 namespace utf8 = sfz::utf8;
 
@@ -158,7 +156,7 @@ void ReplayMaster::init() {
 }
 
 void usage(pn::string_view program_name) {
-    print(io::err, format("usage: {0} replay_path output_dir\n", pn2sfz(program_name)));
+    pn::format(stderr, "usage: {0} replay_path output_dir\n", program_name);
     exit(1);
 }
 
@@ -188,7 +186,7 @@ void main(int argc, char** argv) {
 
     sfz::String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
-        print(io::err, format("{0}: {1}\n", parser.name(), error));
+        pn::format(stderr, "{0}: {1}\n", sfz2pn(parser.name()), sfz2pn(error));
         exit(1);
     }
 

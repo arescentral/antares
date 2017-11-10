@@ -39,7 +39,6 @@
 
 using sfz::Bytes;
 using sfz::dec;
-using sfz::format;
 using std::chrono::duration_cast;
 using std::unique_ptr;
 using std::vector;
@@ -256,7 +255,8 @@ pn::string DebriefingScreen::build_score_text(
     if (par_time > game_ticks()) {
         string_replace(&text, strings.at(2), pn::dump(par_mins, pn::dump_short));
         sfz::String secs_string;
-        print(secs_string, format(":{0}", dec(par_secs, 2)));
+        secs_string.append(":");
+        secs_string.append(dec(par_secs, 2));
         string_replace(&text, strings.at(3), sfz2pn(secs_string));
     } else {
         StringList data_strings(6002);

@@ -36,13 +36,11 @@ using sfz::args::help;
 using sfz::args::store;
 using sfz::args::store_const;
 using sfz::dec;
-using sfz::format;
 using sfz::write;
 using std::pair;
 using std::unique_ptr;
 using std::vector;
 
-namespace io   = sfz::io;
 namespace utf8 = sfz::utf8;
 namespace args = sfz::args;
 
@@ -80,7 +78,7 @@ int main(int argc, char* const* argv) {
 
     sfz::String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
-        print(io::err, format("{0}: {1}\n", parser.name(), error));
+        pn::format(stderr, "{0}: {1}\n", sfz2pn(parser.name()), sfz2pn(error));
         exit(1);
     }
 

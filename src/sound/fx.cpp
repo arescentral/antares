@@ -35,8 +35,6 @@
 #include "sound/driver.hpp"
 #include "video/driver.hpp"
 
-using sfz::format;
-
 namespace antares {
 
 static const int32_t kMaxChannelNum = 3;

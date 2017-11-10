@@ -21,8 +21,6 @@
 #include <pn/file>
 #include <sfz/sfz.hpp>
 
-using sfz::format;
-
 namespace antares {
 
 static int kAttrs[] = {None};

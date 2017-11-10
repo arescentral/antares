@@ -20,6 +20,7 @@
 #define ANTARES_MATH_GEOMETRY_HPP_
 
 #include <stdint.h>
+#include <pn/string>
 #include <sfz/sfz.hpp>
 
 namespace antares {
@@ -184,8 +185,8 @@ struct Rect {
     void enlarge_to(const Rect& r);
 };
 
-void read_from(sfz::ReadSource in, Rect& r);
-void print_to(sfz::PrintTarget out, Rect r);
+void       read_from(sfz::ReadSource in, Rect& r);
+pn::string stringify(Rect r);
 
 struct coordPointType {
     uint32_t h;

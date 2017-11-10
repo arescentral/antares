@@ -25,7 +25,6 @@
 
 #include "video/driver.hpp"
 
-using sfz::format;
 using std::unique_ptr;
 
 namespace antares {

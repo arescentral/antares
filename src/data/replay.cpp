@@ -37,7 +37,6 @@ using sfz::CString;
 using sfz::ReadSource;
 using sfz::ScopedFd;
 using sfz::WriteTarget;
-using sfz::format;
 using sfz::range;
 using sfz::read;
 using sfz::write;

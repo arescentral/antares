@@ -22,7 +22,6 @@
 #include <sfz/sfz.hpp>
 
 using sfz::dec;
-using sfz::format;
 
 namespace antares {
 namespace {

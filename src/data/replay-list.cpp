@@ -29,7 +29,6 @@
 
 using sfz::CString;
 using sfz::MappedFile;
-using sfz::format;
 using sfz::read;
 using std::vector;
 

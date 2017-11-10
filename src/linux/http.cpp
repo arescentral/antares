@@ -29,7 +29,6 @@
 using sfz::BytesSlice;
 using sfz::CString;
 using sfz::WriteTarget;
-using sfz::format;
 using std::unique_ptr;
 
 namespace antares {

@@ -26,7 +26,6 @@
 
 #include "config/preferences.hpp"
 
-using sfz::format;
 using sfz::range;
 
 namespace utf8 = sfz::utf8;

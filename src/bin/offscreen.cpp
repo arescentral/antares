@@ -39,13 +39,11 @@ using sfz::args::help;
 using sfz::args::store;
 using sfz::args::store_const;
 using sfz::makedirs;
-using sfz::print;
 using sfz::quote;
 using sfz::string_to_int;
 using std::unique_ptr;
 
 namespace args = sfz::args;
-namespace io   = sfz::io;
 namespace utf8 = sfz::utf8;
 
 namespace antares {
@@ -74,7 +72,7 @@ void main(int argc, char* const* argv) {
 
     sfz::String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
-        print(io::err, format("{0}: {1}\n", parser.name(), error));
+        pn::format(stderr, "{0}: {1}\n", sfz2pn(parser.name()), sfz2pn(error));
         exit(1);
     }
 
@@ -96,7 +94,7 @@ void main(int argc, char* const* argv) {
     } else if (script == "pause") {
         pause(scheduler);
     } else {
-        print(io::err, format("no such script {0}\n", quote(script)));
+        pn::format(stderr, "no such script {0}\n", sfz2pn(sfz::String(quote(script))));
         exit(1);
     }
 

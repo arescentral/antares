@@ -17,6 +17,7 @@
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include <fcntl.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "data/pn.hpp"
@@ -29,12 +30,10 @@ using sfz::ScopedFd;
 using sfz::args::help;
 using sfz::args::store;
 using sfz::dec;
-using sfz::format;
 using sfz::path::dirname;
 using sfz::write;
 using std::unique_ptr;
 
-namespace io   = sfz::io;
 namespace utf8 = sfz::utf8;
 namespace args = sfz::args;
 
@@ -77,8 +76,9 @@ class ShapeBuilder {
         pix.fill(RgbColor::clear());
         draw(shape, pix);
         if (_output_dir.has()) {
-            const pn::string path =
-                    sfz2pn(format("{0}/{1}/{2}.png", *_output_dir, name(shape), dec(size, 2)));
+            const pn::string path = pn::format(
+                    "{0}/{1}/{2}.png", sfz2pn(*_output_dir), name(shape),
+                    sfz2pn(sfz::String(dec(size, 2))));
             makedirs(dirname(pn2sfz(path)), 0755);
             ScopedFd fd(open(pn2sfz(path), O_WRONLY | O_CREAT | O_TRUNC, 0644));
             write(fd, pix);
@@ -101,7 +101,7 @@ int main(int argc, char* const* argv) {
 
     sfz::String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
-        print(io::err, format("{0}: {1}\n", parser.name(), error));
+        pn::format(stderr, "{0}: {1}\n", sfz2pn(parser.name()), sfz2pn(error));
         exit(1);
     }
 

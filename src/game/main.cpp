@@ -70,7 +70,6 @@
 #include "video/driver.hpp"
 
 using sfz::ScopedFd;
-using sfz::format;
 using sfz::makedirs;
 using sfz::open;
 using std::max;
@@ -234,26 +233,24 @@ void MainPlay::become_front() {
             sys.music.stop();
 #ifdef DATA_COVERAGE
             {
-                sfz::print(
-                        sfz::io::err,
-                        sfz::format("{{ \"level\": {0},\n", g.level->chapter_number()));
+                pn::format(stderr, "{{ \"level\": {0},\n", g.level->chapter_number());
                 const char* sep = "";
-                sfz::print(sfz::io::err, "  \"objects\": [");
+                pn::format(stderr, "  \"objects\": [");
                 for (auto object : covered_objects) {
-                    sfz::print(sfz::io::err, sfz::format("{0}{1}", sep, object));
+                    pn::format(stderr, "{0}{1}", sep, object);
                     sep = ", ";
                 }
-                sfz::print(sfz::io::err, "],\n");
+                pn::format(stderr, "],\n");
                 covered_objects.clear();
 
                 sep = "";
-                sfz::print(sfz::io::err, "  \"actions\": [");
+                pn::format(stderr, "  \"actions\": [");
                 for (auto action : covered_actions) {
-                    sfz::print(sfz::io::err, sfz::format("{0}{1}", sep, action));
+                    pn::format(stderr, "{0}{1}", sep, action);
                     sep = ", ";
                 }
-                sfz::print(sfz::io::err, "]\n");
-                sfz::print(sfz::io::err, "}\n");
+                pn::format(stderr, "]\n");
+                pn::format(stderr, "}\n");
                 covered_actions.clear();
             }
 #endif  // DATA_COVERAGE

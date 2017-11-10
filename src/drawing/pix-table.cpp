@@ -32,7 +32,6 @@
 using sfz::BytesSlice;
 using sfz::ReadSource;
 using sfz::StringMap;
-using sfz::format;
 using sfz::range;
 using sfz::read;
 using std::unique_ptr;

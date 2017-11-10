@@ -38,8 +38,6 @@
 #include "ui/screens/select-level.hpp"
 #include "video/transitions.hpp"
 
-using sfz::format;
-
 namespace antares {
 
 SoloGame::SoloGame() : _state(NEW), _game_result(NO_GAME) {}

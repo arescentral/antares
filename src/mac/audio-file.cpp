@@ -27,7 +27,6 @@
 
 using sfz::Bytes;
 using sfz::BytesSlice;
-using sfz::format;
 using sfz::quote;
 using std::unique_ptr;
 

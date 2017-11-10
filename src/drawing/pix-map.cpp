@@ -26,7 +26,6 @@
 #include "lang/casts.hpp"
 
 using sfz::WriteTarget;
-using sfz::format;
 using sfz::write;
 
 namespace antares {
@@ -125,7 +124,7 @@ PixMap::View::View(PixMap* pix, const Rect& bounds)
         throw std::runtime_error(
                 pn::format(
                         "tried to take view {0} outside of parent PixMap with bounds {1}",
-                        sfz2pn(sfz::String(bounds)), sfz2pn(sfz::String(pix_bounds)))
+                        stringify(bounds), stringify(pix_bounds))
                         .c_str());
     }
 }

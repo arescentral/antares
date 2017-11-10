@@ -37,7 +37,6 @@
 
 using sfz::Optional;
 using sfz::dec;
-using sfz::print;
 using sfz::write;
 using std::make_pair;
 using std::max;

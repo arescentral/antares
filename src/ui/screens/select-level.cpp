@@ -40,7 +40,6 @@
 #include "video/transitions.hpp"
 
 using sfz::BytesSlice;
-using sfz::format;
 using std::unique_ptr;
 
 namespace antares {

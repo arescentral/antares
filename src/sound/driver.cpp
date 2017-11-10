@@ -31,7 +31,6 @@
 
 using sfz::Bytes;
 using sfz::ScopedFd;
-using sfz::format;
 using sfz::write;
 using std::unique_ptr;
 

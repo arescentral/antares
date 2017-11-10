@@ -237,7 +237,7 @@ void Messages::clip(void)
             if (tmessage->currentResID == kStringMessageID) {
                 textData.reset(new sfz::String);
                 if (textData.get() != NULL) {
-                    print(*textData, tmessage->stringMessage);
+                    textData->append(tmessage->stringMessage);
                 }
                 tmessage->labelMessage = false;
             } else {

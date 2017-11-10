@@ -16,21 +16,17 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "data/pn.hpp"
 #include "data/scenario-list.hpp"
 
-using sfz::format;
-using sfz::print;
-
-namespace io = sfz::io;
-
 namespace antares {
 
 void main(int argc, char* const* argv) {
     if (argc != 1) {
-        print(io::err, "usage: ls-scenarios\n");
+        pn::format(stderr, "usage: ls-scenarios\n");
         exit(1);
     }
 
@@ -39,12 +35,12 @@ void main(int argc, char* const* argv) {
         if (!list.at(i).installed) {
             continue;
         }
-        print(io::out, format("{0}:\n", pn2sfz(list.at(i).identifier)));
-        print(io::out, format("    title: {0}\n", pn2sfz(list.at(i).title)));
-        print(io::out, format("    download url: {0}\n", pn2sfz(list.at(i).download_url)));
-        print(io::out, format("    author: {0}\n", pn2sfz(list.at(i).author)));
-        print(io::out, format("    author url: {0}\n", pn2sfz(list.at(i).author_url)));
-        print(io::out, format("    version: {0}\n", pn2sfz(stringify(list.at(i).version))));
+        pn::format(stderr, "{0}:\n", list.at(i).identifier);
+        pn::format(stderr, "    title: {0}\n", list.at(i).title);
+        pn::format(stderr, "    download url: {0}\n", list.at(i).download_url);
+        pn::format(stderr, "    author: {0}\n", list.at(i).author);
+        pn::format(stderr, "    author url: {0}\n", list.at(i).author_url);
+        pn::format(stderr, "    version: {0}\n", stringify(list.at(i).version));
     }
 }
 

@@ -53,7 +53,6 @@ using sfz::StringMap;
 using sfz::StringSlice;
 using sfz::WriteTarget;
 using sfz::dec;
-using sfz::format;
 using sfz::makedirs;
 using sfz::range;
 using sfz::read;

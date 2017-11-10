@@ -20,6 +20,7 @@
 
 #include <stdint.h>
 #include <algorithm>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
@@ -44,14 +45,10 @@
 #include <GL/glu.h>
 #endif
 
-using sfz::format;
 using sfz::hex;
-using sfz::print;
 using std::min;
 using std::max;
 using std::unique_ptr;
-
-namespace io = sfz::io;
 
 namespace antares {
 
@@ -107,7 +104,7 @@ static const char* _gl_error_string(GLenum err) {
 static void _gl_check(const char* fn, const char* file, int line) {
     int error = glGetError();
     if (error != GL_NO_ERROR) {
-        print(io::err, format("{0}: {1} ({2}:{3})\n", fn, _gl_error_string(error), file, line));
+        pn::format(stderr, "{0}: {1} ({2}:{3})\n", fn, _gl_error_string(error), file, line);
     }
 }
 
@@ -187,7 +184,7 @@ void gl_log(GLint object) {
     } else {
         glGetProgramInfoLog(object, log_size, &log_size, log.get());
     }
-    print(io::err, format("object {0} log: {1}\n", object, (const char*)log.get()));
+    pn::format(stderr, "object {0} log: {1}\n", object, (const char*)log.get());
 }
 
 class OpenGlTextureImpl : public Texture::Impl {

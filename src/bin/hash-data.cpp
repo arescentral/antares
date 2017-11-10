@@ -16,15 +16,15 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
-using sfz::format;
+#include "data/pn.hpp"
+
 using sfz::args::help;
 using sfz::args::store;
-using sfz::print;
 
 namespace args = sfz::args;
-namespace io   = sfz::io;
 namespace utf8 = sfz::utf8;
 
 namespace antares {
@@ -40,11 +40,11 @@ void main(int argc, char* const* argv) {
 
     sfz::String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
-        print(io::err, format("{0}: {1}\n", parser.name(), error));
+        pn::format(stderr, "{0}: {1}\n", sfz2pn(parser.name()), sfz2pn(error));
         exit(1);
     }
 
-    print(io::out, format("{0}\n", tree_digest(directory)));
+    pn::format(stdout, "{0}\n", sfz2pn(sfz::String(tree_digest(directory))));
 }
 
 }  // namespace antares

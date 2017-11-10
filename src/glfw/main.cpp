@@ -19,6 +19,7 @@
 #include <GLFW/glfw3.h>
 
 #include <time.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/dirs.hpp"
@@ -38,7 +39,6 @@ using sfz::range;
 using sfz::format;
 
 namespace args = sfz::args;
-namespace io   = sfz::io;
 
 namespace antares {
 
@@ -54,17 +54,18 @@ void main(int argc, const char* argv[]) {
 
     sfz::String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
-        print(io::err, format("{0}: {1}\n", parser.name(), error));
+        pn::format(stderr, "{0}: {1}\n", sfz2pn(parser.name()), sfz2pn(error));
         exit(1);
     }
 
     if (!sfz::path::isdir(pn2sfz(application_path()))) {
         if (sfz_app_data.empty()) {
-            print(io::err, format("{0}: application data not installed\n\n", parser.name()));
-            print(io::err, format("Please install it, or specify a path with --app-data\n\n"));
+            pn::format(stderr, "{0}: application data not installed\n\n", sfz2pn(parser.name()));
+            pn::format(stderr, "Please install it, or specify a path with --app-data\n\n");
         } else {
-            print(io::err, format("{0}: application data not found at {1}\n\n", parser.name(),
-                                  pn2sfz(application_path())));
+            pn::format(
+                    stderr, "{0}: application data not found at {1}\n\n", sfz2pn(parser.name()),
+                    application_path());
         }
         exit(1);
     } else {
@@ -84,15 +85,15 @@ void main(int argc, const char* argv[]) {
                 have_scenario = true;
                 break;
             } else {
-                print(io::err, format("{0}: factory scenario not installed\n\n", parser.name()));
-                print(io::err, format("Please run antares-install-data\n", parser.name()));
+                pn::format(
+                        stderr, "{0}: factory scenario not installed\n\n", sfz2pn(parser.name()));
+                pn::format(stderr, "Please run antares-install-data\n", sfz2pn(parser.name()));
                 exit(1);
             }
         }
     }
     if (!have_scenario) {
-        print(io::err,
-              format("{0}: {1}: scenario not installed\n", parser.name(), pn2sfz(scenario)));
+        pn::format(stderr, "{0}: {1}: scenario not installed\n", sfz2pn(parser.name()), scenario);
         exit(1);
     }
 

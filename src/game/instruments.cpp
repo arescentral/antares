@@ -40,7 +40,6 @@
 #include "math/units.hpp"
 #include "video/driver.hpp"
 
-using sfz::format;
 using sfz::range;
 using std::max;
 using std::min;

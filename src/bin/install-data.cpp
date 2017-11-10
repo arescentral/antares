@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/dirs.hpp"
@@ -24,22 +25,18 @@
 #include "net/http.hpp"
 
 using sfz::Optional;
-using sfz::print;
 using sfz::args::help;
 using sfz::args::store;
 using sfz::args::store_const;
 
 namespace args = sfz::args;
-namespace io   = sfz::io;
 namespace utf8 = sfz::utf8;
 
 namespace antares {
 
 class PrintStatusObserver : public DataExtractor::Observer {
   public:
-    virtual void status(pn::string_view status) {
-        print(io::err, format("{0}\n", pn2sfz(status)));
-    }
+    virtual void status(pn::string_view status) { pn::format(stderr, "{0}\n", status); }
 };
 
 void ExtractDataMain(int argc, char* const* argv) {
@@ -61,7 +58,7 @@ void ExtractDataMain(int argc, char* const* argv) {
     try {
         sfz::String error;
         if (!parser.parse_args(argc - 1, argv + 1, error)) {
-            print(io::err, format("{0}: {1}\n", parser.name(), error));
+            pn::format(stderr, "{0}: {1}\n", sfz2pn(parser.name()), sfz2pn(error));
             exit(1);
         }
 
@@ -71,18 +68,18 @@ void ExtractDataMain(int argc, char* const* argv) {
         }
 
         if (extractor.current()) {
-            print(io::err, format("{0} is up-to-date!\n", dest));
+            pn::format(stderr, "{0} is up-to-date!\n", sfz2pn(dest));
         } else if (check) {
-            print(io::err, format("{0} is not up-to-date.\n", dest));
+            pn::format(stderr, "{0} is not up-to-date.\n", sfz2pn(dest));
             exit(1);
         } else {
-            print(io::err, format("Extracting to {0}...\n", dest));
+            pn::format(stderr, "Extracting to {0}...\n", sfz2pn(dest));
             PrintStatusObserver observer;
             extractor.extract(&observer);
-            print(io::err, "done.\n");
+            pn::format(stderr, "done.\n");
         }
     } catch (std::exception& e) {
-        print(io::err, format("{0}: {1}\n", utf8::decode(argv[0]), utf8::decode(e.what())));
+        pn::format(stderr, "{0}: {1}\n", argv[0], e.what());
         exit(1);
     }
 }

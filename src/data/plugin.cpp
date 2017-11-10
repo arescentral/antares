@@ -27,7 +27,6 @@
 #include "lang/defines.hpp"
 
 using sfz::BytesSlice;
-using sfz::format;
 using sfz::range;
 using std::vector;
 

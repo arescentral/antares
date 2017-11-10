@@ -53,7 +53,6 @@
 #include "sound/fx.hpp"
 
 using sfz::BytesSlice;
-using sfz::format;
 
 namespace macroman = sfz::macroman;
 

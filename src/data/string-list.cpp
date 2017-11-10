@@ -28,7 +28,6 @@
 
 using sfz::Bytes;
 using sfz::BytesSlice;
-using sfz::format;
 using sfz::quote;
 using sfz::read;
 using std::vector;

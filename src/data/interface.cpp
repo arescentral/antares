@@ -32,7 +32,6 @@
 #include "video/driver.hpp"
 
 using sfz::StringMap;
-using sfz::format;
 using sfz::range;
 using std::unique_ptr;
 using std::vector;

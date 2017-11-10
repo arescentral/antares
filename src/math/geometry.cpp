@@ -19,10 +19,10 @@
 #include "math/geometry.hpp"
 
 #include <algorithm>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 using sfz::ReadSource;
-using sfz::format;
 using sfz::read;
 
 namespace antares {
@@ -139,8 +139,8 @@ void read_from(ReadSource in, Rect& r) {
     read(in, r.bottom);
 }
 
-void print_to(sfz::PrintTarget out, Rect r) {
-    print(out, format("{{{0}, {1}, {2}, {3}}}", r.left, r.top, r.right, r.bottom));
+pn::string stringify(Rect r) {
+    return pn::format("{{{0}, {1}, {2}, {3}}}", r.left, r.top, r.right, r.bottom);
 }
 
 }  // namespace antares

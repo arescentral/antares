@@ -32,8 +32,6 @@
 #include "lang/defines.hpp"
 #include "video/driver.hpp"
 
-using sfz::format;
-
 namespace utf8 = sfz::utf8;
 
 namespace antares {

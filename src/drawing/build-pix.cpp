@@ -30,7 +30,6 @@
 #include "game/sys.hpp"
 
 using sfz::BytesSlice;
-using sfz::format;
 using sfz::string_to_int;
 using std::unique_ptr;
 using std::vector;

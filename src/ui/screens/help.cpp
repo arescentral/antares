@@ -34,7 +34,6 @@
 #include "video/driver.hpp"
 
 using sfz::Bytes;
-using sfz::format;
 
 namespace utf8 = sfz::utf8;
 

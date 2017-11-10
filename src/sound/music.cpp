@@ -26,7 +26,6 @@
 #include "lang/defines.hpp"
 #include "sound/driver.hpp"
 
-using sfz::format;
 using std::unique_ptr;
 
 namespace antares {

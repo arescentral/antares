@@ -29,7 +29,6 @@
 
 using sfz::BytesSlice;
 using sfz::MappedFile;
-using sfz::format;
 using std::unique_ptr;
 
 namespace path = sfz::path;

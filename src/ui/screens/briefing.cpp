@@ -41,7 +41,6 @@
 #include "ui/screens/object-data.hpp"
 #include "video/driver.hpp"
 
-using sfz::format;
 using std::make_pair;
 using std::pair;
 using std::vector;

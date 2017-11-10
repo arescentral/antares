@@ -26,7 +26,6 @@
 #include "video/driver.hpp"
 
 using sfz::BytesSlice;
-using sfz::format;
 
 namespace antares {
 

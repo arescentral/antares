@@ -30,7 +30,6 @@
 using sfz::MappedFile;
 using sfz::ScopedFd;
 using sfz::StringMap;
-using sfz::format;
 using sfz::makedirs;
 using sfz::path::dirname;
 using sfz::range;
@@ -98,7 +97,9 @@ static void set_from(
 }
 
 FilePrefsDriver::FilePrefsDriver() {
-    sfz::Json();  // TODO(sfiera): remove me. Just here as a workaround for a weird linker bug.
+    // TODO(sfiera): remove us. These are just here as a workaround for a weird linker bug.
+    sfz::Json();
+    sfz::io::err.push("");
 
     try {
         pn::string path = pn::format("{0}/config.pn", dirs().root);

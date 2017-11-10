@@ -34,7 +34,6 @@
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
-using sfz::format;
 using sfz::range;
 using sfz::read;
 using std::unique_ptr;
