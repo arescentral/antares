@@ -138,7 +138,7 @@ bool BothCommandAndQ() {
 
 void CreateObjectDataText(pn::string& text, Handle<BaseObject> object) {
     Resource    rsrc("text", "txt", kShipDataTextID);
-    sfz::String data(utf8::decode(rsrc.data()));
+    sfz::String data = pn2sfz(rsrc.string());
 
     StringList keys(kShipDataKeyStringID);
     StringList values(kShipDataNameID);
@@ -200,7 +200,7 @@ void CreateWeaponDataText(
 
     // TODO(sfiera): catch exception.
     Resource    rsrc("text", "txt", kWeaponDataTextID);
-    sfz::String data(utf8::decode(rsrc.data()));
+    sfz::String data = pn2sfz(rsrc.string());
     // damage; this is tricky--we have to guess by walking through activate actions,
     //  and for all the createObject actions, see which creates the most damaging
     //  object.  We calc this first so we can use isGuided

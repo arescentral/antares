@@ -31,7 +31,8 @@ class Resource {
     Resource(pn::string_view resource_path);
     ~Resource();
 
-    sfz::BytesSlice data() const;
+    pn::data_view   data() const;
+    pn::string_view string() const;
 
   private:
     std::unique_ptr<sfz::MappedFile> _file;

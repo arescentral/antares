@@ -117,7 +117,7 @@ static void update_mission_brief_point(
 
     // TODO(sfiera): catch exception.
     Resource rsrc("text", "txt", contentID);
-    text               = sfz2pn(utf8::decode(rsrc.data()));
+    text               = rsrc.string().copy();
     int16_t textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
     if (hiliteBounds.left == hiliteBounds.right) {
         dataItem->bounds().left =

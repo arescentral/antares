@@ -180,7 +180,7 @@ TextRect::TextRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style)
 TextRect::TextRect(
         int id, Rect bounds, pn::string_view resource, uint8_t hue, interfaceStyleType style)
         : InterfaceItem(id, bounds),
-          text(sfz2pn(utf8::decode(Resource(resource).data()))),
+          text(Resource(resource).string().copy()),
           hue(hue),
           style(style) {}
 

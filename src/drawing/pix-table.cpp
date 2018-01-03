@@ -42,15 +42,14 @@ namespace antares {
 
 static void load_image(ArrayPixMap& image, pn::string_view path) {
     Resource        rsrc(path);
-    sfz::BytesSlice data = rsrc.data();
+    sfz::BytesSlice data{rsrc.data().data(), static_cast<size_t>(rsrc.data().size())};
     read(data, image);
 }
 
 NatePixTable::NatePixTable(int id, uint8_t color) {
-    Resource   rsrc("sprites", "pn", id);
-    pn::string data = sfz2pn(utf8::decode(rsrc.data()));
-    pn::value  x;
-    if (!pn::parse(data.open(), x, nullptr)) {
+    Resource  rsrc("sprites", "pn", id);
+    pn::value x;
+    if (!pn::parse(rsrc.string().open(), x, nullptr)) {
         throw std::runtime_error("invalid sprite");
     }
     pn::map_cref m = x.as_map();

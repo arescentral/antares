@@ -53,7 +53,7 @@ void sys_init() {
 
     {
         Resource        rsrc("rotation-table");
-        sfz::BytesSlice in(rsrc.data());
+        sfz::BytesSlice in{rsrc.data().data(), static_cast<size_t>(rsrc.data().size())};
         read(in, sys.rot_table, SystemGlobals::ROT_TABLE_SIZE);
         if (!in.empty()) {
             throw std::runtime_error("didn't consume all of rotation data");

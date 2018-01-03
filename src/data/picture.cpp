@@ -40,7 +40,7 @@ Picture::Picture(pn::string_view resource, bool hidpi)
                 _path += ".png";
             }
             Resource        rsrc(_path);
-            sfz::BytesSlice in(rsrc.data());
+            sfz::BytesSlice in{rsrc.data().data(), static_cast<size_t>(rsrc.data().size())};
             read(in, *this);
             break;
         } catch (std::exception& e) {

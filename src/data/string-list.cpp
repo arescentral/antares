@@ -37,7 +37,7 @@ namespace antares {
 StringList::StringList(int id) {
     Resource  rsrc("strings", "pn", id);
     pn::value strings;
-    if (!pn::parse(sfz2pn(utf8::decode(rsrc.data())).open(), strings, nullptr)) {
+    if (!pn::parse(rsrc.data().open(), strings, nullptr)) {
         throw std::runtime_error(pn::format("Couldn't parse strings/{0}.pn", id).c_str());
     }
     pn::array_cref l = strings.as_array();

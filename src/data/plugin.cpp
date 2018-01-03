@@ -43,7 +43,7 @@ template <typename T>
 static void read_all(
         pn::string_view name, pn::string_view type, pn::string_view extension, vector<T>& v) {
     Resource        rsrc(type, extension, kPackedResID);
-    sfz::BytesSlice in(rsrc.data());
+    sfz::BytesSlice in{rsrc.data().data(), static_cast<size_t>(rsrc.data().size())};
     size_t          count = rsrc.data().size() / T::byte_size;
     v.resize(count);
     for (size_t i = 0; i < count; ++i) {
@@ -57,7 +57,7 @@ static void read_all(
 void PluginInit() {
     {
         Resource        rsrc("scenario-info", "nlAG", 128);
-        sfz::BytesSlice in(rsrc.data());
+        sfz::BytesSlice in{rsrc.data().data(), static_cast<size_t>(rsrc.data().size())};
         read(in, plug.meta);
         if (!in.empty()) {
             throw std::runtime_error("didn't consume all of scenario file info data");

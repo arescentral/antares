@@ -63,6 +63,13 @@ Resource::Resource(pn::string_view resource_path) : _file(load(resource_path)) {
 
 Resource::~Resource() {}
 
-sfz::BytesSlice Resource::data() const { return _file->data(); }
+pn::data_view Resource::data() const {
+    return pn::data_view{_file->data().data(), static_cast<int>(_file->data().size())};
+}
+
+pn::string_view Resource::string() const {
+    return pn::string_view{reinterpret_cast<const char*>(_file->data().data()),
+                           static_cast<int>(_file->data().size())};
+}
 
 }  // namespace antares

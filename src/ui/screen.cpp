@@ -57,10 +57,9 @@ InterfaceScreen::InterfaceScreen(pn::value_cref x, const Rect& bounds, bool full
 InterfaceScreen::~InterfaceScreen() {}
 
 pn::value InterfaceScreen::load_pn(pn::string_view id) {
-    Resource   rsrc(pn::format("interfaces/{0}.pn", id));
-    pn::string in = sfz2pn(utf8::decode(rsrc.data()));
-    pn::value  x;
-    if (!pn::parse(in.open(), x, nullptr)) {
+    Resource  rsrc(pn::format("interfaces/{0}.pn", id));
+    pn::value x;
+    if (!pn::parse(rsrc.string().open(), x, nullptr)) {
         throw std::runtime_error("invalid interface file");
     }
     return x;

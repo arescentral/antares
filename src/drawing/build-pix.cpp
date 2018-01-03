@@ -100,8 +100,7 @@ class PixDraw {
 BuildPix::BuildPix(int text_id, int width) : _size({width, 0}) {
     Resource rsrc("text", "txt", text_id);
 
-    sfz::BytesSlice     data = rsrc.data();
-    sfz::String         text(utf8::decode(data));
+    sfz::String         text              = pn2sfz(rsrc.string());
     bool                in_section_header = (text.size() >= 2) && (text.slice(0, 2) == "#+");
     size_t              start             = 0;
     const size_t        end               = text.size();
