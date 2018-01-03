@@ -21,7 +21,6 @@
 #include <stdint.h>
 #include <algorithm>
 #include <pn/file>
-#include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
@@ -45,7 +44,6 @@
 #include <GL/glu.h>
 #endif
 
-using sfz::hex;
 using std::min;
 using std::max;
 using std::unique_ptr;
@@ -352,10 +350,11 @@ class OpenGlTextureImpl : public Texture::Impl {
 
     struct Texture {
         Texture() { glGenTextures(1, &id); }
+        Texture(const Texture&) = delete;
+        Texture& operator=(const Texture&) = delete;
         ~Texture() { glDeleteTextures(1, &id); }
 
         GLuint id;
-        DISALLOW_COPY_AND_ASSIGN(Texture);
     };
 
     const pn::string                   _name;
@@ -363,8 +362,6 @@ class OpenGlTextureImpl : public Texture::Impl {
     Size                               _size;
     const OpenGlVideoDriver::Uniforms& _uniforms;
     GLuint*                            _vbuf;
-
-    DISALLOW_COPY_AND_ASSIGN(OpenGlTextureImpl);
 };
 
 }  // namespace

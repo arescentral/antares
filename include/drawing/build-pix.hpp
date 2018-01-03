@@ -19,7 +19,6 @@
 #ifndef ANTARES_DRAWING_BUILD_PIX_HPP_
 #define ANTARES_DRAWING_BUILD_PIX_HPP_
 
-#include <sfz/sfz.hpp>
 #include <vector>
 #include "drawing/styled-text.hpp"
 #include "math/geometry.hpp"

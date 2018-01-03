@@ -31,7 +31,6 @@ using sfz::MappedFile;
 using std::unique_ptr;
 
 namespace path = sfz::path;
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 

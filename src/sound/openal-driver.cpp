@@ -126,8 +126,6 @@ class OpenAlSoundDriver::OpenAlSound : public Sound {
 
     const OpenAlSoundDriver& _driver;
     ALuint                   _buffer;
-
-    DISALLOW_COPY_AND_ASSIGN(OpenAlSound);
 };
 
 class OpenAlSoundDriver::OpenAlChannel : public SoundChannel {
@@ -178,8 +176,6 @@ class OpenAlSoundDriver::OpenAlChannel : public SoundChannel {
   private:
     OpenAlSoundDriver& _driver;
     ALuint             _source;
-
-    DISALLOW_COPY_AND_ASSIGN(OpenAlChannel);
 };
 
 void OpenAlSoundDriver::OpenAlSound::play() { _driver._active_channel->play(*this); }

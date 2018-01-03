@@ -19,9 +19,6 @@
 #include "math/fixed.hpp"
 
 #include <gmock/gmock.h>
-#include <sfz/sfz.hpp>
-
-using sfz::dec;
 
 namespace antares {
 namespace {

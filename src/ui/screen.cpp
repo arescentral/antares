@@ -20,7 +20,6 @@
 
 #include <pn/array>
 #include <pn/file>
-#include <sfz/sfz.hpp>
 
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
@@ -34,12 +33,8 @@
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
-using sfz::range;
-using sfz::read;
 using std::unique_ptr;
 using std::vector;
-
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 

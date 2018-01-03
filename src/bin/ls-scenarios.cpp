@@ -17,7 +17,6 @@
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include <pn/file>
-#include <sfz/sfz.hpp>
 
 #include "data/pn.hpp"
 #include "data/scenario-list.hpp"

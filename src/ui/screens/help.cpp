@@ -33,8 +33,6 @@
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
-namespace utf8 = sfz::utf8;
-
 namespace antares {
 
 HelpScreen::HelpScreen()

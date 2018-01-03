@@ -21,11 +21,8 @@
 #include <sys/param.h>
 #include <unistd.h>
 #include <pn/file>
-#include <sfz/sfz.hpp>
 #include "build/defs.hpp"
 #include "data/pn.hpp"
-
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 

@@ -20,7 +20,6 @@
 #define ANTARES_GLFW_VIDEO_DRIVER_HPP_
 
 #include <queue>
-#include <sfz/sfz.hpp>
 #include <stack>
 
 #include "config/keys.hpp"
@@ -65,8 +64,6 @@ class GLFWVideoDriver : public OpenGlVideoDriver {
     MainLoop*   _loop;
     wall_time   _last_click_usecs;
     int         _last_click_count;
-
-    DISALLOW_COPY_AND_ASSIGN(GLFWVideoDriver);
 };
 
 }  // namespace antares

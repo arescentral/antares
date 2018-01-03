@@ -19,8 +19,6 @@
 #ifndef ANTARES_UI_SCREENS_DEBRIEFING_HPP_
 #define ANTARES_UI_SCREENS_DEBRIEFING_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "drawing/styled-text.hpp"
 #include "math/units.hpp"
 #include "ui/card.hpp"
@@ -70,8 +68,6 @@ class DebriefingScreen : public Card {
     int       _typed_chars;
 
     LabeledRect _data_item;
-
-    DISALLOW_COPY_AND_ASSIGN(DebriefingScreen);
 };
 
 const char* stringify(DebriefingScreen::State state);

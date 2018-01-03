@@ -20,12 +20,8 @@
 
 #include <cmath>
 #include <pn/file>
-#include <sfz/sfz.hpp>
 
 #include "data/pn.hpp"
-
-using sfz::dec;
-using sfz::range;
 
 namespace antares {
 

@@ -356,8 +356,6 @@ class PauseScreen : public Card {
     pn::string _pause_string;
     Point      _text_origin;
     Rect       _bracket_bounds;
-
-    DISALLOW_COPY_AND_ASSIGN(PauseScreen);
 };
 
 void GamePlay::become_front() {

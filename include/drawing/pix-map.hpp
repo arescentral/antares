@@ -155,7 +155,10 @@ class ArrayPixMap : public PixMap {
     // @param [in] size     the desired size of the PixMap.
     ArrayPixMap(int32_t width, int32_t height);
     ArrayPixMap(Size size);
-    ArrayPixMap(ArrayPixMap&&) = default;
+    ArrayPixMap(const ArrayPixMap&) = delete;
+    ArrayPixMap(ArrayPixMap&&)      = default;
+    ArrayPixMap& operator=(const ArrayPixMap&) = delete;
+    ArrayPixMap& operator=(ArrayPixMap&&) = default;
 
     // Deletes memory associated with the PixMap.
     ~ArrayPixMap();
@@ -187,8 +190,6 @@ class ArrayPixMap : public PixMap {
     // stores all rows of pixels contiguously.  This permits the optimization of `fill()` provided
     // above.
     std::unique_ptr<RgbColor[]> _bytes;
-
-    DISALLOW_COPY_AND_ASSIGN(ArrayPixMap);
 };
 
 // Deserializes an ArrayPixMap from a WriteTarget.

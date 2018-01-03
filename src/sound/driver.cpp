@@ -20,7 +20,6 @@
 
 #include <fcntl.h>
 #include <pn/file>
-#include <sfz/sfz.hpp>
 
 #include "data/pn.hpp"
 #include "game/sys.hpp"
@@ -30,8 +29,6 @@
 #include "video/driver.hpp"
 
 using std::unique_ptr;
-
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -61,9 +58,6 @@ class NullChannel : public SoundChannel {
     virtual void amp(uint8_t volume) { static_cast<void>(volume); }
 
     virtual void quiet() {}
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(NullChannel);
 };
 
 class NullSound : public Sound {
@@ -72,9 +66,6 @@ class NullSound : public Sound {
 
     virtual void play() {}
     virtual void loop() {}
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(NullSound);
 };
 
 }  // namespace
@@ -126,8 +117,6 @@ class LogSoundDriver::LogChannel : public SoundChannel {
   private:
     int             _id;
     LogSoundDriver& _driver;
-
-    DISALLOW_COPY_AND_ASSIGN(LogChannel);
 };
 
 class LogSoundDriver::LogSound : public Sound {
@@ -142,8 +131,6 @@ class LogSoundDriver::LogSound : public Sound {
   private:
     const LogSoundDriver& _driver;
     const pn::string      _path;
-
-    DISALLOW_COPY_AND_ASSIGN(LogSound);
 };
 
 LogSoundDriver::LogSoundDriver(pn::string_view path)

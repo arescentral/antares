@@ -28,8 +28,6 @@
 
 using sfz::range;
 
-namespace utf8 = sfz::utf8;
-
 namespace antares {
 
 static const ticks kDoubleClickInterval = ticks(30);

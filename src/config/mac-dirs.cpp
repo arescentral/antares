@@ -24,8 +24,6 @@
 #include "data/pn.hpp"
 #include "mac/core-foundation.hpp"
 
-namespace utf8 = sfz::utf8;
-
 namespace antares {
 
 pn::string default_application_path() {
@@ -36,7 +34,7 @@ pn::string default_application_path() {
                 url.c_obj(), true, reinterpret_cast<UInt8*>(path_buffer), PATH_MAX)) {
         throw std::runtime_error("couldn't get application_path()");
     }
-    return sfz2pn(utf8::decode(path_buffer));
+    return pn::string(path_buffer, strlen(path_buffer));
 }
 
 Directories mac_dirs() {

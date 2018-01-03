@@ -31,8 +31,6 @@ using sfz::MappedFile;
 using sfz::read;
 using std::vector;
 
-namespace utf8 = sfz::utf8;
-
 namespace antares {
 
 namespace {
@@ -94,7 +92,7 @@ ScenarioList::ScenarioList() {
     size_t prefix_len = dirs().scenarios.size() + 1;
     size_t suffix_len = info.size() + 1;
     for (int i = 0; i < g.data.gl_pathc; ++i) {
-        const pn::string path = sfz2pn(utf8::decode(g.data.gl_pathv[i]));
+        const pn::string path = g.data.gl_pathv[i];
         pn::string_view  identifier =
                 path.substr(prefix_len, path.size() - prefix_len - suffix_len);
         if (identifier == _scenarios[0].identifier) {

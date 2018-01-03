@@ -20,7 +20,6 @@
 #define ANTARES_GAME_SYS_HPP_
 
 #include <pn/string>
-#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "drawing/sprite-handling.hpp"

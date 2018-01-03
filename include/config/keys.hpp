@@ -33,6 +33,8 @@ const size_t kHotKeyNum             = 10;
 class KeyMap {
   public:
     KeyMap();
+    KeyMap(const KeyMap&) = delete;
+    KeyMap& operator=(const KeyMap&) = delete;
 
     bool get(size_t index) const;
     void set(size_t index, bool value);
@@ -47,8 +49,6 @@ class KeyMap {
     static const size_t kDataSize = sizeof(Data);
 
     Data _data;
-
-    DISALLOW_COPY_AND_ASSIGN(KeyMap);
 };
 
 bool operator==(const KeyMap& a, const KeyMap& b);

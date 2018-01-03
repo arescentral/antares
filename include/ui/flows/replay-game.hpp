@@ -19,8 +19,6 @@
 #ifndef ANTARES_UI_FLOWS_REPLAY_GAME_HPP_
 #define ANTARES_UI_FLOWS_REPLAY_GAME_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "data/replay.hpp"
 #include "data/resource.hpp"
 #include "game/input-source.hpp"

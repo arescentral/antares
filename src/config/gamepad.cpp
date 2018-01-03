@@ -18,6 +18,8 @@
 
 #include "config/gamepad.hpp"
 
+#include <sfz/sfz.hpp>
+
 #include "data/pn.hpp"
 #include "game/sys.hpp"
 

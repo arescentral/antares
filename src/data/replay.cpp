@@ -39,7 +39,6 @@ using sfz::write;
 using std::map;
 
 namespace path = sfz::path;
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -161,7 +160,7 @@ static void tag_string(pn::file_view out, uint64_t tag, pn::string_view s) {
 static pn::string read_string(ReadSource in) {
     sfz::Bytes bytes(read_varint<size_t>(in), '\0');
     in.shift(bytes.data(), bytes.size());
-    return sfz2pn(sfz::String(utf8::decode(bytes)));
+    return pn::string{reinterpret_cast<const char*>(bytes.data()), static_cast<int>(bytes.size())};
 }
 
 template <typename T>

@@ -18,8 +18,6 @@
 
 #include "game/cursor.hpp"
 
-#include <sfz/sfz.hpp>
-
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "game/globals.hpp"

@@ -19,7 +19,6 @@
 #ifndef ANTARES_UI_EVENT_SCHEDULER_HPP_
 #define ANTARES_UI_EVENT_SCHEDULER_HPP_
 
-#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "config/keys.hpp"
@@ -41,6 +40,8 @@ class EventScheduler {
     };
 
     EventScheduler();
+    EventScheduler(const EventScheduler&) = delete;
+    EventScheduler& operator=(const EventScheduler&) = delete;
 
     void schedule_snapshot(int64_t at);
     void schedule_event(std::unique_ptr<Event> event);
@@ -63,8 +64,6 @@ class EventScheduler {
     std::vector<wall_ticks>             _snapshot_times;
     std::vector<std::unique_ptr<Event>> _event_heap;
     Point                               _mouse;
-
-    DISALLOW_COPY_AND_ASSIGN(EventScheduler);
 };
 
 }  // namespace antares

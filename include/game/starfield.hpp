@@ -56,6 +56,9 @@ class Starfield {
     static const int32_t kSparkStarOffset = kScrollStarNum;
 
     Starfield();
+    Starfield(const Starfield&) = delete;
+    Starfield& operator=(const Starfield&) = delete;
+
     void reset(Handle<SpaceObject> which_object);
     void make_sparks(
             int32_t sparkNum, int32_t sparkSpeed, Fixed maxVelocity, uint8_t color,
@@ -69,8 +72,6 @@ class Starfield {
     scrollStarType _stars[kScrollStarNum + kSparkStarNum];
     int32_t        _last_clip_bottom;
     bool           _warp_stars;
-
-    DISALLOW_COPY_AND_ASSIGN(Starfield);
 };
 
 }  // namespace antares

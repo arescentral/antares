@@ -19,8 +19,6 @@
 #ifndef ANTARES_UI_SCREENS_MAIN_HPP_
 #define ANTARES_UI_SCREENS_MAIN_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "data/replay-list.hpp"
 #include "ui/screen.hpp"
 
@@ -64,8 +62,6 @@ class MainScreen : public InterfaceScreen {
     State      _state;
     ReplayList _replays;
     wall_time  _next_timer;
-
-    DISALLOW_COPY_AND_ASSIGN(MainScreen);
 };
 
 }  // namespace antares

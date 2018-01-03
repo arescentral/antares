@@ -36,8 +36,6 @@ using sfz::range;
 using std::unique_ptr;
 using std::vector;
 
-namespace utf8 = sfz::utf8;
-
 namespace antares {
 
 static Rect rect(pn::value_cref x) {

@@ -19,7 +19,6 @@
 #ifndef ANTARES_UI_INTERFACE_HANDLING_HPP_
 #define ANTARES_UI_INTERFACE_HANDLING_HPP_
 
-#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "data/handle.hpp"

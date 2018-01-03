@@ -21,7 +21,6 @@
 
 #include <stdint.h>
 #include <pn/string>
-#include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
 #include "math/geometry.hpp"
@@ -50,6 +49,9 @@ enum GameState {
 class VideoDriver {
   public:
     VideoDriver();
+    VideoDriver(const VideoDriver&) = delete;
+    VideoDriver& operator=(const VideoDriver&) = delete;
+
     virtual ~VideoDriver();
     virtual Point     get_mouse()         = 0;
     virtual InputMode input_mode() const  = 0;
@@ -89,7 +91,11 @@ class VideoDriver {
 class Texture {
   public:
     struct Impl {
+        Impl() {}
+        Impl(const Impl&) = delete;
+        Impl& operator=(const Impl&) = delete;
         virtual ~Impl();
+
         virtual pn::string_view name() const                      = 0;
         virtual void            draw(const Rect& draw_rect) const = 0;
         virtual void            draw_cropped(

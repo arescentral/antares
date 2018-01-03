@@ -32,7 +32,6 @@ using sfz::MappedFile;
 using sfz::read;
 using std::vector;
 
-namespace utf8 = sfz::utf8;
 namespace path = sfz::path;
 
 namespace antares {
@@ -54,7 +53,7 @@ ReplayList::ReplayList() {
     glob(str.c_str(), 0, NULL, &g.data);
 
     for (int i = 0; i < g.data.gl_pathc; ++i) {
-        const pn::string path      = sfz2pn(utf8::decode(g.data.gl_pathv[i]));
+        const pn::string path      = g.data.gl_pathv[i];
         pn::string       basename  = sfz2pn(path::basename(pn2sfz(path)));
         pn::string_view  id_string = basename.substr(0, basename.size() - 5);
         int16_t          id;

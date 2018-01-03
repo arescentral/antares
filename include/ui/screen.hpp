@@ -19,7 +19,6 @@
 #ifndef ANTARES_UI_SCREEN_HPP_
 #define ANTARES_UI_SCREEN_HPP_
 
-#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "data/interface.hpp"
@@ -80,8 +79,6 @@ class InterfaceScreen : public Card {
     Button*                                     _hit_button;
     uint32_t                                    _pressed;
     Cursor                                      _cursor;
-
-    DISALLOW_COPY_AND_ASSIGN(InterfaceScreen);
 };
 
 }  // namespace antares

@@ -19,7 +19,6 @@
 #include "ui/event-scheduler.hpp"
 
 #include <algorithm>
-#include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
 #include "drawing/pix-map.hpp"
@@ -46,8 +45,6 @@ class MouseReader : public EventReceiver {
 
   private:
     Point* _mouse;
-
-    DISALLOW_COPY_AND_ASSIGN(MouseReader);
 };
 
 }  // namespace

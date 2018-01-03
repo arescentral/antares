@@ -18,8 +18,6 @@
 
 #include "video/driver.hpp"
 
-#include <sfz/sfz.hpp>
-
 #include "game/sys.hpp"
 #include "lang/defines.hpp"
 

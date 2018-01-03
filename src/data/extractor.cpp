@@ -61,7 +61,6 @@ using zipxx::ZipArchive;
 using zipxx::ZipFileReader;
 
 namespace path = sfz::path;
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -428,7 +427,8 @@ static const char kPluginIdentifierFile[] = "data/identifier";
 
 void check_version(ZipArchive& archive, pn::string_view expected) {
     ZipFileReader version_file(archive, kPluginVersionFile);
-    pn::string    actual = sfz2pn(utf8::decode(version_file.data()));
+    pn::string    actual{reinterpret_cast<const char*>(version_file.data().data()),
+                      static_cast<int>(version_file.data().size())};
     if (actual != expected) {
         throw std::runtime_error(pn::format(
                                          "unsupported plugin version {0}",
@@ -439,7 +439,9 @@ void check_version(ZipArchive& archive, pn::string_view expected) {
 
 void read_identifier(ZipArchive& archive, pn::string& out) {
     ZipFileReader identifier_file(archive, kPluginIdentifierFile);
-    sfz::String   actual(utf8::decode(identifier_file.data()));
+    sfz::String   actual =
+            pn2sfz(pn::string{reinterpret_cast<const char*>(identifier_file.data().data()),
+                              static_cast<int>(identifier_file.data().size())});
     if (actual.at(actual.size() - 1) != '\n') {
         throw std::runtime_error(pn::format(
                                          "missing newline in plugin identifier {0}",
@@ -604,7 +606,7 @@ void DataExtractor::extract_original(Observer* observer, pn::string_view file) c
     options.line_ending = rezin::Options::CR;
 
     for (const ResourceFile& resource_file : kResourceFiles) {
-        pn::string    path = sfz2pn(utf8::decode(resource_file.path));
+        pn::string    path = resource_file.path;
         ZipFileReader file(archive, pn2sfz(path));
         AppleDouble   apple_double(file.data());
         ResourceFork  rsrc(apple_double.at(AppleDouble::RESOURCE_FORK), options);

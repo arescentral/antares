@@ -52,8 +52,6 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
     Rect                      _capture_rect;
 
     EventScheduler* _scheduler = nullptr;
-
-    DISALLOW_COPY_AND_ASSIGN(OffscreenVideoDriver);
 };
 
 }  // namespace antares

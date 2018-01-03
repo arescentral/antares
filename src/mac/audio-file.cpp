@@ -44,6 +44,8 @@ class ExtAudioFile {
             throw std::runtime_error("ExtAudioFileWrapAudioFileID() failed.");
         }
     }
+    ExtAudioFile(const ExtAudioFile&) = delete;
+    ExtAudioFile& operator=(const ExtAudioFile&) = delete;
 
     ~ExtAudioFile() { ExtAudioFileDispose(_id); }
 
@@ -53,8 +55,6 @@ class ExtAudioFile {
 
   private:
     ExtAudioFileRef _id;
-
-    DISALLOW_COPY_AND_ASSIGN(ExtAudioFile);
 };
 
 }  // namespace

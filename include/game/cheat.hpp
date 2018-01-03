@@ -19,8 +19,6 @@
 #ifndef ANTARES_GAME_CHEAT_HPP_
 #define ANTARES_GAME_CHEAT_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "game/globals.hpp"
 
 namespace antares {

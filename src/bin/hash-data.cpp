@@ -25,7 +25,6 @@ using sfz::args::help;
 using sfz::args::store;
 
 namespace args = sfz::args;
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 

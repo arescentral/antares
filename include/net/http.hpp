@@ -20,7 +20,6 @@
 #define ANTARES_NET_HTTP_HPP_
 
 #include <pn/fwd>
-#include <sfz/sfz.hpp>
 
 namespace antares {
 namespace http {

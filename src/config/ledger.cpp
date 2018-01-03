@@ -44,7 +44,6 @@ using std::unique_ptr;
 using std::vector;
 
 namespace path = sfz::path;
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -85,17 +84,16 @@ void DirectoryLedger::load() {
     pn::string            path = pn::format("{0}/{1}/ledger.pn", dirs().registry, scenario_id);
 
     _chapters.clear();
-    unique_ptr<MappedFile> file;
+    pn::file file;
     try {
-        file.reset(new MappedFile(pn2sfz(path)));
+        file = pn::open(path, "r");
     } catch (std::exception& e) {
         _chapters.insert(1);
         return;
     }
 
-    pn::string data = sfz2pn(utf8::decode(file->data()));
-    pn::value  x;
-    if (!pn::parse(data.open(), x, nullptr)) {
+    pn::value x;
+    if (!pn::parse(file, x, nullptr)) {
         throw std::runtime_error("bad ledger");
     }
 

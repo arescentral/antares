@@ -32,6 +32,8 @@ class Quads;
 class Font {
   public:
     Font(pn::string_view name);
+    Font(const Font&) = delete;
+    Font& operator=(const Font&) = delete;
     ~Font();
 
     uint8_t char_width(uint32_t rune) const;
@@ -50,8 +52,6 @@ class Font {
 
     int                      _scale;
     std::map<uint32_t, Rect> _glyphs;
-
-    DISALLOW_COPY_AND_ASSIGN(Font);
 };
 
 }  // namespace antares

@@ -19,8 +19,6 @@
 #ifndef ANTARES_GAME_ADMIRAL_HPP_
 #define ANTARES_GAME_ADMIRAL_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "data/base-object.hpp"
 #include "data/handle.hpp"
 #include "data/level.hpp"

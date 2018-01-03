@@ -20,7 +20,6 @@
 #define ANTARES_GAME_LABELS_HPP_
 
 #include <pn/string>
-#include <sfz/sfz.hpp>
 
 #include "data/base-object.hpp"
 

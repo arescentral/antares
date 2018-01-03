@@ -19,7 +19,6 @@
 #ifndef ANTARES_UI_SCREENS_SELECT_LEVEL_HPP_
 #define ANTARES_UI_SCREENS_SELECT_LEVEL_HPP_
 
-#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "data/handle.hpp"
@@ -69,8 +68,6 @@ class SelectLevelScreen : public InterfaceScreen {
     std::vector<int> _chapters;
     int              _unlock_digits;
     size_t           _unlock_chapter;
-
-    DISALLOW_COPY_AND_ASSIGN(SelectLevelScreen);
 };
 
 }  // namespace antares

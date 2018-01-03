@@ -30,7 +30,6 @@ using sfz::args::store;
 using sfz::args::store_const;
 
 namespace args = sfz::args;
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 

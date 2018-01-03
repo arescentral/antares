@@ -80,8 +80,6 @@ class SoundControlScreen : public InterfaceScreen {
     OptionsScreen::State button_state(int button);
 
     OptionsScreen::State* const _state;
-
-    DISALLOW_COPY_AND_ASSIGN(SoundControlScreen);
 };
 
 class KeyControlScreen : public InterfaceScreen {
@@ -143,8 +141,6 @@ class KeyControlScreen : public InterfaceScreen {
 
     StringList _tabs;
     StringList _keys;
-
-    DISALLOW_COPY_AND_ASSIGN(KeyControlScreen);
 };
 
 }  // namespace antares

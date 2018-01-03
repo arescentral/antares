@@ -19,7 +19,6 @@
 #include "linux/offscreen.hpp"
 
 #include <pn/file>
-#include <sfz/sfz.hpp>
 
 namespace antares {
 

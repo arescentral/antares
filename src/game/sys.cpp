@@ -18,6 +18,8 @@
 
 #include "game/sys.hpp"
 
+#include <sfz/sfz.hpp>
+
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "data/picture.hpp"

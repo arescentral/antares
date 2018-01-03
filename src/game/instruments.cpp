@@ -19,6 +19,7 @@
 #include "game/instruments.hpp"
 
 #include <algorithm>
+#include <sfz/sfz.hpp>
 
 #include "data/base-object.hpp"
 #include "data/picture.hpp"

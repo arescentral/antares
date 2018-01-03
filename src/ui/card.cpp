@@ -21,7 +21,6 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <pn/file>
-#include <sfz/sfz.hpp>
 
 #include "video/driver.hpp"
 

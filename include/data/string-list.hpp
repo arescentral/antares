@@ -20,7 +20,6 @@
 #define ANTARES_DATA_STRING_LIST_HPP_
 
 #include <pn/string>
-#include <sfz/sfz.hpp>
 #include <vector>
 
 namespace antares {
@@ -28,6 +27,8 @@ namespace antares {
 class StringList {
   public:
     StringList(int id);
+    StringList(const StringList&);
+    StringList& operator=(const StringList&);
 
     ssize_t         index_of(pn::string_view result) const;
     size_t          size() const;
@@ -36,8 +37,6 @@ class StringList {
   private:
     friend std::vector<pn::string> to_vector(StringList&& strl);
     std::vector<pn::string>        _strings;
-
-    DISALLOW_COPY_AND_ASSIGN(StringList);
 };
 
 inline std::vector<pn::string> to_vector(StringList&& strl) {

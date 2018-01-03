@@ -57,7 +57,6 @@ using std::unique_ptr;
 using std::vector;
 
 namespace path = sfz::path;
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 

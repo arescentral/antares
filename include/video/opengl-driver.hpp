@@ -20,7 +20,6 @@
 #define ANTARES_VIDEO_OPEN_GL_DRIVER_HPP_
 
 #include <stdint.h>
-#include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
 #include "math/geometry.hpp"
@@ -80,6 +79,9 @@ class OpenGlVideoDriver : public VideoDriver {
     class MainLoop {
       public:
         MainLoop(OpenGlVideoDriver& driver, Card* initial);
+        MainLoop(const MainLoop&) = delete;
+        MainLoop& operator=(const MainLoop&) = delete;
+
         void  draw();
         bool  done() const;
         Card* top() const;
@@ -91,8 +93,6 @@ class OpenGlVideoDriver : public VideoDriver {
         const Setup        _setup;
         OpenGlVideoDriver& _driver;
         CardStack          _stack;
-
-        DISALLOW_COPY_AND_ASSIGN(MainLoop);
     };
 
     virtual Size viewport_size() const = 0;
@@ -119,8 +119,6 @@ class OpenGlVideoDriver : public VideoDriver {
     std::map<size_t, Texture> _pluses;
 
     uint32_t _vbuf[3];
-
-    DISALLOW_COPY_AND_ASSIGN(OpenGlVideoDriver);
 };
 
 }  // namespace antares

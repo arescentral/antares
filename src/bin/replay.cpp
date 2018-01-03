@@ -64,7 +64,6 @@ using std::unique_ptr;
 
 namespace args = sfz::args;
 namespace path = sfz::path;
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -133,8 +132,6 @@ class ReplayMaster : public Card {
     const int32_t        _random_seed;
     GameResult           _game_result;
     ReplayInputSource    _input_source;
-
-    DISALLOW_COPY_AND_ASSIGN(ReplayMaster);
 };
 
 void ReplayMaster::init() {

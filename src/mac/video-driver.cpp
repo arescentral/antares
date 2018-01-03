@@ -68,8 +68,6 @@ class InputModeTracker : public EventReceiver {
 
   private:
     InputMode* _mode;
-
-    DISALLOW_COPY_AND_ASSIGN(InputModeTracker);
 };
 
 }  // namespace

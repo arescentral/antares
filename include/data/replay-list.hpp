@@ -19,7 +19,7 @@
 #ifndef ANTARES_DATA_REPLAY_LIST_HPP_
 #define ANTARES_DATA_REPLAY_LIST_HPP_
 
-#include <sfz/sfz.hpp>
+#include <stdlib.h>
 #include <vector>
 
 namespace antares {
@@ -27,13 +27,14 @@ namespace antares {
 class ReplayList {
   public:
     ReplayList();
+    ReplayList(const ReplayList&) = delete;
+    ReplayList& operator=(const ReplayList&) = delete;
+
     size_t  size() const;
     int16_t at(size_t index) const;
 
   private:
     std::vector<int16_t> _replays;
-
-    DISALLOW_COPY_AND_ASSIGN(ReplayList);
 };
 
 }  // namespace antares

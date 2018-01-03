@@ -44,7 +44,6 @@
 using std::make_pair;
 using std::pair;
 using std::vector;
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 

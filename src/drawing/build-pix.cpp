@@ -33,8 +33,6 @@ using sfz::string_to_int;
 using std::unique_ptr;
 using std::vector;
 
-namespace utf8 = sfz::utf8;
-
 namespace antares {
 
 namespace {

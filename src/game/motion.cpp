@@ -18,8 +18,6 @@
 
 #include "game/motion.hpp"
 
-#include <sfz/sfz.hpp>
-
 #include "data/base-object.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"

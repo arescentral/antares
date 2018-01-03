@@ -20,7 +20,6 @@
 
 #include <algorithm>
 #include <pn/file>
-#include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
 #include "config/ledger.hpp"

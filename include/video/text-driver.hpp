@@ -70,8 +70,6 @@ class TextVideoDriver : public VideoDriver {
     std::vector<std::pair<size_t, size_t>> _last_args;
 
     EventScheduler* _scheduler = nullptr;
-
-    DISALLOW_COPY_AND_ASSIGN(TextVideoDriver);
 };
 
 }  // namespace antares

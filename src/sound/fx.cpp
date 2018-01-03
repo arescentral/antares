@@ -19,7 +19,6 @@
 #include "sound/fx.hpp"
 
 #include <pn/file>
-#include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
 #include "data/base-object.hpp"

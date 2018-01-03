@@ -20,7 +20,6 @@
 #define ANTARES_DATA_SCENARIO_LIST_HPP_
 
 #include <pn/string>
-#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "data/pn.hpp"
@@ -46,13 +45,14 @@ class ScenarioList {
     };
 
     ScenarioList();
+    ScenarioList(const ScenarioList&) = delete;
+    ScenarioList& operator=(const ScenarioList&) = delete;
+
     size_t       size() const;
     const Entry& at(size_t index) const;
 
   private:
     std::vector<Entry> _scenarios;
-
-    DISALLOW_COPY_AND_ASSIGN(ScenarioList);
 };
 
 }  // namespace antares

@@ -19,62 +19,61 @@
 #ifndef ANTARES_SOUND_DRIVER_HPP_
 #define ANTARES_SOUND_DRIVER_HPP_
 
+#include <memory>
 #include <pn/file>
 #include <pn/string>
-#include <sfz/sfz.hpp>
 
 namespace antares {
 
 class Sound {
   public:
     Sound() {}
+    Sound(const Sound&) = delete;
+    Sound& operator=(const Sound&) = delete;
+
     virtual ~Sound() {}
 
     virtual void play() = 0;
     virtual void loop() = 0;
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(Sound);
 };
 
 class SoundChannel {
   public:
     SoundChannel() {}
+    SoundChannel(const SoundChannel&) = delete;
+    SoundChannel& operator=(const SoundChannel&) = delete;
+
     virtual ~SoundChannel() {}
 
     virtual void activate()          = 0;
     virtual void amp(uint8_t volume) = 0;
     virtual void quiet()             = 0;
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(SoundChannel);
 };
 
 class SoundDriver {
   public:
     SoundDriver();
+    SoundDriver(const SoundDriver&) = delete;
+    SoundDriver& operator=(const SoundDriver&) = delete;
+
     virtual ~SoundDriver();
 
-    virtual std::unique_ptr<SoundChannel> open_channel()                    = 0;
-    virtual std::unique_ptr<Sound>        open_sound(pn::string_view path)  = 0;
-    virtual void                          set_global_volume(uint8_t volume) = 0;
+    virtual std::unique_ptr<SoundChannel> open_channel()            = 0;
+    virtual std::unique_ptr<Sound> open_sound(pn::string_view path) = 0;
+    virtual void set_global_volume(uint8_t volume)                  = 0;
 
     static SoundDriver* driver();
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(SoundDriver);
 };
 
 class NullSoundDriver : public SoundDriver {
   public:
     NullSoundDriver() {}
+    NullSoundDriver(const NullSoundDriver&) = delete;
+    NullSoundDriver& operator=(const NullSoundDriver&) = delete;
 
     virtual std::unique_ptr<SoundChannel> open_channel();
-    virtual std::unique_ptr<Sound>        open_sound(pn::string_view path);
-    virtual void                          set_global_volume(uint8_t volume);
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(NullSoundDriver);
+    virtual std::unique_ptr<Sound> open_sound(pn::string_view path);
+    virtual void set_global_volume(uint8_t volume);
 };
 
 class LogSoundDriver : public SoundDriver {
@@ -82,8 +81,8 @@ class LogSoundDriver : public SoundDriver {
     LogSoundDriver(pn::string_view path);
 
     virtual std::unique_ptr<SoundChannel> open_channel();
-    virtual std::unique_ptr<Sound>        open_sound(pn::string_view path);
-    virtual void                          set_global_volume(uint8_t volume);
+    virtual std::unique_ptr<Sound> open_sound(pn::string_view path);
+    virtual void set_global_volume(uint8_t volume);
 
   private:
     class LogSound;

@@ -40,8 +40,6 @@
 
 using std::unique_ptr;
 
-namespace utf8 = sfz::utf8;
-
 namespace antares {
 
 static const int32_t kMessageScreenLeft = 200;

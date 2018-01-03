@@ -34,8 +34,6 @@ using sfz::path::dirname;
 using sfz::range;
 using std::vector;
 
-namespace utf8 = sfz::utf8;
-
 namespace antares {
 
 static const char* kKeyNames[KEY_COUNT] = {
@@ -102,10 +100,8 @@ FilePrefsDriver::FilePrefsDriver() {
 
     try {
         pn::string path = pn::format("{0}/config.pn", dirs().root);
-        MappedFile file(pn2sfz(path));
         pn::value  x;
-        pn::string data = sfz2pn(utf8::decode(file.data()));
-        if (!pn::parse(data.open(), x, nullptr)) {
+        if (!pn::parse(pn::open(path, "r"), x, nullptr)) {
             return;
         }
         pn::map_cref m = x.as_map();

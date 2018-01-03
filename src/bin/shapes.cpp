@@ -33,7 +33,6 @@ using sfz::path::dirname;
 using sfz::write;
 using std::unique_ptr;
 
-namespace utf8 = sfz::utf8;
 namespace args = sfz::args;
 
 namespace antares {
@@ -69,6 +68,8 @@ void draw(Shape shape, PixMap& pix) {
 class ShapeBuilder {
   public:
     ShapeBuilder(const Optional<sfz::String>& output_dir) : _output_dir(output_dir) {}
+    ShapeBuilder(const ShapeBuilder&) = delete;
+    ShapeBuilder& operator=(const ShapeBuilder&) = delete;
 
     void save(Shape shape, int size) {
         ArrayPixMap pix(size, size);
@@ -86,8 +87,6 @@ class ShapeBuilder {
 
   private:
     const Optional<sfz::String> _output_dir;
-
-    DISALLOW_COPY_AND_ASSIGN(ShapeBuilder);
 };
 
 int main(int argc, char* const* argv) {

@@ -40,7 +40,6 @@ using sfz::write;
 using std::unique_ptr;
 
 namespace args = sfz::args;
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 namespace {
@@ -48,6 +47,8 @@ namespace {
 class ObjectDataBuilder {
   public:
     ObjectDataBuilder(const Optional<sfz::String>& output_dir) : _output_dir(output_dir) {}
+    ObjectDataBuilder(const ObjectDataBuilder&) = delete;
+    ObjectDataBuilder& operator=(const ObjectDataBuilder&) = delete;
 
     void save(Handle<BaseObject> object, int pict_id) {
         pn::string data;
@@ -62,8 +63,6 @@ class ObjectDataBuilder {
 
   private:
     const Optional<sfz::String> _output_dir;
-
-    DISALLOW_COPY_AND_ASSIGN(ObjectDataBuilder);
 };
 
 int main(int argc, char** argv) {
