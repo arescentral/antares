@@ -98,8 +98,7 @@ class ReplayMaster : public Card {
                     pn::file outcome = pn::open(path, "w");
                     if ((g.victory_text >= 0)) {
                         Resource rsrc("text", "txt", g.victory_text);
-                        outcome.write(pn::data_view{rsrc.data().data(),
-                                                    static_cast<int>(rsrc.data().size())});
+                        outcome.write(rsrc.data());
                         if (_game_result == WIN_GAME) {
                             outcome.write("\n\n");
                             Handle<Admiral> player(0);

@@ -184,11 +184,12 @@ static bool read_string(pn::file_view in, pn::string* out) {
     if (!read_varint(in, &size)) {
         return false;
     }
-    sfz::Bytes bytes(size, '\0');
-    if (fread(bytes.data(), 1, bytes.size(), in.c_obj()) != bytes.size()) {
+    pn::data data;
+    data.resize(size);
+    if (fread(data.data(), 1, data.size(), in.c_obj()) != data.size()) {
         return false;
     }
-    *out = pn::string{reinterpret_cast<const char*>(bytes.data()), static_cast<int>(bytes.size())};
+    *out = pn::string{reinterpret_cast<const char*>(data.data()), data.size()};
     return true;
 }
 

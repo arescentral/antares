@@ -216,8 +216,7 @@ unique_ptr<Sound> OpenAlSoundDriver::open_sound(pn::string_view path) {
     for (const auto& fmt : fmts) {
         try {
             Resource rsrc(pn::format("{0}{1}", path, fmt.ext));
-            fmt.fn(pn::data_view{rsrc.data().data(), static_cast<int>(rsrc.data().size())},
-                   *sound);
+            fmt.fn(pn::data_view{rsrc.data().data(), rsrc.data().size()}, *sound);
             return std::move(sound);
         } catch (std::exception& e) {
             continue;
