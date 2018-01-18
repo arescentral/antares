@@ -66,6 +66,7 @@ def check_submodules():
         "ext/libsfz/BUILD.gn",
         "ext/libsndfile/BUILD.gn",
         "ext/libzipxx/BUILD.gn",
+        "ext/procyon/BUILD.gn",
         "ext/rezin/BUILD.gn",
         "data/README.md",
     ]
