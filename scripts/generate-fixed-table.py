@@ -19,7 +19,7 @@ for i in xrange(1000):
             if other_err < err:
                 continue  # then don't replace a more accurate representation
     table[fix] = rep, err
-    
+
 print "static const char fractions[][5] = {"
 for _, (rep, _) in sorted(table.iteritems()):
     print '    ".%s",' % rep

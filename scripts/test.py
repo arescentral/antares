@@ -16,7 +16,6 @@ import tempfile
 import time
 import traceback
 
-
 START = "START"
 PASSED = "PASSED"
 FAILED = "FAILED"
@@ -80,7 +79,7 @@ def call(args):
 
     sys.stdout = cStringIO.StringIO()
 
-    queue.put((name, START,))
+    queue.put((name, START, ))
     try:
         start = time.time()
         result = fn(opts, queue, name, *args)
@@ -100,8 +99,7 @@ def main():
         if "DISPLAY" not in os.environ:
             # TODO(sfiera): determine when Xvfb is unnecessary and skip this.
             print("no DISPLAY; using Xvfb")
-            os.execvp("xvfb-run",
-                      ["xvfb-run", "-s", "-screen 0 640x480x24"] + sys.argv)
+            os.execvp("xvfb-run", ["xvfb-run", "-s", "-screen 0 640x480x24"] + sys.argv)
 
     test_types = "unit data offscreen replay".split()
     parser = argparse.ArgumentParser()
@@ -114,17 +112,14 @@ def main():
     pool = multiprocessing.pool.ThreadPool()
     tests = [
         (unit_test, opts, queue, "fixed-test"),
-
         (data_test, opts, queue, "build-pix", [], ["--text"]),
         (data_test, opts, queue, "object-data"),
         (data_test, opts, queue, "shapes"),
         (data_test, opts, queue, "tint"),
-
         (offscreen_test, opts, queue, "main-screen"),
         (offscreen_test, opts, queue, "mission-briefing", ["--text"]),
         (offscreen_test, opts, queue, "options"),
         (offscreen_test, opts, queue, "pause", ["--text"]),
-
         (replay_test, opts, queue, "and-it-feels-so-good"),
         (replay_test, opts, queue, "astrotrash-plus"),
         (replay_test, opts, queue, "blood-toil-tears-sweat"),
