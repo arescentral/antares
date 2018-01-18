@@ -19,7 +19,6 @@
 #include "mac/c/AntaresController.h"
 
 #include <stdlib.h>
-#include <sfz/sfz.hpp>
 
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
@@ -32,10 +31,6 @@
 #include "ui/flows/master.hpp"
 #include "video/driver.hpp"
 
-using sfz::CString;
-using sfz::Exception;
-using sfz::String;
-using sfz::StringSlice;
 using antares::CardStack;
 using antares::CocoaVideoDriver;
 using antares::CoreFoundationPrefsDriver;
@@ -48,8 +43,6 @@ using antares::Preferences;
 using antares::PrefsDriver;
 using antares::SoundDriver;
 using antares::VideoDriver;
-
-namespace utf8 = sfz::utf8;
 
 struct AntaresDrivers {
     CoreFoundationPrefsDriver prefs;
@@ -69,8 +62,8 @@ extern "C" void antares_controller_destroy_drivers(AntaresDrivers* drivers) { de
 extern "C" bool antares_controller_loop(AntaresDrivers* drivers, CFStringRef* error_message) {
     try {
         drivers->video.loop(new Master(time(NULL)));
-    } catch (Exception& e) {
-        *error_message = cf::wrap(e.message()).release();
+    } catch (std::exception& e) {
+        *error_message = cf::wrap(pn::string_view{e.what()}).release();
         return false;
     }
     return true;

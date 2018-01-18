@@ -19,7 +19,7 @@
 #ifndef ANTARES_SOUND_SNDFILE_HPP_
 #define ANTARES_SOUND_SNDFILE_HPP_
 
-#include <sfz/sfz.hpp>
+#include <pn/data>
 
 #ifdef __APPLE__
 #include <OpenAL/al.h>
@@ -33,14 +33,14 @@ namespace antares {
 
 class Sndfile {
   public:
-    Sndfile(const sfz::BytesSlice& data);
+    Sndfile(pn::data_view data);
+    Sndfile(const Sndfile&) = delete;
+    Sndfile& operator=(const Sndfile&) = delete;
 
-    void convert(sfz::Bytes& data, ALenum& format, ALsizei& frequency) const;
+    void convert(pn::data_ref data, ALenum& format, ALsizei& frequency) const;
 
   private:
-    sfz::BytesSlice _data;
-
-    DISALLOW_COPY_AND_ASSIGN(Sndfile);
+    pn::data_view _data;
 };
 
 }  // namespace antares

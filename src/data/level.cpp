@@ -22,10 +22,6 @@
 
 #include "data/plugin.hpp"
 
-using sfz::BytesSlice;
-using sfz::ReadSource;
-using sfz::String;
-using sfz::read;
 namespace macroman = sfz::macroman;
 
 namespace antares {
@@ -35,171 +31,194 @@ static const int16_t kLevel_IsTraining_Bit = 0x8000;
 
 namespace {
 
-void read_pstr(ReadSource in, String& out) {
+bool read_pstr(pn::file_view in, pn::string* out) {
     uint8_t bytes[256];
-    read(in, bytes, 256);
-    BytesSlice encoded(bytes + 1, bytes[0]);
-    out.assign(macroman::decode(encoded));
+    if (fread(bytes, 1, 256, in.c_obj()) < 256) {
+        return false;
+    }
+    pn::data_view encoded{bytes + 1, bytes[0]};
+    *out = macroman::decode(encoded);
+    return true;
 }
 
 }  // namespace
 
 Level* Level::get(int n) { return &plug.levels[n]; }
 
-void read_from(ReadSource in, scenarioInfoType& scenario_info) {
-    scenario_info.warpInFlareID  = Handle<BaseObject>(read<int32_t>(in));
-    scenario_info.warpOutFlareID = Handle<BaseObject>(read<int32_t>(in));
-    scenario_info.playerBodyID   = Handle<BaseObject>(read<int32_t>(in));
-    scenario_info.energyBlobID   = Handle<BaseObject>(read<int32_t>(in));
-    read_pstr(in, scenario_info.downloadURLString);
-    read_pstr(in, scenario_info.titleString);
-    read_pstr(in, scenario_info.authorNameString);
-    read_pstr(in, scenario_info.authorURLString);
-    read(in, scenario_info.version);
-    in.shift(12);
+bool read_from(pn::file_view in, scenarioInfoType* scenario_info) {
+    int32_t warp_in, warp_out, body, energy;
+    uint8_t unused[12];
+    if (!(in.read(&warp_in, &warp_out, &body, &energy) &&
+          read_pstr(in, &scenario_info->downloadURLString) &&
+          read_pstr(in, &scenario_info->titleString) &&
+          read_pstr(in, &scenario_info->authorNameString) &&
+          read_pstr(in, &scenario_info->authorURLString) && in.read(&scenario_info->version) &&
+          (fread(unused, 1, 12, in.c_obj()) == 12))) {
+        return false;
+    }
+
+    scenario_info->warpInFlareID  = Handle<BaseObject>(warp_in);
+    scenario_info->warpOutFlareID = Handle<BaseObject>(warp_out);
+    scenario_info->playerBodyID   = Handle<BaseObject>(body);
+    scenario_info->energyBlobID   = Handle<BaseObject>(energy);
+    return true;
 }
 
-void read_from(ReadSource in, Level& level) {
-    read(in, level.netRaceFlags);
-    read(in, level.playerNum);
-    read(in, level.player, kMaxPlayerNum);
-    read(in, level.scoreStringResID);
-    read(in, level.initialFirst);
-    read(in, level.prologueID);
-    read(in, level.initialNum);
-    read(in, level.songID);
-    read(in, level.conditionFirst);
-    read(in, level.epilogueID);
-    read(in, level.conditionNum);
-    read(in, level.starMapH);
-    read(in, level.briefPointFirst);
-    read(in, level.starMapV);
-    read(in, level.briefPointNum);
-    level.parTime = game_ticks(secs(read<int16_t>(in)));
-    in.shift(2);
-    read(in, level.parKills);
-    read(in, level.levelNameStrNum);
-    read(in, level.parKillRatio);
-    read(in, level.parLosses);
-    int16_t start_time = read<int16_t>(in);
-    level.startTime    = secs(start_time & kLevel_StartTimeMask);
-    level.is_training  = start_time & kLevel_IsTraining_Bit;
+bool read_from(pn::file_view in, Level* level) {
+    if (!in.read(&level->netRaceFlags, &level->playerNum)) {
+        return false;
+    }
+    for (size_t i = 0; i < kMaxPlayerNum; ++i) {
+        if (!read_from(in, &level->player[i])) {
+            return false;
+        }
+    }
+    int16_t par_time, start_time, unused;
+    if (!(in.read(&level->scoreStringResID, &level->initialFirst, &level->prologueID,
+                  &level->initialNum, &level->songID, &level->conditionFirst, &level->epilogueID,
+                  &level->conditionNum, &level->starMapH, &level->briefPointFirst,
+                  &level->starMapV, &level->briefPointNum, &par_time, &unused, &level->parKills,
+                  &level->levelNameStrNum) &&
+          read_from(in, &level->parKillRatio) && in.read(&level->parLosses, &start_time))) {
+        return false;
+    }
+    level->parTime     = game_ticks(secs(par_time));
+    level->startTime   = secs(start_time & kLevel_StartTimeMask);
+    level->is_training = start_time & kLevel_IsTraining_Bit;
+    return true;
 }
 
-void read_from(ReadSource in, Level::Player& level_player) {
-    read(in, level_player.playerType);
-    read(in, level_player.playerRace);
-    read(in, level_player.nameResID);
-    read(in, level_player.nameStrNum);
-    in.shift(4);
-    read(in, level_player.earningPower);
-    read(in, level_player.netRaceFlags);
-    in.shift(2);
+bool read_from(pn::file_view in, Level::Player* level_player) {
+    uint32_t unused1;
+    uint16_t unused2;
+    return in.read(&level_player->playerType, &level_player->playerRace, &level_player->nameResID,
+                   &level_player->nameStrNum, &unused1) &&
+           read_from(in, &level_player->earningPower) &&
+           in.read(&level_player->netRaceFlags, &unused2);
 }
 
-static void read_action(sfz::ReadSource in, Level::Condition& condition) {
-    auto start       = read<int32_t>(in);
-    auto count       = read<int32_t>(in);
-    auto end         = (start >= 0) ? (start + count) : start;
-    condition.action = {start, end};
+static bool read_action(pn::file_view in, Level::Condition* condition) {
+    int32_t start, count;
+    if (!in.read(&start, &count)) {
+        return false;
+    }
+    auto end          = (start >= 0) ? (start + count) : start;
+    condition->action = {start, end};
+    return true;
 }
 
-void read_from(ReadSource in, Level::Condition& level_condition) {
+bool read_from(pn::file_view in, Level::Condition* level_condition) {
     uint8_t section[12];
 
-    read(in, level_condition.condition);
-    in.shift(1);
-    read(in, section, 12);
-    read(in, level_condition.subjectObject);
-    read(in, level_condition.directObject);
-    read_action(in, level_condition);
-    read(in, level_condition.flags);
-    read(in, level_condition.direction);
+    uint8_t unused;
+    if (!(in.read(&level_condition->condition, &unused) &&
+          (fread(section, 1, 12, in.c_obj()) == 12) &&
+          in.read(&level_condition->subjectObject, &level_condition->directObject) &&
+          read_action(in, level_condition) &&
+          in.read(&level_condition->flags, &level_condition->direction))) {
+        return false;
+    }
 
-    BytesSlice sub(section, 12);
-    switch (level_condition.condition) {
+    pn::file sub = pn::data_view{section, 12}.open();
+    switch (level_condition->condition) {
         case kCounterCondition:
         case kCounterGreaterCondition:
-        case kCounterNotCondition: read(sub, level_condition.conditionArgument.counter); break;
+        case kCounterNotCondition:
+            return read_from(sub, &level_condition->conditionArgument.counter);
 
         case kDestructionCondition:
         case kOwnerCondition:
         case kNoShipsLeftCondition:
-        case kZoomLevelCondition: read(sub, level_condition.conditionArgument.longValue); break;
+        case kZoomLevelCondition: return sub.read(&level_condition->conditionArgument.longValue);
 
         case kVelocityLessThanEqualToCondition:
-            read(sub, level_condition.conditionArgument.fixedValue);
+            return read_from(sub, &level_condition->conditionArgument.fixedValue);
 
-        case kTimeCondition:
-            level_condition.conditionArgument.timeValue = ticks(read<int32_t>(sub));
-            break;
+        case kTimeCondition: {
+            int32_t time;
+            if (!sub.read(&time)) {
+                return false;
+            }
+            level_condition->conditionArgument.timeValue = ticks(time);
+            return true;
+        }
 
         case kProximityCondition:
         case kDistanceGreaterCondition:
-            read(sub, level_condition.conditionArgument.unsignedLongValue);
-            break;
+            return sub.read(&level_condition->conditionArgument.unsignedLongValue);
 
         case kCurrentMessageCondition:
         case kCurrentComputerCondition:
-            read(sub, level_condition.conditionArgument.location);
-            break;
+            return read_from(sub, &level_condition->conditionArgument.location);
+
+        default: return true;
     }
 }
 
-void read_from(ReadSource in, Level::Condition::CounterArgument& counter_argument) {
-    counter_argument.whichPlayer = Handle<Admiral>(read<int32_t>(in));
-    read(in, counter_argument.whichCounter);
-    read(in, counter_argument.amount);
+bool read_from(pn::file_view in, Level::Condition::CounterArgument* counter_argument) {
+    int32_t admiral;
+    if (!in.read(&admiral, &counter_argument->whichCounter, &counter_argument->amount)) {
+        return false;
+    }
+    counter_argument->whichPlayer = Handle<Admiral>(admiral);
+    return true;
 }
 
-void read_from(ReadSource in, Level::BriefPoint& brief_point) {
+bool read_from(pn::file_view in, Level::BriefPoint* brief_point) {
+    uint8_t unused;
     uint8_t section[8];
+    if (!(in.read(&brief_point->briefPointKind, &unused) &&
+          (fread(section, 1, 8, in.c_obj()) == 8) && read_from(in, &brief_point->range) &&
+          in.read(&brief_point->titleResID, &brief_point->titleNum, &brief_point->contentResID))) {
+        return false;
+    }
 
-    read(in, brief_point.briefPointKind);
-    in.shift(1);
-    read(in, section, 8);
-    read(in, brief_point.range);
-    read(in, brief_point.titleResID);
-    read(in, brief_point.titleNum);
-    read(in, brief_point.contentResID);
-
-    BytesSlice sub(section, 8);
-    switch (brief_point.briefPointKind) {
+    pn::file sub = pn::data_view{section, 8}.open();
+    switch (brief_point->briefPointKind) {
         case kNoPointKind:
-        case kBriefFreestandingKind: break;
+        case kBriefFreestandingKind: return true;
 
-        case kBriefObjectKind: read(sub, brief_point.briefPointData.objectBriefType); break;
+        case kBriefObjectKind: return read_from(sub, &brief_point->briefPointData.objectBriefType);
 
-        case kBriefAbsoluteKind: read(sub, brief_point.briefPointData.absoluteBriefType); break;
+        case kBriefAbsoluteKind:
+            return read_from(sub, &brief_point->briefPointData.absoluteBriefType);
+
+        default: return false;
     }
 }
 
-void read_from(ReadSource in, Level::BriefPoint::ObjectBrief& object_brief) {
-    read(in, object_brief.objectNum);
-    read(in, object_brief.objectVisible);
+bool read_from(pn::file_view in, Level::BriefPoint::ObjectBrief* object_brief) {
+    return in.read(&object_brief->objectNum, &object_brief->objectVisible);
 }
 
-void read_from(ReadSource in, Level::BriefPoint::AbsoluteBrief& absolute_brief) {
-    read(in, absolute_brief.location);
+bool read_from(pn::file_view in, Level::BriefPoint::AbsoluteBrief* absolute_brief) {
+    return read_from(in, &absolute_brief->location);
 }
 
-void read_from(ReadSource in, Level::InitialObject& level_initial) {
-    level_initial.type  = Handle<BaseObject>(read<int32_t>(in));
-    level_initial.owner = Handle<Admiral>(read<int32_t>(in));
-    in.shift(4);
-    level_initial.realObject = Handle<SpaceObject>(-1);
-    read(in, level_initial.realObjectID);
-    read(in, level_initial.location);
-    read(in, level_initial.earning);
-    read(in, level_initial.distanceRange);
-    read(in, level_initial.rotationMinimum);
-    read(in, level_initial.rotationRange);
-    read(in, level_initial.spriteIDOverride);
-    read(in, level_initial.canBuild, kMaxTypeBaseCanBuild);
-    read(in, level_initial.initialDestination);
-    read(in, level_initial.nameResID);
-    read(in, level_initial.nameStrNum);
-    read(in, level_initial.attributes);
+bool read_from(pn::file_view in, Level::InitialObject* level_initial) {
+    int32_t type, owner;
+    uint8_t unused[4];
+    if (!(in.read(&type, &owner) && (fread(unused, 1, 4, in.c_obj()) == 4) &&
+          in.read(&level_initial->realObjectID) && read_from(in, &level_initial->location) &&
+          read_from(in, &level_initial->earning) &&
+          in.read(&level_initial->distanceRange, &level_initial->rotationMinimum,
+                  &level_initial->rotationRange, &level_initial->spriteIDOverride))) {
+        return false;
+    }
+    for (size_t i = 0; i < kMaxTypeBaseCanBuild; ++i) {
+        if (!in.read(&level_initial->canBuild[i])) {
+            return false;
+        }
+    }
+    if (!in.read(
+                &level_initial->initialDestination, &level_initial->nameResID,
+                &level_initial->nameStrNum, &level_initial->attributes)) {
+        return false;
+    }
+    level_initial->realObject = Handle<SpaceObject>(-1);
+    level_initial->type       = Handle<BaseObject>(type);
+    level_initial->owner      = Handle<Admiral>(owner);
+    return true;
 }
 
 }  // namespace antares

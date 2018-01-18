@@ -19,7 +19,6 @@
 #include "game/labels.hpp"
 
 #include <algorithm>
-#include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
@@ -32,11 +31,6 @@
 #include "lang/defines.hpp"
 #include "video/driver.hpp"
 
-using sfz::Rune;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::format;
-using sfz::quote;
 using std::max;
 using std::min;
 using std::unique_ptr;
@@ -54,9 +48,9 @@ const int32_t kLabelTotalInnerSpace = kLabelInnerSpace << 1;
 const ticks Label::kVisibleTime = secs(1);
 
 // local function prototypes
-static int32_t     String_Count_Lines(const StringSlice& s);
-static StringSlice String_Get_Nth_Line(const StringSlice& source, int32_t nth);
-static void        Auto_Animate_Line(Point* source, Point* dest);
+static int32_t         String_Count_Lines(pn::string_view s);
+static pn::string_view String_Get_Nth_Line(pn::string_view source, int32_t nth);
+static void            Auto_Animate_Line(Point* source, Point* dest);
 
 Label* Label::get(int number) {
     if ((0 <= number) && (number < kMaxLabelNum)) {
@@ -131,9 +125,9 @@ void Label::draw() {
             (label->thisRect.width() <= 0) || (label->thisRect.height() <= 0)) {
             continue;
         }
-        StringSlice text = label->text;
-        if (label->retroCount >= 0) {
-            text = text.slice(0, label->retroCount);
+        pn::string_view text = label->text;
+        if ((0 <= label->retroCount) && (label->retroCount < text.size())) {
+            text = text.substr(0, label->retroCount);
         }
         const RgbColor light = GetRGBTranslateColorShade(label->color, VERY_LIGHT);
         const RgbColor dark  = GetRGBTranslateColorShade(label->color, VERY_DARK);
@@ -142,7 +136,7 @@ void Label::draw() {
 
         if (label->lineNum > 1) {
             for (int j = 1; j <= label->lineNum; j++) {
-                StringSlice line = String_Get_Nth_Line(text, j);
+                pn::string_view line = String_Get_Nth_Line(text, j);
 
                 sys.fonts.tactical->draw(Point(at.h + 1, at.v + 1), line, RgbColor::black());
                 sys.fonts.tactical->draw(Point(at.h - 1, at.v - 1), line, RgbColor::black());
@@ -177,7 +171,12 @@ void Label::update_contents(ticks units_done) {
             // printing was tied to the frame rate before: 3 per frame.  Here, we've switched to 1
             // per tick, so this would be equivalent to the old code at 20 FPS.  The question is,
             // does it feel equivalent?  It only comes up in the tutorial.
-            label->retroCount += units_done.count();
+            pn::string_view::iterator it{label->text.data(), label->text.size(),
+                                         label->retroCount};
+            for (size_t i = 0; i < units_done.count(); ++i) {
+                ++it;  // Increment rune, not byte.
+            }
+            label->retroCount = it.offset();
             if (static_cast<size_t>(label->retroCount) > label->text.size()) {
                 label->retroCount = -1;
             } else {
@@ -321,8 +320,8 @@ void Label::set_age(ticks age) {
     visible   = true;
 }
 
-void Label::set_string(const StringSlice& string) {
-    text.assign(string);
+void Label::set_string(pn::string_view string) {
+    text = string.copy();
     recalc_size();
 }
 
@@ -360,8 +359,8 @@ void Label::recalc_size() {
         this->lineNum = lineNum;
         int maxWidth  = 0;
         for (int i = 1; i <= lineNum; i++) {
-            StringSlice text  = String_Get_Nth_Line(this->text, i);
-            int32_t     width = sys.fonts.tactical->string_width(text);
+            pn::string_view text  = String_Get_Nth_Line(this->text, i);
+            int32_t         width = sys.fonts.tactical->string_width(text);
             if (width > maxWidth) {
                 maxWidth = width;
             }
@@ -376,27 +375,27 @@ void Label::recalc_size() {
     }
 }
 
-static int32_t String_Count_Lines(const StringSlice& s) {
-    static const Rune kCarriageReturn = '\n';
+static int32_t String_Count_Lines(pn::string_view s) {
+    static const pn::rune kCarriageReturn{'\n'};
     return 1 + std::count(s.begin(), s.end(), kCarriageReturn);
 }
 
-static StringSlice String_Get_Nth_Line(const StringSlice& source, int32_t nth) {
+static pn::string_view String_Get_Nth_Line(pn::string_view source, int32_t nth) {
     if (nth < 1) {
-        return StringSlice();
+        return pn::string_view{};
     }
-    const StringSlice::size_type carriage_return = source.find('\n');
-    if (carriage_return == StringSlice::npos) {
+    pn::string_view::size_type carriage_return = source.find(pn::rune{'\n'});
+    if (carriage_return == pn::string_view::npos) {
         if (nth == 1) {
             return source;
         } else {
-            return StringSlice();
+            return pn::string_view{};
         }
     }
     if (nth == 1) {
-        return source.slice(0, carriage_return);
+        return source.substr(0, carriage_return);
     } else {
-        return String_Get_Nth_Line(source.slice(carriage_return + 1), nth - 1);
+        return String_Get_Nth_Line(source.substr(carriage_return + 1), nth - 1);
     }
 }
 

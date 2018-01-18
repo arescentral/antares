@@ -21,7 +21,6 @@
 
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
-#include <sfz/sfz.hpp>
 
 namespace antares {
 namespace cgl {
@@ -34,6 +33,8 @@ void check(CGLError error);
 class PixelFormat {
   public:
     PixelFormat(const CGLPixelFormatAttribute* attrs);
+    PixelFormat(const PixelFormat&) = delete;
+    PixelFormat& operator=(const PixelFormat&) = delete;
     ~PixelFormat();
 
     CGLPixelFormatObj c_obj() const;
@@ -42,21 +43,19 @@ class PixelFormat {
   private:
     CGLPixelFormatObj _pixel_format;
     GLint             _npix;
-
-    DISALLOW_COPY_AND_ASSIGN(PixelFormat);
 };
 
 class Context {
   public:
     Context(CGLPixelFormatObj pix, CGLContextObj share);
+    Context(const Context&) = delete;
+    Context& operator=(const Context&) = delete;
 
     ~Context();
     CGLContextObj c_obj() const;
 
   private:
     CGLContextObj _context;
-
-    DISALLOW_COPY_AND_ASSIGN(Context);
 };
 
 }  // namespace cgl

@@ -18,7 +18,7 @@
 
 #include "ui/screens/select-level.hpp"
 
-#include <sfz/sfz.hpp>
+#include <pn/file>
 
 #include "config/keys.hpp"
 #include "config/ledger.hpp"
@@ -37,11 +37,6 @@
 #include "video/driver.hpp"
 #include "video/transitions.hpp"
 
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::format;
 using std::unique_ptr;
 
 namespace antares {
@@ -158,14 +153,15 @@ void SelectLevelScreen::handle_button(Button& button) {
             adjust_interface();
             break;
 
-        default: throw Exception(format("Got unknown button {0}.", button.id));
+        default:
+            throw std::runtime_error(pn::format("Got unknown button {0}.", button.id).c_str());
     }
 }
 
 void SelectLevelScreen::overlay() const { draw_level_name(); }
 
 void SelectLevelScreen::draw_level_name() const {
-    const String chapter_name((*_level)->name);
+    const pn::string_view chapter_name = (*_level)->name;
 
     const InterfaceItem& i = item(NAME);
 

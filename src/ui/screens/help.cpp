@@ -18,6 +18,8 @@
 
 #include "ui/screens/help.hpp"
 
+#include <pn/file>
+
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
@@ -30,20 +32,13 @@
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
-using sfz::Bytes;
-using sfz::Exception;
-using sfz::String;
-using sfz::format;
-
-namespace utf8 = sfz::utf8;
-
 namespace antares {
 
 HelpScreen::HelpScreen()
         : InterfaceScreen("help", {128, 0, 608, 480}, false), _text(sys.fonts.computer) {
-    Resource rsrc("text", "txt", 6002);
-    String   text(utf8::decode(rsrc.data()));
-    Replace_KeyCode_Strings_With_Actual_Key_Names(&text, 1000, 4);
+    Resource   rsrc("text", "txt", 6002);
+    pn::string text = rsrc.string().copy();
+    Replace_KeyCode_Strings_With_Actual_Key_Names(text, 1000, 4);
 
     RgbColor fore = GetRGBTranslateColorShade(RED, VERY_LIGHT);
     RgbColor back = GetRGBTranslateColorShade(RED, VERY_DARK);
@@ -67,7 +62,8 @@ void HelpScreen::handle_button(Button& button) {
     switch (button.id) {
         case DONE: stack()->pop(this); break;
 
-        default: throw Exception(format("Got unknown button {0}.", button.id));
+        default:
+            throw std::runtime_error(pn::format("Got unknown button {0}.", button.id).c_str());
     }
 }
 

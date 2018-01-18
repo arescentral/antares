@@ -37,14 +37,7 @@
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
-using sfz::Bytes;
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::String;
-using sfz::StringSlice;
 using std::unique_ptr;
-
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -104,10 +97,10 @@ struct Messages::longMessageType {
     int16_t                     previousEndResID;
     int16_t                     pictID;
     uint8_t                     backColor;
-    sfz::String                 stringMessage;
-    sfz::String                 lastStringMessage;
+    pn::string                  stringMessage;
+    pn::string                  lastStringMessage;
     bool                        newStringMessage;
-    sfz::String                 text;
+    pn::string                  text;
     std::unique_ptr<StyledText> retro_text;
     Point                       retro_origin;
     int32_t                     at_char;
@@ -116,11 +109,11 @@ struct Messages::longMessageType {
     Handle<Label>               labelMessageID;
 };
 
-ANTARES_GLOBAL std::queue<sfz::String> Messages::message_data;
+ANTARES_GLOBAL std::queue<pn::string> Messages::message_data;
 ANTARES_GLOBAL Messages::longMessageType* Messages::long_message_data;
 ANTARES_GLOBAL ticks Messages::time_count;
 
-void MessageLabel_Set_Special(Handle<Label> id, const StringSlice& text);
+void MessageLabel_Set_Special(Handle<Label> id, pn::string_view text);
 
 void Messages::init() {
     longMessageType* tmessage = NULL;
@@ -133,13 +126,13 @@ void Messages::init() {
             kMessageColor);
 
     if (!g.message_label.get()) {
-        throw Exception("Couldn't add a screen label.");
+        throw std::runtime_error("Couldn't add a screen label.");
     }
     g.status_label = Label::add(
             kStatusLabelLeft, kStatusLabelTop, 0, 0, SpaceObject::none(), false,
             kStatusLabelColor);
     if (!g.status_label.get()) {
-        throw Exception("Couldn't add a screen label.");
+        throw std::runtime_error("Couldn't add a screen label.");
     }
 
     tmessage             = long_message_data;
@@ -165,7 +158,7 @@ void Messages::clear() {
     longMessageType* tmessage;
 
     time_count = ticks(0);
-    std::queue<sfz::String> empty;
+    std::queue<pn::string> empty;
     swap(message_data, empty);
     g.message_label = Label::add(
             kMessageScreenLeft, kMessageScreenTop, 0, 0, SpaceObject::none(), false,
@@ -193,7 +186,7 @@ void Messages::clear() {
     tmessage->labelMessageID->set_keep_on_screen_anyway(true);
 }
 
-void Messages::add(const sfz::PrintItem& message) { message_data.emplace(message); }
+void Messages::add(pn::string_view message) { message_data.emplace(message.copy()); }
 
 void Messages::start(int16_t startResID, int16_t endResID) {
     longMessageType* tmessage;
@@ -227,8 +220,8 @@ void Messages::start(int16_t startResID, int16_t endResID) {
 void Messages::clip(void)
 
 {
-    longMessageType*   tmessage;
-    unique_ptr<String> textData;
+    longMessageType*       tmessage;
+    unique_ptr<pn::string> textData;
 
     tmessage = long_message_data;
     if ((tmessage->currentResID != tmessage->lastResID) || (tmessage->newStringMessage)) {
@@ -239,16 +232,17 @@ void Messages::clip(void)
         // draw in offscreen world
         if ((tmessage->currentResID >= 0) && (tmessage->stage == kClipStage)) {
             if (tmessage->currentResID == kStringMessageID) {
-                textData.reset(new String);
+                textData.reset(new pn::string);
                 if (textData.get() != NULL) {
-                    print(*textData, tmessage->stringMessage);
+                    *textData += tmessage->stringMessage;
                 }
                 tmessage->labelMessage = false;
             } else {
-                Resource rsrc("text", "txt", tmessage->currentResID);
-                textData.reset(new String(utf8::decode(rsrc.data())));
-                Replace_KeyCode_Strings_With_Actual_Key_Names(textData.get(), KEY_LONG_NAMES, 0);
-                if (textData->at(0) == '#') {
+                Resource   rsrc("text", "txt", tmessage->currentResID);
+                pn::string text = rsrc.string().copy();
+                Replace_KeyCode_Strings_With_Actual_Key_Names(text, KEY_LONG_NAMES, 0);
+                textData.reset(new pn::string(text.copy()));
+                if (*textData->begin() == pn::rune{'#'}) {
                     tmessage->labelMessage = true;
                 } else
                     tmessage->labelMessage = false;
@@ -256,7 +250,7 @@ void Messages::clip(void)
             if (textData.get() != NULL) {
                 const RgbColor& light_blue = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
                 const RgbColor& dark_blue  = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
-                tmessage->text.assign(*textData);
+                tmessage->text             = textData->copy();
                 tmessage->retro_text.reset(new StyledText(sys.fonts.tactical));
                 tmessage->retro_text->set_fore_color(light_blue);
                 tmessage->retro_text->set_back_color(dark_blue);
@@ -372,7 +366,7 @@ void Messages::end() {
     tmessage->currentResID       = -1;
     tmessage->stage              = kStartStage;
     tmessage->retro_text.reset();
-    tmessage->lastStringMessage.assign(tmessage->stringMessage);
+    tmessage->lastStringMessage = tmessage->stringMessage.copy();
 }
 
 void Messages::advance() {
@@ -406,7 +400,7 @@ void Messages::replay() {
 
     tmessage = long_message_data;
     if ((tmessage->previousStartResID >= 0) && (tmessage->currentResID < 0)) {
-        tmessage->stringMessage.assign(tmessage->lastStringMessage);
+        tmessage->stringMessage = tmessage->lastStringMessage.copy();
         start(tmessage->previousStartResID, tmessage->previousEndResID);
     }
 }
@@ -426,7 +420,7 @@ void Messages::draw_message_screen(ticks by_units) {
     }
 
     if (!message_data.empty()) {
-        const String& message = message_data.front();
+        pn::string_view message = message_data.front();
 
         if (time_count < kRaiseTime) {
             g.message_label->set_position(
@@ -444,7 +438,7 @@ void Messages::draw_message_screen(ticks by_units) {
     }
 }
 
-void Messages::set_status(const StringSlice& status, uint8_t color) {
+void Messages::set_status(pn::string_view status, uint8_t color) {
     g.status_label->set_color(color);
     g.status_label->set_string(status);
     g.status_label->set_age(kStatusLabelAge);
@@ -465,16 +459,16 @@ int16_t Messages::current() { return long_message_data->currentResID; }
 //  t = one of three characters: 'L' for left, 'R' for right, and 'O' for object
 //  nnn... are digits specifying value (distance from top, or initial object #)
 //
-void MessageLabel_Set_Special(Handle<Label> label, const StringSlice& text) {
-    char    whichType;
-    int32_t value = 0;
-    Point   attachPoint;
-    bool    hintLine = false;
+void MessageLabel_Set_Special(Handle<Label> label, pn::string_view text) {
+    pn::rune whichType;
+    int32_t  value = 0;
+    Point    attachPoint;
+    bool     hintLine = false;
 
-    StringSlice::const_iterator it = text.begin();
+    pn::string_view::iterator it = text.begin();
 
     // if not legal, bail
-    if (*it != '#') {
+    if (*it != pn::rune{'#'}) {
         return;
     }
 
@@ -482,28 +476,28 @@ void MessageLabel_Set_Special(Handle<Label> label, const StringSlice& text) {
 
     whichType = *it;
     ++it;
-    while ((it != text.end()) && (*it != '#')) {
+    while ((it != text.end()) && (*it != pn::rune{'#'})) {
         value *= 10;
-        value += *it - '0';
+        value += (*it).value() - '0';
         ++it;
     }
 
     ++it;
-    if (*it == '#') {  // also a hint line attached
+    if (*it == pn::rune{'#'}) {  // also a hint line attached
         hintLine = true;
         ++it;
         // h coord
-        while ((it != text.end()) && (*it != ',')) {
+        while ((it != text.end()) && (*it != pn::rune{','})) {
             attachPoint.h *= 10;
-            attachPoint.h += *it - '0';
+            attachPoint.h += (*it).value() - '0';
             ++it;
         }
 
         ++it;
 
-        while ((it != text.end()) && (*it != '#')) {
+        while ((it != text.end()) && (*it != pn::rune{'#'})) {
             attachPoint.v *= 10;
-            attachPoint.v += *it - '0';
+            attachPoint.v += (*it).value() - '0';
             ++it;
         }
         attachPoint.v += instrument_top();
@@ -514,16 +508,16 @@ void MessageLabel_Set_Special(Handle<Label> label, const StringSlice& text) {
         ++it;
     }
 
-    String message;
+    pn::string message;
     while (it != text.end()) {
-        message.push(1, *it);
+        message += *it;
         ++it;
     }
 
     label->set_string(message);
     label->set_keep_on_screen_anyway(true);
 
-    switch (whichType) {
+    switch (whichType.value()) {
         case 'R':
             label->set_offset(0, 0);
             label->set_position(

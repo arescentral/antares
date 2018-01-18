@@ -19,8 +19,6 @@
 #ifndef ANTARES_UI_SCREENS_PLAY_AGAIN_HPP_
 #define ANTARES_UI_SCREENS_PLAY_AGAIN_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "ui/screen.hpp"
 
 namespace antares {
@@ -53,11 +51,9 @@ class PlayAgainScreen : public InterfaceScreen {
     State _state;
 
     Item* _button_pressed;
-
-    DISALLOW_COPY_AND_ASSIGN(PlayAgainScreen);
 };
 
-void print_to(sfz::PrintTarget out, PlayAgainScreen::Item item);
+const char* stringify(PlayAgainScreen::Item item);
 
 }  // namespace antares
 

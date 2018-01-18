@@ -19,6 +19,8 @@
 #ifndef ANTARES_DATA_BASE_OBJECT_HPP_
 #define ANTARES_DATA_BASE_OBJECT_HPP_
 
+#include <pn/string>
+
 #include "data/action.hpp"
 #include "drawing/color.hpp"
 #include "math/fixed.hpp"
@@ -254,10 +256,10 @@ union objectFrameType {
     };
     Weapon weapon;
 };
-void read_from(sfz::ReadSource in, objectFrameType::Rotation& rotation);
-void read_from(sfz::ReadSource in, objectFrameType::Animation& animation);
-void read_from(sfz::ReadSource in, objectFrameType::Vector& vector);
-void read_from(sfz::ReadSource in, objectFrameType::Weapon& weapon);
+bool read_from(pn::file_view in, objectFrameType::Rotation* rotation);
+bool read_from(pn::file_view in, objectFrameType::Animation* animation);
+bool read_from(pn::file_view in, objectFrameType::Vector* vector);
+bool read_from(pn::file_view in, objectFrameType::Weapon* weapon);
 
 class BaseObject {
   public:
@@ -265,8 +267,8 @@ class BaseObject {
     static Handle<BaseObject>     none() { return Handle<BaseObject>(-1); }
     static HandleList<BaseObject> all();
 
-    sfz::String name;
-    sfz::String short_name;
+    pn::string name;
+    pn::string short_name;
 
     uint32_t attributes;  // initial attributes (see flags)
     int32_t  baseClass;
@@ -355,7 +357,7 @@ class BaseObject {
 
     static const int byte_size = 318;
 };
-void read_from(sfz::ReadSource in, BaseObject& object);
+bool read_from(pn::file_view in, BaseObject* object);
 
 }  // namespace antares
 

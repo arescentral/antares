@@ -26,7 +26,7 @@
 #include <strings.h>
 #include <sys/time.h>
 #include <algorithm>
-#include <sfz/sfz.hpp>
+#include <pn/file>
 
 #include "game/time.hpp"
 #include "mac/c/CocoaVideoDriver.h"
@@ -36,7 +36,6 @@
 #include "ui/card.hpp"
 #include "ui/event.hpp"
 
-using sfz::Exception;
 using std::min;
 using std::unique_ptr;
 
@@ -69,8 +68,6 @@ class InputModeTracker : public EventReceiver {
 
   private:
     InputMode* _mode;
-
-    DISALLOW_COPY_AND_ASSIGN(InputModeTracker);
 };
 
 }  // namespace
@@ -141,7 +138,7 @@ struct CocoaVideoDriver::EventBridge {
             case kHIDPage_KeyboardOrKeypad: self->key_event(result, element, value); break;
             case kHIDPage_GenericDesktop: self->analog_event(result, element, value); break;
             case kHIDPage_Button: self->button_event(result, element, value); break;
-            default: sfz::print(sfz::io::err, sfz::format("{0}\n", usage_page)); break;
+            default: pn::format(stderr, "{0}\n", usage_page); break;
         }
     }
 
@@ -282,7 +279,7 @@ void CocoaVideoDriver::loop(Card* initial) {
     IOHIDManagerScheduleWithRunLoop(hid_manager, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
     IOReturn r = IOHIDManagerOpen(hid_manager, kIOHIDOptionsTypeNone);
     if (r != 0) {
-        throw Exception("IOHIDManagerOpen");
+        throw std::runtime_error("IOHIDManagerOpen");
     }
     IOHIDManagerRegisterInputValueCallback(hid_manager, EventBridge::hid_event, &bridge);
 

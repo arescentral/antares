@@ -18,14 +18,13 @@
 
 #include "ui/screens/play-again.hpp"
 
+#include <pn/file>
+
 #include "drawing/interface.hpp"
 #include "drawing/pix-map.hpp"
 #include "game/globals.hpp"
 #include "ui/card.hpp"
 #include "video/transitions.hpp"
-
-using sfz::Exception;
-using sfz::format;
 
 namespace antares {
 
@@ -40,7 +39,7 @@ const char* interface_id(bool allow_resume, bool allow_skip) {
         }
     } else {
         if (allow_skip) {
-            throw Exception("allow_skip specified without allow_resume");
+            throw std::runtime_error("allow_skip specified without allow_resume");
         } else {
             return "play-again/lose";
         }
@@ -85,19 +84,20 @@ void PlayAgainScreen::handle_button(Button& button) {
             stack()->pop(this);
             break;
 
-        default: throw Exception(format("Got unknown button {0}.", button.id));
+        default:
+            throw std::runtime_error(pn::format("Got unknown button {0}.", button.id).c_str());
     }
 }
 
-void print_to(sfz::PrintTarget out, PlayAgainScreen::Item item) {
+const char* stringify(PlayAgainScreen::Item item) {
     switch (item) {
-        case PlayAgainScreen::RESTART: print(out, "RESTART"); return;
-        case PlayAgainScreen::QUIT: print(out, "QUIT"); return;
-        case PlayAgainScreen::RESUME: print(out, "RESUME"); return;
-        case PlayAgainScreen::SKIP: print(out, "SKIP"); return;
-        case PlayAgainScreen::BOX: print(out, "BOX"); return;
+        case PlayAgainScreen::RESTART: return "RESTART";
+        case PlayAgainScreen::QUIT: return "QUIT";
+        case PlayAgainScreen::RESUME: return "RESUME";
+        case PlayAgainScreen::SKIP: return "SKIP";
+        case PlayAgainScreen::BOX: return "BOX";
     }
-    print(out, static_cast<int64_t>(item));
+    return "?";
 }
 
 }  // namespace antares

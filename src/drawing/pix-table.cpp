@@ -18,6 +18,9 @@
 
 #include "drawing/pix-table.hpp"
 
+#include <pn/array>
+#include <pn/file>
+#include <pn/map>
 #include <sfz/sfz.hpp>
 
 #include "data/resource.hpp"
@@ -25,209 +28,78 @@
 #include "game/sys.hpp"
 #include "video/driver.hpp"
 
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::Json;
-using sfz::JsonDefaultVisitor;
-using sfz::ReadSource;
-using sfz::String;
 using sfz::StringMap;
-using sfz::StringSlice;
-using sfz::format;
 using sfz::range;
-using sfz::read;
-using sfz::string_to_json;
 using std::unique_ptr;
 using std::vector;
 
-namespace utf8 = sfz::utf8;
-
 namespace antares {
 
-namespace {
+static ArrayPixMap load_image(pn::string_view path) {
+    Resource rsrc(path);
+    return read_png(rsrc.data().open());
+}
 
-struct PixTableVisitor : public JsonDefaultVisitor {
-    enum StateEnum {
-        NEW,
-        ROWS,
-        COLS,
-        CENTER,
-        CENTER_X,
-        CENTER_Y,
-        FRAMES,
-        FRAME,
-        FRAME_LEFT,
-        FRAME_TOP,
-        FRAME_RIGHT,
-        FRAME_BOTTOM,
-        IMAGE,
-        OVERLAY,
-        DONE,
-    };
+NatePixTable::NatePixTable(int id, uint8_t color) {
+    Resource  rsrc("sprites", "pn", id);
+    pn::value x;
+    if (!pn::parse(rsrc.string().open(), x, nullptr)) {
+        throw std::runtime_error("invalid sprite");
+    }
+    pn::map_cref m = x.as_map();
+
     struct State {
         int         rows, cols;
         Point       center;
         Rect        frame;
-        StateEnum   state;
         ArrayPixMap image, overlay;
-        State() : state(NEW), image(0, 0), overlay(0, 0) {}
-    };
-    State&                       state;
-    int16_t                      id;
-    uint8_t                      color;
-    vector<NatePixTable::Frame>& frames;
+        State() : image(0, 0), overlay(0, 0) {}
+    } state;
 
-    PixTableVisitor(State& state, int16_t id, uint8_t color, vector<NatePixTable::Frame>& frames)
-            : state(state), id(id), color(color), frames(frames) {}
+    pn::map_cref point = m.get("center").as_map();
+    state.center       = Point(point.get("x").as_int(), point.get("y").as_int());
+    state.rows         = m.get("rows").as_int();
+    state.cols         = m.get("cols").as_int();
+    state.image        = load_image(m.get("image").as_string());
+    state.overlay      = load_image(m.get("overlay").as_string());
 
-    bool descend(StateEnum state, const StringMap<Json>& value, StringSlice key) const {
-        auto it = value.find(key);
-        if (it == value.end()) {
-            return false;
-        }
-        StateEnum saved_state = this->state.state;
-        this->state.state     = state;
-        it->second.accept(*this);
-        this->state.state = saved_state;
-        return true;
+    if (state.image.size() != state.overlay.size()) {
+        throw std::runtime_error("size mismatch between image and overlay");
+    }
+    if (state.image.size().width % state.cols) {
+        throw std::runtime_error("sprite column count does not evenly split image");
+    }
+    if (state.image.size().height % state.rows) {
+        throw std::runtime_error("sprite row count does not evenly split image");
     }
 
-    virtual void visit_object(const StringMap<Json>& value) const {
-        switch (state.state) {
-            case NEW:
-                state.center = Point(0, 0);
-                descend(CENTER, value, "center");
-
-                if (!descend(ROWS, value, "rows")) {
-                    throw Exception("missing rows in sprite json");
-                }
-                if (!descend(COLS, value, "cols")) {
-                    throw Exception("missing cols in sprite json");
-                }
-                if (!descend(IMAGE, value, "image")) {
-                    throw Exception("missing image in sprite json");
-                }
-
-                if (color) {
-                    if (!descend(OVERLAY, value, "overlay")) {
-                        throw Exception("missing overlay in sprite json");
-                    }
-                    if (state.image.size() != state.overlay.size()) {
-                        throw Exception("size mismatch between image and overlay");
-                    }
-                }
-
-                if (state.image.size().width % state.cols) {
-                    throw Exception("sprite column count does not evenly split image");
-                }
-                if (state.image.size().height % state.rows) {
-                    throw Exception("sprite row count does not evenly split image");
-                }
-
-                if (!descend(FRAMES, value, "frames")) {
-                    throw Exception("missing frames in sprite json");
-                }
-                break;
-
-            case CENTER:
-                descend(CENTER_X, value, "x");
-                descend(CENTER_Y, value, "y");
-                break;
-
-            case FRAME:
-                if (descend(FRAME_LEFT, value, "left") && descend(FRAME_TOP, value, "top") &&
-                    descend(FRAME_RIGHT, value, "right") &&
-                    descend(FRAME_BOTTOM, value, "bottom")) {
-                    const int  frame       = frames.size();
-                    const int  col         = frame % state.cols;
-                    const int  row         = frame / state.cols;
-                    const int  cell_width  = state.image.size().width / state.cols;
-                    const int  cell_height = state.image.size().height / state.rows;
-                    const Rect cell(
-                            Point(cell_width * col, cell_height * row),
-                            Size(cell_width, cell_height));
-                    Rect sprite(state.frame);
-                    sprite.offset(state.center.h, state.center.v);
-                    Rect bounds(state.frame);
-                    bounds.offset(2 * -bounds.left, 2 * -bounds.top);
-                    if (color) {
-                        frames.emplace_back(
-                                bounds, state.image.view(cell).view(sprite), id, frame,
-                                state.overlay.view(cell).view(sprite), color);
-                    } else {
-                        frames.emplace_back(
-                                bounds, state.image.view(cell).view(sprite), id, frame);
-                    }
-                } else {
-                    throw Exception("bad frame rect");
-                }
-                break;
-
-            default: return visit_default("object");
+    pn::array_cref frames = m.get("frames").as_array();
+    if (frames.size() != (state.rows * state.cols)) {
+        throw std::runtime_error("frame count not equal to rows * cols");
+    }
+    for (pn::value_cref frame_value : frames) {
+        pn::map_cref f = frame_value.as_map();
+        state.frame =
+                Rect(f.get("left").as_int(), f.get("top").as_int(), f.get("right").as_int(),
+                     f.get("bottom").as_int());
+        const int  frame       = _frames.size();
+        const int  col         = frame % state.cols;
+        const int  row         = frame / state.cols;
+        const int  cell_width  = state.image.size().width / state.cols;
+        const int  cell_height = state.image.size().height / state.rows;
+        const Rect cell(Point(cell_width * col, cell_height * row), Size(cell_width, cell_height));
+        Rect       sprite(state.frame);
+        sprite.offset(state.center.h, state.center.v);
+        Rect bounds(state.frame);
+        bounds.offset(2 * -bounds.left, 2 * -bounds.top);
+        if (color) {
+            _frames.emplace_back(
+                    bounds, state.image.view(cell).view(sprite), id, frame,
+                    state.overlay.view(cell).view(sprite), color);
+        } else {
+            _frames.emplace_back(bounds, state.image.view(cell).view(sprite), id, frame);
         }
     }
-
-    virtual void visit_array(const std::vector<Json>& value) const {
-        switch (state.state) {
-            case FRAMES:
-                if (value.size() != (state.rows * state.cols)) {
-                    throw Exception("frame count not equal to rows * cols");
-                }
-                state.state = FRAME;
-                for (const auto& v : value) {
-                    v.accept(*this);
-                }
-                state.state = DONE;
-                break;
-
-            default: return visit_default("array");
-        }
-    }
-
-    void load_image(ArrayPixMap& image, StringSlice path) const {
-        Resource   rsrc(path);
-        BytesSlice data = rsrc.data();
-        read(data, image);
-    }
-
-    virtual void visit_string(const StringSlice& value) const {
-        switch (state.state) {
-            case IMAGE: return load_image(state.image, value);
-            case OVERLAY: return load_image(state.overlay, value);
-            default: return visit_default("string");
-        }
-    }
-
-    virtual void visit_number(double value) const {
-        switch (state.state) {
-            case ROWS: state.rows = value; break;
-            case COLS: state.cols = value; break;
-            case CENTER_X: state.center.h = value; break;
-            case CENTER_Y: state.center.v = value; break;
-            case FRAME_LEFT: state.frame.left = value; break;
-            case FRAME_TOP: state.frame.top = value; break;
-            case FRAME_RIGHT: state.frame.right = value; break;
-            case FRAME_BOTTOM: state.frame.bottom = value; break;
-            default: return visit_default("number");
-        }
-    }
-
-    virtual void visit_default(const char* type) const {
-        throw Exception(format("unexpected {0} in sprite json", type));
-    }
-};
-
-}  // namespace
-
-NatePixTable::NatePixTable(int id, uint8_t color) {
-    Resource rsrc("sprites", "json", id);
-    String   data(utf8::decode(rsrc.data()));
-    Json     json;
-    if (!string_to_json(data, json)) {
-        throw Exception("invalid sprite json");
-    }
-    PixTableVisitor::State state;
-    json.accept(PixTableVisitor(state, id, color, _frames));
 }
 
 NatePixTable::~NatePixTable() {}
@@ -280,7 +152,7 @@ const PixMap&  NatePixTable::Frame::pix_map() const { return _pix_map; }
 const Texture& NatePixTable::Frame::texture() const { return _texture; }
 
 void NatePixTable::Frame::build(int16_t id, int frame) {
-    _texture = sys.video->texture(format("/sprites/{0}.SMIV/{1}", id, frame), _pix_map);
+    _texture = sys.video->texture(pn::format("/sprites/{0}.SMIV/{1}", id, frame), _pix_map);
 }
 
 }  // namespace antares

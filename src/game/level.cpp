@@ -44,14 +44,7 @@
 #include "math/rotation.hpp"
 #include "math/units.hpp"
 
-using sfz::Bytes;
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::PrintTarget;
-using sfz::String;
-using sfz::StringSlice;
 using sfz::range;
-using sfz::read;
 using std::set;
 
 namespace antares {
@@ -267,16 +260,16 @@ bool start_construct_level(Handle<Level> level, int32_t* max) {
 
 static void load_blessed_objects(uint32_t all_colors) {
     if (!plug.meta.energyBlobID.get()) {
-        throw Exception("No energy blob defined");
+        throw std::runtime_error("No energy blob defined");
     }
     if (!plug.meta.warpInFlareID.get()) {
-        throw Exception("No warp in flare defined");
+        throw std::runtime_error("No warp in flare defined");
     }
     if (!plug.meta.warpOutFlareID.get()) {
-        throw Exception("No warp out flare defined");
+        throw std::runtime_error("No warp out flare defined");
     }
     if (!plug.meta.playerBodyID.get()) {
-        throw Exception("No player body defined");
+        throw std::runtime_error("No player body defined");
     }
 
     // Load the four blessed objects.  The player's body is needed

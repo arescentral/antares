@@ -21,34 +21,24 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <cmath>
+#include <pn/array>
+#include <pn/file>
+#include <pn/map>
+#include <pn/value>
 #include <sfz/sfz.hpp>
+
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
 #include "game/sys.hpp"
 #include "lang/defines.hpp"
 
-using sfz::Bytes;
-using sfz::Exception;
-using sfz::Json;
-using sfz::JsonVisitor;
-using sfz::MappedFile;
-using sfz::PrintItem;
-using sfz::Rune;
-using sfz::ScopedFd;
-using sfz::String;
 using sfz::StringMap;
-using sfz::StringSlice;
-using sfz::format;
 using sfz::makedirs;
-using sfz::print;
 using sfz::range;
-using sfz::string_to_int;
-using sfz::write;
 using std::unique_ptr;
 using std::vector;
 
 namespace path = sfz::path;
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -56,7 +46,7 @@ static ANTARES_GLOBAL Ledger* ledger;
 
 Ledger::Ledger() {
     if (antares::ledger) {
-        throw Exception("Ledger is a singleton");
+        throw std::runtime_error("Ledger is a singleton");
     }
     antares::ledger = this;
 }
@@ -84,103 +74,41 @@ void DirectoryLedger::unlocked_chapters(std::vector<int>* chapters) {
     *chapters = std::vector<int>(_chapters.begin(), _chapters.end());
 }
 
-class DirectoryLedger::Visitor : public JsonVisitor {
-  public:
-    enum State {
-        NEW,
-        UNLOCKED_CHAPTERS,
-        UNLOCKED_CHAPTER,
-    };
-
-    Visitor(DirectoryLedger& ledger, State& state) : _ledger(ledger), _state(state) {
-        _state = NEW;
-    }
-
-    virtual void visit_object(const StringMap<Json>& value) const {
-        if (_state == NEW) {
-            _state = UNLOCKED_CHAPTERS;
-            if (value.find("unlocked-levels") != value.end()) {
-                value.find("unlocked-levels")->second.accept(*this);
-            }
-            _state = NEW;
-            return;
-        }
-        throw Exception("invalid ledger content");
-    }
-
-    virtual void visit_array(const std::vector<Json>& value) const {
-        if (_state == UNLOCKED_CHAPTERS) {
-            _state = UNLOCKED_CHAPTER;
-            for (const Json& chapter : value) {
-                chapter.accept(*this);
-            }
-            _state = UNLOCKED_CHAPTERS;
-            return;
-        }
-        throw Exception("invalid ledger content");
-    }
-
-    virtual void visit_string(const StringSlice& value) const {
-        throw Exception("invalid ledger content");
-    }
-
-    virtual void visit_number(double value) const {
-        if ((_state == UNLOCKED_CHAPTER) && (value == floor(value))) {
-            _ledger._chapters.insert(value);
-            return;
-        }
-        throw Exception("invalid ledger content");
-    }
-
-    virtual void visit_bool(bool value) const { throw Exception("invalid ledger content"); }
-
-    virtual void visit_null() const { throw Exception("invalid ledger content"); }
-
-  private:
-    DirectoryLedger& _ledger;
-    State&           _state;
-};
-
 void DirectoryLedger::load() {
-    const StringSlice scenario_id = sys.prefs->scenario_identifier();
-    String            path(format("{0}/{1}/ledger.json", dirs().registry, scenario_id));
+    const pn::string_view scenario_id = sys.prefs->scenario_identifier();
+    pn::string            path = pn::format("{0}/{1}/ledger.pn", dirs().registry, scenario_id);
 
     _chapters.clear();
-    unique_ptr<MappedFile> file;
-    try {
-        file.reset(new MappedFile(path));
-    } catch (Exception& e) {
+    pn::file file = pn::open(path, "r");
+    if (!file) {
         _chapters.insert(1);
         return;
     }
 
-    String data(utf8::decode(file->data()));
-    Json   json;
-    if (!string_to_json(data, json)) {
-        throw Exception("bad ledger");
+    pn::value x;
+    if (!pn::parse(file, x, nullptr)) {
+        throw std::runtime_error("bad ledger");
     }
 
-    Visitor::State state;
-    json.accept(Visitor(*this, state));
+    for (pn::value_cref level : x.as_map().get("unlocked-levels").as_array()) {
+        if (level.is_int()) {
+            _chapters.insert(level.as_int());
+        }
+    }
 }
 
 void DirectoryLedger::save() {
-    const StringSlice scenario_id = sys.prefs->scenario_identifier();
-    const String      path(format("{0}/{1}/ledger.json", dirs().registry, scenario_id));
+    const pn::string_view scenario_id = sys.prefs->scenario_identifier();
+    const pn::string      path = pn::format("{0}/{1}/ledger.pn", dirs().registry, scenario_id);
 
-    vector<Json> unlocked_levels;
+    pn::array unlocked_levels;
     for (std::set<int>::const_iterator it = _chapters.begin(); it != _chapters.end(); ++it) {
-        unlocked_levels.push_back(Json::number(*it));
+        unlocked_levels.push_back(*it);
     }
-    StringMap<Json> data;
-    data["unlocked-levels"] = Json::array(unlocked_levels);
-    Json   json             = Json::object(data);
-    String contents(pretty_print(json));
 
     makedirs(path::dirname(path), 0755);
-    ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-    Bytes    bytes(utf8::encode(contents));
-    write(fd, bytes);
+    pn::file file = pn::open(path, "w");
+    pn::dump(file, pn::map{{"unlocked-levels", std::move(unlocked_levels)}});
 }
 
 }  // namespace antares

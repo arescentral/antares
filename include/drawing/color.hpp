@@ -21,7 +21,7 @@
 
 #include <stdint.h>
 #include <string.h>
-#include <sfz/sfz.hpp>
+#include <pn/string>
 #include <vector>
 
 namespace antares {
@@ -100,7 +100,7 @@ inline constexpr RgbColor rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
 
 inline constexpr RgbColor rgb(uint8_t r, uint8_t g, uint8_t b) { return rgba(r, g, b, 0xff); }
 
-void print_to(sfz::PrintTarget out, const RgbColor& color);
+pn::string stringify(const RgbColor& color);
 
 inline bool operator==(const RgbColor& lhs, const RgbColor& rhs) {
     return memcmp(&lhs, &rhs, sizeof(RgbColor)) == 0;

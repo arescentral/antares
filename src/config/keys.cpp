@@ -65,9 +65,9 @@ int GetKeyNumFromKeyMap(const KeyMap& key_map) {
     return 0;
 }
 
-void GetKeyNumName(int key_num, sfz::String* out) { out->assign(sys.key_names.at(key_num - 1)); }
+void GetKeyNumName(int key_num, pn::string& out) { out = sys.key_names.at(key_num - 1).copy(); }
 
-bool GetKeyNameNum(sfz::StringSlice name, int& out) {
+bool GetKeyNameNum(pn::string_view name, int& out) {
     bool result = false;
     for (int i = 0; i < sys.key_names.size(); ++i) {
         if (sys.key_names.at(i) == name) {

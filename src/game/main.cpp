@@ -21,6 +21,7 @@
 #include <fcntl.h>
 #include <math.h>
 #include <algorithm>
+#include <pn/file>
 #include <set>
 
 #include "config/gamepad.hpp"
@@ -67,19 +68,10 @@
 #include "ui/screens/play-again.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
-using sfz::ScopedFd;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::format;
-using sfz::makedirs;
-using sfz::open;
 using std::max;
 using std::min;
 using std::set;
 using std::unique_ptr;
-
-namespace path = sfz::path;
 
 namespace antares {
 
@@ -235,38 +227,30 @@ void MainPlay::become_front() {
             sys.music.stop();
 #ifdef DATA_COVERAGE
             {
-                sfz::print(
-                        sfz::io::err,
-                        sfz::format("{{ \"level\": {0},\n", g.level->chapter_number()));
+                pn::format(stderr, "{{ \"level\": {0},\n", g.level->chapter_number());
                 const char* sep = "";
-                sfz::print(sfz::io::err, "  \"objects\": [");
+                pn::format(stderr, "  \"objects\": [");
                 for (auto object : covered_objects) {
-                    sfz::print(sfz::io::err, sfz::format("{0}{1}", sep, object));
+                    pn::format(stderr, "{0}{1}", sep, object);
                     sep = ", ";
                 }
-                sfz::print(sfz::io::err, "],\n");
+                pn::format(stderr, "],\n");
                 covered_objects.clear();
 
                 sep = "";
-                sfz::print(sfz::io::err, "  \"actions\": [");
+                pn::format(stderr, "  \"actions\": [");
                 for (auto action : covered_actions) {
-                    sfz::print(sfz::io::err, sfz::format("{0}{1}", sep, action));
+                    pn::format(stderr, "{0}{1}", sep, action);
                     sep = ", ";
                 }
-                sfz::print(sfz::io::err, "]\n");
-                sfz::print(sfz::io::err, "}\n");
+                pn::format(stderr, "]\n");
+                pn::format(stderr, "}\n");
                 covered_actions.clear();
             }
 #endif  // DATA_COVERAGE
             stack()->pop(this);
             break;
     }
-}
-
-int new_replay_file() {
-    String path;
-    makedirs(path::basename(path), 0755);
-    return open(path, O_WRONLY | O_CREAT | O_EXCL, 0644);
 }
 
 GamePlay::GamePlay(bool replay, InputSource* input, GameResult* game_result)
@@ -289,7 +273,7 @@ class PauseScreen : public Card {
   public:
     PauseScreen() {
         const StringList list(3100);
-        _pause_string.assign(list.at(10));
+        _pause_string = list.at(10).copy();
         int32_t width = sys.fonts.title->string_width(_pause_string);
         Rect    bounds(0, 0, width, sys.fonts.title->height);
         bounds.center_in(play_screen());
@@ -361,14 +345,12 @@ class PauseScreen : public Card {
 
     void wake() { _sleep_at = now() + kSleepAfter; }
 
-    bool      _visible;
-    wall_time _next_switch;
-    wall_time _sleep_at;
-    String    _pause_string;
-    Point     _text_origin;
-    Rect      _bracket_bounds;
-
-    DISALLOW_COPY_AND_ASSIGN(PauseScreen);
+    bool       _visible;
+    wall_time  _next_switch;
+    wall_time  _sleep_at;
+    pn::string _pause_string;
+    Point      _text_origin;
+    Rect       _bracket_bounds;
 };
 
 void GamePlay::become_front() {
@@ -417,7 +399,10 @@ void GamePlay::become_front() {
                     stack()->pop(this);
                     break;
 
-                default: throw Exception(format("invalid play again result {0}", _play_again));
+                default:
+                    throw std::runtime_error(
+                            pn::format("invalid play again result {0}", stringify(_play_again))
+                                    .c_str());
             }
             break;
 

@@ -19,7 +19,7 @@
 #ifndef ANTARES_DRAWING_STYLED_TEXT_HPP_
 #define ANTARES_DRAWING_STYLED_TEXT_HPP_
 
-#include <sfz/sfz.hpp>
+#include <pn/string>
 #include <vector>
 
 #include "drawing/color.hpp"
@@ -40,13 +40,15 @@ struct inlinePictType {
 class StyledText {
   public:
     StyledText(const Font* font);
+    StyledText(const StyledText&) = delete;
+    StyledText& operator=(const StyledText&) = delete;
     ~StyledText();
 
     void set_fore_color(RgbColor fore_color);
     void set_back_color(RgbColor back_color);
     void set_tab_width(int tab_width);
-    void set_retro_text(sfz::StringSlice text);
-    void set_interface_text(sfz::StringSlice text);
+    void set_retro_text(pn::string_view text);
+    void set_interface_text(pn::string_view text);
     void wrap_to(int width, int side_margin, int line_spacing);
 
     int                                size() const;
@@ -77,7 +79,7 @@ class StyledText {
                 uint32_t character, SpecialChar special, const RgbColor& fore_color,
                 const RgbColor& back_color);
 
-        sfz::Rune   character;
+        pn::rune    character;
         SpecialChar special;
         RgbColor    fore_color;
         RgbColor    back_color;
@@ -100,8 +102,6 @@ class StyledText {
     int                         _side_margin;
     int                         _line_spacing;
     const Font* const           _font;
-
-    DISALLOW_COPY_AND_ASSIGN(StyledText);
 };
 
 }  // namespace antares

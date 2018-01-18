@@ -19,8 +19,6 @@
 #ifndef ANTARES_UI_SCREENS_HELP_HPP_
 #define ANTARES_UI_SCREENS_HELP_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "drawing/styled-text.hpp"
 #include "ui/screen.hpp"
 
@@ -45,8 +43,6 @@ class HelpScreen : public InterfaceScreen {
     };
 
     StyledText _text;
-
-    DISALLOW_COPY_AND_ASSIGN(HelpScreen);
 };
 
 }  // namespace antares

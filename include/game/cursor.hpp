@@ -19,8 +19,6 @@
 #ifndef ANTARES_GAME_CURSOR_HPP_
 #define ANTARES_GAME_CURSOR_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "math/geometry.hpp"

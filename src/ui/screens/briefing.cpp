@@ -18,6 +18,8 @@
 
 #include "ui/screens/briefing.hpp"
 
+#include <pn/file>
+
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "data/base-object.hpp"
@@ -38,14 +40,9 @@
 #include "ui/screens/object-data.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::format;
 using std::make_pair;
 using std::pair;
 using std::vector;
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -87,7 +84,7 @@ static const Font* interface_font(interfaceStyleType style) {
 }
 
 static void populate_inline_picts(
-        Rect rect, StringSlice text, interfaceStyleType style,
+        Rect rect, pn::string_view text, interfaceStyleType style,
         vector<inlinePictType>& inline_pict) {
     StyledText interface_text(interface_font(style));
     interface_text.set_interface_text(text);
@@ -101,7 +98,7 @@ static void populate_inline_picts(
 static void update_mission_brief_point(
         LabeledRect* dataItem, int32_t whichBriefPoint, const Level* level, coordPointType* corner,
         int32_t scale, Rect* bounds, vector<inlinePictType>& inlinePict, Rect& highlight_rect,
-        vector<pair<Point, Point>>& lines, String& text) {
+        vector<pair<Point, Point>>& lines, pn::string& text) {
     if (whichBriefPoint < kMissionBriefPointOffset) {
         // No longer handled here.
         return;
@@ -118,7 +115,7 @@ static void update_mission_brief_point(
 
     // TODO(sfiera): catch exception.
     Resource rsrc("text", "txt", contentID);
-    text.assign(utf8::decode(rsrc.data()));
+    text               = rsrc.string().copy();
     int16_t textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
     if (hiliteBounds.left == hiliteBounds.right) {
         dataItem->bounds().left =
@@ -199,7 +196,7 @@ static void update_mission_brief_point(
             lines.push_back(make_pair(p7, p8));
         }
     }
-    dataItem->label.assign(StringList(headerID).at(headerNumber - 1));
+    dataItem->label = StringList(headerID).at(headerNumber - 1).copy();
     Rect newRect;
     GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
     populate_inline_picts(dataItem->bounds(), text, dataItem->style, inlinePict);
@@ -343,7 +340,8 @@ void BriefingScreen::handle_button(Button& button) {
             build_brief_point();
             break;
 
-        default: throw Exception(format("Got unknown button {0}.", button.id));
+        default:
+            throw std::runtime_error(pn::format("Got unknown button {0}.", button.id).c_str());
     }
 }
 

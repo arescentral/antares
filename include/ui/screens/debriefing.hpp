@@ -19,8 +19,6 @@
 #ifndef ANTARES_UI_SCREENS_DEBRIEFING_HPP_
 #define ANTARES_UI_SCREENS_DEBRIEFING_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "drawing/styled-text.hpp"
 #include "math/units.hpp"
 #include "ui/card.hpp"
@@ -46,7 +44,7 @@ class DebriefingScreen : public Card {
     virtual bool next_timer(wall_time& time);
     virtual void fire_timer();
 
-    static sfz::String build_score_text(
+    static pn::string build_score_text(
             game_ticks your_length, game_ticks par_length, int your_loss, int par_loss,
             int your_kill, int par_kill);
 
@@ -57,10 +55,10 @@ class DebriefingScreen : public Card {
         TYPING,
         DONE,
     };
-    friend void print_to(sfz::PrintTarget out, State state);
-    State       _state;
+    friend const char* stringify(State state);
+    State              _state;
 
-    sfz::String                 _message;
+    pn::string                  _message;
     std::unique_ptr<StyledText> _score;
     Rect                        _pix_bounds;
     Rect                        _message_bounds;
@@ -70,11 +68,9 @@ class DebriefingScreen : public Card {
     int       _typed_chars;
 
     LabeledRect _data_item;
-
-    DISALLOW_COPY_AND_ASSIGN(DebriefingScreen);
 };
 
-void print_to(sfz::PrintTarget out, DebriefingScreen::State state);
+const char* stringify(DebriefingScreen::State state);
 
 }  // namespace antares
 

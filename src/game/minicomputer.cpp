@@ -19,6 +19,7 @@
 #include "game/minicomputer.hpp"
 
 #include <algorithm>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
@@ -42,13 +43,8 @@
 #include "sound/fx.hpp"
 #include "video/driver.hpp"
 
-using sfz::Bytes;
-using sfz::Rune;
-using sfz::String;
-using sfz::StringSlice;
 using sfz::bin;
 using sfz::range;
-using sfz::string_to_int;
 using std::max;
 using std::vector;
 
@@ -164,14 +160,22 @@ const int32_t kMiniAmmoTextHBuffer = 2;
 
 const int32_t kMaxShipBuffer = 40;
 
-void pad_to(String& s, size_t width) {
-    if (s.size() < width) {
-        String result;
-        result.append((width - s.size()) / 2, ' ');
-        result.append(s);
-        result.append((1 + width - s.size()) / 2, ' ');
-        swap(result, s);
+void pad_to(pn::string& s, size_t width) {
+    size_t length = pn::rune::count(s);
+    if (length >= width) {
+        return;
     }
+    size_t     left_pad  = (width - length) / 2;
+    size_t     right_pad = (width - length) - left_pad;
+    pn::string t;
+    for (size_t i = 0; i < left_pad; ++i) {
+        t += pn::rune{' '};
+    }
+    t += s;
+    for (size_t i = 0; i < right_pad; ++i) {
+        t += pn::rune{' '};
+    }
+    s = std::move(t);
 }
 
 const int32_t MiniIconMacLineTop() { return sys.fonts.computer->height * 2; }
@@ -189,23 +193,23 @@ inline int32_t mGetLineNumFromV(int32_t mV) {
     return (((mV) - (kMiniScreenTop + instrument_top())) / sys.fonts.computer->height);
 }
 
-inline void mCopyBlankLineString(miniScreenLineType* mline, StringSlice mstring) {
-    mline->string.assign(mstring);
-    if (mline->string.size() > kMiniScreenCharWidth) {
-        mline->string.resize(kMiniScreenCharWidth);
+inline void mCopyBlankLineString(miniScreenLineType* mline, pn::string_view mstring) {
+    if (pn::rune::count(mstring) > kMiniScreenCharWidth) {
+        mstring = pn::rune::slice(mstring, 0, kMiniScreenCharWidth);
     }
+    mline->string = mstring.copy();
 }
 
 }  // namespace
 
 static void draw_mini_ship_data(
-        Handle<SpaceObject> obj, uint8_t header_color, int16_t screen_top, StringSlice label);
+        Handle<SpaceObject> obj, uint8_t header_color, int16_t screen_top, pn::string_view label);
 static void MiniComputerExecute(
         int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral);
 
 void    MiniComputerSetStatusStrings(void);
 int32_t MiniComputerGetStatusValue(int32_t);
-void    MiniComputerMakeStatusString(int32_t which_line, String& string);
+void    MiniComputerMakeStatusString(int32_t which_line, pn::string& string);
 
 void MiniScreenInit() {
     g.mini.selectLine    = kMiniScreenNoLineSelected;
@@ -265,7 +269,7 @@ static void highlight(const Rects& rects, int line) {
     draw_shaded_rect(rects, hilite_rect, kMiniScreenColor, DARK, MEDIUM, DARKER);
 }
 
-static void item_text(const Quads& quads, int line, StringSlice string, bool dim) {
+static void item_text(const Quads& quads, int line, pn::string_view string, bool dim) {
     Rect rect = Rect(kMiniScreenLeft, kMiniScreenTop, kMiniScreenRight, kMiniScreenBottom);
     rect.offset(0, instrument_top());
     Point origin = rect.origin();
@@ -306,7 +310,7 @@ static void button_off(const Rects& rects, int line) {
     draw_shaded_rect(rects, hilite_rect, kMiniButColor, MEDIUM, LIGHT, DARK);
 }
 
-static void button_on_text(const Quads& quads, int line, StringSlice string) {
+static void button_on_text(const Quads& quads, int line, pn::string_view string) {
     Rect rect = Rect(kButBoxLeft, kButBoxTop, kButBoxRight, kButBoxBottom);
     rect.offset(0, instrument_top());
     Point origin = rect.origin();
@@ -317,7 +321,7 @@ static void button_on_text(const Quads& quads, int line, StringSlice string) {
     sys.fonts.computer->draw(quads, origin, string, textcolor);
 }
 
-static void button_off_text(const Quads& quads, int line, StringSlice string) {
+static void button_off_text(const Quads& quads, int line, pn::string_view string) {
     Rect rect = Rect(kButBoxLeft, kButBoxTop, kButBoxRight, kButBoxBottom);
     rect.offset(0, instrument_top());
     Point origin = rect.origin();
@@ -361,9 +365,9 @@ static void draw_minicomputer_lines() {
     }
 
     {
-        Quads       quads(sys.fonts.computer->texture);
-        bool        dim[kMiniScreenCharHeight];
-        StringSlice strings[kMiniScreenCharHeight];
+        Quads           quads(sys.fonts.computer->texture);
+        bool            dim[kMiniScreenCharHeight];
+        pn::string_view strings[kMiniScreenCharHeight];
         for (int32_t count = 0; count < kMiniScreenCharHeight; count++) {
             auto c         = &g.mini.lineData[count];
             dim[count]     = (c->kind == MINI_DIM);
@@ -404,46 +408,51 @@ void draw_mini_screen() {
             g.admiral->target(), SKY_BLUE, kMiniTargetTop + instrument_top(), "TARGET");
 }
 
-static miniScreenLineType text(StringSlice name, bool underlined) {
+static miniScreenLineType text(pn::string_view name, bool underlined) {
     miniScreenLineType line;
-    line.string.assign(name);
+    line.string    = name.copy();
     line.kind      = MINI_NONE;
     line.underline = underlined;
     return line;
 }
 
 static miniScreenLineType selectable(
-        StringSlice name, void (*callback)(Handle<Admiral> adm, int32_t line)) {
+        pn::string_view name, void (*callback)(Handle<Admiral> adm, int32_t line)) {
     miniScreenLineType line;
-    line.kind = MINI_SELECTABLE;
-    line.string.assign(name);
+    line.kind     = MINI_SELECTABLE;
+    line.string   = name.copy();
     line.callback = callback;
     return line;
 }
 
-static miniScreenLineType accept(StringSlice name) {
+static miniScreenLineType accept(pn::string_view name) {
     miniScreenLineType line;
-    GetKeyNumName(sys.prefs->key(kCompAcceptKeyNum), &line.string);
+    pn::string         line_string;
+    GetKeyNumName(sys.prefs->key(kCompAcceptKeyNum), line_string);
+    line.string = line_string.copy();
     pad_to(line.string, kKeyNameLength);
-    line.string.append(" ");
-    line.string.append(name);
+    line.string += " ";
+    line.string += name;
     line.kind        = MINI_BUTTON_OFF;
     line.whichButton = kInLineButton;
     return line;
 }
 
-static miniScreenLineType cancel(StringSlice name) {
+static miniScreenLineType cancel(pn::string_view name) {
     miniScreenLineType line;
-    GetKeyNumName(sys.prefs->key(kCompCancelKeyNum), &line.string);
+    pn::string         line_string;
+    GetKeyNumName(sys.prefs->key(kCompCancelKeyNum), line_string);
+    line.string = line_string.copy();
     pad_to(line.string, kKeyNameLength);
-    line.string.append(" ");
-    line.string.append(name);
+    line.string += " ";
+    line.string += name;
     line.kind        = MINI_BUTTON_OFF;
     line.whichButton = kOutLineButton;
     return line;
 }
 
-static void make_mini_screen(int16_t screen, vector<miniScreenLineType> lines) {
+template <int size>
+static void make_mini_screen(int16_t screen, const miniScreenLineType (&lines)[size]) {
     auto* item           = g.mini.lineData.get();
     auto* button         = g.mini.lineData.get() + kMiniScreenCharHeight;
     g.mini.currentScreen = screen;
@@ -471,8 +480,8 @@ static void make_mini_screen(int16_t screen, vector<miniScreenLineType> lines) {
                 }
                 break;
         }
-        dst->kind = src.kind;
-        dst->string.assign(src.string);
+        dst->kind        = src.kind;
+        dst->string      = src.string.copy();
         dst->underline   = src.underline;
         dst->callback    = src.callback;
         dst->whichButton = src.whichButton;
@@ -626,7 +635,7 @@ void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) 
 }
 
 static void draw_mini_ship_data(
-        Handle<SpaceObject> obj, uint8_t header_color, int16_t screen_top, StringSlice label) {
+        Handle<SpaceObject> obj, uint8_t header_color, int16_t screen_top, pn::string_view label) {
     {
         // "CONTROL" or "TARGET" label.
         Rect bar = mini_screen_line_bounds(screen_top, 0, 0, kMiniScreenWidth);
@@ -1073,26 +1082,26 @@ void MiniComputerSetStatusStrings() {
             gMissionStatusStrList->size()) {
             // we have some data for this line to interpret
 
-            StringSlice sourceString =
+            pn::string_view sourceString =
                     gMissionStatusStrList->at(count - kStatusMiniScreenFirstLine);
 
-            if (sourceString.at(0) == '_') {
+            if (sourceString.data()[0] == '_') {
                 line->underline = true;
-                sourceString    = sourceString.slice(1);
+                sourceString    = sourceString.substr(1);
             }
 
-            if (sourceString.at(0) == '-') {
+            if (sourceString.data()[0] == '-') {
                 // - = abbreviated string, just plain text
                 line->statusType = kPlainTextStatus;
                 line->value      = 0;
-                line->string.assign(sourceString.slice(1));
+                line->string     = sourceString.substr(1).copy();
             } else {
                 //////////////////////////////////////////////
                 // get status type
-                StringSlice status_type_string;
-                if (partition(status_type_string, "\\", sourceString)) {
-                    int32_t value;
-                    if (string_to_int<int32_t>(status_type_string, value)) {
+                pn::string_view status_type_string;
+                if (pn::partition(status_type_string, "\\", sourceString)) {
+                    int64_t value;
+                    if (pn::strtoll(status_type_string, &value, nullptr)) {
                         if ((0 <= value) && (value <= kMaxStatusTypeValue)) {
                             line->statusType = value;
                         }
@@ -1101,58 +1110,58 @@ void MiniComputerSetStatusStrings() {
 
                 //////////////////////////////////////////////
                 // get score/condition number
-                StringSlice score_condition_string;
-                if (partition(score_condition_string, "\\", sourceString)) {
-                    int32_t value;
-                    if (string_to_int<int32_t>(score_condition_string, value)) {
+                pn::string_view score_condition_string;
+                if (pn::partition(score_condition_string, "\\", sourceString)) {
+                    int64_t value;
+                    if (pn::strtoll(score_condition_string, &value, nullptr)) {
                         line->whichStatus = value;
                     }
                 }
 
                 //////////////////////////////////////////////
                 // get player number
-                StringSlice player_number_string;
-                if (partition(player_number_string, "\\", sourceString)) {
-                    int32_t value;
-                    if (string_to_int<int32_t>(player_number_string, value)) {
+                pn::string_view player_number_string;
+                if (pn::partition(player_number_string, "\\", sourceString)) {
+                    int64_t value;
+                    if (pn::strtoll(player_number_string, &value, nullptr)) {
                         line->statusPlayer = Handle<Admiral>(value);
                     }
                 }
 
                 //////////////////////////////////////////////
                 // get negative value
-                StringSlice negative_value_string;
-                if (partition(negative_value_string, "\\", sourceString)) {
-                    int32_t value;
-                    if (string_to_int<int32_t>(negative_value_string, value)) {
+                pn::string_view negative_value_string;
+                if (pn::partition(negative_value_string, "\\", sourceString)) {
+                    int64_t value;
+                    if (pn::strtoll(negative_value_string, &value, nullptr)) {
                         line->negativeValue = value;
                     }
                 }
 
                 //////////////////////////////////////////////
                 // get falseString
-                StringSlice status_false_string;
-                if (partition(status_false_string, "\\", sourceString)) {
-                    line->statusFalse.assign(status_false_string);
+                pn::string_view status_false_string;
+                if (pn::partition(status_false_string, "\\", sourceString)) {
+                    line->statusFalse = status_false_string.copy();
                 }
 
                 //////////////////////////////////////////////
                 // get trueString
-                StringSlice status_true_string;
-                if (partition(status_true_string, "\\", sourceString)) {
-                    line->statusTrue.assign(status_true_string);
+                pn::string_view status_true_string;
+                if (pn::partition(status_true_string, "\\", sourceString)) {
+                    line->statusTrue = status_true_string.copy();
                 }
 
                 //////////////////////////////////////////////
                 // get statusString
-                StringSlice status_string;
-                if (partition(status_string, "\\", sourceString)) {
-                    line->statusString.assign(status_string);
+                pn::string_view status_string;
+                if (pn::partition(status_string, "\\", sourceString)) {
+                    line->statusString = status_string.copy();
                 }
 
                 //////////////////////////////////////////////
                 // get postString
-                line->postString.assign(sourceString);
+                line->postString = sourceString.copy();
 
                 line->value = MiniComputerGetStatusValue(count);
                 MiniComputerMakeStatusString(count, line->string);
@@ -1165,7 +1174,7 @@ void MiniComputerSetStatusStrings() {
     }
 }
 
-void MiniComputerMakeStatusString(int32_t which_line, String& string) {
+void MiniComputerMakeStatusString(int32_t which_line, pn::string& string) {
     string.clear();
 
     const miniScreenLineType& line = g.mini.lineData[which_line];
@@ -1173,24 +1182,24 @@ void MiniComputerMakeStatusString(int32_t which_line, String& string) {
         return;
     }
 
-    print(string, line.statusString);
+    string += line.statusString;
     switch (line.statusType) {
         case kTrueFalseCondition:
             if (line.value == 1) {
-                print(string, line.statusTrue);
+                string += line.statusTrue;
             } else {
-                print(string, line.statusFalse);
+                string += line.statusFalse;
             }
             break;
 
         case kIntegerValue:
-        case kIntegerMinusValue: print(string, line.value); break;
+        case kIntegerMinusValue: string += pn::dump(line.value, pn::dump_short); break;
 
         case kSmallFixedValue:
-        case kSmallFixedMinusValue: print(string, Fixed::from_val(line.value)); break;
+        case kSmallFixedMinusValue: string += stringify(Fixed::from_val(line.value)); break;
     }
     if (line.statusType != kPlainTextStatus) {
-        print(string, line.postString);
+        string += line.postString;
     }
 }
 

@@ -20,7 +20,6 @@
 #ifndef ANTARES_UI_SCREENS_LOADING_HPP_
 #define ANTARES_UI_SCREENS_LOADING_HPP_
 
-#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "data/handle.hpp"
@@ -64,8 +63,6 @@ class LoadingScreen : public InterfaceScreen {
 
     int32_t _current;
     int32_t _max;
-
-    DISALLOW_COPY_AND_ASSIGN(LoadingScreen);
 };
 
 }  // namespace antares

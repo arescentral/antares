@@ -18,8 +18,6 @@
 
 #include "game/motion.hpp"
 
-#include <sfz/sfz.hpp>
-
 #include "data/base-object.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
@@ -39,7 +37,6 @@
 #include "math/units.hpp"
 #include "sound/fx.hpp"
 
-using sfz::Exception;
 using std::unique_ptr;
 
 namespace antares {
@@ -307,7 +304,7 @@ static void animate(Handle<SpaceObject> o) {
 
 static void move_vector(Handle<SpaceObject> o) {
     if (!o->frame.vector.get()) {
-        throw Exception("Unexpected error: a vector appears to be missing.");
+        throw std::runtime_error("Unexpected error: a vector appears to be missing.");
     }
     auto& vector = *o->frame.vector;
 

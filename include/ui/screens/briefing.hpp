@@ -19,7 +19,6 @@
 #ifndef ANTARES_UI_SCREENS_BRIEFING_HPP_
 #define ANTARES_UI_SCREENS_BRIEFING_HPP_
 
-#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "drawing/interface.hpp"
@@ -87,9 +86,7 @@ class BriefingScreen : public InterfaceScreen {
     std::vector<inlinePictType>          _inline_pict;
     Rect                                 _highlight_rect;
     std::vector<std::pair<Point, Point>> _highlight_lines;
-    sfz::String                          _text;
-
-    DISALLOW_COPY_AND_ASSIGN(BriefingScreen);
+    pn::string                           _text;
 };
 
 }  // namespace antares

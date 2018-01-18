@@ -18,7 +18,7 @@
 
 #include "drawing/build-pix.hpp"
 
-#include <sfz/sfz.hpp>
+#include <pn/file>
 #include <vector>
 
 #include "data/picture.hpp"
@@ -27,16 +27,8 @@
 #include "drawing/text.hpp"
 #include "game/sys.hpp"
 
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::format;
-using sfz::string_to_int;
 using std::unique_ptr;
 using std::vector;
-
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -103,35 +95,37 @@ class PixDraw {
 BuildPix::BuildPix(int text_id, int width) : _size({width, 0}) {
     Resource rsrc("text", "txt", text_id);
 
-    BytesSlice     data = rsrc.data();
-    String         text(utf8::decode(data));
-    bool           in_section_header = (text.size() >= 2) && (text.slice(0, 2) == "#+");
-    size_t         start             = 0;
-    const size_t   end               = text.size();
-    vector<String> raw_lines;
+    pn::string_view    text              = rsrc.string();
+    bool               in_section_header = (text.size() >= 2) && (text.substr(0, 2) == "#+");
+    size_t             start             = 0;
+    const size_t       end               = text.size();
+    vector<pn::string> raw_lines;
     for (size_t i = start; i != end; ++i) {
-        if (((end - i) >= 3) && (text.slice(i, 3) == "\n#+")) {
-            raw_lines.emplace_back(text.slice(start, i - start));
+        if (((end - i) >= 3) && (text.substr(i, 3) == "\n#+")) {
+            raw_lines.emplace_back(text.substr(start, i - start).copy());
             start             = i + 1;
             in_section_header = true;
-        } else if (in_section_header && (text.at(i) == '\n')) {
-            raw_lines.emplace_back(text.slice(start, i - start));
+        } else if (in_section_header && (text.data()[i] == '\n')) {
+            raw_lines.emplace_back(text.substr(start, i - start).copy());
             start             = i + 1;
             in_section_header = false;
         }
     }
     if (start != end) {
-        raw_lines.emplace_back(text.slice(start));
+        raw_lines.emplace_back(text.substr(start).copy());
     }
 
     for (const auto& line : raw_lines) {
-        if (line.size() >= 2 && line.slice(0, 2) == "#+") {
+        if (line.size() >= 2 && line.substr(0, 2) == "#+") {
             if (line.size() > 2) {
-                if (line.at(2) == 'B') {
-                    int32_t id = 2005;
+                if (line.data()[2] == 'B') {
+                    int64_t id = 2005;
                     if (line.size() > 3) {
-                        if (!string_to_int(line.slice(3), id)) {
-                            throw Exception(format("malformed header line {0}", quote(line)));
+                        if (!pn::strtoll(line.substr(3), &id, nullptr)) {
+                            throw std::runtime_error(pn::format(
+                                                             "malformed header line {0}",
+                                                             pn::dump(line, pn::dump_short))
+                                                             .c_str());
                         }
                     }
                     Picture pict(id);
@@ -139,9 +133,12 @@ BuildPix::BuildPix(int text_id, int width) : _size({width, 0}) {
                             Line::BACKGROUND, Picture(id).texture(), nullptr,
                     });
                 } else {
-                    int32_t id;
-                    if (!string_to_int(line.slice(2), id)) {
-                        throw Exception(format("malformed header line {0}", quote(line)));
+                    int64_t id;
+                    if (!pn::strtoll(line.substr(2), &id, nullptr)) {
+                        throw std::runtime_error(pn::format(
+                                                         "malformed header line {0}",
+                                                         pn::dump(line, pn::dump_short))
+                                                         .c_str());
                     }
                     Picture pict(id);
                     _lines.push_back(Line{

@@ -19,8 +19,8 @@
 #ifndef ANTARES_GAME_MESSAGES_HPP_
 #define ANTARES_GAME_MESSAGES_HPP_
 
+#include <pn/string>
 #include <queue>
-#include <sfz/sfz.hpp>
 
 #include "data/handle.hpp"
 #include "drawing/color.hpp"
@@ -41,14 +41,14 @@ class Messages {
   public:
     static void    init();
     static void    clear();
-    static void    add(const sfz::PrintItem& message);
+    static void    add(pn::string_view message);
     static void    start(int16_t, int16_t);
     static void    clip();
     static void    end();
     static void    advance();
     static void    previous();
     static void    replay();
-    static void    set_status(const sfz::StringSlice& status, uint8_t color);
+    static void    set_status(pn::string_view status, uint8_t color);
     static int16_t current();
 
     static void draw_long_message(ticks time_pass);
@@ -58,9 +58,9 @@ class Messages {
   private:
     struct longMessageType;
 
-    static std::queue<sfz::String> message_data;
-    static longMessageType*        long_message_data;
-    static ticks                   time_count;
+    static std::queue<pn::string> message_data;
+    static longMessageType*       long_message_data;
+    static ticks                  time_count;
 };
 
 }  // namespace antares

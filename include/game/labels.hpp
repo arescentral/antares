@@ -19,7 +19,7 @@
 #ifndef ANTARES_GAME_LABELS_HPP_
 #define ANTARES_GAME_LABELS_HPP_
 
-#include <sfz/sfz.hpp>
+#include <pn/string>
 
 #include "data/base-object.hpp"
 
@@ -50,7 +50,7 @@ class Label {
     void    set_position(int16_t h, int16_t v);
     void    set_object(Handle<SpaceObject> object);
     void    set_age(ticks age);
-    void    set_string(const sfz::StringSlice& string);
+    void    set_string(pn::string_view string);
     void    clear_string();
     void    set_color(uint8_t color);
     void    set_offset(int32_t hoff, int32_t voff);
@@ -68,7 +68,7 @@ class Label {
     int32_t             width;
     int32_t             height;
     ticks               age = ticks(0);
-    sfz::String         text;
+    pn::string          text;
     uint8_t             color;
     bool                active  = false;
     bool                killMe  = false;

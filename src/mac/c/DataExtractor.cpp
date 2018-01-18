@@ -18,21 +18,14 @@
 
 #include "mac/c/DataExtractor.h"
 
-#include <sfz/sfz.hpp>
-
 #include "data/extractor.hpp"
 
-using sfz::CString;
-using sfz::String;
-using sfz::StringSlice;
 using std::unique_ptr;
-
-namespace utf8 = sfz::utf8;
 
 struct AntaresDataExtractor {
     antares::DataExtractor cxx_obj;
 
-    AntaresDataExtractor(const StringSlice& downloads_dir, const StringSlice& output_dir)
+    AntaresDataExtractor(pn::string_view downloads_dir, pn::string_view output_dir)
             : cxx_obj(downloads_dir, output_dir) {}
 };
 
@@ -40,9 +33,7 @@ namespace antares {
 
 extern "C" AntaresDataExtractor* antares_data_extractor_create(
         const char* downloads_dir, const char* output_dir) {
-    const String downloads_dir_string(utf8::decode(downloads_dir));
-    const String output_dir_string(utf8::decode(output_dir));
-    return new AntaresDataExtractor(downloads_dir_string, output_dir_string);
+    return new AntaresDataExtractor(downloads_dir, output_dir);
 }
 
 extern "C" void antares_data_extractor_destroy(AntaresDataExtractor* extractor) {
@@ -51,14 +42,12 @@ extern "C" void antares_data_extractor_destroy(AntaresDataExtractor* extractor) 
 
 extern "C" void antares_data_extractor_set_scenario(
         AntaresDataExtractor* extractor, const char* scenario) {
-    const String scenario_string(utf8::decode(scenario));
-    extractor->cxx_obj.set_scenario(scenario_string);
+    extractor->cxx_obj.set_scenario(scenario);
 }
 
 extern "C" void antares_data_extractor_set_plugin_file(
         AntaresDataExtractor* extractor, const char* path) {
-    const String path_string(utf8::decode(path));
-    extractor->cxx_obj.set_plugin_file(path_string);
+    extractor->cxx_obj.set_plugin_file(path);
 }
 
 extern "C" int antares_data_extractor_current(AntaresDataExtractor* extractor) {
@@ -72,9 +61,9 @@ class UserDataObserver : public DataExtractor::Observer {
     UserDataObserver(void (*callback)(const char*, void*), void* userdata)
             : _callback(callback), _userdata(userdata) {}
 
-    virtual void status(const StringSlice& status) {
-        CString c_str(status);
-        _callback(c_str.data(), _userdata);
+    virtual void status(pn::string_view status) {
+        pn::string copy = status.copy();
+        _callback(copy.c_str(), _userdata);
     }
 
   private:

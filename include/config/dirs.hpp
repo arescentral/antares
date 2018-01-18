@@ -19,28 +19,28 @@
 #ifndef ANTARES_CONFIG_DIRS_HPP_
 #define ANTARES_CONFIG_DIRS_HPP_
 
-#include <sfz/sfz.hpp>
+#include <pn/string>
 
 namespace antares {
 
 extern const char kFactoryScenarioIdentifier[];
 
 struct Directories {
-    sfz::String root;
+    pn::string root;
 
-    sfz::String downloads;
-    sfz::String registry;
-    sfz::String replays;
-    sfz::String scenarios;
+    pn::string downloads;
+    pn::string registry;
+    pn::string replays;
+    pn::string scenarios;
 };
 
 const Directories& dirs();
 
-sfz::String default_application_path();
-sfz::String application_path();
-void        set_application_path(sfz::StringSlice path);
+pn::string      default_application_path();
+pn::string_view application_path();
+void            set_application_path(pn::string_view path);
 
-sfz::String scenario_dir(sfz::StringSlice identifier);
+pn::string scenario_dir(pn::string_view identifier);
 
 }  // namespace antares
 

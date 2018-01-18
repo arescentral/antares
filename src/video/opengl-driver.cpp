@@ -20,7 +20,7 @@
 
 #include <stdint.h>
 #include <algorithm>
-#include <sfz/sfz.hpp>
+#include <pn/file>
 
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
@@ -44,18 +44,9 @@
 #include <GL/glu.h>
 #endif
 
-using sfz::Exception;
-using sfz::PrintItem;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::format;
-using sfz::hex;
-using sfz::print;
 using std::min;
 using std::max;
 using std::unique_ptr;
-
-namespace io = sfz::io;
 
 namespace antares {
 
@@ -111,7 +102,7 @@ static const char* _gl_error_string(GLenum err) {
 static void _gl_check(const char* fn, const char* file, int line) {
     int error = glGetError();
     if (error != GL_NO_ERROR) {
-        print(io::err, format("{0}: {1} ({2}:{3})\n", fn, _gl_error_string(error), file, line));
+        pn::format(stderr, "{0}: {1} ({2}:{3})\n", fn, _gl_error_string(error), file, line);
     }
 }
 
@@ -191,15 +182,15 @@ void gl_log(GLint object) {
     } else {
         glGetProgramInfoLog(object, log_size, &log_size, log.get());
     }
-    print(io::err, format("object {0} log: {1}\n", object, (const char*)log.get()));
+    pn::format(stderr, "object {0} log: {1}\n", object, (const char*)log.get());
 }
 
 class OpenGlTextureImpl : public Texture::Impl {
   public:
     OpenGlTextureImpl(
-            PrintItem name, const PixMap& image, const OpenGlVideoDriver::Uniforms& uniforms,
+            pn::string_view name, const PixMap& image, const OpenGlVideoDriver::Uniforms& uniforms,
             GLuint vbuf[3])
-            : _name(name), _size(image.size()), _uniforms(uniforms), _vbuf(vbuf) {
+            : _name(name.copy()), _size(image.size()), _uniforms(uniforms), _vbuf(vbuf) {
         glBindTexture(GL_TEXTURE_RECTANGLE, _texture.id);
         glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -225,7 +216,7 @@ class OpenGlTextureImpl : public Texture::Impl {
                 copy.bytes());
     }
 
-    virtual StringSlice name() const { return _name; }
+    virtual pn::string_view name() const { return _name; }
 
     virtual void draw(const Rect& draw_rect) const {
         _uniforms.color_mode.set(DRAW_SPRITE_MODE);
@@ -359,19 +350,18 @@ class OpenGlTextureImpl : public Texture::Impl {
 
     struct Texture {
         Texture() { glGenTextures(1, &id); }
+        Texture(const Texture&) = delete;
+        Texture& operator=(const Texture&) = delete;
         ~Texture() { glDeleteTextures(1, &id); }
 
         GLuint id;
-        DISALLOW_COPY_AND_ASSIGN(Texture);
     };
 
-    const String                       _name;
+    const pn::string                   _name;
     Texture                            _texture;
     Size                               _size;
     const OpenGlVideoDriver::Uniforms& _uniforms;
     GLuint*                            _vbuf;
-
-    DISALLOW_COPY_AND_ASSIGN(OpenGlTextureImpl);
 };
 
 }  // namespace
@@ -380,7 +370,7 @@ OpenGlVideoDriver::OpenGlVideoDriver() : _static_seed{0} {}
 
 int OpenGlVideoDriver::scale() const { return viewport_size().width / screen_size().width; }
 
-Texture OpenGlVideoDriver::texture(PrintItem name, const PixMap& content) {
+Texture OpenGlVideoDriver::texture(pn::string_view name, const PixMap& content) {
     return unique_ptr<Texture::Impl>(new OpenGlTextureImpl(name, content, _uniforms, _vbuf));
 }
 
@@ -564,7 +554,7 @@ static GLuint make_shader(GLenum shader_type, const GLchar* source) {
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
     if (compiled == GL_FALSE) {
         gl_log(shader);
-        throw Exception("compilation failed");
+        throw std::runtime_error("compilation failed");
     }
     return shader;
 }
@@ -593,7 +583,7 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     glGetProgramiv(program, GL_LINK_STATUS, &linked);
     if (linked == GL_FALSE) {
         gl_log(program);
-        throw Exception("linking failed");
+        throw std::runtime_error("linking failed");
     }
 
     GLuint array;

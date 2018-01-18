@@ -18,8 +18,6 @@
 
 #include "game/cursor.hpp"
 
-#include <sfz/sfz.hpp>
-
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "game/globals.hpp"
@@ -28,8 +26,6 @@
 #include "lang/defines.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
-using sfz::format;
 using std::unique_ptr;
 
 namespace antares {

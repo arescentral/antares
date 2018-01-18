@@ -19,51 +19,51 @@
 #include "data/resource.hpp"
 
 #include <stdio.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
+
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
 #include "game/sys.hpp"
 
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::MappedFile;
-using sfz::PrintItem;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::format;
 using std::unique_ptr;
 
 namespace path = sfz::path;
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-static unique_ptr<MappedFile> load_first(
-        sfz::StringSlice resource_path, const std::initializer_list<PrintItem>& dirs) {
+static unique_ptr<sfz::mapped_file> load_first(
+        pn::string_view resource_path, const std::vector<pn::string_view>& dirs) {
     for (const auto& dir : dirs) {
-        String path(sfz::format("{0}/{1}", dir, resource_path));
+        pn::string path = pn::format("{0}/{1}", dir, resource_path);
         if (path::isfile(path)) {
-            return unique_ptr<MappedFile>(new MappedFile(path));
+            return unique_ptr<sfz::mapped_file>(new sfz::mapped_file(path));
         }
     }
-    throw Exception(format("couldn't find resource {0}", quote(resource_path)));
+    throw std::runtime_error(
+            pn::format("couldn't find resource {0}", pn::dump(resource_path, pn::dump_short))
+                    .c_str());
 }
 
-static unique_ptr<MappedFile> load(sfz::StringSlice resource_path) {
-    return load_first(
-            resource_path, {
-                                   scenario_dir(sys.prefs->scenario_identifier()),
-                                   scenario_dir(kFactoryScenarioIdentifier), application_path(),
-                           });
+static unique_ptr<sfz::mapped_file> load(pn::string_view resource_path) {
+    pn::string scenario = scenario_dir(sys.prefs->scenario_identifier());
+    pn::string factory  = scenario_dir(kFactoryScenarioIdentifier);
+    pn::string app      = application_path().copy();
+    return load_first(resource_path, {scenario, factory, app});
 }
 
-Resource::Resource(const StringSlice& type, const StringSlice& extension, int id)
-        : Resource(format("{0}/{1}.{2}", type, id, extension)) {}
+Resource::Resource(pn::string_view type, pn::string_view extension, int id)
+        : Resource(pn::format("{0}/{1}.{2}", type, id, extension)) {}
 
-Resource::Resource(const sfz::PrintItem& resource_path) : _file(load(String(resource_path))) {}
+Resource::Resource(pn::string_view resource_path) : _file(load(resource_path)) {}
 
 Resource::~Resource() {}
 
-BytesSlice Resource::data() const { return _file->data(); }
+pn::data_view Resource::data() const { return _file->data(); }
+
+pn::string_view Resource::string() const {
+    return pn::string_view{reinterpret_cast<const char*>(_file->data().data()),
+                           static_cast<int>(_file->data().size())};
+}
 
 }  // namespace antares

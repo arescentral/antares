@@ -18,6 +18,9 @@
 
 #include "data/interface.hpp"
 
+#include <pn/file>
+#include <pn/map>
+
 #include <sfz/sfz.hpp>
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
@@ -27,35 +30,27 @@
 #include "lang/casts.hpp"
 #include "video/driver.hpp"
 
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::Json;
-using sfz::ReadSource;
 using sfz::StringMap;
-using sfz::StringSlice;
-using sfz::format;
 using sfz::range;
 using std::unique_ptr;
 using std::vector;
 
-namespace utf8 = sfz::utf8;
-
 namespace antares {
 
-static Rect rect(const Json& json) {
-    return {implicit_cast<int>(json.get("left").number()),
-            implicit_cast<int>(json.get("top").number()),
-            implicit_cast<int>(json.get("right").number()),
-            implicit_cast<int>(json.get("bottom").number())};
+static Rect rect(pn::value_cref x) {
+    return {implicit_cast<int>(x.as_map().get("left").as_int()),
+            implicit_cast<int>(x.as_map().get("top").as_int()),
+            implicit_cast<int>(x.as_map().get("right").as_int()),
+            implicit_cast<int>(x.as_map().get("bottom").as_int())};
 }
 
-static interfaceLabelType label(const Json& json) {
+static interfaceLabelType label(pn::value_cref x) {
     return {
-            int16_t(json.get("id").number()), int16_t(json.get("index").number() + 1),
+            int16_t(x.as_map().get("id").as_int()), int16_t(x.as_map().get("index").as_int() + 1),
     };
 }
 
-static uint8_t hue(const Json& json) {
+static uint8_t hue(pn::value_cref x) {
     StringMap<uint8_t> hues;
     hues["gray"]        = GRAY;
     hues["orange"]      = ORANGE;
@@ -73,48 +68,49 @@ static uint8_t hue(const Json& json) {
     hues["sky-blue"]    = SKY_BLUE;
     hues["tan"]         = TAN;
     hues["red"]         = RED;
-    return hues[json.string()];
+    return hues[x.as_string()];
 }
 
-static interfaceStyleType style(const Json& json) {
+static interfaceStyleType style(pn::value_cref x) {
     StringMap<interfaceStyleType> styles;
     styles["large"] = kLarge;
     styles["small"] = kSmall;
-    return styles[json.string()];
+    return styles[x.as_string()];
 }
 
-static int16_t key(const Json& json) {
+static int16_t key(pn::value_cref x) {
     int k;
-    if (!GetKeyNameNum(json.string(), k)) {
+    if (!GetKeyNameNum(x.as_string(), k)) {
         k = 0;
     }
     return k;
 }
 
-vector<unique_ptr<InterfaceItem>> interface_items(int id0, const Json& json) {
+vector<unique_ptr<InterfaceItem>> interface_items(int id0, pn::array_cref l) {
     vector<unique_ptr<InterfaceItem>> items;
     int                               id = id0;
-    for (auto i : range(json.size())) {
-        Json item_json = json.at(i);
+    for (auto i : range(l.size())) {
+        pn::map_cref item = l[i].as_map();
 
-        sfz::StringSlice kind;
+        pn::string kind;
         for (auto key : {"rect", "button", "checkbox", "radio", "picture", "text", "tab-box"}) {
-            if (item_json.has(key)) {
+            if (item.has(key)) {
                 if (kind.empty()) {
                     kind = key;
                 } else {
-                    throw Exception(format("interface item has both {0} and {1}", kind, key));
+                    throw std::runtime_error(
+                            pn::format("interface item has both {0} and {1}", kind, key).c_str());
                 }
             }
         }
 
-        Json               sub      = item_json.get(kind);
-        Rect               bounds   = rect(item_json.get("bounds"));
-        StringSlice        resource = sub.get("resource").string();
+        pn::map_cref       sub      = item.get(kind).as_map();
+        Rect               bounds   = rect(item.get("bounds"));
+        pn::string_view    resource = sub.get("resource").as_string();
         uint8_t            hue      = antares::hue(sub.get("hue"));
         interfaceStyleType style    = antares::style(sub.get("style"));
         int16_t            key      = sub.has("key") ? antares::key(sub.get("key")) : 0;
-        int16_t gamepad = sub.has("gamepad") ? Gamepad::num(sub.get("gamepad").string()) : 0;
+        int16_t gamepad = sub.has("gamepad") ? Gamepad::num(sub.get("gamepad").as_string()) : 0;
         interfaceLabelType label =
                 sub.has("label") ? antares::label(sub.get("label")) : interfaceLabelType{};
 
@@ -142,10 +138,10 @@ vector<unique_ptr<InterfaceItem>> interface_items(int id0, const Json& json) {
             Rect button_bounds = {
                     bounds.left + 22, bounds.top - 20, 0, bounds.top - 10,
             };
-            Json tabs = sub.get("tabs");
+            pn::array_cref tabs = sub.get("tabs").as_array();
             for (auto i : range(tabs.size())) {
-                Json tab                 = tabs.at(i);
-                button_bounds.right      = button_bounds.left + tab.get("width").number();
+                pn::map_cref tab         = tabs[i].as_map();
+                button_bounds.right      = button_bounds.left + tab.get("width").as_int();
                 interfaceLabelType label = antares::label(tab.get("label"));
                 items.emplace_back(new TabBoxButton(
                         id++, button_bounds, key, gamepad, label, hue, style, tab.get("content")));
@@ -167,7 +163,7 @@ void PlainRect::accept(const Visitor& visitor) const { visitor.visit_plain_rect(
 
 LabeledItem::LabeledItem(int id, Rect bounds, interfaceLabelType label)
         : InterfaceItem(id, bounds),
-          label(StringList(label.stringID).at(label.stringNumber - 1)) {}
+          label(StringList(label.stringID).at(label.stringNumber - 1).copy()) {}
 
 LabeledRect::LabeledRect(
         int id, Rect bounds, interfaceLabelType label, uint8_t hue, interfaceStyleType style)
@@ -179,15 +175,15 @@ TextRect::TextRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style)
         : InterfaceItem(id, bounds), hue(hue), style(style) {}
 
 TextRect::TextRect(
-        int id, Rect bounds, StringSlice resource, uint8_t hue, interfaceStyleType style)
+        int id, Rect bounds, pn::string_view resource, uint8_t hue, interfaceStyleType style)
         : InterfaceItem(id, bounds),
-          text(utf8::decode(Resource(resource).data())),
+          text(Resource(resource).string().copy()),
           hue(hue),
           style(style) {}
 
 void TextRect::accept(const Visitor& visitor) const { visitor.visit_text_rect(*this); }
 
-PictureRect::PictureRect(int id, Rect bounds, StringSlice resource)
+PictureRect::PictureRect(int id, Rect bounds, pn::string_view resource)
         : InterfaceItem(id, bounds),
           picture(resource),
           texture(picture.texture()),
@@ -230,10 +226,10 @@ void RadioButton::accept(const Visitor& visitor) const { visitor.visit_radio_but
 
 TabBoxButton::TabBoxButton(
         int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, uint8_t hue,
-        interfaceStyleType style, const Json& tab_content)
+        interfaceStyleType style, pn::value_cref tab_content)
         : Button(id, bounds, key, gamepad, label, hue, style),
           on(false),
-          tab_content(tab_content) {}
+          tab_content(tab_content.copy()) {}
 
 void TabBoxButton::accept(const Visitor& visitor) const { visitor.visit_tab_box_button(*this); }
 

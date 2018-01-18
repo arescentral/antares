@@ -16,42 +16,95 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
-using sfz::String;
-using sfz::StringSlice;
-using sfz::format;
-using sfz::args::help;
-using sfz::args::store;
-using sfz::print;
-
 namespace args = sfz::args;
-namespace io   = sfz::io;
-namespace utf8 = sfz::utf8;
 
 namespace antares {
+namespace {
 
-void main(int argc, char* const* argv) {
-    args::Parser parser(argv[0], "Prints the tree digest of a directory");
-
-    String directory;
-    parser.add_argument("directory", store(directory))
-            .help("the directory to take the digest of")
-            .required();
-    parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
-
-    String error;
-    if (!parser.parse_args(argc - 1, argv + 1, error)) {
-        print(io::err, format("{0}: {1}\n", parser.name(), error));
-        exit(1);
-    }
-
-    print(io::out, format("{0}\n", tree_digest(directory)));
+void usage(pn::file_view out, pn::string_view progname, int retcode) {
+    pn::format(
+            out,
+            "usage: {0} [OPTIONS] directory\n"
+            "\n"
+            "  Prints the tree digest of a directory\n"
+            "\n"
+            "  arguments:\n"
+            "    directory           the directory to take the digest of\n"
+            "\n"
+            "  options:\n"
+            "    -h, --help          display this help screen\n",
+            progname);
+    exit(retcode);
 }
 
+void main(int argc, char* const* argv) {
+    args::callbacks callbacks;
+
+    sfz::optional<pn::string> directory;
+    callbacks.argument = [&directory](pn::string_view arg) {
+        if (!directory.has_value()) {
+            directory.emplace(arg.copy());
+        } else {
+            return false;
+        }
+        return true;
+    };
+
+    callbacks.short_option = [&argv](pn::rune opt, const args::callbacks::get_value_f& get_value) {
+        switch (opt.value()) {
+            case 'h': usage(stdout, sfz::path::basename(argv[0]), 0); return true;
+            default: return false;
+        }
+    };
+
+    callbacks.long_option =
+            [&callbacks](pn::string_view opt, const args::callbacks::get_value_f& get_value) {
+                if (opt == "help") {
+                    return callbacks.short_option(pn::rune{'h'}, get_value);
+                } else {
+                    return false;
+                }
+            };
+
+    args::parse(argc - 1, argv + 1, callbacks);
+    if (!directory.has_value()) {
+        throw std::runtime_error("missing required argument 'replay'");
+    }
+
+    pn::format(stdout, "{0}\n", sfz::tree_digest(*directory).hex());
+}
+
+void print_nested_exception(const std::exception& e) {
+    pn::format(stderr, ": {0}", e.what());
+    try {
+        std::rethrow_if_nested(e);
+    } catch (const std::exception& e) {
+        print_nested_exception(e);
+    }
+}
+
+void print_exception(pn::string_view progname, const std::exception& e) {
+    pn::format(stderr, "{0}: {1}", sfz::path::basename(progname), e.what());
+    try {
+        std::rethrow_if_nested(e);
+    } catch (const std::exception& e) {
+        print_nested_exception(e);
+    }
+    pn::format(stderr, "\n");
+}
+
+}  // namespace
 }  // namespace antares
 
 int main(int argc, char* const* argv) {
-    antares::main(argc, argv);
+    try {
+        antares::main(argc, argv);
+    } catch (const std::exception& e) {
+        antares::print_exception(argv[0], e);
+        return 1;
+    }
     return 0;
 }

@@ -20,7 +20,6 @@
 #define ANTARES_GAME_GLOBALS_HPP_
 
 #include <queue>
-#include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
 #include "data/handle.hpp"

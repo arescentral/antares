@@ -26,11 +26,6 @@
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
-using sfz::Bytes;
-using sfz::Exception;
-using sfz::String;
-using sfz::format;
-
 namespace antares {
 
 namespace {
@@ -63,8 +58,8 @@ Rect object_data_bounds(Point origin, Size size) {
 ObjectDataScreen::ObjectDataScreen(
         Point origin, Handle<BaseObject> object, Trigger trigger, int which)
         : _trigger(trigger), _which(which), _state(TYPING) {
-    String text;
-    CreateObjectDataText(&text, object);
+    pn::string text;
+    CreateObjectDataText(text, object);
     _text.reset(new StyledText(sys.fonts.button));
     _text->set_fore_color(GetRGBTranslateColorShade(GREEN, VERY_LIGHT));
     _text->set_back_color(GetRGBTranslateColorShade(GREEN, DARKEST));

@@ -19,8 +19,6 @@
 #ifndef ANTARES_UI_FLOWS_SOLO_GAME_HPP_
 #define ANTARES_UI_FLOWS_SOLO_GAME_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "game/input-source.hpp"
 #include "game/main.hpp"
 #include "ui/card.hpp"

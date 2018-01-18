@@ -19,7 +19,6 @@
 #ifndef ANTARES_DRAWING_PIX_TABLE_HPP_
 #define ANTARES_DRAWING_PIX_TABLE_HPP_
 
-#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "drawing/pix-map.hpp"
@@ -34,6 +33,8 @@ class NatePixTable {
     NatePixTable(int id, uint8_t color);
     NatePixTable(const NatePixTable&) = delete;
     NatePixTable(NatePixTable&&)      = default;
+    NatePixTable& operator=(const NatePixTable&) = delete;
+    NatePixTable& operator=(NatePixTable&&) = default;
     ~NatePixTable();
 
     const Frame& at(size_t index) const;
@@ -66,8 +67,6 @@ class NatePixTable::Frame {
     Rect        _bounds;
     ArrayPixMap _pix_map;
     Texture     _texture;
-
-    DISALLOW_COPY_AND_ASSIGN(Frame);
 };
 
 }  // namespace antares

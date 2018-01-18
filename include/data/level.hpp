@@ -19,7 +19,7 @@
 #ifndef ANTARES_DATA_LEVEL_HPP_
 #define ANTARES_DATA_LEVEL_HPP_
 
-#include <sfz/sfz.hpp>
+#include <pn/string>
 
 #include "data/action.hpp"
 #include "data/handle.hpp"
@@ -59,13 +59,13 @@ struct scenarioInfoType {
     Handle<BaseObject> warpOutFlareID;
     Handle<BaseObject> playerBodyID;
     Handle<BaseObject> energyBlobID;
-    sfz::String        downloadURLString;
-    sfz::String        titleString;
-    sfz::String        authorNameString;
-    sfz::String        authorURLString;
+    pn::string         downloadURLString;
+    pn::string         titleString;
+    pn::string         authorNameString;
+    pn::string         authorURLString;
     uint32_t           version;
 };
-void read_from(sfz::ReadSource in, scenarioInfoType& scenario_info);
+bool read_from(pn::file_view in, scenarioInfoType* scenario_info);
 
 enum conditionType {
     kNoCondition                      = 0,
@@ -118,29 +118,29 @@ struct Level {
         int16_t reserved1;
     };
 
-    sfz::String name;
-    int16_t     netRaceFlags;
-    int16_t     playerNum;
-    Player      player[kMaxPlayerNum];
-    int16_t     scoreStringResID;
-    int16_t     initialFirst;
-    int16_t     prologueID;
-    int16_t     initialNum;
-    int16_t     songID;
-    int16_t     conditionFirst;
-    int16_t     epilogueID;
-    int16_t     conditionNum;
-    int16_t     starMapH;
-    int16_t     briefPointFirst;
-    int16_t     starMapV;
-    int16_t     briefPointNum;  // use kLevelBriefMask
-    game_ticks  parTime;
-    int16_t     parKills;
-    int16_t     levelNameStrNum;
-    Fixed       parKillRatio;
-    int16_t     parLosses;
-    secs        startTime;
-    bool        is_training;
+    pn::string name;
+    int16_t    netRaceFlags;
+    int16_t    playerNum;
+    Player     player[kMaxPlayerNum];
+    int16_t    scoreStringResID;
+    int16_t    initialFirst;
+    int16_t    prologueID;
+    int16_t    initialNum;
+    int16_t    songID;
+    int16_t    conditionFirst;
+    int16_t    epilogueID;
+    int16_t    conditionNum;
+    int16_t    starMapH;
+    int16_t    briefPointFirst;
+    int16_t    starMapV;
+    int16_t    briefPointNum;  // use kLevelBriefMask
+    game_ticks parTime;
+    int16_t    parKills;
+    int16_t    levelNameStrNum;
+    Fixed      parKillRatio;
+    int16_t    parLosses;
+    secs       startTime;
+    bool       is_training;
 
     static const size_t byte_size = 124;
 
@@ -160,8 +160,8 @@ struct Level {
     int32_t prologue_id() const;
     int32_t epilogue_id() const;
 };
-void read_from(sfz::ReadSource in, Level& level);
-void read_from(sfz::ReadSource in, Level::Player& level_player);
+bool read_from(pn::file_view in, Level* level);
+bool read_from(pn::file_view in, Level::Player* level_player);
 
 struct Level::InitialObject {
     Handle<BaseObject>  type;
@@ -182,7 +182,7 @@ struct Level::InitialObject {
 
     static const size_t byte_size = 108;
 };
-void read_from(sfz::ReadSource in, Level::InitialObject& level_initial);
+bool read_from(pn::file_view in, Level::InitialObject* level_initial);
 
 struct Level::Condition {
     struct CounterArgument {
@@ -214,8 +214,8 @@ struct Level::Condition {
     bool true_yet() const;
     void set_true_yet(bool state);
 };
-void read_from(sfz::ReadSource in, Level::Condition& level_condition);
-void read_from(sfz::ReadSource in, Level::Condition::CounterArgument& counter_argument);
+bool read_from(pn::file_view in, Level::Condition* level_condition);
+bool read_from(pn::file_view in, Level::Condition::CounterArgument* counter_argument);
 
 //
 // We need to know:
@@ -248,9 +248,9 @@ struct Level::BriefPoint {
 
     static const size_t byte_size = 24;
 };
-void read_from(sfz::ReadSource in, Level::BriefPoint::ObjectBrief& object_brief);
-void read_from(sfz::ReadSource in, Level::BriefPoint::AbsoluteBrief& absolute_brief);
-void read_from(sfz::ReadSource in, Level::BriefPoint& brief_point);
+bool read_from(pn::file_view in, Level::BriefPoint::ObjectBrief* object_brief);
+bool read_from(pn::file_view in, Level::BriefPoint::AbsoluteBrief* absolute_brief);
+bool read_from(pn::file_view in, Level::BriefPoint* brief_point);
 
 struct Race {
     int32_t  id;
@@ -260,7 +260,7 @@ struct Race {
 
     static const size_t byte_size = 14;
 };
-void read_from(sfz::ReadSource in, Race& race);
+bool read_from(pn::file_view in, Race* race);
 
 }  // namespace antares
 

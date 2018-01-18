@@ -34,8 +34,6 @@
 #include "ui/screens/scroll-text.hpp"
 #include "video/driver.hpp"
 
-using sfz::Exception;
-
 namespace antares {
 
 namespace {
@@ -134,7 +132,9 @@ void MainScreen::handle_button(antares::Button& button) {
 
         case START_NEW_GAME: stack()->push(new SoloGame); break;
 
-        case START_NETWORK_GAME: throw Exception("Networked games not yet implemented."); break;
+        case START_NETWORK_GAME:
+            throw std::runtime_error("Networked games not yet implemented.");
+            break;
 
         case ABOUT_ARES:
             stack()->push(new ScrollTextScreen(6500, 540, kFastScrollInterval));

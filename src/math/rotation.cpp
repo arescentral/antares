@@ -18,16 +18,10 @@
 
 #include "math/rotation.hpp"
 
-#include <sfz/sfz.hpp>
-
 #include "data/resource.hpp"
 #include "game/sys.hpp"
 #include "lang/defines.hpp"
 #include "math/macros.hpp"
-
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::read;
 
 namespace antares {
 

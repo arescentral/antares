@@ -28,12 +28,7 @@
 #include "game/sys.hpp"
 #include "lang/defines.hpp"
 
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::ReadSource;
-using sfz::StringSlice;
 using sfz::range;
-using sfz::read;
 using std::max;
 using std::min;
 using std::unique_ptr;
@@ -103,23 +98,23 @@ Preferences::Preferences() {
 
     volume = 7;
 
-    scenario_identifier.assign(kFactoryScenarioIdentifier);
+    scenario_identifier = kFactoryScenarioIdentifier;
 }
 
 Preferences Preferences::copy() const {
     Preferences copy;
     memcpy(copy.keys, keys, sizeof(keys));
-    copy.play_idle_music    = play_idle_music;
-    copy.play_music_in_game = play_music_in_game;
-    copy.speech_on          = speech_on;
-    copy.volume             = volume;
-    copy.scenario_identifier.assign(scenario_identifier);
+    copy.play_idle_music     = play_idle_music;
+    copy.play_music_in_game  = play_music_in_game;
+    copy.speech_on           = speech_on;
+    copy.volume              = volume;
+    copy.scenario_identifier = scenario_identifier.copy();
     return copy;
 }
 
 PrefsDriver::PrefsDriver() {
     if (sys.prefs) {
-        throw Exception("PrefsDriver is a singleton");
+        throw std::runtime_error("PrefsDriver is a singleton");
     }
     sys.prefs = this;
 }
@@ -127,44 +122,44 @@ PrefsDriver::PrefsDriver() {
 PrefsDriver::~PrefsDriver() { sys.prefs = NULL; }
 
 void PrefsDriver::set_key(size_t index, uint32_t key) {
-    Preferences p(get());
+    Preferences p(get().copy());
     p.keys[index] = key;
     set(p);
 }
 
 void PrefsDriver::set_play_idle_music(bool on) {
-    Preferences p(get());
+    Preferences p(get().copy());
     p.play_idle_music = on;
     set(p);
 }
 
 void PrefsDriver::set_play_music_in_game(bool on) {
-    Preferences p(get());
+    Preferences p(get().copy());
     p.play_music_in_game = on;
     set(p);
 }
 
 void PrefsDriver::set_speech_on(bool on) {
-    Preferences p(get());
+    Preferences p(get().copy());
     p.speech_on = on;
     set(p);
 }
 
 void PrefsDriver::set_volume(int volume) {
-    Preferences p(get());
+    Preferences p(get().copy());
     p.volume = volume;
     set(p);
 }
 
-void PrefsDriver::set_scenario_identifier(sfz::StringSlice id) {
-    Preferences p(get());
-    p.scenario_identifier.assign(id);
+void PrefsDriver::set_scenario_identifier(pn::string_view id) {
+    Preferences p(get().copy());
+    p.scenario_identifier = id.copy();
     set(p);
 }
 
 NullPrefsDriver::NullPrefsDriver() {}
 
-NullPrefsDriver::NullPrefsDriver(Preferences defaults) : _saved(defaults) {}
+NullPrefsDriver::NullPrefsDriver(Preferences defaults) : _saved(defaults.copy()) {}
 
 const Preferences& NullPrefsDriver::get() const { return _saved; }
 

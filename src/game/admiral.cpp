@@ -30,10 +30,6 @@
 #include "math/units.hpp"
 #include "sound/fx.hpp"
 
-using sfz::Bytes;
-using sfz::Exception;
-using sfz::String;
-using sfz::StringSlice;
 using std::min;
 using std::unique_ptr;
 
@@ -113,10 +109,12 @@ Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Level::Playe
     a->_earning_power = player.earningPower;
     a->_race          = player.playerRace;
     if ((player.nameResID >= 0)) {
-        a->_name.assign(StringList(player.nameResID).at(player.nameStrNum - 1));
-        if (a->_name.size() > kAdmiralNameLen) {
-            a->_name.resize(kAdmiralNameLen);
+        StringList      strings(player.nameResID);
+        pn::string_view name = strings.at(player.nameStrNum - 1);
+        if (pn::rune::count(name) > kAdmiralNameLen) {
+            name = pn::rune::slice(name, 0, kAdmiralNameLen);
         }
+        a->_name = name.copy();
     }
 
     // for now set strategy balance to 0 -- we may want to calc this if player added on the fly?
@@ -156,10 +154,12 @@ Handle<Destination> MakeNewDestination(
     }
 
     if ((nameResID >= 0)) {
-        d->name.assign(StringList(nameResID).at(nameStrNum - 1));
-        if (d->name.size() > kDestinationNameLen) {
-            d->name.resize(kDestinationNameLen);
+        StringList      strings(nameResID);
+        pn::string_view name = strings.at(nameStrNum - 1);
+        if (pn::rune::count(name) > kDestinationNameLen) {
+            name = pn::rune::slice(name, 0, kDestinationNameLen);
         }
+        d->name = name.copy();
     }
 
     if (object->attributes & kNeutralDeath) {
@@ -247,7 +247,7 @@ void RecalcAllAdmiralBuildData() {
                                 j++;
                             }
                             if (j == kMaxNumAdmiralCanBuild) {
-                                throw Exception("Too Many Types to Build!");
+                                throw std::runtime_error("Too Many Types to Build!");
                             }
                             a->canBuildType()[j].baseNum     = d->canBuildType[k];
                             a->canBuildType()[j].base        = baseObject;
@@ -343,7 +343,7 @@ Handle<Destination> GetAdmiralBuildAtObject(Handle<Admiral> a) {
 
 void SetAdmiralBuildAtObject(Handle<Admiral> a, Handle<SpaceObject> obj) {
     if (!a.get()) {
-        throw Exception("Can't set consider ship for -1 admiral.");
+        throw std::runtime_error("Can't set consider ship for -1 admiral.");
     }
     if (obj.get()) {
         if (obj->attributes & kCanAcceptBuild) {
@@ -355,20 +355,27 @@ void SetAdmiralBuildAtObject(Handle<Admiral> a, Handle<SpaceObject> obj) {
     }
 }
 
-void SetAdmiralBuildAtName(Handle<Admiral> a, StringSlice name) {
-    auto destObject = a->buildAtObject();
-    destObject->name.assign(name.slice(0, min<size_t>(name.size(), kDestinationNameLen)));
+void SetAdmiralBuildAtName(Handle<Admiral> a, pn::string_view name) {
+    auto   destObject = a->buildAtObject();
+    size_t rune_count = 0;
+    for (pn::string_view::iterator it = name.begin(); it != name.end(); ++it) {
+        if (rune_count++ == kDestinationNameLen) {
+            destObject->name = name.substr(0, it.offset()).copy();
+            return;
+        }
+    }
+    destObject->name = name.copy();
 }
 
-StringSlice GetDestBalanceName(Handle<Destination> whichDestObject) {
+pn::string_view GetDestBalanceName(Handle<Destination> whichDestObject) {
     return whichDestObject->name;
 }
 
-StringSlice GetAdmiralName(Handle<Admiral> a) {
+pn::string_view GetAdmiralName(Handle<Admiral> a) {
     if (a.get()) {
         return a->name();
     } else {
-        return NULL;
+        return pn::string_view{};
     }
 }
 

@@ -19,6 +19,8 @@
 #ifndef ANTARES_DRAWING_SPRITE_HANDLING_HPP_
 #define ANTARES_DRAWING_SPRITE_HANDLING_HPP_
 
+#include <map>
+
 #include "data/handle.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"

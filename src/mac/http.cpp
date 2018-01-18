@@ -19,27 +19,23 @@
 #include "net/http.hpp"
 
 #include <CoreFoundation/CoreFoundation.h>
-#include <sfz/sfz.hpp>
+#include <pn/file>
 
 #include "mac/core-foundation.hpp"
-
-using sfz::Exception;
-using sfz::StringSlice;
-using sfz::WriteTarget;
-using sfz::format;
+#include "net/http.hpp"
 
 namespace antares {
 namespace http {
 
-void get(const StringSlice& url, WriteTarget out) {
+void get(pn::string_view url, pn::file_view out) {
     cf::Url  cfurl(url);
     cf::Data cfdata;
     SInt32   error;
     if (CFURLCreateDataAndPropertiesFromResource(
                 NULL, cfurl.c_obj(), &cfdata.c_obj(), NULL, NULL, &error)) {
-        write(out, cfdata.data());
+        out.write(cfdata.data());
     } else {
-        throw Exception(format("Couldn't load requested url {0}", url));
+        throw std::runtime_error(pn::format("Couldn't load requested url {0}", url).c_str());
     }
 }
 

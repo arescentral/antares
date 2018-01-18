@@ -50,13 +50,7 @@
 #include "math/units.hpp"
 #include "video/transitions.hpp"
 
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::ReadSource;
-using sfz::String;
-using sfz::StringSlice;
 using sfz::range;
-using sfz::read;
 using std::set;
 using std::unique_ptr;
 
@@ -651,8 +645,8 @@ static void set_zoom(Handle<Action> action, Handle<SpaceObject> focus) {
     if (action->argument.zoom.zoomLevel != g.zoom) {
         g.zoom = static_cast<ZoomType>(action->argument.zoom.zoomLevel);
         sys.sound.click();
-        StringList  strings(kMessageStringID);
-        StringSlice string = strings.at(g.zoom + kZoomStringOffset - 1);
+        StringList      strings(kMessageStringID);
+        pn::string_view string = strings.at(g.zoom + kZoomStringOffset - 1);
         Messages::set_status(string, kStatusLabelColor);
     }
 }

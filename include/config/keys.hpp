@@ -19,6 +19,8 @@
 #ifndef ANTARES_CONFIG_KEYS_HPP_
 #define ANTARES_CONFIG_KEYS_HPP_
 
+#include <pn/string>
+
 #include "config/preferences.hpp"
 
 namespace antares {
@@ -31,6 +33,8 @@ const size_t kHotKeyNum             = 10;
 class KeyMap {
   public:
     KeyMap();
+    KeyMap(const KeyMap&) = delete;
+    KeyMap& operator=(const KeyMap&) = delete;
 
     bool get(size_t index) const;
     void set(size_t index, bool value);
@@ -45,8 +49,6 @@ class KeyMap {
     static const size_t kDataSize = sizeof(Data);
 
     Data _data;
-
-    DISALLOW_COPY_AND_ASSIGN(KeyMap);
 };
 
 bool operator==(const KeyMap& a, const KeyMap& b);
@@ -198,8 +200,8 @@ inline bool mLeftArrowKey(const KeyMap& km) { return km.get(Keys::LEFT_ARROW); }
 
 void    GetKeyMapFromKeyNum(int key_num, KeyMap* key_map);
 int     GetKeyNumFromKeyMap(const KeyMap& key_map);
-void    GetKeyNumName(int key_num, sfz::String* out);
-bool    GetKeyNameNum(sfz::StringSlice name, int& out);
+void    GetKeyNumName(int key_num, pn::string& out);
+bool    GetKeyNameNum(pn::string_view name, int& out);
 bool    AnyKeyButThisOne(const KeyMap& key_map, int key_num);
 int32_t GetAsciiFromKeyMap(const KeyMap&, const KeyMap&);
 

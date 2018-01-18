@@ -20,7 +20,7 @@
 #define ANTARES_DATA_PICTURE_HPP_
 
 #include <stdint.h>
-#include <sfz/sfz.hpp>
+#include <pn/string>
 
 #include "drawing/pix-map.hpp"
 
@@ -31,16 +31,16 @@ class Texture;
 class Picture : public ArrayPixMap {
   public:
     Picture(int32_t id, bool hidpi = false);
-    Picture(sfz::StringSlice resource, bool hidpi = false);
+    Picture(pn::string_view resource, bool hidpi = false);
 
-    sfz::StringSlice path() const { return _path; }
-    int              scale() const { return _scale; }
+    pn::string_view path() const { return _path; }
+    int             scale() const { return _scale; }
 
     Texture texture() const;
 
   private:
-    sfz::String _path;
-    int         _scale;
+    pn::string _path;
+    int        _scale;
 };
 
 }  // namespace antares

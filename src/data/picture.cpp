@@ -18,35 +18,30 @@
 
 #include "data/picture.hpp"
 
+#include <pn/file>
+
 #include "data/resource.hpp"
 #include "game/sys.hpp"
 #include "video/driver.hpp"
 
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::format;
-
 namespace antares {
 
-Picture::Picture(int32_t id, bool hidpi) : Picture(String(format("pictures/{0}", id))) {}
+Picture::Picture(int32_t id, bool hidpi) : Picture(pn::format("pictures/{0}", id)) {}
 
-Picture::Picture(StringSlice resource, bool hidpi)
+Picture::Picture(pn::string_view resource, bool hidpi)
         : ArrayPixMap(0, 0), _scale(hidpi ? sys.video->scale() : 1) {
     while (true) {
         try {
-            _path.assign(resource);
+            _path = resource.copy();
             if (_scale > 1) {
-                _path.append(format("@{0}x.png", _scale));
+                _path += pn::format("@{0}x.png", _scale);
             } else {
-                _path.append(".png");
+                _path += ".png";
             }
-            Resource   rsrc(_path);
-            BytesSlice in(rsrc.data());
-            read(in, *this);
+            Resource     rsrc(_path);
+            ArrayPixMap::operator=(read_png(rsrc.data().open()));
             break;
-        } catch (Exception& e) {
+        } catch (std::exception& e) {
             if (_scale > 1) {
                 _scale >>= 1;
             } else {
@@ -56,6 +51,6 @@ Picture::Picture(StringSlice resource, bool hidpi)
     }
 }
 
-Texture Picture::texture() const { return sys.video->texture(format("/{0}", _path), *this); }
+Texture Picture::texture() const { return sys.video->texture(pn::format("/{0}", _path), *this); }
 
 }  // namespace antares

@@ -18,18 +18,14 @@
 
 #include "video/driver.hpp"
 
-#include <sfz/sfz.hpp>
-
 #include "game/sys.hpp"
 #include "lang/defines.hpp"
-
-using sfz::Exception;
 
 namespace antares {
 
 VideoDriver::VideoDriver() {
     if (sys.video) {
-        throw Exception("VideoDriver is a singleton");
+        throw std::runtime_error("VideoDriver is a singleton");
     }
     sys.video = this;
 }

@@ -20,20 +20,18 @@
 
 #include <sndfile.h>
 #include <string.h>
-
-using sfz::Bytes;
-using sfz::BytesSlice;
-using sfz::Exception;
+#include <memory>
+#include <pn/file>
 
 namespace antares {
 
-Sndfile::Sndfile(const BytesSlice& data) : _data(data) {}
+Sndfile::Sndfile(pn::data_view data) : _data(data) {}
 
 namespace {
 
 struct VirtualFile {
-    BytesSlice data;
-    size_t     pointer;
+    pn::data_view data;
+    size_t        pointer;
 
     sf_count_t get_filelen() { return data.size(); }
 
@@ -104,7 +102,7 @@ sf_count_t sf_vio_tell(void* user_data) {
     return reinterpret_cast<VirtualFile*>(user_data)->tell();
 }
 
-void Sndfile::convert(Bytes& data, ALenum& format, ALsizei& frequency) const {
+void Sndfile::convert(pn::data_ref data, ALenum& format, ALsizei& frequency) const {
     SF_VIRTUAL_IO io = {
             .get_filelen = sf_vio_get_filelen,
             .seek        = sf_vio_seek,
@@ -115,12 +113,12 @@ void Sndfile::convert(Bytes& data, ALenum& format, ALsizei& frequency) const {
     VirtualFile userdata = {
             .data = _data, .pointer = 0,
     };
-    SF_INFO                                       info = {};
+    SF_INFO info = {};
     std::unique_ptr<SNDFILE, decltype(&sf_close)> file(
             sf_open_virtual(&io, SFM_READ, &info, &userdata), sf_close);
 
     if (!file.get()) {
-        throw Exception(sf_strerror(NULL));
+        throw std::runtime_error(sf_strerror(NULL));
     }
 
     frequency = info.samplerate;
@@ -129,13 +127,13 @@ void Sndfile::convert(Bytes& data, ALenum& format, ALsizei& frequency) const {
     } else if (info.channels == 2) {
         format = AL_FORMAT_STEREO16;
     } else {
-        throw Exception(sfz::format("audio file has {0} channels", info.channels));
+        throw std::runtime_error(pn::format("audio file has {0} channels", info.channels).c_str());
     }
 
     int16_t shorts[1024];
     while (auto count = sf_read_short(file.get(), shorts, 1024)) {
-        BytesSlice bytes(reinterpret_cast<uint8_t*>(shorts), sizeof(int16_t) * count);
-        data.push(bytes);
+        data += pn::data_view{reinterpret_cast<uint8_t*>(shorts),
+                              static_cast<int>(sizeof(int16_t) * count)};
     }
 }
 

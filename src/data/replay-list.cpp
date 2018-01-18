@@ -19,20 +19,15 @@
 #include "data/replay-list.hpp"
 
 #include <glob.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
+
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
 #include "game/sys.hpp"
 
-using sfz::CString;
-using sfz::MappedFile;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::format;
-using sfz::read;
 using std::vector;
 
-namespace utf8 = sfz::utf8;
 namespace path = sfz::path;
 
 namespace antares {
@@ -48,18 +43,17 @@ struct ScopedGlob {
 }  // namespace
 
 ReplayList::ReplayList() {
-    ScopedGlob        g;
-    const StringSlice scenario = sys.prefs->scenario_identifier();
-    String            str(format("{0}/replays/*.NLRP", scenario_dir(scenario)));
-    CString           c_str(str);
-    glob(c_str.data(), 0, NULL, &g.data);
+    ScopedGlob            g;
+    const pn::string_view scenario = sys.prefs->scenario_identifier();
+    pn::string            str = pn::format("{0}/{1}/replays/*.NLRP", dirs().scenarios, scenario);
+    glob(str.c_str(), 0, NULL, &g.data);
 
     for (int i = 0; i < g.data.gl_pathc; ++i) {
-        const String path(utf8::decode(g.data.gl_pathv[i]));
-        StringSlice  basename  = path::basename(path);
-        StringSlice  id_string = basename.slice(0, basename.size() - 5);
-        int16_t      id;
-        if (string_to_int(id_string, id)) {
+        const pn::string path      = g.data.gl_pathv[i];
+        pn::string_view  basename  = path::basename(path);
+        pn::string_view  id_string = basename.substr(0, basename.size() - 5);
+        int64_t          id;
+        if (pn::strtoll(id_string, &id, nullptr)) {
             _replays.push_back(id);
         }
     }

@@ -19,6 +19,7 @@
 #include <GLFW/glfw3.h>
 
 #include <time.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/dirs.hpp"
@@ -31,41 +32,79 @@
 #include "sound/openal-driver.hpp"
 #include "ui/flows/master.hpp"
 
-using sfz::String;
-using sfz::args::store;
-using sfz::args::store_const;
 using sfz::range;
-using sfz::format;
 
 namespace args = sfz::args;
-namespace io   = sfz::io;
 
 namespace antares {
+namespace {
 
-void main(int argc, const char* argv[]) {
-    args::Parser parser(argv[0], "Runs Antares");
+void usage(pn::file_view out, pn::string_view progname, int retcode) {
+    pn::format(
+            out,
+            "usage: {0} [OPTIONS] [scenario]\n"
+            "\n"
+            "  Antares: a tactical space combat game\n"
+            "\n"
+            "  arguments:\n"
+            "    scenario            select scenario\n"
+            "\n"
+            "  options:\n"
+            "    -h, --app-data      set path to application data\n"
+            "                        (default: {0})\n"
+            "    -h, --help          display this help screen\n",
+            progname, default_application_path());
+    exit(retcode);
+}
 
-    sfz::String app_data(default_application_path());
-    sfz::String scenario(kFactoryScenarioIdentifier);
-    parser.add_argument("scenario", store(scenario)).help("select scenario");
-    parser.add_argument("--help", help(parser, 0)).help("display this help screen");
-    parser.add_argument("--app-data", store(app_data))
-            .help(format(
-                    "set path to application data (default: {0})", default_application_path()));
+void main(int argc, char* const* argv) {
+    pn::string_view progname = sfz::path::basename(argv[0]);
+    pn::string      app_data = default_application_path();
 
-    String error;
-    if (!parser.parse_args(argc - 1, argv + 1, error)) {
-        print(io::err, format("{0}: {1}\n", parser.name(), error));
-        exit(1);
-    }
+    args::callbacks callbacks;
+
+    sfz::optional<pn::string> scenario;
+    scenario.emplace(kFactoryScenarioIdentifier);
+    callbacks.argument = [&scenario](pn::string_view arg) {
+        if (!scenario.has_value()) {
+            scenario.emplace(arg.copy());
+        } else {
+            return false;
+        }
+        return true;
+    };
+
+    callbacks.short_option = [&progname, &app_data](
+                                     pn::rune opt, const args::callbacks::get_value_f& get_value) {
+        switch (opt.value()) {
+            case 'a': app_data = get_value().copy(); return true;
+            case 'h': usage(stdout, progname, 0); return true;
+            default: return false;
+        }
+    };
+
+    callbacks.long_option =
+            [&callbacks](pn::string_view opt, const args::callbacks::get_value_f& get_value) {
+                if (opt == "app-data") {
+                    return callbacks.short_option(pn::rune{'a'}, get_value);
+                } else if (opt == "help") {
+                    return callbacks.short_option(pn::rune{'h'}, get_value);
+                } else {
+                    return false;
+                }
+            };
+
+    args::parse(argc - 1, argv + 1, callbacks);
 
     if (!sfz::path::isdir(application_path())) {
         if (app_data.empty()) {
-            print(io::err, format("{0}: application data not installed\n\n", parser.name()));
-            print(io::err, format("Please install it, or specify a path with --app-data\n\n"));
+            throw std::runtime_error(
+                    "application data not installed\n"
+                    "\n"
+                    "Please install it, or specify a path with --app-data\n\n");
         } else {
-            print(io::err, format("{0}: application data not found at {1}\n\n", parser.name(),
-                                  application_path()));
+            throw std::runtime_error(
+                    pn::format("{0}: application data not found", application_path()).c_str());
         }
         exit(1);
     } else {
@@ -74,25 +113,28 @@ void main(int argc, const char* argv[]) {
 
     FilePrefsDriver prefs;
 
-    sys.prefs->set_scenario_identifier(scenario);
-    bool         have_scenario = false;
-    ScenarioList l;
-    for (auto i : range(l.size())) {
-        const auto& entry = l.at(i);
-        if (entry.identifier == scenario) {
-            if (entry.installed) {
-                have_scenario = true;
-                break;
-            } else {
-                print(io::err, format("{0}: factory scenario not installed\n\n", parser.name()));
-                print(io::err, format("Please run antares-install-data\n", parser.name()));
-                exit(1);
+    if (scenario.has_value()) {
+        sys.prefs->set_scenario_identifier(*scenario);
+        bool         have_scenario = false;
+        ScenarioList l;
+        for (auto i : range(l.size())) {
+            const auto& entry = l.at(i);
+            if (entry.identifier == *scenario) {
+                if (entry.installed) {
+                    have_scenario = true;
+                    break;
+                } else {
+                    throw std::runtime_error(
+                            "factory scenario not installed\n"
+                            "\n"
+                            "Please run antares-install-data");
+                }
             }
         }
-    }
-    if (!have_scenario) {
-        print(io::err, format("{0}: {1}: scenario not installed\n", parser.name(), scenario));
-        exit(1);
+        if (!have_scenario) {
+            throw std::runtime_error(
+                    pn::format("{1}: scenario not installed\n", progname, *scenario).c_str());
+        }
     }
 
     DirectoryLedger   ledger;
@@ -101,9 +143,34 @@ void main(int argc, const char* argv[]) {
     video.loop(new Master(time(NULL)));
 }
 
+void print_nested_exception(const std::exception& e) {
+    pn::format(stderr, ": {0}", e.what());
+    try {
+        std::rethrow_if_nested(e);
+    } catch (const std::exception& e) {
+        print_nested_exception(e);
+    }
+}
+
+void print_exception(pn::string_view progname, const std::exception& e) {
+    pn::format(stderr, "{0}: {1}", sfz::path::basename(progname), e.what());
+    try {
+        std::rethrow_if_nested(e);
+    } catch (const std::exception& e) {
+        print_nested_exception(e);
+    }
+    pn::format(stderr, "\n");
+}
+
+}  // namespace
 }  // namespace antares
 
-int main(int argc, const char* argv[]) {
-    antares::main(argc, argv);
+int main(int argc, char* const* argv) {
+    try {
+        antares::main(argc, argv);
+    } catch (const std::exception& e) {
+        antares::print_exception(argv[0], e);
+        return 1;
+    }
     return 0;
 }

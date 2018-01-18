@@ -19,27 +19,21 @@
 #include "config/dirs.hpp"
 
 #include <unistd.h>
-#include <sfz/sfz.hpp>
+#include <pn/file>
 
 #include "mac/core-foundation.hpp"
 
-using sfz::Exception;
-using sfz::String;
-using sfz::format;
-
-namespace utf8 = sfz::utf8;
-
 namespace antares {
 
-String default_application_path() {
+pn::string default_application_path() {
     cf::Url    url(CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle()));
     cf::String url_string(CFStringCreateCopy(NULL, CFURLGetString(url.c_obj())));
     char       path_buffer[PATH_MAX];
     if (!CFURLGetFileSystemRepresentation(
                 url.c_obj(), true, reinterpret_cast<UInt8*>(path_buffer), PATH_MAX)) {
-        throw Exception("couldn't get application_path()");
+        throw std::runtime_error("couldn't get application_path()");
     }
-    return String(utf8::decode(path_buffer));
+    return pn::string(path_buffer, strlen(path_buffer));
 }
 
 Directories mac_dirs() {
@@ -47,17 +41,17 @@ Directories mac_dirs() {
 
     char* home = getenv("HOME");
     if (home && *home) {
-        directories.root.assign(utf8::decode(home));
+        directories.root = home;
     } else {
         char tmp[PATH_MAX] = "/tmp/antares-XXXXXX";
-        directories.root.assign(utf8::decode(mkdtemp(tmp)));
+        directories.root   = mkdtemp(tmp);
     }
-    directories.root.append("/Library/Application Support/Antares");
+    directories.root += "/Library/Application Support/Antares";
 
-    directories.downloads.assign(format("{0}/Downloads", directories.root));
-    directories.registry.assign(format("{0}/Registry", directories.root));
-    directories.replays.assign(format("{0}/Replays", directories.root));
-    directories.scenarios.assign(format("{0}/Scenarios", directories.root));
+    directories.downloads = pn::format("{0}/Downloads", directories.root);
+    directories.registry  = pn::format("{0}/Registry", directories.root);
+    directories.replays   = pn::format("{0}/Replays", directories.root);
+    directories.scenarios = pn::format("{0}/Scenarios", directories.root);
     return directories;
 };
 
@@ -66,8 +60,8 @@ const Directories& dirs() {
     return dirs;
 }
 
-sfz::String scenario_dir(sfz::StringSlice identifier) {
-    return sfz::String(sfz::format("{0}/{1}", dirs().scenarios, identifier));
+pn::string scenario_dir(pn::string_view identifier) {
+    return pn::format("{0}/{1}", dirs().scenarios, identifier);
 }
 
 }  // namespace antares

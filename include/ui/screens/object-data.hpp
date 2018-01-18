@@ -19,8 +19,6 @@
 #ifndef ANTARES_UI_SCREENS_OBJECT_DATA_HPP_
 #define ANTARES_UI_SCREENS_OBJECT_DATA_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "data/handle.hpp"
 #include "drawing/styled-text.hpp"
 #include "math/geometry.hpp"
@@ -60,8 +58,6 @@ class ObjectDataScreen : public Card {
 
     Rect                        _bounds;
     std::unique_ptr<StyledText> _text;
-
-    DISALLOW_COPY_AND_ASSIGN(ObjectDataScreen);
 };
 
 }  // namespace antares

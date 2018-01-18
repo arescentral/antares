@@ -19,8 +19,6 @@
 
 #include "ui/screens/loading.hpp"
 
-#include <sfz/sfz.hpp>
-
 #include "data/string-list.hpp"
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"

@@ -20,7 +20,8 @@
 #define ANTARES_MATH_FIXED_HPP_
 
 #include <math.h>
-#include <sfz/sfz.hpp>
+#include <pn/file>
+#include <pn/string>
 
 namespace antares {
 
@@ -73,8 +74,13 @@ inline Fixed& operator>>=(Fixed& x, int n) { return x = x >> n; }
 
 inline Fixed operator-(Fixed x) { return Fixed::from_val(-x.val()); }
 
-inline void read_from(sfz::ReadSource in, Fixed& f) {
-    f = Fixed::from_val(sfz::read<int32_t>(in));
+inline bool read_from(pn::file_view in, Fixed* f) {
+    int32_t i32;
+    if (!in.read(&i32)) {
+        return false;
+    }
+    *f = Fixed::from_val(i32);
+    return true;
 }
 
 static const Fixed kFixedNone = Fixed::from_val(-1);
@@ -107,13 +113,13 @@ inline int32_t more_evil_fixed_to_long(Fixed value) { return (value >> 8).val();
 inline float   mFixedToFloat(Fixed m_f) { return floorf(m_f.val() * 1e3 / 256.0) / 1e3; }
 inline int32_t mFixedToLong(Fixed m_f) { return evil_fixed_to_long(m_f); }
 
-void print_to(sfz::PrintTarget out, const Fixed& fixed);
+pn::string stringify(Fixed fixed);
 
 struct fixedPointType {
     Fixed h;
     Fixed v;
 };
-void read_from(sfz::ReadSource in, fixedPointType& point);
+bool read_from(pn::file_view in, fixedPointType* point);
 
 }  // namespace antares
 

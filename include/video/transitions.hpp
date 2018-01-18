@@ -19,8 +19,6 @@
 #ifndef ANTARES_VIDEO_TRANSITIONS_HPP_
 #define ANTARES_VIDEO_TRANSITIONS_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "drawing/color.hpp"
 #include "math/units.hpp"
 #include "ui/card.hpp"
@@ -33,6 +31,8 @@ class Sprite;
 class Transitions {
   public:
     Transitions();
+    Transitions(const Transitions&) = delete;
+    Transitions& operator=(const Transitions&) = delete;
     ~Transitions();
 
     void reset();
@@ -46,8 +46,6 @@ class Transitions {
     int32_t  _in_speed;
     int32_t  _out_speed;
     RgbColor _color;
-
-    DISALLOW_COPY_AND_ASSIGN(Transitions);
 };
 
 class ColorFade : public Card {
@@ -81,8 +79,6 @@ class ColorFade : public Card {
     wall_time   _start;
     wall_time   _next_event;
     const usecs _duration;
-
-    DISALLOW_COPY_AND_ASSIGN(ColorFade);
 };
 
 class PictFade : public Card {
@@ -120,8 +116,6 @@ class PictFade : public Card {
     wall_time _wane_start;
 
     Texture _texture;
-
-    DISALLOW_COPY_AND_ASSIGN(PictFade);
 };
 
 }  // namespace antares

@@ -19,25 +19,17 @@
 #include "mac/audio-file.hpp"
 
 #include <AudioToolbox/AudioToolbox.h>
-#include <sfz/sfz.hpp>
+#include <pn/file>
 
 #include "data/resource.hpp"
 
-using sfz::Bytes;
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::PrintItem;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::format;
-using sfz::quote;
 using std::unique_ptr;
 
 namespace antares {
 
-static void check_os_err(OSStatus err, const StringSlice& method) {
+static void check_os_err(OSStatus err, pn::string_view method) {
     if (err != noErr) {
-        throw Exception(format("{0}: {1}", method, err));
+        throw std::runtime_error(pn::format("{0}: {1}", method, err).c_str());
     }
 }
 
@@ -48,25 +40,25 @@ class ExtAudioFile {
     ExtAudioFile(const AudioFile& audio_file) {
         OSStatus err = ExtAudioFileWrapAudioFileID(audio_file.id(), false, &_id);
         if (err != noErr) {
-            throw Exception("ExtAudioFileWrapAudioFileID() failed.");
+            throw std::runtime_error("ExtAudioFileWrapAudioFileID() failed.");
         }
     }
+    ExtAudioFile(const ExtAudioFile&) = delete;
+    ExtAudioFile& operator=(const ExtAudioFile&) = delete;
 
     ~ExtAudioFile() { ExtAudioFileDispose(_id); }
 
-    void convert(Bytes& data, ALenum& format, ALsizei& frequency);
+    void convert(pn::data_ref data, ALenum& format, ALsizei& frequency);
 
     ExtAudioFileRef id() const { return _id; }
 
   private:
     ExtAudioFileRef _id;
-
-    DISALLOW_COPY_AND_ASSIGN(ExtAudioFile);
 };
 
 }  // namespace
 
-AudioFile::AudioFile(const BytesSlice& data) : _data(data) {
+AudioFile::AudioFile(pn::data_view data) : _data(data) {
     OSStatus err = AudioFileOpenWithCallbacks(
             this, read_proc, NULL, get_size_proc, NULL, kAudioFileAIFFType, &_id);
     check_os_err(err, "AudioFileOpenWithCallbacks");
@@ -74,12 +66,12 @@ AudioFile::AudioFile(const BytesSlice& data) : _data(data) {
 
 AudioFile::~AudioFile() { AudioFileClose(_id); }
 
-void AudioFile::convert(Bytes& data, ALenum& format, ALsizei& frequency) const {
+void AudioFile::convert(pn::data_ref data, ALenum& format, ALsizei& frequency) const {
     ExtAudioFile ext(*this);
     ext.convert(data, format, frequency);
 }
 
-void ExtAudioFile::convert(Bytes& data, ALenum& format, ALsizei& frequency) {
+void ExtAudioFile::convert(pn::data_ref data, ALenum& format, ALsizei& frequency) {
     OSStatus err;
 
     // Read in the original file format.
@@ -95,7 +87,7 @@ void ExtAudioFile::convert(Bytes& data, ALenum& format, ALsizei& frequency) {
     } else if (in_format.mChannelsPerFrame == 2) {
         format = AL_FORMAT_STEREO16;
     } else {
-        throw Exception("audio file has more than two channels");
+        throw std::runtime_error("audio file has more than two channels");
     }
 
     // Convert to 16-bit native-endian linear PCM.  Preserve the frequency and channel count

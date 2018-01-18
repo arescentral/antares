@@ -22,17 +22,19 @@
 #include <AudioToolbox/AudioToolbox.h>
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
-#include <sfz/sfz.hpp>
+#include <pn/data>
 
 namespace antares {
 
 class AudioFile {
   public:
-    AudioFile(const sfz::BytesSlice& data);
+    AudioFile(pn::data_view data);
+    AudioFile(const AudioFile&) = delete;
+    AudioFile& operator=(const AudioFile&) = delete;
 
     ~AudioFile();
 
-    void convert(sfz::Bytes& data, ALenum& format, ALsizei& frequency) const;
+    void convert(pn::data_ref data, ALenum& format, ALsizei& frequency) const;
 
     AudioFileID id() const { return _id; }
 
@@ -43,10 +45,8 @@ class AudioFile {
     OSStatus      read(SInt64 in_pos, UInt32 req_count, void* buffer, UInt32* actual_count) const;
     SInt64        get_size() const;
 
-    AudioFileID     _id;
-    sfz::BytesSlice _data;
-
-    DISALLOW_COPY_AND_ASSIGN(AudioFile);
+    AudioFileID   _id;
+    pn::data_view _data;
 };
 
 }  // namespace antares

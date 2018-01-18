@@ -19,11 +19,7 @@
 #include "math/geometry.hpp"
 
 #include <algorithm>
-#include <sfz/sfz.hpp>
-
-using sfz::ReadSource;
-using sfz::format;
-using sfz::read;
+#include <pn/file>
 
 namespace antares {
 
@@ -49,10 +45,7 @@ bool operator==(const Point& lhs, const Point& rhs) {
 
 bool operator!=(const Point& lhs, const Point& rhs) { return !(lhs == rhs); }
 
-void read_from(ReadSource in, Point& p) {
-    read(in, p.h);
-    read(in, p.v);
-}
+bool read_from(pn::file_view in, Point* p) { return in.read(&p->h, &p->v); }
 
 Size::Size() : width(0), height(0) {}
 
@@ -132,15 +125,12 @@ void Rect::enlarge_to(const Rect& r) {
     bottom = std::max(bottom, r.bottom);
 }
 
-void read_from(ReadSource in, Rect& r) {
-    read(in, r.left);
-    read(in, r.top);
-    read(in, r.right);
-    read(in, r.bottom);
+bool read_from(pn::file_view in, Rect* r) {
+    return in.read(&r->left, &r->top, &r->right, &r->bottom);
 }
 
-void print_to(sfz::PrintTarget out, Rect r) {
-    print(out, format("{{{0}, {1}, {2}, {3}}}", r.left, r.top, r.right, r.bottom));
+pn::string stringify(Rect r) {
+    return pn::format("{{{0}, {1}, {2}, {3}}}", r.left, r.top, r.right, r.bottom);
 }
 
 }  // namespace antares

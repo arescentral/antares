@@ -18,15 +18,15 @@
 
 #include "config/gamepad.hpp"
 
+#include <sfz/sfz.hpp>
+
 #include "game/sys.hpp"
 
-using sfz::String;
-using sfz::StringSlice;
 using sfz::range;
 
 namespace antares {
 
-int16_t Gamepad::num(StringSlice name) {
+int16_t Gamepad::num(pn::string_view name) {
     for (auto i : range<int>(BEGIN, END)) {
         if (sys.gamepad_names.at(i) == name) {
             return i;
@@ -35,9 +35,9 @@ int16_t Gamepad::num(StringSlice name) {
     return 0;
 }
 
-bool Gamepad::name(int16_t button, String& out) {
+bool Gamepad::name(int16_t button, pn::string& out) {
     if ((0 <= button) && (button < sys.gamepad_names.size())) {
-        out.assign(sys.gamepad_names.at(button));
+        out = sys.gamepad_names.at(button).copy();
         return true;
     }
     return false;

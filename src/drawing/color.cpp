@@ -19,16 +19,10 @@
 #include "drawing/color.hpp"
 
 #include <stdint.h>
-#include <sfz/sfz.hpp>
+#include <pn/file>
 
 #include "lang/casts.hpp"
 #include "lang/defines.hpp"
-
-using sfz::ReadSource;
-using sfz::WriteTarget;
-using sfz::format;
-using sfz::read;
-using sfz::write;
 
 namespace antares {
 
@@ -135,12 +129,12 @@ RgbColor RgbColor::tint(uint8_t color, uint8_t value) {
 
 const RgbColor& RgbColor::at(uint8_t index) { return kColors[index]; }
 
-void print_to(sfz::PrintTarget out, const RgbColor& color) {
+pn::string stringify(const RgbColor& color) {
     if (color.alpha == 0xff) {
-        print(out, format("rgb({0}, {1}, {2})", color.red, color.green, color.blue));
+        return pn::format("rgb({0}, {1}, {2})", color.red, color.green, color.blue);
     } else {
-        print(out,
-              format("rgba({0}, {1}, {2}, {3})", color.red, color.green, color.blue, color.alpha));
+        return pn::format(
+                "rgba({0}, {1}, {2}, {3})", color.red, color.green, color.blue, color.alpha);
     }
 }
 

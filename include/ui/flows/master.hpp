@@ -19,8 +19,6 @@
 #ifndef ANTARES_UI_FLOWS_MASTER_HPP_
 #define ANTARES_UI_FLOWS_MASTER_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "game/main.hpp"
 #include "ui/card.hpp"
 #include "ui/screens/play-again.hpp"

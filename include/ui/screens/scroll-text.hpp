@@ -19,8 +19,6 @@
 #ifndef ANTARES_UI_SCREENS_SCROLL_TEXT_HPP_
 #define ANTARES_UI_SCREENS_SCROLL_TEXT_HPP_
 
-#include <sfz/sfz.hpp>
-
 #include "drawing/build-pix.hpp"
 #include "math/geometry.hpp"
 #include "math/units.hpp"
@@ -57,8 +55,6 @@ class ScrollTextScreen : public Card {
     wall_time _start;
     wall_time _next_shift;
     int32_t   _position;
-
-    DISALLOW_COPY_AND_ASSIGN(ScrollTextScreen);
 };
 
 }  // namespace antares

@@ -18,6 +18,7 @@
 
 #include "ui/screens/debriefing.hpp"
 
+#include <pn/file>
 #include <sfz/sfz.hpp>
 #include <vector>
 
@@ -35,17 +36,10 @@
 #include "ui/card.hpp"
 #include "video/driver.hpp"
 
-using sfz::Bytes;
-using sfz::Exception;
-using sfz::PrintItem;
-using sfz::String;
 using sfz::dec;
-using sfz::format;
 using std::chrono::duration_cast;
 using std::unique_ptr;
 using std::vector;
-
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -55,13 +49,11 @@ const usecs kTypingDelay      = kMajorTick;
 const int   kScoreTableHeight = 120;
 const int   kTextWidth        = 300;
 
-void string_replace(String* s, const String& in, const PrintItem& out) {
-    size_t index = s->find(in);
-    while (index != String::npos) {
-        String out_string;
-        out.print_to(out_string);
-        s->replace(index, in.size(), out_string);
-        index = s->find(in, index + 1);
+void string_replace(pn::string_ref s, pn::string_view in, pn::string_view out) {
+    size_t index = s.find(in);
+    while (index != s.npos) {
+        s.replace(index, in.size(), out);
+        index = s.find(in, index + 1);
     }
 }
 
@@ -111,7 +103,7 @@ int score(
     return score;
 }
 
-unique_ptr<StyledText> style_score_text(String text) {
+unique_ptr<StyledText> style_score_text(pn::string text) {
     unique_ptr<StyledText> result(new StyledText(sys.fonts.button));
     result->set_fore_color(GetRGBTranslateColorShade(GOLD, VERY_LIGHT));
     result->set_back_color(GetRGBTranslateColorShade(GOLD, DARKEST));
@@ -201,7 +193,10 @@ bool DebriefingScreen::next_timer(wall_time& time) {
 
 void DebriefingScreen::fire_timer() {
     if (_state != TYPING) {
-        throw Exception(format("DebriefingScreen::fire_timer() called but _state is {0}", _state));
+        throw std::runtime_error(pn::format(
+                                         "DebriefingScreen::fire_timer() called but _state is {0}",
+                                         stringify(_state))
+                                         .c_str());
     }
     sys.sound.teletype();
     wall_time now = antares::now();
@@ -219,7 +214,7 @@ void DebriefingScreen::fire_timer() {
 
 LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
     Resource rsrc("text", "txt", text_id);
-    _message.assign(utf8::decode(rsrc.data()));
+    _message = rsrc.string().copy();
 
     int  text_height = GetInterfaceTextHeightFromWidth(_message, kLarge, kTextWidth);
     Rect text_bounds(0, 0, kTextWidth, text_height);
@@ -235,11 +230,11 @@ LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
     return data_item;
 }
 
-String DebriefingScreen::build_score_text(
+pn::string DebriefingScreen::build_score_text(
         game_ticks your_time, game_ticks par_time, int your_loss, int par_loss, int your_kill,
         int par_kill) {
-    Resource rsrc("text", "txt", 6000);
-    String   text(utf8::decode(rsrc.data()));
+    Resource   rsrc("text", "txt", 6000);
+    pn::string text = rsrc.string().copy();
 
     StringList strings(6000);
 
@@ -250,33 +245,34 @@ String DebriefingScreen::build_score_text(
     const int your_score = score(your_time, par_time, your_loss, par_loss, your_kill, par_kill);
     const int par_score  = 100;
 
-    string_replace(&text, strings.at(0), your_mins);
-    string_replace(&text, strings.at(1), dec(your_secs, 2));
+    string_replace(text, strings.at(0), pn::dump(your_mins, pn::dump_short));
+    string_replace(text, strings.at(1), dec(your_secs, 2));
     if (par_time > game_ticks()) {
-        string_replace(&text, strings.at(2), par_mins);
-        String secs_string;
-        print(secs_string, format(":{0}", dec(par_secs, 2)));
-        string_replace(&text, strings.at(3), secs_string);
+        string_replace(text, strings.at(2), pn::dump(par_mins, pn::dump_short));
+        pn::string secs_string;
+        secs_string += ":";
+        secs_string += dec(par_secs, 2);
+        string_replace(text, strings.at(3), secs_string);
     } else {
         StringList data_strings(6002);
-        string_replace(&text, strings.at(2), data_strings.at(8));  // = "N/A"
-        string_replace(&text, strings.at(3), "");
+        string_replace(text, strings.at(2), data_strings.at(8));  // = "N/A"
+        string_replace(text, strings.at(3), "");
     }
-    string_replace(&text, strings.at(4), your_loss);
-    string_replace(&text, strings.at(5), par_loss);
-    string_replace(&text, strings.at(6), your_kill);
-    string_replace(&text, strings.at(7), par_kill);
-    string_replace(&text, strings.at(8), your_score);
-    string_replace(&text, strings.at(9), par_score);
+    string_replace(text, strings.at(4), pn::dump(your_loss, pn::dump_short));
+    string_replace(text, strings.at(5), pn::dump(par_loss, pn::dump_short));
+    string_replace(text, strings.at(6), pn::dump(your_kill, pn::dump_short));
+    string_replace(text, strings.at(7), pn::dump(par_kill, pn::dump_short));
+    string_replace(text, strings.at(8), pn::dump(your_score, pn::dump_short));
+    string_replace(text, strings.at(9), pn::dump(par_score, pn::dump_short));
     return text;
 }
 
-void print_to(sfz::PrintTarget out, DebriefingScreen::State state) {
+const char* stringify(DebriefingScreen::State state) {
     switch (state) {
-        case DebriefingScreen::TYPING: print(out, "TYPING"); return;
-        case DebriefingScreen::DONE: print(out, "DONE"); return;
+        case DebriefingScreen::TYPING: return "TYPING";
+        case DebriefingScreen::DONE: return "DONE";
     }
-    print(out, static_cast<int64_t>(state));
+    return "?";
 }
 
 }  // namespace antares

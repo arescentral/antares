@@ -18,6 +18,7 @@
 
 #include "game/player-ship.hpp"
 
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/gamepad.hpp"
@@ -49,13 +50,6 @@
 #include "math/special.hpp"
 #include "math/units.hpp"
 #include "sound/fx.hpp"
-
-using sfz::Exception;
-using sfz::BytesSlice;
-using sfz::PrintTarget;
-using sfz::String;
-using sfz::StringSlice;
-using sfz::format;
 
 namespace macroman = sfz::macroman;
 
@@ -98,29 +92,20 @@ static ANTARES_GLOBAL int       gHotKeyNum;
 
 static ANTARES_GLOBAL ZoomType gPreviousZoomMode;
 
-struct HotKeySuffix {
-    Handle<SpaceObject> space_object;
-};
-
-void print_to(PrintTarget out, const HotKeySuffix& suffix) {
-    int h = HotKey_GetFromObject(suffix.space_object);
+pn::string hot_key_suffix(Handle<SpaceObject> space_object) {
+    int h = HotKey_GetFromObject(space_object);
     if (h < 0) {
-        return;
+        return "";
     }
 
     int keyNum = sys.prefs->key(h + kFirstHotKeyNum);
     if (keyNum < 0) {
-        return;
+        return "";
     }
 
-    StringList  strings(KEY_LONG_NAMES);
-    StringSlice key_name = strings.at(keyNum - 1);
-    print(out, format(" < {0} >", key_name));
-};
-
-HotKeySuffix hot_key_suffix(Handle<SpaceObject> space_object) {
-    HotKeySuffix result = {space_object};
-    return result;
+    StringList      strings(KEY_LONG_NAMES);
+    pn::string_view key_name = strings.at(keyNum - 1);
+    return pn::format(" < {0} >", key_name);
 };
 
 }  // namespace
@@ -176,8 +161,8 @@ static void zoom_to(ZoomType zoom) {
     if (g.zoom != zoom) {
         g.zoom = zoom;
         sys.sound.click();
-        StringList  strings(kMessageStringID);
-        StringSlice string = strings.at(g.zoom + kZoomStringOffset - 1);
+        StringList      strings(kMessageStringID);
+        pn::string_view string = strings.at(g.zoom + kZoomStringOffset - 1);
         Messages::set_status(string, kStatusLabelColor);
     }
 }
@@ -592,7 +577,7 @@ void PlayerShip::update(bool enter_message) {
                         uint8_t ch = GetAsciiFromKeyMap(*bufMap, globals()->gLastMessageKeyMap);
                         if (ch) {
                             message->resize(message->size() - 1);
-                            String s(macroman::decode(BytesSlice(&ch, 1)));
+                            String s(macroman::decode(sfz::BytesSlice(&ch, 1)));
                             message->append(s);
                             message->append(1, '>');
                         }
@@ -832,13 +817,13 @@ void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> 
         if (ship == g.ship) {
             label->set_age(Label::kVisibleTime);
         }
-        String string;
+        pn::string string;
         if (ship->attributes & kIsDestination) {
-            string.assign(GetDestBalanceName(ship->asDestination));
+            string = GetDestBalanceName(ship->asDestination).copy();
         } else {
-            string.assign(get_object_name(ship->base));
+            string = get_object_name(ship->base).copy();
         }
-        print(string, hot_key_suffix(ship));
+        string += hot_key_suffix(ship);
         label->set_string(string);
     }
 }
@@ -850,7 +835,8 @@ void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> 
 void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
     auto flagship = adm->flagship();
     if (!flagship.get()) {
-        throw Exception(format("adm: {0}, newShip: {1}", adm.number(), newShip.number()));
+        throw std::runtime_error(
+                pn::format("adm: {0}, newShip: {1}", adm.number(), newShip.number()).c_str());
     }
 
     if (adm == g.admiral) {
@@ -862,9 +848,10 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
 
         flagship = g.ship;
         if (!flagship.get()) {
-            throw Exception(
-                    format("adm: {0}, newShip: {1}, gPlayerShip: {2}", adm.number(),
-                           newShip.number(), g.ship.number()));
+            throw std::runtime_error(pn::format(
+                                             "adm: {0}, newShip: {1}, gPlayerShip: {2}",
+                                             adm.number(), newShip.number(), g.ship.number())
+                                             .c_str());
         }
 
         flagship->attributes |= kIsHumanControlled | kIsPlayerShip;
@@ -887,16 +874,16 @@ void TogglePlayerAutoPilot(Handle<SpaceObject> flagship) {
     if (flagship->attributes & kOnAutoPilot) {
         flagship->attributes &= ~kOnAutoPilot;
         if ((flagship->owner == g.admiral) && (flagship->attributes & kIsHumanControlled)) {
-            StringList  strings(kMessageStringID);
-            StringSlice string = strings.at(kAutoPilotOffString - 1);
+            StringList      strings(kMessageStringID);
+            pn::string_view string = strings.at(kAutoPilotOffString - 1);
             Messages::set_status(string, kStatusLabelColor);
         }
     } else {
         SetObjectDestination(flagship);
         flagship->attributes |= kOnAutoPilot;
         if ((flagship->owner == g.admiral) && (flagship->attributes & kIsHumanControlled)) {
-            StringList  strings(kMessageStringID);
-            StringSlice string = strings.at(kAutoPilotOnString - 1);
+            StringList      strings(kMessageStringID);
+            pn::string_view string = strings.at(kAutoPilotOnString - 1);
             Messages::set_status(string, kStatusLabelColor);
         }
     }
@@ -975,12 +962,12 @@ void Update_LabelStrings_ForHotKeyChange(void) {
             g.target_label->set_age(Label::kVisibleTime);
         }
         if (target->attributes & kIsDestination) {
-            String string(GetDestBalanceName(target->asDestination));
-            print(string, hot_key_suffix(target));
+            pn::string string = GetDestBalanceName(target->asDestination).copy();
+            string += hot_key_suffix(target);
             g.target_label->set_string(string);
         } else {
-            String string(get_object_name(target->base));
-            print(string, hot_key_suffix(target));
+            pn::string string = get_object_name(target->base).copy();
+            string += hot_key_suffix(target);
             g.target_label->set_string(string);
         }
     }
@@ -993,12 +980,12 @@ void Update_LabelStrings_ForHotKeyChange(void) {
         }
         sys.sound.select();
         if (control->attributes & kIsDestination) {
-            String string(GetDestBalanceName(control->asDestination));
-            print(string, hot_key_suffix(control));
+            pn::string string = GetDestBalanceName(control->asDestination).copy();
+            string += hot_key_suffix(control);
             g.control_label->set_string(string);
         } else {
-            String string(get_object_name(control->base));
-            print(string, hot_key_suffix(control));
+            pn::string string = get_object_name(control->base).copy();
+            string += hot_key_suffix(control);
             g.control_label->set_string(string);
         }
     }

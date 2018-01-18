@@ -18,15 +18,13 @@
 
 #include "data/plugin.hpp"
 
+#include <pn/file>
+
 #include "data/base-object.hpp"
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
 #include "lang/defines.hpp"
 
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::StringSlice;
-using sfz::format;
 using sfz::range;
 using std::vector;
 
@@ -41,26 +39,32 @@ static const int16_t kPackedResID = 500;
 ANTARES_GLOBAL ScenarioGlobals plug;
 
 template <typename T>
-static void read_all(StringSlice name, StringSlice type, StringSlice extension, vector<T>& v) {
-    Resource   rsrc(type, extension, kPackedResID);
-    BytesSlice in(rsrc.data());
-    size_t     count = rsrc.data().size() / T::byte_size;
+static void read_all(
+        pn::string_view name, pn::string_view type, pn::string_view extension, vector<T>& v) {
+    Resource rsrc(type, extension, kPackedResID);
+    size_t   count = rsrc.data().size() / T::byte_size;
     v.resize(count);
+    pn::file in = rsrc.data().open();
     for (size_t i = 0; i < count; ++i) {
-        read(in, v[i]);
+        if (!read_from(in, &v[i])) {
+            throw std::runtime_error(pn::format("error while reading {0} data", name).c_str());
+        }
     }
-    if (!in.empty()) {
-        throw Exception(format("didn't consume all of {0} data", name));
+
+    if (fgetc(in.c_obj()) != EOF) {
+        throw std::runtime_error(pn::format("incorrectly-sized {0} data", name).c_str());
     }
 }
 
 void PluginInit() {
     {
-        Resource   rsrc("scenario-info", "nlAG", 128);
-        BytesSlice in(rsrc.data());
-        read(in, plug.meta);
-        if (!in.empty()) {
-            throw Exception("didn't consume all of scenario file info data");
+        Resource rsrc("scenario-info", "nlAG", 128);
+        pn::file in = rsrc.data().open();
+        if (!read_from(in, &plug.meta)) {
+            throw std::runtime_error("error while reading scenario file info data");
+        }
+        if (fgetc(in.c_obj()) != EOF) {
+            throw std::runtime_error("didn't consume all of scenario file info data");
         }
     }
 
@@ -74,7 +78,7 @@ void PluginInit() {
 
     StringList level_names(kLevelNameID);
     for (auto& level : plug.levels) {
-        level.name.assign(level_names.at(level.levelNameStrNum - 1));
+        level.name = level_names.at(level.levelNameStrNum - 1).copy();
     }
     for (int i : range(plug.levels.size())) {
         while (i != plug.levels[i].levelNameStrNum - 1) {
@@ -86,8 +90,8 @@ void PluginInit() {
     StringList object_names(kSpaceObjectNameResID);
     StringList object_short_names(kSpaceObjectShortNameResID);
     for (size_t i = 0; i < plug.objects.size(); ++i) {
-        plug.objects[i].name.assign(object_names.at(i));
-        plug.objects[i].short_name.assign(object_short_names.at(i));
+        plug.objects[i].name       = object_names.at(i).copy();
+        plug.objects[i].short_name = object_short_names.at(i).copy();
     }
 }
 

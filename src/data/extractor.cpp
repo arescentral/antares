@@ -21,6 +21,9 @@
 #include <fcntl.h>
 #include <math.h>
 #include <stdint.h>
+#include <pn/array>
+#include <pn/file>
+#include <pn/string>
 #include <rezin/rezin.hpp>
 #include <set>
 #include <sfz/sfz.hpp>
@@ -40,25 +43,13 @@ using rezin::ResourceType;
 using rezin::Sound;
 using rezin::StringList;
 using rezin::aiff;
-using sfz::Bytes;
-using sfz::BytesSlice;
-using sfz::Exception;
-using sfz::Json;
-using sfz::MappedFile;
-using sfz::ScopedFd;
-using sfz::Sha1;
-using sfz::String;
 using sfz::StringMap;
-using sfz::StringSlice;
-using sfz::WriteTarget;
 using sfz::dec;
-using sfz::format;
 using sfz::makedirs;
-using sfz::quote;
+using sfz::mapped_file;
 using sfz::range;
-using sfz::read;
-using sfz::tree_digest;
-using sfz::write;
+using sfz::rmtree;
+using sfz::sha1;
 using std::set;
 using std::unique_ptr;
 using std::vector;
@@ -66,14 +57,13 @@ using zipxx::ZipArchive;
 using zipxx::ZipFileReader;
 
 namespace path = sfz::path;
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 
 namespace {
 
-bool verbatim(StringSlice, bool, int16_t, BytesSlice data, WriteTarget out) {
-    write(out, data);
+bool verbatim(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
+    out.write(data);
     return true;
 }
 
@@ -89,21 +79,30 @@ int32_t nlrp_chapter(int16_t id) {
         case WHILE_THE_IRON_IS_HOT: return 6;
         case SPACE_RACE_THE_MUSICAL: return 26;
     };
-    throw Exception(format("invalid replay ID {0}", id));
+    throw std::runtime_error(pn::format("invalid replay ID {0}", id).c_str());
 }
 
-bool convert_nlrp(StringSlice, bool, int16_t id, BytesSlice data, WriteTarget out) {
+bool convert_nlrp(pn::string_view, bool, int16_t id, pn::data_view data, pn::file_view out) {
+    pn::file   in = data.open();
     ReplayData replay;
-    replay.scenario.identifier.assign(kFactoryScenarioIdentifier);
-    replay.scenario.version.assign("1.1.1");
-    replay.chapter_id = nlrp_chapter(id);
-    read(data, replay.global_seed);
+    replay.scenario.identifier = kFactoryScenarioIdentifier;
+    replay.scenario.version    = "1.1.1";
+    replay.chapter_id          = nlrp_chapter(id);
+    if (!in.read(&replay.global_seed)) {
+        return false;
+    }
 
     uint32_t keys = 0;
     uint32_t at   = 0;
-    while (!data.empty()) {
-        const uint32_t ticks     = read<uint32_t>(data) + 1;
-        const uint32_t new_keys  = read<uint32_t>(data);
+    while (true) {
+        uint32_t ticks_minus_one, new_keys;
+        if (!in.read(&ticks_minus_one, &new_keys)) {
+            if (in.error()) {
+                return false;
+            }
+            break;
+        }
+        const uint32_t ticks     = ticks_minus_one + 1;
         const uint32_t keys_down = new_keys & ~keys;
         const uint32_t keys_up   = keys & ~new_keys;
 
@@ -121,48 +120,55 @@ bool convert_nlrp(StringSlice, bool, int16_t id, BytesSlice data, WriteTarget ou
     }
     replay.duration = at;
 
-    write(out, replay);
+    replay.write_to(out);
     return true;
 }
 
-bool convert_pict(StringSlice, bool, int16_t, BytesSlice data, WriteTarget out) {
+bool convert_pict(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
     rezin::Picture pict(data);
     if ((pict.version() == 2) && (pict.is_raster())) {
-        write(out, png(pict));
+        out.write(png(pict));
         return true;
     }
     return false;
 }
 
-bool convert_str(StringSlice, bool, int16_t, BytesSlice data, WriteTarget out) {
+static pn::array pn_str(const StringList& str_list) {
+    pn::array a;
+    for (pn::string_view s : str_list.strings) {
+        a.push_back(s.copy());
+    }
+    return a;
+}
+
+bool convert_str(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
     Options    options;
     StringList list(data, options);
-    String     string(pretty_print(json(list)));
-    write(out, utf8::encode(string));
+    pn::dump(out, pn::value{pn_str(list)});
     return true;
 }
 
-bool convert_text(StringSlice, bool, int16_t, BytesSlice data, WriteTarget out) {
+bool convert_text(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
     Options options;
-    String  string(options.decode(data));
-    write(out, utf8::encode(string));
+    out.write(options.decode(data));
     return true;
 }
 
-bool convert_snd(StringSlice, bool, int16_t, BytesSlice data, WriteTarget out) {
+bool convert_snd(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
     Sound snd(data);
-    write(out, aiff(snd));
+    out.write(aiff(snd));
     return true;
 }
 
-void convert_frame(StringSlice dir, int16_t id, BytesSlice data, PixMap::View pix) {
+void convert_frame(pn::string_view dir, int16_t id, pn::data_view data, PixMap::View pix) {
     auto width  = pix.size().width;
     auto height = pix.size().height;
 
     pix.fill(RgbColor::clear());
+    size_t i = 0;
     for (auto y : range(height)) {
         for (auto x : range(width)) {
-            uint8_t byte = read<uint8_t>(data);
+            uint8_t byte = data[i++];
             if (byte) {
                 pix.set(x, y, RgbColor::at(byte));
             }
@@ -170,7 +176,7 @@ void convert_frame(StringSlice dir, int16_t id, BytesSlice data, PixMap::View pi
     }
 }
 
-void convert_overlay(StringSlice dir, int16_t id, BytesSlice data, PixMap::View pix) {
+void convert_overlay(pn::string_view dir, int16_t id, pn::data_view data, PixMap::View pix) {
     auto width  = pix.size().width;
     auto height = pix.size().height;
 
@@ -189,10 +195,11 @@ void convert_overlay(StringSlice dir, int16_t id, BytesSlice data, PixMap::View 
     // 'white' band of the color table, then colorize all opaque
     // (non-0x00) pixels.  Otherwise, only colors pixels which are
     // opaque and outside of the white band (0x01..0x0F).
+    int           i          = 0;
     const uint8_t color_mask = (white_count > (pixel_count / 3)) ? 0xFF : 0xF0;
     for (auto y : range(height)) {
         for (auto x : range(width)) {
-            uint8_t byte = read<uint8_t>(data);
+            uint8_t byte = data[i++];
             if (byte & color_mask) {
                 byte          = (byte & 0x0f) | 0x10;
                 uint8_t value = RgbColor::at(byte).red;
@@ -204,20 +211,20 @@ void convert_overlay(StringSlice dir, int16_t id, BytesSlice data, PixMap::View 
     }
 }
 
-static Json json(const Rect& r) {
-    StringMap<Json> json;
-    json["left"]   = Json::number(r.left);
-    json["top"]    = Json::number(r.top);
-    json["right"]  = Json::number(r.right);
-    json["bottom"] = Json::number(r.bottom);
-    return Json::object(json);
+static pn::map pn_rect(const Rect& r) {
+    pn::map x;
+    x["left"]   = r.left;
+    x["top"]    = r.top;
+    x["right"]  = r.right;
+    x["bottom"] = r.bottom;
+    return x;
 }
 
-static Json json(const Point& p) {
-    StringMap<Json> json;
-    json["x"] = Json::number(p.h);
-    json["y"] = Json::number(p.v);
-    return Json::object(json);
+static pn::map pn_point(const Point& p) {
+    pn::map x;
+    x["x"] = p.h;
+    x["y"] = p.v;
+    return x;
 }
 
 void alphatize(ArrayPixMap& image) {
@@ -254,29 +261,34 @@ void alphatize(ArrayPixMap& image) {
     }
 }
 
-bool convert_smiv(StringSlice dir, bool factory, int16_t id, BytesSlice data, WriteTarget out) {
-    BytesSlice header = data;
-    header.shift(4);
-    uint32_t         size = read<uint32_t>(header);
+bool convert_smiv(
+        pn::string_view dir, bool factory, int16_t id, pn::data_view data, pn::file_view out) {
+    pn::file header = data.slice(4).open();
+    uint32_t size;
+    if (!header.read(&size)) {
+        return false;
+    }
     vector<uint32_t> offsets;
     vector<Rect>     bounds;
 
-    StringMap<Json> object;
-    vector<Json>    frames;
+    pn::array frames;
     for (auto i : range(size)) {
         static_cast<void>(i);
-        uint32_t   offset     = read<uint32_t>(header);
-        BytesSlice frame_data = data.slice(offset);
-        auto       width      = read<uint16_t>(frame_data);
-        auto       height     = read<uint16_t>(frame_data);
-        auto       x_offset   = -read<int16_t>(frame_data);
-        auto       y_offset   = -read<int16_t>(frame_data);
+        uint32_t offset;
+        if (!header.read(&offset)) {
+            return false;
+        }
+        pn::file frame_data = data.slice(offset).open();
+        uint16_t width, height;
+        int16_t  x_offset, y_offset;
+        if (!frame_data.read(&width, &height, &x_offset, &y_offset)) {
+            return false;
+        }
         offsets.push_back(offset);
-        bounds.emplace_back(Point(x_offset, y_offset), Size(width, height));
+        bounds.emplace_back(Point(-x_offset, -y_offset), Size(width, height));
 
-        frames.push_back(json(bounds.back()));
+        frames.push_back(pn_rect(bounds.back()));
     }
-    object["frames"] = Json::array(frames);
 
     Rect max_bounds = bounds[0];
     for (const auto& rect : bounds) {
@@ -285,7 +297,6 @@ bool convert_smiv(StringSlice dir, bool factory, int16_t id, BytesSlice data, Wr
         max_bounds.right  = std::max(max_bounds.right, rect.right);
         max_bounds.bottom = std::max(max_bounds.bottom, rect.bottom);
     }
-    object["center"] = json(Point(-max_bounds.left, -max_bounds.top));
 
     // Do our best to find a square layout of all the frames.  In the
     // event of a prime number of frames, we'll end up with one row and
@@ -300,8 +311,6 @@ bool convert_smiv(StringSlice dir, bool factory, int16_t id, BytesSlice data, Wr
             --rows;
         }
     }
-    object["rows"] = Json::number(rows);
-    object["cols"] = Json::number(cols);
 
     ArrayPixMap image(max_bounds.width() * cols, max_bounds.height() * rows);
     ArrayPixMap overlay(max_bounds.width() * cols, max_bounds.height() * rows);
@@ -311,8 +320,8 @@ bool convert_smiv(StringSlice dir, bool factory, int16_t id, BytesSlice data, Wr
         int col = i % cols;
         int row = i / cols;
 
-        StringMap<Json> frame;
-        BytesSlice      frame_data = data.slice(offsets[i]);
+        pn::map       frame;
+        pn::data_view frame_data = data.slice(offsets[i]);
         frame_data.shift(8);
         Rect r = bounds[i];
         r.offset(max_bounds.width() * col, max_bounds.height() * row);
@@ -330,25 +339,26 @@ bool convert_smiv(StringSlice dir, bool factory, int16_t id, BytesSlice data, Wr
         alphatize(image);
     }
 
-    String sprite_dir(format("{0}/{1}", dir, id));
+    pn::string sprite_dir = pn::format("{0}/{1}", dir, id);
     makedirs(sprite_dir, 0755);
 
     {
-        String   output(format("{0}/{1}/image.png", dir, id));
-        ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-        write(fd, Bytes(image));
-        object["image"] = Json::string(format("sprites/{0}/image.png", id));
+        pn::file file = pn::open(pn::format("{0}/{1}/image.png", dir, id), "w");
+        image.encode(file);
     }
 
     {
-        String   output(format("{0}/{1}/overlay.png", dir, id));
-        ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-        write(fd, Bytes(overlay));
-        object["overlay"] = Json::string(format("sprites/{0}/overlay.png", id));
+        pn::file file = pn::open(pn::format("{0}/{1}/overlay.png", dir, id), "w");
+        overlay.encode(file);
     }
 
-    String string(pretty_print(Json::object(object)));
-    write(out, utf8::encode(string));
+    pn::dump(
+            out, pn::map{{"image", pn::format("sprites/{0}/image.png", id)},
+                         {"overlay", pn::format("sprites/{0}/overlay.png", id)},
+                         {"rows", rows},
+                         {"cols", cols},
+                         {"center", pn_point(Point(-max_bounds.left, -max_bounds.top))},
+                         {"frames", std::move(frames)}});
     return true;
 }
 
@@ -359,7 +369,8 @@ struct ResourceFile {
         const char* output_directory;
         const char* output_extension;
         bool (*convert)(
-                StringSlice dir, bool factory, int16_t id, BytesSlice data, WriteTarget out);
+                pn::string_view dir, bool factory, int16_t id, pn::data_view data,
+                pn::file_view out);
     } resources[16];
 };
 
@@ -368,7 +379,7 @@ static const ResourceFile kResourceFiles[] = {
                 "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Scenarios",
                 {
                         {"PICT", "pictures", "png", convert_pict},
-                        {"STR#", "strings", "json", convert_str},
+                        {"STR#", "strings", "pn", convert_str},
                         {"TEXT", "text", "txt", convert_text},
                         {"bsob", "objects", "bsob", verbatim},
                         {"nlAG", "scenario-info", "nlAG", verbatim},
@@ -389,7 +400,7 @@ static const ResourceFile kResourceFiles[] = {
         {
                 "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Sprites",
                 {
-                        {"SMIV", "sprites", "json", convert_smiv},
+                        {"SMIV", "sprites", "pn", convert_smiv},
                 },
         },
         {
@@ -403,8 +414,8 @@ static const ResourceFile kResourceFiles[] = {
 static const ResourceFile::ExtractedResource kPluginFiles[] = {
         {"PICT", "pictures", "png", convert_pict},
         {"NLRP", "replays", "NLRP", convert_nlrp},
-        {"SMIV", "sprites", "json", convert_smiv},
-        {"STR#", "strings", "json", convert_str},
+        {"SMIV", "sprites", "pn", convert_smiv},
+        {"STR#", "strings", "pn", convert_str},
         {"TEXT", "text", "txt", convert_text},
         {"bsob", "objects", "bsob", verbatim},
         {"nlAG", "scenario-info", "nlAG", verbatim},
@@ -418,34 +429,43 @@ static const ResourceFile::ExtractedResource kPluginFiles[] = {
 };
 
 static const char kDownloadBase[] = "http://downloads.arescentral.org";
-static const char kVersion[]      = "14\n";
+static const char kVersion[]      = "16\n";
 
 static const char kPluginVersionFile[]    = "data/version";
 static const char kPluginVersion[]        = "1\n";
 static const char kPluginIdentifierFile[] = "data/identifier";
 
-void check_version(ZipArchive& archive, StringSlice expected) {
+void check_version(ZipArchive& archive, pn::string_view expected) {
     ZipFileReader version_file(archive, kPluginVersionFile);
-    String        actual(utf8::decode(version_file.data()));
+    pn::string    actual{reinterpret_cast<const char*>(version_file.data().data()),
+                      static_cast<int>(version_file.data().size())};
     if (actual != expected) {
-        throw Exception(format("unsupported plugin version {0}", quote(actual)));
+        throw std::runtime_error(
+                pn::format("unsupported plugin version {0}", pn::dump(actual, pn::dump_short))
+                        .c_str());
     }
 }
 
-void read_identifier(ZipArchive& archive, String& out) {
+void read_identifier(ZipArchive& archive, pn::string& out) {
     ZipFileReader identifier_file(archive, kPluginIdentifierFile);
-    String        actual(utf8::decode(identifier_file.data()));
-    if (actual.at(actual.size() - 1) != '\n') {
-        throw Exception(format("missing newline in plugin identifier {0}", quote(actual)));
+    pn::string    actual{reinterpret_cast<const char*>(identifier_file.data().data()),
+                      static_cast<int>(identifier_file.data().size())};
+    if (actual.data()[actual.size() - 1] != '\n') {
+        throw std::runtime_error(pn::format(
+                                         "missing newline in plugin identifier {0}",
+                                         pn::dump(actual, pn::dump_short))
+                                         .c_str());
     }
-    out.assign(actual.slice(0, actual.size() - 1));
+    out = actual.substr(0, actual.size() - 1).copy();
 }
 
-void check_identifier(ZipArchive& archive, StringSlice expected) {
-    String actual;
+void check_identifier(ZipArchive& archive, pn::string_view expected) {
+    pn::string actual;
     read_identifier(archive, actual);
     if (expected != actual) {
-        throw Exception(format("mismatch in plugin identifier {0}", quote(actual)));
+        throw std::runtime_error(
+                pn::format("mismatch in plugin identifier {0}", pn::dump(actual, pn::dump_short))
+                        .c_str());
     }
 }
 
@@ -453,15 +473,15 @@ void check_identifier(ZipArchive& archive, StringSlice expected) {
 
 DataExtractor::Observer::~Observer() {}
 
-DataExtractor::DataExtractor(const StringSlice& downloads_dir, const StringSlice& output_dir)
-        : _downloads_dir(downloads_dir),
-          _output_dir(output_dir),
+DataExtractor::DataExtractor(pn::string_view downloads_dir, pn::string_view output_dir)
+        : _downloads_dir(downloads_dir.copy()),
+          _output_dir(output_dir.copy()),
           _scenario(kFactoryScenarioIdentifier) {}
 
-void DataExtractor::set_scenario(sfz::StringSlice scenario) { _scenario.assign(scenario); }
+void DataExtractor::set_scenario(pn::string_view scenario) { _scenario = scenario.copy(); }
 
-void DataExtractor::set_plugin_file(StringSlice path) {
-    String found_scenario;
+void DataExtractor::set_plugin_file(pn::string_view path) {
+    pn::string found_scenario;
     {
         // Make sure that the provided file is actually an archive that
         // will be usable as a plugin, then get its identifier.
@@ -472,19 +492,19 @@ void DataExtractor::set_plugin_file(StringSlice path) {
 
     // Copy it to $DOWNLOADS/$IDENTIFIER.antaresplugin.  This is where
     // extract_scenario() will expect it later.
-    String out_path(format("{0}/{1}.antaresplugin", _downloads_dir, found_scenario));
+    pn::string out_path = pn::format("{0}/{1}.antaresplugin", _downloads_dir, found_scenario);
     if (path != out_path) {
         makedirs(path::dirname(out_path), 0755);
-        MappedFile file(path);
-        ScopedFd   fd(open(out_path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-        write(fd, file.data());
+        mapped_file file(path);
+        pn::file    f = pn::open(out_path, "w");
+        f.write(file.data());
     }
-    String scenario_dir(format("{0}/{1}", _output_dir, found_scenario));
+    pn::string scenario_dir = pn::format("{0}/{1}", _output_dir, found_scenario);
     if (path::exists(scenario_dir)) {
         rmtree(scenario_dir);
     }
 
-    swap(_scenario, found_scenario);
+    std::swap(_scenario, found_scenario);
 }
 
 bool DataExtractor::current() const {
@@ -500,9 +520,9 @@ void DataExtractor::extract_factory_scenario(Observer* observer) const {
     if (!scenario_current(kFactoryScenarioIdentifier)) {
         download(
                 observer, kDownloadBase, "Ares", "1.2.0",
-                (Sha1::Digest){{0x246c393c, 0xa598af68, 0xa58cfdd1, 0x8e1601c1, 0xf4f30931}});
+                {0x246c393c, 0xa598af68, 0xa58cfdd1, 0x8e1601c1, 0xf4f30931});
 
-        String scenario_dir(format("{0}/{1}", _output_dir, kFactoryScenarioIdentifier));
+        pn::string scenario_dir = pn::format("{0}/{1}", _output_dir, kFactoryScenarioIdentifier);
         rmtree(scenario_dir);
         extract_original(observer, "Ares-1.2.0.zip");
         write_version(kFactoryScenarioIdentifier);
@@ -511,87 +531,88 @@ void DataExtractor::extract_factory_scenario(Observer* observer) const {
 
 void DataExtractor::extract_plugin_scenario(Observer* observer) const {
     if ((_scenario != kFactoryScenarioIdentifier) && !scenario_current(_scenario)) {
-        String scenario_dir(format("{0}/{1}", _output_dir, _scenario));
+        pn::string scenario_dir = pn::format("{0}/{1}", _output_dir, _scenario);
         rmtree(scenario_dir);
         extract_plugin(observer);
         write_version(_scenario);
     }
 }
 
-bool DataExtractor::scenario_current(sfz::StringSlice scenario) const {
-    String     path(format("{0}/{1}/version", _output_dir, scenario));
-    BytesSlice version(kVersion);
+bool DataExtractor::scenario_current(pn::string_view scenario) const {
+    pn::string    path    = pn::format("{0}/{1}/version", _output_dir, scenario);
+    pn::data_view version = pn::string{kVersion}.as_data();
     try {
-        MappedFile file(path);
+        mapped_file file(path);
         return file.data() == version;
-    } catch (Exception& e) {
+    } catch (std::exception& e) {
         return false;
     }
 }
 
 void DataExtractor::download(
-        Observer* observer, const StringSlice& base, const StringSlice& name,
-        const StringSlice& version, const Sha1::Digest& expected_digest) const {
-    String full_path(format("{0}/{1}-{2}.zip", _downloads_dir, name, version));
+        Observer* observer, pn::string_view base, pn::string_view name, pn::string_view version,
+        const sha1::digest& expected_digest) const {
+    pn::string full_path = pn::format("{0}/{1}-{2}.zip", _downloads_dir, name, version);
 
     // Don't download `file` if it has already been downloaded.  If there is a regular file at
     // `full_path` and it has the expected digest, then return without doing anything.  Otherwise,
     // delete whatever's there (if anything).
     if (path::exists(full_path)) {
         if (path::isfile(full_path)) {
-            MappedFile file(full_path);
-            Sha1       sha;
-            write(sha, file.data());
-            if (sha.digest() == expected_digest) {
+            mapped_file file(full_path);
+            sha1        sha;
+            sha.write(file.data());
+            if (sha.compute() == expected_digest) {
                 return;
             }
         }
         rmtree(full_path);
     }
 
-    String url(format("{0}/{1}/{1}-{2}.zip", base, name, version));
+    pn::string url = pn::format("{0}/{1}/{1}-{2}.zip", base, name, version);
 
-    String status(format("Downloading {0}-{1}.zip...", name, version));
+    pn::string status = pn::format("Downloading {0}-{1}.zip...", name, version);
     observer->status(status);
 
     // Download the file from `url`.  Check its digest when it has been downloaded; if it is not
     // the right file, then throw an exception without writing it to disk.  Otherwise, write it to
     // disk.
-    Bytes download;
-    http::get(url, download);
-    Sha1 sha;
-    write(sha, download);
-    if (sha.digest() != expected_digest) {
-        throw Exception(
-                format("Downloaded {0}, size={1} but it didn't have the right digest.", quote(url),
-                       download.size()));
+    pn::data download;
+    http::get(url, download.open("w"));
+    sha1 sha;
+    sha.write(download);
+    if (sha.compute() != expected_digest) {
+        throw std::runtime_error(
+                pn::format(
+                        "Downloaded {0}, size={1} but it didn't have the right digest.",
+                        pn::dump(url, pn::dump_short), download.size())
+                        .c_str());
     }
 
     // If we got the file, write it out at `full_path`.
     makedirs(path::dirname(full_path), 0755);
-    ScopedFd fd(open(full_path, O_WRONLY | O_CREAT | O_EXCL, 0644));
-    write(fd, download.data(), download.size());
+    pn::file file = pn::open(full_path, "w");
+    file.write(download);
 }
 
-void DataExtractor::write_version(sfz::StringSlice scenario_identifier) const {
-    String path(format("{0}/{1}/version", _output_dir, scenario_identifier));
+void DataExtractor::write_version(pn::string_view scenario_identifier) const {
+    pn::string path = pn::format("{0}/{1}/version", _output_dir, scenario_identifier);
     makedirs(path::dirname(path), 0755);
-    ScopedFd   fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-    BytesSlice version(kVersion);
-    write(fd, version);
+    pn::file file = pn::open(path, "w");
+    file.write(kVersion);
 }
 
-void DataExtractor::extract_original(Observer* observer, const StringSlice& file) const {
-    String status(format("Extracting {0}...", file));
+void DataExtractor::extract_original(Observer* observer, pn::string_view file) const {
+    pn::string status = pn::format("Extracting {0}...", file);
     observer->status(status);
-    String     full_path(format("{0}/{1}", _downloads_dir, file));
+    pn::string full_path = pn::format("{0}/{1}", _downloads_dir, file);
     ZipArchive archive(full_path, 0);
 
     rezin::Options options;
     options.line_ending = rezin::Options::CR;
 
     for (const ResourceFile& resource_file : kResourceFiles) {
-        String        path(utf8::decode(resource_file.path));
+        pn::string    path = resource_file.path;
         ZipFileReader file(archive, path);
         AppleDouble   apple_double(file.data());
         ResourceFork  rsrc(apple_double.at(AppleDouble::RESOURCE_FORK), options);
@@ -603,15 +624,16 @@ void DataExtractor::extract_original(Observer* observer, const StringSlice& file
 
             const ResourceType& type = rsrc.at(conversion.resource);
             for (const ResourceEntry& entry : type) {
-                Bytes  data;
-                String output(format(
+                pn::data   data;
+                pn::string output = pn::format(
                         "{0}/{1}/{2}/{3}.{4}", _output_dir, kFactoryScenarioIdentifier,
-                        conversion.output_directory, entry.id(), conversion.output_extension));
+                        conversion.output_directory, entry.id(), conversion.output_extension);
                 if (conversion.convert(
-                            path::dirname(output), true, entry.id(), entry.data(), data)) {
+                            path::dirname(output), true, entry.id(), entry.data(),
+                            data.open("w"))) {
                     makedirs(path::dirname(output), 0755);
-                    ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-                    write(fd, data.data(), data.size());
+                    pn::file file = pn::open(output, "w");
+                    file.write(data);
                 }
             }
         }
@@ -619,10 +641,10 @@ void DataExtractor::extract_original(Observer* observer, const StringSlice& file
 }
 
 void DataExtractor::extract_plugin(Observer* observer) const {
-    String file(format("{0}.antaresplugin", _scenario));
-    String status(format("Extracting {0}...", file));
+    pn::string file   = pn::format("{0}.antaresplugin", _scenario);
+    pn::string status = pn::format("Extracting {0}...", file);
     observer->status(status);
-    String     full_path(format("{0}/{1}", _downloads_dir, file));
+    pn::string full_path = pn::format("{0}/{1}", _downloads_dir, file);
     ZipArchive archive(full_path, 0);
 
     rezin::Options options;
@@ -632,8 +654,8 @@ void DataExtractor::extract_plugin(Observer* observer) const {
     check_identifier(archive, _scenario);
 
     for (size_t i : range(archive.size())) {
-        ZipFileReader file(archive, i);
-        StringSlice   path = file.path();
+        ZipFileReader   file(archive, i);
+        pn::string_view path = file.path();
 
         // Skip directories and special files.
         if ((path.rfind("/") == (path.size() - 1)) || (path == kPluginIdentifierFile) ||
@@ -642,37 +664,43 @@ void DataExtractor::extract_plugin(Observer* observer) const {
         }
 
         // Parse path into "data/$TYPE/$ID etc.".
-        StringSlice data;
-        StringSlice resource_type_slice;
-        StringSlice id_slice;
-        int16_t     id;
-        if (!partition(data, "/", path) || (data != "data") ||
-            !partition(resource_type_slice, "/", path) || !partition(id_slice, " ", path) ||
-            !string_to_int(id_slice, id) || (path.find('/') != StringSlice::npos)) {
-            throw Exception(format("bad plugin file {0}", quote(file.path())));
+        pn::string_view data;
+        pn::string_view resource_type_slice;
+        pn::string_view id_slice;
+        int64_t         id;
+        if (!pn::partition(data, "/", path) || (data != "data") ||
+            !pn::partition(resource_type_slice, "/", path) ||
+            !pn::partition(id_slice, " ", path) || !pn::strtoll(id_slice, &id, nullptr) ||
+            (path.find(pn::rune{'/'}) != path.npos)) {
+            throw std::runtime_error(
+                    pn::format("bad plugin file {0}", pn::dump(file.path(), pn::dump_short))
+                            .c_str());
         }
 
-        String resource_type(resource_type_slice);
-        if (resource_type.size() < 4) {
-            resource_type.resize(4, ' ');
+        pn::string resource_type(resource_type_slice.copy());
+        while (std::distance(resource_type.begin(), resource_type.end()) != 4) {
+            resource_type += pn::rune{' '};
         }
 
         for (const ResourceFile::ExtractedResource& conversion : kPluginFiles) {
             if (conversion.resource == resource_type) {
-                Bytes  data;
-                String output(
-                        format("{0}/{1}/{2}/{3}.{4}", _output_dir, _scenario,
-                               conversion.output_directory, id, conversion.output_extension));
-                if (conversion.convert(path::dirname(output), false, id, file.data(), data)) {
+                pn::data   data;
+                pn::string output = pn::format(
+                        "{0}/{1}/{2}/{3}.{4}", _output_dir, _scenario, conversion.output_directory,
+                        id, conversion.output_extension);
+                if (conversion.convert(
+                            path::dirname(output), false, id, file.data(), data.open("w"))) {
                     makedirs(path::dirname(output), 0755);
-                    ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-                    write(fd, data.data(), data.size());
+                    pn::file file = pn::open(output, "w");
+                    file.write(data);
                 }
                 goto next;
             }
         }
 
-        throw Exception(format("unknown resource type {0}", quote(resource_type)));
+        throw std::runtime_error(
+                pn::format("unknown resource type {0}", pn::dump(resource_type, pn::dump_short))
+                        .c_str());
 
     next:;  // labeled continue.
     }

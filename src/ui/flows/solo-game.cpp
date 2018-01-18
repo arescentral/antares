@@ -18,6 +18,8 @@
 
 #include "ui/flows/solo-game.hpp"
 
+#include <pn/file>
+
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "data/plugin.hpp"
@@ -35,9 +37,6 @@
 #include "ui/screens/scroll-text.hpp"
 #include "ui/screens/select-level.hpp"
 #include "video/transitions.hpp"
-
-using sfz::Exception;
-using sfz::format;
 
 namespace antares {
 
@@ -115,7 +114,10 @@ void SoloGame::handle_game_result() {
             break;
 
         default:
-            throw Exception(format("_play_again was invalid after PLAY_AGAIN ({0})", _play_again));
+            throw std::runtime_error(pn::format(
+                                             "_play_again was invalid after PLAY_AGAIN ({0})",
+                                             stringify(_play_again))
+                                             .c_str());
     }
 }
 

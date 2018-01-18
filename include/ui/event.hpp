@@ -20,7 +20,6 @@
 #define ANTARES_UI_EVENT_HPP_
 
 #include <stdint.h>
-#include <sfz/sfz.hpp>
 
 #include "math/geometry.hpp"
 #include "math/units.hpp"
@@ -38,6 +37,8 @@ enum InputMode {
 class Event {
   public:
     Event(wall_time at);
+    Event(const Event&) = delete;
+    Event& operator=(const Event&) = delete;
     virtual ~Event();
 
     wall_time at() const;
@@ -47,8 +48,6 @@ class Event {
 
   private:
     const wall_time _at;
-
-    DISALLOW_COPY_AND_ASSIGN(Event);
 };
 
 // Superclass for events involving the keyboard (press, release).
@@ -192,6 +191,9 @@ class MouseMoveEvent : public MouseEvent {
 
 class EventReceiver {
   public:
+    EventReceiver() {}
+    EventReceiver(const EventReceiver&) = delete;
+    EventReceiver& operator=(const EventReceiver&) = delete;
     virtual ~EventReceiver();
 
     virtual void key_down(const KeyDownEvent& event);
