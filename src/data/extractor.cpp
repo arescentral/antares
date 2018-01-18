@@ -540,7 +540,7 @@ void DataExtractor::extract_plugin_scenario(Observer* observer) const {
 
 bool DataExtractor::scenario_current(pn::string_view scenario) const {
     pn::string    path    = pn::format("{0}/{1}/version", _output_dir, scenario);
-    pn::data_view version = pn::string{kVersion}.as_data();
+    pn::data_view version = pn::string_view{kVersion}.as_data();
     try {
         mapped_file file(path);
         return file.data() == version;
