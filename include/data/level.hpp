@@ -161,8 +161,8 @@ struct Level {
     int32_t prologue_id() const;
     int32_t epilogue_id() const;
 };
-void read_from(sfz::ReadSource in, Level& level);
-void read_from(sfz::ReadSource in, Level::Player& level_player);
+bool read_from(pn::file_view in, Level* level);
+bool read_from(pn::file_view in, Level::Player* level_player);
 
 struct Level::InitialObject {
     Handle<BaseObject>  type;

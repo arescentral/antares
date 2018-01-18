@@ -84,7 +84,7 @@ void PluginInit() {
         }
     }
 
-    read_all("level", "scenarios", "snro", plug.levels);
+    read_all_pn("level", "scenarios", "snro", plug.levels);
     read_all_pn("initials", "scenario-initial-objects", "snit", plug.initials);
     read_all_pn("conditions", "scenario-conditions", "sncd", plug.conditions);
     read_all_pn("briefings", "scenario-briefing-points", "snbf", plug.briefings);

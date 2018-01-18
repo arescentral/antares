@@ -44,6 +44,7 @@ config("antares_private") {
     "-Werror",
     "-Wno-sign-compare",
     "-Wno-deprecated-declarations",
+    "-ftemplate-depth=1024",
   ]
 }
 

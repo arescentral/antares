@@ -23,8 +23,6 @@
 #include "data/plugin.hpp"
 #include "data/pn.hpp"
 
-using sfz::ReadSource;
-using sfz::read;
 namespace macroman = sfz::macroman;
 
 namespace antares {
@@ -67,42 +65,37 @@ bool read_from(pn::file_view in, scenarioInfoType* scenario_info) {
     return true;
 }
 
-void read_from(ReadSource in, Level& level) {
-    read(in, level.netRaceFlags);
-    read(in, level.playerNum);
-    read(in, level.player, kMaxPlayerNum);
-    read(in, level.scoreStringResID);
-    read(in, level.initialFirst);
-    read(in, level.prologueID);
-    read(in, level.initialNum);
-    read(in, level.songID);
-    read(in, level.conditionFirst);
-    read(in, level.epilogueID);
-    read(in, level.conditionNum);
-    read(in, level.starMapH);
-    read(in, level.briefPointFirst);
-    read(in, level.starMapV);
-    read(in, level.briefPointNum);
-    level.parTime = game_ticks(secs(read<int16_t>(in)));
-    in.shift(2);
-    read(in, level.parKills);
-    read(in, level.levelNameStrNum);
-    read(in, level.parKillRatio);
-    read(in, level.parLosses);
-    int16_t start_time = read<int16_t>(in);
-    level.startTime    = secs(start_time & kLevel_StartTimeMask);
-    level.is_training  = start_time & kLevel_IsTraining_Bit;
+bool read_from(pn::file_view in, Level* level) {
+    if (!in.read(&level->netRaceFlags, &level->playerNum)) {
+        return false;
+    }
+    for (size_t i = 0; i < kMaxPlayerNum; ++i) {
+        if (!read_from(in, &level->player[i])) {
+            return false;
+        }
+    }
+    int16_t par_time, start_time, unused;
+    if (!(in.read(&level->scoreStringResID, &level->initialFirst, &level->prologueID,
+                  &level->initialNum, &level->songID, &level->conditionFirst, &level->epilogueID,
+                  &level->conditionNum, &level->starMapH, &level->briefPointFirst,
+                  &level->starMapV, &level->briefPointNum, &par_time, &unused, &level->parKills,
+                  &level->levelNameStrNum) &&
+          read_from(in, &level->parKillRatio) && in.read(&level->parLosses, &start_time))) {
+        return false;
+    }
+    level->parTime     = game_ticks(secs(par_time));
+    level->startTime   = secs(start_time & kLevel_StartTimeMask);
+    level->is_training = start_time & kLevel_IsTraining_Bit;
+    return true;
 }
 
-void read_from(ReadSource in, Level::Player& level_player) {
-    read(in, level_player.playerType);
-    read(in, level_player.playerRace);
-    read(in, level_player.nameResID);
-    read(in, level_player.nameStrNum);
-    in.shift(4);
-    read(in, level_player.earningPower);
-    read(in, level_player.netRaceFlags);
-    in.shift(2);
+bool read_from(pn::file_view in, Level::Player* level_player) {
+    uint32_t unused1;
+    uint16_t unused2;
+    return in.read(&level_player->playerType, &level_player->playerRace, &level_player->nameResID,
+                   &level_player->nameStrNum, &unused1) &&
+           read_from(in, &level_player->earningPower) &&
+           in.read(&level_player->netRaceFlags, &unused2);
 }
 
 static bool read_action(pn::file_view in, Level::Condition* condition) {
