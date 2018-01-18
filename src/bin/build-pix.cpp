@@ -22,7 +22,6 @@
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
-#include "data/pn.hpp"
 #include "drawing/build-pix.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
@@ -30,10 +29,6 @@
 #include "video/offscreen-driver.hpp"
 #include "video/text-driver.hpp"
 
-using sfz::Optional;
-using sfz::args::help;
-using sfz::args::store;
-using sfz::args::store_const;
 using sfz::dec;
 using std::pair;
 using std::unique_ptr;
@@ -63,26 +58,54 @@ class DrawPix : public Card {
     const int32_t         _width;
 };
 
-int main(int argc, char* const* argv) {
-    args::Parser parser(argv[0], "Builds all of the scrolling text images in the game");
+void usage(pn::file_view out, pn::string_view progname, int retcode) {
+    pn::format(
+            out,
+            "usage: {0} [OPTIONS]\n"
+            "\n"
+            "  Builds all of the scrolling text images in the game\n"
+            "\n"
+            "  options:\n"
+            "    -o, --output=OUTPUT place output in this directory\n"
+            "    -h, --help          display this help screen\n"
+            "    -t, --text          produce text output\n",
+            progname);
+    exit(retcode);
+}
 
-    Optional<sfz::String> sfz_output_dir;
-    bool                  text = false;
-    parser.add_argument("-o", "--output", store(sfz_output_dir))
-            .help("place output in this directory");
-    parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
-    parser.add_argument("-t", "--text", store_const(text, true)).help("produce text output");
+void main(int argc, char* const* argv) {
+    args::callbacks callbacks;
 
-    sfz::String error;
-    if (!parser.parse_args(argc - 1, argv + 1, error)) {
-        pn::format(stderr, "{0}: {1}\n", sfz2pn(parser.name()), sfz2pn(error));
-        exit(1);
-    }
+    callbacks.argument = [](pn::string_view arg) { return false; };
 
-    Optional<pn::string> output_dir;
-    if (sfz_output_dir.has()) {
-        output_dir.set(sfz2pn(*sfz_output_dir));
-        makedirs(pn2sfz(*output_dir), 0755);
+    sfz::optional<pn::string> output_dir;
+    bool                      text = false;
+    callbacks.short_option         = [&argv, &output_dir, &text](
+                                     pn::rune opt, const args::callbacks::get_value_f& get_value) {
+        switch (opt.value()) {
+            case 'o': output_dir.emplace(get_value().copy()); return true;
+            case 't': text = true; return true;
+            case 'h': usage(stdout, sfz::path::basename(argv[0]), 0); return true;
+            default: return false;
+        }
+    };
+    callbacks.long_option =
+            [&callbacks](pn::string_view opt, const args::callbacks::get_value_f& get_value) {
+                if (opt == "output") {
+                    return callbacks.short_option(pn::rune{'o'}, get_value);
+                } else if (opt == "text") {
+                    return callbacks.short_option(pn::rune{'t'}, get_value);
+                } else if (opt == "help") {
+                    return callbacks.short_option(pn::rune{'h'}, get_value);
+                } else {
+                    return false;
+                }
+            };
+
+    args::parse(argc - 1, argv + 1, callbacks);
+
+    if (output_dir.has_value()) {
+        sfz::makedirs(*output_dir, 0755);
     }
 
     NullPrefsDriver prefs;
@@ -109,7 +132,7 @@ int main(int argc, char* const* argv) {
         for (auto spec : specs) {
             pix.emplace_back(
                     unique_ptr<Card>(new DrawPix(nullptr, spec.first, spec.second)),
-                    pn::format("{0}.txt", sfz2pn(sfz::String(dec(spec.first, 5)))));
+                    pn::format("{0}.txt", dec(spec.first, 5)));
         }
         video.capture(pix);
     } else {
@@ -117,15 +140,40 @@ int main(int argc, char* const* argv) {
         for (auto spec : specs) {
             pix.emplace_back(
                     unique_ptr<Card>(new DrawPix(&video, spec.first, spec.second)),
-                    pn::format("{0}.png", sfz2pn(sfz::String(dec(spec.first, 5)))));
+                    pn::format("{0}.png", dec(spec.first, 5)));
         }
         video.capture(pix);
     }
+}
 
-    return 0;
+void print_nested_exception(const std::exception& e) {
+    pn::format(stderr, ": {0}", e.what());
+    try {
+        std::rethrow_if_nested(e);
+    } catch (const std::exception& e) {
+        print_nested_exception(e);
+    }
+}
+
+void print_exception(pn::string_view progname, const std::exception& e) {
+    pn::format(stderr, "{0}: {1}", sfz::path::basename(progname), e.what());
+    try {
+        std::rethrow_if_nested(e);
+    } catch (const std::exception& e) {
+        print_nested_exception(e);
+    }
+    pn::format(stderr, "\n");
 }
 
 }  // namespace
 }  // namespace antares
 
-int main(int argc, char** argv) { return antares::main(argc, argv); }
+int main(int argc, char* const* argv) {
+    try {
+        antares::main(argc, argv);
+    } catch (const std::exception& e) {
+        antares::print_exception(argv[0], e);
+        return 1;
+    }
+    return 0;
+}

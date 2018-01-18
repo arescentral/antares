@@ -18,7 +18,6 @@
 
 #include "ui/screens/object-data.hpp"
 
-#include "data/pn.hpp"
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"

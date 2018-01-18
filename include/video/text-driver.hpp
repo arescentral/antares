@@ -30,7 +30,7 @@ namespace antares {
 
 class TextVideoDriver : public VideoDriver {
   public:
-    TextVideoDriver(Size screen_size, const sfz::Optional<pn::string>& output_dir);
+    TextVideoDriver(Size screen_size, const sfz::optional<pn::string>& output_dir);
 
     virtual Point     get_mouse() { return _scheduler->get_mouse(); }
     virtual InputMode input_mode() const { return KEYBOARD_MOUSE; }
@@ -64,7 +64,7 @@ class TextVideoDriver : public VideoDriver {
     void log(pn::string_view command, const Args&... args);
 
     const Size                _size;
-    sfz::Optional<pn::string> _output_dir;
+    sfz::optional<pn::string> _output_dir;
 
     pn::string                             _log;
     std::vector<std::pair<size_t, size_t>> _last_args;

@@ -21,7 +21,6 @@
 #include <libmodplug/modplug.h>
 #include <pn/file>
 
-#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "sound/sndfile.hpp"
 
@@ -216,7 +215,7 @@ unique_ptr<Sound> OpenAlSoundDriver::open_sound(pn::string_view path) {
     for (const auto& fmt : fmts) {
         try {
             Resource rsrc(pn::format("{0}{1}", path, fmt.ext));
-            fmt.fn(pn::data_view{rsrc.data().data(), rsrc.data().size()}, *sound);
+            fmt.fn(rsrc.data(), *sound);
             return std::move(sound);
         } catch (std::exception& e) {
             continue;

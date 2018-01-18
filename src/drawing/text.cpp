@@ -25,7 +25,6 @@
 #include <pn/value>
 
 #include "data/picture.hpp"
-#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "game/globals.hpp"

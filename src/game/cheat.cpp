@@ -21,7 +21,6 @@
 #include <algorithm>
 #include <pn/file>
 
-#include "data/pn.hpp"
 #include "data/string-list.hpp"
 #include "game/admiral.hpp"
 #include "game/globals.hpp"

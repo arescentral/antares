@@ -26,7 +26,6 @@
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
-#include "data/pn.hpp"
 #include "drawing/pix-map.hpp"
 #include "game/sys.hpp"
 #include "game/time.hpp"
@@ -46,7 +45,6 @@
 #include "linux/offscreen.hpp"
 #endif
 
-using sfz::Optional;
 using sfz::dec;
 using sfz::range;
 using std::greater;
@@ -120,24 +118,24 @@ struct Renderbuffer {
 
 class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
   public:
-    MainLoop(OffscreenVideoDriver& driver, const Optional<pn::string>& output_dir, Card* initial)
+    MainLoop(
+            OffscreenVideoDriver& driver, const sfz::optional<pn::string>& output_dir,
+            Card* initial)
             : _driver(driver),
               _offscreen(driver._screen_size),
               _setup(*this),
               _loop(driver, initial) {
-        if (output_dir.has()) {
-            _output_dir.set(output_dir->copy());
+        if (output_dir.has_value()) {
+            _output_dir.emplace(output_dir->copy());
         }
     }
 
-    bool takes_snapshots() { return _output_dir.has(); }
+    bool takes_snapshots() { return _output_dir.has_value(); }
 
     void snapshot(wall_ticks ticks) {
         snapshot_to(
                 _driver._capture_rect,
-                pn::format(
-                        "screens/{0}.png",
-                        sfz2pn(sfz::String(dec(ticks.time_since_epoch().count(), 6)))));
+                pn::format("screens/{0}.png", dec(ticks.time_since_epoch().count(), 6)));
     }
 
     void snapshot_to(Rect bounds, pn::string_view relpath) {
@@ -148,7 +146,7 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
         ArrayPixMap pix(bounds.size());
         _buffer.copy(bounds, pix);
         pn::string path = pn::format("{0}/{1}", *_output_dir, relpath);
-        makedirs(path::dirname(pn2sfz(path)), 0755);
+        sfz::makedirs(path::dirname(path), 0755);
         pn::file file = pn::open(path, "w");
         pix.encode(file);
     }
@@ -175,15 +173,15 @@ class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
         }
     };
     Setup                       _setup;
-    Optional<pn::string>        _output_dir;
+    sfz::optional<pn::string>   _output_dir;
     OpenGlVideoDriver::MainLoop _loop;
 };
 
 OffscreenVideoDriver::OffscreenVideoDriver(
-        Size screen_size, const Optional<pn::string>& output_dir)
+        Size screen_size, const sfz::optional<pn::string>& output_dir)
         : _screen_size(screen_size), _capture_rect(screen_size.as_rect()) {
-    if (output_dir.has()) {
-        _output_dir.set(output_dir->copy());
+    if (output_dir.has_value()) {
+        _output_dir.emplace(output_dir->copy());
     }
 }
 

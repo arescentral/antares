@@ -21,7 +21,6 @@
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "data/interface.hpp"
-#include "data/pn.hpp"
 #include "drawing/color.hpp"
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"

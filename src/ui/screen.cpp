@@ -23,7 +23,6 @@
 
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
-#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"

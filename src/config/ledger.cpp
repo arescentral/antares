@@ -29,11 +29,9 @@
 
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
-#include "data/pn.hpp"
 #include "game/sys.hpp"
 #include "lang/defines.hpp"
 
-using sfz::MappedFile;
 using sfz::StringMap;
 using sfz::makedirs;
 using sfz::range;
@@ -81,10 +79,8 @@ void DirectoryLedger::load() {
     pn::string            path = pn::format("{0}/{1}/ledger.pn", dirs().registry, scenario_id);
 
     _chapters.clear();
-    pn::file file;
-    try {
-        file = pn::open(path, "r");
-    } catch (std::exception& e) {
+    pn::file file = pn::open(path, "r");
+    if (!file) {
         _chapters.insert(1);
         return;
     }
@@ -110,7 +106,7 @@ void DirectoryLedger::save() {
         unlocked_levels.push_back(*it);
     }
 
-    makedirs(path::dirname(pn2sfz(path)), 0755);
+    makedirs(path::dirname(path), 0755);
     pn::file file = pn::open(path, "w");
     pn::dump(file, pn::map{{"unlocked-levels", std::move(unlocked_levels)}});
 }

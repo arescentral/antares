@@ -19,7 +19,6 @@
 #include "game/admiral.hpp"
 
 #include "data/base-object.hpp"
-#include "data/pn.hpp"
 #include "data/string-list.hpp"
 #include "game/cheat.hpp"
 #include "game/globals.hpp"

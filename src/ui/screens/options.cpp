@@ -25,7 +25,6 @@
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "data/interface.hpp"
-#include "data/pn.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/styled-text.hpp"

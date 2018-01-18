@@ -24,7 +24,6 @@
 #include "config/preferences.hpp"
 #include "data/base-object.hpp"
 #include "data/plugin.hpp"
-#include "data/pn.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
@@ -32,9 +31,6 @@
 #include "ui/interface-handling.hpp"
 #include "video/text-driver.hpp"
 
-using sfz::Optional;
-using sfz::args::help;
-using sfz::args::store;
 using sfz::dec;
 using std::unique_ptr;
 
@@ -45,41 +41,71 @@ namespace {
 
 class ObjectDataBuilder {
   public:
-    ObjectDataBuilder(const Optional<sfz::String>& output_dir) : _output_dir(output_dir) {}
+    ObjectDataBuilder(const sfz::optional<pn::string>& output_dir) {
+        if (output_dir.has_value()) {
+            _output_dir.emplace(output_dir->copy());
+        }
+    }
     ObjectDataBuilder(const ObjectDataBuilder&) = delete;
     ObjectDataBuilder& operator=(const ObjectDataBuilder&) = delete;
 
     void save(Handle<BaseObject> object, int pict_id) {
         pn::string data;
         CreateObjectDataText(data, object);
-        if (_output_dir.has()) {
-            pn::string path = pn::format(
-                    "{0}/{1}.txt", sfz2pn(*_output_dir), sfz2pn(sfz::String(dec(pict_id, 5))));
-            pn::file file = pn::open(path, "w");
+        if (_output_dir.has_value()) {
+            pn::string path = pn::format("{0}/{1}.txt", *_output_dir, dec(pict_id, 5));
+            pn::file   file = pn::open(path, "w");
             file.write(data);
         }
     }
 
   private:
-    const Optional<sfz::String> _output_dir;
+    sfz::optional<pn::string> _output_dir;
 };
 
-int main(int argc, char** argv) {
-    args::Parser parser(argv[0], "Builds all of the scrolling text images in the game");
+void usage(pn::file_view out, pn::string_view progname, int retcode) {
+    pn::format(
+            out,
+            "usage: {0} [OPTIONS]\n"
+            "\n"
+            "  Builds all of the scrolling text images in the game\n"
+            "\n"
+            "  options:\n"
+            "    -o, --output=OUTPUT place output in this directory\n"
+            "    -h, --help          display this help screen\n",
+            progname);
+    exit(retcode);
+}
 
-    Optional<sfz::String> output_dir;
-    parser.add_argument("-o", "--output", store(output_dir))
-            .help("place output in this directory");
-    parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
+void main(int argc, char* const* argv) {
+    args::callbacks callbacks;
 
-    sfz::String error;
-    if (!parser.parse_args(argc - 1, argv + 1, error)) {
-        pn::format(stderr, "{0}: {1}\n", sfz2pn(parser.name()), sfz2pn(error));
-        exit(1);
-    }
+    callbacks.argument = [](pn::string_view arg) { return false; };
 
-    if (output_dir.has()) {
-        makedirs(*output_dir, 0755);
+    sfz::optional<pn::string> output_dir;
+    callbacks.short_option = [&argv, &output_dir](
+                                     pn::rune opt, const args::callbacks::get_value_f& get_value) {
+        switch (opt.value()) {
+            case 'o': output_dir.emplace(get_value().copy()); return true;
+            case 'h': usage(stdout, sfz::path::basename(argv[0]), 0); return true;
+            default: return false;
+        }
+    };
+    callbacks.long_option =
+            [&callbacks](pn::string_view opt, const args::callbacks::get_value_f& get_value) {
+                if (opt == "output") {
+                    return callbacks.short_option(pn::rune{'o'}, get_value);
+                } else if (opt == "help") {
+                    return callbacks.short_option(pn::rune{'h'}, get_value);
+                } else {
+                    return false;
+                }
+            };
+
+    args::parse(argc - 1, argv + 1, callbacks);
+
+    if (output_dir.has_value()) {
+        sfz::makedirs(*output_dir, 0755);
     }
 
     NullPrefsDriver prefs;
@@ -95,11 +121,36 @@ int main(int argc, char** argv) {
         }
         builder.save(object, pict_id);
     }
+}
 
-    return 0;
+void print_nested_exception(const std::exception& e) {
+    pn::format(stderr, ": {0}", e.what());
+    try {
+        std::rethrow_if_nested(e);
+    } catch (const std::exception& e) {
+        print_nested_exception(e);
+    }
+}
+
+void print_exception(pn::string_view progname, const std::exception& e) {
+    pn::format(stderr, "{0}: {1}", sfz::path::basename(progname), e.what());
+    try {
+        std::rethrow_if_nested(e);
+    } catch (const std::exception& e) {
+        print_nested_exception(e);
+    }
+    pn::format(stderr, "\n");
 }
 
 }  // namespace
 }  // namespace antares
 
-int main(int argc, char** argv) { return antares::main(argc, argv); }
+int main(int argc, char* const* argv) {
+    try {
+        antares::main(argc, argv);
+    } catch (const std::exception& e) {
+        antares::print_exception(argv[0], e);
+        return 1;
+    }
+    return 0;
+}

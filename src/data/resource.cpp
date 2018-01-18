@@ -24,22 +24,20 @@
 
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
-#include "data/pn.hpp"
 #include "game/sys.hpp"
 
-using sfz::MappedFile;
 using std::unique_ptr;
 
 namespace path = sfz::path;
 
 namespace antares {
 
-static unique_ptr<MappedFile> load_first(
+static unique_ptr<sfz::mapped_file> load_first(
         pn::string_view resource_path, const std::vector<pn::string_view>& dirs) {
     for (const auto& dir : dirs) {
         pn::string path = pn::format("{0}/{1}", dir, resource_path);
-        if (path::isfile(pn2sfz(path))) {
-            return unique_ptr<MappedFile>(new MappedFile(pn2sfz(path)));
+        if (path::isfile(path)) {
+            return unique_ptr<sfz::mapped_file>(new sfz::mapped_file(path));
         }
     }
     throw std::runtime_error(
@@ -47,7 +45,7 @@ static unique_ptr<MappedFile> load_first(
                     .c_str());
 }
 
-static unique_ptr<MappedFile> load(pn::string_view resource_path) {
+static unique_ptr<sfz::mapped_file> load(pn::string_view resource_path) {
     pn::string scenario = scenario_dir(sys.prefs->scenario_identifier());
     pn::string factory  = scenario_dir(kFactoryScenarioIdentifier);
     pn::string app      = application_path().copy();
@@ -61,9 +59,7 @@ Resource::Resource(pn::string_view resource_path) : _file(load(resource_path)) {
 
 Resource::~Resource() {}
 
-pn::data_view Resource::data() const {
-    return pn::data_view{_file->data().data(), static_cast<int>(_file->data().size())};
-}
+pn::data_view Resource::data() const { return _file->data(); }
 
 pn::string_view Resource::string() const {
     return pn::string_view{reinterpret_cast<const char*>(_file->data().data()),

@@ -25,9 +25,7 @@
 
 #include "config/dirs.hpp"
 #include "config/keys.hpp"
-#include "data/pn.hpp"
 
-using sfz::MappedFile;
 using sfz::StringMap;
 using sfz::makedirs;
 using sfz::path::dirname;
@@ -94,28 +92,21 @@ static void set_from(
 }
 
 FilePrefsDriver::FilePrefsDriver() {
-    // TODO(sfiera): remove us. These are just here as a workaround for a weird linker bug.
-    sfz::Json();
-    sfz::io::err.push("");
+    pn::string path = pn::format("{0}/config.pn", dirs().root);
+    pn::value  x;
+    pn::file   f = pn::open(path, "r");
+    if (!f || !pn::parse(f, x, nullptr)) {
+        return;
+    }
+    pn::map_cref m = x.as_map();
 
-    try {
-        pn::string path = pn::format("{0}/config.pn", dirs().root);
-        pn::value  x;
-        if (!pn::parse(pn::open(path, "r"), x, nullptr)) {
-            return;
-        }
-        pn::map_cref m = x.as_map();
+    set_from<int>(m, "sound", "volume", _current, &Preferences::volume);
+    set_from<bool>(m, "sound", "speech", _current, &Preferences::speech_on);
+    set_from<bool>(m, "sound", "idle music", _current, &Preferences::play_idle_music);
+    set_from<bool>(m, "sound", "game music", _current, &Preferences::play_music_in_game);
 
-        set_from<int>(m, "sound", "volume", _current, &Preferences::volume);
-        set_from<bool>(m, "sound", "speech", _current, &Preferences::speech_on);
-        set_from<bool>(m, "sound", "idle music", _current, &Preferences::play_idle_music);
-        set_from<bool>(m, "sound", "game music", _current, &Preferences::play_music_in_game);
-
-        for (auto i : range<size_t>(KEY_COUNT)) {
-            set_from<int>(m, "keys", kKeyNames[i], _current, &Preferences::keys, i);
-        }
-    } catch (std::exception& e) {
-        // pass
+    for (auto i : range<size_t>(KEY_COUNT)) {
+        set_from<int>(m, "keys", kKeyNames[i], _current, &Preferences::keys, i);
     }
 }
 
@@ -128,7 +119,7 @@ void FilePrefsDriver::set(const Preferences& p) {
     }
 
     pn::string path = pn::format("{0}/config.pn", dirs().root);
-    makedirs(dirname(pn2sfz(path)), 0755);
+    makedirs(dirname(path), 0755);
     pn::file file = pn::open(path, "w");
     pn::dump(
             file, pn::map{{"sound", pn::map{{"volume", p.volume},

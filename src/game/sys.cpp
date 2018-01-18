@@ -54,10 +54,12 @@ void sys_init() {
     sys.gamepad_long_names = to_vector(StringList(Gamepad::LONG_NAMES));
 
     {
-        Resource        rsrc("rotation-table");
-        sfz::BytesSlice in{rsrc.data().data(), static_cast<size_t>(rsrc.data().size())};
-        read(in, sys.rot_table, SystemGlobals::ROT_TABLE_SIZE);
-        if (!in.empty()) {
+        Resource rsrc("rotation-table");
+        pn::file in = rsrc.data().open();
+        for (int i = 0; i < SystemGlobals::ROT_TABLE_SIZE; ++i) {
+            in.read(&sys.rot_table[i]).check();
+        }
+        if (!in.read(pn::pad(1)).eof()) {
             throw std::runtime_error("didn't consume all of rotation data");
         }
     }

@@ -20,7 +20,6 @@
 
 #include <algorithm>
 
-#include "data/pn.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/text.hpp"

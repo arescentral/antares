@@ -28,7 +28,6 @@
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
 #include "data/plugin.hpp"
-#include "data/pn.hpp"
 #include "data/replay.hpp"
 #include "data/scenario-list.hpp"
 #include "data/string-list.hpp"
@@ -69,13 +68,10 @@
 #include "ui/screens/play-again.hpp"
 #include "video/driver.hpp"
 
-using sfz::makedirs;
 using std::max;
 using std::min;
 using std::set;
 using std::unique_ptr;
-
-namespace path = sfz::path;
 
 namespace antares {
 

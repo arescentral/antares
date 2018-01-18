@@ -35,7 +35,7 @@ class Resource {
     pn::string_view string() const;
 
   private:
-    std::unique_ptr<sfz::MappedFile> _file;
+    std::unique_ptr<sfz::mapped_file> _file;
 };
 
 }  // namespace antares

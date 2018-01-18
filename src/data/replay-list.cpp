@@ -24,10 +24,8 @@
 
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
-#include "data/pn.hpp"
 #include "game/sys.hpp"
 
-using sfz::MappedFile;
 using std::vector;
 
 namespace path = sfz::path;
@@ -52,7 +50,7 @@ ReplayList::ReplayList() {
 
     for (int i = 0; i < g.data.gl_pathc; ++i) {
         const pn::string path      = g.data.gl_pathv[i];
-        pn::string       basename  = sfz2pn(path::basename(pn2sfz(path)));
+        pn::string_view  basename  = path::basename(path);
         pn::string_view  id_string = basename.substr(0, basename.size() - 5);
         int64_t          id;
         if (pn::strtoll(id_string, &id, nullptr)) {

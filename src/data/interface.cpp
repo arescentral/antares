@@ -24,7 +24,6 @@
 #include <sfz/sfz.hpp>
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
-#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
@@ -69,14 +68,14 @@ static uint8_t hue(pn::value_cref x) {
     hues["sky-blue"]    = SKY_BLUE;
     hues["tan"]         = TAN;
     hues["red"]         = RED;
-    return hues[pn2sfz(x.as_string())];
+    return hues[x.as_string()];
 }
 
 static interfaceStyleType style(pn::value_cref x) {
     StringMap<interfaceStyleType> styles;
     styles["large"] = kLarge;
     styles["small"] = kSmall;
-    return styles[pn2sfz(x.as_string())];
+    return styles[x.as_string()];
 }
 
 static int16_t key(pn::value_cref x) {

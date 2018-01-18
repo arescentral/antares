@@ -26,7 +26,6 @@
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
-#include "data/pn.hpp"
 #include "drawing/pix-map.hpp"
 #include "game/globals.hpp"
 #include "game/sys.hpp"
@@ -35,7 +34,6 @@
 #include "ui/card.hpp"
 #include "ui/event.hpp"
 
-using sfz::Optional;
 using sfz::dec;
 using std::make_pair;
 using std::max;
@@ -130,23 +128,22 @@ class TextVideoDriver::TextureImpl : public Texture::Impl {
 
 class TextVideoDriver::MainLoop : public EventScheduler::MainLoop {
   public:
-    MainLoop(TextVideoDriver& driver, const Optional<pn::string>& output_dir, Card* initial)
+    MainLoop(TextVideoDriver& driver, const sfz::optional<pn::string>& output_dir, Card* initial)
             : _driver(driver), _stack(initial) {
-        if (output_dir.has()) {
-            _output_dir.set(output_dir->copy());
+        if (output_dir.has_value()) {
+            _output_dir.emplace(output_dir->copy());
         }
     }
 
-    bool takes_snapshots() { return _output_dir.has(); }
+    bool takes_snapshots() { return _output_dir.has_value(); }
 
     void snapshot(wall_ticks ticks) {
-        snapshot_to(pn::format(
-                "screens/{0}.txt", sfz2pn(sfz::String(dec(ticks.time_since_epoch().count(), 6)))));
+        snapshot_to(pn::format("screens/{0}.txt", dec(ticks.time_since_epoch().count(), 6)));
     }
 
     void snapshot_to(pn::string_view relpath) {
         pn::string path = pn::format("{0}/{1}", *_output_dir, relpath);
-        makedirs(path::dirname(pn2sfz(path)), 0755);
+        sfz::makedirs(path::dirname(path), 0755);
         pn::file file = pn::open(path, "w");
         file.write(_driver._log);
     }
@@ -160,15 +157,15 @@ class TextVideoDriver::MainLoop : public EventScheduler::MainLoop {
     Card* top() const { return _stack.top(); }
 
   private:
-    TextVideoDriver&     _driver;
-    Optional<pn::string> _output_dir;
-    CardStack            _stack;
+    TextVideoDriver&          _driver;
+    sfz::optional<pn::string> _output_dir;
+    CardStack                 _stack;
 };
 
-TextVideoDriver::TextVideoDriver(Size screen_size, const Optional<pn::string>& output_dir)
+TextVideoDriver::TextVideoDriver(Size screen_size, const sfz::optional<pn::string>& output_dir)
         : _size(screen_size) {
-    if (output_dir.has()) {
-        _output_dir.set(output_dir->copy());
+    if (output_dir.has_value()) {
+        _output_dir.emplace(output_dir->copy());
     }
 }
 

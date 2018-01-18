@@ -21,7 +21,6 @@
 #include <pn/file>
 
 #include "data/base-object.hpp"
-#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
 #include "lang/defines.hpp"

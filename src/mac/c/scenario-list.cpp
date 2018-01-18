@@ -18,7 +18,6 @@
 
 #include "mac/c/scenario-list.h"
 
-#include "data/pn.hpp"
 #include "data/scenario-list.hpp"
 
 using std::vector;

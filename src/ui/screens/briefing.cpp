@@ -24,7 +24,6 @@
 #include "config/keys.hpp"
 #include "data/base-object.hpp"
 #include "data/picture.hpp"
-#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
 #include "drawing/briefing.hpp"

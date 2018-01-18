@@ -28,7 +28,6 @@
 #include "config/dirs.hpp"
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
-#include "data/pn.hpp"
 #include "game/sys.hpp"
 
 using sfz::range;
@@ -189,7 +188,7 @@ static bool read_string(pn::file_view in, pn::string* out) {
     if (fread(data.data(), 1, data.size(), in.c_obj()) != data.size()) {
         return false;
     }
-    *out = pn::string{reinterpret_cast<const char*>(data.data()), data.size()};
+    *out = data.as_string().copy();
     return true;
 }
 
@@ -208,11 +207,12 @@ static bool read_message(pn::file_view in, T* out) {
     if (!read_varint(in, &size)) {
         return false;
     }
-    sfz::Bytes bytes(size, '\0');
-    if (fread(bytes.data(), 1, bytes.size(), in.c_obj()) != bytes.size()) {
+    pn::data d;
+    d.resize(size);
+    if (fread(d.data(), 1, d.size(), in.c_obj()) != d.size()) {
         return false;
     }
-    return read_from(pn::data_view{bytes.data(), static_cast<int>(bytes.size())}.open(), out);
+    return read_from(d.open(), out);
 }
 
 bool read_from(pn::file_view in, ReplayData* replay) {
@@ -355,7 +355,7 @@ struct ScopedGlob {
 
 // Deletes the oldest replay until there are fewer than `count` in the replays folder.
 static void cull_replays(size_t count) {
-    if (path::isdir(pn2sfz(dirs().replays))) {
+    if (path::isdir(dirs().replays)) {
         ScopedGlob g;
         pn::string str = pn::format("{0}/*.nlrp", dirs().replays);
         glob(str.c_str(), 0, NULL, &g.data);
@@ -374,7 +374,7 @@ static void cull_replays(size_t count) {
             }
         }
     } else {
-        makedirs(pn2sfz(dirs().replays), 0755);
+        sfz::makedirs(dirs().replays, 0755);
     }
 }
 

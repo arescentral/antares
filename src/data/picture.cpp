@@ -20,7 +20,6 @@
 
 #include <pn/file>
 
-#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "game/sys.hpp"
 #include "video/driver.hpp"

@@ -18,10 +18,9 @@
 
 #include "math/fixed.hpp"
 
+#include <stdlib.h>
 #include <cmath>
 #include <pn/file>
-
-#include "data/pn.hpp"
 
 namespace antares {
 

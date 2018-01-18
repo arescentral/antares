@@ -22,8 +22,6 @@
 #include <pn/string>
 #include <vector>
 
-#include "data/pn.hpp"
-
 namespace antares {
 
 struct Version {

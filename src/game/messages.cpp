@@ -19,7 +19,6 @@
 #include "game/messages.hpp"
 
 #include "config/keys.hpp"
-#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"

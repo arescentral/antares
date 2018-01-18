@@ -24,7 +24,6 @@
 
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
-#include "data/pn.hpp"
 #include "sound/driver.hpp"
 #include "ui/card.hpp"
 #include "ui/flows/master.hpp"
@@ -32,10 +31,6 @@
 #include "video/offscreen-driver.hpp"
 #include "video/text-driver.hpp"
 
-using sfz::Optional;
-using sfz::args::help;
-using sfz::args::store;
-using sfz::args::store_const;
 using sfz::makedirs;
 using std::unique_ptr;
 
@@ -49,52 +44,91 @@ void options(EventScheduler& scheduler);
 void mission_briefing(EventScheduler& scheduler, Ledger& ledger);
 void pause(EventScheduler& scheduler);
 
+void usage(pn::file_view out, pn::string_view progname, int retcode) {
+    pn::format(
+            out,
+            "usage: {0} [OPTIONS] SCRIPT\n"
+            "\n"
+            "Simulates a game off-screen\n"
+            "\n"
+            "scripts:\n"
+            "     main-screen\n"
+            "     options\n"
+            "     mission-briefing\n"
+            "     pause\n"
+            "\n"
+            "options:\n"
+            " -o, --output=OUTPUT place output in this directory\n"
+            " -t, --text          produce text output\n"
+            " -h, --help          display this help screen\n",
+            progname);
+    exit(retcode);
+}
+
 void main(int argc, char* const* argv) {
-    args::Parser parser(argv[0], "Simulates a game off-screen");
+    args::callbacks callbacks;
 
-    sfz::String script;
-    parser.add_argument("script", store(script))
-            .metavar("main-screen|options|mission-briefing|pause")
-            .required()
-            .help("the script to execute");
+    sfz::optional<pn::string> script;
+    callbacks.argument = [&script](pn::string_view arg) {
+        if (!script.has_value()) {
+            script.emplace(arg.copy());
+        } else {
+            return false;
+        }
+        return true;
+    };
 
-    Optional<sfz::String> sfz_output_dir;
-    bool                  text = false;
-    parser.add_argument("-o", "--output", store(sfz_output_dir))
-            .help("place output in this directory");
-    parser.add_argument("-t", "--text", store_const(text, true)).help("produce text output");
-    parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
+    sfz::optional<pn::string> output_dir;
+    bool                      text = false;
+    callbacks.short_option         = [&argv, &output_dir, &text](
+                                     pn::rune opt, const args::callbacks::get_value_f& get_value) {
+        switch (opt.value()) {
+            case 'o': output_dir.emplace(get_value().copy()); return true;
+            case 't': text = true; return true;
+            case 'h': usage(stdout, sfz::path::basename(argv[0]), 0); return true;
+            default: return false;
+        }
+    };
 
-    sfz::String error;
-    if (!parser.parse_args(argc - 1, argv + 1, error)) {
-        pn::format(stderr, "{0}: {1}\n", sfz2pn(parser.name()), sfz2pn(error));
-        exit(1);
-    }
+    callbacks.long_option =
+            [&callbacks](pn::string_view opt, const args::callbacks::get_value_f& get_value) {
+                if (opt == "output") {
+                    return callbacks.short_option(pn::rune{'o'}, get_value);
+                } else if (opt == "text") {
+                    return callbacks.short_option(pn::rune{'t'}, get_value);
+                } else if (opt == "help") {
+                    return callbacks.short_option(pn::rune{'h'}, get_value);
+                } else {
+                    return false;
+                }
+            };
 
-    Optional<pn::string> output_dir;
-    if (sfz_output_dir.has()) {
-        output_dir.set(sfz2pn(*sfz_output_dir));
-        makedirs(pn2sfz(*output_dir), 0755);
+    args::parse(argc - 1, argv + 1, callbacks);
+
+    if (output_dir.has_value()) {
+        makedirs(*output_dir, 0755);
     }
 
     NullPrefsDriver prefs;
     EventScheduler  scheduler;
     NullLedger      ledger;
-    if (script == "main-screen") {
+    if (!script.has_value()) {
+        throw std::runtime_error("missing required argument 'script'");
+    } else if (*script == "main-screen") {
         main_screen(scheduler);
-    } else if (script == "options") {
+    } else if (*script == "options") {
         options(scheduler);
-    } else if (script == "mission-briefing") {
+    } else if (*script == "mission-briefing") {
         mission_briefing(scheduler, ledger);
-    } else if (script == "pause") {
+    } else if (*script == "pause") {
         pause(scheduler);
     } else {
-        pn::format(stderr, "no such script {0}\n", pn::dump(sfz2pn(script), pn::dump_short));
-        exit(1);
+        throw std::runtime_error(
+                pn::format("no such script {0}\n", pn::dump(*script, pn::dump_short)).c_str());
     }
 
     unique_ptr<SoundDriver> sound;
-    if (output_dir.has()) {
+    if (output_dir.has_value()) {
         pn::string out = pn::format("{0}/sound.log", *output_dir);
         sound.reset(new LogSoundDriver(out));
     } else {
@@ -238,10 +272,34 @@ void pause(EventScheduler& scheduler) {
     scheduler.schedule_snapshot(2440);
 }
 
+void print_nested_exception(const std::exception& e) {
+    pn::format(stderr, ": {0}", e.what());
+    try {
+        std::rethrow_if_nested(e);
+    } catch (const std::exception& e) {
+        print_nested_exception(e);
+    }
+}
+
+void print_exception(pn::string_view progname, const std::exception& e) {
+    pn::format(stderr, "{0}: {1}", sfz::path::basename(progname), e.what());
+    try {
+        std::rethrow_if_nested(e);
+    } catch (const std::exception& e) {
+        print_nested_exception(e);
+    }
+    pn::format(stderr, "\n");
+}
+
 }  // namespace
 }  // namespace antares
 
 int main(int argc, char* const* argv) {
-    antares::main(argc, argv);
+    try {
+        antares::main(argc, argv);
+    } catch (const std::exception& e) {
+        antares::print_exception(argv[0], e);
+        return 1;
+    }
     return 0;
 }

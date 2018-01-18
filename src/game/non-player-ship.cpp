@@ -22,7 +22,6 @@
 
 #include "config/keys.hpp"
 #include "data/plugin.hpp"
-#include "data/pn.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/sprite-handling.hpp"

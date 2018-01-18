@@ -24,7 +24,6 @@
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "data/plugin.hpp"
-#include "data/pn.hpp"
 #include "data/replay.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
@@ -54,27 +53,24 @@
 #include "video/offscreen-driver.hpp"
 #include "video/text-driver.hpp"
 
-using sfz::MappedFile;
-using sfz::Optional;
-using sfz::args::store;
-using sfz::args::store_const;
 using std::unique_ptr;
 
 namespace args = sfz::args;
 namespace path = sfz::path;
 
 namespace antares {
+namespace {
 
 class ReplayMaster : public Card {
   public:
-    ReplayMaster(pn::data_view data, const Optional<pn::string>& output_path)
+    ReplayMaster(pn::data_view data, const sfz::optional<pn::string>& output_path)
             : _state(NEW),
               _replay_data(data),
               _random_seed(_replay_data.global_seed),
               _game_result(NO_GAME),
               _input_source(&_replay_data) {
-        if (output_path.has()) {
-            _output_path.set(output_path->copy());
+        if (output_path.has_value()) {
+            _output_path.emplace(output_path->copy());
         }
     }
 
@@ -92,9 +88,9 @@ class ReplayMaster : public Card {
                 break;
 
             case REPLAY:
-                if (_output_path.has()) {
+                if (_output_path.has_value()) {
                     pn::string path = pn::format("{0}/debriefing.txt", *_output_path);
-                    makedirs(path::dirname(pn2sfz(path)), 0755);
+                    sfz::makedirs(path::dirname(path), 0755);
                     pn::file outcome = pn::open(path, "w");
                     if ((g.victory_text >= 0)) {
                         Resource rsrc("text", "txt", g.victory_text);
@@ -124,11 +120,11 @@ class ReplayMaster : public Card {
     };
     State _state;
 
-    Optional<pn::string> _output_path;
-    ReplayData           _replay_data;
-    const int32_t        _random_seed;
-    GameResult           _game_result;
-    ReplayInputSource    _input_source;
+    sfz::optional<pn::string> _output_path;
+    ReplayData                _replay_data;
+    const int32_t             _random_seed;
+    GameResult                _game_result;
+    ReplayInputSource         _input_source;
 };
 
 void ReplayMaster::init() {
@@ -148,45 +144,91 @@ void ReplayMaster::init() {
     Vectors::init();
 }
 
-void usage(pn::string_view program_name) {
-    pn::format(stderr, "usage: {0} replay_path output_dir\n", program_name);
-    exit(1);
+void usage(pn::file_view out, pn::string_view progname, int retcode) {
+    pn::format(
+            out,
+            "usage: {0} [OPTIONS]\n"
+            "\n"
+            "  Plays a replay into a set of images and a log of sounds\n"
+            "\n"
+            "  arguments:\n"
+            "    replay              an Antares replay script\n"
+            "\n"
+            "  options:\n"
+            "    -o, --output=OUTPUT place output in this directory\n"
+            "    -i, --interval=INTERVAL\n"
+            "                        take one screenshot per this many ticks (default: 60)\n"
+            "    -w, --width=WIDTH   screen width (default: 640)\n"
+            "    -h, --height=HEIGHT screen height (default: 480)\n"
+            "    -t, --text          produce text output\n"
+            "    -s, --smoke         run as smoke text\n"
+            "        --help          display this help screen\n",
+            progname);
+    exit(retcode);
 }
 
-void main(int argc, char** argv) {
-    args::Parser parser(argv[0], "Plays a replay into a set of images and a log of sounds");
+void main(int argc, char* const* argv) {
+    args::callbacks callbacks;
 
-    sfz::String replay_path;
-    parser.add_argument("replay", store(replay_path)).help("an Antares replay script").required();
+    sfz::optional<pn::string> replay_path;
+    callbacks.argument = [&replay_path](pn::string_view arg) {
+        if (!replay_path.has_value()) {
+            replay_path.emplace(arg.copy());
+        } else {
+            return false;
+        }
+        return true;
+    };
 
-    Optional<sfz::String> sfz_output_dir;
-    parser.add_argument("-o", "--output", store(sfz_output_dir))
-            .help("place output in this directory");
+    sfz::optional<pn::string> output_dir;
+    int                       interval = 60;
+    int                       width    = 640;
+    int                       height   = 480;
+    bool                      text     = false;
+    bool                      smoke    = false;
+    callbacks.short_option             = [&output_dir, &interval, &width, &height, &text, &smoke](
+                                     pn::rune opt, const args::callbacks::get_value_f& get_value) {
+        switch (opt.value()) {
+            case 'o': output_dir.emplace(get_value().copy()); return true;
+            case 'i': sfz::args::integer_option(get_value(), &interval); return true;
+            case 'w': sfz::args::integer_option(get_value(), &width); return true;
+            case 'h': sfz::args::integer_option(get_value(), &height); return true;
+            case 't': text = true; return true;
+            case 's': smoke = true; return true;
+            default: return false;
+        }
+    };
 
-    int  interval = 60;
-    int  width    = 640;
-    int  height   = 480;
-    bool text     = false;
-    bool smoke    = false;
-    parser.add_argument("-i", "--interval", store(interval))
-            .help("take one screenshot per this many ticks (default: 60)");
-    parser.add_argument("-w", "--width", store(width)).help("screen width (default: 640)");
-    parser.add_argument("-h", "--height", store(height)).help("screen height (default: 480)");
-    parser.add_argument("-t", "--text", store_const(text, true)).help("produce text output");
-    parser.add_argument("-s", "--smoke", store_const(smoke, true)).help("run as smoke text");
+    callbacks.long_option = [&argv, &callbacks](
+                                    pn::string_view                     opt,
+                                    const args::callbacks::get_value_f& get_value) {
+        if (opt == "output") {
+            return callbacks.short_option(pn::rune{'o'}, get_value);
+        } else if (opt == "interval") {
+            return callbacks.short_option(pn::rune{'i'}, get_value);
+        } else if (opt == "width") {
+            return callbacks.short_option(pn::rune{'w'}, get_value);
+        } else if (opt == "height") {
+            return callbacks.short_option(pn::rune{'h'}, get_value);
+        } else if (opt == "text") {
+            return callbacks.short_option(pn::rune{'t'}, get_value);
+        } else if (opt == "smoke") {
+            return callbacks.short_option(pn::rune{'s'}, get_value);
+        } else if (opt == "help") {
+            usage(stdout, sfz::path::basename(argv[0]), 0);
+            return true;
+        } else {
+            return false;
+        }
+    };
 
-    parser.add_argument("--help", help(parser, 0)).help("display this help screen");
-
-    sfz::String error;
-    if (!parser.parse_args(argc - 1, argv + 1, error)) {
-        pn::format(stderr, "{0}: {1}\n", sfz2pn(parser.name()), sfz2pn(error));
-        exit(1);
+    args::parse(argc - 1, argv + 1, callbacks);
+    if (!replay_path.has_value()) {
+        throw std::runtime_error("missing required argument 'replay'");
     }
 
-    Optional<pn::string> output_dir;
-    if (sfz_output_dir.has()) {
-        output_dir.set(sfz2pn(*sfz_output_dir));
-        makedirs(pn2sfz(*output_dir), 0755);
+    if (output_dir.has_value()) {
+        sfz::makedirs(*output_dir, 0755);
     }
 
     Preferences preferences;
@@ -201,7 +243,7 @@ void main(int argc, char** argv) {
     }
 
     unique_ptr<SoundDriver> sound;
-    if (!smoke && output_dir.has()) {
+    if (!smoke && output_dir.has_value()) {
         pn::string out = pn::format("{0}/sound.log", *output_dir);
         sound.reset(new LogSoundDriver(out));
     } else {
@@ -209,23 +251,47 @@ void main(int argc, char** argv) {
     }
     NullLedger ledger;
 
-    MappedFile    replay_file(replay_path);
-    pn::data_view in{replay_file.data().data(), static_cast<int>(replay_file.data().size())};
+    sfz::mapped_file replay_file(*replay_path);
     if (smoke) {
-        TextVideoDriver video({width, height}, Optional<pn::string>());
-        video.loop(new ReplayMaster(in, output_dir), scheduler);
+        TextVideoDriver video({width, height}, sfz::optional<pn::string>());
+        video.loop(new ReplayMaster(replay_file.data(), output_dir), scheduler);
     } else if (text) {
         TextVideoDriver video({width, height}, output_dir);
-        video.loop(new ReplayMaster(in, output_dir), scheduler);
+        video.loop(new ReplayMaster(replay_file.data(), output_dir), scheduler);
     } else {
         OffscreenVideoDriver video({width, height}, output_dir);
-        video.loop(new ReplayMaster(in, output_dir), scheduler);
+        video.loop(new ReplayMaster(replay_file.data(), output_dir), scheduler);
     }
 }
 
+void print_nested_exception(const std::exception& e) {
+    pn::format(stderr, ": {0}", e.what());
+    try {
+        std::rethrow_if_nested(e);
+    } catch (const std::exception& e) {
+        print_nested_exception(e);
+    }
+}
+
+void print_exception(pn::string_view progname, const std::exception& e) {
+    pn::format(stderr, "{0}: {1}", sfz::path::basename(progname), e.what());
+    try {
+        std::rethrow_if_nested(e);
+    } catch (const std::exception& e) {
+        print_nested_exception(e);
+    }
+    pn::format(stderr, "\n");
+}
+
+}  // namespace
 }  // namespace antares
 
-int main(int argc, char** argv) {
-    antares::main(argc, argv);
+int main(int argc, char* const* argv) {
+    try {
+        antares::main(argc, argv);
+    } catch (const std::exception& e) {
+        antares::print_exception(argv[0], e);
+        return 1;
+    }
     return 0;
 }

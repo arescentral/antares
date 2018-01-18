@@ -23,7 +23,6 @@
 
 #include "data/base-object.hpp"
 #include "data/plugin.hpp"
-#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"

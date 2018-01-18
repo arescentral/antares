@@ -22,7 +22,6 @@
 
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
-#include "data/pn.hpp"
 #include "game/globals.hpp"
 #include "mac/core-foundation.hpp"
 #include "mac/prefs-driver.hpp"

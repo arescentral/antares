@@ -21,7 +21,6 @@
 #include <AudioToolbox/AudioToolbox.h>
 #include <pn/file>
 
-#include "data/pn.hpp"
 #include "data/resource.hpp"
 
 using std::unique_ptr;

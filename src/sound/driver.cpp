@@ -21,7 +21,6 @@
 #include <fcntl.h>
 #include <pn/file>
 
-#include "data/pn.hpp"
 #include "game/sys.hpp"
 #include "game/time.hpp"
 #include "lang/casts.hpp"
@@ -91,25 +90,25 @@ class LogSoundDriver::LogChannel : public SoundChannel {
     virtual void activate() { _driver._active_channel = this; }
 
     void play(pn::string_view sound_path) {
-        auto       t    = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
+        int64_t    t    = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
         pn::string line = pn::format("play\t{0}\t{1}\t{2}\n", _id, t, sound_path);
         _driver._sound_log.write(line);
     }
 
     void loop(pn::string_view sound_path) {
-        auto       t    = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
+        int64_t    t    = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
         pn::string line = pn::format("loop\t{0}\t{1}\t{2}\n", _id, t, sound_path);
         _driver._sound_log.write(line);
     }
 
     virtual void amp(uint8_t volume) {
-        auto       t    = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
+        int64_t    t    = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
         pn::string line = pn::format("amp\t{0}\t{1}\t{2}\n", _id, t, volume);
         _driver._sound_log.write(line);
     }
 
     virtual void quiet() {
-        auto       t    = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
+        int64_t    t    = std::chrono::time_point_cast<ticks>(now()).time_since_epoch().count();
         pn::string line = pn::format("quiet\t{0}\t{1}\n", _id, t);
         _driver._sound_log.write(line);
     }

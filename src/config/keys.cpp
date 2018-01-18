@@ -20,7 +20,6 @@
 
 #include <string.h>
 
-#include "data/pn.hpp"
 #include "game/sys.hpp"
 
 namespace antares {

@@ -22,7 +22,6 @@
 #include <vector>
 
 #include "data/picture.hpp"
-#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"

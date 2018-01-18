@@ -25,7 +25,6 @@
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
 #include "data/base-object.hpp"
-#include "data/pn.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"

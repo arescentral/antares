@@ -21,7 +21,6 @@
 #include <pn/file>
 
 #include "config/preferences.hpp"
-#include "data/pn.hpp"
 #include "game/sys.hpp"
 #include "lang/defines.hpp"
 #include "sound/driver.hpp"

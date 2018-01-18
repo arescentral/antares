@@ -21,15 +21,11 @@
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
-#include "data/pn.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/pix-table.hpp"
 #include "video/text-driver.hpp"
 
-using sfz::Optional;
-using sfz::args::help;
-using sfz::args::store;
 using sfz::hex;
 using sfz::path::dirname;
 using std::unique_ptr;
@@ -62,9 +58,9 @@ void draw(int16_t id, uint8_t color, ArrayPixMap& pix) {
 
 class ShapeBuilder {
   public:
-    ShapeBuilder(const Optional<pn::string>& output_dir) {
-        if (output_dir.has()) {
-            _output_dir.set(output_dir->copy());
+    ShapeBuilder(const sfz::optional<pn::string>& output_dir) {
+        if (output_dir.has_value()) {
+            _output_dir.emplace(output_dir->copy());
         }
     }
     ShapeBuilder(const ShapeBuilder&) = delete;
@@ -73,37 +69,59 @@ class ShapeBuilder {
     void save(int16_t id, uint8_t color) {
         ArrayPixMap pix(0, 0);
         draw(id, color, pix);
-        if (_output_dir.has()) {
-            const pn::string path = pn::format(
-                    "{0}/{1}/{2}.png", *_output_dir, name(id), sfz2pn(sfz::String(hex(color))));
-            makedirs(dirname(pn2sfz(path)), 0755);
+        if (_output_dir.has_value()) {
+            const pn::string path =
+                    pn::format("{0}/{1}/{2}.png", *_output_dir, name(id), hex(color));
+            sfz::makedirs(dirname(path), 0755);
             pn::file file = pn::open(path, "w");
             pix.encode(file);
         }
     }
 
   private:
-    Optional<pn::string> _output_dir;
+    sfz::optional<pn::string> _output_dir;
 };
 
-int main(int argc, char* const* argv) {
-    args::Parser parser(argv[0], "Draws shapes used in the long-range view");
+void usage(pn::file_view out, pn::string_view progname, int retcode) {
+    pn::format(
+            out,
+            "usage: {0} [OPTIONS]\n"
+            "\n"
+            "  Draws shapes used in the long-range view\n"
+            "\n"
+            "  options:\n"
+            "    -o, --output=OUTPUT place output in this directory\n"
+            "    -h, --help          display this help screen\n",
+            progname);
+    exit(retcode);
+}
 
-    Optional<sfz::String> sfz_output_dir;
-    parser.add_argument("-o", "--output", store(sfz_output_dir))
-            .help("place output in this directory");
-    parser.add_argument("-h", "--help", help(parser, 0)).help("display this help screen");
+void main(int argc, char* const* argv) {
+    args::callbacks callbacks;
 
-    sfz::String error;
-    if (!parser.parse_args(argc - 1, argv + 1, error)) {
-        pn::format(stderr, "{0}: {1}\n", sfz2pn(parser.name()), sfz2pn(error));
-        exit(1);
-    }
+    callbacks.argument = [](pn::string_view arg) { return false; };
 
-    Optional<pn::string> output_dir;
-    if (sfz_output_dir.has()) {
-        output_dir.set(sfz2pn(*sfz_output_dir));
-    }
+    sfz::optional<pn::string> output_dir;
+    callbacks.short_option = [&argv, &output_dir](
+                                     pn::rune opt, const args::callbacks::get_value_f& get_value) {
+        switch (opt.value()) {
+            case 'o': output_dir.emplace(get_value().copy()); return true;
+            case 'h': usage(stdout, sfz::path::basename(argv[0]), 0); return true;
+            default: return false;
+        }
+    };
+    callbacks.long_option =
+            [&callbacks](pn::string_view opt, const args::callbacks::get_value_f& get_value) {
+                if (opt == "output") {
+                    return callbacks.short_option(pn::rune{'o'}, get_value);
+                } else if (opt == "help") {
+                    return callbacks.short_option(pn::rune{'h'}, get_value);
+                } else {
+                    return false;
+                }
+            };
+
+    args::parse(argc - 1, argv + 1, callbacks);
 
     NullPrefsDriver prefs;
     TextVideoDriver video({640, 480}, output_dir);
@@ -114,11 +132,36 @@ int main(int argc, char* const* argv) {
             builder.save(id, tint);
         }
     }
+}
 
-    return 0;
+void print_nested_exception(const std::exception& e) {
+    pn::format(stderr, ": {0}", e.what());
+    try {
+        std::rethrow_if_nested(e);
+    } catch (const std::exception& e) {
+        print_nested_exception(e);
+    }
+}
+
+void print_exception(pn::string_view progname, const std::exception& e) {
+    pn::format(stderr, "{0}: {1}", sfz::path::basename(progname), e.what());
+    try {
+        std::rethrow_if_nested(e);
+    } catch (const std::exception& e) {
+        print_nested_exception(e);
+    }
+    pn::format(stderr, "\n");
 }
 
 }  // namespace
 }  // namespace antares
 
-int main(int argc, char** argv) { return antares::main(argc, argv); }
+int main(int argc, char* const* argv) {
+    try {
+        antares::main(argc, argv);
+    } catch (const std::exception& e) {
+        antares::print_exception(argv[0], e);
+        return 1;
+    }
+    return 0;
+}

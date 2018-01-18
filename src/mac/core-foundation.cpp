@@ -21,8 +21,6 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <pn/data>
 
-#include "data/pn.hpp"
-
 using std::unique_ptr;
 
 namespace antares {

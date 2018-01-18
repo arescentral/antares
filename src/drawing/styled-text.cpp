@@ -23,7 +23,6 @@
 #include <pn/file>
 
 #include "data/picture.hpp"
-#include "data/pn.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
 #include "video/driver.hpp"

@@ -16,9 +16,9 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
+#include <stdlib.h>
 #include <pn/file>
 
-#include "data/pn.hpp"
 #include "data/scenario-list.hpp"
 
 namespace antares {

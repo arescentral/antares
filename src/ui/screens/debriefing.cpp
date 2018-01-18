@@ -22,7 +22,6 @@
 #include <sfz/sfz.hpp>
 #include <vector>
 
-#include "data/pn.hpp"
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
@@ -247,13 +246,13 @@ pn::string DebriefingScreen::build_score_text(
     const int par_score  = 100;
 
     string_replace(text, strings.at(0), pn::dump(your_mins, pn::dump_short));
-    string_replace(text, strings.at(1), sfz2pn(sfz::String(dec(your_secs, 2))));
+    string_replace(text, strings.at(1), dec(your_secs, 2));
     if (par_time > game_ticks()) {
         string_replace(text, strings.at(2), pn::dump(par_mins, pn::dump_short));
-        sfz::String secs_string;
-        secs_string.append(":");
-        secs_string.append(dec(par_secs, 2));
-        string_replace(text, strings.at(3), sfz2pn(secs_string));
+        pn::string secs_string;
+        secs_string += ":";
+        secs_string += dec(par_secs, 2);
+        string_replace(text, strings.at(3), secs_string);
     } else {
         StringList data_strings(6002);
         string_replace(text, strings.at(2), data_strings.at(8));  // = "N/A"

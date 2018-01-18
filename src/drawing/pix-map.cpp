@@ -22,7 +22,6 @@
 #include <pn/file>
 #include <sfz/sfz.hpp>
 
-#include "data/pn.hpp"
 #include "lang/casts.hpp"
 
 namespace antares {
@@ -89,8 +88,8 @@ ArrayPixMap::ArrayPixMap(Size size)
 ArrayPixMap::~ArrayPixMap() {}
 
 void ArrayPixMap::resize(Size new_size) {
-    using sfz::swap;
     using std::min;
+    using std::swap;
     ArrayPixMap new_pix_map(new_size.width, new_size.height);
     Size        min_size(min(size().width, new_size.width), min(size().height, new_size.height));
     Rect        transfer = min_size.as_rect();
@@ -108,7 +107,6 @@ const RgbColor* ArrayPixMap::bytes() const { return _bytes.get(); }
 RgbColor* ArrayPixMap::mutable_bytes() { return _bytes.get(); }
 
 void ArrayPixMap::swap(ArrayPixMap& other) {
-    using sfz::swap;
     using std::swap;
     swap(_size, other._size);
     swap(_bytes, other._bytes);

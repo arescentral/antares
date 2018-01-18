@@ -30,7 +30,6 @@
 #include "config/preferences.hpp"
 #include "data/interface.hpp"
 #include "data/picture.hpp"
-#include "data/pn.hpp"
 #include "data/races.hpp"
 #include "data/resource.hpp"
 #include "data/string-list.hpp"

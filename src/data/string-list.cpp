@@ -23,7 +23,6 @@
 #include <pn/value>
 #include <sfz/sfz.hpp>
 
-#include "data/pn.hpp"
 #include "data/resource.hpp"
 
 using std::vector;

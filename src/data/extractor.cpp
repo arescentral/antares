@@ -30,7 +30,6 @@
 #include <zipxx/zipxx.hpp>
 
 #include "config/dirs.hpp"
-#include "data/pn.hpp"
 #include "data/replay.hpp"
 #include "drawing/pix-map.hpp"
 #include "math/geometry.hpp"
@@ -44,12 +43,13 @@ using rezin::ResourceType;
 using rezin::Sound;
 using rezin::StringList;
 using rezin::aiff;
-using sfz::MappedFile;
-using sfz::Sha1;
 using sfz::StringMap;
 using sfz::dec;
 using sfz::makedirs;
+using sfz::mapped_file;
 using sfz::range;
+using sfz::rmtree;
+using sfz::sha1;
 using std::set;
 using std::unique_ptr;
 using std::vector;
@@ -63,7 +63,7 @@ namespace antares {
 namespace {
 
 bool verbatim(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
-    out.write(pn::data_view{data.data(), data.size()});
+    out.write(data);
     return true;
 }
 
@@ -125,10 +125,9 @@ bool convert_nlrp(pn::string_view, bool, int16_t id, pn::data_view data, pn::fil
 }
 
 bool convert_pict(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
-    rezin::Picture pict({data.data(), static_cast<size_t>(data.size())});
+    rezin::Picture pict(data);
     if ((pict.version() == 2) && (pict.is_raster())) {
-        sfz::Bytes bytes(png(pict));
-        out.write(pn::data_view{bytes.data(), static_cast<int>(bytes.size())});
+        out.write(png(pict));
         return true;
     }
     return false;
@@ -136,30 +135,28 @@ bool convert_pict(pn::string_view, bool, int16_t, pn::data_view data, pn::file_v
 
 static pn::array pn_str(const StringList& str_list) {
     pn::array a;
-    for (const std::shared_ptr<const sfz::String>& s : str_list.strings) {
-        a.push_back(sfz2pn(*s));
+    for (pn::string_view s : str_list.strings) {
+        a.push_back(s.copy());
     }
     return a;
 }
 
 bool convert_str(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
     Options    options;
-    StringList list(sfz::BytesSlice{data.data(), static_cast<size_t>(data.size())}, options);
+    StringList list(data, options);
     pn::dump(out, pn::value{pn_str(list)});
     return true;
 }
 
 bool convert_text(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
     Options options;
-    out.write(
-            sfz2pn(sfz::String(options.decode({data.data(), static_cast<size_t>(data.size())}))));
+    out.write(options.decode(data));
     return true;
 }
 
 bool convert_snd(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
-    Sound      snd({data.data(), static_cast<size_t>(data.size())});
-    sfz::Bytes bytes(aiff(snd));
-    out.write(pn::data_view{bytes.data(), static_cast<int>(bytes.size())});
+    Sound snd(data);
+    out.write(aiff(snd));
     return true;
 }
 
@@ -343,7 +340,7 @@ bool convert_smiv(
     }
 
     pn::string sprite_dir = pn::format("{0}/{1}", dir, id);
-    makedirs(pn2sfz(sprite_dir), 0755);
+    makedirs(sprite_dir, 0755);
 
     {
         pn::file file = pn::open(pn::format("{0}/{1}/image.png", dir, id), "w");
@@ -488,7 +485,7 @@ void DataExtractor::set_plugin_file(pn::string_view path) {
     {
         // Make sure that the provided file is actually an archive that
         // will be usable as a plugin, then get its identifier.
-        ZipArchive archive(pn2sfz(path), 0);
+        ZipArchive archive(path, 0);
         check_version(archive, kPluginVersion);
         read_identifier(archive, found_scenario);
     }
@@ -497,14 +494,14 @@ void DataExtractor::set_plugin_file(pn::string_view path) {
     // extract_scenario() will expect it later.
     pn::string out_path = pn::format("{0}/{1}.antaresplugin", _downloads_dir, found_scenario);
     if (path != out_path) {
-        makedirs(path::dirname(pn2sfz(out_path)), 0755);
-        MappedFile file(pn2sfz(path));
-        pn::file   f = pn::open(out_path, "w");
-        f.write(pn::data_view{file.data().data(), static_cast<int>(file.data().size())});
+        makedirs(path::dirname(out_path), 0755);
+        mapped_file file(path);
+        pn::file    f = pn::open(out_path, "w");
+        f.write(file.data());
     }
     pn::string scenario_dir = pn::format("{0}/{1}", _output_dir, found_scenario);
-    if (path::exists(pn2sfz(scenario_dir))) {
-        rmtree(pn2sfz(scenario_dir));
+    if (path::exists(scenario_dir)) {
+        rmtree(scenario_dir);
     }
 
     std::swap(_scenario, found_scenario);
@@ -523,10 +520,10 @@ void DataExtractor::extract_factory_scenario(Observer* observer) const {
     if (!scenario_current(kFactoryScenarioIdentifier)) {
         download(
                 observer, kDownloadBase, "Ares", "1.2.0",
-                (Sha1::Digest){{0x246c393c, 0xa598af68, 0xa58cfdd1, 0x8e1601c1, 0xf4f30931}});
+                {0x246c393c, 0xa598af68, 0xa58cfdd1, 0x8e1601c1, 0xf4f30931});
 
         pn::string scenario_dir = pn::format("{0}/{1}", _output_dir, kFactoryScenarioIdentifier);
-        rmtree(pn2sfz(scenario_dir));
+        rmtree(scenario_dir);
         extract_original(observer, "Ares-1.2.0.zip");
         write_version(kFactoryScenarioIdentifier);
     }
@@ -535,19 +532,18 @@ void DataExtractor::extract_factory_scenario(Observer* observer) const {
 void DataExtractor::extract_plugin_scenario(Observer* observer) const {
     if ((_scenario != kFactoryScenarioIdentifier) && !scenario_current(_scenario)) {
         pn::string scenario_dir = pn::format("{0}/{1}", _output_dir, _scenario);
-        rmtree(pn2sfz(scenario_dir));
+        rmtree(scenario_dir);
         extract_plugin(observer);
         write_version(_scenario);
     }
 }
 
 bool DataExtractor::scenario_current(pn::string_view scenario) const {
-    pn::string    path = pn::format("{0}/{1}/version", _output_dir, scenario);
-    pn::data_view version{reinterpret_cast<const uint8_t*>(kVersion),
-                          static_cast<int>(strlen(kVersion))};
+    pn::string    path    = pn::format("{0}/{1}/version", _output_dir, scenario);
+    pn::data_view version = pn::string{kVersion}.as_data();
     try {
-        MappedFile file(pn2sfz(path));
-        return pn::data_view{file.data().data(), static_cast<int>(file.data().size())} == version;
+        mapped_file file(path);
+        return file.data() == version;
     } catch (std::exception& e) {
         return false;
     }
@@ -555,22 +551,22 @@ bool DataExtractor::scenario_current(pn::string_view scenario) const {
 
 void DataExtractor::download(
         Observer* observer, pn::string_view base, pn::string_view name, pn::string_view version,
-        const Sha1::Digest& expected_digest) const {
+        const sha1::digest& expected_digest) const {
     pn::string full_path = pn::format("{0}/{1}-{2}.zip", _downloads_dir, name, version);
 
     // Don't download `file` if it has already been downloaded.  If there is a regular file at
     // `full_path` and it has the expected digest, then return without doing anything.  Otherwise,
     // delete whatever's there (if anything).
-    if (path::exists(pn2sfz(full_path))) {
-        if (path::isfile(pn2sfz(full_path))) {
-            MappedFile file(pn2sfz(full_path));
-            Sha1       sha;
-            sfz::write(sha, file.data());
-            if (sha.digest() == expected_digest) {
+    if (path::exists(full_path)) {
+        if (path::isfile(full_path)) {
+            mapped_file file(full_path);
+            sha1        sha;
+            sha.write(file.data());
+            if (sha.compute() == expected_digest) {
                 return;
             }
         }
-        rmtree(pn2sfz(full_path));
+        rmtree(full_path);
     }
 
     pn::string url = pn::format("{0}/{1}/{1}-{2}.zip", base, name, version);
@@ -583,9 +579,9 @@ void DataExtractor::download(
     // disk.
     pn::data download;
     http::get(url, download.open("w"));
-    Sha1 sha;
-    sfz::write(sha, sfz::BytesSlice{download.data(), static_cast<size_t>(download.size())});
-    if (sha.digest() != expected_digest) {
+    sha1 sha;
+    sha.write(download);
+    if (sha.compute() != expected_digest) {
         throw std::runtime_error(
                 pn::format(
                         "Downloaded {0}, size={1} but it didn't have the right digest.",
@@ -594,14 +590,14 @@ void DataExtractor::download(
     }
 
     // If we got the file, write it out at `full_path`.
-    makedirs(path::dirname(pn2sfz(full_path)), 0755);
+    makedirs(path::dirname(full_path), 0755);
     pn::file file = pn::open(full_path, "w");
     file.write(download);
 }
 
 void DataExtractor::write_version(pn::string_view scenario_identifier) const {
     pn::string path = pn::format("{0}/{1}/version", _output_dir, scenario_identifier);
-    makedirs(path::dirname(pn2sfz(path)), 0755);
+    makedirs(path::dirname(path), 0755);
     pn::file file = pn::open(path, "w");
     file.write(kVersion);
 }
@@ -610,14 +606,14 @@ void DataExtractor::extract_original(Observer* observer, pn::string_view file) c
     pn::string status = pn::format("Extracting {0}...", file);
     observer->status(status);
     pn::string full_path = pn::format("{0}/{1}", _downloads_dir, file);
-    ZipArchive archive(pn2sfz(full_path), 0);
+    ZipArchive archive(full_path, 0);
 
     rezin::Options options;
     options.line_ending = rezin::Options::CR;
 
     for (const ResourceFile& resource_file : kResourceFiles) {
         pn::string    path = resource_file.path;
-        ZipFileReader file(archive, pn2sfz(path));
+        ZipFileReader file(archive, path);
         AppleDouble   apple_double(file.data());
         ResourceFork  rsrc(apple_double.at(AppleDouble::RESOURCE_FORK), options);
 
@@ -633,10 +629,9 @@ void DataExtractor::extract_original(Observer* observer, pn::string_view file) c
                         "{0}/{1}/{2}/{3}.{4}", _output_dir, kFactoryScenarioIdentifier,
                         conversion.output_directory, entry.id(), conversion.output_extension);
                 if (conversion.convert(
-                            sfz2pn(path::dirname(pn2sfz(output))), true, entry.id(),
-                            {entry.data().data(), static_cast<int>(entry.data().size())},
+                            path::dirname(output), true, entry.id(), entry.data(),
                             data.open("w"))) {
-                    makedirs(path::dirname(pn2sfz(output)), 0755);
+                    makedirs(path::dirname(output), 0755);
                     pn::file file = pn::open(output, "w");
                     file.write(data);
                 }
@@ -650,7 +645,7 @@ void DataExtractor::extract_plugin(Observer* observer) const {
     pn::string status = pn::format("Extracting {0}...", file);
     observer->status(status);
     pn::string full_path = pn::format("{0}/{1}", _downloads_dir, file);
-    ZipArchive archive(pn2sfz(full_path), 0);
+    ZipArchive archive(full_path, 0);
 
     rezin::Options options;
     options.line_ending = rezin::Options::CR;
@@ -660,8 +655,7 @@ void DataExtractor::extract_plugin(Observer* observer) const {
 
     for (size_t i : range(archive.size())) {
         ZipFileReader   file(archive, i);
-        pn::string      path_data = sfz2pn(file.path());
-        pn::string_view path      = path_data;
+        pn::string_view path = file.path();
 
         // Skip directories and special files.
         if ((path.rfind("/") == (path.size() - 1)) || (path == kPluginIdentifierFile) ||
@@ -679,8 +673,7 @@ void DataExtractor::extract_plugin(Observer* observer) const {
             !pn::partition(id_slice, " ", path) || !pn::strtoll(id_slice, &id, nullptr) ||
             (path.find(pn::rune{'/'}) != path.npos)) {
             throw std::runtime_error(
-                    pn::format(
-                            "bad plugin file {0}", pn::dump(sfz2pn(file.path()), pn::dump_short))
+                    pn::format("bad plugin file {0}", pn::dump(file.path(), pn::dump_short))
                             .c_str());
         }
 
@@ -696,10 +689,8 @@ void DataExtractor::extract_plugin(Observer* observer) const {
                         "{0}/{1}/{2}/{3}.{4}", _output_dir, _scenario, conversion.output_directory,
                         id, conversion.output_extension);
                 if (conversion.convert(
-                            sfz2pn(path::dirname(pn2sfz(output))), false, id,
-                            {file.data().data(), static_cast<int>(file.data().size())},
-                            data.open("w"))) {
-                    makedirs(path::dirname(pn2sfz(output)), 0755);
+                            path::dirname(output), false, id, file.data(), data.open("w"))) {
+                    makedirs(path::dirname(output), 0755);
                     pn::file file = pn::open(output, "w");
                     file.write(data);
                 }

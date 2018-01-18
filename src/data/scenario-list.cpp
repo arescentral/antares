@@ -24,9 +24,7 @@
 #include <sfz/sfz.hpp>
 #include "config/dirs.hpp"
 #include "data/level.hpp"
-#include "data/pn.hpp"
 
-using sfz::MappedFile;
 using std::vector;
 
 namespace antares {
@@ -62,7 +60,7 @@ ScenarioList::ScenarioList() {
 
     const pn::string factory_path =
             pn::format("{0}/scenario-info/128.nlAG", scenario_dir(kFactoryScenarioIdentifier));
-    if (sfz::path::isfile(pn2sfz(factory_path))) {
+    if (sfz::path::isfile(factory_path)) {
         scenarioInfoType info;
         read_from(pn::open(factory_path, "r"), &info);
         factory_scenario.title        = info.titleString.copy();
@@ -95,9 +93,8 @@ ScenarioList::ScenarioList() {
             continue;
         }
 
-        MappedFile file(pn2sfz(path));
-        pn::file   in =
-                pn::data_view{file.data().data(), static_cast<int>(file.data().size())}.open();
+        sfz::mapped_file file(path);
+        pn::file         in = file.data().open();
         scenarioInfoType info;
         if (!read_from(in, &info)) {
             continue;

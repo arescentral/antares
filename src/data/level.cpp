@@ -21,7 +21,6 @@
 #include <sfz/sfz.hpp>
 
 #include "data/plugin.hpp"
-#include "data/pn.hpp"
 
 namespace macroman = sfz::macroman;
 
@@ -38,7 +37,7 @@ bool read_pstr(pn::file_view in, pn::string* out) {
         return false;
     }
     pn::data_view encoded{bytes + 1, bytes[0]};
-    *out = sfz2pn(macroman::decode({encoded.data(), static_cast<size_t>(encoded.size())}));
+    *out = macroman::decode(encoded);
     return true;
 }
 

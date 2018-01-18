@@ -22,7 +22,6 @@
 
 #include "config/preferences.hpp"
 #include "data/base-object.hpp"
-#include "data/pn.hpp"
 #include "game/globals.hpp"
 #include "game/motion.hpp"
 #include "game/space-object.hpp"

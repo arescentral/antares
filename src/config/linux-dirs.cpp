@@ -18,6 +18,7 @@
 
 #include "config/dirs.hpp"
 
+#include <stdlib.h>
 #include <sys/param.h>
 #include <unistd.h>
 #include <pn/file>
