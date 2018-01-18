@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- encoding: utf-8 -*-
 # Copyright (C) 2017 The Antares Authors
 # This file is part of Antares, a tactical space combat game.
 # Antares is free software, distributed under the LGPL+. See COPYING.
@@ -107,6 +108,9 @@ def main():
     if not os.path.isfile("test/space-race.NLRP"):
         print("test data submodule is missing; fetching it")
         subprocess.check_call("git submodule update --init test".split())
+
+    # Install or reinstall data/scenarios if it’s missing or out-of-date.
+    subprocess.check_call("out/cur/antares-install-data -d data/scenarios".split())
 
     test_types = "unit data offscreen replay".split()
     parser = argparse.ArgumentParser()
