@@ -38,10 +38,10 @@ if (host_os == "mac") {
   assert(false, "unsupported host_os $host_os")
 }
 
-_default_configs = [
-  "//build/lib:c++11",
-  "//build/lib:libc++",
-]
+_default_configs = [ "//build/lib:c++11" ]
+if (target_os == "mac") {
+  _default_configs += [ "//build/lib:libc++" ]
+}
 
 if (mode == "dev") {
   _default_configs += [ "//build/lib:dev" ]
