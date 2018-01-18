@@ -101,6 +101,8 @@ def main():
             print("no DISPLAY; using Xvfb")
             os.execvp("xvfb-run", ["xvfb-run", "-s", "-screen 0 640x480x24"] + sys.argv)
 
+    os.chdir(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+
     test_types = "unit data offscreen replay".split()
     parser = argparse.ArgumentParser()
     parser.add_argument("--smoke", action="store_true")
