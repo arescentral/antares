@@ -27,6 +27,7 @@
 #include "config/dirs.hpp"
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
+#include "data/pn.hpp"
 #include "game/sys.hpp"
 
 using sfz::Bytes;
@@ -259,9 +260,9 @@ struct ScopedGlob {
 
 // Deletes the oldest replay until there are fewer than `count` in the replays folder.
 static void cull_replays(size_t count) {
-    if (path::isdir(dirs().replays)) {
+    if (path::isdir(pn2sfz(dirs().replays))) {
         ScopedGlob g;
-        String     str(format("{0}/*.nlrp", dirs().replays));
+        String     str(format("{0}/*.nlrp", pn2sfz(dirs().replays)));
         CString    c_str(str);
         glob(c_str.data(), 0, NULL, &g.data);
 
@@ -279,7 +280,7 @@ static void cull_replays(size_t count) {
             }
         }
     } else {
-        makedirs(dirs().replays, 0755);
+        makedirs(pn2sfz(dirs().replays), 0755);
     }
 }
 
@@ -301,7 +302,7 @@ void ReplayBuilder::start() {
     if ((time(&t) < 0) || !localtime_r(&t, &tm) || (strftime(buffer, 1024, "%c", &tm) <= 0)) {
         return;
     }
-    sfz::String path(format("{0}/Replay {1}.nlrp", dirs().replays, utf8::decode(buffer)));
+    sfz::String path(format("{0}/Replay {1}.nlrp", pn2sfz(dirs().replays), utf8::decode(buffer)));
     int         fd = open(path, O_WRONLY | O_CREAT | O_EXCL, 0644);
     if (fd >= 0) {
         _file.reset(new ScopedFd(fd));

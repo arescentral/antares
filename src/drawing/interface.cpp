@@ -404,11 +404,11 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
         }
     }
 
-    bool   draw_shortcut = false;
-    String shortcut_text;
+    bool       draw_shortcut = false;
+    pn::string shortcut_text;
     if ((mode == KEYBOARD_MOUSE) && item.key) {
         draw_shortcut = true;
-        GetKeyNumName(item.key, &shortcut_text);
+        GetKeyNumName(item.key, shortcut_text);
     } else if ((mode == GAMEPAD) && item.gamepad) {
         draw_shortcut = true;
         Gamepad::name(item.gamepad, shortcut_text);
@@ -469,7 +469,7 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
             color = GetRGBTranslateColorShade(item.hue, shade);
             rects.fill(vRect, color);
 
-            swidth = GetInterfaceStringWidth(sfz2pn(shortcut_text), item.style);
+            swidth = GetInterfaceStringWidth(shortcut_text, item.style);
             swidth = uRect.left + (uRect.right - uRect.left) / 2 - swidth / 2;
             if (item.status == kDimmed) {
                 color = GetRGBTranslateColorShade(item.hue, VERY_DARK);
@@ -479,8 +479,8 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
         }
 
         DrawInterfaceString(
-                Point(swidth, uRect.top + GetInterfaceFontAscent(item.style)),
-                sfz2pn(shortcut_text), item.style, color);
+                Point(swidth, uRect.top + GetInterfaceFontAscent(item.style)), shortcut_text,
+                item.style, color);
 
         // draw the button title
         {
@@ -649,8 +649,8 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
         } else {
             shade = DARK;  // DARKEST + kSlightlyLighterColor;
         }
-        String s;
-        GetKeyNumName(item.key, &s);
+        pn::string s;
+        GetKeyNumName(item.key, s);
         swidth = GetInterfaceFontWidth(item.style) * kMaxKeyNameLength;
 
         Rect uRect(
@@ -673,7 +673,7 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
         color = GetRGBTranslateColorShade(item.hue, shade);
         Rects().fill(vRect, color);
 
-        swidth = GetInterfaceStringWidth(sfz2pn(s), item.style);
+        swidth = GetInterfaceStringWidth(s, item.style);
         swidth = uRect.left + (uRect.right - uRect.left) / 2 - swidth / 2;
         if (item.status == kDimmed) {
             color = GetRGBTranslateColorShade(item.hue, VERY_DARK);
@@ -682,8 +682,8 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
         }
 
         DrawInterfaceString(
-                Point(swidth, uRect.top + GetInterfaceFontAscent(item.style)), sfz2pn(s),
-                item.style, color);
+                Point(swidth, uRect.top + GetInterfaceFontAscent(item.style)), s, item.style,
+                color);
 
         // draw the button title
         if (!item.on) {

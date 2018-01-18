@@ -18,20 +18,18 @@
 
 #include "config/dirs.hpp"
 
-#include <sfz/sfz.hpp>
-
 namespace antares {
 
-static sfz::String app_data;
-const char         kFactoryScenarioIdentifier[] = "com.biggerplanet.ares";
+static pn::string app_data;
+const char        kFactoryScenarioIdentifier[] = "com.biggerplanet.ares";
 
-sfz::String application_path() {
+pn::string_view application_path() {
     if (app_data.empty()) {
         return default_application_path();
     }
-    return sfz::String(app_data);
+    return app_data;
 }
 
-void set_application_path(sfz::StringSlice path) { app_data.assign(path); }
+void set_application_path(pn::string_view path) { app_data = path.copy(); }
 
 }  // namespace antares

@@ -20,6 +20,7 @@
 
 #include "config/dirs.hpp"
 #include "data/extractor.hpp"
+#include "data/pn.hpp"
 #include "net/http.hpp"
 
 using sfz::Exception;
@@ -47,9 +48,9 @@ class PrintStatusObserver : public DataExtractor::Observer {
 void ExtractDataMain(int argc, char* const* argv) {
     args::Parser parser(argv[0], "Downloads and extracts game data");
 
-    String           source(dirs().downloads);
-    String           dest(dirs().scenarios);
-    bool             check = false;
+    String           source = pn2sfz(dirs().downloads);
+    String           dest   = pn2sfz(dirs().scenarios);
+    bool             check  = false;
     Optional<String> plugin;
     parser.add_argument("plugin", store(plugin))
             .help("a plugin to install (default: install factory scenario)");

@@ -46,13 +46,12 @@ namespace antares {
 void main(int argc, const char* argv[]) {
     args::Parser parser(argv[0], "Runs Antares");
 
-    sfz::String sfz_app_data(default_application_path());
+    sfz::String sfz_app_data(pn2sfz(default_application_path()));
     sfz::String sfz_scenario(kFactoryScenarioIdentifier);
     parser.add_argument("scenario", store(sfz_scenario)).help("select scenario");
     parser.add_argument("--help", help(parser, 0)).help("display this help screen");
     parser.add_argument("--app-data", store(sfz_app_data))
-            .help(format(
-                    "set path to application data (default: {0})", default_application_path()));
+            .help(format("set path to application data (default: {0})", sfz_app_data));
 
     String error;
     if (!parser.parse_args(argc - 1, argv + 1, error)) {
@@ -60,17 +59,17 @@ void main(int argc, const char* argv[]) {
         exit(1);
     }
 
-    if (!sfz::path::isdir(application_path())) {
+    if (!sfz::path::isdir(pn2sfz(application_path()))) {
         if (sfz_app_data.empty()) {
             print(io::err, format("{0}: application data not installed\n\n", parser.name()));
             print(io::err, format("Please install it, or specify a path with --app-data\n\n"));
         } else {
             print(io::err, format("{0}: application data not found at {1}\n\n", parser.name(),
-                                  application_path()));
+                                  pn2sfz(application_path())));
         }
         exit(1);
     } else {
-        set_application_path(sfz_app_data);
+        set_application_path(sfz2pn(sfz_app_data));
     }
 
     FilePrefsDriver prefs;

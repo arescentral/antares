@@ -200,7 +200,7 @@ inline bool mLeftArrowKey(const KeyMap& km) { return km.get(Keys::LEFT_ARROW); }
 
 void    GetKeyMapFromKeyNum(int key_num, KeyMap* key_map);
 int     GetKeyNumFromKeyMap(const KeyMap& key_map);
-void    GetKeyNumName(int key_num, sfz::String* out);
+void    GetKeyNumName(int key_num, pn::string& out);
 bool    GetKeyNameNum(pn::string_view name, int& out);
 bool    AnyKeyButThisOne(const KeyMap& key_map, int key_num);
 int32_t GetAsciiFromKeyMap(const KeyMap&, const KeyMap&);

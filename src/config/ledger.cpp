@@ -144,7 +144,7 @@ class DirectoryLedger::Visitor : public JsonVisitor {
 
 void DirectoryLedger::load() {
     const pn::string_view scenario_id = sys.prefs->scenario_identifier();
-    String path(format("{0}/{1}/ledger.json", dirs().registry, pn2sfz(scenario_id)));
+    String path(format("{0}/{1}/ledger.json", pn2sfz(dirs().registry), pn2sfz(scenario_id)));
 
     _chapters.clear();
     unique_ptr<MappedFile> file;
@@ -167,7 +167,7 @@ void DirectoryLedger::load() {
 
 void DirectoryLedger::save() {
     const pn::string_view scenario_id = sys.prefs->scenario_identifier();
-    const String path(format("{0}/{1}/ledger.json", dirs().registry, pn2sfz(scenario_id)));
+    const String path(format("{0}/{1}/ledger.json", pn2sfz(dirs().registry), pn2sfz(scenario_id)));
 
     vector<Json> unlocked_levels;
     for (std::set<int>::const_iterator it = _chapters.begin(); it != _chapters.end(); ++it) {

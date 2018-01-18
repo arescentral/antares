@@ -21,8 +21,6 @@
 #include "data/pn.hpp"
 #include "game/sys.hpp"
 
-using sfz::String;
-using sfz::StringSlice;
 using sfz::range;
 
 namespace antares {
@@ -36,9 +34,9 @@ int16_t Gamepad::num(pn::string_view name) {
     return 0;
 }
 
-bool Gamepad::name(int16_t button, String& out) {
+bool Gamepad::name(int16_t button, pn::string& out) {
     if ((0 <= button) && (button < sys.gamepad_names.size())) {
-        out = pn2sfz(sys.gamepad_names.at(button));
+        out = sys.gamepad_names.at(button).copy();
         return true;
     }
     return false;

@@ -52,10 +52,11 @@ static unique_ptr<MappedFile> load_first(
 
 static unique_ptr<MappedFile> load(sfz::StringSlice resource_path) {
     return load_first(
-            resource_path, {
-                                   scenario_dir(pn2sfz(sys.prefs->scenario_identifier())),
-                                   scenario_dir(kFactoryScenarioIdentifier), application_path(),
-                           });
+            resource_path,
+            {
+                    pn2sfz(scenario_dir(sys.prefs->scenario_identifier())),
+                    pn2sfz(scenario_dir(kFactoryScenarioIdentifier)), pn2sfz(application_path()),
+            });
 }
 
 Resource::Resource(pn::string_view type, pn::string_view extension, int id)

@@ -23,6 +23,7 @@
 
 #include "config/dirs.hpp"
 #include "config/keys.hpp"
+#include "data/pn.hpp"
 
 using sfz::Exception;
 using sfz::Json;
@@ -100,7 +101,7 @@ static void set_from(
 
 FilePrefsDriver::FilePrefsDriver() {
     try {
-        String     path(format("{0}/config.json", dirs().root));
+        String     path(format("{0}/config.json", pn2sfz(dirs().root)));
         MappedFile file(path);
         Json       json;
         String     data(utf8::decode(file.data()));
@@ -139,7 +140,7 @@ void FilePrefsDriver::set(const Preferences& p) {
     all["sound"] = Json::object(sound);
     all["keys"]  = Json::object(keys);
 
-    String path(format("{0}/config.json", dirs().root));
+    String path(format("{0}/config.json", pn2sfz(dirs().root)));
     makedirs(dirname(path), 0755);
     ScopedFd fd(open(path, O_CREAT | O_TRUNC | O_WRONLY, 0644));
     String   pretty(pretty_print(Json::object(all)));

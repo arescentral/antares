@@ -20,6 +20,7 @@
 
 #include <sys/param.h>
 #include <unistd.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 namespace antares {
@@ -28,15 +29,15 @@ namespace antares {
 #define STRINGIFY(x) STRINGIFY_(x)
 #define ANTARES_DATA_STRING STRINGIFY(ANTARES_DATA)
 
-sfz::String default_application_path() { return sfz::String(ANTARES_DATA_STRING); }
+pn::string default_application_path() { return ANTARES_DATA_STRING; }
 
 Directories test_dirs() {
     Directories directories;
-    directories.root.assign(application_path());
-    directories.downloads.assign(format("{0}/downloads", directories.root));
-    directories.registry.assign(format("{0}/registry", directories.root));
-    directories.replays.assign(format("{0}/replays", directories.root));
-    directories.scenarios.assign(format("{0}/scenarios", directories.root));
+    directories.root      = application_path().copy();
+    directories.downloads = pn::format("{0}/downloads", directories.root);
+    directories.registry  = pn::format("{0}/registry", directories.root);
+    directories.replays   = pn::format("{0}/replays", directories.root);
+    directories.scenarios = pn::format("{0}/scenarios", directories.root);
     return directories;
 };
 
@@ -45,8 +46,8 @@ const Directories& dirs() {
     return dirs;
 }
 
-sfz::String scenario_dir(sfz::StringSlice identifier) {
-    return sfz::String(sfz::format("{0}/{1}", dirs().scenarios, identifier));
+pn::string scenario_dir(pn::string_view identifier) {
+    return pn::format("{0}/{1}", dirs().scenarios, identifier);
 }
 
 }  // namespace antares

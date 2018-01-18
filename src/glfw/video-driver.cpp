@@ -179,8 +179,6 @@ void GLFWVideoDriver::key(int key, int scancode, int action, int mods) {
     if (!key) {
         return;
     }
-    String name;
-    GetKeyNumName(key + 1, &name);
     if (action == GLFW_PRESS) {
         KeyDownEvent(now(), key).send(_loop->top());
     } else if (action == GLFW_RELEASE) {

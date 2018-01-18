@@ -67,8 +67,8 @@ ScenarioList::ScenarioList() {
     Entry& factory_scenario     = _scenarios.back();
     factory_scenario.identifier = kFactoryScenarioIdentifier;
 
-    const String factory_path(
-            format("{0}/scenario-info/128.nlAG", scenario_dir(kFactoryScenarioIdentifier)));
+    const String factory_path(format(
+            "{0}/scenario-info/128.nlAG", pn2sfz(scenario_dir(kFactoryScenarioIdentifier))));
     if (sfz::path::isfile(factory_path)) {
         MappedFile       file(factory_path);
         BytesSlice       data(file.data());
@@ -91,11 +91,11 @@ ScenarioList::ScenarioList() {
 
     ScopedGlob        g;
     const StringSlice info("scenario-info/128.nlAG");
-    String            str(format("{0}/*/{1}", dirs().scenarios, info));
+    String            str(format("{0}/*/{1}", pn2sfz(dirs().scenarios), info));
     CString           c_str(str);
     glob(c_str.data(), 0, NULL, &g.data);
 
-    size_t prefix_len = dirs().scenarios.size() + 1;
+    size_t prefix_len = pn2sfz(dirs().scenarios).size() + 1;
     size_t suffix_len = info.size() + 1;
     for (int i = 0; i < g.data.gl_pathc; ++i) {
         const String path(utf8::decode(g.data.gl_pathv[i]));

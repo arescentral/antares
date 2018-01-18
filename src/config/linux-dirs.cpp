@@ -20,9 +20,11 @@
 
 #include <sys/param.h>
 #include <unistd.h>
+#include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "build/defs.hpp"
+#include "data/pn.hpp"
 
 using sfz::String;
 using sfz::format;
@@ -31,8 +33,8 @@ namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-String default_application_path() {
-    return String(format("{0}/share/games/antares/app", kAntaresPrefix));
+pn::string default_application_path() {
+    return sfz2pn(format("{0}/share/games/antares/app", kAntaresPrefix));
 }
 
 Directories linux_dirs() {
@@ -40,17 +42,21 @@ Directories linux_dirs() {
 
     char* home = getenv("HOME");
     if (home && *home) {
-        directories.root.assign(utf8::decode(home));
+        directories.root = home;
     } else {
         char tmp[PATH_MAX] = "/tmp/antares-XXXXXX";
-        directories.root.assign(utf8::decode(mkdtemp(tmp)));
+        directories.root   = mkdtemp(tmp);
     }
-    directories.root.append("/.local/share/games/antares");
+    directories.root += "/.local/share/games/antares";
 
-    directories.downloads.assign(format("{0}/downloads", directories.root));
-    directories.registry.assign(format("{0}/registry", directories.root));
-    directories.replays.assign(format("{0}/replays", directories.root));
-    directories.scenarios.assign(format("{0}/scenarios", directories.root));
+    directories.downloads = directories.root.copy();
+    directories.downloads += "/downloads";
+    directories.registry = directories.root.copy();
+    directories.registry += "/registry";
+    directories.replays = directories.root.copy();
+    directories.replays += "/replays";
+    directories.scenarios = directories.root.copy();
+    directories.scenarios += "/scenarios";
     return directories;
 };
 
@@ -59,12 +65,11 @@ const Directories& dirs() {
     return dirs;
 }
 
-sfz::String scenario_dir(sfz::StringSlice identifier) {
+pn::string scenario_dir(pn::string_view identifier) {
     if (identifier == kFactoryScenarioIdentifier) {
-        return sfz::String(
-                sfz::format("{0}/share/games/antares/scenarios/{1}", kAntaresPrefix, identifier));
+        return pn::format("{0}/share/games/antares/scenarios/{1}", kAntaresPrefix, identifier);
     }
-    return sfz::String(sfz::format("{0}/{1}", dirs().scenarios, identifier));
+    return pn::format("{0}/{1}", dirs().scenarios, identifier);
 }
 
 }  // namespace antares

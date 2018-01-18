@@ -424,7 +424,9 @@ static miniScreenLineType selectable(
 
 static miniScreenLineType accept(StringSlice name) {
     miniScreenLineType line;
-    GetKeyNumName(sys.prefs->key(kCompAcceptKeyNum), &line.string);
+    pn::string         line_string;
+    GetKeyNumName(sys.prefs->key(kCompAcceptKeyNum), line_string);
+    line.string = pn2sfz(line_string);
     pad_to(line.string, kKeyNameLength);
     line.string.append(" ");
     line.string.append(name);
@@ -435,7 +437,9 @@ static miniScreenLineType accept(StringSlice name) {
 
 static miniScreenLineType cancel(StringSlice name) {
     miniScreenLineType line;
-    GetKeyNumName(sys.prefs->key(kCompCancelKeyNum), &line.string);
+    pn::string         line_string;
+    GetKeyNumName(sys.prefs->key(kCompCancelKeyNum), line_string);
+    line.string = pn2sfz(line_string);
     pad_to(line.string, kKeyNameLength);
     line.string.append(" ");
     line.string.append(name);
