@@ -20,6 +20,7 @@
 #define ANTARES_DATA_REPLAY_HPP_
 
 #include <stdint.h>
+#include <pn/string>
 #include <sfz/sfz.hpp>
 #include <vector>
 
@@ -63,7 +64,7 @@ class ReplayBuilder : public EventReceiver {
     ReplayBuilder();
 
     void init(
-            sfz::StringSlice scenario_identifier, sfz::StringSlice scenario_version,
+            pn::string_view scenario_identifier, pn::string_view scenario_version,
             int32_t chapter_id, int32_t global_seed);
     void         start();
     virtual void key_down(const KeyDownEvent& key);

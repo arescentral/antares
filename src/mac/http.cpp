@@ -21,6 +21,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <sfz/sfz.hpp>
 
+#include "data/pn.hpp"
 #include "mac/core-foundation.hpp"
 
 using sfz::Exception;
@@ -31,7 +32,7 @@ using sfz::format;
 namespace antares {
 namespace http {
 
-void get(const StringSlice& url, WriteTarget out) {
+void get(pn::string_view url, WriteTarget out) {
     cf::Url  cfurl(url);
     cf::Data cfdata;
     SInt32   error;
@@ -39,7 +40,7 @@ void get(const StringSlice& url, WriteTarget out) {
                 NULL, cfurl.c_obj(), &cfdata.c_obj(), NULL, NULL, &error)) {
         write(out, cfdata.data());
     } else {
-        throw Exception(format("Couldn't load requested url {0}", url));
+        throw Exception(format("Couldn't load requested url {0}", pn2sfz(url)));
     }
 }
 

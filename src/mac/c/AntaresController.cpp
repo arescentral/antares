@@ -23,6 +23,7 @@
 
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
+#include "data/pn.hpp"
 #include "game/globals.hpp"
 #include "mac/core-foundation.hpp"
 #include "mac/prefs-driver.hpp"
@@ -32,10 +33,7 @@
 #include "ui/flows/master.hpp"
 #include "video/driver.hpp"
 
-using sfz::CString;
 using sfz::Exception;
-using sfz::String;
-using sfz::StringSlice;
 using antares::CardStack;
 using antares::CocoaVideoDriver;
 using antares::CoreFoundationPrefsDriver;
@@ -70,7 +68,7 @@ extern "C" bool antares_controller_loop(AntaresDrivers* drivers, CFStringRef* er
     try {
         drivers->video.loop(new Master(time(NULL)));
     } catch (Exception& e) {
-        *error_message = cf::wrap(e.message()).release();
+        *error_message = cf::wrap(sfz2pn(e.message())).release();
         return false;
     }
     return true;

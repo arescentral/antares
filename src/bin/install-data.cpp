@@ -40,8 +40,8 @@ namespace antares {
 
 class PrintStatusObserver : public DataExtractor::Observer {
   public:
-    virtual void status(const sfz::StringSlice& status) {
-        print(io::err, format("{0}\n", status));
+    virtual void status(pn::string_view status) {
+        print(io::err, format("{0}\n", pn2sfz(status)));
     }
 };
 
@@ -68,9 +68,9 @@ void ExtractDataMain(int argc, char* const* argv) {
             exit(1);
         }
 
-        DataExtractor extractor(source, dest);
+        DataExtractor extractor(sfz2pn(source), sfz2pn(dest));
         if (plugin.has()) {
-            extractor.set_plugin_file(*plugin);
+            extractor.set_plugin_file(sfz2pn(*plugin));
         }
 
         if (extractor.current()) {

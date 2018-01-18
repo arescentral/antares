@@ -59,7 +59,7 @@ namespace cf {
 namespace {
 
 template <typename T>
-bool get_preference(const StringSlice& key, T& value) {
+bool get_preference(pn::string_view key, T& value) {
     PropertyList plist(
             CFPreferencesCopyAppValue(cf::wrap(key).c_obj(), kCFPreferencesCurrentApplication));
     if (plist.c_obj()) {
@@ -70,7 +70,7 @@ bool get_preference(const StringSlice& key, T& value) {
 }
 
 template <typename T>
-void set_preference(const StringSlice& key, const T& value) {
+void set_preference(pn::string_view key, const T& value) {
     CFPreferencesSetAppValue(
             cf::wrap(key).c_obj(), value.c_obj(), kCFPreferencesCurrentApplication);
 }

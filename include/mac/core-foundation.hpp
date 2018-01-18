@@ -137,10 +137,7 @@ class String : public Object<CFStringRef> {
     String(String&&) = default;
     String& operator=(String&&) = default;
 };
-String wrap(const char* value);
-String wrap(sfz::StringSlice value);
 String wrap(pn::string_view value);
-bool   unwrap(const String& cfvalue, sfz::String& value);
 bool   unwrap(const String& cfvalue, pn::string& value);
 
 class Array : public Object<CFArrayRef> {
@@ -210,7 +207,7 @@ class Url : public Object<CFURLRef> {
     static CFTypeID type_id();
     Url();
     Url(type c_obj);
-    Url(const sfz::StringSlice& string);
+    Url(pn::string_view string);
     Url(Url&&)   = default;
     Url& operator=(Url&&) = default;
 };

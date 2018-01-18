@@ -26,7 +26,6 @@
 using sfz::Bytes;
 using sfz::BytesSlice;
 using sfz::CString;
-using sfz::StringSlice;
 using std::unique_ptr;
 
 namespace utf8 = sfz::utf8;
@@ -147,9 +146,10 @@ PropertyList::PropertyList(type c_obj) : Object<CFPropertyListRef>(c_obj) {}
 
 namespace {
 
-CFURLRef create_url(const StringSlice& string) {
-    Bytes bytes(utf8::encode(string));
-    return CFURLCreateWithBytes(NULL, bytes.data(), bytes.size(), kCFStringEncodingUTF8, NULL);
+CFURLRef create_url(pn::string_view string) {
+    return CFURLCreateWithBytes(
+            NULL, reinterpret_cast<const uint8_t*>(string.data()), string.size(),
+            kCFStringEncodingUTF8, NULL);
 }
 
 }  // namespace
@@ -160,7 +160,7 @@ Url::Url() {}
 
 Url::Url(type c_obj) : Object<CFURLRef>(c_obj) {}
 
-Url::Url(const sfz::StringSlice& string) : Object<CFURLRef>(create_url(string)) {}
+Url::Url(pn::string_view string) : Object<CFURLRef>(create_url(string)) {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // wrap()
@@ -187,15 +187,11 @@ Number wrap(float value) { return Number(CFNumberCreate(NULL, kCFNumberFloatType
 
 Number wrap(double value) { return Number(CFNumberCreate(NULL, kCFNumberDoubleType, &value)); }
 
-String wrap(const char* value) { return wrap(StringSlice(value)); }
-
-String wrap(sfz::StringSlice value) {
-    Bytes bytes(utf8::encode(value));
+String wrap(pn::string_view value) {
     return String(CFStringCreateWithBytes(
-            NULL, bytes.data(), bytes.size(), kCFStringEncodingUTF8, false));
+            NULL, reinterpret_cast<const uint8_t*>(value.data()), value.size(),
+            kCFStringEncodingUTF8, false));
 }
-
-String wrap(pn::string_view value) { return wrap(pn2sfz(value)); }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // unwrap()
@@ -250,23 +246,16 @@ bool unwrap(const Number& cfvalue, double& value) {
     return CFNumberGetValue(cfvalue.c_obj(), kCFNumberDoubleType, &value);
 }
 
-bool unwrap(const String& cfvalue, sfz::String& value) {
+bool unwrap(const String& cfvalue, pn::string& value) {
     if (!cfvalue.c_obj()) {
         return false;
     }
-    Data encoded(CFStringCreateExternalRepresentation(
-            NULL, cfvalue.c_obj(), kCFStringEncodingUTF8, '?'));
-    print(value, utf8::decode(encoded.data()));
-    return true;
-}
-
-bool unwrap(const String& cfvalue, pn::string& value) {
     sfz::String sfz_value;
-    if (unwrap(cfvalue, sfz_value)) {
-        value = sfz2pn(sfz_value);
-        return true;
-    }
-    return false;
+    Data        encoded(CFStringCreateExternalRepresentation(
+            NULL, cfvalue.c_obj(), kCFStringEncodingUTF8, '?'));
+    print(sfz_value, utf8::decode(encoded.data()));
+    value = sfz2pn(sfz_value);
+    return true;
 }
 
 }  // namespace cf

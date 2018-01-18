@@ -356,9 +356,16 @@ void SetAdmiralBuildAtObject(Handle<Admiral> a, Handle<SpaceObject> obj) {
     }
 }
 
-void SetAdmiralBuildAtName(Handle<Admiral> a, StringSlice name) {
-    auto destObject  = a->buildAtObject();
-    destObject->name = sfz2pn(name.slice(0, min<size_t>(name.size(), kDestinationNameLen)));
+void SetAdmiralBuildAtName(Handle<Admiral> a, pn::string_view name) {
+    auto   destObject = a->buildAtObject();
+    size_t rune_count = 0;
+    for (pn::string_view::iterator it = name.begin(); it != name.end(); ++it) {
+        if (rune_count++ == kDestinationNameLen) {
+            destObject->name = name.substr(0, it.offset()).copy();
+            return;
+        }
+    }
+    destObject->name = name.copy();
 }
 
 pn::string_view GetDestBalanceName(Handle<Destination> whichDestObject) {

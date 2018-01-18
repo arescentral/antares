@@ -285,12 +285,12 @@ static void cull_replays(size_t count) {
 }
 
 void ReplayBuilder::init(
-        StringSlice scenario_identifier, StringSlice scenario_version, int32_t chapter_id,
+        pn::string_view scenario_identifier, pn::string_view scenario_version, int32_t chapter_id,
         int32_t global_seed) {
-    _scenario.identifier.assign(scenario_identifier);
-    _scenario.version.assign(scenario_version);
-    _chapter_id  = chapter_id;
-    _global_seed = global_seed;
+    _scenario.identifier = pn2sfz(scenario_identifier);
+    _scenario.version    = pn2sfz(scenario_version);
+    _chapter_id          = chapter_id;
+    _global_seed         = global_seed;
 }
 
 void ReplayBuilder::start() {

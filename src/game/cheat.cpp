@@ -56,10 +56,10 @@ void CheatFeedback(int16_t whichCheat, bool activate, Handle<Admiral> whichPlaye
 void CheatFeedbackPlus(
         int16_t whichCheat, bool activate, Handle<Admiral> whichPlayer, PrintItem extra);
 
-int16_t GetCheatNumFromString(const StringSlice& s) {
+int16_t GetCheatNumFromString(pn::string_view s) {
     String code_string;
-    for (Rune r : s) {
-        code_string.append(1, r + kCheatCodeValue);
+    for (pn::rune r : s) {
+        code_string.append(1, r.value() + kCheatCodeValue);
     }
     auto it = std::find(sys.cheat.codes.begin(), sys.cheat.codes.end(), sfz2pn(code_string));
     if (it == sys.cheat.codes.end()) {

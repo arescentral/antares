@@ -444,20 +444,20 @@ void check_version(ZipArchive& archive, StringSlice expected) {
     }
 }
 
-void read_identifier(ZipArchive& archive, String& out) {
+void read_identifier(ZipArchive& archive, pn::string& out) {
     ZipFileReader identifier_file(archive, kPluginIdentifierFile);
     String        actual(utf8::decode(identifier_file.data()));
     if (actual.at(actual.size() - 1) != '\n') {
         throw Exception(format("missing newline in plugin identifier {0}", quote(actual)));
     }
-    out.assign(actual.slice(0, actual.size() - 1));
+    out = sfz2pn(actual.slice(0, actual.size() - 1));
 }
 
-void check_identifier(ZipArchive& archive, StringSlice expected) {
-    String actual;
+void check_identifier(ZipArchive& archive, pn::string_view expected) {
+    pn::string actual;
     read_identifier(archive, actual);
     if (expected != actual) {
-        throw Exception(format("mismatch in plugin identifier {0}", quote(actual)));
+        throw Exception(format("mismatch in plugin identifier {0}", quote(pn2sfz(actual))));
     }
 }
 
@@ -465,38 +465,39 @@ void check_identifier(ZipArchive& archive, StringSlice expected) {
 
 DataExtractor::Observer::~Observer() {}
 
-DataExtractor::DataExtractor(const StringSlice& downloads_dir, const StringSlice& output_dir)
-        : _downloads_dir(downloads_dir),
-          _output_dir(output_dir),
+DataExtractor::DataExtractor(pn::string_view downloads_dir, pn::string_view output_dir)
+        : _downloads_dir(downloads_dir.copy()),
+          _output_dir(output_dir.copy()),
           _scenario(kFactoryScenarioIdentifier) {}
 
-void DataExtractor::set_scenario(sfz::StringSlice scenario) { _scenario.assign(scenario); }
+void DataExtractor::set_scenario(pn::string_view scenario) { _scenario = scenario.copy(); }
 
-void DataExtractor::set_plugin_file(StringSlice path) {
-    String found_scenario;
+void DataExtractor::set_plugin_file(pn::string_view path) {
+    pn::string found_scenario;
     {
         // Make sure that the provided file is actually an archive that
         // will be usable as a plugin, then get its identifier.
-        ZipArchive archive(path, 0);
+        ZipArchive archive(pn2sfz(path), 0);
         check_version(archive, kPluginVersion);
         read_identifier(archive, found_scenario);
     }
 
     // Copy it to $DOWNLOADS/$IDENTIFIER.antaresplugin.  This is where
     // extract_scenario() will expect it later.
-    String out_path(format("{0}/{1}.antaresplugin", _downloads_dir, found_scenario));
-    if (path != out_path) {
+    String out_path(
+            format("{0}/{1}.antaresplugin", pn2sfz(_downloads_dir), pn2sfz(found_scenario)));
+    if (pn2sfz(path) != out_path) {
         makedirs(path::dirname(out_path), 0755);
-        MappedFile file(path);
+        MappedFile file(pn2sfz(path));
         ScopedFd   fd(open(out_path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
         write(fd, file.data());
     }
-    String scenario_dir(format("{0}/{1}", _output_dir, found_scenario));
+    String scenario_dir(format("{0}/{1}", pn2sfz(_output_dir), pn2sfz(found_scenario)));
     if (path::exists(scenario_dir)) {
         rmtree(scenario_dir);
     }
 
-    swap(_scenario, found_scenario);
+    std::swap(_scenario, found_scenario);
 }
 
 bool DataExtractor::current() const {
@@ -514,7 +515,7 @@ void DataExtractor::extract_factory_scenario(Observer* observer) const {
                 observer, kDownloadBase, "Ares", "1.2.0",
                 (Sha1::Digest){{0x246c393c, 0xa598af68, 0xa58cfdd1, 0x8e1601c1, 0xf4f30931}});
 
-        String scenario_dir(format("{0}/{1}", _output_dir, kFactoryScenarioIdentifier));
+        String scenario_dir(format("{0}/{1}", pn2sfz(_output_dir), kFactoryScenarioIdentifier));
         rmtree(scenario_dir);
         extract_original(observer, "Ares-1.2.0.zip");
         write_version(kFactoryScenarioIdentifier);
@@ -523,15 +524,15 @@ void DataExtractor::extract_factory_scenario(Observer* observer) const {
 
 void DataExtractor::extract_plugin_scenario(Observer* observer) const {
     if ((_scenario != kFactoryScenarioIdentifier) && !scenario_current(_scenario)) {
-        String scenario_dir(format("{0}/{1}", _output_dir, _scenario));
+        String scenario_dir(format("{0}/{1}", pn2sfz(_output_dir), pn2sfz(_scenario)));
         rmtree(scenario_dir);
         extract_plugin(observer);
         write_version(_scenario);
     }
 }
 
-bool DataExtractor::scenario_current(sfz::StringSlice scenario) const {
-    String     path(format("{0}/{1}/version", _output_dir, scenario));
+bool DataExtractor::scenario_current(pn::string_view scenario) const {
+    String     path(format("{0}/{1}/version", pn2sfz(_output_dir), pn2sfz(scenario)));
     BytesSlice version(kVersion);
     try {
         MappedFile file(path);
@@ -542,9 +543,10 @@ bool DataExtractor::scenario_current(sfz::StringSlice scenario) const {
 }
 
 void DataExtractor::download(
-        Observer* observer, const StringSlice& base, const StringSlice& name,
-        const StringSlice& version, const Sha1::Digest& expected_digest) const {
-    String full_path(format("{0}/{1}-{2}.zip", _downloads_dir, name, version));
+        Observer* observer, pn::string_view base, pn::string_view name, pn::string_view version,
+        const Sha1::Digest& expected_digest) const {
+    String full_path(
+            format("{0}/{1}-{2}.zip", pn2sfz(_downloads_dir), pn2sfz(name), pn2sfz(version)));
 
     // Don't download `file` if it has already been downloaded.  If there is a regular file at
     // `full_path` and it has the expected digest, then return without doing anything.  Otherwise,
@@ -561,16 +563,16 @@ void DataExtractor::download(
         rmtree(full_path);
     }
 
-    String url(format("{0}/{1}/{1}-{2}.zip", base, name, version));
+    String url(format("{0}/{1}/{1}-{2}.zip", pn2sfz(base), pn2sfz(name), pn2sfz(version)));
 
-    String status(format("Downloading {0}-{1}.zip...", name, version));
-    observer->status(status);
+    String status(format("Downloading {0}-{1}.zip...", pn2sfz(name), pn2sfz(version)));
+    observer->status(sfz2pn(status));
 
     // Download the file from `url`.  Check its digest when it has been downloaded; if it is not
     // the right file, then throw an exception without writing it to disk.  Otherwise, write it to
     // disk.
     Bytes download;
-    http::get(url, download);
+    http::get(sfz2pn(url), download);
     Sha1 sha;
     write(sha, download);
     if (sha.digest() != expected_digest) {
@@ -585,18 +587,18 @@ void DataExtractor::download(
     write(fd, download.data(), download.size());
 }
 
-void DataExtractor::write_version(sfz::StringSlice scenario_identifier) const {
-    String path(format("{0}/{1}/version", _output_dir, scenario_identifier));
+void DataExtractor::write_version(pn::string_view scenario_identifier) const {
+    String path(format("{0}/{1}/version", pn2sfz(_output_dir), pn2sfz(scenario_identifier)));
     makedirs(path::dirname(path), 0755);
     ScopedFd   fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
     BytesSlice version(kVersion);
     write(fd, version);
 }
 
-void DataExtractor::extract_original(Observer* observer, const StringSlice& file) const {
-    String status(format("Extracting {0}...", file));
-    observer->status(status);
-    String     full_path(format("{0}/{1}", _downloads_dir, file));
+void DataExtractor::extract_original(Observer* observer, pn::string_view file) const {
+    String status(format("Extracting {0}...", pn2sfz(file)));
+    observer->status(sfz2pn(status));
+    String     full_path(format("{0}/{1}", pn2sfz(_downloads_dir), pn2sfz(file)));
     ZipArchive archive(full_path, 0);
 
     rezin::Options options;
@@ -617,7 +619,7 @@ void DataExtractor::extract_original(Observer* observer, const StringSlice& file
             for (const ResourceEntry& entry : type) {
                 Bytes  data;
                 String output(format(
-                        "{0}/{1}/{2}/{3}.{4}", _output_dir, kFactoryScenarioIdentifier,
+                        "{0}/{1}/{2}/{3}.{4}", pn2sfz(_output_dir), kFactoryScenarioIdentifier,
                         conversion.output_directory, entry.id(), conversion.output_extension));
                 if (conversion.convert(
                             path::dirname(output), true, entry.id(), entry.data(), data)) {
@@ -631,10 +633,10 @@ void DataExtractor::extract_original(Observer* observer, const StringSlice& file
 }
 
 void DataExtractor::extract_plugin(Observer* observer) const {
-    String file(format("{0}.antaresplugin", _scenario));
+    String file(format("{0}.antaresplugin", pn2sfz(_scenario)));
     String status(format("Extracting {0}...", file));
-    observer->status(status);
-    String     full_path(format("{0}/{1}", _downloads_dir, file));
+    observer->status(sfz2pn(status));
+    String     full_path(format("{0}/{1}", pn2sfz(_downloads_dir), file));
     ZipArchive archive(full_path, 0);
 
     rezin::Options options;
@@ -673,7 +675,7 @@ void DataExtractor::extract_plugin(Observer* observer) const {
             if (conversion.resource == resource_type) {
                 Bytes  data;
                 String output(
-                        format("{0}/{1}/{2}/{3}.{4}", _output_dir, _scenario,
+                        format("{0}/{1}/{2}/{3}.{4}", pn2sfz(_output_dir), pn2sfz(_scenario),
                                conversion.output_directory, id, conversion.output_extension));
                 if (conversion.convert(path::dirname(output), false, id, file.data(), data)) {
                     makedirs(path::dirname(output), 0755);

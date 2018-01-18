@@ -60,7 +60,7 @@ enum {
     kCheatBit32      = 0x80000000,
 };
 
-int16_t GetCheatNumFromString(const sfz::StringSlice& string);
+int16_t GetCheatNumFromString(pn::string_view string);
 void    ExecuteCheat(int16_t whichCheat, Handle<Admiral> whichPlayer);
 
 }  // namespace antares

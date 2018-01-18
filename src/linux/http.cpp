@@ -22,12 +22,12 @@
 #include <neon/ne_session.h>
 #include <neon/ne_uri.h>
 #include <unistd.h>
+#include <pn/string>
 #include <sfz/sfz.hpp>
 
 using sfz::BytesSlice;
 using sfz::CString;
 using sfz::Exception;
-using sfz::StringSlice;
 using sfz::WriteTarget;
 using sfz::format;
 using std::unique_ptr;
@@ -55,15 +55,14 @@ static int reader(void* userdata, const char* buf, size_t len) {
     return 0;
 }
 
-void get(const StringSlice& url, WriteTarget out) {
+void get(pn::string_view url, WriteTarget out) {
     static int inited = ne_sock_init();
     if (inited != 0) {
         throw Exception("ne_sock_init()");
     }
 
-    CString cstr(url);
-    ne_uri  uri = {};
-    if (ne_uri_parse(cstr.data(), &uri)) {
+    ne_uri uri = {};
+    if (ne_uri_parse(url.copy().c_str(), &uri)) {
         throw Exception("ne_uri_parse()");
     }
     if (uri.port == 0) {

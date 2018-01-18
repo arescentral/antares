@@ -19,12 +19,13 @@
 #ifndef ANTARES_NET_HTTP_HPP_
 #define ANTARES_NET_HTTP_HPP_
 
+#include <pn/fwd>
 #include <sfz/sfz.hpp>
 
 namespace antares {
 namespace http {
 
-void get(const sfz::StringSlice& url, sfz::WriteTarget out);
+void get(pn::string_view url, sfz::WriteTarget out);
 
 }  // namespace http
 }  // namespace antares

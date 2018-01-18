@@ -196,7 +196,7 @@ bool                BaseHasSomethingToBuild(Handle<SpaceObject> obj);
 Handle<Destination> GetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral);
 void                SetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral, Handle<SpaceObject> obj);
 
-void            SetAdmiralBuildAtName(Handle<Admiral> whichAdmiral, sfz::StringSlice name);
+void            SetAdmiralBuildAtName(Handle<Admiral> whichAdmiral, pn::string_view name);
 pn::string_view GetDestBalanceName(Handle<Destination> whichDestObject);
 pn::string_view GetAdmiralName(Handle<Admiral> whichAdmiral);
 

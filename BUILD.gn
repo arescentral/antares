@@ -647,6 +647,7 @@ if (target_os == "mac") {
     ]
     public_deps = [
       "//ext/libsfz",
+      "//ext/procyon:procyon-cpp",
     ]
     libs = [ "-lneon" ]
     configs += [ ":antares_private" ]
