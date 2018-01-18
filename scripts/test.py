@@ -103,6 +103,11 @@ def main():
 
     os.chdir(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
+    # Get test submodule if necessary.
+    if not os.path.isfile("test/space-race.NLRP"):
+        print("test data submodule is missing; fetching it")
+        subprocess.check_call("git submodule update --init test".split())
+
     test_types = "unit data offscreen replay".split()
     parser = argparse.ArgumentParser()
     parser.add_argument("--smoke", action="store_true")
