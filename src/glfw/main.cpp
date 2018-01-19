@@ -50,8 +50,8 @@ void usage(pn::file_view out, pn::string_view progname, int retcode) {
             "    scenario            select scenario\n"
             "\n"
             "  options:\n"
-            "    -h, --app-data      set path to application data\n"
-            "                        (default: {0})\n"
+            "    -a, --app-data      set path to application data\n"
+            "                        (default: {1})\n"
             "    -h, --help          display this help screen\n",
             progname, default_application_path());
     exit(retcode);
@@ -96,19 +96,18 @@ void main(int argc, char* const* argv) {
 
     args::parse(argc - 1, argv + 1, callbacks);
 
-    if (!sfz::path::isdir(application_path())) {
-        if (app_data.empty()) {
+    set_application_path(app_data);
+    if (!sfz::path::isdir(app_data)) {
+        if (app_data == default_application_path()) {
             throw std::runtime_error(
                     "application data not installed\n"
                     "\n"
-                    "Please install it, or specify a path with --app-data\n\n");
+                    "Please install it, or specify a path with --app-data");
         } else {
             throw std::runtime_error(
-                    pn::format("{0}: application data not found", application_path()).c_str());
+                    pn::format("{0}: application data not found", app_data).c_str());
         }
         exit(1);
-    } else {
-        set_application_path(app_data);
     }
 
     FilePrefsDriver prefs;

@@ -25,7 +25,7 @@ const char        kFactoryScenarioIdentifier[] = "com.biggerplanet.ares";
 
 pn::string_view application_path() {
     if (app_data.empty()) {
-        return default_application_path();
+        app_data = default_application_path();
     }
     return app_data;
 }
