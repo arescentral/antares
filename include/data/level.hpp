@@ -54,7 +54,7 @@ const int32_t kTrueOnlyOnce  = 0x00000001;
 const int32_t kInitiallyTrue = 0x00000002;
 const int32_t kHasBeenTrue   = 0x00000004;
 
-struct scenarioInfoType {
+struct ScenarioInfo {
     Handle<BaseObject> warpInFlareID;
     Handle<BaseObject> warpOutFlareID;
     Handle<BaseObject> playerBodyID;
@@ -63,9 +63,9 @@ struct scenarioInfoType {
     pn::string         titleString;
     pn::string         authorNameString;
     pn::string         authorURLString;
-    uint32_t           version;
+    pn::string         version;
 };
-bool read_from(pn::file_view in, scenarioInfoType* scenario_info);
+bool read_from(pn::file_view in, ScenarioInfo* scenario_info);
 
 enum conditionType {
     kNoCondition                      = 0,

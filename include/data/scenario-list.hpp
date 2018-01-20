@@ -24,12 +24,6 @@
 
 namespace antares {
 
-struct Version {
-    std::vector<int> components;
-};
-pn::string stringify(const Version& v);
-Version    u32_to_version(uint32_t in);
-
 class ScenarioList {
   public:
     struct Entry {
@@ -38,7 +32,7 @@ class ScenarioList {
         pn::string download_url;
         pn::string author;
         pn::string author_url;
-        Version    version;
+        pn::string version;
         bool       installed;
     };
 

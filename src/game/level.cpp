@@ -259,27 +259,27 @@ bool start_construct_level(Handle<Level> level, int32_t* max) {
 }
 
 static void load_blessed_objects(uint32_t all_colors) {
-    if (!plug.meta.energyBlobID.get()) {
+    if (!plug.info.energyBlobID.get()) {
         throw std::runtime_error("No energy blob defined");
     }
-    if (!plug.meta.warpInFlareID.get()) {
+    if (!plug.info.warpInFlareID.get()) {
         throw std::runtime_error("No warp in flare defined");
     }
-    if (!plug.meta.warpOutFlareID.get()) {
+    if (!plug.info.warpOutFlareID.get()) {
         throw std::runtime_error("No warp out flare defined");
     }
-    if (!plug.meta.playerBodyID.get()) {
+    if (!plug.info.playerBodyID.get()) {
         throw std::runtime_error("No player body defined");
     }
 
     // Load the four blessed objects.  The player's body is needed
     // in all colors; the other three are needed only as neutral
     // objects by default.
-    plug.meta.playerBodyID->internalFlags |= all_colors;
+    plug.info.playerBodyID->internalFlags |= all_colors;
     for (int i = 0; i < g.level->playerNum; i++) {
-        const auto&        meta      = plug.meta;
+        const auto&        info      = plug.info;
         Handle<BaseObject> blessed[] = {
-                meta.energyBlobID, meta.warpInFlareID, meta.warpOutFlareID, meta.playerBodyID,
+                info.energyBlobID, info.warpInFlareID, info.warpOutFlareID, info.playerBodyID,
         };
         for (auto id : blessed) {
             AddBaseObjectMedia(id, GRAY, all_colors);

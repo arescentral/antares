@@ -29,38 +29,37 @@ namespace antares {
 static const int16_t kLevel_StartTimeMask  = 0x7fff;
 static const int16_t kLevel_IsTraining_Bit = 0x8000;
 
-namespace {
-
-bool read_pstr(pn::file_view in, pn::string* out) {
-    uint8_t bytes[256];
-    if (fread(bytes, 1, 256, in.c_obj()) < 256) {
-        return false;
-    }
-    pn::data_view encoded{bytes + 1, bytes[0]};
-    *out = macroman::decode(encoded);
-    return true;
-}
-
-}  // namespace
-
 Level* Level::get(int n) { return &plug.levels[n]; }
 
-bool read_from(pn::file_view in, scenarioInfoType* scenario_info) {
-    int32_t warp_in, warp_out, body, energy;
-    uint8_t unused[12];
-    if (!(in.read(&warp_in, &warp_out, &body, &energy) &&
-          read_pstr(in, &scenario_info->downloadURLString) &&
-          read_pstr(in, &scenario_info->titleString) &&
-          read_pstr(in, &scenario_info->authorNameString) &&
-          read_pstr(in, &scenario_info->authorURLString) && in.read(&scenario_info->version) &&
-          (fread(unused, 1, 12, in.c_obj()) == 12))) {
+bool read_from(pn::file_view in, ScenarioInfo* info) {
+    pn::value  x;
+    pn_error_t error;
+    if (!pn::parse(in, x, &error)) {
         return false;
     }
+    pn::map_cref m = x.as_map();
+    for (pn::string_view field : {"title", "download_url", "author", "author_url", "version"}) {
+        if (m.get(field).as_string().empty()) {
+            return false;
+        }
+    }
+    for (pn::string_view field :
+         {"warp_in_flare", "warp_out_flare", "player_body", "energy_blob"}) {
+        if (!m.has(field) || !m.get(field).is_int()) {
+            return false;
+        }
+    }
 
-    scenario_info->warpInFlareID  = Handle<BaseObject>(warp_in);
-    scenario_info->warpOutFlareID = Handle<BaseObject>(warp_out);
-    scenario_info->playerBodyID   = Handle<BaseObject>(body);
-    scenario_info->energyBlobID   = Handle<BaseObject>(energy);
+    info->titleString       = m.get("title").as_string().copy();
+    info->downloadURLString = m.get("download_url").as_string().copy();
+    info->authorNameString  = m.get("author").as_string().copy();
+    info->authorURLString   = m.get("author_url").as_string().copy();
+    info->version           = m.get("version").as_string().copy();
+    info->warpInFlareID     = Handle<BaseObject>(m.get("warp_in_flare").as_int());
+    info->warpOutFlareID    = Handle<BaseObject>(m.get("warp_out_flare").as_int());
+    info->playerBodyID      = Handle<BaseObject>(m.get("player_body").as_int());
+    info->energyBlobID      = Handle<BaseObject>(m.get("energy_blob").as_int());
+
     return true;
 }
 

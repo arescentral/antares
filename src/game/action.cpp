@@ -574,7 +574,7 @@ static void enter_warp(
     subject->attributes &= ~kOccupiesSpace;
     fixedPointType newVel = {Fixed::zero(), Fixed::zero()};
     CreateAnySpaceObject(
-            plug.meta.warpInFlareID, &newVel, &subject->location, subject->direction,
+            plug.info.warpInFlareID, &newVel, &subject->location, subject->direction,
             Admiral::none(), 0, -1);
 }
 

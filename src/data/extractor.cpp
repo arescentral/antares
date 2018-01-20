@@ -124,6 +124,63 @@ bool convert_nlrp(pn::string_view, bool, int16_t id, pn::data_view data, pn::fil
     return true;
 }
 
+bool read_pstr(pn::file_view in, pn::string* out) {
+    uint8_t bytes[256];
+    if (fread(bytes, 1, 256, in.c_obj()) < 256) {
+        return false;
+    }
+    pn::data_view encoded{bytes + 1, bytes[0]};
+    *out = sfz::macroman::decode(encoded);
+    return true;
+}
+
+pn::string u32_to_version(uint32_t in) {
+    using std::swap;
+    int a = (in >> 030) & 0xff;
+    int b = (in >> 020) & 0xff;
+    int c = (in >> 010) & 0xff;
+    int d = (in >> 000) & 0xff;
+    if (d) {
+        return pn::format("{0}.{1}.{2}.{3}", a, b, c, d);
+    } else if (c) {
+        return pn::format("{0}.{1}.{2}", a, b, c);
+    } else {
+        return pn::format("{0}.{1}", a, b);
+    }
+}
+
+bool convert_nlag(pn::string_view, bool, int16_t id, pn::data_view data, pn::file_view out) {
+    pn::file in = data.open();
+
+    int32_t    warp_in_flare, warp_out_flare, player_body, energy_blob;
+    uint32_t   version;
+    pn::string download_url;
+    pn::string title;
+    pn::string author;
+    pn::string author_url;
+    uint8_t    unused[12];
+    if (!(in.read(&warp_in_flare, &warp_out_flare, &player_body, &energy_blob) &&
+          read_pstr(in, &download_url) && read_pstr(in, &title) && read_pstr(in, &author) &&
+          read_pstr(in, &author_url) && in.read(&version) &&
+          (fread(unused, 1, 12, in.c_obj()) == 12))) {
+        return false;
+    }
+
+    pn::dump(
+            out, pn::map{
+                         {"title", std::move(title)},
+                         {"download_url", std::move(download_url)},
+                         {"author", std::move(author)},
+                         {"author_url", std::move(author_url)},
+                         {"version", u32_to_version(version)},
+                         {"warp_in_flare", warp_in_flare},
+                         {"warp_out_flare", warp_out_flare},
+                         {"player_body", player_body},
+                         {"energy_blob", energy_blob},
+                 });
+    return true;
+}
+
 bool convert_pict(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
     rezin::Picture pict(data);
     if ((pict.version() == 2) && (pict.is_raster())) {
@@ -383,7 +440,7 @@ static const ResourceFile kResourceFiles[] = {
                         {"STR#", "strings", "pn", convert_str},
                         {"TEXT", "text", "txt", convert_text},
                         {"bsob", "objects", "bin", verbatim, 500},
-                        {"nlAG", "info", "bin", verbatim, 128},
+                        {"nlAG", "info", "pn", convert_nlag, 128},
                         {"obac", "actions", "bin", verbatim, 500},
                         {"race", "races", "bin", verbatim, 500},
                         {"snbf", "scenario-briefings", "bin", verbatim, 500},
@@ -419,7 +476,7 @@ static const ResourceFile::ExtractedResource kPluginFiles[] = {
         {"STR#", "strings", "pn", convert_str},
         {"TEXT", "text", "txt", convert_text},
         {"bsob", "objects", "bin", verbatim, 500},
-        {"nlAG", "info", "bin", verbatim, 128},
+        {"nlAG", "info", "pn", convert_nlag, 128},
         {"obac", "actions", "bin", verbatim, 500},
         {"race", "races", "bin", verbatim, 500},
         {"snbf", "scenario-briefings", "bin", verbatim, 500},
@@ -430,7 +487,7 @@ static const ResourceFile::ExtractedResource kPluginFiles[] = {
 };
 
 static const char kDownloadBase[] = "http://downloads.arescentral.org";
-static const char kVersion[]      = "17\n";
+static const char kVersion[]      = "18+\n";
 
 static const char kPluginVersionFile[]    = "data/version";
 static const char kPluginVersion[]        = "1\n";

@@ -55,9 +55,9 @@ static void read_all(pn::string_view name, pn::string_view path, vector<T>& v) {
 
 void PluginInit() {
     {
-        Resource rsrc("info.bin");
+        Resource rsrc("info.pn");
         pn::file in = rsrc.data().open();
-        if (!read_from(in, &plug.meta)) {
+        if (!read_from(in, &plug.info)) {
             throw std::runtime_error("error while reading scenario file info data");
         }
         if (fgetc(in.c_obj()) != EOF) {

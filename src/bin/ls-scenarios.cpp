@@ -71,18 +71,18 @@ void main(int argc, char* const* argv) {
 
     args::parse(argc - 1, argv + 1, callbacks);
 
-    bool found_at_least_one = false;
+    bool         found_at_least_one = false;
     ScenarioList list;
     for (size_t i = 0; i < list.size(); ++i) {
         if (!list.at(i).installed) {
             continue;
         }
-        pn::format(stdout, "{0}:\n", list.at(i).identifier);
-        pn::format(stdout, "    title: {0}\n", list.at(i).title);
-        pn::format(stdout, "    download url: {0}\n", list.at(i).download_url);
-        pn::format(stdout, "    author: {0}\n", list.at(i).author);
-        pn::format(stdout, "    author url: {0}\n", list.at(i).author_url);
-        pn::format(stdout, "    version: {0}\n", stringify(list.at(i).version));
+        pn::format(stderr, "{0}:\n", list.at(i).identifier);
+        pn::format(stderr, "    title: {0}\n", list.at(i).title);
+        pn::format(stderr, "    download url: {0}\n", list.at(i).download_url);
+        pn::format(stderr, "    author: {0}\n", list.at(i).author);
+        pn::format(stderr, "    author url: {0}\n", list.at(i).author_url);
+        pn::format(stderr, "    version: {0}\n", list.at(i).version);
         found_at_least_one = true;
     }
     if (!found_at_least_one) {

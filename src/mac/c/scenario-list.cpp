@@ -29,7 +29,7 @@ struct AntaresScenarioListEntry {
               download_url(entry.download_url.copy()),
               author(entry.author.copy()),
               author_url(entry.author_url.copy()),
-              version(stringify(entry.version)) {}
+              version(entry.version.copy()) {}
 
     pn::string identifier;
     pn::string title;

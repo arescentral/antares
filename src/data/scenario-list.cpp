@@ -39,51 +39,36 @@ struct ScopedGlob {
 
 }  // namespace
 
-Version u32_to_version(uint32_t in) {
-    using std::swap;
-    vector<int> components;
-    components.push_back((in & 0xff000000) >> 24);
-    components.push_back((in & 0x00ff0000) >> 16);
-    if (in & 0x0000ffff) {
-        components.push_back((in & 0x0000ff00) >> 8);
-    }
-    if (in & 0x000000ff) {
-        components.push_back(in & 0x000000ff);
-    }
-    return Version{components};
-}
-
 ScenarioList::ScenarioList() {
     _scenarios.emplace_back();
     Entry& factory_scenario     = _scenarios.back();
     factory_scenario.identifier = kFactoryScenarioIdentifier;
 
-    const pn::string factory_path = pn::format("{0}/info.bin", factory_scenario_path());
-    if (sfz::path::isfile(factory_path)) {
-        scenarioInfoType info;
-        read_from(pn::open(factory_path, "r"), &info);
+    const pn::string factory_path = pn::format("{0}/info.pn", factory_scenario_path());
+    ScenarioInfo     info;
+    if (sfz::path::isfile(factory_path) && read_from(pn::open(factory_path, "r"), &info)) {
         factory_scenario.title        = info.titleString.copy();
         factory_scenario.download_url = info.downloadURLString.copy();
         factory_scenario.author       = info.authorNameString.copy();
         factory_scenario.author_url   = info.authorURLString.copy();
-        factory_scenario.version      = u32_to_version(info.version);
+        factory_scenario.version      = info.version.copy();
         factory_scenario.installed    = true;
     } else {
         factory_scenario.title        = "Ares";
         factory_scenario.download_url = "http://www.arescentral.com";
         factory_scenario.author       = "Bigger Planet";
         factory_scenario.author_url   = "http://www.biggerplanet.com";
-        factory_scenario.version      = u32_to_version(0x01010100);
+        factory_scenario.version      = "1.1.1";
         factory_scenario.installed    = false;
     }
 
     ScopedGlob            g;
-    const pn::string_view info("info.bin");
-    pn::string            str = pn::format("{0}/*/{1}", dirs().scenarios, info);
+    const pn::string_view info_basename("info.pn");
+    pn::string            str = pn::format("{0}/*/{1}", dirs().scenarios, info_basename);
     glob(str.c_str(), 0, NULL, &g.data);
 
     size_t prefix_len = dirs().scenarios.size() + 1;
-    size_t suffix_len = info.size() + 1;
+    size_t suffix_len = info_basename.size() + 1;
     for (int i = 0; i < g.data.gl_pathc; ++i) {
         const pn::string path = g.data.gl_pathv[i];
         pn::string_view  identifier =
@@ -94,7 +79,7 @@ ScenarioList::ScenarioList() {
 
         sfz::mapped_file file(path);
         pn::file         in = file.data().open();
-        scenarioInfoType info;
+        ScenarioInfo     info;
         if (!read_from(in, &info)) {
             continue;
         }
@@ -105,7 +90,7 @@ ScenarioList::ScenarioList() {
         entry.download_url = info.downloadURLString.copy();
         entry.author       = info.authorNameString.copy();
         entry.author_url   = info.authorURLString.copy();
-        entry.version      = u32_to_version(info.version);
+        entry.version      = info.version.copy();
         entry.installed    = true;
     }
 }
@@ -113,17 +98,5 @@ ScenarioList::ScenarioList() {
 size_t ScenarioList::size() const { return _scenarios.size(); }
 
 const ScenarioList::Entry& ScenarioList::at(size_t index) const { return _scenarios.at(index); }
-
-pn::string stringify(const Version& v) {
-    pn::string out;
-    for (vector<int>::const_iterator begin = v.components.begin(), end = v.components.end();
-         begin != end; ++begin) {
-        if (begin != v.components.begin()) {
-            out += ".";
-        }
-        out += pn::dump(*begin, pn::dump_short);
-    }
-    return out;
-}
 
 }  // namespace antares

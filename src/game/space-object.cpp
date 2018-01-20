@@ -770,7 +770,7 @@ void SpaceObject::destroy() {
             int16_t energyNum = object->energy() / kEnergyPodAmount;
             while (energyNum > 0) {
                 CreateAnySpaceObject(
-                        plug.meta.energyBlobID, &object->velocity, &object->location,
+                        plug.info.energyBlobID, &object->velocity, &object->location,
                         object->direction, Admiral::none(), 0, -1);
                 energyNum--;
             }
@@ -840,7 +840,7 @@ void SpaceObject::free() {
 
 void SpaceObject::create_floating_player_body() {
     auto       obj       = Handle<SpaceObject>(number());
-    const auto body_type = plug.meta.playerBodyID;
+    const auto body_type = plug.info.playerBodyID;
     // if we're already in a body, don't create a body from it
     // a body expiring is handled elsewhere
     if (obj->base == body_type) {
