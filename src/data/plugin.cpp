@@ -34,14 +34,11 @@ static const int16_t kLevelNameID               = 4600;
 static const int16_t kSpaceObjectNameResID      = 5000;
 static const int16_t kSpaceObjectShortNameResID = 5001;
 
-static const int16_t kPackedResID = 500;
-
 ANTARES_GLOBAL ScenarioGlobals plug;
 
 template <typename T>
-static void read_all(
-        pn::string_view name, pn::string_view type, pn::string_view extension, vector<T>& v) {
-    Resource rsrc(type, extension, kPackedResID);
+static void read_all(pn::string_view name, pn::string_view path, vector<T>& v) {
+    Resource rsrc(path);
     size_t   count = rsrc.data().size() / T::byte_size;
     v.resize(count);
     pn::file in = rsrc.data().open();
@@ -58,7 +55,7 @@ static void read_all(
 
 void PluginInit() {
     {
-        Resource rsrc("scenario-info", "nlAG", 128);
+        Resource rsrc("info.bin");
         pn::file in = rsrc.data().open();
         if (!read_from(in, &plug.meta)) {
             throw std::runtime_error("error while reading scenario file info data");
@@ -68,13 +65,13 @@ void PluginInit() {
         }
     }
 
-    read_all("level", "scenarios", "snro", plug.levels);
-    read_all("initials", "scenario-initial-objects", "snit", plug.initials);
-    read_all("conditions", "scenario-conditions", "sncd", plug.conditions);
-    read_all("briefings", "scenario-briefing-points", "snbf", plug.briefings);
-    read_all("objects", "objects", "bsob", plug.objects);
-    read_all("actions", "object-actions", "obac", plug.actions);
-    read_all("races", "races", "race", plug.races);
+    read_all("level", "scenarios.bin", plug.levels);
+    read_all("initials", "scenario-initials.bin", plug.initials);
+    read_all("conditions", "scenario-conditions.bin", plug.conditions);
+    read_all("briefings", "scenario-briefings.bin", plug.briefings);
+    read_all("objects", "objects.bin", plug.objects);
+    read_all("actions", "actions.bin", plug.actions);
+    read_all("races", "races.bin", plug.races);
 
     StringList level_names(kLevelNameID);
     for (auto& level : plug.levels) {

@@ -58,8 +58,7 @@ ScenarioList::ScenarioList() {
     Entry& factory_scenario     = _scenarios.back();
     factory_scenario.identifier = kFactoryScenarioIdentifier;
 
-    const pn::string factory_path =
-            pn::format("{0}/scenario-info/128.nlAG", factory_scenario_path());
+    const pn::string factory_path = pn::format("{0}/info.bin", factory_scenario_path());
     if (sfz::path::isfile(factory_path)) {
         scenarioInfoType info;
         read_from(pn::open(factory_path, "r"), &info);
@@ -79,7 +78,7 @@ ScenarioList::ScenarioList() {
     }
 
     ScopedGlob            g;
-    const pn::string_view info("scenario-info/128.nlAG");
+    const pn::string_view info("info.bin");
     pn::string            str = pn::format("{0}/*/{1}", dirs().scenarios, info);
     glob(str.c_str(), 0, NULL, &g.data);
 

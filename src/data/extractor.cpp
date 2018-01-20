@@ -371,6 +371,7 @@ struct ResourceFile {
         bool (*convert)(
                 pn::string_view dir, bool factory, int16_t id, pn::data_view data,
                 pn::file_view out);
+        int16_t id;
     } resources[16];
 };
 
@@ -381,14 +382,14 @@ static const ResourceFile kResourceFiles[] = {
                         {"PICT", "pictures", "png", convert_pict},
                         {"STR#", "strings", "pn", convert_str},
                         {"TEXT", "text", "txt", convert_text},
-                        {"bsob", "objects", "bsob", verbatim},
-                        {"nlAG", "scenario-info", "nlAG", verbatim},
-                        {"obac", "object-actions", "obac", verbatim},
-                        {"race", "races", "race", verbatim},
-                        {"snbf", "scenario-briefing-points", "snbf", verbatim},
-                        {"sncd", "scenario-conditions", "sncd", verbatim},
-                        {"snit", "scenario-initial-objects", "snit", verbatim},
-                        {"snro", "scenarios", "snro", verbatim},
+                        {"bsob", "objects", "bin", verbatim, 500},
+                        {"nlAG", "info", "bin", verbatim, 128},
+                        {"obac", "actions", "bin", verbatim, 500},
+                        {"race", "races", "bin", verbatim, 500},
+                        {"snbf", "scenario-briefings", "bin", verbatim, 500},
+                        {"sncd", "scenario-conditions", "bin", verbatim, 500},
+                        {"snit", "scenario-initials", "bin", verbatim, 500},
+                        {"snro", "scenarios", "bin", verbatim, 500},
                 },
         },
         {
@@ -417,19 +418,19 @@ static const ResourceFile::ExtractedResource kPluginFiles[] = {
         {"SMIV", "sprites", "pn", convert_smiv},
         {"STR#", "strings", "pn", convert_str},
         {"TEXT", "text", "txt", convert_text},
-        {"bsob", "objects", "bsob", verbatim},
-        {"nlAG", "scenario-info", "nlAG", verbatim},
-        {"obac", "object-actions", "obac", verbatim},
-        {"race", "races", "race", verbatim},
-        {"snbf", "scenario-briefing-points", "snbf", verbatim},
-        {"sncd", "scenario-conditions", "sncd", verbatim},
+        {"bsob", "objects", "bin", verbatim, 500},
+        {"nlAG", "info", "bin", verbatim, 128},
+        {"obac", "actions", "bin", verbatim, 500},
+        {"race", "races", "bin", verbatim, 500},
+        {"snbf", "scenario-briefings", "bin", verbatim, 500},
+        {"sncd", "scenario-conditions", "bin", verbatim, 500},
         {"snd ", "sounds", "aiff", convert_snd},
-        {"snit", "scenario-initial-objects", "snit", verbatim},
-        {"snro", "scenarios", "snro", verbatim},
+        {"snit", "scenario-initials", "bin", verbatim, 500},
+        {"snro", "scenarios", "bin", verbatim, 500},
 };
 
 static const char kDownloadBase[] = "http://downloads.arescentral.org";
-static const char kVersion[]      = "16\n";
+static const char kVersion[]      = "17\n";
 
 static const char kPluginVersionFile[]    = "data/version";
 static const char kPluginVersion[]        = "1\n";
@@ -623,17 +624,31 @@ void DataExtractor::extract_original(Observer* observer, pn::string_view file) c
             }
 
             const ResourceType& type = rsrc.at(conversion.resource);
-            for (const ResourceEntry& entry : type) {
+            if (conversion.id) {
                 pn::data   data;
                 pn::string output = pn::format(
-                        "{0}/{1}/{2}/{3}.{4}", _output_dir, kFactoryScenarioIdentifier,
-                        conversion.output_directory, entry.id(), conversion.output_extension);
+                        "{0}/{1}/{2}.{3}", _output_dir, kFactoryScenarioIdentifier,
+                        conversion.output_directory, conversion.output_extension);
                 if (conversion.convert(
-                            path::dirname(output), true, entry.id(), entry.data(),
-                            data.open("w"))) {
+                            path::dirname(output), true, conversion.id,
+                            type.at(conversion.id).data(), data.open("w"))) {
                     makedirs(path::dirname(output), 0755);
                     pn::file file = pn::open(output, "w");
                     file.write(data);
+                }
+            } else {
+                for (const ResourceEntry& entry : type) {
+                    pn::data   data;
+                    pn::string output = pn::format(
+                            "{0}/{1}/{2}/{3}.{4}", _output_dir, kFactoryScenarioIdentifier,
+                            conversion.output_directory, entry.id(), conversion.output_extension);
+                    if (conversion.convert(
+                                path::dirname(output), true, entry.id(), entry.data(),
+                                data.open("w"))) {
+                        makedirs(path::dirname(output), 0755);
+                        pn::file file = pn::open(output, "w");
+                        file.write(data);
+                    }
                 }
             }
         }
@@ -683,19 +698,31 @@ void DataExtractor::extract_plugin(Observer* observer) const {
         }
 
         for (const ResourceFile::ExtractedResource& conversion : kPluginFiles) {
-            if (conversion.resource == resource_type) {
-                pn::data   data;
-                pn::string output = pn::format(
+            if (conversion.resource != resource_type) {
+                continue;
+            }
+            pn::string output_path;
+            if (conversion.id) {
+                if (id != conversion.id) {
+                    continue;
+                }
+                output_path = pn::format(
+                        "{0}/{1}/{2}.{3}", _output_dir, _scenario, conversion.output_directory,
+                        conversion.output_extension);
+            } else {
+                output_path = pn::format(
                         "{0}/{1}/{2}/{3}.{4}", _output_dir, _scenario, conversion.output_directory,
                         id, conversion.output_extension);
-                if (conversion.convert(
-                            path::dirname(output), false, id, file.data(), data.open("w"))) {
-                    makedirs(path::dirname(output), 0755);
-                    pn::file file = pn::open(output, "w");
-                    file.write(data);
-                }
-                goto next;
             }
+
+            pn::data data;
+            if (conversion.convert(
+                        path::dirname(output_path), false, id, file.data(), data.open("w"))) {
+                makedirs(path::dirname(output_path), 0755);
+                pn::file file = pn::open(output_path, "w");
+                file.write(data);
+            }
+            goto next;
         }
 
         throw std::runtime_error(
