@@ -2,10 +2,11 @@ language:  cpp
 
 matrix:
   include:
-    - os:  osx
+    - os:         osx
+      osx_image:  xcode9.2
 
     - os:    linux
-      dist:  trusty
+      dist:  xenial
       addons:
         apt:
           packages:
