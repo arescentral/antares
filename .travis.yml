@@ -29,3 +29,9 @@ matrix:
             - libxxf86vm-dev
             - zlib1g-dev
 
+# Recursive submodules are unnecessary and wasteful in Antares.
+# Manually check out non-recursive submodules.
+git:
+  submodules: false
+before_install:
+  - git submodule update --init
