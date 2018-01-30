@@ -5,29 +5,9 @@ matrix:
     - os:         osx
       osx_image:  xcode9.2
 
-    - os:    linux
-      dist:  xenial
-      addons:
-        apt:
-          packages:
-            - clang
-            - pkg-config
-
-            - libgl1-mesa-dev
-            - libglfw3-dev
-            - libglu1-mesa-dev
-            - libmodplug-dev
-            - libzip-dev
-            - libpng16-dev
-            - libneon27-dev
-            - libopenal-dev
-            - libsndfile1-dev
-            - libx11-dev
-            - libxcursor-dev
-            - libxinerama-dev
-            - libxrandr-dev
-            - libxxf86vm-dev
-            - zlib1g-dev
+    - os:       linux
+      dist:     xenial
+      install:  sudo apt-get install clang libgl1-mesa-dev libglfw3-dev libglu1-mesa-dev libmodplug-dev libzip-dev libpng16-dev libneon27-dev libopenal-dev libsndfile1-dev libx11-dev libxcursor-dev libxinerama-dev libxrandr-dev libxxf86vm-dev zlib1g-dev
 
 # Recursive submodules are unnecessary and wasteful in Antares.
 # Manually check out non-recursive submodules.
