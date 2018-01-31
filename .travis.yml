@@ -1,9 +1,14 @@
 language:  cpp
 
+env:
+  - TESTS=test
+
 matrix:
   include:
     - os:         osx
       osx_image:  xcode9.2
+      env:
+        - TESTS=smoke-test  # Need to figure out headless CGLPixelFormatObj
 
     - os:       linux
       dist:     xenial
@@ -15,3 +20,5 @@ git:
   submodules: false
 before_install:
   - git submodule update --init
+
+script: ./configure && make && make $TESTS
