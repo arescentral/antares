@@ -50,6 +50,10 @@ sign:
 		--entitlements resources/entitlements.plist \
 		out/cur/Antares.app
 
+.PHONY: install-deps
+install-deps:
+	@scripts/installdeps.py
+
 ifeq ($(target_os), "linux")
 .PHONY: install
 install: install-bin install-data install-scenario
