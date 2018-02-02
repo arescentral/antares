@@ -45,13 +45,20 @@ The short version is::
 
     $ make run
 
-On Mac, the launcher will let you choose video settings, and optionally
-a plugin to run.
+A launcher will appear, letting you choose a plugin to play. By default,
+the original Ares scenario will be listed. There aren’t any video
+settings; just resize or maximize the window and Antares will adapt to
+the new size.
 
-On Linux, you'll need to run `out/cur/antares-install-data` first.
-Afterwards, you may want to run `out/cur/antares` directly.  You can
-choose video settings with command line options; see `antares --help`.
-There's no plugin support yet.
+On Linux, you can also install the game::
+
+    $ sudo make install
+
+This will install the game to /usr/local/games/antares, by default.
+
+On Mac, you can put the game anywhere you’d like::
+
+    $ mv out/cur/Antares.app /Applications
 
 Links
 -----
