@@ -65,11 +65,4 @@ const Directories& dirs() {
     return dirs;
 }
 
-pn::string scenario_dir(pn::string_view identifier) {
-    if (identifier == kFactoryScenarioIdentifier) {
-        return factory_scenario_path().copy();
-    }
-    return pn::format("{0}/{1}", dirs().scenarios, identifier);
-}
-
 }  // namespace antares

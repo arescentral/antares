@@ -59,7 +59,7 @@ ScenarioList::ScenarioList() {
     factory_scenario.identifier = kFactoryScenarioIdentifier;
 
     const pn::string factory_path =
-            pn::format("{0}/scenario-info/128.nlAG", scenario_dir(kFactoryScenarioIdentifier));
+            pn::format("{0}/scenario-info/128.nlAG", factory_scenario_path());
     if (sfz::path::isfile(factory_path)) {
         scenarioInfoType info;
         read_from(pn::open(factory_path, "r"), &info);

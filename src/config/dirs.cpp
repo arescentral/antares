@@ -16,9 +16,12 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
+#include "config/dirs.hpp"
+
 #include <sfz/sfz.hpp>
 
-#include "config/dirs.hpp"
+#include "config/preferences.hpp"
+#include "game/sys.hpp"
 
 namespace antares {
 
@@ -43,5 +46,13 @@ pn::string_view factory_scenario_path() {
 }
 
 void set_factory_scenario_path(pn::string_view path) { factory_scenario.emplace(path.copy()); }
+
+pn::string scenario_path() {
+    pn::string_view identifier = sys.prefs->scenario_identifier();
+    if (identifier == kFactoryScenarioIdentifier) {
+        return factory_scenario_path().copy();
+    }
+    return pn::format("{0}/{1}", dirs().scenarios, identifier);
+}
 
 }  // namespace antares
