@@ -177,7 +177,7 @@ def check_linux_native(args):
     if missing_pkgs:
         print("\nmissing dependencies: %s" % " ".join(missing_pkgs))
         if len(missing_pkgs) == 1:
-            print("On %s, you can install it with:\n" % (distro, missing_pkgs[0]))
+            print("On %s, you can install it with:\n" % distro)
         else:
             print("On %s, you can install them with:\n" % distro)
         command = ["sudo"] + command + list(package[pkg] for pkg in missing_pkgs)
