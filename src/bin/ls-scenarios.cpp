@@ -34,12 +34,12 @@ void main(int argc, char* const* argv) {
         if (!list.at(i).installed) {
             continue;
         }
-        pn::format(stderr, "{0}:\n", list.at(i).identifier);
-        pn::format(stderr, "    title: {0}\n", list.at(i).title);
-        pn::format(stderr, "    download url: {0}\n", list.at(i).download_url);
-        pn::format(stderr, "    author: {0}\n", list.at(i).author);
-        pn::format(stderr, "    author url: {0}\n", list.at(i).author_url);
-        pn::format(stderr, "    version: {0}\n", stringify(list.at(i).version));
+        pn::format(stdout, "{0}:\n", list.at(i).identifier);
+        pn::format(stdout, "    title: {0}\n", list.at(i).title);
+        pn::format(stdout, "    download url: {0}\n", list.at(i).download_url);
+        pn::format(stdout, "    author: {0}\n", list.at(i).author);
+        pn::format(stdout, "    author url: {0}\n", list.at(i).author_url);
+        pn::format(stdout, "    version: {0}\n", stringify(list.at(i).version));
     }
 }
 
