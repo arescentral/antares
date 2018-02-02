@@ -7,7 +7,7 @@ matrix:
   include:
     - os:         osx
       env:
-        - TESTS=smoke-test  # Need to figure out headless CGLPixelFormatObj
+        - TESTS=travis-test-mac
 
     - os:       linux
       dist:     trusty
@@ -23,7 +23,7 @@ matrix:
         sudo dpkg -i libpng*.deb libglfw3*.deb && \
         sudo scripts/installdeps.py
       env:
-        - TESTS=smoke-test  # Need to figure out headless CGLPixelFormatObj
+        - TESTS=travis-test-linux
 
 # Recursive submodules are unnecessary and wasteful in Antares.
 # Manually check out non-recursive submodules.

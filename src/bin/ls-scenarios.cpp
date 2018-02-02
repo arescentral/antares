@@ -71,6 +71,7 @@ void main(int argc, char* const* argv) {
 
     args::parse(argc - 1, argv + 1, callbacks);
 
+    bool found_at_least_one = false;
     ScenarioList list;
     for (size_t i = 0; i < list.size(); ++i) {
         if (!list.at(i).installed) {
@@ -82,6 +83,10 @@ void main(int argc, char* const* argv) {
         pn::format(stdout, "    author: {0}\n", list.at(i).author);
         pn::format(stdout, "    author url: {0}\n", list.at(i).author_url);
         pn::format(stdout, "    version: {0}\n", stringify(list.at(i).version));
+        found_at_least_one = true;
+    }
+    if (!found_at_least_one) {
+        exit(1);
     }
 }
 
