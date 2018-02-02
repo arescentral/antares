@@ -25,7 +25,7 @@
 
 namespace antares {
 
-pn::string default_application_path() {
+static pn::string make_default_application_path() {
     cf::Url    url(CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle()));
     cf::String url_string(CFStringCreateCopy(NULL, CFURLGetString(url.c_obj())));
     char       path_buffer[PATH_MAX];
@@ -34,6 +34,16 @@ pn::string default_application_path() {
         throw std::runtime_error("couldn't get application_path()");
     }
     return pn::string(path_buffer, strlen(path_buffer));
+}
+
+pn::string_view default_application_path() {
+    static pn::string s = make_default_application_path();
+    return s;
+}
+
+pn::string_view default_factory_scenario_path() {
+    static pn::string s = pn::format("{0}/{1}", dirs().scenarios, kFactoryScenarioIdentifier);
+    return s;
 }
 
 Directories mac_dirs() {
@@ -61,7 +71,10 @@ const Directories& dirs() {
 }
 
 pn::string scenario_dir(pn::string_view identifier) {
-    return pn::format("{0}/{1}", dirs().scenarios, identifier);
+    if (identifier == kFactoryScenarioIdentifier) {
+        return pn::format("{0}/{1}", dirs().scenarios, identifier);
+    }
+    return factory_scenario_path().copy();
 }
 
 }  // namespace antares

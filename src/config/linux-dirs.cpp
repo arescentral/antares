@@ -26,8 +26,15 @@
 
 namespace antares {
 
-pn::string default_application_path() {
-    return pn::format("{0}/share/games/antares/app", kAntaresPrefix);
+pn::string_view default_application_path() {
+    static pn::string s = pn::format("{0}/share/games/antares/app", kAntaresPrefix);
+    return s;
+}
+
+pn::string_view default_factory_scenario_path() {
+    static pn::string s = pn::format(
+            "{0}/share/games/antares/scenarios/{1}", kAntaresPrefix, kFactoryScenarioIdentifier);
+    return s;
 }
 
 Directories linux_dirs() {
@@ -60,7 +67,7 @@ const Directories& dirs() {
 
 pn::string scenario_dir(pn::string_view identifier) {
     if (identifier == kFactoryScenarioIdentifier) {
-        return pn::format("{0}/share/games/antares/scenarios/{1}", kAntaresPrefix, identifier);
+        return factory_scenario_path().copy();
     }
     return pn::format("{0}/{1}", dirs().scenarios, identifier);
 }

@@ -52,14 +52,15 @@ void usage(pn::file_view out, pn::string_view progname, int retcode) {
             "  options:\n"
             "    -a, --app-data      set path to application data\n"
             "                        (default: {1})\n"
+            "    -f, --factory       set path to factory scenario\n"
+            "                        (default: {2})\n"
             "    -h, --help          display this help screen\n",
-            progname, default_application_path());
+            progname, default_application_path(), default_factory_scenario_path());
     exit(retcode);
 }
 
 void main(int argc, char* const* argv) {
     pn::string_view progname = sfz::path::basename(argv[0]);
-    pn::string      app_data = default_application_path();
 
     args::callbacks callbacks;
 
@@ -73,10 +74,11 @@ void main(int argc, char* const* argv) {
         return true;
     };
 
-    callbacks.short_option = [&progname, &app_data](
+    callbacks.short_option = [&progname](
                                      pn::rune opt, const args::callbacks::get_value_f& get_value) {
         switch (opt.value()) {
-            case 'a': app_data = get_value().copy(); return true;
+            case 'a': set_application_path(get_value()); return true;
+            case 'f': set_factory_scenario_path(get_value()); return true;
             case 'h': usage(stdout, progname, 0); return true;
             default: return false;
         }
@@ -86,6 +88,8 @@ void main(int argc, char* const* argv) {
             [&callbacks](pn::string_view opt, const args::callbacks::get_value_f& get_value) {
                 if (opt == "app-data") {
                     return callbacks.short_option(pn::rune{'a'}, get_value);
+                } else if (opt == "factory-scenario") {
+                    return callbacks.short_option(pn::rune{'f'}, get_value);
                 } else if (opt == "help") {
                     return callbacks.short_option(pn::rune{'h'}, get_value);
                 } else {
@@ -99,16 +103,29 @@ void main(int argc, char* const* argv) {
         scenario.emplace(kFactoryScenarioIdentifier);
     }
 
-    set_application_path(app_data);
-    if (!sfz::path::isdir(app_data)) {
-        if (app_data == default_application_path()) {
+    if (!sfz::path::isdir(application_path())) {
+        if (application_path() == default_application_path()) {
             throw std::runtime_error(
                     "application data not installed\n"
                     "\n"
                     "Please install it, or specify a path with --app-data");
         } else {
             throw std::runtime_error(
-                    pn::format("{0}: application data not found", app_data).c_str());
+                    pn::format("{0}: application data not found", application_path()).c_str());
+        }
+        exit(1);
+    }
+
+    if (!sfz::path::isdir(factory_scenario_path())) {
+        if (factory_scenario_path() == default_factory_scenario_path()) {
+            throw std::runtime_error(
+                    "factory scenario not installed\n"
+                    "\n"
+                    "Please install it, or specify a path with --factory-scenario");
+        } else {
+            throw std::runtime_error(
+                    pn::format("{0}: factory scenario not found", factory_scenario_path())
+                            .c_str());
         }
         exit(1);
     }

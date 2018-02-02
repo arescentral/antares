@@ -18,16 +18,58 @@
 
 #include <stdlib.h>
 #include <pn/file>
+#include <sfz/sfz.hpp>
 
+#include "config/dirs.hpp"
 #include "data/scenario-list.hpp"
+
+namespace args = sfz::args;
 
 namespace antares {
 
+void usage(pn::file_view out, pn::string_view progname, int retcode) {
+    pn::format(
+            out,
+            "usage: {0} [OPTIONS]\n"
+            "\n"
+            "  Lists installed Antares scenarios\n"
+            "\n"
+            "  options:\n"
+            "    -f, --factory       set path to factory scenario\n"
+            "                        (default: {1})\n"
+            "    -h, --help          display this help screen\n",
+            progname, default_factory_scenario_path());
+    exit(retcode);
+}
+
 void main(int argc, char* const* argv) {
-    if (argc != 1) {
-        pn::format(stderr, "usage: ls-scenarios\n");
-        exit(1);
-    }
+    pn::string_view progname = sfz::path::basename(argv[0]);
+
+    args::callbacks callbacks;
+
+    callbacks.argument = [](pn::string_view arg) { return false; };
+
+    callbacks.short_option = [&progname](
+                                     pn::rune opt, const args::callbacks::get_value_f& get_value) {
+        switch (opt.value()) {
+            case 'f': set_factory_scenario_path(get_value()); return true;
+            case 'h': usage(stdout, progname, 0); return true;
+            default: return false;
+        }
+    };
+
+    callbacks.long_option =
+            [&callbacks](pn::string_view opt, const args::callbacks::get_value_f& get_value) {
+                if (opt == "factory-scenario") {
+                    return callbacks.short_option(pn::rune{'f'}, get_value);
+                } else if (opt == "help") {
+                    return callbacks.short_option(pn::rune{'h'}, get_value);
+                } else {
+                    return false;
+                }
+            };
+
+    args::parse(argc - 1, argv + 1, callbacks);
 
     ScenarioList list;
     for (size_t i = 0; i < list.size(); ++i) {
@@ -43,9 +85,33 @@ void main(int argc, char* const* argv) {
     }
 }
 
+void print_nested_exception(const std::exception& e) {
+    pn::format(stderr, ": {0}", e.what());
+    try {
+        std::rethrow_if_nested(e);
+    } catch (const std::exception& e) {
+        print_nested_exception(e);
+    }
+}
+
+void print_exception(pn::string_view progname, const std::exception& e) {
+    pn::format(stderr, "{0}: {1}", sfz::path::basename(progname), e.what());
+    try {
+        std::rethrow_if_nested(e);
+    } catch (const std::exception& e) {
+        print_nested_exception(e);
+    }
+    pn::format(stderr, "\n");
+}
+
 }  // namespace antares
 
 int main(int argc, char* const* argv) {
-    antares::main(argc, argv);
+    try {
+        antares::main(argc, argv);
+    } catch (const std::exception& e) {
+        antares::print_exception(argv[0], e);
+        return 1;
+    }
     return 0;
 }

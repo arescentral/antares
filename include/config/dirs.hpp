@@ -36,9 +36,13 @@ struct Directories {
 
 const Directories& dirs();
 
-pn::string      default_application_path();
+pn::string_view default_application_path();
 pn::string_view application_path();
 void            set_application_path(pn::string_view path);
+
+pn::string_view default_factory_scenario_path();
+pn::string_view factory_scenario_path();
+void            set_factory_scenario_path(pn::string_view path);
 
 pn::string scenario_dir(pn::string_view identifier);
 
