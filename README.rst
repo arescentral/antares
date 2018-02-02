@@ -3,6 +3,8 @@ Antares
 
 Download: `Antares 0.8.2 for Mac OS X`_
 
+..  _Antares 0.8.2 for Mac OS X: http://downloads.arescentral.org/Antares/Antares-0.8.2.zip
+
 ..  image:: https://travis-ci.org/arescentral/antares.svg?branch=master
     :target: https://travis-ci.org/arescentral/antares
 
@@ -15,14 +17,12 @@ modern systems.
 
 There are several issues that need to be fixed before the 1.0 release;
 the issue tracker contains a `list of them`_. After they are fixed,
-Antares will have feature parity with Ares in all respects, except for
-plugins and multiplayer. These are considered features to be added after
-1.0.
+Antares will have feature parity with Ares in all respects except for
+multiplayer. The timeline for multiplayer is less certain.
 
-..  _Antares 0.8.2 for Mac OS X: http://downloads.arescentral.org/Antares/Antares-0.8.2.zip
-..  _Ares: http://en.wikipedia.org/wiki/Ares_(computer_game)
+..  _Ares: https://en.wikipedia.org/wiki/Ares_(computer_game)
 ..  _Nathan Lamont: http://biggerplanet.com/
-..  _Ambrosia Software: http://www.ambrosiasw.com/
+..  _Ambrosia Software: https://www.ambrosiasw.com/
 ..  _list of them: https://github.com/arescentral/antares/issues?q=is%3Aissue+is%3Aopen+-milestone%3ALater+
 
 Building Antares
@@ -34,9 +34,9 @@ Building Antares
     $ make
 
 You may need to install some extra software first; the configure script
-give you instructions if so.
+will give you instructions if so.
 
-..  _the long version is here: http://arescentral.org/antares/contributing/building/
+..  _the long version is here: https://arescentral.org/antares/contributing/building/
 
 Running Antares
 ---------------
@@ -64,13 +64,11 @@ Links
 *   `Development mailing list`_
 
 *   `Ares Forums`_
-*   Xsera_
 
-..  _Antares website: http://arescentral.org/antares/
-..  _Contributing to Antares: http://arescentral.org/antares/contributing/
+..  _Antares website: https://arescentral.org/antares/
+..  _Contributing to Antares: https://arescentral.org/antares/contributing/
 ..  _Announcements mailing list: https://groups.google.com/a/arescentral.org/group/antares-announce
 ..  _Development mailing list: https://groups.google.com/a/arescentral.org/group/antares-dev
-..  _Ares Forums: http://www.ambrosiasw.com/forums/index.php?showforum=88
-..  _Xsera: http://www.xsera.org/
+..  _Ares Forums: https://www.ambrosiasw.com/forums/index.php?showforum=88
 
 ..  -*- tab-width: 4; fill-column: 72 -*-
