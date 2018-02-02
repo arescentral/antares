@@ -90,7 +90,10 @@ def check_submodules():
 
     if missing:
         print("Some submodules are missing. Run:")
+        print("")
         print("  $ git submodule update --init build ext data")
+        print("")
+        print("Then, try ./configure again")
         sys.exit(1)
 
 
@@ -139,6 +142,8 @@ def check_mac(args):
         print("\nmissing dependencies: %s\n" % " ".join(missing.keys()))
         for step in missing.values():
             sys.stdout.write(step)
+        print("")
+        print("Then, try ./configure again")
         sys.exit(1)
 
 
@@ -172,11 +177,12 @@ def check_linux_native(args):
     if missing_pkgs:
         print("\nmissing dependencies: %s" % " ".join(missing_pkgs))
         if len(missing_pkgs) == 1:
-            print("On %s, you can install it with:\n" % (distro, missing_pkgs[0]))
+            print("On %s, you can install it with:\n" % distro)
         else:
             print("On %s, you can install them with:\n" % distro)
         command = ["sudo"] + command + list(package[pkg] for pkg in missing_pkgs)
         print("    $ %s\n" % (" ".join(quote(arg) for arg in command)))
+        print("Then, try ./configure again")
         sys.exit(1)
 
 
