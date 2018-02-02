@@ -23,8 +23,6 @@
 #include <sfz/sfz.hpp>
 
 #include "config/dirs.hpp"
-#include "config/preferences.hpp"
-#include "game/sys.hpp"
 
 using std::unique_ptr;
 
@@ -46,9 +44,9 @@ static unique_ptr<sfz::mapped_file> load_first(
 }
 
 static unique_ptr<sfz::mapped_file> load(pn::string_view resource_path) {
-    pn::string scenario = scenario_dir(sys.prefs->scenario_identifier());
-    pn::string factory  = scenario_dir(kFactoryScenarioIdentifier);
-    pn::string app      = application_path().copy();
+    pn::string      scenario = scenario_path();
+    pn::string_view factory  = factory_scenario_path();
+    pn::string_view app      = application_path();
     return load_first(resource_path, {scenario, factory, app});
 }
 
