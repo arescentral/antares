@@ -28,7 +28,8 @@ namespace antares {
 #define STRINGIFY(x) STRINGIFY_(x)
 #define ANTARES_DATA_STRING STRINGIFY(ANTARES_DATA)
 
-pn::string default_application_path() { return ANTARES_DATA_STRING; }
+pn::string_view default_application_path() { return ANTARES_DATA_STRING; }
+pn::string_view default_factory_scenario_path() { return ANTARES_DATA_STRING; }
 
 Directories test_dirs() {
     Directories directories;

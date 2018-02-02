@@ -15,21 +15,29 @@ from gi.repository import Gtk
 
 
 PREFIX = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-if os.path.exists(os.path.join(PREFIX, "share", "games", "antares", "app")):
+if os.path.exists(os.path.join(PREFIX, "games", "antares-glfw")):
     BIN_PREFIX = os.path.join(PREFIX, "games")
-    DATADIR = os.path.join(PREFIX, "share", "games", "antares", "app")
+    DATADIR = ""
     ANTARES_ICON = os.path.join(PREFIX, "share", "icons", "hicolor", "128x128", "apps",
                                 "antares.png")
+    APP_DATA = ""
+    SCENARIOS = os.path.join(PREFIX, "share", "games", "antares", "scenarios")
+    FACTORY_SCENARIO = ""
 else:
     BIN_PREFIX = os.path.join(PREFIX, "out", "cur")
     DATADIR = os.path.join(PREFIX, "resources")
-    ANTARES_ICON = os.path.join(PREFIX, "resources", "antares.iconset", "icon_128x128.png")
+    ANTARES_ICON = os.path.join(DATADIR, "antares.iconset", "icon_128x128.png")
+    APP_DATA = os.path.join(PREFIX, "data")
+    SCENARIOS = os.path.join(APP_DATA, "scenarios")
+    FACTORY_SCENARIO = os.path.join(SCENARIOS, "com.biggerplanet.ares")
 
 ANTARES_BIN = os.path.join(BIN_PREFIX, "antares-glfw")
+INSTALL_DATA_BIN = os.path.join(BIN_PREFIX, "antares-install-data")
 LS_SCENARIOS_BIN = os.path.join(BIN_PREFIX, "antares-ls-scenarios")
 
 
 def main():
+    reinstall_or_check_scenario()
     scenarios = ls_scenarios()
     win = LauncherWindow(scenarios)
     win.show_all()
@@ -95,14 +103,36 @@ class LauncherWindow(Gtk.Dialog):
     def on_response(self, widget, value):
         if value == Gtk.ResponseType.OK:
             args = [ANTARES_BIN, self.scenario]
+            if APP_DATA:
+                args += ["--app-data", APP_DATA]
+            if FACTORY_SCENARIO:
+                args += ["--factory-scenario", FACTORY_SCENARIO]
             print(" ".join(args))
             os.execvp(args[0], args)
         else:
             Gtk.main_quit()
 
 
+def reinstall_or_check_scenario():
+    args = [INSTALL_DATA_BIN]
+    args += ["--dest", SCENARIOS]
+    if FACTORY_SCENARIO:
+        # Running from build dir: reinstall.
+        pass
+    else:
+        # Running from installation: just check.
+        args += ["--check"]
+    print(" ".join(args))
+    subprocess.check_call(args)
+
+
+
 def ls_scenarios():
-    out = subprocess.check_output(LS_SCENARIOS_BIN)
+    args = [LS_SCENARIOS_BIN]
+    if FACTORY_SCENARIO:
+        args += ["--factory-scenario", FACTORY_SCENARIO]
+    print(" ".join(args))
+    out = subprocess.check_output(args)
     scenarios = []
     for line in out.splitlines():
         if not line[0].isspace():

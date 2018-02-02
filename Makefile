@@ -95,6 +95,16 @@ install-scenario: all
 	out/cur/antares-install-data -s $(DESTDIR)$(DATADIR)/downloads -d $(DESTDIR)$(DATADIR)/scenarios
 endif
 
+.PHONY: travis-test-mac
+travis-test-mac: smoke-test
+
+.PHONY: travis-test-linux
+travis-test-linux: smoke-test
+	sudo rm -Rf $(prefix)/share/games/antares
+	! out/cur/antares-ls-scenarios
+	sudo make install
+	$(prefix)/games/antares-ls-scenarios
+
 .PHONY: friends
 friends:
 	@echo "Sure! You can email me at sfiera@sfzmail.com."

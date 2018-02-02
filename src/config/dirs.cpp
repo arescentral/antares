@@ -16,20 +16,32 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
+#include <sfz/sfz.hpp>
+
 #include "config/dirs.hpp"
 
 namespace antares {
 
-static pn::string app_data;
-const char        kFactoryScenarioIdentifier[] = "com.biggerplanet.ares";
+static sfz::optional<pn::string> app_data;
+static sfz::optional<pn::string> factory_scenario;
+const char                       kFactoryScenarioIdentifier[] = "com.biggerplanet.ares";
 
 pn::string_view application_path() {
-    if (app_data.empty()) {
-        app_data = default_application_path();
+    if (app_data.has_value()) {
+        return *app_data;
     }
-    return app_data;
+    return default_application_path();
 }
 
-void set_application_path(pn::string_view path) { app_data = path.copy(); }
+void set_application_path(pn::string_view path) { app_data.emplace(path.copy()); }
+
+pn::string_view factory_scenario_path() {
+    if (factory_scenario.has_value()) {
+        return *factory_scenario;
+    }
+    return default_factory_scenario_path();
+}
+
+void set_factory_scenario_path(pn::string_view path) { factory_scenario.emplace(path.copy()); }
 
 }  // namespace antares
