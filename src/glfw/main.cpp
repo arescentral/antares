@@ -64,7 +64,6 @@ void main(int argc, char* const* argv) {
     args::callbacks callbacks;
 
     sfz::optional<pn::string> scenario;
-    scenario.emplace(kFactoryScenarioIdentifier);
     callbacks.argument = [&scenario](pn::string_view arg) {
         if (!scenario.has_value()) {
             scenario.emplace(arg.copy());
@@ -95,6 +94,10 @@ void main(int argc, char* const* argv) {
             };
 
     args::parse(argc - 1, argv + 1, callbacks);
+
+    if (!scenario.has_value()) {
+        scenario.emplace(kFactoryScenarioIdentifier);
+    }
 
     set_application_path(app_data);
     if (!sfz::path::isdir(app_data)) {
