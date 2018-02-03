@@ -100,6 +100,11 @@ travis-test-mac: smoke-test
 
 .PHONY: travis-test-linux
 travis-test-linux: smoke-test
+
+	# Check that deps for launcher were installed:
+	python -c "from scripts import antares_launcher"
+
+	# Check that antares-ls-scenarios finds scenario only after installation:
 	sudo rm -Rf $(prefix)/share/games/antares
 	! out/cur/antares-ls-scenarios
 	sudo make install
