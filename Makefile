@@ -41,7 +41,7 @@ distclean:
 .PHONY: run
 run: all
 	@[ -f $(MAC_BIN) ] && $(MAC_BIN) || true
-	@[ ! -f $(MAC_BIN) ] && scripts/antares-launcher || true
+	@[ ! -f $(MAC_BIN) ] && scripts/antares_launcher.py || true
 
 .PHONY: sign
 sign:
@@ -61,7 +61,7 @@ install: install-bin install-data install-scenario
 .PHONY: install-bin
 install-bin: all
 	install -m 755 -d $(DESTDIR)$(BINDIR)
-	install -m 755 scripts/antares-launcher $(DESTDIR)$(BINDIR)/antares
+	install -m 755 scripts/antares_launcher.py $(DESTDIR)$(BINDIR)/antares
 	install -m 755 out/cur/antares-glfw $(DESTDIR)$(BINDIR)/antares-glfw
 	install -m 755 out/cur/antares-install-data $(DESTDIR)$(BINDIR)/antares-install-data
 	install -m 755 out/cur/antares-ls-scenarios $(DESTDIR)$(BINDIR)/antares-ls-scenarios
@@ -100,6 +100,11 @@ travis-test-mac: smoke-test
 
 .PHONY: travis-test-linux
 travis-test-linux: smoke-test
+
+	# Check that deps for launcher were installed:
+	python -c "from scripts import antares_launcher"
+
+	# Check that antares-ls-scenarios finds scenario only after installation:
 	sudo rm -Rf $(prefix)/share/games/antares
 	! out/cur/antares-ls-scenarios
 	sudo make install

@@ -163,6 +163,11 @@ def check_linux_native(args):
     if not check_clang("clang++"):
         missing_pkgs.append("clang")
 
+    if not check_python_gi():
+        missing_pkgs.append("python-gi")
+    elif not check_python_gtk():
+        missing_pkgs.append("python-gtk3")
+
     if check_pkg_config():
         libs = """
             gl glfw3 glu libmodplug libzip libpng16 neon openal sndfile
@@ -207,6 +212,30 @@ def check_libcxx(executable=""):
 def check_pkg_config():
     """Run pkg-config --version."""
     return cfg.check_bin("pkg-config --version".split())
+
+
+def check_python_gi():
+    """Check if Python can import python-gi."""
+    with cfg.step("checking for python-gi") as msg:
+        try:
+            import gi
+            return True
+        except ImportError:
+            msg("missing", color="red")
+    return False
+
+
+def check_python_gtk():
+    """Check if Python can load Gtk 3.0 through python-gi."""
+    with cfg.step("checking for python Gtk") as msg:
+        try:
+            import gi
+            gi.require_version("Gtk", "3.0")
+            from gi.repository import Gtk
+            return True
+        except ImportError:
+            msg("missing", color="red")
+    return False
 
 
 if __name__ == "__main__":
