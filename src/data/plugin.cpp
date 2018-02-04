@@ -38,7 +38,7 @@ ANTARES_GLOBAL ScenarioGlobals plug;
 
 template <typename T>
 static void read_all(pn::string_view name, pn::string_view path, vector<T>& v) {
-    Resource rsrc(path);
+    Resource rsrc  = Resource::path(path);
     size_t   count = rsrc.data().size() / T::byte_size;
     v.resize(count);
     pn::file in = rsrc.data().open();
@@ -55,8 +55,8 @@ static void read_all(pn::string_view name, pn::string_view path, vector<T>& v) {
 
 void PluginInit() {
     {
-        Resource rsrc("info.pn");
-        pn::file in = rsrc.data().open();
+        Resource rsrc = Resource::path("info.pn");
+        pn::file in   = rsrc.data().open();
         if (!read_from(in, &plug.info)) {
             throw std::runtime_error("error while reading scenario file info data");
         }

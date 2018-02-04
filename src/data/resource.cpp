@@ -24,18 +24,16 @@
 
 #include "config/dirs.hpp"
 
-using std::unique_ptr;
-
 namespace path = sfz::path;
 
 namespace antares {
 
-static unique_ptr<sfz::mapped_file> load_first(
+static std::unique_ptr<sfz::mapped_file> load_first(
         pn::string_view resource_path, const std::vector<pn::string_view>& dirs) {
     for (const auto& dir : dirs) {
         pn::string path = pn::format("{0}/{1}", dir, resource_path);
         if (path::isfile(path)) {
-            return unique_ptr<sfz::mapped_file>(new sfz::mapped_file(path));
+            return std::unique_ptr<sfz::mapped_file>(new sfz::mapped_file(path));
         }
     }
     throw std::runtime_error(
@@ -43,17 +41,27 @@ static unique_ptr<sfz::mapped_file> load_first(
                     .c_str());
 }
 
-static unique_ptr<sfz::mapped_file> load(pn::string_view resource_path) {
+static std::unique_ptr<sfz::mapped_file> load(pn::string_view resource_path) {
     pn::string      scenario = scenario_path();
     pn::string_view factory  = factory_scenario_path();
     pn::string_view app      = application_path();
     return load_first(resource_path, {scenario, factory, app});
 }
 
-Resource::Resource(pn::string_view type, pn::string_view extension, int id)
-        : Resource(pn::format("{0}/{1}.{2}", type, id, extension)) {}
+Resource Resource::path(pn::string_view path) { return Resource(load(path)); }
 
-Resource::Resource(pn::string_view resource_path) : _file(load(resource_path)) {}
+Resource Resource::font(pn::string_view name) {
+    return Resource(load(pn::format("fonts/{0}.pn", name)));
+}
+Resource Resource::interface(pn::string_view name) {
+    return Resource(load(pn::format("interfaces/{0}.pn", name)));
+}
+Resource Resource::replay(int id) { return Resource(load(pn::format("replays/{0}.NLRP", id))); }
+Resource Resource::strings(int id) { return Resource(load(pn::format("strings/{0}.pn", id))); }
+Resource Resource::sprite(int id) { return Resource(load(pn::format("sprites/{0}.pn", id))); }
+Resource Resource::text(int id) { return Resource(load(pn::format("text/{0}.txt", id))); }
+
+Resource::Resource(std::unique_ptr<sfz::mapped_file> file) : _file(std::move(file)) {}
 
 Resource::~Resource() {}
 

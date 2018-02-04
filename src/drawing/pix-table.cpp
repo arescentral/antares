@@ -36,12 +36,12 @@ using std::vector;
 namespace antares {
 
 static ArrayPixMap load_image(pn::string_view path) {
-    Resource rsrc(path);
+    Resource rsrc = Resource::path(path);
     return read_png(rsrc.data().open());
 }
 
 NatePixTable::NatePixTable(int id, uint8_t color) {
-    Resource  rsrc("sprites", "pn", id);
+    Resource  rsrc = Resource::sprite(id);
     pn::value x;
     if (!pn::parse(rsrc.string().open(), x, nullptr)) {
         throw std::runtime_error("invalid sprite");

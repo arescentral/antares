@@ -131,7 +131,7 @@ bool BothCommandAndQ() {
 }
 
 void CreateObjectDataText(pn::string& text, Handle<BaseObject> object) {
-    Resource   rsrc("text", "txt", kShipDataTextID);
+    Resource   rsrc = Resource::text(kShipDataTextID);
     pn::string data = rsrc.string().copy();
 
     StringList keys(kShipDataKeyStringID);
@@ -193,7 +193,7 @@ void CreateWeaponDataText(
     }
 
     // TODO(sfiera): catch exception.
-    Resource   rsrc("text", "txt", kWeaponDataTextID);
+    Resource   rsrc = Resource::text(kWeaponDataTextID);
     pn::string data = rsrc.string().copy();
     // damage; this is tricky--we have to guess by walking through activate actions,
     //  and for all the createObject actions, see which creates the most damaging

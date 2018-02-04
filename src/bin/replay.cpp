@@ -93,7 +93,7 @@ class ReplayMaster : public Card {
                     sfz::makedirs(path::dirname(path), 0755);
                     pn::file outcome = pn::open(path, "w");
                     if ((g.victory_text >= 0)) {
-                        Resource rsrc("text", "txt", g.victory_text);
+                        Resource rsrc = Resource::text(g.victory_text);
                         outcome.write(rsrc.data());
                         if (_game_result == WIN_GAME) {
                             outcome.write("\n\n");

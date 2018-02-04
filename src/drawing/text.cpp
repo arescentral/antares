@@ -58,13 +58,12 @@ void recolor(PixMap& glyph_table) {
 }  // namespace
 
 Font::Font(pn::string_view name) {
-    pn::string path = pn::format("fonts/{0}.pn", name);
-    Resource   rsrc(path);
+    Resource   rsrc = Resource::font(name);
     pn::value  x;
     pn_error_t err;
     if (!pn::parse(rsrc.string().open(), x, &err)) {
         throw std::runtime_error(
-                pn::format("{0}:{1}:{2}: {3}", path, err.lineno, err.column, pn_strerror(err.code))
+                pn::format("{0}:{1}:{2}: {3}", name, err.lineno, err.column, pn_strerror(err.code))
                         .c_str());
     }
 

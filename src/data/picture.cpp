@@ -38,7 +38,7 @@ Picture::Picture(pn::string_view resource, bool hidpi)
             } else {
                 _path += ".png";
             }
-            Resource     rsrc(_path);
+            Resource     rsrc    = Resource::path(_path);
             ArrayPixMap::operator=(read_png(rsrc.data().open()));
             break;
         } catch (std::exception& e) {

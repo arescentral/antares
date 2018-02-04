@@ -27,14 +27,25 @@ namespace antares {
 
 class Resource {
   public:
-    Resource(pn::string_view type, pn::string_view extension, int id);
-    Resource(pn::string_view resource_path);
+    static Resource path(pn::string_view path);
+
+    static Resource font(pn::string_view name);
+    static Resource interface(pn::string_view name);
+    static Resource replay(int id);
+    static Resource sprite(int id);
+    static Resource strings(int id);
+    static Resource text(int id);
+
+    Resource(Resource&&) = default;
+    Resource& operator=(Resource&&) = default;
+
     ~Resource();
 
     pn::data_view   data() const;
     pn::string_view string() const;
 
   private:
+    Resource(std::unique_ptr<sfz::mapped_file> file);
     std::unique_ptr<sfz::mapped_file> _file;
 };
 

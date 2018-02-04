@@ -93,7 +93,7 @@ class PixDraw {
 }  // namespace
 
 BuildPix::BuildPix(int text_id, int width) : _size({width, 0}) {
-    Resource rsrc("text", "txt", text_id);
+    Resource rsrc = Resource::text(text_id);
 
     pn::string_view    text              = rsrc.string();
     bool               in_section_header = (text.size() >= 2) && (text.substr(0, 2) == "#+");

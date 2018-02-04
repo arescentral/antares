@@ -54,8 +54,8 @@ void sys_init() {
     sys.gamepad_long_names = to_vector(StringList(Gamepad::LONG_NAMES));
 
     {
-        Resource rsrc("rotation-table");
-        pn::file in = rsrc.data().open();
+        Resource rsrc = Resource::path("rotation-table");
+        pn::file in   = rsrc.data().open();
         for (int i = 0; i < SystemGlobals::ROT_TABLE_SIZE; ++i) {
             in.read(&sys.rot_table[i]).check();
         }

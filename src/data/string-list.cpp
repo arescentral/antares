@@ -30,7 +30,7 @@ using std::vector;
 namespace antares {
 
 StringList::StringList(int id) {
-    Resource  rsrc("strings", "pn", id);
+    Resource  rsrc = Resource::strings(id);
     pn::value strings;
     if (!pn::parse(rsrc.data().open(), strings, nullptr)) {
         throw std::runtime_error(pn::format("Couldn't parse strings/{0}.pn", id).c_str());

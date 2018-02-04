@@ -213,8 +213,8 @@ void DebriefingScreen::fire_timer() {
 }
 
 LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
-    Resource rsrc("text", "txt", text_id);
-    _message = rsrc.string().copy();
+    Resource rsrc = Resource::text(text_id);
+    _message      = rsrc.string().copy();
 
     int  text_height = GetInterfaceTextHeightFromWidth(_message, kLarge, kTextWidth);
     Rect text_bounds(0, 0, kTextWidth, text_height);
@@ -233,7 +233,7 @@ LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
 pn::string DebriefingScreen::build_score_text(
         game_ticks your_time, game_ticks par_time, int your_loss, int par_loss, int your_kill,
         int par_kill) {
-    Resource   rsrc("text", "txt", 6000);
+    Resource   rsrc = Resource::text(6000);
     pn::string text = rsrc.string().copy();
 
     StringList strings(6000);

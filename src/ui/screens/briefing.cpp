@@ -114,7 +114,7 @@ static void update_mission_brief_point(
     hiliteBounds.offset(bounds->left, bounds->top);
 
     // TODO(sfiera): catch exception.
-    Resource rsrc("text", "txt", contentID);
+    Resource rsrc      = Resource::text(contentID);
     text               = rsrc.string().copy();
     int16_t textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
     if (hiliteBounds.left == hiliteBounds.right) {
