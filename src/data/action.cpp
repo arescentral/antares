@@ -21,6 +21,7 @@
 #include <sfz/sfz.hpp>
 
 #include "data/base-object.hpp"
+#include "data/resource.hpp"
 
 namespace antares {
 
@@ -172,10 +173,12 @@ bool read_from(pn::file_view in, argumentType::ChangeScore* argument) {
 
 bool read_from(pn::file_view in, argumentType::DeclareWinner* argument) {
     int32_t admiral;
-    if (!in.read(&admiral, &argument->nextLevel, &argument->textID)) {
+    int32_t text_id;
+    if (!in.read(&admiral, &argument->nextLevel, &text_id)) {
         return false;
     }
     argument->whichPlayer = Handle<Admiral>(admiral);
+    argument->text        = Resource::text(text_id).string().copy();
     return true;
 }
 

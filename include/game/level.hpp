@@ -27,7 +27,7 @@ const int16_t kLevelNoShipTextID = 10000;
 
 bool start_construct_level(Handle<Level> level, int32_t* max);
 void construct_level(Handle<Level> level, int32_t* current);
-void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, int32_t textID);
+void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, pn::string_view text);
 void GetLevelFullScaleAndCorner(
         const Level* level, int32_t rotation, coordPointType* corner, int32_t* scale,
         Rect* bounds);

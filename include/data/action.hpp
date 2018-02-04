@@ -101,7 +101,8 @@ typedef uint8_t dieVerbIDType;
 //  destroy, expire, create, collide, activate, or message.
 //
 
-union argumentType {
+// TODO(sfiera): use std::variant<> when it’s available.
+struct argumentType {
     argumentType() {}
 
     // createObject: make another type of object appear
@@ -248,7 +249,7 @@ union argumentType {
     struct DeclareWinner {
         Handle<Admiral> whichPlayer;  // in scenario's terms; -1 = owner of executor of action
         int32_t         nextLevel;    // -1 = none
-        int32_t         textID;       // id of "debriefing" text
+        pn::string      text;         // "debriefing" text
     };
     DeclareWinner declareWinner;
 

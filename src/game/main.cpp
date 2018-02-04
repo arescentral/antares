@@ -377,7 +377,7 @@ void GamePlay::become_front() {
                     *_game_result  = QUIT_GAME;
                     g.game_over    = true;
                     g.next_level   = -1;
-                    g.victory_text = -1;
+                    g.victory_text = "";
                     stack()->pop(this);
                     break;
 
@@ -385,7 +385,7 @@ void GamePlay::become_front() {
                     *_game_result  = RESTART_GAME;
                     g.game_over    = true;
                     g.next_level   = -1;
-                    g.victory_text = -1;
+                    g.victory_text = "";
                     stack()->pop(this);
                     break;
 
@@ -396,7 +396,7 @@ void GamePlay::become_front() {
                     g.game_over    = true;
                     g.victor       = g.admiral;
                     g.next_level   = g.level->chapter_number() + 1;
-                    g.victory_text = -1;
+                    g.victory_text = "";
                     stack()->pop(this);
                     break;
 
@@ -546,24 +546,23 @@ void GamePlay::fire_timer() {
         case RESTART_GAME: stack()->pop(this); break;
 
         case WIN_GAME:
-            if (_replay || (g.victory_text < 0)) {
+            if (_replay || g.victory_text.empty()) {
                 stack()->pop(this);
             } else {
                 _state        = DEBRIEFING;
                 const auto& a = g.admiral;
                 stack()->push(new DebriefingScreen(
-                        Resource::text(g.victory_text).string(), g.time, g.level->parTime,
-                        GetAdmiralLoss(a), g.level->parLosses, GetAdmiralKill(a),
-                        g.level->parKills));
+                        g.victory_text, g.time, g.level->parTime, GetAdmiralLoss(a),
+                        g.level->parLosses, GetAdmiralKill(a), g.level->parKills));
             }
             break;
 
         case LOSE_GAME:
-            if (_replay || (g.victory_text < 0)) {
+            if (_replay || g.victory_text.empty()) {
                 stack()->pop(this);
             } else {
                 _state = DEBRIEFING;
-                stack()->push(new DebriefingScreen(Resource::text(g.victory_text).string()));
+                stack()->push(new DebriefingScreen(g.victory_text));
             }
             break;
 

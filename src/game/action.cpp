@@ -595,7 +595,7 @@ static void declare_winner(Handle<Action> action, Handle<SpaceObject> focus) {
     if ((!winner.whichPlayer.get() && focus.get())) {
         admiral = focus->owner;
     }
-    DeclareWinner(admiral, winner.nextLevel, winner.textID);
+    DeclareWinner(admiral, winner.nextLevel, winner.text);
 }
 
 static void display_message(Handle<Action> action, Handle<SpaceObject> focus) {
