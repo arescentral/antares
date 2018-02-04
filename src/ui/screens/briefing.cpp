@@ -98,7 +98,7 @@ static void populate_inline_picts(
 static void update_mission_brief_point(
         LabeledRect* dataItem, int32_t whichBriefPoint, const Level* level, coordPointType* corner,
         int32_t scale, Rect* bounds, vector<inlinePictType>& inlinePict, Rect& highlight_rect,
-        vector<pair<Point, Point>>& lines, pn::string& text) {
+        vector<pair<Point, Point>>& lines, pn::string_ref text) {
     if (whichBriefPoint < kMissionBriefPointOffset) {
         // No longer handled here.
         return;
@@ -107,14 +107,12 @@ static void update_mission_brief_point(
     whichBriefPoint -= kMissionBriefPointOffset;
 
     Rect    hiliteBounds;
-    int32_t headerID, headerNumber, contentID;
+    int32_t headerID, headerNumber;
     BriefPoint_Data_Get(
-            whichBriefPoint, level, &headerID, &headerNumber, &contentID, &hiliteBounds, corner,
-            scale, 16, 32, bounds);
+            whichBriefPoint, level, &headerID, &headerNumber, text, &hiliteBounds, corner, scale,
+            16, 32, bounds);
     hiliteBounds.offset(bounds->left, bounds->top);
 
-    // TODO(sfiera): catch exception.
-    text               = Resource::text(contentID).string().copy();
     int16_t textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
     if (hiliteBounds.left == hiliteBounds.right) {
         dataItem->bounds().left =

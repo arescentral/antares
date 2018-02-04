@@ -21,6 +21,7 @@
 #include <sfz/sfz.hpp>
 
 #include "data/plugin.hpp"
+#include "data/resource.hpp"
 
 namespace macroman = sfz::macroman;
 
@@ -166,10 +167,16 @@ bool read_from(pn::file_view in, Level::Condition::CounterArgument* counter_argu
 bool read_from(pn::file_view in, Level::BriefPoint* brief_point) {
     uint8_t unused;
     uint8_t section[8];
+    int16_t content_id;
     if (!(in.read(&brief_point->briefPointKind, &unused) &&
           (fread(section, 1, 8, in.c_obj()) == 8) && read_from(in, &brief_point->range) &&
-          in.read(&brief_point->titleResID, &brief_point->titleNum, &brief_point->contentResID))) {
+          in.read(&brief_point->titleResID, &brief_point->titleNum, &content_id))) {
         return false;
+    }
+    try {
+        brief_point->content = Resource::text(content_id).string().copy();
+    } catch (std::exception& e) {
+        brief_point->content = "";
     }
 
     pn::file sub = pn::data_view{section, 8}.open();
