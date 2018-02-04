@@ -67,7 +67,8 @@ void MainScreen::fire_timer() {
     Randomize(1);
     size_t demo = rand() % (_replays.size() + 1);
     if (demo == _replays.size()) {
-        stack()->push(new ScrollTextScreen(5600, kTitleTextScrollWidth, kSlowScrollInterval));
+        stack()->push(new ScrollTextScreen(
+                Resource::text(5600).string(), kTitleTextScrollWidth, kSlowScrollInterval));
     } else {
         stack()->push(new ReplayGame(_replays.at(demo)));
     }
@@ -127,7 +128,8 @@ void MainScreen::handle_button(antares::Button& button) {
         case DEMO: stack()->push(new ReplayGame(_replays.at(rand() % _replays.size()))); break;
 
         case REPLAY_INTRO:
-            stack()->push(new ScrollTextScreen(5600, kTitleTextScrollWidth, kSlowScrollInterval));
+            stack()->push(new ScrollTextScreen(
+                    Resource::text(5600).string(), kTitleTextScrollWidth, kSlowScrollInterval));
             break;
 
         case START_NEW_GAME: stack()->push(new SoloGame); break;
@@ -137,7 +139,8 @@ void MainScreen::handle_button(antares::Button& button) {
             break;
 
         case ABOUT_ARES:
-            stack()->push(new ScrollTextScreen(6500, 540, kFastScrollInterval));
+            stack()->push(
+                    new ScrollTextScreen(Resource::text(6500).string(), 540, kFastScrollInterval));
             break;
 
         case OPTIONS: stack()->push(new OptionsScreen); break;

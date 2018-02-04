@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
+#include "data/resource.hpp"
 #include "drawing/build-pix.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
@@ -41,11 +42,11 @@ namespace {
 
 class DrawPix : public Card {
   public:
-    DrawPix(OffscreenVideoDriver* driver, int16_t id, int32_t width)
-            : _driver(driver), _id(id), _width(width) {}
+    DrawPix(OffscreenVideoDriver* driver, pn::string_view text, int32_t width)
+            : _driver(driver), _text(text.copy()), _width(width) {}
 
     virtual void draw() const {
-        BuildPix pix(_id, _width);
+        BuildPix pix(_text, _width);
         pix.draw({0, 0});
         if (_driver) {
             _driver->set_capture_rect({0, 0, _width, pix.size().height});
@@ -54,7 +55,7 @@ class DrawPix : public Card {
 
   private:
     OffscreenVideoDriver* _driver;
-    const int16_t         _id;
+    const pn::string      _text;
     const int32_t         _width;
 };
 
@@ -131,7 +132,8 @@ void main(int argc, char* const* argv) {
         TextVideoDriver video({540, 2000}, output_dir);
         for (auto spec : specs) {
             pix.emplace_back(
-                    unique_ptr<Card>(new DrawPix(nullptr, spec.first, spec.second)),
+                    unique_ptr<Card>(new DrawPix(
+                            nullptr, Resource::text(spec.first).string(), spec.second)),
                     pn::format("{0}.txt", dec(spec.first, 5)));
         }
         video.capture(pix);
@@ -139,7 +141,8 @@ void main(int argc, char* const* argv) {
         OffscreenVideoDriver video({540, 2000}, output_dir);
         for (auto spec : specs) {
             pix.emplace_back(
-                    unique_ptr<Card>(new DrawPix(&video, spec.first, spec.second)),
+                    unique_ptr<Card>(
+                            new DrawPix(&video, Resource::text(spec.first).string(), spec.second)),
                     pn::format("{0}.png", dec(spec.first, 5)));
         }
         video.capture(pix);

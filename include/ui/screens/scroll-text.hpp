@@ -31,8 +31,8 @@ const ticks kFastScrollInterval = ticks(2);
 
 class ScrollTextScreen : public Card {
   public:
-    ScrollTextScreen(int text_id, int width, ticks interval);
-    ScrollTextScreen(int text_id, int width, ticks interval, int song_id);
+    ScrollTextScreen(pn::string_view text, int width, ticks interval);
+    ScrollTextScreen(pn::string_view text, int width, ticks interval, int song_id);
 
     virtual void become_front();
     virtual void resign_front();

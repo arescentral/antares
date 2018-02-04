@@ -29,6 +29,7 @@
 #include "config/preferences.hpp"
 #include "data/plugin.hpp"
 #include "data/replay.hpp"
+#include "data/resource.hpp"
 #include "data/scenario-list.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
@@ -551,8 +552,9 @@ void GamePlay::fire_timer() {
                 _state        = DEBRIEFING;
                 const auto& a = g.admiral;
                 stack()->push(new DebriefingScreen(
-                        g.victory_text, g.time, g.level->parTime, GetAdmiralLoss(a),
-                        g.level->parLosses, GetAdmiralKill(a), g.level->parKills));
+                        Resource::text(g.victory_text).string(), g.time, g.level->parTime,
+                        GetAdmiralLoss(a), g.level->parLosses, GetAdmiralKill(a),
+                        g.level->parKills));
             }
             break;
 
@@ -561,7 +563,7 @@ void GamePlay::fire_timer() {
                 stack()->pop(this);
             } else {
                 _state = DEBRIEFING;
-                stack()->push(new DebriefingScreen(g.victory_text));
+                stack()->push(new DebriefingScreen(Resource::text(g.victory_text).string()));
             }
             break;
 

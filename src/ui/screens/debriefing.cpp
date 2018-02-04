@@ -113,13 +113,13 @@ unique_ptr<StyledText> style_score_text(pn::string text) {
 
 }  // namespace
 
-DebriefingScreen::DebriefingScreen(int text_id)
-        : _state(DONE), _typed_chars(0), _data_item(initialize(text_id, false)) {}
+DebriefingScreen::DebriefingScreen(pn::string_view message)
+        : _state(DONE), _typed_chars(0), _data_item(initialize(message, false)) {}
 
 DebriefingScreen::DebriefingScreen(
-        int text_id, game_ticks your_time, game_ticks par_time, int your_loss, int par_loss,
-        int your_kill, int par_kill)
-        : _state(TYPING), _typed_chars(0), _data_item(initialize(text_id, true)) {
+        pn::string_view message, game_ticks your_time, game_ticks par_time, int your_loss,
+        int par_loss, int your_kill, int par_kill)
+        : _state(TYPING), _typed_chars(0), _data_item(initialize(message, true)) {
     Rect score_area = _message_bounds;
     score_area.top  = score_area.bottom - kScoreTableHeight;
 
@@ -212,9 +212,8 @@ void DebriefingScreen::fire_timer() {
     }
 }
 
-LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
-    Resource rsrc = Resource::text(text_id);
-    _message      = rsrc.string().copy();
+LabeledRect DebriefingScreen::initialize(pn::string_view message, bool do_score) {
+    _message = message.copy();
 
     int  text_height = GetInterfaceTextHeightFromWidth(_message, kLarge, kTextWidth);
     Rect text_bounds(0, 0, kTextWidth, text_height);

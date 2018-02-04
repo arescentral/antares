@@ -23,6 +23,7 @@
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "data/plugin.hpp"
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
 #include "game/admiral.hpp"
@@ -64,7 +65,8 @@ void SoloGame::become_front() {
             _state = PROLOGUE;
             if (_level->prologue_id() > 0) {
                 stack()->push(new ScrollTextScreen(
-                        _level->prologue_id(), 450, kSlowScrollInterval, 4002));
+                        Resource::text(_level->prologue_id()).string(), 450, kSlowScrollInterval,
+                        4002));
                 break;
             }
         // else fall through
@@ -96,8 +98,8 @@ void SoloGame::handle_game_result() {
                     // we win but no next level? Play triumph song
                     scroll_song = 4003;
                 }
-                stack()->push(
-                        new ScrollTextScreen(epilogue, 450, kSlowScrollInterval, scroll_song));
+                stack()->push(new ScrollTextScreen(
+                        Resource::text(epilogue).string(), 450, kSlowScrollInterval, scroll_song));
             } else {
                 become_front();
             }

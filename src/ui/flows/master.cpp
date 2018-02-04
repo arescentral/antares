@@ -19,6 +19,7 @@
 #include "ui/flows/master.hpp"
 
 #include "data/plugin.hpp"
+#include "data/resource.hpp"
 #include "game/admiral.hpp"
 #include "game/cheat.hpp"
 #include "game/cursor.hpp"
@@ -87,7 +88,8 @@ void Master::become_front() {
         case TITLE_SCREEN_PICT:
             _state = INTRO_SCROLL;
             // TODO(sfiera): prevent the intro screen from displaying on subsequent launches.
-            stack()->push(new ScrollTextScreen(5600, 450, kSlowScrollInterval));
+            stack()->push(
+                    new ScrollTextScreen(Resource::text(5600).string(), 450, kSlowScrollInterval));
             break;
 
         case INTRO_SCROLL:

@@ -37,14 +37,11 @@ const int kScrollTextHeight = 200;
 
 }  // namespace
 
-ScrollTextScreen::ScrollTextScreen(int text_id, int width, ticks interval)
-        : _build_pix(BuildPix(text_id, width)),
-          _interval(interval),
-          _play_song(false),
-          _song_id(0) {}
+ScrollTextScreen::ScrollTextScreen(pn::string_view text, int width, ticks interval)
+        : _build_pix(BuildPix(text, width)), _interval(interval), _play_song(false), _song_id(0) {}
 
-ScrollTextScreen::ScrollTextScreen(int text_id, int width, ticks interval, int song_id)
-        : _build_pix(BuildPix(text_id, width)),
+ScrollTextScreen::ScrollTextScreen(pn::string_view text, int width, ticks interval, int song_id)
+        : _build_pix(BuildPix(text, width)),
           _interval(interval),
           _play_song(true),
           _song_id(song_id) {}
