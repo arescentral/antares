@@ -196,10 +196,6 @@ Point Level::star_map_point() const { return Point(starMapH, starMapV); }
 
 int32_t Level::chapter_number() const { return levelNameStrNum; }
 
-int32_t Level::prologue_id() const { return prologueID; }
-
-int32_t Level::epilogue_id() const { return epilogueID; }
-
 bool start_construct_level(Handle<Level> level, int32_t* max) {
     ResetAllSpaceObjects();
     reset_action_queue();
@@ -228,7 +224,7 @@ bool start_construct_level(Handle<Level> level, int32_t* max) {
     g.next_level   = -1;
     g.victory_text = "";
 
-    SetMiniScreenStatusStrList(g.level->scoreStringResID);
+    SetMiniScreenStatusStrList(g.level->score_strings);
 
     for (int i = 0; i < g.level->playerNum; i++) {
         if (g.level->player[i].playerType == kSingleHumanPlayer) {

@@ -63,10 +63,9 @@ void SoloGame::become_front() {
 
         case START_LEVEL:
             _state = PROLOGUE;
-            if (_level->prologue_id() > 0) {
-                stack()->push(new ScrollTextScreen(
-                        Resource::text(_level->prologue_id()).string(), 450, kSlowScrollInterval,
-                        4002));
+            if (!_level->prologue.empty()) {
+                stack()->push(
+                        new ScrollTextScreen(_level->prologue, 450, kSlowScrollInterval, 4002));
                 break;
             }
         // else fall through
@@ -89,17 +88,17 @@ void SoloGame::become_front() {
 void SoloGame::handle_game_result() {
     switch (_game_result) {
         case WIN_GAME: {
-            _state             = EPILOGUE;
-            const int epilogue = _level->epilogue_id();
-            if (epilogue > 0) {
+            _state                         = EPILOGUE;
+            const pn::string_view epilogue = _level->epilogue;
+            if (!epilogue.empty()) {
                 // normal scrolltext song
                 int scroll_song = 4002;
                 if (g.next_level == -1) {
                     // we win but no next level? Play triumph song
                     scroll_song = 4003;
                 }
-                stack()->push(new ScrollTextScreen(
-                        Resource::text(epilogue).string(), 450, kSlowScrollInterval, scroll_song));
+                stack()->push(
+                        new ScrollTextScreen(epilogue, 450, kSlowScrollInterval, scroll_song));
             } else {
                 become_front();
             }

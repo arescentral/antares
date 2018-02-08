@@ -20,6 +20,7 @@
 #define ANTARES_DATA_LEVEL_HPP_
 
 #include <pn/string>
+#include <vector>
 
 #include "data/action.hpp"
 #include "data/handle.hpp"
@@ -118,29 +119,29 @@ struct Level {
         int16_t reserved1;
     };
 
-    pn::string name;
-    int16_t    netRaceFlags;
-    int16_t    playerNum;
-    Player     player[kMaxPlayerNum];
-    int16_t    scoreStringResID;
-    int16_t    initialFirst;
-    int16_t    prologueID;
-    int16_t    initialNum;
-    int16_t    songID;
-    int16_t    conditionFirst;
-    int16_t    epilogueID;
-    int16_t    conditionNum;
-    int16_t    starMapH;
-    int16_t    briefPointFirst;
-    int16_t    starMapV;
-    int16_t    briefPointNum;  // use kLevelBriefMask
-    game_ticks parTime;
-    int16_t    parKills;
-    int16_t    levelNameStrNum;
-    Fixed      parKillRatio;
-    int16_t    parLosses;
-    secs       startTime;
-    bool       is_training;
+    pn::string              name;
+    int16_t                 netRaceFlags;
+    int16_t                 playerNum;
+    Player                  player[kMaxPlayerNum];
+    std::vector<pn::string> score_strings;
+    int16_t                 initialFirst;
+    pn::string              prologue;
+    int16_t                 initialNum;
+    int16_t                 songID;
+    int16_t                 conditionFirst;
+    pn::string              epilogue;
+    int16_t                 conditionNum;
+    int16_t                 starMapH;
+    int16_t                 briefPointFirst;
+    int16_t                 starMapV;
+    int16_t                 briefPointNum;  // use kLevelBriefMask
+    game_ticks              parTime;
+    int16_t                 parKills;
+    int16_t                 levelNameStrNum;
+    Fixed                   parKillRatio;
+    int16_t                 parLosses;
+    secs                    startTime;
+    bool                    is_training;
 
     static const size_t byte_size = 124;
 
@@ -156,9 +157,6 @@ struct Level {
     int32_t angle() const;
     Point   star_map_point() const;
     int32_t chapter_number() const;
-
-    int32_t prologue_id() const;
-    int32_t epilogue_id() const;
 };
 bool read_from(pn::file_view in, Level* level);
 bool read_from(pn::file_view in, Level::Player* level_player);

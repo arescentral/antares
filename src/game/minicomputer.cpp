@@ -80,7 +80,7 @@ const int32_t kNoLineButton  = -1;
 const int32_t kInLineButton  = kCompAcceptKeyNum;
 const int32_t kOutLineButton = kCompCancelKeyNum;
 
-static ANTARES_GLOBAL std::unique_ptr<StringList> gMissionStatusStrList;
+static ANTARES_GLOBAL std::vector<pn::string> gMissionStatusStrList;
 
 enum {
     kMainMiniScreen    = 1,
@@ -228,14 +228,14 @@ void MiniScreenCleanup() {
 
 #pragma mark -
 
-void SetMiniScreenStatusStrList(int16_t strID) {
-    DisposeMiniScreenStatusStrList();
-    if (strID > 0) {
-        gMissionStatusStrList.reset(new StringList(strID));
+void SetMiniScreenStatusStrList(std::vector<pn::string>& strings) {
+    gMissionStatusStrList.clear();
+    for (pn::string_view s : strings) {
+        gMissionStatusStrList.emplace_back(s.copy());
     }
 }
 
-void DisposeMiniScreenStatusStrList() { gMissionStatusStrList.reset(); }
+void DisposeMiniScreenStatusStrList() { gMissionStatusStrList.clear(); }
 
 void ClearMiniScreenLines() {
     miniScreenLineType* c = g.mini.lineData.get();
@@ -1065,7 +1065,7 @@ void MiniComputerSetStatusStrings() {
     //  Samples Left: 7
     //
 
-    if (gMissionStatusStrList.get() == NULL) {
+    if (gMissionStatusStrList.empty()) {
         for (int count = kStatusMiniScreenFirstLine; count < kMiniScreenCharHeight; count++) {
             miniScreenLineType* line = g.mini.lineData.get() + count;
             line->statusType         = kNoStatusData;
@@ -1079,11 +1079,11 @@ void MiniComputerSetStatusStrings() {
         miniScreenLineType* line = g.mini.lineData.get() + count;
 
         if (implicit_cast<size_t>(count - kStatusMiniScreenFirstLine) <
-            gMissionStatusStrList->size()) {
+            gMissionStatusStrList.size()) {
             // we have some data for this line to interpret
 
             pn::string_view sourceString =
-                    gMissionStatusStrList->at(count - kStatusMiniScreenFirstLine);
+                    gMissionStatusStrList.at(count - kStatusMiniScreenFirstLine);
 
             if (sourceString.data()[0] == '_') {
                 line->underline = true;

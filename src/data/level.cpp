@@ -22,6 +22,7 @@
 
 #include "data/plugin.hpp"
 #include "data/resource.hpp"
+#include "data/string-list.hpp"
 
 namespace macroman = sfz::macroman;
 
@@ -74,13 +75,23 @@ bool read_from(pn::file_view in, Level* level) {
         }
     }
     int16_t par_time, start_time, unused;
-    if (!(in.read(&level->scoreStringResID, &level->initialFirst, &level->prologueID,
-                  &level->initialNum, &level->songID, &level->conditionFirst, &level->epilogueID,
-                  &level->conditionNum, &level->starMapH, &level->briefPointFirst,
-                  &level->starMapV, &level->briefPointNum, &par_time, &unused, &level->parKills,
+    int16_t score_string_id, prologue_id, epilogue_id;
+    if (!(in.read(&score_string_id, &level->initialFirst, &prologue_id, &level->initialNum,
+                  &level->songID, &level->conditionFirst, &epilogue_id, &level->conditionNum,
+                  &level->starMapH, &level->briefPointFirst, &level->starMapV,
+                  &level->briefPointNum, &par_time, &unused, &level->parKills,
                   &level->levelNameStrNum) &&
           read_from(in, &level->parKillRatio) && in.read(&level->parLosses, &start_time))) {
         return false;
+    }
+    if (score_string_id > 0) {
+        level->score_strings = to_vector(StringList(score_string_id));
+    }
+    if (prologue_id > 0) {
+        level->prologue = Resource::text(prologue_id).string().copy();
+    }
+    if (epilogue_id > 0) {
+        level->epilogue = Resource::text(epilogue_id).string().copy();
     }
     level->parTime     = game_ticks(secs(par_time));
     level->startTime   = secs(start_time & kLevel_StartTimeMask);

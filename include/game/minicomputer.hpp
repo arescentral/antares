@@ -51,7 +51,7 @@ struct miniScreenLineType {
 
 void  MiniScreenInit(void);
 void  MiniScreenCleanup(void);
-void  SetMiniScreenStatusStrList(int16_t);
+void  SetMiniScreenStatusStrList(std::vector<pn::string>& strings);
 void  DisposeMiniScreenStatusStrList(void);
 void  ClearMiniScreenLines(void);
 void  draw_mini_screen();
