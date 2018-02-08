@@ -31,6 +31,9 @@ namespace antares {
 static const int16_t kLevel_StartTimeMask  = 0x7fff;
 static const int16_t kLevel_IsTraining_Bit = 0x8000;
 
+const int16_t kLevelOwnNoShipTextID = 10000;
+const int16_t kLevelFoeNoShipTextID = 10050;
+
 Level* Level::get(int n) { return &plug.levels[n]; }
 
 bool read_from(pn::file_view in, ScenarioInfo* info) {
@@ -69,11 +72,19 @@ bool read_from(pn::file_view in, Level* level) {
     if (!in.read(&level->netRaceFlags, &level->playerNum)) {
         return false;
     }
+
+    level->type = Level::DEMO;
     for (size_t i = 0; i < kMaxPlayerNum; ++i) {
         if (!read_from(in, &level->player[i])) {
             return false;
         }
+        if (level->player[i].playerType == kSingleHumanPlayer) {
+            level->type = Level::SOLO;
+        } else if (level->player[i].playerType == kNetworkHumanPlayer) {
+            level->type = Level::NET;
+        }
     }
+
     int16_t par_time, start_time, unused;
     int16_t score_string_id, prologue_id, epilogue_id;
     if (!(in.read(&score_string_id, &level->initialFirst, &prologue_id, &level->initialNum,
@@ -87,12 +98,36 @@ bool read_from(pn::file_view in, Level* level) {
     if (score_string_id > 0) {
         level->score_strings = to_vector(StringList(score_string_id));
     }
-    if (prologue_id > 0) {
-        level->prologue = Resource::text(prologue_id).string().copy();
+
+    switch (level->type) {
+        case Level::DEMO: break;
+        case Level::SOLO:
+            try {
+                level->own_no_ships_text =
+                        Resource::text(kLevelOwnNoShipTextID + level->levelNameStrNum)
+                                .string()
+                                .copy();
+            } catch (std::runtime_error& e) {
+                level->own_no_ships_text.clear();
+            }
+            if (prologue_id > 0) {
+                level->prologue = Resource::text(prologue_id).string().copy();
+            }
+            if (epilogue_id > 0) {
+                level->epilogue = Resource::text(epilogue_id).string().copy();
+            }
+            break;
+        case Level::NET:
+            level->own_no_ships_text =
+                    Resource::text(kLevelOwnNoShipTextID + level->levelNameStrNum).string().copy();
+            level->foe_no_ships_text =
+                    Resource::text(kLevelFoeNoShipTextID + level->levelNameStrNum).string().copy();
+            if (prologue_id > 0) {
+                level->description = Resource::text(prologue_id).string().copy();
+            }
+            break;
     }
-    if (epilogue_id > 0) {
-        level->epilogue = Resource::text(epilogue_id).string().copy();
-    }
+
     level->parTime     = game_ticks(secs(par_time));
     level->startTime   = secs(start_time & kLevel_StartTimeMask);
     level->is_training = start_time & kLevel_IsTraining_Bit;

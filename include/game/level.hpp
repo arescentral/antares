@@ -23,8 +23,6 @@
 
 namespace antares {
 
-const int16_t kLevelNoShipTextID = 10000;
-
 bool start_construct_level(Handle<Level> level, int32_t* max);
 void construct_level(Handle<Level> level, int32_t* current);
 void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, pn::string_view text);

@@ -109,6 +109,13 @@ struct Level {
     struct Condition;
     struct BriefPoint;
 
+    enum Type {
+        DEMO,
+        SOLO,
+        NET,
+    };
+    Type type = DEMO;
+
     struct Player {
         int16_t playerType;
         int16_t playerRace;
@@ -125,11 +132,9 @@ struct Level {
     Player                  player[kMaxPlayerNum];
     std::vector<pn::string> score_strings;
     int16_t                 initialFirst;
-    pn::string              prologue;
     int16_t                 initialNum;
     int16_t                 songID;
     int16_t                 conditionFirst;
-    pn::string              epilogue;
     int16_t                 conditionNum;
     int16_t                 starMapH;
     int16_t                 briefPointFirst;
@@ -142,6 +147,12 @@ struct Level {
     int16_t                 parLosses;
     secs                    startTime;
     bool                    is_training;
+
+    pn::string prologue;           // SOLO
+    pn::string epilogue;           // SOLO
+    pn::string own_no_ships_text;  // SOLO, NET
+    pn::string foe_no_ships_text;  // NET
+    pn::string description;        // NET
 
     static const size_t byte_size = 124;
 
