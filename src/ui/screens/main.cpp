@@ -19,6 +19,7 @@
 #include "ui/screens/main.hpp"
 
 #include "config/preferences.hpp"
+#include "data/plugin.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/level.hpp"
@@ -68,7 +69,7 @@ void MainScreen::fire_timer() {
     size_t demo = rand() % (_replays.size() + 1);
     if (demo == _replays.size()) {
         stack()->push(new ScrollTextScreen(
-                Resource::text(5600).string(), kTitleTextScrollWidth, kSlowScrollInterval));
+                plug.info.intro_text, kTitleTextScrollWidth, kSlowScrollInterval));
     } else {
         stack()->push(new ReplayGame(_replays.at(demo)));
     }
@@ -129,7 +130,7 @@ void MainScreen::handle_button(antares::Button& button) {
 
         case REPLAY_INTRO:
             stack()->push(new ScrollTextScreen(
-                    Resource::text(5600).string(), kTitleTextScrollWidth, kSlowScrollInterval));
+                    plug.info.intro_text, kTitleTextScrollWidth, kSlowScrollInterval));
             break;
 
         case START_NEW_GAME: stack()->push(new SoloGame); break;
@@ -139,8 +140,7 @@ void MainScreen::handle_button(antares::Button& button) {
             break;
 
         case ABOUT_ARES:
-            stack()->push(
-                    new ScrollTextScreen(Resource::text(6500).string(), 540, kFastScrollInterval));
+            stack()->push(new ScrollTextScreen(plug.info.about_text, 540, kFastScrollInterval));
             break;
 
         case OPTIONS: stack()->push(new OptionsScreen); break;

@@ -64,6 +64,8 @@ struct ScenarioInfo {
     pn::string         titleString;
     pn::string         authorNameString;
     pn::string         authorURLString;
+    pn::string         intro_text;
+    pn::string         about_text;
     pn::string         version;
 };
 bool read_from(pn::file_view in, ScenarioInfo* scenario_info);

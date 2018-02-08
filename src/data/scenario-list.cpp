@@ -45,13 +45,15 @@ ScenarioList::ScenarioList() {
     factory_scenario.identifier = kFactoryScenarioIdentifier;
 
     const pn::string factory_path = pn::format("{0}/info.pn", factory_scenario_path());
-    ScenarioInfo     info;
-    if (sfz::path::isfile(factory_path) && read_from(pn::open(factory_path, "r"), &info)) {
-        factory_scenario.title        = info.titleString.copy();
-        factory_scenario.download_url = info.downloadURLString.copy();
-        factory_scenario.author       = info.authorNameString.copy();
-        factory_scenario.author_url   = info.authorURLString.copy();
-        factory_scenario.version      = info.version.copy();
+    pn::value        info;
+    pn_error_t       err;
+    if (sfz::path::isfile(factory_path) && pn::parse(pn::open(factory_path, "r"), info, &err)) {
+        pn::map_cref m                = info.as_map();
+        factory_scenario.title        = m.get("title").as_string().copy();
+        factory_scenario.download_url = m.get("download_url").as_string().copy();
+        factory_scenario.author       = m.get("author").as_string().copy();
+        factory_scenario.author_url   = m.get("author_url").as_string().copy();
+        factory_scenario.version      = m.get("version").as_string().copy();
         factory_scenario.installed    = true;
     } else {
         factory_scenario.title        = "Ares";
@@ -79,18 +81,19 @@ ScenarioList::ScenarioList() {
 
         sfz::mapped_file file(path);
         pn::file         in = file.data().open();
-        ScenarioInfo     info;
-        if (!read_from(in, &info)) {
+        pn::value        info;
+        if (!pn::parse(in, info, &err)) {
             continue;
         }
         _scenarios.emplace_back();
         Entry& entry       = _scenarios.back();
         entry.identifier   = identifier.copy();
-        entry.title        = info.titleString.copy();
-        entry.download_url = info.downloadURLString.copy();
-        entry.author       = info.authorNameString.copy();
-        entry.author_url   = info.authorURLString.copy();
-        entry.version      = info.version.copy();
+        pn::map_cref m     = info.as_map();
+        entry.title        = m.get("title").as_string().copy();
+        entry.download_url = m.get("download_url").as_string().copy();
+        entry.author       = m.get("author").as_string().copy();
+        entry.author_url   = m.get("author_url").as_string().copy();
+        entry.version      = m.get("version").as_string().copy();
         entry.installed    = true;
     }
 }

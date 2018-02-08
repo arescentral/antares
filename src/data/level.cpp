@@ -65,6 +65,9 @@ bool read_from(pn::file_view in, ScenarioInfo* info) {
     info->playerBodyID      = Handle<BaseObject>(m.get("player_body").as_int());
     info->energyBlobID      = Handle<BaseObject>(m.get("energy_blob").as_int());
 
+    info->intro_text = Resource::text(5600).string().copy();
+    info->about_text = Resource::text(6500).string().copy();
+
     return true;
 }
 
