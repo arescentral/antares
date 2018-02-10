@@ -57,8 +57,6 @@ static const ticks   kStatusLabelAge  = secs(2);
 static const int32_t kLongMessageVPad       = 5;
 static const int32_t kLongMessageVPadDouble = 10;
 
-static const int16_t kStringMessageID = 1;
-
 static const int32_t kHBuffer = 4;
 
 namespace {
@@ -83,10 +81,6 @@ enum longMessageStageType {
 struct Messages::longMessageType {
     longMessageStageType        stage;
     ticks                       charDelayCount;
-    Rect                        pictBounds;
-    int32_t                     pictDelayCount;
-    int32_t                     pictCurrentLeft;
-    int32_t                     pictCurrentTop;
     int32_t                     time;
     int32_t                     textHeight;
     int16_t                     startResID;
@@ -95,11 +89,7 @@ struct Messages::longMessageType {
     int16_t                     lastResID;
     int16_t                     previousStartResID;
     int16_t                     previousEndResID;
-    int16_t                     pictID;
     uint8_t                     backColor;
-    pn::string                  stringMessage;
-    pn::string                  lastStringMessage;
-    bool                        newStringMessage;
     pn::string                  text;
     std::unique_ptr<StyledText> retro_text;
     Point                       retro_origin;
@@ -141,14 +131,7 @@ void Messages::init() {
     tmessage->stage      = kNoStage;
     tmessage->textHeight = 0;
     tmessage->retro_text.reset();
-    tmessage->charDelayCount  = ticks(0);
-    tmessage->pictBounds.left = tmessage->pictBounds.right = 0;
-    tmessage->pictCurrentLeft                              = 0;
-    tmessage->pictCurrentTop                               = 0;
-    tmessage->pictID                                       = -1;
-    tmessage->stringMessage.clear();
-    tmessage->lastStringMessage.clear();
-    tmessage->newStringMessage = false;
+    tmessage->charDelayCount   = ticks(0);
     tmessage->labelMessage     = false;
     tmessage->lastLabelMessage = false;
     tmessage->labelMessageID   = Label::none();
@@ -175,11 +158,8 @@ void Messages::clear() {
     tmessage->textHeight         = 0;
     tmessage->previousStartResID = tmessage->previousEndResID = -1;
     tmessage                                                  = long_message_data;
-    tmessage->stringMessage.clear();
-    tmessage->lastStringMessage.clear();
-    tmessage->newStringMessage = false;
-    tmessage->labelMessage     = false;
-    tmessage->lastLabelMessage = false;
+    tmessage->labelMessage                                    = false;
+    tmessage->lastLabelMessage                                = false;
     tmessage->retro_text.reset();
     g.bottom_border          = 0;
     tmessage->labelMessageID = Label::add(0, 0, 0, 0, SpaceObject::none(), false, SKY_BLUE);
@@ -208,12 +188,7 @@ void Messages::start(int16_t startResID, int16_t endResID) {
         tmessage->stage              = kStartStage;
         tmessage->textHeight         = 0;
         tmessage->retro_text.reset();
-        tmessage->charDelayCount  = ticks(0);
-        tmessage->pictBounds.left = tmessage->pictBounds.right = 0;
-        // tmessage->pictDelayCount;
-        tmessage->pictCurrentLeft = 0;
-        tmessage->pictCurrentTop  = 0;
-        tmessage->pictID          = -1;
+        tmessage->charDelayCount = ticks(0);
     }
 }
 
@@ -224,29 +199,21 @@ void Messages::clip(void)
     unique_ptr<pn::string> textData;
 
     tmessage = long_message_data;
-    if ((tmessage->currentResID != tmessage->lastResID) || (tmessage->newStringMessage)) {
+    if (tmessage->currentResID != tmessage->lastResID) {
         if (tmessage->lastResID >= 0) {
             g.bottom_border = 0;
         }
 
         // draw in offscreen world
         if ((tmessage->currentResID >= 0) && (tmessage->stage == kClipStage)) {
-            if (tmessage->currentResID == kStringMessageID) {
-                textData.reset(new pn::string);
-                if (textData.get() != NULL) {
-                    *textData += tmessage->stringMessage;
-                }
+            Resource   rsrc = Resource::text(tmessage->currentResID);
+            pn::string text = rsrc.string().copy();
+            Replace_KeyCode_Strings_With_Actual_Key_Names(text, KEY_LONG_NAMES, 0);
+            textData.reset(new pn::string(text.copy()));
+            if (*textData->begin() == pn::rune{'#'}) {
+                tmessage->labelMessage = true;
+            } else
                 tmessage->labelMessage = false;
-            } else {
-                Resource   rsrc = Resource::text(tmessage->currentResID);
-                pn::string text = rsrc.string().copy();
-                Replace_KeyCode_Strings_With_Actual_Key_Names(text, KEY_LONG_NAMES, 0);
-                textData.reset(new pn::string(text.copy()));
-                if (*textData->begin() == pn::rune{'#'}) {
-                    tmessage->labelMessage = true;
-                } else
-                    tmessage->labelMessage = false;
-            }
             if (textData.get() != NULL) {
                 const RgbColor& light_blue = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
                 const RgbColor& dark_blue  = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
@@ -305,7 +272,7 @@ void Messages::draw_long_message(ticks time_pass) {
     RgbColor         color;
 
     tmessage = long_message_data;
-    if ((tmessage->currentResID != tmessage->lastResID) || (tmessage->newStringMessage)) {
+    if (tmessage->currentResID != tmessage->lastResID) {
         // TODO(sfiera): figure out what this meant.
         //
         // we check scenario conditions here for ambrosia tutorial
@@ -336,7 +303,6 @@ void Messages::draw_long_message(ticks time_pass) {
         if ((tmessage->stage == kShowStage) || (tmessage->currentResID < 0)) {
             tmessage->lastResID        = tmessage->currentResID;
             tmessage->lastLabelMessage = tmessage->labelMessage;
-            tmessage->newStringMessage = false;
         }
     } else if (
             (tmessage->currentResID >= 0) && (tmessage->retro_text.get() != NULL) &&
@@ -366,7 +332,6 @@ void Messages::end() {
     tmessage->currentResID       = -1;
     tmessage->stage              = kStartStage;
     tmessage->retro_text.reset();
-    tmessage->lastStringMessage = tmessage->stringMessage.copy();
 }
 
 void Messages::advance() {
@@ -400,7 +365,6 @@ void Messages::replay() {
 
     tmessage = long_message_data;
     if ((tmessage->previousStartResID >= 0) && (tmessage->currentResID < 0)) {
-        tmessage->stringMessage = tmessage->lastStringMessage.copy();
         start(tmessage->previousStartResID, tmessage->previousEndResID);
     }
 }
