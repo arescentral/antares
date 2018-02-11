@@ -1,9 +1,9 @@
 Antares
 =======
 
-Download: `Antares 0.8.2 for Mac OS X`_
+Download: `Antares 0.8.3 for Mac OS X`_
 
-..  _Antares 0.8.2 for Mac OS X: http://downloads.arescentral.org/Antares/Antares-0.8.2.zip
+..  _Antares 0.8.3 for Mac OS X: http://downloads.arescentral.org/Antares/Antares-0.8.3.zip
 
 ..  image:: https://travis-ci.org/arescentral/antares.svg?branch=master
     :target: https://travis-ci.org/arescentral/antares
