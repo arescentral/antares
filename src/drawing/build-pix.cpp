@@ -86,8 +86,8 @@ class PixDraw {
 
     Rect _bounds;
 
-    const Texture* _background;
-    int            _background_start;
+    const Texture* _background       = nullptr;
+    int            _background_start = 0;
 };
 
 }  // namespace
