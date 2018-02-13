@@ -600,7 +600,7 @@ static void declare_winner(Handle<Action> action, Handle<SpaceObject> focus) {
 
 static void display_message(Handle<Action> action, Handle<SpaceObject> focus) {
     const auto& message = action->argument.displayMessage;
-    Messages::start(message.resID, message.resID + message.pageNum - 1);
+    Messages::start(message.resID, message.resID + message.pageNum);
 }
 
 static void set_destination(
