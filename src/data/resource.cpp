@@ -58,11 +58,13 @@ Resource Resource::font(pn::string_view name) {
 Resource Resource::interface(pn::string_view name) {
     return Resource(load(pn::format("interfaces/{0}.pn", name)));
 }
-Resource Resource::replay(int id) { return Resource(load(pn::format("replays/{0}.NLRP", id))); }
-Resource Resource::strings(int id) { return Resource(load(pn::format("strings/{0}.pn", id))); }
-Resource Resource::sprite(int id) { return Resource(load(pn::format("sprites/{0}.pn", id))); }
-Resource Resource::text(int id) { return Resource(load(pn::format("text/{0}.txt", id))); }
-Texture  Resource::texture(pn::string_view name) {
+Resource   Resource::replay(int id) { return Resource(load(pn::format("replays/{0}.NLRP", id))); }
+Resource   Resource::strings(int id) { return Resource(load(pn::format("strings/{0}.pn", id))); }
+Resource   Resource::sprite(int id) { return Resource(load(pn::format("sprites/{0}.pn", id))); }
+pn::string Resource::text(int id) {
+    return Resource(load(pn::format("text/{0}.txt", id))).string().copy();
+}
+Texture Resource::texture(pn::string_view name) {
     int scale = sys.video->scale();
     while (true) {
         try {

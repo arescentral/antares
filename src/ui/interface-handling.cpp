@@ -130,7 +130,7 @@ bool BothCommandAndQ() {
 }
 
 void CreateObjectDataText(pn::string& text, Handle<BaseObject> object) {
-    pn::string data = Resource::text(kShipDataTextID).string().copy();
+    pn::string data = Resource::text(kShipDataTextID);
 
     StringList keys(kShipDataKeyStringID);
     StringList values(kShipDataNameID);
@@ -191,7 +191,7 @@ void CreateWeaponDataText(
     }
 
     // TODO(sfiera): catch exception.
-    pn::string data = Resource::text(kWeaponDataTextID).string().copy();
+    pn::string data = Resource::text(kWeaponDataTextID);
     // damage; this is tricky--we have to guess by walking through activate actions,
     //  and for all the createObject actions, see which creates the most damaging
     //  object.  We calc this first so we can use isGuided

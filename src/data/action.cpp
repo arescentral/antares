@@ -166,7 +166,7 @@ bool read_from(pn::file_view in, argumentType::DisplayMessage* argument) {
     argument->pages.clear();
     for (int id : sfz::range<int>(argument->resID, argument->resID + page_count)) {
         try {
-            argument->pages.push_back(Resource::text(id).string().copy());
+            argument->pages.push_back(Resource::text(id));
         } catch (...) {
             argument->pages.push_back("<RESOURCE NOT FOUND>");
         }
@@ -190,7 +190,7 @@ bool read_from(pn::file_view in, argumentType::DeclareWinner* argument) {
         return false;
     }
     argument->whichPlayer = Handle<Admiral>(admiral);
-    argument->text        = Resource::text(text_id).string().copy();
+    argument->text        = Resource::text(text_id);
     return true;
 }
 

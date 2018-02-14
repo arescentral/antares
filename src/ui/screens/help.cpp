@@ -36,8 +36,7 @@ namespace antares {
 
 HelpScreen::HelpScreen()
         : InterfaceScreen("help", {128, 0, 608, 480}, false), _text(sys.fonts.computer) {
-    Resource   rsrc = Resource::text(6002);
-    pn::string text = rsrc.string().copy();
+    pn::string text = Resource::text(6002);
     Replace_KeyCode_Strings_With_Actual_Key_Names(text, 1000, 4);
 
     RgbColor fore = GetRGBTranslateColorShade(RED, VERY_LIGHT);

@@ -65,8 +65,8 @@ bool read_from(pn::file_view in, ScenarioInfo* info) {
     info->playerBodyID      = Handle<BaseObject>(m.get("player_body").as_int());
     info->energyBlobID      = Handle<BaseObject>(m.get("energy_blob").as_int());
 
-    info->intro_text = Resource::text(5600).string().copy();
-    info->about_text = Resource::text(6500).string().copy();
+    info->intro_text = Resource::text(5600);
+    info->about_text = Resource::text(6500);
 
     return true;
 }
@@ -107,26 +107,24 @@ bool read_from(pn::file_view in, Level* level) {
         case Level::SOLO:
             try {
                 level->own_no_ships_text =
-                        Resource::text(kLevelOwnNoShipTextID + level->levelNameStrNum)
-                                .string()
-                                .copy();
+                        Resource::text(kLevelOwnNoShipTextID + level->levelNameStrNum);
             } catch (std::runtime_error& e) {
                 level->own_no_ships_text.clear();
             }
             if (prologue_id > 0) {
-                level->prologue = Resource::text(prologue_id).string().copy();
+                level->prologue = Resource::text(prologue_id);
             }
             if (epilogue_id > 0) {
-                level->epilogue = Resource::text(epilogue_id).string().copy();
+                level->epilogue = Resource::text(epilogue_id);
             }
             break;
         case Level::NET:
             level->own_no_ships_text =
-                    Resource::text(kLevelOwnNoShipTextID + level->levelNameStrNum).string().copy();
+                    Resource::text(kLevelOwnNoShipTextID + level->levelNameStrNum);
             level->foe_no_ships_text =
-                    Resource::text(kLevelFoeNoShipTextID + level->levelNameStrNum).string().copy();
+                    Resource::text(kLevelFoeNoShipTextID + level->levelNameStrNum);
             if (prologue_id > 0) {
-                level->description = Resource::text(prologue_id).string().copy();
+                level->description = Resource::text(prologue_id);
             }
             break;
     }
@@ -223,7 +221,7 @@ bool read_from(pn::file_view in, Level::BriefPoint* brief_point) {
         return false;
     }
     try {
-        brief_point->content = Resource::text(content_id).string().copy();
+        brief_point->content = Resource::text(content_id);
     } catch (std::exception& e) {
         brief_point->content = "";
     }

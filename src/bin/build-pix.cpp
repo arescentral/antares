@@ -132,8 +132,8 @@ void main(int argc, char* const* argv) {
         TextVideoDriver video({540, 2000}, output_dir);
         for (auto spec : specs) {
             pix.emplace_back(
-                    unique_ptr<Card>(new DrawPix(
-                            nullptr, Resource::text(spec.first).string(), spec.second)),
+                    unique_ptr<Card>(
+                            new DrawPix(nullptr, Resource::text(spec.first), spec.second)),
                     pn::format("{0}.txt", dec(spec.first, 5)));
         }
         video.capture(pix);
@@ -141,8 +141,7 @@ void main(int argc, char* const* argv) {
         OffscreenVideoDriver video({540, 2000}, output_dir);
         for (auto spec : specs) {
             pix.emplace_back(
-                    unique_ptr<Card>(
-                            new DrawPix(&video, Resource::text(spec.first).string(), spec.second)),
+                    unique_ptr<Card>(new DrawPix(&video, Resource::text(spec.first), spec.second)),
                     pn::format("{0}.png", dec(spec.first, 5)));
         }
         video.capture(pix);

@@ -232,8 +232,7 @@ LabeledRect DebriefingScreen::initialize(pn::string_view message, bool do_score)
 pn::string DebriefingScreen::build_score_text(
         game_ticks your_time, game_ticks par_time, int your_loss, int par_loss, int your_kill,
         int par_kill) {
-    Resource   rsrc = Resource::text(6000);
-    pn::string text = rsrc.string().copy();
+    pn::string text = Resource::text(6000);
 
     StringList strings(6000);
 
