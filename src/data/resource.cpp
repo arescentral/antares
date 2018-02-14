@@ -58,36 +58,31 @@ Resource Resource::font(pn::string_view name) {
 Resource Resource::interface(pn::string_view name) {
     return Resource(load(pn::format("interfaces/{0}.pn", name)));
 }
-ArrayPixMap Resource::pixmap(pn::string_view name, int* scale) {
-    *scale = sys.video->scale();
-    while (true) {
-        try {
-            pn::string path = name.copy();
-            if (*scale > 1) {
-                path += pn::format("@{0}x.png", *scale);
-            } else {
-                path += ".png";
-            }
-            Resource    rsrc = Resource::path(path);
-            ArrayPixMap pix  = read_png(rsrc.data().open());
-            return pix;
-        } catch (std::exception& e) {
-            if (*scale > 1) {
-                *scale >>= 1;
-            } else {
-                throw;
-            }
-        }
-    }
-}
 Resource Resource::replay(int id) { return Resource(load(pn::format("replays/{0}.NLRP", id))); }
 Resource Resource::strings(int id) { return Resource(load(pn::format("strings/{0}.pn", id))); }
 Resource Resource::sprite(int id) { return Resource(load(pn::format("sprites/{0}.pn", id))); }
 Resource Resource::text(int id) { return Resource(load(pn::format("text/{0}.txt", id))); }
 Texture  Resource::texture(pn::string_view name) {
-    int         scale;
-    ArrayPixMap pix = pixmap(name, &scale);
-    return sys.video->texture(pn::format("/{0}.png", name), pix, scale);
+    int scale = sys.video->scale();
+    while (true) {
+        try {
+            pn::string path = name.copy();
+            if (scale > 1) {
+                path += pn::format("@{0}x.png", scale);
+            } else {
+                path += ".png";
+            }
+            Resource    rsrc = Resource::path(path);
+            ArrayPixMap pix  = read_png(rsrc.data().open());
+            return sys.video->texture(pn::format("/{0}", path), pix, scale);
+        } catch (std::exception& e) {
+            if (scale > 1) {
+                scale >>= 1;
+            } else {
+                throw;
+            }
+        }
+    }
 }
 Texture Resource::texture(int16_t id) { return texture(pn::format("pictures/{0}", id)); }
 

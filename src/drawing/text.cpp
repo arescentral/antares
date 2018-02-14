@@ -43,18 +43,6 @@ enum {
     kButtonSmallFontResID = 5005,
 };
 
-void recolor(PixMap& glyph_table) {
-    for (size_t y = 0; y < glyph_table.size().height; ++y) {
-        for (size_t x = 0; x < glyph_table.size().width; ++x) {
-            if (glyph_table.get(x, y).red < 255) {
-                glyph_table.set(x, y, RgbColor::white());
-            } else {
-                glyph_table.set(x, y, RgbColor::clear());
-            }
-        }
-    }
-}
-
 }  // namespace
 
 Font::Font(pn::string_view name) {
@@ -73,11 +61,7 @@ Font::Font(pn::string_view name) {
     height                = m.get("height").as_int();
     ascent                = m.get("ascent").as_int();
     pn::map_cref glyphs   = m.get("glyphs").as_map();
-
-    int         scale;
-    ArrayPixMap glyph_table = Resource::pixmap(image, &scale);
-    recolor(glyph_table);
-    texture = sys.video->texture(pn::format("/{0}.png", image), glyph_table, scale);
+    texture               = Resource::texture(image);
 
     for (pn::key_value_cref kv : glyphs) {
         pn::string_view glyph    = kv.key();
