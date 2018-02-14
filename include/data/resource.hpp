@@ -22,6 +22,7 @@
 #include <stdint.h>
 #include <pn/string>
 #include <sfz/sfz.hpp>
+#include <vector>
 
 #include "drawing/pix-map.hpp"
 
@@ -33,14 +34,14 @@ class Resource {
   public:
     static Resource path(pn::string_view path);
 
-    static Resource   font(pn::string_view name);
-    static Resource   interface(pn::string_view name);
-    static Resource   replay(int id);
-    static Resource   sprite(int id);
-    static Resource   strings(int id);
-    static pn::string text(int id);
-    static Texture    texture(pn::string_view name);
-    static Texture    texture(int16_t id);
+    static Resource                font(pn::string_view name);
+    static Resource                interface(pn::string_view name);
+    static Resource                replay(int id);
+    static Resource                sprite(int id);
+    static std::vector<pn::string> strings(int id);
+    static pn::string              text(int id);
+    static Texture                 texture(pn::string_view name);
+    static Texture                 texture(int16_t id);
 
     Resource(Resource&&) = default;
     Resource& operator=(Resource&&) = default;

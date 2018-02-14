@@ -19,7 +19,7 @@
 #include "game/admiral.hpp"
 
 #include "data/base-object.hpp"
-#include "data/string-list.hpp"
+#include "data/resource.hpp"
 #include "game/cheat.hpp"
 #include "game/globals.hpp"
 #include "game/space-object.hpp"
@@ -109,8 +109,8 @@ Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Level::Playe
     a->_earning_power = player.earningPower;
     a->_race          = player.playerRace;
     if ((player.nameResID >= 0)) {
-        StringList      strings(player.nameResID);
-        pn::string_view name = strings.at(player.nameStrNum - 1);
+        auto            strings = Resource::strings(player.nameResID);
+        pn::string_view name    = strings.at(player.nameStrNum - 1);
         if (pn::rune::count(name) > kAdmiralNameLen) {
             name = pn::rune::slice(name, 0, kAdmiralNameLen);
         }
@@ -154,8 +154,8 @@ Handle<Destination> MakeNewDestination(
     }
 
     if ((nameResID >= 0)) {
-        StringList      strings(nameResID);
-        pn::string_view name = strings.at(nameStrNum - 1);
+        auto            strings = Resource::strings(nameResID);
+        pn::string_view name    = strings.at(nameStrNum - 1);
         if (pn::rune::count(name) > kDestinationNameLen) {
             name = pn::rune::slice(name, 0, kDestinationNameLen);
         }

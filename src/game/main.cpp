@@ -31,7 +31,6 @@
 #include "data/replay.hpp"
 #include "data/resource.hpp"
 #include "data/scenario-list.hpp"
-#include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/shapes.hpp"
 #include "drawing/sprite-handling.hpp"
@@ -273,9 +272,9 @@ static const usecs kSleepAfter  = secs(60);
 class PauseScreen : public Card {
   public:
     PauseScreen() {
-        const StringList list(3100);
-        _pause_string = list.at(10).copy();
-        int32_t width = sys.fonts.title->string_width(_pause_string);
+        const auto list = Resource::strings(3100);
+        _pause_string   = list.at(10).copy();
+        int32_t width   = sys.fonts.title->string_width(_pause_string);
         Rect    bounds(0, 0, width, sys.fonts.title->height);
         bounds.center_in(play_screen());
         _text_origin = Point(bounds.left, bounds.top + sys.fonts.title->ascent);

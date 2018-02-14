@@ -31,7 +31,6 @@
 #include "data/interface.hpp"
 #include "data/races.hpp"
 #include "data/resource.hpp"
-#include "data/string-list.hpp"
 #include "drawing/briefing.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
@@ -132,8 +131,8 @@ bool BothCommandAndQ() {
 void CreateObjectDataText(pn::string& text, Handle<BaseObject> object) {
     pn::string data = Resource::text(kShipDataTextID);
 
-    StringList keys(kShipDataKeyStringID);
-    StringList values(kShipDataNameID);
+    auto keys   = Resource::strings(kShipDataKeyStringID);
+    auto values = Resource::strings(kShipDataNameID);
 
     // *** Replace place-holders in text with real data, using the fabulous find_replace routine
     // an object or a ship?
@@ -210,8 +209,8 @@ void CreateWeaponDataText(
         }
     }
 
-    StringList keys(kShipDataKeyStringID);
-    StringList values(kShipDataNameID);
+    auto keys   = Resource::strings(kShipDataKeyStringID);
+    auto values = Resource::strings(kShipDataNameID);
 
     // weapon name #
     find_replace(data, 0, keys.at(kWeaponNumberStringNum), weaponName);
@@ -255,8 +254,8 @@ void CreateWeaponDataText(
 }
 
 void Replace_KeyCode_Strings_With_Actual_Key_Names(pn::string& text, int16_t resID, size_t padTo) {
-    StringList keys(kHelpScreenKeyStringID);
-    StringList values(resID);
+    auto keys   = Resource::strings(kHelpScreenKeyStringID);
+    auto values = Resource::strings(resID);
 
     for (int i = 0; i < kKeyExtendedControlNum; ++i) {
         pn::string_view search  = keys.at(i);

@@ -24,7 +24,6 @@
 #include "config/keys.hpp"
 #include "data/handle.hpp"
 #include "data/level.hpp"
-#include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "game/starfield.hpp"
 #include "math/random.hpp"
@@ -72,7 +71,6 @@ struct proximityUnitType;
 struct scrollStarType;
 class Sprite;
 class InputSource;
-class StringList;
 
 struct GlobalState {
     uint32_t   sync;    // Indicates when net games are desynchronized.

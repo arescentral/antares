@@ -122,7 +122,6 @@ source_set("libantares-data") {
     "include/data/replay.hpp",
     "include/data/resource.hpp",
     "include/data/scenario-list.hpp",
-    "include/data/string-list.hpp",
     "src/data/action.cpp",
     "src/data/base-object.cpp",
     "src/data/extractor.cpp",
@@ -134,7 +133,6 @@ source_set("libantares-data") {
     "src/data/replay.cpp",
     "src/data/resource.cpp",
     "src/data/scenario-list.cpp",
-    "src/data/string-list.cpp",
   ]
   public_deps = [
     "//ext/libpng",

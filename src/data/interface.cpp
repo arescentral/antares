@@ -25,7 +25,6 @@
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "data/resource.hpp"
-#include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "lang/casts.hpp"
 #include "video/driver.hpp"
@@ -163,7 +162,7 @@ void PlainRect::accept(const Visitor& visitor) const { visitor.visit_plain_rect(
 
 LabeledItem::LabeledItem(int id, Rect bounds, interfaceLabelType label)
         : InterfaceItem(id, bounds),
-          label(StringList(label.stringID).at(label.stringNumber - 1).copy()) {}
+          label(Resource::strings(label.stringID).at(label.stringNumber - 1).copy()) {}
 
 LabeledRect::LabeledRect(
         int id, Rect bounds, interfaceLabelType label, uint8_t hue, interfaceStyleType style)

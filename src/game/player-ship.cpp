@@ -26,7 +26,6 @@
 #include "config/preferences.hpp"
 #include "data/base-object.hpp"
 #include "data/resource.hpp"
-#include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
 #include "game/admiral.hpp"
@@ -104,7 +103,7 @@ pn::string hot_key_suffix(Handle<SpaceObject> space_object) {
         return "";
     }
 
-    StringList      strings(KEY_LONG_NAMES);
+    auto            strings  = Resource::strings(KEY_LONG_NAMES);
     pn::string_view key_name = strings.at(keyNum - 1);
     return pn::format(" < {0} >", key_name);
 };
@@ -162,8 +161,8 @@ static void zoom_to(ZoomType zoom) {
     if (g.zoom != zoom) {
         g.zoom = zoom;
         sys.sound.click();
-        StringList      strings(kMessageStringID);
-        pn::string_view string = strings.at(g.zoom + kZoomStringOffset - 1);
+        auto            strings = Resource::strings(kMessageStringID);
+        pn::string_view string  = strings.at(g.zoom + kZoomStringOffset - 1);
         Messages::set_status(string, kStatusLabelColor);
     }
 }
@@ -875,16 +874,16 @@ void TogglePlayerAutoPilot(Handle<SpaceObject> flagship) {
     if (flagship->attributes & kOnAutoPilot) {
         flagship->attributes &= ~kOnAutoPilot;
         if ((flagship->owner == g.admiral) && (flagship->attributes & kIsHumanControlled)) {
-            StringList      strings(kMessageStringID);
-            pn::string_view string = strings.at(kAutoPilotOffString - 1);
+            auto            strings = Resource::strings(kMessageStringID);
+            pn::string_view string  = strings.at(kAutoPilotOffString - 1);
             Messages::set_status(string, kStatusLabelColor);
         }
     } else {
         SetObjectDestination(flagship);
         flagship->attributes |= kOnAutoPilot;
         if ((flagship->owner == g.admiral) && (flagship->attributes & kIsHumanControlled)) {
-            StringList      strings(kMessageStringID);
-            pn::string_view string = strings.at(kAutoPilotOnString - 1);
+            auto            strings = Resource::strings(kMessageStringID);
+            pn::string_view string  = strings.at(kAutoPilotOnString - 1);
             Messages::set_status(string, kStatusLabelColor);
         }
     }

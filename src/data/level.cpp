@@ -22,7 +22,6 @@
 
 #include "data/plugin.hpp"
 #include "data/resource.hpp"
-#include "data/string-list.hpp"
 
 namespace macroman = sfz::macroman;
 
@@ -99,7 +98,7 @@ bool read_from(pn::file_view in, Level* level) {
         return false;
     }
     if (score_string_id > 0) {
-        level->score_strings = to_vector(StringList(score_string_id));
+        level->score_strings = Resource::strings(score_string_id);
     }
 
     switch (level->type) {

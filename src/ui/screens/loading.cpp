@@ -19,7 +19,7 @@
 
 #include "ui/screens/loading.hpp"
 
-#include "data/string-list.hpp"
+#include "data/resource.hpp"
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
@@ -44,7 +44,7 @@ LoadingScreen::LoadingScreen(Handle<Level> level, bool* cancelled)
           _chars_typed(0),
           _current(0),
           _max(1) {
-    StringList strings(kLevelNameID);
+    auto strings = Resource::strings(kLevelNameID);
     _name_text.reset(new StyledText(sys.fonts.title));
     _name_text->set_fore_color(GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT));
     _name_text->set_retro_text(strings.at(_level->levelNameStrNum - 1));

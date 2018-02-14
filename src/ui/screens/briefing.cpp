@@ -24,7 +24,6 @@
 #include "config/keys.hpp"
 #include "data/base-object.hpp"
 #include "data/resource.hpp"
-#include "data/string-list.hpp"
 #include "drawing/briefing.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
@@ -192,7 +191,7 @@ static void update_mission_brief_point(
             lines.push_back(make_pair(p7, p8));
         }
     }
-    dataItem->label = StringList(headerID).at(headerNumber - 1).copy();
+    dataItem->label = Resource::strings(headerID).at(headerNumber - 1).copy();
     Rect newRect;
     GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
     populate_inline_picts(dataItem->bounds(), text, dataItem->style, inlinePict);

@@ -19,7 +19,6 @@
 #include "game/globals.hpp"
 
 #include "config/gamepad.hpp"
-#include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "game/admiral.hpp"

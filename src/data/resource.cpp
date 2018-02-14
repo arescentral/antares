@@ -58,8 +58,23 @@ Resource Resource::font(pn::string_view name) {
 Resource Resource::interface(pn::string_view name) {
     return Resource(load(pn::format("interfaces/{0}.pn", name)));
 }
-Resource   Resource::replay(int id) { return Resource(load(pn::format("replays/{0}.NLRP", id))); }
-Resource   Resource::strings(int id) { return Resource(load(pn::format("strings/{0}.pn", id))); }
+Resource Resource::replay(int id) { return Resource(load(pn::format("replays/{0}.NLRP", id))); }
+
+std::vector<pn::string> Resource::strings(int id) {
+    Resource  rsrc(load(pn::format("strings/{0}.pn", id)));
+    pn::value strings;
+    if (!pn::parse(rsrc.data().open(), strings, nullptr)) {
+        throw std::runtime_error(pn::format("Couldn't parse strings/{0}.pn", id).c_str());
+    }
+    pn::array_cref          l = strings.as_array();
+    std::vector<pn::string> result;
+    for (pn::value_cref x : l) {
+        pn::string_view s = x.as_string();
+        result.push_back(s.copy());
+    }
+    return result;
+}
+
 Resource   Resource::sprite(int id) { return Resource(load(pn::format("sprites/{0}.pn", id))); }
 pn::string Resource::text(int id) {
     return Resource(load(pn::format("text/{0}.txt", id))).string().copy();

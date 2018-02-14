@@ -22,7 +22,6 @@
 
 #include "data/base-object.hpp"
 #include "data/resource.hpp"
-#include "data/string-list.hpp"
 #include "lang/defines.hpp"
 
 using sfz::range;
@@ -73,7 +72,7 @@ void PluginInit() {
     read_all("actions", "actions.bin", plug.actions);
     read_all("races", "races.bin", plug.races);
 
-    StringList level_names(kLevelNameID);
+    auto level_names = Resource::strings(kLevelNameID);
     for (auto& level : plug.levels) {
         level.name = level_names.at(level.levelNameStrNum - 1).copy();
     }
@@ -84,8 +83,8 @@ void PluginInit() {
         }
     }
 
-    StringList object_names(kSpaceObjectNameResID);
-    StringList object_short_names(kSpaceObjectShortNameResID);
+    auto object_names       = Resource::strings(kSpaceObjectNameResID);
+    auto object_short_names = Resource::strings(kSpaceObjectShortNameResID);
     for (size_t i = 0; i < plug.objects.size(); ++i) {
         plug.objects[i].name       = object_names.at(i).copy();
         plug.objects[i].short_name = object_short_names.at(i).copy();

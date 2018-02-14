@@ -20,7 +20,6 @@
 
 #include "config/keys.hpp"
 #include "data/resource.hpp"
-#include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
 #include "drawing/sprite-handling.hpp"

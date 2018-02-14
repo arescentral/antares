@@ -23,7 +23,6 @@
 #include <vector>
 
 #include "data/resource.hpp"
-#include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
 #include "drawing/shapes.hpp"
@@ -234,7 +233,7 @@ pn::string DebriefingScreen::build_score_text(
         int par_kill) {
     pn::string text = Resource::text(6000);
 
-    StringList strings(6000);
+    auto strings = Resource::strings(6000);
 
     const int your_mins  = duration_cast<secs>(your_time.time_since_epoch()).count() / 60;
     const int your_secs  = duration_cast<secs>(your_time.time_since_epoch()).count() % 60;
@@ -252,7 +251,7 @@ pn::string DebriefingScreen::build_score_text(
         secs_string += dec(par_secs, 2);
         string_replace(text, strings.at(3), secs_string);
     } else {
-        StringList data_strings(6002);
+        auto data_strings = Resource::strings(6002);
         string_replace(text, strings.at(2), data_strings.at(8));  // = "N/A"
         string_replace(text, strings.at(3), "");
     }
