@@ -24,10 +24,10 @@
 #include <pn/string>
 #include <pn/value>
 
-#include "data/picture.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "game/globals.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 #include "video/driver.hpp"
 
@@ -74,10 +74,10 @@ Font::Font(pn::string_view name) {
     ascent                = m.get("ascent").as_int();
     pn::map_cref glyphs   = m.get("glyphs").as_map();
 
-    Picture glyph_table(image, true);
+    int         scale;
+    ArrayPixMap glyph_table = Resource::pixmap(image, &scale);
     recolor(glyph_table);
-    texture = glyph_table.texture();
-    _scale  = glyph_table.scale();
+    texture = sys.video->texture(pn::format("/{0}.png", image), glyph_table, scale);
 
     for (pn::key_value_cref kv : glyphs) {
         pn::string_view glyph    = kv.key();
@@ -107,10 +107,7 @@ void Font::draw(const Quads& quads, Point cursor, pn::string_view string, RgbCol
     cursor.offset(0, -ascent);
     for (pn::rune rune : string) {
         auto glyph = glyph_rect(rune);
-        Rect scaled(
-                glyph.left * _scale, glyph.top * _scale, glyph.right * _scale,
-                glyph.bottom * _scale);
-        quads.draw(Rect(cursor, glyph.size()), scaled, color);
+        quads.draw(Rect(cursor, glyph.size()), glyph, color);
         cursor.offset(glyph.width(), 0);
     }
 }

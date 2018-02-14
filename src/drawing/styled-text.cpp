@@ -22,7 +22,7 @@
 #include <limits>
 #include <pn/file>
 
-#include "data/picture.hpp"
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
 #include "video/driver.hpp"
@@ -198,10 +198,9 @@ void StyledText::set_interface_text(pn::string_view text) {
                 // TODO(sfiera): report an error if the picture is not loadable,
                 // instead of silently ignoring it.
                 try {
-                    Picture pict(id);
-                    inline_pict.bounds = pict.size().as_rect();
+                    _textures.push_back(Resource::texture(id));
+                    inline_pict.bounds = _textures.back().size().as_rect();
                     _inline_picts.push_back(inline_pict);
-                    _textures.push_back(pict.texture());
                     _chars.push_back(StyledChar(_inline_picts.size() - 1, PICTURE, f, b));
                 } catch (std::exception& e) {
                 }

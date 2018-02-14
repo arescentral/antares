@@ -22,7 +22,6 @@
 #include <pn/array>
 #include <pn/string>
 
-#include "data/picture.hpp"
 #include "math/geometry.hpp"
 #include "video/driver.hpp"
 
@@ -98,7 +97,6 @@ struct PictureRect : public InterfaceItem {
     PictureRect(int id, Rect bounds, pn::string_view name);
     virtual void accept(const Visitor& visitor) const;
 
-    Picture            picture;
     Texture            texture;
     bool               visible_bounds;
     uint8_t            hue;

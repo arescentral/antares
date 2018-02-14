@@ -23,7 +23,6 @@
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "data/base-object.hpp"
-#include "data/picture.hpp"
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
 #include "drawing/briefing.hpp"
@@ -343,7 +342,7 @@ void BriefingScreen::handle_button(Button& button) {
 }
 
 void BriefingScreen::build_star_map() {
-    _star_map       = Picture(kStarMapPictId).texture();
+    _star_map       = Resource::texture(kStarMapPictId);
     Rect pix_bounds = _star_map.size().as_rect();
     pix_bounds.offset(0, 2);
     pix_bounds.bottom -= 3;

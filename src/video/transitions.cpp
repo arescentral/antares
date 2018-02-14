@@ -19,7 +19,7 @@
 #include "video/transitions.hpp"
 
 #include "config/keys.hpp"
-#include "data/picture.hpp"
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "game/globals.hpp"
 #include "game/main.hpp"
@@ -142,7 +142,7 @@ void ColorFade::draw() const {
 }
 
 PictFade::PictFade(int pict_id, bool* skipped)
-        : _state(NEW), _skipped(skipped), _texture(Picture(pict_id).texture()) {}
+        : _state(NEW), _skipped(skipped), _texture(Resource::texture(pict_id)) {}
 
 PictFade::~PictFade() {}
 

@@ -23,18 +23,25 @@
 #include <pn/string>
 #include <sfz/sfz.hpp>
 
+#include "drawing/pix-map.hpp"
+
 namespace antares {
+
+class Texture;
 
 class Resource {
   public:
     static Resource path(pn::string_view path);
 
-    static Resource font(pn::string_view name);
-    static Resource interface(pn::string_view name);
-    static Resource replay(int id);
-    static Resource sprite(int id);
-    static Resource strings(int id);
-    static Resource text(int id);
+    static Resource    font(pn::string_view name);
+    static Resource    interface(pn::string_view name);
+    static ArrayPixMap pixmap(pn::string_view name, int* scale);
+    static Resource    replay(int id);
+    static Resource    sprite(int id);
+    static Resource    strings(int id);
+    static Resource    text(int id);
+    static Texture     texture(pn::string_view name);
+    static Texture     texture(int16_t id);
 
     Resource(Resource&&) = default;
     Resource& operator=(Resource&&) = default;

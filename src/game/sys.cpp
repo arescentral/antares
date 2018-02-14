@@ -22,7 +22,6 @@
 
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
-#include "data/picture.hpp"
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
 #include "drawing/text.hpp"
@@ -73,8 +72,8 @@ void sys_init() {
         sys.music.init();
     }
 
-    sys.left_instrument_texture  = Picture(kInstLeftPictID).texture();
-    sys.right_instrument_texture = Picture(kInstRightPictID).texture();
+    sys.left_instrument_texture  = Resource::texture(kInstLeftPictID);
+    sys.right_instrument_texture = Resource::texture(kInstRightPictID);
 }
 
 }  // namespace antares

@@ -50,7 +50,6 @@ class Font {
   private:
     Rect glyph_rect(pn::rune rune) const;
 
-    int                      _scale;
     std::map<pn::rune, Rect> _glyphs;
 };
 

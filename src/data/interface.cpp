@@ -185,8 +185,7 @@ void TextRect::accept(const Visitor& visitor) const { visitor.visit_text_rect(*t
 
 PictureRect::PictureRect(int id, Rect bounds, pn::string_view resource)
         : InterfaceItem(id, bounds),
-          picture(resource),
-          texture(picture.texture()),
+          texture(Resource::texture(resource)),
           visible_bounds(false),
           hue(GRAY),
           style(kSmall) {}

@@ -22,7 +22,6 @@
 #include <sfz/sfz.hpp>
 
 #include "data/base-object.hpp"
-#include "data/picture.hpp"
 #include "drawing/color.hpp"
 #include "drawing/shapes.hpp"
 #include "game/admiral.hpp"

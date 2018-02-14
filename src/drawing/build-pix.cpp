@@ -21,7 +21,7 @@
 #include <pn/file>
 #include <vector>
 
-#include "data/picture.hpp"
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
 #include "game/sys.hpp"
@@ -124,10 +124,7 @@ BuildPix::BuildPix(pn::string_view text, int width) : _size({width, 0}) {
                                                              .c_str());
                         }
                     }
-                    Picture pict(id);
-                    _lines.push_back(Line{
-                            Line::BACKGROUND, Picture(id).texture(), nullptr,
-                    });
+                    _lines.push_back(Line{Line::BACKGROUND, Resource::texture(id), nullptr});
                 } else {
                     int64_t id;
                     if (!pn::strtoll(line.substr(2), &id, nullptr)) {
@@ -136,10 +133,7 @@ BuildPix::BuildPix(pn::string_view text, int width) : _size({width, 0}) {
                                                          pn::dump(line, pn::dump_short))
                                                          .c_str());
                     }
-                    Picture pict(id);
-                    _lines.push_back(Line{
-                            Line::PICTURE, Picture(id).texture(), nullptr,
-                    });
+                    _lines.push_back(Line{Line::PICTURE, Resource::texture(id), nullptr});
                 }
             }
         } else {

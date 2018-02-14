@@ -98,6 +98,13 @@ void Rect::offset(int32_t x, int32_t y) {
     bottom += y;
 }
 
+void Rect::scale(int32_t x, int32_t y) {
+    left *= x;
+    right *= x;
+    top *= y;
+    bottom *= y;
+}
+
 void Rect::inset(int32_t x, int32_t y) {
     left += x;
     right -= x;

@@ -150,6 +150,9 @@ struct Rect {
     // @param [in] y        Added to `top` and `bottom`.
     void offset(int32_t x, int32_t y);
 
+    // Multiplies all components by `(x, y)`
+    void scale(int32_t x, int32_t y);
+
     // Shrinks this Rect by `(x, y)`.
     //
     // Either of `x` and `y` may be negative, which would correspond to enlarging the rectangle in
