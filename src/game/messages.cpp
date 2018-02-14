@@ -81,8 +81,8 @@ enum longMessageStageType {
 struct Messages::longMessageType {
     longMessageStageType        stage              = kNoStage;
     ticks                       charDelayCount     = ticks(0);
-    int16_t                     startResID         = -1;
-    int16_t                     endResID           = -1;
+    int16_t                     start_id           = -1;
+    std::vector<pn::string>     pages              = {};
     int16_t                     current_page_index = -1;
     int16_t                     last_page_index    = -1;
     uint8_t                     backColor          = 0;
@@ -94,10 +94,10 @@ struct Messages::longMessageType {
     bool                        lastLabelMessage   = false;
     Handle<Label>               labelMessageID     = Label::none();
 
-    bool have_pages() const { return startResID < endResID; }
+    bool have_pages() const { return !pages.empty(); }
     bool have_current() const { return current_page_index >= 0; }
     bool had_current() const { return last_page_index >= 0; }
-    bool have_next() const { return (current_page_index + 1) < (endResID - startResID); }
+    bool have_next() const { return (current_page_index + 1) < pages.size(); }
     bool have_previous() const { return current_page_index > 0; }
     bool was_updated() const { return current_page_index != last_page_index; }
 };
@@ -149,14 +149,14 @@ void Messages::clear() {
 
 void Messages::add(pn::string_view message) { message_data.emplace(message.copy()); }
 
-void Messages::start(int16_t startResID, int16_t endResID) {
+void Messages::start(int16_t start_id, std::vector<pn::string> pages) {
     longMessageType* m = long_message_data;
     if (!m->have_current()) {
         m->retro_text.reset();
         m->charDelayCount = ticks(0);
     }
-    m->startResID         = startResID;
-    m->endResID           = endResID;
+    m->start_id           = start_id;
+    m->pages              = std::move(pages);
     m->current_page_index = 0;
     m->last_page_index    = -1;  // Force clip() to be run.
     m->stage              = kStartStage;
@@ -174,8 +174,7 @@ void Messages::clip() {
         return;
     }
 
-    Resource   rsrc = Resource::text(current());
-    pn::string text = rsrc.string().copy();
+    pn::string text = m->pages[m->current_page_index].copy();
     Replace_KeyCode_Strings_With_Actual_Key_Names(text, KEY_LONG_NAMES, 0);
     if (*text.begin() == pn::rune{'#'}) {
         m->labelMessage = true;
@@ -289,7 +288,7 @@ void Messages::previous() {
 void Messages::replay() {
     longMessageType* m = long_message_data;
     if (m->have_pages() && !m->have_current()) {
-        start(m->startResID, m->endResID);
+        start(m->start_id, std::move(m->pages));
     }
 }
 
@@ -333,7 +332,7 @@ void Messages::set_status(pn::string_view status, uint8_t color) {
 }
 
 int16_t Messages::current() {
-    return long_message_data->startResID + long_message_data->current_page_index;
+    return long_message_data->start_id + long_message_data->current_page_index;
 }
 
 //

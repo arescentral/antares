@@ -20,6 +20,8 @@
 #define ANTARES_DATA_ACTION_HPP_
 
 #include <stdint.h>
+#include <pn/string>
+#include <vector>
 
 #include "data/handle.hpp"
 #include "math/fixed.hpp"
@@ -232,8 +234,8 @@ struct argumentType {
 
     // Display message
     struct DisplayMessage {
-        int16_t resID;
-        int16_t pageNum;
+        int16_t                 resID;
+        std::vector<pn::string> pages;
     };
     DisplayMessage displayMessage;
 

@@ -599,8 +599,12 @@ static void declare_winner(Handle<Action> action, Handle<SpaceObject> focus) {
 }
 
 static void display_message(Handle<Action> action, Handle<SpaceObject> focus) {
-    const auto& message = action->argument.displayMessage;
-    Messages::start(message.resID, message.resID + message.pageNum);
+    const auto&             message = action->argument.displayMessage;
+    std::vector<pn::string> pages;
+    for (pn::string_view s : message.pages) {
+        pages.push_back(s.copy());
+    }
+    Messages::start(message.resID, std::move(pages));
 }
 
 static void set_destination(

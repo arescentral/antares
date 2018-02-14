@@ -159,7 +159,19 @@ bool read_from(pn::file_view in, argumentType::EnterWarp* argument) {
 }
 
 bool read_from(pn::file_view in, argumentType::DisplayMessage* argument) {
-    return in.read(&argument->resID, &argument->pageNum);
+    int16_t page_count;
+    if (!in.read(&argument->resID, &page_count)) {
+        return false;
+    }
+    argument->pages.clear();
+    for (int id : sfz::range<int>(argument->resID, argument->resID + page_count)) {
+        try {
+            argument->pages.push_back(Resource::text(id).string().copy());
+        } catch (...) {
+            argument->pages.push_back("<RESOURCE NOT FOUND>");
+        }
+    }
+    return true;
 }
 
 bool read_from(pn::file_view in, argumentType::ChangeScore* argument) {
