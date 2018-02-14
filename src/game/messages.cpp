@@ -79,27 +79,27 @@ enum longMessageStageType {
 }  // namespace
 
 struct Messages::longMessageType {
-    longMessageStageType        stage            = kNoStage;
-    ticks                       charDelayCount   = ticks(0);
-    int16_t                     startResID       = -1;
-    int16_t                     endResID         = -1;
-    int16_t                     currentResID     = -1;
-    int16_t                     lastResID        = -1;
-    uint8_t                     backColor        = 0;
-    pn::string                  text             = "";
-    std::unique_ptr<StyledText> retro_text       = nullptr;
-    Point                       retro_origin     = {0, 0};
-    int32_t                     at_char          = 0;
-    bool                        labelMessage     = false;
-    bool                        lastLabelMessage = false;
-    Handle<Label>               labelMessageID   = Label::none();
+    longMessageStageType        stage              = kNoStage;
+    ticks                       charDelayCount     = ticks(0);
+    int16_t                     startResID         = -1;
+    int16_t                     endResID           = -1;
+    int16_t                     current_page_index = -1;
+    int16_t                     last_page_index    = -1;
+    uint8_t                     backColor          = 0;
+    pn::string                  text               = "";
+    std::unique_ptr<StyledText> retro_text         = nullptr;
+    Point                       retro_origin       = {0, 0};
+    int32_t                     at_char            = 0;
+    bool                        labelMessage       = false;
+    bool                        lastLabelMessage   = false;
+    Handle<Label>               labelMessageID     = Label::none();
 
     bool have_pages() const { return startResID < endResID; }
-    bool have_current() const { return currentResID >= 0; }
-    bool had_current() const { return lastResID >= 0; }
-    bool have_next() const { return (currentResID + 1) < endResID; }
-    bool have_previous() const { return currentResID > startResID; }
-    bool was_updated() const { return currentResID != lastResID; }
+    bool have_current() const { return current_page_index >= 0; }
+    bool had_current() const { return last_page_index >= 0; }
+    bool have_next() const { return (current_page_index + 1) < (endResID - startResID); }
+    bool have_previous() const { return current_page_index > 0; }
+    bool was_updated() const { return current_page_index != last_page_index; }
 };
 
 ANTARES_GLOBAL std::queue<pn::string> Messages::message_data;
@@ -155,10 +155,11 @@ void Messages::start(int16_t startResID, int16_t endResID) {
         m->retro_text.reset();
         m->charDelayCount = ticks(0);
     }
-    m->startResID   = startResID;
-    m->endResID     = endResID;
-    m->currentResID = startResID;
-    m->stage        = kStartStage;
+    m->startResID         = startResID;
+    m->endResID           = endResID;
+    m->current_page_index = 0;
+    m->last_page_index    = -1;  // Force clip() to be run.
+    m->stage              = kStartStage;
 }
 
 void Messages::clip() {
@@ -173,7 +174,7 @@ void Messages::clip() {
         return;
     }
 
-    Resource   rsrc = Resource::text(m->currentResID);
+    Resource   rsrc = Resource::text(current());
     pn::string text = rsrc.string().copy();
     Replace_KeyCode_Strings_With_Actual_Key_Names(text, KEY_LONG_NAMES, 0);
     if (*text.begin() == pn::rune{'#'}) {
@@ -238,7 +239,7 @@ void Messages::draw_long_message(ticks time_pass) {
             }
         }
         if ((m->stage == kShowStage) || !m->have_current()) {
-            m->lastResID        = m->currentResID;
+            m->last_page_index  = m->current_page_index;
             m->lastLabelMessage = m->labelMessage;
         }
     } else if (
@@ -258,9 +259,9 @@ void Messages::draw_long_message(ticks time_pass) {
 }
 
 void Messages::end() {
-    longMessageType* m = long_message_data;
-    m->currentResID    = -1;
-    m->stage           = kStartStage;
+    longMessageType* m    = long_message_data;
+    m->current_page_index = -1;
+    m->stage              = kStartStage;
     m->retro_text.reset();
 }
 
@@ -270,7 +271,7 @@ void Messages::advance() {
         return;
     }
     if (m->have_next()) {
-        m->currentResID++;
+        m->current_page_index++;
         m->stage = kStartStage;
     } else {
         end();
@@ -280,7 +281,7 @@ void Messages::advance() {
 void Messages::previous() {
     longMessageType* m = long_message_data;
     if (m->have_current() && m->have_previous()) {
-        m->currentResID--;
+        m->current_page_index--;
         m->stage = kStartStage;
     }
 }
@@ -331,7 +332,9 @@ void Messages::set_status(pn::string_view status, uint8_t color) {
     g.status_label->set_age(kStatusLabelAge);
 }
 
-int16_t Messages::current() { return long_message_data->currentResID; }
+int16_t Messages::current() {
+    return long_message_data->startResID + long_message_data->current_page_index;
+}
 
 //
 // MessageLabel_Set_Special
