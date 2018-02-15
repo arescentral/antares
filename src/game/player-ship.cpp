@@ -103,8 +103,7 @@ pn::string hot_key_suffix(Handle<SpaceObject> space_object) {
         return "";
     }
 
-    auto            strings  = Resource::strings(KEY_LONG_NAMES);
-    pn::string_view key_name = strings.at(keyNum - 1);
+    pn::string_view key_name = sys.key_long_names.at(keyNum - 1);
     return pn::format(" < {0} >", key_name);
 };
 
