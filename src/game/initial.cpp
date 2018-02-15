@@ -56,9 +56,8 @@ void create_initial(Level::InitialObject* initial, uint32_t all_colors) {
             type, &v, &coord, g.angle, owner, specialAttributes, initial->spriteIDOverride);
 
     if (anObject->attributes & kIsDestination) {
-        anObject->asDestination = MakeNewDestination(
-                anObject, initial->canBuild, initial->earning, initial->nameResID,
-                initial->nameStrNum);
+        anObject->asDestination =
+                MakeNewDestination(anObject, initial->canBuild, initial->earning, initial->name);
     }
     initial->realObjectID = anObject->id;
 
@@ -149,9 +148,8 @@ void UnhideInitialObject(int32_t whichInitial) {
             type, &v, &coord, 0, owner, specialAttributes, initial->spriteIDOverride);
 
     if (anObject->attributes & kIsDestination) {
-        anObject->asDestination = MakeNewDestination(
-                anObject, initial->canBuild, initial->earning, initial->nameResID,
-                initial->nameStrNum);
+        anObject->asDestination =
+                MakeNewDestination(anObject, initial->canBuild, initial->earning, initial->name);
 
         if (owner.get()) {
             if (initial->canBuild[0] >= 0) {

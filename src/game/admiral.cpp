@@ -108,13 +108,13 @@ Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Level::Playe
     a->_attributes    = attributes;
     a->_earning_power = player.earningPower;
     a->_race          = player.playerRace;
-    if ((player.nameResID >= 0)) {
-        auto            strings = Resource::strings(player.nameResID);
-        pn::string_view name    = strings.at(player.nameStrNum - 1);
-        if (pn::rune::count(name) > kAdmiralNameLen) {
-            name = pn::rune::slice(name, 0, kAdmiralNameLen);
+
+    if (!player.name.empty()) {
+        if (pn::rune::count(player.name) > kAdmiralNameLen) {
+            a->_name = pn::rune::slice(player.name, 0, kAdmiralNameLen).copy();
+        } else {
+            a->_name = player.name.copy();
         }
-        a->_name = name.copy();
     }
 
     // for now set strategy balance to 0 -- we may want to calc this if player added on the fly?
@@ -131,8 +131,7 @@ static Handle<Destination> next_free_destination() {
 }
 
 Handle<Destination> MakeNewDestination(
-        Handle<SpaceObject> object, int32_t* canBuildType, Fixed earn, int16_t nameResID,
-        int16_t nameStrNum) {
+        Handle<SpaceObject> object, int32_t* canBuildType, Fixed earn, pn::string_view name) {
     auto d = next_free_destination();
     if (!d.get()) {
         return Destination::none();
@@ -153,13 +152,12 @@ Handle<Destination> MakeNewDestination(
         }
     }
 
-    if ((nameResID >= 0)) {
-        auto            strings = Resource::strings(nameResID);
-        pn::string_view name    = strings.at(nameStrNum - 1);
-        if (pn::rune::count(name) > kDestinationNameLen) {
-            name = pn::rune::slice(name, 0, kDestinationNameLen);
+    if (!name.empty()) {
+        if (pn::rune::count(name) > kAdmiralNameLen) {
+            d->name = pn::rune::slice(name, 0, kAdmiralNameLen).copy();
+        } else {
+            d->name = name.copy();
         }
-        d->name = name.copy();
     }
 
     if (object->attributes & kNeutralDeath) {

@@ -119,13 +119,11 @@ struct Level {
     Type type = DEMO;
 
     struct Player {
-        int16_t playerType;
-        int16_t playerRace;
-        int16_t nameResID;
-        int16_t nameStrNum;
-        Fixed   earningPower;
-        int16_t netRaceFlags;
-        int16_t reserved1;
+        int16_t    playerType;
+        int16_t    playerRace;
+        pn::string name;
+        Fixed      earningPower;
+        int16_t    netRaceFlags;
     };
 
     pn::string              name;
@@ -187,8 +185,7 @@ struct Level::InitialObject {
     int32_t             spriteIDOverride;  // <- ADDED 9/30
     int32_t             canBuild[kMaxTypeBaseCanBuild];
     int32_t             initialDestination;  // <- ADDED 9/27
-    int32_t             nameResID;
-    int32_t             nameStrNum;
+    pn::string          name;
     uint32_t            attributes;
 
     static const size_t byte_size = 108;

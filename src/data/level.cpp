@@ -136,11 +136,20 @@ bool read_from(pn::file_view in, Level* level) {
 
 bool read_from(pn::file_view in, Level::Player* level_player) {
     uint32_t unused1;
+    int16_t  name_id, name_index;
     uint16_t unused2;
-    return in.read(&level_player->playerType, &level_player->playerRace, &level_player->nameResID,
-                   &level_player->nameStrNum, &unused1) &&
-           read_from(in, &level_player->earningPower) &&
-           in.read(&level_player->netRaceFlags, &unused2);
+    if (!(in.read(&level_player->playerType, &level_player->playerRace, &name_id, &name_index,
+                  &unused1) &&
+          read_from(in, &level_player->earningPower) &&
+          in.read(&level_player->netRaceFlags, &unused2))) {
+        return false;
+    }
+    try {
+        level_player->name = Resource::strings(name_id).at(name_index - 1).copy();
+    } catch (...) {
+        level_player->name = "";
+    }
+    return true;
 }
 
 static bool read_action(pn::file_view in, Level::Condition* condition) {
@@ -267,14 +276,22 @@ bool read_from(pn::file_view in, Level::InitialObject* level_initial) {
             return false;
         }
     }
+    int32_t name_id, name_index;
     if (!in.read(
-                &level_initial->initialDestination, &level_initial->nameResID,
-                &level_initial->nameStrNum, &level_initial->attributes)) {
+                &level_initial->initialDestination, &name_id, &name_index,
+                &level_initial->attributes)) {
         return false;
     }
     level_initial->realObject = Handle<SpaceObject>(-1);
     level_initial->type       = Handle<BaseObject>(type);
     level_initial->owner      = Handle<Admiral>(owner);
+    level_initial->name       = "";
+    if (name_id > 0) {
+        try {
+            level_initial->name = Resource::strings(name_id).at(name_index - 1).copy();
+        } catch (...) {
+        }
+    }
     return true;
 }
 

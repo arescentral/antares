@@ -182,8 +182,7 @@ class Admiral {
 void ResetAllDestObjectData();
 
 Handle<Destination> MakeNewDestination(
-        Handle<SpaceObject> object, int32_t* canBuildType, Fixed earn, int16_t nameResID,
-        int16_t nameStrNum);
+        Handle<SpaceObject> object, int32_t* canBuildType, Fixed earn, pn::string_view name);
 void RemoveDestination(Handle<Destination> d);
 void RecalcAllAdmiralBuildData();
 
