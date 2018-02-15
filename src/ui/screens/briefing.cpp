@@ -104,11 +104,10 @@ static void update_mission_brief_point(
 
     whichBriefPoint -= kMissionBriefPointOffset;
 
-    Rect    hiliteBounds;
-    int32_t headerID, headerNumber;
+    Rect       hiliteBounds;
+    pn::string header;
     BriefPoint_Data_Get(
-            whichBriefPoint, level, &headerID, &headerNumber, text, &hiliteBounds, corner, scale,
-            16, 32, bounds);
+            whichBriefPoint, level, header, text, &hiliteBounds, corner, scale, 16, 32, bounds);
     hiliteBounds.offset(bounds->left, bounds->top);
 
     int16_t textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
@@ -191,7 +190,7 @@ static void update_mission_brief_point(
             lines.push_back(make_pair(p7, p8));
         }
     }
-    dataItem->label = Resource::strings(headerID).at(headerNumber - 1).copy();
+    dataItem->label = std::move(header);
     Rect newRect;
     GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
     populate_inline_picts(dataItem->bounds(), text, dataItem->style, inlinePict);

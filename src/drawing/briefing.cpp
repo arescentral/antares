@@ -445,9 +445,9 @@ void draw_briefing_objects(
 }
 
 void BriefPoint_Data_Get(
-        int32_t whichPoint, const Level* level, int32_t* headerID, int32_t* headerNumber,
-        pn::string_ref content, Rect* hiliteBounds, coordPointType* corner, int32_t scale,
-        int32_t minSectorSize, int32_t maxSize, Rect* bounds) {
+        int32_t whichPoint, const Level* level, pn::string_ref header, pn::string_ref content,
+        Rect* hiliteBounds, coordPointType* corner, int32_t scale, int32_t minSectorSize,
+        int32_t maxSize, Rect* bounds) {
     Point              where;
     Rect               spriteRect;
     int32_t            thisScale;
@@ -466,9 +466,8 @@ void BriefPoint_Data_Get(
         hiliteBounds->top    = spriteRect.top - 2;
         hiliteBounds->bottom = spriteRect.bottom + 2;
     }
-    *headerID     = brief->titleResID;
-    *headerNumber = brief->titleNum;
-    content       = brief->content.copy();
+    header  = brief->title.copy();
+    content = brief->content.copy();
 }
 
 }  // namespace antares

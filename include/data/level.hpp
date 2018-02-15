@@ -253,8 +253,7 @@ struct Level::BriefPoint {
         AbsoluteBrief absoluteBriefType;
     } briefPointData;
     Point      range;
-    int16_t    titleResID;
-    int16_t    titleNum;
+    pn::string title;
     pn::string content;
 
     static const size_t byte_size = 24;
