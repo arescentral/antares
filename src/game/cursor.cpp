@@ -18,6 +18,7 @@
 
 #include "game/cursor.hpp"
 
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "game/globals.hpp"
@@ -33,7 +34,7 @@ namespace antares {
 static const int   kCursorBoundsSize = 16;
 static const usecs kTimeout          = secs(1);
 
-Cursor::Cursor() : _sprite(500, GRAY) {}
+Cursor::Cursor() : _sprite(Resource::sprite(500, GRAY)) {}
 
 void Cursor::draw() const { draw_at(sys.video->get_mouse()); }
 

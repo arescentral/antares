@@ -21,6 +21,7 @@
 #include <numeric>
 #include <sfz/sfz.hpp>
 
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "drawing/shapes.hpp"
@@ -123,7 +124,7 @@ NatePixTable* Pix::add(int16_t resource_id) {
 
     int16_t real_resource_id = resource_id & ~kSpriteTableColorIDMask;
     int16_t color            = (resource_id & kSpriteTableColorIDMask) >> kSpriteTableColorShift;
-    auto    it = pix.emplace(resource_id, NatePixTable(real_resource_id, color)).first;
+    auto    it = pix.emplace(resource_id, Resource::sprite(real_resource_id, color)).first;
     return &it->second;
 }
 

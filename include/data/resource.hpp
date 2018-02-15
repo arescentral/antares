@@ -24,11 +24,10 @@
 #include <sfz/sfz.hpp>
 #include <vector>
 
-#include "drawing/pix-map.hpp"
-
 namespace antares {
 
 class Texture;
+class NatePixTable;
 
 class Resource {
   public:
@@ -37,7 +36,7 @@ class Resource {
     static Resource                font(pn::string_view name);
     static Resource                interface(pn::string_view name);
     static Resource                replay(int id);
-    static Resource                sprite(int id);
+    static NatePixTable            sprite(int id, uint8_t color);
     static std::vector<pn::string> strings(int id);
     static pn::string              text(int id);
     static Texture                 texture(pn::string_view name);
@@ -52,6 +51,8 @@ class Resource {
     pn::string_view string() const;
 
   private:
+    static pn::value procyon(pn::string_view path);
+
     Resource(std::unique_ptr<sfz::mapped_file> file);
     std::unique_ptr<sfz::mapped_file> _file;
 };

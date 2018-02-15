@@ -35,19 +35,8 @@ using std::vector;
 
 namespace antares {
 
-static ArrayPixMap load_image(pn::string_view path) {
-    Resource rsrc = Resource::path(path);
-    return read_png(rsrc.data().open());
-}
-
-NatePixTable::NatePixTable(int id, uint8_t color) {
-    Resource  rsrc = Resource::sprite(id);
-    pn::value x;
-    if (!pn::parse(rsrc.string().open(), x, nullptr)) {
-        throw std::runtime_error("invalid sprite");
-    }
-    pn::map_cref m = x.as_map();
-
+NatePixTable::NatePixTable(
+        int id, uint8_t color, pn::map_cref data, ArrayPixMap image, ArrayPixMap overlay) {
     struct State {
         int         rows, cols;
         Point       center;
@@ -56,12 +45,12 @@ NatePixTable::NatePixTable(int id, uint8_t color) {
         State() : image(0, 0), overlay(0, 0) {}
     } state;
 
-    pn::map_cref point = m.get("center").as_map();
+    pn::map_cref point = data.get("center").as_map();
     state.center       = Point(point.get("x").as_int(), point.get("y").as_int());
-    state.rows         = m.get("rows").as_int();
-    state.cols         = m.get("cols").as_int();
-    state.image        = load_image(m.get("image").as_string());
-    state.overlay      = load_image(m.get("overlay").as_string());
+    state.rows         = data.get("rows").as_int();
+    state.cols         = data.get("cols").as_int();
+    state.image        = std::move(image);
+    state.overlay      = std::move(overlay);
 
     if (state.image.size() != state.overlay.size()) {
         throw std::runtime_error("size mismatch between image and overlay");
@@ -73,7 +62,7 @@ NatePixTable::NatePixTable(int id, uint8_t color) {
         throw std::runtime_error("sprite row count does not evenly split image");
     }
 
-    pn::array_cref frames = m.get("frames").as_array();
+    pn::array_cref frames = data.get("frames").as_array();
     if (frames.size() != (state.rows * state.cols)) {
         throw std::runtime_error("frame count not equal to rows * cols");
     }

@@ -21,6 +21,7 @@
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/pix-table.hpp"
@@ -50,7 +51,7 @@ const char* name(int16_t id) {
 }
 
 void draw(int16_t id, uint8_t color, ArrayPixMap& pix) {
-    NatePixTable               table(id, color);
+    NatePixTable               table = Resource::sprite(id, color);
     const NatePixTable::Frame& frame = table.at(9);
     pix.resize(Size(frame.width(), frame.height()));
     pix.copy(frame.pix_map());

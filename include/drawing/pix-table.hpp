@@ -30,7 +30,7 @@ class NatePixTable {
   public:
     class Frame;
 
-    NatePixTable(int id, uint8_t color);
+    NatePixTable(int id, uint8_t color, pn::map_cref data, ArrayPixMap image, ArrayPixMap overlay);
     NatePixTable(const NatePixTable&) = delete;
     NatePixTable(NatePixTable&&)      = default;
     NatePixTable& operator=(const NatePixTable&) = delete;

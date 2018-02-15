@@ -75,10 +75,18 @@ std::vector<pn::string> Resource::strings(int id) {
     return result;
 }
 
-Resource   Resource::sprite(int id) { return Resource(load(pn::format("sprites/{0}.pn", id))); }
+NatePixTable Resource::sprite(int id, uint8_t color) {
+    pn::value    x       = procyon(pn::format("sprites/{0}.pn", id));
+    pn::map_cref m       = x.as_map();
+    ArrayPixMap  image   = read_png(Resource::path(m.get("image").as_string()).data().open());
+    ArrayPixMap  overlay = read_png(Resource::path(m.get("overlay").as_string()).data().open());
+    return NatePixTable(id, color, m, std::move(image), std::move(overlay));
+}
+
 pn::string Resource::text(int id) {
     return Resource(load(pn::format("text/{0}.txt", id))).string().copy();
 }
+
 Texture Resource::texture(pn::string_view name) {
     int scale = sys.video->scale();
     while (true) {
@@ -112,6 +120,14 @@ pn::data_view Resource::data() const { return _file->data(); }
 pn::string_view Resource::string() const {
     return pn::string_view{reinterpret_cast<const char*>(_file->data().data()),
                            static_cast<int>(_file->data().size())};
+}
+
+pn::value Resource::procyon(pn::string_view path) {
+    pn::value x;
+    if (!pn::parse(Resource::path(path).data().open(), x, nullptr)) {
+        throw std::runtime_error("invalid sprite");
+    }
+    return x;
 }
 
 }  // namespace antares
