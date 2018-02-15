@@ -815,7 +815,7 @@ static void build_ship(Handle<Admiral> adm, int32_t line) {
         }
     } else {
         if (adm == g.admiral) {
-            Messages::set_status("Maximum number of ships built", ORANGE);
+            Messages::max_ships_built();
         }
     }
 }

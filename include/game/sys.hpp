@@ -54,6 +54,8 @@ struct SystemGlobals {
     VideoDriver* video = nullptr;
     PrefsDriver* prefs = nullptr;
 
+    std::vector<pn::string> messages;
+
     struct {
         std::vector<pn::string> codes;
         std::vector<pn::string> on;

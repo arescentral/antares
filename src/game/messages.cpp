@@ -58,6 +58,11 @@ static const int32_t kLongMessageVPadDouble = 10;
 
 static const int32_t kHBuffer = 4;
 
+static const int16_t kAutoPilotOnString  = 8;
+static const int16_t kAutoPilotOffString = 9;
+static const uint8_t kStatusLabelColor   = AQUA;
+static const uint8_t kStatusWarnColor    = PINK;
+
 namespace {
 
 template <typename T>
@@ -330,6 +335,13 @@ void Messages::set_status(pn::string_view status, uint8_t color) {
     g.status_label->set_age(kStatusLabelAge);
 }
 
+void Messages::zoom(ZoomType zoom) { set_status(sys.messages.at(zoom), kStatusLabelColor); }
+void Messages::autopilot(bool on) {
+    set_status(sys.messages.at(on ? kAutoPilotOnString : kAutoPilotOffString), kStatusLabelColor);
+}
+void Messages::shields_low() { set_status("WARNING: Shields Low", kStatusWarnColor); }
+void Messages::max_ships_built() { set_status("Maximum number of ships built", ORANGE); }
+
 int16_t Messages::current() {
     return long_message_data->start_id + long_message_data->current_page_index;
 }
@@ -455,5 +467,7 @@ void Messages::draw_message() {
         long_message_data->retro_text->draw_cursor(bounds, long_message_data->at_char);
     }
 }
+
+pn::string_view Messages::pause_string() { return sys.messages.at(10); }
 
 }  // namespace antares

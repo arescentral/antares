@@ -30,6 +30,7 @@
 
 namespace antares {
 
+static const int16_t kMessageStringID    = 3100;
 static const int16_t kCheatStringListID  = 750;
 static const int16_t kCheatFeedbackOnID  = 751;
 static const int16_t kCheatFeedbackOffID = 752;
@@ -62,6 +63,7 @@ void sys_init() {
         }
     }
 
+    sys.messages    = Resource::strings(kMessageStringID);
     sys.cheat.codes = Resource::strings(kCheatStringListID);
     sys.cheat.on    = Resource::strings(kCheatFeedbackOnID);
     sys.cheat.off   = Resource::strings(kCheatFeedbackOffID);
