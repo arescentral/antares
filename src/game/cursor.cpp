@@ -34,14 +34,15 @@ namespace antares {
 static const int   kCursorBoundsSize = 16;
 static const usecs kTimeout          = secs(1);
 
-Cursor::Cursor() : _sprite(Resource::sprite(500, GRAY)) {}
+Cursor::Cursor() = default;
 
 void Cursor::draw() const { draw_at(sys.video->get_mouse()); }
 
 void Cursor::draw_at(Point where) const {
     if (world().contains(where)) {
-        where.offset(-_sprite.at(0).center().h, -_sprite.at(0).center().v);
-        _sprite.at(0).texture().draw(where.h, where.v);
+        const NatePixTable* sprite = sys.pix.cursor();
+        where.offset(-sprite->at(0).center().h, -sprite->at(0).center().v);
+        sprite->at(0).texture().draw(where.h, where.v);
     }
 }
 

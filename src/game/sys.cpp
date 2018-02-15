@@ -73,6 +73,8 @@ void sys_init() {
         sys.music.init();
     }
 
+    sys.pix.reset();
+
     sys.left_instrument_texture  = Resource::texture(kInstLeftPictID);
     sys.right_instrument_texture = Resource::texture(kInstRightPictID);
 }

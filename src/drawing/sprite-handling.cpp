@@ -114,7 +114,10 @@ void ResetAllSprites() {
     }
 }
 
-void Pix::reset() { pix.clear(); }
+void Pix::reset() {
+    _pix.clear();
+    _cursor.reset(new NatePixTable(Resource::sprite(500, GRAY)));
+}
 
 NatePixTable* Pix::add(int16_t resource_id) {
     NatePixTable* result = get(resource_id);
@@ -124,17 +127,19 @@ NatePixTable* Pix::add(int16_t resource_id) {
 
     int16_t real_resource_id = resource_id & ~kSpriteTableColorIDMask;
     int16_t color            = (resource_id & kSpriteTableColorIDMask) >> kSpriteTableColorShift;
-    auto    it = pix.emplace(resource_id, Resource::sprite(real_resource_id, color)).first;
+    auto    it = _pix.emplace(resource_id, Resource::sprite(real_resource_id, color)).first;
     return &it->second;
 }
 
 NatePixTable* Pix::get(int16_t resource_id) {
-    auto it = pix.find(resource_id);
-    if (it != pix.end()) {
+    auto it = _pix.find(resource_id);
+    if (it != _pix.end()) {
         return &it->second;
     }
     return nullptr;
 }
+
+const NatePixTable* Pix::cursor() { return _cursor.get(); }
 
 Handle<Sprite> AddSprite(
         Point where, NatePixTable* table, int16_t resID, int16_t whichShape, int32_t scale,

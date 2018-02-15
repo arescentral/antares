@@ -36,9 +36,6 @@ class Cursor {
 
     void draw() const;
     void draw_at(Point where) const;
-
-  private:
-    NatePixTable _sprite;
 };
 
 class GameCursor : public Cursor, public EventReceiver {
