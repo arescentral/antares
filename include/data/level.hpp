@@ -27,6 +27,7 @@
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
 #include "math/units.hpp"
+#include "video/driver.hpp"
 
 namespace antares {
 
@@ -66,7 +67,13 @@ struct ScenarioInfo {
     pn::string         authorURLString;
     pn::string         intro_text;
     pn::string         about_text;
-    pn::string         version;
+
+    Texture publisher_screen;
+    Texture ego_screen;
+    Texture splash_screen;
+    Texture starmap;
+
+    pn::string version;
 };
 bool read_from(pn::file_view in, ScenarioInfo* scenario_info);
 

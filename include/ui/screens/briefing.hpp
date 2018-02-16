@@ -74,9 +74,7 @@ class BriefingScreen : public InterfaceScreen {
     mutable LabeledRect _data_item;
 
     Rect _bounds;
-
-    Texture _star_map;
-    Rect    _star_rect;
+    Rect _star_rect;
 
     struct Star {
         Point   location;

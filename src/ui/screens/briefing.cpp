@@ -23,6 +23,7 @@
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "data/base-object.hpp"
+#include "data/plugin.hpp"
 #include "data/resource.hpp"
 #include "drawing/briefing.hpp"
 #include "drawing/color.hpp"
@@ -54,7 +55,6 @@ enum BriefingPoint {
 
 }  // namespace
 
-static const int     kStarMapPictId          = 8000;
 static const int     kMissionStarPointWidth  = 16;
 static const int     kMissionStarPointHeight = 12;
 static const int32_t kMissionDataHiliteColor = GOLD;
@@ -233,7 +233,7 @@ void BriefingScreen::overlay() const {
             RgbColor    gold   = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
             Rect        bounds = _bounds;
             bounds.offset(off.h, off.v);
-            _star_map.draw_cropped(bounds, Rect(Point(0, 2), bounds.size()));
+            plug.info.starmap.draw_cropped(bounds, Rect(Point(0, 2), bounds.size()));
             Rects rects;
             draw_vbracket(rects, star_rect, gold);
             rects.fill({star.h, bounds.top, star.h + 1, star_rect.top + 1}, gold);
@@ -340,8 +340,7 @@ void BriefingScreen::handle_button(Button& button) {
 }
 
 void BriefingScreen::build_star_map() {
-    _star_map       = Resource::texture(kStarMapPictId);
-    Rect pix_bounds = _star_map.size().as_rect();
+    Rect pix_bounds = plug.info.starmap.size().as_rect();
     pix_bounds.offset(0, 2);
     pix_bounds.bottom -= 3;
     _bounds = pix_bounds;

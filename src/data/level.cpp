@@ -67,6 +67,11 @@ bool read_from(pn::file_view in, ScenarioInfo* info) {
     info->intro_text = Resource::text(5600);
     info->about_text = Resource::text(6500);
 
+    info->publisher_screen = nullptr;  // Don’t have permission to show ASW logo.
+    info->ego_screen       = Resource::texture(2001);
+    info->splash_screen    = Resource::texture(502);
+    info->starmap          = Resource::texture(8000);
+
     return true;
 }
 

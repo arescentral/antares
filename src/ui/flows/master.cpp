@@ -46,7 +46,7 @@ namespace {
 
 class TitleScreenFade : public PictFade {
   public:
-    TitleScreenFade(bool* fast) : PictFade(502, fast), _fast(fast) {}
+    TitleScreenFade(bool* fast) : PictFade(&plug.info.splash_screen, fast), _fast(fast) {}
 
   protected:
     virtual usecs fade_time() const { return ticks(*_fast ? 20 : 100); }
@@ -68,17 +68,19 @@ void Master::become_front() {
         case START:
             init();
             _state = PUBLISHER_PICT;
-        // We don't have permission to display the Ambrosia logo.
-        // stack()->push(new PictFade(2000, &_skipped));
-        // break;
+            if (plug.info.publisher_screen) {
+                stack()->push(new PictFade(&plug.info.publisher_screen, &_skipped));
+                break;
+            }
+            [[clang::fallthrough]];
 
         case PUBLISHER_PICT:
             _state = EGO_PICT;
             if (!_skipped) {
-                stack()->push(new PictFade(2001, &_skipped));
+                stack()->push(new PictFade(&plug.info.ego_screen, &_skipped));
                 break;
             }
-        // fall through.
+            [[clang::fallthrough]];
 
         case EGO_PICT:
             _state = TITLE_SCREEN_PICT;

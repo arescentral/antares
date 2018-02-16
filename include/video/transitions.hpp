@@ -83,7 +83,7 @@ class ColorFade : public Card {
 
 class PictFade : public Card {
   public:
-    PictFade(int pict_id, bool* skipped);
+    PictFade(const Texture* texture, bool* skipped);
     ~PictFade();
 
     virtual void become_front();
@@ -115,7 +115,7 @@ class PictFade : public Card {
     bool*     _skipped;
     wall_time _wane_start;
 
-    Texture _texture;
+    const Texture* _texture;
 };
 
 }  // namespace antares

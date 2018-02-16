@@ -141,8 +141,8 @@ void ColorFade::draw() const {
     Rects().fill(world(), fill_color);
 }
 
-PictFade::PictFade(int pict_id, bool* skipped)
-        : _state(NEW), _skipped(skipped), _texture(Resource::texture(pict_id)) {}
+PictFade::PictFade(const Texture* texture, bool* skipped)
+        : _state(NEW), _skipped(skipped), _texture(texture) {}
 
 PictFade::~PictFade() {}
 
@@ -201,9 +201,9 @@ void PictFade::fire_timer() {
 }
 
 void PictFade::draw() const {
-    Rect bounds = _texture.size().as_rect();
+    Rect bounds = _texture->size().as_rect();
     bounds.center_in(world());
-    _texture.draw(bounds.left, bounds.top);
+    _texture->draw(bounds.left, bounds.top);
 }
 
 void PictFade::wax() {

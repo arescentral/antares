@@ -119,6 +119,8 @@ class Texture {
     Texture(std::nullptr_t n = nullptr) {}
     Texture(std::unique_ptr<Impl> impl) : _impl(std::move(impl)) {}
 
+    operator bool() const { return _impl != nullptr; }
+
     void draw(const Rect& draw_rect) const { _impl->draw(draw_rect); }
     void draw(int32_t x, int32_t y) const { _impl->draw(rect(x, y)); }
 
