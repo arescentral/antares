@@ -52,16 +52,7 @@ void sys_init() {
     sys.gamepad_names      = Resource::strings(Gamepad::NAMES);
     sys.gamepad_long_names = Resource::strings(Gamepad::LONG_NAMES);
 
-    {
-        Resource rsrc = Resource::path("rotation-table");
-        pn::file in   = rsrc.data().open();
-        for (int i = 0; i < SystemGlobals::ROT_TABLE_SIZE; ++i) {
-            in.read(&sys.rot_table[i]).check();
-        }
-        if (!in.read(pn::pad(1)).eof()) {
-            throw std::runtime_error("didn't consume all of rotation data");
-        }
-    }
+    sys.rot_table = Resource::rotation_table();
 
     sys.messages    = Resource::strings(kMessageStringID);
     sys.cheat.codes = Resource::strings(kCheatStringListID);

@@ -60,6 +60,20 @@ Resource Resource::interface(pn::string_view name) {
 }
 Resource Resource::replay(int id) { return Resource(load(pn::format("replays/{0}.NLRP", id))); }
 
+std::vector<int32_t> Resource::rotation_table() {
+    Resource             rsrc = path("rotation-table");
+    pn::file             in   = rsrc.data().open();
+    std::vector<int32_t> v;
+    v.resize(SystemGlobals::ROT_TABLE_SIZE);
+    for (int32_t& i : v) {
+        in.read(&i).check();
+    }
+    if (!in.read(pn::pad(1)).eof()) {
+        throw std::runtime_error("didn't consume all of rotation data");
+    }
+    return v;
+}
+
 std::vector<pn::string> Resource::strings(int id) {
     Resource  rsrc(load(pn::format("strings/{0}.pn", id)));
     pn::value strings;

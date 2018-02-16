@@ -48,7 +48,7 @@ struct SystemGlobals {
     std::vector<pn::string> gamepad_long_names;
 
     enum { ROT_TABLE_SIZE = 720 };
-    int32_t rot_table[ROT_TABLE_SIZE];
+    std::vector<int32_t> rot_table;
 
     SoundDriver* audio = nullptr;
     VideoDriver* video = nullptr;

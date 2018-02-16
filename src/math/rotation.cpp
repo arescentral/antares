@@ -28,7 +28,7 @@ namespace antares {
 void GetRotPoint(Fixed* x, Fixed* y, int32_t rotpos) {
     int32_t* i;
 
-    i  = sys.rot_table + rotpos * 2L;
+    i  = sys.rot_table.data() + rotpos * 2L;
     *x = Fixed::from_val(*i);
     i++;
     *y = Fixed::from_val(*i);
@@ -47,7 +47,7 @@ int32_t GetAngleFromVector(int32_t x, int32_t y) {
     if (b < 0)
         b = -b;
     if (b < a) {
-        h          = sys.rot_table + ROT_45 * 2;
+        h          = sys.rot_table.data() + ROT_45 * 2;
         whichAngle = ROT_45;
         v          = h + 1;
         do {
@@ -63,7 +63,7 @@ int32_t GetAngleFromVector(int32_t x, int32_t y) {
             whichAngle++;
         } while ((test == best) && (whichAngle <= ROT_90));
     } else {
-        h          = sys.rot_table + ROT_0 * 2;
+        h          = sys.rot_table.data() + ROT_0 * 2;
         whichAngle = ROT_0;
         v          = h + 1;
         do {
