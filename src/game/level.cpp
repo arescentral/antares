@@ -61,9 +61,9 @@ ANTARES_GLOBAL set<int32_t> possible_actions;
 #endif  // DATA_COVERAGE
 
 void AddBaseObjectActionMedia(
-        Handle<BaseObject> base, HandleList<Action>(BaseObject::*whichType), uint8_t color,
+        Handle<BaseObject> base, std::vector<Action>(BaseObject::*whichType), uint8_t color,
         uint32_t all_colors);
-void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors);
+void AddActionMedia(const Action& action, uint8_t color, uint32_t all_colors);
 
 void SetAllBaseObjectsUnchecked() {
     for (auto aBase : BaseObject::all()) {
@@ -109,45 +109,40 @@ void AddBaseObjectMedia(Handle<BaseObject> base, uint8_t color, uint32_t all_col
 }
 
 void AddBaseObjectActionMedia(
-        Handle<BaseObject> base, HandleList<Action>(BaseObject::*whichType), uint8_t color,
+        Handle<BaseObject> base, std::vector<Action>(BaseObject::*whichType), uint8_t color,
         uint32_t all_colors) {
-    for (auto action : (*base.*whichType)) {
-        if (action.get()) {
-            AddActionMedia(action, color, all_colors);
-        }
+    for (const auto& action : (*base.*whichType)) {
+        AddActionMedia(action, color, all_colors);
     }
 }
 
-void AddActionMedia(Handle<Action> action, uint8_t color, uint32_t all_colors) {
+void AddActionMedia(const Action& action, uint8_t color, uint32_t all_colors) {
     int32_t l1, l2;
 #ifdef DATA_COVERAGE
     possible_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
-    if (!action.get()) {
-        return;
-    }
-    switch (action->verb) {
+    switch (action.verb) {
         case kCreateObject:
         case kCreateObjectSetDest:
-            AddBaseObjectMedia(action->argument.createObject.whichBaseType, color, all_colors);
+            AddBaseObjectMedia(action.argument.createObject.whichBaseType, color, all_colors);
             break;
 
         case kPlaySound:
-            l1 = action->argument.playSound.idMinimum;
-            l2 = action->argument.playSound.idMinimum + action->argument.playSound.idRange;
+            l1 = action.argument.playSound.idMinimum;
+            l2 = action.argument.playSound.idMinimum + action.argument.playSound.idRange;
             for (int32_t count = l1; count <= l2; count++) {
                 sys.sound.load(count);
             }
             break;
 
         case kAlterBaseType:
-            AddBaseObjectMedia(action->argument.alterBaseType.base, color, all_colors);
+            AddBaseObjectMedia(action.argument.alterBaseType.base, color, all_colors);
             break;
 
         case kAlterOwner:
             for (auto baseObject : BaseObject::all()) {
-                if (action_filter_applies_to(*action, baseObject)) {
+                if (action_filter_applies_to(action, baseObject)) {
                     baseObject->internalFlags |= all_colors;
                 }
                 if (baseObject->internalFlags & kAnyColorLoadedFlag) {
@@ -332,7 +327,7 @@ static void load_initial(int i, uint32_t all_colors) {
 
 static void load_condition(int i, uint32_t all_colors) {
     Level::Condition* condition = g.level->condition(i);
-    for (auto action : condition->action) {
+    for (const auto& action : condition->action) {
         AddActionMedia(action, GRAY, all_colors);
     }
     condition->set_true_yet(condition->flags & kInitiallyTrue);

@@ -163,7 +163,7 @@ static bool read_action(pn::file_view in, Level::Condition* condition) {
         return false;
     }
     auto end          = (start >= 0) ? (start + count) : start;
-    condition->action = {start, end};
+    condition->action = read_actions(start, end);
     return true;
 }
 

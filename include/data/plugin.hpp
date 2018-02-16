@@ -19,6 +19,7 @@
 #ifndef ANTARES_DATA_PLUGIN_HPP_
 #define ANTARES_DATA_PLUGIN_HPP_
 
+#include <map>
 #include <vector>
 
 #include "data/level.hpp"
@@ -32,7 +33,6 @@ struct ScenarioGlobals {
     std::vector<Level::Condition>     conditions;
     std::vector<Level::BriefPoint>    briefings;
     std::vector<BaseObject>           objects;
-    std::vector<Action>               actions;
     std::vector<Race>                 races;
 };
 

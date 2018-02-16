@@ -216,11 +216,11 @@ struct Level::Condition {
         ticks           timeValue;
         uint32_t        unsignedLongValue;
     } conditionArgument;
-    int32_t            subjectObject;  // initial object #
-    int32_t            directObject;   // initial object #
-    HandleList<Action> action;
-    uint32_t           flags;
-    int32_t            direction;
+    int32_t             subjectObject;  // initial object #
+    int32_t             directObject;   // initial object #
+    std::vector<Action> action;
+    uint32_t            flags;
+    int32_t             direction;
 
     static const size_t byte_size = 38;
 

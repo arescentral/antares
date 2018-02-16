@@ -58,7 +58,8 @@ namespace antares {
 const size_t kActionQueueLength = 120;
 
 struct actionQueueType {
-    HandleList<Action>  actionRef;
+    const Action*       actionBegin;
+    const Action*       actionEnd;
     ticks               scheduledTime;
     actionQueueType*    nextActionQueue;
     Handle<SpaceObject> subjectObject;
@@ -68,6 +69,8 @@ struct actionQueueType {
     int32_t             directObjectNum;
     int32_t             directObjectID;
     Point               offset;
+
+    bool empty() const { return actionBegin == actionEnd; }
 };
 
 static ANTARES_GLOBAL actionQueueType* gFirstActionQueue = NULL;
@@ -79,7 +82,7 @@ ANTARES_GLOBAL set<int32_t> covered_actions;
 #endif  // DATA_COVERAGE
 
 static void queue_action(
-        HandleList<Action> actions, ticks delayTime, Handle<SpaceObject> subjectObject,
+        const Action* begin, const Action* end, ticks delayTime, Handle<SpaceObject> subjectObject,
         Handle<SpaceObject> directObject, Point* offset);
 
 bool action_filter_applies_to(const Action& action, Handle<BaseObject> target) {
@@ -99,9 +102,9 @@ bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target) 
 }
 
 static void create_object(
-        Handle<Action> action, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
+        const Action& action, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
         Point* offset) {
-    const auto& create     = action->argument.createObject;
+    const auto& create     = action.argument.createObject;
     const auto  baseObject = create.whichBaseType;
     auto        count      = create.howManyMinimum;
     if (create.howManyRange > 0) {
@@ -139,14 +142,14 @@ static void create_object(
             uint32_t save_attributes = product->attributes;
             product->attributes &= ~kStaticDestination;
             if (product->owner.get()) {
-                if (action->reflexive) {
-                    if (action->verb != kCreateObjectSetDest) {
+                if (action.reflexive) {
+                    if (action.verb != kCreateObjectSetDest) {
                         OverrideObjectDestination(product, focus);
                     } else if (focus->destObject.get()) {
                         OverrideObjectDestination(product, focus->destObject);
                     }
                 }
-            } else if (action->reflexive) {
+            } else if (action.reflexive) {
                 product->timeFromOrigin = kTimeToCheckHome;
                 product->runTimeFlags &= ~kHasArrived;
                 product->destObject       = focus;  // a->destinationObject;
@@ -171,8 +174,8 @@ static void create_object(
     }
 }
 
-static void play_sound(Handle<Action> action, Handle<SpaceObject> focus) {
-    const auto& sound = action->argument.playSound;
+static void play_sound(const Action& action, Handle<SpaceObject> focus) {
+    const auto& sound = action.argument.playSound;
     auto        id    = sound.idMinimum;
     if (sound.idRange > 0) {
         id += focus->randomSeed.next(sound.idRange + 1);
@@ -184,8 +187,8 @@ static void play_sound(Handle<Action> action, Handle<SpaceObject> focus) {
     }
 }
 
-static void make_sparks(Handle<Action> action, Handle<SpaceObject> focus) {
-    const auto& sparks = action->argument.makeSparks;
+static void make_sparks(const Action& action, Handle<SpaceObject> focus) {
+    const auto& sparks = action.argument.makeSparks;
     Point       location;
     if (focus->sprite.get()) {
         location.h = focus->sprite->where.h;
@@ -211,9 +214,9 @@ static void make_sparks(Handle<Action> action, Handle<SpaceObject> focus) {
             sparks.howMany, sparks.speed, sparks.velocityRange, sparks.color, &location);
 }
 
-static void die(Handle<Action> action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
+static void die(const Action& action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
     bool destroy = false;
-    switch (action->argument.killObject.dieType) {
+    switch (action.argument.killObject.dieType) {
         case kDieExpire:
             if (subject.get()) {
                 focus = subject;
@@ -246,24 +249,24 @@ static void die(Handle<Action> action, Handle<SpaceObject> focus, Handle<SpaceOb
     }
 }
 
-static void nil_target(Handle<Action> action, Handle<SpaceObject> focus) {
+static void nil_target(const Action& action, Handle<SpaceObject> focus) {
     focus->targetObject   = SpaceObject::none();
     focus->targetObjectID = kNoShip;
     focus->lastTarget     = SpaceObject::none();
 }
 
-static void alter_damage(Handle<Action> action, Handle<SpaceObject> focus) {
-    const auto alter = action->argument.alterDamage;
+static void alter_damage(const Action& action, Handle<SpaceObject> focus) {
+    const auto alter = action.argument.alterDamage;
     focus->alter_health(alter.amount);
 }
 
-static void alter_energy(Handle<Action> action, Handle<SpaceObject> focus) {
-    const auto alter = action->argument.alterEnergy;
+static void alter_energy(const Action& action, Handle<SpaceObject> focus) {
+    const auto alter = action.argument.alterEnergy;
     focus->alter_energy(alter.amount);
 }
 
-static void alter_hidden(Handle<Action> action) {
-    const auto alter = action->argument.alterHidden;
+static void alter_hidden(const Action& action) {
+    const auto alter = action.argument.alterHidden;
     int32_t    begin = alter.first;
     int32_t    end   = begin + std::max(0, alter.count_minus_1) + 1;
     for (auto i : range(begin, end)) {
@@ -271,12 +274,12 @@ static void alter_hidden(Handle<Action> action) {
     }
 }
 
-static void alter_cloak(Handle<Action> action, Handle<SpaceObject> focus) {
+static void alter_cloak(const Action& action, Handle<SpaceObject> focus) {
     focus->set_cloak(true);
 }
 
-static void alter_spin(Handle<Action> action, Handle<SpaceObject> focus) {
-    const auto alter = action->argument.alterSpin;
+static void alter_spin(const Action& action, Handle<SpaceObject> focus) {
+    const auto alter = action.argument.alterSpin;
     if (focus->attributes & kCanTurn) {
         Fixed f  = focus->turn_rate() * (alter.minimum + focus->randomSeed.next(alter.range));
         Fixed f2 = focus->baseType->mass;
@@ -289,8 +292,8 @@ static void alter_spin(Handle<Action> action, Handle<SpaceObject> focus) {
     }
 }
 
-static void alter_offline(Handle<Action> action, Handle<SpaceObject> focus) {
-    const auto alter = action->argument.alterOffline;
+static void alter_offline(const Action& action, Handle<SpaceObject> focus) {
+    const auto alter = action.argument.alterOffline;
     Fixed      f     = alter.minimum + focus->randomSeed.next(alter.range);
     Fixed      f2    = focus->baseType->mass;
     if (f2 == Fixed::zero()) {
@@ -302,9 +305,9 @@ static void alter_offline(Handle<Action> action, Handle<SpaceObject> focus) {
 }
 
 static void alter_velocity(
-        Handle<Action> action, Handle<SpaceObject> focus, Handle<SpaceObject> subject,
+        const Action& action, Handle<SpaceObject> focus, Handle<SpaceObject> subject,
         Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterVelocity;
+    const auto alter = action.argument.alterVelocity;
     Fixed      f, f2;
     int16_t    angle;
     if (subject.get()) {
@@ -391,8 +394,8 @@ static void alter_velocity(
     }
 }
 
-static void alter_max_velocity(Handle<Action> action, Handle<SpaceObject> focus) {
-    const auto alter = action->argument.alterMaxVelocity;
+static void alter_max_velocity(const Action& action, Handle<SpaceObject> focus) {
+    const auto alter = action.argument.alterMaxVelocity;
     if (alter.amount < Fixed::zero()) {
         focus->maxVelocity = focus->baseType->maxVelocity;
     } else {
@@ -400,8 +403,8 @@ static void alter_max_velocity(Handle<Action> action, Handle<SpaceObject> focus)
     }
 }
 
-static void alter_thrust(Handle<Action> action, Handle<SpaceObject> focus) {
-    const auto alter = action->argument.alterThrust;
+static void alter_thrust(const Action& action, Handle<SpaceObject> focus) {
+    const auto alter = action.argument.alterThrust;
     Fixed      f     = alter.minimum + focus->randomSeed.next(alter.range);
     if (alter.relative) {
         focus->thrust += f;
@@ -411,17 +414,17 @@ static void alter_thrust(Handle<Action> action, Handle<SpaceObject> focus) {
 }
 
 static void alter_base_type(
-        Handle<Action> action, Handle<SpaceObject> focus, Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterBaseType;
-    if (action->reflexive || object.get()) {
+        const Action& action, Handle<SpaceObject> focus, Handle<SpaceObject> object) {
+    const auto alter = action.argument.alterBaseType;
+    if (action.reflexive || object.get()) {
         focus->change_base_type(alter.base, -1, alter.keep_ammo);
     }
 }
 
 static void alter_owner(
-        Handle<Action> action, Handle<SpaceObject> focus, Handle<SpaceObject> subject,
+        const Action& action, Handle<SpaceObject> focus, Handle<SpaceObject> subject,
         Handle<SpaceObject> object) {
-    const auto alter = action->argument.alterOwner;
+    const auto alter = action.argument.alterOwner;
     if (!focus.get()) {
         return;
     }
@@ -429,7 +432,7 @@ static void alter_owner(
         // if it's relative AND reflexive, we take the direct
         // object's owner, since relative & reflexive would
         // do nothing.
-        if (action->reflexive && object.get()) {
+        if (action.reflexive && object.get()) {
             focus->set_owner(object->owner, true);
         } else {
             focus->set_owner(subject->owner, true);
@@ -439,8 +442,8 @@ static void alter_owner(
     }
 }
 
-static void alter_condition_true_yet(Handle<Action> action) {
-    const auto alter = action->argument.alterConditionTrueYet;
+static void alter_condition_true_yet(const Action& action) {
+    const auto alter = action.argument.alterConditionTrueYet;
     int32_t    begin = alter.first;
     int32_t    end   = begin + std::max(0, alter.count_minus_1) + 1;
     for (auto l : range(begin, end)) {
@@ -449,15 +452,15 @@ static void alter_condition_true_yet(Handle<Action> action) {
 }
 
 static void alter_occupation(
-        Handle<Action> action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
-    const auto alter = action->argument.alterOccupation;
+        const Action& action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
+    const auto alter = action.argument.alterOccupation;
     if (focus.get()) {
         focus->alter_occupation(subject->owner, alter.amount, true);
     }
 }
 
-static void alter_absolute_cash(Handle<Action> action, Handle<SpaceObject> focus) {
-    const auto      alter = action->argument.alterAbsoluteCash;
+static void alter_absolute_cash(const Action& action, Handle<SpaceObject> focus) {
+    const auto      alter = action.argument.alterAbsoluteCash;
     Handle<Admiral> admiral;
     if (alter.relative) {
         if (focus.get()) {
@@ -471,8 +474,8 @@ static void alter_absolute_cash(Handle<Action> action, Handle<SpaceObject> focus
     }
 }
 
-static void alter_age(Handle<Action> action, Handle<SpaceObject> focus) {
-    const auto alter = action->argument.alterAge;
+static void alter_age(const Action& action, Handle<SpaceObject> focus) {
+    const auto alter = action.argument.alterAge;
     ticks      t     = alter.minimum + focus->randomSeed.next(alter.range);
 
     if (alter.relative) {
@@ -489,9 +492,9 @@ static void alter_age(Handle<Action> action, Handle<SpaceObject> focus) {
 }
 
 static void alter_location(
-        Handle<Action> action, Handle<SpaceObject> focus, Handle<SpaceObject> subject,
+        const Action& action, Handle<SpaceObject> focus, Handle<SpaceObject> subject,
         Handle<SpaceObject> object) {
-    const auto     alter = action->argument.alterLocation;
+    const auto     alter = action.argument.alterLocation;
     coordPointType newLocation;
     if (alter.relative) {
         if (object.get()) {
@@ -510,8 +513,8 @@ static void alter_location(
     focus->location.v = newLocation.v;
 }
 
-static void alter_absolute_location(Handle<Action> action, Handle<SpaceObject> focus) {
-    const auto alter = action->argument.alterAbsoluteLocation;
+static void alter_absolute_location(const Action& action, Handle<SpaceObject> focus) {
+    const auto alter = action.argument.alterAbsoluteLocation;
     if (alter.relative) {
         focus->location.h += alter.at.h;
         focus->location.v += alter.at.v;
@@ -521,8 +524,8 @@ static void alter_absolute_location(Handle<Action> action, Handle<SpaceObject> f
 }
 
 static void alter_weapon(
-        Handle<Action> action, Handle<SpaceObject> focus, SpaceObject::Weapon& weapon) {
-    const auto alter = action->argument.alterWeapon;
+        const Action& action, Handle<SpaceObject> focus, SpaceObject::Weapon& weapon) {
+    const auto alter = action.argument.alterWeapon;
     weapon.base      = alter.base;
     if (weapon.base.get()) {
         auto baseObject = weapon.base;
@@ -542,31 +545,30 @@ static void alter_weapon(
     }
 }
 
-static void alter_weapon1(Handle<Action> action, Handle<SpaceObject> focus) {
+static void alter_weapon1(const Action& action, Handle<SpaceObject> focus) {
     alter_weapon(action, focus, focus->pulse);
 }
 
-static void alter_weapon2(Handle<Action> action, Handle<SpaceObject> focus) {
+static void alter_weapon2(const Action& action, Handle<SpaceObject> focus) {
     alter_weapon(action, focus, focus->beam);
 }
 
-static void alter_special(Handle<Action> action, Handle<SpaceObject> focus) {
+static void alter_special(const Action& action, Handle<SpaceObject> focus) {
     alter_weapon(action, focus, focus->special);
 }
 
-static void land_at(
-        Handle<Action> action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
+static void land_at(const Action& action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
     // even though this is never a reflexive verb, we only effect ourselves
     if (subject->attributes & (kIsPlayerShip | kRemoteOrHuman)) {
         subject->create_floating_player_body();
     }
     subject->presenceState          = kLandingPresence;
-    subject->presence.landing.speed = action->argument.landAt.landingSpeed;
+    subject->presence.landing.speed = action.argument.landAt.landingSpeed;
     subject->presence.landing.scale = subject->baseType->naturalScale;
 }
 
 static void enter_warp(
-        Handle<Action> action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
+        const Action& action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
     subject->presenceState             = kWarpInPresence;
     subject->presence.warp_in.progress = ticks(0);
     subject->presence.warp_in.step     = 0;
@@ -577,8 +579,8 @@ static void enter_warp(
             Admiral::none(), 0, -1);
 }
 
-static void change_score(Handle<Action> action, Handle<SpaceObject> focus) {
-    const auto&     score   = action->argument.changeScore;
+static void change_score(const Action& action, Handle<SpaceObject> focus) {
+    const auto&     score   = action.argument.changeScore;
     Handle<Admiral> admiral = score.whichPlayer;
     if ((!score.whichPlayer.get() && focus.get())) {
         admiral = focus->owner;
@@ -588,8 +590,8 @@ static void change_score(Handle<Action> action, Handle<SpaceObject> focus) {
     }
 }
 
-static void declare_winner(Handle<Action> action, Handle<SpaceObject> focus) {
-    const auto&     winner  = action->argument.declareWinner;
+static void declare_winner(const Action& action, Handle<SpaceObject> focus) {
+    const auto&     winner  = action.argument.declareWinner;
     Handle<Admiral> admiral = winner.whichPlayer;
     if ((!winner.whichPlayer.get() && focus.get())) {
         admiral = focus->owner;
@@ -597,8 +599,8 @@ static void declare_winner(Handle<Action> action, Handle<SpaceObject> focus) {
     DeclareWinner(admiral, winner.nextLevel, winner.text);
 }
 
-static void display_message(Handle<Action> action, Handle<SpaceObject> focus) {
-    const auto&             message = action->argument.displayMessage;
+static void display_message(const Action& action, Handle<SpaceObject> focus) {
+    const auto&             message = action.argument.displayMessage;
     std::vector<pn::string> pages;
     for (pn::string_view s : message.pages) {
         pages.push_back(s.copy());
@@ -607,7 +609,7 @@ static void display_message(Handle<Action> action, Handle<SpaceObject> focus) {
 }
 
 static void set_destination(
-        Handle<Action> action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
+        const Action& action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
     uint32_t save_attributes = subject->attributes;
     subject->attributes &= ~kStaticDestination;
     OverrideObjectDestination(subject, focus);
@@ -615,53 +617,53 @@ static void set_destination(
 }
 
 static void activate_special(
-        Handle<Action> action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
+        const Action& action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
     fire_weapon(subject, SpaceObject::none(), subject->baseType->special, subject->special);
 }
 
 static void activate_pulse(
-        Handle<Action> action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
+        const Action& action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
     fire_weapon(subject, SpaceObject::none(), subject->baseType->pulse, subject->pulse);
 }
 
 static void activate_beam(
-        Handle<Action> action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
+        const Action& action, Handle<SpaceObject> focus, Handle<SpaceObject> subject) {
     fire_weapon(subject, SpaceObject::none(), subject->baseType->beam, subject->beam);
 }
 
-static void color_flash(Handle<Action> action, Handle<SpaceObject> focus) {
+static void color_flash(const Action& action, Handle<SpaceObject> focus) {
     uint8_t tinyColor = GetTranslateColorShade(
-            action->argument.colorFlash.color, action->argument.colorFlash.shade);
+            action.argument.colorFlash.color, action.argument.colorFlash.shade);
     globals()->transitions.start_boolean(
-            action->argument.colorFlash.length, action->argument.colorFlash.length, tinyColor);
+            action.argument.colorFlash.length, action.argument.colorFlash.length, tinyColor);
 }
 
-static void enable_keys(Handle<Action> action, Handle<SpaceObject> focus) {
-    g.key_mask = g.key_mask & ~action->argument.keys.keyMask;
+static void enable_keys(const Action& action, Handle<SpaceObject> focus) {
+    g.key_mask = g.key_mask & ~action.argument.keys.keyMask;
 }
 
-static void disable_keys(Handle<Action> action, Handle<SpaceObject> focus) {
-    g.key_mask = g.key_mask | action->argument.keys.keyMask;
+static void disable_keys(const Action& action, Handle<SpaceObject> focus) {
+    g.key_mask = g.key_mask | action.argument.keys.keyMask;
 }
 
-static void set_zoom(Handle<Action> action, Handle<SpaceObject> focus) {
-    if (action->argument.zoom.zoomLevel != g.zoom) {
-        g.zoom = static_cast<ZoomType>(action->argument.zoom.zoomLevel);
+static void set_zoom(const Action& action, Handle<SpaceObject> focus) {
+    if (action.argument.zoom.zoomLevel != g.zoom) {
+        g.zoom = static_cast<ZoomType>(action.argument.zoom.zoomLevel);
         sys.sound.click();
         Messages::zoom(g.zoom);
     }
 }
 
-static void computer_select(Handle<Action> action, Handle<SpaceObject> focus) {
+static void computer_select(const Action& action, Handle<SpaceObject> focus) {
     MiniComputer_SetScreenAndLineHack(
-            action->argument.computerSelect.screenNumber,
-            action->argument.computerSelect.lineNumber);
+            action.argument.computerSelect.screenNumber,
+            action.argument.computerSelect.lineNumber);
 }
 
-static void assume_initial_object(Handle<Action> action, Handle<SpaceObject> focus) {
+static void assume_initial_object(const Action& action, Handle<SpaceObject> focus) {
     Handle<Admiral>       player1(0);
     Level::InitialObject* initialObject = g.level->initial(
-            action->argument.assumeInitial.whichInitialObject + GetAdmiralScore(player1, 0));
+            action.argument.assumeInitial.whichInitialObject + GetAdmiralScore(player1, 0));
     if (initialObject) {
         initialObject->realObjectID = focus->id;
         initialObject->realObject   = focus;
@@ -669,11 +671,11 @@ static void assume_initial_object(Handle<Action> action, Handle<SpaceObject> foc
 }
 
 static void execute_actions(
-        const HandleList<Action>& actions, const Handle<SpaceObject> original_subject,
+        const Action* begin, const Action* end, const Handle<SpaceObject> original_subject,
         const Handle<SpaceObject> original_object, Point* offset, bool allowDelay) {
     bool checkConditions = false;
 
-    for (auto action : actions) {
+    for (const Action* action : sfz::range(begin, end)) {
 #ifdef DATA_COVERAGE
         covered_actions.insert(action.number());
 #endif  // DATA_COVERAGE
@@ -691,9 +693,7 @@ static void execute_actions(
         }
 
         if ((action->delay > ticks(0)) && allowDelay) {
-            queue_action(
-                    {action.number(), (*actions.end()).number()}, action->delay, subject, object,
-                    offset);
+            queue_action(action, end, action->delay, subject, object, offset);
             return;
         }
         allowDelay = true;
@@ -719,48 +719,48 @@ static void execute_actions(
 
         switch (action->verb) {
             case kCreateObject:
-            case kCreateObjectSetDest: create_object(action, focus, subject, offset); break;
+            case kCreateObjectSetDest: create_object(*action, focus, subject, offset); break;
 
-            case kPlaySound: play_sound(action, focus); break;
-            case kMakeSparks: make_sparks(action, focus); break;
-            case kDie: die(action, focus, subject); break;
-            case kNilTarget: nil_target(action, focus); break;
-            case kLandAt: land_at(action, focus, subject); break;
-            case kEnterWarp: enter_warp(action, focus, subject); break;
-            case kChangeScore: change_score(action, focus); break;
-            case kDeclareWinner: declare_winner(action, focus); break;
-            case kDisplayMessage: display_message(action, focus); break;
-            case kSetDestination: set_destination(action, focus, subject); break;
-            case kActivateSpecial: activate_special(action, focus, subject); break;
-            case kActivatePulse: activate_pulse(action, focus, subject); break;
-            case kActivateBeam: activate_beam(action, focus, subject); break;
-            case kColorFlash: color_flash(action, focus); break;
-            case kEnableKeys: enable_keys(action, focus); break;
-            case kDisableKeys: disable_keys(action, focus); break;
-            case kSetZoom: set_zoom(action, focus); break;
-            case kComputerSelect: computer_select(action, focus); break;
-            case kAssumeInitialObject: assume_initial_object(action, focus); break;
+            case kPlaySound: play_sound(*action, focus); break;
+            case kMakeSparks: make_sparks(*action, focus); break;
+            case kDie: die(*action, focus, subject); break;
+            case kNilTarget: nil_target(*action, focus); break;
+            case kLandAt: land_at(*action, focus, subject); break;
+            case kEnterWarp: enter_warp(*action, focus, subject); break;
+            case kChangeScore: change_score(*action, focus); break;
+            case kDeclareWinner: declare_winner(*action, focus); break;
+            case kDisplayMessage: display_message(*action, focus); break;
+            case kSetDestination: set_destination(*action, focus, subject); break;
+            case kActivateSpecial: activate_special(*action, focus, subject); break;
+            case kActivatePulse: activate_pulse(*action, focus, subject); break;
+            case kActivateBeam: activate_beam(*action, focus, subject); break;
+            case kColorFlash: color_flash(*action, focus); break;
+            case kEnableKeys: enable_keys(*action, focus); break;
+            case kDisableKeys: disable_keys(*action, focus); break;
+            case kSetZoom: set_zoom(*action, focus); break;
+            case kComputerSelect: computer_select(*action, focus); break;
+            case kAssumeInitialObject: assume_initial_object(*action, focus); break;
 
-            case kAlterDamage: alter_damage(action, focus); break;
-            case kAlterVelocity: alter_velocity(action, focus, subject, object); break;
-            case kAlterThrust: alter_thrust(action, focus); break;
-            case kAlterMaxVelocity: alter_max_velocity(action, focus); break;
-            case kAlterLocation: alter_location(action, focus, subject, object); break;
-            case kAlterWeapon1: alter_weapon1(action, focus); break;
-            case kAlterWeapon2: alter_weapon2(action, focus); break;
-            case kAlterSpecial: alter_special(action, focus); break;
-            case kAlterEnergy: alter_energy(action, focus); break;
-            case kAlterOwner: alter_owner(action, focus, subject, object); break;
-            case kAlterHidden: alter_hidden(action); break;
-            case kAlterCloak: alter_cloak(action, focus); break;
-            case kAlterOffline: alter_offline(action, focus); break;
-            case kAlterSpin: alter_spin(action, focus); break;
-            case kAlterBaseType: alter_base_type(action, focus, object); break;
-            case kAlterConditionTrueYet: alter_condition_true_yet(action); break;
-            case kAlterOccupation: alter_occupation(action, focus, subject); break;
-            case kAlterAbsoluteCash: alter_absolute_cash(action, focus); break;
-            case kAlterAge: alter_age(action, focus); break;
-            case kAlterAbsoluteLocation: alter_absolute_location(action, focus); break;
+            case kAlterDamage: alter_damage(*action, focus); break;
+            case kAlterVelocity: alter_velocity(*action, focus, subject, object); break;
+            case kAlterThrust: alter_thrust(*action, focus); break;
+            case kAlterMaxVelocity: alter_max_velocity(*action, focus); break;
+            case kAlterLocation: alter_location(*action, focus, subject, object); break;
+            case kAlterWeapon1: alter_weapon1(*action, focus); break;
+            case kAlterWeapon2: alter_weapon2(*action, focus); break;
+            case kAlterSpecial: alter_special(*action, focus); break;
+            case kAlterEnergy: alter_energy(*action, focus); break;
+            case kAlterOwner: alter_owner(*action, focus, subject, object); break;
+            case kAlterHidden: alter_hidden(*action); break;
+            case kAlterCloak: alter_cloak(*action, focus); break;
+            case kAlterOffline: alter_offline(*action, focus); break;
+            case kAlterSpin: alter_spin(*action, focus); break;
+            case kAlterBaseType: alter_base_type(*action, focus, object); break;
+            case kAlterConditionTrueYet: alter_condition_true_yet(*action); break;
+            case kAlterOccupation: alter_occupation(*action, focus, subject); break;
+            case kAlterAbsoluteCash: alter_absolute_cash(*action, focus); break;
+            case kAlterAge: alter_age(*action, focus); break;
+            case kAlterAbsoluteLocation: alter_absolute_location(*action, focus); break;
 
             case kAlterMaxThrust:
             case kAlterMaxTurnRate:
@@ -783,9 +783,10 @@ static void execute_actions(
 }
 
 void exec(
-        HandleList<Action> actions, Handle<SpaceObject> sObject, Handle<SpaceObject> dObject,
-        Point* offset) {
-    execute_actions(actions, sObject, dObject, offset, true);
+        const std::vector<Action>& actions, Handle<SpaceObject> sObject,
+        Handle<SpaceObject> dObject, Point* offset) {
+    execute_actions(
+            actions.data(), actions.data() + actions.size(), sObject, dObject, offset, true);
 }
 
 void reset_action_queue() {
@@ -795,16 +796,17 @@ void reset_action_queue() {
 
     actionQueueType* action = gActionQueueData.get();
     for (int32_t i = 0; i < kActionQueueLength; i++) {
-        (action++)->actionRef = {-1, -1};
+        action->actionBegin = action->actionEnd = nullptr;
+        ++action;
     }
 }
 
 static void queue_action(
-        HandleList<Action> actions, ticks delayTime, Handle<SpaceObject> subjectObject,
+        const Action* begin, const Action* end, ticks delayTime, Handle<SpaceObject> subjectObject,
         Handle<SpaceObject> directObject, Point* offset) {
     int32_t          queueNumber = 0;
     actionQueueType* actionQueue = gActionQueueData.get();
-    while (actionQueue->actionRef.size() && (queueNumber < kActionQueueLength)) {
+    while (!actionQueue->empty() && (queueNumber < kActionQueueLength)) {
         actionQueue++;
         queueNumber++;
     }
@@ -812,7 +814,8 @@ static void queue_action(
     if (queueNumber == kActionQueueLength) {
         return;
     }
-    actionQueue->actionRef     = actions;
+    actionQueue->actionBegin   = begin;
+    actionQueue->actionEnd     = end;
     actionQueue->scheduledTime = delayTime;
 
     if (offset) {
@@ -858,12 +861,12 @@ static void queue_action(
 void execute_action_queue() {
     for (int32_t i = 0; i < kActionQueueLength; i++) {
         auto actionQueue = &gActionQueueData[i];
-        if (actionQueue->actionRef.size()) {
+        if (!actionQueue->empty()) {
             actionQueue->scheduledTime -= kMajorTick;
         }
     }
 
-    while (gFirstActionQueue && gFirstActionQueue->actionRef.size() &&
+    while (gFirstActionQueue && !gFirstActionQueue->empty() &&
            (gFirstActionQueue->scheduledTime <= ticks(0))) {
         int32_t subjectid = -1;
         if (gFirstActionQueue->subjectObject.get() && gFirstActionQueue->subjectObject->active) {
@@ -877,12 +880,13 @@ void execute_action_queue() {
         if ((subjectid == gFirstActionQueue->subjectObjectID) &&
             (directid == gFirstActionQueue->directObjectID)) {
             execute_actions(
-                    gFirstActionQueue->actionRef, gFirstActionQueue->subjectObject,
-                    gFirstActionQueue->directObject, &gFirstActionQueue->offset, false);
+                    gFirstActionQueue->actionBegin, gFirstActionQueue->actionEnd,
+                    gFirstActionQueue->subjectObject, gFirstActionQueue->directObject,
+                    &gFirstActionQueue->offset, false);
         }
 
-        gFirstActionQueue->actionRef = {-1, -1};
-        gFirstActionQueue            = gFirstActionQueue->nextActionQueue;
+        gFirstActionQueue->actionBegin = gFirstActionQueue->actionEnd = nullptr;
+        gFirstActionQueue = gFirstActionQueue->nextActionQueue;
     }
 }
 

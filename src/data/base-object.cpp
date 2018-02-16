@@ -39,7 +39,7 @@ static bool read_destroy(pn::file_view in, BaseObject* object) {
     object->destroyDontDie = count & kDestroyActionDontDieFlag;
     count &= kDestroyActionNotMask;
     auto end        = (start >= 0) ? (start + count) : start;
-    object->destroy = {start, end};
+    object->destroy = read_actions(start, end);
     return true;
 }
 
@@ -51,7 +51,7 @@ static bool read_expire(pn::file_view in, BaseObject* object) {
     object->expireDontDie = count & kDestroyActionDontDieFlag;
     count &= kDestroyActionNotMask;
     auto end       = (start >= 0) ? (start + count) : start;
-    object->expire = {start, end};
+    object->expire = read_actions(start, end);
     return true;
 }
 
@@ -61,7 +61,7 @@ static bool read_create(pn::file_view in, BaseObject* object) {
         return false;
     }
     auto end       = (start >= 0) ? (start + count) : start;
-    object->create = {start, end};
+    object->create = read_actions(start, end);
     return true;
 }
 
@@ -71,7 +71,7 @@ static bool read_collide(pn::file_view in, BaseObject* object) {
         return false;
     }
     auto end        = (start >= 0) ? (start + count) : start;
-    object->collide = {start, end};
+    object->collide = read_actions(start, end);
     return true;
 }
 
@@ -85,7 +85,7 @@ static bool read_activate(pn::file_view in, BaseObject* object) {
             ticks((count & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift);
     count &= kPeriodicActionNotMask;
     auto end         = (start >= 0) ? (start + count) : start;
-    object->activate = {start, end};
+    object->activate = read_actions(start, end);
     return true;
 }
 
@@ -95,7 +95,7 @@ static bool read_arrive(pn::file_view in, BaseObject* object) {
         return false;
     }
     auto end       = (start >= 0) ? (start + count) : start;
-    object->arrive = {start, end};
+    object->arrive = read_actions(start, end);
     return true;
 }
 

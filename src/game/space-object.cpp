@@ -86,13 +86,6 @@ BaseObject* BaseObject::get(int number) {
 
 HandleList<BaseObject> BaseObject::all() { return HandleList<BaseObject>(0, plug.objects.size()); }
 
-Action* Action::get(int32_t number) {
-    if ((0 <= number) && (number < plug.actions.size())) {
-        return &plug.actions[number];
-    }
-    return nullptr;
-}
-
 Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, int race) {
     if (class_ >= kLiteralClass) {
         return Handle<BaseObject>(class_ - kLiteralClass);

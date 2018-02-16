@@ -330,4 +330,28 @@ bool read_from(pn::file_view in, Action* action) {
     }
 }
 
+std::vector<Action> read_actions(int begin, int end) {
+    if (end <= begin) {
+        return std::vector<Action>{};
+    }
+    Resource r = Resource::path("actions.bin");
+
+    pn::data_view d = r.data();
+    if ((begin < 0) || ((d.size() / Action::byte_size) < end)) {
+        throw std::runtime_error(pn::format(
+                                         "action range {{{0}, {1}}} outside {{0, {2}}}", begin,
+                                         end, d.size() / Action::byte_size)
+                                         .c_str());
+    }
+
+    int                 count = end - begin;
+    pn::file            f = d.slice(Action::byte_size * begin, Action::byte_size * count).open();
+    std::vector<Action> actions;
+    actions.resize(count);
+    for (Action& a : actions) {
+        read_from(f, &a);
+    }
+    return actions;
+}
+
 }  // namespace antares

@@ -294,8 +294,6 @@ struct argumentType {
 };
 
 struct Action {
-    static Action* get(int number);
-
     uint16_t verb;
 
     uint8_t  reflexive;        // does it apply to object executing verb?
@@ -313,6 +311,8 @@ struct Action {
     static const size_t byte_size = 48;
 };
 bool read_from(pn::file_view in, Action* action);
+
+std::vector<Action> read_actions(int begin, int end);
 
 }  // namespace antares
 

@@ -69,7 +69,6 @@ void PluginInit() {
     read_all("conditions", "scenario-conditions.bin", plug.conditions);
     read_all("briefings", "scenario-briefings.bin", plug.briefings);
     read_all("objects", "objects.bin", plug.objects);
-    read_all("actions", "actions.bin", plug.actions);
     read_all("races", "races.bin", plug.races);
 
     auto level_names = Resource::strings(kLevelNameID);
