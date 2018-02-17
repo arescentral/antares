@@ -206,7 +206,7 @@ struct Level::Condition {
         int32_t         amount;
     };
 
-    uint8_t condition;
+    conditionType condition;
     struct {
         // Really a union
         Point           location;
@@ -216,18 +216,21 @@ struct Level::Condition {
         ticks           timeValue;
         uint32_t        unsignedLongValue;
     } conditionArgument;
-    int32_t             subjectObject;  // initial object #
-    int32_t             directObject;   // initial object #
+
+    int32_t             subject           = -1;  // initial object #
+    int32_t             object            = -1;  // initial object #
+    bool                initially_enabled = true;
+    bool                persistent        = false;
     std::vector<Action> action;
-    uint32_t            flags;
-    int32_t             direction;
+
+    // Transient information during level.
+    // TODO(sfiera): remove.
+    bool enabled = true;
 
     static const size_t byte_size = 38;
 
     bool active() const;
     bool is_true() const;
-    bool true_yet() const;
-    void set_true_yet(bool state);
 };
 bool read_from(pn::file_view in, Level::Condition* level_condition);
 bool read_from(pn::file_view in, Level::Condition::CounterArgument* counter_argument);

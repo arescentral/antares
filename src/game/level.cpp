@@ -305,7 +305,7 @@ static void load_condition(
     for (const auto& action : condition->action) {
         AddActionMedia(action, GRAY, all_colors, state);
     }
-    condition->set_true_yet(condition->flags & kInitiallyTrue);
+    condition->enabled = condition->initially_enabled;
 }
 
 static void run_game_1s() {

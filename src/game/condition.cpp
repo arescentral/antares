@@ -31,19 +31,7 @@
 
 namespace antares {
 
-bool Level::Condition::active() const {
-    return !(flags & kTrueOnlyOnce) || !(flags & kHasBeenTrue);
-}
-
-void Level::Condition::set_true_yet(bool state) {
-    if (state) {
-        flags |= kHasBeenTrue;
-    } else {
-        flags &= ~kHasBeenTrue;
-    }
-}
-
-bool Level::Condition::true_yet() const { return flags & kHasBeenTrue; }
+bool Level::Condition::active() const { return persistent || enabled; }
 
 bool Level::Condition::is_true() const {
     int32_t         difference;
@@ -51,6 +39,11 @@ bool Level::Condition::is_true() const {
     uint32_t        distance, dcalc;
 
     switch (condition) {
+        case kNoCondition:
+        case kLocationCondition:
+        case kAgeCondition:
+        case kRandomCondition: return false;
+
         case kCounterCondition:
             a = conditionArgument.counter.whichPlayer;
             if (GetAdmiralScore(a, conditionArgument.counter.whichCounter) ==
@@ -81,7 +74,7 @@ bool Level::Condition::is_true() const {
         }
 
         case kOwnerCondition: {
-            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            auto sObject = GetObjectFromInitialNumber(subject);
             auto a       = Handle<Admiral>(conditionArgument.longValue);
             return sObject.get() && (a == sObject->owner);
         }
@@ -99,8 +92,8 @@ bool Level::Condition::is_true() const {
         }
 
         case kProximityCondition: {
-            auto sObject = GetObjectFromInitialNumber(subjectObject);
-            auto dObject = GetObjectFromInitialNumber(directObject);
+            auto sObject = GetObjectFromInitialNumber(subject);
+            auto dObject = GetObjectFromInitialNumber(object);
             if (sObject.get() && dObject.get()) {
                 difference = ABS<int>(sObject->location.h - dObject->location.h);
                 dcalc      = difference;
@@ -118,8 +111,8 @@ bool Level::Condition::is_true() const {
         }
 
         case kDistanceGreaterCondition: {
-            auto sObject = GetObjectFromInitialNumber(subjectObject);
-            auto dObject = GetObjectFromInitialNumber(directObject);
+            auto sObject = GetObjectFromInitialNumber(subject);
+            auto dObject = GetObjectFromInitialNumber(object);
             if (sObject.get() && dObject.get()) {
                 difference = ABS<int>(sObject->location.h - dObject->location.h);
                 dcalc      = difference;
@@ -137,24 +130,24 @@ bool Level::Condition::is_true() const {
         }
 
         case kHalfHealthCondition: {
-            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            auto sObject = GetObjectFromInitialNumber(subject);
             return !sObject.get() || (sObject->health() <= (sObject->max_health() >> 1));
         }
 
         case kIsAuxiliaryObject: {
-            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            auto sObject = GetObjectFromInitialNumber(subject);
             auto dObject = g.admiral->control();
             return sObject.get() && dObject.get() && (dObject == sObject);
         }
 
         case kIsTargetObject: {
-            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            auto sObject = GetObjectFromInitialNumber(subject);
             auto dObject = g.admiral->target();
             return sObject.get() && dObject.get() && (dObject == sObject);
         }
 
         case kVelocityLessThanEqualToCondition: {
-            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            auto sObject = GetObjectFromInitialNumber(subject);
             return sObject.get() && (ABS(sObject->velocity.h) < conditionArgument.fixedValue) &&
                    (ABS(sObject->velocity.v) < conditionArgument.fixedValue);
         }
@@ -183,14 +176,14 @@ bool Level::Condition::is_true() const {
         }
 
         case kDirectIsSubjectTarget: {
-            auto sObject = GetObjectFromInitialNumber(subjectObject);
-            auto dObject = GetObjectFromInitialNumber(directObject);
+            auto sObject = GetObjectFromInitialNumber(subject);
+            auto dObject = GetObjectFromInitialNumber(object);
             return sObject.get() && dObject.get() && (sObject->destObject == dObject) &&
                    (sObject->destObjectID == dObject->id);
         }
 
         case kSubjectIsPlayerCondition: {
-            auto sObject = GetObjectFromInitialNumber(subjectObject);
+            auto sObject = GetObjectFromInitialNumber(subject);
             return sObject.get() && (sObject == g.ship);
         }
     }
@@ -200,9 +193,9 @@ bool Level::Condition::is_true() const {
 void CheckLevelConditions() {
     for (auto& c : g.level->conditions) {
         if (c.active() && c.is_true()) {
-            c.set_true_yet(true);
-            auto  sObject = GetObjectFromInitialNumber(c.subjectObject);
-            auto  dObject = GetObjectFromInitialNumber(c.directObject);
+            c.enabled     = false;
+            auto  sObject = GetObjectFromInitialNumber(c.subject);
+            auto  dObject = GetObjectFromInitialNumber(c.object);
             Point offset;
             exec(c.action, sObject, dObject, &offset);
         }

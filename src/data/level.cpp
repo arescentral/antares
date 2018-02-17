@@ -180,14 +180,16 @@ static bool read_action(pn::file_view in, Level::Condition* condition) {
 bool read_from(pn::file_view in, Level::Condition* level_condition) {
     uint8_t section[12];
 
-    uint8_t unused;
-    if (!(in.read(&level_condition->condition, &unused) &&
-          (fread(section, 1, 12, in.c_obj()) == 12) &&
-          in.read(&level_condition->subjectObject, &level_condition->directObject) &&
-          read_action(in, level_condition) &&
-          in.read(&level_condition->flags, &level_condition->direction))) {
+    uint32_t flags;
+    uint8_t  condition;
+    if (!(in.read(&condition, pn::pad(1)) && (fread(section, 1, 12, in.c_obj()) == 12) &&
+          in.read(&level_condition->subject, &level_condition->object) &&
+          read_action(in, level_condition) && in.read(&flags, pn::pad(4)))) {
         return false;
     }
+    level_condition->condition         = static_cast<conditionType>(condition);
+    level_condition->persistent        = !(flags & kTrueOnlyOnce);
+    level_condition->initially_enabled = !(flags & kInitiallyTrue);
 
     pn::file sub = pn::data_view{section, 12}.open();
     switch (level_condition->condition) {
