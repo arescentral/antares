@@ -310,61 +310,57 @@ std::vector<Level::Briefing> read_briefings(int begin, int end) {
     return briefings;
 }
 
-bool read_from(pn::file_view in, Level::InitialObject* level_initial) {
+bool read_from(pn::file_view in, Level::Initial* level_initial) {
     int32_t type, owner;
     uint8_t unused[4];
     if (!(in.read(&type, &owner) && (fread(unused, 1, 4, in.c_obj()) == 4) &&
-          in.read(&level_initial->realObjectID) && read_from(in, &level_initial->location) &&
+          in.read(&level_initial->realObjectID) && read_from(in, &level_initial->at) &&
           read_from(in, &level_initial->earning) &&
-          in.read(&level_initial->distanceRange, &level_initial->rotationMinimum,
-                  &level_initial->rotationRange, &level_initial->spriteIDOverride))) {
+          in.read(pn::pad(12), &level_initial->sprite_override))) {
         return false;
     }
     for (size_t i = 0; i < kMaxTypeBaseCanBuild; ++i) {
-        if (!in.read(&level_initial->canBuild[i])) {
+        if (!in.read(&level_initial->build[i])) {
             return false;
         }
     }
     int32_t  name_id, name_index;
     uint32_t attributes;
-    if (!in.read(&level_initial->initialDestination, &name_id, &name_index, &attributes)) {
+    if (!in.read(&level_initial->target, &name_id, &name_index, &attributes)) {
         return false;
     }
     level_initial->realObject = Handle<SpaceObject>(-1);
-    level_initial->type       = Handle<BaseObject>(type);
+    level_initial->base       = Handle<BaseObject>(type);
     level_initial->owner      = Handle<Admiral>(owner);
-    level_initial->name       = "";
-    level_initial->attributes = Level::InitialObject::Attributes(attributes);
+    level_initial->attributes = Level::Initial::Attributes(attributes);
     if (name_id > 0) {
-        try {
-            level_initial->name = Resource::strings(name_id).at(name_index - 1).copy();
-        } catch (...) {
-        }
+        level_initial->name_override = Resource::strings(name_id).at(name_index - 1).copy();
+    } else {
+        level_initial->name_override = "";
     }
     return true;
 }
 
-std::vector<Level::InitialObject> read_initials(int begin, int end) {
+std::vector<Level::Initial> read_initials(int begin, int end) {
     if (end <= begin) {
-        return std::vector<Level::InitialObject>{};
+        return std::vector<Level::Initial>{};
     }
     Resource r = Resource::path("scenario-initials.bin");
 
     pn::data_view d = r.data();
-    if ((begin < 0) || ((d.size() / Level::InitialObject::byte_size) < end)) {
+    if ((begin < 0) || ((d.size() / Level::Initial::byte_size) < end)) {
         throw std::runtime_error(pn::format(
                                          "initial range {{{0}, {1}}} outside {{0, {2}}}", begin,
-                                         end, d.size() / Level::InitialObject::byte_size)
+                                         end, d.size() / Level::Initial::byte_size)
                                          .c_str());
     }
 
     int      count = end - begin;
-    pn::file f     = d.slice(Level::InitialObject::byte_size * begin,
-                         Level::InitialObject::byte_size * count)
-                         .open();
-    std::vector<Level::InitialObject> initials;
+    pn::file f =
+            d.slice(Level::Initial::byte_size * begin, Level::Initial::byte_size * count).open();
+    std::vector<Level::Initial> initials;
     initials.resize(count);
-    for (Level::InitialObject& a : initials) {
+    for (Level::Initial& a : initials) {
         read_from(f, &a);
     }
     return initials;

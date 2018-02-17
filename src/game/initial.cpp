@@ -27,14 +27,13 @@
 
 namespace antares {
 
-void create_initial(Level::InitialObject* initial) {
+void create_initial(Level::Initial* initial) {
     if (initial->attributes.initially_hidden()) {
         initial->realObject = SpaceObject::none();
         return;
     }
 
-    coordPointType coord =
-            Translate_Coord_To_Level_Rotation(initial->location.h, initial->location.v);
+    coordPointType coord = Translate_Coord_To_Level_Rotation(initial->at.h, initial->at.v);
 
     Handle<Admiral> owner = Admiral::none();
     if (initial->owner.get()) {
@@ -49,15 +48,15 @@ void create_initial(Level::InitialObject* initial) {
         }
     }
 
-    auto type = initial->type;
+    auto base = initial->base;
     // TODO(sfiera): remap object in networked games.
     fixedPointType v        = {Fixed::zero(), Fixed::zero()};
     auto           anObject = initial->realObject = CreateAnySpaceObject(
-            type, &v, &coord, g.angle, owner, specialAttributes, initial->spriteIDOverride);
+            base, &v, &coord, g.angle, owner, specialAttributes, initial->sprite_override);
 
     if (anObject->attributes & kIsDestination) {
-        anObject->asDestination =
-                MakeNewDestination(anObject, initial->canBuild, initial->earning, initial->name);
+        anObject->asDestination = MakeNewDestination(
+                anObject, initial->build, initial->earning, initial->name_override);
     }
     initial->realObjectID = anObject->id;
 
@@ -70,7 +69,7 @@ void create_initial(Level::InitialObject* initial) {
 
     if (anObject->attributes & kIsDestination) {
         if (owner.get()) {
-            if (initial->canBuild[0] >= 0) {
+            if (initial->build[0] >= 0) {
                 if (!GetAdmiralBuildAtObject(owner).get()) {
                     owner->set_control(anObject);
                     owner->set_target(anObject);
@@ -80,17 +79,17 @@ void create_initial(Level::InitialObject* initial) {
     }
 }
 
-void set_initial_destination(const Level::InitialObject* initial, bool preserve) {
-    if (!initial->realObject.get()            // hasn't been created yet
-        || (initial->initialDestination < 0)  // doesn't have a target
-        || (!initial->owner.get())) {         // doesn't have an owner
+void set_initial_destination(const Level::Initial* initial, bool preserve) {
+    if (!initial->realObject.get()     // hasn't been created yet
+        || (initial->target < 0)       // doesn't have a target
+        || (!initial->owner.get())) {  // doesn't have an owner
         return;
     }
 
     // get the correct admiral #
     Handle<Admiral> owner = initial->owner;
 
-    const auto& target = g.level->initials[initial->initialDestination];
+    const auto& target = g.level->initials[initial->target];
     if (target.realObject.get()) {
         auto saveDest = owner->target();  // save the original dest
 
@@ -118,8 +117,7 @@ void UnhideInitialObject(int32_t whichInitial) {
         return;  // Already visible.
     }
 
-    coordPointType coord =
-            Translate_Coord_To_Level_Rotation(initial->location.h, initial->location.v);
+    coordPointType coord = Translate_Coord_To_Level_Rotation(initial->at.h, initial->at.v);
 
     Handle<Admiral> owner = Admiral::none();
     if (initial->owner.get()) {
@@ -139,18 +137,18 @@ void UnhideInitialObject(int32_t whichInitial) {
         }
     }
 
-    auto type = initial->type;
+    auto base = initial->base;
     // TODO(sfiera): remap objects in networked games.
     fixedPointType v        = {Fixed::zero(), Fixed::zero()};
     auto           anObject = initial->realObject = CreateAnySpaceObject(
-            type, &v, &coord, 0, owner, specialAttributes, initial->spriteIDOverride);
+            base, &v, &coord, 0, owner, specialAttributes, initial->sprite_override);
 
     if (anObject->attributes & kIsDestination) {
-        anObject->asDestination =
-                MakeNewDestination(anObject, initial->canBuild, initial->earning, initial->name);
+        anObject->asDestination = MakeNewDestination(
+                anObject, initial->build, initial->earning, initial->name_override);
 
         if (owner.get()) {
-            if (initial->canBuild[0] >= 0) {
+            if (initial->build[0] >= 0) {
                 if (!owner->control().get()) {
                     owner->set_control(anObject);
                 }
@@ -177,7 +175,7 @@ void UnhideInitialObject(int32_t whichInitial) {
 
 Handle<SpaceObject> GetObjectFromInitialNumber(int32_t initialNumber) {
     if (initialNumber >= 0) {
-        const Level::InitialObject& initial = g.level->initials[initialNumber];
+        const Level::Initial& initial = g.level->initials[initialNumber];
         if (initial.realObject.get()) {
             auto object = initial.realObject;
             if ((object->id != initial.realObjectID) || (object->active != kObjectInUse)) {

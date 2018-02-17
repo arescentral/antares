@@ -161,9 +161,8 @@ static coordPointType rotate_coords(int32_t h, int32_t v, int32_t rotation) {
     return coord;
 }
 
-void GetInitialCoord(
-        const Level::InitialObject* initial, coordPointType* coord, int32_t rotation) {
-    *coord = rotate_coords(initial->location.h, initial->location.v, rotation);
+void GetInitialCoord(const Level::Initial* initial, coordPointType* coord, int32_t rotation) {
+    *coord = rotate_coords(initial->at.h, initial->at.v, rotation);
 }
 
 }  // namespace
@@ -257,9 +256,9 @@ static void load_blessed_objects(std::bitset<16> all_colors, LoadState* state) {
 }
 
 static void load_initial(int i, std::bitset<16> all_colors, LoadState* state) {
-    const Level::InitialObject* initial    = &g.level->initials[i];
-    Handle<Admiral>             owner      = initial->owner;
-    auto                        baseObject = initial->type;
+    const Level::Initial* initial    = &g.level->initials[i];
+    Handle<Admiral>       owner      = initial->owner;
+    auto                  baseObject = initial->base;
     // TODO(sfiera): remap objects in networked games.
 
     // Load the media for this object
@@ -275,24 +274,23 @@ static void load_initial(int i, std::bitset<16> all_colors, LoadState* state) {
     AddBaseObjectMedia(baseObject, GetAdmiralColor(owner), all_colors, state);
 
     // make sure we're not overriding the sprite
-    if (initial->spriteIDOverride >= 0) {
+    if (initial->sprite_override >= 0) {
         if (baseObject->attributes & kCanThink) {
             sys.pix.add(
-                    initial->spriteIDOverride +
-                    (GetAdmiralColor(owner) << kSpriteTableColorShift));
+                    initial->sprite_override + (GetAdmiralColor(owner) << kSpriteTableColorShift));
         } else {
-            sys.pix.add(initial->spriteIDOverride);
+            sys.pix.add(initial->sprite_override);
         }
     }
 
     // check any objects this object can build
     for (int j = 0; j < kMaxTypeBaseCanBuild; j++) {
-        if (initial->canBuild[j] != kNoClass) {
+        if (initial->build[j] != kNoClass) {
             // check for each player
             for (auto a : Admiral::all()) {
                 if (a->active()) {
                     auto baseObject =
-                            mGetBaseObjectFromClassRace(initial->canBuild[j], GetAdmiralRace(a));
+                            mGetBaseObjectFromClassRace(initial->build[j], GetAdmiralRace(a));
                     if (baseObject.get()) {
                         AddBaseObjectMedia(baseObject, GetAdmiralColor(a), all_colors, state);
                     }

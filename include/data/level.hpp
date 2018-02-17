@@ -106,7 +106,7 @@ enum conditionType {
 };
 
 struct Level {
-    struct InitialObject;
+    struct Initial;
     struct Condition;
     struct Briefing;
 
@@ -142,9 +142,9 @@ struct Level {
     bool                    is_training;
     int32_t                 angle;
 
-    std::vector<InitialObject> initials;
-    std::vector<Condition>     conditions;
-    std::vector<Briefing>      briefings;
+    std::vector<Initial>   initials;
+    std::vector<Condition> conditions;
+    std::vector<Briefing>  briefings;
 
     pn::string prologue;           // SOLO
     pn::string epilogue;           // SOLO
@@ -163,20 +163,17 @@ struct Level {
 bool read_from(pn::file_view in, Level* level);
 bool read_from(pn::file_view in, Level::Player* level_player);
 
-struct Level::InitialObject {
-    Handle<BaseObject>  type;
-    Handle<Admiral>     owner;
-    Handle<SpaceObject> realObject;
-    int32_t             realObjectID;
-    Point               location;
-    Fixed               earning;
-    int32_t             distanceRange;
-    int32_t             rotationMinimum;
-    int32_t             rotationRange;
-    int32_t             spriteIDOverride;  // <- ADDED 9/30
-    int32_t             canBuild[kMaxTypeBaseCanBuild];
-    int32_t             initialDestination;  // <- ADDED 9/27
-    pn::string          name;
+struct Level::Initial {
+    Handle<BaseObject> base;
+    Handle<Admiral>    owner;
+    Point              at;
+    Fixed              earning;
+
+    pn::string name_override;
+    int32_t    sprite_override;
+
+    int32_t build[kMaxTypeBaseCanBuild];
+    int32_t target;
 
     class Attributes {
       public:
@@ -192,10 +189,15 @@ struct Level::InitialObject {
     };
     Attributes attributes;
 
+    // Transient information during level.
+    // TODO(sfiera): remove.
+    Handle<SpaceObject> realObject;
+    int32_t             realObjectID;
+
     static const size_t byte_size = 108;
 };
-bool                              read_from(pn::file_view in, Level::InitialObject* level_initial);
-std::vector<Level::InitialObject> read_initials(int begin, int end);
+bool                        read_from(pn::file_view in, Level::Initial* level_initial);
+std::vector<Level::Initial> read_initials(int begin, int end);
 
 struct Level::Condition {
     struct CounterArgument {

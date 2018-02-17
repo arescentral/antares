@@ -663,9 +663,9 @@ static void computer_select(const Action& action, Handle<SpaceObject> focus) {
 static void assume_initial_object(const Action& action, Handle<SpaceObject> focus) {
     Handle<Admiral> player1(0);
     int index = action.argument.assumeInitial.whichInitialObject + GetAdmiralScore(player1, 0);
-    Level::InitialObject* initialObject = &g.level->initials[index];
-    initialObject->realObjectID         = focus->id;
-    initialObject->realObject           = focus;
+    Level::Initial* initialObject = &g.level->initials[index];
+    initialObject->realObjectID   = focus->id;
+    initialObject->realObject     = focus;
 }
 
 static void execute_actions(
