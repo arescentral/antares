@@ -447,7 +447,7 @@ static void alter_condition_true_yet(const Action& action) {
     int32_t    begin = alter.first;
     int32_t    end   = begin + std::max(0, alter.count_minus_1) + 1;
     for (auto l : range(begin, end)) {
-        g.level->conditions[l].enabled = !alter.true_yet;
+        g.level->conditions[l]->enabled = !alter.true_yet;
     }
 }
 

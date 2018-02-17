@@ -302,10 +302,10 @@ static void load_initial(int i, std::bitset<16> all_colors, LoadState* state) {
 
 static void load_condition(
         Level::Condition* condition, std::bitset<16> all_colors, LoadState* state) {
-    for (const auto& action : condition->action) {
+    for (const auto& action : (*condition)->action) {
         AddActionMedia(action, GRAY, all_colors, state);
     }
-    condition->enabled = condition->initially_enabled;
+    (*condition)->enabled = (*condition)->initially_enabled;
 }
 
 static void run_game_1s() {

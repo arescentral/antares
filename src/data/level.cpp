@@ -167,64 +167,128 @@ bool read_from(pn::file_view in, Level::Player* level_player) {
     return true;
 }
 
-static bool read_action(pn::file_view in, Level::Condition* condition) {
-    int32_t start, count;
-    if (!in.read(&start, &count)) {
-        return false;
-    }
-    auto end          = (start >= 0) ? (start + count) : start;
-    condition->action = read_actions(start, end);
-    return true;
-}
-
-bool read_from(pn::file_view in, Level::Condition* level_condition) {
-    uint8_t section[12];
-
+bool read_from(pn::file_view in, Level::Condition* condition) {
     uint32_t flags;
-    uint8_t  condition;
-    if (!(in.read(&condition, pn::pad(1)) && (fread(section, 1, 12, in.c_obj()) == 12) &&
-          in.read(&level_condition->subject, &level_condition->object) &&
-          read_action(in, level_condition) && in.read(&flags, pn::pad(4)))) {
+    uint8_t  type;
+    int32_t  subject, object;
+    int32_t  action_start, action_count;
+    pn::data section;
+    section.resize(12);
+
+    if (!in.read(
+                &type, pn::pad(1), &section, &subject, &object, &action_start, &action_count,
+                &flags, pn::pad(4))) {
         return false;
     }
-    level_condition->condition         = static_cast<conditionType>(condition);
-    level_condition->persistent        = !(flags & kTrueOnlyOnce);
-    level_condition->initially_enabled = !(flags & kInitiallyTrue);
 
-    pn::file sub = pn::data_view{section, 12}.open();
-    switch (level_condition->condition) {
+    pn::file sub = section.open();
+    switch (static_cast<conditionType>(type)) {
+        case kNoCondition: condition->init<Level::NullCondition>(); break;
+        case kLocationCondition: condition->init<Level::LocationCondition>(); break;
+        case kAgeCondition: condition->init<Level::AgeCondition>(); break;
+        case kRandomCondition: condition->init<Level::RandomCondition>(); break;
+        case kHalfHealthCondition: condition->init<Level::HalfHealthCondition>(); break;
+        case kIsAuxiliaryObject: condition->init<Level::IsAuxiliaryObject>(); break;
+        case kIsTargetObject: condition->init<Level::IsTargetObject>(); break;
+        case kAutopilotCondition: condition->init<Level::AutopilotCondition>(); break;
+        case kNotAutopilotCondition: condition->init<Level::NotAutopilotCondition>(); break;
+        case kObjectIsBeingBuilt: condition->init<Level::ObjectIsBeingBuilt>(); break;
+        case kDirectIsSubjectTarget: condition->init<Level::DirectIsSubjectTarget>(); break;
+        case kSubjectIsPlayerCondition: condition->init<Level::SubjectIsPlayerCondition>(); break;
+
         case kCounterCondition:
+            if (!read_from(sub, &condition->init<Level::CounterCondition>()->counter)) {
+                return false;
+            }
+            break;
+
         case kCounterGreaterCondition:
+            if (!read_from(sub, &condition->init<Level::CounterGreaterCondition>()->counter)) {
+                return false;
+            }
+            break;
+
         case kCounterNotCondition:
-            return read_from(sub, &level_condition->conditionArgument.counter);
+            if (!read_from(sub, &condition->init<Level::CounterNotCondition>()->counter)) {
+                return false;
+            }
+            break;
 
         case kDestructionCondition:
+            if (!sub.read(&condition->init<Level::DestructionCondition>()->longValue)) {
+                return false;
+            }
+            break;
+
         case kOwnerCondition:
+            if (!sub.read(&condition->init<Level::OwnerCondition>()->longValue)) {
+                return false;
+            }
+            break;
+
         case kNoShipsLeftCondition:
-        case kZoomLevelCondition: return sub.read(&level_condition->conditionArgument.longValue);
+            if (!sub.read(&condition->init<Level::NoShipsLeftCondition>()->longValue)) {
+                return false;
+            }
+            break;
+
+        case kZoomLevelCondition:
+            if (!sub.read(&condition->init<Level::ZoomLevelCondition>()->longValue)) {
+                return false;
+            }
+            break;
 
         case kVelocityLessThanEqualToCondition:
-            return read_from(sub, &level_condition->conditionArgument.fixedValue);
+            if (!read_from(
+                        sub,
+                        &condition->init<Level::VelocityLessThanEqualToCondition>()->fixedValue)) {
+                return false;
+            }
+            break;
 
         case kTimeCondition: {
             int32_t time;
             if (!sub.read(&time)) {
                 return false;
             }
-            level_condition->conditionArgument.timeValue = ticks(time);
-            return true;
+            condition->init<Level::TimeCondition>()->timeValue = ticks(time);
+            break;
         }
 
         case kProximityCondition:
+            if (!sub.read(&condition->init<Level::ProximityCondition>()->unsignedLongValue)) {
+                return false;
+            }
+            break;
+
         case kDistanceGreaterCondition:
-            return sub.read(&level_condition->conditionArgument.unsignedLongValue);
+            if (!sub.read(
+                        &condition->init<Level::DistanceGreaterCondition>()->unsignedLongValue)) {
+                return false;
+            }
+            break;
 
         case kCurrentMessageCondition:
-        case kCurrentComputerCondition:
-            return read_from(sub, &level_condition->conditionArgument.location);
+            if (!read_from(sub, &condition->init<Level::CurrentMessageCondition>()->location)) {
+                return false;
+            }
+            break;
 
-        default: return true;
+        case kCurrentComputerCondition:
+            if (!read_from(sub, &condition->init<Level::CurrentComputerCondition>()->location)) {
+                return false;
+            }
+            break;
     }
+
+    if (*condition) {
+        (*condition)->subject           = subject;
+        (*condition)->object            = object;
+        (*condition)->action            = read_actions(action_start, action_start + action_count);
+        (*condition)->persistent        = !(flags & kTrueOnlyOnce);
+        (*condition)->initially_enabled = !(flags & kInitiallyTrue);
+    }
+    return true;
 }
 
 std::vector<Level::Condition> read_conditions(int begin, int end) {
@@ -234,15 +298,16 @@ std::vector<Level::Condition> read_conditions(int begin, int end) {
     Resource r = Resource::path("scenario-conditions.bin");
 
     pn::data_view d = r.data();
-    if ((begin < 0) || ((d.size() / Level::Condition::byte_size) < end)) {
+    if ((begin < 0) || ((d.size() / Level::ConditionBase::byte_size) < end)) {
         throw std::runtime_error(pn::format(
                                          "condition range {{{0}, {1}}} outside {{0, {2}}}", begin,
-                                         end, d.size() / Level::Condition::byte_size)
+                                         end, d.size() / Level::ConditionBase::byte_size)
                                          .c_str());
     }
 
     int      count = end - begin;
-    pn::file f = d.slice(Level::Condition::byte_size * begin, Level::Condition::byte_size * count)
+    pn::file f     = d.slice(Level::ConditionBase::byte_size * begin,
+                         Level::ConditionBase::byte_size * count)
                          .open();
     std::vector<Level::Condition> conditions;
     conditions.resize(count);
@@ -252,7 +317,7 @@ std::vector<Level::Condition> read_conditions(int begin, int end) {
     return conditions;
 }
 
-bool read_from(pn::file_view in, Level::Condition::CounterArgument* counter_argument) {
+bool read_from(pn::file_view in, Level::ConditionBase::CounterArgument* counter_argument) {
     int32_t admiral;
     if (!in.read(&admiral, &counter_argument->whichCounter, &counter_argument->amount)) {
         return false;

@@ -107,8 +107,36 @@ enum conditionType {
 
 struct Level {
     struct Initial;
-    struct Condition;
+
     struct Briefing;
+
+    struct ConditionBase;
+    struct NullCondition;
+    struct LocationCondition;
+    struct CounterCondition;
+    struct ProximityCondition;
+    struct OwnerCondition;
+    struct DestructionCondition;
+    struct AgeCondition;
+    struct TimeCondition;
+    struct RandomCondition;
+    struct HalfHealthCondition;
+    struct IsAuxiliaryObject;
+    struct IsTargetObject;
+    struct CounterGreaterCondition;
+    struct CounterNotCondition;
+    struct DistanceGreaterCondition;
+    struct VelocityLessThanEqualToCondition;
+    struct NoShipsLeftCondition;
+    struct CurrentMessageCondition;
+    struct CurrentComputerCondition;
+    struct ZoomLevelCondition;
+    struct AutopilotCondition;
+    struct NotAutopilotCondition;
+    struct ObjectIsBeingBuilt;
+    struct DirectIsSubjectTarget;
+    struct SubjectIsPlayerCondition;
+    struct Condition;
 
     enum Type {
         DEMO,
@@ -199,23 +227,12 @@ struct Level::Initial {
 bool                        read_from(pn::file_view in, Level::Initial* level_initial);
 std::vector<Level::Initial> read_initials(int begin, int end);
 
-struct Level::Condition {
+struct Level::ConditionBase {
     struct CounterArgument {
         Handle<Admiral> whichPlayer;
         int32_t         whichCounter;
         int32_t         amount;
     };
-
-    conditionType condition;
-    struct {
-        // Really a union
-        Point           location;
-        CounterArgument counter;
-        int32_t         longValue;
-        Fixed           fixedValue;
-        ticks           timeValue;
-        uint32_t        unsignedLongValue;
-    } conditionArgument;
 
     int32_t             subject           = -1;  // initial object #
     int32_t             object            = -1;  // initial object #
@@ -229,12 +246,124 @@ struct Level::Condition {
 
     static const size_t byte_size = 38;
 
-    bool active() const;
-    bool is_true() const;
+    ConditionBase()              = default;
+    virtual ~ConditionBase()     = default;
+    virtual bool is_true() const = 0;
+
+    ConditionBase(const ConditionBase&) = delete;
+    ConditionBase& operator=(const ConditionBase&) = delete;
 };
 bool read_from(pn::file_view in, Level::Condition* level_condition);
-bool read_from(pn::file_view in, Level::Condition::CounterArgument* counter_argument);
+bool read_from(pn::file_view in, Level::ConditionBase::CounterArgument* counter_argument);
 std::vector<Level::Condition> read_conditions(int begin, int end);
+
+struct Level::NullCondition : Level::ConditionBase {
+    virtual bool is_true() const;
+};
+struct Level::LocationCondition : Level::ConditionBase {
+    virtual bool is_true() const;
+};
+struct Level::CounterCondition : Level::ConditionBase {
+    Level::ConditionBase::CounterArgument counter;
+    virtual bool                          is_true() const;
+};
+struct Level::ProximityCondition : Level::ConditionBase {
+    uint32_t     unsignedLongValue;
+    virtual bool is_true() const;
+};
+struct Level::OwnerCondition : Level::ConditionBase {
+    int32_t      longValue;
+    virtual bool is_true() const;
+};
+struct Level::DestructionCondition : Level::ConditionBase {
+    int32_t      longValue;
+    virtual bool is_true() const;
+};
+struct Level::AgeCondition : Level::ConditionBase {
+    virtual bool is_true() const;
+};
+struct Level::TimeCondition : Level::ConditionBase {
+    ticks        timeValue;
+    virtual bool is_true() const;
+};
+struct Level::RandomCondition : Level::ConditionBase {
+    virtual bool is_true() const;
+};
+struct Level::HalfHealthCondition : Level::ConditionBase {
+    virtual bool is_true() const;
+};
+struct Level::IsAuxiliaryObject : Level::ConditionBase {
+    virtual bool is_true() const;
+};
+struct Level::IsTargetObject : Level::ConditionBase {
+    virtual bool is_true() const;
+};
+struct Level::CounterGreaterCondition : Level::ConditionBase {
+    Level::ConditionBase::CounterArgument counter;
+    virtual bool                          is_true() const;
+};
+struct Level::CounterNotCondition : Level::ConditionBase {
+    Level::ConditionBase::CounterArgument counter;
+    virtual bool                          is_true() const;
+};
+struct Level::DistanceGreaterCondition : Level::ConditionBase {
+    uint32_t     unsignedLongValue;
+    virtual bool is_true() const;
+};
+struct Level::VelocityLessThanEqualToCondition : Level::ConditionBase {
+    Fixed        fixedValue;
+    virtual bool is_true() const;
+};
+struct Level::NoShipsLeftCondition : Level::ConditionBase {
+    int32_t      longValue;
+    virtual bool is_true() const;
+};
+struct Level::CurrentMessageCondition : Level::ConditionBase {
+    Point        location;
+    virtual bool is_true() const;
+};
+struct Level::CurrentComputerCondition : Level::ConditionBase {
+    Point        location;
+    virtual bool is_true() const;
+};
+struct Level::ZoomLevelCondition : Level::ConditionBase {
+    int32_t      longValue;
+    virtual bool is_true() const;
+};
+struct Level::AutopilotCondition : Level::ConditionBase {
+    virtual bool is_true() const;
+};
+struct Level::NotAutopilotCondition : Level::ConditionBase {
+    virtual bool is_true() const;
+};
+struct Level::ObjectIsBeingBuilt : Level::ConditionBase {
+    virtual bool is_true() const;
+};
+struct Level::DirectIsSubjectTarget : Level::ConditionBase {
+    virtual bool is_true() const;
+};
+struct Level::SubjectIsPlayerCondition : Level::ConditionBase {
+    virtual bool is_true() const;
+};
+
+struct Level::Condition {
+  public:
+                   operator bool() const { return _base != nullptr; }
+    ConditionBase* operator->() const { return _base.get(); }
+    ConditionBase& operator*() const { return *_base.get(); }
+
+    bool active() { return _base->persistent || _base->enabled; }
+
+    template <typename T>
+    T* init() {
+        T* out;
+        _base = std::unique_ptr<ConditionBase>(out = new T);
+        return out;
+    }
+
+  private:
+    std::unique_ptr<ConditionBase> _base;
+};
 
 //
 // We need to know:
