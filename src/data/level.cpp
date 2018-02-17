@@ -183,59 +183,98 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
 
     pn::file sub = section.open();
     switch (static_cast<conditionType>(type)) {
-        case kNoCondition: condition->init<Level::NullCondition>(); break;
-        case kLocationCondition: condition->init<Level::LocationCondition>(); break;
-        case kAgeCondition: condition->init<Level::AgeCondition>(); break;
-        case kRandomCondition: condition->init<Level::RandomCondition>(); break;
-        case kHalfHealthCondition: condition->init<Level::HalfHealthCondition>(); break;
-        case kIsAuxiliaryObject: condition->init<Level::IsAuxiliaryObject>(); break;
-        case kIsTargetObject: condition->init<Level::IsTargetObject>(); break;
-        case kAutopilotCondition: condition->init<Level::AutopilotCondition>(); break;
-        case kNotAutopilotCondition: condition->init<Level::NotAutopilotCondition>(); break;
-        case kObjectIsBeingBuilt: condition->init<Level::ObjectIsBeingBuilt>(); break;
-        case kDirectIsSubjectTarget: condition->init<Level::DirectIsSubjectTarget>(); break;
-        case kSubjectIsPlayerCondition: condition->init<Level::SubjectIsPlayerCondition>(); break;
+        case kNoCondition:
+        case kLocationCondition:
+        case kAgeCondition:
+        case kRandomCondition: condition->init<Level::NullCondition>(); break;
+
+        case kHalfHealthCondition:
+            condition->init<Level::HealthCondition>()->value = 0.5;
+            (*condition)->op                                 = Level::ConditionBase::Op::LE;
+            break;
+
+        case kIsAuxiliaryObject:
+            condition->init<Level::IsAuxiliaryObject>();
+            (*condition)->op = Level::ConditionBase::Op::EQ;
+            break;
+
+        case kIsTargetObject:
+            condition->init<Level::IsTargetObject>();
+            (*condition)->op = Level::ConditionBase::Op::EQ;
+            break;
+
+        case kObjectIsBeingBuilt:
+            condition->init<Level::ObjectIsBeingBuilt>()->value = true;
+            (*condition)->op                                    = Level::ConditionBase::Op::EQ;
+            break;
+
+        case kDirectIsSubjectTarget:
+            condition->init<Level::DirectIsSubjectTarget>();
+            (*condition)->op = Level::ConditionBase::Op::EQ;
+            break;
+
+        case kSubjectIsPlayerCondition:
+            condition->init<Level::SubjectIsPlayerCondition>();
+            (*condition)->op = Level::ConditionBase::Op::EQ;
+            break;
+
+        case kAutopilotCondition:
+            condition->init<Level::AutopilotCondition>()->value = true;
+            (*condition)->op                                    = Level::ConditionBase::Op::EQ;
+            break;
+
+        case kNotAutopilotCondition:
+            condition->init<Level::AutopilotCondition>()->value = false;
+            (*condition)->op                                    = Level::ConditionBase::Op::EQ;
+            break;
 
         case kCounterCondition:
             if (!read_from(sub, &condition->init<Level::CounterCondition>()->counter)) {
                 return false;
             }
+            (*condition)->op = Level::ConditionBase::Op::EQ;
             break;
 
         case kCounterGreaterCondition:
-            if (!read_from(sub, &condition->init<Level::CounterGreaterCondition>()->counter)) {
+            if (!read_from(sub, &condition->init<Level::CounterCondition>()->counter)) {
                 return false;
             }
+            (*condition)->op = Level::ConditionBase::Op::GE;
             break;
 
         case kCounterNotCondition:
-            if (!read_from(sub, &condition->init<Level::CounterNotCondition>()->counter)) {
+            if (!read_from(sub, &condition->init<Level::CounterCondition>()->counter)) {
                 return false;
             }
+            (*condition)->op = Level::ConditionBase::Op::NE;
             break;
 
         case kDestructionCondition:
             if (!sub.read(&condition->init<Level::DestructionCondition>()->longValue)) {
                 return false;
             }
+            (*condition)->op = Level::ConditionBase::Op::EQ;
             break;
 
         case kOwnerCondition:
             if (!sub.read(&condition->init<Level::OwnerCondition>()->longValue)) {
                 return false;
             }
+            (*condition)->op = Level::ConditionBase::Op::EQ;
             break;
 
         case kNoShipsLeftCondition:
             if (!sub.read(&condition->init<Level::NoShipsLeftCondition>()->longValue)) {
                 return false;
             }
+            (*condition)->op = Level::ConditionBase::Op::LE;
             break;
 
         case kZoomLevelCondition:
             if (!sub.read(&condition->init<Level::ZoomLevelCondition>()->longValue)) {
                 return false;
             }
+            (*condition)->op = Level::ConditionBase::Op::EQ;
             break;
 
         case kVelocityLessThanEqualToCondition:
@@ -244,6 +283,7 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
                         &condition->init<Level::VelocityLessThanEqualToCondition>()->fixedValue)) {
                 return false;
             }
+            (*condition)->op = Level::ConditionBase::Op::LT;
             break;
 
         case kTimeCondition: {
@@ -252,32 +292,36 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
                 return false;
             }
             condition->init<Level::TimeCondition>()->timeValue = ticks(time);
+            (*condition)->op                                   = Level::ConditionBase::Op::GE;
             break;
         }
 
         case kProximityCondition:
-            if (!sub.read(&condition->init<Level::ProximityCondition>()->unsignedLongValue)) {
+            if (!sub.read(&condition->init<Level::DistanceCondition>()->unsignedLongValue)) {
                 return false;
             }
+            (*condition)->op = Level::ConditionBase::Op::LT;
             break;
 
         case kDistanceGreaterCondition:
-            if (!sub.read(
-                        &condition->init<Level::DistanceGreaterCondition>()->unsignedLongValue)) {
+            if (!sub.read(&condition->init<Level::DistanceCondition>()->unsignedLongValue)) {
                 return false;
             }
+            (*condition)->op = Level::ConditionBase::Op::GE;
             break;
 
         case kCurrentMessageCondition:
             if (!read_from(sub, &condition->init<Level::CurrentMessageCondition>()->location)) {
                 return false;
             }
+            (*condition)->op = Level::ConditionBase::Op::EQ;
             break;
 
         case kCurrentComputerCondition:
             if (!read_from(sub, &condition->init<Level::CurrentComputerCondition>()->location)) {
                 return false;
             }
+            (*condition)->op = Level::ConditionBase::Op::EQ;
             break;
     }
 

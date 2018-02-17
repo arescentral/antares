@@ -33,16 +33,33 @@ namespace antares {
 
 bool Level::NullCondition::is_true() const { return false; }
 
-bool Level::LocationCondition::is_true() const {
-    return false;  // not implemented
+template <typename X, typename Y>
+static bool op_compare(Level::ConditionBase::Op op, const X& x, const Y& y) {
+    switch (op) {
+        case Level::ConditionBase::Op::EQ: return (x == y);
+        case Level::ConditionBase::Op::NE: return (x != y);
+        case Level::ConditionBase::Op::LT: return (x < y);
+        case Level::ConditionBase::Op::GT: return (x > y);
+        case Level::ConditionBase::Op::LE: return (x <= y);
+        case Level::ConditionBase::Op::GE: return (x >= y);
+    }
+}
+
+template <typename X, typename Y>
+static bool op_eq(Level::ConditionBase::Op op, const X& x, const Y& y) {
+    switch (op) {
+        case Level::ConditionBase::Op::EQ: return (x == y);
+        case Level::ConditionBase::Op::NE: return (x != y);
+        default: return false;
+    }
 }
 
 bool Level::CounterCondition::is_true() const {
     Handle<Admiral> a = counter.whichPlayer;
-    return (GetAdmiralScore(a, counter.whichCounter) == counter.amount);
+    return op_compare(op, GetAdmiralScore(a, counter.whichCounter), counter.amount);
 }
 
-bool Level::ProximityCondition::is_true() const {
+bool Level::DistanceCondition::is_true() const {
     auto sObject = GetObjectFromInitialNumber(subject);
     auto dObject = GetObjectFromInitialNumber(object);
     if (sObject.get() && dObject.get()) {
@@ -53,9 +70,7 @@ bool Level::ProximityCondition::is_true() const {
 
         if ((dcalc < kMaximumRelevantDistance) && (distance < kMaximumRelevantDistance)) {
             distance = distance * distance + dcalc * dcalc;
-            if (distance < unsignedLongValue) {
-                return true;
-            }
+            return op_compare(op, distance, unsignedLongValue);
         }
     }
     return false;
@@ -64,16 +79,12 @@ bool Level::ProximityCondition::is_true() const {
 bool Level::OwnerCondition::is_true() const {
     auto sObject = GetObjectFromInitialNumber(subject);
     auto a       = Handle<Admiral>(longValue);
-    return sObject.get() && (a == sObject->owner);
+    return sObject.get() && op_eq(op, a, sObject->owner);
 }
 
 bool Level::DestructionCondition::is_true() const {
     auto sObject = GetObjectFromInitialNumber(longValue);
-    return !sObject.get();
-}
-
-bool Level::AgeCondition::is_true() const {
-    return false;  // not implemented
+    return op_eq(op, sObject.get(), nullptr);
 }
 
 bool Level::TimeCondition::is_true() const {
@@ -85,99 +96,79 @@ bool Level::TimeCondition::is_true() const {
     if (g.time < game_ticks()) {
         game_time /= 3;
     }
-    return (game_time + start_time) >= timeValue;
+    return op_compare(op, game_time + start_time, timeValue);
 }
 
-bool Level::RandomCondition::is_true() const {
-    return false;  // not implemented
-}
-
-bool Level::HalfHealthCondition::is_true() const {
-    auto sObject = GetObjectFromInitialNumber(subject);
-    return !sObject.get() || (sObject->health() <= (sObject->max_health() >> 1));
+bool Level::HealthCondition::is_true() const {
+    auto   sObject = GetObjectFromInitialNumber(subject);
+    double health  = 0.0;
+    if (sObject.get()) {
+        health = sObject->health();
+        health /= sObject->max_health();
+    }
+    return op_compare(op, health, value);
 }
 
 bool Level::IsAuxiliaryObject::is_true() const {
     auto sObject = GetObjectFromInitialNumber(subject);
     auto dObject = g.admiral->control();
-    return sObject.get() && dObject.get() && (dObject == sObject);
+    return sObject.get() && dObject.get() && op_eq(op, dObject, sObject);
 }
 
 bool Level::IsTargetObject::is_true() const {
     auto sObject = GetObjectFromInitialNumber(subject);
     auto dObject = g.admiral->target();
-    return sObject.get() && dObject.get() && (dObject == sObject);
-}
-
-bool Level::CounterGreaterCondition::is_true() const {
-    Handle<Admiral> a = counter.whichPlayer;
-    return (GetAdmiralScore(a, counter.whichCounter) >= counter.amount);
-}
-
-bool Level::CounterNotCondition::is_true() const {
-    Handle<Admiral> a = counter.whichPlayer;
-    return (GetAdmiralScore(a, counter.whichCounter) != counter.amount);
-}
-
-bool Level::DistanceGreaterCondition::is_true() const {
-    auto sObject = GetObjectFromInitialNumber(subject);
-    auto dObject = GetObjectFromInitialNumber(object);
-    if (sObject.get() && dObject.get()) {
-        int32_t  difference = ABS<int>(sObject->location.h - dObject->location.h);
-        uint32_t dcalc      = difference;
-        difference          = ABS<int>(sObject->location.v - dObject->location.v);
-        uint32_t distance   = difference;
-
-        if ((dcalc < kMaximumRelevantDistance) && (distance < kMaximumRelevantDistance)) {
-            distance = distance * distance + dcalc * dcalc;
-            if (distance >= unsignedLongValue) {
-                return true;
-            }
-        }
-    }
-    return false;
+    return sObject.get() && dObject.get() && op_eq(op, dObject, sObject);
 }
 
 bool Level::VelocityLessThanEqualToCondition::is_true() const {
     auto sObject = GetObjectFromInitialNumber(subject);
-    return sObject.get() && (ABS(sObject->velocity.h) < fixedValue) &&
-           (ABS(sObject->velocity.v) < fixedValue);
+    return sObject.get() &&
+           op_compare(
+                   op, std::max(ABS(sObject->velocity.h), ABS(sObject->velocity.v)), fixedValue);
 }
 
 bool Level::NoShipsLeftCondition::is_true() const {
-    return GetAdmiralShipsLeft(Handle<Admiral>(longValue)) <= 0;
+    return op_compare(op, GetAdmiralShipsLeft(Handle<Admiral>(longValue)), 0);
 }
 
 bool Level::CurrentMessageCondition::is_true() const {
-    return Messages::current() == (location.h + location.v - 1);
+    return op_eq(op, Messages::current(), location.h + location.v - 1);
 }
 
 bool Level::CurrentComputerCondition::is_true() const {
-    return (g.mini.currentScreen == location.h) &&
-           ((location.v < 0) || (g.mini.selectLine == location.v));
+    if (location.v < 0) {
+        pn::format(stderr, "{0} {1}\n", g.mini.currentScreen, location.h);
+        return op_eq(op, g.mini.currentScreen, location.h);
+    } else {
+        return op_eq(
+                op, std::make_pair(g.mini.currentScreen, g.mini.selectLine),
+                std::make_pair(location.h, location.v));
+    }
 }
 
-bool Level::ZoomLevelCondition::is_true() const { return g.zoom == longValue; }
+bool Level::ZoomLevelCondition::is_true() const { return op_compare(op, g.zoom, longValue); }
 
-bool Level::AutopilotCondition::is_true() const { return IsPlayerShipOnAutoPilot(); }
-
-bool Level::NotAutopilotCondition::is_true() const { return !IsPlayerShipOnAutoPilot(); }
+bool Level::AutopilotCondition::is_true() const {
+    return op_eq(op, IsPlayerShipOnAutoPilot(), value);
+}
 
 bool Level::ObjectIsBeingBuilt::is_true() const {
     auto buildAtObject = GetAdmiralBuildAtObject(g.admiral);
-    return buildAtObject.get() && (buildAtObject->totalBuildTime > ticks(0));
+    return buildAtObject.get() && op_eq(op, buildAtObject->totalBuildTime > ticks(0), value);
 }
 
 bool Level::DirectIsSubjectTarget::is_true() const {
     auto sObject = GetObjectFromInitialNumber(subject);
     auto dObject = GetObjectFromInitialNumber(object);
-    return sObject.get() && dObject.get() && (sObject->destObject == dObject) &&
-           (sObject->destObjectID == dObject->id);
+    return sObject.get() && dObject.get() &&
+           op_eq(op, std::make_pair(sObject->destObject, sObject->destObjectID),
+                 std::make_pair(dObject, dObject->id));
 }
 
 bool Level::SubjectIsPlayerCondition::is_true() const {
     auto sObject = GetObjectFromInitialNumber(subject);
-    return sObject.get() && (sObject == g.ship);
+    return sObject.get() && op_eq(op, sObject, g.ship);
 }
 
 void CheckLevelConditions() {

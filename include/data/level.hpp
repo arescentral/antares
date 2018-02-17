@@ -112,27 +112,20 @@ struct Level {
 
     struct ConditionBase;
     struct NullCondition;
-    struct LocationCondition;
     struct CounterCondition;
-    struct ProximityCondition;
     struct OwnerCondition;
     struct DestructionCondition;
-    struct AgeCondition;
     struct TimeCondition;
-    struct RandomCondition;
-    struct HalfHealthCondition;
+    struct HealthCondition;
     struct IsAuxiliaryObject;
     struct IsTargetObject;
-    struct CounterGreaterCondition;
-    struct CounterNotCondition;
-    struct DistanceGreaterCondition;
+    struct DistanceCondition;
     struct VelocityLessThanEqualToCondition;
     struct NoShipsLeftCondition;
     struct CurrentMessageCondition;
     struct CurrentComputerCondition;
     struct ZoomLevelCondition;
     struct AutopilotCondition;
-    struct NotAutopilotCondition;
     struct ObjectIsBeingBuilt;
     struct DirectIsSubjectTarget;
     struct SubjectIsPlayerCondition;
@@ -234,6 +227,9 @@ struct Level::ConditionBase {
         int32_t         amount;
     };
 
+    enum class Op { EQ, NE, LT, GT, LE, GE };
+
+    Op                  op                = Op::EQ;
     int32_t             subject           = -1;  // initial object #
     int32_t             object            = -1;  // initial object #
     bool                initially_enabled = true;
@@ -260,16 +256,9 @@ std::vector<Level::Condition> read_conditions(int begin, int end);
 struct Level::NullCondition : Level::ConditionBase {
     virtual bool is_true() const;
 };
-struct Level::LocationCondition : Level::ConditionBase {
-    virtual bool is_true() const;
-};
 struct Level::CounterCondition : Level::ConditionBase {
     Level::ConditionBase::CounterArgument counter;
     virtual bool                          is_true() const;
-};
-struct Level::ProximityCondition : Level::ConditionBase {
-    uint32_t     unsignedLongValue;
-    virtual bool is_true() const;
 };
 struct Level::OwnerCondition : Level::ConditionBase {
     int32_t      longValue;
@@ -279,17 +268,12 @@ struct Level::DestructionCondition : Level::ConditionBase {
     int32_t      longValue;
     virtual bool is_true() const;
 };
-struct Level::AgeCondition : Level::ConditionBase {
-    virtual bool is_true() const;
-};
 struct Level::TimeCondition : Level::ConditionBase {
     ticks        timeValue;
     virtual bool is_true() const;
 };
-struct Level::RandomCondition : Level::ConditionBase {
-    virtual bool is_true() const;
-};
-struct Level::HalfHealthCondition : Level::ConditionBase {
+struct Level::HealthCondition : Level::ConditionBase {
+    double       value;
     virtual bool is_true() const;
 };
 struct Level::IsAuxiliaryObject : Level::ConditionBase {
@@ -298,15 +282,7 @@ struct Level::IsAuxiliaryObject : Level::ConditionBase {
 struct Level::IsTargetObject : Level::ConditionBase {
     virtual bool is_true() const;
 };
-struct Level::CounterGreaterCondition : Level::ConditionBase {
-    Level::ConditionBase::CounterArgument counter;
-    virtual bool                          is_true() const;
-};
-struct Level::CounterNotCondition : Level::ConditionBase {
-    Level::ConditionBase::CounterArgument counter;
-    virtual bool                          is_true() const;
-};
-struct Level::DistanceGreaterCondition : Level::ConditionBase {
+struct Level::DistanceCondition : Level::ConditionBase {
     uint32_t     unsignedLongValue;
     virtual bool is_true() const;
 };
@@ -331,12 +307,11 @@ struct Level::ZoomLevelCondition : Level::ConditionBase {
     virtual bool is_true() const;
 };
 struct Level::AutopilotCondition : Level::ConditionBase {
-    virtual bool is_true() const;
-};
-struct Level::NotAutopilotCondition : Level::ConditionBase {
+    bool         value;
     virtual bool is_true() const;
 };
 struct Level::ObjectIsBeingBuilt : Level::ConditionBase {
+    bool         value;
     virtual bool is_true() const;
 };
 struct Level::DirectIsSubjectTarget : Level::ConditionBase {
