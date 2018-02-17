@@ -165,13 +165,6 @@ struct Level {
     static Level*        get(int n);
     static Handle<Level> none() { return Handle<Level>(-1); }
 
-    InitialObject*       initial(size_t at);
-    const InitialObject* initial(size_t at) const;
-    Condition*           condition(size_t at);
-    const Condition*     condition(size_t at) const;
-    BriefPoint*          brief_point(size_t at);
-    const BriefPoint*    brief_point(size_t at) const;
-
     Point   star_map_point() const;
     int32_t chapter_number() const;
 };

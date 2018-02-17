@@ -447,7 +447,7 @@ static void alter_condition_true_yet(const Action& action) {
     int32_t    begin = alter.first;
     int32_t    end   = begin + std::max(0, alter.count_minus_1) + 1;
     for (auto l : range(begin, end)) {
-        g.level->condition(l)->set_true_yet(alter.true_yet);
+        g.level->conditions[l].set_true_yet(alter.true_yet);
     }
 }
 
@@ -661,13 +661,11 @@ static void computer_select(const Action& action, Handle<SpaceObject> focus) {
 }
 
 static void assume_initial_object(const Action& action, Handle<SpaceObject> focus) {
-    Handle<Admiral>       player1(0);
-    Level::InitialObject* initialObject = g.level->initial(
-            action.argument.assumeInitial.whichInitialObject + GetAdmiralScore(player1, 0));
-    if (initialObject) {
-        initialObject->realObjectID = focus->id;
-        initialObject->realObject   = focus;
-    }
+    Handle<Admiral> player1(0);
+    int index = action.argument.assumeInitial.whichInitialObject + GetAdmiralScore(player1, 0);
+    Level::InitialObject* initialObject = &g.level->initials[index];
+    initialObject->realObjectID         = focus->id;
+    initialObject->realObject           = focus;
 }
 
 static void execute_actions(

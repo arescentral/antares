@@ -451,7 +451,7 @@ void BriefPoint_Data_Get(
     Point                    where;
     Rect                     spriteRect;
     int32_t                  thisScale;
-    const Level::BriefPoint* brief = level->brief_point(whichPoint);
+    const Level::BriefPoint* brief = &level->briefings[whichPoint];
 
 #pragma unused(minSectorSize)
     hiliteBounds->right = hiliteBounds->left = 0;

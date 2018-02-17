@@ -90,12 +90,12 @@ void set_initial_destination(const Level::InitialObject* initial, bool preserve)
     // get the correct admiral #
     Handle<Admiral> owner = initial->owner;
 
-    auto target = g.level->initial(initial->initialDestination);
-    if (target->realObject.get()) {
+    const auto& target = g.level->initials[initial->initialDestination];
+    if (target.realObject.get()) {
         auto saveDest = owner->target();  // save the original dest
 
         // set the admiral's dest object to the mapped initial dest object
-        owner->set_target(target->realObject);
+        owner->set_target(target.realObject);
 
         // now give the mapped initial object the admiral's destination
 
@@ -112,11 +112,8 @@ void set_initial_destination(const Level::InitialObject* initial, bool preserve)
     }
 }
 
-Level::InitialObject*       Level::initial(size_t at) { return &initials[at]; }
-const Level::InitialObject* Level::initial(size_t at) const { return &initials[at]; }
-
 void UnhideInitialObject(int32_t whichInitial) {
-    auto initial = g.level->initial(whichInitial);
+    auto* initial = &g.level->initials[whichInitial];
     if (GetObjectFromInitialNumber(whichInitial).get()) {
         return;  // Already visible.
     }
@@ -180,10 +177,10 @@ void UnhideInitialObject(int32_t whichInitial) {
 
 Handle<SpaceObject> GetObjectFromInitialNumber(int32_t initialNumber) {
     if (initialNumber >= 0) {
-        Level::InitialObject* initial = g.level->initial(initialNumber);
-        if (initial->realObject.get()) {
-            auto object = initial->realObject;
-            if ((object->id != initial->realObjectID) || (object->active != kObjectInUse)) {
+        const Level::InitialObject& initial = g.level->initials[initialNumber];
+        if (initial.realObject.get()) {
+            auto object = initial.realObject;
+            if ((object->id != initial.realObjectID) || (object->active != kObjectInUse)) {
                 return SpaceObject::none();
             }
             return object;

@@ -174,9 +174,6 @@ void GetInitialCoord(
 
 }  // namespace
 
-Level::BriefPoint*       Level::brief_point(size_t at) { return &briefings[at]; }
-const Level::BriefPoint* Level::brief_point(size_t at) const { return &briefings[at]; }
-
 Point Level::star_map_point() const { return Point(starMapH, starMapV); }
 
 int32_t Level::chapter_number() const { return levelNameStrNum; }
@@ -269,9 +266,9 @@ static void load_blessed_objects(uint32_t all_colors) {
 }
 
 static void load_initial(int i, uint32_t all_colors) {
-    Level::InitialObject* initial    = g.level->initial(i);
-    Handle<Admiral>       owner      = initial->owner;
-    auto                  baseObject = initial->type;
+    const Level::InitialObject* initial    = &g.level->initials[i];
+    Handle<Admiral>             owner      = initial->owner;
+    auto                        baseObject = initial->type;
     // TODO(sfiera): remap objects in networked games.
 
     // Load the media for this object
@@ -299,7 +296,6 @@ static void load_initial(int i, uint32_t all_colors) {
 
     // check any objects this object can build
     for (int j = 0; j < kMaxTypeBaseCanBuild; j++) {
-        initial = g.level->initial(i);
         if (initial->canBuild[j] != kNoClass) {
             // check for each player
             for (auto a : Admiral::all()) {
@@ -359,14 +355,14 @@ void construct_level(Handle<Level> level, int32_t* current) {
         for (auto& condition : g.level->conditions) {
             load_condition(&condition, all_colors);
         }
-        create_initial(g.level->initial(step), all_colors);
+        create_initial(&g.level->initials[step], all_colors);
     } else if (step < (2 * g.level->initials.size())) {
         step -= g.level->initials.size();
-        create_initial(g.level->initial(step), all_colors);
+        create_initial(&g.level->initials[step], all_colors);
     } else if (step < (3 * g.level->initials.size())) {
         // double back and set up any defined initial destinations
         step -= (2 * g.level->initials.size());
-        set_initial_destination(g.level->initial(step), false);
+        set_initial_destination(&g.level->initials[step], false);
     } else if (step == (3 * g.level->initials.size())) {
         RecalcAllAdmiralBuildData();  // set up all the admiral's destination objects
         Messages::clear();

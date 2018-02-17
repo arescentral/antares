@@ -31,9 +31,6 @@
 
 namespace antares {
 
-Level::Condition*       Level::condition(size_t at) { return &conditions[at]; }
-const Level::Condition* Level::condition(size_t at) const { return &conditions[at]; }
-
 bool Level::Condition::active() const {
     return !(flags & kTrueOnlyOnce) || !(flags & kHasBeenTrue);
 }
