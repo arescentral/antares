@@ -161,10 +161,8 @@ bool read_from(pn::file_view in, Level::Player* level_player) {
           in.read(&level_player->netRaceFlags, &unused2))) {
         return false;
     }
-    try {
+    if ((name_id > 0) && (name_index > 0)) {
         level_player->name = Resource::strings(name_id).at(name_index - 1).copy();
-    } catch (...) {
-        level_player->name = "";
     }
     return true;
 }
