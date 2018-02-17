@@ -167,25 +167,15 @@ static coordPointType rotate_coords(int32_t h, int32_t v, int32_t rotation) {
     return coord;
 }
 
-void GetInitialCoord(Level::InitialObject* initial, coordPointType* coord, int32_t rotation) {
+void GetInitialCoord(
+        const Level::InitialObject* initial, coordPointType* coord, int32_t rotation) {
     *coord = rotate_coords(initial->location.h, initial->location.v, rotation);
 }
 
 }  // namespace
 
-Level::BriefPoint* Level::brief_point(size_t at) const {
-    return &plug.briefings[briefPointFirst + at];
-}
-
-size_t Level::brief_point_size() const { return briefPointNum & kLevelBriefMask; }
-
-int32_t Level::angle() const {
-    if (briefPointNum & kLevelAngleMask) {
-        return (((briefPointNum & kLevelAngleMask) >> kLevelAngleShift) - 1) * 2;
-    } else {
-        return -1;
-    }
-}
+Level::BriefPoint*       Level::brief_point(size_t at) { return &briefings[at]; }
+const Level::BriefPoint* Level::brief_point(size_t at) const { return &briefings[at]; }
 
 Point Level::star_map_point() const { return Point(starMapH, starMapV); }
 
@@ -207,7 +197,7 @@ bool start_construct_level(Handle<Level> level, int32_t* max) {
     g.level = level;
 
     {
-        int32_t angle = g.level->angle();
+        int32_t angle = g.level->angle;
         if (angle < 0) {
             g.angle = g.random.next(ROT_POS);
         } else {
@@ -416,9 +406,9 @@ void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, pn::string_vi
 void GetLevelFullScaleAndCorner(
         const Level* level, int32_t rotation, coordPointType* corner, int32_t* scale,
         Rect* bounds) {
-    int32_t               biggest, mustFit;
-    Point                 coord, otherCoord, tempCoord;
-    Level::InitialObject* initial;
+    int32_t                     biggest, mustFit;
+    Point                       coord, otherCoord, tempCoord;
+    const Level::InitialObject* initial;
 
     mustFit = bounds->bottom - bounds->top;
     if ((bounds->right - bounds->left) < mustFit)

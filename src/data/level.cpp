@@ -105,6 +105,18 @@ bool read_from(pn::file_view in, Level* level) {
     if (score_string_id > 0) {
         level->score_strings = Resource::strings(score_string_id);
     }
+    if (level->briefPointNum & kLevelAngleMask) {
+        level->angle = (((level->briefPointNum & kLevelAngleMask) >> kLevelAngleShift) - 1) * 2;
+        level->briefPointNum &= ~kLevelAngleMask;
+    } else {
+        level->angle = -1;
+    }
+
+    level->initials = read_initials(level->initialFirst, level->initialFirst + level->initialNum);
+    level->conditions =
+            read_conditions(level->conditionFirst, level->conditionFirst + level->conditionNum);
+    level->briefings =
+            read_briefings(level->briefPointFirst, level->briefPointFirst + level->briefPointNum);
 
     switch (level->type) {
         case Level::DEMO: break;
@@ -215,6 +227,31 @@ bool read_from(pn::file_view in, Level::Condition* level_condition) {
     }
 }
 
+std::vector<Level::Condition> read_conditions(int begin, int end) {
+    if (end <= begin) {
+        return std::vector<Level::Condition>{};
+    }
+    Resource r = Resource::path("scenario-conditions.bin");
+
+    pn::data_view d = r.data();
+    if ((begin < 0) || ((d.size() / Level::Condition::byte_size) < end)) {
+        throw std::runtime_error(pn::format(
+                                         "condition range {{{0}, {1}}} outside {{0, {2}}}", begin,
+                                         end, d.size() / Level::Condition::byte_size)
+                                         .c_str());
+    }
+
+    int      count = end - begin;
+    pn::file f = d.slice(Level::Condition::byte_size * begin, Level::Condition::byte_size * count)
+                         .open();
+    std::vector<Level::Condition> conditions;
+    conditions.resize(count);
+    for (Level::Condition& a : conditions) {
+        read_from(f, &a);
+    }
+    return conditions;
+}
+
 bool read_from(pn::file_view in, Level::Condition::CounterArgument* counter_argument) {
     int32_t admiral;
     if (!in.read(&admiral, &counter_argument->whichCounter, &counter_argument->amount)) {
@@ -266,6 +303,32 @@ bool read_from(pn::file_view in, Level::BriefPoint::AbsoluteBrief* absolute_brie
     return read_from(in, &absolute_brief->location);
 }
 
+std::vector<Level::BriefPoint> read_briefings(int begin, int end) {
+    if (end <= begin) {
+        return std::vector<Level::BriefPoint>{};
+    }
+    Resource r = Resource::path("scenario-briefings.bin");
+
+    pn::data_view d = r.data();
+    if ((begin < 0) || ((d.size() / Level::BriefPoint::byte_size) < end)) {
+        throw std::runtime_error(pn::format(
+                                         "briefing range {{{0}, {1}}} outside {{0, {2}}}", begin,
+                                         end, d.size() / Level::BriefPoint::byte_size)
+                                         .c_str());
+    }
+
+    int      count = end - begin;
+    pn::file f =
+            d.slice(Level::BriefPoint::byte_size * begin, Level::BriefPoint::byte_size * count)
+                    .open();
+    std::vector<Level::BriefPoint> briefings;
+    briefings.resize(count);
+    for (Level::BriefPoint& a : briefings) {
+        read_from(f, &a);
+    }
+    return briefings;
+}
+
 bool read_from(pn::file_view in, Level::InitialObject* level_initial) {
     int32_t type, owner;
     uint8_t unused[4];
@@ -298,6 +361,32 @@ bool read_from(pn::file_view in, Level::InitialObject* level_initial) {
         }
     }
     return true;
+}
+
+std::vector<Level::InitialObject> read_initials(int begin, int end) {
+    if (end <= begin) {
+        return std::vector<Level::InitialObject>{};
+    }
+    Resource r = Resource::path("scenario-initials.bin");
+
+    pn::data_view d = r.data();
+    if ((begin < 0) || ((d.size() / Level::InitialObject::byte_size) < end)) {
+        throw std::runtime_error(pn::format(
+                                         "initial range {{{0}, {1}}} outside {{0, {2}}}", begin,
+                                         end, d.size() / Level::InitialObject::byte_size)
+                                         .c_str());
+    }
+
+    int      count = end - begin;
+    pn::file f     = d.slice(Level::InitialObject::byte_size * begin,
+                         Level::InitialObject::byte_size * count)
+                         .open();
+    std::vector<Level::InitialObject> initials;
+    initials.resize(count);
+    for (Level::InitialObject& a : initials) {
+        read_from(f, &a);
+    }
+    return initials;
 }
 
 }  // namespace antares

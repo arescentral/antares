@@ -201,7 +201,7 @@ BriefingScreen::BriefingScreen(const Level* level, bool* cancelled)
           _level(level),
           _cancelled(cancelled),
           _briefing_point(0),
-          _briefing_point_count(_level->brief_point_size() + 2),
+          _briefing_point_count(_level->briefings.size() + 2),
           _data_item(data_item(item(MAP_RECT))) {
     build_star_map();
     for (int i = 0; i < 500; ++i) {

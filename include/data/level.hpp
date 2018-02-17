@@ -146,7 +146,7 @@ struct Level {
     int16_t                 starMapH;
     int16_t                 briefPointFirst;
     int16_t                 starMapV;
-    int16_t                 briefPointNum;  // use kLevelBriefMask
+    int16_t                 briefPointNum;
     game_ticks              parTime;
     int16_t                 parKills;
     int16_t                 levelNameStrNum;
@@ -154,6 +154,11 @@ struct Level {
     int16_t                 parLosses;
     secs                    startTime;
     bool                    is_training;
+    int32_t                 angle;
+
+    std::vector<InitialObject> initials;
+    std::vector<Condition>     conditions;
+    std::vector<BriefPoint>    briefings;
 
     pn::string prologue;           // SOLO
     pn::string epilogue;           // SOLO
@@ -166,13 +171,13 @@ struct Level {
     static Level*        get(int n);
     static Handle<Level> none() { return Handle<Level>(-1); }
 
-    InitialObject* initial(size_t at) const;
-    Condition*     condition(size_t at) const;
+    InitialObject*       initial(size_t at);
+    const InitialObject* initial(size_t at) const;
+    Condition*           condition(size_t at);
+    const Condition*     condition(size_t at) const;
+    BriefPoint*          brief_point(size_t at);
+    const BriefPoint*    brief_point(size_t at) const;
 
-    BriefPoint* brief_point(size_t at) const;
-    size_t      brief_point_size() const;
-
-    int32_t angle() const;
     Point   star_map_point() const;
     int32_t chapter_number() const;
 };
@@ -197,7 +202,8 @@ struct Level::InitialObject {
 
     static const size_t byte_size = 108;
 };
-bool read_from(pn::file_view in, Level::InitialObject* level_initial);
+bool                              read_from(pn::file_view in, Level::InitialObject* level_initial);
+std::vector<Level::InitialObject> read_initials(int begin, int end);
 
 struct Level::Condition {
     struct CounterArgument {
@@ -231,6 +237,7 @@ struct Level::Condition {
 };
 bool read_from(pn::file_view in, Level::Condition* level_condition);
 bool read_from(pn::file_view in, Level::Condition::CounterArgument* counter_argument);
+std::vector<Level::Condition> read_conditions(int begin, int end);
 
 //
 // We need to know:
@@ -265,6 +272,7 @@ struct Level::BriefPoint {
 bool read_from(pn::file_view in, Level::BriefPoint::ObjectBrief* object_brief);
 bool read_from(pn::file_view in, Level::BriefPoint::AbsoluteBrief* absolute_brief);
 bool read_from(pn::file_view in, Level::BriefPoint* brief_point);
+std::vector<Level::BriefPoint> read_briefings(int begin, int end);
 
 struct Race {
     int32_t  id;

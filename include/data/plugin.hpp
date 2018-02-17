@@ -27,13 +27,10 @@
 namespace antares {
 
 struct ScenarioGlobals {
-    ScenarioInfo                      info;
-    std::vector<Level>                levels;
-    std::vector<Level::InitialObject> initials;
-    std::vector<Level::Condition>     conditions;
-    std::vector<Level::BriefPoint>    briefings;
-    std::vector<BaseObject>           objects;
-    std::vector<Race>                 races;
+    ScenarioInfo            info;
+    std::vector<Level>      levels;
+    std::vector<BaseObject> objects;
+    std::vector<Race>       races;
 };
 
 extern ScenarioGlobals plug;
