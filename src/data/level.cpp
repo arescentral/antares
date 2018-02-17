@@ -94,29 +94,29 @@ bool read_from(pn::file_view in, Level* level) {
 
     int16_t par_time, start_time, unused;
     int16_t score_string_id, prologue_id, epilogue_id;
-    if (!(in.read(&score_string_id, &level->initialFirst, &prologue_id, &level->initialNum,
-                  &level->songID, &level->conditionFirst, &epilogue_id, &level->conditionNum,
-                  &level->starMapH, &level->briefPointFirst, &level->starMapV,
-                  &level->briefPointNum, &par_time, &unused, &level->parKills,
-                  &level->levelNameStrNum) &&
+    int16_t initial_first, initial_num;
+    int16_t condition_first, condition_num;
+    int16_t briefing_first, briefing_num;
+    if (!(in.read(&score_string_id, &initial_first, &prologue_id, &initial_num, &level->songID,
+                  &condition_first, &epilogue_id, &condition_num, &level->starMapH,
+                  &briefing_first, &level->starMapV, &briefing_num, &par_time, &unused,
+                  &level->parKills, &level->levelNameStrNum) &&
           read_from(in, &level->parKillRatio) && in.read(&level->parLosses, &start_time))) {
         return false;
     }
     if (score_string_id > 0) {
         level->score_strings = Resource::strings(score_string_id);
     }
-    if (level->briefPointNum & kLevelAngleMask) {
-        level->angle = (((level->briefPointNum & kLevelAngleMask) >> kLevelAngleShift) - 1) * 2;
-        level->briefPointNum &= ~kLevelAngleMask;
+    if (briefing_num & kLevelAngleMask) {
+        level->angle = (((briefing_num & kLevelAngleMask) >> kLevelAngleShift) - 1) * 2;
+        briefing_num &= ~kLevelAngleMask;
     } else {
         level->angle = -1;
     }
 
-    level->initials = read_initials(level->initialFirst, level->initialFirst + level->initialNum);
-    level->conditions =
-            read_conditions(level->conditionFirst, level->conditionFirst + level->conditionNum);
-    level->briefings =
-            read_briefings(level->briefPointFirst, level->briefPointFirst + level->briefPointNum);
+    level->initials   = read_initials(initial_first, initial_first + initial_num);
+    level->conditions = read_conditions(condition_first, condition_first + condition_num);
+    level->briefings  = read_briefings(briefing_first, briefing_first + briefing_num);
 
     switch (level->type) {
         case Level::DEMO: break;

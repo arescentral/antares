@@ -138,15 +138,9 @@ struct Level {
     int16_t                 playerNum;
     Player                  player[kMaxPlayerNum];
     std::vector<pn::string> score_strings;
-    int16_t                 initialFirst;
-    int16_t                 initialNum;
     int16_t                 songID;
-    int16_t                 conditionFirst;
-    int16_t                 conditionNum;
     int16_t                 starMapH;
-    int16_t                 briefPointFirst;
     int16_t                 starMapV;
-    int16_t                 briefPointNum;
     game_ticks              parTime;
     int16_t                 parKills;
     int16_t                 levelNameStrNum;

@@ -201,14 +201,13 @@ bool Level::Condition::is_true() const {
 }
 
 void CheckLevelConditions() {
-    for (int32_t i = 0; i < g.level->conditionNum; i++) {
-        auto c = g.level->condition(i);
-        if (c->active() && c->is_true()) {
-            c->set_true_yet(true);
-            auto  sObject = GetObjectFromInitialNumber(c->subjectObject);
-            auto  dObject = GetObjectFromInitialNumber(c->directObject);
+    for (auto& c : g.level->conditions) {
+        if (c.active() && c.is_true()) {
+            c.set_true_yet(true);
+            auto  sObject = GetObjectFromInitialNumber(c.subjectObject);
+            auto  dObject = GetObjectFromInitialNumber(c.directObject);
             Point offset;
-            exec(c->action, sObject, dObject, &offset);
+            exec(c.action, sObject, dObject, &offset);
         }
     }
 }

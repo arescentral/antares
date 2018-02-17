@@ -233,7 +233,7 @@ bool start_construct_level(Handle<Level> level, int32_t* max) {
     sys.pix.reset();
     sys.sound.reset();
 
-    *max = g.level->initialNum * 3L + 1 +
+    *max = g.level->initials.size() * 3L + 1 +
            g.level->startTime.count();  // for each run through the initial num
 
     return true;
@@ -315,8 +315,7 @@ static void load_initial(int i, uint32_t all_colors) {
     }
 }
 
-static void load_condition(int i, uint32_t all_colors) {
-    Level::Condition* condition = g.level->condition(i);
+static void load_condition(Level::Condition* condition, uint32_t all_colors) {
     for (const auto& action : condition->action) {
         AddActionMedia(action, GRAY, all_colors);
     }
@@ -352,23 +351,23 @@ void construct_level(Handle<Level> level, int32_t* current) {
     if (step == 0) {
         load_blessed_objects(all_colors);
         load_initial(step, all_colors);
-    } else if (step < g.level->initialNum) {
+    } else if (step < g.level->initials.size()) {
         load_initial(step, all_colors);
-    } else if (step == g.level->initialNum) {
+    } else if (step == g.level->initials.size()) {
         // add media for all condition actions
-        step -= g.level->initialNum;
-        for (int i = 0; i < g.level->conditionNum; i++) {
-            load_condition(i, all_colors);
+        step -= g.level->initials.size();
+        for (auto& condition : g.level->conditions) {
+            load_condition(&condition, all_colors);
         }
         create_initial(g.level->initial(step), all_colors);
-    } else if (step < (2 * g.level->initialNum)) {
-        step -= g.level->initialNum;
+    } else if (step < (2 * g.level->initials.size())) {
+        step -= g.level->initials.size();
         create_initial(g.level->initial(step), all_colors);
-    } else if (step < (3 * g.level->initialNum)) {
+    } else if (step < (3 * g.level->initials.size())) {
         // double back and set up any defined initial destinations
-        step -= (2 * g.level->initialNum);
+        step -= (2 * g.level->initials.size());
         set_initial_destination(g.level->initial(step), false);
-    } else if (step == (3 * g.level->initialNum)) {
+    } else if (step == (3 * g.level->initials.size())) {
         RecalcAllAdmiralBuildData();  // set up all the admiral's destination objects
         Messages::clear();
         g.time = game_ticks(-g.level->startTime);
@@ -406,23 +405,20 @@ void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, pn::string_vi
 void GetLevelFullScaleAndCorner(
         const Level* level, int32_t rotation, coordPointType* corner, int32_t* scale,
         Rect* bounds) {
-    int32_t                     biggest, mustFit;
-    Point                       coord, otherCoord, tempCoord;
-    const Level::InitialObject* initial;
+    int32_t biggest, mustFit;
+    Point   coord, otherCoord, tempCoord;
 
     mustFit = bounds->bottom - bounds->top;
     if ((bounds->right - bounds->left) < mustFit)
         mustFit = bounds->right - bounds->left;
 
     biggest = 0;
-    for (int32_t count = 0; count < level->initialNum; count++) {
-        initial = level->initial(count);
-        if (!(initial->attributes & kInitiallyHidden)) {
-            GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&coord), g.angle);
+    for (const auto& initial : level->initials) {
+        if (!(initial.attributes & kInitiallyHidden)) {
+            GetInitialCoord(&initial, reinterpret_cast<coordPointType*>(&coord), g.angle);
 
-            for (int32_t otherCount = 0; otherCount < level->initialNum; otherCount++) {
-                initial = level->initial(otherCount);
-                GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&otherCoord), g.angle);
+            for (const auto& other : level->initials) {
+                GetInitialCoord(&other, reinterpret_cast<coordPointType*>(&otherCoord), g.angle);
 
                 if (ABS(otherCoord.h - coord.h) > biggest) {
                     biggest = ABS(otherCoord.h - coord.h);
@@ -443,10 +439,9 @@ void GetLevelFullScaleAndCorner(
     otherCoord.v = kUniversalCenter;
     coord.h      = kUniversalCenter;
     coord.v      = kUniversalCenter;
-    initial      = level->initial(0);
-    for (int32_t count = 0; count < level->initialNum; count++) {
-        if (!(initial->attributes & kInitiallyHidden)) {
-            GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&tempCoord), g.angle);
+    for (const auto& initial : level->initials) {
+        if (!(initial.attributes & kInitiallyHidden)) {
+            GetInitialCoord(&initial, reinterpret_cast<coordPointType*>(&tempCoord), g.angle);
 
             if (tempCoord.h < coord.h) {
                 coord.h = tempCoord.h;
@@ -462,7 +457,6 @@ void GetLevelFullScaleAndCorner(
                 otherCoord.v = tempCoord.v;
             }
         }
-        initial++;
     }
 
     biggest = bounds->right - bounds->left;
