@@ -177,7 +177,20 @@ struct Level::InitialObject {
     int32_t             canBuild[kMaxTypeBaseCanBuild];
     int32_t             initialDestination;  // <- ADDED 9/27
     pn::string          name;
-    uint32_t            attributes;
+
+    class Attributes {
+      public:
+        constexpr Attributes(uint32_t value = 0) : _value(value) {}
+
+        bool     initially_hidden() const { return _value & (1 << 5); }
+        bool     fixed_race() const { return _value & (1 << 4); }
+        bool     is_player_ship() const { return _value & (1 << 9); }
+        uint32_t space_object_attributes() const { return _value & ~((1 << 4) | (1 << 5)); }
+
+      private:
+        uint32_t _value;
+    };
+    Attributes attributes;
 
     static const size_t byte_size = 108;
 };

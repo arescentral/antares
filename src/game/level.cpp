@@ -406,7 +406,7 @@ void GetLevelFullScaleAndCorner(
 
     biggest = 0;
     for (const auto& initial : level->initials) {
-        if (!(initial.attributes & kInitiallyHidden)) {
+        if (!(initial.attributes.initially_hidden())) {
             GetInitialCoord(&initial, reinterpret_cast<coordPointType*>(&coord), g.angle);
 
             for (const auto& other : level->initials) {
@@ -432,7 +432,7 @@ void GetLevelFullScaleAndCorner(
     coord.h      = kUniversalCenter;
     coord.v      = kUniversalCenter;
     for (const auto& initial : level->initials) {
-        if (!(initial.attributes & kInitiallyHidden)) {
+        if (!(initial.attributes.initially_hidden())) {
             GetInitialCoord(&initial, reinterpret_cast<coordPointType*>(&tempCoord), g.angle);
 
             if (tempCoord.h < coord.h) {

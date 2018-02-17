@@ -325,16 +325,16 @@ bool read_from(pn::file_view in, Level::InitialObject* level_initial) {
             return false;
         }
     }
-    int32_t name_id, name_index;
-    if (!in.read(
-                &level_initial->initialDestination, &name_id, &name_index,
-                &level_initial->attributes)) {
+    int32_t  name_id, name_index;
+    uint32_t attributes;
+    if (!in.read(&level_initial->initialDestination, &name_id, &name_index, &attributes)) {
         return false;
     }
     level_initial->realObject = Handle<SpaceObject>(-1);
     level_initial->type       = Handle<BaseObject>(type);
     level_initial->owner      = Handle<Admiral>(owner);
     level_initial->name       = "";
+    level_initial->attributes = Level::InitialObject::Attributes(attributes);
     if (name_id > 0) {
         try {
             level_initial->name = Resource::strings(name_id).at(name_index - 1).copy();

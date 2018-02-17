@@ -28,7 +28,7 @@
 namespace antares {
 
 void create_initial(Level::InitialObject* initial) {
-    if (initial->attributes & kInitiallyHidden) {
+    if (initial->attributes.initially_hidden()) {
         initial->realObject = SpaceObject::none();
         return;
     }
@@ -41,8 +41,8 @@ void create_initial(Level::InitialObject* initial) {
         owner = initial->owner;
     }
 
-    int32_t specialAttributes = initial->attributes & (~kInitialAttributesMask);
-    if (initial->attributes & kIsPlayerShip) {
+    int32_t specialAttributes = initial->attributes.space_object_attributes();
+    if (initial->attributes.is_player_ship()) {
         specialAttributes &= ~kIsPlayerShip;
         if ((owner == g.admiral) && !owner->flagship().get()) {
             specialAttributes |= kIsHumanControlled | kIsPlayerShip;
@@ -61,7 +61,7 @@ void create_initial(Level::InitialObject* initial) {
     }
     initial->realObjectID = anObject->id;
 
-    if ((initial->attributes & kIsPlayerShip) && owner.get() && !owner->flagship().get()) {
+    if (initial->attributes.is_player_ship() && owner.get() && !owner->flagship().get()) {
         owner->set_flagship(anObject);
         if (owner == g.admiral) {
             ResetPlayerShip(anObject);
@@ -126,8 +126,8 @@ void UnhideInitialObject(int32_t whichInitial) {
         owner = initial->owner;
     }
 
-    uint32_t specialAttributes = initial->attributes & ~kInitialAttributesMask;
-    if (initial->attributes & kIsPlayerShip) {
+    uint32_t specialAttributes = initial->attributes.space_object_attributes();
+    if (initial->attributes.is_player_ship()) {
         if (owner.get() && !owner->flagship().get()) {
             if (owner == g.admiral) {
                 specialAttributes |= kIsHumanControlled;
@@ -165,7 +165,7 @@ void UnhideInitialObject(int32_t whichInitial) {
     }
 
     initial->realObjectID = anObject->id;
-    if ((initial->attributes & kIsPlayerShip) && owner.get() && !owner->flagship().get()) {
+    if (initial->attributes.is_player_ship() && owner.get() && !owner->flagship().get()) {
         owner->set_flagship(anObject);
         if (owner == g.admiral) {
             ResetPlayerShip(anObject);
