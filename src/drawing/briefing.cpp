@@ -448,19 +448,19 @@ void BriefPoint_Data_Get(
         int32_t whichPoint, const Level* level, pn::string_ref header, pn::string_ref content,
         Rect* hiliteBounds, coordPointType* corner, int32_t scale, int32_t minSectorSize,
         int32_t maxSize, Rect* bounds) {
-    Point                    where;
-    Rect                     spriteRect;
-    int32_t                  thisScale;
-    const Level::BriefPoint* brief = &level->briefings[whichPoint];
+    Point                  where;
+    Rect                   spriteRect;
+    int32_t                thisScale;
+    const Level::Briefing* brief = &level->briefings[whichPoint];
 
 #pragma unused(minSectorSize)
     hiliteBounds->right = hiliteBounds->left = 0;
-    if (brief->briefPointKind == kBriefFreestandingKind) {
+    if (brief->object < 0) {
         hiliteBounds->left = hiliteBounds->right = -1;
-    } else if (brief->briefPointKind == kBriefObjectKind) {
+    } else {
         GetInitialObjectSpriteData(
-                level, brief->briefPointData.objectBriefType.objectNum, maxSize, bounds, corner,
-                scale, &thisScale, &where, &spriteRect);
+                level, brief->object, maxSize, bounds, corner, scale, &thisScale, &where,
+                &spriteRect);
         hiliteBounds->left   = spriteRect.left - 2;
         hiliteBounds->right  = spriteRect.right + 2;
         hiliteBounds->top    = spriteRect.top - 2;

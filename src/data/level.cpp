@@ -259,15 +259,19 @@ bool read_from(pn::file_view in, Level::Condition::CounterArgument* counter_argu
     return true;
 }
 
-bool read_from(pn::file_view in, Level::BriefPoint* brief_point) {
-    uint8_t unused;
-    uint8_t section[8];
+bool read_from(pn::file_view in, Level::Briefing* brief_point) {
+    uint8_t kind;
     int16_t title_id, title_index, content_id;
-    if (!(in.read(&brief_point->briefPointKind, &unused) &&
-          (fread(section, 1, 8, in.c_obj()) == 8) && read_from(in, &brief_point->range) &&
-          in.read(&title_id, &title_index, &content_id))) {
+    if (!in.read(
+                &kind, pn::pad(1), &brief_point->object, pn::pad(12), &title_id, &title_index,
+                &content_id)) {
         return false;
     }
+
+    if (kind != 1) {
+        brief_point->object = -1;
+    }
+
     try {
         brief_point->title = Resource::strings(title_id).at(title_index - 1).copy();
     } catch (std::exception& e) {
@@ -278,50 +282,29 @@ bool read_from(pn::file_view in, Level::BriefPoint* brief_point) {
     } catch (std::exception& e) {
         brief_point->content = "";
     }
-
-    pn::file sub = pn::data_view{section, 8}.open();
-    switch (brief_point->briefPointKind) {
-        case kNoPointKind:
-        case kBriefFreestandingKind: return true;
-
-        case kBriefObjectKind: return read_from(sub, &brief_point->briefPointData.objectBriefType);
-
-        case kBriefAbsoluteKind:
-            return read_from(sub, &brief_point->briefPointData.absoluteBriefType);
-
-        default: return false;
-    }
+    return true;
 }
 
-bool read_from(pn::file_view in, Level::BriefPoint::ObjectBrief* object_brief) {
-    return in.read(&object_brief->objectNum, &object_brief->objectVisible);
-}
-
-bool read_from(pn::file_view in, Level::BriefPoint::AbsoluteBrief* absolute_brief) {
-    return read_from(in, &absolute_brief->location);
-}
-
-std::vector<Level::BriefPoint> read_briefings(int begin, int end) {
+std::vector<Level::Briefing> read_briefings(int begin, int end) {
     if (end <= begin) {
-        return std::vector<Level::BriefPoint>{};
+        return std::vector<Level::Briefing>{};
     }
     Resource r = Resource::path("scenario-briefings.bin");
 
     pn::data_view d = r.data();
-    if ((begin < 0) || ((d.size() / Level::BriefPoint::byte_size) < end)) {
+    if ((begin < 0) || ((d.size() / Level::Briefing::byte_size) < end)) {
         throw std::runtime_error(pn::format(
                                          "briefing range {{{0}, {1}}} outside {{0, {2}}}", begin,
-                                         end, d.size() / Level::BriefPoint::byte_size)
+                                         end, d.size() / Level::Briefing::byte_size)
                                          .c_str());
     }
 
     int      count = end - begin;
     pn::file f =
-            d.slice(Level::BriefPoint::byte_size * begin, Level::BriefPoint::byte_size * count)
-                    .open();
-    std::vector<Level::BriefPoint> briefings;
+            d.slice(Level::Briefing::byte_size * begin, Level::Briefing::byte_size * count).open();
+    std::vector<Level::Briefing> briefings;
     briefings.resize(count);
-    for (Level::BriefPoint& a : briefings) {
+    for (Level::Briefing& a : briefings) {
         read_from(f, &a);
     }
     return briefings;

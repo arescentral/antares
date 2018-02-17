@@ -105,18 +105,10 @@ enum conditionType {
     kSubjectIsPlayerCondition         = 24
 };
 
-typedef uint8_t briefingPointKindType;
-enum briefingPointKindEnum {
-    kNoPointKind           = 0,
-    kBriefObjectKind       = 1,
-    kBriefAbsoluteKind     = 2,
-    kBriefFreestandingKind = 3
-};
-
 struct Level {
     struct InitialObject;
     struct Condition;
-    struct BriefPoint;
+    struct Briefing;
 
     enum Type {
         DEMO,
@@ -152,7 +144,7 @@ struct Level {
 
     std::vector<InitialObject> initials;
     std::vector<Condition>     conditions;
-    std::vector<BriefPoint>    briefings;
+    std::vector<Briefing>      briefings;
 
     pn::string prologue;           // SOLO
     pn::string epilogue;           // SOLO
@@ -235,31 +227,15 @@ std::vector<Level::Condition> read_conditions(int begin, int end);
 // content ID, # (int16_t, int16_t)
 //
 
-struct Level::BriefPoint {
-    struct ObjectBrief {
-        int32_t objectNum;
-        uint8_t objectVisible;  // bool
-    };
-    struct AbsoluteBrief {
-        Point location;
-    };
-
-    briefingPointKindType briefPointKind;
-    struct {
-        // Really a union
-        ObjectBrief   objectBriefType;
-        AbsoluteBrief absoluteBriefType;
-    } briefPointData;
-    Point      range;
-    pn::string title;
-    pn::string content;
+struct Level::Briefing {
+    int32_t    object;   // Index into g.level->initials, or <0 for freestanding.
+    pn::string title;    // Plain text, used for title bar.
+    pn::string content;  // Styled text, used for body.
 
     static const size_t byte_size = 24;
 };
-bool read_from(pn::file_view in, Level::BriefPoint::ObjectBrief* object_brief);
-bool read_from(pn::file_view in, Level::BriefPoint::AbsoluteBrief* absolute_brief);
-bool read_from(pn::file_view in, Level::BriefPoint* brief_point);
-std::vector<Level::BriefPoint> read_briefings(int begin, int end);
+bool                         read_from(pn::file_view in, Level::Briefing* brief_point);
+std::vector<Level::Briefing> read_briefings(int begin, int end);
 
 struct Race {
     int32_t  id;
