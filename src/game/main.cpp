@@ -175,15 +175,9 @@ void MainPlay::become_front() {
                 stack()->push(new LoadingScreen(_level, &_cancelled));
                 break;
             } else {
-                int32_t max;
-                int32_t current = 0;
-                if (!start_construct_level(_level, &max)) {
-                    *_game_result = QUIT_GAME;
-                    stack()->pop(this);
-                    return;
-                }
-                while (current < max) {
-                    construct_level(_level, &current);
+                LoadState s = start_construct_level(_level);
+                while (!s.done) {
+                    construct_level(_level, &s);
                 }
             }
         }

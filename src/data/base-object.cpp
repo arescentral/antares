@@ -182,12 +182,10 @@ bool read_from(pn::file_view in, BaseObject* object) {
     object->engageKeyTag = (object->buildFlags & kEngageKeyTag) >> kEngageKeyTagShift;
     object->orderKeyTag  = (object->orderFlags & kOrderKeyTag) >> kOrderKeyTagShift;
 
-    uint32_t build_time, unused2;
-    uint16_t unused3;
+    uint32_t build_time;
     if (!(read_from(in, &object->buildRatio) &&
           in.read(&build_time, &object->skillNum, &object->skillDen, &object->skillNumAdj,
-                  &object->skillDenAdj, &object->pictPortraitResID, &unused2, &unused3,
-                  &object->internalFlags))) {
+                  &object->skillDenAdj, &object->pictPortraitResID, pn::pad(10)))) {
         return false;
     }
     object->buildTime = 3 * ticks(build_time / 10);

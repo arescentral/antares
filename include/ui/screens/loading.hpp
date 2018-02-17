@@ -24,6 +24,7 @@
 
 #include "data/handle.hpp"
 #include "drawing/styled-text.hpp"
+#include "game/level.hpp"
 #include "math/units.hpp"
 #include "ui/screen.hpp"
 
@@ -61,8 +62,7 @@ class LoadingScreen : public InterfaceScreen {
     wall_time                   _next_update;
     int32_t                     _chars_typed;
 
-    int32_t _current;
-    int32_t _max;
+    LoadState _load_state;
 };
 
 }  // namespace antares

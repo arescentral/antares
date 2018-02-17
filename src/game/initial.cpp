@@ -27,7 +27,7 @@
 
 namespace antares {
 
-void create_initial(Level::InitialObject* initial, uint32_t all_colors) {
+void create_initial(Level::InitialObject* initial) {
     if (initial->attributes & kInitiallyHidden) {
         initial->realObject = SpaceObject::none();
         return;

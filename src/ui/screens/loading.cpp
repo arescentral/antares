@@ -40,9 +40,7 @@ LoadingScreen::LoadingScreen(Handle<Level> level, bool* cancelled)
           _level(level),
           _cancelled(cancelled),
           _next_update(now() + kTypingDelay),
-          _chars_typed(0),
-          _current(0),
-          _max(1) {
+          _chars_typed(0) {
     _name_text.reset(new StyledText(sys.fonts.title));
     _name_text->set_fore_color(GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT));
     _name_text->set_retro_text(level->name);
@@ -68,11 +66,8 @@ void LoadingScreen::fire_timer() {
         case TYPING:
             while (_next_update < now()) {
                 if (_chars_typed >= _name_text->size()) {
-                    _state = LOADING;
-                    if (!start_construct_level(_level, &_max)) {
-                        *_cancelled = true;
-                        stack()->pop(this);
-                    }
+                    _state      = LOADING;
+                    _load_state = start_construct_level(_level);
                     return;
                 }
                 if ((_chars_typed % 3) == 0) {
@@ -86,8 +81,8 @@ void LoadingScreen::fire_timer() {
         case LOADING:
             _next_update = now() + kTypingDelay;
             while (now() < _next_update) {
-                if (_current < _max) {
-                    construct_level(_level, &_current);
+                if (!_load_state.done) {
+                    construct_level(_level, &_load_state);
                 } else {
                     _state = DONE;
                     return;
@@ -120,7 +115,7 @@ void LoadingScreen::overlay() const {
     bar.offset(off.h, off.v);
     Rects rects;
     rects.fill(bar, dark);
-    bar.right = bar.left + (bar.width() * _current / _max);
+    bar.right = bar.left + (bar.width() * _load_state.step / _load_state.max);
     rects.fill(bar, light);
 }
 

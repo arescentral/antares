@@ -51,10 +51,6 @@ namespace antares {
 
 namespace {
 
-const uint32_t kNeutralColorNeededFlag = 0x00010000u;
-const uint32_t kNeutralColorLoadedFlag = 0x00000001u;
-const uint32_t kAnyColorLoadedFlag     = 0x0000ffffu;
-
 #ifdef DATA_COVERAGE
 ANTARES_GLOBAL set<int32_t> possible_objects;
 ANTARES_GLOBAL set<int32_t> possible_actions;
@@ -62,16 +58,12 @@ ANTARES_GLOBAL set<int32_t> possible_actions;
 
 void AddBaseObjectActionMedia(
         Handle<BaseObject> base, std::vector<Action>(BaseObject::*whichType), uint8_t color,
-        uint32_t all_colors);
-void AddActionMedia(const Action& action, uint8_t color, uint32_t all_colors);
+        std::bitset<16> all_colors, LoadState* state);
+void AddActionMedia(
+        const Action& action, uint8_t color, std::bitset<16> all_colors, LoadState* state);
 
-void SetAllBaseObjectsUnchecked() {
-    for (auto aBase : BaseObject::all()) {
-        aBase->internalFlags = 0;
-    }
-}
-
-void AddBaseObjectMedia(Handle<BaseObject> base, uint8_t color, uint32_t all_colors) {
+void AddBaseObjectMedia(
+        Handle<BaseObject> base, uint8_t color, std::bitset<16> all_colors, LoadState* state) {
 #ifdef DATA_COVERAGE
     possible_objects.insert(base.number());
 #endif  // DATA_COVERAGE
@@ -79,30 +71,30 @@ void AddBaseObjectMedia(Handle<BaseObject> base, uint8_t color, uint32_t all_col
     if (!(base->attributes & kCanThink)) {
         color = GRAY;
     }
-    base->internalFlags |= (kNeutralColorNeededFlag << color);
+    state->colors_needed[base.number()][color] = true;
     for (int i = 0; i < 16; ++i) {
-        if (base->internalFlags & (kNeutralColorLoadedFlag << i)) {
+        if (state->colors_loaded[base.number()][i]) {
             continue;  // color already loaded.
-        } else if (!(base->internalFlags & (kNeutralColorNeededFlag << i))) {
+        } else if (!state->colors_needed[base.number()][i]) {
             continue;  // color not needed.
         }
-        base->internalFlags |= kNeutralColorLoadedFlag << i;
+        state->colors_loaded[base.number()][i] = true;
 
         if (base->pixResID != kNoSpriteTable) {
             int16_t id = base->pixResID + (i << kSpriteTableColorShift);
             sys.pix.add(id);
         }
 
-        AddBaseObjectActionMedia(base, &BaseObject::destroy, i, all_colors);
-        AddBaseObjectActionMedia(base, &BaseObject::expire, i, all_colors);
-        AddBaseObjectActionMedia(base, &BaseObject::create, i, all_colors);
-        AddBaseObjectActionMedia(base, &BaseObject::collide, i, all_colors);
-        AddBaseObjectActionMedia(base, &BaseObject::activate, i, all_colors);
-        AddBaseObjectActionMedia(base, &BaseObject::arrive, i, all_colors);
+        AddBaseObjectActionMedia(base, &BaseObject::destroy, i, all_colors, state);
+        AddBaseObjectActionMedia(base, &BaseObject::expire, i, all_colors, state);
+        AddBaseObjectActionMedia(base, &BaseObject::create, i, all_colors, state);
+        AddBaseObjectActionMedia(base, &BaseObject::collide, i, all_colors, state);
+        AddBaseObjectActionMedia(base, &BaseObject::activate, i, all_colors, state);
+        AddBaseObjectActionMedia(base, &BaseObject::arrive, i, all_colors, state);
 
         for (Handle<BaseObject> weapon : {base->pulse.base, base->beam.base, base->special.base}) {
             if (weapon.get()) {
-                AddBaseObjectMedia(weapon, i, all_colors);
+                AddBaseObjectMedia(weapon, i, all_colors, state);
             }
         }
     }
@@ -110,13 +102,14 @@ void AddBaseObjectMedia(Handle<BaseObject> base, uint8_t color, uint32_t all_col
 
 void AddBaseObjectActionMedia(
         Handle<BaseObject> base, std::vector<Action>(BaseObject::*whichType), uint8_t color,
-        uint32_t all_colors) {
+        std::bitset<16> all_colors, LoadState* state) {
     for (const auto& action : (*base.*whichType)) {
-        AddActionMedia(action, color, all_colors);
+        AddActionMedia(action, color, all_colors, state);
     }
 }
 
-void AddActionMedia(const Action& action, uint8_t color, uint32_t all_colors) {
+void AddActionMedia(
+        const Action& action, uint8_t color, std::bitset<16> all_colors, LoadState* state) {
     int32_t l1, l2;
 #ifdef DATA_COVERAGE
     possible_actions.insert(action.number());
@@ -125,7 +118,8 @@ void AddActionMedia(const Action& action, uint8_t color, uint32_t all_colors) {
     switch (action.verb) {
         case kCreateObject:
         case kCreateObjectSetDest:
-            AddBaseObjectMedia(action.argument.createObject.whichBaseType, color, all_colors);
+            AddBaseObjectMedia(
+                    action.argument.createObject.whichBaseType, color, all_colors, state);
             break;
 
         case kPlaySound:
@@ -137,16 +131,16 @@ void AddActionMedia(const Action& action, uint8_t color, uint32_t all_colors) {
             break;
 
         case kAlterBaseType:
-            AddBaseObjectMedia(action.argument.alterBaseType.base, color, all_colors);
+            AddBaseObjectMedia(action.argument.alterBaseType.base, color, all_colors, state);
             break;
 
         case kAlterOwner:
             for (auto baseObject : BaseObject::all()) {
                 if (action_filter_applies_to(action, baseObject)) {
-                    baseObject->internalFlags |= all_colors;
+                    state->colors_needed[baseObject.number()] |= all_colors;
                 }
-                if (baseObject->internalFlags & kAnyColorLoadedFlag) {
-                    AddBaseObjectMedia(baseObject, color, all_colors);
+                if (state->colors_loaded[baseObject.number()].any()) {
+                    AddBaseObjectMedia(baseObject, color, all_colors, state);
                 }
             }
             break;
@@ -178,7 +172,7 @@ Point Level::star_map_point() const { return Point(starMapH, starMapV); }
 
 int32_t Level::chapter_number() const { return levelNameStrNum; }
 
-bool start_construct_level(Handle<Level> level, int32_t* max) {
+LoadState start_construct_level(Handle<Level> level) {
     ResetAllSpaceObjects();
     reset_action_queue();
     Vectors::reset();
@@ -223,20 +217,17 @@ bool start_construct_level(Handle<Level> level, int32_t* max) {
 
     ///// FIRST SELECT WHAT MEDIA WE NEED TO USE:
 
-    // uncheck all base objects
-    SetAllBaseObjectsUnchecked();
-    // uncheck all sounds
-
     sys.pix.reset();
     sys.sound.reset();
 
-    *max = g.level->initials.size() * 3L + 1 +
-           g.level->startTime.count();  // for each run through the initial num
+    LoadState s;
+    s.max = g.level->initials.size() * 3L + 1 +
+            g.level->startTime.count();  // for each run through the initial num
 
-    return true;
+    return s;
 }
 
-static void load_blessed_objects(uint32_t all_colors) {
+static void load_blessed_objects(std::bitset<16> all_colors, LoadState* state) {
     if (!plug.info.energyBlobID.get()) {
         throw std::runtime_error("No energy blob defined");
     }
@@ -253,19 +244,19 @@ static void load_blessed_objects(uint32_t all_colors) {
     // Load the four blessed objects.  The player's body is needed
     // in all colors; the other three are needed only as neutral
     // objects by default.
-    plug.info.playerBodyID->internalFlags |= all_colors;
+    state->colors_needed[plug.info.playerBodyID.number()] |= all_colors;
     for (int i = 0; i < g.level->playerNum; i++) {
         const auto&        info      = plug.info;
         Handle<BaseObject> blessed[] = {
                 info.energyBlobID, info.warpInFlareID, info.warpOutFlareID, info.playerBodyID,
         };
         for (auto id : blessed) {
-            AddBaseObjectMedia(id, GRAY, all_colors);
+            AddBaseObjectMedia(id, GRAY, all_colors, state);
         }
     }
 }
 
-static void load_initial(int i, uint32_t all_colors) {
+static void load_initial(int i, std::bitset<16> all_colors, LoadState* state) {
     const Level::InitialObject* initial    = &g.level->initials[i];
     Handle<Admiral>             owner      = initial->owner;
     auto                        baseObject = initial->type;
@@ -279,9 +270,9 @@ static void load_initial(int i, uint32_t all_colors) {
     // mark the necessity of having all colors through action
     // checking.
     if (baseObject->attributes & kIsDestination) {
-        baseObject->internalFlags |= all_colors;
+        state->colors_needed[baseObject.number()] |= all_colors;
     }
-    AddBaseObjectMedia(baseObject, GetAdmiralColor(owner), all_colors);
+    AddBaseObjectMedia(baseObject, GetAdmiralColor(owner), all_colors, state);
 
     // make sure we're not overriding the sprite
     if (initial->spriteIDOverride >= 0) {
@@ -303,7 +294,7 @@ static void load_initial(int i, uint32_t all_colors) {
                     auto baseObject =
                             mGetBaseObjectFromClassRace(initial->canBuild[j], GetAdmiralRace(a));
                     if (baseObject.get()) {
-                        AddBaseObjectMedia(baseObject, GetAdmiralColor(a), all_colors);
+                        AddBaseObjectMedia(baseObject, GetAdmiralColor(a), all_colors, state);
                     }
                 }
             }
@@ -311,9 +302,10 @@ static void load_initial(int i, uint32_t all_colors) {
     }
 }
 
-static void load_condition(Level::Condition* condition, uint32_t all_colors) {
+static void load_condition(
+        Level::Condition* condition, std::bitset<16> all_colors, LoadState* state) {
     for (const auto& action : condition->action) {
-        AddActionMedia(action, GRAY, all_colors);
+        AddActionMedia(action, GRAY, all_colors, state);
     }
     condition->set_true_yet(condition->flags & kInitiallyTrue);
 }
@@ -335,30 +327,31 @@ static void run_game_1s() {
     } while ((g.time.time_since_epoch() % secs(1)) != ticks(0));
 }
 
-void construct_level(Handle<Level> level, int32_t* current) {
-    int32_t  step       = *current;
-    uint32_t all_colors = kNeutralColorNeededFlag;
+void construct_level(Handle<Level> level, LoadState* state) {
+    int32_t         step = state->step;
+    std::bitset<16> all_colors;
+    all_colors[0] = true;
     for (auto adm : Admiral::all()) {
         if (adm->active()) {
-            all_colors |= kNeutralColorNeededFlag << GetAdmiralColor(adm);
+            all_colors[GetAdmiralColor(adm)] = true;
         }
     }
 
     if (step == 0) {
-        load_blessed_objects(all_colors);
-        load_initial(step, all_colors);
+        load_blessed_objects(all_colors, state);
+        load_initial(step, all_colors, state);
     } else if (step < g.level->initials.size()) {
-        load_initial(step, all_colors);
+        load_initial(step, all_colors, state);
     } else if (step == g.level->initials.size()) {
         // add media for all condition actions
         step -= g.level->initials.size();
         for (auto& condition : g.level->conditions) {
-            load_condition(&condition, all_colors);
+            load_condition(&condition, all_colors, state);
         }
-        create_initial(&g.level->initials[step], all_colors);
+        create_initial(&g.level->initials[step]);
     } else if (step < (2 * g.level->initials.size())) {
         step -= g.level->initials.size();
-        create_initial(&g.level->initials[step], all_colors);
+        create_initial(&g.level->initials[step]);
     } else if (step < (3 * g.level->initials.size())) {
         // double back and set up any defined initial destinations
         step -= (2 * g.level->initials.size());
@@ -370,7 +363,10 @@ void construct_level(Handle<Level> level, int32_t* current) {
     } else {
         run_game_1s();
     }
-    ++*current;
+    ++state->step;
+    if (state->step == state->max) {
+        state->done = true;
+    }
     return;
 }
 

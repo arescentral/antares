@@ -345,15 +345,12 @@ class BaseObject {
     uint8_t  orderKeyTag;
     Fixed    buildRatio;
     ticks    buildTime;
-    //  int32_t             reserved1;
-    uint8_t  skillNum;
-    uint8_t  skillDen;
-    uint8_t  skillNumAdj;
-    uint8_t  skillDenAdj;
-    int16_t  pictPortraitResID;
-    int16_t  reserved2;
-    int32_t  reserved3;
-    uint32_t internalFlags;
+
+    uint8_t skillNum;
+    uint8_t skillDen;
+    uint8_t skillNumAdj;
+    uint8_t skillDenAdj;
+    int16_t pictPortraitResID;
 
     static const int byte_size = 318;
 };
