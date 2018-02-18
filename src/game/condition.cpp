@@ -63,7 +63,6 @@ bool Level::BuildingCondition::is_true() const {
 
 bool Level::ComputerCondition::is_true() const {
     if (line < 0) {
-        pn::format(stderr, "{0} {1}\n", g.mini.currentScreen, screen);
         return op_eq(op, g.mini.currentScreen, screen);
     } else {
         return op_eq(
