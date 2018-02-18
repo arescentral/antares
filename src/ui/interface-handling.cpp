@@ -199,8 +199,8 @@ void CreateWeaponDataText(
     isGuided   = false;
     if (weaponObject->activate.size() > 0) {
         for (const Action& action : weaponObject->activate) {
-            if ((action.verb == kCreateObject) || (action.verb == kCreateObjectSetDest)) {
-                Handle<BaseObject> missileObject = action.argument.createObject.whichBaseType;
+            if ((action->verb == kCreateObject) || (action->verb == kCreateObjectSetDest)) {
+                Handle<BaseObject> missileObject = action->argument.createObject.whichBaseType;
                 if (missileObject->attributes & kIsGuided)
                     isGuided = true;
                 if (missileObject->damage > mostDamage)

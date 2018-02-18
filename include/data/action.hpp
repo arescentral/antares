@@ -21,6 +21,7 @@
 
 #include <stdint.h>
 #include <pn/string>
+#include <memory>
 #include <vector>
 
 #include "data/handle.hpp"
@@ -294,7 +295,26 @@ struct argumentType {
     AssumeInitial assumeInitial;
 };
 
-struct Action {
+struct ActionBase;
+
+class Action {
+  public:
+                      operator bool() const { return _base != nullptr; }
+    const ActionBase* operator->() const { return _base.get(); }
+    const ActionBase& operator*() const { return *_base; }
+
+    template <typename T>
+    T* init() {
+        T* out;
+        _base = std::unique_ptr<ActionBase>(out = new T);
+        return out;
+    }
+
+  private:
+    std::unique_ptr<ActionBase> _base;
+};
+
+struct ActionBase {
     uint16_t verb;
 
     uint8_t  reflexive;        // does it apply to object executing verb?

@@ -115,23 +115,23 @@ void AddActionMedia(
     possible_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
-    switch (action.verb) {
+    switch (action->verb) {
         case kCreateObject:
         case kCreateObjectSetDest:
             AddBaseObjectMedia(
-                    action.argument.createObject.whichBaseType, color, all_colors, state);
+                    action->argument.createObject.whichBaseType, color, all_colors, state);
             break;
 
         case kPlaySound:
-            l1 = action.argument.playSound.idMinimum;
-            l2 = action.argument.playSound.idMinimum + action.argument.playSound.idRange;
+            l1 = action->argument.playSound.idMinimum;
+            l2 = action->argument.playSound.idMinimum + action->argument.playSound.idRange;
             for (int32_t count = l1; count <= l2; count++) {
                 sys.sound.load(count);
             }
             break;
 
         case kAlterBaseType:
-            AddBaseObjectMedia(action.argument.alterBaseType.base, color, all_colors, state);
+            AddBaseObjectMedia(action->argument.alterBaseType.base, color, all_colors, state);
             break;
 
         case kAlterOwner:
