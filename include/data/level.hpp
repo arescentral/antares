@@ -269,6 +269,7 @@ struct Level::CounterCondition : Level::ConditionBase {
 
 struct Level::DestroyedCondition : Level::ConditionBase {
     int32_t      initial;
+    bool         value;
     virtual bool is_true() const;
 };
 
@@ -303,11 +304,12 @@ struct Level::OrderedCondition : Level::ConditionBase {
 
 struct Level::ShipsCondition : Level::ConditionBase {
     Handle<Admiral> player;
+    int32_t         value;
     virtual bool    is_true() const;
 };
 
 struct Level::SpeedCondition : Level::ConditionBase {
-    Fixed        fixedValue;
+    Fixed        value;
     virtual bool is_true() const;
 };
 

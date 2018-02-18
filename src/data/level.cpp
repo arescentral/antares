@@ -264,12 +264,15 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
             break;
         }
 
-        case kDestructionCondition:
-            if (!sub.read(&condition->init<Level::DestroyedCondition>()->initial)) {
+        case kDestructionCondition: {
+            auto* destroyed = condition->init<Level::DestroyedCondition>();
+            if (!sub.read(&destroyed->initial)) {
                 return false;
             }
-            (*condition)->op = Level::ConditionBase::Op::EQ;
+            destroyed->value = true;
+            destroyed->op    = Level::ConditionBase::Op::EQ;
             break;
+        }
 
         case kOwnerCondition: {
             int32_t player;
@@ -286,8 +289,10 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
             if (!sub.read(&player)) {
                 return false;
             }
-            condition->init<Level::ShipsCondition>()->player = Handle<Admiral>(player);
-            (*condition)->op                                 = Level::ConditionBase::Op::LE;
+            auto* ships   = condition->init<Level::ShipsCondition>();
+            ships->player = Handle<Admiral>(player);
+            ships->value  = 0;
+            ships->op     = Level::ConditionBase::Op::LE;
             break;
         }
 
@@ -299,7 +304,7 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
             break;
 
         case kVelocityLessThanEqualToCondition:
-            if (!read_from(sub, &condition->init<Level::SpeedCondition>()->fixedValue)) {
+            if (!read_from(sub, &condition->init<Level::SpeedCondition>()->value)) {
                 return false;
             }
             (*condition)->op = Level::ConditionBase::Op::LT;

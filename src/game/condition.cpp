@@ -78,7 +78,7 @@ bool Level::CounterCondition::is_true() const {
 
 bool Level::DestroyedCondition::is_true() const {
     auto sObject = GetObjectFromInitialNumber(initial);
-    return op_eq(op, sObject.get(), nullptr);
+    return op_eq(op, !sObject.get(), value);
 }
 
 bool Level::DistanceCondition::is_true() const {
@@ -128,14 +128,13 @@ bool Level::OwnerCondition::is_true() const {
 }
 
 bool Level::ShipsCondition::is_true() const {
-    return op_compare(op, GetAdmiralShipsLeft(player), 0);
+    return op_compare(op, GetAdmiralShipsLeft(player), value);
 }
 
 bool Level::SpeedCondition::is_true() const {
     auto sObject = GetObjectFromInitialNumber(subject);
     return sObject.get() &&
-           op_compare(
-                   op, std::max(ABS(sObject->velocity.h), ABS(sObject->velocity.v)), fixedValue);
+           op_compare(op, std::max(ABS(sObject->velocity.h), ABS(sObject->velocity.v)), value);
 }
 
 bool Level::SubjectCondition::is_true() const {
