@@ -347,6 +347,7 @@ struct NoAction : public ActionBase {
 };
 
 struct CreateObjectAction : public ActionBase {
+    bool         inherit = false;
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);

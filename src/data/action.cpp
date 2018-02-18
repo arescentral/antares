@@ -226,10 +226,16 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
         case kActivateBeam: action->init<ActivateBeamAction>(); return true;
         case kNilTarget: action->init<NilTargetAction>(); return true;
 
-        case kCreateObject:
-            return read_from(sub, &action->init<CreateObjectAction>()->argument.createObject);
-        case kCreateObjectSetDest:
-            return read_from(sub, &action->init<CreateObjectAction>()->argument.createObject);
+        case kCreateObject: {
+            auto* create    = action->init<CreateObjectAction>();
+            create->inherit = false;
+            return read_from(sub, &create->argument.createObject);
+        }
+        case kCreateObjectSetDest: {
+            auto* create    = action->init<CreateObjectAction>();
+            create->inherit = true;
+            return read_from(sub, &create->argument.createObject);
+        }
 
         case kPlaySound:
             return read_from(sub, &action->init<PlaySoundAction>()->argument.playSound);

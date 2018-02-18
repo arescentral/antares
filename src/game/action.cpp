@@ -148,7 +148,7 @@ void CreateObjectAction::apply(
             product->attributes &= ~kStaticDestination;
             if (product->owner.get()) {
                 if (reflexive) {
-                    if (verb != kCreateObjectSetDest) {
+                    if (!inherit) {
                         OverrideObjectDestination(product, subject);
                     } else if (subject->destObject.get()) {
                         OverrideObjectDestination(product, subject->destObject);
@@ -786,7 +786,6 @@ static void execute_actions(
             continue;
         }
 
-        pn::format(stderr, "{0}\n", action->verb);
         action->apply(subject, focus, object, offset);
         switch (action->verb) {
             case kChangeScore:
