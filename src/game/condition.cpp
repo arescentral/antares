@@ -73,11 +73,11 @@ bool Level::ComputerCondition::is_true() const {
 }
 
 bool Level::CounterCondition::is_true() const {
-    return op_compare(op, GetAdmiralScore(whichPlayer, whichCounter), amount);
+    return op_compare(op, GetAdmiralScore(player, counter), value);
 }
 
 bool Level::DestroyedCondition::is_true() const {
-    auto sObject = GetObjectFromInitialNumber(longValue);
+    auto sObject = GetObjectFromInitialNumber(initial);
     return op_eq(op, sObject.get(), nullptr);
 }
 
@@ -92,7 +92,7 @@ bool Level::DistanceCondition::is_true() const {
 
         if ((dcalc < kMaximumRelevantDistance) && (distance < kMaximumRelevantDistance)) {
             distance = distance * distance + dcalc * dcalc;
-            return op_compare(op, distance, unsignedLongValue);
+            return op_compare(op, distance, value);
         }
     }
     return false;
@@ -124,12 +124,11 @@ bool Level::OrderedCondition::is_true() const {
 
 bool Level::OwnerCondition::is_true() const {
     auto sObject = GetObjectFromInitialNumber(subject);
-    auto a       = Handle<Admiral>(longValue);
-    return sObject.get() && op_eq(op, a, sObject->owner);
+    return sObject.get() && op_eq(op, player, sObject->owner);
 }
 
 bool Level::ShipsCondition::is_true() const {
-    return op_compare(op, GetAdmiralShipsLeft(Handle<Admiral>(longValue)), 0);
+    return op_compare(op, GetAdmiralShipsLeft(player), 0);
 }
 
 bool Level::SpeedCondition::is_true() const {
@@ -157,10 +156,10 @@ bool Level::TimeCondition::is_true() const {
     if (g.time < game_ticks()) {
         game_time /= 3;
     }
-    return op_compare(op, game_time + start_time, timeValue);
+    return op_compare(op, game_time + start_time, value);
 }
 
-bool Level::ZoomCondition::is_true() const { return op_compare(op, g.zoom, longValue); }
+bool Level::ZoomCondition::is_true() const { return op_compare(op, g.zoom, value); }
 
 void CheckLevelConditions() {
     for (auto& c : g.level->conditions) {

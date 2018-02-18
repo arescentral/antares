@@ -261,19 +261,23 @@ struct Level::ComputerCondition : Level::ConditionBase {
 };
 
 struct Level::CounterCondition : Level::ConditionBase {
-    Handle<Admiral> whichPlayer;
-    int32_t         whichCounter;
-    int32_t         amount;
+    Handle<Admiral> player;
+    int32_t         counter;
+    int32_t         value;
     virtual bool    is_true() const;
 };
 
 struct Level::DestroyedCondition : Level::ConditionBase {
-    int32_t      longValue;
+    int32_t      initial;
     virtual bool is_true() const;
 };
 
 struct Level::DistanceCondition : Level::ConditionBase {
-    uint32_t     unsignedLongValue;
+    uint32_t     value;
+    virtual bool is_true() const;
+};
+
+struct Level::FalseCondition : Level::ConditionBase {
     virtual bool is_true() const;
 };
 
@@ -288,13 +292,9 @@ struct Level::MessageCondition : Level::ConditionBase {
     virtual bool is_true() const;
 };
 
-struct Level::FalseCondition : Level::ConditionBase {
-    virtual bool is_true() const;
-};
-
 struct Level::OwnerCondition : Level::ConditionBase {
-    int32_t      longValue;
-    virtual bool is_true() const;
+    Handle<Admiral> player;
+    virtual bool    is_true() const;
 };
 
 struct Level::OrderedCondition : Level::ConditionBase {
@@ -302,8 +302,8 @@ struct Level::OrderedCondition : Level::ConditionBase {
 };
 
 struct Level::ShipsCondition : Level::ConditionBase {
-    int32_t      longValue;
-    virtual bool is_true() const;
+    Handle<Admiral> player;
+    virtual bool    is_true() const;
 };
 
 struct Level::SpeedCondition : Level::ConditionBase {
@@ -318,12 +318,12 @@ struct Level::SubjectCondition : Level::ConditionBase {
 };
 
 struct Level::TimeCondition : Level::ConditionBase {
-    ticks        timeValue;
+    ticks        value;
     virtual bool is_true() const;
 };
 
 struct Level::ZoomCondition : Level::ConditionBase {
-    int32_t      longValue;
+    int32_t      value;
     virtual bool is_true() const;
 };
 
