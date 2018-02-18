@@ -147,10 +147,6 @@ bool read_from(pn::file_view in, argumentType::MakeSparks* argument) {
            read_from(in, &argument->velocityRange) && in.read(&argument->color);
 }
 
-bool read_from(pn::file_view in, argumentType::ReleaseEnergy* argument) {
-    return read_from(in, &argument->percent);
-}
-
 bool read_from(pn::file_view in, argumentType::LandAt* argument) {
     return in.read(&argument->landingSpeed);
 }
@@ -219,117 +215,176 @@ bool read_from(pn::file_view in, argumentType::AssumeInitial* argument) {
     return in.read(&argument->whichInitialObject);
 }
 
-}  // namespace
+bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
+    switch (static_cast<objectVerbIDEnum>(*composite_verb)) {
+        case kReleaseEnergy:
+        case kNoAction: action->init<NoAction>(); return true;
 
-bool read_from(pn::file_view in, Action* action) {
-    uint8_t section[24];
-
-    uint8_t verb;
-    if (!in.read(&verb)) {
-        return false;
-    }
-    ActionBase* base = action->init<ActionBase>();
-    base->verb       = verb << 8;
-
-    if (!in.read(&base->reflexive, &base->inclusiveFilter, &base->exclusiveFilter)) {
-        return false;
-    }
-    if (base->exclusiveFilter == 0xffffffff) {
-        base->levelKeyTag = (base->inclusiveFilter & kLevelKeyTag) >> kLevelKeyTagShift;
-    } else {
-        base->levelKeyTag = 0;
-    }
-    uint32_t delay;
-    int16_t  subject_override, object_override;
-    if (!in.read(&base->owner, &delay, &subject_override, &object_override)) {
-        return false;
-    }
-    base->delay                  = ticks(delay);
-    base->initialSubjectOverride = Handle<Level::Initial>(subject_override);
-    base->initialDirectOverride  = Handle<Level::Initial>(object_override);
-    char ignore[4];
-    if (fread(ignore, 1, 4, in.c_obj()) < 4) {
-        return false;
-    }
-    if (fread(section, 1, 24, in.c_obj()) < 24) {
-        return false;
-    }
-
-    pn::file sub = pn::data_view{section, 24}.open();
-    switch (base->verb) {
-        case kNoAction:
-        case kSetDestination:
-        case kActivateSpecial:
-        case kActivatePulse:
-        case kActivateBeam:
-        case kNilTarget: return true;
+        case kSetDestination: action->init<SetDestinationAction>(); return true;
+        case kActivateSpecial: action->init<ActivateSpecialAction>(); return true;
+        case kActivatePulse: action->init<ActivatePulseAction>(); return true;
+        case kActivateBeam: action->init<ActivateBeamAction>(); return true;
+        case kNilTarget: action->init<NilTargetAction>(); return true;
 
         case kCreateObject:
-        case kCreateObjectSetDest: return read_from(sub, &base->argument.createObject);
+            return read_from(sub, &action->init<CreateObjectAction>()->argument.createObject);
+        case kCreateObjectSetDest:
+            return read_from(
+                    sub, &action->init<CreateObjectSetDestAction>()->argument.createObject);
 
-        case kPlaySound: return read_from(sub, &base->argument.playSound);
+        case kPlaySound:
+            return read_from(sub, &action->init<PlaySoundAction>()->argument.playSound);
 
         case kAlter: {
             uint8_t alter;
             if (!sub.read(&alter)) {
                 return false;
             }
-            base->verb |= alter;
-            switch (base->verb) {
-                case kAlterDamage: return read_from(sub, &base->argument.alterDamage);
-                case kAlterEnergy: return read_from(sub, &base->argument.alterEnergy);
-                case kAlterHidden: return read_from(sub, &base->argument.alterHidden);
-                case kAlterSpin: return read_from(sub, &base->argument.alterSpin);
-                case kAlterOffline: return read_from(sub, &base->argument.alterOffline);
-                case kAlterVelocity: return read_from(sub, &base->argument.alterVelocity);
-                case kAlterMaxVelocity: return read_from(sub, &base->argument.alterMaxVelocity);
-                case kAlterThrust: return read_from(sub, &base->argument.alterThrust);
-                case kAlterBaseType: return read_from(sub, &base->argument.alterBaseType);
-                case kAlterOwner: return read_from(sub, &base->argument.alterOwner);
+            *composite_verb |= alter;
+            switch (static_cast<alterVerbIDType>(*composite_verb)) {
+                case kAlterMaxThrust: action->init<NoAction>(); return true;
+                case kAlterMaxTurnRate: action->init<NoAction>(); return true;
+                case kAlterScale: action->init<NoAction>(); return true;
+                case kAlterAttributes: action->init<NoAction>(); return true;
+                case kAlterLevelKeyTag: action->init<NoAction>(); return true;
+                case kAlterOrderKeyTag: action->init<NoAction>(); return true;
+                case kAlterEngageKeyTag: action->init<NoAction>(); return true;
+
+                case kAlterCloak: action->init<AlterCloakAction>(); return true;
+
+                case kAlterDamage:
+                    return read_from(
+                            sub, &action->init<AlterDamageAction>()->argument.alterDamage);
+                case kAlterEnergy:
+                    return read_from(
+                            sub, &action->init<AlterEnergyAction>()->argument.alterEnergy);
+                case kAlterHidden:
+                    return read_from(
+                            sub, &action->init<AlterHiddenAction>()->argument.alterHidden);
+                case kAlterSpin:
+                    return read_from(sub, &action->init<AlterSpinAction>()->argument.alterSpin);
+                case kAlterOffline:
+                    return read_from(
+                            sub, &action->init<AlterOfflineAction>()->argument.alterOffline);
+                case kAlterVelocity:
+                    return read_from(
+                            sub, &action->init<AlterVelocityAction>()->argument.alterVelocity);
+                case kAlterMaxVelocity:
+                    return read_from(
+                            sub,
+                            &action->init<AlterMaxVelocityAction>()->argument.alterMaxVelocity);
+                case kAlterThrust:
+                    return read_from(
+                            sub, &action->init<AlterThrustAction>()->argument.alterThrust);
+                case kAlterBaseType:
+                    return read_from(
+                            sub, &action->init<AlterBaseTypeAction>()->argument.alterBaseType);
+                case kAlterOwner:
+                    return read_from(sub, &action->init<AlterOwnerAction>()->argument.alterOwner);
                 case kAlterConditionTrueYet:
-                    return read_from(sub, &base->argument.alterConditionTrueYet);
-                case kAlterOccupation: return read_from(sub, &base->argument.alterOccupation);
-                case kAlterAbsoluteCash: return read_from(sub, &base->argument.alterAbsoluteCash);
-                case kAlterAge: return read_from(sub, &base->argument.alterAge);
-                case kAlterLocation: return read_from(sub, &base->argument.alterLocation);
+                    return read_from(
+                            sub, &action->init<AlterConditionTrueYetAction>()
+                                          ->argument.alterConditionTrueYet);
+                case kAlterOccupation:
+                    return read_from(
+                            sub, &action->init<AlterOccupationAction>()->argument.alterOccupation);
+                case kAlterAbsoluteCash:
+                    return read_from(
+                            sub,
+                            &action->init<AlterAbsoluteCashAction>()->argument.alterAbsoluteCash);
+                case kAlterAge:
+                    return read_from(sub, &action->init<AlterAgeAction>()->argument.alterAge);
+                case kAlterLocation:
+                    return read_from(
+                            sub, &action->init<AlterLocationAction>()->argument.alterLocation);
                 case kAlterAbsoluteLocation:
-                    return read_from(sub, &base->argument.alterAbsoluteLocation);
+                    return read_from(
+                            sub, &action->init<AlterAbsoluteLocationAction>()
+                                          ->argument.alterAbsoluteLocation);
                 case kAlterWeapon1:
+                    return read_from(
+                            sub, &action->init<AlterWeapon1Action>()->argument.alterWeapon);
                 case kAlterWeapon2:
-                case kAlterSpecial: return read_from(sub, &base->argument.alterWeapon);
-                default: return true;
+                    return read_from(
+                            sub, &action->init<AlterWeapon2Action>()->argument.alterWeapon);
+                case kAlterSpecial:
+                    return read_from(
+                            sub, &action->init<AlterSpecialAction>()->argument.alterWeapon);
             }
         }
 
-        case kMakeSparks: return read_from(sub, &base->argument.makeSparks);
+        case kMakeSparks:
+            return read_from(sub, &action->init<MakeSparksAction>()->argument.makeSparks);
 
-        case kReleaseEnergy: return read_from(sub, &base->argument.releaseEnergy);
+        case kLandAt: return read_from(sub, &action->init<LandAtAction>()->argument.landAt);
 
-        case kLandAt: return read_from(sub, &base->argument.landAt);
+        case kEnterWarp:
+            return read_from(sub, &action->init<EnterWarpAction>()->argument.enterWarp);
 
-        case kEnterWarp: return read_from(sub, &base->argument.enterWarp);
+        case kDisplayMessage:
+            return read_from(sub, &action->init<DisplayMessageAction>()->argument.displayMessage);
 
-        case kDisplayMessage: return read_from(sub, &base->argument.displayMessage);
+        case kChangeScore:
+            return read_from(sub, &action->init<ChangeScoreAction>()->argument.changeScore);
 
-        case kChangeScore: return read_from(sub, &base->argument.changeScore);
+        case kDeclareWinner:
+            return read_from(sub, &action->init<DeclareWinnerAction>()->argument.declareWinner);
 
-        case kDeclareWinner: return read_from(sub, &base->argument.declareWinner);
+        case kDie: return read_from(sub, &action->init<DieAction>()->argument.killObject);
 
-        case kDie: return read_from(sub, &base->argument.killObject);
-
-        case kColorFlash: return read_from(sub, &base->argument.colorFlash);
+        case kColorFlash:
+            return read_from(sub, &action->init<ColorFlashAction>()->argument.colorFlash);
 
         case kDisableKeys:
-        case kEnableKeys: return read_from(sub, &base->argument.keys);
+            return read_from(sub, &action->init<DisableKeysAction>()->argument.keys);
+        case kEnableKeys: return read_from(sub, &action->init<EnableKeysAction>()->argument.keys);
 
-        case kSetZoom: return read_from(sub, &base->argument.zoom);
+        case kSetZoom: return read_from(sub, &action->init<SetZoomAction>()->argument.zoom);
 
-        case kComputerSelect: return read_from(sub, &base->argument.computerSelect);
+        case kComputerSelect:
+            return read_from(sub, &action->init<ComputerSelectAction>()->argument.computerSelect);
 
-        case kAssumeInitialObject: return read_from(sub, &base->argument.assumeInitial);
-
-        default: return true;
+        case kAssumeInitialObject:
+            return read_from(
+                    sub, &action->init<AssumeInitialObjectAction>()->argument.assumeInitial);
     }
+}
+
+}  // namespace
+
+bool read_from(pn::file_view in, Action* action) {
+    uint8_t  verb, reflexive;
+    uint32_t inclusive_filter, exclusive_filter;
+    uint32_t delay;
+    int16_t  owner, subject_override, object_override;
+    pn::data section;
+    section.resize(24);
+    if (!in.read(
+                &verb, &reflexive, &inclusive_filter, &exclusive_filter, &owner, &delay,
+                &subject_override, &object_override, pn::pad(4), &section)) {
+        return false;
+    }
+
+    int composite_verb = verb << 8;
+    read_argument(&composite_verb, action, section.open());
+
+    if (*action) {
+        auto& base            = *action;
+        base->verb            = composite_verb;
+        base->reflexive       = reflexive;
+        base->inclusiveFilter = inclusive_filter;
+        base->exclusiveFilter = exclusive_filter;
+        if (exclusive_filter == 0xffffffff) {
+            base->levelKeyTag = (inclusive_filter & kLevelKeyTag) >> kLevelKeyTagShift;
+        } else {
+            base->levelKeyTag = 0;
+        }
+        base->owner                  = owner;
+        base->delay                  = ticks(delay);
+        base->initialSubjectOverride = Handle<Level::Initial>(subject_override);
+        base->initialDirectOverride  = Handle<Level::Initial>(object_override);
+    }
+    return true;
 }
 
 std::vector<Action> read_actions(int begin, int end) {

@@ -299,9 +299,9 @@ struct ActionBase;
 
 class Action {
   public:
-                      operator bool() const { return _base != nullptr; }
-    const ActionBase* operator->() const { return _base.get(); }
-    const ActionBase& operator*() const { return *_base; }
+                operator bool() const { return _base != nullptr; }
+    ActionBase* operator->() const { return _base.get(); }
+    ActionBase& operator*() const { return *_base; }
 
     template <typename T>
     T* init() {
@@ -317,7 +317,7 @@ class Action {
 struct ActionBase {
     uint16_t verb;
 
-    uint8_t  reflexive;        // does it apply to object executing verb?
+    bool     reflexive;        // does it apply to object executing verb?
     uint32_t inclusiveFilter;  // if it has ALL these attributes, OK -- for non-reflective verbs
     uint32_t exclusiveFilter;  // don't execute if it has ANY of these
     uint8_t  levelKeyTag;
@@ -329,11 +329,322 @@ struct ActionBase {
     uint32_t              reserved2;
     argumentType          argument;
 
+    virtual ~ActionBase() = default;
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) = 0;
+
     static const size_t byte_size = 48;
 };
 bool read_from(pn::file_view in, Action* action);
 
 std::vector<Action> read_actions(int begin, int end);
+
+struct NoAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct CreateObjectAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct PlaySoundAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct MakeSparksAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct ReleaseEnergyAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct LandAtAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct EnterWarpAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct DisplayMessageAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct ChangeScoreAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct DeclareWinnerAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct DieAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct SetDestinationAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct ActivateSpecialAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct ActivatePulseAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct ActivateBeamAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct ColorFlashAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct CreateObjectSetDestAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct NilTargetAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct DisableKeysAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct EnableKeysAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct SetZoomAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct ComputerSelectAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AssumeInitialObjectAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterDamageAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterVelocityAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterThrustAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterMaxThrustAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterMaxVelocityAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterMaxTurnRateAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterLocationAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterScaleAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterWeapon1Action : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterWeapon2Action : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterSpecialAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterEnergyAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterOwnerAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterHiddenAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterCloakAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterOfflineAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterSpinAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterBaseTypeAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterConditionTrueYetAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterOccupationAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterAbsoluteCashAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterAgeAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterAttributesAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterLevelKeyTagAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterOrderKeyTagAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterEngageKeyTagAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AlterAbsoluteLocationAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
 
 }  // namespace antares
 
