@@ -109,18 +109,6 @@ typedef uint8_t dieVerbIDType;
 struct argumentType {
     argumentType() {}
 
-    // createObject: make another type of object appear
-    struct CreateObject {
-        Handle<BaseObject> whichBaseType;      // what type
-        int32_t            howManyMinimum;     // # to make min
-        int32_t            howManyRange;       // # to make range
-        uint8_t            velocityRelative;   // is velocity relative to creator?
-        uint8_t            directionRelative;  // determines initial heading
-        int32_t randomDistance;  // if not 0, then object will be created in random direction from
-                                 // 0 to this away
-    };
-    CreateObject createObject;
-
     // playSound: play a sound effect
     struct PlaySound {
         uint8_t priority;
@@ -334,6 +322,8 @@ struct ActionBase {
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset) = 0;
 
+    virtual Handle<BaseObject> created_base() const;
+
     static const size_t byte_size = 48;
 };
 bool read_from(pn::file_view in, Action* action);
@@ -347,10 +337,19 @@ struct NoAction : public ActionBase {
 };
 
 struct CreateObjectAction : public ActionBase {
-    bool         inherit = false;
+    Handle<BaseObject> base;                        // what type
+    int32_t            count_minimum      = 1;      // # to make min
+    int32_t            count_range        = 0;      // # to make range
+    bool               relative_velocity  = false;  // is velocity relative to creator?
+    bool               relative_direction = false;  // determines initial heading
+    int32_t            distance           = 0;      // create at this distance in random direction
+    bool               inherit            = false;  // if false, gets creator as target
+                                                    // if true, gets creator’s target as target
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
+    virtual Handle<BaseObject> created_base() const;
 };
 
 struct PlaySoundAction : public ActionBase {

@@ -108,21 +108,19 @@ void NoAction::apply(
 void CreateObjectAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto& create     = argument.createObject;
-    const auto  baseObject = create.whichBaseType;
-    auto        count      = create.howManyMinimum;
-    if (create.howManyRange > 0) {
-        count += subject->randomSeed.next(create.howManyRange);
+    auto count = count_minimum;
+    if (count_range > 0) {
+        count += subject->randomSeed.next(count_range);
     }
     for (int i = 0; i < count; ++i) {
         fixedPointType vel = {Fixed::zero(), Fixed::zero()};
-        if (create.velocityRelative) {
+        if (relative_velocity) {
             vel = subject->velocity;
         }
         int32_t direction = 0;
-        if (baseObject->attributes & kAutoTarget) {
+        if (base->attributes & kAutoTarget) {
             direction = focus->targetAngle;
-        } else if (create.directionRelative) {
+        } else if (relative_direction) {
             direction = subject->direction;
         }
         coordPointType at = subject->location;
@@ -131,14 +129,12 @@ void CreateObjectAction::apply(
             at.v += offset->v;
         }
 
-        const int32_t distance = create.randomDistance;
         if (distance > 0) {
             at.h += subject->randomSeed.next(distance * 2) - distance;
             at.v += subject->randomSeed.next(distance * 2) - distance;
         }
 
-        auto product =
-                CreateAnySpaceObject(baseObject, &vel, &at, direction, subject->owner, 0, -1);
+        auto product = CreateAnySpaceObject(base, &vel, &at, direction, subject->owner, 0, -1);
         if (!product.get()) {
             continue;
         }

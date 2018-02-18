@@ -118,8 +118,7 @@ void AddActionMedia(
     switch (action->verb) {
         case kCreateObject:
         case kCreateObjectSetDest:
-            AddBaseObjectMedia(
-                    action->argument.createObject.whichBaseType, color, all_colors, state);
+            AddBaseObjectMedia(action->created_base(), color, all_colors, state);
             break;
 
         case kPlaySound:

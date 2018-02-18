@@ -28,15 +28,18 @@ namespace antares {
 
 namespace {
 
-bool read_from(pn::file_view in, argumentType::CreateObject* argument) {
+bool read_from(pn::file_view in, CreateObjectAction* create, bool inherit) {
     int32_t base_type;
+    uint8_t relative_velocity, relative_direction;
     if (!in.read(
-                &base_type, &argument->howManyMinimum, &argument->howManyRange,
-                &argument->velocityRelative, &argument->directionRelative,
-                &argument->randomDistance)) {
+                &base_type, &create->count_minimum, &create->count_range, &relative_velocity,
+                &relative_direction, &create->distance)) {
         return false;
     }
-    argument->whichBaseType = Handle<BaseObject>(base_type);
+    create->base               = Handle<BaseObject>(base_type);
+    create->relative_velocity  = relative_velocity;
+    create->relative_direction = relative_direction;
+    create->inherit            = inherit;
     return true;
 }
 
@@ -226,16 +229,8 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
         case kActivateBeam: action->init<ActivateBeamAction>(); return true;
         case kNilTarget: action->init<NilTargetAction>(); return true;
 
-        case kCreateObject: {
-            auto* create    = action->init<CreateObjectAction>();
-            create->inherit = false;
-            return read_from(sub, &create->argument.createObject);
-        }
-        case kCreateObjectSetDest: {
-            auto* create    = action->init<CreateObjectAction>();
-            create->inherit = true;
-            return read_from(sub, &create->argument.createObject);
-        }
+        case kCreateObject: return read_from(sub, action->init<CreateObjectAction>(), false);
+        case kCreateObjectSetDest: return read_from(sub, action->init<CreateObjectAction>(), true);
 
         case kPlaySound:
             return read_from(sub, &action->init<PlaySoundAction>()->argument.playSound);
@@ -415,5 +410,8 @@ std::vector<Action> read_actions(int begin, int end) {
     }
     return actions;
 }
+
+Handle<BaseObject> ActionBase::created_base() const { return BaseObject::none(); }
+Handle<BaseObject> CreateObjectAction::created_base() const { return base; }
 
 }  // namespace antares
