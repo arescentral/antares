@@ -105,27 +105,27 @@ void NoAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {}
 
-static void create_object(
-        const ActionBase& action, Handle<SpaceObject> subject, Handle<SpaceObject> focus,
+void CreateObjectAction::apply(
+        Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto& create     = action.argument.createObject;
+    const auto& create     = argument.createObject;
     const auto  baseObject = create.whichBaseType;
     auto        count      = create.howManyMinimum;
     if (create.howManyRange > 0) {
-        count += focus->randomSeed.next(create.howManyRange);
+        count += subject->randomSeed.next(create.howManyRange);
     }
     for (int i = 0; i < count; ++i) {
         fixedPointType vel = {Fixed::zero(), Fixed::zero()};
         if (create.velocityRelative) {
-            vel = focus->velocity;
+            vel = subject->velocity;
         }
         int32_t direction = 0;
         if (baseObject->attributes & kAutoTarget) {
-            direction = subject->targetAngle;
+            direction = focus->targetAngle;
         } else if (create.directionRelative) {
-            direction = focus->direction;
+            direction = subject->direction;
         }
-        coordPointType at = focus->location;
+        coordPointType at = subject->location;
         if (offset != NULL) {
             at.h += offset->h;
             at.v += offset->v;
@@ -133,11 +133,12 @@ static void create_object(
 
         const int32_t distance = create.randomDistance;
         if (distance > 0) {
-            at.h += focus->randomSeed.next(distance * 2) - distance;
-            at.v += focus->randomSeed.next(distance * 2) - distance;
+            at.h += subject->randomSeed.next(distance * 2) - distance;
+            at.v += subject->randomSeed.next(distance * 2) - distance;
         }
 
-        auto product = CreateAnySpaceObject(baseObject, &vel, &at, direction, focus->owner, 0, -1);
+        auto product =
+                CreateAnySpaceObject(baseObject, &vel, &at, direction, subject->owner, 0, -1);
         if (!product.get()) {
             continue;
         }
@@ -146,25 +147,25 @@ static void create_object(
             uint32_t save_attributes = product->attributes;
             product->attributes &= ~kStaticDestination;
             if (product->owner.get()) {
-                if (action.reflexive) {
-                    if (action.verb != kCreateObjectSetDest) {
-                        OverrideObjectDestination(product, focus);
-                    } else if (focus->destObject.get()) {
-                        OverrideObjectDestination(product, focus->destObject);
+                if (reflexive) {
+                    if (verb != kCreateObjectSetDest) {
+                        OverrideObjectDestination(product, subject);
+                    } else if (subject->destObject.get()) {
+                        OverrideObjectDestination(product, subject->destObject);
                     }
                 }
-            } else if (action.reflexive) {
+            } else if (reflexive) {
                 product->timeFromOrigin = kTimeToCheckHome;
                 product->runTimeFlags &= ~kHasArrived;
-                product->destObject       = focus;  // a->destinationObject;
-                product->destObjectDest   = focus->destObject;
-                product->destObjectID     = focus->id;
-                product->destObjectDestID = focus->destObjectID;
+                product->destObject       = subject;  // a->destinationObject;
+                product->destObjectDest   = subject->destObject;
+                product->destObjectID     = subject->id;
+                product->destObjectDestID = subject->destObjectID;
             }
             product->attributes = save_attributes;
         }
-        product->targetObject   = focus->targetObject;
-        product->targetObjectID = focus->targetObjectID;
+        product->targetObject   = subject->targetObject;
+        product->targetObjectID = subject->targetObjectID;
         product->closestObject  = product->targetObject;
 
         //  ugly though it is, we have to fill in the rest of
@@ -172,22 +173,10 @@ static void create_object(
         if (product->attributes & kIsVector) {
             if (product->frame.vector->vectorKind != Vector::BOLT) {
                 // special beams need special post-creation acts
-                Vectors::set_attributes(product, focus);
+                Vectors::set_attributes(product, subject);
             }
         }
     }
-}
-
-void CreateObjectAction::apply(
-        Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-        Point* offset) {
-    create_object(*this, focus, subject, offset);
-}
-
-void CreateObjectSetDestAction::apply(
-        Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-        Point* offset) {
-    create_object(*this, focus, subject, offset);
 }
 
 static void play_sound(const ActionBase& action, Handle<SpaceObject> focus) {

@@ -229,8 +229,7 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
         case kCreateObject:
             return read_from(sub, &action->init<CreateObjectAction>()->argument.createObject);
         case kCreateObjectSetDest:
-            return read_from(
-                    sub, &action->init<CreateObjectSetDestAction>()->argument.createObject);
+            return read_from(sub, &action->init<CreateObjectAction>()->argument.createObject);
 
         case kPlaySound:
             return read_from(sub, &action->init<PlaySoundAction>()->argument.playSound);

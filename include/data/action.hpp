@@ -442,12 +442,6 @@ struct ColorFlashAction : public ActionBase {
             Point* offset);
 };
 
-struct CreateObjectSetDestAction : public ActionBase {
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
 struct NilTargetAction : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
