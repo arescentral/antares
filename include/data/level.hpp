@@ -208,11 +208,6 @@ struct Level::Initial {
     };
     Attributes attributes;
 
-    // Transient information during level.
-    // TODO(sfiera): remove.
-    Handle<SpaceObject> realObject;
-    int32_t             realObjectID;
-
     static const size_t byte_size = 108;
 };
 bool                        read_from(pn::file_view in, Level::Initial* level_initial);
@@ -227,10 +222,6 @@ struct Level::ConditionBase {
     bool                initially_enabled = true;
     bool                persistent        = false;
     std::vector<Action> action;
-
-    // Transient information during level.
-    // TODO(sfiera): remove.
-    bool enabled = true;
 
     static const size_t byte_size = 38;
 
@@ -398,8 +389,6 @@ struct Level::Condition {
                    operator bool() const { return _base != nullptr; }
     ConditionBase* operator->() const { return _base.get(); }
     ConditionBase& operator*() const { return *_base.get(); }
-
-    bool active() { return _base->persistent || _base->enabled; }
 
     template <typename T>
     T* init() {

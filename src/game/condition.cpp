@@ -161,10 +161,11 @@ bool Level::ZoomCondition::is_true() const { return op_compare(op, g.zoom, value
 
 void CheckLevelConditions() {
     for (auto& c : g.level->conditions) {
-        if (c.active() && c->is_true()) {
-            c->enabled    = false;
-            auto  sObject = GetObjectFromInitialNumber(c->subject);
-            auto  dObject = GetObjectFromInitialNumber(c->object);
+        int index = (&c - g.level->conditions.data());
+        if ((g.condition_enabled[index] || c->persistent) && c->is_true()) {
+            g.condition_enabled[index] = false;
+            auto  sObject              = GetObjectFromInitialNumber(c->subject);
+            auto  dObject              = GetObjectFromInitialNumber(c->object);
             Point offset;
             exec(c->action, sObject, dObject, &offset);
         }

@@ -1213,7 +1213,7 @@ int32_t MiniComputerGetStatusValue(int32_t whichLine) {
         case kPlainTextStatus: return 0; break;
 
         case kTrueFalseCondition:
-            if (g.level->conditions[line->whichStatus]->enabled) {
+            if (g.condition_enabled[line->whichStatus]) {
                 return 0;
             } else {
                 return 1;

@@ -442,9 +442,7 @@ std::vector<Level::Briefing> read_briefings(int begin, int end) {
 
 bool read_from(pn::file_view in, Level::Initial* level_initial) {
     int32_t type, owner;
-    uint8_t unused[4];
-    if (!(in.read(&type, &owner) && (fread(unused, 1, 4, in.c_obj()) == 4) &&
-          in.read(&level_initial->realObjectID) && read_from(in, &level_initial->at) &&
+    if (!(in.read(&type, &owner, pn::pad(8)) && read_from(in, &level_initial->at) &&
           read_from(in, &level_initial->earning) &&
           in.read(pn::pad(12), &level_initial->sprite_override))) {
         return false;
@@ -459,7 +457,6 @@ bool read_from(pn::file_view in, Level::Initial* level_initial) {
     if (!in.read(&level_initial->target, &name_id, &name_index, &attributes)) {
         return false;
     }
-    level_initial->realObject = Handle<SpaceObject>(-1);
     level_initial->base       = Handle<BaseObject>(type);
     level_initial->owner      = Handle<Admiral>(owner);
     level_initial->attributes = Level::Initial::Attributes(attributes);

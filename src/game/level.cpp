@@ -214,6 +214,13 @@ LoadState start_construct_level(Handle<Level> level) {
 
     // *** END INIT ADMIRALS ***
 
+    g.initials.clear();
+    g.initials.resize(g.level->initials.size());
+    g.initial_ids.clear();
+    g.initial_ids.resize(g.level->initials.size());
+    g.condition_enabled.clear();
+    g.condition_enabled.resize(g.level->conditions.size());
+
     ///// FIRST SELECT WHAT MEDIA WE NEED TO USE:
 
     sys.pix.reset();
@@ -305,7 +312,8 @@ static void load_condition(
     for (const auto& action : (*condition)->action) {
         AddActionMedia(action, GRAY, all_colors, state);
     }
-    (*condition)->enabled = (*condition)->initially_enabled;
+    int index                  = condition - g.level->conditions.data();
+    g.condition_enabled[index] = (*condition)->initially_enabled;
 }
 
 static void run_game_1s() {
@@ -346,14 +354,14 @@ void construct_level(Handle<Level> level, LoadState* state) {
         for (auto& condition : g.level->conditions) {
             load_condition(&condition, all_colors, state);
         }
-        create_initial(&g.level->initials[step]);
+        create_initial(step, &g.level->initials[step]);
     } else if (step < (2 * g.level->initials.size())) {
         step -= g.level->initials.size();
-        create_initial(&g.level->initials[step]);
+        create_initial(step, &g.level->initials[step]);
     } else if (step < (3 * g.level->initials.size())) {
         // double back and set up any defined initial destinations
         step -= (2 * g.level->initials.size());
-        set_initial_destination(&g.level->initials[step], false);
+        set_initial_destination(step, &g.level->initials[step], false);
     } else if (step == (3 * g.level->initials.size())) {
         RecalcAllAdmiralBuildData();  // set up all the admiral's destination objects
         Messages::clear();

@@ -91,6 +91,11 @@ struct GlobalState {
     std::unique_ptr<Destination[]> destinations;  // Auxiliary info for kIsDestination objects.
     std::unique_ptr<Sprite[]>      sprites;       // Auxiliary info for objects with sprites.
 
+    std::vector<Handle<SpaceObject>> initials;     // May change due to assume initial.
+    std::vector<int32_t>             initial_ids;  // Ditto.
+
+    std::vector<bool> condition_enabled;  // Check conditions if enabled or persistent.
+
     bool            game_over;     // True if an admiral won or lost the level.
     game_ticks      game_over_at;  // The time to stop the game (ignored unless game_over).
     Handle<Admiral> victor;        // The winner (or none).

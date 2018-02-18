@@ -27,9 +27,9 @@
 
 namespace antares {
 
-void create_initial(Level::Initial* initial) {
+void create_initial(int index, Level::Initial* initial) {
     if (initial->attributes.initially_hidden()) {
-        initial->realObject = SpaceObject::none();
+        g.initials[index] = SpaceObject::none();
         return;
     }
 
@@ -51,14 +51,14 @@ void create_initial(Level::Initial* initial) {
     auto base = initial->base;
     // TODO(sfiera): remap object in networked games.
     fixedPointType v        = {Fixed::zero(), Fixed::zero()};
-    auto           anObject = initial->realObject = CreateAnySpaceObject(
+    auto           anObject = g.initials[index] = CreateAnySpaceObject(
             base, &v, &coord, g.angle, owner, specialAttributes, initial->sprite_override);
 
     if (anObject->attributes & kIsDestination) {
         anObject->asDestination = MakeNewDestination(
                 anObject, initial->build, initial->earning, initial->name_override);
     }
-    initial->realObjectID = anObject->id;
+    g.initial_ids[index] = anObject->id;
 
     if (initial->attributes.is_player_ship() && owner.get() && !owner->flagship().get()) {
         owner->set_flagship(anObject);
@@ -79,8 +79,9 @@ void create_initial(Level::Initial* initial) {
     }
 }
 
-void set_initial_destination(const Level::Initial* initial, bool preserve) {
-    if (!initial->realObject.get()     // hasn't been created yet
+void set_initial_destination(int index, const Level::Initial* initial, bool preserve) {
+    auto object = g.initials[index];
+    if (!object.get()                  // hasn't been created yet
         || (initial->target < 0)       // doesn't have a target
         || (!initial->owner.get())) {  // doesn't have an owner
         return;
@@ -89,16 +90,15 @@ void set_initial_destination(const Level::Initial* initial, bool preserve) {
     // get the correct admiral #
     Handle<Admiral> owner = initial->owner;
 
-    const auto& target = g.level->initials[initial->target];
-    if (target.realObject.get()) {
+    const auto& target = g.initials[initial->target];
+    if (target.get()) {
         auto saveDest = owner->target();  // save the original dest
 
         // set the admiral's dest object to the mapped initial dest object
-        owner->set_target(target.realObject);
+        owner->set_target(target);
 
         // now give the mapped initial object the admiral's destination
 
-        auto     object            = initial->realObject;
         uint32_t specialAttributes = object->attributes;  // preserve the attributes
         object->attributes &=
                 ~kStaticDestination;  // we've got to force this off so we can set dest
@@ -140,7 +140,7 @@ void UnhideInitialObject(int32_t whichInitial) {
     auto base = initial->base;
     // TODO(sfiera): remap objects in networked games.
     fixedPointType v        = {Fixed::zero(), Fixed::zero()};
-    auto           anObject = initial->realObject = CreateAnySpaceObject(
+    auto           anObject = g.initials[whichInitial] = CreateAnySpaceObject(
             base, &v, &coord, 0, owner, specialAttributes, initial->sprite_override);
 
     if (anObject->attributes & kIsDestination) {
@@ -162,7 +162,7 @@ void UnhideInitialObject(int32_t whichInitial) {
         }
     }
 
-    initial->realObjectID = anObject->id;
+    g.initial_ids[whichInitial] = anObject->id;
     if (initial->attributes.is_player_ship() && owner.get() && !owner->flagship().get()) {
         owner->set_flagship(anObject);
         if (owner == g.admiral) {
@@ -170,15 +170,14 @@ void UnhideInitialObject(int32_t whichInitial) {
         }
     }
 
-    set_initial_destination(initial, true);
+    set_initial_destination(whichInitial, initial, true);
 }
 
 Handle<SpaceObject> GetObjectFromInitialNumber(int32_t initialNumber) {
     if (initialNumber >= 0) {
-        const Level::Initial& initial = g.level->initials[initialNumber];
-        if (initial.realObject.get()) {
-            auto object = initial.realObject;
-            if ((object->id != initial.realObjectID) || (object->active != kObjectInUse)) {
+        auto object = g.initials[initialNumber];
+        if (object.get()) {
+            if ((object->id != g.initial_ids[initialNumber]) || (object->active != kObjectInUse)) {
                 return SpaceObject::none();
             }
             return object;

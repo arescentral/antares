@@ -23,9 +23,9 @@
 
 namespace antares {
 
-void                create_initial(Level::Initial* initial);
-void                set_initial_destination(const Level::Initial* initial, bool preserve);
-void                UnhideInitialObject(int32_t whichInitial);
+void create_initial(int index, Level::Initial* initial);
+void set_initial_destination(int index, const Level::Initial* initial, bool preserve);
+void UnhideInitialObject(int32_t whichInitial);
 Handle<SpaceObject> GetObjectFromInitialNumber(int32_t initialNumber);
 
 }  // namespace antares
