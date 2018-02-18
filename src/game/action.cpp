@@ -269,7 +269,7 @@ static void alter_hidden(const Action& action) {
     const auto alter = action.argument.alterHidden;
     int32_t    begin = alter.first;
     int32_t    end   = begin + std::max(0, alter.count_minus_1) + 1;
-    for (auto i : range(begin, end)) {
+    for (auto i : HandleList<Level::Initial>(begin, end)) {
         UnhideInitialObject(i);
     }
 }
@@ -682,11 +682,13 @@ static void execute_actions(
         }
         auto subject = original_subject;
         if (action->initialSubjectOverride != kNoShip) {
-            subject = GetObjectFromInitialNumber(action->initialSubjectOverride);
+            subject = GetObjectFromInitialNumber(
+                    Handle<Level::Initial>(action->initialSubjectOverride));
         }
         auto object = original_object;
         if (action->initialDirectOverride != kNoShip) {
-            object = GetObjectFromInitialNumber(action->initialDirectOverride);
+            object = GetObjectFromInitialNumber(
+                    Handle<Level::Initial>(action->initialDirectOverride));
         }
 
         if ((action->delay > ticks(0)) && allowDelay) {

@@ -45,7 +45,7 @@ Point BriefingSprite_GetBestLocation(
         int32_t gridWidth, int32_t gridHeight, Rect* bounds);
 
 void GetInitialObjectSpriteData(
-        const Level* level, int32_t whichObject, int32_t maxSize, Rect* bounds,
+        const Level* level, Handle<Level::Initial> whichObject, int32_t maxSize, Rect* bounds,
         coordPointType* corner, int32_t scale, int32_t* thisScale, Point* where, Rect* spriteRect);
 
 void GetRealObjectSpriteData(
@@ -212,7 +212,7 @@ void Briefing_Grid_Set(
 }
 
 void GetInitialObjectSpriteData(
-        const Level* level, int32_t whichObject, int32_t maxSize, Rect* bounds,
+        const Level* level, Handle<Level::Initial> whichObject, int32_t maxSize, Rect* bounds,
         coordPointType* corner, int32_t scale, int32_t* thisScale, Point* where,
         Rect* spriteRect) {
     spriteRect->right = spriteRect->left = -1;
@@ -455,7 +455,7 @@ void BriefPoint_Data_Get(
 
 #pragma unused(minSectorSize)
     hiliteBounds->right = hiliteBounds->left = 0;
-    if (brief->object < 0) {
+    if (!brief->object.get()) {
         hiliteBounds->left = hiliteBounds->right = -1;
     } else {
         GetInitialObjectSpriteData(

@@ -208,6 +208,10 @@ struct Level::Initial {
     };
     Attributes attributes;
 
+    static Level::Initial*            get(int n);
+    static Handle<Level::Initial>     none() { return Handle<Level::Initial>(-1); }
+    static HandleList<Level::Initial> all();
+
     static const size_t byte_size = 108;
 };
 bool                        read_from(pn::file_view in, Level::Initial* level_initial);
@@ -216,12 +220,12 @@ std::vector<Level::Initial> read_initials(int begin, int end);
 struct Level::ConditionBase {
     enum class Op { EQ, NE, LT, GT, LE, GE };
 
-    Op                  op                = Op::EQ;
-    int32_t             subject           = -1;  // initial object #
-    int32_t             object            = -1;  // initial object #
-    bool                initially_enabled = true;
-    bool                persistent        = false;
-    std::vector<Action> action;
+    Op                     op                = Op::EQ;
+    bool                   initially_enabled = true;
+    bool                   persistent        = false;
+    Handle<Level::Initial> subject;
+    Handle<Level::Initial> object;
+    std::vector<Action>    action;
 
     static const size_t byte_size = 38;
 
@@ -280,9 +284,9 @@ struct Level::CounterCondition : Level::ConditionBase {
 // or `object`.
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”
 struct Level::DestroyedCondition : Level::ConditionBase {
-    int32_t      initial;
-    bool         value;
-    virtual bool is_true() const;
+    Handle<Level::Initial> initial;
+    bool                   value;
+    virtual bool           is_true() const;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -411,9 +415,9 @@ struct Level::Condition {
 //
 
 struct Level::Briefing {
-    int32_t    object;   // Index into g.level->initials, or <0 for freestanding.
-    pn::string title;    // Plain text, used for title bar.
-    pn::string content;  // Styled text, used for body.
+    Handle<Level::Initial> object;   // Object to focus on, or none for freestanding.
+    pn::string             title;    // Plain text, used for title bar.
+    pn::string             content;  // Styled text, used for body.
 
     static const size_t byte_size = 24;
 };

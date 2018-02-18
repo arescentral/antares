@@ -265,12 +265,14 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
         }
 
         case kDestructionCondition: {
-            auto* destroyed = condition->init<Level::DestroyedCondition>();
-            if (!sub.read(&destroyed->initial)) {
+            int32_t initial;
+            if (!sub.read(&initial)) {
                 return false;
             }
-            destroyed->value = true;
-            destroyed->op    = Level::ConditionBase::Op::EQ;
+            auto* destroyed    = condition->init<Level::DestroyedCondition>();
+            destroyed->initial = Handle<Level::Initial>(initial);
+            destroyed->value   = true;
+            destroyed->op      = Level::ConditionBase::Op::EQ;
             break;
         }
 
@@ -354,8 +356,8 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
     }
 
     if (*condition) {
-        (*condition)->subject           = subject;
-        (*condition)->object            = object;
+        (*condition)->subject           = Handle<Level::Initial>(subject);
+        (*condition)->object            = Handle<Level::Initial>(object);
         (*condition)->action            = read_actions(action_start, action_start + action_count);
         (*condition)->persistent        = !(flags & kTrueOnlyOnce);
         (*condition)->initially_enabled = !(flags & kInitiallyTrue);
@@ -392,14 +394,15 @@ std::vector<Level::Condition> read_conditions(int begin, int end) {
 bool read_from(pn::file_view in, Level::Briefing* brief_point) {
     uint8_t kind;
     int16_t title_id, title_index, content_id;
-    if (!in.read(
-                &kind, pn::pad(1), &brief_point->object, pn::pad(12), &title_id, &title_index,
-                &content_id)) {
+    int32_t object;
+    if (!in.read(&kind, pn::pad(1), &object, pn::pad(12), &title_id, &title_index, &content_id)) {
         return false;
     }
 
-    if (kind != 1) {
-        brief_point->object = -1;
+    if (kind == 1) {
+        brief_point->object = Handle<Level::Initial>(object);
+    } else {
+        brief_point->object = Level::Initial::none();
     }
 
     try {

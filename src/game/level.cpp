@@ -161,7 +161,7 @@ static coordPointType rotate_coords(int32_t h, int32_t v, int32_t rotation) {
     return coord;
 }
 
-void GetInitialCoord(const Level::Initial* initial, coordPointType* coord, int32_t rotation) {
+void GetInitialCoord(Handle<Level::Initial> initial, coordPointType* coord, int32_t rotation) {
     *coord = rotate_coords(initial->at.h, initial->at.v, rotation);
 }
 
@@ -215,9 +215,9 @@ LoadState start_construct_level(Handle<Level> level) {
     // *** END INIT ADMIRALS ***
 
     g.initials.clear();
-    g.initials.resize(g.level->initials.size());
+    g.initials.resize(Level::Initial::all().size());
     g.initial_ids.clear();
-    g.initial_ids.resize(g.level->initials.size());
+    g.initial_ids.resize(Level::Initial::all().size());
     g.condition_enabled.clear();
     g.condition_enabled.resize(g.level->conditions.size());
 
@@ -227,7 +227,7 @@ LoadState start_construct_level(Handle<Level> level) {
     sys.sound.reset();
 
     LoadState s;
-    s.max = g.level->initials.size() * 3L + 1 +
+    s.max = Level::Initial::all().size() * 3L + 1 +
             g.level->startTime.count();  // for each run through the initial num
 
     return s;
@@ -262,10 +262,10 @@ static void load_blessed_objects(std::bitset<16> all_colors, LoadState* state) {
     }
 }
 
-static void load_initial(int i, std::bitset<16> all_colors, LoadState* state) {
-    const Level::Initial* initial    = &g.level->initials[i];
-    Handle<Admiral>       owner      = initial->owner;
-    auto                  baseObject = initial->base;
+static void load_initial(
+        Handle<Level::Initial> initial, std::bitset<16> all_colors, LoadState* state) {
+    Handle<Admiral> owner      = initial->owner;
+    auto            baseObject = initial->base;
     // TODO(sfiera): remap objects in networked games.
 
     // Load the media for this object
@@ -345,24 +345,24 @@ void construct_level(Handle<Level> level, LoadState* state) {
 
     if (step == 0) {
         load_blessed_objects(all_colors, state);
-        load_initial(step, all_colors, state);
-    } else if (step < g.level->initials.size()) {
-        load_initial(step, all_colors, state);
-    } else if (step == g.level->initials.size()) {
+        load_initial(Handle<Level::Initial>(step), all_colors, state);
+    } else if (step < Level::Initial::all().size()) {
+        load_initial(Handle<Level::Initial>(step), all_colors, state);
+    } else if (step == Level::Initial::all().size()) {
         // add media for all condition actions
-        step -= g.level->initials.size();
+        step -= Level::Initial::all().size();
         for (auto& condition : g.level->conditions) {
             load_condition(&condition, all_colors, state);
         }
-        create_initial(step, &g.level->initials[step]);
-    } else if (step < (2 * g.level->initials.size())) {
-        step -= g.level->initials.size();
-        create_initial(step, &g.level->initials[step]);
-    } else if (step < (3 * g.level->initials.size())) {
+        create_initial(Handle<Level::Initial>(step));
+    } else if (step < (2 * Level::Initial::all().size())) {
+        step -= Level::Initial::all().size();
+        create_initial(Handle<Level::Initial>(step));
+    } else if (step < (3 * Level::Initial::all().size())) {
         // double back and set up any defined initial destinations
-        step -= (2 * g.level->initials.size());
-        set_initial_destination(step, &g.level->initials[step], false);
-    } else if (step == (3 * g.level->initials.size())) {
+        step -= (2 * Level::Initial::all().size());
+        set_initial_destination(Handle<Level::Initial>(step), false);
+    } else if (step == (3 * Level::Initial::all().size())) {
         RecalcAllAdmiralBuildData();  // set up all the admiral's destination objects
         Messages::clear();
         g.time = game_ticks(-g.level->startTime);
@@ -411,12 +411,12 @@ void GetLevelFullScaleAndCorner(
         mustFit = bounds->right - bounds->left;
 
     biggest = 0;
-    for (const auto& initial : level->initials) {
-        if (!(initial.attributes.initially_hidden())) {
-            GetInitialCoord(&initial, reinterpret_cast<coordPointType*>(&coord), g.angle);
+    for (const auto& initial : Level::Initial::all()) {
+        if (!(initial->attributes.initially_hidden())) {
+            GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&coord), g.angle);
 
-            for (const auto& other : level->initials) {
-                GetInitialCoord(&other, reinterpret_cast<coordPointType*>(&otherCoord), g.angle);
+            for (const auto& other : Level::Initial::all()) {
+                GetInitialCoord(other, reinterpret_cast<coordPointType*>(&otherCoord), g.angle);
 
                 if (ABS(otherCoord.h - coord.h) > biggest) {
                     biggest = ABS(otherCoord.h - coord.h);
@@ -437,9 +437,9 @@ void GetLevelFullScaleAndCorner(
     otherCoord.v = kUniversalCenter;
     coord.h      = kUniversalCenter;
     coord.v      = kUniversalCenter;
-    for (const auto& initial : level->initials) {
-        if (!(initial.attributes.initially_hidden())) {
-            GetInitialCoord(&initial, reinterpret_cast<coordPointType*>(&tempCoord), g.angle);
+    for (const auto& initial : Level::Initial::all()) {
+        if (!(initial->attributes.initially_hidden())) {
+            GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&tempCoord), g.angle);
 
             if (tempCoord.h < coord.h) {
                 coord.h = tempCoord.h;
