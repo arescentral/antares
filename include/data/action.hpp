@@ -31,6 +31,7 @@
 namespace antares {
 
 class SpaceObject;
+struct Level_Initial;
 
 enum objectVerbIDEnum {
     kNoAction            = 0 << 8,
@@ -303,10 +304,10 @@ struct Action {
     int16_t  owner;  // 0 no matter, 1 same owner, -1 different owner
     ticks    delay;
     //  uint32_t                    reserved1;
-    int16_t      initialSubjectOverride;
-    int16_t      initialDirectOverride;
-    uint32_t     reserved2;
-    argumentType argument;
+    Handle<Level_Initial> initialSubjectOverride;
+    Handle<Level_Initial> initialDirectOverride;
+    uint32_t              reserved2;
+    argumentType          argument;
 
     static const size_t byte_size = 48;
 };

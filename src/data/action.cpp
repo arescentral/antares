@@ -21,6 +21,7 @@
 #include <sfz/sfz.hpp>
 
 #include "data/base-object.hpp"
+#include "data/level.hpp"
 #include "data/resource.hpp"
 
 namespace antares {
@@ -238,12 +239,13 @@ bool read_from(pn::file_view in, Action* action) {
         action->levelKeyTag = 0;
     }
     uint32_t delay;
-    if (!in.read(
-                &action->owner, &delay, &action->initialSubjectOverride,
-                &action->initialDirectOverride)) {
+    int16_t  subject_override, object_override;
+    if (!in.read(&action->owner, &delay, &subject_override, &object_override)) {
         return false;
     }
-    action->delay = ticks(delay);
+    action->delay                  = ticks(delay);
+    action->initialSubjectOverride = Handle<Level::Initial>(subject_override);
+    action->initialDirectOverride  = Handle<Level::Initial>(object_override);
     char ignore[4];
     if (fread(ignore, 1, 4, in.c_obj()) < 4) {
         return false;

@@ -33,6 +33,9 @@ namespace antares {
 
 struct LevelName;
 class BaseObject;
+struct Level_Briefing;
+struct Level_Condition;
+struct Level_Initial;
 
 const size_t kMaxPlayerNum = 4;
 
@@ -106,11 +109,11 @@ enum conditionType {
 };
 
 struct Level {
-    struct Initial;
+    using Initial = Level_Initial;
 
-    struct Briefing;
+    using Briefing = Level_Briefing;
 
-    struct Condition;
+    using Condition = Level_Condition;
     struct ConditionBase;
     struct AutopilotCondition;
     struct BuildingCondition;
@@ -182,7 +185,7 @@ struct Level {
 bool read_from(pn::file_view in, Level* level);
 bool read_from(pn::file_view in, Level::Player* level_player);
 
-struct Level::Initial {
+struct Level_Initial {
     Handle<BaseObject> base;
     Handle<Admiral>    owner;
     Point              at;
@@ -388,21 +391,21 @@ struct Level::ZoomCondition : Level::ConditionBase {
     virtual bool is_true() const;
 };
 
-struct Level::Condition {
+struct Level_Condition {
   public:
-                   operator bool() const { return _base != nullptr; }
-    ConditionBase* operator->() const { return _base.get(); }
-    ConditionBase& operator*() const { return *_base.get(); }
+                          operator bool() const { return _base != nullptr; }
+    Level::ConditionBase* operator->() const { return _base.get(); }
+    Level::ConditionBase& operator*() const { return *_base.get(); }
 
     template <typename T>
     T* init() {
         T* out;
-        _base = std::unique_ptr<ConditionBase>(out = new T);
+        _base = std::unique_ptr<Level::ConditionBase>(out = new T);
         return out;
     }
 
   private:
-    std::unique_ptr<ConditionBase> _base;
+    std::unique_ptr<Level::ConditionBase> _base;
 };
 
 //
@@ -414,7 +417,7 @@ struct Level::Condition {
 // content ID, # (int16_t, int16_t)
 //
 
-struct Level::Briefing {
+struct Level_Briefing {
     Handle<Level::Initial> object;   // Object to focus on, or none for freestanding.
     pn::string             title;    // Plain text, used for title bar.
     pn::string             content;  // Styled text, used for body.

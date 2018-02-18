@@ -681,12 +681,12 @@ static void execute_actions(
             break;
         }
         auto subject = original_subject;
-        if (action->initialSubjectOverride != kNoShip) {
+        if (action->initialSubjectOverride.number() != kNoShip) {
             subject = GetObjectFromInitialNumber(
                     Handle<Level::Initial>(action->initialSubjectOverride));
         }
         auto object = original_object;
-        if (action->initialDirectOverride != kNoShip) {
+        if (action->initialDirectOverride.number() != kNoShip) {
             object = GetObjectFromInitialNumber(
                     Handle<Level::Initial>(action->initialDirectOverride));
         }
