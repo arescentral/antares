@@ -110,26 +110,24 @@ struct Level {
 
     struct Briefing;
 
-    struct ConditionBase;
-    struct NullCondition;
-    struct CounterCondition;
-    struct OwnerCondition;
-    struct DestructionCondition;
-    struct TimeCondition;
-    struct HealthCondition;
-    struct IsAuxiliaryObject;
-    struct IsTargetObject;
-    struct DistanceCondition;
-    struct VelocityLessThanEqualToCondition;
-    struct NoShipsLeftCondition;
-    struct CurrentMessageCondition;
-    struct CurrentComputerCondition;
-    struct ZoomLevelCondition;
-    struct AutopilotCondition;
-    struct ObjectIsBeingBuilt;
-    struct DirectIsSubjectTarget;
-    struct SubjectIsPlayerCondition;
     struct Condition;
+    struct ConditionBase;
+    struct AutopilotCondition;
+    struct BuildingCondition;
+    struct ComputerCondition;
+    struct CounterCondition;
+    struct DestroyedCondition;
+    struct DistanceCondition;
+    struct FalseCondition;
+    struct HealthCondition;
+    struct MessageCondition;
+    struct OrderedCondition;
+    struct OwnerCondition;
+    struct ShipsCondition;
+    struct SpeedCondition;
+    struct SubjectCondition;
+    struct TimeCondition;
+    struct ZoomCondition;
 
     enum Type {
         DEMO,
@@ -221,12 +219,6 @@ bool                        read_from(pn::file_view in, Level::Initial* level_in
 std::vector<Level::Initial> read_initials(int begin, int end);
 
 struct Level::ConditionBase {
-    struct CounterArgument {
-        Handle<Admiral> whichPlayer;
-        int32_t         whichCounter;
-        int32_t         amount;
-    };
-
     enum class Op { EQ, NE, LT, GT, LE, GE };
 
     Op                  op                = Op::EQ;
@@ -249,75 +241,89 @@ struct Level::ConditionBase {
     ConditionBase(const ConditionBase&) = delete;
     ConditionBase& operator=(const ConditionBase&) = delete;
 };
-bool read_from(pn::file_view in, Level::Condition* level_condition);
-bool read_from(pn::file_view in, Level::ConditionBase::CounterArgument* counter_argument);
+bool                          read_from(pn::file_view in, Level::Condition* level_condition);
 std::vector<Level::Condition> read_conditions(int begin, int end);
 
-struct Level::NullCondition : Level::ConditionBase {
-    virtual bool is_true() const;
-};
-struct Level::CounterCondition : Level::ConditionBase {
-    Level::ConditionBase::CounterArgument counter;
-    virtual bool                          is_true() const;
-};
-struct Level::OwnerCondition : Level::ConditionBase {
-    int32_t      longValue;
-    virtual bool is_true() const;
-};
-struct Level::DestructionCondition : Level::ConditionBase {
-    int32_t      longValue;
-    virtual bool is_true() const;
-};
-struct Level::TimeCondition : Level::ConditionBase {
-    ticks        timeValue;
-    virtual bool is_true() const;
-};
-struct Level::HealthCondition : Level::ConditionBase {
-    double       value;
-    virtual bool is_true() const;
-};
-struct Level::IsAuxiliaryObject : Level::ConditionBase {
-    virtual bool is_true() const;
-};
-struct Level::IsTargetObject : Level::ConditionBase {
-    virtual bool is_true() const;
-};
-struct Level::DistanceCondition : Level::ConditionBase {
-    uint32_t     unsignedLongValue;
-    virtual bool is_true() const;
-};
-struct Level::VelocityLessThanEqualToCondition : Level::ConditionBase {
-    Fixed        fixedValue;
-    virtual bool is_true() const;
-};
-struct Level::NoShipsLeftCondition : Level::ConditionBase {
-    int32_t      longValue;
-    virtual bool is_true() const;
-};
-struct Level::CurrentMessageCondition : Level::ConditionBase {
-    Point        location;
-    virtual bool is_true() const;
-};
-struct Level::CurrentComputerCondition : Level::ConditionBase {
-    Point        location;
-    virtual bool is_true() const;
-};
-struct Level::ZoomLevelCondition : Level::ConditionBase {
-    int32_t      longValue;
-    virtual bool is_true() const;
-};
 struct Level::AutopilotCondition : Level::ConditionBase {
     bool         value;
     virtual bool is_true() const;
 };
-struct Level::ObjectIsBeingBuilt : Level::ConditionBase {
+
+struct Level::BuildingCondition : Level::ConditionBase {
     bool         value;
     virtual bool is_true() const;
 };
-struct Level::DirectIsSubjectTarget : Level::ConditionBase {
+
+struct Level::ComputerCondition : Level::ConditionBase {
+    int32_t      screen;
+    int32_t      line;
     virtual bool is_true() const;
 };
-struct Level::SubjectIsPlayerCondition : Level::ConditionBase {
+
+struct Level::CounterCondition : Level::ConditionBase {
+    Handle<Admiral> whichPlayer;
+    int32_t         whichCounter;
+    int32_t         amount;
+    virtual bool    is_true() const;
+};
+
+struct Level::DestroyedCondition : Level::ConditionBase {
+    int32_t      longValue;
+    virtual bool is_true() const;
+};
+
+struct Level::DistanceCondition : Level::ConditionBase {
+    uint32_t     unsignedLongValue;
+    virtual bool is_true() const;
+};
+
+struct Level::HealthCondition : Level::ConditionBase {
+    double       value;
+    virtual bool is_true() const;
+};
+
+struct Level::MessageCondition : Level::ConditionBase {
+    int32_t      start;
+    int32_t      page;
+    virtual bool is_true() const;
+};
+
+struct Level::FalseCondition : Level::ConditionBase {
+    virtual bool is_true() const;
+};
+
+struct Level::OwnerCondition : Level::ConditionBase {
+    int32_t      longValue;
+    virtual bool is_true() const;
+};
+
+struct Level::OrderedCondition : Level::ConditionBase {
+    virtual bool is_true() const;
+};
+
+struct Level::ShipsCondition : Level::ConditionBase {
+    int32_t      longValue;
+    virtual bool is_true() const;
+};
+
+struct Level::SpeedCondition : Level::ConditionBase {
+    Fixed        fixedValue;
+    virtual bool is_true() const;
+};
+
+struct Level::SubjectCondition : Level::ConditionBase {
+    enum class Value { CONTROL, TARGET, PLAYER };
+    Value        value;
+    virtual bool is_true() const;
+};
+
+struct Level::TimeCondition : Level::ConditionBase {
+    ticks        timeValue;
+    virtual bool is_true() const;
+};
+
+struct Level::ZoomCondition : Level::ConditionBase {
+    int32_t      longValue;
     virtual bool is_true() const;
 };
 

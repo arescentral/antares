@@ -31,8 +31,6 @@
 
 namespace antares {
 
-bool Level::NullCondition::is_true() const { return false; }
-
 template <typename X, typename Y>
 static bool op_compare(Level::ConditionBase::Op op, const X& x, const Y& y) {
     switch (op) {
@@ -54,9 +52,33 @@ static bool op_eq(Level::ConditionBase::Op op, const X& x, const Y& y) {
     }
 }
 
+bool Level::AutopilotCondition::is_true() const {
+    return op_eq(op, IsPlayerShipOnAutoPilot(), value);
+}
+
+bool Level::BuildingCondition::is_true() const {
+    auto buildAtObject = GetAdmiralBuildAtObject(g.admiral);
+    return buildAtObject.get() && op_eq(op, buildAtObject->totalBuildTime > ticks(0), value);
+}
+
+bool Level::ComputerCondition::is_true() const {
+    if (line < 0) {
+        pn::format(stderr, "{0} {1}\n", g.mini.currentScreen, screen);
+        return op_eq(op, g.mini.currentScreen, screen);
+    } else {
+        return op_eq(
+                op, std::make_pair(g.mini.currentScreen, g.mini.selectLine),
+                std::make_pair(screen, line));
+    }
+}
+
 bool Level::CounterCondition::is_true() const {
-    Handle<Admiral> a = counter.whichPlayer;
-    return op_compare(op, GetAdmiralScore(a, counter.whichCounter), counter.amount);
+    return op_compare(op, GetAdmiralScore(whichPlayer, whichCounter), amount);
+}
+
+bool Level::DestroyedCondition::is_true() const {
+    auto sObject = GetObjectFromInitialNumber(longValue);
+    return op_eq(op, sObject.get(), nullptr);
 }
 
 bool Level::DistanceCondition::is_true() const {
@@ -76,15 +98,54 @@ bool Level::DistanceCondition::is_true() const {
     return false;
 }
 
+bool Level::FalseCondition::is_true() const { return false; }
+
+bool Level::HealthCondition::is_true() const {
+    auto   sObject = GetObjectFromInitialNumber(subject);
+    double health  = 0.0;
+    if (sObject.get()) {
+        health = sObject->health();
+        health /= sObject->max_health();
+    }
+    return op_compare(op, health, value);
+}
+
+bool Level::MessageCondition::is_true() const {
+    return op_eq(op, Messages::current(), start + page - 1);
+}
+
+bool Level::OrderedCondition::is_true() const {
+    auto sObject = GetObjectFromInitialNumber(subject);
+    auto dObject = GetObjectFromInitialNumber(object);
+    return sObject.get() && dObject.get() &&
+           op_eq(op, std::make_pair(sObject->destObject, sObject->destObjectID),
+                 std::make_pair(dObject, dObject->id));
+}
+
 bool Level::OwnerCondition::is_true() const {
     auto sObject = GetObjectFromInitialNumber(subject);
     auto a       = Handle<Admiral>(longValue);
     return sObject.get() && op_eq(op, a, sObject->owner);
 }
 
-bool Level::DestructionCondition::is_true() const {
-    auto sObject = GetObjectFromInitialNumber(longValue);
-    return op_eq(op, sObject.get(), nullptr);
+bool Level::ShipsCondition::is_true() const {
+    return op_compare(op, GetAdmiralShipsLeft(Handle<Admiral>(longValue)), 0);
+}
+
+bool Level::SpeedCondition::is_true() const {
+    auto sObject = GetObjectFromInitialNumber(subject);
+    return sObject.get() &&
+           op_compare(
+                   op, std::max(ABS(sObject->velocity.h), ABS(sObject->velocity.v)), fixedValue);
+}
+
+bool Level::SubjectCondition::is_true() const {
+    auto sObject = GetObjectFromInitialNumber(subject);
+    switch (value) {
+        case Value::CONTROL: return sObject.get() && op_eq(op, sObject, g.admiral->control());
+        case Value::TARGET: return sObject.get() && op_eq(op, sObject, g.admiral->target());
+        case Value::PLAYER: return sObject.get() && op_eq(op, sObject, g.ship);
+    }
 }
 
 bool Level::TimeCondition::is_true() const {
@@ -99,77 +160,7 @@ bool Level::TimeCondition::is_true() const {
     return op_compare(op, game_time + start_time, timeValue);
 }
 
-bool Level::HealthCondition::is_true() const {
-    auto   sObject = GetObjectFromInitialNumber(subject);
-    double health  = 0.0;
-    if (sObject.get()) {
-        health = sObject->health();
-        health /= sObject->max_health();
-    }
-    return op_compare(op, health, value);
-}
-
-bool Level::IsAuxiliaryObject::is_true() const {
-    auto sObject = GetObjectFromInitialNumber(subject);
-    auto dObject = g.admiral->control();
-    return sObject.get() && dObject.get() && op_eq(op, dObject, sObject);
-}
-
-bool Level::IsTargetObject::is_true() const {
-    auto sObject = GetObjectFromInitialNumber(subject);
-    auto dObject = g.admiral->target();
-    return sObject.get() && dObject.get() && op_eq(op, dObject, sObject);
-}
-
-bool Level::VelocityLessThanEqualToCondition::is_true() const {
-    auto sObject = GetObjectFromInitialNumber(subject);
-    return sObject.get() &&
-           op_compare(
-                   op, std::max(ABS(sObject->velocity.h), ABS(sObject->velocity.v)), fixedValue);
-}
-
-bool Level::NoShipsLeftCondition::is_true() const {
-    return op_compare(op, GetAdmiralShipsLeft(Handle<Admiral>(longValue)), 0);
-}
-
-bool Level::CurrentMessageCondition::is_true() const {
-    return op_eq(op, Messages::current(), location.h + location.v - 1);
-}
-
-bool Level::CurrentComputerCondition::is_true() const {
-    if (location.v < 0) {
-        pn::format(stderr, "{0} {1}\n", g.mini.currentScreen, location.h);
-        return op_eq(op, g.mini.currentScreen, location.h);
-    } else {
-        return op_eq(
-                op, std::make_pair(g.mini.currentScreen, g.mini.selectLine),
-                std::make_pair(location.h, location.v));
-    }
-}
-
-bool Level::ZoomLevelCondition::is_true() const { return op_compare(op, g.zoom, longValue); }
-
-bool Level::AutopilotCondition::is_true() const {
-    return op_eq(op, IsPlayerShipOnAutoPilot(), value);
-}
-
-bool Level::ObjectIsBeingBuilt::is_true() const {
-    auto buildAtObject = GetAdmiralBuildAtObject(g.admiral);
-    return buildAtObject.get() && op_eq(op, buildAtObject->totalBuildTime > ticks(0), value);
-}
-
-bool Level::DirectIsSubjectTarget::is_true() const {
-    auto sObject = GetObjectFromInitialNumber(subject);
-    auto dObject = GetObjectFromInitialNumber(object);
-    return sObject.get() && dObject.get() &&
-           op_eq(op, std::make_pair(sObject->destObject, sObject->destObjectID),
-                 std::make_pair(dObject, dObject->id));
-}
-
-bool Level::SubjectIsPlayerCondition::is_true() const {
-    auto sObject = GetObjectFromInitialNumber(subject);
-    return sObject.get() && op_eq(op, sObject, g.ship);
-}
+bool Level::ZoomCondition::is_true() const { return op_compare(op, g.zoom, longValue); }
 
 void CheckLevelConditions() {
     for (auto& c : g.level->conditions) {

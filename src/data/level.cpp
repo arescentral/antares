@@ -186,7 +186,7 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
         case kNoCondition:
         case kLocationCondition:
         case kAgeCondition:
-        case kRandomCondition: condition->init<Level::NullCondition>(); break;
+        case kRandomCondition: condition->init<Level::FalseCondition>(); break;
 
         case kHalfHealthCondition:
             condition->init<Level::HealthCondition>()->value = 0.5;
@@ -194,27 +194,30 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
             break;
 
         case kIsAuxiliaryObject:
-            condition->init<Level::IsAuxiliaryObject>();
+            condition->init<Level::SubjectCondition>()->value =
+                    Level::SubjectCondition::Value::CONTROL;
             (*condition)->op = Level::ConditionBase::Op::EQ;
             break;
 
         case kIsTargetObject:
-            condition->init<Level::IsTargetObject>();
+            condition->init<Level::SubjectCondition>()->value =
+                    Level::SubjectCondition::Value::TARGET;
             (*condition)->op = Level::ConditionBase::Op::EQ;
             break;
 
         case kObjectIsBeingBuilt:
-            condition->init<Level::ObjectIsBeingBuilt>()->value = true;
-            (*condition)->op                                    = Level::ConditionBase::Op::EQ;
+            condition->init<Level::BuildingCondition>()->value = true;
+            (*condition)->op                                   = Level::ConditionBase::Op::EQ;
             break;
 
         case kDirectIsSubjectTarget:
-            condition->init<Level::DirectIsSubjectTarget>();
+            condition->init<Level::OrderedCondition>();
             (*condition)->op = Level::ConditionBase::Op::EQ;
             break;
 
         case kSubjectIsPlayerCondition:
-            condition->init<Level::SubjectIsPlayerCondition>();
+            condition->init<Level::SubjectCondition>()->value =
+                    Level::SubjectCondition::Value::PLAYER;
             (*condition)->op = Level::ConditionBase::Op::EQ;
             break;
 
@@ -228,29 +231,41 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
             (*condition)->op                                    = Level::ConditionBase::Op::EQ;
             break;
 
-        case kCounterCondition:
-            if (!read_from(sub, &condition->init<Level::CounterCondition>()->counter)) {
+        case kCounterCondition: {
+            auto*   counter = condition->init<Level::CounterCondition>();
+            int32_t admiral;
+            if (!sub.read(&admiral, &counter->whichCounter, &counter->amount)) {
                 return false;
             }
-            (*condition)->op = Level::ConditionBase::Op::EQ;
+            counter->whichPlayer = Handle<Admiral>(admiral);
+            counter->op          = Level::ConditionBase::Op::EQ;
             break;
+        }
 
-        case kCounterGreaterCondition:
-            if (!read_from(sub, &condition->init<Level::CounterCondition>()->counter)) {
+        case kCounterGreaterCondition: {
+            auto*   counter = condition->init<Level::CounterCondition>();
+            int32_t admiral;
+            if (!sub.read(&admiral, &counter->whichCounter, &counter->amount)) {
                 return false;
             }
-            (*condition)->op = Level::ConditionBase::Op::GE;
+            counter->whichPlayer = Handle<Admiral>(admiral);
+            counter->op          = Level::ConditionBase::Op::GE;
             break;
+        }
 
-        case kCounterNotCondition:
-            if (!read_from(sub, &condition->init<Level::CounterCondition>()->counter)) {
+        case kCounterNotCondition: {
+            auto*   counter = condition->init<Level::CounterCondition>();
+            int32_t admiral;
+            if (!sub.read(&admiral, &counter->whichCounter, &counter->amount)) {
                 return false;
             }
-            (*condition)->op = Level::ConditionBase::Op::NE;
+            counter->whichPlayer = Handle<Admiral>(admiral);
+            counter->op          = Level::ConditionBase::Op::NE;
             break;
+        }
 
         case kDestructionCondition:
-            if (!sub.read(&condition->init<Level::DestructionCondition>()->longValue)) {
+            if (!sub.read(&condition->init<Level::DestroyedCondition>()->longValue)) {
                 return false;
             }
             (*condition)->op = Level::ConditionBase::Op::EQ;
@@ -264,23 +279,21 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
             break;
 
         case kNoShipsLeftCondition:
-            if (!sub.read(&condition->init<Level::NoShipsLeftCondition>()->longValue)) {
+            if (!sub.read(&condition->init<Level::ShipsCondition>()->longValue)) {
                 return false;
             }
             (*condition)->op = Level::ConditionBase::Op::LE;
             break;
 
         case kZoomLevelCondition:
-            if (!sub.read(&condition->init<Level::ZoomLevelCondition>()->longValue)) {
+            if (!sub.read(&condition->init<Level::ZoomCondition>()->longValue)) {
                 return false;
             }
             (*condition)->op = Level::ConditionBase::Op::EQ;
             break;
 
         case kVelocityLessThanEqualToCondition:
-            if (!read_from(
-                        sub,
-                        &condition->init<Level::VelocityLessThanEqualToCondition>()->fixedValue)) {
+            if (!read_from(sub, &condition->init<Level::SpeedCondition>()->fixedValue)) {
                 return false;
             }
             (*condition)->op = Level::ConditionBase::Op::LT;
@@ -310,19 +323,23 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
             (*condition)->op = Level::ConditionBase::Op::GE;
             break;
 
-        case kCurrentMessageCondition:
-            if (!read_from(sub, &condition->init<Level::CurrentMessageCondition>()->location)) {
+        case kCurrentMessageCondition: {
+            auto* message = condition->init<Level::MessageCondition>();
+            if (!sub.read(&message->start, &message->page)) {
                 return false;
             }
             (*condition)->op = Level::ConditionBase::Op::EQ;
             break;
+        }
 
-        case kCurrentComputerCondition:
-            if (!read_from(sub, &condition->init<Level::CurrentComputerCondition>()->location)) {
+        case kCurrentComputerCondition: {
+            auto* computer = condition->init<Level::ComputerCondition>();
+            if (!sub.read(&computer->screen, &computer->line)) {
                 return false;
             }
             (*condition)->op = Level::ConditionBase::Op::EQ;
             break;
+        }
     }
 
     if (*condition) {
@@ -359,15 +376,6 @@ std::vector<Level::Condition> read_conditions(int begin, int end) {
         read_from(f, &a);
     }
     return conditions;
-}
-
-bool read_from(pn::file_view in, Level::ConditionBase::CounterArgument* counter_argument) {
-    int32_t admiral;
-    if (!in.read(&admiral, &counter_argument->whichCounter, &counter_argument->amount)) {
-        return false;
-    }
-    counter_argument->whichPlayer = Handle<Admiral>(admiral);
-    return true;
 }
 
 bool read_from(pn::file_view in, Level::Briefing* brief_point) {
