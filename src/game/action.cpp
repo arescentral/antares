@@ -178,15 +178,15 @@ void CreateObjectAction::apply(
 void PlaySoundAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto& sound = argument.playSound;
-    auto        id    = sound.idMinimum;
-    if (sound.idRange > 0) {
-        id += focus->randomSeed.next(sound.idRange + 1);
+    auto    pick  = id.first;
+    int32_t range = id.second - id.first;
+    if (range > 1) {
+        pick += focus->randomSeed.next(range);
     }
-    if (sound.absolute) {
-        sys.sound.play(id, sound.volumeMinimum, sound.persistence, sound.priority);
+    if (absolute) {
+        sys.sound.play(pick, volume, persistence, priority);
     } else {
-        sys.sound.play_at(id, sound.volumeMinimum, sound.persistence, sound.priority, focus);
+        sys.sound.play_at(pick, volume, persistence, priority, focus);
     }
 }
 

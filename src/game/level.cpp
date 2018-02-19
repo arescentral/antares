@@ -110,7 +110,6 @@ void AddBaseObjectActionMedia(
 
 void AddActionMedia(
         const Action& action, uint8_t color, std::bitset<16> all_colors, LoadState* state) {
-    int32_t l1, l2;
 #ifdef DATA_COVERAGE
     possible_actions.insert(action.number());
 #endif  // DATA_COVERAGE
@@ -121,13 +120,13 @@ void AddActionMedia(
             AddBaseObjectMedia(action->created_base(), color, all_colors, state);
             break;
 
-        case kPlaySound:
-            l1 = action->argument.playSound.idMinimum;
-            l2 = action->argument.playSound.idMinimum + action->argument.playSound.idRange;
-            for (int32_t count = l1; count <= l2; count++) {
+        case kPlaySound: {
+            auto range = action->sound_range();
+            for (int32_t count = range.first; count < range.second; count++) {
                 sys.sound.load(count);
             }
             break;
+        }
 
         case kAlterBaseType:
             AddBaseObjectMedia(action->argument.alterBaseType.base, color, all_colors, state);

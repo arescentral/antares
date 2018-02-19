@@ -43,16 +43,19 @@ bool read_from(pn::file_view in, CreateObjectAction* create, bool inherit) {
     return true;
 }
 
-bool read_from(pn::file_view in, argumentType::PlaySound* argument) {
-    uint8_t unused1, unused2;
+bool read_from(pn::file_view in, PlaySoundAction* play) {
+    uint8_t absolute;
     int32_t persistence;
+    int32_t id_minimum, id_range;
     if (!in.read(
-                &argument->priority, &unused1, &persistence, &argument->absolute, &unused2,
-                &argument->volumeMinimum, &argument->volumeRange, &argument->idMinimum,
-                &argument->idRange)) {
+                &play->priority, pn::pad(1), &persistence, &absolute, pn::pad(1), &play->volume,
+                pn::pad(4), &id_minimum, &id_range)) {
         return false;
     }
-    argument->persistence = ticks(persistence);
+    play->id.first    = id_minimum;
+    play->id.second   = id_minimum + id_range + 1;
+    play->absolute    = absolute;
+    play->persistence = ticks(persistence);
     return true;
 }
 
@@ -232,8 +235,7 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
         case kCreateObject: return read_from(sub, action->init<CreateObjectAction>(), false);
         case kCreateObjectSetDest: return read_from(sub, action->init<CreateObjectAction>(), true);
 
-        case kPlaySound:
-            return read_from(sub, &action->init<PlaySoundAction>()->argument.playSound);
+        case kPlaySound: return read_from(sub, action->init<PlaySoundAction>());
 
         case kAlter: {
             uint8_t alter;
@@ -411,7 +413,9 @@ std::vector<Action> read_actions(int begin, int end) {
     return actions;
 }
 
-Handle<BaseObject> ActionBase::created_base() const { return BaseObject::none(); }
-Handle<BaseObject> CreateObjectAction::created_base() const { return base; }
+Handle<BaseObject>  ActionBase::created_base() const { return BaseObject::none(); }
+Handle<BaseObject>  CreateObjectAction::created_base() const { return base; }
+std::pair<int, int> ActionBase::sound_range() const { return std::make_pair(-1, -1); }
+std::pair<int, int> PlaySoundAction::sound_range() const { return id; }
 
 }  // namespace antares

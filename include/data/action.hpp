@@ -109,18 +109,6 @@ typedef uint8_t dieVerbIDType;
 struct argumentType {
     argumentType() {}
 
-    // playSound: play a sound effect
-    struct PlaySound {
-        uint8_t priority;
-        ticks   persistence;
-        uint8_t absolute;  // not distanced
-        int32_t volumeMinimum;
-        int32_t volumeRange;
-        int32_t idMinimum;
-        int32_t idRange;
-    };
-    PlaySound playSound;
-
     struct AlterSimple {
         int32_t amount;
     };
@@ -322,7 +310,8 @@ struct ActionBase {
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset) = 0;
 
-    virtual Handle<BaseObject> created_base() const;
+    virtual Handle<BaseObject>  created_base() const;
+    virtual std::pair<int, int> sound_range() const;
 
     static const size_t byte_size = 48;
 };
@@ -353,9 +342,16 @@ struct CreateObjectAction : public ActionBase {
 };
 
 struct PlaySoundAction : public ActionBase {
+    uint8_t priority;                // 1-5; takes over a channel playing a lower-priority sound
+    ticks   persistence;             // time before a lower-priority sound can take channel
+    bool    absolute;                // plays at same volume, regardless of distance from player
+    int32_t volume;                  // 1-255; volume at focus
+    std::pair<int32_t, int32_t> id;  // pick ID randomly in [first, second)
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
+    virtual std::pair<int, int> sound_range() const;
 };
 
 struct AlterAction : public ActionBase {
