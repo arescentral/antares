@@ -153,9 +153,7 @@ bool read_from(pn::file_view in, MakeSparksAction* sparks) {
            in.read(&sparks->hue);
 }
 
-bool read_from(pn::file_view in, argumentType::LandAt* argument) {
-    return in.read(&argument->landingSpeed);
-}
+bool read_from(pn::file_view in, LandAtAction* land) { return in.read(&land->speed); }
 
 bool read_from(pn::file_view in, argumentType::EnterWarp* argument) {
     return read_from(in, &argument->warpSpeed);
@@ -317,7 +315,7 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
 
         case kMakeSparks: return read_from(sub, action->init<MakeSparksAction>());
 
-        case kLandAt: return read_from(sub, &action->init<LandAtAction>()->argument.landAt);
+        case kLandAt: return read_from(sub, action->init<LandAtAction>());
 
         case kEnterWarp:
             return read_from(sub, &action->init<EnterWarpAction>()->argument.enterWarp);

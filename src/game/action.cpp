@@ -604,7 +604,7 @@ void LandAtAction::apply(
         subject->create_floating_player_body();
     }
     subject->presenceState          = kLandingPresence;
-    subject->presence.landing.speed = argument.landAt.landingSpeed;
+    subject->presence.landing.speed = speed;
     subject->presence.landing.scale = subject->baseType->naturalScale;
 }
 

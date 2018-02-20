@@ -189,12 +189,6 @@ struct argumentType {
     };
     ReleaseEnergy releaseEnergy;
 
-    // land at
-    struct LandAt {
-        int32_t landingSpeed;
-    };
-    LandAt landAt;
-
     // enter warp
     struct EnterWarp {
         Fixed warpSpeed;
@@ -357,6 +351,8 @@ struct MakeSparksAction : public ActionBase {
 };
 
 struct LandAtAction : public ActionBase {
+    int32_t speed;
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
