@@ -183,15 +183,6 @@ struct argumentType {
         int32_t count_minus_1;
     } alterConditionTrueYet;
 
-    // makeSpark
-    struct MakeSparks {
-        int32_t howMany;
-        int32_t speed;
-        Fixed   velocityRange;
-        uint8_t color;
-    };
-    MakeSparks makeSparks;
-
     // release energy
     struct ReleaseEnergy {
         Fixed percent;
@@ -354,13 +345,12 @@ struct PlaySoundAction : public ActionBase {
     virtual std::pair<int, int> sound_range() const;
 };
 
-struct AlterAction : public ActionBase {
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
 struct MakeSparksAction : public ActionBase {
+    int32_t count;     // number of sparks to create
+    uint8_t hue;       // hue of sparks; they start bright and fade with time
+    int32_t decay;     // sparks will be visible for 17.05/decay seconds
+    Fixed   velocity;  // sparks fly at at random speed up to this
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);

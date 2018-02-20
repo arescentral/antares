@@ -193,8 +193,7 @@ void PlaySoundAction::apply(
 void MakeSparksAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto& sparks = argument.makeSparks;
-    Point       location;
+    Point location;
     if (focus->sprite.get()) {
         location.h = focus->sprite->where.h;
         location.v = focus->sprite->where.v;
@@ -215,8 +214,7 @@ void MakeSparksAction::apply(
             location.v = -kSpriteMaxSize;
         }
     }
-    globals()->starfield.make_sparks(
-            sparks.howMany, sparks.speed, sparks.velocityRange, sparks.color, &location);
+    globals()->starfield.make_sparks(count, decay, velocity, hue, &location);
 }
 
 void DieAction::apply(

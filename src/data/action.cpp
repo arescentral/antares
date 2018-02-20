@@ -148,9 +148,9 @@ bool read_from(pn::file_view in, argumentType::AlterLocation* argument) {
     return in.read(&argument->relative, &argument->by);
 }
 
-bool read_from(pn::file_view in, argumentType::MakeSparks* argument) {
-    return in.read(&argument->howMany, &argument->speed) &&
-           read_from(in, &argument->velocityRange) && in.read(&argument->color);
+bool read_from(pn::file_view in, MakeSparksAction* sparks) {
+    return in.read(&sparks->count, &sparks->decay) && read_from(in, &sparks->velocity) &&
+           in.read(&sparks->hue);
 }
 
 bool read_from(pn::file_view in, argumentType::LandAt* argument) {
@@ -315,8 +315,7 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
             }
         }
 
-        case kMakeSparks:
-            return read_from(sub, &action->init<MakeSparksAction>()->argument.makeSparks);
+        case kMakeSparks: return read_from(sub, action->init<MakeSparksAction>());
 
         case kLandAt: return read_from(sub, &action->init<LandAtAction>()->argument.landAt);
 
