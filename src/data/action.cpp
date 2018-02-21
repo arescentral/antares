@@ -200,8 +200,8 @@ bool read_from(pn::file_view in, DieAction* kill) {
     return true;
 }
 
-bool read_from(pn::file_view in, argumentType::ColorFlash* argument) {
-    return in.read(&argument->length, &argument->color, &argument->shade);
+bool read_from(pn::file_view in, ColorFlashAction* flash) {
+    return in.read(&flash->length, &flash->hue, &flash->shade);
 }
 
 bool read_from(pn::file_view in, argumentType::Keys* argument) {
@@ -328,8 +328,7 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
 
         case kDie: return read_from(sub, action->init<DieAction>());
 
-        case kColorFlash:
-            return read_from(sub, &action->init<ColorFlashAction>()->argument.colorFlash);
+        case kColorFlash: return read_from(sub, action->init<ColorFlashAction>());
 
         case kDisableKeys:
             return read_from(sub, &action->init<DisableKeysAction>()->argument.keys);

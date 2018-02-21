@@ -1535,7 +1535,7 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
 
     if (anObject->owner == g.admiral && (anObject->attributes & kIsHumanControlled) &&
         (sObject->baseType->damage > 0)) {
-        globals()->transitions.start_boolean(128, 128, WHITE);
+        globals()->transitions.start_boolean(128, WHITE);
     }
 }
 

@@ -186,14 +186,6 @@ struct argumentType {
     };
     ReleaseEnergy releaseEnergy;
 
-    // colorFlash: flash whole screen to a color
-    struct ColorFlash {
-        int32_t length;  // length of color flash
-        uint8_t color;   // color of flash
-        uint8_t shade;   // brightness of flash
-    };
-    ColorFlash colorFlash;
-
     // keys: disable or enable keys/ for tutorial
     struct Keys {
         uint32_t keyMask;
@@ -399,6 +391,10 @@ struct ActivateBeamAction : public ActionBase {
 };
 
 struct ColorFlashAction : public ActionBase {
+    int32_t length;  // length of color flash
+    uint8_t hue;     // hue of flash
+    uint8_t shade;   // brightness of flash
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);

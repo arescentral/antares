@@ -681,10 +681,7 @@ void ActivateBeamAction::apply(
 void ColorFlashAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    uint8_t tinyColor =
-            GetTranslateColorShade(argument.colorFlash.color, argument.colorFlash.shade);
-    globals()->transitions.start_boolean(
-            argument.colorFlash.length, argument.colorFlash.length, tinyColor);
+    globals()->transitions.start_boolean(length, GetTranslateColorShade(hue, shade));
 }
 
 void EnableKeysAction::apply(
