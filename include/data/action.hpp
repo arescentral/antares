@@ -106,12 +106,6 @@ enum alterVerbIDType {
 struct argumentType {
     argumentType() {}
 
-    struct AlterFixedRange {
-        Fixed minimum, range;
-    };
-    AlterFixedRange alterSpin;
-    AlterFixedRange alterOffline;
-
     struct AlterAge {
         bool  relative;
         ticks minimum, range;
@@ -515,12 +509,16 @@ struct AlterCloakAction : public ActionBase {
 };
 
 struct AlterOfflineAction : public ActionBase {
+    std::pair<Fixed, Fixed> value;
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
 };
 
 struct AlterSpinAction : public ActionBase {
+    std::pair<Fixed, Fixed> value;
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);

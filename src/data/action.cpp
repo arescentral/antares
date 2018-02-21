@@ -107,10 +107,24 @@ bool read_from(pn::file_view in, argumentType::AlterHidden* argument) {
     return in.read(&unused, &argument->first, &argument->count_minus_1);
 }
 
-bool read_from(pn::file_view in, argumentType::AlterFixedRange* argument) {
-    uint8_t unused;
-    return in.read(&unused) && read_from(in, &argument->minimum) &&
-           read_from(in, &argument->range);
+bool read_from(pn::file_view in, AlterOfflineAction* disable) {
+    int32_t minimum, range;
+    if (!in.read(pn::pad(1), &minimum, &range)) {
+        return false;
+    }
+    disable->value.first  = Fixed::from_val(minimum);
+    disable->value.second = Fixed::from_val(minimum + range);
+    return true;
+}
+
+bool read_from(pn::file_view in, AlterSpinAction* spin) {
+    int32_t minimum, range;
+    if (!in.read(pn::pad(1), &minimum, &range)) {
+        return false;
+    }
+    spin->value.first  = Fixed::from_val(minimum);
+    spin->value.second = Fixed::from_val(minimum + range);
+    return true;
 }
 
 bool read_from(pn::file_view in, argumentType::AlterVelocity* argument) {
@@ -280,11 +294,8 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
                 case kAlterHidden:
                     return read_from(
                             sub, &action->init<AlterHiddenAction>()->argument.alterHidden);
-                case kAlterSpin:
-                    return read_from(sub, &action->init<AlterSpinAction>()->argument.alterSpin);
-                case kAlterOffline:
-                    return read_from(
-                            sub, &action->init<AlterOfflineAction>()->argument.alterOffline);
+                case kAlterSpin: return read_from(sub, action->init<AlterSpinAction>());
+                case kAlterOffline: return read_from(sub, action->init<AlterOfflineAction>());
                 case kAlterVelocity:
                     return read_from(
                             sub, &action->init<AlterVelocityAction>()->argument.alterVelocity);

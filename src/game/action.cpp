@@ -296,9 +296,9 @@ void AlterCloakAction::apply(
 void AlterSpinAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto alter = argument.alterSpin;
     if (focus->attributes & kCanTurn) {
-        Fixed f  = focus->turn_rate() * (alter.minimum + focus->randomSeed.next(alter.range));
+        Fixed f = focus->turn_rate() *
+                  (value.first + focus->randomSeed.next(value.second - value.first));
         Fixed f2 = focus->baseType->mass;
         if (f2 == Fixed::zero()) {
             f = kFixedNone;
@@ -312,9 +312,8 @@ void AlterSpinAction::apply(
 void AlterOfflineAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto alter = argument.alterOffline;
-    Fixed      f     = alter.minimum + focus->randomSeed.next(alter.range);
-    Fixed      f2    = focus->baseType->mass;
+    Fixed f  = value.first + focus->randomSeed.next(value.second - value.first);
+    Fixed f2 = focus->baseType->mass;
     if (f2 == Fixed::zero()) {
         f = kFixedNone;
     } else {
