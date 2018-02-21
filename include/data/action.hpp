@@ -115,12 +115,6 @@ struct argumentType {
         Fixed amount;
     } alterMaxVelocity;
 
-    struct AlterOwner {
-        bool            relative;
-        Fixed           amount;
-        Handle<Admiral> admiral;
-    } alterOwner;
-
     struct AlterCash {
         bool            relative;
         Fixed           amount;
@@ -486,6 +480,11 @@ struct AlterEnergyAction : public ActionBase {
 };
 
 struct AlterOwnerAction : public ActionBase {
+    bool relative;  // if true and reflexive, set subject’s owner to object’s
+                    // if true and non-reflexive, set object’s owner to subject’s
+                    // if false, set focus’s owner to `player`
+    Handle<Admiral> player;
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);

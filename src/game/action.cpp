@@ -447,11 +447,10 @@ void AlterBaseTypeAction::apply(
 void AlterOwnerAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto alter = argument.alterOwner;
     if (!focus.get()) {
         return;
     }
-    if (alter.relative) {
+    if (relative) {
         // if it's relative AND reflexive, we take the direct
         // object's owner, since relative & reflexive would
         // do nothing.
@@ -461,7 +460,7 @@ void AlterOwnerAction::apply(
             focus->set_owner(subject->owner, true);
         }
     } else {
-        focus->set_owner(alter.admiral, false);
+        focus->set_owner(player, false);
     }
 }
 

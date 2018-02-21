@@ -150,12 +150,14 @@ bool read_from(pn::file_view in, argumentType::AlterBaseType* argument) {
     return true;
 }
 
-bool read_from(pn::file_view in, argumentType::AlterOwner* argument) {
-    uint32_t admiral;
-    if (!in.read(&argument->relative, &admiral)) {
+bool read_from(pn::file_view in, AlterOwnerAction* capture) {
+    uint8_t relative;
+    int32_t admiral;
+    if (!in.read(&relative, &admiral)) {
         return false;
     }
-    argument->admiral = Handle<Admiral>(admiral);
+    capture->relative = relative;
+    capture->player   = Handle<Admiral>(admiral);
     return true;
 }
 
@@ -311,8 +313,7 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
                 case kAlterBaseType:
                     return read_from(
                             sub, &action->init<AlterBaseTypeAction>()->argument.alterBaseType);
-                case kAlterOwner:
-                    return read_from(sub, &action->init<AlterOwnerAction>()->argument.alterOwner);
+                case kAlterOwner: return read_from(sub, action->init<AlterOwnerAction>());
                 case kAlterConditionTrueYet:
                     return read_from(
                             sub, &action->init<AlterConditionTrueYetAction>()
