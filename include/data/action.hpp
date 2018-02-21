@@ -186,12 +186,6 @@ struct argumentType {
     };
     ReleaseEnergy releaseEnergy;
 
-    // keys: disable or enable keys/ for tutorial
-    struct Keys {
-        uint32_t keyMask;
-    };
-    Keys keys;
-
     // zoomLevel; manually set zoom level
     struct Zoom {
         int32_t zoomLevel;
@@ -407,12 +401,16 @@ struct NilTargetAction : public ActionBase {
 };
 
 struct DisableKeysAction : public ActionBase {
+    uint32_t disable = 0;  // keys to disable
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
 };
 
 struct EnableKeysAction : public ActionBase {
+    uint32_t enable = 0;  // keys to enable
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);

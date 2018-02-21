@@ -204,9 +204,9 @@ bool read_from(pn::file_view in, ColorFlashAction* flash) {
     return in.read(&flash->length, &flash->hue, &flash->shade);
 }
 
-bool read_from(pn::file_view in, argumentType::Keys* argument) {
-    return in.read(&argument->keyMask);
-}
+bool read_from(pn::file_view in, EnableKeysAction* keys) { return in.read(&keys->enable); }
+
+bool read_from(pn::file_view in, DisableKeysAction* keys) { return in.read(&keys->disable); }
 
 bool read_from(pn::file_view in, argumentType::Zoom* argument) {
     return in.read(&argument->zoomLevel);
@@ -330,9 +330,8 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
 
         case kColorFlash: return read_from(sub, action->init<ColorFlashAction>());
 
-        case kDisableKeys:
-            return read_from(sub, &action->init<DisableKeysAction>()->argument.keys);
-        case kEnableKeys: return read_from(sub, &action->init<EnableKeysAction>()->argument.keys);
+        case kDisableKeys: return read_from(sub, action->init<DisableKeysAction>());
+        case kEnableKeys: return read_from(sub, action->init<EnableKeysAction>());
 
         case kSetZoom: return read_from(sub, &action->init<SetZoomAction>()->argument.zoom);
 

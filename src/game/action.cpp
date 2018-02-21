@@ -687,13 +687,13 @@ void ColorFlashAction::apply(
 void EnableKeysAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    g.key_mask = g.key_mask & ~argument.keys.keyMask;
+    g.key_mask = g.key_mask & ~enable;
 }
 
 void DisableKeysAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    g.key_mask = g.key_mask | argument.keys.keyMask;
+    g.key_mask = g.key_mask | disable;
 }
 
 void SetZoomAction::apply(
