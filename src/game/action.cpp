@@ -699,8 +699,8 @@ void DisableKeysAction::apply(
 void SetZoomAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    if (argument.zoom.zoomLevel != g.zoom) {
-        g.zoom = static_cast<ZoomType>(argument.zoom.zoomLevel);
+    if (value != g.zoom) {
+        g.zoom = static_cast<ZoomType>(value);
         sys.sound.click();
         Messages::zoom(g.zoom);
     }

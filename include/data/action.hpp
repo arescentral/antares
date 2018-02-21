@@ -186,12 +186,6 @@ struct argumentType {
     };
     ReleaseEnergy releaseEnergy;
 
-    // zoomLevel; manually set zoom level
-    struct Zoom {
-        int32_t zoomLevel;
-    };
-    Zoom zoom;
-
     struct ComputerSelect {
         int32_t screenNumber;
         int32_t lineNumber;
@@ -417,6 +411,8 @@ struct EnableKeysAction : public ActionBase {
 };
 
 struct SetZoomAction : public ActionBase {
+    int32_t value;
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
