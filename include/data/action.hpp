@@ -106,13 +106,6 @@ enum alterVerbIDType {
 struct argumentType {
     argumentType() {}
 
-    struct AlterSimple {
-        int32_t amount;
-    };
-    struct AlterSimple alterDamage;
-    struct AlterSimple alterEnergy;
-    struct AlterSimple alterOccupation;
-
     struct AlterWeapon {
         Handle<BaseObject> base;
     } alterWeapon;
@@ -426,6 +419,8 @@ struct AssumeInitialObjectAction : public ActionBase {
 };
 
 struct AlterDamageAction : public ActionBase {
+    int32_t value;
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
@@ -492,6 +487,8 @@ struct AlterSpecialAction : public ActionBase {
 };
 
 struct AlterEnergyAction : public ActionBase {
+    int32_t value;
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
@@ -540,6 +537,8 @@ struct AlterConditionTrueYetAction : public ActionBase {
 };
 
 struct AlterOccupationAction : public ActionBase {
+    int32_t value;
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);

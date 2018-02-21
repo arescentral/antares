@@ -267,15 +267,13 @@ void NilTargetAction::apply(
 void AlterDamageAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto alter = argument.alterDamage;
-    focus->alter_health(alter.amount);
+    focus->alter_health(value);
 }
 
 void AlterEnergyAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto alter = argument.alterEnergy;
-    focus->alter_energy(alter.amount);
+    focus->alter_energy(value);
 }
 
 void AlterHiddenAction::apply(
@@ -482,9 +480,8 @@ void AlterConditionTrueYetAction::apply(
 void AlterOccupationAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto alter = argument.alterOccupation;
     if (focus.get()) {
-        focus->alter_occupation(subject->owner, alter.amount, true);
+        focus->alter_occupation(subject->owner, value, true);
     }
 }
 

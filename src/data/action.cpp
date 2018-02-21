@@ -59,9 +59,16 @@ bool read_from(pn::file_view in, PlaySoundAction* play) {
     return true;
 }
 
-bool read_from(pn::file_view in, argumentType::AlterSimple* argument) {
-    uint8_t unused;
-    return in.read(&unused, &argument->amount);
+bool read_from(pn::file_view in, AlterDamageAction* heal) {
+    return in.read(pn::pad(1), &heal->value);
+}
+
+bool read_from(pn::file_view in, AlterEnergyAction* energize) {
+    return in.read(pn::pad(1), &energize->value);
+}
+
+bool read_from(pn::file_view in, AlterOccupationAction* occupy) {
+    return in.read(pn::pad(1), &occupy->value);
 }
 
 bool read_from(pn::file_view in, argumentType::AlterWeapon* argument) {
@@ -251,12 +258,8 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
 
                 case kAlterCloak: action->init<AlterCloakAction>(); return true;
 
-                case kAlterDamage:
-                    return read_from(
-                            sub, &action->init<AlterDamageAction>()->argument.alterDamage);
-                case kAlterEnergy:
-                    return read_from(
-                            sub, &action->init<AlterEnergyAction>()->argument.alterEnergy);
+                case kAlterDamage: return read_from(sub, action->init<AlterDamageAction>());
+                case kAlterEnergy: return read_from(sub, action->init<AlterEnergyAction>());
                 case kAlterHidden:
                     return read_from(
                             sub, &action->init<AlterHiddenAction>()->argument.alterHidden);
@@ -285,8 +288,7 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
                             sub, &action->init<AlterConditionTrueYetAction>()
                                           ->argument.alterConditionTrueYet);
                 case kAlterOccupation:
-                    return read_from(
-                            sub, &action->init<AlterOccupationAction>()->argument.alterOccupation);
+                    return read_from(sub, action->init<AlterOccupationAction>());
                 case kAlterAbsoluteCash:
                     return read_from(
                             sub,
