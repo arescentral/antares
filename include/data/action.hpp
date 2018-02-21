@@ -189,14 +189,6 @@ struct argumentType {
     };
     ReleaseEnergy releaseEnergy;
 
-    // Declare winner
-    struct DeclareWinner {
-        Handle<Admiral> whichPlayer;  // in scenario's terms; -1 = owner of executor of action
-        int32_t         nextLevel;    // -1 = none
-        pn::string      text;         // "debriefing" text
-    };
-    DeclareWinner declareWinner;
-
     // killObject: cause object to expire
     struct KillObject {
         dieVerbIDType dieType;
@@ -363,6 +355,10 @@ struct ChangeScoreAction : public ActionBase {
 };
 
 struct DeclareWinnerAction : public ActionBase {
+    Handle<Admiral> player;  // victor; -1 = owner of focus
+    int32_t         next;    // next chapter to play; -1 = none
+    pn::string      text;    // "debriefing" text
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);

@@ -636,12 +636,11 @@ void ChangeScoreAction::apply(
 void DeclareWinnerAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto&     winner  = argument.declareWinner;
-    Handle<Admiral> admiral = winner.whichPlayer;
-    if ((!winner.whichPlayer.get() && focus.get())) {
+    Handle<Admiral> admiral = player;
+    if (!player.get() && focus.get()) {
         admiral = focus->owner;
     }
-    DeclareWinner(admiral, winner.nextLevel, winner.text);
+    DeclareWinner(admiral, next, text);
 }
 
 void DisplayMessageAction::apply(

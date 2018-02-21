@@ -180,14 +180,14 @@ bool read_from(pn::file_view in, ChangeScoreAction* score) {
     return true;
 }
 
-bool read_from(pn::file_view in, argumentType::DeclareWinner* argument) {
+bool read_from(pn::file_view in, DeclareWinnerAction* win) {
     int32_t admiral;
     int32_t text_id;
-    if (!in.read(&admiral, &argument->nextLevel, &text_id)) {
+    if (!in.read(&admiral, &win->next, &text_id)) {
         return false;
     }
-    argument->whichPlayer = Handle<Admiral>(admiral);
-    argument->text        = Resource::text(text_id);
+    win->player = Handle<Admiral>(admiral);
+    win->text   = Resource::text(text_id);
     return true;
 }
 
@@ -319,8 +319,7 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
 
         case kChangeScore: return read_from(sub, action->init<ChangeScoreAction>());
 
-        case kDeclareWinner:
-            return read_from(sub, &action->init<DeclareWinnerAction>()->argument.declareWinner);
+        case kDeclareWinner: return read_from(sub, action->init<DeclareWinnerAction>());
 
         case kDie: return read_from(sub, &action->init<DieAction>()->argument.killObject);
 
