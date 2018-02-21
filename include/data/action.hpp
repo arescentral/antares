@@ -95,9 +95,6 @@ enum alterVerbIDType {
     kAlterAbsoluteLocation = kAlter | 26,
 };
 
-enum dieVerbIDEnum { kDieNone = 0, kDieExpire = 1, kDieDestroy = 2 };
-typedef uint8_t dieVerbIDType;
-
 //
 // Action:
 //  Defines any action that an object can take.  Conditions that can cause an action to execute
@@ -188,12 +185,6 @@ struct argumentType {
         Fixed percent;
     };
     ReleaseEnergy releaseEnergy;
-
-    // killObject: cause object to expire
-    struct KillObject {
-        dieVerbIDType dieType;
-    };
-    KillObject killObject;
 
     // colorFlash: flash whole screen to a color
     struct ColorFlash {
@@ -365,6 +356,19 @@ struct DeclareWinnerAction : public ActionBase {
 };
 
 struct DieAction : public ActionBase {
+    enum class Kind {
+        // Removes the focus without any further fanfare.
+        NONE = 0,
+
+        // Removes the subject without any further fanfare.
+        // Essentially, this is NONE, but always reflexive.
+        EXPIRE = 1,
+
+        // Removes the subject and executes its destroy action.
+        DESTROY = 2,
+    };
+    Kind kind;
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);

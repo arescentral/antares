@@ -191,8 +191,13 @@ bool read_from(pn::file_view in, DeclareWinnerAction* win) {
     return true;
 }
 
-bool read_from(pn::file_view in, argumentType::KillObject* argument) {
-    return in.read(&argument->dieType);
+bool read_from(pn::file_view in, DieAction* kill) {
+    uint8_t kind;
+    if (!in.read(&kind)) {
+        return false;
+    }
+    kill->kind = static_cast<DieAction::Kind>(kind);
+    return true;
 }
 
 bool read_from(pn::file_view in, argumentType::ColorFlash* argument) {
@@ -321,7 +326,7 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
 
         case kDeclareWinner: return read_from(sub, action->init<DeclareWinnerAction>());
 
-        case kDie: return read_from(sub, &action->init<DieAction>()->argument.killObject);
+        case kDie: return read_from(sub, action->init<DieAction>());
 
         case kColorFlash:
             return read_from(sub, &action->init<ColorFlashAction>()->argument.colorFlash);

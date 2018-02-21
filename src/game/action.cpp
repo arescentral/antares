@@ -221,8 +221,8 @@ void DieAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     bool destroy = false;
-    switch (argument.killObject.dieType) {
-        case kDieExpire:
+    switch (kind) {
+        case Kind::EXPIRE:
             if (subject.get()) {
                 focus = subject;
             } else {
@@ -230,7 +230,7 @@ void DieAction::apply(
             }
             break;
 
-        case kDieDestroy:
+        case Kind::DESTROY:
             if (subject.get()) {
                 focus   = subject;
                 destroy = true;
@@ -238,6 +238,8 @@ void DieAction::apply(
                 return;
             }
             break;
+
+        case Kind::NONE: break;
     }
 
     // if the object is occupied by a human, eject him since he can't die
