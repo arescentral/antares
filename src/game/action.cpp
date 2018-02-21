@@ -504,10 +504,9 @@ void AlterAbsoluteCashAction::apply(
 void AlterAgeAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto alter = argument.alterAge;
-    ticks      t     = alter.minimum + focus->randomSeed.next(alter.range);
+    ticks t = value.first + focus->randomSeed.next(value.second - value.first);
 
-    if (alter.relative) {
+    if (relative) {
         if (focus->expires) {
             focus->expire_after += t;
         } else {

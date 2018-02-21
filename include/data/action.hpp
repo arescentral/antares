@@ -106,11 +106,6 @@ enum alterVerbIDType {
 struct argumentType {
     argumentType() {}
 
-    struct AlterAge {
-        bool  relative;
-        ticks minimum, range;
-    } alterAge;
-
     struct AlterThrust {
         bool  relative;
         Fixed minimum, range;
@@ -551,6 +546,9 @@ struct AlterAbsoluteCashAction : public ActionBase {
 };
 
 struct AlterAgeAction : public ActionBase {
+    bool                    relative;  // if true, add value to age; if false, set age to value
+    std::pair<ticks, ticks> value;     // age range
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);

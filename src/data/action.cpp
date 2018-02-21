@@ -172,13 +172,15 @@ bool read_from(pn::file_view in, argumentType::AlterCash* argument) {
     return true;
 }
 
-bool read_from(pn::file_view in, argumentType::AlterAge* argument) {
+bool read_from(pn::file_view in, AlterAgeAction* argument) {
+    uint8_t relative;
     int32_t minimum, range;
-    if (!in.read(&argument->relative, &minimum, &range)) {
+    if (!in.read(&relative, &minimum, &range)) {
         return false;
     }
-    argument->minimum = ticks(minimum);
-    argument->range   = ticks(range);
+    argument->relative     = relative;
+    argument->value.first  = ticks(minimum);
+    argument->value.second = ticks(minimum + range);
     return true;
 }
 
@@ -321,8 +323,7 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
                     return read_from(
                             sub,
                             &action->init<AlterAbsoluteCashAction>()->argument.alterAbsoluteCash);
-                case kAlterAge:
-                    return read_from(sub, &action->init<AlterAgeAction>()->argument.alterAge);
+                case kAlterAge: return read_from(sub, action->init<AlterAgeAction>());
                 case kAlterLocation:
                     return read_from(
                             sub, &action->init<AlterLocationAction>()->argument.alterLocation);
