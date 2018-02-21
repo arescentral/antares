@@ -35,7 +35,7 @@ class Messages {
     static void    init();
     static void    clear();
     static void    add(pn::string_view message);
-    static void    start(int16_t start_id, std::vector<pn::string> pages);
+    static void    start(int16_t start_id, const std::vector<pn::string>* pages);
     static void    clip();
     static void    end();
     static void    advance();

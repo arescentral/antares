@@ -624,13 +624,12 @@ void EnterWarpAction::apply(
 void ChangeScoreAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto&     score   = argument.changeScore;
-    Handle<Admiral> admiral = score.whichPlayer;
-    if ((!score.whichPlayer.get() && focus.get())) {
+    Handle<Admiral> admiral = player;
+    if (!admiral.get() && focus.get()) {
         admiral = focus->owner;
     }
     if (admiral.get()) {
-        AlterAdmiralScore(admiral, score.whichScore, score.amount);
+        AlterAdmiralScore(player, which, value);
     }
 }
 
@@ -648,12 +647,7 @@ void DeclareWinnerAction::apply(
 void DisplayMessageAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto&             message = argument.displayMessage;
-    std::vector<pn::string> pages;
-    for (pn::string_view s : message.pages) {
-        pages.push_back(s.copy());
-    }
-    Messages::start(message.resID, std::move(pages));
+    Messages::start(id, &pages);
 }
 
 void SetDestinationAction::apply(

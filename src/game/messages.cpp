@@ -83,25 +83,25 @@ enum longMessageStageType {
 }  // namespace
 
 struct Messages::longMessageType {
-    longMessageStageType        stage              = kNoStage;
-    ticks                       charDelayCount     = ticks(0);
-    int16_t                     start_id           = -1;
-    std::vector<pn::string>     pages              = {};
-    int16_t                     current_page_index = -1;
-    int16_t                     last_page_index    = -1;
-    uint8_t                     backColor          = 0;
-    pn::string                  text               = "";
-    std::unique_ptr<StyledText> retro_text         = nullptr;
-    Point                       retro_origin       = {0, 0};
-    int32_t                     at_char            = 0;
-    bool                        labelMessage       = false;
-    bool                        lastLabelMessage   = false;
-    Handle<Label>               labelMessageID     = Label::none();
+    longMessageStageType           stage              = kNoStage;
+    ticks                          charDelayCount     = ticks(0);
+    int16_t                        start_id           = -1;
+    const std::vector<pn::string>* pages              = nullptr;
+    int16_t                        current_page_index = -1;
+    int16_t                        last_page_index    = -1;
+    uint8_t                        backColor          = 0;
+    pn::string                     text               = "";
+    std::unique_ptr<StyledText>    retro_text         = nullptr;
+    Point                          retro_origin       = {0, 0};
+    int32_t                        at_char            = 0;
+    bool                           labelMessage       = false;
+    bool                           lastLabelMessage   = false;
+    Handle<Label>                  labelMessageID     = Label::none();
 
-    bool have_pages() const { return !pages.empty(); }
+    bool have_pages() const { return !pages->empty(); }
     bool have_current() const { return current_page_index >= 0; }
     bool had_current() const { return last_page_index >= 0; }
-    bool have_next() const { return (current_page_index + 1) < pages.size(); }
+    bool have_next() const { return (current_page_index + 1) < pages->size(); }
     bool have_previous() const { return current_page_index > 0; }
     bool was_updated() const { return current_page_index != last_page_index; }
 };
@@ -153,14 +153,14 @@ void Messages::clear() {
 
 void Messages::add(pn::string_view message) { message_data.emplace(message.copy()); }
 
-void Messages::start(int16_t start_id, std::vector<pn::string> pages) {
+void Messages::start(int16_t start_id, const std::vector<pn::string>* pages) {
     longMessageType* m = long_message_data;
     if (!m->have_current()) {
         m->retro_text.reset();
         m->charDelayCount = ticks(0);
     }
     m->start_id           = start_id;
-    m->pages              = std::move(pages);
+    m->pages              = pages;
     m->current_page_index = 0;
     m->last_page_index    = -1;  // Force clip() to be run.
     m->stage              = kStartStage;
@@ -178,7 +178,7 @@ void Messages::clip() {
         return;
     }
 
-    pn::string text = m->pages[m->current_page_index].copy();
+    pn::string text = (*m->pages)[m->current_page_index].copy();
     Replace_KeyCode_Strings_With_Actual_Key_Names(text, KEY_LONG_NAMES, 0);
     if (*text.begin() == pn::rune{'#'}) {
         m->labelMessage = true;
@@ -292,7 +292,7 @@ void Messages::previous() {
 void Messages::replay() {
     longMessageType* m = long_message_data;
     if (m->have_pages() && !m->have_current()) {
-        start(m->start_id, std::move(m->pages));
+        start(m->start_id, m->pages);
     }
 }
 

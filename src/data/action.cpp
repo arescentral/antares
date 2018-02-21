@@ -155,28 +155,28 @@ bool read_from(pn::file_view in, MakeSparksAction* sparks) {
 
 bool read_from(pn::file_view in, LandAtAction* land) { return in.read(&land->speed); }
 
-bool read_from(pn::file_view in, argumentType::DisplayMessage* argument) {
+bool read_from(pn::file_view in, DisplayMessageAction* message) {
     int16_t page_count;
-    if (!in.read(&argument->resID, &page_count)) {
+    if (!in.read(&message->id, &page_count)) {
         return false;
     }
-    argument->pages.clear();
-    for (int id : sfz::range<int>(argument->resID, argument->resID + page_count)) {
+    message->pages.clear();
+    for (int id : sfz::range<int>(message->id, message->id + page_count)) {
         try {
-            argument->pages.push_back(Resource::text(id));
+            message->pages.push_back(Resource::text(id));
         } catch (...) {
-            argument->pages.push_back("<RESOURCE NOT FOUND>");
+            message->pages.push_back("<RESOURCE NOT FOUND>");
         }
     }
     return true;
 }
 
-bool read_from(pn::file_view in, argumentType::ChangeScore* argument) {
+bool read_from(pn::file_view in, ChangeScoreAction* score) {
     int32_t admiral;
-    if (!in.read(&admiral, &argument->whichScore, &argument->amount)) {
+    if (!in.read(&admiral, &score->which, &score->value)) {
         return false;
     }
-    argument->whichPlayer = Handle<Admiral>(admiral);
+    score->player = Handle<Admiral>(admiral);
     return true;
 }
 
@@ -315,11 +315,9 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
 
         case kEnterWarp: action->init<EnterWarpAction>(); return true;
 
-        case kDisplayMessage:
-            return read_from(sub, &action->init<DisplayMessageAction>()->argument.displayMessage);
+        case kDisplayMessage: return read_from(sub, action->init<DisplayMessageAction>());
 
-        case kChangeScore:
-            return read_from(sub, &action->init<ChangeScoreAction>()->argument.changeScore);
+        case kChangeScore: return read_from(sub, action->init<ChangeScoreAction>());
 
         case kDeclareWinner:
             return read_from(sub, &action->init<DeclareWinnerAction>()->argument.declareWinner);

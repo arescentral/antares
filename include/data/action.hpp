@@ -189,21 +189,6 @@ struct argumentType {
     };
     ReleaseEnergy releaseEnergy;
 
-    // Display message
-    struct DisplayMessage {
-        int16_t                 resID;
-        std::vector<pn::string> pages;
-    };
-    DisplayMessage displayMessage;
-
-    // Change score
-    struct ChangeScore {
-        Handle<Admiral> whichPlayer;  // in scenario's terms; -1 = owner of executor of action
-        int32_t         whichScore;   // each player can have many "scores"
-        int32_t         amount;
-    };
-    ChangeScore changeScore;
-
     // Declare winner
     struct DeclareWinner {
         Handle<Admiral> whichPlayer;  // in scenario's terms; -1 = owner of executor of action
@@ -359,12 +344,19 @@ struct EnterWarpAction : public ActionBase {
 };
 
 struct DisplayMessageAction : public ActionBase {
+    int16_t                 id;     // identifies the message to a "message" condition
+    std::vector<pn::string> pages;  // pages of message bodies to show
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
 };
 
 struct ChangeScoreAction : public ActionBase {
+    Handle<Admiral> player;  // which player’s score to change; -1 = owner of focus
+    int32_t         which;   // 0-2; each player has three "scores"
+    int32_t         value;   // amount to change by
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
