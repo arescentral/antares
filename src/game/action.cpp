@@ -709,8 +709,7 @@ void SetZoomAction::apply(
 void ComputerSelectAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    MiniComputer_SetScreenAndLineHack(
-            argument.computerSelect.screenNumber, argument.computerSelect.lineNumber);
+    MiniComputer_SetScreenAndLineHack(screen, line);
 }
 
 void AssumeInitialObjectAction::apply(

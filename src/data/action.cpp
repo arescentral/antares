@@ -210,8 +210,8 @@ bool read_from(pn::file_view in, DisableKeysAction* keys) { return in.read(&keys
 
 bool read_from(pn::file_view in, SetZoomAction* zoom) { return in.read(&zoom->value); }
 
-bool read_from(pn::file_view in, argumentType::ComputerSelect* argument) {
-    return in.read(&argument->screenNumber, &argument->lineNumber);
+bool read_from(pn::file_view in, ComputerSelectAction* select) {
+    return in.read(&select->screen, &select->line);
 }
 
 bool read_from(pn::file_view in, argumentType::AssumeInitial* argument) {
@@ -333,8 +333,7 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
 
         case kSetZoom: return read_from(sub, action->init<SetZoomAction>());
 
-        case kComputerSelect:
-            return read_from(sub, &action->init<ComputerSelectAction>()->argument.computerSelect);
+        case kComputerSelect: return read_from(sub, action->init<ComputerSelectAction>());
 
         case kAssumeInitialObject:
             return read_from(

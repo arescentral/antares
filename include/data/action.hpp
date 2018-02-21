@@ -186,12 +186,6 @@ struct argumentType {
     };
     ReleaseEnergy releaseEnergy;
 
-    struct ComputerSelect {
-        int32_t screenNumber;
-        int32_t lineNumber;
-    };
-    ComputerSelect computerSelect;
-
     struct AssumeInitial {
         int32_t whichInitialObject;
     };
@@ -419,6 +413,9 @@ struct SetZoomAction : public ActionBase {
 };
 
 struct ComputerSelectAction : public ActionBase {
+    int32_t screen;
+    int32_t line;
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
