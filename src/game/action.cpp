@@ -716,9 +716,9 @@ void AssumeInitialObjectAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     Handle<Admiral> player1(0);
-    int index            = argument.assumeInitial.whichInitialObject + GetAdmiralScore(player1, 0);
-    g.initials[index]    = focus;
-    g.initial_ids[index] = focus->id;
+    int             index = which + GetAdmiralScore(player1, 0);
+    g.initials[index]     = focus;
+    g.initial_ids[index]  = focus->id;
 }
 
 static void execute_actions(

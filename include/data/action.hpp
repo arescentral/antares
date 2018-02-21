@@ -185,11 +185,6 @@ struct argumentType {
         Fixed percent;
     };
     ReleaseEnergy releaseEnergy;
-
-    struct AssumeInitial {
-        int32_t whichInitialObject;
-    };
-    AssumeInitial assumeInitial;
 };
 
 struct ActionBase;
@@ -422,6 +417,9 @@ struct ComputerSelectAction : public ActionBase {
 };
 
 struct AssumeInitialObjectAction : public ActionBase {
+    int32_t which;  // which initial to become
+                    // Note: player 1’s score 0 is added to this number
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);

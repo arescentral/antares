@@ -214,8 +214,8 @@ bool read_from(pn::file_view in, ComputerSelectAction* select) {
     return in.read(&select->screen, &select->line);
 }
 
-bool read_from(pn::file_view in, argumentType::AssumeInitial* argument) {
-    return in.read(&argument->whichInitialObject);
+bool read_from(pn::file_view in, AssumeInitialObjectAction* assume) {
+    return in.read(&assume->which);
 }
 
 bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
@@ -336,8 +336,7 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
         case kComputerSelect: return read_from(sub, action->init<ComputerSelectAction>());
 
         case kAssumeInitialObject:
-            return read_from(
-                    sub, &action->init<AssumeInitialObjectAction>()->argument.assumeInitial);
+            return read_from(sub, action->init<AssumeInitialObjectAction>());
     }
 }
 
