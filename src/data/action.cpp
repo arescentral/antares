@@ -155,10 +155,6 @@ bool read_from(pn::file_view in, MakeSparksAction* sparks) {
 
 bool read_from(pn::file_view in, LandAtAction* land) { return in.read(&land->speed); }
 
-bool read_from(pn::file_view in, argumentType::EnterWarp* argument) {
-    return read_from(in, &argument->warpSpeed);
-}
-
 bool read_from(pn::file_view in, argumentType::DisplayMessage* argument) {
     int16_t page_count;
     if (!in.read(&argument->resID, &page_count)) {
@@ -317,8 +313,7 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
 
         case kLandAt: return read_from(sub, action->init<LandAtAction>());
 
-        case kEnterWarp:
-            return read_from(sub, &action->init<EnterWarpAction>()->argument.enterWarp);
+        case kEnterWarp: action->init<EnterWarpAction>(); return true;
 
         case kDisplayMessage:
             return read_from(sub, &action->init<DisplayMessageAction>()->argument.displayMessage);

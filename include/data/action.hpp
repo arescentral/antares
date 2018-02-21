@@ -189,12 +189,6 @@ struct argumentType {
     };
     ReleaseEnergy releaseEnergy;
 
-    // enter warp
-    struct EnterWarp {
-        Fixed warpSpeed;
-    };
-    EnterWarp enterWarp;
-
     // Display message
     struct DisplayMessage {
         int16_t                 resID;
