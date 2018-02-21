@@ -556,9 +556,8 @@ void AlterAbsoluteLocationAction::apply(
 }
 
 static void alter_weapon(
-        const ActionBase& action, Handle<SpaceObject> focus, SpaceObject::Weapon& weapon) {
-    const auto alter = action.argument.alterWeapon;
-    weapon.base      = alter.base;
+        Handle<BaseObject> base, Handle<SpaceObject> focus, SpaceObject::Weapon& weapon) {
+    weapon.base = base;
     if (weapon.base.get()) {
         auto baseObject = weapon.base;
         weapon.ammo     = baseObject->frame.weapon.ammo;
@@ -580,19 +579,19 @@ static void alter_weapon(
 void AlterWeapon1Action::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    alter_weapon(*this, focus, focus->pulse);
+    alter_weapon(base, focus, focus->pulse);
 }
 
 void AlterWeapon2Action::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    alter_weapon(*this, focus, focus->beam);
+    alter_weapon(base, focus, focus->beam);
 }
 
 void AlterSpecialAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    alter_weapon(*this, focus, focus->special);
+    alter_weapon(base, focus, focus->special);
 }
 
 void LandAtAction::apply(

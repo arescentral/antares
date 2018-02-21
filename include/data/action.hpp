@@ -106,10 +106,6 @@ enum alterVerbIDType {
 struct argumentType {
     argumentType() {}
 
-    struct AlterWeapon {
-        Handle<BaseObject> base;
-    } alterWeapon;
-
     struct AlterFixedRange {
         Fixed minimum, range;
     };
@@ -469,18 +465,24 @@ struct AlterScaleAction : public ActionBase {
 };
 
 struct AlterWeapon1Action : public ActionBase {
+    Handle<BaseObject> base;
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
 };
 
 struct AlterWeapon2Action : public ActionBase {
+    Handle<BaseObject> base;
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
 };
 
 struct AlterSpecialAction : public ActionBase {
+    Handle<BaseObject> base;
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);

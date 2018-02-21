@@ -71,13 +71,30 @@ bool read_from(pn::file_view in, AlterOccupationAction* occupy) {
     return in.read(pn::pad(1), &occupy->value);
 }
 
-bool read_from(pn::file_view in, argumentType::AlterWeapon* argument) {
-    uint8_t unused;
+bool read_from(pn::file_view in, AlterWeapon1Action* equip) {
     int32_t base;
-    if (!in.read(&unused, &base)) {
+    if (!in.read(pn::pad(1), &base)) {
         return false;
     }
-    argument->base = Handle<BaseObject>(base);
+    equip->base = Handle<BaseObject>(base);
+    return true;
+}
+
+bool read_from(pn::file_view in, AlterWeapon2Action* equip) {
+    int32_t base;
+    if (!in.read(pn::pad(1), &base)) {
+        return false;
+    }
+    equip->base = Handle<BaseObject>(base);
+    return true;
+}
+
+bool read_from(pn::file_view in, AlterSpecialAction* equip) {
+    int32_t base;
+    if (!in.read(pn::pad(1), &base)) {
+        return false;
+    }
+    equip->base = Handle<BaseObject>(base);
     return true;
 }
 
@@ -302,15 +319,9 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
                     return read_from(
                             sub, &action->init<AlterAbsoluteLocationAction>()
                                           ->argument.alterAbsoluteLocation);
-                case kAlterWeapon1:
-                    return read_from(
-                            sub, &action->init<AlterWeapon1Action>()->argument.alterWeapon);
-                case kAlterWeapon2:
-                    return read_from(
-                            sub, &action->init<AlterWeapon2Action>()->argument.alterWeapon);
-                case kAlterSpecial:
-                    return read_from(
-                            sub, &action->init<AlterSpecialAction>()->argument.alterWeapon);
+                case kAlterWeapon1: return read_from(sub, action->init<AlterWeapon1Action>());
+                case kAlterWeapon2: return read_from(sub, action->init<AlterWeapon2Action>());
+                case kAlterSpecial: return read_from(sub, action->init<AlterSpecialAction>());
             }
         }
 
