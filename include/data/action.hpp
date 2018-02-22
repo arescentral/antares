@@ -106,12 +106,6 @@ enum alterVerbIDType {
 struct argumentType {
     argumentType() {}
 
-    struct AlterConditionTrueYet {
-        bool    true_yet;
-        int32_t first;
-        int32_t count_minus_1;
-    } alterConditionTrueYet;
-
     // release energy
     struct ReleaseEnergy {
         Fixed percent;
@@ -519,6 +513,9 @@ struct AlterBaseTypeAction : public ActionBase {
 };
 
 struct AlterConditionTrueYetAction : public ActionBase {
+    bool                        enabled;
+    std::pair<int32_t, int32_t> which;
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);

@@ -469,11 +469,8 @@ void AlterOwnerAction::apply(
 void AlterConditionTrueYetAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto alter = argument.alterConditionTrueYet;
-    int32_t    begin = alter.first;
-    int32_t    end   = begin + std::max(0, alter.count_minus_1) + 1;
-    for (auto l : range(begin, end)) {
-        g.condition_enabled[l] = !alter.true_yet;
+    for (auto l = which.first; l < which.second; ++l) {
+        g.condition_enabled[l] = enabled;
     }
 }
 

@@ -196,8 +196,16 @@ bool read_from(pn::file_view in, AlterOwnerAction* capture) {
     return true;
 }
 
-bool read_from(pn::file_view in, argumentType::AlterConditionTrueYet* argument) {
-    return in.read(&argument->true_yet, &argument->first, &argument->count_minus_1);
+bool read_from(pn::file_view in, AlterConditionTrueYetAction* condition) {
+    uint8_t disabled;
+    int32_t first, count_minus_1;
+    if (!in.read(&disabled, &first, &count_minus_1)) {
+        return false;
+    }
+    condition->enabled      = !disabled;
+    condition->which.first  = first;
+    condition->which.second = first + std::max(count_minus_1, 0) + 1;
+    return true;
 }
 
 bool read_from(pn::file_view in, AlterAbsoluteCashAction* pay) {
@@ -375,9 +383,7 @@ bool read_argument(int verb, bool reflexive, Action* action, pn::file_view sub) 
                 case kAlterBaseType: return read_from(sub, action->init<AlterBaseTypeAction>());
                 case kAlterOwner: return read_from(sub, action->init<AlterOwnerAction>());
                 case kAlterConditionTrueYet:
-                    return read_from(
-                            sub, &action->init<AlterConditionTrueYetAction>()
-                                          ->argument.alterConditionTrueYet);
+                    return read_from(sub, action->init<AlterConditionTrueYetAction>());
                 case kAlterOccupation:
                     return read_from(sub, action->init<AlterOccupationAction>());
                 case kAlterAbsoluteCash:
