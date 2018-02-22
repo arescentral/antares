@@ -102,17 +102,6 @@ enum alterVerbIDType {
 //  destroy, expire, create, collide, activate, or message.
 //
 
-// TODO(sfiera): use std::variant<> when it’s available.
-struct argumentType {
-    argumentType() {}
-
-    // release energy
-    struct ReleaseEnergy {
-        Fixed percent;
-    };
-    ReleaseEnergy releaseEnergy;
-};
-
 struct ActionBase;
 
 class Action {
@@ -142,8 +131,6 @@ struct ActionBase {
     //  uint32_t                    reserved1;
     Handle<Level_Initial> initialSubjectOverride;
     Handle<Level_Initial> initialDirectOverride;
-    uint32_t              reserved2;
-    argumentType          argument;
 
     virtual ~ActionBase() = default;
     virtual void apply(
