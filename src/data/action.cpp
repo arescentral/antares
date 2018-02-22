@@ -131,9 +131,13 @@ bool read_from(pn::file_view in, argumentType::AlterVelocity* argument) {
     return in.read(&argument->relative) && read_from(in, &argument->amount);
 }
 
-bool read_from(pn::file_view in, argumentType::AlterMaxVelocity* argument) {
-    uint8_t unused;
-    return in.read(&unused) && read_from(in, &argument->amount);
+bool read_from(pn::file_view in, AlterMaxVelocityAction* cap_speed) {
+    int32_t value;
+    if (!in.read(pn::pad(1), &value)) {
+        return false;
+    }
+    cap_speed->value = Fixed::from_val(value);
+    return true;
 }
 
 bool read_from(pn::file_view in, AlterThrustAction* thrust) {
@@ -313,9 +317,7 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
                     return read_from(
                             sub, &action->init<AlterVelocityAction>()->argument.alterVelocity);
                 case kAlterMaxVelocity:
-                    return read_from(
-                            sub,
-                            &action->init<AlterMaxVelocityAction>()->argument.alterMaxVelocity);
+                    return read_from(sub, action->init<AlterMaxVelocityAction>());
                 case kAlterThrust: return read_from(sub, action->init<AlterThrustAction>());
                 case kAlterBaseType:
                     return read_from(

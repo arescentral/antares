@@ -415,11 +415,10 @@ void AlterVelocityAction::apply(
 void AlterMaxVelocityAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto alter = argument.alterMaxVelocity;
-    if (alter.amount < Fixed::zero()) {
+    if (value < Fixed::zero()) {
         focus->maxVelocity = focus->baseType->maxVelocity;
     } else {
-        focus->maxVelocity = alter.amount;
+        focus->maxVelocity = value;
     }
 }
 

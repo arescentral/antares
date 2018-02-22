@@ -106,10 +106,6 @@ enum alterVerbIDType {
 struct argumentType {
     argumentType() {}
 
-    struct AlterMaxVelocity {
-        Fixed amount;
-    } alterMaxVelocity;
-
     struct AlterVelocity {
         bool  relative;
         Fixed amount;
@@ -410,6 +406,8 @@ struct AlterThrustAction : public ActionBase {
 };
 
 struct AlterMaxVelocityAction : public ActionBase {
+    Fixed value;  // if >= 0, set to value; if < 0, set to base type’s default
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
