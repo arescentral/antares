@@ -553,22 +553,14 @@ static void alter_weapon(
     }
 }
 
-void AlterWeapon1Action::apply(
+void EquipAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    alter_weapon(base, focus, focus->pulse);
-}
-
-void AlterWeapon2Action::apply(
-        Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-        Point* offset) {
-    alter_weapon(base, focus, focus->beam);
-}
-
-void AlterSpecialAction::apply(
-        Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-        Point* offset) {
-    alter_weapon(base, focus, focus->special);
+    switch (which) {
+        case Which::PULSE: alter_weapon(base, focus, focus->pulse); break;
+        case Which::BEAM: alter_weapon(base, focus, focus->beam); break;
+        case Which::SPECIAL: alter_weapon(base, focus, focus->special); break;
+    }
 }
 
 void LandAtAction::apply(

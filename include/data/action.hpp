@@ -413,25 +413,9 @@ struct AlterScaleAction : public ActionBase {
             Point* offset);
 };
 
-struct AlterWeapon1Action : public ActionBase {
-    Handle<BaseObject> base;
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-    virtual Handle<BaseObject> created_base() const;
-};
-
-struct AlterWeapon2Action : public ActionBase {
-    Handle<BaseObject> base;
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-    virtual Handle<BaseObject> created_base() const;
-};
-
-struct AlterSpecialAction : public ActionBase {
+struct EquipAction : public ActionBase {
+    enum class Which { PULSE, BEAM, SPECIAL };
+    Which              which;
     Handle<BaseObject> base;
 
     virtual void apply(

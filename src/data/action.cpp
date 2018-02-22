@@ -71,30 +71,13 @@ bool read_from(pn::file_view in, AlterOccupationAction* occupy) {
     return in.read(pn::pad(1), &occupy->value);
 }
 
-bool read_from(pn::file_view in, AlterWeapon1Action* equip) {
+bool read_from(pn::file_view in, EquipAction::Which which, EquipAction* equip) {
     int32_t base;
     if (!in.read(pn::pad(1), &base)) {
         return false;
     }
-    equip->base = Handle<BaseObject>(base);
-    return true;
-}
-
-bool read_from(pn::file_view in, AlterWeapon2Action* equip) {
-    int32_t base;
-    if (!in.read(pn::pad(1), &base)) {
-        return false;
-    }
-    equip->base = Handle<BaseObject>(base);
-    return true;
-}
-
-bool read_from(pn::file_view in, AlterSpecialAction* equip) {
-    int32_t base;
-    if (!in.read(pn::pad(1), &base)) {
-        return false;
-    }
-    equip->base = Handle<BaseObject>(base);
+    equip->which = which;
+    equip->base  = Handle<BaseObject>(base);
     return true;
 }
 
@@ -393,9 +376,13 @@ bool read_argument(int verb, bool reflexive, Action* action, pn::file_view sub) 
                     return read_from_relative(sub, reflexive, action->init<AlterLocationAction>());
                 case kAlterAbsoluteLocation:
                     return read_from_absolute(sub, action->init<AlterLocationAction>());
-                case kAlterWeapon1: return read_from(sub, action->init<AlterWeapon1Action>());
-                case kAlterWeapon2: return read_from(sub, action->init<AlterWeapon2Action>());
-                case kAlterSpecial: return read_from(sub, action->init<AlterSpecialAction>());
+                case kAlterWeapon1:
+                    return read_from(sub, EquipAction::Which::PULSE, action->init<EquipAction>());
+                case kAlterWeapon2:
+                    return read_from(sub, EquipAction::Which::BEAM, action->init<EquipAction>());
+                case kAlterSpecial:
+                    return read_from(
+                            sub, EquipAction::Which::SPECIAL, action->init<EquipAction>());
             }
         }
 
@@ -504,9 +491,7 @@ bool NoAction::should_end() const { return true; }
 
 Handle<BaseObject> CreateObjectAction::created_base() const { return base; }
 Handle<BaseObject> AlterBaseTypeAction::created_base() const { return base; }
-Handle<BaseObject> AlterWeapon1Action::created_base() const { return base; }
-Handle<BaseObject> AlterWeapon2Action::created_base() const { return base; }
-Handle<BaseObject> AlterSpecialAction::created_base() const { return base; }
+Handle<BaseObject> EquipAction::created_base() const { return base; }
 
 std::pair<int, int> PlaySoundAction::sound_range() const { return id; }
 
