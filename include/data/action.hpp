@@ -292,16 +292,9 @@ struct DetargetAction : public ActionBase {
             Point* offset);
 };
 
-struct DisableKeysAction : public ActionBase {
+struct KeyAction : public ActionBase {
     uint32_t disable = 0;  // keys to disable
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct EnableKeysAction : public ActionBase {
-    uint32_t enable = 0;  // keys to enable
+    uint32_t enable  = 0;  // keys to enable
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,

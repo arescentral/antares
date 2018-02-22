@@ -648,16 +648,10 @@ void FlashAction::apply(
     globals()->transitions.start_boolean(length, GetTranslateColorShade(hue, shade));
 }
 
-void EnableKeysAction::apply(
+void KeyAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    g.key_mask = g.key_mask & ~enable;
-}
-
-void DisableKeysAction::apply(
-        Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-        Point* offset) {
-    g.key_mask = g.key_mask | disable;
+    g.key_mask = (g.key_mask & ~enable) | disable;
 }
 
 void ZoomAction::apply(
