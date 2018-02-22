@@ -690,9 +690,6 @@ static void execute_actions(
         covered_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
-        if (action->should_end()) {
-            break;
-        }
         auto subject = original_subject;
         if (action->initialSubjectOverride.number() != kNoShip) {
             subject = GetObjectFromInitialNumber(

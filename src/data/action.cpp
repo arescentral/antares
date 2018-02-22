@@ -549,9 +549,6 @@ Handle<BaseObject>  ActionBase::created_base() const { return BaseObject::none()
 std::pair<int, int> ActionBase::sound_range() const { return std::make_pair(-1, -1); }
 bool                ActionBase::alters_owner() const { return false; }
 bool                ActionBase::check_conditions() const { return false; }
-bool                ActionBase::should_end() const { return false; }
-
-bool NoAction::should_end() const { return true; }
 
 Handle<BaseObject> CreateAction::created_base() const { return base; }
 Handle<BaseObject> MorphAction::created_base() const { return base; }

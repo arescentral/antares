@@ -83,7 +83,6 @@ struct ActionBase {
     virtual std::pair<int, int> sound_range() const;
     virtual bool                alters_owner() const;
     virtual bool                check_conditions() const;
-    virtual bool                should_end() const;
 
     static const size_t byte_size = 48;
 };
@@ -95,7 +94,6 @@ struct NoAction : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
-    virtual bool should_end() const;
 };
 
 struct AgeAction : public ActionBase {
