@@ -28,7 +28,7 @@ namespace antares {
 
 namespace {
 
-bool read_from(pn::file_view in, CreateObjectAction* create, bool inherit) {
+bool read_from(pn::file_view in, CreateAction* create, bool inherit) {
     int32_t base_type;
     uint8_t relative_velocity, relative_direction;
     if (!in.read(
@@ -43,31 +43,29 @@ bool read_from(pn::file_view in, CreateObjectAction* create, bool inherit) {
     return true;
 }
 
-bool read_from(pn::file_view in, PlaySoundAction* play) {
+bool read_from(pn::file_view in, SoundAction* sound) {
     uint8_t absolute;
     int32_t persistence;
     int32_t id_minimum, id_range;
     if (!in.read(
-                &play->priority, pn::pad(1), &persistence, &absolute, pn::pad(1), &play->volume,
+                &sound->priority, pn::pad(1), &persistence, &absolute, pn::pad(1), &sound->volume,
                 pn::pad(4), &id_minimum, &id_range)) {
         return false;
     }
-    play->id.first    = id_minimum;
-    play->id.second   = id_minimum + id_range + 1;
-    play->absolute    = absolute;
-    play->persistence = ticks(persistence);
+    sound->id.first    = id_minimum;
+    sound->id.second   = id_minimum + id_range + 1;
+    sound->absolute    = absolute;
+    sound->persistence = ticks(persistence);
     return true;
 }
 
-bool read_from(pn::file_view in, AlterDamageAction* heal) {
-    return in.read(pn::pad(1), &heal->value);
-}
+bool read_from(pn::file_view in, HealAction* heal) { return in.read(pn::pad(1), &heal->value); }
 
-bool read_from(pn::file_view in, AlterEnergyAction* energize) {
+bool read_from(pn::file_view in, EnergizeAction* energize) {
     return in.read(pn::pad(1), &energize->value);
 }
 
-bool read_from(pn::file_view in, AlterOccupationAction* occupy) {
+bool read_from(pn::file_view in, OccupyAction* occupy) {
     return in.read(pn::pad(1), &occupy->value);
 }
 
@@ -81,7 +79,7 @@ bool read_from(pn::file_view in, EquipAction::Which which, EquipAction* equip) {
     return true;
 }
 
-bool read_from(pn::file_view in, AlterHiddenAction* reveal) {
+bool read_from(pn::file_view in, RevealAction* reveal) {
     int32_t first, count_minus_1;
     if (!in.read(pn::pad(1), &first, &count_minus_1)) {
         return false;
@@ -90,7 +88,7 @@ bool read_from(pn::file_view in, AlterHiddenAction* reveal) {
     return true;
 }
 
-bool read_from(pn::file_view in, AlterOfflineAction* disable) {
+bool read_from(pn::file_view in, DisableAction* disable) {
     int32_t minimum, range;
     if (!in.read(pn::pad(1), &minimum, &range)) {
         return false;
@@ -100,7 +98,7 @@ bool read_from(pn::file_view in, AlterOfflineAction* disable) {
     return true;
 }
 
-bool read_from(pn::file_view in, AlterSpinAction* spin) {
+bool read_from(pn::file_view in, SpinAction* spin) {
     int32_t minimum, range;
     if (!in.read(pn::pad(1), &minimum, &range)) {
         return false;
@@ -110,7 +108,7 @@ bool read_from(pn::file_view in, AlterSpinAction* spin) {
     return true;
 }
 
-bool read_from(pn::file_view in, bool reflexive, AlterVelocityAction* push) {
+bool read_from(pn::file_view in, bool reflexive, PushAction* push) {
     uint8_t relative;
     int32_t value;
     if (!in.read(&relative, &value)) {
@@ -118,27 +116,27 @@ bool read_from(pn::file_view in, bool reflexive, AlterVelocityAction* push) {
     }
     if (relative) {
         if (reflexive) {
-            push->kind = AlterVelocityAction::Kind::BOOST;
+            push->kind = PushAction::Kind::BOOST;
         } else if (value >= 0) {
-            push->kind = AlterVelocityAction::Kind::COLLIDE;
+            push->kind = PushAction::Kind::COLLIDE;
         } else {
-            push->kind = AlterVelocityAction::Kind::DECELERATE;
+            push->kind = PushAction::Kind::DECELERATE;
             value      = -value;
         }
     } else {
         if (value == 0) {
-            push->kind = AlterVelocityAction::Kind::STOP;
+            push->kind = PushAction::Kind::STOP;
         } else if (reflexive) {
-            push->kind = AlterVelocityAction::Kind::CRUISE;
+            push->kind = PushAction::Kind::CRUISE;
         } else {
-            push->kind = AlterVelocityAction::Kind::SET;
+            push->kind = PushAction::Kind::SET;
         }
     }
     push->value = Fixed::from_val(value);
     return true;
 }
 
-bool read_from(pn::file_view in, AlterMaxVelocityAction* cap_speed) {
+bool read_from(pn::file_view in, CapSpeedAction* cap_speed) {
     int32_t value;
     if (!in.read(pn::pad(1), &value)) {
         return false;
@@ -147,7 +145,7 @@ bool read_from(pn::file_view in, AlterMaxVelocityAction* cap_speed) {
     return true;
 }
 
-bool read_from(pn::file_view in, AlterThrustAction* thrust) {
+bool read_from(pn::file_view in, ThrustAction* thrust) {
     int32_t minimum, range;
     if (!in.read(pn::pad(1), &minimum, &range)) {
         return false;
@@ -157,7 +155,7 @@ bool read_from(pn::file_view in, AlterThrustAction* thrust) {
     return true;
 }
 
-bool read_from(pn::file_view in, AlterBaseTypeAction* morph) {
+bool read_from(pn::file_view in, MorphAction* morph) {
     uint8_t keep_ammo;
     int32_t base;
     if (!in.read(&keep_ammo, &base)) {
@@ -168,7 +166,7 @@ bool read_from(pn::file_view in, AlterBaseTypeAction* morph) {
     return true;
 }
 
-bool read_from(pn::file_view in, AlterOwnerAction* capture) {
+bool read_from(pn::file_view in, CaptureAction* capture) {
     uint8_t relative;
     int32_t admiral;
     if (!in.read(&relative, &admiral)) {
@@ -179,7 +177,7 @@ bool read_from(pn::file_view in, AlterOwnerAction* capture) {
     return true;
 }
 
-bool read_from(pn::file_view in, AlterConditionTrueYetAction* condition) {
+bool read_from(pn::file_view in, ConditionAction* condition) {
     uint8_t disabled;
     int32_t first, count_minus_1;
     if (!in.read(&disabled, &first, &count_minus_1)) {
@@ -191,7 +189,7 @@ bool read_from(pn::file_view in, AlterConditionTrueYetAction* condition) {
     return true;
 }
 
-bool read_from(pn::file_view in, AlterAbsoluteCashAction* pay) {
+bool read_from(pn::file_view in, PayAction* pay) {
     uint8_t  relative;
     uint32_t player;
     int32_t  value;
@@ -204,7 +202,7 @@ bool read_from(pn::file_view in, AlterAbsoluteCashAction* pay) {
     return true;
 }
 
-bool read_from(pn::file_view in, AlterAgeAction* argument) {
+bool read_from(pn::file_view in, AgeAction* argument) {
     uint8_t relative;
     int32_t minimum, range;
     if (!in.read(&relative, &minimum, &range)) {
@@ -216,48 +214,48 @@ bool read_from(pn::file_view in, AlterAgeAction* argument) {
     return true;
 }
 
-bool read_from_relative(pn::file_view in, bool reflexive, AlterLocationAction* move) {
+bool read_from_relative(pn::file_view in, bool reflexive, MoveAction* move) {
     uint8_t relative;
     int32_t distance;
     if (!in.read(&relative, &distance)) {
         return false;
     }
     if (!relative) {
-        move->origin = AlterLocationAction::Origin::LEVEL;
+        move->origin = MoveAction::Origin::LEVEL;
     } else if (reflexive) {
-        move->origin = AlterLocationAction::Origin::OBJECT;
+        move->origin = MoveAction::Origin::OBJECT;
     } else {
-        move->origin = AlterLocationAction::Origin::SUBJECT;
+        move->origin = MoveAction::Origin::SUBJECT;
     }
     move->to       = {0, 0};
     move->distance = distance;
     return true;
 }
 
-bool read_from_absolute(pn::file_view in, AlterLocationAction* move) {
+bool read_from_absolute(pn::file_view in, MoveAction* move) {
     uint8_t  relative;
     uint32_t x, y;
     if (!in.read(&relative, &x, &y)) {
         return false;
     }
     if (!relative) {
-        move->origin = AlterLocationAction::Origin::LEVEL;
+        move->origin = MoveAction::Origin::LEVEL;
     } else {
-        move->origin = AlterLocationAction::Origin::FOCUS;
+        move->origin = MoveAction::Origin::FOCUS;
     }
     move->to       = {x, y};
     move->distance = 0;
     return true;
 }
 
-bool read_from(pn::file_view in, MakeSparksAction* sparks) {
+bool read_from(pn::file_view in, SparkAction* sparks) {
     return in.read(&sparks->count, &sparks->decay) && read_from(in, &sparks->velocity) &&
            in.read(&sparks->hue);
 }
 
-bool read_from(pn::file_view in, LandAtAction* land) { return in.read(&land->speed); }
+bool read_from(pn::file_view in, LandAction* land) { return in.read(&land->speed); }
 
-bool read_from(pn::file_view in, DisplayMessageAction* message) {
+bool read_from(pn::file_view in, MessageAction* message) {
     int16_t page_count;
     if (!in.read(&message->id, &page_count)) {
         return false;
@@ -273,7 +271,7 @@ bool read_from(pn::file_view in, DisplayMessageAction* message) {
     return true;
 }
 
-bool read_from(pn::file_view in, ChangeScoreAction* score) {
+bool read_from(pn::file_view in, ScoreAction* score) {
     int32_t admiral;
     if (!in.read(&admiral, &score->which, &score->value)) {
         return false;
@@ -282,7 +280,7 @@ bool read_from(pn::file_view in, ChangeScoreAction* score) {
     return true;
 }
 
-bool read_from(pn::file_view in, DeclareWinnerAction* win) {
+bool read_from(pn::file_view in, WinAction* win) {
     int32_t admiral;
     int32_t text_id;
     if (!in.read(&admiral, &win->next, &text_id)) {
@@ -293,16 +291,16 @@ bool read_from(pn::file_view in, DeclareWinnerAction* win) {
     return true;
 }
 
-bool read_from(pn::file_view in, DieAction* kill) {
+bool read_from(pn::file_view in, KillAction* kill) {
     uint8_t kind;
     if (!in.read(&kind)) {
         return false;
     }
-    kill->kind = static_cast<DieAction::Kind>(kind);
+    kill->kind = static_cast<KillAction::Kind>(kind);
     return true;
 }
 
-bool read_from(pn::file_view in, ColorFlashAction* flash) {
+bool read_from(pn::file_view in, FlashAction* flash) {
     return in.read(&flash->length, &flash->hue, &flash->shade);
 }
 
@@ -310,22 +308,20 @@ bool read_from(pn::file_view in, EnableKeysAction* keys) { return in.read(&keys-
 
 bool read_from(pn::file_view in, DisableKeysAction* keys) { return in.read(&keys->disable); }
 
-bool read_from(pn::file_view in, SetZoomAction* zoom) { return in.read(&zoom->value); }
+bool read_from(pn::file_view in, ZoomAction* zoom) { return in.read(&zoom->value); }
 
-bool read_from(pn::file_view in, ComputerSelectAction* select) {
+bool read_from(pn::file_view in, SelectAction* select) {
     return in.read(&select->screen, &select->line);
 }
 
-bool read_from(pn::file_view in, AssumeInitialObjectAction* assume) {
-    return in.read(&assume->which);
-}
+bool read_from(pn::file_view in, AssumeAction* assume) { return in.read(&assume->which); }
 
 bool read_argument(int verb, bool reflexive, Action* action, pn::file_view sub) {
     switch (static_cast<objectVerbIDEnum>(verb)) {
         case kReleaseEnergy:
         case kNoAction: action->init<NoAction>(); return true;
 
-        case kSetDestination: action->init<SetDestinationAction>(); return true;
+        case kSetDestination: action->init<RetargetAction>(); return true;
         case kActivateSpecial:
             action->init<FireAction>()->which = FireAction::Which::SPECIAL;
             return true;
@@ -335,12 +331,12 @@ bool read_argument(int verb, bool reflexive, Action* action, pn::file_view sub) 
         case kActivateBeam:
             action->init<FireAction>()->which = FireAction::Which::BEAM;
             return true;
-        case kNilTarget: action->init<NilTargetAction>(); return true;
+        case kNilTarget: action->init<DetargetAction>(); return true;
 
-        case kCreateObject: return read_from(sub, action->init<CreateObjectAction>(), false);
-        case kCreateObjectSetDest: return read_from(sub, action->init<CreateObjectAction>(), true);
+        case kCreateObject: return read_from(sub, action->init<CreateAction>(), false);
+        case kCreateObjectSetDest: return read_from(sub, action->init<CreateAction>(), true);
 
-        case kPlaySound: return read_from(sub, action->init<PlaySoundAction>());
+        case kPlaySound: return read_from(sub, action->init<SoundAction>());
 
         case kAlter: {
             uint8_t alter;
@@ -357,31 +353,27 @@ bool read_argument(int verb, bool reflexive, Action* action, pn::file_view sub) 
                 case kAlterOrderKeyTag: action->init<NoAction>(); return true;
                 case kAlterEngageKeyTag: action->init<NoAction>(); return true;
 
-                case kAlterCloak: action->init<AlterCloakAction>(); return true;
+                case kAlterCloak: action->init<CloakAction>(); return true;
 
-                case kAlterDamage: return read_from(sub, action->init<AlterDamageAction>());
-                case kAlterEnergy: return read_from(sub, action->init<AlterEnergyAction>());
-                case kAlterHidden: return read_from(sub, action->init<AlterHiddenAction>());
-                case kAlterSpin: return read_from(sub, action->init<AlterSpinAction>());
-                case kAlterOffline: return read_from(sub, action->init<AlterOfflineAction>());
-                case kAlterVelocity:
-                    return read_from(sub, reflexive, action->init<AlterVelocityAction>());
-                case kAlterMaxVelocity:
-                    return read_from(sub, action->init<AlterMaxVelocityAction>());
-                case kAlterThrust: return read_from(sub, action->init<AlterThrustAction>());
-                case kAlterBaseType: return read_from(sub, action->init<AlterBaseTypeAction>());
-                case kAlterOwner: return read_from(sub, action->init<AlterOwnerAction>());
+                case kAlterDamage: return read_from(sub, action->init<HealAction>());
+                case kAlterEnergy: return read_from(sub, action->init<EnergizeAction>());
+                case kAlterHidden: return read_from(sub, action->init<RevealAction>());
+                case kAlterSpin: return read_from(sub, action->init<SpinAction>());
+                case kAlterOffline: return read_from(sub, action->init<DisableAction>());
+                case kAlterVelocity: return read_from(sub, reflexive, action->init<PushAction>());
+                case kAlterMaxVelocity: return read_from(sub, action->init<CapSpeedAction>());
+                case kAlterThrust: return read_from(sub, action->init<ThrustAction>());
+                case kAlterBaseType: return read_from(sub, action->init<MorphAction>());
+                case kAlterOwner: return read_from(sub, action->init<CaptureAction>());
                 case kAlterConditionTrueYet:
-                    return read_from(sub, action->init<AlterConditionTrueYetAction>());
-                case kAlterOccupation:
-                    return read_from(sub, action->init<AlterOccupationAction>());
-                case kAlterAbsoluteCash:
-                    return read_from(sub, action->init<AlterAbsoluteCashAction>());
-                case kAlterAge: return read_from(sub, action->init<AlterAgeAction>());
+                    return read_from(sub, action->init<ConditionAction>());
+                case kAlterOccupation: return read_from(sub, action->init<OccupyAction>());
+                case kAlterAbsoluteCash: return read_from(sub, action->init<PayAction>());
+                case kAlterAge: return read_from(sub, action->init<AgeAction>());
                 case kAlterLocation:
-                    return read_from_relative(sub, reflexive, action->init<AlterLocationAction>());
+                    return read_from_relative(sub, reflexive, action->init<MoveAction>());
                 case kAlterAbsoluteLocation:
-                    return read_from_absolute(sub, action->init<AlterLocationAction>());
+                    return read_from_absolute(sub, action->init<MoveAction>());
                 case kAlterWeapon1:
                     return read_from(sub, EquipAction::Which::PULSE, action->init<EquipAction>());
                 case kAlterWeapon2:
@@ -392,31 +384,30 @@ bool read_argument(int verb, bool reflexive, Action* action, pn::file_view sub) 
             }
         }
 
-        case kMakeSparks: return read_from(sub, action->init<MakeSparksAction>());
+        case kMakeSparks: return read_from(sub, action->init<SparkAction>());
 
-        case kLandAt: return read_from(sub, action->init<LandAtAction>());
+        case kLandAt: return read_from(sub, action->init<LandAction>());
 
-        case kEnterWarp: action->init<EnterWarpAction>(); return true;
+        case kEnterWarp: action->init<WarpAction>(); return true;
 
-        case kDisplayMessage: return read_from(sub, action->init<DisplayMessageAction>());
+        case kDisplayMessage: return read_from(sub, action->init<MessageAction>());
 
-        case kChangeScore: return read_from(sub, action->init<ChangeScoreAction>());
+        case kChangeScore: return read_from(sub, action->init<ScoreAction>());
 
-        case kDeclareWinner: return read_from(sub, action->init<DeclareWinnerAction>());
+        case kDeclareWinner: return read_from(sub, action->init<WinAction>());
 
-        case kDie: return read_from(sub, action->init<DieAction>());
+        case kDie: return read_from(sub, action->init<KillAction>());
 
-        case kColorFlash: return read_from(sub, action->init<ColorFlashAction>());
+        case kColorFlash: return read_from(sub, action->init<FlashAction>());
 
         case kDisableKeys: return read_from(sub, action->init<DisableKeysAction>());
         case kEnableKeys: return read_from(sub, action->init<EnableKeysAction>());
 
-        case kSetZoom: return read_from(sub, action->init<SetZoomAction>());
+        case kSetZoom: return read_from(sub, action->init<ZoomAction>());
 
-        case kComputerSelect: return read_from(sub, action->init<ComputerSelectAction>());
+        case kComputerSelect: return read_from(sub, action->init<SelectAction>());
 
-        case kAssumeInitialObject:
-            return read_from(sub, action->init<AssumeInitialObjectAction>());
+        case kAssumeInitialObject: return read_from(sub, action->init<AssumeAction>());
     }
 }
 
@@ -495,15 +486,15 @@ bool                ActionBase::should_end() const { return false; }
 
 bool NoAction::should_end() const { return true; }
 
-Handle<BaseObject> CreateObjectAction::created_base() const { return base; }
-Handle<BaseObject> AlterBaseTypeAction::created_base() const { return base; }
+Handle<BaseObject> CreateAction::created_base() const { return base; }
+Handle<BaseObject> MorphAction::created_base() const { return base; }
 Handle<BaseObject> EquipAction::created_base() const { return base; }
 
-std::pair<int, int> PlaySoundAction::sound_range() const { return id; }
+std::pair<int, int> SoundAction::sound_range() const { return id; }
 
-bool AlterOwnerAction::alters_owner() const { return true; }
+bool CaptureAction::alters_owner() const { return true; }
 
-bool ChangeScoreAction::check_conditions() const { return true; }
-bool DisplayMessageAction::check_conditions() const { return true; }
+bool ScoreAction::check_conditions() const { return true; }
+bool MessageAction::check_conditions() const { return true; }
 
 }  // namespace antares

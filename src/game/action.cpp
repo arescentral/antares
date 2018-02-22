@@ -105,7 +105,7 @@ void NoAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {}
 
-void CreateObjectAction::apply(
+void CreateAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     auto count = count_minimum;
@@ -175,7 +175,7 @@ void CreateObjectAction::apply(
     }
 }
 
-void PlaySoundAction::apply(
+void SoundAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     auto    pick  = id.first;
@@ -190,7 +190,7 @@ void PlaySoundAction::apply(
     }
 }
 
-void MakeSparksAction::apply(
+void SparkAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     Point location;
@@ -217,7 +217,7 @@ void MakeSparksAction::apply(
     globals()->starfield.make_sparks(count, decay, velocity, hue, &location);
 }
 
-void DieAction::apply(
+void KillAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     bool destroy = false;
@@ -256,7 +256,7 @@ void DieAction::apply(
     }
 }
 
-void NilTargetAction::apply(
+void DetargetAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     focus->targetObject   = SpaceObject::none();
@@ -264,19 +264,19 @@ void NilTargetAction::apply(
     focus->lastTarget     = SpaceObject::none();
 }
 
-void AlterDamageAction::apply(
+void HealAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     focus->alter_health(value);
 }
 
-void AlterEnergyAction::apply(
+void EnergizeAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     focus->alter_energy(value);
 }
 
-void AlterHiddenAction::apply(
+void RevealAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     for (auto i : initial) {
@@ -284,13 +284,13 @@ void AlterHiddenAction::apply(
     }
 }
 
-void AlterCloakAction::apply(
+void CloakAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     focus->set_cloak(true);
 }
 
-void AlterSpinAction::apply(
+void SpinAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     if (focus->attributes & kCanTurn) {
@@ -306,7 +306,7 @@ void AlterSpinAction::apply(
     }
 }
 
-void AlterOfflineAction::apply(
+void DisableAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     Fixed f  = value.first + focus->randomSeed.next(value.second - value.first);
@@ -349,7 +349,7 @@ void cap_velocity(Handle<SpaceObject> object) {
     }
 }
 
-void AlterVelocityAction::apply(
+void PushAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     if (!subject.get()) {
@@ -417,7 +417,7 @@ void AlterVelocityAction::apply(
     }
 }
 
-void AlterMaxVelocityAction::apply(
+void CapSpeedAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     if (value < Fixed::zero()) {
@@ -427,7 +427,7 @@ void AlterMaxVelocityAction::apply(
     }
 }
 
-void AlterThrustAction::apply(
+void ThrustAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     Fixed f = value.first + focus->randomSeed.next(value.second - value.first);
@@ -438,7 +438,7 @@ void AlterThrustAction::apply(
     }
 }
 
-void AlterBaseTypeAction::apply(
+void MorphAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     if (focus.get()) {
@@ -446,7 +446,7 @@ void AlterBaseTypeAction::apply(
     }
 }
 
-void AlterOwnerAction::apply(
+void CaptureAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     if (!focus.get()) {
@@ -466,7 +466,7 @@ void AlterOwnerAction::apply(
     }
 }
 
-void AlterConditionTrueYetAction::apply(
+void ConditionAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     for (auto l = which.first; l < which.second; ++l) {
@@ -474,7 +474,7 @@ void AlterConditionTrueYetAction::apply(
     }
 }
 
-void AlterOccupationAction::apply(
+void OccupyAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     if (focus.get()) {
@@ -482,7 +482,7 @@ void AlterOccupationAction::apply(
     }
 }
 
-void AlterAbsoluteCashAction::apply(
+void PayAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     Handle<Admiral> admiral;
@@ -498,7 +498,7 @@ void AlterAbsoluteCashAction::apply(
     }
 }
 
-void AlterAgeAction::apply(
+void AgeAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     ticks t = value.first + focus->randomSeed.next(value.second - value.first);
@@ -516,7 +516,7 @@ void AlterAgeAction::apply(
     }
 }
 
-void AlterLocationAction::apply(
+void MoveAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     coordPointType newLocation;
@@ -563,7 +563,7 @@ void EquipAction::apply(
     }
 }
 
-void LandAtAction::apply(
+void LandAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     // even though this is never a reflexive verb, we only effect ourselves
@@ -575,7 +575,7 @@ void LandAtAction::apply(
     subject->presence.landing.scale = subject->baseType->naturalScale;
 }
 
-void EnterWarpAction::apply(
+void WarpAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     subject->presenceState             = kWarpInPresence;
@@ -588,7 +588,7 @@ void EnterWarpAction::apply(
             Admiral::none(), 0, -1);
 }
 
-void ChangeScoreAction::apply(
+void ScoreAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     Handle<Admiral> admiral = player;
@@ -600,7 +600,7 @@ void ChangeScoreAction::apply(
     }
 }
 
-void DeclareWinnerAction::apply(
+void WinAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     Handle<Admiral> admiral = player;
@@ -610,13 +610,13 @@ void DeclareWinnerAction::apply(
     DeclareWinner(admiral, next, text);
 }
 
-void DisplayMessageAction::apply(
+void MessageAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     Messages::start(id, &pages);
 }
 
-void SetDestinationAction::apply(
+void RetargetAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     uint32_t save_attributes = subject->attributes;
@@ -642,7 +642,7 @@ void FireAction::apply(
     }
 }
 
-void ColorFlashAction::apply(
+void FlashAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     globals()->transitions.start_boolean(length, GetTranslateColorShade(hue, shade));
@@ -660,7 +660,7 @@ void DisableKeysAction::apply(
     g.key_mask = g.key_mask | disable;
 }
 
-void SetZoomAction::apply(
+void ZoomAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     if (value != g.zoom) {
@@ -670,13 +670,13 @@ void SetZoomAction::apply(
     }
 }
 
-void ComputerSelectAction::apply(
+void SelectAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     MiniComputer_SetScreenAndLineHack(screen, line);
 }
 
-void AssumeInitialObjectAction::apply(
+void AssumeAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     Handle<Admiral> player1(0);

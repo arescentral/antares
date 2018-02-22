@@ -157,7 +157,7 @@ struct NoAction : public ActionBase {
     virtual bool should_end() const;
 };
 
-struct CreateObjectAction : public ActionBase {
+struct CreateAction : public ActionBase {
     Handle<BaseObject> base;                        // what type
     int32_t            count_minimum      = 1;      // # to make min
     int32_t            count_range        = 0;      // # to make range
@@ -173,7 +173,7 @@ struct CreateObjectAction : public ActionBase {
     virtual Handle<BaseObject> created_base() const;
 };
 
-struct PlaySoundAction : public ActionBase {
+struct SoundAction : public ActionBase {
     uint8_t priority;                // 1-5; takes over a channel playing a lower-priority sound
     ticks   persistence;             // time before a lower-priority sound can take channel
     bool    absolute;                // plays at same volume, regardless of distance from player
@@ -186,7 +186,7 @@ struct PlaySoundAction : public ActionBase {
     virtual std::pair<int, int> sound_range() const;
 };
 
-struct MakeSparksAction : public ActionBase {
+struct SparkAction : public ActionBase {
     int32_t count;     // number of sparks to create
     uint8_t hue;       // hue of sparks; they start bright and fade with time
     int32_t decay;     // sparks will be visible for 17.05/decay seconds
@@ -197,7 +197,7 @@ struct MakeSparksAction : public ActionBase {
             Point* offset);
 };
 
-struct LandAtAction : public ActionBase {
+struct LandAction : public ActionBase {
     int32_t speed;
 
     virtual void apply(
@@ -205,13 +205,13 @@ struct LandAtAction : public ActionBase {
             Point* offset);
 };
 
-struct EnterWarpAction : public ActionBase {
+struct WarpAction : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
 };
 
-struct DisplayMessageAction : public ActionBase {
+struct MessageAction : public ActionBase {
     int16_t                 id;     // identifies the message to a "message" condition
     std::vector<pn::string> pages;  // pages of message bodies to show
 
@@ -221,7 +221,7 @@ struct DisplayMessageAction : public ActionBase {
     virtual bool check_conditions() const;
 };
 
-struct ChangeScoreAction : public ActionBase {
+struct ScoreAction : public ActionBase {
     Handle<Admiral> player;  // which player’s score to change; -1 = owner of focus
     int32_t         which;   // 0-2; each player has three "scores"
     int32_t         value;   // amount to change by
@@ -232,7 +232,7 @@ struct ChangeScoreAction : public ActionBase {
     virtual bool check_conditions() const;
 };
 
-struct DeclareWinnerAction : public ActionBase {
+struct WinAction : public ActionBase {
     Handle<Admiral> player;  // victor; -1 = owner of focus
     int32_t         next;    // next chapter to play; -1 = none
     pn::string      text;    // "debriefing" text
@@ -242,7 +242,7 @@ struct DeclareWinnerAction : public ActionBase {
             Point* offset);
 };
 
-struct DieAction : public ActionBase {
+struct KillAction : public ActionBase {
     enum class Kind {
         // Removes the focus without any further fanfare.
         NONE = 0,
@@ -261,7 +261,7 @@ struct DieAction : public ActionBase {
             Point* offset);
 };
 
-struct SetDestinationAction : public ActionBase {
+struct RetargetAction : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
@@ -276,7 +276,7 @@ struct FireAction : public ActionBase {
             Point* offset);
 };
 
-struct ColorFlashAction : public ActionBase {
+struct FlashAction : public ActionBase {
     int32_t length;  // length of color flash
     uint8_t hue;     // hue of flash
     uint8_t shade;   // brightness of flash
@@ -286,7 +286,7 @@ struct ColorFlashAction : public ActionBase {
             Point* offset);
 };
 
-struct NilTargetAction : public ActionBase {
+struct DetargetAction : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
@@ -308,7 +308,7 @@ struct EnableKeysAction : public ActionBase {
             Point* offset);
 };
 
-struct SetZoomAction : public ActionBase {
+struct ZoomAction : public ActionBase {
     int32_t value;
 
     virtual void apply(
@@ -316,7 +316,7 @@ struct SetZoomAction : public ActionBase {
             Point* offset);
 };
 
-struct ComputerSelectAction : public ActionBase {
+struct SelectAction : public ActionBase {
     int32_t screen;
     int32_t line;
 
@@ -325,7 +325,7 @@ struct ComputerSelectAction : public ActionBase {
             Point* offset);
 };
 
-struct AssumeInitialObjectAction : public ActionBase {
+struct AssumeAction : public ActionBase {
     int32_t which;  // which initial to become
                     // Note: player 1’s score 0 is added to this number
 
@@ -334,7 +334,7 @@ struct AssumeInitialObjectAction : public ActionBase {
             Point* offset);
 };
 
-struct AlterDamageAction : public ActionBase {
+struct HealAction : public ActionBase {
     int32_t value;
 
     virtual void apply(
@@ -342,7 +342,7 @@ struct AlterDamageAction : public ActionBase {
             Point* offset);
 };
 
-struct AlterVelocityAction : public ActionBase {
+struct PushAction : public ActionBase {
     enum class Kind {
         STOP,        // set focus’s velocity to 0
         COLLIDE,     // impart velocity from subject like a collision (capped)
@@ -359,7 +359,7 @@ struct AlterVelocityAction : public ActionBase {
             Point* offset);
 };
 
-struct AlterThrustAction : public ActionBase {
+struct ThrustAction : public ActionBase {
     bool                    relative;  // if true, set to value; if false, add value
     std::pair<Fixed, Fixed> value;     // range
 
@@ -368,7 +368,7 @@ struct AlterThrustAction : public ActionBase {
             Point* offset);
 };
 
-struct AlterMaxVelocityAction : public ActionBase {
+struct CapSpeedAction : public ActionBase {
     Fixed value;  // if >= 0, set to value; if < 0, set to base type’s default
 
     virtual void apply(
@@ -376,13 +376,7 @@ struct AlterMaxVelocityAction : public ActionBase {
             Point* offset);
 };
 
-struct AlterMaxTurnRateAction : public ActionBase {
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct AlterLocationAction : public ActionBase {
+struct MoveAction : public ActionBase {
     enum Origin {
         LEVEL,    // absolute coordinates, in level’s rotated frame of reference
         SUBJECT,  // relative to subject
@@ -393,12 +387,6 @@ struct AlterLocationAction : public ActionBase {
     coordPointType to;
     int32_t        distance;
 
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct AlterScaleAction : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
@@ -415,7 +403,7 @@ struct EquipAction : public ActionBase {
     virtual Handle<BaseObject> created_base() const;
 };
 
-struct AlterEnergyAction : public ActionBase {
+struct EnergizeAction : public ActionBase {
     int32_t value;
 
     virtual void apply(
@@ -423,7 +411,7 @@ struct AlterEnergyAction : public ActionBase {
             Point* offset);
 };
 
-struct AlterOwnerAction : public ActionBase {
+struct CaptureAction : public ActionBase {
     bool relative;  // if true and reflexive, set subject’s owner to object’s
                     // if true and non-reflexive, set object’s owner to subject’s
                     // if false, set focus’s owner to `player`
@@ -435,7 +423,7 @@ struct AlterOwnerAction : public ActionBase {
     virtual bool alters_owner() const;
 };
 
-struct AlterHiddenAction : public ActionBase {
+struct RevealAction : public ActionBase {
     HandleList<Level_Initial> initial;
 
     virtual void apply(
@@ -443,13 +431,13 @@ struct AlterHiddenAction : public ActionBase {
             Point* offset);
 };
 
-struct AlterCloakAction : public ActionBase {
+struct CloakAction : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
 };
 
-struct AlterOfflineAction : public ActionBase {
+struct DisableAction : public ActionBase {
     std::pair<Fixed, Fixed> value;
 
     virtual void apply(
@@ -457,7 +445,7 @@ struct AlterOfflineAction : public ActionBase {
             Point* offset);
 };
 
-struct AlterSpinAction : public ActionBase {
+struct SpinAction : public ActionBase {
     std::pair<Fixed, Fixed> value;
 
     virtual void apply(
@@ -465,7 +453,7 @@ struct AlterSpinAction : public ActionBase {
             Point* offset);
 };
 
-struct AlterBaseTypeAction : public ActionBase {
+struct MorphAction : public ActionBase {
     bool               keep_ammo;
     Handle<BaseObject> base;
 
@@ -475,7 +463,7 @@ struct AlterBaseTypeAction : public ActionBase {
     virtual Handle<BaseObject> created_base() const;
 };
 
-struct AlterConditionTrueYetAction : public ActionBase {
+struct ConditionAction : public ActionBase {
     bool                        enabled;
     std::pair<int32_t, int32_t> which;
 
@@ -484,7 +472,7 @@ struct AlterConditionTrueYetAction : public ActionBase {
             Point* offset);
 };
 
-struct AlterOccupationAction : public ActionBase {
+struct OccupyAction : public ActionBase {
     int32_t value;
 
     virtual void apply(
@@ -492,7 +480,7 @@ struct AlterOccupationAction : public ActionBase {
             Point* offset);
 };
 
-struct AlterAbsoluteCashAction : public ActionBase {
+struct PayAction : public ActionBase {
     bool            relative;  // if true, pay focus’s owner; if false, pay `player`
     Fixed           value;     // amount to pay; not affected by earning power
     Handle<Admiral> player;
@@ -502,34 +490,10 @@ struct AlterAbsoluteCashAction : public ActionBase {
             Point* offset);
 };
 
-struct AlterAgeAction : public ActionBase {
+struct AgeAction : public ActionBase {
     bool                    relative;  // if true, add value to age; if false, set age to value
     std::pair<ticks, ticks> value;     // age range
 
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct AlterAttributesAction : public ActionBase {
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct AlterLevelKeyTagAction : public ActionBase {
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct AlterOrderKeyTagAction : public ActionBase {
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct AlterEngageKeyTagAction : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
