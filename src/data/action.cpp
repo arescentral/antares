@@ -323,8 +323,8 @@ bool read_from(pn::file_view in, AssumeInitialObjectAction* assume) {
     return in.read(&assume->which);
 }
 
-bool read_argument(int* composite_verb, bool reflexive, Action* action, pn::file_view sub) {
-    switch (static_cast<objectVerbIDEnum>(*composite_verb)) {
+bool read_argument(int verb, bool reflexive, Action* action, pn::file_view sub) {
+    switch (static_cast<objectVerbIDEnum>(verb)) {
         case kReleaseEnergy:
         case kNoAction: action->init<NoAction>(); return true;
 
@@ -344,8 +344,8 @@ bool read_argument(int* composite_verb, bool reflexive, Action* action, pn::file
             if (!sub.read(&alter)) {
                 return false;
             }
-            *composite_verb |= alter;
-            switch (static_cast<alterVerbIDType>(*composite_verb)) {
+            verb |= alter;
+            switch (static_cast<alterVerbIDType>(verb)) {
                 case kAlterMaxThrust: action->init<NoAction>(); return true;
                 case kAlterMaxTurnRate: action->init<NoAction>(); return true;
                 case kAlterScale: action->init<NoAction>(); return true;
@@ -434,12 +434,10 @@ bool read_from(pn::file_view in, Action* action) {
         return false;
     }
 
-    int composite_verb = verb << 8;
-    read_argument(&composite_verb, reflexive, action, section.open());
+    read_argument(verb << 8, reflexive, action, section.open());
 
     if (*action) {
         auto& base            = *action;
-        base->verb            = composite_verb;
         base->reflexive       = reflexive;
         base->inclusiveFilter = inclusive_filter;
         base->exclusiveFilter = exclusive_filter;
@@ -481,8 +479,26 @@ std::vector<Action> read_actions(int begin, int end) {
 }
 
 Handle<BaseObject>  ActionBase::created_base() const { return BaseObject::none(); }
-Handle<BaseObject>  CreateObjectAction::created_base() const { return base; }
 std::pair<int, int> ActionBase::sound_range() const { return std::make_pair(-1, -1); }
+bool                ActionBase::alters_owner() const { return false; }
+bool                ActionBase::check_conditions() const { return false; }
+bool                ActionBase::should_end() const { return false; }
+
+bool NoAction::should_end() const { return true; }
+
+Handle<BaseObject> CreateObjectAction::created_base() const { return base; }
+Handle<BaseObject> AlterBaseTypeAction::created_base() const {
+    return argument.alterBaseType.base;
+}
+Handle<BaseObject> AlterWeapon1Action::created_base() const { return base; }
+Handle<BaseObject> AlterWeapon2Action::created_base() const { return base; }
+Handle<BaseObject> AlterSpecialAction::created_base() const { return base; }
+
 std::pair<int, int> PlaySoundAction::sound_range() const { return id; }
+
+bool AlterOwnerAction::alters_owner() const { return true; }
+
+bool ChangeScoreAction::check_conditions() const { return true; }
+bool DisplayMessageAction::check_conditions() const { return true; }
 
 }  // namespace antares

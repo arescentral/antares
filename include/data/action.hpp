@@ -149,8 +149,6 @@ class Action {
 };
 
 struct ActionBase {
-    uint16_t verb;
-
     bool     reflexive;        // does it apply to object executing verb?
     uint32_t inclusiveFilter;  // if it has ALL these attributes, OK -- for non-reflective verbs
     uint32_t exclusiveFilter;  // don't execute if it has ANY of these
@@ -170,6 +168,9 @@ struct ActionBase {
 
     virtual Handle<BaseObject>  created_base() const;
     virtual std::pair<int, int> sound_range() const;
+    virtual bool                alters_owner() const;
+    virtual bool                check_conditions() const;
+    virtual bool                should_end() const;
 
     static const size_t byte_size = 48;
 };
@@ -181,6 +182,7 @@ struct NoAction : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
+    virtual bool should_end() const;
 };
 
 struct CreateObjectAction : public ActionBase {
@@ -244,6 +246,7 @@ struct DisplayMessageAction : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
+    virtual bool check_conditions() const;
 };
 
 struct ChangeScoreAction : public ActionBase {
@@ -254,6 +257,7 @@ struct ChangeScoreAction : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
+    virtual bool check_conditions() const;
 };
 
 struct DeclareWinnerAction : public ActionBase {
@@ -443,6 +447,7 @@ struct AlterWeapon1Action : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
+    virtual Handle<BaseObject> created_base() const;
 };
 
 struct AlterWeapon2Action : public ActionBase {
@@ -451,6 +456,7 @@ struct AlterWeapon2Action : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
+    virtual Handle<BaseObject> created_base() const;
 };
 
 struct AlterSpecialAction : public ActionBase {
@@ -459,6 +465,7 @@ struct AlterSpecialAction : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
+    virtual Handle<BaseObject> created_base() const;
 };
 
 struct AlterEnergyAction : public ActionBase {
@@ -478,6 +485,7 @@ struct AlterOwnerAction : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
+    virtual bool alters_owner() const;
 };
 
 struct AlterHiddenAction : public ActionBase {
@@ -512,6 +520,7 @@ struct AlterBaseTypeAction : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
+    virtual Handle<BaseObject> created_base() const;
 };
 
 struct AlterConditionTrueYetAction : public ActionBase {

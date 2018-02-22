@@ -712,7 +712,7 @@ static void execute_actions(
         covered_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
-        if (action->verb == kNoAction) {
+        if (action->should_end()) {
             break;
         }
         auto subject = original_subject;
@@ -752,10 +752,7 @@ static void execute_actions(
         }
 
         action->apply(subject, focus, object, offset);
-        switch (action->verb) {
-            case kChangeScore:
-            case kDisplayMessage: checkConditions = true; break;
-        }
+        checkConditions = checkConditions || action->check_conditions();
     }
 
     if (checkConditions) {

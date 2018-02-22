@@ -114,34 +114,25 @@ void AddActionMedia(
     possible_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
-    switch (action->verb) {
-        case kCreateObject:
-        case kCreateObjectSetDest:
-            AddBaseObjectMedia(action->created_base(), color, all_colors, state);
-            break;
+    auto base = action->created_base();
+    if (base.get()) {
+        AddBaseObjectMedia(action->created_base(), color, all_colors, state);
+    }
 
-        case kPlaySound: {
-            auto range = action->sound_range();
-            for (int32_t count = range.first; count < range.second; count++) {
-                sys.sound.load(count);
+    auto range = action->sound_range();
+    for (int32_t count = range.first; count < range.second; count++) {
+        sys.sound.load(count);
+    }
+
+    if (action->alters_owner()) {
+        for (auto baseObject : BaseObject::all()) {
+            if (action_filter_applies_to(action, baseObject)) {
+                state->colors_needed[baseObject.number()] |= all_colors;
             }
-            break;
+            if (state->colors_loaded[baseObject.number()].any()) {
+                AddBaseObjectMedia(baseObject, color, all_colors, state);
+            }
         }
-
-        case kAlterBaseType:
-            AddBaseObjectMedia(action->argument.alterBaseType.base, color, all_colors, state);
-            break;
-
-        case kAlterOwner:
-            for (auto baseObject : BaseObject::all()) {
-                if (action_filter_applies_to(action, baseObject)) {
-                    state->colors_needed[baseObject.number()] |= all_colors;
-                }
-                if (state->colors_loaded[baseObject.number()].any()) {
-                    AddBaseObjectMedia(baseObject, color, all_colors, state);
-                }
-            }
-            break;
     }
 }
 
