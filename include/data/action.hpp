@@ -106,20 +106,9 @@ enum alterVerbIDType {
 struct argumentType {
     argumentType() {}
 
-    struct AlterThrust {
-        bool  relative;
-        Fixed minimum, range;
-    } alterThrust;
-
     struct AlterMaxVelocity {
         Fixed amount;
     } alterMaxVelocity;
-
-    struct AlterCash {
-        bool            relative;
-        Fixed           amount;
-        Handle<Admiral> admiral;
-    } alterAbsoluteCash;
 
     struct AlterVelocity {
         bool  relative;
@@ -412,12 +401,9 @@ struct AlterVelocityAction : public ActionBase {
 };
 
 struct AlterThrustAction : public ActionBase {
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
+    bool                    relative;  // if true, set to value; if false, add value
+    std::pair<Fixed, Fixed> value;     // range
 
-struct AlterMaxThrustAction : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
@@ -539,6 +525,10 @@ struct AlterOccupationAction : public ActionBase {
 };
 
 struct AlterAbsoluteCashAction : public ActionBase {
+    bool            relative;  // if true, pay focus’s owner; if false, pay `player`
+    Fixed           value;     // amount to pay; not affected by earning power
+    Handle<Admiral> player;
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);

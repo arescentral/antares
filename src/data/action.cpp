@@ -136,9 +136,14 @@ bool read_from(pn::file_view in, argumentType::AlterMaxVelocity* argument) {
     return in.read(&unused) && read_from(in, &argument->amount);
 }
 
-bool read_from(pn::file_view in, argumentType::AlterThrust* argument) {
-    return in.read(&argument->relative) && read_from(in, &argument->minimum) &&
-           read_from(in, &argument->range);
+bool read_from(pn::file_view in, AlterThrustAction* thrust) {
+    int32_t minimum, range;
+    if (!in.read(pn::pad(1), &minimum, &range)) {
+        return false;
+    }
+    thrust->value.first  = Fixed::from_val(minimum);
+    thrust->value.second = Fixed::from_val(minimum + range);
+    return true;
 }
 
 bool read_from(pn::file_view in, argumentType::AlterBaseType* argument) {
@@ -165,12 +170,16 @@ bool read_from(pn::file_view in, argumentType::AlterConditionTrueYet* argument) 
     return in.read(&argument->true_yet, &argument->first, &argument->count_minus_1);
 }
 
-bool read_from(pn::file_view in, argumentType::AlterCash* argument) {
-    uint32_t admiral;
-    if (!(in.read(&argument->relative) && read_from(in, &argument->amount) && in.read(&admiral))) {
+bool read_from(pn::file_view in, AlterAbsoluteCashAction* pay) {
+    uint8_t  relative;
+    uint32_t player;
+    int32_t  value;
+    if (!(in.read(&relative, &value, &player))) {
         return false;
     }
-    argument->admiral = Handle<Admiral>(admiral);
+    pay->relative = relative;
+    pay->value    = Fixed::from_val(value);
+    pay->player   = Handle<Admiral>(player);
     return true;
 }
 
@@ -307,9 +316,7 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
                     return read_from(
                             sub,
                             &action->init<AlterMaxVelocityAction>()->argument.alterMaxVelocity);
-                case kAlterThrust:
-                    return read_from(
-                            sub, &action->init<AlterThrustAction>()->argument.alterThrust);
+                case kAlterThrust: return read_from(sub, action->init<AlterThrustAction>());
                 case kAlterBaseType:
                     return read_from(
                             sub, &action->init<AlterBaseTypeAction>()->argument.alterBaseType);
@@ -321,9 +328,7 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
                 case kAlterOccupation:
                     return read_from(sub, action->init<AlterOccupationAction>());
                 case kAlterAbsoluteCash:
-                    return read_from(
-                            sub,
-                            &action->init<AlterAbsoluteCashAction>()->argument.alterAbsoluteCash);
+                    return read_from(sub, action->init<AlterAbsoluteCashAction>());
                 case kAlterAge: return read_from(sub, action->init<AlterAgeAction>());
                 case kAlterLocation:
                     return read_from(

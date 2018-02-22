@@ -426,9 +426,8 @@ void AlterMaxVelocityAction::apply(
 void AlterThrustAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto alter = argument.alterThrust;
-    Fixed      f     = alter.minimum + focus->randomSeed.next(alter.range);
-    if (alter.relative) {
+    Fixed f = value.first + focus->randomSeed.next(value.second - value.first);
+    if (relative) {
         focus->thrust += f;
     } else {
         focus->thrust = f;
@@ -486,17 +485,16 @@ void AlterOccupationAction::apply(
 void AlterAbsoluteCashAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto      alter = argument.alterAbsoluteCash;
     Handle<Admiral> admiral;
-    if (alter.relative) {
+    if (relative) {
         if (focus.get()) {
             admiral = focus->owner;
         }
     } else {
-        admiral = alter.admiral;
+        admiral = player;
     }
     if (admiral.get()) {
-        admiral->pay_absolute(alter.amount);
+        admiral->pay_absolute(value);
     }
 }
 
