@@ -322,92 +322,100 @@ void AlterOfflineAction::apply(
     focus->offlineTime = mFixedToLong(f);
 }
 
+void cap_velocity(Handle<SpaceObject> object) {
+    int16_t angle = ratio_to_angle(object->velocity.h, object->velocity.v);
+    Fixed   f, f2;
+
+    // get the maxthrust of new vector
+    GetRotPoint(&f, &f2, angle);
+    f  = object->maxVelocity * f;
+    f2 = object->maxVelocity * f2;
+
+    if (f < Fixed::zero()) {
+        if (object->velocity.h < f) {
+            object->velocity.h = f;
+        }
+    } else {
+        if (object->velocity.h > f) {
+            object->velocity.h = f;
+        }
+    }
+
+    if (f2 < Fixed::zero()) {
+        if (object->velocity.v < f2) {
+            object->velocity.v = f2;
+        }
+    } else {
+        if (object->velocity.v > f2) {
+            object->velocity.v = f2;
+        }
+    }
+}
+
 void AlterVelocityAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto alter = argument.alterVelocity;
-    Fixed      f, f2;
-    int16_t    angle;
-    if (subject.get()) {
-        // active (non-reflexive) altering of velocity means a PUSH, just like
-        //  two objects colliding.  Negative velocity = slow down
-        if (object.get()) {
-            if (alter.relative) {
-                if ((object->baseType->mass > Fixed::zero()) &&
-                    (object->maxVelocity > Fixed::zero())) {
-                    if (alter.amount >= Fixed::zero()) {
-                        // if the amount >= 0, then PUSH the object like collision
-                        f = subject->velocity.h - object->velocity.h;
-                        f /= object->baseType->mass.val();
-                        f <<= 6L;
-                        object->velocity.h += f;
-                        f = subject->velocity.v - object->velocity.v;
-                        f /= object->baseType->mass.val();
-                        f <<= 6L;
-                        object->velocity.v += f;
+    if (!subject.get()) {
+        return;
+    }
 
-                        // make sure we're not going faster than our top speed
-                        angle = ratio_to_angle(object->velocity.h, object->velocity.v);
-                    } else {
-                        // if the minumum < 0, then STOP the object like applying breaks
-                        f = object->velocity.h;
-                        f = f * alter.amount;
-                        object->velocity.h += f;
-                        f = object->velocity.v;
-                        f = f * alter.amount;
-                        object->velocity.v += f;
+    switch (kind) {
+        case Kind::STOP: focus->velocity = {Fixed::zero(), Fixed::zero()}; break;
 
-                        // make sure we're not going faster than our top speed
-                        angle = ratio_to_angle(object->velocity.h, object->velocity.v);
-                    }
+        case Kind::BOOST: {
+            Fixed fx, fy;
+            GetRotPoint(&fx, &fy, focus->direction);
+            focus->velocity.h += value * fx;
+            focus->velocity.v += value * fy;
+            break;
+        }
 
-                    // get the maxthrust of new vector
-                    GetRotPoint(&f, &f2, angle);
-                    f  = object->maxVelocity * f;
-                    f2 = object->maxVelocity * f2;
+        case Kind::CRUISE: {
+            Fixed fx, fy;
+            GetRotPoint(&fx, &fy, focus->direction);
+            focus->velocity = {value * fx, value * fy};
+            break;
+        }
 
-                    if (f < Fixed::zero()) {
-                        if (object->velocity.h < f) {
-                            object->velocity.h = f;
-                        }
-                    } else {
-                        if (object->velocity.h > f) {
-                            object->velocity.h = f;
-                        }
-                    }
+        case Kind::SET: {
+            Fixed fx, fy;
+            GetRotPoint(&fx, &fy, subject->direction);
+            focus->velocity = {value * fx, value * fy};
+            break;
+        }
 
-                    if (f2 < Fixed::zero()) {
-                        if (object->velocity.v < f2) {
-                            object->velocity.v = f2;
-                        }
-                    } else {
-                        if (object->velocity.v > f2) {
-                            object->velocity.v = f2;
-                        }
-                    }
-                }
-            } else {
-                GetRotPoint(&f, &f2, subject->direction);
-                f                 = alter.amount * f;
-                f2                = alter.amount * f2;
-                focus->velocity.h = f;
-                focus->velocity.v = f2;
+        case Kind::COLLIDE: {
+            if ((focus->baseType->mass <= Fixed::zero()) ||
+                (focus->maxVelocity <= Fixed::zero())) {
+                return;
             }
-        } else {
-            // reflexive alter velocity means a burst of speed in the direction
-            // the object is facing, where negative speed means backwards. Object can
-            // excede its max velocity.
-            // Minimum value is absolute speed in direction.
-            GetRotPoint(&f, &f2, focus->direction);
-            f  = alter.amount * f;
-            f2 = alter.amount * f2;
-            if (alter.relative) {
-                focus->velocity.h += f;
-                focus->velocity.v += f2;
-            } else {
-                focus->velocity.h = f;
-                focus->velocity.v = f2;
+
+            // if colliding, then PUSH the focus like collision
+            focus->velocity.h +=
+                    ((subject->velocity.h - focus->velocity.h) / focus->baseType->mass.val())
+                    << 6L;
+            focus->velocity.v +=
+                    ((subject->velocity.v - focus->velocity.v) / focus->baseType->mass.val())
+                    << 6L;
+
+            // make sure we're not going faster than our top speed
+            cap_velocity(focus);
+            break;
+        }
+
+        case Kind::DECELERATE: {
+            if ((focus->baseType->mass <= Fixed::zero()) ||
+                (focus->maxVelocity <= Fixed::zero())) {
+                return;
             }
+
+            // if decelerating, then STOP the focus like applying brakes
+            focus->velocity.h += focus->velocity.h * -value;
+            focus->velocity.v += focus->velocity.v * -value;
+
+            // make sure we're not going faster than our top speed
+            cap_velocity(focus);
+            break;
         }
     }
 }

@@ -127,8 +127,32 @@ bool read_from(pn::file_view in, AlterSpinAction* spin) {
     return true;
 }
 
-bool read_from(pn::file_view in, argumentType::AlterVelocity* argument) {
-    return in.read(&argument->relative) && read_from(in, &argument->amount);
+bool read_from(pn::file_view in, bool reflexive, AlterVelocityAction* push) {
+    uint8_t relative;
+    int32_t value;
+    if (!in.read(&relative, &value)) {
+        return false;
+    }
+    if (relative) {
+        if (reflexive) {
+            push->kind = AlterVelocityAction::Kind::BOOST;
+        } else if (value >= 0) {
+            push->kind = AlterVelocityAction::Kind::COLLIDE;
+        } else {
+            push->kind = AlterVelocityAction::Kind::DECELERATE;
+            value      = -value;
+        }
+    } else {
+        if (value == 0) {
+            push->kind = AlterVelocityAction::Kind::STOP;
+        } else if (reflexive) {
+            push->kind = AlterVelocityAction::Kind::CRUISE;
+        } else {
+            push->kind = AlterVelocityAction::Kind::SET;
+        }
+    }
+    push->value = Fixed::from_val(value);
+    return true;
 }
 
 bool read_from(pn::file_view in, AlterMaxVelocityAction* cap_speed) {
@@ -273,7 +297,7 @@ bool read_from(pn::file_view in, AssumeInitialObjectAction* assume) {
     return in.read(&assume->which);
 }
 
-bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
+bool read_argument(int* composite_verb, bool reflexive, Action* action, pn::file_view sub) {
     switch (static_cast<objectVerbIDEnum>(*composite_verb)) {
         case kReleaseEnergy:
         case kNoAction: action->init<NoAction>(); return true;
@@ -314,8 +338,7 @@ bool read_argument(int* composite_verb, Action* action, pn::file_view sub) {
                 case kAlterSpin: return read_from(sub, action->init<AlterSpinAction>());
                 case kAlterOffline: return read_from(sub, action->init<AlterOfflineAction>());
                 case kAlterVelocity:
-                    return read_from(
-                            sub, &action->init<AlterVelocityAction>()->argument.alterVelocity);
+                    return read_from(sub, reflexive, action->init<AlterVelocityAction>());
                 case kAlterMaxVelocity:
                     return read_from(sub, action->init<AlterMaxVelocityAction>());
                 case kAlterThrust: return read_from(sub, action->init<AlterThrustAction>());
@@ -389,7 +412,7 @@ bool read_from(pn::file_view in, Action* action) {
     }
 
     int composite_verb = verb << 8;
-    read_argument(&composite_verb, action, section.open());
+    read_argument(&composite_verb, reflexive, action, section.open());
 
     if (*action) {
         auto& base            = *action;

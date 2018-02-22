@@ -106,11 +106,6 @@ enum alterVerbIDType {
 struct argumentType {
     argumentType() {}
 
-    struct AlterVelocity {
-        bool  relative;
-        Fixed amount;
-    } alterVelocity;
-
     struct AlterBaseType {
         bool               keep_ammo;
         Handle<BaseObject> base;
@@ -391,6 +386,17 @@ struct AlterDamageAction : public ActionBase {
 };
 
 struct AlterVelocityAction : public ActionBase {
+    enum class Kind {
+        STOP,        // set focus’s velocity to 0
+        COLLIDE,     // impart velocity from subject like a collision (capped)
+        DECELERATE,  // decrease focus’s velocity (capped)
+        SET,         // set focus’s velocity to value in subject’s direction
+        BOOST,       // add to focus’s velocity in subject’s direction
+        CRUISE,      // set focus’s velocity in focus’s direction
+    };
+    Kind  kind;
+    Fixed value;
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
