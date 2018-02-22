@@ -427,6 +427,16 @@ bool read_argument(int verb, bool reflexive, Action* action, pn::file_view sub) 
     }
 }
 
+template <typename T>
+ActionBase::Owner owner_cast(T t) {
+    switch (t) {
+        case static_cast<T>(ActionBase::Owner::ANY): return ActionBase::Owner::ANY;
+        case static_cast<T>(ActionBase::Owner::SAME): return ActionBase::Owner::SAME;
+        case static_cast<T>(ActionBase::Owner::DIFFERENT): return ActionBase::Owner::DIFFERENT;
+    }
+    return owner_cast(ActionBase::Owner::ANY);
+}
+
 }  // namespace
 
 bool read_from(pn::file_view in, Action* action) {
@@ -452,7 +462,7 @@ bool read_from(pn::file_view in, Action* action) {
         } else {
             base->levelKeyTag = 0;
         }
-        base->owner                  = owner;
+        base->owner                  = owner_cast(owner);
         base->delay                  = ticks(delay);
         base->initialSubjectOverride = Handle<Level::Initial>(subject_override);
         base->initialDirectOverride  = Handle<Level::Initial>(object_override);

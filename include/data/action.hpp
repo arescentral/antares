@@ -126,8 +126,9 @@ struct ActionBase {
     uint32_t inclusiveFilter;  // if it has ALL these attributes, OK -- for non-reflective verbs
     uint32_t exclusiveFilter;  // don't execute if it has ANY of these
     uint8_t  levelKeyTag;
-    int16_t  owner;  // 0 no matter, 1 same owner, -1 different owner
-    ticks    delay;
+    enum class Owner { ANY = 0, SAME = 1, DIFFERENT = -1 };
+    Owner owner;
+    ticks delay;
     //  uint32_t                    reserved1;
     Handle<Level_Initial> initialSubjectOverride;
     Handle<Level_Initial> initialDirectOverride;

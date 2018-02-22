@@ -731,10 +731,10 @@ static void execute_actions(
         }
 
         if (object.get() && subject.get()) {
-            if ((action->owner < -1) ||
-                ((action->owner == -1) && (object->owner == subject->owner)) ||
-                ((action->owner == 1) && (object->owner != subject->owner)) ||
-                (action->owner > 1)) {
+            if (((action->owner == ActionBase::Owner::DIFFERENT) &&
+                 (object->owner == subject->owner)) ||
+                ((action->owner == ActionBase::Owner::SAME) &&
+                 (object->owner != subject->owner))) {
                 continue;
             }
         }
