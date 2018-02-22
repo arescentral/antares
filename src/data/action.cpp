@@ -98,9 +98,13 @@ bool read_from(pn::file_view in, AlterSpecialAction* equip) {
     return true;
 }
 
-bool read_from(pn::file_view in, argumentType::AlterHidden* argument) {
-    uint8_t unused;
-    return in.read(&unused, &argument->first, &argument->count_minus_1);
+bool read_from(pn::file_view in, AlterHiddenAction* reveal) {
+    int32_t first, count_minus_1;
+    if (!in.read(pn::pad(1), &first, &count_minus_1)) {
+        return false;
+    }
+    reveal->initial = HandleList<Level::Initial>(first, first + std::max(count_minus_1, 0) + 1);
+    return true;
 }
 
 bool read_from(pn::file_view in, AlterOfflineAction* disable) {
@@ -360,9 +364,7 @@ bool read_argument(int verb, bool reflexive, Action* action, pn::file_view sub) 
 
                 case kAlterDamage: return read_from(sub, action->init<AlterDamageAction>());
                 case kAlterEnergy: return read_from(sub, action->init<AlterEnergyAction>());
-                case kAlterHidden:
-                    return read_from(
-                            sub, &action->init<AlterHiddenAction>()->argument.alterHidden);
+                case kAlterHidden: return read_from(sub, action->init<AlterHiddenAction>());
                 case kAlterSpin: return read_from(sub, action->init<AlterSpinAction>());
                 case kAlterOffline: return read_from(sub, action->init<AlterOfflineAction>());
                 case kAlterVelocity:

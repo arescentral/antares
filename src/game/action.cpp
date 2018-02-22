@@ -279,10 +279,7 @@ void AlterEnergyAction::apply(
 void AlterHiddenAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto alter = argument.alterHidden;
-    int32_t    begin = alter.first;
-    int32_t    end   = begin + std::max(0, alter.count_minus_1) + 1;
-    for (auto i : HandleList<Level::Initial>(begin, end)) {
+    for (auto i : initial) {
         UnhideInitialObject(i);
     }
 }

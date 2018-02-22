@@ -106,11 +106,6 @@ enum alterVerbIDType {
 struct argumentType {
     argumentType() {}
 
-    struct AlterHidden {
-        int32_t first;
-        int32_t count_minus_1;
-    } alterHidden;
-
     struct AlterConditionTrueYet {
         bool    true_yet;
         int32_t first;
@@ -484,6 +479,8 @@ struct AlterOwnerAction : public ActionBase {
 };
 
 struct AlterHiddenAction : public ActionBase {
+    HandleList<Level_Initial> initial;
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
