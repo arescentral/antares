@@ -526,35 +526,17 @@ void AlterAgeAction::apply(
 void AlterLocationAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto     alter = argument.alterLocation;
     coordPointType newLocation;
-    if (alter.relative) {
-        if (object.get()) {
-            newLocation.h = subject->location.h;
-            newLocation.v = subject->location.v;
-        } else {
-            newLocation.h = object->location.h;
-            newLocation.v = object->location.v;
-        }
-    } else {
-        newLocation.h = newLocation.v = 0;
+    switch (origin) {
+        case LEVEL: newLocation = Translate_Coord_To_Level_Rotation(to.h, to.v); break;
+        case SUBJECT: newLocation = subject->location; break;
+        case OBJECT: newLocation = object->location; break;
+        case FOCUS: newLocation = focus->location; break;
     }
-    newLocation.h += focus->randomSeed.next(alter.by << 1) - alter.by;
-    newLocation.v += focus->randomSeed.next(alter.by << 1) - alter.by;
+    newLocation.h += focus->randomSeed.next(distance << 1) - distance;
+    newLocation.v += focus->randomSeed.next(distance << 1) - distance;
     focus->location.h = newLocation.h;
     focus->location.v = newLocation.v;
-}
-
-void AlterAbsoluteLocationAction::apply(
-        Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-        Point* offset) {
-    const auto alter = argument.alterAbsoluteLocation;
-    if (alter.relative) {
-        focus->location.h += alter.at.h;
-        focus->location.v += alter.at.v;
-    } else {
-        focus->location = Translate_Coord_To_Level_Rotation(alter.at.h, alter.at.v);
-    }
 }
 
 static void alter_weapon(

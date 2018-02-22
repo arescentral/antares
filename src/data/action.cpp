@@ -98,10 +98,6 @@ bool read_from(pn::file_view in, AlterSpecialAction* equip) {
     return true;
 }
 
-bool read_from(pn::file_view in, argumentType::AlterAbsoluteLocation* argument) {
-    return in.read(&argument->relative) && read_from(in, &argument->at);
-}
-
 bool read_from(pn::file_view in, argumentType::AlterHidden* argument) {
     uint8_t unused;
     return in.read(&unused, &argument->first, &argument->count_minus_1);
@@ -223,8 +219,38 @@ bool read_from(pn::file_view in, AlterAgeAction* argument) {
     return true;
 }
 
-bool read_from(pn::file_view in, argumentType::AlterLocation* argument) {
-    return in.read(&argument->relative, &argument->by);
+bool read_from_relative(pn::file_view in, bool reflexive, AlterLocationAction* move) {
+    uint8_t relative;
+    int32_t distance;
+    if (!in.read(&relative, &distance)) {
+        return false;
+    }
+    if (!relative) {
+        move->origin = AlterLocationAction::Origin::LEVEL;
+    } else if (reflexive) {
+        move->origin = AlterLocationAction::Origin::OBJECT;
+    } else {
+        move->origin = AlterLocationAction::Origin::SUBJECT;
+    }
+    move->to       = {0, 0};
+    move->distance = distance;
+    return true;
+}
+
+bool read_from_absolute(pn::file_view in, AlterLocationAction* move) {
+    uint8_t  relative;
+    uint32_t x, y;
+    if (!in.read(&relative, &x, &y)) {
+        return false;
+    }
+    if (!relative) {
+        move->origin = AlterLocationAction::Origin::LEVEL;
+    } else {
+        move->origin = AlterLocationAction::Origin::FOCUS;
+    }
+    move->to       = {x, y};
+    move->distance = 0;
+    return true;
 }
 
 bool read_from(pn::file_view in, MakeSparksAction* sparks) {
@@ -356,12 +382,9 @@ bool read_argument(int* composite_verb, bool reflexive, Action* action, pn::file
                     return read_from(sub, action->init<AlterAbsoluteCashAction>());
                 case kAlterAge: return read_from(sub, action->init<AlterAgeAction>());
                 case kAlterLocation:
-                    return read_from(
-                            sub, &action->init<AlterLocationAction>()->argument.alterLocation);
+                    return read_from_relative(sub, reflexive, action->init<AlterLocationAction>());
                 case kAlterAbsoluteLocation:
-                    return read_from(
-                            sub, &action->init<AlterAbsoluteLocationAction>()
-                                          ->argument.alterAbsoluteLocation);
+                    return read_from_absolute(sub, action->init<AlterLocationAction>());
                 case kAlterWeapon1: return read_from(sub, action->init<AlterWeapon1Action>());
                 case kAlterWeapon2: return read_from(sub, action->init<AlterWeapon2Action>());
                 case kAlterSpecial: return read_from(sub, action->init<AlterSpecialAction>());

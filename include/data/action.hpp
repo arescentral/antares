@@ -111,16 +111,6 @@ struct argumentType {
         Handle<BaseObject> base;
     } alterBaseType;
 
-    struct AlterLocation {
-        bool    relative;
-        int32_t by;
-    } alterLocation;
-
-    struct AlterAbsoluteLocation {
-        bool  relative;
-        Point at;
-    } alterAbsoluteLocation;
-
     struct AlterHidden {
         int32_t first;
         int32_t count_minus_1;
@@ -426,6 +416,16 @@ struct AlterMaxTurnRateAction : public ActionBase {
 };
 
 struct AlterLocationAction : public ActionBase {
+    enum Origin {
+        LEVEL,    // absolute coordinates, in level’s rotated frame of reference
+        SUBJECT,  // relative to subject
+        OBJECT,   // relative to object
+        FOCUS,    // relative to focus
+    };
+    Origin         origin;
+    coordPointType to;
+    int32_t        distance;
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
@@ -566,12 +566,6 @@ struct AlterOrderKeyTagAction : public ActionBase {
 };
 
 struct AlterEngageKeyTagAction : public ActionBase {
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct AlterAbsoluteLocationAction : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
