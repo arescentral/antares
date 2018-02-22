@@ -327,7 +327,7 @@ bool read_argument(int verb, bool reflexive, Action* action, pn::file_view sub) 
         case kReleaseEnergy:
         case kNoAction: action->init<NoAction>(); return true;
 
-        case kSetDestination: action->init<RetargetAction>(); return true;
+        case kSetDestination: action->init<OrderAction>(); return true;
         case kActivateSpecial:
             action->init<FireAction>()->which = FireAction::Which::SPECIAL;
             return true;
@@ -337,7 +337,7 @@ bool read_argument(int verb, bool reflexive, Action* action, pn::file_view sub) 
         case kActivateBeam:
             action->init<FireAction>()->which = FireAction::Which::BEAM;
             return true;
-        case kNilTarget: action->init<DetargetAction>(); return true;
+        case kNilTarget: action->init<HoldPositionAction>(); return true;
 
         case kCreateObject: return read_from(sub, action->init<CreateAction>(), false);
         case kCreateObjectSetDest: return read_from(sub, action->init<CreateAction>(), true);

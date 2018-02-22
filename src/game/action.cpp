@@ -256,7 +256,7 @@ void KillAction::apply(
     }
 }
 
-void DetargetAction::apply(
+void HoldPositionAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     focus->targetObject   = SpaceObject::none();
@@ -616,7 +616,7 @@ void MessageAction::apply(
     Messages::start(id, &pages);
 }
 
-void RetargetAction::apply(
+void OrderAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
     uint32_t save_attributes = subject->attributes;

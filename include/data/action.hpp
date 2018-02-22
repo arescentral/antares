@@ -261,7 +261,7 @@ struct KillAction : public ActionBase {
             Point* offset);
 };
 
-struct RetargetAction : public ActionBase {
+struct OrderAction : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
@@ -286,7 +286,7 @@ struct FlashAction : public ActionBase {
             Point* offset);
 };
 
-struct DetargetAction : public ActionBase {
+struct HoldPositionAction : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
