@@ -625,22 +625,21 @@ void SetDestinationAction::apply(
     subject->attributes = save_attributes;
 }
 
-void ActivateSpecialAction::apply(
+void FireAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    fire_weapon(subject, SpaceObject::none(), subject->baseType->special, subject->special);
-}
-
-void ActivatePulseAction::apply(
-        Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-        Point* offset) {
-    fire_weapon(subject, SpaceObject::none(), subject->baseType->pulse, subject->pulse);
-}
-
-void ActivateBeamAction::apply(
-        Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-        Point* offset) {
-    fire_weapon(subject, SpaceObject::none(), subject->baseType->beam, subject->beam);
+    switch (which) {
+        case Which::PULSE:
+            fire_weapon(subject, SpaceObject::none(), subject->baseType->pulse, subject->pulse);
+            break;
+        case Which::BEAM:
+            fire_weapon(subject, SpaceObject::none(), subject->baseType->beam, subject->beam);
+            break;
+        case Which::SPECIAL:
+            fire_weapon(
+                    subject, SpaceObject::none(), subject->baseType->special, subject->special);
+            break;
+    }
 }
 
 void ColorFlashAction::apply(

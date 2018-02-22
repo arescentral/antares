@@ -267,19 +267,10 @@ struct SetDestinationAction : public ActionBase {
             Point* offset);
 };
 
-struct ActivateSpecialAction : public ActionBase {
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
+struct FireAction : public ActionBase {
+    enum class Which { PULSE, BEAM, SPECIAL };
+    Which which;
 
-struct ActivatePulseAction : public ActionBase {
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct ActivateBeamAction : public ActionBase {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);

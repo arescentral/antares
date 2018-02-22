@@ -326,9 +326,15 @@ bool read_argument(int verb, bool reflexive, Action* action, pn::file_view sub) 
         case kNoAction: action->init<NoAction>(); return true;
 
         case kSetDestination: action->init<SetDestinationAction>(); return true;
-        case kActivateSpecial: action->init<ActivateSpecialAction>(); return true;
-        case kActivatePulse: action->init<ActivatePulseAction>(); return true;
-        case kActivateBeam: action->init<ActivateBeamAction>(); return true;
+        case kActivateSpecial:
+            action->init<FireAction>()->which = FireAction::Which::SPECIAL;
+            return true;
+        case kActivatePulse:
+            action->init<FireAction>()->which = FireAction::Which::PULSE;
+            return true;
+        case kActivateBeam:
+            action->init<FireAction>()->which = FireAction::Which::BEAM;
+            return true;
         case kNilTarget: action->init<NilTargetAction>(); return true;
 
         case kCreateObject: return read_from(sub, action->init<CreateObjectAction>(), false);
