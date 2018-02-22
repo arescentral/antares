@@ -428,13 +428,11 @@ bool read_from(pn::file_view in, Action* action) {
     int16_t  owner, subject_override, object_override;
     pn::data section;
     section.resize(24);
-    if (!in.read(
-                &verb, &reflexive, &inclusive_filter, &exclusive_filter, &owner, &delay,
-                &subject_override, &object_override, pn::pad(4), &section)) {
+    if (!(in.read(&verb, &reflexive, &inclusive_filter, &exclusive_filter, &owner, &delay,
+                  &subject_override, &object_override, pn::pad(4), &section) &&
+          read_argument(verb << 8, reflexive, action, section.open()))) {
         return false;
     }
-
-    read_argument(verb << 8, reflexive, action, section.open());
 
     if (*action) {
         auto& base            = *action;
