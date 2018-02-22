@@ -444,9 +444,8 @@ void AlterThrustAction::apply(
 void AlterBaseTypeAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) {
-    const auto alter = argument.alterBaseType;
     if (reflexive || object.get()) {
-        focus->change_base_type(alter.base, -1, alter.keep_ammo);
+        focus->change_base_type(base, -1, keep_ammo);
     }
 }
 

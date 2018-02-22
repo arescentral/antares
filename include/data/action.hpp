@@ -106,11 +106,6 @@ enum alterVerbIDType {
 struct argumentType {
     argumentType() {}
 
-    struct AlterBaseType {
-        bool               keep_ammo;
-        Handle<BaseObject> base;
-    } alterBaseType;
-
     struct AlterHidden {
         int32_t first;
         int32_t count_minus_1;
@@ -517,6 +512,9 @@ struct AlterSpinAction : public ActionBase {
 };
 
 struct AlterBaseTypeAction : public ActionBase {
+    bool               keep_ammo;
+    Handle<BaseObject> base;
+
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);

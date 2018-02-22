@@ -170,12 +170,14 @@ bool read_from(pn::file_view in, AlterThrustAction* thrust) {
     return true;
 }
 
-bool read_from(pn::file_view in, argumentType::AlterBaseType* argument) {
+bool read_from(pn::file_view in, AlterBaseTypeAction* morph) {
+    uint8_t keep_ammo;
     int32_t base;
-    if (!in.read(&argument->keep_ammo, &base)) {
+    if (!in.read(&keep_ammo, &base)) {
         return false;
     }
-    argument->base = Handle<BaseObject>(base);
+    morph->keep_ammo = keep_ammo;
+    morph->base      = Handle<BaseObject>(base);
     return true;
 }
 
@@ -368,9 +370,7 @@ bool read_argument(int verb, bool reflexive, Action* action, pn::file_view sub) 
                 case kAlterMaxVelocity:
                     return read_from(sub, action->init<AlterMaxVelocityAction>());
                 case kAlterThrust: return read_from(sub, action->init<AlterThrustAction>());
-                case kAlterBaseType:
-                    return read_from(
-                            sub, &action->init<AlterBaseTypeAction>()->argument.alterBaseType);
+                case kAlterBaseType: return read_from(sub, action->init<AlterBaseTypeAction>());
                 case kAlterOwner: return read_from(sub, action->init<AlterOwnerAction>());
                 case kAlterConditionTrueYet:
                     return read_from(
@@ -485,9 +485,7 @@ bool                ActionBase::should_end() const { return false; }
 bool NoAction::should_end() const { return true; }
 
 Handle<BaseObject> CreateObjectAction::created_base() const { return base; }
-Handle<BaseObject> AlterBaseTypeAction::created_base() const {
-    return argument.alterBaseType.base;
-}
+Handle<BaseObject> AlterBaseTypeAction::created_base() const { return base; }
 Handle<BaseObject> AlterWeapon1Action::created_base() const { return base; }
 Handle<BaseObject> AlterWeapon2Action::created_base() const { return base; }
 Handle<BaseObject> AlterSpecialAction::created_base() const { return base; }
