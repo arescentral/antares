@@ -34,67 +34,6 @@ namespace antares {
 class SpaceObject;
 struct Level_Initial;
 
-enum objectVerbIDEnum {
-    kNoAction            = 0 << 8,
-    kCreateObject        = 1 << 8,
-    kPlaySound           = 2 << 8,
-    kAlter               = 3 << 8,
-    kMakeSparks          = 4 << 8,
-    kReleaseEnergy       = 5 << 8,
-    kLandAt              = 6 << 8,
-    kEnterWarp           = 7 << 8,
-    kDisplayMessage      = 8 << 8,
-    kChangeScore         = 9 << 8,
-    kDeclareWinner       = 10 << 8,
-    kDie                 = 11 << 8,
-    kSetDestination      = 12 << 8,
-    kActivateSpecial     = 13 << 8,
-    kActivatePulse       = 14 << 8,
-    kActivateBeam        = 15 << 8,
-    kColorFlash          = 16 << 8,
-    kCreateObjectSetDest = 17 << 8,  // creates an object with the same destination as anObject's
-                                     // (either subject or direct)
-    kNilTarget           = 18 << 8,
-    kDisableKeys         = 19 << 8,
-    kEnableKeys          = 20 << 8,
-    kSetZoom             = 21 << 8,
-    kComputerSelect      = 22 << 8,  // selects a line & screen of the minicomputer
-    kAssumeInitialObject = 23 << 8,  // assumes the identity of an intial object; for tutorial
-};
-
-enum alterVerbIDType {
-    kAlterDamage      = kAlter | 0,
-    kAlterVelocity    = kAlter | 1,
-    kAlterThrust      = kAlter | 2,
-    kAlterMaxThrust   = kAlter | 3,
-    kAlterMaxVelocity = kAlter | 4,
-    kAlterMaxTurnRate = kAlter | 5,
-    kAlterLocation    = kAlter | 6,
-    kAlterScale       = kAlter | 7,
-    kAlterWeapon1     = kAlter | 8,
-    kAlterWeapon2     = kAlter | 9,
-    kAlterSpecial     = kAlter | 10,
-    kAlterEnergy      = kAlter | 11,
-    kAlterOwner       = kAlter | 12,
-    kAlterHidden      = kAlter | 13,
-    kAlterCloak       = kAlter | 14,
-    kAlterOffline     = kAlter | 15,
-    kAlterSpin        = kAlter | 16,
-    kAlterBaseType    = kAlter | 17,
-    kAlterConditionTrueYet =
-            kAlter | 18,  // relative = state, min = which condition basically force to recheck
-    kAlterOccupation = kAlter | 19,  // for special neutral death objects
-    kAlterAbsoluteCash =
-            kAlter |
-            20,  // relative: true = cash to object : false = range = admiral who gets cash
-    kAlterAge              = kAlter | 21,
-    kAlterAttributes       = kAlter | 22,
-    kAlterLevelKeyTag      = kAlter | 23,
-    kAlterOrderKeyTag      = kAlter | 24,
-    kAlterEngageKeyTag     = kAlter | 25,
-    kAlterAbsoluteLocation = kAlter | 26,
-};
-
 //
 // Action:
 //  Defines any action that an object can take.  Conditions that can cause an action to execute
@@ -122,14 +61,16 @@ class Action {
 };
 
 struct ActionBase {
-    bool     reflexive;        // does it apply to object executing verb?
+    bool reflexive;  // does it apply to object executing verb?
+
     uint32_t inclusiveFilter;  // if it has ALL these attributes, OK -- for non-reflective verbs
     uint32_t exclusiveFilter;  // don't execute if it has ANY of these
     uint8_t  levelKeyTag;
+
     enum class Owner { ANY = 0, SAME = 1, DIFFERENT = -1 };
     Owner owner;
     ticks delay;
-    //  uint32_t                    reserved1;
+
     Handle<Level_Initial> initialSubjectOverride;
     Handle<Level_Initial> initialDirectOverride;
 
@@ -157,6 +98,59 @@ struct NoAction : public ActionBase {
     virtual bool should_end() const;
 };
 
+struct AgeAction : public ActionBase {
+    bool                    relative;  // if true, add value to age; if false, set age to value
+    std::pair<ticks, ticks> value;     // age range
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct AssumeAction : public ActionBase {
+    int32_t which;  // which initial to become
+                    // Note: player 1’s score 0 is added to this number
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct CapSpeedAction : public ActionBase {
+    Fixed value;  // if >= 0, set to value; if < 0, set to base type’s default
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct CaptureAction : public ActionBase {
+    bool relative;  // if true and reflexive, set subject’s owner to object’s
+                    // if true and non-reflexive, set object’s owner to subject’s
+                    // if false, set focus’s owner to `player`
+    Handle<Admiral> player;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+    virtual bool alters_owner() const;
+};
+
+struct CloakAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct ConditionAction : public ActionBase {
+    bool                        enabled;
+    std::pair<int32_t, int32_t> which;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
 struct CreateAction : public ActionBase {
     Handle<BaseObject> base;                        // what type
     int32_t            count_minimum      = 1;      // # to make min
@@ -171,6 +165,207 @@ struct CreateAction : public ActionBase {
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
     virtual Handle<BaseObject> created_base() const;
+};
+
+struct DisableAction : public ActionBase {
+    std::pair<Fixed, Fixed> value;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct EnergizeAction : public ActionBase {
+    int32_t value;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct EquipAction : public ActionBase {
+    enum class Which { PULSE, BEAM, SPECIAL };
+    Which              which;
+    Handle<BaseObject> base;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+    virtual Handle<BaseObject> created_base() const;
+};
+
+struct FireAction : public ActionBase {
+    enum class Which { PULSE, BEAM, SPECIAL };
+    Which which;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct FlashAction : public ActionBase {
+    int32_t length;  // length of color flash
+    uint8_t hue;     // hue of flash
+    uint8_t shade;   // brightness of flash
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct HealAction : public ActionBase {
+    int32_t value;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct HoldPositionAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct KeyAction : public ActionBase {
+    uint32_t disable = 0;  // keys to disable
+    uint32_t enable  = 0;  // keys to enable
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct KillAction : public ActionBase {
+    enum class Kind {
+        // Removes the focus without any further fanfare.
+        NONE = 0,
+
+        // Removes the subject without any further fanfare.
+        // Essentially, this is NONE, but always reflexive.
+        EXPIRE = 1,
+
+        // Removes the subject and executes its destroy action.
+        DESTROY = 2,
+    };
+    Kind kind;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct LandAction : public ActionBase {
+    int32_t speed;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct MessageAction : public ActionBase {
+    int16_t                 id;     // identifies the message to a "message" condition
+    std::vector<pn::string> pages;  // pages of message bodies to show
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+    virtual bool check_conditions() const;
+};
+
+struct MorphAction : public ActionBase {
+    bool               keep_ammo;
+    Handle<BaseObject> base;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+    virtual Handle<BaseObject> created_base() const;
+};
+
+struct MoveAction : public ActionBase {
+    enum Origin {
+        LEVEL,    // absolute coordinates, in level’s rotated frame of reference
+        SUBJECT,  // relative to subject
+        OBJECT,   // relative to object
+        FOCUS,    // relative to focus
+    };
+    Origin         origin;
+    coordPointType to;
+    int32_t        distance;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct OccupyAction : public ActionBase {
+    int32_t value;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct OrderAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct PayAction : public ActionBase {
+    bool            relative;  // if true, pay focus’s owner; if false, pay `player`
+    Fixed           value;     // amount to pay; not affected by earning power
+    Handle<Admiral> player;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct PushAction : public ActionBase {
+    enum class Kind {
+        STOP,        // set focus’s velocity to 0
+        COLLIDE,     // impart velocity from subject like a collision (capped)
+        DECELERATE,  // decrease focus’s velocity (capped)
+        SET,         // set focus’s velocity to value in subject’s direction
+        BOOST,       // add to focus’s velocity in subject’s direction
+        CRUISE,      // set focus’s velocity in focus’s direction
+    };
+    Kind  kind;
+    Fixed value;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct RevealAction : public ActionBase {
+    HandleList<Level_Initial> initial;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct ScoreAction : public ActionBase {
+    Handle<Admiral> player;  // which player’s score to change; -1 = owner of focus
+    int32_t         which;   // 0-2; each player has three "scores"
+    int32_t         value;   // amount to change by
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+    virtual bool check_conditions() const;
+};
+
+struct SelectAction : public ActionBase {
+    int32_t screen;
+    int32_t line;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
 };
 
 struct SoundAction : public ActionBase {
@@ -197,155 +392,8 @@ struct SparkAction : public ActionBase {
             Point* offset);
 };
 
-struct LandAction : public ActionBase {
-    int32_t speed;
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct WarpAction : public ActionBase {
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct MessageAction : public ActionBase {
-    int16_t                 id;     // identifies the message to a "message" condition
-    std::vector<pn::string> pages;  // pages of message bodies to show
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-    virtual bool check_conditions() const;
-};
-
-struct ScoreAction : public ActionBase {
-    Handle<Admiral> player;  // which player’s score to change; -1 = owner of focus
-    int32_t         which;   // 0-2; each player has three "scores"
-    int32_t         value;   // amount to change by
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-    virtual bool check_conditions() const;
-};
-
-struct WinAction : public ActionBase {
-    Handle<Admiral> player;  // victor; -1 = owner of focus
-    int32_t         next;    // next chapter to play; -1 = none
-    pn::string      text;    // "debriefing" text
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct KillAction : public ActionBase {
-    enum class Kind {
-        // Removes the focus without any further fanfare.
-        NONE = 0,
-
-        // Removes the subject without any further fanfare.
-        // Essentially, this is NONE, but always reflexive.
-        EXPIRE = 1,
-
-        // Removes the subject and executes its destroy action.
-        DESTROY = 2,
-    };
-    Kind kind;
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct OrderAction : public ActionBase {
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct FireAction : public ActionBase {
-    enum class Which { PULSE, BEAM, SPECIAL };
-    Which which;
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct FlashAction : public ActionBase {
-    int32_t length;  // length of color flash
-    uint8_t hue;     // hue of flash
-    uint8_t shade;   // brightness of flash
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct HoldPositionAction : public ActionBase {
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct KeyAction : public ActionBase {
-    uint32_t disable = 0;  // keys to disable
-    uint32_t enable  = 0;  // keys to enable
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct ZoomAction : public ActionBase {
-    int32_t value;
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct SelectAction : public ActionBase {
-    int32_t screen;
-    int32_t line;
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct AssumeAction : public ActionBase {
-    int32_t which;  // which initial to become
-                    // Note: player 1’s score 0 is added to this number
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct HealAction : public ActionBase {
-    int32_t value;
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct PushAction : public ActionBase {
-    enum class Kind {
-        STOP,        // set focus’s velocity to 0
-        COLLIDE,     // impart velocity from subject like a collision (capped)
-        DECELERATE,  // decrease focus’s velocity (capped)
-        SET,         // set focus’s velocity to value in subject’s direction
-        BOOST,       // add to focus’s velocity in subject’s direction
-        CRUISE,      // set focus’s velocity in focus’s direction
-    };
-    Kind  kind;
-    Fixed value;
+struct SpinAction : public ActionBase {
+    std::pair<Fixed, Fixed> value;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
@@ -361,131 +409,24 @@ struct ThrustAction : public ActionBase {
             Point* offset);
 };
 
-struct CapSpeedAction : public ActionBase {
-    Fixed value;  // if >= 0, set to value; if < 0, set to base type’s default
+struct WarpAction : public ActionBase {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset);
+};
+
+struct WinAction : public ActionBase {
+    Handle<Admiral> player;  // victor; -1 = owner of focus
+    int32_t         next;    // next chapter to play; -1 = none
+    pn::string      text;    // "debriefing" text
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset);
 };
 
-struct MoveAction : public ActionBase {
-    enum Origin {
-        LEVEL,    // absolute coordinates, in level’s rotated frame of reference
-        SUBJECT,  // relative to subject
-        OBJECT,   // relative to object
-        FOCUS,    // relative to focus
-    };
-    Origin         origin;
-    coordPointType to;
-    int32_t        distance;
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct EquipAction : public ActionBase {
-    enum class Which { PULSE, BEAM, SPECIAL };
-    Which              which;
-    Handle<BaseObject> base;
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-    virtual Handle<BaseObject> created_base() const;
-};
-
-struct EnergizeAction : public ActionBase {
+struct ZoomAction : public ActionBase {
     int32_t value;
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct CaptureAction : public ActionBase {
-    bool relative;  // if true and reflexive, set subject’s owner to object’s
-                    // if true and non-reflexive, set object’s owner to subject’s
-                    // if false, set focus’s owner to `player`
-    Handle<Admiral> player;
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-    virtual bool alters_owner() const;
-};
-
-struct RevealAction : public ActionBase {
-    HandleList<Level_Initial> initial;
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct CloakAction : public ActionBase {
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct DisableAction : public ActionBase {
-    std::pair<Fixed, Fixed> value;
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct SpinAction : public ActionBase {
-    std::pair<Fixed, Fixed> value;
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct MorphAction : public ActionBase {
-    bool               keep_ammo;
-    Handle<BaseObject> base;
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-    virtual Handle<BaseObject> created_base() const;
-};
-
-struct ConditionAction : public ActionBase {
-    bool                        enabled;
-    std::pair<int32_t, int32_t> which;
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct OccupyAction : public ActionBase {
-    int32_t value;
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct PayAction : public ActionBase {
-    bool            relative;  // if true, pay focus’s owner; if false, pay `player`
-    Fixed           value;     // amount to pay; not affected by earning power
-    Handle<Admiral> player;
-
-    virtual void apply(
-            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
-            Point* offset);
-};
-
-struct AgeAction : public ActionBase {
-    bool                    relative;  // if true, add value to age; if false, set age to value
-    std::pair<ticks, ticks> value;     // age range
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
