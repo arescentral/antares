@@ -57,7 +57,8 @@ ANTARES_GLOBAL set<int32_t> possible_actions;
 #endif  // DATA_COVERAGE
 
 void AddBaseObjectActionMedia(
-        Handle<BaseObject> base, std::vector<Action>(BaseObject::*whichType), uint8_t color,
+        Handle<BaseObject> base,
+        std::vector<std::unique_ptr<const Action>>(BaseObject::*whichType), uint8_t color,
         std::bitset<16> all_colors, LoadState* state);
 void AddActionMedia(
         const Action& action, uint8_t color, std::bitset<16> all_colors, LoadState* state);
@@ -101,10 +102,11 @@ void AddBaseObjectMedia(
 }
 
 void AddBaseObjectActionMedia(
-        Handle<BaseObject> base, std::vector<Action>(BaseObject::*whichType), uint8_t color,
+        Handle<BaseObject> base,
+        std::vector<std::unique_ptr<const Action>>(BaseObject::*whichType), uint8_t color,
         std::bitset<16> all_colors, LoadState* state) {
     for (const auto& action : (*base.*whichType)) {
-        AddActionMedia(action, color, all_colors, state);
+        AddActionMedia(*action, color, all_colors, state);
     }
 }
 
@@ -114,17 +116,17 @@ void AddActionMedia(
     possible_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
-    auto base = action->created_base();
+    auto base = action.created_base();
     if (base.get()) {
-        AddBaseObjectMedia(action->created_base(), color, all_colors, state);
+        AddBaseObjectMedia(action.created_base(), color, all_colors, state);
     }
 
-    auto range = action->sound_range();
+    auto range = action.sound_range();
     for (int32_t count = range.first; count < range.second; count++) {
         sys.sound.load(count);
     }
 
-    if (action->alters_owner()) {
+    if (action.alters_owner()) {
         for (auto baseObject : BaseObject::all()) {
             if (action_filter_applies_to(action, baseObject)) {
                 state->colors_needed[baseObject.number()] |= all_colors;
@@ -299,7 +301,7 @@ static void load_initial(
 static void load_condition(
         Level::Condition* condition, std::bitset<16> all_colors, LoadState* state) {
     for (const auto& action : (*condition)->action) {
-        AddActionMedia(action, GRAY, all_colors, state);
+        AddActionMedia(*action, GRAY, all_colors, state);
     }
     int index                  = condition - g.level->conditions.data();
     g.condition_enabled[index] = (*condition)->initially_enabled;

@@ -223,12 +223,12 @@ std::vector<Level::Initial> read_initials(int begin, int end);
 struct Level::ConditionBase {
     enum class Op { EQ, NE, LT, GT, LE, GE };
 
-    Op                     op                = Op::EQ;
-    bool                   initially_enabled = true;
-    bool                   persistent        = false;
-    Handle<Level::Initial> subject;
-    Handle<Level::Initial> object;
-    std::vector<Action>    action;
+    Op                                         op                = Op::EQ;
+    bool                                       initially_enabled = true;
+    bool                                       persistent        = false;
+    Handle<Level::Initial>                     subject;
+    Handle<Level::Initial>                     object;
+    std::vector<std::unique_ptr<const Action>> action;
 
     static const size_t byte_size = 38;
 

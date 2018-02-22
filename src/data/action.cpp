@@ -383,27 +383,32 @@ bool read_from(pn::file_view in, SelectAction* select) {
 
 bool read_from(pn::file_view in, AssumeAction* assume) { return in.read(&assume->which); }
 
-bool read_argument(int verb, bool reflexive, Action* action, pn::file_view sub) {
+template <typename T>
+T* init(std::unique_ptr<Action>* action) {
+    T* t;
+    action->reset(t = new T());
+    return t;
+}
+
+bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn::file_view sub) {
     switch (static_cast<objectVerbIDEnum>(verb)) {
         case kReleaseEnergy:
-        case kNoAction: action->init<NoAction>(); return true;
+        case kNoAction: init<NoAction>(action); return true;
 
-        case kSetDestination: action->init<OrderAction>(); return true;
+        case kSetDestination: init<OrderAction>(action); return true;
         case kActivateSpecial:
-            action->init<FireAction>()->which = FireAction::Which::SPECIAL;
+            init<FireAction>(action)->which = FireAction::Which::SPECIAL;
             return true;
         case kActivatePulse:
-            action->init<FireAction>()->which = FireAction::Which::PULSE;
+            init<FireAction>(action)->which = FireAction::Which::PULSE;
             return true;
-        case kActivateBeam:
-            action->init<FireAction>()->which = FireAction::Which::BEAM;
-            return true;
-        case kNilTarget: action->init<HoldPositionAction>(); return true;
+        case kActivateBeam: init<FireAction>(action)->which = FireAction::Which::BEAM; return true;
+        case kNilTarget: init<HoldPositionAction>(action); return true;
 
-        case kCreateObject: return read_from(sub, action->init<CreateAction>(), false);
-        case kCreateObjectSetDest: return read_from(sub, action->init<CreateAction>(), true);
+        case kCreateObject: return read_from(sub, init<CreateAction>(action), false);
+        case kCreateObjectSetDest: return read_from(sub, init<CreateAction>(action), true);
 
-        case kPlaySound: return read_from(sub, action->init<SoundAction>());
+        case kPlaySound: return read_from(sub, init<SoundAction>(action));
 
         case kAlter: {
             uint8_t alter;
@@ -412,143 +417,142 @@ bool read_argument(int verb, bool reflexive, Action* action, pn::file_view sub) 
             }
             verb |= alter;
             switch (static_cast<alterVerbIDType>(verb)) {
-                case kAlterMaxThrust: action->init<NoAction>(); return true;
-                case kAlterMaxTurnRate: action->init<NoAction>(); return true;
-                case kAlterScale: action->init<NoAction>(); return true;
-                case kAlterAttributes: action->init<NoAction>(); return true;
-                case kAlterLevelKeyTag: action->init<NoAction>(); return true;
-                case kAlterOrderKeyTag: action->init<NoAction>(); return true;
-                case kAlterEngageKeyTag: action->init<NoAction>(); return true;
+                case kAlterMaxThrust: init<NoAction>(action); return true;
+                case kAlterMaxTurnRate: init<NoAction>(action); return true;
+                case kAlterScale: init<NoAction>(action); return true;
+                case kAlterAttributes: init<NoAction>(action); return true;
+                case kAlterLevelKeyTag: init<NoAction>(action); return true;
+                case kAlterOrderKeyTag: init<NoAction>(action); return true;
+                case kAlterEngageKeyTag: init<NoAction>(action); return true;
 
-                case kAlterCloak: action->init<CloakAction>(); return true;
+                case kAlterCloak: init<CloakAction>(action); return true;
 
-                case kAlterDamage: return read_from(sub, action->init<HealAction>());
-                case kAlterEnergy: return read_from(sub, action->init<EnergizeAction>());
-                case kAlterHidden: return read_from(sub, action->init<RevealAction>());
-                case kAlterSpin: return read_from(sub, action->init<SpinAction>());
-                case kAlterOffline: return read_from(sub, action->init<DisableAction>());
-                case kAlterVelocity: return read_from(sub, reflexive, action->init<PushAction>());
-                case kAlterMaxVelocity: return read_from(sub, action->init<CapSpeedAction>());
-                case kAlterThrust: return read_from(sub, action->init<ThrustAction>());
-                case kAlterBaseType: return read_from(sub, action->init<MorphAction>());
-                case kAlterOwner: return read_from(sub, action->init<CaptureAction>());
-                case kAlterConditionTrueYet:
-                    return read_from(sub, action->init<ConditionAction>());
-                case kAlterOccupation: return read_from(sub, action->init<OccupyAction>());
-                case kAlterAbsoluteCash: return read_from(sub, action->init<PayAction>());
-                case kAlterAge: return read_from(sub, action->init<AgeAction>());
+                case kAlterDamage: return read_from(sub, init<HealAction>(action));
+                case kAlterEnergy: return read_from(sub, init<EnergizeAction>(action));
+                case kAlterHidden: return read_from(sub, init<RevealAction>(action));
+                case kAlterSpin: return read_from(sub, init<SpinAction>(action));
+                case kAlterOffline: return read_from(sub, init<DisableAction>(action));
+                case kAlterVelocity: return read_from(sub, reflexive, init<PushAction>(action));
+                case kAlterMaxVelocity: return read_from(sub, init<CapSpeedAction>(action));
+                case kAlterThrust: return read_from(sub, init<ThrustAction>(action));
+                case kAlterBaseType: return read_from(sub, init<MorphAction>(action));
+                case kAlterOwner: return read_from(sub, init<CaptureAction>(action));
+                case kAlterConditionTrueYet: return read_from(sub, init<ConditionAction>(action));
+                case kAlterOccupation: return read_from(sub, init<OccupyAction>(action));
+                case kAlterAbsoluteCash: return read_from(sub, init<PayAction>(action));
+                case kAlterAge: return read_from(sub, init<AgeAction>(action));
                 case kAlterLocation:
-                    return read_from_relative(sub, reflexive, action->init<MoveAction>());
+                    return read_from_relative(sub, reflexive, init<MoveAction>(action));
                 case kAlterAbsoluteLocation:
-                    return read_from_absolute(sub, action->init<MoveAction>());
+                    return read_from_absolute(sub, init<MoveAction>(action));
                 case kAlterWeapon1:
-                    return read_from(sub, EquipAction::Which::PULSE, action->init<EquipAction>());
+                    return read_from(sub, EquipAction::Which::PULSE, init<EquipAction>(action));
                 case kAlterWeapon2:
-                    return read_from(sub, EquipAction::Which::BEAM, action->init<EquipAction>());
+                    return read_from(sub, EquipAction::Which::BEAM, init<EquipAction>(action));
                 case kAlterSpecial:
-                    return read_from(
-                            sub, EquipAction::Which::SPECIAL, action->init<EquipAction>());
+                    return read_from(sub, EquipAction::Which::SPECIAL, init<EquipAction>(action));
             }
         }
 
-        case kMakeSparks: return read_from(sub, action->init<SparkAction>());
+        case kMakeSparks: return read_from(sub, init<SparkAction>(action));
 
-        case kLandAt: return read_from(sub, action->init<LandAction>());
+        case kLandAt: return read_from(sub, init<LandAction>(action));
 
-        case kEnterWarp: action->init<WarpAction>(); return true;
+        case kEnterWarp: init<WarpAction>(action); return true;
 
-        case kDisplayMessage: return read_from(sub, action->init<MessageAction>());
+        case kDisplayMessage: return read_from(sub, init<MessageAction>(action));
 
-        case kChangeScore: return read_from(sub, action->init<ScoreAction>());
+        case kChangeScore: return read_from(sub, init<ScoreAction>(action));
 
-        case kDeclareWinner: return read_from(sub, action->init<WinAction>());
+        case kDeclareWinner: return read_from(sub, init<WinAction>(action));
 
-        case kDie: return read_from(sub, action->init<KillAction>());
+        case kDie: return read_from(sub, init<KillAction>(action));
 
-        case kColorFlash: return read_from(sub, action->init<FlashAction>());
+        case kColorFlash: return read_from(sub, init<FlashAction>(action));
 
-        case kDisableKeys: return read_disable_keys_from(sub, action->init<KeyAction>());
-        case kEnableKeys: return read_enable_keys_from(sub, action->init<KeyAction>());
+        case kDisableKeys: return read_disable_keys_from(sub, init<KeyAction>(action));
+        case kEnableKeys: return read_enable_keys_from(sub, init<KeyAction>(action));
 
-        case kSetZoom: return read_from(sub, action->init<ZoomAction>());
+        case kSetZoom: return read_from(sub, init<ZoomAction>(action));
 
-        case kComputerSelect: return read_from(sub, action->init<SelectAction>());
+        case kComputerSelect: return read_from(sub, init<SelectAction>(action));
 
-        case kAssumeInitialObject: return read_from(sub, action->init<AssumeAction>());
+        case kAssumeInitialObject: return read_from(sub, init<AssumeAction>(action));
     }
 }
 
 template <typename T>
-ActionBase::Owner owner_cast(T t) {
+Action::Owner owner_cast(T t) {
     switch (t) {
-        case static_cast<T>(ActionBase::Owner::ANY): return ActionBase::Owner::ANY;
-        case static_cast<T>(ActionBase::Owner::SAME): return ActionBase::Owner::SAME;
-        case static_cast<T>(ActionBase::Owner::DIFFERENT): return ActionBase::Owner::DIFFERENT;
+        case static_cast<T>(Action::Owner::ANY): return Action::Owner::ANY;
+        case static_cast<T>(Action::Owner::SAME): return Action::Owner::SAME;
+        case static_cast<T>(Action::Owner::DIFFERENT): return Action::Owner::DIFFERENT;
     }
-    return owner_cast(ActionBase::Owner::ANY);
+    return owner_cast(Action::Owner::ANY);
 }
 
 }  // namespace
 
-bool read_from(pn::file_view in, Action* action) {
+bool read_from(pn::file_view in, std::unique_ptr<const Action>* action) {
     uint8_t  verb, reflexive;
     uint32_t inclusive_filter, exclusive_filter;
     uint32_t delay;
     int16_t  owner, subject_override, object_override;
     pn::data section;
     section.resize(24);
+    std::unique_ptr<Action> a;
     if (!(in.read(&verb, &reflexive, &inclusive_filter, &exclusive_filter, &owner, &delay,
                   &subject_override, &object_override, pn::pad(4), &section) &&
-          read_argument(verb << 8, reflexive, action, section.open()))) {
+          read_argument(verb << 8, reflexive, &a, section.open()))) {
         return false;
     }
 
-    if (*action) {
-        auto& base            = *action;
-        base->reflexive       = reflexive;
-        base->inclusiveFilter = inclusive_filter;
-        base->exclusiveFilter = exclusive_filter;
+    if (a) {
+        a->reflexive       = reflexive;
+        a->inclusiveFilter = inclusive_filter;
+        a->exclusiveFilter = exclusive_filter;
         if (exclusive_filter == 0xffffffff) {
-            base->levelKeyTag = (inclusive_filter & kLevelKeyTag) >> kLevelKeyTagShift;
+            a->levelKeyTag = (inclusive_filter & kLevelKeyTag) >> kLevelKeyTagShift;
         } else {
-            base->levelKeyTag = 0;
+            a->levelKeyTag = 0;
         }
-        base->owner                  = owner_cast(owner);
-        base->delay                  = ticks(delay);
-        base->initialSubjectOverride = Handle<Level::Initial>(subject_override);
-        base->initialDirectOverride  = Handle<Level::Initial>(object_override);
+        a->owner                  = owner_cast(owner);
+        a->delay                  = ticks(delay);
+        a->initialSubjectOverride = Handle<Level::Initial>(subject_override);
+        a->initialDirectOverride  = Handle<Level::Initial>(object_override);
+        *action                   = std::move(a);
     }
     return true;
 }
 
-std::vector<Action> read_actions(int begin, int end) {
+std::vector<std::unique_ptr<const Action>> read_actions(int begin, int end) {
     if (end <= begin) {
-        return std::vector<Action>{};
+        return std::vector<std::unique_ptr<const Action>>{};
     }
     Resource r = Resource::path("actions.bin");
 
     pn::data_view d = r.data();
-    if ((begin < 0) || ((d.size() / ActionBase::byte_size) < end)) {
+    if ((begin < 0) || ((d.size() / Action::byte_size) < end)) {
         throw std::runtime_error(pn::format(
                                          "action range {{{0}, {1}}} outside {{0, {2}}}", begin,
-                                         end, d.size() / ActionBase::byte_size)
+                                         end, d.size() / Action::byte_size)
                                          .c_str());
     }
 
     int      count = end - begin;
-    pn::file f     = d.slice(ActionBase::byte_size * begin, ActionBase::byte_size * count).open();
-    std::vector<Action> actions;
+    pn::file f     = d.slice(Action::byte_size * begin, Action::byte_size * count).open();
+    std::vector<std::unique_ptr<const Action>> actions;
     actions.resize(count);
-    for (Action& a : actions) {
+    for (std::unique_ptr<const Action>& a : actions) {
         read_from(f, &a);
     }
     return actions;
 }
 
-Handle<BaseObject>  ActionBase::created_base() const { return BaseObject::none(); }
-std::pair<int, int> ActionBase::sound_range() const { return std::make_pair(-1, -1); }
-bool                ActionBase::alters_owner() const { return false; }
-bool                ActionBase::check_conditions() const { return false; }
+Handle<BaseObject>  Action::created_base() const { return BaseObject::none(); }
+std::pair<int, int> Action::sound_range() const { return std::make_pair(-1, -1); }
+bool                Action::alters_owner() const { return false; }
+bool                Action::check_conditions() const { return false; }
 
 Handle<BaseObject> CreateAction::created_base() const { return base; }
 Handle<BaseObject> MorphAction::created_base() const { return base; }
