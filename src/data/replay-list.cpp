@@ -44,8 +44,11 @@ struct ScopedGlob {
 
 ReplayList::ReplayList() {
     ScopedGlob g;
-    pn::string str = pn::format("{0}/replays/*.NLRP", scenario_path());
-    glob(str.c_str(), 0, NULL, &g.data);
+    if (sys.prefs->scenario_identifier() == kFactoryScenarioIdentifier) {
+        glob(pn::format("{0}/replays/*.NLRP", application_path()).c_str(), 0, NULL, &g.data);
+    } else {
+        glob(pn::format("{0}/replays/*.NLRP", scenario_path()).c_str(), 0, NULL, &g.data);
+    }
 
     for (int i = 0; i < g.data.gl_pathc; ++i) {
         const pn::string path      = g.data.gl_pathv[i];

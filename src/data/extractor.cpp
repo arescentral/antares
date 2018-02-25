@@ -62,6 +62,12 @@ namespace antares {
 
 namespace {
 
+const char kAresSounds[]      = "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Sounds";
+const int  kNonFreeSoundIDs[] = {
+        502, 504, 505, 506, 507, 508, 509, 513, 514,  515,  516,   530,   531,   532,   535,
+        536, 540, 548, 550, 552, 553, 562, 571, 2000, 2001, 12558, 17406, 28007, 31989,
+};
+
 bool verbatim(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
     out.write(data);
     return true;
@@ -72,57 +78,6 @@ enum {
     WHILE_THE_IRON_IS_HOT  = 605,
     SPACE_RACE_THE_MUSICAL = 623,
 };
-
-int32_t nlrp_chapter(int16_t id) {
-    switch (id) {
-        case THE_STARS_HAVE_EARS: return 4;
-        case WHILE_THE_IRON_IS_HOT: return 6;
-        case SPACE_RACE_THE_MUSICAL: return 26;
-    };
-    throw std::runtime_error(pn::format("invalid replay ID {0}", id).c_str());
-}
-
-bool convert_nlrp(pn::string_view, bool, int16_t id, pn::data_view data, pn::file_view out) {
-    pn::file   in = data.open();
-    ReplayData replay;
-    replay.scenario.identifier = kFactoryScenarioIdentifier;
-    replay.scenario.version    = "1.1.1";
-    replay.chapter_id          = nlrp_chapter(id);
-    if (!in.read(&replay.global_seed)) {
-        return false;
-    }
-
-    uint32_t keys = 0;
-    uint32_t at   = 0;
-    while (true) {
-        uint32_t ticks_minus_one, new_keys;
-        if (!in.read(&ticks_minus_one, &new_keys)) {
-            if (in.error()) {
-                return false;
-            }
-            break;
-        }
-        const uint32_t ticks     = ticks_minus_one + 1;
-        const uint32_t keys_down = new_keys & ~keys;
-        const uint32_t keys_up   = keys & ~new_keys;
-
-        for (int i = 0; i < 19; ++i) {
-            if (keys_down & (1 << i)) {
-                replay.key_down(at, i);
-            }
-            if (keys_up & (1 << i)) {
-                replay.key_up(at, i);
-            }
-        }
-        at += ticks;
-
-        keys = new_keys;
-    }
-    replay.duration = at;
-
-    replay.write_to(out);
-    return true;
-}
 
 bool read_pstr(pn::file_view in, pn::string* out) {
     uint8_t bytes[256];
@@ -432,46 +387,8 @@ struct ResourceFile {
     } resources[16];
 };
 
-static const ResourceFile kResourceFiles[] = {
-        {
-                "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Scenarios",
-                {
-                        {"PICT", "pictures", "png", convert_pict},
-                        {"STR#", "strings", "pn", convert_str},
-                        {"TEXT", "text", "txt", convert_text},
-                        {"bsob", "objects", "bin", verbatim, 500},
-                        {"nlAG", "info", "pn", convert_nlag, 128},
-                        {"obac", "actions", "bin", verbatim, 500},
-                        {"race", "races", "bin", verbatim, 500},
-                        {"snbf", "scenario-briefings", "bin", verbatim, 500},
-                        {"sncd", "scenario-conditions", "bin", verbatim, 500},
-                        {"snit", "scenario-initials", "bin", verbatim, 500},
-                        {"snro", "scenarios", "bin", verbatim, 500},
-                },
-        },
-        {
-                "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Sounds",
-                {
-                        {"snd ", "sounds", "aiff", convert_snd},
-                },
-        },
-        {
-                "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Sprites",
-                {
-                        {"SMIV", "sprites", "pn", convert_smiv},
-                },
-        },
-        {
-                "__MACOSX/Ares 1.2.0 ƒ/._Ares",
-                {
-                        {"NLRP", "replays", "NLRP", convert_nlrp},
-                },
-        },
-};
-
 static const ResourceFile::ExtractedResource kPluginFiles[] = {
         {"PICT", "pictures", "png", convert_pict},
-        {"NLRP", "replays", "NLRP", convert_nlrp},
         {"SMIV", "sprites", "pn", convert_smiv},
         {"STR#", "strings", "pn", convert_str},
         {"TEXT", "text", "txt", convert_text},
@@ -487,7 +404,7 @@ static const ResourceFile::ExtractedResource kPluginFiles[] = {
 };
 
 static const char kDownloadBase[] = "http://downloads.arescentral.org";
-static const char kVersion[]      = "18+\n";
+static const char kVersion[]      = "19\n";
 
 static const char kPluginVersionFile[]    = "data/version";
 static const char kPluginVersion[]        = "1\n";
@@ -669,45 +586,19 @@ void DataExtractor::extract_original(Observer* observer, pn::string_view file) c
     rezin::Options options;
     options.line_ending = rezin::Options::CR;
 
-    for (const ResourceFile& resource_file : kResourceFiles) {
-        pn::string    path = resource_file.path;
-        ZipFileReader file(archive, path);
-        AppleDouble   apple_double(file.data());
-        ResourceFork  rsrc(apple_double.at(AppleDouble::RESOURCE_FORK), options);
+    ZipFileReader       zip(archive, kAresSounds);
+    AppleDouble         apple_double(zip.data());
+    ResourceFork        rsrc(apple_double.at(AppleDouble::RESOURCE_FORK), options);
+    const ResourceType& snd = rsrc.at("snd ");
 
-        for (const ResourceFile::ExtractedResource& conversion : resource_file.resources) {
-            if (!conversion.resource) {
-                continue;
-            }
-
-            const ResourceType& type = rsrc.at(conversion.resource);
-            if (conversion.id) {
-                pn::data   data;
-                pn::string output = pn::format(
-                        "{0}/{1}/{2}.{3}", _output_dir, kFactoryScenarioIdentifier,
-                        conversion.output_directory, conversion.output_extension);
-                if (conversion.convert(
-                            path::dirname(output), true, conversion.id,
-                            type.at(conversion.id).data(), data.open("w"))) {
-                    makedirs(path::dirname(output), 0755);
-                    pn::file file = pn::open(output, "w");
-                    file.write(data);
-                }
-            } else {
-                for (const ResourceEntry& entry : type) {
-                    pn::data   data;
-                    pn::string output = pn::format(
-                            "{0}/{1}/{2}/{3}.{4}", _output_dir, kFactoryScenarioIdentifier,
-                            conversion.output_directory, entry.id(), conversion.output_extension);
-                    if (conversion.convert(
-                                path::dirname(output), true, entry.id(), entry.data(),
-                                data.open("w"))) {
-                        makedirs(path::dirname(output), 0755);
-                        pn::file file = pn::open(output, "w");
-                        file.write(data);
-                    }
-                }
-            }
+    for (int id : kNonFreeSoundIDs) {
+        pn::data   data;
+        pn::string output = pn::format(
+                "{0}/{1}/sounds/{2}.{3}", _output_dir, kFactoryScenarioIdentifier, id, "aiff");
+        if (convert_snd(path::dirname(output), true, id, snd.at(id).data(), data.open("w"))) {
+            makedirs(path::dirname(output), 0755);
+            pn::file file = pn::open(output, "w");
+            file.write(data);
         }
     }
 }
