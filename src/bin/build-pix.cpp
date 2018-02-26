@@ -84,19 +84,19 @@ void run(
         std::function<pn::string()> text;
     };
     vector<Spec> specs{
-            {"03020", 450, [] { return Resource::text(3020); }},
-            {"03025", 450, [] { return Resource::text(3025); }},
-            {"03080", 450, [] { return Resource::text(3080); }},
-            {"03081", 450, [] { return Resource::text(3081); }},
-            {"03120", 450, [] { return Resource::text(3120); }},
-            {"03211", 450, [] { return Resource::text(3211); }},
-            {"04063", 450, [] { return Resource::text(4063); }},
-            {"04509", 450, [] { return Resource::text(4509); }},
-            {"04606", 450, [] { return Resource::text(4606); }},
-            {"05600", 450, [] { return PluginInit(), plug.info.intro_text.copy(); }},
-            {"06500", 540, [] { return PluginInit(), plug.info.about_text.copy(); }},
-            {"06501", 450, [] { return Resource::text(6501); }},
-            {"10199", 450, [] { return Resource::text(10199); }},
+            {"gai-prologue", 450, [] { return Resource::text(3020); }},
+            {"tut-prologue", 450, [] { return Resource::text(3025); }},
+            {"can-prologue", 450, [] { return Resource::text(3080); }},
+            {"can-epilogue", 450, [] { return Resource::text(3081); }},
+            {"sal-prologue", 450, [] { return Resource::text(3120); }},
+            {"outro", 450, [] { return Resource::text(3211); }},
+            {"baz-prologue", 450, [] { return Resource::text(4063); }},
+            {"ele-prologue", 450, [] { return Resource::text(4509); }},
+            {"aud-prologue", 450, [] { return Resource::text(4606); }},
+            {"intro", 450, [] { return PluginInit(), plug.info.intro_text.copy(); }},
+            {"about", 540, [] { return PluginInit(), plug.info.about_text.copy(); }},
+            {"please-register", 450, [] { return Resource::text(6501); }},
+            {"unused-gai-prologue", 450, [] { return Resource::text(10199); }},
     };
 
     vector<pair<unique_ptr<Card>, pn::string>> pix;
