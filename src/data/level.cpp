@@ -42,7 +42,8 @@ bool read_from(pn::file_view in, ScenarioInfo* info) {
         return false;
     }
     pn::map_cref m = x.as_map();
-    for (pn::string_view field : {"title", "download_url", "author", "author_url", "version"}) {
+    for (pn::string_view field :
+         {"title", "download_url", "author", "author_url", "version", "splash", "starmap"}) {
         if (m.get(field).as_string().empty()) {
             return false;
         }
@@ -64,13 +65,13 @@ bool read_from(pn::file_view in, ScenarioInfo* info) {
     info->playerBodyID      = Handle<BaseObject>(m.get("player_body").as_int());
     info->energyBlobID      = Handle<BaseObject>(m.get("energy_blob").as_int());
 
-    info->intro_text = Resource::text(5600);
-    info->about_text = Resource::text(6500);
+    info->intro_text = m.get("intro").as_string().copy();
+    info->about_text = m.get("about").as_string().copy();
 
     info->publisher_screen = nullptr;  // Don’t have permission to show ASW logo.
-    info->ego_screen       = Resource::texture(2001);
-    info->splash_screen    = Resource::texture(502);
-    info->starmap          = Resource::texture(8000);
+    info->ego_screen       = Resource::texture("pictures/credit");
+    info->splash_screen    = Resource::texture(m.get("splash").as_string());
+    info->starmap          = Resource::texture(m.get("starmap").as_string());
 
     return true;
 }

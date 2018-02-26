@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
+#include "data/plugin.hpp"
 #include "data/resource.hpp"
 #include "drawing/build-pix.hpp"
 #include "drawing/color.hpp"
@@ -42,21 +43,20 @@ namespace {
 
 class DrawPix : public Card {
   public:
-    DrawPix(OffscreenVideoDriver* driver, pn::string_view text, int32_t width)
-            : _driver(driver), _text(text.copy()), _width(width) {}
+    DrawPix(std::function<pn::string()> text, int32_t width,
+            std::function<void(Rect)> set_capture_rect)
+            : _set_capture_rect(set_capture_rect), _text(text), _width(width) {}
 
     virtual void draw() const {
-        BuildPix pix(_text, _width);
+        BuildPix pix(_text(), _width);
         pix.draw({0, 0});
-        if (_driver) {
-            _driver->set_capture_rect({0, 0, _width, pix.size().height});
-        }
+        _set_capture_rect({0, 0, _width, pix.size().height});
     }
 
   private:
-    OffscreenVideoDriver* _driver;
-    const pn::string      _text;
-    const int32_t         _width;
+    const std::function<void(Rect)>   _set_capture_rect;
+    const std::function<pn::string()> _text;
+    const int32_t                     _width;
 };
 
 void usage(pn::file_view out, pn::string_view progname, int retcode) {
@@ -72,6 +72,40 @@ void usage(pn::file_view out, pn::string_view progname, int retcode) {
             "    -t, --text          produce text output\n",
             progname);
     exit(retcode);
+}
+
+template <typename VideoDriver>
+void run(
+        VideoDriver* video, pn::string_view extension,
+        std::function<void(Rect)> set_capture_rect) {
+    struct Spec {
+        pn::string_view             name;
+        int                         width;
+        std::function<pn::string()> text;
+    };
+    vector<Spec> specs{
+            {"03020", 450, [] { return Resource::text(3020); }},
+            {"03025", 450, [] { return Resource::text(3025); }},
+            {"03080", 450, [] { return Resource::text(3080); }},
+            {"03081", 450, [] { return Resource::text(3081); }},
+            {"03120", 450, [] { return Resource::text(3120); }},
+            {"03211", 450, [] { return Resource::text(3211); }},
+            {"04063", 450, [] { return Resource::text(4063); }},
+            {"04509", 450, [] { return Resource::text(4509); }},
+            {"04606", 450, [] { return Resource::text(4606); }},
+            {"05600", 450, [] { return PluginInit(), plug.info.intro_text.copy(); }},
+            {"06500", 540, [] { return PluginInit(), plug.info.about_text.copy(); }},
+            {"06501", 450, [] { return Resource::text(6501); }},
+            {"10199", 450, [] { return Resource::text(10199); }},
+    };
+
+    vector<pair<unique_ptr<Card>, pn::string>> pix;
+    for (const auto& spec : specs) {
+        pix.emplace_back(
+                unique_ptr<Card>(new DrawPix(spec.text, spec.width, set_capture_rect)),
+                pn::format("{0}.{1}", spec.name, extension));
+    }
+    video->capture(pix);
 }
 
 void main(int argc, char* const* argv) {
@@ -110,41 +144,12 @@ void main(int argc, char* const* argv) {
     }
 
     NullPrefsDriver prefs;
-
-    vector<pair<int, int>> specs = {
-            {3020, 450},   // Gaitori prologue
-            {3025, 450},   // Tutorial prologue
-            {3080, 450},   // Cantharan prologue
-            {3081, 450},   // Cantharan epilogue
-            {3120, 450},   // Salrilian prologue
-            {3211, 450},   // Game epilogue
-            {4063, 450},   // Bazidanese prologue
-            {4509, 450},   // Elejeetian prologue
-            {4606, 450},   // Audemedon prologue
-            {5600, 450},   // Story introduction
-            {6500, 540},   // Credits text
-            {6501, 450},   // Please register
-            {10199, 450},  // Unused Gaitori prologue
-    };
-
-    vector<pair<unique_ptr<Card>, pn::string>> pix;
     if (text) {
         TextVideoDriver video({540, 2000}, output_dir);
-        for (auto spec : specs) {
-            pix.emplace_back(
-                    unique_ptr<Card>(
-                            new DrawPix(nullptr, Resource::text(spec.first), spec.second)),
-                    pn::format("{0}.txt", dec(spec.first, 5)));
-        }
-        video.capture(pix);
+        run(&video, "txt", [](Rect) {});
     } else {
         OffscreenVideoDriver video({540, 2000}, output_dir);
-        for (auto spec : specs) {
-            pix.emplace_back(
-                    unique_ptr<Card>(new DrawPix(&video, Resource::text(spec.first), spec.second)),
-                    pn::format("{0}.png", dec(spec.first, 5)));
-        }
-        video.capture(pix);
+        run(&video, "png", [&video](Rect r) { video.set_capture_rect(r); });
     }
 }
 
