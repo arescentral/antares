@@ -370,24 +370,12 @@ std::vector<Level::Condition> read_conditions(int begin, int end) {
     if (end <= begin) {
         return std::vector<Level::Condition>{};
     }
-    Resource r = Resource::path("scenario-conditions.bin");
 
-    pn::data_view d = r.data();
-    if ((begin < 0) || ((d.size() / Level::ConditionBase::byte_size) < end)) {
-        throw std::runtime_error(pn::format(
-                                         "condition range {{{0}, {1}}} outside {{0, {2}}}", begin,
-                                         end, d.size() / Level::ConditionBase::byte_size)
-                                         .c_str());
-    }
-
-    int      count = end - begin;
-    pn::file f     = d.slice(Level::ConditionBase::byte_size * begin,
-                         Level::ConditionBase::byte_size * count)
-                         .open();
     std::vector<Level::Condition> conditions;
-    conditions.resize(count);
-    for (Level::Condition& a : conditions) {
-        read_from(f, &a);
+    conditions.resize(end - begin);
+    for (int i : sfz::range(begin, end)) {
+        Resource r = Resource::path(pn::format("conditions/{0}.bin", i));
+        read_from(r.data().open(), &conditions[i - begin]);
     }
     return conditions;
 }
@@ -423,23 +411,12 @@ std::vector<Level::Briefing> read_briefings(int begin, int end) {
     if (end <= begin) {
         return std::vector<Level::Briefing>{};
     }
-    Resource r = Resource::path("scenario-briefings.bin");
 
-    pn::data_view d = r.data();
-    if ((begin < 0) || ((d.size() / Level::Briefing::byte_size) < end)) {
-        throw std::runtime_error(pn::format(
-                                         "briefing range {{{0}, {1}}} outside {{0, {2}}}", begin,
-                                         end, d.size() / Level::Briefing::byte_size)
-                                         .c_str());
-    }
-
-    int      count = end - begin;
-    pn::file f =
-            d.slice(Level::Briefing::byte_size * begin, Level::Briefing::byte_size * count).open();
     std::vector<Level::Briefing> briefings;
-    briefings.resize(count);
-    for (Level::Briefing& a : briefings) {
-        read_from(f, &a);
+    briefings.resize(end - begin);
+    for (int i : sfz::range(begin, end)) {
+        Resource r = Resource::path(pn::format("briefings/{0}.bin", i));
+        read_from(r.data().open(), &briefings[i - begin]);
     }
     return briefings;
 }
@@ -476,23 +453,12 @@ std::vector<Level::Initial> read_initials(int begin, int end) {
     if (end <= begin) {
         return std::vector<Level::Initial>{};
     }
-    Resource r = Resource::path("scenario-initials.bin");
 
-    pn::data_view d = r.data();
-    if ((begin < 0) || ((d.size() / Level::Initial::byte_size) < end)) {
-        throw std::runtime_error(pn::format(
-                                         "initial range {{{0}, {1}}} outside {{0, {2}}}", begin,
-                                         end, d.size() / Level::Initial::byte_size)
-                                         .c_str());
-    }
-
-    int      count = end - begin;
-    pn::file f =
-            d.slice(Level::Initial::byte_size * begin, Level::Initial::byte_size * count).open();
     std::vector<Level::Initial> initials;
-    initials.resize(count);
-    for (Level::Initial& a : initials) {
-        read_from(f, &a);
+    initials.resize(end - begin);
+    for (int i : sfz::range(begin, end)) {
+        Resource r = Resource::path(pn::format("initials/{0}.bin", i));
+        read_from(r.data().open(), &initials[i - begin]);
     }
     return initials;
 }

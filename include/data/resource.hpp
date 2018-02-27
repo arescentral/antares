@@ -31,6 +31,7 @@ class NatePixTable;
 
 class Resource {
   public:
+    static bool     exists(pn::string_view path);
     static Resource path(pn::string_view path);
 
     static Resource                font(pn::string_view name);

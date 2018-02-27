@@ -36,19 +36,26 @@ static const int16_t kSpaceObjectShortNameResID = 5001;
 ANTARES_GLOBAL ScenarioGlobals plug;
 
 template <typename T>
-static void read_all(pn::string_view name, pn::string_view path, vector<T>& v) {
-    Resource rsrc  = Resource::path(path);
-    size_t   count = rsrc.data().size() / T::byte_size;
-    v.resize(count);
-    pn::file in = rsrc.data().open();
-    for (size_t i = 0; i < count; ++i) {
-        if (!read_from(in, &v[i])) {
-            throw std::runtime_error(pn::format("error while reading {0} data", name).c_str());
+static void read_all(pn::string_view name, pn::string_view dir, vector<T>& v) {
+    for (int i = 0; true; ++i) {
+        pn::string path = pn::format("{0}/{1}.bin", dir, i);
+        if (!Resource::exists(path)) {
+            break;
         }
-    }
 
-    if (fgetc(in.c_obj()) != EOF) {
-        throw std::runtime_error(pn::format("incorrectly-sized {0} data", name).c_str());
+        try {
+            v.resize(i + 1);
+            Resource rsrc = Resource::path(path);
+
+            pn::file in = rsrc.data().open();
+            read_from(in, &v[i]);
+            in.check();
+            if (fgetc(in.c_obj()) != EOF) {
+                throw std::runtime_error("expected eof");
+            }
+        } catch (...) {
+            std::throw_with_nested(std::runtime_error(path.c_str()));
+        }
     }
 }
 
@@ -64,9 +71,9 @@ void PluginInit() {
         }
     }
 
-    read_all("level", "scenarios.bin", plug.levels);
-    read_all("objects", "objects.bin", plug.objects);
-    read_all("races", "races.bin", plug.races);
+    read_all("level", "levels", plug.levels);
+    read_all("objects", "objects", plug.objects);
+    read_all("races", "races", plug.races);
 
     auto level_names = Resource::strings(kLevelNameID);
     for (auto& level : plug.levels) {

@@ -19,6 +19,7 @@
 #include "data/resource.hpp"
 
 #include <stdio.h>
+#include <array>
 #include <pn/file>
 #include <sfz/sfz.hpp>
 
@@ -30,9 +31,11 @@ namespace path = sfz::path;
 
 namespace antares {
 
-static std::unique_ptr<sfz::mapped_file> load_first(
-        pn::string_view resource_path, const std::vector<pn::string_view>& dirs) {
-    for (const auto& dir : dirs) {
+static std::unique_ptr<sfz::mapped_file> load(pn::string_view resource_path) {
+    pn::string      scenario = scenario_path();
+    pn::string_view factory  = factory_scenario_path();
+    pn::string_view app      = application_path();
+    for (const auto& dir : std::array<pn::string_view, 3>{{scenario, factory, app}}) {
         pn::string path = pn::format("{0}/{1}", dir, resource_path);
         if (path::isfile(path)) {
             return std::unique_ptr<sfz::mapped_file>(new sfz::mapped_file(path));
@@ -43,11 +46,17 @@ static std::unique_ptr<sfz::mapped_file> load_first(
                     .c_str());
 }
 
-static std::unique_ptr<sfz::mapped_file> load(pn::string_view resource_path) {
+bool Resource::exists(pn::string_view resource_path) {
     pn::string      scenario = scenario_path();
     pn::string_view factory  = factory_scenario_path();
     pn::string_view app      = application_path();
-    return load_first(resource_path, {scenario, factory, app});
+    for (const auto& dir : std::array<pn::string_view, 3>{{scenario, factory, app}}) {
+        pn::string path = pn::format("{0}/{1}", dir, resource_path);
+        if (path::isfile(path)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 Resource Resource::path(pn::string_view path) { return Resource(load(path)); }
