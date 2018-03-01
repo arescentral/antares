@@ -426,10 +426,10 @@ void PushAction::apply(
 void CapSpeedAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
-    if (value < Fixed::zero()) {
-        focus->maxVelocity = focus->baseType->maxVelocity;
+    if (value.has_value()) {
+        focus->maxVelocity = *value;
     } else {
-        focus->maxVelocity = value;
+        focus->maxVelocity = focus->baseType->maxVelocity;
     }
 }
 
@@ -458,7 +458,9 @@ void CaptureAction::apply(
     if (!focus.get()) {
         return;
     }
-    if (relative) {
+    if (player.has_value()) {
+        focus->set_owner(*player, false);
+    } else {
         // if it's relative AND reflexive, we take the direct
         // object's owner, since relative & reflexive would
         // do nothing.
@@ -467,16 +469,17 @@ void CaptureAction::apply(
         } else {
             focus->set_owner(subject->owner, true);
         }
-    } else {
-        focus->set_owner(player, false);
     }
 }
 
 void ConditionAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
-    for (auto l = which.begin; l < which.end; ++l) {
-        g.condition_enabled[l] = enabled;
+    for (auto l = enable.begin; l < enable.end; ++l) {
+        g.condition_enabled[l] = true;
+    }
+    for (auto l = disable.begin; l < disable.end; ++l) {
+        g.condition_enabled[l] = false;
     }
 }
 
@@ -492,12 +495,12 @@ void PayAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
     Handle<Admiral> admiral;
-    if (relative) {
+    if (player.has_value()) {
+        admiral = *player;
+    } else {
         if (focus.get()) {
             admiral = focus->owner;
         }
-    } else {
-        admiral = player;
     }
     if (admiral.get()) {
         admiral->pay_absolute(value);
@@ -527,10 +530,9 @@ void MoveAction::apply(
         Point* offset) const {
     coordPointType newLocation;
     switch (origin) {
-        case LEVEL: newLocation = Translate_Coord_To_Level_Rotation(to.h, to.v); break;
-        case SUBJECT: newLocation = subject->location; break;
-        case OBJECT: newLocation = object->location; break;
-        case FOCUS: newLocation = focus->location; break;
+        case Origin::LEVEL: newLocation = Translate_Coord_To_Level_Rotation(to.h, to.v); break;
+        case Origin::SUBJECT: newLocation = subject->location; break;
+        case Origin::OBJECT: newLocation = object->location; break;
     }
     newLocation.h += focus->randomSeed.next(distance << 1) - distance;
     newLocation.v += focus->randomSeed.next(distance << 1) - distance;

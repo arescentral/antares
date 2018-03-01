@@ -205,7 +205,11 @@ bool read_from(pn::file_view in, CapSpeedAction* cap_speed) {
     if (!in.read(pn::pad(1), &value)) {
         return false;
     }
-    cap_speed->value = Fixed::from_val(value);
+    if (value < 0) {
+        cap_speed->value.reset();
+    } else {
+        cap_speed->value.emplace(Fixed::from_val(value));
+    }
     return true;
 }
 
@@ -236,8 +240,11 @@ bool read_from(pn::file_view in, CaptureAction* capture) {
     if (!in.read(&relative, &admiral)) {
         return false;
     }
-    capture->relative = relative;
-    capture->player   = Handle<Admiral>(admiral);
+    if (relative) {
+        capture->player.reset();
+    } else {
+        capture->player.emplace(Handle<Admiral>(admiral));
+    }
     return true;
 }
 
@@ -247,9 +254,13 @@ bool read_from(pn::file_view in, ConditionAction* condition) {
     if (!in.read(&disabled, &first, &count_minus_1)) {
         return false;
     }
-    condition->enabled     = !disabled;
-    condition->which.begin = first;
-    condition->which.end   = first + std::max(count_minus_1, 0) + 1;
+    if (disabled) {
+        condition->enable  = Range<int32_t>::empty();
+        condition->disable = {first, first + std::max(count_minus_1, 0) + 1};
+    } else {
+        condition->enable  = {first, first + std::max(count_minus_1, 0) + 1};
+        condition->disable = Range<int32_t>::empty();
+    }
     return true;
 }
 
@@ -260,9 +271,12 @@ bool read_from(pn::file_view in, PayAction* pay) {
     if (!(in.read(&relative, &value, &player))) {
         return false;
     }
-    pay->relative = relative;
-    pay->value    = Fixed::from_val(value);
-    pay->player   = Handle<Admiral>(player);
+    pay->value = Fixed::from_val(value);
+    if (relative) {
+        pay->player.reset();
+    } else {
+        pay->player.emplace(Handle<Admiral>(player));
+    }
     return true;
 }
 
@@ -296,7 +310,7 @@ bool read_from_relative(pn::file_view in, bool reflexive, MoveAction* move) {
     return true;
 }
 
-bool read_from_absolute(pn::file_view in, MoveAction* move) {
+bool read_from_absolute(pn::file_view in, bool reflexive, MoveAction* move) {
     uint8_t  relative;
     uint32_t x, y;
     if (!in.read(&relative, &x, &y)) {
@@ -304,8 +318,10 @@ bool read_from_absolute(pn::file_view in, MoveAction* move) {
     }
     if (!relative) {
         move->origin = MoveAction::Origin::LEVEL;
+    } else if (reflexive) {
+        move->origin = MoveAction::Origin::SUBJECT;
     } else {
-        move->origin = MoveAction::Origin::FOCUS;
+        move->origin = MoveAction::Origin::OBJECT;
     }
     move->to       = {x, y};
     move->distance = 0;
@@ -447,7 +463,7 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
                 case kAlterLocation:
                     return read_from_relative(sub, reflexive, init<MoveAction>(action));
                 case kAlterAbsoluteLocation:
-                    return read_from_absolute(sub, init<MoveAction>(action));
+                    return read_from_absolute(sub, reflexive, init<MoveAction>(action));
                 case kAlterWeapon1:
                     return read_from(sub, EquipAction::Which::PULSE, init<EquipAction>(action));
                 case kAlterWeapon2:

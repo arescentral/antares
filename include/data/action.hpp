@@ -22,6 +22,7 @@
 #include <stdint.h>
 #include <memory>
 #include <pn/string>
+#include <sfz/sfz.hpp>
 #include <vector>
 
 #include "data/handle.hpp"
@@ -105,7 +106,7 @@ struct AssumeAction : public Action {
 };
 
 struct CapSpeedAction : public Action {
-    Fixed value;  // if >= 0, set to value; if < 0, set to base type’s default
+    sfz::optional<Fixed> value;  // if absent set to base type’s default
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
@@ -113,10 +114,10 @@ struct CapSpeedAction : public Action {
 };
 
 struct CaptureAction : public Action {
-    bool relative;  // if true and reflexive, set subject’s owner to object’s
-                    // if true and non-reflexive, set object’s owner to subject’s
-                    // if false, set focus’s owner to `player`
-    Handle<Admiral> player;
+    sfz::optional<Handle<Admiral>>
+            player;  // if present, set focus’s owner to `*player`
+                     // if absent and reflexive, set subject’s owner to object’s
+                     // if absent and non-reflexive, set object’s owner to subject’s
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
@@ -131,8 +132,8 @@ struct CloakAction : public Action {
 };
 
 struct ConditionAction : public Action {
-    bool           enabled;
-    Range<int32_t> which;
+    Range<int32_t> enable;
+    Range<int32_t> disable;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
@@ -273,11 +274,10 @@ struct MorphAction : public Action {
 };
 
 struct MoveAction : public Action {
-    enum Origin {
+    enum class Origin {
         LEVEL,    // absolute coordinates, in level’s rotated frame of reference
         SUBJECT,  // relative to subject
         OBJECT,   // relative to object
-        FOCUS,    // relative to focus
     };
     Origin         origin;
     coordPointType to;
@@ -303,9 +303,8 @@ struct OrderAction : public Action {
 };
 
 struct PayAction : public Action {
-    bool            relative;  // if true, pay focus’s owner; if false, pay `player`
-    Fixed           value;     // amount to pay; not affected by earning power
-    Handle<Admiral> player;
+    Fixed                          value;   // amount to pay; not affected by earning power
+    sfz::optional<Handle<Admiral>> player;  // if not present pay focus’s owner.
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
