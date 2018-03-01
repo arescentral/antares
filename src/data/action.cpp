@@ -91,16 +91,19 @@ enum alterVerbIDType {
 
 bool read_from(pn::file_view in, CreateAction* create, bool inherit) {
     int32_t base_type;
+    int32_t count_minimum, count_range;
     uint8_t relative_velocity, relative_direction;
     if (!in.read(
-                &base_type, &create->count_minimum, &create->count_range, &relative_velocity,
-                &relative_direction, &create->distance)) {
+                &base_type, &count_minimum, &count_range, &relative_velocity, &relative_direction,
+                &create->distance)) {
         return false;
     }
     create->base               = Handle<BaseObject>(base_type);
+    create->count              = {count_minimum, count_minimum + std::max(count_range, 0)};
     create->relative_velocity  = relative_velocity;
     create->relative_direction = relative_direction;
     create->inherit            = inherit;
+    create->legacy_random      = (count_range == 1);
     return true;
 }
 

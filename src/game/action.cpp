@@ -109,11 +109,18 @@ void NoAction::apply(
 void CreateAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
-    auto count = count_minimum;
-    if (count_range > 0) {
-        count += subject->randomSeed.next(count_range);
+    auto c = count.begin;
+    if (count.range() > 1) {
+        c += subject->randomSeed.next(count.range());
+    } else if (legacy_random) {
+        // It used to be that the range test above was >0 instead of >1. That worked for most
+        // objects, which had ranges of 0. However, the Nastiroid shooter on Mothership Connection
+        // specified a range of 1. This was meaningless as far as the actual object count went, but
+        // caused a random number to be consumed unnecessarily. To preserve replay-compatibility,
+        // it now specifies `legacy_random`.
+        subject->randomSeed.next(1);
     }
-    for (int i = 0; i < count; ++i) {
+    for (int i = 0; i < c; ++i) {
         fixedPointType vel = {Fixed::zero(), Fixed::zero()};
         if (relative_velocity) {
             vel = subject->velocity;

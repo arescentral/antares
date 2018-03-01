@@ -140,14 +140,15 @@ struct ConditionAction : public Action {
 };
 
 struct CreateAction : public Action {
-    Handle<BaseObject> base;                        // what type
-    int32_t            count_minimum      = 1;      // # to make min
-    int32_t            count_range        = 0;      // # to make range
-    bool               relative_velocity  = false;  // is velocity relative to creator?
-    bool               relative_direction = false;  // determines initial heading
-    int32_t            distance           = 0;      // create at this distance in random direction
-    bool               inherit            = false;  // if false, gets creator as target
-                                                    // if true, gets creator’s target as target
+    Handle<BaseObject> base;                         // what type
+    Range<int32_t>     count              = {1, 2};  // # to make randomly
+    bool               relative_velocity  = false;   // is velocity relative to creator?
+    bool               relative_direction = false;   // determines initial heading
+    int32_t            distance           = 0;       // create at this distance in random direction
+    bool               inherit            = false;   // if false, gets creator as target
+                                                     // if true, gets creator’s target as target
+    bool legacy_random = false;                      // if true, consume a random number from
+                                                     // subject even if not necessary
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
