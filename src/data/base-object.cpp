@@ -178,9 +178,13 @@ bool read_from(pn::file_view in, BaseObject* object) {
         return false;
     }
 
-    object->levelKeyTag  = (object->buildFlags & kLevelKeyTag) >> kLevelKeyTagShift;
-    object->engageKeyTag = (object->buildFlags & kEngageKeyTag) >> kEngageKeyTagShift;
-    object->orderKeyTag  = (object->orderFlags & kOrderKeyTag) >> kOrderKeyTagShift;
+    static const char hex[]      = "0123456789abcdef";
+    int               level_tag  = (object->buildFlags & kLevelKeyTag) >> kLevelKeyTagShift;
+    int               engage_tag = (object->buildFlags & kEngageKeyTag) >> kEngageKeyTagShift;
+    int               order_tag  = (object->orderFlags & kOrderKeyTag) >> kOrderKeyTagShift;
+    object->levelKeyTag          = level_tag ? pn::rune(hex[level_tag]).copy() : "";
+    object->engageKeyTag         = engage_tag ? pn::rune(hex[engage_tag]).copy() : "";
+    object->orderKeyTag          = order_tag ? pn::rune(hex[order_tag]).copy() : "";
 
     uint32_t build_time;
     if (!(read_from(in, &object->buildRatio) &&

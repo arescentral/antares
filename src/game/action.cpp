@@ -87,16 +87,16 @@ static void queue_action(
         Point* offset);
 
 bool action_filter_applies_to(const Action& action, Handle<BaseObject> target) {
-    if (action.exclusiveFilter == 0xffffffff) {
-        return action.levelKeyTag == target->levelKeyTag;
+    if (!action.level_key_tag.empty()) {
+        return action.level_key_tag == target->levelKeyTag;
     } else {
         return (action.inclusiveFilter & target->attributes) == action.inclusiveFilter;
     }
 }
 
 bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target) {
-    if (action.exclusiveFilter == 0xffffffff) {
-        return action.levelKeyTag == target->baseType->levelKeyTag;
+    if (!action.level_key_tag.empty()) {
+        return action.level_key_tag == target->baseType->levelKeyTag;
     } else {
         return (action.inclusiveFilter & target->attributes) == action.inclusiveFilter;
     }
@@ -729,7 +729,7 @@ static void execute_actions(
             }
         }
 
-        if ((action.inclusiveFilter || action.exclusiveFilter) &&
+        if ((action.inclusiveFilter || !action.level_key_tag.empty()) &&
             (!object.get() || !action_filter_applies_to(action, object))) {
             continue;
         }

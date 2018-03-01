@@ -54,9 +54,8 @@ struct Range {
 struct Action {
     bool reflexive;  // does it apply to object executing verb?
 
-    uint32_t inclusiveFilter;  // if it has ALL these attributes, OK -- for non-reflective verbs
-    uint32_t exclusiveFilter;  // don't execute if it has ANY of these
-    uint8_t  levelKeyTag;
+    uint32_t   inclusiveFilter;  // if it has ALL these attributes, OK -- for non-reflective verbs
+    pn::string level_key_tag;    // don’t execute if non empty and subject/object don’t match
 
     enum class Owner { ANY = 0, SAME = 1, DIFFERENT = -1 };
     Owner owner;

@@ -338,13 +338,13 @@ class BaseObject {
 
     objectFrameType frame;
 
-    uint32_t buildFlags;
-    uint32_t orderFlags;
-    uint8_t  levelKeyTag;
-    uint8_t  engageKeyTag;
-    uint8_t  orderKeyTag;
-    Fixed    buildRatio;
-    ticks    buildTime;
+    uint32_t   buildFlags;
+    uint32_t   orderFlags;
+    pn::string levelKeyTag;
+    pn::string engageKeyTag;
+    pn::string orderKeyTag;
+    Fixed      buildRatio;
+    ticks      buildTime;
 
     uint8_t skillNum;
     uint8_t skillDen;
