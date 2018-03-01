@@ -113,8 +113,8 @@ bool read_from(pn::file_view in, SoundAction* sound) {
                 pn::pad(4), &id_minimum, &id_range)) {
         return false;
     }
-    sound->id.first    = id_minimum;
-    sound->id.second   = id_minimum + id_range + 1;
+    sound->id.begin    = id_minimum;
+    sound->id.end      = id_minimum + id_range + 1;
     sound->absolute    = absolute;
     sound->persistence = ticks(persistence);
     return true;
@@ -154,8 +154,8 @@ bool read_from(pn::file_view in, DisableAction* disable) {
     if (!in.read(pn::pad(1), &minimum, &range)) {
         return false;
     }
-    disable->value.first  = Fixed::from_val(minimum);
-    disable->value.second = Fixed::from_val(minimum + range);
+    disable->value.begin = Fixed::from_val(minimum);
+    disable->value.end   = Fixed::from_val(minimum + range);
     return true;
 }
 
@@ -164,8 +164,8 @@ bool read_from(pn::file_view in, SpinAction* spin) {
     if (!in.read(pn::pad(1), &minimum, &range)) {
         return false;
     }
-    spin->value.first  = Fixed::from_val(minimum);
-    spin->value.second = Fixed::from_val(minimum + range);
+    spin->value.begin = Fixed::from_val(minimum);
+    spin->value.end   = Fixed::from_val(minimum + range);
     return true;
 }
 
@@ -211,8 +211,8 @@ bool read_from(pn::file_view in, ThrustAction* thrust) {
     if (!in.read(pn::pad(1), &minimum, &range)) {
         return false;
     }
-    thrust->value.first  = Fixed::from_val(minimum);
-    thrust->value.second = Fixed::from_val(minimum + range);
+    thrust->value.begin = Fixed::from_val(minimum);
+    thrust->value.end   = Fixed::from_val(minimum + range);
     return true;
 }
 
@@ -244,9 +244,9 @@ bool read_from(pn::file_view in, ConditionAction* condition) {
     if (!in.read(&disabled, &first, &count_minus_1)) {
         return false;
     }
-    condition->enabled      = !disabled;
-    condition->which.first  = first;
-    condition->which.second = first + std::max(count_minus_1, 0) + 1;
+    condition->enabled     = !disabled;
+    condition->which.begin = first;
+    condition->which.end   = first + std::max(count_minus_1, 0) + 1;
     return true;
 }
 
@@ -269,9 +269,9 @@ bool read_from(pn::file_view in, AgeAction* argument) {
     if (!in.read(&relative, &minimum, &range)) {
         return false;
     }
-    argument->relative     = relative;
-    argument->value.first  = ticks(minimum);
-    argument->value.second = ticks(minimum + range);
+    argument->relative    = relative;
+    argument->value.begin = ticks(minimum);
+    argument->value.end   = ticks(minimum + range);
     return true;
 }
 
@@ -539,16 +539,16 @@ std::vector<std::unique_ptr<const Action>> read_actions(int begin, int end) {
     return actions;
 }
 
-Handle<BaseObject>  Action::created_base() const { return BaseObject::none(); }
-std::pair<int, int> Action::sound_range() const { return std::make_pair(-1, -1); }
-bool                Action::alters_owner() const { return false; }
-bool                Action::check_conditions() const { return false; }
+Handle<BaseObject> Action::created_base() const { return BaseObject::none(); }
+Range<int>         Action::sound_range() const { return Range<int>::empty(); }
+bool               Action::alters_owner() const { return false; }
+bool               Action::check_conditions() const { return false; }
 
 Handle<BaseObject> CreateAction::created_base() const { return base; }
 Handle<BaseObject> MorphAction::created_base() const { return base; }
 Handle<BaseObject> EquipAction::created_base() const { return base; }
 
-std::pair<int, int> SoundAction::sound_range() const { return id; }
+Range<int> SoundAction::sound_range() const { return id; }
 
 bool CaptureAction::alters_owner() const { return true; }
 

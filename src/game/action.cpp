@@ -179,10 +179,9 @@ void CreateAction::apply(
 void SoundAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
-    auto    pick  = id.first;
-    int32_t range = id.second - id.first;
-    if (range > 1) {
-        pick += focus->randomSeed.next(range);
+    auto pick = id.begin;
+    if (id.range() > 1) {
+        pick += focus->randomSeed.next(id.range());
     }
     if (absolute) {
         sys.sound.play(pick, volume, persistence, priority);
@@ -295,8 +294,7 @@ void SpinAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
     if (focus->attributes & kCanTurn) {
-        Fixed f = focus->turn_rate() *
-                  (value.first + focus->randomSeed.next(value.second - value.first));
+        Fixed f  = focus->turn_rate() * (value.begin + focus->randomSeed.next(value.range()));
         Fixed f2 = focus->baseType->mass;
         if (f2 == Fixed::zero()) {
             f = kFixedNone;
@@ -310,7 +308,7 @@ void SpinAction::apply(
 void DisableAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
-    Fixed f  = value.first + focus->randomSeed.next(value.second - value.first);
+    Fixed f  = value.begin + focus->randomSeed.next(value.range());
     Fixed f2 = focus->baseType->mass;
     if (f2 == Fixed::zero()) {
         f = kFixedNone;
@@ -431,7 +429,7 @@ void CapSpeedAction::apply(
 void ThrustAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
-    Fixed f = value.first + focus->randomSeed.next(value.second - value.first);
+    Fixed f = value.begin + focus->randomSeed.next(value.range());
     if (relative) {
         focus->thrust += f;
     } else {
@@ -470,7 +468,7 @@ void CaptureAction::apply(
 void ConditionAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
-    for (auto l = which.first; l < which.second; ++l) {
+    for (auto l = which.begin; l < which.end; ++l) {
         g.condition_enabled[l] = enabled;
     }
 }
@@ -502,7 +500,7 @@ void PayAction::apply(
 void AgeAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
-    ticks t = value.first + focus->randomSeed.next(value.second - value.first);
+    ticks t = value.begin + focus->randomSeed.next(value.range());
 
     if (relative) {
         if (focus->expires) {

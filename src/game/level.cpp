@@ -122,7 +122,7 @@ void AddActionMedia(
     }
 
     auto range = action.sound_range();
-    for (int32_t count = range.first; count < range.second; count++) {
+    for (int32_t count = range.begin; count < range.end; count++) {
         sys.sound.load(count);
     }
 

@@ -20,8 +20,8 @@
 #define ANTARES_DATA_ACTION_HPP_
 
 #include <stdint.h>
-#include <pn/string>
 #include <memory>
+#include <pn/string>
 #include <vector>
 
 #include "data/handle.hpp"
@@ -33,6 +33,15 @@ namespace antares {
 
 class SpaceObject;
 struct Level_Initial;
+
+template <typename T>
+struct Range {
+    T begin, end;
+
+    T range() const { return end - begin; }
+
+    static constexpr Range empty() { return {-1, -1}; }
+};
 
 //
 // Action:
@@ -60,10 +69,10 @@ struct Action {
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset) const = 0;
 
-    virtual Handle<BaseObject>  created_base() const;
-    virtual std::pair<int, int> sound_range() const;
-    virtual bool                alters_owner() const;
-    virtual bool                check_conditions() const;
+    virtual Handle<BaseObject> created_base() const;
+    virtual Range<int32_t>     sound_range() const;
+    virtual bool               alters_owner() const;
+    virtual bool               check_conditions() const;
 
     static const size_t byte_size = 48;
 };
@@ -78,8 +87,8 @@ struct NoAction : public Action {
 };
 
 struct AgeAction : public Action {
-    bool                    relative;  // if true, add value to age; if false, set age to value
-    std::pair<ticks, ticks> value;     // age range
+    bool         relative;  // if true, add value to age; if false, set age to value
+    Range<ticks> value;     // age range
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
@@ -122,8 +131,8 @@ struct CloakAction : public Action {
 };
 
 struct ConditionAction : public Action {
-    bool                        enabled;
-    std::pair<int32_t, int32_t> which;
+    bool           enabled;
+    Range<int32_t> which;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
@@ -147,7 +156,7 @@ struct CreateAction : public Action {
 };
 
 struct DisableAction : public Action {
-    std::pair<Fixed, Fixed> value;
+    Range<Fixed> value;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
@@ -348,16 +357,16 @@ struct SelectAction : public Action {
 };
 
 struct SoundAction : public Action {
-    uint8_t priority;                // 1-5; takes over a channel playing a lower-priority sound
-    ticks   persistence;             // time before a lower-priority sound can take channel
-    bool    absolute;                // plays at same volume, regardless of distance from player
-    int32_t volume;                  // 1-255; volume at focus
-    std::pair<int32_t, int32_t> id;  // pick ID randomly in [first, second)
+    uint8_t        priority;     // 1-5; takes over a channel playing a lower-priority sound
+    ticks          persistence;  // time before a lower-priority sound can take channel
+    bool           absolute;     // plays at same volume, regardless of distance from player
+    int32_t        volume;       // 1-255; volume at focus
+    Range<int32_t> id;           // pick ID randomly in [first, second)
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset) const;
-    virtual std::pair<int, int> sound_range() const;
+    virtual Range<int32_t> sound_range() const;
 };
 
 struct SparkAction : public Action {
@@ -372,7 +381,7 @@ struct SparkAction : public Action {
 };
 
 struct SpinAction : public Action {
-    std::pair<Fixed, Fixed> value;
+    Range<Fixed> value;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
@@ -380,8 +389,8 @@ struct SpinAction : public Action {
 };
 
 struct ThrustAction : public Action {
-    bool                    relative;  // if true, set to value; if false, add value
-    std::pair<Fixed, Fixed> value;     // range
+    bool         relative;  // if true, set to value; if false, add value
+    Range<Fixed> value;     // range
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
