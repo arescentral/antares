@@ -356,18 +356,30 @@ bool read_from(pn::file_view in, ScoreAction* score) {
     if (!in.read(&admiral, &score->which, &score->value)) {
         return false;
     }
-    score->player = Handle<Admiral>(admiral);
+    if (admiral < 0) {
+        score->player = sfz::nullopt;
+    } else {
+        score->player = sfz::make_optional(Handle<Admiral>(admiral));
+    }
     return true;
 }
 
 bool read_from(pn::file_view in, WinAction* win) {
-    int32_t admiral;
-    int32_t text_id;
-    if (!in.read(&admiral, &win->next, &text_id)) {
+    int32_t admiral, next, text_id;
+    if (!in.read(&admiral, &next, &text_id)) {
         return false;
     }
-    win->player = Handle<Admiral>(admiral);
-    win->text   = Resource::text(text_id);
+    if (admiral < 0) {
+        win->player = sfz::nullopt;
+    } else {
+        win->player = sfz::make_optional(Handle<Admiral>(admiral));
+    }
+    if (next < 0) {
+        win->next = sfz::nullopt;
+    } else {
+        win->next.emplace(next);
+    }
+    win->text = Resource::text(text_id);
     return true;
 }
 

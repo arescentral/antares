@@ -599,20 +599,24 @@ void WarpAction::apply(
 void ScoreAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
-    Handle<Admiral> admiral = player;
-    if (!admiral.get() && focus.get()) {
+    Handle<Admiral> admiral;
+    if (player.has_value()) {
+        admiral = *player;
+    } else if (focus.get()) {
         admiral = focus->owner;
     }
     if (admiral.get()) {
-        AlterAdmiralScore(player, which, value);
+        AlterAdmiralScore(admiral, which, value);
     }
 }
 
 void WinAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
-    Handle<Admiral> admiral = player;
-    if (!player.get() && focus.get()) {
+    Handle<Admiral> admiral;
+    if (player.has_value()) {
+        admiral = *player;
+    } else if (focus.get()) {
         admiral = focus->owner;
     }
     DeclareWinner(admiral, next, text);

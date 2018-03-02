@@ -336,9 +336,10 @@ struct RevealAction : public Action {
 };
 
 struct ScoreAction : public Action {
-    Handle<Admiral> player;  // which player’s score to change; -1 = owner of focus
-    int32_t         which;   // 0-2; each player has three "scores"
-    int32_t         value;   // amount to change by
+    sfz::optional<Handle<Admiral>>
+            player;  // which player’s score to change; absent = owner of focus
+    int32_t which;   // 0-2; each player has three "scores"
+    int32_t value;   // amount to change by
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
@@ -403,9 +404,9 @@ struct WarpAction : public Action {
 };
 
 struct WinAction : public Action {
-    Handle<Admiral> player;  // victor; -1 = owner of focus
-    int32_t         next;    // next chapter to play; -1 = none
-    pn::string      text;    // "debriefing" text
+    sfz::optional<Handle<Admiral>> player;  // victor; absent = owner of focus
+    sfz::optional<int32_t>         next;    // next chapter to play; absent = none
+    pn::string                     text;    // "debriefing" text
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
