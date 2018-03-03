@@ -539,8 +539,8 @@ bool read_from(pn::file_view in, std::unique_ptr<const Action>* action) {
     }
 
     if (a) {
-        a->reflexive       = reflexive;
-        a->inclusiveFilter = inclusive_filter;
+        a->reflexive        = reflexive;
+        a->inclusive_filter = inclusive_filter;
         if (exclusive_filter == 0xffffffff) {
             static const char hex[] = "0123456789abcdef";
             int               tag   = (inclusive_filter & kLevelKeyTag) >> kLevelKeyTagShift;

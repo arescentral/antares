@@ -54,12 +54,12 @@ struct Range {
 struct Action {
     bool reflexive;  // does it apply to object executing verb?
 
-    uint32_t   inclusiveFilter;  // if it has ALL these attributes, OK -- for non-reflective verbs
-    pn::string level_key_tag;    // don’t execute if non empty and subject/object don’t match
+    uint32_t   inclusive_filter = 0;  // if it has ALL these attributes, OK
+    pn::string level_key_tag;  // don’t execute if non empty and subject/object don’t match
 
     enum class Owner { ANY = 0, SAME = 1, DIFFERENT = -1 };
-    Owner owner;
-    ticks delay;
+    Owner owner = Owner::ANY;
+    ticks delay = ticks(0);
 
     Handle<Level_Initial> initialSubjectOverride;
     Handle<Level_Initial> initialDirectOverride;

@@ -90,7 +90,7 @@ bool action_filter_applies_to(const Action& action, Handle<BaseObject> target) {
     if (!action.level_key_tag.empty()) {
         return action.level_key_tag == target->levelKeyTag;
     } else {
-        return (action.inclusiveFilter & target->attributes) == action.inclusiveFilter;
+        return (action.inclusive_filter & target->attributes) == action.inclusive_filter;
     }
 }
 
@@ -98,7 +98,7 @@ bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target) 
     if (!action.level_key_tag.empty()) {
         return action.level_key_tag == target->baseType->levelKeyTag;
     } else {
-        return (action.inclusiveFilter & target->attributes) == action.inclusiveFilter;
+        return (action.inclusive_filter & target->attributes) == action.inclusive_filter;
     }
 }
 
@@ -733,7 +733,7 @@ static void execute_actions(
             }
         }
 
-        if ((action.inclusiveFilter || !action.level_key_tag.empty()) &&
+        if ((action.inclusive_filter || !action.level_key_tag.empty()) &&
             (!object.get() || !action_filter_applies_to(action, object))) {
             continue;
         }
