@@ -122,26 +122,19 @@ void SoloGame::handle_game_result() {
 }
 
 void SoloGame::epilogue_done() {
-    if (g.next_level < 0) {
-        _level = Level::none();
-    } else {
-        _level = Handle<Level>(g.next_level - 1);
-    }
+    _level = Level::none();
+    _state = QUIT;
 
-    if (_level.get()) {
-        const int32_t chapter = _level->chapter_number();
+    if (g.next_level > 0) {
+        Handle<Level> next_level{g.next_level - 1};
+        const int32_t chapter = next_level->chapter_number();
         if (chapter >= 0) {
             Ledger::ledger()->unlock_chapter(chapter);
-        } else {
-            _level = Level::none();
+            _level = next_level;
+            _state = START_LEVEL;
         }
     }
 
-    if (_level.get()) {
-        _state = START_LEVEL;
-    } else {
-        _state = QUIT;
-    }
     become_front();
 }
 
