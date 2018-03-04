@@ -24,26 +24,9 @@
 #include <pn/string>
 #include <vector>
 
-namespace antares {
+#include "data/enums.hpp"
 
-enum {
-    RED         = 15,
-    ORANGE      = 1,
-    YELLOW      = 2,
-    BLUE        = 3,
-    GREEN       = 4,
-    PURPLE      = 5,
-    INDIGO      = 6,
-    SALMON      = 7,
-    GOLD        = 8,
-    AQUA        = 9,
-    PINK        = 10,
-    PALE_GREEN  = 11,
-    PALE_PURPLE = 12,
-    SKY_BLUE    = 13,
-    TAN         = 14,
-    GRAY        = 0,
-};
+namespace antares {
 
 enum {
     BLACK = 0xff,
@@ -84,7 +67,7 @@ class RgbColor {
 
     constexpr RgbColor() : RgbColor(0x00, 0x00, 0x00, 0xff) {}
 
-    static RgbColor tint(uint8_t color, uint8_t value);
+    static RgbColor tint(Hue hue, uint8_t shade);
 
     static const RgbColor& at(uint8_t index);
 
@@ -110,9 +93,9 @@ inline bool operator!=(const RgbColor& lhs, const RgbColor& rhs) {
     return memcmp(&lhs, &rhs, sizeof(RgbColor)) != 0;
 }
 
-uint8_t GetTranslateColorShade(uint8_t color, uint8_t shade);
+uint8_t GetTranslateColorShade(Hue hue, uint8_t shade);
 
-RgbColor GetRGBTranslateColorShade(uint8_t color, uint8_t shade);
+RgbColor GetRGBTranslateColorShade(Hue hue, uint8_t shade);
 RgbColor GetRGBTranslateColor(uint8_t color);
 
 }  // namespace antares

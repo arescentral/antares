@@ -120,11 +120,17 @@ static const uint8_t kAmbient[][3] = {
         {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {16, 15, 12}, {0, 0, 0},
 };
 
-RgbColor RgbColor::tint(uint8_t color, uint8_t value) {
+RgbColor RgbColor::tint(Hue hue, uint8_t shade) {
     return rgb(
-            implicit_cast<uint8_t>((kDiffuse[color][0] * value / 255) + kAmbient[color][0]),
-            implicit_cast<uint8_t>((kDiffuse[color][1] * value / 255) + kAmbient[color][1]),
-            implicit_cast<uint8_t>((kDiffuse[color][2] * value / 255) + kAmbient[color][2]));
+            implicit_cast<uint8_t>(
+                    (kDiffuse[static_cast<int>(hue)][0] * shade / 255) +
+                    kAmbient[static_cast<int>(hue)][0]),
+            implicit_cast<uint8_t>(
+                    (kDiffuse[static_cast<int>(hue)][1] * shade / 255) +
+                    kAmbient[static_cast<int>(hue)][1]),
+            implicit_cast<uint8_t>(
+                    (kDiffuse[static_cast<int>(hue)][2] * shade / 255) +
+                    kAmbient[static_cast<int>(hue)][2]));
 }
 
 const RgbColor& RgbColor::at(uint8_t index) { return kColors[index]; }
@@ -138,17 +144,17 @@ pn::string stringify(const RgbColor& color) {
     }
 }
 
-uint8_t GetTranslateColorShade(uint8_t color, uint8_t shade) {
-    return (17 - shade) + (color * 16);
+uint8_t GetTranslateColorShade(Hue hue, uint8_t shade) {
+    return (17 - shade) + (static_cast<int>(hue) * 16);
 }
 
-void GetRGBTranslateColorShade(RgbColor* c, uint8_t color, uint8_t shade) {
-    *c = RgbColor::at(GetTranslateColorShade(color, shade));
+void GetRGBTranslateColorShade(RgbColor* c, Hue hue, uint8_t shade) {
+    *c = RgbColor::at(GetTranslateColorShade(hue, shade));
 }
 
-RgbColor GetRGBTranslateColorShade(uint8_t color, uint8_t shade) {
+RgbColor GetRGBTranslateColorShade(Hue hue, uint8_t shade) {
     RgbColor result;
-    GetRGBTranslateColorShade(&result, color, shade);
+    GetRGBTranslateColorShade(&result, hue, shade);
     return result;
 }
 

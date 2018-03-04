@@ -39,8 +39,8 @@ HelpScreen::HelpScreen()
     pn::string text = Resource::text(6002);
     Replace_KeyCode_Strings_With_Actual_Key_Names(text, 1000, 4);
 
-    RgbColor fore = GetRGBTranslateColorShade(RED, VERY_LIGHT);
-    RgbColor back = GetRGBTranslateColorShade(RED, VERY_DARK);
+    RgbColor fore = GetRGBTranslateColorShade(Hue::RED, VERY_LIGHT);
+    RgbColor back = GetRGBTranslateColorShade(Hue::RED, VERY_DARK);
     _text.set_fore_color(fore);
     _text.set_back_color(back);
     _text.set_retro_text(text);

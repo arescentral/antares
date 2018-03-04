@@ -24,6 +24,8 @@
 #include <sfz/sfz.hpp>
 #include <vector>
 
+#include "data/enums.hpp"
+
 namespace antares {
 
 class Texture;
@@ -38,7 +40,7 @@ class Resource {
     static Resource                interface(pn::string_view name);
     static Resource                replay(int id);
     static std::vector<int32_t>    rotation_table();
-    static NatePixTable            sprite(int id, uint8_t color);
+    static NatePixTable            sprite(int id, Hue hue);
     static std::vector<pn::string> strings(int id);
     static pn::string              text(int id);
     static Texture                 texture(pn::string_view name);

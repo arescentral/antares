@@ -22,6 +22,7 @@
 #include <pn/array>
 #include <pn/string>
 
+#include "data/enums.hpp"
 #include "math/geometry.hpp"
 #include "video/driver.hpp"
 
@@ -61,10 +62,10 @@ class InterfaceItem {
 std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, pn::array_cref l);
 
 struct PlainRect : public InterfaceItem {
-    PlainRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style);
+    PlainRect(int id, Rect bounds, Hue hue, interfaceStyleType style);
     virtual void accept(const Visitor& visitor) const;
 
-    uint8_t            hue;
+    Hue                hue;
     interfaceStyleType style;
 };
 
@@ -75,21 +76,20 @@ struct LabeledItem : public InterfaceItem {
 };
 
 struct LabeledRect : public LabeledItem {
-    LabeledRect(
-            int id, Rect bounds, interfaceLabelType label, uint8_t hue, interfaceStyleType style);
+    LabeledRect(int id, Rect bounds, interfaceLabelType label, Hue hue, interfaceStyleType style);
     virtual void accept(const Visitor& visitor) const;
 
-    uint8_t            hue;
+    Hue                hue;
     interfaceStyleType style;
 };
 
 struct TextRect : public InterfaceItem {
-    TextRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style);
-    TextRect(int id, Rect bounds, pn::string_view name, uint8_t hue, interfaceStyleType style);
+    TextRect(int id, Rect bounds, Hue hue, interfaceStyleType style);
+    TextRect(int id, Rect bounds, pn::string_view name, Hue hue, interfaceStyleType style);
     virtual void accept(const Visitor& visitor) const;
 
     pn::string         text;
-    uint8_t            hue;
+    Hue                hue;
     interfaceStyleType style;
 };
 
@@ -99,32 +99,32 @@ struct PictureRect : public InterfaceItem {
 
     Texture            texture;
     bool               visible_bounds;
-    uint8_t            hue;
+    Hue                hue;
     interfaceStyleType style;
 };
 
 struct Button : public LabeledItem {
-    Button(int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
-           uint8_t hue, interfaceStyleType style);
+    Button(int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, Hue hue,
+           interfaceStyleType style);
 
     int16_t                 key;
     int16_t                 gamepad;
-    uint8_t                 hue;
+    Hue                     hue;
     interfaceStyleType      style;
     interfaceItemStatusType status;
 };
 
 struct PlainButton : public Button {
     PlainButton(
-            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
-            uint8_t hue, interfaceStyleType style);
+            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, Hue hue,
+            interfaceStyleType style);
     virtual void accept(const Visitor& visitor) const;
 };
 
 struct CheckboxButton : public Button {
     CheckboxButton(
-            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
-            uint8_t hue, interfaceStyleType style);
+            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, Hue hue,
+            interfaceStyleType style);
     virtual void accept(const Visitor& visitor) const;
 
     bool on;
@@ -132,8 +132,8 @@ struct CheckboxButton : public Button {
 
 struct RadioButton : public Button {
     RadioButton(
-            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
-            uint8_t hue, interfaceStyleType style);
+            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, Hue hue,
+            interfaceStyleType style);
     virtual void accept(const Visitor& visitor) const;
 
     bool on;
@@ -141,8 +141,8 @@ struct RadioButton : public Button {
 
 struct TabBoxButton : public Button {
     TabBoxButton(
-            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
-            uint8_t hue, interfaceStyleType style, pn::value_cref tab_content);
+            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, Hue hue,
+            interfaceStyleType style, pn::value_cref tab_content);
     virtual void accept(const Visitor& visitor) const;
 
     bool      on;
@@ -150,11 +150,10 @@ struct TabBoxButton : public Button {
 };
 
 struct TabBox : public InterfaceItem {
-    TabBox(int id, Rect bounds, uint8_t hue, interfaceStyleType style,
-           int16_t top_right_border_size);
+    TabBox(int id, Rect bounds, Hue hue, interfaceStyleType style, int16_t top_right_border_size);
     virtual void accept(const Visitor& visitor) const;
 
-    uint8_t            hue;
+    Hue                hue;
     interfaceStyleType style;
     int16_t            top_right_border_size;
 };

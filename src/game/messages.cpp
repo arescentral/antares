@@ -43,11 +43,11 @@ namespace antares {
 static const int32_t kMessageScreenLeft = 200;
 static const int32_t kMessageScreenTop  = 454;
 
-static const uint8_t kMessageColor       = RED;
-static const ticks   kMessageMoveTime    = ticks(30);
-static const ticks   kMessageDisplayTime = (kMessageMoveTime * 2 + secs(2));
-static const ticks   kLowerTime          = (kMessageDisplayTime - kMessageMoveTime);
-static const ticks   kRaiseTime          = kMessageMoveTime;
+static const Hue   kMessageColor       = Hue::RED;
+static const ticks kMessageMoveTime    = ticks(30);
+static const ticks kMessageDisplayTime = (kMessageMoveTime * 2 + secs(2));
+static const ticks kLowerTime          = (kMessageDisplayTime - kMessageMoveTime);
+static const ticks kRaiseTime          = kMessageMoveTime;
 
 static const int32_t kStatusLabelLeft = 200;
 static const int32_t kStatusLabelTop  = 50;
@@ -60,8 +60,8 @@ static const int32_t kHBuffer = 4;
 
 static const int16_t kAutoPilotOnString  = 8;
 static const int16_t kAutoPilotOffString = 9;
-static const uint8_t kStatusLabelColor   = AQUA;
-static const uint8_t kStatusWarnColor    = PINK;
+static const Hue     kStatusLabelColor   = Hue::AQUA;
+static const Hue     kStatusWarnColor    = Hue::PINK;
 
 namespace {
 
@@ -147,7 +147,7 @@ void Messages::clear() {
     *long_message_data = longMessageType();
     g.bottom_border    = 0;
     long_message_data->labelMessageID =
-            Label::add(0, 0, 0, 0, SpaceObject::none(), false, SKY_BLUE);
+            Label::add(0, 0, 0, 0, SpaceObject::none(), false, Hue::SKY_BLUE);
     long_message_data->labelMessageID->set_keep_on_screen_anyway(true);
 }
 
@@ -186,8 +186,8 @@ void Messages::clip() {
         m->labelMessage = false;
     }
 
-    const RgbColor& light_blue = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
-    const RgbColor& dark_blue  = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
+    const RgbColor& light_blue = GetRGBTranslateColorShade(Hue::SKY_BLUE, VERY_LIGHT);
+    const RgbColor& dark_blue  = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKEST);
     m->retro_text.reset(new StyledText(sys.fonts.tactical));
     m->retro_text->set_fore_color(light_blue);
     m->retro_text->set_back_color(dark_blue);
@@ -329,8 +329,8 @@ void Messages::draw_message_screen(ticks by_units) {
     }
 }
 
-void Messages::set_status(pn::string_view status, uint8_t color) {
-    g.status_label->set_color(color);
+void Messages::set_status(pn::string_view status, Hue hue) {
+    g.status_label->set_hue(hue);
     g.status_label->set_string(status);
     g.status_label->set_age(kStatusLabelAge);
 }
@@ -342,7 +342,7 @@ void Messages::autopilot(bool on) {
     set_status(sys.messages.at(on ? kAutoPilotOnString : kAutoPilotOffString), kStatusLabelColor);
 }
 void Messages::shields_low() { set_status("WARNING: Shields Low", kStatusWarnColor); }
-void Messages::max_ships_built() { set_status("Maximum number of ships built", ORANGE); }
+void Messages::max_ships_built() { set_status("Maximum number of ships built", Hue::ORANGE); }
 
 int16_t Messages::current() {
     return long_message_data->start_id + long_message_data->current_page_index;
@@ -448,8 +448,8 @@ void Messages::draw_message() {
         return;
     }
 
-    const RgbColor& dark_blue  = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
-    const RgbColor& light_blue = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
+    const RgbColor& dark_blue  = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKEST);
+    const RgbColor& light_blue = GetRGBTranslateColorShade(Hue::SKY_BLUE, VERY_LIGHT);
     Rect            message_bounds(
             play_screen().left, viewport().bottom, play_screen().right, play_screen().bottom);
     {

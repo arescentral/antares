@@ -21,6 +21,8 @@
 
 #include <stdint.h>
 
+#include "data/enums.hpp"
+
 namespace antares {
 
 class PixMap;
@@ -36,7 +38,7 @@ void draw_shaded_rect(
         const Rects& rects, Rect rect, const RgbColor& fill_color, const RgbColor& light_color,
         const RgbColor& dark_color);
 void draw_shaded_rect(
-        const Rects& rects, Rect rect, uint8_t hue, uint8_t fill_color, uint8_t light_color,
+        const Rects& rects, Rect rect, Hue hue, uint8_t fill_color, uint8_t light_color,
         uint8_t dark_color);
 
 }  // namespace antares

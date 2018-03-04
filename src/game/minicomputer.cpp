@@ -72,8 +72,8 @@ const int32_t kButBoxBottom = 475;
 
 const int32_t kMiniScreenNoLineSelected = -1;
 
-const uint8_t kMiniScreenColor = GREEN;
-const uint8_t kMiniButColor    = AQUA;
+const Hue kMiniScreenColor = Hue::GREEN;
+const Hue kMiniButColor    = Hue::AQUA;
 
 const int32_t kNoLineButton  = -1;
 const int32_t kInLineButton  = kCompAcceptKeyNum;
@@ -202,7 +202,7 @@ inline void mCopyBlankLineString(miniScreenLineType* mline, pn::string_view mstr
 }  // namespace
 
 static void draw_mini_ship_data(
-        Handle<SpaceObject> obj, uint8_t header_color, int16_t screen_top, pn::string_view label);
+        Handle<SpaceObject> obj, Hue header_hue, int16_t screen_top, pn::string_view label);
 static void MiniComputerExecute(
         int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral);
 
@@ -402,9 +402,9 @@ void draw_mini_screen() {
         case kStatusMiniScreen: draw_minicomputer_lines(); break;
     }
     draw_mini_ship_data(
-            g.admiral->control(), YELLOW, kMiniSelectTop + instrument_top(), "CONTROL");
+            g.admiral->control(), Hue::YELLOW, kMiniSelectTop + instrument_top(), "CONTROL");
     draw_mini_ship_data(
-            g.admiral->target(), SKY_BLUE, kMiniTargetTop + instrument_top(), "TARGET");
+            g.admiral->target(), Hue::SKY_BLUE, kMiniTargetTop + instrument_top(), "TARGET");
 }
 
 static miniScreenLineType text(pn::string_view name, bool underlined) {
@@ -609,7 +609,7 @@ void UpdateMiniScreenLines() {
     }
 }
 
-static void draw_player_ammo_in_rect(int32_t value, int8_t hue, const Rect& rect) {
+static void draw_player_ammo_in_rect(int32_t value, Hue hue, const Rect& rect) {
     if (value >= 0) {
         const RgbColor text_color = GetRGBTranslateColorShade(hue, VERY_LIGHT);
         const char     digits[]   = {
@@ -626,19 +626,19 @@ void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) 
     clip.offset(0, instrument_top());
 
     clip.offset(kMiniAmmoLeftOne - clip.left, 0);
-    draw_player_ammo_in_rect(ammo_one, RED, clip);
+    draw_player_ammo_in_rect(ammo_one, Hue::RED, clip);
     clip.offset(kMiniAmmoLeftTwo - clip.left, 0);
-    draw_player_ammo_in_rect(ammo_two, PALE_GREEN, clip);
+    draw_player_ammo_in_rect(ammo_two, Hue::PALE_GREEN, clip);
     clip.offset(kMiniAmmoLeftSpecial - clip.left, 0);
-    draw_player_ammo_in_rect(ammo_special, ORANGE, clip);
+    draw_player_ammo_in_rect(ammo_special, Hue::ORANGE, clip);
 }
 
 static void draw_mini_ship_data(
-        Handle<SpaceObject> obj, uint8_t header_color, int16_t screen_top, pn::string_view label) {
+        Handle<SpaceObject> obj, Hue header_hue, int16_t screen_top, pn::string_view label) {
     {
         // "CONTROL" or "TARGET" label.
         Rect bar = mini_screen_line_bounds(screen_top, 0, 0, kMiniScreenWidth);
-        draw_shaded_rect(Rects(), bar, header_color, LIGHT, VERY_LIGHT, MEDIUM);
+        draw_shaded_rect(Rects(), bar, header_hue, LIGHT, VERY_LIGHT, MEDIUM);
         sys.fonts.computer->draw(
                 Point(bar.left + kMiniScreenLeftBuffer, bar.top + sys.fonts.computer->ascent),
                 label, RgbColor::black());
@@ -649,7 +649,7 @@ static void draw_mini_ship_data(
             {kMiniIconLeft, screen_top + MiniIconMacLineTop()}, {kMiniIconWidth, kMiniIconHeight},
     };
     if (!obj.get()) {
-        draw_vbracket(Rects(), icon_rect, GetRGBTranslateColorShade(PALE_GREEN, MEDIUM));
+        draw_vbracket(Rects(), icon_rect, GetRGBTranslateColorShade(Hue::PALE_GREEN, MEDIUM));
         return;
     }
 
@@ -661,7 +661,7 @@ static void draw_mini_ship_data(
             sys.fonts.computer->draw(
                     Point(lRect.left + kMiniScreenLeftBuffer,
                           lRect.top + sys.fonts.computer->ascent),
-                    obj->short_name(), GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT));
+                    obj->short_name(), GetRGBTranslateColorShade(Hue::PALE_GREEN, VERY_LIGHT));
         }
     }
 
@@ -691,7 +691,7 @@ static void draw_mini_ship_data(
             frame.texture().draw(rect);
         }
     }
-    draw_vbracket(Rects(), icon_rect, GetRGBTranslateColorShade(PALE_GREEN, MEDIUM));
+    draw_vbracket(Rects(), icon_rect, GetRGBTranslateColorShade(Hue::PALE_GREEN, MEDIUM));
 
     {
         if ((obj->max_health() > 0) && (obj->_health > 0)) {
@@ -707,13 +707,13 @@ static void draw_mini_ship_data(
             lRect.top    = dRect.top + 2;
             lRect.right  = dRect.right - 2;
             lRect.bottom = dRect.bottom - 2 - tlong;
-            rects.fill(lRect, GetRGBTranslateColorShade(SKY_BLUE, DARK));
+            rects.fill(lRect, GetRGBTranslateColorShade(Hue::SKY_BLUE, DARK));
 
             lRect.top    = dRect.bottom - 2 - tlong;
             lRect.bottom = dRect.bottom - 2;
-            rects.fill(lRect, GetRGBTranslateColorShade(SKY_BLUE, LIGHT));
+            rects.fill(lRect, GetRGBTranslateColorShade(Hue::SKY_BLUE, LIGHT));
 
-            draw_vbracket(rects, dRect, GetRGBTranslateColorShade(SKY_BLUE, MEDIUM));
+            draw_vbracket(rects, dRect, GetRGBTranslateColorShade(Hue::SKY_BLUE, MEDIUM));
         }
     }
 
@@ -731,19 +731,19 @@ static void draw_mini_ship_data(
             lRect.top    = dRect.top + 2;
             lRect.right  = dRect.right - 2;
             lRect.bottom = dRect.bottom - 2 - tlong;
-            rects.fill(lRect, GetRGBTranslateColorShade(YELLOW, DARK));
+            rects.fill(lRect, GetRGBTranslateColorShade(Hue::YELLOW, DARK));
 
             lRect.top    = dRect.bottom - 2 - tlong;
             lRect.bottom = dRect.bottom - 2;
-            rects.fill(lRect, GetRGBTranslateColorShade(YELLOW, LIGHT));
+            rects.fill(lRect, GetRGBTranslateColorShade(Hue::YELLOW, LIGHT));
 
-            draw_vbracket(rects, dRect, GetRGBTranslateColorShade(YELLOW, MEDIUM));
+            draw_vbracket(rects, dRect, GetRGBTranslateColorShade(Hue::YELLOW, MEDIUM));
         }
     }
 
     {
         // Weapons
-        RgbColor color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
+        RgbColor color = GetRGBTranslateColorShade(Hue::PALE_GREEN, VERY_LIGHT);
 
         if (obj->beam.base.get()) {
             Rect lRect = mini_screen_line_bounds(
@@ -777,7 +777,7 @@ static void draw_mini_ship_data(
     if (obj->destObject.get()) {
         auto     dest     = obj->destObject;
         bool     friendly = (dest->owner == g.admiral);
-        RgbColor color    = GetRGBTranslateColorShade(friendly ? GREEN : RED, VERY_LIGHT);
+        RgbColor color = GetRGBTranslateColorShade(friendly ? Hue::GREEN : Hue::RED, VERY_LIGHT);
         Rect lRect = mini_screen_line_bounds(screen_top, kMiniDestLineNum, 0, kMiniScreenWidth);
         sys.fonts.computer->draw(
                 Point(lRect.left, lRect.top + sys.fonts.computer->ascent), dest->name(), color);

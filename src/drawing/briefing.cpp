@@ -244,7 +244,7 @@ void GetRealObjectSpriteData(
         if (baseObject->attributes & kCanThink) {
             pixTable = sys.pix.get(
                     tlong +
-                    (implicit_cast<int16_t>(GetAdmiralColor(owner)) << kSpriteTableColorShift));
+                    (static_cast<int16_t>(GetAdmiralColor(owner)) << kSpriteTableColorShift));
         } else {
             pixTable = sys.pix.get(tlong);
         }
@@ -317,7 +317,8 @@ template <typename Renderer>
 static void render_briefing_with(
         const Renderer& renderer, int32_t maxSize, Rect* bounds, coordPointType* corner,
         int32_t scale) {
-    int32_t thisScale, gridWidth, gridHeight, i, j, color;
+    int32_t thisScale, gridWidth, gridHeight, i, j;
+    Hue     color;
     Point   where;
     Rect    clipRect;
     bool*   gridCells = NULL;
@@ -363,11 +364,11 @@ static void render_briefing_with(
                             *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
 
                     if (anObject->owner.number() == 0) {
-                        color = GREEN;
+                        color = Hue::GREEN;
                     } else if (anObject->owner.number() < 0) {
-                        color = BLUE;
+                        color = Hue::BLUE;
                     } else {
-                        color = RED;
+                        color = Hue::RED;
                     }
 
                     renderer.draw(*frame, where, thisScale, &spriteRect, clipRect);
@@ -394,11 +395,11 @@ static void render_briefing_with(
                             *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
 
                     if (anObject->owner.number() == 0) {
-                        color = GREEN;
+                        color = Hue::GREEN;
                     } else if (anObject->owner.number() < 0) {
-                        color = BLUE;
+                        color = Hue::BLUE;
                     } else {
-                        color = RED;
+                        color = Hue::RED;
                     }
 
                     const RgbColor light_color = GetRGBTranslateColorShade(color, LIGHT);

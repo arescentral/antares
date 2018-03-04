@@ -49,24 +49,24 @@ static interfaceLabelType label(pn::value_cref x) {
     };
 }
 
-static uint8_t hue(pn::value_cref x) {
-    StringMap<uint8_t> hues;
-    hues["gray"]        = GRAY;
-    hues["orange"]      = ORANGE;
-    hues["yellow"]      = YELLOW;
-    hues["blue"]        = BLUE;
-    hues["green"]       = GREEN;
-    hues["purple"]      = PURPLE;
-    hues["indigo"]      = INDIGO;
-    hues["salmon"]      = SALMON;
-    hues["gold"]        = GOLD;
-    hues["aqua"]        = AQUA;
-    hues["pink"]        = PINK;
-    hues["pale-green"]  = PALE_GREEN;
-    hues["pale-purple"] = PALE_PURPLE;
-    hues["sky-blue"]    = SKY_BLUE;
-    hues["tan"]         = TAN;
-    hues["red"]         = RED;
+static Hue hue(pn::value_cref x) {
+    StringMap<Hue> hues;
+    hues["gray"]        = Hue::GRAY;
+    hues["orange"]      = Hue::ORANGE;
+    hues["yellow"]      = Hue::YELLOW;
+    hues["blue"]        = Hue::BLUE;
+    hues["green"]       = Hue::GREEN;
+    hues["purple"]      = Hue::PURPLE;
+    hues["indigo"]      = Hue::INDIGO;
+    hues["salmon"]      = Hue::SALMON;
+    hues["gold"]        = Hue::GOLD;
+    hues["aqua"]        = Hue::AQUA;
+    hues["pink"]        = Hue::PINK;
+    hues["pale-green"]  = Hue::PALE_GREEN;
+    hues["pale-purple"] = Hue::PALE_PURPLE;
+    hues["sky-blue"]    = Hue::SKY_BLUE;
+    hues["tan"]         = Hue::TAN;
+    hues["red"]         = Hue::RED;
     return hues[x.as_string()];
 }
 
@@ -106,7 +106,7 @@ vector<unique_ptr<InterfaceItem>> interface_items(int id0, pn::array_cref l) {
         pn::map_cref       sub      = item.get(kind).as_map();
         Rect               bounds   = rect(item.get("bounds"));
         pn::string_view    resource = sub.get("resource").as_string();
-        uint8_t            hue      = antares::hue(sub.get("hue"));
+        Hue                hue      = antares::hue(sub.get("hue"));
         interfaceStyleType style    = antares::style(sub.get("style"));
         int16_t            key      = sub.has("key") ? antares::key(sub.get("key")) : 0;
         int16_t gamepad = sub.has("gamepad") ? Gamepad::num(sub.get("gamepad").as_string()) : 0;
@@ -155,7 +155,7 @@ vector<unique_ptr<InterfaceItem>> interface_items(int id0, pn::array_cref l) {
 
 InterfaceItem::InterfaceItem(int id, Rect bounds) : id(id), _bounds(bounds) {}
 
-PlainRect::PlainRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style)
+PlainRect::PlainRect(int id, Rect bounds, Hue hue, interfaceStyleType style)
         : InterfaceItem(id, bounds), hue(hue), style(style) {}
 
 void PlainRect::accept(const Visitor& visitor) const { visitor.visit_plain_rect(*this); }
@@ -165,16 +165,16 @@ LabeledItem::LabeledItem(int id, Rect bounds, interfaceLabelType label)
           label(Resource::strings(label.stringID).at(label.stringNumber - 1).copy()) {}
 
 LabeledRect::LabeledRect(
-        int id, Rect bounds, interfaceLabelType label, uint8_t hue, interfaceStyleType style)
+        int id, Rect bounds, interfaceLabelType label, Hue hue, interfaceStyleType style)
         : LabeledItem(id, bounds, label), hue(hue), style(style) {}
 
 void LabeledRect::accept(const Visitor& visitor) const { visitor.visit_labeled_rect(*this); }
 
-TextRect::TextRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style)
+TextRect::TextRect(int id, Rect bounds, Hue hue, interfaceStyleType style)
         : InterfaceItem(id, bounds), hue(hue), style(style) {}
 
 TextRect::TextRect(
-        int id, Rect bounds, pn::string_view resource, uint8_t hue, interfaceStyleType style)
+        int id, Rect bounds, pn::string_view resource, Hue hue, interfaceStyleType style)
         : InterfaceItem(id, bounds),
           text(Resource::path(resource).string().copy()),
           hue(hue),
@@ -186,13 +186,13 @@ PictureRect::PictureRect(int id, Rect bounds, pn::string_view resource)
         : InterfaceItem(id, bounds),
           texture(Resource::texture(resource)),
           visible_bounds(false),
-          hue(GRAY),
+          hue(Hue::GRAY),
           style(kSmall) {}
 
 void PictureRect::accept(const Visitor& visitor) const { visitor.visit_picture_rect(*this); }
 
 Button::Button(
-        int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, uint8_t hue,
+        int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, Hue hue,
         interfaceStyleType style)
         : LabeledItem(id, bounds, label),
           key(key),
@@ -202,28 +202,28 @@ Button::Button(
           status(kActive) {}
 
 PlainButton::PlainButton(
-        int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, uint8_t hue,
+        int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, Hue hue,
         interfaceStyleType style)
         : Button(id, bounds, key, gamepad, label, hue, style) {}
 
 void PlainButton::accept(const Visitor& visitor) const { visitor.visit_plain_button(*this); }
 
 CheckboxButton::CheckboxButton(
-        int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, uint8_t hue,
+        int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, Hue hue,
         interfaceStyleType style)
         : Button(id, bounds, key, gamepad, label, hue, style), on(false) {}
 
 void CheckboxButton::accept(const Visitor& visitor) const { visitor.visit_checkbox_button(*this); }
 
 RadioButton::RadioButton(
-        int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, uint8_t hue,
+        int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, Hue hue,
         interfaceStyleType style)
         : Button(id, bounds, key, gamepad, label, hue, style), on(false) {}
 
 void RadioButton::accept(const Visitor& visitor) const { visitor.visit_radio_button(*this); }
 
 TabBoxButton::TabBoxButton(
-        int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, uint8_t hue,
+        int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, Hue hue,
         interfaceStyleType style, pn::value_cref tab_content)
         : Button(id, bounds, key, gamepad, label, hue, style),
           on(false),
@@ -232,7 +232,7 @@ TabBoxButton::TabBoxButton(
 void TabBoxButton::accept(const Visitor& visitor) const { visitor.visit_tab_box_button(*this); }
 
 TabBox::TabBox(
-        int id, Rect bounds, uint8_t hue, interfaceStyleType style, int16_t top_right_border_size)
+        int id, Rect bounds, Hue hue, interfaceStyleType style, int16_t top_right_border_size)
         : InterfaceItem(id, bounds),
           hue(hue),
           style(style),

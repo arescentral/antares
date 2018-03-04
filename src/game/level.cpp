@@ -58,21 +58,20 @@ ANTARES_GLOBAL set<int32_t> possible_actions;
 
 void AddBaseObjectActionMedia(
         Handle<BaseObject> base,
-        std::vector<std::unique_ptr<const Action>>(BaseObject::*whichType), uint8_t color,
+        std::vector<std::unique_ptr<const Action>>(BaseObject::*whichType), Hue hue,
         std::bitset<16> all_colors, LoadState* state);
-void AddActionMedia(
-        const Action& action, uint8_t color, std::bitset<16> all_colors, LoadState* state);
+void AddActionMedia(const Action& action, Hue hue, std::bitset<16> all_colors, LoadState* state);
 
 void AddBaseObjectMedia(
-        Handle<BaseObject> base, uint8_t color, std::bitset<16> all_colors, LoadState* state) {
+        Handle<BaseObject> base, Hue hue, std::bitset<16> all_colors, LoadState* state) {
 #ifdef DATA_COVERAGE
     possible_objects.insert(base.number());
 #endif  // DATA_COVERAGE
 
     if (!(base->attributes & kCanThink)) {
-        color = GRAY;
+        hue = Hue::GRAY;
     }
-    state->colors_needed[base.number()][color] = true;
+    state->colors_needed[base.number()][static_cast<int>(hue)] = true;
     for (int i = 0; i < 16; ++i) {
         if (state->colors_loaded[base.number()][i]) {
             continue;  // color already loaded.
@@ -86,16 +85,18 @@ void AddBaseObjectMedia(
             sys.pix.add(id);
         }
 
-        AddBaseObjectActionMedia(base, &BaseObject::destroy, i, all_colors, state);
-        AddBaseObjectActionMedia(base, &BaseObject::expire, i, all_colors, state);
-        AddBaseObjectActionMedia(base, &BaseObject::create, i, all_colors, state);
-        AddBaseObjectActionMedia(base, &BaseObject::collide, i, all_colors, state);
-        AddBaseObjectActionMedia(base, &BaseObject::activate, i, all_colors, state);
-        AddBaseObjectActionMedia(base, &BaseObject::arrive, i, all_colors, state);
+        Hue hue2 = static_cast<Hue>(i);
+
+        AddBaseObjectActionMedia(base, &BaseObject::destroy, hue2, all_colors, state);
+        AddBaseObjectActionMedia(base, &BaseObject::expire, hue2, all_colors, state);
+        AddBaseObjectActionMedia(base, &BaseObject::create, hue2, all_colors, state);
+        AddBaseObjectActionMedia(base, &BaseObject::collide, hue2, all_colors, state);
+        AddBaseObjectActionMedia(base, &BaseObject::activate, hue2, all_colors, state);
+        AddBaseObjectActionMedia(base, &BaseObject::arrive, hue2, all_colors, state);
 
         for (Handle<BaseObject> weapon : {base->pulse.base, base->beam.base, base->special.base}) {
             if (weapon.get()) {
-                AddBaseObjectMedia(weapon, i, all_colors, state);
+                AddBaseObjectMedia(weapon, hue2, all_colors, state);
             }
         }
     }
@@ -103,22 +104,21 @@ void AddBaseObjectMedia(
 
 void AddBaseObjectActionMedia(
         Handle<BaseObject> base,
-        std::vector<std::unique_ptr<const Action>>(BaseObject::*whichType), uint8_t color,
+        std::vector<std::unique_ptr<const Action>>(BaseObject::*whichType), Hue hue,
         std::bitset<16> all_colors, LoadState* state) {
     for (const auto& action : (*base.*whichType)) {
-        AddActionMedia(*action, color, all_colors, state);
+        AddActionMedia(*action, hue, all_colors, state);
     }
 }
 
-void AddActionMedia(
-        const Action& action, uint8_t color, std::bitset<16> all_colors, LoadState* state) {
+void AddActionMedia(const Action& action, Hue hue, std::bitset<16> all_colors, LoadState* state) {
 #ifdef DATA_COVERAGE
     possible_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
     auto base = action.created_base();
     if (base.get()) {
-        AddBaseObjectMedia(action.created_base(), color, all_colors, state);
+        AddBaseObjectMedia(action.created_base(), hue, all_colors, state);
     }
 
     auto range = action.sound_range();
@@ -132,7 +132,7 @@ void AddActionMedia(
                 state->colors_needed[baseObject.number()] |= all_colors;
             }
             if (state->colors_loaded[baseObject.number()].any()) {
-                AddBaseObjectMedia(baseObject, color, all_colors, state);
+                AddBaseObjectMedia(baseObject, hue, all_colors, state);
             }
         }
     }
@@ -248,7 +248,7 @@ static void load_blessed_objects(std::bitset<16> all_colors, LoadState* state) {
                 info.energyBlobID, info.warpInFlareID, info.warpOutFlareID, info.playerBodyID,
         };
         for (auto id : blessed) {
-            AddBaseObjectMedia(id, GRAY, all_colors, state);
+            AddBaseObjectMedia(id, Hue::GRAY, all_colors, state);
         }
     }
 }
@@ -275,7 +275,8 @@ static void load_initial(
     if (initial->sprite_override >= 0) {
         if (baseObject->attributes & kCanThink) {
             sys.pix.add(
-                    initial->sprite_override + (GetAdmiralColor(owner) << kSpriteTableColorShift));
+                    initial->sprite_override +
+                    (static_cast<int>(GetAdmiralColor(owner)) << kSpriteTableColorShift));
         } else {
             sys.pix.add(initial->sprite_override);
         }
@@ -301,7 +302,7 @@ static void load_initial(
 static void load_condition(
         Level::Condition* condition, std::bitset<16> all_colors, LoadState* state) {
     for (const auto& action : (*condition)->action) {
-        AddActionMedia(*action, GRAY, all_colors, state);
+        AddActionMedia(*action, Hue::GRAY, all_colors, state);
     }
     int index                  = condition - g.level->conditions.data();
     g.condition_enabled[index] = (*condition)->initially_enabled;
@@ -330,7 +331,7 @@ void construct_level(Handle<Level> level, LoadState* state) {
     all_colors[0] = true;
     for (auto adm : Admiral::all()) {
         if (adm->active()) {
-            all_colors[GetAdmiralColor(adm)] = true;
+            all_colors[static_cast<int>(GetAdmiralColor(adm))] = true;
         }
     }
 

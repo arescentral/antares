@@ -261,11 +261,11 @@ void RecalcAllAdmiralBuildData() {
     }
 }
 
-uint8_t GetAdmiralColor(Handle<Admiral> a) {
+Hue GetAdmiralColor(Handle<Admiral> a) {
     if (!a.get()) {
-        return 0;
+        return Hue::GRAY;
     }
-    return a->color();
+    return a->hue();
 }
 
 int32_t GetAdmiralRace(Handle<Admiral> a) {

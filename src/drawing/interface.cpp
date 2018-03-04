@@ -86,29 +86,28 @@ int16_t GetInterfaceFontAscent(interfaceStyleType style) { return interface_font
 
 enum inlineKindType { kNoKind = 0, kVPictKind = 1, kVClearPictKind = 2 };
 
-inline void mDrawPuffUpRect(const Rects& rects, Rect r, uint8_t mcolor, int mshade) {
-    const RgbColor color = GetRGBTranslateColorShade(mcolor, mshade);
+inline void mDrawPuffUpRect(const Rects& rects, Rect r, Hue hue, int mshade) {
+    const RgbColor color = GetRGBTranslateColorShade(hue, mshade);
     rects.fill(r, color);
-    const RgbColor lighter = GetRGBTranslateColorShade(mcolor, mshade + kLighterColor);
+    const RgbColor lighter = GetRGBTranslateColorShade(hue, mshade + kLighterColor);
     rects.fill(Rect(r.left, r.top, r.left + 1, r.bottom), lighter);
     rects.fill(Rect(r.left, r.top, r.right - 1, r.top + 1), lighter);
-    const RgbColor darker = GetRGBTranslateColorShade(mcolor, mshade + kDarkerColor);
+    const RgbColor darker = GetRGBTranslateColorShade(hue, mshade + kDarkerColor);
     rects.fill(Rect(r.right - 1, r.top, r.right, r.bottom), darker);
     rects.fill(Rect(r.left + 1, r.bottom - 1, r.right, r.bottom), darker);
 }
 
-inline void mDrawPuffDownRect(const Rects& rects, Rect r, uint8_t mcolor, int mshade) {
+inline void mDrawPuffDownRect(const Rects& rects, Rect r, Hue hue, int mshade) {
     rects.fill(r, RgbColor::black());
-    const RgbColor darker = GetRGBTranslateColorShade(mcolor, mshade + kDarkerColor);
+    const RgbColor darker = GetRGBTranslateColorShade(hue, mshade + kDarkerColor);
     rects.fill(Rect(r.left - 1, r.top - 1, r.left, r.bottom + 1), darker);
     rects.fill(Rect(r.left - 1, r.top - 1, r.right, r.top), darker);
-    const RgbColor lighter = GetRGBTranslateColorShade(mcolor, mshade + kLighterColor);
+    const RgbColor lighter = GetRGBTranslateColorShade(hue, mshade + kLighterColor);
     rects.fill(Rect(r.right, r.top - 1, r.right + 1, r.bottom + 1), lighter);
     rects.fill(Rect(r.left, r.bottom, r.right + 1, r.bottom + 1), lighter);
 }
 
-inline void mDrawPuffUpTopBorder(
-        const Rects& rects, Rect r, uint8_t hue, int shade, int h_border) {
+inline void mDrawPuffUpTopBorder(const Rects& rects, Rect r, Hue hue, int shade, int h_border) {
     // For historical reasons, this function assumes r has closed intervals.
     ++r.right;
     ++r.bottom;
@@ -132,8 +131,7 @@ inline void mDrawPuffUpTopBorder(
     rects.fill(Rect(outer.left, outer.top, outer.right, outer.top + 1), lighter);
 }
 
-inline void mDrawPuffUpBottomBorder(
-        const Rects& rects, Rect r, uint8_t hue, int shade, int h_border) {
+inline void mDrawPuffUpBottomBorder(const Rects& rects, Rect r, Hue hue, int shade, int h_border) {
     // For historical reasons, this function assumes r has closed intervals.
     ++r.right;
     ++r.bottom;
@@ -159,11 +157,11 @@ inline void mDrawPuffUpBottomBorder(
 }
 
 inline void mDrawPuffUpTBorder(
-        const Rects& rects, Rect r, uint8_t mcolor, int mshade, int msheight, int h_border) {
+        const Rects& rects, Rect r, Hue hue, int mshade, int msheight, int h_border) {
     ++r.right;
     ++r.bottom;
 
-    const RgbColor color = GetRGBTranslateColorShade(mcolor, mshade);
+    const RgbColor color = GetRGBTranslateColorShade(hue, mshade);
     rects.fill(
             Rect(r.left - h_border, r.top + msheight, r.left + 1,
                  r.top + msheight + kLabelBottomHeight + 1),
@@ -177,7 +175,7 @@ inline void mDrawPuffUpTBorder(
                  r.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight + 1),
             color);
 
-    const RgbColor lighter = GetRGBTranslateColorShade(mcolor, mshade + kLighterColor);
+    const RgbColor lighter = GetRGBTranslateColorShade(hue, mshade + kLighterColor);
     rects.fill(
             Rect(r.left - h_border, r.top + msheight, r.left - h_border + 1,
                  r.top + msheight + kLabelBottomHeight + 1),
@@ -192,7 +190,7 @@ inline void mDrawPuffUpTBorder(
             Rect(r.right - 1, r.top + msheight, r.right + h_border - 1, r.top + msheight + 1),
             lighter);
 
-    const RgbColor darker = GetRGBTranslateColorShade(mcolor, mshade + kDarkerColor);
+    const RgbColor darker = GetRGBTranslateColorShade(hue, mshade + kDarkerColor);
     rects.fill(
             Rect(r.left - h_border + 1, r.top + msheight + kLabelBottomHeight, r.left + 1,
                  r.top + msheight + kLabelBottomHeight + 1),
@@ -216,7 +214,7 @@ void draw_plain_rect(Point origin, const T& item) {
     Rects              rects;
     Rect               tRect, uRect;
     int16_t            vcenter, thisHBorder = kInterfaceSmallHBorder;
-    uint8_t            color = item.hue;
+    Hue                color = item.hue;
     interfaceStyleType style = item.style;
 
     if (style == kLarge) {
@@ -267,7 +265,7 @@ void draw_tab_box(Point origin, const TabBox& item) {
     Rect               uRect;
     int16_t            vcenter, h_border = kInterfaceSmallHBorder;
     uint8_t            shade;
-    uint8_t            color                 = item.hue;
+    Hue                color                 = item.hue;
     interfaceStyleType style                 = item.style;
     int16_t            top_right_border_size = item.top_right_border_size;
 
@@ -1162,9 +1160,8 @@ void draw_text_rect(Point origin, const TextRect& item) {
 
 }  // namespace
 
-void draw_text_in_rect(
-        Rect tRect, pn::string_view text, interfaceStyleType style, uint8_t textcolor) {
-    RgbColor   color = GetRGBTranslateColorShade(textcolor, VERY_LIGHT);
+void draw_text_in_rect(Rect tRect, pn::string_view text, interfaceStyleType style, Hue hue) {
+    RgbColor   color = GetRGBTranslateColorShade(hue, VERY_LIGHT);
     StyledText interface_text(interface_font(style));
     interface_text.set_fore_color(color);
     interface_text.set_interface_text(text);

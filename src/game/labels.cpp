@@ -78,7 +78,7 @@ Handle<Label> Label::next_free_label() {
 
 Handle<Label> Label::add(
         int16_t h, int16_t v, int16_t hoff, int16_t voff, Handle<SpaceObject> object,
-        bool objectLink, uint8_t color) {
+        bool objectLink, Hue hue) {
     auto label = next_free_label();
     if (!label.get()) {
         return Label::none();  // no free label
@@ -88,7 +88,7 @@ Handle<Label> Label::add(
     label->killMe             = false;
     label->where              = Point(h, v);
     label->offset             = Point(hoff, voff);
-    label->color              = color;
+    label->hue                = hue;
     label->object             = object;
     label->objectLink         = objectLink;
     label->keepOnScreenAnyway = false;
@@ -129,8 +129,8 @@ void Label::draw() {
         if ((0 <= label->retroCount) && (label->retroCount < text.size())) {
             text = text.substr(0, label->retroCount);
         }
-        const RgbColor light = GetRGBTranslateColorShade(label->color, VERY_LIGHT);
-        const RgbColor dark  = GetRGBTranslateColorShade(label->color, VERY_DARK);
+        const RgbColor light = GetRGBTranslateColorShade(label->hue, VERY_LIGHT);
+        const RgbColor dark  = GetRGBTranslateColorShade(label->hue, VERY_DARK);
         sys.video->dither_rect(label->thisRect, dark);
         at.offset(kLabelInnerSpace, kLabelInnerSpace + sys.fonts.tactical->ascent);
 
@@ -260,7 +260,7 @@ void Label::update_positions(ticks units_done) {
                             source.v = label->where.v + label->height + 2;
                         }
                         Auto_Animate_Line(&source, &dest);
-                        HintLine::show(source, dest, label->color, DARK);
+                        HintLine::show(source, dest, label->hue, DARK);
                     }
                 } else {
                     label->set_string("");
@@ -284,7 +284,7 @@ void Label::update_positions(ticks units_done) {
                         source.h = label->where.h + label->width + 2;
                     }
                     Auto_Animate_Line(&source, &dest);
-                    HintLine::show(source, dest, label->color, VERY_LIGHT);
+                    HintLine::show(source, dest, label->hue, VERY_LIGHT);
                 }
             }
             if (label->age > ticks(0)) {
@@ -330,7 +330,7 @@ void Label::clear_string() {
     width = height = 0;
 }
 
-void Label::set_color(uint8_t color) { this->color = color; }
+void Label::set_hue(Hue hue) { this->hue = hue; }
 
 void Label::set_keep_on_screen_anyway(bool keepOnScreenAnyway) {
     this->keepOnScreenAnyway = keepOnScreenAnyway;

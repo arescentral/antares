@@ -165,7 +165,7 @@ bool read_from(pn::file_view in, BaseObject* object) {
     }
 
     if ((object->shieldColor != 0xFF) && (object->shieldColor != 0)) {
-        object->shieldColor = GetTranslateColorShade(object->shieldColor, 15);
+        object->shieldColor = GetTranslateColorShade(static_cast<Hue>(object->shieldColor), 15);
     }
 
     if (!(read_weapons(in, object) && read_from(in, &object->friendDefecit) &&

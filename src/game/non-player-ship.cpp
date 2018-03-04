@@ -59,11 +59,9 @@ const int32_t kWeaponRatio        = 2;
 const int32_t kEnergyChunk        = kHealthRatio + (kWeaponRatio * 3);
 const int32_t kWarpInEnergyFactor = 3;
 
-enum {
-    kFriendlyColor = GREEN,
-    kHostileColor  = RED,
-    kNeutralColor  = SKY_BLUE,
-};
+const Hue kFriendlyColor = Hue::GREEN;
+const Hue kHostileColor  = Hue::RED;
+const Hue kNeutralColor  = Hue::SKY_BLUE;
 
 uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, Handle<BaseObject> baseObject);
 uint32_t ThinkObjectWarpingPresence(Handle<SpaceObject> anObject);

@@ -133,14 +133,16 @@ void StyledText::set_retro_text(pn::string_view text) {
 
             case FG1: r1 = r, state = FG2; break;
             case FG2:
-                fore_color = GetRGBTranslateColorShade(hex_digit(r1), hex_digit(r));
-                state      = START;
+                fore_color =
+                        GetRGBTranslateColorShade(static_cast<Hue>(hex_digit(r1)), hex_digit(r));
+                state = START;
                 break;
 
             case BG1: r1 = r, state = BG2; break;
             case BG2:
-                back_color = GetRGBTranslateColorShade(hex_digit(r1), hex_digit(r));
-                state      = START;
+                back_color =
+                        GetRGBTranslateColorShade(static_cast<Hue>(hex_digit(r1)), hex_digit(r));
+                state = START;
                 break;
         }
     }

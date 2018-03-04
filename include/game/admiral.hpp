@@ -20,6 +20,7 @@
 #define ANTARES_GAME_ADMIRAL_HPP_
 
 #include "data/base-object.hpp"
+#include "data/enums.hpp"
 #include "data/handle.hpp"
 #include "data/level.hpp"
 #include "math/fixed.hpp"
@@ -140,7 +141,7 @@ class Admiral {
     admiralBuildType* canBuildType() { return _canBuildType; };
     Fixed&            totalBuildChance() { return _totalBuildChance; }
     int32_t&          hopeToBuild() { return _hopeToBuild; }
-    uint8_t&          color() { return _color; }
+    Hue&              hue() { return _hue; }
     bool&             active() { return _active; }
     pn::string_view   name() { return _name; }
     uint32_t&         cheats() { return _cheats; }
@@ -170,7 +171,7 @@ class Admiral {
     admiralBuildType    _canBuildType[kMaxNumAdmiralCanBuild];
     Fixed               _totalBuildChance = Fixed::zero();
     int32_t             _hopeToBuild      = -1;
-    uint8_t             _color            = 0;
+    Hue                 _hue              = Hue::GRAY;
     bool                _active           = false;
     uint32_t            _cheats           = 0;
     pn::string          _name;
@@ -186,7 +187,7 @@ Handle<Destination> MakeNewDestination(
 void RemoveDestination(Handle<Destination> d);
 void RecalcAllAdmiralBuildData();
 
-uint8_t GetAdmiralColor(Handle<Admiral> whichAdmiral);
+Hue     GetAdmiralColor(Handle<Admiral> whichAdmiral);
 int32_t GetAdmiralRace(Handle<Admiral> whichAdmiral);
 
 bool                BaseHasSomethingToBuild(Handle<SpaceObject> obj);

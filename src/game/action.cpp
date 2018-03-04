@@ -221,7 +221,7 @@ void SparkAction::apply(
             location.v = -kSpriteMaxSize;
         }
     }
-    globals()->starfield.make_sparks(count, decay, velocity, uint8_t(hue), &location);
+    globals()->starfield.make_sparks(count, decay, velocity, hue, &location);
 }
 
 void KillAction::apply(
@@ -657,7 +657,7 @@ void FireAction::apply(
 void FlashAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
-    globals()->transitions.start_boolean(length, GetTranslateColorShade(uint8_t(hue), shade));
+    globals()->transitions.start_boolean(length, GetTranslateColorShade(hue, shade));
 }
 
 void KeyAction::apply(

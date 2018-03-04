@@ -19,6 +19,7 @@
 #ifndef ANTARES_GAME_STARFIELD_HPP_
 #define ANTARES_GAME_STARFIELD_HPP_
 
+#include "data/enums.hpp"
 #include "data/handle.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
@@ -45,7 +46,7 @@ struct scrollStarType {
     fixedPointType velocity;
     int32_t        age;
     int32_t        speed;
-    uint8_t        color;
+    Hue            hue;
 };
 
 class Starfield {
@@ -61,8 +62,7 @@ class Starfield {
 
     void reset(Handle<SpaceObject> which_object);
     void make_sparks(
-            int32_t sparkNum, int32_t sparkSpeed, Fixed maxVelocity, uint8_t color,
-            Point* location);
+            int32_t sparkNum, int32_t sparkSpeed, Fixed maxVelocity, Hue hue, Point* location);
     void prepare_to_move();
     void move(ticks by_units);
     void draw() const;

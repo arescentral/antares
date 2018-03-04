@@ -55,9 +55,9 @@ enum BriefingPoint {
 
 }  // namespace
 
-static const int     kMissionStarPointWidth  = 16;
-static const int     kMissionStarPointHeight = 12;
-static const int32_t kMissionDataHiliteColor = GOLD;
+static const int kMissionStarPointWidth  = 16;
+static const int kMissionStarPointHeight = 12;
+static const Hue kMissionDataHiliteColor = Hue::GOLD;
 
 static const int32_t kMissionBriefPointOffset = 2;
 static const int32_t kMissionDataWidth        = 200;
@@ -70,7 +70,7 @@ static const int32_t kMissionLineHJog         = 10;
 static LabeledRect data_item(const InterfaceItem& map_rect) {
     Rect bounds(0, 0, 200, 200);
     bounds.center_in(map_rect.bounds());
-    return LabeledRect(0, bounds, {4000, 1}, GOLD, kLarge);
+    return LabeledRect(0, bounds, {4000, 1}, Hue::GOLD, kLarge);
 }
 
 static const Font* interface_font(interfaceStyleType style) {
@@ -230,7 +230,7 @@ void BriefingScreen::overlay() const {
             Rect  star_rect = _star_rect;
             star_rect.offset(off.h, off.v);
             const Point star   = star_rect.center();
-            RgbColor    gold   = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
+            RgbColor    gold   = GetRGBTranslateColorShade(Hue::GOLD, VERY_LIGHT);
             Rect        bounds = _bounds;
             bounds.offset(off.h, off.v);
             plug.info.starmap.draw_cropped(bounds, Rect(Point(0, 2), bounds.size()));
@@ -385,7 +385,7 @@ void BriefingScreen::draw_system_map() const {
         Points points;
         for (int i = 0; i < _system_stars.size(); ++i) {
             const Star& star       = _system_stars[i];
-            RgbColor    star_color = GetRGBTranslateColorShade(GRAY, star.shade + DARKEST);
+            RgbColor    star_color = GetRGBTranslateColorShade(Hue::GRAY, star.shade + DARKEST);
             Point       location   = star.location;
             location.offset(off.h, off.v);
             points.draw(location, star_color);

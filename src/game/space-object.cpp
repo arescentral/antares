@@ -53,9 +53,9 @@ using std::unique_ptr;
 
 namespace antares {
 
-const uint8_t kFriendlyColor = GREEN;
-const uint8_t kHostileColor  = RED;
-const uint8_t kNeutralColor  = SKY_BLUE;
+const Hue kFriendlyColor = Hue::GREEN;
+const Hue kHostileColor  = Hue::RED;
+const Hue kNeutralColor  = Hue::SKY_BLUE;
 
 const Fixed kDefaultTurnRate = Fixed::from_long(2.000);
 
@@ -301,7 +301,7 @@ SpaceObject::SpaceObject(
     }
 
     if (baseType->attributes & kCanThink) {
-        pixResID += (GetAdmiralColor(owner) << kSpriteTableColorShift);
+        pixResID += (static_cast<int>(GetAdmiralColor(owner)) << kSpriteTableColorShift);
     }
 
     pulse.base   = baseType->pulse.base;
@@ -433,7 +433,7 @@ void SpaceObject::change_base_type(
     }
 
     if (base->attributes & kCanThink) {
-        obj->pixResID += (GetAdmiralColor(obj->owner) << kSpriteTableColorShift);
+        obj->pixResID += (static_cast<int>(GetAdmiralColor(obj->owner)) << kSpriteTableColorShift);
     }
 
     // check periodic time
@@ -653,10 +653,12 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
             NatePixTable* pixTable;
 
             if ((object->pixResID == object->baseType->pixResID) ||
-                (object->pixResID == (object->baseType->pixResID |
-                                      (GetAdmiralColor(old_owner) << kSpriteTableColorShift)))) {
-                object->pixResID = object->baseType->pixResID |
-                                   (GetAdmiralColor(owner) << kSpriteTableColorShift);
+                (object->pixResID ==
+                 (object->baseType->pixResID |
+                  (static_cast<int>(GetAdmiralColor(old_owner)) << kSpriteTableColorShift)))) {
+                object->pixResID =
+                        object->baseType->pixResID |
+                        (static_cast<int>(GetAdmiralColor(owner)) << kSpriteTableColorShift);
 
                 pixTable = sys.pix.get(object->pixResID);
                 if (pixTable != NULL) {

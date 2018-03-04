@@ -91,13 +91,13 @@ ANTARES_GLOBAL Point HintLine::hint_line_end;
 ANTARES_GLOBAL RgbColor HintLine::hint_line_color;
 ANTARES_GLOBAL RgbColor HintLine::hint_line_color_dark;
 
-void HintLine::show(Point fromWhere, Point toWhere, uint8_t color, uint8_t brightness) {
+void HintLine::show(Point fromWhere, Point toWhere, Hue hue, uint8_t brightness) {
     hint_line_start = fromWhere;
     hint_line_end   = toWhere;
     show_hint_line  = true;
 
-    hint_line_color      = GetRGBTranslateColorShade(color, brightness);
-    hint_line_color_dark = GetRGBTranslateColorShade(color, VERY_DARK);
+    hint_line_color      = GetRGBTranslateColorShade(hue, brightness);
+    hint_line_color_dark = GetRGBTranslateColorShade(hue, VERY_DARK);
 }
 
 void HintLine::hide() { show_hint_line = false; }
@@ -119,7 +119,7 @@ void GameCursor::draw() const {
     where = clamp(where);
     if (active()) {
         const Rect     clip_rect = viewport();
-        const RgbColor color     = GetRGBTranslateColorShade(SKY_BLUE, MEDIUM);
+        const RgbColor color     = GetRGBTranslateColorShade(Hue::SKY_BLUE, MEDIUM);
 
         Point top_a    = Point(where.h, clip_rect.top);
         Point top_b    = Point(where.h, (where.v - kCursorBoundsSize));

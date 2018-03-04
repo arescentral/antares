@@ -306,8 +306,8 @@ class PauseScreen : public Card {
     virtual void draw() const {
         next()->draw();
         if (asleep() || _visible) {
-            const RgbColor& light_green = GetRGBTranslateColorShade(GREEN, LIGHTER);
-            const RgbColor& dark_green  = GetRGBTranslateColorShade(GREEN, DARKER);
+            const RgbColor& light_green = GetRGBTranslateColorShade(Hue::GREEN, LIGHTER);
+            const RgbColor& dark_green  = GetRGBTranslateColorShade(Hue::GREEN, DARKER);
 
             {
                 Rects rects;

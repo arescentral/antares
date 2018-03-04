@@ -138,7 +138,7 @@ BuildPix::BuildPix(pn::string_view text, int width) : _size({width, 0}) {
             }
         } else {
             unique_ptr<StyledText> styled(new StyledText(sys.fonts.title));
-            auto                   red = GetRGBTranslateColorShade(RED, VERY_LIGHT);
+            auto                   red = GetRGBTranslateColorShade(Hue::RED, VERY_LIGHT);
             styled->set_fore_color(red);
             if (line.data() == raw_lines.back().data()) {
                 styled->set_retro_text(line);

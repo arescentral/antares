@@ -36,7 +36,7 @@ using std::vector;
 namespace antares {
 
 NatePixTable::NatePixTable(
-        int id, uint8_t color, pn::map_cref data, ArrayPixMap image, ArrayPixMap overlay) {
+        int id, Hue hue, pn::map_cref data, ArrayPixMap image, ArrayPixMap overlay) {
     struct State {
         int         rows, cols;
         Point       center;
@@ -81,12 +81,12 @@ NatePixTable::NatePixTable(
         sprite.offset(state.center.h, state.center.v);
         Rect bounds(state.frame);
         bounds.offset(2 * -bounds.left, 2 * -bounds.top);
-        if (color) {
+        if (hue == Hue::GRAY) {
+            _frames.emplace_back(bounds, state.image.view(cell).view(sprite), id, frame);
+        } else {
             _frames.emplace_back(
                     bounds, state.image.view(cell).view(sprite), id, frame,
-                    state.overlay.view(cell).view(sprite), color);
-        } else {
-            _frames.emplace_back(bounds, state.image.view(cell).view(sprite), id, frame);
+                    state.overlay.view(cell).view(sprite), hue);
         }
     }
 }
@@ -98,11 +98,10 @@ const NatePixTable::Frame& NatePixTable::at(size_t index) const { return _frames
 size_t NatePixTable::size() const { return _size; }
 
 NatePixTable::Frame::Frame(
-        Rect bounds, const PixMap& image, int16_t id, int frame, const PixMap& overlay,
-        uint8_t color)
+        Rect bounds, const PixMap& image, int16_t id, int frame, const PixMap& overlay, Hue hue)
         : _bounds(bounds), _pix_map(bounds.width(), bounds.height()) {
     load_image(image);
-    load_overlay(overlay, color);
+    load_overlay(overlay, hue);
     build(id, frame);
 }
 
@@ -116,13 +115,13 @@ NatePixTable::Frame::~Frame() {}
 
 void NatePixTable::Frame::load_image(const PixMap& pix) { _pix_map.copy(pix); }
 
-void NatePixTable::Frame::load_overlay(const PixMap& pix, uint8_t color) {
+void NatePixTable::Frame::load_overlay(const PixMap& pix, Hue hue) {
     for (auto x : range(width())) {
         for (auto y : range(height())) {
             RgbColor over  = pix.get(x, y);
             uint8_t  value = over.red;
             uint8_t  frac  = over.alpha;
-            over           = RgbColor::tint(color, value);
+            over           = RgbColor::tint(hue, value);
             RgbColor under = _pix_map.get(x, y);
             RgbColor composite;
             composite.red   = ((over.red * frac) + (under.red * (255 - frac))) / 255;

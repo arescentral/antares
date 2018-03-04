@@ -50,8 +50,8 @@ const char* name(int16_t id) {
     abort();
 }
 
-void draw(int16_t id, uint8_t color, ArrayPixMap& pix) {
-    NatePixTable               table = Resource::sprite(id, color);
+void draw(int16_t id, Hue hue, ArrayPixMap& pix) {
+    NatePixTable               table = Resource::sprite(id, hue);
     const NatePixTable::Frame& frame = table.at(9);
     pix.resize(Size(frame.width(), frame.height()));
     pix.copy(frame.pix_map());
@@ -67,12 +67,12 @@ class ShapeBuilder {
     ShapeBuilder(const ShapeBuilder&) = delete;
     ShapeBuilder& operator=(const ShapeBuilder&) = delete;
 
-    void save(int16_t id, uint8_t color) {
+    void save(int16_t id, Hue hue) {
         ArrayPixMap pix(0, 0);
-        draw(id, color, pix);
+        draw(id, hue, pix);
         if (_output_dir.has_value()) {
-            const pn::string path =
-                    pn::format("{0}/{1}/{2}.png", *_output_dir, name(id), hex(color));
+            const pn::string path = pn::format(
+                    "{0}/{1}/{2}.png", *_output_dir, name(id), hex(static_cast<int>(hue)));
             sfz::makedirs(dirname(path), 0755);
             pn::file file = pn::open(path, "w");
             pix.encode(file);
@@ -130,7 +130,7 @@ void main(int argc, char* const* argv) {
     int16_t         ids[] = {501, 510, 515, 532, 550, 551, 563, 567};
     for (int16_t id : ids) {
         for (int tint = 0; tint < 16; ++tint) {
-            builder.save(id, tint);
+            builder.save(id, static_cast<Hue>(tint));
         }
     }
 }

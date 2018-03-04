@@ -57,7 +57,7 @@ class Messages {
   private:
     struct longMessageType;
 
-    static void set_status(pn::string_view status, uint8_t color);
+    static void set_status(pn::string_view status, Hue hue);
 
     static std::queue<pn::string> message_data;
     static longMessageType*       long_message_data;

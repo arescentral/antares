@@ -53,7 +53,7 @@ const int32_t kRadarScale   = 50;
 const int32_t kRadarRange   = kRadarSize * kRadarScale;
 const ticks   kRadarSpeed   = ticks(30);
 const int32_t kRadarBlipNum = 50;
-const uint8_t kRadarColor   = GREEN;
+const Hue     kRadarColor   = Hue::GREEN;
 
 const int32_t kRadarLeft       = 6;
 const int32_t kRadarTop        = 6;
@@ -89,7 +89,7 @@ const int32_t kGrossMoneyBarWidth  = 10;
 const int32_t kGrossMoneyBarHeight = 5;
 const int32_t kGrossMoneyBarNum    = 7;
 const int32_t kGrossMoneyBarValue  = 20000;
-const uint8_t kGrossMoneyColor     = YELLOW;
+const Hue     kGrossMoneyColor     = Hue::YELLOW;
 
 const int32_t kFineMoneyLeft      = 25;
 const int32_t kFineMoneyTop       = 48;
@@ -100,9 +100,9 @@ const int32_t kFineMoneyBarHeight = 4;
 const int32_t kFineMoneyBarNum    = 100;
 const int32_t kFineMoneyBarMod    = kGrossMoneyBarValue;
 const int32_t kFineMoneyBarValue  = 200;
-const int32_t kFineMoneyColor     = PALE_GREEN;
-const int32_t kFineMoneyNeedColor = ORANGE;
-const uint8_t kFineMoneyUseColor  = SKY_BLUE;
+const Hue     kFineMoneyColor     = Hue::PALE_GREEN;
+const Hue     kFineMoneyNeedColor = Hue::ORANGE;
+const Hue     kFineMoneyUseColor  = Hue::SKY_BLUE;
 
 const Fixed kMaxMoneyValue =
         Fixed::from_long(kGrossMoneyBarValue * kGrossMoneyBarNum) - Fixed::from_val(1);
@@ -122,7 +122,7 @@ namespace {
 struct barIndicatorType {
     int16_t top;
     int32_t thisValue;
-    uint8_t color;
+    Hue     hue;
 };
 
 static ANTARES_GLOBAL coordPointType gLastGlobalCorner;
@@ -162,8 +162,8 @@ void InstrumentInit() {
     gScaleList.reset(new int32_t[kScaleListNum]);
     ResetInstruments();
 
-    site.light = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);
-    site.dark  = GetRGBTranslateColorShade(PALE_GREEN, DARKER + kSlightlyDarkerColor);
+    site.light = GetRGBTranslateColorShade(Hue::PALE_GREEN, MEDIUM);
+    site.dark  = GetRGBTranslateColorShade(Hue::PALE_GREEN, DARKER + kSlightlyDarkerColor);
 
     MiniScreenInit();
 }
@@ -193,14 +193,14 @@ void ResetInstruments() {
         gBarIndicator[i].thisValue = -1;
     }
     // the shield bar
-    gBarIndicator[kShieldBar].top   = 359;
-    gBarIndicator[kShieldBar].color = SKY_BLUE;
+    gBarIndicator[kShieldBar].top = 359;
+    gBarIndicator[kShieldBar].hue = Hue::SKY_BLUE;
 
-    gBarIndicator[kEnergyBar].top   = 231;
-    gBarIndicator[kEnergyBar].color = GOLD;
+    gBarIndicator[kEnergyBar].top = 231;
+    gBarIndicator[kEnergyBar].hue = Hue::GOLD;
 
-    gBarIndicator[kBatteryBar].top   = 103;
-    gBarIndicator[kBatteryBar].color = SALMON;
+    gBarIndicator[kBatteryBar].top = 103;
+    gBarIndicator[kBatteryBar].hue = Hue::SALMON;
 
     lp = g.radar_blips.get();
     for (i = 0; i < kRadarBlipNum; i++) {
@@ -572,12 +572,12 @@ void draw_site(const PlayerShip& player) {
 
         SiteData control = {};
         if (player.show_select()) {
-            control.light       = GetRGBTranslateColorShade(YELLOW, MEDIUM);
-            control.dark        = GetRGBTranslateColorShade(YELLOW, DARKER + kSlightlyDarkerColor);
+            control.light = GetRGBTranslateColorShade(Hue::YELLOW, MEDIUM);
+            control.dark  = GetRGBTranslateColorShade(Hue::YELLOW, DARKER + kSlightlyDarkerColor);
             control.should_draw = true;
         } else if (player.show_target()) {
-            control.light = GetRGBTranslateColorShade(SKY_BLUE, MEDIUM);
-            control.dark  = GetRGBTranslateColorShade(SKY_BLUE, DARKER + kSlightlyDarkerColor);
+            control.light = GetRGBTranslateColorShade(Hue::SKY_BLUE, MEDIUM);
+            control.dark = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKER + kSlightlyDarkerColor);
             control.should_draw = true;
         }
         if (control.should_draw) {
@@ -631,11 +631,11 @@ void draw_sector_lines() {
         while ((x < implicit_cast<uint32_t>(viewport().right)) && (h > 0)) {
             RgbColor color;
             if (!division) {
-                color = GetRGBTranslateColorShade(GREEN, kSectorLineBrightness);
+                color = GetRGBTranslateColorShade(Hue::GREEN, kSectorLineBrightness);
             } else if (!(division & 0x3)) {
-                color = GetRGBTranslateColorShade(SKY_BLUE, kSectorLineBrightness);
+                color = GetRGBTranslateColorShade(Hue::SKY_BLUE, kSectorLineBrightness);
             } else {
-                color = GetRGBTranslateColorShade(BLUE, kSectorLineBrightness);
+                color = GetRGBTranslateColorShade(Hue::BLUE, kSectorLineBrightness);
             }
 
             // TODO(sfiera): +1 on bottom no longer needed.
@@ -654,11 +654,11 @@ void draw_sector_lines() {
         while ((x < implicit_cast<uint32_t>(viewport().bottom)) && (h > 0)) {
             RgbColor color;
             if (!division) {
-                color = GetRGBTranslateColorShade(GREEN, kSectorLineBrightness);
+                color = GetRGBTranslateColorShade(Hue::GREEN, kSectorLineBrightness);
             } else if (!(division & 0x3)) {
-                color = GetRGBTranslateColorShade(SKY_BLUE, kSectorLineBrightness);
+                color = GetRGBTranslateColorShade(Hue::SKY_BLUE, kSectorLineBrightness);
             } else {
-                color = GetRGBTranslateColorShade(BLUE, kSectorLineBrightness);
+                color = GetRGBTranslateColorShade(Hue::BLUE, kSectorLineBrightness);
             }
 
             // TODO(sfiera): +1 on right no longer needed.
@@ -727,11 +727,11 @@ void draw_arbitrary_sector_lines(
 
     while ((x < implicit_cast<uint32_t>(bounds.right)) && (h > 0)) {
         if (!division) {
-            color = GetRGBTranslateColorShade(GREEN, DARKER);
+            color = GetRGBTranslateColorShade(Hue::GREEN, DARKER);
         } else if (!(division & 0x3)) {
-            color = GetRGBTranslateColorShade(SKY_BLUE, DARKER);
+            color = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKER);
         } else {
-            color = GetRGBTranslateColorShade(BLUE, DARKER);
+            color = GetRGBTranslateColorShade(Hue::BLUE, DARKER);
         }
 
         rects.fill({x, bounds.top, x + 1, bounds.bottom}, color);
@@ -754,11 +754,11 @@ void draw_arbitrary_sector_lines(
 
     while ((x < implicit_cast<uint32_t>(bounds.bottom)) && (h > 0)) {
         if (!division) {
-            color = GetRGBTranslateColorShade(GREEN, DARKER);
+            color = GetRGBTranslateColorShade(Hue::GREEN, DARKER);
         } else if (!(division & 0x3)) {
-            color = GetRGBTranslateColorShade(SKY_BLUE, DARKER);
+            color = GetRGBTranslateColorShade(Hue::SKY_BLUE, DARKER);
         } else {
-            color = GetRGBTranslateColorShade(BLUE, DARKER);
+            color = GetRGBTranslateColorShade(Hue::BLUE, DARKER);
         }
 
         rects.fill({bounds.left, x, bounds.right, x + 1}, color);
@@ -880,8 +880,8 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
     RgbColor color, lightColor, darkColor;
     Rect     rrect;
 
-    int8_t hue = gBarIndicator[which].color;
-    Rect   bar(0, 0, kBarIndicatorWidth, kBarIndicatorHeight);
+    Hue  hue = gBarIndicator[which].hue;
+    Rect bar(0, 0, kBarIndicatorWidth, kBarIndicatorHeight);
     bar.offset(
             kBarIndicatorLeft + play_screen().right, gBarIndicator[which].top + instrument_top());
     if (graphicValue < kBarIndicatorHeight) {
@@ -922,7 +922,7 @@ void draw_build_time_bar() {
     const Rect clip = mini_build_time_rect();
 
     {
-        const RgbColor color = GetRGBTranslateColorShade(PALE_PURPLE, MEDIUM);
+        const RgbColor color = GetRGBTranslateColorShade(Hue::PALE_PURPLE, MEDIUM);
         draw_vbracket(rects, clip, color);
     }
 
@@ -930,13 +930,13 @@ void draw_build_time_bar() {
     bar.inset(2, 2);
 
     {
-        const RgbColor color = GetRGBTranslateColorShade(PALE_PURPLE, DARK);
+        const RgbColor color = GetRGBTranslateColorShade(Hue::PALE_PURPLE, DARK);
         rects.fill(bar, color);
     }
 
     if (value > 0) {
         bar.top += value;
-        const RgbColor color = GetRGBTranslateColorShade(PALE_PURPLE, LIGHT);
+        const RgbColor color = GetRGBTranslateColorShade(Hue::PALE_PURPLE, LIGHT);
         rects.fill(bar, color);
     }
 }
