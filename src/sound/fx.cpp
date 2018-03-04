@@ -223,7 +223,7 @@ void SoundFX::reset() {
 
 void SoundFX::load(int16_t id) {
     int whichSound = 0;
-    while ((sounds[whichSound].id != id) && (whichSound < sounds.size())) {
+    while ((whichSound < sounds.size()) && (sounds[whichSound].id != id)) {
         whichSound++;
     }
 
