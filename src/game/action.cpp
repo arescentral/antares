@@ -229,7 +229,7 @@ void KillAction::apply(
         Point* offset) const {
     bool destroy = false;
     switch (kind) {
-        case Kind::EXPIRE:
+        case KillKind::EXPIRE:
             if (subject.get()) {
                 focus = subject;
             } else {
@@ -237,7 +237,7 @@ void KillAction::apply(
             }
             break;
 
-        case Kind::DESTROY:
+        case KillKind::DESTROY:
             if (subject.get()) {
                 focus   = subject;
                 destroy = true;
@@ -246,7 +246,7 @@ void KillAction::apply(
             }
             break;
 
-        case Kind::NONE: break;
+        case KillKind::NONE: break;
     }
 
     // if the object is occupied by a human, eject him since he can't die
@@ -363,9 +363,9 @@ void PushAction::apply(
     }
 
     switch (kind) {
-        case Kind::STOP: focus->velocity = {Fixed::zero(), Fixed::zero()}; break;
+        case PushKind::STOP: focus->velocity = {Fixed::zero(), Fixed::zero()}; break;
 
-        case Kind::BOOST: {
+        case PushKind::BOOST: {
             Fixed fx, fy;
             GetRotPoint(&fx, &fy, focus->direction);
             focus->velocity.h += value * fx;
@@ -373,21 +373,21 @@ void PushAction::apply(
             break;
         }
 
-        case Kind::CRUISE: {
+        case PushKind::CRUISE: {
             Fixed fx, fy;
             GetRotPoint(&fx, &fy, focus->direction);
             focus->velocity = {value * fx, value * fy};
             break;
         }
 
-        case Kind::SET: {
+        case PushKind::SET: {
             Fixed fx, fy;
             GetRotPoint(&fx, &fy, subject->direction);
             focus->velocity = {value * fx, value * fy};
             break;
         }
 
-        case Kind::COLLIDE: {
+        case PushKind::COLLIDE: {
             if ((focus->baseType->mass <= Fixed::zero()) ||
                 (focus->maxVelocity <= Fixed::zero())) {
                 return;
@@ -406,7 +406,7 @@ void PushAction::apply(
             break;
         }
 
-        case Kind::DECELERATE: {
+        case PushKind::DECELERATE: {
             if ((focus->baseType->mass <= Fixed::zero()) ||
                 (focus->maxVelocity <= Fixed::zero())) {
                 return;
@@ -530,9 +530,9 @@ void MoveAction::apply(
         Point* offset) const {
     coordPointType newLocation;
     switch (origin) {
-        case Origin::LEVEL: newLocation = Translate_Coord_To_Level_Rotation(to.h, to.v); break;
-        case Origin::SUBJECT: newLocation = subject->location; break;
-        case Origin::OBJECT: newLocation = object->location; break;
+        case MoveOrigin::LEVEL: newLocation = Translate_Coord_To_Level_Rotation(to.h, to.v); break;
+        case MoveOrigin::SUBJECT: newLocation = subject->location; break;
+        case MoveOrigin::OBJECT: newLocation = object->location; break;
     }
     newLocation.h += focus->randomSeed.next(distance << 1) - distance;
     newLocation.v += focus->randomSeed.next(distance << 1) - distance;

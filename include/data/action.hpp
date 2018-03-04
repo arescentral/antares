@@ -26,6 +26,7 @@
 #include <vector>
 
 #include "data/enums.hpp"
+#include "data/field.hpp"
 #include "data/handle.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
@@ -36,15 +37,6 @@ namespace antares {
 class SpaceObject;
 struct Level;
 struct Level_Initial;
-
-template <typename T>
-struct Range {
-    T begin, end;
-
-    T range() const { return end - begin; }
-
-    static constexpr Range empty() { return {-1, -1}; }
-};
 
 //
 // Action:
@@ -224,18 +216,7 @@ struct KeyAction : public Action {
 };
 
 struct KillAction : public Action {
-    enum class Kind {
-        // Removes the focus without any further fanfare.
-        NONE = 0,
-
-        // Removes the subject without any further fanfare.
-        // Essentially, this is NONE, but always reflexive.
-        EXPIRE = 1,
-
-        // Removes the subject and executes its destroy action.
-        DESTROY = 2,
-    };
-    Kind kind;
+    KillKind kind;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
@@ -271,12 +252,7 @@ struct MorphAction : public Action {
 };
 
 struct MoveAction : public Action {
-    enum class Origin {
-        LEVEL,    // absolute coordinates, in level’s rotated frame of reference
-        SUBJECT,  // relative to subject
-        OBJECT,   // relative to object
-    };
-    Origin         origin;
+    MoveOrigin     origin;
     coordPointType to;
     int32_t        distance;
 
@@ -309,16 +285,8 @@ struct PayAction : public Action {
 };
 
 struct PushAction : public Action {
-    enum class Kind {
-        STOP,        // set focus’s velocity to 0
-        COLLIDE,     // impart velocity from subject like a collision (capped)
-        DECELERATE,  // decrease focus’s velocity (capped)
-        SET,         // set focus’s velocity to value in subject’s direction
-        BOOST,       // add to focus’s velocity in subject’s direction
-        CRUISE,      // set focus’s velocity in focus’s direction
-    };
-    Kind  kind;
-    Fixed value;
+    PushKind kind;
+    Fixed    value;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,

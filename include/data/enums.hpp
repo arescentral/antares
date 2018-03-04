@@ -41,11 +41,38 @@ enum class Hue {
     RED         = 15,
 };
 
+enum class KillKind {
+    // Removes the focus without any further fanfare.
+    NONE = 0,
+
+    // Removes the subject without any further fanfare.
+    // Essentially, this is NONE, but always reflexive.
+    EXPIRE = 1,
+
+    // Removes the subject and executes its destroy action.
+    DESTROY = 2,
+};
+
+enum class MoveOrigin {
+    LEVEL,    // absolute coordinates, in level’s rotated frame of reference
+    SUBJECT,  // relative to subject
+    OBJECT,   // relative to object
+};
+
 // Restricts actions based on the owners of the subject and object.
 enum class Owner {
     ANY       = 0,   // Always execute.
     SAME      = 1,   // Execute only if match.
     DIFFERENT = -1,  // Execute only if no match.
+};
+
+enum class PushKind {
+    STOP,        // set focus’s velocity to 0
+    COLLIDE,     // impart velocity from subject like a collision (capped)
+    DECELERATE,  // decrease focus’s velocity (capped)
+    SET,         // set focus’s velocity to value in subject’s direction
+    BOOST,       // add to focus’s velocity in subject’s direction
+    CRUISE,      // set focus’s velocity in focus’s direction
 };
 
 // Different screens on the minicomputer.
