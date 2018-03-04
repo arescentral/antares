@@ -90,7 +90,7 @@ static ANTARES_GLOBAL HotKeyState gHotKeyState = HOT_KEY_UP;
 static ANTARES_GLOBAL wall_time gHotKeyTime;
 static ANTARES_GLOBAL int       gHotKeyNum;
 
-static ANTARES_GLOBAL ZoomType gPreviousZoomMode;
+static ANTARES_GLOBAL Zoom gPreviousZoomMode;
 
 pn::string hot_key_suffix(Handle<SpaceObject> space_object) {
     int h = HotKey_GetFromObject(space_object);
@@ -117,8 +117,8 @@ void ResetPlayerShip(Handle<SpaceObject> which) {
     globals()->starfield.reset(g.ship);
     globals()->next_klaxon = game_ticks();
     g.key_mask             = 0;
-    g.zoom                 = kNearestFoeZoom;
-    gPreviousZoomMode      = kNearestFoeZoom;
+    g.zoom                 = Zoom::FOE;
+    gPreviousZoomMode      = Zoom::FOE;
 
     for (int h = 0; h < kHotKeyNum; h++) {
         globals()->hotKey[h].object   = SpaceObject::none();
@@ -156,7 +156,7 @@ static int key_num(uint32_t key) {
     return -1;
 }
 
-static void zoom_to(ZoomType zoom) {
+static void zoom_to(Zoom zoom) {
     if (g.zoom != zoom) {
         g.zoom = zoom;
         sys.sound.click();
@@ -164,11 +164,11 @@ static void zoom_to(ZoomType zoom) {
     }
 }
 
-static void zoom_shortcut(ZoomType zoom) {
+static void zoom_shortcut(Zoom zoom) {
     if (g.key_mask & kShortcutZoomMask) {
         return;
     }
-    ZoomType previous = gPreviousZoomMode;
+    Zoom previous     = gPreviousZoomMode;
     gPreviousZoomMode = g.zoom;
     if (g.zoom == zoom) {
         zoom_to(previous);
@@ -181,8 +181,8 @@ static void zoom_in() {
     if (g.key_mask & kZoomInKey) {
         return;
     }
-    if (g.zoom > kTimesTwoZoom) {
-        zoom_to(static_cast<ZoomType>(g.zoom - 1));
+    if (g.zoom > Zoom::DOUBLE) {
+        zoom_to(static_cast<Zoom>(static_cast<int>(g.zoom) - 1));
     }
 }
 
@@ -190,8 +190,8 @@ static void zoom_out() {
     if (g.key_mask & kZoomOutKey) {
         return;
     }
-    if (g.zoom < kSmallestZoom) {
-        zoom_to(static_cast<ZoomType>(g.zoom + 1));
+    if (g.zoom < Zoom::ALL) {
+        zoom_to(static_cast<Zoom>(static_cast<int>(g.zoom) + 1));
     }
 }
 
@@ -283,13 +283,13 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
     switch (key) {
         case kZoomOutKeyNum: zoom_out(); break;
         case kZoomInKeyNum: zoom_in(); break;
-        case kScale121KeyNum: zoom_shortcut(kActualSizeZoom); break;
-        case kScale122KeyNum: zoom_shortcut(kHalfSizeZoom); break;
-        case kScale124KeyNum: zoom_shortcut(kQuarterSizeZoom); break;
-        case kScale1216KeyNum: zoom_shortcut(kEighthSizeZoom); break;
-        case kScaleHostileKeyNum: zoom_shortcut(kNearestFoeZoom); break;
-        case kScaleObjectKeyNum: zoom_shortcut(kNearestAnythingZoom); break;
-        case kScaleAllKeyNum: zoom_shortcut(kSmallestZoom); break;
+        case kScale121KeyNum: zoom_shortcut(Zoom::ACTUAL); break;
+        case kScale122KeyNum: zoom_shortcut(Zoom::DOUBLE); break;
+        case kScale124KeyNum: zoom_shortcut(Zoom::QUARTER); break;
+        case kScale1216KeyNum: zoom_shortcut(Zoom::SIXTEENTH); break;
+        case kScaleHostileKeyNum: zoom_shortcut(Zoom::FOE); break;
+        case kScaleObjectKeyNum: zoom_shortcut(Zoom::OBJECT); break;
+        case kScaleAllKeyNum: zoom_shortcut(Zoom::ALL); break;
         case kTransferKeyNum: transfer_control(g.admiral, 0); break;
         case kMessageNextKeyNum: Messages::advance(); break;
         default:

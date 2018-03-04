@@ -43,7 +43,7 @@ class Messages {
     static void    replay();
     static int16_t current();
 
-    static void zoom(ZoomType zoom);
+    static void zoom(Zoom zoom);
     static void autopilot(bool on);
     static void shields_low();
     static void max_ships_built();

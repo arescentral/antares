@@ -413,7 +413,7 @@ struct WinAction : public Action {
 };
 
 struct ZoomAction : public Action {
-    int32_t value;
+    Zoom value;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,

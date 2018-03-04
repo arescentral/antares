@@ -529,7 +529,7 @@ static void calc_misc() {
                 uint64_t dist         = (vdiff * vdiff) + (hdiff * hdiff);
                 o->distanceFromPlayer = dist;
                 if ((dist < closestDist) && (o != g.ship)) {
-                    if (!((g.zoom == kNearestFoeZoom) && (o->owner == g.ship->owner))) {
+                    if (!((g.zoom == Zoom::FOE) && (o->owner == g.ship->owner))) {
                         closestDist = dist;
                         g.closest   = o;
                     }

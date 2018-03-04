@@ -278,8 +278,8 @@ void UpdateRadar(ticks unitsDone) {
 
     uint32_t bestScale = MIN_SCALE;
     switch (g.zoom) {
-        case kNearestFoeZoom:
-        case kNearestAnythingZoom: {
+        case Zoom::FOE:
+        case Zoom::OBJECT: {
             auto     anObject     = g.closest;
             uint64_t hugeDistance = anObject->distanceFromPlayer;
             if (hugeDistance == 0) {  // if this is true, then we haven't calced its distance
@@ -297,17 +297,17 @@ void UpdateRadar(ticks unitsDone) {
             bestScale = clamp<uint32_t>(bestScale, kMinimumAutoScale, SCALE_SCALE);
         } break;
 
-        case kActualSizeZoom: bestScale = SCALE_SCALE; break;
+        case Zoom::ACTUAL: bestScale = SCALE_SCALE; break;
 
-        case kEighthSizeZoom: bestScale = kOneEighthScale; break;
+        case Zoom::SIXTEENTH: bestScale = kOneEighthScale; break;
 
-        case kQuarterSizeZoom: bestScale = kOneQuarterScale; break;
+        case Zoom::QUARTER: bestScale = kOneQuarterScale; break;
 
-        case kHalfSizeZoom: bestScale = kOneHalfScale; break;
+        case Zoom::HALF: bestScale = kOneHalfScale; break;
 
-        case kTimesTwoZoom: bestScale = kTimesTwoScale; break;
+        case Zoom::DOUBLE: bestScale = kTimesTwoScale; break;
 
-        case kSmallestZoom: {
+        case Zoom::ALL: {
             auto     anObject = g.farthest;
             uint64_t tempWide = anObject->distanceFromPlayer;
             bestScale         = wsqrt(tempWide);
@@ -468,7 +468,7 @@ static void draw_money() {
 }
 
 void set_up_instruments() {
-    g.zoom = kNearestFoeZoom;
+    g.zoom = Zoom::FOE;
 
     MiniComputerDoCancel();  // i.e., go to main screen
     ResetInstruments();

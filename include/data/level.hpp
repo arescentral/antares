@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "data/action.hpp"
+#include "data/enums.hpp"
 #include "data/handle.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
@@ -387,7 +388,7 @@ struct Level::TimeCondition : Level::ConditionBase {
 //
 // Warning: not net-safe.
 struct Level::ZoomCondition : Level::ConditionBase {
-    int32_t      value;
+    Zoom         value;
     virtual bool is_true() const;
 };
 

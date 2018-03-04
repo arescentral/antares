@@ -417,7 +417,14 @@ bool read_disable_keys_from(pn::file_view in, KeyAction* key) {
     return in.read(&key->disable);
 }
 
-bool read_from(pn::file_view in, ZoomAction* zoom) { return in.read(&zoom->value); }
+bool read_from(pn::file_view in, ZoomAction* zoom) {
+    int32_t value;
+    if (!in.read(&value)) {
+        return false;
+    }
+    zoom->value = Zoom(value);
+    return true;
+}
 
 bool read_from(pn::file_view in, SelectAction* select) {
     int32_t screen;

@@ -299,12 +299,15 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
             break;
         }
 
-        case kZoomLevelCondition:
-            if (!sub.read(&condition->init<Level::ZoomCondition>()->value)) {
+        case kZoomLevelCondition: {
+            int32_t value;
+            if (!sub.read(&value)) {
                 return false;
             }
-            (*condition)->op = Level::ConditionBase::Op::EQ;
+            condition->init<Level::ZoomCondition>()->value = static_cast<Zoom>(value);
+            (*condition)->op                               = Level::ConditionBase::Op::EQ;
             break;
+        }
 
         case kVelocityLessThanEqualToCondition:
             if (!read_from(sub, &condition->init<Level::SpeedCondition>()->value)) {

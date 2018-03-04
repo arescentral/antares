@@ -22,6 +22,7 @@
 #include <queue>
 
 #include "config/keys.hpp"
+#include "data/enums.hpp"
 #include "data/handle.hpp"
 #include "data/level.hpp"
 #include "drawing/color.hpp"
@@ -39,17 +40,6 @@ const int32_t kLeftPanelWidth   = 128;
 const int32_t kRightPanelWidth  = 32;
 const int32_t kSmallScreenWidth = 640;
 const int32_t kRadarSize        = 110;
-
-enum ZoomType {
-    kTimesTwoZoom        = 0,
-    kActualSizeZoom      = 1,
-    kHalfSizeZoom        = 2,
-    kQuarterSizeZoom     = 3,
-    kEighthSizeZoom      = 4,
-    kNearestFoeZoom      = 5,
-    kNearestAnythingZoom = 6,
-    kSmallestZoom        = 7,
-};
 
 struct miniScreenLineType;
 struct miniComputerDataType {
@@ -119,7 +109,7 @@ struct GlobalState {
 
     miniComputerDataType mini;
 
-    ZoomType            zoom;
+    Zoom                zoom;
     Handle<SpaceObject> closest;   // Nearest object or hostile, depending on zoom.
     Handle<SpaceObject> farthest;  // Farthest object (sufficient for zoom-to-all).
 };

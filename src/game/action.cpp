@@ -670,7 +670,7 @@ void ZoomAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
     if (value != g.zoom) {
-        g.zoom = static_cast<ZoomType>(value);
+        g.zoom = value;
         sys.sound.click();
         Messages::zoom(g.zoom);
     }

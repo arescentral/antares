@@ -335,7 +335,9 @@ void Messages::set_status(pn::string_view status, uint8_t color) {
     g.status_label->set_age(kStatusLabelAge);
 }
 
-void Messages::zoom(ZoomType zoom) { set_status(sys.messages.at(zoom), kStatusLabelColor); }
+void Messages::zoom(Zoom zoom) {
+    set_status(sys.messages.at(static_cast<int>(zoom)), kStatusLabelColor);
+}
 void Messages::autopilot(bool on) {
     set_status(sys.messages.at(on ? kAutoPilotOnString : kAutoPilotOffString), kStatusLabelColor);
 }
