@@ -131,8 +131,8 @@ struct CloakAction : public Action {
 };
 
 struct ConditionAction : public Action {
-    Range<int32_t> enable;
-    Range<int32_t> disable;
+    Range<int64_t> enable;
+    Range<int64_t> disable;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,

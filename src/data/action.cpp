@@ -162,6 +162,22 @@ static sfz::optional<int64_t> optional_int(path_value x) {
     }
 }
 
+static int64_t required_int(path_value x) {
+    if (x.value().is_int()) {
+        return x.value().as_int();
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be int", x.path()).c_str());
+    }
+}
+
+static Fixed required_fixed(path_value x) {
+    if (x.value().is_float()) {
+        return Fixed::from_float(x.value().as_float());
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be float", x.path()).c_str());
+    }
+}
+
 static sfz::optional<pn::string_view> optional_string(path_value x) {
     if (x.value().is_null()) {
         return sfz::nullopt;
@@ -226,6 +242,35 @@ static sfz::optional<Owner> optional_owner(path_value x) {
             x, {{"any", Owner::ANY}, {"same", Owner::SAME}, {"different", Owner::DIFFERENT}});
 }
 
+static sfz::optional<Range<int64_t>> optional_int_range(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_int()) {
+        int64_t begin = x.value().as_int();
+        return sfz::make_optional(Range<int64_t>{begin, begin + 1});
+    } else if (x.value().is_map()) {
+        int64_t begin = required_int(x.get("begin"));
+        int64_t end   = required_int(x.get("end"));
+        return sfz::make_optional(Range<int64_t>{begin, end});
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null, int, or map", x.path()).c_str());
+    }
+}
+
+static Range<Fixed> required_fixed_range(path_value x) {
+    if (x.value().is_float()) {
+        Fixed begin = Fixed::from_float(x.value().as_float());
+        Fixed end   = Fixed::from_val(begin.val() + 1);
+        return {begin, end};
+    } else if (x.value().is_map()) {
+        Fixed begin = required_fixed(x.get("begin"));
+        Fixed end   = required_fixed(x.get("end"));
+        return {begin, end};
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be float or map", x.path()).c_str());
+    }
+}
+
 static sfz::optional<int32_t> optional_object_attributes(path_value x) {
     if (x.value().is_null()) {
         return sfz::nullopt;
@@ -281,12 +326,39 @@ static std::unique_ptr<Action> cloak_action(path_value x) {
     return std::unique_ptr<CloakAction>(new CloakAction);
 }
 
+static std::unique_ptr<Action> condition_action(path_value x) {
+    std::unique_ptr<ConditionAction> a(new ConditionAction);
+    a->enable  = optional_int_range(x.get("enable")).value_or(Range<int64_t>::empty());
+    a->disable = optional_int_range(x.get("disable")).value_or(Range<int64_t>::empty());
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> disable_action(path_value x) {
+    std::unique_ptr<DisableAction> a(new DisableAction);
+    a->value = required_fixed_range(x.get("value"));
+    return std::move(a);
+}
+
 static std::unique_ptr<Action> hold_action(path_value x) {
     return std::unique_ptr<HoldPositionAction>(new HoldPositionAction);
 }
 
 static std::unique_ptr<Action> order_action(path_value x) {
     return std::unique_ptr<OrderAction>(new OrderAction);
+}
+
+static std::unique_ptr<Action> spin_action(path_value x) {
+    std::unique_ptr<SpinAction> a(new SpinAction);
+    a->value = required_fixed_range(x.get("value"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> thrust_action(path_value x) {
+    std::unique_ptr<ThrustAction> a(new ThrustAction);
+    a->relative = optional_bool(x.get("relative"));
+    a->value    = required_fixed_range(x.get("value"));
+    a->relative = false;  // TODO(sfiera): verify that this is correct.
+    return std::move(a);
 }
 
 static std::unique_ptr<Action> warp_action(path_value x) {
@@ -356,26 +428,6 @@ bool read_from(pn::file_view in, RevealAction* reveal) {
     return true;
 }
 
-bool read_from(pn::file_view in, DisableAction* disable) {
-    int32_t minimum, range;
-    if (!in.read(pn::pad(1), &minimum, &range)) {
-        return false;
-    }
-    disable->value.begin = Fixed::from_val(minimum);
-    disable->value.end   = Fixed::from_val(minimum + range);
-    return true;
-}
-
-bool read_from(pn::file_view in, SpinAction* spin) {
-    int32_t minimum, range;
-    if (!in.read(pn::pad(1), &minimum, &range)) {
-        return false;
-    }
-    spin->value.begin = Fixed::from_val(minimum);
-    spin->value.end   = Fixed::from_val(minimum + range);
-    return true;
-}
-
 bool read_from(pn::file_view in, bool reflexive, PushAction* push) {
     uint8_t relative;
     int32_t value;
@@ -417,17 +469,6 @@ bool read_from(pn::file_view in, CapSpeedAction* cap_speed) {
     return true;
 }
 
-bool read_from(pn::file_view in, ThrustAction* thrust) {
-    int32_t minimum, range;
-    if (!in.read(pn::pad(1), &minimum, &range)) {
-        return false;
-    }
-    thrust->value.begin = Fixed::from_val(minimum);
-    thrust->value.end   = Fixed::from_val(minimum + range);
-    thrust->relative    = false;
-    return true;
-}
-
 bool read_from(pn::file_view in, MorphAction* morph) {
     uint8_t keep_ammo;
     int32_t base;
@@ -449,22 +490,6 @@ bool read_from(pn::file_view in, CaptureAction* capture) {
         capture->player.reset();
     } else {
         capture->player.emplace(Handle<Admiral>(admiral));
-    }
-    return true;
-}
-
-bool read_from(pn::file_view in, ConditionAction* condition) {
-    uint8_t disabled;
-    int32_t first, count_minus_1;
-    if (!in.read(&disabled, &first, &count_minus_1)) {
-        return false;
-    }
-    if (disabled) {
-        condition->enable  = Range<int32_t>::empty();
-        condition->disable = {first, first + std::max(count_minus_1, 0) + 1};
-    } else {
-        condition->enable  = {first, first + std::max(count_minus_1, 0) + 1};
-        condition->disable = Range<int32_t>::empty();
     }
     return true;
 }
@@ -654,11 +679,11 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
         case kReleaseEnergy:
         case kNoAction: init<NoAction>(action); return true;
 
-        case kSetDestination: init<OrderAction>(action); return true;
+        case kSetDestination: return true;
         case kActivateSpecial: init<FireAction>(action)->which = Weapon::SPECIAL; return true;
-        case kActivatePulse: init<FireAction>(action)->which = Weapon::PULSE; return true;
-        case kActivateBeam: init<FireAction>(action)->which = Weapon::BEAM; return true;
-        case kNilTarget: init<HoldPositionAction>(action); return true;
+        case kActivatePulse: init<FireAction>(action)->which   = Weapon::PULSE; return true;
+        case kActivateBeam: init<FireAction>(action)->which    = Weapon::BEAM; return true;
+        case kNilTarget: return true;
 
         case kCreateObject: return read_from(sub, init<CreateAction>(action), false);
         case kCreateObjectSetDest: return read_from(sub, init<CreateAction>(action), true);
@@ -680,19 +705,19 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
                 case kAlterOrderKeyTag: init<NoAction>(action); return true;
                 case kAlterEngageKeyTag: init<NoAction>(action); return true;
 
-                case kAlterCloak: init<CloakAction>(action); return true;
+                case kAlterCloak: return true;
 
                 case kAlterDamage: return read_from(sub, init<HealAction>(action));
                 case kAlterEnergy: return read_from(sub, init<EnergizeAction>(action));
                 case kAlterHidden: return read_from(sub, init<RevealAction>(action));
-                case kAlterSpin: return read_from(sub, init<SpinAction>(action));
-                case kAlterOffline: return read_from(sub, init<DisableAction>(action));
+                case kAlterSpin: return true;
+                case kAlterOffline: return true;
                 case kAlterVelocity: return read_from(sub, reflexive, init<PushAction>(action));
                 case kAlterMaxVelocity: return read_from(sub, init<CapSpeedAction>(action));
-                case kAlterThrust: return read_from(sub, init<ThrustAction>(action));
+                case kAlterThrust: return true;
                 case kAlterBaseType: return read_from(sub, init<MorphAction>(action));
                 case kAlterOwner: return read_from(sub, init<CaptureAction>(action));
-                case kAlterConditionTrueYet: return read_from(sub, init<ConditionAction>(action));
+                case kAlterConditionTrueYet: return true;
                 case kAlterOccupation: return read_from(sub, init<OccupyAction>(action));
                 case kAlterAbsoluteCash: return read_from(sub, init<PayAction>(action));
                 case kAlterAge: return read_from(sub, init<AgeAction>(action));
@@ -774,11 +799,11 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     } else if (type == "cloak") {
         a = cloak_action(x);
     } else if (type == "condition") {
-        // a = condition_action(x);
+        a = condition_action(x);
     } else if (type == "create") {
         // a = create_action(x);
     } else if (type == "disable") {
-        // a = disable_action(x);
+        a = disable_action(x);
     } else if (type == "energize") {
         // a = energize_action(x);
     } else if (type == "equip") {
@@ -822,9 +847,9 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     } else if (type == "spark") {
         // a = spark_action(x);
     } else if (type == "spin") {
-        // a = spin_action(x);
+        a = spin_action(x);
     } else if (type == "thrust") {
-        // a = thrust_action(x);
+        a = thrust_action(x);
     } else if (type == "warp") {
         a = warp_action(x);
     } else if (type == "win") {
