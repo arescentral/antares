@@ -585,8 +585,20 @@ std::vector<std::unique_ptr<const Action>> read_actions(int begin, int end) {
     std::vector<std::unique_ptr<const Action>> actions;
     actions.resize(end - begin);
     for (int i : sfz::range(begin, end)) {
-        Resource r = Resource::path(pn::format("actions/{0}.bin", i));
-        read_from(r.data().open(), &actions[i - begin]);
+        pn::string path = pn::format("actions/{0}.pn", i);
+        try {
+            Resource   r = Resource::path(path);
+            pn::value  x;
+            pn_error_t e;
+            if (!pn::parse(r.data().open(), x, &e)) {
+                throw std::runtime_error(
+                        pn::format("{1}:{2}: {3}", e.lineno, e.column, pn_strerror(e.code))
+                                .c_str());
+            }
+            read_from(x.as_map().get("bin").as_data().open(), &actions[i - begin]);
+        } catch (...) {
+            std::throw_with_nested(std::runtime_error(path.c_str()));
+        }
     }
     return actions;
 }
