@@ -277,6 +277,22 @@ static sfz::optional<int32_t> optional_object_attributes(path_value x) {
     }
 }
 
+static std::unique_ptr<Action> cloak_action(path_value x) {
+    return std::unique_ptr<CloakAction>(new CloakAction);
+}
+
+static std::unique_ptr<Action> hold_action(path_value x) {
+    return std::unique_ptr<HoldPositionAction>(new HoldPositionAction);
+}
+
+static std::unique_ptr<Action> order_action(path_value x) {
+    return std::unique_ptr<OrderAction>(new OrderAction);
+}
+
+static std::unique_ptr<Action> warp_action(path_value x) {
+    return std::unique_ptr<WarpAction>(new WarpAction);
+}
+
 bool read_from(pn::file_view in, CreateAction* create, bool inherit) {
     int32_t base_type;
     int32_t count_minimum, count_range;
@@ -737,9 +753,6 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     }
     path_value x{x0};
 
-    pn::string_view type = required_string(x.get("type"));
-    static_cast<void>(type);
-
     uint8_t  verb, reflexive;
     pn::data section;
     section.resize(24);
@@ -747,6 +760,79 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     if (!(x.get("bin").value().as_data().open().read(&verb, &reflexive, pn::pad(22), &section) &&
           read_argument(verb << 8, reflexive, &a, section.open()))) {
         throw std::runtime_error("read failed");
+    }
+
+    pn::string_view type = required_string(x.get("type"));
+    if (type == "age") {
+        // a = age_action(x);
+    } else if (type == "assume") {
+        // a = assume_action(x);
+    } else if (type == "cap-speed") {
+        // a = cap_speed_action(x);
+    } else if (type == "capture") {
+        // a = capture_action(x);
+    } else if (type == "cloak") {
+        a = cloak_action(x);
+    } else if (type == "condition") {
+        // a = condition_action(x);
+    } else if (type == "create") {
+        // a = create_action(x);
+    } else if (type == "disable") {
+        // a = disable_action(x);
+    } else if (type == "energize") {
+        // a = energize_action(x);
+    } else if (type == "equip") {
+        // a = equip_action(x);
+    } else if (type == "fire") {
+        // a = fire_action(x);
+    } else if (type == "flash") {
+        // a = flash_action(x);
+    } else if (type == "heal") {
+        // a = heal_action(x);
+    } else if (type == "hold") {
+        a = hold_action(x);
+    } else if (type == "key") {
+        // a = key_action(x);
+    } else if (type == "kill") {
+        // a = kill_action(x);
+    } else if (type == "land") {
+        // a = land_action(x);
+    } else if (type == "message") {
+        // a = message_action(x);
+    } else if (type == "morph") {
+        // a = morph_action(x);
+    } else if (type == "move") {
+        // a = move_action(x);
+    } else if (type == "occupy") {
+        // a = occupy_action(x);
+    } else if (type == "order") {
+        a = order_action(x);
+    } else if (type == "pay") {
+        // a = pay_action(x);
+    } else if (type == "push") {
+        // a = push_action(x);
+    } else if (type == "reveal") {
+        // a = reveal_action(x);
+    } else if (type == "score") {
+        // a = score_action(x);
+    } else if (type == "select") {
+        // a = select_action(x);
+    } else if (type == "sound") {
+        // a = sound_action(x);
+    } else if (type == "spark") {
+        // a = spark_action(x);
+    } else if (type == "spin") {
+        // a = spin_action(x);
+    } else if (type == "thrust") {
+        // a = thrust_action(x);
+    } else if (type == "warp") {
+        a = warp_action(x);
+    } else if (type == "win") {
+        // a = win_action(x);
+    } else if (type == "zoom") {
+        // a = zoom_action(x);
+    } else {
+        throw std::runtime_error(pn::format("unknown type: {0}", type).c_str());
     }
 
     if (a) {
