@@ -99,7 +99,7 @@ struct GlobalState {
     bool            game_over;     // True if an admiral won or lost the level.
     game_ticks      game_over_at;  // The time to stop the game (ignored unless game_over).
     Handle<Admiral> victor;        // The winner (or none).
-    int             next_level;    // Next level (or -1 for none).
+    Handle<Level>   next_level;    // Next level (or Level::none() for none).
     pn::string      victory_text;  // Text to show in debriefing.
 
     ticks                    radar_count;  // Counts down to a radar pulse every 5/6 seconds.

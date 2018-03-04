@@ -368,7 +368,7 @@ void GamePlay::become_front() {
                 case PlayAgainScreen::QUIT:
                     *_game_result  = QUIT_GAME;
                     g.game_over    = true;
-                    g.next_level   = -1;
+                    g.next_level   = Level::none();
                     g.victory_text = "";
                     stack()->pop(this);
                     break;
@@ -376,7 +376,7 @@ void GamePlay::become_front() {
                 case PlayAgainScreen::RESTART:
                     *_game_result  = RESTART_GAME;
                     g.game_over    = true;
-                    g.next_level   = -1;
+                    g.next_level   = Level::none();
                     g.victory_text = "";
                     stack()->pop(this);
                     break;
@@ -387,7 +387,7 @@ void GamePlay::become_front() {
                     *_game_result  = WIN_GAME;
                     g.game_over    = true;
                     g.victor       = g.admiral;
-                    g.next_level   = g.level->chapter_number() + 1;
+                    g.next_level   = Handle<Level>{g.level->chapter_number()};
                     g.victory_text = "";
                     stack()->pop(this);
                     break;

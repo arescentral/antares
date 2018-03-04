@@ -93,7 +93,7 @@ void SoloGame::handle_game_result() {
             if (!epilogue.empty()) {
                 // normal scrolltext song
                 int scroll_song = 4002;
-                if (g.next_level == -1) {
+                if (g.next_level == Level::none()) {
                     // we win but no next level? Play triumph song
                     scroll_song = 4003;
                 }
@@ -126,12 +126,11 @@ void SoloGame::epilogue_done() {
     _level = Level::none();
     _state = QUIT;
 
-    if (g.next_level > 0) {
-        Handle<Level> next_level{g.next_level - 1};
-        const int32_t chapter = next_level->chapter_number();
+    if (g.next_level != Level::none()) {
+        const int32_t chapter = g.next_level->chapter_number();
         if (chapter >= 0) {
             Ledger::ledger()->unlock_chapter(chapter);
-            _level = next_level;
+            _level = g.next_level;
             _state = START_LEVEL;
         }
     }

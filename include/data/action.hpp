@@ -33,6 +33,7 @@
 namespace antares {
 
 class SpaceObject;
+struct Level;
 struct Level_Initial;
 
 template <typename T>
@@ -405,7 +406,7 @@ struct WarpAction : public Action {
 
 struct WinAction : public Action {
     sfz::optional<Handle<Admiral>> player;  // victor; absent = owner of focus
-    sfz::optional<int32_t>         next;    // next chapter to play; absent = none
+    sfz::optional<Handle<Level>>   next;    // next chapter to play; absent = none
     pn::string                     text;    // "debriefing" text
 
     virtual void apply(

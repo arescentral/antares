@@ -187,7 +187,7 @@ LoadState start_construct_level(Handle<Level> level) {
     }
 
     g.victor       = Admiral::none();
-    g.next_level   = -1;
+    g.next_level   = Level::none();
     g.victory_text = "";
 
     SetMiniScreenStatusStrList(g.level->score_strings);
@@ -367,7 +367,7 @@ void construct_level(Handle<Level> level, LoadState* state) {
     return;
 }
 
-void DeclareWinner(Handle<Admiral> whichPlayer, int32_t nextLevel, pn::string_view text) {
+void DeclareWinner(Handle<Admiral> whichPlayer, Handle<Level> nextLevel, pn::string_view text) {
     if (!whichPlayer.get()) {
         // if there's no winner, we want to exit immediately
         g.next_level   = nextLevel;
