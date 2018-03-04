@@ -383,31 +383,17 @@ std::vector<Level::Condition> read_conditions(int begin, int end) {
     return conditions;
 }
 
-bool read_from(pn::file_view in, Level::Briefing* brief_point) {
-    uint8_t kind;
-    int16_t title_id, title_index, content_id;
-    int32_t object;
-    if (!in.read(&kind, pn::pad(1), &object, pn::pad(12), &title_id, &title_index, &content_id)) {
-        return false;
+static Level::Briefing briefing(pn::value_cref x0) {
+    if (!x0.is_map()) {
+        throw std::runtime_error("must be map");
     }
+    path_value x{x0};
 
-    if (kind == 1) {
-        brief_point->object = Handle<Level::Initial>(object);
-    } else {
-        brief_point->object = Level::Initial::none();
-    }
-
-    try {
-        brief_point->title = Resource::strings(title_id).at(title_index - 1).copy();
-    } catch (std::exception& e) {
-        brief_point->title = "";
-    }
-    try {
-        brief_point->content = Resource::text(content_id);
-    } catch (std::exception& e) {
-        brief_point->content = "";
-    }
-    return true;
+    Level::Briefing b;
+    b.object  = optional_initial(x.get("object")).value_or(Level::Initial::none());
+    b.title   = required_string(x.get("title")).copy();
+    b.content = required_string(x.get("content")).copy();
+    return b;
 }
 
 std::vector<Level::Briefing> read_briefings(int begin, int end) {
@@ -418,8 +404,20 @@ std::vector<Level::Briefing> read_briefings(int begin, int end) {
     std::vector<Level::Briefing> briefings;
     briefings.resize(end - begin);
     for (int i : sfz::range(begin, end)) {
-        Resource r = Resource::path(pn::format("briefings/{0}.bin", i));
-        read_from(r.data().open(), &briefings[i - begin]);
+        pn::string path = pn::format("briefings/{0}.pn", i);
+        try {
+            Resource   r = Resource::path(path);
+            pn::value  x;
+            pn_error_t e;
+            if (!pn::parse(r.data().open(), x, &e)) {
+                throw std::runtime_error(
+                        pn::format("{1}:{2}: {3}", e.lineno, e.column, pn_strerror(e.code))
+                                .c_str());
+            }
+            briefings[i - begin] = briefing(x);
+        } catch (...) {
+            std::throw_with_nested(std::runtime_error(path.c_str()));
+        }
     }
     return briefings;
 }
