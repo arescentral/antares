@@ -149,7 +149,9 @@ void StyledText::set_retro_text(pn::string_view text) {
         throw std::runtime_error(pn::format("not enough input for special code.").c_str());
     }
 
-    _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
+    if (_chars.empty() || (_chars.back().special != LINE_BREAK)) {
+        _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
+    }
 
     wrap_to(std::numeric_limits<int>::max(), 0, 0);
 }
@@ -209,7 +211,10 @@ void StyledText::set_interface_text(pn::string_view text) {
                 break;
         }
     }
-    _chars.push_back(StyledChar('\n', LINE_BREAK, f, b));
+
+    if (_chars.empty() || (_chars.back().special != LINE_BREAK)) {
+        _chars.push_back(StyledChar('\n', LINE_BREAK, f, b));
+    }
 
     wrap_to(std::numeric_limits<int>::max(), 0, 0);
 }

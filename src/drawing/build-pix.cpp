@@ -92,26 +92,26 @@ class PixDraw {
 }  // namespace
 
 BuildPix::BuildPix(pn::string_view text, int width) : _size({width, 0}) {
-    bool               in_section_header = (text.size() >= 2) && (text.substr(0, 2) == "#+");
-    size_t             start             = 0;
-    const size_t       end               = text.size();
-    vector<pn::string> raw_lines;
+    bool                    in_section_header = (text.size() >= 2) && (text.substr(0, 2) == "#+");
+    size_t                  start             = 0;
+    const size_t            end               = text.size();
+    vector<pn::string_view> raw_lines;
     for (size_t i = start; i != end; ++i) {
         if (((end - i) >= 3) && (text.substr(i, 3) == "\n#+")) {
-            raw_lines.emplace_back(text.substr(start, i - start).copy());
+            raw_lines.emplace_back(text.substr(start, i - start));
             start             = i + 1;
             in_section_header = true;
         } else if (in_section_header && (text.data()[i] == '\n')) {
-            raw_lines.emplace_back(text.substr(start, i - start).copy());
+            raw_lines.emplace_back(text.substr(start, i - start));
             start             = i + 1;
             in_section_header = false;
         }
     }
     if (start != end) {
-        raw_lines.emplace_back(text.substr(start).copy());
+        raw_lines.emplace_back(text.substr(start));
     }
 
-    for (const auto& line : raw_lines) {
+    for (pn::string_view line : raw_lines) {
         if (line.size() >= 2 && line.substr(0, 2) == "#+") {
             if (line.size() > 2) {
                 if (line.data()[2] == 'B') {
@@ -140,7 +140,11 @@ BuildPix::BuildPix(pn::string_view text, int width) : _size({width, 0}) {
             unique_ptr<StyledText> styled(new StyledText(sys.fonts.title));
             auto                   red = GetRGBTranslateColorShade(RED, VERY_LIGHT);
             styled->set_fore_color(red);
-            styled->set_retro_text(line);
+            if (line.data() == raw_lines.back().data()) {
+                styled->set_retro_text(line);
+            } else {
+                styled->set_retro_text(pn::format("{0}\n", line));
+            }
             styled->wrap_to(_size.width - 11, 0, 2);
             _lines.push_back(Line{Line::TEXT, nullptr, std::move(styled)});
         }
