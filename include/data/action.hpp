@@ -77,7 +77,6 @@ struct Action {
 
     static const size_t byte_size = 48;
 };
-bool read_from(pn::file_view in, std::unique_ptr<const Action>* action);
 
 std::vector<std::unique_ptr<const Action>> read_actions(int begin, int end);
 

@@ -89,6 +89,194 @@ enum alterVerbIDType {
     kAlterAbsoluteLocation = kAlter | 26,
 };
 
+class path_value {
+    enum class Kind { ROOT, KEY, INDEX };
+
+  public:
+    path_value(pn::value_cref x) : _kind{Kind::ROOT}, _value{x} {}
+
+    pn::value_cref value() const { return _value; }
+
+    path_value get(pn::string_view key) const {
+        return path_value{this, Kind::KEY, key, 0, _value.as_map().get(key)};
+    }
+    path_value get(int64_t index) const {
+        return path_value{this, Kind::INDEX, pn::string_view{}, index,
+                          array_get(_value.as_array(), index)};
+    }
+
+    pn::string path() const {
+        if (_parent && (_parent->_kind != Kind::ROOT)) {
+            if (_kind == Kind::KEY) {
+                return pn::format("{0}.{1}", _parent->path(), _key);
+            } else {
+                return pn::format("{0}[{1}]", _parent->path(), _index);
+            }
+        } else {
+            if (_kind == Kind::KEY) {
+                return _key.copy();
+            } else {
+                return pn::format("[{0}]", _index);
+            }
+        }
+    }
+
+  private:
+    static pn::value_cref array_get(pn::array_cref a, int64_t index) {
+        if ((0 <= index) && (index < a.size())) {
+            return a[index];
+        } else {
+            return pn::value_cref{&pn_null};
+        }
+    }
+
+    path_value(
+            const path_value* parent, Kind kind, pn::string_view key, int64_t index,
+            pn::value_cref value)
+            : _parent{parent}, _kind{kind}, _key{key}, _index{index}, _value{value} {}
+
+    const path_value* _parent = nullptr;
+    Kind              _kind;
+    pn::string_view   _key;
+    int64_t           _index;
+    pn::value_cref    _value;
+};
+
+static sfz::optional<bool> optional_bool(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_bool()) {
+        return sfz::make_optional(x.value().as_bool());
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or bool", x.path()).c_str());
+    }
+}
+
+static sfz::optional<int64_t> optional_int(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_int()) {
+        return sfz::make_optional(x.value().as_int());
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or int", x.path()).c_str());
+    }
+}
+
+static sfz::optional<pn::string_view> optional_string(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_string()) {
+        return sfz::make_optional(x.value().as_string());
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be string", x.path()).c_str());
+    }
+}
+
+static pn::string_view required_string(path_value x) {
+    if (x.value().is_string()) {
+        return x.value().as_string();
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be string", x.path()).c_str());
+    }
+}
+
+template <typename T, int N>
+static sfz::optional<T> optional_enum(
+        path_value x, const std::pair<pn::string_view, T> (&values)[N]) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_string()) {
+        pn::string_view s = x.value().as_string();
+        for (auto kv : values) {
+            if (s == kv.first) {
+                sfz::optional<T> t;
+                t.emplace(kv.second);
+                return t;
+            }
+        }
+    }
+
+    pn::array keys;
+    for (auto kv : values) {
+        keys.push_back(kv.first.copy());
+    }
+    throw std::runtime_error(pn::format("{0}: must be one of {1}", x.path(), keys).c_str());
+}
+
+static sfz::optional<ticks> optional_ticks(path_value x) {
+    sfz::optional<int64_t> i = optional_int(x);
+    if (i.has_value()) {
+        return sfz::make_optional(ticks(*i));
+    } else {
+        return sfz::nullopt;
+    }
+}
+
+static sfz::optional<Handle<Level::Initial>> optional_initial(path_value x) {
+    sfz::optional<int64_t> i = optional_int(x);
+    if (i.has_value()) {
+        return sfz::make_optional(Handle<Level::Initial>(*i));
+    } else {
+        return sfz::nullopt;
+    }
+}
+
+static sfz::optional<Owner> optional_owner(path_value x) {
+    return optional_enum<Owner>(
+            x, {{"any", Owner::ANY}, {"same", Owner::SAME}, {"different", Owner::DIFFERENT}});
+}
+
+static sfz::optional<int32_t> optional_object_attributes(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_map()) {
+        static const pn::string_view flags[32] = {"can_turn",
+                                                  "can_be_engaged",
+                                                  "has_direction_goal",
+                                                  "is_remote",
+                                                  "is_human_controlled",
+                                                  "is_beam",
+                                                  "does_bounce",
+                                                  "is_self_animated",
+                                                  "shape_from_direction",
+                                                  "is_player_ship",
+                                                  "can_be_destination",
+                                                  "can_engage",
+                                                  "can_evade",
+                                                  "can_accept_messages",
+                                                  "can_accept_build",
+                                                  "can_accept_destination",
+                                                  "autotarget",
+                                                  "animation_cycle",
+                                                  "can_collide",
+                                                  "can_be_hit",
+                                                  "is_destination",
+                                                  "hide_effect",
+                                                  "release_energy_on_death",
+                                                  "hated",
+                                                  "occupies_space",
+                                                  "static_destination",
+                                                  "can_be_evaded",
+                                                  "neutral_death",
+                                                  "is_guided",
+                                                  "appear_on_radar",
+                                                  "bit31",
+                                                  "on_autopilot"};
+
+        int32_t bit    = 0x00000001;
+        int32_t result = 0x00000000;
+        for (pn::string_view flag : flags) {
+            if (optional_bool(x.get(flag)).value_or(false)) {
+                result |= bit;
+            }
+            bit <<= 1;
+        }
+        return sfz::make_optional(+result);
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
+    }
+}
+
 bool read_from(pn::file_view in, CreateAction* create, bool inherit) {
     int32_t base_type;
     int32_t count_minimum, count_range;
@@ -541,41 +729,44 @@ Owner owner_cast(T t) {
     return owner_cast(Owner::ANY);
 }
 
-}  // namespace
+std::unique_ptr<Action> action(pn::value_cref x0) {
+    if (x0.is_null()) {
+        return std::unique_ptr<Action>(new NoAction);
+    } else if (!x0.is_map()) {
+        throw std::runtime_error("must be null or map");
+    }
+    path_value x{x0};
 
-bool read_from(pn::file_view in, std::unique_ptr<const Action>* action) {
+    pn::string_view type = required_string(x.get("type"));
+    static_cast<void>(type);
+
     uint8_t  verb, reflexive;
-    uint32_t inclusive_filter, exclusive_filter;
-    uint32_t delay;
-    int16_t  owner, subject_override, object_override;
     pn::data section;
     section.resize(24);
     std::unique_ptr<Action> a;
-    if (!(in.read(&verb, &reflexive, &inclusive_filter, &exclusive_filter, &owner, &delay,
-                  &subject_override, &object_override, pn::pad(4), &section) &&
+    if (!(x.get("bin").value().as_data().open().read(&verb, &reflexive, pn::pad(22), &section) &&
           read_argument(verb << 8, reflexive, &a, section.open()))) {
-        return false;
+        throw std::runtime_error("read failed");
     }
 
     if (a) {
-        a->reflexive        = reflexive;
-        a->inclusive_filter = inclusive_filter;
-        if (exclusive_filter == 0xffffffff) {
-            static const char hex[] = "0123456789abcdef";
-            int               tag   = (inclusive_filter & kLevelKeyTag) >> kLevelKeyTagShift;
-            a->level_key_tag        = pn::rune(hex[tag]).copy();
-            a->inclusive_filter     = 0;
-        } else {
-            a->level_key_tag = "";
-        }
-        a->owner                  = owner_cast(owner);
-        a->delay                  = ticks(delay);
-        a->initialSubjectOverride = Handle<Level::Initial>(subject_override);
-        a->initialDirectOverride  = Handle<Level::Initial>(object_override);
-        *action                   = std::move(a);
+        a->reflexive = optional_bool(x.get("reflexive")).value_or(false);
+
+        a->inclusive_filter = optional_object_attributes(x.get("inclusive_filter")).value_or(0);
+        a->level_key_tag    = optional_string(x.get("level_key_filter")).value_or("").copy();
+
+        a->owner = optional_owner(x.get("owner")).value_or(Owner::ANY);
+        a->delay = optional_ticks(x.get("delay")).value_or(ticks(0));
+
+        a->initialSubjectOverride =
+                optional_initial(x.get("initial_subject")).value_or(Level::Initial::none());
+        a->initialDirectOverride =
+                optional_initial(x.get("initial_object")).value_or(Level::Initial::none());
     }
-    return true;
+    return a;
 }
+
+}  // namespace
 
 std::vector<std::unique_ptr<const Action>> read_actions(int begin, int end) {
     if (end <= begin) {
@@ -595,7 +786,7 @@ std::vector<std::unique_ptr<const Action>> read_actions(int begin, int end) {
                         pn::format("{1}:{2}: {3}", e.lineno, e.column, pn_strerror(e.code))
                                 .c_str());
             }
-            read_from(x.as_map().get("bin").as_data().open(), &actions[i - begin]);
+            actions[i - begin] = action(x);
         } catch (...) {
             std::throw_with_nested(std::runtime_error(path.c_str()));
         }
