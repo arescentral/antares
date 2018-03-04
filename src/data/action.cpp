@@ -220,6 +220,7 @@ bool read_from(pn::file_view in, ThrustAction* thrust) {
     }
     thrust->value.begin = Fixed::from_val(minimum);
     thrust->value.end   = Fixed::from_val(minimum + range);
+    thrust->relative    = false;
     return true;
 }
 
@@ -563,6 +564,7 @@ bool read_from(pn::file_view in, std::unique_ptr<const Action>* action) {
             static const char hex[] = "0123456789abcdef";
             int               tag   = (inclusive_filter & kLevelKeyTag) >> kLevelKeyTagShift;
             a->level_key_tag        = pn::rune(hex[tag]).copy();
+            a->inclusive_filter     = 0;
         } else {
             a->level_key_tag = "";
         }
