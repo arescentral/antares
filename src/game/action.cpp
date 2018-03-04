@@ -221,7 +221,7 @@ void SparkAction::apply(
             location.v = -kSpriteMaxSize;
         }
     }
-    globals()->starfield.make_sparks(count, decay, velocity, hue, &location);
+    globals()->starfield.make_sparks(count, decay, velocity, uint8_t(hue), &location);
 }
 
 void KillAction::apply(
@@ -565,9 +565,9 @@ void EquipAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
     switch (which) {
-        case Which::PULSE: alter_weapon(base, focus, focus->pulse); break;
-        case Which::BEAM: alter_weapon(base, focus, focus->beam); break;
-        case Which::SPECIAL: alter_weapon(base, focus, focus->special); break;
+        case Weapon::PULSE: alter_weapon(base, focus, focus->pulse); break;
+        case Weapon::BEAM: alter_weapon(base, focus, focus->beam); break;
+        case Weapon::SPECIAL: alter_weapon(base, focus, focus->special); break;
     }
 }
 
@@ -641,13 +641,13 @@ void FireAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
     switch (which) {
-        case Which::PULSE:
+        case Weapon::PULSE:
             fire_weapon(subject, SpaceObject::none(), subject->baseType->pulse, subject->pulse);
             break;
-        case Which::BEAM:
+        case Weapon::BEAM:
             fire_weapon(subject, SpaceObject::none(), subject->baseType->beam, subject->beam);
             break;
-        case Which::SPECIAL:
+        case Weapon::SPECIAL:
             fire_weapon(
                     subject, SpaceObject::none(), subject->baseType->special, subject->special);
             break;
@@ -657,7 +657,7 @@ void FireAction::apply(
 void FlashAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
-    globals()->transitions.start_boolean(length, GetTranslateColorShade(hue, shade));
+    globals()->transitions.start_boolean(length, GetTranslateColorShade(uint8_t(hue), shade));
 }
 
 void KeyAction::apply(
@@ -679,7 +679,7 @@ void ZoomAction::apply(
 void SelectAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
-    MiniComputer_SetScreenAndLineHack(screen, line);
+    MiniComputer_SetScreenAndLineHack(int32_t(screen), line);
 }
 
 void AssumeAction::apply(
@@ -726,9 +726,8 @@ static void execute_actions(
         }
 
         if (object.get() && subject.get()) {
-            if (((action.owner == Action::Owner::DIFFERENT) &&
-                 (object->owner == subject->owner)) ||
-                ((action.owner == Action::Owner::SAME) && (object->owner != subject->owner))) {
+            if (((action.owner == Owner::DIFFERENT) && (object->owner == subject->owner)) ||
+                ((action.owner == Owner::SAME) && (object->owner != subject->owner))) {
                 continue;
             }
         }

@@ -133,7 +133,7 @@ bool read_from(pn::file_view in, OccupyAction* occupy) {
     return in.read(pn::pad(1), &occupy->value);
 }
 
-bool read_from(pn::file_view in, EquipAction::Which which, EquipAction* equip) {
+bool read_from(pn::file_view in, Weapon which, EquipAction* equip) {
     int32_t base;
     if (!in.read(pn::pad(1), &base)) {
         return false;
@@ -329,8 +329,14 @@ bool read_from_absolute(pn::file_view in, bool reflexive, MoveAction* move) {
 }
 
 bool read_from(pn::file_view in, SparkAction* sparks) {
-    return in.read(&sparks->count, &sparks->decay) && read_from(in, &sparks->velocity) &&
-           in.read(&sparks->hue);
+    uint8_t hue;
+    int32_t velocity;
+    if (!in.read(&sparks->count, &sparks->decay, &velocity, &hue)) {
+        return false;
+    }
+    sparks->velocity = Fixed::from_val(velocity);
+    sparks->hue      = Hue(hue);
+    return true;
 }
 
 bool read_from(pn::file_view in, LandAction* land) { return in.read(&land->speed); }
@@ -393,7 +399,12 @@ bool read_from(pn::file_view in, KillAction* kill) {
 }
 
 bool read_from(pn::file_view in, FlashAction* flash) {
-    return in.read(&flash->length, &flash->hue, &flash->shade);
+    uint8_t hue;
+    if (!in.read(&flash->length, &hue, &flash->shade)) {
+        return false;
+    }
+    flash->hue = Hue(hue);
+    return true;
 }
 
 bool read_enable_keys_from(pn::file_view in, KeyAction* key) {
@@ -409,7 +420,12 @@ bool read_disable_keys_from(pn::file_view in, KeyAction* key) {
 bool read_from(pn::file_view in, ZoomAction* zoom) { return in.read(&zoom->value); }
 
 bool read_from(pn::file_view in, SelectAction* select) {
-    return in.read(&select->screen, &select->line);
+    int32_t screen;
+    if (!in.read(&screen, &select->line)) {
+        return false;
+    }
+    select->screen = Screen(screen);
+    return true;
 }
 
 bool read_from(pn::file_view in, AssumeAction* assume) { return in.read(&assume->which); }
@@ -427,13 +443,9 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
         case kNoAction: init<NoAction>(action); return true;
 
         case kSetDestination: init<OrderAction>(action); return true;
-        case kActivateSpecial:
-            init<FireAction>(action)->which = FireAction::Which::SPECIAL;
-            return true;
-        case kActivatePulse:
-            init<FireAction>(action)->which = FireAction::Which::PULSE;
-            return true;
-        case kActivateBeam: init<FireAction>(action)->which = FireAction::Which::BEAM; return true;
+        case kActivateSpecial: init<FireAction>(action)->which = Weapon::SPECIAL; return true;
+        case kActivatePulse: init<FireAction>(action)->which = Weapon::PULSE; return true;
+        case kActivateBeam: init<FireAction>(action)->which = Weapon::BEAM; return true;
         case kNilTarget: init<HoldPositionAction>(action); return true;
 
         case kCreateObject: return read_from(sub, init<CreateAction>(action), false);
@@ -477,11 +489,10 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
                 case kAlterAbsoluteLocation:
                     return read_from_absolute(sub, reflexive, init<MoveAction>(action));
                 case kAlterWeapon1:
-                    return read_from(sub, EquipAction::Which::PULSE, init<EquipAction>(action));
-                case kAlterWeapon2:
-                    return read_from(sub, EquipAction::Which::BEAM, init<EquipAction>(action));
+                    return read_from(sub, Weapon::PULSE, init<EquipAction>(action));
+                case kAlterWeapon2: return read_from(sub, Weapon::BEAM, init<EquipAction>(action));
                 case kAlterSpecial:
-                    return read_from(sub, EquipAction::Which::SPECIAL, init<EquipAction>(action));
+                    return read_from(sub, Weapon::SPECIAL, init<EquipAction>(action));
             }
         }
 
@@ -513,13 +524,13 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
 }
 
 template <typename T>
-Action::Owner owner_cast(T t) {
+Owner owner_cast(T t) {
     switch (t) {
-        case static_cast<T>(Action::Owner::ANY): return Action::Owner::ANY;
-        case static_cast<T>(Action::Owner::SAME): return Action::Owner::SAME;
-        case static_cast<T>(Action::Owner::DIFFERENT): return Action::Owner::DIFFERENT;
+        case static_cast<T>(Owner::ANY): return Owner::ANY;
+        case static_cast<T>(Owner::SAME): return Owner::SAME;
+        case static_cast<T>(Owner::DIFFERENT): return Owner::DIFFERENT;
     }
-    return owner_cast(Action::Owner::ANY);
+    return owner_cast(Owner::ANY);
 }
 
 }  // namespace

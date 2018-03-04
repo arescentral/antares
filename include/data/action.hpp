@@ -25,6 +25,7 @@
 #include <sfz/sfz.hpp>
 #include <vector>
 
+#include "data/enums.hpp"
 #include "data/handle.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
@@ -58,7 +59,6 @@ struct Action {
     uint32_t   inclusive_filter = 0;  // if it has ALL these attributes, OK
     pn::string level_key_tag;  // don’t execute if non empty and subject/object don’t match
 
-    enum class Owner { ANY = 0, SAME = 1, DIFFERENT = -1 };
     Owner owner = Owner::ANY;
     ticks delay = ticks(0);
 
@@ -174,8 +174,7 @@ struct EnergizeAction : public Action {
 };
 
 struct EquipAction : public Action {
-    enum class Which { PULSE, BEAM, SPECIAL };
-    Which              which;
+    Weapon             which;
     Handle<BaseObject> base;
 
     virtual void apply(
@@ -185,8 +184,7 @@ struct EquipAction : public Action {
 };
 
 struct FireAction : public Action {
-    enum class Which { PULSE, BEAM, SPECIAL };
-    Which which;
+    Weapon which;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
@@ -195,7 +193,7 @@ struct FireAction : public Action {
 
 struct FlashAction : public Action {
     int32_t length;  // length of color flash
-    uint8_t hue;     // hue of flash
+    Hue     hue;     // hue of flash
     uint8_t shade;   // brightness of flash
 
     virtual void apply(
@@ -349,7 +347,7 @@ struct ScoreAction : public Action {
 };
 
 struct SelectAction : public Action {
-    int32_t screen;
+    Screen  screen;
     int32_t line;
 
     virtual void apply(
@@ -372,7 +370,7 @@ struct SoundAction : public Action {
 
 struct SparkAction : public Action {
     int32_t count;     // number of sparks to create
-    uint8_t hue;       // hue of sparks; they start bright and fade with time
+    Hue     hue;       // hue of sparks; they start bright and fade with time
     int32_t decay;     // sparks will be visible for 17.05/decay seconds
     Fixed   velocity;  // sparks fly at at random speed up to this
 
