@@ -330,9 +330,47 @@ static Range<ticks> required_ticks_range(path_value x) {
     return {ticks(range.begin), ticks(range.end)};
 }
 
+static KillAction::Kind required_kill_kind(path_value x) {
+    return required_enum<KillAction::Kind>(
+            x, {{"none", KillAction::Kind::NONE},
+                {"expire", KillAction::Kind::EXPIRE},
+                {"destroy", KillAction::Kind::DESTROY}});
+}
+
+static PushAction::Kind required_push_kind(path_value x) {
+    return required_enum<PushAction::Kind>(
+            x, {{"stop", PushAction::Kind::STOP},
+                {"collide", PushAction::Kind::COLLIDE},
+                {"decelerate", PushAction::Kind::DECELERATE},
+                {"boost", PushAction::Kind::BOOST},
+                {"set", PushAction::Kind::SET},
+                {"cruise", PushAction::Kind::CRUISE}});
+}
+
+static Screen required_screen(path_value x) {
+    return required_enum<Screen>(
+            x, {{"main", Screen::MAIN},
+                {"build", Screen::BUILD},
+                {"special", Screen::SPECIAL},
+                {"message", Screen::MESSAGE},
+                {"status", Screen::STATUS}});
+}
+
 static Weapon required_weapon(path_value x) {
     return required_enum<Weapon>(
             x, {{"pulse", Weapon::PULSE}, {"beam", Weapon::BEAM}, {"special", Weapon::SPECIAL}});
+}
+
+static Zoom required_zoom(path_value x) {
+    return required_enum<Zoom>(
+            x, {{"2:1", Zoom::DOUBLE},
+                {"1:1", Zoom::ACTUAL},
+                {"1:2", Zoom::HALF},
+                {"1:4", Zoom::QUARTER},
+                {"1:16", Zoom::SIXTEENTH},
+                {"foe", Zoom::FOE},
+                {"object", Zoom::OBJECT},
+                {"all", Zoom::ALL}});
 }
 
 static sfz::optional<int32_t> optional_object_attributes(path_value x) {
@@ -451,6 +489,12 @@ static std::unique_ptr<Action> hold_action(path_value x) {
     return std::unique_ptr<HoldPositionAction>(new HoldPositionAction);
 }
 
+static std::unique_ptr<Action> kill_action(path_value x) {
+    std::unique_ptr<KillAction> a(new KillAction);
+    a->kind = required_kill_kind(x.get("kind"));
+    return std::move(a);
+}
+
 static std::unique_ptr<Action> morph_action(path_value x) {
     std::unique_ptr<MorphAction> a(new MorphAction);
     a->base      = required_base(x.get("base"));
@@ -460,6 +504,20 @@ static std::unique_ptr<Action> morph_action(path_value x) {
 
 static std::unique_ptr<Action> order_action(path_value x) {
     return std::unique_ptr<OrderAction>(new OrderAction);
+}
+
+static std::unique_ptr<Action> push_action(path_value x) {
+    std::unique_ptr<PushAction> a(new PushAction);
+    a->kind  = required_push_kind(x.get("kind"));
+    a->value = optional_fixed(x.get("value")).value_or(Fixed::zero());
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> select_action(path_value x) {
+    std::unique_ptr<SelectAction> a(new SelectAction);
+    a->screen = required_screen(x.get("screen"));
+    a->line   = required_int(x.get("line"));
+    return std::move(a);
 }
 
 static std::unique_ptr<Action> spin_action(path_value x) {
@@ -478,6 +536,12 @@ static std::unique_ptr<Action> thrust_action(path_value x) {
 
 static std::unique_ptr<Action> warp_action(path_value x) {
     return std::unique_ptr<WarpAction>(new WarpAction);
+}
+
+static std::unique_ptr<Action> zoom_action(path_value x) {
+    std::unique_ptr<ZoomAction> a(new ZoomAction);
+    a->value = required_zoom(x.get("value"));
+    return std::move(a);
 }
 
 bool read_from(pn::file_view in, SoundAction* sound) {
@@ -512,34 +576,6 @@ bool read_from(pn::file_view in, RevealAction* reveal) {
         return false;
     }
     reveal->initial = HandleList<Level::Initial>(first, first + std::max(count_minus_1, 0) + 1);
-    return true;
-}
-
-bool read_from(pn::file_view in, bool reflexive, PushAction* push) {
-    uint8_t relative;
-    int32_t value;
-    if (!in.read(&relative, &value)) {
-        return false;
-    }
-    if (relative) {
-        if (reflexive) {
-            push->kind = PushAction::Kind::BOOST;
-        } else if (value >= 0) {
-            push->kind = PushAction::Kind::COLLIDE;
-        } else {
-            push->kind = PushAction::Kind::DECELERATE;
-            value      = -value;
-        }
-    } else {
-        if (value == 0) {
-            push->kind = PushAction::Kind::STOP;
-        } else if (reflexive) {
-            push->kind = PushAction::Kind::CRUISE;
-        } else {
-            push->kind = PushAction::Kind::SET;
-        }
-    }
-    push->value = Fixed::from_val(value);
     return true;
 }
 
@@ -656,15 +692,6 @@ bool read_from(pn::file_view in, WinAction* win) {
     return true;
 }
 
-bool read_from(pn::file_view in, KillAction* kill) {
-    uint8_t kind;
-    if (!in.read(&kind)) {
-        return false;
-    }
-    kill->kind = static_cast<KillAction::Kind>(kind);
-    return true;
-}
-
 bool read_from(pn::file_view in, FlashAction* flash) {
     uint8_t hue;
     if (!in.read(&flash->length, &hue, &flash->shade)) {
@@ -682,24 +709,6 @@ bool read_enable_keys_from(pn::file_view in, KeyAction* key) {
 bool read_disable_keys_from(pn::file_view in, KeyAction* key) {
     key->enable = 0x00000000;
     return in.read(&key->disable);
-}
-
-bool read_from(pn::file_view in, ZoomAction* zoom) {
-    int32_t value;
-    if (!in.read(&value)) {
-        return false;
-    }
-    zoom->value = Zoom(value);
-    return true;
-}
-
-bool read_from(pn::file_view in, SelectAction* select) {
-    int32_t screen;
-    if (!in.read(&screen, &select->line)) {
-        return false;
-    }
-    select->screen = Screen(screen);
-    return true;
 }
 
 template <typename T>
@@ -747,7 +756,7 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
                 case kAlterHidden: return read_from(sub, init<RevealAction>(action));
                 case kAlterSpin: return true;
                 case kAlterOffline: return true;
-                case kAlterVelocity: return read_from(sub, reflexive, init<PushAction>(action));
+                case kAlterVelocity: return true;
                 case kAlterMaxVelocity: return true;
                 case kAlterThrust: return true;
                 case kAlterBaseType: return true;
@@ -778,16 +787,16 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
 
         case kDeclareWinner: return read_from(sub, init<WinAction>(action));
 
-        case kDie: return read_from(sub, init<KillAction>(action));
+        case kDie: return true;
 
         case kColorFlash: return read_from(sub, init<FlashAction>(action));
 
         case kDisableKeys: return read_disable_keys_from(sub, init<KeyAction>(action));
         case kEnableKeys: return read_enable_keys_from(sub, init<KeyAction>(action));
 
-        case kSetZoom: return read_from(sub, init<ZoomAction>(action));
+        case kSetZoom: return true;
 
-        case kComputerSelect: return read_from(sub, init<SelectAction>(action));
+        case kComputerSelect: return true;
 
         case kAssumeInitialObject: return true;
     }
@@ -852,7 +861,7 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     } else if (type == "key") {
         // a = key_action(x);
     } else if (type == "kill") {
-        // a = kill_action(x);
+        a = kill_action(x);
     } else if (type == "land") {
         // a = land_action(x);
     } else if (type == "message") {
@@ -868,13 +877,13 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     } else if (type == "pay") {
         // a = pay_action(x);
     } else if (type == "push") {
-        // a = push_action(x);
+        a = push_action(x);
     } else if (type == "reveal") {
         // a = reveal_action(x);
     } else if (type == "score") {
         // a = score_action(x);
     } else if (type == "select") {
-        // a = select_action(x);
+        a = select_action(x);
     } else if (type == "sound") {
         // a = sound_action(x);
     } else if (type == "spark") {
@@ -888,7 +897,7 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     } else if (type == "win") {
         // a = win_action(x);
     } else if (type == "zoom") {
-        // a = zoom_action(x);
+        a = zoom_action(x);
     } else {
         throw std::runtime_error(pn::format("unknown type: {0}", type).c_str());
     }
