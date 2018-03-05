@@ -369,6 +369,12 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
     return true;
 }
 
+static Level::Condition condition(pn::value_cref x0) {
+    Level::Condition c;
+    read_from(x0.as_map().get("bin").as_data().open(), &c);
+    return c;
+}
+
 std::vector<Level::Condition> read_conditions(int begin, int end) {
     if (end <= begin) {
         return std::vector<Level::Condition>{};
@@ -377,8 +383,20 @@ std::vector<Level::Condition> read_conditions(int begin, int end) {
     std::vector<Level::Condition> conditions;
     conditions.resize(end - begin);
     for (int i : sfz::range(begin, end)) {
-        Resource r = Resource::path(pn::format("conditions/{0}.bin", i));
-        read_from(r.data().open(), &conditions[i - begin]);
+        pn::string path = pn::format("conditions/{0}.pn", i);
+        try {
+            Resource   r = Resource::path(path);
+            pn::value  x;
+            pn_error_t e;
+            if (!pn::parse(r.data().open(), x, &e)) {
+                throw std::runtime_error(
+                        pn::format("{1}:{2}: {3}", e.lineno, e.column, pn_strerror(e.code))
+                                .c_str());
+            }
+            conditions[i - begin] = condition(x);
+        } catch (...) {
+            std::throw_with_nested(std::runtime_error(path.c_str()));
+        }
     }
     return conditions;
 }
