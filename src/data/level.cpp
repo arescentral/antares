@@ -169,37 +169,6 @@ bool read_from(pn::file_view in, Level::Player* level_player) {
     return true;
 }
 
-template <typename T>
-static T* init_condition(std::unique_ptr<Level::Condition>* c) {
-    T* t;
-    c->reset(t = new T);
-    return t;
-}
-
-bool read_from(pn::file_view in, std::unique_ptr<Level::Condition>* condition) {
-    uint32_t flags;
-    uint8_t  type;
-    int32_t  subject, object;
-    int32_t  action_start, action_count;
-    pn::data section;
-    section.resize(12);
-
-    if (!in.read(
-                &type, pn::pad(1), &section, &subject, &object, &action_start, &action_count,
-                &flags, pn::pad(4))) {
-        return false;
-    }
-
-    if (*condition) {
-        (*condition)->subject           = Handle<Level::Initial>(subject);
-        (*condition)->object            = Handle<Level::Initial>(object);
-        (*condition)->action            = read_actions(action_start, action_start + action_count);
-        (*condition)->persistent        = !(flags & kTrueOnlyOnce);
-        (*condition)->initially_enabled = !(flags & kInitiallyTrue);
-    }
-    return true;
-}
-
 static std::unique_ptr<Level::Condition> autopilot_condition(path_value x) {
     std::unique_ptr<Level::AutopilotCondition> c(new Level::AutopilotCondition);
     c->value = required_bool(x.get("value"));
@@ -335,13 +304,12 @@ static std::unique_ptr<Level::Condition> condition(pn::value_cref x0) {
         throw std::runtime_error(pn::format("unknown type: {0}", type).c_str());
     }
 
-    read_from(x.get("bin").value().as_data().open(), &c);
-
     c->op                = required_condition_op(x.get("op"));
     c->persistent        = optional_bool(x.get("persistent")).value_or(false);
     c->initially_enabled = !optional_bool(x.get("initially_disabled")).value_or(false);
     c->subject           = optional_initial(x.get("subject")).value_or(Level::Initial::none());
     c->object            = optional_initial(x.get("object")).value_or(Level::Initial::none());
+    c->action            = required_action_array(x.get("action"));
 
     return c;
 }

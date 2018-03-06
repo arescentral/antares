@@ -276,13 +276,10 @@ Owner owner_cast(T t) {
     return owner_cast(Owner::ANY);
 }
 
-std::unique_ptr<Action> action(pn::value_cref x0) {
-    if (x0.is_null()) {
-        return std::unique_ptr<Action>(new NoAction);
-    } else if (!x0.is_map()) {
-        throw std::runtime_error("must be null or map");
+std::unique_ptr<Action> action(path_value x) {
+    if (!x.value().is_map()) {
+        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
     }
-    path_value x{x0};
 
     pn::string_view         type = required_string(x.get("type"));
     std::unique_ptr<Action> a;
@@ -373,6 +370,15 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     return a;
 }
 
+std::unique_ptr<Action> action(pn::value_cref x0) {
+    if (x0.is_null()) {
+        return std::unique_ptr<Action>(new NoAction);
+    } else if (!x0.is_map()) {
+        throw std::runtime_error("must be null or map");
+    }
+    return action(path_value{x0});
+}
+
 }  // namespace
 
 std::vector<std::unique_ptr<const Action>> read_actions(int begin, int end) {
@@ -399,6 +405,18 @@ std::vector<std::unique_ptr<const Action>> read_actions(int begin, int end) {
         }
     }
     return actions;
+}
+
+std::vector<std::unique_ptr<const Action>> required_action_array(path_value x) {
+    if (x.value().is_array()) {
+        std::vector<std::unique_ptr<const Action>> a;
+        for (int i = 0; i < x.value().as_array().size(); ++i) {
+            a.push_back(action(x.get(i)));
+        }
+        return a;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be array", x.path()).c_str());
+    }
 }
 
 Handle<BaseObject> Action::created_base() const { return BaseObject::none(); }
