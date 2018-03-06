@@ -300,12 +300,11 @@ static void load_initial(
 }
 
 static void load_condition(
-        Level::Condition* condition, std::bitset<16> all_colors, LoadState* state) {
-    for (const auto& action : (*condition)->action) {
+        Handle<Level::Condition> condition, std::bitset<16> all_colors, LoadState* state) {
+    for (const auto& action : condition->action) {
         AddActionMedia(*action, Hue::GRAY, all_colors, state);
     }
-    int index                  = condition - g.level->conditions.data();
-    g.condition_enabled[index] = (*condition)->initially_enabled;
+    g.condition_enabled[condition.number()] = condition->initially_enabled;
 }
 
 static void run_game_1s() {
@@ -343,8 +342,8 @@ void construct_level(Handle<Level> level, LoadState* state) {
     } else if (step == Level::Initial::all().size()) {
         // add media for all condition actions
         step -= Level::Initial::all().size();
-        for (auto& condition : g.level->conditions) {
-            load_condition(&condition, all_colors, state);
+        for (auto c : Level::Condition::all()) {
+            load_condition(c, all_colors, state);
         }
         create_initial(Handle<Level::Initial>(step));
     } else if (step < (2 * Level::Initial::all().size())) {

@@ -60,8 +60,10 @@ static std::unique_ptr<Action> cloak_action(path_value x) {
 
 static std::unique_ptr<Action> condition_action(path_value x) {
     std::unique_ptr<ConditionAction> a(new ConditionAction);
-    a->enable  = optional_int_range(x.get("enable")).value_or(Range<int64_t>::empty());
-    a->disable = optional_int_range(x.get("disable")).value_or(Range<int64_t>::empty());
+    a->enable = optional_condition_range(x.get("enable"))
+                        .value_or(HandleList<Level::Condition>{-1, -1});
+    a->disable = optional_condition_range(x.get("disable"))
+                         .value_or(HandleList<Level::Condition>{-1, -1});
     return std::move(a);
 }
 

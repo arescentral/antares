@@ -31,6 +31,17 @@
 
 namespace antares {
 
+Level::Condition* Level::Condition::get(int number) {
+    if ((0 <= number) && (number < g.level->conditions.size())) {
+        return g.level->conditions[number].get();
+    }
+    return nullptr;
+}
+
+HandleList<Level::Condition> Level::Condition::all() {
+    return HandleList<Level::Condition>(0, g.level->conditions.size());
+}
+
 template <typename X, typename Y>
 static bool op_compare(ConditionOp op, const X& x, const Y& y) {
     switch (op) {

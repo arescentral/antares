@@ -37,6 +37,7 @@ namespace antares {
 class SpaceObject;
 struct Level;
 struct Level_Initial;
+struct Level_Condition;
 
 //
 // Action:
@@ -123,8 +124,8 @@ struct CloakAction : public Action {
 };
 
 struct ConditionAction : public Action {
-    Range<int64_t> enable;
-    Range<int64_t> disable;
+    HandleList<Level_Condition> enable;
+    HandleList<Level_Condition> disable;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,

@@ -475,11 +475,11 @@ void CaptureAction::apply(
 void ConditionAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
-    for (auto l = enable.begin; l < enable.end; ++l) {
-        g.condition_enabled[l] = true;
+    for (auto c : enable) {
+        g.condition_enabled[c.number()] = true;
     }
-    for (auto l = disable.begin; l < disable.end; ++l) {
-        g.condition_enabled[l] = false;
+    for (auto c : disable) {
+        g.condition_enabled[c.number()] = false;
     }
 }
 

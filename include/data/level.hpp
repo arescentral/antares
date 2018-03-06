@@ -165,9 +165,9 @@ struct Level {
     bool                    is_training;
     int32_t                 angle;
 
-    std::vector<Initial>   initials;
-    std::vector<Condition> conditions;
-    std::vector<Briefing>  briefings;
+    std::vector<Initial>                    initials;
+    std::vector<std::unique_ptr<Condition>> conditions;
+    std::vector<Briefing>                   briefings;
 
     pn::string prologue;           // SOLO
     pn::string epilogue;           // SOLO
@@ -221,7 +221,7 @@ struct Level_Initial {
 bool                        read_from(pn::file_view in, Level::Initial* level_initial);
 std::vector<Level::Initial> read_initials(int begin, int end);
 
-struct Level::ConditionBase {
+struct Level_Condition {
     ConditionOp                                op                = ConditionOp::EQ;
     bool                                       initially_enabled = true;
     bool                                       persistent        = false;
@@ -231,21 +231,24 @@ struct Level::ConditionBase {
 
     static const size_t byte_size = 38;
 
-    ConditionBase()              = default;
-    virtual ~ConditionBase()     = default;
+    static Level::Condition*            get(int n);
+    static HandleList<Level::Condition> all();
+
+    Level_Condition()            = default;
+    virtual ~Level_Condition()   = default;
     virtual bool is_true() const = 0;
 
-    ConditionBase(const ConditionBase&) = delete;
-    ConditionBase& operator=(const ConditionBase&) = delete;
+    Level_Condition(const Level_Condition&) = delete;
+    Level_Condition& operator=(const Level_Condition&) = delete;
 };
-bool                          read_from(pn::file_view in, Level::Condition* level_condition);
-std::vector<Level::Condition> read_conditions(int begin, int end);
+bool read_from(pn::file_view in, std::unique_ptr<Level::Condition>* level_condition);
+std::vector<std::unique_ptr<Level::Condition>> read_conditions(int begin, int end);
 
 // Ops: EQ, NE
 // Compares local player’s autopilot state (on = true; off = false) to `value`.
 //
 // Warning: not net-safe.
-struct Level::AutopilotCondition : Level::ConditionBase {
+struct Level::AutopilotCondition : Level::Condition {
     bool         value;
     virtual bool is_true() const;
 };
@@ -255,7 +258,7 @@ struct Level::AutopilotCondition : Level::ConditionBase {
 // Compares local player’s build object state (building = true; not building = false) to `value`.
 //
 // Warning: not net-safe.
-struct Level::BuildingCondition : Level::ConditionBase {
+struct Level::BuildingCondition : Level::Condition {
     bool         value;
     virtual bool is_true() const;
 };
@@ -264,7 +267,7 @@ struct Level::BuildingCondition : Level::ConditionBase {
 // Compares local player’s (screen, line), or just screen if line < 0.
 //
 // Warning: not net-safe.
-struct Level::ComputerCondition : Level::ConditionBase {
+struct Level::ComputerCondition : Level::Condition {
     int32_t      screen;
     int32_t      line;
     virtual bool is_true() const;
@@ -272,7 +275,7 @@ struct Level::ComputerCondition : Level::ConditionBase {
 
 // Ops: EQ, NE, LT, GT, LE, GE
 // Compares given counter of given admiral to `value`.
-struct Level::CounterCondition : Level::ConditionBase {
+struct Level::CounterCondition : Level::Condition {
     Handle<Admiral> player;
     int32_t         counter;
     int32_t         value;
@@ -285,7 +288,7 @@ struct Level::CounterCondition : Level::ConditionBase {
 // Note: the initial object referenced here can be (and usually is) different from either `subject`
 // or `object`.
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”
-struct Level::DestroyedCondition : Level::ConditionBase {
+struct Level::DestroyedCondition : Level::Condition {
     Handle<Level::Initial> initial;
     bool                   value;
     virtual bool           is_true() const;
@@ -297,13 +300,13 @@ struct Level::DestroyedCondition : Level::ConditionBase {
 //
 // TODO(sfiera): provide a definition of “distance” in this context, and especially what
 // “extremely” distant means.
-struct Level::DistanceCondition : Level::ConditionBase {
+struct Level::DistanceCondition : Level::Condition {
     uint32_t     value;
     virtual bool is_true() const;
 };
 
 // Always false.
-struct Level::FalseCondition : Level::ConditionBase {
+struct Level::FalseCondition : Level::Condition {
     virtual bool is_true() const;
 };
 
@@ -312,7 +315,7 @@ struct Level::FalseCondition : Level::ConditionBase {
 //
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”; i.e.
 // its health fraction is 0.0.
-struct Level::HealthCondition : Level::ConditionBase {
+struct Level::HealthCondition : Level::Condition {
     double       value;
     virtual bool is_true() const;
 };
@@ -321,7 +324,7 @@ struct Level::HealthCondition : Level::ConditionBase {
 // Compares (start, page) of local player’s current message to (start, page).
 //
 // Warning: not net-safe.
-struct Level::MessageCondition : Level::ConditionBase {
+struct Level::MessageCondition : Level::Condition {
     int32_t      start;
     int32_t      page;
     virtual bool is_true() const;
@@ -330,21 +333,21 @@ struct Level::MessageCondition : Level::ConditionBase {
 // Ops: EQ, NE
 // Precondition: `subject` and `object` exist.
 // Compares target of `subject` to `object`.
-struct Level::OrderedCondition : Level::ConditionBase {
+struct Level::OrderedCondition : Level::Condition {
     virtual bool is_true() const;
 };
 
 // Ops: EQ, NE
 // Precondition: `subject` exists.
 // Compares owner of `subject` to `player`.
-struct Level::OwnerCondition : Level::ConditionBase {
+struct Level::OwnerCondition : Level::Condition {
     Handle<Admiral> player;
     virtual bool    is_true() const;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
 // Compares ship count of `player` to `value`.
-struct Level::ShipsCondition : Level::ConditionBase {
+struct Level::ShipsCondition : Level::Condition {
     Handle<Admiral> player;
     int32_t         value;
     virtual bool    is_true() const;
@@ -353,7 +356,7 @@ struct Level::ShipsCondition : Level::ConditionBase {
 // Ops: EQ, NE, LT, GT, LE, GE
 // Precondition: `subject` exists.
 // Compares speed of `subject` to `value`.
-struct Level::SpeedCondition : Level::ConditionBase {
+struct Level::SpeedCondition : Level::Condition {
     Fixed        value;
     virtual bool is_true() const;
 };
@@ -363,7 +366,7 @@ struct Level::SpeedCondition : Level::ConditionBase {
 // Compares `subject` to the control, target, or flagship of the local player, per `value`.
 //
 // Warning: not net-safe.
-struct Level::SubjectCondition : Level::ConditionBase {
+struct Level::SubjectCondition : Level::Condition {
     enum class Value { CONTROL, TARGET, PLAYER };
     Value        value;
     virtual bool is_true() const;
@@ -376,7 +379,7 @@ struct Level::SubjectCondition : Level::ConditionBase {
 // time after the
 //
 // TODO(sfiera): provide a way to specify game time “normally”
-struct Level::TimeCondition : Level::ConditionBase {
+struct Level::TimeCondition : Level::Condition {
     ticks        value;
     virtual bool is_true() const;
 };
@@ -385,26 +388,9 @@ struct Level::TimeCondition : Level::ConditionBase {
 // Compares zoom level of the local player to `value`.
 //
 // Warning: not net-safe.
-struct Level::ZoomCondition : Level::ConditionBase {
+struct Level::ZoomCondition : Level::Condition {
     Zoom         value;
     virtual bool is_true() const;
-};
-
-struct Level_Condition {
-  public:
-                          operator bool() const { return _base != nullptr; }
-    Level::ConditionBase* operator->() const { return _base.get(); }
-    Level::ConditionBase& operator*() const { return *_base.get(); }
-
-    template <typename T>
-    T* init() {
-        T* out;
-        _base = std::unique_ptr<Level::ConditionBase>(out = new T);
-        return out;
-    }
-
-  private:
-    std::unique_ptr<Level::ConditionBase> _base;
 };
 
 //

@@ -169,7 +169,14 @@ bool read_from(pn::file_view in, Level::Player* level_player) {
     return true;
 }
 
-bool read_from(pn::file_view in, Level::Condition* condition) {
+template <typename T>
+static T* init_condition(std::unique_ptr<Level::Condition>* c) {
+    T* t;
+    c->reset(t = new T);
+    return t;
+}
+
+bool read_from(pn::file_view in, std::unique_ptr<Level::Condition>* condition) {
     uint32_t flags;
     uint8_t  type;
     int32_t  subject, object;
@@ -188,53 +195,53 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
         case kNoCondition:
         case kLocationCondition:
         case kAgeCondition:
-        case kRandomCondition: condition->init<Level::FalseCondition>(); break;
+        case kRandomCondition: init_condition<Level::FalseCondition>(condition); break;
 
         case kHalfHealthCondition:
-            condition->init<Level::HealthCondition>()->value = 0.5;
-            (*condition)->op                                 = ConditionOp::LE;
+            init_condition<Level::HealthCondition>(condition)->value = 0.5;
+            (*condition)->op                                         = ConditionOp::LE;
             break;
 
         case kIsAuxiliaryObject:
-            condition->init<Level::SubjectCondition>()->value =
+            init_condition<Level::SubjectCondition>(condition)->value =
                     Level::SubjectCondition::Value::CONTROL;
             (*condition)->op = ConditionOp::EQ;
             break;
 
         case kIsTargetObject:
-            condition->init<Level::SubjectCondition>()->value =
+            init_condition<Level::SubjectCondition>(condition)->value =
                     Level::SubjectCondition::Value::TARGET;
             (*condition)->op = ConditionOp::EQ;
             break;
 
         case kObjectIsBeingBuilt:
-            condition->init<Level::BuildingCondition>()->value = true;
-            (*condition)->op                                   = ConditionOp::EQ;
+            init_condition<Level::BuildingCondition>(condition)->value = true;
+            (*condition)->op                                           = ConditionOp::EQ;
             break;
 
         case kDirectIsSubjectTarget:
-            condition->init<Level::OrderedCondition>();
+            init_condition<Level::OrderedCondition>(condition);
             (*condition)->op = ConditionOp::EQ;
             break;
 
         case kSubjectIsPlayerCondition:
-            condition->init<Level::SubjectCondition>()->value =
+            init_condition<Level::SubjectCondition>(condition)->value =
                     Level::SubjectCondition::Value::PLAYER;
             (*condition)->op = ConditionOp::EQ;
             break;
 
         case kAutopilotCondition:
-            condition->init<Level::AutopilotCondition>()->value = true;
-            (*condition)->op                                    = ConditionOp::EQ;
+            init_condition<Level::AutopilotCondition>(condition)->value = true;
+            (*condition)->op                                            = ConditionOp::EQ;
             break;
 
         case kNotAutopilotCondition:
-            condition->init<Level::AutopilotCondition>()->value = false;
-            (*condition)->op                                    = ConditionOp::EQ;
+            init_condition<Level::AutopilotCondition>(condition)->value = false;
+            (*condition)->op                                            = ConditionOp::EQ;
             break;
 
         case kCounterCondition: {
-            auto*   counter = condition->init<Level::CounterCondition>();
+            auto*   counter = init_condition<Level::CounterCondition>(condition);
             int32_t admiral;
             if (!sub.read(&admiral, &counter->counter, &counter->value)) {
                 return false;
@@ -245,7 +252,7 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
         }
 
         case kCounterGreaterCondition: {
-            auto*   counter = condition->init<Level::CounterCondition>();
+            auto*   counter = init_condition<Level::CounterCondition>(condition);
             int32_t admiral;
             if (!sub.read(&admiral, &counter->counter, &counter->value)) {
                 return false;
@@ -256,7 +263,7 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
         }
 
         case kCounterNotCondition: {
-            auto*   counter = condition->init<Level::CounterCondition>();
+            auto*   counter = init_condition<Level::CounterCondition>(condition);
             int32_t admiral;
             if (!sub.read(&admiral, &counter->counter, &counter->value)) {
                 return false;
@@ -271,7 +278,7 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
             if (!sub.read(&initial)) {
                 return false;
             }
-            auto* destroyed    = condition->init<Level::DestroyedCondition>();
+            auto* destroyed    = init_condition<Level::DestroyedCondition>(condition);
             destroyed->initial = Handle<Level::Initial>(initial);
             destroyed->value   = true;
             destroyed->op      = ConditionOp::EQ;
@@ -283,8 +290,8 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
             if (!sub.read(&player)) {
                 return false;
             }
-            condition->init<Level::OwnerCondition>()->player = Handle<Admiral>(player);
-            (*condition)->op                                 = ConditionOp::EQ;
+            init_condition<Level::OwnerCondition>(condition)->player = Handle<Admiral>(player);
+            (*condition)->op                                         = ConditionOp::EQ;
             break;
         }
 
@@ -293,7 +300,7 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
             if (!sub.read(&player)) {
                 return false;
             }
-            auto* ships   = condition->init<Level::ShipsCondition>();
+            auto* ships   = init_condition<Level::ShipsCondition>(condition);
             ships->player = Handle<Admiral>(player);
             ships->value  = 0;
             ships->op     = ConditionOp::LE;
@@ -305,13 +312,13 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
             if (!sub.read(&value)) {
                 return false;
             }
-            condition->init<Level::ZoomCondition>()->value = static_cast<Zoom>(value);
-            (*condition)->op                               = ConditionOp::EQ;
+            init_condition<Level::ZoomCondition>(condition)->value = static_cast<Zoom>(value);
+            (*condition)->op                                       = ConditionOp::EQ;
             break;
         }
 
         case kVelocityLessThanEqualToCondition:
-            if (!read_from(sub, &condition->init<Level::SpeedCondition>()->value)) {
+            if (!read_from(sub, &init_condition<Level::SpeedCondition>(condition)->value)) {
                 return false;
             }
             (*condition)->op = ConditionOp::LT;
@@ -322,27 +329,27 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
             if (!sub.read(&time)) {
                 return false;
             }
-            condition->init<Level::TimeCondition>()->value = ticks(time);
-            (*condition)->op                               = ConditionOp::GE;
+            init_condition<Level::TimeCondition>(condition)->value = ticks(time);
+            (*condition)->op                                       = ConditionOp::GE;
             break;
         }
 
         case kProximityCondition:
-            if (!sub.read(&condition->init<Level::DistanceCondition>()->value)) {
+            if (!sub.read(&init_condition<Level::DistanceCondition>(condition)->value)) {
                 return false;
             }
             (*condition)->op = ConditionOp::LT;
             break;
 
         case kDistanceGreaterCondition:
-            if (!sub.read(&condition->init<Level::DistanceCondition>()->value)) {
+            if (!sub.read(&init_condition<Level::DistanceCondition>(condition)->value)) {
                 return false;
             }
             (*condition)->op = ConditionOp::GE;
             break;
 
         case kCurrentMessageCondition: {
-            auto* message = condition->init<Level::MessageCondition>();
+            auto* message = init_condition<Level::MessageCondition>(condition);
             if (!sub.read(&message->start, &message->page)) {
                 return false;
             }
@@ -351,7 +358,7 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
         }
 
         case kCurrentComputerCondition: {
-            auto* computer = condition->init<Level::ComputerCondition>();
+            auto* computer = init_condition<Level::ComputerCondition>(condition);
             if (!sub.read(&computer->screen, &computer->line)) {
                 return false;
             }
@@ -370,9 +377,9 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
     return true;
 }
 
-static Level::Condition condition(pn::value_cref x0) {
-    path_value       x{x0};
-    Level::Condition c;
+static std::unique_ptr<Level::Condition> condition(pn::value_cref x0) {
+    path_value                        x{x0};
+    std::unique_ptr<Level::Condition> c;
     read_from(x.get("bin").value().as_data().open(), &c);
 
     pn::string_view type = required_string(x.get("type"));
@@ -383,8 +390,7 @@ static Level::Condition condition(pn::value_cref x0) {
     } else if (type == "destroyed") {
     } else if (type == "distance") {
     } else if (type == "false") {
-        c.init<Level::FalseCondition>();
-        return c;
+        return std::unique_ptr<Level::Condition>(new Level::FalseCondition);
     } else if (type == "health") {
     } else if (type == "message") {
     } else if (type == "ordered") {
@@ -406,12 +412,12 @@ static Level::Condition condition(pn::value_cref x0) {
     return c;
 }
 
-std::vector<Level::Condition> read_conditions(int begin, int end) {
+std::vector<std::unique_ptr<Level::Condition>> read_conditions(int begin, int end) {
     if (end <= begin) {
-        return std::vector<Level::Condition>{};
+        return std::vector<std::unique_ptr<Level::Condition>>{};
     }
 
-    std::vector<Level::Condition> conditions;
+    std::vector<std::unique_ptr<Level::Condition>> conditions;
     conditions.resize(end - begin);
     for (int i : sfz::range(begin, end)) {
         pn::string path = pn::format("conditions/{0}.pn", i);

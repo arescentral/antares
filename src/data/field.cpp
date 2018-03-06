@@ -246,6 +246,15 @@ Range<ticks> required_ticks_range(path_value x) {
     return {ticks(range.begin), ticks(range.end)};
 }
 
+sfz::optional<HandleList<Level_Condition>> optional_condition_range(path_value x) {
+    auto range = optional_int_range(x);
+    if (range.has_value()) {
+        return sfz::make_optional(HandleList<Level::Condition>(range->begin, range->end));
+    } else {
+        return sfz::nullopt;
+    }
+}
+
 HandleList<Level::Initial> required_initial_range(path_value x) {
     auto range = required_int_range(x);
     return HandleList<Level::Initial>(range.begin, range.end);
