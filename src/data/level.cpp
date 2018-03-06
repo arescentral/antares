@@ -20,6 +20,7 @@
 
 #include <sfz/sfz.hpp>
 
+#include "data/field.hpp"
 #include "data/plugin.hpp"
 #include "data/resource.hpp"
 
@@ -191,45 +192,45 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
 
         case kHalfHealthCondition:
             condition->init<Level::HealthCondition>()->value = 0.5;
-            (*condition)->op                                 = Level::ConditionBase::Op::LE;
+            (*condition)->op                                 = ConditionOp::LE;
             break;
 
         case kIsAuxiliaryObject:
             condition->init<Level::SubjectCondition>()->value =
                     Level::SubjectCondition::Value::CONTROL;
-            (*condition)->op = Level::ConditionBase::Op::EQ;
+            (*condition)->op = ConditionOp::EQ;
             break;
 
         case kIsTargetObject:
             condition->init<Level::SubjectCondition>()->value =
                     Level::SubjectCondition::Value::TARGET;
-            (*condition)->op = Level::ConditionBase::Op::EQ;
+            (*condition)->op = ConditionOp::EQ;
             break;
 
         case kObjectIsBeingBuilt:
             condition->init<Level::BuildingCondition>()->value = true;
-            (*condition)->op                                   = Level::ConditionBase::Op::EQ;
+            (*condition)->op                                   = ConditionOp::EQ;
             break;
 
         case kDirectIsSubjectTarget:
             condition->init<Level::OrderedCondition>();
-            (*condition)->op = Level::ConditionBase::Op::EQ;
+            (*condition)->op = ConditionOp::EQ;
             break;
 
         case kSubjectIsPlayerCondition:
             condition->init<Level::SubjectCondition>()->value =
                     Level::SubjectCondition::Value::PLAYER;
-            (*condition)->op = Level::ConditionBase::Op::EQ;
+            (*condition)->op = ConditionOp::EQ;
             break;
 
         case kAutopilotCondition:
             condition->init<Level::AutopilotCondition>()->value = true;
-            (*condition)->op                                    = Level::ConditionBase::Op::EQ;
+            (*condition)->op                                    = ConditionOp::EQ;
             break;
 
         case kNotAutopilotCondition:
             condition->init<Level::AutopilotCondition>()->value = false;
-            (*condition)->op                                    = Level::ConditionBase::Op::EQ;
+            (*condition)->op                                    = ConditionOp::EQ;
             break;
 
         case kCounterCondition: {
@@ -239,7 +240,7 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
                 return false;
             }
             counter->player = Handle<Admiral>(admiral);
-            counter->op     = Level::ConditionBase::Op::EQ;
+            counter->op     = ConditionOp::EQ;
             break;
         }
 
@@ -250,7 +251,7 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
                 return false;
             }
             counter->player = Handle<Admiral>(admiral);
-            counter->op     = Level::ConditionBase::Op::GE;
+            counter->op     = ConditionOp::GE;
             break;
         }
 
@@ -261,7 +262,7 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
                 return false;
             }
             counter->player = Handle<Admiral>(admiral);
-            counter->op     = Level::ConditionBase::Op::NE;
+            counter->op     = ConditionOp::NE;
             break;
         }
 
@@ -273,7 +274,7 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
             auto* destroyed    = condition->init<Level::DestroyedCondition>();
             destroyed->initial = Handle<Level::Initial>(initial);
             destroyed->value   = true;
-            destroyed->op      = Level::ConditionBase::Op::EQ;
+            destroyed->op      = ConditionOp::EQ;
             break;
         }
 
@@ -283,7 +284,7 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
                 return false;
             }
             condition->init<Level::OwnerCondition>()->player = Handle<Admiral>(player);
-            (*condition)->op                                 = Level::ConditionBase::Op::EQ;
+            (*condition)->op                                 = ConditionOp::EQ;
             break;
         }
 
@@ -295,7 +296,7 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
             auto* ships   = condition->init<Level::ShipsCondition>();
             ships->player = Handle<Admiral>(player);
             ships->value  = 0;
-            ships->op     = Level::ConditionBase::Op::LE;
+            ships->op     = ConditionOp::LE;
             break;
         }
 
@@ -305,7 +306,7 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
                 return false;
             }
             condition->init<Level::ZoomCondition>()->value = static_cast<Zoom>(value);
-            (*condition)->op                               = Level::ConditionBase::Op::EQ;
+            (*condition)->op                               = ConditionOp::EQ;
             break;
         }
 
@@ -313,7 +314,7 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
             if (!read_from(sub, &condition->init<Level::SpeedCondition>()->value)) {
                 return false;
             }
-            (*condition)->op = Level::ConditionBase::Op::LT;
+            (*condition)->op = ConditionOp::LT;
             break;
 
         case kTimeCondition: {
@@ -322,7 +323,7 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
                 return false;
             }
             condition->init<Level::TimeCondition>()->value = ticks(time);
-            (*condition)->op                               = Level::ConditionBase::Op::GE;
+            (*condition)->op                               = ConditionOp::GE;
             break;
         }
 
@@ -330,14 +331,14 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
             if (!sub.read(&condition->init<Level::DistanceCondition>()->value)) {
                 return false;
             }
-            (*condition)->op = Level::ConditionBase::Op::LT;
+            (*condition)->op = ConditionOp::LT;
             break;
 
         case kDistanceGreaterCondition:
             if (!sub.read(&condition->init<Level::DistanceCondition>()->value)) {
                 return false;
             }
-            (*condition)->op = Level::ConditionBase::Op::GE;
+            (*condition)->op = ConditionOp::GE;
             break;
 
         case kCurrentMessageCondition: {
@@ -345,7 +346,7 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
             if (!sub.read(&message->start, &message->page)) {
                 return false;
             }
-            (*condition)->op = Level::ConditionBase::Op::EQ;
+            (*condition)->op = ConditionOp::EQ;
             break;
         }
 
@@ -354,7 +355,7 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
             if (!sub.read(&computer->screen, &computer->line)) {
                 return false;
             }
-            (*condition)->op = Level::ConditionBase::Op::EQ;
+            (*condition)->op = ConditionOp::EQ;
             break;
         }
     }
@@ -370,8 +371,38 @@ bool read_from(pn::file_view in, Level::Condition* condition) {
 }
 
 static Level::Condition condition(pn::value_cref x0) {
+    path_value       x{x0};
     Level::Condition c;
-    read_from(x0.as_map().get("bin").as_data().open(), &c);
+    read_from(x.get("bin").value().as_data().open(), &c);
+
+    pn::string_view type = required_string(x.get("type"));
+    if (type == "autopilot") {
+    } else if (type == "building") {
+    } else if (type == "computer") {
+    } else if (type == "counter") {
+    } else if (type == "destroyed") {
+    } else if (type == "distance") {
+    } else if (type == "false") {
+        c.init<Level::FalseCondition>();
+        return c;
+    } else if (type == "health") {
+    } else if (type == "message") {
+    } else if (type == "ordered") {
+    } else if (type == "owner") {
+    } else if (type == "ships") {
+    } else if (type == "speed") {
+    } else if (type == "subject") {
+    } else if (type == "time") {
+    } else if (type == "zoom") {
+    } else {
+    }
+
+    c->op                = required_condition_op(x.get("op"));
+    c->persistent        = optional_bool(x.get("persistent")).value_or(false);
+    c->initially_enabled = !optional_bool(x.get("initially_disabled")).value_or(false);
+    c->subject           = optional_initial(x.get("subject")).value_or(Level::Initial::none());
+    c->object            = optional_initial(x.get("object")).value_or(Level::Initial::none());
+
     return c;
 }
 

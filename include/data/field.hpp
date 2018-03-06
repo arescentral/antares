@@ -107,6 +107,7 @@ Hue                       required_hue(path_value x);
 KillKind                  required_kill_kind(path_value x);
 sfz::optional<MoveOrigin> optional_origin(path_value x);
 int                       required_key(path_value x);
+ConditionOp               required_condition_op(path_value x);
 PushKind                  required_push_kind(path_value x);
 Screen                    required_screen(path_value x);
 Weapon                    required_weapon(path_value x);

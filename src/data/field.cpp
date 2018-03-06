@@ -155,11 +155,15 @@ sfz::optional<Handle<Admiral>> optional_admiral(path_value x) {
 Handle<BaseObject> required_base(path_value x) { return Handle<BaseObject>(required_int(x)); }
 
 sfz::optional<Handle<Level::Initial>> optional_initial(path_value x) {
-    sfz::optional<int64_t> i = optional_int(x);
-    if (i.has_value()) {
-        return sfz::make_optional(Handle<Level::Initial>(*i));
-    } else {
+    if (x.value().is_null()) {
         return sfz::nullopt;
+    } else if (x.value().is_int()) {
+        return sfz::make_optional(Handle<Level::Initial>(x.value().as_int()));
+    } else if (x.value().as_string() == "player") {
+        return sfz::make_optional(Handle<Level::Initial>(-2));
+    } else {
+        throw std::runtime_error(
+                pn::format("{0}: must be null, int, or \"player\"", x.path()).c_str());
     }
 }
 
@@ -321,6 +325,16 @@ int required_key(path_value x) {
                 {"zoom_shortcut", 29},
                 {"send_message", 30},
                 {"mouse", 31}});
+}
+
+ConditionOp required_condition_op(path_value x) {
+    return required_enum<ConditionOp>(
+            x, {{"eq", ConditionOp::EQ},
+                {"ne", ConditionOp::NE},
+                {"lt", ConditionOp::LT},
+                {"gt", ConditionOp::GT},
+                {"le", ConditionOp::LE},
+                {"ge", ConditionOp::GE}});
 }
 
 PushKind required_push_kind(path_value x) {

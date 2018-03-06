@@ -222,9 +222,7 @@ bool                        read_from(pn::file_view in, Level::Initial* level_in
 std::vector<Level::Initial> read_initials(int begin, int end);
 
 struct Level::ConditionBase {
-    enum class Op { EQ, NE, LT, GT, LE, GE };
-
-    Op                                         op                = Op::EQ;
+    ConditionOp                                op                = ConditionOp::EQ;
     bool                                       initially_enabled = true;
     bool                                       persistent        = false;
     Handle<Level::Initial>                     subject;

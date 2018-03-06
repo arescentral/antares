@@ -32,22 +32,22 @@
 namespace antares {
 
 template <typename X, typename Y>
-static bool op_compare(Level::ConditionBase::Op op, const X& x, const Y& y) {
+static bool op_compare(ConditionOp op, const X& x, const Y& y) {
     switch (op) {
-        case Level::ConditionBase::Op::EQ: return (x == y);
-        case Level::ConditionBase::Op::NE: return (x != y);
-        case Level::ConditionBase::Op::LT: return (x < y);
-        case Level::ConditionBase::Op::GT: return (x > y);
-        case Level::ConditionBase::Op::LE: return (x <= y);
-        case Level::ConditionBase::Op::GE: return (x >= y);
+        case ConditionOp::EQ: return (x == y);
+        case ConditionOp::NE: return (x != y);
+        case ConditionOp::LT: return (x < y);
+        case ConditionOp::GT: return (x > y);
+        case ConditionOp::LE: return (x <= y);
+        case ConditionOp::GE: return (x >= y);
     }
 }
 
 template <typename X, typename Y>
-static bool op_eq(Level::ConditionBase::Op op, const X& x, const Y& y) {
+static bool op_eq(ConditionOp op, const X& x, const Y& y) {
     switch (op) {
-        case Level::ConditionBase::Op::EQ: return (x == y);
-        case Level::ConditionBase::Op::NE: return (x != y);
+        case ConditionOp::EQ: return (x == y);
+        case ConditionOp::NE: return (x != y);
         default: return false;
     }
 }

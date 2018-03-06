@@ -59,6 +59,8 @@ enum class MoveOrigin {
     OBJECT,   // relative to object
 };
 
+enum class ConditionOp { EQ, NE, LT, GT, LE, GE };
+
 // Restricts actions based on the owners of the subject and object.
 enum class Owner {
     ANY       = 0,   // Always execute.
