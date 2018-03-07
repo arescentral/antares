@@ -183,8 +183,7 @@ struct Level {
     Point   star_map_point() const;
     int32_t chapter_number() const;
 };
-bool read_from(pn::file_view in, Level* level);
-bool read_from(pn::file_view in, Level::Player* level_player);
+Level level(pn::value_cref x);
 
 struct Level_Initial {
     Handle<BaseObject> base;

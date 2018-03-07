@@ -34,6 +34,8 @@ static const int16_t kLevel_IsTraining_Bit = 0x8000;
 const int16_t kLevelOwnNoShipTextID = 10000;
 const int16_t kLevelFoeNoShipTextID = 10050;
 
+bool read_from(pn::file_view in, Level::Player* level_player);
+
 Level* Level::get(int n) { return &plug.levels[n]; }
 
 bool read_from(pn::file_view in, ScenarioInfo* info) {
@@ -167,6 +169,12 @@ bool read_from(pn::file_view in, Level::Player* level_player) {
         level_player->name = Resource::strings(name_id).at(name_index - 1).copy();
     }
     return true;
+}
+
+Level level(pn::value_cref x) {
+    Level l;
+    read_from(x.as_map().get("bin").as_data().open(), &l);
+    return l;
 }
 
 static std::unique_ptr<Level::Condition> autopilot_condition(path_value x) {

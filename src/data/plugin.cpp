@@ -36,7 +36,7 @@ static const int16_t kSpaceObjectShortNameResID = 5001;
 ANTARES_GLOBAL ScenarioGlobals plug;
 
 template <typename T>
-static void read_all(pn::string_view name, pn::string_view dir, vector<T>& v) {
+static void read_all_binary(pn::string_view name, pn::string_view dir, vector<T>& v) {
     for (int i = 0; true; ++i) {
         pn::string path = pn::format("{0}/{1}.bin", dir, i);
         if (!Resource::exists(path)) {
@@ -59,6 +59,29 @@ static void read_all(pn::string_view name, pn::string_view dir, vector<T>& v) {
     }
 }
 
+static void read_all_levels(vector<Level>& v) {
+    v.clear();
+    for (int i = 0; true; ++i) {
+        pn::string path = pn::format("levels/{0}.pn", i);
+        if (!Resource::exists(path)) {
+            break;
+        }
+
+        try {
+            pn::value  x;
+            pn_error_t e;
+            if (!pn::parse(Resource::path(path).data().open(), x, &e)) {
+                throw std::runtime_error(
+                        pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code))
+                                .c_str());
+            }
+            v.push_back(level(x));
+        } catch (...) {
+            std::throw_with_nested(std::runtime_error(path.c_str()));
+        }
+    }
+}
+
 void PluginInit() {
     {
         Resource rsrc = Resource::path("info.pn");
@@ -71,9 +94,9 @@ void PluginInit() {
         }
     }
 
-    read_all("level", "levels", plug.levels);
-    read_all("objects", "objects", plug.objects);
-    read_all("races", "races", plug.races);
+    read_all_levels(plug.levels);
+    read_all_binary("objects", "objects", plug.objects);
+    read_all_binary("races", "races", plug.races);
 
     auto level_names = Resource::strings(kLevelNameID);
     for (auto& level : plug.levels) {
