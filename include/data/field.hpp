@@ -109,6 +109,7 @@ sfz::optional<HandleList<Level_Condition>> optional_condition_range(path_value x
 HandleList<Level_Initial>                  required_initial_range(path_value x);
 
 sfz::optional<coordPointType> optional_point(path_value x);
+Point                         required_point(path_value x);
 
 Hue                       required_hue(path_value x);
 KillKind                  required_kill_kind(path_value x);
@@ -122,9 +123,11 @@ Weapon                    required_weapon(path_value x);
 Zoom                      required_zoom(path_value x);
 
 sfz::optional<int32_t> optional_object_attributes(path_value x);
+sfz::optional<int32_t> optional_initial_attributes(path_value x);
 int32_t                optional_keys(path_value x);
 
-std::vector<pn::string> required_string_array(path_value x);
+std::vector<pn::string>         required_string_array(path_value x);
+sfz::optional<std::vector<int>> optional_int_array(path_value x);
 
 }  // namespace antares
 

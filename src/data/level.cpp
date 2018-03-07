@@ -379,32 +379,42 @@ std::vector<Level::Briefing> read_briefings(int begin, int end) {
     return briefings;
 }
 
-bool read_from(pn::file_view in, Level::Initial* level_initial) {
-    int32_t type, owner;
-    if (!(in.read(&type, &owner, pn::pad(8)) && read_from(in, &level_initial->at) &&
-          read_from(in, &level_initial->earning) &&
-          in.read(pn::pad(12), &level_initial->sprite_override))) {
-        return false;
+static Level::Initial initial(pn::value_cref x0) {
+    if (!x0.is_map()) {
+        throw std::runtime_error("must be map");
     }
-    for (size_t i = 0; i < kMaxTypeBaseCanBuild; ++i) {
-        if (!in.read(&level_initial->build[i])) {
-            return false;
+    path_value x{x0};
+
+    Level::Initial i;
+    i.base    = required_base(x.get("base"));
+    i.owner   = optional_admiral(x.get("owner")).value_or(Handle<Admiral>(-1));
+    i.at      = required_point(x.get("at"));
+    i.earning = optional_fixed(x.get("earning")).value_or(Fixed::zero());
+
+    i.name_override   = optional_string(x.get("rename")).value_or("").copy();
+    i.sprite_override = optional_int(x.get("sprite_override")).value_or(-1);
+
+    i.target = optional_initial(x.get("target")).value_or(Level::Initial::none());
+
+    i.attributes = Level::Initial::Attributes(
+            optional_initial_attributes(x.get("attributes")).value_or(0));
+
+    std::vector<int> build = optional_int_array(x.get("build")).value_or(std::vector<int>{});
+    if (build.size() >= kMaxTypeBaseCanBuild) {
+        throw std::runtime_error(pn::format(
+                                         "{0}: has {1} elements, more than max of {2}",
+                                         x.get("build").path(), build.size(), kMaxTypeBaseCanBuild)
+                                         .c_str());
+    }
+    for (int x = 0; x < kMaxTypeBaseCanBuild; ++x) {
+        if (x < build.size()) {
+            i.build[x] = build[x];
+        } else {
+            i.build[x] = -1;
         }
     }
-    int32_t  name_id, name_index;
-    uint32_t attributes;
-    if (!in.read(&level_initial->target, &name_id, &name_index, &attributes)) {
-        return false;
-    }
-    level_initial->base       = Handle<BaseObject>(type);
-    level_initial->owner      = Handle<Admiral>(owner);
-    level_initial->attributes = Level::Initial::Attributes(attributes);
-    if (name_id > 0) {
-        level_initial->name_override = Resource::strings(name_id).at(name_index - 1).copy();
-    } else {
-        level_initial->name_override = "";
-    }
-    return true;
+
+    return i;
 }
 
 std::vector<Level::Initial> read_initials(int begin, int end) {
@@ -415,8 +425,20 @@ std::vector<Level::Initial> read_initials(int begin, int end) {
     std::vector<Level::Initial> initials;
     initials.resize(end - begin);
     for (int i : sfz::range(begin, end)) {
-        Resource r = Resource::path(pn::format("initials/{0}.bin", i));
-        read_from(r.data().open(), &initials[i - begin]);
+        pn::string path = pn::format("initials/{0}.pn", i);
+        try {
+            Resource   r = Resource::path(path);
+            pn::value  x;
+            pn_error_t e;
+            if (!pn::parse(r.data().open(), x, &e)) {
+                throw std::runtime_error(
+                        pn::format("{1}:{2}: {3}", e.lineno, e.column, pn_strerror(e.code))
+                                .c_str());
+            }
+            initials[i - begin] = initial(x);
+        } catch (...) {
+            std::throw_with_nested(std::runtime_error(path.c_str()));
+        }
     }
     return initials;
 }

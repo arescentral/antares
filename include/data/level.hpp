@@ -195,8 +195,8 @@ struct Level_Initial {
     pn::string name_override;
     int32_t    sprite_override;
 
-    int32_t build[kMaxTypeBaseCanBuild];
-    int32_t target;
+    int32_t                build[kMaxTypeBaseCanBuild];
+    Handle<Level::Initial> target;
 
     class Attributes {
       public:

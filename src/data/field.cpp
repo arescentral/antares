@@ -300,6 +300,16 @@ sfz::optional<coordPointType> optional_point(path_value x) {
     }
 }
 
+Point required_point(path_value x) {
+    if (x.value().is_map()) {
+        int px = required_int(x.get("x"));
+        int py = required_int(x.get("y"));
+        return {px, py};
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
+    }
+}
+
 Hue required_hue(path_value x) {
     return required_enum<Hue>(
             x, {{"red", Hue::RED},
@@ -468,6 +478,57 @@ sfz::optional<int32_t> optional_object_attributes(path_value x) {
     }
 }
 
+sfz::optional<int32_t> optional_initial_attributes(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_map()) {
+        static const pn::string_view flags[32] = {"can_turn",
+                                                  "can_be_engaged",
+                                                  "has_direction_goal",
+                                                  "is_remote",
+                                                  "fixed_race",
+                                                  "initially_hidden",
+                                                  "does_bounce",
+                                                  "is_self_animated",
+                                                  "shape_from_direction",
+                                                  "is_player_ship",
+                                                  "can_be_destination",
+                                                  "can_engage",
+                                                  "can_evade",
+                                                  "can_accept_messages",
+                                                  "can_accept_build",
+                                                  "can_accept_destination",
+                                                  "autotarget",
+                                                  "animation_cycle",
+                                                  "can_collide",
+                                                  "can_be_hit",
+                                                  "is_destination",
+                                                  "hide_effect",
+                                                  "release_energy_on_death",
+                                                  "hated",
+                                                  "occupies_space",
+                                                  "static_destination",
+                                                  "can_be_evaded",
+                                                  "neutral_death",
+                                                  "is_guided",
+                                                  "appear_on_radar",
+                                                  "bit31",
+                                                  "on_autopilot"};
+
+        int32_t bit    = 0x00000001;
+        int32_t result = 0x00000000;
+        for (pn::string_view flag : flags) {
+            if (optional_bool(x.get(flag)).value_or(false)) {
+                result |= bit;
+            }
+            bit <<= 1;
+        }
+        return sfz::make_optional(+result);
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
+    }
+}
+
 int32_t optional_keys(path_value x) {
     if (x.value().is_null()) {
         return 0x00000000;
@@ -494,6 +555,21 @@ std::vector<pn::string> required_string_array(path_value x) {
         return result;
     } else {
         throw std::runtime_error(pn::format("{0}: must be array", x.path()).c_str());
+    }
+}
+
+sfz::optional<std::vector<int>> optional_int_array(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_array()) {
+        pn::array_cref   a = x.value().as_array();
+        std::vector<int> result;
+        for (int i = 0; i < a.size(); ++i) {
+            result.emplace_back(required_int(x.get(i)));
+        }
+        return sfz::make_optional<std::vector<int>>(std::move(result));
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
     }
 }
 

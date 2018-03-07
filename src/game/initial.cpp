@@ -92,16 +92,16 @@ void create_initial(Handle<Level::Initial> initial) {
 
 void set_initial_destination(Handle<Level::Initial> initial, bool preserve) {
     auto object = g.initials[initial.number()];
-    if (!object.get()                  // hasn't been created yet
-        || (initial->target < 0)       // doesn't have a target
-        || (!initial->owner.get())) {  // doesn't have an owner
+    if (!object.get()                      // hasn't been created yet
+        || (initial->target.number() < 0)  // doesn't have a target
+        || (!initial->owner.get())) {      // doesn't have an owner
         return;
     }
 
     // get the correct admiral #
     Handle<Admiral> owner = initial->owner;
 
-    const auto& target = g.initials[initial->target];
+    const auto& target = g.initials[initial->target.number()];
     if (target.get()) {
         auto saveDest = owner->target();  // save the original dest
 
