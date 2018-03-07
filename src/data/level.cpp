@@ -34,7 +34,7 @@ static const int16_t kLevel_IsTraining_Bit = 0x8000;
 const int16_t kLevelOwnNoShipTextID = 10000;
 const int16_t kLevelFoeNoShipTextID = 10050;
 
-bool read_from(pn::file_view in, Level::Player* level_player);
+bool read_from(pn::file_view in, Level::Player* level_player, LevelType* level_type);
 
 Level* Level::get(int n) { return &plug.levels[n]; }
 
@@ -84,15 +84,10 @@ bool read_from(pn::file_view in, Level* level) {
         return false;
     }
 
-    level->type = Level::DEMO;
+    level->type = LevelType::DEMO;
     for (size_t i = 0; i < kMaxPlayerNum; ++i) {
-        if (!read_from(in, &level->player[i])) {
+        if (!read_from(in, &level->player[i], &level->type)) {
             return false;
-        }
-        if (level->player[i].playerType == kSingleHumanPlayer) {
-            level->type = Level::SOLO;
-        } else if (level->player[i].playerType == kNetworkHumanPlayer) {
-            level->type = Level::NET;
         }
     }
 
@@ -101,11 +96,11 @@ bool read_from(pn::file_view in, Level* level) {
     int16_t initial_first, initial_num;
     int16_t condition_first, condition_num;
     int16_t briefing_first, briefing_num;
-    if (!(in.read(&score_string_id, &initial_first, &prologue_id, &initial_num, &level->songID,
-                  &condition_first, &epilogue_id, &condition_num, &level->starMapH,
-                  &briefing_first, &level->starMapV, &briefing_num, &par_time, &unused,
-                  &level->parKills, &level->levelNameStrNum) &&
-          read_from(in, &level->parKillRatio) && in.read(&level->parLosses, &start_time))) {
+    if (!(in.read(
+                &score_string_id, &initial_first, &prologue_id, &initial_num, &level->songID,
+                &condition_first, &epilogue_id, &condition_num, &level->starMapH, &briefing_first,
+                &level->starMapV, &briefing_num, &par_time, &unused, &level->parKills,
+                &level->levelNameStrNum, pn::pad(4), &level->parLosses, &start_time))) {
         return false;
     }
     if (score_string_id > 0) {
@@ -123,8 +118,8 @@ bool read_from(pn::file_view in, Level* level) {
     level->briefings  = read_briefings(briefing_first, briefing_first + briefing_num);
 
     switch (level->type) {
-        case Level::DEMO: break;
-        case Level::SOLO:
+        case LevelType::DEMO: break;
+        case LevelType::SOLO:
             try {
                 level->own_no_ships_text =
                         Resource::text(kLevelOwnNoShipTextID + level->levelNameStrNum);
@@ -138,7 +133,7 @@ bool read_from(pn::file_view in, Level* level) {
                 level->epilogue = Resource::text(epilogue_id);
             }
             break;
-        case Level::NET:
+        case LevelType::NET:
             level->own_no_ships_text =
                     Resource::text(kLevelOwnNoShipTextID + level->levelNameStrNum);
             level->foe_no_ships_text =
@@ -155,18 +150,21 @@ bool read_from(pn::file_view in, Level* level) {
     return true;
 }
 
-bool read_from(pn::file_view in, Level::Player* level_player) {
-    uint32_t unused1;
-    int16_t  name_id, name_index;
-    uint16_t unused2;
-    if (!(in.read(&level_player->playerType, &level_player->playerRace, &name_id, &name_index,
-                  &unused1) &&
+bool read_from(pn::file_view in, Level::Player* level_player, LevelType* level_type) {
+    int16_t name_id, name_index;
+    int16_t player_type;
+    if (!(in.read(&player_type, &level_player->playerRace, &name_id, &name_index, pn::pad(4)) &&
           read_from(in, &level_player->earningPower) &&
-          in.read(&level_player->netRaceFlags, &unused2))) {
+          in.read(&level_player->netRaceFlags, pn::pad(2)))) {
         return false;
     }
     if ((name_id > 0) && (name_index > 0)) {
         level_player->name = Resource::strings(name_id).at(name_index - 1).copy();
+    }
+    switch (player_type) {
+        case 0: level_player->playerType = PlayerType::HUMAN, *level_type = LevelType::SOLO; break;
+        case 1: level_player->playerType = PlayerType::HUMAN, *level_type = LevelType::NET; break;
+        default: level_player->playerType = PlayerType::CPU; break;
     }
     return true;
 }

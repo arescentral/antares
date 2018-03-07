@@ -43,12 +43,6 @@ const size_t kMaxPlayerNum = 4;
 const int32_t kMaxTypeBaseCanBuild = 12;
 const int32_t kMaxShipCanBuild     = 6;
 
-enum {
-    kSingleHumanPlayer  = 0,
-    kNetworkHumanPlayer = 1,
-    kComputerPlayer     = 2,
-};
-
 const int16_t kLevelBriefMask  = 0x00ff;
 const int16_t kLevelAngleMask  = 0xff00;
 const int32_t kLevelAngleShift = 8;
@@ -133,37 +127,31 @@ struct Level {
     struct TimeCondition;
     struct ZoomCondition;
 
-    enum Type {
-        DEMO,
-        SOLO,
-        NET,
-    };
-    Type type = DEMO;
+    LevelType type = LevelType::DEMO;
 
     struct Player {
-        int16_t    playerType;
-        int16_t    playerRace;
+        PlayerType playerType = PlayerType::CPU;
+        int16_t    playerRace = 100;
         pn::string name;
-        Fixed      earningPower;
-        int16_t    netRaceFlags;
+        Fixed      earningPower = Fixed::zero();
+        int16_t    netRaceFlags = 0;
     };
 
     pn::string              name;
-    int16_t                 netRaceFlags;
-    int16_t                 playerNum;
+    int16_t                 netRaceFlags = 0;
+    int16_t                 playerNum    = 0;
     Player                  player[kMaxPlayerNum];
     std::vector<pn::string> score_strings;
-    int16_t                 songID;
-    int16_t                 starMapH;
-    int16_t                 starMapV;
-    game_ticks              parTime;
-    int16_t                 parKills;
-    int16_t                 levelNameStrNum;
-    Fixed                   parKillRatio;
-    int16_t                 parLosses;
-    secs                    startTime;
-    bool                    is_training;
-    int32_t                 angle;
+    int16_t                 songID          = -1;
+    int16_t                 starMapH        = 0;
+    int16_t                 starMapV        = 0;
+    game_ticks              parTime         = game_ticks{};
+    int16_t                 parKills        = 0;
+    int16_t                 levelNameStrNum = -1;
+    int16_t                 parLosses       = 0;
+    secs                    startTime       = secs(0);
+    bool                    is_training     = false;
+    int32_t                 angle           = 0;
 
     std::vector<Initial>                    initials;
     std::vector<std::unique_ptr<Condition>> conditions;

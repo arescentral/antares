@@ -116,6 +116,7 @@ KillKind                  required_kill_kind(path_value x);
 sfz::optional<MoveOrigin> optional_origin(path_value x);
 int                       required_key(path_value x);
 ConditionOp               required_condition_op(path_value x);
+PlayerType                required_player_type(path_value x);
 PushKind                  required_push_kind(path_value x);
 Screen                    required_screen(path_value x);
 SubjectValue              required_subject_value(path_value x);

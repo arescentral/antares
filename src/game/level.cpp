@@ -193,7 +193,7 @@ LoadState start_construct_level(Handle<Level> level) {
     SetMiniScreenStatusStrList(g.level->score_strings);
 
     for (int i = 0; i < g.level->playerNum; i++) {
-        if (g.level->player[i].playerType == kSingleHumanPlayer) {
+        if (g.level->player[i].playerType == PlayerType::HUMAN) {
             auto admiral = Admiral::make(i, kAIsHuman, g.level->player[i]);
             admiral->pay(Fixed::from_long(5000));
             g.admiral = admiral;

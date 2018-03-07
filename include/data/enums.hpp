@@ -61,12 +61,16 @@ enum class MoveOrigin {
 
 enum class ConditionOp { EQ, NE, LT, GT, LE, GE };
 
+enum class LevelType { SOLO, NET, DEMO };
+
 // Restricts actions based on the owners of the subject and object.
 enum class Owner {
     ANY       = 0,   // Always execute.
     SAME      = 1,   // Execute only if match.
     DIFFERENT = -1,  // Execute only if no match.
 };
+
+enum class PlayerType { HUMAN, CPU };
 
 enum class PushKind {
     STOP,        // set focus’s velocity to 0
