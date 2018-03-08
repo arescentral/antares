@@ -22,83 +22,6 @@
 
 namespace antares {
 
-static const uint32_t kPeriodicActionTimeMask   = 0xff000000;
-static const uint32_t kPeriodicActionRangeMask  = 0x00ff0000;
-static const uint32_t kPeriodicActionNotMask    = 0x0000ffff;
-static const int32_t  kPeriodicActionTimeShift  = 24;
-static const int32_t  kPeriodicActionRangeShift = 16;
-
-static const uint32_t kDestroyActionNotMask     = 0x7fffffff;
-static const uint32_t kDestroyActionDontDieFlag = 0x80000000;
-
-static bool read_destroy(pn::file_view in, BaseObject* object) {
-    int32_t start, count;
-    if (!in.read(&start, &count)) {
-        return false;
-    }
-    object->destroyDontDie = count & kDestroyActionDontDieFlag;
-    count &= kDestroyActionNotMask;
-    auto end        = (start >= 0) ? (start + count) : start;
-    object->destroy = read_actions(start, end);
-    return true;
-}
-
-static bool read_expire(pn::file_view in, BaseObject* object) {
-    int32_t start, count;
-    if (!in.read(&start, &count)) {
-        return false;
-    }
-    object->expireDontDie = count & kDestroyActionDontDieFlag;
-    count &= kDestroyActionNotMask;
-    auto end       = (start >= 0) ? (start + count) : start;
-    object->expire = read_actions(start, end);
-    return true;
-}
-
-static bool read_create(pn::file_view in, BaseObject* object) {
-    int32_t start, count;
-    if (!in.read(&start, &count)) {
-        return false;
-    }
-    auto end       = (start >= 0) ? (start + count) : start;
-    object->create = read_actions(start, end);
-    return true;
-}
-
-static bool read_collide(pn::file_view in, BaseObject* object) {
-    int32_t start, count;
-    if (!in.read(&start, &count)) {
-        return false;
-    }
-    auto end        = (start >= 0) ? (start + count) : start;
-    object->collide = read_actions(start, end);
-    return true;
-}
-
-static bool read_activate(pn::file_view in, BaseObject* object) {
-    int32_t start, count;
-    if (!in.read(&start, &count)) {
-        return false;
-    }
-    object->activatePeriod = ticks((count & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift);
-    object->activatePeriodRange =
-            ticks((count & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift);
-    count &= kPeriodicActionNotMask;
-    auto end         = (start >= 0) ? (start + count) : start;
-    object->activate = read_actions(start, end);
-    return true;
-}
-
-static bool read_arrive(pn::file_view in, BaseObject* object) {
-    int32_t start, count;
-    if (!in.read(&start, &count)) {
-        return false;
-    }
-    auto end       = (start >= 0) ? (start + count) : start;
-    object->arrive = read_actions(start, end);
-    return true;
-}
-
 static bool read_weapons(pn::file_view in, BaseObject* object) {
     int32_t pulse, beam, special;
     if (!in.read(
@@ -171,10 +94,8 @@ bool read_from(pn::file_view in, BaseObject* object) {
     if (!(read_weapons(in, object) && read_from(in, &object->friendDefecit) &&
           read_from(in, &object->dangerThreshold) &&
           in.read(&object->specialDirection, &object->arriveActionDistance) &&
-          read_destroy(in, object) && read_expire(in, object) && read_create(in, object) &&
-          read_collide(in, object) && read_activate(in, object) && read_arrive(in, object) &&
-          (fread(section, 1, 32, in.c_obj()) == 32) && in.read(&object->buildFlags) &&
-          in.read(&object->orderFlags))) {
+          in.read(pn::pad(48)) && (fread(section, 1, 32, in.c_obj()) == 32) &&
+          in.read(&object->buildFlags) && in.read(&object->orderFlags))) {
         return false;
     }
 
@@ -257,6 +178,27 @@ BaseObject base_object(pn::value_cref x0) {
     if (!read_from(x.get("bin").value().as_data().open(), &o)) {
         throw std::runtime_error("read failure");
     }
+
+    o.destroy = optional_action_array(x.get("on_destroy"))
+                        .value_or(std::vector<std::unique_ptr<const Action>>{});
+    o.expire = optional_action_array(x.get("on_expire"))
+                       .value_or(std::vector<std::unique_ptr<const Action>>{});
+    o.create = optional_action_array(x.get("on_create"))
+                       .value_or(std::vector<std::unique_ptr<const Action>>{});
+    o.collide = optional_action_array(x.get("on_collide"))
+                        .value_or(std::vector<std::unique_ptr<const Action>>{});
+    o.activate = optional_action_array(x.get("on_activate"))
+                         .value_or(std::vector<std::unique_ptr<const Action>>{});
+    o.arrive = optional_action_array(x.get("on_arrive"))
+                       .value_or(std::vector<std::unique_ptr<const Action>>{});
+
+    o.destroyDontDie = optional_bool(x.get("destroy_dont_die")).value_or(false);
+    o.expireDontDie  = optional_bool(x.get("expire_dont_die")).value_or(false);
+    Range<int64_t> activate_period =
+            optional_int_range(x.get("activate_period")).value_or(Range<int64_t>{0, 0});
+    o.activatePeriod      = ticks(activate_period.begin);
+    o.activatePeriodRange = ticks(activate_period.end - activate_period.begin);
+
     return o;
 }
 

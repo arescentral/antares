@@ -421,6 +421,20 @@ std::vector<std::unique_ptr<const Action>> required_action_array(path_value x) {
     }
 }
 
+sfz::optional<std::vector<std::unique_ptr<const Action>>> optional_action_array(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_array()) {
+        std::vector<std::unique_ptr<const Action>> a;
+        for (int i = 0; i < x.value().as_array().size(); ++i) {
+            a.push_back(action(x.get(i)));
+        }
+        return sfz::make_optional(std::move(a));
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be array", x.path()).c_str());
+    }
+}
+
 Handle<BaseObject> Action::created_base() const { return BaseObject::none(); }
 Range<int64_t>     Action::sound_range() const { return Range<int64_t>::empty(); }
 bool               Action::alters_owner() const { return false; }
