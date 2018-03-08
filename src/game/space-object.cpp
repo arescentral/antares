@@ -241,8 +241,9 @@ SpaceObject::SpaceObject(
         continue;
     }
 
-    if (baseType->activatePeriod != ticks(0)) {
-        periodicTime = baseType->activatePeriod + randomSeed.next(baseType->activatePeriodRange);
+    if (baseType->activate_period.begin != ticks(0)) {
+        periodicTime = baseType->activate_period.begin +
+                       randomSeed.next(baseType->activate_period.range());
     }
 
     direction = baseType->initialDirection;
@@ -436,8 +437,9 @@ void SpaceObject::change_base_type(
 
     // check periodic time
     obj->periodicTime = ticks(0);
-    if (base->activatePeriod != ticks(0)) {
-        obj->periodicTime = base->activatePeriod + obj->randomSeed.next(base->activatePeriodRange);
+    if (base->activate_period.begin != ticks(0)) {
+        obj->periodicTime =
+                base->activate_period.begin + obj->randomSeed.next(base->activate_period.range());
     }
 
     obj->pulse.base          = base->pulse.base;

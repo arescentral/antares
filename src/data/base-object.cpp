@@ -209,12 +209,10 @@ BaseObject base_object(pn::value_cref x0) {
     o.arrive = optional_action_array(x.get("on_arrive"))
                        .value_or(std::vector<std::unique_ptr<const Action>>{});
 
-    o.destroyDontDie = optional_bool(x.get("destroy_dont_die")).value_or(false);
-    o.expireDontDie  = optional_bool(x.get("expire_dont_die")).value_or(false);
-    Range<int64_t> activate_period =
-            optional_int_range(x.get("activate_period")).value_or(Range<int64_t>{0, 0});
-    o.activatePeriod      = ticks(activate_period.begin);
-    o.activatePeriodRange = ticks(activate_period.end - activate_period.begin);
+    o.destroyDontDie  = optional_bool(x.get("destroy_dont_die")).value_or(false);
+    o.expireDontDie   = optional_bool(x.get("expire_dont_die")).value_or(false);
+    o.activate_period = optional_ticks_range(x.get("activate_period"))
+                                .value_or(Range<ticks>{ticks(0), ticks(0)});
 
     return o;
 }

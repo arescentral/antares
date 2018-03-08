@@ -289,6 +289,15 @@ Range<Fixed> required_fixed_range(path_value x) {
     }
 }
 
+sfz::optional<Range<ticks>> optional_ticks_range(path_value x) {
+    auto range = optional_int_range(x);
+    if (range.has_value()) {
+        return sfz::make_optional(Range<ticks>{ticks(range->begin), ticks(range->end)});
+    } else {
+        return sfz::nullopt;
+    }
+}
+
 Range<ticks> required_ticks_range(path_value x) {
     auto range = required_int_range(x);
     return {ticks(range.begin), ticks(range.end)};

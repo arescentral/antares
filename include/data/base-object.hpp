@@ -330,10 +330,9 @@ class BaseObject {
     std::vector<std::unique_ptr<const Action>> activate;
     std::vector<std::unique_ptr<const Action>> arrive;
 
-    bool  destroyDontDie;
-    bool  expireDontDie;
-    ticks activatePeriod;
-    ticks activatePeriodRange;
+    bool         destroyDontDie;
+    bool         expireDontDie;
+    Range<ticks> activate_period;
 
     objectFrameType frame;
 

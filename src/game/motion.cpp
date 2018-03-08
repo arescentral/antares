@@ -481,8 +481,8 @@ static void activate_object(const Handle<SpaceObject>& o) {
         o->periodicTime--;
         if (o->periodicTime <= ticks(0)) {
             exec(o->baseType->activate, o, SpaceObject::none(), NULL);
-            o->periodicTime = o->baseType->activatePeriod +
-                              o->randomSeed.next(o->baseType->activatePeriodRange);
+            o->periodicTime = o->baseType->activate_period.begin +
+                              o->randomSeed.next(o->baseType->activate_period.range());
         }
     }
 }
