@@ -32,9 +32,6 @@ namespace antares {
 static const int16_t kLevel_StartTimeMask  = 0x7fff;
 static const int16_t kLevel_IsTraining_Bit = 0x8000;
 
-const int16_t kLevelOwnNoShipTextID = 10000;
-const int16_t kLevelFoeNoShipTextID = 10050;
-
 static sfz::optional<std::vector<Level::Initial>> optional_initial_array(path_value x);
 static sfz::optional<std::vector<std::unique_ptr<Level::Condition>>> optional_condition_array(
         path_value x);
@@ -91,13 +88,12 @@ bool read_from(pn::file_view in, Level* level) {
     }
 
     int16_t par_time, start_time, unused;
-    int16_t score_string_id, prologue_id, epilogue_id;
+    int16_t score_string_id;
     int16_t briefing_num;
     if (!in.read(
-                &score_string_id, pn::pad(2), &prologue_id, pn::pad(2), &level->songID, pn::pad(2),
-                &epilogue_id, pn::pad(2), &level->starMapH, pn::pad(2), &level->starMapV,
-                &briefing_num, &par_time, &unused, &level->parKills, &level->levelNameStrNum,
-                pn::pad(4), &level->parLosses, &start_time)) {
+                &score_string_id, pn::pad(6), &level->songID, pn::pad(6), &level->starMapH,
+                pn::pad(2), &level->starMapV, &briefing_num, &par_time, &unused, &level->parKills,
+                &level->levelNameStrNum, pn::pad(4), &level->parLosses, &start_time)) {
         return false;
     }
     if (score_string_id > 0) {
@@ -107,33 +103,6 @@ bool read_from(pn::file_view in, Level* level) {
         level->angle = (((briefing_num & kLevelAngleMask) >> kLevelAngleShift) - 1) * 2;
     } else {
         level->angle = -1;
-    }
-
-    switch (level->type) {
-        case LevelType::DEMO: break;
-        case LevelType::SOLO:
-            try {
-                level->own_no_ships_text =
-                        Resource::text(kLevelOwnNoShipTextID + level->levelNameStrNum);
-            } catch (std::runtime_error& e) {
-                level->own_no_ships_text.clear();
-            }
-            if (prologue_id > 0) {
-                level->prologue = Resource::text(prologue_id);
-            }
-            if (epilogue_id > 0) {
-                level->epilogue = Resource::text(epilogue_id);
-            }
-            break;
-        case LevelType::NET:
-            level->own_no_ships_text =
-                    Resource::text(kLevelOwnNoShipTextID + level->levelNameStrNum);
-            level->foe_no_ships_text =
-                    Resource::text(kLevelFoeNoShipTextID + level->levelNameStrNum);
-            if (prologue_id > 0) {
-                level->description = Resource::text(prologue_id);
-            }
-            break;
     }
 
     level->parTime     = game_ticks(secs(par_time));
@@ -193,6 +162,22 @@ Level level(pn::value_cref x0) {
                            .value_or(std::vector<std::unique_ptr<Level::Condition>>{});
     l.briefings =
             optional_briefing_array(x.get("briefings")).value_or(std::vector<Level::Briefing>{});
+
+    switch (l.type) {
+        case LevelType::DEMO: break;
+
+        case LevelType::SOLO:
+            l.own_no_ships_text = optional_string(x.get("no_ships")).value_or("").copy();
+            l.prologue          = optional_string(x.get("prologue")).value_or("").copy();
+            l.epilogue          = optional_string(x.get("epilogue")).value_or("").copy();
+            break;
+
+        case LevelType::NET:
+            l.own_no_ships_text = required_string(x.get("own_no_ships")).copy();
+            l.foe_no_ships_text = required_string(x.get("foe_no_ships")).copy();
+            l.description       = required_string(x.get("description")).copy();
+            break;
+    }
 
     read_from(x.get("bin").value().as_data().open(), &l);
     return l;
