@@ -268,9 +268,9 @@ Hue GetAdmiralColor(Handle<Admiral> a) {
     return a->hue();
 }
 
-int32_t GetAdmiralRace(Handle<Admiral> a) {
+Handle<Race> GetAdmiralRace(Handle<Admiral> a) {
     if (!a.get()) {
-        return -1;
+        return Race::none();
     }
     return a->race();
 }

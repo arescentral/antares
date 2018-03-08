@@ -192,13 +192,14 @@ LoadState start_construct_level(Handle<Level> level) {
 
     SetMiniScreenStatusStrList(g.level->score_strings);
 
-    for (int i = 0; i < g.level->playerNum; i++) {
-        if (g.level->player[i].playerType == PlayerType::HUMAN) {
-            auto admiral = Admiral::make(i, kAIsHuman, g.level->player[i]);
+    int i = 0;
+    for (const auto& player : g.level->players) {
+        if (player.playerType == PlayerType::HUMAN) {
+            auto admiral = Admiral::make(i++, kAIsHuman, player);
             admiral->pay(Fixed::from_long(5000));
             g.admiral = admiral;
         } else {
-            auto admiral = Admiral::make(i, kAIsComputer, g.level->player[i]);
+            auto admiral = Admiral::make(i++, kAIsComputer, player);
             admiral->pay(Fixed::from_long(5000));
         }
     }
@@ -242,14 +243,12 @@ static void load_blessed_objects(std::bitset<16> all_colors, LoadState* state) {
     // in all colors; the other three are needed only as neutral
     // objects by default.
     state->colors_needed[plug.info.playerBodyID.number()] |= all_colors;
-    for (int i = 0; i < g.level->playerNum; i++) {
-        const auto&        info      = plug.info;
-        Handle<BaseObject> blessed[] = {
-                info.energyBlobID, info.warpInFlareID, info.warpOutFlareID, info.playerBodyID,
-        };
-        for (auto id : blessed) {
-            AddBaseObjectMedia(id, Hue::GRAY, all_colors, state);
-        }
+    const auto&        info      = plug.info;
+    Handle<BaseObject> blessed[] = {
+            info.energyBlobID, info.warpInFlareID, info.warpOutFlareID, info.playerBodyID,
+    };
+    for (auto id : blessed) {
+        AddBaseObjectMedia(id, Hue::GRAY, all_colors, state);
     }
 }
 

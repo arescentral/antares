@@ -37,6 +37,7 @@ class BaseObject;
 struct Level_Briefing;
 struct Level_Condition;
 struct Level_Initial;
+struct Race;
 
 const size_t kMaxPlayerNum = 4;
 
@@ -130,17 +131,16 @@ struct Level {
     LevelType type = LevelType::DEMO;
 
     struct Player {
-        PlayerType playerType = PlayerType::CPU;
-        int16_t    playerRace = 100;
-        pn::string name;
-        Fixed      earningPower = Fixed::zero();
-        int16_t    netRaceFlags = 0;
+        PlayerType   playerType = PlayerType::CPU;
+        Handle<Race> playerRace;
+        pn::string   name;
+        Fixed        earningPower = Fixed::zero();
+        int16_t      netRaceFlags = 0;
     };
 
     pn::string              name;
     int16_t                 netRaceFlags = 0;
-    int16_t                 playerNum    = 0;
-    Player                  player[kMaxPlayerNum];
+    std::vector<Player>     players;
     std::vector<pn::string> score_strings;
     int16_t                 songID          = -1;
     int16_t                 starMapH        = 0;
@@ -403,6 +403,9 @@ struct Race {
     uint8_t  apparentColor;
     uint32_t illegalColors;
     int32_t  advantage;
+
+    static Race*        get(int n);
+    static Handle<Race> none() { return Handle<Race>(-1); }
 
     static const size_t byte_size = 14;
 };

@@ -33,6 +33,7 @@ namespace antares {
 struct Level;
 struct Level_Initial;
 struct Level_Condition;
+struct Race;
 
 template <typename T>
 struct Range {
@@ -100,6 +101,7 @@ sfz::optional<Handle<Level_Initial>> optional_initial(path_value x);
 Handle<Level_Initial>                required_initial(path_value x);
 sfz::optional<Handle<Level>>         optional_level(path_value x);
 sfz::optional<Owner>                 optional_owner(path_value x);
+Handle<Race>                         required_race(path_value x);
 
 sfz::optional<Range<int64_t>>              optional_int_range(path_value x);
 Range<int64_t>                             required_int_range(path_value x);
@@ -116,6 +118,7 @@ KillKind                  required_kill_kind(path_value x);
 sfz::optional<MoveOrigin> optional_origin(path_value x);
 int                       required_key(path_value x);
 ConditionOp               required_condition_op(path_value x);
+LevelType                 required_level_type(path_value x);
 PlayerType                required_player_type(path_value x);
 PushKind                  required_push_kind(path_value x);
 Screen                    required_screen(path_value x);

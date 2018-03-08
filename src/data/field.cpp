@@ -209,6 +209,8 @@ sfz::optional<Owner> optional_owner(path_value x) {
             x, {{"any", Owner::ANY}, {"same", Owner::SAME}, {"different", Owner::DIFFERENT}});
 }
 
+Handle<Race> required_race(path_value x) { return Handle<Race>(required_int(x)); }
+
 template <typename T, int N>
 T required_enum(path_value x, const std::pair<pn::string_view, T> (&values)[N]) {
     if (x.value().is_string()) {
@@ -382,6 +384,15 @@ ConditionOp required_condition_op(path_value x) {
                 {"gt", ConditionOp::GT},
                 {"le", ConditionOp::LE},
                 {"ge", ConditionOp::GE}});
+}
+
+LevelType required_level_type(path_value x) {
+    return required_enum<LevelType>(
+            x, {{"solo", LevelType::SOLO}, {"net", LevelType::NET}, {"demo", LevelType::DEMO}});
+}
+
+PlayerType required_player_type(path_value x) {
+    return required_enum<PlayerType>(x, {{"human", PlayerType::HUMAN}, {"cpu", PlayerType::CPU}});
 }
 
 PushKind required_push_kind(path_value x) {

@@ -22,6 +22,7 @@
 
 #include "data/field.hpp"
 #include "data/plugin.hpp"
+#include "data/races.hpp"
 #include "data/resource.hpp"
 
 namespace macroman = sfz::macroman;
@@ -37,6 +38,8 @@ const int16_t kLevelFoeNoShipTextID = 10050;
 bool read_from(pn::file_view in, Level::Player* level_player, LevelType* level_type);
 
 Level* Level::get(int n) { return &plug.levels[n]; }
+
+Race* Race::get(int n) { return &plug.races[n]; }
 
 bool read_from(pn::file_view in, ScenarioInfo* info) {
     pn::value  x;
@@ -80,15 +83,8 @@ bool read_from(pn::file_view in, ScenarioInfo* info) {
 }
 
 bool read_from(pn::file_view in, Level* level) {
-    if (!in.read(&level->netRaceFlags, &level->playerNum)) {
+    if (!in.read(&level->netRaceFlags, pn::pad(82))) {
         return false;
-    }
-
-    level->type = LevelType::DEMO;
-    for (size_t i = 0; i < kMaxPlayerNum; ++i) {
-        if (!read_from(in, &level->player[i], &level->type)) {
-            return false;
-        }
     }
 
     int16_t par_time, start_time, unused;
@@ -150,28 +146,53 @@ bool read_from(pn::file_view in, Level* level) {
     return true;
 }
 
-bool read_from(pn::file_view in, Level::Player* level_player, LevelType* level_type) {
-    int16_t name_id, name_index;
-    int16_t player_type;
-    if (!(in.read(&player_type, &level_player->playerRace, &name_id, &name_index, pn::pad(4)) &&
-          read_from(in, &level_player->earningPower) &&
-          in.read(&level_player->netRaceFlags, pn::pad(2)))) {
-        return false;
+static Level::Player required_player(path_value x, LevelType level_type) {
+    if (x.value().is_map()) {
+        Level::Player p;
+        p.earningPower = optional_fixed(x.get("earning_power")).value_or(Fixed::zero());
+        switch (level_type) {
+            case LevelType::DEMO:
+                p.name       = required_string(x.get("name")).copy();
+                p.playerRace = required_race(x.get("race"));
+                break;
+            case LevelType::SOLO:
+                p.playerType = required_player_type(x.get("type"));
+                p.name       = required_string(x.get("name")).copy();
+                p.playerRace = required_race(x.get("race"));
+                break;
+            case LevelType::NET:
+                p.playerType   = required_player_type(x.get("type"));
+                p.netRaceFlags = 0;  // TODO(sfiera): fill
+                break;
+        }
+        return p;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
     }
-    if ((name_id > 0) && (name_index > 0)) {
-        level_player->name = Resource::strings(name_id).at(name_index - 1).copy();
-    }
-    switch (player_type) {
-        case 0: level_player->playerType = PlayerType::HUMAN, *level_type = LevelType::SOLO; break;
-        case 1: level_player->playerType = PlayerType::HUMAN, *level_type = LevelType::NET; break;
-        default: level_player->playerType = PlayerType::CPU; break;
-    }
-    return true;
 }
 
-Level level(pn::value_cref x) {
-    Level l;
-    read_from(x.as_map().get("bin").as_data().open(), &l);
+static std::vector<Level::Player> required_player_array(path_value x, LevelType level_type) {
+    if (x.value().is_array()) {
+        std::vector<Level::Player> p;
+        for (int i = 0; i < x.value().as_array().size(); ++i) {
+            p.push_back(required_player(x.get(i), level_type));
+        }
+        return p;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be array", x.path()).c_str());
+    }
+}
+
+Level level(pn::value_cref x0) {
+    if (!x0.is_map()) {
+        throw std::runtime_error("must be map");
+    }
+
+    path_value x{x0};
+    Level      l;
+    l.type    = required_level_type(x.get("type"));
+    l.players = required_player_array(x.get("players"), l.type);
+    read_from(x.get("bin").value().as_data().open(), &l);
     return l;
 }
 
