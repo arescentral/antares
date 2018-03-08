@@ -34,9 +34,6 @@ using std::vector;
 
 namespace antares {
 
-static const int16_t kSpaceObjectNameResID      = 5000;
-static const int16_t kSpaceObjectShortNameResID = 5001;
-
 ANTARES_GLOBAL ScenarioGlobals plug;
 
 static void read_all_objects(vector<BaseObject>& v) {
@@ -143,13 +140,6 @@ void PluginInit() {
     std::sort(plug.levels.begin(), plug.levels.end(), [](const Level& x, const Level& y) {
         return (x.chapter < y.chapter);
     });
-
-    auto object_names       = Resource::strings(kSpaceObjectNameResID);
-    auto object_short_names = Resource::strings(kSpaceObjectShortNameResID);
-    for (size_t i = 0; i < plug.objects.size(); ++i) {
-        plug.objects[i].name       = object_names.at(i).copy();
-        plug.objects[i].short_name = object_short_names.at(i).copy();
-    }
 }
 
 }  // namespace antares

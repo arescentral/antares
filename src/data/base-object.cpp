@@ -181,6 +181,9 @@ BaseObject base_object(pn::value_cref x0) {
         throw std::runtime_error("read failure");
     }
 
+    o.name       = required_string(x.get("long_name")).copy();
+    o.short_name = required_string(x.get("short_name")).copy();
+
     o.race = optional_race(x.get("race")).value_or(Race::none());
 
     o.destroy = optional_action_array(x.get("on_destroy"))
