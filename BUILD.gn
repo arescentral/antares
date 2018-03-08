@@ -623,11 +623,8 @@ if (target_os == "mac") {
   app_resources("antares_app_embedded_scenario_data") {
     sources = [
       "data/actions",
-      "data/briefings",
-      "data/conditions",
       "data/fonts",
       "data/info.pn",
-      "data/initials",
       "data/interfaces",
       "data/levels",
       "data/music",

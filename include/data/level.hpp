@@ -205,8 +205,6 @@ struct Level_Initial {
 
     static const size_t byte_size = 108;
 };
-bool                        read_from(pn::file_view in, Level::Initial* level_initial);
-std::vector<Level::Initial> read_initials(int begin, int end);
 
 struct Level_Condition {
     ConditionOp                                op                = ConditionOp::EQ;
@@ -228,8 +226,6 @@ struct Level_Condition {
     Level_Condition(const Level_Condition&) = delete;
     Level_Condition& operator=(const Level_Condition&) = delete;
 };
-bool read_from(pn::file_view in, std::unique_ptr<Level::Condition>* level_condition);
-std::vector<std::unique_ptr<Level::Condition>> read_conditions(int begin, int end);
 
 // Ops: EQ, NE
 // Compares local player’s autopilot state (on = true; off = false) to `value`.
@@ -395,8 +391,6 @@ struct Level_Briefing {
 
     static const size_t byte_size = 24;
 };
-bool                         read_from(pn::file_view in, Level::Briefing* brief_point);
-std::vector<Level::Briefing> read_briefings(int begin, int end);
 
 struct Race {
     int32_t  id;

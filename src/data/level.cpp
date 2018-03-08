@@ -35,7 +35,10 @@ static const int16_t kLevel_IsTraining_Bit = 0x8000;
 const int16_t kLevelOwnNoShipTextID = 10000;
 const int16_t kLevelFoeNoShipTextID = 10050;
 
-bool read_from(pn::file_view in, Level::Player* level_player, LevelType* level_type);
+static sfz::optional<std::vector<Level::Initial>> optional_initial_array(path_value x);
+static sfz::optional<std::vector<std::unique_ptr<Level::Condition>>> optional_condition_array(
+        path_value x);
+static sfz::optional<std::vector<Level::Briefing>> optional_briefing_array(path_value x);
 
 Level* Level::get(int n) { return &plug.levels[n]; }
 
@@ -89,14 +92,12 @@ bool read_from(pn::file_view in, Level* level) {
 
     int16_t par_time, start_time, unused;
     int16_t score_string_id, prologue_id, epilogue_id;
-    int16_t initial_first, initial_num;
-    int16_t condition_first, condition_num;
-    int16_t briefing_first, briefing_num;
-    if (!(in.read(
-                &score_string_id, &initial_first, &prologue_id, &initial_num, &level->songID,
-                &condition_first, &epilogue_id, &condition_num, &level->starMapH, &briefing_first,
-                &level->starMapV, &briefing_num, &par_time, &unused, &level->parKills,
-                &level->levelNameStrNum, pn::pad(4), &level->parLosses, &start_time))) {
+    int16_t briefing_num;
+    if (!in.read(
+                &score_string_id, pn::pad(2), &prologue_id, pn::pad(2), &level->songID, pn::pad(2),
+                &epilogue_id, pn::pad(2), &level->starMapH, pn::pad(2), &level->starMapV,
+                &briefing_num, &par_time, &unused, &level->parKills, &level->levelNameStrNum,
+                pn::pad(4), &level->parLosses, &start_time)) {
         return false;
     }
     if (score_string_id > 0) {
@@ -104,14 +105,9 @@ bool read_from(pn::file_view in, Level* level) {
     }
     if (briefing_num & kLevelAngleMask) {
         level->angle = (((briefing_num & kLevelAngleMask) >> kLevelAngleShift) - 1) * 2;
-        briefing_num &= ~kLevelAngleMask;
     } else {
         level->angle = -1;
     }
-
-    level->initials   = read_initials(initial_first, initial_first + initial_num);
-    level->conditions = read_conditions(condition_first, condition_first + condition_num);
-    level->briefings  = read_briefings(briefing_first, briefing_first + briefing_num);
 
     switch (level->type) {
         case LevelType::DEMO: break;
@@ -190,8 +186,14 @@ Level level(pn::value_cref x0) {
 
     path_value x{x0};
     Level      l;
-    l.type    = required_level_type(x.get("type"));
-    l.players = required_player_array(x.get("players"), l.type);
+    l.type     = required_level_type(x.get("type"));
+    l.players  = required_player_array(x.get("players"), l.type);
+    l.initials = optional_initial_array(x.get("initials")).value_or(std::vector<Level::Initial>{});
+    l.conditions = optional_condition_array(x.get("conditions"))
+                           .value_or(std::vector<std::unique_ptr<Level::Condition>>{});
+    l.briefings =
+            optional_briefing_array(x.get("briefings")).value_or(std::vector<Level::Briefing>{});
+
     read_from(x.get("bin").value().as_data().open(), &l);
     return l;
 }
@@ -290,8 +292,10 @@ static std::unique_ptr<Level::Condition> zoom_condition(path_value x) {
     return std::move(c);
 }
 
-static std::unique_ptr<Level::Condition> condition(pn::value_cref x0) {
-    path_value x{x0};
+static std::unique_ptr<Level::Condition> condition(path_value x) {
+    if (!x.value().is_map()) {
+        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
+    }
 
     pn::string_view                   type = required_string(x.get("type"));
     std::unique_ptr<Level::Condition> c;
@@ -341,37 +345,25 @@ static std::unique_ptr<Level::Condition> condition(pn::value_cref x0) {
     return c;
 }
 
-std::vector<std::unique_ptr<Level::Condition>> read_conditions(int begin, int end) {
-    if (end <= begin) {
-        return std::vector<std::unique_ptr<Level::Condition>>{};
-    }
-
-    std::vector<std::unique_ptr<Level::Condition>> conditions;
-    conditions.resize(end - begin);
-    for (int i : sfz::range(begin, end)) {
-        pn::string path = pn::format("conditions/{0}.pn", i);
-        try {
-            Resource   r = Resource::path(path);
-            pn::value  x;
-            pn_error_t e;
-            if (!pn::parse(r.data().open(), x, &e)) {
-                throw std::runtime_error(
-                        pn::format("{1}:{2}: {3}", e.lineno, e.column, pn_strerror(e.code))
-                                .c_str());
-            }
-            conditions[i - begin] = condition(x);
-        } catch (...) {
-            std::throw_with_nested(std::runtime_error(path.c_str()));
+static sfz::optional<std::vector<std::unique_ptr<Level::Condition>>> optional_condition_array(
+        path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_array()) {
+        std::vector<std::unique_ptr<Level::Condition>> v;
+        for (int i = 0; i < x.value().as_array().size(); ++i) {
+            v.push_back(condition(x.get(i)));
         }
+        return sfz::make_optional(std::move(v));
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
     }
-    return conditions;
 }
 
-static Level::Briefing briefing(pn::value_cref x0) {
-    if (!x0.is_map()) {
-        throw std::runtime_error("must be map");
+static Level::Briefing briefing(path_value x) {
+    if (!x.value().is_map()) {
+        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
     }
-    path_value x{x0};
 
     Level::Briefing b;
     b.object  = optional_initial(x.get("object")).value_or(Level::Initial::none());
@@ -380,37 +372,24 @@ static Level::Briefing briefing(pn::value_cref x0) {
     return b;
 }
 
-std::vector<Level::Briefing> read_briefings(int begin, int end) {
-    if (end <= begin) {
-        return std::vector<Level::Briefing>{};
-    }
-
-    std::vector<Level::Briefing> briefings;
-    briefings.resize(end - begin);
-    for (int i : sfz::range(begin, end)) {
-        pn::string path = pn::format("briefings/{0}.pn", i);
-        try {
-            Resource   r = Resource::path(path);
-            pn::value  x;
-            pn_error_t e;
-            if (!pn::parse(r.data().open(), x, &e)) {
-                throw std::runtime_error(
-                        pn::format("{1}:{2}: {3}", e.lineno, e.column, pn_strerror(e.code))
-                                .c_str());
-            }
-            briefings[i - begin] = briefing(x);
-        } catch (...) {
-            std::throw_with_nested(std::runtime_error(path.c_str()));
+static sfz::optional<std::vector<Level::Briefing>> optional_briefing_array(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_array()) {
+        std::vector<Level::Briefing> v;
+        for (int i = 0; i < x.value().as_array().size(); ++i) {
+            v.push_back(briefing(x.get(i)));
         }
+        return sfz::make_optional(std::move(v));
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
     }
-    return briefings;
 }
 
-static Level::Initial initial(pn::value_cref x0) {
-    if (!x0.is_map()) {
-        throw std::runtime_error("must be map");
+static Level::Initial initial(path_value x) {
+    if (!x.value().is_map()) {
+        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
     }
-    path_value x{x0};
 
     Level::Initial i;
     i.base    = required_base(x.get("base"));
@@ -444,30 +423,18 @@ static Level::Initial initial(pn::value_cref x0) {
     return i;
 }
 
-std::vector<Level::Initial> read_initials(int begin, int end) {
-    if (end <= begin) {
-        return std::vector<Level::Initial>{};
-    }
-
-    std::vector<Level::Initial> initials;
-    initials.resize(end - begin);
-    for (int i : sfz::range(begin, end)) {
-        pn::string path = pn::format("initials/{0}.pn", i);
-        try {
-            Resource   r = Resource::path(path);
-            pn::value  x;
-            pn_error_t e;
-            if (!pn::parse(r.data().open(), x, &e)) {
-                throw std::runtime_error(
-                        pn::format("{1}:{2}: {3}", e.lineno, e.column, pn_strerror(e.code))
-                                .c_str());
-            }
-            initials[i - begin] = initial(x);
-        } catch (...) {
-            std::throw_with_nested(std::runtime_error(path.c_str()));
+static sfz::optional<std::vector<Level::Initial>> optional_initial_array(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_array()) {
+        std::vector<Level::Initial> v;
+        for (int i = 0; i < x.value().as_array().size(); ++i) {
+            v.push_back(initial(x.get(i)));
         }
+        return sfz::make_optional(std::move(v));
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
     }
-    return initials;
 }
 
 }  // namespace antares
