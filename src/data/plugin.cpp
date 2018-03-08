@@ -25,6 +25,7 @@
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
 #include "data/base-object.hpp"
+#include "data/races.hpp"
 #include "data/resource.hpp"
 #include "lang/defines.hpp"
 
@@ -102,6 +103,28 @@ static void read_all_levels(vector<Level>& v) {
     }
 }
 
+static void read_all_races(vector<Race>& v) {
+    for (int i = 0; true; ++i) {
+        pn::string path = pn::format("races/{0}.pn", i);
+        if (!Resource::exists(path)) {
+            break;
+        }
+
+        try {
+            pn::value  x;
+            pn_error_t e;
+            if (!pn::parse(Resource::path(path).data().open(), x, &e)) {
+                throw std::runtime_error(
+                        pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code))
+                                .c_str());
+            }
+            v.push_back(race(x));
+        } catch (...) {
+            std::throw_with_nested(std::runtime_error(path.copy().c_str()));
+        }
+    }
+}
+
 void PluginInit() {
     {
         Resource rsrc = Resource::path("info.pn");
@@ -116,7 +139,7 @@ void PluginInit() {
 
     read_all_levels(plug.levels);
     read_all_binary("objects", "objects", plug.objects);
-    read_all_binary("races", "races", plug.races);
+    read_all_races(plug.races);
 
     std::sort(plug.levels.begin(), plug.levels.end(), [](const Level& x, const Level& y) {
         return (x.chapter < y.chapter);

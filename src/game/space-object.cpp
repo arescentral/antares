@@ -91,7 +91,7 @@ Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, Handle<Race> race) {
         return Handle<BaseObject>(class_ - kLiteralClass);
     }
     for (auto o : BaseObject::all()) {
-        if ((o->baseClass == class_) && (o->baseRace == race->id)) {
+        if ((o->baseClass == class_) && (o->baseRace == race->numeric)) {
             return o;
         }
     }

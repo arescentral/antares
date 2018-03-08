@@ -30,16 +30,27 @@ namespace antares {
 
 int16_t GetRaceIDFromNum(size_t raceNum) {
     if (raceNum < plug.races.size()) {
-        return plug.races[raceNum].id;
+        return plug.races[raceNum].numeric;
     } else {
         return -1;
     }
 }
 
-bool read_from(pn::file_view in, Race* race) {
-    uint8_t unused;
-    return in.read(
-            &race->id, &race->apparentColor, &unused, &race->illegalColors, &race->advantage);
+Race race(pn::value_cref x0) {
+    if (!x0.is_map()) {
+        throw std::runtime_error("must be map");
+    }
+
+    path_value x{x0};
+    Race       r;
+    r.numeric       = required_int(x.get("numeric"));
+    r.singular      = required_string(x.get("singular")).copy();
+    r.plural        = required_string(x.get("plural")).copy();
+    r.military      = required_string(x.get("military")).copy();
+    r.homeworld     = required_string(x.get("homeworld")).copy();
+    r.apparentColor = required_hue(x.get("apparent_color"));
+    r.advantage     = required_fixed(x.get("advantage"));
+    return r;
 }
 
 }  // namespace antares

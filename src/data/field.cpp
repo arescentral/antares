@@ -334,9 +334,9 @@ Hue required_hue(path_value x) {
                 {"gold", Hue::GOLD},
                 {"aqua", Hue::AQUA},
                 {"pink", Hue::PINK},
-                {"pale-green", Hue::PALE_GREEN},
-                {"pale-purple", Hue::PALE_PURPLE},
-                {"sky-blue", Hue::SKY_BLUE},
+                {"pale green", Hue::PALE_GREEN},
+                {"pale purple", Hue::PALE_PURPLE},
+                {"sky blue", Hue::SKY_BLUE},
                 {"tan", Hue::TAN},
                 {"gray", Hue::GRAY}});
 }

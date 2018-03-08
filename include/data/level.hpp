@@ -391,10 +391,14 @@ struct Level_Briefing {
 };
 
 struct Race {
-    int32_t  id;
-    uint8_t  apparentColor;
-    uint32_t illegalColors;
-    int32_t  advantage;
+    int32_t    numeric;
+    pn::string singular;
+    pn::string plural;
+    pn::string military;
+    pn::string homeworld;
+    Hue        apparentColor;
+    Fixed      advantage;
+    // uint32_t   illegalColors;
 
     static Race*        get(int n);
     static Handle<Race> none() { return Handle<Race>(-1); }

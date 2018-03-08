@@ -21,12 +21,16 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <pn/fwd>
 
 namespace antares {
+
+struct Race;
 
 void    InitRaces();
 void    CleanupRaces();
 int16_t GetRaceIDFromNum(size_t raceNum);
+Race    race(pn::value_cref x);
 
 }  // namespace antares
 
