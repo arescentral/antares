@@ -21,6 +21,13 @@
 
 namespace antares {
 
+enum class AnimationDirection {
+    NONE   = 0,   // 0
+    PLUS   = +1,  // +
+    MINUS  = -1,  // -
+    RANDOM = 2,   // ?
+};
+
 // Hues, combined with a shade to get a color.
 enum class Hue {
     GRAY        = 0,

@@ -284,7 +284,7 @@ static void animate(Handle<SpaceObject> o) {
     }
 
     auto& space_anim = o->frame.animation;
-    space_anim.thisShape += space_anim.frameDirection * space_anim.frameSpeed;
+    space_anim.thisShape += static_cast<int>(space_anim.direction) * space_anim.frameSpeed;
     if (o->attributes & kAnimationCycle) {
         // TODO(sfiera): does Fixed::from_val(1) make sense here? Not Fixed::from_long(1)?
         Fixed shape_num = (base_anim.lastShape - base_anim.firstShape) + Fixed::from_val(1);

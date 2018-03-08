@@ -122,10 +122,10 @@ class SpaceObject {
 
     struct {
         struct {
-            Fixed   thisShape;
-            Fixed   frameFraction;
-            int32_t frameDirection;
-            Fixed   frameSpeed;
+            Fixed              thisShape;
+            Fixed              frameFraction;
+            AnimationDirection direction;
+            Fixed              frameSpeed;
         } animation;
         Handle<Vector> vector;
     } frame;

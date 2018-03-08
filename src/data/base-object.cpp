@@ -141,9 +141,8 @@ bool read_from(pn::file_view in, objectFrameType::Rotation* rotation) {
 }
 
 bool read_from(pn::file_view in, objectFrameType::Animation* animation) {
-    int32_t first_shape, last_shape, frame_shape, frame_shape_range;
-    if (!(in.read(&first_shape, &last_shape, &animation->frameDirection,
-                  &animation->frameDirectionRange) &&
+    int32_t first_shape, last_shape, direction, direction_range, frame_shape, frame_shape_range;
+    if (!(in.read(&first_shape, &last_shape, &direction, &direction_range) &&
           read_from(in, &animation->frameSpeed) && read_from(in, &animation->frameSpeedRange) &&
           in.read(&frame_shape, &frame_shape_range))) {
         return false;
@@ -152,6 +151,17 @@ bool read_from(pn::file_view in, objectFrameType::Animation* animation) {
     animation->lastShape       = Fixed::from_long(last_shape);
     animation->frameShape      = Fixed::from_long(frame_shape);
     animation->frameShapeRange = Fixed::from_long(frame_shape_range);
+    if ((direction == 0) && (direction_range == 0)) {
+        animation->direction = AnimationDirection::NONE;
+    } else if ((direction == +1) && (direction_range == 0)) {
+        animation->direction = AnimationDirection::PLUS;
+    } else if ((direction == -1) && (direction_range == 0)) {
+        animation->direction = AnimationDirection::MINUS;
+    } else if ((direction == -1) && (direction_range == -1)) {
+        animation->direction = AnimationDirection::RANDOM;
+    } else {
+        animation->direction = AnimationDirection::NONE;
+    }
     return true;
 }
 

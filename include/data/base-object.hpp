@@ -224,8 +224,7 @@ union objectFrameType {
         Fixed firstShape;  // first shape in range
         Fixed lastShape;   // last shape (inclusive)
 
-        int32_t frameDirection;       // direction (either -1, 0, or 1)
-        int32_t frameDirectionRange;  // either 0, 1, or 2
+        AnimationDirection direction;  // frame sequence
 
         Fixed frameSpeed;       // speed at which object animates
         Fixed frameSpeedRange;  // random addition to speed

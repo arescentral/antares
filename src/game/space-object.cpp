@@ -274,14 +274,13 @@ SpaceObject::SpaceObject(
             frame.animation.thisShape +=
                     randomSeed.next(baseType->frame.animation.frameShapeRange);
         }
-        frame.animation.frameDirection = baseType->frame.animation.frameDirection;
-        if (baseType->frame.animation.frameDirectionRange == -1) {
+        frame.animation.direction = baseType->frame.animation.direction;
+        if (baseType->frame.animation.direction == AnimationDirection::RANDOM) {
             if (randomSeed.next(2) == 1) {
-                frame.animation.frameDirection = 1;
+                frame.animation.direction = AnimationDirection::PLUS;
+            } else {
+                frame.animation.direction = AnimationDirection::MINUS;
             }
-        } else if (baseType->frame.animation.frameDirectionRange > 0) {
-            frame.animation.frameDirection +=
-                    randomSeed.next(baseType->frame.animation.frameDirectionRange);
         }
         frame.animation.frameFraction = Fixed::zero();
         frame.animation.frameSpeed    = baseType->frame.animation.frameSpeed;
@@ -391,14 +390,13 @@ void SpaceObject::change_base_type(
             obj->frame.animation.thisShape +=
                     obj->randomSeed.next(base->frame.animation.frameShapeRange);
         }
-        obj->frame.animation.frameDirection = base->frame.animation.frameDirection;
-        if (base->frame.animation.frameDirectionRange == -1) {
-            if (obj->randomSeed.next(2) == 1) {
-                obj->frame.animation.frameDirection = 1;
+        frame.animation.direction = baseType->frame.animation.direction;
+        if (baseType->frame.animation.direction == AnimationDirection::RANDOM) {
+            if (randomSeed.next(2) == 1) {
+                frame.animation.direction = AnimationDirection::PLUS;
+            } else {
+                frame.animation.direction = AnimationDirection::MINUS;
             }
-        } else if (base->frame.animation.frameDirectionRange > 0) {
-            obj->frame.animation.frameDirection +=
-                    obj->randomSeed.next(base->frame.animation.frameDirectionRange);
         }
         obj->frame.animation.frameFraction = Fixed::zero();
         obj->frame.animation.frameSpeed    = base->frame.animation.frameSpeed;

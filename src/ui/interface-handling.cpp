@@ -168,9 +168,17 @@ void CreateObjectDataText(pn::string& text, Handle<BaseObject> object) {
     find_replace(data, 0, keys.at(kThrustStringNum), stringify(Fixed(object->maxThrust)));
 
     // par turn
-    find_replace(
-            data, 0, keys.at(kTurnStringNum),
-            stringify(Fixed(object->frame.rotation.turnAcceleration)));
+    if (object->attributes & kCanTurn) {
+        if (object->attributes & kShapeFromDirection) {
+            find_replace(
+                    data, 0, keys.at(kTurnStringNum),
+                    stringify(Fixed(object->frame.rotation.maxTurnRate)));
+        } else {
+            find_replace(data, 0, keys.at(kTurnStringNum), stringify(Fixed::from_long(1)));
+        }
+    } else {
+        find_replace(data, 0, keys.at(kTurnStringNum), stringify(Fixed::zero()));
+    }
 
     // now, check for weapons!
     CreateWeaponDataText(&data, object->pulse.base, values.at(kShipDataPulseStringNum));
