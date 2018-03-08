@@ -159,6 +159,15 @@ sfz::optional<ticks> optional_ticks(path_value x) {
 
 ticks required_ticks(path_value x) { return ticks(required_int(x)); }
 
+sfz::optional<secs> optional_secs(path_value x) {
+    sfz::optional<int64_t> i = optional_int(x);
+    if (i.has_value()) {
+        return sfz::make_optional(secs(*i));
+    } else {
+        return sfz::nullopt;
+    }
+}
+
 sfz::optional<Handle<Admiral>> optional_admiral(path_value x) {
     sfz::optional<int64_t> i = optional_int(x);
     if (i.has_value()) {

@@ -87,25 +87,17 @@ bool read_from(pn::file_view in, Level* level) {
         return false;
     }
 
-    int16_t par_time, start_time, unused;
+    int16_t start_time, unused;
     int16_t score_string_id;
-    int16_t briefing_num;
     if (!in.read(
                 &score_string_id, pn::pad(6), &level->songID, pn::pad(6), &level->starMapH,
-                pn::pad(2), &level->starMapV, &briefing_num, &par_time, &unused, &level->parKills,
-                pn::pad(6), &level->parLosses, &start_time)) {
+                pn::pad(2), &level->starMapV, pn::pad(4), &unused, pn::pad(10), &start_time)) {
         return false;
     }
     if (score_string_id > 0) {
         level->score_strings = Resource::strings(score_string_id);
     }
-    if (briefing_num & kLevelAngleMask) {
-        level->angle = (((briefing_num & kLevelAngleMask) >> kLevelAngleShift) - 1) * 2;
-    } else {
-        level->angle = -1;
-    }
 
-    level->parTime     = game_ticks(secs(par_time));
     level->startTime   = secs(start_time & kLevel_StartTimeMask);
     level->is_training = start_time & kLevel_IsTraining_Bit;
     return true;
@@ -164,6 +156,13 @@ Level level(pn::value_cref x0) {
                            .value_or(std::vector<std::unique_ptr<Level::Condition>>{});
     l.briefings =
             optional_briefing_array(x.get("briefings")).value_or(std::vector<Level::Briefing>{});
+
+    l.startTime   = optional_secs(x.get("start_time")).value_or(secs(0));
+    l.is_training = optional_bool(x.get("is_training")).value_or(false);
+    l.angle       = optional_int(x.get("angle")).value_or(-1);
+    l.parTime     = game_ticks(optional_secs(x.get("par_time")).value_or(secs(0)));
+    l.parKills    = optional_int(x.get("par_kills")).value_or(0);
+    l.parLosses   = optional_int(x.get("par_losses")).value_or(0);
 
     switch (l.type) {
         case LevelType::DEMO: break;

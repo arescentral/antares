@@ -93,6 +93,7 @@ pn::string_view                required_string(path_value x);
 
 sfz::optional<ticks> optional_ticks(path_value x);
 ticks                required_ticks(path_value x);
+sfz::optional<secs>  optional_secs(path_value x);
 
 sfz::optional<Handle<Admiral>>       optional_admiral(path_value x);
 Handle<Admiral>                      required_admiral(path_value x);
