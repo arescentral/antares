@@ -39,24 +39,23 @@ static const int16_t kSpaceObjectShortNameResID = 5001;
 
 ANTARES_GLOBAL ScenarioGlobals plug;
 
-template <typename T>
-static void read_all_binary(pn::string_view name, pn::string_view dir, vector<T>& v) {
+static void read_all_objects(vector<BaseObject>& v) {
+    v.clear();
     for (int i = 0; true; ++i) {
-        pn::string path = pn::format("{0}/{1}.bin", dir, i);
+        pn::string path = pn::format("objects/{0}.pn", i);
         if (!Resource::exists(path)) {
             break;
         }
 
         try {
-            v.resize(i + 1);
-            Resource rsrc = Resource::path(path);
-
-            pn::file in = rsrc.data().open();
-            read_from(in, &v[i]);
-            in.check();
-            if (fgetc(in.c_obj()) != EOF) {
-                throw std::runtime_error("expected eof");
+            pn::value  x;
+            pn_error_t e;
+            if (!pn::parse(Resource::path(path).data().open(), x, &e)) {
+                throw std::runtime_error(
+                        pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code))
+                                .c_str());
             }
+            v.push_back(base_object(x));
         } catch (...) {
             std::throw_with_nested(std::runtime_error(path.c_str()));
         }
@@ -138,7 +137,7 @@ void PluginInit() {
     }
 
     read_all_levels(plug.levels);
-    read_all_binary("objects", "objects", plug.objects);
+    read_all_objects(plug.objects);
     read_all_races(plug.races);
 
     std::sort(plug.levels.begin(), plug.levels.end(), [](const Level& x, const Level& y) {

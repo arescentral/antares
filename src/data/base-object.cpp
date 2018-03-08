@@ -247,4 +247,17 @@ bool read_from(pn::file_view in, objectFrameType::Weapon* weapon) {
     return true;
 }
 
+BaseObject base_object(pn::value_cref x0) {
+    if (!x0.is_map()) {
+        throw std::runtime_error("must be map");
+    }
+
+    path_value x{x0};
+    BaseObject o;
+    if (!read_from(x.get("bin").value().as_data().open(), &o)) {
+        throw std::runtime_error("read failure");
+    }
+    return o;
+}
+
 }  // namespace antares
