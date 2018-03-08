@@ -303,10 +303,8 @@ class BaseObject {
     uint8_t shieldColor;  // color on radar (0 = don't put on radar)
 
     struct Weapon {
-        Handle<BaseObject> base;
-        int32_t            positionNum;  // # of places from which weapon can fire
-        fixedPointType
-                position[kMaxWeaponPosition];  // relative positions (unrotated) of fire points
+        Handle<BaseObject>          base;
+        std::vector<fixedPointType> positions;  // relative positions (unrotated) of fire points
     };
     Weapon pulse;
     Weapon beam;

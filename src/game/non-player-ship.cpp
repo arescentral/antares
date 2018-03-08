@@ -134,7 +134,7 @@ void fire_weapon(
     }
     subject->_energy -= weaponObject->frame.weapon.energyCost;
     weapon.position++;
-    if (weapon.position >= base_weapon.positionNum) {
+    if (weapon.position >= base_weapon.positions.size()) {
         weapon.position = 0;
     }
 
@@ -149,11 +149,11 @@ void fire_weapon(
     Point* at = nullptr;
     if (&weapon != &subject->special) {
         offset.h = mFixedToLong(
-                (base_weapon.position[weapon.position].h * fcos) +
-                (base_weapon.position[weapon.position].v * -fsin));
+                (base_weapon.positions[weapon.position].h * fcos) +
+                (base_weapon.positions[weapon.position].v * -fsin));
         offset.v = mFixedToLong(
-                (base_weapon.position[weapon.position].h * fsin) +
-                (base_weapon.position[weapon.position].v * fcos));
+                (base_weapon.positions[weapon.position].h * fsin) +
+                (base_weapon.positions[weapon.position].v * fcos));
         at = &offset;
     }
 

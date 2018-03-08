@@ -26,18 +26,25 @@ namespace antares {
 
 static bool read_weapons(pn::file_view in, BaseObject* object) {
     int32_t pulse, beam, special;
-    if (!in.read(
-                &pulse, &beam, &special, &object->pulse.positionNum, &object->beam.positionNum,
-                &object->special.positionNum)) {
+    int32_t pulse_count, beam_count, special_count;
+    if (!in.read(&pulse, &beam, &special, &pulse_count, &beam_count, &special_count)) {
         return false;
     }
     object->pulse.base   = Handle<BaseObject>(pulse);
     object->beam.base    = Handle<BaseObject>(beam);
     object->special.base = Handle<BaseObject>(special);
+    object->pulse.positions.resize(std::max(1, pulse_count));
+    object->beam.positions.resize(std::max(1, beam_count));
+    object->special.positions.resize(std::max(1, special_count));
 
     for (auto weapon : {&object->pulse, &object->beam, &object->special}) {
         for (size_t i = 0; i < kMaxWeaponPosition; ++i) {
-            if (!read_from(in, &weapon->position[i])) {
+            fixedPointType  ignored;
+            fixedPointType* p = &ignored;
+            if (i < weapon->positions.size()) {
+                p = &weapon->positions[i];
+            }
+            if (!read_from(in, p)) {
                 return false;
             }
         }
