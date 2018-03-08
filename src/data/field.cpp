@@ -578,6 +578,21 @@ std::vector<pn::string> required_string_array(path_value x) {
     }
 }
 
+sfz::optional<std::vector<pn::string>> optional_string_array(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_array()) {
+        pn::array_cref          a = x.value().as_array();
+        std::vector<pn::string> result;
+        for (int i = 0; i < a.size(); ++i) {
+            result.emplace_back(required_string(x.get(i)).copy());
+        }
+        return sfz::make_optional(std::move(result));
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
+    }
+}
+
 sfz::optional<std::vector<int>> optional_int_array(path_value x) {
     if (x.value().is_null()) {
         return sfz::nullopt;

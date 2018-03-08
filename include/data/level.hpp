@@ -140,7 +140,6 @@ struct Level {
 
     int                     chapter = -1;
     pn::string              name;
-    int16_t                 netRaceFlags = 0;
     std::vector<Player>     players;
     std::vector<pn::string> score_strings;
     int16_t                 songID      = -1;
