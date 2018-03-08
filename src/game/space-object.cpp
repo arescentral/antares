@@ -246,15 +246,15 @@ SpaceObject::SpaceObject(
                        randomSeed.next(baseType->activate_period.range());
     }
 
-    direction = baseType->initialDirection;
+    direction = baseType->initial_direction.begin;
     mAddAngle(direction, relative_direction);
-    if (baseType->initialDirectionRange > 0) {
-        mAddAngle(direction, randomSeed.next(baseType->initialDirectionRange));
+    if (baseType->initial_direction.range() > 0) {
+        mAddAngle(direction, randomSeed.next(baseType->initial_direction.range()));
     }
 
-    Fixed f = baseType->initialVelocity;
-    if (baseType->initialVelocityRange > Fixed::zero()) {
-        f += randomSeed.next(baseType->initialVelocityRange);
+    Fixed f = baseType->initial_velocity.begin;
+    if (baseType->initial_velocity.range() > Fixed::zero()) {
+        f += randomSeed.next(baseType->initial_velocity.range());
     }
     GetRotPoint(&velocity.h, &velocity.v, direction);
     velocity.h = (velocity.h * f);
@@ -287,9 +287,10 @@ SpaceObject::SpaceObject(
         frame.animation.frameSpeed    = baseType->frame.animation.frameSpeed;
     }
 
-    if (baseType->initialAge >= ticks(0)) {
-        expire_after = baseType->initialAge + randomSeed.next(baseType->initialAgeRange);
-        expires      = true;
+    if (baseType->initial_age.begin >= ticks(0)) {
+        expire_after =
+                baseType->initial_age.begin + randomSeed.next(baseType->initial_age.range());
+        expires = true;
     } else {
         expires = false;
     }
@@ -405,9 +406,10 @@ void SpaceObject::change_base_type(
 
     obj->maxVelocity = base->maxVelocity;
 
-    if (base->initialAge >= ticks(0)) {
-        obj->expire_after = base->initialAge + obj->randomSeed.next(base->initialAgeRange);
-        obj->expires      = true;
+    if (base->initial_age.begin >= ticks(0)) {
+        obj->expire_after =
+                base->initial_age.begin + obj->randomSeed.next(base->initial_age.range());
+        obj->expires = true;
     } else {
         obj->expires = false;
 

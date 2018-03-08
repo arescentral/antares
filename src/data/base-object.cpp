@@ -57,22 +57,24 @@ bool read_from(pn::file_view in, BaseObject* object) {
         object->attributes &= ~kIsVector;
     }
 
-    int32_t initial_age, age_range;
+    int32_t initial_age, age_range, initial_velocity, initial_velocity_range;
     if (!(in.read(&object->baseClass, pn::pad(4), &object->price) &&
           read_from(in, &object->offenseValue) && in.read(&object->destinationClass) &&
           read_from(in, &object->maxVelocity) && read_from(in, &object->warpSpeed) &&
-          in.read(&object->warpOutDistance) && read_from(in, &object->initialVelocity) &&
-          read_from(in, &object->initialVelocityRange) && read_from(in, &object->mass) &&
+          in.read(&object->warpOutDistance) &&
+          in.read(&initial_velocity, &initial_velocity_range) && read_from(in, &object->mass) &&
           read_from(in, &object->maxThrust) &&
           in.read(&object->health, &object->damage, &object->energy, &initial_age, &age_range))) {
         return false;
     }
-
-    object->initialAge = ticks(initial_age);
-    if (age_range >= 0) {
-        object->initialAgeRange = ticks(age_range);
+    object->initial_velocity = {
+            Fixed::from_val(initial_velocity),
+            Fixed::from_val(initial_velocity + std::max(0, initial_velocity_range))};
+    if (initial_age >= 0) {
+        object->initial_age =
+                Range<ticks>{ticks(initial_age), ticks(initial_age + std::max(0, age_range))};
     } else {
-        object->initialAgeRange = ticks(0);
+        object->initial_age = {ticks(-1), ticks(-1)};
     }
 
     if (object->attributes & kNeutralDeath) {
@@ -81,13 +83,14 @@ bool read_from(pn::file_view in, BaseObject* object) {
         object->occupy_count = -1;
     }
 
-    uint8_t unused1;
+    int32_t initial_direction, initial_direction_range;
     if (!in.read(
                 &object->naturalScale, &object->pixLayer, &object->pixResID, &object->tinySize,
-                &object->shieldColor, &unused1, &object->initialDirection,
-                &object->initialDirectionRange)) {
+                &object->shieldColor, pn::pad(1), &initial_direction, &initial_direction_range)) {
         return false;
     }
+    object->initial_direction = {initial_direction,
+                                 initial_direction + std::max(0, initial_direction_range)};
 
     if ((object->shieldColor != 0xFF) && (object->shieldColor != 0)) {
         object->shieldColor = GetTranslateColorShade(static_cast<Hue>(object->shieldColor), 15);

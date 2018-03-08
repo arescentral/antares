@@ -282,9 +282,6 @@ class BaseObject {
     Fixed    warpSpeed;        // multiplier of speed at warp (0 if cannot)
     uint32_t warpOutDistance;  // distance at which to come out of warp
 
-    Fixed initialVelocity;       // initial minimum velocity (usually relative)
-    Fixed initialVelocityRange;  // random addition to initial velocity
-
     Fixed mass;       // how quickly thrust acheives max
     Fixed maxThrust;  // maximum amount of thrust
 
@@ -292,8 +289,9 @@ class BaseObject {
     int32_t damage;  // damage caused by impact
     int32_t energy;  // starting energy for material objects
 
-    ticks initialAge;       // starting minimum age
-    ticks initialAgeRange;  // random addition to starting age
+    Range<Fixed>   initial_velocity;   // initial random velocity (usually relative)
+    Range<ticks>   initial_age;        // starting random age
+    Range<int32_t> initial_direction;  // initial random direction (usually relative)
 
     int32_t occupy_count;  // size of occupying force
 
@@ -303,9 +301,6 @@ class BaseObject {
     int16_t pixResID;     // resID of SMIV
     int32_t tinySize;     // size of representation on radar (0 = 1 pixel)
     uint8_t shieldColor;  // color on radar (0 = don't put on radar)
-
-    int32_t initialDirection;       // initial direction (usually relative)
-    int32_t initialDirectionRange;  // random addition to initial direction
 
     struct Weapon {
         Handle<BaseObject> base;
