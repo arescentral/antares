@@ -270,10 +270,10 @@ class BaseObject {
     pn::string name;
     pn::string short_name;
 
-    uint32_t attributes;  // initial attributes (see flags)
-    int32_t  baseClass;
-    int32_t  baseRace;
-    int32_t  price;
+    uint32_t     attributes;  // initial attributes (see flags)
+    int32_t      baseClass;
+    Handle<Race> race;
+    int32_t      price;
 
     Fixed offenseValue;
     //  Fixed                   defenseValue;

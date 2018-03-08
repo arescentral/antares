@@ -20,6 +20,8 @@
 
 #include "data/base-object.hpp"
 
+#include "data/level.hpp"
+
 namespace antares {
 
 static bool read_weapons(pn::file_view in, BaseObject* object) {
@@ -56,7 +58,7 @@ bool read_from(pn::file_view in, BaseObject* object) {
     }
 
     int32_t initial_age, age_range;
-    if (!(in.read(&object->baseClass, &object->baseRace, &object->price) &&
+    if (!(in.read(&object->baseClass, pn::pad(4), &object->price) &&
           read_from(in, &object->offenseValue) && in.read(&object->destinationClass) &&
           read_from(in, &object->maxVelocity) && read_from(in, &object->warpSpeed) &&
           in.read(&object->warpOutDistance) && read_from(in, &object->initialVelocity) &&
@@ -178,6 +180,8 @@ BaseObject base_object(pn::value_cref x0) {
     if (!read_from(x.get("bin").value().as_data().open(), &o)) {
         throw std::runtime_error("read failure");
     }
+
+    o.race = optional_race(x.get("race")).value_or(Race::none());
 
     o.destroy = optional_action_array(x.get("on_destroy"))
                         .value_or(std::vector<std::unique_ptr<const Action>>{});
