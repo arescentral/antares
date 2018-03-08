@@ -299,13 +299,13 @@ HandleList<Level::Initial> required_initial_range(path_value x) {
     return HandleList<Level::Initial>(range.begin, range.end);
 }
 
-sfz::optional<coordPointType> optional_point(path_value x) {
+sfz::optional<Point> optional_point(path_value x) {
     if (x.value().is_null()) {
         return sfz::nullopt;
     } else if (x.value().is_map()) {
-        uint32_t px = required_int(x.get("x"));
-        uint32_t py = required_int(x.get("y"));
-        return sfz::make_optional<coordPointType>({px, py});
+        int32_t px = required_int(x.get("x"));
+        int32_t py = required_int(x.get("y"));
+        return sfz::make_optional<Point>({px, py});
     } else {
         throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
     }
@@ -313,8 +313,8 @@ sfz::optional<coordPointType> optional_point(path_value x) {
 
 Point required_point(path_value x) {
     if (x.value().is_map()) {
-        int px = required_int(x.get("x"));
-        int py = required_int(x.get("y"));
+        int32_t px = required_int(x.get("x"));
+        int32_t py = required_int(x.get("y"));
         return {px, py};
     } else {
         throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());

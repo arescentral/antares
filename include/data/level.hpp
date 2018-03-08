@@ -144,8 +144,7 @@ struct Level {
     std::vector<Player>     players;
     std::vector<pn::string> score_strings;
     int16_t                 songID      = -1;
-    int16_t                 starMapH    = 0;
-    int16_t                 starMapV    = 0;
+    Point                   starMap     = {-1, -1};
     game_ticks              parTime     = game_ticks{};
     int16_t                 parKills    = 0;
     int16_t                 parLosses   = 0;

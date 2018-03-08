@@ -158,7 +158,9 @@ static std::unique_ptr<Action> morph_action(path_value x) {
 static std::unique_ptr<Action> move_action(path_value x) {
     std::unique_ptr<MoveAction> a(new MoveAction);
     a->origin   = optional_origin(x.get("origin")).value_or(MoveOrigin::LEVEL);
-    a->to       = optional_point(x.get("to")).value_or(coordPointType{0, 0});
+    Point p     = optional_point(x.get("to")).value_or(Point{0, 0});
+    a->to.h     = p.h;
+    a->to.v     = p.v;
     a->distance = optional_int(x.get("distance")).value_or(0);
     return std::move(a);
 }

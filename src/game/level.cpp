@@ -158,7 +158,7 @@ void GetInitialCoord(Handle<Level::Initial> initial, coordPointType* coord, int3
 
 }  // namespace
 
-Point Level::star_map_point() const { return Point(starMapH, starMapV); }
+Point Level::star_map_point() const { return starMap; }
 
 int32_t Level::chapter_number() const { return chapter; }
 

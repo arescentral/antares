@@ -29,9 +29,6 @@ namespace macroman = sfz::macroman;
 
 namespace antares {
 
-static const int16_t kLevel_StartTimeMask  = 0x7fff;
-static const int16_t kLevel_IsTraining_Bit = 0x8000;
-
 static sfz::optional<std::vector<Level::Initial>> optional_initial_array(path_value x);
 static sfz::optional<std::vector<std::unique_ptr<Level::Condition>>> optional_condition_array(
         path_value x);
@@ -83,23 +80,16 @@ bool read_from(pn::file_view in, ScenarioInfo* info) {
 }
 
 bool read_from(pn::file_view in, Level* level) {
-    if (!in.read(&level->netRaceFlags, pn::pad(82))) {
-        return false;
-    }
-
-    int16_t start_time, unused;
     int16_t score_string_id;
     if (!in.read(
-                &score_string_id, pn::pad(6), &level->songID, pn::pad(6), &level->starMapH,
-                pn::pad(2), &level->starMapV, pn::pad(4), &unused, pn::pad(10), &start_time)) {
+                &level->netRaceFlags, pn::pad(82), &score_string_id, pn::pad(6), &level->songID,
+                pn::pad(30))) {
         return false;
     }
     if (score_string_id > 0) {
         level->score_strings = Resource::strings(score_string_id);
     }
 
-    level->startTime   = secs(start_time & kLevel_StartTimeMask);
-    level->is_training = start_time & kLevel_IsTraining_Bit;
     return true;
 }
 
@@ -156,6 +146,7 @@ Level level(pn::value_cref x0) {
                            .value_or(std::vector<std::unique_ptr<Level::Condition>>{});
     l.briefings =
             optional_briefing_array(x.get("briefings")).value_or(std::vector<Level::Briefing>{});
+    l.starMap = optional_point(x.get("starmap")).value_or(Point{0, 0});
 
     l.startTime   = optional_secs(x.get("start_time")).value_or(secs(0));
     l.is_training = optional_bool(x.get("is_training")).value_or(false);

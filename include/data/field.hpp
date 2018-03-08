@@ -111,8 +111,8 @@ Range<ticks>                               required_ticks_range(path_value x);
 sfz::optional<HandleList<Level_Condition>> optional_condition_range(path_value x);
 HandleList<Level_Initial>                  required_initial_range(path_value x);
 
-sfz::optional<coordPointType> optional_point(path_value x);
-Point                         required_point(path_value x);
+sfz::optional<Point> optional_point(path_value x);
+Point                required_point(path_value x);
 
 Hue                       required_hue(path_value x);
 KillKind                  required_kill_kind(path_value x);
