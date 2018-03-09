@@ -236,7 +236,9 @@ struct objectFrameType {
 
     // vector: have no associated sprite
     struct Vector {
-        uint8_t    color;  // color of line
+        bool       visible;
+        RgbColor   bolt_color;  // for VectorKind::BOLT only
+        Hue        beam_hue;    // for all but VectorKind::BOLT
         VectorKind kind     = VectorKind::BOLT;
         int32_t    accuracy = 0;  // for non-normal vector objects, how accurate
         int32_t    range    = 0;

@@ -83,9 +83,7 @@ void Vectors::reset() {
     }
 }
 
-Handle<Vector> Vectors::add(
-        coordPointType* location, uint8_t color, VectorKind kind, int32_t accuracy,
-        int32_t vector_range) {
+Handle<Vector> Vectors::add(coordPointType* location, const objectFrameType::Vector& v) {
     for (auto vector : Vector::all()) {
         if (!vector->active) {
             vector->lastGlobalLocation   = *location;
@@ -93,16 +91,18 @@ Handle<Vector> Vectors::add(
             vector->lastApparentLocation = *location;
             vector->killMe               = false;
             vector->active               = true;
-            vector->color                = color;
+            vector->visible              = v.visible;
+            vector->bolt_color           = v.bolt_color;
+            vector->beam_hue             = v.beam_hue;
 
-            const int32_t h      = scale(location->h - gGlobalCorner.h, gAbsoluteScale);
-            const int32_t v      = scale(location->v - gGlobalCorner.v, gAbsoluteScale);
+            const int32_t x      = scale(location->h - gGlobalCorner.h, gAbsoluteScale);
+            const int32_t y      = scale(location->v - gGlobalCorner.v, gAbsoluteScale);
             vector->thisLocation = Rect(0, 0, 0, 0);
-            vector->thisLocation.offset(h + viewport().left, v + viewport().top);
+            vector->thisLocation.offset(x + viewport().left, y + viewport().top);
 
-            vector->vectorKind      = kind;
-            vector->accuracy        = accuracy;
-            vector->range           = vector_range;
+            vector->vectorKind      = v.kind;
+            vector->accuracy        = v.accuracy;
+            vector->range           = v.range;
             vector->fromObjectID    = -1;
             vector->fromObject      = SpaceObject::none();
             vector->toObjectID      = -1;
@@ -185,18 +185,17 @@ void Vectors::update() {
             }
 
             if (!vector->killMe) {
-                if (vector->color) {
+                if (vector->visible) {
                     if (vector->vectorKind != VectorKind::BOLT) {
                         vector->boltState++;
                         if (vector->boltState > 24)
                             vector->boltState = -24;
-                        uint8_t currentColor = vector->color;
-                        currentColor &= 0xf0;
+                        uint8_t currentColor = static_cast<int>(vector->beam_hue) << 4;
                         if (vector->boltState < 0)
                             currentColor += (-vector->boltState) >> 1;
                         else
                             currentColor += vector->boltState >> 1;
-                        vector->color = currentColor;
+                        vector->bolt_color = GetRGBTranslateColor(currentColor);
                     }
                     if ((vector->vectorKind == VectorKind::BEAM_TO_OBJECT_LIGHTNING) ||
                         (vector->vectorKind == VectorKind::BEAM_TO_COORD_LIGHTNING)) {
@@ -231,19 +230,19 @@ void Vectors::draw() {
     for (auto vector : Vector::all()) {
         if (vector->active) {
             if (!vector->killMe) {
-                if (vector->color) {
+                if (vector->visible) {
                     if ((vector->vectorKind == VectorKind::BEAM_TO_OBJECT_LIGHTNING) ||
                         (vector->vectorKind == VectorKind::BEAM_TO_COORD_LIGHTNING)) {
                         for (int j : range(1, kBoltPointNum)) {
                             lines.draw(
                                     vector->thisBoltPoint[j - 1], vector->thisBoltPoint[j],
-                                    GetRGBTranslateColor(vector->color));
+                                    vector->bolt_color);
                         }
                     } else {
                         lines.draw(
                                 Point(vector->thisLocation.left, vector->thisLocation.top),
                                 Point(vector->thisLocation.right, vector->thisLocation.bottom),
-                                GetRGBTranslateColor(vector->color));
+                                vector->bolt_color);
                     }
                 }
             }
@@ -257,7 +256,7 @@ void Vectors::show_all() {
             if (vector->killMe) {
                 vector->active = false;
             }
-            if (vector->color) {
+            if (vector->visible) {
                 if ((vector->vectorKind == VectorKind::BEAM_TO_OBJECT_LIGHTNING) ||
                     (vector->vectorKind == VectorKind::BEAM_TO_COORD_LIGHTNING)) {
                     for (int j : range(kBoltPointNum)) {

@@ -43,7 +43,9 @@ struct Vector {
     coordPointType      lastGlobalLocation;
     coordPointType      objectLocation;
     coordPointType      lastApparentLocation;
-    uint8_t             color;
+    bool                visible;
+    RgbColor            bolt_color;
+    Hue                 beam_hue;
     bool                killMe;
     bool                active;
     int32_t             fromObjectID;
@@ -66,9 +68,7 @@ class Vectors {
   public:
     static void           init();
     static void           reset();
-    static Handle<Vector> add(
-            coordPointType* location, uint8_t color, VectorKind kind, int32_t accuracy,
-            int32_t vector_range);
+    static Handle<Vector> add(coordPointType* location, const objectFrameType::Vector& v);
     static void set_attributes(Handle<SpaceObject> vectorObject, Handle<SpaceObject> sourceObject);
     static void update();
     static void draw();

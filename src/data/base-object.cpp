@@ -183,12 +183,9 @@ bool read_from(pn::file_view in, objectFrameType::Animation* animation) {
 }
 
 bool read_from(pn::file_view in, objectFrameType::Vector* vector) {
-    uint8_t kind;
-    if (!in.read(&vector->color, &kind, &vector->accuracy, &vector->range)) {
+    uint8_t kind, color;
+    if (!in.read(&color, &kind, &vector->accuracy, &vector->range)) {
         return false;
-    }
-    if (vector->color <= 16) {
-        vector->color = 0;
     }
     switch (kind) {
         default: vector->kind = VectorKind::BOLT; break;
@@ -196,6 +193,15 @@ bool read_from(pn::file_view in, objectFrameType::Vector* vector) {
         case 2: vector->kind = VectorKind::BEAM_TO_COORD; break;
         case 3: vector->kind = VectorKind::BEAM_TO_OBJECT_LIGHTNING; break;
         case 4: vector->kind = VectorKind::BEAM_TO_COORD_LIGHTNING; break;
+    }
+    if (color <= 16) {
+        vector->visible = 0;
+    } else if (vector->kind == VectorKind::BOLT) {
+        vector->visible    = true;
+        vector->bolt_color = GetRGBTranslateColor(color);
+    } else {
+        vector->visible  = true;
+        vector->beam_hue = static_cast<Hue>(color >> 4);
     }
     return true;
 }

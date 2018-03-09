@@ -181,8 +181,7 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject* sourceObject) {
 
     if (obj->attributes & kIsVector) {
         const auto& vector = obj->baseType->frame.vector;
-        obj->frame.vector  = Vectors::add(
-                &(obj->location), vector.color, vector.kind, vector.accuracy, vector.range);
+        obj->frame.vector  = Vectors::add(&(obj->location), vector);
     }
 
     obj->nextObject     = g.root;
