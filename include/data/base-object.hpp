@@ -212,10 +212,9 @@ enum kPresenceStateType {
 struct objectFrameType {
     // rotation: for objects whose shapes depend on their direction
     struct Rotation {
-        int32_t shapeOffset;       // offset for 1st shape
-        int32_t rotRes;            // ROT_POS / rotRes = # of discrete shapes
-        Fixed   maxTurnRate;       // max rate at which object can turn
-        Fixed   turnAcceleration;  // rate at which object reaches maxTurnRate
+        int32_t shapeOffset;  // offset for 1st shape
+        int32_t rotRes;       // ROT_POS / rotRes = # of discrete shapes
+        Fixed   maxTurnRate;  // max rate at which object can turn
     };
     Rotation rotation;
 

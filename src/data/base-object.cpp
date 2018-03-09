@@ -153,8 +153,12 @@ bool read_from(pn::file_view in, BaseObject* object) {
 }
 
 bool read_from(pn::file_view in, objectFrameType::Rotation* rotation) {
-    return in.read(&rotation->shapeOffset, &rotation->rotRes) &&
-           read_from(in, &rotation->maxTurnRate) && read_from(in, &rotation->turnAcceleration);
+    int32_t turn_rate;
+    if (!in.read(&rotation->shapeOffset, &rotation->rotRes, &turn_rate, pn::pad(4))) {
+        return false;
+    }
+    rotation->maxTurnRate = Fixed::from_val(turn_rate);
+    return true;
 }
 
 bool read_from(pn::file_view in, objectFrameType::Animation* animation) {
