@@ -269,10 +269,9 @@ SpaceObject::SpaceObject(
     }
 
     if (attributes & kIsSelfAnimated) {
-        frame.animation.thisShape = baseType->frame.animation.frameShape;
-        if (baseType->frame.animation.frameShapeRange > Fixed::zero()) {
-            frame.animation.thisShape +=
-                    randomSeed.next(baseType->frame.animation.frameShapeRange);
+        frame.animation.thisShape = baseType->frame.animation.first.begin;
+        if (baseType->frame.animation.first.range() > Fixed::zero()) {
+            frame.animation.thisShape += randomSeed.next(baseType->frame.animation.first.range());
         }
         frame.animation.direction = baseType->frame.animation.direction;
         if (baseType->frame.animation.direction == AnimationDirection::RANDOM) {
@@ -283,7 +282,7 @@ SpaceObject::SpaceObject(
             }
         }
         frame.animation.frameFraction = Fixed::zero();
-        frame.animation.frameSpeed    = baseType->frame.animation.frameSpeed;
+        frame.animation.speed         = baseType->frame.animation.speed;
     }
 
     if (baseType->initial_age.begin >= ticks(0)) {
@@ -386,10 +385,10 @@ void SpaceObject::change_base_type(
     obj->turnFraction = obj->turnVelocity = Fixed::zero();
 
     if (obj->attributes & kIsSelfAnimated) {
-        obj->frame.animation.thisShape = base->frame.animation.frameShape;
-        if (base->frame.animation.frameShapeRange > Fixed::zero()) {
+        obj->frame.animation.thisShape = base->frame.animation.first.begin;
+        if (base->frame.animation.first.range() > Fixed::zero()) {
             obj->frame.animation.thisShape +=
-                    obj->randomSeed.next(base->frame.animation.frameShapeRange);
+                    obj->randomSeed.next(base->frame.animation.first.range());
         }
         frame.animation.direction = baseType->frame.animation.direction;
         if (baseType->frame.animation.direction == AnimationDirection::RANDOM) {
@@ -400,7 +399,7 @@ void SpaceObject::change_base_type(
             }
         }
         obj->frame.animation.frameFraction = Fixed::zero();
-        obj->frame.animation.frameSpeed    = base->frame.animation.frameSpeed;
+        obj->frame.animation.speed         = base->frame.animation.speed;
     }
 
     obj->maxVelocity = base->maxVelocity;

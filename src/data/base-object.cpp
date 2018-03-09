@@ -158,27 +158,29 @@ bool read_from(pn::file_view in, objectFrameType::Rotation* rotation) {
 }
 
 bool read_from(pn::file_view in, objectFrameType::Animation* animation) {
-    int32_t first_shape, last_shape, direction, direction_range, frame_shape, frame_shape_range;
-    if (!(in.read(&first_shape, &last_shape, &direction, &direction_range) &&
-          read_from(in, &animation->frameSpeed) && read_from(in, &animation->frameSpeedRange) &&
-          in.read(&frame_shape, &frame_shape_range))) {
+    int32_t begin, end, dir, dir_range, speed, first, first_range;
+    if (!in.read(&begin, &end, &dir, &dir_range, &speed, pn::pad(4), &first, &first_range)) {
         return false;
     }
-    animation->firstShape      = Fixed::from_long(first_shape);
-    animation->lastShape       = Fixed::from_long(last_shape);
-    animation->frameShape      = Fixed::from_long(frame_shape);
-    animation->frameShapeRange = Fixed::from_long(frame_shape_range);
-    if ((direction == 0) && (direction_range == 0)) {
+
+    // TODO(sfiera): use Fixed::from_long(1) instead of Fixed::from_val(1). This causes
+    // arescentral/antares#163.
+    animation->shapes = {Fixed::from_long(begin), Fixed::from_long(end) + Fixed::from_val(1)};
+    animation->speed  = Fixed::from_val(speed);
+    animation->first  = {Fixed::from_long(first), Fixed::from_long(first + first_range)};
+
+    if ((dir == 0) && (dir_range == 0)) {
         animation->direction = AnimationDirection::NONE;
-    } else if ((direction == +1) && (direction_range == 0)) {
+    } else if ((dir == +1) && (dir_range == 0)) {
         animation->direction = AnimationDirection::PLUS;
-    } else if ((direction == -1) && (direction_range == 0)) {
+    } else if ((dir == -1) && (dir_range == 0)) {
         animation->direction = AnimationDirection::MINUS;
-    } else if ((direction == -1) && (direction_range == -1)) {
+    } else if ((dir == -1) && (dir_range == -1)) {
         animation->direction = AnimationDirection::RANDOM;
     } else {
         animation->direction = AnimationDirection::NONE;
     }
+
     return true;
 }
 

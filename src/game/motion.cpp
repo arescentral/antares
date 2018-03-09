@@ -279,26 +279,25 @@ static void bounce(Handle<SpaceObject> o) {
 
 static void animate(Handle<SpaceObject> o) {
     auto& base_anim = o->base->frame.animation;
-    if (base_anim.frameSpeed == Fixed::zero()) {
+    if (base_anim.speed == Fixed::zero()) {
         return;
     }
 
     auto& space_anim = o->frame.animation;
-    space_anim.thisShape += static_cast<int>(space_anim.direction) * space_anim.frameSpeed;
+    space_anim.thisShape += static_cast<int>(space_anim.direction) * space_anim.speed;
     if (o->attributes & kAnimationCycle) {
-        // TODO(sfiera): does Fixed::from_val(1) make sense here? Not Fixed::from_long(1)?
-        Fixed shape_num = (base_anim.lastShape - base_anim.firstShape) + Fixed::from_val(1);
-        while (space_anim.thisShape > base_anim.lastShape) {
+        Fixed shape_num = base_anim.shapes.range();
+        while (space_anim.thisShape >= base_anim.shapes.end) {
             space_anim.thisShape -= shape_num;
         }
-        while (space_anim.thisShape < base_anim.firstShape) {
+        while (space_anim.thisShape < base_anim.shapes.begin) {
             space_anim.thisShape += shape_num;
         }
     } else if (
-            (space_anim.thisShape > base_anim.lastShape) ||
-            (space_anim.thisShape < base_anim.firstShape)) {
+            (space_anim.thisShape >= base_anim.shapes.end) ||
+            (space_anim.thisShape < base_anim.shapes.begin)) {
         o->active            = kObjectToBeFreed;
-        space_anim.thisShape = base_anim.lastShape;
+        space_anim.thisShape = base_anim.shapes.end - Fixed::from_val(1);
     }
 }
 
@@ -452,7 +451,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
 
         auto baseObject = o->base;
         if (o->attributes & kIsSelfAnimated) {
-            if (baseObject->frame.animation.frameSpeed != Fixed::zero()) {
+            if (baseObject->frame.animation.speed != Fixed::zero()) {
                 sprite.whichShape = more_evil_fixed_to_long(o->frame.animation.thisShape);
             }
         } else if (o->attributes & kShapeFromDirection) {

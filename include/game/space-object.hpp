@@ -125,7 +125,7 @@ class SpaceObject {
             Fixed              thisShape;
             Fixed              frameFraction;
             AnimationDirection direction;
-            Fixed              frameSpeed;
+            Fixed              speed;
         } animation;
         Handle<Vector> vector;
     } frame;

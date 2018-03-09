@@ -258,7 +258,7 @@ void GetRealObjectSpriteData(
     }
 
     if (baseObject->attributes & kIsSelfAnimated)
-        whichShape = more_evil_fixed_to_long(baseObject->frame.animation.firstShape);
+        whichShape = more_evil_fixed_to_long(baseObject->frame.animation.shapes.begin);
     else
         whichShape = 0;
 

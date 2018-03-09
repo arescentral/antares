@@ -221,16 +221,10 @@ struct objectFrameType {
 
     // animation: objects whose appearence does not depend on direction
     struct Animation {
-        Fixed firstShape;  // first shape in range
-        Fixed lastShape;   // last shape (inclusive)
-
+        Range<Fixed>       shapes;     // range of frames from sprite
         AnimationDirection direction;  // frame sequence
-
-        Fixed frameSpeed;       // speed at which object animates
-        Fixed frameSpeedRange;  // random addition to speed
-
-        Fixed frameShape;       // starting shape #
-        Fixed frameShapeRange;  // random addition to starting shape #
+        Fixed              speed;      // speed at which object animates
+        Range<Fixed>       first;      // starting shape #
     };
     Animation animation;
 
