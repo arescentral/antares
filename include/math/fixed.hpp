@@ -30,7 +30,7 @@ class Fixed {
     Fixed() = default;
 
     static constexpr Fixed from_long(int32_t x) { return Fixed(x << 8); }
-    static constexpr Fixed from_float(float x) { return Fixed(roundf(x * 256.0)); }
+    static constexpr Fixed from_float(double x) { return Fixed(round(x * 256.0)); }
     static constexpr Fixed from_val(int32_t value) { return Fixed(value); }
     static constexpr Fixed zero() { return Fixed(0); }
 
