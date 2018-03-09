@@ -25,27 +25,38 @@
 namespace antares {
 
 bool read_from(pn::file_view in, BaseObject* object) {
-    uint8_t section[32];
-
-    if (!in.read(&object->attributes)) {
+    int32_t  offense, max_velocity, warp_speed, mass, max_thrust;
+    int32_t  initial_age, age_range, initial_velocity, initial_velocity_range;
+    int32_t  initial_direction, initial_direction_range, icon;
+    pn::data frame;
+    frame.resize(32);
+    int32_t  friend_deficit, danger_threshold, build_ratio;
+    uint32_t build_time;
+    if (!in.read(
+                &object->attributes, &object->baseClass, pn::pad(4), &object->price, &offense,
+                &object->destinationClass, &max_velocity, &warp_speed, &object->warpOutDistance,
+                &initial_velocity, &initial_velocity_range, &mass, &max_thrust, &object->health,
+                &object->damage, &object->energy, &initial_age, &age_range, &object->naturalScale,
+                &object->pixLayer, &object->pixResID, &icon, &object->shieldColor, pn::pad(1),
+                &initial_direction, &initial_direction_range, pn::pad(96), &friend_deficit,
+                &danger_threshold, &object->specialDirection, &object->arriveActionDistance,
+                pn::pad(48), &frame, &object->buildFlags, &object->orderFlags, &build_ratio,
+                &build_time, &object->skillNum, &object->skillDen, &object->skillNumAdj,
+                &object->skillDenAdj, &object->pictPortraitResID, pn::pad(10))) {
         return false;
     }
+
     if (object->attributes & kIsSelfAnimated) {
         object->attributes &= ~(kShapeFromDirection | kIsVector);
     } else if (object->attributes & kShapeFromDirection) {
         object->attributes &= ~kIsVector;
     }
 
-    int32_t initial_age, age_range, initial_velocity, initial_velocity_range;
-    if (!(in.read(&object->baseClass, pn::pad(4), &object->price) &&
-          read_from(in, &object->offenseValue) && in.read(&object->destinationClass) &&
-          read_from(in, &object->maxVelocity) && read_from(in, &object->warpSpeed) &&
-          in.read(&object->warpOutDistance) &&
-          in.read(&initial_velocity, &initial_velocity_range) && read_from(in, &object->mass) &&
-          read_from(in, &object->maxThrust) &&
-          in.read(&object->health, &object->damage, &object->energy, &initial_age, &age_range))) {
-        return false;
-    }
+    object->offenseValue     = Fixed::from_val(offense);
+    object->maxVelocity      = Fixed::from_val(max_velocity);
+    object->warpSpeed        = Fixed::from_val(warp_speed);
+    object->mass             = Fixed::from_val(mass);
+    object->maxThrust        = Fixed::from_val(max_thrust);
     object->initial_velocity = {
             Fixed::from_val(initial_velocity),
             Fixed::from_val(initial_velocity + std::max(0, initial_velocity_range))};
@@ -62,12 +73,6 @@ bool read_from(pn::file_view in, BaseObject* object) {
         object->occupy_count = -1;
     }
 
-    int32_t initial_direction, initial_direction_range, icon;
-    if (!in.read(
-                &object->naturalScale, &object->pixLayer, &object->pixResID, &icon,
-                &object->shieldColor, pn::pad(1), &initial_direction, &initial_direction_range)) {
-        return false;
-    }
     object->initial_direction = {initial_direction,
                                  initial_direction + std::max(0, initial_direction_range)};
     if ((0 < icon) && (icon < 0x50)) {
@@ -87,13 +92,10 @@ bool read_from(pn::file_view in, BaseObject* object) {
         object->shieldColor = GetTranslateColorShade(static_cast<Hue>(object->shieldColor), 15);
     }
 
-    if (!(in.read(pn::pad(96)) && read_from(in, &object->friendDefecit) &&
-          read_from(in, &object->dangerThreshold) &&
-          in.read(&object->specialDirection, &object->arriveActionDistance) &&
-          in.read(pn::pad(48)) && (fread(section, 1, 32, in.c_obj()) == 32) &&
-          in.read(&object->buildFlags) && in.read(&object->orderFlags))) {
-        return false;
-    }
+    object->friendDefecit   = Fixed::from_val(friend_deficit);
+    object->dangerThreshold = Fixed::from_val(danger_threshold);
+    object->buildRatio      = Fixed::from_val(build_ratio);
+    object->buildTime       = 3 * ticks(build_time / 10);
 
     static const char hex[]      = "0123456789abcdef";
     int               level_tag  = (object->buildFlags & kLevelKeyTag) >> kLevelKeyTagShift;
@@ -103,23 +105,14 @@ bool read_from(pn::file_view in, BaseObject* object) {
     object->engageKeyTag         = engage_tag ? pn::rune(hex[engage_tag]).copy() : "";
     object->orderKeyTag          = order_tag ? pn::rune(hex[order_tag]).copy() : "";
 
-    uint32_t build_time;
-    if (!(read_from(in, &object->buildRatio) &&
-          in.read(&build_time, &object->skillNum, &object->skillDen, &object->skillNumAdj,
-                  &object->skillDenAdj, &object->pictPortraitResID, pn::pad(10)))) {
-        return false;
-    }
-    object->buildTime = 3 * ticks(build_time / 10);
-
-    pn::file sub = pn::data_view{section, 32}.open();
     if (object->attributes & kShapeFromDirection) {
-        read_from(sub, &object->frame.rotation);
+        read_from(frame.open(), &object->frame.rotation);
     } else if (object->attributes & kIsSelfAnimated) {
-        read_from(sub, &object->frame.animation);
+        read_from(frame.open(), &object->frame.animation);
     } else if (object->attributes & kIsVector) {
-        read_from(sub, &object->frame.vector);
+        read_from(frame.open(), &object->frame.vector);
     } else {
-        read_from(sub, &object->frame.weapon);
+        read_from(frame.open(), &object->frame.weapon);
     }
     return true;
 }
