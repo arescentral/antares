@@ -25,21 +25,17 @@
 namespace antares {
 
 bool read_from(pn::file_view in, BaseObject* object) {
-    int32_t  offense, max_velocity, warp_speed, mass, max_thrust;
     int32_t  initial_age, age_range, initial_velocity, initial_velocity_range;
     int32_t  initial_direction, initial_direction_range, icon;
     pn::data frame;
     frame.resize(32);
-    int32_t  friend_deficit, build_ratio;
     uint32_t build_time;
     if (!in.read(
-                &object->attributes, pn::pad(12), &offense, pn::pad(4), &max_velocity, &warp_speed,
-                pn::pad(4), &initial_velocity, &initial_velocity_range, &mass, &max_thrust,
-                pn::pad(12), &initial_age, &age_range, pn::pad(8), &icon, &object->shieldColor,
-                pn::pad(1), &initial_direction, &initial_direction_range, pn::pad(96),
-                &friend_deficit, pn::pad(8), &object->arriveActionDistance, pn::pad(48), &frame,
-                &object->buildFlags, &object->orderFlags, &build_ratio, &build_time,
-                pn::pad(16))) {
+                &object->attributes, pn::pad(32), &initial_velocity, &initial_velocity_range,
+                pn::pad(20), &initial_age, &age_range, pn::pad(8), &icon, &object->shieldColor,
+                pn::pad(1), &initial_direction, &initial_direction_range, pn::pad(108),
+                &object->arriveActionDistance, pn::pad(48), &frame, &object->buildFlags,
+                &object->orderFlags, pn::pad(4), &build_time, pn::pad(16))) {
         return false;
     }
     pn::dump(stdout, object->arriveActionDistance, pn::dump_default);
@@ -50,11 +46,6 @@ bool read_from(pn::file_view in, BaseObject* object) {
         object->attributes &= ~kIsVector;
     }
 
-    object->offenseValue     = Fixed::from_val(offense);
-    object->maxVelocity      = Fixed::from_val(max_velocity);
-    object->warpSpeed        = Fixed::from_val(warp_speed);
-    object->mass             = Fixed::from_val(mass);
-    object->maxThrust        = Fixed::from_val(max_thrust);
     object->initial_velocity = {
             Fixed::from_val(initial_velocity),
             Fixed::from_val(initial_velocity + std::max(0, initial_velocity_range))};
@@ -90,9 +81,7 @@ bool read_from(pn::file_view in, BaseObject* object) {
         object->shieldColor = GetTranslateColorShade(static_cast<Hue>(object->shieldColor), 15);
     }
 
-    object->friendDefecit = Fixed::from_val(friend_deficit);
-    object->buildRatio    = Fixed::from_val(build_ratio);
-    object->buildTime     = 3 * ticks(build_time / 10);
+    object->buildTime = 3 * ticks(build_time / 10);
 
     if (object->attributes & kShapeFromDirection) {
         read_from(frame.open(), &object->frame.rotation);
@@ -247,6 +236,14 @@ BaseObject base_object(pn::value_cref x0) {
     o.skillNum          = optional_int(x.get("skill_num")).value_or(0);
     o.skillDen          = optional_int(x.get("skill_den")).value_or(0);
     o.pictPortraitResID = optional_int(x.get("portrait")).value_or(0);
+
+    o.offenseValue  = optional_fixed(x.get("offense")).value_or(Fixed::zero());
+    o.maxVelocity   = optional_fixed(x.get("max_velocity")).value_or(Fixed::zero());
+    o.warpSpeed     = optional_fixed(x.get("warp_speed")).value_or(Fixed::zero());
+    o.mass          = optional_fixed(x.get("mass")).value_or(Fixed::zero());
+    o.maxThrust     = optional_fixed(x.get("max_thrust")).value_or(Fixed::zero());
+    o.friendDefecit = optional_fixed(x.get("friend_deficit")).value_or(Fixed::zero());
+    o.buildRatio    = optional_fixed(x.get("build_ratio")).value_or(Fixed::zero());
 
     o.destroy = optional_action_array(x.get("on_destroy"))
                         .value_or(std::vector<std::unique_ptr<const Action>>{});
