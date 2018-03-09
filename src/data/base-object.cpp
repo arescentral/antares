@@ -30,7 +30,7 @@ bool read_from(pn::file_view in, BaseObject* object) {
     int32_t  initial_direction, initial_direction_range, icon;
     pn::data frame;
     frame.resize(32);
-    int32_t  friend_deficit, danger_threshold, build_ratio;
+    int32_t  friend_deficit, build_ratio;
     uint32_t build_time;
     if (!in.read(
                 &object->attributes, &object->baseClass, pn::pad(4), &object->price, &offense,
@@ -39,10 +39,10 @@ bool read_from(pn::file_view in, BaseObject* object) {
                 &object->damage, &object->energy, &initial_age, &age_range, &object->naturalScale,
                 &object->pixLayer, &object->pixResID, &icon, &object->shieldColor, pn::pad(1),
                 &initial_direction, &initial_direction_range, pn::pad(96), &friend_deficit,
-                &danger_threshold, &object->specialDirection, &object->arriveActionDistance,
-                pn::pad(48), &frame, &object->buildFlags, &object->orderFlags, &build_ratio,
-                &build_time, &object->skillNum, &object->skillDen, &object->skillNumAdj,
-                &object->skillDenAdj, &object->pictPortraitResID, pn::pad(10))) {
+                pn::pad(8), &object->arriveActionDistance, pn::pad(48), &frame,
+                &object->buildFlags, &object->orderFlags, &build_ratio, &build_time,
+                &object->skillNum, &object->skillDen, pn::pad(2), &object->pictPortraitResID,
+                pn::pad(10))) {
         return false;
     }
 
@@ -92,10 +92,9 @@ bool read_from(pn::file_view in, BaseObject* object) {
         object->shieldColor = GetTranslateColorShade(static_cast<Hue>(object->shieldColor), 15);
     }
 
-    object->friendDefecit   = Fixed::from_val(friend_deficit);
-    object->dangerThreshold = Fixed::from_val(danger_threshold);
-    object->buildRatio      = Fixed::from_val(build_ratio);
-    object->buildTime       = 3 * ticks(build_time / 10);
+    object->friendDefecit = Fixed::from_val(friend_deficit);
+    object->buildRatio    = Fixed::from_val(build_ratio);
+    object->buildTime     = 3 * ticks(build_time / 10);
 
     static const char hex[]      = "0123456789abcdef";
     int               level_tag  = (object->buildFlags & kLevelKeyTag) >> kLevelKeyTagShift;

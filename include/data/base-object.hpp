@@ -310,9 +310,7 @@ class BaseObject {
     Weapon beam;
     Weapon special;
 
-    Fixed   friendDefecit;
-    Fixed   dangerThreshold;
-    int32_t specialDirection;  // direction relative to shooter
+    Fixed friendDefecit;
 
     int32_t arriveActionDistance;  // distance^2 at which arrive action is triggered on dest
 
@@ -339,8 +337,6 @@ class BaseObject {
 
     uint8_t skillNum;
     uint8_t skillDen;
-    uint8_t skillNumAdj;
-    uint8_t skillDenAdj;
     int16_t pictPortraitResID;
 
     static const int byte_size = 318;
