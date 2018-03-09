@@ -26,6 +26,7 @@
 
 #include "data/enums.hpp"
 #include "data/handle.hpp"
+#include "drawing/color.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
 #include "math/units.hpp"
@@ -119,19 +120,24 @@ HandleList<Level_Initial>                  required_initial_range(path_value x);
 sfz::optional<Point> optional_point(path_value x);
 Point                required_point(path_value x);
 
-Hue                       required_hue(path_value x);
-KillKind                  required_kill_kind(path_value x);
-sfz::optional<MoveOrigin> optional_origin(path_value x);
-int                       required_key(path_value x);
-ConditionOp               required_condition_op(path_value x);
-IconShape                 required_icon_shape(path_value x);
-LevelType                 required_level_type(path_value x);
-PlayerType                required_player_type(path_value x);
-PushKind                  required_push_kind(path_value x);
-Screen                    required_screen(path_value x);
-SubjectValue              required_subject_value(path_value x);
-Weapon                    required_weapon(path_value x);
-Zoom                      required_zoom(path_value x);
+sfz::optional<RgbColor> optional_color(path_value x);
+
+sfz::optional<AnimationDirection> optional_animation_direction(path_value x);
+sfz::optional<Hue>                optional_hue(path_value x);
+Hue                               required_hue(path_value x);
+KillKind                          required_kill_kind(path_value x);
+sfz::optional<MoveOrigin>         optional_origin(path_value x);
+int                               required_key(path_value x);
+ConditionOp                       required_condition_op(path_value x);
+IconShape                         required_icon_shape(path_value x);
+LevelType                         required_level_type(path_value x);
+PlayerType                        required_player_type(path_value x);
+PushKind                          required_push_kind(path_value x);
+Screen                            required_screen(path_value x);
+SubjectValue                      required_subject_value(path_value x);
+VectorKind                        required_vector_kind(path_value x);
+Weapon                            required_weapon(path_value x);
+Zoom                              required_zoom(path_value x);
 
 sfz::optional<int32_t> optional_object_attributes(path_value x);
 sfz::optional<int32_t> optional_initial_attributes(path_value x);

@@ -34,94 +34,12 @@ bool read_from(pn::file_view in, BaseObject* object) {
                 &build_time, pn::pad(16))) {
         return false;
     }
-    pn::dump(stdout, object->arriveActionDistance, pn::dump_default);
 
     if ((object->shieldColor != 0xFF) && (object->shieldColor != 0)) {
         object->shieldColor = GetTranslateColorShade(static_cast<Hue>(object->shieldColor), 15);
     }
 
     object->buildTime = 3 * ticks(build_time / 10);
-
-    if (object->attributes & kShapeFromDirection) {
-        read_from(frame.open(), &object->frame.rotation);
-    } else if (object->attributes & kIsSelfAnimated) {
-        read_from(frame.open(), &object->frame.animation);
-    } else if (object->attributes & kIsVector) {
-        read_from(frame.open(), &object->frame.vector);
-    } else {
-        read_from(frame.open(), &object->frame.weapon);
-    }
-    return true;
-}
-
-bool read_from(pn::file_view in, objectFrameType::Rotation* rotation) {
-    int32_t turn_rate;
-    if (!in.read(&rotation->shapeOffset, &rotation->rotRes, &turn_rate, pn::pad(4))) {
-        return false;
-    }
-    rotation->maxTurnRate = Fixed::from_val(turn_rate);
-    return true;
-}
-
-bool read_from(pn::file_view in, objectFrameType::Animation* animation) {
-    int32_t begin, end, dir, dir_range, speed, first, first_range;
-    if (!in.read(&begin, &end, &dir, &dir_range, &speed, pn::pad(4), &first, &first_range)) {
-        return false;
-    }
-
-    // TODO(sfiera): use Fixed::from_long(1) instead of Fixed::from_val(1). This causes
-    // arescentral/antares#163.
-    animation->shapes = {Fixed::from_long(begin), Fixed::from_long(end) + Fixed::from_val(1)};
-    animation->speed  = Fixed::from_val(speed);
-    animation->first  = {Fixed::from_long(first), Fixed::from_long(first + first_range)};
-
-    if ((dir == 0) && (dir_range == 0)) {
-        animation->direction = AnimationDirection::NONE;
-    } else if ((dir == +1) && (dir_range == 0)) {
-        animation->direction = AnimationDirection::PLUS;
-    } else if ((dir == -1) && (dir_range == 0)) {
-        animation->direction = AnimationDirection::MINUS;
-    } else if ((dir == -1) && (dir_range == -1)) {
-        animation->direction = AnimationDirection::RANDOM;
-    } else {
-        animation->direction = AnimationDirection::NONE;
-    }
-
-    return true;
-}
-
-bool read_from(pn::file_view in, objectFrameType::Vector* vector) {
-    uint8_t kind, color;
-    if (!in.read(&color, &kind, &vector->accuracy, &vector->range)) {
-        return false;
-    }
-    switch (kind) {
-        default: vector->kind = VectorKind::BOLT; break;
-        case 1: vector->kind = VectorKind::BEAM_TO_OBJECT; break;
-        case 2: vector->kind = VectorKind::BEAM_TO_COORD; break;
-        case 3: vector->kind = VectorKind::BEAM_TO_OBJECT_LIGHTNING; break;
-        case 4: vector->kind = VectorKind::BEAM_TO_COORD_LIGHTNING; break;
-    }
-    if (color <= 16) {
-        vector->visible = 0;
-    } else if (vector->kind == VectorKind::BOLT) {
-        vector->visible    = true;
-        vector->bolt_color = GetRGBTranslateColor(color);
-    } else {
-        vector->visible  = true;
-        vector->beam_hue = static_cast<Hue>(color >> 4);
-    }
-    return true;
-}
-
-bool read_from(pn::file_view in, objectFrameType::Weapon* weapon) {
-    int32_t fire_time;
-    if (!(in.read(&weapon->usage, &weapon->energyCost, &fire_time, &weapon->ammo,
-                  &weapon->range) &&
-          read_from(in, &weapon->inverseSpeed) && in.read(&weapon->restockCost))) {
-        return false;
-    }
-    weapon->fireTime = ticks(fire_time);
     return true;
 }
 
@@ -164,6 +82,100 @@ sfz::optional<BaseObject::Weapon> optional_weapon(path_value x) {
         return sfz::make_optional(std::move(w));
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
+    }
+}
+
+objectFrameType::Rotation required_rotation_frame(path_value x) {
+    if (x.value().is_map()) {
+        objectFrameType::Rotation r;
+        r.shapeOffset = optional_int(x.get("offset")).value_or(0);
+        r.rotRes      = required_int(x.get("resolution"));
+        r.maxTurnRate = optional_fixed(x.get("turn_rate")).value_or(Fixed::zero());
+        return r;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
+    }
+}
+
+objectFrameType::Animation required_animation_frame(path_value x) {
+    if (x.value().is_null()) {
+        objectFrameType::Animation a;
+        a.shapes    = Range<Fixed>{Fixed::zero(), Fixed::from_val(1)};
+        a.direction = AnimationDirection::NONE;
+        a.speed     = Fixed::zero();
+        a.first     = Range<Fixed>{Fixed::zero(), Fixed::from_val(1)};
+        return a;
+    } else if (x.value().is_map()) {
+        objectFrameType::Animation a;
+        a.shapes = optional_fixed_range(x.get("shape"))
+                           .value_or(Range<Fixed>{Fixed::zero(), Fixed::from_val(1)});
+        a.direction = optional_animation_direction(x.get("direction"))
+                              .value_or(AnimationDirection::NONE);
+        a.speed = optional_fixed(x.get("speed")).value_or(Fixed::zero());
+        a.first = optional_fixed_range(x.get("first"))
+                          .value_or(Range<Fixed>{Fixed::zero(), Fixed::from_val(1)});
+        return a;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
+    }
+}
+
+objectFrameType::Vector required_vector_frame(path_value x) {
+    if (x.value().is_map()) {
+        objectFrameType::Vector v;
+        v.kind     = required_vector_kind(x.get("kind"));
+        v.accuracy = required_int(x.get("accuracy"));
+        v.range    = required_int(x.get("range"));
+
+        sfz::optional<RgbColor> color = optional_color(x.get("color"));
+        sfz::optional<Hue>      hue   = optional_hue(x.get("hue"));
+        if (v.kind == VectorKind::BOLT) {
+            v.visible    = color.has_value();
+            v.bolt_color = color.value_or(RgbColor::clear());
+            v.beam_hue   = Hue::GRAY;
+        } else {
+            v.visible    = hue.has_value();
+            v.bolt_color = RgbColor::clear();
+            v.beam_hue   = hue.value_or(Hue::GRAY);
+        }
+        return v;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
+    }
+}
+
+sfz::optional<int32_t> optional_usage(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_map()) {
+        static const pn::string_view flags[3] = {"transportation", "attacking", "defense"};
+        int32_t                      bit      = 0x00000001;
+        int32_t                      result   = 0x00000000;
+        for (pn::string_view flag : flags) {
+            if (optional_bool(x.get(flag)).value_or(false)) {
+                result |= bit;
+            }
+            bit <<= 1;
+        }
+        return sfz::make_optional(+result);
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
+    }
+}
+
+objectFrameType::Weapon required_device_frame(path_value x) {
+    if (x.value().is_map()) {
+        objectFrameType::Weapon w;
+        w.usage        = optional_usage(x.get("usage")).value_or(0);
+        w.energyCost   = optional_int(x.get("energy_cost")).value_or(0);
+        w.fireTime     = required_ticks(x.get("fire_time"));
+        w.ammo         = optional_int(x.get("ammo")).value_or(-1);
+        w.range        = required_int(x.get("range"));
+        w.inverseSpeed = optional_fixed(x.get("inverse_speed")).value_or(Fixed::zero());
+        w.restockCost  = optional_int(x.get("restock_cost")).value_or(-1);
+        return w;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
     }
 }
 
@@ -249,6 +261,17 @@ BaseObject base_object(pn::value_cref x0) {
                             .value_or(BaseObject::Weapon{BaseObject::none()});
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or map", weapons.path()).c_str());
+    }
+
+    auto frame = x.get("frame");
+    if (o.attributes & kShapeFromDirection) {
+        o.frame.rotation = required_rotation_frame(frame);
+    } else if (o.attributes & kIsSelfAnimated) {
+        o.frame.animation = required_animation_frame(frame);
+    } else if (o.attributes & kIsVector) {
+        o.frame.vector = required_vector_frame(frame);
+    } else {
+        o.frame.weapon = required_device_frame(frame);
     }
 
     o.destroyDontDie  = optional_bool(x.get("destroy_dont_die")).value_or(false);

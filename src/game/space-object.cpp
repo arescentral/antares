@@ -270,7 +270,7 @@ SpaceObject::SpaceObject(
 
     if (attributes & kIsSelfAnimated) {
         frame.animation.thisShape = baseType->frame.animation.first.begin;
-        if (baseType->frame.animation.first.range() > Fixed::zero()) {
+        if (baseType->frame.animation.first.range() > Fixed::from_val(1)) {
             frame.animation.thisShape += randomSeed.next(baseType->frame.animation.first.range());
         }
         frame.animation.direction = baseType->frame.animation.direction;
@@ -386,7 +386,7 @@ void SpaceObject::change_base_type(
 
     if (obj->attributes & kIsSelfAnimated) {
         obj->frame.animation.thisShape = base->frame.animation.first.begin;
-        if (base->frame.animation.first.range() > Fixed::zero()) {
+        if (base->frame.animation.first.range() > Fixed::from_val(1)) {
             obj->frame.animation.thisShape +=
                     obj->randomSeed.next(base->frame.animation.first.range());
         }

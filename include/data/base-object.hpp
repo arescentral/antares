@@ -242,10 +242,6 @@ struct objectFrameType {
     };
     Weapon weapon;
 };
-bool read_from(pn::file_view in, objectFrameType::Rotation* rotation);
-bool read_from(pn::file_view in, objectFrameType::Animation* animation);
-bool read_from(pn::file_view in, objectFrameType::Vector* vector);
-bool read_from(pn::file_view in, objectFrameType::Weapon* weapon);
 
 class BaseObject {
   public:

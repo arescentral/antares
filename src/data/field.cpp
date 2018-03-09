@@ -355,6 +355,48 @@ Point required_point(path_value x) {
     }
 }
 
+sfz::optional<RgbColor> optional_color(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_map()) {
+        int32_t r = required_int(x.get("r"));
+        int32_t g = required_int(x.get("g"));
+        int32_t b = required_int(x.get("b"));
+        int32_t a = optional_int(x.get("a")).value_or(255);
+        return sfz::make_optional<RgbColor>(rgba(r, g, b, a));
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
+    }
+}
+
+sfz::optional<AnimationDirection> optional_animation_direction(path_value x) {
+    return optional_enum<AnimationDirection>(
+            x, {{"0", AnimationDirection::NONE},
+                {"+", AnimationDirection::PLUS},
+                {"-", AnimationDirection::MINUS},
+                {"?", AnimationDirection::RANDOM}});
+}
+
+sfz::optional<Hue> optional_hue(path_value x) {
+    return optional_enum<Hue>(
+            x, {{"red", Hue::RED},
+                {"orange", Hue::ORANGE},
+                {"yellow", Hue::YELLOW},
+                {"blue", Hue::BLUE},
+                {"green", Hue::GREEN},
+                {"purple", Hue::PURPLE},
+                {"indigo", Hue::INDIGO},
+                {"salmon", Hue::SALMON},
+                {"gold", Hue::GOLD},
+                {"aqua", Hue::AQUA},
+                {"pink", Hue::PINK},
+                {"pale green", Hue::PALE_GREEN},
+                {"pale purple", Hue::PALE_PURPLE},
+                {"sky blue", Hue::SKY_BLUE},
+                {"tan", Hue::TAN},
+                {"gray", Hue::GRAY}});
+}
+
 Hue required_hue(path_value x) {
     return required_enum<Hue>(
             x, {{"red", Hue::RED},
@@ -470,6 +512,15 @@ SubjectValue required_subject_value(path_value x) {
             x, {{"control", SubjectValue::CONTROL},
                 {"target", SubjectValue::TARGET},
                 {"player", SubjectValue::PLAYER}});
+}
+
+VectorKind required_vector_kind(path_value x) {
+    return required_enum<VectorKind>(
+            x, {{"kinetic", VectorKind::BOLT},
+                {"static to object", VectorKind::BEAM_TO_OBJECT},
+                {"static to coord", VectorKind::BEAM_TO_COORD},
+                {"bolt to object", VectorKind::BEAM_TO_OBJECT_LIGHTNING},
+                {"bolt to coord", VectorKind::BEAM_TO_COORD_LIGHTNING}});
 }
 
 Weapon required_weapon(path_value x) {
