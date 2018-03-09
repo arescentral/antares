@@ -429,6 +429,14 @@ ConditionOp required_condition_op(path_value x) {
                 {"ge", ConditionOp::GE}});
 }
 
+IconShape required_icon_shape(path_value x) {
+    return required_enum<IconShape>(
+            x, {{"square", IconShape::SQUARE},
+                {"triangle", IconShape::TRIANGLE},
+                {"diamond", IconShape::DIAMOND},
+                {"plus", IconShape::PLUS}});
+}
+
 LevelType required_level_type(path_value x) {
     return required_enum<LevelType>(
             x, {{"solo", LevelType::SOLO}, {"net", LevelType::NET}, {"demo", LevelType::DEMO}});

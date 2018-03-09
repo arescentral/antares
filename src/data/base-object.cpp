@@ -25,12 +25,11 @@
 namespace antares {
 
 bool read_from(pn::file_view in, BaseObject* object) {
-    int32_t  icon;
     pn::data frame;
     frame.resize(32);
     uint32_t build_time;
     if (!in.read(
-                &object->attributes, pn::pad(76), &icon, &object->shieldColor, pn::pad(117),
+                &object->attributes, pn::pad(80), &object->shieldColor, pn::pad(117),
                 &object->arriveActionDistance, pn::pad(48), &frame, &object->buildFlags,
                 &object->orderFlags, pn::pad(4), &build_time, pn::pad(16))) {
         return false;
@@ -41,19 +40,6 @@ bool read_from(pn::file_view in, BaseObject* object) {
         object->attributes &= ~(kShapeFromDirection | kIsVector);
     } else if (object->attributes & kShapeFromDirection) {
         object->attributes &= ~kIsVector;
-    }
-
-    if ((0 < icon) && (icon < 0x50)) {
-        object->icon.size = icon & 0x0F;
-        switch (icon & 0xF0) {
-            case 0x00: object->icon.shape = IconShape::SQUARE; break;
-            case 0x10: object->icon.shape = IconShape::TRIANGLE; break;
-            case 0x20: object->icon.shape = IconShape::DIAMOND; break;
-            case 0x30: object->icon.shape = IconShape::PLUS; break;
-            case 0x40: object->icon.shape = IconShape::SQUARE; break;
-        }
-    } else {
-        object->icon = {IconShape::SQUARE, 0};
     }
 
     if ((object->shieldColor != 0xFF) && (object->shieldColor != 0)) {
@@ -244,6 +230,16 @@ BaseObject base_object(pn::value_cref x0) {
                          .value_or(std::vector<std::unique_ptr<const Action>>{});
     o.arrive = optional_action_array(x.get("on_arrive"))
                        .value_or(std::vector<std::unique_ptr<const Action>>{});
+
+    auto icon = x.get("icon");
+    if (icon.value().is_null()) {
+        o.icon = {IconShape::SQUARE, 0};
+    } else if (icon.value().is_map()) {
+        o.icon.shape = required_icon_shape(icon.get("shape"));
+        o.icon.size  = required_int(icon.get("size"));
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or map", icon.path()).c_str());
+    }
 
     auto weapons = x.get("weapons");
     if (weapons.value().is_null()) {
