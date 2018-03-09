@@ -275,6 +275,22 @@ Range<int64_t> required_int_range(path_value x) {
     }
 }
 
+sfz::optional<Range<Fixed>> optional_fixed_range(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_float()) {
+        Fixed begin = Fixed::from_float(x.value().as_float());
+        Fixed end   = Fixed::from_val(begin.val() + 1);
+        return sfz::make_optional(Range<Fixed>{begin, end});
+    } else if (x.value().is_map()) {
+        Fixed begin = required_fixed(x.get("begin"));
+        Fixed end   = required_fixed(x.get("end"));
+        return sfz::make_optional(Range<Fixed>{begin, end});
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be float or map", x.path()).c_str());
+    }
+}
+
 Range<Fixed> required_fixed_range(path_value x) {
     if (x.value().is_float()) {
         Fixed begin = Fixed::from_float(x.value().as_float());

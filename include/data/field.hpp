@@ -109,6 +109,7 @@ Handle<Race>                         required_race(path_value x);
 
 sfz::optional<Range<int64_t>>              optional_int_range(path_value x);
 Range<int64_t>                             required_int_range(path_value x);
+sfz::optional<Range<Fixed>>                optional_fixed_range(path_value x);
 Range<Fixed>                               required_fixed_range(path_value x);
 sfz::optional<Range<ticks>>                optional_ticks_range(path_value x);
 Range<ticks>                               required_ticks_range(path_value x);

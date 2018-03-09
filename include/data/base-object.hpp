@@ -278,7 +278,7 @@ class BaseObject {
 
     Range<Fixed>   initial_velocity;   // initial random velocity (usually relative)
     Range<ticks>   initial_age;        // starting random age
-    Range<int32_t> initial_direction;  // initial random direction (usually relative)
+    Range<int64_t> initial_direction;  // initial random direction (usually relative)
 
     int32_t occupy_count;  // size of occupying force
 

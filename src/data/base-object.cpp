@@ -25,15 +25,12 @@
 namespace antares {
 
 bool read_from(pn::file_view in, BaseObject* object) {
-    int32_t  initial_age, age_range, initial_velocity, initial_velocity_range;
-    int32_t  initial_direction, initial_direction_range, icon;
+    int32_t  icon;
     pn::data frame;
     frame.resize(32);
     uint32_t build_time;
     if (!in.read(
-                &object->attributes, pn::pad(32), &initial_velocity, &initial_velocity_range,
-                pn::pad(20), &initial_age, &age_range, pn::pad(8), &icon, &object->shieldColor,
-                pn::pad(1), &initial_direction, &initial_direction_range, pn::pad(108),
+                &object->attributes, pn::pad(76), &icon, &object->shieldColor, pn::pad(117),
                 &object->arriveActionDistance, pn::pad(48), &frame, &object->buildFlags,
                 &object->orderFlags, pn::pad(4), &build_time, pn::pad(16))) {
         return false;
@@ -46,24 +43,6 @@ bool read_from(pn::file_view in, BaseObject* object) {
         object->attributes &= ~kIsVector;
     }
 
-    object->initial_velocity = {
-            Fixed::from_val(initial_velocity),
-            Fixed::from_val(initial_velocity + std::max(0, initial_velocity_range))};
-    if (initial_age >= 0) {
-        object->initial_age =
-                Range<ticks>{ticks(initial_age), ticks(initial_age + std::max(0, age_range))};
-    } else {
-        object->initial_age = {ticks(-1), ticks(-1)};
-    }
-
-    if (object->attributes & kNeutralDeath) {
-        object->occupy_count = age_range;
-    } else {
-        object->occupy_count = -1;
-    }
-
-    object->initial_direction = {initial_direction,
-                                 initial_direction + std::max(0, initial_direction_range)};
     if ((0 < icon) && (icon < 0x50)) {
         object->icon.size = icon & 0x0F;
         switch (icon & 0xF0) {
@@ -236,6 +215,7 @@ BaseObject base_object(pn::value_cref x0) {
     o.skillNum          = optional_int(x.get("skill_num")).value_or(0);
     o.skillDen          = optional_int(x.get("skill_den")).value_or(0);
     o.pictPortraitResID = optional_int(x.get("portrait")).value_or(0);
+    o.occupy_count      = optional_int(x.get("occupy_count")).value_or(-1);
 
     o.offenseValue  = optional_fixed(x.get("offense")).value_or(Fixed::zero());
     o.maxVelocity   = optional_fixed(x.get("max_velocity")).value_or(Fixed::zero());
@@ -244,6 +224,13 @@ BaseObject base_object(pn::value_cref x0) {
     o.maxThrust     = optional_fixed(x.get("max_thrust")).value_or(Fixed::zero());
     o.friendDefecit = optional_fixed(x.get("friend_deficit")).value_or(Fixed::zero());
     o.buildRatio    = optional_fixed(x.get("build_ratio")).value_or(Fixed::zero());
+
+    o.initial_velocity = optional_fixed_range(x.get("initial_velocity"))
+                                 .value_or(Range<Fixed>{Fixed::zero(), Fixed::zero()});
+    o.initial_age = optional_ticks_range(x.get("initial_age"))
+                            .value_or(Range<ticks>{ticks(-1), ticks(-1)});
+    o.initial_direction =
+            optional_int_range(x.get("initial_direction")).value_or(Range<int64_t>{0, 0});
 
     o.destroy = optional_action_array(x.get("on_destroy"))
                         .value_or(std::vector<std::unique_ptr<const Action>>{});

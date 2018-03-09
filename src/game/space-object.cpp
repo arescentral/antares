@@ -247,12 +247,12 @@ SpaceObject::SpaceObject(
 
     direction = baseType->initial_direction.begin;
     mAddAngle(direction, relative_direction);
-    if (baseType->initial_direction.range() > 0) {
+    if (baseType->initial_direction.range() > 1) {
         mAddAngle(direction, randomSeed.next(baseType->initial_direction.range()));
     }
 
     Fixed f = baseType->initial_velocity.begin;
-    if (baseType->initial_velocity.range() > Fixed::zero()) {
+    if (baseType->initial_velocity.range() > Fixed::from_val(1)) {
         f += randomSeed.next(baseType->initial_velocity.range());
     }
     GetRotPoint(&velocity.h, &velocity.v, direction);
@@ -285,7 +285,7 @@ SpaceObject::SpaceObject(
         frame.animation.speed         = baseType->frame.animation.speed;
     }
 
-    if (baseType->initial_age.begin >= ticks(0)) {
+    if (baseType->initial_age.begin >= ticks(1)) {
         expire_after =
                 baseType->initial_age.begin + randomSeed.next(baseType->initial_age.range());
         expires = true;
@@ -404,7 +404,7 @@ void SpaceObject::change_base_type(
 
     obj->maxVelocity = base->maxVelocity;
 
-    if (base->initial_age.begin >= ticks(0)) {
+    if (base->initial_age.begin >= ticks(1)) {
         obj->expire_after =
                 base->initial_age.begin + obj->randomSeed.next(base->initial_age.range());
         obj->expires = true;
