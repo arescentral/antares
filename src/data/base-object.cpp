@@ -29,18 +29,12 @@ bool read_from(pn::file_view in, BaseObject* object) {
     frame.resize(32);
     uint32_t build_time;
     if (!in.read(
-                &object->attributes, pn::pad(80), &object->shieldColor, pn::pad(117),
-                &object->arriveActionDistance, pn::pad(48), &frame, &object->buildFlags,
-                &object->orderFlags, pn::pad(4), &build_time, pn::pad(16))) {
+                pn::pad(84), &object->shieldColor, pn::pad(117), &object->arriveActionDistance,
+                pn::pad(48), &frame, &object->buildFlags, &object->orderFlags, pn::pad(4),
+                &build_time, pn::pad(16))) {
         return false;
     }
     pn::dump(stdout, object->arriveActionDistance, pn::dump_default);
-
-    if (object->attributes & kIsSelfAnimated) {
-        object->attributes &= ~(kShapeFromDirection | kIsVector);
-    } else if (object->attributes & kShapeFromDirection) {
-        object->attributes &= ~kIsVector;
-    }
 
     if ((object->shieldColor != 0xFF) && (object->shieldColor != 0)) {
         object->shieldColor = GetTranslateColorShade(static_cast<Hue>(object->shieldColor), 15);
@@ -180,6 +174,8 @@ BaseObject base_object(pn::value_cref x0) {
 
     path_value x{x0};
     BaseObject o;
+    o.attributes = optional_object_attributes(x.get("attributes")).value_or(0);
+
     if (!read_from(x.get("bin").value().as_data().open(), &o)) {
         throw std::runtime_error("read failure");
     }
