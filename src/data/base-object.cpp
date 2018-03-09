@@ -24,34 +24,6 @@
 
 namespace antares {
 
-static bool read_weapons(pn::file_view in, BaseObject* object) {
-    int32_t pulse, beam, special;
-    int32_t pulse_count, beam_count, special_count;
-    if (!in.read(&pulse, &beam, &special, &pulse_count, &beam_count, &special_count)) {
-        return false;
-    }
-    object->pulse.base   = Handle<BaseObject>(pulse);
-    object->beam.base    = Handle<BaseObject>(beam);
-    object->special.base = Handle<BaseObject>(special);
-    object->pulse.positions.resize(std::max(1, pulse_count));
-    object->beam.positions.resize(std::max(1, beam_count));
-    object->special.positions.resize(std::max(1, special_count));
-
-    for (auto weapon : {&object->pulse, &object->beam, &object->special}) {
-        for (size_t i = 0; i < kMaxWeaponPosition; ++i) {
-            fixedPointType  ignored;
-            fixedPointType* p = &ignored;
-            if (i < weapon->positions.size()) {
-                p = &weapon->positions[i];
-            }
-            if (!read_from(in, p)) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
 bool read_from(pn::file_view in, BaseObject* object) {
     uint8_t section[32];
 
@@ -115,7 +87,7 @@ bool read_from(pn::file_view in, BaseObject* object) {
         object->shieldColor = GetTranslateColorShade(static_cast<Hue>(object->shieldColor), 15);
     }
 
-    if (!(read_weapons(in, object) && read_from(in, &object->friendDefecit) &&
+    if (!(in.read(pn::pad(96)) && read_from(in, &object->friendDefecit) &&
           read_from(in, &object->dangerThreshold) &&
           in.read(&object->specialDirection, &object->arriveActionDistance) &&
           in.read(pn::pad(48)) && (fread(section, 1, 32, in.c_obj()) == 32) &&
@@ -223,6 +195,48 @@ bool read_from(pn::file_view in, objectFrameType::Weapon* weapon) {
     return true;
 }
 
+fixedPointType required_fixed_point(path_value x) {
+    if (x.value().is_map()) {
+        Fixed px = required_fixed(x.get("x"));
+        Fixed py = required_fixed(x.get("y"));
+        return {px, py};
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
+    }
+}
+
+sfz::optional<std::vector<fixedPointType>> optional_fixed_point_array(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_array()) {
+        pn::array_cref              a = x.value().as_array();
+        std::vector<fixedPointType> result;
+        for (int i = 0; i < a.size(); ++i) {
+            result.emplace_back(required_fixed_point(x.get(i)));
+        }
+        return sfz::make_optional(std::move(result));
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
+    }
+}
+
+sfz::optional<BaseObject::Weapon> optional_weapon(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_map()) {
+        BaseObject::Weapon w;
+        w.base      = required_base(x.get("base"));
+        w.positions = optional_fixed_point_array(x.get("positions"))
+                              .value_or(std::vector<fixedPointType>{});
+        if (w.positions.empty()) {
+            w.positions.push_back({Fixed::zero(), Fixed::zero()});
+        }
+        return sfz::make_optional(std::move(w));
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
+    }
+}
+
 BaseObject base_object(pn::value_cref x0) {
     if (!x0.is_map()) {
         throw std::runtime_error("must be map");
@@ -251,6 +265,20 @@ BaseObject base_object(pn::value_cref x0) {
                          .value_or(std::vector<std::unique_ptr<const Action>>{});
     o.arrive = optional_action_array(x.get("on_arrive"))
                        .value_or(std::vector<std::unique_ptr<const Action>>{});
+
+    auto weapons = x.get("weapons");
+    if (weapons.value().is_null()) {
+        // no weapons
+    } else if (weapons.value().is_map()) {
+        o.pulse = optional_weapon(weapons.get("pulse"))
+                          .value_or(BaseObject::Weapon{BaseObject::none()});
+        o.beam = optional_weapon(weapons.get("beam"))
+                         .value_or(BaseObject::Weapon{BaseObject::none()});
+        o.special = optional_weapon(weapons.get("special"))
+                            .value_or(BaseObject::Weapon{BaseObject::none()});
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or map", weapons.path()).c_str());
+    }
 
     o.destroyDontDie  = optional_bool(x.get("destroy_dont_die")).value_or(false);
     o.expireDontDie   = optional_bool(x.get("expire_dont_die")).value_or(false);
