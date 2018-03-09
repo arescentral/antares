@@ -33,18 +33,16 @@ bool read_from(pn::file_view in, BaseObject* object) {
     int32_t  friend_deficit, build_ratio;
     uint32_t build_time;
     if (!in.read(
-                &object->attributes, &object->baseClass, pn::pad(4), &object->price, &offense,
-                &object->destinationClass, &max_velocity, &warp_speed, &object->warpOutDistance,
-                &initial_velocity, &initial_velocity_range, &mass, &max_thrust, &object->health,
-                &object->damage, &object->energy, &initial_age, &age_range, &object->naturalScale,
-                &object->pixLayer, &object->pixResID, &icon, &object->shieldColor, pn::pad(1),
-                &initial_direction, &initial_direction_range, pn::pad(96), &friend_deficit,
-                pn::pad(8), &object->arriveActionDistance, pn::pad(48), &frame,
+                &object->attributes, pn::pad(12), &offense, pn::pad(4), &max_velocity, &warp_speed,
+                pn::pad(4), &initial_velocity, &initial_velocity_range, &mass, &max_thrust,
+                pn::pad(12), &initial_age, &age_range, pn::pad(8), &icon, &object->shieldColor,
+                pn::pad(1), &initial_direction, &initial_direction_range, pn::pad(96),
+                &friend_deficit, pn::pad(8), &object->arriveActionDistance, pn::pad(48), &frame,
                 &object->buildFlags, &object->orderFlags, &build_ratio, &build_time,
-                &object->skillNum, &object->skillDen, pn::pad(2), &object->pictPortraitResID,
-                pn::pad(10))) {
+                pn::pad(16))) {
         return false;
     }
+    pn::dump(stdout, object->arriveActionDistance, pn::dump_default);
 
     if (object->attributes & kIsSelfAnimated) {
         object->attributes &= ~(kShapeFromDirection | kIsVector);
@@ -235,7 +233,20 @@ BaseObject base_object(pn::value_cref x0) {
     o.name       = required_string(x.get("long_name")).copy();
     o.short_name = required_string(x.get("short_name")).copy();
 
-    o.race = optional_race(x.get("race")).value_or(Race::none());
+    o.race              = optional_race(x.get("race")).value_or(Race::none());
+    o.baseClass         = optional_int(x.get("class")).value_or(-1);
+    o.price             = optional_int(x.get("price")).value_or(0);
+    o.destinationClass  = optional_int(x.get("destination_class")).value_or(0);
+    o.warpOutDistance   = optional_int(x.get("warp_out_distance")).value_or(0);
+    o.health            = optional_int(x.get("health")).value_or(0);
+    o.damage            = optional_int(x.get("damage")).value_or(0);
+    o.energy            = optional_int(x.get("energy")).value_or(0);
+    o.naturalScale      = optional_fixed(x.get("scale")).value_or(Fixed::from_long(1)).val() * 16;
+    o.pixLayer          = optional_int(x.get("layer")).value_or(0);
+    o.pixResID          = optional_int(x.get("sprite")).value_or(-1);
+    o.skillNum          = optional_int(x.get("skill_num")).value_or(0);
+    o.skillDen          = optional_int(x.get("skill_den")).value_or(0);
+    o.pictPortraitResID = optional_int(x.get("portrait")).value_or(0);
 
     o.destroy = optional_action_array(x.get("on_destroy"))
                         .value_or(std::vector<std::unique_ptr<const Action>>{});
