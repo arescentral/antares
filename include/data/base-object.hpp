@@ -209,7 +209,7 @@ enum kPresenceStateType {
     kWarpOutPresence = 5
 };
 
-union objectFrameType {
+struct objectFrameType {
     // rotation: for objects whose shapes depend on their direction
     struct Rotation {
         int32_t shapeOffset;       // offset for 1st shape
@@ -236,10 +236,10 @@ union objectFrameType {
 
     // vector: have no associated sprite
     struct Vector {
-        uint8_t color;  // color of line
-        uint8_t kind;
-        int32_t accuracy;  // for non-normal vector objects, how accurate
-        int32_t range;
+        uint8_t    color;  // color of line
+        VectorKind kind     = VectorKind::BOLT;
+        int32_t    accuracy = 0;  // for non-normal vector objects, how accurate
+        int32_t    range    = 0;
     };
     Vector vector;
 

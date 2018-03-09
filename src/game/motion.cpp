@@ -309,8 +309,8 @@ static void move_vector(Handle<SpaceObject> o) {
     auto& vector = *o->frame.vector;
 
     vector.objectLocation = o->location;
-    if ((vector.vectorKind == Vector::BEAM_TO_OBJECT) ||
-        (vector.vectorKind == Vector::BEAM_TO_OBJECT_LIGHTNING)) {
+    if ((vector.vectorKind == VectorKind::BEAM_TO_OBJECT) ||
+        (vector.vectorKind == VectorKind::BEAM_TO_OBJECT_LIGHTNING)) {
         if (vector.toObject.get()) {
             auto target = vector.toObject;
             if (target->active && (target->id == vector.toObjectID)) {
@@ -329,8 +329,8 @@ static void move_vector(Handle<SpaceObject> o) {
             }
         }
     } else if (
-            (vector.vectorKind == Vector::BEAM_TO_COORD) ||
-            (vector.vectorKind == Vector::BEAM_TO_COORD_LIGHTNING)) {
+            (vector.vectorKind == VectorKind::BEAM_TO_COORD) ||
+            (vector.vectorKind == VectorKind::BEAM_TO_COORD_LIGHTNING)) {
         if (vector.fromObject.get()) {
             auto target = vector.fromObject;
             if (target->active && (target->id == vector.fromObjectID)) {

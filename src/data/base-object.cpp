@@ -146,11 +146,6 @@ bool read_from(pn::file_view in, BaseObject* object) {
         read_from(sub, &object->frame.animation);
     } else if (object->attributes & kIsVector) {
         read_from(sub, &object->frame.vector);
-        if (object->frame.vector.color > 16) {
-            object->frame.vector.color = object->frame.vector.color;
-        } else {
-            object->frame.vector.color = 0;
-        }
     } else {
         read_from(sub, &object->frame.weapon);
     }
@@ -188,7 +183,21 @@ bool read_from(pn::file_view in, objectFrameType::Animation* animation) {
 }
 
 bool read_from(pn::file_view in, objectFrameType::Vector* vector) {
-    return in.read(&vector->color, &vector->kind, &vector->accuracy, &vector->range);
+    uint8_t kind;
+    if (!in.read(&vector->color, &kind, &vector->accuracy, &vector->range)) {
+        return false;
+    }
+    if (vector->color <= 16) {
+        vector->color = 0;
+    }
+    switch (kind) {
+        default: vector->kind = VectorKind::BOLT; break;
+        case 1: vector->kind = VectorKind::BEAM_TO_OBJECT; break;
+        case 2: vector->kind = VectorKind::BEAM_TO_COORD; break;
+        case 3: vector->kind = VectorKind::BEAM_TO_OBJECT_LIGHTNING; break;
+        case 4: vector->kind = VectorKind::BEAM_TO_COORD_LIGHTNING; break;
+    }
+    return true;
 }
 
 bool read_from(pn::file_view in, objectFrameType::Weapon* weapon) {
