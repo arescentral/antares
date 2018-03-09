@@ -96,14 +96,6 @@ bool read_from(pn::file_view in, BaseObject* object) {
     object->buildRatio    = Fixed::from_val(build_ratio);
     object->buildTime     = 3 * ticks(build_time / 10);
 
-    static const char hex[]      = "0123456789abcdef";
-    int               level_tag  = (object->buildFlags & kLevelKeyTag) >> kLevelKeyTagShift;
-    int               engage_tag = (object->buildFlags & kEngageKeyTag) >> kEngageKeyTagShift;
-    int               order_tag  = (object->orderFlags & kOrderKeyTag) >> kOrderKeyTagShift;
-    object->levelKeyTag          = level_tag ? pn::rune(hex[level_tag]).copy() : "";
-    object->engageKeyTag         = engage_tag ? pn::rune(hex[engage_tag]).copy() : "";
-    object->orderKeyTag          = order_tag ? pn::rune(hex[order_tag]).copy() : "";
-
     if (object->attributes & kShapeFromDirection) {
         read_from(frame.open(), &object->frame.rotation);
     } else if (object->attributes & kIsSelfAnimated) {
@@ -276,6 +268,10 @@ BaseObject base_object(pn::value_cref x0) {
     o.expireDontDie   = optional_bool(x.get("expire_dont_die")).value_or(false);
     o.activate_period = optional_ticks_range(x.get("activate_period"))
                                 .value_or(Range<ticks>{ticks(0), ticks(0)});
+
+    o.levelKeyTag  = optional_string(x.get("level_tag")).value_or("").copy();
+    o.engageKeyTag = optional_string(x.get("engage_tag")).value_or("").copy();
+    o.orderKeyTag  = optional_string(x.get("order_tag")).value_or("").copy();
 
     return o;
 }

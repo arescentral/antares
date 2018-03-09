@@ -140,11 +140,6 @@ enum {
     kBuildFlagBit22          = 0x00200000,
     kOnlyEngagedBy           = 0x00400000,
     kCanOnlyEngage           = 0x00800000,
-
-    kEngageKeyTag      = 0x0f000000,
-    kEngageKeyTagShift = 24,
-    kLevelKeyTag       = 0xf0000000,
-    kLevelKeyTagShift  = 28,
 };
 
 //
@@ -183,9 +178,6 @@ enum {
     kHardTargetIsFriend     = 0x02000000,
     kHardTargetIsNotBase    = 0x04000000,
     kHardTargetIsBase       = 0x08000000,
-
-    kOrderKeyTag      = 0xf0000000,
-    kOrderKeyTagShift = 28,
 };
 
 // RUNTIME FLAG BITS
