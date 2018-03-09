@@ -299,8 +299,13 @@ class BaseObject {
 
     int16_t pixLayer;     // 0 = no layer 1->3 = back to front
     int16_t pixResID;     // resID of SMIV
-    int32_t tinySize;     // size of representation on radar (0 = 1 pixel)
     uint8_t shieldColor;  // color on radar (0 = don't put on radar)
+
+    struct Icon {
+        IconShape shape;
+        int       size;
+    };
+    Icon icon;
 
     struct Weapon {
         Handle<BaseObject>          base;

@@ -577,7 +577,7 @@ static void calc_misc() {
             o->runTimeFlags &= ~kIsHidden;
 
             if (o->sprite.get()) {
-                o->sprite->tinySize = o->tinySize;
+                o->sprite->icon = o->icon;
             }
         }
     }
@@ -868,7 +868,7 @@ static void calc_visibility() {
                 }
                 o->seenByPlayerFlags |= o->myPlayerFlag;
                 if (!(o->seenByPlayerFlags & seen_by_me) && o->sprite.get()) {
-                    o->sprite->tinySize = 0;
+                    o->sprite->icon.size = 0;
                 }
             }
         }

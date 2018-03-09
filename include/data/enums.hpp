@@ -68,6 +68,13 @@ enum class MoveOrigin {
 
 enum class ConditionOp { EQ, NE, LT, GT, LE, GE };
 
+enum class IconShape {
+    SQUARE,
+    TRIANGLE,
+    DIAMOND,
+    PLUS,
+};
+
 enum class LevelType { SOLO, NET, DEMO };
 
 // Restricts actions based on the owners of the subject and object.

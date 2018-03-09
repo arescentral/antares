@@ -25,8 +25,10 @@
 #include <sfz/sfz.hpp>
 
 #include "data/enums.hpp"
-#include "game/time.hpp"
+#include "data/handle.hpp"
 #include "math/fixed.hpp"
+#include "math/geometry.hpp"
+#include "math/units.hpp"
 
 namespace antares {
 

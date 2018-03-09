@@ -72,8 +72,8 @@ class SpaceObject {
 
     uint32_t keysDown = 0;
 
-    int32_t  tinySize = 0;
-    RgbColor tinyColor;
+    BaseObject::Icon icon;
+    RgbColor         tinyColor;
 
     int32_t direction     = 0;
     int32_t directionGoal = 0;

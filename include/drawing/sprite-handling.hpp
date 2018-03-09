@@ -21,6 +21,7 @@
 
 #include <map>
 
+#include "data/base-object.hpp"
 #include "data/handle.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
@@ -69,11 +70,12 @@ class Sprite {
     spriteStyleType style;
     RgbColor        styleColor;
     int16_t         styleData;
-    int32_t         tinySize;
     int16_t         whichLayer;
     RgbColor        tinyColor;
     bool            killMe;
     draw_tiny_t     draw_tiny;
+
+    BaseObject::Icon icon;
 
   private:
     friend void         SpriteHandlingInit();
@@ -108,7 +110,7 @@ void           ResetAllSprites();
 Rect           scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t scale);
 Handle<Sprite> AddSprite(
         Point where, NatePixTable* table, int16_t resID, int16_t whichShape, int32_t scale,
-        int32_t size, int16_t layer, const RgbColor& color);
+        BaseObject::Icon icon, int16_t layer, const RgbColor& color);
 void RemoveSprite(Handle<Sprite> sprite);
 void draw_sprites();
 void CullSprites();

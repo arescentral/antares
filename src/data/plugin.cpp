@@ -27,6 +27,7 @@
 #include "data/base-object.hpp"
 #include "data/races.hpp"
 #include "data/resource.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 
 using sfz::range;

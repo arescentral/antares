@@ -39,15 +39,6 @@ using std::unique_ptr;
 
 namespace antares {
 
-static const uint32_t kSolidSquareBlip  = 0x00000000;
-static const uint32_t kTriangleUpBlip   = 0x00000010;
-static const uint32_t kDiamondBlip      = 0x00000020;
-static const uint32_t kPlusBlip         = 0x00000030;
-static const uint32_t kFramedSquareBlip = 0x00000040;
-
-static const uint32_t kBlipSizeMask = 0x0000000f;
-static const uint32_t kBlipTypeMask = 0x000000f0;
-
 static void draw_tiny_square(const Rect& rect, const RgbColor& color) {
     Rects().fill(rect, color);
 }
@@ -64,18 +55,15 @@ static void draw_tiny_plus(const Rect& rect, const RgbColor& color) {
     sys.video->draw_plus(rect, color);
 }
 
-static draw_tiny_t draw_tiny_function(uint8_t id) {
-    uint8_t size = id & kBlipSizeMask;
-    uint8_t type = id & kBlipTypeMask;
+static draw_tiny_t draw_tiny_function(IconShape shape, int size) {
     if (size <= 0) {
         return NULL;
     }
-    switch (type) {
-        case kTriangleUpBlip: return draw_tiny_triangle;
-        case kFramedSquareBlip:
-        case kSolidSquareBlip: return draw_tiny_square;
-        case kPlusBlip: return draw_tiny_plus;
-        case kDiamondBlip: return draw_tiny_diamond;
+    switch (shape) {
+        case IconShape::TRIANGLE: return draw_tiny_triangle;
+        case IconShape::SQUARE: return draw_tiny_square;
+        case IconShape::PLUS: return draw_tiny_plus;
+        case IconShape::DIAMOND: return draw_tiny_diamond;
         default: return NULL;
     }
 }
@@ -143,7 +131,7 @@ const NatePixTable* Pix::cursor() { return _cursor.get(); }
 
 Handle<Sprite> AddSprite(
         Point where, NatePixTable* table, int16_t resID, int16_t whichShape, int32_t scale,
-        int32_t size, int16_t layer, const RgbColor& color) {
+        BaseObject::Icon icon, int16_t layer, const RgbColor& color) {
     for (Handle<Sprite> sprite : Sprite::all()) {
         if (sprite->table == NULL) {
             sprite->where      = where;
@@ -152,9 +140,9 @@ Handle<Sprite> AddSprite(
             sprite->whichShape = whichShape;
             sprite->scale      = scale;
             sprite->whichLayer = layer;
-            sprite->tinySize   = size;
+            sprite->icon       = icon;
             sprite->tinyColor  = color;
-            sprite->draw_tiny  = draw_tiny_function(size);
+            sprite->draw_tiny  = draw_tiny_function(icon.shape, icon.size);
             sprite->killMe     = false;
             sprite->style      = spriteNormal;
             sprite->styleColor = RgbColor::white();
@@ -221,7 +209,7 @@ void draw_sprites() {
     } else {
         for (int layer : range<int>(kFirstSpriteLayer, kLastSpriteLayer + 1)) {
             for (auto aSprite : Sprite::all()) {
-                int tinySize = aSprite->tinySize & kBlipSizeMask;
+                int tinySize = aSprite->icon.size;
                 if ((aSprite->table != NULL) && !aSprite->killMe && tinySize &&
                     (aSprite->draw_tiny != NULL) && (aSprite->whichLayer == layer)) {
                     Rect tiny_rect(-tinySize, -tinySize, tinySize, tinySize);

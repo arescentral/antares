@@ -146,7 +146,7 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject* sourceObject) {
         }
 
         RgbColor tinyColor;
-        if (obj->tinySize == 0) {
+        if (obj->icon.size == 0) {
             tinyColor = RgbColor::clear();
         } else if (obj->owner == g.admiral) {
             tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
@@ -168,7 +168,7 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject* sourceObject) {
 
         obj->sprite = AddSprite(
                 where, spriteTable, sourceObject->pixResID, whichShape, obj->naturalScale,
-                obj->tinySize, obj->layer, tinyColor);
+                obj->icon, obj->layer, tinyColor);
         obj->tinyColor = tinyColor;
 
         if (!obj->sprite.get()) {
@@ -222,7 +222,7 @@ SpaceObject::SpaceObject(
 
     attributes   = baseType->attributes;
     shieldColor  = baseType->shieldColor;
-    tinySize     = baseType->tinySize;
+    icon         = baseType->icon;
     layer        = baseType->pixLayer;
     maxVelocity  = baseType->maxVelocity;
     naturalScale = baseType->naturalScale;
@@ -380,7 +380,7 @@ void SpaceObject::change_base_type(
                                                              kIsPlayerShip | kStaticDestination));
     obj->baseType      = base.get();
     obj->base          = base;
-    obj->tinySize      = base->tinySize;
+    obj->icon          = base->icon;
     obj->shieldColor   = base->shieldColor;
     obj->layer         = base->pixLayer;
     obj->directionGoal = 0;
@@ -493,7 +493,7 @@ void SpaceObject::change_base_type(
         }
 
         obj->sprite->table      = spriteTable;
-        obj->sprite->tinySize   = base->tinySize;
+        obj->sprite->icon       = base->icon;
         obj->sprite->whichLayer = base->pixLayer;
         obj->sprite->scale      = base->naturalScale;
 

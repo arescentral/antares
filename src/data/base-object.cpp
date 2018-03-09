@@ -90,14 +90,26 @@ bool read_from(pn::file_view in, BaseObject* object) {
         object->occupy_count = -1;
     }
 
-    int32_t initial_direction, initial_direction_range;
+    int32_t initial_direction, initial_direction_range, icon;
     if (!in.read(
-                &object->naturalScale, &object->pixLayer, &object->pixResID, &object->tinySize,
+                &object->naturalScale, &object->pixLayer, &object->pixResID, &icon,
                 &object->shieldColor, pn::pad(1), &initial_direction, &initial_direction_range)) {
         return false;
     }
     object->initial_direction = {initial_direction,
                                  initial_direction + std::max(0, initial_direction_range)};
+    if ((0 < icon) && (icon < 0x50)) {
+        object->icon.size = icon & 0x0F;
+        switch (icon & 0xF0) {
+            case 0x00: object->icon.shape = IconShape::SQUARE; break;
+            case 0x10: object->icon.shape = IconShape::TRIANGLE; break;
+            case 0x20: object->icon.shape = IconShape::DIAMOND; break;
+            case 0x30: object->icon.shape = IconShape::PLUS; break;
+            case 0x40: object->icon.shape = IconShape::SQUARE; break;
+        }
+    } else {
+        object->icon = {IconShape::SQUARE, 0};
+    }
 
     if ((object->shieldColor != 0xFF) && (object->shieldColor != 0)) {
         object->shieldColor = GetTranslateColorShade(static_cast<Hue>(object->shieldColor), 15);
