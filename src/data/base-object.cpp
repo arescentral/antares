@@ -25,15 +25,7 @@
 namespace antares {
 
 bool read_from(pn::file_view in, BaseObject* object) {
-    pn::data frame;
-    frame.resize(32);
-    if (!in.read(
-                pn::pad(202), &object->arriveActionDistance, pn::pad(48), &frame,
-                &object->buildFlags, &object->orderFlags, pn::pad(24))) {
-        return false;
-    }
-
-    return true;
+    return in.read(pn::pad(286), &object->buildFlags, &object->orderFlags, pn::pad(24));
 }
 
 fixedPointType required_fixed_point(path_value x) {
@@ -203,6 +195,7 @@ BaseObject base_object(pn::value_cref x0) {
     o.skillDen          = optional_int(x.get("skill_den")).value_or(0);
     o.pictPortraitResID = optional_int(x.get("portrait")).value_or(0);
     o.occupy_count      = optional_int(x.get("occupy_count")).value_or(-1);
+    o.arriveActionDistance = optional_int(x.get("arrive_action_distance")).value_or(0);
 
     o.offenseValue  = optional_fixed(x.get("offense")).value_or(Fixed::zero());
     o.maxVelocity   = optional_fixed(x.get("max_velocity")).value_or(Fixed::zero());
