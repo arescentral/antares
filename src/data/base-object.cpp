@@ -24,8 +24,99 @@
 
 namespace antares {
 
-bool read_from(pn::file_view in, BaseObject* object) {
-    return in.read(pn::pad(286), &object->buildFlags, &object->orderFlags, pn::pad(24));
+sfz::optional<int32_t> optional_object_order_flags(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_map()) {
+        static const pn::string_view flags[32] = {"stronger_than_target",
+                                                  "base",
+                                                  "not_base",
+                                                  "local",
+                                                  "remote",
+                                                  "only_escort_not_base",
+                                                  "friend",
+                                                  "foe",
+
+                                                  "bit09",
+                                                  "bit10",
+                                                  "bit11",
+                                                  "bit12",
+                                                  "bit13",
+                                                  "bit14",
+                                                  "bit15",
+                                                  "bit16",
+
+                                                  "bit17",
+                                                  "bit18",
+                                                  "hard_matching_friend",
+                                                  "hard_matching_foe",
+                                                  "hard_friendly_escort_only",
+                                                  "hard_no_friendly_escort",
+                                                  "hard_remote",
+                                                  "hard_local",
+
+                                                  "hard_foe",
+                                                  "hard_friend",
+                                                  "hard_not_base",
+                                                  "hard_base"};
+
+        int32_t bit    = 0x00000001;
+        int32_t result = 0x00000000;
+        for (pn::string_view flag : flags) {
+            if (optional_bool(x.get(flag)).value_or(false)) {
+                result |= bit;
+            }
+            bit <<= 1;
+        }
+        return sfz::make_optional(+result);
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
+    }
+}
+
+sfz::optional<int32_t> optional_object_build_flags(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_map()) {
+        static const pn::string_view flags[32] = {"uncaptured_base_exists",
+                                                  "sufficient_escorts_exist",
+                                                  "this_base_needs_protection",
+                                                  "friend_up_trend",
+                                                  "friend_down_trend",
+                                                  "foe_up_trend",
+                                                  "foe_down_trend",
+                                                  "matching_foe_exists",
+
+                                                  "bit09",
+                                                  "bit10",
+                                                  "bit11",
+                                                  "bit12",
+                                                  "bit13",
+                                                  "bit14",
+                                                  "bit15",
+                                                  "bit16",
+
+                                                  "bit17",
+                                                  "bit18",
+                                                  "bit19",
+                                                  "bit20",
+                                                  "bit21",
+                                                  "bit22",
+                                                  "only_engaged_by",
+                                                  "can_only_engage"};
+
+        int32_t bit    = 0x00000001;
+        int32_t result = 0x00000000;
+        for (pn::string_view flag : flags) {
+            if (optional_bool(x.get(flag)).value_or(false)) {
+                result |= bit;
+            }
+            bit <<= 1;
+        }
+        return sfz::make_optional(+result);
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
+    }
 }
 
 fixedPointType required_fixed_point(path_value x) {
@@ -172,10 +263,8 @@ BaseObject base_object(pn::value_cref x0) {
     path_value x{x0};
     BaseObject o;
     o.attributes = optional_object_attributes(x.get("attributes")).value_or(0);
-
-    if (!read_from(x.get("bin").value().as_data().open(), &o)) {
-        throw std::runtime_error("read failure");
-    }
+    o.buildFlags = optional_object_build_flags(x.get("build_flags")).value_or(0);
+    o.orderFlags = optional_object_order_flags(x.get("order_flags")).value_or(0);
 
     o.name       = required_string(x.get("long_name")).copy();
     o.short_name = required_string(x.get("short_name")).copy();
