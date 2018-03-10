@@ -21,16 +21,36 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <pn/fwd>
+#include <map>
+#include <pn/string>
+
+#include "data/enums.hpp"
+#include "data/handle.hpp"
+#include "math/fixed.hpp"
 
 namespace antares {
 
-struct Race;
+class BaseObject;
 
-void    InitRaces();
-void    CleanupRaces();
-int16_t GetRaceIDFromNum(size_t raceNum);
-Race    race(pn::value_cref x);
+struct Race {
+    int32_t    numeric;
+    pn::string singular;
+    pn::string plural;
+    pn::string military;
+    pn::string homeworld;
+    Hue        apparentColor;
+    Fixed      advantage;
+    // uint32_t   illegalColors;
+
+    std::map<pn::string, Handle<BaseObject>> ships;
+
+    static Race*        get(int n);
+    static Handle<Race> none() { return Handle<Race>(-1); }
+
+    static const size_t byte_size = 14;
+};
+
+Race race(pn::value_cref x);
 
 }  // namespace antares
 

@@ -390,23 +390,6 @@ struct Level_Briefing {
     static const size_t byte_size = 24;
 };
 
-struct Race {
-    int32_t    numeric;
-    pn::string singular;
-    pn::string plural;
-    pn::string military;
-    pn::string homeworld;
-    Hue        apparentColor;
-    Fixed      advantage;
-    // uint32_t   illegalColors;
-
-    static Race*        get(int n);
-    static Handle<Race> none() { return Handle<Race>(-1); }
-
-    static const size_t byte_size = 14;
-};
-bool read_from(pn::file_view in, Race* race);
-
 }  // namespace antares
 
 #endif  // ANTARES_DATA_LEVEL_HPP_

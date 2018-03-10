@@ -23,6 +23,7 @@
 
 #include "data/base-object.hpp"
 #include "data/plugin.hpp"
+#include "data/races.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/sprite-handling.hpp"
@@ -90,12 +91,11 @@ Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, Handle<Race> race) {
     if (class_ >= kLiteralClass) {
         return Handle<BaseObject>(class_ - kLiteralClass);
     }
-    for (auto o : BaseObject::all()) {
-        if ((o->baseClass == class_) && (o->race == race)) {
-            return o;
-        }
+    auto it = race->ships.find(pn::dump(class_, pn::dump_short));
+    if (it == race->ships.end()) {
+        return BaseObject::none();
     }
-    return BaseObject::none();
+    return it->second;
 }
 
 static Handle<SpaceObject> next_free_space_object() {

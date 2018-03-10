@@ -28,14 +28,6 @@ using std::unique_ptr;
 
 namespace antares {
 
-int16_t GetRaceIDFromNum(size_t raceNum) {
-    if (raceNum < plug.races.size()) {
-        return plug.races[raceNum].numeric;
-    } else {
-        return -1;
-    }
-}
-
 Race race(pn::value_cref x0) {
     if (!x0.is_map()) {
         throw std::runtime_error("must be map");
@@ -50,6 +42,18 @@ Race race(pn::value_cref x0) {
     r.homeworld     = required_string(x.get("homeworld")).copy();
     r.apparentColor = required_hue(x.get("apparent_color"));
     r.advantage     = required_fixed(x.get("advantage"));
+
+    path_value ships = x.get("ships");
+    if (ships.value().is_null()) {
+        r.ships.clear();
+    } else if (ships.value().is_map()) {
+        for (pn::key_value_cref kv : ships.value().as_map()) {
+            r.ships.emplace(kv.key().copy(), required_base(ships.get(kv.key())));
+        }
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or map", ships.path()).c_str());
+    }
+
     return r;
 }
 

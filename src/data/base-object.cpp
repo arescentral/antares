@@ -20,8 +20,6 @@
 
 #include "data/base-object.hpp"
 
-#include "data/level.hpp"
-
 namespace antares {
 
 sfz::optional<int32_t> optional_object_order_flags(path_value x) {
@@ -269,8 +267,6 @@ BaseObject base_object(pn::value_cref x0) {
     o.name       = required_string(x.get("long_name")).copy();
     o.short_name = required_string(x.get("short_name")).copy();
 
-    o.race              = optional_race(x.get("race")).value_or(Race::none());
-    o.baseClass         = optional_int(x.get("class")).value_or(-1);
     o.price             = optional_int(x.get("price")).value_or(0);
     o.destinationClass  = optional_int(x.get("destination_class")).value_or(0);
     o.warpOutDistance   = optional_int(x.get("warp_out_distance")).value_or(0);

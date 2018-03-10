@@ -19,6 +19,7 @@
 #include "game/admiral.hpp"
 
 #include "data/base-object.hpp"
+#include "data/races.hpp"
 #include "data/resource.hpp"
 #include "game/cheat.hpp"
 #include "game/globals.hpp"
