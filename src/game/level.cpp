@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 
 #include "data/plugin.hpp"
+#include "data/races.hpp"
 #include "drawing/pix-table.hpp"
 #include "game/action.hpp"
 #include "game/admiral.hpp"
@@ -172,6 +173,7 @@ LoadState start_construct_level(Handle<Level> level) {
     Admiral::reset();
     ResetAllDestObjectData();
     ResetMotionGlobals();
+    plug.races.clear();
     gAbsoluteScale = kTimesTwoScale;
     g.sync         = 0;
 
@@ -202,6 +204,7 @@ LoadState start_construct_level(Handle<Level> level) {
             auto admiral = Admiral::make(i++, kAIsComputer, player);
             admiral->pay(Fixed::from_long(5000));
         }
+        load_race(player.playerRace);
     }
 
     // *** END INIT ADMIRALS ***

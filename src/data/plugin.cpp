@@ -100,28 +100,6 @@ static void read_all_levels(vector<Level>& v) {
     }
 }
 
-static void read_all_races(vector<Race>& v) {
-    for (int i = 0; true; ++i) {
-        pn::string path = pn::format("races/{0}.pn", i);
-        if (!Resource::exists(path)) {
-            break;
-        }
-
-        try {
-            pn::value  x;
-            pn_error_t e;
-            if (!pn::parse(Resource::path(path).data().open(), x, &e)) {
-                throw std::runtime_error(
-                        pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code))
-                                .c_str());
-            }
-            v.push_back(race(x));
-        } catch (...) {
-            std::throw_with_nested(std::runtime_error(path.copy().c_str()));
-        }
-    }
-}
-
 void PluginInit() {
     {
         Resource rsrc = Resource::path("info.pn");
@@ -136,11 +114,29 @@ void PluginInit() {
 
     read_all_levels(plug.levels);
     read_all_objects(plug.objects);
-    read_all_races(plug.races);
 
     std::sort(plug.levels.begin(), plug.levels.end(), [](const Level& x, const Level& y) {
         return (x.chapter < y.chapter);
     });
+}
+
+void load_race(Handle<Race> r) {
+    if (plug.races.find(r.number()) != plug.races.end()) {
+        return;  // already loaded.
+    }
+
+    pn::string path = pn::format("races/{0}.pn", r.number());
+    try {
+        pn::value  x;
+        pn_error_t e;
+        if (!pn::parse(Resource::path(path).data().open(), x, &e)) {
+            throw std::runtime_error(
+                    pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
+        }
+        plug.races.emplace(r.number(), race(x));
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(path.copy().c_str()));
+    }
 }
 
 }  // namespace antares
