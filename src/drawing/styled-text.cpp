@@ -197,17 +197,20 @@ void StyledText::set_interface_text(pn::string_view text) {
                                                      pn::dump(id_string, pn::dump_short))
                                                      .c_str());
                 }
-                inlinePictType inline_pict;
-                inline_pict.id = id;
-                // TODO(sfiera): report an error if the picture is not loadable,
-                // instead of silently ignoring it.
-                try {
-                    _textures.push_back(Resource::texture(id));
-                    inline_pict.bounds = _textures.back().size().as_rect();
-                    _inline_picts.push_back(inline_pict);
-                    _chars.push_back(StyledChar(_inline_picts.size() - 1, PICTURE, f, b));
-                } catch (std::exception& e) {
+                inlinePictType     inline_pict;
+                Handle<BaseObject> object(id);
+                if (object.get()) {
+                    inline_pict.object  = object;
+                    inline_pict.picture = object->pictPortraitResID;
+                } else {
+                    inline_pict.object  = BaseObject::none();
+                    inline_pict.picture = id;
                 }
+
+                _textures.push_back(Resource::texture(inline_pict.picture));
+                inline_pict.bounds = _textures.back().size().as_rect();
+                _inline_picts.push_back(inline_pict);
+                _chars.push_back(StyledChar(_inline_picts.size() - 1, PICTURE, f, b));
                 id_string.clear();
                 state = START;
                 break;

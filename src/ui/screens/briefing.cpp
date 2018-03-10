@@ -252,16 +252,11 @@ void BriefingScreen::mouse_down(const MouseDownEvent& event) {
     Point off   = offset();
     Point where = event.where();
     where.offset(-off.h, -off.v);
-    for (size_t i = 0; i < _inline_pict.size(); ++i) {
-        if (_inline_pict[i].bounds.contains(where)) {
-            const int pict_id = _inline_pict[i].id;
-            for (auto obj : BaseObject::all()) {
-                if (obj->pictPortraitResID == pict_id) {
-                    stack()->push(new ObjectDataScreen(
-                            event.where(), obj, ObjectDataScreen::MOUSE, event.button()));
-                    return;
-                }
-            }
+    for (const auto& pict : _inline_pict) {
+        if (pict.bounds.contains(where) && pict.object.get()) {
+            stack()->push(new ObjectDataScreen(
+                    event.where(), pict.object, ObjectDataScreen::MOUSE, event.button()));
+            return;
         }
     }
     InterfaceScreen::mouse_down(event);
@@ -465,13 +460,11 @@ void BriefingScreen::show_object_data(int index, const GamepadButtonDownEvent& e
 
 void BriefingScreen::show_object_data(int index, ObjectDataScreen::Trigger trigger, int which) {
     if (index < _inline_pict.size()) {
-        const int   pict_id = _inline_pict[index].id;
-        const Point origin  = _inline_pict[index].bounds.center();
-        for (auto obj : BaseObject::all()) {
-            if (obj->pictPortraitResID == pict_id) {
-                stack()->push(new ObjectDataScreen(origin, obj, trigger, which));
-                return;
-            }
+        auto obj = _inline_pict[index].object;
+        if (obj.get()) {
+            const Point origin = _inline_pict[index].bounds.center();
+            stack()->push(new ObjectDataScreen(origin, obj, trigger, which));
+            return;
         }
     }
 }

@@ -22,6 +22,7 @@
 #include <pn/string>
 #include <vector>
 
+#include "data/handle.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
 #include "math/geometry.hpp"
@@ -33,8 +34,9 @@ class Picture;
 
 // the inline pictType struct is for keeping track of picts included in my text boxes.
 struct inlinePictType {
-    Rect    bounds;
-    int16_t id;
+    Rect               bounds;
+    int16_t            picture;
+    Handle<BaseObject> object;  // May be null.
 };
 
 class StyledText {
