@@ -356,7 +356,7 @@ static void update_static(Handle<SpaceObject> o, ticks unitsToDo) {
         } else {
             // we know it has sprite
             sprite.style      = spriteColor;
-            sprite.styleColor = GetRGBTranslateColor(o->shieldColor);
+            sprite.styleColor = o->shieldColor.value_or(RgbColor::clear());
             sprite.styleData  = o->hitState;
         }
     } else {

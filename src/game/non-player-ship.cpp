@@ -1511,7 +1511,7 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
         anObject->create_floating_player_body();
     }
     anObject->alter_health(-sObject->baseType->damage);
-    if (anObject->shieldColor != 0xFF) {
+    if (anObject->shieldColor.has_value()) {
         anObject->hitState = (anObject->health() * kHitStateMax) / anObject->max_health();
         anObject->hitState += 16;
     }

@@ -29,14 +29,9 @@ bool read_from(pn::file_view in, BaseObject* object) {
     frame.resize(32);
     uint32_t build_time;
     if (!in.read(
-                pn::pad(84), &object->shieldColor, pn::pad(117), &object->arriveActionDistance,
-                pn::pad(48), &frame, &object->buildFlags, &object->orderFlags, pn::pad(4),
-                &build_time, pn::pad(16))) {
+                pn::pad(202), &object->arriveActionDistance, pn::pad(48), &frame,
+                &object->buildFlags, &object->orderFlags, pn::pad(4), &build_time, pn::pad(16))) {
         return false;
-    }
-
-    if ((object->shieldColor != 0xFF) && (object->shieldColor != 0)) {
-        object->shieldColor = GetTranslateColorShade(static_cast<Hue>(object->shieldColor), 15);
     }
 
     object->buildTime = 3 * ticks(build_time / 10);
@@ -218,6 +213,8 @@ BaseObject base_object(pn::value_cref x0) {
     o.maxThrust     = optional_fixed(x.get("max_thrust")).value_or(Fixed::zero());
     o.friendDefecit = optional_fixed(x.get("friend_deficit")).value_or(Fixed::zero());
     o.buildRatio    = optional_fixed(x.get("build_ratio")).value_or(Fixed::zero());
+
+    o.shieldColor = optional_color(x.get("shield_color"));
 
     o.initial_velocity = optional_fixed_range(x.get("initial_velocity"))
                                  .value_or(Range<Fixed>{Fixed::zero(), Fixed::zero()});

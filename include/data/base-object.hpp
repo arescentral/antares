@@ -280,9 +280,9 @@ class BaseObject {
 
     int32_t naturalScale;  // natural scale relative to %100
 
-    int16_t pixLayer;     // 0 = no layer 1->3 = back to front
-    int16_t pixResID;     // resID of SMIV
-    uint8_t shieldColor;  // color on radar (0 = don't put on radar)
+    int16_t                 pixLayer;     // 0 = no layer 1->3 = back to front
+    int16_t                 pixResID;     // resID of SMIV
+    sfz::optional<RgbColor> shieldColor;  // color on radar (!has_value() = don't draw shields)
 
     struct Icon {
         IconShape shape;

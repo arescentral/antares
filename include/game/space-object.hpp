@@ -210,8 +210,8 @@ class SpaceObject {
     uint32_t seenByPlayerFlags   = 0xffffffff;
     uint32_t hostileTowardsFlags = 0;
 
-    uint8_t shieldColor   = 0;
-    uint8_t originalColor = 0;
+    sfz::optional<RgbColor> shieldColor;
+    uint8_t                 originalColor = 0;
 };
 
 void SpaceObjectHandlingInit(void);
