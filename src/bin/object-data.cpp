@@ -114,8 +114,12 @@ void main(int argc, char* const* argv) {
     PluginInit();
 
     ObjectDataBuilder builder(output_dir);
-    for (auto object : BaseObject::all()) {
-        const int pict_id = object->pictPortraitResID;
+    for (auto id : {0,   7,   13,  14,  17,  19,  24,  25,  37,  38,  42,  45,  47,  54,  56,
+                    59,  61,  62,  64,  67,  75,  78,  80,  86,  88,  89,  93,  94,  95,  101,
+                    104, 109, 110, 112, 113, 114, 118, 119, 120, 126, 127, 128, 129, 138, 139,
+                    140, 142, 147, 148, 149, 151, 164, 165, 166, 167, 184, 243, 250, 270}) {
+        Handle<BaseObject> object(id);
+        const int          pict_id = object->pictPortraitResID;
         if (pict_id <= 0) {
             continue;
         }
