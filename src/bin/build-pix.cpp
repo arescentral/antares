@@ -43,20 +43,21 @@ namespace {
 
 class DrawPix : public Card {
   public:
-    DrawPix(std::function<pn::string()> text, int32_t width,
+    DrawPix(std::function<pn::string_view()> text, int32_t width,
             std::function<void(Rect)> set_capture_rect)
             : _set_capture_rect(set_capture_rect), _text(text), _width(width) {}
 
     virtual void draw() const {
+        PluginInit();
         BuildPix pix(_text(), _width);
         pix.draw({0, 0});
         _set_capture_rect({0, 0, _width, pix.size().height});
     }
 
   private:
-    const std::function<void(Rect)>   _set_capture_rect;
-    const std::function<pn::string()> _text;
-    const int32_t                     _width;
+    const std::function<void(Rect)>        _set_capture_rect;
+    const std::function<pn::string_view()> _text;
+    const int32_t                          _width;
 };
 
 void usage(pn::file_view out, pn::string_view progname, int retcode) {
@@ -79,24 +80,22 @@ void run(
         VideoDriver* video, pn::string_view extension,
         std::function<void(Rect)> set_capture_rect) {
     struct Spec {
-        pn::string_view             name;
-        int                         width;
-        std::function<pn::string()> text;
+        pn::string_view                  name;
+        int                              width;
+        std::function<pn::string_view()> text;
     };
     vector<Spec> specs{
-            {"gai-prologue", 450, [] { return Resource::text(3020); }},
-            {"tut-prologue", 450, [] { return Resource::text(3025); }},
-            {"can-prologue", 450, [] { return Resource::text(3080); }},
-            {"can-epilogue", 450, [] { return Resource::text(3081); }},
-            {"sal-prologue", 450, [] { return Resource::text(3120); }},
-            {"outro", 450, [] { return Resource::text(3211); }},
-            {"baz-prologue", 450, [] { return Resource::text(4063); }},
-            {"ele-prologue", 450, [] { return Resource::text(4509); }},
-            {"aud-prologue", 450, [] { return Resource::text(4606); }},
-            {"intro", 450, [] { return PluginInit(), plug.info.intro_text.copy(); }},
-            {"about", 540, [] { return PluginInit(), plug.info.about_text.copy(); }},
-            {"please-register", 450, [] { return Resource::text(6501); }},
-            {"unused-gai-prologue", 450, [] { return Resource::text(10199); }},
+            {"gai-prologue", 450, []() -> pn::string_view { return plug.levels[1].prologue; }},
+            {"tut-prologue", 450, []() -> pn::string_view { return plug.levels[0].prologue; }},
+            {"can-prologue", 450, []() -> pn::string_view { return plug.levels[9].prologue; }},
+            {"can-epilogue", 450, []() -> pn::string_view { return plug.levels[9].epilogue; }},
+            {"sal-prologue", 450, []() -> pn::string_view { return plug.levels[13].prologue; }},
+            {"outro", 450, []() -> pn::string_view { return plug.levels[22].epilogue; }},
+            {"baz-prologue", 450, []() -> pn::string_view { return plug.levels[16].prologue; }},
+            {"ele-prologue", 450, []() -> pn::string_view { return plug.levels[15].prologue; }},
+            {"aud-prologue", 450, []() -> pn::string_view { return plug.levels[18].prologue; }},
+            {"intro", 450, []() -> pn::string_view { return plug.info.intro_text; }},
+            {"about", 540, []() -> pn::string_view { return plug.info.about_text; }},
     };
 
     vector<pair<unique_ptr<Card>, pn::string>> pix;
