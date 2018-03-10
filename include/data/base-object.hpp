@@ -245,9 +245,8 @@ struct objectFrameType {
 
 class BaseObject {
   public:
-    static BaseObject*            get(int number);
-    static Handle<BaseObject>     none() { return Handle<BaseObject>(-1); }
-    static HandleList<BaseObject> all();
+    static BaseObject*        get(int number);
+    static Handle<BaseObject> none() { return Handle<BaseObject>(-1); }
 
     pn::string name;
     pn::string short_name;

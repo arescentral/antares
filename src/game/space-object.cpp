@@ -85,8 +85,6 @@ BaseObject* BaseObject::get(int number) {
     return nullptr;
 }
 
-HandleList<BaseObject> BaseObject::all() { return HandleList<BaseObject>(0, plug.objects.size()); }
-
 Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, Handle<Race> race) {
     if (class_ >= kLiteralClass) {
         return Handle<BaseObject>(class_ - kLiteralClass);
