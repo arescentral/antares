@@ -79,7 +79,7 @@ void ResetAllSpaceObjects() {
 }
 
 BaseObject* BaseObject::get(int number) {
-    if ((0 <= number) && (number < plug.objects.size())) {
+    if (plug.objects.find(number) != plug.objects.end()) {
         return &plug.objects[number];
     }
     return nullptr;

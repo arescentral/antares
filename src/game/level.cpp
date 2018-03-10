@@ -58,16 +58,14 @@ ANTARES_GLOBAL set<int32_t> possible_actions;
 #endif  // DATA_COVERAGE
 
 void AddBaseObjectActionMedia(
-        Handle<BaseObject> base,
-        std::vector<std::unique_ptr<const Action>>(BaseObject::*whichType),
-        std::bitset<16> all_colors, LoadState* state);
-void AddActionMedia(const Action& action, std::bitset<16> all_colors, LoadState* state);
+        const std::vector<std::unique_ptr<const Action>>& actions, std::bitset<16> all_colors);
+void AddActionMedia(const Action& action, std::bitset<16> all_colors);
 
-void AddBaseObjectMedia(Handle<BaseObject> base, std::bitset<16> all_colors, LoadState* state) {
-    if (state->object_loaded[base.number()]) {
+void AddBaseObjectMedia(Handle<BaseObject> base, std::bitset<16> all_colors) {
+    if (base.get()) {
         return;
     }
-    state->object_loaded[base.number()] = true;
+    load_object(base);
 
 #ifdef DATA_COVERAGE
     possible_objects.insert(base.number());
@@ -94,37 +92,35 @@ void AddBaseObjectMedia(Handle<BaseObject> base, std::bitset<16> all_colors, Loa
         }
     }
 
-    AddBaseObjectActionMedia(base, &BaseObject::destroy, all_colors, state);
-    AddBaseObjectActionMedia(base, &BaseObject::expire, all_colors, state);
-    AddBaseObjectActionMedia(base, &BaseObject::create, all_colors, state);
-    AddBaseObjectActionMedia(base, &BaseObject::collide, all_colors, state);
-    AddBaseObjectActionMedia(base, &BaseObject::activate, all_colors, state);
-    AddBaseObjectActionMedia(base, &BaseObject::arrive, all_colors, state);
+    AddBaseObjectActionMedia(base->destroy, all_colors);
+    AddBaseObjectActionMedia(base->expire, all_colors);
+    AddBaseObjectActionMedia(base->create, all_colors);
+    AddBaseObjectActionMedia(base->collide, all_colors);
+    AddBaseObjectActionMedia(base->activate, all_colors);
+    AddBaseObjectActionMedia(base->arrive, all_colors);
 
     for (Handle<BaseObject> weapon : {base->pulse.base, base->beam.base, base->special.base}) {
-        if (weapon.get()) {
-            AddBaseObjectMedia(weapon, all_colors, state);
+        if (weapon.number() >= 0) {
+            AddBaseObjectMedia(weapon, all_colors);
         }
     }
 }
 
 void AddBaseObjectActionMedia(
-        Handle<BaseObject> base,
-        std::vector<std::unique_ptr<const Action>>(BaseObject::*whichType),
-        std::bitset<16> all_colors, LoadState* state) {
-    for (const auto& action : (*base.*whichType)) {
-        AddActionMedia(*action, all_colors, state);
+        const std::vector<std::unique_ptr<const Action>>& actions, std::bitset<16> all_colors) {
+    for (const auto& action : actions) {
+        AddActionMedia(*action, all_colors);
     }
 }
 
-void AddActionMedia(const Action& action, std::bitset<16> all_colors, LoadState* state) {
+void AddActionMedia(const Action& action, std::bitset<16> all_colors) {
 #ifdef DATA_COVERAGE
     possible_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
     auto base = action.created_base();
-    if (base.get()) {
-        AddBaseObjectMedia(action.created_base(), all_colors, state);
+    if (base.number() >= 0) {
+        AddBaseObjectMedia(action.created_base(), all_colors);
     }
 
     auto range = action.sound_range();
@@ -168,6 +164,7 @@ LoadState start_construct_level(Handle<Level> level) {
     ResetAllDestObjectData();
     ResetMotionGlobals();
     plug.races.clear();
+    plug.objects.clear();
     gAbsoluteScale = kTimesTwoScale;
     g.sync         = 0;
 
@@ -222,17 +219,17 @@ LoadState start_construct_level(Handle<Level> level) {
     return s;
 }
 
-static void load_blessed_objects(std::bitset<16> all_colors, LoadState* state) {
-    if (!plug.info.energyBlobID.get()) {
+static void load_blessed_objects(std::bitset<16> all_colors) {
+    if (plug.info.energyBlobID.number() < 0) {
         throw std::runtime_error("No energy blob defined");
     }
-    if (!plug.info.warpInFlareID.get()) {
+    if (plug.info.warpInFlareID.number() < 0) {
         throw std::runtime_error("No warp in flare defined");
     }
-    if (!plug.info.warpOutFlareID.get()) {
+    if (plug.info.warpOutFlareID.number() < 0) {
         throw std::runtime_error("No warp out flare defined");
     }
-    if (!plug.info.playerBodyID.get()) {
+    if (plug.info.playerBodyID.number() < 0) {
         throw std::runtime_error("No player body defined");
     }
 
@@ -244,18 +241,17 @@ static void load_blessed_objects(std::bitset<16> all_colors, LoadState* state) {
             info.energyBlobID, info.warpInFlareID, info.warpOutFlareID, info.playerBodyID,
     };
     for (auto id : blessed) {
-        AddBaseObjectMedia(id, all_colors, state);
+        AddBaseObjectMedia(id, all_colors);
     }
 }
 
-static void load_initial(
-        Handle<Level::Initial> initial, std::bitset<16> all_colors, LoadState* state) {
+static void load_initial(Handle<Level::Initial> initial, std::bitset<16> all_colors) {
     Handle<Admiral> owner      = initial->owner;
     auto            baseObject = initial->base;
     // TODO(sfiera): remap objects in networked games.
 
     // Load the media for this object
-    AddBaseObjectMedia(baseObject, all_colors, state);
+    AddBaseObjectMedia(baseObject, all_colors);
 
     // make sure we're not overriding the sprite
     if (initial->sprite_override >= 0) {
@@ -276,8 +272,8 @@ static void load_initial(
                 if (a->active()) {
                     auto baseObject =
                             mGetBaseObjectFromClassRace(initial->build[j], GetAdmiralRace(a));
-                    if (baseObject.get()) {
-                        AddBaseObjectMedia(baseObject, all_colors, state);
+                    if (baseObject.number() >= 0) {
+                        AddBaseObjectMedia(baseObject, all_colors);
                     }
                 }
             }
@@ -285,10 +281,9 @@ static void load_initial(
     }
 }
 
-static void load_condition(
-        Handle<Level::Condition> condition, std::bitset<16> all_colors, LoadState* state) {
+static void load_condition(Handle<Level::Condition> condition, std::bitset<16> all_colors) {
     for (const auto& action : condition->action) {
-        AddActionMedia(*action, all_colors, state);
+        AddActionMedia(*action, all_colors);
     }
     g.condition_enabled[condition.number()] = condition->initially_enabled;
 }
@@ -321,15 +316,15 @@ void construct_level(Handle<Level> level, LoadState* state) {
     }
 
     if (step == 0) {
-        load_blessed_objects(all_colors, state);
-        load_initial(Handle<Level::Initial>(step), all_colors, state);
+        load_blessed_objects(all_colors);
+        load_initial(Handle<Level::Initial>(step), all_colors);
     } else if (step < Level::Initial::all().size()) {
-        load_initial(Handle<Level::Initial>(step), all_colors, state);
+        load_initial(Handle<Level::Initial>(step), all_colors);
     } else if (step == Level::Initial::all().size()) {
         // add media for all condition actions
         step -= Level::Initial::all().size();
         for (auto c : Level::Condition::all()) {
-            load_condition(c, all_colors, state);
+            load_condition(c, all_colors);
         }
         create_initial(Handle<Level::Initial>(step));
     } else if (step < (2 * Level::Initial::all().size())) {

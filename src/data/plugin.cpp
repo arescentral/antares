@@ -37,29 +37,6 @@ namespace antares {
 
 ANTARES_GLOBAL ScenarioGlobals plug;
 
-static void read_all_objects(vector<BaseObject>& v) {
-    v.clear();
-    for (int i = 0; true; ++i) {
-        pn::string path = pn::format("objects/{0}.pn", i);
-        if (!Resource::exists(path)) {
-            break;
-        }
-
-        try {
-            pn::value  x;
-            pn_error_t e;
-            if (!pn::parse(Resource::path(path).data().open(), x, &e)) {
-                throw std::runtime_error(
-                        pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code))
-                                .c_str());
-            }
-            v.push_back(base_object(x));
-        } catch (...) {
-            std::throw_with_nested(std::runtime_error(path.c_str()));
-        }
-    }
-}
-
 namespace {
 
 struct ScopedGlob {
@@ -113,8 +90,6 @@ void PluginInit() {
     }
 
     read_all_levels(plug.levels);
-    read_all_objects(plug.objects);
-
     std::sort(plug.levels.begin(), plug.levels.end(), [](const Level& x, const Level& y) {
         return (x.chapter < y.chapter);
     });
@@ -136,6 +111,25 @@ void load_race(Handle<Race> r) {
         plug.races.emplace(r.number(), race(x));
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.copy().c_str()));
+    }
+}
+
+void load_object(Handle<BaseObject> o) {
+    if (plug.objects.find(o.number()) != plug.objects.end()) {
+        return;  // already loaded.
+    }
+
+    pn::string path = pn::format("objects/{0}.pn", o.number());
+    try {
+        pn::value  x;
+        pn_error_t e;
+        if (!pn::parse(Resource::path(path).data().open(), x, &e)) {
+            throw std::runtime_error(
+                    pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
+        }
+        plug.objects.emplace(o.number(), base_object(x));
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(path.c_str()));
     }
 }
 

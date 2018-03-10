@@ -27,10 +27,10 @@
 namespace antares {
 
 struct ScenarioGlobals {
-    ScenarioInfo            info;
-    std::vector<Level>      levels;
-    std::vector<BaseObject> objects;
-    std::map<int, Race>     races;
+    ScenarioInfo              info;
+    std::vector<Level>        levels;
+    std::map<int, BaseObject> objects;
+    std::map<int, Race>       races;
 };
 
 extern ScenarioGlobals plug;
@@ -38,6 +38,7 @@ extern ScenarioGlobals plug;
 void PluginInit();
 
 void load_race(Handle<Race> r);
+void load_object(Handle<BaseObject> o);
 
 }  // namespace antares
 
