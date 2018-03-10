@@ -27,14 +27,12 @@ namespace antares {
 bool read_from(pn::file_view in, BaseObject* object) {
     pn::data frame;
     frame.resize(32);
-    uint32_t build_time;
     if (!in.read(
                 pn::pad(202), &object->arriveActionDistance, pn::pad(48), &frame,
-                &object->buildFlags, &object->orderFlags, pn::pad(4), &build_time, pn::pad(16))) {
+                &object->buildFlags, &object->orderFlags, pn::pad(24))) {
         return false;
     }
 
-    object->buildTime = 3 * ticks(build_time / 10);
     return true;
 }
 
@@ -213,6 +211,8 @@ BaseObject base_object(pn::value_cref x0) {
     o.maxThrust     = optional_fixed(x.get("max_thrust")).value_or(Fixed::zero());
     o.friendDefecit = optional_fixed(x.get("friend_deficit")).value_or(Fixed::zero());
     o.buildRatio    = optional_fixed(x.get("build_ratio")).value_or(Fixed::zero());
+
+    o.buildTime = optional_ticks(x.get("build_time")).value_or(ticks(0));
 
     o.shieldColor = optional_color(x.get("shield_color"));
 
