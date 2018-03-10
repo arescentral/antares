@@ -31,8 +31,7 @@ struct LoadState {
     int32_t step = 0;
     int32_t max  = 1;  // So that (step / max) is 0 before construct_level() starts.
 
-    std::map<int, std::bitset<16>> colors_needed;
-    std::map<int, std::bitset<16>> colors_loaded;
+    std::map<int, bool> object_loaded;
 };
 
 LoadState start_construct_level(Handle<Level> level);

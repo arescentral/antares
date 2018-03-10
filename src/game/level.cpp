@@ -59,83 +59,77 @@ ANTARES_GLOBAL set<int32_t> possible_actions;
 
 void AddBaseObjectActionMedia(
         Handle<BaseObject> base,
-        std::vector<std::unique_ptr<const Action>>(BaseObject::*whichType), Hue hue,
+        std::vector<std::unique_ptr<const Action>>(BaseObject::*whichType),
         std::bitset<16> all_colors, LoadState* state);
-void AddActionMedia(const Action& action, Hue hue, std::bitset<16> all_colors, LoadState* state);
+void AddActionMedia(const Action& action, std::bitset<16> all_colors, LoadState* state);
 
-void AddBaseObjectMedia(
-        Handle<BaseObject> base, Hue hue, std::bitset<16> all_colors, LoadState* state) {
+void AddBaseObjectMedia(Handle<BaseObject> base, std::bitset<16> all_colors, LoadState* state) {
+    if (state->object_loaded[base.number()]) {
+        return;
+    }
+    state->object_loaded[base.number()] = true;
+
 #ifdef DATA_COVERAGE
     possible_objects.insert(base.number());
 #endif  // DATA_COVERAGE
 
-    if (!(base->attributes & kCanThink)) {
-        hue = Hue::GRAY;
+    // Load sprites in all possible colors.
+    //
+    // For non-thinking objects, just load the gray ones. For thinking
+    // objects, load gray, plus all admiral colors.
+    //
+    // This actually loads more colors than are possible in practice;
+    // there was older code that determined which objects were possible
+    // per admiral, and which could change ownership, but that wasn’t
+    // worth the extra complication.
+    std::bitset<16> colors;
+    if (base->attributes & kCanThink) {
+        colors = all_colors;
+    } else {
+        colors[0] = true;
     }
-    state->colors_needed[base.number()][static_cast<int>(hue)] = true;
     for (int i = 0; i < 16; ++i) {
-        if (state->colors_loaded[base.number()][i]) {
-            continue;  // color already loaded.
-        } else if (!state->colors_needed[base.number()][i]) {
-            continue;  // color not needed.
+        if (colors[i] && (base->pixResID != kNoSpriteTable)) {
+            sys.pix.add(base->pixResID + (i << kSpriteTableColorShift));
         }
-        state->colors_loaded[base.number()][i] = true;
+    }
 
-        if (base->pixResID != kNoSpriteTable) {
-            int16_t id = base->pixResID + (i << kSpriteTableColorShift);
-            sys.pix.add(id);
-        }
+    AddBaseObjectActionMedia(base, &BaseObject::destroy, all_colors, state);
+    AddBaseObjectActionMedia(base, &BaseObject::expire, all_colors, state);
+    AddBaseObjectActionMedia(base, &BaseObject::create, all_colors, state);
+    AddBaseObjectActionMedia(base, &BaseObject::collide, all_colors, state);
+    AddBaseObjectActionMedia(base, &BaseObject::activate, all_colors, state);
+    AddBaseObjectActionMedia(base, &BaseObject::arrive, all_colors, state);
 
-        Hue hue2 = static_cast<Hue>(i);
-
-        AddBaseObjectActionMedia(base, &BaseObject::destroy, hue2, all_colors, state);
-        AddBaseObjectActionMedia(base, &BaseObject::expire, hue2, all_colors, state);
-        AddBaseObjectActionMedia(base, &BaseObject::create, hue2, all_colors, state);
-        AddBaseObjectActionMedia(base, &BaseObject::collide, hue2, all_colors, state);
-        AddBaseObjectActionMedia(base, &BaseObject::activate, hue2, all_colors, state);
-        AddBaseObjectActionMedia(base, &BaseObject::arrive, hue2, all_colors, state);
-
-        for (Handle<BaseObject> weapon : {base->pulse.base, base->beam.base, base->special.base}) {
-            if (weapon.get()) {
-                AddBaseObjectMedia(weapon, hue2, all_colors, state);
-            }
+    for (Handle<BaseObject> weapon : {base->pulse.base, base->beam.base, base->special.base}) {
+        if (weapon.get()) {
+            AddBaseObjectMedia(weapon, all_colors, state);
         }
     }
 }
 
 void AddBaseObjectActionMedia(
         Handle<BaseObject> base,
-        std::vector<std::unique_ptr<const Action>>(BaseObject::*whichType), Hue hue,
+        std::vector<std::unique_ptr<const Action>>(BaseObject::*whichType),
         std::bitset<16> all_colors, LoadState* state) {
     for (const auto& action : (*base.*whichType)) {
-        AddActionMedia(*action, hue, all_colors, state);
+        AddActionMedia(*action, all_colors, state);
     }
 }
 
-void AddActionMedia(const Action& action, Hue hue, std::bitset<16> all_colors, LoadState* state) {
+void AddActionMedia(const Action& action, std::bitset<16> all_colors, LoadState* state) {
 #ifdef DATA_COVERAGE
     possible_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
     auto base = action.created_base();
     if (base.get()) {
-        AddBaseObjectMedia(action.created_base(), hue, all_colors, state);
+        AddBaseObjectMedia(action.created_base(), all_colors, state);
     }
 
     auto range = action.sound_range();
     for (int32_t count = range.begin; count < range.end; count++) {
         sys.sound.load(count);
-    }
-
-    if (action.alters_owner()) {
-        for (auto baseObject : BaseObject::all()) {
-            if (action_filter_applies_to(action, baseObject)) {
-                state->colors_needed[baseObject.number()] |= all_colors;
-            }
-            if (state->colors_loaded[baseObject.number()].any()) {
-                AddBaseObjectMedia(baseObject, hue, all_colors, state);
-            }
-        }
     }
 }
 
@@ -245,13 +239,12 @@ static void load_blessed_objects(std::bitset<16> all_colors, LoadState* state) {
     // Load the four blessed objects.  The player's body is needed
     // in all colors; the other three are needed only as neutral
     // objects by default.
-    state->colors_needed[plug.info.playerBodyID.number()] |= all_colors;
     const auto&        info      = plug.info;
     Handle<BaseObject> blessed[] = {
             info.energyBlobID, info.warpInFlareID, info.warpOutFlareID, info.playerBodyID,
     };
     for (auto id : blessed) {
-        AddBaseObjectMedia(id, Hue::GRAY, all_colors, state);
+        AddBaseObjectMedia(id, all_colors, state);
     }
 }
 
@@ -262,16 +255,7 @@ static void load_initial(
     // TODO(sfiera): remap objects in networked games.
 
     // Load the media for this object
-    //
-    // I don't think that it's necessary to treat kIsDestination
-    // objects specially here.  If their ownership can change, there
-    // will be a transport or something that does it, and we will
-    // mark the necessity of having all colors through action
-    // checking.
-    if (baseObject->attributes & kIsDestination) {
-        state->colors_needed[baseObject.number()] |= all_colors;
-    }
-    AddBaseObjectMedia(baseObject, GetAdmiralColor(owner), all_colors, state);
+    AddBaseObjectMedia(baseObject, all_colors, state);
 
     // make sure we're not overriding the sprite
     if (initial->sprite_override >= 0) {
@@ -293,7 +277,7 @@ static void load_initial(
                     auto baseObject =
                             mGetBaseObjectFromClassRace(initial->build[j], GetAdmiralRace(a));
                     if (baseObject.get()) {
-                        AddBaseObjectMedia(baseObject, GetAdmiralColor(a), all_colors, state);
+                        AddBaseObjectMedia(baseObject, all_colors, state);
                     }
                 }
             }
@@ -304,7 +288,7 @@ static void load_initial(
 static void load_condition(
         Handle<Level::Condition> condition, std::bitset<16> all_colors, LoadState* state) {
     for (const auto& action : condition->action) {
-        AddActionMedia(*action, Hue::GRAY, all_colors, state);
+        AddActionMedia(*action, all_colors, state);
     }
     g.condition_enabled[condition.number()] = condition->initially_enabled;
 }
