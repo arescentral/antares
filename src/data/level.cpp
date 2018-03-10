@@ -321,15 +321,13 @@ static std::vector<std::unique_ptr<Level::Condition>> optional_condition_array(p
 }
 
 static Level::Briefing briefing(path_value x) {
-    if (!x.value().is_map()) {
-        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
-    }
-
-    Level::Briefing b;
-    b.object  = optional_initial(x.get("object")).value_or(Level::Initial::none());
-    b.title   = required_string(x.get("title")).copy();
-    b.content = required_string(x.get("content")).copy();
-    return b;
+    return required_struct<Level::Briefing>(
+            x, {
+                       {"object",
+                        {&Level::Briefing::object, optional_initial, Level::Initial::none()}},
+                       {"title", {&Level::Briefing::title, required_string_copy}},
+                       {"content", {&Level::Briefing::content, required_string_copy}},
+               });
 }
 
 static std::vector<Level::Briefing> optional_briefing_array(path_value x) {

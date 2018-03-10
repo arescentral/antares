@@ -42,8 +42,6 @@ std::map<pn::string, Handle<BaseObject>> optional_ships(path_value x) {
     }
 }
 
-pn::string required_string_copy(path_value x) { return required_string(x).copy(); }
-
 Race race(path_value x) {
     return required_struct<Race>(
             x, {{"numeric", nullptr},

@@ -94,6 +94,7 @@ Fixed                required_fixed(path_value x);
 
 sfz::optional<pn::string_view> optional_string(path_value x);
 pn::string_view                required_string(path_value x);
+pn::string                     required_string_copy(path_value x);
 
 sfz::optional<ticks> optional_ticks(path_value x);
 ticks                required_ticks(path_value x);
@@ -152,11 +153,17 @@ template <typename T>
 struct field {
     std::function<void(T* t, path_value x)> set;
 
+    constexpr field(std::nullptr_t) : set([](T*, path_value) {}) {}
+
     template <typename F>
     constexpr field(F(T::*field), F (*reader)(path_value x))
             : set([field, reader](T* t, path_value x) { (t->*field) = reader(x); }) {}
 
-    constexpr field(std::nullptr_t) : set([](T*, path_value) {}) {}
+    template <typename F>
+    constexpr field(F(T::*field), sfz::optional<F> (*reader)(path_value x), F default_value)
+            : set([field, reader, default_value](T* t, path_value x) {
+                  (t->*field) = reader(x).value_or(default_value);
+              }) {}
 };
 
 template <typename T>

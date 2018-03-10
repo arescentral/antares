@@ -689,6 +689,8 @@ std::vector<pn::string> required_string_array(path_value x) {
     }
 }
 
+pn::string required_string_copy(path_value x) { return required_string(x).copy(); }
+
 std::vector<pn::string> optional_string_array(path_value x) {
     if (x.value().is_null()) {
         return {};
