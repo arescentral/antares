@@ -29,10 +29,9 @@ namespace macroman = sfz::macroman;
 
 namespace antares {
 
-static sfz::optional<std::vector<Level::Initial>> optional_initial_array(path_value x);
-static sfz::optional<std::vector<std::unique_ptr<Level::Condition>>> optional_condition_array(
-        path_value x);
-static sfz::optional<std::vector<Level::Briefing>> optional_briefing_array(path_value x);
+static std::vector<Level::Initial>                    optional_initial_array(path_value x);
+static std::vector<std::unique_ptr<Level::Condition>> optional_condition_array(path_value x);
+static std::vector<Level::Briefing>                   optional_briefing_array(path_value x);
 
 Level* Level::get(int n) { return &plug.levels[n]; }
 
@@ -123,18 +122,16 @@ Level level(pn::value_cref x0) {
 
     path_value x{x0};
     Level      l;
-    l.type     = required_level_type(x.get("type"));
-    l.chapter  = required_int(x.get("chapter"));
-    l.name     = required_string(x.get("title")).copy();
-    l.players  = required_player_array(x.get("players"), l.type);
-    l.initials = optional_initial_array(x.get("initials")).value_or(std::vector<Level::Initial>{});
-    l.conditions = optional_condition_array(x.get("conditions"))
-                           .value_or(std::vector<std::unique_ptr<Level::Condition>>{});
-    l.briefings =
-            optional_briefing_array(x.get("briefings")).value_or(std::vector<Level::Briefing>{});
+    l.type          = required_level_type(x.get("type"));
+    l.chapter       = required_int(x.get("chapter"));
+    l.name          = required_string(x.get("title")).copy();
+    l.players       = required_player_array(x.get("players"), l.type);
+    l.initials      = optional_initial_array(x.get("initials"));
+    l.conditions    = optional_condition_array(x.get("conditions"));
+    l.briefings     = optional_briefing_array(x.get("briefings"));
     l.starMap       = optional_point(x.get("starmap")).value_or(Point{0, 0});
     l.songID        = required_int(x.get("song"));
-    l.score_strings = optional_string_array(x.get("score")).value_or(std::vector<pn::string>{});
+    l.score_strings = optional_string_array(x.get("score"));
 
     l.startTime   = optional_secs(x.get("start_time")).value_or(secs(0));
     l.is_training = optional_bool(x.get("is_training")).value_or(false);
@@ -309,16 +306,15 @@ static std::unique_ptr<Level::Condition> condition(path_value x) {
     return c;
 }
 
-static sfz::optional<std::vector<std::unique_ptr<Level::Condition>>> optional_condition_array(
-        path_value x) {
+static std::vector<std::unique_ptr<Level::Condition>> optional_condition_array(path_value x) {
     if (x.value().is_null()) {
-        return sfz::nullopt;
+        return {};
     } else if (x.value().is_array()) {
         std::vector<std::unique_ptr<Level::Condition>> v;
         for (int i = 0; i < x.value().as_array().size(); ++i) {
             v.push_back(condition(x.get(i)));
         }
-        return sfz::make_optional(std::move(v));
+        return v;
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
     }
@@ -336,15 +332,15 @@ static Level::Briefing briefing(path_value x) {
     return b;
 }
 
-static sfz::optional<std::vector<Level::Briefing>> optional_briefing_array(path_value x) {
+static std::vector<Level::Briefing> optional_briefing_array(path_value x) {
     if (x.value().is_null()) {
-        return sfz::nullopt;
+        return {};
     } else if (x.value().is_array()) {
         std::vector<Level::Briefing> v;
         for (int i = 0; i < x.value().as_array().size(); ++i) {
             v.push_back(briefing(x.get(i)));
         }
-        return sfz::make_optional(std::move(v));
+        return v;
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
     }
@@ -366,10 +362,9 @@ static Level::Initial initial(path_value x) {
 
     i.target = optional_initial(x.get("target")).value_or(Level::Initial::none());
 
-    i.attributes = Level::Initial::Attributes(
-            optional_initial_attributes(x.get("attributes")).value_or(0));
+    i.attributes = Level::Initial::Attributes(optional_initial_attributes(x.get("attributes")));
 
-    std::vector<int> build = optional_int_array(x.get("build")).value_or(std::vector<int>{});
+    std::vector<int> build = optional_int_array(x.get("build"));
     if (build.size() >= kMaxTypeBaseCanBuild) {
         throw std::runtime_error(pn::format(
                                          "{0}: has {1} elements, more than max of {2}",
@@ -387,15 +382,15 @@ static Level::Initial initial(path_value x) {
     return i;
 }
 
-static sfz::optional<std::vector<Level::Initial>> optional_initial_array(path_value x) {
+static std::vector<Level::Initial> optional_initial_array(path_value x) {
     if (x.value().is_null()) {
-        return sfz::nullopt;
+        return {};
     } else if (x.value().is_array()) {
         std::vector<Level::Initial> v;
         for (int i = 0; i < x.value().as_array().size(); ++i) {
             v.push_back(initial(x.get(i)));
         }
-        return sfz::make_optional(std::move(v));
+        return v;
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
     }

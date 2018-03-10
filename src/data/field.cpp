@@ -558,9 +558,9 @@ Zoom required_zoom(path_value x) {
                 {"all", Zoom::ALL}});
 }
 
-sfz::optional<int32_t> optional_object_attributes(path_value x) {
+int32_t optional_object_attributes(path_value x) {
     if (x.value().is_null()) {
-        return sfz::nullopt;
+        return 0;
     } else if (x.value().is_map()) {
         static const pn::string_view flags[32] = {"can_turn",
                                                   "can_be_engaged",
@@ -603,15 +603,15 @@ sfz::optional<int32_t> optional_object_attributes(path_value x) {
             }
             bit <<= 1;
         }
-        return sfz::make_optional(+result);
+        return result;
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
     }
 }
 
-sfz::optional<int32_t> optional_initial_attributes(path_value x) {
+int32_t optional_initial_attributes(path_value x) {
     if (x.value().is_null()) {
-        return sfz::nullopt;
+        return 0;
     } else if (x.value().is_map()) {
         static const pn::string_view flags[32] = {"can_turn",
                                                   "can_be_engaged",
@@ -654,7 +654,7 @@ sfz::optional<int32_t> optional_initial_attributes(path_value x) {
             }
             bit <<= 1;
         }
-        return sfz::make_optional(+result);
+        return result;
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
     }
@@ -689,31 +689,31 @@ std::vector<pn::string> required_string_array(path_value x) {
     }
 }
 
-sfz::optional<std::vector<pn::string>> optional_string_array(path_value x) {
+std::vector<pn::string> optional_string_array(path_value x) {
     if (x.value().is_null()) {
-        return sfz::nullopt;
+        return {};
     } else if (x.value().is_array()) {
         pn::array_cref          a = x.value().as_array();
         std::vector<pn::string> result;
         for (int i = 0; i < a.size(); ++i) {
             result.emplace_back(required_string(x.get(i)).copy());
         }
-        return sfz::make_optional(std::move(result));
+        return result;
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
     }
 }
 
-sfz::optional<std::vector<int>> optional_int_array(path_value x) {
+std::vector<int> optional_int_array(path_value x) {
     if (x.value().is_null()) {
-        return sfz::nullopt;
+        return {};
     } else if (x.value().is_array()) {
         pn::array_cref   a = x.value().as_array();
         std::vector<int> result;
         for (int i = 0; i < a.size(); ++i) {
             result.emplace_back(required_int(x.get(i)));
         }
-        return sfz::make_optional<std::vector<int>>(std::move(result));
+        return result;
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
     }

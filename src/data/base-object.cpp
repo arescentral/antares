@@ -22,9 +22,9 @@
 
 namespace antares {
 
-sfz::optional<int32_t> optional_object_order_flags(path_value x) {
+int32_t optional_object_order_flags(path_value x) {
     if (x.value().is_null()) {
-        return sfz::nullopt;
+        return 0;
     } else if (x.value().is_map()) {
         static const pn::string_view flags[32] = {"stronger_than_target",
                                                   "base",
@@ -66,15 +66,15 @@ sfz::optional<int32_t> optional_object_order_flags(path_value x) {
             }
             bit <<= 1;
         }
-        return sfz::make_optional(+result);
+        return result;
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
     }
 }
 
-sfz::optional<int32_t> optional_object_build_flags(path_value x) {
+int32_t optional_object_build_flags(path_value x) {
     if (x.value().is_null()) {
-        return sfz::nullopt;
+        return 0;
     } else if (x.value().is_map()) {
         static const pn::string_view flags[32] = {"uncaptured_base_exists",
                                                   "sufficient_escorts_exist",
@@ -111,7 +111,7 @@ sfz::optional<int32_t> optional_object_build_flags(path_value x) {
             }
             bit <<= 1;
         }
-        return sfz::make_optional(+result);
+        return result;
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
     }
@@ -127,16 +127,16 @@ fixedPointType required_fixed_point(path_value x) {
     }
 }
 
-sfz::optional<std::vector<fixedPointType>> optional_fixed_point_array(path_value x) {
+std::vector<fixedPointType> optional_fixed_point_array(path_value x) {
     if (x.value().is_null()) {
-        return sfz::nullopt;
+        return {};
     } else if (x.value().is_array()) {
         pn::array_cref              a = x.value().as_array();
         std::vector<fixedPointType> result;
         for (int i = 0; i < a.size(); ++i) {
             result.emplace_back(required_fixed_point(x.get(i)));
         }
-        return sfz::make_optional(std::move(result));
+        return result;
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
     }
@@ -148,8 +148,7 @@ sfz::optional<BaseObject::Weapon> optional_weapon(path_value x) {
     } else if (x.value().is_map()) {
         BaseObject::Weapon w;
         w.base      = required_base(x.get("base"));
-        w.positions = optional_fixed_point_array(x.get("positions"))
-                              .value_or(std::vector<fixedPointType>{});
+        w.positions = optional_fixed_point_array(x.get("positions"));
         if (w.positions.empty()) {
             w.positions.push_back({Fixed::zero(), Fixed::zero()});
         }
@@ -218,9 +217,9 @@ objectFrameType::Vector required_vector_frame(path_value x) {
     }
 }
 
-sfz::optional<int32_t> optional_usage(path_value x) {
+int32_t optional_usage(path_value x) {
     if (x.value().is_null()) {
-        return sfz::nullopt;
+        return 0;
     } else if (x.value().is_map()) {
         static const pn::string_view flags[3] = {"transportation", "attacking", "defense"};
         int32_t                      bit      = 0x00000001;
@@ -231,7 +230,7 @@ sfz::optional<int32_t> optional_usage(path_value x) {
             }
             bit <<= 1;
         }
-        return sfz::make_optional(+result);
+        return result;
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
     }
@@ -240,7 +239,7 @@ sfz::optional<int32_t> optional_usage(path_value x) {
 objectFrameType::Weapon required_device_frame(path_value x) {
     if (x.value().is_map()) {
         objectFrameType::Weapon w;
-        w.usage        = optional_usage(x.get("usage")).value_or(0);
+        w.usage        = optional_usage(x.get("usage"));
         w.energyCost   = optional_int(x.get("energy_cost")).value_or(0);
         w.fireTime     = required_ticks(x.get("fire_time"));
         w.ammo         = optional_int(x.get("ammo")).value_or(-1);
@@ -260,9 +259,9 @@ BaseObject base_object(pn::value_cref x0) {
 
     path_value x{x0};
     BaseObject o;
-    o.attributes = optional_object_attributes(x.get("attributes")).value_or(0);
-    o.buildFlags = optional_object_build_flags(x.get("build_flags")).value_or(0);
-    o.orderFlags = optional_object_order_flags(x.get("order_flags")).value_or(0);
+    o.attributes = optional_object_attributes(x.get("attributes"));
+    o.buildFlags = optional_object_build_flags(x.get("build_flags"));
+    o.orderFlags = optional_object_order_flags(x.get("order_flags"));
 
     o.name       = required_string(x.get("long_name")).copy();
     o.short_name = required_string(x.get("short_name")).copy();
@@ -301,18 +300,12 @@ BaseObject base_object(pn::value_cref x0) {
     o.initial_direction =
             optional_int_range(x.get("initial_direction")).value_or(Range<int64_t>{0, 0});
 
-    o.destroy = optional_action_array(x.get("on_destroy"))
-                        .value_or(std::vector<std::unique_ptr<const Action>>{});
-    o.expire = optional_action_array(x.get("on_expire"))
-                       .value_or(std::vector<std::unique_ptr<const Action>>{});
-    o.create = optional_action_array(x.get("on_create"))
-                       .value_or(std::vector<std::unique_ptr<const Action>>{});
-    o.collide = optional_action_array(x.get("on_collide"))
-                        .value_or(std::vector<std::unique_ptr<const Action>>{});
-    o.activate = optional_action_array(x.get("on_activate"))
-                         .value_or(std::vector<std::unique_ptr<const Action>>{});
-    o.arrive = optional_action_array(x.get("on_arrive"))
-                       .value_or(std::vector<std::unique_ptr<const Action>>{});
+    o.destroy  = optional_action_array(x.get("on_destroy"));
+    o.expire   = optional_action_array(x.get("on_expire"));
+    o.create   = optional_action_array(x.get("on_create"));
+    o.collide  = optional_action_array(x.get("on_collide"));
+    o.activate = optional_action_array(x.get("on_activate"));
+    o.arrive   = optional_action_array(x.get("on_arrive"));
 
     auto icon = x.get("icon");
     if (icon.value().is_null()) {

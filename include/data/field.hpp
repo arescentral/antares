@@ -140,13 +140,13 @@ VectorKind                        required_vector_kind(path_value x);
 Weapon                            required_weapon(path_value x);
 Zoom                              required_zoom(path_value x);
 
-sfz::optional<int32_t> optional_object_attributes(path_value x);
-sfz::optional<int32_t> optional_initial_attributes(path_value x);
-int32_t                optional_keys(path_value x);
+int32_t optional_object_attributes(path_value x);
+int32_t optional_initial_attributes(path_value x);
+int32_t optional_keys(path_value x);
 
-std::vector<pn::string>                required_string_array(path_value x);
-sfz::optional<std::vector<pn::string>> optional_string_array(path_value x);
-sfz::optional<std::vector<int>>        optional_int_array(path_value x);
+std::vector<pn::string> required_string_array(path_value x);
+std::vector<pn::string> optional_string_array(path_value x);
+std::vector<int>        optional_int_array(path_value x);
 
 template <typename T>
 struct field {

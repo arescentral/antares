@@ -359,7 +359,7 @@ std::unique_ptr<Action> action(path_value x) {
 
     a->reflexive = optional_bool(x.get("reflexive")).value_or(false);
 
-    a->inclusive_filter = optional_object_attributes(x.get("inclusive_filter")).value_or(0);
+    a->inclusive_filter = optional_object_attributes(x.get("inclusive_filter"));
     a->level_key_tag    = optional_string(x.get("level_key_filter")).value_or("").copy();
 
     a->owner = optional_owner(x.get("owner")).value_or(Owner::ANY);
@@ -421,15 +421,15 @@ std::vector<std::unique_ptr<const Action>> required_action_array(path_value x) {
     }
 }
 
-sfz::optional<std::vector<std::unique_ptr<const Action>>> optional_action_array(path_value x) {
+std::vector<std::unique_ptr<const Action>> optional_action_array(path_value x) {
     if (x.value().is_null()) {
-        return sfz::nullopt;
+        return {};
     } else if (x.value().is_array()) {
         std::vector<std::unique_ptr<const Action>> a;
         for (int i = 0; i < x.value().as_array().size(); ++i) {
             a.push_back(action(x.get(i)));
         }
-        return sfz::make_optional(std::move(a));
+        return a;
     } else {
         throw std::runtime_error(pn::format("{0}: must be array", x.path()).c_str());
     }
