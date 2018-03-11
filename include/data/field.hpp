@@ -107,8 +107,7 @@ sfz::optional<Handle<Level_Initial>> optional_initial(path_value x);
 Handle<Level_Initial>                required_initial(path_value x);
 sfz::optional<Handle<Level>>         optional_level(path_value x);
 sfz::optional<Owner>                 optional_owner(path_value x);
-sfz::optional<Handle<Race>>          optional_race(path_value x);
-Handle<Race>                         required_race(path_value x);
+NamedHandle<Race>                    required_race(path_value x);
 
 sfz::optional<Range<int64_t>>              optional_int_range(path_value x);
 Range<int64_t>                             required_int_range(path_value x);

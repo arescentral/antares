@@ -123,10 +123,10 @@ class Admiral {
     Handle<Destination>& buildAtObject() {
         return _buildAtObject;
     }  // # of destination object to build at
-    Handle<Race>& race() { return _race; }
-    Fixed         cash() const { return _cash; }
-    Fixed&        cash() { return _cash; }
-    Fixed&        saveGoal() { return _saveGoal; }
+    const NamedHandle<Race>& race() { return _race; }
+    Fixed                    cash() const { return _cash; }
+    Fixed&                   cash() { return _cash; }
+    Fixed&                   saveGoal() { return _saveGoal; }
 
     Fixed earning_power() { return _earning_power; }
     void  set_earning_power(Fixed value) { _earning_power = value; }
@@ -157,7 +157,7 @@ class Admiral {
     int32_t             _considerShipID      = -1;
     int32_t             _considerDestination = kNoShip;
     Handle<Destination> _buildAtObject;  // # of destination object to build at
-    Handle<Race>        _race;
+    NamedHandle<Race>   _race;
     Fixed               _cash                    = Fixed::zero();
     Fixed               _saveGoal                = Fixed::zero();
     Fixed               _earning_power           = Fixed::zero();
@@ -187,8 +187,7 @@ Handle<Destination> MakeNewDestination(
 void RemoveDestination(Handle<Destination> d);
 void RecalcAllAdmiralBuildData();
 
-Hue          GetAdmiralColor(Handle<Admiral> whichAdmiral);
-Handle<Race> GetAdmiralRace(Handle<Admiral> whichAdmiral);
+Hue GetAdmiralColor(Handle<Admiral> whichAdmiral);
 
 bool                BaseHasSomethingToBuild(Handle<SpaceObject> obj);
 Handle<Destination> GetAdmiralBuildAtObject(Handle<Admiral> whichAdmiral);

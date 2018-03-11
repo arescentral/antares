@@ -131,11 +131,11 @@ struct Level {
     LevelType type = LevelType::DEMO;
 
     struct Player {
-        PlayerType   playerType = PlayerType::CPU;
-        Handle<Race> playerRace;
-        pn::string   name;
-        Fixed        earningPower = Fixed::zero();
-        int16_t      netRaceFlags = 0;
+        PlayerType        playerType = PlayerType::CPU;
+        NamedHandle<Race> playerRace;
+        pn::string        name;
+        Fixed             earningPower = Fixed::zero();
+        int16_t           netRaceFlags = 0;
     };
 
     int                     chapter = -1;

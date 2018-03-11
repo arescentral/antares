@@ -236,16 +236,7 @@ sfz::optional<Owner> optional_owner(path_value x) {
             x, {{"any", Owner::ANY}, {"same", Owner::SAME}, {"different", Owner::DIFFERENT}});
 }
 
-sfz::optional<Handle<Race>> optional_race(path_value x) {
-    sfz::optional<int64_t> i = optional_int(x);
-    if (i.has_value()) {
-        return sfz::make_optional(Handle<Race>(*i));
-    } else {
-        return sfz::nullopt;
-    }
-}
-
-Handle<Race> required_race(path_value x) { return Handle<Race>(required_int(x)); }
+NamedHandle<Race> required_race(path_value x) { return NamedHandle<Race>(required_string(x)); }
 
 template <typename T, int N>
 T required_enum(path_value x, const std::pair<pn::string_view, T> (&values)[N]) {

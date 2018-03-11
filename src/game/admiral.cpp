@@ -108,7 +108,7 @@ Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Level::Playe
     a->_active        = true;
     a->_attributes    = attributes;
     a->_earning_power = player.earningPower;
-    a->_race          = player.playerRace;
+    a->_race          = player.playerRace.copy();
 
     if (!player.name.empty()) {
         if (pn::rune::count(player.name) > kAdmiralNameLen) {
@@ -267,13 +267,6 @@ Hue GetAdmiralColor(Handle<Admiral> a) {
         return Hue::GRAY;
     }
     return a->hue();
-}
-
-Handle<Race> GetAdmiralRace(Handle<Admiral> a) {
-    if (!a.get()) {
-        return Race::none();
-    }
-    return a->race();
 }
 
 void Admiral::set_target(Handle<SpaceObject> obj) {

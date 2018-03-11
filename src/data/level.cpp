@@ -35,8 +35,6 @@ static std::vector<Level::Briefing>                   optional_briefing_array(pa
 
 Level* Level::get(int n) { return &plug.levels[n]; }
 
-Race* Race::get(int n) { return &plug.races[n]; }
-
 bool read_from(pn::file_view in, ScenarioInfo* info) {
     pn::value  x;
     pn_error_t error;

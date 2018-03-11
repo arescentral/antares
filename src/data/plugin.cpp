@@ -95,12 +95,12 @@ void PluginInit() {
     });
 }
 
-void load_race(Handle<Race> r) {
-    if (plug.races.find(r.number()) != plug.races.end()) {
+void load_race(const NamedHandle<Race>& r) {
+    if (plug.races.find(r.name().copy()) != plug.races.end()) {
         return;  // already loaded.
     }
 
-    pn::string path = pn::format("races/{0}.pn", r.number());
+    pn::string path = pn::format("races/{0}.pn", r.name());
     try {
         pn::value  x;
         pn_error_t e;
@@ -108,7 +108,7 @@ void load_race(Handle<Race> r) {
             throw std::runtime_error(
                     pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
         }
-        plug.races.emplace(r.number(), race(path_value{x}));
+        plug.races.emplace(r.name().copy(), race(path_value{x}));
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.copy().c_str()));
     }

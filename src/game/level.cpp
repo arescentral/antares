@@ -270,8 +270,7 @@ static void load_initial(Handle<Level::Initial> initial, std::bitset<16> all_col
             // check for each player
             for (auto a : Admiral::all()) {
                 if (a->active()) {
-                    auto baseObject =
-                            mGetBaseObjectFromClassRace(initial->build[j], GetAdmiralRace(a));
+                    auto baseObject = mGetBaseObjectFromClassRace(initial->build[j], a->race());
                     if (baseObject.number() >= 0) {
                         AddBaseObjectMedia(baseObject, all_colors);
                     }

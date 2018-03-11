@@ -42,8 +42,7 @@ struct Race {
     Fixed                                    advantage;
     std::map<pn::string, Handle<BaseObject>> ships;
 
-    static Race*        get(int n);
-    static Handle<Race> none() { return Handle<Race>(-1); }
+    static Race* get(pn::string_view name);
 
     static const size_t byte_size = 14;
 };

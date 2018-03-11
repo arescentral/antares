@@ -85,7 +85,7 @@ BaseObject* BaseObject::get(int number) {
     return nullptr;
 }
 
-Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, Handle<Race> race) {
+Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, const NamedHandle<Race>& race) {
     if (class_ >= kLiteralClass) {
         return Handle<BaseObject>(class_ - kLiteralClass);
     }

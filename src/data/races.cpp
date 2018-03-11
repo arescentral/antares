@@ -28,6 +28,8 @@ using std::unique_ptr;
 
 namespace antares {
 
+Race* Race::get(pn::string_view name) { return &plug.races[name.copy()]; }
+
 std::map<pn::string, Handle<BaseObject>> optional_ships(path_value x) {
     if (x.value().is_null()) {
         return {};
