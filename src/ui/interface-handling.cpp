@@ -145,10 +145,7 @@ void CreateObjectDataText(pn::string& text, Handle<BaseObject> object) {
     }
 
     // ship name
-    {
-        pn::string_view name = get_object_name(object);
-        find_replace(data, 0, keys.at(kShipTypeStringNum), name);
-    }
+    find_replace(data, 0, keys.at(kShipTypeStringNum), object->name);
 
     // ship mass
     find_replace(data, 0, keys.at(kMassStringNum), stringify(Fixed(object->mass)));
@@ -226,10 +223,7 @@ void CreateWeaponDataText(
     find_replace(data, 0, keys.at(kWeaponNumberStringNum), weaponName);
 
     // weapon name
-    {
-        pn::string_view name = get_object_name(weaponObject);
-        find_replace(data, 0, keys.at(kWeaponNameStringNum), name);
-    }
+    find_replace(data, 0, keys.at(kWeaponNameStringNum), weaponObject->name);
 
     pn::string_view yes  = values.at(kShipDataYesStringNum);
     pn::string_view no   = values.at(kShipDataNoStringNum);

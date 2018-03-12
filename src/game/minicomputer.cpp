@@ -750,7 +750,7 @@ static void draw_mini_ship_data(
                     screen_top, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
             sys.fonts.computer->draw(
                     Point(lRect.left, lRect.top + sys.fonts.computer->ascent),
-                    get_object_short_name(obj->beam.base), color);
+                    obj->beam.base->short_name, color);
         }
 
         if (obj->pulse.base.get()) {
@@ -758,7 +758,7 @@ static void draw_mini_ship_data(
                     screen_top, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
             sys.fonts.computer->draw(
                     Point(lRect.left, lRect.top + sys.fonts.computer->ascent),
-                    get_object_short_name(obj->pulse.base), color);
+                    obj->pulse.base->short_name, color);
         }
 
         // Don't show special weapons of destination objects.
@@ -768,7 +768,7 @@ static void draw_mini_ship_data(
                         screen_top, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
                 sys.fonts.computer->draw(
                         Point(lRect.left, lRect.top + sys.fonts.computer->ascent),
-                        get_object_short_name(obj->special.base), color);
+                        obj->special.base->short_name, color);
             }
         }
     }
@@ -997,7 +997,7 @@ void MiniComputerSetBuildStrings() {
             continue;
         }
 
-        mCopyBlankLineString(line, get_object_name(buildObject));
+        mCopyBlankLineString(line, buildObject->name);
         if (buildObject->price > mFixedToLong(g.admiral->cash())) {
             line->kind = MINI_DIM;
         } else {

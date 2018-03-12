@@ -226,9 +226,6 @@ int32_t CountObjectsOfBaseType(Handle<BaseObject> whichType, Handle<Admiral> own
 
 Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, const NamedHandle<Race>& race);
 
-pn::string_view get_object_name(Handle<BaseObject> id);
-pn::string_view get_object_short_name(Handle<BaseObject> id);
-
 }  // namespace antares
 
 #endif  // ANTARES_GAME_SPACE_OBJECT_HPP_

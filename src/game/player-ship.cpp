@@ -92,19 +92,18 @@ static ANTARES_GLOBAL int       gHotKeyNum;
 
 static ANTARES_GLOBAL Zoom gPreviousZoomMode;
 
-pn::string hot_key_suffix(Handle<SpaceObject> space_object) {
+pn::string name_with_hot_key_suffix(Handle<SpaceObject> space_object) {
     int h = HotKey_GetFromObject(space_object);
     if (h < 0) {
-        return "";
+        return space_object->name().copy();
     }
 
     int keyNum = sys.prefs->key(h + kFirstHotKeyNum);
     if (keyNum < 0) {
-        return "";
+        return space_object->name().copy();
     }
 
-    pn::string_view key_name = sys.key_long_names.at(keyNum - 1);
-    return pn::format(" < {0} >", key_name);
+    return pn::format("{0} < {1} >", space_object->name(), sys.key_long_names.at(keyNum - 1));
 };
 
 }  // namespace
@@ -814,14 +813,7 @@ void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> 
         if (ship == g.ship) {
             label->set_age(Label::kVisibleTime);
         }
-        pn::string string;
-        if (ship->attributes & kIsDestination) {
-            string = GetDestBalanceName(ship->asDestination).copy();
-        } else {
-            string = get_object_name(ship->base).copy();
-        }
-        string += hot_key_suffix(ship);
-        label->set_string(string);
+        label->set_string(name_with_hot_key_suffix(ship));
     }
 }
 
@@ -954,15 +946,7 @@ void Update_LabelStrings_ForHotKeyChange(void) {
         if (target == g.ship) {
             g.target_label->set_age(Label::kVisibleTime);
         }
-        if (target->attributes & kIsDestination) {
-            pn::string string = GetDestBalanceName(target->asDestination).copy();
-            string += hot_key_suffix(target);
-            g.target_label->set_string(string);
-        } else {
-            pn::string string = get_object_name(target->base).copy();
-            string += hot_key_suffix(target);
-            g.target_label->set_string(string);
-        }
+        g.target_label->set_string(name_with_hot_key_suffix(target));
     }
 
     auto control = g.admiral->control();
@@ -972,15 +956,7 @@ void Update_LabelStrings_ForHotKeyChange(void) {
             g.control_label->set_age(Label::kVisibleTime);
         }
         sys.sound.select();
-        if (control->attributes & kIsDestination) {
-            pn::string string = GetDestBalanceName(control->asDestination).copy();
-            string += hot_key_suffix(control);
-            g.control_label->set_string(string);
-        } else {
-            pn::string string = get_object_name(control->base).copy();
-            string += hot_key_suffix(control);
-            g.control_label->set_string(string);
-        }
+        g.control_label->set_string(name_with_hot_key_suffix(control));
     }
 }
 

@@ -594,9 +594,9 @@ void SpaceObject::refund_warp_energy() {
     warpEnergyCollected = 0;
 }
 
-void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
+void SpaceObject::set_owner(Handle<Admiral> new_owner, bool message) {
     auto object = Handle<SpaceObject>(number());
-    if (object->owner == owner) {
+    if (object->owner == new_owner) {
         return;
     }
 
@@ -607,20 +607,20 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
     }
 
     Handle<Admiral> old_owner = object->owner;
-    object->owner             = owner;
+    object->owner             = new_owner;
 
-    if (owner.get() && (object->attributes & kIsDestination)) {
-        if (!owner->control().get()) {
-            owner->set_control(object);
+    if (new_owner.get() && (object->attributes & kIsDestination)) {
+        if (!new_owner->control().get()) {
+            new_owner->set_control(object);
         }
 
-        if (!GetAdmiralBuildAtObject(owner).get()) {
+        if (!GetAdmiralBuildAtObject(new_owner).get()) {
             if (BaseHasSomethingToBuild(object)) {
-                SetAdmiralBuildAtObject(owner, object);
+                SetAdmiralBuildAtObject(new_owner, object);
             }
         }
-        if (!owner->target().get()) {
-            owner->set_target(object);
+        if (!new_owner->target().get()) {
+            new_owner->set_target(object);
         }
     }
 
@@ -638,9 +638,9 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
         }
 
         RgbColor tinyColor;
-        if (owner == g.admiral) {
+        if (new_owner == g.admiral) {
             tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
-        } else if (owner.get()) {
+        } else if (new_owner.get()) {
             tinyColor = GetRGBTranslateColorShade(kHostileColor, tinyShade);
         } else {
             tinyColor = GetRGBTranslateColorShade(kNeutralColor, tinyShade);
@@ -656,7 +656,7 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
                   (static_cast<int>(GetAdmiralColor(old_owner)) << kSpriteTableColorShift)))) {
                 object->pixResID =
                         object->baseType->pixResID |
-                        (static_cast<int>(GetAdmiralColor(owner)) << kSpriteTableColorShift);
+                        (static_cast<int>(GetAdmiralColor(new_owner)) << kSpriteTableColorShift);
 
                 pixTable = sys.pix.get(object->pixResID);
                 if (pixTable != NULL) {
@@ -675,7 +675,7 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
         if ((fixObject->destObject == object) && (fixObject->active != kObjectAvailable) &&
             (fixObject->attributes & kCanThink)) {
             fixObject->currentTargetValue = kFixedNone;
-            if (fixObject->owner != owner) {
+            if (fixObject->owner != new_owner) {
                 object->remoteFoeStrength += fixObject->baseType->offenseValue;
             } else {
                 object->remoteFriendStrength += fixObject->baseType->offenseValue;
@@ -686,31 +686,16 @@ void SpaceObject::set_owner(Handle<Admiral> owner, bool message) {
 
     if (object->attributes & kIsDestination) {
         if (object->attributes & kNeutralDeath) {
-            ClearAllOccupants(object->asDestination, owner, object->baseType->occupy_count);
+            ClearAllOccupants(object->asDestination, new_owner, object->baseType->occupy_count);
         }
         StopBuilding(object->asDestination);
-        if (message) {
-            pn::string_view destination_name = GetDestBalanceName(object->asDestination);
-            if (owner.get()) {
-                pn::string_view new_owner_name(GetAdmiralName(object->owner));
-                Messages::add(
-                        pn::format("{0} captured by {1}.", destination_name, new_owner_name));
-            } else if (old_owner.get()) {  // must be since can't both be -1
-                pn::string_view old_owner_name(GetAdmiralName(old_owner));
-                Messages::add(pn::format("{0} lost by {1}.", destination_name, old_owner_name));
-            }
-        }
         RecalcAllAdmiralBuildData();
-    } else {
-        if (message) {
-            pn::string_view object_name = get_object_name(object->base);
-            if (owner.get()) {
-                pn::string_view new_owner_name = GetAdmiralName(object->owner);
-                Messages::add(pn::format("{0} captured by {1}.", object_name, new_owner_name));
-            } else if (old_owner.get()) {  // must be since can't both be -1
-                pn::string_view old_owner_name = GetAdmiralName(old_owner);
-                Messages::add(pn::format("{0} lost by {1}.", object_name, old_owner_name));
-            }
+    }
+    if (message) {
+        if (new_owner.get()) {
+            Messages::add(pn::format("{0} captured by {1}.", object->name(), new_owner->name()));
+        } else if (old_owner.get()) {  // must be since can't both be -1
+            Messages::add(pn::format("{0} lost by {1}.", object->name(), old_owner->name()));
         }
     }
 }
@@ -852,7 +837,7 @@ pn::string_view SpaceObject::name() const {
     if (attributes & kIsDestination) {
         return GetDestBalanceName(asDestination);
     } else {
-        return get_object_name(base);
+        return base->name;
     }
 }
 
@@ -860,7 +845,7 @@ pn::string_view SpaceObject::short_name() const {
     if (attributes & kIsDestination) {
         return GetDestBalanceName(asDestination);
     } else {
-        return get_object_short_name(base);
+        return base->short_name;
     }
 }
 
@@ -877,14 +862,6 @@ Fixed SpaceObject::turn_rate() const {
         return baseType->frame.rotation.maxTurnRate;
     }
     return kDefaultTurnRate;
-}
-
-pn::string_view get_object_name(Handle<BaseObject> id) {
-    return id->name;  // TODO(sfiera): use directly.
-}
-
-pn::string_view get_object_short_name(Handle<BaseObject> id) {
-    return id->short_name;  // TODO(sfiera): use directly.
 }
 
 int32_t SpaceObject::number() const { return this - g.objects.get(); }
