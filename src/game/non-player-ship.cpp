@@ -113,13 +113,13 @@ static void tick_weapon(
         Handle<SpaceObject> subject, Handle<SpaceObject> target, uint32_t key,
         const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
     if (subject->keysDown & key) {
-        fire_weapon(subject, target, base_weapon, weapon);
+        fire_weapon(subject, target, weapon, base_weapon.positions);
     }
 }
 
 void fire_weapon(
-        Handle<SpaceObject> subject, Handle<SpaceObject> target,
-        const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
+        Handle<SpaceObject> subject, Handle<SpaceObject> target, SpaceObject::Weapon& weapon,
+        const std::vector<fixedPointType>& positions) {
     if ((weapon.time > g.time) || !weapon.base.get()) {
         return;
     }
@@ -134,7 +134,7 @@ void fire_weapon(
     }
     subject->_energy -= weaponObject->frame.weapon.energyCost;
     weapon.position++;
-    if (weapon.position >= base_weapon.positions.size()) {
+    if (weapon.position >= positions.size()) {
         weapon.position = 0;
     }
 
@@ -147,13 +147,11 @@ void fire_weapon(
 
     Point  offset;
     Point* at = nullptr;
-    if (&weapon != &subject->special) {
+    if ((&weapon != &subject->special) && !positions.empty()) {
         offset.h = mFixedToLong(
-                (base_weapon.positions[weapon.position].h * fcos) +
-                (base_weapon.positions[weapon.position].v * -fsin));
+                (positions[weapon.position].h * fcos) + (positions[weapon.position].v * -fsin));
         offset.v = mFixedToLong(
-                (base_weapon.positions[weapon.position].h * fsin) +
-                (base_weapon.positions[weapon.position].v * fcos));
+                (positions[weapon.position].h * fsin) + (positions[weapon.position].v * fcos));
         at = &offset;
     }
 

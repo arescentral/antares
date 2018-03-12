@@ -642,14 +642,19 @@ void FireAction::apply(
         Point* offset) const {
     switch (which) {
         case Weapon::PULSE:
-            fire_weapon(subject, SpaceObject::none(), subject->baseType->pulse, subject->pulse);
+            fire_weapon(
+                    subject, SpaceObject::none(), subject->pulse,
+                    subject->baseType->pulse.positions);
             break;
         case Weapon::BEAM:
-            fire_weapon(subject, SpaceObject::none(), subject->baseType->beam, subject->beam);
+            fire_weapon(
+                    subject, SpaceObject::none(), subject->beam,
+                    subject->baseType->beam.positions);
             break;
         case Weapon::SPECIAL:
             fire_weapon(
-                    subject, SpaceObject::none(), subject->baseType->special, subject->special);
+                    subject, SpaceObject::none(), subject->special,
+                    subject->baseType->special.positions);
             break;
     }
 }

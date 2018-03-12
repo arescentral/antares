@@ -149,9 +149,6 @@ sfz::optional<BaseObject::Weapon> optional_weapon(path_value x) {
         BaseObject::Weapon w;
         w.base      = required_base(x.get("base"));
         w.positions = optional_fixed_point_array(x.get("positions"));
-        if (w.positions.empty()) {
-            w.positions.push_back({Fixed::zero(), Fixed::zero()});
-        }
         return sfz::make_optional(std::move(w));
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
