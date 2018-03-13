@@ -86,6 +86,8 @@ bool                required_bool(path_value x);
 
 sfz::optional<int64_t> optional_int(path_value x);
 int64_t                required_int(path_value x);
+sfz::optional<int64_t> optional_int(path_value x, const std::initializer_list<int64_t>& ranges);
+int64_t                required_int(path_value x, const std::initializer_list<int64_t>& ranges);
 
 double required_double(path_value x);
 

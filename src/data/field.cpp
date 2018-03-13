@@ -100,6 +100,58 @@ int64_t required_int(path_value x) {
     }
 }
 
+// 0 {} => false
+// -1 {0} => false
+// 0 {0} => true
+// 1 {0} => true
+// 0 {1, 4} => false
+// 2 {1, 4} => true
+// 4 {1, 4} => false
+static void check_ranges(path_value x, int64_t i, const std::initializer_list<int64_t>& ranges) {
+    bool ok = false;
+    for (int64_t x : ranges) {
+        if (i >= x) {
+            ok = !ok;
+        } else {
+            break;
+        }
+    }
+    if (!ok) {
+        pn::string err      = pn::format("{0}: must satisfy", x.path());
+        bool       is_first = true;
+        bool       is_begin = true;
+        for (int64_t x : ranges) {
+            if (is_first) {
+                err += pn::format(" ({0} <= x", x);
+            } else if (is_begin) {
+                err += pn::format(" or ({0} <= x", x);
+            } else {
+                err += pn::format(" < {0})", x);
+            }
+            is_begin = !is_begin;
+            is_first = false;
+        }
+        if (!is_begin) {
+            err += ")";
+        }
+        throw std::runtime_error(err.c_str());
+    }
+}
+
+sfz::optional<int64_t> optional_int(path_value x, const std::initializer_list<int64_t>& ranges) {
+    auto i = optional_int(x);
+    if (i.has_value()) {
+        check_ranges(x, *i, ranges);
+    }
+    return i;
+}
+
+int64_t required_int(path_value x, const std::initializer_list<int64_t>& ranges) {
+    auto i = required_int(x);
+    check_ranges(x, i, ranges);
+    return i;
+}
+
 double required_double(path_value x) {
     if (x.value().is_float()) {
         return x.value().as_float();

@@ -159,7 +159,7 @@ objectFrameType::Rotation required_rotation_frame(path_value x) {
     if (x.value().is_map()) {
         objectFrameType::Rotation r;
         r.sprite    = required_int(x.get("sprite"));
-        r.layer     = required_int(x.get("layer"));
+        r.layer     = required_int(x.get("layer"), {1, 4});
         r.scale     = optional_fixed(x.get("scale")).value_or(Fixed::from_long(1)).val() * 16;
         r.frames    = required_int_range(x.get("frames"));
         r.turn_rate = optional_fixed(x.get("turn_rate")).value_or(Fixed::zero());
@@ -173,7 +173,7 @@ objectFrameType::Animation required_animation_frame(path_value x) {
     if (x.value().is_map()) {
         objectFrameType::Animation a;
         a.sprite = required_int(x.get("sprite"));
-        a.layer  = required_int(x.get("layer"));
+        a.layer  = required_int(x.get("layer"), {1, 4});
         a.scale  = optional_fixed(x.get("scale")).value_or(Fixed::from_long(1)).val() * 16;
         a.frames = optional_fixed_range(x.get("frames"))
                            .value_or(Range<Fixed>{Fixed::zero(), Fixed::from_val(1)});
