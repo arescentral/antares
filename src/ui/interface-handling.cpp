@@ -169,7 +169,7 @@ void CreateObjectDataText(pn::string& text, Handle<BaseObject> object) {
         if (object->attributes & kShapeFromDirection) {
             find_replace(
                     data, 0, keys.at(kTurnStringNum),
-                    stringify(Fixed(object->frame.rotation.maxTurnRate)));
+                    stringify(Fixed(object->frame.rotation.turn_rate)));
         } else {
             find_replace(data, 0, keys.at(kTurnStringNum), stringify(Fixed::from_long(1)));
         }

@@ -222,8 +222,9 @@ void GetInitialObjectSpriteData(
     if (sObject.get() && sObject->active) {
         const NatePixTable::Frame* frame = NULL;
         GetRealObjectSpriteData(
-                &(sObject->location), sObject->base, sObject->owner, sObject->pixResID, maxSize,
-                bounds, corner, scale, thisScale, &frame, where, spriteRect);
+                &(sObject->location), sObject->base, sObject->owner,
+                sprite_resource(*sObject->base), maxSize, bounds, corner, scale, thisScale, &frame,
+                where, spriteRect);
 
         *spriteRect = gBriefingSpriteBounds[sObject.number()];
     }
@@ -240,7 +241,7 @@ void GetRealObjectSpriteData(
     coordPointType coord = *realCoord;
 
     if (spriteOverride == -1) {
-        tlong = baseObject->pixResID;
+        tlong = sprite_resource(*baseObject);
         if (baseObject->attributes & kCanThink) {
             pixTable = sys.pix.get(
                     tlong +
@@ -258,7 +259,7 @@ void GetRealObjectSpriteData(
     }
 
     if (baseObject->attributes & kIsSelfAnimated)
-        whichShape = more_evil_fixed_to_long(baseObject->frame.animation.shapes.begin);
+        whichShape = more_evil_fixed_to_long(baseObject->frame.animation.frames.begin);
     else
         whichShape = 0;
 
@@ -350,7 +351,7 @@ static void render_briefing_with(
                         &(anObject->location), anObject->base, anObject->owner, anObject->pixResID,
                         maxSize, bounds, corner, scale, &thisScale, &frame, &where, &spriteRect);
                 if (frame != NULL) {
-                    thisScale = evil_scale_by(kOneQuarterScale, baseObject->naturalScale);
+                    thisScale = evil_scale_by(kOneQuarterScale, sprite_scale(*baseObject));
                     clipRect  = *bounds;
 
                     clipRect.left = clipRect.top = 0;
@@ -382,7 +383,7 @@ static void render_briefing_with(
                         maxSize / 2, bounds, corner, scale, &thisScale, &frame, &where,
                         &spriteRect);
                 if (frame != NULL) {
-                    thisScale = evil_scale_by(kOneQuarterScale, baseObject->naturalScale);
+                    thisScale = evil_scale_by(kOneQuarterScale, sprite_scale(*baseObject));
 
                     clipRect = *bounds;
 

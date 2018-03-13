@@ -87,8 +87,8 @@ void AddBaseObjectMedia(Handle<BaseObject> base, std::bitset<16> all_colors) {
         colors[0] = true;
     }
     for (int i = 0; i < 16; ++i) {
-        if (colors[i] && (base->pixResID != kNoSpriteTable)) {
-            sys.pix.add(base->pixResID + (i << kSpriteTableColorShift));
+        if (colors[i] && (sprite_resource(*base) != kNoSpriteTable)) {
+            sys.pix.add(sprite_resource(*base) + (i << kSpriteTableColorShift));
         }
     }
 

@@ -204,15 +204,22 @@ enum kPresenceStateType {
 struct objectFrameType {
     // rotation: for objects whose shapes depend on their direction
     struct Rotation {
-        int32_t shapeOffset;  // offset for 1st shape
-        int32_t rotRes;       // ROT_POS / rotRes = # of discrete shapes
-        Fixed   maxTurnRate;  // max rate at which object can turn
+        int16_t sprite;  // ID of sprite resource
+        int16_t layer;   // 0 = no layer 1->3 = back to front
+        int32_t scale;   // sprite scale; 4096 = 100%
+
+        Range<int64_t> frames;
+        Fixed          turn_rate;  // max rate at which object can turn
     };
     Rotation rotation;
 
     // animation: objects whose appearence does not depend on direction
     struct Animation {
-        Range<Fixed>       shapes;     // range of frames from sprite
+        int16_t sprite;  // ID of sprite resource
+        int16_t layer;   // 0 = no layer 1->3 = back to front
+        int32_t scale;   // sprite scale; 4096 = 100%
+
+        Range<Fixed>       frames;     // range of frames from sprite
         AnimationDirection direction;  // frame sequence
         Fixed              speed;      // speed at which object animates
         Range<Fixed>       first;      // starting shape #
@@ -275,10 +282,6 @@ class BaseObject {
 
     int32_t occupy_count;  // size of occupying force
 
-    int32_t naturalScale;  // natural scale relative to %100
-
-    int16_t                 pixLayer;     // 0 = no layer 1->3 = back to front
-    int16_t                 pixResID;     // resID of SMIV
     sfz::optional<RgbColor> shieldColor;  // color on radar (!has_value() = don't draw shields)
 
     struct Icon {

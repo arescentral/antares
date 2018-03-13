@@ -158,9 +158,11 @@ sfz::optional<BaseObject::Weapon> optional_weapon(path_value x) {
 objectFrameType::Rotation required_rotation_frame(path_value x) {
     if (x.value().is_map()) {
         objectFrameType::Rotation r;
-        r.shapeOffset = optional_int(x.get("offset")).value_or(0);
-        r.rotRes      = required_int(x.get("resolution"));
-        r.maxTurnRate = optional_fixed(x.get("turn_rate")).value_or(Fixed::zero());
+        r.sprite    = required_int(x.get("sprite"));
+        r.layer     = required_int(x.get("layer"));
+        r.scale     = optional_fixed(x.get("scale")).value_or(Fixed::from_long(1)).val() * 16;
+        r.frames    = required_int_range(x.get("frames"));
+        r.turn_rate = optional_fixed(x.get("turn_rate")).value_or(Fixed::zero());
         return r;
     } else {
         throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
@@ -168,16 +170,12 @@ objectFrameType::Rotation required_rotation_frame(path_value x) {
 }
 
 objectFrameType::Animation required_animation_frame(path_value x) {
-    if (x.value().is_null()) {
+    if (x.value().is_map()) {
         objectFrameType::Animation a;
-        a.shapes    = Range<Fixed>{Fixed::zero(), Fixed::from_val(1)};
-        a.direction = AnimationDirection::NONE;
-        a.speed     = Fixed::zero();
-        a.first     = Range<Fixed>{Fixed::zero(), Fixed::from_val(1)};
-        return a;
-    } else if (x.value().is_map()) {
-        objectFrameType::Animation a;
-        a.shapes = optional_fixed_range(x.get("shape"))
+        a.sprite = required_int(x.get("sprite"));
+        a.layer  = required_int(x.get("layer"));
+        a.scale  = optional_fixed(x.get("scale")).value_or(Fixed::from_long(1)).val() * 16;
+        a.frames = optional_fixed_range(x.get("frames"))
                            .value_or(Range<Fixed>{Fixed::zero(), Fixed::from_val(1)});
         a.direction = optional_animation_direction(x.get("direction"))
                               .value_or(AnimationDirection::NONE);
@@ -186,7 +184,7 @@ objectFrameType::Animation required_animation_frame(path_value x) {
                           .value_or(Range<Fixed>{Fixed::zero(), Fixed::from_val(1)});
         return a;
     } else {
-        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
     }
 }
 
@@ -263,19 +261,16 @@ BaseObject base_object(pn::value_cref x0) {
     o.name       = required_string(x.get("long_name")).copy();
     o.short_name = required_string(x.get("short_name")).copy();
 
-    o.price             = optional_int(x.get("price")).value_or(0);
-    o.destinationClass  = optional_int(x.get("destination_class")).value_or(0);
-    o.warpOutDistance   = optional_int(x.get("warp_out_distance")).value_or(0);
-    o.health            = optional_int(x.get("health")).value_or(0);
-    o.damage            = optional_int(x.get("damage")).value_or(0);
-    o.energy            = optional_int(x.get("energy")).value_or(0);
-    o.naturalScale      = optional_fixed(x.get("scale")).value_or(Fixed::from_long(1)).val() * 16;
-    o.pixLayer          = optional_int(x.get("layer")).value_or(0);
-    o.pixResID          = optional_int(x.get("sprite")).value_or(-1);
-    o.skillNum          = optional_int(x.get("skill_num")).value_or(0);
-    o.skillDen          = optional_int(x.get("skill_den")).value_or(0);
-    o.pictPortraitResID = optional_int(x.get("portrait")).value_or(0);
-    o.occupy_count      = optional_int(x.get("occupy_count")).value_or(-1);
+    o.price                = optional_int(x.get("price")).value_or(0);
+    o.destinationClass     = optional_int(x.get("destination_class")).value_or(0);
+    o.warpOutDistance      = optional_int(x.get("warp_out_distance")).value_or(0);
+    o.health               = optional_int(x.get("health")).value_or(0);
+    o.damage               = optional_int(x.get("damage")).value_or(0);
+    o.energy               = optional_int(x.get("energy")).value_or(0);
+    o.skillNum             = optional_int(x.get("skill_num")).value_or(0);
+    o.skillDen             = optional_int(x.get("skill_den")).value_or(0);
+    o.pictPortraitResID    = optional_int(x.get("portrait")).value_or(0);
+    o.occupy_count         = optional_int(x.get("occupy_count")).value_or(-1);
     o.arriveActionDistance = optional_int(x.get("arrive_action_distance")).value_or(0);
 
     o.offenseValue  = optional_fixed(x.get("offense")).value_or(Fixed::zero());
@@ -328,15 +323,14 @@ BaseObject base_object(pn::value_cref x0) {
         throw std::runtime_error(pn::format("{0}: must be null or map", weapons.path()).c_str());
     }
 
-    auto frame = x.get("frame");
     if (o.attributes & kShapeFromDirection) {
-        o.frame.rotation = required_rotation_frame(frame);
+        o.frame.rotation = required_rotation_frame(x.get("rotation"));
     } else if (o.attributes & kIsSelfAnimated) {
-        o.frame.animation = required_animation_frame(frame);
+        o.frame.animation = required_animation_frame(x.get("animation"));
     } else if (o.attributes & kIsVector) {
-        o.frame.vector = required_vector_frame(frame);
+        o.frame.vector = required_vector_frame(x.get("vector"));
     } else {
-        o.frame.weapon = required_device_frame(frame);
+        o.frame.weapon = required_device_frame(x.get("device"));
     }
 
     o.destroyDontDie  = optional_bool(x.get("destroy_dont_die")).value_or(false);

@@ -160,8 +160,8 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject* sourceObject) {
             whichShape = more_evil_fixed_to_long(obj->frame.animation.thisShape);
         } else if (obj->attributes & kShapeFromDirection) {
             angle = obj->direction;
-            mAddAngle(angle, obj->baseType->frame.rotation.rotRes >> 1);
-            whichShape = angle / obj->baseType->frame.rotation.rotRes;
+            mAddAngle(angle, rotation_resolution(*obj->baseType) >> 1);
+            whichShape = angle / rotation_resolution(*obj->baseType);
         }
 
         obj->sprite = AddSprite(
@@ -220,9 +220,9 @@ SpaceObject::SpaceObject(
     attributes   = baseType->attributes;
     shieldColor  = baseType->shieldColor;
     icon         = baseType->icon;
-    layer        = baseType->pixLayer;
+    layer        = sprite_layer(*baseType);
     maxVelocity  = baseType->maxVelocity;
-    naturalScale = baseType->naturalScale;
+    naturalScale = sprite_scale(*baseType);
 
     _health  = max_health();
     _energy  = max_energy();
@@ -292,7 +292,7 @@ SpaceObject::SpaceObject(
     }
 
     if (spriteIDOverride == -1) {
-        pixResID = baseType->pixResID;
+        pixResID = sprite_resource(*baseType);
     } else {
         pixResID = spriteIDOverride;
     }
@@ -378,7 +378,7 @@ void SpaceObject::change_base_type(
     obj->base          = base;
     obj->icon          = base->icon;
     obj->shieldColor   = base->shieldColor;
-    obj->layer         = base->pixLayer;
+    obj->layer         = sprite_layer(*base);
     obj->directionGoal = 0;
     obj->turnFraction = obj->turnVelocity = Fixed::zero();
 
@@ -415,7 +415,7 @@ void SpaceObject::change_base_type(
         obj->randomSeed.next(1);
     }
 
-    obj->naturalScale = base->naturalScale;
+    obj->naturalScale = sprite_scale(*base);
 
     // not setting id
 
@@ -424,7 +424,7 @@ void SpaceObject::change_base_type(
     // not setting sprite, targetObjectNumber, lastTarget, lastTargetDistance;
 
     if (spriteIDOverride == -1) {
-        obj->pixResID = base->pixResID;
+        obj->pixResID = sprite_resource(*base);
     } else {
         obj->pixResID = spriteIDOverride;
     }
@@ -490,15 +490,15 @@ void SpaceObject::change_base_type(
 
         obj->sprite->table      = spriteTable;
         obj->sprite->icon       = base->icon;
-        obj->sprite->whichLayer = base->pixLayer;
-        obj->sprite->scale      = base->naturalScale;
+        obj->sprite->whichLayer = sprite_layer(*base);
+        obj->sprite->scale      = sprite_scale(*base);
 
         if (obj->attributes & kIsSelfAnimated) {
             obj->sprite->whichShape = more_evil_fixed_to_long(obj->frame.animation.thisShape);
         } else if (obj->attributes & kShapeFromDirection) {
             angle = obj->direction;
-            mAddAngle(angle, base->frame.rotation.rotRes >> 1);
-            obj->sprite->whichShape = angle / base->frame.rotation.rotRes;
+            mAddAngle(angle, rotation_resolution(*base) >> 1);
+            obj->sprite->whichShape = angle / rotation_resolution(*base);
         } else {
             obj->sprite->whichShape = 0;
         }
@@ -650,12 +650,12 @@ void SpaceObject::set_owner(Handle<Admiral> new_owner, bool message) {
         if (object->attributes & kCanThink) {
             NatePixTable* pixTable;
 
-            if ((object->pixResID == object->baseType->pixResID) ||
+            if ((object->pixResID == sprite_resource(*object->baseType)) ||
                 (object->pixResID ==
-                 (object->baseType->pixResID |
+                 (sprite_resource(*object->baseType) |
                   (static_cast<int>(GetAdmiralColor(old_owner)) << kSpriteTableColorShift)))) {
                 object->pixResID =
-                        object->baseType->pixResID |
+                        sprite_resource(*object->baseType) |
                         (static_cast<int>(GetAdmiralColor(new_owner)) << kSpriteTableColorShift);
 
                 pixTable = sys.pix.get(object->pixResID);
@@ -859,11 +859,49 @@ bool SpaceObject::engages(const SpaceObject& b) const {
 Fixed SpaceObject::turn_rate() const {
     // design flaw: can't have turn rate unless shapefromdirection
     if (attributes & kShapeFromDirection) {
-        return baseType->frame.rotation.maxTurnRate;
+        return baseType->frame.rotation.turn_rate;
     }
     return kDefaultTurnRate;
 }
 
 int32_t SpaceObject::number() const { return this - g.objects.get(); }
+
+int32_t sprite_resource(const BaseObject& o) {
+    if (o.attributes & kShapeFromDirection) {
+        return o.frame.rotation.sprite;
+    } else if (o.attributes & kIsSelfAnimated) {
+        return o.frame.animation.sprite;
+    } else {
+        return -1;
+    }
+}
+
+int32_t sprite_layer(const BaseObject& o) {
+    if (o.attributes & kShapeFromDirection) {
+        return o.frame.rotation.layer;
+    } else if (o.attributes & kIsSelfAnimated) {
+        return o.frame.animation.layer;
+    } else {
+        return 0;
+    }
+}
+
+int32_t sprite_scale(const BaseObject& o) {
+    if (o.attributes & kShapeFromDirection) {
+        return o.frame.rotation.scale;
+    } else if (o.attributes & kIsSelfAnimated) {
+        return o.frame.animation.scale;
+    } else {
+        return SCALE_SCALE;
+    }
+}
+
+int32_t rotation_resolution(const BaseObject& o) {
+    if (o.attributes & kShapeFromDirection) {
+        return 360 / o.frame.rotation.frames.range();
+    } else {
+        return 360;
+    }
+}
 
 }  // namespace antares

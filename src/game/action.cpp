@@ -580,7 +580,7 @@ void LandAction::apply(
     }
     subject->presenceState          = kLandingPresence;
     subject->presence.landing.speed = speed;
-    subject->presence.landing.scale = subject->baseType->naturalScale;
+    subject->presence.landing.scale = sprite_scale(*subject->baseType);
 }
 
 void WarpAction::apply(

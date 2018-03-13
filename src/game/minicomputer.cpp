@@ -672,7 +672,7 @@ static void draw_mini_ship_data(
         if (pixTable != NULL) {
             int16_t whichShape;
             if (obj->attributes & kIsSelfAnimated) {
-                whichShape = more_evil_fixed_to_long(obj->base->frame.animation.shapes.begin);
+                whichShape = more_evil_fixed_to_long(obj->base->frame.animation.frames.begin);
             } else {
                 whichShape = 0;
             }

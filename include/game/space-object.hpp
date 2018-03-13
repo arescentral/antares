@@ -226,6 +226,11 @@ int32_t CountObjectsOfBaseType(Handle<BaseObject> whichType, Handle<Admiral> own
 
 Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, const NamedHandle<Race>& race);
 
+int32_t sprite_resource(const BaseObject& o);
+int32_t sprite_layer(const BaseObject& o);
+int32_t sprite_scale(const BaseObject& o);
+int32_t rotation_resolution(const BaseObject& o);
+
 }  // namespace antares
 
 #endif  // ANTARES_GAME_SPACE_OBJECT_HPP_

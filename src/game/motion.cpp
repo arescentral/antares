@@ -286,18 +286,18 @@ static void animate(Handle<SpaceObject> o) {
     auto& space_anim = o->frame.animation;
     space_anim.thisShape += static_cast<int>(space_anim.direction) * space_anim.speed;
     if (o->attributes & kAnimationCycle) {
-        Fixed shape_num = base_anim.shapes.range();
-        while (space_anim.thisShape >= base_anim.shapes.end) {
+        Fixed shape_num = base_anim.frames.range();
+        while (space_anim.thisShape >= base_anim.frames.end) {
             space_anim.thisShape -= shape_num;
         }
-        while (space_anim.thisShape < base_anim.shapes.begin) {
+        while (space_anim.thisShape < base_anim.frames.begin) {
             space_anim.thisShape += shape_num;
         }
     } else if (
-            (space_anim.thisShape >= base_anim.shapes.end) ||
-            (space_anim.thisShape < base_anim.shapes.begin)) {
+            (space_anim.thisShape >= base_anim.frames.end) ||
+            (space_anim.thisShape < base_anim.frames.begin)) {
         o->active            = kObjectToBeFreed;
-        space_anim.thisShape = base_anim.shapes.end - Fixed::from_val(1);
+        space_anim.thisShape = base_anim.frames.end - Fixed::from_val(1);
     }
 }
 
@@ -456,8 +456,8 @@ void MoveSpaceObjects(const ticks unitsToDo) {
             }
         } else if (o->attributes & kShapeFromDirection) {
             int16_t angle = o->direction;
-            mAddAngle(angle, baseObject->frame.rotation.rotRes >> 1);
-            sprite.whichShape = angle / baseObject->frame.rotation.rotRes;
+            mAddAngle(angle, rotation_resolution(*baseObject) >> 1);
+            sprite.whichShape = angle / rotation_resolution(*baseObject);
         }
     }
 }
