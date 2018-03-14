@@ -85,12 +85,11 @@ BaseObject* BaseObject::get(int number) {
     return nullptr;
 }
 
-Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, const NamedHandle<Race>& race) {
-    if (class_ >= kLiteralClass) {
-        return Handle<BaseObject>(class_ - kLiteralClass);
-    }
-    auto it = race->ships.find(pn::dump(class_, pn::dump_short));
+Handle<BaseObject> mGetBaseObjectFromClassRace(
+        pn::string_view class_, const NamedHandle<Race>& race) {
+    auto it = race->ships.find(class_.copy());
     if (it == race->ships.end()) {
+        // TODO(sfiera): return BaseObject with literal name class_.
         return BaseObject::none();
     }
     return it->second;

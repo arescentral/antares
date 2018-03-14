@@ -224,7 +224,8 @@ Handle<SpaceObject> CreateAnySpaceObject(
         int16_t spriteIDOverride);
 int32_t CountObjectsOfBaseType(Handle<BaseObject> whichType, Handle<Admiral> owner);
 
-Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, const NamedHandle<Race>& race);
+Handle<BaseObject> mGetBaseObjectFromClassRace(
+        pn::string_view class_, const NamedHandle<Race>& race);
 
 int32_t sprite_resource(const BaseObject& o);
 int32_t sprite_layer(const BaseObject& o);

@@ -123,7 +123,7 @@ static Handle<Destination> next_free_destination() {
 }
 
 Handle<Destination> MakeNewDestination(
-        Handle<SpaceObject> object, const std::vector<int32_t>& canBuildType, Fixed earn,
+        Handle<SpaceObject> object, const std::vector<pn::string>& canBuildType, Fixed earn,
         pn::string_view name) {
     auto d = next_free_destination();
     if (!d.get()) {
@@ -133,7 +133,10 @@ Handle<Destination> MakeNewDestination(
     d->whichObject    = object;
     d->earn           = earn;
     d->totalBuildTime = d->buildTime = ticks(0);
-    d->canBuildType                  = canBuildType;
+    d->canBuildType.clear();
+    for (pn::string_view s : canBuildType) {
+        d->canBuildType.emplace_back(s.copy());
+    }
 
     if (!name.empty()) {
         if (pn::rune::count(name) > kAdmiralNameLen) {
@@ -198,7 +201,7 @@ void RecalcAllAdmiralBuildData() {
     for (Handle<Admiral> a : Admiral::all()) {
         a->canBuildType().clear();
         a->totalBuildChance() = Fixed::zero();
-        a->hopeToBuild()      = -1;
+        a->hopeToBuild().reset();
     }
 
     for (Handle<Destination> d : Destination::all()) {
@@ -207,7 +210,7 @@ void RecalcAllAdmiralBuildData() {
             continue;
         }
         Handle<Admiral> a = anObject->owner;
-        for (int32_t buildable_class : d->canBuildType) {
+        for (pn::string_view buildable_class : d->canBuildType) {
             bool found = false;
             for (const admiralBuildType& admiral_build : a->canBuildType()) {
                 if (admiral_build.class_ == buildable_class) {
@@ -221,7 +224,7 @@ void RecalcAllAdmiralBuildData() {
             auto baseObject = mGetBaseObjectFromClassRace(buildable_class, a->race());
             if (baseObject.get()) {
                 a->canBuildType().emplace_back();
-                a->canBuildType().back().class_      = buildable_class;
+                a->canBuildType().back().class_      = buildable_class.copy();
                 a->canBuildType().back().base        = baseObject;
                 a->canBuildType().back().chanceRange = a->totalBuildChance();
                 a->totalBuildChance() += baseObject->buildRatio;
@@ -922,9 +925,9 @@ void Admiral::think() {
         if (anObject.get()) {
             auto destBalance = anObject->asDestination;
             if (destBalance->buildTime <= ticks(0)) {
-                if (_hopeToBuild < 0) {
+                if (!_hopeToBuild.has_value()) {
                     int k = 0;
-                    while ((_hopeToBuild < 0) && (k < 7)) {
+                    while (!_hopeToBuild.has_value() && (k < 7)) {
                         k++;
                         // choose something to build
                         thisValue   = g.random.next(_totalBuildChance);
@@ -932,18 +935,18 @@ void Admiral::think() {
                         for (int j = 0; j < _canBuildType.size(); ++j) {
                             if ((_canBuildType[j].chanceRange <= thisValue) &&
                                 (_canBuildType[j].chanceRange > friendValue)) {
-                                friendValue  = _canBuildType[j].chanceRange;
-                                _hopeToBuild = _canBuildType[j].class_;
+                                friendValue = _canBuildType[j].chanceRange;
+                                _hopeToBuild.emplace(_canBuildType[j].class_.copy());
                             }
                         }
-                        if (_hopeToBuild >= 0) {
-                            auto baseObject = mGetBaseObjectFromClassRace(_hopeToBuild, _race);
+                        if (_hopeToBuild.has_value()) {
+                            auto baseObject = mGetBaseObjectFromClassRace(*_hopeToBuild, _race);
                             if (baseObject->buildFlags & kSufficientEscortsExist) {
                                 for (auto anObject : SpaceObject::all()) {
                                     if ((anObject->active) && (anObject->owner.get() == this) &&
                                         (anObject->base == baseObject) &&
                                         (anObject->escortStrength < baseObject->friendDefecit)) {
-                                        _hopeToBuild = -1;
+                                        _hopeToBuild.reset();
                                         break;
                                     }
                                 }
@@ -959,28 +962,30 @@ void Admiral::think() {
                                     }
                                 }
                                 if (thisValue == Fixed::zero()) {
-                                    _hopeToBuild = -1;
+                                    _hopeToBuild.reset();
                                 }
                             }
                         }
                     }
                 }
-                int j = 0;
-                for (; j < destBalance->canBuildType.size(); ++j) {
-                    if (destBalance->canBuildType[j] == _hopeToBuild) {
-                        break;
+                if (_hopeToBuild.has_value()) {
+                    int j = 0;
+                    for (; j < destBalance->canBuildType.size(); ++j) {
+                        if (destBalance->canBuildType[j] == *_hopeToBuild) {
+                            break;
+                        }
                     }
+                    if (j < destBalance->canBuildType.size()) {
+                        auto baseObject = mGetBaseObjectFromClassRace(*_hopeToBuild, _race);
+                        if (_cash >= Fixed::from_long(baseObject->price)) {
+                            Admiral::build(j);
+                            _hopeToBuild.reset();
+                            _saveGoal = Fixed::zero();
+                        } else {
+                            _saveGoal = Fixed::from_long(baseObject->price);
+                        }
+                    }  // otherwise just wait until we get to it
                 }
-                if ((j < destBalance->canBuildType.size()) && (_hopeToBuild != kNoShip)) {
-                    auto baseObject = mGetBaseObjectFromClassRace(_hopeToBuild, _race);
-                    if (_cash >= Fixed::from_long(baseObject->price)) {
-                        Admiral::build(j);
-                        _hopeToBuild = -1;
-                        _saveGoal    = Fixed::zero();
-                    } else {
-                        _saveGoal = Fixed::from_long(baseObject->price);
-                    }
-                }  // otherwise just wait until we get to it
             }
         }
     }

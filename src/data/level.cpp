@@ -360,7 +360,7 @@ static Level::Initial initial(path_value x) {
 
     i.attributes = Level::Initial::Attributes(optional_initial_attributes(x.get("attributes")));
 
-    i.build = optional_int_array(x.get("build"));
+    i.build = optional_string_array(x.get("build"));
     if (i.build.size() > kMaxShipCanBuild) {
         throw std::runtime_error(pn::format(
                                          "{0}: has {1} elements, more than max of {2}",

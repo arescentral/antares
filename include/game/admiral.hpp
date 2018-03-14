@@ -70,21 +70,21 @@ struct Destination {
     static Handle<Destination>     none() { return Handle<Destination>(-1); }
     static HandleList<Destination> all() { return HandleList<Destination>(0, kMaxDestObject); }
 
-    Handle<SpaceObject>  whichObject;
-    std::vector<int32_t> canBuildType;
-    int32_t              occupied[kMaxPlayerNum];
-    Fixed                earn;
-    ticks                buildTime;
-    ticks                totalBuildTime;
-    Handle<BaseObject>   buildObjectBaseNum;
-    pn::string           name;
+    Handle<SpaceObject>     whichObject;
+    std::vector<pn::string> canBuildType;
+    int32_t                 occupied[kMaxPlayerNum];
+    Fixed                   earn;
+    ticks                   buildTime;
+    ticks                   totalBuildTime;
+    Handle<BaseObject>      buildObjectBaseNum;
+    pn::string              name;
 
     bool can_build() const;  // Can build anything.
 };
 
 struct admiralBuildType {
     Handle<BaseObject> base;
-    int32_t            class_      = -1;
+    pn::string         class_;
     Fixed              chanceRange = kFixedNone;
 };
 
@@ -139,7 +139,7 @@ class Admiral {
     Fixed&                         thisFreeEscortStrength() { return _thisFreeEscortStrength; }
     std::vector<admiralBuildType>& canBuildType() { return _canBuildType; };
     Fixed&                         totalBuildChance() { return _totalBuildChance; }
-    int32_t&                       hopeToBuild() { return _hopeToBuild; }
+    sfz::optional<pn::string>&     hopeToBuild() { return _hopeToBuild; }
     Hue&                           hue() { return _hue; }
     bool&                          active() { return _active; }
     pn::string_view                name() { return _name; }
@@ -169,10 +169,10 @@ class Admiral {
     Fixed                         _thisFreeEscortStrength  = Fixed::zero();
     std::vector<admiralBuildType> _canBuildType;
     Fixed                         _totalBuildChance = Fixed::zero();
-    int32_t                       _hopeToBuild      = -1;
-    Hue                           _hue              = Hue::GRAY;
-    bool                          _active           = false;
-    uint32_t                      _cheats           = 0;
+    sfz::optional<pn::string>     _hopeToBuild;
+    Hue                           _hue    = Hue::GRAY;
+    bool                          _active = false;
+    uint32_t                      _cheats = 0;
     pn::string                    _name;
 
   private:
@@ -182,7 +182,7 @@ class Admiral {
 void ResetAllDestObjectData();
 
 Handle<Destination> MakeNewDestination(
-        Handle<SpaceObject> object, const std::vector<int32_t>& canBuildType, Fixed earn,
+        Handle<SpaceObject> object, const std::vector<pn::string>& canBuildType, Fixed earn,
         pn::string_view name);
 void RemoveDestination(Handle<Destination> d);
 void RecalcAllAdmiralBuildData();

@@ -266,14 +266,12 @@ static void load_initial(Handle<Level::Initial> initial, std::bitset<16> all_col
 
     // check any objects this object can build
     for (int j = 0; j < initial->build.size(); j++) {
-        if (initial->build[j] != kNoClass) {
-            // check for each player
-            for (auto a : Admiral::all()) {
-                if (a->active()) {
-                    auto baseObject = mGetBaseObjectFromClassRace(initial->build[j], a->race());
-                    if (baseObject.number() >= 0) {
-                        AddBaseObjectMedia(baseObject, all_colors);
-                    }
+        // check for each player
+        for (auto a : Admiral::all()) {
+            if (a->active()) {
+                auto baseObject = mGetBaseObjectFromClassRace(initial->build[j], a->race());
+                if (baseObject.number() >= 0) {
+                    AddBaseObjectMedia(baseObject, all_colors);
                 }
             }
         }

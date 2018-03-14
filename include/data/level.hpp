@@ -179,8 +179,8 @@ struct Level_Initial {
     pn::string name_override;
     int32_t    sprite_override;
 
-    std::vector<int32_t>   build;
-    Handle<Level::Initial> target;
+    std::vector<pn::string> build;
+    Handle<Level::Initial>  target;
 
     class Attributes {
       public:
