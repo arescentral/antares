@@ -360,19 +360,12 @@ static Level::Initial initial(path_value x) {
 
     i.attributes = Level::Initial::Attributes(optional_initial_attributes(x.get("attributes")));
 
-    std::vector<int> build = optional_int_array(x.get("build"));
-    if (build.size() >= kMaxTypeBaseCanBuild) {
+    i.build = optional_int_array(x.get("build"));
+    if (i.build.size() > kMaxShipCanBuild) {
         throw std::runtime_error(pn::format(
                                          "{0}: has {1} elements, more than max of {2}",
-                                         x.get("build").path(), build.size(), kMaxTypeBaseCanBuild)
+                                         x.get("build").path(), i.build.size(), kMaxShipCanBuild)
                                          .c_str());
-    }
-    for (int x = 0; x < kMaxTypeBaseCanBuild; ++x) {
-        if (x < build.size()) {
-            i.build[x] = build[x];
-        } else {
-            i.build[x] = -1;
-        }
     }
 
     return i;

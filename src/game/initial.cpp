@@ -80,7 +80,7 @@ void create_initial(Handle<Level::Initial> initial) {
 
     if (anObject->attributes & kIsDestination) {
         if (owner.get()) {
-            if (initial->build[0] >= 0) {
+            if (!initial->build.empty()) {
                 if (!GetAdmiralBuildAtObject(owner).get()) {
                     owner->set_control(anObject);
                     owner->set_target(anObject);

@@ -41,8 +41,7 @@ struct Race;
 
 const size_t kMaxPlayerNum = 4;
 
-const int32_t kMaxTypeBaseCanBuild = 12;
-const int32_t kMaxShipCanBuild     = 6;
+const int32_t kMaxShipCanBuild = 6;
 
 const int16_t kLevelBriefMask  = 0x00ff;
 const int16_t kLevelAngleMask  = 0xff00;
@@ -180,7 +179,7 @@ struct Level_Initial {
     pn::string name_override;
     int32_t    sprite_override;
 
-    int32_t                build[kMaxTypeBaseCanBuild];
+    std::vector<int32_t>   build;
     Handle<Level::Initial> target;
 
     class Attributes {

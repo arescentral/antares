@@ -67,9 +67,7 @@ void ResetAllDestObjectData() {
         d->earn           = Fixed::zero();
         d->totalBuildTime = d->buildTime = ticks(0);
         d->buildObjectBaseNum            = BaseObject::none();
-        for (int j = 0; j < kMaxTypeBaseCanBuild; ++j) {
-            d->canBuildType[j] = kNoShip;
-        }
+        d->canBuildType.clear();
         for (int j = 0; j < kMaxPlayerNum; ++j) {
             d->occupied[j] = 0;
         }
@@ -83,14 +81,7 @@ Destination* Destination::get(int i) {
     return nullptr;
 }
 
-bool Destination::can_build() const {
-    for (int i = 0; i < kMaxShipCanBuild; ++i) {
-        if (canBuildType[i] != kNoShip) {
-            return true;
-        }
-    }
-    return false;
-}
+bool Destination::can_build() const { return !canBuildType.empty(); }
 
 Admiral* Admiral::get(int i) {
     if ((0 <= i) && (i < kMaxPlayerNum)) {
@@ -132,7 +123,8 @@ static Handle<Destination> next_free_destination() {
 }
 
 Handle<Destination> MakeNewDestination(
-        Handle<SpaceObject> object, int32_t* canBuildType, Fixed earn, pn::string_view name) {
+        Handle<SpaceObject> object, const std::vector<int32_t>& canBuildType, Fixed earn,
+        pn::string_view name) {
     auto d = next_free_destination();
     if (!d.get()) {
         return Destination::none();
@@ -141,17 +133,7 @@ Handle<Destination> MakeNewDestination(
     d->whichObject    = object;
     d->earn           = earn;
     d->totalBuildTime = d->buildTime = ticks(0);
-
-    if (canBuildType != NULL) {
-        for (int j = 0; j < kMaxTypeBaseCanBuild; j++) {
-            d->canBuildType[j] = *canBuildType;
-            canBuildType++;
-        }
-    } else {
-        for (int j = 0; j < kMaxTypeBaseCanBuild; j++) {
-            d->canBuildType[j] = kNoShip;
-        }
-    }
+    d->canBuildType                  = canBuildType;
 
     if (!name.empty()) {
         if (pn::rune::count(name) > kAdmiralNameLen) {
@@ -204,9 +186,7 @@ void RemoveDestination(Handle<Destination> d) {
     d->earn           = Fixed::zero();
     d->totalBuildTime = d->buildTime = ticks(0);
     d->buildObjectBaseNum            = BaseObject::none();
-    for (int i = 0; i < kMaxTypeBaseCanBuild; i++) {
-        d->canBuildType[i] = kNoShip;
-    }
+    d->canBuildType.clear();
 
     for (int i = 0; i < kMaxPlayerNum; i++) {
         d->occupied[i] = 0;
@@ -215,48 +195,36 @@ void RemoveDestination(Handle<Destination> d) {
 
 void RecalcAllAdmiralBuildData() {
     // first clear all the data
-    for (auto a : Admiral::all()) {
-        for (int j = 0; j < kMaxNumAdmiralCanBuild; j++) {
-            a->canBuildType()[j].baseNum     = -1;
-            a->canBuildType()[j].base        = BaseObject::none();
-            a->canBuildType()[j].chanceRange = kFixedNone;
-        }
+    for (Handle<Admiral> a : Admiral::all()) {
+        a->canBuildType().clear();
         a->totalBuildChance() = Fixed::zero();
         a->hopeToBuild()      = -1;
     }
 
-    for (auto d : Destination::all()) {
-        if (d->whichObject.get()) {
-            auto anObject = d->whichObject;
-            if (anObject->owner.get()) {
-                const auto& a = anObject->owner;
-                for (int k = 0; k < kMaxTypeBaseCanBuild; k++) {
-                    if (d->canBuildType[k] >= 0) {
-                        int j = 0;
-                        while ((a->canBuildType()[j].baseNum != d->canBuildType[k]) &&
-                               (j < kMaxNumAdmiralCanBuild)) {
-                            j++;
-                        }
-                        if (j == kMaxNumAdmiralCanBuild) {
-                            auto baseObject =
-                                    mGetBaseObjectFromClassRace(d->canBuildType[k], a->race());
-                            j = 0;
-                            while ((a->canBuildType()[j].baseNum != -1) &&
-                                   (j < kMaxNumAdmiralCanBuild)) {
-                                j++;
-                            }
-                            if (j == kMaxNumAdmiralCanBuild) {
-                                throw std::runtime_error("Too Many Types to Build!");
-                            }
-                            a->canBuildType()[j].baseNum     = d->canBuildType[k];
-                            a->canBuildType()[j].base        = baseObject;
-                            a->canBuildType()[j].chanceRange = a->totalBuildChance();
-                            if (baseObject.get()) {
-                                a->totalBuildChance() += baseObject->buildRatio;
-                            }
-                        }
-                    }
+    for (Handle<Destination> d : Destination::all()) {
+        Handle<SpaceObject> anObject = d->whichObject;
+        if (!anObject.get() || !anObject->owner.get()) {
+            continue;
+        }
+        Handle<Admiral> a = anObject->owner;
+        for (int32_t buildable_class : d->canBuildType) {
+            bool found = false;
+            for (const admiralBuildType& admiral_build : a->canBuildType()) {
+                if (admiral_build.class_ == buildable_class) {
+                    found = true;
+                    break;
                 }
+            }
+            if (found) {
+                continue;
+            }
+            auto baseObject = mGetBaseObjectFromClassRace(buildable_class, a->race());
+            if (baseObject.get()) {
+                a->canBuildType().emplace_back();
+                a->canBuildType().back().class_      = buildable_class;
+                a->canBuildType().back().base        = baseObject;
+                a->canBuildType().back().chanceRange = a->totalBuildChance();
+                a->totalBuildChance() += baseObject->buildRatio;
             }
         }
     }
@@ -961,11 +929,11 @@ void Admiral::think() {
                         // choose something to build
                         thisValue   = g.random.next(_totalBuildChance);
                         friendValue = kFixedNone;  // equals the highest qualifying object
-                        for (int j = 0; j < kMaxNumAdmiralCanBuild; ++j) {
+                        for (int j = 0; j < _canBuildType.size(); ++j) {
                             if ((_canBuildType[j].chanceRange <= thisValue) &&
                                 (_canBuildType[j].chanceRange > friendValue)) {
                                 friendValue  = _canBuildType[j].chanceRange;
-                                _hopeToBuild = _canBuildType[j].baseNum;
+                                _hopeToBuild = _canBuildType[j].class_;
                             }
                         }
                         if (_hopeToBuild >= 0) {
@@ -998,11 +966,12 @@ void Admiral::think() {
                     }
                 }
                 int j = 0;
-                while ((destBalance->canBuildType[j] != _hopeToBuild) &&
-                       (j < kMaxTypeBaseCanBuild)) {
-                    j++;
+                for (; j < destBalance->canBuildType.size(); ++j) {
+                    if (destBalance->canBuildType[j] == _hopeToBuild) {
+                        break;
+                    }
                 }
-                if ((j < kMaxTypeBaseCanBuild) && (_hopeToBuild != kNoShip)) {
+                if ((j < destBalance->canBuildType.size()) && (_hopeToBuild != kNoShip)) {
                     auto baseObject = mGetBaseObjectFromClassRace(_hopeToBuild, _race);
                     if (_cash >= Fixed::from_long(baseObject->price)) {
                         Admiral::build(j);
@@ -1019,7 +988,7 @@ void Admiral::think() {
 
 bool Admiral::build(int32_t buildWhichType) {
     auto dest = _buildAtObject;
-    if ((buildWhichType >= 0) && (buildWhichType < kMaxTypeBaseCanBuild) && (dest.get()) &&
+    if ((buildWhichType >= 0) && (buildWhichType < dest->canBuildType.size()) && (dest.get()) &&
         (dest->buildTime <= ticks(0))) {
         auto buildBaseObject =
                 mGetBaseObjectFromClassRace(dest->canBuildType[buildWhichType], _race);

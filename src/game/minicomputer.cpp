@@ -987,10 +987,13 @@ void MiniComputerSetBuildStrings() {
     mCopyBlankLineString(header, buildAtObject->name);
 
     for (int32_t count = 0; count < kMaxShipCanBuild; count++) {
-        int32_t             lineNum = kBuildScreenFirstTypeLine + count;
-        miniScreenLineType* line    = &g.mini.lineData[lineNum];
-        auto                buildObject =
-                mGetBaseObjectFromClassRace(buildAtObject->canBuildType[count], g.admiral->race());
+        int32_t             lineNum     = kBuildScreenFirstTypeLine + count;
+        miniScreenLineType* line        = &g.mini.lineData[lineNum];
+        Handle<BaseObject>  buildObject = BaseObject::none();
+        if (count < buildAtObject->canBuildType.size()) {
+            buildObject = mGetBaseObjectFromClassRace(
+                    buildAtObject->canBuildType[count], g.admiral->race());
+        }
         line->value      = buildObject.number();
         line->sourceData = buildObject;
         if (!buildObject.get()) {

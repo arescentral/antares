@@ -265,7 +265,7 @@ static void load_initial(Handle<Level::Initial> initial, std::bitset<16> all_col
     }
 
     // check any objects this object can build
-    for (int j = 0; j < kMaxTypeBaseCanBuild; j++) {
+    for (int j = 0; j < initial->build.size(); j++) {
         if (initial->build[j] != kNoClass) {
             // check for each player
             for (auto a : Admiral::all()) {
