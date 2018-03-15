@@ -466,11 +466,11 @@ static void age_object(const Handle<SpaceObject>& o) {
     if (o->expires) {
         o->expire_after -= kMajorTick;
         if (o->expire_after < ticks(0)) {
-            if (!(o->baseType->expireDontDie)) {
+            if (!(o->base->expireDontDie)) {
                 o->active = kObjectToBeFreed;
             }
 
-            exec(o->baseType->expire, o, SpaceObject::none(), NULL);
+            exec(o->base->expire, o, SpaceObject::none(), NULL);
         }
     }
 }
@@ -479,9 +479,9 @@ static void activate_object(const Handle<SpaceObject>& o) {
     if (o->periodicTime > ticks(0)) {
         o->periodicTime--;
         if (o->periodicTime <= ticks(0)) {
-            exec(o->baseType->activate, o, SpaceObject::none(), NULL);
-            o->periodicTime = o->baseType->activate_period.begin +
-                              o->randomSeed.next(o->baseType->activate_period.range());
+            exec(o->base->activate, o, SpaceObject::none(), NULL);
+            o->periodicTime = o->base->activate_period.begin +
+                              o->randomSeed.next(o->base->activate_period.range());
         }
     }
 }
@@ -541,7 +541,7 @@ static void calc_misc() {
         }
 
         if (o->attributes & kConsiderDistanceAttributes) {
-            o->localFriendStrength  = o->baseType->offenseValue;
+            o->localFriendStrength  = o->base->offenseValue;
             o->localFoeStrength     = Fixed::zero();
             o->closestObject        = SpaceObject::none();
             o->closestDistance      = kMaximumRelevantDistanceSquared;
@@ -894,7 +894,7 @@ void CollideSpaceObjects() {
 }
 
 static void adjust_velocity(Handle<SpaceObject> o, int16_t angle, Fixed totalMass, Fixed force) {
-    Fixed tfix = (o->baseType->mass * force);
+    Fixed tfix = (o->base->mass * force);
     if (totalMass == Fixed::zero()) {
         tfix = kFixedNone;
     } else {
@@ -953,7 +953,7 @@ static void correct_physical_space(Handle<SpaceObject> a, Handle<SpaceObject> b)
     const int32_t ah    = b->location.h - a->location.h;
     const int32_t av    = b->location.v - a->location.v;
 
-    const Fixed totalMass = a->baseType->mass + b->baseType->mass;
+    const Fixed totalMass = a->base->mass + b->base->mass;
     int16_t     angle     = ratio_to_angle(ah, av);
     adjust_velocity(a, angle, totalMass, force);
     mAddAngle(angle, 180);

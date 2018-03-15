@@ -49,7 +49,7 @@ void GetInitialObjectSpriteData(
         coordPointType* corner, int32_t scale, int32_t* thisScale, Point* where, Rect* spriteRect);
 
 void GetRealObjectSpriteData(
-        coordPointType* realCoord, Handle<BaseObject> baseObject, Handle<Admiral> owner,
+        coordPointType* realCoord, const BaseObject* baseObject, Handle<Admiral> owner,
         int32_t spriteOverride, int32_t maxSize, Rect* bounds, coordPointType* corner,
         int32_t scale, int32_t* thisScale, const NatePixTable::Frame** frame, Point* where,
         Rect* spriteRect);
@@ -231,7 +231,7 @@ void GetInitialObjectSpriteData(
 }
 
 void GetRealObjectSpriteData(
-        coordPointType* realCoord, Handle<BaseObject> baseObject, Handle<Admiral> owner,
+        coordPointType* realCoord, const BaseObject* baseObject, Handle<Admiral> owner,
         int32_t spriteOverride, int32_t maxSize, Rect* bounds, coordPointType* corner,
         int32_t scale, int32_t* thisScale, const NatePixTable::Frame** frame, Point* where,
         Rect* spriteRect) {

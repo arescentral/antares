@@ -152,7 +152,7 @@ Handle<Destination> MakeNewDestination(
         }
 
         if (object->owner.get()) {
-            d->occupied[object->owner.number()] = object->baseType->occupy_count;
+            d->occupied[object->owner.number()] = object->base->occupy_count;
         }
     }
 
@@ -475,23 +475,23 @@ void OverrideObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overri
                 o->destObjectID     = dObject->id;
 
                 if (dObject->owner == o->owner) {
-                    dObject->remoteFriendStrength += o->baseType->offenseValue;
-                    dObject->escortStrength += o->baseType->offenseValue;
+                    dObject->remoteFriendStrength += o->base->offenseValue;
+                    dObject->escortStrength += o->base->offenseValue;
                     if (dObject->attributes & kIsDestination) {
-                        if (dObject->escortStrength < dObject->baseType->friendDefecit) {
+                        if (dObject->escortStrength < dObject->base->friendDefecit) {
                             o->duty = eGuardDuty;
                         } else {
                             o->duty = eNoDuty;
                         }
                     } else {
-                        if (dObject->escortStrength < dObject->baseType->friendDefecit) {
+                        if (dObject->escortStrength < dObject->base->friendDefecit) {
                             o->duty = eEscortDuty;
                         } else {
                             o->duty = eNoDuty;
                         }
                     }
                 } else {
-                    dObject->remoteFoeStrength += o->baseType->offenseValue;
+                    dObject->remoteFoeStrength += o->base->offenseValue;
                     if (dObject->attributes & kIsDestination) {
                         o->duty = eAssaultDuty;
                     } else {
@@ -522,10 +522,10 @@ void RemoveObjectFromDestination(Handle<SpaceObject> o) {
         auto dObject = o->destObject;
         if (dObject->id == o->destObjectID) {
             if (dObject->owner == o->owner) {
-                dObject->remoteFriendStrength -= o->baseType->offenseValue;
-                dObject->escortStrength -= o->baseType->offenseValue;
+                dObject->remoteFriendStrength -= o->base->offenseValue;
+                dObject->escortStrength -= o->base->offenseValue;
             } else {
-                dObject->remoteFoeStrength -= o->baseType->offenseValue;
+                dObject->remoteFoeStrength -= o->base->offenseValue;
             }
         }
     }
@@ -665,7 +665,7 @@ void Admiral::think() {
                 }
 
                 if ((anObject->duty != eEscortDuty) && (anObject->duty != eHostileBaseDuty)) {
-                    _thisFreeEscortStrength += anObject->baseType->offenseValue;
+                    _thisFreeEscortStrength += anObject->base->offenseValue;
                 }
 
                 anObject->bestConsideredTargetValue = kFixedNone;
@@ -710,7 +710,7 @@ void Admiral::think() {
             (anObject->active == kObjectInUse) && (destObject->attributes & (kCanBeDestination)) &&
             (destObject->active == kObjectInUse) &&
             ((anObject->owner != destObject->owner) ||
-             (anObject->baseType->destinationClass < destObject->baseType->destinationClass))) {
+             (anObject->base->destinationClass < destObject->base->destinationClass))) {
             gridLoc    = destObject->distanceGrid;
             stepObject = otherDestObject = destObject;
             while (stepObject->nextFarObject.get()) {
@@ -731,7 +731,7 @@ void Admiral::think() {
             thisValue = kUnimportantTarget;
             if (destObject->owner == anObject->owner) {
                 if (destObject->attributes & kIsDestination) {
-                    if (destObject->escortStrength < destObject->baseType->friendDefecit) {
+                    if (destObject->escortStrength < destObject->base->friendDefecit) {
                         thisValue = kAbsolutelyEssential;
                     } else if (foeValue != Fixed::zero()) {
                         if (foeValue >= friendValue) {
@@ -752,19 +752,18 @@ void Admiral::think() {
                             }
                         }
                     }
-                    if (anObject->baseType->orderFlags & kTargetIsBase) {
+                    if (anObject->base->orderFlags & kTargetIsBase) {
                         thisValue <<= 3;
                     }
-                    if (anObject->baseType->orderFlags & kHardTargetIsNotBase) {
+                    if (anObject->base->orderFlags & kHardTargetIsNotBase) {
                         thisValue = Fixed::zero();
                     }
                 } else {
-                    if (destObject->baseType->destinationClass >
-                        anObject->baseType->destinationClass) {
+                    if (destObject->base->destinationClass > anObject->base->destinationClass) {
                         if (foeValue > friendValue) {
                             thisValue = kMostImportantTarget;
                         } else {
-                            if (destObject->escortStrength < destObject->baseType->friendDefecit) {
+                            if (destObject->escortStrength < destObject->base->friendDefecit) {
                                 thisValue = kMostImportantTarget;
                             } else {
                                 thisValue = kUnimportantTarget;
@@ -773,17 +772,17 @@ void Admiral::think() {
                     } else {
                         thisValue = kUnimportantTarget;
                     }
-                    if (anObject->baseType->orderFlags & kTargetIsNotBase) {
+                    if (anObject->base->orderFlags & kTargetIsNotBase) {
                         thisValue <<= 3;
                     }
-                    if (anObject->baseType->orderFlags & kHardTargetIsBase) {
+                    if (anObject->base->orderFlags & kHardTargetIsBase) {
                         thisValue = Fixed::zero();
                     }
                 }
-                if (anObject->baseType->orderFlags & kTargetIsFriend) {
+                if (anObject->base->orderFlags & kTargetIsFriend) {
                     thisValue <<= 3;
                 }
-                if (anObject->baseType->orderFlags & kHardTargetIsFoe) {
+                if (anObject->base->orderFlags & kHardTargetIsFoe) {
                     thisValue = Fixed::zero();
                 }
             } else if (destObject->owner.get()) {
@@ -797,11 +796,11 @@ void Admiral::think() {
                         if (_blitzkrieg > 0) {
                             thisValue <<= 2;
                         }
-                        if (anObject->baseType->orderFlags & kTargetIsBase) {
+                        if (anObject->base->orderFlags & kTargetIsBase) {
                             thisValue <<= 3;
                         }
 
-                        if (anObject->baseType->orderFlags & kHardTargetIsNotBase) {
+                        if (anObject->base->orderFlags & kHardTargetIsNotBase) {
                             thisValue = Fixed::zero();
                         }
                     } else {
@@ -814,19 +813,19 @@ void Admiral::think() {
                         } else {
                             thisValue = kLeastImportantTarget;
                         }
-                        if (anObject->baseType->orderFlags & kTargetIsNotBase) {
+                        if (anObject->base->orderFlags & kTargetIsNotBase) {
                             thisValue <<= 1;
                         }
 
-                        if (anObject->baseType->orderFlags & kHardTargetIsBase) {
+                        if (anObject->base->orderFlags & kHardTargetIsBase) {
                             thisValue = Fixed::zero();
                         }
                     }
                 }
-                if (anObject->baseType->orderFlags & kTargetIsFoe) {
+                if (anObject->base->orderFlags & kTargetIsFoe) {
                     thisValue <<= 3;
                 }
-                if (anObject->baseType->orderFlags & kHardTargetIsFriend) {
+                if (anObject->base->orderFlags & kHardTargetIsFriend) {
                     thisValue = Fixed::zero();
                 }
             } else {
@@ -835,24 +834,24 @@ void Admiral::think() {
                     if (_blitzkrieg > 0) {
                         thisValue <<= 2;
                     }
-                    if (anObject->baseType->orderFlags & kTargetIsBase) {
+                    if (anObject->base->orderFlags & kTargetIsBase) {
                         thisValue <<= 3;
                     }
-                    if (anObject->baseType->orderFlags & kHardTargetIsNotBase) {
+                    if (anObject->base->orderFlags & kHardTargetIsNotBase) {
                         thisValue = Fixed::zero();
                     }
                 } else {
-                    if (anObject->baseType->orderFlags & kTargetIsNotBase) {
+                    if (anObject->base->orderFlags & kTargetIsNotBase) {
                         thisValue <<= 3;
                     }
-                    if (anObject->baseType->orderFlags & kHardTargetIsBase) {
+                    if (anObject->base->orderFlags & kHardTargetIsBase) {
                         thisValue = Fixed::zero();
                     }
                 }
-                if (anObject->baseType->orderFlags & kTargetIsFoe) {
+                if (anObject->base->orderFlags & kTargetIsFoe) {
                     thisValue <<= 3;
                 }
-                if (anObject->baseType->orderFlags & kHardTargetIsFriend) {
+                if (anObject->base->orderFlags & kHardTargetIsFriend) {
                     thisValue = Fixed::zero();
                 }
             }
@@ -867,25 +866,25 @@ void Admiral::think() {
             gridLoc.v = difference;
 
             if ((gridLoc.h < kMaximumRelevantDistance) && (gridLoc.v < kMaximumRelevantDistance)) {
-                if (anObject->baseType->orderFlags & kTargetIsLocal) {
+                if (anObject->base->orderFlags & kTargetIsLocal) {
                     thisValue <<= 3;
                 }
-                if (anObject->baseType->orderFlags & kHardTargetIsRemote) {
+                if (anObject->base->orderFlags & kHardTargetIsRemote) {
                     thisValue = Fixed::zero();
                 }
             } else {
-                if (anObject->baseType->orderFlags & kTargetIsRemote) {
+                if (anObject->base->orderFlags & kTargetIsRemote) {
                     thisValue <<= 3;
                 }
-                if (anObject->baseType->orderFlags & kHardTargetIsLocal) {
+                if (anObject->base->orderFlags & kHardTargetIsLocal) {
                     thisValue = Fixed::zero();
                 }
             }
 
-            if (!anObject->baseType->orderKeyTag.empty() &&
-                (anObject->baseType->orderKeyTag == destObject->baseType->levelKeyTag)) {
+            if (!anObject->base->orderKeyTag.empty() &&
+                (anObject->base->orderKeyTag == destObject->base->levelKeyTag)) {
                 thisValue <<= 3;
-            } else if (anObject->baseType->orderFlags & kHardMatchingFoe) {
+            } else if (anObject->base->orderFlags & kHardMatchingFoe) {
                 thisValue = Fixed::zero();
             }
 
@@ -944,7 +943,7 @@ void Admiral::think() {
                             if (baseObject->buildFlags & kSufficientEscortsExist) {
                                 for (auto anObject : SpaceObject::all()) {
                                     if ((anObject->active) && (anObject->owner.get() == this) &&
-                                        (anObject->base == baseObject) &&
+                                        (anObject->base == baseObject.get()) &&
                                         (anObject->escortStrength < baseObject->friendDefecit)) {
                                         _hopeToBuild.reset();
                                         break;
@@ -956,8 +955,7 @@ void Admiral::think() {
                                 thisValue = Fixed::zero();
                                 for (auto anObject : SpaceObject::all()) {
                                     if ((anObject->active) && (anObject->owner.get() != this) &&
-                                        (anObject->baseType->levelKeyTag ==
-                                         baseObject->orderKeyTag)) {
+                                        (anObject->base->levelKeyTag == baseObject->orderKeyTag)) {
                                         thisValue = Fixed::from_val(1);
                                     }
                                 }

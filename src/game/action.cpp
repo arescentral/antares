@@ -96,7 +96,7 @@ bool action_filter_applies_to(const Action& action, Handle<BaseObject> target) {
 
 bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target) {
     if (!action.level_key_tag.empty()) {
-        return action.level_key_tag == target->baseType->levelKeyTag;
+        return action.level_key_tag == target->base->levelKeyTag;
     } else {
         return (action.inclusive_filter & target->attributes) == action.inclusive_filter;
     }
@@ -250,8 +250,7 @@ void KillAction::apply(
     }
 
     // if the object is occupied by a human, eject him since he can't die
-    if ((focus->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
-        !focus->baseType->destroyDontDie) {
+    if ((focus->attributes & (kIsPlayerShip | kRemoteOrHuman)) && !focus->base->destroyDontDie) {
         focus->create_floating_player_body();
     }
     if (destroy) {
@@ -302,7 +301,7 @@ void SpinAction::apply(
         Point* offset) const {
     if (focus->attributes & kCanTurn) {
         Fixed f  = focus->turn_rate() * (value.begin + focus->randomSeed.next(value.range()));
-        Fixed f2 = focus->baseType->mass;
+        Fixed f2 = focus->base->mass;
         if (f2 == Fixed::zero()) {
             f = kFixedNone;
         } else {
@@ -316,7 +315,7 @@ void DisableAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
     Fixed f  = value.begin + focus->randomSeed.next(value.range());
-    Fixed f2 = focus->baseType->mass;
+    Fixed f2 = focus->base->mass;
     if (f2 == Fixed::zero()) {
         f = kFixedNone;
     } else {
@@ -388,18 +387,15 @@ void PushAction::apply(
         }
 
         case PushKind::COLLIDE: {
-            if ((focus->baseType->mass <= Fixed::zero()) ||
-                (focus->maxVelocity <= Fixed::zero())) {
+            if ((focus->base->mass <= Fixed::zero()) || (focus->maxVelocity <= Fixed::zero())) {
                 return;
             }
 
             // if colliding, then PUSH the focus like collision
             focus->velocity.h +=
-                    ((subject->velocity.h - focus->velocity.h) / focus->baseType->mass.val())
-                    << 6L;
+                    ((subject->velocity.h - focus->velocity.h) / focus->base->mass.val()) << 6L;
             focus->velocity.v +=
-                    ((subject->velocity.v - focus->velocity.v) / focus->baseType->mass.val())
-                    << 6L;
+                    ((subject->velocity.v - focus->velocity.v) / focus->base->mass.val()) << 6L;
 
             // make sure we're not going faster than our top speed
             cap_velocity(focus);
@@ -407,8 +403,7 @@ void PushAction::apply(
         }
 
         case PushKind::DECELERATE: {
-            if ((focus->baseType->mass <= Fixed::zero()) ||
-                (focus->maxVelocity <= Fixed::zero())) {
+            if ((focus->base->mass <= Fixed::zero()) || (focus->maxVelocity <= Fixed::zero())) {
                 return;
             }
 
@@ -429,7 +424,7 @@ void CapSpeedAction::apply(
     if (value.has_value()) {
         focus->maxVelocity = *value;
     } else {
-        focus->maxVelocity = focus->baseType->maxVelocity;
+        focus->maxVelocity = focus->base->maxVelocity;
     }
 }
 
@@ -541,9 +536,9 @@ void MoveAction::apply(
 }
 
 static void alter_weapon(
-        Handle<BaseObject> base, Handle<SpaceObject> focus, SpaceObject::Weapon& weapon) {
+        const BaseObject* base, Handle<SpaceObject> focus, SpaceObject::Weapon& weapon) {
     weapon.base = base;
-    if (weapon.base.get()) {
+    if (weapon.base) {
         auto baseObject = weapon.base;
         weapon.ammo     = baseObject->frame.weapon.ammo;
         weapon.time     = g.time;
@@ -555,7 +550,7 @@ static void alter_weapon(
             focus->shortestWeaponRange = baseObject->frame.weapon.range;
         }
     } else {
-        weapon.base = BaseObject::none();
+        weapon.base = nullptr;
         weapon.ammo = 0;
         weapon.time = g.time;
     }
@@ -565,9 +560,9 @@ void EquipAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
     switch (which) {
-        case Weapon::PULSE: alter_weapon(base, focus, focus->pulse); break;
-        case Weapon::BEAM: alter_weapon(base, focus, focus->beam); break;
-        case Weapon::SPECIAL: alter_weapon(base, focus, focus->special); break;
+        case Weapon::PULSE: alter_weapon(base.get(), focus, focus->pulse); break;
+        case Weapon::BEAM: alter_weapon(base.get(), focus, focus->beam); break;
+        case Weapon::SPECIAL: alter_weapon(base.get(), focus, focus->special); break;
     }
 }
 
@@ -580,7 +575,7 @@ void LandAction::apply(
     }
     subject->presenceState          = kLandingPresence;
     subject->presence.landing.speed = speed;
-    subject->presence.landing.scale = sprite_scale(*subject->baseType);
+    subject->presence.landing.scale = sprite_scale(*subject->base);
 }
 
 void WarpAction::apply(
@@ -643,18 +638,16 @@ void FireAction::apply(
     switch (which) {
         case Weapon::PULSE:
             fire_weapon(
-                    subject, SpaceObject::none(), subject->pulse,
-                    subject->baseType->pulse.positions);
+                    subject, SpaceObject::none(), subject->pulse, subject->base->pulse.positions);
             break;
         case Weapon::BEAM:
             fire_weapon(
-                    subject, SpaceObject::none(), subject->beam,
-                    subject->baseType->beam.positions);
+                    subject, SpaceObject::none(), subject->beam, subject->base->beam.positions);
             break;
         case Weapon::SPECIAL:
             fire_weapon(
                     subject, SpaceObject::none(), subject->special,
-                    subject->baseType->special.positions);
+                    subject->base->special.positions);
             break;
     }
 }

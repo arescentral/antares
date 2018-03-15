@@ -655,7 +655,7 @@ static void draw_mini_ship_data(
 
     {
         // Object name.
-        if (obj->base.get()) {
+        if (obj->base) {
             Rect lRect =
                     mini_screen_line_bounds(screen_top, kMiniNameLineNum, 0, kMiniScreenWidth);
             sys.fonts.computer->draw(
@@ -665,7 +665,7 @@ static void draw_mini_ship_data(
         }
     }
 
-    if ((obj->base.get()) && (obj->pixResID >= 0)) {
+    if (obj->base && (obj->pixResID >= 0)) {
         // Icon
         NatePixTable* pixTable = sys.pix.get(obj->pixResID);
 
@@ -745,7 +745,7 @@ static void draw_mini_ship_data(
         // Weapons
         RgbColor color = GetRGBTranslateColorShade(Hue::PALE_GREEN, VERY_LIGHT);
 
-        if (obj->beam.base.get()) {
+        if (obj->beam.base) {
             Rect lRect = mini_screen_line_bounds(
                     screen_top, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
             sys.fonts.computer->draw(
@@ -753,7 +753,7 @@ static void draw_mini_ship_data(
                     obj->beam.base->short_name, color);
         }
 
-        if (obj->pulse.base.get()) {
+        if (obj->pulse.base) {
             Rect lRect = mini_screen_line_bounds(
                     screen_top, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
             sys.fonts.computer->draw(
@@ -763,7 +763,7 @@ static void draw_mini_ship_data(
 
         // Don't show special weapons of destination objects.
         if (!(obj->attributes & kIsDestination)) {
-            if (obj->special.base.get()) {
+            if (obj->special.base) {
                 Rect lRect = mini_screen_line_bounds(
                         screen_top, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
                 sys.fonts.computer->draw(
@@ -806,8 +806,7 @@ static void build_ship(Handle<Admiral> adm, int32_t line) {
     if (g.key_mask & kComputerBuildMenu) {
         return;
     }
-    if (CountObjectsOfBaseType(BaseObject::none(), Admiral::none()) <
-        (kMaxSpaceObject - kMaxShipBuffer)) {
+    if (CountObjectsOfBaseType(nullptr, Admiral::none()) < (kMaxSpaceObject - kMaxShipBuffer)) {
         if (adm->build(line - kBuildScreenFirstTypeLine) == false) {
             if (adm == g.admiral) {
                 sys.sound.warning();

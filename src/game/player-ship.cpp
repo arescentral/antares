@@ -604,7 +604,7 @@ void PlayerShip::update(bool enter_message) {
         return;
     }
 
-    if (theShip->health() < (theShip->baseType->health >> 2L)) {
+    if (theShip->health() < (theShip->base->health >> 2L)) {
         if (g.time > globals()->next_klaxon) {
             if (globals()->next_klaxon == game_ticks()) {
                 sys.sound.loud_klaxon();

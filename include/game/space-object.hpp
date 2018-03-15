@@ -65,10 +65,9 @@ class SpaceObject {
     bool            engages(const SpaceObject& b) const;
     Fixed           turn_rate() const;
 
-    uint32_t           attributes = 0;
-    BaseObject*        baseType   = nullptr;
-    Handle<BaseObject> base;
-    int32_t            number() const;
+    uint32_t          attributes = 0;
+    const BaseObject* base       = nullptr;
+    int32_t           number() const;
 
     uint32_t keysDown = 0;
 
@@ -136,11 +135,11 @@ class SpaceObject {
 
     int32_t health() const { return _health; }
     void    alter_health(int32_t amount);
-    int32_t max_health() const { return baseType->health; }
+    int32_t max_health() const { return base->health; }
 
     int32_t energy() const { return _energy; }
     void    alter_energy(int32_t amount);
-    int32_t max_energy() const { return baseType->energy; }
+    int32_t max_energy() const { return base->energy; }
 
     int32_t battery() const { return _battery; }
     void    alter_battery(int32_t amount);
@@ -194,11 +193,11 @@ class SpaceObject {
     int      pixResID   = -1;
 
     struct Weapon {
-        Handle<BaseObject> base;
-        game_ticks         time;
-        int32_t            ammo     = 0;
-        int32_t            position = 0;
-        int16_t            charge   = 0;
+        const BaseObject* base;
+        game_ticks        time;
+        int32_t           ammo     = 0;
+        int32_t           position = 0;
+        int16_t           charge   = 0;
     };
     Weapon pulse;
     Weapon beam;
@@ -222,7 +221,7 @@ Handle<SpaceObject> CreateAnySpaceObject(
         Handle<BaseObject> whichBase, fixedPointType* velocity, coordPointType* location,
         int32_t direction, Handle<Admiral> owner, uint32_t specialAttributes,
         int16_t spriteIDOverride);
-int32_t CountObjectsOfBaseType(Handle<BaseObject> whichType, Handle<Admiral> owner);
+int32_t CountObjectsOfBaseType(const BaseObject* whichType, Handle<Admiral> owner);
 
 Handle<BaseObject> mGetBaseObjectFromClassRace(
         pn::string_view class_, const NamedHandle<Race>& race);
