@@ -88,7 +88,7 @@ BaseObject* BaseObject::get(pn::string_view name) {
     return nullptr;
 }
 
-Handle<BaseObject> mGetBaseObjectFromClassRace(
+Handle<BaseObject> get_base_object_handle_from_class_and_race(
         pn::string_view class_, const NamedHandle<Race>& race) {
     auto it = race->ships.find(class_.copy());
     if (it == race->ships.end()) {
@@ -96,6 +96,11 @@ Handle<BaseObject> mGetBaseObjectFromClassRace(
         return BaseObject::none();
     }
     return it->second;
+}
+
+const BaseObject* get_base_object_from_class_and_race(
+        pn::string_view class_, const NamedHandle<Race>& race) {
+    return get_base_object_handle_from_class_and_race(class_, race).get();
 }
 
 static Handle<SpaceObject> next_free_space_object() {

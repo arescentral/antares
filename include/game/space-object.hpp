@@ -223,7 +223,9 @@ Handle<SpaceObject> CreateAnySpaceObject(
         int16_t spriteIDOverride);
 int32_t CountObjectsOfBaseType(const BaseObject* whichType, Handle<Admiral> owner);
 
-Handle<BaseObject> mGetBaseObjectFromClassRace(
+Handle<BaseObject> get_base_object_handle_from_class_and_race(
+        pn::string_view class_, const NamedHandle<Race>& race);
+const BaseObject* get_base_object_from_class_and_race(
         pn::string_view class_, const NamedHandle<Race>& race);
 
 int32_t sprite_resource(const BaseObject& o);

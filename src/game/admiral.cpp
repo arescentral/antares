@@ -221,7 +221,7 @@ void RecalcAllAdmiralBuildData() {
             if (found) {
                 continue;
             }
-            auto baseObject = mGetBaseObjectFromClassRace(buildable_class, a->race()).get();
+            auto baseObject = get_base_object_from_class_and_race(buildable_class, a->race());
             if (baseObject) {
                 a->canBuildType().emplace_back();
                 a->canBuildType().back().class_      = buildable_class.copy();
@@ -940,7 +940,7 @@ void Admiral::think() {
                         }
                         if (_hopeToBuild.has_value()) {
                             auto baseObject =
-                                    mGetBaseObjectFromClassRace(*_hopeToBuild, _race).get();
+                                    get_base_object_from_class_and_race(*_hopeToBuild, _race);
                             if (baseObject->buildFlags & kSufficientEscortsExist) {
                                 for (auto anObject : SpaceObject::all()) {
                                     if ((anObject->active) && (anObject->owner.get() == this) &&
@@ -975,7 +975,8 @@ void Admiral::think() {
                         }
                     }
                     if (j < destBalance->canBuildType.size()) {
-                        auto baseObject = mGetBaseObjectFromClassRace(*_hopeToBuild, _race);
+                        auto baseObject =
+                                get_base_object_from_class_and_race(*_hopeToBuild, _race);
                         if (_cash >= Fixed::from_long(baseObject->price)) {
                             Admiral::build(j);
                             _hopeToBuild.reset();
@@ -995,7 +996,7 @@ bool Admiral::build(int32_t buildWhichType) {
     if ((buildWhichType >= 0) && (buildWhichType < dest->canBuildType.size()) && (dest.get()) &&
         (dest->buildTime <= ticks(0))) {
         auto buildBaseObject =
-                mGetBaseObjectFromClassRace(dest->canBuildType[buildWhichType], _race).get();
+                get_base_object_from_class_and_race(dest->canBuildType[buildWhichType], _race);
         if (buildBaseObject && (buildBaseObject->price <= mFixedToLong(_cash))) {
             _cash -= (Fixed::from_long(buildBaseObject->price));
             if (_cheats & kBuildFastBit) {
