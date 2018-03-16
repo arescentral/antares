@@ -56,7 +56,7 @@ Rect object_data_bounds(Point origin, Size size) {
 }  // namespace
 
 ObjectDataScreen::ObjectDataScreen(
-        Point origin, Handle<BaseObject> object, Trigger trigger, int which)
+        Point origin, const BaseObject& object, Trigger trigger, int which)
         : _trigger(trigger), _which(which), _state(TYPING) {
     pn::string text;
     CreateObjectDataText(text, object);

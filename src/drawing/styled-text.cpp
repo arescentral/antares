@@ -200,10 +200,10 @@ void StyledText::set_interface_text(pn::string_view text) {
                 inlinePictType     inline_pict;
                 Handle<BaseObject> object(id);
                 if (object.get()) {
-                    inline_pict.object  = object;
+                    inline_pict.object  = object.get();
                     inline_pict.picture = object->pictPortraitResID;
                 } else {
-                    inline_pict.object  = BaseObject::none();
+                    inline_pict.object  = nullptr;
                     inline_pict.picture = id;
                 }
 

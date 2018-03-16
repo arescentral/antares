@@ -107,7 +107,7 @@ pn::string_view::size_type find_replace(
 }  // namespace
 
 void CreateWeaponDataText(
-        pn::string* text, Handle<BaseObject> weaponObject, pn::string_view weaponName);
+        pn::string* text, const BaseObject* weaponObject, pn::string_view weaponName);
 
 //
 // BothCommandAndQ:
@@ -128,7 +128,7 @@ bool BothCommandAndQ() {
     return command && q;
 }
 
-void CreateObjectDataText(pn::string& text, Handle<BaseObject> object) {
+void CreateObjectDataText(pn::string& text, const BaseObject& object) {
     pn::string data = Resource::text(kShipDataTextID);
 
     auto keys   = Resource::strings(kShipDataKeyStringID);
@@ -136,7 +136,7 @@ void CreateObjectDataText(pn::string& text, Handle<BaseObject> object) {
 
     // *** Replace place-holders in text with real data, using the fabulous find_replace routine
     // an object or a ship?
-    if (object->attributes & kCanThink) {
+    if (object.attributes & kCanThink) {
         pn::string_view name = values.at(0);
         find_replace(data, 0, keys.at(kShipOrObjectStringNum), name);
     } else {
@@ -145,31 +145,31 @@ void CreateObjectDataText(pn::string& text, Handle<BaseObject> object) {
     }
 
     // ship name
-    find_replace(data, 0, keys.at(kShipTypeStringNum), object->name);
+    find_replace(data, 0, keys.at(kShipTypeStringNum), object.name);
 
     // ship mass
-    find_replace(data, 0, keys.at(kMassStringNum), stringify(Fixed(object->mass)));
+    find_replace(data, 0, keys.at(kMassStringNum), stringify(Fixed(object.mass)));
 
     // ship shields
-    find_replace(data, 0, keys.at(kShieldStringNum), pn::dump(object->health, pn::dump_short));
+    find_replace(data, 0, keys.at(kShieldStringNum), pn::dump(object.health, pn::dump_short));
 
     // light speed
     find_replace(
             data, 0, keys.at(kHasLightStringNum),
-            pn::dump(object->warpSpeed.val(), pn::dump_short));
+            pn::dump(object.warpSpeed.val(), pn::dump_short));
 
     // max velocity
-    find_replace(data, 0, keys.at(kMaxSpeedStringNum), stringify(Fixed(object->maxVelocity)));
+    find_replace(data, 0, keys.at(kMaxSpeedStringNum), stringify(Fixed(object.maxVelocity)));
 
     // thrust
-    find_replace(data, 0, keys.at(kThrustStringNum), stringify(Fixed(object->maxThrust)));
+    find_replace(data, 0, keys.at(kThrustStringNum), stringify(Fixed(object.maxThrust)));
 
     // par turn
-    if (object->attributes & kCanTurn) {
-        if (object->attributes & kShapeFromDirection) {
+    if (object.attributes & kCanTurn) {
+        if (object.attributes & kShapeFromDirection) {
             find_replace(
                     data, 0, keys.at(kTurnStringNum),
-                    stringify(Fixed(object->frame.rotation.turn_rate)));
+                    stringify(Fixed(object.frame.rotation.turn_rate)));
         } else {
             find_replace(data, 0, keys.at(kTurnStringNum), stringify(Fixed::from_long(1)));
         }
@@ -178,19 +178,19 @@ void CreateObjectDataText(pn::string& text, Handle<BaseObject> object) {
     }
 
     // now, check for weapons!
-    CreateWeaponDataText(&data, object->pulse.base, values.at(kShipDataPulseStringNum));
-    CreateWeaponDataText(&data, object->beam.base, values.at(kShipDataBeamStringNum));
-    CreateWeaponDataText(&data, object->special.base, values.at(kShipDataSpecialStringNum));
+    CreateWeaponDataText(&data, object.pulse.base.get(), values.at(kShipDataPulseStringNum));
+    CreateWeaponDataText(&data, object.beam.base.get(), values.at(kShipDataBeamStringNum));
+    CreateWeaponDataText(&data, object.special.base.get(), values.at(kShipDataSpecialStringNum));
 
     text = std::move(data);
 }
 
 void CreateWeaponDataText(
-        pn::string* text, Handle<BaseObject> weaponObject, pn::string_view weaponName) {
+        pn::string* text, const BaseObject* weaponObject, pn::string_view weaponName) {
     int32_t mostDamage;
     bool    isGuided = false;
 
-    if (!weaponObject.get()) {
+    if (!weaponObject) {
         return;
     }
 

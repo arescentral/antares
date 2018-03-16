@@ -253,9 +253,9 @@ void BriefingScreen::mouse_down(const MouseDownEvent& event) {
     Point where = event.where();
     where.offset(-off.h, -off.v);
     for (const auto& pict : _inline_pict) {
-        if (pict.bounds.contains(where) && pict.object.get()) {
+        if (pict.bounds.contains(where) && pict.object) {
             stack()->push(new ObjectDataScreen(
-                    event.where(), pict.object, ObjectDataScreen::MOUSE, event.button()));
+                    event.where(), *pict.object, ObjectDataScreen::MOUSE, event.button()));
             return;
         }
     }
@@ -461,9 +461,9 @@ void BriefingScreen::show_object_data(int index, const GamepadButtonDownEvent& e
 void BriefingScreen::show_object_data(int index, ObjectDataScreen::Trigger trigger, int which) {
     if (index < _inline_pict.size()) {
         auto obj = _inline_pict[index].object;
-        if (obj.get()) {
+        if (obj) {
             const Point origin = _inline_pict[index].bounds.center();
-            stack()->push(new ObjectDataScreen(origin, obj, trigger, which));
+            stack()->push(new ObjectDataScreen(origin, *obj, trigger, which));
             return;
         }
     }

@@ -32,7 +32,7 @@ class ObjectDataScreen : public Card {
   public:
     enum Trigger { MOUSE, KEY, GAMEPAD };
 
-    ObjectDataScreen(Point origin, Handle<BaseObject> object, Trigger trigger, int which);
+    ObjectDataScreen(Point origin, const BaseObject& object, Trigger trigger, int which);
     ~ObjectDataScreen();
 
     virtual void become_front();

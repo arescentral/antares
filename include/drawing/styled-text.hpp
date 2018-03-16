@@ -34,9 +34,9 @@ class Picture;
 
 // the inline pictType struct is for keeping track of picts included in my text boxes.
 struct inlinePictType {
-    Rect               bounds;
-    int16_t            picture;
-    Handle<BaseObject> object;  // May be null.
+    Rect              bounds;
+    int16_t           picture;
+    const BaseObject* object;  // May be null.
 };
 
 class StyledText {

@@ -49,7 +49,7 @@ class ObjectDataBuilder {
     ObjectDataBuilder(const ObjectDataBuilder&) = delete;
     ObjectDataBuilder& operator=(const ObjectDataBuilder&) = delete;
 
-    void save(Handle<BaseObject> object, int pict_id) {
+    void save(const BaseObject& object, int pict_id) {
         pn::string data;
         CreateObjectDataText(data, object);
         if (_output_dir.has_value()) {
@@ -137,7 +137,7 @@ void main(int argc, char* const* argv) {
         if (pict_id <= 0) {
             continue;
         }
-        builder.save(object, pict_id);
+        builder.save(*object, pict_id);
     }
 }
 
