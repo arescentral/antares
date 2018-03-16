@@ -243,7 +243,7 @@ void ClearMiniScreenLines() {
         c->whichButton = kNoLineButton;
         c->kind        = MINI_NONE;
         c->underline   = false;
-        c->sourceData  = BaseObject::none();
+        c->sourceData  = nullptr;
         c->callback    = nullptr;
         c++;
     }
@@ -569,7 +569,7 @@ static void update_build_screen_lines() {
 
         for (int32_t count = 0; count < kMaxShipCanBuild; count++) {
             auto buildObject = line->sourceData;
-            if (buildObject.get()) {
+            if (buildObject) {
                 if (buildObject->price > mFixedToLong(admiral->cash())) {
                     if (line->kind != MINI_DIM) {
                         line->kind = MINI_DIM;
@@ -988,14 +988,15 @@ void MiniComputerSetBuildStrings() {
     for (int32_t count = 0; count < kMaxShipCanBuild; count++) {
         int32_t             lineNum     = kBuildScreenFirstTypeLine + count;
         miniScreenLineType* line        = &g.mini.lineData[lineNum];
-        Handle<BaseObject>  buildObject = BaseObject::none();
+        const BaseObject*   buildObject = nullptr;
         if (count < buildAtObject->canBuildType.size()) {
             buildObject = mGetBaseObjectFromClassRace(
-                    buildAtObject->canBuildType[count], g.admiral->race());
+                                  buildAtObject->canBuildType[count], g.admiral->race())
+                                  .get();
         }
-        line->value      = buildObject.number();
+        line->value      = -1;
         line->sourceData = buildObject;
-        if (!buildObject.get()) {
+        if (!buildObject) {
             continue;
         }
 
@@ -1024,13 +1025,9 @@ Fixed MiniComputerGetPriceOfCurrentSelection() {
         return Fixed::zero();
     }
 
-    miniScreenLineType* line = &g.mini.lineData[g.mini.selectLine];
-    if (line->value < 0) {
-        return Fixed::zero();
-    }
-
-    auto buildObject = Handle<BaseObject>(line->value);
-    if (buildObject->price < 0) {
+    miniScreenLineType* line        = &g.mini.lineData[g.mini.selectLine];
+    auto                buildObject = line->sourceData;
+    if (!buildObject || (buildObject->price < 0)) {
         return Fixed::zero();
     }
 

@@ -45,7 +45,7 @@ struct miniScreenLineType {
     int32_t            whichStatus;
     Handle<Admiral>    statusPlayer;
     int32_t            negativeValue;
-    Handle<BaseObject> sourceData;
+    const BaseObject*  sourceData;
     void (*callback)(Handle<Admiral> adm, int32_t line) = nullptr;
 };
 

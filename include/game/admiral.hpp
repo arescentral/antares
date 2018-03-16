@@ -76,16 +76,16 @@ struct Destination {
     Fixed                   earn;
     ticks                   buildTime;
     ticks                   totalBuildTime;
-    Handle<BaseObject>      buildObjectBaseNum;
+    const BaseObject*       buildObjectBaseNum;
     pn::string              name;
 
     bool can_build() const;  // Can build anything.
 };
 
 struct admiralBuildType {
-    Handle<BaseObject> base;
-    pn::string         class_;
-    Fixed              chanceRange = kFixedNone;
+    const BaseObject* base;
+    pn::string        class_;
+    Fixed             chanceRange = kFixedNone;
 };
 
 class Admiral {

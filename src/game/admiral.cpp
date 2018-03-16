@@ -66,7 +66,7 @@ void ResetAllDestObjectData() {
         d->name.clear();
         d->earn           = Fixed::zero();
         d->totalBuildTime = d->buildTime = ticks(0);
-        d->buildObjectBaseNum            = BaseObject::none();
+        d->buildObjectBaseNum            = nullptr;
         d->canBuildType.clear();
         for (int j = 0; j < kMaxPlayerNum; ++j) {
             d->occupied[j] = 0;
@@ -188,7 +188,7 @@ void RemoveDestination(Handle<Destination> d) {
     d->name.clear();
     d->earn           = Fixed::zero();
     d->totalBuildTime = d->buildTime = ticks(0);
-    d->buildObjectBaseNum            = BaseObject::none();
+    d->buildObjectBaseNum            = nullptr;
     d->canBuildType.clear();
 
     for (int i = 0; i < kMaxPlayerNum; i++) {
@@ -221,8 +221,8 @@ void RecalcAllAdmiralBuildData() {
             if (found) {
                 continue;
             }
-            auto baseObject = mGetBaseObjectFromClassRace(buildable_class, a->race());
-            if (baseObject.get()) {
+            auto baseObject = mGetBaseObjectFromClassRace(buildable_class, a->race()).get();
+            if (baseObject) {
                 a->canBuildType().emplace_back();
                 a->canBuildType().back().class_      = buildable_class.copy();
                 a->canBuildType().back().base        = baseObject;
@@ -537,9 +537,9 @@ void RemoveObjectFromDestination(Handle<SpaceObject> o) {
 
 // assumes you can afford it & base has time
 static void AdmiralBuildAtObject(
-        Handle<Admiral> admiral, Handle<BaseObject> base, Handle<Destination> buildAtDest) {
+        Handle<Admiral> admiral, const BaseObject* base, Handle<Destination> buildAtDest) {
     fixedPointType v = {Fixed::zero(), Fixed::zero()};
-    if (base.get()) {
+    if (base) {
         auto coord = buildAtDest->whichObject->location;
 
         auto newObject = CreateAnySpaceObject(*base, &v, &coord, 0, admiral, 0, -1);
@@ -557,11 +557,11 @@ void AdmiralThink() {
         destBalance->buildTime -= kMajorTick;
         if (destBalance->buildTime <= ticks(0)) {
             destBalance->buildTime = ticks(0);
-            if (destBalance->buildObjectBaseNum.get()) {
+            if (destBalance->buildObjectBaseNum) {
                 auto anObject = destBalance->whichObject;
                 AdmiralBuildAtObject(
                         anObject->owner, destBalance->buildObjectBaseNum, destBalance);
-                destBalance->buildObjectBaseNum = BaseObject::none();
+                destBalance->buildObjectBaseNum = nullptr;
             }
         }
 
@@ -939,11 +939,12 @@ void Admiral::think() {
                             }
                         }
                         if (_hopeToBuild.has_value()) {
-                            auto baseObject = mGetBaseObjectFromClassRace(*_hopeToBuild, _race);
+                            auto baseObject =
+                                    mGetBaseObjectFromClassRace(*_hopeToBuild, _race).get();
                             if (baseObject->buildFlags & kSufficientEscortsExist) {
                                 for (auto anObject : SpaceObject::all()) {
                                     if ((anObject->active) && (anObject->owner.get() == this) &&
-                                        (anObject->base == baseObject.get()) &&
+                                        (anObject->base == baseObject) &&
                                         (anObject->escortStrength < baseObject->friendDefecit)) {
                                         _hopeToBuild.reset();
                                         break;
@@ -994,8 +995,8 @@ bool Admiral::build(int32_t buildWhichType) {
     if ((buildWhichType >= 0) && (buildWhichType < dest->canBuildType.size()) && (dest.get()) &&
         (dest->buildTime <= ticks(0))) {
         auto buildBaseObject =
-                mGetBaseObjectFromClassRace(dest->canBuildType[buildWhichType], _race);
-        if (buildBaseObject.get() && (buildBaseObject->price <= mFixedToLong(_cash))) {
+                mGetBaseObjectFromClassRace(dest->canBuildType[buildWhichType], _race).get();
+        if (buildBaseObject && (buildBaseObject->price <= mFixedToLong(_cash))) {
             _cash -= (Fixed::from_long(buildBaseObject->price));
             if (_cheats & kBuildFastBit) {
                 dest->buildTime      = kMinorTick;
@@ -1013,7 +1014,7 @@ bool Admiral::build(int32_t buildWhichType) {
 
 void StopBuilding(Handle<Destination> destObject) {
     destObject->totalBuildTime = destObject->buildTime = ticks(0);
-    destObject->buildObjectBaseNum                     = BaseObject::none();
+    destObject->buildObjectBaseNum                     = nullptr;
 }
 
 void Admiral::pay(Fixed howMuch) { pay_absolute(howMuch * _earning_power); }
