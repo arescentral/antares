@@ -542,7 +542,7 @@ static void AdmiralBuildAtObject(
     if (base.get()) {
         auto coord = buildAtDest->whichObject->location;
 
-        auto newObject = CreateAnySpaceObject(base, &v, &coord, 0, admiral, 0, -1);
+        auto newObject = CreateAnySpaceObject(*base, &v, &coord, 0, admiral, 0, -1);
         if (newObject.get()) {
             SetObjectDestination(newObject);
             if (admiral == g.admiral) {

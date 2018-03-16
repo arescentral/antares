@@ -47,12 +47,12 @@ class SpaceObject {
 
     SpaceObject() = default;
     SpaceObject(
-            Handle<BaseObject> type, Random seed, int32_t object_id,
+            const BaseObject& type, Random seed, int32_t object_id,
             const coordPointType& initial_location, int32_t relative_direction,
             fixedPointType* relative_velocity, Handle<Admiral> new_owner,
             int16_t spriteIDOverride);
 
-    void change_base_type(Handle<BaseObject> base, int32_t spriteIDOverride, bool relative);
+    void change_base_type(const BaseObject& base, int32_t spriteIDOverride, bool relative);
     void set_owner(Handle<Admiral> owner, bool message);
     void set_cloak(bool cloak);
     void alter_occupation(Handle<Admiral> owner, int32_t howMuch, bool message);
@@ -218,7 +218,7 @@ void ResetAllSpaceObjects(void);
 void RemoveAllSpaceObjects(void);
 
 Handle<SpaceObject> CreateAnySpaceObject(
-        Handle<BaseObject> whichBase, fixedPointType* velocity, coordPointType* location,
+        const BaseObject& whichBase, fixedPointType* velocity, coordPointType* location,
         int32_t direction, Handle<Admiral> owner, uint32_t specialAttributes,
         int16_t spriteIDOverride);
 int32_t CountObjectsOfBaseType(const BaseObject* whichType, Handle<Admiral> owner);

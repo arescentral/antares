@@ -204,10 +204,10 @@ void RemoveAllSpaceObjects() {
 }
 
 SpaceObject::SpaceObject(
-        Handle<BaseObject> type, Random seed, int32_t object_id,
+        const BaseObject& type, Random seed, int32_t object_id,
         const coordPointType& initial_location, int32_t relative_direction,
         fixedPointType* relative_velocity, Handle<Admiral> new_owner, int16_t spriteIDOverride) {
-    base       = type.get();
+    base       = &type;
     active     = kObjectInUse;
     randomSeed = seed;
     owner      = new_owner;
@@ -354,7 +354,7 @@ SpaceObject::SpaceObject(
 //
 
 void SpaceObject::change_base_type(
-        Handle<BaseObject> base, int32_t spriteIDOverride, bool relative) {
+        const BaseObject& base, int32_t spriteIDOverride, bool relative) {
     auto          obj = this;
     int16_t       angle;
     int32_t       r;
@@ -369,23 +369,23 @@ void SpaceObject::change_base_type(
     }
 #endif  // DATA_COVERAGE
 
-    obj->attributes    = base->attributes | (obj->attributes & (kIsHumanControlled | kIsRemote |
-                                                             kIsPlayerShip | kStaticDestination));
-    obj->base          = base.get();
-    obj->icon          = base->icon;
-    obj->shieldColor   = base->shieldColor;
-    obj->layer         = sprite_layer(*base);
+    obj->attributes    = base.attributes | (obj->attributes & (kIsHumanControlled | kIsRemote |
+                                                            kIsPlayerShip | kStaticDestination));
+    obj->base          = &base;
+    obj->icon          = base.icon;
+    obj->shieldColor   = base.shieldColor;
+    obj->layer         = sprite_layer(base);
     obj->directionGoal = 0;
     obj->turnFraction = obj->turnVelocity = Fixed::zero();
 
     if (obj->attributes & kIsSelfAnimated) {
-        obj->frame.animation.thisShape = base->frame.animation.first.begin;
-        if (base->frame.animation.first.range() > Fixed::from_val(1)) {
+        obj->frame.animation.thisShape = base.frame.animation.first.begin;
+        if (base.frame.animation.first.range() > Fixed::from_val(1)) {
             obj->frame.animation.thisShape +=
-                    obj->randomSeed.next(base->frame.animation.first.range());
+                    obj->randomSeed.next(base.frame.animation.first.range());
         }
-        frame.animation.direction = base->frame.animation.direction;
-        if (base->frame.animation.direction == AnimationDirection::RANDOM) {
+        frame.animation.direction = base.frame.animation.direction;
+        if (base.frame.animation.direction == AnimationDirection::RANDOM) {
             if (randomSeed.next(2) == 1) {
                 frame.animation.direction = AnimationDirection::PLUS;
             } else {
@@ -393,14 +393,14 @@ void SpaceObject::change_base_type(
             }
         }
         obj->frame.animation.frameFraction = Fixed::zero();
-        obj->frame.animation.speed         = base->frame.animation.speed;
+        obj->frame.animation.speed         = base.frame.animation.speed;
     }
 
-    obj->maxVelocity = base->maxVelocity;
+    obj->maxVelocity = base.maxVelocity;
 
-    if (base->initial_age.begin >= ticks(1)) {
+    if (base.initial_age.begin >= ticks(1)) {
         obj->expire_after =
-                base->initial_age.begin + obj->randomSeed.next(base->initial_age.range());
+                base.initial_age.begin + obj->randomSeed.next(base.initial_age.range());
         obj->expires = true;
     } else {
         obj->expires = false;
@@ -411,7 +411,7 @@ void SpaceObject::change_base_type(
         obj->randomSeed.next(1);
     }
 
-    obj->naturalScale = sprite_scale(*base);
+    obj->naturalScale = sprite_scale(base);
 
     // not setting id
 
@@ -420,25 +420,25 @@ void SpaceObject::change_base_type(
     // not setting sprite, targetObjectNumber, lastTarget, lastTargetDistance;
 
     if (spriteIDOverride == -1) {
-        obj->pixResID = sprite_resource(*base);
+        obj->pixResID = sprite_resource(base);
     } else {
         obj->pixResID = spriteIDOverride;
     }
 
-    if (base->attributes & kCanThink) {
+    if (base.attributes & kCanThink) {
         obj->pixResID += (static_cast<int>(GetAdmiralColor(obj->owner)) << kSpriteTableColorShift);
     }
 
     // check periodic time
     obj->periodicTime = ticks(0);
-    if (base->activate_period.begin != ticks(0)) {
+    if (base.activate_period.begin != ticks(0)) {
         obj->periodicTime =
-                base->activate_period.begin + obj->randomSeed.next(base->activate_period.range());
+                base.activate_period.begin + obj->randomSeed.next(base.activate_period.range());
     }
 
-    obj->pulse.base          = base->pulse.base.get();
-    obj->beam.base           = base->beam.base.get();
-    obj->special.base        = base->special.base.get();
+    obj->pulse.base          = base.pulse.base.get();
+    obj->beam.base           = base.beam.base.get();
+    obj->special.base        = base.special.base.get();
     obj->longestWeaponRange  = 0;
     obj->shortestWeaponRange = kMaximumRelevantDistance;
 
@@ -485,16 +485,16 @@ void SpaceObject::change_base_type(
         }
 
         obj->sprite->table      = spriteTable;
-        obj->sprite->icon       = base->icon;
-        obj->sprite->whichLayer = sprite_layer(*base);
-        obj->sprite->scale      = sprite_scale(*base);
+        obj->sprite->icon       = base.icon;
+        obj->sprite->whichLayer = sprite_layer(base);
+        obj->sprite->scale      = sprite_scale(base);
 
         if (obj->attributes & kIsSelfAnimated) {
             obj->sprite->whichShape = more_evil_fixed_to_long(obj->frame.animation.thisShape);
         } else if (obj->attributes & kShapeFromDirection) {
             angle = obj->direction;
-            mAddAngle(angle, rotation_resolution(*base) >> 1);
-            obj->sprite->whichShape = angle / rotation_resolution(*base);
+            mAddAngle(angle, rotation_resolution(base) >> 1);
+            obj->sprite->whichShape = angle / rotation_resolution(base);
         } else {
             obj->sprite->whichShape = 0;
         }
@@ -502,7 +502,7 @@ void SpaceObject::change_base_type(
 }
 
 Handle<SpaceObject> CreateAnySpaceObject(
-        Handle<BaseObject> whichBase, fixedPointType* velocity, coordPointType* location,
+        const BaseObject& whichBase, fixedPointType* velocity, coordPointType* location,
         int32_t direction, Handle<Admiral> owner, uint32_t specialAttributes,
         int16_t spriteIDOverride) {
     Random      random{g.random.next(32766)};
@@ -742,7 +742,7 @@ void SpaceObject::destroy() {
             int16_t energyNum = object->energy() / kEnergyPodAmount;
             while (energyNum > 0) {
                 CreateAnySpaceObject(
-                        plug.info.energyBlobID, &object->velocity, &object->location,
+                        *plug.info.energyBlobID, &object->velocity, &object->location,
                         object->direction, Admiral::none(), 0, -1);
                 energyNum--;
             }
@@ -811,11 +811,11 @@ void SpaceObject::free() {
 }
 
 void SpaceObject::create_floating_player_body() {
-    auto       obj       = Handle<SpaceObject>(number());
-    const auto body_type = plug.info.playerBodyID;
+    auto              obj       = Handle<SpaceObject>(number());
+    const BaseObject& body_type = *plug.info.playerBodyID;
     // if we're already in a body, don't create a body from it
     // a body expiring is handled elsewhere
-    if (obj->base == body_type.get()) {
+    if (obj->base == &body_type) {
         return;
     }
 

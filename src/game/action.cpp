@@ -142,7 +142,7 @@ void CreateAction::apply(
             at.v += subject->randomSeed.next(distance * 2) - distance;
         }
 
-        auto product = CreateAnySpaceObject(base, &vel, &at, direction, subject->owner, 0, -1);
+        auto product = CreateAnySpaceObject(*base, &vel, &at, direction, subject->owner, 0, -1);
         if (!product.get()) {
             continue;
         }
@@ -443,7 +443,7 @@ void MorphAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
     if (focus.get()) {
-        focus->change_base_type(base, -1, keep_ammo);
+        focus->change_base_type(*base, -1, keep_ammo);
     }
 }
 
@@ -587,7 +587,7 @@ void WarpAction::apply(
     subject->attributes &= ~kOccupiesSpace;
     fixedPointType newVel = {Fixed::zero(), Fixed::zero()};
     CreateAnySpaceObject(
-            plug.info.warpInFlareID, &newVel, &subject->location, subject->direction,
+            *plug.info.warpInFlareID, &newVel, &subject->location, subject->direction,
             Admiral::none(), 0, -1);
 }
 
