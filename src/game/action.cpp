@@ -86,14 +86,6 @@ static void queue_action(
         ticks delayTime, Handle<SpaceObject> subjectObject, Handle<SpaceObject> directObject,
         Point* offset);
 
-bool action_filter_applies_to(const Action& action, Handle<BaseObject> target) {
-    if (!action.level_key_tag.empty()) {
-        return action.level_key_tag == target->levelKeyTag;
-    } else {
-        return (action.inclusive_filter & target->attributes) == action.inclusive_filter;
-    }
-}
-
 bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target) {
     if (!action.level_key_tag.empty()) {
         return action.level_key_tag == target->base->levelKeyTag;

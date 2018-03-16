@@ -27,7 +27,6 @@ namespace antares {
 // `target`. The baseObject version uses the default attributes of the
 // object, and the spaceObject version uses the actual attributes in
 // effect (e.g. kStaticDestination or kOnAutopilot).
-bool action_filter_applies_to(const Action& action, Handle<BaseObject> target);
 bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target);
 
 void exec(
