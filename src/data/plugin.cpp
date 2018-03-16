@@ -114,12 +114,12 @@ void load_race(const NamedHandle<Race>& r) {
     }
 }
 
-void load_object(Handle<BaseObject> o) {
-    if (plug.objects.find(o.number()) != plug.objects.end()) {
+void load_object(const NamedHandle<BaseObject>& o) {
+    if (plug.objects.find(o.name().copy()) != plug.objects.end()) {
         return;  // already loaded.
     }
 
-    pn::string path = pn::format("objects/{0}.pn", o.number());
+    pn::string path = pn::format("objects/{0}.pn", o.name());
     try {
         pn::value  x;
         pn_error_t e;
@@ -127,10 +127,14 @@ void load_object(Handle<BaseObject> o) {
             throw std::runtime_error(
                     pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
         }
-        plug.objects.emplace(o.number(), base_object(x));
+        plug.objects.emplace(o.name().copy(), base_object(x));
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.c_str()));
     }
+}
+
+void load_object(Handle<BaseObject> o) {
+    return load_object(NamedHandle<BaseObject>(pn::dump(o.number(), pn::dump_short)));
 }
 
 }  // namespace antares

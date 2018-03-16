@@ -78,9 +78,12 @@ void ResetAllSpaceObjects() {
     }
 }
 
-BaseObject* BaseObject::get(int number) {
-    if (plug.objects.find(number) != plug.objects.end()) {
-        return &plug.objects[number];
+BaseObject* BaseObject::get(int number) { return get(pn::dump(number, pn::dump_short)); }
+
+BaseObject* BaseObject::get(pn::string_view name) {
+    auto it = plug.objects.find(name.copy());
+    if (it != plug.objects.end()) {
+        return &it->second;
     }
     return nullptr;
 }
