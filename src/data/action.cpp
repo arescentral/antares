@@ -520,10 +520,22 @@ static std::unique_ptr<Action> disable_action(path_value x) {
     return std::move(a);
 }
 
+static std::unique_ptr<Action> energize_action(path_value x) {
+    std::unique_ptr<EnergizeAction> a(new EnergizeAction);
+    a->value = required_int(x.get("value"));
+    return std::move(a);
+}
+
 static std::unique_ptr<Action> equip_action(path_value x) {
     std::unique_ptr<EquipAction> a(new EquipAction);
     a->which = required_weapon(x.get("which"));
     a->base  = required_base(x.get("base"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> fire_action(path_value x) {
+    std::unique_ptr<FireAction> a(new FireAction);
+    a->which = required_weapon(x.get("which"));
     return std::move(a);
 }
 
@@ -535,6 +547,12 @@ static std::unique_ptr<Action> flash_action(path_value x) {
     return std::move(a);
 }
 
+static std::unique_ptr<Action> heal_action(path_value x) {
+    std::unique_ptr<HealAction> a(new HealAction);
+    a->value = required_int(x.get("value"));
+    return std::move(a);
+}
+
 static std::unique_ptr<Action> hold_action(path_value x) {
     return std::unique_ptr<HoldPositionAction>(new HoldPositionAction);
 }
@@ -542,6 +560,12 @@ static std::unique_ptr<Action> hold_action(path_value x) {
 static std::unique_ptr<Action> kill_action(path_value x) {
     std::unique_ptr<KillAction> a(new KillAction);
     a->kind = required_kill_kind(x.get("kind"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> land_action(path_value x) {
+    std::unique_ptr<LandAction> a(new LandAction);
+    a->speed = required_int(x.get("speed"));
     return std::move(a);
 }
 
@@ -561,6 +585,13 @@ static std::unique_ptr<Action> morph_action(path_value x) {
 
 static std::unique_ptr<Action> order_action(path_value x) {
     return std::unique_ptr<OrderAction>(new OrderAction);
+}
+
+static std::unique_ptr<Action> pay_action(path_value x) {
+    std::unique_ptr<PayAction> a(new PayAction);
+    a->value  = required_fixed(x.get("value"));
+    a->player = optional_admiral(x.get("player"));
+    return std::move(a);
 }
 
 static std::unique_ptr<Action> push_action(path_value x) {
@@ -634,12 +665,6 @@ bool read_from(pn::file_view in, SoundAction* sound) {
     return true;
 }
 
-bool read_from(pn::file_view in, HealAction* heal) { return in.read(pn::pad(1), &heal->value); }
-
-bool read_from(pn::file_view in, EnergizeAction* energize) {
-    return in.read(pn::pad(1), &energize->value);
-}
-
 bool read_from(pn::file_view in, OccupyAction* occupy) {
     return in.read(pn::pad(1), &occupy->value);
 }
@@ -650,22 +675,6 @@ bool read_from(pn::file_view in, RevealAction* reveal) {
         return false;
     }
     reveal->initial = HandleList<Level::Initial>(first, first + std::max(count_minus_1, 0) + 1);
-    return true;
-}
-
-bool read_from(pn::file_view in, PayAction* pay) {
-    uint8_t  relative;
-    uint32_t player;
-    int32_t  value;
-    if (!(in.read(&relative, &value, &player))) {
-        return false;
-    }
-    pay->value = Fixed::from_val(value);
-    if (relative) {
-        pay->player.reset();
-    } else {
-        pay->player.emplace(Handle<Admiral>(player));
-    }
     return true;
 }
 
@@ -705,8 +714,6 @@ bool read_from_absolute(pn::file_view in, bool reflexive, MoveAction* move) {
     return true;
 }
 
-bool read_from(pn::file_view in, LandAction* land) { return in.read(&land->speed); }
-
 bool read_from(pn::file_view in, ScoreAction* score) {
     int32_t admiral;
     if (!in.read(&admiral, &score->which, &score->value)) {
@@ -743,9 +750,9 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
         case kNoAction: init<NoAction>(action); return true;
 
         case kSetDestination: return true;
-        case kActivateSpecial: init<FireAction>(action)->which = Weapon::SPECIAL; return true;
-        case kActivatePulse: init<FireAction>(action)->which   = Weapon::PULSE; return true;
-        case kActivateBeam: init<FireAction>(action)->which    = Weapon::BEAM; return true;
+        case kActivateSpecial: return true;
+        case kActivatePulse: return true;
+        case kActivateBeam: return true;
         case kNilTarget: return true;
 
         case kCreateObject: return true;
@@ -770,8 +777,8 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
 
                 case kAlterCloak: return true;
 
-                case kAlterDamage: return read_from(sub, init<HealAction>(action));
-                case kAlterEnergy: return read_from(sub, init<EnergizeAction>(action));
+                case kAlterDamage: return true;
+                case kAlterEnergy: return true;
                 case kAlterHidden: return read_from(sub, init<RevealAction>(action));
                 case kAlterSpin: return true;
                 case kAlterOffline: return true;
@@ -782,7 +789,7 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
                 case kAlterOwner: return true;
                 case kAlterConditionTrueYet: return true;
                 case kAlterOccupation: return read_from(sub, init<OccupyAction>(action));
-                case kAlterAbsoluteCash: return read_from(sub, init<PayAction>(action));
+                case kAlterAbsoluteCash: return true;
                 case kAlterAge: return true;
                 case kAlterLocation:
                     return read_from_relative(sub, reflexive, init<MoveAction>(action));
@@ -796,9 +803,9 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
 
         case kMakeSparks: return true;
 
-        case kLandAt: return read_from(sub, init<LandAction>(action));
+        case kLandAt: return true;
 
-        case kEnterWarp: init<WarpAction>(action); return true;
+        case kEnterWarp: return true;
 
         case kDisplayMessage: return true;
 
@@ -866,15 +873,15 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     } else if (type == "disable") {
         a = disable_action(x);
     } else if (type == "energize") {
-        // a = energize_action(x);
+        a = energize_action(x);
     } else if (type == "equip") {
         a = equip_action(x);
     } else if (type == "fire") {
-        // a = fire_action(x);
+        a = fire_action(x);
     } else if (type == "flash") {
         a = flash_action(x);
     } else if (type == "heal") {
-        // a = heal_action(x);
+        a = heal_action(x);
     } else if (type == "hold") {
         a = hold_action(x);
     } else if (type == "key") {
@@ -882,7 +889,7 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     } else if (type == "kill") {
         a = kill_action(x);
     } else if (type == "land") {
-        // a = land_action(x);
+        a = land_action(x);
     } else if (type == "message") {
         a = message_action(x);
     } else if (type == "morph") {
@@ -894,7 +901,7 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     } else if (type == "order") {
         a = order_action(x);
     } else if (type == "pay") {
-        // a = pay_action(x);
+        a = pay_action(x);
     } else if (type == "push") {
         a = push_action(x);
     } else if (type == "reveal") {
