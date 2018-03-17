@@ -141,7 +141,7 @@ struct ConditionAction : public Action {
 
 struct CreateAction : public Action {
     Handle<BaseObject> base;                         // what type
-    Range<int32_t>     count              = {1, 2};  // # to make randomly
+    Range<int64_t>     count              = {1, 2};  // # to make randomly
     bool               relative_velocity  = false;   // is velocity relative to creator?
     bool               relative_direction = false;   // determines initial heading
     int32_t            distance           = 0;       // create at this distance in random direction

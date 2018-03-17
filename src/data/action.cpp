@@ -247,6 +247,10 @@ static sfz::optional<Handle<Admiral>> optional_admiral(path_value x) {
     }
 }
 
+static Handle<BaseObject> required_base(path_value x) {
+    return Handle<BaseObject>(required_int(x));
+}
+
 static sfz::optional<Handle<Level::Initial>> optional_initial(path_value x) {
     sfz::optional<int64_t> i = optional_int(x);
     if (i.has_value()) {
@@ -259,6 +263,24 @@ static sfz::optional<Handle<Level::Initial>> optional_initial(path_value x) {
 static sfz::optional<Owner> optional_owner(path_value x) {
     return optional_enum<Owner>(
             x, {{"any", Owner::ANY}, {"same", Owner::SAME}, {"different", Owner::DIFFERENT}});
+}
+
+template <typename T, int N>
+static T required_enum(path_value x, const std::pair<pn::string_view, T> (&values)[N]) {
+    if (x.value().is_string()) {
+        for (auto kv : values) {
+            pn::string_view s = x.value().as_string();
+            if (s == kv.first) {
+                return kv.second;
+            }
+        }
+    }
+
+    pn::array keys;
+    for (auto kv : values) {
+        keys.push_back(kv.first.copy());
+    }
+    throw std::runtime_error(pn::format("{0}: must be one of {1}", x.path(), keys).c_str());
 }
 
 static sfz::optional<Range<int64_t>> optional_int_range(path_value x) {
@@ -306,6 +328,11 @@ static Range<Fixed> required_fixed_range(path_value x) {
 static Range<ticks> required_ticks_range(path_value x) {
     auto range = required_int_range(x);
     return {ticks(range.begin), ticks(range.end)};
+}
+
+static Weapon required_weapon(path_value x) {
+    return required_enum<Weapon>(
+            x, {{"pulse", Weapon::PULSE}, {"beam", Weapon::BEAM}, {"special", Weapon::SPECIAL}});
 }
 
 static sfz::optional<int32_t> optional_object_attributes(path_value x) {
@@ -395,14 +422,40 @@ static std::unique_ptr<Action> condition_action(path_value x) {
     return std::move(a);
 }
 
+static std::unique_ptr<Action> create_action(path_value x) {
+    std::unique_ptr<CreateAction> a(new CreateAction);
+    a->base               = required_base(x.get("base"));
+    a->count              = optional_int_range(x.get("count")).value_or(Range<int64_t>{1, 2});
+    a->relative_velocity  = optional_bool(x.get("relative_velocity"));
+    a->relative_direction = optional_bool(x.get("relative_direction"));
+    a->distance           = optional_int(x.get("distance")).value_or(0);
+    a->inherit            = optional_bool(x.get("inherit"));
+    a->legacy_random      = optional_bool(x.get("legacy_random"));
+    return std::move(a);
+}
+
 static std::unique_ptr<Action> disable_action(path_value x) {
     std::unique_ptr<DisableAction> a(new DisableAction);
     a->value = required_fixed_range(x.get("value"));
     return std::move(a);
 }
 
+static std::unique_ptr<Action> equip_action(path_value x) {
+    std::unique_ptr<EquipAction> a(new EquipAction);
+    a->which = required_weapon(x.get("which"));
+    a->base  = required_base(x.get("base"));
+    return std::move(a);
+}
+
 static std::unique_ptr<Action> hold_action(path_value x) {
     return std::unique_ptr<HoldPositionAction>(new HoldPositionAction);
+}
+
+static std::unique_ptr<Action> morph_action(path_value x) {
+    std::unique_ptr<MorphAction> a(new MorphAction);
+    a->base      = required_base(x.get("base"));
+    a->keep_ammo = optional_bool(x.get("keep_ammo"));
+    return std::move(a);
 }
 
 static std::unique_ptr<Action> order_action(path_value x) {
@@ -425,24 +478,6 @@ static std::unique_ptr<Action> thrust_action(path_value x) {
 
 static std::unique_ptr<Action> warp_action(path_value x) {
     return std::unique_ptr<WarpAction>(new WarpAction);
-}
-
-bool read_from(pn::file_view in, CreateAction* create, bool inherit) {
-    int32_t base_type;
-    int32_t count_minimum, count_range;
-    uint8_t relative_velocity, relative_direction;
-    if (!in.read(
-                &base_type, &count_minimum, &count_range, &relative_velocity, &relative_direction,
-                &create->distance)) {
-        return false;
-    }
-    create->base               = Handle<BaseObject>(base_type);
-    create->count              = {count_minimum, count_minimum + std::max(count_range, 0)};
-    create->relative_velocity  = relative_velocity;
-    create->relative_direction = relative_direction;
-    create->inherit            = inherit;
-    create->legacy_random      = (count_range == 1);
-    return true;
 }
 
 bool read_from(pn::file_view in, SoundAction* sound) {
@@ -469,16 +504,6 @@ bool read_from(pn::file_view in, EnergizeAction* energize) {
 
 bool read_from(pn::file_view in, OccupyAction* occupy) {
     return in.read(pn::pad(1), &occupy->value);
-}
-
-bool read_from(pn::file_view in, Weapon which, EquipAction* equip) {
-    int32_t base;
-    if (!in.read(pn::pad(1), &base)) {
-        return false;
-    }
-    equip->which = which;
-    equip->base  = Handle<BaseObject>(base);
-    return true;
 }
 
 bool read_from(pn::file_view in, RevealAction* reveal) {
@@ -515,17 +540,6 @@ bool read_from(pn::file_view in, bool reflexive, PushAction* push) {
         }
     }
     push->value = Fixed::from_val(value);
-    return true;
-}
-
-bool read_from(pn::file_view in, MorphAction* morph) {
-    uint8_t keep_ammo;
-    int32_t base;
-    if (!in.read(&keep_ammo, &base)) {
-        return false;
-    }
-    morph->keep_ammo = keep_ammo;
-    morph->base      = Handle<BaseObject>(base);
     return true;
 }
 
@@ -706,8 +720,8 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
         case kActivateBeam: init<FireAction>(action)->which    = Weapon::BEAM; return true;
         case kNilTarget: return true;
 
-        case kCreateObject: return read_from(sub, init<CreateAction>(action), false);
-        case kCreateObjectSetDest: return read_from(sub, init<CreateAction>(action), true);
+        case kCreateObject: return true;
+        case kCreateObjectSetDest: return true;
 
         case kPlaySound: return read_from(sub, init<SoundAction>(action));
 
@@ -736,7 +750,7 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
                 case kAlterVelocity: return read_from(sub, reflexive, init<PushAction>(action));
                 case kAlterMaxVelocity: return true;
                 case kAlterThrust: return true;
-                case kAlterBaseType: return read_from(sub, init<MorphAction>(action));
+                case kAlterBaseType: return true;
                 case kAlterOwner: return true;
                 case kAlterConditionTrueYet: return true;
                 case kAlterOccupation: return read_from(sub, init<OccupyAction>(action));
@@ -746,11 +760,9 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
                     return read_from_relative(sub, reflexive, init<MoveAction>(action));
                 case kAlterAbsoluteLocation:
                     return read_from_absolute(sub, reflexive, init<MoveAction>(action));
-                case kAlterWeapon1:
-                    return read_from(sub, Weapon::PULSE, init<EquipAction>(action));
-                case kAlterWeapon2: return read_from(sub, Weapon::BEAM, init<EquipAction>(action));
-                case kAlterSpecial:
-                    return read_from(sub, Weapon::SPECIAL, init<EquipAction>(action));
+                case kAlterWeapon1: return true;
+                case kAlterWeapon2: return true;
+                case kAlterSpecial: return true;
             }
         }
 
@@ -822,13 +834,13 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     } else if (type == "condition") {
         a = condition_action(x);
     } else if (type == "create") {
-        // a = create_action(x);
+        a = create_action(x);
     } else if (type == "disable") {
         a = disable_action(x);
     } else if (type == "energize") {
         // a = energize_action(x);
     } else if (type == "equip") {
-        // a = equip_action(x);
+        a = equip_action(x);
     } else if (type == "fire") {
         // a = fire_action(x);
     } else if (type == "flash") {
@@ -846,7 +858,7 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     } else if (type == "message") {
         // a = message_action(x);
     } else if (type == "morph") {
-        // a = morph_action(x);
+        a = morph_action(x);
     } else if (type == "move") {
         // a = move_action(x);
     } else if (type == "occupy") {
