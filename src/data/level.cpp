@@ -209,38 +209,11 @@ bool read_from(pn::file_view in, std::unique_ptr<Level::Condition>* condition) {
             (*condition)->op = ConditionOp::EQ;
             break;
 
-        case kDirectIsSubjectTarget:
-            init_condition<Level::OrderedCondition>(condition);
-            (*condition)->op = ConditionOp::EQ;
-            break;
-
         case kSubjectIsPlayerCondition:
             init_condition<Level::SubjectCondition>(condition)->value =
                     Level::SubjectCondition::Value::PLAYER;
             (*condition)->op = ConditionOp::EQ;
             break;
-
-        case kOwnerCondition: {
-            int32_t player;
-            if (!sub.read(&player)) {
-                return false;
-            }
-            init_condition<Level::OwnerCondition>(condition)->player = Handle<Admiral>(player);
-            (*condition)->op                                         = ConditionOp::EQ;
-            break;
-        }
-
-        case kNoShipsLeftCondition: {
-            int32_t player;
-            if (!sub.read(&player)) {
-                return false;
-            }
-            auto* ships   = init_condition<Level::ShipsCondition>(condition);
-            ships->player = Handle<Admiral>(player);
-            ships->value  = 0;
-            ships->op     = ConditionOp::LE;
-            break;
-        }
 
         case kZoomLevelCondition: {
             int32_t value;
@@ -269,15 +242,10 @@ bool read_from(pn::file_view in, std::unique_ptr<Level::Condition>* condition) {
             break;
         }
 
-        case kCurrentMessageCondition: {
-            auto* message = init_condition<Level::MessageCondition>(condition);
-            if (!sub.read(&message->start, &message->page)) {
-                return false;
-            }
-            (*condition)->op = ConditionOp::EQ;
-            break;
-        }
-
+        case kDirectIsSubjectTarget:
+        case kOwnerCondition:
+        case kNoShipsLeftCondition:
+        case kCurrentMessageCondition:
         case kHalfHealthCondition:
         case kDestructionCondition:
         case kProximityCondition:
@@ -347,6 +315,30 @@ static std::unique_ptr<Level::Condition> health_condition(path_value x) {
     return std::move(c);
 }
 
+static std::unique_ptr<Level::Condition> message_condition(path_value x) {
+    std::unique_ptr<Level::MessageCondition> c(new Level::MessageCondition);
+    c->id   = required_int(x.get("id"));
+    c->page = required_int(x.get("page"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> ordered_condition(path_value x) {
+    return std::unique_ptr<Level::OrderedCondition>(new Level::OrderedCondition);
+}
+
+static std::unique_ptr<Level::Condition> owner_condition(path_value x) {
+    std::unique_ptr<Level::OwnerCondition> c(new Level::OwnerCondition);
+    c->player = required_admiral(x.get("player"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> ships_condition(path_value x) {
+    std::unique_ptr<Level::ShipsCondition> c(new Level::ShipsCondition);
+    c->player = required_admiral(x.get("player"));
+    c->value  = required_int(x.get("value"));
+    return std::move(c);
+}
+
 static std::unique_ptr<Level::Condition> condition(pn::value_cref x0) {
     path_value x{x0};
 
@@ -369,9 +361,13 @@ static std::unique_ptr<Level::Condition> condition(pn::value_cref x0) {
     } else if (type == "health") {
         c = health_condition(x);
     } else if (type == "message") {
+        c = message_condition(x);
     } else if (type == "ordered") {
+        c = ordered_condition(x);
     } else if (type == "owner") {
+        c = owner_condition(x);
     } else if (type == "ships") {
+        c = ships_condition(x);
     } else if (type == "speed") {
     } else if (type == "subject") {
     } else if (type == "time") {

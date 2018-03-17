@@ -121,7 +121,7 @@ bool Level::HealthCondition::is_true() const {
 }
 
 bool Level::MessageCondition::is_true() const {
-    return op_eq(op, Messages::current(), start + page - 1);
+    return op_eq(op, Messages::current(), id + page - 1);
 }
 
 bool Level::OrderedCondition::is_true() const {

@@ -321,11 +321,11 @@ struct Level::HealthCondition : Level::Condition {
 };
 
 // Ops: EQ, NE
-// Compares (start, page) of local player’s current message to (start, page).
+// Compares (id, page) of local player’s current message to (id, page).
 //
 // Warning: not net-safe.
 struct Level::MessageCondition : Level::Condition {
-    int32_t      start;
+    int32_t      id;
     int32_t      page;
     virtual bool is_true() const;
 };
