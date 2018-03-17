@@ -170,6 +170,16 @@ static int64_t required_int(path_value x) {
     }
 }
 
+static sfz::optional<Fixed> optional_fixed(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_float()) {
+        return sfz::make_optional(Fixed::from_float(x.value().as_float()));
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be float", x.path()).c_str());
+    }
+}
+
 static Fixed required_fixed(path_value x) {
     if (x.value().is_float()) {
         return Fixed::from_float(x.value().as_float());
@@ -228,6 +238,15 @@ static sfz::optional<ticks> optional_ticks(path_value x) {
     }
 }
 
+static sfz::optional<Handle<Admiral>> optional_admiral(path_value x) {
+    sfz::optional<int64_t> i = optional_int(x);
+    if (i.has_value()) {
+        return sfz::make_optional(Handle<Admiral>(*i));
+    } else {
+        return sfz::nullopt;
+    }
+}
+
 static sfz::optional<Handle<Level::Initial>> optional_initial(path_value x) {
     sfz::optional<int64_t> i = optional_int(x);
     if (i.has_value()) {
@@ -257,6 +276,19 @@ static sfz::optional<Range<int64_t>> optional_int_range(path_value x) {
     }
 }
 
+static Range<int64_t> required_int_range(path_value x) {
+    if (x.value().is_int()) {
+        int64_t begin = x.value().as_int();
+        return Range<int64_t>{begin, begin + 1};
+    } else if (x.value().is_map()) {
+        int64_t begin = required_int(x.get("begin"));
+        int64_t end   = required_int(x.get("end"));
+        return Range<int64_t>{begin, end};
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null, int, or map", x.path()).c_str());
+    }
+}
+
 static Range<Fixed> required_fixed_range(path_value x) {
     if (x.value().is_float()) {
         Fixed begin = Fixed::from_float(x.value().as_float());
@@ -269,6 +301,11 @@ static Range<Fixed> required_fixed_range(path_value x) {
     } else {
         throw std::runtime_error(pn::format("{0}: must be float or map", x.path()).c_str());
     }
+}
+
+static Range<ticks> required_ticks_range(path_value x) {
+    auto range = required_int_range(x);
+    return {ticks(range.begin), ticks(range.end)};
 }
 
 static sfz::optional<int32_t> optional_object_attributes(path_value x) {
@@ -320,6 +357,31 @@ static sfz::optional<int32_t> optional_object_attributes(path_value x) {
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
     }
+}
+
+static std::unique_ptr<Action> age_action(path_value x) {
+    std::unique_ptr<AgeAction> a(new AgeAction);
+    a->relative = optional_bool(x.get("relative"));
+    a->value    = required_ticks_range(x.get("value"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> assume_action(path_value x) {
+    std::unique_ptr<AssumeAction> a(new AssumeAction);
+    a->which = required_int(x.get("which"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> cap_speed_action(path_value x) {
+    std::unique_ptr<CapSpeedAction> a(new CapSpeedAction);
+    a->value = optional_fixed(x.get("value"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> capture_action(path_value x) {
+    std::unique_ptr<CaptureAction> a(new CaptureAction);
+    a->player = optional_admiral(x.get("player"));
+    return std::move(a);
 }
 
 static std::unique_ptr<Action> cloak_action(path_value x) {
@@ -456,19 +518,6 @@ bool read_from(pn::file_view in, bool reflexive, PushAction* push) {
     return true;
 }
 
-bool read_from(pn::file_view in, CapSpeedAction* cap_speed) {
-    int32_t value;
-    if (!in.read(pn::pad(1), &value)) {
-        return false;
-    }
-    if (value < 0) {
-        cap_speed->value.reset();
-    } else {
-        cap_speed->value.emplace(Fixed::from_val(value));
-    }
-    return true;
-}
-
 bool read_from(pn::file_view in, MorphAction* morph) {
     uint8_t keep_ammo;
     int32_t base;
@@ -477,20 +526,6 @@ bool read_from(pn::file_view in, MorphAction* morph) {
     }
     morph->keep_ammo = keep_ammo;
     morph->base      = Handle<BaseObject>(base);
-    return true;
-}
-
-bool read_from(pn::file_view in, CaptureAction* capture) {
-    uint8_t relative;
-    int32_t admiral;
-    if (!in.read(&relative, &admiral)) {
-        return false;
-    }
-    if (relative) {
-        capture->player.reset();
-    } else {
-        capture->player.emplace(Handle<Admiral>(admiral));
-    }
     return true;
 }
 
@@ -507,18 +542,6 @@ bool read_from(pn::file_view in, PayAction* pay) {
     } else {
         pay->player.emplace(Handle<Admiral>(player));
     }
-    return true;
-}
-
-bool read_from(pn::file_view in, AgeAction* argument) {
-    uint8_t relative;
-    int32_t minimum, range;
-    if (!in.read(&relative, &minimum, &range)) {
-        return false;
-    }
-    argument->relative    = relative;
-    argument->value.begin = ticks(minimum);
-    argument->value.end   = ticks(minimum + range);
     return true;
 }
 
@@ -665,8 +688,6 @@ bool read_from(pn::file_view in, SelectAction* select) {
     return true;
 }
 
-bool read_from(pn::file_view in, AssumeAction* assume) { return in.read(&assume->which); }
-
 template <typename T>
 T* init(std::unique_ptr<Action>* action) {
     T* t;
@@ -713,14 +734,14 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
                 case kAlterSpin: return true;
                 case kAlterOffline: return true;
                 case kAlterVelocity: return read_from(sub, reflexive, init<PushAction>(action));
-                case kAlterMaxVelocity: return read_from(sub, init<CapSpeedAction>(action));
+                case kAlterMaxVelocity: return true;
                 case kAlterThrust: return true;
                 case kAlterBaseType: return read_from(sub, init<MorphAction>(action));
-                case kAlterOwner: return read_from(sub, init<CaptureAction>(action));
+                case kAlterOwner: return true;
                 case kAlterConditionTrueYet: return true;
                 case kAlterOccupation: return read_from(sub, init<OccupyAction>(action));
                 case kAlterAbsoluteCash: return read_from(sub, init<PayAction>(action));
-                case kAlterAge: return read_from(sub, init<AgeAction>(action));
+                case kAlterAge: return true;
                 case kAlterLocation:
                     return read_from_relative(sub, reflexive, init<MoveAction>(action));
                 case kAlterAbsoluteLocation:
@@ -756,7 +777,7 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
 
         case kComputerSelect: return read_from(sub, init<SelectAction>(action));
 
-        case kAssumeInitialObject: return read_from(sub, init<AssumeAction>(action));
+        case kAssumeInitialObject: return true;
     }
 }
 
@@ -789,13 +810,13 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
 
     pn::string_view type = required_string(x.get("type"));
     if (type == "age") {
-        // a = age_action(x);
+        a = age_action(x);
     } else if (type == "assume") {
-        // a = assume_action(x);
+        a = assume_action(x);
     } else if (type == "cap-speed") {
-        // a = cap_speed_action(x);
+        a = cap_speed_action(x);
     } else if (type == "capture") {
-        // a = capture_action(x);
+        a = capture_action(x);
     } else if (type == "cloak") {
         a = cloak_action(x);
     } else if (type == "condition") {
