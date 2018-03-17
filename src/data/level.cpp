@@ -36,42 +36,32 @@ static std::vector<Level::Briefing>                   optional_briefing_array(pa
 Level* Level::get(int n) { return &plug.levels[n]; }
 
 bool read_from(pn::file_view in, ScenarioInfo* info) {
-    pn::value  x;
+    pn::value  x0;
     pn_error_t error;
-    if (!pn::parse(in, x, &error)) {
+    if (!pn::parse(in, x0, &error)) {
         return false;
+    } else if (!x0.is_map()) {
+        throw std::runtime_error("must be map");
     }
-    pn::map_cref m = x.as_map();
-    for (pn::string_view field :
-         {"title", "download_url", "author", "author_url", "version", "splash", "starmap"}) {
-        if (m.get(field).as_string().empty()) {
-            return false;
-        }
-    }
-    for (pn::string_view field :
-         {"warp_in_flare", "warp_out_flare", "player_body", "energy_blob"}) {
-        if (!m.has(field) || !m.get(field).is_int()) {
-            return false;
-        }
-    }
+    path_value x{x0};
 
-    info->titleString       = m.get("title").as_string().copy();
-    info->downloadURLString = m.get("download_url").as_string().copy();
-    info->authorNameString  = m.get("author").as_string().copy();
-    info->authorURLString   = m.get("author_url").as_string().copy();
-    info->version           = m.get("version").as_string().copy();
-    info->warpInFlareID     = Handle<BaseObject>(m.get("warp_in_flare").as_int());
-    info->warpOutFlareID    = Handle<BaseObject>(m.get("warp_out_flare").as_int());
-    info->playerBodyID      = Handle<BaseObject>(m.get("player_body").as_int());
-    info->energyBlobID      = Handle<BaseObject>(m.get("energy_blob").as_int());
+    info->titleString       = required_string_copy(x.get("title"));
+    info->downloadURLString = required_string_copy(x.get("download_url"));
+    info->authorNameString  = required_string_copy(x.get("author"));
+    info->authorURLString   = required_string_copy(x.get("author_url"));
+    info->version           = required_string_copy(x.get("version"));
+    info->warpInFlareID     = required_base(x.get("warp_in_flare"));
+    info->warpOutFlareID    = required_base(x.get("warp_out_flare"));
+    info->playerBodyID      = required_base(x.get("player_body"));
+    info->energyBlobID      = required_base(x.get("energy_blob"));
 
-    info->intro_text = m.get("intro").as_string().copy();
-    info->about_text = m.get("about").as_string().copy();
+    info->intro_text = optional_string(x.get("intro")).value_or("").copy();
+    info->about_text = optional_string(x.get("about")).value_or("").copy();
 
     info->publisher_screen = nullptr;  // Don’t have permission to show ASW logo.
     info->ego_screen       = Resource::texture("pictures/credit");
-    info->splash_screen    = Resource::texture(m.get("splash").as_string());
-    info->starmap          = Resource::texture(m.get("starmap").as_string());
+    info->splash_screen    = Resource::texture(required_string(x.get("splash")));
+    info->starmap          = Resource::texture(required_string(x.get("starmap")));
 
     return true;
 }
