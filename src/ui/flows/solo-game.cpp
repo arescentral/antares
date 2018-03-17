@@ -74,7 +74,7 @@ void SoloGame::become_front() {
         case RESTART_LEVEL:
             _state       = PLAYING;
             _game_result = NO_GAME;
-            stack()->push(new MainPlay(_level, false, &_input_source, true, &_game_result));
+            stack()->push(new MainPlay(*_level, false, &_input_source, true, &_game_result));
             break;
 
         case PLAYING: handle_game_result(); break;
@@ -93,7 +93,7 @@ void SoloGame::handle_game_result() {
             if (!epilogue.empty()) {
                 // normal scrolltext song
                 int scroll_song = 4002;
-                if (g.next_level == Level::none()) {
+                if (!g.next_level) {
                     // we win but no next level? Play triumph song
                     scroll_song = 4003;
                 }
@@ -123,10 +123,10 @@ void SoloGame::handle_game_result() {
 }
 
 void SoloGame::epilogue_done() {
-    _level = Level::none();
+    _level = nullptr;
     _state = QUIT;
 
-    if (g.next_level != Level::none()) {
+    if (g.next_level) {
         const int32_t chapter = g.next_level->chapter_number();
         if (chapter >= 0) {
             Ledger::ledger()->unlock_chapter(chapter);

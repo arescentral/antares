@@ -53,7 +53,7 @@ class SoloGame : public Card {
     void epilogue_done();
 
     bool                  _cancelled;
-    Handle<const Level>   _level;
+    const Level*          _level;
     GameResult            _game_result;
     PlayAgainScreen::Item _play_again;
     RealInputSource       _input_source;

@@ -94,7 +94,7 @@ static void populate_inline_picts(
 }
 
 static void update_mission_brief_point(
-        LabeledRect* dataItem, int32_t whichBriefPoint, const Level* level, coordPointType* corner,
+        LabeledRect* dataItem, int32_t whichBriefPoint, const Level& level, coordPointType* corner,
         int32_t scale, Rect* bounds, vector<inlinePictType>& inlinePict, Rect& highlight_rect,
         vector<pair<Point, Point>>& lines, pn::string_ref text) {
     if (whichBriefPoint < kMissionBriefPointOffset) {
@@ -196,12 +196,12 @@ static void update_mission_brief_point(
     populate_inline_picts(dataItem->bounds(), text, dataItem->style, inlinePict);
 }
 
-BriefingScreen::BriefingScreen(const Level* level, bool* cancelled)
+BriefingScreen::BriefingScreen(const Level& level, bool* cancelled)
         : InterfaceScreen("briefing", {0, 0, 640, 480}, true),
           _level(level),
           _cancelled(cancelled),
           _briefing_point(0),
-          _briefing_point_count(_level->briefings.size() + 2),
+          _briefing_point_count(_level.briefings.size() + 2),
           _data_item(data_item(item(MAP_RECT))) {
     build_star_map();
     for (int i = 0; i < 500; ++i) {
@@ -341,7 +341,7 @@ void BriefingScreen::build_star_map() {
     _bounds = pix_bounds;
     _bounds.center_in(item(MAP_RECT).bounds());
 
-    _star_rect = Rect(_level->star_map_point(), Size(0, 0));
+    _star_rect = Rect(_level.star_map_point(), Size(0, 0));
     _star_rect.inset(-kMissionStarPointWidth, -kMissionStarPointHeight);
 
     // Move `_star_rect` so that it is inside of `pix_bounds`.
@@ -363,7 +363,7 @@ void BriefingScreen::build_brief_point() {
         coordPointType corner;
         int32_t        scale;
         Rect           map_rect = item(MAP_RECT).bounds();
-        GetLevelFullScaleAndCorner(_level, 0, &corner, &scale, &map_rect);
+        GetLevelFullScaleAndCorner(0, &corner, &scale, &map_rect);
 
         vector<inlinePictType> inline_pict;
 
@@ -390,7 +390,7 @@ void BriefingScreen::draw_system_map() const {
     coordPointType corner;
     int32_t        scale;
     Rect           pix_bounds = _bounds.size().as_rect();
-    GetLevelFullScaleAndCorner(_level, 0, &corner, &scale, &pix_bounds);
+    GetLevelFullScaleAndCorner(0, &corner, &scale, &pix_bounds);
     Rect bounds = _bounds;
     bounds.offset(off.h, off.v);
     draw_arbitrary_sector_lines(corner, scale, 16, bounds);

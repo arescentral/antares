@@ -606,7 +606,7 @@ void WinAction::apply(
     } else if (focus.get()) {
         admiral = focus->owner;
     }
-    DeclareWinner(admiral, next.value_or(Level::none()), text);
+    DeclareWinner(admiral, next.value_or(Level::none()).get(), text);
 }
 
 void MessageAction::apply(

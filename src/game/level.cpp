@@ -155,7 +155,7 @@ Point Level::star_map_point() const { return starMap; }
 
 int32_t Level::chapter_number() const { return chapter; }
 
-LoadState start_construct_level(Handle<const Level> level) {
+LoadState start_construct_level(const Level& level) {
     ResetAllSpaceObjects();
     reset_action_queue();
     Vectors::reset();
@@ -170,7 +170,7 @@ LoadState start_construct_level(Handle<const Level> level) {
     gAbsoluteScale = kTimesTwoScale;
     g.sync         = 0;
 
-    g.level = level;
+    g.level = &level;
 
     {
         int32_t angle = g.level->angle;
@@ -182,7 +182,7 @@ LoadState start_construct_level(Handle<const Level> level) {
     }
 
     g.victor       = Admiral::none();
-    g.next_level   = Level::none();
+    g.next_level   = nullptr;
     g.victory_text = "";
 
     SetMiniScreenStatusStrList(g.level->score_strings);
@@ -305,7 +305,7 @@ static void run_game_1s() {
     } while ((g.time.time_since_epoch() % secs(1)) != ticks(0));
 }
 
-void construct_level(Handle<const Level> level, LoadState* state) {
+void construct_level(LoadState* state) {
     int32_t         step = state->step;
     std::bitset<16> all_colors;
     all_colors[0] = true;
@@ -348,8 +348,7 @@ void construct_level(Handle<const Level> level, LoadState* state) {
     return;
 }
 
-void DeclareWinner(
-        Handle<Admiral> whichPlayer, Handle<const Level> nextLevel, pn::string_view text) {
+void DeclareWinner(Handle<Admiral> whichPlayer, const Level* nextLevel, pn::string_view text) {
     if (!whichPlayer.get()) {
         // if there's no winner, we want to exit immediately
         g.next_level   = nextLevel;
@@ -374,8 +373,7 @@ void DeclareWinner(
 //  at which to show the entire scenario.
 
 void GetLevelFullScaleAndCorner(
-        const Level* level, int32_t rotation, coordPointType* corner, int32_t* scale,
-        Rect* bounds) {
+        int32_t rotation, coordPointType* corner, int32_t* scale, Rect* bounds) {
     int32_t biggest, mustFit;
     Point   coord, otherCoord, tempCoord;
 

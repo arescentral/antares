@@ -36,13 +36,11 @@ struct LoadState {
     int32_t max  = 1;  // So that (step / max) is 0 before construct_level() starts.
 };
 
-LoadState start_construct_level(Handle<const Level> level);
-void      construct_level(Handle<const Level> level, LoadState* state);
-void      DeclareWinner(
-             Handle<Admiral> whichPlayer, Handle<const Level> nextLevel, pn::string_view text);
-void GetLevelFullScaleAndCorner(
-        const Level* level, int32_t rotation, coordPointType* corner, int32_t* scale,
-        Rect* bounds);
+LoadState start_construct_level(const Level& level);
+void      construct_level(LoadState* state);
+void      DeclareWinner(Handle<Admiral> whichPlayer, const Level* nextLevel, pn::string_view text);
+void      GetLevelFullScaleAndCorner(
+             int32_t rotation, coordPointType* corner, int32_t* scale, Rect* bounds);
 coordPointType Translate_Coord_To_Level_Rotation(int32_t h, int32_t v);
 
 }  // namespace antares

@@ -146,7 +146,7 @@ class GamePlay : public Card {
 };
 
 MainPlay::MainPlay(
-        Handle<const Level> level, bool replay, InputSource* input, bool show_loading_screen,
+        const Level& level, bool replay, InputSource* input, bool show_loading_screen,
         GameResult* game_result)
         : _state(NEW),
           _level(level),
@@ -177,7 +177,7 @@ void MainPlay::become_front() {
             } else {
                 LoadState s = start_construct_level(_level);
                 while (!s.done) {
-                    construct_level(_level, &s);
+                    construct_level(&s);
                 }
             }
         }
@@ -191,7 +191,7 @@ void MainPlay::become_front() {
             }
             if (!_replay) {
                 _state = BRIEFING;
-                stack()->push(new BriefingScreen(_level.get(), &_cancelled));
+                stack()->push(new BriefingScreen(_level, &_cancelled));
                 break;
             }
         }
@@ -368,7 +368,7 @@ void GamePlay::become_front() {
                 case PlayAgainScreen::QUIT:
                     *_game_result  = QUIT_GAME;
                     g.game_over    = true;
-                    g.next_level   = Level::none();
+                    g.next_level   = nullptr;
                     g.victory_text = "";
                     stack()->pop(this);
                     break;
@@ -376,7 +376,7 @@ void GamePlay::become_front() {
                 case PlayAgainScreen::RESTART:
                     *_game_result  = RESTART_GAME;
                     g.game_over    = true;
-                    g.next_level   = Level::none();
+                    g.next_level   = nullptr;
                     g.victory_text = "";
                     stack()->pop(this);
                     break;
@@ -387,7 +387,7 @@ void GamePlay::become_front() {
                     *_game_result  = WIN_GAME;
                     g.game_over    = true;
                     g.victor       = g.admiral;
-                    g.next_level   = Handle<const Level>{g.level->chapter_number()};
+                    g.next_level   = Level::get(g.level->chapter_number());
                     g.victory_text = "";
                     stack()->pop(this);
                     break;

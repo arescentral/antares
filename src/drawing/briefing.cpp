@@ -45,9 +45,8 @@ Point BriefingSprite_GetBestLocation(
         int32_t gridWidth, int32_t gridHeight, Rect* bounds);
 
 void GetInitialObjectSpriteData(
-        const Level* level, Handle<const Level::Initial> whichObject, int32_t maxSize,
-        Rect* bounds, coordPointType* corner, int32_t scale, int32_t* thisScale, Point* where,
-        Rect* spriteRect);
+        Handle<const Level::Initial> whichObject, int32_t maxSize, Rect* bounds,
+        coordPointType* corner, int32_t scale, int32_t* thisScale, Point* where, Rect* spriteRect);
 
 void GetRealObjectSpriteData(
         coordPointType* realCoord, const BaseObject* baseObject, Handle<Admiral> owner,
@@ -213,8 +212,8 @@ void Briefing_Grid_Set(
 }
 
 void GetInitialObjectSpriteData(
-        const Level* level, Handle<const Level::Initial> whichObject, int32_t maxSize,
-        Rect* bounds, coordPointType* corner, int32_t scale, int32_t* thisScale, Point* where,
+        Handle<const Level::Initial> whichObject, int32_t maxSize, Rect* bounds,
+        coordPointType* corner, int32_t scale, int32_t* thisScale, Point* where,
         Rect* spriteRect) {
     spriteRect->right = spriteRect->left = -1;
 
@@ -448,13 +447,13 @@ void draw_briefing_objects(
 }
 
 void BriefPoint_Data_Get(
-        int32_t whichPoint, const Level* level, pn::string_ref header, pn::string_ref content,
+        int32_t whichPoint, const Level& level, pn::string_ref header, pn::string_ref content,
         Rect* hiliteBounds, coordPointType* corner, int32_t scale, int32_t minSectorSize,
         int32_t maxSize, Rect* bounds) {
     Point                  where;
     Rect                   spriteRect;
     int32_t                thisScale;
-    const Level::Briefing* brief = &level->briefings[whichPoint];
+    const Level::Briefing* brief = &level.briefings[whichPoint];
 
 #pragma unused(minSectorSize)
     hiliteBounds->right = hiliteBounds->left = 0;
@@ -462,8 +461,7 @@ void BriefPoint_Data_Get(
         hiliteBounds->left = hiliteBounds->right = -1;
     } else {
         GetInitialObjectSpriteData(
-                level, brief->object, maxSize, bounds, corner, scale, &thisScale, &where,
-                &spriteRect);
+                brief->object, maxSize, bounds, corner, scale, &thisScale, &where, &spriteRect);
         hiliteBounds->left   = spriteRect.left - 2;
         hiliteBounds->right  = spriteRect.right + 2;
         hiliteBounds->top    = spriteRect.top - 2;

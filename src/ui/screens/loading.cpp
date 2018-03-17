@@ -34,7 +34,7 @@ namespace antares {
 static const Hue   kLoadingScreenColor = Hue::PALE_GREEN;
 static const ticks kTypingDelay        = kMinorTick;
 
-LoadingScreen::LoadingScreen(Handle<const Level> level, bool* cancelled)
+LoadingScreen::LoadingScreen(const Level& level, bool* cancelled)
         : InterfaceScreen("loading", {0, 0, 640, 480}, true),
           _state(TYPING),
           _level(level),
@@ -43,7 +43,7 @@ LoadingScreen::LoadingScreen(Handle<const Level> level, bool* cancelled)
           _chars_typed(0) {
     _name_text.reset(new StyledText(sys.fonts.title));
     _name_text->set_fore_color(GetRGBTranslateColorShade(Hue::PALE_GREEN, VERY_LIGHT));
-    _name_text->set_retro_text(level->name);
+    _name_text->set_retro_text(level.name);
     _name_text->set_tab_width(220);
     _name_text->wrap_to(640, 0, 2);
 }
@@ -82,7 +82,7 @@ void LoadingScreen::fire_timer() {
             _next_update = now() + kTypingDelay;
             while (now() < _next_update) {
                 if (!_load_state.done) {
-                    construct_level(_level, &_load_state);
+                    construct_level(&_load_state);
                 } else {
                     _state = DONE;
                     return;
