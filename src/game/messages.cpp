@@ -432,7 +432,7 @@ void MessageLabel_Set_Special(Handle<Label> label, pn::string_view text) {
             break;
 
         case 'O': {
-            auto o = GetObjectFromInitialNumber(Handle<Level::Initial>(value));
+            auto o = GetObjectFromInitialNumber(Handle<const Level::Initial>(value));
             label->set_offset(-(label->get_width() / 2), 64);
             label->set_object(o);
 

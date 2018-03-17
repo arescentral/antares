@@ -34,7 +34,7 @@ namespace antares {
 static const Hue   kLoadingScreenColor = Hue::PALE_GREEN;
 static const ticks kTypingDelay        = kMinorTick;
 
-LoadingScreen::LoadingScreen(Handle<Level> level, bool* cancelled)
+LoadingScreen::LoadingScreen(Handle<const Level> level, bool* cancelled)
         : InterfaceScreen("loading", {0, 0, 640, 480}, true),
           _state(TYPING),
           _level(level),

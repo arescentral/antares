@@ -30,11 +30,11 @@ namespace antares {
 
 Race* Race::get(pn::string_view name) { return &plug.races[name.copy()]; }
 
-std::map<pn::string, Handle<BaseObject>> optional_ships(path_value x) {
+std::map<pn::string, Handle<const BaseObject>> optional_ships(path_value x) {
     if (x.value().is_null()) {
         return {};
     } else if (x.value().is_map()) {
-        std::map<pn::string, Handle<BaseObject>> ships;
+        std::map<pn::string, Handle<const BaseObject>> ships;
         for (pn::key_value_cref kv : x.value().as_map()) {
             ships.emplace(kv.key().copy(), required_base(x.get(kv.key())));
         }

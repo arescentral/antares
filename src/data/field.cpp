@@ -249,35 +249,37 @@ sfz::optional<Handle<Admiral>> optional_admiral(path_value x) {
 
 Handle<Admiral> required_admiral(path_value x) { return Handle<Admiral>(required_int(x)); }
 
-Handle<BaseObject> required_base(path_value x) { return Handle<BaseObject>(required_int(x)); }
+Handle<const BaseObject> required_base(path_value x) {
+    return Handle<const BaseObject>(required_int(x));
+}
 
-sfz::optional<Handle<Level::Initial>> optional_initial(path_value x) {
+sfz::optional<Handle<const Level::Initial>> optional_initial(path_value x) {
     if (x.value().is_null()) {
         return sfz::nullopt;
     } else if (x.value().is_int()) {
-        return sfz::make_optional(Handle<Level::Initial>(x.value().as_int()));
+        return sfz::make_optional(Handle<const Level::Initial>(x.value().as_int()));
     } else if (x.value().as_string() == "player") {
-        return sfz::make_optional(Handle<Level::Initial>(-2));
+        return sfz::make_optional(Handle<const Level::Initial>(-2));
     } else {
         throw std::runtime_error(
                 pn::format("{0}: must be null, int, or \"player\"", x.path()).c_str());
     }
 }
 
-Handle<Level::Initial> required_initial(path_value x) {
+Handle<const Level::Initial> required_initial(path_value x) {
     if (x.value().is_int()) {
-        return Handle<Level::Initial>(x.value().as_int());
+        return Handle<const Level::Initial>(x.value().as_int());
     } else if (x.value().as_string() == "player") {
-        return Handle<Level::Initial>(-2);
+        return Handle<const Level::Initial>(-2);
     } else {
         throw std::runtime_error(pn::format("{0}: must be int, or \"player\"", x.path()).c_str());
     }
 }
 
-sfz::optional<Handle<Level>> optional_level(path_value x) {
+sfz::optional<Handle<const Level>> optional_level(path_value x) {
     sfz::optional<int64_t> i = optional_int(x);
     if (i.has_value()) {
-        return sfz::make_optional(Handle<Level>(*i));
+        return sfz::make_optional(Handle<const Level>(*i));
     } else {
         return sfz::nullopt;
     }
@@ -288,7 +290,9 @@ sfz::optional<Owner> optional_owner(path_value x) {
             x, {{"any", Owner::ANY}, {"same", Owner::SAME}, {"different", Owner::DIFFERENT}});
 }
 
-NamedHandle<Race> required_race(path_value x) { return NamedHandle<Race>(required_string(x)); }
+NamedHandle<const Race> required_race(path_value x) {
+    return NamedHandle<const Race>(required_string(x));
+}
 
 template <typename T, int N>
 T required_enum(path_value x, const std::pair<pn::string_view, T> (&values)[N]) {
@@ -380,18 +384,18 @@ Range<ticks> required_ticks_range(path_value x) {
     return {ticks(range.begin), ticks(range.end)};
 }
 
-sfz::optional<HandleList<Level_Condition>> optional_condition_range(path_value x) {
+HandleList<const Level_Condition> optional_condition_range(path_value x) {
     auto range = optional_int_range(x);
     if (range.has_value()) {
-        return sfz::make_optional(HandleList<Level::Condition>(range->begin, range->end));
+        return HandleList<const Level::Condition>(range->begin, range->end);
     } else {
-        return sfz::nullopt;
+        return {-1, -1};
     }
 }
 
-HandleList<Level::Initial> required_initial_range(path_value x) {
+HandleList<const Level::Initial> required_initial_range(path_value x) {
     auto range = required_int_range(x);
-    return HandleList<Level::Initial>(range.begin, range.end);
+    return HandleList<const Level::Initial>(range.begin, range.end);
 }
 
 sfz::optional<Point> optional_point(path_value x) {

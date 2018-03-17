@@ -146,7 +146,7 @@ class GamePlay : public Card {
 };
 
 MainPlay::MainPlay(
-        Handle<Level> level, bool replay, InputSource* input, bool show_loading_screen,
+        Handle<const Level> level, bool replay, InputSource* input, bool show_loading_screen,
         GameResult* game_result)
         : _state(NEW),
           _level(level),
@@ -387,7 +387,7 @@ void GamePlay::become_front() {
                     *_game_result  = WIN_GAME;
                     g.game_over    = true;
                     g.victor       = g.admiral;
-                    g.next_level   = Handle<Level>{g.level->chapter_number()};
+                    g.next_level   = Handle<const Level>{g.level->chapter_number()};
                     g.victory_text = "";
                     stack()->pop(this);
                     break;

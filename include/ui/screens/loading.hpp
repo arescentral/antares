@@ -34,7 +34,7 @@ struct Level;
 
 class LoadingScreen : public InterfaceScreen {
   public:
-    LoadingScreen(Handle<Level> level, bool* cancelled);
+    LoadingScreen(Handle<const Level> level, bool* cancelled);
     ~LoadingScreen();
 
     virtual void become_front();
@@ -55,8 +55,8 @@ class LoadingScreen : public InterfaceScreen {
     };
     State _state;
 
-    Handle<Level> const _level;
-    bool* const         _cancelled;
+    Handle<const Level> const _level;
+    bool* const               _cancelled;
 
     std::unique_ptr<StyledText> _name_text;
     wall_time                   _next_update;

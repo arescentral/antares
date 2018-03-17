@@ -77,12 +77,12 @@ void usage(pn::file_view out, pn::string_view progname, int retcode) {
     exit(retcode);
 }
 
-void load_object_data(Handle<BaseObject> o) {
+void load_object_data(Handle<const BaseObject> o) {
     if (o.number() < 0) {
         return;
     }
     load_object(o);
-    for (Handle<BaseObject> w : {o->pulse.base, o->beam.base, o->special.base}) {
+    for (Handle<const BaseObject> w : {o->pulse.base, o->beam.base, o->special.base}) {
         load_object_data(w);
     }
     for (const std::unique_ptr<const Action>& a : o->activate) {
@@ -131,7 +131,7 @@ void main(int argc, char* const* argv) {
                     59,  61,  62,  64,  67,  75,  78,  80,  86,  88,  89,  93,  94,  95,  101,
                     104, 109, 110, 112, 113, 114, 118, 119, 120, 126, 127, 128, 129, 138, 139,
                     140, 142, 147, 148, 149, 151, 164, 165, 166, 167, 184, 243, 250, 270}) {
-        Handle<BaseObject> object(id);
+        Handle<const BaseObject> object(id);
         load_object_data(object);
         const int pict_id = object->pictPortraitResID;
         if (pict_id <= 0) {

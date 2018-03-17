@@ -61,7 +61,7 @@ void AddBaseObjectActionMedia(
         const std::vector<std::unique_ptr<const Action>>& actions, std::bitset<16> all_colors);
 void AddActionMedia(const Action& action, std::bitset<16> all_colors);
 
-void AddBaseObjectMedia(Handle<BaseObject> base, std::bitset<16> all_colors) {
+void AddBaseObjectMedia(Handle<const BaseObject> base, std::bitset<16> all_colors) {
     if (base.get()) {
         return;
     }
@@ -99,7 +99,8 @@ void AddBaseObjectMedia(Handle<BaseObject> base, std::bitset<16> all_colors) {
     AddBaseObjectActionMedia(base->activate, all_colors);
     AddBaseObjectActionMedia(base->arrive, all_colors);
 
-    for (Handle<BaseObject> weapon : {base->pulse.base, base->beam.base, base->special.base}) {
+    for (Handle<const BaseObject> weapon :
+         {base->pulse.base, base->beam.base, base->special.base}) {
         if (weapon.number() >= 0) {
             AddBaseObjectMedia(weapon, all_colors);
         }
@@ -143,7 +144,8 @@ static coordPointType rotate_coords(int32_t h, int32_t v, int32_t rotation) {
     return coord;
 }
 
-void GetInitialCoord(Handle<Level::Initial> initial, coordPointType* coord, int32_t rotation) {
+void GetInitialCoord(
+        Handle<const Level::Initial> initial, coordPointType* coord, int32_t rotation) {
     *coord = rotate_coords(initial->at.h, initial->at.v, rotation);
 }
 
@@ -153,7 +155,7 @@ Point Level::star_map_point() const { return starMap; }
 
 int32_t Level::chapter_number() const { return chapter; }
 
-LoadState start_construct_level(Handle<Level> level) {
+LoadState start_construct_level(Handle<const Level> level) {
     ResetAllSpaceObjects();
     reset_action_queue();
     Vectors::reset();
@@ -236,8 +238,8 @@ static void load_blessed_objects(std::bitset<16> all_colors) {
     // Load the four blessed objects.  The player's body is needed
     // in all colors; the other three are needed only as neutral
     // objects by default.
-    const auto&        info      = plug.info;
-    Handle<BaseObject> blessed[] = {
+    const auto&              info      = plug.info;
+    Handle<const BaseObject> blessed[] = {
             info.energyBlobID, info.warpInFlareID, info.warpOutFlareID, info.playerBodyID,
     };
     for (auto id : blessed) {
@@ -245,7 +247,7 @@ static void load_blessed_objects(std::bitset<16> all_colors) {
     }
 }
 
-static void load_initial(Handle<Level::Initial> initial, std::bitset<16> all_colors) {
+static void load_initial(Handle<const Level::Initial> initial, std::bitset<16> all_colors) {
     Handle<Admiral> owner      = initial->owner;
     auto            baseObject = initial->base;
     // TODO(sfiera): remap objects in networked games.
@@ -279,7 +281,7 @@ static void load_initial(Handle<Level::Initial> initial, std::bitset<16> all_col
     }
 }
 
-static void load_condition(Handle<Level::Condition> condition, std::bitset<16> all_colors) {
+static void load_condition(Handle<const Level::Condition> condition, std::bitset<16> all_colors) {
     for (const auto& action : condition->action) {
         AddActionMedia(*action, all_colors);
     }
@@ -303,7 +305,7 @@ static void run_game_1s() {
     } while ((g.time.time_since_epoch() % secs(1)) != ticks(0));
 }
 
-void construct_level(Handle<Level> level, LoadState* state) {
+void construct_level(Handle<const Level> level, LoadState* state) {
     int32_t         step = state->step;
     std::bitset<16> all_colors;
     all_colors[0] = true;
@@ -315,23 +317,23 @@ void construct_level(Handle<Level> level, LoadState* state) {
 
     if (step == 0) {
         load_blessed_objects(all_colors);
-        load_initial(Handle<Level::Initial>(step), all_colors);
+        load_initial(Handle<const Level::Initial>(step), all_colors);
     } else if (step < Level::Initial::all().size()) {
-        load_initial(Handle<Level::Initial>(step), all_colors);
+        load_initial(Handle<const Level::Initial>(step), all_colors);
     } else if (step == Level::Initial::all().size()) {
         // add media for all condition actions
         step -= Level::Initial::all().size();
         for (auto c : Level::Condition::all()) {
             load_condition(c, all_colors);
         }
-        create_initial(Handle<Level::Initial>(step));
+        create_initial(Handle<const Level::Initial>(step));
     } else if (step < (2 * Level::Initial::all().size())) {
         step -= Level::Initial::all().size();
-        create_initial(Handle<Level::Initial>(step));
+        create_initial(Handle<const Level::Initial>(step));
     } else if (step < (3 * Level::Initial::all().size())) {
         // double back and set up any defined initial destinations
         step -= (2 * Level::Initial::all().size());
-        set_initial_destination(Handle<Level::Initial>(step), false);
+        set_initial_destination(Handle<const Level::Initial>(step), false);
     } else if (step == (3 * Level::Initial::all().size())) {
         RecalcAllAdmiralBuildData();  // set up all the admiral's destination objects
         Messages::clear();
@@ -346,7 +348,8 @@ void construct_level(Handle<Level> level, LoadState* state) {
     return;
 }
 
-void DeclareWinner(Handle<Admiral> whichPlayer, Handle<Level> nextLevel, pn::string_view text) {
+void DeclareWinner(
+        Handle<Admiral> whichPlayer, Handle<const Level> nextLevel, pn::string_view text) {
     if (!whichPlayer.get()) {
         // if there's no winner, we want to exit immediately
         g.next_level   = nextLevel;

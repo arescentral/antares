@@ -227,7 +227,7 @@ void MiniScreenCleanup() {
 
 #pragma mark -
 
-void SetMiniScreenStatusStrList(std::vector<pn::string>& strings) {
+void SetMiniScreenStatusStrList(const std::vector<pn::string>& strings) {
     gMissionStatusStrList.clear();
     for (pn::string_view s : strings) {
         gMissionStatusStrList.emplace_back(s.copy());

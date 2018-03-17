@@ -67,8 +67,8 @@ struct GlobalState {
     game_ticks time;    // Current game time.
     Random     random;  // Global random number generator.
 
-    Handle<Level> level;
-    int32_t       angle;
+    Handle<const Level> level;
+    int32_t             angle;
 
     std::unique_ptr<Admiral[]> admirals;  // All admirals (whether active or not).
     Handle<Admiral>            admiral;   // Local player.
@@ -86,11 +86,11 @@ struct GlobalState {
 
     std::vector<bool> condition_enabled;  // Check conditions if enabled or persistent.
 
-    bool            game_over;     // True if an admiral won or lost the level.
-    game_ticks      game_over_at;  // The time to stop the game (ignored unless game_over).
-    Handle<Admiral> victor;        // The winner (or none).
-    Handle<Level>   next_level;    // Next level (or Level::none() for none).
-    pn::string      victory_text;  // Text to show in debriefing.
+    bool                game_over;     // True if an admiral won or lost the level.
+    game_ticks          game_over_at;  // The time to stop the game (ignored unless game_over).
+    Handle<Admiral>     victor;        // The winner (or none).
+    Handle<const Level> next_level;    // Next level (or Level::none() for none).
+    pn::string          victory_text;  // Text to show in debriefing.
 
     ticks                    radar_count;  // Counts down to a radar pulse every 5/6 seconds.
     std::unique_ptr<Point[]> radar_blips;  // Screen locations of radar blips.

@@ -252,9 +252,9 @@ struct objectFrameType {
 
 class BaseObject {
   public:
-    static BaseObject*        get(int number);
-    static BaseObject*        get(pn::string_view name);
-    static Handle<BaseObject> none() { return Handle<BaseObject>(-1); }
+    static BaseObject*              get(int number);
+    static BaseObject*              get(pn::string_view name);
+    static Handle<const BaseObject> none() { return Handle<const BaseObject>(-1); }
 
     pn::string name;
     pn::string short_name;
@@ -292,7 +292,7 @@ class BaseObject {
     Icon icon;
 
     struct Weapon {
-        Handle<BaseObject>          base;
+        Handle<const BaseObject>    base;
         std::vector<fixedPointType> positions;  // relative positions (unrotated) of fire points
     };
     Weapon pulse;

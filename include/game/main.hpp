@@ -39,7 +39,7 @@ enum GameResult {
 class MainPlay : public Card {
   public:
     MainPlay(
-            Handle<Level> level, bool replay, InputSource* input, bool show_loading_screen,
+            Handle<const Level> level, bool replay, InputSource* input, bool show_loading_screen,
             GameResult* game_result);
 
     virtual void become_front();
@@ -53,12 +53,12 @@ class MainPlay : public Card {
     };
     State _state;
 
-    Handle<Level>     _level;
-    const bool        _replay;
-    const bool        _show_loading_screen;
-    bool              _cancelled;
-    GameResult* const _game_result;
-    InputSource*      _input_source;
+    Handle<const Level> _level;
+    const bool          _replay;
+    const bool          _show_loading_screen;
+    bool                _cancelled;
+    GameResult* const   _game_result;
+    InputSource*        _input_source;
 };
 
 }  // namespace antares

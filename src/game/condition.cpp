@@ -31,15 +31,15 @@
 
 namespace antares {
 
-Level::Condition* Level::Condition::get(int number) {
+const Level::Condition* Level::Condition::get(int number) {
     if ((0 <= number) && (number < g.level->conditions.size())) {
         return g.level->conditions[number].get();
     }
     return nullptr;
 }
 
-HandleList<Level::Condition> Level::Condition::all() {
-    return HandleList<Level::Condition>(0, g.level->conditions.size());
+HandleList<const Level::Condition> Level::Condition::all() {
+    return HandleList<const Level::Condition>(0, g.level->conditions.size());
 }
 
 template <typename X, typename Y>

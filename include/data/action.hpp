@@ -55,18 +55,18 @@ struct Action {
     Owner owner = Owner::ANY;
     ticks delay = ticks(0);
 
-    Handle<Level_Initial> initialSubjectOverride;
-    Handle<Level_Initial> initialDirectOverride;
+    Handle<const Level_Initial> initialSubjectOverride;
+    Handle<const Level_Initial> initialDirectOverride;
 
     virtual ~Action() = default;
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset) const = 0;
 
-    virtual Handle<BaseObject> created_base() const;
-    virtual Range<int64_t>     sound_range() const;
-    virtual bool               alters_owner() const;
-    virtual bool               check_conditions() const;
+    virtual Handle<const BaseObject> created_base() const;
+    virtual Range<int64_t>           sound_range() const;
+    virtual bool                     alters_owner() const;
+    virtual bool                     check_conditions() const;
 
     static const size_t byte_size = 48;
 };
@@ -126,8 +126,8 @@ struct CloakAction : public Action {
 };
 
 struct ConditionAction : public Action {
-    HandleList<Level_Condition> enable;
-    HandleList<Level_Condition> disable;
+    HandleList<const Level_Condition> enable;
+    HandleList<const Level_Condition> disable;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
@@ -135,20 +135,20 @@ struct ConditionAction : public Action {
 };
 
 struct CreateAction : public Action {
-    Handle<BaseObject> base;                         // what type
-    Range<int64_t>     count              = {1, 2};  // # to make randomly
-    bool               relative_velocity  = false;   // is velocity relative to creator?
-    bool               relative_direction = false;   // determines initial heading
-    int32_t            distance           = 0;       // create at this distance in random direction
-    bool               inherit            = false;   // if false, gets creator as target
-                                                     // if true, gets creator’s target as target
-    bool legacy_random = false;                      // if true, consume a random number from
-                                                     // subject even if not necessary
+    Handle<const BaseObject> base;                         // what type
+    Range<int64_t>           count              = {1, 2};  // # to make randomly
+    bool                     relative_velocity  = false;   // is velocity relative to creator?
+    bool                     relative_direction = false;   // determines initial heading
+    int32_t                  distance = 0;      // create at this distance in random direction
+    bool                     inherit  = false;  // if false, gets creator as target
+                                                // if true, gets creator’s target as target
+    bool legacy_random = false;                 // if true, consume a random number from
+                                                // subject even if not necessary
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset) const;
-    virtual Handle<BaseObject> created_base() const;
+    virtual Handle<const BaseObject> created_base() const;
 };
 
 struct DisableAction : public Action {
@@ -168,13 +168,13 @@ struct EnergizeAction : public Action {
 };
 
 struct EquipAction : public Action {
-    Weapon             which;
-    Handle<BaseObject> base;
+    Weapon                   which;
+    Handle<const BaseObject> base;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset) const;
-    virtual Handle<BaseObject> created_base() const;
+    virtual Handle<const BaseObject> created_base() const;
 };
 
 struct FireAction : public Action {
@@ -245,13 +245,13 @@ struct MessageAction : public Action {
 };
 
 struct MorphAction : public Action {
-    bool               keep_ammo;
-    Handle<BaseObject> base;
+    bool                     keep_ammo;
+    Handle<const BaseObject> base;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset) const;
-    virtual Handle<BaseObject> created_base() const;
+    virtual Handle<const BaseObject> created_base() const;
 };
 
 struct MoveAction : public Action {
@@ -297,7 +297,7 @@ struct PushAction : public Action {
 };
 
 struct RevealAction : public Action {
-    HandleList<Level_Initial> initial;
+    HandleList<const Level_Initial> initial;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
@@ -373,9 +373,9 @@ struct WarpAction : public Action {
 };
 
 struct WinAction : public Action {
-    sfz::optional<Handle<Admiral>> player;  // victor; absent = owner of focus
-    sfz::optional<Handle<Level>>   next;    // next chapter to play; absent = none
-    pn::string                     text;    // "debriefing" text
+    sfz::optional<Handle<Admiral>>     player;  // victor; absent = owner of focus
+    sfz::optional<Handle<const Level>> next;    // next chapter to play; absent = none
+    pn::string                         text;    // "debriefing" text
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,

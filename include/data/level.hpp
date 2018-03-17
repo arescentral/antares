@@ -55,16 +55,16 @@ const int32_t kInitiallyTrue = 0x00000002;
 const int32_t kHasBeenTrue   = 0x00000004;
 
 struct ScenarioInfo {
-    Handle<BaseObject> warpInFlareID;
-    Handle<BaseObject> warpOutFlareID;
-    Handle<BaseObject> playerBodyID;
-    Handle<BaseObject> energyBlobID;
-    pn::string         downloadURLString;
-    pn::string         titleString;
-    pn::string         authorNameString;
-    pn::string         authorURLString;
-    pn::string         intro_text;
-    pn::string         about_text;
+    Handle<const BaseObject> warpInFlareID;
+    Handle<const BaseObject> warpOutFlareID;
+    Handle<const BaseObject> playerBodyID;
+    Handle<const BaseObject> energyBlobID;
+    pn::string               downloadURLString;
+    pn::string               titleString;
+    pn::string               authorNameString;
+    pn::string               authorURLString;
+    pn::string               intro_text;
+    pn::string               about_text;
 
     Texture publisher_screen;
     Texture ego_screen;
@@ -130,11 +130,11 @@ struct Level {
     LevelType type = LevelType::DEMO;
 
     struct Player {
-        PlayerType        playerType = PlayerType::CPU;
-        NamedHandle<Race> playerRace;
-        pn::string        name;
-        Fixed             earningPower = Fixed::zero();
-        int16_t           netRaceFlags = 0;
+        PlayerType              playerType = PlayerType::CPU;
+        NamedHandle<const Race> playerRace;
+        pn::string              name;
+        Fixed                   earningPower = Fixed::zero();
+        int16_t                 netRaceFlags = 0;
     };
 
     int                     chapter = -1;
@@ -162,8 +162,8 @@ struct Level {
 
     static const size_t byte_size = 124;
 
-    static Level*        get(int n);
-    static Handle<Level> none() { return Handle<Level>(-1); }
+    static const Level*        get(int n);
+    static Handle<const Level> none() { return Handle<const Level>(-1); }
 
     Point   star_map_point() const;
     int32_t chapter_number() const;
@@ -171,16 +171,16 @@ struct Level {
 Level level(pn::value_cref x);
 
 struct Level_Initial {
-    Handle<BaseObject> base;
-    Handle<Admiral>    owner;
-    Point              at;
-    Fixed              earning;
+    Handle<const BaseObject> base;
+    Handle<Admiral>          owner;
+    Point                    at;
+    Fixed                    earning;
 
     pn::string name_override;
     int32_t    sprite_override;
 
-    std::vector<pn::string> build;
-    Handle<Level::Initial>  target;
+    std::vector<pn::string>      build;
+    Handle<const Level::Initial> target;
 
     class Attributes {
       public:
@@ -196,9 +196,9 @@ struct Level_Initial {
     };
     Attributes attributes;
 
-    static Level::Initial*            get(int n);
-    static Handle<Level::Initial>     none() { return Handle<Level::Initial>(-1); }
-    static HandleList<Level::Initial> all();
+    static const Level::Initial*            get(int n);
+    static Handle<const Level::Initial>     none() { return Handle<const Level::Initial>(-1); }
+    static HandleList<const Level::Initial> all();
 
     static const size_t byte_size = 108;
 };
@@ -207,14 +207,14 @@ struct Level_Condition {
     ConditionOp                                op                = ConditionOp::EQ;
     bool                                       initially_enabled = true;
     bool                                       persistent        = false;
-    Handle<Level::Initial>                     subject;
-    Handle<Level::Initial>                     object;
+    Handle<const Level::Initial>               subject;
+    Handle<const Level::Initial>               object;
     std::vector<std::unique_ptr<const Action>> action;
 
     static const size_t byte_size = 38;
 
-    static Level::Condition*            get(int n);
-    static HandleList<Level::Condition> all();
+    static const Level::Condition*            get(int n);
+    static HandleList<const Level::Condition> all();
 
     Level_Condition()            = default;
     virtual ~Level_Condition()   = default;
@@ -269,9 +269,9 @@ struct Level::CounterCondition : Level::Condition {
 // or `object`.
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”
 struct Level::DestroyedCondition : Level::Condition {
-    Handle<Level::Initial> initial;
-    bool                   value;
-    virtual bool           is_true() const;
+    Handle<const Level::Initial> initial;
+    bool                         value;
+    virtual bool                 is_true() const;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -382,9 +382,9 @@ struct Level::ZoomCondition : Level::Condition {
 //
 
 struct Level_Briefing {
-    Handle<Level::Initial> object;   // Object to focus on, or none for freestanding.
-    pn::string             title;    // Plain text, used for title bar.
-    pn::string             content;  // Styled text, used for body.
+    Handle<const Level::Initial> object;   // Object to focus on, or none for freestanding.
+    pn::string                   title;    // Plain text, used for title bar.
+    pn::string                   content;  // Styled text, used for body.
 
     static const size_t byte_size = 24;
 };

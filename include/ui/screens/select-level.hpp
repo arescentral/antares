@@ -30,7 +30,7 @@ struct Level;
 
 class SelectLevelScreen : public InterfaceScreen {
   public:
-    SelectLevelScreen(bool* cancelled, Handle<Level>* level);
+    SelectLevelScreen(bool* cancelled, Handle<const Level>* level);
     ~SelectLevelScreen();
 
     virtual void become_front();
@@ -62,12 +62,12 @@ class SelectLevelScreen : public InterfaceScreen {
 
     void draw_level_name() const;
 
-    bool*            _cancelled;
-    size_t           _index;
-    Handle<Level>*   _level;
-    std::vector<int> _chapters;
-    int              _unlock_digits;
-    size_t           _unlock_chapter;
+    bool*                _cancelled;
+    size_t               _index;
+    Handle<const Level>* _level;
+    std::vector<int>     _chapters;
+    int                  _unlock_digits;
+    size_t               _unlock_chapter;
 };
 
 }  // namespace antares

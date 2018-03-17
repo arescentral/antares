@@ -122,10 +122,10 @@ class Admiral {
     Handle<Destination>& buildAtObject() {
         return _buildAtObject;
     }  // # of destination object to build at
-    const NamedHandle<Race>& race() { return _race; }
-    Fixed                    cash() const { return _cash; }
-    Fixed&                   cash() { return _cash; }
-    Fixed&                   saveGoal() { return _saveGoal; }
+    const NamedHandle<const Race>& race() { return _race; }
+    Fixed                          cash() const { return _cash; }
+    Fixed&                         cash() { return _cash; }
+    Fixed&                         saveGoal() { return _saveGoal; }
 
     Fixed earning_power() { return _earning_power; }
     void  set_earning_power(Fixed value) { _earning_power = value; }
@@ -156,7 +156,7 @@ class Admiral {
     int32_t                       _considerShipID      = -1;
     int32_t                       _considerDestination = kNoShip;
     Handle<Destination>           _buildAtObject;  // # of destination object to build at
-    NamedHandle<Race>             _race;
+    NamedHandle<const Race>       _race;
     Fixed                         _cash                    = Fixed::zero();
     Fixed                         _saveGoal                = Fixed::zero();
     Fixed                         _earning_power           = Fixed::zero();

@@ -95,7 +95,7 @@ void PluginInit() {
     });
 }
 
-void load_race(const NamedHandle<Race>& r) {
+void load_race(const NamedHandle<const Race>& r) {
     if (plug.races.find(r.name().copy()) != plug.races.end()) {
         return;  // already loaded.
     }
@@ -114,7 +114,7 @@ void load_race(const NamedHandle<Race>& r) {
     }
 }
 
-void load_object(const NamedHandle<BaseObject>& o) {
+void load_object(const NamedHandle<const BaseObject>& o) {
     if (plug.objects.find(o.name().copy()) != plug.objects.end()) {
         return;  // already loaded.
     }
@@ -133,8 +133,8 @@ void load_object(const NamedHandle<BaseObject>& o) {
     }
 }
 
-void load_object(Handle<BaseObject> o) {
-    return load_object(NamedHandle<BaseObject>(pn::dump(o.number(), pn::dump_short)));
+void load_object(Handle<const BaseObject> o) {
+    return load_object(NamedHandle<const BaseObject>(pn::dump(o.number(), pn::dump_short)));
 }
 
 }  // namespace antares

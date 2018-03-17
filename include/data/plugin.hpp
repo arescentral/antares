@@ -37,9 +37,9 @@ extern ScenarioGlobals plug;
 
 void PluginInit();
 
-void load_race(const NamedHandle<Race>& r);
-void load_object(const NamedHandle<BaseObject>& o);
-void load_object(Handle<BaseObject> o);
+void load_race(const NamedHandle<const Race>& r);
+void load_object(const NamedHandle<const BaseObject>& o);
+void load_object(Handle<const BaseObject> o);
 
 }  // namespace antares
 

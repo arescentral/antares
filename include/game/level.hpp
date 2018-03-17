@@ -36,9 +36,10 @@ struct LoadState {
     int32_t max  = 1;  // So that (step / max) is 0 before construct_level() starts.
 };
 
-LoadState start_construct_level(Handle<Level> level);
-void      construct_level(Handle<Level> level, LoadState* state);
-void DeclareWinner(Handle<Admiral> whichPlayer, Handle<Level> nextLevel, pn::string_view text);
+LoadState start_construct_level(Handle<const Level> level);
+void      construct_level(Handle<const Level> level, LoadState* state);
+void      DeclareWinner(
+             Handle<Admiral> whichPlayer, Handle<const Level> nextLevel, pn::string_view text);
 void GetLevelFullScaleAndCorner(
         const Level* level, int32_t rotation, coordPointType* corner, int32_t* scale,
         Rect* bounds);

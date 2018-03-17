@@ -60,10 +60,8 @@ static std::unique_ptr<Action> cloak_action(path_value x) {
 
 static std::unique_ptr<Action> condition_action(path_value x) {
     std::unique_ptr<ConditionAction> a(new ConditionAction);
-    a->enable = optional_condition_range(x.get("enable"))
-                        .value_or(HandleList<Level::Condition>{-1, -1});
-    a->disable = optional_condition_range(x.get("disable"))
-                         .value_or(HandleList<Level::Condition>{-1, -1});
+    a->enable  = optional_condition_range(x.get("enable"));
+    a->disable = optional_condition_range(x.get("disable"));
     return std::move(a);
 }
 
@@ -435,14 +433,14 @@ std::vector<std::unique_ptr<const Action>> optional_action_array(path_value x) {
     }
 }
 
-Handle<BaseObject> Action::created_base() const { return BaseObject::none(); }
-Range<int64_t>     Action::sound_range() const { return Range<int64_t>::empty(); }
-bool               Action::alters_owner() const { return false; }
-bool               Action::check_conditions() const { return false; }
+Handle<const BaseObject> Action::created_base() const { return BaseObject::none(); }
+Range<int64_t>           Action::sound_range() const { return Range<int64_t>::empty(); }
+bool                     Action::alters_owner() const { return false; }
+bool                     Action::check_conditions() const { return false; }
 
-Handle<BaseObject> CreateAction::created_base() const { return base; }
-Handle<BaseObject> MorphAction::created_base() const { return base; }
-Handle<BaseObject> EquipAction::created_base() const { return base; }
+Handle<const BaseObject> CreateAction::created_base() const { return base; }
+Handle<const BaseObject> MorphAction::created_base() const { return base; }
+Handle<const BaseObject> EquipAction::created_base() const { return base; }
 
 Range<int64_t> SoundAction::sound_range() const { return id; }
 

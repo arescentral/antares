@@ -695,13 +695,11 @@ static void execute_actions(
 
         auto subject = original_subject;
         if (action.initialSubjectOverride.number() != kNoShip) {
-            subject = GetObjectFromInitialNumber(
-                    Handle<Level::Initial>(action.initialSubjectOverride));
+            subject = GetObjectFromInitialNumber(action.initialSubjectOverride);
         }
         auto object = original_object;
         if (action.initialDirectOverride.number() != kNoShip) {
-            object = GetObjectFromInitialNumber(
-                    Handle<Level::Initial>(action.initialDirectOverride));
+            object = GetObjectFromInitialNumber(action.initialDirectOverride);
         }
 
         if ((action.delay > ticks(0)) && allowDelay) {
