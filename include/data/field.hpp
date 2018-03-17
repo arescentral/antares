@@ -82,6 +82,8 @@ bool                required_bool(path_value x);
 sfz::optional<int64_t> optional_int(path_value x);
 int64_t                required_int(path_value x);
 
+double required_double(path_value x);
+
 sfz::optional<Fixed> optional_fixed(path_value x);
 Fixed                required_fixed(path_value x);
 
@@ -95,6 +97,7 @@ sfz::optional<Handle<Admiral>>       optional_admiral(path_value x);
 Handle<Admiral>                      required_admiral(path_value x);
 Handle<BaseObject>                   required_base(path_value x);
 sfz::optional<Handle<Level_Initial>> optional_initial(path_value x);
+Handle<Level_Initial>                required_initial(path_value x);
 sfz::optional<Handle<Level>>         optional_level(path_value x);
 sfz::optional<Owner>                 optional_owner(path_value x);
 

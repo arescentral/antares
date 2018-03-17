@@ -197,11 +197,6 @@ bool read_from(pn::file_view in, std::unique_ptr<Level::Condition>* condition) {
         case kAgeCondition:
         case kRandomCondition: init_condition<Level::FalseCondition>(condition); break;
 
-        case kHalfHealthCondition:
-            init_condition<Level::HealthCondition>(condition)->value = 0.5;
-            (*condition)->op                                         = ConditionOp::LE;
-            break;
-
         case kIsAuxiliaryObject:
             init_condition<Level::SubjectCondition>(condition)->value =
                     Level::SubjectCondition::Value::CONTROL;
@@ -224,18 +219,6 @@ bool read_from(pn::file_view in, std::unique_ptr<Level::Condition>* condition) {
                     Level::SubjectCondition::Value::PLAYER;
             (*condition)->op = ConditionOp::EQ;
             break;
-
-        case kDestructionCondition: {
-            int32_t initial;
-            if (!sub.read(&initial)) {
-                return false;
-            }
-            auto* destroyed    = init_condition<Level::DestroyedCondition>(condition);
-            destroyed->initial = Handle<Level::Initial>(initial);
-            destroyed->value   = true;
-            destroyed->op      = ConditionOp::EQ;
-            break;
-        }
 
         case kOwnerCondition: {
             int32_t player;
@@ -286,20 +269,6 @@ bool read_from(pn::file_view in, std::unique_ptr<Level::Condition>* condition) {
             break;
         }
 
-        case kProximityCondition:
-            if (!sub.read(&init_condition<Level::DistanceCondition>(condition)->value)) {
-                return false;
-            }
-            (*condition)->op = ConditionOp::LT;
-            break;
-
-        case kDistanceGreaterCondition:
-            if (!sub.read(&init_condition<Level::DistanceCondition>(condition)->value)) {
-                return false;
-            }
-            (*condition)->op = ConditionOp::GE;
-            break;
-
         case kCurrentMessageCondition: {
             auto* message = init_condition<Level::MessageCondition>(condition);
             if (!sub.read(&message->start, &message->page)) {
@@ -309,6 +278,10 @@ bool read_from(pn::file_view in, std::unique_ptr<Level::Condition>* condition) {
             break;
         }
 
+        case kHalfHealthCondition:
+        case kDestructionCondition:
+        case kProximityCondition:
+        case kDistanceGreaterCondition:
         case kObjectIsBeingBuilt:
         case kAutopilotCondition:
         case kNotAutopilotCondition:
@@ -355,6 +328,25 @@ static std::unique_ptr<Level::Condition> counter_condition(path_value x) {
     return std::move(c);
 }
 
+static std::unique_ptr<Level::Condition> destroyed_condition(path_value x) {
+    std::unique_ptr<Level::DestroyedCondition> c(new Level::DestroyedCondition);
+    c->initial = required_initial(x.get("initial"));
+    c->value   = required_bool(x.get("value"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> distance_condition(path_value x) {
+    std::unique_ptr<Level::DistanceCondition> c(new Level::DistanceCondition);
+    c->value = required_int(x.get("value"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> health_condition(path_value x) {
+    std::unique_ptr<Level::HealthCondition> c(new Level::HealthCondition);
+    c->value = required_double(x.get("value"));
+    return std::move(c);
+}
+
 static std::unique_ptr<Level::Condition> condition(pn::value_cref x0) {
     path_value x{x0};
 
@@ -369,10 +361,13 @@ static std::unique_ptr<Level::Condition> condition(pn::value_cref x0) {
     } else if (type == "counter") {
         c = counter_condition(x);
     } else if (type == "destroyed") {
+        c = destroyed_condition(x);
     } else if (type == "distance") {
+        c = distance_condition(x);
     } else if (type == "false") {
         return std::unique_ptr<Level::Condition>(new Level::FalseCondition);
     } else if (type == "health") {
+        c = health_condition(x);
     } else if (type == "message") {
     } else if (type == "ordered") {
     } else if (type == "owner") {

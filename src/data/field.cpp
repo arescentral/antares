@@ -82,6 +82,14 @@ int64_t required_int(path_value x) {
     }
 }
 
+double required_double(path_value x) {
+    if (x.value().is_float()) {
+        return x.value().as_float();
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be float", x.path()).c_str());
+    }
+}
+
 sfz::optional<Fixed> optional_fixed(path_value x) {
     if (x.value().is_null()) {
         return sfz::nullopt;
@@ -174,6 +182,16 @@ sfz::optional<Handle<Level::Initial>> optional_initial(path_value x) {
     } else {
         throw std::runtime_error(
                 pn::format("{0}: must be null, int, or \"player\"", x.path()).c_str());
+    }
+}
+
+Handle<Level::Initial> required_initial(path_value x) {
+    if (x.value().is_int()) {
+        return Handle<Level::Initial>(x.value().as_int());
+    } else if (x.value().as_string() == "player") {
+        return Handle<Level::Initial>(-2);
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be int, or \"player\"", x.path()).c_str());
     }
 }
 
