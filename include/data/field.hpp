@@ -77,6 +77,7 @@ class path_value {
 };
 
 sfz::optional<bool> optional_bool(path_value x);
+bool                required_bool(path_value x);
 
 sfz::optional<int64_t> optional_int(path_value x);
 int64_t                required_int(path_value x);
@@ -91,6 +92,7 @@ sfz::optional<ticks> optional_ticks(path_value x);
 ticks                required_ticks(path_value x);
 
 sfz::optional<Handle<Admiral>>       optional_admiral(path_value x);
+Handle<Admiral>                      required_admiral(path_value x);
 Handle<BaseObject>                   required_base(path_value x);
 sfz::optional<Handle<Level_Initial>> optional_initial(path_value x);
 sfz::optional<Handle<Level>>         optional_level(path_value x);

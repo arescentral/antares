@@ -268,7 +268,7 @@ struct Level::BuildingCondition : Level::Condition {
 //
 // Warning: not net-safe.
 struct Level::ComputerCondition : Level::Condition {
-    int32_t      screen;
+    Screen       screen;
     int32_t      line;
     virtual bool is_true() const;
 };

@@ -74,11 +74,11 @@ bool Level::BuildingCondition::is_true() const {
 
 bool Level::ComputerCondition::is_true() const {
     if (line < 0) {
-        return op_eq(op, g.mini.currentScreen, screen);
+        return op_eq(op, g.mini.currentScreen, static_cast<int>(screen));
     } else {
         return op_eq(
                 op, std::make_pair(g.mini.currentScreen, g.mini.selectLine),
-                std::make_pair(screen, line));
+                std::make_pair(static_cast<int>(screen), line));
     }
 }
 

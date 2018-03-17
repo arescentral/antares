@@ -56,6 +56,14 @@ sfz::optional<bool> optional_bool(path_value x) {
     }
 }
 
+bool required_bool(path_value x) {
+    if (x.value().is_bool()) {
+        return x.value().as_bool();
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be bool", x.path()).c_str());
+    }
+}
+
 sfz::optional<int64_t> optional_int(path_value x) {
     if (x.value().is_null()) {
         return sfz::nullopt;
@@ -151,6 +159,8 @@ sfz::optional<Handle<Admiral>> optional_admiral(path_value x) {
         return sfz::nullopt;
     }
 }
+
+Handle<Admiral> required_admiral(path_value x) { return Handle<Admiral>(required_int(x)); }
 
 Handle<BaseObject> required_base(path_value x) { return Handle<BaseObject>(required_int(x)); }
 

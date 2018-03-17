@@ -214,11 +214,6 @@ bool read_from(pn::file_view in, std::unique_ptr<Level::Condition>* condition) {
             (*condition)->op = ConditionOp::EQ;
             break;
 
-        case kObjectIsBeingBuilt:
-            init_condition<Level::BuildingCondition>(condition)->value = true;
-            (*condition)->op                                           = ConditionOp::EQ;
-            break;
-
         case kDirectIsSubjectTarget:
             init_condition<Level::OrderedCondition>(condition);
             (*condition)->op = ConditionOp::EQ;
@@ -229,49 +224,6 @@ bool read_from(pn::file_view in, std::unique_ptr<Level::Condition>* condition) {
                     Level::SubjectCondition::Value::PLAYER;
             (*condition)->op = ConditionOp::EQ;
             break;
-
-        case kAutopilotCondition:
-            init_condition<Level::AutopilotCondition>(condition)->value = true;
-            (*condition)->op                                            = ConditionOp::EQ;
-            break;
-
-        case kNotAutopilotCondition:
-            init_condition<Level::AutopilotCondition>(condition)->value = false;
-            (*condition)->op                                            = ConditionOp::EQ;
-            break;
-
-        case kCounterCondition: {
-            auto*   counter = init_condition<Level::CounterCondition>(condition);
-            int32_t admiral;
-            if (!sub.read(&admiral, &counter->counter, &counter->value)) {
-                return false;
-            }
-            counter->player = Handle<Admiral>(admiral);
-            counter->op     = ConditionOp::EQ;
-            break;
-        }
-
-        case kCounterGreaterCondition: {
-            auto*   counter = init_condition<Level::CounterCondition>(condition);
-            int32_t admiral;
-            if (!sub.read(&admiral, &counter->counter, &counter->value)) {
-                return false;
-            }
-            counter->player = Handle<Admiral>(admiral);
-            counter->op     = ConditionOp::GE;
-            break;
-        }
-
-        case kCounterNotCondition: {
-            auto*   counter = init_condition<Level::CounterCondition>(condition);
-            int32_t admiral;
-            if (!sub.read(&admiral, &counter->counter, &counter->value)) {
-                return false;
-            }
-            counter->player = Handle<Admiral>(admiral);
-            counter->op     = ConditionOp::NE;
-            break;
-        }
 
         case kDestructionCondition: {
             int32_t initial;
@@ -357,14 +309,13 @@ bool read_from(pn::file_view in, std::unique_ptr<Level::Condition>* condition) {
             break;
         }
 
-        case kCurrentComputerCondition: {
-            auto* computer = init_condition<Level::ComputerCondition>(condition);
-            if (!sub.read(&computer->screen, &computer->line)) {
-                return false;
-            }
-            (*condition)->op = ConditionOp::EQ;
-            break;
-        }
+        case kObjectIsBeingBuilt:
+        case kAutopilotCondition:
+        case kNotAutopilotCondition:
+        case kCounterCondition:
+        case kCounterGreaterCondition:
+        case kCounterNotCondition:
+        case kCurrentComputerCondition: break;
     }
 
     if (*condition) {
@@ -377,16 +328,46 @@ bool read_from(pn::file_view in, std::unique_ptr<Level::Condition>* condition) {
     return true;
 }
 
-static std::unique_ptr<Level::Condition> condition(pn::value_cref x0) {
-    path_value                        x{x0};
-    std::unique_ptr<Level::Condition> c;
-    read_from(x.get("bin").value().as_data().open(), &c);
+static std::unique_ptr<Level::Condition> autopilot_condition(path_value x) {
+    std::unique_ptr<Level::AutopilotCondition> c(new Level::AutopilotCondition);
+    c->value = required_bool(x.get("value"));
+    return std::move(c);
+}
 
-    pn::string_view type = required_string(x.get("type"));
+static std::unique_ptr<Level::Condition> building_condition(path_value x) {
+    std::unique_ptr<Level::BuildingCondition> c(new Level::BuildingCondition);
+    c->value = required_bool(x.get("value"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> computer_condition(path_value x) {
+    std::unique_ptr<Level::ComputerCondition> c(new Level::ComputerCondition);
+    c->screen = required_screen(x.get("screen"));
+    c->line   = optional_int(x.get("line")).value_or(-1);
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> counter_condition(path_value x) {
+    std::unique_ptr<Level::CounterCondition> c(new Level::CounterCondition);
+    c->player  = required_admiral(x.get("player"));
+    c->counter = required_int(x.get("counter"));
+    c->value   = required_int(x.get("value"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> condition(pn::value_cref x0) {
+    path_value x{x0};
+
+    pn::string_view                   type = required_string(x.get("type"));
+    std::unique_ptr<Level::Condition> c;
     if (type == "autopilot") {
+        c = autopilot_condition(x);
     } else if (type == "building") {
+        c = building_condition(x);
     } else if (type == "computer") {
+        c = computer_condition(x);
     } else if (type == "counter") {
+        c = counter_condition(x);
     } else if (type == "destroyed") {
     } else if (type == "distance") {
     } else if (type == "false") {
@@ -402,6 +383,8 @@ static std::unique_ptr<Level::Condition> condition(pn::value_cref x0) {
     } else if (type == "zoom") {
     } else {
     }
+
+    read_from(x.get("bin").value().as_data().open(), &c);
 
     c->op                = required_condition_op(x.get("op"));
     c->persistent        = optional_bool(x.get("persistent")).value_or(false);
