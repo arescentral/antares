@@ -339,6 +339,18 @@ static Range<ticks> required_ticks_range(path_value x) {
     return {ticks(range.begin), ticks(range.end)};
 }
 
+static sfz::optional<coordPointType> optional_point(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_map()) {
+        uint32_t px = required_int(x.get("x"));
+        uint32_t py = required_int(x.get("y"));
+        return sfz::make_optional<coordPointType>({px, py});
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
+    }
+}
+
 static Hue required_hue(path_value x) {
     return required_enum<Hue>(
             x, {{"red", Hue::RED},
@@ -364,6 +376,13 @@ static KillAction::Kind required_kill_kind(path_value x) {
             x, {{"none", KillAction::Kind::NONE},
                 {"expire", KillAction::Kind::EXPIRE},
                 {"destroy", KillAction::Kind::DESTROY}});
+}
+
+static sfz::optional<MoveAction::Origin> optional_origin(path_value x) {
+    return optional_enum<MoveAction::Origin>(
+            x, {{"level", MoveAction::Origin::LEVEL},
+                {"subject", MoveAction::Origin::SUBJECT},
+                {"object", MoveAction::Origin::OBJECT}});
 }
 
 static PushAction::Kind required_push_kind(path_value x) {
@@ -583,6 +602,14 @@ static std::unique_ptr<Action> morph_action(path_value x) {
     return std::move(a);
 }
 
+static std::unique_ptr<Action> move_action(path_value x) {
+    std::unique_ptr<MoveAction> a(new MoveAction);
+    a->origin   = optional_origin(x.get("origin")).value_or(MoveAction::Origin::LEVEL);
+    a->to       = optional_point(x.get("to")).value_or(coordPointType{0, 0});
+    a->distance = optional_int(x.get("distance")).value_or(0);
+    return std::move(a);
+}
+
 static std::unique_ptr<Action> order_action(path_value x) {
     return std::unique_ptr<OrderAction>(new OrderAction);
 }
@@ -678,42 +705,6 @@ bool read_from(pn::file_view in, RevealAction* reveal) {
     return true;
 }
 
-bool read_from_relative(pn::file_view in, bool reflexive, MoveAction* move) {
-    uint8_t relative;
-    int32_t distance;
-    if (!in.read(&relative, &distance)) {
-        return false;
-    }
-    if (!relative) {
-        move->origin = MoveAction::Origin::LEVEL;
-    } else if (reflexive) {
-        move->origin = MoveAction::Origin::OBJECT;
-    } else {
-        move->origin = MoveAction::Origin::SUBJECT;
-    }
-    move->to       = {0, 0};
-    move->distance = distance;
-    return true;
-}
-
-bool read_from_absolute(pn::file_view in, bool reflexive, MoveAction* move) {
-    uint8_t  relative;
-    uint32_t x, y;
-    if (!in.read(&relative, &x, &y)) {
-        return false;
-    }
-    if (!relative) {
-        move->origin = MoveAction::Origin::LEVEL;
-    } else if (reflexive) {
-        move->origin = MoveAction::Origin::SUBJECT;
-    } else {
-        move->origin = MoveAction::Origin::OBJECT;
-    }
-    move->to       = {x, y};
-    move->distance = 0;
-    return true;
-}
-
 bool read_from(pn::file_view in, ScoreAction* score) {
     int32_t admiral;
     if (!in.read(&admiral, &score->which, &score->value)) {
@@ -791,10 +782,8 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
                 case kAlterOccupation: return read_from(sub, init<OccupyAction>(action));
                 case kAlterAbsoluteCash: return true;
                 case kAlterAge: return true;
-                case kAlterLocation:
-                    return read_from_relative(sub, reflexive, init<MoveAction>(action));
-                case kAlterAbsoluteLocation:
-                    return read_from_absolute(sub, reflexive, init<MoveAction>(action));
+                case kAlterLocation: return true;
+                case kAlterAbsoluteLocation: return true;
                 case kAlterWeapon1: return true;
                 case kAlterWeapon2: return true;
                 case kAlterSpecial: return true;
@@ -895,7 +884,7 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     } else if (type == "morph") {
         a = morph_action(x);
     } else if (type == "move") {
-        // a = move_action(x);
+        a = move_action(x);
     } else if (type == "occupy") {
         // a = occupy_action(x);
     } else if (type == "order") {
