@@ -330,6 +330,26 @@ static Range<ticks> required_ticks_range(path_value x) {
     return {ticks(range.begin), ticks(range.end)};
 }
 
+static Hue required_hue(path_value x) {
+    return required_enum<Hue>(
+            x, {{"red", Hue::RED},
+                {"orange", Hue::ORANGE},
+                {"yellow", Hue::YELLOW},
+                {"blue", Hue::BLUE},
+                {"green", Hue::GREEN},
+                {"purple", Hue::PURPLE},
+                {"indigo", Hue::INDIGO},
+                {"salmon", Hue::SALMON},
+                {"gold", Hue::GOLD},
+                {"aqua", Hue::AQUA},
+                {"pink", Hue::PINK},
+                {"pale-green", Hue::PALE_GREEN},
+                {"pale-purple", Hue::PALE_PURPLE},
+                {"sky-blue", Hue::SKY_BLUE},
+                {"tan", Hue::TAN},
+                {"gray", Hue::GRAY}});
+}
+
 static KillAction::Kind required_kill_kind(path_value x) {
     return required_enum<KillAction::Kind>(
             x, {{"none", KillAction::Kind::NONE},
@@ -485,6 +505,14 @@ static std::unique_ptr<Action> equip_action(path_value x) {
     return std::move(a);
 }
 
+static std::unique_ptr<Action> flash_action(path_value x) {
+    std::unique_ptr<FlashAction> a(new FlashAction);
+    a->length = required_int(x.get("length"));
+    a->shade  = required_int(x.get("shade"));
+    a->hue    = required_hue(x.get("hue"));
+    return std::move(a);
+}
+
 static std::unique_ptr<Action> hold_action(path_value x) {
     return std::unique_ptr<HoldPositionAction>(new HoldPositionAction);
 }
@@ -517,6 +545,15 @@ static std::unique_ptr<Action> select_action(path_value x) {
     std::unique_ptr<SelectAction> a(new SelectAction);
     a->screen = required_screen(x.get("screen"));
     a->line   = required_int(x.get("line"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> spark_action(path_value x) {
+    std::unique_ptr<SparkAction> a(new SparkAction);
+    a->count    = required_int(x.get("count"));
+    a->hue      = required_hue(x.get("hue"));
+    a->decay    = required_int(x.get("decay"));
+    a->velocity = required_fixed(x.get("velocity"));
     return std::move(a);
 }
 
@@ -631,17 +668,6 @@ bool read_from_absolute(pn::file_view in, bool reflexive, MoveAction* move) {
     return true;
 }
 
-bool read_from(pn::file_view in, SparkAction* sparks) {
-    uint8_t hue;
-    int32_t velocity;
-    if (!in.read(&sparks->count, &sparks->decay, &velocity, &hue)) {
-        return false;
-    }
-    sparks->velocity = Fixed::from_val(velocity);
-    sparks->hue      = Hue(hue);
-    return true;
-}
-
 bool read_from(pn::file_view in, LandAction* land) { return in.read(&land->speed); }
 
 bool read_from(pn::file_view in, MessageAction* message) {
@@ -689,15 +715,6 @@ bool read_from(pn::file_view in, WinAction* win) {
         win->next.emplace(next);
     }
     win->text = Resource::text(text_id);
-    return true;
-}
-
-bool read_from(pn::file_view in, FlashAction* flash) {
-    uint8_t hue;
-    if (!in.read(&flash->length, &hue, &flash->shade)) {
-        return false;
-    }
-    flash->hue = Hue(hue);
     return true;
 }
 
@@ -775,7 +792,7 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
             }
         }
 
-        case kMakeSparks: return read_from(sub, init<SparkAction>(action));
+        case kMakeSparks: return true;
 
         case kLandAt: return read_from(sub, init<LandAction>(action));
 
@@ -789,7 +806,7 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
 
         case kDie: return true;
 
-        case kColorFlash: return read_from(sub, init<FlashAction>(action));
+        case kColorFlash: return true;
 
         case kDisableKeys: return read_disable_keys_from(sub, init<KeyAction>(action));
         case kEnableKeys: return read_enable_keys_from(sub, init<KeyAction>(action));
@@ -853,7 +870,7 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     } else if (type == "fire") {
         // a = fire_action(x);
     } else if (type == "flash") {
-        // a = flash_action(x);
+        a = flash_action(x);
     } else if (type == "heal") {
         // a = heal_action(x);
     } else if (type == "hold") {
@@ -887,7 +904,7 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     } else if (type == "sound") {
         // a = sound_action(x);
     } else if (type == "spark") {
-        // a = spark_action(x);
+        a = spark_action(x);
     } else if (type == "spin") {
         a = spin_action(x);
     } else if (type == "thrust") {
