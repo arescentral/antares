@@ -260,6 +260,15 @@ static sfz::optional<Handle<Level::Initial>> optional_initial(path_value x) {
     }
 }
 
+static sfz::optional<Handle<Level>> optional_level(path_value x) {
+    sfz::optional<int64_t> i = optional_int(x);
+    if (i.has_value()) {
+        return sfz::make_optional(Handle<Level>(*i));
+    } else {
+        return sfz::nullopt;
+    }
+}
+
 static sfz::optional<Owner> optional_owner(path_value x) {
     return optional_enum<Owner>(
             x, {{"any", Owner::ANY}, {"same", Owner::SAME}, {"different", Owner::DIFFERENT}});
@@ -444,6 +453,19 @@ static sfz::optional<int32_t> optional_object_attributes(path_value x) {
     }
 }
 
+static std::vector<pn::string> required_string_array(path_value x) {
+    if (x.value().is_array()) {
+        pn::array_cref          a = x.value().as_array();
+        std::vector<pn::string> result;
+        for (int i = 0; i < a.size(); ++i) {
+            result.emplace_back(required_string(x.get(i)).copy());
+        }
+        return result;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be array", x.path()).c_str());
+    }
+}
+
 static std::unique_ptr<Action> age_action(path_value x) {
     std::unique_ptr<AgeAction> a(new AgeAction);
     a->relative = optional_bool(x.get("relative"));
@@ -523,6 +545,13 @@ static std::unique_ptr<Action> kill_action(path_value x) {
     return std::move(a);
 }
 
+static std::unique_ptr<Action> message_action(path_value x) {
+    std::unique_ptr<MessageAction> a(new MessageAction);
+    a->id    = required_int(x.get("id"));
+    a->pages = required_string_array(x.get("pages"));
+    return std::move(a);
+}
+
 static std::unique_ptr<Action> morph_action(path_value x) {
     std::unique_ptr<MorphAction> a(new MorphAction);
     a->base      = required_base(x.get("base"));
@@ -573,6 +602,14 @@ static std::unique_ptr<Action> thrust_action(path_value x) {
 
 static std::unique_ptr<Action> warp_action(path_value x) {
     return std::unique_ptr<WarpAction>(new WarpAction);
+}
+
+static std::unique_ptr<Action> win_action(path_value x) {
+    std::unique_ptr<WinAction> a(new WinAction);
+    a->player = optional_admiral(x.get("player"));
+    a->next   = optional_level(x.get("next"));
+    a->text   = required_string(x.get("text")).copy();
+    return std::move(a);
 }
 
 static std::unique_ptr<Action> zoom_action(path_value x) {
@@ -670,22 +707,6 @@ bool read_from_absolute(pn::file_view in, bool reflexive, MoveAction* move) {
 
 bool read_from(pn::file_view in, LandAction* land) { return in.read(&land->speed); }
 
-bool read_from(pn::file_view in, MessageAction* message) {
-    int16_t page_count;
-    if (!in.read(&message->id, &page_count)) {
-        return false;
-    }
-    message->pages.clear();
-    for (int id : sfz::range<int>(message->id, message->id + page_count)) {
-        try {
-            message->pages.push_back(Resource::text(id));
-        } catch (...) {
-            message->pages.push_back("<RESOURCE NOT FOUND>");
-        }
-    }
-    return true;
-}
-
 bool read_from(pn::file_view in, ScoreAction* score) {
     int32_t admiral;
     if (!in.read(&admiral, &score->which, &score->value)) {
@@ -696,25 +717,6 @@ bool read_from(pn::file_view in, ScoreAction* score) {
     } else {
         score->player = sfz::make_optional(Handle<Admiral>(admiral));
     }
-    return true;
-}
-
-bool read_from(pn::file_view in, WinAction* win) {
-    int32_t admiral, next, text_id;
-    if (!in.read(&admiral, &next, &text_id)) {
-        return false;
-    }
-    if (admiral < 0) {
-        win->player = sfz::nullopt;
-    } else {
-        win->player = sfz::make_optional(Handle<Admiral>(admiral));
-    }
-    if (next < 0) {
-        win->next = sfz::nullopt;
-    } else {
-        win->next.emplace(next);
-    }
-    win->text = Resource::text(text_id);
     return true;
 }
 
@@ -798,11 +800,11 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
 
         case kEnterWarp: init<WarpAction>(action); return true;
 
-        case kDisplayMessage: return read_from(sub, init<MessageAction>(action));
+        case kDisplayMessage: return true;
 
         case kChangeScore: return read_from(sub, init<ScoreAction>(action));
 
-        case kDeclareWinner: return read_from(sub, init<WinAction>(action));
+        case kDeclareWinner: return true;
 
         case kDie: return true;
 
@@ -882,7 +884,7 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     } else if (type == "land") {
         // a = land_action(x);
     } else if (type == "message") {
-        // a = message_action(x);
+        a = message_action(x);
     } else if (type == "morph") {
         a = morph_action(x);
     } else if (type == "move") {
@@ -912,7 +914,7 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     } else if (type == "warp") {
         a = warp_action(x);
     } else if (type == "win") {
-        // a = win_action(x);
+        a = win_action(x);
     } else if (type == "zoom") {
         a = zoom_action(x);
     } else {

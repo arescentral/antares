@@ -95,14 +95,14 @@ class ReplayMaster : public Card {
                     if (!g.victory_text.empty()) {
                         outcome.write(g.victory_text);
                         if (_game_result == WIN_GAME) {
-                            outcome.write("\n\n");
+                            outcome.write("\n");
                             Handle<Admiral> player(0);
                             pn::string      text = DebriefingScreen::build_score_text(
                                     g.time, g.level->parTime, GetAdmiralLoss(player),
                                     g.level->parLosses, GetAdmiralKill(player), g.level->parKills);
                             outcome.write(text);
+                            outcome.write("\n");
                         }
-                        outcome.write("\n");
                     }
                 }
                 stack()->pop(this);

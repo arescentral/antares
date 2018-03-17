@@ -177,7 +177,7 @@ void Label::update_contents(ticks units_done) {
                 ++it;  // Increment rune, not byte.
             }
             label->retroCount = it.offset();
-            if (static_cast<size_t>(label->retroCount) > label->text.size()) {
+            if (static_cast<size_t>(label->retroCount) >= label->text.size()) {
                 label->retroCount = -1;
             } else {
                 sys.sound.teletype();
@@ -376,8 +376,21 @@ void Label::recalc_size() {
 }
 
 static int32_t String_Count_Lines(pn::string_view s) {
-    static const pn::rune kCarriageReturn{'\n'};
-    return 1 + std::count(s.begin(), s.end(), kCarriageReturn);
+    bool trailing_nl = false;
+    int  count       = 0;
+    for (pn::rune r : s) {
+        if (r == pn::rune{'\n'}) {
+            ++count;
+            trailing_nl = true;
+        } else {
+            trailing_nl = false;
+        }
+    }
+    if (trailing_nl) {
+        return count;
+    } else {
+        return count + 1;
+    }
 }
 
 static pn::string_view String_Get_Nth_Line(pn::string_view source, int32_t nth) {
