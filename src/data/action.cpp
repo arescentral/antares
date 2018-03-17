@@ -238,6 +238,8 @@ static sfz::optional<ticks> optional_ticks(path_value x) {
     }
 }
 
+static ticks required_ticks(path_value x) { return ticks(required_int(x)); }
+
 static sfz::optional<Handle<Admiral>> optional_admiral(path_value x) {
     sfz::optional<int64_t> i = optional_int(x);
     if (i.has_value()) {
@@ -337,6 +339,11 @@ static Range<Fixed> required_fixed_range(path_value x) {
 static Range<ticks> required_ticks_range(path_value x) {
     auto range = required_int_range(x);
     return {ticks(range.begin), ticks(range.end)};
+}
+
+static HandleList<Level::Initial> required_initial_range(path_value x) {
+    auto range = required_int_range(x);
+    return HandleList<Level::Initial>(range.begin, range.end);
 }
 
 static sfz::optional<coordPointType> optional_point(path_value x) {
@@ -610,6 +617,12 @@ static std::unique_ptr<Action> move_action(path_value x) {
     return std::move(a);
 }
 
+static std::unique_ptr<Action> occupy_action(path_value x) {
+    std::unique_ptr<OccupyAction> a(new OccupyAction);
+    a->value = required_int(x.get("value"));
+    return std::move(a);
+}
+
 static std::unique_ptr<Action> order_action(path_value x) {
     return std::unique_ptr<OrderAction>(new OrderAction);
 }
@@ -628,10 +641,34 @@ static std::unique_ptr<Action> push_action(path_value x) {
     return std::move(a);
 }
 
+static std::unique_ptr<Action> reveal_action(path_value x) {
+    std::unique_ptr<RevealAction> a(new RevealAction);
+    a->initial = required_initial_range(x.get("which"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> score_action(path_value x) {
+    std::unique_ptr<ScoreAction> a(new ScoreAction);
+    a->player = optional_admiral(x.get("player"));
+    a->which  = required_int(x.get("which"));
+    a->value  = required_int(x.get("value"));
+    return std::move(a);
+}
+
 static std::unique_ptr<Action> select_action(path_value x) {
     std::unique_ptr<SelectAction> a(new SelectAction);
     a->screen = required_screen(x.get("screen"));
     a->line   = required_int(x.get("line"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> sound_action(path_value x) {
+    std::unique_ptr<SoundAction> a(new SoundAction);
+    a->priority    = required_int(x.get("priority"));
+    a->persistence = required_ticks(x.get("persistence"));
+    a->absolute    = optional_bool(x.get("absolute")).value_or(false);
+    a->volume      = required_int(x.get("volume"));
+    a->id          = required_int_range(x.get("id"));
     return std::move(a);
 }
 
@@ -676,48 +713,6 @@ static std::unique_ptr<Action> zoom_action(path_value x) {
     return std::move(a);
 }
 
-bool read_from(pn::file_view in, SoundAction* sound) {
-    uint8_t absolute;
-    int32_t persistence;
-    int32_t id_minimum, id_range;
-    if (!in.read(
-                &sound->priority, pn::pad(1), &persistence, &absolute, pn::pad(1), &sound->volume,
-                pn::pad(4), &id_minimum, &id_range)) {
-        return false;
-    }
-    sound->id.begin    = id_minimum;
-    sound->id.end      = id_minimum + id_range + 1;
-    sound->absolute    = absolute;
-    sound->persistence = ticks(persistence);
-    return true;
-}
-
-bool read_from(pn::file_view in, OccupyAction* occupy) {
-    return in.read(pn::pad(1), &occupy->value);
-}
-
-bool read_from(pn::file_view in, RevealAction* reveal) {
-    int32_t first, count_minus_1;
-    if (!in.read(pn::pad(1), &first, &count_minus_1)) {
-        return false;
-    }
-    reveal->initial = HandleList<Level::Initial>(first, first + std::max(count_minus_1, 0) + 1);
-    return true;
-}
-
-bool read_from(pn::file_view in, ScoreAction* score) {
-    int32_t admiral;
-    if (!in.read(&admiral, &score->which, &score->value)) {
-        return false;
-    }
-    if (admiral < 0) {
-        score->player = sfz::nullopt;
-    } else {
-        score->player = sfz::make_optional(Handle<Admiral>(admiral));
-    }
-    return true;
-}
-
 bool read_enable_keys_from(pn::file_view in, KeyAction* key) {
     key->disable = 0x00000000;
     return in.read(&key->enable);
@@ -749,7 +744,7 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
         case kCreateObject: return true;
         case kCreateObjectSetDest: return true;
 
-        case kPlaySound: return read_from(sub, init<SoundAction>(action));
+        case kPlaySound: return true;
 
         case kAlter: {
             uint8_t alter;
@@ -770,7 +765,7 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
 
                 case kAlterDamage: return true;
                 case kAlterEnergy: return true;
-                case kAlterHidden: return read_from(sub, init<RevealAction>(action));
+                case kAlterHidden: return true;
                 case kAlterSpin: return true;
                 case kAlterOffline: return true;
                 case kAlterVelocity: return true;
@@ -779,7 +774,7 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
                 case kAlterBaseType: return true;
                 case kAlterOwner: return true;
                 case kAlterConditionTrueYet: return true;
-                case kAlterOccupation: return read_from(sub, init<OccupyAction>(action));
+                case kAlterOccupation: return true;
                 case kAlterAbsoluteCash: return true;
                 case kAlterAge: return true;
                 case kAlterLocation: return true;
@@ -798,7 +793,7 @@ bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn
 
         case kDisplayMessage: return true;
 
-        case kChangeScore: return read_from(sub, init<ScoreAction>(action));
+        case kChangeScore: return true;
 
         case kDeclareWinner: return true;
 
@@ -886,7 +881,7 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     } else if (type == "move") {
         a = move_action(x);
     } else if (type == "occupy") {
-        // a = occupy_action(x);
+        a = occupy_action(x);
     } else if (type == "order") {
         a = order_action(x);
     } else if (type == "pay") {
@@ -894,13 +889,13 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     } else if (type == "push") {
         a = push_action(x);
     } else if (type == "reveal") {
-        // a = reveal_action(x);
+        a = reveal_action(x);
     } else if (type == "score") {
-        // a = score_action(x);
+        a = score_action(x);
     } else if (type == "select") {
         a = select_action(x);
     } else if (type == "sound") {
-        // a = sound_action(x);
+        a = sound_action(x);
     } else if (type == "spark") {
         a = spark_action(x);
     } else if (type == "spin") {
@@ -963,7 +958,7 @@ std::vector<std::unique_ptr<const Action>> read_actions(int begin, int end) {
 }
 
 Handle<BaseObject> Action::created_base() const { return BaseObject::none(); }
-Range<int>         Action::sound_range() const { return Range<int>::empty(); }
+Range<int64_t>     Action::sound_range() const { return Range<int64_t>::empty(); }
 bool               Action::alters_owner() const { return false; }
 bool               Action::check_conditions() const { return false; }
 
@@ -971,7 +966,7 @@ Handle<BaseObject> CreateAction::created_base() const { return base; }
 Handle<BaseObject> MorphAction::created_base() const { return base; }
 Handle<BaseObject> EquipAction::created_base() const { return base; }
 
-Range<int> SoundAction::sound_range() const { return id; }
+Range<int64_t> SoundAction::sound_range() const { return id; }
 
 bool CaptureAction::alters_owner() const { return true; }
 

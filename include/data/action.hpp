@@ -71,7 +71,7 @@ struct Action {
             Point* offset) const = 0;
 
     virtual Handle<BaseObject> created_base() const;
-    virtual Range<int32_t>     sound_range() const;
+    virtual Range<int64_t>     sound_range() const;
     virtual bool               alters_owner() const;
     virtual bool               check_conditions() const;
 
@@ -359,12 +359,12 @@ struct SoundAction : public Action {
     ticks          persistence;  // time before a lower-priority sound can take channel
     bool           absolute;     // plays at same volume, regardless of distance from player
     int32_t        volume;       // 1-255; volume at focus
-    Range<int32_t> id;           // pick ID randomly in [first, second)
+    Range<int64_t> id;           // pick ID randomly in [first, second)
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset) const;
-    virtual Range<int32_t> sound_range() const;
+    virtual Range<int64_t> sound_range() const;
 };
 
 struct SparkAction : public Action {
