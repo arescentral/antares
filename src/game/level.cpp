@@ -160,7 +160,7 @@ void GetInitialCoord(Handle<Level::Initial> initial, coordPointType* coord, int3
 
 Point Level::star_map_point() const { return Point(starMapH, starMapV); }
 
-int32_t Level::chapter_number() const { return levelNameStrNum; }
+int32_t Level::chapter_number() const { return chapter; }
 
 LoadState start_construct_level(Handle<Level> level) {
     ResetAllSpaceObjects();

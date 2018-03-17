@@ -93,7 +93,7 @@ bool read_from(pn::file_view in, Level* level) {
     if (!in.read(
                 &score_string_id, pn::pad(6), &level->songID, pn::pad(6), &level->starMapH,
                 pn::pad(2), &level->starMapV, &briefing_num, &par_time, &unused, &level->parKills,
-                &level->levelNameStrNum, pn::pad(4), &level->parLosses, &start_time)) {
+                pn::pad(6), &level->parLosses, &start_time)) {
         return false;
     }
     if (score_string_id > 0) {
@@ -156,6 +156,8 @@ Level level(pn::value_cref x0) {
     path_value x{x0};
     Level      l;
     l.type     = required_level_type(x.get("type"));
+    l.chapter  = required_int(x.get("chapter"));
+    l.name     = required_string(x.get("title")).copy();
     l.players  = required_player_array(x.get("players"), l.type);
     l.initials = optional_initial_array(x.get("initials")).value_or(std::vector<Level::Initial>{});
     l.conditions = optional_condition_array(x.get("conditions"))

@@ -18,8 +18,12 @@
 
 #include "data/plugin.hpp"
 
+#include <glob.h>
+#include <algorithm>
 #include <pn/file>
 
+#include "config/dirs.hpp"
+#include "config/preferences.hpp"
 #include "data/base-object.hpp"
 #include "data/resource.hpp"
 #include "lang/defines.hpp"
@@ -29,7 +33,6 @@ using std::vector;
 
 namespace antares {
 
-static const int16_t kLevelNameID               = 4600;
 static const int16_t kSpaceObjectNameResID      = 5000;
 static const int16_t kSpaceObjectShortNameResID = 5001;
 
@@ -59,13 +62,30 @@ static void read_all_binary(pn::string_view name, pn::string_view dir, vector<T>
     }
 }
 
+namespace {
+
+struct ScopedGlob {
+    glob_t data;
+    ScopedGlob() { memset(&data, sizeof(data), 0); }
+    ~ScopedGlob() { globfree(&data); }
+};
+
+}  // namespace
+
 static void read_all_levels(vector<Level>& v) {
+    ScopedGlob g;
+    pn::string dir;
+    if (sys.prefs->scenario_identifier() == kFactoryScenarioIdentifier) {
+        dir = application_path().copy();
+    } else {
+        dir = scenario_path();
+    }
+    glob(pn::format("{0}/levels/*.pn", dir).c_str(), 0, NULL, &g.data);
+
     v.clear();
-    for (int i = 0; true; ++i) {
-        pn::string path = pn::format("levels/{0}.pn", i);
-        if (!Resource::exists(path)) {
-            break;
-        }
+    for (int i = 0; i < g.data.gl_pathc; ++i) {
+        const pn::string_view full_path = g.data.gl_pathv[i];
+        const pn::string_view path      = full_path.substr(dir.size() + 1);
 
         try {
             pn::value  x;
@@ -77,7 +97,7 @@ static void read_all_levels(vector<Level>& v) {
             }
             v.push_back(level(x));
         } catch (...) {
-            std::throw_with_nested(std::runtime_error(path.c_str()));
+            std::throw_with_nested(std::runtime_error(path.copy().c_str()));
         }
     }
 }
@@ -98,16 +118,9 @@ void PluginInit() {
     read_all_binary("objects", "objects", plug.objects);
     read_all_binary("races", "races", plug.races);
 
-    auto level_names = Resource::strings(kLevelNameID);
-    for (auto& level : plug.levels) {
-        level.name = level_names.at(level.levelNameStrNum - 1).copy();
-    }
-    for (int i : range(plug.levels.size())) {
-        while (i != plug.levels[i].levelNameStrNum - 1) {
-            using std::swap;
-            swap(plug.levels[i], plug.levels[plug.levels[i].levelNameStrNum - 1]);
-        }
-    }
+    std::sort(plug.levels.begin(), plug.levels.end(), [](const Level& x, const Level& y) {
+        return (x.chapter < y.chapter);
+    });
 
     auto object_names       = Resource::strings(kSpaceObjectNameResID);
     auto object_short_names = Resource::strings(kSpaceObjectShortNameResID);

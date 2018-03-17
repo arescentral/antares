@@ -138,20 +138,20 @@ struct Level {
         int16_t      netRaceFlags = 0;
     };
 
+    int                     chapter = -1;
     pn::string              name;
     int16_t                 netRaceFlags = 0;
     std::vector<Player>     players;
     std::vector<pn::string> score_strings;
-    int16_t                 songID          = -1;
-    int16_t                 starMapH        = 0;
-    int16_t                 starMapV        = 0;
-    game_ticks              parTime         = game_ticks{};
-    int16_t                 parKills        = 0;
-    int16_t                 levelNameStrNum = -1;
-    int16_t                 parLosses       = 0;
-    secs                    startTime       = secs(0);
-    bool                    is_training     = false;
-    int32_t                 angle           = 0;
+    int16_t                 songID      = -1;
+    int16_t                 starMapH    = 0;
+    int16_t                 starMapV    = 0;
+    game_ticks              parTime     = game_ticks{};
+    int16_t                 parKills    = 0;
+    int16_t                 parLosses   = 0;
+    secs                    startTime   = secs(0);
+    bool                    is_training = false;
+    int32_t                 angle       = 0;
 
     std::vector<Initial>                    initials;
     std::vector<std::unique_ptr<Condition>> conditions;
