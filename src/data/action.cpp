@@ -392,6 +392,35 @@ static sfz::optional<MoveAction::Origin> optional_origin(path_value x) {
                 {"object", MoveAction::Origin::OBJECT}});
 }
 
+static int required_key(path_value x) {
+    return required_enum<int>(x, {{"up", 0},
+                                  {"down", 1},
+                                  {"left", 2},
+                                  {"right", 3},
+                                  {"fire_1", 4},
+                                  {"fire_2", 5},
+                                  {"fire_s", 6},
+                                  {"warp", 0},
+                                  {"select_friend", 8},
+                                  {"select_foe", 9},
+                                  {"select_base", 10},
+                                  {"target", 11},
+                                  {"order", 12},
+                                  {"zoom_in", 13},
+                                  {"zoom_out", 14},
+                                  {"comp_up", 15},
+                                  {"comp_down", 16},
+                                  {"comp_accept", 17},
+                                  {"comp_back", 18},
+
+                                  {"comp_message", 26},
+                                  {"comp_special", 27},
+                                  {"comp_build", 28},
+                                  {"zoom_shortcut", 29},
+                                  {"send_message", 30},
+                                  {"mouse", 31}});
+}
+
 static PushAction::Kind required_push_kind(path_value x) {
     return required_enum<PushAction::Kind>(
             x, {{"stop", PushAction::Kind::STOP},
@@ -476,6 +505,22 @@ static sfz::optional<int32_t> optional_object_attributes(path_value x) {
         return sfz::make_optional(+result);
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
+    }
+}
+
+static int32_t optional_keys(path_value x) {
+    if (x.value().is_null()) {
+        return 0x00000000;
+    } else if (x.value().is_array()) {
+        pn::array_cref a      = x.value().as_array();
+        int32_t        result = 0x00000000;
+        for (int i = 0; i < a.size(); ++i) {
+            int key = required_key(x.get(i));
+            result |= (0x1 << key);
+        }
+        return result;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or list", x.path()).c_str());
     }
 }
 
@@ -581,6 +626,13 @@ static std::unique_ptr<Action> heal_action(path_value x) {
 
 static std::unique_ptr<Action> hold_action(path_value x) {
     return std::unique_ptr<HoldPositionAction>(new HoldPositionAction);
+}
+
+static std::unique_ptr<Action> key_action(path_value x) {
+    std::unique_ptr<KeyAction> a(new KeyAction);
+    a->enable  = optional_keys(x.get("enable"));
+    a->disable = optional_keys(x.get("disable"));
+    return std::move(a);
 }
 
 static std::unique_ptr<Action> kill_action(path_value x) {
@@ -713,103 +765,11 @@ static std::unique_ptr<Action> zoom_action(path_value x) {
     return std::move(a);
 }
 
-bool read_enable_keys_from(pn::file_view in, KeyAction* key) {
-    key->disable = 0x00000000;
-    return in.read(&key->enable);
-}
-
-bool read_disable_keys_from(pn::file_view in, KeyAction* key) {
-    key->enable = 0x00000000;
-    return in.read(&key->disable);
-}
-
 template <typename T>
 T* init(std::unique_ptr<Action>* action) {
     T* t;
     action->reset(t = new T());
     return t;
-}
-
-bool read_argument(int verb, bool reflexive, std::unique_ptr<Action>* action, pn::file_view sub) {
-    switch (static_cast<objectVerbIDEnum>(verb)) {
-        case kReleaseEnergy:
-        case kNoAction: init<NoAction>(action); return true;
-
-        case kSetDestination: return true;
-        case kActivateSpecial: return true;
-        case kActivatePulse: return true;
-        case kActivateBeam: return true;
-        case kNilTarget: return true;
-
-        case kCreateObject: return true;
-        case kCreateObjectSetDest: return true;
-
-        case kPlaySound: return true;
-
-        case kAlter: {
-            uint8_t alter;
-            if (!sub.read(&alter)) {
-                return false;
-            }
-            verb |= alter;
-            switch (static_cast<alterVerbIDType>(verb)) {
-                case kAlterMaxThrust: init<NoAction>(action); return true;
-                case kAlterMaxTurnRate: init<NoAction>(action); return true;
-                case kAlterScale: init<NoAction>(action); return true;
-                case kAlterAttributes: init<NoAction>(action); return true;
-                case kAlterLevelKeyTag: init<NoAction>(action); return true;
-                case kAlterOrderKeyTag: init<NoAction>(action); return true;
-                case kAlterEngageKeyTag: init<NoAction>(action); return true;
-
-                case kAlterCloak: return true;
-
-                case kAlterDamage: return true;
-                case kAlterEnergy: return true;
-                case kAlterHidden: return true;
-                case kAlterSpin: return true;
-                case kAlterOffline: return true;
-                case kAlterVelocity: return true;
-                case kAlterMaxVelocity: return true;
-                case kAlterThrust: return true;
-                case kAlterBaseType: return true;
-                case kAlterOwner: return true;
-                case kAlterConditionTrueYet: return true;
-                case kAlterOccupation: return true;
-                case kAlterAbsoluteCash: return true;
-                case kAlterAge: return true;
-                case kAlterLocation: return true;
-                case kAlterAbsoluteLocation: return true;
-                case kAlterWeapon1: return true;
-                case kAlterWeapon2: return true;
-                case kAlterSpecial: return true;
-            }
-        }
-
-        case kMakeSparks: return true;
-
-        case kLandAt: return true;
-
-        case kEnterWarp: return true;
-
-        case kDisplayMessage: return true;
-
-        case kChangeScore: return true;
-
-        case kDeclareWinner: return true;
-
-        case kDie: return true;
-
-        case kColorFlash: return true;
-
-        case kDisableKeys: return read_disable_keys_from(sub, init<KeyAction>(action));
-        case kEnableKeys: return read_enable_keys_from(sub, init<KeyAction>(action));
-
-        case kSetZoom: return true;
-
-        case kComputerSelect: return true;
-
-        case kAssumeInitialObject: return true;
-    }
 }
 
 template <typename T>
@@ -830,16 +790,8 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     }
     path_value x{x0};
 
-    uint8_t  verb, reflexive;
-    pn::data section;
-    section.resize(24);
+    pn::string_view         type = required_string(x.get("type"));
     std::unique_ptr<Action> a;
-    if (!(x.get("bin").value().as_data().open().read(&verb, &reflexive, pn::pad(22), &section) &&
-          read_argument(verb << 8, reflexive, &a, section.open()))) {
-        throw std::runtime_error("read failed");
-    }
-
-    pn::string_view type = required_string(x.get("type"));
     if (type == "age") {
         a = age_action(x);
     } else if (type == "assume") {
@@ -869,7 +821,7 @@ std::unique_ptr<Action> action(pn::value_cref x0) {
     } else if (type == "hold") {
         a = hold_action(x);
     } else if (type == "key") {
-        // a = key_action(x);
+        a = key_action(x);
     } else if (type == "kill") {
         a = kill_action(x);
     } else if (type == "land") {
