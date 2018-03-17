@@ -190,75 +190,6 @@ bool read_from(pn::file_view in, std::unique_ptr<Level::Condition>* condition) {
         return false;
     }
 
-    pn::file sub = section.open();
-    switch (static_cast<conditionType>(type)) {
-        case kNoCondition:
-        case kLocationCondition:
-        case kAgeCondition:
-        case kRandomCondition: init_condition<Level::FalseCondition>(condition); break;
-
-        case kIsAuxiliaryObject:
-            init_condition<Level::SubjectCondition>(condition)->value =
-                    Level::SubjectCondition::Value::CONTROL;
-            (*condition)->op = ConditionOp::EQ;
-            break;
-
-        case kIsTargetObject:
-            init_condition<Level::SubjectCondition>(condition)->value =
-                    Level::SubjectCondition::Value::TARGET;
-            (*condition)->op = ConditionOp::EQ;
-            break;
-
-        case kSubjectIsPlayerCondition:
-            init_condition<Level::SubjectCondition>(condition)->value =
-                    Level::SubjectCondition::Value::PLAYER;
-            (*condition)->op = ConditionOp::EQ;
-            break;
-
-        case kZoomLevelCondition: {
-            int32_t value;
-            if (!sub.read(&value)) {
-                return false;
-            }
-            init_condition<Level::ZoomCondition>(condition)->value = static_cast<Zoom>(value);
-            (*condition)->op                                       = ConditionOp::EQ;
-            break;
-        }
-
-        case kVelocityLessThanEqualToCondition:
-            if (!read_from(sub, &init_condition<Level::SpeedCondition>(condition)->value)) {
-                return false;
-            }
-            (*condition)->op = ConditionOp::LT;
-            break;
-
-        case kTimeCondition: {
-            int32_t time;
-            if (!sub.read(&time)) {
-                return false;
-            }
-            init_condition<Level::TimeCondition>(condition)->value = ticks(time);
-            (*condition)->op                                       = ConditionOp::GE;
-            break;
-        }
-
-        case kDirectIsSubjectTarget:
-        case kOwnerCondition:
-        case kNoShipsLeftCondition:
-        case kCurrentMessageCondition:
-        case kHalfHealthCondition:
-        case kDestructionCondition:
-        case kProximityCondition:
-        case kDistanceGreaterCondition:
-        case kObjectIsBeingBuilt:
-        case kAutopilotCondition:
-        case kNotAutopilotCondition:
-        case kCounterCondition:
-        case kCounterGreaterCondition:
-        case kCounterNotCondition:
-        case kCurrentComputerCondition: break;
-    }
-
     if (*condition) {
         (*condition)->subject           = Handle<Level::Initial>(subject);
         (*condition)->object            = Handle<Level::Initial>(object);
@@ -339,6 +270,30 @@ static std::unique_ptr<Level::Condition> ships_condition(path_value x) {
     return std::move(c);
 }
 
+static std::unique_ptr<Level::Condition> speed_condition(path_value x) {
+    std::unique_ptr<Level::SpeedCondition> c(new Level::SpeedCondition);
+    c->value = required_fixed(x.get("value"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> subject_condition(path_value x) {
+    std::unique_ptr<Level::SubjectCondition> c(new Level::SubjectCondition);
+    c->value = required_subject_value(x.get("value"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> time_condition(path_value x) {
+    std::unique_ptr<Level::TimeCondition> c(new Level::TimeCondition);
+    c->value = required_ticks(x.get("value"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> zoom_condition(path_value x) {
+    std::unique_ptr<Level::ZoomCondition> c(new Level::ZoomCondition);
+    c->value = required_zoom(x.get("value"));
+    return std::move(c);
+}
+
 static std::unique_ptr<Level::Condition> condition(pn::value_cref x0) {
     path_value x{x0};
 
@@ -369,10 +324,15 @@ static std::unique_ptr<Level::Condition> condition(pn::value_cref x0) {
     } else if (type == "ships") {
         c = ships_condition(x);
     } else if (type == "speed") {
+        c = speed_condition(x);
     } else if (type == "subject") {
+        c = subject_condition(x);
     } else if (type == "time") {
+        c = time_condition(x);
     } else if (type == "zoom") {
+        c = zoom_condition(x);
     } else {
+        throw std::runtime_error(pn::format("unknown type: {0}", type).c_str());
     }
 
     read_from(x.get("bin").value().as_data().open(), &c);

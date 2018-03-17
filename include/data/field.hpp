@@ -117,6 +117,7 @@ int                       required_key(path_value x);
 ConditionOp               required_condition_op(path_value x);
 PushKind                  required_push_kind(path_value x);
 Screen                    required_screen(path_value x);
+SubjectValue              required_subject_value(path_value x);
 Weapon                    required_weapon(path_value x);
 Zoom                      required_zoom(path_value x);
 

@@ -367,8 +367,7 @@ struct Level::SpeedCondition : Level::Condition {
 //
 // Warning: not net-safe.
 struct Level::SubjectCondition : Level::Condition {
-    enum class Value { CONTROL, TARGET, PLAYER };
-    Value        value;
+    SubjectValue value;
     virtual bool is_true() const;
 };
 

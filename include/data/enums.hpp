@@ -86,6 +86,8 @@ enum class Screen {
     STATUS  = 5,
 };
 
+enum class SubjectValue { CONTROL, TARGET, PLAYER };
+
 // The three weapons a ship may have.
 enum class Weapon {
     PULSE   = 0,  // Also known as “Weapon 1”

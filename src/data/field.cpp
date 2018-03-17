@@ -393,6 +393,13 @@ Screen required_screen(path_value x) {
                 {"status", Screen::STATUS}});
 }
 
+SubjectValue required_subject_value(path_value x) {
+    return required_enum<SubjectValue>(
+            x, {{"control", SubjectValue::CONTROL},
+                {"target", SubjectValue::TARGET},
+                {"player", SubjectValue::PLAYER}});
+}
+
 Weapon required_weapon(path_value x) {
     return required_enum<Weapon>(
             x, {{"pulse", Weapon::PULSE}, {"beam", Weapon::BEAM}, {"special", Weapon::SPECIAL}});

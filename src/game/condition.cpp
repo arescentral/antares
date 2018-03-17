@@ -150,9 +150,10 @@ bool Level::SpeedCondition::is_true() const {
 bool Level::SubjectCondition::is_true() const {
     auto sObject = GetObjectFromInitialNumber(subject);
     switch (value) {
-        case Value::CONTROL: return sObject.get() && op_eq(op, sObject, g.admiral->control());
-        case Value::TARGET: return sObject.get() && op_eq(op, sObject, g.admiral->target());
-        case Value::PLAYER: return sObject.get() && op_eq(op, sObject, g.ship);
+        case SubjectValue::CONTROL:
+            return sObject.get() && op_eq(op, sObject, g.admiral->control());
+        case SubjectValue::TARGET: return sObject.get() && op_eq(op, sObject, g.admiral->target());
+        case SubjectValue::PLAYER: return sObject.get() && op_eq(op, sObject, g.ship);
     }
 }
 
