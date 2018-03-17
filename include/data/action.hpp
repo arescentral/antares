@@ -373,9 +373,9 @@ struct WarpAction : public Action {
 };
 
 struct WinAction : public Action {
-    sfz::optional<Handle<Admiral>>     player;  // victor; absent = owner of focus
-    sfz::optional<Handle<const Level>> next;    // next chapter to play; absent = none
-    pn::string                         text;    // "debriefing" text
+    sfz::optional<Handle<Admiral>>          player;  // victor; absent = owner of focus
+    sfz::optional<NamedHandle<const Level>> next;    // next chapter to play; absent = none
+    pn::string                              text;    // "debriefing" text
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,

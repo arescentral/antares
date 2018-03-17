@@ -166,7 +166,7 @@ sfz::optional<Fixed> optional_fixed(path_value x) {
     } else if (x.value().is_float()) {
         return sfz::make_optional(Fixed::from_float(x.value().as_float()));
     } else {
-        throw std::runtime_error(pn::format("{0}: must be float", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}: must be null or float", x.path()).c_str());
     }
 }
 
@@ -184,7 +184,7 @@ sfz::optional<pn::string_view> optional_string(path_value x) {
     } else if (x.value().is_string()) {
         return sfz::make_optional(x.value().as_string());
     } else {
-        throw std::runtime_error(pn::format("{0}: must be string", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}: must be null or string", x.path()).c_str());
     }
 }
 
@@ -276,10 +276,10 @@ Handle<const Level::Initial> required_initial(path_value x) {
     }
 }
 
-sfz::optional<Handle<const Level>> optional_level(path_value x) {
-    sfz::optional<int64_t> i = optional_int(x);
-    if (i.has_value()) {
-        return sfz::make_optional(Handle<const Level>(*i));
+sfz::optional<NamedHandle<const Level>> optional_level(path_value x) {
+    sfz::optional<pn::string_view> s = optional_string(x);
+    if (s.has_value()) {
+        return sfz::make_optional(NamedHandle<const Level>(*s));
     } else {
         return sfz::nullopt;
     }

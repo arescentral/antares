@@ -83,7 +83,7 @@ class ReplayMaster : public Card {
                 _game_result  = NO_GAME;
                 g.random.seed = _random_seed;
                 stack()->push(new MainPlay(
-                        *Level::get(_replay_data.chapter_id - 1), true, &_input_source, false,
+                        *Level::get(_replay_data.chapter_id), true, &_input_source, false,
                         &_game_result));
                 break;
 

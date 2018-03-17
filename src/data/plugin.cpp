@@ -47,7 +47,7 @@ struct ScopedGlob {
 
 }  // namespace
 
-static void read_all_levels(vector<Level>& v) {
+static void read_all_levels() {
     ScopedGlob g;
     pn::string dir;
     if (sys.prefs->scenario_identifier() == kFactoryScenarioIdentifier) {
@@ -57,10 +57,13 @@ static void read_all_levels(vector<Level>& v) {
     }
     glob(pn::format("{0}/levels/*.pn", dir).c_str(), 0, NULL, &g.data);
 
-    v.clear();
+    plug.levels.clear();
+    plug.chapters.clear();
     for (int i = 0; i < g.data.gl_pathc; ++i) {
         const pn::string_view full_path = g.data.gl_pathv[i];
         const pn::string_view path      = full_path.substr(dir.size() + 1);
+        const pn::string_view id =
+                full_path.substr(dir.size() + 8, full_path.size() - dir.size() - 11);
 
         try {
             pn::value  x;
@@ -70,7 +73,8 @@ static void read_all_levels(vector<Level>& v) {
                         pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code))
                                 .c_str());
             }
-            v.push_back(level(x));
+            auto it                           = plug.levels.emplace(id.copy(), level(x)).first;
+            plug.chapters[it->second.chapter] = &it->second;
         } catch (...) {
             std::throw_with_nested(std::runtime_error(path.copy().c_str()));
         }
@@ -89,10 +93,7 @@ void PluginInit() {
         }
     }
 
-    read_all_levels(plug.levels);
-    std::sort(plug.levels.begin(), plug.levels.end(), [](const Level& x, const Level& y) {
-        return (x.chapter < y.chapter);
-    });
+    read_all_levels();
 }
 
 void load_race(const NamedHandle<const Race>& r) {

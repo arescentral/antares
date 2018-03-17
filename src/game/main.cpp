@@ -387,7 +387,7 @@ void GamePlay::become_front() {
                     *_game_result  = WIN_GAME;
                     g.game_over    = true;
                     g.victor       = g.admiral;
-                    g.next_level   = Level::get(g.level->chapter_number());
+                    g.next_level   = Level::get(g.level->chapter_number() + 1);
                     g.victory_text = "";
                     stack()->pop(this);
                     break;

@@ -28,7 +28,8 @@ namespace antares {
 
 struct ScenarioGlobals {
     ScenarioInfo                     info;
-    std::vector<Level>               levels;
+    std::map<int, const Level*>      chapters;
+    std::map<pn::string, Level>      levels;
     std::map<pn::string, BaseObject> objects;
     std::map<pn::string, Race>       races;
 };

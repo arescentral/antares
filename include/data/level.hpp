@@ -162,8 +162,8 @@ struct Level {
 
     static const size_t byte_size = 124;
 
-    static const Level*        get(int n);
-    static Handle<const Level> none() { return Handle<const Level>(-1); }
+    static const Level* get(int n);
+    static const Level* get(pn::string_view n);
 
     Point   star_map_point() const;
     int32_t chapter_number() const;

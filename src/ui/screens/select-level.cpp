@@ -48,7 +48,7 @@ SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Level** level)
           _level(level) {
     Ledger::ledger()->unlocked_chapters(&_chapters);
     _index  = _chapters.size() - 1;
-    *_level = Level::get(_chapters[_index] - 1);
+    *_level = Level::get(_chapters[_index]);
 }
 
 SelectLevelScreen::~SelectLevelScreen() {}
@@ -140,7 +140,7 @@ void SelectLevelScreen::handle_button(Button& button) {
         case PREVIOUS:
             if (_index > 0) {
                 --_index;
-                *_level = Level::get(_chapters[_index] - 1);
+                *_level = Level::get(_chapters[_index]);
             }
             adjust_interface();
             break;
@@ -148,7 +148,7 @@ void SelectLevelScreen::handle_button(Button& button) {
         case NEXT:
             if (_index < _chapters.size() - 1) {
                 ++_index;
-                *_level = Level::get(_chapters[_index] - 1);
+                *_level = Level::get(_chapters[_index]);
             }
             adjust_interface();
             break;

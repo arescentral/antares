@@ -33,7 +33,16 @@ static std::vector<Level::Initial>                    optional_initial_array(pat
 static std::vector<std::unique_ptr<Level::Condition>> optional_condition_array(path_value x);
 static std::vector<Level::Briefing>                   optional_briefing_array(path_value x);
 
-const Level* Level::get(int n) { return &plug.levels[n]; }
+const Level* Level::get(int number) { return plug.chapters[number]; }
+
+const Level* Level::get(pn::string_view name) {
+    auto it = plug.levels.find(name.copy());
+    if (it == plug.levels.end()) {
+        return nullptr;
+    } else {
+        return &it->second;
+    }
+}
 
 bool read_from(pn::file_view in, ScenarioInfo* info) {
     pn::value  x0;

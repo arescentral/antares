@@ -75,6 +75,14 @@ void usage(pn::file_view out, pn::string_view progname, int retcode) {
     exit(retcode);
 }
 
+std::function<pn::string_view()> prologue(pn::string_view chapter) {
+    return [chapter]() -> pn::string_view { return plug.levels[chapter.copy()].prologue; };
+}
+
+std::function<pn::string_view()> epilogue(pn::string_view chapter) {
+    return [chapter]() -> pn::string_view { return plug.levels[chapter.copy()].epilogue; };
+}
+
 template <typename VideoDriver>
 void run(
         VideoDriver* video, pn::string_view extension,
@@ -85,15 +93,15 @@ void run(
         std::function<pn::string_view()> text;
     };
     vector<Spec> specs{
-            {"gai-prologue", 450, []() -> pn::string_view { return plug.levels[1].prologue; }},
-            {"tut-prologue", 450, []() -> pn::string_view { return plug.levels[0].prologue; }},
-            {"can-prologue", 450, []() -> pn::string_view { return plug.levels[9].prologue; }},
-            {"can-epilogue", 450, []() -> pn::string_view { return plug.levels[9].epilogue; }},
-            {"sal-prologue", 450, []() -> pn::string_view { return plug.levels[13].prologue; }},
-            {"outro", 450, []() -> pn::string_view { return plug.levels[22].epilogue; }},
-            {"baz-prologue", 450, []() -> pn::string_view { return plug.levels[16].prologue; }},
-            {"ele-prologue", 450, []() -> pn::string_view { return plug.levels[15].prologue; }},
-            {"aud-prologue", 450, []() -> pn::string_view { return plug.levels[18].prologue; }},
+            {"gai-prologue", 450, prologue("ch01")},
+            {"tut-prologue", 450, prologue("tut1")},
+            {"can-prologue", 450, prologue("ch07")},
+            {"can-epilogue", 450, epilogue("ch07")},
+            {"sal-prologue", 450, prologue("ch11")},
+            {"outro", 450, epilogue("ch20")},
+            {"baz-prologue", 450, prologue("ch14")},
+            {"ele-prologue", 450, prologue("ch13")},
+            {"aud-prologue", 450, prologue("ch16")},
             {"intro", 450, []() -> pn::string_view { return plug.info.intro_text; }},
             {"about", 540, []() -> pn::string_view { return plug.info.about_text; }},
     };

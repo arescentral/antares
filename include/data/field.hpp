@@ -107,7 +107,7 @@ Handle<Admiral>                            required_admiral(path_value x);
 Handle<const BaseObject>                   required_base(path_value x);
 sfz::optional<Handle<const Level_Initial>> optional_initial(path_value x);
 Handle<const Level_Initial>                required_initial(path_value x);
-sfz::optional<Handle<const Level>>         optional_level(path_value x);
+sfz::optional<NamedHandle<const Level>>    optional_level(path_value x);
 sfz::optional<Owner>                       optional_owner(path_value x);
 NamedHandle<const Race>                    required_race(path_value x);
 
