@@ -64,6 +64,7 @@ class path_value {
     }
 
     pn::string path() const;
+    pn::string prefix() const;
 
   private:
     static pn::value_cref array_get(pn::array_cref a, int64_t index);
@@ -146,6 +147,36 @@ int32_t                optional_keys(path_value x);
 std::vector<pn::string>                required_string_array(path_value x);
 sfz::optional<std::vector<pn::string>> optional_string_array(path_value x);
 sfz::optional<std::vector<int>>        optional_int_array(path_value x);
+
+template <typename T>
+struct field {
+    std::function<void(T* t, path_value x)> set;
+
+    template <typename F>
+    constexpr field(F(T::*field), F (*reader)(path_value x))
+            : set([field, reader](T* t, path_value x) { (t->*field) = reader(x); }) {}
+
+    constexpr field(std::nullptr_t) : set([](T*, path_value) {}) {}
+};
+
+template <typename T>
+T required_struct(path_value x, const std::map<pn::string_view, field<T>>& fields) {
+    if (x.value().is_map()) {
+        T t;
+        for (const auto& kv : x.value().as_map()) {
+            pn::string_view k  = kv.key();
+            path_value      v  = x.get(k);
+            auto            it = fields.find(k);
+            if (it == fields.end()) {
+                throw std::runtime_error(pn::format("{0}unknown field", v.prefix()).c_str());
+            }
+            it->second.set(&t, v);
+        }
+        return t;
+    } else {
+        throw std::runtime_error(pn::format("{0}must be map", x.prefix()).c_str());
+    }
+}
 
 }  // namespace antares
 

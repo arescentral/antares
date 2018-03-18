@@ -28,33 +28,33 @@ using std::unique_ptr;
 
 namespace antares {
 
-Race race(pn::value_cref x0) {
-    if (!x0.is_map()) {
-        throw std::runtime_error("must be map");
-    }
-
-    path_value x{x0};
-    Race       r;
-    r.numeric       = required_int(x.get("numeric"));
-    r.singular      = required_string(x.get("singular")).copy();
-    r.plural        = required_string(x.get("plural")).copy();
-    r.military      = required_string(x.get("military")).copy();
-    r.homeworld     = required_string(x.get("homeworld")).copy();
-    r.apparentColor = required_hue(x.get("apparent_color"));
-    r.advantage     = required_fixed(x.get("advantage"));
-
-    path_value ships = x.get("ships");
-    if (ships.value().is_null()) {
-        r.ships.clear();
-    } else if (ships.value().is_map()) {
-        for (pn::key_value_cref kv : ships.value().as_map()) {
-            r.ships.emplace(kv.key().copy(), required_base(ships.get(kv.key())));
+std::map<pn::string, Handle<BaseObject>> optional_ships(path_value x) {
+    if (x.value().is_null()) {
+        return {};
+    } else if (x.value().is_map()) {
+        std::map<pn::string, Handle<BaseObject>> ships;
+        for (pn::key_value_cref kv : x.value().as_map()) {
+            ships.emplace(kv.key().copy(), required_base(x.get(kv.key())));
         }
+        return ships;
     } else {
-        throw std::runtime_error(pn::format("{0}: must be null or map", ships.path()).c_str());
+        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
     }
+}
 
-    return r;
+pn::string required_string_copy(path_value x) { return required_string(x).copy(); }
+
+Race race(path_value x) {
+    return required_struct<Race>(
+            x, {{"numeric", nullptr},
+                {"singular", {&Race::singular, required_string_copy}},
+                {"plural", {&Race::plural, required_string_copy}},
+                {"military", {&Race::military, required_string_copy}},
+                {"homeworld", {&Race::homeworld, required_string_copy}},
+                {"apparent_color", {&Race::apparentColor, required_hue}},
+                {"illegal_colors", nullptr},
+                {"advantage", {&Race::advantage, required_fixed}},
+                {"ships", {&Race::ships, optional_ships}}});
 }
 
 }  // namespace antares

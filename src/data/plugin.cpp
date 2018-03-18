@@ -108,7 +108,7 @@ void load_race(Handle<Race> r) {
             throw std::runtime_error(
                     pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
         }
-        plug.races.emplace(r.number(), race(x));
+        plug.races.emplace(r.number(), race(path_value{x}));
     } catch (...) {
         std::throw_with_nested(std::runtime_error(path.copy().c_str()));
     }

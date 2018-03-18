@@ -31,17 +31,15 @@
 namespace antares {
 
 class BaseObject;
+class path_value;
 
 struct Race {
-    int32_t    numeric;
-    pn::string singular;
-    pn::string plural;
-    pn::string military;
-    pn::string homeworld;
-    Hue        apparentColor;
-    Fixed      advantage;
-    // uint32_t   illegalColors;
-
+    pn::string                               singular;
+    pn::string                               plural;
+    pn::string                               military;
+    pn::string                               homeworld;
+    Hue                                      apparentColor;
+    Fixed                                    advantage;
     std::map<pn::string, Handle<BaseObject>> ships;
 
     static Race*        get(int n);
@@ -50,7 +48,7 @@ struct Race {
     static const size_t byte_size = 14;
 };
 
-Race race(pn::value_cref x);
+Race race(path_value x);
 
 }  // namespace antares
 

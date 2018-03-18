@@ -38,6 +38,24 @@ pn::string path_value::path() const {
     }
 }
 
+pn::string path_value::prefix() const {
+    if (_kind == Kind::ROOT) {
+        return "";
+    } else if (_parent->_kind == Kind::ROOT) {
+        if (_kind == Kind::KEY) {
+            return pn::format("{0}: ", _key);
+        } else {
+            return pn::format("[{0}]: ", _index);
+        }
+    } else {
+        if (_kind == Kind::KEY) {
+            return pn::format("{0}.{1}: ", _parent->path(), _key);
+        } else {
+            return pn::format("{0}[{1}]: ", _parent->path(), _index);
+        }
+    }
+}
+
 pn::value_cref path_value::array_get(pn::array_cref a, int64_t index) {
     if ((0 <= index) && (index < a.size())) {
         return a[index];
