@@ -116,20 +116,6 @@ void main(int argc, char* const* argv) {
         exit(1);
     }
 
-    if (!sfz::path::isdir(factory_scenario_path())) {
-        if (factory_scenario_path() == default_factory_scenario_path()) {
-            throw std::runtime_error(
-                    "factory scenario not installed\n"
-                    "\n"
-                    "Please install it, or specify a path with --factory-scenario");
-        } else {
-            throw std::runtime_error(
-                    pn::format("{0}: factory scenario not found", factory_scenario_path())
-                            .c_str());
-        }
-        exit(1);
-    }
-
     FilePrefsDriver prefs;
 
     if (scenario.has_value()) {
@@ -139,15 +125,8 @@ void main(int argc, char* const* argv) {
         for (auto i : range(l.size())) {
             const auto& entry = l.at(i);
             if (entry.identifier == *scenario) {
-                if (entry.installed) {
-                    have_scenario = true;
-                    break;
-                } else {
-                    throw std::runtime_error(
-                            "factory scenario not installed\n"
-                            "\n"
-                            "Please run antares-install-data");
-                }
+                have_scenario = true;
+                break;
             }
         }
         if (!have_scenario) {

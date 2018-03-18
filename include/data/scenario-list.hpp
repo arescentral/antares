@@ -33,7 +33,6 @@ class ScenarioList {
         pn::string author;
         pn::string author_url;
         pn::string version;
-        bool       installed;
     };
 
     ScenarioList();

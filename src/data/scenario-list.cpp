@@ -44,33 +44,30 @@ ScenarioList::ScenarioList() {
     Entry& factory_scenario     = _scenarios.back();
     factory_scenario.identifier = kFactoryScenarioIdentifier;
 
-    const pn::string factory_path = pn::format("{0}/info.pn", factory_scenario_path());
-    pn::value        info;
-    pn_error_t       err;
-    if (sfz::path::isfile(factory_path) && pn::parse(pn::open(factory_path, "r"), info, &err)) {
+    const pn::string factory_info_path = pn::format("{0}/info.pn", application_path());
+    try {
+        pn::value  info;
+        pn_error_t e;
+        if (!pn::parse(pn::open(factory_info_path, "r").check(), info, &e)) {
+            throw std::runtime_error(
+                    pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
+        }
         pn::map_cref m                = info.as_map();
         factory_scenario.title        = m.get("title").as_string().copy();
         factory_scenario.download_url = m.get("download_url").as_string().copy();
         factory_scenario.author       = m.get("author").as_string().copy();
         factory_scenario.author_url   = m.get("author_url").as_string().copy();
         factory_scenario.version      = m.get("version").as_string().copy();
-        factory_scenario.installed    = true;
-    } else {
-        factory_scenario.title        = "Ares";
-        factory_scenario.download_url = "http://www.arescentral.com";
-        factory_scenario.author       = "Bigger Planet";
-        factory_scenario.author_url   = "http://www.biggerplanet.com";
-        factory_scenario.version      = "1.1.1";
-        factory_scenario.installed    = false;
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(factory_info_path.copy().c_str()));
     }
 
-    ScopedGlob            g;
-    const pn::string_view info_basename("info.pn");
-    pn::string            str = pn::format("{0}/*/{1}", dirs().scenarios, info_basename);
+    ScopedGlob g;
+    pn::string str = pn::format("{0}/*/info.pn", dirs().scenarios);
     glob(str.c_str(), 0, NULL, &g.data);
 
     size_t prefix_len = dirs().scenarios.size() + 1;
-    size_t suffix_len = info_basename.size() + 1;
+    size_t suffix_len = 8;
     for (int i = 0; i < g.data.gl_pathc; ++i) {
         const pn::string path = g.data.gl_pathv[i];
         pn::string_view  identifier =
@@ -79,22 +76,26 @@ ScenarioList::ScenarioList() {
             continue;
         }
 
-        sfz::mapped_file file(path);
-        pn::file         in = file.data().open();
-        pn::value        info;
-        if (!pn::parse(in, info, &err)) {
-            continue;
+        try {
+            sfz::mapped_file file(path);
+            pn::file         in = file.data().open();
+            pn::value        info;
+            pn_error_t       e;
+            if (!pn::parse(in, info, &e)) {
+                continue;
+            }
+            _scenarios.emplace_back();
+            Entry& entry       = _scenarios.back();
+            entry.identifier   = identifier.copy();
+            pn::map_cref m     = info.as_map();
+            entry.title        = m.get("title").as_string().copy();
+            entry.download_url = m.get("download_url").as_string().copy();
+            entry.author       = m.get("author").as_string().copy();
+            entry.author_url   = m.get("author_url").as_string().copy();
+            entry.version      = m.get("version").as_string().copy();
+        } catch (...) {
+            std::throw_with_nested(std::runtime_error(path.copy().c_str()));
         }
-        _scenarios.emplace_back();
-        Entry& entry       = _scenarios.back();
-        entry.identifier   = identifier.copy();
-        pn::map_cref m     = info.as_map();
-        entry.title        = m.get("title").as_string().copy();
-        entry.download_url = m.get("download_url").as_string().copy();
-        entry.author       = m.get("author").as_string().copy();
-        entry.author_url   = m.get("author_url").as_string().copy();
-        entry.version      = m.get("version").as_string().copy();
-        entry.installed    = true;
     }
 }
 

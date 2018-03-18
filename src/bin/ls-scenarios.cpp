@@ -74,9 +74,6 @@ void main(int argc, char* const* argv) {
     bool         found_at_least_one = false;
     ScenarioList list;
     for (size_t i = 0; i < list.size(); ++i) {
-        if (!list.at(i).installed) {
-            continue;
-        }
         pn::format(stderr, "{0}:\n", list.at(i).identifier);
         pn::format(stderr, "    title: {0}\n", list.at(i).title);
         pn::format(stderr, "    download url: {0}\n", list.at(i).download_url);
