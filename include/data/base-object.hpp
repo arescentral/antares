@@ -258,6 +258,7 @@ class BaseObject {
 
     pn::string name;
     pn::string short_name;
+    pn::string portrait;
 
     uint32_t attributes;  // initial attributes (see flags)
     int32_t  price;
@@ -326,7 +327,6 @@ class BaseObject {
 
     uint8_t skillNum;
     uint8_t skillDen;
-    int16_t pictPortraitResID;
 
     static const int byte_size = 318;
 };

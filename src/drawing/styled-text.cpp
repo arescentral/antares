@@ -194,8 +194,7 @@ void StyledText::set_interface_text(pn::string_view text) {
                 inlinePictType inline_pict;
                 if (pn::strtoll(id_string, &id, nullptr) &&
                     (inline_pict.object = BaseObject::get(id))) {
-                    inline_pict.picture =
-                            pn::format("pictures/{0}", inline_pict.object->pictPortraitResID);
+                    inline_pict.picture = pn::format("pictures/{0}", inline_pict.object->portrait);
                 } else {
                     inline_pict.object  = nullptr;
                     inline_pict.picture = pn::format("pictures/{0}", id_string);

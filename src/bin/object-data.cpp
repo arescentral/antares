@@ -49,13 +49,23 @@ class ObjectDataBuilder {
     ObjectDataBuilder(const ObjectDataBuilder&) = delete;
     ObjectDataBuilder& operator=(const ObjectDataBuilder&) = delete;
 
-    void save(const BaseObject& object, int pict_id) {
+    void save(const BaseObject& object, pn::string_view portrait) {
         pn::string data;
         CreateObjectDataText(data, object);
         if (_output_dir.has_value()) {
-            pn::string path = pn::format("{0}/{1}.txt", *_output_dir, dec(pict_id, 5));
-            pn::file   file = pn::open(path, "w");
-            file.write(data);
+            pn::string      path = pn::format("{0}/{1}.txt", *_output_dir, portrait);
+            pn::string_view dir  = sfz::path::dirname(path);
+            try {
+                sfz::makedirs(dir, 0755);
+            } catch (...) {
+                std::throw_with_nested(std::runtime_error(dir.copy().c_str()));
+            }
+            try {
+                pn::file file = pn::open(path, "w").check();
+                file.write(data);
+            } catch (...) {
+                std::throw_with_nested(std::runtime_error(path.copy().c_str()));
+            }
         }
     }
 
@@ -133,11 +143,7 @@ void main(int argc, char* const* argv) {
                     140, 142, 147, 148, 149, 151, 164, 165, 166, 167, 184, 243, 250, 270}) {
         Handle<const BaseObject> object(id);
         load_object_data(object);
-        const int pict_id = object->pictPortraitResID;
-        if (pict_id <= 0) {
-            continue;
-        }
-        builder.save(*object, pict_id);
+        builder.save(*object, object->portrait);
     }
 }
 

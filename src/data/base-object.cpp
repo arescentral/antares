@@ -260,6 +260,7 @@ BaseObject base_object(pn::value_cref x0) {
 
     o.name       = required_string(x.get("long_name")).copy();
     o.short_name = required_string(x.get("short_name")).copy();
+    o.portrait   = optional_string(x.get("portrait")).value_or("").copy();
 
     o.price                = optional_int(x.get("price")).value_or(0);
     o.destinationClass     = optional_int(x.get("destination_class")).value_or(0);
@@ -269,7 +270,6 @@ BaseObject base_object(pn::value_cref x0) {
     o.energy               = optional_int(x.get("energy")).value_or(0);
     o.skillNum             = optional_int(x.get("skill_num")).value_or(0);
     o.skillDen             = optional_int(x.get("skill_den")).value_or(0);
-    o.pictPortraitResID    = optional_int(x.get("portrait")).value_or(0);
     o.occupy_count         = optional_int(x.get("occupy_count")).value_or(-1);
     o.arriveActionDistance = optional_int(x.get("arrive_action_distance")).value_or(0);
 
