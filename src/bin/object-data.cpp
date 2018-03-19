@@ -87,11 +87,11 @@ void usage(pn::file_view out, pn::string_view progname, int retcode) {
     exit(retcode);
 }
 
-void load_object_data(Handle<const BaseObject> o) {
+void load_object_data(const NamedHandle<const BaseObject>& o) {
     load_object(o);
-    for (const auto& w : {o->pulse, o->beam, o->special}) {
-        if (w.has_value()) {
-            load_object_data(w->base);
+    for (const auto* w : {&o->pulse, &o->beam, &o->special}) {
+        if (w->has_value()) {
+            load_object_data((*w)->base);
         }
     }
     for (const std::unique_ptr<const Action>& a : o->activate) {
@@ -142,7 +142,7 @@ void main(int argc, char* const* argv) {
                     59,  61,  62,  64,  67,  75,  78,  80,  86,  88,  89,  93,  94,  95,  101,
                     104, 109, 110, 112, 113, 114, 118, 119, 120, 126, 127, 128, 129, 138, 139,
                     140, 142, 147, 148, 149, 151, 164, 165, 166, 167, 184, 243, 250, 270}) {
-        Handle<const BaseObject> object(id);
+        NamedHandle<const BaseObject> object(pn::dump(id, pn::dump_short));
         load_object_data(object);
         builder.save(*object, object->portrait);
     }

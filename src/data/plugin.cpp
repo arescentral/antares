@@ -134,8 +134,4 @@ void load_object(const NamedHandle<const BaseObject>& o) {
     }
 }
 
-void load_object(Handle<const BaseObject> o) {
-    return load_object(NamedHandle<const BaseObject>(pn::dump(o.number(), pn::dump_short)));
-}
-
 }  // namespace antares

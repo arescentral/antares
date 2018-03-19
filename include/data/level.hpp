@@ -55,16 +55,16 @@ const int32_t kInitiallyTrue = 0x00000002;
 const int32_t kHasBeenTrue   = 0x00000004;
 
 struct ScenarioInfo {
-    Handle<const BaseObject> warpInFlareID;
-    Handle<const BaseObject> warpOutFlareID;
-    Handle<const BaseObject> playerBodyID;
-    Handle<const BaseObject> energyBlobID;
-    pn::string               downloadURLString;
-    pn::string               titleString;
-    pn::string               authorNameString;
-    pn::string               authorURLString;
-    pn::string               intro_text;
-    pn::string               about_text;
+    NamedHandle<const BaseObject> warpInFlareID;
+    NamedHandle<const BaseObject> warpOutFlareID;
+    NamedHandle<const BaseObject> playerBodyID;
+    NamedHandle<const BaseObject> energyBlobID;
+    pn::string                    downloadURLString;
+    pn::string                    titleString;
+    pn::string                    authorNameString;
+    pn::string                    authorURLString;
+    pn::string                    intro_text;
+    pn::string                    about_text;
 
     Texture publisher_screen;
     Texture ego_screen;
@@ -171,10 +171,10 @@ struct Level {
 Level level(pn::value_cref x);
 
 struct Level_Initial {
-    Handle<const BaseObject> base;
-    Handle<Admiral>          owner;
-    Point                    at;
-    Fixed                    earning;
+    NamedHandle<const BaseObject> base;
+    Handle<Admiral>               owner;
+    Point                         at;
+    Fixed                         earning;
 
     pn::string name_override;
     int32_t    sprite_override;

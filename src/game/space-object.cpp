@@ -88,7 +88,7 @@ BaseObject* BaseObject::get(pn::string_view name) {
     return nullptr;
 }
 
-const Handle<const BaseObject>* get_base_object_handle_from_class_and_race(
+const NamedHandle<const BaseObject>* get_base_object_handle_from_class_and_race(
         pn::string_view class_, const NamedHandle<const Race>& race) {
     auto it = race->ships.find(class_.copy());
     if (it == race->ships.end()) {

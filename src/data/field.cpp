@@ -249,8 +249,8 @@ sfz::optional<Handle<Admiral>> optional_admiral(path_value x) {
 
 Handle<Admiral> required_admiral(path_value x) { return Handle<Admiral>(required_int(x)); }
 
-Handle<const BaseObject> required_base(path_value x) {
-    return Handle<const BaseObject>(required_int(x));
+NamedHandle<const BaseObject> required_base(path_value x) {
+    return NamedHandle<const BaseObject>(required_string(x));
 }
 
 sfz::optional<Handle<const Level::Initial>> optional_initial(path_value x) {

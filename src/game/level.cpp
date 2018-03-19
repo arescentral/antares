@@ -61,7 +61,7 @@ void AddBaseObjectActionMedia(
         const std::vector<std::unique_ptr<const Action>>& actions, std::bitset<16> all_colors);
 void AddActionMedia(const Action& action, std::bitset<16> all_colors);
 
-void AddBaseObjectMedia(Handle<const BaseObject> base, std::bitset<16> all_colors) {
+void AddBaseObjectMedia(const NamedHandle<const BaseObject>& base, std::bitset<16> all_colors) {
     if (base.get()) {
         return;
     }
@@ -225,18 +225,18 @@ static void load_blessed_objects(std::bitset<16> all_colors) {
     // Load the four blessed objects.  The player's body is needed
     // in all colors; the other three are needed only as neutral
     // objects by default.
-    const auto&              info      = plug.info;
-    Handle<const BaseObject> blessed[] = {
-            info.energyBlobID, info.warpInFlareID, info.warpOutFlareID, info.playerBodyID,
+    const auto&                          info      = plug.info;
+    const NamedHandle<const BaseObject>* blessed[] = {
+            &info.energyBlobID, &info.warpInFlareID, &info.warpOutFlareID, &info.playerBodyID,
     };
     for (auto id : blessed) {
-        AddBaseObjectMedia(id, all_colors);
+        AddBaseObjectMedia(*id, all_colors);
     }
 }
 
 static void load_initial(Handle<const Level::Initial> initial, std::bitset<16> all_colors) {
     Handle<Admiral> owner      = initial->owner;
-    auto            baseObject = initial->base;
+    const auto&     baseObject = initial->base;
     // TODO(sfiera): remap objects in networked games.
 
     // Load the media for this object

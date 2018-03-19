@@ -292,8 +292,8 @@ class BaseObject {
     Icon icon;
 
     struct Weapon {
-        Handle<const BaseObject>    base;
-        std::vector<fixedPointType> positions;  // relative positions (unrotated) of fire points
+        NamedHandle<const BaseObject> base;
+        std::vector<fixedPointType>   positions;  // relative positions (unrotated) of fire points
     };
     sfz::optional<Weapon> pulse;
     sfz::optional<Weapon> beam;

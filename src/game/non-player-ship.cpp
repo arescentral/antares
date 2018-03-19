@@ -113,7 +113,9 @@ static void tick_weapon(
         Handle<SpaceObject> subject, Handle<SpaceObject> target, uint32_t key,
         const sfz::optional<BaseObject::Weapon>& base_weapon, SpaceObject::Weapon& weapon) {
     if (subject->keysDown & key) {
-        fire_weapon(subject, target, weapon, base_weapon.value_or(BaseObject::Weapon{}).positions);
+        fire_weapon(
+                subject, target, weapon,
+                base_weapon.has_value() ? base_weapon->positions : std::vector<fixedPointType>{});
     }
 }
 

@@ -59,7 +59,7 @@ void create_initial(Handle<const Level::Initial> initial) {
         }
     }
 
-    auto base = initial->base;
+    const auto& base = initial->base;
     // TODO(sfiera): remap object in networked games.
     fixedPointType v        = {Fixed::zero(), Fixed::zero()};
     auto           anObject = g.initials[initial.number()] = CreateAnySpaceObject(
@@ -147,7 +147,7 @@ void UnhideInitialObject(Handle<const Level::Initial> initial) {
         }
     }
 
-    auto base = initial->base;
+    const auto& base = initial->base;
     // TODO(sfiera): remap objects in networked games.
     fixedPointType v        = {Fixed::zero(), Fixed::zero()};
     auto           anObject = g.initials[initial.number()] = CreateAnySpaceObject(

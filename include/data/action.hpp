@@ -63,10 +63,10 @@ struct Action {
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset) const = 0;
 
-    virtual const Handle<const BaseObject>* created_base() const;
-    virtual Range<int64_t>                  sound_range() const;
-    virtual bool                            alters_owner() const;
-    virtual bool                            check_conditions() const;
+    virtual const NamedHandle<const BaseObject>* created_base() const;
+    virtual Range<int64_t>                       sound_range() const;
+    virtual bool                                 alters_owner() const;
+    virtual bool                                 check_conditions() const;
 
     static const size_t byte_size = 48;
 };
@@ -135,20 +135,20 @@ struct ConditionAction : public Action {
 };
 
 struct CreateAction : public Action {
-    Handle<const BaseObject> base;                         // what type
-    Range<int64_t>           count              = {1, 2};  // # to make randomly
-    bool                     relative_velocity  = false;   // is velocity relative to creator?
-    bool                     relative_direction = false;   // determines initial heading
-    int32_t                  distance = 0;      // create at this distance in random direction
-    bool                     inherit  = false;  // if false, gets creator as target
-                                                // if true, gets creator’s target as target
-    bool legacy_random = false;                 // if true, consume a random number from
-                                                // subject even if not necessary
+    NamedHandle<const BaseObject> base;                         // what type
+    Range<int64_t>                count              = {1, 2};  // # to make randomly
+    bool                          relative_velocity  = false;   // is velocity relative to creator?
+    bool                          relative_direction = false;   // determines initial heading
+    int32_t                       distance = 0;      // create at this distance in random direction
+    bool                          inherit  = false;  // if false, gets creator as target
+                                                     // if true, gets creator’s target as target
+    bool legacy_random = false;                      // if true, consume a random number from
+                                                     // subject even if not necessary
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset) const;
-    virtual const Handle<const BaseObject>* created_base() const;
+    virtual const NamedHandle<const BaseObject>* created_base() const;
 };
 
 struct DisableAction : public Action {
@@ -168,13 +168,13 @@ struct EnergizeAction : public Action {
 };
 
 struct EquipAction : public Action {
-    Weapon                   which;
-    Handle<const BaseObject> base;
+    Weapon                        which;
+    NamedHandle<const BaseObject> base;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset) const;
-    virtual const Handle<const BaseObject>* created_base() const;
+    virtual const NamedHandle<const BaseObject>* created_base() const;
 };
 
 struct FireAction : public Action {
@@ -245,13 +245,13 @@ struct MessageAction : public Action {
 };
 
 struct MorphAction : public Action {
-    bool                     keep_ammo;
-    Handle<const BaseObject> base;
+    bool                          keep_ammo;
+    NamedHandle<const BaseObject> base;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset) const;
-    virtual const Handle<const BaseObject>* created_base() const;
+    virtual const NamedHandle<const BaseObject>* created_base() const;
 };
 
 struct MoveAction : public Action {
