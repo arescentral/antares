@@ -107,7 +107,8 @@ pn::string_view::size_type find_replace(
 }  // namespace
 
 void CreateWeaponDataText(
-        pn::string* text, const BaseObject* weaponObject, pn::string_view weaponName);
+        pn::string* text, const sfz::optional<BaseObject::Weapon>& weapon,
+        pn::string_view weaponName);
 
 //
 // BothCommandAndQ:
@@ -178,21 +179,23 @@ void CreateObjectDataText(pn::string& text, const BaseObject& object) {
     }
 
     // now, check for weapons!
-    CreateWeaponDataText(&data, object.pulse.base.get(), values.at(kShipDataPulseStringNum));
-    CreateWeaponDataText(&data, object.beam.base.get(), values.at(kShipDataBeamStringNum));
-    CreateWeaponDataText(&data, object.special.base.get(), values.at(kShipDataSpecialStringNum));
+    CreateWeaponDataText(&data, object.pulse, values.at(kShipDataPulseStringNum));
+    CreateWeaponDataText(&data, object.beam, values.at(kShipDataBeamStringNum));
+    CreateWeaponDataText(&data, object.special, values.at(kShipDataSpecialStringNum));
 
     text = std::move(data);
 }
 
 void CreateWeaponDataText(
-        pn::string* text, const BaseObject* weaponObject, pn::string_view weaponName) {
+        pn::string* text, const sfz::optional<BaseObject::Weapon>& weapon,
+        pn::string_view weaponName) {
     int32_t mostDamage;
     bool    isGuided = false;
 
-    if (!weaponObject) {
+    if (!weapon.has_value()) {
         return;
     }
+    const auto& weaponObject = weapon->base;
 
     // TODO(sfiera): catch exception.
     pn::string data = Resource::text(kWeaponDataTextID);
@@ -204,13 +207,13 @@ void CreateWeaponDataText(
     isGuided   = false;
     if (weaponObject->activate.size() > 0) {
         for (const auto& action : weaponObject->activate) {
-            Handle<const BaseObject> created_base = action->created_base();
-            if (created_base.get()) {
-                if (created_base->attributes & kIsGuided) {
+            const Handle<const BaseObject>* created_base = action->created_base();
+            if (created_base) {
+                if ((*created_base)->attributes & kIsGuided) {
                     isGuided = true;
                 }
-                if (created_base->damage > mostDamage) {
-                    mostDamage = created_base->damage;
+                if ((*created_base)->damage > mostDamage) {
+                    mostDamage = (*created_base)->damage;
                 }
             }
         }

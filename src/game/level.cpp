@@ -99,10 +99,10 @@ void AddBaseObjectMedia(Handle<const BaseObject> base, std::bitset<16> all_color
     AddBaseObjectActionMedia(base->activate, all_colors);
     AddBaseObjectActionMedia(base->arrive, all_colors);
 
-    for (Handle<const BaseObject> weapon :
-         {base->pulse.base, base->beam.base, base->special.base}) {
-        if (weapon.number() >= 0) {
-            AddBaseObjectMedia(weapon, all_colors);
+    for (const sfz::optional<BaseObject::Weapon>* weapon :
+         {&base->pulse, &base->beam, &base->special}) {
+        if (weapon->has_value()) {
+            AddBaseObjectMedia((*weapon)->base, all_colors);
         }
     }
 }
@@ -120,8 +120,8 @@ void AddActionMedia(const Action& action, std::bitset<16> all_colors) {
 #endif  // DATA_COVERAGE
 
     auto base = action.created_base();
-    if (base.number() >= 0) {
-        AddBaseObjectMedia(action.created_base(), all_colors);
+    if (base) {
+        AddBaseObjectMedia(*base, all_colors);
     }
 
     auto range = action.sound_range();
@@ -222,19 +222,6 @@ LoadState start_construct_level(const Level& level) {
 }
 
 static void load_blessed_objects(std::bitset<16> all_colors) {
-    if (plug.info.energyBlobID.number() < 0) {
-        throw std::runtime_error("No energy blob defined");
-    }
-    if (plug.info.warpInFlareID.number() < 0) {
-        throw std::runtime_error("No warp in flare defined");
-    }
-    if (plug.info.warpOutFlareID.number() < 0) {
-        throw std::runtime_error("No warp out flare defined");
-    }
-    if (plug.info.playerBodyID.number() < 0) {
-        throw std::runtime_error("No player body defined");
-    }
-
     // Load the four blessed objects.  The player's body is needed
     // in all colors; the other three are needed only as neutral
     // objects by default.
@@ -273,8 +260,8 @@ static void load_initial(Handle<const Level::Initial> initial, std::bitset<16> a
             if (a->active()) {
                 auto baseObject =
                         get_base_object_handle_from_class_and_race(initial->build[j], a->race());
-                if (baseObject.number() >= 0) {
-                    AddBaseObjectMedia(baseObject, all_colors);
+                if (baseObject) {
+                    AddBaseObjectMedia(*baseObject, all_colors);
                 }
             }
         }

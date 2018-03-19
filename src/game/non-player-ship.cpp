@@ -111,9 +111,9 @@ void SpaceObject::recharge() {
 
 static void tick_weapon(
         Handle<SpaceObject> subject, Handle<SpaceObject> target, uint32_t key,
-        const BaseObject::Weapon& base_weapon, SpaceObject::Weapon& weapon) {
+        const sfz::optional<BaseObject::Weapon>& base_weapon, SpaceObject::Weapon& weapon) {
     if (subject->keysDown & key) {
-        fire_weapon(subject, target, weapon, base_weapon.positions);
+        fire_weapon(subject, target, weapon, base_weapon.value_or(BaseObject::Weapon{}).positions);
     }
 }
 

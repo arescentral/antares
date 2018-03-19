@@ -63,10 +63,10 @@ struct Action {
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset) const = 0;
 
-    virtual Handle<const BaseObject> created_base() const;
-    virtual Range<int64_t>           sound_range() const;
-    virtual bool                     alters_owner() const;
-    virtual bool                     check_conditions() const;
+    virtual const Handle<const BaseObject>* created_base() const;
+    virtual Range<int64_t>                  sound_range() const;
+    virtual bool                            alters_owner() const;
+    virtual bool                            check_conditions() const;
 
     static const size_t byte_size = 48;
 };
@@ -148,7 +148,7 @@ struct CreateAction : public Action {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset) const;
-    virtual Handle<const BaseObject> created_base() const;
+    virtual const Handle<const BaseObject>* created_base() const;
 };
 
 struct DisableAction : public Action {
@@ -174,7 +174,7 @@ struct EquipAction : public Action {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset) const;
-    virtual Handle<const BaseObject> created_base() const;
+    virtual const Handle<const BaseObject>* created_base() const;
 };
 
 struct FireAction : public Action {
@@ -251,7 +251,7 @@ struct MorphAction : public Action {
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset) const;
-    virtual Handle<const BaseObject> created_base() const;
+    virtual const Handle<const BaseObject>* created_base() const;
 };
 
 struct MoveAction : public Action {

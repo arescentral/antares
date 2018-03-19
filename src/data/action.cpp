@@ -433,14 +433,14 @@ std::vector<std::unique_ptr<const Action>> optional_action_array(path_value x) {
     }
 }
 
-Handle<const BaseObject> Action::created_base() const { return BaseObject::none(); }
-Range<int64_t>           Action::sound_range() const { return Range<int64_t>::empty(); }
-bool                     Action::alters_owner() const { return false; }
-bool                     Action::check_conditions() const { return false; }
+const Handle<const BaseObject>* Action::created_base() const { return nullptr; }
+Range<int64_t>                  Action::sound_range() const { return Range<int64_t>::empty(); }
+bool                            Action::alters_owner() const { return false; }
+bool                            Action::check_conditions() const { return false; }
 
-Handle<const BaseObject> CreateAction::created_base() const { return base; }
-Handle<const BaseObject> MorphAction::created_base() const { return base; }
-Handle<const BaseObject> EquipAction::created_base() const { return base; }
+const Handle<const BaseObject>* CreateAction::created_base() const { return &base; }
+const Handle<const BaseObject>* MorphAction::created_base() const { return &base; }
+const Handle<const BaseObject>* EquipAction::created_base() const { return &base; }
 
 Range<int64_t> SoundAction::sound_range() const { return id; }
 

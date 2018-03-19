@@ -88,15 +88,16 @@ void usage(pn::file_view out, pn::string_view progname, int retcode) {
 }
 
 void load_object_data(Handle<const BaseObject> o) {
-    if (o.number() < 0) {
-        return;
-    }
     load_object(o);
-    for (Handle<const BaseObject> w : {o->pulse.base, o->beam.base, o->special.base}) {
-        load_object_data(w);
+    for (const auto& w : {o->pulse, o->beam, o->special}) {
+        if (w.has_value()) {
+            load_object_data(w->base);
+        }
     }
     for (const std::unique_ptr<const Action>& a : o->activate) {
-        load_object_data(a->created_base());
+        if (a->created_base()) {
+            load_object_data(*a->created_base());
+        }
     }
 }
 

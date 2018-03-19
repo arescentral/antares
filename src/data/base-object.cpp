@@ -313,12 +313,9 @@ BaseObject base_object(pn::value_cref x0) {
     if (weapons.value().is_null()) {
         // no weapons
     } else if (weapons.value().is_map()) {
-        o.pulse = optional_weapon(weapons.get("pulse"))
-                          .value_or(BaseObject::Weapon{BaseObject::none()});
-        o.beam = optional_weapon(weapons.get("beam"))
-                         .value_or(BaseObject::Weapon{BaseObject::none()});
-        o.special = optional_weapon(weapons.get("special"))
-                            .value_or(BaseObject::Weapon{BaseObject::none()});
+        o.pulse   = optional_weapon(weapons.get("pulse"));
+        o.beam    = optional_weapon(weapons.get("beam"));
+        o.special = optional_weapon(weapons.get("special"));
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or map", weapons.path()).c_str());
     }

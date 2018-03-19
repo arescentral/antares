@@ -634,16 +634,18 @@ void FireAction::apply(
     switch (which) {
         case Weapon::PULSE:
             fire_weapon(
-                    subject, SpaceObject::none(), subject->pulse, subject->base->pulse.positions);
+                    subject, SpaceObject::none(), subject->pulse,
+                    subject->base->pulse.value_or(BaseObject::Weapon{}).positions);
             break;
         case Weapon::BEAM:
             fire_weapon(
-                    subject, SpaceObject::none(), subject->beam, subject->base->beam.positions);
+                    subject, SpaceObject::none(), subject->beam,
+                    subject->base->beam.value_or(BaseObject::Weapon{}).positions);
             break;
         case Weapon::SPECIAL:
             fire_weapon(
                     subject, SpaceObject::none(), subject->special,
-                    subject->base->special.positions);
+                    subject->base->special.value_or(BaseObject::Weapon{}).positions);
             break;
     }
 }

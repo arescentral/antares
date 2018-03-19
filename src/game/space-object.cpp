@@ -88,19 +88,20 @@ BaseObject* BaseObject::get(pn::string_view name) {
     return nullptr;
 }
 
-Handle<const BaseObject> get_base_object_handle_from_class_and_race(
+const Handle<const BaseObject>* get_base_object_handle_from_class_and_race(
         pn::string_view class_, const NamedHandle<const Race>& race) {
     auto it = race->ships.find(class_.copy());
     if (it == race->ships.end()) {
         // TODO(sfiera): return BaseObject with literal name class_.
-        return BaseObject::none();
+        return nullptr;
     }
-    return it->second;
+    return &it->second;
 }
 
 const BaseObject* get_base_object_from_class_and_race(
         pn::string_view class_, const NamedHandle<const Race>& race) {
-    return get_base_object_handle_from_class_and_race(class_, race).get();
+    const auto* base = get_base_object_handle_from_class_and_race(class_, race);
+    return base ? base->get() : nullptr;
 }
 
 static Handle<SpaceObject> next_free_space_object() {
@@ -306,9 +307,9 @@ SpaceObject::SpaceObject(
         pixResID += (static_cast<int>(GetAdmiralColor(owner)) << kSpriteTableColorShift);
     }
 
-    pulse.base   = base->pulse.base.get();
-    beam.base    = base->beam.base.get();
-    special.base = base->special.base.get();
+    pulse.base   = base->pulse.has_value() ? base->pulse->base.get() : nullptr;
+    beam.base    = base->beam.has_value() ? base->beam->base.get() : nullptr;
+    special.base = base->special.has_value() ? base->special->base.get() : nullptr;
 
     longestWeaponRange  = 0;
     shortestWeaponRange = kMaximumRelevantDistance;
@@ -444,9 +445,9 @@ void SpaceObject::change_base_type(
                 base.activate_period.begin + obj->randomSeed.next(base.activate_period.range());
     }
 
-    obj->pulse.base          = base.pulse.base.get();
-    obj->beam.base           = base.beam.base.get();
-    obj->special.base        = base.special.base.get();
+    obj->pulse.base          = base.pulse.has_value() ? base.pulse->base.get() : nullptr;
+    obj->beam.base           = base.beam.has_value() ? base.beam->base.get() : nullptr;
+    obj->special.base        = base.special.has_value() ? base.special->base.get() : nullptr;
     obj->longestWeaponRange  = 0;
     obj->shortestWeaponRange = kMaximumRelevantDistance;
 
