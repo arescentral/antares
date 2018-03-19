@@ -191,25 +191,19 @@ void StyledText::set_interface_text(pn::string_view text) {
                     id_string += r;
                     continue;
                 }
-                if (!pn::strtoll(id_string, &id, nullptr)) {
-                    throw std::runtime_error(pn::format(
-                                                     "invalid numeric literal {0}",
-                                                     pn::dump(id_string, pn::dump_short))
-                                                     .c_str());
-                }
-                inlinePictType    inline_pict;
-                const BaseObject* object = BaseObject::get(id);
-                if (object) {
-                    inline_pict.object  = object;
-                    inline_pict.picture = object->pictPortraitResID;
+                inlinePictType inline_pict;
+                if (pn::strtoll(id_string, &id, nullptr) &&
+                    (inline_pict.object = BaseObject::get(id))) {
+                    inline_pict.picture =
+                            pn::format("pictures/{0}", inline_pict.object->pictPortraitResID);
                 } else {
                     inline_pict.object  = nullptr;
-                    inline_pict.picture = id;
+                    inline_pict.picture = pn::format("pictures/{0}", id_string);
                 }
 
                 _textures.push_back(Resource::texture(inline_pict.picture));
                 inline_pict.bounds = _textures.back().size().as_rect();
-                _inline_picts.push_back(inline_pict);
+                _inline_picts.emplace_back(std::move(inline_pict));
                 _chars.push_back(StyledChar(_inline_picts.size() - 1, PICTURE, f, b));
                 id_string.clear();
                 state = START;

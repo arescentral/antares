@@ -81,16 +81,20 @@ static const Font* interface_font(interfaceStyleType style) {
     }
 }
 
-static void populate_inline_picts(
-        Rect rect, pn::string_view text, interfaceStyleType style,
-        vector<inlinePictType>& inline_pict) {
+static vector<inlinePictType> populate_inline_picts(
+        Rect rect, pn::string_view text, interfaceStyleType style) {
     StyledText interface_text(interface_font(style));
     interface_text.set_interface_text(text);
     interface_text.wrap_to(rect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer);
-    inline_pict = interface_text.inline_picts();
-    for (int i = 0; i < inline_pict.size(); ++i) {
-        inline_pict[i].bounds.offset(rect.left, rect.top);
+    std::vector<inlinePictType> result;
+    for (const inlinePictType& pict : interface_text.inline_picts()) {
+        result.emplace_back();
+        result.back().bounds  = pict.bounds;
+        result.back().object  = pict.object;
+        result.back().picture = pict.picture.copy();
+        result.back().bounds.offset(rect.left, rect.top);
     }
+    return result;
 }
 
 static void update_mission_brief_point(
@@ -193,7 +197,7 @@ static void update_mission_brief_point(
     dataItem->label = std::move(header);
     Rect newRect;
     GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
-    populate_inline_picts(dataItem->bounds(), text, dataItem->style, inlinePict);
+    inlinePict = populate_inline_picts(dataItem->bounds(), text, dataItem->style);
 }
 
 BriefingScreen::BriefingScreen(const Level& level, bool* cancelled)

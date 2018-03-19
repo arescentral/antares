@@ -115,25 +115,18 @@ BuildPix::BuildPix(pn::string_view text, int width) : _size({width, 0}) {
         if (line.size() >= 2 && line.substr(0, 2) == "#+") {
             if (line.size() > 2) {
                 if (line.data()[2] == 'B') {
-                    int64_t id = 2005;
+                    pn::string_view id = "log/starfield/a";
                     if (line.size() > 3) {
-                        if (!pn::strtoll(line.substr(3), &id, nullptr)) {
-                            throw std::runtime_error(pn::format(
-                                                             "malformed header line {0}",
-                                                             pn::dump(line, pn::dump_short))
-                                                             .c_str());
-                        }
+                        id = line.substr(3);
                     }
-                    _lines.push_back(Line{Line::BACKGROUND, Resource::texture(id), nullptr});
+                    _lines.push_back(Line{Line::BACKGROUND,
+                                          Resource::texture(pn::format("pictures/{0}", id)),
+                                          nullptr});
                 } else {
-                    int64_t id;
-                    if (!pn::strtoll(line.substr(2), &id, nullptr)) {
-                        throw std::runtime_error(pn::format(
-                                                         "malformed header line {0}",
-                                                         pn::dump(line, pn::dump_short))
-                                                         .c_str());
-                    }
-                    _lines.push_back(Line{Line::PICTURE, Resource::texture(id), nullptr});
+                    pn::string_view id = line.substr(2);
+                    _lines.push_back(Line{Line::PICTURE,
+                                          Resource::texture(pn::format("pictures/{0}", id)),
+                                          nullptr});
                 }
             }
         } else {
