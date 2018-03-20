@@ -161,8 +161,7 @@ void StyledText::set_retro_text(pn::string_view text) {
 void StyledText::set_interface_text(pn::string_view text) {
     const auto f = _fore_color;
     const auto b = _back_color;
-    pn::string id_string;
-    int64_t    id;
+    pn::string id;
     enum { START, CODE, ID } state = START;
 
     for (auto r : text) {
@@ -188,23 +187,21 @@ void StyledText::set_interface_text(pn::string_view text) {
 
             case ID:
                 if (r != pn::rune{'^'}) {
-                    id_string += r;
+                    id += r;
                     continue;
                 }
                 inlinePictType inline_pict;
-                if (pn::strtoll(id_string, &id, nullptr) &&
-                    (inline_pict.object = BaseObject::get(id))) {
+                if ((inline_pict.object = BaseObject::get(id))) {
                     inline_pict.picture = pn::format("pictures/{0}", inline_pict.object->portrait);
                 } else {
-                    inline_pict.object  = nullptr;
-                    inline_pict.picture = pn::format("pictures/{0}", id_string);
+                    inline_pict.picture = pn::format("pictures/{0}", id);
                 }
 
                 _textures.push_back(Resource::texture(inline_pict.picture));
                 inline_pict.bounds = _textures.back().size().as_rect();
                 _inline_picts.emplace_back(std::move(inline_pict));
                 _chars.push_back(StyledChar(_inline_picts.size() - 1, PICTURE, f, b));
-                id_string.clear();
+                id.clear();
                 state = START;
                 break;
         }
