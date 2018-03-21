@@ -45,8 +45,6 @@ bool operator==(const Point& lhs, const Point& rhs) {
 
 bool operator!=(const Point& lhs, const Point& rhs) { return !(lhs == rhs); }
 
-bool read_from(pn::file_view in, Point* p) { return in.read(&p->h, &p->v); }
-
 Size::Size() : width(0), height(0) {}
 
 Size::Size(int32_t width, int32_t height) : width(width), height(height) {}
@@ -130,10 +128,6 @@ void Rect::enlarge_to(const Rect& r) {
     top    = std::min(top, r.top);
     right  = std::max(right, r.right);
     bottom = std::max(bottom, r.bottom);
-}
-
-bool read_from(pn::file_view in, Rect* r) {
-    return in.read(&r->left, &r->top, &r->right, &r->bottom);
 }
 
 pn::string stringify(Rect r) {
