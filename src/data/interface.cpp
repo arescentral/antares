@@ -70,25 +70,7 @@ static int16_t optional_gamepad_button(path_value x) {
     return i;
 }
 
-pn::string required_label(path_value x) {
-    auto label = required_struct<interfaceLabelType>(
-            x, {
-                       {"id", {&interfaceLabelType::stringID, required_int}},
-                       {"index", {&interfaceLabelType::stringNumber, required_int}},
-               });
-    return Resource::strings(label.stringID).at(label.stringNumber).copy();
-}
-
 Texture required_texture(path_value x) { return Resource::texture(required_string(x)); }
-
-pn::string optional_text(path_value x) {
-    sfz::optional<int64_t> id = optional_int(x);
-    if (id.has_value()) {
-        return Resource::text(*id);
-    } else {
-        return "";
-    }
-}
 
 struct Tab {
     int64_t    width;
@@ -120,7 +102,7 @@ std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, path_value 
                         item, {
                                       {"type", nullptr},
                                       {"bounds", {&LabeledRect::bounds, required_rect}},
-                                      {"label", {&LabeledRect::label, required_label}},
+                                      {"label", {&LabeledRect::label, required_string_copy}},
                                       {"hue", {&LabeledRect::hue, required_hue}},
                                       {"style", {&LabeledRect::style, required_interface_style}},
                               })));
@@ -131,7 +113,7 @@ std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, path_value 
                     item, {
                                   {"type", nullptr},
                                   {"bounds", {&PlainButton::bounds, required_rect}},
-                                  {"label", {&PlainButton::label, required_label}},
+                                  {"label", {&PlainButton::label, required_string_copy}},
                                   {"key", {&PlainButton::key, optional_key_num}},
                                   {"gamepad", {&PlainButton::gamepad, optional_gamepad_button}},
                                   {"hue", {&PlainButton::hue, required_hue}},
@@ -143,7 +125,7 @@ std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, path_value 
                     item, {
                                   {"type", nullptr},
                                   {"bounds", {&CheckboxButton::bounds, required_rect}},
-                                  {"label", {&CheckboxButton::label, required_label}},
+                                  {"label", {&CheckboxButton::label, required_string_copy}},
                                   {"key", {&CheckboxButton::key, optional_key_num}},
                                   {"gamepad", {&CheckboxButton::gamepad, optional_gamepad_button}},
                                   {"hue", {&CheckboxButton::hue, required_hue}},
@@ -155,7 +137,7 @@ std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, path_value 
                     item, {
                                   {"type", nullptr},
                                   {"bounds", {&RadioButton::bounds, required_rect}},
-                                  {"label", {&RadioButton::label, required_label}},
+                                  {"label", {&RadioButton::label, required_string_copy}},
                                   {"key", {&RadioButton::key, optional_key_num}},
                                   {"gamepad", {&RadioButton::gamepad, optional_gamepad_button}},
                                   {"hue", {&RadioButton::hue, required_hue}},
@@ -175,7 +157,7 @@ std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, path_value 
                     item, {
                                   {"type", nullptr},
                                   {"bounds", {&TextRect::bounds, required_rect}},
-                                  {"id", {&TextRect::text, optional_text}},
+                                  {"text", {&TextRect::text, optional_string, ""}},
                                   {"hue", {&TextRect::hue, required_hue}},
                                   {"style", {&TextRect::style, required_interface_style}},
                           })));
@@ -198,7 +180,7 @@ std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, path_value 
                 auto tab = required_struct<Tab>(
                         tabs.get(i), {
                                              {"width", {&Tab::width, required_int}},
-                                             {"label", {&Tab::label, required_label}},
+                                             {"label", {&Tab::label, required_string_copy}},
                                              {"content", nullptr},
                                      });
                 button_bounds.right = button_bounds.left + tab.width;
