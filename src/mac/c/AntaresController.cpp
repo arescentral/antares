@@ -23,6 +23,7 @@
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "game/globals.hpp"
+#include "lang/exception.hpp"
 #include "mac/core-foundation.hpp"
 #include "mac/prefs-driver.hpp"
 #include "mac/video-driver.hpp"
@@ -63,7 +64,7 @@ extern "C" bool antares_controller_loop(AntaresDrivers* drivers, CFStringRef* er
     try {
         drivers->video.loop(new Master(time(NULL)));
     } catch (std::exception& e) {
-        *error_message = cf::wrap(pn::string_view{e.what()}).release();
+        *error_message = cf::wrap(pn::string_view{antares::full_exception_string(e)}).release();
         return false;
     }
     return true;

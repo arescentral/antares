@@ -25,6 +25,7 @@
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/pix-table.hpp"
+#include "lang/exception.hpp"
 #include "video/text-driver.hpp"
 
 using sfz::hex;
@@ -135,34 +136,7 @@ void main(int argc, char* const* argv) {
     }
 }
 
-void print_nested_exception(const std::exception& e) {
-    pn::format(stderr, ": {0}", e.what());
-    try {
-        std::rethrow_if_nested(e);
-    } catch (const std::exception& e) {
-        print_nested_exception(e);
-    }
-}
-
-void print_exception(pn::string_view progname, const std::exception& e) {
-    pn::format(stderr, "{0}: {1}", sfz::path::basename(progname), e.what());
-    try {
-        std::rethrow_if_nested(e);
-    } catch (const std::exception& e) {
-        print_nested_exception(e);
-    }
-    pn::format(stderr, "\n");
-}
-
 }  // namespace
 }  // namespace antares
 
-int main(int argc, char* const* argv) {
-    try {
-        antares::main(argc, argv);
-    } catch (const std::exception& e) {
-        antares::print_exception(argv[0], e);
-        return 1;
-    }
-    return 0;
-}
+int main(int argc, char* const* argv) { return antares::wrap_main(antares::main, argc, argv); }
