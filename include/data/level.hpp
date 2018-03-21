@@ -73,7 +73,7 @@ struct ScenarioInfo {
 
     pn::string version;
 };
-bool read_from(pn::file_view in, ScenarioInfo* scenario_info);
+ScenarioInfo scenario_info(pn::value_cref x0);
 
 enum conditionType {
     kNoCondition                      = 0,

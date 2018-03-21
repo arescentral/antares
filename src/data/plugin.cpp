@@ -82,15 +82,16 @@ static void read_all_levels() {
 }
 
 void PluginInit() {
-    {
-        Resource rsrc = Resource::path("info.pn");
-        pn::file in   = rsrc.data().open();
-        if (!read_from(in, &plug.info)) {
-            throw std::runtime_error("error while reading scenario file info data");
+    try {
+        pn::value  x;
+        pn_error_t e;
+        if (!pn::parse(Resource::path("info.pn").data().open(), x, &e)) {
+            throw std::runtime_error(
+                    pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
         }
-        if (fgetc(in.c_obj()) != EOF) {
-            throw std::runtime_error("didn't consume all of scenario file info data");
-        }
+        plug.info = scenario_info(x);
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error("info.pn"));
     }
 
     read_all_levels();

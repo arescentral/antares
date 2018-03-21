@@ -44,35 +44,32 @@ const Level* Level::get(pn::string_view name) {
     }
 }
 
-bool read_from(pn::file_view in, ScenarioInfo* info) {
-    pn::value  x0;
-    pn_error_t error;
-    if (!pn::parse(in, x0, &error)) {
-        return false;
-    } else if (!x0.is_map()) {
+ScenarioInfo scenario_info(pn::value_cref x0) {
+    if (!x0.is_map()) {
         throw std::runtime_error("must be map");
     }
     path_value x{x0};
 
-    info->titleString       = required_string_copy(x.get("title"));
-    info->downloadURLString = required_string_copy(x.get("download_url"));
-    info->authorNameString  = required_string_copy(x.get("author"));
-    info->authorURLString   = required_string_copy(x.get("author_url"));
-    info->version           = required_string_copy(x.get("version"));
-    info->warpInFlareID     = required_base(x.get("warp_in_flare"));
-    info->warpOutFlareID    = required_base(x.get("warp_out_flare"));
-    info->playerBodyID      = required_base(x.get("player_body"));
-    info->energyBlobID      = required_base(x.get("energy_blob"));
+    ScenarioInfo info;
+    info.titleString       = required_string_copy(x.get("title"));
+    info.downloadURLString = required_string_copy(x.get("download_url"));
+    info.authorNameString  = required_string_copy(x.get("author"));
+    info.authorURLString   = required_string_copy(x.get("author_url"));
+    info.version           = required_string_copy(x.get("version"));
+    info.warpInFlareID     = required_base(x.get("warp_in_flare"));
+    info.warpOutFlareID    = required_base(x.get("warp_out_flare"));
+    info.playerBodyID      = required_base(x.get("player_body"));
+    info.energyBlobID      = required_base(x.get("energy_blob"));
 
-    info->intro_text = optional_string(x.get("intro")).value_or("").copy();
-    info->about_text = optional_string(x.get("about")).value_or("").copy();
+    info.intro_text = optional_string(x.get("intro")).value_or("").copy();
+    info.about_text = optional_string(x.get("about")).value_or("").copy();
 
-    info->publisher_screen = nullptr;  // Don’t have permission to show ASW logo.
-    info->ego_screen       = Resource::texture("pictures/credit");
-    info->splash_screen    = Resource::texture(required_string(x.get("splash")));
-    info->starmap          = Resource::texture(required_string(x.get("starmap")));
+    info.publisher_screen = nullptr;  // Don’t have permission to show ASW logo.
+    info.ego_screen       = Resource::texture("pictures/credit");
+    info.splash_screen    = Resource::texture(required_string(x.get("splash")));
+    info.starmap          = Resource::texture(required_string(x.get("starmap")));
 
-    return true;
+    return info;
 }
 
 static Level::Player required_player(path_value x, LevelType level_type) {
