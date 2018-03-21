@@ -23,6 +23,7 @@
 #include <pn/string>
 
 #include "data/enums.hpp"
+#include "data/field.hpp"
 #include "math/geometry.hpp"
 #include "video/driver.hpp"
 
@@ -44,16 +45,18 @@ class InterfaceItem {
     InterfaceItem& operator=(InterfaceItem&&) = default;
     virtual ~InterfaceItem() {}
 
-    virtual void accept(const Visitor& visitor) const = 0;
+    virtual std::unique_ptr<InterfaceItem> copy() const                         = 0;
+    virtual void                           accept(const Visitor& visitor) const = 0;
 
     int  id = -1;
     Rect bounds;
 };
 
-std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, pn::value_cref x0);
+std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, path_value x);
 
 struct PlainRect : public InterfaceItem {
-    virtual void accept(const Visitor& visitor) const;
+    virtual std::unique_ptr<InterfaceItem> copy() const;
+    virtual void                           accept(const Visitor& visitor) const;
 
     Hue            hue   = Hue::GRAY;
     InterfaceStyle style = InterfaceStyle::LARGE;
@@ -64,14 +67,16 @@ struct LabeledItem : public InterfaceItem {
 };
 
 struct LabeledRect : public LabeledItem {
-    virtual void accept(const Visitor& visitor) const;
+    virtual std::unique_ptr<InterfaceItem> copy() const;
+    virtual void                           accept(const Visitor& visitor) const;
 
     Hue            hue   = Hue::GRAY;
     InterfaceStyle style = InterfaceStyle::LARGE;
 };
 
 struct TextRect : public InterfaceItem {
-    virtual void accept(const Visitor& visitor) const;
+    virtual std::unique_ptr<InterfaceItem> copy() const;
+    virtual void                           accept(const Visitor& visitor) const;
 
     pn::string     text;
     Hue            hue   = Hue::GRAY;
@@ -79,7 +84,8 @@ struct TextRect : public InterfaceItem {
 };
 
 struct PictureRect : public InterfaceItem {
-    virtual void accept(const Visitor& visitor) const;
+    virtual std::unique_ptr<InterfaceItem> copy() const;
+    virtual void                           accept(const Visitor& visitor) const;
 
     Texture texture;
 };
@@ -93,30 +99,35 @@ struct Button : public LabeledItem {
 };
 
 struct PlainButton : public Button {
-    virtual void accept(const Visitor& visitor) const;
+    virtual std::unique_ptr<InterfaceItem> copy() const;
+    virtual void                           accept(const Visitor& visitor) const;
 };
 
 struct CheckboxButton : public Button {
-    virtual void accept(const Visitor& visitor) const;
+    virtual std::unique_ptr<InterfaceItem> copy() const;
+    virtual void                           accept(const Visitor& visitor) const;
 
     bool on = false;
 };
 
 struct RadioButton : public Button {
-    virtual void accept(const Visitor& visitor) const;
+    virtual std::unique_ptr<InterfaceItem> copy() const;
+    virtual void                           accept(const Visitor& visitor) const;
 
     bool on = false;
 };
 
 struct TabBoxButton : public Button {
-    virtual void accept(const Visitor& visitor) const;
+    virtual std::unique_ptr<InterfaceItem> copy() const;
+    virtual void                           accept(const Visitor& visitor) const;
 
-    bool      on = false;
-    pn::value tab_content;
+    bool                                        on = false;
+    std::vector<std::unique_ptr<InterfaceItem>> tab_content;
 };
 
 struct TabBox : public InterfaceItem {
-    virtual void accept(const Visitor& visitor) const;
+    virtual std::unique_ptr<InterfaceItem> copy() const;
+    virtual void                           accept(const Visitor& visitor) const;
 
     Hue            hue                   = Hue::GRAY;
     InterfaceStyle style                 = InterfaceStyle::LARGE;

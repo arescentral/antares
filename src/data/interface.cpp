@@ -90,24 +90,15 @@ pn::string optional_text(path_value x) {
     }
 }
 
-pn::array required_array(path_value x) {
-    if (!x.value().is_array()) {
-        throw std::runtime_error(pn::format("{0}: must be an array", x.path()).c_str());
-    }
-    return x.value().as_array().copy();
-}
-
 struct Tab {
     int64_t    width;
     pn::string label;
-    pn::array  content;
 };
 
-std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, pn::value_cref x0) {
-    if (!x0.is_array()) {
-        throw std::runtime_error("must be array");
+std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, path_value x) {
+    if (!x.value().is_array()) {
+        throw std::runtime_error(pn::format("{0}must be array", x.prefix()).c_str());
     }
-    path_value x{x0};
 
     std::vector<std::unique_ptr<InterfaceItem>> items;
     int                                         id = id0;
@@ -208,7 +199,7 @@ std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, pn::value_c
                         tabs.get(i), {
                                              {"width", {&Tab::width, required_int}},
                                              {"label", {&Tab::label, required_label}},
-                                             {"content", {&Tab::content, required_array}},
+                                             {"content", nullptr},
                                      });
                 button_bounds.right = button_bounds.left + tab.width;
                 TabBoxButton button;
@@ -216,7 +207,7 @@ std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, pn::value_c
                 button.label       = std::move(tab.label);
                 button.hue         = tab_box.hue;
                 button.style       = tab_box.style;
-                button.tab_content = tab.content.copy();
+                button.tab_content = interface_items(0, tabs.get(i).get("content"));
                 button.id          = id++;
                 items.emplace_back(new TabBoxButton(std::move(button)));
                 button_bounds.left = button_bounds.right + 37;
@@ -231,6 +222,107 @@ std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, pn::value_c
         }
     }
     return items;
+}
+
+std::unique_ptr<InterfaceItem> PlainRect::copy() const {
+    std::unique_ptr<PlainRect> copy(new PlainRect);
+    copy->bounds = bounds;
+    copy->id     = id;
+    copy->hue    = hue;
+    copy->style  = style;
+    return copy;
+}
+
+std::unique_ptr<InterfaceItem> LabeledRect::copy() const {
+    std::unique_ptr<LabeledRect> copy(new LabeledRect);
+    copy->bounds = bounds;
+    copy->id     = id;
+    copy->label  = label.copy();
+    copy->hue    = hue;
+    copy->style  = style;
+    return copy;
+}
+
+std::unique_ptr<InterfaceItem> TextRect::copy() const {
+    std::unique_ptr<TextRect> copy(new TextRect);
+    copy->bounds = bounds;
+    copy->id     = id;
+    copy->text   = text.copy();
+    copy->hue    = hue;
+    copy->style  = style;
+    return copy;
+}
+
+std::unique_ptr<InterfaceItem> PictureRect::copy() const {
+    std::unique_ptr<PictureRect> copy(new PictureRect);
+    copy->bounds = bounds;
+    copy->id     = id;
+    return copy;
+}
+
+std::unique_ptr<InterfaceItem> PlainButton::copy() const {
+    std::unique_ptr<PlainButton> copy(new PlainButton);
+    copy->bounds  = bounds;
+    copy->id      = id;
+    copy->label   = label.copy();
+    copy->key     = key;
+    copy->gamepad = gamepad;
+    copy->hue     = hue;
+    copy->style   = style;
+    copy->status  = status;
+    return copy;
+}
+
+std::unique_ptr<InterfaceItem> CheckboxButton::copy() const {
+    std::unique_ptr<CheckboxButton> copy(new CheckboxButton);
+    copy->bounds  = bounds;
+    copy->id      = id;
+    copy->label   = label.copy();
+    copy->key     = key;
+    copy->gamepad = gamepad;
+    copy->hue     = hue;
+    copy->style   = style;
+    copy->status  = status;
+    copy->on      = on;
+    return copy;
+}
+
+std::unique_ptr<InterfaceItem> RadioButton::copy() const {
+    std::unique_ptr<RadioButton> copy(new RadioButton);
+    copy->bounds  = bounds;
+    copy->id      = id;
+    copy->label   = label.copy();
+    copy->key     = key;
+    copy->gamepad = gamepad;
+    copy->hue     = hue;
+    copy->style   = style;
+    copy->status  = status;
+    copy->on      = on;
+    return copy;
+}
+
+std::unique_ptr<InterfaceItem> TabBoxButton::copy() const {
+    std::unique_ptr<TabBoxButton> copy(new TabBoxButton);
+    copy->bounds  = bounds;
+    copy->id      = id;
+    copy->label   = label.copy();
+    copy->key     = key;
+    copy->gamepad = gamepad;
+    copy->hue     = hue;
+    copy->style   = style;
+    copy->status  = status;
+    copy->on      = on;
+    return copy;
+}
+
+std::unique_ptr<InterfaceItem> TabBox::copy() const {
+    std::unique_ptr<TabBox> copy(new TabBox);
+    copy->bounds                = bounds;
+    copy->id                    = id;
+    copy->hue                   = hue;
+    copy->style                 = style;
+    copy->top_right_border_size = top_right_border_size;
+    return copy;
 }
 
 void PlainRect::accept(const Visitor& visitor) const { visitor.visit_plain_rect(*this); }

@@ -53,7 +53,7 @@ class InterfaceScreen : public Card {
     virtual void handle_button(Button& button) = 0;
 
     void truncate(size_t size);
-    void extend(pn::value_cref x);
+    void extend(const std::vector<std::unique_ptr<InterfaceItem>>& items);
 
     Point                offset() const;
     size_t               size() const;

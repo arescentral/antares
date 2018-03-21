@@ -40,7 +40,7 @@ namespace antares {
 InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds, bool full_screen)
         : _state(NORMAL), _bounds(bounds), _full_screen(full_screen), _hit_button(nullptr) {
     try {
-        _items = interface_items(0, load_pn(name));
+        _items = interface_items(0, path_value{load_pn(name)});
         for (auto& item : _items) {
             item->bounds.offset(bounds.left, bounds.top);
         }
@@ -219,11 +219,13 @@ void InterfaceScreen::truncate(size_t size) {
     _items.resize(size);
 }
 
-void InterfaceScreen::extend(pn::value_cref x) {
-    const int offset_x = (_bounds.width() / 2) - 320;
-    const int offset_y = (_bounds.height() / 2) - 240;
-    for (auto&& item : interface_items(_items.size(), x)) {
-        _items.emplace_back(std::move(item));
+void InterfaceScreen::extend(const std::vector<std::unique_ptr<InterfaceItem>>& items) {
+    const int offset_id = _items.size();
+    const int offset_x  = (_bounds.width() / 2) - 320;
+    const int offset_y  = (_bounds.height() / 2) - 240;
+    for (const auto& item : items) {
+        _items.emplace_back(item->copy());
+        _items.back()->id += offset_id;
         _items.back()->bounds.offset(offset_x, offset_y);
     }
 }
