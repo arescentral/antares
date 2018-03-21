@@ -482,6 +482,11 @@ Hue required_hue(path_value x) {
                 {"gray", Hue::GRAY}});
 }
 
+InterfaceStyle required_interface_style(path_value x) {
+    return required_enum<InterfaceStyle>(
+            x, {{"small", InterfaceStyle::SMALL}, {"large", InterfaceStyle::LARGE}});
+}
+
 KillKind required_kill_kind(path_value x) {
     return required_enum<KillKind>(
             x, {{"none", KillKind::NONE},

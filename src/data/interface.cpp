@@ -24,220 +24,223 @@
 #include <sfz/sfz.hpp>
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
+#include "data/field.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "lang/casts.hpp"
 #include "video/driver.hpp"
 
-using sfz::StringMap;
 using sfz::range;
-using std::unique_ptr;
-using std::vector;
 
 namespace antares {
 
-static Rect rect(pn::value_cref x) {
-    return {implicit_cast<int>(x.as_map().get("left").as_int()),
-            implicit_cast<int>(x.as_map().get("top").as_int()),
-            implicit_cast<int>(x.as_map().get("right").as_int()),
-            implicit_cast<int>(x.as_map().get("bottom").as_int())};
+static int32_t required_int32(path_value x) { return required_int(x, {-2147483648, 2147483648}); }
+
+static Rect required_rect(path_value x) {
+    return required_struct<Rect>(
+            x, {
+                       {"left", {&Rect::left, required_int32}},
+                       {"top", {&Rect::top, required_int32}},
+                       {"right", {&Rect::right, required_int32}},
+                       {"bottom", {&Rect::bottom, required_int32}},
+               });
 }
 
-static interfaceLabelType label(pn::value_cref x) {
-    return {
-            int16_t(x.as_map().get("id").as_int()), int16_t(x.as_map().get("index").as_int() + 1),
-    };
-}
-
-static Hue hue(pn::value_cref x) {
-    StringMap<Hue> hues;
-    hues["gray"]        = Hue::GRAY;
-    hues["orange"]      = Hue::ORANGE;
-    hues["yellow"]      = Hue::YELLOW;
-    hues["blue"]        = Hue::BLUE;
-    hues["green"]       = Hue::GREEN;
-    hues["purple"]      = Hue::PURPLE;
-    hues["indigo"]      = Hue::INDIGO;
-    hues["salmon"]      = Hue::SALMON;
-    hues["gold"]        = Hue::GOLD;
-    hues["aqua"]        = Hue::AQUA;
-    hues["pink"]        = Hue::PINK;
-    hues["pale-green"]  = Hue::PALE_GREEN;
-    hues["pale-purple"] = Hue::PALE_PURPLE;
-    hues["sky-blue"]    = Hue::SKY_BLUE;
-    hues["tan"]         = Hue::TAN;
-    hues["red"]         = Hue::RED;
-    return hues[x.as_string()];
-}
-
-static interfaceStyleType style(pn::value_cref x) {
-    StringMap<interfaceStyleType> styles;
-    styles["large"] = kLarge;
-    styles["small"] = kSmall;
-    return styles[x.as_string()];
-}
-
-static int16_t key(pn::value_cref x) {
-    int k;
-    if (!GetKeyNameNum(x.as_string(), k)) {
-        k = 0;
+static int16_t optional_key_num(path_value x) {
+    auto k = optional_string(x);
+    if (!k.has_value()) {
+        return 0;
     }
-    return k;
+    int i;
+    if (!GetKeyNameNum(*k, i)) {
+        throw std::runtime_error(pn::format("{0}: must be a key", x.path()).c_str());
+    }
+    return i;
 }
 
-vector<unique_ptr<InterfaceItem>> interface_items(int id0, pn::array_cref l) {
-    vector<unique_ptr<InterfaceItem>> items;
-    int                               id = id0;
-    for (auto i : range(l.size())) {
-        pn::map_cref item = l[i].as_map();
+static int16_t optional_gamepad_button(path_value x) {
+    auto k = optional_string(x);
+    if (!k.has_value()) {
+        return 0;
+    }
+    int i;
+    if (!(i = Gamepad::num(*k))) {
+        throw std::runtime_error(pn::format("{0}: must be a gamepad button", x.path()).c_str());
+    }
+    return i;
+}
 
-        pn::string kind;
-        for (auto key : {"rect", "button", "checkbox", "radio", "picture", "text", "tab-box"}) {
-            if (item.has(key)) {
-                if (kind.empty()) {
-                    kind = key;
-                } else {
-                    throw std::runtime_error(
-                            pn::format("interface item has both {0} and {1}", kind, key).c_str());
-                }
-            }
-        }
+pn::string required_label(path_value x) {
+    auto label = required_struct<interfaceLabelType>(
+            x, {
+                       {"id", {&interfaceLabelType::stringID, required_int}},
+                       {"index", {&interfaceLabelType::stringNumber, required_int}},
+               });
+    return Resource::strings(label.stringID).at(label.stringNumber).copy();
+}
 
-        pn::map_cref       sub      = item.get(kind).as_map();
-        Rect               bounds   = rect(item.get("bounds"));
-        pn::string_view    resource = sub.get("resource").as_string();
-        Hue                hue      = antares::hue(sub.get("hue"));
-        interfaceStyleType style    = antares::style(sub.get("style"));
-        int16_t            key      = sub.has("key") ? antares::key(sub.get("key")) : 0;
-        int16_t gamepad = sub.has("gamepad") ? Gamepad::num(sub.get("gamepad").as_string()) : 0;
-        interfaceLabelType label =
-                sub.has("label") ? antares::label(sub.get("label")) : interfaceLabelType{};
+Texture required_texture(path_value x) { return Resource::texture(required_string(x)); }
 
-        if (kind == "rect") {
-            if (sub.has("label")) {
-                items.emplace_back(new LabeledRect(id++, bounds, label, hue, style));
+pn::string optional_text(path_value x) {
+    sfz::optional<int64_t> id = optional_int(x);
+    if (id.has_value()) {
+        return Resource::text(*id);
+    } else {
+        return "";
+    }
+}
+
+pn::array required_array(path_value x) {
+    if (!x.value().is_array()) {
+        throw std::runtime_error(pn::format("{0}: must be an array", x.path()).c_str());
+    }
+    return x.value().as_array().copy();
+}
+
+struct Tab {
+    int64_t    width;
+    pn::string label;
+    pn::array  content;
+};
+
+std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, pn::value_cref x0) {
+    if (!x0.is_array()) {
+        throw std::runtime_error("must be array");
+    }
+    path_value x{x0};
+
+    std::vector<std::unique_ptr<InterfaceItem>> items;
+    int                                         id = id0;
+    for (auto i : range(x.value().as_array().size())) {
+        path_value item = x.get(i);
+
+        pn::string_view type = required_string(item.get("type"));
+        if (type == "rect") {
+            if (item.get("label").value().is_null()) {
+                items.emplace_back(new PlainRect(required_struct<PlainRect>(
+                        item, {
+                                      {"type", nullptr},
+                                      {"bounds", {&PlainRect::bounds, required_rect}},
+                                      {"hue", {&PlainRect::hue, required_hue}},
+                                      {"style", {&PlainRect::style, required_interface_style}},
+                              })));
             } else {
-                items.emplace_back(new PlainRect(id++, bounds, hue, style));
+                items.emplace_back(new LabeledRect(required_struct<LabeledRect>(
+                        item, {
+                                      {"type", nullptr},
+                                      {"bounds", {&LabeledRect::bounds, required_rect}},
+                                      {"label", {&LabeledRect::label, required_label}},
+                                      {"hue", {&LabeledRect::hue, required_hue}},
+                                      {"style", {&LabeledRect::style, required_interface_style}},
+                              })));
             }
-        } else if (kind == "button") {
-            items.emplace_back(new PlainButton(id++, bounds, key, gamepad, label, hue, style));
-        } else if (kind == "checkbox") {
-            items.emplace_back(new CheckboxButton(id++, bounds, key, gamepad, label, hue, style));
-        } else if (kind == "radio") {
-            items.emplace_back(new RadioButton(id++, bounds, key, gamepad, label, hue, style));
-        } else if (kind == "picture") {
-            items.emplace_back(new PictureRect(id++, bounds, resource));
-        } else if (kind == "text") {
-            if (sub.has("resource")) {
-                items.emplace_back(new TextRect(id++, bounds, resource, hue, style));
-            } else {
-                items.emplace_back(new TextRect(id++, bounds, hue, style));
-            }
-        } else if (kind == "tab-box") {
+            items.back()->id = id++;
+        } else if (type == "button") {
+            items.emplace_back(new PlainButton(required_struct<PlainButton>(
+                    item, {
+                                  {"type", nullptr},
+                                  {"bounds", {&PlainButton::bounds, required_rect}},
+                                  {"label", {&PlainButton::label, required_label}},
+                                  {"key", {&PlainButton::key, optional_key_num}},
+                                  {"gamepad", {&PlainButton::gamepad, optional_gamepad_button}},
+                                  {"hue", {&PlainButton::hue, required_hue}},
+                                  {"style", {&PlainButton::style, required_interface_style}},
+                          })));
+            items.back()->id = id++;
+        } else if (type == "checkbox") {
+            items.emplace_back(new CheckboxButton(required_struct<CheckboxButton>(
+                    item, {
+                                  {"type", nullptr},
+                                  {"bounds", {&CheckboxButton::bounds, required_rect}},
+                                  {"label", {&CheckboxButton::label, required_label}},
+                                  {"key", {&CheckboxButton::key, optional_key_num}},
+                                  {"gamepad", {&CheckboxButton::gamepad, optional_gamepad_button}},
+                                  {"hue", {&CheckboxButton::hue, required_hue}},
+                                  {"style", {&CheckboxButton::style, required_interface_style}},
+                          })));
+            items.back()->id = id++;
+        } else if (type == "radio") {
+            items.emplace_back(new RadioButton(required_struct<RadioButton>(
+                    item, {
+                                  {"type", nullptr},
+                                  {"bounds", {&RadioButton::bounds, required_rect}},
+                                  {"label", {&RadioButton::label, required_label}},
+                                  {"key", {&RadioButton::key, optional_key_num}},
+                                  {"gamepad", {&RadioButton::gamepad, optional_gamepad_button}},
+                                  {"hue", {&RadioButton::hue, required_hue}},
+                                  {"style", {&RadioButton::style, required_interface_style}},
+                          })));
+            items.back()->id = id++;
+        } else if (type == "picture") {
+            items.emplace_back(new PictureRect(required_struct<PictureRect>(
+                    item, {
+                                  {"type", nullptr},
+                                  {"bounds", {&PictureRect::bounds, required_rect}},
+                                  {"id", {&PictureRect::texture, required_texture}},
+                          })));
+            items.back()->id = id++;
+        } else if (type == "text") {
+            items.emplace_back(new TextRect(required_struct<TextRect>(
+                    item, {
+                                  {"type", nullptr},
+                                  {"bounds", {&TextRect::bounds, required_rect}},
+                                  {"id", {&TextRect::text, optional_text}},
+                                  {"hue", {&TextRect::hue, required_hue}},
+                                  {"style", {&TextRect::style, required_interface_style}},
+                          })));
+            items.back()->id = id++;
+        } else if (type == "tab-box") {
+            TabBox tab_box = required_struct<TabBox>(
+                    item, {
+                                  {"type", nullptr},
+                                  {"bounds", {&TabBox::bounds, required_rect}},
+                                  {"hue", {&TabBox::hue, required_hue}},
+                                  {"style", {&TabBox::style, required_interface_style}},
+                                  {"tabs", nullptr},
+                          });
             Rect button_bounds = {
-                    bounds.left + 22, bounds.top - 20, 0, bounds.top - 10,
+                    tab_box.bounds.left + 22, tab_box.bounds.top - 20, 0, tab_box.bounds.top - 10,
             };
-            pn::array_cref tabs = sub.get("tabs").as_array();
-            for (auto i : range(tabs.size())) {
-                pn::map_cref tab         = tabs[i].as_map();
-                button_bounds.right      = button_bounds.left + tab.get("width").as_int();
-                interfaceLabelType label = antares::label(tab.get("label"));
-                items.emplace_back(new TabBoxButton(
-                        id++, button_bounds, key, gamepad, label, hue, style, tab.get("content")));
+
+            path_value tabs = item.get("tabs");
+            for (auto i : range(tabs.value().as_array().size())) {
+                auto tab = required_struct<Tab>(
+                        tabs.get(i), {
+                                             {"width", {&Tab::width, required_int}},
+                                             {"label", {&Tab::label, required_label}},
+                                             {"content", {&Tab::content, required_array}},
+                                     });
+                button_bounds.right = button_bounds.left + tab.width;
+                TabBoxButton button;
+                button.bounds      = button_bounds;
+                button.label       = std::move(tab.label);
+                button.hue         = tab_box.hue;
+                button.style       = tab_box.style;
+                button.tab_content = tab.content.copy();
+                button.id          = id++;
+                items.emplace_back(new TabBoxButton(std::move(button)));
                 button_bounds.left = button_bounds.right + 37;
             }
-            int16_t top_right_border_size = bounds.right - button_bounds.right - 17;
-            items.emplace_back(new TabBox(id++, bounds, hue, style, top_right_border_size));
+
+            tab_box.top_right_border_size = tab_box.bounds.right - button_bounds.right - 17;
+            tab_box.id                    = id++;
+            items.emplace_back(new TabBox(std::move(tab_box)));
+        } else {
+            throw std::runtime_error(
+                    pn::format("{0}: unknown type: {1}", item.path(), type).c_str());
         }
     }
     return items;
 }
 
-InterfaceItem::InterfaceItem(int id, Rect bounds) : id(id), _bounds(bounds) {}
-
-PlainRect::PlainRect(int id, Rect bounds, Hue hue, interfaceStyleType style)
-        : InterfaceItem(id, bounds), hue(hue), style(style) {}
-
 void PlainRect::accept(const Visitor& visitor) const { visitor.visit_plain_rect(*this); }
-
-LabeledItem::LabeledItem(int id, Rect bounds, interfaceLabelType label)
-        : InterfaceItem(id, bounds),
-          label(Resource::strings(label.stringID).at(label.stringNumber - 1).copy()) {}
-
-LabeledRect::LabeledRect(
-        int id, Rect bounds, interfaceLabelType label, Hue hue, interfaceStyleType style)
-        : LabeledItem(id, bounds, label), hue(hue), style(style) {}
-
 void LabeledRect::accept(const Visitor& visitor) const { visitor.visit_labeled_rect(*this); }
-
-TextRect::TextRect(int id, Rect bounds, Hue hue, interfaceStyleType style)
-        : InterfaceItem(id, bounds), hue(hue), style(style) {}
-
-TextRect::TextRect(
-        int id, Rect bounds, pn::string_view resource, Hue hue, interfaceStyleType style)
-        : InterfaceItem(id, bounds),
-          text(Resource::path(resource).string().copy()),
-          hue(hue),
-          style(style) {}
-
 void TextRect::accept(const Visitor& visitor) const { visitor.visit_text_rect(*this); }
-
-PictureRect::PictureRect(int id, Rect bounds, pn::string_view resource)
-        : InterfaceItem(id, bounds),
-          texture(Resource::texture(resource)),
-          visible_bounds(false),
-          hue(Hue::GRAY),
-          style(kSmall) {}
-
 void PictureRect::accept(const Visitor& visitor) const { visitor.visit_picture_rect(*this); }
-
-Button::Button(
-        int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, Hue hue,
-        interfaceStyleType style)
-        : LabeledItem(id, bounds, label),
-          key(key),
-          gamepad(gamepad),
-          hue(hue),
-          style(style),
-          status(kActive) {}
-
-PlainButton::PlainButton(
-        int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, Hue hue,
-        interfaceStyleType style)
-        : Button(id, bounds, key, gamepad, label, hue, style) {}
-
 void PlainButton::accept(const Visitor& visitor) const { visitor.visit_plain_button(*this); }
-
-CheckboxButton::CheckboxButton(
-        int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, Hue hue,
-        interfaceStyleType style)
-        : Button(id, bounds, key, gamepad, label, hue, style), on(false) {}
-
 void CheckboxButton::accept(const Visitor& visitor) const { visitor.visit_checkbox_button(*this); }
-
-RadioButton::RadioButton(
-        int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, Hue hue,
-        interfaceStyleType style)
-        : Button(id, bounds, key, gamepad, label, hue, style), on(false) {}
-
 void RadioButton::accept(const Visitor& visitor) const { visitor.visit_radio_button(*this); }
-
-TabBoxButton::TabBoxButton(
-        int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, Hue hue,
-        interfaceStyleType style, pn::value_cref tab_content)
-        : Button(id, bounds, key, gamepad, label, hue, style),
-          on(false),
-          tab_content(tab_content.copy()) {}
-
 void TabBoxButton::accept(const Visitor& visitor) const { visitor.visit_tab_box_button(*this); }
-
-TabBox::TabBox(
-        int id, Rect bounds, Hue hue, interfaceStyleType style, int16_t top_right_border_size)
-        : InterfaceItem(id, bounds),
-          hue(hue),
-          style(style),
-          top_right_border_size(top_right_border_size) {}
-
 void TabBox::accept(const Visitor& visitor) const { visitor.visit_tab_box(*this); }
 
 InterfaceItem::Visitor::~Visitor() {}

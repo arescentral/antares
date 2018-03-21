@@ -75,6 +75,8 @@ enum class IconShape {
     PLUS,
 };
 
+enum class InterfaceStyle { LARGE, SMALL };
+
 enum class LevelType { SOLO, NET, DEMO };
 
 // Restricts actions based on the owners of the subject and object.

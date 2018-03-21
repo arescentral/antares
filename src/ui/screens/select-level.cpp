@@ -171,7 +171,7 @@ void SelectLevelScreen::draw_level_name() const {
     retro.set_retro_text(chapter_name);
     retro.wrap_to(440, 0, 2);
 
-    Rect  bounds = i.bounds();
+    Rect  bounds = i.bounds;
     Point off    = offset();
     bounds.offset(off.h, off.v);
     retro.draw(bounds);

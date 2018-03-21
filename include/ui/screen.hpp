@@ -32,7 +32,6 @@ namespace antares {
 class InterfaceScreen : public Card {
   public:
     InterfaceScreen(pn::string_view name, const Rect& bounds, bool full_screen);
-    InterfaceScreen(pn::value_cref x, const Rect& bounds, bool full_screen);
     ~InterfaceScreen();
 
     virtual void become_front();

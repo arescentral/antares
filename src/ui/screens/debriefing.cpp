@@ -57,7 +57,13 @@ void string_replace(pn::string_ref s, pn::string_view in, pn::string_view out) {
 }
 
 LabeledRect interface_item(const Rect& text_bounds) {
-    return LabeledRect(0, text_bounds, {2001, 29}, Hue::GOLD, kLarge);
+    LabeledRect r;
+    r.id     = 0;
+    r.bounds = text_bounds;
+    r.label  = Resource::strings(2001).at(28).copy();
+    r.hue    = Hue::GOLD;
+    r.style  = InterfaceStyle::LARGE;
+    return r;
 }
 
 Rect pix_bounds(const InterfaceItem& item) {
@@ -153,7 +159,7 @@ void DebriefingScreen::draw() const {
     interface_bounds.offset(_pix_bounds.left, _pix_bounds.top);
     draw_interface_item(_data_item, KEYBOARD_MOUSE);
 
-    draw_text_in_rect(interface_bounds, _message, kLarge, Hue::GOLD);
+    draw_text_in_rect(interface_bounds, _message, InterfaceStyle::LARGE, Hue::GOLD);
 
     RgbColor bracket_color  = GetRGBTranslateColorShade(Hue::GOLD, VERY_LIGHT);
     Rect     bracket_bounds = _score_bounds;
@@ -214,7 +220,7 @@ void DebriefingScreen::fire_timer() {
 LabeledRect DebriefingScreen::initialize(pn::string_view message, bool do_score) {
     _message = message.copy();
 
-    int  text_height = GetInterfaceTextHeightFromWidth(_message, kLarge, kTextWidth);
+    int text_height = GetInterfaceTextHeightFromWidth(_message, InterfaceStyle::LARGE, kTextWidth);
     Rect text_bounds(0, 0, kTextWidth, text_height);
     if (do_score) {
         text_bounds.bottom += kScoreTableHeight;

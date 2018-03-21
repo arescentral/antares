@@ -128,6 +128,7 @@ sfz::optional<RgbColor> optional_color(path_value x);
 sfz::optional<AnimationDirection> optional_animation_direction(path_value x);
 sfz::optional<Hue>                optional_hue(path_value x);
 Hue                               required_hue(path_value x);
+InterfaceStyle                    required_interface_style(path_value x);
 KillKind                          required_kill_kind(path_value x);
 sfz::optional<MoveOrigin>         optional_origin(path_value x);
 int                               required_key(path_value x);
@@ -156,12 +157,12 @@ struct field {
 
     constexpr field(std::nullptr_t) : set([](T*, path_value) {}) {}
 
-    template <typename F>
-    constexpr field(F(T::*field), F (*reader)(path_value x))
+    template <typename F, typename U>
+    constexpr field(F(U::*field), F (*reader)(path_value x))
             : set([field, reader](T* t, path_value x) { (t->*field) = reader(x); }) {}
 
-    template <typename F>
-    constexpr field(F(T::*field), sfz::optional<F> (*reader)(path_value x), F default_value)
+    template <typename F, typename U>
+    constexpr field(F(U::*field), sfz::optional<F> (*reader)(path_value x), F default_value)
             : set([field, reader, default_value](T* t, path_value x) {
                   (t->*field) = reader(x).value_or(default_value);
               }) {}

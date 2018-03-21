@@ -52,20 +52,19 @@ const int32_t kMaxKeyNameLength = 4;  // how many chars can be in name of key fo
 // DrawInterfaceString:
 //  Relies on roman alphabet for upper/lower casing.  NOT WORLD-READY!
 
-const Font* interface_font(interfaceStyleType style) {
-    if (style == kSmall) {
+const Font* interface_font(InterfaceStyle style) {
+    if (style == InterfaceStyle::SMALL) {
         return sys.fonts.small_button;
     } else {
         return sys.fonts.button;
     }
 }
 
-void DrawInterfaceString(
-        Point p, pn::string_view s, interfaceStyleType style, const RgbColor& color) {
+void DrawInterfaceString(Point p, pn::string_view s, InterfaceStyle style, const RgbColor& color) {
     interface_font(style)->draw(p, s, color);
 }
 
-int16_t GetInterfaceStringWidth(pn::string_view s, interfaceStyleType style) {
+int16_t GetInterfaceStringWidth(pn::string_view s, InterfaceStyle style) {
     return interface_font(style)->string_width(s);
 }
 
@@ -76,13 +75,11 @@ int16_t GetInterfaceStringWidth(pn::string_view s, interfaceStyleType style) {
 //  using the width of 'R' which is about as wide as our normal letters get.
 //
 
-int16_t GetInterfaceFontWidth(interfaceStyleType style) {
-    return interface_font(style)->logicalWidth;
-}
+int16_t GetInterfaceFontWidth(InterfaceStyle style) { return interface_font(style)->logicalWidth; }
 
-int16_t GetInterfaceFontHeight(interfaceStyleType style) { return interface_font(style)->height; }
+int16_t GetInterfaceFontHeight(InterfaceStyle style) { return interface_font(style)->height; }
 
-int16_t GetInterfaceFontAscent(interfaceStyleType style) { return interface_font(style)->ascent; }
+int16_t GetInterfaceFontAscent(InterfaceStyle style) { return interface_font(style)->ascent; }
 
 enum inlineKindType { kNoKind = 0, kVPictKind = 1, kVClearPictKind = 2 };
 
@@ -211,16 +208,16 @@ inline void mDrawPuffUpTBorder(
 
 template <typename T>
 void draw_plain_rect(Point origin, const T& item) {
-    Rects              rects;
-    Rect               tRect, uRect;
-    int16_t            vcenter, thisHBorder = kInterfaceSmallHBorder;
-    Hue                color = item.hue;
-    interfaceStyleType style = item.style;
+    Rects          rects;
+    Rect           tRect, uRect;
+    int16_t        vcenter, thisHBorder = kInterfaceSmallHBorder;
+    Hue            color = item.hue;
+    InterfaceStyle style = item.style;
 
-    if (style == kLarge) {
+    if (style == InterfaceStyle::LARGE) {
         thisHBorder = kInterfaceLargeHBorder;
     }
-    tRect = item.bounds();
+    tRect = item.bounds;
     tRect.offset(origin.h, origin.v);
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer;
@@ -261,17 +258,17 @@ void draw_plain_rect(Point origin, const T& item) {
 }
 
 void draw_tab_box(Point origin, const TabBox& item) {
-    Rects              rects;
-    Rect               uRect;
-    int16_t            vcenter, h_border = kInterfaceSmallHBorder;
-    uint8_t            shade;
-    Hue                color                 = item.hue;
-    interfaceStyleType style                 = item.style;
-    int16_t            top_right_border_size = item.top_right_border_size;
+    Rects          rects;
+    Rect           uRect;
+    int16_t        vcenter, h_border = kInterfaceSmallHBorder;
+    uint8_t        shade;
+    Hue            color                 = item.hue;
+    InterfaceStyle style                 = item.style;
+    int16_t        top_right_border_size = item.top_right_border_size;
 
-    Rect r = item.bounds();
+    Rect r = item.bounds;
     r.offset(origin.h, origin.v);
-    if (style == kLarge)
+    if (style == InterfaceStyle::LARGE)
         h_border = kInterfaceLargeHBorder;
     r.left -= kInterfaceContentBuffer;
     r.top -= kInterfaceContentBuffer;
@@ -344,10 +341,10 @@ void draw_button(Point origin, InputMode mode, const PlainButton& item) {
 
     {
         Rects rects;
-        if (item.style == kLarge) {
+        if (item.style == InterfaceStyle::LARGE) {
             thisHBorder = kInterfaceLargeHBorder;
         }
-        tRect = item.bounds();
+        tRect = item.bounds;
         tRect.offset(origin.h, origin.v);
 
         uRect = tRect;
@@ -498,10 +495,10 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
     uint8_t  shade;
     RgbColor color;
 
-    if (item.style == kLarge) {
+    if (item.style == InterfaceStyle::LARGE) {
         h_border = kInterfaceLargeHBorder;
     }
-    tRect = item.bounds();
+    tRect = item.bounds;
     tRect.offset(origin.h, origin.v);
 
     tRect.left -= kInterfaceContentBuffer;
@@ -706,7 +703,7 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap
     uint8_t         shade;
     RgbColor        color;
 
-    if ( item.style == kLarge) thisHBorder = kInterfaceLargeHBorder;
+    if ( item.style == InterfaceStyle::LARGE) thisHBorder = kInterfaceLargeHBorder;
     tRect = bounds;
 
     tRect.left -= kInterfaceContentBuffer;
@@ -948,9 +945,9 @@ void draw_checkbox(Point origin, const CheckboxButton& item) {
     uint8_t  shade;
     RgbColor color;
 
-    if (item.style == kLarge)
+    if (item.style == InterfaceStyle::LARGE)
         thisHBorder = kInterfaceLargeHBorder;
-    tRect = item.bounds();
+    tRect = item.bounds;
     tRect.offset(origin.h, origin.v);
 
     tRect.left -= kInterfaceContentBuffer;
@@ -1058,10 +1055,10 @@ void draw_labeled_box(Point origin, const LabeledRect& item) {
     uint8_t  shade;
     RgbColor color;
 
-    if (item.style == kLarge) {
+    if (item.style == InterfaceStyle::LARGE) {
         thisHBorder = kInterfaceLargeHBorder;
     }
-    tRect = item.bounds();
+    tRect = item.bounds;
     tRect.offset(origin.h, origin.v);
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer + GetInterfaceFontHeight(item.style) +
@@ -1153,14 +1150,14 @@ void draw_labeled_box(Point origin, const LabeledRect& item) {
 }
 
 void draw_text_rect(Point origin, const TextRect& item) {
-    Rect bounds = item.bounds();
+    Rect bounds = item.bounds;
     bounds.offset(origin.h, origin.v);
     draw_text_in_rect(bounds, item.text, item.style, item.hue);
 }
 
 }  // namespace
 
-void draw_text_in_rect(Rect tRect, pn::string_view text, interfaceStyleType style, Hue hue) {
+void draw_text_in_rect(Rect tRect, pn::string_view text, InterfaceStyle style, Hue hue) {
     RgbColor   color = GetRGBTranslateColorShade(hue, VERY_LIGHT);
     StyledText interface_text(interface_font(style));
     interface_text.set_fore_color(color);
@@ -1171,7 +1168,7 @@ void draw_text_in_rect(Rect tRect, pn::string_view text, interfaceStyleType styl
 }
 
 int16_t GetInterfaceTextHeightFromWidth(
-        pn::string_view text, interfaceStyleType style, int16_t boundsWidth) {
+        pn::string_view text, InterfaceStyle style, int16_t boundsWidth) {
     StyledText interface_text(interface_font(style));
     interface_text.set_interface_text(text);
     interface_text.wrap_to(boundsWidth, kInterfaceTextHBuffer, kInterfaceTextVBuffer);
@@ -1179,11 +1176,8 @@ int16_t GetInterfaceTextHeightFromWidth(
 }
 
 void draw_picture_rect(Point origin, const PictureRect& item) {
-    Rect bounds = item.bounds();
+    Rect bounds = item.bounds;
     bounds.offset(origin.h, origin.v);
-    if (item.visible_bounds) {
-        draw_plain_rect(origin, item);
-    }
     item.texture.draw(bounds.left, bounds.top);
 }
 
@@ -1210,7 +1204,7 @@ struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
     GetBoundsInterfaceItemVisitor(Rect* bounds) : bounds(bounds) {}
 
     void initialize_bounds(const InterfaceItem& item) const {
-        *bounds = item.bounds();
+        *bounds = item.bounds;
         bounds->left -= kInterfaceContentBuffer;
         bounds->top -= kInterfaceContentBuffer;
         bounds->right += kInterfaceContentBuffer + 1;
@@ -1219,7 +1213,7 @@ struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
 
     template <typename T>
     int h_border(T& t) const {
-        return t.style == kLarge ? kInterfaceLargeHBorder : kInterfaceSmallHBorder;
+        return t.style == InterfaceStyle::LARGE ? kInterfaceLargeHBorder : kInterfaceSmallHBorder;
     }
 
     virtual void visit_plain_rect(const PlainRect& item) const {
@@ -1249,8 +1243,8 @@ struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
 
     virtual void visit_picture_rect(const PictureRect& item) const {
         initialize_bounds(item);
-        bounds->left -= h_border(item);
-        bounds->right += h_border(item);
+        bounds->left -= kInterfaceSmallHBorder;
+        bounds->right += kInterfaceSmallHBorder;
         bounds->top -= kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
         bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
     }

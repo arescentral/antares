@@ -38,23 +38,26 @@ using std::vector;
 namespace antares {
 
 InterfaceScreen::InterfaceScreen(pn::string_view name, const Rect& bounds, bool full_screen)
-        : InterfaceScreen(pn::value_cref{load_pn(name)}, bounds, full_screen) {}
-
-InterfaceScreen::InterfaceScreen(pn::value_cref x, const Rect& bounds, bool full_screen)
         : _state(NORMAL), _bounds(bounds), _full_screen(full_screen), _hit_button(nullptr) {
-    _items = interface_items(0, x.as_array());
-    for (auto& item : _items) {
-        item->bounds().offset(bounds.left, bounds.top);
+    try {
+        _items = interface_items(0, load_pn(name));
+        for (auto& item : _items) {
+            item->bounds.offset(bounds.left, bounds.top);
+        }
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(name.copy().c_str()));
     }
 }
 
 InterfaceScreen::~InterfaceScreen() {}
 
 pn::value InterfaceScreen::load_pn(pn::string_view id) {
-    Resource  rsrc = Resource::interface(id);
-    pn::value x;
-    if (!pn::parse(rsrc.string().open(), x, nullptr)) {
-        throw std::runtime_error("invalid interface file");
+    Resource   rsrc = Resource::interface(id);
+    pn::value  x;
+    pn_error_t e;
+    if (!pn::parse(rsrc.string().open(), x, &e)) {
+        throw std::runtime_error(
+                pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
     }
     return x;
 }
@@ -219,9 +222,9 @@ void InterfaceScreen::truncate(size_t size) {
 void InterfaceScreen::extend(pn::value_cref x) {
     const int offset_x = (_bounds.width() / 2) - 320;
     const int offset_y = (_bounds.height() / 2) - 240;
-    for (auto&& item : interface_items(_items.size(), x.as_array())) {
+    for (auto&& item : interface_items(_items.size(), x)) {
         _items.emplace_back(std::move(item));
-        _items.back()->bounds().offset(offset_x, offset_y);
+        _items.back()->bounds.offset(offset_x, offset_y);
     }
 }
 
