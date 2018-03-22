@@ -40,7 +40,7 @@ class Resource {
     static Resource                interface(pn::string_view name);
     static Resource                replay(int id);
     static std::vector<int32_t>    rotation_table();
-    static NatePixTable            sprite(int id, Hue hue);
+    static NatePixTable            sprite(pn::string_view name, Hue hue);
     static std::vector<pn::string> strings(int id);
     static pn::string              text(int id);
     static Texture                 texture(pn::string_view name);

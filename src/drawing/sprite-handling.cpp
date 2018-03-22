@@ -104,7 +104,7 @@ void ResetAllSprites() {
 
 void Pix::reset() {
     _pix.clear();
-    _cursor.reset(new NatePixTable(Resource::sprite(500, Hue::GRAY)));
+    _cursor.reset(new NatePixTable(Resource::sprite("cursor", Hue::GRAY)));
 }
 
 NatePixTable* Pix::add(int16_t resource_id) {
@@ -115,7 +115,10 @@ NatePixTable* Pix::add(int16_t resource_id) {
 
     int16_t real_resource_id = resource_id & ~kSpriteTableColorIDMask;
     Hue  hue = static_cast<Hue>((resource_id & kSpriteTableColorIDMask) >> kSpriteTableColorShift);
-    auto it  = _pix.emplace(resource_id, Resource::sprite(real_resource_id, hue)).first;
+    auto it  = _pix.emplace(
+                          resource_id,
+                          Resource::sprite(pn::dump(real_resource_id, pn::dump_short), hue))
+                      .first;
     return &it->second;
 }
 

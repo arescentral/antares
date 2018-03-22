@@ -36,7 +36,7 @@ using std::vector;
 namespace antares {
 
 NatePixTable::NatePixTable(
-        int id, Hue hue, pn::map_cref data, ArrayPixMap image, ArrayPixMap overlay) {
+        pn::string_view name, Hue hue, pn::map_cref data, ArrayPixMap image, ArrayPixMap overlay) {
     struct State {
         int         rows, cols;
         Point       center;
@@ -82,10 +82,10 @@ NatePixTable::NatePixTable(
         Rect bounds(state.frame);
         bounds.offset(2 * -bounds.left, 2 * -bounds.top);
         if (hue == Hue::GRAY) {
-            _frames.emplace_back(bounds, state.image.view(cell).view(sprite), id, frame);
+            _frames.emplace_back(bounds, state.image.view(cell).view(sprite), name, frame);
         } else {
             _frames.emplace_back(
-                    bounds, state.image.view(cell).view(sprite), id, frame,
+                    bounds, state.image.view(cell).view(sprite), name, frame,
                     state.overlay.view(cell).view(sprite), hue);
         }
     }
@@ -98,17 +98,18 @@ const NatePixTable::Frame& NatePixTable::at(size_t index) const { return _frames
 size_t NatePixTable::size() const { return _size; }
 
 NatePixTable::Frame::Frame(
-        Rect bounds, const PixMap& image, int16_t id, int frame, const PixMap& overlay, Hue hue)
+        Rect bounds, const PixMap& image, pn::string_view name, int frame, const PixMap& overlay,
+        Hue hue)
         : _bounds(bounds), _pix_map(bounds.width(), bounds.height()) {
     load_image(image);
     load_overlay(overlay, hue);
-    build(id, frame);
+    build(name, frame);
 }
 
-NatePixTable::Frame::Frame(Rect bounds, const PixMap& image, int16_t id, int frame)
+NatePixTable::Frame::Frame(Rect bounds, const PixMap& image, pn::string_view name, int frame)
         : _bounds(bounds), _pix_map(bounds.width(), bounds.height()) {
     load_image(image);
-    build(id, frame);
+    build(name, frame);
 }
 
 NatePixTable::Frame::~Frame() {}
@@ -139,8 +140,8 @@ Point          NatePixTable::Frame::center() const { return _bounds.origin(); }
 const PixMap&  NatePixTable::Frame::pix_map() const { return _pix_map; }
 const Texture& NatePixTable::Frame::texture() const { return _texture; }
 
-void NatePixTable::Frame::build(int16_t id, int frame) {
-    _texture = sys.video->texture(pn::format("/sprites/{0}.SMIV/{1}", id, frame), _pix_map, 1);
+void NatePixTable::Frame::build(pn::string_view name, int frame) {
+    _texture = sys.video->texture(pn::format("/sprites/{0}.SMIV/{1}", name, frame), _pix_map, 1);
 }
 
 }  // namespace antares

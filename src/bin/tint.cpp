@@ -51,8 +51,8 @@ const char* name(int16_t id) {
     abort();
 }
 
-void draw(int16_t id, Hue hue, ArrayPixMap& pix) {
-    NatePixTable               table = Resource::sprite(id, hue);
+void draw(pn::string_view name, Hue hue, ArrayPixMap& pix) {
+    NatePixTable               table = Resource::sprite(name, hue);
     const NatePixTable::Frame& frame = table.at(9);
     pix.resize(Size(frame.width(), frame.height()));
     pix.copy(frame.pix_map());
@@ -70,7 +70,7 @@ class ShapeBuilder {
 
     void save(int16_t id, Hue hue) {
         ArrayPixMap pix(0, 0);
-        draw(id, hue, pix);
+        draw(pn::dump(id, pn::dump_short), hue, pix);
         if (_output_dir.has_value()) {
             const pn::string path = pn::format(
                     "{0}/{1}/{2}.png", *_output_dir, name(id), hex(static_cast<int>(hue)));

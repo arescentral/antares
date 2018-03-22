@@ -30,7 +30,9 @@ class NatePixTable {
   public:
     class Frame;
 
-    NatePixTable(int id, Hue hue, pn::map_cref data, ArrayPixMap image, ArrayPixMap overlay);
+    NatePixTable(
+            pn::string_view name, Hue hue, pn::map_cref data, ArrayPixMap image,
+            ArrayPixMap overlay);
     NatePixTable(const NatePixTable&) = delete;
     NatePixTable(NatePixTable&&)      = default;
     NatePixTable& operator=(const NatePixTable&) = delete;
@@ -47,8 +49,9 @@ class NatePixTable {
 
 class NatePixTable::Frame {
   public:
-    Frame(Rect bounds, const PixMap& image, int16_t id, int frame);
-    Frame(Rect bounds, const PixMap& image, int16_t id, int frame, const PixMap& overlay, Hue hue);
+    Frame(Rect bounds, const PixMap& image, pn::string_view name, int frame);
+    Frame(Rect bounds, const PixMap& image, pn::string_view name, int frame, const PixMap& overlay,
+          Hue hue);
     Frame(Frame&&) = default;
     ~Frame();
 
@@ -61,7 +64,7 @@ class NatePixTable::Frame {
   private:
     void load_image(const PixMap& pix);
     void load_overlay(const PixMap& pix, Hue hue);
-    void build(int16_t id, int frame);
+    void build(pn::string_view name, int frame);
 
     Rect        _bounds;
     ArrayPixMap _pix_map;
