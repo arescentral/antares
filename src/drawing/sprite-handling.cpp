@@ -88,7 +88,6 @@ Sprite* Sprite::get(int number) {
 
 Sprite::Sprite()
         : table(NULL),
-          resID(-1),
           style(spriteNormal),
           styleColor(RgbColor::white()),
           styleData(0),
@@ -107,23 +106,21 @@ void Pix::reset() {
     _cursor.reset(new NatePixTable(Resource::sprite("cursor", Hue::GRAY)));
 }
 
-NatePixTable* Pix::add(int16_t resource_id) {
-    NatePixTable* result = get(resource_id);
+NatePixTable* Pix::add(int id, Hue hue) {
+    NatePixTable* result = get(id, hue);
     if (result) {
         return result;
     }
 
-    int16_t real_resource_id = resource_id & ~kSpriteTableColorIDMask;
-    Hue  hue = static_cast<Hue>((resource_id & kSpriteTableColorIDMask) >> kSpriteTableColorShift);
-    auto it  = _pix.emplace(
-                          resource_id,
-                          Resource::sprite(pn::dump(real_resource_id, pn::dump_short), hue))
+    auto it = _pix.emplace(
+                          std::make_pair(id, hue),
+                          Resource::sprite(pn::dump(id, pn::dump_short), hue))
                       .first;
     return &it->second;
 }
 
-NatePixTable* Pix::get(int16_t resource_id) {
-    auto it = _pix.find(resource_id);
+NatePixTable* Pix::get(int id, Hue hue) {
+    auto it = _pix.find({id, hue});
     if (it != _pix.end()) {
         return &it->second;
     }
@@ -133,13 +130,12 @@ NatePixTable* Pix::get(int16_t resource_id) {
 const NatePixTable* Pix::cursor() { return _cursor.get(); }
 
 Handle<Sprite> AddSprite(
-        Point where, NatePixTable* table, int16_t resID, int16_t whichShape, int32_t scale,
+        Point where, NatePixTable* table, int id, Hue hue, int16_t whichShape, int32_t scale,
         BaseObject::Icon icon, int16_t layer, const RgbColor& color) {
     for (Handle<Sprite> sprite : Sprite::all()) {
         if (sprite->table == NULL) {
             sprite->where      = where;
             sprite->table      = table;
-            sprite->resID      = resID;
             sprite->whichShape = whichShape;
             sprite->scale      = scale;
             sprite->whichLayer = layer;
@@ -161,7 +157,6 @@ Handle<Sprite> AddSprite(
 void RemoveSprite(Handle<Sprite> sprite) {
     sprite->killMe = false;
     sprite->table  = NULL;
-    sprite->resID  = -1;
 }
 
 Fixed scale_by(Fixed value, int32_t scale) { return (value * scale) / SCALE_SCALE; }

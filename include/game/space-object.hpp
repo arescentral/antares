@@ -190,7 +190,12 @@ class SpaceObject {
     int32_t  hitState   = 0;
     int32_t  cloakState = 0;
     dutyType duty       = eNoDuty;
-    int      pixResID   = -1;
+
+    struct PixID {
+        int id  = -1;
+        Hue hue = Hue::GRAY;
+    };
+    PixID pix_id;
 
     struct Weapon {
         const BaseObject* base;
@@ -228,7 +233,7 @@ const NamedHandle<const BaseObject>* get_base_object_handle_from_class_and_race(
 const BaseObject* get_base_object_from_class_and_race(
         pn::string_view class_, const NamedHandle<const Race>& race);
 
-int32_t sprite_resource(const BaseObject& o);
+int     sprite_resource(const BaseObject& o);
 int32_t sprite_layer(const BaseObject& o);
 int32_t sprite_scale(const BaseObject& o);
 int32_t rotation_resolution(const BaseObject& o);

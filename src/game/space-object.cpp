@@ -120,8 +120,8 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject* sourceObject) {
     }
 
     NatePixTable* spriteTable = nullptr;
-    if (sourceObject->pixResID != kNoSpriteTable) {
-        spriteTable = sys.pix.get(sourceObject->pixResID);
+    if (sourceObject->pix_id.id != kNoSpriteTable) {
+        spriteTable = sys.pix.get(sourceObject->pix_id.id, sourceObject->pix_id.hue);
         if (!spriteTable) {
             throw std::runtime_error("Received an unexpected request to load a sprite");
         }
@@ -173,8 +173,8 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject* sourceObject) {
         }
 
         obj->sprite = AddSprite(
-                where, spriteTable, sourceObject->pixResID, whichShape, obj->naturalScale,
-                obj->icon, obj->layer, tinyColor);
+                where, spriteTable, sourceObject->pix_id.id, sourceObject->pix_id.hue, whichShape,
+                obj->naturalScale, obj->icon, obj->layer, tinyColor);
         obj->tinyColor = tinyColor;
 
         if (!obj->sprite.get()) {
@@ -298,13 +298,14 @@ SpaceObject::SpaceObject(
     }
 
     if (spriteIDOverride == -1) {
-        pixResID = sprite_resource(*base);
+        pix_id.id = sprite_resource(*base);
     } else {
-        pixResID = spriteIDOverride;
+        pix_id.id = spriteIDOverride;
     }
-
     if (base->attributes & kCanThink) {
-        pixResID += (static_cast<int>(GetAdmiralColor(owner)) << kSpriteTableColorShift);
+        pix_id.hue = GetAdmiralColor(owner);
+    } else {
+        pix_id.hue = Hue::GRAY;
     }
 
     pulse.base   = base->pulse.has_value() ? base->pulse->base.get() : nullptr;
@@ -429,13 +430,14 @@ void SpaceObject::change_base_type(
     // not setting sprite, targetObjectNumber, lastTarget, lastTargetDistance;
 
     if (spriteIDOverride == -1) {
-        obj->pixResID = sprite_resource(base);
+        obj->pix_id.id = sprite_resource(base);
     } else {
-        obj->pixResID = spriteIDOverride;
+        obj->pix_id.id = spriteIDOverride;
     }
-
     if (base.attributes & kCanThink) {
-        obj->pixResID += (static_cast<int>(GetAdmiralColor(obj->owner)) << kSpriteTableColorShift);
+        obj->pix_id.hue = GetAdmiralColor(obj->owner);
+    } else {
+        obj->pix_id.hue = Hue::GRAY;
     }
 
     // check periodic time
@@ -485,12 +487,11 @@ void SpaceObject::change_base_type(
     }
 
     // HANDLE THE NEW SPRITE DATA:
-    if (obj->pixResID != kNoSpriteTable) {
-        spriteTable = sys.pix.get(obj->pixResID);
+    if (obj->pix_id.id != kNoSpriteTable) {
+        spriteTable = sys.pix.get(obj->pix_id.id, obj->pix_id.hue);
 
         if (spriteTable == NULL) {
             throw std::runtime_error("Couldn't load a requested sprite");
-            spriteTable = sys.pix.add(obj->pixResID);
         }
 
         obj->sprite->table      = spriteTable;
@@ -654,18 +655,10 @@ void SpaceObject::set_owner(Handle<Admiral> new_owner, bool message) {
         if (object->attributes & kCanThink) {
             NatePixTable* pixTable;
 
-            if ((object->pixResID == sprite_resource(*object->base)) ||
-                (object->pixResID ==
-                 (sprite_resource(*object->base) |
-                  (static_cast<int>(GetAdmiralColor(old_owner)) << kSpriteTableColorShift)))) {
-                object->pixResID =
-                        sprite_resource(*object->base) |
-                        (static_cast<int>(GetAdmiralColor(new_owner)) << kSpriteTableColorShift);
-
-                pixTable = sys.pix.get(object->pixResID);
-                if (pixTable != NULL) {
-                    object->sprite->table = pixTable;
-                }
+            object->pix_id.hue = GetAdmiralColor(new_owner);
+            pixTable           = sys.pix.get(object->pix_id.id, object->pix_id.hue);
+            if (pixTable != NULL) {
+                object->sprite->table = pixTable;
             }
         }
     }

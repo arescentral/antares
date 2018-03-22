@@ -243,15 +243,13 @@ void GetRealObjectSpriteData(
     if (spriteOverride == -1) {
         tlong = sprite_resource(*baseObject);
         if (baseObject->attributes & kCanThink) {
-            pixTable = sys.pix.get(
-                    tlong +
-                    (static_cast<int16_t>(GetAdmiralColor(owner)) << kSpriteTableColorShift));
+            pixTable = sys.pix.get(tlong, GetAdmiralColor(owner));
         } else {
-            pixTable = sys.pix.get(tlong);
+            pixTable = sys.pix.get(tlong, Hue::GRAY);
         }
     } else {
         tlong    = spriteOverride;
-        pixTable = sys.pix.get(tlong);
+        pixTable = sys.pix.get(tlong, Hue::GRAY);
     }
 
     if (pixTable == NULL) {
@@ -348,8 +346,9 @@ static void render_briefing_with(
             if (baseObject->maxVelocity == Fixed::zero()) {
                 const NatePixTable::Frame* frame = NULL;
                 GetRealObjectSpriteData(
-                        &(anObject->location), anObject->base, anObject->owner, anObject->pixResID,
-                        maxSize, bounds, corner, scale, &thisScale, &frame, &where, &spriteRect);
+                        &(anObject->location), anObject->base, anObject->owner,
+                        anObject->pix_id.id, maxSize, bounds, corner, scale, &thisScale, &frame,
+                        &where, &spriteRect);
                 if (frame != NULL) {
                     thisScale = evil_scale_by(kOneQuarterScale, sprite_scale(*baseObject));
                     clipRect  = *bounds;
@@ -379,9 +378,9 @@ static void render_briefing_with(
             } else {
                 const NatePixTable::Frame* frame = NULL;
                 GetRealObjectSpriteData(
-                        &(anObject->location), anObject->base, anObject->owner, anObject->pixResID,
-                        maxSize / 2, bounds, corner, scale, &thisScale, &frame, &where,
-                        &spriteRect);
+                        &(anObject->location), anObject->base, anObject->owner,
+                        anObject->pix_id.id, maxSize / 2, bounds, corner, scale, &thisScale,
+                        &frame, &where, &spriteRect);
                 if (frame != NULL) {
                     thisScale = evil_scale_by(kOneQuarterScale, sprite_scale(*baseObject));
 

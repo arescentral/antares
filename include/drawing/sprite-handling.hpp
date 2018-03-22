@@ -64,7 +64,6 @@ class Sprite {
 
     Point           where;
     NatePixTable*   table;
-    int16_t         resID;
     int             whichShape;
     int32_t         scale;
     spriteStyleType style;
@@ -96,20 +95,20 @@ int32_t evil_scale_by(int32_t value, int32_t scale);
 class Pix {
   public:
     void                reset();
-    NatePixTable*       add(int16_t id);
-    NatePixTable*       get(int16_t id);
+    NatePixTable*       add(int id, Hue hue);
+    NatePixTable*       get(int id, Hue hue);
     const NatePixTable* cursor();
 
   private:
-    std::map<int16_t, NatePixTable> _pix;
-    std::unique_ptr<NatePixTable>   _cursor;
+    std::map<std::pair<int, Hue>, NatePixTable> _pix;
+    std::unique_ptr<NatePixTable>               _cursor;
 };
 
 void           SpriteHandlingInit();
 void           ResetAllSprites();
 Rect           scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t scale);
 Handle<Sprite> AddSprite(
-        Point where, NatePixTable* table, int16_t resID, int16_t whichShape, int32_t scale,
+        Point where, NatePixTable* table, int id, Hue hue, int16_t whichShape, int32_t scale,
         BaseObject::Icon icon, int16_t layer, const RgbColor& color);
 void RemoveSprite(Handle<Sprite> sprite);
 void draw_sprites();

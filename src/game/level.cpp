@@ -88,7 +88,7 @@ void AddBaseObjectMedia(const NamedHandle<const BaseObject>& base, std::bitset<1
     }
     for (int i = 0; i < 16; ++i) {
         if (colors[i] && (sprite_resource(*base) != kNoSpriteTable)) {
-            sys.pix.add(sprite_resource(*base) + (i << kSpriteTableColorShift));
+            sys.pix.add(sprite_resource(*base), Hue(i));
         }
     }
 
@@ -245,11 +245,9 @@ static void load_initial(Handle<const Level::Initial> initial, std::bitset<16> a
     // make sure we're not overriding the sprite
     if (initial->sprite_override >= 0) {
         if (baseObject->attributes & kCanThink) {
-            sys.pix.add(
-                    initial->sprite_override +
-                    (static_cast<int>(GetAdmiralColor(owner)) << kSpriteTableColorShift));
+            sys.pix.add(initial->sprite_override, GetAdmiralColor(owner));
         } else {
-            sys.pix.add(initial->sprite_override);
+            sys.pix.add(initial->sprite_override, Hue::GRAY);
         }
     }
 
