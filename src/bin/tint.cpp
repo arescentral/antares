@@ -37,20 +37,6 @@ namespace args = sfz::args;
 namespace antares {
 namespace {
 
-const char* name(int16_t id) {
-    switch (id) {
-        case 501: return "ishiman/cruiser";
-        case 510: return "ishiman/fighter";
-        case 515: return "ishiman/transport";
-        case 532: return "obish/escort";
-        case 550: return "gaitori/cruiser";
-        case 551: return "gaitori/fighter";
-        case 563: return "gaitori/transport";
-        case 567: return "obish/transport";
-    }
-    abort();
-}
-
 void draw(pn::string_view name, Hue hue, ArrayPixMap& pix) {
     NatePixTable               table = Resource::sprite(name, hue);
     const NatePixTable::Frame& frame = table.at(9);
@@ -68,12 +54,12 @@ class ShapeBuilder {
     ShapeBuilder(const ShapeBuilder&) = delete;
     ShapeBuilder& operator=(const ShapeBuilder&) = delete;
 
-    void save(int16_t id, Hue hue) {
+    void save(pn::string_view name, pn::string_view out, Hue hue) {
         ArrayPixMap pix(0, 0);
-        draw(pn::dump(id, pn::dump_short), hue, pix);
+        draw(name, hue, pix);
         if (_output_dir.has_value()) {
-            const pn::string path = pn::format(
-                    "{0}/{1}/{2}.png", *_output_dir, name(id), hex(static_cast<int>(hue)));
+            const pn::string path =
+                    pn::format("{0}/{1}/{2}.png", *_output_dir, out, hex(static_cast<int>(hue)));
             sfz::makedirs(dirname(path), 0755);
             pn::file file = pn::open(path, "w");
             pix.encode(file);
@@ -125,13 +111,20 @@ void main(int argc, char* const* argv) {
 
     args::parse(argc - 1, argv + 1, callbacks);
 
+    struct {
+        pn::string_view name, out;
+    } ids[] = {
+            {"501", "ishiman/cruiser"},   {"510", "ishiman/fighter"}, {"515", "ishiman/transport"},
+            {"532", "obish/escort"},      {"550", "gaitori/cruiser"}, {"551", "gaitori/fighter"},
+            {"563", "gaitori/transport"}, {"567", "obish/transport"},
+    };
+
     NullPrefsDriver prefs;
     TextVideoDriver video({640, 480}, output_dir);
     ShapeBuilder    builder(output_dir);
-    int16_t         ids[] = {501, 510, 515, 532, 550, 551, 563, 567};
-    for (int16_t id : ids) {
+    for (auto id : ids) {
         for (int tint = 0; tint < 16; ++tint) {
-            builder.save(id, static_cast<Hue>(tint));
+            builder.save(id.name, id.out, static_cast<Hue>(tint));
         }
     }
 }
