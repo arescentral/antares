@@ -23,23 +23,23 @@
 #include <vector>
 
 #include "drawing/sprite-handling.hpp"
+#include "drawing/text.hpp"
 #include "sound/fx.hpp"
 #include "sound/music.hpp"
 
 namespace antares {
 
 class SoundDriver;
-class Font;
 class PrefsDriver;
 class VideoDriver;
 
 struct SystemGlobals {
     struct {
-        const Font* tactical;
-        const Font* computer;
-        const Font* button;
-        const Font* title;
-        const Font* small_button;
+        Font tactical;
+        Font computer;
+        Font button;
+        Font title;
+        Font small_button;
     } fonts;
 
     std::vector<pn::string> key_names;

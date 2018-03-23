@@ -24,6 +24,7 @@
 #include <sfz/sfz.hpp>
 
 #include "config/dirs.hpp"
+#include "drawing/text.hpp"
 #include "game/sys.hpp"
 #include "video/driver.hpp"
 
@@ -59,10 +60,38 @@ bool Resource::exists(pn::string_view resource_path) {
     return false;
 }
 
+static Texture load_png(pn::string_view path, int scale) {
+    Resource    rsrc = Resource::path(pn::format("{0}.png", path));
+    ArrayPixMap pix  = read_png(rsrc.data().open());
+    return sys.video->texture(pn::format("/{0}.png", path), pix, scale);
+}
+
+static Texture load_hidpi_texture(pn::string_view name) {
+    int scale = sys.video->scale();
+    while (true) {
+        try {
+            pn::string path = name.copy();
+            if (scale > 1) {
+                return load_png(pn::format("{0}@{1}x", name, scale), scale);
+            } else {
+                return load_png(name, scale);
+            }
+        } catch (...) {
+            if (scale > 1) {
+                scale >>= 1;
+            } else {
+                throw;
+            }
+        }
+    }
+}
+
 Resource Resource::path(pn::string_view path) { return Resource(load(path)); }
 
-Resource Resource::font(pn::string_view name) {
-    return Resource(load(pn::format("fonts/{0}.pn", name)));
+Font Resource::font(pn::string_view name) {
+    return ::antares::font(
+            procyon(pn::format("fonts/{0}.pn", name)),
+            load_hidpi_texture(pn::format("fonts/{0}", name)));
 }
 Resource Resource::interface(pn::string_view name) {
     return Resource(load(pn::format("interfaces/{0}.pn", name)));
@@ -111,29 +140,10 @@ pn::string Resource::text(int id) {
     return Resource(load(pn::format("text/{0}.txt", id))).string().copy();
 }
 
-Texture Resource::texture(pn::string_view name) {
-    int scale = sys.video->scale();
-    while (true) {
-        try {
-            pn::string path = name.copy();
-            if (scale > 1) {
-                path += pn::format("@{0}x.png", scale);
-            } else {
-                path += ".png";
-            }
-            Resource    rsrc = Resource::path(path);
-            ArrayPixMap pix  = read_png(rsrc.data().open());
-            return sys.video->texture(pn::format("/{0}", path), pix, scale);
-        } catch (std::exception& e) {
-            if (scale > 1) {
-                scale >>= 1;
-            } else {
-                throw;
-            }
-        }
-    }
+Texture Resource::texture(pn::string_view name) { return load_hidpi_texture(name); }
+Texture Resource::texture(int16_t id) {
+    return load_hidpi_texture(pn::format("pictures/{0}", id));
 }
-Texture Resource::texture(int16_t id) { return texture(pn::format("pictures/{0}", id)); }
 
 Resource::Resource(std::unique_ptr<sfz::mapped_file> file) : _file(std::move(file)) {}
 

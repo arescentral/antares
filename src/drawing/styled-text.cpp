@@ -47,7 +47,7 @@ int hex_digit(pn::rune r) {
 
 }  // namespace
 
-StyledText::StyledText(const Font* font)
+StyledText::StyledText(const Font& font)
         : _fore_color(RgbColor::white()),
           _back_color(RgbColor::black()),
           _tab_width(0),
@@ -229,9 +229,9 @@ void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
         _chars[i].v = v;
         switch (_chars[i].special) {
             case NONE:
-                h += _font->char_width(_chars[i].character);
+                h += _font.char_width(_chars[i].character);
                 if (h >= wrap_distance) {
-                    v += _font->height + _line_spacing;
+                    v += _font.height + _line_spacing;
                     h = move_word_down(i, v);
                 }
                 _auto_width = std::max(_auto_width, h);
@@ -244,21 +244,21 @@ void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
 
             case LINE_BREAK:
                 h = _side_margin;
-                v += _font->height + _line_spacing;
+                v += _font.height + _line_spacing;
                 break;
 
-            case WORD_BREAK: h += _font->char_width(_chars[i].character); break;
+            case WORD_BREAK: h += _font.char_width(_chars[i].character); break;
 
             case PICTURE: {
                 inlinePictType* pict = &_inline_picts[_chars[i].character.value()];
                 if (h != _side_margin) {
-                    v += _font->height + _line_spacing;
+                    v += _font.height + _line_spacing;
                 }
                 h = _side_margin;
                 pict->bounds.offset(0, v - pict->bounds.top);
                 v += pict->bounds.height() + _line_spacing + 3;
                 if (_chars[i + 1].special == LINE_BREAK) {
-                    v -= (_font->height + _line_spacing);
+                    v -= (_font.height + _line_spacing);
                 }
             } break;
 
@@ -289,8 +289,8 @@ const std::vector<inlinePictType>& StyledText::inline_picts() const { return _in
 void StyledText::draw(const Rect& bounds) const { draw_range(bounds, 0, _chars.size()); }
 
 void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
-    const int line_height = _font->height + _line_spacing;
-    const int char_adjust = _font->ascent + _line_spacing;
+    const int line_height = _font.height + _line_spacing;
+    const int char_adjust = _font.ascent + _line_spacing;
     {
         Rects rects;
         for (size_t i = begin; i < end; ++i) {
@@ -302,7 +302,7 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
                 case WORD_BREAK:
                     corner.offset(ch.h, ch.v);
                     if (ch.back_color != RgbColor::black()) {
-                        Rect char_rect(0, 0, _font->char_width(ch.character), line_height);
+                        Rect char_rect(0, 0, _font.char_width(ch.character), line_height);
                         char_rect.offset(corner.h, corner.v);
                         rects.fill(char_rect, ch.back_color);
                     }
@@ -332,11 +332,11 @@ void StyledText::draw_range(const Rect& bounds, int begin, int end) const {
     }
 
     {
-        Quads quads(_font->texture);
+        Quads quads(_font.texture);
         for (size_t i = begin; i < end; ++i) {
             const StyledChar& ch = _chars[i];
             if (ch.special == NONE) {
-                _font->draw(
+                _font.draw(
                         quads, Point(bounds.left + ch.h, bounds.top + ch.v + char_adjust),
                         ch.character, ch.fore_color);
             }
@@ -364,10 +364,10 @@ void StyledText::draw_cursor(const Rect& bounds, int index) const {
 }
 
 void StyledText::color_cursor(const Rect& bounds, int index, const RgbColor& color) const {
-    const int         line_height = _font->height + _line_spacing;
+    const int         line_height = _font.height + _line_spacing;
     const StyledChar& ch          = _chars[index];
     Point             corner(bounds.left + ch.h, bounds.top + ch.v);
-    Rect              char_rect(0, 0, _font->logicalWidth, line_height);
+    Rect              char_rect(0, 0, _font.logicalWidth, line_height);
     char_rect.offset(corner.h, corner.v);
     char_rect.clip_to(bounds);
     if ((char_rect.width() > 0) && (char_rect.height() > 0)) {
@@ -392,7 +392,7 @@ int StyledText::move_word_down(int index, int v) {
                 for (int j = i + 1; j <= index; ++j) {
                     _chars[j].h = h;
                     _chars[j].v = v;
-                    h += _font->char_width(_chars[j].character);
+                    h += _font.char_width(_chars[j].character);
                 }
                 return h;
             }

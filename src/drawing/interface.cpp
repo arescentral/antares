@@ -52,7 +52,7 @@ const int32_t kMaxKeyNameLength = 4;  // how many chars can be in name of key fo
 // DrawInterfaceString:
 //  Relies on roman alphabet for upper/lower casing.  NOT WORLD-READY!
 
-const Font* interface_font(InterfaceStyle style) {
+const Font& interface_font(InterfaceStyle style) {
     if (style == InterfaceStyle::SMALL) {
         return sys.fonts.small_button;
     } else {
@@ -61,11 +61,11 @@ const Font* interface_font(InterfaceStyle style) {
 }
 
 void DrawInterfaceString(Point p, pn::string_view s, InterfaceStyle style, const RgbColor& color) {
-    interface_font(style)->draw(p, s, color);
+    interface_font(style).draw(p, s, color);
 }
 
 int16_t GetInterfaceStringWidth(pn::string_view s, InterfaceStyle style) {
-    return interface_font(style)->string_width(s);
+    return interface_font(style).string_width(s);
 }
 
 // GetInterfaceFontWidth:       -- NOT WORLD-READY! --
@@ -75,11 +75,11 @@ int16_t GetInterfaceStringWidth(pn::string_view s, InterfaceStyle style) {
 //  using the width of 'R' which is about as wide as our normal letters get.
 //
 
-int16_t GetInterfaceFontWidth(InterfaceStyle style) { return interface_font(style)->logicalWidth; }
+int16_t GetInterfaceFontWidth(InterfaceStyle style) { return interface_font(style).logicalWidth; }
 
-int16_t GetInterfaceFontHeight(InterfaceStyle style) { return interface_font(style)->height; }
+int16_t GetInterfaceFontHeight(InterfaceStyle style) { return interface_font(style).height; }
 
-int16_t GetInterfaceFontAscent(InterfaceStyle style) { return interface_font(style)->ascent; }
+int16_t GetInterfaceFontAscent(InterfaceStyle style) { return interface_font(style).ascent; }
 
 enum inlineKindType { kNoKind = 0, kVPictKind = 1, kVClearPictKind = 2 };
 

@@ -177,19 +177,19 @@ void pad_to(pn::string& s, size_t width) {
     s = std::move(t);
 }
 
-const int32_t MiniIconMacLineTop() { return sys.fonts.computer->height * 2; }
+const int32_t MiniIconMacLineTop() { return sys.fonts.computer.height * 2; }
 
 Rect mini_screen_line_bounds(int32_t mtop, int32_t mlinenum, int32_t mleft, int32_t mright) {
     Rect mbounds;
     mbounds.left   = kMiniScreenLeft + mleft;
-    mbounds.top    = mtop + mlinenum * sys.fonts.computer->height;
+    mbounds.top    = mtop + mlinenum * sys.fonts.computer.height;
     mbounds.right  = kMiniScreenLeft + mright;
-    mbounds.bottom = mbounds.top + sys.fonts.computer->height;
+    mbounds.bottom = mbounds.top + sys.fonts.computer.height;
     return mbounds;
 }
 
 inline int32_t mGetLineNumFromV(int32_t mV) {
-    return (((mV) - (kMiniScreenTop + instrument_top())) / sys.fonts.computer->height);
+    return (((mV) - (kMiniScreenTop + instrument_top())) / sys.fonts.computer.height);
 }
 
 inline void mCopyBlankLineString(miniScreenLineType* mline, pn::string_view mstring) {
@@ -253,7 +253,7 @@ static void underline(const Rects& rects, int line) {
     Rect rect = Rect(kMiniScreenLeft, kMiniScreenTop, kMiniScreenRight, kMiniScreenBottom);
     rect.offset(0, instrument_top());
     const RgbColor color = GetRGBTranslateColorShade(kMiniScreenColor, MEDIUM);
-    int32_t        y = rect.top + (line * sys.fonts.computer->height) + sys.fonts.computer->ascent;
+    int32_t        y = rect.top + (line * sys.fonts.computer.height) + sys.fonts.computer.ascent;
     rects.fill({rect.left, y, rect.right - 1, y + 1}, color);
 }
 
@@ -262,9 +262,9 @@ static void highlight(const Rects& rects, int line) {
     rect.offset(0, instrument_top());
     Rect hilite_rect;
     hilite_rect.left   = rect.left;
-    hilite_rect.top    = rect.top + (line * sys.fonts.computer->height);
+    hilite_rect.top    = rect.top + (line * sys.fonts.computer.height);
     hilite_rect.right  = rect.right;
-    hilite_rect.bottom = hilite_rect.top + sys.fonts.computer->height;
+    hilite_rect.bottom = hilite_rect.top + sys.fonts.computer.height;
     draw_shaded_rect(rects, hilite_rect, kMiniScreenColor, DARK, MEDIUM, DARKER);
 }
 
@@ -273,8 +273,7 @@ static void item_text(const Quads& quads, int line, pn::string_view string, bool
     rect.offset(0, instrument_top());
     Point origin = rect.origin();
     origin.offset(
-            kMiniScreenLeftBuffer,
-            (line * sys.fonts.computer->height) + sys.fonts.computer->ascent);
+            kMiniScreenLeftBuffer, (line * sys.fonts.computer.height) + sys.fonts.computer.ascent);
     RgbColor textcolor = GetRGBTranslateColorShade(kMiniScreenColor, VERY_LIGHT);
     if (dim) {
         if (line == g.mini.selectLine) {
@@ -283,7 +282,7 @@ static void item_text(const Quads& quads, int line, pn::string_view string, bool
             textcolor = GetRGBTranslateColorShade(kMiniScreenColor, MEDIUM);
         }
     }
-    sys.fonts.computer->draw(quads, origin, string, textcolor);
+    sys.fonts.computer.draw(quads, origin, string, textcolor);
 }
 
 static void button_on(const Rects& rects, int line) {
@@ -291,9 +290,9 @@ static void button_on(const Rects& rects, int line) {
     rect.offset(0, instrument_top());
     Rect hilite_rect;
     hilite_rect.left   = rect.left + kMiniScreenLeftBuffer - 2;
-    hilite_rect.top    = rect.top + (line * sys.fonts.computer->height);
+    hilite_rect.top    = rect.top + (line * sys.fonts.computer.height);
     hilite_rect.right  = rect.right;
-    hilite_rect.bottom = hilite_rect.top + sys.fonts.computer->height;
+    hilite_rect.bottom = hilite_rect.top + sys.fonts.computer.height;
     draw_shaded_rect(rects, hilite_rect, kMiniButColor, LIGHT, VERY_LIGHT, MEDIUM);
 }
 
@@ -302,10 +301,10 @@ static void button_off(const Rects& rects, int line) {
     rect.offset(0, instrument_top());
     Rect hilite_rect;
     hilite_rect.left = rect.left + kMiniScreenLeftBuffer - 2;
-    hilite_rect.top  = rect.top + (line * sys.fonts.computer->height);
+    hilite_rect.top  = rect.top + (line * sys.fonts.computer.height);
     hilite_rect.right =
-            rect.left + kMiniScreenLeftBuffer + sys.fonts.computer->logicalWidth * 4 + 1;
-    hilite_rect.bottom = hilite_rect.top + sys.fonts.computer->height;
+            rect.left + kMiniScreenLeftBuffer + sys.fonts.computer.logicalWidth * 4 + 1;
+    hilite_rect.bottom = hilite_rect.top + sys.fonts.computer.height;
     draw_shaded_rect(rects, hilite_rect, kMiniButColor, MEDIUM, LIGHT, DARK);
 }
 
@@ -314,10 +313,9 @@ static void button_on_text(const Quads& quads, int line, pn::string_view string)
     rect.offset(0, instrument_top());
     Point origin = rect.origin();
     origin.offset(
-            kMiniScreenLeftBuffer,
-            (line * sys.fonts.computer->height) + sys.fonts.computer->ascent);
+            kMiniScreenLeftBuffer, (line * sys.fonts.computer.height) + sys.fonts.computer.ascent);
     RgbColor textcolor = RgbColor::black();
-    sys.fonts.computer->draw(quads, origin, string, textcolor);
+    sys.fonts.computer.draw(quads, origin, string, textcolor);
 }
 
 static void button_off_text(const Quads& quads, int line, pn::string_view string) {
@@ -325,10 +323,9 @@ static void button_off_text(const Quads& quads, int line, pn::string_view string
     rect.offset(0, instrument_top());
     Point origin = rect.origin();
     origin.offset(
-            kMiniScreenLeftBuffer,
-            (line * sys.fonts.computer->height) + sys.fonts.computer->ascent);
+            kMiniScreenLeftBuffer, (line * sys.fonts.computer.height) + sys.fonts.computer.ascent);
     RgbColor textcolor = GetRGBTranslateColorShade(kMiniButColor, VERY_LIGHT);
-    sys.fonts.computer->draw(quads, origin, string, textcolor);
+    sys.fonts.computer.draw(quads, origin, string, textcolor);
 }
 
 static void draw_minicomputer_lines() {
@@ -364,7 +361,7 @@ static void draw_minicomputer_lines() {
     }
 
     {
-        Quads           quads(sys.fonts.computer->texture);
+        Quads           quads(sys.fonts.computer.texture);
         bool            dim[kMiniScreenCharHeight];
         pn::string_view strings[kMiniScreenCharHeight];
         for (int32_t count = 0; count < kMiniScreenCharHeight; count++) {
@@ -617,7 +614,7 @@ static void draw_player_ammo_in_rect(int32_t value, Hue hue, const Rect& rect) {
                 char((value % 10) + '0'), '\0',
         };
         Point origin(rect.left + kMiniAmmoTextHBuffer, rect.bottom - 1);
-        sys.fonts.computer->draw(origin, digits, text_color);
+        sys.fonts.computer.draw(origin, digits, text_color);
     }
 }
 
@@ -639,8 +636,8 @@ static void draw_mini_ship_data(
         // "CONTROL" or "TARGET" label.
         Rect bar = mini_screen_line_bounds(screen_top, 0, 0, kMiniScreenWidth);
         draw_shaded_rect(Rects(), bar, header_hue, LIGHT, VERY_LIGHT, MEDIUM);
-        sys.fonts.computer->draw(
-                Point(bar.left + kMiniScreenLeftBuffer, bar.top + sys.fonts.computer->ascent),
+        sys.fonts.computer.draw(
+                Point(bar.left + kMiniScreenLeftBuffer, bar.top + sys.fonts.computer.ascent),
                 label, RgbColor::black());
     }
 
@@ -658,9 +655,9 @@ static void draw_mini_ship_data(
         if (obj->base) {
             Rect lRect =
                     mini_screen_line_bounds(screen_top, kMiniNameLineNum, 0, kMiniScreenWidth);
-            sys.fonts.computer->draw(
+            sys.fonts.computer.draw(
                     Point(lRect.left + kMiniScreenLeftBuffer,
-                          lRect.top + sys.fonts.computer->ascent),
+                          lRect.top + sys.fonts.computer.ascent),
                     obj->short_name(), GetRGBTranslateColorShade(Hue::PALE_GREEN, VERY_LIGHT));
         }
     }
@@ -748,16 +745,16 @@ static void draw_mini_ship_data(
         if (obj->beam.base) {
             Rect lRect = mini_screen_line_bounds(
                     screen_top, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-            sys.fonts.computer->draw(
-                    Point(lRect.left, lRect.top + sys.fonts.computer->ascent),
+            sys.fonts.computer.draw(
+                    Point(lRect.left, lRect.top + sys.fonts.computer.ascent),
                     obj->beam.base->short_name, color);
         }
 
         if (obj->pulse.base) {
             Rect lRect = mini_screen_line_bounds(
                     screen_top, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-            sys.fonts.computer->draw(
-                    Point(lRect.left, lRect.top + sys.fonts.computer->ascent),
+            sys.fonts.computer.draw(
+                    Point(lRect.left, lRect.top + sys.fonts.computer.ascent),
                     obj->pulse.base->short_name, color);
         }
 
@@ -766,8 +763,8 @@ static void draw_mini_ship_data(
             if (obj->special.base) {
                 Rect lRect = mini_screen_line_bounds(
                         screen_top, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-                sys.fonts.computer->draw(
-                        Point(lRect.left, lRect.top + sys.fonts.computer->ascent),
+                sys.fonts.computer.draw(
+                        Point(lRect.left, lRect.top + sys.fonts.computer.ascent),
                         obj->special.base->short_name, color);
             }
         }
@@ -779,8 +776,8 @@ static void draw_mini_ship_data(
         bool     friendly = (dest->owner == g.admiral);
         RgbColor color = GetRGBTranslateColorShade(friendly ? Hue::GREEN : Hue::RED, VERY_LIGHT);
         Rect lRect = mini_screen_line_bounds(screen_top, kMiniDestLineNum, 0, kMiniScreenWidth);
-        sys.fonts.computer->draw(
-                Point(lRect.left, lRect.top + sys.fonts.computer->ascent), dest->name(), color);
+        sys.fonts.computer.draw(
+                Point(lRect.left, lRect.top + sys.fonts.computer.ascent), dest->name(), color);
     }
 }
 
@@ -1255,7 +1252,7 @@ void MiniComputerHandleClick(Point where) {
 
     // if click is in button screen
     if (mRect.contains(where)) {
-        lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer->height) +
+        lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer.height) +
                   kMiniScreenCharHeight;
         g.mini.clickLine = lineNum;
         line             = g.mini.lineData.get() + lineNum;
@@ -1343,7 +1340,7 @@ void MiniComputerHandleDoubleClick(Point where) {
 
     // if click is in button screen
     if (mRect.contains(where)) {
-        lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer->height) +
+        lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer.height) +
                   kMiniScreenCharHeight;
         line = g.mini.lineData.get() + lineNum;
         if (line->whichButton == kInLineButton) {
@@ -1422,7 +1419,7 @@ void MiniComputerHandleMouseUp(Point where) {
 
     // if click is in button screen
     if (mRect.contains(where)) {
-        lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer->height) +
+        lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer.height) +
                   kMiniScreenCharHeight;
         line = g.mini.lineData.get() + lineNum;
         if (line->whichButton == kInLineButton) {
@@ -1462,7 +1459,7 @@ void MiniComputerHandleMouseStillDown(Point where) {
 
     // if click is in button screen
     if (mRect.contains(where)) {
-        lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer->height) +
+        lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer.height) +
                   kMiniScreenCharHeight;
         line = g.mini.lineData.get() + lineNum;
         if ((line->whichButton == kInLineButton) && (lineNum == g.mini.clickLine)) {
@@ -1504,7 +1501,7 @@ void MiniComputer_SetScreenAndLineHack(int32_t whichScreen, int32_t whichLine) {
         default: show_main_screen(g.admiral, 0); break;
     }
 
-    w.v = (whichLine * sys.fonts.computer->height) + (kMiniScreenTop + instrument_top());
+    w.v = (whichLine * sys.fonts.computer.height) + (kMiniScreenTop + instrument_top());
     w.h = kMiniScreenLeft + 5;
     MiniComputerHandleClick(w);  // what an atrocious hack! oh well
 }

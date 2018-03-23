@@ -41,11 +41,11 @@ constexpr char kInstRightPictID[] = "interfaces/instruments/right";
 ANTARES_GLOBAL SystemGlobals sys;
 
 void sys_init() {
-    sys.fonts.tactical     = new Font("tactical");
-    sys.fonts.computer     = new Font("computer");
-    sys.fonts.button       = new Font("button");
-    sys.fonts.title        = new Font("title");
-    sys.fonts.small_button = new Font("button-small");
+    sys.fonts.tactical     = Resource::font("tactical");
+    sys.fonts.computer     = Resource::font("computer");
+    sys.fonts.button       = Resource::font("button");
+    sys.fonts.title        = Resource::font("title");
+    sys.fonts.small_button = Resource::font("button-small");
 
     sys.key_names          = Resource::strings(KEY_NAMES);
     sys.key_long_names     = Resource::strings(KEY_LONG_NAMES);

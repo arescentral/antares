@@ -78,7 +78,7 @@ static LabeledRect data_item(const InterfaceItem& map_rect) {
     return r;
 }
 
-static const Font* interface_font(InterfaceStyle style) {
+static const Font& interface_font(InterfaceStyle style) {
     if (style == InterfaceStyle::SMALL) {
         return sys.fonts.small_button;
     } else {

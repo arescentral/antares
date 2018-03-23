@@ -132,21 +132,21 @@ void Label::draw() {
         const RgbColor light = GetRGBTranslateColorShade(label->hue, VERY_LIGHT);
         const RgbColor dark  = GetRGBTranslateColorShade(label->hue, VERY_DARK);
         sys.video->dither_rect(label->thisRect, dark);
-        at.offset(kLabelInnerSpace, kLabelInnerSpace + sys.fonts.tactical->ascent);
+        at.offset(kLabelInnerSpace, kLabelInnerSpace + sys.fonts.tactical.ascent);
 
         if (label->lineNum > 1) {
             for (int j = 1; j <= label->lineNum; j++) {
                 pn::string_view line = String_Get_Nth_Line(text, j);
 
-                sys.fonts.tactical->draw(Point(at.h + 1, at.v + 1), line, RgbColor::black());
-                sys.fonts.tactical->draw(Point(at.h - 1, at.v - 1), line, RgbColor::black());
-                sys.fonts.tactical->draw(at, line, light);
+                sys.fonts.tactical.draw(Point(at.h + 1, at.v + 1), line, RgbColor::black());
+                sys.fonts.tactical.draw(Point(at.h - 1, at.v - 1), line, RgbColor::black());
+                sys.fonts.tactical.draw(at, line, light);
 
                 at.offset(0, label->lineHeight);
             }
         } else {
-            sys.fonts.tactical->draw(Point(at.h + 1, at.v + 1), text, RgbColor::black());
-            sys.fonts.tactical->draw(at, text, light);
+            sys.fonts.tactical.draw(Point(at.h + 1, at.v + 1), text, RgbColor::black());
+            sys.fonts.tactical.draw(at, text, light);
         }
     }
 }
@@ -360,18 +360,18 @@ void Label::recalc_size() {
         int maxWidth  = 0;
         for (int i = 1; i <= lineNum; i++) {
             pn::string_view text  = String_Get_Nth_Line(this->text, i);
-            int32_t         width = sys.fonts.tactical->string_width(text);
+            int32_t         width = sys.fonts.tactical.string_width(text);
             if (width > maxWidth) {
                 maxWidth = width;
             }
         }
         width      = maxWidth + kLabelTotalInnerSpace;
-        height     = (sys.fonts.tactical->height * lineNum) + kLabelTotalInnerSpace;
-        lineHeight = sys.fonts.tactical->height;
+        height     = (sys.fonts.tactical.height * lineNum) + kLabelTotalInnerSpace;
+        lineHeight = sys.fonts.tactical.height;
     } else {
-        width      = sys.fonts.tactical->string_width(text) + kLabelTotalInnerSpace;
-        height     = sys.fonts.tactical->height + kLabelTotalInnerSpace;
-        lineHeight = sys.fonts.tactical->height;
+        width      = sys.fonts.tactical.string_width(text) + kLabelTotalInnerSpace;
+        height     = sys.fonts.tactical.height + kLabelTotalInnerSpace;
+        lineHeight = sys.fonts.tactical.height;
     }
 }
 

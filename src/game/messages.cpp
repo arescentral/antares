@@ -194,10 +194,10 @@ void Messages::clip() {
     m->retro_text->set_retro_text(text);
     m->retro_text->set_tab_width(60);
     m->retro_text->wrap_to(
-            viewport().width() - kHBuffer - sys.fonts.tactical->logicalWidth + 1, 0, 0);
+            viewport().width() - kHBuffer - sys.fonts.tactical.logicalWidth + 1, 0, 0);
     m->retro_origin =
             Point(viewport().left + kHBuffer,
-                  viewport().bottom + sys.fonts.tactical->ascent + kLongMessageVPad);
+                  viewport().bottom + sys.fonts.tactical.ascent + kLongMessageVPad);
     m->text    = std::move(text);
     m->at_char = 0;
 

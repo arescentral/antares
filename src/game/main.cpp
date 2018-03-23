@@ -267,10 +267,10 @@ class PauseScreen : public Card {
   public:
     PauseScreen() {
         _pause_string = Messages::pause_string().copy();
-        int32_t width = sys.fonts.title->string_width(_pause_string);
-        Rect    bounds(0, 0, width, sys.fonts.title->height);
+        int32_t width = sys.fonts.title.string_width(_pause_string);
+        Rect    bounds(0, 0, width, sys.fonts.title.height);
         bounds.center_in(play_screen());
-        _text_origin = Point(bounds.left, bounds.top + sys.fonts.title->ascent);
+        _text_origin = Point(bounds.left, bounds.top + sys.fonts.title.ascent);
 
         bounds.inset(-4, -4);
         _bracket_bounds = bounds;
@@ -318,7 +318,7 @@ class PauseScreen : public Card {
                 draw_vbracket(rects, _bracket_bounds, light_green);
             }
 
-            sys.fonts.title->draw(_text_origin, _pause_string, light_green);
+            sys.fonts.title.draw(_text_origin, _pause_string, light_green);
         }
         if (asleep()) {
             Rects().fill(world(), rgba(0, 0, 0, 63));
