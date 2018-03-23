@@ -176,8 +176,8 @@ struct Level_Initial {
     Point                         at;
     Fixed                         earning;
 
-    pn::string name_override;
-    int32_t    sprite_override;
+    pn::string                name_override;
+    sfz::optional<pn::string> sprite_override;
 
     std::vector<pn::string>      build;
     Handle<const Level::Initial> target;

@@ -50,7 +50,7 @@ void GetInitialObjectSpriteData(
 
 void GetRealObjectSpriteData(
         coordPointType* realCoord, const BaseObject* baseObject, Handle<Admiral> owner,
-        int32_t spriteOverride, int32_t maxSize, Rect* bounds, coordPointType* corner,
+        const SpaceObject::PixID& sprite, int32_t maxSize, Rect* bounds, coordPointType* corner,
         int32_t scale, int32_t* thisScale, const NatePixTable::Frame** frame, Point* where,
         Rect* spriteRect);
 
@@ -222,9 +222,8 @@ void GetInitialObjectSpriteData(
     if (sObject.get() && sObject->active) {
         const NatePixTable::Frame* frame = NULL;
         GetRealObjectSpriteData(
-                &(sObject->location), sObject->base, sObject->owner,
-                sprite_resource(*sObject->base), maxSize, bounds, corner, scale, thisScale, &frame,
-                where, spriteRect);
+                &(sObject->location), sObject->base, sObject->owner, *sObject->pix_id, maxSize,
+                bounds, corner, scale, thisScale, &frame, where, spriteRect);
 
         *spriteRect = gBriefingSpriteBounds[sObject.number()];
     }
@@ -232,26 +231,13 @@ void GetInitialObjectSpriteData(
 
 void GetRealObjectSpriteData(
         coordPointType* realCoord, const BaseObject* baseObject, Handle<Admiral> owner,
-        int32_t spriteOverride, int32_t maxSize, Rect* bounds, coordPointType* corner,
+        const SpaceObject::PixID& sprite, int32_t maxSize, Rect* bounds, coordPointType* corner,
         int32_t scale, int32_t* thisScale, const NatePixTable::Frame** frame, Point* where,
         Rect* spriteRect) {
-    NatePixTable*  pixTable;
     int            whichShape;
-    int32_t        tlong;
     coordPointType coord = *realCoord;
 
-    if (spriteOverride == -1) {
-        tlong = sprite_resource(*baseObject);
-        if (baseObject->attributes & kCanThink) {
-            pixTable = sys.pix.get(tlong, GetAdmiralColor(owner));
-        } else {
-            pixTable = sys.pix.get(tlong, Hue::GRAY);
-        }
-    } else {
-        tlong    = spriteOverride;
-        pixTable = sys.pix.get(tlong, Hue::GRAY);
-    }
-
+    NatePixTable* pixTable = sys.pix.get(sprite.name, sprite.hue);
     if (pixTable == NULL) {
         throw std::runtime_error("Couldn't load a requested sprite");
     }
@@ -263,6 +249,7 @@ void GetRealObjectSpriteData(
 
     *frame = &pixTable->at(whichShape);
 
+    int32_t tlong;
     tlong = *thisScale = implicit_cast<int32_t>(maxSize) * SCALE_SCALE;
     *thisScale /= (*frame)->width();
     tlong /= (*frame)->height();
@@ -341,76 +328,75 @@ static void render_briefing_with(
         Rect& rect = gBriefingSpriteBounds[anObject.number()];
         rect       = Rect(0, 0, 0, 0);
         Rect spriteRect;
-        if ((anObject->active == kObjectInUse) && (anObject->sprite.get())) {
-            auto baseObject = anObject->base;
-            if (baseObject->maxVelocity == Fixed::zero()) {
-                const NatePixTable::Frame* frame = NULL;
-                GetRealObjectSpriteData(
-                        &(anObject->location), anObject->base, anObject->owner,
-                        anObject->pix_id.id, maxSize, bounds, corner, scale, &thisScale, &frame,
-                        &where, &spriteRect);
-                if (frame != NULL) {
-                    thisScale = evil_scale_by(kOneQuarterScale, sprite_scale(*baseObject));
-                    clipRect  = *bounds;
+        if (!((anObject->active == kObjectInUse) && anObject->sprite.get())) {
+            continue;
+        }
 
-                    clipRect.left = clipRect.top = 0;
-                    clipRect.right -= 1;
-                    clipRect.bottom -= 1;
+        auto baseObject = anObject->base;
+        if (baseObject->maxVelocity == Fixed::zero()) {
+            const NatePixTable::Frame* frame = NULL;
+            GetRealObjectSpriteData(
+                    &(anObject->location), anObject->base, anObject->owner, *anObject->pix_id,
+                    maxSize, bounds, corner, scale, &thisScale, &frame, &where, &spriteRect);
+            if (frame != NULL) {
+                thisScale = evil_scale_by(kOneQuarterScale, sprite_scale(*baseObject));
+                clipRect  = *bounds;
 
-                    where = BriefingSprite_GetBestLocation(
-                            *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
+                clipRect.left = clipRect.top = 0;
+                clipRect.right -= 1;
+                clipRect.bottom -= 1;
 
-                    BriefingSprite_UseLocation(
-                            *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
+                where = BriefingSprite_GetBestLocation(
+                        *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
 
-                    if (anObject->owner.number() == 0) {
-                        color = Hue::GREEN;
-                    } else if (anObject->owner.number() < 0) {
-                        color = Hue::BLUE;
-                    } else {
-                        color = Hue::RED;
-                    }
+                BriefingSprite_UseLocation(
+                        *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
 
-                    renderer.draw(*frame, where, thisScale, &spriteRect, clipRect);
-
-                    rect = spriteRect;
+                if (anObject->owner.number() == 0) {
+                    color = Hue::GREEN;
+                } else if (anObject->owner.number() < 0) {
+                    color = Hue::BLUE;
+                } else {
+                    color = Hue::RED;
                 }
-            } else {
-                const NatePixTable::Frame* frame = NULL;
-                GetRealObjectSpriteData(
-                        &(anObject->location), anObject->base, anObject->owner,
-                        anObject->pix_id.id, maxSize / 2, bounds, corner, scale, &thisScale,
-                        &frame, &where, &spriteRect);
-                if (frame != NULL) {
-                    thisScale = evil_scale_by(kOneQuarterScale, sprite_scale(*baseObject));
 
-                    clipRect = *bounds;
+                renderer.draw(*frame, where, thisScale, &spriteRect, clipRect);
 
-                    clipRect.left = clipRect.top = 0;
-                    clipRect.right -= 1;
-                    clipRect.bottom -= 1;
-                    where = BriefingSprite_GetBestLocation(
-                            *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
-                    BriefingSprite_UseLocation(
-                            *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
+                rect = spriteRect;
+            }
+        } else {
+            const NatePixTable::Frame* frame = NULL;
+            GetRealObjectSpriteData(
+                    &(anObject->location), anObject->base, anObject->owner, *anObject->pix_id,
+                    maxSize / 2, bounds, corner, scale, &thisScale, &frame, &where, &spriteRect);
+            if (frame != NULL) {
+                thisScale = evil_scale_by(kOneQuarterScale, sprite_scale(*baseObject));
 
-                    if (anObject->owner.number() == 0) {
-                        color = Hue::GREEN;
-                    } else if (anObject->owner.number() < 0) {
-                        color = Hue::BLUE;
-                    } else {
-                        color = Hue::RED;
-                    }
+                clipRect = *bounds;
 
-                    const RgbColor light_color = GetRGBTranslateColorShade(color, LIGHT);
-                    const RgbColor dark_color  = GetRGBTranslateColorShade(color, DARK);
+                clipRect.left = clipRect.top = 0;
+                clipRect.right -= 1;
+                clipRect.bottom -= 1;
+                where = BriefingSprite_GetBestLocation(
+                        *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
+                BriefingSprite_UseLocation(
+                        *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
 
-                    renderer.outline(
-                            *frame, where, thisScale, &spriteRect, clipRect, light_color,
-                            dark_color);
-
-                    rect = spriteRect;
+                if (anObject->owner.number() == 0) {
+                    color = Hue::GREEN;
+                } else if (anObject->owner.number() < 0) {
+                    color = Hue::BLUE;
+                } else {
+                    color = Hue::RED;
                 }
+
+                const RgbColor light_color = GetRGBTranslateColorShade(color, LIGHT);
+                const RgbColor dark_color  = GetRGBTranslateColorShade(color, DARK);
+
+                renderer.outline(
+                        *frame, where, thisScale, &spriteRect, clipRect, light_color, dark_color);
+
+                rect = spriteRect;
             }
         }
     }

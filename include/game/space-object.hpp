@@ -50,9 +50,11 @@ class SpaceObject {
             const BaseObject& type, Random seed, int32_t object_id,
             const coordPointType& initial_location, int32_t relative_direction,
             fixedPointType* relative_velocity, Handle<Admiral> new_owner,
-            int16_t spriteIDOverride);
+            sfz::optional<pn::string_view> spriteIDOverride);
 
-    void change_base_type(const BaseObject& base, int32_t spriteIDOverride, bool relative);
+    void change_base_type(
+            const BaseObject& base, sfz::optional<pn::string_view> spriteIDOverride,
+            bool relative);
     void set_owner(Handle<Admiral> owner, bool message);
     void set_cloak(bool cloak);
     void alter_occupation(Handle<Admiral> owner, int32_t howMuch, bool message);
@@ -192,10 +194,10 @@ class SpaceObject {
     dutyType duty       = eNoDuty;
 
     struct PixID {
-        int id  = -1;
-        Hue hue = Hue::GRAY;
+        pn::string_view name;
+        Hue             hue = Hue::GRAY;
     };
-    PixID pix_id;
+    sfz::optional<PixID> pix_id;
 
     struct Weapon {
         const BaseObject* base;
@@ -225,7 +227,7 @@ void RemoveAllSpaceObjects(void);
 Handle<SpaceObject> CreateAnySpaceObject(
         const BaseObject& whichBase, fixedPointType* velocity, coordPointType* location,
         int32_t direction, Handle<Admiral> owner, uint32_t specialAttributes,
-        int16_t spriteIDOverride);
+        sfz::optional<pn::string_view> spriteIDOverride);
 int32_t CountObjectsOfBaseType(const BaseObject* whichType, Handle<Admiral> owner);
 
 const NamedHandle<const BaseObject>* get_base_object_handle_from_class_and_race(
@@ -233,10 +235,10 @@ const NamedHandle<const BaseObject>* get_base_object_handle_from_class_and_race(
 const BaseObject* get_base_object_from_class_and_race(
         pn::string_view class_, const NamedHandle<const Race>& race);
 
-int     sprite_resource(const BaseObject& o);
-int32_t sprite_layer(const BaseObject& o);
-int32_t sprite_scale(const BaseObject& o);
-int32_t rotation_resolution(const BaseObject& o);
+sfz::optional<pn::string_view> sprite_resource(const BaseObject& o);
+int32_t                        sprite_layer(const BaseObject& o);
+int32_t                        sprite_scale(const BaseObject& o);
+int32_t                        rotation_resolution(const BaseObject& o);
 
 }  // namespace antares
 

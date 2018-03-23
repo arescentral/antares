@@ -106,21 +106,18 @@ void Pix::reset() {
     _cursor.reset(new NatePixTable(Resource::sprite("cursor", Hue::GRAY)));
 }
 
-NatePixTable* Pix::add(int id, Hue hue) {
-    NatePixTable* result = get(id, hue);
+NatePixTable* Pix::add(pn::string_view name, Hue hue) {
+    NatePixTable* result = get(name, hue);
     if (result) {
         return result;
     }
 
-    auto it = _pix.emplace(
-                          std::make_pair(id, hue),
-                          Resource::sprite(pn::dump(id, pn::dump_short), hue))
-                      .first;
+    auto it = _pix.emplace(std::make_pair(name.copy(), hue), Resource::sprite(name, hue)).first;
     return &it->second;
 }
 
-NatePixTable* Pix::get(int id, Hue hue) {
-    auto it = _pix.find({id, hue});
+NatePixTable* Pix::get(pn::string_view id, Hue hue) {
+    auto it = _pix.find({id.copy(), hue});
     if (it != _pix.end()) {
         return &it->second;
     }
@@ -130,8 +127,8 @@ NatePixTable* Pix::get(int id, Hue hue) {
 const NatePixTable* Pix::cursor() { return _cursor.get(); }
 
 Handle<Sprite> AddSprite(
-        Point where, NatePixTable* table, int id, Hue hue, int16_t whichShape, int32_t scale,
-        BaseObject::Icon icon, int16_t layer, const RgbColor& color) {
+        Point where, NatePixTable* table, pn::string_view name, Hue hue, int16_t whichShape,
+        int32_t scale, BaseObject::Icon icon, int16_t layer, const RgbColor& color) {
     for (Handle<Sprite> sprite : Sprite::all()) {
         if (sprite->table == NULL) {
             sprite->where      = where;

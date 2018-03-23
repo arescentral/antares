@@ -95,6 +95,7 @@ sfz::optional<Fixed> optional_fixed(path_value x);
 Fixed                required_fixed(path_value x);
 
 sfz::optional<pn::string_view> optional_string(path_value x);
+sfz::optional<pn::string>      optional_string_copy(path_value x);
 pn::string_view                required_string(path_value x);
 pn::string                     required_string_copy(path_value x);
 

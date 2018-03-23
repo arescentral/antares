@@ -204,9 +204,9 @@ enum kPresenceStateType {
 struct objectFrameType {
     // rotation: for objects whose shapes depend on their direction
     struct Rotation {
-        int16_t sprite;  // ID of sprite resource
-        int16_t layer;   // 0 = no layer 1->3 = back to front
-        int32_t scale;   // sprite scale; 4096 = 100%
+        pn::string sprite;  // ID of sprite resource
+        int16_t    layer;   // 0 = no layer 1->3 = back to front
+        int32_t    scale;   // sprite scale; 4096 = 100%
 
         Range<int64_t> frames;
         Fixed          turn_rate;  // max rate at which object can turn
@@ -215,9 +215,9 @@ struct objectFrameType {
 
     // animation: objects whose appearence does not depend on direction
     struct Animation {
-        int16_t sprite;  // ID of sprite resource
-        int16_t layer;   // 0 = no layer 1->3 = back to front
-        int32_t scale;   // sprite scale; 4096 = 100%
+        pn::string sprite;  // ID of sprite resource
+        int16_t    layer;   // 0 = no layer 1->3 = back to front
+        int32_t    scale;   // sprite scale; 4096 = 100%
 
         Range<Fixed>       frames;     // range of frames from sprite
         AnimationDirection direction;  // frame sequence

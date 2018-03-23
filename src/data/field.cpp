@@ -188,6 +188,16 @@ sfz::optional<pn::string_view> optional_string(path_value x) {
     }
 }
 
+sfz::optional<pn::string> optional_string_copy(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_string()) {
+        return sfz::make_optional(x.value().as_string().copy());
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or string", x.path()).c_str());
+    }
+}
+
 pn::string_view required_string(path_value x) {
     if (x.value().is_string()) {
         return x.value().as_string();

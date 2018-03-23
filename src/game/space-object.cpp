@@ -120,10 +120,14 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject* sourceObject) {
     }
 
     NatePixTable* spriteTable = nullptr;
-    if (sourceObject->pix_id.id != kNoSpriteTable) {
-        spriteTable = sys.pix.get(sourceObject->pix_id.id, sourceObject->pix_id.hue);
+    if (sourceObject->pix_id.has_value()) {
+        spriteTable = sys.pix.get(sourceObject->pix_id->name, sourceObject->pix_id->hue);
         if (!spriteTable) {
-            throw std::runtime_error("Received an unexpected request to load a sprite");
+            throw std::runtime_error(pn::format(
+                                             "{0}/{1}: sprite not loaded",
+                                             sourceObject->pix_id->name,
+                                             static_cast<int>(sourceObject->pix_id->hue))
+                                             .c_str());
         }
     }
 
@@ -173,8 +177,8 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject* sourceObject) {
         }
 
         obj->sprite = AddSprite(
-                where, spriteTable, sourceObject->pix_id.id, sourceObject->pix_id.hue, whichShape,
-                obj->naturalScale, obj->icon, obj->layer, tinyColor);
+                where, spriteTable, sourceObject->pix_id->name, sourceObject->pix_id->hue,
+                whichShape, obj->naturalScale, obj->icon, obj->layer, tinyColor);
         obj->tinyColor = tinyColor;
 
         if (!obj->sprite.get()) {
@@ -215,7 +219,8 @@ void RemoveAllSpaceObjects() {
 SpaceObject::SpaceObject(
         const BaseObject& type, Random seed, int32_t object_id,
         const coordPointType& initial_location, int32_t relative_direction,
-        fixedPointType* relative_velocity, Handle<Admiral> new_owner, int16_t spriteIDOverride) {
+        fixedPointType* relative_velocity, Handle<Admiral> new_owner,
+        sfz::optional<pn::string_view> spriteIDOverride) {
     base       = &type;
     active     = kObjectInUse;
     randomSeed = seed;
@@ -297,15 +302,19 @@ SpaceObject::SpaceObject(
         expires = false;
     }
 
-    if (spriteIDOverride == -1) {
-        pix_id.id = sprite_resource(*base);
-    } else {
-        pix_id.id = spriteIDOverride;
-    }
-    if (base->attributes & kCanThink) {
-        pix_id.hue = GetAdmiralColor(owner);
-    } else {
-        pix_id.hue = Hue::GRAY;
+    auto pix_resource = sprite_resource(*base);
+    if (pix_resource.has_value()) {
+        pix_id.emplace();
+        if (spriteIDOverride.has_value()) {
+            pix_id->name = *spriteIDOverride;
+        } else {
+            pix_id->name = *pix_resource;
+        }
+        if (base->attributes & kCanThink) {
+            pix_id->hue = GetAdmiralColor(owner);
+        } else {
+            pix_id->hue = Hue::GRAY;
+        }
     }
 
     pulse.base   = base->pulse.has_value() ? base->pulse->base.get() : nullptr;
@@ -364,7 +373,7 @@ SpaceObject::SpaceObject(
 //
 
 void SpaceObject::change_base_type(
-        const BaseObject& base, int32_t spriteIDOverride, bool relative) {
+        const BaseObject& base, sfz::optional<pn::string_view> spriteIDOverride, bool relative) {
     auto          obj = this;
     int16_t       angle;
     int32_t       r;
@@ -429,15 +438,19 @@ void SpaceObject::change_base_type(
 
     // not setting sprite, targetObjectNumber, lastTarget, lastTargetDistance;
 
-    if (spriteIDOverride == -1) {
-        obj->pix_id.id = sprite_resource(base);
-    } else {
-        obj->pix_id.id = spriteIDOverride;
-    }
-    if (base.attributes & kCanThink) {
-        obj->pix_id.hue = GetAdmiralColor(obj->owner);
-    } else {
-        obj->pix_id.hue = Hue::GRAY;
+    auto pix_resource = sprite_resource(base);
+    if (pix_resource.has_value()) {
+        pix_id.emplace();
+        if (spriteIDOverride.has_value()) {
+            pix_id->name = *spriteIDOverride;
+        } else {
+            pix_id->name = *pix_resource;
+        }
+        if (base.attributes & kCanThink) {
+            pix_id->hue = GetAdmiralColor(owner);
+        } else {
+            pix_id->hue = Hue::GRAY;
+        }
     }
 
     // check periodic time
@@ -487,8 +500,8 @@ void SpaceObject::change_base_type(
     }
 
     // HANDLE THE NEW SPRITE DATA:
-    if (obj->pix_id.id != kNoSpriteTable) {
-        spriteTable = sys.pix.get(obj->pix_id.id, obj->pix_id.hue);
+    if (obj->pix_id.has_value()) {
+        spriteTable = sys.pix.get(obj->pix_id->name, obj->pix_id->hue);
 
         if (spriteTable == NULL) {
             throw std::runtime_error("Couldn't load a requested sprite");
@@ -514,7 +527,7 @@ void SpaceObject::change_base_type(
 Handle<SpaceObject> CreateAnySpaceObject(
         const BaseObject& whichBase, fixedPointType* velocity, coordPointType* location,
         int32_t direction, Handle<Admiral> owner, uint32_t specialAttributes,
-        int16_t spriteIDOverride) {
+        sfz::optional<pn::string_view> spriteIDOverride) {
     Random      random{g.random.next(32766)};
     int32_t     id = g.random.next(16384);
     SpaceObject newObject(
@@ -655,8 +668,8 @@ void SpaceObject::set_owner(Handle<Admiral> new_owner, bool message) {
         if (object->attributes & kCanThink) {
             NatePixTable* pixTable;
 
-            object->pix_id.hue = GetAdmiralColor(new_owner);
-            pixTable           = sys.pix.get(object->pix_id.id, object->pix_id.hue);
+            object->pix_id->hue = GetAdmiralColor(new_owner);
+            pixTable            = sys.pix.get(object->pix_id->name, object->pix_id->hue);
             if (pixTable != NULL) {
                 object->sprite->table = pixTable;
             }
@@ -745,7 +758,7 @@ void SpaceObject::destroy() {
             while (energyNum > 0) {
                 CreateAnySpaceObject(
                         *plug.info.energyBlobID, &object->velocity, &object->location,
-                        object->direction, Admiral::none(), 0, -1);
+                        object->direction, Admiral::none(), 0, sfz::nullopt);
                 energyNum--;
             }
         }
@@ -822,7 +835,8 @@ void SpaceObject::create_floating_player_body() {
     }
 
     auto body = CreateAnySpaceObject(
-            body_type, &obj->velocity, &obj->location, obj->direction, obj->owner, 0, -1);
+            body_type, &obj->velocity, &obj->location, obj->direction, obj->owner, 0,
+            sfz::nullopt);
     if (body.get()) {
         ChangePlayerShipNumber(obj->owner, body);
     } else {
@@ -863,13 +877,13 @@ Fixed SpaceObject::turn_rate() const {
 
 int32_t SpaceObject::number() const { return this - g.objects.get(); }
 
-int32_t sprite_resource(const BaseObject& o) {
+sfz::optional<pn::string_view> sprite_resource(const BaseObject& o) {
     if (o.attributes & kShapeFromDirection) {
-        return o.frame.rotation.sprite;
+        return sfz::make_optional<pn::string_view>(o.frame.rotation.sprite);
     } else if (o.attributes & kIsSelfAnimated) {
-        return o.frame.animation.sprite;
+        return sfz::make_optional<pn::string_view>(o.frame.animation.sprite);
     } else {
-        return -1;
+        return sfz::nullopt;
     }
 }
 

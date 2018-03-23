@@ -350,7 +350,7 @@ static Level::Initial initial(path_value x) {
     i.earning = optional_fixed(x.get("earning")).value_or(Fixed::zero());
 
     i.name_override   = optional_string(x.get("rename")).value_or("").copy();
-    i.sprite_override = optional_int(x.get("sprite_override")).value_or(-1);
+    i.sprite_override = optional_string_copy(x.get("sprite_override"));
 
     i.target = optional_initial(x.get("target")).value_or(Level::Initial::none());
 

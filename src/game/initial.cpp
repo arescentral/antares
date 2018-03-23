@@ -63,7 +63,10 @@ void create_initial(Handle<const Level::Initial> initial) {
     // TODO(sfiera): remap object in networked games.
     fixedPointType v        = {Fixed::zero(), Fixed::zero()};
     auto           anObject = g.initials[initial.number()] = CreateAnySpaceObject(
-            *base, &v, &coord, g.angle, owner, specialAttributes, initial->sprite_override);
+            *base, &v, &coord, g.angle, owner, specialAttributes,
+            initial->sprite_override.has_value()
+                    ? sfz::make_optional<pn::string_view>(*initial->sprite_override)
+                    : sfz::nullopt);
 
     if (anObject->attributes & kIsDestination) {
         anObject->asDestination = MakeNewDestination(
@@ -151,7 +154,10 @@ void UnhideInitialObject(Handle<const Level::Initial> initial) {
     // TODO(sfiera): remap objects in networked games.
     fixedPointType v        = {Fixed::zero(), Fixed::zero()};
     auto           anObject = g.initials[initial.number()] = CreateAnySpaceObject(
-            *base, &v, &coord, 0, owner, specialAttributes, initial->sprite_override);
+            *base, &v, &coord, 0, owner, specialAttributes,
+            initial->sprite_override.has_value()
+                    ? sfz::make_optional<pn::string_view>(*initial->sprite_override)
+                    : sfz::nullopt);
 
     if (anObject->attributes & kIsDestination) {
         anObject->asDestination = MakeNewDestination(

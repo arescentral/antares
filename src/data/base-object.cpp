@@ -158,7 +158,7 @@ sfz::optional<BaseObject::Weapon> optional_weapon(path_value x) {
 objectFrameType::Rotation required_rotation_frame(path_value x) {
     if (x.value().is_map()) {
         objectFrameType::Rotation r;
-        r.sprite    = required_int(x.get("sprite"));
+        r.sprite    = required_string(x.get("sprite")).copy();
         r.layer     = required_int(x.get("layer"), {1, 4});
         r.scale     = optional_fixed(x.get("scale")).value_or(Fixed::from_long(1)).val() * 16;
         r.frames    = required_int_range(x.get("frames"));
@@ -172,7 +172,7 @@ objectFrameType::Rotation required_rotation_frame(path_value x) {
 objectFrameType::Animation required_animation_frame(path_value x) {
     if (x.value().is_map()) {
         objectFrameType::Animation a;
-        a.sprite = required_int(x.get("sprite"));
+        a.sprite = required_string(x.get("sprite")).copy();
         a.layer  = required_int(x.get("layer"), {1, 4});
         a.scale  = optional_fixed(x.get("scale")).value_or(Fixed::from_long(1)).val() * 16;
         a.frames = optional_fixed_range(x.get("frames"))
