@@ -73,7 +73,6 @@ static LabeledRect data_item(const InterfaceItem& map_rect) {
     LabeledRect r;
     r.id     = 0;
     r.bounds = bounds;
-    r.label  = Resource::strings(4000).at(0).copy();
     r.hue    = Hue::GOLD;
     r.style  = InterfaceStyle::LARGE;
     return r;

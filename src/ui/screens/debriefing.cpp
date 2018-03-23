@@ -60,7 +60,7 @@ LabeledRect interface_item(const Rect& text_bounds) {
     LabeledRect r;
     r.id     = 0;
     r.bounds = text_bounds;
-    r.label  = Resource::strings(2001).at(28).copy();
+    r.label  = "Results";
     r.hue    = Hue::GOLD;
     r.style  = InterfaceStyle::LARGE;
     return r;
