@@ -114,9 +114,10 @@ void main(int argc, char* const* argv) {
     struct {
         pn::string_view name, out;
     } ids[] = {
-            {"501", "ishiman/cruiser"},   {"510", "ishiman/fighter"}, {"515", "ishiman/transport"},
-            {"532", "obish/escort"},      {"550", "gaitori/cruiser"}, {"551", "gaitori/fighter"},
-            {"563", "gaitori/transport"}, {"567", "obish/transport"},
+            {"ish/cruiser", "ishiman/cruiser"},    {"ish/fighter", "ishiman/fighter"},
+            {"ish/transprt", "ishiman/transport"}, {"obi/escort", "obish/escort"},
+            {"gai/cruiser", "gaitori/cruiser"},    {"gai/fighter", "gaitori/fighter"},
+            {"gai/transprt", "gaitori/transport"}, {"obi/transprt", "obish/transport"},
     };
 
     NullPrefsDriver prefs;
