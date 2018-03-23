@@ -65,7 +65,7 @@ ScenarioInfo scenario_info(pn::value_cref x0) {
     info.about_text = optional_string(x.get("about")).value_or("").copy();
 
     info.publisher_screen = nullptr;  // Don’t have permission to show ASW logo.
-    info.ego_screen       = Resource::texture("pictures/credit");
+    info.ego_screen       = Resource::texture("credit");
     info.splash_screen    = Resource::texture(required_string(x.get("splash")));
     info.starmap          = Resource::texture(required_string(x.get("starmap")));
 

@@ -35,8 +35,8 @@ static const int16_t kCheatStringListID  = 750;
 static const int16_t kCheatFeedbackOnID  = 751;
 static const int16_t kCheatFeedbackOffID = 752;
 
-constexpr char kInstLeftPictID[]  = "interfaces/instruments/left";
-constexpr char kInstRightPictID[] = "interfaces/instruments/right";
+constexpr char kInstLeftPictID[]  = "gui/instruments/left";
+constexpr char kInstRightPictID[] = "gui/instruments/right";
 
 ANTARES_GLOBAL SystemGlobals sys;
 

@@ -140,9 +140,8 @@ pn::string Resource::text(int id) {
     return Resource(load(pn::format("text/{0}.txt", id))).string().copy();
 }
 
-Texture Resource::texture(pn::string_view name) { return load_hidpi_texture(name); }
-Texture Resource::texture(int16_t id) {
-    return load_hidpi_texture(pn::format("pictures/{0}", id));
+Texture Resource::texture(pn::string_view name) {
+    return load_hidpi_texture(pn::format("pictures/{0}", name));
 }
 
 Resource::Resource(std::unique_ptr<sfz::mapped_file> file) : _file(std::move(file)) {}

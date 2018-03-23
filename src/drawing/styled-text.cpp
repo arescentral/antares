@@ -192,9 +192,9 @@ void StyledText::set_interface_text(pn::string_view text) {
                 }
                 inlinePictType inline_pict;
                 if ((inline_pict.object = BaseObject::get(id))) {
-                    inline_pict.picture = pn::format("pictures/{0}", inline_pict.object->portrait);
+                    inline_pict.picture = inline_pict.object->portrait.copy();
                 } else {
-                    inline_pict.picture = pn::format("pictures/{0}", id);
+                    inline_pict.picture = std::move(id);
                 }
 
                 _textures.push_back(Resource::texture(inline_pict.picture));

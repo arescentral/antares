@@ -119,14 +119,10 @@ BuildPix::BuildPix(pn::string_view text, int width) : _size({width, 0}) {
                     if (line.size() > 3) {
                         id = line.substr(3);
                     }
-                    _lines.push_back(Line{Line::BACKGROUND,
-                                          Resource::texture(pn::format("pictures/{0}", id)),
-                                          nullptr});
+                    _lines.push_back(Line{Line::BACKGROUND, Resource::texture(id), nullptr});
                 } else {
                     pn::string_view id = line.substr(2);
-                    _lines.push_back(Line{Line::PICTURE,
-                                          Resource::texture(pn::format("pictures/{0}", id)),
-                                          nullptr});
+                    _lines.push_back(Line{Line::PICTURE, Resource::texture(id), nullptr});
                 }
             }
         } else {
