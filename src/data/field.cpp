@@ -430,6 +430,18 @@ Point required_point(path_value x) {
     }
 }
 
+static int32_t required_int32(path_value x) { return required_int(x, {-2147483648, 2147483648}); }
+
+Rect required_rect(path_value x) {
+    return required_struct<Rect>(
+            x, {
+                       {"left", {&Rect::left, required_int32}},
+                       {"top", {&Rect::top, required_int32}},
+                       {"right", {&Rect::right, required_int32}},
+                       {"bottom", {&Rect::bottom, required_int32}},
+               });
+}
+
 sfz::optional<RgbColor> optional_color(path_value x) {
     if (x.value().is_null()) {
         return sfz::nullopt;

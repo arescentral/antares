@@ -99,11 +99,12 @@ std::vector<pn::string> Resource::strings(int id) {
 }
 
 NatePixTable Resource::sprite(pn::string_view name, Hue hue) {
-    pn::value    x       = procyon(pn::format("sprites/{0}.pn", name));
-    pn::map_cref m       = x.as_map();
-    ArrayPixMap  image   = read_png(Resource::path(m.get("image").as_string()).data().open());
-    ArrayPixMap  overlay = read_png(Resource::path(m.get("overlay").as_string()).data().open());
-    return NatePixTable(name, hue, m, std::move(image), std::move(overlay));
+    pn::value   x = procyon(pn::format("sprites/{0}.pn", name));
+    ArrayPixMap image =
+            read_png(Resource::path(pn::format("sprites/{0}/image.png", name)).data().open());
+    ArrayPixMap overlay =
+            read_png(Resource::path(pn::format("sprites/{0}/overlay.png", name)).data().open());
+    return NatePixTable(name, hue, x, std::move(image), std::move(overlay));
 }
 
 pn::string Resource::text(int id) {

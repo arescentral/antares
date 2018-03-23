@@ -123,6 +123,7 @@ HandleList<const Level_Initial>   required_initial_range(path_value x);
 
 sfz::optional<Point> optional_point(path_value x);
 Point                required_point(path_value x);
+Rect                 required_rect(path_value x);
 
 sfz::optional<RgbColor> optional_color(path_value x);
 
@@ -181,14 +182,16 @@ template <typename T>
 T required_struct(path_value x, const std::map<pn::string_view, field<T>>& fields) {
     if (x.value().is_map()) {
         T t;
+        for (const auto& kv : fields) {
+            path_value v = x.get(kv.first);
+            kv.second.set(&t, v);
+        }
         for (const auto& kv : x.value().as_map()) {
-            pn::string_view k  = kv.key();
-            path_value      v  = x.get(k);
-            auto            it = fields.find(k);
-            if (it == fields.end()) {
+            pn::string_view k = kv.key();
+            path_value      v = x.get(k);
+            if (fields.find(k) == fields.end()) {
                 throw std::runtime_error(pn::format("{0}unknown field", v.prefix()).c_str());
             }
-            it->second.set(&t, v);
         }
         return t;
     } else {

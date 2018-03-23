@@ -23,6 +23,7 @@
 #include <pn/map>
 #include <sfz/sfz.hpp>
 
+#include "data/field.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "game/sys.hpp"
@@ -35,58 +36,65 @@ using std::vector;
 
 namespace antares {
 
+std::vector<Rect> required_rect_array(path_value x) {
+    if (x.value().is_array()) {
+        pn::array_cref    a = x.value().as_array();
+        std::vector<Rect> result;
+        for (int i = 0; i < a.size(); ++i) {
+            result.emplace_back(required_rect(x.get(i)));
+        }
+        return result;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be array", x.path()).c_str());
+    }
+}
+
 NatePixTable::NatePixTable(
-        pn::string_view name, Hue hue, pn::map_cref data, ArrayPixMap image, ArrayPixMap overlay) {
-    struct State {
-        int         rows, cols;
-        Point       center;
-        Rect        frame;
-        ArrayPixMap image, overlay;
-        State() : image(0, 0), overlay(0, 0) {}
-    } state;
+        pn::string_view name, Hue hue, pn::value_cref x0, ArrayPixMap image, ArrayPixMap overlay) {
+    path_value x{x0};
 
-    pn::map_cref point = data.get("center").as_map();
-    state.center       = Point(point.get("x").as_int(), point.get("y").as_int());
-    state.rows         = data.get("rows").as_int();
-    state.cols         = data.get("cols").as_int();
-    state.image        = std::move(image);
-    state.overlay      = std::move(overlay);
+    struct SpriteData {
+        int64_t           rows, cols;
+        Point             center;
+        std::vector<Rect> frames;
+    };
+    auto s = required_struct<SpriteData>(
+            x, {
+                       {"rows", {&SpriteData::rows, optional_int, 1LL}},
+                       {"cols", {&SpriteData::cols, optional_int, 1LL}},
+                       {"center", {&SpriteData::center, required_point}},
+                       {"frames", {&SpriteData::frames, required_rect_array}},
+               });
 
-    if (state.image.size() != state.overlay.size()) {
+    if (image.size() != overlay.size()) {
         throw std::runtime_error("size mismatch between image and overlay");
     }
-    if (state.image.size().width % state.cols) {
+    if (image.size().width % s.cols) {
         throw std::runtime_error("sprite column count does not evenly split image");
     }
-    if (state.image.size().height % state.rows) {
+    if (image.size().height % s.rows) {
         throw std::runtime_error("sprite row count does not evenly split image");
     }
-
-    pn::array_cref frames = data.get("frames").as_array();
-    if (frames.size() != (state.rows * state.cols)) {
+    if (s.frames.size() != (s.rows * s.cols)) {
         throw std::runtime_error("frame count not equal to rows * cols");
     }
-    for (pn::value_cref frame_value : frames) {
-        pn::map_cref f = frame_value.as_map();
-        state.frame =
-                Rect(f.get("left").as_int(), f.get("top").as_int(), f.get("right").as_int(),
-                     f.get("bottom").as_int());
-        const int  frame       = _frames.size();
-        const int  col         = frame % state.cols;
-        const int  row         = frame / state.cols;
-        const int  cell_width  = state.image.size().width / state.cols;
-        const int  cell_height = state.image.size().height / state.rows;
+    for (Rect frame : s.frames) {
+        const int  i           = _frames.size();
+        const int  col         = i % s.cols;
+        const int  row         = i / s.cols;
+        const int  cell_width  = image.size().width / s.cols;
+        const int  cell_height = image.size().height / s.rows;
         const Rect cell(Point(cell_width * col, cell_height * row), Size(cell_width, cell_height));
-        Rect       sprite(state.frame);
-        sprite.offset(state.center.h, state.center.v);
-        Rect bounds(state.frame);
+        Rect       sprite = frame;
+        sprite.offset(s.center.h, s.center.v);
+        Rect bounds(frame);
         bounds.offset(2 * -bounds.left, 2 * -bounds.top);
         if (hue == Hue::GRAY) {
-            _frames.emplace_back(bounds, state.image.view(cell).view(sprite), name, frame);
+            _frames.emplace_back(bounds, image.view(cell).view(sprite), name, i);
         } else {
             _frames.emplace_back(
-                    bounds, state.image.view(cell).view(sprite), name, frame,
-                    state.overlay.view(cell).view(sprite), hue);
+                    bounds, image.view(cell).view(sprite), name, i,
+                    overlay.view(cell).view(sprite), hue);
         }
     }
 }

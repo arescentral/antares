@@ -34,18 +34,6 @@ using sfz::range;
 
 namespace antares {
 
-static int32_t required_int32(path_value x) { return required_int(x, {-2147483648, 2147483648}); }
-
-static Rect required_rect(path_value x) {
-    return required_struct<Rect>(
-            x, {
-                       {"left", {&Rect::left, required_int32}},
-                       {"top", {&Rect::top, required_int32}},
-                       {"right", {&Rect::right, required_int32}},
-                       {"bottom", {&Rect::bottom, required_int32}},
-               });
-}
-
 static int16_t optional_key_num(path_value x) {
     auto k = optional_string(x);
     if (!k.has_value()) {
