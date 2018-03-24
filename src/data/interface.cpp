@@ -200,7 +200,7 @@ std::unique_ptr<InterfaceItem> PlainRect::copy() const {
     copy->id     = id;
     copy->hue    = hue;
     copy->style  = style;
-    return copy;
+    return std::move(copy);
 }
 
 std::unique_ptr<InterfaceItem> LabeledRect::copy() const {
@@ -210,7 +210,7 @@ std::unique_ptr<InterfaceItem> LabeledRect::copy() const {
     copy->label  = label.copy();
     copy->hue    = hue;
     copy->style  = style;
-    return copy;
+    return std::move(copy);
 }
 
 std::unique_ptr<InterfaceItem> TextRect::copy() const {
@@ -220,14 +220,14 @@ std::unique_ptr<InterfaceItem> TextRect::copy() const {
     copy->text   = text.copy();
     copy->hue    = hue;
     copy->style  = style;
-    return copy;
+    return std::move(copy);
 }
 
 std::unique_ptr<InterfaceItem> PictureRect::copy() const {
     std::unique_ptr<PictureRect> copy(new PictureRect);
     copy->bounds = bounds;
     copy->id     = id;
-    return copy;
+    return std::move(copy);
 }
 
 std::unique_ptr<InterfaceItem> PlainButton::copy() const {
@@ -240,7 +240,7 @@ std::unique_ptr<InterfaceItem> PlainButton::copy() const {
     copy->hue     = hue;
     copy->style   = style;
     copy->status  = status;
-    return copy;
+    return std::move(copy);
 }
 
 std::unique_ptr<InterfaceItem> CheckboxButton::copy() const {
@@ -254,7 +254,7 @@ std::unique_ptr<InterfaceItem> CheckboxButton::copy() const {
     copy->style   = style;
     copy->status  = status;
     copy->on      = on;
-    return copy;
+    return std::move(copy);
 }
 
 std::unique_ptr<InterfaceItem> RadioButton::copy() const {
@@ -268,7 +268,7 @@ std::unique_ptr<InterfaceItem> RadioButton::copy() const {
     copy->style   = style;
     copy->status  = status;
     copy->on      = on;
-    return copy;
+    return std::move(copy);
 }
 
 std::unique_ptr<InterfaceItem> TabBoxButton::copy() const {
@@ -282,7 +282,7 @@ std::unique_ptr<InterfaceItem> TabBoxButton::copy() const {
     copy->style   = style;
     copy->status  = status;
     copy->on      = on;
-    return copy;
+    return std::move(copy);
 }
 
 std::unique_ptr<InterfaceItem> TabBox::copy() const {
@@ -292,7 +292,7 @@ std::unique_ptr<InterfaceItem> TabBox::copy() const {
     copy->hue                   = hue;
     copy->style                 = style;
     copy->top_right_border_size = top_right_border_size;
-    return copy;
+    return std::move(copy);
 }
 
 void PlainRect::accept(const Visitor& visitor) const { visitor.visit_plain_rect(*this); }
