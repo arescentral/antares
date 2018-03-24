@@ -60,8 +60,8 @@ NatePixTable::NatePixTable(
     };
     auto s = required_struct<SpriteData>(
             x, {
-                       {"rows", {&SpriteData::rows, optional_int, 1LL}},
-                       {"cols", {&SpriteData::cols, optional_int, 1LL}},
+                       {"rows", {&SpriteData::rows, optional_int, 1}},
+                       {"cols", {&SpriteData::cols, optional_int, 1}},
                        {"center", {&SpriteData::center, required_point}},
                        {"frames", {&SpriteData::frames, required_rect_array}},
                });

@@ -163,8 +163,8 @@ struct field {
     constexpr field(F(U::*field), F (*reader)(path_value x))
             : set([field, reader](T* t, path_value x) { (t->*field) = reader(x); }) {}
 
-    template <typename F, typename U>
-    constexpr field(F(U::*field), sfz::optional<F> (*reader)(path_value x), F default_value)
+    template <typename F, typename U, typename D>
+    constexpr field(F(U::*field), sfz::optional<F> (*reader)(path_value x), const D& default_value)
             : set([field, reader, default_value](T* t, path_value x) {
                   (t->*field) = reader(x).value_or(default_value);
               }) {}
