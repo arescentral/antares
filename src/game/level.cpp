@@ -57,15 +57,29 @@ ANTARES_GLOBAL set<int32_t> possible_objects;
 ANTARES_GLOBAL set<int32_t> possible_actions;
 #endif  // DATA_COVERAGE
 
+enum class Required : bool {
+    NO  = false,
+    YES = true,
+};
+
 void AddBaseObjectActionMedia(
         const std::vector<std::unique_ptr<const Action>>& actions, std::bitset<16> all_colors);
 void AddActionMedia(const Action& action, std::bitset<16> all_colors);
 
-void AddBaseObjectMedia(const NamedHandle<const BaseObject>& base, std::bitset<16> all_colors) {
+void AddBaseObjectMedia(
+        const NamedHandle<const BaseObject>& base, std::bitset<16> all_colors, Required required) {
     if (base.get()) {
         return;
     }
-    load_object(base);
+    if (required == Required::YES) {
+        load_object(base);
+    } else {
+        try {
+            load_object(base);
+        } catch (...) {
+            return;
+        }
+    }
 
 #ifdef DATA_COVERAGE
     possible_objects.insert(base.number());
@@ -102,7 +116,7 @@ void AddBaseObjectMedia(const NamedHandle<const BaseObject>& base, std::bitset<1
     for (const sfz::optional<BaseObject::Weapon>* weapon :
          {&base->pulse, &base->beam, &base->special}) {
         if (weapon->has_value()) {
-            AddBaseObjectMedia((*weapon)->base, all_colors);
+            AddBaseObjectMedia((*weapon)->base, all_colors, Required::YES);
         }
     }
 }
@@ -121,7 +135,7 @@ void AddActionMedia(const Action& action, std::bitset<16> all_colors) {
 
     auto base = action.created_base();
     if (base) {
-        AddBaseObjectMedia(*base, all_colors);
+        AddBaseObjectMedia(*base, all_colors, Required::YES);
     }
 
     auto range = action.sound_range();
@@ -230,17 +244,22 @@ static void load_blessed_objects(std::bitset<16> all_colors) {
             &info.energyBlobID, &info.warpInFlareID, &info.warpOutFlareID, &info.playerBodyID,
     };
     for (auto id : blessed) {
-        AddBaseObjectMedia(*id, all_colors);
+        AddBaseObjectMedia(*id, all_colors, Required::YES);
     }
 }
 
 static void load_initial(Handle<const Level::Initial> initial, std::bitset<16> all_colors) {
-    Handle<Admiral> owner      = initial->owner;
-    const auto&     baseObject = initial->base;
-    // TODO(sfiera): remap objects in networked games.
+    Handle<Admiral>               owner           = initial->owner;
+    const BuildableObject&        buildableObject = initial->base;
+    NamedHandle<const BaseObject> baseObject;
+    if (owner.get()) {
+        baseObject = get_buildable_object_handle(buildableObject, owner->race());
+    } else {
+        baseObject = NamedHandle<const BaseObject>{buildableObject.name.copy()};
+    }
 
     // Load the media for this object
-    AddBaseObjectMedia(baseObject, all_colors);
+    AddBaseObjectMedia(baseObject, all_colors, Required::YES);
 
     // make sure we're not overriding the sprite
     if (initial->sprite_override.has_value()) {
@@ -256,11 +275,9 @@ static void load_initial(Handle<const Level::Initial> initial, std::bitset<16> a
         // check for each player
         for (auto a : Admiral::all()) {
             if (a->active()) {
-                auto baseObject =
-                        get_base_object_handle_from_class_and_race(initial->build[j], a->race());
-                if (baseObject) {
-                    AddBaseObjectMedia(*baseObject, all_colors);
-                }
+                NamedHandle<const BaseObject> baseObject =
+                        get_buildable_object_handle(initial->build[j], a->race());
+                AddBaseObjectMedia(baseObject, all_colors, Required::NO);
             }
         }
     }

@@ -230,10 +230,10 @@ Handle<SpaceObject> CreateAnySpaceObject(
         sfz::optional<pn::string_view> spriteIDOverride);
 int32_t CountObjectsOfBaseType(const BaseObject* whichType, Handle<Admiral> owner);
 
-const NamedHandle<const BaseObject>* get_base_object_handle_from_class_and_race(
-        pn::string_view class_, const NamedHandle<const Race>& race);
-const BaseObject* get_base_object_from_class_and_race(
-        pn::string_view class_, const NamedHandle<const Race>& race);
+NamedHandle<const BaseObject> get_buildable_object_handle(
+        const BuildableObject& o, const NamedHandle<const Race>& race);
+const BaseObject* get_buildable_object(
+        const BuildableObject& o, const NamedHandle<const Race>& race);
 
 sfz::optional<pn::string_view> sprite_resource(const BaseObject& o);
 int32_t                        sprite_layer(const BaseObject& o);

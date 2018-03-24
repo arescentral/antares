@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "data/action.hpp"
+#include "data/base-object.hpp"
 #include "data/enums.hpp"
 #include "data/handle.hpp"
 #include "math/fixed.hpp"
@@ -170,16 +171,21 @@ struct Level {
 };
 Level level(pn::value_cref x);
 
+// Might be the name of a BaseObject, or of an entry in a Race’s “ships” list.
+struct BuildableObject {
+    pn::string name;
+};
+
 struct Level_Initial {
-    NamedHandle<const BaseObject> base;
-    Handle<Admiral>               owner;
-    Point                         at;
-    Fixed                         earning;
+    BuildableObject base;
+    Handle<Admiral> owner;
+    Point           at;
+    Fixed           earning;
 
     pn::string                name_override;
     sfz::optional<pn::string> sprite_override;
 
-    std::vector<pn::string>      build;
+    std::vector<BuildableObject> build;
     Handle<const Level::Initial> target;
 
     class Attributes {

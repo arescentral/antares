@@ -123,7 +123,7 @@ static Handle<Destination> next_free_destination() {
 }
 
 Handle<Destination> MakeNewDestination(
-        Handle<SpaceObject> object, const std::vector<pn::string>& canBuildType, Fixed earn,
+        Handle<SpaceObject> object, const std::vector<BuildableObject>& canBuildType, Fixed earn,
         pn::string_view name) {
     auto d = next_free_destination();
     if (!d.get()) {
@@ -134,8 +134,8 @@ Handle<Destination> MakeNewDestination(
     d->earn           = earn;
     d->totalBuildTime = d->buildTime = ticks(0);
     d->canBuildType.clear();
-    for (pn::string_view s : canBuildType) {
-        d->canBuildType.emplace_back(s.copy());
+    for (const BuildableObject& o : canBuildType) {
+        d->canBuildType.emplace_back(BuildableObject{o.name.copy()});
     }
 
     if (!name.empty()) {
@@ -210,10 +210,10 @@ void RecalcAllAdmiralBuildData() {
             continue;
         }
         Handle<Admiral> a = anObject->owner;
-        for (pn::string_view buildable_class : d->canBuildType) {
+        for (const BuildableObject& buildable_class : d->canBuildType) {
             bool found = false;
             for (const admiralBuildType& admiral_build : a->canBuildType()) {
-                if (admiral_build.class_ == buildable_class) {
+                if (admiral_build.buildable.name == buildable_class.name) {
                     found = true;
                     break;
                 }
@@ -221,11 +221,11 @@ void RecalcAllAdmiralBuildData() {
             if (found) {
                 continue;
             }
-            auto baseObject = get_base_object_from_class_and_race(buildable_class, a->race());
+            auto baseObject = get_buildable_object(buildable_class, a->race());
             if (baseObject) {
                 a->canBuildType().emplace_back();
-                a->canBuildType().back().class_      = buildable_class.copy();
-                a->canBuildType().back().base        = baseObject;
+                a->canBuildType().back().buildable = BuildableObject{buildable_class.name.copy()};
+                a->canBuildType().back().base      = baseObject;
                 a->canBuildType().back().chanceRange = a->totalBuildChance();
                 a->totalBuildChance() += baseObject->buildRatio;
             }
@@ -935,12 +935,12 @@ void Admiral::think() {
                             if ((_canBuildType[j].chanceRange <= thisValue) &&
                                 (_canBuildType[j].chanceRange > friendValue)) {
                                 friendValue = _canBuildType[j].chanceRange;
-                                _hopeToBuild.emplace(_canBuildType[j].class_.copy());
+                                _hopeToBuild.emplace(
+                                        BuildableObject{_canBuildType[j].buildable.name.copy()});
                             }
                         }
                         if (_hopeToBuild.has_value()) {
-                            auto baseObject =
-                                    get_base_object_from_class_and_race(*_hopeToBuild, _race);
+                            auto baseObject = get_buildable_object(*_hopeToBuild, _race);
                             if (baseObject->buildFlags & kSufficientEscortsExist) {
                                 for (auto anObject : SpaceObject::all()) {
                                     if ((anObject->active) && (anObject->owner.get() == this) &&
@@ -970,13 +970,12 @@ void Admiral::think() {
                 if (_hopeToBuild.has_value()) {
                     int j = 0;
                     for (; j < destBalance->canBuildType.size(); ++j) {
-                        if (destBalance->canBuildType[j] == *_hopeToBuild) {
+                        if (destBalance->canBuildType[j].name == _hopeToBuild->name) {
                             break;
                         }
                     }
                     if (j < destBalance->canBuildType.size()) {
-                        auto baseObject =
-                                get_base_object_from_class_and_race(*_hopeToBuild, _race);
+                        auto baseObject = get_buildable_object(*_hopeToBuild, _race);
                         if (_cash >= Fixed::from_long(baseObject->price)) {
                             Admiral::build(j);
                             _hopeToBuild.reset();
@@ -995,8 +994,7 @@ bool Admiral::build(int32_t buildWhichType) {
     auto dest = _buildAtObject;
     if ((buildWhichType >= 0) && (buildWhichType < dest->canBuildType.size()) && (dest.get()) &&
         (dest->buildTime <= ticks(0))) {
-        auto buildBaseObject =
-                get_base_object_from_class_and_race(dest->canBuildType[buildWhichType], _race);
+        auto buildBaseObject = get_buildable_object(dest->canBuildType[buildWhichType], _race);
         if (buildBaseObject && (buildBaseObject->price <= mFixedToLong(_cash))) {
             _cash -= (Fixed::from_long(buildBaseObject->price));
             if (_cheats & kBuildFastBit) {

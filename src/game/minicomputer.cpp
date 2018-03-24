@@ -987,8 +987,8 @@ void MiniComputerSetBuildStrings() {
         miniScreenLineType* line        = &g.mini.lineData[lineNum];
         const BaseObject*   buildObject = nullptr;
         if (count < buildAtObject->canBuildType.size()) {
-            buildObject = get_base_object_from_class_and_race(
-                    buildAtObject->canBuildType[count], g.admiral->race());
+            buildObject =
+                    get_buildable_object(buildAtObject->canBuildType[count], g.admiral->race());
         }
         line->value      = -1;
         line->sourceData = buildObject;

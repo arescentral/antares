@@ -88,20 +88,22 @@ BaseObject* BaseObject::get(pn::string_view name) {
     return nullptr;
 }
 
-const NamedHandle<const BaseObject>* get_base_object_handle_from_class_and_race(
-        pn::string_view class_, const NamedHandle<const Race>& race) {
-    auto it = race->ships.find(class_.copy());
+NamedHandle<const BaseObject> get_buildable_object_handle(
+        const BuildableObject& o, const NamedHandle<const Race>& race) {
+    auto it = race->ships.find(o.name.copy());
     if (it == race->ships.end()) {
-        // TODO(sfiera): return BaseObject with literal name class_.
-        return nullptr;
+        return NamedHandle<const BaseObject>(o.name.copy());
     }
-    return &it->second;
+    return it->second.copy();
 }
 
-const BaseObject* get_base_object_from_class_and_race(
-        pn::string_view class_, const NamedHandle<const Race>& race) {
-    const auto* base = get_base_object_handle_from_class_and_race(class_, race);
-    return base ? base->get() : nullptr;
+const BaseObject* get_buildable_object(
+        const BuildableObject& o, const NamedHandle<const Race>& race) {
+    auto it = race->ships.find(o.name.copy());
+    if (it == race->ships.end()) {
+        return BaseObject::get(o.name);
+    }
+    return BaseObject::get(it->second.name());
 }
 
 static Handle<SpaceObject> next_free_space_object() {

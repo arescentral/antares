@@ -70,21 +70,21 @@ struct Destination {
     static Handle<Destination>     none() { return Handle<Destination>(-1); }
     static HandleList<Destination> all() { return HandleList<Destination>(0, kMaxDestObject); }
 
-    Handle<SpaceObject>     whichObject;
-    std::vector<pn::string> canBuildType;
-    int32_t                 occupied[kMaxPlayerNum];
-    Fixed                   earn;
-    ticks                   buildTime;
-    ticks                   totalBuildTime;
-    const BaseObject*       buildObjectBaseNum;
-    pn::string              name;
+    Handle<SpaceObject>          whichObject;
+    std::vector<BuildableObject> canBuildType;
+    int32_t                      occupied[kMaxPlayerNum];
+    Fixed                        earn;
+    ticks                        buildTime;
+    ticks                        totalBuildTime;
+    const BaseObject*            buildObjectBaseNum;
+    pn::string                   name;
 
     bool can_build() const;  // Can build anything.
 };
 
 struct admiralBuildType {
     const BaseObject* base;
-    pn::string        class_;
+    BuildableObject   buildable;
     Fixed             chanceRange = kFixedNone;
 };
 
@@ -130,50 +130,50 @@ class Admiral {
     Fixed earning_power() { return _earning_power; }
     void  set_earning_power(Fixed value) { _earning_power = value; }
 
-    int32_t&                       kills() { return _kills; }
-    int32_t&                       losses() { return _losses; }
-    int32_t&                       shipsLeft() { return _shipsLeft; }
-    int32_t*                       score() { return _score; }
-    int32_t&                       blitzkrieg() { return _blitzkrieg; }
-    Fixed&                         lastFreeEscortStrength() { return _lastFreeEscortStrength; }
-    Fixed&                         thisFreeEscortStrength() { return _thisFreeEscortStrength; }
-    std::vector<admiralBuildType>& canBuildType() { return _canBuildType; };
-    Fixed&                         totalBuildChance() { return _totalBuildChance; }
-    sfz::optional<pn::string>&     hopeToBuild() { return _hopeToBuild; }
-    Hue&                           hue() { return _hue; }
-    bool&                          active() { return _active; }
-    pn::string_view                name() { return _name; }
-    uint32_t&                      cheats() { return _cheats; }
+    int32_t&                        kills() { return _kills; }
+    int32_t&                        losses() { return _losses; }
+    int32_t&                        shipsLeft() { return _shipsLeft; }
+    int32_t*                        score() { return _score; }
+    int32_t&                        blitzkrieg() { return _blitzkrieg; }
+    Fixed&                          lastFreeEscortStrength() { return _lastFreeEscortStrength; }
+    Fixed&                          thisFreeEscortStrength() { return _thisFreeEscortStrength; }
+    std::vector<admiralBuildType>&  canBuildType() { return _canBuildType; };
+    Fixed&                          totalBuildChance() { return _totalBuildChance; }
+    sfz::optional<BuildableObject>& hopeToBuild() { return _hopeToBuild; }
+    Hue&                            hue() { return _hue; }
+    bool&                           active() { return _active; }
+    pn::string_view                 name() { return _name; }
+    uint32_t&                       cheats() { return _cheats; }
 
   private:
-    uint32_t                      _attributes;
-    bool                          _has_destination = false;
-    Handle<SpaceObject>           _destinationObject;
-    int32_t                       _destinationObjectID = -1;
-    Handle<SpaceObject>           _flagship;
-    int32_t                       _flagshipID = -1;
-    Handle<SpaceObject>           _considerShip;
-    int32_t                       _considerShipID      = -1;
-    int32_t                       _considerDestination = kNoShip;
-    Handle<Destination>           _buildAtObject;  // # of destination object to build at
-    NamedHandle<const Race>       _race;
-    Fixed                         _cash                    = Fixed::zero();
-    Fixed                         _saveGoal                = Fixed::zero();
-    Fixed                         _earning_power           = Fixed::zero();
-    int32_t                       _kills                   = 0;
-    int32_t                       _losses                  = 0;
-    int32_t                       _shipsLeft               = 0;
-    int32_t                       _score[kAdmiralScoreNum] = {};
-    int32_t                       _blitzkrieg              = 1200;
-    Fixed                         _lastFreeEscortStrength  = Fixed::zero();
-    Fixed                         _thisFreeEscortStrength  = Fixed::zero();
-    std::vector<admiralBuildType> _canBuildType;
-    Fixed                         _totalBuildChance = Fixed::zero();
-    sfz::optional<pn::string>     _hopeToBuild;
-    Hue                           _hue    = Hue::GRAY;
-    bool                          _active = false;
-    uint32_t                      _cheats = 0;
-    pn::string                    _name;
+    uint32_t                       _attributes;
+    bool                           _has_destination = false;
+    Handle<SpaceObject>            _destinationObject;
+    int32_t                        _destinationObjectID = -1;
+    Handle<SpaceObject>            _flagship;
+    int32_t                        _flagshipID = -1;
+    Handle<SpaceObject>            _considerShip;
+    int32_t                        _considerShipID      = -1;
+    int32_t                        _considerDestination = kNoShip;
+    Handle<Destination>            _buildAtObject;  // # of destination object to build at
+    NamedHandle<const Race>        _race;
+    Fixed                          _cash                    = Fixed::zero();
+    Fixed                          _saveGoal                = Fixed::zero();
+    Fixed                          _earning_power           = Fixed::zero();
+    int32_t                        _kills                   = 0;
+    int32_t                        _losses                  = 0;
+    int32_t                        _shipsLeft               = 0;
+    int32_t                        _score[kAdmiralScoreNum] = {};
+    int32_t                        _blitzkrieg              = 1200;
+    Fixed                          _lastFreeEscortStrength  = Fixed::zero();
+    Fixed                          _thisFreeEscortStrength  = Fixed::zero();
+    std::vector<admiralBuildType>  _canBuildType;
+    Fixed                          _totalBuildChance = Fixed::zero();
+    sfz::optional<BuildableObject> _hopeToBuild;
+    Hue                            _hue    = Hue::GRAY;
+    bool                           _active = false;
+    uint32_t                       _cheats = 0;
+    pn::string                     _name;
 
   private:
     Admiral() = default;
@@ -182,7 +182,7 @@ class Admiral {
 void ResetAllDestObjectData();
 
 Handle<Destination> MakeNewDestination(
-        Handle<SpaceObject> object, const std::vector<pn::string>& canBuildType, Fixed earn,
+        Handle<SpaceObject> object, const std::vector<BuildableObject>& canBuildType, Fixed earn,
         pn::string_view name);
 void RemoveDestination(Handle<Destination> d);
 void RecalcAllAdmiralBuildData();

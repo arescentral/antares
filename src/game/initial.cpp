@@ -59,7 +59,9 @@ void create_initial(Handle<const Level::Initial> initial) {
         }
     }
 
-    const auto& base = initial->base;
+    const BaseObject* base = initial->owner.get()
+                                     ? get_buildable_object(initial->base, initial->owner->race())
+                                     : BaseObject::get(initial->base.name);
     // TODO(sfiera): remap object in networked games.
     fixedPointType v        = {Fixed::zero(), Fixed::zero()};
     auto           anObject = g.initials[initial.number()] = CreateAnySpaceObject(
@@ -150,7 +152,9 @@ void UnhideInitialObject(Handle<const Level::Initial> initial) {
         }
     }
 
-    const auto& base = initial->base;
+    const BaseObject* base = initial->owner.get()
+                                     ? get_buildable_object(initial->base, initial->owner->race())
+                                     : BaseObject::get(initial->base.name);
     // TODO(sfiera): remap objects in networked games.
     fixedPointType v        = {Fixed::zero(), Fixed::zero()};
     auto           anObject = g.initials[initial.number()] = CreateAnySpaceObject(
@@ -164,7 +168,7 @@ void UnhideInitialObject(Handle<const Level::Initial> initial) {
                 anObject, initial->build, initial->earning, initial->name_override);
 
         if (owner.get()) {
-            if (initial->build[0] >= 0) {
+            if (initial->build.size() > 0) {
                 if (!owner->control().get()) {
                     owner->set_control(anObject);
                 }

@@ -338,13 +338,32 @@ static std::vector<Level::Briefing> optional_briefing_array(path_value x) {
     }
 }
 
+static BuildableObject required_buildable_object(path_value x) {
+    return BuildableObject{required_string_copy(x)};
+}
+
+std::vector<BuildableObject> optional_buildable_object_array(path_value x) {
+    if (x.value().is_null()) {
+        return {};
+    } else if (x.value().is_array()) {
+        pn::array_cref               a = x.value().as_array();
+        std::vector<BuildableObject> result;
+        for (int i = 0; i < a.size(); ++i) {
+            result.emplace_back(required_buildable_object(x.get(i)));
+        }
+        return result;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
+    }
+}
+
 static Level::Initial initial(path_value x) {
     if (!x.value().is_map()) {
         throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
     }
 
     Level::Initial i;
-    i.base    = required_base(x.get("base"));
+    i.base    = required_buildable_object(x.get("base"));
     i.owner   = optional_admiral(x.get("owner")).value_or(Handle<Admiral>(-1));
     i.at      = required_point(x.get("at"));
     i.earning = optional_fixed(x.get("earning")).value_or(Fixed::zero());
@@ -356,7 +375,7 @@ static Level::Initial initial(path_value x) {
 
     i.attributes = Level::Initial::Attributes(optional_initial_attributes(x.get("attributes")));
 
-    i.build = optional_string_array(x.get("build"));
+    i.build = optional_buildable_object_array(x.get("build"));
     if (i.build.size() > kMaxShipCanBuild) {
         throw std::runtime_error(pn::format(
                                          "{0}: has {1} elements, more than max of {2}",
