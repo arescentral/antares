@@ -68,347 +68,17 @@ const int  kNonFreeSoundIDs[] = {
         536, 540, 548, 550, 552, 553, 562, 571, 2000, 2001, 12558, 17406, 28007, 31989,
 };
 
-bool verbatim(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
-    out.write(data);
-    return true;
-}
-
-enum {
-    THE_STARS_HAVE_EARS    = 600,
-    WHILE_THE_IRON_IS_HOT  = 605,
-    SPACE_RACE_THE_MUSICAL = 623,
-};
-
-bool read_pstr(pn::file_view in, pn::string* out) {
-    uint8_t bytes[256];
-    if (fread(bytes, 1, 256, in.c_obj()) < 256) {
-        return false;
-    }
-    pn::data_view encoded{bytes + 1, bytes[0]};
-    *out = sfz::macroman::decode(encoded);
-    return true;
-}
-
-pn::string u32_to_version(uint32_t in) {
-    using std::swap;
-    int a = (in >> 030) & 0xff;
-    int b = (in >> 020) & 0xff;
-    int c = (in >> 010) & 0xff;
-    int d = (in >> 000) & 0xff;
-    if (d) {
-        return pn::format("{0}.{1}.{2}.{3}", a, b, c, d);
-    } else if (c) {
-        return pn::format("{0}.{1}.{2}", a, b, c);
-    } else {
-        return pn::format("{0}.{1}", a, b);
-    }
-}
-
-bool convert_nlag(pn::string_view, bool, int16_t id, pn::data_view data, pn::file_view out) {
-    pn::file in = data.open();
-
-    int32_t    warp_in_flare, warp_out_flare, player_body, energy_blob;
-    uint32_t   version;
-    pn::string download_url;
-    pn::string title;
-    pn::string author;
-    pn::string author_url;
-    uint8_t    unused[12];
-    if (!(in.read(&warp_in_flare, &warp_out_flare, &player_body, &energy_blob) &&
-          read_pstr(in, &download_url) && read_pstr(in, &title) && read_pstr(in, &author) &&
-          read_pstr(in, &author_url) && in.read(&version) &&
-          (fread(unused, 1, 12, in.c_obj()) == 12))) {
-        return false;
-    }
-
-    pn::dump(
-            out, pn::map{
-                         {"title", std::move(title)},
-                         {"download_url", std::move(download_url)},
-                         {"author", std::move(author)},
-                         {"author_url", std::move(author_url)},
-                         {"version", u32_to_version(version)},
-                         {"warp_in_flare", warp_in_flare},
-                         {"warp_out_flare", warp_out_flare},
-                         {"player_body", player_body},
-                         {"energy_blob", energy_blob},
-                 });
-    return true;
-}
-
-bool convert_pict(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
-    rezin::Picture pict(data);
-    if ((pict.version() == 2) && (pict.is_raster())) {
-        out.write(png(pict));
-        return true;
-    }
-    return false;
-}
-
-static pn::array pn_str(const StringList& str_list) {
-    pn::array a;
-    for (pn::string_view s : str_list.strings) {
-        a.push_back(s.copy());
-    }
-    return a;
-}
-
-bool convert_str(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
-    Options    options;
-    StringList list(data, options);
-    pn::dump(out, pn::value{pn_str(list)});
-    return true;
-}
-
-bool convert_text(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
-    Options options;
-    out.write(options.decode(data));
-    return true;
-}
-
 bool convert_snd(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
     Sound snd(data);
     out.write(aiff(snd));
     return true;
 }
 
-void convert_frame(pn::string_view dir, int16_t id, pn::data_view data, PixMap::View pix) {
-    auto width  = pix.size().width;
-    auto height = pix.size().height;
-
-    pix.fill(RgbColor::clear());
-    size_t i = 0;
-    for (auto y : range(height)) {
-        for (auto x : range(width)) {
-            uint8_t byte = data[i++];
-            if (byte) {
-                pix.set(x, y, RgbColor::at(byte));
-            }
-        }
-    }
-}
-
-void convert_overlay(pn::string_view dir, int16_t id, pn::data_view data, PixMap::View pix) {
-    auto width  = pix.size().width;
-    auto height = pix.size().height;
-
-    int white_count = 0;
-    int pixel_count = 0;
-    for (auto b : data) {
-        if (b) {
-            ++pixel_count;
-            if (b < 0x10) {
-                ++white_count;
-            }
-        }
-    }
-
-    // If more than 1/3 of the opaque pixels in the frame are in the
-    // 'white' band of the color table, then colorize all opaque
-    // (non-0x00) pixels.  Otherwise, only colors pixels which are
-    // opaque and outside of the white band (0x01..0x0F).
-    int           i          = 0;
-    const uint8_t color_mask = (white_count > (pixel_count / 3)) ? 0xFF : 0xF0;
-    for (auto y : range(height)) {
-        for (auto x : range(width)) {
-            uint8_t byte = data[i++];
-            if (byte & color_mask) {
-                byte          = (byte & 0x0f) | 0x10;
-                uint8_t value = RgbColor::at(byte).red;
-                pix.set(x, y, rgb(value, 0, 0));
-            } else {
-                pix.set(x, y, RgbColor::clear());
-            }
-        }
-    }
-}
-
-static pn::map pn_rect(const Rect& r) {
-    pn::map x;
-    x["left"]   = r.left;
-    x["top"]    = r.top;
-    x["right"]  = r.right;
-    x["bottom"] = r.bottom;
-    return x;
-}
-
-static pn::map pn_point(const Point& p) {
-    pn::map x;
-    x["x"] = p.h;
-    x["y"] = p.v;
-    return x;
-}
-
-void alphatize(ArrayPixMap& image) {
-    // Find the brightest pixel in the image.
-    using std::max;
-    uint8_t brightest = 0;
-    for (int y : range(image.size().height)) {
-        for (int x : range(image.size().width)) {
-            auto p    = image.get(x, y);
-            brightest = max(max(brightest, p.red), max(p.green, p.blue));
-        }
-    }
-
-    if (!brightest) {
-        return;
-    }
-
-    for (int y : range(image.size().height)) {
-        for (int x : range(image.size().width)) {
-            auto p = image.get(x, y);
-            if (p.alpha) {
-                // Brightest pixel has alpha of 255.
-                p.alpha = max(max(p.red, p.green), p.blue);
-                p.alpha = (p.alpha * 255) / brightest;
-                if (p.alpha) {
-                    // Un-premultiply alpha.
-                    p.red   = (p.red * 255) / p.alpha;
-                    p.green = (p.green * 255) / p.alpha;
-                    p.blue  = (p.blue * 255) / p.alpha;
-                }
-            }
-            image.set(x, y, p);
-        }
-    }
-}
-
-bool convert_smiv(
-        pn::string_view dir, bool factory, int16_t id, pn::data_view data, pn::file_view out) {
-    pn::file header = data.slice(4).open();
-    uint32_t size;
-    if (!header.read(&size)) {
-        return false;
-    }
-    vector<uint32_t> offsets;
-    vector<Rect>     bounds;
-
-    pn::array frames;
-    for (auto i : range(size)) {
-        static_cast<void>(i);
-        uint32_t offset;
-        if (!header.read(&offset)) {
-            return false;
-        }
-        pn::file frame_data = data.slice(offset).open();
-        uint16_t width, height;
-        int16_t  x_offset, y_offset;
-        if (!frame_data.read(&width, &height, &x_offset, &y_offset)) {
-            return false;
-        }
-        offsets.push_back(offset);
-        bounds.emplace_back(Point(-x_offset, -y_offset), Size(width, height));
-
-        frames.push_back(pn_rect(bounds.back()));
-    }
-
-    Rect max_bounds = bounds[0];
-    for (const auto& rect : bounds) {
-        max_bounds.left   = std::min(max_bounds.left, rect.left);
-        max_bounds.top    = std::min(max_bounds.top, rect.top);
-        max_bounds.right  = std::max(max_bounds.right, rect.right);
-        max_bounds.bottom = std::max(max_bounds.bottom, rect.bottom);
-    }
-
-    // Do our best to find a square layout of all the frames.  In the
-    // event of a prime number of frames, we'll end up with one row and
-    // many columns.
-    int rows = sqrt(size);
-    int cols = size;
-    while (rows > 1) {
-        if ((size % rows) == 0) {
-            cols = size / rows;
-            break;
-        } else {
-            --rows;
-        }
-    }
-
-    ArrayPixMap image(max_bounds.width() * cols, max_bounds.height() * rows);
-    ArrayPixMap overlay(max_bounds.width() * cols, max_bounds.height() * rows);
-    image.fill(RgbColor::clear());
-    overlay.fill(RgbColor::clear());
-    for (auto i : range(size)) {
-        int col = i % cols;
-        int row = i / cols;
-
-        pn::map       frame;
-        pn::data_view frame_data = data.slice(offsets[i]);
-        frame_data.shift(8);
-        Rect r = bounds[i];
-        r.offset(max_bounds.width() * col, max_bounds.height() * row);
-        r.offset(-max_bounds.left, -max_bounds.top);
-
-        convert_frame(dir, id, frame_data.slice(0, r.area()), image.view(r));
-        convert_overlay(dir, id, frame_data.slice(0, r.area()), overlay.view(r));
-    }
-
-    set<int> alpha_sprites = {
-            504, 516, 517, 519, 522, 526, 541, 547, 548, 554, 557, 558, 580, 581,
-            584, 589, 598, 605, 606, 611, 613, 614, 620, 645, 653, 655, 656,
-    };
-    if (factory && (alpha_sprites.find(id) != alpha_sprites.end())) {
-        alphatize(image);
-    }
-
-    pn::string sprite_dir = pn::format("{0}/{1}", dir, id);
-    makedirs(sprite_dir, 0755);
-
-    {
-        pn::file file = pn::open(pn::format("{0}/{1}/image.png", dir, id), "w");
-        image.encode(file);
-    }
-
-    {
-        pn::file file = pn::open(pn::format("{0}/{1}/overlay.png", dir, id), "w");
-        overlay.encode(file);
-    }
-
-    pn::dump(
-            out, pn::map{{"image", pn::format("sprites/{0}/image.png", id)},
-                         {"overlay", pn::format("sprites/{0}/overlay.png", id)},
-                         {"rows", rows},
-                         {"cols", cols},
-                         {"center", pn_point(Point(-max_bounds.left, -max_bounds.top))},
-                         {"frames", std::move(frames)}});
-    return true;
-}
-
-struct ResourceFile {
-    const char* path;
-    struct ExtractedResource {
-        const char* resource;
-        const char* output_directory;
-        const char* output_extension;
-        bool (*convert)(
-                pn::string_view dir, bool factory, int16_t id, pn::data_view data,
-                pn::file_view out);
-        int16_t id;
-    } resources[16];
-};
-
-static const ResourceFile::ExtractedResource kPluginFiles[] = {
-        {"PICT", "pictures", "png", convert_pict},
-        {"SMIV", "sprites", "pn", convert_smiv},
-        {"STR#", "strings", "pn", convert_str},
-        {"TEXT", "text", "txt", convert_text},
-        {"bsob", "objects", "bin", verbatim, 500},
-        {"nlAG", "info", "pn", convert_nlag, 128},
-        {"obac", "actions", "bin", verbatim, 500},
-        {"race", "races", "bin", verbatim, 500},
-        {"snbf", "scenario-briefings", "bin", verbatim, 500},
-        {"sncd", "scenario-conditions", "bin", verbatim, 500},
-        {"snd ", "sounds", "aiff", convert_snd},
-        {"snit", "scenario-initials", "bin", verbatim, 500},
-        {"snro", "scenarios", "bin", verbatim, 500},
-};
-
 static const char kDownloadBase[] = "http://downloads.arescentral.org";
 static const char kVersion[]      = "19\n";
 
-static const char kPluginVersionFile[]    = "data/version";
-static const char kPluginVersion[]        = "1\n";
-static const char kPluginIdentifierFile[] = "data/identifier";
+static const char kPluginVersionFile[]    = "version";
+static const char kPluginIdentifierFile[] = "identifier";
 
 void check_version(ZipArchive& archive, pn::string_view expected) {
     ZipFileReader version_file(archive, kPluginVersionFile);
@@ -461,7 +131,7 @@ void DataExtractor::set_plugin_file(pn::string_view path) {
         // Make sure that the provided file is actually an archive that
         // will be usable as a plugin, then get its identifier.
         ZipArchive archive(path, 0);
-        check_version(archive, kPluginVersion);
+        check_version(archive, kVersion);
         read_identifier(archive, found_scenario);
     }
 
@@ -613,71 +283,21 @@ void DataExtractor::extract_plugin(Observer* observer) const {
     rezin::Options options;
     options.line_ending = rezin::Options::CR;
 
-    check_version(archive, kPluginVersion);
+    check_version(archive, kVersion);
     check_identifier(archive, _scenario);
 
     for (size_t i : range(archive.size())) {
         ZipFileReader   file(archive, i);
-        pn::string_view path = file.path();
+        pn::string_view in_path = file.path();
 
-        // Skip directories and special files.
-        if ((path.rfind("/") == (path.size() - 1)) || (path == kPluginIdentifierFile) ||
-            (path == kPluginVersionFile)) {
+        // Skip directories and identifier file.
+        if ((in_path.rfind("/") == (in_path.size() - 1)) || (in_path == kPluginIdentifierFile)) {
             continue;
         }
 
-        // Parse path into "data/$TYPE/$ID etc.".
-        pn::string_view data;
-        pn::string_view resource_type_slice;
-        pn::string_view id_slice;
-        int64_t         id;
-        if (!pn::partition(data, "/", path) || (data != "data") ||
-            !pn::partition(resource_type_slice, "/", path) ||
-            !pn::partition(id_slice, " ", path) || !pn::strtoll(id_slice, &id, nullptr) ||
-            (path.find(pn::rune{'/'}) != path.npos)) {
-            throw std::runtime_error(
-                    pn::format("bad plugin file {0}", pn::dump(file.path(), pn::dump_short))
-                            .c_str());
-        }
-
-        pn::string resource_type(resource_type_slice.copy());
-        while (std::distance(resource_type.begin(), resource_type.end()) != 4) {
-            resource_type += pn::rune{' '};
-        }
-
-        for (const ResourceFile::ExtractedResource& conversion : kPluginFiles) {
-            if (conversion.resource != resource_type) {
-                continue;
-            }
-            pn::string output_path;
-            if (conversion.id) {
-                if (id != conversion.id) {
-                    continue;
-                }
-                output_path = pn::format(
-                        "{0}/{1}/{2}.{3}", _output_dir, _scenario, conversion.output_directory,
-                        conversion.output_extension);
-            } else {
-                output_path = pn::format(
-                        "{0}/{1}/{2}/{3}.{4}", _output_dir, _scenario, conversion.output_directory,
-                        id, conversion.output_extension);
-            }
-
-            pn::data data;
-            if (conversion.convert(
-                        path::dirname(output_path), false, id, file.data(), data.open("w"))) {
-                makedirs(path::dirname(output_path), 0755);
-                pn::file file = pn::open(output_path, "w");
-                file.write(data);
-            }
-            goto next;
-        }
-
-        throw std::runtime_error(
-                pn::format("unknown resource type {0}", pn::dump(resource_type, pn::dump_short))
-                        .c_str());
-
-    next:;  // labeled continue.
+        pn::string output_path = pn::format("{0}/{1}/{2}", _output_dir, _scenario, in_path);
+        makedirs(path::dirname(output_path), 0755);
+        pn::open(output_path, "w").write(file.data()).check();
     }
 }
 
