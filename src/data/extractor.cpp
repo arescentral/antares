@@ -25,7 +25,6 @@
 #include <pn/file>
 #include <pn/string>
 #include <rezin/rezin.hpp>
-#include <set>
 #include <sfz/sfz.hpp>
 #include <zipxx/zipxx.hpp>
 
@@ -40,19 +39,12 @@ using rezin::Options;
 using rezin::ResourceEntry;
 using rezin::ResourceFork;
 using rezin::ResourceType;
-using rezin::Sound;
 using rezin::StringList;
-using rezin::aiff;
-using sfz::StringMap;
-using sfz::dec;
 using sfz::makedirs;
 using sfz::mapped_file;
 using sfz::range;
 using sfz::rmtree;
 using sfz::sha1;
-using std::set;
-using std::unique_ptr;
-using std::vector;
 using zipxx::ZipArchive;
 using zipxx::ZipFileReader;
 
@@ -62,16 +54,108 @@ namespace antares {
 
 namespace {
 
-const char kAresSounds[]      = "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Sounds";
-const int  kNonFreeSoundIDs[] = {
-        502, 504, 505, 506, 507, 508, 509, 513, 514,  515,  516,   530,   531,   532,   535,
-        536, 540, 548, 550, 552, 553, 562, 571, 2000, 2001, 12558, 17406, 28007, 31989,
+const char kAresSounds[] = "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Sounds";
+
+struct SoundInfo {
+    int          id;
+    int          snd_format;   // 1 = 42-byte header; 2 = 36-byte header
+    double       sample_rate;  // encoded float80
+    char         name[6];
+    sha1::digest digest;
 };
 
-bool convert_snd(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
-    Sound snd(data);
-    out.write(aiff(snd));
-    return true;
+const SoundInfo kNonFreeSounds[] = {
+        {502, 2, 22050, "502", {0x29de6afe, 0xaf09ba9b, 0xa321e2df, 0x058efe4a, 0x7a104604}},
+        {504, 1, 22050, "504", {0xeb62526b, 0x413ccc64, 0xa3c40b1c, 0xd9eaab44, 0x7dacffd4}},
+        {505, 1, 22050, "505", {0x870a0c2a, 0xcd29683b, 0xba5684c4, 0x04828cb8, 0x026eb7b7}},
+        {506, 1, 22050, "506", {0x7160680b, 0xda68a321, 0xd4ab8045, 0x77a239ed, 0xab11484a}},
+        {507, 1, 22050, "507", {0x664d3624, 0x98828500, 0x0f9e91ff, 0x8ef13c90, 0x9355253e}},
+        {508, 1, 22050, "508", {0x758b84ce, 0xd7f57c82, 0xedbdb831, 0xdc7fb4a2, 0xb10473fc}},
+        {509, 1, 22050, "509", {0x7d33dc2c, 0x72168237, 0xec66bd18, 0x04597cb2, 0xf854ee18}},
+        {513, 1, 11025, "513", {0x5bae5076, 0xbcacff7e, 0x48f4876a, 0x4b6800ab, 0xc6079a72}},
+        {514, 1, 22050, "514", {0xfb2d4ce9, 0x03098593, 0x96f7af06, 0x8b7639ed, 0xb1f362da}},
+        {515, 2, 11025, "515", {0x70b1fb3e, 0x8251a6f2, 0xdfebcf0a, 0xdaa5a316, 0x45b2d329}},
+        {516, 1, 11025, "516", {0xaf1e0119, 0x73b6433a, 0xc154d3a0, 0x59dab9ea, 0xfb74fe10}},
+        {530, 1, 22050, "530", {0x90c38cfc, 0x1965c1c7, 0x936729a9, 0x1fe76215, 0xdd7a0f3c}},
+        {531, 1, 22050, "531", {0x8463f15d, 0x3be17c70, 0xce209796, 0xb69c95ef, 0x4b6f4f23}},
+        {532, 1, 22050, "532", {0xb6dad1e2, 0x249c1bbe, 0x467c0be3, 0x3b26ecd9, 0x11e7216e}},
+        {535, 1, 22050, "535", {0x72a8e5c7, 0xb5db2587, 0x19ca8927, 0x940f57d9, 0x38955afd}},
+        {536, 1, 22050, "536", {0x2bd9ded2, 0xd03f682c, 0x8a8e37ae, 0xdbd12d66, 0xef2229d8}},
+        {540, 1, 22050, "540", {0xe7dbe00e, 0x2dcab111, 0x133bf193, 0xd63c5744, 0xbb85b0c1}},
+        {548, 1, 11025, "548", {0x1479096a, 0xb0f32be0, 0x3998af62, 0x5b5d9a53, 0x525a5858}},
+        {550, 1, 22050, "550", {0xb439f0d6, 0xe32c0a86, 0xab49b700, 0xd592083c, 0xf0667114}},
+        {552, 1, 22050, "552", {0x4d37321a, 0x3503b96d, 0x1540adf6, 0xb33c1c36, 0xc15af67d}},
+        {553, 1, 22050, "553", {0x812ea3f1, 0xe73ae797, 0xe5141ce1, 0xede5dd36, 0xeb62f862}},
+        {562, 1, 11025, "562", {0x0246bf0f, 0x12c38a6c, 0xf1ad2662, 0x8dffa3c5, 0x41c7bc6a}},
+        {571, 1, 22050, "571", {0x88d47d4d, 0x759b3084, 0x0259bb8d, 0xc3169b82, 0x354b5f30}},
+        {2000, 1, 22050, "2000", {0xabbc1783, 0x08a92270, 0xfbaeebcc, 0xe3c73ae5, 0xf6f44979}},
+        {2001, 1, 11025, "2001", {0x7a9db74e, 0xc4f1602c, 0x8a9a509d, 0xe9af8711, 0xdbe28c07}},
+        {12558, 1, 11025, "12558", {0xa79d0450, 0xc19b91f0, 0x5ca71911, 0x16b01e65, 0xc2594f6b}},
+        {17406, 1, 22050, "17406", {0xd72524cd, 0x1dbc1c26, 0x37655ed9, 0x8e76aead, 0xde4dce91}},
+        {28007, 1, 22050, "28007", {0x7c430c15, 0xd3899d1b, 0x0b7ce3a4, 0x8cc0fc7d, 0x8d73e59c}},
+        {31989, 1, 22050, "31989", {0xa7aa6c8f, 0xe3147850, 0x374beda8, 0x45630aa2, 0xd0d8f9d7}},
+};
+
+// Write `d` as an IEEE 754 80-bit floating point (extended precision) number.
+//
+// Not verified for special values (positive and negative zero and infinity, NaN) correctly,
+// because those aren't valid sample rates, and that's the reason this function was written.
+//
+// @param [out] out     The pn::file_view to write the value to.
+// @param [in] d        A double-precision floating point value.
+pn::file_view write_float80(pn::file_view out, double d) {
+    // Reinterpret `d` as uint64_t, since we will be manupulating bits.
+    uint64_t sample_rate_bits;
+    memcpy(&sample_rate_bits, &d, sizeof(uint64_t));
+
+    // Deconstruct the double:
+    //   * the sign, 1 bit.
+    //   * the exponent, 11 bits with a bias of 1023.
+    //   * the fraction, 52 bits, with an implicit '1' bit preceding.
+    uint64_t sign     = sample_rate_bits >> 63;
+    uint64_t exponent = ((sample_rate_bits >> 52) & ((1 << 11) - 1)) - 1023;
+    uint64_t fraction = (1ull << 52) | (sample_rate_bits & ((1ull << 52) - 1));
+
+    // Reconstruct the 80-bit float:
+    //   * the sign, 1 bit.
+    //   * the exponent, 15 bits with a bias of 16383.
+    //   * the fraction, 64 bits, with no implicit '1' bit.
+    return out.write<uint16_t, uint64_t>(
+            (sign << 15) | ((exponent + 16383) & 0x7FFF), fraction << 11);
+}
+
+pn::data convert_snd(const SoundInfo& info, pn::data_view data) {
+    pn::data samples;
+    if (info.snd_format == 1) {
+        samples = data.slice(42).copy();
+    } else {
+        samples = data.slice(36).copy();
+    }
+    for (int i = 0; i < samples.size(); ++i) {
+        samples[i] ^= 0x80;
+    }
+
+    static const pn::string_view form = "FORM";
+    static const pn::string_view aiff = "AIFF";
+    static const pn::string_view comm = "COMM";
+    static const pn::string_view ssnd = "SSND";
+
+    uint16_t channels    = 1;
+    uint32_t data_size   = samples.size();
+    uint32_t ssnd_size   = data_size + 8;
+    uint32_t form_size   = data_size + 46;
+    uint32_t comm_size   = 18;
+    uint64_t zeros       = 0;
+    uint16_t sample_size = 8;
+    pn::data sample_rate;
+    write_float80(sample_rate.open("w"), info.sample_rate).check();
+
+    pn::data out;
+    pn::file f = out.open("w").check();
+    f.write(form, form_size, aiff, comm, comm_size, channels, data_size, sample_size, sample_rate,
+            ssnd, ssnd_size, zeros, samples)
+            .check();
+    return out;
 }
 
 static const char kDownloadBase[] = "http://downloads.arescentral.org";
@@ -261,15 +345,20 @@ void DataExtractor::extract_original(Observer* observer, pn::string_view file) c
     ResourceFork        rsrc(apple_double.at(AppleDouble::RESOURCE_FORK), options);
     const ResourceType& snd = rsrc.at("snd ");
 
-    for (int id : kNonFreeSoundIDs) {
-        pn::data   data;
-        pn::string output = pn::format(
-                "{0}/{1}/sounds/{2}.{3}", _output_dir, kFactoryScenarioIdentifier, id, "aiff");
-        if (convert_snd(path::dirname(output), true, id, snd.at(id).data(), data.open("w"))) {
-            makedirs(path::dirname(output), 0755);
-            pn::file file = pn::open(output, "w");
-            file.write(data);
+    for (const SoundInfo& info : kNonFreeSounds) {
+        pn::data data = convert_snd(info, snd.at(info.id).data());
+
+        sha1 sha;
+        sha.write(data);
+        if (sha.compute() != info.digest) {
+            throw std::runtime_error(pn::format("sound {0}: digest mismatch", info.name).c_str());
         }
+
+        pn::string output = pn::format(
+                "{0}/{1}/sounds/{2}.aiff", _output_dir, kFactoryScenarioIdentifier, info.name);
+        makedirs(path::dirname(output), 0755);
+        pn::file file = pn::open(output, "w");
+        file.write(data);
     }
 }
 
