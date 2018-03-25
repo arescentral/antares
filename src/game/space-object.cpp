@@ -54,9 +54,9 @@ using std::unique_ptr;
 
 namespace antares {
 
-const Hue kFriendlyColor = Hue::GREEN;
-const Hue kHostileColor  = Hue::RED;
-const Hue kNeutralColor  = Hue::SKY_BLUE;
+const Hue kFriendlyColor               = Hue::GREEN;
+const Hue kHostileColor[kMaxPlayerNum] = {Hue::PINK, Hue::RED, Hue::YELLOW, Hue::ORANGE};
+const Hue kNeutralColor                = Hue::SKY_BLUE;
 
 const Fixed kDefaultTurnRate = Fixed::from_long(2.000);
 
@@ -115,6 +115,25 @@ static Handle<SpaceObject> next_free_space_object() {
     return SpaceObject::none();
 }
 
+static uint8_t get_tiny_shade(const SpaceObject& o) {
+    switch (o.layer) {
+        case kFirstSpriteLayer: return MEDIUM; break;
+        case kMiddleSpriteLayer: return LIGHT; break;
+        case kLastSpriteLayer: return VERY_LIGHT; break;
+    }
+    return DARK;
+}
+
+static Hue get_tiny_color(const SpaceObject& o) {
+    if (o.owner == g.admiral) {
+        return kFriendlyColor;
+    } else if (o.owner.get()) {
+        return kHostileColor[o.owner.number()];
+    } else {
+        return kNeutralColor;
+    }
+}
+
 static Handle<SpaceObject> AddSpaceObject(SpaceObject* sourceObject) {
     auto obj = next_free_space_object();
     if (!obj.get()) {
@@ -146,28 +165,6 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject* sourceObject) {
 
     obj->sprite = Sprite::none();
     if (spriteTable) {
-        uint8_t tinyShade;
-        switch (obj->layer) {
-            case kFirstSpriteLayer: tinyShade = MEDIUM; break;
-
-            case kMiddleSpriteLayer: tinyShade = LIGHT; break;
-
-            case kLastSpriteLayer: tinyShade = VERY_LIGHT; break;
-
-            default: tinyShade = DARK; break;
-        }
-
-        RgbColor tinyColor;
-        if (obj->icon.size == 0) {
-            tinyColor = RgbColor::clear();
-        } else if (obj->owner == g.admiral) {
-            tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
-        } else if (obj->owner.get()) {
-            tinyColor = GetRGBTranslateColorShade(kHostileColor, tinyShade);
-        } else {
-            tinyColor = GetRGBTranslateColorShade(kNeutralColor, tinyShade);
-        }
-
         int16_t whichShape = 0;
         int16_t angle;
         if (obj->attributes & kIsSelfAnimated) {
@@ -180,8 +177,8 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject* sourceObject) {
 
         obj->sprite = AddSprite(
                 where, spriteTable, sourceObject->pix_id->name, sourceObject->pix_id->hue,
-                whichShape, obj->naturalScale, obj->icon, obj->layer, tinyColor);
-        obj->tinyColor = tinyColor;
+                whichShape, obj->naturalScale, obj->icon, obj->layer, get_tiny_color(*obj),
+                get_tiny_shade(*obj));
 
         if (!obj->sprite.get()) {
             g.game_over    = true;
@@ -649,23 +646,7 @@ void SpaceObject::set_owner(Handle<Admiral> new_owner, bool message) {
     }
 
     if (object->sprite.get()) {
-        uint8_t tinyShade;
-        switch (object->sprite->whichLayer) {
-            case kFirstSpriteLayer: tinyShade = MEDIUM; break;
-            case kMiddleSpriteLayer: tinyShade = LIGHT; break;
-            case kLastSpriteLayer: tinyShade = VERY_LIGHT; break;
-            default: tinyShade = DARK; break;
-        }
-
-        RgbColor tinyColor;
-        if (new_owner == g.admiral) {
-            tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
-        } else if (new_owner.get()) {
-            tinyColor = GetRGBTranslateColorShade(kHostileColor, tinyShade);
-        } else {
-            tinyColor = GetRGBTranslateColorShade(kNeutralColor, tinyShade);
-        }
-        object->tinyColor = object->sprite->tinyColor = tinyColor;
+        object->sprite->tinyColor.hue = get_tiny_color(*object);
 
         if (object->attributes & kCanThink) {
             NatePixTable* pixTable;

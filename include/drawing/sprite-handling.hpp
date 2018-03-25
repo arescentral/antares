@@ -70,9 +70,12 @@ class Sprite {
     RgbColor        styleColor;
     int16_t         styleData;
     int16_t         whichLayer;
-    RgbColor        tinyColor;
-    bool            killMe;
-    draw_tiny_t     draw_tiny;
+    struct {
+        Hue     hue;
+        uint8_t shade;
+    } tinyColor;
+    bool        killMe;
+    draw_tiny_t draw_tiny;
 
     BaseObject::Icon icon;
 
@@ -109,7 +112,7 @@ void           ResetAllSprites();
 Rect           scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t scale);
 Handle<Sprite> AddSprite(
         Point where, NatePixTable* table, pn::string_view name, Hue hue, int16_t whichShape,
-        int32_t scale, BaseObject::Icon icon, int16_t layer, const RgbColor& color);
+        int32_t scale, BaseObject::Icon icon, int16_t layer, Hue tiny_hue, uint8_t tiny_shade);
 void RemoveSprite(Handle<Sprite> sprite);
 void draw_sprites();
 void CullSprites();

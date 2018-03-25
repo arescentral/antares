@@ -59,10 +59,6 @@ const int32_t kWeaponRatio        = 2;
 const int32_t kEnergyChunk        = kHealthRatio + (kWeaponRatio * 3);
 const int32_t kWarpInEnergyFactor = 3;
 
-const Hue kFriendlyColor = Hue::GREEN;
-const Hue kHostileColor  = Hue::RED;
-const Hue kNeutralColor  = Hue::SKY_BLUE;
-
 uint32_t ThinkObjectNormalPresence(Handle<SpaceObject> anObject, const BaseObject* baseObject);
 uint32_t ThinkObjectWarpingPresence(Handle<SpaceObject> anObject);
 uint32_t ThinkObjectWarpInPresence(Handle<SpaceObject> anObject);
@@ -176,28 +172,24 @@ static void tick_special(Handle<SpaceObject> subject, Handle<SpaceObject> target
     tick_weapon(subject, target, kEnterKey, subject->base->special, subject->special);
 }
 
+static uint8_t get_tiny_shade(const SpaceObject& o) {
+    switch (o.layer) {
+        case kFirstSpriteLayer: return MEDIUM; break;
+        case kMiddleSpriteLayer: return LIGHT; break;
+        case kLastSpriteLayer: return VERY_LIGHT; break;
+    }
+    return DARK;
+}
+
 void NonplayerShipThink() {
-    RgbColor friendSick, foeSick, neutralSick;
+    uint8_t friendSick, foeSick, neutralSick;
     switch ((std::chrono::time_point_cast<ticks>(g.time).time_since_epoch().count() / 9) % 4) {
-        case 0:
-            friendSick  = GetRGBTranslateColorShade(kFriendlyColor, MEDIUM);
-            foeSick     = GetRGBTranslateColorShade(kHostileColor, MEDIUM);
-            neutralSick = GetRGBTranslateColorShade(kNeutralColor, MEDIUM);
-            break;
-        case 1:
-            friendSick  = GetRGBTranslateColorShade(kFriendlyColor, DARK);
-            foeSick     = GetRGBTranslateColorShade(kHostileColor, DARK);
-            neutralSick = GetRGBTranslateColorShade(kNeutralColor, DARK);
-            break;
-        case 2:
-            friendSick  = GetRGBTranslateColorShade(kFriendlyColor, DARKER);
-            foeSick     = GetRGBTranslateColorShade(kHostileColor, DARKER);
-            neutralSick = GetRGBTranslateColorShade(kNeutralColor, DARKER);
-            break;
+        case 0: friendSick = foeSick = neutralSick = MEDIUM; break;
+        case 1: friendSick = foeSick = neutralSick = DARK; break;
+        case 2: friendSick = foeSick = neutralSick = DARKER; break;
         case 3:
-            friendSick  = GetRGBTranslateColorShade(kFriendlyColor, DARKEST);
-            foeSick     = GetRGBTranslateColorShade(kHostileColor, DARKER - 1);
-            neutralSick = GetRGBTranslateColorShade(kNeutralColor, DARKEST);
+            friendSick = neutralSick = DARKEST;
+            foeSick                  = DARKER - 1;
             break;
     }
 
@@ -221,14 +213,14 @@ void NonplayerShipThink() {
             if ((anObject->health() > 0) &&
                 (anObject->health() <= (anObject->max_health() >> 2))) {
                 if (anObject->owner == g.admiral) {
-                    anObject->sprite->tinyColor = friendSick;
+                    anObject->sprite->tinyColor.shade = friendSick;
                 } else if (anObject->owner.get()) {
-                    anObject->sprite->tinyColor = foeSick;
+                    anObject->sprite->tinyColor.shade = foeSick;
                 } else {
-                    anObject->sprite->tinyColor = neutralSick;
+                    anObject->sprite->tinyColor.shade = neutralSick;
                 }
             } else {
-                anObject->sprite->tinyColor = anObject->tinyColor;
+                anObject->sprite->tinyColor.shade = get_tiny_shade(*anObject);
             }
         }
 
