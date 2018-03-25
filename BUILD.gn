@@ -143,7 +143,6 @@ source_set("libantares-data") {
     "//ext/libsfz",
     "//ext/libzipxx",
     "//ext/procyon:procyon-cpp",
-    "//ext/rezin:librezin",
   ]
   configs += [ ":antares_private" ]
 }

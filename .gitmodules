@@ -7,9 +7,6 @@
 [submodule "ext/libzipxx"]
 	path = ext/libzipxx
 	url = https://github.com/sfiera/libzipxx.git
-[submodule "ext/rezin"]
-	path = ext/rezin
-	url = https://github.com/sfiera/rezin.git
 [submodule "ext/gmock-gyp"]
 	path = ext/gmock
 	url = https://github.com/sfiera/gmock-gyp.git

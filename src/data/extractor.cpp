@@ -24,7 +24,6 @@
 #include <pn/array>
 #include <pn/file>
 #include <pn/string>
-#include <rezin/rezin.hpp>
 #include <sfz/sfz.hpp>
 #include <zipxx/zipxx.hpp>
 
@@ -34,12 +33,6 @@
 #include "math/geometry.hpp"
 #include "net/http.hpp"
 
-using rezin::AppleDouble;
-using rezin::Options;
-using rezin::ResourceEntry;
-using rezin::ResourceFork;
-using rezin::ResourceType;
-using rezin::StringList;
 using sfz::makedirs;
 using sfz::mapped_file;
 using sfz::range;
@@ -57,43 +50,104 @@ namespace {
 const char kAresSounds[] = "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Sounds";
 
 struct SoundInfo {
-    int          id;
-    int          snd_format;   // 1 = 42-byte header; 2 = 36-byte header
-    double       sample_rate;  // encoded float80
-    char         name[6];
+    char name[6];
+    struct {
+        int     id;
+        double  sample_rate;
+        int64_t offset;
+        int64_t size;
+    } input;
     sha1::digest digest;
 };
 
 const SoundInfo kNonFreeSounds[] = {
-        {502, 2, 22050, "502", {0x29de6afe, 0xaf09ba9b, 0xa321e2df, 0x058efe4a, 0x7a104604}},
-        {504, 1, 22050, "504", {0xeb62526b, 0x413ccc64, 0xa3c40b1c, 0xd9eaab44, 0x7dacffd4}},
-        {505, 1, 22050, "505", {0x870a0c2a, 0xcd29683b, 0xba5684c4, 0x04828cb8, 0x026eb7b7}},
-        {506, 1, 22050, "506", {0x7160680b, 0xda68a321, 0xd4ab8045, 0x77a239ed, 0xab11484a}},
-        {507, 1, 22050, "507", {0x664d3624, 0x98828500, 0x0f9e91ff, 0x8ef13c90, 0x9355253e}},
-        {508, 1, 22050, "508", {0x758b84ce, 0xd7f57c82, 0xedbdb831, 0xdc7fb4a2, 0xb10473fc}},
-        {509, 1, 22050, "509", {0x7d33dc2c, 0x72168237, 0xec66bd18, 0x04597cb2, 0xf854ee18}},
-        {513, 1, 11025, "513", {0x5bae5076, 0xbcacff7e, 0x48f4876a, 0x4b6800ab, 0xc6079a72}},
-        {514, 1, 22050, "514", {0xfb2d4ce9, 0x03098593, 0x96f7af06, 0x8b7639ed, 0xb1f362da}},
-        {515, 2, 11025, "515", {0x70b1fb3e, 0x8251a6f2, 0xdfebcf0a, 0xdaa5a316, 0x45b2d329}},
-        {516, 1, 11025, "516", {0xaf1e0119, 0x73b6433a, 0xc154d3a0, 0x59dab9ea, 0xfb74fe10}},
-        {530, 1, 22050, "530", {0x90c38cfc, 0x1965c1c7, 0x936729a9, 0x1fe76215, 0xdd7a0f3c}},
-        {531, 1, 22050, "531", {0x8463f15d, 0x3be17c70, 0xce209796, 0xb69c95ef, 0x4b6f4f23}},
-        {532, 1, 22050, "532", {0xb6dad1e2, 0x249c1bbe, 0x467c0be3, 0x3b26ecd9, 0x11e7216e}},
-        {535, 1, 22050, "535", {0x72a8e5c7, 0xb5db2587, 0x19ca8927, 0x940f57d9, 0x38955afd}},
-        {536, 1, 22050, "536", {0x2bd9ded2, 0xd03f682c, 0x8a8e37ae, 0xdbd12d66, 0xef2229d8}},
-        {540, 1, 22050, "540", {0xe7dbe00e, 0x2dcab111, 0x133bf193, 0xd63c5744, 0xbb85b0c1}},
-        {548, 1, 11025, "548", {0x1479096a, 0xb0f32be0, 0x3998af62, 0x5b5d9a53, 0x525a5858}},
-        {550, 1, 22050, "550", {0xb439f0d6, 0xe32c0a86, 0xab49b700, 0xd592083c, 0xf0667114}},
-        {552, 1, 22050, "552", {0x4d37321a, 0x3503b96d, 0x1540adf6, 0xb33c1c36, 0xc15af67d}},
-        {553, 1, 22050, "553", {0x812ea3f1, 0xe73ae797, 0xe5141ce1, 0xede5dd36, 0xeb62f862}},
-        {562, 1, 11025, "562", {0x0246bf0f, 0x12c38a6c, 0xf1ad2662, 0x8dffa3c5, 0x41c7bc6a}},
-        {571, 1, 22050, "571", {0x88d47d4d, 0x759b3084, 0x0259bb8d, 0xc3169b82, 0x354b5f30}},
-        {2000, 1, 22050, "2000", {0xabbc1783, 0x08a92270, 0xfbaeebcc, 0xe3c73ae5, 0xf6f44979}},
-        {2001, 1, 11025, "2001", {0x7a9db74e, 0xc4f1602c, 0x8a9a509d, 0xe9af8711, 0xdbe28c07}},
-        {12558, 1, 11025, "12558", {0xa79d0450, 0xc19b91f0, 0x5ca71911, 0x16b01e65, 0xc2594f6b}},
-        {17406, 1, 22050, "17406", {0xd72524cd, 0x1dbc1c26, 0x37655ed9, 0x8e76aead, 0xde4dce91}},
-        {28007, 1, 22050, "28007", {0x7c430c15, 0xd3899d1b, 0x0b7ce3a4, 0x8cc0fc7d, 0x8d73e59c}},
-        {31989, 1, 22050, "31989", {0xa7aa6c8f, 0xe3147850, 0x374beda8, 0x45630aa2, 0xd0d8f9d7}},
+        {"502",
+         {502, 22050, 959406, 19261},
+         {0x29de6afe, 0xaf09ba9b, 0xa321e2df, 0x058efe4a, 0x7a104604}},
+        {"504",
+         {504, 22050, 384, 6750},
+         {0xeb62526b, 0x413ccc64, 0xa3c40b1c, 0xd9eaab44, 0x7dacffd4}},
+        {"505",
+         {505, 22050, 1321083, 18693},
+         {0x870a0c2a, 0xcd29683b, 0xba5684c4, 0x04828cb8, 0x026eb7b7}},
+        {"506",
+         {506, 22050, 1312482, 8555},
+         {0x7160680b, 0xda68a321, 0xd4ab8045, 0x77a239ed, 0xab11484a}},
+        {"507",
+         {507, 22050, 1339822, 2322},
+         {0x664d3624, 0x98828500, 0x0f9e91ff, 0x8ef13c90, 0x9355253e}},
+        {"508",
+         {508, 22050, 1173417, 3892},
+         {0x758b84ce, 0xd7f57c82, 0xedbdb831, 0xdc7fb4a2, 0xb10473fc}},
+        {"509",
+         {509, 22050, 1194454, 2223},
+         {0x7d33dc2c, 0x72168237, 0xec66bd18, 0x04597cb2, 0xf854ee18}},
+        {"513",
+         {513, 11025, 1351516, 50332},
+         {0x5bae5076, 0xbcacff7e, 0x48f4876a, 0x4b6800ab, 0xc6079a72}},
+        {"514",
+         {514, 22050, 1287398, 6665},
+         {0xfb2d4ce9, 0x03098593, 0x96f7af06, 0x8b7639ed, 0xb1f362da}},
+        {"515",
+         {515, 11025, 1146575, 26796},
+         {0x70b1fb3e, 0x8251a6f2, 0xdfebcf0a, 0xdaa5a316, 0x45b2d329}},
+        {"516",
+         {516, 11025, 1196723, 66678},
+         {0xaf1e0119, 0x73b6433a, 0xc154d3a0, 0x59dab9ea, 0xfb74fe10}},
+        {"530",
+         {530, 22050, 68036, 16128},
+         {0x90c38cfc, 0x1965c1c7, 0x936729a9, 0x1fe76215, 0xdd7a0f3c}},
+        {"531",
+         {531, 22050, 84210, 10553},
+         {0x8463f15d, 0x3be17c70, 0xce209796, 0xb69c95ef, 0x4b6f4f23}},
+        {"532",
+         {532, 22050, 94809, 25268},
+         {0xb6dad1e2, 0x249c1bbe, 0x467c0be3, 0x3b26ecd9, 0x11e7216e}},
+        {"535",
+         {535, 22050, 142420, 1252},
+         {0x72a8e5c7, 0xb5db2587, 0x19ca8927, 0x940f57d9, 0x38955afd}},
+        {"536",
+         {536, 22050, 143718, 15616},
+         {0x2bd9ded2, 0xd03f682c, 0x8a8e37ae, 0xdbd12d66, 0xef2229d8}},
+        {"540",
+         {540, 22050, 726536, 16535},
+         {0xe7dbe00e, 0x2dcab111, 0x133bf193, 0xd63c5744, 0xbb85b0c1}},
+        {"548",
+         {548, 11025, 1428461, 16768},
+         {0x1479096a, 0xb0f32be0, 0x3998af62, 0x5b5d9a53, 0x525a5858}},
+        {"550",
+         {550, 22050, 159380, 6470},
+         {0xb439f0d6, 0xe32c0a86, 0xab49b700, 0xd592083c, 0xf0667114}},
+        {"552",
+         {552, 22050, 1524780, 9792},
+         {0x4d37321a, 0x3503b96d, 0x1540adf6, 0xb33c1c36, 0xc15af67d}},
+        {"553",
+         {553, 22050, 1534618, 10176},
+         {0x812ea3f1, 0xe73ae797, 0xe5141ce1, 0xede5dd36, 0xeb62f862}},
+        {"562",
+         {562, 11025, 1621564, 18979},
+         {0x0246bf0f, 0x12c38a6c, 0xf1ad2662, 0x8dffa3c5, 0x41c7bc6a}},
+        {"571",
+         {571, 22050, 2985648, 2730},
+         {0x88d47d4d, 0x759b3084, 0x0259bb8d, 0xc3169b82, 0x354b5f30}},
+        {"2000",
+         {2000, 22050, 986014, 100663},
+         {0xabbc1783, 0x08a92270, 0xfbaeebcc, 0xe3c73ae5, 0xf6f44979}},
+        {"2001",
+         {2001, 11025, 1086723, 50332},
+         {0x7a9db74e, 0xc4f1602c, 0x8a9a509d, 0xe9af8711, 0xdbe28c07}},
+        {"12558",
+         {12558, 11025, 1445275, 12160},
+         {0xa79d0450, 0xc19b91f0, 0x5ca71911, 0x16b01e65, 0xc2594f6b}},
+        {"17406",
+         {17406, 22050, 186727, 14880},
+         {0xd72524cd, 0x1dbc1c26, 0x37655ed9, 0x8e76aead, 0xde4dce91}},
+        {"28007",
+         {28007, 22050, 263487, 26624},
+         {0x7c430c15, 0xd3899d1b, 0x0b7ce3a4, 0x8cc0fc7d, 0x8d73e59c}},
+        {"31989",
+         {31989, 22050, 201653, 31360},
+         {0xa7aa6c8f, 0xe3147850, 0x374beda8, 0x45630aa2, 0xd0d8f9d7}},
 };
 
 // Write `d` as an IEEE 754 80-bit floating point (extended precision) number.
@@ -125,12 +179,7 @@ pn::file_view write_float80(pn::file_view out, double d) {
 }
 
 pn::data convert_snd(const SoundInfo& info, pn::data_view data) {
-    pn::data samples;
-    if (info.snd_format == 1) {
-        samples = data.slice(42).copy();
-    } else {
-        samples = data.slice(36).copy();
-    }
+    pn::data samples = data.slice(info.input.offset, info.input.size).copy();
     for (int i = 0; i < samples.size(); ++i) {
         samples[i] ^= 0x80;
     }
@@ -148,7 +197,7 @@ pn::data convert_snd(const SoundInfo& info, pn::data_view data) {
     uint64_t zeros       = 0;
     uint16_t sample_size = 8;
     pn::data sample_rate;
-    write_float80(sample_rate.open("w"), info.sample_rate).check();
+    write_float80(sample_rate.open("w"), info.input.sample_rate).check();
 
     pn::data out;
     pn::file f = out.open("w").check();
@@ -337,16 +386,9 @@ void DataExtractor::extract_original(Observer* observer, pn::string_view file) c
     pn::string full_path = pn::format("{0}/{1}", _downloads_dir, file);
     ZipArchive archive(full_path, 0);
 
-    rezin::Options options;
-    options.line_ending = rezin::Options::CR;
-
-    ZipFileReader       zip(archive, kAresSounds);
-    AppleDouble         apple_double(zip.data());
-    ResourceFork        rsrc(apple_double.at(AppleDouble::RESOURCE_FORK), options);
-    const ResourceType& snd = rsrc.at("snd ");
-
+    ZipFileReader zip(archive, kAresSounds);
     for (const SoundInfo& info : kNonFreeSounds) {
-        pn::data data = convert_snd(info, snd.at(info.id).data());
+        pn::data data = convert_snd(info, zip.data());
 
         sha1 sha;
         sha.write(data);
@@ -368,9 +410,6 @@ void DataExtractor::extract_plugin(Observer* observer) const {
     observer->status(status);
     pn::string full_path = pn::format("{0}/{1}", _downloads_dir, file);
     ZipArchive archive(full_path, 0);
-
-    rezin::Options options;
-    options.line_ending = rezin::Options::CR;
 
     check_version(archive, kVersion);
     check_identifier(archive, _scenario);
