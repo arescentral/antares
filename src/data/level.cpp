@@ -73,27 +73,31 @@ ScenarioInfo scenario_info(pn::value_cref x0) {
 }
 
 static Level::Player required_player(path_value x, LevelType level_type) {
-    if (x.value().is_map()) {
-        Level::Player p;
-        p.earningPower = optional_fixed(x.get("earning_power")).value_or(Fixed::zero());
-        switch (level_type) {
-            case LevelType::DEMO:
-                p.name       = required_string(x.get("name")).copy();
-                p.playerRace = required_race(x.get("race"));
-                break;
-            case LevelType::SOLO:
-                p.playerType = required_player_type(x.get("type"));
-                p.name       = required_string(x.get("name")).copy();
-                p.playerRace = required_race(x.get("race"));
-                break;
-            case LevelType::NET:
-                p.playerType   = required_player_type(x.get("type"));
-                p.netRaceFlags = 0;  // TODO(sfiera): fill
-                break;
-        }
-        return p;
-    } else {
+    if (!x.value().is_map()) {
         throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
+    }
+
+    switch (level_type) {
+        case LevelType::DEMO:
+            return required_struct<Level::Player>(
+                    x, {{"name", {&Level::Player::name, required_string_copy}},
+                        {"race", {&Level::Player::playerRace, required_race}},
+                        {"earning_power",
+                         {&Level::Player::earningPower, optional_fixed, Fixed::zero()}}});
+        case LevelType::SOLO:
+            return required_struct<Level::Player>(
+                    x, {{"type", {&Level::Player::playerType, required_player_type}},
+                        {"name", {&Level::Player::name, required_string_copy}},
+                        {"race", {&Level::Player::playerRace, required_race}},
+                        {"hue", {&Level::Player::hue, optional_hue, Hue::GRAY}},
+                        {"earning_power",
+                         {&Level::Player::earningPower, optional_fixed, Fixed::zero()}}});
+        case LevelType::NET:
+            return required_struct<Level::Player>(
+                    x, {{"type", {&Level::Player::playerType, required_player_type}},
+                        {"earning_power",
+                         {&Level::Player::earningPower, optional_fixed, Fixed::zero()}},
+                        {"races", nullptr}});  // TODO(sfiera): populate field
     }
 }
 

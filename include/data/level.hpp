@@ -136,6 +136,7 @@ struct Level {
         pn::string              name;
         Fixed                   earningPower = Fixed::zero();
         int16_t                 netRaceFlags = 0;
+        Hue                     hue          = Hue::GRAY;
     };
 
     int                     chapter = -1;

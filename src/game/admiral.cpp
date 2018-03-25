@@ -100,6 +100,7 @@ Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Level::Playe
     a->_attributes    = attributes;
     a->_earning_power = player.earningPower;
     a->_race          = player.playerRace.copy();
+    a->_hue           = player.hue;
 
     if (!player.name.empty()) {
         if (pn::rune::count(player.name) > kAdmiralNameLen) {
