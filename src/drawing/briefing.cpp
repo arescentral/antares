@@ -304,7 +304,6 @@ static void render_briefing_with(
         const Renderer& renderer, int32_t maxSize, Rect* bounds, coordPointType* corner,
         int32_t scale) {
     int32_t thisScale, gridWidth, gridHeight, i, j;
-    Hue     color;
     Point   where;
     Rect    clipRect;
     bool*   gridCells = NULL;
@@ -352,14 +351,6 @@ static void render_briefing_with(
                 BriefingSprite_UseLocation(
                         *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
 
-                if (anObject->owner.number() == 0) {
-                    color = Hue::GREEN;
-                } else if (anObject->owner.number() < 0) {
-                    color = Hue::BLUE;
-                } else {
-                    color = Hue::RED;
-                }
-
                 renderer.draw(*frame, where, thisScale, &spriteRect, clipRect);
 
                 rect = spriteRect;
@@ -382,16 +373,13 @@ static void render_briefing_with(
                 BriefingSprite_UseLocation(
                         *frame, thisScale, where, gridCells, gridWidth, gridHeight, bounds);
 
-                if (anObject->owner.number() == 0) {
-                    color = Hue::GREEN;
-                } else if (anObject->owner.number() < 0) {
-                    color = Hue::BLUE;
-                } else {
-                    color = Hue::RED;
+                Hue hue = Hue::BLUE;
+                if (anObject->owner.number() >= 0) {
+                    hue = anObject->sprite->tinyColor.hue;
                 }
 
-                const RgbColor light_color = GetRGBTranslateColorShade(color, LIGHT);
-                const RgbColor dark_color  = GetRGBTranslateColorShade(color, DARK);
+                const RgbColor light_color = GetRGBTranslateColorShade(hue, LIGHT);
+                const RgbColor dark_color  = GetRGBTranslateColorShade(hue, DARK);
 
                 renderer.outline(
                         *frame, where, thisScale, &spriteRect, clipRect, light_color, dark_color);
