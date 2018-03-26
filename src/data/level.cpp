@@ -350,7 +350,13 @@ std::vector<BuildableObject> optional_buildable_object_array(path_value x) {
     if (x.value().is_null()) {
         return {};
     } else if (x.value().is_array()) {
-        pn::array_cref               a = x.value().as_array();
+        pn::array_cref a = x.value().as_array();
+        if (a.size() > kMaxShipCanBuild) {
+            throw std::runtime_error(pn::format(
+                                             "{0}has {1} elements, more than max of {2}",
+                                             x.prefix(), a.size(), kMaxShipCanBuild)
+                                             .c_str());
+        }
         std::vector<BuildableObject> result;
         for (int i = 0; i < a.size(); ++i) {
             result.emplace_back(required_buildable_object(x.get(i)));
@@ -361,54 +367,45 @@ std::vector<BuildableObject> optional_buildable_object_array(path_value x) {
     }
 }
 
+template <typename T>
+static sfz::optional<T> optional_struct(
+        path_value x, const std::map<pn::string_view, field<T>>& fields) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_map()) {
+        return sfz::make_optional(required_struct<T>(x, fields));
+    } else {
+        throw std::runtime_error(pn::format("{0}must be map", x.prefix()).c_str());
+    }
+}
+
+Level::Initial::Override optional_override(path_value x) {
+    return optional_struct<Level::Initial::Override>(
+                   x, {{"name", {&Level::Initial::Override::name, optional_string_copy}},
+                       {"sprite", {&Level::Initial::Override::sprite, optional_string_copy}}})
+            .value_or(Level::Initial::Override{});
+}
+
+Level::Initial::Target optional_target(path_value x) {
+    return optional_struct<Level::Initial::Target>(
+                   x,
+                   {{"initial",
+                     {&Level::Initial::Target::initial, optional_initial, Level::Initial::none()}},
+                    {"lock", {&Level::Initial::Target::lock, optional_bool, false}}})
+            .value_or(Level::Initial::Target{});
+}
+
 static Level::Initial initial(path_value x) {
-    if (!x.value().is_map()) {
-        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
-    }
-
-    Level::Initial i;
-    i.base    = required_buildable_object(x.get("base"));
-    i.owner   = optional_admiral(x.get("owner")).value_or(Handle<Admiral>(-1));
-    i.at      = required_point(x.get("at"));
-    i.earning = optional_fixed(x.get("earning")).value_or(Fixed::zero());
-
-    i.override_.name   = optional_string_copy(x.get("rename"));
-    i.override_.sprite = optional_string_copy(x.get("sprite_override"));
-
-    i.target.initial = optional_initial(x.get("target")).value_or(Level::Initial::none());
-
-    struct InitialAttributes {
-        bool is_player_ship     = false;
-        bool initially_hidden   = false;
-        bool static_destination = false;
-    };
-    InitialAttributes attributes;
-    if (!x.get("attributes").value().is_null()) {
-        attributes = required_struct<InitialAttributes>(
-                x.get("attributes"),
-                {
-                        {"is_player_ship",
-                         {&InitialAttributes::is_player_ship, optional_bool, false}},
-                        {"initially_hidden",
-                         {&InitialAttributes::initially_hidden, optional_bool, false}},
-                        {"static_destination",
-                         {&InitialAttributes::static_destination, optional_bool, false}},
-                        {"fixed_race", nullptr},
-                });
-    }
-    i.flagship    = attributes.is_player_ship;
-    i.hide        = attributes.initially_hidden;
-    i.target.lock = attributes.static_destination;
-
-    i.build = optional_buildable_object_array(x.get("build"));
-    if (i.build.size() > kMaxShipCanBuild) {
-        throw std::runtime_error(pn::format(
-                                         "{0}: has {1} elements, more than max of {2}",
-                                         x.get("build").path(), i.build.size(), kMaxShipCanBuild)
-                                         .c_str());
-    }
-
-    return i;
+    return required_struct<Level::Initial>(
+            x, {{"base", {&Level::Initial::base, required_buildable_object}},
+                {"owner", {&Level::Initial::owner, optional_admiral, Handle<Admiral>(-1)}},
+                {"at", {&Level::Initial::at, required_point}},
+                {"earning", {&Level::Initial::earning, optional_fixed, Fixed::zero()}},
+                {"hide", {&Level::Initial::hide, optional_bool, false}},
+                {"flagship", {&Level::Initial::flagship, optional_bool, false}},
+                {"override", {&Level::Initial::override_, optional_override}},
+                {"target", {&Level::Initial::target, optional_target}},
+                {"build", {&Level::Initial::build, optional_buildable_object_array}}});
 }
 
 static std::vector<Level::Initial> optional_initial_array(path_value x) {
