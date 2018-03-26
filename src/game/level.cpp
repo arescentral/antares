@@ -262,11 +262,11 @@ static void load_initial(Handle<const Level::Initial> initial, std::bitset<16> a
     AddBaseObjectMedia(baseObject, all_colors, Required::YES);
 
     // make sure we're not overriding the sprite
-    if (initial->sprite_override.has_value()) {
+    if (initial->override_.sprite.has_value()) {
         if (baseObject->attributes & kCanThink) {
-            sys.pix.add(*initial->sprite_override, GetAdmiralColor(owner));
+            sys.pix.add(*initial->override_.sprite, GetAdmiralColor(owner));
         } else {
-            sys.pix.add(*initial->sprite_override, Hue::GRAY);
+            sys.pix.add(*initial->override_.sprite, Hue::GRAY);
         }
     }
 
@@ -385,7 +385,7 @@ void GetLevelFullScaleAndCorner(
 
     biggest = 0;
     for (const auto& initial : Level::Initial::all()) {
-        if (!(initial->attributes.initially_hidden())) {
+        if (!initial->hide) {
             GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&coord), g.angle);
 
             for (const auto& other : Level::Initial::all()) {
@@ -411,7 +411,7 @@ void GetLevelFullScaleAndCorner(
     coord.h      = kUniversalCenter;
     coord.v      = kUniversalCenter;
     for (const auto& initial : Level::Initial::all()) {
-        if (!(initial->attributes.initially_hidden())) {
+        if (!initial->hide) {
             GetInitialCoord(initial, reinterpret_cast<coordPointType*>(&tempCoord), g.angle);
 
             if (tempCoord.h < coord.h) {

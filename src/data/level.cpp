@@ -372,12 +372,15 @@ static Level::Initial initial(path_value x) {
     i.at      = required_point(x.get("at"));
     i.earning = optional_fixed(x.get("earning")).value_or(Fixed::zero());
 
-    i.name_override   = optional_string(x.get("rename")).value_or("").copy();
-    i.sprite_override = optional_string_copy(x.get("sprite_override"));
+    i.override_.name   = optional_string_copy(x.get("rename"));
+    i.override_.sprite = optional_string_copy(x.get("sprite_override"));
 
-    i.target = optional_initial(x.get("target")).value_or(Level::Initial::none());
+    i.target.initial = optional_initial(x.get("target")).value_or(Level::Initial::none());
 
-    i.attributes = Level::Initial::Attributes(optional_initial_attributes(x.get("attributes")));
+    auto attributes = Level::Initial::Attributes(optional_initial_attributes(x.get("attributes")));
+    i.flagship      = attributes.is_player_ship();
+    i.hide          = attributes.initially_hidden();
+    i.target.lock   = attributes.space_object_attributes() & kStaticDestination;
 
     i.build = optional_buildable_object_array(x.get("build"));
     if (i.build.size() > kMaxShipCanBuild) {

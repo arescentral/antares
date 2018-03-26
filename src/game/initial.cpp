@@ -39,7 +39,7 @@ HandleList<const Level::Initial> Level::Initial::all() {
 }
 
 void create_initial(Handle<const Level::Initial> initial) {
-    if (initial->attributes.initially_hidden()) {
+    if (initial->hide) {
         g.initials[initial.number()] = SpaceObject::none();
         return;
     }
@@ -51,12 +51,14 @@ void create_initial(Handle<const Level::Initial> initial) {
         owner = initial->owner;
     }
 
-    int32_t specialAttributes = initial->attributes.space_object_attributes();
-    if (initial->attributes.is_player_ship()) {
-        specialAttributes &= ~kIsPlayerShip;
+    int32_t attributes = 0;
+    if (initial->flagship) {
         if ((owner == g.admiral) && !owner->flagship().get()) {
-            specialAttributes |= kIsHumanControlled | kIsPlayerShip;
+            attributes |= kIsHumanControlled | kIsPlayerShip;
         }
+    }
+    if (initial->target.lock) {
+        attributes |= kStaticDestination;
     }
 
     const BaseObject* base = initial->owner.get()
@@ -65,18 +67,18 @@ void create_initial(Handle<const Level::Initial> initial) {
     // TODO(sfiera): remap object in networked games.
     fixedPointType v        = {Fixed::zero(), Fixed::zero()};
     auto           anObject = g.initials[initial.number()] = CreateAnySpaceObject(
-            *base, &v, &coord, g.angle, owner, specialAttributes,
-            initial->sprite_override.has_value()
-                    ? sfz::make_optional<pn::string_view>(*initial->sprite_override)
+            *base, &v, &coord, g.angle, owner, attributes,
+            initial->override_.sprite.has_value()
+                    ? sfz::make_optional<pn::string_view>(*initial->override_.sprite)
                     : sfz::nullopt);
 
     if (anObject->attributes & kIsDestination) {
         anObject->asDestination = MakeNewDestination(
-                anObject, initial->build, initial->earning, initial->name_override);
+                anObject, initial->build, initial->earning, initial->override_.name);
     }
     g.initial_ids[initial.number()] = anObject->id;
 
-    if (initial->attributes.is_player_ship() && owner.get() && !owner->flagship().get()) {
+    if ((anObject->attributes & kIsPlayerShip) && owner.get() && !owner->flagship().get()) {
         owner->set_flagship(anObject);
         if (owner == g.admiral) {
             ResetPlayerShip(anObject);
@@ -97,16 +99,16 @@ void create_initial(Handle<const Level::Initial> initial) {
 
 void set_initial_destination(Handle<const Level::Initial> initial, bool preserve) {
     auto object = g.initials[initial.number()];
-    if (!object.get()                      // hasn't been created yet
-        || (initial->target.number() < 0)  // doesn't have a target
-        || (!initial->owner.get())) {      // doesn't have an owner
+    if (!object.get()                              // hasn't been created yet
+        || (initial->target.initial.number() < 0)  // doesn't have a target
+        || (!initial->owner.get())) {              // doesn't have an owner
         return;
     }
 
     // get the correct admiral #
     Handle<Admiral> owner = initial->owner;
 
-    const auto& target = g.initials[initial->target.number()];
+    const auto& target = g.initials[initial->target.initial.number()];
     if (target.get()) {
         auto saveDest = owner->target();  // save the original dest
 
@@ -139,17 +141,14 @@ void UnhideInitialObject(Handle<const Level::Initial> initial) {
         owner = initial->owner;
     }
 
-    uint32_t specialAttributes = initial->attributes.space_object_attributes();
-    if (initial->attributes.is_player_ship()) {
-        if (owner.get() && !owner->flagship().get()) {
-            if (owner == g.admiral) {
-                specialAttributes |= kIsHumanControlled;
-            } else {
-                specialAttributes &= ~kIsPlayerShip;
-            }
-        } else {  // we already have a flagship; this should not override
-            specialAttributes &= ~kIsPlayerShip;
+    uint32_t attributes = 0;
+    if (initial->flagship) {
+        if ((owner == g.admiral) && !owner->flagship().get()) {
+            attributes |= kIsHumanControlled | kIsPlayerShip;
         }
+    }
+    if (initial->target.lock) {
+        attributes |= kStaticDestination;
     }
 
     const BaseObject* base = initial->owner.get()
@@ -158,14 +157,14 @@ void UnhideInitialObject(Handle<const Level::Initial> initial) {
     // TODO(sfiera): remap objects in networked games.
     fixedPointType v        = {Fixed::zero(), Fixed::zero()};
     auto           anObject = g.initials[initial.number()] = CreateAnySpaceObject(
-            *base, &v, &coord, 0, owner, specialAttributes,
-            initial->sprite_override.has_value()
-                    ? sfz::make_optional<pn::string_view>(*initial->sprite_override)
+            *base, &v, &coord, 0, owner, attributes,
+            initial->override_.sprite.has_value()
+                    ? sfz::make_optional<pn::string_view>(*initial->override_.sprite)
                     : sfz::nullopt);
 
     if (anObject->attributes & kIsDestination) {
         anObject->asDestination = MakeNewDestination(
-                anObject, initial->build, initial->earning, initial->name_override);
+                anObject, initial->build, initial->earning, initial->override_.name);
 
         if (owner.get()) {
             if (initial->build.size() > 0) {
@@ -183,7 +182,7 @@ void UnhideInitialObject(Handle<const Level::Initial> initial) {
     }
 
     g.initial_ids[initial.number()] = anObject->id;
-    if (initial->attributes.is_player_ship() && owner.get() && !owner->flagship().get()) {
+    if ((anObject->attributes & kIsPlayerShip) && owner.get() && !owner->flagship().get()) {
         owner->set_flagship(anObject);
         if (owner == g.admiral) {
             ResetPlayerShip(anObject);

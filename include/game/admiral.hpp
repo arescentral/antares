@@ -183,7 +183,7 @@ void ResetAllDestObjectData();
 
 Handle<Destination> MakeNewDestination(
         Handle<SpaceObject> object, const std::vector<BuildableObject>& canBuildType, Fixed earn,
-        pn::string_view name);
+        const sfz::optional<pn::string>& name);
 void RemoveDestination(Handle<Destination> d);
 void RecalcAllAdmiralBuildData();
 

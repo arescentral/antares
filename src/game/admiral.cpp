@@ -125,7 +125,7 @@ static Handle<Destination> next_free_destination() {
 
 Handle<Destination> MakeNewDestination(
         Handle<SpaceObject> object, const std::vector<BuildableObject>& canBuildType, Fixed earn,
-        pn::string_view name) {
+        const sfz::optional<pn::string>& name) {
     auto d = next_free_destination();
     if (!d.get()) {
         return Destination::none();
@@ -139,11 +139,11 @@ Handle<Destination> MakeNewDestination(
         d->canBuildType.emplace_back(BuildableObject{o.name.copy()});
     }
 
-    if (!name.empty()) {
-        if (pn::rune::count(name) > kAdmiralNameLen) {
-            d->name = pn::rune::slice(name, 0, kAdmiralNameLen).copy();
+    if (name.has_value()) {
+        if (pn::rune::count(*name) > kAdmiralNameLen) {
+            d->name = pn::rune::slice(*name, 0, kAdmiralNameLen).copy();
         } else {
-            d->name = name.copy();
+            d->name = name->copy();
         }
     }
 

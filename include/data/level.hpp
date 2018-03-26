@@ -181,13 +181,21 @@ struct Level_Initial {
     BuildableObject base;
     Handle<Admiral> owner;
     Point           at;
-    Fixed           earning;
+    bool            hide     = false;
+    bool            flagship = false;
 
-    pn::string                name_override;
-    sfz::optional<pn::string> sprite_override;
+    struct Target {
+        Handle<const Level::Initial> initial;
+        bool                         lock = false;
+    } target;
 
+    struct Override {
+        sfz::optional<pn::string> name;
+        sfz::optional<pn::string> sprite;
+    } override_;
+
+    Fixed                        earning = Fixed::zero();
     std::vector<BuildableObject> build;
-    Handle<const Level::Initial> target;
 
     class Attributes {
       public:
