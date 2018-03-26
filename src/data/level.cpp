@@ -377,10 +377,28 @@ static Level::Initial initial(path_value x) {
 
     i.target.initial = optional_initial(x.get("target")).value_or(Level::Initial::none());
 
-    auto attributes = Level::Initial::Attributes(optional_initial_attributes(x.get("attributes")));
-    i.flagship      = attributes.is_player_ship();
-    i.hide          = attributes.initially_hidden();
-    i.target.lock   = attributes.space_object_attributes() & kStaticDestination;
+    struct InitialAttributes {
+        bool is_player_ship     = false;
+        bool initially_hidden   = false;
+        bool static_destination = false;
+    };
+    InitialAttributes attributes;
+    if (!x.get("attributes").value().is_null()) {
+        attributes = required_struct<InitialAttributes>(
+                x.get("attributes"),
+                {
+                        {"is_player_ship",
+                         {&InitialAttributes::is_player_ship, optional_bool, false}},
+                        {"initially_hidden",
+                         {&InitialAttributes::initially_hidden, optional_bool, false}},
+                        {"static_destination",
+                         {&InitialAttributes::static_destination, optional_bool, false}},
+                        {"fixed_race", nullptr},
+                });
+    }
+    i.flagship    = attributes.is_player_ship;
+    i.hide        = attributes.initially_hidden;
+    i.target.lock = attributes.static_destination;
 
     i.build = optional_buildable_object_array(x.get("build"));
     if (i.build.size() > kMaxShipCanBuild) {

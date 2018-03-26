@@ -146,7 +146,6 @@ Weapon                            required_weapon(path_value x);
 Zoom                              required_zoom(path_value x);
 
 int32_t optional_object_attributes(path_value x);
-int32_t optional_initial_attributes(path_value x);
 int32_t optional_keys(path_value x);
 
 std::vector<pn::string> required_string_array(path_value x);

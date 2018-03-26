@@ -197,20 +197,6 @@ struct Level_Initial {
     Fixed                        earning = Fixed::zero();
     std::vector<BuildableObject> build;
 
-    class Attributes {
-      public:
-        constexpr Attributes(uint32_t value = 0) : _value(value) {}
-
-        bool     initially_hidden() const { return _value & (1 << 5); }
-        bool     fixed_race() const { return _value & (1 << 4); }
-        bool     is_player_ship() const { return _value & (1 << 9); }
-        uint32_t space_object_attributes() const { return _value & ~((1 << 4) | (1 << 5)); }
-
-      private:
-        uint32_t _value;
-    };
-    Attributes attributes;
-
     static const Level::Initial*            get(int n);
     static Handle<const Level::Initial>     none() { return Handle<const Level::Initial>(-1); }
     static HandleList<const Level::Initial> all();
