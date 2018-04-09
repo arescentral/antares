@@ -158,12 +158,16 @@ bool Level::SubjectCondition::is_true() const {
 }
 
 bool Level::TimeCondition::is_true() const {
+    ticks game_time = g.time.time_since_epoch();
+    if (!legacy_start_time) {
+        return op_compare(op, game_time, value);
+    }
+
     // Tricky: the original code for handling startTime counted g.time in major ticks,
     // but new code uses minor ticks, as game/main.cpp does. So, time before the epoch
     // (game start) counts as 1/3 towards time conditions to preserve old behavior.
-    ticks game_time  = g.time.time_since_epoch();
     ticks start_time = g.level->startTime / 3;
-    if (g.time < game_ticks()) {
+    if (g.time.time_since_epoch() < ticks(0)) {
         game_time /= 3;
     }
     return op_compare(op, game_time + start_time, value);
