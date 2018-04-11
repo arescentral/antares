@@ -230,31 +230,36 @@ sfz::optional<T> optional_enum(path_value x, const std::pair<pn::string_view, T>
 
 static ticks parse_ticks(path_value x, pn::string_view s) {
     try {
-        enum { START, SIGN, INT, DECIMAL, FLOAT } state = START;
-        pn::string_view::size_type begin                = 0;
+        enum { START, START_COMPONENT, COMPONENT_DONE, INT, DECIMAL, FLOAT } state = START;
+        pn::string_view::size_type begin                                           = 0;
         int64_t                    ll;
         double                     d;
         pn_error_code_t            err;
         ticks                      result{0};
+        int                        sign = 1;
 
         for (pn::string_view::size_type i = 0; i < s.size(); ++i) {
             char ch = s.data()[i];
             switch (state) {
                 case START:
                     if (isdigit(ch)) {
-                        begin = i;
                         state = INT;
-                    } else if ((ch == '-') || (ch == '+')) {
                         begin = i;
-                        state = SIGN;
+                    } else if (ch == '-') {
+                        sign  = -1;
+                        state = START_COMPONENT;
+                    } else if (ch == '+') {
+                        state = START_COMPONENT;
                     } else {
                         throw std::runtime_error(pn::format("expected digit ({0})", i).c_str());
                     }
                     break;
 
-                case SIGN:
+                case START_COMPONENT:
+                case COMPONENT_DONE:
                     if (isdigit(ch)) {
                         state = INT;
+                        begin = i;
                     } else {
                         throw std::runtime_error(pn::format("expected digit ({0})", i).c_str());
                     }
@@ -288,8 +293,7 @@ static ticks parse_ticks(path_value x, pn::string_view s) {
                         default:
                             throw std::runtime_error(pn::format("expected unit ({0})", i).c_str());
                     }
-                    state = START;
-                    break;
+                    state = COMPONENT_DONE;
                     break;
 
                 case FLOAT:
@@ -309,15 +313,16 @@ static ticks parse_ticks(path_value x, pn::string_view s) {
                         default:
                             throw std::runtime_error(pn::format("expected unit ({0})", i).c_str());
                     }
-                    state = START;
+                    state = COMPONENT_DONE;
                     break;
             }
         }
 
         switch (state) {
-            case START: return result;
+            case COMPONENT_DONE: return sign * result;
 
-            case SIGN:
+            case START:
+            case START_COMPONENT:
             case DECIMAL:
             case INT:
             case FLOAT: throw std::runtime_error("unexpected end of duration");
