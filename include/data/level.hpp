@@ -360,7 +360,7 @@ struct Level::SubjectCondition : Level::Condition {
 //
 // TODO(sfiera): provide a way to specify game time “normally”
 struct Level::TimeCondition : Level::Condition {
-    ticks        value;
+    ticks        duration;
     bool         legacy_start_time;
     virtual bool is_true() const;
 };

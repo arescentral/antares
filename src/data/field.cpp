@@ -228,21 +228,130 @@ sfz::optional<T> optional_enum(path_value x, const std::pair<pn::string_view, T>
     throw std::runtime_error(pn::format("{0}: must be one of {1}", x.path(), keys).c_str());
 }
 
+static ticks parse_ticks(path_value x, pn::string_view s) {
+    try {
+        enum { START, SIGN, INT, DECIMAL, FLOAT } state = START;
+        pn::string_view::size_type begin                = 0;
+        int64_t                    ll;
+        double                     d;
+        pn_error_code_t            err;
+        ticks                      result{0};
+
+        for (pn::string_view::size_type i = 0; i < s.size(); ++i) {
+            char ch = s.data()[i];
+            switch (state) {
+                case START:
+                    if (isdigit(ch)) {
+                        begin = i;
+                        state = INT;
+                    } else if ((ch == '-') || (ch == '+')) {
+                        begin = i;
+                        state = SIGN;
+                    } else {
+                        throw std::runtime_error(pn::format("expected digit ({0})", i).c_str());
+                    }
+                    break;
+
+                case SIGN:
+                    if (isdigit(ch)) {
+                        state = INT;
+                    } else {
+                        throw std::runtime_error(pn::format("expected digit ({0})", i).c_str());
+                    }
+                    break;
+
+                case DECIMAL:
+                    if (isdigit(ch)) {
+                        state = FLOAT;
+                    } else {
+                        throw std::runtime_error(pn::format("expected digit ({0})", i).c_str());
+                    }
+                    break;
+
+                case INT:
+                    if (ch == '.') {
+                        state = DECIMAL;
+                        break;
+                    } else if (isdigit(ch)) {
+                        break;
+                    }
+
+                    if (!pn::strtoll(s.substr(begin, i - begin), &ll, &err)) {
+                        throw std::runtime_error(
+                                pn::format("{0} ({1}:{2})", pn_strerror(err), begin, i).c_str());
+                    }
+                    switch (ch) {
+                        case 'h': result += ticks{ll * 216000}; break;
+                        case 'm': result += ticks{ll * 3600}; break;
+                        case 's': result += ticks{ll * 60}; break;
+                        case 't': result += ticks{ll * 1}; break;
+                        default:
+                            throw std::runtime_error(pn::format("expected unit ({0})", i).c_str());
+                    }
+                    state = START;
+                    break;
+                    break;
+
+                case FLOAT:
+                    if (isdigit(ch)) {
+                        break;
+                    }
+
+                    if (!pn::strtod(s.substr(begin, i - begin), &d, &err)) {
+                        throw std::runtime_error(
+                                pn::format("{0} ({1}:{2})", pn_strerror(err), begin, i).c_str());
+                    }
+                    switch (ch) {
+                        case 'h': result += ticks{int64_t(d * 216000)}; break;
+                        case 'm': result += ticks{int64_t(d * 3600)}; break;
+                        case 's': result += ticks{int64_t(d * 60)}; break;
+                        case 't': result += ticks{int64_t(d * 1)}; break;
+                        default:
+                            throw std::runtime_error(pn::format("expected unit ({0})", i).c_str());
+                    }
+                    state = START;
+                    break;
+            }
+        }
+
+        switch (state) {
+            case START: return result;
+
+            case SIGN:
+            case DECIMAL:
+            case INT:
+            case FLOAT: throw std::runtime_error("unexpected end of duration");
+        }
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(x.path().c_str()));
+    }
+}
+
+static secs parse_secs(path_value x, pn::string_view s) {
+    ticks t  = parse_ticks(x, s);
+    secs  ss = std::chrono::duration_cast<secs>(t);
+    if (t != ss) {
+        throw std::runtime_error(
+                pn::format("{0}: {1} is not an even number of seconds", x.path(), s).c_str());
+    }
+    return ss;
+}
+
 sfz::optional<ticks> optional_ticks(path_value x) {
-    sfz::optional<int64_t> i = optional_int(x);
-    if (i.has_value()) {
-        return sfz::make_optional(ticks(*i));
+    sfz::optional<pn::string_view> s = optional_string(x);
+    if (s.has_value()) {
+        return sfz::make_optional(parse_ticks(x, *s));
     } else {
         return sfz::nullopt;
     }
 }
 
-ticks required_ticks(path_value x) { return ticks(required_int(x)); }
+ticks required_ticks(path_value x) { return parse_ticks(x, required_string(x)); }
 
 sfz::optional<secs> optional_secs(path_value x) {
-    sfz::optional<int64_t> i = optional_int(x);
-    if (i.has_value()) {
-        return sfz::make_optional(secs(*i));
+    sfz::optional<pn::string_view> s = optional_string(x);
+    if (s.has_value()) {
+        return sfz::make_optional(parse_secs(x, *s));
     } else {
         return sfz::nullopt;
     }
@@ -381,17 +490,32 @@ Range<Fixed> required_fixed_range(path_value x) {
 }
 
 sfz::optional<Range<ticks>> optional_ticks_range(path_value x) {
-    auto range = optional_int_range(x);
-    if (range.has_value()) {
-        return sfz::make_optional(Range<ticks>{ticks(range->begin), ticks(range->end)});
-    } else {
+    if (x.value().is_null()) {
         return sfz::nullopt;
+    } else if (x.value().is_string()) {
+        ticks begin = required_ticks(x);
+        return sfz::make_optional(Range<ticks>{begin, begin + ticks{1}});
+    } else if (x.value().is_map()) {
+        ticks begin = required_ticks(x.get("begin"));
+        ticks end   = required_ticks(x.get("end"));
+        return sfz::make_optional(Range<ticks>{begin, end});
+    } else {
+        throw std::runtime_error(
+                pn::format("{0}: must be null, string, or map", x.path()).c_str());
     }
 }
 
 Range<ticks> required_ticks_range(path_value x) {
-    auto range = required_int_range(x);
-    return {ticks(range.begin), ticks(range.end)};
+    if (x.value().is_int()) {
+        ticks begin = required_ticks(x);
+        return Range<ticks>{begin, begin + ticks{1}};
+    } else if (x.value().is_map()) {
+        ticks begin = required_ticks(x.get("begin"));
+        ticks end   = required_ticks(x.get("end"));
+        return Range<ticks>{begin, end};
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be string or map", x.path()).c_str());
+    }
 }
 
 HandleList<const Level_Condition> optional_condition_range(path_value x) {

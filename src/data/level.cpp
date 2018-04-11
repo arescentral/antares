@@ -241,7 +241,7 @@ static std::unique_ptr<Level::Condition> subject_condition(path_value x) {
 
 static std::unique_ptr<Level::Condition> time_condition(path_value x) {
     std::unique_ptr<Level::TimeCondition> c(new Level::TimeCondition);
-    c->value             = required_ticks(x.get("value"));
+    c->duration          = required_ticks(x.get("duration"));
     c->legacy_start_time = optional_bool(x.get("legacy_start_time")).value_or(false);
     return std::move(c);
 }
