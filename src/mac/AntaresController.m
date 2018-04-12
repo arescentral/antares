@@ -36,7 +36,7 @@
 #define kAuthorURL @"AuthorURL"
 #define kVersion @"Version"
 
-#define kFactoryScenarioIdentifier @"com.biggerplanet.ares"
+#define kFactoryScenarioIdentifier @"0000000000000000000000000000000000000000"
 
 static NSInteger compare_scenarios(id x, id y, void* unused) {
     (void)unused;

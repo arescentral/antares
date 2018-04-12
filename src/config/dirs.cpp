@@ -27,7 +27,7 @@ namespace antares {
 
 static sfz::optional<pn::string> app_data;
 static sfz::optional<pn::string> factory_scenario;
-const char                       kFactoryScenarioIdentifier[] = "com.biggerplanet.ares";
+const char kFactoryScenarioIdentifier[] = "0000000000000000000000000000000000000000";
 
 pn::string_view application_path() {
     if (app_data.has_value()) {
