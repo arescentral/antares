@@ -22,6 +22,18 @@
 
 namespace antares {
 
+static int32_t required_int32(path_value x) {
+    return required_int(x, {-0x80000000ll, 0x80000000ll});
+}
+
+static sfz::optional<int32_t> optional_int32(path_value x) {
+    sfz::optional<int64_t> i = optional_int(x, {-0x80000000ll, 0x80000000ll});
+    if (i.has_value()) {
+        return sfz::make_optional<int32_t>(*i);
+    }
+    return sfz::nullopt;
+}
+
 int32_t optional_object_order_flags(path_value x) {
     if (x.value().is_null()) {
         return 0;
@@ -212,13 +224,13 @@ objectFrameType::Vector required_vector_frame(path_value x) {
     }
 }
 
-int32_t optional_usage(path_value x) {
+uint32_t optional_usage(path_value x) {
     if (x.value().is_null()) {
         return 0;
     } else if (x.value().is_map()) {
         static const pn::string_view flags[3] = {"transportation", "attacking", "defense"};
-        int32_t                      bit      = 0x00000001;
-        int32_t                      result   = 0x00000000;
+        uint32_t                     bit      = 0x00000001;
+        uint32_t                     result   = 0x00000000;
         for (pn::string_view flag : flags) {
             if (optional_bool(x.get(flag)).value_or(false)) {
                 result |= bit;
@@ -232,19 +244,17 @@ int32_t optional_usage(path_value x) {
 }
 
 objectFrameType::Weapon required_device_frame(path_value x) {
-    if (x.value().is_map()) {
-        objectFrameType::Weapon w;
-        w.usage        = optional_usage(x.get("usage"));
-        w.energyCost   = optional_int(x.get("energy_cost")).value_or(0);
-        w.fireTime     = required_ticks(x.get("fire_time"));
-        w.ammo         = optional_int(x.get("ammo")).value_or(-1);
-        w.range        = required_int(x.get("range"));
-        w.inverseSpeed = optional_fixed(x.get("inverse_speed")).value_or(Fixed::zero());
-        w.restockCost  = optional_int(x.get("restock_cost")).value_or(-1);
-        return w;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
-    }
+    using Weapon = objectFrameType::Weapon;
+    return required_struct<Weapon>(
+            x, {
+                       {"usage", {&Weapon::usage, optional_usage}},
+                       {"energy_cost", {&Weapon::energyCost, optional_int32, 0}},
+                       {"fire_time", {&Weapon::fireTime, required_ticks}},
+                       {"ammo", {&Weapon::ammo, optional_int32, -1}},
+                       {"range", {&Weapon::range, required_int32}},
+                       {"inverse_speed", {&Weapon::inverseSpeed, optional_fixed, Fixed::zero()}},
+                       {"restock_cost", {&Weapon::restockCost, optional_int32, -1}},
+               });
 }
 
 BaseObject base_object(pn::value_cref x0) {
