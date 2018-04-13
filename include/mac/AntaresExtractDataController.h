@@ -30,6 +30,7 @@
     NSWindow*            _window;
     NSProgressIndicator* _progress_bar;
     NSTextField*         _status_field;
+    bool                 _success;
 }
 
 @property(strong) IBOutlet NSWindow* _window;
@@ -38,6 +39,8 @@
 
 - (id)initWithTarget:(id)target selector:(SEL)selector path:(NSString*)path;
 - (id)initWithTarget:(id)target selector:(SEL)selector scenario:(NSString*)scenario;
+
+- (bool)success;
 
 @end
 

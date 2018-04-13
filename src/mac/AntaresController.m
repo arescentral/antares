@@ -207,6 +207,9 @@ static NSURL* url(const char* utf8_bytes) { return [NSURL URLWithString:str(utf8
 }
 
 - (void)extractDone:(id)sender {
+    if (![sender success]) {
+        return;
+    }
     CFStringRef error_message;
     if (!antares_controller_loop(drivers, &error_message)) {
         [self fail:(NSString*)error_message];
