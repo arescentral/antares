@@ -44,32 +44,29 @@ const Level* Level::get(pn::string_view name) {
     }
 }
 
+static Texture required_texture(path_value x) { return Resource::texture(required_string(x)); }
+
 ScenarioInfo scenario_info(pn::value_cref x0) {
     if (!x0.is_map()) {
         throw std::runtime_error("must be map");
     }
     path_value x{x0};
 
-    ScenarioInfo info;
-    info.titleString       = required_string_copy(x.get("title"));
-    info.downloadURLString = required_string_copy(x.get("download_url"));
-    info.authorNameString  = required_string_copy(x.get("author"));
-    info.authorURLString   = required_string_copy(x.get("author_url"));
-    info.version           = required_string_copy(x.get("version"));
-    info.warpInFlareID     = required_base(x.get("warp_in_flare"));
-    info.warpOutFlareID    = required_base(x.get("warp_out_flare"));
-    info.playerBodyID      = required_base(x.get("player_body"));
-    info.energyBlobID      = required_base(x.get("energy_blob"));
-
-    info.intro_text = optional_string(x.get("intro")).value_or("").copy();
-    info.about_text = optional_string(x.get("about")).value_or("").copy();
-
-    info.publisher_screen = nullptr;  // Don’t have permission to show ASW logo.
-    info.ego_screen       = Resource::texture("credit");
-    info.splash_screen    = Resource::texture(required_string(x.get("splash")));
-    info.starmap          = Resource::texture(required_string(x.get("starmap")));
-
-    return info;
+    return required_struct<ScenarioInfo>(
+            x, {{"title", {&ScenarioInfo::titleString, required_string_copy}},
+                {"identifier", nullptr},
+                {"download_url", {&ScenarioInfo::downloadURLString, required_string_copy}},
+                {"author", {&ScenarioInfo::authorNameString, required_string_copy}},
+                {"author_url", {&ScenarioInfo::authorURLString, required_string_copy}},
+                {"version", {&ScenarioInfo::version, required_string_copy}},
+                {"warp_in_flare", {&ScenarioInfo::warpInFlareID, required_base}},
+                {"warp_out_flare", {&ScenarioInfo::warpOutFlareID, required_base}},
+                {"player_body", {&ScenarioInfo::playerBodyID, required_base}},
+                {"energy_blob", {&ScenarioInfo::energyBlobID, required_base}},
+                {"intro", {&ScenarioInfo::intro_text, optional_string, ""}},
+                {"about", {&ScenarioInfo::about_text, optional_string, ""}},
+                {"splash", {&ScenarioInfo::splash_screen, required_texture}},
+                {"starmap", {&ScenarioInfo::starmap, required_texture}}});
 }
 
 static Level::Player required_player(path_value x, LevelType level_type) {

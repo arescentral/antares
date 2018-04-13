@@ -56,6 +56,9 @@ const int32_t kInitiallyTrue = 0x00000002;
 const int32_t kHasBeenTrue   = 0x00000004;
 
 struct ScenarioInfo {
+    pn::string identifier;
+    int64_t    format;
+
     NamedHandle<const BaseObject> warpInFlareID;
     NamedHandle<const BaseObject> warpOutFlareID;
     NamedHandle<const BaseObject> playerBodyID;
@@ -67,10 +70,8 @@ struct ScenarioInfo {
     pn::string                    intro_text;
     pn::string                    about_text;
 
-    Texture publisher_screen;
-    Texture ego_screen;
-    Texture splash_screen;
-    Texture starmap;
+    Texture splash_screen = nullptr;
+    Texture starmap       = nullptr;
 
     pn::string version;
 };

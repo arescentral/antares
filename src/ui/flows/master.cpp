@@ -68,8 +68,8 @@ void Master::become_front() {
         case START:
             init();
             _state = PUBLISHER_PICT;
-            if (plug.info.publisher_screen) {
-                stack()->push(new PictFade(&plug.info.publisher_screen, &_skipped));
+            if (_publisher_screen) {
+                stack()->push(new PictFade(&_publisher_screen, &_skipped));
                 break;
             }
             [[clang::fallthrough]];
@@ -77,7 +77,7 @@ void Master::become_front() {
         case PUBLISHER_PICT:
             _state = EGO_PICT;
             if (!_skipped) {
-                stack()->push(new PictFade(&plug.info.ego_screen, &_skipped));
+                stack()->push(new PictFade(&_ego_screen, &_skipped));
                 break;
             }
             [[clang::fallthrough]];
@@ -130,6 +130,9 @@ void Master::init() {
     Vectors::init();
 
     sys.music.play(Music::IDLE, kTitleSongID);
+
+    _publisher_screen = nullptr;
+    _ego_screen       = Resource::texture("credit");
 }
 
 }  // namespace antares
