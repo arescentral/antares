@@ -35,6 +35,8 @@ using std::vector;
 
 namespace antares {
 
+static constexpr int kPluginFormat = 20;
+
 ANTARES_GLOBAL ScenarioGlobals plug;
 
 namespace {
@@ -90,6 +92,12 @@ void PluginInit() {
                     pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
         }
         plug.info = scenario_info(x);
+        if (plug.info.format != kPluginFormat) {
+            throw std::runtime_error(
+                    pn::format("unknown plugin format {0}", plug.info.format).c_str());
+        }
+        plug.splash  = Resource::texture(plug.info.splash_screen);
+        plug.starmap = Resource::texture(plug.info.starmap);
     } catch (...) {
         std::throw_with_nested(std::runtime_error("info.pn"));
     }

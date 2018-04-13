@@ -241,7 +241,7 @@ void BriefingScreen::overlay() const {
             RgbColor    gold   = GetRGBTranslateColorShade(Hue::GOLD, VERY_LIGHT);
             Rect        bounds = _bounds;
             bounds.offset(off.h, off.v);
-            plug.info.starmap.draw_cropped(bounds, Rect(Point(0, 2), bounds.size()));
+            plug.starmap.draw_cropped(bounds, Rect(Point(0, 2), bounds.size()));
             Rects rects;
             draw_vbracket(rects, star_rect, gold);
             rects.fill({star.h, bounds.top, star.h + 1, star_rect.top + 1}, gold);
@@ -343,7 +343,7 @@ void BriefingScreen::handle_button(Button& button) {
 }
 
 void BriefingScreen::build_star_map() {
-    Rect pix_bounds = plug.info.starmap.size().as_rect();
+    Rect pix_bounds = plug.starmap.size().as_rect();
     pix_bounds.offset(0, 2);
     pix_bounds.bottom -= 3;
     _bounds = pix_bounds;

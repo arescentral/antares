@@ -44,17 +44,35 @@ const Level* Level::get(pn::string_view name) {
     }
 }
 
-static Texture required_texture(path_value x) { return Resource::texture(required_string(x)); }
+static bool valid_sha1(pn::string_view s) {
+    if (s.size() != 40) {
+        return false;
+    }
+    for (pn::rune r : s) {
+        if (!(((pn::rune{'0'} <= r) && (r <= pn::rune{'9'})) ||
+              ((pn::rune{'a'} <= r) && (r <= pn::rune{'f'})))) {
+            return false;
+        }
+    }
+    return true;
+}
+
+static sfz::optional<pn::string_view> optional_identifier(path_value x) {
+    auto id = optional_string(x);
+    if (id.has_value() && !valid_sha1(*id)) {
+        throw std::runtime_error(
+                pn::format("{0}invalid identifier (must be lowercase sha1 digest)", x.prefix())
+                        .c_str());
+    }
+    return id;
+}
 
 ScenarioInfo scenario_info(pn::value_cref x0) {
-    if (!x0.is_map()) {
-        throw std::runtime_error("must be map");
-    }
     path_value x{x0};
-
     return required_struct<ScenarioInfo>(
             x, {{"title", {&ScenarioInfo::titleString, required_string_copy}},
-                {"identifier", nullptr},
+                {"identifier", {&ScenarioInfo::identifier, optional_identifier, ""}},
+                {"format", {&ScenarioInfo::format, required_int}},
                 {"download_url", {&ScenarioInfo::downloadURLString, required_string_copy}},
                 {"author", {&ScenarioInfo::authorNameString, required_string_copy}},
                 {"author_url", {&ScenarioInfo::authorURLString, required_string_copy}},
@@ -65,8 +83,8 @@ ScenarioInfo scenario_info(pn::value_cref x0) {
                 {"energy_blob", {&ScenarioInfo::energyBlobID, required_base}},
                 {"intro", {&ScenarioInfo::intro_text, optional_string, ""}},
                 {"about", {&ScenarioInfo::about_text, optional_string, ""}},
-                {"splash", {&ScenarioInfo::splash_screen, required_texture}},
-                {"starmap", {&ScenarioInfo::starmap, required_texture}}});
+                {"splash", {&ScenarioInfo::splash_screen, required_string_copy}},
+                {"starmap", {&ScenarioInfo::starmap, required_string_copy}}});
 }
 
 static Level::Player required_player(path_value x, LevelType level_type) {

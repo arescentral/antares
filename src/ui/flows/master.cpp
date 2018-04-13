@@ -46,7 +46,7 @@ namespace {
 
 class TitleScreenFade : public PictFade {
   public:
-    TitleScreenFade(bool* fast) : PictFade(&plug.info.splash_screen, fast), _fast(fast) {}
+    TitleScreenFade(bool* fast) : PictFade(&plug.splash, fast), _fast(fast) {}
 
   protected:
     virtual usecs fade_time() const { return ticks(*_fast ? 20 : 100); }

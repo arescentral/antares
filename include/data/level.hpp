@@ -70,8 +70,8 @@ struct ScenarioInfo {
     pn::string                    intro_text;
     pn::string                    about_text;
 
-    Texture splash_screen = nullptr;
-    Texture starmap       = nullptr;
+    pn::string splash_screen;
+    pn::string starmap;
 
     pn::string version;
 };
