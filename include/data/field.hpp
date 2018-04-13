@@ -145,8 +145,8 @@ VectorKind                        required_vector_kind(path_value x);
 Weapon                            required_weapon(path_value x);
 Zoom                              required_zoom(path_value x);
 
-int32_t optional_object_attributes(path_value x);
-int32_t optional_keys(path_value x);
+uint32_t optional_object_attributes(path_value x);
+uint32_t optional_keys(path_value x);
 
 std::vector<pn::string> required_string_array(path_value x);
 std::vector<pn::string> optional_string_array(path_value x);
@@ -195,6 +195,17 @@ T required_struct(path_value x, const std::map<pn::string_view, field<T>>& field
         return t;
     } else {
         throw std::runtime_error(pn::format("{0}must be map", x.prefix()).c_str());
+    }
+}
+
+template <typename T>
+sfz::optional<T> optional_struct(path_value x, const std::map<pn::string_view, field<T>>& fields) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_map()) {
+        return sfz::make_optional(required_struct(x, fields));
+    } else {
+        throw std::runtime_error(pn::format("{0}must be null or map", x.prefix()).c_str());
     }
 }
 

@@ -761,7 +761,7 @@ Zoom required_zoom(path_value x) {
                 {"all", Zoom::ALL}});
 }
 
-int32_t optional_object_attributes(path_value x) {
+uint32_t optional_object_attributes(path_value x) {
     if (x.value().is_null()) {
         return 0;
     } else if (x.value().is_map()) {
@@ -798,8 +798,8 @@ int32_t optional_object_attributes(path_value x) {
                                                   "bit31",
                                                   "on_autopilot"};
 
-        int32_t bit    = 0x00000001;
-        int32_t result = 0x00000000;
+        uint32_t bit    = 0x00000001;
+        uint32_t result = 0x00000000;
         for (pn::string_view flag : flags) {
             if (optional_bool(x.get(flag)).value_or(false)) {
                 result |= bit;
@@ -812,12 +812,12 @@ int32_t optional_object_attributes(path_value x) {
     }
 }
 
-int32_t optional_keys(path_value x) {
+uint32_t optional_keys(path_value x) {
     if (x.value().is_null()) {
         return 0x00000000;
     } else if (x.value().is_array()) {
         pn::array_cref a      = x.value().as_array();
-        int32_t        result = 0x00000000;
+        uint32_t       result = 0x00000000;
         for (int i = 0; i < a.size(); ++i) {
             int key = required_key(x.get(i));
             result |= (0x1 << key);

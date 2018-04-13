@@ -357,10 +357,17 @@ std::unique_ptr<Action> action(path_value x) {
 
     a->reflexive = optional_bool(x.get("reflexive")).value_or(false);
 
-    a->inclusive_filter = optional_object_attributes(x.get("inclusive_filter"));
-    a->level_key_tag    = optional_string(x.get("level_key_filter")).value_or("").copy();
+    a->filter =
+            optional_struct<Action::Filter>(
+                    x.get("if"),
+                    {
+                            {"attributes",
+                             {&Action::Filter::attributes, optional_object_attributes}},
+                            {"level_tag", {&Action::Filter::level_key_tag, optional_string, ""}},
+                            {"owner", {&Action::Filter::owner, optional_owner, Owner::ANY}},
+                    })
+                    .value_or(Action::Filter{});
 
-    a->owner = optional_owner(x.get("owner")).value_or(Owner::ANY);
     a->delay = optional_ticks(x.get("delay")).value_or(ticks(0));
 
     a->initialSubjectOverride =

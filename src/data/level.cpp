@@ -383,18 +383,6 @@ std::vector<BuildableObject> optional_buildable_object_array(path_value x) {
     }
 }
 
-template <typename T>
-static sfz::optional<T> optional_struct(
-        path_value x, const std::map<pn::string_view, field<T>>& fields) {
-    if (x.value().is_null()) {
-        return sfz::nullopt;
-    } else if (x.value().is_map()) {
-        return sfz::make_optional(required_struct<T>(x, fields));
-    } else {
-        throw std::runtime_error(pn::format("{0}must be map", x.prefix()).c_str());
-    }
-}
-
 Level::Initial::Override optional_override(path_value x) {
     return optional_struct<Level::Initial::Override>(
                    x, {{"name", {&Level::Initial::Override::name, optional_string_copy}},

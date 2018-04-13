@@ -49,10 +49,12 @@ struct Level_Condition;
 struct Action {
     bool reflexive;  // does it apply to object executing verb?
 
-    uint32_t   inclusive_filter = 0;  // if it has ALL these attributes, OK
-    pn::string level_key_tag;  // don’t execute if non empty and subject/object don’t match
+    struct Filter {
+        uint32_t   attributes = 0;
+        pn::string level_key_tag;
+        Owner      owner = Owner::ANY;
+    } filter;
 
-    Owner owner = Owner::ANY;
     ticks delay = ticks(0);
 
     Handle<const Level_Initial> initialSubjectOverride;

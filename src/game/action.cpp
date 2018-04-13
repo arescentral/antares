@@ -87,11 +87,17 @@ static void queue_action(
         Point* offset);
 
 bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target) {
-    if (!action.level_key_tag.empty()) {
-        return action.level_key_tag == target->base->levelKeyTag;
-    } else {
-        return (action.inclusive_filter & target->attributes) == action.inclusive_filter;
+    if (!action.filter.level_key_tag.empty()) {
+        if (action.filter.level_key_tag != target->base->levelKeyTag) {
+            return false;
+        }
     }
+
+    if (action.filter.attributes & ~target->attributes) {
+        return false;
+    }
+
+    return true;
 }
 
 void NoAction::apply(
@@ -724,13 +730,13 @@ static void execute_actions(
         }
 
         if (object.get() && subject.get()) {
-            if (((action.owner == Owner::DIFFERENT) && (object->owner == subject->owner)) ||
-                ((action.owner == Owner::SAME) && (object->owner != subject->owner))) {
+            if (((action.filter.owner == Owner::DIFFERENT) && (object->owner == subject->owner)) ||
+                ((action.filter.owner == Owner::SAME) && (object->owner != subject->owner))) {
                 continue;
             }
         }
 
-        if ((action.inclusive_filter || !action.level_key_tag.empty()) &&
+        if ((action.filter.attributes || !action.filter.level_key_tag.empty()) &&
             (!object.get() || !action_filter_applies_to(action, object))) {
             continue;
         }
