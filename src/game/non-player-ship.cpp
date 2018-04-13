@@ -161,15 +161,15 @@ void fire_weapon(
 }
 
 static void tick_pulse(Handle<SpaceObject> subject, Handle<SpaceObject> target) {
-    tick_weapon(subject, target, kOneKey, subject->base->pulse, subject->pulse);
+    tick_weapon(subject, target, kOneKey, subject->base->weapons.pulse, subject->pulse);
 }
 
 static void tick_beam(Handle<SpaceObject> subject, Handle<SpaceObject> target) {
-    tick_weapon(subject, target, kTwoKey, subject->base->beam, subject->beam);
+    tick_weapon(subject, target, kTwoKey, subject->base->weapons.beam, subject->beam);
 }
 
 static void tick_special(Handle<SpaceObject> subject, Handle<SpaceObject> target) {
-    tick_weapon(subject, target, kEnterKey, subject->base->special, subject->special);
+    tick_weapon(subject, target, kEnterKey, subject->base->weapons.special, subject->special);
 }
 
 static uint8_t get_tiny_shade(const SpaceObject& o) {

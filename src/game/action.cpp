@@ -642,20 +642,23 @@ void FireAction::apply(
         case Weapon::PULSE:
             fire_weapon(
                     subject, SpaceObject::none(), subject->pulse,
-                    subject->base->pulse.has_value() ? subject->base->pulse->positions
-                                                     : std::vector<fixedPointType>{});
+                    subject->base->weapons.pulse.has_value()
+                            ? subject->base->weapons.pulse->positions
+                            : std::vector<fixedPointType>{});
             break;
         case Weapon::BEAM:
             fire_weapon(
                     subject, SpaceObject::none(), subject->beam,
-                    subject->base->beam.has_value() ? subject->base->beam->positions
-                                                    : std::vector<fixedPointType>{});
+                    subject->base->weapons.beam.has_value()
+                            ? subject->base->weapons.beam->positions
+                            : std::vector<fixedPointType>{});
             break;
         case Weapon::SPECIAL:
             fire_weapon(
                     subject, SpaceObject::none(), subject->special,
-                    subject->base->special.has_value() ? subject->base->special->positions
-                                                       : std::vector<fixedPointType>{});
+                    subject->base->weapons.special.has_value()
+                            ? subject->base->weapons.special->positions
+                            : std::vector<fixedPointType>{});
             break;
     }
 }

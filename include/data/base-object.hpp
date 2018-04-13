@@ -287,7 +287,7 @@ class BaseObject {
 
     struct Icon {
         IconShape shape;
-        int       size;
+        int64_t   size;
     };
     Icon icon;
 
@@ -295,9 +295,11 @@ class BaseObject {
         NamedHandle<const BaseObject> base;
         std::vector<fixedPointType>   positions;  // relative positions (unrotated) of fire points
     };
-    sfz::optional<Weapon> pulse;
-    sfz::optional<Weapon> beam;
-    sfz::optional<Weapon> special;
+    struct Loadout {
+        sfz::optional<Weapon> pulse;
+        sfz::optional<Weapon> beam;
+        sfz::optional<Weapon> special;
+    } weapons;
 
     Fixed friendDefecit;
 

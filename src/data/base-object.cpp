@@ -272,6 +272,23 @@ objectFrameType::Weapon required_device_frame(path_value x) {
                });
 }
 
+static sfz::optional<BaseObject::Icon> optional_icon(path_value x) {
+    return optional_struct<BaseObject::Icon>(
+            x, {
+                       {"shape", {&BaseObject::Icon::shape, required_icon_shape}},
+                       {"size", {&BaseObject::Icon::size, required_int}},
+               });
+}
+
+static sfz::optional<BaseObject::Loadout> optional_loadout(path_value x) {
+    return optional_struct<BaseObject::Loadout>(
+            x, {
+                       {"pulse", {&BaseObject::Loadout::pulse, optional_weapon}},
+                       {"beam", {&BaseObject::Loadout::beam, optional_weapon}},
+                       {"special", {&BaseObject::Loadout::special, optional_weapon}},
+               });
+}
+
 BaseObject base_object(pn::value_cref x0) {
     if (!x0.is_map()) {
         throw std::runtime_error("must be map");
@@ -324,26 +341,8 @@ BaseObject base_object(pn::value_cref x0) {
     o.activate = optional_action_array(x.get("on_activate"));
     o.arrive   = optional_action_array(x.get("on_arrive"));
 
-    auto icon = x.get("icon");
-    if (icon.value().is_null()) {
-        o.icon = {IconShape::SQUARE, 0};
-    } else if (icon.value().is_map()) {
-        o.icon.shape = required_icon_shape(icon.get("shape"));
-        o.icon.size  = required_int(icon.get("size"));
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or map", icon.path()).c_str());
-    }
-
-    auto weapons = x.get("weapons");
-    if (weapons.value().is_null()) {
-        // no weapons
-    } else if (weapons.value().is_map()) {
-        o.pulse   = optional_weapon(weapons.get("pulse"));
-        o.beam    = optional_weapon(weapons.get("beam"));
-        o.special = optional_weapon(weapons.get("special"));
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or map", weapons.path()).c_str());
-    }
+    o.icon    = optional_icon(x.get("icon")).value_or(BaseObject::Icon{IconShape::SQUARE, 0});
+    o.weapons = optional_loadout(x.get("weapons")).value_or(BaseObject::Loadout{});
 
     if (o.attributes & kShapeFromDirection) {
         o.frame.rotation = required_rotation_frame(x.get("rotation"));

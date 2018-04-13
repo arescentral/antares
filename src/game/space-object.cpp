@@ -316,9 +316,9 @@ SpaceObject::SpaceObject(
         }
     }
 
-    pulse.base   = base->pulse.has_value() ? base->pulse->base.get() : nullptr;
-    beam.base    = base->beam.has_value() ? base->beam->base.get() : nullptr;
-    special.base = base->special.has_value() ? base->special->base.get() : nullptr;
+    pulse.base   = base->weapons.pulse.has_value() ? base->weapons.pulse->base.get() : nullptr;
+    beam.base    = base->weapons.beam.has_value() ? base->weapons.beam->base.get() : nullptr;
+    special.base = base->weapons.special.has_value() ? base->weapons.special->base.get() : nullptr;
 
     longestWeaponRange  = 0;
     shortestWeaponRange = kMaximumRelevantDistance;
@@ -459,9 +459,10 @@ void SpaceObject::change_base_type(
                 base.activate_period.begin + obj->randomSeed.next(base.activate_period.range());
     }
 
-    obj->pulse.base          = base.pulse.has_value() ? base.pulse->base.get() : nullptr;
-    obj->beam.base           = base.beam.has_value() ? base.beam->base.get() : nullptr;
-    obj->special.base        = base.special.has_value() ? base.special->base.get() : nullptr;
+    obj->pulse.base = base.weapons.pulse.has_value() ? base.weapons.pulse->base.get() : nullptr;
+    obj->beam.base  = base.weapons.beam.has_value() ? base.weapons.beam->base.get() : nullptr;
+    obj->special.base =
+            base.weapons.special.has_value() ? base.weapons.special->base.get() : nullptr;
     obj->longestWeaponRange  = 0;
     obj->shortestWeaponRange = kMaximumRelevantDistance;
 

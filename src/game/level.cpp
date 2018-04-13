@@ -114,7 +114,7 @@ void AddBaseObjectMedia(
     AddBaseObjectActionMedia(base->arrive, all_colors);
 
     for (const sfz::optional<BaseObject::Weapon>* weapon :
-         {&base->pulse, &base->beam, &base->special}) {
+         {&base->weapons.pulse, &base->weapons.beam, &base->weapons.special}) {
         if (weapon->has_value()) {
             AddBaseObjectMedia((*weapon)->base, all_colors, Required::YES);
         }

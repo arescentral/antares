@@ -179,9 +179,9 @@ void CreateObjectDataText(pn::string& text, const BaseObject& object) {
     }
 
     // now, check for weapons!
-    CreateWeaponDataText(&data, object.pulse, values.at(kShipDataPulseStringNum));
-    CreateWeaponDataText(&data, object.beam, values.at(kShipDataBeamStringNum));
-    CreateWeaponDataText(&data, object.special, values.at(kShipDataSpecialStringNum));
+    CreateWeaponDataText(&data, object.weapons.pulse, values.at(kShipDataPulseStringNum));
+    CreateWeaponDataText(&data, object.weapons.beam, values.at(kShipDataBeamStringNum));
+    CreateWeaponDataText(&data, object.weapons.special, values.at(kShipDataSpecialStringNum));
 
     text = std::move(data);
 }
