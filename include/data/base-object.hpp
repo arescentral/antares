@@ -293,12 +293,11 @@ class BaseObject {
 
     // vector: have no associated sprite
     struct Vector {
-        bool       visible;
-        RgbColor   bolt_color;  // for VectorKind::BOLT only
-        Hue        beam_hue;    // for all but VectorKind::BOLT
-        VectorKind kind     = VectorKind::BOLT;
-        int32_t    accuracy = 0;  // for non-normal vector objects, how accurate
-        int32_t    range    = 0;
+        RgbColor           color;
+        sfz::optional<Hue> hue;  // if present, override color and cycle through shades
+        VectorKind         kind     = VectorKind::BOLT;
+        int32_t            accuracy = 0;  // for non-normal vector objects, how accurate
+        int32_t            range    = 0;
     };
     Vector vector;
 

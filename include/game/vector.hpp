@@ -44,8 +44,8 @@ struct Vector {
     coordPointType      objectLocation;
     coordPointType      lastApparentLocation;
     bool                visible;
-    RgbColor            bolt_color;
-    Hue                 beam_hue;
+    RgbColor            color;
+    sfz::optional<Hue>  hue;
     bool                killMe;
     bool                active;
     int32_t             fromObjectID;

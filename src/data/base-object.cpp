@@ -240,17 +240,8 @@ BaseObject::Vector optional_vector_frame(path_value x) {
         v.accuracy = required_int(x.get("accuracy"));
         v.range    = required_int(x.get("range"));
 
-        sfz::optional<RgbColor> color = optional_color(x.get("color"));
-        sfz::optional<Hue>      hue   = optional_hue(x.get("hue"));
-        if (v.kind == VectorKind::BOLT) {
-            v.visible    = color.has_value();
-            v.bolt_color = color.value_or(RgbColor::clear());
-            v.beam_hue   = Hue::GRAY;
-        } else {
-            v.visible    = hue.has_value();
-            v.bolt_color = RgbColor::clear();
-            v.beam_hue   = hue.value_or(Hue::GRAY);
-        }
+        v.color = optional_color(x.get("color")).value_or(RgbColor::clear());
+        v.hue   = optional_hue(x.get("hue"));
         return v;
     } else {
         throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());

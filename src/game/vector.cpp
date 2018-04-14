@@ -91,9 +91,9 @@ Handle<Vector> Vectors::add(coordPointType* location, const BaseObject::Vector& 
             vector->lastApparentLocation = *location;
             vector->killMe               = false;
             vector->active               = true;
-            vector->visible              = v.visible;
-            vector->bolt_color           = v.bolt_color;
-            vector->beam_hue             = v.beam_hue;
+            vector->visible              = (v.color != RgbColor::clear()) || v.hue.has_value();
+            vector->color                = v.color;
+            vector->hue                  = v.hue;
 
             const int32_t x      = scale(location->h - gGlobalCorner.h, gAbsoluteScale);
             const int32_t y      = scale(location->v - gGlobalCorner.v, gAbsoluteScale);
@@ -186,16 +186,16 @@ void Vectors::update() {
 
             if (!vector->killMe) {
                 if (vector->visible) {
-                    if (vector->vectorKind != VectorKind::BOLT) {
+                    if (vector->hue.has_value()) {
                         vector->boltState++;
                         if (vector->boltState > 24)
                             vector->boltState = -24;
-                        uint8_t currentColor = static_cast<int>(vector->beam_hue) << 4;
+                        uint8_t currentColor = static_cast<int>(*vector->hue) << 4;
                         if (vector->boltState < 0)
                             currentColor += (-vector->boltState) >> 1;
                         else
                             currentColor += vector->boltState >> 1;
-                        vector->bolt_color = GetRGBTranslateColor(currentColor);
+                        vector->color = GetRGBTranslateColor(currentColor);
                     }
                     if ((vector->vectorKind == VectorKind::BEAM_TO_OBJECT_LIGHTNING) ||
                         (vector->vectorKind == VectorKind::BEAM_TO_COORD_LIGHTNING)) {
@@ -236,13 +236,13 @@ void Vectors::draw() {
                         for (int j : range(1, kBoltPointNum)) {
                             lines.draw(
                                     vector->thisBoltPoint[j - 1], vector->thisBoltPoint[j],
-                                    vector->bolt_color);
+                                    vector->color);
                         }
                     } else {
                         lines.draw(
                                 Point(vector->thisLocation.left, vector->thisLocation.top),
                                 Point(vector->thisLocation.right, vector->thisLocation.bottom),
-                                vector->bolt_color);
+                                vector->color);
                     }
                 }
             }
