@@ -146,23 +146,22 @@ uint32_t optional_object_build_flags(path_value x) {
 }
 
 fixedPointType required_fixed_point(path_value x) {
-    if (x.value().is_map()) {
-        Fixed px = required_fixed(x.get("x"));
-        Fixed py = required_fixed(x.get("y"));
-        return {px, py};
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
-    }
+    return required_struct<fixedPointType>(
+            x, {
+                       {"x", {&fixedPointType::h, required_fixed}},
+                       {"y", {&fixedPointType::v, required_fixed}},
+               });
 }
 
-std::vector<fixedPointType> optional_fixed_point_array(path_value x) {
+template <typename T, T (*F)(path_value x)>
+std::vector<T> optional_array(path_value x) {
     if (x.value().is_null()) {
         return {};
     } else if (x.value().is_array()) {
-        pn::array_cref              a = x.value().as_array();
-        std::vector<fixedPointType> result;
+        pn::array_cref a = x.value().as_array();
+        std::vector<T> result;
         for (int i = 0; i < a.size(); ++i) {
-            result.emplace_back(required_fixed_point(x.get(i)));
+            result.emplace_back(F(x.get(i)));
         }
         return result;
     } else {
@@ -171,16 +170,13 @@ std::vector<fixedPointType> optional_fixed_point_array(path_value x) {
 }
 
 sfz::optional<BaseObject::Weapon> optional_weapon(path_value x) {
-    if (x.value().is_null()) {
-        return sfz::nullopt;
-    } else if (x.value().is_map()) {
-        BaseObject::Weapon w;
-        w.base      = required_base(x.get("base"));
-        w.positions = optional_fixed_point_array(x.get("positions"));
-        return sfz::make_optional(std::move(w));
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
-    }
+    return optional_struct<BaseObject::Weapon>(
+            x, {
+                       {"base", {&BaseObject::Weapon::base, required_base}},
+                       {"positions",
+                        {&BaseObject::Weapon::positions,
+                         optional_array<fixedPointType, required_fixed_point>}},
+               });
 }
 
 static sfz::optional<int16_t> optional_layer(path_value x) {
