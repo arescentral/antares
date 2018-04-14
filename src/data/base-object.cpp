@@ -179,13 +179,7 @@ sfz::optional<BaseObject::Weapon> optional_weapon(path_value x) {
                });
 }
 
-static sfz::optional<int16_t> optional_layer(path_value x) {
-    sfz::optional<int64_t> i = optional_int(x, {1, 4});
-    if (i.has_value()) {
-        return sfz::make_optional<int16_t>(*i);
-    }
-    return sfz::nullopt;
-}
+static int16_t required_layer(path_value x) { return required_int(x, {1, 4}); }
 
 static sfz::optional<int32_t> optional_scale(path_value x) {
     sfz::optional<Fixed> f = optional_fixed(x);
@@ -201,8 +195,8 @@ BaseObject::Rotation optional_rotation_frame(path_value x) {
                    x,
                    {
                            {"sprite", {&Rotation::sprite, required_string_copy}},
-                           {"layer", {&Rotation::layer, optional_layer, 0}},
-                           {"scale", {&Rotation::scale, optional_scale, 4096}},
+                           {"layer", {&Rotation::layer, required_layer}},
+                           {"scale", {&Rotation::scale, optional_scale, SCALE_SCALE}},
                            {"frames", {&Rotation::frames, required_int_range}},
                            {"turn_rate", {&Rotation::turn_rate, optional_fixed, Fixed::zero()}},
                    })
@@ -215,8 +209,8 @@ BaseObject::Animation optional_animation_frame(path_value x) {
                    x,
                    {
                            {"sprite", {&Animation::sprite, required_string_copy}},
-                           {"layer", {&Animation::layer, optional_layer, 0}},
-                           {"scale", {&Animation::scale, optional_scale, 4096}},
+                           {"layer", {&Animation::layer, required_layer}},
+                           {"scale", {&Animation::scale, optional_scale, SCALE_SCALE}},
                            {"frames",
                             {&Animation::frames, optional_fixed_range,
                              Range<Fixed>{Fixed::zero(), Fixed::from_val(1)}}},
