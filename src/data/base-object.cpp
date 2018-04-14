@@ -285,8 +285,22 @@ static BaseObject::Loadout optional_loadout(path_value x) {
             .value_or(BaseObject::Loadout{});
 }
 
+BaseObject set_attributes(BaseObject o) {
+    if (((o.rotation.has_value() + o.animation.has_value() + o.vector.has_value() +
+          o.device.has_value()) != 1)) {
+        throw std::runtime_error("must have single rotation, animation, vector, or device block");
+    } else if (o.rotation.has_value()) {
+        o.attributes |= kShapeFromDirection;
+    } else if (o.animation.has_value()) {
+        o.attributes |= kIsSelfAnimated;
+    } else if (o.vector.has_value()) {
+        o.attributes |= kIsVector;
+    }
+    return o;
+}
+
 BaseObject base_object(pn::value_cref x0) {
-    return required_struct<BaseObject>(
+    return set_attributes(required_struct<BaseObject>(
             path_value{x0},
             {
                     {"attributes", {&BaseObject::attributes, optional_object_attributes}},
@@ -362,7 +376,7 @@ BaseObject base_object(pn::value_cref x0) {
                     {"level_tag", {&BaseObject::levelKeyTag, optional_string, ""}},
                     {"engage_tag", {&BaseObject::engageKeyTag, optional_string, ""}},
                     {"order_tag", {&BaseObject::orderKeyTag, optional_string, ""}},
-            });
+            }));
 }
 
 }  // namespace antares
