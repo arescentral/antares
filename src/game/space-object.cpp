@@ -387,12 +387,11 @@ void SpaceObject::change_base_type(
     }
 #endif  // DATA_COVERAGE
 
-    obj->attributes    = base.attributes | (obj->attributes & (kIsHumanControlled | kIsRemote |
-                                                            kIsPlayerShip | kStaticDestination));
-    obj->base          = &base;
-    obj->icon          = base.icon;
-    obj->shieldColor   = base.shieldColor;
-    obj->layer         = sprite_layer(base);
+    obj->attributes  = base.attributes | (obj->attributes & (kIsPlayerShip | kStaticDestination));
+    obj->base        = &base;
+    obj->icon        = base.icon;
+    obj->shieldColor = base.shieldColor;
+    obj->layer       = sprite_layer(base);
     obj->directionGoal = 0;
     obj->turnFraction = obj->turnVelocity = Fixed::zero();
 

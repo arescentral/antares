@@ -61,14 +61,11 @@ const int32_t kEngageRange = 1048576;  // range at which to engage closest ship
                                        // about 2 subsectors (512 * 2)^2
 
 enum {
-    kCanTurn           = 0x00000001,  // we have to worry about its rotation velocity
-    kCanBeEngaged      = 0x00000002,  // if it's worth going after
-    kHasDirectionGoal  = 0x00000004,  // we must turn it towards its goal
-    kIsRemote          = 0x00000008,  // is controlled by remote computer
-    kIsHumanControlled = 0x00000010,  // human is controlling it
-    kIsVector          = 0x00000020,  // a vector shot, no sprite
-    kDoesBounce =
-            0x00000040,  // when it hits the edge, it bounces FORMER: can't move, so don't try
+    kCanTurn              = 0x00000001,  // we have to worry about its rotation velocity
+    kCanBeEngaged         = 0x00000002,  // if it's worth going after
+    kHasDirectionGoal     = 0x00000004,  // we must turn it towards its goal
+    kIsVector             = 0x00000020,  // a vector shot, no sprite
+    kDoesBounce           = 0x00000040,  // when it hits the edge, it bounces
     kIsSelfAnimated       = 0x00000080,  // cycles through animation frames
     kShapeFromDirection   = 0x00000100,  // its appearence is based on its direction
     kIsPlayerShip         = 0x00000200,  // this is the ship we focus on
@@ -94,7 +91,6 @@ enum {
     kIsGuided =
             0x10000000,  // doesn't really think; can't accept orders; if not yours, it is feared
     kAppearOnRadar = 0x20000000,  // shows up on radar
-    kBit31         = 0x40000000,
     kOnAutoPilot = 0x80000000,  // if human controlled, this temporarily gives the computer control
 
     kCanThink         = kCanEngage | kCanEvade | kCanAcceptDestination,  // not just "dumb"

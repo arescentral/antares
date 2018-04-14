@@ -54,7 +54,7 @@ void create_initial(Handle<const Level::Initial> initial) {
     int32_t attributes = 0;
     if (initial->flagship) {
         if ((owner == g.admiral) && !owner->flagship().get()) {
-            attributes |= kIsHumanControlled | kIsPlayerShip;
+            attributes |= kIsPlayerShip;
         }
     }
     if (initial->target.lock) {
@@ -144,7 +144,7 @@ void UnhideInitialObject(Handle<const Level::Initial> initial) {
     uint32_t attributes = 0;
     if (initial->flagship) {
         if ((owner == g.admiral) && !owner->flagship().get()) {
-            attributes |= kIsHumanControlled | kIsPlayerShip;
+            attributes |= kIsPlayerShip;
         }
     }
     if (initial->target.lock) {

@@ -511,7 +511,7 @@ void PlayerShip::gamepad_stick(const GamepadStickEvent& event) {
 
 bool PlayerShip::active() const {
     auto player = g.ship;
-    return player.get() && player->active && (player->attributes & kIsHumanControlled);
+    return player.get() && player->active && (player->attributes & kIsPlayerShip);
 }
 
 void PlayerShip::update(bool enter_message) {
@@ -618,7 +618,7 @@ void PlayerShip::update(bool enter_message) {
         globals()->next_klaxon = game_ticks();
     }
 
-    if (!(theShip->attributes & kIsHumanControlled)) {
+    if (!(theShip->attributes & kIsPlayerShip)) {
         return;
     }
 
@@ -760,7 +760,7 @@ void PlayerShipHandleClick(Point where, int button) {
 
     gDestKeyState = DEST_KEY_BLOCKED;
     if (g.ship.get()) {
-        if ((g.ship->active) && (g.ship->attributes & kIsHumanControlled)) {
+        if ((g.ship->active) && (g.ship->attributes & kIsPlayerShip)) {
             Rect bounds = {
                     where.h - kCursorBoundsSize, where.v - kCursorBoundsSize,
                     where.h + kCursorBoundsSize, where.v + kCursorBoundsSize,
@@ -829,7 +829,7 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
     }
 
     if (adm == g.admiral) {
-        flagship->attributes &= ~(kIsHumanControlled | kIsPlayerShip);
+        flagship->attributes &= ~kIsPlayerShip;
         if (newShip != g.ship) {
             g.ship = newShip;
             globals()->starfield.reset(newShip);
@@ -843,7 +843,7 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
                                              .c_str());
         }
 
-        flagship->attributes |= kIsHumanControlled | kIsPlayerShip;
+        flagship->attributes |= kIsPlayerShip;
 
         if (newShip == g.admiral->control()) {
             g.control_label->set_age(Label::kVisibleTime);
@@ -852,9 +852,9 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
             g.target_label->set_age(Label::kVisibleTime);
         }
     } else {
-        flagship->attributes &= ~(kIsRemote | kIsPlayerShip);
+        flagship->attributes &= ~kIsPlayerShip;
         flagship = newShip;
-        flagship->attributes |= (kIsRemote | kIsPlayerShip);
+        flagship->attributes |= kIsPlayerShip;
     }
     adm->set_flagship(newShip);
 }
@@ -862,13 +862,13 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
 void TogglePlayerAutoPilot(Handle<SpaceObject> flagship) {
     if (flagship->attributes & kOnAutoPilot) {
         flagship->attributes &= ~kOnAutoPilot;
-        if ((flagship->owner == g.admiral) && (flagship->attributes & kIsHumanControlled)) {
+        if ((flagship->owner == g.admiral) && (flagship->attributes & kIsPlayerShip)) {
             Messages::autopilot(false);
         }
     } else {
         SetObjectDestination(flagship);
         flagship->attributes |= kOnAutoPilot;
-        if ((flagship->owner == g.admiral) && (flagship->attributes & kIsHumanControlled)) {
+        if ((flagship->owner == g.admiral) && (flagship->attributes & kIsPlayerShip)) {
             Messages::autopilot(true);
         }
     }

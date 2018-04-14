@@ -55,7 +55,7 @@ const int32_t kDistanceSuperUnitBitShift = 15;  // >> 18L = / 262144
 
 const int32_t kConsiderDistanceAttributes =
         (kCanCollide | kCanBeHit | kIsDestination | kCanThink | kConsiderDistance | kCanBeEvaded |
-         kIsHumanControlled | kIsRemote);
+         kIsPlayerShip);
 
 const uint32_t kThinkiverseTopLeft =
         (kUniversalCenter - (2 * 65534));  // universe for thinking or owned objects

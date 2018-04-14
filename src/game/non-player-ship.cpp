@@ -1521,7 +1521,7 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
         exec(sObject->base->collide, sObject, anObject, NULL);
     }
 
-    if (anObject->owner == g.admiral && (anObject->attributes & kIsHumanControlled) &&
+    if (anObject->owner == g.admiral && (anObject->attributes & kIsPlayerShip) &&
         (sObject->base->damage > 0)) {
         globals()->transitions.start_boolean(128, WHITE);
     }
