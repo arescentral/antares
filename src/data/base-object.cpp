@@ -26,6 +26,14 @@ static int32_t required_int32(path_value x) {
     return required_int(x, {-0x80000000ll, 0x80000000ll});
 }
 
+static sfz::optional<uint8_t> optional_uint8(path_value x) {
+    sfz::optional<int64_t> i = optional_int(x, {0, 0x100});
+    if (i.has_value()) {
+        return sfz::make_optional<uint8_t>(*i);
+    }
+    return sfz::nullopt;
+}
+
 static sfz::optional<int32_t> optional_int32(path_value x) {
     sfz::optional<int64_t> i = optional_int(x, {-0x80000000ll, 0x80000000ll});
     if (i.has_value()) {
@@ -34,7 +42,15 @@ static sfz::optional<int32_t> optional_int32(path_value x) {
     return sfz::nullopt;
 }
 
-int32_t optional_object_order_flags(path_value x) {
+static sfz::optional<uint32_t> optional_uint32(path_value x) {
+    sfz::optional<int64_t> i = optional_int(x, {0, 0x100000000ll});
+    if (i.has_value()) {
+        return sfz::make_optional<uint32_t>(*i);
+    }
+    return sfz::nullopt;
+}
+
+uint32_t optional_object_order_flags(path_value x) {
     if (x.value().is_null()) {
         return 0;
     } else if (x.value().is_map()) {
@@ -70,8 +86,8 @@ int32_t optional_object_order_flags(path_value x) {
                                                   "hard_not_base",
                                                   "hard_base"};
 
-        int32_t bit    = 0x00000001;
-        int32_t result = 0x00000000;
+        uint32_t bit    = 0x00000001;
+        uint32_t result = 0x00000000;
         for (pn::string_view flag : flags) {
             if (optional_bool(x.get(flag)).value_or(false)) {
                 result |= bit;
@@ -84,7 +100,7 @@ int32_t optional_object_order_flags(path_value x) {
     }
 }
 
-int32_t optional_object_build_flags(path_value x) {
+uint32_t optional_object_build_flags(path_value x) {
     if (x.value().is_null()) {
         return 0;
     } else if (x.value().is_map()) {
@@ -115,8 +131,8 @@ int32_t optional_object_build_flags(path_value x) {
                                                   "only_engaged_by",
                                                   "can_only_engage"};
 
-        int32_t bit    = 0x00000001;
-        int32_t result = 0x00000000;
+        uint32_t bit    = 0x00000001;
+        uint32_t result = 0x00000000;
         for (pn::string_view flag : flags) {
             if (optional_bool(x.get(flag)).value_or(false)) {
                 result |= bit;
@@ -183,41 +199,47 @@ static sfz::optional<int32_t> optional_scale(path_value x) {
     return sfz::nullopt;
 }
 
-objectFrameType::Rotation required_rotation_frame(path_value x) {
-    using Rotation = objectFrameType::Rotation;
-    return required_struct<Rotation>(
-            x, {
-                       {"sprite", {&Rotation::sprite, required_string_copy}},
-                       {"layer", {&Rotation::layer, optional_layer, 0}},
-                       {"scale", {&Rotation::scale, optional_scale, 4096}},
-                       {"frames", {&Rotation::frames, required_int_range}},
-                       {"turn_rate", {&Rotation::turn_rate, optional_fixed, Fixed::zero()}},
-               });
+BaseObject::Rotation optional_rotation_frame(path_value x) {
+    using Rotation = BaseObject::Rotation;
+    return optional_struct<Rotation>(
+                   x,
+                   {
+                           {"sprite", {&Rotation::sprite, required_string_copy}},
+                           {"layer", {&Rotation::layer, optional_layer, 0}},
+                           {"scale", {&Rotation::scale, optional_scale, 4096}},
+                           {"frames", {&Rotation::frames, required_int_range}},
+                           {"turn_rate", {&Rotation::turn_rate, optional_fixed, Fixed::zero()}},
+                   })
+            .value_or(Rotation{});
 }
 
-objectFrameType::Animation required_animation_frame(path_value x) {
-    using Animation = objectFrameType::Animation;
-    return required_struct<Animation>(
-            x, {
-                       {"sprite", {&Animation::sprite, required_string_copy}},
-                       {"layer", {&Animation::layer, optional_layer, 0}},
-                       {"scale", {&Animation::scale, optional_scale, 4096}},
-                       {"frames",
-                        {&Animation::frames, optional_fixed_range,
-                         Range<Fixed>{Fixed::zero(), Fixed::from_val(1)}}},
-                       {"direction",
-                        {&Animation::direction, optional_animation_direction,
-                         AnimationDirection::NONE}},
-                       {"speed", {&Animation::speed, optional_fixed, Fixed::zero()}},
-                       {"first",
-                        {&Animation::first, optional_fixed_range,
-                         Range<Fixed>{Fixed::zero(), Fixed::from_val(1)}}},
-               });
+BaseObject::Animation optional_animation_frame(path_value x) {
+    using Animation = BaseObject::Animation;
+    return optional_struct<Animation>(
+                   x,
+                   {
+                           {"sprite", {&Animation::sprite, required_string_copy}},
+                           {"layer", {&Animation::layer, optional_layer, 0}},
+                           {"scale", {&Animation::scale, optional_scale, 4096}},
+                           {"frames",
+                            {&Animation::frames, optional_fixed_range,
+                             Range<Fixed>{Fixed::zero(), Fixed::from_val(1)}}},
+                           {"direction",
+                            {&Animation::direction, optional_animation_direction,
+                             AnimationDirection::NONE}},
+                           {"speed", {&Animation::speed, optional_fixed, Fixed::zero()}},
+                           {"first",
+                            {&Animation::first, optional_fixed_range,
+                             Range<Fixed>{Fixed::zero(), Fixed::from_val(1)}}},
+                   })
+            .value_or(Animation{});
 }
 
-objectFrameType::Vector required_vector_frame(path_value x) {
-    if (x.value().is_map()) {
-        objectFrameType::Vector v;
+BaseObject::Vector optional_vector_frame(path_value x) {
+    if (x.value().is_null()) {
+        return BaseObject::Vector{};
+    } else if (x.value().is_map()) {
+        BaseObject::Vector v;
         v.kind     = required_vector_kind(x.get("kind"));
         v.accuracy = required_int(x.get("accuracy"));
         v.range    = required_int(x.get("range"));
@@ -258,18 +280,21 @@ uint32_t optional_usage(path_value x) {
     }
 }
 
-objectFrameType::Weapon required_device_frame(path_value x) {
-    using Weapon = objectFrameType::Weapon;
-    return required_struct<Weapon>(
-            x, {
-                       {"usage", {&Weapon::usage, optional_usage}},
-                       {"energy_cost", {&Weapon::energyCost, optional_int32, 0}},
-                       {"fire_time", {&Weapon::fireTime, required_ticks}},
-                       {"ammo", {&Weapon::ammo, optional_int32, -1}},
-                       {"range", {&Weapon::range, required_int32}},
-                       {"inverse_speed", {&Weapon::inverseSpeed, optional_fixed, Fixed::zero()}},
-                       {"restock_cost", {&Weapon::restockCost, optional_int32, -1}},
-               });
+BaseObject::Device optional_device_frame(path_value x) {
+    using Device = BaseObject::Device;
+    return optional_struct<Device>(
+                   x,
+                   {
+                           {"usage", {&Device::usage, optional_usage}},
+                           {"energy_cost", {&Device::energyCost, optional_int32, 0}},
+                           {"fire_time", {&Device::fireTime, required_ticks}},
+                           {"ammo", {&Device::ammo, optional_int32, -1}},
+                           {"range", {&Device::range, required_int32}},
+                           {"inverse_speed",
+                            {&Device::inverseSpeed, optional_fixed, Fixed::zero()}},
+                           {"restock_cost", {&Device::restockCost, optional_int32, -1}},
+                   })
+            .value_or(Device{});
 }
 
 static sfz::optional<BaseObject::Icon> optional_icon(path_value x) {
@@ -280,90 +305,95 @@ static sfz::optional<BaseObject::Icon> optional_icon(path_value x) {
                });
 }
 
-static sfz::optional<BaseObject::Loadout> optional_loadout(path_value x) {
+static BaseObject::Loadout optional_loadout(path_value x) {
     return optional_struct<BaseObject::Loadout>(
-            x, {
-                       {"pulse", {&BaseObject::Loadout::pulse, optional_weapon}},
-                       {"beam", {&BaseObject::Loadout::beam, optional_weapon}},
-                       {"special", {&BaseObject::Loadout::special, optional_weapon}},
-               });
+                   x,
+                   {
+                           {"pulse", {&BaseObject::Loadout::pulse, optional_weapon}},
+                           {"beam", {&BaseObject::Loadout::beam, optional_weapon}},
+                           {"special", {&BaseObject::Loadout::special, optional_weapon}},
+                   })
+            .value_or(BaseObject::Loadout{});
 }
 
 BaseObject base_object(pn::value_cref x0) {
-    if (!x0.is_map()) {
-        throw std::runtime_error("must be map");
-    }
+    return required_struct<BaseObject>(
+            path_value{x0},
+            {
+                    {"attributes", {&BaseObject::attributes, optional_object_attributes}},
+                    {"build_flags", {&BaseObject::buildFlags, optional_object_build_flags}},
+                    {"order_flags", {&BaseObject::orderFlags, optional_object_order_flags}},
 
-    path_value x{x0};
-    BaseObject o;
-    o.attributes = optional_object_attributes(x.get("attributes"));
-    o.buildFlags = optional_object_build_flags(x.get("build_flags"));
-    o.orderFlags = optional_object_order_flags(x.get("order_flags"));
+                    {"long_name", {&BaseObject::name, required_string_copy}},
+                    {"short_name", {&BaseObject::short_name, required_string_copy}},
 
-    o.name       = required_string(x.get("long_name")).copy();
-    o.short_name = required_string(x.get("short_name")).copy();
-    o.portrait   = optional_string(x.get("portrait")).value_or("").copy();
+                    {"notes", nullptr},
+                    {"class", nullptr},
+                    {"race", nullptr},
+                    {"danger_threshold", nullptr},
 
-    o.price                = optional_int(x.get("price")).value_or(0);
-    o.destinationClass     = optional_int(x.get("destination_class")).value_or(0);
-    o.warpOutDistance      = optional_int(x.get("warp_out_distance")).value_or(0);
-    o.health               = optional_int(x.get("health")).value_or(0);
-    o.damage               = optional_int(x.get("damage")).value_or(0);
-    o.energy               = optional_int(x.get("energy")).value_or(0);
-    o.skillNum             = optional_int(x.get("skill_num")).value_or(0);
-    o.skillDen             = optional_int(x.get("skill_den")).value_or(0);
-    o.occupy_count         = optional_int(x.get("occupy_count")).value_or(-1);
-    o.arriveActionDistance = optional_int(x.get("arrive_action_distance")).value_or(0);
+                    {"portrait", {&BaseObject::portrait, optional_string, ""}},
 
-    o.offenseValue  = optional_fixed(x.get("offense")).value_or(Fixed::zero());
-    o.maxVelocity   = optional_fixed(x.get("max_velocity")).value_or(Fixed::zero());
-    o.warpSpeed     = optional_fixed(x.get("warp_speed")).value_or(Fixed::zero());
-    o.mass          = optional_fixed(x.get("mass")).value_or(Fixed::zero());
-    o.maxThrust     = optional_fixed(x.get("max_thrust")).value_or(Fixed::zero());
-    o.friendDefecit = optional_fixed(x.get("friend_deficit")).value_or(Fixed::zero());
-    o.buildRatio    = optional_fixed(x.get("build_ratio")).value_or(Fixed::zero());
+                    {"price", {&BaseObject::price, optional_int32, 0}},
+                    {"destination_class", {&BaseObject::destinationClass, optional_int32, 0}},
+                    {"warp_out_distance", {&BaseObject::warpOutDistance, optional_uint32, 0}},
+                    {"health", {&BaseObject::health, optional_int32, 0}},
+                    {"damage", {&BaseObject::damage, optional_int32, 0}},
+                    {"energy", {&BaseObject::energy, optional_int32, 0}},
+                    {"skill_num", {&BaseObject::skillNum, optional_uint8, 0}},
+                    {"skill_den", {&BaseObject::skillDen, optional_uint8, 0}},
+                    {"occupy_count", {&BaseObject::occupy_count, optional_int32, -1}},
+                    {"arrive_action_distance",
+                     {&BaseObject::arriveActionDistance, optional_int32, 0}},
 
-    o.buildTime = optional_ticks(x.get("build_time")).value_or(ticks(0));
+                    {"offense", {&BaseObject::offenseValue, optional_fixed, Fixed::zero()}},
+                    {"max_velocity", {&BaseObject::maxVelocity, optional_fixed, Fixed::zero()}},
+                    {"warp_speed", {&BaseObject::warpSpeed, optional_fixed, Fixed::zero()}},
+                    {"mass", {&BaseObject::mass, optional_fixed, Fixed::zero()}},
+                    {"max_thrust", {&BaseObject::maxThrust, optional_fixed, Fixed::zero()}},
+                    {"friend_deficit",
+                     {&BaseObject::friendDefecit, optional_fixed, Fixed::zero()}},
+                    {"build_ratio", {&BaseObject::buildRatio, optional_fixed, Fixed::zero()}},
 
-    o.shieldColor = optional_color(x.get("shield_color"));
+                    {"build_time", {&BaseObject::buildTime, optional_ticks, ticks(0)}},
 
-    o.initial_velocity = optional_fixed_range(x.get("initial_velocity"))
-                                 .value_or(Range<Fixed>{Fixed::zero(), Fixed::zero()});
-    o.initial_age = optional_ticks_range(x.get("initial_age"))
-                            .value_or(Range<ticks>{ticks(-1), ticks(-1)});
-    o.initial_direction =
-            optional_int_range(x.get("initial_direction")).value_or(Range<int64_t>{0, 0});
+                    {"shield_color", {&BaseObject::shieldColor, optional_color}},
 
-    o.destroy  = optional_action_array(x.get("on_destroy"));
-    o.expire   = optional_action_array(x.get("on_expire"));
-    o.create   = optional_action_array(x.get("on_create"));
-    o.collide  = optional_action_array(x.get("on_collide"));
-    o.activate = optional_action_array(x.get("on_activate"));
-    o.arrive   = optional_action_array(x.get("on_arrive"));
+                    {"initial_velocity",
+                     {&BaseObject::initial_velocity, optional_fixed_range,
+                      Range<Fixed>{Fixed::zero(), Fixed::zero()}}},
+                    {"initial_age",
+                     {&BaseObject::initial_age, optional_ticks_range,
+                      Range<ticks>{ticks(-1), ticks(-1)}}},
+                    {"initial_direction",
+                     {&BaseObject::initial_direction, optional_int_range, Range<int64_t>{0, 0}}},
 
-    o.icon    = optional_icon(x.get("icon")).value_or(BaseObject::Icon{IconShape::SQUARE, 0});
-    o.weapons = optional_loadout(x.get("weapons")).value_or(BaseObject::Loadout{});
+                    {"on_destroy", {&BaseObject::destroy, optional_action_array}},
+                    {"on_expire", {&BaseObject::expire, optional_action_array}},
+                    {"on_create", {&BaseObject::create, optional_action_array}},
+                    {"on_collide", {&BaseObject::collide, optional_action_array}},
+                    {"on_activate", {&BaseObject::activate, optional_action_array}},
+                    {"on_arrive", {&BaseObject::arrive, optional_action_array}},
 
-    if (o.attributes & kShapeFromDirection) {
-        o.frame.rotation = required_rotation_frame(x.get("rotation"));
-    } else if (o.attributes & kIsSelfAnimated) {
-        o.frame.animation = required_animation_frame(x.get("animation"));
-    } else if (o.attributes & kIsVector) {
-        o.frame.vector = required_vector_frame(x.get("vector"));
-    } else {
-        o.frame.weapon = required_device_frame(x.get("device"));
-    }
+                    {"icon",
+                     {&BaseObject::icon, optional_icon, BaseObject::Icon{IconShape::SQUARE, 0}}},
+                    {"weapons", {&BaseObject::weapons, optional_loadout}},
 
-    o.destroyDontDie  = optional_bool(x.get("destroy_dont_die")).value_or(false);
-    o.expireDontDie   = optional_bool(x.get("expire_dont_die")).value_or(false);
-    o.activate_period = optional_ticks_range(x.get("activate_period"))
-                                .value_or(Range<ticks>{ticks(0), ticks(0)});
+                    {"rotation", {&BaseObject::rotation, optional_rotation_frame}},
+                    {"animation", {&BaseObject::animation, optional_animation_frame}},
+                    {"vector", {&BaseObject::vector, optional_vector_frame}},
+                    {"device", {&BaseObject::device, optional_device_frame}},
 
-    o.levelKeyTag  = optional_string(x.get("level_tag")).value_or("").copy();
-    o.engageKeyTag = optional_string(x.get("engage_tag")).value_or("").copy();
-    o.orderKeyTag  = optional_string(x.get("order_tag")).value_or("").copy();
+                    {"destroy_dont_die", {&BaseObject::destroyDontDie, optional_bool, false}},
+                    {"expire_dont_die", {&BaseObject::expireDontDie, optional_bool, false}},
+                    {"activate_period",
+                     {&BaseObject::activate_period, optional_ticks_range,
+                      Range<ticks>{ticks(0), ticks(0)}}},
 
-    return o;
+                    {"level_tag", {&BaseObject::levelKeyTag, optional_string, ""}},
+                    {"engage_tag", {&BaseObject::engageKeyTag, optional_string, ""}},
+                    {"order_tag", {&BaseObject::orderKeyTag, optional_string, ""}},
+            });
 }
 
 }  // namespace antares

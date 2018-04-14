@@ -189,7 +189,7 @@ static Handle<SpaceObject> AddSpaceObject(SpaceObject* sourceObject) {
     }
 
     if (obj->attributes & kIsVector) {
-        const auto& vector = obj->base->frame.vector;
+        const auto& vector = obj->base->vector;
         obj->frame.vector  = Vectors::add(&(obj->location), vector);
     }
 
@@ -278,12 +278,12 @@ SpaceObject::SpaceObject(
     }
 
     if (attributes & kIsSelfAnimated) {
-        frame.animation.thisShape = base->frame.animation.first.begin;
-        if (base->frame.animation.first.range() > Fixed::from_val(1)) {
-            frame.animation.thisShape += randomSeed.next(base->frame.animation.first.range());
+        frame.animation.thisShape = base->animation.first.begin;
+        if (base->animation.first.range() > Fixed::from_val(1)) {
+            frame.animation.thisShape += randomSeed.next(base->animation.first.range());
         }
-        frame.animation.direction = base->frame.animation.direction;
-        if (base->frame.animation.direction == AnimationDirection::RANDOM) {
+        frame.animation.direction = base->animation.direction;
+        if (base->animation.direction == AnimationDirection::RANDOM) {
             if (randomSeed.next(2) == 1) {
                 frame.animation.direction = AnimationDirection::PLUS;
             } else {
@@ -291,7 +291,7 @@ SpaceObject::SpaceObject(
             }
         }
         frame.animation.frameFraction = Fixed::zero();
-        frame.animation.speed         = base->frame.animation.speed;
+        frame.animation.speed         = base->animation.speed;
     }
 
     if (base->initial_age.begin >= ticks(1)) {
@@ -325,7 +325,7 @@ SpaceObject::SpaceObject(
 
     for (auto weapon : {&pulse, &beam, &special}) {
         if (weapon->base) {
-            const auto& frame = weapon->base->frame.weapon;
+            const auto& frame = weapon->base->device;
             weapon->ammo      = frame.ammo;
             if ((frame.range > 0) && (frame.usage & kUseForAttacking)) {
                 longestWeaponRange  = max(frame.range, longestWeaponRange);
@@ -397,13 +397,12 @@ void SpaceObject::change_base_type(
     obj->turnFraction = obj->turnVelocity = Fixed::zero();
 
     if (obj->attributes & kIsSelfAnimated) {
-        obj->frame.animation.thisShape = base.frame.animation.first.begin;
-        if (base.frame.animation.first.range() > Fixed::from_val(1)) {
-            obj->frame.animation.thisShape +=
-                    obj->randomSeed.next(base.frame.animation.first.range());
+        obj->frame.animation.thisShape = base.animation.first.begin;
+        if (base.animation.first.range() > Fixed::from_val(1)) {
+            obj->frame.animation.thisShape += obj->randomSeed.next(base.animation.first.range());
         }
-        frame.animation.direction = base.frame.animation.direction;
-        if (base.frame.animation.direction == AnimationDirection::RANDOM) {
+        frame.animation.direction = base.animation.direction;
+        if (base.animation.direction == AnimationDirection::RANDOM) {
             if (randomSeed.next(2) == 1) {
                 frame.animation.direction = AnimationDirection::PLUS;
             } else {
@@ -411,7 +410,7 @@ void SpaceObject::change_base_type(
             }
         }
         obj->frame.animation.frameFraction = Fixed::zero();
-        obj->frame.animation.speed         = base.frame.animation.speed;
+        obj->frame.animation.speed         = base.animation.speed;
     }
 
     obj->maxVelocity = base.maxVelocity;
@@ -473,14 +472,14 @@ void SpaceObject::change_base_type(
         }
 
         if (!relative) {
-            weapon->ammo     = weapon->base->frame.weapon.ammo;
+            weapon->ammo     = weapon->base->device.ammo;
             weapon->position = 0;
-            if (weapon->time > g.time + weapon->base->frame.weapon.fireTime) {
-                weapon->time = g.time + weapon->base->frame.weapon.fireTime;
+            if (weapon->time > g.time + weapon->base->device.fireTime) {
+                weapon->time = g.time + weapon->base->device.fireTime;
             }
         }
-        r = weapon->base->frame.weapon.range;
-        if ((r > 0) && (weapon->base->frame.weapon.usage & kUseForAttacking)) {
+        r = weapon->base->device.range;
+        if ((r > 0) && (weapon->base->device.usage & kUseForAttacking)) {
             if (r > obj->longestWeaponRange) {
                 obj->longestWeaponRange = r;
             }
@@ -854,7 +853,7 @@ bool SpaceObject::engages(const SpaceObject& b) const {
 Fixed SpaceObject::turn_rate() const {
     // design flaw: can't have turn rate unless shapefromdirection
     if (attributes & kShapeFromDirection) {
-        return base->frame.rotation.turn_rate;
+        return base->rotation.turn_rate;
     }
     return kDefaultTurnRate;
 }
@@ -863,9 +862,9 @@ int32_t SpaceObject::number() const { return this - g.objects.get(); }
 
 sfz::optional<pn::string_view> sprite_resource(const BaseObject& o) {
     if (o.attributes & kShapeFromDirection) {
-        return sfz::make_optional<pn::string_view>(o.frame.rotation.sprite);
+        return sfz::make_optional<pn::string_view>(o.rotation.sprite);
     } else if (o.attributes & kIsSelfAnimated) {
-        return sfz::make_optional<pn::string_view>(o.frame.animation.sprite);
+        return sfz::make_optional<pn::string_view>(o.animation.sprite);
     } else {
         return sfz::nullopt;
     }
@@ -873,9 +872,9 @@ sfz::optional<pn::string_view> sprite_resource(const BaseObject& o) {
 
 int32_t sprite_layer(const BaseObject& o) {
     if (o.attributes & kShapeFromDirection) {
-        return o.frame.rotation.layer;
+        return o.rotation.layer;
     } else if (o.attributes & kIsSelfAnimated) {
-        return o.frame.animation.layer;
+        return o.animation.layer;
     } else {
         return 0;
     }
@@ -883,9 +882,9 @@ int32_t sprite_layer(const BaseObject& o) {
 
 int32_t sprite_scale(const BaseObject& o) {
     if (o.attributes & kShapeFromDirection) {
-        return o.frame.rotation.scale;
+        return o.rotation.scale;
     } else if (o.attributes & kIsSelfAnimated) {
-        return o.frame.animation.scale;
+        return o.animation.scale;
     } else {
         return SCALE_SCALE;
     }
@@ -893,7 +892,7 @@ int32_t sprite_scale(const BaseObject& o) {
 
 int32_t rotation_resolution(const BaseObject& o) {
     if (o.attributes & kShapeFromDirection) {
-        return 360 / o.frame.rotation.frames.range();
+        return 360 / o.rotation.frames.range();
     } else {
         return 360;
     }

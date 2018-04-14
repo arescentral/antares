@@ -83,7 +83,7 @@ void Vectors::reset() {
     }
 }
 
-Handle<Vector> Vectors::add(coordPointType* location, const objectFrameType::Vector& v) {
+Handle<Vector> Vectors::add(coordPointType* location, const BaseObject::Vector& v) {
     for (auto vector : Vector::all()) {
         if (!vector->active) {
             vector->lastGlobalLocation   = *location;

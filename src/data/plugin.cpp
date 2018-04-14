@@ -158,8 +158,8 @@ static pn::value merged_object(pn::string_view name) {
             throw std::runtime_error(
                     pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
         }
-        pn::value_cref tpl = x.as_map().get("template");
-        if (tpl.is_null()) {
+        pn::value tpl;
+        if (!x.is_map() || !x.to_map().pop("template", tpl) || tpl.is_null()) {
             return x;
         } else if (tpl.is_string()) {
             pn::value base = merged_object(tpl.as_string());

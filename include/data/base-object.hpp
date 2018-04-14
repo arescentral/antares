@@ -201,55 +201,6 @@ enum kPresenceStateType {
     kWarpOutPresence = 5
 };
 
-struct objectFrameType {
-    // rotation: for objects whose shapes depend on their direction
-    struct Rotation {
-        pn::string sprite;  // ID of sprite resource
-        int16_t    layer;   // 0 = no layer 1->3 = back to front
-        int32_t    scale;   // sprite scale; 4096 = 100%
-
-        Range<int64_t> frames;
-        Fixed          turn_rate;  // max rate at which object can turn
-    };
-    Rotation rotation;
-
-    // animation: objects whose appearence does not depend on direction
-    struct Animation {
-        pn::string sprite;  // ID of sprite resource
-        int16_t    layer;   // 0 = no layer 1->3 = back to front
-        int32_t    scale;   // sprite scale; 4096 = 100%
-
-        Range<Fixed>       frames;     // range of frames from sprite
-        AnimationDirection direction;  // frame sequence
-        Fixed              speed;      // speed at which object animates
-        Range<Fixed>       first;      // starting shape #
-    };
-    Animation animation;
-
-    // vector: have no associated sprite
-    struct Vector {
-        bool       visible;
-        RgbColor   bolt_color;  // for VectorKind::BOLT only
-        Hue        beam_hue;    // for all but VectorKind::BOLT
-        VectorKind kind     = VectorKind::BOLT;
-        int32_t    accuracy = 0;  // for non-normal vector objects, how accurate
-        int32_t    range    = 0;
-    };
-    Vector vector;
-
-    // weapon: weapon objects have no physical form, and can only be activated
-    struct Weapon {
-        uint32_t usage;         // when is this used?
-        int32_t  energyCost;    // cost to fire
-        ticks    fireTime;      // time between shots
-        int32_t  ammo;          // initial ammo
-        int32_t  range;         // range (= age * max velocity)
-        Fixed    inverseSpeed;  // for AI = 1/max velocity
-        int32_t  restockCost;   // energy to make new ammo
-    };
-    Weapon weapon;
-};
-
 class BaseObject {
   public:
     static BaseObject* get(int number);
@@ -316,7 +267,52 @@ class BaseObject {
     bool         expireDontDie;
     Range<ticks> activate_period;
 
-    objectFrameType frame;
+    // rotation: for objects whose shapes depend on their direction
+    struct Rotation {
+        pn::string sprite;  // ID of sprite resource
+        int16_t    layer;   // 0 = no layer 1->3 = back to front
+        int32_t    scale;   // sprite scale; 4096 = 100%
+
+        Range<int64_t> frames;
+        Fixed          turn_rate;  // max rate at which object can turn
+    };
+    Rotation rotation;
+
+    // animation: objects whose appearence does not depend on direction
+    struct Animation {
+        pn::string sprite;  // ID of sprite resource
+        int16_t    layer;   // 0 = no layer 1->3 = back to front
+        int32_t    scale;   // sprite scale; 4096 = 100%
+
+        Range<Fixed>       frames;     // range of frames from sprite
+        AnimationDirection direction;  // frame sequence
+        Fixed              speed;      // speed at which object animates
+        Range<Fixed>       first;      // starting shape #
+    };
+    Animation animation;
+
+    // vector: have no associated sprite
+    struct Vector {
+        bool       visible;
+        RgbColor   bolt_color;  // for VectorKind::BOLT only
+        Hue        beam_hue;    // for all but VectorKind::BOLT
+        VectorKind kind     = VectorKind::BOLT;
+        int32_t    accuracy = 0;  // for non-normal vector objects, how accurate
+        int32_t    range    = 0;
+    };
+    Vector vector;
+
+    // weapon: weapon objects have no physical form, and can only be activated
+    struct Device {
+        uint32_t usage;         // when is this used?
+        int32_t  energyCost;    // cost to fire
+        ticks    fireTime;      // time between shots
+        int32_t  ammo;          // initial ammo
+        int32_t  range;         // range (= age * max velocity)
+        Fixed    inverseSpeed;  // for AI = 1/max velocity
+        int32_t  restockCost;   // energy to make new ammo
+    };
+    Device device;
 
     uint32_t   buildFlags;
     uint32_t   orderFlags;

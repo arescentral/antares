@@ -278,7 +278,7 @@ static void bounce(Handle<SpaceObject> o) {
 }
 
 static void animate(Handle<SpaceObject> o) {
-    auto& base_anim = o->base->frame.animation;
+    auto& base_anim = o->base->animation;
     if (base_anim.speed == Fixed::zero()) {
         return;
     }
@@ -451,7 +451,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
 
         auto baseObject = o->base;
         if (o->attributes & kIsSelfAnimated) {
-            if (baseObject->frame.animation.speed != Fixed::zero()) {
+            if (baseObject->animation.speed != Fixed::zero()) {
                 sprite.whichShape = more_evil_fixed_to_long(o->frame.animation.thisShape);
             }
         } else if (o->attributes & kShapeFromDirection) {
