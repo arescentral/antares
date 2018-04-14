@@ -232,20 +232,17 @@ BaseObject::Animation optional_animation_frame(path_value x) {
 }
 
 BaseObject::Vector optional_vector_frame(path_value x) {
-    if (x.value().is_null()) {
-        return BaseObject::Vector{};
-    } else if (x.value().is_map()) {
-        BaseObject::Vector v;
-        v.kind     = required_vector_kind(x.get("kind"));
-        v.accuracy = required_int(x.get("accuracy"));
-        v.range    = required_int(x.get("range"));
-
-        v.color = optional_color(x.get("color")).value_or(RgbColor::clear());
-        v.hue   = optional_hue(x.get("hue"));
-        return v;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
-    }
+    using Vector = BaseObject::Vector;
+    return optional_struct<Vector>(
+                   x,
+                   {
+                           {"kind", {&Vector::kind, required_vector_kind}},
+                           {"accuracy", {&Vector::accuracy, required_int32}},
+                           {"range", {&Vector::range, required_int32}},
+                           {"color", {&Vector::color, optional_color, RgbColor::clear()}},
+                           {"hue", {&Vector::hue, optional_hue}},
+                   })
+            .value_or(Vector{});
 }
 
 uint32_t optional_usage(path_value x) {
