@@ -279,25 +279,25 @@ static void bounce(Handle<SpaceObject> o) {
 
 static void animate(Handle<SpaceObject> o) {
     auto& base_anim = o->base->animation;
-    if (base_anim.speed == Fixed::zero()) {
+    if (base_anim->speed == Fixed::zero()) {
         return;
     }
 
     auto& space_anim = o->frame.animation;
     space_anim.thisShape += static_cast<int>(space_anim.direction) * space_anim.speed;
     if (o->attributes & kAnimationCycle) {
-        Fixed shape_num = base_anim.frames.range();
-        while (space_anim.thisShape >= base_anim.frames.end) {
+        Fixed shape_num = base_anim->frames.range();
+        while (space_anim.thisShape >= base_anim->frames.end) {
             space_anim.thisShape -= shape_num;
         }
-        while (space_anim.thisShape < base_anim.frames.begin) {
+        while (space_anim.thisShape < base_anim->frames.begin) {
             space_anim.thisShape += shape_num;
         }
     } else if (
-            (space_anim.thisShape >= base_anim.frames.end) ||
-            (space_anim.thisShape < base_anim.frames.begin)) {
+            (space_anim.thisShape >= base_anim->frames.end) ||
+            (space_anim.thisShape < base_anim->frames.begin)) {
         o->active            = kObjectToBeFreed;
-        space_anim.thisShape = base_anim.frames.end - Fixed::from_val(1);
+        space_anim.thisShape = base_anim->frames.end - Fixed::from_val(1);
     }
 }
 
@@ -451,7 +451,7 @@ void MoveSpaceObjects(const ticks unitsToDo) {
 
         auto baseObject = o->base;
         if (o->attributes & kIsSelfAnimated) {
-            if (baseObject->animation.speed != Fixed::zero()) {
+            if (baseObject->animation->speed != Fixed::zero()) {
                 sprite.whichShape = more_evil_fixed_to_long(o->frame.animation.thisShape);
             }
         } else if (o->attributes & kShapeFromDirection) {

@@ -189,54 +189,48 @@ static sfz::optional<int32_t> optional_scale(path_value x) {
     return sfz::nullopt;
 }
 
-BaseObject::Rotation optional_rotation_frame(path_value x) {
+sfz::optional<BaseObject::Rotation> optional_rotation_frame(path_value x) {
     using Rotation = BaseObject::Rotation;
     return optional_struct<Rotation>(
-                   x,
-                   {
-                           {"sprite", {&Rotation::sprite, required_string_copy}},
-                           {"layer", {&Rotation::layer, required_layer}},
-                           {"scale", {&Rotation::scale, optional_scale, SCALE_SCALE}},
-                           {"frames", {&Rotation::frames, required_int_range}},
-                           {"turn_rate", {&Rotation::turn_rate, optional_fixed, Fixed::zero()}},
-                   })
-            .value_or(Rotation{});
+            x, {
+                       {"sprite", {&Rotation::sprite, required_string_copy}},
+                       {"layer", {&Rotation::layer, required_layer}},
+                       {"scale", {&Rotation::scale, optional_scale, SCALE_SCALE}},
+                       {"frames", {&Rotation::frames, required_int_range}},
+                       {"turn_rate", {&Rotation::turn_rate, optional_fixed, Fixed::zero()}},
+               });
 }
 
-BaseObject::Animation optional_animation_frame(path_value x) {
+sfz::optional<BaseObject::Animation> optional_animation_frame(path_value x) {
     using Animation = BaseObject::Animation;
     return optional_struct<Animation>(
-                   x,
-                   {
-                           {"sprite", {&Animation::sprite, required_string_copy}},
-                           {"layer", {&Animation::layer, required_layer}},
-                           {"scale", {&Animation::scale, optional_scale, SCALE_SCALE}},
-                           {"frames",
-                            {&Animation::frames, optional_fixed_range,
-                             Range<Fixed>{Fixed::zero(), Fixed::from_val(1)}}},
-                           {"direction",
-                            {&Animation::direction, optional_animation_direction,
-                             AnimationDirection::NONE}},
-                           {"speed", {&Animation::speed, optional_fixed, Fixed::zero()}},
-                           {"first",
-                            {&Animation::first, optional_fixed_range,
-                             Range<Fixed>{Fixed::zero(), Fixed::from_val(1)}}},
-                   })
-            .value_or(Animation{});
+            x, {
+                       {"sprite", {&Animation::sprite, required_string_copy}},
+                       {"layer", {&Animation::layer, required_layer}},
+                       {"scale", {&Animation::scale, optional_scale, SCALE_SCALE}},
+                       {"frames",
+                        {&Animation::frames, optional_fixed_range,
+                         Range<Fixed>{Fixed::zero(), Fixed::from_val(1)}}},
+                       {"direction",
+                        {&Animation::direction, optional_animation_direction,
+                         AnimationDirection::NONE}},
+                       {"speed", {&Animation::speed, optional_fixed, Fixed::zero()}},
+                       {"first",
+                        {&Animation::first, optional_fixed_range,
+                         Range<Fixed>{Fixed::zero(), Fixed::from_val(1)}}},
+               });
 }
 
-BaseObject::Vector optional_vector_frame(path_value x) {
+sfz::optional<BaseObject::Vector> optional_vector_frame(path_value x) {
     using Vector = BaseObject::Vector;
     return optional_struct<Vector>(
-                   x,
-                   {
-                           {"kind", {&Vector::kind, required_vector_kind}},
-                           {"accuracy", {&Vector::accuracy, required_int32}},
-                           {"range", {&Vector::range, required_int32}},
-                           {"color", {&Vector::color, optional_color, RgbColor::clear()}},
-                           {"hue", {&Vector::hue, optional_hue}},
-                   })
-            .value_or(Vector{});
+            x, {
+                       {"kind", {&Vector::kind, required_vector_kind}},
+                       {"accuracy", {&Vector::accuracy, required_int32}},
+                       {"range", {&Vector::range, required_int32}},
+                       {"color", {&Vector::color, optional_color, RgbColor::clear()}},
+                       {"hue", {&Vector::hue, optional_hue}},
+               });
 }
 
 uint32_t optional_usage(path_value x) {
@@ -258,21 +252,18 @@ uint32_t optional_usage(path_value x) {
     }
 }
 
-BaseObject::Device optional_device_frame(path_value x) {
+sfz::optional<BaseObject::Device> optional_device_frame(path_value x) {
     using Device = BaseObject::Device;
     return optional_struct<Device>(
-                   x,
-                   {
-                           {"usage", {&Device::usage, optional_usage}},
-                           {"energy_cost", {&Device::energyCost, optional_int32, 0}},
-                           {"fire_time", {&Device::fireTime, required_ticks}},
-                           {"ammo", {&Device::ammo, optional_int32, -1}},
-                           {"range", {&Device::range, required_int32}},
-                           {"inverse_speed",
-                            {&Device::inverseSpeed, optional_fixed, Fixed::zero()}},
-                           {"restock_cost", {&Device::restockCost, optional_int32, -1}},
-                   })
-            .value_or(Device{});
+            x, {
+                       {"usage", {&Device::usage, optional_usage}},
+                       {"energy_cost", {&Device::energyCost, optional_int32, 0}},
+                       {"fire_time", {&Device::fireTime, required_ticks}},
+                       {"ammo", {&Device::ammo, optional_int32, -1}},
+                       {"range", {&Device::range, required_int32}},
+                       {"inverse_speed", {&Device::inverseSpeed, optional_fixed, Fixed::zero()}},
+                       {"restock_cost", {&Device::restockCost, optional_int32, -1}},
+               });
 }
 
 static sfz::optional<BaseObject::Icon> optional_icon(path_value x) {

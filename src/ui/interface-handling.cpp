@@ -169,7 +169,8 @@ void CreateObjectDataText(pn::string& text, const BaseObject& object) {
     if (object.attributes & kCanTurn) {
         if (object.attributes & kShapeFromDirection) {
             find_replace(
-                    data, 0, keys.at(kTurnStringNum), stringify(Fixed(object.rotation.turn_rate)));
+                    data, 0, keys.at(kTurnStringNum),
+                    stringify(Fixed(object.rotation->turn_rate)));
         } else {
             find_replace(data, 0, keys.at(kTurnStringNum), stringify(Fixed::from_long(1)));
         }
@@ -248,7 +249,7 @@ void CreateWeaponDataText(
     // range
     find_replace(
             data, 0, keys.at(kWeaponRangeStringNum),
-            pn::dump((int64_t)lsqrt(weaponObject->device.range), pn::dump_short));
+            pn::dump((int64_t)lsqrt(weaponObject->device->range), pn::dump_short));
 
     if (mostDamage > 0) {
         find_replace(

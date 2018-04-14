@@ -539,14 +539,14 @@ static void alter_weapon(
     weapon.base = base;
     if (weapon.base) {
         auto baseObject = weapon.base;
-        weapon.ammo     = baseObject->device.ammo;
+        weapon.ammo     = baseObject->device->ammo;
         weapon.time     = g.time;
         weapon.position = 0;
-        if (baseObject->device.range > focus->longestWeaponRange) {
-            focus->longestWeaponRange = baseObject->device.range;
+        if (baseObject->device->range > focus->longestWeaponRange) {
+            focus->longestWeaponRange = baseObject->device->range;
         }
-        if (baseObject->device.range < focus->shortestWeaponRange) {
-            focus->shortestWeaponRange = baseObject->device.range;
+        if (baseObject->device->range < focus->shortestWeaponRange) {
+            focus->shortestWeaponRange = baseObject->device->range;
         }
     } else {
         weapon.base = nullptr;

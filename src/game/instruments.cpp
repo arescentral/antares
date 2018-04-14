@@ -489,12 +489,13 @@ void draw_instruments() {
         auto player = g.ship;
         if (player->active) {
             draw_player_ammo(
-                    (player->pulse.base && (player->pulse.base->device.ammo > 0))
+                    (player->pulse.base && (player->pulse.base->device->ammo > 0))
                             ? player->pulse.ammo
                             : -1,
-                    (player->beam.base && (player->beam.base->device.ammo > 0)) ? player->beam.ammo
-                                                                                : -1,
-                    (player->special.base && (player->special.base->device.ammo > 0))
+                    (player->beam.base && (player->beam.base->device->ammo > 0))
+                            ? player->beam.ammo
+                            : -1,
+                    (player->special.base && (player->special.base->device->ammo > 0))
                             ? player->special.ammo
                             : -1);
         }

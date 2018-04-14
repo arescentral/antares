@@ -272,7 +272,7 @@ class BaseObject {
         Range<int64_t> frames;
         Fixed          turn_rate;  // max rate at which object can turn
     };
-    Rotation rotation;
+    sfz::optional<Rotation> rotation;
 
     // animation: objects whose appearence does not depend on direction
     struct Animation {
@@ -285,7 +285,7 @@ class BaseObject {
         Fixed              speed;      // speed at which object animates
         Range<Fixed>       first;      // starting shape #
     };
-    Animation animation;
+    sfz::optional<Animation> animation;
 
     // vector: have no associated sprite
     struct Vector {
@@ -295,7 +295,7 @@ class BaseObject {
         int32_t            accuracy = 0;  // for non-normal vector objects, how accurate
         int32_t            range    = 0;
     };
-    Vector vector;
+    sfz::optional<Vector> vector;
 
     // weapon: weapon objects have no physical form, and can only be activated
     struct Device {
@@ -307,7 +307,7 @@ class BaseObject {
         Fixed    inverseSpeed;  // for AI = 1/max velocity
         int32_t  restockCost;   // energy to make new ammo
     };
-    Device device;
+    sfz::optional<Device> device;
 
     uint32_t   buildFlags;
     uint32_t   orderFlags;
