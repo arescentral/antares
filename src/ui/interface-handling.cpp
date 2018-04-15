@@ -205,8 +205,8 @@ void CreateWeaponDataText(
 
     mostDamage = 0;
     isGuided   = false;
-    if (weaponObject->activate.size() > 0) {
-        for (const auto& action : weaponObject->activate) {
+    if (weaponObject->activate.action.size() > 0) {
+        for (const auto& action : weaponObject->activate.action) {
             const NamedHandle<const BaseObject>* created_base = action->created_base();
             if (created_base) {
                 if ((*created_base)->attributes & kIsGuided) {

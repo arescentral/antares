@@ -106,12 +106,12 @@ void AddBaseObjectMedia(
         }
     }
 
-    AddBaseObjectActionMedia(base->destroy, all_colors);
-    AddBaseObjectActionMedia(base->expire, all_colors);
-    AddBaseObjectActionMedia(base->create, all_colors);
-    AddBaseObjectActionMedia(base->collide, all_colors);
-    AddBaseObjectActionMedia(base->activate, all_colors);
-    AddBaseObjectActionMedia(base->arrive, all_colors);
+    AddBaseObjectActionMedia(base->destroy.action, all_colors);
+    AddBaseObjectActionMedia(base->expire.action, all_colors);
+    AddBaseObjectActionMedia(base->create.action, all_colors);
+    AddBaseObjectActionMedia(base->collide.action, all_colors);
+    AddBaseObjectActionMedia(base->activate.action, all_colors);
+    AddBaseObjectActionMedia(base->arrive.action, all_colors);
 
     for (const sfz::optional<BaseObject::Weapon>* weapon :
          {&base->weapons.pulse, &base->weapons.beam, &base->weapons.special}) {

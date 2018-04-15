@@ -299,6 +299,60 @@ BaseObject set_attributes(BaseObject o) {
     return o;
 }
 
+BaseObject::Destroy optional_destroy(path_value x) {
+    return optional_struct<BaseObject::Destroy>(
+                   x,
+                   {
+                           {"action", {&BaseObject::Destroy::action, optional_action_array}},
+                   })
+            .value_or(BaseObject::Destroy{});
+}
+
+BaseObject::Expire optional_expire(path_value x) {
+    return optional_struct<BaseObject::Expire>(
+                   x,
+                   {
+                           {"action", {&BaseObject::Expire::action, optional_action_array}},
+                   })
+            .value_or(BaseObject::Expire{});
+}
+
+BaseObject::Create optional_create(path_value x) {
+    return optional_struct<BaseObject::Create>(
+                   x,
+                   {
+                           {"action", {&BaseObject::Create::action, optional_action_array}},
+                   })
+            .value_or(BaseObject::Create{});
+}
+
+BaseObject::Collide optional_collide(path_value x) {
+    return optional_struct<BaseObject::Collide>(
+                   x,
+                   {
+                           {"action", {&BaseObject::Collide::action, optional_action_array}},
+                   })
+            .value_or(BaseObject::Collide{});
+}
+
+BaseObject::Activate optional_activate(path_value x) {
+    return optional_struct<BaseObject::Activate>(
+                   x,
+                   {
+                           {"action", {&BaseObject::Activate::action, optional_action_array}},
+                   })
+            .value_or(BaseObject::Activate{});
+}
+
+BaseObject::Arrive optional_arrive(path_value x) {
+    return optional_struct<BaseObject::Arrive>(
+                   x,
+                   {
+                           {"action", {&BaseObject::Arrive::action, optional_action_array}},
+                   })
+            .value_or(BaseObject::Arrive{});
+}
+
 BaseObject base_object(pn::value_cref x0) {
     return set_attributes(required_struct<BaseObject>(
             path_value{x0},
@@ -351,12 +405,12 @@ BaseObject base_object(pn::value_cref x0) {
                     {"initial_direction",
                      {&BaseObject::initial_direction, optional_int_range, Range<int64_t>{0, 0}}},
 
-                    {"on_destroy", {&BaseObject::destroy, optional_action_array}},
-                    {"on_expire", {&BaseObject::expire, optional_action_array}},
-                    {"on_create", {&BaseObject::create, optional_action_array}},
-                    {"on_collide", {&BaseObject::collide, optional_action_array}},
-                    {"on_activate", {&BaseObject::activate, optional_action_array}},
-                    {"on_arrive", {&BaseObject::arrive, optional_action_array}},
+                    {"destroy", {&BaseObject::destroy, optional_destroy}},
+                    {"expire", {&BaseObject::expire, optional_expire}},
+                    {"create", {&BaseObject::create, optional_create}},
+                    {"collide", {&BaseObject::collide, optional_collide}},
+                    {"activate", {&BaseObject::activate, optional_activate}},
+                    {"arrive", {&BaseObject::arrive, optional_arrive}},
 
                     {"icon",
                      {&BaseObject::icon, optional_icon, BaseObject::Icon{IconShape::SQUARE, 0}}},

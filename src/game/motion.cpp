@@ -470,7 +470,7 @@ static void age_object(const Handle<SpaceObject>& o) {
                 o->active = kObjectToBeFreed;
             }
 
-            exec(o->base->expire, o, SpaceObject::none(), NULL);
+            exec(o->base->expire.action, o, SpaceObject::none(), NULL);
         }
     }
 }
@@ -479,7 +479,7 @@ static void activate_object(const Handle<SpaceObject>& o) {
     if (o->periodicTime > ticks(0)) {
         o->periodicTime--;
         if (o->periodicTime <= ticks(0)) {
-            exec(o->base->activate, o, SpaceObject::none(), NULL);
+            exec(o->base->activate.action, o, SpaceObject::none(), NULL);
             o->periodicTime = o->base->activate_period.begin +
                               o->randomSeed.next(o->base->activate_period.range());
         }

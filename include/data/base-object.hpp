@@ -252,12 +252,24 @@ class BaseObject {
 
     int32_t arriveActionDistance;  // distance^2 at which arrive action is triggered on dest
 
-    std::vector<std::unique_ptr<const Action>> destroy;
-    std::vector<std::unique_ptr<const Action>> expire;
-    std::vector<std::unique_ptr<const Action>> create;
-    std::vector<std::unique_ptr<const Action>> collide;
-    std::vector<std::unique_ptr<const Action>> activate;
-    std::vector<std::unique_ptr<const Action>> arrive;
+    struct Destroy {
+        std::vector<std::unique_ptr<const Action>> action;
+    } destroy;
+    struct Expire {
+        std::vector<std::unique_ptr<const Action>> action;
+    } expire;
+    struct Create {
+        std::vector<std::unique_ptr<const Action>> action;
+    } create;
+    struct Collide {
+        std::vector<std::unique_ptr<const Action>> action;
+    } collide;
+    struct Activate {
+        std::vector<std::unique_ptr<const Action>> action;
+    } activate;
+    struct Arrive {
+        std::vector<std::unique_ptr<const Action>> action;
+    } arrive;
 
     bool         destroyDontDie;
     bool         expireDontDie;
