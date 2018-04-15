@@ -762,54 +762,30 @@ Zoom required_zoom(path_value x) {
 }
 
 uint32_t optional_object_attributes(path_value x) {
-    if (x.value().is_null()) {
-        return 0;
-    } else if (x.value().is_map()) {
-        static const pn::string_view flags[32] = {"can_turn",
-                                                  "can_be_engaged",
-                                                  "has_direction_goal",
-                                                  "is_remote",
-                                                  "is_human_controlled",
-                                                  "bit05",
-                                                  "does_bounce",
-                                                  "bit07",
-                                                  "bit08",
-                                                  "is_player_ship",
-                                                  "can_be_destination",
-                                                  "can_engage",
-                                                  "can_evade",
-                                                  "can_accept_messages",
-                                                  "can_accept_build",
-                                                  "can_accept_destination",
-                                                  "autotarget",
-                                                  "animation_cycle",
-                                                  "can_collide",
-                                                  "can_be_hit",
-                                                  "is_destination",
-                                                  "hide_effect",
-                                                  "release_energy_on_death",
-                                                  "hated",
-                                                  "occupies_space",
-                                                  "static_destination",
-                                                  "can_be_evaded",
-                                                  "neutral_death",
-                                                  "is_guided",
-                                                  "appear_on_radar",
-                                                  "bit31",
-                                                  "on_autopilot"};
-
-        uint32_t bit    = 0x00000001;
-        uint32_t result = 0x00000000;
-        for (pn::string_view flag : flags) {
-            if (optional_bool(x.get(flag)).value_or(false)) {
-                result |= bit;
-            }
-            bit <<= 1;
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
-    }
+    return optional_flags(
+            x, {{"can_turn", 0},
+                {"can_be_engaged", 1},
+                {"has_direction_goal", 2},
+                {"does_bounce", 6},
+                {"can_be_destination", 10},
+                {"can_engage", 11},
+                {"can_evade", 12},
+                {"can_accept_build", 14},
+                {"can_accept_destination", 15},
+                {"autotarget", 16},
+                {"animation_cycle", 17},
+                {"can_collide", 18},
+                {"can_be_hit", 19},
+                {"is_destination", 20},
+                {"hide_effect", 21},
+                {"release_energy_on_death", 22},
+                {"hated", 23},
+                {"occupies_space", 24},
+                {"static_destination", 25},
+                {"can_be_evaded", 26},
+                {"neutral_death", 27},
+                {"is_guided", 28},
+                {"appear_on_radar", 29}});
 }
 
 uint32_t optional_keys(path_value x) {
@@ -870,6 +846,28 @@ std::vector<int> optional_int_array(path_value x) {
         return result;
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
+    }
+}
+
+uint32_t optional_flags(path_value x, const std::map<pn::string_view, int>& flags) {
+    if (x.value().is_null()) {
+        return 0;
+    } else if (x.value().is_map()) {
+        uint32_t result = 0;
+        for (auto kv : flags) {
+            if (optional_bool(x.get(kv.first)).value_or(false)) {
+                result |= 1 << kv.second;
+            }
+        }
+        for (auto kv : x.value().as_map()) {
+            if (flags.find(kv.key()) == flags.end()) {
+                path_value v = x.get(kv.key());
+                throw std::runtime_error(pn::format("{0}unknown flag", v.prefix()).c_str());
+            }
+        }
+        return result;
+    } else {
+        throw std::runtime_error(pn::format("{0}must be null or map", x.prefix()).c_str());
     }
 }
 

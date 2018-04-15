@@ -177,6 +177,8 @@ struct field {
               }) {}
 };
 
+uint32_t optional_flags(path_value x, const std::map<pn::string_view, int>& flags);
+
 template <typename T>
 T required_struct(path_value x, const std::map<pn::string_view, field<T>>& fields) {
     if (x.value().is_map()) {
