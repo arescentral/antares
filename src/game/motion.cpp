@@ -466,7 +466,7 @@ static void age_object(const Handle<SpaceObject>& o) {
     if (o->expires) {
         o->expire_after -= kMajorTick;
         if (o->expire_after < ticks(0)) {
-            if (!(o->base->expireDontDie)) {
+            if (!(o->base->expire.dont_die)) {
                 o->active = kObjectToBeFreed;
             }
 

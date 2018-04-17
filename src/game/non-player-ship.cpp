@@ -1500,7 +1500,7 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
     anObject->timeFromOrigin = ticks(0);
     if (((anObject->_health - sObject->base->damage) < 0) &&
         (anObject->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
-        !anObject->base->destroyDontDie) {
+        !anObject->base->destroy.dont_die) {
         anObject->create_floating_player_body();
     }
     anObject->alter_health(-sObject->base->damage);

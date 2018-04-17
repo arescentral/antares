@@ -618,7 +618,8 @@ void SpaceObject::set_owner(Handle<Admiral> new_owner, bool message) {
     }
 
     // if the object is occupied by a human, eject him since he can't change sides
-    if ((object->attributes & (kIsPlayerShip | kRemoteOrHuman)) && !object->base->destroyDontDie) {
+    if ((object->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
+        !object->base->destroy.dont_die) {
         object->create_floating_player_body();
     }
 
@@ -747,7 +748,7 @@ void SpaceObject::destroy() {
 
         // if it's a destination, we keep anyone from thinking they have it as a destination
         // (all at once since this should be very rare)
-        if ((object->attributes & kIsDestination) && !object->base->destroyDontDie) {
+        if ((object->attributes & kIsDestination) && !object->base->destroy.dont_die) {
             RemoveDestination(object->asDestination);
             for (auto fixObject : SpaceObject::all()) {
                 if ((fixObject->attributes & kCanAcceptDestination) &&
@@ -765,7 +766,7 @@ void SpaceObject::destroy() {
         if (object->attributes & kCanAcceptDestination) {
             RemoveObjectFromDestination(object);
         }
-        if (!object->base->destroyDontDie) {
+        if (!object->base->destroy.dont_die) {
             object->active = kObjectToBeFreed;
         }
     }

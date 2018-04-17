@@ -303,6 +303,7 @@ BaseObject::Destroy optional_destroy(path_value x) {
     return optional_struct<BaseObject::Destroy>(
                    x,
                    {
+                           {"dont_die", {&BaseObject::Destroy::dont_die, optional_bool, false}},
                            {"action", {&BaseObject::Destroy::action, optional_action_array}},
                    })
             .value_or(BaseObject::Destroy{});
@@ -312,6 +313,7 @@ BaseObject::Expire optional_expire(path_value x) {
     return optional_struct<BaseObject::Expire>(
                    x,
                    {
+                           {"dont_die", {&BaseObject::Expire::dont_die, optional_bool, false}},
                            {"action", {&BaseObject::Expire::action, optional_action_array}},
                    })
             .value_or(BaseObject::Expire{});
@@ -421,8 +423,6 @@ BaseObject base_object(pn::value_cref x0) {
                     {"vector", {&BaseObject::vector, optional_vector_frame}},
                     {"device", {&BaseObject::device, optional_device_frame}},
 
-                    {"destroy_dont_die", {&BaseObject::destroyDontDie, optional_bool, false}},
-                    {"expire_dont_die", {&BaseObject::expireDontDie, optional_bool, false}},
                     {"activate_period",
                      {&BaseObject::activate_period, optional_ticks_range,
                       Range<ticks>{ticks(0), ticks(0)}}},

@@ -249,7 +249,7 @@ void KillAction::apply(
     }
 
     // if the object is occupied by a human, eject him since he can't die
-    if ((focus->attributes & (kIsPlayerShip | kRemoteOrHuman)) && !focus->base->destroyDontDie) {
+    if ((focus->attributes & (kIsPlayerShip | kRemoteOrHuman)) && !focus->base->destroy.dont_die) {
         focus->create_floating_player_body();
     }
     if (destroy) {
