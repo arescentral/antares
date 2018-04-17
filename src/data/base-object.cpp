@@ -298,6 +298,12 @@ BaseObject set_attributes(BaseObject o) {
     if (o.turn_rate > Fixed::zero()) {
         o.attributes |= (kCanTurn | kHasDirectionGoal);
     }
+    if (o.destroy.neutralize) {
+        o.attributes |= kNeutralDeath;
+    }
+    if (o.destroy.release_energy) {
+        o.attributes |= kReleaseEnergyOnDeath;
+    }
     return o;
 }
 
@@ -306,6 +312,10 @@ BaseObject::Destroy optional_destroy(path_value x) {
                    x,
                    {
                            {"dont_die", {&BaseObject::Destroy::dont_die, optional_bool, false}},
+                           {"neutralize",
+                            {&BaseObject::Destroy::neutralize, optional_bool, false}},
+                           {"release_energy",
+                            {&BaseObject::Destroy::release_energy, optional_bool, false}},
                            {"action", {&BaseObject::Destroy::action, optional_action_array}},
                    })
             .value_or(BaseObject::Destroy{});

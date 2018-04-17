@@ -253,6 +253,8 @@ class BaseObject {
 
     struct Destroy {
         bool                                       dont_die;
+        bool                                       neutralize;
+        bool                                       release_energy;
         std::vector<std::unique_ptr<const Action>> action;
     } destroy;
 
