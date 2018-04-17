@@ -250,8 +250,6 @@ class BaseObject {
 
     Fixed friendDefecit;
 
-    int32_t arriveActionDistance;  // distance^2 at which arrive action is triggered on dest
-
     struct Destroy {
         bool                                       dont_die;
         std::vector<std::unique_ptr<const Action>> action;
@@ -271,14 +269,14 @@ class BaseObject {
     } collide;
 
     struct Activate {
+        Range<ticks>                               period;
         std::vector<std::unique_ptr<const Action>> action;
     } activate;
 
     struct Arrive {
+        int32_t                                    distance;
         std::vector<std::unique_ptr<const Action>> action;
     } arrive;
-
-    Range<ticks> activate_period;
 
     // rotation: for objects whose shapes depend on their direction
     struct Rotation {

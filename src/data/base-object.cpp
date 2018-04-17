@@ -341,6 +341,9 @@ BaseObject::Activate optional_activate(path_value x) {
     return optional_struct<BaseObject::Activate>(
                    x,
                    {
+                           {"period",
+                            {&BaseObject::Activate::period, optional_ticks_range,
+                             Range<ticks>{ticks(0), ticks(0)}}},
                            {"action", {&BaseObject::Activate::action, optional_action_array}},
                    })
             .value_or(BaseObject::Activate{});
@@ -350,6 +353,7 @@ BaseObject::Arrive optional_arrive(path_value x) {
     return optional_struct<BaseObject::Arrive>(
                    x,
                    {
+                           {"distance", {&BaseObject::Arrive::distance, optional_int32, 0}},
                            {"action", {&BaseObject::Arrive::action, optional_action_array}},
                    })
             .value_or(BaseObject::Arrive{});
@@ -382,8 +386,6 @@ BaseObject base_object(pn::value_cref x0) {
                     {"skill_num", {&BaseObject::skillNum, optional_uint8, 0}},
                     {"skill_den", {&BaseObject::skillDen, optional_uint8, 0}},
                     {"occupy_count", {&BaseObject::occupy_count, optional_int32, -1}},
-                    {"arrive_action_distance",
-                     {&BaseObject::arriveActionDistance, optional_int32, 0}},
 
                     {"offense", {&BaseObject::offenseValue, optional_fixed, Fixed::zero()}},
                     {"max_velocity", {&BaseObject::maxVelocity, optional_fixed, Fixed::zero()}},
@@ -422,10 +424,6 @@ BaseObject base_object(pn::value_cref x0) {
                     {"animation", {&BaseObject::animation, optional_animation_frame}},
                     {"vector", {&BaseObject::vector, optional_vector_frame}},
                     {"device", {&BaseObject::device, optional_device_frame}},
-
-                    {"activate_period",
-                     {&BaseObject::activate_period, optional_ticks_range,
-                      Range<ticks>{ticks(0), ticks(0)}}},
 
                     {"level_tag", {&BaseObject::levelKeyTag, optional_string, ""}},
                     {"engage_tag", {&BaseObject::engageKeyTag, optional_string, ""}},
