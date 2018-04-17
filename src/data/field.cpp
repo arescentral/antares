@@ -763,9 +763,7 @@ Zoom required_zoom(path_value x) {
 
 uint32_t optional_object_attributes(path_value x) {
     return optional_flags(
-            x, {{"can_turn", 0},
-                {"can_be_engaged", 1},
-                {"has_direction_goal", 2},
+            x, {{"can_be_engaged", 1},
                 {"does_bounce", 6},
                 {"can_be_destination", 10},
                 {"can_engage", 11},

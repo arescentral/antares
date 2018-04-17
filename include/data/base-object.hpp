@@ -218,6 +218,7 @@ class BaseObject {
     uint32_t warpOutDistance;  // distance at which to come out of warp
 
     Fixed mass;       // how quickly thrust acheives max
+    Fixed turn_rate;  // max rate at which object can turn
     Fixed maxThrust;  // maximum amount of thrust
 
     int32_t health;  // starting health
@@ -285,7 +286,6 @@ class BaseObject {
         int32_t    scale;   // sprite scale; 4096 = 100%
 
         Range<int64_t> frames;
-        Fixed          turn_rate;  // max rate at which object can turn
     };
     sfz::optional<Rotation> rotation;
 

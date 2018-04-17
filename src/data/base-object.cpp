@@ -197,7 +197,6 @@ sfz::optional<BaseObject::Rotation> optional_rotation_frame(path_value x) {
                        {"layer", {&Rotation::layer, required_layer}},
                        {"scale", {&Rotation::scale, optional_scale, SCALE_SCALE}},
                        {"frames", {&Rotation::frames, required_int_range}},
-                       {"turn_rate", {&Rotation::turn_rate, optional_fixed, Fixed::zero()}},
                });
 }
 
@@ -296,6 +295,9 @@ BaseObject set_attributes(BaseObject o) {
     } else if (o.vector.has_value()) {
         o.attributes |= kIsVector;
     }
+    if (o.turn_rate > Fixed::zero()) {
+        o.attributes |= (kCanTurn | kHasDirectionGoal);
+    }
     return o;
 }
 
@@ -391,6 +393,7 @@ BaseObject base_object(pn::value_cref x0) {
                     {"max_velocity", {&BaseObject::maxVelocity, optional_fixed, Fixed::zero()}},
                     {"warp_speed", {&BaseObject::warpSpeed, optional_fixed, Fixed::zero()}},
                     {"mass", {&BaseObject::mass, optional_fixed, Fixed::zero()}},
+                    {"turn_rate", {&BaseObject::turn_rate, optional_fixed, Fixed::zero()}},
                     {"max_thrust", {&BaseObject::maxThrust, optional_fixed, Fixed::zero()}},
                     {"friend_deficit",
                      {&BaseObject::friendDefecit, optional_fixed, Fixed::zero()}},

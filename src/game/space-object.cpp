@@ -58,8 +58,6 @@ const Hue kFriendlyColor               = Hue::GREEN;
 const Hue kHostileColor[kMaxPlayerNum] = {Hue::PINK, Hue::RED, Hue::YELLOW, Hue::ORANGE};
 const Hue kNeutralColor                = Hue::SKY_BLUE;
 
-const Fixed kDefaultTurnRate = Fixed::from_long(2.000);
-
 #ifdef DATA_COVERAGE
 ANTARES_GLOBAL set<int32_t> covered_objects;
 #endif  // DATA_COVERAGE
@@ -850,13 +848,7 @@ bool SpaceObject::engages(const SpaceObject& b) const {
     return true;
 }
 
-Fixed SpaceObject::turn_rate() const {
-    // design flaw: can't have turn rate unless shapefromdirection
-    if (attributes & kShapeFromDirection) {
-        return base->rotation->turn_rate;
-    }
-    return kDefaultTurnRate;
-}
+Fixed SpaceObject::turn_rate() const { return base->turn_rate; }
 
 int32_t SpaceObject::number() const { return this - g.objects.get(); }
 
