@@ -706,6 +706,10 @@ static void calc_bounds() {
     }
 }
 
+static bool can_hit(const Handle<SpaceObject>& a, const Handle<SpaceObject>& b) {
+    return (a->attributes & kCanCollide) && (b->attributes & kCanBeHit);
+}
+
 // Call HitObject() and CorrectPhysicalSpace() for all colliding pairs of objects.
 static void calc_impacts() {
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
@@ -725,14 +729,9 @@ static void calc_impacts() {
                 }
 
                 for (; b.get(); b = b->nextNearObject) {
-                    // this'll be true even ONLY if BOTH objects are not non-physical dest object
-                    if (!((b->attributes | a->attributes) & kCanCollide) ||
-                        !((b->attributes | a->attributes) & kCanBeHit) ||
-                        (b->collisionGrid != super)) {
-                        continue;
-                    }
-
-                    if (a->owner == b->owner) {
+                    if ((!can_hit(a, b) && !can_hit(b, a)) ||  // neither object can hit the other
+                        (b->collisionGrid != super) ||         // not near enough
+                        (a->owner == b->owner)) {              // same owner
                         continue;
                     }
 
