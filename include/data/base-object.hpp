@@ -222,7 +222,6 @@ class BaseObject {
     Fixed maxThrust;  // maximum amount of thrust
 
     int32_t health;  // starting health
-    int32_t damage;  // damage caused by impact
     int32_t energy;  // starting energy for material objects
 
     Range<Fixed>   initial_velocity;   // initial random velocity (usually relative)
@@ -268,6 +267,13 @@ class BaseObject {
     } create;
 
     struct Collide {
+        struct As {
+            bool subject = false;
+            bool object  = false;
+        } as;
+        bool                                       solid  = false;
+        bool                                       edge   = false;
+        int32_t                                    damage = 0;
         std::vector<std::unique_ptr<const Action>> action;
     } collide;
 

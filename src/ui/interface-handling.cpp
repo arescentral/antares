@@ -202,8 +202,8 @@ void CreateWeaponDataText(
                 if ((*created_base)->attributes & kIsGuided) {
                     isGuided = true;
                 }
-                if ((*created_base)->damage > mostDamage) {
-                    mostDamage = (*created_base)->damage;
+                if ((*created_base)->collide.damage > mostDamage) {
+                    mostDamage = (*created_base)->collide.damage;
                 }
             }
         }

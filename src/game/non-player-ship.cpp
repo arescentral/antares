@@ -1498,12 +1498,12 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
     }
 
     anObject->timeFromOrigin = ticks(0);
-    if (((anObject->_health - sObject->base->damage) < 0) &&
+    if (((anObject->_health - sObject->base->collide.damage) < 0) &&
         (anObject->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
         !anObject->base->destroy.dont_die) {
         anObject->create_floating_player_body();
     }
-    anObject->alter_health(-sObject->base->damage);
+    anObject->alter_health(-sObject->base->collide.damage);
     if (anObject->shieldColor.has_value()) {
         anObject->hitState = (anObject->health() * kHitStateMax) / anObject->max_health();
         anObject->hitState += 16;
@@ -1524,7 +1524,7 @@ void HitObject(Handle<SpaceObject> anObject, Handle<SpaceObject> sObject) {
     }
 
     if (anObject->owner == g.admiral && (anObject->attributes & kIsPlayerShip) &&
-        (sObject->base->damage > 0)) {
+        (sObject->base->collide.damage > 0)) {
         globals()->transitions.start_boolean(128, WHITE);
     }
 }

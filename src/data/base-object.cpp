@@ -304,6 +304,18 @@ BaseObject set_attributes(BaseObject o) {
     if (o.destroy.release_energy) {
         o.attributes |= kReleaseEnergyOnDeath;
     }
+    if (o.collide.as.subject) {
+        o.attributes |= kCanCollide;
+    }
+    if (o.collide.as.object) {
+        o.attributes |= kCanBeHit;
+    }
+    if (o.collide.solid) {
+        o.attributes |= kOccupiesSpace;
+    }
+    if (o.collide.edge) {
+        o.attributes |= kDoesBounce;
+    }
     return o;
 }
 
@@ -340,10 +352,24 @@ BaseObject::Create optional_create(path_value x) {
             .value_or(BaseObject::Create{});
 }
 
+BaseObject::Collide::As optional_collide_as(path_value x) {
+    return optional_struct<BaseObject::Collide::As>(
+                   x,
+                   {
+                           {"subject", {&BaseObject::Collide::As::subject, optional_bool, false}},
+                           {"object", {&BaseObject::Collide::As::object, optional_bool, false}},
+                   })
+            .value_or(BaseObject::Collide::As{});
+}
+
 BaseObject::Collide optional_collide(path_value x) {
     return optional_struct<BaseObject::Collide>(
                    x,
                    {
+                           {"as", {&BaseObject::Collide::as, optional_collide_as}},
+                           {"damage", {&BaseObject::Collide::damage, optional_int32, 0}},
+                           {"solid", {&BaseObject::Collide::solid, optional_bool, false}},
+                           {"edge", {&BaseObject::Collide::edge, optional_bool, false}},
                            {"action", {&BaseObject::Collide::action, optional_action_array}},
                    })
             .value_or(BaseObject::Collide{});
@@ -393,7 +419,6 @@ BaseObject base_object(pn::value_cref x0) {
                     {"destination_class", {&BaseObject::destinationClass, optional_int32, 0}},
                     {"warp_out_distance", {&BaseObject::warpOutDistance, optional_uint32, 0}},
                     {"health", {&BaseObject::health, optional_int32, 0}},
-                    {"damage", {&BaseObject::damage, optional_int32, 0}},
                     {"energy", {&BaseObject::energy, optional_int32, 0}},
                     {"skill_num", {&BaseObject::skillNum, optional_uint8, 0}},
                     {"skill_den", {&BaseObject::skillDen, optional_uint8, 0}},
