@@ -225,7 +225,6 @@ class BaseObject {
     int32_t energy;  // starting energy for material objects
 
     Range<Fixed>   initial_velocity;   // initial random velocity (usually relative)
-    Range<ticks>   initial_age;        // starting random age
     Range<int64_t> initial_direction;  // initial random direction (usually relative)
 
     int32_t occupy_count;  // size of occupying force
@@ -258,6 +257,10 @@ class BaseObject {
     } destroy;
 
     struct Expire {
+        struct After {
+            Range<ticks> age;  // starting random age
+            bool         animation = false;
+        } after;
         bool                                       dont_die;
         std::vector<std::unique_ptr<const Action>> action;
     } expire;

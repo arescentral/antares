@@ -292,6 +292,9 @@ BaseObject set_attributes(BaseObject o) {
         o.attributes |= kShapeFromDirection;
     } else if (o.animation.has_value()) {
         o.attributes |= kIsSelfAnimated;
+        if (!o.expire.after.animation) {
+            o.attributes |= kAnimationCycle;
+        }
     } else if (o.vector.has_value()) {
         o.attributes |= kIsVector;
     }
@@ -333,10 +336,24 @@ BaseObject::Destroy optional_destroy(path_value x) {
             .value_or(BaseObject::Destroy{});
 }
 
+BaseObject::Expire::After optional_expire_after(path_value x) {
+    return optional_struct<BaseObject::Expire::After>(
+                   x,
+                   {
+                           {"age",
+                            {&BaseObject::Expire::After::age, optional_ticks_range,
+                             Range<ticks>{ticks(-1), ticks(-1)}}},
+                           {"animation",
+                            {&BaseObject::Expire::After::animation, optional_bool, false}},
+                   })
+            .value_or(BaseObject::Expire::After{});
+}
+
 BaseObject::Expire optional_expire(path_value x) {
     return optional_struct<BaseObject::Expire>(
                    x,
                    {
+                           {"after", {&BaseObject::Expire::after, optional_expire_after}},
                            {"dont_die", {&BaseObject::Expire::dont_die, optional_bool, false}},
                            {"action", {&BaseObject::Expire::action, optional_action_array}},
                    })
@@ -441,9 +458,6 @@ BaseObject base_object(pn::value_cref x0) {
                     {"initial_velocity",
                      {&BaseObject::initial_velocity, optional_fixed_range,
                       Range<Fixed>{Fixed::zero(), Fixed::zero()}}},
-                    {"initial_age",
-                     {&BaseObject::initial_age, optional_ticks_range,
-                      Range<ticks>{ticks(-1), ticks(-1)}}},
                     {"initial_direction",
                      {&BaseObject::initial_direction, optional_int_range, Range<int64_t>{0, 0}}},
 

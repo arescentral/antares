@@ -292,9 +292,10 @@ SpaceObject::SpaceObject(
         frame.animation.speed         = base->animation->speed;
     }
 
-    if (base->initial_age.begin >= ticks(1)) {
-        expire_after = base->initial_age.begin + randomSeed.next(base->initial_age.range());
-        expires      = true;
+    if (base->expire.after.age.begin >= ticks(1)) {
+        expire_after =
+                base->expire.after.age.begin + randomSeed.next(base->expire.after.age.range());
+        expires = true;
     } else {
         expires = false;
     }
@@ -412,9 +413,9 @@ void SpaceObject::change_base_type(
 
     obj->maxVelocity = base.maxVelocity;
 
-    if (base.initial_age.begin >= ticks(1)) {
+    if (base.expire.after.age.begin >= ticks(1)) {
         obj->expire_after =
-                base.initial_age.begin + obj->randomSeed.next(base.initial_age.range());
+                base.expire.after.age.begin + obj->randomSeed.next(base.expire.after.age.range());
         obj->expires = true;
     } else {
         obj->expires = false;
