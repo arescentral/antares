@@ -882,11 +882,14 @@ void Admiral::think() {
                 }
             }
 
-            if (!anObject->base->orderKeyTag.empty() &&
-                (anObject->base->orderKeyTag == destObject->base->levelKeyTag)) {
-                thisValue <<= 3;
-            } else if (anObject->base->orderFlags & kHardMatchingFoe) {
-                thisValue = Fixed::zero();
+            if (anObject->base->orderKeyTag == destObject->base->levelKeyTag) {
+                if (anObject->base->orderFlags & kMatchingFoe) {
+                    thisValue <<= 3;
+                }
+            } else {
+                if (anObject->base->orderFlags & kHardMatchingFoe) {
+                    thisValue = Fixed::zero();
+                }
             }
 
             if (thisValue > Fixed::zero()) {

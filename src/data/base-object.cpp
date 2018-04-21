@@ -84,7 +84,9 @@ uint32_t optional_object_order_flags(path_value x) {
                                                   "hard_foe",
                                                   "hard_friend",
                                                   "hard_not_base",
-                                                  "hard_base"};
+                                                  "hard_base",
+
+                                                  "matching_foe"};
 
         uint32_t bit    = 0x00000001;
         uint32_t result = 0x00000000;

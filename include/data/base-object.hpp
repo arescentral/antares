@@ -174,6 +174,7 @@ enum {
     kHardTargetIsFriend     = 0x02000000,
     kHardTargetIsNotBase    = 0x04000000,
     kHardTargetIsBase       = 0x08000000,
+    kMatchingFoe            = 0x10000000,
 };
 
 // RUNTIME FLAG BITS
