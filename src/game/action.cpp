@@ -87,8 +87,10 @@ static void queue_action(
         Point* offset);
 
 bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target) {
-    if (!action.filter.level_key_tag.empty()) {
-        if (action.filter.level_key_tag != target->base->levelKeyTag) {
+    for (const auto& kv : action.filter.tags) {
+        auto it      = target->base->tags.find(kv.first);
+        bool has_tag = ((it != target->base->tags.end()) && it->second);
+        if (kv.second != has_tag) {
             return false;
         }
     }
@@ -739,7 +741,7 @@ static void execute_actions(
             }
         }
 
-        if ((action.filter.attributes || !action.filter.level_key_tag.empty()) &&
+        if ((action.filter.attributes || !action.filter.tags.empty()) &&
             (!object.get() || !action_filter_applies_to(action, object))) {
             continue;
         }

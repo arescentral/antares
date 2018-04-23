@@ -50,9 +50,9 @@ struct Action {
     bool reflexive;  // does it apply to object executing verb?
 
     struct Filter {
-        uint32_t   attributes = 0;
-        pn::string level_key_tag;
-        Owner      owner = Owner::ANY;
+        uint32_t                   attributes = 0;
+        std::map<pn::string, bool> tags;
+        Owner                      owner = Owner::ANY;
     } filter;
 
     ticks delay = ticks(0);

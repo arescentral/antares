@@ -276,6 +276,24 @@ Owner owner_cast(T t) {
     return owner_cast(Owner::ANY);
 }
 
+static std::map<pn::string, bool> optional_tags(path_value x) {
+    if (x.value().is_null()) {
+        return {};
+    } else if (x.value().is_map()) {
+        pn::map_cref               m = x.value().as_map();
+        std::map<pn::string, bool> result;
+        for (const auto& kv : m) {
+            auto v = optional_bool(x.get(kv.key()));
+            if (v.has_value()) {
+                result[kv.key().copy()] = *v;
+            }
+        }
+        return result;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
+    }
+}
+
 std::unique_ptr<Action> action(path_value x) {
     if (!x.value().is_map()) {
         throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
@@ -357,16 +375,15 @@ std::unique_ptr<Action> action(path_value x) {
 
     a->reflexive = optional_bool(x.get("reflexive")).value_or(false);
 
-    a->filter =
-            optional_struct<Action::Filter>(
-                    x.get("if"),
-                    {
-                            {"attributes",
-                             {&Action::Filter::attributes, optional_object_attributes}},
-                            {"level_tag", {&Action::Filter::level_key_tag, optional_string, ""}},
-                            {"owner", {&Action::Filter::owner, optional_owner, Owner::ANY}},
-                    })
-                    .value_or(Action::Filter{});
+    a->filter = optional_struct<Action::Filter>(
+                        x.get("if"),
+                        {
+                                {"attributes",
+                                 {&Action::Filter::attributes, optional_object_attributes}},
+                                {"tags", {&Action::Filter::tags, optional_tags}},
+                                {"owner", {&Action::Filter::owner, optional_owner, Owner::ANY}},
+                        })
+                        .value_or(Action::Filter{});
 
     a->delay = optional_ticks(x.get("delay")).value_or(ticks(0));
 

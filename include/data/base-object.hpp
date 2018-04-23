@@ -336,13 +336,13 @@ class BaseObject {
     };
     sfz::optional<Device> device;
 
-    uint32_t   buildFlags;
-    uint32_t   orderFlags;
-    pn::string levelKeyTag;
-    pn::string engageKeyTag;
-    pn::string orderKeyTag;
-    Fixed      buildRatio;
-    ticks      buildTime;
+    uint32_t                   buildFlags;
+    uint32_t                   orderFlags;
+    std::map<pn::string, bool> tags;
+    pn::string                 engageKeyTag;
+    pn::string                 orderKeyTag;
+    Fixed                      buildRatio;
+    ticks                      buildTime;
 
     uint8_t skillNum;
     uint8_t skillDen;

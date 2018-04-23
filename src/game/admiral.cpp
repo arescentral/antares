@@ -882,7 +882,8 @@ void Admiral::think() {
                 }
             }
 
-            if (anObject->base->orderKeyTag == destObject->base->levelKeyTag) {
+            if (destObject->base->tags.find(anObject->base->orderKeyTag) !=
+                destObject->base->tags.end()) {
                 if (anObject->base->orderFlags & kMatchingFoe) {
                     thisValue <<= 3;
                 }
@@ -960,7 +961,8 @@ void Admiral::think() {
                                 thisValue = Fixed::zero();
                                 for (auto anObject : SpaceObject::all()) {
                                     if ((anObject->active) && (anObject->owner.get() != this) &&
-                                        (anObject->base->levelKeyTag == baseObject->orderKeyTag)) {
+                                        (anObject->base->tags.find(baseObject->orderKeyTag) !=
+                                         anObject->base->tags.end())) {
                                         thisValue = Fixed::from_val(1);
                                     }
                                 }

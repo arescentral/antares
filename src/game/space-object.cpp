@@ -844,7 +844,7 @@ pn::string_view SpaceObject::short_name() const {
 
 bool SpaceObject::engages(const SpaceObject& b) const {
     if ((base->buildFlags & kCanOnlyEngage) || (b.base->buildFlags & kOnlyEngagedBy)) {
-        return base->engageKeyTag == b.base->levelKeyTag;
+        return b.base->tags.find(base->engageKeyTag) != b.base->tags.end();
     }
     return true;
 }
