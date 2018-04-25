@@ -339,8 +339,9 @@ class BaseObject {
     uint32_t                   buildFlags;
     uint32_t                   orderFlags;
     std::map<pn::string, bool> tags;
-    pn::string                 engageKeyTag;
-    pn::string                 orderKeyTag;
+    pn::string                 attack_tag;  // if kCanOnlyEngage
+    pn::string                 defend_tag;  // if kOnlyEngagedBy
+    pn::string                 order_tag;   // if k[Hard]MatchingFoe
     Fixed                      buildRatio;
     ticks                      buildTime;
 

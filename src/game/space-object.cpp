@@ -843,8 +843,11 @@ pn::string_view SpaceObject::short_name() const {
 }
 
 bool SpaceObject::engages(const SpaceObject& b) const {
-    if ((base->buildFlags & kCanOnlyEngage) || (b.base->buildFlags & kOnlyEngagedBy)) {
-        return b.base->tags.find(base->engageKeyTag) != b.base->tags.end();
+    if ((base->buildFlags & kCanOnlyEngage) && (!tag_matches(*b.base, base->attack_tag))) {
+        return false;
+    }
+    if ((b.base->buildFlags & kOnlyEngagedBy) && (!tag_matches(*base, b.base->defend_tag))) {
+        return false;
     }
     return true;
 }
@@ -852,6 +855,22 @@ bool SpaceObject::engages(const SpaceObject& b) const {
 Fixed SpaceObject::turn_rate() const { return base->turn_rate; }
 
 int32_t SpaceObject::number() const { return this - g.objects.get(); }
+
+bool tag_matches(const BaseObject& o, pn::string_view query) {
+    auto it = o.tags.find(query.copy());
+    return (it != o.tags.end()) & it->second;
+}
+
+bool tags_match(const BaseObject& o, const std::map<pn::string, bool>& query) {
+    for (const auto& kv : query) {
+        auto it      = o.tags.find(kv.first);
+        bool has_tag = ((it != o.tags.end()) && it->second);
+        if (kv.second != has_tag) {
+            return false;
+        }
+    }
+    return true;
+}
 
 sfz::optional<pn::string_view> sprite_resource(const BaseObject& o) {
     if (o.attributes & kShapeFromDirection) {
