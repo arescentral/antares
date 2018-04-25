@@ -753,7 +753,7 @@ void Admiral::think() {
                             }
                         }
                     }
-                    if (anObject->base->orderFlags & kTargetIsBase) {
+                    if (anObject->base->orderFlags & kSoftTargetIsBase) {
                         thisValue <<= 3;
                     }
                     if (anObject->base->orderFlags & kHardTargetIsNotBase) {
@@ -773,14 +773,14 @@ void Admiral::think() {
                     } else {
                         thisValue = kUnimportantTarget;
                     }
-                    if (anObject->base->orderFlags & kTargetIsNotBase) {
+                    if (anObject->base->orderFlags & kSoftTargetIsNotBase) {
                         thisValue <<= 3;
                     }
                     if (anObject->base->orderFlags & kHardTargetIsBase) {
                         thisValue = Fixed::zero();
                     }
                 }
-                if (anObject->base->orderFlags & kTargetIsFriend) {
+                if (anObject->base->orderFlags & kSoftTargetIsFriend) {
                     thisValue <<= 3;
                 }
                 if (anObject->base->orderFlags & kHardTargetIsFoe) {
@@ -797,7 +797,7 @@ void Admiral::think() {
                         if (_blitzkrieg > 0) {
                             thisValue <<= 2;
                         }
-                        if (anObject->base->orderFlags & kTargetIsBase) {
+                        if (anObject->base->orderFlags & kSoftTargetIsBase) {
                             thisValue <<= 3;
                         }
 
@@ -814,7 +814,7 @@ void Admiral::think() {
                         } else {
                             thisValue = kLeastImportantTarget;
                         }
-                        if (anObject->base->orderFlags & kTargetIsNotBase) {
+                        if (anObject->base->orderFlags & kSoftTargetIsNotBase) {
                             thisValue <<= 1;
                         }
 
@@ -823,7 +823,7 @@ void Admiral::think() {
                         }
                     }
                 }
-                if (anObject->base->orderFlags & kTargetIsFoe) {
+                if (anObject->base->orderFlags & kSoftTargetIsFoe) {
                     thisValue <<= 3;
                 }
                 if (anObject->base->orderFlags & kHardTargetIsFriend) {
@@ -835,21 +835,21 @@ void Admiral::think() {
                     if (_blitzkrieg > 0) {
                         thisValue <<= 2;
                     }
-                    if (anObject->base->orderFlags & kTargetIsBase) {
+                    if (anObject->base->orderFlags & kSoftTargetIsBase) {
                         thisValue <<= 3;
                     }
                     if (anObject->base->orderFlags & kHardTargetIsNotBase) {
                         thisValue = Fixed::zero();
                     }
                 } else {
-                    if (anObject->base->orderFlags & kTargetIsNotBase) {
+                    if (anObject->base->orderFlags & kSoftTargetIsNotBase) {
                         thisValue <<= 3;
                     }
                     if (anObject->base->orderFlags & kHardTargetIsBase) {
                         thisValue = Fixed::zero();
                     }
                 }
-                if (anObject->base->orderFlags & kTargetIsFoe) {
+                if (anObject->base->orderFlags & kSoftTargetIsFoe) {
                     thisValue <<= 3;
                 }
                 if (anObject->base->orderFlags & kHardTargetIsFriend) {
@@ -867,14 +867,14 @@ void Admiral::think() {
             gridLoc.v = difference;
 
             if ((gridLoc.h < kMaximumRelevantDistance) && (gridLoc.v < kMaximumRelevantDistance)) {
-                if (anObject->base->orderFlags & kTargetIsLocal) {
+                if (anObject->base->orderFlags & kSoftTargetIsLocal) {
                     thisValue <<= 3;
                 }
                 if (anObject->base->orderFlags & kHardTargetIsRemote) {
                     thisValue = Fixed::zero();
                 }
             } else {
-                if (anObject->base->orderFlags & kTargetIsRemote) {
+                if (anObject->base->orderFlags & kSoftTargetIsRemote) {
                     thisValue <<= 3;
                 }
                 if (anObject->base->orderFlags & kHardTargetIsLocal) {
@@ -883,7 +883,7 @@ void Admiral::think() {
             }
 
             if (tag_matches(*destObject->base, anObject->base->order_tag)) {
-                if (anObject->base->orderFlags & kMatchingFoe) {
+                if (anObject->base->orderFlags & kSoftMatchingFoe) {
                     thisValue <<= 3;
                 }
             } else {

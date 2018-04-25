@@ -54,14 +54,14 @@ uint32_t optional_object_order_flags(path_value x) {
     if (x.value().is_null()) {
         return 0;
     } else if (x.value().is_map()) {
-        static const pn::string_view flags[32] = {"stronger_than_target",
-                                                  "base",
-                                                  "not_base",
-                                                  "local",
-                                                  "remote",
-                                                  "only_escort_not_base",
-                                                  "friend",
-                                                  "foe",
+        static const pn::string_view flags[32] = {"bit01",
+                                                  "soft_base",
+                                                  "soft_not_base",
+                                                  "soft_local",
+                                                  "soft_remote",
+                                                  "bit06",
+                                                  "soft_friend",
+                                                  "soft_foe",
 
                                                   "bit09",
                                                   "bit10",
@@ -74,10 +74,10 @@ uint32_t optional_object_order_flags(path_value x) {
 
                                                   "bit17",
                                                   "bit18",
-                                                  "hard_matching_friend",
+                                                  "bit19",
                                                   "hard_matching_foe",
-                                                  "hard_friendly_escort_only",
-                                                  "hard_no_friendly_escort",
+                                                  "bit21",
+                                                  "bit22",
                                                   "hard_remote",
                                                   "hard_local",
 
@@ -86,7 +86,7 @@ uint32_t optional_object_order_flags(path_value x) {
                                                   "hard_not_base",
                                                   "hard_base",
 
-                                                  "matching_foe"};
+                                                  "soft_matching_foe"};
 
         uint32_t bit    = 0x00000001;
         uint32_t result = 0x00000000;
