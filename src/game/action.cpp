@@ -87,12 +87,8 @@ static void queue_action(
         Point* offset);
 
 bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target) {
-    for (const auto& kv : action.filter.tags) {
-        auto it      = target->base->tags.find(kv.first);
-        bool has_tag = ((it != target->base->tags.end()) && it->second);
-        if (kv.second != has_tag) {
-            return false;
-        }
+    if (!tags_match(*target->base, action.filter.tags)) {
+        return false;
     }
 
     if (action.filter.attributes & ~target->attributes) {

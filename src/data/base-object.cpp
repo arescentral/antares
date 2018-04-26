@@ -498,9 +498,9 @@ BaseObject base_object(pn::value_cref x0) {
                     {"device", {&BaseObject::device, optional_device_frame}},
 
                     {"tags", {&BaseObject::tags, optional_tags}},
-                    {"attack_tag", {&BaseObject::attack_tag, optional_string, ""}},
-                    {"defend_tag", {&BaseObject::defend_tag, optional_string, ""}},
-                    {"order_tag", {&BaseObject::order_tag, optional_string, ""}},
+                    {"attack_tags", {&BaseObject::attack_tags, optional_tags}},
+                    {"defend_tags", {&BaseObject::defend_tags, optional_tags}},
+                    {"order_tags", {&BaseObject::order_tags, optional_tags}},
             }));
 }
 

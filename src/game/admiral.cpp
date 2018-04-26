@@ -882,7 +882,7 @@ void Admiral::think() {
                 }
             }
 
-            if (tag_matches(*destObject->base, anObject->base->order_tag)) {
+            if (tags_match(*destObject->base, anObject->base->order_tags)) {
                 if (anObject->base->orderFlags & kSoftMatchingFoe) {
                     thisValue <<= 3;
                 }
@@ -960,7 +960,7 @@ void Admiral::think() {
                                 thisValue = Fixed::zero();
                                 for (auto anObject : SpaceObject::all()) {
                                     if ((anObject->active) && (anObject->owner.get() != this) &&
-                                        tag_matches(*anObject->base, baseObject->order_tag)) {
+                                        tags_match(*anObject->base, baseObject->order_tags)) {
                                         thisValue = Fixed::from_val(1);
                                     }
                                 }

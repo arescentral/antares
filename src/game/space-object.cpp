@@ -843,10 +843,10 @@ pn::string_view SpaceObject::short_name() const {
 }
 
 bool SpaceObject::engages(const SpaceObject& b) const {
-    if ((base->buildFlags & kCanOnlyEngage) && (!tag_matches(*b.base, base->attack_tag))) {
+    if ((base->buildFlags & kCanOnlyEngage) && (!tags_match(*b.base, base->attack_tags))) {
         return false;
     }
-    if ((b.base->buildFlags & kOnlyEngagedBy) && (!tag_matches(*base, b.base->defend_tag))) {
+    if ((b.base->buildFlags & kOnlyEngagedBy) && (!tags_match(*base, b.base->defend_tags))) {
         return false;
     }
     return true;
@@ -855,11 +855,6 @@ bool SpaceObject::engages(const SpaceObject& b) const {
 Fixed SpaceObject::turn_rate() const { return base->turn_rate; }
 
 int32_t SpaceObject::number() const { return this - g.objects.get(); }
-
-bool tag_matches(const BaseObject& o, pn::string_view query) {
-    auto it = o.tags.find(query.copy());
-    return (it != o.tags.end()) & it->second;
-}
 
 bool tags_match(const BaseObject& o, const std::map<pn::string, bool>& query) {
     for (const auto& kv : query) {
