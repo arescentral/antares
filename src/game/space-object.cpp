@@ -843,13 +843,7 @@ pn::string_view SpaceObject::short_name() const {
 }
 
 bool SpaceObject::engages(const SpaceObject& b) const {
-    if ((base->buildFlags & kCanOnlyEngage) && (!tags_match(*b.base, base->attack_tags))) {
-        return false;
-    }
-    if ((b.base->buildFlags & kOnlyEngagedBy) && (!tags_match(*base, b.base->defend_tags))) {
-        return false;
-    }
-    return true;
+    return tags_match(*b.base, base->attack_tags) && tags_match(*base, b.base->defend_tags);
 }
 
 Fixed SpaceObject::turn_rate() const { return base->turn_rate; }

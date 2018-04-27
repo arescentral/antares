@@ -106,32 +106,11 @@ uint32_t optional_object_build_flags(path_value x) {
     if (x.value().is_null()) {
         return 0;
     } else if (x.value().is_map()) {
-        static const pn::string_view flags[32] = {"uncaptured_base_exists",
-                                                  "sufficient_escorts_exist",
-                                                  "this_base_needs_protection",
-                                                  "friend_up_trend",
-                                                  "friend_down_trend",
-                                                  "foe_up_trend",
-                                                  "foe_down_trend",
-                                                  "matching_foe_exists",
-
-                                                  "bit09",
-                                                  "bit10",
-                                                  "bit11",
-                                                  "bit12",
-                                                  "bit13",
-                                                  "bit14",
-                                                  "bit15",
-                                                  "bit16",
-
-                                                  "bit17",
-                                                  "bit18",
-                                                  "bit19",
-                                                  "bit20",
-                                                  "bit21",
-                                                  "bit22",
-                                                  "only_engaged_by",
-                                                  "can_only_engage"};
+        static const pn::string_view flags[32] = {
+                "uncaptured_base_exists", "sufficient_escorts_exist", "this_base_needs_protection",
+                "friend_up_trend",        "friend_down_trend",        "foe_up_trend",
+                "foe_down_trend",         "matching_foe_exists",
+        };
 
         uint32_t bit    = 0x00000001;
         uint32_t result = 0x00000000;

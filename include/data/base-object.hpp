@@ -120,22 +120,6 @@ enum {
     kFoeUpTrend              = 0x00000020,
     kFoeDownTrend            = 0x00000040,
     kMatchingFoeExists       = 0x00000080,  // unowned object with same level-key exists
-    kBuildFlagBit9           = 0x00000100,
-    kBuildFlagBit10          = 0x00000200,
-    kBuildFlagBit11          = 0x00000400,
-    kBuildFlagBit12          = 0x00000800,
-    kBuildFlagBit13          = 0x00001000,
-    kBuildFlagBit14          = 0x00002000,
-    kBuildFlagBit15          = 0x00004000,
-    kBuildFlagBit16          = 0x00008000,
-    kBuildFlagBit17          = 0x00010000,
-    kBuildFlagBit18          = 0x00020000,
-    kBuildFlagBit19          = 0x00040000,
-    kBuildFlagBit20          = 0x00080000,
-    kBuildFlagBit21          = 0x00100000,
-    kBuildFlagBit22          = 0x00200000,
-    kOnlyEngagedBy           = 0x00400000,
-    kCanOnlyEngage           = 0x00800000,
 };
 
 //
@@ -324,9 +308,9 @@ class BaseObject {
     uint32_t                   buildFlags;
     uint32_t                   orderFlags;
     std::map<pn::string, bool> tags;
-    std::map<pn::string, bool> attack_tags;  // if kCanOnlyEngage
-    std::map<pn::string, bool> defend_tags;  // if kOnlyEngagedBy
-    std::map<pn::string, bool> order_tags;   // if k[Hard]MatchingFoe
+    std::map<pn::string, bool> attack_tags;
+    std::map<pn::string, bool> defend_tags;
+    std::map<pn::string, bool> order_tags;  // if k[Hard]MatchingFoe
     Fixed                      buildRatio;
     ticks                      buildTime;
 
