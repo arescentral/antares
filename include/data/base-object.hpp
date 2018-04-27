@@ -112,14 +112,8 @@ enum {
 };
 
 enum {
-    kUncapturedBaseExists    = 0x00000001,
-    kSufficientEscortsExist  = 0x00000002,
-    kThisBaseNeedsProtection = 0x00000004,
-    kFriendUpTrend           = 0x00000008,
-    kFriendDownTrend         = 0x00000010,
-    kFoeUpTrend              = 0x00000020,
-    kFoeDownTrend            = 0x00000040,
-    kMatchingFoeExists       = 0x00000080,  // unowned object with same level-key exists
+    kSufficientEscortsExist = 0x00000002,
+    kMatchingFoeExists      = 0x00000080,  // unowned object with same level-key exists
 };
 
 //
