@@ -327,7 +327,6 @@ class BaseObject {
         struct Build {
             Fixed ratio        = Fixed::zero();
             bool  needs_escort = false;
-            bool  needs_target = false;
         } build;
     } ai;
 

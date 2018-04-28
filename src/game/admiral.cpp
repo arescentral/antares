@@ -47,6 +47,27 @@ static const Fixed kImportantTarget         = Fixed::from_float(1.250);
 static const Fixed kSomewhatImportantTarget = Fixed::from_float(1.125);
 static const Fixed kAbsolutelyEssential     = Fixed::from_float(128.0);
 
+static bool could_target_per_destination_flag(const BaseObject& base, const SpaceObject& target) {
+    return base.ai.target.force.base.has_value()
+                   ? (!!(target.attributes & kIsDestination) == *base.ai.target.force.base)
+                   : true;
+}
+
+static bool could_target_per_owner(
+        const Admiral& a, const BaseObject& base, const SpaceObject& target) {
+    switch (base.ai.target.force.owner) {
+        case Owner::ANY: return true;
+        case Owner::DIFFERENT: return target.owner.get() != &a;
+        case Owner::SAME: return target.owner.get() == &a;
+    }
+}
+
+static bool could_target(const Admiral& a, const BaseObject& base, const SpaceObject& target) {
+    return could_target_per_destination_flag(base, target) &&
+           could_target_per_owner(a, base, target) &&
+           tags_match(*target.base, base.ai.target.force.tags);
+}
+
 void Admiral::init() {
     g.admirals.reset(new Admiral[kMaxPlayerNum]);
     reset();
@@ -945,6 +966,8 @@ void Admiral::think() {
                             }
                         }
                         if (_hopeToBuild.has_value()) {
+                            // If “needs_escort” is set, don’t build a second object of this type
+                            // until the first one has sufficient escorts.
                             auto baseObject = get_buildable_object(*_hopeToBuild, _race);
                             if (baseObject->ai.build.needs_escort) {
                                 for (auto anObject : SpaceObject::all()) {
@@ -957,21 +980,17 @@ void Admiral::think() {
                                 }
                             }
 
-                            if (baseObject->ai.build.needs_target) {
-                                const auto& target = baseObject->ai.target;
-                                const auto& tags   = (!target.force.tags.empty())
-                                                           ? target.force.tags
-                                                           : target.prefer.tags;
-                                thisValue = Fixed::zero();
-                                for (auto anObject : SpaceObject::all()) {
-                                    if ((anObject->active) && (anObject->owner.get() != this) &&
-                                        tags_match(*anObject->base, tags)) {
-                                        thisValue = Fixed::from_val(1);
-                                    }
+                            // Don’t build an object if there are no valid targets for it.
+                            bool any_target = false;
+                            for (auto anObject : SpaceObject::all()) {
+                                if (anObject->active &&
+                                    could_target(*this, *baseObject, *anObject)) {
+                                    any_target = true;
+                                    break;
                                 }
-                                if (thisValue == Fixed::zero()) {
-                                    _hopeToBuild.reset();
-                                }
+                            }
+                            if (!any_target) {
+                                _hopeToBuild.reset();
                             }
                         }
                     }

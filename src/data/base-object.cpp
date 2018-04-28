@@ -460,7 +460,6 @@ BaseObject::AI::Build optional_ai_build(path_value x) {
                    {
                            {"ratio", {&Build::ratio, optional_fixed, Fixed::zero()}},
                            {"needs_escort", {&Build::needs_escort, optional_bool, false}},
-                           {"needs_target", {&Build::needs_target, optional_bool, false}},
                    })
             .value_or(Build{});
 }
