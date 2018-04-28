@@ -50,58 +50,6 @@ static sfz::optional<uint32_t> optional_uint32(path_value x) {
     return sfz::nullopt;
 }
 
-uint32_t optional_object_order_flags(path_value x) {
-    if (x.value().is_null()) {
-        return 0;
-    } else if (x.value().is_map()) {
-        static const pn::string_view flags[32] = {"bit01",
-                                                  "soft_base",
-                                                  "soft_not_base",
-                                                  "soft_local",
-                                                  "soft_remote",
-                                                  "bit06",
-                                                  "soft_friend",
-                                                  "soft_foe",
-
-                                                  "bit09",
-                                                  "bit10",
-                                                  "bit11",
-                                                  "bit12",
-                                                  "bit13",
-                                                  "bit14",
-                                                  "bit15",
-                                                  "bit16",
-
-                                                  "bit17",
-                                                  "bit18",
-                                                  "bit19",
-                                                  "hard_matching_foe",
-                                                  "bit21",
-                                                  "bit22",
-                                                  "hard_remote",
-                                                  "hard_local",
-
-                                                  "hard_foe",
-                                                  "hard_friend",
-                                                  "hard_not_base",
-                                                  "hard_base",
-
-                                                  "soft_matching_foe"};
-
-        uint32_t bit    = 0x00000001;
-        uint32_t result = 0x00000000;
-        for (pn::string_view flag : flags) {
-            if (optional_bool(x.get(flag)).value_or(false)) {
-                result |= bit;
-            }
-            bit <<= 1;
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
-    }
-}
-
 uint32_t optional_object_build_flags(path_value x) {
     if (x.value().is_null()) {
         return 0;
@@ -318,6 +266,53 @@ BaseObject set_attributes(BaseObject o) {
     if (o.collide.edge) {
         o.attributes |= kDoesBounce;
     }
+
+    if (o.ai.target.prefer.base.has_value()) {
+        if (*o.ai.target.prefer.base) {
+            o.orderFlags |= kSoftTargetIsBase;
+        } else {
+            o.orderFlags |= kSoftTargetIsNotBase;
+        }
+    }
+    if (o.ai.target.prefer.local.has_value()) {
+        if (*o.ai.target.prefer.local) {
+            o.orderFlags |= kSoftTargetIsLocal;
+        } else {
+            o.orderFlags |= kSoftTargetIsRemote;
+        }
+    }
+    if (o.ai.target.prefer.owner == Owner::DIFFERENT) {
+        o.orderFlags |= kSoftTargetIsFoe;
+    } else if (o.ai.target.prefer.owner == Owner::SAME) {
+        o.orderFlags |= kSoftTargetIsFriend;
+    }
+    if (!o.ai.target.prefer.tags.empty()) {
+        o.orderFlags |= kSoftTargetMatchesTags;
+    }
+
+    if (o.ai.target.force.base.has_value()) {
+        if (*o.ai.target.force.base) {
+            o.orderFlags |= kHardTargetIsBase;
+        } else {
+            o.orderFlags |= kHardTargetIsNotBase;
+        }
+    }
+    if (o.ai.target.force.local.has_value()) {
+        if (*o.ai.target.force.local) {
+            o.orderFlags |= kHardTargetIsLocal;
+        } else {
+            o.orderFlags |= kHardTargetIsRemote;
+        }
+    }
+    if (o.ai.target.force.owner == Owner::DIFFERENT) {
+        o.orderFlags |= kHardTargetIsFoe;
+    } else if (o.ai.target.force.owner == Owner::SAME) {
+        o.orderFlags |= kHardTargetIsFriend;
+    }
+    if (!o.ai.target.force.tags.empty()) {
+        o.orderFlags |= kHardTargetMatchesTags;
+    }
+
     return o;
 }
 
@@ -413,13 +408,45 @@ BaseObject::Arrive optional_arrive(path_value x) {
             .value_or(BaseObject::Arrive{});
 }
 
+BaseObject::AI::Target::Filter optional_ai_target_filter(path_value x) {
+    using Filter = BaseObject::AI::Target::Filter;
+    return optional_struct<Filter>(
+                   x,
+                   {
+                           {"base", {&Filter::base, optional_bool}},
+                           {"local", {&Filter::local, optional_bool}},
+                           {"owner", {&Filter::owner, optional_owner, Owner::ANY}},
+                           {"tags", {&Filter::tags, optional_tags}},
+                   })
+            .value_or(Filter{});
+}
+
+BaseObject::AI::Target optional_ai_target(path_value x) {
+    using Target = BaseObject::AI::Target;
+    return optional_struct<Target>(
+                   x,
+                   {
+                           {"prefer", {&Target::prefer, optional_ai_target_filter}},
+                           {"force", {&Target::force, optional_ai_target_filter}},
+                   })
+            .value_or(Target{});
+}
+
+BaseObject::AI optional_ai(path_value x) {
+    return optional_struct<BaseObject::AI>(
+                   x,
+                   {
+                           {"target", {&BaseObject::AI::target, optional_ai_target}},
+                   })
+            .value_or(BaseObject::AI{});
+}
+
 BaseObject base_object(pn::value_cref x0) {
     return set_attributes(required_struct<BaseObject>(
             path_value{x0},
             {
                     {"attributes", {&BaseObject::attributes, optional_object_attributes}},
                     {"build_flags", {&BaseObject::buildFlags, optional_object_build_flags}},
-                    {"order_flags", {&BaseObject::orderFlags, optional_object_order_flags}},
 
                     {"long_name", {&BaseObject::name, required_string_copy}},
                     {"short_name", {&BaseObject::short_name, required_string_copy}},
@@ -479,7 +506,7 @@ BaseObject base_object(pn::value_cref x0) {
                     {"tags", {&BaseObject::tags, optional_tags}},
                     {"attack_tags", {&BaseObject::attack_tags, optional_tags}},
                     {"defend_tags", {&BaseObject::defend_tags, optional_tags}},
-                    {"order_tags", {&BaseObject::order_tags, optional_tags}},
+                    {"ai", {&BaseObject::ai, optional_ai}},
             }));
 }
 

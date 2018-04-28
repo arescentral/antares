@@ -124,20 +124,20 @@ enum {
 //
 
 enum {
-    kSoftTargetIsBase    = 0x00000002,
-    kHardTargetIsBase    = 0x08000000,
-    kSoftTargetIsNotBase = 0x00000004,
-    kHardTargetIsNotBase = 0x04000000,
-    kSoftTargetIsLocal   = 0x00000008,
-    kHardTargetIsLocal   = 0x00800000,
-    kSoftTargetIsRemote  = 0x00000010,
-    kHardTargetIsRemote  = 0x00400000,
-    kSoftTargetIsFriend  = 0x00000040,
-    kHardTargetIsFriend  = 0x02000000,
-    kSoftTargetIsFoe     = 0x00000080,
-    kHardTargetIsFoe     = 0x01000000,
-    kSoftMatchingFoe     = 0x10000000,
-    kHardMatchingFoe     = 0x00080000,
+    kSoftTargetIsBase      = 0x00000002,
+    kHardTargetIsBase      = 0x08000000,
+    kSoftTargetIsNotBase   = 0x00000004,
+    kHardTargetIsNotBase   = 0x04000000,
+    kSoftTargetIsLocal     = 0x00000008,
+    kHardTargetIsLocal     = 0x00800000,
+    kSoftTargetIsRemote    = 0x00000010,
+    kHardTargetIsRemote    = 0x00400000,
+    kSoftTargetIsFriend    = 0x00000040,
+    kHardTargetIsFriend    = 0x02000000,
+    kSoftTargetIsFoe       = 0x00000080,
+    kHardTargetIsFoe       = 0x01000000,
+    kSoftTargetMatchesTags = 0x10000000,
+    kHardTargetMatchesTags = 0x00080000,
 };
 
 // RUNTIME FLAG BITS
@@ -300,13 +300,25 @@ class BaseObject {
     sfz::optional<Device> device;
 
     uint32_t                   buildFlags;
-    uint32_t                   orderFlags;
+    uint32_t                   orderFlags = 0;
     std::map<pn::string, bool> tags;
     std::map<pn::string, bool> attack_tags;
     std::map<pn::string, bool> defend_tags;
-    std::map<pn::string, bool> order_tags;  // if k[Hard]MatchingFoe
     Fixed                      buildRatio;
     ticks                      buildTime;
+
+    struct AI {
+        struct Target {
+            struct Filter {
+                sfz::optional<bool>        base;
+                sfz::optional<bool>        local;
+                Owner                      owner;
+                std::map<pn::string, bool> tags;
+            };
+            Filter prefer;
+            Filter force;
+        } target;
+    } ai;
 
     uint8_t skillNum;
     uint8_t skillDen;

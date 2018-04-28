@@ -882,12 +882,13 @@ void Admiral::think() {
                 }
             }
 
-            if (tags_match(*destObject->base, anObject->base->order_tags)) {
-                if (anObject->base->orderFlags & kSoftMatchingFoe) {
+            if (anObject->base->orderFlags & kSoftTargetMatchesTags) {
+                if (tags_match(*destObject->base, anObject->base->ai.target.prefer.tags)) {
                     thisValue <<= 3;
                 }
-            } else {
-                if (anObject->base->orderFlags & kHardMatchingFoe) {
+            }
+            if (anObject->base->orderFlags & kHardTargetMatchesTags) {
+                if (!tags_match(*destObject->base, anObject->base->ai.target.force.tags)) {
                     thisValue = Fixed::zero();
                 }
             }
@@ -957,10 +958,14 @@ void Admiral::think() {
                             }
 
                             if (baseObject->buildFlags & kMatchingFoeExists) {
+                                const auto& target = baseObject->ai.target;
+                                const auto& tags   = (!target.force.tags.empty())
+                                                           ? target.force.tags
+                                                           : target.prefer.tags;
                                 thisValue = Fixed::zero();
                                 for (auto anObject : SpaceObject::all()) {
                                     if ((anObject->active) && (anObject->owner.get() != this) &&
-                                        tags_match(*anObject->base, baseObject->order_tags)) {
+                                        tags_match(*anObject->base, tags)) {
                                         thisValue = Fixed::from_val(1);
                                     }
                                 }
