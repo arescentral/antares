@@ -453,12 +453,25 @@ BaseObject::AI::Target optional_ai_target(path_value x) {
             .value_or(Target{});
 }
 
+BaseObject::AI::Build optional_ai_build(path_value x) {
+    using Build = BaseObject::AI::Build;
+    return optional_struct<Build>(
+                   x,
+                   {
+                           {"ratio", {&Build::ratio, optional_fixed, Fixed::zero()}},
+                           {"needs_escort", {&Build::needs_escort, optional_bool, false}},
+                           {"needs_target", {&Build::needs_target, optional_bool, false}},
+                   })
+            .value_or(Build{});
+}
+
 BaseObject::AI optional_ai(path_value x) {
     return optional_struct<BaseObject::AI>(
                    x,
                    {
                            {"combat", {&BaseObject::AI::combat, optional_ai_combat}},
                            {"target", {&BaseObject::AI::target, optional_ai_target}},
+                           {"build", {&BaseObject::AI::build, optional_ai_build}},
                    })
             .value_or(BaseObject::AI{});
 }
@@ -468,7 +481,6 @@ BaseObject base_object(pn::value_cref x0) {
             path_value{x0},
             {
                     {"attributes", {&BaseObject::attributes, optional_object_attributes}},
-                    {"build_flags", {&BaseObject::buildFlags, optional_object_build_flags}},
 
                     {"long_name", {&BaseObject::name, required_string_copy}},
                     {"short_name", {&BaseObject::short_name, required_string_copy}},
@@ -495,7 +507,6 @@ BaseObject base_object(pn::value_cref x0) {
                     {"max_thrust", {&BaseObject::maxThrust, optional_fixed, Fixed::zero()}},
                     {"friend_deficit",
                      {&BaseObject::friendDefecit, optional_fixed, Fixed::zero()}},
-                    {"build_ratio", {&BaseObject::buildRatio, optional_fixed, Fixed::zero()}},
 
                     {"build_time", {&BaseObject::buildTime, optional_ticks, ticks(0)}},
 

@@ -228,7 +228,7 @@ void RecalcAllAdmiralBuildData() {
                 a->canBuildType().back().buildable = BuildableObject{buildable_class.name.copy()};
                 a->canBuildType().back().base      = baseObject;
                 a->canBuildType().back().chanceRange = a->totalBuildChance();
-                a->totalBuildChance() += baseObject->buildRatio;
+                a->totalBuildChance() += baseObject->ai.build.ratio;
             }
         }
     }
@@ -946,7 +946,7 @@ void Admiral::think() {
                         }
                         if (_hopeToBuild.has_value()) {
                             auto baseObject = get_buildable_object(*_hopeToBuild, _race);
-                            if (baseObject->buildFlags & kSufficientEscortsExist) {
+                            if (baseObject->ai.build.needs_escort) {
                                 for (auto anObject : SpaceObject::all()) {
                                     if ((anObject->active) && (anObject->owner.get() == this) &&
                                         (anObject->base == baseObject) &&
@@ -957,7 +957,7 @@ void Admiral::think() {
                                 }
                             }
 
-                            if (baseObject->buildFlags & kMatchingFoeExists) {
+                            if (baseObject->ai.build.needs_target) {
                                 const auto& target = baseObject->ai.target;
                                 const auto& tags   = (!target.force.tags.empty())
                                                            ? target.force.tags

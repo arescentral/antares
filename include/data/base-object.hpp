@@ -299,12 +299,10 @@ class BaseObject {
     };
     sfz::optional<Device> device;
 
-    uint32_t                   buildFlags;
     uint32_t                   orderFlags = 0;
     std::map<pn::string, bool> tags;
     std::map<pn::string, bool> attack_tags;
     std::map<pn::string, bool> defend_tags;
-    Fixed                      buildRatio;
     ticks                      buildTime;
 
     struct AI {
@@ -325,6 +323,12 @@ class BaseObject {
             Filter prefer;
             Filter force;
         } target;
+
+        struct Build {
+            Fixed ratio        = Fixed::zero();
+            bool  needs_escort = false;
+            bool  needs_target = false;
+        } build;
     } ai;
 
     static const int byte_size = 318;
