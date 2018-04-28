@@ -284,7 +284,8 @@ void NonplayerShipThink() {
                     // why do we only do this randomly when closest is within engagerange?
                     // to simulate the innaccuracy of battle
                     // (to keep things from wiggling, really)
-                    if (anObject->randomSeed.next(baseObject->skillDen) < baseObject->skillNum) {
+                    if (anObject->randomSeed.next(baseObject->ai.combat.skill.den) <
+                        baseObject->ai.combat.skill.num) {
                         anObject->keysDown &= ~kMotionKeyMask;
                         anObject->keysDown |= keysDown & kMotionKeyMask;
                     }

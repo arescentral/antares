@@ -408,6 +408,27 @@ BaseObject::Arrive optional_arrive(path_value x) {
             .value_or(BaseObject::Arrive{});
 }
 
+BaseObject::AI::Combat::Skill optional_ai_combat_skill(path_value x) {
+    using Skill = BaseObject::AI::Combat::Skill;
+    return optional_struct<Skill>(
+                   x,
+                   {
+                           {"num", {&Skill::num, optional_uint8, 0}},
+                           {"den", {&Skill::den, optional_uint8, 0}},
+                   })
+            .value_or(Skill{});
+}
+
+BaseObject::AI::Combat optional_ai_combat(path_value x) {
+    using Combat = BaseObject::AI::Combat;
+    return optional_struct<Combat>(
+                   x,
+                   {
+                           {"skill", {&Combat::skill, optional_ai_combat_skill}},
+                   })
+            .value_or(Combat{});
+}
+
 BaseObject::AI::Target::Filter optional_ai_target_filter(path_value x) {
     using Filter = BaseObject::AI::Target::Filter;
     return optional_struct<Filter>(
@@ -436,6 +457,7 @@ BaseObject::AI optional_ai(path_value x) {
     return optional_struct<BaseObject::AI>(
                    x,
                    {
+                           {"combat", {&BaseObject::AI::combat, optional_ai_combat}},
                            {"target", {&BaseObject::AI::target, optional_ai_target}},
                    })
             .value_or(BaseObject::AI{});
@@ -463,8 +485,6 @@ BaseObject base_object(pn::value_cref x0) {
                     {"warp_out_distance", {&BaseObject::warpOutDistance, optional_uint32, 0}},
                     {"health", {&BaseObject::health, optional_int32, 0}},
                     {"energy", {&BaseObject::energy, optional_int32, 0}},
-                    {"skill_num", {&BaseObject::skillNum, optional_uint8, 0}},
-                    {"skill_den", {&BaseObject::skillDen, optional_uint8, 0}},
                     {"occupy_count", {&BaseObject::occupy_count, optional_int32, -1}},
 
                     {"offense", {&BaseObject::offenseValue, optional_fixed, Fixed::zero()}},

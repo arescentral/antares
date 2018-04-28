@@ -308,6 +308,13 @@ class BaseObject {
     ticks                      buildTime;
 
     struct AI {
+        struct Combat {
+            struct Skill {
+                uint8_t num;
+                uint8_t den;
+            } skill;
+        } combat;
+
         struct Target {
             struct Filter {
                 sfz::optional<bool>        base;
@@ -319,9 +326,6 @@ class BaseObject {
             Filter force;
         } target;
     } ai;
-
-    uint8_t skillNum;
-    uint8_t skillDen;
 
     static const int byte_size = 318;
 };
