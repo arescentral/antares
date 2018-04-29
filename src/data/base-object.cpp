@@ -267,6 +267,22 @@ BaseObject set_attributes(BaseObject o) {
         o.attributes |= kDoesBounce;
     }
 
+    if (o.ai.combat.hated) {
+        o.attributes |= kHated;
+    }
+    if (o.ai.combat.engages) {
+        o.attributes |= kCanEngage;
+    }
+    if (o.ai.combat.engaged) {
+        o.attributes |= kCanBeEngaged;
+    }
+    if (o.ai.combat.evades) {
+        o.attributes |= kCanEvade;
+    }
+    if (o.ai.combat.evaded) {
+        o.attributes |= kCanBeEvaded;
+    }
+
     if (o.ai.target.prefer.base.has_value()) {
         if (*o.ai.target.prefer.base) {
             o.orderFlags |= kSoftTargetIsBase;
@@ -424,6 +440,13 @@ BaseObject::AI::Combat optional_ai_combat(path_value x) {
     return optional_struct<Combat>(
                    x,
                    {
+                           {"hated", {&Combat::hated, optional_bool, false}},
+                           {"engages", {&Combat::engages, optional_bool, false}},
+                           {"engages_if", {&Combat::engages_if, optional_tags}},
+                           {"engaged", {&Combat::engaged, optional_bool, false}},
+                           {"engaged_if", {&Combat::engaged_if, optional_tags}},
+                           {"evades", {&Combat::evades, optional_bool, false}},
+                           {"evaded", {&Combat::evaded, optional_bool, false}},
                            {"skill", {&Combat::skill, optional_ai_combat_skill}},
                    })
             .value_or(Combat{});
@@ -534,8 +557,6 @@ BaseObject base_object(pn::value_cref x0) {
                     {"device", {&BaseObject::device, optional_device_frame}},
 
                     {"tags", {&BaseObject::tags, optional_tags}},
-                    {"attack_tags", {&BaseObject::attack_tags, optional_tags}},
-                    {"defend_tags", {&BaseObject::defend_tags, optional_tags}},
                     {"ai", {&BaseObject::ai, optional_ai}},
             }));
 }

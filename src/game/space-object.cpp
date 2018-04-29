@@ -843,7 +843,8 @@ pn::string_view SpaceObject::short_name() const {
 }
 
 bool SpaceObject::engages(const SpaceObject& b) const {
-    return tags_match(*b.base, base->attack_tags) && tags_match(*base, b.base->defend_tags);
+    return tags_match(*b.base, base->ai.combat.engages_if) &&
+           tags_match(*base, b.base->ai.combat.engaged_if);
 }
 
 Fixed SpaceObject::turn_rate() const { return base->turn_rate; }

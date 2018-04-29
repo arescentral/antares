@@ -301,12 +301,17 @@ class BaseObject {
 
     uint32_t                   orderFlags = 0;
     std::map<pn::string, bool> tags;
-    std::map<pn::string, bool> attack_tags;
-    std::map<pn::string, bool> defend_tags;
     ticks                      buildTime;
 
     struct AI {
         struct Combat {
+            bool                       hated   = false;
+            bool                       engages = false;
+            std::map<pn::string, bool> engages_if;
+            bool                       engaged = false;
+            std::map<pn::string, bool> engaged_if;
+            bool                       evades = false;
+            bool                       evaded = false;
             struct Skill {
                 uint8_t num;
                 uint8_t den;
