@@ -284,11 +284,9 @@ void Admiral::set_control(Handle<SpaceObject> obj) {
     _considerShip = obj;
     if (obj.get()) {
         _considerShipID = obj->id;
-        if (obj->attributes & kCanAcceptBuild) {
-            auto d = obj->asDestination;
-            if (d.get() && d->can_build()) {
-                _buildAtObject = d;
-            }
+        auto d          = obj->asDestination;
+        if (d.get() && d->can_build()) {
+            _buildAtObject = d;
         }
     } else {
         _considerShipID = -1;
@@ -304,11 +302,8 @@ Handle<SpaceObject> Admiral::control() const {
 }
 
 bool BaseHasSomethingToBuild(Handle<SpaceObject> obj) {
-    if (obj->attributes & kCanAcceptBuild) {
-        auto d = obj->asDestination;
-        return d.get() && d->can_build();
-    }
-    return false;
+    auto d = obj->asDestination;
+    return d.get() && d->can_build();
 }
 
 Handle<Destination> GetAdmiralBuildAtObject(Handle<Admiral> a) {
@@ -331,11 +326,9 @@ void SetAdmiralBuildAtObject(Handle<Admiral> a, Handle<SpaceObject> obj) {
         throw std::runtime_error("Can't set consider ship for -1 admiral.");
     }
     if (obj.get()) {
-        if (obj->attributes & kCanAcceptBuild) {
-            auto d = obj->asDestination;
-            if (d.get() && d->can_build()) {
-                a->buildAtObject() = d;
-            }
+        auto d = obj->asDestination;
+        if (d.get() && d->can_build()) {
+            a->buildAtObject() = d;
         }
     }
 }
