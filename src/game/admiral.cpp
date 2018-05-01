@@ -916,98 +916,108 @@ void Admiral::think() {
             }
         }
     }
+    think_build();
+}
 
+void Admiral::think_build() {
     // if we've saved enough for our dreams
-    if (_cash > _saveGoal) {
-        _saveGoal = Fixed::zero();
+    if (_cash <= _saveGoal) {
+        return;
+    }
+    _saveGoal = Fixed::zero();
 
-        // consider what ship to build
-        if (!_buildAtObject.get()) {
-            _buildAtObject = Handle<Destination>(0);
+    // consider what ship to build
+    if (!_buildAtObject.get()) {
+        _buildAtObject = Handle<Destination>(0);
+    }
+
+    // try to find the next destination object that we own & that can build
+    auto anObject = SpaceObject::none();
+    auto begin    = _buildAtObject.number() + 1;
+    auto end      = begin + kMaxDestObject;
+    for (int i = begin; i < end; ++i) {
+        auto d = _buildAtObject = Handle<Destination>(i % kMaxDestObject);
+        if (d->whichObject.get() && (d->whichObject->owner.get() == this) &&
+            (d->whichObject->attributes & kCanAcceptBuild)) {
+            anObject = d->whichObject;
+            break;
         }
+    }
 
-        // try to find the next destination object that we own & that can build
-        auto anObject = SpaceObject::none();
-        auto begin    = _buildAtObject.number() + 1;
-        auto end      = begin + kMaxDestObject;
-        for (int i = begin; i < end; ++i) {
-            auto d = _buildAtObject = Handle<Destination>(i % kMaxDestObject);
-            if (d->whichObject.get() && (d->whichObject->owner.get() == this) &&
-                (d->whichObject->attributes & kCanAcceptBuild)) {
-                anObject = d->whichObject;
-                break;
-            }
-        }
+    // if we have a legal object
+    if (!anObject.get()) {
+        return;
+    }
+    auto destBalance = anObject->asDestination;
+    if (destBalance->buildTime > ticks(0)) {
+        return;
+    }
 
-        // if we have a legal object
-        if (anObject.get()) {
-            auto destBalance = anObject->asDestination;
-            if (destBalance->buildTime <= ticks(0)) {
-                if (!_hopeToBuild.has_value()) {
-                    int k = 0;
-                    while (!_hopeToBuild.has_value() && (k < 7)) {
-                        k++;
-                        // choose something to build
-                        thisValue   = g.random.next(_totalBuildChance);
-                        friendValue = kFixedNone;  // equals the highest qualifying object
-                        for (int j = 0; j < _canBuildType.size(); ++j) {
-                            if ((_canBuildType[j].chanceRange <= thisValue) &&
-                                (_canBuildType[j].chanceRange > friendValue)) {
-                                friendValue = _canBuildType[j].chanceRange;
-                                _hopeToBuild.emplace(
-                                        BuildableObject{_canBuildType[j].buildable.name.copy()});
-                            }
-                        }
-                        if (_hopeToBuild.has_value()) {
-                            // If “needs_escort” is set, don’t build a second object of this type
-                            // until the first one has sufficient escorts.
-                            auto baseObject = get_buildable_object(*_hopeToBuild, _race);
-                            if (baseObject->ai.build.needs_escort) {
-                                for (auto anObject : SpaceObject::all()) {
-                                    if ((anObject->active) && (anObject->owner.get() == this) &&
-                                        (anObject->base == baseObject) &&
-                                        (anObject->escortStrength < baseObject->friendDefecit)) {
-                                        _hopeToBuild.reset();
-                                        break;
-                                    }
-                                }
-                            }
-
-                            // Don’t build an object if there are no valid targets for it.
-                            bool any_target = false;
-                            for (auto anObject : SpaceObject::all()) {
-                                if (anObject->active &&
-                                    could_target(*this, *baseObject, *anObject)) {
-                                    any_target = true;
-                                    break;
-                                }
-                            }
-                            if (!any_target) {
-                                _hopeToBuild.reset();
-                            }
-                        }
-                    }
+    if (!_hopeToBuild.has_value()) {
+        int k = 0;
+        while (!_hopeToBuild.has_value() && (k < 7)) {
+            k++;
+            // choose something to build
+            Fixed thisValue   = g.random.next(_totalBuildChance);
+            Fixed friendValue = kFixedNone;  // equals the highest qualifying object
+            for (int j = 0; j < _canBuildType.size(); ++j) {
+                if ((_canBuildType[j].chanceRange <= thisValue) &&
+                    (_canBuildType[j].chanceRange > friendValue)) {
+                    friendValue = _canBuildType[j].chanceRange;
+                    _hopeToBuild.emplace(BuildableObject{_canBuildType[j].buildable.name.copy()});
                 }
-                if (_hopeToBuild.has_value()) {
-                    int j = 0;
-                    for (; j < destBalance->canBuildType.size(); ++j) {
-                        if (destBalance->canBuildType[j].name == _hopeToBuild->name) {
+            }
+            if (_hopeToBuild.has_value()) {
+                // If “needs_escort” is set, don’t build a second object of this type
+                // until the first one has sufficient escorts.
+                auto baseObject = get_buildable_object(*_hopeToBuild, _race);
+                if (baseObject->ai.build.needs_escort) {
+                    for (auto anObject : SpaceObject::all()) {
+                        if ((anObject->active) && (anObject->owner.get() == this) &&
+                            (anObject->base == baseObject) &&
+                            (anObject->escortStrength < baseObject->friendDefecit)) {
+                            _hopeToBuild.reset();
                             break;
                         }
                     }
-                    if (j < destBalance->canBuildType.size()) {
-                        auto baseObject = get_buildable_object(*_hopeToBuild, _race);
-                        if (_cash >= Fixed::from_long(baseObject->price)) {
-                            Admiral::build(j);
-                            _hopeToBuild.reset();
-                            _saveGoal = Fixed::zero();
-                        } else {
-                            _saveGoal = Fixed::from_long(baseObject->price);
-                        }
-                    }  // otherwise just wait until we get to it
+                }
+
+                // Don’t build an object if there are no valid targets for it.
+                bool any_target = false;
+                for (auto anObject : SpaceObject::all()) {
+                    if (anObject->active && could_target(*this, *baseObject, *anObject)) {
+                        any_target = true;
+                        break;
+                    }
+                }
+                if (!any_target) {
+                    _hopeToBuild.reset();
                 }
             }
         }
+    }
+
+    if (!_hopeToBuild.has_value()) {
+        return;
+    }
+
+    int j = 0;
+    for (; j < destBalance->canBuildType.size(); ++j) {
+        if (destBalance->canBuildType[j].name == _hopeToBuild->name) {
+            break;
+        }
+    }
+    if (j >= destBalance->canBuildType.size()) {
+        return;  // just wait until we get to it
+    }
+
+    auto baseObject = get_buildable_object(*_hopeToBuild, _race);
+    if (_cash >= Fixed::from_long(baseObject->price)) {
+        Admiral::build(j);
+        _hopeToBuild.reset();
+        _saveGoal = Fixed::zero();
+    } else {
+        _saveGoal = Fixed::from_long(baseObject->price);
     }
 }
 

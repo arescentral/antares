@@ -177,6 +177,8 @@ class Admiral {
 
   private:
     Admiral() = default;
+
+    void think_build();
 };
 
 void ResetAllDestObjectData();
