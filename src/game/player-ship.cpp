@@ -260,7 +260,7 @@ static void target_hostile(Handle<SpaceObject> origin_ship, int32_t direction) {
 }
 
 static void select_base(Handle<SpaceObject> origin_ship, int32_t direction) {
-    pick_object(origin_ship, direction, false, kCanAcceptBuild, 0, g.admiral->control(), FRIENDLY);
+    pick_object(origin_ship, direction, false, kIsDestination, 0, g.admiral->control(), FRIENDLY);
 }
 
 static void target_base(Handle<SpaceObject> origin_ship, int32_t direction) {
@@ -777,7 +777,7 @@ void PlayerShipHandleClick(Point where, int button) {
             } else {
                 auto control       = g.admiral->control();
                 auto selectShipNum = GetSpritePointSelectObject(
-                        &bounds, g.ship, kCanBeDestination | kCanAcceptBuild, control, FRIENDLY);
+                        &bounds, g.ship, kCanBeDestination | kIsDestination, control, FRIENDLY);
                 if (selectShipNum.get()) {
                     SetPlayerSelectShip(selectShipNum, false, g.admiral);
                 }
