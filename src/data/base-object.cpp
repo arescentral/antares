@@ -270,6 +270,9 @@ BaseObject set_attributes(BaseObject o) {
     if (o.ai.combat.hated) {
         o.attributes |= kHated;
     }
+    if (o.ai.combat.guided) {
+        o.attributes |= kIsGuided;
+    }
     if (o.ai.combat.engages) {
         o.attributes |= kCanEngage;
     }
@@ -445,6 +448,7 @@ BaseObject::AI::Combat optional_ai_combat(path_value x) {
                    x,
                    {
                            {"hated", {&Combat::hated, optional_bool, false}},
+                           {"guided", {&Combat::guided, optional_bool, false}},
                            {"engages", {&Combat::engages, optional_bool, false}},
                            {"engages_if", {&Combat::engages_if, optional_tags}},
                            {"engaged", {&Combat::engaged, optional_bool, false}},

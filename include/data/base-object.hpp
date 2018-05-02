@@ -306,6 +306,7 @@ class BaseObject {
     struct AI {
         struct Combat {
             bool                       hated   = false;
+            bool                       guided  = false;
             bool                       engages = false;
             std::map<pn::string, bool> engages_if;
             bool                       engaged = false;
