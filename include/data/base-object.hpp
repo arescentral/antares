@@ -330,8 +330,9 @@ class BaseObject {
         } target;
 
         struct Build {
-            Fixed ratio        = Fixed::zero();
-            bool  needs_escort = false;
+            Fixed ratio              = Fixed::zero();
+            bool  needs_escort       = false;
+            bool  legacy_non_builder = false;
         } build;
     } ai;
 

@@ -283,6 +283,10 @@ BaseObject set_attributes(BaseObject o) {
         o.attributes |= kCanBeEvaded;
     }
 
+    if ((o.attributes & kIsDestination) && !o.ai.build.legacy_non_builder) {
+        o.attributes |= kCanAcceptBuild;
+    }
+
     if (o.ai.target.prefer.base.has_value()) {
         if (*o.ai.target.prefer.base) {
             o.orderFlags |= kSoftTargetIsBase;
@@ -483,6 +487,8 @@ BaseObject::AI::Build optional_ai_build(path_value x) {
                    {
                            {"ratio", {&Build::ratio, optional_fixed, Fixed::zero()}},
                            {"needs_escort", {&Build::needs_escort, optional_bool, false}},
+                           {"legacy_non_builder",
+                            {&Build::legacy_non_builder, optional_bool, false}},
                    })
             .value_or(Build{});
 }
