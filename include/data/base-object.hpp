@@ -173,10 +173,6 @@ class BaseObject {
     uint32_t attributes;  // initial attributes (see flags)
     int32_t  price;
 
-    Fixed offenseValue;
-    //  Fixed                   defenseValue;
-    int32_t destinationClass;  // for computer
-
     Fixed    maxVelocity;      // maximum speed
     Fixed    warpSpeed;        // multiplier of speed at warp (0 if cannot)
     uint32_t warpOutDistance;  // distance at which to come out of warp
@@ -210,8 +206,6 @@ class BaseObject {
         sfz::optional<Weapon> beam;
         sfz::optional<Weapon> special;
     } weapons;
-
-    Fixed friendDefecit;
 
     struct Destroy {
         bool                                       dont_die;
@@ -329,6 +323,12 @@ class BaseObject {
             Filter prefer;
             Filter force;
         } target;
+
+        struct Escort {
+            int   class_ = 0;
+            Fixed power  = Fixed::zero();
+            Fixed need   = Fixed::zero();
+        } escort;
 
         struct Build {
             Fixed ratio              = Fixed::zero();

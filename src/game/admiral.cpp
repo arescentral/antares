@@ -490,23 +490,23 @@ void OverrideObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overri
                 o->destObjectID     = dObject->id;
 
                 if (dObject->owner == o->owner) {
-                    dObject->remoteFriendStrength += o->base->offenseValue;
-                    dObject->escortStrength += o->base->offenseValue;
+                    dObject->remoteFriendStrength += o->base->ai.escort.power;
+                    dObject->escortStrength += o->base->ai.escort.power;
                     if (dObject->attributes & kIsDestination) {
-                        if (dObject->escortStrength < dObject->base->friendDefecit) {
+                        if (dObject->escortStrength < dObject->base->ai.escort.need) {
                             o->duty = eGuardDuty;
                         } else {
                             o->duty = eNoDuty;
                         }
                     } else {
-                        if (dObject->escortStrength < dObject->base->friendDefecit) {
+                        if (dObject->escortStrength < dObject->base->ai.escort.need) {
                             o->duty = eEscortDuty;
                         } else {
                             o->duty = eNoDuty;
                         }
                     }
                 } else {
-                    dObject->remoteFoeStrength += o->base->offenseValue;
+                    dObject->remoteFoeStrength += o->base->ai.escort.power;
                     if (dObject->attributes & kIsDestination) {
                         o->duty = eAssaultDuty;
                     } else {
@@ -537,10 +537,10 @@ void RemoveObjectFromDestination(Handle<SpaceObject> o) {
         auto dObject = o->destObject;
         if (dObject->id == o->destObjectID) {
             if (dObject->owner == o->owner) {
-                dObject->remoteFriendStrength -= o->base->offenseValue;
-                dObject->escortStrength -= o->base->offenseValue;
+                dObject->remoteFriendStrength -= o->base->ai.escort.power;
+                dObject->escortStrength -= o->base->ai.escort.power;
             } else {
-                dObject->remoteFoeStrength -= o->base->offenseValue;
+                dObject->remoteFoeStrength -= o->base->ai.escort.power;
             }
         }
     }
@@ -680,7 +680,7 @@ void Admiral::think() {
                 }
 
                 if ((anObject->duty != eEscortDuty) && (anObject->duty != eHostileBaseDuty)) {
-                    _thisFreeEscortStrength += anObject->base->offenseValue;
+                    _thisFreeEscortStrength += anObject->base->ai.escort.power;
                 }
 
                 anObject->bestConsideredTargetValue = kFixedNone;
@@ -725,7 +725,7 @@ void Admiral::think() {
             (anObject->active == kObjectInUse) && (destObject->attributes & (kCanBeDestination)) &&
             (destObject->active == kObjectInUse) &&
             ((anObject->owner != destObject->owner) ||
-             (anObject->base->destinationClass < destObject->base->destinationClass))) {
+             (anObject->base->ai.escort.class_ < destObject->base->ai.escort.class_))) {
             gridLoc    = destObject->distanceGrid;
             stepObject = otherDestObject = destObject;
             while (stepObject->nextFarObject.get()) {
@@ -746,7 +746,7 @@ void Admiral::think() {
             thisValue = kUnimportantTarget;
             if (destObject->owner == anObject->owner) {
                 if (destObject->attributes & kIsDestination) {
-                    if (destObject->escortStrength < destObject->base->friendDefecit) {
+                    if (destObject->escortStrength < destObject->base->ai.escort.need) {
                         thisValue = kAbsolutelyEssential;
                     } else if (foeValue != Fixed::zero()) {
                         if (foeValue >= friendValue) {
@@ -774,11 +774,11 @@ void Admiral::think() {
                         thisValue = Fixed::zero();
                     }
                 } else {
-                    if (destObject->base->destinationClass > anObject->base->destinationClass) {
+                    if (destObject->base->ai.escort.class_ > anObject->base->ai.escort.class_) {
                         if (foeValue > friendValue) {
                             thisValue = kMostImportantTarget;
                         } else {
-                            if (destObject->escortStrength < destObject->base->friendDefecit) {
+                            if (destObject->escortStrength < destObject->base->ai.escort.need) {
                                 thisValue = kMostImportantTarget;
                             } else {
                                 thisValue = kUnimportantTarget;
@@ -975,7 +975,7 @@ void Admiral::think_build() {
                     for (auto anObject : SpaceObject::all()) {
                         if ((anObject->active) && (anObject->owner.get() == this) &&
                             (anObject->base == baseObject) &&
-                            (anObject->escortStrength < baseObject->friendDefecit)) {
+                            (anObject->escortStrength < baseObject->ai.escort.need)) {
                             _hopeToBuild.reset();
                             break;
                         }

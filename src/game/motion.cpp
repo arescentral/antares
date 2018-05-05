@@ -541,7 +541,7 @@ static void calc_misc() {
         }
 
         if (o->attributes & kConsiderDistanceAttributes) {
-            o->localFriendStrength  = o->base->offenseValue;
+            o->localFriendStrength  = o->base->ai.escort.power;
             o->localFoeStrength     = Fixed::zero();
             o->closestObject        = SpaceObject::none();
             o->closestDistance      = kMaximumRelevantDistanceSquared;

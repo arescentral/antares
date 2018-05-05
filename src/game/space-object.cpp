@@ -668,10 +668,10 @@ void SpaceObject::set_owner(Handle<Admiral> new_owner, bool message) {
             (fixObject->attributes & kCanThink)) {
             fixObject->currentTargetValue = kFixedNone;
             if (fixObject->owner != new_owner) {
-                object->remoteFoeStrength += fixObject->base->offenseValue;
+                object->remoteFoeStrength += fixObject->base->ai.escort.power;
             } else {
-                object->remoteFriendStrength += fixObject->base->offenseValue;
-                object->escortStrength += fixObject->base->offenseValue;
+                object->remoteFriendStrength += fixObject->base->ai.escort.power;
+                object->escortStrength += fixObject->base->ai.escort.power;
             }
         }
     }

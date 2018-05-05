@@ -484,6 +484,18 @@ BaseObject::AI::Target optional_ai_target(path_value x) {
             .value_or(Target{});
 }
 
+BaseObject::AI::Escort optional_ai_escort(path_value x) {
+    using Escort = BaseObject::AI::Escort;
+    return optional_struct<Escort>(
+                   x,
+                   {
+                           {"class", {&Escort::class_, optional_int32, 0}},
+                           {"power", {&Escort::power, optional_fixed, Fixed::zero()}},
+                           {"need", {&Escort::need, optional_fixed, Fixed::zero()}},
+                   })
+            .value_or(Escort{});
+}
+
 BaseObject::AI::Build optional_ai_build(path_value x) {
     using Build = BaseObject::AI::Build;
     return optional_struct<Build>(
@@ -503,6 +515,7 @@ BaseObject::AI optional_ai(path_value x) {
                    {
                            {"combat", {&BaseObject::AI::combat, optional_ai_combat}},
                            {"target", {&BaseObject::AI::target, optional_ai_target}},
+                           {"escort", {&BaseObject::AI::escort, optional_ai_escort}},
                            {"build", {&BaseObject::AI::build, optional_ai_build}},
                    })
             .value_or(BaseObject::AI{});
@@ -524,20 +537,16 @@ BaseObject base_object(pn::value_cref x0) {
                     {"portrait", {&BaseObject::portrait, optional_string, ""}},
 
                     {"price", {&BaseObject::price, optional_int32, 0}},
-                    {"destination_class", {&BaseObject::destinationClass, optional_int32, 0}},
                     {"warp_out_distance", {&BaseObject::warpOutDistance, optional_uint32, 0}},
                     {"health", {&BaseObject::health, optional_int32, 0}},
                     {"energy", {&BaseObject::energy, optional_int32, 0}},
                     {"occupy_count", {&BaseObject::occupy_count, optional_int32, -1}},
 
-                    {"offense", {&BaseObject::offenseValue, optional_fixed, Fixed::zero()}},
                     {"max_velocity", {&BaseObject::maxVelocity, optional_fixed, Fixed::zero()}},
                     {"warp_speed", {&BaseObject::warpSpeed, optional_fixed, Fixed::zero()}},
                     {"mass", {&BaseObject::mass, optional_fixed, Fixed::zero()}},
                     {"turn_rate", {&BaseObject::turn_rate, optional_fixed, Fixed::zero()}},
                     {"max_thrust", {&BaseObject::maxThrust, optional_fixed, Fixed::zero()}},
-                    {"friend_deficit",
-                     {&BaseObject::friendDefecit, optional_fixed, Fixed::zero()}},
 
                     {"build_time", {&BaseObject::buildTime, optional_ticks, ticks(0)}},
 
