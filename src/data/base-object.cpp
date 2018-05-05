@@ -520,7 +520,6 @@ BaseObject base_object(pn::value_cref x0) {
                     {"notes", nullptr},
                     {"class", nullptr},
                     {"race", nullptr},
-                    {"danger_threshold", nullptr},
 
                     {"portrait", {&BaseObject::portrait, optional_string, ""}},
 
