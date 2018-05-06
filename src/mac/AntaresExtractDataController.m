@@ -24,7 +24,7 @@ static NSString* kAntaresDidInstallScenarioFromPath = @"AntaresDidInstallScenari
 
 static void set_label(const char* status, void* userdata) {
     AntaresExtractDataController* controller = userdata;
-    NSString* label                          = [[NSString alloc] initWithUTF8String:status];
+    NSString*                     label      = [[NSString alloc] initWithUTF8String:status];
     [controller performSelectorOnMainThread:@selector(setAndReleaseLabel:)
                                  withObject:label
                               waitUntilDone:NO];
@@ -109,7 +109,7 @@ static void set_label(const char* status, void* userdata) {
 - (void)doWork {
     NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 
-    NSString* antares = [[NSSearchPathForDirectoriesInDomains(
+    NSString* antares   = [[NSSearchPathForDirectoriesInDomains(
             NSApplicationSupportDirectory, NSUserDomainMask, YES) objectAtIndex:0]
             stringByAppendingPathComponent:@"Antares"];
     NSString* downloads = [antares stringByAppendingPathComponent:@"Downloads"];

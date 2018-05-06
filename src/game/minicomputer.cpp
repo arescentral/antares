@@ -447,7 +447,7 @@ static miniScreenLineType cancel(pn::string_view name) {
     return line;
 }
 
-template <int size>
+template <size_t size>
 static void make_mini_screen(int16_t screen, const miniScreenLineType (&lines)[size]) {
     auto* item           = g.mini.lineData.get();
     auto* button         = g.mini.lineData.get() + kMiniScreenCharHeight;
@@ -878,14 +878,13 @@ static void show_build_screen(Handle<Admiral> adm, int32_t line) {
     if (adm != g.admiral) {
         return;
     }
-    make_mini_screen(
-            kBuildMiniScreen,
-            {
-                    text("BUILD SHIPS", false), text("", true), selectable("", build_ship),
-                    selectable("", build_ship), selectable("", build_ship),
-                    selectable("", build_ship), selectable("", build_ship),
-                    selectable("", build_ship), accept("Build"), cancel("Main Menu"),
-            });
+    const miniScreenLineType lines[] = {
+        text("BUILD SHIPS", false), text("", true), selectable("", build_ship),
+        selectable("", build_ship), selectable("", build_ship),
+        selectable("", build_ship), selectable("", build_ship),
+        selectable("", build_ship), accept("Build"), cancel("Main Menu"),
+    };
+    make_mini_screen(kBuildMiniScreen, lines);
     MiniComputerSetBuildStrings();
 }
 
@@ -893,40 +892,39 @@ static void show_special_screen(Handle<Admiral> adm, int32_t line) {
     if (adm != g.admiral) {
         return;
     }
-    make_mini_screen(
-            kSpecialMiniScreen,
-            {
-                    text("SPECIAL ORDERS", true), selectable("Transfer Control", transfer_control),
-                    selectable("Hold Position", hold_position),
-                    selectable("Go To My Position", come_to_me),
-                    selectable("Fire Weapon 1", fire1), selectable("Fire Weapon 2", fire2),
-                    selectable("Fire Special", fire_special), accept("Execute"),
-                    cancel("Main Menu"),
-            });
+    const miniScreenLineType lines[] =
+    {
+        text("SPECIAL ORDERS", true), selectable("Transfer Control", transfer_control),
+        selectable("Hold Position", hold_position),
+        selectable("Go To My Position", come_to_me),
+        selectable("Fire Weapon 1", fire1), selectable("Fire Weapon 2", fire2),
+        selectable("Fire Special", fire_special), accept("Execute"),
+        cancel("Main Menu"),
+    };
+    make_mini_screen(kSpecialMiniScreen, lines);
 }
 
 static void show_message_screen(Handle<Admiral> adm, int32_t line) {
     if (adm != g.admiral) {
         return;
     }
-    make_mini_screen(
-            kMessageMiniScreen,
-            {
-                    text("MESSAGES", true), selectable("Next Page/Clear", next_message),
-                    selectable("Previous Page", prev_message),
-                    selectable("Last Message", last_message), accept("Execute"),
-                    cancel("Main Menu"),
-            });
+    const miniScreenLineType lines[] = {
+        text("MESSAGES", true), selectable("Next Page/Clear", next_message),
+        selectable("Previous Page", prev_message),
+        selectable("Last Message", last_message), accept("Execute"),
+        cancel("Main Menu"),
+    };
+    make_mini_screen(kMessageMiniScreen, lines);
 }
 
 static void show_status_screen(Handle<Admiral> adm, int32_t line) {
     if (adm != g.admiral) {
         return;
     }
-    make_mini_screen(
-            kStatusMiniScreen, {
-                                       text("MISSION STATUS", true), cancel("Main Menu"),
-                               });
+    const miniScreenLineType lines[] = {
+        text("MISSION STATUS", true), cancel("Main Menu"),
+    };
+    make_mini_screen(kStatusMiniScreen, lines);
     MiniComputerSetStatusStrings();
 }
 
@@ -934,14 +932,14 @@ static void show_main_screen(Handle<Admiral> adm, int32_t line) {
     if (adm != g.admiral) {
         return;
     }
-    make_mini_screen(
-            kMainMiniScreen,
-            {
-                    text("MAIN MENU", true), selectable("<Build>", show_build_screen),
-                    selectable("<Special Orders>", show_special_screen),
-                    selectable("<Message>", show_message_screen),
-                    selectable("<Mission Status>", show_status_screen), accept("Select"),
-            });
+    const miniScreenLineType lines[] =
+    {
+        text("MAIN MENU", true), selectable("<Build>", show_build_screen),
+        selectable("<Special Orders>", show_special_screen),
+        selectable("<Message>", show_message_screen),
+        selectable("<Mission Status>", show_status_screen), accept("Select"),
+    };
+    make_mini_screen(kMainMiniScreen, lines);
 }
 
 static void MiniComputerExecute(

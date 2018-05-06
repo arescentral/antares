@@ -55,11 +55,12 @@ class ModPlugFile {
     ModPlugFile(pn::data_view data) {
         ModPlug_Settings settings;
         ModPlug_GetSettings(&settings);
-        settings.mFlags          = MODPLUG_ENABLE_OVERSAMPLING;
-        settings.mChannels       = 2;
-        settings.mBits           = 16;
-        settings.mFrequency      = 44100;
-        settings.mResamplingMode = MODPLUG_RESAMPLE_LINEAR;
+        settings.mFlags            = MODPLUG_ENABLE_OVERSAMPLING;
+        settings.mChannels         = 2;
+        settings.mBits             = 16;
+        settings.mFrequency        = 44100;
+        settings.mStereoSeparation = 192;
+        settings.mResamplingMode   = MODPLUG_RESAMPLE_LINEAR;
         ModPlug_SetSettings(&settings);
         file = ModPlug_Load(data.data(), data.size());
     }
