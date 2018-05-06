@@ -38,7 +38,9 @@ struct Vector {
 
     Vector();
 
-    VectorKind          vectorKind;
+    bool                is_ray    = false;
+    bool                to_coord  = false;
+    bool                lightning = false;
     Rect                thisLocation;
     coordPointType      lastGlobalLocation;
     coordPointType      objectLocation;

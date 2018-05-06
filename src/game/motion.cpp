@@ -308,8 +308,9 @@ static void move_vector(Handle<SpaceObject> o) {
     auto& vector = *o->frame.vector;
 
     vector.objectLocation = o->location;
-    if ((vector.vectorKind == VectorKind::BEAM_TO_OBJECT) ||
-        (vector.vectorKind == VectorKind::BEAM_TO_OBJECT_LIGHTNING)) {
+    if (!vector.is_ray) {
+        return;
+    } else if (!vector.to_coord) {
         if (vector.toObject.get()) {
             auto target = vector.toObject;
             if (target->active && (target->id == vector.toObjectID)) {
@@ -327,9 +328,7 @@ static void move_vector(Handle<SpaceObject> o) {
                 o->active = kObjectToBeFreed;
             }
         }
-    } else if (
-            (vector.vectorKind == VectorKind::BEAM_TO_COORD) ||
-            (vector.vectorKind == VectorKind::BEAM_TO_COORD_LIGHTNING)) {
+    } else if (vector.to_coord) {
         if (vector.fromObject.get()) {
             auto target = vector.fromObject;
             if (target->active && (target->id == vector.fromObjectID)) {
