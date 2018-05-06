@@ -97,12 +97,12 @@ static NSURL* url(const char* utf8_bytes) { return [NSURL URLWithString:str(utf8
 }
 
 - (void)updateScenarioList {
-    NSString* user_scenario = [[NSUserDefaults standardUserDefaults] stringForKey:kScenario];
-    int factory_scenario    = -1;
-    int best_scenario       = -1;
+    NSString* user_scenario    = [[NSUserDefaults standardUserDefaults] stringForKey:kScenario];
+    int       factory_scenario = -1;
+    int       best_scenario    = -1;
 
-    NSMutableArray* scenarios = [NSMutableArray array];
-    AntaresScenarioList* list = antares_scenario_list_create();
+    NSMutableArray*      scenarios = [NSMutableArray array];
+    AntaresScenarioList* list      = antares_scenario_list_create();
     size_t               i;
     for (i = 0; i < antares_scenario_list_size(list); ++i) {
         AntaresScenarioListEntry* entry      = antares_scenario_list_at(list, i);
@@ -129,9 +129,8 @@ static NSURL* url(const char* utf8_bytes) { return [NSURL URLWithString:str(utf8
         NSString*     title      = [scenario objectForKey:kTitle];
         NSString*     identifier = [scenario objectForKey:kIdentifier];
 
-        NSMenuItem* menu_item =
-                [[[NSMenuItem alloc] initWithTitle:title action:nil keyEquivalent:@""]
-                        autorelease];
+        NSMenuItem* menu_item = [
+                [[NSMenuItem alloc] initWithTitle:title action:nil keyEquivalent:@""] autorelease];
         [menu_item setRepresentedObject:scenario];
         [menu_item setTarget:self];
         [menu_item setAction:@selector(setScenarioFrom:)];
