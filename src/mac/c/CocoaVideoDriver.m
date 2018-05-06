@@ -70,7 +70,8 @@ AntaresWindow* antares_window_create(CGLPixelFormatObj pixel_format, CGLContextO
     window->context       = [[NSOpenGLContext alloc] initWithCGLContextObj:context];
 
     NSRect window_rect = NSMakeRect(0, 0, 640, 480);
-    int    style_mask  = NSTitledWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
+    int    style_mask  = NSTitledWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask |
+                     NSFullScreenWindowMask;
 
     window->view =
             [[NSOpenGLView alloc] initWithFrame:window_rect pixelFormat:window->pixel_format];
