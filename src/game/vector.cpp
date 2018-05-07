@@ -83,7 +83,7 @@ void Vectors::reset() {
     }
 }
 
-Handle<Vector> Vectors::add(coordPointType* location, const BaseObject::Vector& v) {
+Handle<Vector> Vectors::add(coordPointType* location, const BaseObject::Ray& r) {
     for (auto vector : Vector::all()) {
         if (!vector->active) {
             vector->lastGlobalLocation   = *location;
@@ -91,22 +91,54 @@ Handle<Vector> Vectors::add(coordPointType* location, const BaseObject::Vector& 
             vector->lastApparentLocation = *location;
             vector->killMe               = false;
             vector->active               = true;
-            vector->visible              = (v.color != RgbColor::clear()) || v.hue.has_value();
-            vector->color                = v.color;
-            vector->hue                  = v.hue;
+            vector->visible              = r.hue.has_value();
+            vector->color                = RgbColor::clear();
+            vector->hue                  = r.hue;
 
             const int32_t x      = scale(location->h - gGlobalCorner.h, gAbsoluteScale);
             const int32_t y      = scale(location->v - gGlobalCorner.v, gAbsoluteScale);
             vector->thisLocation = Rect(0, 0, 0, 0);
             vector->thisLocation.offset(x + viewport().left, y + viewport().top);
 
-            vector->is_ray   = (v.kind != VectorKind::BOLT);
-            vector->to_coord = (v.kind == VectorKind::BEAM_TO_COORD) ||
-                               (v.kind == VectorKind::BEAM_TO_COORD_LIGHTNING);
-            vector->lightning = (v.kind == VectorKind::BEAM_TO_COORD_LIGHTNING) ||
-                                (v.kind == VectorKind::BEAM_TO_OBJECT_LIGHTNING);
-            vector->accuracy        = v.accuracy;
-            vector->range           = v.range;
+            vector->is_ray          = true;
+            vector->to_coord        = (r.to == BaseObject::Ray::To::COORD);
+            vector->lightning       = r.lightning;
+            vector->accuracy        = r.accuracy;
+            vector->range           = r.range;
+            vector->fromObjectID    = -1;
+            vector->fromObject      = SpaceObject::none();
+            vector->toObjectID      = -1;
+            vector->toObject        = SpaceObject::none();
+            vector->toRelativeCoord = Point(0, 0);
+            vector->boltState       = 0;
+
+            return vector;
+        }
+    }
+
+    return Vector::none();
+}
+
+Handle<Vector> Vectors::add(coordPointType* location, const BaseObject::Bolt& b) {
+    for (auto vector : Vector::all()) {
+        if (!vector->active) {
+            vector->lastGlobalLocation   = *location;
+            vector->objectLocation       = *location;
+            vector->lastApparentLocation = *location;
+            vector->killMe               = false;
+            vector->active               = true;
+            vector->visible              = (b.color != RgbColor::clear());
+            vector->hue                  = sfz::nullopt;
+            vector->color                = b.color;
+
+            const int32_t x      = scale(location->h - gGlobalCorner.h, gAbsoluteScale);
+            const int32_t y      = scale(location->v - gGlobalCorner.v, gAbsoluteScale);
+            vector->thisLocation = Rect(0, 0, 0, 0);
+            vector->thisLocation.offset(x + viewport().left, y + viewport().top);
+
+            vector->is_ray          = false;
+            vector->to_coord        = false;
+            vector->lightning       = false;
             vector->fromObjectID    = -1;
             vector->fromObject      = SpaceObject::none();
             vector->toObjectID      = -1;

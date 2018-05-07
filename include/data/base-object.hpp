@@ -271,15 +271,24 @@ class BaseObject {
     };
     sfz::optional<Animation> animation;
 
-    // vector: have no associated sprite
-    struct Vector {
-        RgbColor           color;
+    // ray: point-to-point vector object
+    struct Ray {
         sfz::optional<Hue> hue;  // if present, override color and cycle through shades
-        VectorKind         kind     = VectorKind::BOLT;
-        int32_t            accuracy = 0;  // for non-normal vector objects, how accurate
-        int32_t            range    = 0;
+        enum To {
+            OBJECT,
+            COORD,
+        } to              = To::OBJECT;
+        bool    lightning = false;
+        int32_t accuracy  = 0;  // for non-normal vector objects, how accurate
+        int32_t range     = 0;
     };
-    sfz::optional<Vector> vector;
+    sfz::optional<Ray> ray;
+
+    // bolt: moving vector object
+    struct Bolt {
+        RgbColor color;
+    };
+    sfz::optional<Bolt> bolt;
 
     // weapon: weapon objects have no physical form, and can only be activated
     struct Device {

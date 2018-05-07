@@ -167,15 +167,32 @@ sfz::optional<BaseObject::Animation> optional_animation_frame(path_value x) {
                });
 }
 
-sfz::optional<BaseObject::Vector> optional_vector_frame(path_value x) {
-    using Vector = BaseObject::Vector;
-    return optional_struct<Vector>(
+BaseObject::Ray::To required_ray_to(path_value x) {
+    if (x.value() == pn::value{"object"}) {
+        return BaseObject::Ray::To::OBJECT;
+    } else if (x.value() == pn::value{"coord"}) {
+        return BaseObject::Ray::To::COORD;
+    }
+    throw std::runtime_error(pn::format("{0}: must be \"object\" or \"coord\"", x.path()).c_str());
+}
+
+sfz::optional<BaseObject::Ray> optional_ray_frame(path_value x) {
+    using Ray = BaseObject::Ray;
+    return optional_struct<Ray>(
             x, {
-                       {"kind", {&Vector::kind, required_vector_kind}},
-                       {"accuracy", {&Vector::accuracy, required_int32}},
-                       {"range", {&Vector::range, required_int32}},
-                       {"color", {&Vector::color, optional_color, RgbColor::clear()}},
-                       {"hue", {&Vector::hue, optional_hue}},
+                       {"hue", {&Ray::hue, optional_hue}},
+                       {"to", {&Ray::to, required_ray_to}},
+                       {"lightning", {&Ray::lightning, optional_bool, false}},
+                       {"accuracy", {&Ray::accuracy, required_int32}},
+                       {"range", {&Ray::range, required_int32}},
+               });
+}
+
+sfz::optional<BaseObject::Bolt> optional_bolt_frame(path_value x) {
+    using Bolt = BaseObject::Bolt;
+    return optional_struct<Bolt>(
+            x, {
+                       {"color", {&Bolt::color, optional_color, RgbColor::clear()}},
                });
 }
 
@@ -232,9 +249,10 @@ static BaseObject::Loadout optional_loadout(path_value x) {
 }
 
 BaseObject set_attributes(BaseObject o) {
-    if (((o.rotation.has_value() + o.animation.has_value() + o.vector.has_value() +
-          o.device.has_value()) != 1)) {
-        throw std::runtime_error("must have single rotation, animation, vector, or device block");
+    if (((o.rotation.has_value() + o.animation.has_value() + o.ray.has_value() +
+          o.bolt.has_value() + o.device.has_value()) != 1)) {
+        throw std::runtime_error(
+                "must have single rotation, animation, ray, bolt, or device block");
     } else if (o.rotation.has_value()) {
         o.attributes |= kShapeFromDirection;
     } else if (o.animation.has_value()) {
@@ -242,7 +260,7 @@ BaseObject set_attributes(BaseObject o) {
         if (!o.expire.after.animation) {
             o.attributes |= kAnimationCycle;
         }
-    } else if (o.vector.has_value()) {
+    } else if (o.ray.has_value() || o.bolt.has_value()) {
         o.attributes |= kIsVector;
     }
     if (o.turn_rate > Fixed::zero()) {
@@ -571,7 +589,8 @@ BaseObject base_object(pn::value_cref x0) {
 
                     {"rotation", {&BaseObject::rotation, optional_rotation_frame}},
                     {"animation", {&BaseObject::animation, optional_animation_frame}},
-                    {"vector", {&BaseObject::vector, optional_vector_frame}},
+                    {"ray", {&BaseObject::ray, optional_ray_frame}},
+                    {"bolt", {&BaseObject::bolt, optional_bolt_frame}},
                     {"device", {&BaseObject::device, optional_device_frame}},
 
                     {"tags", {&BaseObject::tags, optional_tags}},

@@ -735,15 +735,6 @@ SubjectValue required_subject_value(path_value x) {
                 {"player", SubjectValue::PLAYER}});
 }
 
-VectorKind required_vector_kind(path_value x) {
-    return required_enum<VectorKind>(
-            x, {{"kinetic", VectorKind::BOLT},
-                {"static to object", VectorKind::BEAM_TO_OBJECT},
-                {"static to coord", VectorKind::BEAM_TO_COORD},
-                {"bolt to object", VectorKind::BEAM_TO_OBJECT_LIGHTNING},
-                {"bolt to coord", VectorKind::BEAM_TO_COORD_LIGHTNING}});
-}
-
 Weapon required_weapon(path_value x) {
     return required_enum<Weapon>(
             x, {{"pulse", Weapon::PULSE}, {"beam", Weapon::BEAM}, {"special", Weapon::SPECIAL}});

@@ -108,14 +108,6 @@ enum class Screen {
 
 enum class SubjectValue { CONTROL, TARGET, PLAYER };
 
-enum class VectorKind {
-    BOLT                     = 0,  // has velocity, moves
-    BEAM_TO_OBJECT           = 1,  // static line connects 2 objects
-    BEAM_TO_COORD            = 2,  // static line goes from object to coord
-    BEAM_TO_OBJECT_LIGHTNING = 3,  // lightning bolt, connects 2 objects
-    BEAM_TO_COORD_LIGHTNING  = 4,  // lightning bolt, from object to coord
-};
-
 // The three weapons a ship may have.
 enum class Weapon {
     PULSE   = 0,  // Also known as “Weapon 1”

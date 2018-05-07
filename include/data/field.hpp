@@ -141,7 +141,6 @@ PlayerType                        required_player_type(path_value x);
 PushKind                          required_push_kind(path_value x);
 Screen                            required_screen(path_value x);
 SubjectValue                      required_subject_value(path_value x);
-VectorKind                        required_vector_kind(path_value x);
 Weapon                            required_weapon(path_value x);
 Zoom                              required_zoom(path_value x);
 
