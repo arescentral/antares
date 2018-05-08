@@ -30,31 +30,7 @@ static uint32_t required_uint32(path_value x) { return required_int(x, {0, 0x100
 
 static uint8_t required_uint8(path_value x) { return required_int(x, {0, 0x100}); }
 
-uint32_t optional_object_build_flags(path_value x) {
-    if (x.value().is_null()) {
-        return 0;
-    } else if (x.value().is_map()) {
-        static const pn::string_view flags[32] = {
-                "uncaptured_base_exists", "sufficient_escorts_exist", "this_base_needs_protection",
-                "friend_up_trend",        "friend_down_trend",        "foe_up_trend",
-                "foe_down_trend",         "matching_foe_exists",
-        };
-
-        uint32_t bit    = 0x00000001;
-        uint32_t result = 0x00000000;
-        for (pn::string_view flag : flags) {
-            if (optional_bool(x.get(flag)).value_or(false)) {
-                result |= bit;
-            }
-            bit <<= 1;
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
-    }
-}
-
-fixedPointType required_fixed_point(path_value x) {
+static fixedPointType required_fixed_point(path_value x) {
     return required_struct<fixedPointType>(
             x, {
                        {"x", {&fixedPointType::h, required_fixed}},
@@ -63,7 +39,7 @@ fixedPointType required_fixed_point(path_value x) {
 }
 
 template <typename T, T (*F)(path_value x)>
-std::vector<T> optional_array(path_value x) {
+static std::vector<T> optional_array(path_value x) {
     if (x.value().is_null()) {
         return {};
     } else if (x.value().is_array()) {
@@ -96,7 +72,7 @@ static std::map<pn::string, bool> optional_tags(path_value x) {
     }
 }
 
-sfz::optional<BaseObject::Weapon> optional_weapon(path_value x) {
+static sfz::optional<BaseObject::Weapon> optional_weapon(path_value x) {
     return optional_struct<BaseObject::Weapon>(
             x, {
                        {"base", {&BaseObject::Weapon::base, required_base}},
@@ -110,7 +86,7 @@ static int16_t required_layer(path_value x) { return required_int(x, {1, 4}); }
 
 static int32_t required_scale(path_value x) { return required_fixed(x).val() << 4; }
 
-sfz::optional<BaseObject::Rotation> optional_rotation_frame(path_value x) {
+static sfz::optional<BaseObject::Rotation> optional_rotation_frame(path_value x) {
     using Rotation = BaseObject::Rotation;
     return optional_struct<Rotation>(
             x, {
@@ -121,7 +97,7 @@ sfz::optional<BaseObject::Rotation> optional_rotation_frame(path_value x) {
                });
 }
 
-sfz::optional<BaseObject::Animation> optional_animation_frame(path_value x) {
+static sfz::optional<BaseObject::Animation> optional_animation_frame(path_value x) {
     using Animation = BaseObject::Animation;
     return optional_struct<Animation>(
             x, {
@@ -139,7 +115,7 @@ sfz::optional<BaseObject::Animation> optional_animation_frame(path_value x) {
                });
 }
 
-BaseObject::Ray::To required_ray_to(path_value x) {
+static BaseObject::Ray::To required_ray_to(path_value x) {
     if (x.value() == pn::value{"object"}) {
         return BaseObject::Ray::To::OBJECT;
     } else if (x.value() == pn::value{"coord"}) {
@@ -148,7 +124,7 @@ BaseObject::Ray::To required_ray_to(path_value x) {
     throw std::runtime_error(pn::format("{0}: must be \"object\" or \"coord\"", x.path()).c_str());
 }
 
-sfz::optional<BaseObject::Ray> optional_ray_frame(path_value x) {
+static sfz::optional<BaseObject::Ray> optional_ray_frame(path_value x) {
     using Ray = BaseObject::Ray;
     return optional_struct<Ray>(
             x, {
@@ -160,12 +136,12 @@ sfz::optional<BaseObject::Ray> optional_ray_frame(path_value x) {
                });
 }
 
-sfz::optional<BaseObject::Bolt> optional_bolt_frame(path_value x) {
+static sfz::optional<BaseObject::Bolt> optional_bolt_frame(path_value x) {
     using Bolt = BaseObject::Bolt;
     return optional_struct<Bolt>(x, {{"color", {&Bolt::color, required_color}}});
 }
 
-uint32_t optional_usage(path_value x) {
+static uint32_t optional_usage(path_value x) {
     if (x.value().is_null()) {
         return 0;
     } else if (x.value().is_map()) {
@@ -184,7 +160,7 @@ uint32_t optional_usage(path_value x) {
     }
 }
 
-sfz::optional<BaseObject::Device> optional_device_frame(path_value x) {
+static sfz::optional<BaseObject::Device> optional_device_frame(path_value x) {
     using Device = BaseObject::Device;
     return optional_struct<Device>(
             x, {
@@ -217,7 +193,7 @@ static BaseObject::Loadout optional_loadout(path_value x) {
             .value_or(BaseObject::Loadout{});
 }
 
-BaseObject set_attributes(BaseObject o) {
+static BaseObject set_attributes(BaseObject o) {
     if (((o.rotation.has_value() + o.animation.has_value() + o.ray.has_value() +
           o.bolt.has_value() + o.device.has_value()) != 1)) {
         throw std::runtime_error(
@@ -326,7 +302,7 @@ BaseObject set_attributes(BaseObject o) {
     return o;
 }
 
-BaseObject::Destroy optional_destroy(path_value x) {
+static BaseObject::Destroy optional_destroy(path_value x) {
     return optional_struct<BaseObject::Destroy>(
                    x,
                    {
@@ -339,7 +315,7 @@ BaseObject::Destroy optional_destroy(path_value x) {
             .value_or(BaseObject::Destroy{});
 }
 
-BaseObject::Expire::After optional_expire_after(path_value x) {
+static BaseObject::Expire::After optional_expire_after(path_value x) {
     return optional_struct<BaseObject::Expire::After>(
                    x,
                    {
@@ -351,7 +327,7 @@ BaseObject::Expire::After optional_expire_after(path_value x) {
             .value_or(BaseObject::Expire::After{});
 }
 
-BaseObject::Expire optional_expire(path_value x) {
+static BaseObject::Expire optional_expire(path_value x) {
     return optional_struct<BaseObject::Expire>(
                    x,
                    {
@@ -362,7 +338,7 @@ BaseObject::Expire optional_expire(path_value x) {
             .value_or(BaseObject::Expire{});
 }
 
-BaseObject::Create optional_create(path_value x) {
+static BaseObject::Create optional_create(path_value x) {
     return optional_struct<BaseObject::Create>(
                    x,
                    {
@@ -371,7 +347,7 @@ BaseObject::Create optional_create(path_value x) {
             .value_or(BaseObject::Create{});
 }
 
-BaseObject::Collide::As optional_collide_as(path_value x) {
+static BaseObject::Collide::As optional_collide_as(path_value x) {
     return optional_struct<BaseObject::Collide::As>(
                    x,
                    {
@@ -381,7 +357,7 @@ BaseObject::Collide::As optional_collide_as(path_value x) {
             .value_or(BaseObject::Collide::As{});
 }
 
-BaseObject::Collide optional_collide(path_value x) {
+static BaseObject::Collide optional_collide(path_value x) {
     return optional_struct<BaseObject::Collide>(
                    x,
                    {
@@ -394,7 +370,7 @@ BaseObject::Collide optional_collide(path_value x) {
             .value_or(BaseObject::Collide{});
 }
 
-BaseObject::Activate optional_activate(path_value x) {
+static BaseObject::Activate optional_activate(path_value x) {
     return optional_struct<BaseObject::Activate>(
                    x,
                    {
@@ -406,7 +382,7 @@ BaseObject::Activate optional_activate(path_value x) {
             .value_or(BaseObject::Activate{});
 }
 
-BaseObject::Arrive optional_arrive(path_value x) {
+static BaseObject::Arrive optional_arrive(path_value x) {
     return optional_struct<BaseObject::Arrive>(
                    x,
                    {
@@ -416,7 +392,7 @@ BaseObject::Arrive optional_arrive(path_value x) {
             .value_or(BaseObject::Arrive{});
 }
 
-BaseObject::AI::Combat::Skill optional_ai_combat_skill(path_value x) {
+static BaseObject::AI::Combat::Skill optional_ai_combat_skill(path_value x) {
     using Skill = BaseObject::AI::Combat::Skill;
     return optional_struct<Skill>(
                    x,
@@ -427,7 +403,7 @@ BaseObject::AI::Combat::Skill optional_ai_combat_skill(path_value x) {
             .value_or(Skill{});
 }
 
-BaseObject::AI::Combat optional_ai_combat(path_value x) {
+static BaseObject::AI::Combat optional_ai_combat(path_value x) {
     using Combat = BaseObject::AI::Combat;
     return optional_struct<Combat>(
                    x,
@@ -445,7 +421,7 @@ BaseObject::AI::Combat optional_ai_combat(path_value x) {
             .value_or(Combat{});
 }
 
-BaseObject::AI::Target::Filter optional_ai_target_filter(path_value x) {
+static BaseObject::AI::Target::Filter optional_ai_target_filter(path_value x) {
     using Filter = BaseObject::AI::Target::Filter;
     return optional_struct<Filter>(
                    x,
@@ -458,7 +434,7 @@ BaseObject::AI::Target::Filter optional_ai_target_filter(path_value x) {
             .value_or(Filter{});
 }
 
-BaseObject::AI::Target optional_ai_target(path_value x) {
+static BaseObject::AI::Target optional_ai_target(path_value x) {
     using Target = BaseObject::AI::Target;
     return optional_struct<Target>(
                    x,
@@ -469,7 +445,7 @@ BaseObject::AI::Target optional_ai_target(path_value x) {
             .value_or(Target{});
 }
 
-BaseObject::AI::Escort optional_ai_escort(path_value x) {
+static BaseObject::AI::Escort optional_ai_escort(path_value x) {
     using Escort = BaseObject::AI::Escort;
     return optional_struct<Escort>(
                    x,
@@ -481,7 +457,7 @@ BaseObject::AI::Escort optional_ai_escort(path_value x) {
             .value_or(Escort{});
 }
 
-BaseObject::AI::Build optional_ai_build(path_value x) {
+static BaseObject::AI::Build optional_ai_build(path_value x) {
     using Build = BaseObject::AI::Build;
     return optional_struct<Build>(
                    x,
@@ -493,7 +469,7 @@ BaseObject::AI::Build optional_ai_build(path_value x) {
             .value_or(Build{});
 }
 
-BaseObject::AI optional_ai(path_value x) {
+static BaseObject::AI optional_ai(path_value x) {
     return optional_struct<BaseObject::AI>(
                    x,
                    {
