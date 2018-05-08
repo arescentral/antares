@@ -575,18 +575,26 @@ sfz::optional<RgbColor> optional_color(path_value x) {
     if (x.value().is_null()) {
         return sfz::nullopt;
     } else if (x.value().is_map()) {
-        int32_t r = required_int(x.get("r"));
-        int32_t g = required_int(x.get("g"));
-        int32_t b = required_int(x.get("b"));
-        int32_t a = optional_int(x.get("a")).value_or(255);
-        return sfz::make_optional<RgbColor>(rgba(r, g, b, a));
+        return sfz::make_optional<RgbColor>(required_color(x));
     } else {
         throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
     }
 }
 
-sfz::optional<AnimationDirection> optional_animation_direction(path_value x) {
-    return optional_enum<AnimationDirection>(
+RgbColor required_color(path_value x) {
+    if (x.value().is_map()) {
+        int32_t r = required_int(x.get("r"));
+        int32_t g = required_int(x.get("g"));
+        int32_t b = required_int(x.get("b"));
+        int32_t a = optional_int(x.get("a")).value_or(255);
+        return rgba(r, g, b, a);
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
+    }
+}
+
+AnimationDirection required_animation_direction(path_value x) {
+    return required_enum<AnimationDirection>(
             x, {{"0", AnimationDirection::NONE},
                 {"+", AnimationDirection::PLUS},
                 {"-", AnimationDirection::MINUS},
