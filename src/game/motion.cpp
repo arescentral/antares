@@ -575,7 +575,7 @@ static void calc_misc() {
             o->runTimeFlags &= ~kIsHidden;
 
             if (o->sprite.get()) {
-                o->sprite->icon = o->icon;
+                o->sprite->icon = o->icon.value_or(BaseObject::Icon{IconShape::SQUARE, 0});
             }
         }
     }

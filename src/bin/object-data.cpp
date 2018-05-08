@@ -203,7 +203,7 @@ void main(int argc, char* const* argv) {
     for (pn::string_view id : ids) {
         NamedHandle<const BaseObject> object(id);
         load_object_data(object);
-        builder.save(*object, object->portrait);
+        builder.save(*object, *object->portrait);
     }
 }
 

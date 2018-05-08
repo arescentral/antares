@@ -104,14 +104,10 @@ static sfz::optional<BaseObject::Animation> optional_animation_frame(path_value 
                        {"sprite", {&Animation::sprite, required_string_copy}},
                        {"layer", {&Animation::layer, required_layer}},
                        {"scale", {&Animation::scale, required_scale}},
-                       {"frames",
-                        {&Animation::frames, optional_fixed_range,
-                         Range<Fixed>{Fixed::zero(), Fixed::from_val(1)}}},
+                       {"frames", {&Animation::frames, required_fixed_range}},
                        {"direction", {&Animation::direction, required_animation_direction}},
                        {"speed", {&Animation::speed, required_fixed}},
-                       {"first",
-                        {&Animation::first, optional_fixed_range,
-                         Range<Fixed>{Fixed::zero(), Fixed::from_val(1)}}},
+                       {"first", {&Animation::first, required_fixed_range}},
                });
 }
 
@@ -428,7 +424,7 @@ static BaseObject::AI::Target::Filter optional_ai_target_filter(path_value x) {
                    {
                            {"base", {&Filter::base, optional_bool}},
                            {"local", {&Filter::local, optional_bool}},
-                           {"owner", {&Filter::owner, optional_owner, Owner::ANY}},
+                           {"owner", {&Filter::owner, required_owner}},
                            {"tags", {&Filter::tags, optional_tags}},
                    })
             .value_or(Filter{});
@@ -494,7 +490,7 @@ BaseObject base_object(pn::value_cref x0) {
                     {"class", nullptr},
                     {"race", nullptr},
 
-                    {"portrait", {&BaseObject::portrait, optional_string, ""}},
+                    {"portrait", {&BaseObject::portrait, optional_string_copy}},
 
                     {"price", {&BaseObject::price, required_int32}},
                     {"warp_out_distance", {&BaseObject::warpOutDistance, required_uint32}},
@@ -512,11 +508,8 @@ BaseObject base_object(pn::value_cref x0) {
 
                     {"shield_color", {&BaseObject::shieldColor, optional_color}},
 
-                    {"initial_velocity",
-                     {&BaseObject::initial_velocity, optional_fixed_range,
-                      Range<Fixed>{Fixed::zero(), Fixed::zero()}}},
-                    {"initial_direction",
-                     {&BaseObject::initial_direction, optional_int_range, Range<int64_t>{0, 0}}},
+                    {"initial_velocity", {&BaseObject::initial_velocity, required_fixed_range}},
+                    {"initial_direction", {&BaseObject::initial_direction, required_int_range}},
 
                     {"destroy", {&BaseObject::destroy, optional_destroy}},
                     {"expire", {&BaseObject::expire, optional_expire}},
@@ -525,8 +518,7 @@ BaseObject base_object(pn::value_cref x0) {
                     {"activate", {&BaseObject::activate, optional_activate}},
                     {"arrive", {&BaseObject::arrive, optional_arrive}},
 
-                    {"icon",
-                     {&BaseObject::icon, optional_icon, BaseObject::Icon{IconShape::SQUARE, 0}}},
+                    {"icon", {&BaseObject::icon, optional_icon}},
                     {"weapons", {&BaseObject::weapons, optional_loadout}},
 
                     {"rotation", {&BaseObject::rotation, optional_rotation_frame}},

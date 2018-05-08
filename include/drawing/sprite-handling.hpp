@@ -112,7 +112,8 @@ void           ResetAllSprites();
 Rect           scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t scale);
 Handle<Sprite> AddSprite(
         Point where, NatePixTable* table, pn::string_view name, Hue hue, int16_t whichShape,
-        int32_t scale, BaseObject::Icon icon, int16_t layer, Hue tiny_hue, uint8_t tiny_shade);
+        int32_t scale, sfz::optional<BaseObject::Icon> icon, int16_t layer, Hue tiny_hue,
+        uint8_t tiny_shade);
 void RemoveSprite(Handle<Sprite> sprite);
 void draw_sprites();
 void CullSprites();

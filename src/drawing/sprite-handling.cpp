@@ -128,7 +128,8 @@ const NatePixTable* Pix::cursor() { return _cursor.get(); }
 
 Handle<Sprite> AddSprite(
         Point where, NatePixTable* table, pn::string_view name, Hue hue, int16_t whichShape,
-        int32_t scale, BaseObject::Icon icon, int16_t layer, Hue tiny_hue, uint8_t tiny_shade) {
+        int32_t scale, sfz::optional<BaseObject::Icon> icon, int16_t layer, Hue tiny_hue,
+        uint8_t tiny_shade) {
     for (Handle<Sprite> sprite : Sprite::all()) {
         if (sprite->table == NULL) {
             sprite->where      = where;
@@ -136,9 +137,9 @@ Handle<Sprite> AddSprite(
             sprite->whichShape = whichShape;
             sprite->scale      = scale;
             sprite->whichLayer = layer;
-            sprite->icon       = icon;
+            sprite->icon       = icon.value_or(BaseObject::Icon{IconShape::SQUARE, 0});
             sprite->tinyColor  = {tiny_hue, tiny_shade};
-            sprite->draw_tiny  = draw_tiny_function(icon.shape, icon.size);
+            sprite->draw_tiny  = draw_tiny_function(sprite->icon.shape, sprite->icon.size);
             sprite->killMe     = false;
             sprite->style      = spriteNormal;
             sprite->styleColor = RgbColor::white();

@@ -436,6 +436,11 @@ T required_enum(path_value x, const std::pair<pn::string_view, T> (&values)[N]) 
     throw std::runtime_error(pn::format("{0}: must be one of {1}", x.path(), keys).c_str());
 }
 
+Owner required_owner(path_value x) {
+    return required_enum<Owner>(
+            x, {{"any", Owner::ANY}, {"same", Owner::SAME}, {"different", Owner::DIFFERENT}});
+}
+
 sfz::optional<Range<int64_t>> optional_int_range(path_value x) {
     if (x.value().is_null()) {
         return sfz::nullopt;

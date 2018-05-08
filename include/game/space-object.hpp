@@ -73,7 +73,7 @@ class SpaceObject {
 
     uint32_t keysDown = 0;
 
-    BaseObject::Icon icon;
+    sfz::optional<BaseObject::Icon> icon;
 
     int32_t direction     = 0;
     int32_t directionGoal = 0;

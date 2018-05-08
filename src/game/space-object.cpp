@@ -508,7 +508,7 @@ void SpaceObject::change_base_type(
         }
 
         obj->sprite->table      = spriteTable;
-        obj->sprite->icon       = base.icon;
+        obj->sprite->icon       = base.icon.value_or(BaseObject::Icon{IconShape::SQUARE, 0});
         obj->sprite->whichLayer = sprite_layer(base);
         obj->sprite->scale      = sprite_scale(base);
 

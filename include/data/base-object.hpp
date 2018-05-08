@@ -166,9 +166,9 @@ class BaseObject {
     static BaseObject* get(int number);
     static BaseObject* get(pn::string_view name);
 
-    pn::string name;
-    pn::string short_name;
-    pn::string portrait;
+    pn::string                name;
+    pn::string                short_name;
+    sfz::optional<pn::string> portrait;
 
     uint32_t attributes;  // initial attributes (see flags)
     int32_t  price;
@@ -195,7 +195,7 @@ class BaseObject {
         IconShape shape;
         int64_t   size;
     };
-    Icon icon;
+    sfz::optional<Icon> icon;
 
     struct Weapon {
         NamedHandle<const BaseObject> base;

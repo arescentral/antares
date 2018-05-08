@@ -191,8 +191,9 @@ void StyledText::set_interface_text(pn::string_view text) {
                     continue;
                 }
                 inlinePictType inline_pict;
-                if ((inline_pict.object = BaseObject::get(id))) {
-                    inline_pict.picture = inline_pict.object->portrait.copy();
+                if ((inline_pict.object = BaseObject::get(id)) &&
+                    inline_pict.object->portrait.has_value()) {
+                    inline_pict.picture = inline_pict.object->portrait->copy();
                 } else {
                     inline_pict.picture = std::move(id);
                 }
