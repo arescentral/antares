@@ -140,7 +140,7 @@ struct Level {
         Hue                     hue          = Hue::GRAY;
     };
 
-    int                     chapter = -1;
+    int64_t                 chapter = -1;
     pn::string              name;
     std::vector<Player>     players;
     std::vector<pn::string> score_strings;

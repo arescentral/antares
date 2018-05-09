@@ -44,6 +44,18 @@ const Level* Level::get(pn::string_view name) {
     }
 }
 
+static int16_t required_int16(path_value x) { return required_int(x, {-0x8000ll, 0x8000ll}); }
+
+static sfz::optional<int16_t> optional_int16(path_value x) {
+    auto i = optional_int(x, {-0x8000ll, 0x8000ll});
+    return (i.has_value()) ? sfz::make_optional<int16_t>(*i) : sfz::nullopt;
+}
+
+static sfz::optional<int32_t> optional_int32(path_value x) {
+    auto i = optional_int(x, {-0x80000000ll, 0x80000000ll});
+    return (i.has_value()) ? sfz::make_optional<int32_t>(*i) : sfz::nullopt;
+}
+
 static bool valid_sha1(pn::string_view s) {
     if (s.size() != 40) {
         return false;
@@ -88,10 +100,6 @@ ScenarioInfo scenario_info(pn::value_cref x0) {
 }
 
 static Level::Player required_player(path_value x, LevelType level_type) {
-    if (!x.value().is_map()) {
-        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
-    }
-
     switch (level_type) {
         case LevelType::DEMO:
             return required_struct<Level::Player>(
@@ -116,7 +124,8 @@ static Level::Player required_player(path_value x, LevelType level_type) {
     }
 }
 
-static std::vector<Level::Player> required_player_array(path_value x, LevelType level_type) {
+template <LevelType level_type>
+static std::vector<Level::Player> required_player_array(path_value x) {
     if (x.value().is_array()) {
         std::vector<Level::Player> p;
         for (int i = 0; i < x.value().as_array().size(); ++i) {
@@ -128,48 +137,70 @@ static std::vector<Level::Player> required_player_array(path_value x, LevelType 
     }
 }
 
+static sfz::optional<game_ticks> optional_game_secs(path_value x) {
+    auto secs = optional_secs(x);
+    return (secs.has_value()) ? sfz::make_optional<game_ticks>(game_ticks(*secs)) : sfz::nullopt;
+}
+
+// clang-format off
+#define COMMON_LEVEL_FIELDS                                                                      \
+            {"type", {&Level::type, required_level_type}},                                       \
+            {"chapter", {&Level::chapter, required_int}},                                        \
+            {"title", {&Level::name, required_string_copy}},                                     \
+            {"initials", {&Level::initials, optional_initial_array}},                            \
+            {"conditions", {&Level::conditions, optional_condition_array}},                      \
+            {"briefings", {&Level::briefings, optional_briefing_array}},                         \
+            {"starmap", {&Level::starMap, optional_point, Point{0, 0}}},                         \
+            {"song", {&Level::songID, required_int16}},                                          \
+            {"score", {&Level::score_strings, optional_string_array}},                           \
+            {"start_time", {&Level::startTime, optional_secs, secs(0)}},                         \
+            {"is_training", {&Level::is_training, optional_bool, false}},                        \
+            {"angle", {&Level::angle, optional_int32, -1}},                                      \
+            {"par_time", {&Level::parTime, optional_game_secs, game_ticks{secs{0}}}},            \
+            {"par_kills", {&Level::parKills, optional_int16, 0}},                                \
+            {"par_losses", {&Level::parLosses, optional_int16, 0}}
+// clang-format on
+
+Level demo_level(path_value x) {
+    return required_struct<Level>(
+            x, {
+                       COMMON_LEVEL_FIELDS,
+                       {"players", {&Level::players, required_player_array<LevelType::DEMO>}},
+               });
+}
+
+Level solo_level(path_value x) {
+    return required_struct<Level>(
+            x, {
+                       COMMON_LEVEL_FIELDS,
+                       {"players", {&Level::players, required_player_array<LevelType::SOLO>}},
+                       {"no_ships", {&Level::own_no_ships_text, optional_string, ""}},
+                       {"prologue", {&Level::prologue, optional_string, ""}},
+                       {"epilogue", {&Level::epilogue, optional_string, ""}},
+               });
+}
+
+Level net_level(path_value x) {
+    return required_struct<Level>(
+            x, {
+                       COMMON_LEVEL_FIELDS,
+                       {"players", {&Level::players, required_player_array<LevelType::NET>}},
+                       {"own_no_ships", {&Level::own_no_ships_text, optional_string, ""}},
+                       {"foe_no_ships", {&Level::foe_no_ships_text, optional_string, ""}},
+                       {"description", {&Level::description, optional_string, ""}},
+               });
+}
+
 Level level(pn::value_cref x0) {
-    if (!x0.is_map()) {
+    path_value x{x0};
+    if (!x.value().is_map()) {
         throw std::runtime_error("must be map");
     }
-
-    path_value x{x0};
-    Level      l;
-    l.type          = required_level_type(x.get("type"));
-    l.chapter       = required_int(x.get("chapter"));
-    l.name          = required_string(x.get("title")).copy();
-    l.players       = required_player_array(x.get("players"), l.type);
-    l.initials      = optional_initial_array(x.get("initials"));
-    l.conditions    = optional_condition_array(x.get("conditions"));
-    l.briefings     = optional_briefing_array(x.get("briefings"));
-    l.starMap       = optional_point(x.get("starmap")).value_or(Point{0, 0});
-    l.songID        = required_int(x.get("song"));
-    l.score_strings = optional_string_array(x.get("score"));
-
-    l.startTime   = optional_secs(x.get("start_time")).value_or(secs(0));
-    l.is_training = optional_bool(x.get("is_training")).value_or(false);
-    l.angle       = optional_int(x.get("angle")).value_or(-1);
-    l.parTime     = game_ticks(optional_secs(x.get("par_time")).value_or(secs(0)));
-    l.parKills    = optional_int(x.get("par_kills")).value_or(0);
-    l.parLosses   = optional_int(x.get("par_losses")).value_or(0);
-
-    switch (l.type) {
-        case LevelType::DEMO: break;
-
-        case LevelType::SOLO:
-            l.own_no_ships_text = optional_string(x.get("no_ships")).value_or("").copy();
-            l.prologue          = optional_string(x.get("prologue")).value_or("").copy();
-            l.epilogue          = optional_string(x.get("epilogue")).value_or("").copy();
-            break;
-
-        case LevelType::NET:
-            l.own_no_ships_text = required_string(x.get("own_no_ships")).copy();
-            l.foe_no_ships_text = required_string(x.get("foe_no_ships")).copy();
-            l.description       = required_string(x.get("description")).copy();
-            break;
+    switch (required_level_type(x.get("type"))) {
+        case LevelType::DEMO: return demo_level(x);
+        case LevelType::SOLO: return solo_level(x);
+        case LevelType::NET: return net_level(x);
     }
-
-    return l;
 }
 
 static std::unique_ptr<Level::Condition> autopilot_condition(path_value x) {
