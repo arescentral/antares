@@ -46,11 +46,6 @@ const Level* Level::get(pn::string_view name) {
 
 static int16_t required_int16(path_value x) { return required_int(x, {-0x8000ll, 0x8000ll}); }
 
-static sfz::optional<int16_t> optional_int16(path_value x) {
-    auto i = optional_int(x, {-0x8000ll, 0x8000ll});
-    return (i.has_value()) ? sfz::make_optional<int16_t>(*i) : sfz::nullopt;
-}
-
 static sfz::optional<int32_t> optional_int32(path_value x) {
     auto i = optional_int(x, {-0x80000000ll, 0x80000000ll});
     return (i.has_value()) ? sfz::make_optional<int32_t>(*i) : sfz::nullopt;
@@ -137,9 +132,17 @@ static std::vector<Level::Player> required_player_array(path_value x) {
     }
 }
 
-static sfz::optional<game_ticks> optional_game_secs(path_value x) {
-    auto secs = optional_secs(x);
-    return (secs.has_value()) ? sfz::make_optional<game_ticks>(game_ticks(*secs)) : sfz::nullopt;
+static game_ticks required_game_ticks(path_value x) { return game_ticks{required_ticks(x)}; }
+
+static Level::Par optional_par(path_value x) {
+    return optional_struct<Level::Par>(
+                   x,
+                   {
+                           {"time", {&Level::Par::time, required_game_ticks}},
+                           {"kills", {&Level::Par::kills, required_int}},
+                           {"losses", {&Level::Par::losses, required_int}},
+                   })
+            .value_or(Level::Par{game_ticks{ticks{0}}, 0, 0});
 }
 
 // clang-format off
@@ -156,9 +159,7 @@ static sfz::optional<game_ticks> optional_game_secs(path_value x) {
             {"start_time", {&Level::startTime, optional_secs, secs(0)}},                         \
             {"is_training", {&Level::is_training, optional_bool, false}},                        \
             {"angle", {&Level::angle, optional_int32, -1}},                                      \
-            {"par_time", {&Level::parTime, optional_game_secs, game_ticks{secs{0}}}},            \
-            {"par_kills", {&Level::parKills, optional_int16, 0}},                                \
-            {"par_losses", {&Level::parLosses, optional_int16, 0}}
+            {"par", {&Level::par, optional_par}}
 // clang-format on
 
 Level demo_level(path_value x) {

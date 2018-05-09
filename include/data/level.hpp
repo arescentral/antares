@@ -146,12 +146,14 @@ struct Level {
     std::vector<pn::string> score_strings;
     int16_t                 songID      = -1;
     Point                   starMap     = {-1, -1};
-    game_ticks              parTime     = game_ticks{};
-    int16_t                 parKills    = 0;
-    int16_t                 parLosses   = 0;
     secs                    startTime   = secs(0);
     bool                    is_training = false;
     int32_t                 angle       = 0;
+    struct Par {
+        game_ticks time;
+        int64_t    kills;
+        int64_t    losses;
+    } par;
 
     std::vector<Initial>                    initials;
     std::vector<std::unique_ptr<Condition>> conditions;
