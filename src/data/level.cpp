@@ -145,7 +145,7 @@ static sfz::optional<game_ticks> optional_game_secs(path_value x) {
 // clang-format off
 #define COMMON_LEVEL_FIELDS                                                                      \
             {"type", {&Level::type, required_level_type}},                                       \
-            {"chapter", {&Level::chapter, required_int}},                                        \
+            {"chapter", {&Level::chapter, optional_int}},                                        \
             {"title", {&Level::name, required_string_copy}},                                     \
             {"initials", {&Level::initials, optional_initial_array}},                            \
             {"conditions", {&Level::conditions, optional_condition_array}},                      \

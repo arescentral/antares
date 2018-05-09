@@ -75,8 +75,10 @@ static void read_all_levels() {
                         pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code))
                                 .c_str());
             }
-            auto it                           = plug.levels.emplace(id.copy(), level(x)).first;
-            plug.chapters[it->second.chapter] = &it->second;
+            auto it = plug.levels.emplace(id.copy(), level(x)).first;
+            if (it->second.chapter.has_value()) {
+                plug.chapters[*it->second.chapter] = &it->second;
+            }
         } catch (...) {
             std::throw_with_nested(std::runtime_error(path.copy().c_str()));
         }

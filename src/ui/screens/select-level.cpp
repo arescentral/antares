@@ -95,12 +95,15 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
             _unlock_chapter = (_unlock_chapter * 10) + digit;
             if (--_unlock_digits == 0) {
                 _state = SELECTING;
-                if (_unlock_chapter > plug.levels.size()) {
+                if (plug.chapters.find(_unlock_chapter) == plug.chapters.end()) {
                     return;
                 }
                 sys.sound.cloak_off();
                 Ledger::ledger()->unlock_chapter(_unlock_chapter);
                 Ledger::ledger()->unlocked_chapters(&_chapters);
+                _index = std::find(_chapters.begin(), _chapters.end(), _unlock_chapter) -
+                         _chapters.begin();
+                *_level = Level::get(_chapters[_index]);
                 adjust_interface();
             }
             return;
