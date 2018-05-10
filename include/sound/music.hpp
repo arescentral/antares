@@ -20,6 +20,7 @@
 #define ANTARES_SOUND_MUSIC_HPP_
 
 #include <memory>
+#include <pn/string>
 
 using std::unique_ptr;
 
@@ -28,17 +29,20 @@ namespace antares {
 class Sound;
 class SoundChannel;
 
-const int kTitleSongID = 4001;  // Doomtroopers, Unite!
-
 class Music {
   public:
+    static const pn::string_view title_song;
+    static const pn::string_view prologue_song;
+    static const pn::string_view victory_song;
+    static const pn::string_view briefing_song;
+
     enum Type {
         IN_GAME,
         IDLE,
     };
 
     void init();
-    void play(Type type, int16_t id);
+    void play(Type type, pn::string_view song);
     void stop();
     void toggle();
     void sync();
@@ -48,8 +52,8 @@ class Music {
 
     bool                     _playing = false;
     Type                     _song_type;
-    int16_t                  _song_id;
-    unique_ptr<Sound>        _song;
+    pn::string               _song;
+    unique_ptr<Sound>        _song_sound;
     unique_ptr<SoundChannel> _channel;
 };
 

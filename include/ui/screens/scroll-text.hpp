@@ -32,7 +32,7 @@ const ticks kFastScrollInterval = ticks(2);
 class ScrollTextScreen : public Card {
   public:
     ScrollTextScreen(pn::string_view text, int width, ticks interval);
-    ScrollTextScreen(pn::string_view text, int width, ticks interval, int song_id);
+    ScrollTextScreen(pn::string_view text, int width, ticks interval, pn::string_view song);
 
     virtual void become_front();
     virtual void resign_front();
@@ -47,10 +47,10 @@ class ScrollTextScreen : public Card {
     virtual void draw() const;
 
   private:
-    BuildPix    _build_pix;
-    const ticks _interval;
-    const bool  _play_song;
-    const int   _song_id;
+    BuildPix         _build_pix;
+    const ticks      _interval;
+    const bool       _play_song;
+    const pn::string _song;
 
     wall_time _start;
     wall_time _next_shift;

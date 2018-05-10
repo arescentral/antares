@@ -44,8 +44,6 @@ const Level* Level::get(pn::string_view name) {
     }
 }
 
-static int16_t required_int16(path_value x) { return required_int(x, {-0x8000ll, 0x8000ll}); }
-
 static sfz::optional<int32_t> optional_int32(path_value x) {
     auto i = optional_int(x, {-0x80000000ll, 0x80000000ll});
     return (i.has_value()) ? sfz::make_optional<int32_t>(*i) : sfz::nullopt;
@@ -154,7 +152,7 @@ static Level::Par optional_par(path_value x) {
             {"conditions", {&Level::conditions, optional_condition_array}},                      \
             {"briefings", {&Level::briefings, optional_briefing_array}},                         \
             {"starmap", {&Level::starMap, optional_point, Point{0, 0}}},                         \
-            {"song", {&Level::songID, required_int16}},                                          \
+            {"song", {&Level::song, required_string_copy}},                                      \
             {"score", {&Level::score_strings, optional_string_array}},                           \
             {"start_time", {&Level::startTime, optional_secs, secs(0)}},                         \
             {"is_training", {&Level::is_training, optional_bool, false}},                        \

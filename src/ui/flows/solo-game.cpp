@@ -64,8 +64,8 @@ void SoloGame::become_front() {
         case START_LEVEL:
             _state = PROLOGUE;
             if (!_level->prologue.empty()) {
-                stack()->push(
-                        new ScrollTextScreen(_level->prologue, 450, kSlowScrollInterval, 4002));
+                stack()->push(new ScrollTextScreen(
+                        _level->prologue, 450, kSlowScrollInterval, Music::prologue_song));
                 break;
             }
         // else fall through
@@ -91,14 +91,9 @@ void SoloGame::handle_game_result() {
             _state                         = EPILOGUE;
             const pn::string_view epilogue = _level->epilogue;
             if (!epilogue.empty()) {
-                // normal scrolltext song
-                int scroll_song = 4002;
-                if (!g.next_level) {
-                    // we win but no next level? Play triumph song
-                    scroll_song = 4003;
-                }
-                stack()->push(
-                        new ScrollTextScreen(epilogue, 450, kSlowScrollInterval, scroll_song));
+                stack()->push(new ScrollTextScreen(
+                        epilogue, 450, kSlowScrollInterval,
+                        g.next_level ? Music::prologue_song : Music::victory_song));
             } else {
                 become_front();
             }

@@ -129,7 +129,7 @@ void Master::init() {
     Admiral::init();
     Vectors::init();
 
-    sys.music.play(Music::IDLE, kTitleSongID);
+    sys.music.play(Music::IDLE, Music::title_song);
 
     _publisher_screen = nullptr;
     _ego_screen       = Resource::texture("credit");

@@ -52,7 +52,7 @@ void MainScreen::become_front() {
     switch (_state) {
         case NORMAL:
             InterfaceScreen::become_front();
-            sys.music.play(Music::IDLE, kTitleSongID);
+            sys.music.play(Music::IDLE, Music::title_song);
             _next_timer = (now() + kMainDemoTimeOutTime);
             break;
         case QUITTING: stack()->pop(this); break;

@@ -144,7 +144,7 @@ struct Level {
     pn::string              name;
     std::vector<Player>     players;
     std::vector<pn::string> score_strings;
-    int16_t                 songID      = -1;
+    pn::string              song;
     Point                   starMap     = {-1, -1};
     secs                    startTime   = secs(0);
     bool                    is_training = false;

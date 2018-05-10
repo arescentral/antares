@@ -169,7 +169,7 @@ void MainPlay::become_front() {
             //         _level->chapter_number(),
             //         g.random.seed);
 
-            sys.music.play(Music::IDLE, 3000);
+            sys.music.play(Music::IDLE, Music::briefing_song);
 
             if (_show_loading_screen) {
                 stack()->push(new LoadingScreen(_level, &_cancelled));
@@ -210,7 +210,7 @@ void MainPlay::become_front() {
 
             set_up_instruments();
 
-            sys.music.play(Music::IN_GAME, g.level->songID);
+            sys.music.play(Music::IN_GAME, g.level->song);
 
             stack()->push(new GamePlay(_replay, _input_source, _game_result));
         } break;
