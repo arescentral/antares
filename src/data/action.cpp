@@ -214,7 +214,7 @@ static std::unique_ptr<Action> sound_action(path_value x) {
     a->persistence = required_ticks(x.get("persistence"));
     a->absolute    = optional_bool(x.get("absolute")).value_or(false);
     a->volume      = required_int(x.get("volume"));
-    a->id          = required_int_range(x.get("id"));
+    a->ids         = required_string_array(x.get("ids"));
     return std::move(a);
 }
 
@@ -458,15 +458,18 @@ std::vector<std::unique_ptr<const Action>> optional_action_array(path_value x) {
 }
 
 const NamedHandle<const BaseObject>* Action::created_base() const { return nullptr; }
-Range<int64_t> Action::sound_range() const { return Range<int64_t>::empty(); }
-bool           Action::alters_owner() const { return false; }
-bool           Action::check_conditions() const { return false; }
+const std::vector<pn::string>&       Action::sound_ids() const {
+    static const std::vector<pn::string> empty;
+    return empty;
+}
+bool Action::alters_owner() const { return false; }
+bool Action::check_conditions() const { return false; }
 
 const NamedHandle<const BaseObject>* CreateAction::created_base() const { return &base; }
 const NamedHandle<const BaseObject>* MorphAction::created_base() const { return &base; }
 const NamedHandle<const BaseObject>* EquipAction::created_base() const { return &base; }
 
-Range<int64_t> SoundAction::sound_range() const { return id; }
+const std::vector<pn::string>& SoundAction::sound_ids() const { return ids; }
 
 bool CaptureAction::alters_owner() const { return true; }
 

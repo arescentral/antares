@@ -48,7 +48,6 @@ class DataExtractor {
     void download(
             Observer* observer, pn::string_view base, pn::string_view name,
             pn::string_view version, const sfz::sha1::digest& digest) const;
-    void write_version(pn::string_view scenario_identifier) const;
     void extract_original(Observer* observer, pn::string_view zip) const;
     void extract_supplemental(Observer* observer, pn::string_view zip) const;
     void extract_plugin(Observer* observer) const;

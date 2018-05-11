@@ -138,9 +138,8 @@ void AddActionMedia(const Action& action, std::bitset<16> all_colors) {
         AddBaseObjectMedia(*base, all_colors, Required::YES);
     }
 
-    auto range = action.sound_range();
-    for (int32_t count = range.begin; count < range.end; count++) {
-        sys.sound.load(count);
+    for (const pn::string_view sound : action.sound_ids()) {
+        sys.sound.load(sound);
     }
 }
 

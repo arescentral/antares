@@ -183,9 +183,13 @@ void CreateAction::apply(
 void SoundAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
-    auto pick = id.begin;
-    if (id.range() > 1) {
-        pick += focus->randomSeed.next(id.range());
+    pn::string_view pick;
+    if (ids.size() == 1) {
+        pick = ids[0];
+    } else if (ids.size() > 1) {
+        pick = ids[focus->randomSeed.next(ids.size())];
+    } else {
+        return;
     }
     if (absolute) {
         sys.sound.play(pick, volume, persistence, priority);
