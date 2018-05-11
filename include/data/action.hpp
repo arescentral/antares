@@ -66,7 +66,7 @@ struct Action {
             Point* offset) const = 0;
 
     virtual const NamedHandle<const BaseObject>* created_base() const;
-    virtual const std::vector<pn::string>&       sound_ids() const;
+    virtual std::vector<pn::string>              sound_ids() const;
     virtual bool                                 alters_owner() const;
     virtual bool                                 check_conditions() const;
 
@@ -327,17 +327,22 @@ struct SelectAction : public Action {
             Point* offset) const;
 };
 
-struct SoundAction : public Action {
-    uint8_t                 priority;  // 1-5; takes over a channel playing a lower-priority sound
-    ticks                   persistence;  // time before a lower-priority sound can take channel
-    bool                    absolute;  // plays at same volume, regardless of distance from player
-    int32_t                 volume;    // 1-255; volume at focus
-    std::vector<pn::string> ids;       // pick ID randomly
+struct PlayAction : public Action {
+    uint8_t priority;     // 1-5; takes over a channel playing a lower-priority sound
+    ticks   persistence;  // time before a lower-priority sound can take channel
+    bool    absolute;     // plays at same volume, regardless of distance from player
+    int32_t volume;       // 1-255; volume at focus
+
+    struct Sound {
+        pn::string sound;
+    };
+    sfz::optional<pn::string> sound;  // play this sound if present
+    std::vector<Sound>        any;    // pick ID randomly
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset) const;
-    virtual const std::vector<pn::string>& sound_ids() const;
+    virtual std::vector<pn::string> sound_ids() const;
 };
 
 struct SparkAction : public Action {

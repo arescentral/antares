@@ -38,22 +38,6 @@ static fixedPointType required_fixed_point(path_value x) {
                });
 }
 
-template <typename T, T (*F)(path_value x)>
-static std::vector<T> optional_array(path_value x) {
-    if (x.value().is_null()) {
-        return {};
-    } else if (x.value().is_array()) {
-        pn::array_cref a = x.value().as_array();
-        std::vector<T> result;
-        for (int i = 0; i < a.size(); ++i) {
-            result.emplace_back(F(x.get(i)));
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
-    }
-}
-
 static std::map<pn::string, bool> optional_tags(path_value x) {
     if (x.value().is_null()) {
         return {};

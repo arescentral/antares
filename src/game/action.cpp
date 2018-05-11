@@ -180,14 +180,14 @@ void CreateAction::apply(
     }
 }
 
-void SoundAction::apply(
+void PlayAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
     pn::string_view pick;
-    if (ids.size() == 1) {
-        pick = ids[0];
-    } else if (ids.size() > 1) {
-        pick = ids[focus->randomSeed.next(ids.size())];
+    if (sound.has_value()) {
+        pick = *sound;
+    } else if (any.size() > 1) {
+        pick = any[focus->randomSeed.next(any.size())].sound;
     } else {
         return;
     }

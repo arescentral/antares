@@ -208,13 +208,23 @@ static std::unique_ptr<Action> select_action(path_value x) {
     return std::move(a);
 }
 
-static std::unique_ptr<Action> sound_action(path_value x) {
-    std::unique_ptr<SoundAction> a(new SoundAction);
+static PlayAction::Sound required_sound(path_value x) {
+    return required_struct<PlayAction::Sound>(
+            x, {{"sound", {&PlayAction::Sound::sound, required_string_copy}}});
+}
+
+static std::vector<PlayAction::Sound> optional_sound_list(path_value x) {
+    return optional_array<PlayAction::Sound, required_sound>(x);
+}
+
+static std::unique_ptr<Action> play_action(path_value x) {
+    std::unique_ptr<PlayAction> a(new PlayAction);
     a->priority    = required_int(x.get("priority"));
     a->persistence = required_ticks(x.get("persistence"));
     a->absolute    = optional_bool(x.get("absolute")).value_or(false);
     a->volume      = required_int(x.get("volume"));
-    a->ids         = required_string_array(x.get("ids"));
+    a->sound       = optional_string_copy(x.get("sound"));
+    a->any         = optional_sound_list(x.get("any"));
     return std::move(a);
 }
 
@@ -347,6 +357,8 @@ std::unique_ptr<Action> action(path_value x) {
         a = order_action(x);
     } else if (type == "pay") {
         a = pay_action(x);
+    } else if (type == "play") {
+        a = play_action(x);
     } else if (type == "push") {
         a = push_action(x);
     } else if (type == "reveal") {
@@ -355,8 +367,6 @@ std::unique_ptr<Action> action(path_value x) {
         a = score_action(x);
     } else if (type == "select") {
         a = select_action(x);
-    } else if (type == "sound") {
-        a = sound_action(x);
     } else if (type == "spark") {
         a = spark_action(x);
     } else if (type == "spin") {
@@ -458,18 +468,25 @@ std::vector<std::unique_ptr<const Action>> optional_action_array(path_value x) {
 }
 
 const NamedHandle<const BaseObject>* Action::created_base() const { return nullptr; }
-const std::vector<pn::string>&       Action::sound_ids() const {
-    static const std::vector<pn::string> empty;
-    return empty;
-}
-bool Action::alters_owner() const { return false; }
-bool Action::check_conditions() const { return false; }
+std::vector<pn::string>              Action::sound_ids() const { return {}; }
+bool                                 Action::alters_owner() const { return false; }
+bool                                 Action::check_conditions() const { return false; }
 
 const NamedHandle<const BaseObject>* CreateAction::created_base() const { return &base; }
 const NamedHandle<const BaseObject>* MorphAction::created_base() const { return &base; }
 const NamedHandle<const BaseObject>* EquipAction::created_base() const { return &base; }
 
-const std::vector<pn::string>& SoundAction::sound_ids() const { return ids; }
+std::vector<pn::string> PlayAction::sound_ids() const {
+    std::vector<pn::string> result;
+    if (sound.has_value()) {
+        result.push_back(sound->copy());
+    } else {
+        for (auto& s : any) {
+            result.push_back(s.sound.copy());
+        }
+    }
+    return result;
+}
 
 bool CaptureAction::alters_owner() const { return true; }
 
