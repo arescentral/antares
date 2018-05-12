@@ -387,7 +387,7 @@ void GamePlay::become_front() {
                     *_game_result  = WIN_GAME;
                     g.game_over    = true;
                     g.victor       = g.admiral;
-                    g.next_level   = Level::get(*g.level->chapter + 1);
+                    g.next_level   = g.level->skip->get();
                     g.victory_text = "";
                     stack()->pop(this);
                     break;
@@ -582,7 +582,7 @@ void GamePlay::key_down(const KeyDownEvent& event) {
             } else {
                 _state         = PLAY_AGAIN;
                 _player_paused = true;
-                stack()->push(new PlayAgainScreen(true, g.level->is_training, &_play_again));
+                stack()->push(new PlayAgainScreen(true, g.level->skip.has_value(), &_play_again));
                 return;
             }
 
@@ -641,7 +641,7 @@ void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
             } else {
                 _state         = PLAY_AGAIN;
                 _player_paused = true;
-                stack()->push(new PlayAgainScreen(true, g.level->is_training, &_play_again));
+                stack()->push(new PlayAgainScreen(true, g.level->skip.has_value(), &_play_again));
                 return;
             }
     }

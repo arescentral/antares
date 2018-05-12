@@ -164,15 +164,15 @@ struct Level {
         StatusLine(const StatusLine&) = delete;
     };
 
-    sfz::optional<int64_t>  chapter;
-    pn::string              name;
-    std::vector<Player>     players;
-    std::vector<StatusLine> status;
-    pn::string              song;
-    sfz::optional<Rect>     starmap;
-    secs                    startTime   = secs(0);
-    bool                    is_training = false;
-    int32_t                 angle       = 0;
+    sfz::optional<int64_t>                  chapter;
+    pn::string                              name;
+    std::vector<Player>                     players;
+    std::vector<StatusLine>                 status;
+    pn::string                              song;
+    sfz::optional<Rect>                     starmap;
+    secs                                    startTime = secs(0);
+    sfz::optional<NamedHandle<const Level>> skip;
+    int32_t                                 angle = 0;
     struct Par {
         game_ticks time;
         int64_t    kills;

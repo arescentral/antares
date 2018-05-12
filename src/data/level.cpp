@@ -205,7 +205,7 @@ static std::vector<Level::StatusLine> optional_status_line_array(path_value x) {
             {"song", {&Level::song, required_string_copy}},                                      \
             {"status", {&Level::status, optional_status_line_array}},                            \
             {"start_time", {&Level::startTime, optional_secs, secs(0)}},                         \
-            {"is_training", {&Level::is_training, optional_bool, false}},                        \
+            {"skip", {&Level::skip, optional_level}},                                            \
             {"angle", {&Level::angle, optional_int32, -1}},                                      \
             {"par", {&Level::par, optional_par}}
 // clang-format on
