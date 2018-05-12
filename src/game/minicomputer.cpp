@@ -79,8 +79,6 @@ const int32_t kNoLineButton  = -1;
 const int32_t kInLineButton  = kCompAcceptKeyNum;
 const int32_t kOutLineButton = kCompCancelKeyNum;
 
-static ANTARES_GLOBAL std::vector<pn::string> gMissionStatusStrList;
-
 enum {
     kMainMiniScreen    = 1,
     kBuildMiniScreen   = 2,
@@ -226,15 +224,6 @@ void MiniScreenCleanup() {
 }
 
 #pragma mark -
-
-void SetMiniScreenStatusStrList(const std::vector<pn::string>& strings) {
-    gMissionStatusStrList.clear();
-    for (pn::string_view s : strings) {
-        gMissionStatusStrList.emplace_back(s.copy());
-    }
-}
-
-void DisposeMiniScreenStatusStrList() { gMissionStatusStrList.clear(); }
 
 void ClearMiniScreenLines() {
     miniScreenLineType* c = g.mini.lineData.get();
@@ -879,10 +868,16 @@ static void show_build_screen(Handle<Admiral> adm, int32_t line) {
         return;
     }
     const miniScreenLineType lines[] = {
-        text("BUILD SHIPS", false), text("", true), selectable("", build_ship),
-        selectable("", build_ship), selectable("", build_ship),
-        selectable("", build_ship), selectable("", build_ship),
-        selectable("", build_ship), accept("Build"), cancel("Main Menu"),
+            text("BUILD SHIPS", false),
+            text("", true),
+            selectable("", build_ship),
+            selectable("", build_ship),
+            selectable("", build_ship),
+            selectable("", build_ship),
+            selectable("", build_ship),
+            selectable("", build_ship),
+            accept("Build"),
+            cancel("Main Menu"),
     };
     make_mini_screen(kBuildMiniScreen, lines);
     MiniComputerSetBuildStrings();
@@ -892,14 +887,16 @@ static void show_special_screen(Handle<Admiral> adm, int32_t line) {
     if (adm != g.admiral) {
         return;
     }
-    const miniScreenLineType lines[] =
-    {
-        text("SPECIAL ORDERS", true), selectable("Transfer Control", transfer_control),
-        selectable("Hold Position", hold_position),
-        selectable("Go To My Position", come_to_me),
-        selectable("Fire Weapon 1", fire1), selectable("Fire Weapon 2", fire2),
-        selectable("Fire Special", fire_special), accept("Execute"),
-        cancel("Main Menu"),
+    const miniScreenLineType lines[] = {
+            text("SPECIAL ORDERS", true),
+            selectable("Transfer Control", transfer_control),
+            selectable("Hold Position", hold_position),
+            selectable("Go To My Position", come_to_me),
+            selectable("Fire Weapon 1", fire1),
+            selectable("Fire Weapon 2", fire2),
+            selectable("Fire Special", fire_special),
+            accept("Execute"),
+            cancel("Main Menu"),
     };
     make_mini_screen(kSpecialMiniScreen, lines);
 }
@@ -909,10 +906,12 @@ static void show_message_screen(Handle<Admiral> adm, int32_t line) {
         return;
     }
     const miniScreenLineType lines[] = {
-        text("MESSAGES", true), selectable("Next Page/Clear", next_message),
-        selectable("Previous Page", prev_message),
-        selectable("Last Message", last_message), accept("Execute"),
-        cancel("Main Menu"),
+            text("MESSAGES", true),
+            selectable("Next Page/Clear", next_message),
+            selectable("Previous Page", prev_message),
+            selectable("Last Message", last_message),
+            accept("Execute"),
+            cancel("Main Menu"),
     };
     make_mini_screen(kMessageMiniScreen, lines);
 }
@@ -922,7 +921,7 @@ static void show_status_screen(Handle<Admiral> adm, int32_t line) {
         return;
     }
     const miniScreenLineType lines[] = {
-        text("MISSION STATUS", true), cancel("Main Menu"),
+            text("MISSION STATUS", true), cancel("Main Menu"),
     };
     make_mini_screen(kStatusMiniScreen, lines);
     MiniComputerSetStatusStrings();
@@ -932,12 +931,13 @@ static void show_main_screen(Handle<Admiral> adm, int32_t line) {
     if (adm != g.admiral) {
         return;
     }
-    const miniScreenLineType lines[] =
-    {
-        text("MAIN MENU", true), selectable("<Build>", show_build_screen),
-        selectable("<Special Orders>", show_special_screen),
-        selectable("<Message>", show_message_screen),
-        selectable("<Mission Status>", show_status_screen), accept("Select"),
+    const miniScreenLineType lines[] = {
+            text("MAIN MENU", true),
+            selectable("<Build>", show_build_screen),
+            selectable("<Special Orders>", show_special_screen),
+            selectable("<Message>", show_message_screen),
+            selectable("<Mission Status>", show_status_screen),
+            accept("Select"),
     };
     make_mini_screen(kMainMiniScreen, lines);
 }
@@ -1057,112 +1057,60 @@ void MiniComputerSetStatusStrings() {
     //  Samples Left: 7
     //
 
-    if (gMissionStatusStrList.empty()) {
-        for (int count = kStatusMiniScreenFirstLine; count < kMiniScreenCharHeight; count++) {
-            miniScreenLineType* line = g.mini.lineData.get() + count;
-            line->statusType         = kNoStatusData;
-            line->value              = -1;
-            line->string.clear();
-        }
-        return;
-    }
-
     for (int count = kStatusMiniScreenFirstLine; count < kMiniScreenCharHeight; count++) {
         miniScreenLineType* line = g.mini.lineData.get() + count;
-
-        if (implicit_cast<size_t>(count - kStatusMiniScreenFirstLine) <
-            gMissionStatusStrList.size()) {
-            // we have some data for this line to interpret
-
-            pn::string_view sourceString =
-                    gMissionStatusStrList.at(count - kStatusMiniScreenFirstLine);
-
-            if (sourceString.data()[0] == '_') {
-                line->underline = true;
-                sourceString    = sourceString.substr(1);
-            }
-
-            if (sourceString.data()[0] == '-') {
-                // - = abbreviated string, just plain text
-                line->statusType = kPlainTextStatus;
-                line->value      = 0;
-                line->string     = sourceString.substr(1).copy();
-            } else {
-                //////////////////////////////////////////////
-                // get status type
-                pn::string_view status_type_string;
-                if (pn::partition(status_type_string, "\\", sourceString)) {
-                    int64_t value;
-                    if (pn::strtoll(status_type_string, &value, nullptr)) {
-                        if ((0 <= value) && (value <= kMaxStatusTypeValue)) {
-                            line->statusType = value;
-                        }
-                    }
-                }
-
-                //////////////////////////////////////////////
-                // get score/condition number
-                pn::string_view score_condition_string;
-                if (pn::partition(score_condition_string, "\\", sourceString)) {
-                    int64_t value;
-                    if (pn::strtoll(score_condition_string, &value, nullptr)) {
-                        line->whichStatus = value;
-                    }
-                }
-
-                //////////////////////////////////////////////
-                // get player number
-                pn::string_view player_number_string;
-                if (pn::partition(player_number_string, "\\", sourceString)) {
-                    int64_t value;
-                    if (pn::strtoll(player_number_string, &value, nullptr)) {
-                        line->statusPlayer = Handle<Admiral>(value);
-                    }
-                }
-
-                //////////////////////////////////////////////
-                // get negative value
-                pn::string_view negative_value_string;
-                if (pn::partition(negative_value_string, "\\", sourceString)) {
-                    int64_t value;
-                    if (pn::strtoll(negative_value_string, &value, nullptr)) {
-                        line->negativeValue = value;
-                    }
-                }
-
-                //////////////////////////////////////////////
-                // get falseString
-                pn::string_view status_false_string;
-                if (pn::partition(status_false_string, "\\", sourceString)) {
-                    line->statusFalse = status_false_string.copy();
-                }
-
-                //////////////////////////////////////////////
-                // get trueString
-                pn::string_view status_true_string;
-                if (pn::partition(status_true_string, "\\", sourceString)) {
-                    line->statusTrue = status_true_string.copy();
-                }
-
-                //////////////////////////////////////////////
-                // get statusString
-                pn::string_view status_string;
-                if (pn::partition(status_string, "\\", sourceString)) {
-                    line->statusString = status_string.copy();
-                }
-
-                //////////////////////////////////////////////
-                // get postString
-                line->postString = sourceString.copy();
-
-                line->value = MiniComputerGetStatusValue(count);
-                MiniComputerMakeStatusString(count, line->string);
-            }
-        } else {
+        if (implicit_cast<size_t>(count - kStatusMiniScreenFirstLine) >= g.level->status.size()) {
             line->statusType = kNoStatusData;
             line->value      = -1;
             line->string.clear();
+            continue;
         }
+
+        // we have some data for this line to interpret
+        const Level::StatusLine& l = g.level->status.at(count - kStatusMiniScreenFirstLine);
+
+        line->underline = l.underline;
+        if (l.text.has_value()) {
+            line->statusType = kPlainTextStatus;
+            line->value      = 0;
+            line->string     = l.text->copy();
+            continue;
+        }
+
+        line->statusString = l.prefix.has_value() ? l.prefix->copy() : pn::string{};
+        line->postString   = l.suffix.has_value() ? l.suffix->copy() : pn::string{};
+        if (l.condition.has_value()) {
+            line->statusType  = kTrueFalseCondition;
+            line->whichStatus = *l.condition;
+            line->statusTrue  = l.true_.has_value() ? l.true_->copy() : pn::string{};
+            line->statusFalse = l.false_.has_value() ? l.false_->copy() : pn::string{};
+        } else if (l.counter.has_value()) {
+            line->whichStatus  = l.counter->which;
+            line->statusPlayer = Handle<Admiral>(l.counter->player);
+            if (l.counter->fixed) {
+                if (l.minuend.has_value()) {
+                    line->statusType    = kSmallFixedMinusValue;
+                    line->negativeValue = l.minuend->val();
+                } else {
+                    line->statusType = kSmallFixedValue;
+                }
+            } else {
+                if (l.minuend.has_value()) {
+                    line->statusType    = kIntegerMinusValue;
+                    line->negativeValue = mFixedToLong(*l.minuend);
+                } else {
+                    line->statusType = kIntegerValue;
+                }
+            }
+        } else {
+            line->statusType = kPlainTextStatus;
+            line->value      = 0;
+            line->string.clear();
+            continue;
+        }
+
+        line->value = MiniComputerGetStatusValue(count);
+        MiniComputerMakeStatusString(count, line->string);
     }
 }
 

@@ -198,8 +198,6 @@ LoadState start_construct_level(const Level& level) {
     g.next_level   = nullptr;
     g.victory_text = "";
 
-    SetMiniScreenStatusStrList(g.level->score_strings);
-
     int i = 0;
     for (const auto& player : g.level->players) {
         if (player.playerType == PlayerType::HUMAN) {

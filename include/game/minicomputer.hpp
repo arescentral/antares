@@ -20,6 +20,7 @@
 #define ANTARES_GAME_MINICOMPUTER_HPP_
 
 #include "data/base-object.hpp"
+#include "data/level.hpp"
 
 namespace antares {
 
@@ -51,7 +52,6 @@ struct miniScreenLineType {
 
 void  MiniScreenInit(void);
 void  MiniScreenCleanup(void);
-void  SetMiniScreenStatusStrList(const std::vector<pn::string>& strings);
 void  DisposeMiniScreenStatusStrList(void);
 void  ClearMiniScreenLines(void);
 void  draw_mini_screen();

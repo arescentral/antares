@@ -153,28 +153,28 @@ int64_t required_int(path_value x, const std::initializer_list<int64_t>& ranges)
 }
 
 double required_double(path_value x) {
-    if (x.value().is_float()) {
-        return x.value().as_float();
+    if (x.value().is_number()) {
+        return x.value().as_number();
     } else {
-        throw std::runtime_error(pn::format("{0}: must be float", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}: must be number", x.path()).c_str());
     }
 }
 
 sfz::optional<Fixed> optional_fixed(path_value x) {
     if (x.value().is_null()) {
         return sfz::nullopt;
-    } else if (x.value().is_float()) {
-        return sfz::make_optional(Fixed::from_float(x.value().as_float()));
+    } else if (x.value().is_number()) {
+        return sfz::make_optional(Fixed::from_float(x.value().as_number()));
     } else {
-        throw std::runtime_error(pn::format("{0}: must be null or float", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}: must be null or number", x.path()).c_str());
     }
 }
 
 Fixed required_fixed(path_value x) {
-    if (x.value().is_float()) {
-        return Fixed::from_float(x.value().as_float());
+    if (x.value().is_number()) {
+        return Fixed::from_float(x.value().as_number());
     } else {
-        throw std::runtime_error(pn::format("{0}: must be float", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}: must be number", x.path()).c_str());
     }
 }
 

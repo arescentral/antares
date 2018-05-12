@@ -143,6 +143,56 @@ static Level::Par optional_par(path_value x) {
             .value_or(Level::Par{game_ticks{ticks{0}}, 0, 0});
 }
 
+/*
+        struct Counter {
+            int  player = 0;
+            int  which  = 0;
+            bool fixed  = false;
+        };
+        */
+
+static sfz::optional<Level::StatusLine::Counter> optional_status_line_counter(path_value x) {
+    return optional_struct<Level::StatusLine::Counter>(
+            x, {
+                       {"player", {&Level::StatusLine::Counter::player, required_int}},
+                       {"which", {&Level::StatusLine::Counter::which, required_int}},
+                       {"fixed", {&Level::StatusLine::Counter::fixed, optional_bool, false}},
+               });
+};
+
+static Level::StatusLine required_status_line(path_value x) {
+    return required_struct<Level::StatusLine>(
+            x, {
+                       {"text", {&Level::StatusLine::text, optional_string_copy}},
+                       {"prefix", {&Level::StatusLine::prefix, optional_string_copy}},
+
+                       {"condition", {&Level::StatusLine::condition, optional_int}},
+                       {"true", {&Level::StatusLine::true_, optional_string_copy}},
+                       {"false", {&Level::StatusLine::false_, optional_string_copy}},
+
+                       {"minuend", {&Level::StatusLine::minuend, optional_fixed}},
+                       {"counter", {&Level::StatusLine::counter, optional_status_line_counter}},
+
+                       {"suffix", {&Level::StatusLine::suffix, optional_string_copy}},
+                       {"underline", {&Level::StatusLine::underline, optional_bool, false}},
+               });
+};
+
+static std::vector<Level::StatusLine> optional_status_line_array(path_value x) {
+    if (x.value().is_null()) {
+        return {};
+    } else if (x.value().is_array()) {
+        pn::array_cref                 a = x.value().as_array();
+        std::vector<Level::StatusLine> result;
+        for (int i = 0; i < a.size(); ++i) {
+            result.emplace_back(required_status_line(x.get(i)));
+        }
+        return result;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
+    }
+}
+
 // clang-format off
 #define COMMON_LEVEL_FIELDS                                                                      \
             {"type", {&Level::type, required_level_type}},                                       \
@@ -153,7 +203,7 @@ static Level::Par optional_par(path_value x) {
             {"briefings", {&Level::briefings, optional_briefing_array}},                         \
             {"starmap", {&Level::starMap, optional_point, Point{0, 0}}},                         \
             {"song", {&Level::song, required_string_copy}},                                      \
-            {"score", {&Level::score_strings, optional_string_array}},                           \
+            {"status", {&Level::status, optional_status_line_array}},                            \
             {"start_time", {&Level::startTime, optional_secs, secs(0)}},                         \
             {"is_training", {&Level::is_training, optional_bool, false}},                        \
             {"angle", {&Level::angle, optional_int32, -1}},                                      \

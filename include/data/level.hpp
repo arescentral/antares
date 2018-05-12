@@ -140,10 +140,34 @@ struct Level {
         Hue                     hue          = Hue::GRAY;
     };
 
+    struct StatusLine {
+        sfz::optional<pn::string> text;
+        sfz::optional<pn::string> prefix;
+
+        sfz::optional<int64_t>    condition;
+        sfz::optional<pn::string> true_;
+        sfz::optional<pn::string> false_;
+
+        struct Counter {
+            int64_t player = 0;
+            int64_t which  = 0;
+            bool    fixed  = false;
+        };
+        sfz::optional<Fixed>   minuend;
+        sfz::optional<Counter> counter;
+
+        sfz::optional<pn::string> suffix;
+        bool                      underline = false;
+
+        StatusLine()                  = default;
+        StatusLine(StatusLine&&)      = default;
+        StatusLine(const StatusLine&) = delete;
+    };
+
     sfz::optional<int64_t>  chapter;
     pn::string              name;
     std::vector<Player>     players;
-    std::vector<pn::string> score_strings;
+    std::vector<StatusLine> status;
     pn::string              song;
     Point                   starMap     = {-1, -1};
     secs                    startTime   = secs(0);
