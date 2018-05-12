@@ -550,8 +550,12 @@ void GamePlay::fire_timer() {
             break;
 
         case LOSE_GAME:
-            if (_replay || g.victory_text.empty()) {
+            if (_replay) {
+                *_game_result = QUIT_GAME;
                 stack()->pop(this);
+            } else if (g.victory_text.empty()) {
+                _state = PLAY_AGAIN;
+                stack()->push(new PlayAgainScreen(false, false, &_play_again));
             } else {
                 _state = DEBRIEFING;
                 stack()->push(new DebriefingScreen(g.victory_text));
