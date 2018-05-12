@@ -122,9 +122,8 @@ void SoloGame::epilogue_done() {
     _state = QUIT;
 
     if (g.next_level) {
-        const int32_t chapter = g.next_level->chapter_number();
-        if (chapter >= 0) {
-            Ledger::ledger()->unlock_chapter(chapter);
+        if (g.next_level && g.next_level->chapter.has_value()) {
+            Ledger::ledger()->unlock_chapter(*g.next_level->chapter);
             _level = g.next_level;
             _state = START_LEVEL;
         }

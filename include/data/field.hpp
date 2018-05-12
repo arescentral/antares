@@ -124,6 +124,7 @@ HandleList<const Level_Initial>   required_initial_range(path_value x);
 
 sfz::optional<Point> optional_point(path_value x);
 Point                required_point(path_value x);
+sfz::optional<Rect>  optional_rect(path_value x);
 Rect                 required_rect(path_value x);
 
 sfz::optional<RgbColor> optional_color(path_value x);

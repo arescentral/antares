@@ -70,7 +70,8 @@ class BriefingScreen : public InterfaceScreen {
     const Level&        _level;
     bool* const         _cancelled;
     int                 _briefing_point;
-    const int           _briefing_point_count;
+    const int           _briefing_point_start;
+    const int           _briefing_point_end;
     mutable LabeledRect _data_item;
 
     Rect _bounds;

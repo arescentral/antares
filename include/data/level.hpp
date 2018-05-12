@@ -169,7 +169,7 @@ struct Level {
     std::vector<Player>     players;
     std::vector<StatusLine> status;
     pn::string              song;
-    Point                   starMap     = {-1, -1};
+    sfz::optional<Rect>     starmap;
     secs                    startTime   = secs(0);
     bool                    is_training = false;
     int32_t                 angle       = 0;
@@ -193,9 +193,6 @@ struct Level {
 
     static const Level* get(int n);
     static const Level* get(pn::string_view n);
-
-    Point   star_map_point() const;
-    int32_t chapter_number() const;
 };
 Level level(pn::value_cref x);
 

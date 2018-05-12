@@ -48,18 +48,14 @@ namespace antares {
 namespace {
 
 enum BriefingPoint {
-    STAR_MAP = 0,
-    BLANK_SYSTEM_MAP,
-    BRIEFING_POINT_COUNT,
+    STAR_MAP         = -2,
+    BLANK_SYSTEM_MAP = -1,
 };
 
 }  // namespace
 
-static const int kMissionStarPointWidth  = 16;
-static const int kMissionStarPointHeight = 12;
 static const Hue kMissionDataHiliteColor = Hue::GOLD;
 
-static const int32_t kMissionBriefPointOffset = 2;
 static const int32_t kMissionDataWidth        = 200;
 static const int32_t kMissionDataVBuffer      = 40;
 static const int32_t kMissionDataTopBuffer    = 30;
@@ -106,12 +102,10 @@ static void update_mission_brief_point(
         LabeledRect* dataItem, int32_t whichBriefPoint, const Level& level, coordPointType* corner,
         int32_t scale, Rect* bounds, vector<inlinePictType>& inlinePict, Rect& highlight_rect,
         vector<pair<Point, Point>>& lines, pn::string_ref text) {
-    if (whichBriefPoint < kMissionBriefPointOffset) {
+    if (whichBriefPoint < 0) {
         // No longer handled here.
         return;
     }
-
-    whichBriefPoint -= kMissionBriefPointOffset;
 
     Rect       hiliteBounds;
     pn::string header;
@@ -208,8 +202,9 @@ BriefingScreen::BriefingScreen(const Level& level, bool* cancelled)
         : InterfaceScreen("briefing", {0, 0, 640, 480}, true),
           _level(level),
           _cancelled(cancelled),
-          _briefing_point(0),
-          _briefing_point_count(_level.briefings.size() + 2),
+          _briefing_point(_level.starmap.has_value() ? STAR_MAP : BLANK_SYSTEM_MAP),
+          _briefing_point_start(_briefing_point),
+          _briefing_point_end(_level.briefings.size()),
           _data_item(data_item(item(MAP_RECT))) {
     build_star_map();
     for (int i = 0; i < 500; ++i) {
@@ -224,7 +219,7 @@ BriefingScreen::BriefingScreen(const Level& level, bool* cancelled)
 BriefingScreen::~BriefingScreen() {}
 
 void BriefingScreen::become_front() {
-    if (_briefing_point_count <= 2) {
+    if (_briefing_point_end == 0) {
         stack()->pop(this);
     } else {
         InterfaceScreen::become_front();
@@ -305,12 +300,12 @@ void BriefingScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
 }
 
 void BriefingScreen::adjust_interface() {
-    if (_briefing_point > 0) {
+    if (_briefing_point > _briefing_point_start) {
         dynamic_cast<Button&>(mutable_item(PREVIOUS)).status = kActive;
     } else {
         dynamic_cast<Button&>(mutable_item(PREVIOUS)).status = kDimmed;
     }
-    if (_briefing_point < _briefing_point_count - 1) {
+    if (_briefing_point < _briefing_point_end - 1) {
         dynamic_cast<Button&>(mutable_item(NEXT)).status = kActive;
     } else {
         dynamic_cast<Button&>(mutable_item(NEXT)).status = kDimmed;
@@ -322,7 +317,7 @@ void BriefingScreen::handle_button(Button& button) {
         case DONE: stack()->pop(this); break;
 
         case PREVIOUS:
-            if (_briefing_point > 0) {
+            if (_briefing_point > _briefing_point_start) {
                 --_briefing_point;
             }
             adjust_interface();
@@ -330,7 +325,7 @@ void BriefingScreen::handle_button(Button& button) {
             break;
 
         case NEXT:
-            if (_briefing_point < _briefing_point_count - 1) {
+            if (_briefing_point < _briefing_point_end - 1) {
                 ++_briefing_point;
             }
             adjust_interface();
@@ -349,25 +344,26 @@ void BriefingScreen::build_star_map() {
     _bounds = pix_bounds;
     _bounds.center_in(item(MAP_RECT).bounds);
 
-    _star_rect = Rect(_level.star_map_point(), Size(0, 0));
-    _star_rect.inset(-kMissionStarPointWidth, -kMissionStarPointHeight);
+    if (_level.starmap.has_value()) {
+        _star_rect = *_level.starmap;
 
-    // Move `_star_rect` so that it is inside of `pix_bounds`.
-    if (_star_rect.left < pix_bounds.left) {
-        _star_rect.offset(pix_bounds.left - _star_rect.left, 0);
-    } else if (_star_rect.right > pix_bounds.right) {
-        _star_rect.offset(pix_bounds.right - _star_rect.right, 0);
+        // Move `_star_rect` so that it is inside of `pix_bounds`.
+        if (_star_rect.left < pix_bounds.left) {
+            _star_rect.offset(pix_bounds.left - _star_rect.left, 0);
+        } else if (_star_rect.right > pix_bounds.right) {
+            _star_rect.offset(pix_bounds.right - _star_rect.right, 0);
+        }
+        if (_star_rect.top < pix_bounds.top) {
+            _star_rect.offset(0, pix_bounds.top - _star_rect.top);
+        } else if (_star_rect.bottom > pix_bounds.bottom) {
+            _star_rect.offset(0, pix_bounds.bottom - _star_rect.bottom);
+        }
+        _star_rect.offset(_bounds.left, _bounds.top);
     }
-    if (_star_rect.top < pix_bounds.top) {
-        _star_rect.offset(0, pix_bounds.top - _star_rect.top);
-    } else if (_star_rect.bottom > pix_bounds.bottom) {
-        _star_rect.offset(0, pix_bounds.bottom - _star_rect.bottom);
-    }
-    _star_rect.offset(_bounds.left, _bounds.top);
 }
 
 void BriefingScreen::build_brief_point() {
-    if (_briefing_point >= BRIEFING_POINT_COUNT) {
+    if (_briefing_point >= 0) {
         coordPointType corner;
         int32_t        scale;
         Rect           map_rect = item(MAP_RECT).bounds;

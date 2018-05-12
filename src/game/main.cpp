@@ -166,7 +166,7 @@ void MainPlay::become_front() {
             // _replay_builder.init(
             //         sys.prefs->scenario_identifier(),
             //         String(u32_to_version(plug.meta.version)),
-            //         _level->chapter_number(),
+            //         *_level->chapter,
             //         g.random.seed);
 
             sys.music.play(Music::IDLE, Music::briefing_song);
@@ -221,7 +221,7 @@ void MainPlay::become_front() {
             sys.music.stop();
 #ifdef DATA_COVERAGE
             {
-                pn::format(stderr, "{{ \"level\": {0},\n", g.level->chapter_number());
+                pn::format(stderr, "{{ \"level\": {0},\n", *g.level->chapter);
                 const char* sep = "";
                 pn::format(stderr, "  \"objects\": [");
                 for (auto object : covered_objects) {
@@ -387,7 +387,7 @@ void GamePlay::become_front() {
                     *_game_result  = WIN_GAME;
                     g.game_over    = true;
                     g.victor       = g.admiral;
-                    g.next_level   = Level::get(g.level->chapter_number() + 1);
+                    g.next_level   = Level::get(*g.level->chapter + 1);
                     g.victory_text = "";
                     stack()->pop(this);
                     break;

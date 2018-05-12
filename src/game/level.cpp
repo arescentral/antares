@@ -164,10 +164,6 @@ void GetInitialCoord(
 
 }  // namespace
 
-Point Level::star_map_point() const { return starMap; }
-
-int32_t Level::chapter_number() const { return chapter; }
-
 LoadState start_construct_level(const Level& level) {
     ResetAllSpaceObjects();
     reset_action_queue();
