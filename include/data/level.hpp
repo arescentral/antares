@@ -67,8 +67,8 @@ struct ScenarioInfo {
     pn::string                    titleString;
     pn::string                    authorNameString;
     pn::string                    authorURLString;
-    pn::string                    intro_text;
-    pn::string                    about_text;
+    sfz::optional<pn::string>     intro;
+    sfz::optional<pn::string>     about;
 
     pn::string splash_screen;
     pn::string starmap;

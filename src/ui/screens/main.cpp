@@ -60,18 +60,25 @@ void MainScreen::become_front() {
 }
 
 bool MainScreen::next_timer(wall_time& time) {
-    time = _next_timer;
-    return true;
+    if (_replays.size() || plug.info.intro.has_value()) {
+        time = _next_timer;
+        return true;
+    }
+    return false;
 }
 
 void MainScreen::fire_timer() {
     Randomize(1);
-    size_t demo = rand() % (_replays.size() + 1);
-    if (demo == _replays.size()) {
+    int option_count = _replays.size() + (plug.info.intro.has_value() ? 1 : 0);
+    if (option_count == 0) {
+        return;
+    }
+    int option = rand() % option_count;
+    if (option == _replays.size()) {
         stack()->push(new ScrollTextScreen(
-                plug.info.intro_text, kTitleTextScrollWidth, kSlowScrollInterval));
+                *plug.info.intro, kTitleTextScrollWidth, kSlowScrollInterval));
     } else {
-        stack()->push(new ReplayGame(_replays.at(demo)));
+        stack()->push(new ReplayGame(_replays.at(option)));
     }
 }
 
@@ -106,14 +113,23 @@ void MainScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
 }
 
 void MainScreen::adjust_interface() {
+    if (plug.chapters.find(1) == plug.chapters.end()) {
+        dynamic_cast<PlainButton&>(mutable_item(START_NEW_GAME)).status = kDimmed;
+    }
+
     // TODO(sfiera): switch on whether or not network games are available.
     dynamic_cast<PlainButton&>(mutable_item(START_NETWORK_GAME)).status = kDimmed;
 
-    // TODO(sfiera): switch on whether or not there is a single-player campaign.
-    dynamic_cast<PlainButton&>(mutable_item(START_NEW_GAME)).status = kActive;
+    if (!plug.info.intro.has_value()) {
+        dynamic_cast<PlainButton&>(mutable_item(REPLAY_INTRO)).status = kDimmed;
+    }
 
     if (_replays.size() == 0) {
         dynamic_cast<PlainButton&>(mutable_item(DEMO)).status = kDimmed;
+    }
+
+    if (!plug.info.about.has_value()) {
+        dynamic_cast<PlainButton&>(mutable_item(ABOUT_ARES)).status = kDimmed;
     }
 }
 
@@ -130,7 +146,7 @@ void MainScreen::handle_button(antares::Button& button) {
 
         case REPLAY_INTRO:
             stack()->push(new ScrollTextScreen(
-                    plug.info.intro_text, kTitleTextScrollWidth, kSlowScrollInterval));
+                    *plug.info.intro, kTitleTextScrollWidth, kSlowScrollInterval));
             break;
 
         case START_NEW_GAME: stack()->push(new SoloGame); break;
@@ -140,7 +156,7 @@ void MainScreen::handle_button(antares::Button& button) {
             break;
 
         case ABOUT_ARES:
-            stack()->push(new ScrollTextScreen(plug.info.about_text, 540, kFastScrollInterval));
+            stack()->push(new ScrollTextScreen(*plug.info.about, 540, kFastScrollInterval));
             break;
 
         case OPTIONS: stack()->push(new OptionsScreen); break;

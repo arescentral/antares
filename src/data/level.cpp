@@ -86,8 +86,8 @@ ScenarioInfo scenario_info(pn::value_cref x0) {
                 {"warp_out_flare", {&ScenarioInfo::warpOutFlareID, required_base}},
                 {"player_body", {&ScenarioInfo::playerBodyID, required_base}},
                 {"energy_blob", {&ScenarioInfo::energyBlobID, required_base}},
-                {"intro", {&ScenarioInfo::intro_text, optional_string, ""}},
-                {"about", {&ScenarioInfo::about_text, optional_string, ""}},
+                {"intro", {&ScenarioInfo::intro, optional_string_copy}},
+                {"about", {&ScenarioInfo::about, optional_string_copy}},
                 {"splash", {&ScenarioInfo::splash_screen, required_string_copy}},
                 {"starmap", {&ScenarioInfo::starmap, required_string_copy}}});
 }

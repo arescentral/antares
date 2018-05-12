@@ -103,8 +103,8 @@ void run(
             {"baz-prologue", 450, prologue("ch14")},
             {"ele-prologue", 450, prologue("ch13")},
             {"aud-prologue", 450, prologue("ch16")},
-            {"intro", 450, []() -> pn::string_view { return plug.info.intro_text; }},
-            {"about", 540, []() -> pn::string_view { return plug.info.about_text; }},
+            {"intro", 450, []() -> pn::string_view { return *plug.info.intro; }},
+            {"about", 540, []() -> pn::string_view { return *plug.info.about; }},
     };
 
     vector<pair<unique_ptr<Card>, pn::string>> pix;

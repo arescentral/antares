@@ -90,8 +90,11 @@ void Master::become_front() {
         case TITLE_SCREEN_PICT:
             _state = INTRO_SCROLL;
             // TODO(sfiera): prevent the intro screen from displaying on subsequent launches.
-            stack()->push(new ScrollTextScreen(plug.info.intro_text, 450, kSlowScrollInterval));
-            break;
+            if (plug.info.intro.has_value()) {
+                stack()->push(new ScrollTextScreen(*plug.info.intro, 450, kSlowScrollInterval));
+                break;
+            }
+            [[clang::fallthrough]];
 
         case INTRO_SCROLL:
             _state = MAIN_SCREEN;
