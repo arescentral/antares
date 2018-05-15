@@ -197,6 +197,15 @@ class BaseObject {
     };
     sfz::optional<Icon> icon;
 
+    struct Targeting {
+        bool base   = false;
+        bool hide   = false;
+        bool radar  = false;
+        bool order  = false;
+        bool select = false;
+        bool lock   = false;
+    } target;
+
     struct Weapon {
         NamedHandle<const BaseObject> base;
         std::vector<fixedPointType>   positions;  // relative positions (unrotated) of fire points

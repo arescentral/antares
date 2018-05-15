@@ -162,6 +162,18 @@ static sfz::optional<BaseObject::Icon> optional_icon(path_value x) {
                });
 }
 
+static BaseObject::Targeting required_targeting(path_value x) {
+    return required_struct<BaseObject::Targeting>(
+            x, {
+                       {"base", {&BaseObject::Targeting::base, required_bool}},
+                       {"hide", {&BaseObject::Targeting::hide, required_bool}},
+                       {"radar", {&BaseObject::Targeting::radar, required_bool}},
+                       {"order", {&BaseObject::Targeting::order, required_bool}},
+                       {"select", {&BaseObject::Targeting::select, required_bool}},
+                       {"lock", {&BaseObject::Targeting::lock, required_bool}},
+               });
+}
+
 static BaseObject::Loadout optional_loadout(path_value x) {
     return optional_struct<BaseObject::Loadout>(
                    x,
@@ -188,6 +200,26 @@ static BaseObject set_attributes(BaseObject o) {
     } else if (o.ray.has_value() || o.bolt.has_value()) {
         o.attributes |= kIsVector;
     }
+
+    if (o.target.base) {
+        o.attributes |= kIsDestination;
+    }
+    if (o.target.hide) {
+        o.attributes |= kHideEffect;
+    }
+    if (o.target.radar) {
+        o.attributes |= kAppearOnRadar;
+    }
+    if (o.target.order) {
+        o.attributes |= kCanAcceptDestination;
+    }
+    if (o.target.select) {
+        o.attributes |= kCanBeDestination;
+    }
+    if (o.target.lock) {
+        o.attributes |= kStaticDestination;
+    }
+
     if (o.turn_rate > Fixed::zero()) {
         o.attributes |= (kCanTurn | kHasDirectionGoal);
     }
@@ -502,6 +534,7 @@ BaseObject base_object(pn::value_cref x0) {
                     {"activate", {&BaseObject::activate, optional_activate}},
                     {"arrive", {&BaseObject::arrive, optional_arrive}},
 
+                    {"target", {&BaseObject::target, required_targeting}},
                     {"icon", {&BaseObject::icon, optional_icon}},
                     {"weapons", {&BaseObject::weapons, optional_loadout}},
 
