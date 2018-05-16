@@ -48,6 +48,10 @@ static NSString* str(const char* utf8_bytes) { return [NSString stringWithUTF8St
 
 static NSURL* url(const char* utf8_bytes) { return [NSURL URLWithString:str(utf8_bytes)]; }
 
+static bool isWebScheme(NSURL* url) {
+    return [[url scheme] isEqual:@"http"] || [[url scheme] isEqual:@"https"];
+}
+
 @interface AntaresController (Private)
 - (void)fail:(NSString*)message;
 
@@ -82,15 +86,35 @@ static NSURL* url(const char* utf8_bytes) { return [NSURL URLWithString:str(utf8
 }
 
 - (void)setScenarioFrom:(NSMenuItem*)sender {
-    NSString* identifier = [[sender representedObject] objectForKey:kIdentifier];
-    NSString* title      = [[sender representedObject] objectForKey:kTitle];
-    NSString* author     = [[sender representedObject] objectForKey:kAuthor];
-    NSString* version    = [[sender representedObject] objectForKey:kVersion];
+    NSString* identifier   = [[sender representedObject] objectForKey:kIdentifier];
+    NSString* title        = [[sender representedObject] objectForKey:kTitle];
+    NSURL*    download_url = [[sender representedObject] objectForKey:kDownloadURL];
+    NSString* author       = [[sender representedObject] objectForKey:kAuthor];
+    NSURL*    author_url   = [[sender representedObject] objectForKey:kAuthorURL];
+    NSString* version      = [[sender representedObject] objectForKey:kVersion];
 
-    [_scenario_button setTitle:title];
-    [self setDownloadURL:[[sender representedObject] objectForKey:kDownloadURL]];
-    [_author_button setTitle:author];
-    [self setAuthorURL:[[sender representedObject] objectForKey:kAuthorURL]];
+    [_scenario_button setHidden:YES];
+    [_scenario_label setHidden:YES];
+    if (download_url) {
+        [_scenario_button setTitle:title];
+        [self setDownloadURL:download_url];
+        [_scenario_button setHidden:NO];
+    } else {
+        [_scenario_label setStringValue:title];
+        [_scenario_label setHidden:NO];
+    }
+
+    [_author_button setHidden:YES];
+    [_author_label setHidden:YES];
+    if (author_url) {
+        [_author_button setTitle:author];
+        [self setAuthorURL:author_url];
+        [_author_button setHidden:NO];
+    } else {
+        [_author_label setStringValue:author];
+        [_author_label setHidden:NO];
+    }
+
     [_version_label setStringValue:version];
 
     [[NSUserDefaults standardUserDefaults] setObject:identifier forKey:kScenario];
@@ -117,10 +141,10 @@ static NSURL* url(const char* utf8_bytes) { return [NSURL URLWithString:str(utf8
         [scenario_info setObject:identifier forKey:kIdentifier];
         [scenario_info setObject:title forKey:kTitle];
         [scenario_info setObject:author forKey:kAuthor];
-        if (download_url) {
+        if (download_url && isWebScheme(download_url)) {
             [scenario_info setObject:download_url forKey:kDownloadURL];
         }
-        if (author_url) {
+        if (author_url && isWebScheme(author_url)) {
             [scenario_info setObject:author_url forKey:kAuthorURL];
         }
         [scenario_info setObject:version forKey:kVersion];
