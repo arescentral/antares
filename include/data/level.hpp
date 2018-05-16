@@ -168,7 +168,7 @@ struct Level {
     pn::string                              name;
     std::vector<Player>                     players;
     std::vector<StatusLine>                 status;
-    pn::string                              song;
+    sfz::optional<pn::string>               song;
     sfz::optional<Rect>                     starmap;
     secs                                    startTime = secs(0);
     sfz::optional<NamedHandle<const Level>> skip;

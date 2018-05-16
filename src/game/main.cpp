@@ -210,7 +210,9 @@ void MainPlay::become_front() {
 
             set_up_instruments();
 
-            sys.music.play(Music::IN_GAME, g.level->song);
+            if (g.level->song) {
+                sys.music.play(Music::IN_GAME, *g.level->song);
+            }
 
             stack()->push(new GamePlay(_replay, _input_source, _game_result));
         } break;

@@ -202,7 +202,7 @@ static std::vector<Level::StatusLine> optional_status_line_array(path_value x) {
             {"conditions", {&Level::conditions, optional_condition_array}},                      \
             {"briefings", {&Level::briefings, optional_briefing_array}},                         \
             {"starmap", {&Level::starmap, optional_rect}},                                       \
-            {"song", {&Level::song, required_string_copy}},                                      \
+            {"song", {&Level::song, optional_string_copy}},                                      \
             {"status", {&Level::status, optional_status_line_array}},                            \
             {"start_time", {&Level::startTime, optional_secs, secs(0)}},                         \
             {"skip", {&Level::skip, optional_level}},                                            \
