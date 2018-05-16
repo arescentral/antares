@@ -108,16 +108,23 @@ static NSURL* url(const char* utf8_bytes) { return [NSURL URLWithString:str(utf8
         AntaresScenarioListEntry* entry      = antares_scenario_list_at(list, i);
         NSString*                 title      = str(antares_scenario_list_entry_title(entry));
         NSString*                 identifier = str(antares_scenario_list_entry_identifier(entry));
-        NSDictionary*             scenario_info = [NSDictionary
-                dictionaryWithObjectsAndKeys:identifier, kIdentifier, title, kTitle,
-                                             url(antares_scenario_list_entry_download_url(entry)),
-                                             kDownloadURL,
-                                             str(antares_scenario_list_entry_author(entry)),
-                                             kAuthor,
-                                             url(antares_scenario_list_entry_author_url(entry)),
-                                             kAuthorURL,
-                                             str(antares_scenario_list_entry_version(entry)),
-                                             kVersion, NULL];
+        NSString*                 author     = str(antares_scenario_list_entry_author(entry));
+        NSString*                 version    = str(antares_scenario_list_entry_version(entry));
+        NSURL* download_url = url(antares_scenario_list_entry_download_url(entry));
+        NSURL* author_url   = url(antares_scenario_list_entry_author_url(entry));
+
+        NSMutableDictionary* scenario_info = [NSMutableDictionary dictionary];
+        [scenario_info setObject:identifier forKey:kIdentifier];
+        [scenario_info setObject:title forKey:kTitle];
+        [scenario_info setObject:author forKey:kAuthor];
+        if (download_url) {
+            [scenario_info setObject:download_url forKey:kDownloadURL];
+        }
+        if (author_url) {
+            [scenario_info setObject:author_url forKey:kAuthorURL];
+        }
+        [scenario_info setObject:version forKey:kVersion];
+
         [scenarios addObject:scenario_info];
     }
     antares_scenario_list_destroy(list);
