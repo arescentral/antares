@@ -63,10 +63,10 @@ struct ScenarioInfo {
     NamedHandle<const BaseObject> warpOutFlareID;
     NamedHandle<const BaseObject> playerBodyID;
     NamedHandle<const BaseObject> energyBlobID;
-    pn::string                    downloadURLString;
+    sfz::optional<pn::string>     downloadURLString;
     pn::string                    titleString;
     pn::string                    authorNameString;
-    pn::string                    authorURLString;
+    sfz::optional<pn::string>     authorURLString;
     sfz::optional<pn::string>     intro;
     sfz::optional<pn::string>     about;
 
