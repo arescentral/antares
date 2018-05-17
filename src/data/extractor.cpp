@@ -237,21 +237,12 @@ void check_version(const ScenarioInfo& archive, int64_t expected) {
     }
 }
 
-pn::string get_identifier(const ScenarioInfo& archive) {
-    if (!archive.identifier.empty()) {
-        return archive.identifier.copy();
-    }
-    sha1 sha;
-    sha.write(archive.titleString);
-    return sha.compute().hex();
-}
-
 void check_identifier(const ScenarioInfo& archive, pn::string_view expected) {
-    pn::string actual = get_identifier(archive);
-    if (expected != actual) {
-        throw std::runtime_error(
-                pn::format("mismatch in plugin identifier {0}", pn::dump(actual, pn::dump_short))
-                        .c_str());
+    if (archive.identifier != expected) {
+        throw std::runtime_error(pn::format(
+                                         "mismatch in plugin identifier {0}",
+                                         pn::dump(archive.identifier, pn::dump_short))
+                                         .c_str());
     }
 }
 
@@ -274,7 +265,7 @@ void DataExtractor::set_plugin_file(pn::string_view path) {
         ZipArchive   archive(path, 0);
         ScenarioInfo info = info_for_zip_archive(archive);
         check_version(info, kVersion);
-        found_scenario = get_identifier(info);
+        found_scenario = info.identifier.copy();
     }
 
     // Copy it to $DOWNLOADS/$IDENTIFIER.antaresplugin.  This is where

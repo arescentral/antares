@@ -134,8 +134,12 @@ static bool isWebScheme(NSURL* url) {
         NSString*                 identifier = str(antares_scenario_list_entry_identifier(entry));
         NSString*                 author     = str(antares_scenario_list_entry_author(entry));
         NSString*                 version    = str(antares_scenario_list_entry_version(entry));
-        NSURL* download_url = url(antares_scenario_list_entry_download_url(entry));
-        NSURL* author_url   = url(antares_scenario_list_entry_author_url(entry));
+        NSURL*                    download_url = antares_scenario_list_entry_download_url(entry)
+                                      ? url(antares_scenario_list_entry_download_url(entry))
+                                      : nil;
+        NSURL* author_url = antares_scenario_list_entry_author_url(entry)
+                                    ? url(antares_scenario_list_entry_author_url(entry))
+                                    : nil;
 
         NSMutableDictionary* scenario_info = [NSMutableDictionary dictionary];
         [scenario_info setObject:identifier forKey:kIdentifier];

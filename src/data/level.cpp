@@ -72,15 +72,25 @@ static sfz::optional<pn::string_view> optional_identifier(path_value x) {
     return id;
 }
 
+static ScenarioInfo fill_identifier(ScenarioInfo info) {
+    if (!info.identifier.empty()) {
+        return info;
+    }
+    sfz::sha1 sha;
+    sha.write(info.title);
+    info.identifier = sha.compute().hex();
+    return info;
+}
+
 ScenarioInfo scenario_info(pn::value_cref x0) {
     path_value x{x0};
-    return required_struct<ScenarioInfo>(
-            x, {{"title", {&ScenarioInfo::titleString, required_string_copy}},
+    return fill_identifier(required_struct<ScenarioInfo>(
+            x, {{"title", {&ScenarioInfo::title, required_string_copy}},
                 {"identifier", {&ScenarioInfo::identifier, optional_identifier, ""}},
                 {"format", {&ScenarioInfo::format, required_int}},
-                {"download_url", {&ScenarioInfo::downloadURLString, optional_string_copy}},
-                {"author", {&ScenarioInfo::authorNameString, required_string_copy}},
-                {"author_url", {&ScenarioInfo::authorURLString, optional_string_copy}},
+                {"download_url", {&ScenarioInfo::download_url, optional_string_copy}},
+                {"author", {&ScenarioInfo::author, required_string_copy}},
+                {"author_url", {&ScenarioInfo::author_url, optional_string_copy}},
                 {"version", {&ScenarioInfo::version, required_string_copy}},
                 {"warp_in_flare", {&ScenarioInfo::warpInFlareID, required_base}},
                 {"warp_out_flare", {&ScenarioInfo::warpOutFlareID, required_base}},
@@ -89,7 +99,7 @@ ScenarioInfo scenario_info(pn::value_cref x0) {
                 {"intro", {&ScenarioInfo::intro, optional_string_copy}},
                 {"about", {&ScenarioInfo::about, optional_string_copy}},
                 {"splash", {&ScenarioInfo::splash_screen, required_string_copy}},
-                {"starmap", {&ScenarioInfo::starmap, required_string_copy}}});
+                {"starmap", {&ScenarioInfo::starmap, required_string_copy}}}));
 }
 
 static Level::Player required_player(path_value x, LevelType level_type) {

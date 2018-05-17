@@ -40,24 +40,16 @@ struct ScopedGlob {
 }  // namespace
 
 ScenarioList::ScenarioList() {
-    _scenarios.emplace_back();
-    Entry& factory_scenario     = _scenarios.back();
-    factory_scenario.identifier = kFactoryScenarioIdentifier;
-
     const pn::string factory_info_path = pn::format("{0}/info.pn", application_path());
     try {
-        pn::value  info;
+        pn::value  x;
         pn_error_t e;
-        if (!pn::parse(pn::open(factory_info_path, "r").check(), info, &e)) {
+        if (!pn::parse(pn::open(factory_info_path, "r").check(), x, &e)) {
             throw std::runtime_error(
                     pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
         }
-        pn::map_cref m                = info.as_map();
-        factory_scenario.title        = m.get("title").as_string().copy();
-        factory_scenario.download_url = m.get("download_url").as_string().copy();
-        factory_scenario.author       = m.get("author").as_string().copy();
-        factory_scenario.author_url   = m.get("author_url").as_string().copy();
-        factory_scenario.version      = m.get("version").as_string().copy();
+        _scenarios.emplace_back(scenario_info(x));
+        _scenarios.back().identifier = kFactoryScenarioIdentifier;
     } catch (...) {
         std::throw_with_nested(std::runtime_error(factory_info_path.copy().c_str()));
     }
@@ -72,27 +64,19 @@ ScenarioList::ScenarioList() {
         const pn::string path = g.data.gl_pathv[i];
         pn::string_view  identifier =
                 path.substr(prefix_len, path.size() - prefix_len - suffix_len);
-        if (identifier == _scenarios[0].identifier) {
+        if (identifier == kFactoryScenarioIdentifier) {
             continue;
         }
 
         try {
             sfz::mapped_file file(path);
             pn::file         in = file.data().open();
-            pn::value        info;
+            pn::value        x;
             pn_error_t       e;
-            if (!pn::parse(in, info, &e)) {
+            if (!pn::parse(in, x, &e)) {
                 continue;
             }
-            _scenarios.emplace_back();
-            Entry& entry       = _scenarios.back();
-            entry.identifier   = identifier.copy();
-            pn::map_cref m     = info.as_map();
-            entry.title        = m.get("title").as_string().copy();
-            entry.download_url = m.get("download_url").as_string().copy();
-            entry.author       = m.get("author").as_string().copy();
-            entry.author_url   = m.get("author_url").as_string().copy();
-            entry.version      = m.get("version").as_string().copy();
+            _scenarios.emplace_back(scenario_info(x));
         } catch (...) {
             std::throw_with_nested(std::runtime_error(path.copy().c_str()));
         }
@@ -101,6 +85,6 @@ ScenarioList::ScenarioList() {
 
 size_t ScenarioList::size() const { return _scenarios.size(); }
 
-const ScenarioList::Entry& ScenarioList::at(size_t index) const { return _scenarios.at(index); }
+const ScenarioInfo& ScenarioList::at(size_t index) const { return _scenarios.at(index); }
 
 }  // namespace antares

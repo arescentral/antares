@@ -43,6 +43,13 @@ void usage(pn::file_view out, pn::string_view progname, int retcode) {
     exit(retcode);
 }
 
+pn::value maybe_string(const sfz::optional<pn::string>& s) {
+    if (s.has_value()) {
+        return s->copy();
+    }
+    return nullptr;
+}
+
 void main(int argc, char* const* argv) {
     pn::string_view progname = sfz::path::basename(argv[0]);
 
@@ -75,12 +82,16 @@ void main(int argc, char* const* argv) {
     bool         found_at_least_one = false;
     ScenarioList list;
     for (size_t i = 0; i < list.size(); ++i) {
-        pn::format(stderr, "{0}:\n", list.at(i).identifier);
-        pn::format(stderr, "    title: {0}\n", list.at(i).title);
-        pn::format(stderr, "    download url: {0}\n", list.at(i).download_url);
-        pn::format(stderr, "    author: {0}\n", list.at(i).author);
-        pn::format(stderr, "    author url: {0}\n", list.at(i).author_url);
-        pn::format(stderr, "    version: {0}\n", list.at(i).version);
+        const auto& s = list.at(i);
+        pn::dump(
+                stdout, pn::map{{s.identifier.copy(),
+                                 pn::map{
+                                         {"title", s.title.copy()},
+                                         {"download_url", maybe_string(s.download_url)},
+                                         {"author", s.author.copy()},
+                                         {"author_url", maybe_string(s.author_url)},
+                                         {"version", s.version.copy()},
+                                 }}});
         found_at_least_one = true;
     }
     if (!found_at_least_one) {
