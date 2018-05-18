@@ -21,6 +21,7 @@
 #include <sfz/sfz.hpp>
 
 #include "data/briefing.hpp"
+#include "data/condition.hpp"
 #include "data/field.hpp"
 #include "data/initial.hpp"
 #include "data/plugin.hpp"
@@ -30,8 +31,6 @@
 namespace macroman = sfz::macroman;
 
 namespace antares {
-
-static std::vector<std::unique_ptr<Level::Condition>> optional_condition_array(path_value x);
 
 const Level* Level::get(int number) { return plug.chapters[number]; }
 
@@ -209,7 +208,8 @@ static std::vector<Level::StatusLine> optional_status_line_array(path_value x) {
             {"chapter", {&Level::chapter, optional_int}},                                        \
             {"title", {&Level::name, required_string_copy}},                                     \
             {"initials", {&Level::initials, optional_array<Initial, initial>}},                  \
-            {"conditions", {&Level::conditions, optional_condition_array}},                      \
+            {"conditions",                                                                       \
+             {&Level::conditions, optional_array<std::unique_ptr<Condition>, condition>}},       \
             {"briefings", {&Level::briefings, optional_array<Briefing, briefing>}},              \
             {"starmap", {&Level::starmap, optional_rect}},                                       \
             {"song", {&Level::song, optional_string_copy}},                                      \
@@ -259,168 +259,6 @@ Level level(pn::value_cref x0) {
         case LevelType::DEMO: return demo_level(x);
         case LevelType::SOLO: return solo_level(x);
         case LevelType::NET: return net_level(x);
-    }
-}
-
-static std::unique_ptr<Level::Condition> autopilot_condition(path_value x) {
-    std::unique_ptr<Level::AutopilotCondition> c(new Level::AutopilotCondition);
-    c->value = required_bool(x.get("value"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> building_condition(path_value x) {
-    std::unique_ptr<Level::BuildingCondition> c(new Level::BuildingCondition);
-    c->value = required_bool(x.get("value"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> computer_condition(path_value x) {
-    std::unique_ptr<Level::ComputerCondition> c(new Level::ComputerCondition);
-    c->screen = required_screen(x.get("screen"));
-    c->line   = optional_int(x.get("line")).value_or(-1);
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> counter_condition(path_value x) {
-    std::unique_ptr<Level::CounterCondition> c(new Level::CounterCondition);
-    c->player  = required_admiral(x.get("player"));
-    c->counter = required_int(x.get("counter"));
-    c->value   = required_int(x.get("value"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> destroyed_condition(path_value x) {
-    std::unique_ptr<Level::DestroyedCondition> c(new Level::DestroyedCondition);
-    c->initial = required_initial(x.get("initial"));
-    c->value   = required_bool(x.get("value"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> distance_condition(path_value x) {
-    std::unique_ptr<Level::DistanceCondition> c(new Level::DistanceCondition);
-    c->value = required_int(x.get("value"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> health_condition(path_value x) {
-    std::unique_ptr<Level::HealthCondition> c(new Level::HealthCondition);
-    c->value = required_double(x.get("value"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> message_condition(path_value x) {
-    std::unique_ptr<Level::MessageCondition> c(new Level::MessageCondition);
-    c->id   = required_int(x.get("id"));
-    c->page = required_int(x.get("page"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> ordered_condition(path_value x) {
-    return std::unique_ptr<Level::OrderedCondition>(new Level::OrderedCondition);
-}
-
-static std::unique_ptr<Level::Condition> owner_condition(path_value x) {
-    std::unique_ptr<Level::OwnerCondition> c(new Level::OwnerCondition);
-    c->player = required_admiral(x.get("player"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> ships_condition(path_value x) {
-    std::unique_ptr<Level::ShipsCondition> c(new Level::ShipsCondition);
-    c->player = required_admiral(x.get("player"));
-    c->value  = required_int(x.get("value"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> speed_condition(path_value x) {
-    std::unique_ptr<Level::SpeedCondition> c(new Level::SpeedCondition);
-    c->value = required_fixed(x.get("value"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> subject_condition(path_value x) {
-    std::unique_ptr<Level::SubjectCondition> c(new Level::SubjectCondition);
-    c->value = required_subject_value(x.get("value"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> time_condition(path_value x) {
-    std::unique_ptr<Level::TimeCondition> c(new Level::TimeCondition);
-    c->duration          = required_ticks(x.get("duration"));
-    c->legacy_start_time = optional_bool(x.get("legacy_start_time")).value_or(false);
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> zoom_condition(path_value x) {
-    std::unique_ptr<Level::ZoomCondition> c(new Level::ZoomCondition);
-    c->value = required_zoom(x.get("value"));
-    return std::move(c);
-}
-
-static std::unique_ptr<Level::Condition> condition(path_value x) {
-    if (!x.value().is_map()) {
-        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
-    }
-
-    pn::string_view                   type = required_string(x.get("type"));
-    std::unique_ptr<Level::Condition> c;
-    if (type == "autopilot") {
-        c = autopilot_condition(x);
-    } else if (type == "building") {
-        c = building_condition(x);
-    } else if (type == "computer") {
-        c = computer_condition(x);
-    } else if (type == "counter") {
-        c = counter_condition(x);
-    } else if (type == "destroyed") {
-        c = destroyed_condition(x);
-    } else if (type == "distance") {
-        c = distance_condition(x);
-    } else if (type == "false") {
-        return std::unique_ptr<Level::Condition>(new Level::FalseCondition);
-    } else if (type == "health") {
-        c = health_condition(x);
-    } else if (type == "message") {
-        c = message_condition(x);
-    } else if (type == "ordered") {
-        c = ordered_condition(x);
-    } else if (type == "owner") {
-        c = owner_condition(x);
-    } else if (type == "ships") {
-        c = ships_condition(x);
-    } else if (type == "speed") {
-        c = speed_condition(x);
-    } else if (type == "subject") {
-        c = subject_condition(x);
-    } else if (type == "time") {
-        c = time_condition(x);
-    } else if (type == "zoom") {
-        c = zoom_condition(x);
-    } else {
-        throw std::runtime_error(pn::format("unknown type: {0}", type).c_str());
-    }
-
-    c->op                = required_condition_op(x.get("op"));
-    c->persistent        = optional_bool(x.get("persistent")).value_or(false);
-    c->initially_enabled = !optional_bool(x.get("initially_disabled")).value_or(false);
-    c->subject           = optional_initial(x.get("subject")).value_or(Initial::none());
-    c->object            = optional_initial(x.get("object")).value_or(Initial::none());
-    c->action            = required_action_array(x.get("action"));
-
-    return c;
-}
-
-static std::vector<std::unique_ptr<Level::Condition>> optional_condition_array(path_value x) {
-    if (x.value().is_null()) {
-        return {};
-    } else if (x.value().is_array()) {
-        std::vector<std::unique_ptr<Level::Condition>> v;
-        for (int i = 0; i < x.value().as_array().size(); ++i) {
-            v.push_back(condition(x.get(i)));
-        }
-        return v;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
     }
 }
 

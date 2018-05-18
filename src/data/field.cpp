@@ -528,10 +528,10 @@ Range<ticks> required_ticks_range(path_value x) {
     }
 }
 
-HandleList<const Level_Condition> optional_condition_range(path_value x) {
+HandleList<const Condition> optional_condition_range(path_value x) {
     auto range = optional_int_range(x);
     if (range.has_value()) {
-        return HandleList<const Level::Condition>(range->begin, range->end);
+        return HandleList<const Condition>(range->begin, range->end);
     } else {
         return {-1, -1};
     }

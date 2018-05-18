@@ -21,6 +21,7 @@
 #include <set>
 #include <sfz/sfz.hpp>
 
+#include "data/condition.hpp"
 #include "data/plugin.hpp"
 #include "data/races.hpp"
 #include "drawing/pix-table.hpp"
@@ -275,7 +276,7 @@ static void load_initial(Handle<const Initial> initial, std::bitset<16> all_colo
     }
 }
 
-static void load_condition(Handle<const Level::Condition> condition, std::bitset<16> all_colors) {
+static void load_condition(Handle<const Condition> condition, std::bitset<16> all_colors) {
     for (const auto& action : condition->action) {
         AddActionMedia(*action, all_colors);
     }
@@ -317,7 +318,7 @@ void construct_level(LoadState* state) {
     } else if (step == Initial::all().size()) {
         // add media for all condition actions
         step -= Initial::all().size();
-        for (auto c : Level::Condition::all()) {
+        for (auto c : Condition::all()) {
             load_condition(c, all_colors);
         }
         create_initial(Handle<const Initial>(step));
