@@ -170,7 +170,7 @@ class BaseObject {
     pn::string                short_name;
     sfz::optional<pn::string> portrait;
 
-    uint32_t attributes;  // initial attributes (see flags)
+    uint32_t attributes = 0;  // initial attributes (see flags)
     int32_t  price;
 
     Fixed    maxVelocity;      // maximum speed
@@ -186,6 +186,7 @@ class BaseObject {
 
     Range<Fixed>   initial_velocity;   // initial random velocity (usually relative)
     Range<int64_t> initial_direction;  // initial random direction (usually relative)
+    bool           autotarget = false;
 
     int32_t occupy_count;  // size of occupying force
 
@@ -301,13 +302,17 @@ class BaseObject {
 
     // weapon: weapon objects have no physical form, and can only be activated
     struct Device {
-        uint32_t usage;         // when is this used?
-        int32_t  energyCost;    // cost to fire
-        ticks    fireTime;      // time between shots
-        int32_t  ammo;          // initial ammo
-        int32_t  range;         // range (= age * max velocity)
-        Fixed    inverseSpeed;  // for AI = 1/max velocity
-        int32_t  restockCost;   // energy to make new ammo
+        uint32_t usage;  // when is this used?
+        enum Direction {
+            FORE,  // should use when foe is in front of bearer
+            OMNI,  // should use when foe is anywhere near bearer
+        } direction = Direction::FORE;
+        int32_t energyCost;    // cost to fire
+        ticks   fireTime;      // time between shots
+        int32_t ammo;          // initial ammo
+        int32_t range;         // range (= age * max velocity)
+        Fixed   inverseSpeed;  // for AI = 1/max velocity
+        int32_t restockCost;   // energy to make new ammo
     };
     sfz::optional<Device> device;
 

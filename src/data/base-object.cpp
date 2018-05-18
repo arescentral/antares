@@ -140,11 +140,21 @@ static uint32_t optional_usage(path_value x) {
     }
 }
 
+static BaseObject::Device::Direction required_device_direction(path_value x) {
+    if (x.value() == pn::value{"fore"}) {
+        return BaseObject::Device::Direction::FORE;
+    } else if (x.value() == pn::value{"omni"}) {
+        return BaseObject::Device::Direction::OMNI;
+    }
+    throw std::runtime_error(pn::format("{0}: must be \"fore\" or \"omni\"", x.path()).c_str());
+}
+
 static sfz::optional<BaseObject::Device> optional_device_frame(path_value x) {
     using Device = BaseObject::Device;
     return optional_struct<Device>(
             x, {
                        {"usage", {&Device::usage, optional_usage}},
+                       {"direction", {&Device::direction, required_device_direction}},
                        {"energy_cost", {&Device::energyCost, required_int32}},
                        {"fire_time", {&Device::fireTime, required_ticks}},
                        {"ammo", {&Device::ammo, required_int32}},
@@ -199,6 +209,10 @@ static BaseObject set_attributes(BaseObject o) {
         }
     } else if (o.ray.has_value() || o.bolt.has_value()) {
         o.attributes |= kIsVector;
+    } else if (o.device.has_value()) {
+        if (o.device->direction == BaseObject::Device::Direction::OMNI) {
+            o.attributes |= kAutoTarget;
+        }
     }
 
     if (o.target.base) {
@@ -218,6 +232,9 @@ static BaseObject set_attributes(BaseObject o) {
     }
     if (o.target.lock) {
         o.attributes |= kStaticDestination;
+    }
+    if (o.autotarget) {
+        o.attributes |= kAutoTarget;
     }
 
     if (o.turn_rate > Fixed::zero()) {
@@ -497,8 +514,6 @@ BaseObject base_object(pn::value_cref x0) {
     return set_attributes(required_struct<BaseObject>(
             path_value{x0},
             {
-                    {"attributes", {&BaseObject::attributes, optional_object_attributes}},
-
                     {"long_name", {&BaseObject::name, required_string_copy}},
                     {"short_name", {&BaseObject::short_name, required_string_copy}},
 
@@ -526,6 +541,7 @@ BaseObject base_object(pn::value_cref x0) {
 
                     {"initial_velocity", {&BaseObject::initial_velocity, required_fixed_range}},
                     {"initial_direction", {&BaseObject::initial_direction, required_int_range}},
+                    {"autotarget", {&BaseObject::autotarget, required_bool}},
 
                     {"destroy", {&BaseObject::destroy, optional_destroy}},
                     {"expire", {&BaseObject::expire, optional_expire}},
