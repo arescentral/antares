@@ -48,59 +48,6 @@ static sfz::optional<int32_t> optional_int32(path_value x) {
     return (i.has_value()) ? sfz::make_optional<int32_t>(*i) : sfz::nullopt;
 }
 
-static bool valid_sha1(pn::string_view s) {
-    if (s.size() != 40) {
-        return false;
-    }
-    for (pn::rune r : s) {
-        if (!(((pn::rune{'0'} <= r) && (r <= pn::rune{'9'})) ||
-              ((pn::rune{'a'} <= r) && (r <= pn::rune{'f'})))) {
-            return false;
-        }
-    }
-    return true;
-}
-
-static sfz::optional<pn::string_view> optional_identifier(path_value x) {
-    auto id = optional_string(x);
-    if (id.has_value() && !valid_sha1(*id)) {
-        throw std::runtime_error(
-                pn::format("{0}invalid identifier (must be lowercase sha1 digest)", x.prefix())
-                        .c_str());
-    }
-    return id;
-}
-
-static ScenarioInfo fill_identifier(ScenarioInfo info) {
-    if (!info.identifier.empty()) {
-        return info;
-    }
-    sfz::sha1 sha;
-    sha.write(info.title);
-    info.identifier = sha.compute().hex();
-    return info;
-}
-
-ScenarioInfo scenario_info(pn::value_cref x0) {
-    path_value x{x0};
-    return fill_identifier(required_struct<ScenarioInfo>(
-            x, {{"title", {&ScenarioInfo::title, required_string_copy}},
-                {"identifier", {&ScenarioInfo::identifier, optional_identifier, ""}},
-                {"format", {&ScenarioInfo::format, required_int}},
-                {"download_url", {&ScenarioInfo::download_url, optional_string_copy}},
-                {"author", {&ScenarioInfo::author, required_string_copy}},
-                {"author_url", {&ScenarioInfo::author_url, optional_string_copy}},
-                {"version", {&ScenarioInfo::version, required_string_copy}},
-                {"warp_in_flare", {&ScenarioInfo::warpInFlareID, required_base}},
-                {"warp_out_flare", {&ScenarioInfo::warpOutFlareID, required_base}},
-                {"player_body", {&ScenarioInfo::playerBodyID, required_base}},
-                {"energy_blob", {&ScenarioInfo::energyBlobID, required_base}},
-                {"intro", {&ScenarioInfo::intro, optional_string_copy}},
-                {"about", {&ScenarioInfo::about, optional_string_copy}},
-                {"splash", {&ScenarioInfo::splash_screen, required_string_copy}},
-                {"starmap", {&ScenarioInfo::starmap, required_string_copy}}}));
-}
-
 static Level::Player required_player(path_value x, LevelType level_type) {
     switch (level_type) {
         case LevelType::DEMO:

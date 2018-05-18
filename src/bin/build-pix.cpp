@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
+#include "data/level.hpp"
 #include "data/plugin.hpp"
 #include "data/resource.hpp"
 #include "drawing/build-pix.hpp"

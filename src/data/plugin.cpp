@@ -27,6 +27,7 @@
 #include "data/base-object.hpp"
 #include "data/condition.hpp"
 #include "data/initial.hpp"
+#include "data/level.hpp"
 #include "data/races.hpp"
 #include "data/resource.hpp"
 #include "game/sys.hpp"
@@ -95,7 +96,7 @@ void PluginInit() {
             throw std::runtime_error(
                     pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
         }
-        plug.info = scenario_info(x);
+        plug.info = info(path_value{x});
         if (plug.info.format != kPluginFormat) {
             throw std::runtime_error(
                     pn::format("unknown plugin format {0}", plug.info.format).c_str());

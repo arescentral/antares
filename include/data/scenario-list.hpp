@@ -22,7 +22,7 @@
 #include <pn/string>
 #include <vector>
 
-#include "data/level.hpp"
+#include "data/info.hpp"
 
 namespace antares {
 
@@ -32,11 +32,11 @@ class ScenarioList {
     ScenarioList(const ScenarioList&) = delete;
     ScenarioList& operator=(const ScenarioList&) = delete;
 
-    size_t              size() const;
-    const ScenarioInfo& at(size_t index) const;
+    size_t      size() const;
+    const Info& at(size_t index) const;
 
   private:
-    std::vector<ScenarioInfo> _scenarios;
+    std::vector<Info> _scenarios;
 };
 
 }  // namespace antares

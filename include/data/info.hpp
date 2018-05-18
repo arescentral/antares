@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2016-2017 The Antares Authors
+// Copyright (C) 2008-2018 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,39 +16,42 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_DATA_PLUGIN_HPP_
-#define ANTARES_DATA_PLUGIN_HPP_
+#ifndef ANTARES_DATA_INFO_HPP_
+#define ANTARES_DATA_INFO_HPP_
 
-#include <map>
-#include <vector>
+#include <pn/string>
+#include <sfz/sfz.hpp>
 
 #include "data/handle.hpp"
-#include "data/info.hpp"
-#include "video/driver.hpp"
 
 namespace antares {
 
 class BaseObject;
-struct Level;
-struct Race;
+class path_value;
 
-struct ScenarioGlobals {
-    Info                             info;
-    std::map<int, const Level*>      chapters;
-    std::map<pn::string, Level>      levels;
-    std::map<pn::string, BaseObject> objects;
-    std::map<pn::string, Race>       races;
-    Texture                          splash;
-    Texture                          starmap;
+struct Info {
+    pn::string identifier;
+    int64_t    format;
+
+    NamedHandle<const BaseObject> warpInFlareID;
+    NamedHandle<const BaseObject> warpOutFlareID;
+    NamedHandle<const BaseObject> playerBodyID;
+    NamedHandle<const BaseObject> energyBlobID;
+    sfz::optional<pn::string>     download_url;
+    pn::string                    title;
+    pn::string                    author;
+    sfz::optional<pn::string>     author_url;
+    sfz::optional<pn::string>     intro;
+    sfz::optional<pn::string>     about;
+
+    pn::string splash_screen;
+    pn::string starmap;
+
+    pn::string version;
 };
 
-extern ScenarioGlobals plug;
-
-void PluginInit();
-
-void load_race(const NamedHandle<const Race>& r);
-void load_object(const NamedHandle<const BaseObject>& o);
+Info info(path_value x);
 
 }  // namespace antares
 
-#endif  // ANTARES_DATA_PLUGIN_HPP_
+#endif  // ANTARES_DATA_INFO_HPP_

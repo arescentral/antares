@@ -48,7 +48,7 @@ ScenarioList::ScenarioList() {
             throw std::runtime_error(
                     pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
         }
-        _scenarios.emplace_back(scenario_info(x));
+        _scenarios.emplace_back(info(path_value{x}));
         _scenarios.back().identifier = kFactoryScenarioIdentifier;
     } catch (...) {
         std::throw_with_nested(std::runtime_error(factory_info_path.copy().c_str()));
@@ -76,7 +76,7 @@ ScenarioList::ScenarioList() {
             if (!pn::parse(in, x, &e)) {
                 continue;
             }
-            _scenarios.emplace_back(scenario_info(x));
+            _scenarios.emplace_back(info(path_value{x}));
         } catch (...) {
             std::throw_with_nested(std::runtime_error(path.copy().c_str()));
         }
@@ -85,6 +85,6 @@ ScenarioList::ScenarioList() {
 
 size_t ScenarioList::size() const { return _scenarios.size(); }
 
-const ScenarioInfo& ScenarioList::at(size_t index) const { return _scenarios.at(index); }
+const Info& ScenarioList::at(size_t index) const { return _scenarios.at(index); }
 
 }  // namespace antares

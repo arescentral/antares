@@ -30,7 +30,7 @@ static sfz::optional<pn::string> copy(const sfz::optional<pn::string>& s) {
 }
 
 struct AntaresScenarioListEntry {
-    AntaresScenarioListEntry(const antares::ScenarioInfo& entry)
+    AntaresScenarioListEntry(const antares::Info& entry)
             : identifier(entry.identifier.copy()),
               title(entry.title.copy()),
               download_url(copy(entry.download_url)),

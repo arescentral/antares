@@ -48,33 +48,6 @@ const int32_t kLevelAngleShift = 8;
 
 const int32_t kLevelNoOwner = -1;
 
-// condition flags
-const int32_t kTrueOnlyOnce  = 0x00000001;
-const int32_t kInitiallyTrue = 0x00000002;
-const int32_t kHasBeenTrue   = 0x00000004;
-
-struct ScenarioInfo {
-    pn::string identifier;
-    int64_t    format;
-
-    NamedHandle<const BaseObject> warpInFlareID;
-    NamedHandle<const BaseObject> warpOutFlareID;
-    NamedHandle<const BaseObject> playerBodyID;
-    NamedHandle<const BaseObject> energyBlobID;
-    sfz::optional<pn::string>     download_url;
-    pn::string                    title;
-    pn::string                    author;
-    sfz::optional<pn::string>     author_url;
-    sfz::optional<pn::string>     intro;
-    sfz::optional<pn::string>     about;
-
-    pn::string splash_screen;
-    pn::string starmap;
-
-    pn::string version;
-};
-ScenarioInfo scenario_info(pn::value_cref x0);
-
 struct Level {
     LevelType type = LevelType::DEMO;
 
