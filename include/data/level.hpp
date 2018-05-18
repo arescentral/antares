@@ -24,6 +24,7 @@
 
 #include "data/action.hpp"
 #include "data/base-object.hpp"
+#include "data/briefing.hpp"
 #include "data/enums.hpp"
 #include "data/handle.hpp"
 #include "math/fixed.hpp"
@@ -35,7 +36,6 @@ namespace antares {
 
 struct LevelName;
 class BaseObject;
-struct Level_Briefing;
 struct Level_Condition;
 struct Level_Initial;
 struct Race;
@@ -107,8 +107,6 @@ enum conditionType {
 
 struct Level {
     using Initial = Level_Initial;
-
-    using Briefing = Level_Briefing;
 
     using Condition = Level_Condition;
     struct ConditionBase;

@@ -20,6 +20,7 @@
 
 #include <sfz/sfz.hpp>
 
+#include "data/briefing.hpp"
 #include "data/field.hpp"
 #include "data/plugin.hpp"
 #include "data/races.hpp"
@@ -31,7 +32,6 @@ namespace antares {
 
 static std::vector<Level::Initial>                    optional_initial_array(path_value x);
 static std::vector<std::unique_ptr<Level::Condition>> optional_condition_array(path_value x);
-static std::vector<Level::Briefing>                   optional_briefing_array(path_value x);
 
 const Level* Level::get(int number) { return plug.chapters[number]; }
 
@@ -210,7 +210,7 @@ static std::vector<Level::StatusLine> optional_status_line_array(path_value x) {
             {"title", {&Level::name, required_string_copy}},                                     \
             {"initials", {&Level::initials, optional_initial_array}},                            \
             {"conditions", {&Level::conditions, optional_condition_array}},                      \
-            {"briefings", {&Level::briefings, optional_briefing_array}},                         \
+            {"briefings", {&Level::briefings, optional_array<Briefing, briefing>}},              \
             {"starmap", {&Level::starmap, optional_rect}},                                       \
             {"song", {&Level::song, optional_string_copy}},                                      \
             {"status", {&Level::status, optional_status_line_array}},                            \
@@ -417,30 +417,6 @@ static std::vector<std::unique_ptr<Level::Condition>> optional_condition_array(p
         std::vector<std::unique_ptr<Level::Condition>> v;
         for (int i = 0; i < x.value().as_array().size(); ++i) {
             v.push_back(condition(x.get(i)));
-        }
-        return v;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
-    }
-}
-
-static Level::Briefing briefing(path_value x) {
-    return required_struct<Level::Briefing>(
-            x, {
-                       {"object",
-                        {&Level::Briefing::object, optional_initial, Level::Initial::none()}},
-                       {"title", {&Level::Briefing::title, required_string_copy}},
-                       {"content", {&Level::Briefing::content, required_string_copy}},
-               });
-}
-
-static std::vector<Level::Briefing> optional_briefing_array(path_value x) {
-    if (x.value().is_null()) {
-        return {};
-    } else if (x.value().is_array()) {
-        std::vector<Level::Briefing> v;
-        for (int i = 0; i < x.value().as_array().size(); ++i) {
-            v.push_back(briefing(x.get(i)));
         }
         return v;
     } else {

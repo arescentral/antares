@@ -423,10 +423,10 @@ void BriefPoint_Data_Get(
         int32_t whichPoint, const Level& level, pn::string_ref header, pn::string_ref content,
         Rect* hiliteBounds, coordPointType* corner, int32_t scale, int32_t minSectorSize,
         int32_t maxSize, Rect* bounds) {
-    Point                  where;
-    Rect                   spriteRect;
-    int32_t                thisScale;
-    const Level::Briefing* brief = &level.briefings[whichPoint];
+    Point           where;
+    Rect            spriteRect;
+    int32_t         thisScale;
+    const Briefing* brief = &level.briefings[whichPoint];
 
 #pragma unused(minSectorSize)
     hiliteBounds->right = hiliteBounds->left = 0;
