@@ -25,7 +25,7 @@
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
 #include "data/base-object.hpp"
-#include "data/string-list.hpp"
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
 #include "game/admiral.hpp"
@@ -90,36 +90,34 @@ static ANTARES_GLOBAL HotKeyState gHotKeyState = HOT_KEY_UP;
 static ANTARES_GLOBAL wall_time gHotKeyTime;
 static ANTARES_GLOBAL int       gHotKeyNum;
 
-static ANTARES_GLOBAL ZoomType gPreviousZoomMode;
+static ANTARES_GLOBAL Zoom gPreviousZoomMode;
 
-pn::string hot_key_suffix(Handle<SpaceObject> space_object) {
+pn::string name_with_hot_key_suffix(Handle<SpaceObject> space_object) {
     int h = HotKey_GetFromObject(space_object);
     if (h < 0) {
-        return "";
+        return space_object->name().copy();
     }
 
     int keyNum = sys.prefs->key(h + kFirstHotKeyNum);
     if (keyNum < 0) {
-        return "";
+        return space_object->name().copy();
     }
 
-    StringList      strings(KEY_LONG_NAMES);
-    pn::string_view key_name = strings.at(keyNum - 1);
-    return pn::format(" < {0} >", key_name);
+    return pn::format("{0} < {1} >", space_object->name(), sys.key_long_names.at(keyNum - 1));
 };
 
 }  // namespace
 
 void ResetPlayerShip(Handle<SpaceObject> which) {
     g.ship          = which;
-    g.control_label = Label::add(0, 0, 0, 10, SpaceObject::none(), true, YELLOW);
-    g.target_label  = Label::add(0, 0, 0, -20, SpaceObject::none(), true, SKY_BLUE);
-    g.send_label    = Label::add(200, 200, 0, 30, SpaceObject::none(), false, GREEN);
+    g.control_label = Label::add(0, 0, 0, 10, SpaceObject::none(), true, Hue::YELLOW);
+    g.target_label  = Label::add(0, 0, 0, -20, SpaceObject::none(), true, Hue::SKY_BLUE);
+    g.send_label    = Label::add(200, 200, 0, 30, SpaceObject::none(), false, Hue::GREEN);
     globals()->starfield.reset(g.ship);
     globals()->next_klaxon = game_ticks();
     g.key_mask             = 0;
-    g.zoom                 = kNearestFoeZoom;
-    gPreviousZoomMode      = kNearestFoeZoom;
+    g.zoom                 = Zoom::FOE;
+    gPreviousZoomMode      = Zoom::FOE;
 
     for (int h = 0; h < kHotKeyNum; h++) {
         globals()->hotKey[h].object   = SpaceObject::none();
@@ -157,21 +155,19 @@ static int key_num(uint32_t key) {
     return -1;
 }
 
-static void zoom_to(ZoomType zoom) {
+static void zoom_to(Zoom zoom) {
     if (g.zoom != zoom) {
         g.zoom = zoom;
         sys.sound.click();
-        StringList      strings(kMessageStringID);
-        pn::string_view string = strings.at(g.zoom + kZoomStringOffset - 1);
-        Messages::set_status(string, kStatusLabelColor);
+        Messages::zoom(g.zoom);
     }
 }
 
-static void zoom_shortcut(ZoomType zoom) {
+static void zoom_shortcut(Zoom zoom) {
     if (g.key_mask & kShortcutZoomMask) {
         return;
     }
-    ZoomType previous = gPreviousZoomMode;
+    Zoom previous     = gPreviousZoomMode;
     gPreviousZoomMode = g.zoom;
     if (g.zoom == zoom) {
         zoom_to(previous);
@@ -184,8 +180,8 @@ static void zoom_in() {
     if (g.key_mask & kZoomInKey) {
         return;
     }
-    if (g.zoom > kTimesTwoZoom) {
-        zoom_to(static_cast<ZoomType>(g.zoom - 1));
+    if (g.zoom > Zoom::DOUBLE) {
+        zoom_to(static_cast<Zoom>(static_cast<int>(g.zoom) - 1));
     }
 }
 
@@ -193,8 +189,8 @@ static void zoom_out() {
     if (g.key_mask & kZoomOutKey) {
         return;
     }
-    if (g.zoom < kSmallestZoom) {
-        zoom_to(static_cast<ZoomType>(g.zoom + 1));
+    if (g.zoom < Zoom::ALL) {
+        zoom_to(static_cast<Zoom>(static_cast<int>(g.zoom) + 1));
     }
 }
 
@@ -264,7 +260,7 @@ static void target_hostile(Handle<SpaceObject> origin_ship, int32_t direction) {
 }
 
 static void select_base(Handle<SpaceObject> origin_ship, int32_t direction) {
-    pick_object(origin_ship, direction, false, kCanAcceptBuild, 0, g.admiral->control(), FRIENDLY);
+    pick_object(origin_ship, direction, false, kIsDestination, 0, g.admiral->control(), FRIENDLY);
 }
 
 static void target_base(Handle<SpaceObject> origin_ship, int32_t direction) {
@@ -286,13 +282,13 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
     switch (key) {
         case kZoomOutKeyNum: zoom_out(); break;
         case kZoomInKeyNum: zoom_in(); break;
-        case kScale121KeyNum: zoom_shortcut(kActualSizeZoom); break;
-        case kScale122KeyNum: zoom_shortcut(kHalfSizeZoom); break;
-        case kScale124KeyNum: zoom_shortcut(kQuarterSizeZoom); break;
-        case kScale1216KeyNum: zoom_shortcut(kEighthSizeZoom); break;
-        case kScaleHostileKeyNum: zoom_shortcut(kNearestFoeZoom); break;
-        case kScaleObjectKeyNum: zoom_shortcut(kNearestAnythingZoom); break;
-        case kScaleAllKeyNum: zoom_shortcut(kSmallestZoom); break;
+        case kScale121KeyNum: zoom_shortcut(Zoom::ACTUAL); break;
+        case kScale122KeyNum: zoom_shortcut(Zoom::DOUBLE); break;
+        case kScale124KeyNum: zoom_shortcut(Zoom::QUARTER); break;
+        case kScale1216KeyNum: zoom_shortcut(Zoom::SIXTEENTH); break;
+        case kScaleHostileKeyNum: zoom_shortcut(Zoom::FOE); break;
+        case kScaleObjectKeyNum: zoom_shortcut(Zoom::OBJECT); break;
+        case kScaleAllKeyNum: zoom_shortcut(Zoom::ALL); break;
         case kTransferKeyNum: transfer_control(g.admiral, 0); break;
         case kMessageNextKeyNum: Messages::advance(); break;
         default:
@@ -515,7 +511,7 @@ void PlayerShip::gamepad_stick(const GamepadStickEvent& event) {
 
 bool PlayerShip::active() const {
     auto player = g.ship;
-    return player.get() && player->active && (player->attributes & kIsHumanControlled);
+    return player.get() && player->active && (player->attributes & kIsPlayerShip);
 }
 
 void PlayerShip::update(bool enter_message) {
@@ -608,21 +604,21 @@ void PlayerShip::update(bool enter_message) {
         return;
     }
 
-    if (theShip->health() < (theShip->baseType->health >> 2L)) {
+    if (theShip->health() < (theShip->base->health >> 2L)) {
         if (g.time > globals()->next_klaxon) {
             if (globals()->next_klaxon == game_ticks()) {
                 sys.sound.loud_klaxon();
             } else {
                 sys.sound.klaxon();
             }
-            Messages::set_status("WARNING: Shields Low", kStatusWarnColor);
+            Messages::shields_low();
             globals()->next_klaxon = g.time + kKlaxonInterval;
         }
     } else {
         globals()->next_klaxon = game_ticks();
     }
 
-    if (!(theShip->attributes & kIsHumanControlled)) {
+    if (!(theShip->attributes & kIsPlayerShip)) {
         return;
     }
 
@@ -764,7 +760,7 @@ void PlayerShipHandleClick(Point where, int button) {
 
     gDestKeyState = DEST_KEY_BLOCKED;
     if (g.ship.get()) {
-        if ((g.ship->active) && (g.ship->attributes & kIsHumanControlled)) {
+        if ((g.ship->active) && (g.ship->attributes & kIsPlayerShip)) {
             Rect bounds = {
                     where.h - kCursorBoundsSize, where.v - kCursorBoundsSize,
                     where.h + kCursorBoundsSize, where.v + kCursorBoundsSize,
@@ -781,7 +777,7 @@ void PlayerShipHandleClick(Point where, int button) {
             } else {
                 auto control       = g.admiral->control();
                 auto selectShipNum = GetSpritePointSelectObject(
-                        &bounds, g.ship, kCanBeDestination | kCanAcceptBuild, control, FRIENDLY);
+                        &bounds, g.ship, kCanBeDestination | kIsDestination, control, FRIENDLY);
                 if (selectShipNum.get()) {
                     SetPlayerSelectShip(selectShipNum, false, g.admiral);
                 }
@@ -817,14 +813,7 @@ void SetPlayerSelectShip(Handle<SpaceObject> ship, bool target, Handle<Admiral> 
         if (ship == g.ship) {
             label->set_age(Label::kVisibleTime);
         }
-        pn::string string;
-        if (ship->attributes & kIsDestination) {
-            string = GetDestBalanceName(ship->asDestination).copy();
-        } else {
-            string = get_object_name(ship->base).copy();
-        }
-        string += hot_key_suffix(ship);
-        label->set_string(string);
+        label->set_string(name_with_hot_key_suffix(ship));
     }
 }
 
@@ -840,7 +829,7 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
     }
 
     if (adm == g.admiral) {
-        flagship->attributes &= ~(kIsHumanControlled | kIsPlayerShip);
+        flagship->attributes &= ~kIsPlayerShip;
         if (newShip != g.ship) {
             g.ship = newShip;
             globals()->starfield.reset(newShip);
@@ -854,7 +843,7 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
                                              .c_str());
         }
 
-        flagship->attributes |= kIsHumanControlled | kIsPlayerShip;
+        flagship->attributes |= kIsPlayerShip;
 
         if (newShip == g.admiral->control()) {
             g.control_label->set_age(Label::kVisibleTime);
@@ -863,9 +852,9 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
             g.target_label->set_age(Label::kVisibleTime);
         }
     } else {
-        flagship->attributes &= ~(kIsRemote | kIsPlayerShip);
+        flagship->attributes &= ~kIsPlayerShip;
         flagship = newShip;
-        flagship->attributes |= (kIsRemote | kIsPlayerShip);
+        flagship->attributes |= kIsPlayerShip;
     }
     adm->set_flagship(newShip);
 }
@@ -873,18 +862,14 @@ void ChangePlayerShipNumber(Handle<Admiral> adm, Handle<SpaceObject> newShip) {
 void TogglePlayerAutoPilot(Handle<SpaceObject> flagship) {
     if (flagship->attributes & kOnAutoPilot) {
         flagship->attributes &= ~kOnAutoPilot;
-        if ((flagship->owner == g.admiral) && (flagship->attributes & kIsHumanControlled)) {
-            StringList      strings(kMessageStringID);
-            pn::string_view string = strings.at(kAutoPilotOffString - 1);
-            Messages::set_status(string, kStatusLabelColor);
+        if ((flagship->owner == g.admiral) && (flagship->attributes & kIsPlayerShip)) {
+            Messages::autopilot(false);
         }
     } else {
         SetObjectDestination(flagship);
         flagship->attributes |= kOnAutoPilot;
-        if ((flagship->owner == g.admiral) && (flagship->attributes & kIsHumanControlled)) {
-            StringList      strings(kMessageStringID);
-            pn::string_view string = strings.at(kAutoPilotOnString - 1);
-            Messages::set_status(string, kStatusLabelColor);
+        if ((flagship->owner == g.admiral) && (flagship->attributes & kIsPlayerShip)) {
+            Messages::autopilot(true);
         }
     }
 }
@@ -930,9 +915,9 @@ void PlayerShipBodyExpire(Handle<SpaceObject> flagship) {
             g.game_over_at = g.time + secs(3);
         }
         if (flagship->owner == g.admiral) {
-            g.victory_text = kLevelNoShipTextID + g.level->levelNameStrNum;
+            g.victory_text = g.level->own_no_ships_text.copy();
         } else {
-            g.victory_text = 10050 + g.level->levelNameStrNum;
+            g.victory_text = g.level->foe_no_ships_text.copy();
         }
         if (flagship->owner.get()) {
             flagship->owner->set_flagship(SpaceObject::none());
@@ -961,15 +946,7 @@ void Update_LabelStrings_ForHotKeyChange(void) {
         if (target == g.ship) {
             g.target_label->set_age(Label::kVisibleTime);
         }
-        if (target->attributes & kIsDestination) {
-            pn::string string = GetDestBalanceName(target->asDestination).copy();
-            string += hot_key_suffix(target);
-            g.target_label->set_string(string);
-        } else {
-            pn::string string = get_object_name(target->base).copy();
-            string += hot_key_suffix(target);
-            g.target_label->set_string(string);
-        }
+        g.target_label->set_string(name_with_hot_key_suffix(target));
     }
 
     auto control = g.admiral->control();
@@ -979,15 +956,7 @@ void Update_LabelStrings_ForHotKeyChange(void) {
             g.control_label->set_age(Label::kVisibleTime);
         }
         sys.sound.select();
-        if (control->attributes & kIsDestination) {
-            pn::string string = GetDestBalanceName(control->asDestination).copy();
-            string += hot_key_suffix(control);
-            g.control_label->set_string(string);
-        } else {
-            pn::string string = get_object_name(control->base).copy();
-            string += hot_key_suffix(control);
-            g.control_label->set_string(string);
-        }
+        g.control_label->set_string(name_with_hot_key_suffix(control));
     }
 }
 

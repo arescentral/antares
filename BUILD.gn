@@ -55,6 +55,7 @@ source_set("libantares") {
     ":libantares-data",
     ":libantares-drawing",
     ":libantares-game",
+    ":libantares-lang",
     ":libantares-math",
     ":libantares-sound",
     ":libantares-ui",
@@ -88,11 +89,9 @@ source_set("libantares-config") {
     "include/config/ledger.hpp",
     "include/config/preferences.hpp",
 
-    # These don't really belong here, but there aren't any
-    # associated sources, and ninja doesn't like when you have a
-    # library with just includes in the sources list.
-    "include/lang/casts.hpp",
-    "include/lang/defines.hpp",
+    # This doesn't really belong here, but there isn't an associated
+    # source, and ninja doesn't like when you have a library with just
+    # includes in the sources list.
     "include/net/http.hpp",
     "src/config/dirs.cpp",
     "src/config/file-prefs-driver.cpp",
@@ -103,6 +102,7 @@ source_set("libantares-config") {
   ]
   public_deps = [
     ":libantares-data",
+    ":libantares-lang",
     "//ext/libsfz",
   ]
   configs += [ ":antares_private" ]
@@ -112,38 +112,37 @@ source_set("libantares-data") {
   sources = [
     "include/data/action.hpp",
     "include/data/base-object.hpp",
+    "include/data/enums.hpp",
     "include/data/extractor.hpp",
+    "include/data/field.hpp",
     "include/data/handle.hpp",
     "include/data/interface.hpp",
     "include/data/level.hpp",
-    "include/data/picture.hpp",
     "include/data/plugin.hpp",
     "include/data/races.hpp",
     "include/data/replay-list.hpp",
     "include/data/replay.hpp",
     "include/data/resource.hpp",
     "include/data/scenario-list.hpp",
-    "include/data/string-list.hpp",
     "src/data/action.cpp",
     "src/data/base-object.cpp",
     "src/data/extractor.cpp",
+    "src/data/field.cpp",
     "src/data/interface.cpp",
     "src/data/level.cpp",
-    "src/data/picture.cpp",
     "src/data/plugin.cpp",
     "src/data/races.cpp",
     "src/data/replay-list.cpp",
     "src/data/replay.cpp",
     "src/data/resource.cpp",
     "src/data/scenario-list.cpp",
-    "src/data/string-list.cpp",
   ]
   public_deps = [
+    ":libantares-lang",
     "//ext/libpng",
     "//ext/libsfz",
     "//ext/libzipxx",
     "//ext/procyon:procyon-cpp",
-    "//ext/rezin:librezin",
   ]
   configs += [ ":antares_private" ]
 }
@@ -174,6 +173,7 @@ source_set("libantares-drawing") {
   ]
   public_deps = [
     ":libantares-data",
+    ":libantares-lang",
     "//ext/libpng",
     "//ext/libsfz",
   ]
@@ -228,6 +228,21 @@ source_set("libantares-game") {
   ]
   public_deps = [
     ":libantares-drawing",
+    ":libantares-lang",
+    "//ext/libsfz",
+    "//ext/procyon:procyon-cpp",
+  ]
+  configs += [ ":antares_private" ]
+}
+
+source_set("libantares-lang") {
+  sources = [
+    "include/lang/casts.hpp",
+    "include/lang/defines.hpp",
+    "include/lang/exception.hpp",
+    "src/lang/exception.cpp",
+  ]
+  public_deps = [
     "//ext/libsfz",
     "//ext/procyon:procyon-cpp",
   ]
@@ -251,6 +266,7 @@ source_set("libantares-math") {
   ]
   public_deps = [
     ":libantares-game",
+    ":libantares-lang",
     "//ext/libsfz",
   ]
   configs += [ ":antares_private" ]
@@ -271,6 +287,7 @@ source_set("libantares-sound") {
   ]
   public_deps = [
     ":libantares-game",
+    ":libantares-lang",
     "//ext/libmodplug",
     "//ext/libsfz",
     "//ext/libsndfile",
@@ -349,6 +366,7 @@ source_set("libantares-video") {
   ]
   public_deps = [
     ":libantares-game",
+    ":libantares-lang",
     "//ext/libpng",
     "//ext/libsfz",
   ]
@@ -624,10 +642,17 @@ if (target_os == "mac") {
   app_resources("antares_app_embedded_scenario_data") {
     sources = [
       "data/fonts",
+      "data/info.pn",
       "data/interfaces",
+      "data/levels",
       "data/music",
+      "data/objects",
       "data/pictures",
+      "data/races",
+      "data/replays",
       "data/rotation-table",
+      "data/sounds",
+      "data/sprites",
       "data/strings",
       "data/text",
     ]

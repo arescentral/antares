@@ -55,7 +55,7 @@ const int32_t kDistanceSuperUnitBitShift = 15;  // >> 18L = / 262144
 
 const int32_t kConsiderDistanceAttributes =
         (kCanCollide | kCanBeHit | kIsDestination | kCanThink | kConsiderDistance | kCanBeEvaded |
-         kIsHumanControlled | kIsRemote);
+         kIsPlayerShip);
 
 const uint32_t kThinkiverseTopLeft =
         (kUniversalCenter - (2 * 65534));  // universe for thinking or owned objects
@@ -278,27 +278,26 @@ static void bounce(Handle<SpaceObject> o) {
 }
 
 static void animate(Handle<SpaceObject> o) {
-    auto& base_anim = o->base->frame.animation;
-    if (base_anim.frameSpeed == Fixed::zero()) {
+    auto& base_anim = o->base->animation;
+    if (base_anim->speed == Fixed::zero()) {
         return;
     }
 
     auto& space_anim = o->frame.animation;
-    space_anim.thisShape += space_anim.frameDirection * space_anim.frameSpeed;
+    space_anim.thisShape += static_cast<int>(space_anim.direction) * space_anim.speed;
     if (o->attributes & kAnimationCycle) {
-        // TODO(sfiera): does Fixed::from_val(1) make sense here? Not Fixed::from_long(1)?
-        Fixed shape_num = (base_anim.lastShape - base_anim.firstShape) + Fixed::from_val(1);
-        while (space_anim.thisShape > base_anim.lastShape) {
+        Fixed shape_num = base_anim->frames.range();
+        while (space_anim.thisShape >= base_anim->frames.end) {
             space_anim.thisShape -= shape_num;
         }
-        while (space_anim.thisShape < base_anim.firstShape) {
+        while (space_anim.thisShape < base_anim->frames.begin) {
             space_anim.thisShape += shape_num;
         }
     } else if (
-            (space_anim.thisShape > base_anim.lastShape) ||
-            (space_anim.thisShape < base_anim.firstShape)) {
+            (space_anim.thisShape >= base_anim->frames.end) ||
+            (space_anim.thisShape < base_anim->frames.begin)) {
         o->active            = kObjectToBeFreed;
-        space_anim.thisShape = base_anim.lastShape;
+        space_anim.thisShape = base_anim->frames.end - Fixed::from_val(1);
     }
 }
 
@@ -309,8 +308,9 @@ static void move_vector(Handle<SpaceObject> o) {
     auto& vector = *o->frame.vector;
 
     vector.objectLocation = o->location;
-    if ((vector.vectorKind == Vector::BEAM_TO_OBJECT) ||
-        (vector.vectorKind == Vector::BEAM_TO_OBJECT_LIGHTNING)) {
+    if (!vector.is_ray) {
+        return;
+    } else if (!vector.to_coord) {
         if (vector.toObject.get()) {
             auto target = vector.toObject;
             if (target->active && (target->id == vector.toObjectID)) {
@@ -328,9 +328,7 @@ static void move_vector(Handle<SpaceObject> o) {
                 o->active = kObjectToBeFreed;
             }
         }
-    } else if (
-            (vector.vectorKind == Vector::BEAM_TO_COORD) ||
-            (vector.vectorKind == Vector::BEAM_TO_COORD_LIGHTNING)) {
+    } else if (vector.to_coord) {
         if (vector.fromObject.get()) {
             auto target = vector.fromObject;
             if (target->active && (target->id == vector.fromObjectID)) {
@@ -357,7 +355,7 @@ static void update_static(Handle<SpaceObject> o, ticks unitsToDo) {
         } else {
             // we know it has sprite
             sprite.style      = spriteColor;
-            sprite.styleColor = GetRGBTranslateColor(o->shieldColor);
+            sprite.styleColor = o->shieldColor.value_or(RgbColor::clear());
             sprite.styleData  = o->hitState;
         }
     } else {
@@ -452,13 +450,13 @@ void MoveSpaceObjects(const ticks unitsToDo) {
 
         auto baseObject = o->base;
         if (o->attributes & kIsSelfAnimated) {
-            if (baseObject->frame.animation.frameSpeed != Fixed::zero()) {
+            if (baseObject->animation->speed != Fixed::zero()) {
                 sprite.whichShape = more_evil_fixed_to_long(o->frame.animation.thisShape);
             }
         } else if (o->attributes & kShapeFromDirection) {
             int16_t angle = o->direction;
-            mAddAngle(angle, baseObject->frame.rotation.rotRes >> 1);
-            sprite.whichShape = angle / baseObject->frame.rotation.rotRes;
+            mAddAngle(angle, rotation_resolution(*baseObject) >> 1);
+            sprite.whichShape = angle / rotation_resolution(*baseObject);
         }
     }
 }
@@ -467,11 +465,11 @@ static void age_object(const Handle<SpaceObject>& o) {
     if (o->expires) {
         o->expire_after -= kMajorTick;
         if (o->expire_after < ticks(0)) {
-            if (!(o->baseType->expireDontDie)) {
+            if (!(o->base->expire.dont_die)) {
                 o->active = kObjectToBeFreed;
             }
 
-            exec(o->baseType->expire, o, SpaceObject::none(), NULL);
+            exec(o->base->expire.action, o, SpaceObject::none(), NULL);
         }
     }
 }
@@ -480,9 +478,9 @@ static void activate_object(const Handle<SpaceObject>& o) {
     if (o->periodicTime > ticks(0)) {
         o->periodicTime--;
         if (o->periodicTime <= ticks(0)) {
-            exec(o->baseType->activate, o, SpaceObject::none(), NULL);
-            o->periodicTime = o->baseType->activatePeriod +
-                              o->randomSeed.next(o->baseType->activatePeriodRange);
+            exec(o->base->activate.action, o, SpaceObject::none(), NULL);
+            o->periodicTime = o->base->activate.period.begin +
+                              o->randomSeed.next(o->base->activate.period.range());
         }
     }
 }
@@ -529,7 +527,7 @@ static void calc_misc() {
                 uint64_t dist         = (vdiff * vdiff) + (hdiff * hdiff);
                 o->distanceFromPlayer = dist;
                 if ((dist < closestDist) && (o != g.ship)) {
-                    if (!((g.zoom == kNearestFoeZoom) && (o->owner == g.ship->owner))) {
+                    if (!((g.zoom == Zoom::FOE) && (o->owner == g.ship->owner))) {
                         closestDist = dist;
                         g.closest   = o;
                     }
@@ -542,7 +540,7 @@ static void calc_misc() {
         }
 
         if (o->attributes & kConsiderDistanceAttributes) {
-            o->localFriendStrength  = o->baseType->offenseValue;
+            o->localFriendStrength  = o->base->ai.escort.power;
             o->localFoeStrength     = Fixed::zero();
             o->closestObject        = SpaceObject::none();
             o->closestDistance      = kMaximumRelevantDistanceSquared;
@@ -577,7 +575,7 @@ static void calc_misc() {
             o->runTimeFlags &= ~kIsHidden;
 
             if (o->sprite.get()) {
-                o->sprite->tinySize = o->tinySize;
+                o->sprite->icon = o->icon.value_or(BaseObject::Icon{IconShape::SQUARE, 0});
             }
         }
     }
@@ -707,6 +705,10 @@ static void calc_bounds() {
     }
 }
 
+static bool can_hit(const Handle<SpaceObject>& a, const Handle<SpaceObject>& b) {
+    return (a->attributes & kCanCollide) && (b->attributes & kCanBeHit);
+}
+
 // Call HitObject() and CorrectPhysicalSpace() for all colliding pairs of objects.
 static void calc_impacts() {
     for (int32_t i = 0; i < kProximityGridDataLength; i++) {
@@ -726,14 +728,9 @@ static void calc_impacts() {
                 }
 
                 for (; b.get(); b = b->nextNearObject) {
-                    // this'll be true even ONLY if BOTH objects are not non-physical dest object
-                    if (!((b->attributes | a->attributes) & kCanCollide) ||
-                        !((b->attributes | a->attributes) & kCanBeHit) ||
-                        (b->collisionGrid != super)) {
-                        continue;
-                    }
-
-                    if (a->owner == b->owner) {
+                    if ((!can_hit(a, b) && !can_hit(b, a)) ||  // neither object can hit the other
+                        (b->collisionGrid != super) ||         // not near enough
+                        (a->owner == b->owner)) {              // same owner
                         continue;
                     }
 
@@ -868,7 +865,7 @@ static void calc_visibility() {
                 }
                 o->seenByPlayerFlags |= o->myPlayerFlag;
                 if (!(o->seenByPlayerFlags & seen_by_me) && o->sprite.get()) {
-                    o->sprite->tinySize = 0;
+                    o->sprite->icon.size = 0;
                 }
             }
         }
@@ -895,7 +892,7 @@ void CollideSpaceObjects() {
 }
 
 static void adjust_velocity(Handle<SpaceObject> o, int16_t angle, Fixed totalMass, Fixed force) {
-    Fixed tfix = (o->baseType->mass * force);
+    Fixed tfix = (o->base->mass * force);
     if (totalMass == Fixed::zero()) {
         tfix = kFixedNone;
     } else {
@@ -954,7 +951,7 @@ static void correct_physical_space(Handle<SpaceObject> a, Handle<SpaceObject> b)
     const int32_t ah    = b->location.h - a->location.h;
     const int32_t av    = b->location.v - a->location.v;
 
-    const Fixed totalMass = a->baseType->mass + b->baseType->mass;
+    const Fixed totalMass = a->base->mass + b->base->mass;
     int16_t     angle     = ratio_to_angle(ah, av);
     adjust_velocity(a, angle, totalMass, force);
     mAddAngle(angle, 180);

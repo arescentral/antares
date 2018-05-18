@@ -36,16 +36,15 @@ namespace antares {
 
 HelpScreen::HelpScreen()
         : InterfaceScreen("help", {128, 0, 608, 480}, false), _text(sys.fonts.computer) {
-    Resource   rsrc("text", "txt", 6002);
-    pn::string text = rsrc.string().copy();
+    pn::string text = Resource::text(6002);
     Replace_KeyCode_Strings_With_Actual_Key_Names(text, 1000, 4);
 
-    RgbColor fore = GetRGBTranslateColorShade(RED, VERY_LIGHT);
-    RgbColor back = GetRGBTranslateColorShade(RED, VERY_DARK);
+    RgbColor fore = GetRGBTranslateColorShade(Hue::RED, VERY_LIGHT);
+    RgbColor back = GetRGBTranslateColorShade(Hue::RED, VERY_DARK);
     _text.set_fore_color(fore);
     _text.set_back_color(back);
     _text.set_retro_text(text);
-    _text.wrap_to(item(BOX).bounds().width(), 0, 0);
+    _text.wrap_to(item(BOX).bounds.width(), 0, 0);
 }
 
 HelpScreen::~HelpScreen() {}
@@ -68,7 +67,7 @@ void HelpScreen::handle_button(Button& button) {
 }
 
 void HelpScreen::overlay() const {
-    Rect  bounds = item(BOX).bounds();
+    Rect  bounds = item(BOX).bounds;
     Point off    = offset();
     bounds.offset(off.h, off.v);
     _text.draw(bounds);

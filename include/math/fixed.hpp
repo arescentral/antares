@@ -30,7 +30,7 @@ class Fixed {
     Fixed() = default;
 
     static constexpr Fixed from_long(int32_t x) { return Fixed(x << 8); }
-    static constexpr Fixed from_float(float x) { return Fixed(roundf(x * 256.0)); }
+    static constexpr Fixed from_float(double x) { return Fixed(round(x * 256.0)); }
     static constexpr Fixed from_val(int32_t value) { return Fixed(value); }
     static constexpr Fixed zero() { return Fixed(0); }
 
@@ -74,15 +74,6 @@ inline Fixed& operator>>=(Fixed& x, int n) { return x = x >> n; }
 
 inline Fixed operator-(Fixed x) { return Fixed::from_val(-x.val()); }
 
-inline bool read_from(pn::file_view in, Fixed* f) {
-    int32_t i32;
-    if (!in.read(&i32)) {
-        return false;
-    }
-    *f = Fixed::from_val(i32);
-    return true;
-}
-
 static const Fixed kFixedNone = Fixed::from_val(-1);
 
 //
@@ -119,7 +110,6 @@ struct fixedPointType {
     Fixed h;
     Fixed v;
 };
-bool read_from(pn::file_view in, fixedPointType* point);
 
 }  // namespace antares
 

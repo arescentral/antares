@@ -31,183 +31,156 @@
 
 namespace antares {
 
-Level::Condition* Level::condition(size_t at) const {
-    return &plug.conditions[conditionFirst + at];
+const Level::Condition* Level::Condition::get(int number) {
+    if ((0 <= number) && (number < g.level->conditions.size())) {
+        return g.level->conditions[number].get();
+    }
+    return nullptr;
 }
 
-bool Level::Condition::active() const {
-    return !(flags & kTrueOnlyOnce) || !(flags & kHasBeenTrue);
+HandleList<const Level::Condition> Level::Condition::all() {
+    return HandleList<const Level::Condition>(0, g.level->conditions.size());
 }
 
-void Level::Condition::set_true_yet(bool state) {
-    if (state) {
-        flags |= kHasBeenTrue;
-    } else {
-        flags &= ~kHasBeenTrue;
+template <typename X, typename Y>
+static bool op_compare(ConditionOp op, const X& x, const Y& y) {
+    switch (op) {
+        case ConditionOp::EQ: return (x == y);
+        case ConditionOp::NE: return (x != y);
+        case ConditionOp::LT: return (x < y);
+        case ConditionOp::GT: return (x > y);
+        case ConditionOp::LE: return (x <= y);
+        case ConditionOp::GE: return (x >= y);
     }
 }
 
-bool Level::Condition::true_yet() const { return flags & kHasBeenTrue; }
+template <typename X, typename Y>
+static bool op_eq(ConditionOp op, const X& x, const Y& y) {
+    switch (op) {
+        case ConditionOp::EQ: return (x == y);
+        case ConditionOp::NE: return (x != y);
+        default: return false;
+    }
+}
 
-bool Level::Condition::is_true() const {
-    int32_t         difference;
-    Handle<Admiral> a;
-    uint32_t        distance, dcalc;
+bool Level::AutopilotCondition::is_true() const {
+    return op_eq(op, IsPlayerShipOnAutoPilot(), value);
+}
 
-    switch (condition) {
-        case kCounterCondition:
-            a = conditionArgument.counter.whichPlayer;
-            if (GetAdmiralScore(a, conditionArgument.counter.whichCounter) ==
-                conditionArgument.counter.amount) {
-                return true;
-            }
-            break;
+bool Level::BuildingCondition::is_true() const {
+    auto buildAtObject = GetAdmiralBuildAtObject(g.admiral);
+    return buildAtObject.get() && op_eq(op, buildAtObject->totalBuildTime > ticks(0), value);
+}
 
-        case kCounterGreaterCondition:
-            a = conditionArgument.counter.whichPlayer;
-            if (GetAdmiralScore(a, conditionArgument.counter.whichCounter) >=
-                conditionArgument.counter.amount) {
-                return true;
-            }
-            break;
+bool Level::ComputerCondition::is_true() const {
+    if (line < 0) {
+        return op_eq(op, g.mini.currentScreen, static_cast<int>(screen));
+    } else {
+        return op_eq(
+                op, std::make_pair(g.mini.currentScreen, g.mini.selectLine),
+                std::make_pair(static_cast<int>(screen), line));
+    }
+}
 
-        case kCounterNotCondition:
-            a = conditionArgument.counter.whichPlayer;
-            if (GetAdmiralScore(a, conditionArgument.counter.whichCounter) !=
-                conditionArgument.counter.amount) {
-                return true;
-            }
-            break;
+bool Level::CounterCondition::is_true() const {
+    return op_compare(op, GetAdmiralScore(player, counter), value);
+}
 
-        case kDestructionCondition: {
-            auto sObject = GetObjectFromInitialNumber(conditionArgument.longValue);
-            return !sObject.get();
-        }
+bool Level::DestroyedCondition::is_true() const {
+    auto sObject = GetObjectFromInitialNumber(initial);
+    return op_eq(op, !sObject.get(), value);
+}
 
-        case kOwnerCondition: {
-            auto sObject = GetObjectFromInitialNumber(subjectObject);
-            auto a       = Handle<Admiral>(conditionArgument.longValue);
-            return sObject.get() && (a == sObject->owner);
-        }
+bool Level::DistanceCondition::is_true() const {
+    auto sObject = GetObjectFromInitialNumber(subject);
+    auto dObject = GetObjectFromInitialNumber(object);
+    if (sObject.get() && dObject.get()) {
+        int32_t  difference = ABS<int>(sObject->location.h - dObject->location.h);
+        uint32_t dcalc      = difference;
+        difference          = ABS<int>(sObject->location.v - dObject->location.v);
+        uint32_t distance   = difference;
 
-        case kTimeCondition: {
-            // Tricky: the original code for handling startTime counted g.time in major ticks,
-            // but new code uses minor ticks, as game/main.cpp does. So, time before the epoch
-            // (game start) counts as 1/3 towards time conditions to preserve old behavior.
-            ticks game_time  = g.time.time_since_epoch();
-            ticks start_time = g.level->startTime / 3;
-            if (g.time < game_ticks()) {
-                game_time /= 3;
-            }
-            return (game_time + start_time) >= conditionArgument.timeValue;
-        }
-
-        case kProximityCondition: {
-            auto sObject = GetObjectFromInitialNumber(subjectObject);
-            auto dObject = GetObjectFromInitialNumber(directObject);
-            if (sObject.get() && dObject.get()) {
-                difference = ABS<int>(sObject->location.h - dObject->location.h);
-                dcalc      = difference;
-                difference = ABS<int>(sObject->location.v - dObject->location.v);
-                distance   = difference;
-
-                if ((dcalc < kMaximumRelevantDistance) && (distance < kMaximumRelevantDistance)) {
-                    distance = distance * distance + dcalc * dcalc;
-                    if (distance < conditionArgument.unsignedLongValue) {
-                        return true;
-                    }
-                }
-            }
-            break;
-        }
-
-        case kDistanceGreaterCondition: {
-            auto sObject = GetObjectFromInitialNumber(subjectObject);
-            auto dObject = GetObjectFromInitialNumber(directObject);
-            if (sObject.get() && dObject.get()) {
-                difference = ABS<int>(sObject->location.h - dObject->location.h);
-                dcalc      = difference;
-                difference = ABS<int>(sObject->location.v - dObject->location.v);
-                distance   = difference;
-
-                if ((dcalc < kMaximumRelevantDistance) && (distance < kMaximumRelevantDistance)) {
-                    distance = distance * distance + dcalc * dcalc;
-                    if (distance >= conditionArgument.unsignedLongValue) {
-                        return true;
-                    }
-                }
-            }
-            break;
-        }
-
-        case kHalfHealthCondition: {
-            auto sObject = GetObjectFromInitialNumber(subjectObject);
-            return !sObject.get() || (sObject->health() <= (sObject->max_health() >> 1));
-        }
-
-        case kIsAuxiliaryObject: {
-            auto sObject = GetObjectFromInitialNumber(subjectObject);
-            auto dObject = g.admiral->control();
-            return sObject.get() && dObject.get() && (dObject == sObject);
-        }
-
-        case kIsTargetObject: {
-            auto sObject = GetObjectFromInitialNumber(subjectObject);
-            auto dObject = g.admiral->target();
-            return sObject.get() && dObject.get() && (dObject == sObject);
-        }
-
-        case kVelocityLessThanEqualToCondition: {
-            auto sObject = GetObjectFromInitialNumber(subjectObject);
-            return sObject.get() && (ABS(sObject->velocity.h) < conditionArgument.fixedValue) &&
-                   (ABS(sObject->velocity.v) < conditionArgument.fixedValue);
-        }
-
-        case kNoShipsLeftCondition:
-            return GetAdmiralShipsLeft(Handle<Admiral>(conditionArgument.longValue)) <= 0;
-
-        case kCurrentMessageCondition:
-            return Messages::current() ==
-                   (conditionArgument.location.h + conditionArgument.location.v - 1);
-
-        case kCurrentComputerCondition:
-            return (g.mini.currentScreen == conditionArgument.location.h) &&
-                   ((conditionArgument.location.v < 0) ||
-                    (g.mini.selectLine == conditionArgument.location.v));
-
-        case kZoomLevelCondition: return g.zoom == conditionArgument.longValue;
-
-        case kAutopilotCondition: return IsPlayerShipOnAutoPilot();
-
-        case kNotAutopilotCondition: return !IsPlayerShipOnAutoPilot();
-
-        case kObjectIsBeingBuilt: {
-            auto buildAtObject = GetAdmiralBuildAtObject(g.admiral);
-            return buildAtObject.get() && (buildAtObject->totalBuildTime > ticks(0));
-        }
-
-        case kDirectIsSubjectTarget: {
-            auto sObject = GetObjectFromInitialNumber(subjectObject);
-            auto dObject = GetObjectFromInitialNumber(directObject);
-            return sObject.get() && dObject.get() && (sObject->destObject == dObject) &&
-                   (sObject->destObjectID == dObject->id);
-        }
-
-        case kSubjectIsPlayerCondition: {
-            auto sObject = GetObjectFromInitialNumber(subjectObject);
-            return sObject.get() && (sObject == g.ship);
+        if ((dcalc < kMaximumRelevantDistance) && (distance < kMaximumRelevantDistance)) {
+            distance = distance * distance + dcalc * dcalc;
+            return op_compare(op, distance, value);
         }
     }
     return false;
 }
 
+bool Level::FalseCondition::is_true() const { return false; }
+
+bool Level::HealthCondition::is_true() const {
+    auto   sObject = GetObjectFromInitialNumber(subject);
+    double health  = 0.0;
+    if (sObject.get()) {
+        health = sObject->health();
+        health /= sObject->max_health();
+    }
+    return op_compare(op, health, value);
+}
+
+bool Level::MessageCondition::is_true() const {
+    return op_eq(op, Messages::current(), id + page - 1);
+}
+
+bool Level::OrderedCondition::is_true() const {
+    auto sObject = GetObjectFromInitialNumber(subject);
+    auto dObject = GetObjectFromInitialNumber(object);
+    return sObject.get() && dObject.get() &&
+           op_eq(op, std::make_pair(sObject->destObject, sObject->destObjectID),
+                 std::make_pair(dObject, dObject->id));
+}
+
+bool Level::OwnerCondition::is_true() const {
+    auto sObject = GetObjectFromInitialNumber(subject);
+    return sObject.get() && op_eq(op, player, sObject->owner);
+}
+
+bool Level::ShipsCondition::is_true() const {
+    return op_compare(op, GetAdmiralShipsLeft(player), value);
+}
+
+bool Level::SpeedCondition::is_true() const {
+    auto sObject = GetObjectFromInitialNumber(subject);
+    return sObject.get() &&
+           op_compare(op, std::max(ABS(sObject->velocity.h), ABS(sObject->velocity.v)), value);
+}
+
+bool Level::SubjectCondition::is_true() const {
+    auto sObject = GetObjectFromInitialNumber(subject);
+    switch (value) {
+        case SubjectValue::CONTROL:
+            return sObject.get() && op_eq(op, sObject, g.admiral->control());
+        case SubjectValue::TARGET: return sObject.get() && op_eq(op, sObject, g.admiral->target());
+        case SubjectValue::PLAYER: return sObject.get() && op_eq(op, sObject, g.ship);
+    }
+}
+
+bool Level::TimeCondition::is_true() const {
+    // Tricky: the original code for handling startTime counted g.time in major ticks,
+    // but new code uses minor ticks, as game/main.cpp does. So, time before the epoch
+    // (game start) counts as 1/3 towards time conditions to preserve old behavior.
+    game_ticks t;
+    if (!legacy_start_time) {
+        t = game_ticks{duration};
+    } else if ((3 * duration) < g.level->startTime) {
+        t = game_ticks{(3 * duration) - g.level->startTime};
+    } else {
+        t = game_ticks{duration - (g.level->startTime / 3)};
+    }
+    return op_compare(op, g.time, t);
+}
+
+bool Level::ZoomCondition::is_true() const { return op_compare(op, g.zoom, value); }
+
 void CheckLevelConditions() {
-    for (int32_t i = 0; i < g.level->conditionNum; i++) {
-        auto c = g.level->condition(i);
-        if (c->active() && c->is_true()) {
-            c->set_true_yet(true);
-            auto  sObject = GetObjectFromInitialNumber(c->subjectObject);
-            auto  dObject = GetObjectFromInitialNumber(c->directObject);
+    for (auto& c : g.level->conditions) {
+        int index = (&c - g.level->conditions.data());
+        if ((g.condition_enabled[index] || c->persistent) && c->is_true()) {
+            g.condition_enabled[index] = false;
+            auto  sObject              = GetObjectFromInitialNumber(c->subject);
+            auto  dObject              = GetObjectFromInitialNumber(c->object);
             Point offset;
             exec(c->action, sObject, dObject, &offset);
         }

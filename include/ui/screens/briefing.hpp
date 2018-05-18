@@ -32,7 +32,7 @@ struct Level;
 
 class BriefingScreen : public InterfaceScreen {
   public:
-    BriefingScreen(const Level* level, bool* cancelled);
+    BriefingScreen(const Level& level, bool* cancelled);
     ~BriefingScreen();
 
     virtual void become_front();
@@ -67,16 +67,15 @@ class BriefingScreen : public InterfaceScreen {
     void show_object_data(int index, const GamepadButtonDownEvent& event);
     void show_object_data(int index, ObjectDataScreen::Trigger trigger, int which);
 
-    const Level* const  _level;
+    const Level&        _level;
     bool* const         _cancelled;
     int                 _briefing_point;
-    const int           _briefing_point_count;
+    const int           _briefing_point_start;
+    const int           _briefing_point_end;
     mutable LabeledRect _data_item;
 
     Rect _bounds;
-
-    Texture _star_map;
-    Rect    _star_rect;
+    Rect _star_rect;
 
     struct Star {
         Point   location;

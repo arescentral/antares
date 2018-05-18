@@ -91,6 +91,10 @@ TEST_F(FixedTest, FloatToFixed) {
     EXPECT_EQ(361, Fixed::from_float(1.41).val());
     EXPECT_EQ(361, Fixed::from_float(1.410).val());
     EXPECT_EQ(362, Fixed::from_float(1.414).val());
+
+    EXPECT_EQ(2147483647, Fixed::from_float(8388607.996).val());
+    EXPECT_EQ(-2147483647, Fixed::from_float(-8388607.996).val());
+    EXPECT_EQ(-2147483648, Fixed::from_float(-8388608.0).val());
 }
 
 TEST_F(FixedTest, FixedToFloat) {
@@ -112,6 +116,10 @@ TEST_F(FixedTest, FixedToFloat) {
     EXPECT_FLOAT_EQ(1.406, mFixedToFloat(Fixed::from_val(360)));
     EXPECT_FLOAT_EQ(1.410, mFixedToFloat(Fixed::from_val(361)));
     EXPECT_FLOAT_EQ(1.414, mFixedToFloat(Fixed::from_val(362)));
+
+    EXPECT_FLOAT_EQ(8388607.996, mFixedToFloat(Fixed::from_val(2147483647)));
+    EXPECT_FLOAT_EQ(-8388607.996, mFixedToFloat(Fixed::from_val(-2147483647)));
+    EXPECT_FLOAT_EQ(-8388608.0, mFixedToFloat(Fixed::from_val(-2147483648)));
 }
 
 }  // namespace

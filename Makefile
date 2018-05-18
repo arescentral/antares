@@ -76,19 +76,27 @@ install-data: all
 	install -m 644 resources/antares.iconset/icon_128x128.png $(DESTDIR)$(ICONDIR)/hicolor/128x128/apps/antares.png
 	install -m 755 -d $(DESTDIR)$(ICONDIR)/hicolor/512x512/apps
 	install -m 644 resources/antares.iconset/icon_512x512.png $(DESTDIR)$(ICONDIR)/hicolor/512x512/apps/antares.png
+	
 	install -m 755 -d $(DESTDIR)$(APPDIR)
 	install -m 644 resources/antares.desktop $(DESTDIR)$(APPDIR)
+	
 	install -m 755 -d $(DESTDIR)$(DATADIR)/app
 	install -m 644 data/COPYING $(DESTDIR)$(DATADIR)/app
 	install -m 644 data/AUTHORS $(DESTDIR)$(DATADIR)/app
 	install -m 644 data/README.md $(DESTDIR)$(DATADIR)/app
+	install -m 644 data/info.pn $(DESTDIR)$(DATADIR)/app
+	install -m 644 data/rotation-table $(DESTDIR)$(DATADIR)/app
 	cp -r data/fonts $(DESTDIR)$(DATADIR)/app
 	cp -r data/interfaces $(DESTDIR)$(DATADIR)/app
+	cp -r data/levels $(DESTDIR)$(DATADIR)/app
 	cp -r data/music $(DESTDIR)$(DATADIR)/app
+	cp -r data/objects $(DESTDIR)$(DATADIR)/app
 	cp -r data/pictures $(DESTDIR)$(DATADIR)/app
-	cp -r data/rotation-table $(DESTDIR)$(DATADIR)/app
+	cp -r data/races $(DESTDIR)$(DATADIR)/app
+	cp -r data/replays $(DESTDIR)$(DATADIR)/app
+	cp -r data/sounds $(DESTDIR)$(DATADIR)/app
+	cp -r data/sprites $(DESTDIR)$(DATADIR)/app
 	cp -r data/strings $(DESTDIR)$(DATADIR)/app
-	cp -r data/text $(DESTDIR)$(DATADIR)/app
 
 .PHONY: install-scenario
 install-scenario: all

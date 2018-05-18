@@ -41,7 +41,7 @@ const Fixed kSlowStarFraction   = Fixed::from_float(0.500);
 const Fixed kMediumStarFraction = Fixed::from_float(0.750);
 const Fixed kFastStarFraction   = Fixed::from_float(1.000);
 
-const uint8_t kStarColor = GRAY;
+const Hue kStarColor = Hue::GRAY;
 
 namespace {
 
@@ -74,7 +74,7 @@ void Starfield::reset(Handle<SpaceObject> which_object) {
 }
 
 void Starfield::make_sparks(
-        int32_t sparkNum, int32_t sparkSpeed, Fixed maxVelocity, uint8_t color, Point* location) {
+        int32_t sparkNum, int32_t sparkSpeed, Fixed maxVelocity, Hue hue, Point* location) {
     maxVelocity = evil_scale_by(maxVelocity, gAbsoluteScale);
     if (sparkNum <= 0) {
         return;
@@ -89,7 +89,7 @@ void Starfield::make_sparks(
             spark->motionFraction.h = spark->motionFraction.v = Fixed::zero();
             spark->age                                        = kMaxSparkAge;
             spark->speed                                      = sparkSpeed;
-            spark->color                                      = color;
+            spark->hue                                        = hue;
 
             if (--sparkNum == 0) {
                 return;
@@ -282,8 +282,8 @@ void Starfield::draw() const {
     Points points;
     for (const scrollStarType* star : range(_stars + kSparkStarOffset, _stars + kAllStarNum)) {
         if ((star->speed != kNoStar) && (star->age > 0)) {
-            const RgbColor color = GetRGBTranslateColorShade(
-                    star->color, (star->age >> kSparkAgeToShadeShift) + 1);
+            const RgbColor color =
+                    GetRGBTranslateColorShade(star->hue, (star->age >> kSparkAgeToShadeShift) + 1);
             points.draw(star->location, color);
         }
     }

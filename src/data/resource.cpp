@@ -19,23 +19,27 @@
 #include "data/resource.hpp"
 
 #include <stdio.h>
+#include <array>
 #include <pn/file>
 #include <sfz/sfz.hpp>
 
 #include "config/dirs.hpp"
-
-using std::unique_ptr;
+#include "drawing/text.hpp"
+#include "game/sys.hpp"
+#include "video/driver.hpp"
 
 namespace path = sfz::path;
 
 namespace antares {
 
-static unique_ptr<sfz::mapped_file> load_first(
-        pn::string_view resource_path, const std::vector<pn::string_view>& dirs) {
-    for (const auto& dir : dirs) {
+static std::unique_ptr<sfz::mapped_file> load(pn::string_view resource_path) {
+    pn::string      scenario = scenario_path();
+    pn::string_view factory  = factory_scenario_path();
+    pn::string_view app      = application_path();
+    for (const auto& dir : std::array<pn::string_view, 3>{{scenario, factory, app}}) {
         pn::string path = pn::format("{0}/{1}", dir, resource_path);
         if (path::isfile(path)) {
-            return unique_ptr<sfz::mapped_file>(new sfz::mapped_file(path));
+            return std::unique_ptr<sfz::mapped_file>(new sfz::mapped_file(path));
         }
     }
     throw std::runtime_error(
@@ -43,17 +47,104 @@ static unique_ptr<sfz::mapped_file> load_first(
                     .c_str());
 }
 
-static unique_ptr<sfz::mapped_file> load(pn::string_view resource_path) {
+bool Resource::exists(pn::string_view resource_path) {
     pn::string      scenario = scenario_path();
     pn::string_view factory  = factory_scenario_path();
     pn::string_view app      = application_path();
-    return load_first(resource_path, {scenario, factory, app});
+    for (const auto& dir : std::array<pn::string_view, 3>{{scenario, factory, app}}) {
+        pn::string path = pn::format("{0}/{1}", dir, resource_path);
+        if (path::isfile(path)) {
+            return true;
+        }
+    }
+    return false;
 }
 
-Resource::Resource(pn::string_view type, pn::string_view extension, int id)
-        : Resource(pn::format("{0}/{1}.{2}", type, id, extension)) {}
+static Texture load_png(pn::string_view path, int scale) {
+    Resource    rsrc = Resource::path(pn::format("{0}.png", path));
+    ArrayPixMap pix  = read_png(rsrc.data().open());
+    return sys.video->texture(pn::format("/{0}.png", path), pix, scale);
+}
 
-Resource::Resource(pn::string_view resource_path) : _file(load(resource_path)) {}
+static Texture load_hidpi_texture(pn::string_view name) {
+    int scale = sys.video->scale();
+    while (true) {
+        try {
+            pn::string path = name.copy();
+            if (scale > 1) {
+                return load_png(pn::format("{0}@{1}x", name, scale), scale);
+            } else {
+                return load_png(name, scale);
+            }
+        } catch (...) {
+            if (scale > 1) {
+                scale >>= 1;
+            } else {
+                throw;
+            }
+        }
+    }
+}
+
+Resource Resource::path(pn::string_view path) { return Resource(load(path)); }
+
+Font Resource::font(pn::string_view name) {
+    return ::antares::font(
+            procyon(pn::format("fonts/{0}.pn", name)),
+            load_hidpi_texture(pn::format("fonts/{0}", name)));
+}
+Resource Resource::interface(pn::string_view name) {
+    return Resource(load(pn::format("interfaces/{0}.pn", name)));
+}
+Resource Resource::replay(int id) { return Resource(load(pn::format("replays/{0}.NLRP", id))); }
+
+std::vector<int32_t> Resource::rotation_table() {
+    Resource             rsrc = path("rotation-table");
+    pn::file             in   = rsrc.data().open();
+    std::vector<int32_t> v;
+    v.resize(SystemGlobals::ROT_TABLE_SIZE);
+    for (int32_t& i : v) {
+        in.read(&i).check();
+    }
+    if (!in.read(pn::pad(1)).eof()) {
+        throw std::runtime_error("didn't consume all of rotation data");
+    }
+    return v;
+}
+
+std::vector<pn::string> Resource::strings(int id) {
+    Resource  rsrc(load(pn::format("strings/{0}.pn", id)));
+    pn::value strings;
+    if (!pn::parse(rsrc.data().open(), strings, nullptr)) {
+        throw std::runtime_error(pn::format("Couldn't parse strings/{0}.pn", id).c_str());
+    }
+    pn::array_cref          l = strings.as_array();
+    std::vector<pn::string> result;
+    for (pn::value_cref x : l) {
+        pn::string_view s = x.as_string();
+        result.push_back(s.copy());
+    }
+    return result;
+}
+
+NatePixTable Resource::sprite(pn::string_view name, Hue hue) {
+    pn::value   x = procyon(pn::format("sprites/{0}.pn", name));
+    ArrayPixMap image =
+            read_png(Resource::path(pn::format("sprites/{0}/image.png", name)).data().open());
+    ArrayPixMap overlay =
+            read_png(Resource::path(pn::format("sprites/{0}/overlay.png", name)).data().open());
+    return NatePixTable(name, hue, x, std::move(image), std::move(overlay));
+}
+
+pn::string Resource::text(int id) {
+    return Resource(load(pn::format("text/{0}.txt", id))).string().copy();
+}
+
+Texture Resource::texture(pn::string_view name) {
+    return load_hidpi_texture(pn::format("pictures/{0}", name));
+}
+
+Resource::Resource(std::unique_ptr<sfz::mapped_file> file) : _file(std::move(file)) {}
 
 Resource::~Resource() {}
 
@@ -62,6 +153,14 @@ pn::data_view Resource::data() const { return _file->data(); }
 pn::string_view Resource::string() const {
     return pn::string_view{reinterpret_cast<const char*>(_file->data().data()),
                            static_cast<int>(_file->data().size())};
+}
+
+pn::value Resource::procyon(pn::string_view path) {
+    pn::value x;
+    if (!pn::parse(Resource::path(path).data().open(), x, nullptr)) {
+        throw std::runtime_error("invalid sprite");
+    }
+    return x;
 }
 
 }  // namespace antares

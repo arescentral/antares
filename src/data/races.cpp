@@ -28,18 +28,33 @@ using std::unique_ptr;
 
 namespace antares {
 
-int16_t GetRaceIDFromNum(size_t raceNum) {
-    if (raceNum < plug.races.size()) {
-        return plug.races[raceNum].id;
+Race* Race::get(pn::string_view name) { return &plug.races[name.copy()]; }
+
+std::map<pn::string, NamedHandle<const BaseObject>> optional_ships(path_value x) {
+    if (x.value().is_null()) {
+        return {};
+    } else if (x.value().is_map()) {
+        std::map<pn::string, NamedHandle<const BaseObject>> ships;
+        for (pn::key_value_cref kv : x.value().as_map()) {
+            ships.emplace(kv.key().copy(), required_base(x.get(kv.key())));
+        }
+        return ships;
     } else {
-        return -1;
+        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
     }
 }
 
-bool read_from(pn::file_view in, Race* race) {
-    uint8_t unused;
-    return in.read(
-            &race->id, &race->apparentColor, &unused, &race->illegalColors, &race->advantage);
+Race race(path_value x) {
+    return required_struct<Race>(
+            x, {{"numeric", nullptr},
+                {"singular", {&Race::singular, required_string_copy}},
+                {"plural", {&Race::plural, required_string_copy}},
+                {"military", {&Race::military, required_string_copy}},
+                {"homeworld", {&Race::homeworld, required_string_copy}},
+                {"apparent_color", {&Race::apparentColor, required_hue}},
+                {"illegal_colors", nullptr},
+                {"advantage", {&Race::advantage, required_fixed}},
+                {"ships", {&Race::ships, optional_ships}}});
 }
 
 }  // namespace antares

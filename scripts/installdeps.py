@@ -15,6 +15,8 @@ PACKAGE[UBUNTU] = PACKAGE[DEBIAN] = collections.OrderedDict([
     ("gl", "libgl1-mesa-dev"),
     ("glfw3", "libglfw3-dev"),
     ("glu", "libglu1-mesa-dev"),
+    ("libc++", "libc++-dev"),
+    ("libc++abi", "libc++abi-dev"),
     ("libmodplug", "libmodplug-dev"),
     ("libzip", "libzip-dev"),
     ("libpng16", "libpng16-dev"),

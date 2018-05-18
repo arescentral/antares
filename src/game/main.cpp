@@ -29,8 +29,8 @@
 #include "config/preferences.hpp"
 #include "data/plugin.hpp"
 #include "data/replay.hpp"
+#include "data/resource.hpp"
 #include "data/scenario-list.hpp"
-#include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/shapes.hpp"
 #include "drawing/sprite-handling.hpp"
@@ -146,7 +146,7 @@ class GamePlay : public Card {
 };
 
 MainPlay::MainPlay(
-        Handle<Level> level, bool replay, InputSource* input, bool show_loading_screen,
+        const Level& level, bool replay, InputSource* input, bool show_loading_screen,
         GameResult* game_result)
         : _state(NEW),
           _level(level),
@@ -166,24 +166,18 @@ void MainPlay::become_front() {
             // _replay_builder.init(
             //         sys.prefs->scenario_identifier(),
             //         String(u32_to_version(plug.meta.version)),
-            //         _level->chapter_number(),
+            //         *_level->chapter,
             //         g.random.seed);
 
-            sys.music.play(Music::IDLE, 3000);
+            sys.music.play(Music::IDLE, Music::briefing_song);
 
             if (_show_loading_screen) {
                 stack()->push(new LoadingScreen(_level, &_cancelled));
                 break;
             } else {
-                int32_t max;
-                int32_t current = 0;
-                if (!start_construct_level(_level, &max)) {
-                    *_game_result = QUIT_GAME;
-                    stack()->pop(this);
-                    return;
-                }
-                while (current < max) {
-                    construct_level(_level, &current);
+                LoadState s = start_construct_level(_level);
+                while (!s.done) {
+                    construct_level(&s);
                 }
             }
         }
@@ -197,7 +191,7 @@ void MainPlay::become_front() {
             }
             if (!_replay) {
                 _state = BRIEFING;
-                stack()->push(new BriefingScreen(_level.get(), &_cancelled));
+                stack()->push(new BriefingScreen(_level, &_cancelled));
                 break;
             }
         }
@@ -216,7 +210,9 @@ void MainPlay::become_front() {
 
             set_up_instruments();
 
-            sys.music.play(Music::IN_GAME, g.level->songID);
+            if (g.level->song) {
+                sys.music.play(Music::IN_GAME, *g.level->song);
+            }
 
             stack()->push(new GamePlay(_replay, _input_source, _game_result));
         } break;
@@ -227,7 +223,7 @@ void MainPlay::become_front() {
             sys.music.stop();
 #ifdef DATA_COVERAGE
             {
-                pn::format(stderr, "{{ \"level\": {0},\n", g.level->chapter_number());
+                pn::format(stderr, "{{ \"level\": {0},\n", *g.level->chapter);
                 const char* sep = "";
                 pn::format(stderr, "  \"objects\": [");
                 for (auto object : covered_objects) {
@@ -272,12 +268,11 @@ static const usecs kSleepAfter  = secs(60);
 class PauseScreen : public Card {
   public:
     PauseScreen() {
-        const StringList list(3100);
-        _pause_string = list.at(10).copy();
-        int32_t width = sys.fonts.title->string_width(_pause_string);
-        Rect    bounds(0, 0, width, sys.fonts.title->height);
+        _pause_string = Messages::pause_string().copy();
+        int32_t width = sys.fonts.title.string_width(_pause_string);
+        Rect    bounds(0, 0, width, sys.fonts.title.height);
         bounds.center_in(play_screen());
-        _text_origin = Point(bounds.left, bounds.top + sys.fonts.title->ascent);
+        _text_origin = Point(bounds.left, bounds.top + sys.fonts.title.ascent);
 
         bounds.inset(-4, -4);
         _bracket_bounds = bounds;
@@ -313,8 +308,8 @@ class PauseScreen : public Card {
     virtual void draw() const {
         next()->draw();
         if (asleep() || _visible) {
-            const RgbColor& light_green = GetRGBTranslateColorShade(GREEN, LIGHTER);
-            const RgbColor& dark_green  = GetRGBTranslateColorShade(GREEN, DARKER);
+            const RgbColor& light_green = GetRGBTranslateColorShade(Hue::GREEN, LIGHTER);
+            const RgbColor& dark_green  = GetRGBTranslateColorShade(Hue::GREEN, DARKER);
 
             {
                 Rects rects;
@@ -325,7 +320,7 @@ class PauseScreen : public Card {
                 draw_vbracket(rects, _bracket_bounds, light_green);
             }
 
-            sys.fonts.title->draw(_text_origin, _pause_string, light_green);
+            sys.fonts.title.draw(_text_origin, _pause_string, light_green);
         }
         if (asleep()) {
             Rects().fill(world(), rgba(0, 0, 0, 63));
@@ -375,16 +370,16 @@ void GamePlay::become_front() {
                 case PlayAgainScreen::QUIT:
                     *_game_result  = QUIT_GAME;
                     g.game_over    = true;
-                    g.next_level   = -1;
-                    g.victory_text = -1;
+                    g.next_level   = nullptr;
+                    g.victory_text = "";
                     stack()->pop(this);
                     break;
 
                 case PlayAgainScreen::RESTART:
                     *_game_result  = RESTART_GAME;
                     g.game_over    = true;
-                    g.next_level   = -1;
-                    g.victory_text = -1;
+                    g.next_level   = nullptr;
+                    g.victory_text = "";
                     stack()->pop(this);
                     break;
 
@@ -394,8 +389,8 @@ void GamePlay::become_front() {
                     *_game_result  = WIN_GAME;
                     g.game_over    = true;
                     g.victor       = g.admiral;
-                    g.next_level   = g.level->chapter_number() + 1;
-                    g.victory_text = -1;
+                    g.next_level   = g.level->skip->get();
+                    g.victory_text = "";
                     stack()->pop(this);
                     break;
 
@@ -545,20 +540,24 @@ void GamePlay::fire_timer() {
         case RESTART_GAME: stack()->pop(this); break;
 
         case WIN_GAME:
-            if (_replay || (g.victory_text < 0)) {
+            if (_replay || g.victory_text.empty()) {
                 stack()->pop(this);
             } else {
                 _state        = DEBRIEFING;
                 const auto& a = g.admiral;
                 stack()->push(new DebriefingScreen(
-                        g.victory_text, g.time, g.level->parTime, GetAdmiralLoss(a),
-                        g.level->parLosses, GetAdmiralKill(a), g.level->parKills));
+                        g.victory_text, g.time, g.level->par.time, GetAdmiralLoss(a),
+                        g.level->par.losses, GetAdmiralKill(a), g.level->par.kills));
             }
             break;
 
         case LOSE_GAME:
-            if (_replay || (g.victory_text < 0)) {
+            if (_replay) {
+                *_game_result = QUIT_GAME;
                 stack()->pop(this);
+            } else if (g.victory_text.empty()) {
+                _state = PLAY_AGAIN;
+                stack()->push(new PlayAgainScreen(false, false, &_play_again));
             } else {
                 _state = DEBRIEFING;
                 stack()->push(new DebriefingScreen(g.victory_text));
@@ -585,7 +584,7 @@ void GamePlay::key_down(const KeyDownEvent& event) {
             } else {
                 _state         = PLAY_AGAIN;
                 _player_paused = true;
-                stack()->push(new PlayAgainScreen(true, g.level->is_training, &_play_again));
+                stack()->push(new PlayAgainScreen(true, g.level->skip.has_value(), &_play_again));
                 return;
             }
 
@@ -644,7 +643,7 @@ void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
             } else {
                 _state         = PLAY_AGAIN;
                 _player_paused = true;
-                stack()->push(new PlayAgainScreen(true, g.level->is_training, &_play_again));
+                stack()->push(new PlayAgainScreen(true, g.level->skip.has_value(), &_play_again));
                 return;
             }
     }

@@ -20,6 +20,7 @@
 #define ANTARES_DATA_HANDLE_HPP_
 
 #include <stdlib.h>
+#include <pn/string>
 
 namespace antares {
 
@@ -83,6 +84,29 @@ class HandleList {
     int _begin;
     int _end;
 };
+
+template <typename T>
+class NamedHandle {
+  public:
+    NamedHandle() : _name() {}
+    explicit NamedHandle(pn::string_view name) : _name(name.copy()) {}
+    NamedHandle     copy() const { return NamedHandle(_name.copy()); }
+    pn::string_view name() const { return _name; }
+    T*              get() const { return T::get(_name); }
+    T&              operator*() const { return *get(); }
+    T*              operator->() const { return get(); }
+
+  private:
+    pn::string _name;
+};
+template <typename T>
+inline bool operator==(NamedHandle<T> x, NamedHandle<T> y) {
+    return x.name() == y.name();
+}
+template <typename T>
+inline bool operator!=(NamedHandle<T> x, NamedHandle<T> y) {
+    return !(x == y);
+}
 
 }  // namespace antares
 

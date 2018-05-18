@@ -20,7 +20,13 @@
 #define ANTARES_DATA_ACTION_HPP_
 
 #include <stdint.h>
+#include <memory>
+#include <pn/string>
+#include <sfz/sfz.hpp>
+#include <vector>
 
+#include "data/enums.hpp"
+#include "data/field.hpp"
 #include "data/handle.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
@@ -29,70 +35,9 @@
 namespace antares {
 
 class SpaceObject;
-
-enum objectVerbIDEnum {
-    kNoAction            = 0 << 8,
-    kCreateObject        = 1 << 8,
-    kPlaySound           = 2 << 8,
-    kAlter               = 3 << 8,
-    kMakeSparks          = 4 << 8,
-    kReleaseEnergy       = 5 << 8,
-    kLandAt              = 6 << 8,
-    kEnterWarp           = 7 << 8,
-    kDisplayMessage      = 8 << 8,
-    kChangeScore         = 9 << 8,
-    kDeclareWinner       = 10 << 8,
-    kDie                 = 11 << 8,
-    kSetDestination      = 12 << 8,
-    kActivateSpecial     = 13 << 8,
-    kActivatePulse       = 14 << 8,
-    kActivateBeam        = 15 << 8,
-    kColorFlash          = 16 << 8,
-    kCreateObjectSetDest = 17 << 8,  // creates an object with the same destination as anObject's
-                                     // (either subject or direct)
-    kNilTarget           = 18 << 8,
-    kDisableKeys         = 19 << 8,
-    kEnableKeys          = 20 << 8,
-    kSetZoom             = 21 << 8,
-    kComputerSelect      = 22 << 8,  // selects a line & screen of the minicomputer
-    kAssumeInitialObject = 23 << 8,  // assumes the identity of an intial object; for tutorial
-};
-
-enum alterVerbIDType {
-    kAlterDamage      = kAlter | 0,
-    kAlterVelocity    = kAlter | 1,
-    kAlterThrust      = kAlter | 2,
-    kAlterMaxThrust   = kAlter | 3,
-    kAlterMaxVelocity = kAlter | 4,
-    kAlterMaxTurnRate = kAlter | 5,
-    kAlterLocation    = kAlter | 6,
-    kAlterScale       = kAlter | 7,
-    kAlterWeapon1     = kAlter | 8,
-    kAlterWeapon2     = kAlter | 9,
-    kAlterSpecial     = kAlter | 10,
-    kAlterEnergy      = kAlter | 11,
-    kAlterOwner       = kAlter | 12,
-    kAlterHidden      = kAlter | 13,
-    kAlterCloak       = kAlter | 14,
-    kAlterOffline     = kAlter | 15,
-    kAlterSpin        = kAlter | 16,
-    kAlterBaseType    = kAlter | 17,
-    kAlterConditionTrueYet =
-            kAlter | 18,  // relative = state, min = which condition basically force to recheck
-    kAlterOccupation = kAlter | 19,  // for special neutral death objects
-    kAlterAbsoluteCash =
-            kAlter |
-            20,  // relative: true = cash to object : false = range = admiral who gets cash
-    kAlterAge              = kAlter | 21,
-    kAlterAttributes       = kAlter | 22,
-    kAlterLevelKeyTag      = kAlter | 23,
-    kAlterOrderKeyTag      = kAlter | 24,
-    kAlterEngageKeyTag     = kAlter | 25,
-    kAlterAbsoluteLocation = kAlter | 26,
-};
-
-enum dieVerbIDEnum { kDieNone = 0, kDieExpire = 1, kDieDestroy = 2 };
-typedef uint8_t dieVerbIDType;
+struct Level;
+struct Level_Initial;
+struct Level_Condition;
 
 //
 // Action:
@@ -101,215 +46,356 @@ typedef uint8_t dieVerbIDType;
 //  destroy, expire, create, collide, activate, or message.
 //
 
-union argumentType {
-    argumentType() {}
-
-    // createObject: make another type of object appear
-    struct CreateObject {
-        Handle<BaseObject> whichBaseType;      // what type
-        int32_t            howManyMinimum;     // # to make min
-        int32_t            howManyRange;       // # to make range
-        uint8_t            velocityRelative;   // is velocity relative to creator?
-        uint8_t            directionRelative;  // determines initial heading
-        int32_t randomDistance;  // if not 0, then object will be created in random direction from
-                                 // 0 to this away
-    };
-    CreateObject createObject;
-
-    // playSound: play a sound effect
-    struct PlaySound {
-        uint8_t priority;
-        ticks   persistence;
-        uint8_t absolute;  // not distanced
-        int32_t volumeMinimum;
-        int32_t volumeRange;
-        int32_t idMinimum;
-        int32_t idRange;
-    };
-    PlaySound playSound;
-
-    struct AlterSimple {
-        int32_t amount;
-    };
-    struct AlterSimple alterDamage;
-    struct AlterSimple alterEnergy;
-    struct AlterSimple alterOccupation;
-
-    struct AlterWeapon {
-        Handle<BaseObject> base;
-    } alterWeapon;
-
-    struct AlterFixedRange {
-        Fixed minimum, range;
-    };
-    AlterFixedRange alterSpin;
-    AlterFixedRange alterOffline;
-
-    struct AlterAge {
-        bool  relative;
-        ticks minimum, range;
-    } alterAge;
-
-    struct AlterThrust {
-        bool  relative;
-        Fixed minimum, range;
-    } alterThrust;
-
-    struct AlterMaxVelocity {
-        Fixed amount;
-    } alterMaxVelocity;
-
-    struct AlterOwner {
-        bool            relative;
-        Fixed           amount;
-        Handle<Admiral> admiral;
-    } alterOwner;
-
-    struct AlterCash {
-        bool            relative;
-        Fixed           amount;
-        Handle<Admiral> admiral;
-    } alterAbsoluteCash;
-
-    struct AlterVelocity {
-        bool  relative;
-        Fixed amount;
-    } alterVelocity;
-
-    struct AlterBaseType {
-        bool               keep_ammo;
-        Handle<BaseObject> base;
-    } alterBaseType;
-
-    struct AlterLocation {
-        bool    relative;
-        int32_t by;
-    } alterLocation;
-
-    struct AlterAbsoluteLocation {
-        bool  relative;
-        Point at;
-    } alterAbsoluteLocation;
-
-    struct AlterHidden {
-        int32_t first;
-        int32_t count_minus_1;
-    } alterHidden;
-
-    struct AlterConditionTrueYet {
-        bool    true_yet;
-        int32_t first;
-        int32_t count_minus_1;
-    } alterConditionTrueYet;
-
-    // makeSpark
-    struct MakeSparks {
-        int32_t howMany;
-        int32_t speed;
-        Fixed   velocityRange;
-        uint8_t color;
-    };
-    MakeSparks makeSparks;
-
-    // release energy
-    struct ReleaseEnergy {
-        Fixed percent;
-    };
-    ReleaseEnergy releaseEnergy;
-
-    // land at
-    struct LandAt {
-        int32_t landingSpeed;
-    };
-    LandAt landAt;
-
-    // enter warp
-    struct EnterWarp {
-        Fixed warpSpeed;
-    };
-    EnterWarp enterWarp;
-
-    // Display message
-    struct DisplayMessage {
-        int16_t resID;
-        int16_t pageNum;
-    };
-    DisplayMessage displayMessage;
-
-    // Change score
-    struct ChangeScore {
-        Handle<Admiral> whichPlayer;  // in scenario's terms; -1 = owner of executor of action
-        int32_t         whichScore;   // each player can have many "scores"
-        int32_t         amount;
-    };
-    ChangeScore changeScore;
-
-    // Declare winner
-    struct DeclareWinner {
-        Handle<Admiral> whichPlayer;  // in scenario's terms; -1 = owner of executor of action
-        int32_t         nextLevel;    // -1 = none
-        int32_t         textID;       // id of "debriefing" text
-    };
-    DeclareWinner declareWinner;
-
-    // killObject: cause object to expire
-    struct KillObject {
-        dieVerbIDType dieType;
-    };
-    KillObject killObject;
-
-    // colorFlash: flash whole screen to a color
-    struct ColorFlash {
-        int32_t length;  // length of color flash
-        uint8_t color;   // color of flash
-        uint8_t shade;   // brightness of flash
-    };
-    ColorFlash colorFlash;
-
-    // keys: disable or enable keys/ for tutorial
-    struct Keys {
-        uint32_t keyMask;
-    };
-    Keys keys;
-
-    // zoomLevel; manually set zoom level
-    struct Zoom {
-        int32_t zoomLevel;
-    };
-    Zoom zoom;
-
-    struct ComputerSelect {
-        int32_t screenNumber;
-        int32_t lineNumber;
-    };
-    ComputerSelect computerSelect;
-
-    struct AssumeInitial {
-        int32_t whichInitialObject;
-    };
-    AssumeInitial assumeInitial;
-};
-
 struct Action {
-    static Action* get(int number);
+    bool reflexive;  // does it apply to object executing verb?
 
-    uint16_t verb;
+    struct Filter {
+        uint32_t                   attributes = 0;
+        std::map<pn::string, bool> tags;
+        Owner                      owner = Owner::ANY;
+    } filter;
 
-    uint8_t  reflexive;        // does it apply to object executing verb?
-    uint32_t inclusiveFilter;  // if it has ALL these attributes, OK -- for non-reflective verbs
-    uint32_t exclusiveFilter;  // don't execute if it has ANY of these
-    uint8_t  levelKeyTag;
-    int16_t  owner;  // 0 no matter, 1 same owner, -1 different owner
-    ticks    delay;
-    //  uint32_t                    reserved1;
-    int16_t      initialSubjectOverride;
-    int16_t      initialDirectOverride;
-    uint32_t     reserved2;
-    argumentType argument;
+    ticks delay = ticks(0);
+
+    Handle<const Level_Initial> initialSubjectOverride;
+    Handle<const Level_Initial> initialDirectOverride;
+
+    virtual ~Action() = default;
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const = 0;
+
+    virtual const NamedHandle<const BaseObject>* created_base() const;
+    virtual std::vector<pn::string>              sound_ids() const;
+    virtual bool                                 alters_owner() const;
+    virtual bool                                 check_conditions() const;
 
     static const size_t byte_size = 48;
 };
-bool read_from(pn::file_view in, Action* action);
+
+std::vector<std::unique_ptr<const Action>> read_actions(int begin, int end);
+std::vector<std::unique_ptr<const Action>> required_action_array(path_value x);
+std::vector<std::unique_ptr<const Action>> optional_action_array(path_value x);
+
+struct NoAction : public Action {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct AgeAction : public Action {
+    bool         relative;  // if true, add value to age; if false, set age to value
+    Range<ticks> value;     // age range
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct AssumeAction : public Action {
+    int32_t which;  // which initial to become
+                    // Note: player 1’s score 0 is added to this number
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct CapSpeedAction : public Action {
+    sfz::optional<Fixed> value;  // if absent set to base type’s default
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct CaptureAction : public Action {
+    sfz::optional<Handle<Admiral>>
+            player;  // if present, set focus’s owner to `*player`
+                     // if absent and reflexive, set subject’s owner to object’s
+                     // if absent and non-reflexive, set object’s owner to subject’s
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+    virtual bool alters_owner() const;
+};
+
+struct CloakAction : public Action {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct ConditionAction : public Action {
+    HandleList<const Level_Condition> enable;
+    HandleList<const Level_Condition> disable;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct CreateAction : public Action {
+    NamedHandle<const BaseObject> base;                         // what type
+    Range<int64_t>                count              = {1, 2};  // # to make randomly
+    bool                          relative_velocity  = false;   // is velocity relative to creator?
+    bool                          relative_direction = false;   // determines initial heading
+    int32_t                       distance = 0;      // create at this distance in random direction
+    bool                          inherit  = false;  // if false, gets creator as target
+                                                     // if true, gets creator’s target as target
+    bool legacy_random = false;                      // if true, consume a random number from
+                                                     // subject even if not necessary
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+    virtual const NamedHandle<const BaseObject>* created_base() const;
+};
+
+struct DisableAction : public Action {
+    Range<Fixed> value;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct EnergizeAction : public Action {
+    int32_t value;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct EquipAction : public Action {
+    Weapon                        which;
+    NamedHandle<const BaseObject> base;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+    virtual const NamedHandle<const BaseObject>* created_base() const;
+};
+
+struct FireAction : public Action {
+    Weapon which;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct FlashAction : public Action {
+    int32_t length;  // length of color flash
+    Hue     hue;     // hue of flash
+    uint8_t shade;   // brightness of flash
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct HealAction : public Action {
+    int32_t value;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct HoldPositionAction : public Action {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct KeyAction : public Action {
+    uint32_t disable = 0;  // keys to disable
+    uint32_t enable  = 0;  // keys to enable
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct KillAction : public Action {
+    KillKind kind;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct LandAction : public Action {
+    int32_t speed;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct MessageAction : public Action {
+    int16_t                 id;     // identifies the message to a "message" condition
+    std::vector<pn::string> pages;  // pages of message bodies to show
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+    virtual bool check_conditions() const;
+};
+
+struct MorphAction : public Action {
+    bool                          keep_ammo;
+    NamedHandle<const BaseObject> base;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+    virtual const NamedHandle<const BaseObject>* created_base() const;
+};
+
+struct MoveAction : public Action {
+    MoveOrigin     origin;
+    coordPointType to;
+    int32_t        distance;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct OccupyAction : public Action {
+    int32_t value;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct OrderAction : public Action {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct PayAction : public Action {
+    Fixed                          value;   // amount to pay; not affected by earning power
+    sfz::optional<Handle<Admiral>> player;  // if not present pay focus’s owner.
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct PushAction : public Action {
+    PushKind kind;
+    Fixed    value;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct RevealAction : public Action {
+    HandleList<const Level_Initial> initial;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct ScoreAction : public Action {
+    sfz::optional<Handle<Admiral>>
+            player;  // which player’s score to change; absent = owner of focus
+    int32_t which;   // 0-2; each player has three "scores"
+    int32_t value;   // amount to change by
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+    virtual bool check_conditions() const;
+};
+
+struct SelectAction : public Action {
+    Screen  screen;
+    int32_t line;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct PlayAction : public Action {
+    uint8_t priority;     // 1-5; takes over a channel playing a lower-priority sound
+    ticks   persistence;  // time before a lower-priority sound can take channel
+    bool    absolute;     // plays at same volume, regardless of distance from player
+    int32_t volume;       // 1-255; volume at focus
+
+    struct Sound {
+        pn::string sound;
+    };
+    sfz::optional<pn::string> sound;  // play this sound if present
+    std::vector<Sound>        any;    // pick ID randomly
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+    virtual std::vector<pn::string> sound_ids() const;
+};
+
+struct SparkAction : public Action {
+    int32_t count;     // number of sparks to create
+    Hue     hue;       // hue of sparks; they start bright and fade with time
+    int32_t decay;     // sparks will be visible for 17.05/decay seconds
+    Fixed   velocity;  // sparks fly at at random speed up to this
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct SpinAction : public Action {
+    Range<Fixed> value;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct ThrustAction : public Action {
+    bool         relative;  // if true, set to value; if false, add value
+    Range<Fixed> value;     // range
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct WarpAction : public Action {
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct WinAction : public Action {
+    sfz::optional<Handle<Admiral>>          player;  // victor; absent = owner of focus
+    sfz::optional<NamedHandle<const Level>> next;    // next chapter to play; absent = none
+    pn::string                              text;    // "debriefing" text
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
+
+struct ZoomAction : public Action {
+    Zoom value;
+
+    virtual void apply(
+            Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
+            Point* offset) const;
+};
 
 }  // namespace antares
 

@@ -22,6 +22,7 @@
 
 #include "config/dirs.hpp"
 #include "data/scenario-list.hpp"
+#include "lang/exception.hpp"
 
 namespace args = sfz::args;
 
@@ -40,6 +41,13 @@ void usage(pn::file_view out, pn::string_view progname, int retcode) {
             "    -h, --help          display this help screen\n",
             progname, default_factory_scenario_path());
     exit(retcode);
+}
+
+pn::value maybe_string(const sfz::optional<pn::string>& s) {
+    if (s.has_value()) {
+        return s->copy();
+    }
+    return nullptr;
 }
 
 void main(int argc, char* const* argv) {
@@ -71,18 +79,19 @@ void main(int argc, char* const* argv) {
 
     args::parse(argc - 1, argv + 1, callbacks);
 
-    bool found_at_least_one = false;
+    bool         found_at_least_one = false;
     ScenarioList list;
     for (size_t i = 0; i < list.size(); ++i) {
-        if (!list.at(i).installed) {
-            continue;
-        }
-        pn::format(stdout, "{0}:\n", list.at(i).identifier);
-        pn::format(stdout, "    title: {0}\n", list.at(i).title);
-        pn::format(stdout, "    download url: {0}\n", list.at(i).download_url);
-        pn::format(stdout, "    author: {0}\n", list.at(i).author);
-        pn::format(stdout, "    author url: {0}\n", list.at(i).author_url);
-        pn::format(stdout, "    version: {0}\n", stringify(list.at(i).version));
+        const auto& s = list.at(i);
+        pn::dump(
+                stdout, pn::map{{s.identifier.copy(),
+                                 pn::map{
+                                         {"title", s.title.copy()},
+                                         {"download_url", maybe_string(s.download_url)},
+                                         {"author", s.author.copy()},
+                                         {"author_url", maybe_string(s.author_url)},
+                                         {"version", s.version.copy()},
+                                 }}});
         found_at_least_one = true;
     }
     if (!found_at_least_one) {
@@ -90,33 +99,6 @@ void main(int argc, char* const* argv) {
     }
 }
 
-void print_nested_exception(const std::exception& e) {
-    pn::format(stderr, ": {0}", e.what());
-    try {
-        std::rethrow_if_nested(e);
-    } catch (const std::exception& e) {
-        print_nested_exception(e);
-    }
-}
-
-void print_exception(pn::string_view progname, const std::exception& e) {
-    pn::format(stderr, "{0}: {1}", sfz::path::basename(progname), e.what());
-    try {
-        std::rethrow_if_nested(e);
-    } catch (const std::exception& e) {
-        print_nested_exception(e);
-    }
-    pn::format(stderr, "\n");
-}
-
 }  // namespace antares
 
-int main(int argc, char* const* argv) {
-    try {
-        antares::main(argc, argv);
-    } catch (const std::exception& e) {
-        antares::print_exception(argv[0], e);
-        return 1;
-    }
-    return 0;
-}
+int main(int argc, char* const* argv) { return antares::wrap_main(antares::main, argc, argv); }

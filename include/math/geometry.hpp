@@ -54,8 +54,6 @@ struct Point {
 bool operator==(const Point& lhs, const Point& rhs);
 bool operator!=(const Point& lhs, const Point& rhs);
 
-bool read_from(pn::file_view in, Point* p);
-
 // A size (width, height) in two-dimensional space.
 struct Size {
     int32_t width;
@@ -150,6 +148,9 @@ struct Rect {
     // @param [in] y        Added to `top` and `bottom`.
     void offset(int32_t x, int32_t y);
 
+    // Multiplies all components by `(x, y)`
+    void scale(int32_t x, int32_t y);
+
     // Shrinks this Rect by `(x, y)`.
     //
     // Either of `x` and `y` may be negative, which would correspond to enlarging the rectangle in
@@ -185,7 +186,6 @@ struct Rect {
     void enlarge_to(const Rect& r);
 };
 
-bool       read_from(pn::file_view in, Rect* r);
 pn::string stringify(Rect r);
 
 struct coordPointType {

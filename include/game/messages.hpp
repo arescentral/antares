@@ -25,38 +25,39 @@
 #include "data/handle.hpp"
 #include "drawing/color.hpp"
 #include "drawing/styled-text.hpp"
+#include "game/globals.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
-
-const int16_t kMessageStringID    = 3100;
-const int16_t kZoomStringOffset   = 1;
-const int16_t kAutoPilotOnString  = 9;
-const int16_t kAutoPilotOffString = 10;
-
-const uint8_t kStatusLabelColor = AQUA;
-const uint8_t kStatusWarnColor  = PINK;
 
 class Messages {
   public:
     static void    init();
     static void    clear();
     static void    add(pn::string_view message);
-    static void    start(int16_t, int16_t);
+    static void    start(int16_t start_id, const std::vector<pn::string>* pages);
     static void    clip();
     static void    end();
     static void    advance();
     static void    previous();
     static void    replay();
-    static void    set_status(pn::string_view status, uint8_t color);
     static int16_t current();
+
+    static void zoom(Zoom zoom);
+    static void autopilot(bool on);
+    static void shields_low();
+    static void max_ships_built();
 
     static void draw_long_message(ticks time_pass);
     static void draw_message_screen(ticks by_units);
     static void draw_message();
 
+    static pn::string_view pause_string();
+
   private:
     struct longMessageType;
+
+    static void set_status(pn::string_view status, Hue hue);
 
     static std::queue<pn::string> message_data;
     static longMessageType*       long_message_data;

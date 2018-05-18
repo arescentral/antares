@@ -23,7 +23,6 @@
 #include <vector>
 
 #include "data/resource.hpp"
-#include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
 #include "drawing/shapes.hpp"
@@ -58,7 +57,13 @@ void string_replace(pn::string_ref s, pn::string_view in, pn::string_view out) {
 }
 
 LabeledRect interface_item(const Rect& text_bounds) {
-    return LabeledRect(0, text_bounds, {2001, 29}, GOLD, kLarge);
+    LabeledRect r;
+    r.id     = 0;
+    r.bounds = text_bounds;
+    r.label  = "Results";
+    r.hue    = Hue::GOLD;
+    r.style  = InterfaceStyle::LARGE;
+    return r;
 }
 
 Rect pix_bounds(const InterfaceItem& item) {
@@ -105,21 +110,21 @@ int score(
 
 unique_ptr<StyledText> style_score_text(pn::string text) {
     unique_ptr<StyledText> result(new StyledText(sys.fonts.button));
-    result->set_fore_color(GetRGBTranslateColorShade(GOLD, VERY_LIGHT));
-    result->set_back_color(GetRGBTranslateColorShade(GOLD, DARKEST));
+    result->set_fore_color(GetRGBTranslateColorShade(Hue::GOLD, VERY_LIGHT));
+    result->set_back_color(GetRGBTranslateColorShade(Hue::GOLD, DARKEST));
     result->set_retro_text(text);
     return result;
 }
 
 }  // namespace
 
-DebriefingScreen::DebriefingScreen(int text_id)
-        : _state(DONE), _typed_chars(0), _data_item(initialize(text_id, false)) {}
+DebriefingScreen::DebriefingScreen(pn::string_view message)
+        : _state(DONE), _typed_chars(0), _data_item(initialize(message, false)) {}
 
 DebriefingScreen::DebriefingScreen(
-        int text_id, game_ticks your_time, game_ticks par_time, int your_loss, int par_loss,
-        int your_kill, int par_kill)
-        : _state(TYPING), _typed_chars(0), _data_item(initialize(text_id, true)) {
+        pn::string_view message, game_ticks your_time, game_ticks par_time, int your_loss,
+        int par_loss, int your_kill, int par_kill)
+        : _state(TYPING), _typed_chars(0), _data_item(initialize(message, true)) {
     Rect score_area = _message_bounds;
     score_area.top  = score_area.bottom - kScoreTableHeight;
 
@@ -154,9 +159,9 @@ void DebriefingScreen::draw() const {
     interface_bounds.offset(_pix_bounds.left, _pix_bounds.top);
     draw_interface_item(_data_item, KEYBOARD_MOUSE);
 
-    draw_text_in_rect(interface_bounds, _message, kLarge, GOLD);
+    draw_text_in_rect(interface_bounds, _message, InterfaceStyle::LARGE, Hue::GOLD);
 
-    RgbColor bracket_color  = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
+    RgbColor bracket_color  = GetRGBTranslateColorShade(Hue::GOLD, VERY_LIGHT);
     Rect     bracket_bounds = _score_bounds;
     bracket_bounds.inset(-2, -2);
     draw_vbracket(Rects(), bracket_bounds, bracket_color);
@@ -212,11 +217,10 @@ void DebriefingScreen::fire_timer() {
     }
 }
 
-LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
-    Resource rsrc("text", "txt", text_id);
-    _message = rsrc.string().copy();
+LabeledRect DebriefingScreen::initialize(pn::string_view message, bool do_score) {
+    _message = message.copy();
 
-    int  text_height = GetInterfaceTextHeightFromWidth(_message, kLarge, kTextWidth);
+    int text_height = GetInterfaceTextHeightFromWidth(_message, InterfaceStyle::LARGE, kTextWidth);
     Rect text_bounds(0, 0, kTextWidth, text_height);
     if (do_score) {
         text_bounds.bottom += kScoreTableHeight;
@@ -233,10 +237,9 @@ LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
 pn::string DebriefingScreen::build_score_text(
         game_ticks your_time, game_ticks par_time, int your_loss, int par_loss, int your_kill,
         int par_kill) {
-    Resource   rsrc("text", "txt", 6000);
-    pn::string text = rsrc.string().copy();
+    pn::string text = Resource::text(6000);
 
-    StringList strings(6000);
+    auto strings = Resource::strings(6000);
 
     const int your_mins  = duration_cast<secs>(your_time.time_since_epoch()).count() / 60;
     const int your_secs  = duration_cast<secs>(your_time.time_since_epoch()).count() % 60;
@@ -254,7 +257,7 @@ pn::string DebriefingScreen::build_score_text(
         secs_string += dec(par_secs, 2);
         string_replace(text, strings.at(3), secs_string);
     } else {
-        StringList data_strings(6002);
+        auto data_strings = Resource::strings(6002);
         string_replace(text, strings.at(2), data_strings.at(8));  // = "N/A"
         string_replace(text, strings.at(3), "");
     }

@@ -27,11 +27,11 @@ namespace antares {
 
 class DebriefingScreen : public Card {
   public:
-    DebriefingScreen(int text_id);
+    DebriefingScreen(pn::string_view message);
 
     DebriefingScreen(
-            int text_id, game_ticks your_time, game_ticks par_time, int your_loss, int par_loss,
-            int your_kill, int par_kill);
+            pn::string_view message, game_ticks your_time, game_ticks par_time, int your_loss,
+            int par_loss, int your_kill, int par_kill);
 
     virtual void become_front();
     virtual void resign_front();
@@ -49,7 +49,7 @@ class DebriefingScreen : public Card {
             int your_kill, int par_kill);
 
   private:
-    LabeledRect initialize(int text_id, bool do_score);
+    LabeledRect initialize(pn::string_view message, bool do_score);
 
     enum State {
         TYPING,

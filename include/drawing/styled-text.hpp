@@ -22,6 +22,7 @@
 #include <pn/string>
 #include <vector>
 
+#include "data/handle.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
 #include "math/geometry.hpp"
@@ -33,13 +34,14 @@ class Picture;
 
 // the inline pictType struct is for keeping track of picts included in my text boxes.
 struct inlinePictType {
-    Rect    bounds;
-    int16_t id;
+    Rect              bounds;
+    pn::string        picture;
+    const BaseObject* object;  // May be null.
 };
 
 class StyledText {
   public:
-    StyledText(const Font* font);
+    StyledText(const Font& font);
     StyledText(const StyledText&) = delete;
     StyledText& operator=(const StyledText&) = delete;
     ~StyledText();
@@ -101,7 +103,7 @@ class StyledText {
     int                         _auto_width;
     int                         _side_margin;
     int                         _line_spacing;
-    const Font* const           _font;
+    const Font&                 _font;
 };
 
 }  // namespace antares

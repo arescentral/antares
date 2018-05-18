@@ -23,7 +23,6 @@
 #include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
-#include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "drawing/shapes.hpp"
@@ -73,14 +72,12 @@ const int32_t kButBoxBottom = 475;
 
 const int32_t kMiniScreenNoLineSelected = -1;
 
-const uint8_t kMiniScreenColor = GREEN;
-const uint8_t kMiniButColor    = AQUA;
+const Hue kMiniScreenColor = Hue::GREEN;
+const Hue kMiniButColor    = Hue::AQUA;
 
 const int32_t kNoLineButton  = -1;
 const int32_t kInLineButton  = kCompAcceptKeyNum;
 const int32_t kOutLineButton = kCompCancelKeyNum;
-
-static ANTARES_GLOBAL std::unique_ptr<StringList> gMissionStatusStrList;
 
 enum {
     kMainMiniScreen    = 1,
@@ -178,19 +175,19 @@ void pad_to(pn::string& s, size_t width) {
     s = std::move(t);
 }
 
-const int32_t MiniIconMacLineTop() { return sys.fonts.computer->height * 2; }
+const int32_t MiniIconMacLineTop() { return sys.fonts.computer.height * 2; }
 
 Rect mini_screen_line_bounds(int32_t mtop, int32_t mlinenum, int32_t mleft, int32_t mright) {
     Rect mbounds;
     mbounds.left   = kMiniScreenLeft + mleft;
-    mbounds.top    = mtop + mlinenum * sys.fonts.computer->height;
+    mbounds.top    = mtop + mlinenum * sys.fonts.computer.height;
     mbounds.right  = kMiniScreenLeft + mright;
-    mbounds.bottom = mbounds.top + sys.fonts.computer->height;
+    mbounds.bottom = mbounds.top + sys.fonts.computer.height;
     return mbounds;
 }
 
 inline int32_t mGetLineNumFromV(int32_t mV) {
-    return (((mV) - (kMiniScreenTop + instrument_top())) / sys.fonts.computer->height);
+    return (((mV) - (kMiniScreenTop + instrument_top())) / sys.fonts.computer.height);
 }
 
 inline void mCopyBlankLineString(miniScreenLineType* mline, pn::string_view mstring) {
@@ -203,7 +200,7 @@ inline void mCopyBlankLineString(miniScreenLineType* mline, pn::string_view mstr
 }  // namespace
 
 static void draw_mini_ship_data(
-        Handle<SpaceObject> obj, uint8_t header_color, int16_t screen_top, pn::string_view label);
+        Handle<SpaceObject> obj, Hue header_hue, int16_t screen_top, pn::string_view label);
 static void MiniComputerExecute(
         int32_t whichPage, int32_t whichLine, Handle<Admiral> whichAdmiral);
 
@@ -228,15 +225,6 @@ void MiniScreenCleanup() {
 
 #pragma mark -
 
-void SetMiniScreenStatusStrList(int16_t strID) {
-    DisposeMiniScreenStatusStrList();
-    if (strID > 0) {
-        gMissionStatusStrList.reset(new StringList(strID));
-    }
-}
-
-void DisposeMiniScreenStatusStrList() { gMissionStatusStrList.reset(); }
-
 void ClearMiniScreenLines() {
     miniScreenLineType* c = g.mini.lineData.get();
     for (int32_t b = 0; b < kMiniScreenTrueLineNum; b++) {
@@ -244,7 +232,7 @@ void ClearMiniScreenLines() {
         c->whichButton = kNoLineButton;
         c->kind        = MINI_NONE;
         c->underline   = false;
-        c->sourceData  = BaseObject::none();
+        c->sourceData  = nullptr;
         c->callback    = nullptr;
         c++;
     }
@@ -254,7 +242,7 @@ static void underline(const Rects& rects, int line) {
     Rect rect = Rect(kMiniScreenLeft, kMiniScreenTop, kMiniScreenRight, kMiniScreenBottom);
     rect.offset(0, instrument_top());
     const RgbColor color = GetRGBTranslateColorShade(kMiniScreenColor, MEDIUM);
-    int32_t        y = rect.top + (line * sys.fonts.computer->height) + sys.fonts.computer->ascent;
+    int32_t        y = rect.top + (line * sys.fonts.computer.height) + sys.fonts.computer.ascent;
     rects.fill({rect.left, y, rect.right - 1, y + 1}, color);
 }
 
@@ -263,9 +251,9 @@ static void highlight(const Rects& rects, int line) {
     rect.offset(0, instrument_top());
     Rect hilite_rect;
     hilite_rect.left   = rect.left;
-    hilite_rect.top    = rect.top + (line * sys.fonts.computer->height);
+    hilite_rect.top    = rect.top + (line * sys.fonts.computer.height);
     hilite_rect.right  = rect.right;
-    hilite_rect.bottom = hilite_rect.top + sys.fonts.computer->height;
+    hilite_rect.bottom = hilite_rect.top + sys.fonts.computer.height;
     draw_shaded_rect(rects, hilite_rect, kMiniScreenColor, DARK, MEDIUM, DARKER);
 }
 
@@ -274,8 +262,7 @@ static void item_text(const Quads& quads, int line, pn::string_view string, bool
     rect.offset(0, instrument_top());
     Point origin = rect.origin();
     origin.offset(
-            kMiniScreenLeftBuffer,
-            (line * sys.fonts.computer->height) + sys.fonts.computer->ascent);
+            kMiniScreenLeftBuffer, (line * sys.fonts.computer.height) + sys.fonts.computer.ascent);
     RgbColor textcolor = GetRGBTranslateColorShade(kMiniScreenColor, VERY_LIGHT);
     if (dim) {
         if (line == g.mini.selectLine) {
@@ -284,7 +271,7 @@ static void item_text(const Quads& quads, int line, pn::string_view string, bool
             textcolor = GetRGBTranslateColorShade(kMiniScreenColor, MEDIUM);
         }
     }
-    sys.fonts.computer->draw(quads, origin, string, textcolor);
+    sys.fonts.computer.draw(quads, origin, string, textcolor);
 }
 
 static void button_on(const Rects& rects, int line) {
@@ -292,9 +279,9 @@ static void button_on(const Rects& rects, int line) {
     rect.offset(0, instrument_top());
     Rect hilite_rect;
     hilite_rect.left   = rect.left + kMiniScreenLeftBuffer - 2;
-    hilite_rect.top    = rect.top + (line * sys.fonts.computer->height);
+    hilite_rect.top    = rect.top + (line * sys.fonts.computer.height);
     hilite_rect.right  = rect.right;
-    hilite_rect.bottom = hilite_rect.top + sys.fonts.computer->height;
+    hilite_rect.bottom = hilite_rect.top + sys.fonts.computer.height;
     draw_shaded_rect(rects, hilite_rect, kMiniButColor, LIGHT, VERY_LIGHT, MEDIUM);
 }
 
@@ -303,10 +290,10 @@ static void button_off(const Rects& rects, int line) {
     rect.offset(0, instrument_top());
     Rect hilite_rect;
     hilite_rect.left = rect.left + kMiniScreenLeftBuffer - 2;
-    hilite_rect.top  = rect.top + (line * sys.fonts.computer->height);
+    hilite_rect.top  = rect.top + (line * sys.fonts.computer.height);
     hilite_rect.right =
-            rect.left + kMiniScreenLeftBuffer + sys.fonts.computer->logicalWidth * 4 + 1;
-    hilite_rect.bottom = hilite_rect.top + sys.fonts.computer->height;
+            rect.left + kMiniScreenLeftBuffer + sys.fonts.computer.logicalWidth * 4 + 1;
+    hilite_rect.bottom = hilite_rect.top + sys.fonts.computer.height;
     draw_shaded_rect(rects, hilite_rect, kMiniButColor, MEDIUM, LIGHT, DARK);
 }
 
@@ -315,10 +302,9 @@ static void button_on_text(const Quads& quads, int line, pn::string_view string)
     rect.offset(0, instrument_top());
     Point origin = rect.origin();
     origin.offset(
-            kMiniScreenLeftBuffer,
-            (line * sys.fonts.computer->height) + sys.fonts.computer->ascent);
+            kMiniScreenLeftBuffer, (line * sys.fonts.computer.height) + sys.fonts.computer.ascent);
     RgbColor textcolor = RgbColor::black();
-    sys.fonts.computer->draw(quads, origin, string, textcolor);
+    sys.fonts.computer.draw(quads, origin, string, textcolor);
 }
 
 static void button_off_text(const Quads& quads, int line, pn::string_view string) {
@@ -326,10 +312,9 @@ static void button_off_text(const Quads& quads, int line, pn::string_view string
     rect.offset(0, instrument_top());
     Point origin = rect.origin();
     origin.offset(
-            kMiniScreenLeftBuffer,
-            (line * sys.fonts.computer->height) + sys.fonts.computer->ascent);
+            kMiniScreenLeftBuffer, (line * sys.fonts.computer.height) + sys.fonts.computer.ascent);
     RgbColor textcolor = GetRGBTranslateColorShade(kMiniButColor, VERY_LIGHT);
-    sys.fonts.computer->draw(quads, origin, string, textcolor);
+    sys.fonts.computer.draw(quads, origin, string, textcolor);
 }
 
 static void draw_minicomputer_lines() {
@@ -365,7 +350,7 @@ static void draw_minicomputer_lines() {
     }
 
     {
-        Quads           quads(sys.fonts.computer->texture);
+        Quads           quads(sys.fonts.computer.texture);
         bool            dim[kMiniScreenCharHeight];
         pn::string_view strings[kMiniScreenCharHeight];
         for (int32_t count = 0; count < kMiniScreenCharHeight; count++) {
@@ -403,9 +388,9 @@ void draw_mini_screen() {
         case kStatusMiniScreen: draw_minicomputer_lines(); break;
     }
     draw_mini_ship_data(
-            g.admiral->control(), YELLOW, kMiniSelectTop + instrument_top(), "CONTROL");
+            g.admiral->control(), Hue::YELLOW, kMiniSelectTop + instrument_top(), "CONTROL");
     draw_mini_ship_data(
-            g.admiral->target(), SKY_BLUE, kMiniTargetTop + instrument_top(), "TARGET");
+            g.admiral->target(), Hue::SKY_BLUE, kMiniTargetTop + instrument_top(), "TARGET");
 }
 
 static miniScreenLineType text(pn::string_view name, bool underlined) {
@@ -570,7 +555,7 @@ static void update_build_screen_lines() {
 
         for (int32_t count = 0; count < kMaxShipCanBuild; count++) {
             auto buildObject = line->sourceData;
-            if (buildObject.get()) {
+            if (buildObject) {
                 if (buildObject->price > mFixedToLong(admiral->cash())) {
                     if (line->kind != MINI_DIM) {
                         line->kind = MINI_DIM;
@@ -610,7 +595,7 @@ void UpdateMiniScreenLines() {
     }
 }
 
-static void draw_player_ammo_in_rect(int32_t value, int8_t hue, const Rect& rect) {
+static void draw_player_ammo_in_rect(int32_t value, Hue hue, const Rect& rect) {
     if (value >= 0) {
         const RgbColor text_color = GetRGBTranslateColorShade(hue, VERY_LIGHT);
         const char     digits[]   = {
@@ -618,7 +603,7 @@ static void draw_player_ammo_in_rect(int32_t value, int8_t hue, const Rect& rect
                 char((value % 10) + '0'), '\0',
         };
         Point origin(rect.left + kMiniAmmoTextHBuffer, rect.bottom - 1);
-        sys.fonts.computer->draw(origin, digits, text_color);
+        sys.fonts.computer.draw(origin, digits, text_color);
     }
 }
 
@@ -627,21 +612,21 @@ void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) 
     clip.offset(0, instrument_top());
 
     clip.offset(kMiniAmmoLeftOne - clip.left, 0);
-    draw_player_ammo_in_rect(ammo_one, RED, clip);
+    draw_player_ammo_in_rect(ammo_one, Hue::RED, clip);
     clip.offset(kMiniAmmoLeftTwo - clip.left, 0);
-    draw_player_ammo_in_rect(ammo_two, PALE_GREEN, clip);
+    draw_player_ammo_in_rect(ammo_two, Hue::PALE_GREEN, clip);
     clip.offset(kMiniAmmoLeftSpecial - clip.left, 0);
-    draw_player_ammo_in_rect(ammo_special, ORANGE, clip);
+    draw_player_ammo_in_rect(ammo_special, Hue::ORANGE, clip);
 }
 
 static void draw_mini_ship_data(
-        Handle<SpaceObject> obj, uint8_t header_color, int16_t screen_top, pn::string_view label) {
+        Handle<SpaceObject> obj, Hue header_hue, int16_t screen_top, pn::string_view label) {
     {
         // "CONTROL" or "TARGET" label.
         Rect bar = mini_screen_line_bounds(screen_top, 0, 0, kMiniScreenWidth);
-        draw_shaded_rect(Rects(), bar, header_color, LIGHT, VERY_LIGHT, MEDIUM);
-        sys.fonts.computer->draw(
-                Point(bar.left + kMiniScreenLeftBuffer, bar.top + sys.fonts.computer->ascent),
+        draw_shaded_rect(Rects(), bar, header_hue, LIGHT, VERY_LIGHT, MEDIUM);
+        sys.fonts.computer.draw(
+                Point(bar.left + kMiniScreenLeftBuffer, bar.top + sys.fonts.computer.ascent),
                 label, RgbColor::black());
     }
 
@@ -650,30 +635,30 @@ static void draw_mini_ship_data(
             {kMiniIconLeft, screen_top + MiniIconMacLineTop()}, {kMiniIconWidth, kMiniIconHeight},
     };
     if (!obj.get()) {
-        draw_vbracket(Rects(), icon_rect, GetRGBTranslateColorShade(PALE_GREEN, MEDIUM));
+        draw_vbracket(Rects(), icon_rect, GetRGBTranslateColorShade(Hue::PALE_GREEN, MEDIUM));
         return;
     }
 
     {
         // Object name.
-        if (obj->base.get()) {
+        if (obj->base) {
             Rect lRect =
                     mini_screen_line_bounds(screen_top, kMiniNameLineNum, 0, kMiniScreenWidth);
-            sys.fonts.computer->draw(
+            sys.fonts.computer.draw(
                     Point(lRect.left + kMiniScreenLeftBuffer,
-                          lRect.top + sys.fonts.computer->ascent),
-                    obj->short_name(), GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT));
+                          lRect.top + sys.fonts.computer.ascent),
+                    obj->short_name(), GetRGBTranslateColorShade(Hue::PALE_GREEN, VERY_LIGHT));
         }
     }
 
-    if ((obj->base.get()) && (obj->pixResID >= 0)) {
+    if (obj->base && obj->pix_id.has_value()) {
         // Icon
-        NatePixTable* pixTable = sys.pix.get(obj->pixResID);
+        NatePixTable* pixTable = sys.pix.get(obj->pix_id->name, obj->pix_id->hue);
 
         if (pixTable != NULL) {
             int16_t whichShape;
             if (obj->attributes & kIsSelfAnimated) {
-                whichShape = more_evil_fixed_to_long(obj->base->frame.animation.firstShape);
+                whichShape = more_evil_fixed_to_long(obj->base->animation->frames.begin);
             } else {
                 whichShape = 0;
             }
@@ -692,7 +677,7 @@ static void draw_mini_ship_data(
             frame.texture().draw(rect);
         }
     }
-    draw_vbracket(Rects(), icon_rect, GetRGBTranslateColorShade(PALE_GREEN, MEDIUM));
+    draw_vbracket(Rects(), icon_rect, GetRGBTranslateColorShade(Hue::PALE_GREEN, MEDIUM));
 
     {
         if ((obj->max_health() > 0) && (obj->_health > 0)) {
@@ -708,13 +693,13 @@ static void draw_mini_ship_data(
             lRect.top    = dRect.top + 2;
             lRect.right  = dRect.right - 2;
             lRect.bottom = dRect.bottom - 2 - tlong;
-            rects.fill(lRect, GetRGBTranslateColorShade(SKY_BLUE, DARK));
+            rects.fill(lRect, GetRGBTranslateColorShade(Hue::SKY_BLUE, DARK));
 
             lRect.top    = dRect.bottom - 2 - tlong;
             lRect.bottom = dRect.bottom - 2;
-            rects.fill(lRect, GetRGBTranslateColorShade(SKY_BLUE, LIGHT));
+            rects.fill(lRect, GetRGBTranslateColorShade(Hue::SKY_BLUE, LIGHT));
 
-            draw_vbracket(rects, dRect, GetRGBTranslateColorShade(SKY_BLUE, MEDIUM));
+            draw_vbracket(rects, dRect, GetRGBTranslateColorShade(Hue::SKY_BLUE, MEDIUM));
         }
     }
 
@@ -732,44 +717,44 @@ static void draw_mini_ship_data(
             lRect.top    = dRect.top + 2;
             lRect.right  = dRect.right - 2;
             lRect.bottom = dRect.bottom - 2 - tlong;
-            rects.fill(lRect, GetRGBTranslateColorShade(YELLOW, DARK));
+            rects.fill(lRect, GetRGBTranslateColorShade(Hue::YELLOW, DARK));
 
             lRect.top    = dRect.bottom - 2 - tlong;
             lRect.bottom = dRect.bottom - 2;
-            rects.fill(lRect, GetRGBTranslateColorShade(YELLOW, LIGHT));
+            rects.fill(lRect, GetRGBTranslateColorShade(Hue::YELLOW, LIGHT));
 
-            draw_vbracket(rects, dRect, GetRGBTranslateColorShade(YELLOW, MEDIUM));
+            draw_vbracket(rects, dRect, GetRGBTranslateColorShade(Hue::YELLOW, MEDIUM));
         }
     }
 
     {
         // Weapons
-        RgbColor color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
+        RgbColor color = GetRGBTranslateColorShade(Hue::PALE_GREEN, VERY_LIGHT);
 
-        if (obj->beam.base.get()) {
+        if (obj->beam.base) {
             Rect lRect = mini_screen_line_bounds(
                     screen_top, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-            sys.fonts.computer->draw(
-                    Point(lRect.left, lRect.top + sys.fonts.computer->ascent),
-                    get_object_short_name(obj->beam.base), color);
+            sys.fonts.computer.draw(
+                    Point(lRect.left, lRect.top + sys.fonts.computer.ascent),
+                    obj->beam.base->short_name, color);
         }
 
-        if (obj->pulse.base.get()) {
+        if (obj->pulse.base) {
             Rect lRect = mini_screen_line_bounds(
                     screen_top, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-            sys.fonts.computer->draw(
-                    Point(lRect.left, lRect.top + sys.fonts.computer->ascent),
-                    get_object_short_name(obj->pulse.base), color);
+            sys.fonts.computer.draw(
+                    Point(lRect.left, lRect.top + sys.fonts.computer.ascent),
+                    obj->pulse.base->short_name, color);
         }
 
         // Don't show special weapons of destination objects.
         if (!(obj->attributes & kIsDestination)) {
-            if (obj->special.base.get()) {
+            if (obj->special.base) {
                 Rect lRect = mini_screen_line_bounds(
                         screen_top, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-                sys.fonts.computer->draw(
-                        Point(lRect.left, lRect.top + sys.fonts.computer->ascent),
-                        get_object_short_name(obj->special.base), color);
+                sys.fonts.computer.draw(
+                        Point(lRect.left, lRect.top + sys.fonts.computer.ascent),
+                        obj->special.base->short_name, color);
             }
         }
     }
@@ -778,10 +763,10 @@ static void draw_mini_ship_data(
     if (obj->destObject.get()) {
         auto     dest     = obj->destObject;
         bool     friendly = (dest->owner == g.admiral);
-        RgbColor color    = GetRGBTranslateColorShade(friendly ? GREEN : RED, VERY_LIGHT);
+        RgbColor color = GetRGBTranslateColorShade(friendly ? Hue::GREEN : Hue::RED, VERY_LIGHT);
         Rect lRect = mini_screen_line_bounds(screen_top, kMiniDestLineNum, 0, kMiniScreenWidth);
-        sys.fonts.computer->draw(
-                Point(lRect.left, lRect.top + sys.fonts.computer->ascent), dest->name(), color);
+        sys.fonts.computer.draw(
+                Point(lRect.left, lRect.top + sys.fonts.computer.ascent), dest->name(), color);
     }
 }
 
@@ -807,8 +792,7 @@ static void build_ship(Handle<Admiral> adm, int32_t line) {
     if (g.key_mask & kComputerBuildMenu) {
         return;
     }
-    if (CountObjectsOfBaseType(BaseObject::none(), Admiral::none()) <
-        (kMaxSpaceObject - kMaxShipBuffer)) {
+    if (CountObjectsOfBaseType(nullptr, Admiral::none()) < (kMaxSpaceObject - kMaxShipBuffer)) {
         if (adm->build(line - kBuildScreenFirstTypeLine) == false) {
             if (adm == g.admiral) {
                 sys.sound.warning();
@@ -816,7 +800,7 @@ static void build_ship(Handle<Admiral> adm, int32_t line) {
         }
     } else {
         if (adm == g.admiral) {
-            Messages::set_status("Maximum number of ships built", ORANGE);
+            Messages::max_ships_built();
         }
     }
 }
@@ -884,10 +868,16 @@ static void show_build_screen(Handle<Admiral> adm, int32_t line) {
         return;
     }
     const miniScreenLineType lines[] = {
-        text("BUILD SHIPS", false), text("", true), selectable("", build_ship),
-        selectable("", build_ship), selectable("", build_ship),
-        selectable("", build_ship), selectable("", build_ship),
-        selectable("", build_ship), accept("Build"), cancel("Main Menu"),
+            text("BUILD SHIPS", false),
+            text("", true),
+            selectable("", build_ship),
+            selectable("", build_ship),
+            selectable("", build_ship),
+            selectable("", build_ship),
+            selectable("", build_ship),
+            selectable("", build_ship),
+            accept("Build"),
+            cancel("Main Menu"),
     };
     make_mini_screen(kBuildMiniScreen, lines);
     MiniComputerSetBuildStrings();
@@ -897,14 +887,16 @@ static void show_special_screen(Handle<Admiral> adm, int32_t line) {
     if (adm != g.admiral) {
         return;
     }
-    const miniScreenLineType lines[] =
-    {
-        text("SPECIAL ORDERS", true), selectable("Transfer Control", transfer_control),
-        selectable("Hold Position", hold_position),
-        selectable("Go To My Position", come_to_me),
-        selectable("Fire Weapon 1", fire1), selectable("Fire Weapon 2", fire2),
-        selectable("Fire Special", fire_special), accept("Execute"),
-        cancel("Main Menu"),
+    const miniScreenLineType lines[] = {
+            text("SPECIAL ORDERS", true),
+            selectable("Transfer Control", transfer_control),
+            selectable("Hold Position", hold_position),
+            selectable("Go To My Position", come_to_me),
+            selectable("Fire Weapon 1", fire1),
+            selectable("Fire Weapon 2", fire2),
+            selectable("Fire Special", fire_special),
+            accept("Execute"),
+            cancel("Main Menu"),
     };
     make_mini_screen(kSpecialMiniScreen, lines);
 }
@@ -914,10 +906,12 @@ static void show_message_screen(Handle<Admiral> adm, int32_t line) {
         return;
     }
     const miniScreenLineType lines[] = {
-        text("MESSAGES", true), selectable("Next Page/Clear", next_message),
-        selectable("Previous Page", prev_message),
-        selectable("Last Message", last_message), accept("Execute"),
-        cancel("Main Menu"),
+            text("MESSAGES", true),
+            selectable("Next Page/Clear", next_message),
+            selectable("Previous Page", prev_message),
+            selectable("Last Message", last_message),
+            accept("Execute"),
+            cancel("Main Menu"),
     };
     make_mini_screen(kMessageMiniScreen, lines);
 }
@@ -927,7 +921,7 @@ static void show_status_screen(Handle<Admiral> adm, int32_t line) {
         return;
     }
     const miniScreenLineType lines[] = {
-        text("MISSION STATUS", true), cancel("Main Menu"),
+            text("MISSION STATUS", true), cancel("Main Menu"),
     };
     make_mini_screen(kStatusMiniScreen, lines);
     MiniComputerSetStatusStrings();
@@ -937,12 +931,13 @@ static void show_main_screen(Handle<Admiral> adm, int32_t line) {
     if (adm != g.admiral) {
         return;
     }
-    const miniScreenLineType lines[] =
-    {
-        text("MAIN MENU", true), selectable("<Build>", show_build_screen),
-        selectable("<Special Orders>", show_special_screen),
-        selectable("<Message>", show_message_screen),
-        selectable("<Mission Status>", show_status_screen), accept("Select"),
+    const miniScreenLineType lines[] = {
+            text("MAIN MENU", true),
+            selectable("<Build>", show_build_screen),
+            selectable("<Special Orders>", show_special_screen),
+            selectable("<Message>", show_message_screen),
+            selectable("<Mission Status>", show_status_screen),
+            accept("Select"),
     };
     make_mini_screen(kMainMiniScreen, lines);
 }
@@ -986,17 +981,20 @@ void MiniComputerSetBuildStrings() {
     mCopyBlankLineString(header, buildAtObject->name);
 
     for (int32_t count = 0; count < kMaxShipCanBuild; count++) {
-        int32_t             lineNum = kBuildScreenFirstTypeLine + count;
-        miniScreenLineType* line    = &g.mini.lineData[lineNum];
-        auto                buildObject =
-                mGetBaseObjectFromClassRace(buildAtObject->canBuildType[count], g.admiral->race());
-        line->value      = buildObject.number();
+        int32_t             lineNum     = kBuildScreenFirstTypeLine + count;
+        miniScreenLineType* line        = &g.mini.lineData[lineNum];
+        const BaseObject*   buildObject = nullptr;
+        if (count < buildAtObject->canBuildType.size()) {
+            buildObject =
+                    get_buildable_object(buildAtObject->canBuildType[count], g.admiral->race());
+        }
+        line->value      = -1;
         line->sourceData = buildObject;
-        if (!buildObject.get()) {
+        if (!buildObject) {
             continue;
         }
 
-        mCopyBlankLineString(line, get_object_name(buildObject));
+        mCopyBlankLineString(line, buildObject->name);
         if (buildObject->price > mFixedToLong(g.admiral->cash())) {
             line->kind = MINI_DIM;
         } else {
@@ -1021,13 +1019,9 @@ Fixed MiniComputerGetPriceOfCurrentSelection() {
         return Fixed::zero();
     }
 
-    miniScreenLineType* line = &g.mini.lineData[g.mini.selectLine];
-    if (line->value < 0) {
-        return Fixed::zero();
-    }
-
-    auto buildObject = Handle<BaseObject>(line->value);
-    if (buildObject->price < 0) {
+    miniScreenLineType* line        = &g.mini.lineData[g.mini.selectLine];
+    auto                buildObject = line->sourceData;
+    if (!buildObject || (buildObject->price < 0)) {
         return Fixed::zero();
     }
 
@@ -1063,112 +1057,60 @@ void MiniComputerSetStatusStrings() {
     //  Samples Left: 7
     //
 
-    if (gMissionStatusStrList.get() == NULL) {
-        for (int count = kStatusMiniScreenFirstLine; count < kMiniScreenCharHeight; count++) {
-            miniScreenLineType* line = g.mini.lineData.get() + count;
-            line->statusType         = kNoStatusData;
-            line->value              = -1;
-            line->string.clear();
-        }
-        return;
-    }
-
     for (int count = kStatusMiniScreenFirstLine; count < kMiniScreenCharHeight; count++) {
         miniScreenLineType* line = g.mini.lineData.get() + count;
-
-        if (implicit_cast<size_t>(count - kStatusMiniScreenFirstLine) <
-            gMissionStatusStrList->size()) {
-            // we have some data for this line to interpret
-
-            pn::string_view sourceString =
-                    gMissionStatusStrList->at(count - kStatusMiniScreenFirstLine);
-
-            if (sourceString.data()[0] == '_') {
-                line->underline = true;
-                sourceString    = sourceString.substr(1);
-            }
-
-            if (sourceString.data()[0] == '-') {
-                // - = abbreviated string, just plain text
-                line->statusType = kPlainTextStatus;
-                line->value      = 0;
-                line->string     = sourceString.substr(1).copy();
-            } else {
-                //////////////////////////////////////////////
-                // get status type
-                pn::string_view status_type_string;
-                if (pn::partition(status_type_string, "\\", sourceString)) {
-                    int64_t value;
-                    if (pn::strtoll(status_type_string, &value, nullptr)) {
-                        if ((0 <= value) && (value <= kMaxStatusTypeValue)) {
-                            line->statusType = value;
-                        }
-                    }
-                }
-
-                //////////////////////////////////////////////
-                // get score/condition number
-                pn::string_view score_condition_string;
-                if (pn::partition(score_condition_string, "\\", sourceString)) {
-                    int64_t value;
-                    if (pn::strtoll(score_condition_string, &value, nullptr)) {
-                        line->whichStatus = value;
-                    }
-                }
-
-                //////////////////////////////////////////////
-                // get player number
-                pn::string_view player_number_string;
-                if (pn::partition(player_number_string, "\\", sourceString)) {
-                    int64_t value;
-                    if (pn::strtoll(player_number_string, &value, nullptr)) {
-                        line->statusPlayer = Handle<Admiral>(value);
-                    }
-                }
-
-                //////////////////////////////////////////////
-                // get negative value
-                pn::string_view negative_value_string;
-                if (pn::partition(negative_value_string, "\\", sourceString)) {
-                    int64_t value;
-                    if (pn::strtoll(negative_value_string, &value, nullptr)) {
-                        line->negativeValue = value;
-                    }
-                }
-
-                //////////////////////////////////////////////
-                // get falseString
-                pn::string_view status_false_string;
-                if (pn::partition(status_false_string, "\\", sourceString)) {
-                    line->statusFalse = status_false_string.copy();
-                }
-
-                //////////////////////////////////////////////
-                // get trueString
-                pn::string_view status_true_string;
-                if (pn::partition(status_true_string, "\\", sourceString)) {
-                    line->statusTrue = status_true_string.copy();
-                }
-
-                //////////////////////////////////////////////
-                // get statusString
-                pn::string_view status_string;
-                if (pn::partition(status_string, "\\", sourceString)) {
-                    line->statusString = status_string.copy();
-                }
-
-                //////////////////////////////////////////////
-                // get postString
-                line->postString = sourceString.copy();
-
-                line->value = MiniComputerGetStatusValue(count);
-                MiniComputerMakeStatusString(count, line->string);
-            }
-        } else {
+        if (implicit_cast<size_t>(count - kStatusMiniScreenFirstLine) >= g.level->status.size()) {
             line->statusType = kNoStatusData;
             line->value      = -1;
             line->string.clear();
+            continue;
         }
+
+        // we have some data for this line to interpret
+        const Level::StatusLine& l = g.level->status.at(count - kStatusMiniScreenFirstLine);
+
+        line->underline = l.underline;
+        if (l.text.has_value()) {
+            line->statusType = kPlainTextStatus;
+            line->value      = 0;
+            line->string     = l.text->copy();
+            continue;
+        }
+
+        line->statusString = l.prefix.has_value() ? l.prefix->copy() : pn::string{};
+        line->postString   = l.suffix.has_value() ? l.suffix->copy() : pn::string{};
+        if (l.condition.has_value()) {
+            line->statusType  = kTrueFalseCondition;
+            line->whichStatus = *l.condition;
+            line->statusTrue  = l.true_.has_value() ? l.true_->copy() : pn::string{};
+            line->statusFalse = l.false_.has_value() ? l.false_->copy() : pn::string{};
+        } else if (l.counter.has_value()) {
+            line->whichStatus  = l.counter->which;
+            line->statusPlayer = Handle<Admiral>(l.counter->player);
+            if (l.counter->fixed) {
+                if (l.minuend.has_value()) {
+                    line->statusType    = kSmallFixedMinusValue;
+                    line->negativeValue = l.minuend->val();
+                } else {
+                    line->statusType = kSmallFixedValue;
+                }
+            } else {
+                if (l.minuend.has_value()) {
+                    line->statusType    = kIntegerMinusValue;
+                    line->negativeValue = mFixedToLong(*l.minuend);
+                } else {
+                    line->statusType = kIntegerValue;
+                }
+            }
+        } else {
+            line->statusType = kPlainTextStatus;
+            line->value      = 0;
+            line->string.clear();
+            continue;
+        }
+
+        line->value = MiniComputerGetStatusValue(count);
+        MiniComputerMakeStatusString(count, line->string);
     }
 }
 
@@ -1212,10 +1154,10 @@ int32_t MiniComputerGetStatusValue(int32_t whichLine) {
         case kPlainTextStatus: return 0; break;
 
         case kTrueFalseCondition:
-            if (g.level->condition(line->whichStatus)->true_yet()) {
-                return 1;
-            } else {
+            if (g.condition_enabled[line->whichStatus]) {
                 return 0;
+            } else {
+                return 1;
             }
             break;
 
@@ -1256,7 +1198,7 @@ void MiniComputerHandleClick(Point where) {
 
     // if click is in button screen
     if (mRect.contains(where)) {
-        lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer->height) +
+        lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer.height) +
                   kMiniScreenCharHeight;
         g.mini.clickLine = lineNum;
         line             = g.mini.lineData.get() + lineNum;
@@ -1344,7 +1286,7 @@ void MiniComputerHandleDoubleClick(Point where) {
 
     // if click is in button screen
     if (mRect.contains(where)) {
-        lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer->height) +
+        lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer.height) +
                   kMiniScreenCharHeight;
         line = g.mini.lineData.get() + lineNum;
         if (line->whichButton == kInLineButton) {
@@ -1423,7 +1365,7 @@ void MiniComputerHandleMouseUp(Point where) {
 
     // if click is in button screen
     if (mRect.contains(where)) {
-        lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer->height) +
+        lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer.height) +
                   kMiniScreenCharHeight;
         line = g.mini.lineData.get() + lineNum;
         if (line->whichButton == kInLineButton) {
@@ -1463,7 +1405,7 @@ void MiniComputerHandleMouseStillDown(Point where) {
 
     // if click is in button screen
     if (mRect.contains(where)) {
-        lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer->height) +
+        lineNum = ((where.v - (kButBoxTop + instrument_top())) / sys.fonts.computer.height) +
                   kMiniScreenCharHeight;
         line = g.mini.lineData.get() + lineNum;
         if ((line->whichButton == kInLineButton) && (lineNum == g.mini.clickLine)) {
@@ -1505,7 +1447,7 @@ void MiniComputer_SetScreenAndLineHack(int32_t whichScreen, int32_t whichLine) {
         default: show_main_screen(g.admiral, 0); break;
     }
 
-    w.v = (whichLine * sys.fonts.computer->height) + (kMiniScreenTop + instrument_top());
+    w.v = (whichLine * sys.fonts.computer.height) + (kMiniScreenTop + instrument_top());
     w.h = kMiniScreenLeft + 5;
     MiniComputerHandleClick(w);  // what an atrocious hack! oh well
 }

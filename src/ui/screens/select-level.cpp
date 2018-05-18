@@ -41,14 +41,14 @@ using std::unique_ptr;
 
 namespace antares {
 
-SelectLevelScreen::SelectLevelScreen(bool* cancelled, Handle<Level>* level)
+SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Level** level)
         : InterfaceScreen("select-level", {0, 0, 640, 480}, true),
           _state(SELECTING),
           _cancelled(cancelled),
           _level(level) {
     Ledger::ledger()->unlocked_chapters(&_chapters);
     _index  = _chapters.size() - 1;
-    *_level = Handle<Level>(_chapters[_index] - 1);
+    *_level = Level::get(_chapters[_index]);
 }
 
 SelectLevelScreen::~SelectLevelScreen() {}
@@ -95,12 +95,15 @@ void SelectLevelScreen::key_down(const KeyDownEvent& event) {
             _unlock_chapter = (_unlock_chapter * 10) + digit;
             if (--_unlock_digits == 0) {
                 _state = SELECTING;
-                if (_unlock_chapter > plug.levels.size()) {
+                if (plug.chapters.find(_unlock_chapter) == plug.chapters.end()) {
                     return;
                 }
                 sys.sound.cloak_off();
                 Ledger::ledger()->unlock_chapter(_unlock_chapter);
                 Ledger::ledger()->unlocked_chapters(&_chapters);
+                _index = std::find(_chapters.begin(), _chapters.end(), _unlock_chapter) -
+                         _chapters.begin();
+                *_level = Level::get(_chapters[_index]);
                 adjust_interface();
             }
             return;
@@ -140,7 +143,7 @@ void SelectLevelScreen::handle_button(Button& button) {
         case PREVIOUS:
             if (_index > 0) {
                 --_index;
-                *_level = Handle<Level>(_chapters[_index] - 1);
+                *_level = Level::get(_chapters[_index]);
             }
             adjust_interface();
             break;
@@ -148,7 +151,7 @@ void SelectLevelScreen::handle_button(Button& button) {
         case NEXT:
             if (_index < _chapters.size() - 1) {
                 ++_index;
-                *_level = Handle<Level>(_chapters[_index] - 1);
+                *_level = Level::get(_chapters[_index]);
             }
             adjust_interface();
             break;
@@ -165,13 +168,13 @@ void SelectLevelScreen::draw_level_name() const {
 
     const InterfaceItem& i = item(NAME);
 
-    RgbColor   color = GetRGBTranslateColorShade(AQUA, VERY_LIGHT);
+    RgbColor   color = GetRGBTranslateColorShade(Hue::AQUA, VERY_LIGHT);
     StyledText retro(sys.fonts.title);
     retro.set_fore_color(color);
     retro.set_retro_text(chapter_name);
     retro.wrap_to(440, 0, 2);
 
-    Rect  bounds = i.bounds();
+    Rect  bounds = i.bounds;
     Point off    = offset();
     bounds.offset(off.h, off.v);
     retro.draw(bounds);

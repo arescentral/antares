@@ -23,23 +23,23 @@
 #include <vector>
 
 #include "drawing/sprite-handling.hpp"
+#include "drawing/text.hpp"
 #include "sound/fx.hpp"
 #include "sound/music.hpp"
 
 namespace antares {
 
 class SoundDriver;
-class Font;
 class PrefsDriver;
 class VideoDriver;
 
 struct SystemGlobals {
     struct {
-        const Font* tactical;
-        const Font* computer;
-        const Font* button;
-        const Font* title;
-        const Font* small_button;
+        Font tactical;
+        Font computer;
+        Font button;
+        Font title;
+        Font small_button;
     } fonts;
 
     std::vector<pn::string> key_names;
@@ -48,11 +48,13 @@ struct SystemGlobals {
     std::vector<pn::string> gamepad_long_names;
 
     enum { ROT_TABLE_SIZE = 720 };
-    int32_t rot_table[ROT_TABLE_SIZE];
+    std::vector<int32_t> rot_table;
 
     SoundDriver* audio = nullptr;
     VideoDriver* video = nullptr;
     PrefsDriver* prefs = nullptr;
+
+    std::vector<pn::string> messages;
 
     struct {
         std::vector<pn::string> codes;

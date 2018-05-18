@@ -28,6 +28,7 @@
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/level.hpp"
+#include "lang/exception.hpp"
 #include "ui/interface-handling.hpp"
 #include "video/text-driver.hpp"
 
@@ -49,13 +50,23 @@ class ObjectDataBuilder {
     ObjectDataBuilder(const ObjectDataBuilder&) = delete;
     ObjectDataBuilder& operator=(const ObjectDataBuilder&) = delete;
 
-    void save(Handle<BaseObject> object, int pict_id) {
+    void save(const BaseObject& object, pn::string_view portrait) {
         pn::string data;
         CreateObjectDataText(data, object);
         if (_output_dir.has_value()) {
-            pn::string path = pn::format("{0}/{1}.txt", *_output_dir, dec(pict_id, 5));
-            pn::file   file = pn::open(path, "w");
-            file.write(data);
+            pn::string      path = pn::format("{0}/{1}.txt", *_output_dir, portrait);
+            pn::string_view dir  = sfz::path::dirname(path);
+            try {
+                sfz::makedirs(dir, 0755);
+            } catch (...) {
+                std::throw_with_nested(std::runtime_error(dir.copy().c_str()));
+            }
+            try {
+                pn::file file = pn::open(path, "w").check();
+                file.write(data);
+            } catch (...) {
+                std::throw_with_nested(std::runtime_error(path.copy().c_str()));
+            }
         }
     }
 
@@ -75,6 +86,20 @@ void usage(pn::file_view out, pn::string_view progname, int retcode) {
             "    -h, --help          display this help screen\n",
             progname);
     exit(retcode);
+}
+
+void load_object_data(const NamedHandle<const BaseObject>& o) {
+    load_object(o);
+    for (const auto* w : {&o->weapons.pulse, &o->weapons.beam, &o->weapons.special}) {
+        if (w->has_value()) {
+            load_object_data((*w)->base);
+        }
+    }
+    for (const std::unique_ptr<const Action>& a : o->activate.action) {
+        if (a->created_base()) {
+            load_object_data(*a->created_base());
+        }
+    }
 }
 
 void main(int argc, char* const* argv) {
@@ -114,43 +139,75 @@ void main(int argc, char* const* argv) {
     PluginInit();
 
     ObjectDataBuilder builder(output_dir);
-    for (auto object : BaseObject::all()) {
-        const int pict_id = object->pictPortraitResID;
-        if (pict_id <= 0) {
-            continue;
-        }
-        builder.save(object, pict_id);
+    pn::string_view   ids[] = {
+            "gai/cruiser",
+            "gai/gunship",
+            "gai/fighter",
+            "gai/transport",
+            "gai/engineer",
+            "gai/hvd",
+            "can/carrier",
+            "can/defdrone",
+            "can/cruiser",
+            "can/aslttran",
+            "can/gunship",
+            "can/fighter",
+            "can/etc/border-drone",
+            "can/transport",
+            "can/engineer",
+            "can/hvc",
+            "can/schooner",
+            "sal/carrier",
+            "sal/cruiser",
+            "sal/aslttran",
+            "sal/gunship",
+            "sal/fighter",
+            "sal/transport",
+            "loc/power",
+            "loc/moor",
+            "loc/outpost",
+            "loc/bunker",
+            "loc/flak",
+            "ish/carrier",
+            "ish/defdrone",
+            "ish/cruiser",
+            "ish/aslttran",
+            "ish/gunship",
+            "ish/fighter",
+            "ish/etc/research",
+            "ish/etc/tug",
+            "ish/etc/astrominer",
+            "ish/etc/cargo",
+            "ish/transport",
+            "ish/engineer",
+            "ish/hvc",
+            "ish/hvd",
+            "ele/cruiser",
+            "ele/etc/escape-pod",
+            "ele/etc/liner",
+            "obi/transport",
+            "obi/escort",
+            "aud/carrier",
+            "aud/cruiser",
+            "aud/aslttran",
+            "aud/gunship",
+            "aud/fighter",
+            "ast/regular/big",
+            "uns/carrier",
+            "uns/cruiser",
+            "uns/gunship",
+            "uns/fighter",
+            "baz/bttlship",
+            "zzz/obi/bttlcrsr",
+    };
+    for (pn::string_view id : ids) {
+        NamedHandle<const BaseObject> object(id);
+        load_object_data(object);
+        builder.save(*object, *object->portrait);
     }
-}
-
-void print_nested_exception(const std::exception& e) {
-    pn::format(stderr, ": {0}", e.what());
-    try {
-        std::rethrow_if_nested(e);
-    } catch (const std::exception& e) {
-        print_nested_exception(e);
-    }
-}
-
-void print_exception(pn::string_view progname, const std::exception& e) {
-    pn::format(stderr, "{0}: {1}", sfz::path::basename(progname), e.what());
-    try {
-        std::rethrow_if_nested(e);
-    } catch (const std::exception& e) {
-        print_nested_exception(e);
-    }
-    pn::format(stderr, "\n");
 }
 
 }  // namespace
 }  // namespace antares
 
-int main(int argc, char* const* argv) {
-    try {
-        antares::main(argc, argv);
-    } catch (const std::exception& e) {
-        antares::print_exception(argv[0], e);
-        return 1;
-    }
-    return 0;
-}
+int main(int argc, char* const* argv) { return antares::wrap_main(antares::main, argc, argv); }

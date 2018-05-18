@@ -22,19 +22,43 @@
 #include <stdint.h>
 #include <pn/string>
 #include <sfz/sfz.hpp>
+#include <vector>
+
+#include "data/enums.hpp"
 
 namespace antares {
 
+class Texture;
+class NatePixTable;
+class Font;
+
 class Resource {
   public:
-    Resource(pn::string_view type, pn::string_view extension, int id);
-    Resource(pn::string_view resource_path);
+    static bool     exists(pn::string_view path);
+    static Resource path(pn::string_view path);
+
+    static Font                    font(pn::string_view name);
+    static Resource                interface(pn::string_view name);
+    static Resource                replay(int id);
+    static std::vector<int32_t>    rotation_table();
+    static NatePixTable            sprite(pn::string_view name, Hue hue);
+    static std::vector<pn::string> strings(int id);
+    static pn::string              text(int id);
+    static Texture                 texture(pn::string_view name);
+    static Texture                 texture(int16_t id);
+
+    Resource(Resource&&) = default;
+    Resource& operator=(Resource&&) = default;
+
     ~Resource();
 
     pn::data_view   data() const;
     pn::string_view string() const;
 
   private:
+    static pn::value procyon(pn::string_view path);
+
+    Resource(std::unique_ptr<sfz::mapped_file> file);
     std::unique_ptr<sfz::mapped_file> _file;
 };
 

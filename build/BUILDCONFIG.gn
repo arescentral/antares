@@ -39,9 +39,11 @@ if (host_os == "mac") {
 }
 
 _default_configs = [ "//build/lib:c++11" ]
-if (target_os == "mac") {
-  _default_configs += [ "//build/lib:libc++" ]
-}
+
+# libc++ is necessary because libstdc++ does not allow move construction of std::map<> when the key
+# type is movable but not copyable:
+# https://stackoverflow.com/questions/36475497/error-by-move-assignment-of-map-with-non-copyable-but-movable-key
+_default_configs += [ "//build/lib:libc++" ]
 
 if (mode == "dev") {
   _default_configs += [ "//build/lib:dev" ]

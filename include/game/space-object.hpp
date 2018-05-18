@@ -47,12 +47,14 @@ class SpaceObject {
 
     SpaceObject() = default;
     SpaceObject(
-            Handle<BaseObject> type, Random seed, int32_t object_id,
+            const BaseObject& type, Random seed, int32_t object_id,
             const coordPointType& initial_location, int32_t relative_direction,
             fixedPointType* relative_velocity, Handle<Admiral> new_owner,
-            int16_t spriteIDOverride);
+            sfz::optional<pn::string_view> spriteIDOverride);
 
-    void change_base_type(Handle<BaseObject> base, int32_t spriteIDOverride, bool relative);
+    void change_base_type(
+            const BaseObject& base, sfz::optional<pn::string_view> spriteIDOverride,
+            bool relative);
     void set_owner(Handle<Admiral> owner, bool message);
     void set_cloak(bool cloak);
     void alter_occupation(Handle<Admiral> owner, int32_t howMuch, bool message);
@@ -65,15 +67,13 @@ class SpaceObject {
     bool            engages(const SpaceObject& b) const;
     Fixed           turn_rate() const;
 
-    uint32_t           attributes = 0;
-    BaseObject*        baseType   = nullptr;
-    Handle<BaseObject> base;
-    int32_t            number() const;
+    uint32_t          attributes = 0;
+    const BaseObject* base       = nullptr;
+    int32_t           number() const;
 
     uint32_t keysDown = 0;
 
-    int32_t  tinySize = 0;
-    RgbColor tinyColor;
+    sfz::optional<BaseObject::Icon> icon;
 
     int32_t direction     = 0;
     int32_t directionGoal = 0;
@@ -122,10 +122,10 @@ class SpaceObject {
 
     struct {
         struct {
-            Fixed   thisShape;
-            Fixed   frameFraction;
-            int32_t frameDirection;
-            Fixed   frameSpeed;
+            Fixed              thisShape;
+            Fixed              frameFraction;
+            AnimationDirection direction;
+            Fixed              speed;
         } animation;
         Handle<Vector> vector;
     } frame;
@@ -136,11 +136,11 @@ class SpaceObject {
 
     int32_t health() const { return _health; }
     void    alter_health(int32_t amount);
-    int32_t max_health() const { return baseType->health; }
+    int32_t max_health() const { return base->health; }
 
     int32_t energy() const { return _energy; }
     void    alter_energy(int32_t amount);
-    int32_t max_energy() const { return baseType->energy; }
+    int32_t max_energy() const { return base->energy; }
 
     int32_t battery() const { return _battery; }
     void    alter_battery(int32_t amount);
@@ -191,14 +191,19 @@ class SpaceObject {
     int32_t  hitState   = 0;
     int32_t  cloakState = 0;
     dutyType duty       = eNoDuty;
-    int      pixResID   = -1;
+
+    struct PixID {
+        pn::string_view name;
+        Hue             hue = Hue::GRAY;
+    };
+    sfz::optional<PixID> pix_id;
 
     struct Weapon {
-        Handle<BaseObject> base;
-        game_ticks         time;
-        int32_t            ammo     = 0;
-        int32_t            position = 0;
-        int16_t            charge   = 0;
+        const BaseObject* base;
+        game_ticks        time;
+        int32_t           ammo     = 0;
+        int32_t           position = 0;
+        int16_t           charge   = 0;
     };
     Weapon pulse;
     Weapon beam;
@@ -210,8 +215,8 @@ class SpaceObject {
     uint32_t seenByPlayerFlags   = 0xffffffff;
     uint32_t hostileTowardsFlags = 0;
 
-    uint8_t shieldColor   = 0;
-    uint8_t originalColor = 0;
+    sfz::optional<RgbColor> shieldColor;
+    uint8_t                 originalColor = 0;
 };
 
 void SpaceObjectHandlingInit(void);
@@ -219,15 +224,22 @@ void ResetAllSpaceObjects(void);
 void RemoveAllSpaceObjects(void);
 
 Handle<SpaceObject> CreateAnySpaceObject(
-        Handle<BaseObject> whichBase, fixedPointType* velocity, coordPointType* location,
+        const BaseObject& whichBase, fixedPointType* velocity, coordPointType* location,
         int32_t direction, Handle<Admiral> owner, uint32_t specialAttributes,
-        int16_t spriteIDOverride);
-int32_t CountObjectsOfBaseType(Handle<BaseObject> whichType, Handle<Admiral> owner);
+        sfz::optional<pn::string_view> spriteIDOverride);
+int32_t CountObjectsOfBaseType(const BaseObject* whichType, Handle<Admiral> owner);
 
-Handle<BaseObject> mGetBaseObjectFromClassRace(int class_, int race);
+NamedHandle<const BaseObject> get_buildable_object_handle(
+        const BuildableObject& o, const NamedHandle<const Race>& race);
+const BaseObject* get_buildable_object(
+        const BuildableObject& o, const NamedHandle<const Race>& race);
 
-pn::string_view get_object_name(Handle<BaseObject> id);
-pn::string_view get_object_short_name(Handle<BaseObject> id);
+bool tags_match(const BaseObject& o, const std::map<pn::string, bool>& query);
+
+sfz::optional<pn::string_view> sprite_resource(const BaseObject& o);
+int32_t                        sprite_layer(const BaseObject& o);
+int32_t                        sprite_scale(const BaseObject& o);
+int32_t                        rotation_resolution(const BaseObject& o);
 
 }  // namespace antares
 

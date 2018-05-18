@@ -23,6 +23,7 @@
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "data/plugin.hpp"
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
 #include "game/admiral.hpp"
@@ -62,9 +63,9 @@ void SoloGame::become_front() {
 
         case START_LEVEL:
             _state = PROLOGUE;
-            if (_level->prologue_id() > 0) {
+            if (!_level->prologue.empty()) {
                 stack()->push(new ScrollTextScreen(
-                        _level->prologue_id(), 450, kSlowScrollInterval, 4002));
+                        _level->prologue, 450, kSlowScrollInterval, Music::prologue_song));
                 break;
             }
         // else fall through
@@ -73,7 +74,7 @@ void SoloGame::become_front() {
         case RESTART_LEVEL:
             _state       = PLAYING;
             _game_result = NO_GAME;
-            stack()->push(new MainPlay(_level, false, &_input_source, true, &_game_result));
+            stack()->push(new MainPlay(*_level, false, &_input_source, true, &_game_result));
             break;
 
         case PLAYING: handle_game_result(); break;
@@ -87,17 +88,12 @@ void SoloGame::become_front() {
 void SoloGame::handle_game_result() {
     switch (_game_result) {
         case WIN_GAME: {
-            _state             = EPILOGUE;
-            const int epilogue = _level->epilogue_id();
-            if (epilogue > 0) {
-                // normal scrolltext song
-                int scroll_song = 4002;
-                if (g.next_level == -1) {
-                    // we win but no next level? Play triumph song
-                    scroll_song = 4003;
-                }
-                stack()->push(
-                        new ScrollTextScreen(epilogue, 450, kSlowScrollInterval, scroll_song));
+            _state                         = EPILOGUE;
+            const pn::string_view epilogue = _level->epilogue;
+            if (!epilogue.empty()) {
+                stack()->push(new ScrollTextScreen(
+                        epilogue, 450, kSlowScrollInterval,
+                        g.next_level ? Music::prologue_song : Music::victory_song));
             } else {
                 become_front();
             }
@@ -122,15 +118,13 @@ void SoloGame::handle_game_result() {
 }
 
 void SoloGame::epilogue_done() {
-    _level = Level::none();
+    _level = nullptr;
     _state = QUIT;
 
-    if (g.next_level > 0) {
-        Handle<Level> next_level{g.next_level - 1};
-        const int32_t chapter = next_level->chapter_number();
-        if (chapter >= 0) {
-            Ledger::ledger()->unlock_chapter(chapter);
-            _level = next_level;
+    if (g.next_level) {
+        if (g.next_level && g.next_level->chapter.has_value()) {
+            Ledger::ledger()->unlock_chapter(*g.next_level->chapter);
+            _level = g.next_level;
             _state = START_LEVEL;
         }
     }

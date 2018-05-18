@@ -24,35 +24,21 @@
 #include <pn/array>
 #include <pn/file>
 #include <pn/string>
-#include <rezin/rezin.hpp>
-#include <set>
 #include <sfz/sfz.hpp>
 #include <zipxx/zipxx.hpp>
 
 #include "config/dirs.hpp"
+#include "data/level.hpp"
 #include "data/replay.hpp"
 #include "drawing/pix-map.hpp"
 #include "math/geometry.hpp"
 #include "net/http.hpp"
 
-using rezin::AppleDouble;
-using rezin::Options;
-using rezin::ResourceEntry;
-using rezin::ResourceFork;
-using rezin::ResourceType;
-using rezin::Sound;
-using rezin::StringList;
-using rezin::aiff;
-using sfz::StringMap;
-using sfz::dec;
 using sfz::makedirs;
 using sfz::mapped_file;
 using sfz::range;
 using sfz::rmtree;
 using sfz::sha1;
-using std::set;
-using std::unique_ptr;
-using std::vector;
 using zipxx::ZipArchive;
 using zipxx::ZipFileReader;
 
@@ -62,383 +48,188 @@ namespace antares {
 
 namespace {
 
-bool verbatim(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
-    out.write(data);
-    return true;
-}
+const char kAresSounds[] = "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Sounds";
 
-enum {
-    THE_STARS_HAVE_EARS    = 600,
-    WHILE_THE_IRON_IS_HOT  = 605,
-    SPACE_RACE_THE_MUSICAL = 623,
+struct SoundInfo {
+    char name[32];
+    struct {
+        int     id;
+        double  sample_rate;
+        int64_t offset;
+        int64_t size;
+    } input;
+    sha1::digest digest;
 };
 
-int32_t nlrp_chapter(int16_t id) {
-    switch (id) {
-        case THE_STARS_HAVE_EARS: return 4;
-        case WHILE_THE_IRON_IS_HOT: return 6;
-        case SPACE_RACE_THE_MUSICAL: return 26;
-    };
-    throw std::runtime_error(pn::format("invalid replay ID {0}", id).c_str());
-}
-
-bool convert_nlrp(pn::string_view, bool, int16_t id, pn::data_view data, pn::file_view out) {
-    pn::file   in = data.open();
-    ReplayData replay;
-    replay.scenario.identifier = kFactoryScenarioIdentifier;
-    replay.scenario.version    = "1.1.1";
-    replay.chapter_id          = nlrp_chapter(id);
-    if (!in.read(&replay.global_seed)) {
-        return false;
-    }
-
-    uint32_t keys = 0;
-    uint32_t at   = 0;
-    while (true) {
-        uint32_t ticks_minus_one, new_keys;
-        if (!in.read(&ticks_minus_one, &new_keys)) {
-            if (in.error()) {
-                return false;
-            }
-            break;
-        }
-        const uint32_t ticks     = ticks_minus_one + 1;
-        const uint32_t keys_down = new_keys & ~keys;
-        const uint32_t keys_up   = keys & ~new_keys;
-
-        for (int i = 0; i < 19; ++i) {
-            if (keys_down & (1 << i)) {
-                replay.key_down(at, i);
-            }
-            if (keys_up & (1 << i)) {
-                replay.key_up(at, i);
-            }
-        }
-        at += ticks;
-
-        keys = new_keys;
-    }
-    replay.duration = at;
-
-    replay.write_to(out);
-    return true;
-}
-
-bool convert_pict(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
-    rezin::Picture pict(data);
-    if ((pict.version() == 2) && (pict.is_raster())) {
-        out.write(png(pict));
-        return true;
-    }
-    return false;
-}
-
-static pn::array pn_str(const StringList& str_list) {
-    pn::array a;
-    for (pn::string_view s : str_list.strings) {
-        a.push_back(s.copy());
-    }
-    return a;
-}
-
-bool convert_str(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
-    Options    options;
-    StringList list(data, options);
-    pn::dump(out, pn::value{pn_str(list)});
-    return true;
-}
-
-bool convert_text(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
-    Options options;
-    out.write(options.decode(data));
-    return true;
-}
-
-bool convert_snd(pn::string_view, bool, int16_t, pn::data_view data, pn::file_view out) {
-    Sound snd(data);
-    out.write(aiff(snd));
-    return true;
-}
-
-void convert_frame(pn::string_view dir, int16_t id, pn::data_view data, PixMap::View pix) {
-    auto width  = pix.size().width;
-    auto height = pix.size().height;
-
-    pix.fill(RgbColor::clear());
-    size_t i = 0;
-    for (auto y : range(height)) {
-        for (auto x : range(width)) {
-            uint8_t byte = data[i++];
-            if (byte) {
-                pix.set(x, y, RgbColor::at(byte));
-            }
-        }
-    }
-}
-
-void convert_overlay(pn::string_view dir, int16_t id, pn::data_view data, PixMap::View pix) {
-    auto width  = pix.size().width;
-    auto height = pix.size().height;
-
-    int white_count = 0;
-    int pixel_count = 0;
-    for (auto b : data) {
-        if (b) {
-            ++pixel_count;
-            if (b < 0x10) {
-                ++white_count;
-            }
-        }
-    }
-
-    // If more than 1/3 of the opaque pixels in the frame are in the
-    // 'white' band of the color table, then colorize all opaque
-    // (non-0x00) pixels.  Otherwise, only colors pixels which are
-    // opaque and outside of the white band (0x01..0x0F).
-    int           i          = 0;
-    const uint8_t color_mask = (white_count > (pixel_count / 3)) ? 0xFF : 0xF0;
-    for (auto y : range(height)) {
-        for (auto x : range(width)) {
-            uint8_t byte = data[i++];
-            if (byte & color_mask) {
-                byte          = (byte & 0x0f) | 0x10;
-                uint8_t value = RgbColor::at(byte).red;
-                pix.set(x, y, rgb(value, 0, 0));
-            } else {
-                pix.set(x, y, RgbColor::clear());
-            }
-        }
-    }
-}
-
-static pn::map pn_rect(const Rect& r) {
-    pn::map x;
-    x["left"]   = r.left;
-    x["top"]    = r.top;
-    x["right"]  = r.right;
-    x["bottom"] = r.bottom;
-    return x;
-}
-
-static pn::map pn_point(const Point& p) {
-    pn::map x;
-    x["x"] = p.h;
-    x["y"] = p.v;
-    return x;
-}
-
-void alphatize(ArrayPixMap& image) {
-    // Find the brightest pixel in the image.
-    using std::max;
-    uint8_t brightest = 0;
-    for (int y : range(image.size().height)) {
-        for (int x : range(image.size().width)) {
-            auto p    = image.get(x, y);
-            brightest = max(max(brightest, p.red), max(p.green, p.blue));
-        }
-    }
-
-    if (!brightest) {
-        return;
-    }
-
-    for (int y : range(image.size().height)) {
-        for (int x : range(image.size().width)) {
-            auto p = image.get(x, y);
-            if (p.alpha) {
-                // Brightest pixel has alpha of 255.
-                p.alpha = max(max(p.red, p.green), p.blue);
-                p.alpha = (p.alpha * 255) / brightest;
-                if (p.alpha) {
-                    // Un-premultiply alpha.
-                    p.red   = (p.red * 255) / p.alpha;
-                    p.green = (p.green * 255) / p.alpha;
-                    p.blue  = (p.blue * 255) / p.alpha;
-                }
-            }
-            image.set(x, y, p);
-        }
-    }
-}
-
-bool convert_smiv(
-        pn::string_view dir, bool factory, int16_t id, pn::data_view data, pn::file_view out) {
-    pn::file header = data.slice(4).open();
-    uint32_t size;
-    if (!header.read(&size)) {
-        return false;
-    }
-    vector<uint32_t> offsets;
-    vector<Rect>     bounds;
-
-    pn::array frames;
-    for (auto i : range(size)) {
-        static_cast<void>(i);
-        uint32_t offset;
-        if (!header.read(&offset)) {
-            return false;
-        }
-        pn::file frame_data = data.slice(offset).open();
-        uint16_t width, height;
-        int16_t  x_offset, y_offset;
-        if (!frame_data.read(&width, &height, &x_offset, &y_offset)) {
-            return false;
-        }
-        offsets.push_back(offset);
-        bounds.emplace_back(Point(-x_offset, -y_offset), Size(width, height));
-
-        frames.push_back(pn_rect(bounds.back()));
-    }
-
-    Rect max_bounds = bounds[0];
-    for (const auto& rect : bounds) {
-        max_bounds.left   = std::min(max_bounds.left, rect.left);
-        max_bounds.top    = std::min(max_bounds.top, rect.top);
-        max_bounds.right  = std::max(max_bounds.right, rect.right);
-        max_bounds.bottom = std::max(max_bounds.bottom, rect.bottom);
-    }
-
-    // Do our best to find a square layout of all the frames.  In the
-    // event of a prime number of frames, we'll end up with one row and
-    // many columns.
-    int rows = sqrt(size);
-    int cols = size;
-    while (rows > 1) {
-        if ((size % rows) == 0) {
-            cols = size / rows;
-            break;
-        } else {
-            --rows;
-        }
-    }
-
-    ArrayPixMap image(max_bounds.width() * cols, max_bounds.height() * rows);
-    ArrayPixMap overlay(max_bounds.width() * cols, max_bounds.height() * rows);
-    image.fill(RgbColor::clear());
-    overlay.fill(RgbColor::clear());
-    for (auto i : range(size)) {
-        int col = i % cols;
-        int row = i / cols;
-
-        pn::map       frame;
-        pn::data_view frame_data = data.slice(offsets[i]);
-        frame_data.shift(8);
-        Rect r = bounds[i];
-        r.offset(max_bounds.width() * col, max_bounds.height() * row);
-        r.offset(-max_bounds.left, -max_bounds.top);
-
-        convert_frame(dir, id, frame_data.slice(0, r.area()), image.view(r));
-        convert_overlay(dir, id, frame_data.slice(0, r.area()), overlay.view(r));
-    }
-
-    set<int> alpha_sprites = {
-            504, 516, 517, 519, 522, 526, 541, 547, 548, 554, 557, 558, 580, 581,
-            584, 589, 598, 605, 606, 611, 613, 614, 620, 645, 653, 655, 656,
-    };
-    if (factory && (alpha_sprites.find(id) != alpha_sprites.end())) {
-        alphatize(image);
-    }
-
-    pn::string sprite_dir = pn::format("{0}/{1}", dir, id);
-    makedirs(sprite_dir, 0755);
-
-    {
-        pn::file file = pn::open(pn::format("{0}/{1}/image.png", dir, id), "w");
-        image.encode(file);
-    }
-
-    {
-        pn::file file = pn::open(pn::format("{0}/{1}/overlay.png", dir, id), "w");
-        overlay.encode(file);
-    }
-
-    pn::dump(
-            out, pn::map{{"image", pn::format("sprites/{0}/image.png", id)},
-                         {"overlay", pn::format("sprites/{0}/overlay.png", id)},
-                         {"rows", rows},
-                         {"cols", cols},
-                         {"center", pn_point(Point(-max_bounds.left, -max_bounds.top))},
-                         {"frames", std::move(frames)}});
-    return true;
-}
-
-struct ResourceFile {
-    const char* path;
-    struct ExtractedResource {
-        const char* resource;
-        const char* output_directory;
-        const char* output_extension;
-        bool (*convert)(
-                pn::string_view dir, bool factory, int16_t id, pn::data_view data,
-                pn::file_view out);
-    } resources[16];
+const SoundInfo kNonFreeSounds[] = {
+        {"dev/fusion",
+         {502, 22050, 959406, 19261},
+         {0x29de6afe, 0xaf09ba9b, 0xa321e2df, 0x058efe4a, 0x7a104604}},
+        {"dev/pk/can",
+         {504, 22050, 384, 6750},
+         {0xeb62526b, 0x413ccc64, 0xa3c40b1c, 0xd9eaab44, 0x7dacffd4}},
+        {"dev/anti",
+         {505, 22050, 1321083, 18693},
+         {0x870a0c2a, 0xcd29683b, 0xba5684c4, 0x04828cb8, 0x026eb7b7}},
+        {"gui/beep/order",
+         {506, 22050, 1312482, 8555},
+         {0x7160680b, 0xda68a321, 0xd4ab8045, 0x77a239ed, 0xab11484a}},
+        {"gui/beep/select",
+         {507, 22050, 1339822, 2322},
+         {0x664d3624, 0x98828500, 0x0f9e91ff, 0x8ef13c90, 0x9355253e}},
+        {"gui/beep/build",
+         {508, 22050, 1173417, 3892},
+         {0x758b84ce, 0xd7f57c82, 0xedbdb831, 0xdc7fb4a2, 0xb10473fc}},
+        {"gui/beep/button",
+         {509, 22050, 1194454, 2223},
+         {0x7d33dc2c, 0x72168237, 0xec66bd18, 0x04597cb2, 0xf854ee18}},
+        {"tpl/transport/land",
+         {513, 11025, 1351516, 50332},
+         {0x5bae5076, 0xbcacff7e, 0x48f4876a, 0x4b6800ab, 0xc6079a72}},
+        {"sfx/energy",
+         {514, 22050, 1287398, 6665},
+         {0xfb2d4ce9, 0x03098593, 0x96f7af06, 0x8b7639ed, 0xb1f362da}},
+        {"sfx/explosion/large",
+         {515, 11025, 1146575, 26796},
+         {0x70b1fb3e, 0x8251a6f2, 0xdfebcf0a, 0xdaa5a316, 0x45b2d329}},
+        {"zzz/sfx/explosion/huge",
+         {516, 11025, 1196723, 66678},
+         {0xaf1e0119, 0x73b6433a, 0xc154d3a0, 0x59dab9ea, 0xfb74fe10}},
+        {"dev/rplasma",
+         {530, 22050, 68036, 16128},
+         {0x90c38cfc, 0x1965c1c7, 0x936729a9, 0x1fe76215, 0xdd7a0f3c}},
+        {"dev/repulser",
+         {531, 22050, 84210, 10553},
+         {0x8463f15d, 0x3be17c70, 0xce209796, 0xb69c95ef, 0x4b6f4f23}},
+        {"sfx/explosion/gas",
+         {532, 22050, 94809, 25268},
+         {0xb6dad1e2, 0x249c1bbe, 0x467c0be3, 0x3b26ecd9, 0x11e7216e}},
+        {"gui/beep/message",
+         {535, 22050, 142420, 1252},
+         {0x72a8e5c7, 0xb5db2587, 0x19ca8927, 0x940f57d9, 0x38955afd}},
+        {"sfx/explosion/flak",
+         {536, 22050, 143718, 15616},
+         {0x2bd9ded2, 0xd03f682c, 0x8a8e37ae, 0xdbd12d66, 0xef2229d8}},
+        {"dev/onas",
+         {540, 22050, 726536, 16535},
+         {0xe7dbe00e, 0x2dcab111, 0x133bf193, 0xd63c5744, 0xbb85b0c1}},
+        {"zrb/destroy",
+         {548, 11025, 1428461, 16768},
+         {0x1479096a, 0xb0f32be0, 0x3998af62, 0x5b5d9a53, 0x525a5858}},
+        {"dev/conc",
+         {550, 22050, 159380, 6470},
+         {0xb439f0d6, 0xe32c0a86, 0xab49b700, 0xd592083c, 0xf0667114}},
+        {"dev/conc/ricochet/1",
+         {552, 22050, 1524780, 9792},
+         {0x4d37321a, 0x3503b96d, 0x1540adf6, 0xb33c1c36, 0xc15af67d}},
+        {"dev/conc/ricochet/2",
+         {553, 22050, 1534618, 10176},
+         {0x812ea3f1, 0xe73ae797, 0xe5141ce1, 0xede5dd36, 0xeb62f862}},
+        {"zzz/lectrocute",
+         {562, 11025, 1621564, 18979},
+         {0x0246bf0f, 0x12c38a6c, 0xf1ad2662, 0x8dffa3c5, 0x41c7bc6a}},
+        {"sfx/pop",
+         {571, 22050, 2985648, 2730},
+         {0x88d47d4d, 0x759b3084, 0x0259bb8d, 0xc3169b82, 0x354b5f30}},
+        {"zzz/transport/land/2",
+         {2000, 22050, 986014, 100663},
+         {0xabbc1783, 0x08a92270, 0xfbaeebcc, 0xe3c73ae5, 0xf6f44979}},
+        {"zzz/transport/land/3",
+         {2001, 11025, 1086723, 50332},
+         {0x7a9db74e, 0xc4f1602c, 0x8a9a509d, 0xe9af8711, 0xdbe28c07}},
+        {"tpl/evat/destroy",
+         {12558, 11025, 1445275, 12160},
+         {0xa79d0450, 0xc19b91f0, 0x5ca71911, 0x16b01e65, 0xc2594f6b}},
+        {"ish/etc/tug/attach",
+         {17406, 22050, 186727, 14880},
+         {0xd72524cd, 0x1dbc1c26, 0x37655ed9, 0x8e76aead, 0xde4dce91}},
+        {"dev/pk/sal",
+         {28007, 22050, 263487, 26624},
+         {0x7c430c15, 0xd3899d1b, 0x0b7ce3a4, 0x8cc0fc7d, 0x8d73e59c}},
+        {"tpl/evat/board",
+         {31989, 22050, 201653, 31360},
+         {0xa7aa6c8f, 0xe3147850, 0x374beda8, 0x45630aa2, 0xd0d8f9d7}},
 };
 
-static const ResourceFile kResourceFiles[] = {
-        {
-                "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Scenarios",
-                {
-                        {"PICT", "pictures", "png", convert_pict},
-                        {"STR#", "strings", "pn", convert_str},
-                        {"TEXT", "text", "txt", convert_text},
-                        {"bsob", "objects", "bsob", verbatim},
-                        {"nlAG", "scenario-info", "nlAG", verbatim},
-                        {"obac", "object-actions", "obac", verbatim},
-                        {"race", "races", "race", verbatim},
-                        {"snbf", "scenario-briefing-points", "snbf", verbatim},
-                        {"sncd", "scenario-conditions", "sncd", verbatim},
-                        {"snit", "scenario-initial-objects", "snit", verbatim},
-                        {"snro", "scenarios", "snro", verbatim},
-                },
-        },
-        {
-                "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Sounds",
-                {
-                        {"snd ", "sounds", "aiff", convert_snd},
-                },
-        },
-        {
-                "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Sprites",
-                {
-                        {"SMIV", "sprites", "pn", convert_smiv},
-                },
-        },
-        {
-                "__MACOSX/Ares 1.2.0 ƒ/._Ares",
-                {
-                        {"NLRP", "replays", "NLRP", convert_nlrp},
-                },
-        },
-};
+// Write `d` as an IEEE 754 80-bit floating point (extended precision) number.
+//
+// Not verified for special values (positive and negative zero and infinity, NaN) correctly,
+// because those aren't valid sample rates, and that's the reason this function was written.
+//
+// @param [out] out     The pn::file_view to write the value to.
+// @param [in] d        A double-precision floating point value.
+pn::file_view write_float80(pn::file_view out, double d) {
+    // Reinterpret `d` as uint64_t, since we will be manupulating bits.
+    uint64_t sample_rate_bits;
+    memcpy(&sample_rate_bits, &d, sizeof(uint64_t));
 
-static const ResourceFile::ExtractedResource kPluginFiles[] = {
-        {"PICT", "pictures", "png", convert_pict},
-        {"NLRP", "replays", "NLRP", convert_nlrp},
-        {"SMIV", "sprites", "pn", convert_smiv},
-        {"STR#", "strings", "pn", convert_str},
-        {"TEXT", "text", "txt", convert_text},
-        {"bsob", "objects", "bsob", verbatim},
-        {"nlAG", "scenario-info", "nlAG", verbatim},
-        {"obac", "object-actions", "obac", verbatim},
-        {"race", "races", "race", verbatim},
-        {"snbf", "scenario-briefing-points", "snbf", verbatim},
-        {"sncd", "scenario-conditions", "sncd", verbatim},
-        {"snd ", "sounds", "aiff", convert_snd},
-        {"snit", "scenario-initial-objects", "snit", verbatim},
-        {"snro", "scenarios", "snro", verbatim},
-};
+    // Deconstruct the double:
+    //   * the sign, 1 bit.
+    //   * the exponent, 11 bits with a bias of 1023.
+    //   * the fraction, 52 bits, with an implicit '1' bit preceding.
+    uint64_t sign     = sample_rate_bits >> 63;
+    uint64_t exponent = ((sample_rate_bits >> 52) & ((1 << 11) - 1)) - 1023;
+    uint64_t fraction = (1ull << 52) | (sample_rate_bits & ((1ull << 52) - 1));
+
+    // Reconstruct the 80-bit float:
+    //   * the sign, 1 bit.
+    //   * the exponent, 15 bits with a bias of 16383.
+    //   * the fraction, 64 bits, with no implicit '1' bit.
+    return out.write<uint16_t, uint64_t>(
+            (sign << 15) | ((exponent + 16383) & 0x7FFF), fraction << 11);
+}
+
+pn::data convert_snd(const SoundInfo& info, pn::data_view data) {
+    pn::data samples = data.slice(info.input.offset, info.input.size).copy();
+    for (int i = 0; i < samples.size(); ++i) {
+        samples[i] ^= 0x80;
+    }
+
+    static const pn::string_view form = "FORM";
+    static const pn::string_view aiff = "AIFF";
+    static const pn::string_view comm = "COMM";
+    static const pn::string_view ssnd = "SSND";
+
+    uint16_t channels    = 1;
+    uint32_t data_size   = samples.size();
+    uint32_t ssnd_size   = data_size + 8;
+    uint32_t form_size   = data_size + 46;
+    uint32_t comm_size   = 18;
+    uint64_t zeros       = 0;
+    uint16_t sample_size = 8;
+    pn::data sample_rate;
+    write_float80(sample_rate.open("w"), info.input.sample_rate).check();
+
+    pn::data out;
+    pn::file f = out.open("w").check();
+    f.write(form, form_size, aiff, comm, comm_size, channels, data_size, sample_size, sample_rate,
+            ssnd, ssnd_size, zeros, samples)
+            .check();
+    return out;
+}
 
 static const char kDownloadBase[] = "http://downloads.arescentral.org";
-static const char kVersion[]      = "16\n";
+static int64_t    kVersion        = 20;
 
-static const char kPluginVersionFile[]    = "data/version";
-static const char kPluginVersion[]        = "1\n";
-static const char kPluginIdentifierFile[] = "data/identifier";
+static const char kPluginInfoFile[] = "info.pn";
 
-void check_version(ZipArchive& archive, pn::string_view expected) {
-    ZipFileReader version_file(archive, kPluginVersionFile);
-    pn::string    actual{reinterpret_cast<const char*>(version_file.data().data()),
-                      static_cast<int>(version_file.data().size())};
+ScenarioInfo info_for_zip_archive(ZipArchive& archive) {
+    ZipFileReader file{archive, kPluginInfoFile};
+    try {
+        pn::value  x;
+        pn_error_t e;
+        if (!pn::parse(file.data().open(), x, &e)) {
+            throw std::runtime_error(
+                    pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
+        }
+        return scenario_info(x);
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(archive.path().copy().c_str()));
+    }
+}
+
+void check_version(const ScenarioInfo& archive, int64_t expected) {
+    int64_t actual = archive.format;
     if (actual != expected) {
         throw std::runtime_error(
                 pn::format("unsupported plugin version {0}", pn::dump(actual, pn::dump_short))
@@ -446,26 +237,12 @@ void check_version(ZipArchive& archive, pn::string_view expected) {
     }
 }
 
-void read_identifier(ZipArchive& archive, pn::string& out) {
-    ZipFileReader identifier_file(archive, kPluginIdentifierFile);
-    pn::string    actual{reinterpret_cast<const char*>(identifier_file.data().data()),
-                      static_cast<int>(identifier_file.data().size())};
-    if (actual.data()[actual.size() - 1] != '\n') {
+void check_identifier(const ScenarioInfo& archive, pn::string_view expected) {
+    if (archive.identifier != expected) {
         throw std::runtime_error(pn::format(
-                                         "missing newline in plugin identifier {0}",
-                                         pn::dump(actual, pn::dump_short))
+                                         "mismatch in plugin identifier {0}",
+                                         pn::dump(archive.identifier, pn::dump_short))
                                          .c_str());
-    }
-    out = actual.substr(0, actual.size() - 1).copy();
-}
-
-void check_identifier(ZipArchive& archive, pn::string_view expected) {
-    pn::string actual;
-    read_identifier(archive, actual);
-    if (expected != actual) {
-        throw std::runtime_error(
-                pn::format("mismatch in plugin identifier {0}", pn::dump(actual, pn::dump_short))
-                        .c_str());
     }
 }
 
@@ -485,9 +262,10 @@ void DataExtractor::set_plugin_file(pn::string_view path) {
     {
         // Make sure that the provided file is actually an archive that
         // will be usable as a plugin, then get its identifier.
-        ZipArchive archive(path, 0);
-        check_version(archive, kPluginVersion);
-        read_identifier(archive, found_scenario);
+        ZipArchive   archive(path, 0);
+        ScenarioInfo info = info_for_zip_archive(archive);
+        check_version(info, kVersion);
+        found_scenario = info.identifier.copy();
     }
 
     // Copy it to $DOWNLOADS/$IDENTIFIER.antaresplugin.  This is where
@@ -525,7 +303,6 @@ void DataExtractor::extract_factory_scenario(Observer* observer) const {
         pn::string scenario_dir = pn::format("{0}/{1}", _output_dir, kFactoryScenarioIdentifier);
         rmtree(scenario_dir);
         extract_original(observer, "Ares-1.2.0.zip");
-        write_version(kFactoryScenarioIdentifier);
     }
 }
 
@@ -534,19 +311,11 @@ void DataExtractor::extract_plugin_scenario(Observer* observer) const {
         pn::string scenario_dir = pn::format("{0}/{1}", _output_dir, _scenario);
         rmtree(scenario_dir);
         extract_plugin(observer);
-        write_version(_scenario);
     }
 }
 
 bool DataExtractor::scenario_current(pn::string_view scenario) const {
-    pn::string    path    = pn::format("{0}/{1}/version", _output_dir, scenario);
-    pn::data_view version = pn::string_view{kVersion}.as_data();
-    try {
-        mapped_file file(path);
-        return file.data() == version;
-    } catch (std::exception& e) {
-        return false;
-    }
+    return sfz::path::isdir(pn::format("{0}/{1}", _output_dir, scenario));
 }
 
 void DataExtractor::download(
@@ -595,48 +364,27 @@ void DataExtractor::download(
     file.write(download);
 }
 
-void DataExtractor::write_version(pn::string_view scenario_identifier) const {
-    pn::string path = pn::format("{0}/{1}/version", _output_dir, scenario_identifier);
-    makedirs(path::dirname(path), 0755);
-    pn::file file = pn::open(path, "w");
-    file.write(kVersion);
-}
-
 void DataExtractor::extract_original(Observer* observer, pn::string_view file) const {
     pn::string status = pn::format("Extracting {0}...", file);
     observer->status(status);
     pn::string full_path = pn::format("{0}/{1}", _downloads_dir, file);
     ZipArchive archive(full_path, 0);
 
-    rezin::Options options;
-    options.line_ending = rezin::Options::CR;
+    ZipFileReader zip(archive, kAresSounds);
+    for (const SoundInfo& info : kNonFreeSounds) {
+        pn::data data = convert_snd(info, zip.data());
 
-    for (const ResourceFile& resource_file : kResourceFiles) {
-        pn::string    path = resource_file.path;
-        ZipFileReader file(archive, path);
-        AppleDouble   apple_double(file.data());
-        ResourceFork  rsrc(apple_double.at(AppleDouble::RESOURCE_FORK), options);
-
-        for (const ResourceFile::ExtractedResource& conversion : resource_file.resources) {
-            if (!conversion.resource) {
-                continue;
-            }
-
-            const ResourceType& type = rsrc.at(conversion.resource);
-            for (const ResourceEntry& entry : type) {
-                pn::data   data;
-                pn::string output = pn::format(
-                        "{0}/{1}/{2}/{3}.{4}", _output_dir, kFactoryScenarioIdentifier,
-                        conversion.output_directory, entry.id(), conversion.output_extension);
-                if (conversion.convert(
-                            path::dirname(output), true, entry.id(), entry.data(),
-                            data.open("w"))) {
-                    makedirs(path::dirname(output), 0755);
-                    pn::file file = pn::open(output, "w");
-                    file.write(data);
-                }
-            }
+        sha1 sha;
+        sha.write(data);
+        if (sha.compute() != info.digest) {
+            throw std::runtime_error(pn::format("sound {0}: digest mismatch", info.name).c_str());
         }
+
+        pn::string output = pn::format(
+                "{0}/{1}/sounds/{2}.aiff", _output_dir, kFactoryScenarioIdentifier, info.name);
+        makedirs(path::dirname(output), 0755);
+        pn::file file = pn::open(output, "w");
+        file.write(data);
     }
 }
 
@@ -644,65 +392,25 @@ void DataExtractor::extract_plugin(Observer* observer) const {
     pn::string file   = pn::format("{0}.antaresplugin", _scenario);
     pn::string status = pn::format("Extracting {0}...", file);
     observer->status(status);
-    pn::string full_path = pn::format("{0}/{1}", _downloads_dir, file);
-    ZipArchive archive(full_path, 0);
+    pn::string   full_path = pn::format("{0}/{1}", _downloads_dir, file);
+    ZipArchive   archive(full_path, 0);
+    ScenarioInfo info = info_for_zip_archive(archive);
 
-    rezin::Options options;
-    options.line_ending = rezin::Options::CR;
-
-    check_version(archive, kPluginVersion);
-    check_identifier(archive, _scenario);
+    check_version(info, kVersion);
+    check_identifier(info, _scenario);
 
     for (size_t i : range(archive.size())) {
         ZipFileReader   file(archive, i);
-        pn::string_view path = file.path();
+        pn::string_view in_path = file.path();
 
-        // Skip directories and special files.
-        if ((path.rfind("/") == (path.size() - 1)) || (path == kPluginIdentifierFile) ||
-            (path == kPluginVersionFile)) {
+        // Skip directories and identifier file.
+        if (in_path.rfind("/") == (in_path.size() - 1)) {
             continue;
         }
 
-        // Parse path into "data/$TYPE/$ID etc.".
-        pn::string_view data;
-        pn::string_view resource_type_slice;
-        pn::string_view id_slice;
-        int64_t         id;
-        if (!pn::partition(data, "/", path) || (data != "data") ||
-            !pn::partition(resource_type_slice, "/", path) ||
-            !pn::partition(id_slice, " ", path) || !pn::strtoll(id_slice, &id, nullptr) ||
-            (path.find(pn::rune{'/'}) != path.npos)) {
-            throw std::runtime_error(
-                    pn::format("bad plugin file {0}", pn::dump(file.path(), pn::dump_short))
-                            .c_str());
-        }
-
-        pn::string resource_type(resource_type_slice.copy());
-        while (std::distance(resource_type.begin(), resource_type.end()) != 4) {
-            resource_type += pn::rune{' '};
-        }
-
-        for (const ResourceFile::ExtractedResource& conversion : kPluginFiles) {
-            if (conversion.resource == resource_type) {
-                pn::data   data;
-                pn::string output = pn::format(
-                        "{0}/{1}/{2}/{3}.{4}", _output_dir, _scenario, conversion.output_directory,
-                        id, conversion.output_extension);
-                if (conversion.convert(
-                            path::dirname(output), false, id, file.data(), data.open("w"))) {
-                    makedirs(path::dirname(output), 0755);
-                    pn::file file = pn::open(output, "w");
-                    file.write(data);
-                }
-                goto next;
-            }
-        }
-
-        throw std::runtime_error(
-                pn::format("unknown resource type {0}", pn::dump(resource_type, pn::dump_short))
-                        .c_str());
-
-    next:;  // labeled continue.
+        pn::string output_path = pn::format("{0}/{1}/{2}", _output_dir, _scenario, in_path);
+        makedirs(path::dirname(output_path), 0755);
+        pn::open(output_path, "w").write(file.data()).check();
     }
 }
 

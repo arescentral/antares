@@ -25,7 +25,6 @@
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "data/interface.hpp"
-#include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
@@ -137,7 +136,7 @@ void SoundControlScreen::handle_button(Button& button) {
 
 void SoundControlScreen::overlay() const {
     const int volume = sys.prefs->volume();
-    Rect      bounds = item(VOLUME_BOX).bounds();
+    Rect      bounds = item(VOLUME_BOX).bounds;
     Point     off    = offset();
     bounds.offset(off.h, off.v);
 
@@ -153,7 +152,7 @@ void SoundControlScreen::overlay() const {
 
     Rects rects;
     for (int i = 0; i < volume; ++i) {
-        const RgbColor color = GetRGBTranslateColorShade(PALE_PURPLE, 2 * (i + 1));
+        const RgbColor color = GetRGBTranslateColorShade(Hue::PALE_PURPLE, 2 * (i + 1));
         rects.fill(notch, color);
         notch.offset(notch_width, 0);
     }
@@ -242,7 +241,7 @@ void KeyControlScreen::fire_timer() {
 
 void KeyControlScreen::adjust_interface() {
     for (size_t i = SHIP_TAB; i <= HOT_KEY_TAB; ++i) {
-        dynamic_cast<TabBoxButton&>(mutable_item(i)).hue = AQUA;
+        dynamic_cast<TabBoxButton&>(mutable_item(i)).hue = Hue::AQUA;
     }
 
     for (size_t i = _key_start; i < size(); ++i) {
@@ -254,7 +253,7 @@ void KeyControlScreen::adjust_interface() {
         } else {
             dynamic_cast<Button&>(mutable_item(i)).status = kActive;
         }
-        dynamic_cast<Button&>(mutable_item(i)).hue = AQUA;
+        dynamic_cast<Button&>(mutable_item(i)).hue = Hue::AQUA;
     }
 
     if (_flashed_on) {
@@ -316,7 +315,7 @@ void KeyControlScreen::overlay() const {
                 _keys.at(key_one), _tabs.at(get_tab_num(key_two)), _keys.at(key_two));
 
         const TextRect& box    = dynamic_cast<const TextRect&>(item(CONFLICT_TEXT));
-        Rect            bounds = box.bounds();
+        Rect            bounds = box.bounds;
         Point           off    = offset();
         bounds.offset(off.h, off.v);
         draw_text_in_rect(bounds, text, box.style, box.hue);
@@ -388,10 +387,10 @@ void KeyControlScreen::update_conflicts() {
 void KeyControlScreen::flash_on(size_t key) {
     if (kKeyIndices[_tab] <= key && key < kKeyIndices[_tab + 1]) {
         Button& item = dynamic_cast<Button&>(mutable_item(key - kKeyIndices[_tab] + _key_start));
-        item.hue     = GOLD;
+        item.hue     = Hue::GOLD;
     } else {
         Button& item = dynamic_cast<Button&>(mutable_item(SHIP_TAB + get_tab_num(key)));
-        item.hue     = GOLD;
+        item.hue     = Hue::GOLD;
     }
 }
 

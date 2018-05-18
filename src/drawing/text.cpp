@@ -24,10 +24,11 @@
 #include <pn/string>
 #include <pn/value>
 
-#include "data/picture.hpp"
+#include "data/field.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "game/globals.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 #include "video/driver.hpp"
 
@@ -43,51 +44,49 @@ enum {
     kButtonSmallFontResID = 5005,
 };
 
-void recolor(PixMap& glyph_table) {
-    for (size_t y = 0; y < glyph_table.size().height; ++y) {
-        for (size_t x = 0; x < glyph_table.size().width; ++x) {
-            if (glyph_table.get(x, y).red < 255) {
-                glyph_table.set(x, y, RgbColor::white());
-            } else {
-                glyph_table.set(x, y, RgbColor::clear());
-            }
+}  // namespace
+
+Font::Font() {}
+
+Font::Font(
+        Texture texture, int logical_width, int height, int ascent,
+        std::map<pn::rune, Rect> glyphs)
+        : texture(std::move(texture)),
+          logicalWidth(logical_width),
+          height(height),
+          ascent(ascent),
+          _glyphs(glyphs) {}
+
+static std::map<pn::rune, Rect> required_glyphs(path_value x) {
+    if (x.value().is_map()) {
+        std::map<pn::rune, Rect> glyphs;
+        for (pn::key_value_cref kv : x.value().as_map()) {
+            pn::string_view glyph  = kv.key();
+            path_value      rect   = x.get(glyph);
+            glyphs[*glyph.begin()] = required_rect(rect);
         }
+        return glyphs;
+    } else {
+        throw std::runtime_error(pn::format("{0}must be map", x.prefix()).c_str());
     }
 }
 
-}  // namespace
-
-Font::Font(pn::string_view name) {
-    pn::string path = pn::format("fonts/{0}.pn", name);
-    Resource   rsrc(path);
-    pn::value  x;
-    pn_error_t err;
-    if (!pn::parse(rsrc.string().open(), x, &err)) {
-        throw std::runtime_error(
-                pn::format("{0}:{1}:{2}: {3}", path, err.lineno, err.column, pn_strerror(err.code))
-                        .c_str());
-    }
-
-    pn::map_cref    m     = x.as_map();
-    pn::string_view image = m.get("image").as_string();
-    logicalWidth          = m.get("logical-width").as_int();
-    height                = m.get("height").as_int();
-    ascent                = m.get("ascent").as_int();
-    pn::map_cref glyphs   = m.get("glyphs").as_map();
-
-    Picture glyph_table(image, true);
-    recolor(glyph_table);
-    texture = glyph_table.texture();
-    _scale  = glyph_table.scale();
-
-    for (pn::key_value_cref kv : glyphs) {
-        pn::string_view glyph    = kv.key();
-        pn::map_cref    rect_map = kv.value().as_map();
-
-        _glyphs[*glyph.begin()] =
-                Rect(rect_map.get("left").as_int(), rect_map.get("top").as_int(),
-                     rect_map.get("right").as_int(), rect_map.get("bottom").as_int());
-    }
+Font font(pn::value_cref x, Texture texture) {
+    struct FontData {
+        int64_t                  logical_width;
+        int64_t                  height;
+        int64_t                  ascent;
+        std::map<pn::rune, Rect> glyphs;
+    };
+    auto d = required_struct<FontData>(
+            path_value{x}, {
+                                   {"image", nullptr},
+                                   {"logical-width", {&FontData::logical_width, required_int}},
+                                   {"height", {&FontData::height, required_int}},
+                                   {"ascent", {&FontData::ascent, required_int}},
+                                   {"glyphs", {&FontData::glyphs, required_glyphs}},
+                           });
+    return Font(std::move(texture), d.logical_width, d.height, d.ascent, d.glyphs);
 }
 
 Font::~Font() {}
@@ -108,10 +107,7 @@ void Font::draw(const Quads& quads, Point cursor, pn::string_view string, RgbCol
     cursor.offset(0, -ascent);
     for (pn::rune rune : string) {
         auto glyph = glyph_rect(rune);
-        Rect scaled(
-                glyph.left * _scale, glyph.top * _scale, glyph.right * _scale,
-                glyph.bottom * _scale);
-        quads.draw(Rect(cursor, glyph.size()), scaled, color);
+        quads.draw(Rect(cursor, glyph.size()), glyph, color);
         cursor.offset(glyph.width(), 0);
     }
 }

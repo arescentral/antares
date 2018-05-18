@@ -22,21 +22,28 @@
 
 using std::vector;
 
+static sfz::optional<pn::string> copy(const sfz::optional<pn::string>& s) {
+    if (s.has_value()) {
+        return sfz::make_optional(s->copy());
+    }
+    return sfz::nullopt;
+}
+
 struct AntaresScenarioListEntry {
-    AntaresScenarioListEntry(const antares::ScenarioList::Entry& entry)
+    AntaresScenarioListEntry(const antares::ScenarioInfo& entry)
             : identifier(entry.identifier.copy()),
               title(entry.title.copy()),
-              download_url(entry.download_url.copy()),
+              download_url(copy(entry.download_url)),
               author(entry.author.copy()),
-              author_url(entry.author_url.copy()),
-              version(stringify(entry.version)) {}
+              author_url(copy(entry.author_url)),
+              version(entry.version.copy()) {}
 
-    pn::string identifier;
-    pn::string title;
-    pn::string download_url;
-    pn::string author;
-    pn::string author_url;
-    pn::string version;
+    pn::string                identifier;
+    pn::string                title;
+    sfz::optional<pn::string> download_url;
+    pn::string                author;
+    sfz::optional<pn::string> author_url;
+    pn::string                version;
 };
 
 struct AntaresScenarioList {
@@ -77,7 +84,10 @@ extern "C" const char* antares_scenario_list_entry_title(AntaresScenarioListEntr
 }
 
 extern "C" const char* antares_scenario_list_entry_download_url(AntaresScenarioListEntry* entry) {
-    return entry->download_url.data();
+    if (entry->download_url.has_value()) {
+        return entry->download_url->data();
+    }
+    return nullptr;
 }
 
 extern "C" const char* antares_scenario_list_entry_author(AntaresScenarioListEntry* entry) {
@@ -85,7 +95,10 @@ extern "C" const char* antares_scenario_list_entry_author(AntaresScenarioListEnt
 }
 
 extern "C" const char* antares_scenario_list_entry_author_url(AntaresScenarioListEntry* entry) {
-    return entry->author_url.data();
+    if (entry->author_url.has_value()) {
+        return entry->author_url->data();
+    }
+    return nullptr;
 }
 
 extern "C" const char* antares_scenario_list_entry_version(AntaresScenarioListEntry* entry) {

@@ -75,9 +75,8 @@ ArrayPixMap read_png(pn::file_view in) {
     // If we are reading an image with an alpha channel, we want the alpha channel to be the
     // first component, rather than the last.  If we are reading an image without an alpha
     // channel, add a 0xFF byte before each RGB triplet.
-    if (color_type & PNG_COLOR_MASK_ALPHA) {
-        png_set_swap_alpha(png);
-    } else {
+    png_set_swap_alpha(png);
+    if (!(color_type & PNG_COLOR_MASK_ALPHA)) {
         png_set_filler(png, 0xFF, PNG_FILLER_BEFORE);
     }
 

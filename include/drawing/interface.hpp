@@ -30,13 +30,11 @@ namespace antares {
 const int32_t kInterfaceTextVBuffer = 2;
 const int32_t kInterfaceTextHBuffer = 3;
 
-void draw_text_in_rect(
-        Rect tRect, pn::string_view text, interfaceStyleType style, uint8_t textcolor);
+void draw_text_in_rect(Rect tRect, pn::string_view text, InterfaceStyle style, Hue hue);
 
-int16_t GetInterfaceTextHeightFromWidth(
-        pn::string_view text, interfaceStyleType style, int16_t width);
-void draw_interface_item(const InterfaceItem& item, InputMode mode);
-void draw_interface_item(const InterfaceItem& item, InputMode mode, Point origin);
+int16_t GetInterfaceTextHeightFromWidth(pn::string_view text, InterfaceStyle style, int16_t width);
+void    draw_interface_item(const InterfaceItem& item, InputMode mode);
+void    draw_interface_item(const InterfaceItem& item, InputMode mode, Point origin);
 
 void GetAnyInterfaceItemGraphicBounds(const InterfaceItem& item, Rect* rect);
 

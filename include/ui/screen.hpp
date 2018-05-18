@@ -32,7 +32,6 @@ namespace antares {
 class InterfaceScreen : public Card {
   public:
     InterfaceScreen(pn::string_view name, const Rect& bounds, bool full_screen);
-    InterfaceScreen(pn::value_cref x, const Rect& bounds, bool full_screen);
     ~InterfaceScreen();
 
     virtual void become_front();
@@ -54,7 +53,7 @@ class InterfaceScreen : public Card {
     virtual void handle_button(Button& button) = 0;
 
     void truncate(size_t size);
-    void extend(pn::value_cref x);
+    void extend(const std::vector<std::unique_ptr<InterfaceItem>>& items);
 
     Point                offset() const;
     size_t               size() const;

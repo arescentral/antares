@@ -20,28 +20,29 @@
 #define ANTARES_DATA_LEVEL_HPP_
 
 #include <pn/string>
+#include <vector>
 
 #include "data/action.hpp"
+#include "data/base-object.hpp"
+#include "data/enums.hpp"
 #include "data/handle.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
 #include "math/units.hpp"
+#include "video/driver.hpp"
 
 namespace antares {
 
 struct LevelName;
 class BaseObject;
+struct Level_Briefing;
+struct Level_Condition;
+struct Level_Initial;
+struct Race;
 
 const size_t kMaxPlayerNum = 4;
 
-const int32_t kMaxTypeBaseCanBuild = 12;
-const int32_t kMaxShipCanBuild     = 6;
-
-enum {
-    kSingleHumanPlayer  = 0,
-    kNetworkHumanPlayer = 1,
-    kComputerPlayer     = 2,
-};
+const int32_t kMaxShipCanBuild = 6;
 
 const int16_t kLevelBriefMask  = 0x00ff;
 const int16_t kLevelAngleMask  = 0xff00;
@@ -54,18 +55,27 @@ const int32_t kTrueOnlyOnce  = 0x00000001;
 const int32_t kInitiallyTrue = 0x00000002;
 const int32_t kHasBeenTrue   = 0x00000004;
 
-struct scenarioInfoType {
-    Handle<BaseObject> warpInFlareID;
-    Handle<BaseObject> warpOutFlareID;
-    Handle<BaseObject> playerBodyID;
-    Handle<BaseObject> energyBlobID;
-    pn::string         downloadURLString;
-    pn::string         titleString;
-    pn::string         authorNameString;
-    pn::string         authorURLString;
-    uint32_t           version;
+struct ScenarioInfo {
+    pn::string identifier;
+    int64_t    format;
+
+    NamedHandle<const BaseObject> warpInFlareID;
+    NamedHandle<const BaseObject> warpOutFlareID;
+    NamedHandle<const BaseObject> playerBodyID;
+    NamedHandle<const BaseObject> energyBlobID;
+    sfz::optional<pn::string>     download_url;
+    pn::string                    title;
+    pn::string                    author;
+    sfz::optional<pn::string>     author_url;
+    sfz::optional<pn::string>     intro;
+    sfz::optional<pn::string>     about;
+
+    pn::string splash_screen;
+    pn::string starmap;
+
+    pn::string version;
 };
-bool read_from(pn::file_view in, scenarioInfoType* scenario_info);
+ScenarioInfo scenario_info(pn::value_cref x0);
 
 enum conditionType {
     kNoCondition                      = 0,
@@ -95,127 +105,298 @@ enum conditionType {
     kSubjectIsPlayerCondition         = 24
 };
 
-typedef uint8_t briefingPointKindType;
-enum briefingPointKindEnum {
-    kNoPointKind           = 0,
-    kBriefObjectKind       = 1,
-    kBriefAbsoluteKind     = 2,
-    kBriefFreestandingKind = 3
-};
-
 struct Level {
-    struct InitialObject;
-    struct Condition;
-    struct BriefPoint;
+    using Initial = Level_Initial;
+
+    using Briefing = Level_Briefing;
+
+    using Condition = Level_Condition;
+    struct ConditionBase;
+    struct AutopilotCondition;
+    struct BuildingCondition;
+    struct ComputerCondition;
+    struct CounterCondition;
+    struct DestroyedCondition;
+    struct DistanceCondition;
+    struct FalseCondition;
+    struct HealthCondition;
+    struct MessageCondition;
+    struct OrderedCondition;
+    struct OwnerCondition;
+    struct ShipsCondition;
+    struct SpeedCondition;
+    struct SubjectCondition;
+    struct TimeCondition;
+    struct ZoomCondition;
+
+    LevelType type = LevelType::DEMO;
 
     struct Player {
-        int16_t playerType;
-        int16_t playerRace;
-        int16_t nameResID;
-        int16_t nameStrNum;
-        Fixed   earningPower;
-        int16_t netRaceFlags;
-        int16_t reserved1;
+        PlayerType              playerType = PlayerType::CPU;
+        NamedHandle<const Race> playerRace;
+        pn::string              name;
+        Fixed                   earningPower = Fixed::zero();
+        int16_t                 netRaceFlags = 0;
+        Hue                     hue          = Hue::GRAY;
     };
 
-    pn::string name;
-    int16_t    netRaceFlags;
-    int16_t    playerNum;
-    Player     player[kMaxPlayerNum];
-    int16_t    scoreStringResID;
-    int16_t    initialFirst;
-    int16_t    prologueID;
-    int16_t    initialNum;
-    int16_t    songID;
-    int16_t    conditionFirst;
-    int16_t    epilogueID;
-    int16_t    conditionNum;
-    int16_t    starMapH;
-    int16_t    briefPointFirst;
-    int16_t    starMapV;
-    int16_t    briefPointNum;  // use kLevelBriefMask
-    game_ticks parTime;
-    int16_t    parKills;
-    int16_t    levelNameStrNum;
-    Fixed      parKillRatio;
-    int16_t    parLosses;
-    secs       startTime;
-    bool       is_training;
+    struct StatusLine {
+        sfz::optional<pn::string> text;
+        sfz::optional<pn::string> prefix;
+
+        sfz::optional<int64_t>    condition;
+        sfz::optional<pn::string> true_;
+        sfz::optional<pn::string> false_;
+
+        struct Counter {
+            int64_t player = 0;
+            int64_t which  = 0;
+            bool    fixed  = false;
+        };
+        sfz::optional<Fixed>   minuend;
+        sfz::optional<Counter> counter;
+
+        sfz::optional<pn::string> suffix;
+        bool                      underline = false;
+
+        StatusLine()                  = default;
+        StatusLine(StatusLine&&)      = default;
+        StatusLine(const StatusLine&) = delete;
+    };
+
+    sfz::optional<int64_t>                  chapter;
+    pn::string                              name;
+    std::vector<Player>                     players;
+    std::vector<StatusLine>                 status;
+    sfz::optional<pn::string>               song;
+    sfz::optional<Rect>                     starmap;
+    secs                                    startTime = secs(0);
+    sfz::optional<NamedHandle<const Level>> skip;
+    int32_t                                 angle = 0;
+    struct Par {
+        game_ticks time;
+        int64_t    kills;
+        int64_t    losses;
+    } par;
+
+    std::vector<Initial>                    initials;
+    std::vector<std::unique_ptr<Condition>> conditions;
+    std::vector<Briefing>                   briefings;
+
+    pn::string prologue;           // SOLO
+    pn::string epilogue;           // SOLO
+    pn::string own_no_ships_text;  // SOLO, NET
+    pn::string foe_no_ships_text;  // NET
+    pn::string description;        // NET
 
     static const size_t byte_size = 124;
 
-    static Level*        get(int n);
-    static Handle<Level> none() { return Handle<Level>(-1); }
-
-    InitialObject* initial(size_t at) const;
-    Condition*     condition(size_t at) const;
-
-    BriefPoint* brief_point(size_t at) const;
-    size_t      brief_point_size() const;
-
-    int32_t angle() const;
-    Point   star_map_point() const;
-    int32_t chapter_number() const;
-
-    int32_t prologue_id() const;
-    int32_t epilogue_id() const;
+    static const Level* get(int n);
+    static const Level* get(pn::string_view n);
 };
-bool read_from(pn::file_view in, Level* level);
-bool read_from(pn::file_view in, Level::Player* level_player);
+Level level(pn::value_cref x);
 
-struct Level::InitialObject {
-    Handle<BaseObject>  type;
-    Handle<Admiral>     owner;
-    Handle<SpaceObject> realObject;
-    int32_t             realObjectID;
-    Point               location;
-    Fixed               earning;
-    int32_t             distanceRange;
-    int32_t             rotationMinimum;
-    int32_t             rotationRange;
-    int32_t             spriteIDOverride;  // <- ADDED 9/30
-    int32_t             canBuild[kMaxTypeBaseCanBuild];
-    int32_t             initialDestination;  // <- ADDED 9/27
-    int32_t             nameResID;
-    int32_t             nameStrNum;
-    uint32_t            attributes;
+// Might be the name of a BaseObject, or of an entry in a Race’s “ships” list.
+struct BuildableObject {
+    pn::string name;
+};
+
+struct Level_Initial {
+    BuildableObject base;
+    Handle<Admiral> owner;
+    Point           at;
+    bool            hide     = false;
+    bool            flagship = false;
+
+    struct Target {
+        Handle<const Level::Initial> initial;
+        bool                         lock = false;
+    } target;
+
+    struct Override {
+        sfz::optional<pn::string> name;
+        sfz::optional<pn::string> sprite;
+    } override_;
+
+    Fixed                        earning = Fixed::zero();
+    std::vector<BuildableObject> build;
+
+    static const Level::Initial*            get(int n);
+    static Handle<const Level::Initial>     none() { return Handle<const Level::Initial>(-1); }
+    static HandleList<const Level::Initial> all();
 
     static const size_t byte_size = 108;
 };
-bool read_from(pn::file_view in, Level::InitialObject* level_initial);
 
-struct Level::Condition {
-    struct CounterArgument {
-        Handle<Admiral> whichPlayer;
-        int32_t         whichCounter;
-        int32_t         amount;
-    };
-
-    uint8_t condition;
-    struct {
-        // Really a union
-        Point           location;
-        CounterArgument counter;
-        int32_t         longValue;
-        Fixed           fixedValue;
-        ticks           timeValue;
-        uint32_t        unsignedLongValue;
-    } conditionArgument;
-    int32_t            subjectObject;  // initial object #
-    int32_t            directObject;   // initial object #
-    HandleList<Action> action;
-    uint32_t           flags;
-    int32_t            direction;
+struct Level_Condition {
+    ConditionOp                                op                = ConditionOp::EQ;
+    bool                                       initially_enabled = true;
+    bool                                       persistent        = false;
+    Handle<const Level::Initial>               subject;
+    Handle<const Level::Initial>               object;
+    std::vector<std::unique_ptr<const Action>> action;
 
     static const size_t byte_size = 38;
 
-    bool active() const;
-    bool is_true() const;
-    bool true_yet() const;
-    void set_true_yet(bool state);
+    static const Level::Condition*            get(int n);
+    static HandleList<const Level::Condition> all();
+
+    Level_Condition()            = default;
+    virtual ~Level_Condition()   = default;
+    virtual bool is_true() const = 0;
+
+    Level_Condition(const Level_Condition&) = delete;
+    Level_Condition& operator=(const Level_Condition&) = delete;
 };
-bool read_from(pn::file_view in, Level::Condition* level_condition);
-bool read_from(pn::file_view in, Level::Condition::CounterArgument* counter_argument);
+
+// Ops: EQ, NE
+// Compares local player’s autopilot state (on = true; off = false) to `value`.
+//
+// Warning: not net-safe.
+struct Level::AutopilotCondition : Level::Condition {
+    bool         value;
+    virtual bool is_true() const;
+};
+
+// Ops: EQ, NE
+// Precondition: local player has a build object.
+// Compares local player’s build object state (building = true; not building = false) to `value`.
+//
+// Warning: not net-safe.
+struct Level::BuildingCondition : Level::Condition {
+    bool         value;
+    virtual bool is_true() const;
+};
+
+// Ops: EQ, NE
+// Compares local player’s (screen, line), or just screen if line < 0.
+//
+// Warning: not net-safe.
+struct Level::ComputerCondition : Level::Condition {
+    Screen       screen;
+    int32_t      line;
+    virtual bool is_true() const;
+};
+
+// Ops: EQ, NE, LT, GT, LE, GE
+// Compares given counter of given admiral to `value`.
+struct Level::CounterCondition : Level::Condition {
+    Handle<Admiral> player;
+    int32_t         counter;
+    int32_t         value;
+    virtual bool    is_true() const;
+};
+
+// Ops: EQ, NE
+// Compares state of given initial (destroyed = true; alive = false) to `value`.
+//
+// Note: the initial object referenced here can be (and usually is) different from either `subject`
+// or `object`.
+// Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”
+struct Level::DestroyedCondition : Level::Condition {
+    Handle<const Level::Initial> initial;
+    bool                         value;
+    virtual bool                 is_true() const;
+};
+
+// Ops: EQ, NE, LT, GT, LE, GE
+// Precondition: `subject` and `object` exist; `subject` and `object` are not “extremely” distant.
+// Compares distance between `subject` and `object` to `value`.
+//
+// TODO(sfiera): provide a definition of “distance” in this context, and especially what
+// “extremely” distant means.
+struct Level::DistanceCondition : Level::Condition {
+    uint32_t     value;
+    virtual bool is_true() const;
+};
+
+// Always false.
+struct Level::FalseCondition : Level::Condition {
+    virtual bool is_true() const;
+};
+
+// Ops: EQ, NE, LT, GT, LE, GE
+// Compares health fraction of `subject` (e.g. 0.5 for half health) to `value`.
+//
+// Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”; i.e.
+// its health fraction is 0.0.
+struct Level::HealthCondition : Level::Condition {
+    double       value;
+    virtual bool is_true() const;
+};
+
+// Ops: EQ, NE
+// Compares (id, page) of local player’s current message to (id, page).
+//
+// Warning: not net-safe.
+struct Level::MessageCondition : Level::Condition {
+    int32_t      id;
+    int32_t      page;
+    virtual bool is_true() const;
+};
+
+// Ops: EQ, NE
+// Precondition: `subject` and `object` exist.
+// Compares target of `subject` to `object`.
+struct Level::OrderedCondition : Level::Condition {
+    virtual bool is_true() const;
+};
+
+// Ops: EQ, NE
+// Precondition: `subject` exists.
+// Compares owner of `subject` to `player`.
+struct Level::OwnerCondition : Level::Condition {
+    Handle<Admiral> player;
+    virtual bool    is_true() const;
+};
+
+// Ops: EQ, NE, LT, GT, LE, GE
+// Compares ship count of `player` to `value`.
+struct Level::ShipsCondition : Level::Condition {
+    Handle<Admiral> player;
+    int32_t         value;
+    virtual bool    is_true() const;
+};
+
+// Ops: EQ, NE, LT, GT, LE, GE
+// Precondition: `subject` exists.
+// Compares speed of `subject` to `value`.
+struct Level::SpeedCondition : Level::Condition {
+    Fixed        value;
+    virtual bool is_true() const;
+};
+
+// Ops: EQ, NE, LT, GT, LE, GE
+// Precondition: `subject` exists.
+// Compares `subject` to the control, target, or flagship of the local player, per `value`.
+//
+// Warning: not net-safe.
+struct Level::SubjectCondition : Level::Condition {
+    SubjectValue value;
+    virtual bool is_true() const;
+};
+
+// Ops: EQ, NE, LT, GT, LE, GE
+// Compares `subject` to the control, target, or flagship of the local player, per `value`.
+//
+// Note: On a level that specifies a `start_time`, the setup time counts for only 1/3 as much as
+// time after the
+//
+// TODO(sfiera): provide a way to specify game time “normally”
+struct Level::TimeCondition : Level::Condition {
+    ticks        duration;
+    bool         legacy_start_time;
+    virtual bool is_true() const;
+};
+
+// Ops: EQ, NE, LT, GT, LE, GE
+// Compares zoom level of the local player to `value`.
+//
+// Warning: not net-safe.
+struct Level::ZoomCondition : Level::Condition {
+    Zoom         value;
+    virtual bool is_true() const;
+};
 
 //
 // We need to know:
@@ -226,41 +407,13 @@ bool read_from(pn::file_view in, Level::Condition::CounterArgument* counter_argu
 // content ID, # (int16_t, int16_t)
 //
 
-struct Level::BriefPoint {
-    struct ObjectBrief {
-        int32_t objectNum;
-        uint8_t objectVisible;  // bool
-    };
-    struct AbsoluteBrief {
-        Point location;
-    };
-
-    briefingPointKindType briefPointKind;
-    struct {
-        // Really a union
-        ObjectBrief   objectBriefType;
-        AbsoluteBrief absoluteBriefType;
-    } briefPointData;
-    Point   range;
-    int16_t titleResID;
-    int16_t titleNum;
-    int16_t contentResID;
+struct Level_Briefing {
+    Handle<const Level::Initial> object;   // Object to focus on, or none for freestanding.
+    pn::string                   title;    // Plain text, used for title bar.
+    pn::string                   content;  // Styled text, used for body.
 
     static const size_t byte_size = 24;
 };
-bool read_from(pn::file_view in, Level::BriefPoint::ObjectBrief* object_brief);
-bool read_from(pn::file_view in, Level::BriefPoint::AbsoluteBrief* absolute_brief);
-bool read_from(pn::file_view in, Level::BriefPoint* brief_point);
-
-struct Race {
-    int32_t  id;
-    uint8_t  apparentColor;
-    uint32_t illegalColors;
-    int32_t  advantage;
-
-    static const size_t byte_size = 14;
-};
-bool read_from(pn::file_view in, Race* race);
 
 }  // namespace antares
 

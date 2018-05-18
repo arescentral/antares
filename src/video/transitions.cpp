@@ -19,7 +19,7 @@
 #include "video/transitions.hpp"
 
 #include "config/keys.hpp"
-#include "data/picture.hpp"
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "game/globals.hpp"
 #include "game/main.hpp"
@@ -43,10 +43,10 @@ Transitions::~Transitions() {}
 
 void Transitions::reset() { _active = false; }
 
-void Transitions::start_boolean(int32_t in_speed, int32_t out_speed, uint8_t goal_color) {
+void Transitions::start_boolean(int32_t speed, uint8_t goal_color) {
     _step        = kStartAnimation;
-    _in_speed    = in_speed;
-    _out_speed   = out_speed;
+    _in_speed    = speed;
+    _out_speed   = speed;
     _color       = GetRGBTranslateColor(goal_color);
     _color.alpha = 127;
     if (!_active) {
@@ -141,8 +141,8 @@ void ColorFade::draw() const {
     Rects().fill(world(), fill_color);
 }
 
-PictFade::PictFade(int pict_id, bool* skipped)
-        : _state(NEW), _skipped(skipped), _texture(Picture(pict_id).texture()) {}
+PictFade::PictFade(const Texture* texture, bool* skipped)
+        : _state(NEW), _skipped(skipped), _texture(texture) {}
 
 PictFade::~PictFade() {}
 
@@ -201,9 +201,9 @@ void PictFade::fire_timer() {
 }
 
 void PictFade::draw() const {
-    Rect bounds = _texture.size().as_rect();
+    Rect bounds = _texture->size().as_rect();
     bounds.center_in(world());
-    _texture.draw(bounds.left, bounds.top);
+    _texture->draw(bounds.left, bounds.top);
 }
 
 void PictFade::wax() {

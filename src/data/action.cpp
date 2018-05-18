@@ -21,298 +21,476 @@
 #include <sfz/sfz.hpp>
 
 #include "data/base-object.hpp"
+#include "data/field.hpp"
+#include "data/level.hpp"
+#include "data/resource.hpp"
 
 namespace antares {
 
 namespace {
 
-bool read_from(pn::file_view in, argumentType::CreateObject* argument) {
-    int32_t base_type;
-    if (!in.read(
-                &base_type, &argument->howManyMinimum, &argument->howManyRange,
-                &argument->velocityRelative, &argument->directionRelative,
-                &argument->randomDistance)) {
-        return false;
+static std::unique_ptr<Action> age_action(path_value x) {
+    std::unique_ptr<AgeAction> a(new AgeAction);
+    a->relative = optional_bool(x.get("relative"));
+    a->value    = required_ticks_range(x.get("value"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> assume_action(path_value x) {
+    std::unique_ptr<AssumeAction> a(new AssumeAction);
+    a->which = required_int(x.get("which"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> cap_speed_action(path_value x) {
+    std::unique_ptr<CapSpeedAction> a(new CapSpeedAction);
+    a->value = optional_fixed(x.get("value"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> capture_action(path_value x) {
+    std::unique_ptr<CaptureAction> a(new CaptureAction);
+    a->player = optional_admiral(x.get("player"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> cloak_action(path_value x) {
+    return std::unique_ptr<CloakAction>(new CloakAction);
+}
+
+static std::unique_ptr<Action> condition_action(path_value x) {
+    std::unique_ptr<ConditionAction> a(new ConditionAction);
+    a->enable  = optional_condition_range(x.get("enable"));
+    a->disable = optional_condition_range(x.get("disable"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> create_action(path_value x) {
+    std::unique_ptr<CreateAction> a(new CreateAction);
+    a->base               = required_base(x.get("base"));
+    a->count              = optional_int_range(x.get("count")).value_or(Range<int64_t>{1, 2});
+    a->relative_velocity  = optional_bool(x.get("relative_velocity"));
+    a->relative_direction = optional_bool(x.get("relative_direction"));
+    a->distance           = optional_int(x.get("distance")).value_or(0);
+    a->inherit            = optional_bool(x.get("inherit"));
+    a->legacy_random      = optional_bool(x.get("legacy_random"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> disable_action(path_value x) {
+    std::unique_ptr<DisableAction> a(new DisableAction);
+    a->value = required_fixed_range(x.get("value"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> energize_action(path_value x) {
+    std::unique_ptr<EnergizeAction> a(new EnergizeAction);
+    a->value = required_int(x.get("value"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> equip_action(path_value x) {
+    std::unique_ptr<EquipAction> a(new EquipAction);
+    a->which = required_weapon(x.get("which"));
+    a->base  = required_base(x.get("base"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> fire_action(path_value x) {
+    std::unique_ptr<FireAction> a(new FireAction);
+    a->which = required_weapon(x.get("which"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> flash_action(path_value x) {
+    std::unique_ptr<FlashAction> a(new FlashAction);
+    a->length = required_int(x.get("length"));
+    a->shade  = required_int(x.get("shade"));
+    a->hue    = required_hue(x.get("hue"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> heal_action(path_value x) {
+    std::unique_ptr<HealAction> a(new HealAction);
+    a->value = required_int(x.get("value"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> hold_action(path_value x) {
+    return std::unique_ptr<HoldPositionAction>(new HoldPositionAction);
+}
+
+static std::unique_ptr<Action> key_action(path_value x) {
+    std::unique_ptr<KeyAction> a(new KeyAction);
+    a->enable  = optional_keys(x.get("enable"));
+    a->disable = optional_keys(x.get("disable"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> kill_action(path_value x) {
+    std::unique_ptr<KillAction> a(new KillAction);
+    a->kind = required_kill_kind(x.get("kind"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> land_action(path_value x) {
+    std::unique_ptr<LandAction> a(new LandAction);
+    a->speed = required_int(x.get("speed"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> message_action(path_value x) {
+    std::unique_ptr<MessageAction> a(new MessageAction);
+    a->id    = required_int(x.get("id"));
+    a->pages = required_string_array(x.get("pages"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> morph_action(path_value x) {
+    std::unique_ptr<MorphAction> a(new MorphAction);
+    a->base      = required_base(x.get("base"));
+    a->keep_ammo = optional_bool(x.get("keep_ammo"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> move_action(path_value x) {
+    std::unique_ptr<MoveAction> a(new MoveAction);
+    a->origin   = optional_origin(x.get("origin")).value_or(MoveOrigin::LEVEL);
+    Point p     = optional_point(x.get("to")).value_or(Point{0, 0});
+    a->to.h     = p.h;
+    a->to.v     = p.v;
+    a->distance = optional_int(x.get("distance")).value_or(0);
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> occupy_action(path_value x) {
+    std::unique_ptr<OccupyAction> a(new OccupyAction);
+    a->value = required_int(x.get("value"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> order_action(path_value x) {
+    return std::unique_ptr<OrderAction>(new OrderAction);
+}
+
+static std::unique_ptr<Action> pay_action(path_value x) {
+    std::unique_ptr<PayAction> a(new PayAction);
+    a->value  = required_fixed(x.get("value"));
+    a->player = optional_admiral(x.get("player"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> push_action(path_value x) {
+    std::unique_ptr<PushAction> a(new PushAction);
+    a->kind  = required_push_kind(x.get("kind"));
+    a->value = optional_fixed(x.get("value")).value_or(Fixed::zero());
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> reveal_action(path_value x) {
+    std::unique_ptr<RevealAction> a(new RevealAction);
+    a->initial = required_initial_range(x.get("which"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> score_action(path_value x) {
+    std::unique_ptr<ScoreAction> a(new ScoreAction);
+    a->player = optional_admiral(x.get("player"));
+    a->which  = required_int(x.get("which"));
+    a->value  = required_int(x.get("value"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> select_action(path_value x) {
+    std::unique_ptr<SelectAction> a(new SelectAction);
+    a->screen = required_screen(x.get("screen"));
+    a->line   = required_int(x.get("line"));
+    return std::move(a);
+}
+
+static PlayAction::Sound required_sound(path_value x) {
+    return required_struct<PlayAction::Sound>(
+            x, {{"sound", {&PlayAction::Sound::sound, required_string_copy}}});
+}
+
+static std::vector<PlayAction::Sound> optional_sound_list(path_value x) {
+    return optional_array<PlayAction::Sound, required_sound>(x);
+}
+
+static std::unique_ptr<Action> play_action(path_value x) {
+    std::unique_ptr<PlayAction> a(new PlayAction);
+    a->priority    = required_int(x.get("priority"));
+    a->persistence = required_ticks(x.get("persistence"));
+    a->absolute    = optional_bool(x.get("absolute")).value_or(false);
+    a->volume      = required_int(x.get("volume"));
+    a->sound       = optional_string_copy(x.get("sound"));
+    a->any         = optional_sound_list(x.get("any"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> spark_action(path_value x) {
+    std::unique_ptr<SparkAction> a(new SparkAction);
+    a->count    = required_int(x.get("count"));
+    a->hue      = required_hue(x.get("hue"));
+    a->decay    = required_int(x.get("decay"));
+    a->velocity = required_fixed(x.get("velocity"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> spin_action(path_value x) {
+    std::unique_ptr<SpinAction> a(new SpinAction);
+    a->value = required_fixed_range(x.get("value"));
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> thrust_action(path_value x) {
+    std::unique_ptr<ThrustAction> a(new ThrustAction);
+    a->relative = optional_bool(x.get("relative"));
+    a->value    = required_fixed_range(x.get("value"));
+    a->relative = false;  // TODO(sfiera): verify that this is correct.
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> warp_action(path_value x) {
+    return std::unique_ptr<WarpAction>(new WarpAction);
+}
+
+static std::unique_ptr<Action> win_action(path_value x) {
+    std::unique_ptr<WinAction> a(new WinAction);
+    a->player = optional_admiral(x.get("player"));
+    a->next   = optional_level(x.get("next"));
+    a->text   = required_string(x.get("text")).copy();
+    return std::move(a);
+}
+
+static std::unique_ptr<Action> zoom_action(path_value x) {
+    std::unique_ptr<ZoomAction> a(new ZoomAction);
+    a->value = required_zoom(x.get("value"));
+    return std::move(a);
+}
+
+template <typename T>
+T* init(std::unique_ptr<Action>* action) {
+    T* t;
+    action->reset(t = new T());
+    return t;
+}
+
+template <typename T>
+Owner owner_cast(T t) {
+    switch (t) {
+        case static_cast<T>(Owner::ANY): return Owner::ANY;
+        case static_cast<T>(Owner::SAME): return Owner::SAME;
+        case static_cast<T>(Owner::DIFFERENT): return Owner::DIFFERENT;
     }
-    argument->whichBaseType = Handle<BaseObject>(base_type);
-    return true;
+    return owner_cast(Owner::ANY);
 }
 
-bool read_from(pn::file_view in, argumentType::PlaySound* argument) {
-    uint8_t unused1, unused2;
-    int32_t persistence;
-    if (!in.read(
-                &argument->priority, &unused1, &persistence, &argument->absolute, &unused2,
-                &argument->volumeMinimum, &argument->volumeRange, &argument->idMinimum,
-                &argument->idRange)) {
-        return false;
+static std::map<pn::string, bool> optional_tags(path_value x) {
+    if (x.value().is_null()) {
+        return {};
+    } else if (x.value().is_map()) {
+        pn::map_cref               m = x.value().as_map();
+        std::map<pn::string, bool> result;
+        for (const auto& kv : m) {
+            auto v = optional_bool(x.get(kv.key()));
+            if (v.has_value()) {
+                result[kv.key().copy()] = *v;
+            }
+        }
+        return result;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
     }
-    argument->persistence = ticks(persistence);
-    return true;
 }
 
-bool read_from(pn::file_view in, argumentType::AlterSimple* argument) {
-    uint8_t unused;
-    return in.read(&unused, &argument->amount);
-}
-
-bool read_from(pn::file_view in, argumentType::AlterWeapon* argument) {
-    uint8_t unused;
-    int32_t base;
-    if (!in.read(&unused, &base)) {
-        return false;
+std::unique_ptr<Action> action(path_value x) {
+    if (!x.value().is_map()) {
+        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
     }
-    argument->base = Handle<BaseObject>(base);
-    return true;
-}
 
-bool read_from(pn::file_view in, argumentType::AlterAbsoluteLocation* argument) {
-    return in.read(&argument->relative) && read_from(in, &argument->at);
-}
-
-bool read_from(pn::file_view in, argumentType::AlterHidden* argument) {
-    uint8_t unused;
-    return in.read(&unused, &argument->first, &argument->count_minus_1);
-}
-
-bool read_from(pn::file_view in, argumentType::AlterFixedRange* argument) {
-    uint8_t unused;
-    return in.read(&unused) && read_from(in, &argument->minimum) &&
-           read_from(in, &argument->range);
-}
-
-bool read_from(pn::file_view in, argumentType::AlterVelocity* argument) {
-    return in.read(&argument->relative) && read_from(in, &argument->amount);
-}
-
-bool read_from(pn::file_view in, argumentType::AlterMaxVelocity* argument) {
-    uint8_t unused;
-    return in.read(&unused) && read_from(in, &argument->amount);
-}
-
-bool read_from(pn::file_view in, argumentType::AlterThrust* argument) {
-    return in.read(&argument->relative) && read_from(in, &argument->minimum) &&
-           read_from(in, &argument->range);
-}
-
-bool read_from(pn::file_view in, argumentType::AlterBaseType* argument) {
-    int32_t base;
-    if (!in.read(&argument->keep_ammo, &base)) {
-        return false;
+    pn::string_view         type = required_string(x.get("type"));
+    std::unique_ptr<Action> a;
+    if (type == "age") {
+        a = age_action(x);
+    } else if (type == "assume") {
+        a = assume_action(x);
+    } else if (type == "cap-speed") {
+        a = cap_speed_action(x);
+    } else if (type == "capture") {
+        a = capture_action(x);
+    } else if (type == "cloak") {
+        a = cloak_action(x);
+    } else if (type == "condition") {
+        a = condition_action(x);
+    } else if (type == "create") {
+        a = create_action(x);
+    } else if (type == "disable") {
+        a = disable_action(x);
+    } else if (type == "energize") {
+        a = energize_action(x);
+    } else if (type == "equip") {
+        a = equip_action(x);
+    } else if (type == "fire") {
+        a = fire_action(x);
+    } else if (type == "flash") {
+        a = flash_action(x);
+    } else if (type == "heal") {
+        a = heal_action(x);
+    } else if (type == "hold") {
+        a = hold_action(x);
+    } else if (type == "key") {
+        a = key_action(x);
+    } else if (type == "kill") {
+        a = kill_action(x);
+    } else if (type == "land") {
+        a = land_action(x);
+    } else if (type == "message") {
+        a = message_action(x);
+    } else if (type == "morph") {
+        a = morph_action(x);
+    } else if (type == "move") {
+        a = move_action(x);
+    } else if (type == "occupy") {
+        a = occupy_action(x);
+    } else if (type == "order") {
+        a = order_action(x);
+    } else if (type == "pay") {
+        a = pay_action(x);
+    } else if (type == "play") {
+        a = play_action(x);
+    } else if (type == "push") {
+        a = push_action(x);
+    } else if (type == "reveal") {
+        a = reveal_action(x);
+    } else if (type == "score") {
+        a = score_action(x);
+    } else if (type == "select") {
+        a = select_action(x);
+    } else if (type == "spark") {
+        a = spark_action(x);
+    } else if (type == "spin") {
+        a = spin_action(x);
+    } else if (type == "thrust") {
+        a = thrust_action(x);
+    } else if (type == "warp") {
+        a = warp_action(x);
+    } else if (type == "win") {
+        a = win_action(x);
+    } else if (type == "zoom") {
+        a = zoom_action(x);
+    } else {
+        throw std::runtime_error(pn::format("unknown type: {0}", type).c_str());
     }
-    argument->base = Handle<BaseObject>(base);
-    return true;
+
+    a->reflexive = optional_bool(x.get("reflexive")).value_or(false);
+
+    a->filter = optional_struct<Action::Filter>(
+                        x.get("if"),
+                        {
+                                {"attributes",
+                                 {&Action::Filter::attributes, optional_object_attributes}},
+                                {"tags", {&Action::Filter::tags, optional_tags}},
+                                {"owner", {&Action::Filter::owner, optional_owner, Owner::ANY}},
+                        })
+                        .value_or(Action::Filter{});
+
+    a->delay = optional_ticks(x.get("delay")).value_or(ticks(0));
+
+    a->initialSubjectOverride =
+            optional_initial(x.get("initial_subject")).value_or(Level::Initial::none());
+    a->initialDirectOverride =
+            optional_initial(x.get("initial_object")).value_or(Level::Initial::none());
+    return a;
 }
 
-bool read_from(pn::file_view in, argumentType::AlterOwner* argument) {
-    uint32_t admiral;
-    if (!in.read(&argument->relative, &admiral)) {
-        return false;
+std::unique_ptr<Action> action(pn::value_cref x0) {
+    if (x0.is_null()) {
+        return std::unique_ptr<Action>(new NoAction);
+    } else if (!x0.is_map()) {
+        throw std::runtime_error("must be null or map");
     }
-    argument->admiral = Handle<Admiral>(admiral);
-    return true;
-}
-
-bool read_from(pn::file_view in, argumentType::AlterConditionTrueYet* argument) {
-    return in.read(&argument->true_yet, &argument->first, &argument->count_minus_1);
-}
-
-bool read_from(pn::file_view in, argumentType::AlterCash* argument) {
-    uint32_t admiral;
-    if (!(in.read(&argument->relative) && read_from(in, &argument->amount) && in.read(&admiral))) {
-        return false;
-    }
-    argument->admiral = Handle<Admiral>(admiral);
-    return true;
-}
-
-bool read_from(pn::file_view in, argumentType::AlterAge* argument) {
-    int32_t minimum, range;
-    if (!in.read(&argument->relative, &minimum, &range)) {
-        return false;
-    }
-    argument->minimum = ticks(minimum);
-    argument->range   = ticks(range);
-    return true;
-}
-
-bool read_from(pn::file_view in, argumentType::AlterLocation* argument) {
-    return in.read(&argument->relative, &argument->by);
-}
-
-bool read_from(pn::file_view in, argumentType::MakeSparks* argument) {
-    return in.read(&argument->howMany, &argument->speed) &&
-           read_from(in, &argument->velocityRange) && in.read(&argument->color);
-}
-
-bool read_from(pn::file_view in, argumentType::ReleaseEnergy* argument) {
-    return read_from(in, &argument->percent);
-}
-
-bool read_from(pn::file_view in, argumentType::LandAt* argument) {
-    return in.read(&argument->landingSpeed);
-}
-
-bool read_from(pn::file_view in, argumentType::EnterWarp* argument) {
-    return read_from(in, &argument->warpSpeed);
-}
-
-bool read_from(pn::file_view in, argumentType::DisplayMessage* argument) {
-    return in.read(&argument->resID, &argument->pageNum);
-}
-
-bool read_from(pn::file_view in, argumentType::ChangeScore* argument) {
-    int32_t admiral;
-    if (!in.read(&admiral, &argument->whichScore, &argument->amount)) {
-        return false;
-    }
-    argument->whichPlayer = Handle<Admiral>(admiral);
-    return true;
-}
-
-bool read_from(pn::file_view in, argumentType::DeclareWinner* argument) {
-    int32_t admiral;
-    if (!in.read(&admiral, &argument->nextLevel, &argument->textID)) {
-        return false;
-    }
-    argument->whichPlayer = Handle<Admiral>(admiral);
-    return true;
-}
-
-bool read_from(pn::file_view in, argumentType::KillObject* argument) {
-    return in.read(&argument->dieType);
-}
-
-bool read_from(pn::file_view in, argumentType::ColorFlash* argument) {
-    return in.read(&argument->length, &argument->color, &argument->shade);
-}
-
-bool read_from(pn::file_view in, argumentType::Keys* argument) {
-    return in.read(&argument->keyMask);
-}
-
-bool read_from(pn::file_view in, argumentType::Zoom* argument) {
-    return in.read(&argument->zoomLevel);
-}
-
-bool read_from(pn::file_view in, argumentType::ComputerSelect* argument) {
-    return in.read(&argument->screenNumber, &argument->lineNumber);
-}
-
-bool read_from(pn::file_view in, argumentType::AssumeInitial* argument) {
-    return in.read(&argument->whichInitialObject);
+    return action(path_value{x0});
 }
 
 }  // namespace
 
-bool read_from(pn::file_view in, Action* action) {
-    uint8_t section[24];
-
-    uint8_t verb;
-    if (!in.read(&verb)) {
-        return false;
-    }
-    action->verb = verb << 8;
-
-    if (!in.read(&action->reflexive, &action->inclusiveFilter, &action->exclusiveFilter)) {
-        return false;
-    }
-    if (action->exclusiveFilter == 0xffffffff) {
-        action->levelKeyTag = (action->inclusiveFilter & kLevelKeyTag) >> kLevelKeyTagShift;
-    } else {
-        action->levelKeyTag = 0;
-    }
-    uint32_t delay;
-    if (!in.read(
-                &action->owner, &delay, &action->initialSubjectOverride,
-                &action->initialDirectOverride)) {
-        return false;
-    }
-    action->delay = ticks(delay);
-    char ignore[4];
-    if (fread(ignore, 1, 4, in.c_obj()) < 4) {
-        return false;
-    }
-    if (fread(section, 1, 24, in.c_obj()) < 24) {
-        return false;
+std::vector<std::unique_ptr<const Action>> read_actions(int begin, int end) {
+    if (end <= begin) {
+        return std::vector<std::unique_ptr<const Action>>{};
     }
 
-    pn::file sub = pn::data_view{section, 24}.open();
-    switch (action->verb) {
-        case kNoAction:
-        case kSetDestination:
-        case kActivateSpecial:
-        case kActivatePulse:
-        case kActivateBeam:
-        case kNilTarget: return true;
-
-        case kCreateObject:
-        case kCreateObjectSetDest: return read_from(sub, &action->argument.createObject);
-
-        case kPlaySound: return read_from(sub, &action->argument.playSound);
-
-        case kAlter: {
-            uint8_t alter;
-            if (!sub.read(&alter)) {
-                return false;
+    std::vector<std::unique_ptr<const Action>> actions;
+    actions.resize(end - begin);
+    for (int i : sfz::range(begin, end)) {
+        pn::string path = pn::format("actions/{0}.pn", i);
+        try {
+            Resource   r = Resource::path(path);
+            pn::value  x;
+            pn_error_t e;
+            if (!pn::parse(r.data().open(), x, &e)) {
+                throw std::runtime_error(
+                        pn::format("{1}:{2}: {3}", e.lineno, e.column, pn_strerror(e.code))
+                                .c_str());
             }
-            action->verb |= alter;
-            switch (action->verb) {
-                case kAlterDamage: return read_from(sub, &action->argument.alterDamage);
-                case kAlterEnergy: return read_from(sub, &action->argument.alterEnergy);
-                case kAlterHidden: return read_from(sub, &action->argument.alterHidden);
-                case kAlterSpin: return read_from(sub, &action->argument.alterSpin);
-                case kAlterOffline: return read_from(sub, &action->argument.alterOffline);
-                case kAlterVelocity: return read_from(sub, &action->argument.alterVelocity);
-                case kAlterMaxVelocity: return read_from(sub, &action->argument.alterMaxVelocity);
-                case kAlterThrust: return read_from(sub, &action->argument.alterThrust);
-                case kAlterBaseType: return read_from(sub, &action->argument.alterBaseType);
-                case kAlterOwner: return read_from(sub, &action->argument.alterOwner);
-                case kAlterConditionTrueYet:
-                    return read_from(sub, &action->argument.alterConditionTrueYet);
-                case kAlterOccupation: return read_from(sub, &action->argument.alterOccupation);
-                case kAlterAbsoluteCash:
-                    return read_from(sub, &action->argument.alterAbsoluteCash);
-                case kAlterAge: return read_from(sub, &action->argument.alterAge);
-                case kAlterLocation: return read_from(sub, &action->argument.alterLocation);
-                case kAlterAbsoluteLocation:
-                    return read_from(sub, &action->argument.alterAbsoluteLocation);
-                case kAlterWeapon1:
-                case kAlterWeapon2:
-                case kAlterSpecial: return read_from(sub, &action->argument.alterWeapon);
-                default: return true;
-            }
+            actions[i - begin] = action(x);
+        } catch (...) {
+            std::throw_with_nested(std::runtime_error(path.c_str()));
         }
+    }
+    return actions;
+}
 
-        case kMakeSparks: return read_from(sub, &action->argument.makeSparks);
-
-        case kReleaseEnergy: return read_from(sub, &action->argument.releaseEnergy);
-
-        case kLandAt: return read_from(sub, &action->argument.landAt);
-
-        case kEnterWarp: return read_from(sub, &action->argument.enterWarp);
-
-        case kDisplayMessage: return read_from(sub, &action->argument.displayMessage);
-
-        case kChangeScore: return read_from(sub, &action->argument.changeScore);
-
-        case kDeclareWinner: return read_from(sub, &action->argument.declareWinner);
-
-        case kDie: return read_from(sub, &action->argument.killObject);
-
-        case kColorFlash: return read_from(sub, &action->argument.colorFlash);
-
-        case kDisableKeys:
-        case kEnableKeys: return read_from(sub, &action->argument.keys);
-
-        case kSetZoom: return read_from(sub, &action->argument.zoom);
-
-        case kComputerSelect: return read_from(sub, &action->argument.computerSelect);
-
-        case kAssumeInitialObject: return read_from(sub, &action->argument.assumeInitial);
-
-        default: return true;
+std::vector<std::unique_ptr<const Action>> required_action_array(path_value x) {
+    if (x.value().is_array()) {
+        std::vector<std::unique_ptr<const Action>> a;
+        for (int i = 0; i < x.value().as_array().size(); ++i) {
+            a.push_back(action(x.get(i)));
+        }
+        return a;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be array", x.path()).c_str());
     }
 }
+
+std::vector<std::unique_ptr<const Action>> optional_action_array(path_value x) {
+    if (x.value().is_null()) {
+        return {};
+    } else if (x.value().is_array()) {
+        std::vector<std::unique_ptr<const Action>> a;
+        for (int i = 0; i < x.value().as_array().size(); ++i) {
+            a.push_back(action(x.get(i)));
+        }
+        return a;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be array", x.path()).c_str());
+    }
+}
+
+const NamedHandle<const BaseObject>* Action::created_base() const { return nullptr; }
+std::vector<pn::string>              Action::sound_ids() const { return {}; }
+bool                                 Action::alters_owner() const { return false; }
+bool                                 Action::check_conditions() const { return false; }
+
+const NamedHandle<const BaseObject>* CreateAction::created_base() const { return &base; }
+const NamedHandle<const BaseObject>* MorphAction::created_base() const { return &base; }
+const NamedHandle<const BaseObject>* EquipAction::created_base() const { return &base; }
+
+std::vector<pn::string> PlayAction::sound_ids() const {
+    std::vector<pn::string> result;
+    if (sound.has_value()) {
+        result.push_back(sound->copy());
+    } else {
+        for (auto& s : any) {
+            result.push_back(s.sound.copy());
+        }
+    }
+    return result;
+}
+
+bool CaptureAction::alters_owner() const { return true; }
+
+bool ScoreAction::check_conditions() const { return true; }
+bool MessageAction::check_conditions() const { return true; }
 
 }  // namespace antares

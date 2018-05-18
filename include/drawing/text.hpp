@@ -31,9 +31,13 @@ class Quads;
 
 class Font {
   public:
-    Font(pn::string_view name);
+    Font();
+    Font(Texture texture, int logical_width, int height, int ascent,
+         std::map<pn::rune, Rect> glyphs);
     Font(const Font&) = delete;
     Font& operator=(const Font&) = delete;
+    Font(Font&&)                 = default;
+    Font& operator=(Font&&) = default;
     ~Font();
 
     uint8_t char_width(pn::rune rune) const;
@@ -43,16 +47,16 @@ class Font {
     void draw(const Quads& quads, Point cursor, pn::string_view string, RgbColor color) const;
 
     Texture texture;
-    int32_t logicalWidth;
-    int32_t height;
-    int32_t ascent;
+    int32_t logicalWidth = 0;
+    int32_t height       = 0;
+    int32_t ascent       = 0;
 
   private:
     Rect glyph_rect(pn::rune rune) const;
 
-    int                      _scale;
     std::map<pn::rune, Rect> _glyphs;
 };
+Font font(pn::value_cref name, Texture texture);
 
 }  // namespace antares
 

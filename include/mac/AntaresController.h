@@ -32,7 +32,9 @@
 
     IBOutlet NSPopUpButton* _scenario_list;
     IBOutlet NSButton* _scenario_button;
+    IBOutlet NSTextField* _scenario_label;
     IBOutlet NSButton* _author_button;
+    IBOutlet NSTextField* _author_label;
     IBOutlet NSTextField* _version_label;
 
     IBOutlet NSButton* _skip_checkbox;

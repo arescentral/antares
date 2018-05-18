@@ -18,11 +18,16 @@
 
 #include "data/plugin.hpp"
 
+#include <glob.h>
+#include <algorithm>
 #include <pn/file>
 
+#include "config/dirs.hpp"
+#include "config/preferences.hpp"
 #include "data/base-object.hpp"
+#include "data/races.hpp"
 #include "data/resource.hpp"
-#include "data/string-list.hpp"
+#include "game/sys.hpp"
 #include "lang/defines.hpp"
 
 using sfz::range;
@@ -30,68 +35,155 @@ using std::vector;
 
 namespace antares {
 
-static const int16_t kLevelNameID               = 4600;
-static const int16_t kSpaceObjectNameResID      = 5000;
-static const int16_t kSpaceObjectShortNameResID = 5001;
-
-static const int16_t kPackedResID = 500;
+static constexpr int kPluginFormat = 20;
 
 ANTARES_GLOBAL ScenarioGlobals plug;
 
-template <typename T>
-static void read_all(
-        pn::string_view name, pn::string_view type, pn::string_view extension, vector<T>& v) {
-    Resource rsrc(type, extension, kPackedResID);
-    size_t   count = rsrc.data().size() / T::byte_size;
-    v.resize(count);
-    pn::file in = rsrc.data().open();
-    for (size_t i = 0; i < count; ++i) {
-        if (!read_from(in, &v[i])) {
-            throw std::runtime_error(pn::format("error while reading {0} data", name).c_str());
-        }
-    }
+namespace {
 
-    if (fgetc(in.c_obj()) != EOF) {
-        throw std::runtime_error(pn::format("incorrectly-sized {0} data", name).c_str());
+struct ScopedGlob {
+    glob_t data;
+    ScopedGlob() { memset(&data, sizeof(data), 0); }
+    ~ScopedGlob() { globfree(&data); }
+};
+
+}  // namespace
+
+static void read_all_levels() {
+    ScopedGlob g;
+    pn::string dir;
+    if (sys.prefs->scenario_identifier() == kFactoryScenarioIdentifier) {
+        dir = application_path().copy();
+    } else {
+        dir = scenario_path();
+    }
+    glob(pn::format("{0}/levels/*.pn", dir).c_str(), 0, NULL, &g.data);
+
+    plug.levels.clear();
+    plug.chapters.clear();
+    for (int i = 0; i < g.data.gl_pathc; ++i) {
+        const pn::string_view full_path = g.data.gl_pathv[i];
+        const pn::string_view path      = full_path.substr(dir.size() + 1);
+        const pn::string_view id =
+                full_path.substr(dir.size() + 8, full_path.size() - dir.size() - 11);
+
+        try {
+            pn::value  x;
+            pn_error_t e;
+            if (!pn::parse(Resource::path(path).data().open(), x, &e)) {
+                throw std::runtime_error(
+                        pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code))
+                                .c_str());
+            }
+            auto it = plug.levels.emplace(id.copy(), level(x)).first;
+            if (it->second.chapter.has_value()) {
+                plug.chapters[*it->second.chapter] = &it->second;
+            }
+        } catch (...) {
+            std::throw_with_nested(std::runtime_error(path.copy().c_str()));
+        }
     }
 }
 
 void PluginInit() {
-    {
-        Resource rsrc("scenario-info", "nlAG", 128);
-        pn::file in = rsrc.data().open();
-        if (!read_from(in, &plug.meta)) {
-            throw std::runtime_error("error while reading scenario file info data");
+    try {
+        pn::value  x;
+        pn_error_t e;
+        if (!pn::parse(Resource::path("info.pn").data().open(), x, &e)) {
+            throw std::runtime_error(
+                    pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
         }
-        if (fgetc(in.c_obj()) != EOF) {
-            throw std::runtime_error("didn't consume all of scenario file info data");
+        plug.info = scenario_info(x);
+        if (plug.info.format != kPluginFormat) {
+            throw std::runtime_error(
+                    pn::format("unknown plugin format {0}", plug.info.format).c_str());
         }
+        plug.splash  = Resource::texture(plug.info.splash_screen);
+        plug.starmap = Resource::texture(plug.info.starmap);
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error("info.pn"));
     }
 
-    read_all("level", "scenarios", "snro", plug.levels);
-    read_all("initials", "scenario-initial-objects", "snit", plug.initials);
-    read_all("conditions", "scenario-conditions", "sncd", plug.conditions);
-    read_all("briefings", "scenario-briefing-points", "snbf", plug.briefings);
-    read_all("objects", "objects", "bsob", plug.objects);
-    read_all("actions", "object-actions", "obac", plug.actions);
-    read_all("races", "races", "race", plug.races);
+    read_all_levels();
+}
 
-    StringList level_names(kLevelNameID);
-    for (auto& level : plug.levels) {
-        level.name = level_names.at(level.levelNameStrNum - 1).copy();
+void load_race(const NamedHandle<const Race>& r) {
+    if (plug.races.find(r.name().copy()) != plug.races.end()) {
+        return;  // already loaded.
     }
-    for (int i : range(plug.levels.size())) {
-        while (i != plug.levels[i].levelNameStrNum - 1) {
-            using std::swap;
-            swap(plug.levels[i], plug.levels[plug.levels[i].levelNameStrNum - 1]);
+
+    pn::string path = pn::format("races/{0}.pn", r.name());
+    try {
+        pn::value  x;
+        pn_error_t e;
+        if (!pn::parse(Resource::path(path).data().open(), x, &e)) {
+            throw std::runtime_error(
+                    pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
+        }
+        plug.races.emplace(r.name().copy(), race(path_value{x}));
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(path.copy().c_str()));
+    }
+}
+
+static void merge_value(pn::value_ref base, pn::value_cref patch) {
+    switch (patch.type()) {
+        case PN_NULL:
+        case PN_BOOL:
+        case PN_INT:
+        case PN_FLOAT:
+        case PN_DATA:
+        case PN_STRING:
+        case PN_ARRAY: base = patch.copy(); return;
+
+        case PN_MAP: break;
+    }
+    pn::map_ref m = base.to_map();
+    for (pn::key_value_cref kv : patch.as_map()) {
+        pn::string_view k = kv.key();
+        if (m.has(k)) {
+            pn::value v = m.get(k).copy();
+            merge_value(v, patch.as_map().get(k));
+            m.set(k, std::move(v));
+        } else {
+            m.set(k, kv.value().copy());
         }
     }
+}
 
-    StringList object_names(kSpaceObjectNameResID);
-    StringList object_short_names(kSpaceObjectShortNameResID);
-    for (size_t i = 0; i < plug.objects.size(); ++i) {
-        plug.objects[i].name       = object_names.at(i).copy();
-        plug.objects[i].short_name = object_short_names.at(i).copy();
+static pn::value merged_object(pn::string_view name) {
+    pn::string path = pn::format("objects/{0}.pn", name);
+    try {
+        pn::value  x;
+        pn_error_t e;
+        if (!pn::parse(Resource::path(path).data().open(), x, &e)) {
+            throw std::runtime_error(
+                    pn::format("{0}:{1}: {2}", e.lineno, e.column, pn_strerror(e.code)).c_str());
+        }
+        pn::value tpl;
+        if (!x.is_map() || !x.to_map().pop("template", tpl) || tpl.is_null()) {
+            return x;
+        } else if (tpl.is_string()) {
+            pn::value base = merged_object(tpl.as_string());
+            merge_value(base, x);
+            return base;
+        } else {
+            throw std::runtime_error("template: must be null or string");
+        }
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(path.c_str()));
+    }
+}
+
+void load_object(const NamedHandle<const BaseObject>& o) {
+    if (plug.objects.find(o.name().copy()) != plug.objects.end()) {
+        return;  // already loaded.
+    }
+    pn::value x = merged_object(o.name());
+    try {
+        plug.objects.emplace(o.name().copy(), base_object(x));
+    } catch (...) {
+        std::throw_with_nested(std::runtime_error(o.name().copy().c_str()));
     }
 }
 

@@ -22,9 +22,7 @@
 
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
-#include "data/picture.hpp"
 #include "data/resource.hpp"
-#include "data/string-list.hpp"
 #include "drawing/text.hpp"
 #include "lang/defines.hpp"
 #include "sound/driver.hpp"
@@ -32,49 +30,44 @@
 
 namespace antares {
 
+static const int16_t kMessageStringID    = 3100;
 static const int16_t kCheatStringListID  = 750;
 static const int16_t kCheatFeedbackOnID  = 751;
 static const int16_t kCheatFeedbackOffID = 752;
 
-const int16_t kInstLeftPictID  = 501;
-const int16_t kInstRightPictID = 512;
+constexpr char kInstLeftPictID[]  = "gui/instruments/left";
+constexpr char kInstRightPictID[] = "gui/instruments/right";
 
 ANTARES_GLOBAL SystemGlobals sys;
 
 void sys_init() {
-    sys.fonts.tactical     = new Font("tactical");
-    sys.fonts.computer     = new Font("computer");
-    sys.fonts.button       = new Font("button");
-    sys.fonts.title        = new Font("title");
-    sys.fonts.small_button = new Font("button-small");
+    sys.fonts.tactical     = Resource::font("tactical");
+    sys.fonts.computer     = Resource::font("computer");
+    sys.fonts.button       = Resource::font("button");
+    sys.fonts.title        = Resource::font("title");
+    sys.fonts.small_button = Resource::font("button-small");
 
-    sys.key_names          = to_vector(StringList(KEY_NAMES));
-    sys.key_long_names     = to_vector(StringList(KEY_LONG_NAMES));
-    sys.gamepad_names      = to_vector(StringList(Gamepad::NAMES));
-    sys.gamepad_long_names = to_vector(StringList(Gamepad::LONG_NAMES));
+    sys.key_names          = Resource::strings(KEY_NAMES);
+    sys.key_long_names     = Resource::strings(KEY_LONG_NAMES);
+    sys.gamepad_names      = Resource::strings(Gamepad::NAMES);
+    sys.gamepad_long_names = Resource::strings(Gamepad::LONG_NAMES);
 
-    {
-        Resource rsrc("rotation-table");
-        pn::file in = rsrc.data().open();
-        for (int i = 0; i < SystemGlobals::ROT_TABLE_SIZE; ++i) {
-            in.read(&sys.rot_table[i]).check();
-        }
-        if (!in.read(pn::pad(1)).eof()) {
-            throw std::runtime_error("didn't consume all of rotation data");
-        }
-    }
+    sys.rot_table = Resource::rotation_table();
 
-    sys.cheat.codes = to_vector(StringList(kCheatStringListID));
-    sys.cheat.on    = to_vector(StringList(kCheatFeedbackOnID));
-    sys.cheat.off   = to_vector(StringList(kCheatFeedbackOffID));
+    sys.messages    = Resource::strings(kMessageStringID);
+    sys.cheat.codes = Resource::strings(kCheatStringListID);
+    sys.cheat.on    = Resource::strings(kCheatFeedbackOnID);
+    sys.cheat.off   = Resource::strings(kCheatFeedbackOffID);
 
     if (sys.audio) {
         sys.sound.init();
         sys.music.init();
     }
 
-    sys.left_instrument_texture  = Picture(kInstLeftPictID).texture();
-    sys.right_instrument_texture = Picture(kInstRightPictID).texture();
+    sys.pix.reset();
+
+    sys.left_instrument_texture  = Resource::texture(kInstLeftPictID);
+    sys.right_instrument_texture = Resource::texture(kInstRightPictID);
 }
 
 }  // namespace antares

@@ -35,7 +35,7 @@ enum PlayAgainResult {
 };
 
 bool BothCommandAndQ(void);
-void CreateObjectDataText(pn::string& text, Handle<BaseObject> object);
+void CreateObjectDataText(pn::string& text, const BaseObject& object);
 void Replace_KeyCode_Strings_With_Actual_Key_Names(pn::string& text, int16_t resID, size_t padTo);
 
 }  // namespace antares

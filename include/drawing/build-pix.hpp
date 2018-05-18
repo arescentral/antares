@@ -28,7 +28,7 @@ namespace antares {
 
 class BuildPix {
   public:
-    BuildPix(int text_id, int width);
+    BuildPix(pn::string_view text, int width);
 
     Size size() const { return _size; }
     void draw(Point origin) const;

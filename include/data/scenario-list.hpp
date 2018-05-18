@@ -22,35 +22,21 @@
 #include <pn/string>
 #include <vector>
 
-namespace antares {
+#include "data/level.hpp"
 
-struct Version {
-    std::vector<int> components;
-};
-pn::string stringify(const Version& v);
-Version    u32_to_version(uint32_t in);
+namespace antares {
 
 class ScenarioList {
   public:
-    struct Entry {
-        pn::string identifier;
-        pn::string title;
-        pn::string download_url;
-        pn::string author;
-        pn::string author_url;
-        Version    version;
-        bool       installed;
-    };
-
     ScenarioList();
     ScenarioList(const ScenarioList&) = delete;
     ScenarioList& operator=(const ScenarioList&) = delete;
 
-    size_t       size() const;
-    const Entry& at(size_t index) const;
+    size_t              size() const;
+    const ScenarioInfo& at(size_t index) const;
 
   private:
-    std::vector<Entry> _scenarios;
+    std::vector<ScenarioInfo> _scenarios;
 };
 
 }  // namespace antares

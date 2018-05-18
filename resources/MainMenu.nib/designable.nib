@@ -1,8 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9532" systemVersion="15D21" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13771" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1040" identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9532"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13771"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication"/>
@@ -95,8 +96,10 @@
         <customObject id="821" userLabel="Controller" customClass="AntaresController">
             <connections>
                 <outlet property="_author_button" destination="843" id="866"/>
+                <outlet property="_author_label" destination="883" id="869"/>
                 <outlet property="_no_show_again_checkbox" destination="829" id="868"/>
                 <outlet property="_scenario_button" destination="844" id="867"/>
+                <outlet property="_scenario_label" destination="882" id="870"/>
                 <outlet property="_scenario_list" destination="845" id="864"/>
                 <outlet property="_skip_checkbox" destination="829" id="881"/>
                 <outlet property="_version_label" destination="839" id="872"/>
@@ -215,7 +218,7 @@ Gw
                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <button verticalHuggingPriority="750" id="843">
+                                        <button verticalHuggingPriority="750" misplaced="YES" id="843">
                                             <rect key="frame" x="105" y="35" width="131" height="25"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="roundTextured" title="Bigger Planet" bezelStyle="texturedRounded" image="NSFollowLinkFreestandingTemplate" imagePosition="right" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="850">
@@ -235,8 +238,8 @@ Gw
                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                             </textFieldCell>
                                         </textField>
-                                        <button verticalHuggingPriority="750" id="844">
-                                            <rect key="frame" x="105" y="65" width="131" height="25"/>
+                                        <button verticalHuggingPriority="750" misplaced="YES" id="844">
+                                            <rect key="frame" x="105" y="64" width="131" height="25"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="roundTextured" title="Ares" bezelStyle="texturedRounded" image="NSFollowLinkFreestandingTemplate" imagePosition="right" alignment="left" lineBreakMode="truncatingTail" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="849">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -246,6 +249,24 @@ Gw
                                                 <action selector="openScenarioURL:" target="821" id="873"/>
                                             </connections>
                                         </button>
+                                        <textField verticalHuggingPriority="750" misplaced="YES" id="882">
+                                            <rect key="frame" x="112" y="69" width="126" height="17"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" title="Ares" id="884">
+                                                <font key="font" metaFont="system"/>
+                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
+                                        <textField verticalHuggingPriority="750" misplaced="YES" id="883">
+                                            <rect key="frame" x="112" y="40" width="126" height="17"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="left" title="Bigger Planet" id="885">
+                                                <font key="font" metaFont="system"/>
+                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                            </textFieldCell>
+                                        </textField>
                                     </subviews>
                                 </view>
                             </tabViewItem>
@@ -253,6 +274,7 @@ Gw
                     </tabView>
                 </subviews>
             </view>
+            <point key="canvasLocation" x="-270.5" y="156"/>
         </window>
     </objects>
     <resources>

@@ -78,7 +78,7 @@ Handle<Label> Label::next_free_label() {
 
 Handle<Label> Label::add(
         int16_t h, int16_t v, int16_t hoff, int16_t voff, Handle<SpaceObject> object,
-        bool objectLink, uint8_t color) {
+        bool objectLink, Hue hue) {
     auto label = next_free_label();
     if (!label.get()) {
         return Label::none();  // no free label
@@ -88,7 +88,7 @@ Handle<Label> Label::add(
     label->killMe             = false;
     label->where              = Point(h, v);
     label->offset             = Point(hoff, voff);
-    label->color              = color;
+    label->hue                = hue;
     label->object             = object;
     label->objectLink         = objectLink;
     label->keepOnScreenAnyway = false;
@@ -129,24 +129,24 @@ void Label::draw() {
         if ((0 <= label->retroCount) && (label->retroCount < text.size())) {
             text = text.substr(0, label->retroCount);
         }
-        const RgbColor light = GetRGBTranslateColorShade(label->color, VERY_LIGHT);
-        const RgbColor dark  = GetRGBTranslateColorShade(label->color, VERY_DARK);
+        const RgbColor light = GetRGBTranslateColorShade(label->hue, VERY_LIGHT);
+        const RgbColor dark  = GetRGBTranslateColorShade(label->hue, VERY_DARK);
         sys.video->dither_rect(label->thisRect, dark);
-        at.offset(kLabelInnerSpace, kLabelInnerSpace + sys.fonts.tactical->ascent);
+        at.offset(kLabelInnerSpace, kLabelInnerSpace + sys.fonts.tactical.ascent);
 
         if (label->lineNum > 1) {
             for (int j = 1; j <= label->lineNum; j++) {
                 pn::string_view line = String_Get_Nth_Line(text, j);
 
-                sys.fonts.tactical->draw(Point(at.h + 1, at.v + 1), line, RgbColor::black());
-                sys.fonts.tactical->draw(Point(at.h - 1, at.v - 1), line, RgbColor::black());
-                sys.fonts.tactical->draw(at, line, light);
+                sys.fonts.tactical.draw(Point(at.h + 1, at.v + 1), line, RgbColor::black());
+                sys.fonts.tactical.draw(Point(at.h - 1, at.v - 1), line, RgbColor::black());
+                sys.fonts.tactical.draw(at, line, light);
 
                 at.offset(0, label->lineHeight);
             }
         } else {
-            sys.fonts.tactical->draw(Point(at.h + 1, at.v + 1), text, RgbColor::black());
-            sys.fonts.tactical->draw(at, text, light);
+            sys.fonts.tactical.draw(Point(at.h + 1, at.v + 1), text, RgbColor::black());
+            sys.fonts.tactical.draw(at, text, light);
         }
     }
 }
@@ -177,7 +177,7 @@ void Label::update_contents(ticks units_done) {
                 ++it;  // Increment rune, not byte.
             }
             label->retroCount = it.offset();
-            if (static_cast<size_t>(label->retroCount) > label->text.size()) {
+            if (static_cast<size_t>(label->retroCount) >= label->text.size()) {
                 label->retroCount = -1;
             } else {
                 sys.sound.teletype();
@@ -260,7 +260,7 @@ void Label::update_positions(ticks units_done) {
                             source.v = label->where.v + label->height + 2;
                         }
                         Auto_Animate_Line(&source, &dest);
-                        HintLine::show(source, dest, label->color, DARK);
+                        HintLine::show(source, dest, label->hue, DARK);
                     }
                 } else {
                     label->set_string("");
@@ -284,7 +284,7 @@ void Label::update_positions(ticks units_done) {
                         source.h = label->where.h + label->width + 2;
                     }
                     Auto_Animate_Line(&source, &dest);
-                    HintLine::show(source, dest, label->color, VERY_LIGHT);
+                    HintLine::show(source, dest, label->hue, VERY_LIGHT);
                 }
             }
             if (label->age > ticks(0)) {
@@ -330,7 +330,7 @@ void Label::clear_string() {
     width = height = 0;
 }
 
-void Label::set_color(uint8_t color) { this->color = color; }
+void Label::set_hue(Hue hue) { this->hue = hue; }
 
 void Label::set_keep_on_screen_anyway(bool keepOnScreenAnyway) {
     this->keepOnScreenAnyway = keepOnScreenAnyway;
@@ -360,24 +360,37 @@ void Label::recalc_size() {
         int maxWidth  = 0;
         for (int i = 1; i <= lineNum; i++) {
             pn::string_view text  = String_Get_Nth_Line(this->text, i);
-            int32_t         width = sys.fonts.tactical->string_width(text);
+            int32_t         width = sys.fonts.tactical.string_width(text);
             if (width > maxWidth) {
                 maxWidth = width;
             }
         }
         width      = maxWidth + kLabelTotalInnerSpace;
-        height     = (sys.fonts.tactical->height * lineNum) + kLabelTotalInnerSpace;
-        lineHeight = sys.fonts.tactical->height;
+        height     = (sys.fonts.tactical.height * lineNum) + kLabelTotalInnerSpace;
+        lineHeight = sys.fonts.tactical.height;
     } else {
-        width      = sys.fonts.tactical->string_width(text) + kLabelTotalInnerSpace;
-        height     = sys.fonts.tactical->height + kLabelTotalInnerSpace;
-        lineHeight = sys.fonts.tactical->height;
+        width      = sys.fonts.tactical.string_width(text) + kLabelTotalInnerSpace;
+        height     = sys.fonts.tactical.height + kLabelTotalInnerSpace;
+        lineHeight = sys.fonts.tactical.height;
     }
 }
 
 static int32_t String_Count_Lines(pn::string_view s) {
-    static const pn::rune kCarriageReturn{'\n'};
-    return 1 + std::count(s.begin(), s.end(), kCarriageReturn);
+    bool trailing_nl = false;
+    int  count       = 0;
+    for (pn::rune r : s) {
+        if (r == pn::rune{'\n'}) {
+            ++count;
+            trailing_nl = true;
+        } else {
+            trailing_nl = false;
+        }
+    }
+    if (trailing_nl) {
+        return count;
+    } else {
+        return count + 1;
+    }
 }
 
 static pn::string_view String_Get_Nth_Line(pn::string_view source, int32_t nth) {

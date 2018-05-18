@@ -76,7 +76,7 @@ void DirectoryLedger::unlocked_chapters(std::vector<int>* chapters) {
 
 void DirectoryLedger::load() {
     const pn::string_view scenario_id = sys.prefs->scenario_identifier();
-    pn::string            path = pn::format("{0}/{1}/ledger.pn", dirs().registry, scenario_id);
+    pn::string            path        = pn::format("{0}/{1}.pn", dirs().registry, scenario_id);
 
     _chapters.clear();
     pn::file file = pn::open(path, "r");
@@ -90,25 +90,34 @@ void DirectoryLedger::load() {
         throw std::runtime_error("bad ledger");
     }
 
-    for (pn::value_cref level : x.as_map().get("unlocked-levels").as_array()) {
-        if (level.is_int()) {
-            _chapters.insert(level.as_int());
+    pn::map_cref   data     = x.as_map();
+    pn::map_cref   unlocked = data.get("unlocked").as_map();
+    pn::array_cref chapters = unlocked.get("chapters").as_array();
+    for (pn::value_cref chapter : chapters) {
+        if (chapter.is_int()) {
+            _chapters.insert(chapter.as_int());
         }
     }
 }
 
 void DirectoryLedger::save() {
     const pn::string_view scenario_id = sys.prefs->scenario_identifier();
-    const pn::string      path = pn::format("{0}/{1}/ledger.pn", dirs().registry, scenario_id);
+    const pn::string      path        = pn::format("{0}/{1}.pn", dirs().registry, scenario_id);
 
-    pn::array unlocked_levels;
+    pn::array unlocked_chapters;
     for (std::set<int>::const_iterator it = _chapters.begin(); it != _chapters.end(); ++it) {
-        unlocked_levels.push_back(*it);
+        unlocked_chapters.push_back(*it);
     }
 
     makedirs(path::dirname(path), 0755);
     pn::file file = pn::open(path, "w");
-    pn::dump(file, pn::map{{"unlocked-levels", std::move(unlocked_levels)}});
+    pn::dump(
+            file, pn::map{
+                          {"unlocked",
+                           pn::map{
+                                   {"chapters", std::move(unlocked_chapters)},
+                           }},
+                  });
 }
 
 }  // namespace antares

@@ -21,9 +21,11 @@
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/pix-table.hpp"
+#include "lang/exception.hpp"
 #include "video/text-driver.hpp"
 
 using sfz::hex;
@@ -35,22 +37,8 @@ namespace args = sfz::args;
 namespace antares {
 namespace {
 
-const char* name(int16_t id) {
-    switch (id) {
-        case 501: return "ishiman/cruiser";
-        case 510: return "ishiman/fighter";
-        case 515: return "ishiman/transport";
-        case 532: return "obish/escort";
-        case 550: return "gaitori/cruiser";
-        case 551: return "gaitori/fighter";
-        case 563: return "gaitori/transport";
-        case 567: return "obish/transport";
-    }
-    abort();
-}
-
-void draw(int16_t id, uint8_t color, ArrayPixMap& pix) {
-    NatePixTable               table(id, color);
+void draw(pn::string_view name, Hue hue, ArrayPixMap& pix) {
+    NatePixTable               table = Resource::sprite(name, hue);
     const NatePixTable::Frame& frame = table.at(9);
     pix.resize(Size(frame.width(), frame.height()));
     pix.copy(frame.pix_map());
@@ -66,12 +54,12 @@ class ShapeBuilder {
     ShapeBuilder(const ShapeBuilder&) = delete;
     ShapeBuilder& operator=(const ShapeBuilder&) = delete;
 
-    void save(int16_t id, uint8_t color) {
+    void save(pn::string_view name, pn::string_view out, Hue hue) {
         ArrayPixMap pix(0, 0);
-        draw(id, color, pix);
+        draw(name, hue, pix);
         if (_output_dir.has_value()) {
             const pn::string path =
-                    pn::format("{0}/{1}/{2}.png", *_output_dir, name(id), hex(color));
+                    pn::format("{0}/{1}/{2}.png", *_output_dir, out, hex(static_cast<int>(hue)));
             sfz::makedirs(dirname(path), 0755);
             pn::file file = pn::open(path, "w");
             pix.encode(file);
@@ -123,45 +111,26 @@ void main(int argc, char* const* argv) {
 
     args::parse(argc - 1, argv + 1, callbacks);
 
+    struct {
+        pn::string_view name, out;
+    } ids[] = {
+            {"ish/cruiser", "ishiman/cruiser"},     {"ish/fighter", "ishiman/fighter"},
+            {"ish/transport", "ishiman/transport"}, {"obi/escort", "obish/escort"},
+            {"gai/cruiser", "gaitori/cruiser"},     {"gai/fighter", "gaitori/fighter"},
+            {"gai/transport", "gaitori/transport"}, {"obi/transport", "obish/transport"},
+    };
+
     NullPrefsDriver prefs;
     TextVideoDriver video({640, 480}, output_dir);
     ShapeBuilder    builder(output_dir);
-    int16_t         ids[] = {501, 510, 515, 532, 550, 551, 563, 567};
-    for (int16_t id : ids) {
+    for (auto id : ids) {
         for (int tint = 0; tint < 16; ++tint) {
-            builder.save(id, tint);
+            builder.save(id.name, id.out, static_cast<Hue>(tint));
         }
     }
-}
-
-void print_nested_exception(const std::exception& e) {
-    pn::format(stderr, ": {0}", e.what());
-    try {
-        std::rethrow_if_nested(e);
-    } catch (const std::exception& e) {
-        print_nested_exception(e);
-    }
-}
-
-void print_exception(pn::string_view progname, const std::exception& e) {
-    pn::format(stderr, "{0}: {1}", sfz::path::basename(progname), e.what());
-    try {
-        std::rethrow_if_nested(e);
-    } catch (const std::exception& e) {
-        print_nested_exception(e);
-    }
-    pn::format(stderr, "\n");
 }
 
 }  // namespace
 }  // namespace antares
 
-int main(int argc, char* const* argv) {
-    try {
-        antares::main(argc, argv);
-    } catch (const std::exception& e) {
-        antares::print_exception(argv[0], e);
-        return 1;
-    }
-    return 0;
-}
+int main(int argc, char* const* argv) { return antares::wrap_main(antares::main, argc, argv); }

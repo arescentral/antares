@@ -18,6 +18,7 @@
 
 #include "game/cursor.hpp"
 
+#include "data/resource.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "game/globals.hpp"
@@ -33,14 +34,15 @@ namespace antares {
 static const int   kCursorBoundsSize = 16;
 static const usecs kTimeout          = secs(1);
 
-Cursor::Cursor() : _sprite(500, GRAY) {}
+Cursor::Cursor() = default;
 
 void Cursor::draw() const { draw_at(sys.video->get_mouse()); }
 
 void Cursor::draw_at(Point where) const {
     if (world().contains(where)) {
-        where.offset(-_sprite.at(0).center().h, -_sprite.at(0).center().v);
-        _sprite.at(0).texture().draw(where.h, where.v);
+        const NatePixTable* sprite = sys.pix.cursor();
+        where.offset(-sprite->at(0).center().h, -sprite->at(0).center().v);
+        sprite->at(0).texture().draw(where.h, where.v);
     }
 }
 
@@ -89,13 +91,13 @@ ANTARES_GLOBAL Point HintLine::hint_line_end;
 ANTARES_GLOBAL RgbColor HintLine::hint_line_color;
 ANTARES_GLOBAL RgbColor HintLine::hint_line_color_dark;
 
-void HintLine::show(Point fromWhere, Point toWhere, uint8_t color, uint8_t brightness) {
+void HintLine::show(Point fromWhere, Point toWhere, Hue hue, uint8_t brightness) {
     hint_line_start = fromWhere;
     hint_line_end   = toWhere;
     show_hint_line  = true;
 
-    hint_line_color      = GetRGBTranslateColorShade(color, brightness);
-    hint_line_color_dark = GetRGBTranslateColorShade(color, VERY_DARK);
+    hint_line_color      = GetRGBTranslateColorShade(hue, brightness);
+    hint_line_color_dark = GetRGBTranslateColorShade(hue, VERY_DARK);
 }
 
 void HintLine::hide() { show_hint_line = false; }
@@ -117,7 +119,7 @@ void GameCursor::draw() const {
     where = clamp(where);
     if (active()) {
         const Rect     clip_rect = viewport();
-        const RgbColor color     = GetRGBTranslateColorShade(SKY_BLUE, MEDIUM);
+        const RgbColor color     = GetRGBTranslateColorShade(Hue::SKY_BLUE, MEDIUM);
 
         Point top_a    = Point(where.h, clip_rect.top);
         Point top_b    = Point(where.h, (where.v - kCursorBoundsSize));

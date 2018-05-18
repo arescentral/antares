@@ -21,6 +21,7 @@
 
 #include <map>
 
+#include "data/base-object.hpp"
 #include "data/handle.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
@@ -63,17 +64,20 @@ class Sprite {
 
     Point           where;
     NatePixTable*   table;
-    int16_t         resID;
     int             whichShape;
     int32_t         scale;
     spriteStyleType style;
     RgbColor        styleColor;
     int16_t         styleData;
-    int32_t         tinySize;
     int16_t         whichLayer;
-    RgbColor        tinyColor;
-    bool            killMe;
-    draw_tiny_t     draw_tiny;
+    struct {
+        Hue     hue;
+        uint8_t shade;
+    } tinyColor;
+    bool        killMe;
+    draw_tiny_t draw_tiny;
+
+    BaseObject::Icon icon;
 
   private:
     friend void         SpriteHandlingInit();
@@ -93,20 +97,23 @@ int32_t evil_scale_by(int32_t value, int32_t scale);
 
 class Pix {
   public:
-    void          reset();
-    NatePixTable* add(int16_t id);
-    NatePixTable* get(int16_t id);
+    void                reset();
+    NatePixTable*       add(pn::string_view id, Hue hue);
+    NatePixTable*       get(pn::string_view id, Hue hue);
+    const NatePixTable* cursor();
 
   private:
-    std::map<int16_t, NatePixTable> pix;
+    std::map<std::pair<pn::string, Hue>, NatePixTable> _pix;
+    std::unique_ptr<NatePixTable>                      _cursor;
 };
 
 void           SpriteHandlingInit();
 void           ResetAllSprites();
 Rect           scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t scale);
 Handle<Sprite> AddSprite(
-        Point where, NatePixTable* table, int16_t resID, int16_t whichShape, int32_t scale,
-        int32_t size, int16_t layer, const RgbColor& color);
+        Point where, NatePixTable* table, pn::string_view name, Hue hue, int16_t whichShape,
+        int32_t scale, sfz::optional<BaseObject::Icon> icon, int16_t layer, Hue tiny_hue,
+        uint8_t tiny_shade);
 void RemoveSprite(Handle<Sprite> sprite);
 void draw_sprites();
 void CullSprites();

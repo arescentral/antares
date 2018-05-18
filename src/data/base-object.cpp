@@ -22,227 +22,547 @@
 
 namespace antares {
 
-static const uint32_t kPeriodicActionTimeMask   = 0xff000000;
-static const uint32_t kPeriodicActionRangeMask  = 0x00ff0000;
-static const uint32_t kPeriodicActionNotMask    = 0x0000ffff;
-static const int32_t  kPeriodicActionTimeShift  = 24;
-static const int32_t  kPeriodicActionRangeShift = 16;
-
-static const uint32_t kDestroyActionNotMask     = 0x7fffffff;
-static const uint32_t kDestroyActionDontDieFlag = 0x80000000;
-
-static bool read_destroy(pn::file_view in, BaseObject* object) {
-    int32_t start, count;
-    if (!in.read(&start, &count)) {
-        return false;
-    }
-    object->destroyDontDie = count & kDestroyActionDontDieFlag;
-    count &= kDestroyActionNotMask;
-    auto end        = (start >= 0) ? (start + count) : start;
-    object->destroy = {start, end};
-    return true;
+static int32_t required_int32(path_value x) {
+    return required_int(x, {-0x80000000ll, 0x80000000ll});
 }
 
-static bool read_expire(pn::file_view in, BaseObject* object) {
-    int32_t start, count;
-    if (!in.read(&start, &count)) {
-        return false;
-    }
-    object->expireDontDie = count & kDestroyActionDontDieFlag;
-    count &= kDestroyActionNotMask;
-    auto end       = (start >= 0) ? (start + count) : start;
-    object->expire = {start, end};
-    return true;
+static uint32_t required_uint32(path_value x) { return required_int(x, {0, 0x100000000ull}); }
+
+static uint8_t required_uint8(path_value x) { return required_int(x, {0, 0x100}); }
+
+static fixedPointType required_fixed_point(path_value x) {
+    return required_struct<fixedPointType>(
+            x, {
+                       {"x", {&fixedPointType::h, required_fixed}},
+                       {"y", {&fixedPointType::v, required_fixed}},
+               });
 }
 
-static bool read_create(pn::file_view in, BaseObject* object) {
-    int32_t start, count;
-    if (!in.read(&start, &count)) {
-        return false;
-    }
-    auto end       = (start >= 0) ? (start + count) : start;
-    object->create = {start, end};
-    return true;
-}
-
-static bool read_collide(pn::file_view in, BaseObject* object) {
-    int32_t start, count;
-    if (!in.read(&start, &count)) {
-        return false;
-    }
-    auto end        = (start >= 0) ? (start + count) : start;
-    object->collide = {start, end};
-    return true;
-}
-
-static bool read_activate(pn::file_view in, BaseObject* object) {
-    int32_t start, count;
-    if (!in.read(&start, &count)) {
-        return false;
-    }
-    object->activatePeriod = ticks((count & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift);
-    object->activatePeriodRange =
-            ticks((count & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift);
-    count &= kPeriodicActionNotMask;
-    auto end         = (start >= 0) ? (start + count) : start;
-    object->activate = {start, end};
-    return true;
-}
-
-static bool read_arrive(pn::file_view in, BaseObject* object) {
-    int32_t start, count;
-    if (!in.read(&start, &count)) {
-        return false;
-    }
-    auto end       = (start >= 0) ? (start + count) : start;
-    object->arrive = {start, end};
-    return true;
-}
-
-static bool read_weapons(pn::file_view in, BaseObject* object) {
-    int32_t pulse, beam, special;
-    if (!in.read(
-                &pulse, &beam, &special, &object->pulse.positionNum, &object->beam.positionNum,
-                &object->special.positionNum)) {
-        return false;
-    }
-    object->pulse.base   = Handle<BaseObject>(pulse);
-    object->beam.base    = Handle<BaseObject>(beam);
-    object->special.base = Handle<BaseObject>(special);
-
-    for (auto weapon : {&object->pulse, &object->beam, &object->special}) {
-        for (size_t i = 0; i < kMaxWeaponPosition; ++i) {
-            if (!read_from(in, &weapon->position[i])) {
-                return false;
+static std::map<pn::string, bool> optional_tags(path_value x) {
+    if (x.value().is_null()) {
+        return {};
+    } else if (x.value().is_map()) {
+        pn::map_cref               m = x.value().as_map();
+        std::map<pn::string, bool> result;
+        for (const auto& kv : m) {
+            auto v = optional_bool(x.get(kv.key()));
+            if (v.has_value()) {
+                result[kv.key().copy()] = *v;
             }
         }
+        return result;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
     }
-    return true;
 }
 
-bool read_from(pn::file_view in, BaseObject* object) {
-    uint8_t section[32];
+static sfz::optional<BaseObject::Weapon> optional_weapon(path_value x) {
+    return optional_struct<BaseObject::Weapon>(
+            x, {
+                       {"base", {&BaseObject::Weapon::base, required_base}},
+                       {"positions",
+                        {&BaseObject::Weapon::positions,
+                         optional_array<fixedPointType, required_fixed_point>}},
+               });
+}
 
-    if (!in.read(&object->attributes)) {
-        return false;
+static int16_t required_layer(path_value x) { return required_int(x, {1, 4}); }
+
+static int32_t required_scale(path_value x) { return required_fixed(x).val() << 4; }
+
+static sfz::optional<BaseObject::Rotation> optional_rotation_frame(path_value x) {
+    using Rotation = BaseObject::Rotation;
+    return optional_struct<Rotation>(
+            x, {
+                       {"sprite", {&Rotation::sprite, required_string_copy}},
+                       {"layer", {&Rotation::layer, required_layer}},
+                       {"scale", {&Rotation::scale, required_scale}},
+                       {"frames", {&Rotation::frames, required_int_range}},
+               });
+}
+
+static sfz::optional<BaseObject::Animation> optional_animation_frame(path_value x) {
+    using Animation = BaseObject::Animation;
+    return optional_struct<Animation>(
+            x, {
+                       {"sprite", {&Animation::sprite, required_string_copy}},
+                       {"layer", {&Animation::layer, required_layer}},
+                       {"scale", {&Animation::scale, required_scale}},
+                       {"frames", {&Animation::frames, required_fixed_range}},
+                       {"direction", {&Animation::direction, required_animation_direction}},
+                       {"speed", {&Animation::speed, required_fixed}},
+                       {"first", {&Animation::first, required_fixed_range}},
+               });
+}
+
+static BaseObject::Ray::To required_ray_to(path_value x) {
+    if (x.value() == pn::value{"object"}) {
+        return BaseObject::Ray::To::OBJECT;
+    } else if (x.value() == pn::value{"coord"}) {
+        return BaseObject::Ray::To::COORD;
     }
-    if (object->attributes & kIsSelfAnimated) {
-        object->attributes &= ~(kShapeFromDirection | kIsVector);
-    } else if (object->attributes & kShapeFromDirection) {
-        object->attributes &= ~kIsVector;
-    }
+    throw std::runtime_error(pn::format("{0}: must be \"object\" or \"coord\"", x.path()).c_str());
+}
 
-    int32_t initial_age, age_range;
-    if (!(in.read(&object->baseClass, &object->baseRace, &object->price) &&
-          read_from(in, &object->offenseValue) && in.read(&object->destinationClass) &&
-          read_from(in, &object->maxVelocity) && read_from(in, &object->warpSpeed) &&
-          in.read(&object->warpOutDistance) && read_from(in, &object->initialVelocity) &&
-          read_from(in, &object->initialVelocityRange) && read_from(in, &object->mass) &&
-          read_from(in, &object->maxThrust) &&
-          in.read(&object->health, &object->damage, &object->energy, &initial_age, &age_range))) {
-        return false;
-    }
+static sfz::optional<BaseObject::Ray> optional_ray_frame(path_value x) {
+    using Ray = BaseObject::Ray;
+    return optional_struct<Ray>(
+            x, {
+                       {"hue", {&Ray::hue, optional_hue}},
+                       {"to", {&Ray::to, required_ray_to}},
+                       {"lightning", {&Ray::lightning, required_bool}},
+                       {"accuracy", {&Ray::accuracy, required_int32}},
+                       {"range", {&Ray::range, required_int32}},
+               });
+}
 
-    object->initialAge = ticks(initial_age);
-    if (age_range >= 0) {
-        object->initialAgeRange = ticks(age_range);
-    } else {
-        object->initialAgeRange = ticks(0);
-    }
+static sfz::optional<BaseObject::Bolt> optional_bolt_frame(path_value x) {
+    using Bolt = BaseObject::Bolt;
+    return optional_struct<Bolt>(x, {{"color", {&Bolt::color, required_color}}});
+}
 
-    if (object->attributes & kNeutralDeath) {
-        object->occupy_count = age_range;
-    } else {
-        object->occupy_count = -1;
-    }
-
-    uint8_t unused1;
-    if (!in.read(
-                &object->naturalScale, &object->pixLayer, &object->pixResID, &object->tinySize,
-                &object->shieldColor, &unused1, &object->initialDirection,
-                &object->initialDirectionRange)) {
-        return false;
-    }
-
-    if ((object->shieldColor != 0xFF) && (object->shieldColor != 0)) {
-        object->shieldColor = GetTranslateColorShade(object->shieldColor, 15);
-    }
-
-    if (!(read_weapons(in, object) && read_from(in, &object->friendDefecit) &&
-          read_from(in, &object->dangerThreshold) &&
-          in.read(&object->specialDirection, &object->arriveActionDistance) &&
-          read_destroy(in, object) && read_expire(in, object) && read_create(in, object) &&
-          read_collide(in, object) && read_activate(in, object) && read_arrive(in, object) &&
-          (fread(section, 1, 32, in.c_obj()) == 32) && in.read(&object->buildFlags) &&
-          in.read(&object->orderFlags))) {
-        return false;
-    }
-
-    object->levelKeyTag  = (object->buildFlags & kLevelKeyTag) >> kLevelKeyTagShift;
-    object->engageKeyTag = (object->buildFlags & kEngageKeyTag) >> kEngageKeyTagShift;
-    object->orderKeyTag  = (object->orderFlags & kOrderKeyTag) >> kOrderKeyTagShift;
-
-    uint32_t build_time, unused2;
-    uint16_t unused3;
-    if (!(read_from(in, &object->buildRatio) &&
-          in.read(&build_time, &object->skillNum, &object->skillDen, &object->skillNumAdj,
-                  &object->skillDenAdj, &object->pictPortraitResID, &unused2, &unused3,
-                  &object->internalFlags))) {
-        return false;
-    }
-    object->buildTime = 3 * ticks(build_time / 10);
-
-    pn::file sub = pn::data_view{section, 32}.open();
-    if (object->attributes & kShapeFromDirection) {
-        read_from(sub, &object->frame.rotation);
-    } else if (object->attributes & kIsSelfAnimated) {
-        read_from(sub, &object->frame.animation);
-    } else if (object->attributes & kIsVector) {
-        read_from(sub, &object->frame.vector);
-        if (object->frame.vector.color > 16) {
-            object->frame.vector.color = object->frame.vector.color;
-        } else {
-            object->frame.vector.color = 0;
+static uint32_t optional_usage(path_value x) {
+    if (x.value().is_null()) {
+        return 0;
+    } else if (x.value().is_map()) {
+        static const pn::string_view flags[3] = {"transportation", "attacking", "defense"};
+        uint32_t                     bit      = 0x00000001;
+        uint32_t                     result   = 0x00000000;
+        for (pn::string_view flag : flags) {
+            if (optional_bool(x.get(flag)).value_or(false)) {
+                result |= bit;
+            }
+            bit <<= 1;
         }
+        return result;
     } else {
-        read_from(sub, &object->frame.weapon);
+        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
     }
-    return true;
 }
 
-bool read_from(pn::file_view in, objectFrameType::Rotation* rotation) {
-    return in.read(&rotation->shapeOffset, &rotation->rotRes) &&
-           read_from(in, &rotation->maxTurnRate) && read_from(in, &rotation->turnAcceleration);
-}
-
-bool read_from(pn::file_view in, objectFrameType::Animation* animation) {
-    int32_t first_shape, last_shape, frame_shape, frame_shape_range;
-    if (!(in.read(&first_shape, &last_shape, &animation->frameDirection,
-                  &animation->frameDirectionRange) &&
-          read_from(in, &animation->frameSpeed) && read_from(in, &animation->frameSpeedRange) &&
-          in.read(&frame_shape, &frame_shape_range))) {
-        return false;
+static BaseObject::Device::Direction required_device_direction(path_value x) {
+    if (x.value() == pn::value{"fore"}) {
+        return BaseObject::Device::Direction::FORE;
+    } else if (x.value() == pn::value{"omni"}) {
+        return BaseObject::Device::Direction::OMNI;
     }
-    animation->firstShape      = Fixed::from_long(first_shape);
-    animation->lastShape       = Fixed::from_long(last_shape);
-    animation->frameShape      = Fixed::from_long(frame_shape);
-    animation->frameShapeRange = Fixed::from_long(frame_shape_range);
-    return true;
+    throw std::runtime_error(pn::format("{0}: must be \"fore\" or \"omni\"", x.path()).c_str());
 }
 
-bool read_from(pn::file_view in, objectFrameType::Vector* vector) {
-    return in.read(&vector->color, &vector->kind, &vector->accuracy, &vector->range);
+static sfz::optional<BaseObject::Device> optional_device_frame(path_value x) {
+    using Device = BaseObject::Device;
+    return optional_struct<Device>(
+            x, {
+                       {"usage", {&Device::usage, optional_usage}},
+                       {"direction", {&Device::direction, required_device_direction}},
+                       {"energy_cost", {&Device::energyCost, required_int32}},
+                       {"fire_time", {&Device::fireTime, required_ticks}},
+                       {"ammo", {&Device::ammo, required_int32}},
+                       {"range", {&Device::range, required_int32}},
+                       {"inverse_speed", {&Device::inverseSpeed, required_fixed}},
+                       {"restock_cost", {&Device::restockCost, required_int32}},
+               });
 }
 
-bool read_from(pn::file_view in, objectFrameType::Weapon* weapon) {
-    int32_t fire_time;
-    if (!(in.read(&weapon->usage, &weapon->energyCost, &fire_time, &weapon->ammo,
-                  &weapon->range) &&
-          read_from(in, &weapon->inverseSpeed) && in.read(&weapon->restockCost))) {
-        return false;
+static sfz::optional<BaseObject::Icon> optional_icon(path_value x) {
+    return optional_struct<BaseObject::Icon>(
+            x, {
+                       {"shape", {&BaseObject::Icon::shape, required_icon_shape}},
+                       {"size", {&BaseObject::Icon::size, required_int}},
+               });
+}
+
+static BaseObject::Targeting required_targeting(path_value x) {
+    return required_struct<BaseObject::Targeting>(
+            x, {
+                       {"base", {&BaseObject::Targeting::base, required_bool}},
+                       {"hide", {&BaseObject::Targeting::hide, required_bool}},
+                       {"radar", {&BaseObject::Targeting::radar, required_bool}},
+                       {"order", {&BaseObject::Targeting::order, required_bool}},
+                       {"select", {&BaseObject::Targeting::select, required_bool}},
+                       {"lock", {&BaseObject::Targeting::lock, required_bool}},
+               });
+}
+
+static BaseObject::Loadout optional_loadout(path_value x) {
+    return optional_struct<BaseObject::Loadout>(
+                   x,
+                   {
+                           {"pulse", {&BaseObject::Loadout::pulse, optional_weapon}},
+                           {"beam", {&BaseObject::Loadout::beam, optional_weapon}},
+                           {"special", {&BaseObject::Loadout::special, optional_weapon}},
+                   })
+            .value_or(BaseObject::Loadout{});
+}
+
+static BaseObject set_attributes(BaseObject o) {
+    if (((o.rotation.has_value() + o.animation.has_value() + o.ray.has_value() +
+          o.bolt.has_value() + o.device.has_value()) != 1)) {
+        throw std::runtime_error(
+                "must have single rotation, animation, ray, bolt, or device block");
+    } else if (o.rotation.has_value()) {
+        o.attributes |= kShapeFromDirection;
+    } else if (o.animation.has_value()) {
+        o.attributes |= kIsSelfAnimated;
+        if (!o.expire.after.animation) {
+            o.attributes |= kAnimationCycle;
+        }
+    } else if (o.ray.has_value() || o.bolt.has_value()) {
+        o.attributes |= kIsVector;
+    } else if (o.device.has_value()) {
+        if (o.device->direction == BaseObject::Device::Direction::OMNI) {
+            o.attributes |= kAutoTarget;
+        }
     }
-    weapon->fireTime = ticks(fire_time);
-    return true;
+
+    if (o.target.base) {
+        o.attributes |= kIsDestination;
+    }
+    if (o.target.hide) {
+        o.attributes |= kHideEffect;
+    }
+    if (o.target.radar) {
+        o.attributes |= kAppearOnRadar;
+    }
+    if (o.target.order) {
+        o.attributes |= kCanAcceptDestination;
+    }
+    if (o.target.select) {
+        o.attributes |= kCanBeDestination;
+    }
+    if (o.target.lock) {
+        o.attributes |= kStaticDestination;
+    }
+    if (o.autotarget) {
+        o.attributes |= kAutoTarget;
+    }
+
+    if (o.turn_rate > Fixed::zero()) {
+        o.attributes |= (kCanTurn | kHasDirectionGoal);
+    }
+    if (o.destroy.neutralize) {
+        o.attributes |= kNeutralDeath;
+    }
+    if (o.destroy.release_energy) {
+        o.attributes |= kReleaseEnergyOnDeath;
+    }
+    if (o.collide.as.subject) {
+        o.attributes |= kCanCollide;
+    }
+    if (o.collide.as.object) {
+        o.attributes |= kCanBeHit;
+    }
+    if (o.collide.solid) {
+        o.attributes |= kOccupiesSpace;
+    }
+    if (o.collide.edge) {
+        o.attributes |= kDoesBounce;
+    }
+
+    if (o.ai.combat.hated) {
+        o.attributes |= kHated;
+    }
+    if (o.ai.combat.guided) {
+        o.attributes |= kIsGuided;
+    }
+    if (o.ai.combat.engages) {
+        o.attributes |= kCanEngage;
+    }
+    if (o.ai.combat.engaged) {
+        o.attributes |= kCanBeEngaged;
+    }
+    if (o.ai.combat.evades) {
+        o.attributes |= kCanEvade;
+    }
+    if (o.ai.combat.evaded) {
+        o.attributes |= kCanBeEvaded;
+    }
+
+    if ((o.attributes & kIsDestination) && !o.ai.build.legacy_non_builder) {
+        o.attributes |= kCanAcceptBuild;
+    }
+
+    if (o.ai.target.prefer.base.has_value()) {
+        if (*o.ai.target.prefer.base) {
+            o.orderFlags |= kSoftTargetIsBase;
+        } else {
+            o.orderFlags |= kSoftTargetIsNotBase;
+        }
+    }
+    if (o.ai.target.prefer.local.has_value()) {
+        if (*o.ai.target.prefer.local) {
+            o.orderFlags |= kSoftTargetIsLocal;
+        } else {
+            o.orderFlags |= kSoftTargetIsRemote;
+        }
+    }
+    if (o.ai.target.prefer.owner == Owner::DIFFERENT) {
+        o.orderFlags |= kSoftTargetIsFoe;
+    } else if (o.ai.target.prefer.owner == Owner::SAME) {
+        o.orderFlags |= kSoftTargetIsFriend;
+    }
+    if (!o.ai.target.prefer.tags.empty()) {
+        o.orderFlags |= kSoftTargetMatchesTags;
+    }
+
+    if (o.ai.target.force.base.has_value()) {
+        if (*o.ai.target.force.base) {
+            o.orderFlags |= kHardTargetIsBase;
+        } else {
+            o.orderFlags |= kHardTargetIsNotBase;
+        }
+    }
+    if (o.ai.target.force.local.has_value()) {
+        if (*o.ai.target.force.local) {
+            o.orderFlags |= kHardTargetIsLocal;
+        } else {
+            o.orderFlags |= kHardTargetIsRemote;
+        }
+    }
+    if (o.ai.target.force.owner == Owner::DIFFERENT) {
+        o.orderFlags |= kHardTargetIsFoe;
+    } else if (o.ai.target.force.owner == Owner::SAME) {
+        o.orderFlags |= kHardTargetIsFriend;
+    }
+    if (!o.ai.target.force.tags.empty()) {
+        o.orderFlags |= kHardTargetMatchesTags;
+    }
+
+    return o;
+}
+
+static BaseObject::Destroy optional_destroy(path_value x) {
+    return optional_struct<BaseObject::Destroy>(
+                   x,
+                   {
+                           {"dont_die", {&BaseObject::Destroy::dont_die, required_bool}},
+                           {"neutralize", {&BaseObject::Destroy::neutralize, required_bool}},
+                           {"release_energy",
+                            {&BaseObject::Destroy::release_energy, required_bool}},
+                           {"action", {&BaseObject::Destroy::action, optional_action_array}},
+                   })
+            .value_or(BaseObject::Destroy{});
+}
+
+static BaseObject::Expire::After optional_expire_after(path_value x) {
+    return optional_struct<BaseObject::Expire::After>(
+                   x,
+                   {
+                           {"age",
+                            {&BaseObject::Expire::After::age, optional_ticks_range,
+                             Range<ticks>{ticks(-1), ticks(-1)}}},
+                           {"animation", {&BaseObject::Expire::After::animation, required_bool}},
+                   })
+            .value_or(BaseObject::Expire::After{});
+}
+
+static BaseObject::Expire optional_expire(path_value x) {
+    return optional_struct<BaseObject::Expire>(
+                   x,
+                   {
+                           {"after", {&BaseObject::Expire::after, optional_expire_after}},
+                           {"dont_die", {&BaseObject::Expire::dont_die, required_bool}},
+                           {"action", {&BaseObject::Expire::action, optional_action_array}},
+                   })
+            .value_or(BaseObject::Expire{});
+}
+
+static BaseObject::Create optional_create(path_value x) {
+    return optional_struct<BaseObject::Create>(
+                   x,
+                   {
+                           {"action", {&BaseObject::Create::action, optional_action_array}},
+                   })
+            .value_or(BaseObject::Create{});
+}
+
+static BaseObject::Collide::As optional_collide_as(path_value x) {
+    return optional_struct<BaseObject::Collide::As>(
+                   x,
+                   {
+                           {"subject", {&BaseObject::Collide::As::subject, required_bool}},
+                           {"object", {&BaseObject::Collide::As::object, required_bool}},
+                   })
+            .value_or(BaseObject::Collide::As{});
+}
+
+static BaseObject::Collide optional_collide(path_value x) {
+    return optional_struct<BaseObject::Collide>(
+                   x,
+                   {
+                           {"as", {&BaseObject::Collide::as, optional_collide_as}},
+                           {"damage", {&BaseObject::Collide::damage, required_int32}},
+                           {"solid", {&BaseObject::Collide::solid, required_bool}},
+                           {"edge", {&BaseObject::Collide::edge, required_bool}},
+                           {"action", {&BaseObject::Collide::action, optional_action_array}},
+                   })
+            .value_or(BaseObject::Collide{});
+}
+
+static BaseObject::Activate optional_activate(path_value x) {
+    return optional_struct<BaseObject::Activate>(
+                   x,
+                   {
+                           {"period",
+                            {&BaseObject::Activate::period, optional_ticks_range,
+                             Range<ticks>{ticks(0), ticks(0)}}},
+                           {"action", {&BaseObject::Activate::action, optional_action_array}},
+                   })
+            .value_or(BaseObject::Activate{});
+}
+
+static BaseObject::Arrive optional_arrive(path_value x) {
+    return optional_struct<BaseObject::Arrive>(
+                   x,
+                   {
+                           {"distance", {&BaseObject::Arrive::distance, required_int32}},
+                           {"action", {&BaseObject::Arrive::action, optional_action_array}},
+                   })
+            .value_or(BaseObject::Arrive{});
+}
+
+static BaseObject::AI::Combat::Skill optional_ai_combat_skill(path_value x) {
+    using Skill = BaseObject::AI::Combat::Skill;
+    return optional_struct<Skill>(
+                   x,
+                   {
+                           {"num", {&Skill::num, required_uint8}},
+                           {"den", {&Skill::den, required_uint8}},
+                   })
+            .value_or(Skill{});
+}
+
+static BaseObject::AI::Combat optional_ai_combat(path_value x) {
+    using Combat = BaseObject::AI::Combat;
+    return optional_struct<Combat>(
+                   x,
+                   {
+                           {"hated", {&Combat::hated, required_bool}},
+                           {"guided", {&Combat::guided, required_bool}},
+                           {"engages", {&Combat::engages, required_bool}},
+                           {"engages_if", {&Combat::engages_if, optional_tags}},
+                           {"engaged", {&Combat::engaged, required_bool}},
+                           {"engaged_if", {&Combat::engaged_if, optional_tags}},
+                           {"evades", {&Combat::evades, required_bool}},
+                           {"evaded", {&Combat::evaded, required_bool}},
+                           {"skill", {&Combat::skill, optional_ai_combat_skill}},
+                   })
+            .value_or(Combat{});
+}
+
+static BaseObject::AI::Target::Filter optional_ai_target_filter(path_value x) {
+    using Filter = BaseObject::AI::Target::Filter;
+    return optional_struct<Filter>(
+                   x,
+                   {
+                           {"base", {&Filter::base, optional_bool}},
+                           {"local", {&Filter::local, optional_bool}},
+                           {"owner", {&Filter::owner, required_owner}},
+                           {"tags", {&Filter::tags, optional_tags}},
+                   })
+            .value_or(Filter{});
+}
+
+static BaseObject::AI::Target optional_ai_target(path_value x) {
+    using Target = BaseObject::AI::Target;
+    return optional_struct<Target>(
+                   x,
+                   {
+                           {"prefer", {&Target::prefer, optional_ai_target_filter}},
+                           {"force", {&Target::force, optional_ai_target_filter}},
+                   })
+            .value_or(Target{});
+}
+
+static BaseObject::AI::Escort optional_ai_escort(path_value x) {
+    using Escort = BaseObject::AI::Escort;
+    return optional_struct<Escort>(
+                   x,
+                   {
+                           {"class", {&Escort::class_, required_int32}},
+                           {"power", {&Escort::power, required_fixed}},
+                           {"need", {&Escort::need, required_fixed}},
+                   })
+            .value_or(Escort{});
+}
+
+static BaseObject::AI::Build optional_ai_build(path_value x) {
+    using Build = BaseObject::AI::Build;
+    return optional_struct<Build>(
+                   x,
+                   {
+                           {"ratio", {&Build::ratio, required_fixed}},
+                           {"needs_escort", {&Build::needs_escort, required_bool}},
+                           {"legacy_non_builder", {&Build::legacy_non_builder, required_bool}},
+                   })
+            .value_or(Build{});
+}
+
+static BaseObject::AI optional_ai(path_value x) {
+    return optional_struct<BaseObject::AI>(
+                   x,
+                   {
+                           {"combat", {&BaseObject::AI::combat, optional_ai_combat}},
+                           {"target", {&BaseObject::AI::target, optional_ai_target}},
+                           {"escort", {&BaseObject::AI::escort, optional_ai_escort}},
+                           {"build", {&BaseObject::AI::build, optional_ai_build}},
+                   })
+            .value_or(BaseObject::AI{});
+}
+
+BaseObject base_object(pn::value_cref x0) {
+    return set_attributes(required_struct<BaseObject>(
+            path_value{x0},
+            {
+                    {"long_name", {&BaseObject::name, required_string_copy}},
+                    {"short_name", {&BaseObject::short_name, required_string_copy}},
+
+                    {"notes", nullptr},
+                    {"class", nullptr},
+                    {"race", nullptr},
+
+                    {"portrait", {&BaseObject::portrait, optional_string_copy}},
+
+                    {"price", {&BaseObject::price, required_int32}},
+                    {"warp_out_distance", {&BaseObject::warpOutDistance, required_uint32}},
+                    {"health", {&BaseObject::health, required_int32}},
+                    {"energy", {&BaseObject::energy, required_int32}},
+                    {"occupy_count", {&BaseObject::occupy_count, required_int32}},
+
+                    {"max_velocity", {&BaseObject::maxVelocity, required_fixed}},
+                    {"warp_speed", {&BaseObject::warpSpeed, required_fixed}},
+                    {"mass", {&BaseObject::mass, required_fixed}},
+                    {"turn_rate", {&BaseObject::turn_rate, required_fixed}},
+                    {"max_thrust", {&BaseObject::maxThrust, required_fixed}},
+
+                    {"build_time", {&BaseObject::buildTime, required_ticks}},
+
+                    {"shield_color", {&BaseObject::shieldColor, optional_color}},
+
+                    {"initial_velocity", {&BaseObject::initial_velocity, required_fixed_range}},
+                    {"initial_direction", {&BaseObject::initial_direction, required_int_range}},
+                    {"autotarget", {&BaseObject::autotarget, required_bool}},
+
+                    {"destroy", {&BaseObject::destroy, optional_destroy}},
+                    {"expire", {&BaseObject::expire, optional_expire}},
+                    {"create", {&BaseObject::create, optional_create}},
+                    {"collide", {&BaseObject::collide, optional_collide}},
+                    {"activate", {&BaseObject::activate, optional_activate}},
+                    {"arrive", {&BaseObject::arrive, optional_arrive}},
+
+                    {"target", {&BaseObject::target, required_targeting}},
+                    {"icon", {&BaseObject::icon, optional_icon}},
+                    {"weapons", {&BaseObject::weapons, optional_loadout}},
+
+                    {"rotation", {&BaseObject::rotation, optional_rotation_frame}},
+                    {"animation", {&BaseObject::animation, optional_animation_frame}},
+                    {"ray", {&BaseObject::ray, optional_ray_frame}},
+                    {"bolt", {&BaseObject::bolt, optional_bolt_frame}},
+                    {"device", {&BaseObject::device, optional_device_frame}},
+
+                    {"tags", {&BaseObject::tags, optional_tags}},
+                    {"ai", {&BaseObject::ai, optional_ai}},
+            }));
 }
 
 }  // namespace antares

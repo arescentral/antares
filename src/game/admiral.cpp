@@ -19,7 +19,8 @@
 #include "game/admiral.hpp"
 
 #include "data/base-object.hpp"
-#include "data/string-list.hpp"
+#include "data/races.hpp"
+#include "data/resource.hpp"
 #include "game/cheat.hpp"
 #include "game/globals.hpp"
 #include "game/space-object.hpp"
@@ -46,6 +47,27 @@ static const Fixed kImportantTarget         = Fixed::from_float(1.250);
 static const Fixed kSomewhatImportantTarget = Fixed::from_float(1.125);
 static const Fixed kAbsolutelyEssential     = Fixed::from_float(128.0);
 
+static bool could_target_per_destination_flag(const BaseObject& base, const SpaceObject& target) {
+    return base.ai.target.force.base.has_value()
+                   ? (!!(target.attributes & kIsDestination) == *base.ai.target.force.base)
+                   : true;
+}
+
+static bool could_target_per_owner(
+        const Admiral& a, const BaseObject& base, const SpaceObject& target) {
+    switch (base.ai.target.force.owner) {
+        case Owner::ANY: return true;
+        case Owner::DIFFERENT: return target.owner.get() != &a;
+        case Owner::SAME: return target.owner.get() == &a;
+    }
+}
+
+static bool could_target(const Admiral& a, const BaseObject& base, const SpaceObject& target) {
+    return could_target_per_destination_flag(base, target) &&
+           could_target_per_owner(a, base, target) &&
+           tags_match(*target.base, base.ai.target.force.tags);
+}
+
 void Admiral::init() {
     g.admirals.reset(new Admiral[kMaxPlayerNum]);
     reset();
@@ -65,10 +87,8 @@ void ResetAllDestObjectData() {
         d->name.clear();
         d->earn           = Fixed::zero();
         d->totalBuildTime = d->buildTime = ticks(0);
-        d->buildObjectBaseNum            = BaseObject::none();
-        for (int j = 0; j < kMaxTypeBaseCanBuild; ++j) {
-            d->canBuildType[j] = kNoShip;
-        }
+        d->buildObjectBaseNum            = nullptr;
+        d->canBuildType.clear();
         for (int j = 0; j < kMaxPlayerNum; ++j) {
             d->occupied[j] = 0;
         }
@@ -82,14 +102,7 @@ Destination* Destination::get(int i) {
     return nullptr;
 }
 
-bool Destination::can_build() const {
-    for (int i = 0; i < kMaxShipCanBuild; ++i) {
-        if (canBuildType[i] != kNoShip) {
-            return true;
-        }
-    }
-    return false;
-}
+bool Destination::can_build() const { return !canBuildType.empty(); }
 
 Admiral* Admiral::get(int i) {
     if ((0 <= i) && (i < kMaxPlayerNum)) {
@@ -107,14 +120,15 @@ Handle<Admiral> Admiral::make(int index, uint32_t attributes, const Level::Playe
     a->_active        = true;
     a->_attributes    = attributes;
     a->_earning_power = player.earningPower;
-    a->_race          = player.playerRace;
-    if ((player.nameResID >= 0)) {
-        StringList      strings(player.nameResID);
-        pn::string_view name = strings.at(player.nameStrNum - 1);
-        if (pn::rune::count(name) > kAdmiralNameLen) {
-            name = pn::rune::slice(name, 0, kAdmiralNameLen);
+    a->_race          = player.playerRace.copy();
+    a->_hue           = player.hue;
+
+    if (!player.name.empty()) {
+        if (pn::rune::count(player.name) > kAdmiralNameLen) {
+            a->_name = pn::rune::slice(player.name, 0, kAdmiralNameLen).copy();
+        } else {
+            a->_name = player.name.copy();
         }
-        a->_name = name.copy();
     }
 
     // for now set strategy balance to 0 -- we may want to calc this if player added on the fly?
@@ -131,8 +145,8 @@ static Handle<Destination> next_free_destination() {
 }
 
 Handle<Destination> MakeNewDestination(
-        Handle<SpaceObject> object, int32_t* canBuildType, Fixed earn, int16_t nameResID,
-        int16_t nameStrNum) {
+        Handle<SpaceObject> object, const std::vector<BuildableObject>& canBuildType, Fixed earn,
+        const sfz::optional<pn::string>& name) {
     auto d = next_free_destination();
     if (!d.get()) {
         return Destination::none();
@@ -141,25 +155,17 @@ Handle<Destination> MakeNewDestination(
     d->whichObject    = object;
     d->earn           = earn;
     d->totalBuildTime = d->buildTime = ticks(0);
-
-    if (canBuildType != NULL) {
-        for (int j = 0; j < kMaxTypeBaseCanBuild; j++) {
-            d->canBuildType[j] = *canBuildType;
-            canBuildType++;
-        }
-    } else {
-        for (int j = 0; j < kMaxTypeBaseCanBuild; j++) {
-            d->canBuildType[j] = kNoShip;
-        }
+    d->canBuildType.clear();
+    for (const BuildableObject& o : canBuildType) {
+        d->canBuildType.emplace_back(BuildableObject{o.name.copy()});
     }
 
-    if ((nameResID >= 0)) {
-        StringList      strings(nameResID);
-        pn::string_view name = strings.at(nameStrNum - 1);
-        if (pn::rune::count(name) > kDestinationNameLen) {
-            name = pn::rune::slice(name, 0, kDestinationNameLen);
+    if (name.has_value()) {
+        if (pn::rune::count(*name) > kAdmiralNameLen) {
+            d->name = pn::rune::slice(*name, 0, kAdmiralNameLen).copy();
+        } else {
+            d->name = name->copy();
         }
-        d->name = name.copy();
     }
 
     if (object->attributes & kNeutralDeath) {
@@ -168,7 +174,7 @@ Handle<Destination> MakeNewDestination(
         }
 
         if (object->owner.get()) {
-            d->occupied[object->owner.number()] = object->baseType->occupy_count;
+            d->occupied[object->owner.number()] = object->base->occupy_count;
         }
     }
 
@@ -204,10 +210,8 @@ void RemoveDestination(Handle<Destination> d) {
     d->name.clear();
     d->earn           = Fixed::zero();
     d->totalBuildTime = d->buildTime = ticks(0);
-    d->buildObjectBaseNum            = BaseObject::none();
-    for (int i = 0; i < kMaxTypeBaseCanBuild; i++) {
-        d->canBuildType[i] = kNoShip;
-    }
+    d->buildObjectBaseNum            = nullptr;
+    d->canBuildType.clear();
 
     for (int i = 0; i < kMaxPlayerNum; i++) {
         d->occupied[i] = 0;
@@ -216,65 +220,46 @@ void RemoveDestination(Handle<Destination> d) {
 
 void RecalcAllAdmiralBuildData() {
     // first clear all the data
-    for (auto a : Admiral::all()) {
-        for (int j = 0; j < kMaxNumAdmiralCanBuild; j++) {
-            a->canBuildType()[j].baseNum     = -1;
-            a->canBuildType()[j].base        = BaseObject::none();
-            a->canBuildType()[j].chanceRange = kFixedNone;
-        }
+    for (Handle<Admiral> a : Admiral::all()) {
+        a->canBuildType().clear();
         a->totalBuildChance() = Fixed::zero();
-        a->hopeToBuild()      = -1;
+        a->hopeToBuild().reset();
     }
 
-    for (auto d : Destination::all()) {
-        if (d->whichObject.get()) {
-            auto anObject = d->whichObject;
-            if (anObject->owner.get()) {
-                const auto& a = anObject->owner;
-                for (int k = 0; k < kMaxTypeBaseCanBuild; k++) {
-                    if (d->canBuildType[k] >= 0) {
-                        int j = 0;
-                        while ((a->canBuildType()[j].baseNum != d->canBuildType[k]) &&
-                               (j < kMaxNumAdmiralCanBuild)) {
-                            j++;
-                        }
-                        if (j == kMaxNumAdmiralCanBuild) {
-                            auto baseObject =
-                                    mGetBaseObjectFromClassRace(d->canBuildType[k], a->race());
-                            j = 0;
-                            while ((a->canBuildType()[j].baseNum != -1) &&
-                                   (j < kMaxNumAdmiralCanBuild)) {
-                                j++;
-                            }
-                            if (j == kMaxNumAdmiralCanBuild) {
-                                throw std::runtime_error("Too Many Types to Build!");
-                            }
-                            a->canBuildType()[j].baseNum     = d->canBuildType[k];
-                            a->canBuildType()[j].base        = baseObject;
-                            a->canBuildType()[j].chanceRange = a->totalBuildChance();
-                            if (baseObject.get()) {
-                                a->totalBuildChance() += baseObject->buildRatio;
-                            }
-                        }
-                    }
+    for (Handle<Destination> d : Destination::all()) {
+        Handle<SpaceObject> anObject = d->whichObject;
+        if (!anObject.get() || !anObject->owner.get()) {
+            continue;
+        }
+        Handle<Admiral> a = anObject->owner;
+        for (const BuildableObject& buildable_class : d->canBuildType) {
+            bool found = false;
+            for (const admiralBuildType& admiral_build : a->canBuildType()) {
+                if (admiral_build.buildable.name == buildable_class.name) {
+                    found = true;
+                    break;
                 }
+            }
+            if (found) {
+                continue;
+            }
+            auto baseObject = get_buildable_object(buildable_class, a->race());
+            if (baseObject) {
+                a->canBuildType().emplace_back();
+                a->canBuildType().back().buildable = BuildableObject{buildable_class.name.copy()};
+                a->canBuildType().back().base      = baseObject;
+                a->canBuildType().back().chanceRange = a->totalBuildChance();
+                a->totalBuildChance() += baseObject->ai.build.ratio;
             }
         }
     }
 }
 
-uint8_t GetAdmiralColor(Handle<Admiral> a) {
+Hue GetAdmiralColor(Handle<Admiral> a) {
     if (!a.get()) {
-        return 0;
+        return Hue::GRAY;
     }
-    return a->color();
-}
-
-int32_t GetAdmiralRace(Handle<Admiral> a) {
-    if (!a.get()) {
-        return -1;
-    }
-    return a->race();
+    return a->hue();
 }
 
 void Admiral::set_target(Handle<SpaceObject> obj) {
@@ -299,11 +284,9 @@ void Admiral::set_control(Handle<SpaceObject> obj) {
     _considerShip = obj;
     if (obj.get()) {
         _considerShipID = obj->id;
-        if (obj->attributes & kCanAcceptBuild) {
-            auto d = obj->asDestination;
-            if (d.get() && d->can_build()) {
-                _buildAtObject = d;
-            }
+        auto d          = obj->asDestination;
+        if (d.get() && d->can_build()) {
+            _buildAtObject = d;
         }
     } else {
         _considerShipID = -1;
@@ -319,11 +302,8 @@ Handle<SpaceObject> Admiral::control() const {
 }
 
 bool BaseHasSomethingToBuild(Handle<SpaceObject> obj) {
-    if (obj->attributes & kCanAcceptBuild) {
-        auto d = obj->asDestination;
-        return d.get() && d->can_build();
-    }
-    return false;
+    auto d = obj->asDestination;
+    return d.get() && d->can_build();
 }
 
 Handle<Destination> GetAdmiralBuildAtObject(Handle<Admiral> a) {
@@ -346,11 +326,9 @@ void SetAdmiralBuildAtObject(Handle<Admiral> a, Handle<SpaceObject> obj) {
         throw std::runtime_error("Can't set consider ship for -1 admiral.");
     }
     if (obj.get()) {
-        if (obj->attributes & kCanAcceptBuild) {
-            auto d = obj->asDestination;
-            if (d.get() && d->can_build()) {
-                a->buildAtObject() = d;
-            }
+        auto d = obj->asDestination;
+        if (d.get() && d->can_build()) {
+            a->buildAtObject() = d;
         }
     }
 }
@@ -512,23 +490,23 @@ void OverrideObjectDestination(Handle<SpaceObject> o, Handle<SpaceObject> overri
                 o->destObjectID     = dObject->id;
 
                 if (dObject->owner == o->owner) {
-                    dObject->remoteFriendStrength += o->baseType->offenseValue;
-                    dObject->escortStrength += o->baseType->offenseValue;
+                    dObject->remoteFriendStrength += o->base->ai.escort.power;
+                    dObject->escortStrength += o->base->ai.escort.power;
                     if (dObject->attributes & kIsDestination) {
-                        if (dObject->escortStrength < dObject->baseType->friendDefecit) {
+                        if (dObject->escortStrength < dObject->base->ai.escort.need) {
                             o->duty = eGuardDuty;
                         } else {
                             o->duty = eNoDuty;
                         }
                     } else {
-                        if (dObject->escortStrength < dObject->baseType->friendDefecit) {
+                        if (dObject->escortStrength < dObject->base->ai.escort.need) {
                             o->duty = eEscortDuty;
                         } else {
                             o->duty = eNoDuty;
                         }
                     }
                 } else {
-                    dObject->remoteFoeStrength += o->baseType->offenseValue;
+                    dObject->remoteFoeStrength += o->base->ai.escort.power;
                     if (dObject->attributes & kIsDestination) {
                         o->duty = eAssaultDuty;
                     } else {
@@ -559,10 +537,10 @@ void RemoveObjectFromDestination(Handle<SpaceObject> o) {
         auto dObject = o->destObject;
         if (dObject->id == o->destObjectID) {
             if (dObject->owner == o->owner) {
-                dObject->remoteFriendStrength -= o->baseType->offenseValue;
-                dObject->escortStrength -= o->baseType->offenseValue;
+                dObject->remoteFriendStrength -= o->base->ai.escort.power;
+                dObject->escortStrength -= o->base->ai.escort.power;
             } else {
-                dObject->remoteFoeStrength -= o->baseType->offenseValue;
+                dObject->remoteFoeStrength -= o->base->ai.escort.power;
             }
         }
     }
@@ -574,12 +552,12 @@ void RemoveObjectFromDestination(Handle<SpaceObject> o) {
 
 // assumes you can afford it & base has time
 static void AdmiralBuildAtObject(
-        Handle<Admiral> admiral, Handle<BaseObject> base, Handle<Destination> buildAtDest) {
+        Handle<Admiral> admiral, const BaseObject* base, Handle<Destination> buildAtDest) {
     fixedPointType v = {Fixed::zero(), Fixed::zero()};
-    if (base.get()) {
+    if (base) {
         auto coord = buildAtDest->whichObject->location;
 
-        auto newObject = CreateAnySpaceObject(base, &v, &coord, 0, admiral, 0, -1);
+        auto newObject = CreateAnySpaceObject(*base, &v, &coord, 0, admiral, 0, sfz::nullopt);
         if (newObject.get()) {
             SetObjectDestination(newObject);
             if (admiral == g.admiral) {
@@ -594,11 +572,11 @@ void AdmiralThink() {
         destBalance->buildTime -= kMajorTick;
         if (destBalance->buildTime <= ticks(0)) {
             destBalance->buildTime = ticks(0);
-            if (destBalance->buildObjectBaseNum.get()) {
+            if (destBalance->buildObjectBaseNum) {
                 auto anObject = destBalance->whichObject;
                 AdmiralBuildAtObject(
                         anObject->owner, destBalance->buildObjectBaseNum, destBalance);
-                destBalance->buildObjectBaseNum = BaseObject::none();
+                destBalance->buildObjectBaseNum = nullptr;
             }
         }
 
@@ -702,7 +680,7 @@ void Admiral::think() {
                 }
 
                 if ((anObject->duty != eEscortDuty) && (anObject->duty != eHostileBaseDuty)) {
-                    _thisFreeEscortStrength += anObject->baseType->offenseValue;
+                    _thisFreeEscortStrength += anObject->base->ai.escort.power;
                 }
 
                 anObject->bestConsideredTargetValue = kFixedNone;
@@ -747,7 +725,7 @@ void Admiral::think() {
             (anObject->active == kObjectInUse) && (destObject->attributes & (kCanBeDestination)) &&
             (destObject->active == kObjectInUse) &&
             ((anObject->owner != destObject->owner) ||
-             (anObject->baseType->destinationClass < destObject->baseType->destinationClass))) {
+             (anObject->base->ai.escort.class_ < destObject->base->ai.escort.class_))) {
             gridLoc    = destObject->distanceGrid;
             stepObject = otherDestObject = destObject;
             while (stepObject->nextFarObject.get()) {
@@ -768,7 +746,7 @@ void Admiral::think() {
             thisValue = kUnimportantTarget;
             if (destObject->owner == anObject->owner) {
                 if (destObject->attributes & kIsDestination) {
-                    if (destObject->escortStrength < destObject->baseType->friendDefecit) {
+                    if (destObject->escortStrength < destObject->base->ai.escort.need) {
                         thisValue = kAbsolutelyEssential;
                     } else if (foeValue != Fixed::zero()) {
                         if (foeValue >= friendValue) {
@@ -789,19 +767,18 @@ void Admiral::think() {
                             }
                         }
                     }
-                    if (anObject->baseType->orderFlags & kTargetIsBase) {
+                    if (anObject->base->orderFlags & kSoftTargetIsBase) {
                         thisValue <<= 3;
                     }
-                    if (anObject->baseType->orderFlags & kHardTargetIsNotBase) {
+                    if (anObject->base->orderFlags & kHardTargetIsNotBase) {
                         thisValue = Fixed::zero();
                     }
                 } else {
-                    if (destObject->baseType->destinationClass >
-                        anObject->baseType->destinationClass) {
+                    if (destObject->base->ai.escort.class_ > anObject->base->ai.escort.class_) {
                         if (foeValue > friendValue) {
                             thisValue = kMostImportantTarget;
                         } else {
-                            if (destObject->escortStrength < destObject->baseType->friendDefecit) {
+                            if (destObject->escortStrength < destObject->base->ai.escort.need) {
                                 thisValue = kMostImportantTarget;
                             } else {
                                 thisValue = kUnimportantTarget;
@@ -810,17 +787,17 @@ void Admiral::think() {
                     } else {
                         thisValue = kUnimportantTarget;
                     }
-                    if (anObject->baseType->orderFlags & kTargetIsNotBase) {
+                    if (anObject->base->orderFlags & kSoftTargetIsNotBase) {
                         thisValue <<= 3;
                     }
-                    if (anObject->baseType->orderFlags & kHardTargetIsBase) {
+                    if (anObject->base->orderFlags & kHardTargetIsBase) {
                         thisValue = Fixed::zero();
                     }
                 }
-                if (anObject->baseType->orderFlags & kTargetIsFriend) {
+                if (anObject->base->orderFlags & kSoftTargetIsFriend) {
                     thisValue <<= 3;
                 }
-                if (anObject->baseType->orderFlags & kHardTargetIsFoe) {
+                if (anObject->base->orderFlags & kHardTargetIsFoe) {
                     thisValue = Fixed::zero();
                 }
             } else if (destObject->owner.get()) {
@@ -834,11 +811,11 @@ void Admiral::think() {
                         if (_blitzkrieg > 0) {
                             thisValue <<= 2;
                         }
-                        if (anObject->baseType->orderFlags & kTargetIsBase) {
+                        if (anObject->base->orderFlags & kSoftTargetIsBase) {
                             thisValue <<= 3;
                         }
 
-                        if (anObject->baseType->orderFlags & kHardTargetIsNotBase) {
+                        if (anObject->base->orderFlags & kHardTargetIsNotBase) {
                             thisValue = Fixed::zero();
                         }
                     } else {
@@ -851,19 +828,19 @@ void Admiral::think() {
                         } else {
                             thisValue = kLeastImportantTarget;
                         }
-                        if (anObject->baseType->orderFlags & kTargetIsNotBase) {
+                        if (anObject->base->orderFlags & kSoftTargetIsNotBase) {
                             thisValue <<= 1;
                         }
 
-                        if (anObject->baseType->orderFlags & kHardTargetIsBase) {
+                        if (anObject->base->orderFlags & kHardTargetIsBase) {
                             thisValue = Fixed::zero();
                         }
                     }
                 }
-                if (anObject->baseType->orderFlags & kTargetIsFoe) {
+                if (anObject->base->orderFlags & kSoftTargetIsFoe) {
                     thisValue <<= 3;
                 }
-                if (anObject->baseType->orderFlags & kHardTargetIsFriend) {
+                if (anObject->base->orderFlags & kHardTargetIsFriend) {
                     thisValue = Fixed::zero();
                 }
             } else {
@@ -872,24 +849,24 @@ void Admiral::think() {
                     if (_blitzkrieg > 0) {
                         thisValue <<= 2;
                     }
-                    if (anObject->baseType->orderFlags & kTargetIsBase) {
+                    if (anObject->base->orderFlags & kSoftTargetIsBase) {
                         thisValue <<= 3;
                     }
-                    if (anObject->baseType->orderFlags & kHardTargetIsNotBase) {
+                    if (anObject->base->orderFlags & kHardTargetIsNotBase) {
                         thisValue = Fixed::zero();
                     }
                 } else {
-                    if (anObject->baseType->orderFlags & kTargetIsNotBase) {
+                    if (anObject->base->orderFlags & kSoftTargetIsNotBase) {
                         thisValue <<= 3;
                     }
-                    if (anObject->baseType->orderFlags & kHardTargetIsBase) {
+                    if (anObject->base->orderFlags & kHardTargetIsBase) {
                         thisValue = Fixed::zero();
                     }
                 }
-                if (anObject->baseType->orderFlags & kTargetIsFoe) {
+                if (anObject->base->orderFlags & kSoftTargetIsFoe) {
                     thisValue <<= 3;
                 }
-                if (anObject->baseType->orderFlags & kHardTargetIsFriend) {
+                if (anObject->base->orderFlags & kHardTargetIsFriend) {
                     thisValue = Fixed::zero();
                 }
             }
@@ -904,26 +881,30 @@ void Admiral::think() {
             gridLoc.v = difference;
 
             if ((gridLoc.h < kMaximumRelevantDistance) && (gridLoc.v < kMaximumRelevantDistance)) {
-                if (anObject->baseType->orderFlags & kTargetIsLocal) {
+                if (anObject->base->orderFlags & kSoftTargetIsLocal) {
                     thisValue <<= 3;
                 }
-                if (anObject->baseType->orderFlags & kHardTargetIsRemote) {
+                if (anObject->base->orderFlags & kHardTargetIsRemote) {
                     thisValue = Fixed::zero();
                 }
             } else {
-                if (anObject->baseType->orderFlags & kTargetIsRemote) {
+                if (anObject->base->orderFlags & kSoftTargetIsRemote) {
                     thisValue <<= 3;
                 }
-                if (anObject->baseType->orderFlags & kHardTargetIsLocal) {
+                if (anObject->base->orderFlags & kHardTargetIsLocal) {
                     thisValue = Fixed::zero();
                 }
             }
 
-            if (anObject->baseType->orderKeyTag &&
-                (anObject->baseType->orderKeyTag == destObject->baseType->levelKeyTag)) {
-                thisValue <<= 3;
-            } else if (anObject->baseType->orderFlags & kHardMatchingFoe) {
-                thisValue = Fixed::zero();
+            if (anObject->base->orderFlags & kSoftTargetMatchesTags) {
+                if (tags_match(*destObject->base, anObject->base->ai.target.prefer.tags)) {
+                    thisValue <<= 3;
+                }
+            }
+            if (anObject->base->orderFlags & kHardTargetMatchesTags) {
+                if (!tags_match(*destObject->base, anObject->base->ai.target.force.tags)) {
+                    thisValue = Fixed::zero();
+                }
             }
 
             if (thisValue > Fixed::zero()) {
@@ -935,103 +916,117 @@ void Admiral::think() {
             }
         }
     }
+    think_build();
+}
 
+void Admiral::think_build() {
     // if we've saved enough for our dreams
-    if (_cash > _saveGoal) {
+    if (_cash <= _saveGoal) {
+        return;
+    }
+    _saveGoal = Fixed::zero();
+
+    // consider what ship to build
+    if (!_buildAtObject.get()) {
+        _buildAtObject = Handle<Destination>(0);
+    }
+
+    // try to find the next destination object that we own & that can build
+    auto anObject = SpaceObject::none();
+    auto begin    = _buildAtObject.number() + 1;
+    auto end      = begin + kMaxDestObject;
+    for (int i = begin; i < end; ++i) {
+        auto d = _buildAtObject = Handle<Destination>(i % kMaxDestObject);
+        if (d->whichObject.get() && (d->whichObject->owner.get() == this) &&
+            (d->whichObject->attributes & kCanAcceptBuild)) {
+            anObject = d->whichObject;
+            break;
+        }
+    }
+
+    // if we have a legal object
+    if (!anObject.get()) {
+        return;
+    }
+    auto destBalance = anObject->asDestination;
+    if (destBalance->buildTime > ticks(0)) {
+        return;
+    }
+
+    if (!_hopeToBuild.has_value()) {
+        int k = 0;
+        while (!_hopeToBuild.has_value() && (k < 7)) {
+            k++;
+            // choose something to build
+            Fixed thisValue   = g.random.next(_totalBuildChance);
+            Fixed friendValue = kFixedNone;  // equals the highest qualifying object
+            for (int j = 0; j < _canBuildType.size(); ++j) {
+                if ((_canBuildType[j].chanceRange <= thisValue) &&
+                    (_canBuildType[j].chanceRange > friendValue)) {
+                    friendValue = _canBuildType[j].chanceRange;
+                    _hopeToBuild.emplace(BuildableObject{_canBuildType[j].buildable.name.copy()});
+                }
+            }
+            if (_hopeToBuild.has_value()) {
+                // If “needs_escort” is set, don’t build a second object of this type
+                // until the first one has sufficient escorts.
+                auto baseObject = get_buildable_object(*_hopeToBuild, _race);
+                if (baseObject->ai.build.needs_escort) {
+                    for (auto anObject : SpaceObject::all()) {
+                        if ((anObject->active) && (anObject->owner.get() == this) &&
+                            (anObject->base == baseObject) &&
+                            (anObject->escortStrength < baseObject->ai.escort.need)) {
+                            _hopeToBuild.reset();
+                            break;
+                        }
+                    }
+                }
+
+                // Don’t build an object if there are no valid targets for it.
+                bool any_target = false;
+                for (auto anObject : SpaceObject::all()) {
+                    if (anObject->active && could_target(*this, *baseObject, *anObject)) {
+                        any_target = true;
+                        break;
+                    }
+                }
+                if (!any_target) {
+                    _hopeToBuild.reset();
+                }
+            }
+        }
+    }
+
+    if (!_hopeToBuild.has_value()) {
+        return;
+    }
+
+    int j = 0;
+    for (; j < destBalance->canBuildType.size(); ++j) {
+        if (destBalance->canBuildType[j].name == _hopeToBuild->name) {
+            break;
+        }
+    }
+    if (j >= destBalance->canBuildType.size()) {
+        return;  // just wait until we get to it
+    }
+
+    auto baseObject = get_buildable_object(*_hopeToBuild, _race);
+    if (_cash >= Fixed::from_long(baseObject->price)) {
+        Admiral::build(j);
+        _hopeToBuild.reset();
         _saveGoal = Fixed::zero();
-
-        // consider what ship to build
-        if (!_buildAtObject.get()) {
-            _buildAtObject = Handle<Destination>(0);
-        }
-
-        // try to find the next destination object that we own & that can build
-        auto anObject = SpaceObject::none();
-        auto begin    = _buildAtObject.number() + 1;
-        auto end      = begin + kMaxDestObject;
-        for (int i = begin; i < end; ++i) {
-            auto d = _buildAtObject = Handle<Destination>(i % kMaxDestObject);
-            if (d->whichObject.get() && (d->whichObject->owner.get() == this) &&
-                (d->whichObject->attributes & kCanAcceptBuild)) {
-                anObject = d->whichObject;
-                break;
-            }
-        }
-
-        // if we have a legal object
-        if (anObject.get()) {
-            auto destBalance = anObject->asDestination;
-            if (destBalance->buildTime <= ticks(0)) {
-                if (_hopeToBuild < 0) {
-                    int k = 0;
-                    while ((_hopeToBuild < 0) && (k < 7)) {
-                        k++;
-                        // choose something to build
-                        thisValue   = g.random.next(_totalBuildChance);
-                        friendValue = kFixedNone;  // equals the highest qualifying object
-                        for (int j = 0; j < kMaxNumAdmiralCanBuild; ++j) {
-                            if ((_canBuildType[j].chanceRange <= thisValue) &&
-                                (_canBuildType[j].chanceRange > friendValue)) {
-                                friendValue  = _canBuildType[j].chanceRange;
-                                _hopeToBuild = _canBuildType[j].baseNum;
-                            }
-                        }
-                        if (_hopeToBuild >= 0) {
-                            auto baseObject = mGetBaseObjectFromClassRace(_hopeToBuild, _race);
-                            if (baseObject->buildFlags & kSufficientEscortsExist) {
-                                for (auto anObject : SpaceObject::all()) {
-                                    if ((anObject->active) && (anObject->owner.get() == this) &&
-                                        (anObject->base == baseObject) &&
-                                        (anObject->escortStrength < baseObject->friendDefecit)) {
-                                        _hopeToBuild = -1;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            if (baseObject->buildFlags & kMatchingFoeExists) {
-                                thisValue = Fixed::zero();
-                                for (auto anObject : SpaceObject::all()) {
-                                    if ((anObject->active) && (anObject->owner.get() != this) &&
-                                        (anObject->baseType->levelKeyTag ==
-                                         baseObject->orderKeyTag)) {
-                                        thisValue = Fixed::from_val(1);
-                                    }
-                                }
-                                if (thisValue == Fixed::zero()) {
-                                    _hopeToBuild = -1;
-                                }
-                            }
-                        }
-                    }
-                }
-                int j = 0;
-                while ((destBalance->canBuildType[j] != _hopeToBuild) &&
-                       (j < kMaxTypeBaseCanBuild)) {
-                    j++;
-                }
-                if ((j < kMaxTypeBaseCanBuild) && (_hopeToBuild != kNoShip)) {
-                    auto baseObject = mGetBaseObjectFromClassRace(_hopeToBuild, _race);
-                    if (_cash >= Fixed::from_long(baseObject->price)) {
-                        Admiral::build(j);
-                        _hopeToBuild = -1;
-                        _saveGoal    = Fixed::zero();
-                    } else {
-                        _saveGoal = Fixed::from_long(baseObject->price);
-                    }
-                }  // otherwise just wait until we get to it
-            }
-        }
+    } else {
+        _saveGoal = Fixed::from_long(baseObject->price);
     }
 }
 
 bool Admiral::build(int32_t buildWhichType) {
     auto dest = _buildAtObject;
-    if ((buildWhichType >= 0) && (buildWhichType < kMaxTypeBaseCanBuild) && (dest.get()) &&
+    if ((buildWhichType >= 0) && (buildWhichType < dest->canBuildType.size()) && (dest.get()) &&
         (dest->buildTime <= ticks(0))) {
-        auto buildBaseObject =
-                mGetBaseObjectFromClassRace(dest->canBuildType[buildWhichType], _race);
-        if (buildBaseObject.get() && (buildBaseObject->price <= mFixedToLong(_cash))) {
+        auto buildBaseObject = get_buildable_object(dest->canBuildType[buildWhichType], _race);
+        if (buildBaseObject && (buildBaseObject->price <= mFixedToLong(_cash))) {
             _cash -= (Fixed::from_long(buildBaseObject->price));
             if (_cheats & kBuildFastBit) {
                 dest->buildTime      = kMinorTick;
@@ -1049,7 +1044,7 @@ bool Admiral::build(int32_t buildWhichType) {
 
 void StopBuilding(Handle<Destination> destObject) {
     destObject->totalBuildTime = destObject->buildTime = ticks(0);
-    destObject->buildObjectBaseNum                     = BaseObject::none();
+    destObject->buildObjectBaseNum                     = nullptr;
 }
 
 void Admiral::pay(Fixed howMuch) { pay_absolute(howMuch * _earning_power); }

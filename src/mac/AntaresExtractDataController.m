@@ -86,13 +86,23 @@ static void set_label(const char* status, void* userdata) {
     [label release];
 }
 
-- (void)done {
+- (void)done:(NSString*)error_message {
     [_window close];
-    [[NSDistributedNotificationCenter defaultCenter]
-            postNotificationName:kAntaresDidInstallScenarioFromPath
-                          object:[_path stringByStandardizingPath]
-                        userInfo:nil
-              deliverImmediately:YES];
+    _success = (error_message == nil);
+    if (!_success) {
+        NSAlert* alert = [[NSAlert alloc] init];
+        [alert setMessageText:@"Oops"];
+        [alert setInformativeText:(NSString*)error_message];
+        [alert addButtonWithTitle:@"Quit"];
+        [alert runModal];
+        [error_message release];
+    } else {
+        [[NSDistributedNotificationCenter defaultCenter]
+                postNotificationName:kAntaresDidInstallScenarioFromPath
+                              object:[_path stringByStandardizingPath]
+                            userInfo:nil
+                  deliverImmediately:YES];
+    }
     [_target performSelector:_selector withObject:self];
 }
 
@@ -105,19 +115,28 @@ static void set_label(const char* status, void* userdata) {
     NSString* downloads = [antares stringByAppendingPathComponent:@"Downloads"];
     NSString* scenarios = [antares stringByAppendingPathComponent:@"Scenarios"];
 
-    AntaresDataExtractor* extractor =
-            antares_data_extractor_create([downloads UTF8String], [scenarios UTF8String]);
+    CFStringRef error_message;
     if (_path) {
-        antares_data_extractor_set_plugin_file(extractor, [_path UTF8String]);
+        if (!antares_data_extract_path(
+                [downloads UTF8String], [scenarios UTF8String], [_path UTF8String], set_label,
+                self, &error_message)) {
+            [self performSelectorOnMainThread:@selector(done:) withObject:(NSString*)error_message waitUntilDone:NO];
+            return;
+        }
     } else {
-        antares_data_extractor_set_scenario(extractor, [_scenario UTF8String]);
+        if (!antares_data_extract_identifier(
+                [downloads UTF8String], [scenarios UTF8String], [_scenario UTF8String], set_label,
+                self, &error_message)) {
+            [self performSelectorOnMainThread:@selector(done:) withObject:(NSString*)error_message waitUntilDone:NO];
+            return;
+        }
     }
-    if (!antares_data_extractor_current(extractor)) {
-        antares_data_extractor_extract(extractor, set_label, self);
-    }
-
-    [self performSelectorOnMainThread:@selector(done) withObject:nil waitUntilDone:NO];
+    [self performSelectorOnMainThread:@selector(done:) withObject:nil waitUntilDone:NO];
     [pool release];
+}
+
+- (bool)success {
+    return _success;
 }
 
 @end

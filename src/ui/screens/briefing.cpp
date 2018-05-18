@@ -23,9 +23,8 @@
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "data/base-object.hpp"
-#include "data/picture.hpp"
+#include "data/plugin.hpp"
 #include "data/resource.hpp"
-#include "data/string-list.hpp"
 #include "drawing/briefing.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
@@ -49,19 +48,14 @@ namespace antares {
 namespace {
 
 enum BriefingPoint {
-    STAR_MAP = 0,
-    BLANK_SYSTEM_MAP,
-    BRIEFING_POINT_COUNT,
+    STAR_MAP         = -2,
+    BLANK_SYSTEM_MAP = -1,
 };
 
 }  // namespace
 
-static const int     kStarMapPictId          = 8000;
-static const int     kMissionStarPointWidth  = 16;
-static const int     kMissionStarPointHeight = 12;
-static const int32_t kMissionDataHiliteColor = GOLD;
+static const Hue kMissionDataHiliteColor = Hue::GOLD;
 
-static const int32_t kMissionBriefPointOffset = 2;
 static const int32_t kMissionDataWidth        = 200;
 static const int32_t kMissionDataVBuffer      = 40;
 static const int32_t kMissionDataTopBuffer    = 30;
@@ -71,89 +65,91 @@ static const int32_t kMissionLineHJog         = 10;
 
 static LabeledRect data_item(const InterfaceItem& map_rect) {
     Rect bounds(0, 0, 200, 200);
-    bounds.center_in(map_rect.bounds());
-    return LabeledRect(0, bounds, {4000, 1}, GOLD, kLarge);
+    bounds.center_in(map_rect.bounds);
+    LabeledRect r;
+    r.id     = 0;
+    r.bounds = bounds;
+    r.hue    = Hue::GOLD;
+    r.style  = InterfaceStyle::LARGE;
+    return r;
 }
 
-static const Font* interface_font(interfaceStyleType style) {
-    if (style == kSmall) {
+static const Font& interface_font(InterfaceStyle style) {
+    if (style == InterfaceStyle::SMALL) {
         return sys.fonts.small_button;
     } else {
         return sys.fonts.button;
     }
 }
 
-static void populate_inline_picts(
-        Rect rect, pn::string_view text, interfaceStyleType style,
-        vector<inlinePictType>& inline_pict) {
+static vector<inlinePictType> populate_inline_picts(
+        Rect rect, pn::string_view text, InterfaceStyle style) {
     StyledText interface_text(interface_font(style));
     interface_text.set_interface_text(text);
     interface_text.wrap_to(rect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer);
-    inline_pict = interface_text.inline_picts();
-    for (int i = 0; i < inline_pict.size(); ++i) {
-        inline_pict[i].bounds.offset(rect.left, rect.top);
+    std::vector<inlinePictType> result;
+    for (const inlinePictType& pict : interface_text.inline_picts()) {
+        result.emplace_back();
+        result.back().bounds  = pict.bounds;
+        result.back().object  = pict.object;
+        result.back().picture = pict.picture.copy();
+        result.back().bounds.offset(rect.left, rect.top);
     }
+    return result;
 }
 
 static void update_mission_brief_point(
-        LabeledRect* dataItem, int32_t whichBriefPoint, const Level* level, coordPointType* corner,
+        LabeledRect* dataItem, int32_t whichBriefPoint, const Level& level, coordPointType* corner,
         int32_t scale, Rect* bounds, vector<inlinePictType>& inlinePict, Rect& highlight_rect,
-        vector<pair<Point, Point>>& lines, pn::string& text) {
-    if (whichBriefPoint < kMissionBriefPointOffset) {
+        vector<pair<Point, Point>>& lines, pn::string_ref text) {
+    if (whichBriefPoint < 0) {
         // No longer handled here.
         return;
     }
 
-    whichBriefPoint -= kMissionBriefPointOffset;
-
-    Rect    hiliteBounds;
-    int32_t headerID, headerNumber, contentID;
+    Rect       hiliteBounds;
+    pn::string header;
     BriefPoint_Data_Get(
-            whichBriefPoint, level, &headerID, &headerNumber, &contentID, &hiliteBounds, corner,
-            scale, 16, 32, bounds);
+            whichBriefPoint, level, header, text, &hiliteBounds, corner, scale, 16, 32, bounds);
     hiliteBounds.offset(bounds->left, bounds->top);
 
-    // TODO(sfiera): catch exception.
-    Resource rsrc("text", "txt", contentID);
-    text               = rsrc.string().copy();
     int16_t textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
     if (hiliteBounds.left == hiliteBounds.right) {
-        dataItem->bounds().left =
+        dataItem->bounds.left =
                 (bounds->right - bounds->left) / 2 - (kMissionDataWidth / 2) + bounds->left;
-        dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
-        dataItem->bounds().top =
-                (bounds->bottom - bounds->top) / 2 - (textHeight / 2) + bounds->top;
-        dataItem->bounds().bottom = dataItem->bounds().top + textHeight;
-        highlight_rect            = Rect();
+        dataItem->bounds.right = dataItem->bounds.left + kMissionDataWidth;
+        dataItem->bounds.top = (bounds->bottom - bounds->top) / 2 - (textHeight / 2) + bounds->top;
+        dataItem->bounds.bottom = dataItem->bounds.top + textHeight;
+        highlight_rect          = Rect();
     } else {
         if ((hiliteBounds.left + (hiliteBounds.right - hiliteBounds.left) / 2) >
             (bounds->left + (bounds->right - bounds->left) / 2)) {
-            dataItem->bounds().right = hiliteBounds.left - kMissionDataHBuffer;
-            dataItem->bounds().left  = dataItem->bounds().right - kMissionDataWidth;
+            dataItem->bounds.right = hiliteBounds.left - kMissionDataHBuffer;
+            dataItem->bounds.left  = dataItem->bounds.right - kMissionDataWidth;
         } else {
-            dataItem->bounds().left  = hiliteBounds.right + kMissionDataHBuffer;
-            dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
+            dataItem->bounds.left  = hiliteBounds.right + kMissionDataHBuffer;
+            dataItem->bounds.right = dataItem->bounds.left + kMissionDataWidth;
         }
 
-        dataItem->bounds().top =
+        dataItem->bounds.top =
                 hiliteBounds.top + (hiliteBounds.bottom - hiliteBounds.top) / 2 - textHeight / 2;
-        dataItem->bounds().bottom = dataItem->bounds().top + textHeight;
-        if (dataItem->bounds().top < (bounds->top + kMissionDataTopBuffer)) {
-            dataItem->bounds().top    = bounds->top + kMissionDataTopBuffer;
-            dataItem->bounds().bottom = dataItem->bounds().top + textHeight;
+        dataItem->bounds.bottom = dataItem->bounds.top + textHeight;
+        if (dataItem->bounds.top < (bounds->top + kMissionDataTopBuffer)) {
+            dataItem->bounds.top    = bounds->top + kMissionDataTopBuffer;
+            dataItem->bounds.bottom = dataItem->bounds.top + textHeight;
         }
-        if (dataItem->bounds().bottom > (bounds->bottom - kMissionDataBottomBuffer)) {
-            dataItem->bounds().bottom = bounds->bottom - kMissionDataBottomBuffer;
-            dataItem->bounds().top    = dataItem->bounds().bottom - textHeight;
+        if (dataItem->bounds.bottom > (bounds->bottom - kMissionDataBottomBuffer)) {
+            dataItem->bounds.bottom = bounds->bottom - kMissionDataBottomBuffer;
+            dataItem->bounds.top    = dataItem->bounds.bottom - textHeight;
         }
 
-        if (dataItem->bounds().left < (bounds->left + kMissionDataVBuffer)) {
-            dataItem->bounds().left  = bounds->left + kMissionDataVBuffer;
-            dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
+        if (dataItem->bounds.left < (bounds->left + kMissionDataVBuffer)) {
+            dataItem->bounds.left  = bounds->left + kMissionDataVBuffer;
+            dataItem->bounds.right = dataItem->bounds.left + kMissionDataWidth;
         }
-        if (dataItem->bounds().right > (bounds->right - kMissionDataVBuffer)) {
-            dataItem->bounds().right = bounds->right - kMissionDataVBuffer;
-            dataItem->bounds().left  = dataItem->bounds().right - kMissionDataWidth;
+        if (dataItem->bounds.right > (bounds->right - kMissionDataVBuffer)) {
+            dataItem->bounds.right = bounds->right - kMissionDataVBuffer;
+            dataItem->bounds.left  = dataItem->bounds.right - kMissionDataWidth;
         }
 
         hiliteBounds.right++;
@@ -162,7 +158,7 @@ static void update_mission_brief_point(
         Rect newRect;
         GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
         lines.clear();
-        if (dataItem->bounds().right < hiliteBounds.left) {
+        if (dataItem->bounds.right < hiliteBounds.left) {
             Point p1(hiliteBounds.left, hiliteBounds.top);
             Point p2(newRect.right + kMissionLineHJog, hiliteBounds.top);
             Point p3(newRect.right + kMissionLineHJog, newRect.top);
@@ -196,18 +192,19 @@ static void update_mission_brief_point(
             lines.push_back(make_pair(p7, p8));
         }
     }
-    dataItem->label = StringList(headerID).at(headerNumber - 1).copy();
+    dataItem->label = std::move(header);
     Rect newRect;
     GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
-    populate_inline_picts(dataItem->bounds(), text, dataItem->style, inlinePict);
+    inlinePict = populate_inline_picts(dataItem->bounds, text, dataItem->style);
 }
 
-BriefingScreen::BriefingScreen(const Level* level, bool* cancelled)
+BriefingScreen::BriefingScreen(const Level& level, bool* cancelled)
         : InterfaceScreen("briefing", {0, 0, 640, 480}, true),
           _level(level),
           _cancelled(cancelled),
-          _briefing_point(0),
-          _briefing_point_count(_level->brief_point_size() + 2),
+          _briefing_point(_level.starmap.has_value() ? STAR_MAP : BLANK_SYSTEM_MAP),
+          _briefing_point_start(_briefing_point),
+          _briefing_point_end(_level.briefings.size()),
           _data_item(data_item(item(MAP_RECT))) {
     build_star_map();
     for (int i = 0; i < 500; ++i) {
@@ -222,7 +219,7 @@ BriefingScreen::BriefingScreen(const Level* level, bool* cancelled)
 BriefingScreen::~BriefingScreen() {}
 
 void BriefingScreen::become_front() {
-    if (_briefing_point_count <= 2) {
+    if (_briefing_point_end == 0) {
         stack()->pop(this);
     } else {
         InterfaceScreen::become_front();
@@ -236,10 +233,10 @@ void BriefingScreen::overlay() const {
             Rect  star_rect = _star_rect;
             star_rect.offset(off.h, off.v);
             const Point star   = star_rect.center();
-            RgbColor    gold   = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
+            RgbColor    gold   = GetRGBTranslateColorShade(Hue::GOLD, VERY_LIGHT);
             Rect        bounds = _bounds;
             bounds.offset(off.h, off.v);
-            _star_map.draw_cropped(bounds, Rect(Point(0, 2), bounds.size()));
+            plug.starmap.draw_cropped(bounds, Rect(Point(0, 2), bounds.size()));
             Rects rects;
             draw_vbracket(rects, star_rect, gold);
             rects.fill({star.h, bounds.top, star.h + 1, star_rect.top + 1}, gold);
@@ -258,16 +255,11 @@ void BriefingScreen::mouse_down(const MouseDownEvent& event) {
     Point off   = offset();
     Point where = event.where();
     where.offset(-off.h, -off.v);
-    for (size_t i = 0; i < _inline_pict.size(); ++i) {
-        if (_inline_pict[i].bounds.contains(where)) {
-            const int pict_id = _inline_pict[i].id;
-            for (auto obj : BaseObject::all()) {
-                if (obj->pictPortraitResID == pict_id) {
-                    stack()->push(new ObjectDataScreen(
-                            event.where(), obj, ObjectDataScreen::MOUSE, event.button()));
-                    return;
-                }
-            }
+    for (const auto& pict : _inline_pict) {
+        if (pict.bounds.contains(where) && pict.object) {
+            stack()->push(new ObjectDataScreen(
+                    event.where(), *pict.object, ObjectDataScreen::MOUSE, event.button()));
+            return;
         }
     }
     InterfaceScreen::mouse_down(event);
@@ -308,12 +300,12 @@ void BriefingScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
 }
 
 void BriefingScreen::adjust_interface() {
-    if (_briefing_point > 0) {
+    if (_briefing_point > _briefing_point_start) {
         dynamic_cast<Button&>(mutable_item(PREVIOUS)).status = kActive;
     } else {
         dynamic_cast<Button&>(mutable_item(PREVIOUS)).status = kDimmed;
     }
-    if (_briefing_point < _briefing_point_count - 1) {
+    if (_briefing_point < _briefing_point_end - 1) {
         dynamic_cast<Button&>(mutable_item(NEXT)).status = kActive;
     } else {
         dynamic_cast<Button&>(mutable_item(NEXT)).status = kDimmed;
@@ -325,7 +317,7 @@ void BriefingScreen::handle_button(Button& button) {
         case DONE: stack()->pop(this); break;
 
         case PREVIOUS:
-            if (_briefing_point > 0) {
+            if (_briefing_point > _briefing_point_start) {
                 --_briefing_point;
             }
             adjust_interface();
@@ -333,7 +325,7 @@ void BriefingScreen::handle_button(Button& button) {
             break;
 
         case NEXT:
-            if (_briefing_point < _briefing_point_count - 1) {
+            if (_briefing_point < _briefing_point_end - 1) {
                 ++_briefing_point;
             }
             adjust_interface();
@@ -346,36 +338,36 @@ void BriefingScreen::handle_button(Button& button) {
 }
 
 void BriefingScreen::build_star_map() {
-    _star_map       = Picture(kStarMapPictId).texture();
-    Rect pix_bounds = _star_map.size().as_rect();
+    Rect pix_bounds = plug.starmap.size().as_rect();
     pix_bounds.offset(0, 2);
     pix_bounds.bottom -= 3;
     _bounds = pix_bounds;
-    _bounds.center_in(item(MAP_RECT).bounds());
+    _bounds.center_in(item(MAP_RECT).bounds);
 
-    _star_rect = Rect(_level->star_map_point(), Size(0, 0));
-    _star_rect.inset(-kMissionStarPointWidth, -kMissionStarPointHeight);
+    if (_level.starmap.has_value()) {
+        _star_rect = *_level.starmap;
 
-    // Move `_star_rect` so that it is inside of `pix_bounds`.
-    if (_star_rect.left < pix_bounds.left) {
-        _star_rect.offset(pix_bounds.left - _star_rect.left, 0);
-    } else if (_star_rect.right > pix_bounds.right) {
-        _star_rect.offset(pix_bounds.right - _star_rect.right, 0);
+        // Move `_star_rect` so that it is inside of `pix_bounds`.
+        if (_star_rect.left < pix_bounds.left) {
+            _star_rect.offset(pix_bounds.left - _star_rect.left, 0);
+        } else if (_star_rect.right > pix_bounds.right) {
+            _star_rect.offset(pix_bounds.right - _star_rect.right, 0);
+        }
+        if (_star_rect.top < pix_bounds.top) {
+            _star_rect.offset(0, pix_bounds.top - _star_rect.top);
+        } else if (_star_rect.bottom > pix_bounds.bottom) {
+            _star_rect.offset(0, pix_bounds.bottom - _star_rect.bottom);
+        }
+        _star_rect.offset(_bounds.left, _bounds.top);
     }
-    if (_star_rect.top < pix_bounds.top) {
-        _star_rect.offset(0, pix_bounds.top - _star_rect.top);
-    } else if (_star_rect.bottom > pix_bounds.bottom) {
-        _star_rect.offset(0, pix_bounds.bottom - _star_rect.bottom);
-    }
-    _star_rect.offset(_bounds.left, _bounds.top);
 }
 
 void BriefingScreen::build_brief_point() {
-    if (_briefing_point >= BRIEFING_POINT_COUNT) {
+    if (_briefing_point >= 0) {
         coordPointType corner;
         int32_t        scale;
-        Rect           map_rect = item(MAP_RECT).bounds();
-        GetLevelFullScaleAndCorner(_level, 0, &corner, &scale, &map_rect);
+        Rect           map_rect = item(MAP_RECT).bounds;
+        GetLevelFullScaleAndCorner(0, &corner, &scale, &map_rect);
 
         vector<inlinePictType> inline_pict;
 
@@ -392,7 +384,7 @@ void BriefingScreen::draw_system_map() const {
         Points points;
         for (int i = 0; i < _system_stars.size(); ++i) {
             const Star& star       = _system_stars[i];
-            RgbColor    star_color = GetRGBTranslateColorShade(GRAY, star.shade + DARKEST);
+            RgbColor    star_color = GetRGBTranslateColorShade(Hue::GRAY, star.shade + DARKEST);
             Point       location   = star.location;
             location.offset(off.h, off.v);
             points.draw(location, star_color);
@@ -402,7 +394,7 @@ void BriefingScreen::draw_system_map() const {
     coordPointType corner;
     int32_t        scale;
     Rect           pix_bounds = _bounds.size().as_rect();
-    GetLevelFullScaleAndCorner(_level, 0, &corner, &scale, &pix_bounds);
+    GetLevelFullScaleAndCorner(0, &corner, &scale, &pix_bounds);
     Rect bounds = _bounds;
     bounds.offset(off.h, off.v);
     draw_arbitrary_sector_lines(corner, scale, 16, bounds);
@@ -457,7 +449,7 @@ void BriefingScreen::draw_brief_point() const {
     bounds.offset(off.h, off.v);
     Rects().fill(bounds, RgbColor::black());
     draw_interface_item(_data_item, KEYBOARD_MOUSE, off);
-    bounds = _data_item.bounds();
+    bounds = _data_item.bounds;
     bounds.offset(off.h, off.v);
     draw_text_in_rect(bounds, _text, _data_item.style, _data_item.hue);
 }
@@ -472,13 +464,11 @@ void BriefingScreen::show_object_data(int index, const GamepadButtonDownEvent& e
 
 void BriefingScreen::show_object_data(int index, ObjectDataScreen::Trigger trigger, int which) {
     if (index < _inline_pict.size()) {
-        const int   pict_id = _inline_pict[index].id;
-        const Point origin  = _inline_pict[index].bounds.center();
-        for (auto obj : BaseObject::all()) {
-            if (obj->pictPortraitResID == pict_id) {
-                stack()->push(new ObjectDataScreen(origin, obj, trigger, which));
-                return;
-            }
+        auto obj = _inline_pict[index].object;
+        if (obj) {
+            const Point origin = _inline_pict[index].bounds.center();
+            stack()->push(new ObjectDataScreen(origin, *obj, trigger, which));
+            return;
         }
     }
 }

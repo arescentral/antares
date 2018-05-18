@@ -36,7 +36,7 @@ class Transitions {
     ~Transitions();
 
     void reset();
-    void start_boolean(int32_t in_speed, int32_t out_speed, uint8_t goal_color);
+    void start_boolean(int32_t speed, uint8_t goal_color);
     void update_boolean(ticks time_passed);
     void draw() const;
 
@@ -83,7 +83,7 @@ class ColorFade : public Card {
 
 class PictFade : public Card {
   public:
-    PictFade(int pict_id, bool* skipped);
+    PictFade(const Texture* texture, bool* skipped);
     ~PictFade();
 
     virtual void become_front();
@@ -115,7 +115,7 @@ class PictFade : public Card {
     bool*     _skipped;
     wall_time _wane_start;
 
-    Texture _texture;
+    const Texture* _texture;
 };
 
 }  // namespace antares

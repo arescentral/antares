@@ -23,7 +23,6 @@
 #include <vector>
 
 #include "config/preferences.hpp"
-#include "data/string-list.hpp"
 #include "math/units.hpp"
 #include "ui/screen.hpp"
 
@@ -139,8 +138,8 @@ class KeyControlScreen : public InterfaceScreen {
     wall_time _next_flash;
     bool      _flashed_on;
 
-    StringList _tabs;
-    StringList _keys;
+    std::vector<pn::string> _tabs;
+    std::vector<pn::string> _keys;
 };
 
 }  // namespace antares

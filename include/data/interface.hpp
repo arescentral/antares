@@ -22,7 +22,8 @@
 #include <pn/array>
 #include <pn/string>
 
-#include "data/picture.hpp"
+#include "data/enums.hpp"
+#include "data/field.hpp"
 #include "math/geometry.hpp"
 #include "video/driver.hpp"
 
@@ -30,135 +31,107 @@ namespace antares {
 
 enum interfaceItemStatusType { kDimmed = 1, kActive = 2, kIH_Hilite = 3 };
 
-enum interfaceStyleType { kLarge = 1, kSmall = 2 };
-
 struct interfaceLabelType {
-    int16_t stringID;
-    int16_t stringNumber;
+    int64_t stringID;
+    int64_t stringNumber;
 };
 
 class InterfaceItem {
   public:
     class Visitor;
 
+    InterfaceItem()                = default;
     InterfaceItem(InterfaceItem&&) = default;
     InterfaceItem& operator=(InterfaceItem&&) = default;
     virtual ~InterfaceItem() {}
 
-    const int    id;
-    const Rect&  bounds() const { return _bounds; }
-    Rect&        bounds() { return _bounds; }
-    virtual void accept(const Visitor& visitor) const = 0;
+    virtual std::unique_ptr<InterfaceItem> copy() const                         = 0;
+    virtual void                           accept(const Visitor& visitor) const = 0;
 
-  protected:
-    InterfaceItem(int id, Rect bounds);
-
-  private:
-    friend std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, pn::array_cref l);
-
-    Rect _bounds;
+    int  id = -1;
+    Rect bounds;
 };
 
-std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, pn::array_cref l);
+std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, path_value x);
 
 struct PlainRect : public InterfaceItem {
-    PlainRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style);
-    virtual void accept(const Visitor& visitor) const;
+    virtual std::unique_ptr<InterfaceItem> copy() const;
+    virtual void                           accept(const Visitor& visitor) const;
 
-    uint8_t            hue;
-    interfaceStyleType style;
+    Hue            hue   = Hue::GRAY;
+    InterfaceStyle style = InterfaceStyle::LARGE;
 };
 
 struct LabeledItem : public InterfaceItem {
-    LabeledItem(int id, Rect bounds, interfaceLabelType label);
-
     pn::string label;
 };
 
 struct LabeledRect : public LabeledItem {
-    LabeledRect(
-            int id, Rect bounds, interfaceLabelType label, uint8_t hue, interfaceStyleType style);
-    virtual void accept(const Visitor& visitor) const;
+    virtual std::unique_ptr<InterfaceItem> copy() const;
+    virtual void                           accept(const Visitor& visitor) const;
 
-    uint8_t            hue;
-    interfaceStyleType style;
+    Hue            hue   = Hue::GRAY;
+    InterfaceStyle style = InterfaceStyle::LARGE;
 };
 
 struct TextRect : public InterfaceItem {
-    TextRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style);
-    TextRect(int id, Rect bounds, pn::string_view name, uint8_t hue, interfaceStyleType style);
-    virtual void accept(const Visitor& visitor) const;
+    virtual std::unique_ptr<InterfaceItem> copy() const;
+    virtual void                           accept(const Visitor& visitor) const;
 
-    pn::string         text;
-    uint8_t            hue;
-    interfaceStyleType style;
+    pn::string     text;
+    Hue            hue   = Hue::GRAY;
+    InterfaceStyle style = InterfaceStyle::LARGE;
 };
 
 struct PictureRect : public InterfaceItem {
-    PictureRect(int id, Rect bounds, pn::string_view name);
-    virtual void accept(const Visitor& visitor) const;
+    virtual std::unique_ptr<InterfaceItem> copy() const;
+    virtual void                           accept(const Visitor& visitor) const;
 
-    Picture            picture;
-    Texture            texture;
-    bool               visible_bounds;
-    uint8_t            hue;
-    interfaceStyleType style;
+    Texture texture;
 };
 
 struct Button : public LabeledItem {
-    Button(int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
-           uint8_t hue, interfaceStyleType style);
-
-    int16_t                 key;
-    int16_t                 gamepad;
-    uint8_t                 hue;
-    interfaceStyleType      style;
-    interfaceItemStatusType status;
+    int16_t                 key     = 0;
+    int16_t                 gamepad = 0;
+    Hue                     hue     = Hue::GRAY;
+    InterfaceStyle          style   = InterfaceStyle::LARGE;
+    interfaceItemStatusType status  = kActive;
 };
 
 struct PlainButton : public Button {
-    PlainButton(
-            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
-            uint8_t hue, interfaceStyleType style);
-    virtual void accept(const Visitor& visitor) const;
+    virtual std::unique_ptr<InterfaceItem> copy() const;
+    virtual void                           accept(const Visitor& visitor) const;
 };
 
 struct CheckboxButton : public Button {
-    CheckboxButton(
-            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
-            uint8_t hue, interfaceStyleType style);
-    virtual void accept(const Visitor& visitor) const;
+    virtual std::unique_ptr<InterfaceItem> copy() const;
+    virtual void                           accept(const Visitor& visitor) const;
 
-    bool on;
+    bool on = false;
 };
 
 struct RadioButton : public Button {
-    RadioButton(
-            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
-            uint8_t hue, interfaceStyleType style);
-    virtual void accept(const Visitor& visitor) const;
+    virtual std::unique_ptr<InterfaceItem> copy() const;
+    virtual void                           accept(const Visitor& visitor) const;
 
-    bool on;
+    bool on = false;
 };
 
 struct TabBoxButton : public Button {
-    TabBoxButton(
-            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
-            uint8_t hue, interfaceStyleType style, pn::value_cref tab_content);
-    virtual void accept(const Visitor& visitor) const;
+    virtual std::unique_ptr<InterfaceItem> copy() const;
+    virtual void                           accept(const Visitor& visitor) const;
 
-    bool      on;
-    pn::value tab_content;
+    bool                                        on = false;
+    std::vector<std::unique_ptr<InterfaceItem>> tab_content;
 };
 
 struct TabBox : public InterfaceItem {
-    TabBox(int id, Rect bounds, uint8_t hue, interfaceStyleType style,
-           int16_t top_right_border_size);
-    virtual void accept(const Visitor& visitor) const;
+    virtual std::unique_ptr<InterfaceItem> copy() const;
+    virtual void                           accept(const Visitor& visitor) const;
 
-    uint8_t            hue;
-    interfaceStyleType style;
-    int16_t            top_right_border_size;
+    Hue            hue                   = Hue::GRAY;
+    InterfaceStyle style                 = InterfaceStyle::LARGE;
+    int16_t        top_right_border_size = 0;
 };
 
 class InterfaceItem::Visitor {

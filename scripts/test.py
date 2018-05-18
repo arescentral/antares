@@ -109,9 +109,6 @@ def main():
         print("test data submodule is missing; fetching it")
         subprocess.check_call("git submodule update --init test".split())
 
-    # Install or reinstall data/scenarios if it’s missing or out-of-date.
-    subprocess.check_call("out/cur/antares-install-data -d data/scenarios".split())
-
     test_types = "unit data offscreen replay".split()
     parser = argparse.ArgumentParser()
     parser.add_argument("--smoke", action="store_true")

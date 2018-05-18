@@ -29,6 +29,7 @@
 #include "data/scenario-list.hpp"
 #include "game/sys.hpp"
 #include "glfw/video-driver.hpp"
+#include "lang/exception.hpp"
 #include "sound/openal-driver.hpp"
 #include "ui/flows/master.hpp"
 
@@ -116,20 +117,6 @@ void main(int argc, char* const* argv) {
         exit(1);
     }
 
-    if (!sfz::path::isdir(factory_scenario_path())) {
-        if (factory_scenario_path() == default_factory_scenario_path()) {
-            throw std::runtime_error(
-                    "factory scenario not installed\n"
-                    "\n"
-                    "Please install it, or specify a path with --factory-scenario");
-        } else {
-            throw std::runtime_error(
-                    pn::format("{0}: factory scenario not found", factory_scenario_path())
-                            .c_str());
-        }
-        exit(1);
-    }
-
     FilePrefsDriver prefs;
 
     if (scenario.has_value()) {
@@ -139,15 +126,8 @@ void main(int argc, char* const* argv) {
         for (auto i : range(l.size())) {
             const auto& entry = l.at(i);
             if (entry.identifier == *scenario) {
-                if (entry.installed) {
-                    have_scenario = true;
-                    break;
-                } else {
-                    throw std::runtime_error(
-                            "factory scenario not installed\n"
-                            "\n"
-                            "Please run antares-install-data");
-                }
+                have_scenario = true;
+                break;
             }
         }
         if (!have_scenario) {
@@ -162,34 +142,7 @@ void main(int argc, char* const* argv) {
     video.loop(new Master(time(NULL)));
 }
 
-void print_nested_exception(const std::exception& e) {
-    pn::format(stderr, ": {0}", e.what());
-    try {
-        std::rethrow_if_nested(e);
-    } catch (const std::exception& e) {
-        print_nested_exception(e);
-    }
-}
-
-void print_exception(pn::string_view progname, const std::exception& e) {
-    pn::format(stderr, "{0}: {1}", sfz::path::basename(progname), e.what());
-    try {
-        std::rethrow_if_nested(e);
-    } catch (const std::exception& e) {
-        print_nested_exception(e);
-    }
-    pn::format(stderr, "\n");
-}
-
 }  // namespace
 }  // namespace antares
 
-int main(int argc, char* const* argv) {
-    try {
-        antares::main(argc, argv);
-    } catch (const std::exception& e) {
-        antares::print_exception(argv[0], e);
-        return 1;
-    }
-    return 0;
-}
+int main(int argc, char* const* argv) { return antares::wrap_main(antares::main, argc, argv); }

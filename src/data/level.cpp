@@ -20,205 +20,500 @@
 
 #include <sfz/sfz.hpp>
 
+#include "data/field.hpp"
 #include "data/plugin.hpp"
+#include "data/races.hpp"
+#include "data/resource.hpp"
 
 namespace macroman = sfz::macroman;
 
 namespace antares {
 
-static const int16_t kLevel_StartTimeMask  = 0x7fff;
-static const int16_t kLevel_IsTraining_Bit = 0x8000;
+static std::vector<Level::Initial>                    optional_initial_array(path_value x);
+static std::vector<std::unique_ptr<Level::Condition>> optional_condition_array(path_value x);
+static std::vector<Level::Briefing>                   optional_briefing_array(path_value x);
 
-namespace {
+const Level* Level::get(int number) { return plug.chapters[number]; }
 
-bool read_pstr(pn::file_view in, pn::string* out) {
-    uint8_t bytes[256];
-    if (fread(bytes, 1, 256, in.c_obj()) < 256) {
-        return false;
+const Level* Level::get(pn::string_view name) {
+    auto it = plug.levels.find(name.copy());
+    if (it == plug.levels.end()) {
+        return nullptr;
+    } else {
+        return &it->second;
     }
-    pn::data_view encoded{bytes + 1, bytes[0]};
-    *out = macroman::decode(encoded);
-    return true;
 }
 
-}  // namespace
-
-Level* Level::get(int n) { return &plug.levels[n]; }
-
-bool read_from(pn::file_view in, scenarioInfoType* scenario_info) {
-    int32_t warp_in, warp_out, body, energy;
-    uint8_t unused[12];
-    if (!(in.read(&warp_in, &warp_out, &body, &energy) &&
-          read_pstr(in, &scenario_info->downloadURLString) &&
-          read_pstr(in, &scenario_info->titleString) &&
-          read_pstr(in, &scenario_info->authorNameString) &&
-          read_pstr(in, &scenario_info->authorURLString) && in.read(&scenario_info->version) &&
-          (fread(unused, 1, 12, in.c_obj()) == 12))) {
-        return false;
-    }
-
-    scenario_info->warpInFlareID  = Handle<BaseObject>(warp_in);
-    scenario_info->warpOutFlareID = Handle<BaseObject>(warp_out);
-    scenario_info->playerBodyID   = Handle<BaseObject>(body);
-    scenario_info->energyBlobID   = Handle<BaseObject>(energy);
-    return true;
+static sfz::optional<int32_t> optional_int32(path_value x) {
+    auto i = optional_int(x, {-0x80000000ll, 0x80000000ll});
+    return (i.has_value()) ? sfz::make_optional<int32_t>(*i) : sfz::nullopt;
 }
 
-bool read_from(pn::file_view in, Level* level) {
-    if (!in.read(&level->netRaceFlags, &level->playerNum)) {
+static bool valid_sha1(pn::string_view s) {
+    if (s.size() != 40) {
         return false;
     }
-    for (size_t i = 0; i < kMaxPlayerNum; ++i) {
-        if (!read_from(in, &level->player[i])) {
+    for (pn::rune r : s) {
+        if (!(((pn::rune{'0'} <= r) && (r <= pn::rune{'9'})) ||
+              ((pn::rune{'a'} <= r) && (r <= pn::rune{'f'})))) {
             return false;
         }
     }
-    int16_t par_time, start_time, unused;
-    if (!(in.read(&level->scoreStringResID, &level->initialFirst, &level->prologueID,
-                  &level->initialNum, &level->songID, &level->conditionFirst, &level->epilogueID,
-                  &level->conditionNum, &level->starMapH, &level->briefPointFirst,
-                  &level->starMapV, &level->briefPointNum, &par_time, &unused, &level->parKills,
-                  &level->levelNameStrNum) &&
-          read_from(in, &level->parKillRatio) && in.read(&level->parLosses, &start_time))) {
-        return false;
-    }
-    level->parTime     = game_ticks(secs(par_time));
-    level->startTime   = secs(start_time & kLevel_StartTimeMask);
-    level->is_training = start_time & kLevel_IsTraining_Bit;
     return true;
 }
 
-bool read_from(pn::file_view in, Level::Player* level_player) {
-    uint32_t unused1;
-    uint16_t unused2;
-    return in.read(&level_player->playerType, &level_player->playerRace, &level_player->nameResID,
-                   &level_player->nameStrNum, &unused1) &&
-           read_from(in, &level_player->earningPower) &&
-           in.read(&level_player->netRaceFlags, &unused2);
+static sfz::optional<pn::string_view> optional_identifier(path_value x) {
+    auto id = optional_string(x);
+    if (id.has_value() && !valid_sha1(*id)) {
+        throw std::runtime_error(
+                pn::format("{0}invalid identifier (must be lowercase sha1 digest)", x.prefix())
+                        .c_str());
+    }
+    return id;
 }
 
-static bool read_action(pn::file_view in, Level::Condition* condition) {
-    int32_t start, count;
-    if (!in.read(&start, &count)) {
-        return false;
+static ScenarioInfo fill_identifier(ScenarioInfo info) {
+    if (!info.identifier.empty()) {
+        return info;
     }
-    auto end          = (start >= 0) ? (start + count) : start;
-    condition->action = {start, end};
-    return true;
+    sfz::sha1 sha;
+    sha.write(info.title);
+    info.identifier = sha.compute().hex();
+    return info;
 }
 
-bool read_from(pn::file_view in, Level::Condition* level_condition) {
-    uint8_t section[12];
+ScenarioInfo scenario_info(pn::value_cref x0) {
+    path_value x{x0};
+    return fill_identifier(required_struct<ScenarioInfo>(
+            x, {{"title", {&ScenarioInfo::title, required_string_copy}},
+                {"identifier", {&ScenarioInfo::identifier, optional_identifier, ""}},
+                {"format", {&ScenarioInfo::format, required_int}},
+                {"download_url", {&ScenarioInfo::download_url, optional_string_copy}},
+                {"author", {&ScenarioInfo::author, required_string_copy}},
+                {"author_url", {&ScenarioInfo::author_url, optional_string_copy}},
+                {"version", {&ScenarioInfo::version, required_string_copy}},
+                {"warp_in_flare", {&ScenarioInfo::warpInFlareID, required_base}},
+                {"warp_out_flare", {&ScenarioInfo::warpOutFlareID, required_base}},
+                {"player_body", {&ScenarioInfo::playerBodyID, required_base}},
+                {"energy_blob", {&ScenarioInfo::energyBlobID, required_base}},
+                {"intro", {&ScenarioInfo::intro, optional_string_copy}},
+                {"about", {&ScenarioInfo::about, optional_string_copy}},
+                {"splash", {&ScenarioInfo::splash_screen, required_string_copy}},
+                {"starmap", {&ScenarioInfo::starmap, required_string_copy}}}));
+}
 
-    uint8_t unused;
-    if (!(in.read(&level_condition->condition, &unused) &&
-          (fread(section, 1, 12, in.c_obj()) == 12) &&
-          in.read(&level_condition->subjectObject, &level_condition->directObject) &&
-          read_action(in, level_condition) &&
-          in.read(&level_condition->flags, &level_condition->direction))) {
-        return false;
+static Level::Player required_player(path_value x, LevelType level_type) {
+    switch (level_type) {
+        case LevelType::DEMO:
+            return required_struct<Level::Player>(
+                    x, {{"name", {&Level::Player::name, required_string_copy}},
+                        {"race", {&Level::Player::playerRace, required_race}},
+                        {"earning_power",
+                         {&Level::Player::earningPower, optional_fixed, Fixed::zero()}}});
+        case LevelType::SOLO:
+            return required_struct<Level::Player>(
+                    x, {{"type", {&Level::Player::playerType, required_player_type}},
+                        {"name", {&Level::Player::name, required_string_copy}},
+                        {"race", {&Level::Player::playerRace, required_race}},
+                        {"hue", {&Level::Player::hue, optional_hue, Hue::GRAY}},
+                        {"earning_power",
+                         {&Level::Player::earningPower, optional_fixed, Fixed::zero()}}});
+        case LevelType::NET:
+            return required_struct<Level::Player>(
+                    x, {{"type", {&Level::Player::playerType, required_player_type}},
+                        {"earning_power",
+                         {&Level::Player::earningPower, optional_fixed, Fixed::zero()}},
+                        {"races", nullptr}});  // TODO(sfiera): populate field
     }
+}
 
-    pn::file sub = pn::data_view{section, 12}.open();
-    switch (level_condition->condition) {
-        case kCounterCondition:
-        case kCounterGreaterCondition:
-        case kCounterNotCondition:
-            return read_from(sub, &level_condition->conditionArgument.counter);
-
-        case kDestructionCondition:
-        case kOwnerCondition:
-        case kNoShipsLeftCondition:
-        case kZoomLevelCondition: return sub.read(&level_condition->conditionArgument.longValue);
-
-        case kVelocityLessThanEqualToCondition:
-            return read_from(sub, &level_condition->conditionArgument.fixedValue);
-
-        case kTimeCondition: {
-            int32_t time;
-            if (!sub.read(&time)) {
-                return false;
-            }
-            level_condition->conditionArgument.timeValue = ticks(time);
-            return true;
+template <LevelType level_type>
+static std::vector<Level::Player> required_player_array(path_value x) {
+    if (x.value().is_array()) {
+        std::vector<Level::Player> p;
+        for (int i = 0; i < x.value().as_array().size(); ++i) {
+            p.push_back(required_player(x.get(i), level_type));
         }
-
-        case kProximityCondition:
-        case kDistanceGreaterCondition:
-            return sub.read(&level_condition->conditionArgument.unsignedLongValue);
-
-        case kCurrentMessageCondition:
-        case kCurrentComputerCondition:
-            return read_from(sub, &level_condition->conditionArgument.location);
-
-        default: return true;
+        return p;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be array", x.path()).c_str());
     }
 }
 
-bool read_from(pn::file_view in, Level::Condition::CounterArgument* counter_argument) {
-    int32_t admiral;
-    if (!in.read(&admiral, &counter_argument->whichCounter, &counter_argument->amount)) {
-        return false;
-    }
-    counter_argument->whichPlayer = Handle<Admiral>(admiral);
-    return true;
+static game_ticks required_game_ticks(path_value x) { return game_ticks{required_ticks(x)}; }
+
+static Level::Par optional_par(path_value x) {
+    return optional_struct<Level::Par>(
+                   x,
+                   {
+                           {"time", {&Level::Par::time, required_game_ticks}},
+                           {"kills", {&Level::Par::kills, required_int}},
+                           {"losses", {&Level::Par::losses, required_int}},
+                   })
+            .value_or(Level::Par{game_ticks{ticks{0}}, 0, 0});
 }
 
-bool read_from(pn::file_view in, Level::BriefPoint* brief_point) {
-    uint8_t unused;
-    uint8_t section[8];
-    if (!(in.read(&brief_point->briefPointKind, &unused) &&
-          (fread(section, 1, 8, in.c_obj()) == 8) && read_from(in, &brief_point->range) &&
-          in.read(&brief_point->titleResID, &brief_point->titleNum, &brief_point->contentResID))) {
-        return false;
-    }
+/*
+        struct Counter {
+            int  player = 0;
+            int  which  = 0;
+            bool fixed  = false;
+        };
+        */
 
-    pn::file sub = pn::data_view{section, 8}.open();
-    switch (brief_point->briefPointKind) {
-        case kNoPointKind:
-        case kBriefFreestandingKind: return true;
+static sfz::optional<Level::StatusLine::Counter> optional_status_line_counter(path_value x) {
+    return optional_struct<Level::StatusLine::Counter>(
+            x, {
+                       {"player", {&Level::StatusLine::Counter::player, required_int}},
+                       {"which", {&Level::StatusLine::Counter::which, required_int}},
+                       {"fixed", {&Level::StatusLine::Counter::fixed, optional_bool, false}},
+               });
+};
 
-        case kBriefObjectKind: return read_from(sub, &brief_point->briefPointData.objectBriefType);
+static Level::StatusLine required_status_line(path_value x) {
+    return required_struct<Level::StatusLine>(
+            x, {
+                       {"text", {&Level::StatusLine::text, optional_string_copy}},
+                       {"prefix", {&Level::StatusLine::prefix, optional_string_copy}},
 
-        case kBriefAbsoluteKind:
-            return read_from(sub, &brief_point->briefPointData.absoluteBriefType);
+                       {"condition", {&Level::StatusLine::condition, optional_int}},
+                       {"true", {&Level::StatusLine::true_, optional_string_copy}},
+                       {"false", {&Level::StatusLine::false_, optional_string_copy}},
 
-        default: return false;
-    }
-}
+                       {"minuend", {&Level::StatusLine::minuend, optional_fixed}},
+                       {"counter", {&Level::StatusLine::counter, optional_status_line_counter}},
 
-bool read_from(pn::file_view in, Level::BriefPoint::ObjectBrief* object_brief) {
-    return in.read(&object_brief->objectNum, &object_brief->objectVisible);
-}
+                       {"suffix", {&Level::StatusLine::suffix, optional_string_copy}},
+                       {"underline", {&Level::StatusLine::underline, optional_bool, false}},
+               });
+};
 
-bool read_from(pn::file_view in, Level::BriefPoint::AbsoluteBrief* absolute_brief) {
-    return read_from(in, &absolute_brief->location);
-}
-
-bool read_from(pn::file_view in, Level::InitialObject* level_initial) {
-    int32_t type, owner;
-    uint8_t unused[4];
-    if (!(in.read(&type, &owner) && (fread(unused, 1, 4, in.c_obj()) == 4) &&
-          in.read(&level_initial->realObjectID) && read_from(in, &level_initial->location) &&
-          read_from(in, &level_initial->earning) &&
-          in.read(&level_initial->distanceRange, &level_initial->rotationMinimum,
-                  &level_initial->rotationRange, &level_initial->spriteIDOverride))) {
-        return false;
-    }
-    for (size_t i = 0; i < kMaxTypeBaseCanBuild; ++i) {
-        if (!in.read(&level_initial->canBuild[i])) {
-            return false;
+static std::vector<Level::StatusLine> optional_status_line_array(path_value x) {
+    if (x.value().is_null()) {
+        return {};
+    } else if (x.value().is_array()) {
+        pn::array_cref                 a = x.value().as_array();
+        std::vector<Level::StatusLine> result;
+        for (int i = 0; i < a.size(); ++i) {
+            result.emplace_back(required_status_line(x.get(i)));
         }
+        return result;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
     }
-    if (!in.read(
-                &level_initial->initialDestination, &level_initial->nameResID,
-                &level_initial->nameStrNum, &level_initial->attributes)) {
-        return false;
+}
+
+// clang-format off
+#define COMMON_LEVEL_FIELDS                                                                      \
+            {"type", {&Level::type, required_level_type}},                                       \
+            {"chapter", {&Level::chapter, optional_int}},                                        \
+            {"title", {&Level::name, required_string_copy}},                                     \
+            {"initials", {&Level::initials, optional_initial_array}},                            \
+            {"conditions", {&Level::conditions, optional_condition_array}},                      \
+            {"briefings", {&Level::briefings, optional_briefing_array}},                         \
+            {"starmap", {&Level::starmap, optional_rect}},                                       \
+            {"song", {&Level::song, optional_string_copy}},                                      \
+            {"status", {&Level::status, optional_status_line_array}},                            \
+            {"start_time", {&Level::startTime, optional_secs, secs(0)}},                         \
+            {"skip", {&Level::skip, optional_level}},                                            \
+            {"angle", {&Level::angle, optional_int32, -1}},                                      \
+            {"par", {&Level::par, optional_par}}
+// clang-format on
+
+Level demo_level(path_value x) {
+    return required_struct<Level>(
+            x, {
+                       COMMON_LEVEL_FIELDS,
+                       {"players", {&Level::players, required_player_array<LevelType::DEMO>}},
+               });
+}
+
+Level solo_level(path_value x) {
+    return required_struct<Level>(
+            x, {
+                       COMMON_LEVEL_FIELDS,
+                       {"players", {&Level::players, required_player_array<LevelType::SOLO>}},
+                       {"no_ships", {&Level::own_no_ships_text, optional_string, ""}},
+                       {"prologue", {&Level::prologue, optional_string, ""}},
+                       {"epilogue", {&Level::epilogue, optional_string, ""}},
+               });
+}
+
+Level net_level(path_value x) {
+    return required_struct<Level>(
+            x, {
+                       COMMON_LEVEL_FIELDS,
+                       {"players", {&Level::players, required_player_array<LevelType::NET>}},
+                       {"own_no_ships", {&Level::own_no_ships_text, optional_string, ""}},
+                       {"foe_no_ships", {&Level::foe_no_ships_text, optional_string, ""}},
+                       {"description", {&Level::description, optional_string, ""}},
+               });
+}
+
+Level level(pn::value_cref x0) {
+    path_value x{x0};
+    if (!x.value().is_map()) {
+        throw std::runtime_error("must be map");
     }
-    level_initial->realObject = Handle<SpaceObject>(-1);
-    level_initial->type       = Handle<BaseObject>(type);
-    level_initial->owner      = Handle<Admiral>(owner);
-    return true;
+    switch (required_level_type(x.get("type"))) {
+        case LevelType::DEMO: return demo_level(x);
+        case LevelType::SOLO: return solo_level(x);
+        case LevelType::NET: return net_level(x);
+    }
+}
+
+static std::unique_ptr<Level::Condition> autopilot_condition(path_value x) {
+    std::unique_ptr<Level::AutopilotCondition> c(new Level::AutopilotCondition);
+    c->value = required_bool(x.get("value"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> building_condition(path_value x) {
+    std::unique_ptr<Level::BuildingCondition> c(new Level::BuildingCondition);
+    c->value = required_bool(x.get("value"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> computer_condition(path_value x) {
+    std::unique_ptr<Level::ComputerCondition> c(new Level::ComputerCondition);
+    c->screen = required_screen(x.get("screen"));
+    c->line   = optional_int(x.get("line")).value_or(-1);
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> counter_condition(path_value x) {
+    std::unique_ptr<Level::CounterCondition> c(new Level::CounterCondition);
+    c->player  = required_admiral(x.get("player"));
+    c->counter = required_int(x.get("counter"));
+    c->value   = required_int(x.get("value"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> destroyed_condition(path_value x) {
+    std::unique_ptr<Level::DestroyedCondition> c(new Level::DestroyedCondition);
+    c->initial = required_initial(x.get("initial"));
+    c->value   = required_bool(x.get("value"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> distance_condition(path_value x) {
+    std::unique_ptr<Level::DistanceCondition> c(new Level::DistanceCondition);
+    c->value = required_int(x.get("value"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> health_condition(path_value x) {
+    std::unique_ptr<Level::HealthCondition> c(new Level::HealthCondition);
+    c->value = required_double(x.get("value"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> message_condition(path_value x) {
+    std::unique_ptr<Level::MessageCondition> c(new Level::MessageCondition);
+    c->id   = required_int(x.get("id"));
+    c->page = required_int(x.get("page"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> ordered_condition(path_value x) {
+    return std::unique_ptr<Level::OrderedCondition>(new Level::OrderedCondition);
+}
+
+static std::unique_ptr<Level::Condition> owner_condition(path_value x) {
+    std::unique_ptr<Level::OwnerCondition> c(new Level::OwnerCondition);
+    c->player = required_admiral(x.get("player"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> ships_condition(path_value x) {
+    std::unique_ptr<Level::ShipsCondition> c(new Level::ShipsCondition);
+    c->player = required_admiral(x.get("player"));
+    c->value  = required_int(x.get("value"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> speed_condition(path_value x) {
+    std::unique_ptr<Level::SpeedCondition> c(new Level::SpeedCondition);
+    c->value = required_fixed(x.get("value"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> subject_condition(path_value x) {
+    std::unique_ptr<Level::SubjectCondition> c(new Level::SubjectCondition);
+    c->value = required_subject_value(x.get("value"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> time_condition(path_value x) {
+    std::unique_ptr<Level::TimeCondition> c(new Level::TimeCondition);
+    c->duration          = required_ticks(x.get("duration"));
+    c->legacy_start_time = optional_bool(x.get("legacy_start_time")).value_or(false);
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> zoom_condition(path_value x) {
+    std::unique_ptr<Level::ZoomCondition> c(new Level::ZoomCondition);
+    c->value = required_zoom(x.get("value"));
+    return std::move(c);
+}
+
+static std::unique_ptr<Level::Condition> condition(path_value x) {
+    if (!x.value().is_map()) {
+        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
+    }
+
+    pn::string_view                   type = required_string(x.get("type"));
+    std::unique_ptr<Level::Condition> c;
+    if (type == "autopilot") {
+        c = autopilot_condition(x);
+    } else if (type == "building") {
+        c = building_condition(x);
+    } else if (type == "computer") {
+        c = computer_condition(x);
+    } else if (type == "counter") {
+        c = counter_condition(x);
+    } else if (type == "destroyed") {
+        c = destroyed_condition(x);
+    } else if (type == "distance") {
+        c = distance_condition(x);
+    } else if (type == "false") {
+        return std::unique_ptr<Level::Condition>(new Level::FalseCondition);
+    } else if (type == "health") {
+        c = health_condition(x);
+    } else if (type == "message") {
+        c = message_condition(x);
+    } else if (type == "ordered") {
+        c = ordered_condition(x);
+    } else if (type == "owner") {
+        c = owner_condition(x);
+    } else if (type == "ships") {
+        c = ships_condition(x);
+    } else if (type == "speed") {
+        c = speed_condition(x);
+    } else if (type == "subject") {
+        c = subject_condition(x);
+    } else if (type == "time") {
+        c = time_condition(x);
+    } else if (type == "zoom") {
+        c = zoom_condition(x);
+    } else {
+        throw std::runtime_error(pn::format("unknown type: {0}", type).c_str());
+    }
+
+    c->op                = required_condition_op(x.get("op"));
+    c->persistent        = optional_bool(x.get("persistent")).value_or(false);
+    c->initially_enabled = !optional_bool(x.get("initially_disabled")).value_or(false);
+    c->subject           = optional_initial(x.get("subject")).value_or(Level::Initial::none());
+    c->object            = optional_initial(x.get("object")).value_or(Level::Initial::none());
+    c->action            = required_action_array(x.get("action"));
+
+    return c;
+}
+
+static std::vector<std::unique_ptr<Level::Condition>> optional_condition_array(path_value x) {
+    if (x.value().is_null()) {
+        return {};
+    } else if (x.value().is_array()) {
+        std::vector<std::unique_ptr<Level::Condition>> v;
+        for (int i = 0; i < x.value().as_array().size(); ++i) {
+            v.push_back(condition(x.get(i)));
+        }
+        return v;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
+    }
+}
+
+static Level::Briefing briefing(path_value x) {
+    return required_struct<Level::Briefing>(
+            x, {
+                       {"object",
+                        {&Level::Briefing::object, optional_initial, Level::Initial::none()}},
+                       {"title", {&Level::Briefing::title, required_string_copy}},
+                       {"content", {&Level::Briefing::content, required_string_copy}},
+               });
+}
+
+static std::vector<Level::Briefing> optional_briefing_array(path_value x) {
+    if (x.value().is_null()) {
+        return {};
+    } else if (x.value().is_array()) {
+        std::vector<Level::Briefing> v;
+        for (int i = 0; i < x.value().as_array().size(); ++i) {
+            v.push_back(briefing(x.get(i)));
+        }
+        return v;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
+    }
+}
+
+static BuildableObject required_buildable_object(path_value x) {
+    return BuildableObject{required_string_copy(x)};
+}
+
+std::vector<BuildableObject> optional_buildable_object_array(path_value x) {
+    if (x.value().is_null()) {
+        return {};
+    } else if (x.value().is_array()) {
+        pn::array_cref a = x.value().as_array();
+        if (a.size() > kMaxShipCanBuild) {
+            throw std::runtime_error(pn::format(
+                                             "{0}has {1} elements, more than max of {2}",
+                                             x.prefix(), a.size(), kMaxShipCanBuild)
+                                             .c_str());
+        }
+        std::vector<BuildableObject> result;
+        for (int i = 0; i < a.size(); ++i) {
+            result.emplace_back(required_buildable_object(x.get(i)));
+        }
+        return result;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
+    }
+}
+
+Level::Initial::Override optional_override(path_value x) {
+    return optional_struct<Level::Initial::Override>(
+                   x, {{"name", {&Level::Initial::Override::name, optional_string_copy}},
+                       {"sprite", {&Level::Initial::Override::sprite, optional_string_copy}}})
+            .value_or(Level::Initial::Override{});
+}
+
+Level::Initial::Target optional_target(path_value x) {
+    return optional_struct<Level::Initial::Target>(
+                   x,
+                   {{"initial",
+                     {&Level::Initial::Target::initial, optional_initial, Level::Initial::none()}},
+                    {"lock", {&Level::Initial::Target::lock, optional_bool, false}}})
+            .value_or(Level::Initial::Target{});
+}
+
+static Level::Initial initial(path_value x) {
+    return required_struct<Level::Initial>(
+            x, {{"base", {&Level::Initial::base, required_buildable_object}},
+                {"owner", {&Level::Initial::owner, optional_admiral, Handle<Admiral>(-1)}},
+                {"at", {&Level::Initial::at, required_point}},
+                {"earning", {&Level::Initial::earning, optional_fixed, Fixed::zero()}},
+                {"hide", {&Level::Initial::hide, optional_bool, false}},
+                {"flagship", {&Level::Initial::flagship, optional_bool, false}},
+                {"override", {&Level::Initial::override_, optional_override}},
+                {"target", {&Level::Initial::target, optional_target}},
+                {"build", {&Level::Initial::build, optional_buildable_object_array}}});
+}
+
+static std::vector<Level::Initial> optional_initial_array(path_value x) {
+    if (x.value().is_null()) {
+        return {};
+    } else if (x.value().is_array()) {
+        std::vector<Level::Initial> v;
+        for (int i = 0; i < x.value().as_array().size(); ++i) {
+            v.push_back(initial(x.get(i)));
+        }
+        return v;
+    } else {
+        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
+    }
 }
 
 }  // namespace antares

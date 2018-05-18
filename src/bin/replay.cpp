@@ -42,6 +42,7 @@
 #include "game/space-object.hpp"
 #include "game/sys.hpp"
 #include "game/vector.hpp"
+#include "lang/exception.hpp"
 #include "math/random.hpp"
 #include "math/rotation.hpp"
 #include "sound/driver.hpp"
@@ -83,7 +84,7 @@ class ReplayMaster : public Card {
                 _game_result  = NO_GAME;
                 g.random.seed = _random_seed;
                 stack()->push(new MainPlay(
-                        Handle<Level>(_replay_data.chapter_id - 1), true, &_input_source, false,
+                        *Level::get(_replay_data.chapter_id), true, &_input_source, false,
                         &_game_result));
                 break;
 
@@ -92,18 +93,18 @@ class ReplayMaster : public Card {
                     pn::string path = pn::format("{0}/debriefing.txt", *_output_path);
                     sfz::makedirs(path::dirname(path), 0755);
                     pn::file outcome = pn::open(path, "w");
-                    if ((g.victory_text >= 0)) {
-                        Resource rsrc("text", "txt", g.victory_text);
-                        outcome.write(rsrc.data());
+                    if (!g.victory_text.empty()) {
+                        outcome.write(g.victory_text);
                         if (_game_result == WIN_GAME) {
-                            outcome.write("\n\n");
+                            outcome.write("\n");
                             Handle<Admiral> player(0);
                             pn::string      text = DebriefingScreen::build_score_text(
-                                    g.time, g.level->parTime, GetAdmiralLoss(player),
-                                    g.level->parLosses, GetAdmiralKill(player), g.level->parKills);
+                                    g.time, g.level->par.time, GetAdmiralLoss(player),
+                                    g.level->par.losses, GetAdmiralKill(player),
+                                    g.level->par.kills);
                             outcome.write(text);
+                            outcome.write("\n");
                         }
-                        outcome.write("\n");
                     }
                 }
                 stack()->pop(this);
@@ -264,34 +265,7 @@ void main(int argc, char* const* argv) {
     }
 }
 
-void print_nested_exception(const std::exception& e) {
-    pn::format(stderr, ": {0}", e.what());
-    try {
-        std::rethrow_if_nested(e);
-    } catch (const std::exception& e) {
-        print_nested_exception(e);
-    }
-}
-
-void print_exception(pn::string_view progname, const std::exception& e) {
-    pn::format(stderr, "{0}: {1}", sfz::path::basename(progname), e.what());
-    try {
-        std::rethrow_if_nested(e);
-    } catch (const std::exception& e) {
-        print_nested_exception(e);
-    }
-    pn::format(stderr, "\n");
-}
-
 }  // namespace
 }  // namespace antares
 
-int main(int argc, char* const* argv) {
-    try {
-        antares::main(argc, argv);
-    } catch (const std::exception& e) {
-        antares::print_exception(argv[0], e);
-        return 1;
-    }
-    return 0;
-}
+int main(int argc, char* const* argv) { return antares::wrap_main(antares::main, argc, argv); }

@@ -22,10 +22,13 @@
 #include <sfz/sfz.hpp>
 
 #include "config/preferences.hpp"
+#include "data/plugin.hpp"
+#include "data/resource.hpp"
 #include "drawing/build-pix.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/text.hpp"
+#include "lang/exception.hpp"
 #include "video/offscreen-driver.hpp"
 #include "video/text-driver.hpp"
 
@@ -41,21 +44,21 @@ namespace {
 
 class DrawPix : public Card {
   public:
-    DrawPix(OffscreenVideoDriver* driver, int16_t id, int32_t width)
-            : _driver(driver), _id(id), _width(width) {}
+    DrawPix(std::function<pn::string_view()> text, int32_t width,
+            std::function<void(Rect)> set_capture_rect)
+            : _set_capture_rect(set_capture_rect), _text(text), _width(width) {}
 
     virtual void draw() const {
-        BuildPix pix(_id, _width);
+        PluginInit();
+        BuildPix pix(_text(), _width);
         pix.draw({0, 0});
-        if (_driver) {
-            _driver->set_capture_rect({0, 0, _width, pix.size().height});
-        }
+        _set_capture_rect({0, 0, _width, pix.size().height});
     }
 
   private:
-    OffscreenVideoDriver* _driver;
-    const int16_t         _id;
-    const int32_t         _width;
+    const std::function<void(Rect)>        _set_capture_rect;
+    const std::function<pn::string_view()> _text;
+    const int32_t                          _width;
 };
 
 void usage(pn::file_view out, pn::string_view progname, int retcode) {
@@ -71,6 +74,46 @@ void usage(pn::file_view out, pn::string_view progname, int retcode) {
             "    -t, --text          produce text output\n",
             progname);
     exit(retcode);
+}
+
+std::function<pn::string_view()> prologue(pn::string_view chapter) {
+    return [chapter]() -> pn::string_view { return plug.levels[chapter.copy()].prologue; };
+}
+
+std::function<pn::string_view()> epilogue(pn::string_view chapter) {
+    return [chapter]() -> pn::string_view { return plug.levels[chapter.copy()].epilogue; };
+}
+
+template <typename VideoDriver>
+void run(
+        VideoDriver* video, pn::string_view extension,
+        std::function<void(Rect)> set_capture_rect) {
+    struct Spec {
+        pn::string_view                  name;
+        int                              width;
+        std::function<pn::string_view()> text;
+    };
+    vector<Spec> specs{
+            {"gai-prologue", 450, prologue("ch01")},
+            {"tut-prologue", 450, prologue("tut1")},
+            {"can-prologue", 450, prologue("ch07")},
+            {"can-epilogue", 450, epilogue("ch07")},
+            {"sal-prologue", 450, prologue("ch11")},
+            {"outro", 450, epilogue("ch20")},
+            {"baz-prologue", 450, prologue("ch14")},
+            {"ele-prologue", 450, prologue("ch13")},
+            {"aud-prologue", 450, prologue("ch16")},
+            {"intro", 450, []() -> pn::string_view { return *plug.info.intro; }},
+            {"about", 540, []() -> pn::string_view { return *plug.info.about; }},
+    };
+
+    vector<pair<unique_ptr<Card>, pn::string>> pix;
+    for (const auto& spec : specs) {
+        pix.emplace_back(
+                unique_ptr<Card>(new DrawPix(spec.text, spec.width, set_capture_rect)),
+                pn::format("{0}.{1}", spec.name, extension));
+    }
+    video->capture(pix);
 }
 
 void main(int argc, char* const* argv) {
@@ -109,71 +152,16 @@ void main(int argc, char* const* argv) {
     }
 
     NullPrefsDriver prefs;
-
-    vector<pair<int, int>> specs = {
-            {3020, 450},   // Gaitori prologue
-            {3025, 450},   // Tutorial prologue
-            {3080, 450},   // Cantharan prologue
-            {3081, 450},   // Cantharan epilogue
-            {3120, 450},   // Salrilian prologue
-            {3211, 450},   // Game epilogue
-            {4063, 450},   // Bazidanese prologue
-            {4509, 450},   // Elejeetian prologue
-            {4606, 450},   // Audemedon prologue
-            {5600, 450},   // Story introduction
-            {6500, 540},   // Credits text
-            {6501, 450},   // Please register
-            {10199, 450},  // Unused Gaitori prologue
-    };
-
-    vector<pair<unique_ptr<Card>, pn::string>> pix;
     if (text) {
         TextVideoDriver video({540, 2000}, output_dir);
-        for (auto spec : specs) {
-            pix.emplace_back(
-                    unique_ptr<Card>(new DrawPix(nullptr, spec.first, spec.second)),
-                    pn::format("{0}.txt", dec(spec.first, 5)));
-        }
-        video.capture(pix);
+        run(&video, "txt", [](Rect) {});
     } else {
         OffscreenVideoDriver video({540, 2000}, output_dir);
-        for (auto spec : specs) {
-            pix.emplace_back(
-                    unique_ptr<Card>(new DrawPix(&video, spec.first, spec.second)),
-                    pn::format("{0}.png", dec(spec.first, 5)));
-        }
-        video.capture(pix);
+        run(&video, "png", [&video](Rect r) { video.set_capture_rect(r); });
     }
-}
-
-void print_nested_exception(const std::exception& e) {
-    pn::format(stderr, ": {0}", e.what());
-    try {
-        std::rethrow_if_nested(e);
-    } catch (const std::exception& e) {
-        print_nested_exception(e);
-    }
-}
-
-void print_exception(pn::string_view progname, const std::exception& e) {
-    pn::format(stderr, "{0}: {1}", sfz::path::basename(progname), e.what());
-    try {
-        std::rethrow_if_nested(e);
-    } catch (const std::exception& e) {
-        print_nested_exception(e);
-    }
-    pn::format(stderr, "\n");
 }
 
 }  // namespace
 }  // namespace antares
 
-int main(int argc, char* const* argv) {
-    try {
-        antares::main(argc, argv);
-    } catch (const std::exception& e) {
-        antares::print_exception(argv[0], e);
-        return 1;
-    }
-    return 0;
-}
+int main(int argc, char* const* argv) { return antares::wrap_main(antares::main, argc, argv); }
