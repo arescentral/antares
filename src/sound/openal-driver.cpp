@@ -59,7 +59,7 @@ class ModPlugFile {
         settings.mChannels         = 2;
         settings.mBits             = 16;
         settings.mFrequency        = 44100;
-        settings.mStereoSeparation = 192;
+        settings.mStereoSeparation = 128;
         settings.mResamplingMode   = MODPLUG_RESAMPLE_LINEAR;
         ModPlug_SetSettings(&settings);
         file = ModPlug_Load(data.data(), data.size());
