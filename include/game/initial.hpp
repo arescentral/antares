@@ -23,10 +23,10 @@
 
 namespace antares {
 
-void                create_initial(Handle<const Level::Initial> initial);
-void                set_initial_destination(Handle<const Level::Initial> initial, bool preserve);
-void                UnhideInitialObject(Handle<const Level::Initial> initial);
-Handle<SpaceObject> GetObjectFromInitialNumber(Handle<const Level::Initial> initial);
+void                create_initial(Handle<const Initial> initial);
+void                set_initial_destination(Handle<const Initial> initial, bool preserve);
+void                UnhideInitialObject(Handle<const Initial> initial);
+Handle<SpaceObject> GetObjectFromInitialNumber(Handle<const Initial> initial);
 
 }  // namespace antares
 

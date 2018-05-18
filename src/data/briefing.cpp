@@ -19,14 +19,14 @@
 #include "data/briefing.hpp"
 
 #include "data/field.hpp"
-#include "data/level.hpp"
+#include "data/initial.hpp"
 
 namespace antares {
 
 Briefing briefing(path_value x) {
     return required_struct<Briefing>(
             x, {
-                       {"object", {&Briefing::object, optional_initial, Level::Initial::none()}},
+                       {"object", {&Briefing::object, optional_initial, Initial::none()}},
                        {"title", {&Briefing::title, required_string_copy}},
                        {"content", {&Briefing::content, required_string_copy}},
                });

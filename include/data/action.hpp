@@ -36,7 +36,7 @@ namespace antares {
 
 class SpaceObject;
 struct Level;
-struct Level_Initial;
+struct Initial;
 struct Level_Condition;
 
 //
@@ -57,8 +57,8 @@ struct Action {
 
     ticks delay = ticks(0);
 
-    Handle<const Level_Initial> initialSubjectOverride;
-    Handle<const Level_Initial> initialDirectOverride;
+    Handle<const Initial> initialSubjectOverride;
+    Handle<const Initial> initialDirectOverride;
 
     virtual ~Action() = default;
     virtual void apply(
@@ -299,7 +299,7 @@ struct PushAction : public Action {
 };
 
 struct RevealAction : public Action {
-    HandleList<const Level_Initial> initial;
+    HandleList<const Initial> initial;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,

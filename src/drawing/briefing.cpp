@@ -45,8 +45,8 @@ Point BriefingSprite_GetBestLocation(
         int32_t gridWidth, int32_t gridHeight, Rect* bounds);
 
 void GetInitialObjectSpriteData(
-        Handle<const Level::Initial> whichObject, int32_t maxSize, Rect* bounds,
-        coordPointType* corner, int32_t scale, int32_t* thisScale, Point* where, Rect* spriteRect);
+        Handle<const Initial> whichObject, int32_t maxSize, Rect* bounds, coordPointType* corner,
+        int32_t scale, int32_t* thisScale, Point* where, Rect* spriteRect);
 
 void GetRealObjectSpriteData(
         coordPointType* realCoord, const BaseObject* baseObject, Handle<Admiral> owner,
@@ -212,9 +212,8 @@ void Briefing_Grid_Set(
 }
 
 void GetInitialObjectSpriteData(
-        Handle<const Level::Initial> whichObject, int32_t maxSize, Rect* bounds,
-        coordPointType* corner, int32_t scale, int32_t* thisScale, Point* where,
-        Rect* spriteRect) {
+        Handle<const Initial> whichObject, int32_t maxSize, Rect* bounds, coordPointType* corner,
+        int32_t scale, int32_t* thisScale, Point* where, Rect* spriteRect) {
     spriteRect->right = spriteRect->left = -1;
 
     auto sObject = GetObjectFromInitialNumber(whichObject);

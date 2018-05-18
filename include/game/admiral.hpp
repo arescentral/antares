@@ -22,6 +22,7 @@
 #include "data/base-object.hpp"
 #include "data/enums.hpp"
 #include "data/handle.hpp"
+#include "data/initial.hpp"
 #include "data/level.hpp"
 #include "math/fixed.hpp"
 

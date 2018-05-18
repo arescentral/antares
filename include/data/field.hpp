@@ -34,7 +34,7 @@
 namespace antares {
 
 struct Level;
-struct Level_Initial;
+struct Initial;
 struct Level_Condition;
 struct Race;
 
@@ -103,15 +103,15 @@ sfz::optional<ticks> optional_ticks(path_value x);
 ticks                required_ticks(path_value x);
 sfz::optional<secs>  optional_secs(path_value x);
 
-sfz::optional<Handle<Admiral>>             optional_admiral(path_value x);
-Handle<Admiral>                            required_admiral(path_value x);
-NamedHandle<const BaseObject>              required_base(path_value x);
-sfz::optional<Handle<const Level_Initial>> optional_initial(path_value x);
-Handle<const Level_Initial>                required_initial(path_value x);
-sfz::optional<NamedHandle<const Level>>    optional_level(path_value x);
-sfz::optional<Owner>                       optional_owner(path_value x);
-Owner                                      required_owner(path_value x);
-NamedHandle<const Race>                    required_race(path_value x);
+sfz::optional<Handle<Admiral>>          optional_admiral(path_value x);
+Handle<Admiral>                         required_admiral(path_value x);
+NamedHandle<const BaseObject>           required_base(path_value x);
+sfz::optional<Handle<const Initial>>    optional_initial(path_value x);
+Handle<const Initial>                   required_initial(path_value x);
+sfz::optional<NamedHandle<const Level>> optional_level(path_value x);
+sfz::optional<Owner>                    optional_owner(path_value x);
+Owner                                   required_owner(path_value x);
+NamedHandle<const Race>                 required_race(path_value x);
 
 sfz::optional<Range<int64_t>>     optional_int_range(path_value x);
 Range<int64_t>                    required_int_range(path_value x);
@@ -120,7 +120,7 @@ Range<Fixed>                      required_fixed_range(path_value x);
 sfz::optional<Range<ticks>>       optional_ticks_range(path_value x);
 Range<ticks>                      required_ticks_range(path_value x);
 HandleList<const Level_Condition> optional_condition_range(path_value x);
-HandleList<const Level_Initial>   required_initial_range(path_value x);
+HandleList<const Initial>         required_initial_range(path_value x);
 
 sfz::optional<Point> optional_point(path_value x);
 Point                required_point(path_value x);

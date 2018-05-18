@@ -26,12 +26,12 @@
 namespace antares {
 
 class path_value;
-struct Level_Initial;
+struct Initial;
 
 struct Briefing {
-    Handle<const Level_Initial> object;   // Object to focus on, or none for freestanding.
-    pn::string                  title;    // Plain text, used for title bar.
-    pn::string                  content;  // Styled text, used for body.
+    Handle<const Initial> object;   // Object to focus on, or none for freestanding.
+    pn::string            title;    // Plain text, used for title bar.
+    pn::string            content;  // Styled text, used for body.
 };
 
 Briefing briefing(path_value x);

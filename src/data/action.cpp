@@ -22,6 +22,7 @@
 
 #include "data/base-object.hpp"
 #include "data/field.hpp"
+#include "data/initial.hpp"
 #include "data/level.hpp"
 #include "data/resource.hpp"
 
@@ -398,9 +399,8 @@ std::unique_ptr<Action> action(path_value x) {
     a->delay = optional_ticks(x.get("delay")).value_or(ticks(0));
 
     a->initialSubjectOverride =
-            optional_initial(x.get("initial_subject")).value_or(Level::Initial::none());
-    a->initialDirectOverride =
-            optional_initial(x.get("initial_object")).value_or(Level::Initial::none());
+            optional_initial(x.get("initial_subject")).value_or(Initial::none());
+    a->initialDirectOverride = optional_initial(x.get("initial_object")).value_or(Initial::none());
     return a;
 }
 

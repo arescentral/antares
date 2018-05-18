@@ -25,6 +25,7 @@
 #include "config/dirs.hpp"
 #include "config/preferences.hpp"
 #include "data/base-object.hpp"
+#include "data/initial.hpp"
 #include "data/races.hpp"
 #include "data/resource.hpp"
 #include "game/sys.hpp"

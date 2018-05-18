@@ -25,6 +25,8 @@
 
 namespace antares {
 
+struct BuildableObject;
+
 enum dutyType {
     eNoDuty          = 0,
     eEscortDuty      = 1,

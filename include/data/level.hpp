@@ -37,12 +37,10 @@ namespace antares {
 struct LevelName;
 class BaseObject;
 struct Level_Condition;
-struct Level_Initial;
+struct Initial;
 struct Race;
 
 const size_t kMaxPlayerNum = 4;
-
-const int32_t kMaxShipCanBuild = 6;
 
 const int16_t kLevelBriefMask  = 0x00ff;
 const int16_t kLevelAngleMask  = 0xff00;
@@ -106,8 +104,6 @@ enum conditionType {
 };
 
 struct Level {
-    using Initial = Level_Initial;
-
     using Condition = Level_Condition;
     struct ConditionBase;
     struct AutopilotCondition;
@@ -194,44 +190,12 @@ struct Level {
 };
 Level level(pn::value_cref x);
 
-// Might be the name of a BaseObject, or of an entry in a Race’s “ships” list.
-struct BuildableObject {
-    pn::string name;
-};
-
-struct Level_Initial {
-    BuildableObject base;
-    Handle<Admiral> owner;
-    Point           at;
-    bool            hide     = false;
-    bool            flagship = false;
-
-    struct Target {
-        Handle<const Level::Initial> initial;
-        bool                         lock = false;
-    } target;
-
-    struct Override {
-        sfz::optional<pn::string> name;
-        sfz::optional<pn::string> sprite;
-    } override_;
-
-    Fixed                        earning = Fixed::zero();
-    std::vector<BuildableObject> build;
-
-    static const Level::Initial*            get(int n);
-    static Handle<const Level::Initial>     none() { return Handle<const Level::Initial>(-1); }
-    static HandleList<const Level::Initial> all();
-
-    static const size_t byte_size = 108;
-};
-
 struct Level_Condition {
     ConditionOp                                op                = ConditionOp::EQ;
     bool                                       initially_enabled = true;
     bool                                       persistent        = false;
-    Handle<const Level::Initial>               subject;
-    Handle<const Level::Initial>               object;
+    Handle<const Initial>                      subject;
+    Handle<const Initial>                      object;
     std::vector<std::unique_ptr<const Action>> action;
 
     static const size_t byte_size = 38;
@@ -292,9 +256,9 @@ struct Level::CounterCondition : Level::Condition {
 // or `object`.
 // Note: an initially-hidden object that has not yet been unhidden is considered “destroyed”
 struct Level::DestroyedCondition : Level::Condition {
-    Handle<const Level::Initial> initial;
-    bool                         value;
-    virtual bool                 is_true() const;
+    Handle<const Initial> initial;
+    bool                  value;
+    virtual bool          is_true() const;
 };
 
 // Ops: EQ, NE, LT, GT, LE, GE
@@ -406,9 +370,9 @@ struct Level::ZoomCondition : Level::Condition {
 //
 
 struct Level_Briefing {
-    Handle<const Level::Initial> object;   // Object to focus on, or none for freestanding.
-    pn::string                   title;    // Plain text, used for title bar.
-    pn::string                   content;  // Styled text, used for body.
+    Handle<const Initial> object;   // Object to focus on, or none for freestanding.
+    pn::string            title;    // Plain text, used for title bar.
+    pn::string            content;  // Styled text, used for body.
 
     static const size_t byte_size = 24;
 };

@@ -22,6 +22,7 @@
 
 #include "data/briefing.hpp"
 #include "data/field.hpp"
+#include "data/initial.hpp"
 #include "data/plugin.hpp"
 #include "data/races.hpp"
 #include "data/resource.hpp"
@@ -30,7 +31,6 @@ namespace macroman = sfz::macroman;
 
 namespace antares {
 
-static std::vector<Level::Initial>                    optional_initial_array(path_value x);
 static std::vector<std::unique_ptr<Level::Condition>> optional_condition_array(path_value x);
 
 const Level* Level::get(int number) { return plug.chapters[number]; }
@@ -208,7 +208,7 @@ static std::vector<Level::StatusLine> optional_status_line_array(path_value x) {
             {"type", {&Level::type, required_level_type}},                                       \
             {"chapter", {&Level::chapter, optional_int}},                                        \
             {"title", {&Level::name, required_string_copy}},                                     \
-            {"initials", {&Level::initials, optional_initial_array}},                            \
+            {"initials", {&Level::initials, optional_array<Initial, initial>}},                  \
             {"conditions", {&Level::conditions, optional_condition_array}},                      \
             {"briefings", {&Level::briefings, optional_array<Briefing, briefing>}},              \
             {"starmap", {&Level::starmap, optional_rect}},                                       \
@@ -403,8 +403,8 @@ static std::unique_ptr<Level::Condition> condition(path_value x) {
     c->op                = required_condition_op(x.get("op"));
     c->persistent        = optional_bool(x.get("persistent")).value_or(false);
     c->initially_enabled = !optional_bool(x.get("initially_disabled")).value_or(false);
-    c->subject           = optional_initial(x.get("subject")).value_or(Level::Initial::none());
-    c->object            = optional_initial(x.get("object")).value_or(Level::Initial::none());
+    c->subject           = optional_initial(x.get("subject")).value_or(Initial::none());
+    c->object            = optional_initial(x.get("object")).value_or(Initial::none());
     c->action            = required_action_array(x.get("action"));
 
     return c;
@@ -417,74 +417,6 @@ static std::vector<std::unique_ptr<Level::Condition>> optional_condition_array(p
         std::vector<std::unique_ptr<Level::Condition>> v;
         for (int i = 0; i < x.value().as_array().size(); ++i) {
             v.push_back(condition(x.get(i)));
-        }
-        return v;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
-    }
-}
-
-static BuildableObject required_buildable_object(path_value x) {
-    return BuildableObject{required_string_copy(x)};
-}
-
-std::vector<BuildableObject> optional_buildable_object_array(path_value x) {
-    if (x.value().is_null()) {
-        return {};
-    } else if (x.value().is_array()) {
-        pn::array_cref a = x.value().as_array();
-        if (a.size() > kMaxShipCanBuild) {
-            throw std::runtime_error(pn::format(
-                                             "{0}has {1} elements, more than max of {2}",
-                                             x.prefix(), a.size(), kMaxShipCanBuild)
-                                             .c_str());
-        }
-        std::vector<BuildableObject> result;
-        for (int i = 0; i < a.size(); ++i) {
-            result.emplace_back(required_buildable_object(x.get(i)));
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
-    }
-}
-
-Level::Initial::Override optional_override(path_value x) {
-    return optional_struct<Level::Initial::Override>(
-                   x, {{"name", {&Level::Initial::Override::name, optional_string_copy}},
-                       {"sprite", {&Level::Initial::Override::sprite, optional_string_copy}}})
-            .value_or(Level::Initial::Override{});
-}
-
-Level::Initial::Target optional_target(path_value x) {
-    return optional_struct<Level::Initial::Target>(
-                   x,
-                   {{"initial",
-                     {&Level::Initial::Target::initial, optional_initial, Level::Initial::none()}},
-                    {"lock", {&Level::Initial::Target::lock, optional_bool, false}}})
-            .value_or(Level::Initial::Target{});
-}
-
-static Level::Initial initial(path_value x) {
-    return required_struct<Level::Initial>(
-            x, {{"base", {&Level::Initial::base, required_buildable_object}},
-                {"owner", {&Level::Initial::owner, optional_admiral, Handle<Admiral>(-1)}},
-                {"at", {&Level::Initial::at, required_point}},
-                {"earning", {&Level::Initial::earning, optional_fixed, Fixed::zero()}},
-                {"hide", {&Level::Initial::hide, optional_bool, false}},
-                {"flagship", {&Level::Initial::flagship, optional_bool, false}},
-                {"override", {&Level::Initial::override_, optional_override}},
-                {"target", {&Level::Initial::target, optional_target}},
-                {"build", {&Level::Initial::build, optional_buildable_object_array}}});
-}
-
-static std::vector<Level::Initial> optional_initial_array(path_value x) {
-    if (x.value().is_null()) {
-        return {};
-    } else if (x.value().is_array()) {
-        std::vector<Level::Initial> v;
-        for (int i = 0; i < x.value().as_array().size(); ++i) {
-            v.push_back(initial(x.get(i)));
         }
         return v;
     } else {

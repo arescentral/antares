@@ -27,18 +27,18 @@
 
 namespace antares {
 
-const Level::Initial* Level::Initial::get(int number) {
+const Initial* Initial::get(int number) {
     if ((0 <= number) && (number < g.level->initials.size())) {
         return &g.level->initials[number];
     }
     return nullptr;
 }
 
-HandleList<const Level::Initial> Level::Initial::all() {
-    return HandleList<const Level::Initial>(0, g.level->initials.size());
+HandleList<const Initial> Initial::all() {
+    return HandleList<const Initial>(0, g.level->initials.size());
 }
 
-void create_initial(Handle<const Level::Initial> initial) {
+void create_initial(Handle<const Initial> initial) {
     if (initial->hide) {
         g.initials[initial.number()] = SpaceObject::none();
         return;
@@ -97,7 +97,7 @@ void create_initial(Handle<const Level::Initial> initial) {
     }
 }
 
-void set_initial_destination(Handle<const Level::Initial> initial, bool preserve) {
+void set_initial_destination(Handle<const Initial> initial, bool preserve) {
     auto object = g.initials[initial.number()];
     if (!object.get()                              // hasn't been created yet
         || (initial->target.initial.number() < 0)  // doesn't have a target
@@ -129,7 +129,7 @@ void set_initial_destination(Handle<const Level::Initial> initial, bool preserve
     }
 }
 
-void UnhideInitialObject(Handle<const Level::Initial> initial) {
+void UnhideInitialObject(Handle<const Initial> initial) {
     if (GetObjectFromInitialNumber(initial).get()) {
         return;  // Already visible.
     }
@@ -192,7 +192,7 @@ void UnhideInitialObject(Handle<const Level::Initial> initial) {
     set_initial_destination(initial, true);
 }
 
-Handle<SpaceObject> GetObjectFromInitialNumber(Handle<const Level::Initial> initial) {
+Handle<SpaceObject> GetObjectFromInitialNumber(Handle<const Initial> initial) {
     if (initial.number() >= 0) {
         auto object = g.initials[initial.number()];
         if (object.get()) {

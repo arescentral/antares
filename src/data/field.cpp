@@ -377,24 +377,24 @@ NamedHandle<const BaseObject> required_base(path_value x) {
     return NamedHandle<const BaseObject>(required_string(x));
 }
 
-sfz::optional<Handle<const Level::Initial>> optional_initial(path_value x) {
+sfz::optional<Handle<const Initial>> optional_initial(path_value x) {
     if (x.value().is_null()) {
         return sfz::nullopt;
     } else if (x.value().is_int()) {
-        return sfz::make_optional(Handle<const Level::Initial>(x.value().as_int()));
+        return sfz::make_optional(Handle<const Initial>(x.value().as_int()));
     } else if (x.value().as_string() == "player") {
-        return sfz::make_optional(Handle<const Level::Initial>(-2));
+        return sfz::make_optional(Handle<const Initial>(-2));
     } else {
         throw std::runtime_error(
                 pn::format("{0}: must be null, int, or \"player\"", x.path()).c_str());
     }
 }
 
-Handle<const Level::Initial> required_initial(path_value x) {
+Handle<const Initial> required_initial(path_value x) {
     if (x.value().is_int()) {
-        return Handle<const Level::Initial>(x.value().as_int());
+        return Handle<const Initial>(x.value().as_int());
     } else if (x.value().as_string() == "player") {
-        return Handle<const Level::Initial>(-2);
+        return Handle<const Initial>(-2);
     } else {
         throw std::runtime_error(pn::format("{0}: must be int, or \"player\"", x.path()).c_str());
     }
@@ -537,9 +537,9 @@ HandleList<const Level_Condition> optional_condition_range(path_value x) {
     }
 }
 
-HandleList<const Level::Initial> required_initial_range(path_value x) {
+HandleList<const Initial> required_initial_range(path_value x) {
     auto range = required_int_range(x);
-    return HandleList<const Level::Initial>(range.begin, range.end);
+    return HandleList<const Initial>(range.begin, range.end);
 }
 
 sfz::optional<Point> optional_point(path_value x) {
