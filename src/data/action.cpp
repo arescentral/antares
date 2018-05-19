@@ -98,7 +98,7 @@ static std::map<pn::string, bool> optional_tags(path_value x) {
         }
         return result;
     } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
     }
 }
 
@@ -247,7 +247,8 @@ static std::unique_ptr<Action> message_action(path_value x) {
     return action_ptr(required_struct<MessageAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"id", {&MessageAction::id, required_int}},
-                {"pages", {&MessageAction::pages, required_string_array}}}));
+                {"pages",
+                 {&MessageAction::pages, required_array<pn::string, required_string_copy>}}}));
 }
 
 static std::unique_ptr<Action> morph_action(path_value x) {
@@ -322,10 +323,6 @@ static PlayAction::Sound required_sound(path_value x) {
             x, {{"sound", {&PlayAction::Sound::sound, required_string_copy}}});
 }
 
-static std::vector<PlayAction::Sound> optional_sound_list(path_value x) {
-    return optional_array<PlayAction::Sound, required_sound>(x);
-}
-
 static uint8_t required_sound_priority(path_value x) { return required_int(x, {0, 6}); }
 
 static std::unique_ptr<Action> play_action(path_value x) {
@@ -336,7 +333,7 @@ static std::unique_ptr<Action> play_action(path_value x) {
                 {"absolute", {&PlayAction::absolute, optional_bool, false}},
                 {"volume", {&PlayAction::volume, required_int}},
                 {"sound", {&PlayAction::sound, optional_string_copy}},
-                {"any", {&PlayAction::any, optional_sound_list}}}));
+                {"any", {&PlayAction::any, optional_array<PlayAction::Sound, required_sound>}}}));
 }
 
 static std::unique_ptr<Action> spark_action(path_value x) {

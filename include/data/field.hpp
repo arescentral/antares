@@ -149,10 +149,6 @@ Zoom                      required_zoom(path_value x);
 
 uint32_t optional_keys(path_value x);
 
-std::vector<pn::string> required_string_array(path_value x);
-std::vector<pn::string> optional_string_array(path_value x);
-std::vector<int>        optional_int_array(path_value x);
-
 template <typename T>
 struct field {
     std::function<void(T* t, path_value x)> set;

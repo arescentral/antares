@@ -785,50 +785,7 @@ uint32_t optional_keys(path_value x) {
     }
 }
 
-std::vector<pn::string> required_string_array(path_value x) {
-    if (x.value().is_array()) {
-        pn::array_cref          a = x.value().as_array();
-        std::vector<pn::string> result;
-        for (int i = 0; i < a.size(); ++i) {
-            result.emplace_back(required_string(x.get(i)).copy());
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be array", x.path()).c_str());
-    }
-}
-
 pn::string required_string_copy(path_value x) { return required_string(x).copy(); }
-
-std::vector<pn::string> optional_string_array(path_value x) {
-    if (x.value().is_null()) {
-        return {};
-    } else if (x.value().is_array()) {
-        pn::array_cref          a = x.value().as_array();
-        std::vector<pn::string> result;
-        for (int i = 0; i < a.size(); ++i) {
-            result.emplace_back(required_string(x.get(i)).copy());
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
-    }
-}
-
-std::vector<int> optional_int_array(path_value x) {
-    if (x.value().is_null()) {
-        return {};
-    } else if (x.value().is_array()) {
-        pn::array_cref   a = x.value().as_array();
-        std::vector<int> result;
-        for (int i = 0; i < a.size(); ++i) {
-            result.emplace_back(required_int(x.get(i)));
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
-    }
-}
 
 }  // namespace antares
 

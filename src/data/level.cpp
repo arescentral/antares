@@ -48,42 +48,33 @@ static sfz::optional<int32_t> optional_int32(path_value x) {
     return (i.has_value()) ? sfz::make_optional<int32_t>(*i) : sfz::nullopt;
 }
 
-static Level::Player required_player(path_value x, LevelType level_type) {
-    switch (level_type) {
-        case LevelType::DEMO:
-            return required_struct<Level::Player>(
-                    x, {{"name", {&Level::Player::name, required_string_copy}},
-                        {"race", {&Level::Player::playerRace, required_race}},
-                        {"earning_power",
-                         {&Level::Player::earningPower, optional_fixed, Fixed::zero()}}});
-        case LevelType::SOLO:
-            return required_struct<Level::Player>(
-                    x, {{"type", {&Level::Player::playerType, required_player_type}},
-                        {"name", {&Level::Player::name, required_string_copy}},
-                        {"race", {&Level::Player::playerRace, required_race}},
-                        {"hue", {&Level::Player::hue, optional_hue, Hue::GRAY}},
-                        {"earning_power",
-                         {&Level::Player::earningPower, optional_fixed, Fixed::zero()}}});
-        case LevelType::NET:
-            return required_struct<Level::Player>(
-                    x, {{"type", {&Level::Player::playerType, required_player_type}},
-                        {"earning_power",
-                         {&Level::Player::earningPower, optional_fixed, Fixed::zero()}},
-                        {"races", nullptr}});  // TODO(sfiera): populate field
-    }
+template <LevelType T>
+static Level::Player required_player(path_value x);
+
+template <>
+Level::Player required_player<LevelType::DEMO>(path_value x) {
+    return required_struct<Level::Player>(
+            x, {{"name", {&Level::Player::name, required_string_copy}},
+                {"race", {&Level::Player::playerRace, required_race}},
+                {"earning_power", {&Level::Player::earningPower, optional_fixed, Fixed::zero()}}});
 }
 
-template <LevelType level_type>
-static std::vector<Level::Player> required_player_array(path_value x) {
-    if (x.value().is_array()) {
-        std::vector<Level::Player> p;
-        for (int i = 0; i < x.value().as_array().size(); ++i) {
-            p.push_back(required_player(x.get(i), level_type));
-        }
-        return p;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be array", x.path()).c_str());
-    }
+template <>
+Level::Player required_player<LevelType::SOLO>(path_value x) {
+    return required_struct<Level::Player>(
+            x, {{"type", {&Level::Player::playerType, required_player_type}},
+                {"name", {&Level::Player::name, required_string_copy}},
+                {"race", {&Level::Player::playerRace, required_race}},
+                {"hue", {&Level::Player::hue, optional_hue, Hue::GRAY}},
+                {"earning_power", {&Level::Player::earningPower, optional_fixed, Fixed::zero()}}});
+}
+
+template <>
+Level::Player required_player<LevelType::NET>(path_value x) {
+    return required_struct<Level::Player>(
+            x, {{"type", {&Level::Player::playerType, required_player_type}},
+                {"earning_power", {&Level::Player::earningPower, optional_fixed, Fixed::zero()}},
+                {"races", nullptr}});  // TODO(sfiera): populate field
 }
 
 static game_ticks required_game_ticks(path_value x) { return game_ticks{required_ticks(x)}; }
@@ -134,21 +125,6 @@ static Level::StatusLine required_status_line(path_value x) {
                });
 };
 
-static std::vector<Level::StatusLine> optional_status_line_array(path_value x) {
-    if (x.value().is_null()) {
-        return {};
-    } else if (x.value().is_array()) {
-        pn::array_cref                 a = x.value().as_array();
-        std::vector<Level::StatusLine> result;
-        for (int i = 0; i < a.size(); ++i) {
-            result.emplace_back(required_status_line(x.get(i)));
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
-    }
-}
-
 // clang-format off
 #define COMMON_LEVEL_FIELDS                                                                      \
             {"type", {&Level::type, required_level_type}},                                       \
@@ -160,7 +136,8 @@ static std::vector<Level::StatusLine> optional_status_line_array(path_value x) {
             {"briefings", {&Level::briefings, optional_array<Briefing, briefing>}},              \
             {"starmap", {&Level::starmap, optional_rect}},                                       \
             {"song", {&Level::song, optional_string_copy}},                                      \
-            {"status", {&Level::status, optional_status_line_array}},                            \
+            {"status",                                                                           \
+             {&Level::status, optional_array<Level::StatusLine, required_status_line>}},         \
             {"start_time", {&Level::startTime, optional_secs, secs(0)}},                         \
             {"skip", {&Level::skip, optional_level}},                                            \
             {"angle", {&Level::angle, optional_int32, -1}},                                      \
@@ -171,7 +148,9 @@ Level demo_level(path_value x) {
     return required_struct<Level>(
             x, {
                        COMMON_LEVEL_FIELDS,
-                       {"players", {&Level::players, required_player_array<LevelType::DEMO>}},
+                       {"players",
+                        {&Level::players,
+                         required_array<Level::Player, required_player<LevelType::DEMO>>}},
                });
 }
 
@@ -179,7 +158,9 @@ Level solo_level(path_value x) {
     return required_struct<Level>(
             x, {
                        COMMON_LEVEL_FIELDS,
-                       {"players", {&Level::players, required_player_array<LevelType::SOLO>}},
+                       {"players",
+                        {&Level::players,
+                         required_array<Level::Player, required_player<LevelType::SOLO>>}},
                        {"no_ships", {&Level::own_no_ships_text, optional_string, ""}},
                        {"prologue", {&Level::prologue, optional_string, ""}},
                        {"epilogue", {&Level::epilogue, optional_string, ""}},
@@ -190,7 +171,9 @@ Level net_level(path_value x) {
     return required_struct<Level>(
             x, {
                        COMMON_LEVEL_FIELDS,
-                       {"players", {&Level::players, required_player_array<LevelType::NET>}},
+                       {"players",
+                        {&Level::players,
+                         required_array<Level::Player, required_player<LevelType::NET>>}},
                        {"own_no_ships", {&Level::own_no_ships_text, optional_string, ""}},
                        {"foe_no_ships", {&Level::foe_no_ships_text, optional_string, ""}},
                        {"description", {&Level::description, optional_string, ""}},

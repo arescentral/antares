@@ -52,7 +52,7 @@ static std::map<pn::string, bool> optional_tags(path_value x) {
         }
         return result;
     } else {
-        throw std::runtime_error(pn::format("{0}: must be null or array", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
     }
 }
 
