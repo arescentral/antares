@@ -237,7 +237,11 @@ class BaseObject {
 
     // weapon: weapon objects have no physical form, and can only be activated
     struct Device {
-        uint32_t usage;  // when is this used?
+        struct Usage {
+            bool attacking;
+            bool defense;
+            bool transportation;
+        } usage;
         enum Direction {
             FORE,  // should use when foe is in front of bearer
             OMNI,  // should use when foe is anywhere near bearer

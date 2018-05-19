@@ -121,23 +121,13 @@ static sfz::optional<BaseObject::Bolt> optional_bolt_frame(path_value x) {
     return optional_struct<Bolt>(x, {{"color", {&Bolt::color, required_color}}});
 }
 
-static uint32_t optional_usage(path_value x) {
-    if (x.value().is_null()) {
-        return 0;
-    } else if (x.value().is_map()) {
-        static const pn::string_view flags[3] = {"transportation", "attacking", "defense"};
-        uint32_t                     bit      = 0x00000001;
-        uint32_t                     result   = 0x00000000;
-        for (pn::string_view flag : flags) {
-            if (optional_bool(x.get(flag)).value_or(false)) {
-                result |= bit;
-            }
-            bit <<= 1;
-        }
-        return result;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be null or map", x.path()).c_str());
-    }
+static BaseObject::Device::Usage optional_usage(path_value x) {
+    using Usage = BaseObject::Device::Usage;
+    return optional_struct<Usage>(
+                   x, {{"attacking", {&Usage::attacking, optional_bool, false}},
+                       {"defense", {&Usage::defense, optional_bool, false}},
+                       {"transportation", {&Usage::transportation, optional_bool, false}}})
+            .value_or(Usage{});
 }
 
 static BaseObject::Device::Direction required_device_direction(path_value x) {
