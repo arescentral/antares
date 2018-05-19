@@ -62,7 +62,10 @@ struct Action {
         sfz::optional<Handle<const Initial>> object;
     } override_;
 
-    virtual ~Action() = default;
+    virtual ~Action()    = default;
+    Action()             = default;
+    Action(Action&&)     = default;
+    Action&      operator=(Action&&) = default;
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
             Point* offset) const = 0;
@@ -91,7 +94,7 @@ struct AgeAction : public Action {
 };
 
 struct AssumeAction : public Action {
-    int32_t which;  // which initial to become
+    int64_t which;  // which initial to become
                     // Note: player 1’s score 0 is added to this number
 
     virtual void apply(
@@ -139,7 +142,7 @@ struct CreateAction : public Action {
     Range<int64_t>                count              = {1, 2};  // # to make randomly
     bool                          relative_velocity  = false;   // is velocity relative to creator?
     bool                          relative_direction = false;   // determines initial heading
-    int32_t                       distance = 0;      // create at this distance in random direction
+    int64_t                       distance = 0;      // create at this distance in random direction
     bool                          inherit  = false;  // if false, gets creator as target
                                                      // if true, gets creator’s target as target
     bool legacy_random = false;                      // if true, consume a random number from
@@ -160,7 +163,7 @@ struct DisableAction : public Action {
 };
 
 struct EnergizeAction : public Action {
-    int32_t value;
+    int64_t value;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
@@ -186,7 +189,7 @@ struct FireAction : public Action {
 };
 
 struct FlashAction : public Action {
-    int32_t length;  // length of color flash
+    int64_t length;  // length of color flash
     Hue     hue;     // hue of flash
     uint8_t shade;   // brightness of flash
 
@@ -196,7 +199,7 @@ struct FlashAction : public Action {
 };
 
 struct HealAction : public Action {
-    int32_t value;
+    int64_t value;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
@@ -227,7 +230,7 @@ struct KillAction : public Action {
 };
 
 struct LandAction : public Action {
-    int32_t speed;
+    int64_t speed;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
@@ -235,7 +238,7 @@ struct LandAction : public Action {
 };
 
 struct MessageAction : public Action {
-    int16_t                 id;     // identifies the message to a "message" condition
+    int64_t                 id;     // identifies the message to a "message" condition
     std::vector<pn::string> pages;  // pages of message bodies to show
 
     virtual void apply(
@@ -257,7 +260,7 @@ struct MorphAction : public Action {
 struct MoveAction : public Action {
     MoveOrigin     origin;
     coordPointType to;
-    int32_t        distance;
+    int64_t        distance;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
@@ -265,7 +268,7 @@ struct MoveAction : public Action {
 };
 
 struct OccupyAction : public Action {
-    int32_t value;
+    int64_t value;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
@@ -307,8 +310,8 @@ struct RevealAction : public Action {
 struct ScoreAction : public Action {
     sfz::optional<Handle<Admiral>>
             player;  // which player’s score to change; absent = owner of focus
-    int32_t which;   // 0-2; each player has three "scores"
-    int32_t value;   // amount to change by
+    int64_t which;   // 0-2; each player has three "scores"
+    int64_t value;   // amount to change by
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
@@ -318,7 +321,7 @@ struct ScoreAction : public Action {
 
 struct SelectAction : public Action {
     Screen  screen;
-    int32_t line;
+    int64_t line;
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
@@ -329,7 +332,7 @@ struct PlayAction : public Action {
     uint8_t priority;     // 1-5; takes over a channel playing a lower-priority sound
     ticks   persistence;  // time before a lower-priority sound can take channel
     bool    absolute;     // plays at same volume, regardless of distance from player
-    int32_t volume;       // 1-255; volume at focus
+    int64_t volume;       // 1-255; volume at focus
 
     struct Sound {
         pn::string sound;
@@ -344,9 +347,9 @@ struct PlayAction : public Action {
 };
 
 struct SparkAction : public Action {
-    int32_t count;     // number of sparks to create
+    int64_t count;     // number of sparks to create
     Hue     hue;       // hue of sparks; they start bright and fade with time
-    int32_t decay;     // sparks will be visible for 17.05/decay seconds
+    int64_t decay;     // sparks will be visible for 17.05/decay seconds
     Fixed   velocity;  // sparks fly at at random speed up to this
 
     virtual void apply(
@@ -363,8 +366,7 @@ struct SpinAction : public Action {
 };
 
 struct ThrustAction : public Action {
-    bool         relative;  // if true, set to value; if false, add value
-    Range<Fixed> value;     // range
+    Range<Fixed> value;  // range
 
     virtual void apply(
             Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,

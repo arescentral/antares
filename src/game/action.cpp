@@ -432,12 +432,8 @@ void CapSpeedAction::apply(
 void ThrustAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
-    Fixed f = value.begin + focus->randomSeed.next(value.range());
-    if (relative) {
-        focus->thrust += f;
-    } else {
-        focus->thrust = f;
-    }
+    Fixed f       = value.begin + focus->randomSeed.next(value.range());
+    focus->thrust = f;
 }
 
 void MorphAction::apply(
