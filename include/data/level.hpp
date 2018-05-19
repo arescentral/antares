@@ -34,19 +34,10 @@
 
 namespace antares {
 
-struct LevelName;
-class BaseObject;
+struct Briefing;
 struct Condition;
 struct Initial;
 struct Race;
-
-const size_t kMaxPlayerNum = 4;
-
-const int16_t kLevelBriefMask  = 0x00ff;
-const int16_t kLevelAngleMask  = 0xff00;
-const int32_t kLevelAngleShift = 8;
-
-const int32_t kLevelNoOwner = -1;
 
 struct Level {
     LevelType type = LevelType::DEMO;

@@ -27,12 +27,53 @@ namespace antares {
 
 struct BuildableObject;
 
+const int32_t kMaxSpaceObject = 250;
+
+const ticks kTimeToCheckHome = secs(15);
+
+const int32_t kEnergyPodAmount = 500;  // average (calced) of 500 energy units/pod
+
+const int32_t kWarpAcceleration = 1;  // how fast we warp in & out
+
+const int32_t kNoShip              = -1;
+const int32_t kNoDestinationCoord  = 0;
+const int32_t kNoDestinationObject = -1;
+const int32_t kNoOwner             = -1;
+
+const int16_t kObjectInUse     = 1;
+const int16_t kObjectToBeFreed = 2;
+const int16_t kObjectAvailable = 0;
+
+const int32_t kHitStateMax      = 128;
+const int32_t kCloakOnStateMax  = 254;
+const int32_t kCloakOffStateMax = -252;
+
+const int32_t kEngageRange = 1048576;  // range at which to engage closest ship
+                                       // about 2 subsectors (512 * 2)^2
+
 enum dutyType {
     eNoDuty          = 0,
     eEscortDuty      = 1,
     eGuardDuty       = 2,
     eAssaultDuty     = 3,
     eHostileBaseDuty = 4
+};
+
+// RUNTIME FLAG BITS
+enum {
+    kHasArrived   = 0x00000001,
+    kTargetLocked = 0x00000002,  // if some foe has locked on, you will be visible
+    kIsCloaked    = 0x00000004,  // if you are near a naturally shielding object
+    kIsHidden     = 0x00000008,  // overrides natural shielding
+    kIsTarget     = 0x00000010,  // preserve target lock in case you become invisible
+};
+
+enum kPresenceStateType {
+    kNormalPresence  = 0,
+    kLandingPresence = 1,
+    kWarpInPresence  = 3,
+    kWarpingPresence = 4,
+    kWarpOutPresence = 5
 };
 
 class SpaceObject {

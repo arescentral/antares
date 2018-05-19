@@ -24,6 +24,7 @@
 #include "data/handle.hpp"
 #include "data/initial.hpp"
 #include "data/level.hpp"
+#include "game/space-object.hpp"
 #include "math/fixed.hpp"
 
 namespace antares {
@@ -63,6 +64,7 @@ enum {
     kABit32      = 1 << 31,
 };
 
+const size_t  kMaxPlayerNum    = 4;
 const int32_t kMaxDestObject   = 10;  // we keep special track of dest objects for AI
 const int32_t kAdmiralScoreNum = 3;
 
