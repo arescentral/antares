@@ -100,8 +100,6 @@ struct Level {
     pn::string foe_no_ships_text;  // NET
     pn::string description;        // NET
 
-    static const size_t byte_size = 124;
-
     static const Level* get(int n);
     static const Level* get(pn::string_view n);
 };

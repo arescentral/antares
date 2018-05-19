@@ -41,8 +41,6 @@ struct Condition {
     Handle<const Initial>                      object;
     std::vector<std::unique_ptr<const Action>> action;
 
-    static const size_t byte_size = 38;
-
     static const Condition*            get(int n);
     static HandleList<const Condition> all();
 

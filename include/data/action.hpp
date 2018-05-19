@@ -69,8 +69,6 @@ struct Action {
     virtual std::vector<pn::string>              sound_ids() const;
     virtual bool                                 alters_owner() const;
     virtual bool                                 check_conditions() const;
-
-    static const size_t byte_size = 48;
 };
 
 std::vector<std::unique_ptr<const Action>> read_actions(int begin, int end);

@@ -43,8 +43,6 @@ struct Race {
     std::map<pn::string, NamedHandle<const BaseObject>> ships;
 
     static Race* get(pn::string_view name);
-
-    static const size_t byte_size = 14;
 };
 
 Race race(path_value x);

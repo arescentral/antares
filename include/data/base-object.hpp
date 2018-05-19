@@ -294,8 +294,6 @@ class BaseObject {
             bool  legacy_non_builder = false;
         } build;
     } ai;
-
-    static const int byte_size = 318;
 };
 BaseObject base_object(pn::value_cref x);
 
