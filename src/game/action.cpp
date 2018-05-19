@@ -715,12 +715,12 @@ static void execute_actions(
 #endif  // DATA_COVERAGE
 
         auto subject = original_subject;
-        if (action.initialSubjectOverride.number() != kNoShip) {
-            subject = GetObjectFromInitialNumber(action.initialSubjectOverride);
+        if (action.override_.subject.has_value()) {
+            subject = GetObjectFromInitialNumber(*action.override_.subject);
         }
         auto object = original_object;
-        if (action.initialDirectOverride.number() != kNoShip) {
-            object = GetObjectFromInitialNumber(action.initialDirectOverride);
+        if (action.override_.object.has_value()) {
+            object = GetObjectFromInitialNumber(*action.override_.object);
         }
 
         if ((action.delay > ticks(0)) && allowDelay) {

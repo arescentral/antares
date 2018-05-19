@@ -57,8 +57,10 @@ struct Action {
 
     ticks delay = ticks(0);
 
-    Handle<const Initial> initialSubjectOverride;
-    Handle<const Initial> initialDirectOverride;
+    struct Override {
+        sfz::optional<Handle<const Initial>> subject;
+        sfz::optional<Handle<const Initial>> object;
+    } override_;
 
     virtual ~Action() = default;
     virtual void apply(

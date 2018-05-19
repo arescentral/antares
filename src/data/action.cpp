@@ -300,6 +300,31 @@ static std::map<pn::string, bool> optional_tags(path_value x) {
 
 }  // namespace
 
+static sfz::optional<Handle<const Initial>> optional_initial_override(path_value x) {
+    if (x.value().is_null()) {
+        return sfz::nullopt;
+    } else if (x.value().is_map()) {
+        struct InitialNumber {
+            int64_t number;
+        };
+        auto i = required_struct<InitialNumber>(
+                x, {{"initial", {&InitialNumber::number, required_int}}});
+        return sfz::make_optional(Handle<const Initial>(i.number));
+    } else if (x.value().as_string() == "player") {
+        return sfz::make_optional(Handle<const Initial>(-2));
+    } else {
+        throw std::runtime_error(
+                pn::format("{0}: must be null, map, or \"player\"", x.path()).c_str());
+    }
+}
+
+static Action::Override optional_action_override(path_value x) {
+    return optional_struct<Action::Override>(
+                   x, {{"subject", {&Action::Override::subject, optional_initial_override}},
+                       {"object", {&Action::Override::object, optional_initial_override}}})
+            .value_or(Action::Override{});
+}
+
 std::unique_ptr<const Action> action(path_value x) {
     if (!x.value().is_map()) {
         throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
@@ -393,9 +418,7 @@ std::unique_ptr<const Action> action(path_value x) {
 
     a->delay = optional_ticks(x.get("delay")).value_or(ticks(0));
 
-    a->initialSubjectOverride =
-            optional_initial(x.get("initial_subject")).value_or(Initial::none());
-    a->initialDirectOverride = optional_initial(x.get("initial_object")).value_or(Initial::none());
+    a->override_ = optional_action_override(x.get("override"));
     return a;
 }
 
