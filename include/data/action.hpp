@@ -71,9 +71,7 @@ struct Action {
     virtual bool                                 check_conditions() const;
 };
 
-std::vector<std::unique_ptr<const Action>> read_actions(int begin, int end);
-std::vector<std::unique_ptr<const Action>> required_action_array(path_value x);
-std::vector<std::unique_ptr<const Action>> optional_action_array(path_value x);
+std::unique_ptr<const Action> action(path_value x);
 
 struct NoAction : public Action {
     virtual void apply(

@@ -271,13 +271,6 @@ static std::unique_ptr<Action> zoom_action(path_value x) {
 }
 
 template <typename T>
-T* init(std::unique_ptr<Action>* action) {
-    T* t;
-    action->reset(t = new T());
-    return t;
-}
-
-template <typename T>
 Owner owner_cast(T t) {
     switch (t) {
         case static_cast<T>(Owner::ANY): return Owner::ANY;
@@ -305,7 +298,9 @@ static std::map<pn::string, bool> optional_tags(path_value x) {
     }
 }
 
-std::unique_ptr<Action> action(path_value x) {
+}  // namespace
+
+std::unique_ptr<const Action> action(path_value x) {
     if (!x.value().is_map()) {
         throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
     }
@@ -402,69 +397,6 @@ std::unique_ptr<Action> action(path_value x) {
             optional_initial(x.get("initial_subject")).value_or(Initial::none());
     a->initialDirectOverride = optional_initial(x.get("initial_object")).value_or(Initial::none());
     return a;
-}
-
-std::unique_ptr<Action> action(pn::value_cref x0) {
-    if (x0.is_null()) {
-        return std::unique_ptr<Action>(new NoAction);
-    } else if (!x0.is_map()) {
-        throw std::runtime_error("must be null or map");
-    }
-    return action(path_value{x0});
-}
-
-}  // namespace
-
-std::vector<std::unique_ptr<const Action>> read_actions(int begin, int end) {
-    if (end <= begin) {
-        return std::vector<std::unique_ptr<const Action>>{};
-    }
-
-    std::vector<std::unique_ptr<const Action>> actions;
-    actions.resize(end - begin);
-    for (int i : sfz::range(begin, end)) {
-        pn::string path = pn::format("actions/{0}.pn", i);
-        try {
-            Resource   r = Resource::path(path);
-            pn::value  x;
-            pn_error_t e;
-            if (!pn::parse(r.data().open(), x, &e)) {
-                throw std::runtime_error(
-                        pn::format("{1}:{2}: {3}", e.lineno, e.column, pn_strerror(e.code))
-                                .c_str());
-            }
-            actions[i - begin] = action(x);
-        } catch (...) {
-            std::throw_with_nested(std::runtime_error(path.c_str()));
-        }
-    }
-    return actions;
-}
-
-std::vector<std::unique_ptr<const Action>> required_action_array(path_value x) {
-    if (x.value().is_array()) {
-        std::vector<std::unique_ptr<const Action>> a;
-        for (int i = 0; i < x.value().as_array().size(); ++i) {
-            a.push_back(action(x.get(i)));
-        }
-        return a;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be array", x.path()).c_str());
-    }
-}
-
-std::vector<std::unique_ptr<const Action>> optional_action_array(path_value x) {
-    if (x.value().is_null()) {
-        return {};
-    } else if (x.value().is_array()) {
-        std::vector<std::unique_ptr<const Action>> a;
-        for (int i = 0; i < x.value().as_array().size(); ++i) {
-            a.push_back(action(x.get(i)));
-        }
-        return a;
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be array", x.path()).c_str());
-    }
 }
 
 const NamedHandle<const BaseObject>* Action::created_base() const { return nullptr; }

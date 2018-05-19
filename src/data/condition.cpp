@@ -167,7 +167,7 @@ std::unique_ptr<Condition> condition(path_value x) {
     c->initially_enabled = !optional_bool(x.get("initially_disabled")).value_or(false);
     c->subject           = optional_initial(x.get("subject")).value_or(Initial::none());
     c->object            = optional_initial(x.get("object")).value_or(Initial::none());
-    c->action            = required_action_array(x.get("action"));
+    c->action            = required_array<std::unique_ptr<const Action>, action>(x.get("action"));
 
     return c;
 }

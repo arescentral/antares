@@ -339,7 +339,9 @@ static BaseObject::Destroy optional_destroy(path_value x) {
                            {"neutralize", {&BaseObject::Destroy::neutralize, required_bool}},
                            {"release_energy",
                             {&BaseObject::Destroy::release_energy, required_bool}},
-                           {"action", {&BaseObject::Destroy::action, optional_action_array}},
+                           {"action",
+                            {&BaseObject::Destroy::action,
+                             optional_array<std::unique_ptr<const Action>, action>}},
                    })
             .value_or(BaseObject::Destroy{});
 }
@@ -362,7 +364,9 @@ static BaseObject::Expire optional_expire(path_value x) {
                    {
                            {"after", {&BaseObject::Expire::after, optional_expire_after}},
                            {"dont_die", {&BaseObject::Expire::dont_die, required_bool}},
-                           {"action", {&BaseObject::Expire::action, optional_action_array}},
+                           {"action",
+                            {&BaseObject::Expire::action,
+                             optional_array<std::unique_ptr<const Action>, action>}},
                    })
             .value_or(BaseObject::Expire{});
 }
@@ -371,7 +375,9 @@ static BaseObject::Create optional_create(path_value x) {
     return optional_struct<BaseObject::Create>(
                    x,
                    {
-                           {"action", {&BaseObject::Create::action, optional_action_array}},
+                           {"action",
+                            {&BaseObject::Create::action,
+                             optional_array<std::unique_ptr<const Action>, action>}},
                    })
             .value_or(BaseObject::Create{});
 }
@@ -394,7 +400,9 @@ static BaseObject::Collide optional_collide(path_value x) {
                            {"damage", {&BaseObject::Collide::damage, required_int32}},
                            {"solid", {&BaseObject::Collide::solid, required_bool}},
                            {"edge", {&BaseObject::Collide::edge, required_bool}},
-                           {"action", {&BaseObject::Collide::action, optional_action_array}},
+                           {"action",
+                            {&BaseObject::Collide::action,
+                             optional_array<std::unique_ptr<const Action>, action>}},
                    })
             .value_or(BaseObject::Collide{});
 }
@@ -406,7 +414,9 @@ static BaseObject::Activate optional_activate(path_value x) {
                            {"period",
                             {&BaseObject::Activate::period, optional_ticks_range,
                              Range<ticks>{ticks(0), ticks(0)}}},
-                           {"action", {&BaseObject::Activate::action, optional_action_array}},
+                           {"action",
+                            {&BaseObject::Activate::action,
+                             optional_array<std::unique_ptr<const Action>, action>}},
                    })
             .value_or(BaseObject::Activate{});
 }
@@ -416,7 +426,9 @@ static BaseObject::Arrive optional_arrive(path_value x) {
                    x,
                    {
                            {"distance", {&BaseObject::Arrive::distance, required_int32}},
-                           {"action", {&BaseObject::Arrive::action, optional_action_array}},
+                           {"action",
+                            {&BaseObject::Arrive::action,
+                             optional_array<std::unique_ptr<const Action>, action>}},
                    })
             .value_or(BaseObject::Arrive{});
 }
