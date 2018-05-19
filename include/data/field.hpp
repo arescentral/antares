@@ -147,7 +147,6 @@ SubjectValue              required_subject_value(path_value x);
 Weapon                    required_weapon(path_value x);
 Zoom                      required_zoom(path_value x);
 
-uint32_t optional_object_attributes(path_value x);
 uint32_t optional_keys(path_value x);
 
 std::vector<pn::string> required_string_array(path_value x);
@@ -178,8 +177,6 @@ struct field {
                   (t->*field) = reader(x).value_or(default_value).copy();
               }) {}
 };
-
-uint32_t optional_flags(path_value x, const std::map<pn::string_view, int>& flags);
 
 template <typename T>
 T required_struct(path_value x, const std::map<pn::string_view, field<T>>& fields) {

@@ -37,6 +37,53 @@ namespace antares {
             {"override", {&Action::override_, optional_action_override}}
 // clang-format on
 
+static uint32_t optional_flags(path_value x, const std::map<pn::string_view, int>& flags) {
+    if (x.value().is_null()) {
+        return 0;
+    } else if (x.value().is_map()) {
+        uint32_t result = 0;
+        for (auto kv : flags) {
+            if (optional_bool(x.get(kv.first)).value_or(false)) {
+                result |= 1 << kv.second;
+            }
+        }
+        for (auto kv : x.value().as_map()) {
+            if (flags.find(kv.key()) == flags.end()) {
+                path_value v = x.get(kv.key());
+                throw std::runtime_error(pn::format("{0}unknown flag", v.prefix()).c_str());
+            }
+        }
+        return result;
+    } else {
+        throw std::runtime_error(pn::format("{0}must be null or map", x.prefix()).c_str());
+    }
+}
+
+static uint32_t optional_object_attributes(path_value x) {
+    return optional_flags(
+            x, {{"can_be_engaged", 1},
+                {"does_bounce", 6},
+                {"can_be_destination", 10},
+                {"can_engage", 11},
+                {"can_evade", 12},
+                {"can_accept_build", 14},
+                {"can_accept_destination", 15},
+                {"autotarget", 16},
+                {"animation_cycle", 17},
+                {"can_collide", 18},
+                {"can_be_hit", 19},
+                {"is_destination", 20},
+                {"hide_effect", 21},
+                {"release_energy_on_death", 22},
+                {"hated", 23},
+                {"occupies_space", 24},
+                {"static_destination", 25},
+                {"can_be_evaded", 26},
+                {"neutral_death", 27},
+                {"is_guided", 28},
+                {"appear_on_radar", 29}});
+}
+
 static std::map<pn::string, bool> optional_tags(path_value x) {
     if (x.value().is_null()) {
         return {};
