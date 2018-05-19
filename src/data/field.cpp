@@ -441,6 +441,15 @@ Owner required_owner(path_value x) {
             x, {{"any", Owner::ANY}, {"same", Owner::SAME}, {"different", Owner::DIFFERENT}});
 }
 
+template <typename T, T (*F)(path_value)>
+std::pair<T, T> range(path_value x) {
+    struct Pair {
+        T begin, end;
+    };
+    Pair p = required_struct<Pair>(x, {{"begin", {&Pair::begin, F}}, {"end", {&Pair::end, F}}});
+    return {p.begin, p.end};
+}
+
 sfz::optional<Range<int64_t>> optional_int_range(path_value x) {
     if (x.value().is_null()) {
         return sfz::nullopt;
@@ -448,9 +457,8 @@ sfz::optional<Range<int64_t>> optional_int_range(path_value x) {
         int64_t begin = x.value().as_int();
         return sfz::make_optional(Range<int64_t>{begin, begin + 1});
     } else if (x.value().is_map()) {
-        int64_t begin = required_int(x.get("begin"));
-        int64_t end   = required_int(x.get("end"));
-        return sfz::make_optional(Range<int64_t>{begin, end});
+        auto r = range<int64_t, required_int>(x);
+        return sfz::make_optional(Range<int64_t>{r.first, r.second});
     } else {
         throw std::runtime_error(pn::format("{0}: must be null, int, or map", x.path()).c_str());
     }
@@ -461,11 +469,10 @@ Range<int64_t> required_int_range(path_value x) {
         int64_t begin = x.value().as_int();
         return Range<int64_t>{begin, begin + 1};
     } else if (x.value().is_map()) {
-        int64_t begin = required_int(x.get("begin"));
-        int64_t end   = required_int(x.get("end"));
-        return Range<int64_t>{begin, end};
+        auto r = range<int64_t, required_int>(x);
+        return {r.first, r.second};
     } else {
-        throw std::runtime_error(pn::format("{0}: must be null, int, or map", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}: must be int or map", x.path()).c_str());
     }
 }
 
@@ -477,9 +484,8 @@ sfz::optional<Range<Fixed>> optional_fixed_range(path_value x) {
         Fixed end   = Fixed::from_val(begin.val() + 1);
         return sfz::make_optional(Range<Fixed>{begin, end});
     } else if (x.value().is_map()) {
-        Fixed begin = required_fixed(x.get("begin"));
-        Fixed end   = required_fixed(x.get("end"));
-        return sfz::make_optional(Range<Fixed>{begin, end});
+        auto r = range<Fixed, required_fixed>(x);
+        return sfz::make_optional(Range<Fixed>{r.first, r.second});
     } else {
         throw std::runtime_error(pn::format("{0}: must be float or map", x.path()).c_str());
     }
@@ -491,9 +497,8 @@ Range<Fixed> required_fixed_range(path_value x) {
         Fixed end   = Fixed::from_val(begin.val() + 1);
         return {begin, end};
     } else if (x.value().is_map()) {
-        Fixed begin = required_fixed(x.get("begin"));
-        Fixed end   = required_fixed(x.get("end"));
-        return {begin, end};
+        auto r = range<Fixed, required_fixed>(x);
+        return {r.first, r.second};
     } else {
         throw std::runtime_error(pn::format("{0}: must be float or map", x.path()).c_str());
     }
@@ -506,12 +511,10 @@ sfz::optional<Range<ticks>> optional_ticks_range(path_value x) {
         ticks begin = required_ticks(x);
         return sfz::make_optional(Range<ticks>{begin, begin + ticks{1}});
     } else if (x.value().is_map()) {
-        ticks begin = required_ticks(x.get("begin"));
-        ticks end   = required_ticks(x.get("end"));
-        return sfz::make_optional(Range<ticks>{begin, end});
+        auto r = range<ticks, required_ticks>(x);
+        return sfz::make_optional(Range<ticks>{r.first, r.second});
     } else {
-        throw std::runtime_error(
-                pn::format("{0}: must be null, string, or map", x.path()).c_str());
+        throw std::runtime_error(pn::format("{0}: must be null, string or map", x.path()).c_str());
     }
 }
 
@@ -520,9 +523,8 @@ Range<ticks> required_ticks_range(path_value x) {
         ticks begin = required_ticks(x);
         return Range<ticks>{begin, begin + ticks{1}};
     } else if (x.value().is_map()) {
-        ticks begin = required_ticks(x.get("begin"));
-        ticks end   = required_ticks(x.get("end"));
-        return Range<ticks>{begin, end};
+        auto r = range<ticks, required_ticks>(x);
+        return {r.first, r.second};
     } else {
         throw std::runtime_error(pn::format("{0}: must be string or map", x.path()).c_str());
     }
@@ -542,29 +544,19 @@ HandleList<const Initial> required_initial_range(path_value x) {
     return HandleList<const Initial>(range.begin, range.end);
 }
 
+static int32_t required_int32(path_value x) {
+    return required_int(x, {-0x80000000ll, 0x80000000ll});
+}
+
 sfz::optional<Point> optional_point(path_value x) {
-    if (x.value().is_null()) {
-        return sfz::nullopt;
-    } else if (x.value().is_map()) {
-        int32_t px = required_int(x.get("x"));
-        int32_t py = required_int(x.get("y"));
-        return sfz::make_optional<Point>({px, py});
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
-    }
+    return optional_struct<Point>(
+            x, {{"x", {&Point::h, required_int32}}, {"y", {&Point::v, required_int32}}});
 }
 
 Point required_point(path_value x) {
-    if (x.value().is_map()) {
-        int32_t px = required_int(x.get("x"));
-        int32_t py = required_int(x.get("y"));
-        return {px, py};
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
-    }
+    return required_struct<Point>(
+            x, {{"x", {&Point::h, required_int32}}, {"y", {&Point::v, required_int32}}});
 }
-
-static int32_t required_int32(path_value x) { return required_int(x, {-2147483648, 2147483648}); }
 
 sfz::optional<Rect> optional_rect(path_value x) {
     return optional_struct<Rect>(
@@ -596,16 +588,18 @@ sfz::optional<RgbColor> optional_color(path_value x) {
     }
 }
 
+static uint8_t                required_uint8(path_value x) { return required_int(x, {0, 256}); }
+static sfz::optional<uint8_t> optional_uint8(path_value x) {
+    auto i = optional_int(x, {0, 256});
+    return i.has_value() ? sfz::make_optional<uint8_t>(*i) : sfz::nullopt;
+}
+
 RgbColor required_color(path_value x) {
-    if (x.value().is_map()) {
-        int32_t r = required_int(x.get("r"));
-        int32_t g = required_int(x.get("g"));
-        int32_t b = required_int(x.get("b"));
-        int32_t a = optional_int(x.get("a")).value_or(255);
-        return rgba(r, g, b, a);
-    } else {
-        throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
-    }
+    return required_struct<RgbColor>(
+            x, {{"r", {&RgbColor::red, required_uint8}},
+                {"g", {&RgbColor::green, required_uint8}},
+                {"b", {&RgbColor::blue, required_uint8}},
+                {"a", {&RgbColor::alpha, optional_uint8, 255}}});
 }
 
 AnimationDirection required_animation_direction(path_value x) {
