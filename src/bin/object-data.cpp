@@ -96,8 +96,11 @@ void load_object_data(const NamedHandle<const BaseObject>& o) {
         }
     }
     for (const Action& a : o->activate.action) {
-        if ((&a.base)->created_base()) {
-            load_object_data(*(&a.base)->created_base());
+        switch (a.type()) {
+            case ActionType::CREATE: load_object_data(a.create.base); break;
+            case ActionType::MORPH: load_object_data(a.morph.base); break;
+            case ActionType::EQUIP: load_object_data(a.equip.base); break;
+            default: continue;
         }
     }
 }

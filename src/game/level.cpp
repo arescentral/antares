@@ -132,13 +132,27 @@ void AddActionMedia(const Action& action, std::bitset<16> all_colors) {
     possible_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
-    auto base = (&action.base)->created_base();
-    if (base) {
-        AddBaseObjectMedia(*base, all_colors, Required::YES);
-    }
+    switch (action.type()) {
+        case ActionType::CREATE:
+            AddBaseObjectMedia(action.create.base, all_colors, Required::YES);
+            break;
+        case ActionType::MORPH:
+            AddBaseObjectMedia(action.morph.base, all_colors, Required::YES);
+            break;
+        case ActionType::EQUIP:
+            AddBaseObjectMedia(action.equip.base, all_colors, Required::YES);
+            break;
 
-    for (const pn::string_view sound : (&action.base)->sound_ids()) {
-        sys.sound.load(sound);
+        case ActionType::PLAY:
+            if (action.play.sound.has_value()) {
+                sys.sound.load(*action.play.sound);
+            } else {
+                for (const auto& s : action.play.any) {
+                    sys.sound.load(s.sound);
+                }
+            }
+
+        default: break;
     }
 }
 

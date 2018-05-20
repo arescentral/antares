@@ -30,10 +30,10 @@ namespace antares {
 
 // clang-format off
 #define COMMON_ACTION_FIELDS                                                                      \
-            {"type", {&ActionBase::type, required_action_type}},                                      \
-            {"reflexive", {&ActionBase::reflexive, optional_bool, false}},                            \
-            {"if", {&ActionBase::filter, optional_action_filter}},                                    \
-            {"delay", {&ActionBase::delay, optional_ticks, ticks(0)}},                                \
+            {"type", {&ActionBase::type, required_action_type}},                                  \
+            {"reflexive", {&ActionBase::reflexive, optional_bool, false}},                        \
+            {"if", {&ActionBase::filter, optional_action_filter}},                                \
+            {"delay", {&ActionBase::delay, optional_ticks, ticks(0)}},                            \
             {"override", {&ActionBase::override_, optional_action_override}}
 // clang-format on
 
@@ -533,31 +533,5 @@ Action action(path_value x) {
         case ActionType::ZOOM: return zoom_action(x);
     }
 }
-
-const NamedHandle<const BaseObject>* ActionBase::created_base() const { return nullptr; }
-std::vector<pn::string>              ActionBase::sound_ids() const { return {}; }
-bool                                 ActionBase::alters_owner() const { return false; }
-bool                                 ActionBase::check_conditions() const { return false; }
-
-const NamedHandle<const BaseObject>* CreateAction::created_base() const { return &base; }
-const NamedHandle<const BaseObject>* MorphAction::created_base() const { return &base; }
-const NamedHandle<const BaseObject>* EquipAction::created_base() const { return &base; }
-
-std::vector<pn::string> PlayAction::sound_ids() const {
-    std::vector<pn::string> result;
-    if (sound.has_value()) {
-        result.push_back(sound->copy());
-    } else {
-        for (auto& s : any) {
-            result.push_back(s.sound.copy());
-        }
-    }
-    return result;
-}
-
-bool CaptureAction::alters_owner() const { return true; }
-
-bool ScoreAction::check_conditions() const { return true; }
-bool MessageAction::check_conditions() const { return true; }
 
 }  // namespace antares

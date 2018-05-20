@@ -197,14 +197,18 @@ void CreateWeaponDataText(
     isGuided   = false;
     if (weaponObject->activate.action.size() > 0) {
         for (const auto& action : weaponObject->activate.action) {
-            const NamedHandle<const BaseObject>* created_base = (&action.base)->created_base();
-            if (created_base) {
-                if ((*created_base)->attributes & kIsGuided) {
-                    isGuided = true;
-                }
-                if ((*created_base)->collide.damage > mostDamage) {
-                    mostDamage = (*created_base)->collide.damage;
-                }
+            const NamedHandle<const BaseObject>* created_base;
+            switch (action.type()) {
+                case ActionType::CREATE: created_base = &action.create.base; break;
+                case ActionType::MORPH: created_base = &action.morph.base; break;
+                case ActionType::EQUIP: created_base = &action.equip.base; break;
+                default: continue;
+            }
+            if ((*created_base)->attributes & kIsGuided) {
+                isGuided = true;
+            }
+            if ((*created_base)->collide.damage > mostDamage) {
+                mostDamage = (*created_base)->collide.damage;
             }
         }
     }
