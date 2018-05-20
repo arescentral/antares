@@ -30,7 +30,7 @@ namespace antares {
 bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target);
 
 void exec(
-        const std::vector<std::unique_ptr<const Action>>& actions, Handle<SpaceObject> sObject,
+        const std::vector<Action>& actions, Handle<SpaceObject> sObject,
         Handle<SpaceObject> dObject, Point* offset);
 
 void reset_action_queue();

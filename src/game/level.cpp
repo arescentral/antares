@@ -63,8 +63,7 @@ enum class Required : bool {
     YES = true,
 };
 
-void AddBaseObjectActionMedia(
-        const std::vector<std::unique_ptr<const Action>>& actions, std::bitset<16> all_colors);
+void AddBaseObjectActionMedia(const std::vector<Action>& actions, std::bitset<16> all_colors);
 void AddActionMedia(const Action& action, std::bitset<16> all_colors);
 
 void AddBaseObjectMedia(
@@ -122,10 +121,9 @@ void AddBaseObjectMedia(
     }
 }
 
-void AddBaseObjectActionMedia(
-        const std::vector<std::unique_ptr<const Action>>& actions, std::bitset<16> all_colors) {
+void AddBaseObjectActionMedia(const std::vector<Action>& actions, std::bitset<16> all_colors) {
     for (const auto& action : actions) {
-        AddActionMedia(*action, all_colors);
+        AddActionMedia(action, all_colors);
     }
 }
 
@@ -134,12 +132,12 @@ void AddActionMedia(const Action& action, std::bitset<16> all_colors) {
     possible_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
-    auto base = action.created_base();
+    auto base = (&action.base)->created_base();
     if (base) {
         AddBaseObjectMedia(*base, all_colors, Required::YES);
     }
 
-    for (const pn::string_view sound : action.sound_ids()) {
+    for (const pn::string_view sound : (&action.base)->sound_ids()) {
         sys.sound.load(sound);
     }
 }
@@ -278,7 +276,7 @@ static void load_initial(Handle<const Initial> initial, std::bitset<16> all_colo
 
 static void load_condition(Handle<const Condition> condition, std::bitset<16> all_colors) {
     for (const auto& action : condition->action) {
-        AddActionMedia(*action, all_colors);
+        AddActionMedia(action, all_colors);
     }
     g.condition_enabled[condition.number()] = !condition->disabled;
 }

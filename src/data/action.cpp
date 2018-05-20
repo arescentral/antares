@@ -30,12 +30,133 @@ namespace antares {
 
 // clang-format off
 #define COMMON_ACTION_FIELDS                                                                      \
-            {"type", nullptr},                                                                    \
-            {"reflexive", {&Action::reflexive, optional_bool, false}},                            \
-            {"if", {&Action::filter, optional_action_filter}},                                    \
-            {"delay", {&Action::delay, optional_ticks, ticks(0)}},                                \
-            {"override", {&Action::override_, optional_action_override}}
+            {"type", {&ActionBase::type, required_action_type}},                                      \
+            {"reflexive", {&ActionBase::reflexive, optional_bool, false}},                            \
+            {"if", {&ActionBase::filter, optional_action_filter}},                                    \
+            {"delay", {&ActionBase::delay, optional_ticks, ticks(0)}},                                \
+            {"override", {&ActionBase::override_, optional_action_override}}
 // clang-format on
+
+ActionType Action::type() const { return base.type; }
+
+Action::Action(AgeAction a) : age(std::move(a)) {}
+Action::Action(AssumeAction a) : assume(std::move(a)) {}
+Action::Action(CapSpeedAction a) : cap_speed(std::move(a)) {}
+Action::Action(CaptureAction a) : capture(std::move(a)) {}
+Action::Action(CloakAction a) : cloak(std::move(a)) {}
+Action::Action(ConditionAction a) : condition(std::move(a)) {}
+Action::Action(CreateAction a) : create(std::move(a)) {}
+Action::Action(DisableAction a) : disable(std::move(a)) {}
+Action::Action(EnergizeAction a) : energize(std::move(a)) {}
+Action::Action(EquipAction a) : equip(std::move(a)) {}
+Action::Action(FireAction a) : fire(std::move(a)) {}
+Action::Action(FlashAction a) : flash(std::move(a)) {}
+Action::Action(HealAction a) : heal(std::move(a)) {}
+Action::Action(HoldPositionAction a) : hold_position(std::move(a)) {}
+Action::Action(KeyAction a) : key(std::move(a)) {}
+Action::Action(KillAction a) : kill(std::move(a)) {}
+Action::Action(LandAction a) : land(std::move(a)) {}
+Action::Action(MessageAction a) : message(std::move(a)) {}
+Action::Action(MorphAction a) : morph(std::move(a)) {}
+Action::Action(MoveAction a) : move(std::move(a)) {}
+Action::Action(OccupyAction a) : occupy(std::move(a)) {}
+Action::Action(OrderAction a) : order(std::move(a)) {}
+Action::Action(PayAction a) : pay(std::move(a)) {}
+Action::Action(PushAction a) : push(std::move(a)) {}
+Action::Action(RevealAction a) : reveal(std::move(a)) {}
+Action::Action(ScoreAction a) : score(std::move(a)) {}
+Action::Action(SelectAction a) : select(std::move(a)) {}
+Action::Action(PlayAction a) : play(std::move(a)) {}
+Action::Action(SparkAction a) : spark(std::move(a)) {}
+Action::Action(SpinAction a) : spin(std::move(a)) {}
+Action::Action(ThrustAction a) : thrust(std::move(a)) {}
+Action::Action(WarpAction a) : warp(std::move(a)) {}
+Action::Action(WinAction a) : win(std::move(a)) {}
+Action::Action(ZoomAction a) : zoom(std::move(a)) {}
+
+Action::Action(Action&& a) {
+    switch (a.type()) {
+        case ActionType::AGE: new (this) Action(std::move(a.age)); break;
+        case ActionType::ASSUME: new (this) Action(std::move(a.assume)); break;
+        case ActionType::CAP_SPEED: new (this) Action(std::move(a.cap_speed)); break;
+        case ActionType::CAPTURE: new (this) Action(std::move(a.capture)); break;
+        case ActionType::CLOAK: new (this) Action(std::move(a.cloak)); break;
+        case ActionType::CONDITION: new (this) Action(std::move(a.condition)); break;
+        case ActionType::CREATE: new (this) Action(std::move(a.create)); break;
+        case ActionType::DISABLE: new (this) Action(std::move(a.disable)); break;
+        case ActionType::ENERGIZE: new (this) Action(std::move(a.energize)); break;
+        case ActionType::EQUIP: new (this) Action(std::move(a.equip)); break;
+        case ActionType::FIRE: new (this) Action(std::move(a.fire)); break;
+        case ActionType::FLASH: new (this) Action(std::move(a.flash)); break;
+        case ActionType::HEAL: new (this) Action(std::move(a.heal)); break;
+        case ActionType::HOLD: new (this) Action(std::move(a.hold_position)); break;
+        case ActionType::KEY: new (this) Action(std::move(a.key)); break;
+        case ActionType::KILL: new (this) Action(std::move(a.kill)); break;
+        case ActionType::LAND: new (this) Action(std::move(a.land)); break;
+        case ActionType::MESSAGE: new (this) Action(std::move(a.message)); break;
+        case ActionType::MORPH: new (this) Action(std::move(a.morph)); break;
+        case ActionType::MOVE: new (this) Action(std::move(a.move)); break;
+        case ActionType::OCCUPY: new (this) Action(std::move(a.occupy)); break;
+        case ActionType::ORDER: new (this) Action(std::move(a.order)); break;
+        case ActionType::PAY: new (this) Action(std::move(a.pay)); break;
+        case ActionType::PUSH: new (this) Action(std::move(a.push)); break;
+        case ActionType::REVEAL: new (this) Action(std::move(a.reveal)); break;
+        case ActionType::SCORE: new (this) Action(std::move(a.score)); break;
+        case ActionType::SELECT: new (this) Action(std::move(a.select)); break;
+        case ActionType::PLAY: new (this) Action(std::move(a.play)); break;
+        case ActionType::SPARK: new (this) Action(std::move(a.spark)); break;
+        case ActionType::SPIN: new (this) Action(std::move(a.spin)); break;
+        case ActionType::THRUST: new (this) Action(std::move(a.thrust)); break;
+        case ActionType::WARP: new (this) Action(std::move(a.warp)); break;
+        case ActionType::WIN: new (this) Action(std::move(a.win)); break;
+        case ActionType::ZOOM: new (this) Action(std::move(a.zoom)); break;
+    }
+}
+
+Action& Action::operator=(Action&& a) {
+    this->~Action();
+    new (this) Action(std::move(a));
+    return *this;
+}
+
+Action::~Action() {
+    switch (type()) {
+        case ActionType::AGE: age.~AgeAction(); break;
+        case ActionType::ASSUME: assume.~AssumeAction(); break;
+        case ActionType::CAP_SPEED: cap_speed.~CapSpeedAction(); break;
+        case ActionType::CAPTURE: capture.~CaptureAction(); break;
+        case ActionType::CLOAK: cloak.~CloakAction(); break;
+        case ActionType::CONDITION: condition.~ConditionAction(); break;
+        case ActionType::CREATE: create.~CreateAction(); break;
+        case ActionType::DISABLE: disable.~DisableAction(); break;
+        case ActionType::ENERGIZE: energize.~EnergizeAction(); break;
+        case ActionType::EQUIP: equip.~EquipAction(); break;
+        case ActionType::FIRE: fire.~FireAction(); break;
+        case ActionType::FLASH: flash.~FlashAction(); break;
+        case ActionType::HEAL: heal.~HealAction(); break;
+        case ActionType::HOLD: hold_position.~HoldPositionAction(); break;
+        case ActionType::KEY: key.~KeyAction(); break;
+        case ActionType::KILL: kill.~KillAction(); break;
+        case ActionType::LAND: land.~LandAction(); break;
+        case ActionType::MESSAGE: message.~MessageAction(); break;
+        case ActionType::MORPH: morph.~MorphAction(); break;
+        case ActionType::MOVE: move.~MoveAction(); break;
+        case ActionType::OCCUPY: occupy.~OccupyAction(); break;
+        case ActionType::ORDER: order.~OrderAction(); break;
+        case ActionType::PAY: pay.~PayAction(); break;
+        case ActionType::PUSH: push.~PushAction(); break;
+        case ActionType::REVEAL: reveal.~RevealAction(); break;
+        case ActionType::SCORE: score.~ScoreAction(); break;
+        case ActionType::SELECT: select.~SelectAction(); break;
+        case ActionType::PLAY: play.~PlayAction(); break;
+        case ActionType::SPARK: spark.~SparkAction(); break;
+        case ActionType::SPIN: spin.~SpinAction(); break;
+        case ActionType::THRUST: thrust.~ThrustAction(); break;
+        case ActionType::WARP: warp.~WarpAction(); break;
+        case ActionType::WIN: win.~WinAction(); break;
+        case ActionType::ZOOM: zoom.~ZoomAction(); break;
+    }
+}
 
 static uint32_t optional_flags(path_value x, const std::map<pn::string_view, int>& flags) {
     if (x.value().is_null()) {
@@ -102,12 +223,13 @@ static std::map<pn::string, bool> optional_tags(path_value x) {
     }
 }
 
-static Action::Filter optional_action_filter(path_value x) {
-    return optional_struct<Action::Filter>(
-                   x, {{"attributes", {&Action::Filter::attributes, optional_object_attributes}},
-                       {"tags", {&Action::Filter::tags, optional_tags}},
-                       {"owner", {&Action::Filter::owner, optional_owner, Owner::ANY}}})
-            .value_or(Action::Filter{});
+static ActionBase::Filter optional_action_filter(path_value x) {
+    return optional_struct<ActionBase::Filter>(
+                   x,
+                   {{"attributes", {&ActionBase::Filter::attributes, optional_object_attributes}},
+                    {"tags", {&ActionBase::Filter::tags, optional_tags}},
+                    {"owner", {&ActionBase::Filter::owner, optional_owner, Owner::ANY}}})
+            .value_or(ActionBase::Filter{});
 }
 
 static sfz::optional<Handle<const Initial>> optional_initial_override(path_value x) {
@@ -128,53 +250,48 @@ static sfz::optional<Handle<const Initial>> optional_initial_override(path_value
     }
 }
 
-static Action::Override optional_action_override(path_value x) {
-    return optional_struct<Action::Override>(
-                   x, {{"subject", {&Action::Override::subject, optional_initial_override}},
-                       {"object", {&Action::Override::object, optional_initial_override}}})
-            .value_or(Action::Override{});
+static ActionBase::Override optional_action_override(path_value x) {
+    return optional_struct<ActionBase::Override>(
+                   x, {{"subject", {&ActionBase::Override::subject, optional_initial_override}},
+                       {"object", {&ActionBase::Override::object, optional_initial_override}}})
+            .value_or(ActionBase::Override{});
 }
 
-template <typename T>
-static std::unique_ptr<Action> action_ptr(T t) {
-    return std::unique_ptr<Action>(new T(std::move(t)));
-}
-
-static std::unique_ptr<Action> age_action(path_value x) {
-    return action_ptr(required_struct<AgeAction>(
+static Action age_action(path_value x) {
+    return required_struct<AgeAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"relative", {&AgeAction::relative, optional_bool, false}},
-                {"value", {&AgeAction::value, required_ticks_range}}}));
+                {"value", {&AgeAction::value, required_ticks_range}}});
 }
 
-static std::unique_ptr<Action> assume_action(path_value x) {
-    return action_ptr(required_struct<AssumeAction>(
-            x, {COMMON_ACTION_FIELDS, {"which", {&AssumeAction::which, required_int}}}));
+static Action assume_action(path_value x) {
+    return required_struct<AssumeAction>(
+            x, {COMMON_ACTION_FIELDS, {"which", {&AssumeAction::which, required_int}}});
 }
 
-static std::unique_ptr<Action> cap_speed_action(path_value x) {
-    return action_ptr(required_struct<CapSpeedAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&CapSpeedAction::value, optional_fixed}}}));
+static Action cap_speed_action(path_value x) {
+    return required_struct<CapSpeedAction>(
+            x, {COMMON_ACTION_FIELDS, {"value", {&CapSpeedAction::value, optional_fixed}}});
 }
 
-static std::unique_ptr<Action> capture_action(path_value x) {
-    return action_ptr(required_struct<CaptureAction>(
-            x, {COMMON_ACTION_FIELDS, {"player", {&CaptureAction::player, optional_admiral}}}));
+static Action capture_action(path_value x) {
+    return required_struct<CaptureAction>(
+            x, {COMMON_ACTION_FIELDS, {"player", {&CaptureAction::player, optional_admiral}}});
 }
 
-static std::unique_ptr<Action> cloak_action(path_value x) {
-    return action_ptr(required_struct<CloakAction>(x, {COMMON_ACTION_FIELDS}));
+static Action cloak_action(path_value x) {
+    return required_struct<CloakAction>(x, {COMMON_ACTION_FIELDS});
 }
 
-static std::unique_ptr<Action> condition_action(path_value x) {
-    return action_ptr(required_struct<ConditionAction>(
+static Action condition_action(path_value x) {
+    return required_struct<ConditionAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"enable", {&ConditionAction::enable, optional_condition_range}},
-                {"disable", {&ConditionAction::disable, optional_condition_range}}}));
+                {"disable", {&ConditionAction::disable, optional_condition_range}}});
 }
 
-static std::unique_ptr<Action> create_action(path_value x) {
-    return action_ptr(required_struct<CreateAction>(
+static Action create_action(path_value x) {
+    return required_struct<CreateAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"base", {&CreateAction::base, required_base}},
                 {"count", {&CreateAction::count, optional_int_range, Range<int64_t>{1, 2}}},
@@ -182,80 +299,80 @@ static std::unique_ptr<Action> create_action(path_value x) {
                 {"relative_direction", {&CreateAction::relative_direction, optional_bool, false}},
                 {"distance", {&CreateAction::distance, optional_int, 0}},
                 {"inherit", {&CreateAction::inherit, optional_bool, false}},
-                {"legacy_random", {&CreateAction::legacy_random, optional_bool, false}}}));
+                {"legacy_random", {&CreateAction::legacy_random, optional_bool, false}}});
 }
 
-static std::unique_ptr<Action> disable_action(path_value x) {
-    return action_ptr(required_struct<DisableAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&DisableAction::value, required_fixed_range}}}));
+static Action disable_action(path_value x) {
+    return required_struct<DisableAction>(
+            x, {COMMON_ACTION_FIELDS, {"value", {&DisableAction::value, required_fixed_range}}});
 }
 
-static std::unique_ptr<Action> energize_action(path_value x) {
-    return action_ptr(required_struct<EnergizeAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&EnergizeAction::value, required_int}}}));
+static Action energize_action(path_value x) {
+    return required_struct<EnergizeAction>(
+            x, {COMMON_ACTION_FIELDS, {"value", {&EnergizeAction::value, required_int}}});
 }
 
-static std::unique_ptr<Action> equip_action(path_value x) {
-    return action_ptr(required_struct<EquipAction>(
+static Action equip_action(path_value x) {
+    return required_struct<EquipAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"which", {&EquipAction::which, required_weapon}},
-                {"base", {&EquipAction::base, required_base}}}));
+                {"base", {&EquipAction::base, required_base}}});
 }
 
-static std::unique_ptr<Action> fire_action(path_value x) {
-    return action_ptr(required_struct<FireAction>(
-            x, {COMMON_ACTION_FIELDS, {"which", {&FireAction::which, required_weapon}}}));
+static Action fire_action(path_value x) {
+    return required_struct<FireAction>(
+            x, {COMMON_ACTION_FIELDS, {"which", {&FireAction::which, required_weapon}}});
 }
 
 static uint8_t required_shade(path_value x) { return required_int(x, {1, 17}); }
 
-static std::unique_ptr<Action> flash_action(path_value x) {
-    return action_ptr(required_struct<FlashAction>(
+static Action flash_action(path_value x) {
+    return required_struct<FlashAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"length", {&FlashAction::length, required_int}},
                 {"hue", {&FlashAction::hue, required_hue}},
-                {"shade", {&FlashAction::shade, required_shade}}}));
+                {"shade", {&FlashAction::shade, required_shade}}});
 }
 
-static std::unique_ptr<Action> heal_action(path_value x) {
-    return action_ptr(required_struct<HealAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&HealAction::value, required_int}}}));
+static Action heal_action(path_value x) {
+    return required_struct<HealAction>(
+            x, {COMMON_ACTION_FIELDS, {"value", {&HealAction::value, required_int}}});
 }
 
-static std::unique_ptr<Action> hold_action(path_value x) {
-    return action_ptr(required_struct<HoldPositionAction>(x, {COMMON_ACTION_FIELDS}));
+static Action hold_action(path_value x) {
+    return required_struct<HoldPositionAction>(x, {COMMON_ACTION_FIELDS});
 }
 
-static std::unique_ptr<Action> key_action(path_value x) {
-    return action_ptr(required_struct<KeyAction>(
+static Action key_action(path_value x) {
+    return required_struct<KeyAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"enable", {&KeyAction::enable, optional_keys}},
-                {"disable", {&KeyAction::disable, optional_keys}}}));
+                {"disable", {&KeyAction::disable, optional_keys}}});
 }
 
-static std::unique_ptr<Action> kill_action(path_value x) {
-    return action_ptr(required_struct<KillAction>(
-            x, {COMMON_ACTION_FIELDS, {"kind", {&KillAction::kind, required_kill_kind}}}));
+static Action kill_action(path_value x) {
+    return required_struct<KillAction>(
+            x, {COMMON_ACTION_FIELDS, {"kind", {&KillAction::kind, required_kill_kind}}});
 }
 
-static std::unique_ptr<Action> land_action(path_value x) {
-    return action_ptr(required_struct<LandAction>(
-            x, {COMMON_ACTION_FIELDS, {"speed", {&LandAction::speed, required_int}}}));
+static Action land_action(path_value x) {
+    return required_struct<LandAction>(
+            x, {COMMON_ACTION_FIELDS, {"speed", {&LandAction::speed, required_int}}});
 }
 
-static std::unique_ptr<Action> message_action(path_value x) {
-    return action_ptr(required_struct<MessageAction>(
+static Action message_action(path_value x) {
+    return required_struct<MessageAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"id", {&MessageAction::id, required_int}},
                 {"pages",
-                 {&MessageAction::pages, required_array<pn::string, required_string_copy>}}}));
+                 {&MessageAction::pages, required_array<pn::string, required_string_copy>}}});
 }
 
-static std::unique_ptr<Action> morph_action(path_value x) {
-    return action_ptr(required_struct<MorphAction>(
+static Action morph_action(path_value x) {
+    return required_struct<MorphAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"base", {&MorphAction::base, required_base}},
-                {"keep_ammo", {&MorphAction::keep_ammo, optional_bool, false}}}));
+                {"keep_ammo", {&MorphAction::keep_ammo, optional_bool, false}}});
 }
 
 static sfz::optional<coordPointType> optional_coord_point(path_value x) {
@@ -266,56 +383,56 @@ static sfz::optional<coordPointType> optional_coord_point(path_value x) {
     return sfz::make_optional(coordPointType{(uint32_t)p->h, (uint32_t)p->v});
 }
 
-static std::unique_ptr<Action> move_action(path_value x) {
-    return action_ptr(required_struct<MoveAction>(
+static Action move_action(path_value x) {
+    return required_struct<MoveAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"origin", {&MoveAction::origin, optional_origin, MoveOrigin::LEVEL}},
                 {"to", {&MoveAction::to, optional_coord_point, coordPointType{0, 0}}},
-                {"distance", {&MoveAction::distance, optional_int, 0}}}));
+                {"distance", {&MoveAction::distance, optional_int, 0}}});
 }
 
-static std::unique_ptr<Action> occupy_action(path_value x) {
-    return action_ptr(required_struct<OccupyAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&OccupyAction::value, required_int}}}));
+static Action occupy_action(path_value x) {
+    return required_struct<OccupyAction>(
+            x, {COMMON_ACTION_FIELDS, {"value", {&OccupyAction::value, required_int}}});
 }
 
-static std::unique_ptr<Action> order_action(path_value x) {
-    return action_ptr(required_struct<OrderAction>(x, {COMMON_ACTION_FIELDS}));
+static Action order_action(path_value x) {
+    return required_struct<OrderAction>(x, {COMMON_ACTION_FIELDS});
 }
 
-static std::unique_ptr<Action> pay_action(path_value x) {
-    return action_ptr(required_struct<PayAction>(
+static Action pay_action(path_value x) {
+    return required_struct<PayAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"value", {&PayAction::value, required_fixed}},
-                {"player", {&PayAction::player, optional_admiral}}}));
+                {"player", {&PayAction::player, optional_admiral}}});
 }
 
-static std::unique_ptr<Action> push_action(path_value x) {
-    return action_ptr(required_struct<PushAction>(
+static Action push_action(path_value x) {
+    return required_struct<PushAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"kind", {&PushAction::kind, required_push_kind}},
-                {"value", {&PushAction::value, optional_fixed, Fixed::zero()}}}));
+                {"value", {&PushAction::value, optional_fixed, Fixed::zero()}}});
 }
 
-static std::unique_ptr<Action> reveal_action(path_value x) {
-    return action_ptr(required_struct<RevealAction>(
+static Action reveal_action(path_value x) {
+    return required_struct<RevealAction>(
             x,
-            {COMMON_ACTION_FIELDS, {"which", {&RevealAction::initial, required_initial_range}}}));
+            {COMMON_ACTION_FIELDS, {"which", {&RevealAction::initial, required_initial_range}}});
 }
 
-static std::unique_ptr<Action> score_action(path_value x) {
-    return action_ptr(required_struct<ScoreAction>(
+static Action score_action(path_value x) {
+    return required_struct<ScoreAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"player", {&ScoreAction::player, optional_admiral}},
                 {"which", {&ScoreAction::which, required_int}},
-                {"value", {&ScoreAction::value, required_int}}}));
+                {"value", {&ScoreAction::value, required_int}}});
 }
 
-static std::unique_ptr<Action> select_action(path_value x) {
-    return action_ptr(required_struct<SelectAction>(
+static Action select_action(path_value x) {
+    return required_struct<SelectAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"screen", {&SelectAction::screen, required_screen}},
-                {"line", {&SelectAction::line, required_int}}}));
+                {"line", {&SelectAction::line, required_int}}});
 }
 
 static PlayAction::Sound required_sound(path_value x) {
@@ -325,139 +442,102 @@ static PlayAction::Sound required_sound(path_value x) {
 
 static uint8_t required_sound_priority(path_value x) { return required_int(x, {0, 6}); }
 
-static std::unique_ptr<Action> play_action(path_value x) {
-    return action_ptr(required_struct<PlayAction>(
+static Action play_action(path_value x) {
+    return required_struct<PlayAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"priority", {&PlayAction::priority, required_sound_priority}},
                 {"persistence", {&PlayAction::persistence, required_ticks}},
                 {"absolute", {&PlayAction::absolute, optional_bool, false}},
                 {"volume", {&PlayAction::volume, required_int}},
                 {"sound", {&PlayAction::sound, optional_string_copy}},
-                {"any", {&PlayAction::any, optional_array<PlayAction::Sound, required_sound>}}}));
+                {"any", {&PlayAction::any, optional_array<PlayAction::Sound, required_sound>}}});
 }
 
-static std::unique_ptr<Action> spark_action(path_value x) {
-    return action_ptr(required_struct<SparkAction>(
+static Action spark_action(path_value x) {
+    return required_struct<SparkAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"count", {&SparkAction::count, required_int}},
                 {"hue", {&SparkAction::hue, required_hue}},
                 {"decay", {&SparkAction::decay, required_int}},
-                {"velocity", {&SparkAction::velocity, required_fixed}}}));
+                {"velocity", {&SparkAction::velocity, required_fixed}}});
 }
 
-static std::unique_ptr<Action> spin_action(path_value x) {
-    return action_ptr(required_struct<SpinAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&SpinAction::value, required_fixed_range}}}));
+static Action spin_action(path_value x) {
+    return required_struct<SpinAction>(
+            x, {COMMON_ACTION_FIELDS, {"value", {&SpinAction::value, required_fixed_range}}});
 }
 
-static std::unique_ptr<Action> thrust_action(path_value x) {
-    return action_ptr(required_struct<ThrustAction>(
+static Action thrust_action(path_value x) {
+    return required_struct<ThrustAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"value", {&ThrustAction::value, required_fixed_range}},
-                {"relative", nullptr}}));
+                {"relative", nullptr}});
 }
 
-static std::unique_ptr<Action> warp_action(path_value x) {
-    return action_ptr(required_struct<WarpAction>(x, {COMMON_ACTION_FIELDS}));
+static Action warp_action(path_value x) {
+    return required_struct<WarpAction>(x, {COMMON_ACTION_FIELDS});
 }
 
-static std::unique_ptr<Action> win_action(path_value x) {
-    return action_ptr(required_struct<WinAction>(
+static Action win_action(path_value x) {
+    return required_struct<WinAction>(
             x, {COMMON_ACTION_FIELDS,
                 {"player", {&WinAction::player, optional_admiral}},
                 {"next", {&WinAction::next, optional_level}},
-                {"text", {&WinAction::text, required_string_copy}}}));
+                {"text", {&WinAction::text, required_string_copy}}});
 }
 
-static std::unique_ptr<Action> zoom_action(path_value x) {
-    return action_ptr(required_struct<ZoomAction>(
-            x, {COMMON_ACTION_FIELDS, {"value", {&ZoomAction::value, required_zoom}}}));
+static Action zoom_action(path_value x) {
+    return required_struct<ZoomAction>(
+            x, {COMMON_ACTION_FIELDS, {"value", {&ZoomAction::value, required_zoom}}});
 }
 
-std::unique_ptr<const Action> action(path_value x) {
+Action action(path_value x) {
     if (!x.value().is_map()) {
         throw std::runtime_error(pn::format("{0}: must be map", x.path()).c_str());
     }
 
-    pn::string_view         type = required_string(x.get("type"));
-    std::unique_ptr<Action> a;
-    if (type == "age") {
-        return age_action(x);
-    } else if (type == "assume") {
-        return assume_action(x);
-    } else if (type == "cap-speed") {
-        return cap_speed_action(x);
-    } else if (type == "capture") {
-        return capture_action(x);
-    } else if (type == "cloak") {
-        return cloak_action(x);
-    } else if (type == "condition") {
-        return condition_action(x);
-    } else if (type == "create") {
-        return create_action(x);
-    } else if (type == "disable") {
-        return disable_action(x);
-    } else if (type == "energize") {
-        return energize_action(x);
-    } else if (type == "equip") {
-        return equip_action(x);
-    } else if (type == "fire") {
-        return fire_action(x);
-    } else if (type == "flash") {
-        return flash_action(x);
-    } else if (type == "heal") {
-        return heal_action(x);
-    } else if (type == "hold") {
-        return hold_action(x);
-    } else if (type == "key") {
-        return key_action(x);
-    } else if (type == "kill") {
-        return kill_action(x);
-    } else if (type == "land") {
-        return land_action(x);
-    } else if (type == "message") {
-        return message_action(x);
-    } else if (type == "morph") {
-        return morph_action(x);
-    } else if (type == "move") {
-        return move_action(x);
-    } else if (type == "occupy") {
-        return occupy_action(x);
-    } else if (type == "order") {
-        return order_action(x);
-    } else if (type == "pay") {
-        return pay_action(x);
-    } else if (type == "play") {
-        return play_action(x);
-    } else if (type == "push") {
-        return push_action(x);
-    } else if (type == "reveal") {
-        return reveal_action(x);
-    } else if (type == "score") {
-        return score_action(x);
-    } else if (type == "select") {
-        return select_action(x);
-    } else if (type == "spark") {
-        return spark_action(x);
-    } else if (type == "spin") {
-        return spin_action(x);
-    } else if (type == "thrust") {
-        return thrust_action(x);
-    } else if (type == "warp") {
-        return warp_action(x);
-    } else if (type == "win") {
-        return win_action(x);
-    } else if (type == "zoom") {
-        return zoom_action(x);
-    } else {
-        throw std::runtime_error(pn::format("unknown type: {0}", type).c_str());
+    switch (required_action_type(x.get("type"))) {
+        case ActionType::AGE: return age_action(x);
+        case ActionType::ASSUME: return assume_action(x);
+        case ActionType::CAP_SPEED: return cap_speed_action(x);
+        case ActionType::CAPTURE: return capture_action(x);
+        case ActionType::CLOAK: return cloak_action(x);
+        case ActionType::CONDITION: return condition_action(x);
+        case ActionType::CREATE: return create_action(x);
+        case ActionType::DISABLE: return disable_action(x);
+        case ActionType::ENERGIZE: return energize_action(x);
+        case ActionType::EQUIP: return equip_action(x);
+        case ActionType::FIRE: return fire_action(x);
+        case ActionType::FLASH: return flash_action(x);
+        case ActionType::HEAL: return heal_action(x);
+        case ActionType::HOLD: return hold_action(x);
+        case ActionType::KEY: return key_action(x);
+        case ActionType::KILL: return kill_action(x);
+        case ActionType::LAND: return land_action(x);
+        case ActionType::MESSAGE: return message_action(x);
+        case ActionType::MORPH: return morph_action(x);
+        case ActionType::MOVE: return move_action(x);
+        case ActionType::OCCUPY: return occupy_action(x);
+        case ActionType::ORDER: return order_action(x);
+        case ActionType::PAY: return pay_action(x);
+        case ActionType::PUSH: return push_action(x);
+        case ActionType::REVEAL: return reveal_action(x);
+        case ActionType::SCORE: return score_action(x);
+        case ActionType::SELECT: return select_action(x);
+        case ActionType::PLAY: return play_action(x);
+        case ActionType::SPARK: return spark_action(x);
+        case ActionType::SPIN: return spin_action(x);
+        case ActionType::THRUST: return thrust_action(x);
+        case ActionType::WARP: return warp_action(x);
+        case ActionType::WIN: return win_action(x);
+        case ActionType::ZOOM: return zoom_action(x);
     }
 }
 
-const NamedHandle<const BaseObject>* Action::created_base() const { return nullptr; }
-std::vector<pn::string>              Action::sound_ids() const { return {}; }
-bool                                 Action::alters_owner() const { return false; }
-bool                                 Action::check_conditions() const { return false; }
+const NamedHandle<const BaseObject>* ActionBase::created_base() const { return nullptr; }
+std::vector<pn::string>              ActionBase::sound_ids() const { return {}; }
+bool                                 ActionBase::alters_owner() const { return false; }
+bool                                 ActionBase::check_conditions() const { return false; }
 
 const NamedHandle<const BaseObject>* CreateAction::created_base() const { return &base; }
 const NamedHandle<const BaseObject>* MorphAction::created_base() const { return &base; }

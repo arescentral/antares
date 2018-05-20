@@ -130,6 +130,7 @@ Rect                 required_rect(path_value x);
 sfz::optional<RgbColor> optional_color(path_value x);
 RgbColor                required_color(path_value x);
 
+ActionType                required_action_type(path_value x);
 AnimationDirection        required_animation_direction(path_value x);
 sfz::optional<Hue>        optional_hue(path_value x);
 Hue                       required_hue(path_value x);

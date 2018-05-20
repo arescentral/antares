@@ -153,10 +153,10 @@ class BaseObject {
     } weapons;
 
     struct Destroy {
-        bool                                       dont_die;
-        bool                                       neutralize;
-        bool                                       release_energy;
-        std::vector<std::unique_ptr<const Action>> action;
+        bool                dont_die;
+        bool                neutralize;
+        bool                release_energy;
+        std::vector<Action> action;
     } destroy;
 
     struct Expire {
@@ -164,12 +164,12 @@ class BaseObject {
             Range<ticks> age;  // starting random age
             bool         animation = false;
         } after;
-        bool                                       dont_die;
-        std::vector<std::unique_ptr<const Action>> action;
+        bool                dont_die;
+        std::vector<Action> action;
     } expire;
 
     struct Create {
-        std::vector<std::unique_ptr<const Action>> action;
+        std::vector<Action> action;
     } create;
 
     struct Collide {
@@ -177,20 +177,20 @@ class BaseObject {
             bool subject = false;
             bool object  = false;
         } as;
-        bool                                       solid  = false;
-        bool                                       edge   = false;
-        int32_t                                    damage = 0;
-        std::vector<std::unique_ptr<const Action>> action;
+        bool                solid  = false;
+        bool                edge   = false;
+        int32_t             damage = 0;
+        std::vector<Action> action;
     } collide;
 
     struct Activate {
-        Range<ticks>                               period;
-        std::vector<std::unique_ptr<const Action>> action;
+        Range<ticks>        period;
+        std::vector<Action> action;
     } activate;
 
     struct Arrive {
-        int32_t                                    distance;
-        std::vector<std::unique_ptr<const Action>> action;
+        int32_t             distance;
+        std::vector<Action> action;
     } arrive;
 
     // rotation: for objects whose shapes depend on their direction

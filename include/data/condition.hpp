@@ -29,17 +29,17 @@
 
 namespace antares {
 
-struct Action;
+union Action;
 struct Initial;
 class path_value;
 
 struct Condition {
-    ConditionOp                                op         = ConditionOp::EQ;
-    bool                                       disabled   = false;
-    bool                                       persistent = false;
-    Handle<const Initial>                      subject;
-    Handle<const Initial>                      object;
-    std::vector<std::unique_ptr<const Action>> action;
+    ConditionOp           op         = ConditionOp::EQ;
+    bool                  disabled   = false;
+    bool                  persistent = false;
+    Handle<const Initial> subject;
+    Handle<const Initial> object;
+    std::vector<Action>   action;
 
     static const Condition*            get(int n);
     static HandleList<const Condition> all();

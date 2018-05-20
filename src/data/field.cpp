@@ -602,6 +602,44 @@ RgbColor required_color(path_value x) {
                 {"a", {&RgbColor::alpha, optional_uint8, 255}}});
 }
 
+ActionType required_action_type(path_value x) {
+    return required_enum<ActionType>(
+            x, {{"age", ActionType::AGE},
+                {"assume", ActionType::ASSUME},
+                {"cap-speed", ActionType::CAP_SPEED},
+                {"capture", ActionType::CAPTURE},
+                {"cloak", ActionType::CLOAK},
+                {"condition", ActionType::CONDITION},
+                {"create", ActionType::CREATE},
+                {"disable", ActionType::DISABLE},
+                {"energize", ActionType::ENERGIZE},
+                {"equip", ActionType::EQUIP},
+                {"fire", ActionType::FIRE},
+                {"flash", ActionType::FLASH},
+                {"heal", ActionType::HEAL},
+                {"hold", ActionType::HOLD},
+                {"key", ActionType::KEY},
+                {"kill", ActionType::KILL},
+                {"land", ActionType::LAND},
+                {"message", ActionType::MESSAGE},
+                {"morph", ActionType::MORPH},
+                {"move", ActionType::MOVE},
+                {"occupy", ActionType::OCCUPY},
+                {"order", ActionType::ORDER},
+                {"pay", ActionType::PAY},
+                {"push", ActionType::PUSH},
+                {"reveal", ActionType::REVEAL},
+                {"score", ActionType::SCORE},
+                {"select", ActionType::SELECT},
+                {"play", ActionType::PLAY},
+                {"spark", ActionType::SPARK},
+                {"spin", ActionType::SPIN},
+                {"thrust", ActionType::THRUST},
+                {"warp", ActionType::WARP},
+                {"win", ActionType::WIN},
+                {"zoom", ActionType::ZOOM}});
+}
+
 AnimationDirection required_animation_direction(path_value x) {
     return required_enum<AnimationDirection>(
             x, {{"0", AnimationDirection::NONE},

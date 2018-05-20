@@ -58,17 +58,17 @@ namespace antares {
 const size_t kActionQueueLength = 120;
 
 struct actionQueueType {
-    const std::unique_ptr<const Action>* actionBegin;
-    const std::unique_ptr<const Action>* actionEnd;
-    ticks                                scheduledTime;
-    actionQueueType*                     nextActionQueue;
-    Handle<SpaceObject>                  subjectObject;
-    int32_t                              subjectObjectNum;
-    int32_t                              subjectObjectID;
-    Handle<SpaceObject>                  directObject;
-    int32_t                              directObjectNum;
-    int32_t                              directObjectID;
-    Point                                offset;
+    const Action*       actionBegin;
+    const Action*       actionEnd;
+    ticks               scheduledTime;
+    actionQueueType*    nextActionQueue;
+    Handle<SpaceObject> subjectObject;
+    int32_t             subjectObjectNum;
+    int32_t             subjectObjectID;
+    Handle<SpaceObject> directObject;
+    int32_t             directObjectNum;
+    int32_t             directObjectID;
+    Point               offset;
 
     bool empty() const { return actionBegin == actionEnd; }
 };
@@ -82,23 +82,22 @@ ANTARES_GLOBAL set<int32_t> covered_actions;
 #endif  // DATA_COVERAGE
 
 static void queue_action(
-        const std::unique_ptr<const Action>* begin, const std::unique_ptr<const Action>* end,
-        ticks delayTime, Handle<SpaceObject> subjectObject, Handle<SpaceObject> directObject,
-        Point* offset);
+        const Action* begin, const Action* end, ticks delayTime, Handle<SpaceObject> subjectObject,
+        Handle<SpaceObject> directObject, Point* offset);
 
 bool action_filter_applies_to(const Action& action, Handle<SpaceObject> target) {
-    if (!tags_match(*target->base, action.filter.tags)) {
+    if (!tags_match(*target->base, action.base.filter.tags)) {
         return false;
     }
 
-    if (action.filter.attributes & ~target->attributes) {
+    if (action.base.filter.attributes & ~target->attributes) {
         return false;
     }
 
     return true;
 }
 
-void NoAction::apply(
+void ActionBase::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {}
 
@@ -699,51 +698,51 @@ void AssumeAction::apply(
 }
 
 static void execute_actions(
-        const std::unique_ptr<const Action>* begin, const std::unique_ptr<const Action>* end,
-        const Handle<SpaceObject> original_subject, const Handle<SpaceObject> original_object,
-        Point* offset, bool allowDelay) {
+        const Action* begin, const Action* end, const Handle<SpaceObject> original_subject,
+        const Handle<SpaceObject> original_object, Point* offset, bool allowDelay) {
     bool checkConditions = false;
 
-    for (const std::unique_ptr<const Action>* curr : sfz::range(begin, end)) {
-        const Action& action = **curr;
+    for (const Action* curr : sfz::range(begin, end)) {
+        const Action& action = *curr;
 #ifdef DATA_COVERAGE
         covered_actions.insert(action.number());
 #endif  // DATA_COVERAGE
 
         auto subject = original_subject;
-        if (action.override_.subject.has_value()) {
-            subject = GetObjectFromInitialNumber(*action.override_.subject);
+        if (action.base.override_.subject.has_value()) {
+            subject = GetObjectFromInitialNumber(*action.base.override_.subject);
         }
         auto object = original_object;
-        if (action.override_.object.has_value()) {
-            object = GetObjectFromInitialNumber(*action.override_.object);
+        if (action.base.override_.object.has_value()) {
+            object = GetObjectFromInitialNumber(*action.base.override_.object);
         }
 
-        if ((action.delay > ticks(0)) && allowDelay) {
-            queue_action(curr, end, action.delay, subject, object, offset);
+        if ((action.base.delay > ticks(0)) && allowDelay) {
+            queue_action(curr, end, action.base.delay, subject, object, offset);
             return;
         }
         allowDelay = true;
 
         auto focus = object;
-        if (action.reflexive || !focus.get()) {
+        if (action.base.reflexive || !focus.get()) {
             focus = subject;
         }
 
         if (object.get() && subject.get()) {
-            if (((action.filter.owner == Owner::DIFFERENT) && (object->owner == subject->owner)) ||
-                ((action.filter.owner == Owner::SAME) && (object->owner != subject->owner))) {
+            if (((action.base.filter.owner == Owner::DIFFERENT) &&
+                 (object->owner == subject->owner)) ||
+                ((action.base.filter.owner == Owner::SAME) && (object->owner != subject->owner))) {
                 continue;
             }
         }
 
-        if ((action.filter.attributes || !action.filter.tags.empty()) &&
+        if ((action.base.filter.attributes || !action.base.filter.tags.empty()) &&
             (!object.get() || !action_filter_applies_to(action, object))) {
             continue;
         }
 
-        action.apply(subject, focus, object, offset);
-        checkConditions = checkConditions || action.check_conditions();
+        (&action.base)->apply(subject, focus, object, offset);
+        checkConditions = checkConditions || (&action.base)->check_conditions();
     }
 
     if (checkConditions) {
@@ -752,7 +751,7 @@ static void execute_actions(
 }
 
 void exec(
-        const std::vector<std::unique_ptr<const Action>>& actions, Handle<SpaceObject> sObject,
+        const std::vector<Action>& actions, Handle<SpaceObject> sObject,
         Handle<SpaceObject> dObject, Point* offset) {
     execute_actions(
             actions.data(), actions.data() + actions.size(), sObject, dObject, offset, true);
@@ -771,9 +770,8 @@ void reset_action_queue() {
 }
 
 static void queue_action(
-        const std::unique_ptr<const Action>* begin, const std::unique_ptr<const Action>* end,
-        ticks delayTime, Handle<SpaceObject> subjectObject, Handle<SpaceObject> directObject,
-        Point* offset) {
+        const Action* begin, const Action* end, ticks delayTime, Handle<SpaceObject> subjectObject,
+        Handle<SpaceObject> directObject, Point* offset) {
     int32_t          queueNumber = 0;
     actionQueueType* actionQueue = gActionQueueData.get();
     while (!actionQueue->empty() && (queueNumber < kActionQueueLength)) {

@@ -21,6 +21,43 @@
 
 namespace antares {
 
+enum class ActionType {
+    AGE,
+    ASSUME,
+    CAP_SPEED,
+    CAPTURE,
+    CLOAK,
+    CONDITION,
+    CREATE,
+    DISABLE,
+    ENERGIZE,
+    EQUIP,
+    FIRE,
+    FLASH,
+    HEAL,
+    HOLD,
+    KEY,
+    KILL,
+    LAND,
+    MESSAGE,
+    MORPH,
+    MOVE,
+    OCCUPY,
+    ORDER,
+    PAY,
+    PUSH,
+    REVEAL,
+    SCORE,
+    SELECT,
+    PLAY,
+    SPARK,
+    SPIN,
+    THRUST,
+    WARP,
+    WIN,
+    ZOOM,
+};
+
 enum class AnimationDirection {
     NONE   = 0,   // 0
     PLUS   = +1,  // +

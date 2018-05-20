@@ -95,9 +95,9 @@ void load_object_data(const NamedHandle<const BaseObject>& o) {
             load_object_data((*w)->base);
         }
     }
-    for (const std::unique_ptr<const Action>& a : o->activate.action) {
-        if (a->created_base()) {
-            load_object_data(*a->created_base());
+    for (const Action& a : o->activate.action) {
+        if ((&a.base)->created_base()) {
+            load_object_data(*(&a.base)->created_base());
         }
     }
 }

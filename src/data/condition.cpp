@@ -32,8 +32,7 @@ namespace antares {
             {"disabled", {&Condition::disabled, optional_bool, false}},                           \
             {"subject", {&Condition::subject, optional_initial, Initial::none()}},                \
             {"object", {&Condition::object, optional_initial, Initial::none()}},                  \
-            {"action",                                                                            \
-             {&Condition::action, required_array<std::unique_ptr<const Action>, action>}}
+            {"action", {&Condition::action, required_array<Action, action>}}
 // clang-format on
 
 template <typename T>
