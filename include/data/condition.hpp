@@ -44,9 +44,11 @@ struct Condition {
     static const Condition*            get(int n);
     static HandleList<const Condition> all();
 
-    Condition()                  = default;
-    virtual ~Condition()         = default;
-    virtual bool is_true() const = 0;
+    Condition()            = default;
+    Condition(Condition&&) = default;
+    Condition& operator=(Condition&&) = default;
+    virtual ~Condition()              = default;
+    virtual bool is_true() const      = 0;
 
     Condition(const Condition&) = delete;
     Condition& operator=(const Condition&) = delete;
@@ -79,7 +81,7 @@ struct BuildingCondition : Condition {
 // Warning: not net-safe.
 struct ComputerCondition : Condition {
     Screen       screen;
-    int32_t      line;
+    int64_t      line;
     virtual bool is_true() const;
 };
 
@@ -87,8 +89,8 @@ struct ComputerCondition : Condition {
 // Compares given counter of given admiral to `value`.
 struct CounterCondition : Condition {
     Handle<Admiral> player;
-    int32_t         counter;
-    int32_t         value;
+    int64_t         counter;
+    int64_t         value;
     virtual bool    is_true() const;
 };
 
@@ -111,7 +113,7 @@ struct DestroyedCondition : Condition {
 // TODO(sfiera): provide a definition of “distance” in this context, and especially what
 // “extremely” distant means.
 struct DistanceCondition : Condition {
-    uint32_t     value;
+    int64_t      value;
     virtual bool is_true() const;
 };
 
@@ -135,8 +137,8 @@ struct HealthCondition : Condition {
 //
 // Warning: not net-safe.
 struct MessageCondition : Condition {
-    int32_t      id;
-    int32_t      page;
+    int64_t      id;
+    int64_t      page;
     virtual bool is_true() const;
 };
 
@@ -159,7 +161,7 @@ struct OwnerCondition : Condition {
 // Compares ship count of `player` to `value`.
 struct ShipsCondition : Condition {
     Handle<Admiral> player;
-    int32_t         value;
+    int64_t         value;
     virtual bool    is_true() const;
 };
 

@@ -76,8 +76,8 @@ bool ComputerCondition::is_true() const {
         return op_eq(op, g.mini.currentScreen, screen);
     } else {
         return op_eq(
-                op, std::make_pair(g.mini.currentScreen, g.mini.selectLine),
-                std::make_pair(screen, line));
+                op, std::pair<Screen, int>(g.mini.currentScreen, g.mini.selectLine),
+                std::pair<Screen, int>(screen, line));
     }
 }
 
