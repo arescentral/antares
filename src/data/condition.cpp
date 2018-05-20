@@ -162,12 +162,12 @@ std::unique_ptr<Condition> condition(path_value x) {
         throw std::runtime_error(pn::format("unknown type: {0}", type).c_str());
     }
 
-    c->op                = required_condition_op(x.get("op"));
-    c->persistent        = optional_bool(x.get("persistent")).value_or(false);
-    c->initially_enabled = !optional_bool(x.get("initially_disabled")).value_or(false);
-    c->subject           = optional_initial(x.get("subject")).value_or(Initial::none());
-    c->object            = optional_initial(x.get("object")).value_or(Initial::none());
-    c->action            = required_array<std::unique_ptr<const Action>, action>(x.get("action"));
+    c->op         = required_condition_op(x.get("op"));
+    c->persistent = optional_bool(x.get("persistent")).value_or(false);
+    c->disabled   = optional_bool(x.get("disabled")).value_or(false);
+    c->subject    = optional_initial(x.get("subject")).value_or(Initial::none());
+    c->object     = optional_initial(x.get("object")).value_or(Initial::none());
+    c->action     = required_array<std::unique_ptr<const Action>, action>(x.get("action"));
 
     return c;
 }

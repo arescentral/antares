@@ -34,9 +34,9 @@ struct Initial;
 class path_value;
 
 struct Condition {
-    ConditionOp                                op                = ConditionOp::EQ;
-    bool                                       initially_enabled = true;
-    bool                                       persistent        = false;
+    ConditionOp                                op         = ConditionOp::EQ;
+    bool                                       disabled   = false;
+    bool                                       persistent = false;
     Handle<const Initial>                      subject;
     Handle<const Initial>                      object;
     std::vector<std::unique_ptr<const Action>> action;

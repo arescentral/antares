@@ -280,7 +280,7 @@ static void load_condition(Handle<const Condition> condition, std::bitset<16> al
     for (const auto& action : condition->action) {
         AddActionMedia(*action, all_colors);
     }
-    g.condition_enabled[condition.number()] = condition->initially_enabled;
+    g.condition_enabled[condition.number()] = !condition->disabled;
 }
 
 static void run_game_1s() {
