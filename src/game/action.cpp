@@ -686,7 +686,7 @@ void ZoomAction::apply(
 void SelectAction::apply(
         Handle<SpaceObject> subject, Handle<SpaceObject> focus, Handle<SpaceObject> object,
         Point* offset) const {
-    MiniComputer_SetScreenAndLineHack(int32_t(screen), line);
+    MiniComputer_SetScreenAndLineHack(screen, line);
 }
 
 void AssumeAction::apply(

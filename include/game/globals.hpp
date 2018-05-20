@@ -45,7 +45,7 @@ struct miniScreenLineType;
 struct miniComputerDataType {
     std::unique_ptr<miniScreenLineType[]> lineData;
     int32_t                               selectLine;
-    int32_t                               currentScreen;
+    Screen                                currentScreen;
     int32_t                               clickLine;
 };
 
